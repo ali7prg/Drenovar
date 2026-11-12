@@ -11,6 +11,7 @@ const MarchMap = preload("res://src/march_map.gd")
 const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
 const HudAction = preload("res://src/hud_action.gd")
+const SessionDiagnostics = preload("res://src/session_diagnostics.gd")
 const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
 const RECRUIT_ORDER := ["ENG-09", "ENG-08", "ENG-01", "ENG-02", "ENG-07", "ENG-10", "ENG-03", "ENG-04", "ENG-05", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
@@ -94,6 +95,7 @@ var action_list_key := ""
 var next_training_update := 0.0
 var followed_army := ""
 var next_minimap_draw := 0
+var diagnostics := SessionDiagnostics.new()
 
 func _ready() -> void:
 	Input.use_accumulated_input = false
@@ -107,6 +109,9 @@ func _ready() -> void:
 				loopback = true
 		if arg == "--smoke":
 			smoke = true
+		if arg.begins_with("--diagnostics="):
+			diagnostics.path = arg.trim_prefix("--diagnostics=")
+	diagnostics.start(str(ProjectSettings.get_setting("application/config/version")), Time.get_unix_time_from_system())
 	var launch := LaunchScreen.new()
 	add_child(launch)
 	# Give the branded screen a frame before parsing game data and loading meshes.
@@ -949,10 +954,17 @@ func drain_retired_scenes(urgent := false) -> void:
 		freed += 1
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		diagnostics.set_state("exited", Time.get_unix_time_from_system())
+	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		diagnostics.set_state("foreground", Time.get_unix_time_from_system())
 	if what == NOTIFICATION_OS_MEMORY_WARNING:
+		diagnostics.log_event("memory_warning", {"memory_mb": snappedf(Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, 0.1),
+			"scenes": scene_cache.size()}, Time.get_unix_time_from_system())
 		release_inactive_scene()
 		drain_retired_scenes(true)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
+		diagnostics.set_state("background", Time.get_unix_time_from_system())
 		last_frame_us = 0
 		if is_instance_valid(modal_scroll):
 			modal_scroll.cancel_touch()
@@ -2090,6 +2102,7 @@ func show_performance() -> void:
 	var primitives := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
 	var draw_calls := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 	open_modal("Плавность на этом устройстве")
+	row(modal_body, diagnostics.summary())
 	if frame_count < 30:
 		row(modal_body, "Поиграй несколько секунд, чтобы получить замер.")
 		return
@@ -2252,10 +2265,11 @@ func sign_out() -> void:
 	if not response.get("signedOut", false) and response.get("httpStatus", 0) != 401:
 		show_error(response)
 		return
-	reset_session()
+	reset_session("sign_out")
 	await show_account()
 
-func reset_session() -> void:
+func reset_session(reason := "auth_401") -> void:
+	diagnostics.log_event("session_reset", {"reason": reason}, Time.get_unix_time_from_system())
 	request_generation += 1
 	SessionStore.forget()
 	session = ""
@@ -2468,6 +2482,9 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	client.queue_free()
 	if foreground:
 		busy = false
+	var transport_ok: bool = result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0 and int(result[1]) < 500
+	diagnostics.network_result(transport_ok, "timeout" if result[0] == HTTPRequest.RESULT_TIMEOUT else ("http_%d" % int(result[1]) if result[0] == HTTPRequest.RESULT_SUCCESS else "transport_%d" % int(result[0])),
+		Time.get_unix_time_from_system(), Time.get_ticks_msec())
 	if result[0] != HTTPRequest.RESULT_SUCCESS or result[3].is_empty():
 		if result[0] == HTTPRequest.RESULT_TIMEOUT:
 			return {"error":"Сервер не ответил вовремя. Проверь соединение и повтори."}
@@ -2502,6 +2519,8 @@ func poll_account_state() -> void:
 
 func _process(delta: float) -> void:
 	drain_retired_scenes()
+	diagnostics.heartbeat(map_name, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
+		Time.get_ticks_msec() / 1000.0, Time.get_unix_time_from_system(), Time.get_ticks_msec())
 	if not is_instance_valid(stage) or scene_loading:
 		return
 	var camera_moving := stage.camera_dirty or stage.camera_target.distance_squared_to(stage.target) >= 0.01 or \
@@ -2571,6 +2590,18 @@ func _process(delta: float) -> void:
 			await poll_account_state()
 
 func _input(event: InputEvent) -> void:
+	# A finger lifted while a window opens or a scene loads must still be released.
+	# Otherwise the stale contact turns the next one-finger drag into a false pinch.
+	if event is InputEventScreenTouch and not event.pressed and fingers.has(event.index) and \
+			(not is_instance_valid(stage) or modal.visible or scene_loading):
+		fingers.erase(event.index)
+		tap_candidate = false
+		last_pinch = 0.0
+		return
+	if event is InputEventMouseButton and not event.pressed and event.button_index == MOUSE_BUTTON_LEFT and dragging and \
+			(not is_instance_valid(stage) or modal.visible or scene_loading):
+		dragging = false
+		return
 	if not is_instance_valid(stage) or modal.visible or scene_loading:
 		return
 	if event is InputEventScreenDrag and fingers.has(event.index):

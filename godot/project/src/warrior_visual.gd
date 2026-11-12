@@ -78,3 +78,33 @@ static func ground_shadow(parent: Node3D, bounds: AABB) -> void:
 	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	shadow.position = Vector3(bounds.get_center().x, bounds.position.y - 0.01, bounds.get_center().z)
 	parent.add_child(shadow)
+
+
+# Stone display pedestal under a recruitment preview: a worn top slab on a wider
+# plinth, stone-textured, top surface just under the unit's feet.
+static func pedestal(parent: Node3D, bounds: AABB, stone: Texture2D) -> AABB:
+	var radius := maxf(0.5, minf(bounds.size.x, bounds.size.z) * 0.95)
+	var material := StandardMaterial3D.new()
+	material.albedo_texture = stone
+	material.albedo_color = Color("#857d70")
+	material.roughness = 0.88
+	material.uv1_triplanar = true
+	material.uv1_scale = Vector3.ONE * 1.6
+	var feet := bounds.position.y - 0.02
+	var parts := [[radius, radius * 1.04, 0.16, feet - 0.08], [radius * 1.12, radius * 1.16, 0.12, feet - 0.22]]
+	for part in parts:
+		var cylinder := CylinderMesh.new()
+		cylinder.top_radius = part[0]
+		cylinder.bottom_radius = part[1]
+		cylinder.height = part[2]
+		cylinder.radial_segments = 40
+		cylinder.rings = 1
+		var slab := MeshInstance3D.new()
+		slab.mesh = cylinder
+		slab.material_override = material
+		slab.position = Vector3(bounds.get_center().x, part[3], bounds.get_center().z)
+		parent.add_child(slab)
+	var grown := bounds
+	grown.position.y = feet - 0.28
+	grown.size.y += 0.28
+	return grown

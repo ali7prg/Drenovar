@@ -84,6 +84,7 @@ var login_deadline := 0
 var login_link_used := false
 var busy := false
 var api := ApiPool.new()
+var action_ring := ActionRing.new()
 var last_command_ms := -1.0
 var polling_state := false
 var request_generation := 0
@@ -201,6 +202,7 @@ func build_ui() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(root)
 	root.add_child(make_vignette())
+	root.add_child(action_ring)
 	var outer := VBoxContainer.new()
 	outer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	outer.offset_left = 52
@@ -963,6 +965,7 @@ func show_scene(scene_name: String) -> void:
 		close_modal()
 		return
 	scene_loading = true
+	action_ring.close()
 	var started_at := Time.get_ticks_msec()
 	followed_army = ""
 	close_modal()
@@ -1334,6 +1337,7 @@ func place_modal(layout: String) -> void:
 	modal.offset_bottom = offsets.end.y
 
 func open_modal(title: String, layout := "center", eyebrow := "") -> void:
+	action_ring.close()
 	result_open = layout == "result"
 	modal_header.visible = not result_open
 	modal_divider.visible = not result_open
@@ -1418,6 +1422,28 @@ func panel_texture(path: String) -> Texture2D:
 	if not panel_textures.has(path):
 		panel_textures[path] = load("res://assets/ui/web-panels/" + path) as Texture2D
 	return panel_textures[path]
+
+func open_building_ring(marker: Dictionary) -> void:
+	var building: Dictionary = marker.item
+	var level := int(building.level)
+	var actions: Array = []
+	var upgradable: bool = level < 5 and building.type in data.upgradable
+	actions.append(["Улучшить" if upgradable else "Сведения", "upgrade" if upgradable else "info", inspect_building.bind(building)])
+	var construction := construction_order()
+	if construction.get("buildingId") == building.id:
+		actions.append(["Ускорить", "speed", show_speedups.bind("construction", construction, "")])
+	var group: String = data.trainingGroups.get(building_definition(building.type).get("base", building.type), "")
+	if group != "":
+		actions.append(["Обучить", "train", open_recruitment.bind(building)])
+	if building.type in data.producers and not player_id.is_empty():
+		actions.append(["Собрать", "collect", command.bind({"kind":"kingdom","action":"collect","buildingId":building.id})])
+	if building.type == "ECO-03":
+		actions.append(["Обмен", "trade", show_trade])
+	if building.type == "SUP-01":
+		actions.append(["Лазарет", "heal", show_hospital])
+	if upgradable:
+		actions.append(["Сведения", "info", inspect_building.bind(building)])
+	action_ring.open(str(building.id), "%s · ур. %d" % [building_title(building.type), level], marker.position, stage.camera, actions)
 
 func inspect_building(building: Dictionary) -> void:
 	open_modal(building_title(building.type), "right", "ПОСЕЛЕНИЕ")
@@ -1545,8 +1571,9 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	var layout := HBoxContainer.new()
 	layout.add_theme_constant_override("separation", 10)
 	modal_body.add_child(layout)
+	var tier := recruit_tier(unit.id)
 	var stage_panel := panel(8)
-	stage_panel.add_theme_stylebox_override("panel", WebPanels.gradient_style(Color("#405450"), Color("#182724"), WebPanels.BRASS, 8))
+	stage_panel.add_theme_stylebox_override("panel", WebPanels.gradient_style(Color("#2c3433"), Color("#121817"), WebPanels.BRASS, 8))
 	stage_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	stage_panel.size_flags_stretch_ratio = 0.62
 	stage_panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -1555,9 +1582,27 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	stage_panel.add_child(display)
 	var preview := create_unit_preview(display, 258, panel_texture(unit.id + ".png"))
 	preview.name = "RecruitPreview"
-	load_unit_preview.call_deferred(preview, data.unitModels[unit.id], 0.72)
+	# Rank-coloured glow behind the unit (I grey ... V gold), under the live 3D view.
+	var glow := TextureRect.new()
+	glow.name = "Backdrop"
+	glow.texture = rank_backdrop(tier)
+	glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	glow.stretch_mode = TextureRect.STRETCH_SCALE
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	preview.get_parent().add_child(glow)
+	preview.get_parent().move_child(glow, 0)
+	glow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var staged: Dictionary = data.unitModels[unit.id].duplicate()
+	staged.pedestal = true
+	load_unit_preview.call_deferred(preview, staged, 0.72)
 	var name_label := Label.new()
 	name_label.text = unit.name
+	var rank := Label.new()
+	rank.text = "РАНГ %s · %s" % [["I", "II", "III", "IV", "V"][tier - 1], unit.get("unit_class", "")]
+	rank.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rank.add_theme_font_size_override("font_size", 14)
+	rank.add_theme_color_override("font_color", RANK_COLOURS[tier - 1][0].lightened(0.45))
+	display.add_child(rank)
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.add_theme_font_override("font", TITLE_FONT)
 	name_label.add_theme_font_size_override("font_size", 26)
@@ -1590,8 +1635,7 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 		card.add_theme_constant_override("icon_max_width", 60)
 		card.add_theme_font_size_override("font_size", 14)
 		card.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		if id == unit.id:
-			card.add_theme_stylebox_override("normal", Interface.style(Color("#504331"), Color("#d3ae6b"), 7, 4, 5))
+		style_rank_card(card, recruit_tier(id), id == unit.id, int(state.city.get("military", {}).get("owned", {}).get(id, 0)))
 	var owned := int(state.city.get("military", {}).get("owned", {}).get(unit.id, 0))
 	var stats := GridContainer.new()
 	stats.columns = 2
@@ -1643,7 +1687,13 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	var terms := panel(8)
 	terms.add_theme_stylebox_override("panel", Interface.style(Color("#272c31"), Color("#846d4d"), 6, 8, 6))
 	order.add_child(terms)
-	terms.add_child(quote)
+	var terms_box := VBoxContainer.new()
+	terms.add_child(terms_box)
+	var cost_row := HBoxContainer.new()
+	cost_row.name = "CostRow"
+	cost_row.add_theme_constant_override("separation", 14)
+	terms_box.add_child(cost_row)
+	terms_box.add_child(quote)
 	var train := panel_action(order, "Обучить", func(): pass)
 	var reason := Label.new()
 	reason.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1666,7 +1716,8 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 			costs[resource] = cost * int(amount)
 		var reduction := clampi(int(building.level) - 1, 0, 4) * 8 if state.city.get("kingdom", state.city.get("legacyUpgrades")) is Dictionary else 0
 		var seconds := maxi(1, ceili(float(unit.train_seconds) * amount * (1.0 - reduction / 100.0)))
-		quote.text = "Стоимость · %s\nВремя обучения · %d сек." % [cost_label(costs), seconds]
+		quote.text = "Время обучения · %d сек." % seconds
+		fill_cost_row(cost_row, costs)
 		var affordable := can_afford(costs)
 		train.disabled = submission.pending or player_id.is_empty() or not paid_training or not queue_has_room or not unlocked or not affordable
 		train.text = "Создаём заказ…" if submission.pending else "Обучить %d" % int(amount)
@@ -1725,6 +1776,85 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	reserves.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	modal_footer.add_child(reserves)
 	button(modal_footer, "Готовые войска →", show_armies)
+
+const RANK_COLOURS := [[Color("#6d7276"), Color("#24272a")], [Color("#46804f"), Color("#15291a")],
+	[Color("#3f63a0"), Color("#152239")], [Color("#70499c"), Color("#241634")], [Color("#b08a3e"), Color("#382810")]]
+var rank_backdrops := {}
+
+# Rank I..V of a unit: the military building level that unlocks it.
+func recruit_tier(id: String) -> int:
+	var levels: Array = data.unitRequirements.get(id, [1, 1])
+	return clampi(int(levels[1]), 1, 5)
+
+func rank_backdrop(tier: int) -> Texture2D:
+	if rank_backdrops.has(tier):
+		return rank_backdrops[tier]
+	var colours: Array = RANK_COLOURS[tier - 1]
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.45, 1.0])
+	gradient.colors = PackedColorArray([Color(colours[0], 0.95), Color(colours[0].darkened(0.35), 0.7), Color(colours[1], 0.0)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.42)
+	texture.fill_to = Vector2(1.05, 0.42)
+	texture.width = 128
+	texture.height = 128
+	rank_backdrops[tier] = texture
+	return texture
+
+func style_rank_card(card: Button, tier: int, selected: bool, owned: int) -> void:
+	var colours: Array = RANK_COLOURS[tier - 1]
+	var edge: Color = WebPanels.GOLD if selected else colours[0].lightened(0.25)
+	var top: Color = colours[0].lightened(0.12) if selected else colours[0]
+	card.add_theme_stylebox_override("normal", WebPanels.gradient_style(top, colours[1], edge, 5))
+	card.add_theme_stylebox_override("hover", WebPanels.gradient_style(top.lightened(0.08), colours[1], WebPanels.GOLD, 5))
+	card.add_theme_stylebox_override("pressed", WebPanels.gradient_style(top.darkened(0.15), colours[1], WebPanels.GOLD, 5))
+	var badge := Label.new()
+	badge.text = ["I", "II", "III", "IV", "V"][tier - 1]
+	badge.add_theme_font_override("font", TITLE_FONT)
+	badge.add_theme_font_size_override("font_size", 15)
+	badge.add_theme_color_override("font_color", Color("#f7e3b4"))
+	badge.add_theme_color_override("font_outline_color", Color("#120e0a"))
+	badge.add_theme_constant_override("outline_size", 5)
+	badge.position = Vector2(7, 3)
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(badge)
+	var count := Label.new()
+	count.text = str(owned)
+	count.add_theme_font_size_override("font_size", 14)
+	count.add_theme_color_override("font_color", Color("#fff1d2"))
+	count.add_theme_color_override("font_outline_color", Color("#120e0a"))
+	count.add_theme_constant_override("outline_size", 5)
+	count.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	count.offset_left = -42
+	count.offset_right = -7
+	count.offset_top = 3
+	count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	count.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(count)
+
+func fill_cost_row(row_box: HBoxContainer, costs: Dictionary) -> void:
+	empty(row_box)
+	for resource in costs:
+		if int(costs[resource]) <= 0 or not resource_icons.has(resource):
+			continue
+		var item := HBoxContainer.new()
+		item.add_theme_constant_override("separation", 4)
+		row_box.add_child(item)
+		add_resource_icon(item, resource, 26)
+		var amount := Label.new()
+		amount.text = compact_number(int(costs[resource]))
+		amount.add_theme_font_size_override("font_size", 18)
+		amount.add_theme_color_override("font_color", Color("#fff0d4") if int(costs[resource]) <= balance(resource) else Color("#ff8f7a"))
+		item.add_child(amount)
+
+func compact_number(value: int) -> String:
+	if value >= 1000000:
+		return "%.1fM" % (value / 1000000.0)
+	if value >= 10000:
+		return "%.1fK" % (value / 1000.0)
+	return str(value)
 
 func create_unit_preview(parent: Container, height: int, portrait: Texture2D = null) -> SubViewportContainer:
 	var frame := Control.new()
@@ -1788,6 +1918,8 @@ func load_unit_preview(preview: SubViewportContainer, visual: Dictionary, framin
 	for part: MeshInstance3D in unit.find_children("*", "MeshInstance3D", true, false):
 		var box := part.global_transform * part.get_aabb()
 		bounds = box if not bounds.has_volume() else bounds.merge(box)
+	if warrior and visual.get("pedestal", false):
+		bounds = WarriorVisual.pedestal(root, bounds, load(data.stoneTexture))
 	var center := bounds.get_center()
 	var size := maxf(0.6, bounds.size.length())
 	var camera := Camera3D.new()
@@ -1978,6 +2110,8 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	var summary := Label.new()
 	summary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary.add_theme_color_override("font_color", WebPanels.GOLD)
+	summary.add_theme_font_size_override("font_size", 18)
 	var quote := Label.new()
 	quote.name = "MarchQuote"
 	quote.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1985,7 +2119,11 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	modal_footer.show()
 	var back := inspect_current_settlement.bind(id) if kind == "pvp" else inspect_current_encounter.bind(id)
 	button(modal_footer, "Назад", back)
-	modal_footer.add_child(summary)
+	if city:
+		modal_footer.add_child(summary)
+	else:
+		# The narrow side panel keeps the footer for actions only.
+		roster.add_child(summary)
 	var send := panel_action(modal_footer, "Марш" if city else "Отправить отряд", func(): pass, false, not city)
 	send.name = "MarchSend"
 	var submit := {"order": {}, "sending": false}
@@ -2006,7 +2144,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 				units[unit_id] = count
 				power += count * int(unit_for_id(unit_id).power)
 		var total := total_units(units)
-		summary.text = "%d / 200 воинов · мощь %d" % [total, power]
+		summary.text = "Мощь %s · войска %d / 200" % [compact_number(power), total]
 		if city:
 			empty(slots)
 			for unit_id in units:
@@ -2039,20 +2177,20 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		fill_party(selected, all_available)
 		selection_batch.active = false
 		update.call()
-	if city:
-		var heading := Label.new()
-		heading.text = "Доступные войска"
-		heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tools.add_child(heading)
-		button(tools, "Все доступные", set_party.bind(true))
-		button(modal_footer, "Очистить", set_party.bind(false))
+	var heading := Label.new()
+	heading.text = "Доступные войска"
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tools.add_child(heading)
+	button(tools, "Все доступные", set_party.bind(true))
+	button(modal_footer, "Очистить", set_party.bind(false))
 	var first_row_index := roster.get_child_count() - 1
 	for unit in data.englishRoster:
 		var available := int(state.healthy.get(unit.id, 0))
 		if available < 1:
 			continue
+		var tier := recruit_tier(unit.id)
 		var entry := panel(5)
-		entry.add_theme_stylebox_override("panel", Interface.style(Color("#2b3036"), Color("#846d4d"), 6, 6, 5))
+		entry.add_theme_stylebox_override("panel", WebPanels.gradient_style(Color("#30363b"), Color("#1d2125"), Color("#846d4d"), 6))
 		roster.add_child(entry)
 		roster.move_child(entry, first_row_index)
 		first_row_index += 1
@@ -2060,7 +2198,20 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		entry.add_child(card)
 		var controls := HBoxContainer.new()
 		card.add_child(controls)
-		panel_art(controls, unit.id + ".png", Vector2(48, 48))
+		var frame := PanelContainer.new()
+		frame.add_theme_stylebox_override("panel", WebPanels.gradient_style(RANK_COLOURS[tier - 1][0], RANK_COLOURS[tier - 1][1],
+			RANK_COLOURS[tier - 1][0].lightened(0.3), 2, 5))
+		controls.add_child(frame)
+		panel_art(frame, unit.id + ".png", Vector2(52, 52))
+		var badge := Label.new()
+		badge.text = ["I", "II", "III", "IV", "V"][tier - 1]
+		badge.add_theme_font_size_override("font_size", 12)
+		badge.add_theme_color_override("font_outline_color", Color("#120e0a"))
+		badge.add_theme_constant_override("outline_size", 4)
+		badge.size_flags_vertical = Control.SIZE_SHRINK_END
+		badge.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		frame.add_child(badge)
 		var info := VBoxContainer.new()
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		controls.add_child(info)
@@ -2075,7 +2226,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		controls.add_child(amount)
 		button(controls, "+", func(): amount.value += 1)
 		selected[unit.id] = amount
-		if city:
+		if true:
 			var slider := HSlider.new()
 			slider.max_value = amount.max_value
 			slider.custom_minimum_size.y = 29
@@ -2094,8 +2245,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			if value > 200 - used:
 				amount.set_value_no_signal(200 - used)
 				amount.get_line_edit().text = str(int(amount.value))
-				if city:
-					(card.get_child(1) as HSlider).set_value_no_signal(amount.value)
+				(card.get_child(1) as HSlider).set_value_no_signal(amount.value)
 			update.call())
 	if selected.is_empty():
 		row(roster, "Свободных воинов нет. Откройте казармы и завершите обучение.")
@@ -2875,6 +3025,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventScreenTouch:
 		if event.pressed:
+			if fingers.is_empty() and action_ring.is_open() and Time.get_ticks_msec() - action_ring.opened_at > 150:
+				action_ring.close()
 			fling_velocity = Vector2.ZERO
 			drag_samples.clear()
 			if fingers.is_empty():
@@ -2927,8 +3079,9 @@ func pick_marker(screen_position: Vector2) -> void:
 		if gap < distance:
 			best = marker
 			distance = gap
+	action_ring.close()
 	if best.get("kind","") == "building":
-		inspect_building(best.item)
+		open_building_ring(best)
 	elif best.get("kind","") == "encounter":
 		inspect_encounter(best.item)
 	elif best.get("kind","") == "settlement":

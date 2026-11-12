@@ -12,6 +12,5 @@ godot --headless --path . -s qa_gait.gd -> exit=0 QA_GAIT checks=156 failures=0
 godot --headless --path . -s qa_network.gd -> exit=0 QA_NETWORK checks=9 failures=0
 godot --headless --path . -s qa_camera_fling.gd -> exit=0 QA_CAMERA_FLING checks=9 failures=0
 godot --headless --path . -s qa_idempotency.gd -> exit=0 QA_IDEMPOTENCY checks=8 failures=0
-godot --headless --path . -s qa_web91.gd -> не запускался (требует сервер v92 по loopback; исходники сервера недоступны)
-godot --headless --path . -s qa_ios_startup.gd -> не запускался (требует сервер v92 по loopback; исходники сервера недоступны)
-godot --headless --path . -s qa_battle_rewards.gd -> не запускался (требует сервер v92 по loopback; исходники сервера недоступны)
+godot --headless --path . -s qa_troops06.gd -> exit=0 QA_TROOPS06 checks=244 failures=0
+UNCOMPRESSED_3D_TEXTURES 0

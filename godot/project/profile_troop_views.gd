@@ -83,6 +83,9 @@ func run() -> void:
 	if close:
 		camera.position = Vector3(width * 0.5, 1.55, 1.6 + width * 0.75)
 		camera.look_at(Vector3(width * 0.5, 1.45, 0), Vector3.UP)
+	elif OS.get_cmdline_user_args().has("--tall"):
+		camera.position = Vector3(width * 0.5, 1.9, 8.2 + width * 0.62)
+		camera.look_at(Vector3(width * 0.5, 1.6, 0), Vector3.UP)
 	else:
 		camera.position = Vector3(width * 0.5, 1.15, 4.6 + width * 0.62)
 		camera.look_at(Vector3(width * 0.5, 0.95, 0), Vector3.UP)

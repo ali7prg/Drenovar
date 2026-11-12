@@ -1,1 +1,1 @@
-CITY_UPDATE_PROFILE {"0.5.9":{"building_upgrade":71.73,"construction_order":78.96,"poll_echo":71.25,"tree_felled":75.56,"troops_trained":4.13},"current":{"building_upgrade":1.98,"construction_order":1.62,"poll_echo":1.56,"tree_felled":13.94,"troops_trained":3.03}}
+CITY_UPDATE_PROFILE {"0.5.9":{"building_upgrade":66.47,"construction_order":63.87,"poll_echo":70.12,"tree_felled":71.53,"troops_trained":4.39},"current":{"building_upgrade":2.59,"construction_order":1.99,"poll_echo":1.96,"tree_felled":17.45,"troops_trained":3.88}}

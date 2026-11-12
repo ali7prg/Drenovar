@@ -35,7 +35,10 @@ func batch_rows(stage: Node3D, raw := false) -> Array:
 		# Imported meshes are shared resources; generated quads are compared by shape.
 		var mesh_key := "%s#%d" % [mesh.resource_path, mesh.get_instance_id()] if not mesh.resource_path.is_empty() or not mesh is PrimitiveMesh \
 			else "%s:%s" % [mesh.get_class(), str(mesh.get_aabb())]
-		var head := "%s|%s|%s|%s|%s" % [mesh_key, material_key(node.material_override), str(batch.total),
+		# 0.6.0 forest trees (assets/*/forest60) intentionally keep their own foliage material
+		# instead of the shared scenery atlas; everything else must match 0.5.9 exactly.
+		var material := "forest60" if str(mesh.resource_path).contains("/forest60/") else material_key(node.material_override)
+		var head := "%s|%s|%s|%s|%s" % [mesh_key, material, str(batch.total),
 			JSON.stringify(batch.layer), str(node.cast_shadow)]
 		if raw:
 			var used: PackedFloat32Array = node.multimesh.buffer.slice(0, int(batch.visible) * 12) if node.visible else PackedFloat32Array()

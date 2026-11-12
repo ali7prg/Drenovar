@@ -28,11 +28,16 @@ float value_noise(vec2 p) {
 // repeats with the texture) and takes the edge off the saturation. Two cheap noise taps.
 vec3 meadow_variation(vec3 grass_color, vec2 world) {
 	float n = value_noise(world * 0.035) * 0.65 + value_noise(world * 0.12 + 17.0) * 0.35;
-	vec3 lush = vec3(0.84, 0.94, 0.80);
-	vec3 dry = vec3(1.10, 1.01, 0.76);
-	vec3 varied = grass_color * mix(lush, dry, smoothstep(0.3, 0.75, n));
+	// Deep moss green to sun-dried olive: a darker, richer meadow than the raw texture.
+	vec3 lush = vec3(0.62, 0.78, 0.60);
+	vec3 dry = vec3(0.98, 0.90, 0.62);
+	float patches = smoothstep(0.3, 0.75, n);
+	vec3 varied = grass_color * mix(lush, dry, patches);
+	// Small dark clumps break the lawn at close range.
+	float clump = value_noise(world * 0.9 + 3.0);
+	varied *= mix(0.86, 1.04, smoothstep(0.25, 0.8, clump));
 	float luma = dot(varied, vec3(0.3, 0.59, 0.11));
-	return mix(vec3(luma), varied, 0.78) * 0.94;
+	return mix(vec3(luma), varied, 0.82) * 0.80;
 }
 
 void vertex() {
@@ -53,7 +58,11 @@ void fragment() {
 			+ texture(rock, terrain_position.xy / 5.0).rgb * axis.z;
 		vec3 tint = vec3(0.96 + 0.045 * sin(terrain_position.x * 0.19 + sin(terrain_position.z * 0.11)), 0.985, 0.96);
 		land = mix(land * tint, texture(earth, UV * 0.85).rgb, UV2.x * 0.8);
-		land = mix(land, stone, UV2.y);
+		// Steep slopes show bare rock instead of stretched grass.
+		// Geometric slope from screen derivatives: smooth vertex normals hide the river cliffs.
+		vec3 facet = normalize(cross(dFdx(terrain_position), dFdy(terrain_position)));
+		float steep = smoothstep(0.45, 0.72, 1.0 - abs(facet.y));
+		land = mix(land, stone * vec3(0.78, 0.8, 0.82), max(UV2.y, steep));
 		land = mix(land, vec3(0.79, 0.82, 0.8), clamp((terrain_position.y - 25.0) / 4.0, 0.0, 1.0));
 	}
 	ALBEDO = land * COLOR.rgb;

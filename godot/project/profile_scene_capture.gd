@@ -51,6 +51,8 @@ func run() -> void:
 		await RenderingServer.frame_post_draw
 		var path := "%s/%s_%d_%s.png" % [out, tag, index, shot[0]]
 		root.get_texture().get_image().save_png(path)
-		print("CAPTURE ", path)
+		print("CAPTURE ", path, " draw_calls=", Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+			" primitives=", Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME),
+			" objects=", Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME))
 		index += 1
 	quit(0)

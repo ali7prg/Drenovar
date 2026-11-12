@@ -98,6 +98,11 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	env.fog_depth_begin = 160.0 if is_city else 340.0
 	env.fog_depth_end = 300.0 if is_city else 610.0
 	WarriorVisual.add_reflections(env, env.background_color)
+	# Grade: a touch more contrast, calmer saturation (the raw palette read as lime).
+	env.adjustment_enabled = true
+	env.adjustment_contrast = 1.1
+	env.adjustment_saturation = 0.9
+	env.adjustment_brightness = 1.0
 	camera.environment = env
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-48, -32, 0)
@@ -258,6 +263,8 @@ func path_mesh(strips: Array, material: Material, scale_uv: float) -> MeshInstan
 		for i in [0,2,1,2,3,1]:
 			var vertex: Vector3 = quad[i]
 			mesh.set_uv(Vector2(vertex.x,vertex.z)*scale_uv)
+			# Across-strip coordinate: 0 on one bank, 1 on the other (water depth, road edges).
+			mesh.set_uv2(Vector2(float(i % 2), 0.0))
 			mesh.add_vertex(vertex)
 	mesh.generate_normals()
 	var instance := MeshInstance3D.new()
@@ -352,7 +359,14 @@ func build_world_water() -> void:
 	mesh.name = "Water"
 	mesh.mesh = plane
 	mesh.position.y = 1.13
-	mesh.material_override = water_material(Color("#347e8b"))
+	var material := water_material(Color("#347e8b"))
+	# Distance to the shore (tools: precomputed from worldHeights) drives depth tint and foam.
+	material.set_shader_parameter("shore_map", load("res://assets/environment/world-water-distance.png"))
+	material.set_shader_parameter("use_shore_map", true)
+	# Texel centres sit on the 1.25 m grid points of the heightfield.
+	material.set_shader_parameter("height_origin", Vector2(-150.625, -120.625))
+	material.set_shader_parameter("height_extent", Vector2(241.0, 193.0) * 1.25)
+	mesh.material_override = material
 	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mesh)
 
@@ -647,8 +661,10 @@ func build_world_scenery() -> void:
 		var transforms: Array = batches[id]
 		var cells := group_placements(transforms)
 		var has_silhouette: bool = spec.canopy is Dictionary and float(spec.canopy.scale) < 0.65
+		# Forest trees carry their own material (foliage atlas); other scenery shares the atlas material.
+		var material: Material = null if str(spec.near).contains("/forest60/") else scenery_material
 		for far in [false, true]:
-			batch_model(scenery, spec.far if far else spec.near, transforms, scenery_material,
+			batch_model(scenery, spec.far if far else spec.near, transforms, material,
 				{"far":far, "tree":spec.tree, "detail":spec.detail, "resource":spec.resource, "canopy":has_silhouette}, cells)
 			slice_started = await setup_slice(slice_started)
 

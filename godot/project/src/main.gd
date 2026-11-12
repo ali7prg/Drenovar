@@ -171,12 +171,36 @@ func _ready() -> void:
 	if smoke:
 		await run_smoke()
 
+func make_vignette() -> TextureRect:
+	# Soft darkening toward the screen edges frames the scene and keeps the eye on the
+	# centre. One small gradient texture stretched over the screen; drawn under the HUD.
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.55, 0.82, 1.0])
+	gradient.colors = PackedColorArray([Color(0.04, 0.05, 0.04, 0.0), Color(0.04, 0.05, 0.04, 0.0),
+		Color(0.04, 0.05, 0.04, 0.22), Color(0.03, 0.035, 0.03, 0.5)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 128
+	texture.height = 64
+	var vignette := TextureRect.new()
+	vignette.name = "Vignette"
+	vignette.texture = texture
+	vignette.stretch_mode = TextureRect.STRETCH_SCALE
+	vignette.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	vignette.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return vignette
+
 func build_ui() -> void:
 	var root := Control.new()
 	root.theme = Interface.make_theme()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(root)
+	root.add_child(make_vignette())
 	var outer := VBoxContainer.new()
 	outer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	outer.offset_left = 52

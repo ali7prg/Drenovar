@@ -17,10 +17,16 @@ const WATER_SHADER = preload("res://src/water.gdshader")
 const BIOME_SHADER = preload("res://src/biome.gdshader")
 const MEADOW_SHADER = preload("res://src/meadow.gdshader")
 const Formations = preload("res://src/formations.gd")
+const GaitTable = preload("res://src/gait_table.gd")
+const FIELD_UNIT_SCALE := 1.15
+# Slowest walk tempo and fastest run tempo; between them feet match exactly.
+const WALK_TEMPO := Vector2(0.55, 0.0)
+const RUN_TEMPO := Vector2(0.0, 1.6)
 var data: Dictionary
 var map_name := "city"
 var world_heights := PackedFloat32Array()
 var actors := Node3D.new()
+var battle_fx := BattleFx.new()
 var creatures := Node3D.new()
 var buildings := Node3D.new()
 var training := Node3D.new()
@@ -67,6 +73,12 @@ var creature_markers: Array[Dictionary] = []
 var patrol_routes: Dictionary = {}
 var effects := Node3D.new()
 var shaft_mesh: CylinderMesh
+var vegetation_rebuilds := 0
+var ground_rebuilds := 0
+var city_nodes_created := 0
+var static_heights: Dictionary = {}
+# Trees that survive the exclusion and street filters for the current ground signature.
+var eligible_trees: Array = []
 
 func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_view: Dictionary) -> void:
 	data = game_data
@@ -86,6 +98,12 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	env.fog_density = 0.72
 	env.fog_depth_begin = 160.0 if is_city else 340.0
 	env.fog_depth_end = 300.0 if is_city else 610.0
+	WarriorVisual.add_reflections(env, env.background_color)
+	# Grade: a touch more contrast, calmer saturation (the raw palette read as lime).
+	env.adjustment_enabled = true
+	env.adjustment_contrast = 1.1
+	env.adjustment_saturation = 0.9
+	env.adjustment_brightness = 1.0
 	camera.environment = env
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-48, -32, 0)
@@ -136,9 +154,7 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 			mesh.material_override = ground_material
 			var bounds: AABB = mesh.transform * mesh.get_aabb()
 			terrain_bounds = bounds if not terrain_bounds.has_volume() else terrain_bounds.merge(bounds)
-		if Time.get_ticks_usec() - terrain_slice >= 3500:
-			await get_tree().process_frame
-			terrain_slice = Time.get_ticks_usec()
+		terrain_slice = await setup_slice(terrain_slice)
 	add_child(buildings)
 	add_child(actors)
 	add_child(creatures)
@@ -148,12 +164,13 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	add_child(parade)
 	add_child(workers)
 	add_child(effects)
+	add_child(battle_fx)
 	add_child(camera)
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL if is_city else Camera3D.PROJECTION_PERSPECTIVE
 	camera.fov = 43.0
 	camera.near = 0.5
 	camera.far = 700.0 if is_city else 1100.0
-	await get_tree().process_frame
+	await yield_frame()
 	if is_city:
 		zoom = 70.0
 		target = Vector3(5, 0, -4)
@@ -161,10 +178,10 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	else:
 		fit_world()
 		await build_world_scenery()
-		await get_tree().process_frame
-		build_towns()
+		await yield_frame()
+		await build_towns()
 		build_world_water()
-		await get_tree().process_frame
+		await yield_frame()
 		build_world_roads()
 	if not saved_view.is_empty():
 		target = saved_view.target
@@ -172,7 +189,10 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 		world_yaw = saved_view.get("yaw", 0.0)
 		resource_layer = saved_view.get("resources", true)
 		detail_layer = saved_view.get("details", true)
-	present(state)
+	if is_city:
+		await present_city(state, true)
+	else:
+		present(state)
 	update_camera(0, true)
 	get_viewport().size_changed.connect(update_visible_batches)
 
@@ -245,6 +265,8 @@ func path_mesh(strips: Array, material: Material, scale_uv: float) -> MeshInstan
 		for i in [0,2,1,2,3,1]:
 			var vertex: Vector3 = quad[i]
 			mesh.set_uv(Vector2(vertex.x,vertex.z)*scale_uv)
+			# Across-strip coordinate: 0 on one bank, 1 on the other (water depth, road edges).
+			mesh.set_uv2(Vector2(float(i % 2), 0.0))
 			mesh.add_vertex(vertex)
 	mesh.generate_normals()
 	var instance := MeshInstance3D.new()
@@ -339,7 +361,14 @@ func build_world_water() -> void:
 	mesh.name = "Water"
 	mesh.mesh = plane
 	mesh.position.y = 1.13
-	mesh.material_override = water_material(Color("#347e8b"))
+	var material := water_material(Color("#347e8b"))
+	# Distance to the shore (tools: precomputed from worldHeights) drives depth tint and foam.
+	material.set_shader_parameter("shore_map", load("res://assets/environment/world-water-distance.png"))
+	material.set_shader_parameter("use_shore_map", true)
+	# Texel centres sit on the 1.25 m grid points of the heightfield.
+	material.set_shader_parameter("height_origin", Vector2(-150.625, -120.625))
+	material.set_shader_parameter("height_extent", Vector2(241.0, 193.0) * 1.25)
+	mesh.material_override = material
 	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mesh)
 
@@ -461,11 +490,14 @@ func batch_mesh(parent: Node3D, mesh: Mesh, offset: Transform3D, cells: Dictiona
 		"origins":origins_by_cell, "low":low_by_cell, "high":high_by_cell,
 		"total":count, "visible":0, "capacity":0, "layer":layer})
 
-func build_forest(city: Dictionary, exclusions: Array) -> void:
+func build_forest(city: Dictionary, exclusions: Array, rebuild_ground := true, staged := false) -> void:
+	# Trees and stumps depend on felled trees; understory and meadow only on exclusions
+	# and streets. A felled tree therefore never rebuilds the ground cover.
 	if is_instance_valid(trees.get("node")):
 		trees.node.free()
-	for child in city_ground_detail.get_children():
-		child.free()
+	if rebuild_ground:
+		for child in city_ground_detail.get_children():
+			child.free()
 	render_batches = render_batches.filter(func(batch): return is_instance_valid(batch.node))
 	var group := Node3D.new()
 	group.name = "Forest"
@@ -478,28 +510,37 @@ func build_forest(city: Dictionary, exclusions: Array) -> void:
 		felled[id] = true
 	var batches: Dictionary = {}
 	var details: Dictionary = {}
-	for tree in data.woods:
-		if tree.village and not city.get("kingdom") is Dictionary:
-			continue
-		var p := array_point(tree.p)
-		if inside_exclusions(p.x, p.z, exclusions) or on_street(Vector2(p.x, p.z), 1.5):
-			continue
+	if rebuild_ground or eligible_trees.is_empty():
+		eligible_trees.clear()
+		for tree in data.woods:
+			if tree.village and not city.get("kingdom") is Dictionary:
+				continue
+			var at := array_point(tree.p)
+			if inside_exclusions(at.x, at.z, exclusions) or on_street(Vector2(at.x, at.z), 1.5):
+				continue
+			var detail: int = {"":0, "mid":1, "far":2}.get(tree.lod, 2)
+			eligible_trees.append({"tree": tree, "p": at, "cell": Vector2i(floori(at.x / 4.0), floori(at.z / 4.0)),
+				"key": "tree" + str(int(tree.variant)) + str(detail), "model": "tree" + str(int(tree.variant)),
+				"detail": detail, "transform": model_transform(at.x, at.y, at.z, float(tree.angle), float(tree.scale))})
+		if staged:
+			await yield_frame()
+	for entry: Dictionary in eligible_trees:
+		var tree: Dictionary = entry.tree
+		var p: Vector3 = entry.p
 		selectable_trees.append(tree)
 		if felled.has(tree.id):
 			if not details.has("tree_stump"):
 				details.tree_stump = []
 			details.tree_stump.append(model_transform(p.x, p.y, p.z, 0.0, 0.7))
 			continue
-		var cell := Vector2i(floori(p.x / 4.0), floori(p.z / 4.0))
+		var cell: Vector2i = entry.cell
 		if not standing_tree_cells.has(cell):
 			standing_tree_cells[cell] = []
 		standing_tree_cells[cell].append(Vector2(p.x, p.z))
-		var key := "tree" + str(int(tree.variant))
-		var detail: int = {"":0, "mid":1, "far":2}.get(tree.lod, 2)
-		key += str(detail)
+		var key: String = entry.key
 		if not batches.has(key):
-			batches[key] = {"model":"tree" + str(int(tree.variant)), "best":detail, "placements":[]}
-		batches[key].placements.append(model_transform(p.x,p.y,p.z,float(tree.angle),float(tree.scale)))
+			batches[key] = {"model":entry.model, "best":entry.detail, "placements":[]}
+		batches[key].placements.append(entry.transform)
 	for key in batches:
 		var batch: Dictionary = batches[key]
 		var cells := group_placements(batch.placements, CITY_TREE_CELL_SIZE)
@@ -508,15 +549,25 @@ func build_forest(city: Dictionary, exclusions: Array) -> void:
 			batch_model(group, data.models[model].path, batch.placements, null,
 				{"city":true, "far":false, "detail":false, "resource":false,
 					"tree_lod":detail, "tree_best":batch.best}, cells)
+	for key in details:
+		batch_model(group, data.cityDetails[key], details[key], scenery_material,
+			{"city":true,"far":true,"detail":true,"resource":false})
+	if not rebuild_ground:
+		return
+	if staged:
+		await yield_frame()
+	var understory: Dictionary = {}
 	for prop in data.cityUnderstory:
 		if inside_exclusions(prop.x, prop.z, exclusions):
 			continue
-		if not details.has(prop.id):
-			details[prop.id] = []
-		details[prop.id].append(model_transform(prop.x, sample_city(prop.x, prop.z), prop.z, prop.angle, prop.scale))
-	for key in details:
-		batch_model(city_ground_detail, data.cityDetails[key], details[key], scenery_material,
+		if not understory.has(prop.id):
+			understory[prop.id] = []
+		understory[prop.id].append(model_transform(prop.x, static_height(prop.x, prop.z), prop.z, prop.angle, prop.scale))
+	for key in understory:
+		batch_model(city_ground_detail, data.cityDetails[key], understory[key], scenery_material,
 			{"city":true,"far":true,"detail":true,"resource":false})
+	if staged:
+		await yield_frame()
 	build_meadow(exclusions)
 
 func build_meadow(exclusions: Array) -> void:
@@ -525,7 +576,7 @@ func build_meadow(exclusions: Array) -> void:
 		for item in data.groundCover[kind]:
 			if inside_exclusions(item.x, item.z, exclusions) or on_street(Vector2(item.x, item.z), 0.85):
 				continue
-			var y := sample_city(item.x, item.z)
+			var y := static_height(item.x, item.z)
 			var scale := float(item.size)
 			var angle := float(item.get("angle", item.x * 0.7 + item.z * 0.3))
 			if kind == "rocks":
@@ -536,6 +587,16 @@ func build_meadow(exclusions: Array) -> void:
 		var material: Material = meadow_stone if kind == "rocks" else meadow_material
 		batch_model(city_ground_detail, data.meadow[kind], transforms, material,
 			{"city":true,"far":kind != "rocks","detail":false,"resource":false})
+
+func static_height(x: float, z: float) -> float:
+	# sample_city() depends only on immutable game data, so heights of fixed
+	# placements can be memoised across vegetation rebuilds.
+	var cell := Vector2(x, z)
+	var cached: Variant = static_heights.get(cell)
+	if cached == null:
+		cached = sample_city(x, z)
+		static_heights[cell] = cached
+	return cached
 
 func on_street(p: Vector2, width: float) -> bool:
 	for segment in city_streets:
@@ -550,10 +611,39 @@ func inside_exclusions(x: float, z: float, exclusions: Array) -> bool:
 			return true
 	return false
 
+const SETUP_SLICE_USEC := 3500
+const BACKGROUND_SLICE_USEC := 2000
+# Set while the scene is prepared in the background (the other scene is on
+# screen). It returns false while the player is touching or the camera moves, and
+# the build waits; cleared when the player asks for this scene, so it finishes at
+# full speed.
+var background_gate := Callable()
+
+func yield_frame() -> void:
+	# One frame; in a background build, also waits while the player interacts.
+	await get_tree().process_frame
+	while background_gate.is_valid() and not background_gate.call():
+		await get_tree().process_frame
+
+func setup_slice(started: int) -> int:
+	# Yields to the next frame once the current one has spent its setup budget.
+	var budget := BACKGROUND_SLICE_USEC if background_gate.is_valid() else SETUP_SLICE_USEC
+	if Time.get_ticks_usec() - started < budget:
+		return started
+	await get_tree().process_frame
+	while background_gate.is_valid() and not background_gate.call():
+		await get_tree().process_frame
+	return Time.get_ticks_usec()
+
 func build_world_scenery() -> void:
 	var batches := {}
 	var distant_canopies := {}
+	var slice_started := Time.get_ticks_usec()
+	var counted := 0
 	for item in data.environment:
+		counted += 1
+		if counted % 256 == 0:
+			slice_started = await setup_slice(slice_started)
 		if not batches.has(item.id):
 			batches[item.id] = []
 		batches[item.id].append(model_transform(item.x, item.y, item.z, item.rotation, item.scale))
@@ -567,18 +657,18 @@ func build_world_scenery() -> void:
 		var transforms: Array = distant_canopies[key]
 		batch_silhouettes(scenery, data.distantModels[key], group_placements(transforms), transforms.size(),
 			{"far":true, "tree":true, "detail":false, "resource":false, "silhouette":true, "canopy":true})
-	var slice_started := Time.get_ticks_usec()
+		slice_started = await setup_slice(slice_started)
 	for id in batches:
 		var spec: Dictionary = data.environmentModels[id]
 		var transforms: Array = batches[id]
 		var cells := group_placements(transforms)
 		var has_silhouette: bool = spec.canopy is Dictionary and float(spec.canopy.scale) < 0.65
+		# Forest trees carry their own material (foliage atlas); other scenery shares the atlas material.
+		var material: Material = null if str(spec.near).contains("/forest60/") else scenery_material
 		for far in [false, true]:
-			batch_model(scenery, spec.far if far else spec.near, transforms, scenery_material,
+			batch_model(scenery, spec.far if far else spec.near, transforms, material,
 				{"far":far, "tree":spec.tree, "detail":spec.detail, "resource":spec.resource, "canopy":has_silhouette}, cells)
-		if Time.get_ticks_usec() - slice_started >= 3500:
-			await get_tree().process_frame
-			slice_started = Time.get_ticks_usec()
+			slice_started = await setup_slice(slice_started)
 
 func toggle_scenery_layer(resources: bool) -> void:
 	if resources:
@@ -737,8 +827,10 @@ func build_towns() -> void:
 		batch_model(group, data.models[key].path, transforms, null, layer, cells)
 		if render_batches.size() > first_batch:
 			render_batches[first_batch].layer = layer.merged({"town_counter":true})
+		await yield_frame()
 		batch_silhouettes(group, data.distantModels[key], cells, transforms.size(),
 			layer.merged({"far":true, "silhouette":true}, true))
+		await yield_frame()
 
 func add_model(parent: Node3D, model_path: String, transform_value: Transform3D) -> Node3D:
 	var instance := scene_resource(model_path).instantiate() as Node3D
@@ -792,85 +884,164 @@ func play_animation(model: Node3D, preferred: String, fallback := "", phase := -
 
 func present(state: Dictionary) -> void:
 	if map_name == "city":
-		var city: Dictionary = state.city
-		var progress: Dictionary = city.get("progress", {})
-		var kingdom: Variant = city.get("kingdom")
-		var construction: Variant = kingdom if kingdom is Dictionary else city.get("legacyUpgrades")
-		var order: Variant = construction.get("order") if construction is Dictionary else null
-		var district: Variant = city.military.get("garrison")
-		var army: Dictionary = city.military.get("owned", {})
-		var key := JSON.stringify([city.buildings, progress.get("sites", []), progress.get("felled", []),
-			progress.get("cleared", []), kingdom.get("clearedPlots", []) if kingdom is Dictionary else [],
-			order, district])
-		if key == geometries.get("city_signature",""):
-			sync_parade(army, district)
-			return
-		geometries["city_signature"] = key
-		for child in buildings.get_children():
-			child.free()
-		for child in workers.get_children():
-			child.free()
-		place_markers.clear()
-		empty_plots.clear()
-		var plots: Array = data.plots.duplicate() if kingdom is Dictionary else data.legacyPlots.duplicate()
-		for id in progress.get("sites", []):
-			if data.treePlots.has(id):
-				plots.append(data.treePlots[id])
-		var occupied := {}
-		var exclusions: Array = []
-		if district is Dictionary:
-			exclusions.append(Rect2(district.x - 15.7, district.z - 12.7, 31.4, 25.4))
-		for building in city.buildings:
-			occupied[building.plotId] = true
-			for plot in plots:
-				if plot.id != building.plotId:
-					continue
-				var id: String = data.starterHall if building.type == "ECO-05" and int(building.level) == 1 else data.types.get(building.type,"")
-				if id == "":
-					break
-				var asset: Dictionary = data.models[id]
-				var x := float(plot.x)
-				var z := float(plot.z)
-				var y := sample_city(x,z)
-				exclusions.append(Rect2(x - 7.0, z - 7.0, 14.0, 14.0))
-				var scale := float(asset.scale)*(1+0.055*(int(building.level)-1))
-				add_model(buildings,asset.path,model_transform(x,y,z,0,scale))
-				add_worker(id, Vector3(x,y,z))
-				var levels: Dictionary = data.architecture.get(building.type, {})
-				var upgrade: String = levels.get(str(int(building.level)), "")
-				if not upgrade.is_empty():
-					add_city_detail(buildings, upgrade, Vector3(x,y,z))
-				place_markers.append({"position":Vector3(x,y+5,z),"id":building.id,"kind":"building","item":building})
-				break
-		for plot in plots:
-			if (kingdom is Dictionary and plot.id in kingdom.get("clearedPlots", [])) or plot.id.begins_with("site-"):
-				exclusions.append(Rect2(plot.x - 6.7, plot.z - 6.7, 13.4, 13.4))
-			if order is Dictionary and order.get("kind", "") != "clear" and order.get("plotId", "") == plot.id:
-				add_city_detail(buildings, data.scaffold, Vector3(plot.x, sample_city(plot.x, plot.z), plot.z))
-			if not occupied.has(plot.id):
-				var x := float(plot.x)
-				var z := float(plot.z)
-				empty_plots.append({"position":Vector3(x, sample_city(x, z), z), "kind":"plot", "item":plot})
-		for grove in data.clearings:
-			if grove.id in progress.get("cleared", []):
-				var half := float(grove.size) * 0.5
-				exclusions.append(Rect2(grove.x - half, grove.z - half, grove.size, grove.size))
-		build_city_roads(city, plots)
-		build_forest(city, exclusions)
-		geometries.erase("parade_signature")
+		present_city(state)
+		return
+	place_markers.clear()
+	empty_plots.clear()
+	var occupied := {}
+	for player in state.world.cities:
+		occupied[player.slot] = true
+		place_markers.append({"position":point(player.position)+Vector3(0,4.5,0),"id":player.id,"kind":"settlement","item":player})
+	for site in data.sites:
+		if not occupied.has(site.slot):
+			empty_plots.append({"position":point(site)+Vector3(0,2,0), "kind":"world-plot", "item":site})
+	present_armies(state, float(state.serverTime))
+
+func present_city(state: Dictionary, staged := false) -> void:
+	# staged=true is used only by setup(): the first build yields between phases so
+	# no single frame carries the whole settlement. Later updates stay synchronous.
+	var city: Dictionary = state.city
+	var progress: Dictionary = city.get("progress", {})
+	var kingdom: Variant = city.get("kingdom")
+	var construction: Variant = kingdom if kingdom is Dictionary else city.get("legacyUpgrades")
+	var order: Variant = construction.get("order") if construction is Dictionary else null
+	var district: Variant = city.military.get("garrison")
+	var army: Dictionary = city.military.get("owned", {})
+	var key := JSON.stringify([city.buildings, progress.get("sites", []), progress.get("felled", []),
+		progress.get("cleared", []), kingdom.get("clearedPlots", []) if kingdom is Dictionary else [],
+		order, district])
+	if key == geometries.get("city_signature",""):
 		sync_parade(army, district)
-		update_visible_batches()
-	else:
-		place_markers.clear()
-		empty_plots.clear()
-		var occupied := {}
-		for player in state.world.cities:
-			occupied[player.slot] = true
-			place_markers.append({"position":point(player.position)+Vector3(0,4.5,0),"id":player.id,"kind":"settlement","item":player})
-		for site in data.sites:
-			if not occupied.has(site.slot):
-				empty_plots.append({"position":point(site)+Vector3(0,2,0), "kind":"world-plot", "item":site})
-		present_armies(state, float(state.serverTime))
+		return
+	geometries["city_signature"] = key
+	place_markers.clear()
+	empty_plots.clear()
+	var plots: Array = data.plots.duplicate() if kingdom is Dictionary else data.legacyPlots.duplicate()
+	for id in progress.get("sites", []):
+		if data.treePlots.has(id):
+			plots.append(data.treePlots[id])
+	var occupied := {}
+	var exclusions: Array = []
+	# Descriptors of every static city node. Unchanged nodes are reused instead of
+	# re-instantiating GLB scenes after each authoritative state update.
+	var wanted_buildings: Array = []
+	var wanted_workers: Array = []
+	if district is Dictionary:
+		exclusions.append(Rect2(district.x - 15.7, district.z - 12.7, 31.4, 25.4))
+	for building in city.buildings:
+		occupied[building.plotId] = true
+		for plot in plots:
+			if plot.id != building.plotId:
+				continue
+			var id: String = data.starterHall if building.type == "ECO-05" and int(building.level) == 1 else data.types.get(building.type,"")
+			if id == "":
+				break
+			var asset: Dictionary = data.models[id]
+			var x := float(plot.x)
+			var z := float(plot.z)
+			var y := sample_city(x,z)
+			exclusions.append(Rect2(x - 7.0, z - 7.0, 14.0, 14.0))
+			var scale := float(asset.scale)*(1+0.055*(int(building.level)-1))
+			wanted_buildings.append(["model", asset.path, model_transform(x,y,z,0,scale)])
+			wanted_workers.append([id, Vector3(x,y,z)])
+			var levels: Dictionary = data.architecture.get(building.type, {})
+			var upgrade: String = levels.get(str(int(building.level)), "")
+			if not upgrade.is_empty():
+				wanted_buildings.append(["detail", upgrade, Transform3D(Basis.IDENTITY, Vector3(x,y,z))])
+			place_markers.append({"position":Vector3(x,y+5,z),"id":building.id,"kind":"building","item":building})
+			break
+	for plot in plots:
+		if (kingdom is Dictionary and plot.id in kingdom.get("clearedPlots", [])) or plot.id.begins_with("site-"):
+			exclusions.append(Rect2(plot.x - 6.7, plot.z - 6.7, 13.4, 13.4))
+		if order is Dictionary and order.get("kind", "") != "clear" and order.get("plotId", "") == plot.id:
+			wanted_buildings.append(["detail", data.scaffold, Transform3D(Basis.IDENTITY, Vector3(plot.x, sample_city(plot.x, plot.z), plot.z))])
+		if not occupied.has(plot.id):
+			var x := float(plot.x)
+			var z := float(plot.z)
+			empty_plots.append({"position":Vector3(x, sample_city(x, z), z), "kind":"plot", "item":plot})
+	for grove in data.clearings:
+		if grove.id in progress.get("cleared", []):
+			var half := float(grove.size) * 0.5
+			exclusions.append(Rect2(grove.x - half, grove.z - half, grove.size, grove.size))
+	sync_city_buildings(wanted_buildings)
+	if staged:
+		await yield_frame()
+	sync_city_workers(wanted_workers)
+	var road_key := JSON.stringify([city.buildings.map(func(b): return [b.id, b.type, b.plotId]), plots.map(func(p): return [p.id, p.x, p.z])])
+	if road_key != geometries.get("road_signature", "") or not is_instance_valid(city_road_mesh):
+		geometries["road_signature"] = road_key
+		build_city_roads(city, plots)
+	var ground_key := JSON.stringify([exclusions.map(func(r: Rect2): return [r.position.x, r.position.y, r.size.x, r.size.y]),
+		kingdom is Dictionary, city_streets.map(func(road): return [road[0].x, road[0].y, road[1].x, road[1].y])])
+	var vegetation_key := JSON.stringify([ground_key, progress.get("felled", [])])
+	if vegetation_key != geometries.get("vegetation_signature", ""):
+		var rebuild_ground: bool = ground_key != geometries.get("ground_signature", "")
+		geometries["vegetation_signature"] = vegetation_key
+		geometries["ground_signature"] = ground_key
+		if staged:
+			await yield_frame()
+			await build_forest(city, exclusions, rebuild_ground, true)
+		else:
+			build_forest(city, exclusions, rebuild_ground)
+		vegetation_rebuilds += 1
+		if rebuild_ground:
+			ground_rebuilds += 1
+	sync_parade(army, district)
+	update_visible_batches()
+
+func node_signature(kind: String, path: String, transform_value: Transform3D) -> String:
+	return "%s|%s|%s" % [kind, path, var_to_str(transform_value)]
+
+func sync_city_buildings(wanted: Array) -> void:
+	var existing := {}
+	for child in buildings.get_children():
+		var signature: String = child.get_meta("city_signature", "")
+		if signature.is_empty() or existing.has(signature):
+			child.free()
+		else:
+			existing[signature] = child
+	var kept := {}
+	for item in wanted:
+		var signature := node_signature(item[0], item[1], item[2])
+		if existing.has(signature) and not kept.has(signature):
+			kept[signature] = true
+			continue
+		var node: Node3D
+		if item[0] == "detail":
+			add_city_detail(buildings, item[1], item[2].origin)
+			node = buildings.get_child(buildings.get_child_count() - 1)
+		else:
+			node = add_model(buildings, item[1], item[2])
+		node.set_meta("city_signature", signature)
+		kept[signature] = true
+		city_nodes_created += 1
+	for signature in existing:
+		if not kept.has(signature):
+			existing[signature].free()
+
+func sync_city_workers(wanted: Array) -> void:
+	var existing := {}
+	for child in workers.get_children():
+		var signature: String = child.get_meta("city_signature", "")
+		if signature.is_empty() or existing.has(signature):
+			child.free()
+		else:
+			existing[signature] = child
+	var kept := {}
+	for item in wanted:
+		var signature := "%s|%s" % [item[0], var_to_str(item[1])]
+		if existing.has(signature) and not kept.has(signature):
+			kept[signature] = true
+			continue
+		var before := workers.get_child_count()
+		add_worker(item[0], item[1])
+		if workers.get_child_count() > before:
+			workers.get_child(workers.get_child_count() - 1).set_meta("city_signature", signature)
+			city_nodes_created += 1
+		kept[signature] = true
+	for signature in existing:
+		if not kept.has(signature):
+			existing[signature].free()
 
 func add_worker(building: String, base: Vector3) -> void:
 	var worker: String = {
@@ -918,7 +1089,7 @@ func present_workers(time: float) -> void:
 			p = ground_point(p) + Vector3.UP * absf(sin(time * 5.0)) * 0.035
 			actor.rotation.y = atan2(cos(phase) * 1.65, -sin(phase) * 0.42)
 		else:
-			p.y = sample_city(p.x, p.z) + (sin(time * 2.0) * 0.025 if kind == "farm" else 0.0)
+			p.y = static_height(p.x, p.z) + (sin(time * 2.0) * 0.025 if kind == "farm" else 0.0)
 		actor.position = p
 
 func add_city_detail(parent: Node3D, path: String, p: Vector3) -> void:
@@ -927,7 +1098,9 @@ func add_city_detail(parent: Node3D, path: String, p: Vector3) -> void:
 		mesh.material_override = scenery_material
 
 func sync_parade(army: Dictionary, district: Variant) -> void:
-	var key := JSON.stringify([army, district])
+	# The parade site depends on building markers and standing trees as well as the army.
+	var key := JSON.stringify([army, district, geometries.get("vegetation_signature", ""),
+		place_markers.map(func(marker): return [marker.position.x, marker.position.z])])
 	if key == geometries.get("parade_signature", ""):
 		return
 	geometries.parade_signature = key
@@ -1094,6 +1267,7 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 				elif at >= elapsed - 430.0 and at <= elapsed + 560.0 and attack == -INF:
 					attack = at
 					charge = kind == "antler_charge"
+			present_battle_fx(id, p, encounter, army, elapsed, events)
 			if attack > -INF:
 				clip = "Alert" if charge and elapsed < attack - 260.0 else "Attack"
 				clip_phase = (elapsed - attack + 560.0) / 300.0 if clip == "Alert" else (elapsed - attack + 260.0) / 690.0
@@ -1112,9 +1286,74 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			play_animation(actor, clip, "Idle", clip_phase)
 			actor.set_meta("clip", clip)
 	retain_hidden_actors(creatures, known, retained, MAX_HIDDEN_CREATURES)
+	battle_fx.finish()
 	for cue in effects.get_children():
 		if not cues.has(String(cue.name)):
 			cue.queue_free()
+
+# Damage timeline of one battle from the server events: soldier hits with the
+# creature's remaining hp, and the creature's strikes on formation members.
+var fx_timelines := {}
+
+func battle_timeline(army: Dictionary, encounter: Dictionary, events: Array) -> Dictionary:
+	var cached: Dictionary = fx_timelines.get(army.id, {})
+	if cached.get("source") == events:
+		return cached
+	var spec: Dictionary = encounter.get("spec", {})
+	var start_hp := float(spec.get("hp", encounter.get("maxHp", encounter.get("hp", 1))))
+	var hits: Array = []
+	var strikes: Array = []
+	var ordered := events.duplicate()
+	ordered.sort_custom(func(a, b): return (float(a[0]) if a is Array else float(a.at)) < (float(b[0]) if b is Array else float(b.at)))
+	var hp := start_hp
+	for event in ordered:
+		var e: Array = event if event is Array else [event.at, event.kind, event.get("unitId", ""), event.get("index", 0), event.get("hp")]
+		if e[1] == "soldier_attack":
+			var after: float = float(e[4]) if e.size() > 4 and e[4] != null else hp
+			hits.append([float(e[0]), maxf(0.0, hp - after), after])
+			hp = after
+		else:
+			strikes.append([float(e[0]), "%s:%d" % [e[2], int(e[3])], e[1]])
+	cached = {"source": events, "hits": hits, "strikes": strikes, "max": maxf(1.0, start_hp)}
+	fx_timelines[army.id] = cached
+	return cached
+
+func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dictionary, elapsed: float, events: Array) -> void:
+	var timeline := battle_timeline(army, encounter, events)
+	var route: Dictionary = army_routes.get(army.id, {})
+	var centre: Vector3 = route.get("position", p)
+	var members: Dictionary = route.get("member_at", {})
+	battle_fx.ring(p.lerp(centre, 0.5), maxf(7.5, p.distance_to(centre) * 0.5 + 6.0), Color("#62e07a"))
+	var hp := float(timeline.max)
+	var recent := hp
+	for hit in timeline.hits:
+		var at := float(hit[0])
+		if at > elapsed:
+			break
+		if elapsed - at > 600.0:
+			recent = float(hit[2])
+		hp = float(hit[2])
+		var age := elapsed - at
+		if age <= 900.0 and float(hit[1]) > 0.0:
+			# Fan consecutive numbers sideways so they never stack on one spot.
+			var side := 1.0 if int(at / 97.0) % 2 == 0 else -1.0
+			var fan := Vector3(side * (1.6 + fposmod(at * 0.0031, 1.0) * 1.2), 0.0, 0.0).rotated(Vector3.UP, camera_yaw)
+			battle_fx.number(p + fan, "-%d" % roundi(float(hit[1])), age / 900.0, Color("#ffe7a8"), float(hit[1]) >= timeline.max * 0.08)
+		if age <= 320.0:
+			battle_fx.spark(p, age / 320.0, Color("#ffb054"), 1.5, fposmod(at * 0.013, 1.0))
+	for strike in timeline.strikes:
+		var age := elapsed - float(strike[0])
+		if age < -380.0 or age > 420.0:
+			continue
+		var target: Vector3 = members.get(strike[1], centre)
+		battle_fx.slash(p, target, (age + 380.0) / 800.0, Color("#ff5a3c"), 3.4 if strike[2] == "antler_charge" else 2.8)
+		if age >= 0.0:
+			battle_fx.spark(target, age / 420.0, Color("#ff6a4a"), 1.3, fposmod(float(strike[0]) * 0.007, 1.0))
+	var spec: Dictionary = encounter.get("spec", {})
+	var title := "%s · %s" % [spec.get("name", encounter.get("species", "")), ["I", "II", "III"][clampi(int(encounter.get("level", 1)), 1, 3) - 1]]
+	var height := 2.6 + 0.5 * clampi(int(encounter.get("level", 1)), 1, 3)
+	battle_fx.health(p + Vector3.UP * height, title, hp / float(timeline.max), recent / float(timeline.max), Color("#d8402c"),
+		clampf(camera_zoom / 46.0, 0.6, 2.5) if map_name == "world" else clampf(camera_zoom / 40.0, 0.6, 2.5))
 
 func show_battle_cue(id: String, p: Vector3, color: Color, phase: float) -> void:
 	var cue := effects.get_node_or_null(NodePath(id)) as MeshInstance3D
@@ -1199,6 +1438,7 @@ func battle_events(army: Dictionary) -> Dictionary:
 	return {"members":by_member, "fallen":fallen}
 
 func present_armies(state: Dictionary, server_ms: float) -> void:
+	battle_fx.begin()
 	var alive := {}
 	var known := {}
 	var rows: Array = state.world.armies if map_name == "world" else state.get("armies", [])
@@ -1253,7 +1493,12 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		actor.process_mode = Node.PROCESS_MODE_INHERIT
 		actor.set_meta("last_visible_ticks", Time.get_ticks_msec())
 		actor.position = p
+		cache.position = p
+		if fighting:
+			cache.member_at = {}
 		var walking: bool = travelling and fraction >= 0.0 and fraction < 1.0
+		# Authoritative ground speed of the formation (world units per second).
+		var ground_speed := float(cache.distances[-1]) / (duration / 1000.0) if walking and cache.distances.size() > 1 else 0.0
 		var elapsed := server_ms - float(army.get("battleAt", end))
 		var spread := smoothstep(0.0, 700.0, elapsed) if fighting else 0.0
 		if returning:
@@ -1275,13 +1520,20 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			var side := float(slot.side) * (1.0 + spread * 0.22)
 			var rear := float(slot.rear) + spread * (4.0 if slot.ranged else 2.5)
 			var offset := Vector3(side * cos(heading) - rear * sin(heading), 0.0, -side * sin(heading) - rear * cos(heading))
-			if map_name == "city" and spread > 0.0:
+			if spread > 0.0:
 				var angle: float = TAU * i / cache.slots.size()
 				offset = offset.lerp(Vector3(cos(angle), 0.0, sin(angle)) * (7.5 if slot.mounted else 4.8), spread)
 			var place := ground_point(p + offset)
+			if fighting:
+				cache.member_at[key] = place
 			var facing := atan2(-offset.x, -offset.z) if fighting else heading
-			unit.transform = model_transform(place.x - p.x, place.y - p.y, place.z - p.z, facing, 1.15)
+			unit.transform = model_transform(place.x - p.x, place.y - p.y, place.z - p.z, facing, FIELD_UNIT_SCALE)
 			var clip := "walk" if walking else "idle"
+			var tempo := 1.0
+			if walking:
+				var gait := gait_for(slot.id, ground_speed)
+				clip = gait[0]
+				tempo = gait[1]
 			var phase := -1.0
 			var strike := -INF
 			var hit := -INF
@@ -1304,6 +1556,9 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				elif strike > -INF:
 					clip = "attack"
 					phase = (elapsed - strike + 490.0) / 1000.0
+					if not slot.ranged:
+						# Weapon sweep timed to the swing's contact frame (event time).
+						battle_fx.slash(place, p, (elapsed - strike + 260.0) / 420.0, Color("#ffd27a"), 2.3)
 				elif army.get("worldKind") == "pvp":
 					clip = "attack"
 					phase = fposmod(elapsed + i * 125.0, 1000.0) / 1000.0
@@ -1311,6 +1566,10 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				play_animation(unit, clip, data.unitModels[slot.id].drill if clip == "attack" else "", phase,
 					fposmod(float(i) * 0.381966, 1.0))
 				unit.set_meta("clip", clip)
+			if unit.get_meta("tempo", 1.0) != tempo:
+				unit.set_meta("tempo", tempo)
+				for player: AnimationPlayer in unit.get_meta("animation_players", []):
+					player.speed_scale = tempo
 			var shot := unit.get_node_or_null("Arrow") as MeshInstance3D
 			var firing: bool = slot.ranged and clip == "attack" and strike > -INF and elapsed >= strike - 260.0 and elapsed <= strike
 			if firing:
@@ -1324,6 +1583,20 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 	for id in army_routes.keys():
 		if not rows.any(func(army): return army.id == id and army.status != "returned"):
 			army_routes.erase(id)
+
+static func gait_for(unit_id: String, ground_speed: float) -> Array:
+	# Picks walk or run and the playback tempo at which planted feet travel at the
+	# formation's ground speed, so soldiers do not skate along the route. The gait
+	# changes at the geometric mean of both strides, which keeps tempo distortion
+	# symmetric; only speeds outside the supported range are clamped.
+	var stance: Dictionary = GaitTable.STANCE_SPEED.get(unit_id, {})
+	var walk := float(stance.get("walk", 0.0)) * FIELD_UNIT_SCALE
+	var run := float(stance.get("run", 0.0)) * FIELD_UNIT_SCALE
+	if walk <= 0.0 or ground_speed <= 0.0:
+		return ["walk", 1.0]
+	if run <= 0.0 or ground_speed < sqrt(walk * run):
+		return ["walk", clampf(ground_speed / walk, WALK_TEMPO.x, INF)]
+	return ["run", clampf(ground_speed / run, 0.0, RUN_TEMPO.y)]
 
 func retain_hidden_actors(parent: Node3D, known: Dictionary, shown: Dictionary, maximum: int) -> void:
 	var hidden: Array[Node] = []

@@ -1,0 +1,43 @@
+name: DRENOVAR native iOS test build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [native-ios-godot]
+    paths: [native-ios/**, .github/workflows/drenovar-ios.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  iphone:
+    runs-on: macos-15
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: native-ios
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: native-ios
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Fetch and verify original game assets
+        run: |
+          node tools/fetch-web84-assets.mjs build/web84
+          node tools/import-web-assets.mjs build/web84
+      - name: Install Godot and matching iOS template
+        run: |
+          curl -fL --retry 2 'https://downloads.godotengine.org/?version=4.6.3&flavor=stable&slug=macos.universal.zip' -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          printf '%s\n' "GODOT_BIN=$RUNNER_TEMP/godot/Godot.app/Contents/MacOS/Godot" >> "$GITHUB_ENV"
+          python3 tools/ios-template.py "$HOME/Library/Application Support/Godot/export_templates/4.6.3.stable/ios.zip"
+      - name: Build unsigned arm64 IPA
+        run: bash tools/package-ios.sh build/ios
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DRENOVAR-unsigned-ipa
+          path: native-ios/build/ios/DRENOVAR-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 5

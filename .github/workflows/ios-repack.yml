@@ -83,6 +83,11 @@ jobs:
         run: |
           tag="ios-test-v${{ steps.meta.outputs.version }}-b${{ steps.meta.outputs.build }}"
           notes="Test build for SideStore (unsigned; SideStore re-signs on install). Repack, not an Xcode compilation: the Godot 4.6.3 arm64 engine and app files come byte-identical from the reduced engine capsule of the device-tested 0.5.9 IPA (DRENOVAR-engine-base-0.5.9.zip, not the original IPA); the game pack DRENOVAR.pck was exported from commit ${GITHUB_SHA}. Not an App Store release; not device-tested."
+          # A published test build is immutable: a new IPA needs a new build number.
+          if gh release view "$tag" --json assets --jq '.assets[].name' 2>/dev/null | grep -qx "${{ steps.meta.outputs.ipa }}"; then
+            echo "::notice::$tag already holds ${{ steps.meta.outputs.ipa }}; not overwritten. Bump application/version in export_presets.cfg for a new IPA."
+            exit 0
+          fi
           gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease --target "${GITHUB_SHA}" --title "DRENOVAR iOS ${{ steps.meta.outputs.version }} (${{ steps.meta.outputs.build }}) test" --notes "$notes"
-          gh release upload "$tag" "$RUNNER_TEMP/${{ steps.meta.outputs.ipa }}" "$RUNNER_TEMP/SHA256.txt" "$CAPSULE" --clobber
+          gh release upload "$tag" "$RUNNER_TEMP/${{ steps.meta.outputs.ipa }}" "$RUNNER_TEMP/SHA256.txt" "$CAPSULE"
           echo "Download: https://github.com/${GITHUB_REPOSITORY}/releases/download/$tag/${{ steps.meta.outputs.ipa }}"

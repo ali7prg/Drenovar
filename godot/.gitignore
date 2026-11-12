@@ -1,0 +1,4 @@
+/project/.godot/
+/build/
+__pycache__/
+# Source assets under project/assets/ are intentionally tracked.

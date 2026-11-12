@@ -1,0 +1,12 @@
+**/.DS_Store
+**/Thumbs.db
+**/.godot/
+**/build/
+**/__pycache__/
+**/*.p12
+**/*.p8
+**/*.pem
+**/*.mobileprovision
+**/.env
+**/.env.*
+**/node_modules/

@@ -97,6 +97,7 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	env.fog_density = 0.72
 	env.fog_depth_begin = 160.0 if is_city else 340.0
 	env.fog_depth_end = 300.0 if is_city else 610.0
+	WarriorVisual.add_reflections(env, env.background_color)
 	camera.environment = env
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-48, -32, 0)

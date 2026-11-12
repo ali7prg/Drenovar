@@ -28,6 +28,8 @@ jobs:
           curl -fL --retry 3 "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -o "$RUNNER_TEMP/godot.zip"
           unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
           echo "GODOT_BIN=$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" >> "$GITHUB_ENV"
+      - name: 3D textures are VRAM-compressed
+        run: python3 godot/tools/texture_import_policy.py godot/project --check
       - name: Import assets
         working-directory: godot/project
         run: '"$GODOT_BIN" --headless --path . --import'
@@ -37,7 +39,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/qa"
           status=0
           for scenario in qa_camera_hud qa_runtime qa_batch_parity qa_optimization qa_warriors qa_web_panels \
-              qa_city_parity qa_stability qa_panel_latency qa_diagnostics qa_gait qa_network qa_camera_fling qa_idempotency; do
+              qa_city_parity qa_stability qa_panel_latency qa_diagnostics qa_gait qa_network qa_camera_fling qa_idempotency qa_troops06; do
             if timeout 300 "$GODOT_BIN" --headless --path . -s "$scenario.gd" > "$RUNNER_TEMP/qa/$scenario.log" 2>&1; then
               echo "PASS $scenario: $(grep -E '^QA_[A-Z_]+ ' "$RUNNER_TEMP/qa/$scenario.log" | grep -v REPORT | tail -1)"
             else

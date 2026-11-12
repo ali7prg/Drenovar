@@ -373,7 +373,12 @@ func add_resource_button(wallet: Container, key: String) -> void:
 	amount.add_theme_font_size_override("font_size", 18)
 	amount.add_theme_color_override("font_color", Color("#fff0d4"))
 	amount.add_theme_color_override("font_outline_color", Color("#191511"))
-	amount.add_theme_constant_override("outline_size", 4)
+	amount.add_theme_constant_override("outline_size", 6)
+	# Soft drop shadow keeps the counters legible over bright grass without a backing plate.
+	amount.add_theme_color_override("font_shadow_color", Color(0.05, 0.04, 0.03, 0.7))
+	amount.add_theme_constant_override("shadow_offset_x", 0)
+	amount.add_theme_constant_override("shadow_offset_y", 2)
+	amount.add_theme_constant_override("shadow_outline_size", 8)
 	amount.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	labels.add_child(amount)
 	resource_amounts[key] = amount
@@ -1713,6 +1718,7 @@ func load_unit_preview(preview: SubViewportContainer, visual: Dictionary, framin
 		rim.light_energy = 0.75
 		root.add_child(rim)
 		WarriorVisual.ground_shadow(root, bounds)
+	WarriorVisual.add_reflections(fill, Color("#8b9874"))
 	camera.environment = fill
 	var clip: String = "Recruit_Showcase" if warrior and visual.drill == "Mounted_Drill" else visual.drill
 	stage.play_animation(unit, clip, visual.drill)
@@ -2382,6 +2388,8 @@ func show_report(report: Dictionary, announced := false) -> void:
 	sigil.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var back := close_modal if announced else show_reports
 	var dismiss := button(heading, "×", back)
+	dismiss.custom_minimum_size = Vector2(58, 54)
+	dismiss.tooltip_text = "Закрыть"
 	dismiss.accessibility_name = "Закрыть результат боя"
 	result_label(modal_body, title, 37, Color("#f1d28c"), true)
 	var opponent: Dictionary = report.get("creature", {})

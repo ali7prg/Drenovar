@@ -1,7 +1,0 @@
-{
-  "comment": "Device-tested IPA whose Godot 4.6.3 engine executable is reused by repack-tested-engine.py. Hashes from docs/ipa_inspection.json.",
-  "name": "DRENOVAR-iOS-v0.5.9-test.ipa",
-  "url": "https://github.com/ali7prg/Drenovar/releases/download/base-ipa-0.5.9/DRENOVAR-iOS-v0.5.9-test.ipa",
-  "ipa_sha256": "987a47b049eda4c9bc1c522e48b95c80beb5dfbebec7e340156d0400b3b18ec3",
-  "executable_sha256": "d9816f67f540bbebccfdb2a5ecf9460feda71c05247e4e80601caf44973bfaae"
-}

@@ -63,6 +63,10 @@ jobs:
   ios-unsigned:
     name: Unsigned arm64 IPA (macOS)
     needs: headless-qa
+    # GitHub never assigns a hosted macOS runner to this repository (annotations:
+    # "not acquired by Runner of type hosted", "configuration not supported"), so the
+    # Xcode build only runs on demand. Test IPAs come from ios-repack.yml (Linux).
+    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
     timeout-minutes: 40
     steps:

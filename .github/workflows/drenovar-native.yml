@@ -61,7 +61,7 @@ jobs:
   ios-unsigned:
     name: Unsigned arm64 IPA (macOS)
     needs: headless-qa
-    runs-on: macos-15
+    runs-on: macos-latest
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4

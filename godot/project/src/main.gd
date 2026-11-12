@@ -11,12 +11,20 @@ const MarchMap = preload("res://src/march_map.gd")
 const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
 const HudAction = preload("res://src/hud_action.gd")
+const SessionDiagnostics = preload("res://src/session_diagnostics.gd")
 const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
 const RECRUIT_ORDER := ["ENG-09", "ENG-08", "ENG-01", "ENG-02", "ENG-07", "ENG-10", "ENG-03", "ENG-04", "ENG-05", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
 const RESOURCE_NAMES := {"food":"Еда","wood":"Дерево","stone":"Камень","iron":"Железо","coins":"Монеты"}
 const SCENE_REUSE_SECONDS := 40.0
 const SCENE_REUSE_HARD_LIMIT := 60.0
+# With VRAM-compressed textures both scenes fit together, so the inactive one is
+# kept (instant city <-> world) unless process + video memory exceeds this or iOS
+# sends a memory warning. Above it, the 0.5.9 timed release applies.
+const TWO_SCENE_MEMORY_MB := 1300.0
+# The other scene is prepared in the background after this much idle time.
+const PREWARM_IDLE_MSEC := 2500
+const PREWARM_QUIET_MSEC := 600
 const LIVE_SERVER := "https://drenovar.pink-lyric-9420.chatgpt.site"
 var data: Dictionary
 var state: Dictionary
@@ -26,6 +34,14 @@ var retired_nodes: Array[Node] = []
 var saved_views: Dictionary = {}
 var scene_loading := false
 var scene_switch_msec := 0
+var prewarm_name := ""
+var prewarm_stage: Landscape
+var prewarm_cancelled := false
+# After the inactive scene had to be released for memory, it is not rebuilt in the background.
+var prewarm_paused_until := 0
+var last_interaction_msec := 0
+var camera_moving_now := false
+signal prewarm_finished
 var map_name := "city"
 var hud := CanvasLayer.new()
 var resource_buttons: Dictionary = {}
@@ -67,6 +83,9 @@ var login_proof := ""
 var login_deadline := 0
 var login_link_used := false
 var busy := false
+var api := ApiPool.new()
+var action_ring := ActionRing.new()
+var last_command_ms := -1.0
 var polling_state := false
 var request_generation := 0
 var login_in_progress := false
@@ -88,12 +107,28 @@ var motion_samples := PackedFloat32Array()
 var motion_index := 0
 var motion_count := 0
 var last_scene_ms := 0
+var last_scene_label := ""
+var memory_peak_mb := 0.0
 var last_frame_us := 0
 var modal_generation := 0
 var action_list_key := ""
 var next_training_update := 0.0
 var followed_army := ""
 var next_minimap_draw := 0
+var diagnostics := SessionDiagnostics.new()
+const OFFLINE_NOTICE := "Нет связи с сервером. Переподключаемся…"
+var offline_notice_shown := false
+# Kinetic camera glide after a quick one-finger swipe.
+const FLING_MIN_SPEED := 280.0
+const FLING_STOP_SPEED := 24.0
+const FLING_FRICTION := 5.5
+const FLING_SAMPLE_USEC := 90000
+var drag_samples: Array = []
+# Idempotency keys kept for commands whose response was lost in transport, so a
+# retry of the same order can never be applied twice by the server.
+var retry_keys: Dictionary = {}
+var fling_velocity := Vector2.ZERO
+var fling_point := Vector2.ZERO
 
 func _ready() -> void:
 	Input.use_accumulated_input = false
@@ -107,6 +142,11 @@ func _ready() -> void:
 				loopback = true
 		if arg == "--smoke":
 			smoke = true
+		if arg.begins_with("--diagnostics="):
+			diagnostics.path = arg.trim_prefix("--diagnostics=")
+	diagnostics.start(str(ProjectSettings.get_setting("application/config/version")), Time.get_unix_time_from_system())
+	api.name = "ApiPool"
+	add_child(api)
 	var launch := LaunchScreen.new()
 	add_child(launch)
 	# Give the branded screen a frame before parsing game data and loading meshes.
@@ -126,10 +166,34 @@ func _ready() -> void:
 	launch.show_step("Готовим поселение…", 72)
 	await show_scene("city")
 	launch.finish()
+	warm_panel_textures()
 	if restoring_session:
 		message.text = "Подключаемся к сохранённому поселению…"
 	if smoke:
 		await run_smoke()
+
+func make_vignette() -> TextureRect:
+	# Soft darkening toward the screen edges frames the scene and keeps the eye on the
+	# centre. One small gradient texture stretched over the screen; drawn under the HUD.
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.55, 0.82, 1.0])
+	gradient.colors = PackedColorArray([Color(0.04, 0.05, 0.04, 0.0), Color(0.04, 0.05, 0.04, 0.0),
+		Color(0.04, 0.05, 0.04, 0.22), Color(0.03, 0.035, 0.03, 0.5)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 128
+	texture.height = 64
+	var vignette := TextureRect.new()
+	vignette.name = "Vignette"
+	vignette.texture = texture
+	vignette.stretch_mode = TextureRect.STRETCH_SCALE
+	vignette.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	vignette.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return vignette
 
 func build_ui() -> void:
 	var root := Control.new()
@@ -137,6 +201,8 @@ func build_ui() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(root)
+	root.add_child(make_vignette())
+	root.add_child(action_ring)
 	var outer := VBoxContainer.new()
 	outer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	outer.offset_left = 52
@@ -260,6 +326,7 @@ func build_ui() -> void:
 	inner.add_child(modal_tools)
 	var scroll := TouchScroll.new()
 	modal_scroll = scroll
+	scroll.press_root = modal
 	scroll.custom_minimum_size.y = 84
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -354,7 +421,12 @@ func add_resource_button(wallet: Container, key: String) -> void:
 	amount.add_theme_font_size_override("font_size", 18)
 	amount.add_theme_color_override("font_color", Color("#fff0d4"))
 	amount.add_theme_color_override("font_outline_color", Color("#191511"))
-	amount.add_theme_constant_override("outline_size", 4)
+	amount.add_theme_constant_override("outline_size", 6)
+	# Soft drop shadow keeps the counters legible over bright grass without a backing plate.
+	amount.add_theme_color_override("font_shadow_color", Color(0.05, 0.04, 0.03, 0.7))
+	amount.add_theme_constant_override("shadow_offset_x", 0)
+	amount.add_theme_constant_override("shadow_offset_y", 2)
+	amount.add_theme_constant_override("shadow_outline_size", 8)
 	amount.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	labels.add_child(amount)
 	resource_amounts[key] = amount
@@ -893,10 +965,23 @@ func show_scene(scene_name: String) -> void:
 		close_modal()
 		return
 	scene_loading = true
+	action_ring.close()
 	var started_at := Time.get_ticks_msec()
 	followed_army = ""
 	close_modal()
 	var next: Landscape = scene_cache.get(scene_name)
+	last_scene_label = ("город" if scene_name == "city" else "мир") + (", из кэша" if next != null else ", первая загрузка")
+	if next == null and prewarm_name == scene_name and not prewarm_cancelled:
+		# Prepared in the background: finish the remaining slices at full speed.
+		message.text = "Открываем карту…" if scene_name == "world" else "Открываем город…"
+		last_scene_label = ("город" if scene_name == "city" else "мир") + ", дозагрузка из фона"
+		prewarm_stage.background_gate = Callable()
+		await prewarm_finished
+		next = scene_cache.get(scene_name)
+	elif not prewarm_name.is_empty():
+		prewarm_stage.background_gate = Callable()
+		await prewarm_finished
+		next = scene_cache.get(scene_name)
 	if next == null:
 		message.text = "Открываем карту…" if scene_name == "world" else "Открываем город…"
 		await get_tree().process_frame
@@ -925,7 +1010,52 @@ func show_scene(scene_name: String) -> void:
 	message.text = ""
 	refresh_hud()
 
+func memory_in_use_mb() -> float:
+	return (Performance.get_monitor(Performance.MEMORY_STATIC) + Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)) / 1048576.0
+
+func two_scenes_fit() -> bool:
+	return memory_in_use_mb() < TWO_SCENE_MEMORY_MB
+
+func prewarm_may_continue() -> bool:
+	return fingers.is_empty() and not dragging and not camera_moving_now and not scene_loading and \
+		Time.get_ticks_msec() - last_interaction_msec >= PREWARM_QUIET_MSEC
+
+func maybe_prewarm_other_scene() -> void:
+	if smoke or not prewarm_name.is_empty() or scene_loading or not is_instance_valid(stage) or Time.get_ticks_msec() < prewarm_paused_until:
+		return
+	var other := "world" if map_name == "city" else "city"
+	if scene_cache.has(other) or not two_scenes_fit():
+		return
+	if Time.get_ticks_msec() - maxi(last_interaction_msec, scene_switch_msec) < PREWARM_IDLE_MSEC or not prewarm_may_continue():
+		return
+	prewarm_scene(other)
+
+func prewarm_scene(scene_name: String) -> void:
+	# Builds the other scene inactive, in small slices, only while the player is idle.
+	prewarm_name = scene_name
+	prewarm_cancelled = false
+	var next := Landscape.new()
+	prewarm_stage = next
+	next.background_gate = prewarm_may_continue
+	next.set_active(false)
+	add_child(next)
+	await next.setup(data, state, scene_name, saved_views.get(scene_name, {}))
+	next.background_gate = Callable()
+	if prewarm_cancelled:
+		if get_viewport().size_changed.is_connected(next.update_visible_batches):
+			get_viewport().size_changed.disconnect(next.update_visible_batches)
+		retired_nodes.append(next)
+		retired_nodes.append_array(next.find_children("*", "", true, false))
+	else:
+		scene_cache[scene_name] = next
+	prewarm_name = ""
+	prewarm_stage = null
+	prewarm_finished.emit()
+
 func release_inactive_scene() -> void:
+	prewarm_paused_until = Time.get_ticks_msec() + 10 * 60 * 1000
+	if not prewarm_name.is_empty():
+		prewarm_cancelled = true
 	for name in scene_cache.keys():
 		var cached: Landscape = scene_cache[name]
 		if cached == stage:
@@ -949,10 +1079,17 @@ func drain_retired_scenes(urgent := false) -> void:
 		freed += 1
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		diagnostics.set_state("exited", Time.get_unix_time_from_system())
+	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		diagnostics.set_state("foreground", Time.get_unix_time_from_system())
 	if what == NOTIFICATION_OS_MEMORY_WARNING:
+		diagnostics.log_event("memory_warning", {"memory_mb": snappedf(Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, 0.1),
+			"scenes": scene_cache.size()}, Time.get_unix_time_from_system())
 		release_inactive_scene()
 		drain_retired_scenes(true)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
+		diagnostics.set_state("background", Time.get_unix_time_from_system())
 		last_frame_us = 0
 		if is_instance_valid(modal_scroll):
 			modal_scroll.cancel_touch()
@@ -963,6 +1100,8 @@ func zoom_scene(amount: float) -> void:
 		stage.change_zoom(amount)
 
 func reset_gestures() -> void:
+	drag_samples.clear()
+	fling_velocity = Vector2.ZERO
 	fingers.clear()
 	last_pinch = 0.0
 	pinch_center = Vector2.ZERO
@@ -1086,10 +1225,19 @@ func show_environment_catalog(category_index := 0) -> void:
 	var grid := GridContainer.new()
 	grid.columns = 4
 	modal_body.add_child(grid)
+	var generation := modal_generation
+	var made := 0
 	for entry in data.atlasData.assets:
 		var group := int(String(entry.category).get_slice("_", 0))
 		if category_index > 0 and group not in groups[category_index]:
 			continue
+		# Fill the grid progressively: the first cards appear at once, the rest
+		# over the next frames, so opening never builds every card in one frame.
+		if made > 0 and made % 24 == 0:
+			await get_tree().process_frame
+			if generation != modal_generation or not is_instance_valid(grid):
+				return
+		made += 1
 		var thumbnail := AtlasTexture.new()
 		thumbnail.atlas = environment_atlas
 		thumbnail.filter_clip = true
@@ -1105,7 +1253,8 @@ func show_environment_catalog(category_index := 0) -> void:
 		item.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		item.custom_minimum_size = Vector2(118, 94)
 		item.tooltip_text = entry.name
-	button(modal_body, "К общему миру", show_world_directory)
+	if generation == modal_generation:
+		button(modal_body, "К общему миру", show_world_directory)
 
 func focus_environment(entry: Dictionary, category_index: int) -> void:
 	var index: int = data.environment.find_custom(func(item): return item.id == entry.id)
@@ -1188,6 +1337,7 @@ func place_modal(layout: String) -> void:
 	modal.offset_bottom = offsets.end.y
 
 func open_modal(title: String, layout := "center", eyebrow := "") -> void:
+	action_ring.close()
 	result_open = layout == "result"
 	modal_header.visible = not result_open
 	modal_divider.visible = not result_open
@@ -1243,10 +1393,57 @@ func panel_art(parent: Container, path: String, pixels: Vector2) -> TextureRect:
 	parent.add_child(art)
 	return art
 
+func warm_panel_textures() -> void:
+	# Decode recruitment portraits on a worker thread after launch, so the first
+	# barracks window does not decode eleven images inside the touch handler.
+	var pending: Array[String] = []
+	for id in RECRUIT_ORDER:
+		var full: String = "res://assets/ui/web-panels/" + id + ".png"
+		if ResourceLoader.exists(full) and ResourceLoader.load_threaded_request(full, "Texture2D") == OK:
+			pending.append(full)
+	var atlas: String = data.environmentAtlas
+	if environment_atlas == null and ResourceLoader.load_threaded_request(atlas, "Texture2D") == OK:
+		pending.append(atlas)
+	while not pending.is_empty():
+		await get_tree().process_frame
+		for full: String in pending.duplicate():
+			if ResourceLoader.load_threaded_get_status(full) != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+				pending.erase(full)
+				var texture := ResourceLoader.load_threaded_get(full) as Texture2D
+				if full == atlas:
+					if environment_atlas == null:
+						environment_atlas = texture
+					continue
+				var key: String = full.trim_prefix("res://assets/ui/web-panels/")
+				if texture != null and not panel_textures.has(key):
+					panel_textures[key] = texture
+
 func panel_texture(path: String) -> Texture2D:
 	if not panel_textures.has(path):
 		panel_textures[path] = load("res://assets/ui/web-panels/" + path) as Texture2D
 	return panel_textures[path]
+
+func open_building_ring(marker: Dictionary) -> void:
+	var building: Dictionary = marker.item
+	var level := int(building.level)
+	var actions: Array = []
+	var upgradable: bool = level < 5 and building.type in data.upgradable
+	actions.append(["Улучшить" if upgradable else "Сведения", "upgrade" if upgradable else "info", inspect_building.bind(building)])
+	var construction := construction_order()
+	if construction.get("buildingId") == building.id:
+		actions.append(["Ускорить", "speed", show_speedups.bind("construction", construction, "")])
+	var group: String = data.trainingGroups.get(building_definition(building.type).get("base", building.type), "")
+	if group != "":
+		actions.append(["Обучить", "train", open_recruitment.bind(building)])
+	if building.type in data.producers and not player_id.is_empty():
+		actions.append(["Собрать", "collect", command.bind({"kind":"kingdom","action":"collect","buildingId":building.id})])
+	if building.type == "ECO-03":
+		actions.append(["Обмен", "trade", show_trade])
+	if building.type == "SUP-01":
+		actions.append(["Лазарет", "heal", show_hospital])
+	if upgradable:
+		actions.append(["Сведения", "info", inspect_building.bind(building)])
+	action_ring.open(str(building.id), "%s · ур. %d" % [building_title(building.type), level], marker.position, stage.camera, actions)
 
 func inspect_building(building: Dictionary) -> void:
 	open_modal(building_title(building.type), "right", "ПОСЕЛЕНИЕ")
@@ -1374,8 +1571,9 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	var layout := HBoxContainer.new()
 	layout.add_theme_constant_override("separation", 10)
 	modal_body.add_child(layout)
+	var tier := recruit_tier(unit.id)
 	var stage_panel := panel(8)
-	stage_panel.add_theme_stylebox_override("panel", WebPanels.gradient_style(Color("#405450"), Color("#182724"), WebPanels.BRASS, 8))
+	stage_panel.add_theme_stylebox_override("panel", WebPanels.gradient_style(Color("#2c3433"), Color("#121817"), WebPanels.BRASS, 8))
 	stage_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	stage_panel.size_flags_stretch_ratio = 0.62
 	stage_panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -1384,9 +1582,27 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	stage_panel.add_child(display)
 	var preview := create_unit_preview(display, 258, panel_texture(unit.id + ".png"))
 	preview.name = "RecruitPreview"
-	load_unit_preview.call_deferred(preview, data.unitModels[unit.id], 0.72)
+	# Rank-coloured glow behind the unit (I grey ... V gold), under the live 3D view.
+	var glow := TextureRect.new()
+	glow.name = "Backdrop"
+	glow.texture = rank_backdrop(tier)
+	glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	glow.stretch_mode = TextureRect.STRETCH_SCALE
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	preview.get_parent().add_child(glow)
+	preview.get_parent().move_child(glow, 0)
+	glow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var staged: Dictionary = data.unitModels[unit.id].duplicate()
+	staged.pedestal = true
+	load_unit_preview.call_deferred(preview, staged, 0.72)
 	var name_label := Label.new()
 	name_label.text = unit.name
+	var rank := Label.new()
+	rank.text = "РАНГ %s · %s" % [["I", "II", "III", "IV", "V"][tier - 1], unit.get("unit_class", "")]
+	rank.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rank.add_theme_font_size_override("font_size", 14)
+	rank.add_theme_color_override("font_color", RANK_COLOURS[tier - 1][0].lightened(0.45))
+	display.add_child(rank)
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.add_theme_font_override("font", TITLE_FONT)
 	name_label.add_theme_font_size_override("font_size", 26)
@@ -1419,8 +1635,7 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 		card.add_theme_constant_override("icon_max_width", 60)
 		card.add_theme_font_size_override("font_size", 14)
 		card.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		if id == unit.id:
-			card.add_theme_stylebox_override("normal", Interface.style(Color("#504331"), Color("#d3ae6b"), 7, 4, 5))
+		style_rank_card(card, recruit_tier(id), id == unit.id, int(state.city.get("military", {}).get("owned", {}).get(id, 0)))
 	var owned := int(state.city.get("military", {}).get("owned", {}).get(unit.id, 0))
 	var stats := GridContainer.new()
 	stats.columns = 2
@@ -1472,7 +1687,13 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	var terms := panel(8)
 	terms.add_theme_stylebox_override("panel", Interface.style(Color("#272c31"), Color("#846d4d"), 6, 8, 6))
 	order.add_child(terms)
-	terms.add_child(quote)
+	var terms_box := VBoxContainer.new()
+	terms.add_child(terms_box)
+	var cost_row := HBoxContainer.new()
+	cost_row.name = "CostRow"
+	cost_row.add_theme_constant_override("separation", 14)
+	terms_box.add_child(cost_row)
+	terms_box.add_child(quote)
 	var train := panel_action(order, "Обучить", func(): pass)
 	var reason := Label.new()
 	reason.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1495,7 +1716,8 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 			costs[resource] = cost * int(amount)
 		var reduction := clampi(int(building.level) - 1, 0, 4) * 8 if state.city.get("kingdom", state.city.get("legacyUpgrades")) is Dictionary else 0
 		var seconds := maxi(1, ceili(float(unit.train_seconds) * amount * (1.0 - reduction / 100.0)))
-		quote.text = "Стоимость · %s\nВремя обучения · %d сек." % [cost_label(costs), seconds]
+		quote.text = "Время обучения · %d сек." % seconds
+		fill_cost_row(cost_row, costs)
 		var affordable := can_afford(costs)
 		train.disabled = submission.pending or player_id.is_empty() or not paid_training or not queue_has_room or not unlocked or not affordable
 		train.text = "Создаём заказ…" if submission.pending else "Обучить %d" % int(amount)
@@ -1554,6 +1776,85 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	reserves.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	modal_footer.add_child(reserves)
 	button(modal_footer, "Готовые войска →", show_armies)
+
+const RANK_COLOURS := [[Color("#6d7276"), Color("#24272a")], [Color("#46804f"), Color("#15291a")],
+	[Color("#3f63a0"), Color("#152239")], [Color("#70499c"), Color("#241634")], [Color("#b08a3e"), Color("#382810")]]
+var rank_backdrops := {}
+
+# Rank I..V of a unit: the military building level that unlocks it.
+func recruit_tier(id: String) -> int:
+	var levels: Array = data.unitRequirements.get(id, [1, 1])
+	return clampi(int(levels[1]), 1, 5)
+
+func rank_backdrop(tier: int) -> Texture2D:
+	if rank_backdrops.has(tier):
+		return rank_backdrops[tier]
+	var colours: Array = RANK_COLOURS[tier - 1]
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.45, 1.0])
+	gradient.colors = PackedColorArray([Color(colours[0], 0.95), Color(colours[0].darkened(0.35), 0.7), Color(colours[1], 0.0)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.42)
+	texture.fill_to = Vector2(1.05, 0.42)
+	texture.width = 128
+	texture.height = 128
+	rank_backdrops[tier] = texture
+	return texture
+
+func style_rank_card(card: Button, tier: int, selected: bool, owned: int) -> void:
+	var colours: Array = RANK_COLOURS[tier - 1]
+	var edge: Color = WebPanels.GOLD if selected else colours[0].lightened(0.25)
+	var top: Color = colours[0].lightened(0.12) if selected else colours[0]
+	card.add_theme_stylebox_override("normal", WebPanels.gradient_style(top, colours[1], edge, 5))
+	card.add_theme_stylebox_override("hover", WebPanels.gradient_style(top.lightened(0.08), colours[1], WebPanels.GOLD, 5))
+	card.add_theme_stylebox_override("pressed", WebPanels.gradient_style(top.darkened(0.15), colours[1], WebPanels.GOLD, 5))
+	var badge := Label.new()
+	badge.text = ["I", "II", "III", "IV", "V"][tier - 1]
+	badge.add_theme_font_override("font", TITLE_FONT)
+	badge.add_theme_font_size_override("font_size", 15)
+	badge.add_theme_color_override("font_color", Color("#f7e3b4"))
+	badge.add_theme_color_override("font_outline_color", Color("#120e0a"))
+	badge.add_theme_constant_override("outline_size", 5)
+	badge.position = Vector2(7, 3)
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(badge)
+	var count := Label.new()
+	count.text = str(owned)
+	count.add_theme_font_size_override("font_size", 14)
+	count.add_theme_color_override("font_color", Color("#fff1d2"))
+	count.add_theme_color_override("font_outline_color", Color("#120e0a"))
+	count.add_theme_constant_override("outline_size", 5)
+	count.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	count.offset_left = -42
+	count.offset_right = -7
+	count.offset_top = 3
+	count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	count.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(count)
+
+func fill_cost_row(row_box: HBoxContainer, costs: Dictionary) -> void:
+	empty(row_box)
+	for resource in costs:
+		if int(costs[resource]) <= 0 or not resource_icons.has(resource):
+			continue
+		var item := HBoxContainer.new()
+		item.add_theme_constant_override("separation", 4)
+		row_box.add_child(item)
+		add_resource_icon(item, resource, 26)
+		var amount := Label.new()
+		amount.text = compact_number(int(costs[resource]))
+		amount.add_theme_font_size_override("font_size", 18)
+		amount.add_theme_color_override("font_color", Color("#fff0d4") if int(costs[resource]) <= balance(resource) else Color("#ff8f7a"))
+		item.add_child(amount)
+
+func compact_number(value: int) -> String:
+	if value >= 1000000:
+		return "%.1fM" % (value / 1000000.0)
+	if value >= 10000:
+		return "%.1fK" % (value / 1000.0)
+	return str(value)
 
 func create_unit_preview(parent: Container, height: int, portrait: Texture2D = null) -> SubViewportContainer:
 	var frame := Control.new()
@@ -1617,6 +1918,8 @@ func load_unit_preview(preview: SubViewportContainer, visual: Dictionary, framin
 	for part: MeshInstance3D in unit.find_children("*", "MeshInstance3D", true, false):
 		var box := part.global_transform * part.get_aabb()
 		bounds = box if not bounds.has_volume() else bounds.merge(box)
+	if warrior and visual.get("pedestal", false):
+		bounds = WarriorVisual.pedestal(root, bounds, load(data.stoneTexture))
 	var center := bounds.get_center()
 	var size := maxf(0.6, bounds.size.length())
 	var camera := Camera3D.new()
@@ -1650,6 +1953,7 @@ func load_unit_preview(preview: SubViewportContainer, visual: Dictionary, framin
 		rim.light_energy = 0.75
 		root.add_child(rim)
 		WarriorVisual.ground_shadow(root, bounds)
+	WarriorVisual.add_reflections(fill, Color("#8b9874"))
 	camera.environment = fill
 	var clip: String = "Recruit_Showcase" if warrior and visual.drill == "Mounted_Drill" else visual.drill
 	stage.play_animation(unit, clip, visual.drill)
@@ -1806,6 +2110,8 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	var summary := Label.new()
 	summary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary.add_theme_color_override("font_color", WebPanels.GOLD)
+	summary.add_theme_font_size_override("font_size", 18)
 	var quote := Label.new()
 	quote.name = "MarchQuote"
 	quote.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1813,7 +2119,11 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	modal_footer.show()
 	var back := inspect_current_settlement.bind(id) if kind == "pvp" else inspect_current_encounter.bind(id)
 	button(modal_footer, "Назад", back)
-	modal_footer.add_child(summary)
+	if city:
+		modal_footer.add_child(summary)
+	else:
+		# The narrow side panel keeps the footer for actions only.
+		roster.add_child(summary)
 	var send := panel_action(modal_footer, "Марш" if city else "Отправить отряд", func(): pass, false, not city)
 	send.name = "MarchSend"
 	var submit := {"order": {}, "sending": false}
@@ -1834,7 +2144,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 				units[unit_id] = count
 				power += count * int(unit_for_id(unit_id).power)
 		var total := total_units(units)
-		summary.text = "%d / 200 воинов · мощь %d" % [total, power]
+		summary.text = "Мощь %s · войска %d / 200" % [compact_number(power), total]
 		if city:
 			empty(slots)
 			for unit_id in units:
@@ -1867,20 +2177,20 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		fill_party(selected, all_available)
 		selection_batch.active = false
 		update.call()
-	if city:
-		var heading := Label.new()
-		heading.text = "Доступные войска"
-		heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tools.add_child(heading)
-		button(tools, "Все доступные", set_party.bind(true))
-		button(modal_footer, "Очистить", set_party.bind(false))
+	var heading := Label.new()
+	heading.text = "Доступные войска"
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tools.add_child(heading)
+	button(tools, "Все доступные", set_party.bind(true))
+	button(modal_footer, "Очистить", set_party.bind(false))
 	var first_row_index := roster.get_child_count() - 1
 	for unit in data.englishRoster:
 		var available := int(state.healthy.get(unit.id, 0))
 		if available < 1:
 			continue
+		var tier := recruit_tier(unit.id)
 		var entry := panel(5)
-		entry.add_theme_stylebox_override("panel", Interface.style(Color("#2b3036"), Color("#846d4d"), 6, 6, 5))
+		entry.add_theme_stylebox_override("panel", WebPanels.gradient_style(Color("#30363b"), Color("#1d2125"), Color("#846d4d"), 6))
 		roster.add_child(entry)
 		roster.move_child(entry, first_row_index)
 		first_row_index += 1
@@ -1888,7 +2198,20 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		entry.add_child(card)
 		var controls := HBoxContainer.new()
 		card.add_child(controls)
-		panel_art(controls, unit.id + ".png", Vector2(48, 48))
+		var frame := PanelContainer.new()
+		frame.add_theme_stylebox_override("panel", WebPanels.gradient_style(RANK_COLOURS[tier - 1][0], RANK_COLOURS[tier - 1][1],
+			RANK_COLOURS[tier - 1][0].lightened(0.3), 2, 5))
+		controls.add_child(frame)
+		panel_art(frame, unit.id + ".png", Vector2(52, 52))
+		var badge := Label.new()
+		badge.text = ["I", "II", "III", "IV", "V"][tier - 1]
+		badge.add_theme_font_size_override("font_size", 12)
+		badge.add_theme_color_override("font_outline_color", Color("#120e0a"))
+		badge.add_theme_constant_override("outline_size", 4)
+		badge.size_flags_vertical = Control.SIZE_SHRINK_END
+		badge.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		frame.add_child(badge)
 		var info := VBoxContainer.new()
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		controls.add_child(info)
@@ -1903,7 +2226,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		controls.add_child(amount)
 		button(controls, "+", func(): amount.value += 1)
 		selected[unit.id] = amount
-		if city:
+		if true:
 			var slider := HSlider.new()
 			slider.max_value = amount.max_value
 			slider.custom_minimum_size.y = 29
@@ -1922,8 +2245,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			if value > 200 - used:
 				amount.set_value_no_signal(200 - used)
 				amount.get_line_edit().text = str(int(amount.value))
-				if city:
-					(card.get_child(1) as HSlider).set_value_no_signal(amount.value)
+				(card.get_child(1) as HSlider).set_value_no_signal(amount.value)
 			update.call())
 	if selected.is_empty():
 		row(roster, "Свободных воинов нет. Откройте казармы и завершите обучение.")
@@ -2090,6 +2412,7 @@ func show_performance() -> void:
 	var primitives := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
 	var draw_calls := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 	open_modal("Плавность на этом устройстве")
+	row(modal_body, diagnostics.summary())
 	if frame_count < 30:
 		row(modal_body, "Поиграй несколько секунд, чтобы получить замер.")
 		return
@@ -2118,6 +2441,19 @@ func show_performance() -> void:
 			stage.camera_zoom, lod.x, lod.y, lod.z
 		]
 	report += "\nРендерер: %s\nGPU: %s\nПередано матриц окружения: %.1f МБ" % [RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), stage.uploaded_transform_bytes / 1048576.0]
+	# Resolution chain: is the 3D drawn at the panel's native size or larger?
+	var window := get_window()
+	report += "\nОкно: %s · экран: %s · масштаб экрана: %.2f · растяжение: %.3f · 3D-масштаб: %.2f · %s" % [
+		DisplayServer.window_get_size(), DisplayServer.screen_get_size(), DisplayServer.screen_get_scale(),
+		window.content_scale_factor, get_viewport().scaling_3d_scale, str(get_viewport().get_visible_rect().size)]
+	report += "\nПамять (CPU): %.0f МБ, пик %.0f МБ · видеопамять: %.0f МБ · текстуры: %.0f МБ" % [
+		Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, memory_peak_mb,
+		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0]
+	report += "\nПоследний переход: %s · время работы: %d мин" % [last_scene_label, Time.get_ticks_msec() / 60000]
+	report += "\nСвязь: последний запрос %s · запросов %d, из них по открытому соединению %d · новых соединений %d" % [
+		("%.0f мс" % last_command_ms) if last_command_ms >= 0.0 else "—", api.requests_total, api.requests_reused, api.connections_opened]
+	report += "\n" + diagnostics.summary()
 	row(modal_body, report)
 	button(modal_body, "Скопировать замер", func(): DisplayServer.clipboard_set(report))
 
@@ -2252,10 +2588,11 @@ func sign_out() -> void:
 	if not response.get("signedOut", false) and response.get("httpStatus", 0) != 401:
 		show_error(response)
 		return
-	reset_session()
+	reset_session("sign_out")
 	await show_account()
 
-func reset_session() -> void:
+func reset_session(reason := "auth_401") -> void:
+	diagnostics.log_event("session_reset", {"reason": reason}, Time.get_unix_time_from_system())
 	request_generation += 1
 	SessionStore.forget()
 	session = ""
@@ -2317,6 +2654,8 @@ func show_report(report: Dictionary, announced := false) -> void:
 	sigil.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var back := close_modal if announced else show_reports
 	var dismiss := button(heading, "×", back)
+	dismiss.custom_minimum_size = Vector2(58, 54)
+	dismiss.tooltip_text = "Закрыть"
 	dismiss.accessibility_name = "Закрыть результат боя"
 	result_label(modal_body, title, 37, Color("#f1d28c"), true)
 	var opponent: Dictionary = report.get("creature", {})
@@ -2406,7 +2745,15 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	if modal.visible:
 		modal_status.text = "Отправляем запрос…"
 		modal_status.show()
-	var response: Dictionary = await request("command",order)
+	var signature := JSON.stringify(order)
+	var key: String = str(order.get("requestId", ""))
+	if key.is_empty():
+		key = retry_keys.get(signature, Crypto.new().generate_random_bytes(16).hex_encode())
+	var response: Dictionary = await request("command", order, key)
+	if response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500:
+		retry_keys[signature] = key
+	else:
+		retry_keys.erase(signature)
 	if not response.has("city"):
 		command_in_progress = false
 		if generation == modal_generation:
@@ -2423,28 +2770,21 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	message.text = "Действие выполнено"
 	return true
 
-func request(path: String, payload: Variant = null) -> Dictionary:
+func request(path: String, payload: Variant = null, idempotency_key := "") -> Dictionary:
 	if not connected():
 		return {"error":"Сначала войди в аккаунт."}
-	var response := await send_request(path if loopback else "native/game/" + path, payload)
+	var response := await send_request(path if loopback else "native/game/" + path, payload, true, 12.0, idempotency_key)
 	if not loopback and response.get("httpStatus", 0) == 401:
 		reset_session()
 	return response
 
-func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0) -> Dictionary:
+func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0, idempotency_key := "") -> Dictionary:
 	if foreground and busy:
 		return {"error":"Подожди завершения предыдущего запроса."}
 	if foreground:
 		busy = true
 		request_generation += 1
-	var client := HTTPRequest.new()
-	client.timeout = timeout_seconds
-	# A stalled preview must not block cancellation while the server withholds headers.
-	client.use_threads = path.get_file() != "march-preview"
-	client.max_redirects = 0
-	client.body_size_limit = 8 * 1024 * 1024
-	add_child(client)
-	var headers := PackedStringArray(["Accept: application/json"])
+	var headers := PackedStringArray(["Accept: application/json", "Accept-Encoding: gzip"])
 	if player_id != "":
 		headers.append("X-Drenovar-Player: "+player_id)
 	if not session.is_empty():
@@ -2452,34 +2792,47 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	if payload != null:
 		headers.append("Content-Type: application/json")
 		headers.append("Origin: "+endpoint)
-		var request_key := ""
-		if path.get_file() == "command" and payload is Dictionary:
+		var request_key := idempotency_key
+		if request_key.is_empty() and path.get_file() == "command" and payload is Dictionary:
 			request_key = str(payload.get("requestId", ""))
 		if request_key.is_empty():
 			request_key = Crypto.new().generate_random_bytes(16).hex_encode()
 		headers.append("Idempotency-Key: "+request_key)
-	var error := client.request(endpoint+"/api/"+path,headers,HTTPClient.METHOD_GET if payload==null else HTTPClient.METHOD_POST,"" if payload==null else JSON.stringify(payload))
-	if error != OK:
-		client.queue_free()
-		if foreground:
-			busy = false
-		return {"error":"Сервер недоступен"}
-	var result: Array = await client.request_completed
-	client.queue_free()
+	# Kept-alive connections: a command no longer pays for a new TCP and TLS handshake.
+	api.configure(endpoint)
+	var started_us := Time.get_ticks_usec()
+	var result: Array = await api.request(HTTPClient.METHOD_GET if payload == null else HTTPClient.METHOD_POST, "/api/" + path,
+		headers, "" if payload == null else JSON.stringify(payload), timeout_seconds, 8 * 1024 * 1024)
 	if foreground:
 		busy = false
+		last_command_ms = (Time.get_ticks_usec() - started_us) / 1000.0
+	var transport_ok: bool = result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0 and int(result[1]) < 500
+	diagnostics.network_result(transport_ok, "timeout" if result[0] == HTTPRequest.RESULT_TIMEOUT else ("http_%d" % int(result[1]) if result[0] == HTTPRequest.RESULT_SUCCESS else "transport_%d" % int(result[0])),
+		Time.get_unix_time_from_system(), Time.get_ticks_msec())
+	update_connection_notice()
 	if result[0] != HTTPRequest.RESULT_SUCCESS or result[3].is_empty():
 		if result[0] == HTTPRequest.RESULT_TIMEOUT:
-			return {"error":"Сервер не ответил вовремя. Проверь соединение и повтори."}
+			return {"error":"Сервер не ответил вовремя. Проверь соединение и повтори.", "transportFailure":true}
 		if result[0] == HTTPRequest.RESULT_TLS_HANDSHAKE_ERROR:
-			return {"error":"Не удалось установить защищённое соединение с сервером."}
-		return {"error":"Сервер недоступен"}
+			return {"error":"Не удалось установить защищённое соединение с сервером.", "transportFailure":true}
+		return {"error":"Сервер недоступен", "transportFailure":true}
 	var response := JSON.new()
 	if response.parse(result[3].get_string_from_utf8()) == OK and response.data is Dictionary:
 		if int(result[1]) >= 400:
 			response.data.httpStatus = result[1]
 		return response.data
 	return {"error":"Сервер вернул неожиданный ответ (HTTP %d)." % int(result[1])}
+
+func update_connection_notice() -> void:
+	# Two consecutive transport failures mean the link is down, not a single blip.
+	var offline := diagnostics.network_failures >= 2 and connected()
+	if offline and not offline_notice_shown:
+		offline_notice_shown = true
+		message.text = OFFLINE_NOTICE
+	elif not offline and offline_notice_shown:
+		offline_notice_shown = false
+		if message.text == OFFLINE_NOTICE:
+			message.text = "Связь восстановлена"
 
 func poll_account_state() -> void:
 	if polling_state or busy or login_in_progress or not connected() or (player_id.is_empty() and not restoring_session):
@@ -2502,14 +2855,21 @@ func poll_account_state() -> void:
 
 func _process(delta: float) -> void:
 	drain_retired_scenes()
+	memory_peak_mb = maxf(memory_peak_mb, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0)
+	diagnostics.heartbeat(map_name, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
+		Time.get_ticks_msec() / 1000.0, Time.get_unix_time_from_system(), Time.get_ticks_msec())
 	if not is_instance_valid(stage) or scene_loading:
 		return
 	var camera_moving := stage.camera_dirty or stage.camera_target.distance_squared_to(stage.target) >= 0.01 or \
 		absf(stage.camera_zoom - stage.zoom) >= 0.1 or absf(angle_difference(stage.camera_yaw, stage.world_yaw)) >= 0.01
+	update_fling(delta)
+	camera_moving = camera_moving or fling_velocity != Vector2.ZERO
+	camera_moving_now = camera_moving
 	stage.update_camera(delta)
 	if relocation_pins.visible and camera_moving:
 		relocation_pins.queue_redraw()
-	if scene_cache.size() > 1:
+	maybe_prewarm_other_scene()
+	if scene_cache.size() > 1 and not two_scenes_fit():
 		var inactive_seconds := (Time.get_ticks_msec() - scene_switch_msec) / 1000.0
 		if inactive_seconds >= SCENE_REUSE_HARD_LIMIT or (
 			inactive_seconds >= SCENE_REUSE_SECONDS and not camera_moving and fingers.is_empty()
@@ -2563,7 +2923,9 @@ func _process(delta: float) -> void:
 		return
 	var active_march: bool = state.world.armies.any(func(army): return army.owner == player_id or army.target == player_id)
 	active_march = active_march or state.get("armies", []).any(func(army): return army.status != "returned")
-	if poll > (0.8 if active_march else 5.0):
+	# Back off while the server is unreachable: 0.8/5 s normally, up to 15 s offline.
+	var interval := (0.8 if active_march else 5.0) * pow(2.0, mini(diagnostics.network_failures, 4))
+	if poll > minf(interval, maxf(15.0, 0.8 if active_march else 5.0)):
 		poll = 0
 		if login_link_used and not login_proof.is_empty():
 			await finish_login()
@@ -2571,6 +2933,21 @@ func _process(delta: float) -> void:
 			await poll_account_state()
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventMouseButton or \
+			(event is InputEventMouseMotion and event.button_mask != 0):
+		last_interaction_msec = Time.get_ticks_msec()
+	# A finger lifted while a window opens or a scene loads must still be released.
+	# Otherwise the stale contact turns the next one-finger drag into a false pinch.
+	if event is InputEventScreenTouch and not event.pressed and fingers.has(event.index) and \
+			(not is_instance_valid(stage) or modal.visible or scene_loading):
+		fingers.erase(event.index)
+		tap_candidate = false
+		last_pinch = 0.0
+		return
+	if event is InputEventMouseButton and not event.pressed and event.button_index == MOUSE_BUTTON_LEFT and dragging and \
+			(not is_instance_valid(stage) or modal.visible or scene_loading):
+		dragging = false
+		return
 	if not is_instance_valid(stage) or modal.visible or scene_loading:
 		return
 	if event is InputEventScreenDrag and fingers.has(event.index):
@@ -2578,6 +2955,9 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event is InputEventScreenTouch and not event.pressed and fingers.has(event.index):
 		var picked: bool = tap_candidate and not event.canceled and pointer_distance < 10.0
+		if fingers.size() == 1 and not picked and not event.canceled:
+			start_fling(event.position)
+		drag_samples.clear()
 		fingers.erase(event.index)
 		tap_candidate = false
 		last_pinch = 0.0
@@ -2590,6 +2970,7 @@ func move_world_touch(event: InputEventScreenDrag) -> void:
 	fingers[event.index] = event.position
 	pointer_distance += event.relative.length()
 	if fingers.size() == 2:
+		drag_samples.clear()
 		var points: Array = fingers.values()
 		var gap: float = points[0].distance_to(points[1])
 		var center: Vector2 = (points[0] + points[1]) * 0.5
@@ -2601,6 +2982,37 @@ func move_world_touch(event: InputEventScreenDrag) -> void:
 	elif fingers.size() == 1:
 		followed_army = ""
 		stage.drag_between(previous, event.position)
+		var now := Time.get_ticks_usec()
+		drag_samples.append([now, event.position])
+		while drag_samples.size() > 2 and now - int(drag_samples[0][0]) > FLING_SAMPLE_USEC:
+			drag_samples.pop_front()
+
+func start_fling(release_position: Vector2) -> void:
+	fling_velocity = Vector2.ZERO
+	if drag_samples.size() < 2:
+		return
+	var first: Array = drag_samples[0]
+	var last: Array = drag_samples[-1]
+	var seconds := (int(last[0]) - int(first[0])) / 1000000.0
+	# A finger that paused before lifting does not glide.
+	if seconds <= 0.004 or Time.get_ticks_usec() - int(last[0]) > FLING_SAMPLE_USEC:
+		return
+	var velocity: Vector2 = (last[1] - first[1]) / seconds
+	if velocity.length() >= FLING_MIN_SPEED:
+		fling_velocity = velocity.limit_length(4200.0)
+		fling_point = release_position
+
+func update_fling(delta: float) -> void:
+	if fling_velocity == Vector2.ZERO:
+		return
+	if not fingers.is_empty() or modal.visible or not followed_army.is_empty():
+		fling_velocity = Vector2.ZERO
+		return
+	var step := fling_velocity * delta
+	stage.drag_between(fling_point, fling_point + step)
+	fling_velocity *= exp(-FLING_FRICTION * delta)
+	if fling_velocity.length() < FLING_STOP_SPEED:
+		fling_velocity = Vector2.ZERO
 
 func _unhandled_input(event: InputEvent) -> void:
 	if (modal.visible or relocation_pins.visible) and event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
@@ -2613,6 +3025,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventScreenTouch:
 		if event.pressed:
+			if fingers.is_empty() and action_ring.is_open() and Time.get_ticks_msec() - action_ring.opened_at > 150:
+				action_ring.close()
+			fling_velocity = Vector2.ZERO
+			drag_samples.clear()
 			if fingers.is_empty():
 				stage.begin_direct_manipulation()
 			tap_candidate = fingers.is_empty()
@@ -2663,8 +3079,9 @@ func pick_marker(screen_position: Vector2) -> void:
 		if gap < distance:
 			best = marker
 			distance = gap
+	action_ring.close()
 	if best.get("kind","") == "building":
-		inspect_building(best.item)
+		open_building_ring(best)
 	elif best.get("kind","") == "encounter":
 		inspect_encounter(best.item)
 	elif best.get("kind","") == "settlement":

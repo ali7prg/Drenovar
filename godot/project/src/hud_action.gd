@@ -22,10 +22,14 @@ func _draw() -> void:
 	var center := Vector2(size.x * 0.5, 33)
 	var pressed_now := is_pressed()
 	var highlighted := is_hovered() or has_focus()
+	var half := 32.0
 	if pressed_now:
+		# Immediate touch-down acknowledgement, independent of what the action does next.
 		center.y += 2
+		half = 29.0
+		draw_circle(center, 31, Color("#0b0f12a8"), true, -1.0, true)
 	if glyph != null:
-		draw_texture_rect(glyph, Rect2(center - Vector2(32,32),Vector2(64,64)),false)
+		draw_texture_rect(glyph, Rect2(center - Vector2(half, half), Vector2(half, half) * 2.0), false)
 	if highlighted:
 		draw_arc(center, 29, 0, TAU, 64, Color("#ffe2a0"), 1.8, true)
 	var font := get_theme_default_font()

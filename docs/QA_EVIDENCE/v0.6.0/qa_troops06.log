@@ -1,0 +1,13 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+TROOP06 {"field_head":1.59,"field_triangles":21231,"preview_head":1.59,"preview_triangles":55144,"unit":"ENG-01"}
+TROOP06 {"field_head":1.61,"field_triangles":20748,"preview_head":1.61,"preview_triangles":68092,"unit":"ENG-02"}
+TROOP06 {"field_head":1.66,"field_triangles":19654,"preview_head":1.66,"preview_triangles":60596,"unit":"ENG-03"}
+TROOP06 {"field_head":1.57,"field_triangles":21320,"preview_head":1.57,"preview_triangles":53364,"unit":"ENG-04"}
+TROOP06 {"field_head":2.49,"field_triangles":28222,"preview_head":2.49,"preview_triangles":96770,"unit":"ENG-05"}
+TROOP06 {"field_head":2.52,"field_triangles":33691,"preview_head":2.52,"preview_triangles":118230,"unit":"ENG-06"}
+TROOP06 {"field_head":1.67,"field_triangles":17074,"preview_head":1.67,"preview_triangles":75628,"unit":"ENG-07"}
+TROOP06 {"field_head":1.55,"field_triangles":21865,"preview_head":1.55,"preview_triangles":52468,"unit":"ENG-08"}
+TROOP06 {"field_head":1.57,"field_triangles":17556,"preview_head":1.57,"preview_triangles":40668,"unit":"ENG-09"}
+TROOP06 {"field_head":1.59,"field_triangles":20665,"preview_head":1.59,"preview_triangles":54776,"unit":"ENG-10"}
+QA_TROOPS06 checks=244 failures=0

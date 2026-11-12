@@ -104,6 +104,9 @@ const FLING_STOP_SPEED := 24.0
 const FLING_FRICTION := 5.5
 const FLING_SAMPLE_USEC := 90000
 var drag_samples: Array = []
+# Idempotency keys kept for commands whose response was lost in transport, so a
+# retry of the same order can never be applied twice by the server.
+var retry_keys: Dictionary = {}
 var fling_velocity := Vector2.ZERO
 var fling_point := Vector2.ZERO
 
@@ -2432,7 +2435,15 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	if modal.visible:
 		modal_status.text = "Отправляем запрос…"
 		modal_status.show()
-	var response: Dictionary = await request("command",order)
+	var signature := JSON.stringify(order)
+	var key: String = str(order.get("requestId", ""))
+	if key.is_empty():
+		key = retry_keys.get(signature, Crypto.new().generate_random_bytes(16).hex_encode())
+	var response: Dictionary = await request("command", order, key)
+	if response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500:
+		retry_keys[signature] = key
+	else:
+		retry_keys.erase(signature)
 	if not response.has("city"):
 		command_in_progress = false
 		if generation == modal_generation:
@@ -2449,15 +2460,15 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	message.text = "Действие выполнено"
 	return true
 
-func request(path: String, payload: Variant = null) -> Dictionary:
+func request(path: String, payload: Variant = null, idempotency_key := "") -> Dictionary:
 	if not connected():
 		return {"error":"Сначала войди в аккаунт."}
-	var response := await send_request(path if loopback else "native/game/" + path, payload)
+	var response := await send_request(path if loopback else "native/game/" + path, payload, true, 12.0, idempotency_key)
 	if not loopback and response.get("httpStatus", 0) == 401:
 		reset_session()
 	return response
 
-func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0) -> Dictionary:
+func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0, idempotency_key := "") -> Dictionary:
 	if foreground and busy:
 		return {"error":"Подожди завершения предыдущего запроса."}
 	if foreground:
@@ -2478,8 +2489,8 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	if payload != null:
 		headers.append("Content-Type: application/json")
 		headers.append("Origin: "+endpoint)
-		var request_key := ""
-		if path.get_file() == "command" and payload is Dictionary:
+		var request_key := idempotency_key
+		if request_key.is_empty() and path.get_file() == "command" and payload is Dictionary:
 			request_key = str(payload.get("requestId", ""))
 		if request_key.is_empty():
 			request_key = Crypto.new().generate_random_bytes(16).hex_encode()
@@ -2500,10 +2511,10 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	update_connection_notice()
 	if result[0] != HTTPRequest.RESULT_SUCCESS or result[3].is_empty():
 		if result[0] == HTTPRequest.RESULT_TIMEOUT:
-			return {"error":"Сервер не ответил вовремя. Проверь соединение и повтори."}
+			return {"error":"Сервер не ответил вовремя. Проверь соединение и повтори.", "transportFailure":true}
 		if result[0] == HTTPRequest.RESULT_TLS_HANDSHAKE_ERROR:
-			return {"error":"Не удалось установить защищённое соединение с сервером."}
-		return {"error":"Сервер недоступен"}
+			return {"error":"Не удалось установить защищённое соединение с сервером.", "transportFailure":true}
+		return {"error":"Сервер недоступен", "transportFailure":true}
 	var response := JSON.new()
 	if response.parse(result[3].get_string_from_utf8()) == OK and response.data is Dictionary:
 		if int(result[1]) >= 400:

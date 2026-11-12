@@ -11,6 +11,7 @@ const MarchMap = preload("res://src/march_map.gd")
 const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
 const HudAction = preload("res://src/hud_action.gd")
+const SessionDiagnostics = preload("res://src/session_diagnostics.gd")
 const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
 const RECRUIT_ORDER := ["ENG-09", "ENG-08", "ENG-01", "ENG-02", "ENG-07", "ENG-10", "ENG-03", "ENG-04", "ENG-05", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
@@ -88,12 +89,28 @@ var motion_samples := PackedFloat32Array()
 var motion_index := 0
 var motion_count := 0
 var last_scene_ms := 0
+var last_scene_label := ""
+var memory_peak_mb := 0.0
 var last_frame_us := 0
 var modal_generation := 0
 var action_list_key := ""
 var next_training_update := 0.0
 var followed_army := ""
 var next_minimap_draw := 0
+var diagnostics := SessionDiagnostics.new()
+const OFFLINE_NOTICE := "Нет связи с сервером. Переподключаемся…"
+var offline_notice_shown := false
+# Kinetic camera glide after a quick one-finger swipe.
+const FLING_MIN_SPEED := 280.0
+const FLING_STOP_SPEED := 24.0
+const FLING_FRICTION := 5.5
+const FLING_SAMPLE_USEC := 90000
+var drag_samples: Array = []
+# Idempotency keys kept for commands whose response was lost in transport, so a
+# retry of the same order can never be applied twice by the server.
+var retry_keys: Dictionary = {}
+var fling_velocity := Vector2.ZERO
+var fling_point := Vector2.ZERO
 
 func _ready() -> void:
 	Input.use_accumulated_input = false
@@ -107,6 +124,9 @@ func _ready() -> void:
 				loopback = true
 		if arg == "--smoke":
 			smoke = true
+		if arg.begins_with("--diagnostics="):
+			diagnostics.path = arg.trim_prefix("--diagnostics=")
+	diagnostics.start(str(ProjectSettings.get_setting("application/config/version")), Time.get_unix_time_from_system())
 	var launch := LaunchScreen.new()
 	add_child(launch)
 	# Give the branded screen a frame before parsing game data and loading meshes.
@@ -126,6 +146,7 @@ func _ready() -> void:
 	launch.show_step("Готовим поселение…", 72)
 	await show_scene("city")
 	launch.finish()
+	warm_panel_textures()
 	if restoring_session:
 		message.text = "Подключаемся к сохранённому поселению…"
 	if smoke:
@@ -354,7 +375,12 @@ func add_resource_button(wallet: Container, key: String) -> void:
 	amount.add_theme_font_size_override("font_size", 18)
 	amount.add_theme_color_override("font_color", Color("#fff0d4"))
 	amount.add_theme_color_override("font_outline_color", Color("#191511"))
-	amount.add_theme_constant_override("outline_size", 4)
+	amount.add_theme_constant_override("outline_size", 6)
+	# Soft drop shadow keeps the counters legible over bright grass without a backing plate.
+	amount.add_theme_color_override("font_shadow_color", Color(0.05, 0.04, 0.03, 0.7))
+	amount.add_theme_constant_override("shadow_offset_x", 0)
+	amount.add_theme_constant_override("shadow_offset_y", 2)
+	amount.add_theme_constant_override("shadow_outline_size", 8)
 	amount.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	labels.add_child(amount)
 	resource_amounts[key] = amount
@@ -897,6 +923,7 @@ func show_scene(scene_name: String) -> void:
 	followed_army = ""
 	close_modal()
 	var next: Landscape = scene_cache.get(scene_name)
+	last_scene_label = ("город" if scene_name == "city" else "мир") + (", из кэша" if next != null else ", первая загрузка")
 	if next == null:
 		message.text = "Открываем карту…" if scene_name == "world" else "Открываем город…"
 		await get_tree().process_frame
@@ -949,10 +976,17 @@ func drain_retired_scenes(urgent := false) -> void:
 		freed += 1
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		diagnostics.set_state("exited", Time.get_unix_time_from_system())
+	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		diagnostics.set_state("foreground", Time.get_unix_time_from_system())
 	if what == NOTIFICATION_OS_MEMORY_WARNING:
+		diagnostics.log_event("memory_warning", {"memory_mb": snappedf(Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, 0.1),
+			"scenes": scene_cache.size()}, Time.get_unix_time_from_system())
 		release_inactive_scene()
 		drain_retired_scenes(true)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
+		diagnostics.set_state("background", Time.get_unix_time_from_system())
 		last_frame_us = 0
 		if is_instance_valid(modal_scroll):
 			modal_scroll.cancel_touch()
@@ -963,6 +997,8 @@ func zoom_scene(amount: float) -> void:
 		stage.change_zoom(amount)
 
 func reset_gestures() -> void:
+	drag_samples.clear()
+	fling_velocity = Vector2.ZERO
 	fingers.clear()
 	last_pinch = 0.0
 	pinch_center = Vector2.ZERO
@@ -1086,10 +1122,19 @@ func show_environment_catalog(category_index := 0) -> void:
 	var grid := GridContainer.new()
 	grid.columns = 4
 	modal_body.add_child(grid)
+	var generation := modal_generation
+	var made := 0
 	for entry in data.atlasData.assets:
 		var group := int(String(entry.category).get_slice("_", 0))
 		if category_index > 0 and group not in groups[category_index]:
 			continue
+		# Fill the grid progressively: the first cards appear at once, the rest
+		# over the next frames, so opening never builds every card in one frame.
+		if made > 0 and made % 24 == 0:
+			await get_tree().process_frame
+			if generation != modal_generation or not is_instance_valid(grid):
+				return
+		made += 1
 		var thumbnail := AtlasTexture.new()
 		thumbnail.atlas = environment_atlas
 		thumbnail.filter_clip = true
@@ -1105,7 +1150,8 @@ func show_environment_catalog(category_index := 0) -> void:
 		item.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		item.custom_minimum_size = Vector2(118, 94)
 		item.tooltip_text = entry.name
-	button(modal_body, "К общему миру", show_world_directory)
+	if generation == modal_generation:
+		button(modal_body, "К общему миру", show_world_directory)
 
 func focus_environment(entry: Dictionary, category_index: int) -> void:
 	var index: int = data.environment.find_custom(func(item): return item.id == entry.id)
@@ -1242,6 +1288,31 @@ func panel_art(parent: Container, path: String, pixels: Vector2) -> TextureRect:
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(art)
 	return art
+
+func warm_panel_textures() -> void:
+	# Decode recruitment portraits on a worker thread after launch, so the first
+	# barracks window does not decode eleven images inside the touch handler.
+	var pending: Array[String] = []
+	for id in RECRUIT_ORDER:
+		var full: String = "res://assets/ui/web-panels/" + id + ".png"
+		if ResourceLoader.exists(full) and ResourceLoader.load_threaded_request(full, "Texture2D") == OK:
+			pending.append(full)
+	var atlas: String = data.environmentAtlas
+	if environment_atlas == null and ResourceLoader.load_threaded_request(atlas, "Texture2D") == OK:
+		pending.append(atlas)
+	while not pending.is_empty():
+		await get_tree().process_frame
+		for full: String in pending.duplicate():
+			if ResourceLoader.load_threaded_get_status(full) != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+				pending.erase(full)
+				var texture := ResourceLoader.load_threaded_get(full) as Texture2D
+				if full == atlas:
+					if environment_atlas == null:
+						environment_atlas = texture
+					continue
+				var key: String = full.trim_prefix("res://assets/ui/web-panels/")
+				if texture != null and not panel_textures.has(key):
+					panel_textures[key] = texture
 
 func panel_texture(path: String) -> Texture2D:
 	if not panel_textures.has(path):
@@ -1650,6 +1721,7 @@ func load_unit_preview(preview: SubViewportContainer, visual: Dictionary, framin
 		rim.light_energy = 0.75
 		root.add_child(rim)
 		WarriorVisual.ground_shadow(root, bounds)
+	WarriorVisual.add_reflections(fill, Color("#8b9874"))
 	camera.environment = fill
 	var clip: String = "Recruit_Showcase" if warrior and visual.drill == "Mounted_Drill" else visual.drill
 	stage.play_animation(unit, clip, visual.drill)
@@ -2090,6 +2162,7 @@ func show_performance() -> void:
 	var primitives := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
 	var draw_calls := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 	open_modal("Плавность на этом устройстве")
+	row(modal_body, diagnostics.summary())
 	if frame_count < 30:
 		row(modal_body, "Поиграй несколько секунд, чтобы получить замер.")
 		return
@@ -2118,6 +2191,17 @@ func show_performance() -> void:
 			stage.camera_zoom, lod.x, lod.y, lod.z
 		]
 	report += "\nРендерер: %s\nGPU: %s\nПередано матриц окружения: %.1f МБ" % [RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), stage.uploaded_transform_bytes / 1048576.0]
+	# Resolution chain: is the 3D drawn at the panel's native size or larger?
+	var window := get_window()
+	report += "\nОкно: %s · экран: %s · масштаб экрана: %.2f · растяжение: %.3f · 3D-масштаб: %.2f · %s" % [
+		DisplayServer.window_get_size(), DisplayServer.screen_get_size(), DisplayServer.screen_get_scale(),
+		window.content_scale_factor, get_viewport().scaling_3d_scale, str(get_viewport().get_visible_rect().size)]
+	report += "\nПамять (CPU): %.0f МБ, пик %.0f МБ · видеопамять: %.0f МБ · текстуры: %.0f МБ" % [
+		Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, memory_peak_mb,
+		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0]
+	report += "\nПоследний переход: %s · время работы: %d мин" % [last_scene_label, Time.get_ticks_msec() / 60000]
+	report += "\n" + diagnostics.summary()
 	row(modal_body, report)
 	button(modal_body, "Скопировать замер", func(): DisplayServer.clipboard_set(report))
 
@@ -2252,10 +2336,11 @@ func sign_out() -> void:
 	if not response.get("signedOut", false) and response.get("httpStatus", 0) != 401:
 		show_error(response)
 		return
-	reset_session()
+	reset_session("sign_out")
 	await show_account()
 
-func reset_session() -> void:
+func reset_session(reason := "auth_401") -> void:
+	diagnostics.log_event("session_reset", {"reason": reason}, Time.get_unix_time_from_system())
 	request_generation += 1
 	SessionStore.forget()
 	session = ""
@@ -2317,6 +2402,8 @@ func show_report(report: Dictionary, announced := false) -> void:
 	sigil.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var back := close_modal if announced else show_reports
 	var dismiss := button(heading, "×", back)
+	dismiss.custom_minimum_size = Vector2(58, 54)
+	dismiss.tooltip_text = "Закрыть"
 	dismiss.accessibility_name = "Закрыть результат боя"
 	result_label(modal_body, title, 37, Color("#f1d28c"), true)
 	var opponent: Dictionary = report.get("creature", {})
@@ -2406,7 +2493,15 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	if modal.visible:
 		modal_status.text = "Отправляем запрос…"
 		modal_status.show()
-	var response: Dictionary = await request("command",order)
+	var signature := JSON.stringify(order)
+	var key: String = str(order.get("requestId", ""))
+	if key.is_empty():
+		key = retry_keys.get(signature, Crypto.new().generate_random_bytes(16).hex_encode())
+	var response: Dictionary = await request("command", order, key)
+	if response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500:
+		retry_keys[signature] = key
+	else:
+		retry_keys.erase(signature)
 	if not response.has("city"):
 		command_in_progress = false
 		if generation == modal_generation:
@@ -2423,15 +2518,15 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	message.text = "Действие выполнено"
 	return true
 
-func request(path: String, payload: Variant = null) -> Dictionary:
+func request(path: String, payload: Variant = null, idempotency_key := "") -> Dictionary:
 	if not connected():
 		return {"error":"Сначала войди в аккаунт."}
-	var response := await send_request(path if loopback else "native/game/" + path, payload)
+	var response := await send_request(path if loopback else "native/game/" + path, payload, true, 12.0, idempotency_key)
 	if not loopback and response.get("httpStatus", 0) == 401:
 		reset_session()
 	return response
 
-func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0) -> Dictionary:
+func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0, idempotency_key := "") -> Dictionary:
 	if foreground and busy:
 		return {"error":"Подожди завершения предыдущего запроса."}
 	if foreground:
@@ -2452,8 +2547,8 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	if payload != null:
 		headers.append("Content-Type: application/json")
 		headers.append("Origin: "+endpoint)
-		var request_key := ""
-		if path.get_file() == "command" and payload is Dictionary:
+		var request_key := idempotency_key
+		if request_key.is_empty() and path.get_file() == "command" and payload is Dictionary:
 			request_key = str(payload.get("requestId", ""))
 		if request_key.is_empty():
 			request_key = Crypto.new().generate_random_bytes(16).hex_encode()
@@ -2468,18 +2563,33 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	client.queue_free()
 	if foreground:
 		busy = false
+	var transport_ok: bool = result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0 and int(result[1]) < 500
+	diagnostics.network_result(transport_ok, "timeout" if result[0] == HTTPRequest.RESULT_TIMEOUT else ("http_%d" % int(result[1]) if result[0] == HTTPRequest.RESULT_SUCCESS else "transport_%d" % int(result[0])),
+		Time.get_unix_time_from_system(), Time.get_ticks_msec())
+	update_connection_notice()
 	if result[0] != HTTPRequest.RESULT_SUCCESS or result[3].is_empty():
 		if result[0] == HTTPRequest.RESULT_TIMEOUT:
-			return {"error":"Сервер не ответил вовремя. Проверь соединение и повтори."}
+			return {"error":"Сервер не ответил вовремя. Проверь соединение и повтори.", "transportFailure":true}
 		if result[0] == HTTPRequest.RESULT_TLS_HANDSHAKE_ERROR:
-			return {"error":"Не удалось установить защищённое соединение с сервером."}
-		return {"error":"Сервер недоступен"}
+			return {"error":"Не удалось установить защищённое соединение с сервером.", "transportFailure":true}
+		return {"error":"Сервер недоступен", "transportFailure":true}
 	var response := JSON.new()
 	if response.parse(result[3].get_string_from_utf8()) == OK and response.data is Dictionary:
 		if int(result[1]) >= 400:
 			response.data.httpStatus = result[1]
 		return response.data
 	return {"error":"Сервер вернул неожиданный ответ (HTTP %d)." % int(result[1])}
+
+func update_connection_notice() -> void:
+	# Two consecutive transport failures mean the link is down, not a single blip.
+	var offline := diagnostics.network_failures >= 2 and connected()
+	if offline and not offline_notice_shown:
+		offline_notice_shown = true
+		message.text = OFFLINE_NOTICE
+	elif not offline and offline_notice_shown:
+		offline_notice_shown = false
+		if message.text == OFFLINE_NOTICE:
+			message.text = "Связь восстановлена"
 
 func poll_account_state() -> void:
 	if polling_state or busy or login_in_progress or not connected() or (player_id.is_empty() and not restoring_session):
@@ -2502,10 +2612,15 @@ func poll_account_state() -> void:
 
 func _process(delta: float) -> void:
 	drain_retired_scenes()
+	memory_peak_mb = maxf(memory_peak_mb, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0)
+	diagnostics.heartbeat(map_name, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
+		Time.get_ticks_msec() / 1000.0, Time.get_unix_time_from_system(), Time.get_ticks_msec())
 	if not is_instance_valid(stage) or scene_loading:
 		return
 	var camera_moving := stage.camera_dirty or stage.camera_target.distance_squared_to(stage.target) >= 0.01 or \
 		absf(stage.camera_zoom - stage.zoom) >= 0.1 or absf(angle_difference(stage.camera_yaw, stage.world_yaw)) >= 0.01
+	update_fling(delta)
+	camera_moving = camera_moving or fling_velocity != Vector2.ZERO
 	stage.update_camera(delta)
 	if relocation_pins.visible and camera_moving:
 		relocation_pins.queue_redraw()
@@ -2563,7 +2678,9 @@ func _process(delta: float) -> void:
 		return
 	var active_march: bool = state.world.armies.any(func(army): return army.owner == player_id or army.target == player_id)
 	active_march = active_march or state.get("armies", []).any(func(army): return army.status != "returned")
-	if poll > (0.8 if active_march else 5.0):
+	# Back off while the server is unreachable: 0.8/5 s normally, up to 15 s offline.
+	var interval := (0.8 if active_march else 5.0) * pow(2.0, mini(diagnostics.network_failures, 4))
+	if poll > minf(interval, maxf(15.0, 0.8 if active_march else 5.0)):
 		poll = 0
 		if login_link_used and not login_proof.is_empty():
 			await finish_login()
@@ -2571,6 +2688,18 @@ func _process(delta: float) -> void:
 			await poll_account_state()
 
 func _input(event: InputEvent) -> void:
+	# A finger lifted while a window opens or a scene loads must still be released.
+	# Otherwise the stale contact turns the next one-finger drag into a false pinch.
+	if event is InputEventScreenTouch and not event.pressed and fingers.has(event.index) and \
+			(not is_instance_valid(stage) or modal.visible or scene_loading):
+		fingers.erase(event.index)
+		tap_candidate = false
+		last_pinch = 0.0
+		return
+	if event is InputEventMouseButton and not event.pressed and event.button_index == MOUSE_BUTTON_LEFT and dragging and \
+			(not is_instance_valid(stage) or modal.visible or scene_loading):
+		dragging = false
+		return
 	if not is_instance_valid(stage) or modal.visible or scene_loading:
 		return
 	if event is InputEventScreenDrag and fingers.has(event.index):
@@ -2578,6 +2707,9 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event is InputEventScreenTouch and not event.pressed and fingers.has(event.index):
 		var picked: bool = tap_candidate and not event.canceled and pointer_distance < 10.0
+		if fingers.size() == 1 and not picked and not event.canceled:
+			start_fling(event.position)
+		drag_samples.clear()
 		fingers.erase(event.index)
 		tap_candidate = false
 		last_pinch = 0.0
@@ -2590,6 +2722,7 @@ func move_world_touch(event: InputEventScreenDrag) -> void:
 	fingers[event.index] = event.position
 	pointer_distance += event.relative.length()
 	if fingers.size() == 2:
+		drag_samples.clear()
 		var points: Array = fingers.values()
 		var gap: float = points[0].distance_to(points[1])
 		var center: Vector2 = (points[0] + points[1]) * 0.5
@@ -2601,6 +2734,37 @@ func move_world_touch(event: InputEventScreenDrag) -> void:
 	elif fingers.size() == 1:
 		followed_army = ""
 		stage.drag_between(previous, event.position)
+		var now := Time.get_ticks_usec()
+		drag_samples.append([now, event.position])
+		while drag_samples.size() > 2 and now - int(drag_samples[0][0]) > FLING_SAMPLE_USEC:
+			drag_samples.pop_front()
+
+func start_fling(release_position: Vector2) -> void:
+	fling_velocity = Vector2.ZERO
+	if drag_samples.size() < 2:
+		return
+	var first: Array = drag_samples[0]
+	var last: Array = drag_samples[-1]
+	var seconds := (int(last[0]) - int(first[0])) / 1000000.0
+	# A finger that paused before lifting does not glide.
+	if seconds <= 0.004 or Time.get_ticks_usec() - int(last[0]) > FLING_SAMPLE_USEC:
+		return
+	var velocity: Vector2 = (last[1] - first[1]) / seconds
+	if velocity.length() >= FLING_MIN_SPEED:
+		fling_velocity = velocity.limit_length(4200.0)
+		fling_point = release_position
+
+func update_fling(delta: float) -> void:
+	if fling_velocity == Vector2.ZERO:
+		return
+	if not fingers.is_empty() or modal.visible or not followed_army.is_empty():
+		fling_velocity = Vector2.ZERO
+		return
+	var step := fling_velocity * delta
+	stage.drag_between(fling_point, fling_point + step)
+	fling_velocity *= exp(-FLING_FRICTION * delta)
+	if fling_velocity.length() < FLING_STOP_SPEED:
+		fling_velocity = Vector2.ZERO
 
 func _unhandled_input(event: InputEvent) -> void:
 	if (modal.visible or relocation_pins.visible) and event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
@@ -2613,6 +2777,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventScreenTouch:
 		if event.pressed:
+			fling_velocity = Vector2.ZERO
+			drag_samples.clear()
 			if fingers.is_empty():
 				stage.begin_direct_manipulation()
 			tap_candidate = fingers.is_empty()

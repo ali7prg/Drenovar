@@ -1,0 +1,93 @@
+name: DRENOVAR iOS test IPA (repack on Linux)
+
+# GitHub does not assign macOS arm64 runners to this repository ("not acquired by
+# Runner of type hosted", "configuration not supported"). This workflow builds the
+# test IPA without macOS from the reduced engine capsule of the device-tested 0.5.9
+# IPA (godot/ios-engine, pinned hashes): the Godot 4.6.3 engine and app files are
+# reused byte-for-byte, the game pack is exported here from this commit.
+# The IPA is unsigned; SideStore/AltStore re-sign it on install.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths: [godot/**, .github/workflows/ios-repack.yml]
+
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ios-repack-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.6.3
+
+jobs:
+  repack:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read version
+        id: meta
+        run: |
+          version=$(grep -oP 'application/short_version="\K[^"]+' godot/project/export_presets.cfg)
+          build=$(grep -oP '^application/version="\K[^"]+' godot/project/export_presets.cfg)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+          echo "ipa=DRENOVAR-iOS-v$version-test.ipa" >> "$GITHUB_OUTPUT"
+      - name: Verify the engine capsule (pinned hashes)
+        run: |
+          meta=godot/ios-engine/engine-capsule.json
+          file=$(python3 -c "import json;print(json.load(open('$meta'))['file'])")
+          sha=$(python3 -c "import json;print(json.load(open('$meta'))['sha256'])")
+          echo "$sha  $file" | sha256sum -c -
+          echo "CAPSULE=$file" >> "$GITHUB_ENV"
+          echo "CAPSULE_SHA=$sha" >> "$GITHUB_ENV"
+      - name: Install Godot and the iOS export template
+        run: |
+          curl -fL --retry 3 "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          echo "GODOT_BIN=$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" >> "$GITHUB_ENV"
+          templates="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          python3 godot/tools/ios-template.py "$templates/ios.zip"
+          echo "${GODOT_VERSION}.stable" > "$templates/version.txt"
+      - name: Export the game pack from this commit
+        run: |
+          python3 godot/tools/texture_import_policy.py godot/project --check
+          bash godot/tools/package-ios.sh "$RUNNER_TEMP/export"
+          test -s "$RUNNER_TEMP/export/DRENOVAR.pck"
+      - name: Pack boots and loads all ten soldiers
+        run: |
+          timeout 300 "$GODOT_BIN" --headless --main-pack "$RUNNER_TEMP/export/DRENOVAR.pck" -s "$GITHUB_WORKSPACE/godot/tools/verify_pck.gd" | tee "$RUNNER_TEMP/verify.log"
+          grep -q "TROOP_SCENES_OK 20 of 20" "$RUNNER_TEMP/verify.log"
+          grep -qE "PARADE_MODELS .*troops06=[1-9]" "$RUNNER_TEMP/verify.log"
+      - name: Repack onto the engine capsule
+        run: |
+          python3 godot/tools/repack_engine_capsule.py "$CAPSULE" "$RUNNER_TEMP/export/DRENOVAR.pck" \
+            "$RUNNER_TEMP/${{ steps.meta.outputs.ipa }}" --version "${{ steps.meta.outputs.version }}" \
+            --build "${{ steps.meta.outputs.build }}" --expect-capsule-sha256 "$CAPSULE_SHA" | tee "$RUNNER_TEMP/repack.json"
+          ( cd "$RUNNER_TEMP" && sha256sum "${{ steps.meta.outputs.ipa }}" > SHA256.txt && echo "commit ${GITHUB_SHA}" >> SHA256.txt && cat repack.json >> SHA256.txt )
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.ipa }}
+          path: |
+            ${{ runner.temp }}/${{ steps.meta.outputs.ipa }}
+            ${{ runner.temp }}/SHA256.txt
+          retention-days: 30
+      - name: Publish as a test pre-release (direct download link)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="ios-test-v${{ steps.meta.outputs.version }}-b${{ steps.meta.outputs.build }}"
+          notes="Test build for SideStore (unsigned; SideStore re-signs on install). Repack, not an Xcode compilation: the Godot 4.6.3 arm64 engine and app files come byte-identical from the reduced engine capsule of the device-tested 0.5.9 IPA (DRENOVAR-engine-base-0.5.9.zip, not the original IPA); the game pack DRENOVAR.pck was exported from commit ${GITHUB_SHA}. Not an App Store release; not device-tested."
+          # A published test build is immutable: a new IPA needs a new build number.
+          if gh release view "$tag" --json assets --jq '.assets[].name' 2>/dev/null | grep -qx "${{ steps.meta.outputs.ipa }}"; then
+            echo "::notice::$tag already holds ${{ steps.meta.outputs.ipa }}; not overwritten. Bump application/version in export_presets.cfg for a new IPA."
+            exit 0
+          fi
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease --target "${GITHUB_SHA}" --title "DRENOVAR iOS ${{ steps.meta.outputs.version }} (${{ steps.meta.outputs.build }}) test" --notes "$notes"
+          gh release upload "$tag" "$RUNNER_TEMP/${{ steps.meta.outputs.ipa }}" "$RUNNER_TEMP/SHA256.txt" "$CAPSULE"
+          echo "Download: https://github.com/${GITHUB_REPOSITORY}/releases/download/$tag/${{ steps.meta.outputs.ipa }}"

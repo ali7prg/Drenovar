@@ -1,0 +1,1 @@
+CITY_UPDATE_PROFILE {"0.5.9":{"building_upgrade":71.73,"construction_order":78.96,"poll_echo":71.25,"tree_felled":75.56,"troops_trained":4.13},"current":{"building_upgrade":1.98,"construction_order":1.62,"poll_echo":1.56,"tree_felled":13.94,"troops_trained":3.03}}

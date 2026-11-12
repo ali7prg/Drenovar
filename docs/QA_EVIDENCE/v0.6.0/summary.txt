@@ -1,0 +1,17 @@
+godot --headless --path . -s qa_camera_hud.gd -> exit=0 QA_CAMERA_HUD checks=153 failures=0
+godot --headless --path . -s qa_runtime.gd -> exit=0 QA_RUNTIME checks=21 failures=0
+godot --headless --path . -s qa_batch_parity.gd -> exit=0 QA_BATCH_PARITY comparisons=5496 failures=0 reference_buffer_bytes=24456528 candidate_buffer_bytes=17209584
+godot --headless --path . -s qa_optimization.gd -> exit=0 QA_OPTIMIZATION comparisons=13740 failures=0
+godot --headless --path . -s qa_warriors.gd -> exit=0 QA_WARRIORS checks=143 failures=0
+godot --headless --path . -s qa_web_panels.gd -> exit=0 QA_WEB_PANELS checks=37 failures=0
+godot --headless --path . -s qa_city_parity.gd -> exit=0 QA_CITY_PARITY steps=7 vegetation_rebuilds=3 checks=218 failures=0
+godot --headless --path . -s qa_stability.gd -> exit=0 QA_STABILITY checks=5 failures=0
+godot --headless --path . -s qa_panel_latency.gd -> exit=0 QA_PANEL_LATENCY panels=26 checks=26 failures=0
+godot --headless --path . -s qa_diagnostics.gd -> exit=0 QA_DIAGNOSTICS checks=12 failures=0
+godot --headless --path . -s qa_gait.gd -> exit=0 QA_GAIT checks=156 failures=0
+godot --headless --path . -s qa_network.gd -> exit=0 QA_NETWORK checks=9 failures=0
+godot --headless --path . -s qa_camera_fling.gd -> exit=0 QA_CAMERA_FLING checks=9 failures=0
+godot --headless --path . -s qa_idempotency.gd -> exit=0 QA_IDEMPOTENCY checks=8 failures=0
+godot --headless --path . -s qa_web91.gd -> exit=1 (требует сервер v92 по loopback; исходники сервера недоступны в этом сеансе)
+godot --headless --path . -s qa_ios_startup.gd -> exit=1 (требует сервер v92 по loopback; исходники сервера недоступны в этом сеансе)
+godot --headless --path . -s qa_battle_rewards.gd -> exit=1 (требует сервер v92 по loopback; исходники сервера недоступны в этом сеансе)

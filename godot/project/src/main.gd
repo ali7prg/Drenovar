@@ -144,6 +144,7 @@ func _ready() -> void:
 	launch.show_step("Готовим поселение…", 72)
 	await show_scene("city")
 	launch.finish()
+	warm_panel_textures()
 	if restoring_session:
 		message.text = "Подключаемся к сохранённому поселению…"
 	if smoke:
@@ -1113,10 +1114,19 @@ func show_environment_catalog(category_index := 0) -> void:
 	var grid := GridContainer.new()
 	grid.columns = 4
 	modal_body.add_child(grid)
+	var generation := modal_generation
+	var made := 0
 	for entry in data.atlasData.assets:
 		var group := int(String(entry.category).get_slice("_", 0))
 		if category_index > 0 and group not in groups[category_index]:
 			continue
+		# Fill the grid progressively: the first cards appear at once, the rest
+		# over the next frames, so opening never builds every card in one frame.
+		if made > 0 and made % 24 == 0:
+			await get_tree().process_frame
+			if generation != modal_generation or not is_instance_valid(grid):
+				return
+		made += 1
 		var thumbnail := AtlasTexture.new()
 		thumbnail.atlas = environment_atlas
 		thumbnail.filter_clip = true
@@ -1132,7 +1142,8 @@ func show_environment_catalog(category_index := 0) -> void:
 		item.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		item.custom_minimum_size = Vector2(118, 94)
 		item.tooltip_text = entry.name
-	button(modal_body, "К общему миру", show_world_directory)
+	if generation == modal_generation:
+		button(modal_body, "К общему миру", show_world_directory)
 
 func focus_environment(entry: Dictionary, category_index: int) -> void:
 	var index: int = data.environment.find_custom(func(item): return item.id == entry.id)
@@ -1269,6 +1280,31 @@ func panel_art(parent: Container, path: String, pixels: Vector2) -> TextureRect:
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(art)
 	return art
+
+func warm_panel_textures() -> void:
+	# Decode recruitment portraits on a worker thread after launch, so the first
+	# barracks window does not decode eleven images inside the touch handler.
+	var pending: Array[String] = []
+	for id in RECRUIT_ORDER:
+		var full: String = "res://assets/ui/web-panels/" + id + ".png"
+		if ResourceLoader.exists(full) and ResourceLoader.load_threaded_request(full, "Texture2D") == OK:
+			pending.append(full)
+	var atlas: String = data.environmentAtlas
+	if environment_atlas == null and ResourceLoader.load_threaded_request(atlas, "Texture2D") == OK:
+		pending.append(atlas)
+	while not pending.is_empty():
+		await get_tree().process_frame
+		for full: String in pending.duplicate():
+			if ResourceLoader.load_threaded_get_status(full) != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+				pending.erase(full)
+				var texture := ResourceLoader.load_threaded_get(full) as Texture2D
+				if full == atlas:
+					if environment_atlas == null:
+						environment_atlas = texture
+					continue
+				var key: String = full.trim_prefix("res://assets/ui/web-panels/")
+				if texture != null and not panel_textures.has(key):
+					panel_textures[key] = texture
 
 func panel_texture(path: String) -> Texture2D:
 	if not panel_textures.has(path):

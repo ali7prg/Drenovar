@@ -26,7 +26,8 @@ func run() -> void:
 	game.endpoint = "http://127.0.0.1:9"
 	game.loopback = true
 	game.player_id = "qa-network"
-	var logged_before: int = game.diagnostics.record.events.size()
+	game.diagnostics.record.events = []
+	var logged_before: int = 0
 	await game.poll_account_state()
 	check(game.message.text != game.OFFLINE_NOTICE, "A single failure already reported offline")
 	await game.poll_account_state()

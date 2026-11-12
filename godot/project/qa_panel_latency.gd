@@ -41,7 +41,8 @@ func run() -> void:
 		game.player_id = "fixture"
 		game.state = game.state.duplicate(true)
 		game.state.healthy = {"ENG-09": 18, "ENG-01": 6}
-	# Warm caches once, as a player would have after the first visit.
+	# Let launch-time background warming finish (a player sees the city first).
+	await create_timer(1.0).timeout
 	game.show_controls_menu()
 	await process_frame
 	var panels := {

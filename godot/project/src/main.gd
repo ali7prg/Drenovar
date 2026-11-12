@@ -89,6 +89,8 @@ var motion_samples := PackedFloat32Array()
 var motion_index := 0
 var motion_count := 0
 var last_scene_ms := 0
+var last_scene_label := ""
+var memory_peak_mb := 0.0
 var last_frame_us := 0
 var modal_generation := 0
 var action_list_key := ""
@@ -921,6 +923,7 @@ func show_scene(scene_name: String) -> void:
 	followed_army = ""
 	close_modal()
 	var next: Landscape = scene_cache.get(scene_name)
+	last_scene_label = ("город" if scene_name == "city" else "мир") + (", из кэша" if next != null else ", первая загрузка")
 	if next == null:
 		message.text = "Открываем карту…" if scene_name == "world" else "Открываем город…"
 		await get_tree().process_frame
@@ -2188,6 +2191,17 @@ func show_performance() -> void:
 			stage.camera_zoom, lod.x, lod.y, lod.z
 		]
 	report += "\nРендерер: %s\nGPU: %s\nПередано матриц окружения: %.1f МБ" % [RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), stage.uploaded_transform_bytes / 1048576.0]
+	# Resolution chain: is the 3D drawn at the panel's native size or larger?
+	var window := get_window()
+	report += "\nОкно: %s · экран: %s · масштаб экрана: %.2f · растяжение: %.3f · 3D-масштаб: %.2f · %s" % [
+		DisplayServer.window_get_size(), DisplayServer.screen_get_size(), DisplayServer.screen_get_scale(),
+		window.content_scale_factor, get_viewport().scaling_3d_scale, str(get_viewport().get_visible_rect().size)]
+	report += "\nПамять (CPU): %.0f МБ, пик %.0f МБ · видеопамять: %.0f МБ · текстуры: %.0f МБ" % [
+		Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, memory_peak_mb,
+		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0]
+	report += "\nПоследний переход: %s · время работы: %d мин" % [last_scene_label, Time.get_ticks_msec() / 60000]
+	report += "\n" + diagnostics.summary()
 	row(modal_body, report)
 	button(modal_body, "Скопировать замер", func(): DisplayServer.clipboard_set(report))
 
@@ -2598,6 +2612,7 @@ func poll_account_state() -> void:
 
 func _process(delta: float) -> void:
 	drain_retired_scenes()
+	memory_peak_mb = maxf(memory_peak_mb, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0)
 	diagnostics.heartbeat(map_name, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
 		Time.get_ticks_msec() / 1000.0, Time.get_unix_time_from_system(), Time.get_ticks_msec())
 	if not is_instance_valid(stage) or scene_loading:

@@ -1,11 +1,12 @@
 {
   "source": "DRENOVAR Godot 0.5.9 frozen original-assets.json",
   "expected_original_files": 203,
-  "newly_recovered": 203,
-  "already_present": 0,
+  "newly_recovered": 0,
+  "already_present": 203,
   "missing_or_changed": [],
   "errors": [],
-  "recovered_paths": [
+  "recovered_paths": [],
+  "existing_paths": [
     "army/assets/cloth20-albedo.png",
     "army/assets/cloth20-normal.png",
     "army/assets/cloth20-orm.png",
@@ -209,6 +210,5 @@
     "environment/atlas.webp",
     "environment/surfaces20.png",
     "icons/drenovar_icon_512.png"
-  ],
-  "existing_paths": []
+  ]
 }

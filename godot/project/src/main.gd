@@ -96,6 +96,16 @@ var next_training_update := 0.0
 var followed_army := ""
 var next_minimap_draw := 0
 var diagnostics := SessionDiagnostics.new()
+const OFFLINE_NOTICE := "Нет связи с сервером. Переподключаемся…"
+var offline_notice_shown := false
+# Kinetic camera glide after a quick one-finger swipe.
+const FLING_MIN_SPEED := 280.0
+const FLING_STOP_SPEED := 24.0
+const FLING_FRICTION := 5.5
+const FLING_SAMPLE_USEC := 90000
+var drag_samples: Array = []
+var fling_velocity := Vector2.ZERO
+var fling_point := Vector2.ZERO
 
 func _ready() -> void:
 	Input.use_accumulated_input = false
@@ -975,6 +985,8 @@ func zoom_scene(amount: float) -> void:
 		stage.change_zoom(amount)
 
 func reset_gestures() -> void:
+	drag_samples.clear()
+	fling_velocity = Vector2.ZERO
 	fingers.clear()
 	last_pinch = 0.0
 	pinch_center = Vector2.ZERO
@@ -2485,6 +2497,7 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	var transport_ok: bool = result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0 and int(result[1]) < 500
 	diagnostics.network_result(transport_ok, "timeout" if result[0] == HTTPRequest.RESULT_TIMEOUT else ("http_%d" % int(result[1]) if result[0] == HTTPRequest.RESULT_SUCCESS else "transport_%d" % int(result[0])),
 		Time.get_unix_time_from_system(), Time.get_ticks_msec())
+	update_connection_notice()
 	if result[0] != HTTPRequest.RESULT_SUCCESS or result[3].is_empty():
 		if result[0] == HTTPRequest.RESULT_TIMEOUT:
 			return {"error":"Сервер не ответил вовремя. Проверь соединение и повтори."}
@@ -2497,6 +2510,17 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 			response.data.httpStatus = result[1]
 		return response.data
 	return {"error":"Сервер вернул неожиданный ответ (HTTP %d)." % int(result[1])}
+
+func update_connection_notice() -> void:
+	# Two consecutive transport failures mean the link is down, not a single blip.
+	var offline := diagnostics.network_failures >= 2 and connected()
+	if offline and not offline_notice_shown:
+		offline_notice_shown = true
+		message.text = OFFLINE_NOTICE
+	elif not offline and offline_notice_shown:
+		offline_notice_shown = false
+		if message.text == OFFLINE_NOTICE:
+			message.text = "Связь восстановлена"
 
 func poll_account_state() -> void:
 	if polling_state or busy or login_in_progress or not connected() or (player_id.is_empty() and not restoring_session):
@@ -2525,6 +2549,8 @@ func _process(delta: float) -> void:
 		return
 	var camera_moving := stage.camera_dirty or stage.camera_target.distance_squared_to(stage.target) >= 0.01 or \
 		absf(stage.camera_zoom - stage.zoom) >= 0.1 or absf(angle_difference(stage.camera_yaw, stage.world_yaw)) >= 0.01
+	update_fling(delta)
+	camera_moving = camera_moving or fling_velocity != Vector2.ZERO
 	stage.update_camera(delta)
 	if relocation_pins.visible and camera_moving:
 		relocation_pins.queue_redraw()
@@ -2582,7 +2608,9 @@ func _process(delta: float) -> void:
 		return
 	var active_march: bool = state.world.armies.any(func(army): return army.owner == player_id or army.target == player_id)
 	active_march = active_march or state.get("armies", []).any(func(army): return army.status != "returned")
-	if poll > (0.8 if active_march else 5.0):
+	# Back off while the server is unreachable: 0.8/5 s normally, up to 15 s offline.
+	var interval := (0.8 if active_march else 5.0) * pow(2.0, mini(diagnostics.network_failures, 4))
+	if poll > minf(interval, maxf(15.0, 0.8 if active_march else 5.0)):
 		poll = 0
 		if login_link_used and not login_proof.is_empty():
 			await finish_login()
@@ -2609,6 +2637,9 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event is InputEventScreenTouch and not event.pressed and fingers.has(event.index):
 		var picked: bool = tap_candidate and not event.canceled and pointer_distance < 10.0
+		if fingers.size() == 1 and not picked and not event.canceled:
+			start_fling(event.position)
+		drag_samples.clear()
 		fingers.erase(event.index)
 		tap_candidate = false
 		last_pinch = 0.0
@@ -2621,6 +2652,7 @@ func move_world_touch(event: InputEventScreenDrag) -> void:
 	fingers[event.index] = event.position
 	pointer_distance += event.relative.length()
 	if fingers.size() == 2:
+		drag_samples.clear()
 		var points: Array = fingers.values()
 		var gap: float = points[0].distance_to(points[1])
 		var center: Vector2 = (points[0] + points[1]) * 0.5
@@ -2632,6 +2664,37 @@ func move_world_touch(event: InputEventScreenDrag) -> void:
 	elif fingers.size() == 1:
 		followed_army = ""
 		stage.drag_between(previous, event.position)
+		var now := Time.get_ticks_usec()
+		drag_samples.append([now, event.position])
+		while drag_samples.size() > 2 and now - int(drag_samples[0][0]) > FLING_SAMPLE_USEC:
+			drag_samples.pop_front()
+
+func start_fling(release_position: Vector2) -> void:
+	fling_velocity = Vector2.ZERO
+	if drag_samples.size() < 2:
+		return
+	var first: Array = drag_samples[0]
+	var last: Array = drag_samples[-1]
+	var seconds := (int(last[0]) - int(first[0])) / 1000000.0
+	# A finger that paused before lifting does not glide.
+	if seconds <= 0.004 or Time.get_ticks_usec() - int(last[0]) > FLING_SAMPLE_USEC:
+		return
+	var velocity: Vector2 = (last[1] - first[1]) / seconds
+	if velocity.length() >= FLING_MIN_SPEED:
+		fling_velocity = velocity.limit_length(4200.0)
+		fling_point = release_position
+
+func update_fling(delta: float) -> void:
+	if fling_velocity == Vector2.ZERO:
+		return
+	if not fingers.is_empty() or modal.visible or not followed_army.is_empty():
+		fling_velocity = Vector2.ZERO
+		return
+	var step := fling_velocity * delta
+	stage.drag_between(fling_point, fling_point + step)
+	fling_velocity *= exp(-FLING_FRICTION * delta)
+	if fling_velocity.length() < FLING_STOP_SPEED:
+		fling_velocity = Vector2.ZERO
 
 func _unhandled_input(event: InputEvent) -> void:
 	if (modal.visible or relocation_pins.visible) and event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
@@ -2644,6 +2707,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventScreenTouch:
 		if event.pressed:
+			fling_velocity = Vector2.ZERO
+			drag_samples.clear()
 			if fingers.is_empty():
 				stage.begin_direct_manipulation()
 			tap_candidate = fingers.is_empty()

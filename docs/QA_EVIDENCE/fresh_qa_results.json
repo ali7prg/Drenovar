@@ -1,0 +1,32 @@
+[
+  {
+    "script": "qa_camera_hud.gd",
+    "command": [
+      "godot",
+      "--headless",
+      "--path",
+      "/workspace/scratch/74815c15c640/drenovar_handoff_work/validation/project",
+      "-s",
+      "qa_camera_hud.gd"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 4.284,
+    "log": "/workspace/scratch/74815c15c640/drenovar_handoff_work/validation/logs/fresh_qa_camera_hud.log",
+    "output": "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org\n\nQA size physical=(1366, 630) logical=(1366.0, 630.0)\nANCHOR city z=32.0 error=0.0000682393802\nANCHOR city z=70.0 error=0.00006103515625\nANCHOR city z=110.0 error=0.00006103515625\nANCHOR world z=45.0 error=0.00006103515625\nANCHOR world z=100.0 error=0.00003051757812\nANCHOR world z=260.0 error=0.00006103515625\nQA size physical=(1194, 630) logical=(1366.0, 630.0)\nANCHOR city z=32.0 error=0.03845215961337\nANCHOR city z=70.0 error=0.03839112445712\nANCHOR city z=110.0 error=0.03839116171002\nANCHOR world z=45.0 error=0.0000682393802\nANCHOR world z=100.0 error=0.00006103515625\nANCHOR world z=260.0 error=0.0000682393802\nQA size physical=(1493, 630) logical=(1366.0, 630.0)\nANCHOR city z=32.0 error=0.0000682393802\nANCHOR city z=70.0 error=0.00006103515625\nANCHOR city z=110.0 error=0.00006103515625\nANCHOR world z=45.0 error=0.00006103515625\nANCHOR world z=100.0 error=0.00003051757812\nANCHOR world z=260.0 error=0.00006103515625\nQA_CAMERA_HUD checks=153 failures=0\n"
+  },
+  {
+    "script": "qa_runtime.gd",
+    "command": [
+      "godot",
+      "--headless",
+      "--path",
+      "/workspace/scratch/74815c15c640/drenovar_handoff_work/validation/project",
+      "-s",
+      "qa_runtime.gd"
+    ],
+    "exit_code": 0,
+    "duration_seconds": 3.138,
+    "log": "/workspace/scratch/74815c15c640/drenovar_handoff_work/validation/logs/fresh_qa_runtime.log",
+    "output": "Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org\n\nQA_RUNTIME checks=21 failures=0\n"
+  }
+]

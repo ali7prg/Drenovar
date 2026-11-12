@@ -1,0 +1,22 @@
+{
+  "server_command": [
+    "node",
+    "/workspace/scratch/74815c15c640/drenovar_handoff_work/source_v0.5.9/DRENOVAR-iOS/tools/test-realm.mjs",
+    "/workspace/scratch/74815c15c640/drenovar_handoff_work/server_checkout/.sites-checkout"
+  ],
+  "server": "http://127.0.0.1:8417",
+  "production_access": false,
+  "readiness_method": "TCP bind; initial player is created by smoke test",
+  "local_realm_ready": true,
+  "client_command": [
+    "godot",
+    "--headless",
+    "--path",
+    "/workspace/scratch/74815c15c640/drenovar_handoff_work/validation/project",
+    "--",
+    "--server=http://127.0.0.1:8417",
+    "--smoke"
+  ],
+  "client_exit_code": 0,
+  "duration_seconds": 4.939
+}

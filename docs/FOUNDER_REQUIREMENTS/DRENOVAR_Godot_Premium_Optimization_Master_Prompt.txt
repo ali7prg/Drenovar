@@ -1,0 +1,345 @@
+DRENOVAR — усиленный промпт для ChatGPT Work, версия 2
+Дата: 11 ноября 2026, Тбилиси.
+
+Модель: GPT-6 Astra.
+Режим: Ultra, если доступен; иначе Max, затем Extra High.
+Более экономный вариант: GPT-6.1 Sol + Extra High.
+Ultra использует субагентов; Max углубляет работу одной модели. Доступность зависит от клиента и аккаунта.
+Рекомендация не гарантирует результат без актуальных исходников, нужных инструментов и проверки сборки.
+
+Обновление задания:
+• Начинать с актуальной сборки, сохранив новые исправления. Проверенный архив при подготовке — Godot iOS 0.5.9, build 19.
+• Оптимизация, кнопки, камера, стабильность и нагрев — первый рабочий приоритет.
+• Переработка всех моделей войск обязательна; прежнее ограничение английскими войсками снято.
+• Замена плохой геометрии, ригов и анимации разрешена и требуется там, где модели выглядят кукольными.
+• Оценивать плавность в итоговой сборке уже с новыми моделями и прежним игровым количеством объектов.
+• Все успехи, пропуски и непроверенные пункты должны быть видны в итоговой таблице.
+
+Отправьте весь текст между отметками в рабочий чат инженера с актуальным проектом Godot.
+Это задание для приложения. Основной отчёт инженера — на русском.
+
+НАЧАЛО ПРОМПТА
+============================================================
+
+DRENOVAR GODOT iOS — MASTER DIRECTIVE V2
+SUSTAINED PERFORMANCE, RESPONSIVE CONTROLS AND COMPLETE TROOP MODEL REWORK
+Revision: 11 November 2026
+
+ROLE, OUTCOME AND PRIORITIES
+
+Act as the AI Supreme Game Engineering & Premium Transformation Director, responsible for Godot mobile performance, character production, animation, touch interaction, multiplayer integration and QA.
+
+Execute this assignment in the CURRENT DRENOVAR native Godot application. The primary acceptance device is the founder's iPhone 12, with landscape-only gameplay.
+
+Deliver both outcomes in the SAME final build:
+1. Responsive controls and camera, sustained smooth gameplay, stable transitions, fewer stalls and less unnecessary thermal load.
+2. A substantive visual rework of ALL troop models without exception, with credible warrior anatomy, equipment, materials and animation.
+
+Viking Rise is the reference for interaction polish, camera feel, character readability and overall presentation. Use the supplied references and retain DRENOVAR's identity. Claim an objectively measured comparison only if comparable evidence exists.
+
+Optimization is the first operational priority. The complete troop rework is also mandatory. Preserve scene content, gameplay and visual quality throughout. Do not trade away one outcome to claim success on the other.
+
+Inspect, implement, integrate, test and deliver. Communicate in Russian. Do not stop at a plan.
+
+1. USE THE NEWEST SOURCE; PRESERVE RECENT FIXES
+
+Locate the authoritative current Godot project, branch/commit or archive, build pipeline and test distribution route. Compare project metadata, executable, resource package and installed version where accessible. Never choose a baseline solely from an old chat message or the largest filename number.
+
+Verified historical evidence available when this directive was prepared:
+- DRENOVAR-iOS-v0.5.9-source.zip identifies native 0.5.9, build 19. Its README names Godot 4.6.3; project settings select the Mobile renderer.
+- 0.5.8 introduced immediate armory UI with background model loading, recruitment pending feedback and duplicate-request handling. Server build 92 introduced real resource deductions and correct cancellation refunds.
+- 0.5.9 added the battle-result window, actual server rewards, trophies, experience, losses and report persistence. It adjusted materials and animation presentation for ENG-01 through ENG-10.
+- Its changelog explicitly preserves original geometry and gameplay LOD. Those material changes do not establish completion of the model rework requested here.
+- That archive contains ten English unit definitions with preview/field representations and seven culture headers. It does not establish that seventy distinct troop models are implemented.
+- Physical-iPhone validation and comparison with Viking Rise remained open in that changelog.
+
+Use these as verified archive facts, not a claim about the build currently installed on the phone. If newer work exists, use it and preserve its changes.
+
+Audit documentation freshness. Reconcile stale integrity manifests or README sections with actual files, hashes and export settings. Record an exact base revision and create a recoverable checkpoint. Work in an isolated branch/worktree where appropriate; do not overwrite concurrent development.
+
+Preserve recent recruitment costs, refund rules, reward reports, input improvements, authentication and saves. Re-test instead of blindly reimplementing reported fixes.
+
+2. SET UP TWO COMPLETE INVENTORIES
+
+A. Troop inventory:
+Reconcile the current design catalog, registered unit definitions, recruitment screens, model mappings and asset files. Include every troop, faction/culture, tier and meaningful equipment variant in the approved scope, including locked or currently unavailable entries.
+
+The historical design named English, Tribal, Norman, Steppe, Viking, Arab and Ottoman cultures. Determine which entries exist, which approved entries lack assets and which are only future proposals. Do not confuse culture headings with finished troops.
+
+Create one row per distinct unit/variant with:
+unit ID; name; culture; tier; role; current source/runtime assets; preview and field representations; mount/equipment; required animation states; replacement files; integration locations; visual/animation checks; device-test status.
+
+Report the denominator explicitly. Do not count a preview and field mesh as two completed troop types. Keep missing approved models visible as unfinished work. This instruction removes any earlier English-only restriction: every current or otherwise approved in-scope troop must be covered.
+
+B. Control inventory:
+List every current interactive control and action, including generated unit/building rows, close/back/cancel, tabs, sliders, scrolling areas, map selections and controls exposed only in error/pending states.
+
+Record expected action, local feedback, authoritative result where applicable, gesture conflicts and test status.
+
+Final reporting must show troop coverage and control coverage as completed/total, with every incomplete item named.
+
+3. ESTABLISH A REPRODUCIBLE PERFORMANCE BASELINE
+
+Create a representative saved test state and route: dense city, populated world map, foliage, multiple available armies, creatures, recruitment, troop previews, combat, result windows and city/world transitions.
+
+Hold scene population, camera route, zoom, graphics settings and rendered resolution constant in comparisons. Record build IDs, device/OS, actual renderer and graphics driver, brightness, charging state and ambient conditions.
+
+Measure cold start, first asset use, warmed use and 20–30 minutes of sustained play separately.
+
+Collect supported evidence:
+- Actual presented-frame intervals: p50/p95/p99 and average FPS.
+- Counts and timestamps of frames above 33.3, 50 and 100 ms.
+- CPU main-thread, physics, animation, rendering and GPU work.
+- Draw calls, material surfaces, active skeletons, geometry and texture residency.
+- Asset loading, shader/pipeline compilation and GPU-upload spikes.
+- Memory peak and trend across repeated operations.
+- Local input-response time, separate from network completion.
+- Thermal state and available energy evidence.
+
+Use Godot profiling and Apple Instruments/Metal diagnostics when available. Clearly label engine timing proxies and inaccessible metrics. Do not present callback duration as physical touch latency or a rendered frame as a displayed frame.
+
+Record reproducible symptoms and evidence before assigning causes. Prioritize crashes, frozen controls, long stalls and dominant repeated CPU/GPU costs.
+
+4. FIX ALL CONTROLS AND CAMERA BEHAVIOR
+
+For each inventoried control, verify the intended action actually completes. A button flash alone is insufficient.
+
+Provide local pressed/pending feedback promptly. Keep expensive loading, serialization and network waits out of input handlers. Use asynchronous operations, bounded timeouts, clear errors and safe retry. Repeated taps must not duplicate orders, attacks, deductions, refunds or rewards.
+
+Find and fix invisible blocking overlays, stale modal ownership, duplicate signals, incorrect disabled states and gesture capture that survives cancellation.
+
+Long panels must scroll naturally with a finger, including over intended child areas. Close, back and cancel must work after object selection, scrolling, loading, network failure and reopening.
+
+The game world must not respond to taps or drags owned by the UI. Closing a panel must restore world input correctly.
+
+Camera validation must cover city and world:
+slow/fast drag; direction reversal; finger stopping; pinch anchoring; two fingers to one; touch cancellation; tap after drag; selection near UI; background/resume.
+
+Inspect touch IDs, coordinate transforms, update timing, input accumulation, duplicated camera controllers, interpolation and expensive visibility work. Direct manipulation must track the finger without delayed chasing. Automatic camera travel may use appropriate animation.
+
+Do not mask input lag with excessive smoothing. Fix jitter, long-frame stutter and input latency as separate problems when the evidence distinguishes them.
+
+Preserve the approved native HUD and restore remaining dialog/intro parity with the current web reference. Include recruitment, attacks, army management, resources, buildings, profile, settings, reports and victory windows. Keep text, targets and safe areas usable in iPhone landscape.
+
+5. REMOVE WASTED WORK WHILE PRESERVING QUALITY
+
+Use measurements to select interventions.
+
+CPU:
+Remove duplicate updates, repeated scene-tree searches, avoidable allocation churn, unnecessary UI rebuilding and redundant pathfinding/navigation work. Cache and reuse resources with bounded lifetimes. Preserve authoritative simulation and timers while reducing offscreen presentation work.
+
+GPU:
+Inspect material duplication, overdraw, transparency, shadow passes, render targets, texture bandwidth and repeated submissions. Evaluate spatial batching and correct culling for suitable scenery. Preserve visible objects, shadows, distances and selection behavior.
+
+Character rendering:
+Profile skeleton evaluation, skinning, animation blending, material surfaces and simultaneous troop instances. Shared resources can help memory; do not assume they automatically reduce draw calls on the current renderer. Do not treat MultiMesh as a drop-in replacement for independently animated soldiers.
+
+Loading:
+Separate background resource loading from main-thread instantiation, GPU upload and scene activation. Poll threaded-load readiness before retrieving results. Respect the exact Godot version's thread-safety rules. Keep active SceneTree mutations controlled.
+
+Transitions:
+Avoid unnecessary destruction and recreation. Use bounded caching and budget scene activation/cleanup. Prevent stale asynchronous results from replacing a newer scene or selected unit. Test first-use shader/material paths, not only warmed caches.
+
+Record every changed renderer/import/quality setting. Evaluate renderer or engine changes against the actual iOS toolchain and visuals before adopting them.
+
+Do not lower render scale, reduce troop/object populations, thin foliage, shorten visibility distances, remove lighting/shadows/effects, introduce visibly worse LOD or deliver a concealed 30 FPS mode to pass.
+
+Diagnostic toggles are temporary experiments, not authorization to ship reduced quality.
+
+6. DEFINE AND APPLY A REAL CHARACTER QUALITY STANDARD
+
+Every troop must read as a finished warrior at ordinary gameplay zoom and in the recruitment close-up.
+
+Rework deficient:
+- Adult anatomy, proportions, head-to-body scale, silhouette and posture.
+- Faces, hands, footwear and exposed skin.
+- Clothing layers, belts, armor construction and equipment scale.
+- Weapons, shields, attachments and clear role/tier/culture identity.
+- Topology and deformation around shoulders, elbows, wrists, hips and knees.
+- UVs, surface detail and believable metal, leather, fabric, skin and wood.
+- Skeleton, skin weights, bind/rest pose and animation presentation.
+
+Reject the current doll/mannequin appearance wherever it remains: featureless heads, disconnected limbs, floating equipment, crude capsule bodies, plastic-looking armor and rigid whole-body bobbing.
+
+Recoloring, lighting changes, higher roughness, file renaming, extra subdivisions or a larger texture file do not constitute a substantive model rebuild.
+
+Preserving quality does not mean preserving defective troop geometry. Rebuild or replace poor meshes and rigs as needed while preserving unit identities and game rules.
+
+Shared anatomical bases, compatible rigs, animation libraries and equipment modules are allowed when they produce convincing, distinguishable units. Do not force an arbitrary polygon count or 4K texture rule; judge visible quality, deformation and measured runtime cost.
+
+Use a representative infantry, ranged and mounted selection to establish the quality and import pipeline. Review those against supplied references, then continue across the entire inventory. This calibration batch is not the final delivery.
+
+7. PRODUCE REAL, EDITABLE, ANIMATED 3D ASSETS
+
+Use the available supported 3D production toolchain, such as Blender with glTF/GLB export, matching actual installed versions.
+
+Deliver editable source geometry, rigs, textures/material maps, animation sources, export settings and usable runtime assets. Concept images or isolated renders cannot substitute for models that load and animate in the application.
+
+Validate transforms, scale, facing direction, pivots, normals/tangents, UVs, triangulation, skeleton hierarchy, bind/rest poses, weights and material slots through the complete export/import process.
+
+Check the imported result in Godot. Correct appearance in a modeling tool does not establish correct runtime integration.
+
+When reusing animations, validate skeleton rest transforms and proportions as well as bone names. Avoid collapsed joints, stretching, shoulder distortion, equipment drift and mesh penetration.
+
+For mounted units, rework and validate BOTH rider and mount, including tack, weapon position, sitting pose and coordinated movement.
+
+Use supported PBR material representations. Bake unsupported procedural appearance into appropriate texture maps when needed. Verify mipmaps, normal-map handling, compression and filtering on the actual renderer without visible degradation.
+
+Preserve editable materials and reproducible reimports. Changes must survive a clean import, not rely on unexplained local editor state.
+
+If essential assets or capabilities are missing, identify the precise gap and finish independent work. Do not manufacture primitive substitutes and declare them premium.
+
+8. INTEGRATE EVERY TROOP IN EVERY RELEVANT LOCATION
+
+For every troop, replace and verify all applicable references:
+recruitment preview, training display, parade ground, formation selection, city army, world march and combat.
+
+Check preview and field assets explicitly. Do not leave the old model on the battlefield after replacing only its portrait or recruitment preview.
+
+Implement and verify applicable states:
+idle/ready, movement start/stop, walking/running, turning, melee attack, ranged aim/release/reload, hit response, death and mounted movement.
+
+Match stride and ground contact to actual travel speed. Prevent foot sliding, hovering, teleporting limbs and double movement from conflicting root-motion/gameplay controllers. Synchronize rider and horse.
+
+Keep attack animation timing consistent with authoritative combat events. Preserve unit IDs, stats, costs, queue behavior, selection, collision and server outcomes.
+
+Validate every troop individually and in mixed formations. Randomized animation phase must not desynchronize authoritative actions.
+
+Record front/side/back views and animation evidence from the actual Godot integration. Provide a roster contact sheet and a per-unit evidence index. A few attractive samples do not validate all units.
+
+9. PRESERVE AND VERIFY REAL GAMEPLAY AND REWARDS
+
+Exercise:
+recruit -> pay -> queue -> complete -> form army -> dispatch -> march -> attack -> result -> reward -> return/report.
+
+Verify real resource deductions, server validation, correct cancellation refunds and one-time processing. Never reintroduce free training or duplicate rewards into normal gameplay.
+
+For Teneris and Velkor:
+- Confirm the actual server outcome and credited rewards.
+- Show the correct native victory/result window, including resources, trophies, experience, surviving troops, wounded and losses where applicable.
+- Preserve report access and per-settlement persistence.
+- Do not award loot again when opening or reopening the report.
+- Respect actual storage limits and server rules; displayed rewards must match credited amounts.
+- Verify behavior when another modal is open, the app backgrounds, or the connection is interrupted.
+
+Re-test tree selection and closing, tree removal/free construction space, creature death/despawn, renaming, settlement relocation and existing progression.
+
+Where the previous farm regression applies, use food around 2,400, production limit 2,800 and First Steps at 2/5 with the 60-food training reward available. Verify production below the limit and progression to 3/5 exactly once after claiming. Preserve legitimate above-production-limit stock according to real game rules.
+
+Use isolated test fixtures and preserve live saves. Validate shared outcomes with independent clients when possible. Mark missing multiplayer coverage explicitly.
+
+10. FIX STABILITY, MEMORY, SESSION RECOVERY AND HEAT
+
+Distinguish crash, watchdog termination, memory-pressure termination, scene reset, account reset and reconnect from evidence. Do not assign every restart to memory without logs.
+
+Audit orphaned nodes, textures, cached previews, duplicate subscriptions, timers, worker tasks and resource lifetimes. Repeated transitions and panel openings should reach a stable memory range after warmup.
+
+Keep account/session restoration secure and consistent. Handle token refresh, relaunch, background/resume and interrupted requests without resetting progress, creating a new identity or repeating transactions.
+
+Aim for stable 60 FPS active gameplay with appropriate frame pacing. Eliminate unnecessary busy loops, background rendering and unused previews. Respect OS thermal protections.
+
+Run matched prolonged sessions. Report performance and available thermal/energy evidence over time. Do not infer a temperature in degrees from a thermal-state label or promise the phone will never warm up.
+
+If the required quality and workload still exceed the measured device budget, document the remaining bottleneck and options. Do not conceal the shortfall by reducing the required quality or changing the test scene.
+
+11. VERIFY THE FINAL BUILD WITH THE NEW MODELS
+
+Suggested project acceptance targets:
+- Sustained 60 FPS active gameplay on physical iPhone 12; approximately 16.67 ms frame pacing.
+- On the fixed representative route: p95 presented-frame interval <=20 ms and p99 <=33.3 ms.
+- Record all >=50 ms hitches and investigate their causes.
+- Local button feedback target <=100 ms; report measurement method and separate network completion.
+- Correct camera tracking, stopping and pinch anchoring; no stuck modal or input leakage.
+- A representative 30-minute session, 20 city/world round trips, repeated major-panel cycles and at least five background/resume cycles.
+- No observed crash, involuntary restart, lost progress or duplicated transaction in that test suite.
+- Memory stabilizes after warmup; no unexplained continuing growth or sustained performance collapse.
+- Complete troop and control inventories have no silently skipped entries.
+- Approved visual quality is preserved or improved in matching views.
+
+These are targets to measure, not achieved facts.
+
+Performance evidence must come from the SAME final build that contains the new troop assets, at the intended simultaneous unit counts, distances and graphics settings. Repeat combat, marching, mixed formations and previews after integration.
+
+Report cold and warm conditions. Account for loading/transition durations separately without hiding them.
+
+For each requirement distinguish implemented, visually inspected, runtime tested and physical-device verified. Use PASS, FAIL or NOT VERIFIED where appropriate.
+
+A headless test, source assertion, export success, desktop run or Linux software-rendered frame does not establish physical-iPhone performance. A clean prescribed run does not prove the absence of all possible bugs.
+
+12. ORGANIZE THE WORK FOR COMPLETION
+
+When supported, delegate independent workstreams:
+- Performance, memory and native platform investigation.
+- Complete troop modeling, rigging and animation production.
+- Touch UX and control inventory.
+- Integration, regression testing and independent visual QA.
+
+Separate file ownership or use isolated branches; integrate centrally. Avoid parallel agents overwriting the same asset mappings, project settings or scenes.
+
+Work in this order:
+A. Identify the newest baseline, preserve fixes and establish inventories/measurements.
+B. Resolve critical stability/input problems and dominant measured costs.
+C. Establish the character production standard, then complete every troop.
+D. Integrate the full asset set and optimize the final workloads.
+E. Run functional, visual and sustained-device acceptance; repair failures and deliver.
+
+Continue between phases without routine permission requests. Do not stop after the audit, representative models, one polished screenshot or a generic recommendations list.
+
+Keep a concise durable progress record: source revision, completed items, evidence, open items and next concrete step. If execution limits interrupt work, preserve a resumable checkpoint and state exact unfinished coverage.
+
+13. DELIVERABLES AND FINAL REPORT
+
+Deliver:
+1. Updated current Godot source/revision, complete editable troop assets, runtime exports and reproducible import/build instructions.
+2. A complete troop manifest with completed/total coverage and evidence for every unit/variant.
+3. A complete control inventory with verified/total coverage and failures or unverified actions named.
+4. Matched before/after scenes and character comparisons, including in-game animation.
+5. Baseline and final frame-time, hitch, responsiveness, memory and sustained-play results, with raw supporting measurements where available.
+6. Root causes, meaningful changes, regression results and remaining blockers.
+7. The actual next test build through the existing authorized route, with visible version/build, source revision and resource-package identity.
+8. A short Russian iPhone-only installation/testing checklist and a supported diagnostic export path.
+
+Distinguish source/export preparation, unsigned IPA, signed installable build and installed/device-verified status. If native code, plugins or engine changes require compilation, use the real supported native build process; do not call a PCK replacement a fresh native rebuild.
+
+Use the existing authorized build/signing resources. New spending is not authorized. If signing or device access is missing, complete all independent work and identify the minimum exact remaining dependency.
+
+Keep expensive diagnostics in developer mode and credentials out of reports. Preserve the working online game and player data.
+
+Final completion must account for BOTH priorities: the application works responsively under the measured representative workload, and every in-scope troop has a substantive, integrated visual upgrade. Report any shortfall plainly.
+
+Begin with the actual newest Godot project and executable/resource provenance, preserve the latest fixes, then execute through the final evidence-backed deliverable.
+
+============================================================
+КОНЕЦ ПРОМПТА
+
+ОСНОВАНИЯ И ИСТОЧНИКИ
+
+История обновлений подтверждена чтением CHANGES-0.5.8.txt и CHANGES-0.5.9.txt внутри:
+https://chatgpt.com/library?file_id=libfile_01fed29f2100819188f5c3d1e1f56da5&account_id=personal
+Проверка архива не устанавливает, какая версия стоит на телефоне.
+В архиве 0.5.9 указано, что геометрия моделей сохранена; текущие материалы и анимационные изменения не равны полной переработке моделей.
+
+OpenAI, модели и режимы:
+https://learn.chatgpt.com/docs/models
+https://developers.openai.com/api/docs/guides/model-selection
+
+Godot, поддерживаемые 3D-форматы:
+https://docs.godotengine.org/en/4.6/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html
+Godot, ретаргетинг скелетов:
+https://docs.godotengine.org/en/4.6/tutorials/assets_pipeline/retargeting_3d_skeletons.html
+Godot, производительность 3D:
+https://docs.godotengine.org/en/4.6/tutorials/performance/optimizing_3d_performance.html
+Godot, рывки и задержка ввода:
+https://docs.godotengine.org/en/4.6/tutorials/rendering/jitter_stutter.html
+Godot, фоновая загрузка и потоки:
+https://docs.godotengine.org/en/4.6/tutorials/io/background_loading.html
+https://docs.godotengine.org/en/4.6/tutorials/performance/thread_safe_apis.html
+Godot, импорт изображений:
+https://docs.godotengine.org/en/4.6/tutorials/assets_pipeline/importing_images.html
+Godot, экспорт iOS:
+https://docs.godotengine.org/en/4.6/tutorials/export/exporting_for_ios.html
+Apple, профилирование:
+https://developer.apple.com/documentation/xcode/analyzing-the-performance-of-your-metal-app
+
+Технические решения необходимо проверять по фактической версии проекта.
+Пороговые значения приёмки — предложенные инженерные цели, не гарантия Apple или Godot.

@@ -1,0 +1,86 @@
+DRENOVAR GODOT 0.5.9 — READ-ONLY ASSET / EXPORT AUDIT
+Audit date: 12 November 2026. Files examined in DRENOVAR-iOS source archive.
+This is static inspection plus checksum/dependency verification performed during this handoff. Historical test results are identified separately. No export, installation, device profiling, or production request was performed by this audit.
+
+1. ENGINE AND CURRENT CONFIGURATION
+
+README.md and all verification logs identify Godot 4.6.3. Logs give the full identifier Godot Engine v4.6.3.stable.official.7d41c59c4. project/project.godot declares config/features=PackedStringArray("4.6", "Mobile"). Its application version is 0.5.9, main scene res://main.tscn, logical viewport 1366 × 630, stretch mode canvas_items, orientation enum 0. Rendering method is Mobile for desktop/default and mobile; rendering_device/driver.ios is metal; textures/vram_compression/import_etc2_astc=true; msaa_3d=1. No native engine source, prebuilt editor, iOS template, executable, Xcode project, IPA or PCK is present in this source ZIP.
+
+project/project.godot uses icon res://assets/icons/drenovar_icon_512.png (512 × 512; 533,217 bytes). Boot splash is res://assets/intro/keep-wide.png (3840 × 1747; 5,185,713 bytes), stretch_mode=4, background Color(0.055, 0.047, 0.035, 1). The runtime launch screen also loads that image in src/launch_screen.gd. The icon filename and texture do not prove a generated iOS AppIcon set; that requires inspecting the Xcode export or IPA, not this ZIP.
+
+2. EXACT EXPORT PRESET
+
+Only one preset exists, named iOS, platform iOS, runnable=true, dedicated_server=false, custom_features="", export_filter="all_resources", include_filter="assets/*.json", exclude_filter="benchmark*,qa_*,profile_*,tests/*,extension_api.json", export_path="", patches=PackedStringArray(), encrypt_pck=false, encrypt_directory=false, script_export_mode=2.
+
+Options: application/bundle_identifier="com.drenovar.game"; application/app_store_team_id="0000000000"; application/export_project_only=true; application/short_version="0.5.9"; application/version="19"; application/min_ios_version="16.0"; application/targeted_device_family=0; application/signature=""; application/category="public.app-category.games"; application/additional_plist_content="".
+
+No Web preset, Web template, .wasm export, browser shell, web renderer configuration, or Godot Web deployment is present. The separately existing browser game is a distinct implementation used as visual/gameplay/server reference. Do not report it as a Web export of this native Godot project.
+
+3. BUILD ROUTES AND UNAVAILABLE REQUIREMENTS
+
+tools/package-ios.sh imports with godot --headless --path project --editor --import, then exports the iOS preset to an output DRENOVAR.ipa path while export_project_only=true. It requires the resulting DRENOVAR.xcodeproj/project.pbxproj and DRENOVAR.pck. On non-Darwin it prints that a macOS host is required and exits successfully with exported project/resources only. On macOS it calls xcodebuild Release/iphoneos/arm64, derived data in the output directory, CODE_SIGNING_ALLOWED=NO, CODE_SIGNING_REQUIRED=NO, DEVELOPMENT_TEAM empty. It then packages Payload/DRENOVAR.app into DRENOVAR-unsigned.ipa and verifies ZIP integrity.
+
+tools/ios-template.py pins VERSION=4.6.3. It reads templates/ios.zip from the official template archive URL recorded in that script. It requires curl with byte-range support and validates Content-Range plus exact returned length. It does not bundle the template in this archive.
+
+tools/repack-tested-engine.py takes previous.ipa new.pck output.ipa, preserves the engine executable/framework bytes, replaces DRENOVAR.pck, writes CFBundleShortVersionString=0.5.9 and CFBundleVersion=19, excludes _CodeSignature and embedded.mobileprovision, verifies a native Mach-O header, ZIP CRC, executable SHA-256 equality and PCK SHA-256 equality. This is package repacking, not an Xcode compilation or signing. It needs a prior compatible IPA, which is not in this source ZIP.
+
+.github/workflows/drenovar-ios.yml targets branch native-ios-godot and changes under native-ios/**. It assumes a repository containing this package at native-ios, uses macos-15, Node24, downloads Godot4.6.3 and its iOS template, fetches/imports assets, and builds an unsigned arm64 IPA. Artifact retention is five days. Copying the ZIP root unchanged to a different repository layout does not match that workflow's working-directory without deliberate adaptation.
+
+Apple team identification, provisioning profile, signing certificate/private key, Xcode installation, export templates and a physical iPhone are external dependencies. No signing identity can be inferred from the placeholder 0000000000. No App Store/TestFlight release receipt is included.
+
+Historical records CHANGES0.5.2–0.5.9 consistently say that test IPA needs signing; 0.5.2 explicitly says a normal open-file operation does not directly install it. Recent iterations reused the existing native Godot4.6.3 binary with a new PCK. Physical iPhone12 Metal, input latency, sustained FPS, memory and heat acceptance remain open. There are no Xcode build failure logs or evidence in this ZIP that would support inventing a specific export crash and its fix. Distinguish runtime complaints from export errors.
+
+4. ASSET INVENTORY — EXACT COUNTS
+
+project/assets contains 1,461 files: 729 .import metadata files and 732 other files. The 732 comprise 447 GLB, 159 PNG, 96 JPG, 20 WebP, 6 SVG, 1 TTF, 1 font license TXT and 2 JSON. Source assets without .import total 243,793,751 bytes. No WAV, OGG, MP3, FLAC, AAC, M4A or Opus file exists. A search of runtime scripts found no Audio* nodes or audio filename references. Therefore there is no bundled sound/music system to document as implemented.
+
+Groups excluding .import:
+army: 168 files, 20GLB+60PNG+88JPG, 84,684,254 bytes.
+city: 115 files, 45GLB+13WebP+8JPG+49PNG, 66,784,408 bytes.
+city-details: 91GLB, 2,785,640 bytes.
+city-ground: 64GLB, 4,223,340 bytes.
+creature-assets37: 12GLB+36PNG, 57,734,771 bytes.
+creatures37: 3WebP, 100,230 bytes.
+environment: 1WebP+1PNG, 2,839,765 bytes.
+icons: 1PNG, 533,217 bytes.
+intro: 1PNG, 5,185,713 bytes.
+ui: 11PNG+3WebP+6SVG+1TTF+1TXT, 2,351,916 bytes.
+world-ground: 64GLB, 3,206,568 bytes.
+world-scenery: 150GLB, 9,406,772 bytes.
+Top-level assets/game.json=3,582,523 bytes; original-assets.json=22,454 bytes; world-roads.glb=352,180 bytes.
+
+Only font: assets/ui/NotoSerif-Regular.ttf, 588,876 bytes. Font license file assets/ui/NotoSerif-LICENSE.txt, 5,208 bytes, identifies Noto under SIL OFL1.1; it also contains Debian package copyright entries. Both runtime main.gd and launch_screen.gd preload this font. No broader art asset licensing/provenance document is present besides README and this font license. Absence of a license record is not proof that art is unlicensed; origin/usage rights for imported art are not independently established by this ZIP.
+
+5. RESOURCE PROVENANCE AND REPRODUCTION
+
+tools/import-web-assets.mjs generates 370GLB: city-details91, city-ground64, world-ground64, world-scenery150, world-roads1. It runs original browser generator functions to produce meshes and game.json. These are actual bundled files even though generated by code; they are not all recreated at runtime. The corresponding browser modules are external inputs, not included in this native ZIP.
+
+The 77 copied GLB are army20 (10 English units with preview/field models), city45 and creatures12 (4 creature families ×3 levels). original-assets.json has 203 entries: army70, city115, creature GLB12, creature portraits3, environment2, icon1. This audit recalculated all203 SHA-256 hashes: every file exists and every checksum matches.
+
+An additional134 PNG/JPG files outside that manifest are exact byte matches for embedded image bufferViews inside GLBs. They are extracted copies of embedded model textures. A mapping from each asset-relative filename to a containing GLB is in the intermediate embedded_image_origins.json. Do not call these134 images newly authored images solely because they are absent from original-assets.json.
+
+CHANGES0.5.6 identifies intro/keep-wide.png as the original web91 splash. CHANGES0.5.7 identifies 10ENG portraits and3Velkor portraits as transferred from web91. CHANGES0.5.3 identifies the six ui/actions SVG icons as newly made vector resources. ui/resources.png is present and used as the resource atlas; exact upstream origin is not independently recorded in the current manifests. All images are included; the user does not need to resend them for this snapshot.
+
+Runtime-created visuals: web_panel_theme.gd gradient_style makes cached raster gradients using Image.create_empty and ImageTexture.create_from_image; warrior_visual.gd ground_shadow creates a64×64 radial GradientTexture2D and a plane for contact shadows; minimap.gd creates an ImageTexture from RGBA data embedded in game.json. Runtime styles/meshes/materials are code, so no external picture upload is needed for those.
+
+Native asset completeness checks: all460 unique res:// references recursively found in game.json resolve to existing files. All447 GLB parse; all101 distinct externally referenced buffers/images resolve to existing files. Internal bufferView image extraction was verified separately. These checks do not prove visual quality, skin deformation, animation quality or successful Godot import on a device.
+
+No .blend/.fbx/.psd authoring source files exist. Retained GLBs/textures are suitable runtime assets; editable authoring scenes and asset history would need separate retrieval if the next developer needs them.
+
+6. CRITICAL REPRODUCTION / DOCUMENTATION GAPS
+
+.gitignore excludes /project/assets/ entirely, also /project/.godot/ and /build/. The source ZIP nevertheless contains the asset files. A plain new Git commit that obeys this ignore rule can omit all assets. Preserve and transfer the supplied full asset tree; do not mistake the repository alone for this full archive.
+
+CI rebuilds assets using tools/web84-sources.json (248 pinned web files) from live production URL paths. fetch-web84-assets.mjs requires their SHA-256 to match pinned bytes and will fail if a referenced current server file has changed. This preserves integrity but leaves reproduction dependent on the old inputs remaining available. Names web84/web-v90 do not prove latest backend version; README/changes use references90,91 and92 in different sections.
+
+The importer does NOT create or copy the later assets/ui/resources.png, assets/ui/actions/*.svg, assets/ui/web-panels portraits, assets/intro/keep-wide.png, NotoSerif font or its license. Thus a clean Git checkout with ignored assets and the current fetch/import workflow cannot be assumed to reproduce the complete0.5.9 archive. This is a concrete packaging gap; audit did not change the workflow. Keep bundled assets authoritative and address pipeline coverage deliberately in subsequent development.
+
+asset-integrity.json is stale: baseline0.5.4, version0.5.5, matching_original_assets718. It is a summary count, not a full current file hash manifest. Do not present718 as the current total. original-assets.json is accurate for its203 entries but not a complete inventory of732 source asset files.
+
+README's general “Текущий объём” still says native session lives only in RAM and scene reuse is4seconds. Current code/CHANGES say encrypted persistent session since0.5.6 and scene retention40seconds with hard60second limit since0.5.4. code_audit independently confirmed current constants. The archival README must remain byte-identical in handoff, with these corrections in new handoff documentation.
+
+7. HISTORICAL QA EVIDENCE
+
+verification/ includes41 historical log files. All examined explicit failure counts are0. Latest qa059 files report: warriors143, battle_rewards31, camera_hud153, runtime21, panels46. Logs identify Godot4.6.3.stable.official.7d41c59c4. This audit did not rerun these tests. qa059 smoke is a stored historical run. No phone performance or Metal proof should be inferred from headless/native-linux logs.
+
+CHANGES0.5.9 explicitly preserves original geometry and gameplay LOD while adjusting material shine, lighting, preview framing, contact shadow, mounted animations and phases. This does not satisfy a requested complete replacement/rework of all troop meshes. game.json has10 English roster records and7 culture headers, only English available; it does not contain70 distinct troop types. The next engineer should preserve actual0.5.9 improvements while treating requested full rework as open.

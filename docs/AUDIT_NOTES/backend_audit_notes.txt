@@ -1,0 +1,219 @@
+DRENOVAR — BACKEND HANDOFF AUDIT
+Audit date: 2026-11-12
+Scope: read-only source inspection and existing in-memory automated tests; no production access, mutation, deployment or live account data export.
+
+SOURCE IDENTITIES
+
+Backend checkout:
+/workspace/scratch/74815c15c640/drenovar_handoff_work/server_checkout/.sites-checkout
+Exact local HEAD: 365276cc169943adc48847c0e9d86ae23e77fb3e
+Parent resolved this source as Sites v92. This audit verified the commit, not deployment state.
+git branch -a and git for-each-ref expose only main at that commit. No native-ios-godot branch exists among the locally fetched refs. This is not proof that no such branch exists in an unqueried remote repository.
+No AGENTS.md was found in the supplied working tree or its searched workspace ancestors.
+After tests, git status --short was empty.
+
+Native source examined:
+/workspace/scratch/74815c15c640/drenovar_handoff_work/source_v0.5.9/DRENOVAR-iOS
+This directory is an unpacked source artifact, not a Git checkout. Its source provenance and archive identity must be recorded separately from backend HEAD.
+
+RUNTIME STRUCTURE
+
+1. gameplay37/server/core.mjs is the authoritative domain engine. It controls training, resource clearing, construction, starter rewards, trading, hospital healing, marches, city hunting, commands and idempotency.
+2. gameplay37/server/world62.mjs provides shared world placement, relocation, world march routing, shared Velkor encounters and PvP.
+3. gameplay37/server/hosted.mjs adapts the domain to Cloudflare D1 using one revision-checked JSON realm snapshot. It reads the production identity injected by Sites or the authenticated identity passed by native-session.mjs.
+4. gameplay37/server/native-session.mjs implements native login confirmation, exchange, session validation/revocation and forwarding of native game actions to the same hosted adapter.
+5. hosting37/app/api/[...path]/route.ts routes /api/native/ to handleNative; ordinary game API requests go to handleGame with worldEnabled=true.
+6. hosting37/worker/index.ts is the Vinext Worker entrypoint. hosting37/vite.config.ts enables nodejs_compat and the declared DB binding.
+7. gameplay37/server/engine.mjs uses Node's built-in node:sqlite as a local domain repository. gameplay37/server/http.mjs is an older isolated development service with cookie-based local sessions; it is not the hosted native-session service.
+8. gameplay37/server/memory-sql.mjs is an in-request SQL-shaped adapter over maps used inside the hosted snapshot; its process-local maps are not production persistence.
+9. Root dist contains authored browser and shared rules/assets, not exclusively disposable build output. Server modules import 21 source modules from dist. Deleting dist breaks the backend.
+10. dist/server and hosting37/dist are generated deployment output and are absent in this checkout. A developer must rebuild them if needed; their absence is not loss of the authored backend.
+11. Root .openai/hosting.json and hosting37/.openai/hosting.json declare DB and the same existing Site project. They are hosting metadata, not secret credentials.
+12. README.md at root documents much older milestones. gameplay37/README.md also has obsolete statements such as no PvP, no world Velkor and no legacy migration. Current source and current tests supersede those historical passages.
+
+DEPENDENCY CLOSURE FOR LOCAL SERVER / NATIVE LOOPBACK TESTS
+
+The following 34 files form the static relative-import closure of hosted.mjs, native-session.mjs, engine.mjs and http.mjs. Query suffixes in ES module imports resolve to the same filesystem file; all files were present. Preserve their relative paths. Also retain root package.json with type=module.
+
+dist/army/roster.js
+dist/city/garrison-layout.js
+dist/city/healing62.js
+dist/city/kingdom29.js
+dist/city/landform.js
+dist/city/military-cultures.js
+dist/city/military.js
+dist/city/progression.js
+dist/city/registry.js
+dist/city/starter71.js
+dist/city/state.js
+dist/city/trade62.js
+dist/city/upgrade-v1.js
+dist/city/village-layout29.js
+dist/city/woodland.js
+dist/creatures37/formation60.js
+dist/creatures37/march38.js
+dist/environment/pvp72.js
+dist/environment/world-field56.js
+dist/environment/world-motion63.js
+dist/environment/world-sites62.js
+gameplay37/server/accounts40.mjs
+gameplay37/server/catalog.mjs
+gameplay37/server/combat.mjs
+gameplay37/server/core.mjs
+gameplay37/server/engine.mjs
+gameplay37/server/hosted.mjs
+gameplay37/server/http.mjs
+gameplay37/server/memory-sql.mjs
+gameplay37/server/names.mjs
+gameplay37/server/native-session.mjs
+gameplay37/server/navigation.mjs
+gameplay37/server/speedups.mjs
+gameplay37/server/world62.mjs
+
+Those modules use Node built-ins: node:crypto, node:fs/promises, node:http, node:path, node:sqlite and node:url. The local loopback tests do not require installing hosting37's frontend dependencies.
+
+For a complete reproducible hosted server, preserve the entire backend source checkout rather than just the 34-module minimum. In particular retain:
+- hosting37 source, package.json, pnpm-lock.yaml, worker, app, lib, scripts, configuration and hosting metadata;
+- root and hosting37 drizzle SQL migration files, metadata snapshot and journal;
+- gameplay37/client and gameplay37/assets;
+- original dist assets and rules;
+- generate-pwa31.py;
+- gameplay37/prepare-hosting.mjs;
+- gameplay37/prune-retired-exports.mjs;
+- gameplay37/publish-layout.mjs;
+- gameplay37 tests, especially native-session.mjs, paid-training92.mjs, world62.mjs, hosted.mjs and server.mjs.
+The repository's full file manifest should enumerate these paths without replacing folders by omitted examples.
+
+LOCAL NATIVE TEST REALM — EXACT COMMANDS
+
+Prerequisites: Node.js 24 (verified here with 24.22.1), native source with packaged project/assets and Godot 4.6.3 available as godot. Commands below use the actual inspected absolute paths.
+
+Terminal 1:
+node /workspace/scratch/74815c15c640/drenovar_handoff_work/source_v0.5.9/DRENOVAR-iOS/tools/test-realm.mjs /workspace/scratch/74815c15c640/drenovar_handoff_work/server_checkout/.sites-checkout
+
+Terminal 2, headless smoke as documented by native source:
+godot --headless --path /workspace/scratch/74815c15c640/drenovar_handoff_work/source_v0.5.9/DRENOVAR-iOS/project -- --server=http://127.0.0.1:8417 --smoke
+
+Terminal 2, interactive desktop launch:
+godot --path /workspace/scratch/74815c15c640/drenovar_handoff_work/source_v0.5.9/DRENOVAR-iOS/project -- --server=http://127.0.0.1:8417
+
+The script accepts the backend checkout as argv[2], although its default directory name mentions web84 and README mentions web-v90. Passing the actual v92 directory avoids those stale defaults.
+
+test-realm.mjs binds only 127.0.0.1. Default port 8417 can be overridden by DRENOVAR_TEST_PORT; the client's --server URL must match. It accepts /api/state, /api/command, /api/session/new and /api/march-preview and injects the synthetic native-loopback-tester identity. It calls the actual hosted.mjs with worldEnabled=true, isolated=true and realmId=native-loopback-only.
+
+The loopback world is held in SQLite :memory:. All test settlements disappear when that process stops. It does not load or change production saves and it is not a persistent save handoff.
+
+The script additionally supports POST /test/clock?time=<nondecreasing millisecond epoch>, DRENOVAR_TEST_CITY_PREVIEW_TIMEOUT=1 (one intentional deploy-preview hang) and DRENOVAR_TEST_BATTLE_FIXTURE=1 (fixture with ENG-03 x200 and modified food/farm state). These are test-only controls.
+
+This launch does not exercise the production browser login flow: the adapter injects a test identity. tools/test-ios-session.mjs is a different local HTTP test double on port 8426; it is not an authoritative backend and its fixed session strings are synthetic test data.
+
+The native --server override intentionally accepts only http://127.0.0.1:. An unmodified iPhone build cannot point to a developer's LAN server through this option: loopback on the iPhone is the phone itself. Current live endpoint is hardcoded in project/src/main.gd as https://drenovar.pink-lyric-9420.chatgpt.site. A staging endpoint would require an explicit code/config change.
+
+NATIVE LOGIN AND API CONTRACT
+
+1. main.gd generates a random 32-byte proof rendered as 64 lowercase hexadecimal characters.
+2. The client derives challenge=SHA256(proof), opens /api/native/approve?challenge=<challenge> in the browser and displays the first eight challenge characters as a confirmation code.
+3. GET approve requires the existing ChatGPT identity; otherwise it redirects to /signin-with-chatgpt. POST approve checks same-origin Origin and the eight-character code.
+4. The server inserts a native:<challenge> record with approval lifetime five minutes. An already-used challenge is rejected.
+5. POST /api/native/exchange with JSON {proof} yields 202 while approval is pending, 410 after approval expiry, or a session string on success.
+6. Native sessions last 12 hours from their creation. There is no refresh-token implementation in the inspected file.
+7. X-Drenovar-Session authenticates native requests. It is a 129-character challenge.token value. The server stores a token hash rather than the clear token.
+8. Forwarded native requests discard supplied oai-authenticated-user-id/email and use the user identity bound by approval.
+9. Allowed native actions: GET /api/native/game/state; POST /api/native/game/session/new; POST /api/native/game/command; POST /api/native/game/march-preview; GET /api/native/game/account; POST /api/native/game/profile/select. Native legacy import is not in this allowlist.
+10. POST /api/native/logout marks the session revoked.
+11. JSON mutations send Content-Type: application/json and Origin equal to endpoint. Commands require Idempotency-Key matching the domain's 8–100-character format. X-Drenovar-Player prevents accidental commands against a different selected profile.
+12. A retried command with the same key and body is not applied twice. Reusing a key with a changed body is rejected. Hosted CAS conflict returns a retryable response after six attempts.
+13. Standard request body limit is 16 KiB; browser profile import allows 512 KiB. Public game responses may be larger. The native HTTP client limits bodies to 8 MiB.
+
+SAVE SYSTEM AND DATABASE SCHEMA
+
+Production binding: Cloudflare D1 DB.
+Migration: drizzle/0000_closed_nightmare.sql.
+Table: game_realm37(id TEXT PRIMARY KEY NOT NULL, revision INTEGER NOT NULL, data TEXT NOT NULL).
+Main realm key: development-37.
+
+Main realm data includes repository and accounts, plus profiles40 and legacy import metadata when used. accounts maps authenticated user identity to selected player ID. profiles40 associates multiple owned profiles.
+repository contains arrays representing maps named players, encounters, commands and sessions:
+- players: key player ID, value containing a JSON state string;
+- encounters: key encounter ID, value containing owner and JSON state string;
+- commands: key encoded player/key pair, value containing command signature and response;
+- sessions: key hashed local session token, value containing player and expiry.
+
+Player JSON includes city, armies, wounded, healing, items, reports, lastAt and, when applicable, worldSlot62, worldOrders62, nickname, origin and migration/eligibility metadata. city includes its economic, construction, military, resource-clearing and tutorial state.
+
+Hosted reads reconstruct a request-scoped repository, apply server-time advancement and commands, then update the complete realm JSON using WHERE revision=<old revision>. Accounts, troops, rewards, casualties and receipts are committed with that snapshot. The snapshot size check is 8*1024*1024 characters in JavaScript JSON string length, not a precise UTF-8 byte bound. It returns 503 when exceeded. This design is for a small development realm, with contention and growth limitations; no load-capacity claim is justified.
+
+Native session approval records use separate native:<challenge> IDs in the same D1 table. Their data contains user, approvalUntil, sessionUntil, tokenHash and optionally revoked. These records are not a substitute for the gameplay save snapshot.
+
+Native local files:
+- user://drenovar-session.bin: encrypted session token, temporary sibling ending .tmp during atomic rename. Key derived from DRENOVAR-iOS-session-v1: plus OS.get_unique_id(). This is an encrypted local token file, not an iOS Keychain implementation and not a complete game save. Do not bundle a real user's copy.
+- user://battle-results.cfg: last announced report ID per profile under journal; presentation state only, not rewards or economic state.
+- project/assets/game.json: packaged data plus demo/starter state. It is not a downloaded production save or proof of live account progress.
+- README mentions user://device-render.json for a rendering measurement; verify its writer separately before claiming it is always present.
+
+The older standalone http.mjs adapter uses a real SQLite file at DRENOVAR37_DB, default /tmp/drenovar38-development.sqlite, and a local cookie session. Its tables are players, encounters, commands and sessions. It is not interchangeable with a copied production D1 row or the in-memory native test realm.
+
+No actual production D1 export, live player data, native token file, signing certificate or provisioning profile was obtained in this audit. Source handoff does not imply transfer of server access or live progress.
+
+CURRENT GAME RULES FOUND IN SERVER SOURCE
+
+No final campaign win, seasonal victory or terminal account defeat is implemented in the inspected domain files. Concrete outcomes are encounter/PvP victories and defeats, troop casualties and continuing settlement progression.
+
+City hunting:
+- New ordinary sessions spawn three city Tenerys encounters at levels 1, 2 and 3.
+- Required hall levels are 1, 3 and 5 respectively.
+- A party may contain at most 200 soldiers; the server's active roster is the ten English units from dist/army/roster.js.
+- At most three active armies across city and world orders.
+- Simulate() runs server-side in 200 ms steps up to 180 seconds. Creature HP reaching zero is victory; surviving creature at termination is defeat.
+- A living soldier survives. An incapacitated soldier is classified wounded with 60% seeded probability; otherwise dead.
+- After a city victory, food, items and XP are added once and a report is stored. Surviving troops return after their travel time; wounded enter the hospital pool, dead troops are lost.
+- Tenerys food rewards for L1/L2/L3: 1500/4000/10000. Base respawn four hours multiplied by level. The first Tenerys victory sets the tutorial firstHuntWon flag.
+- Defeat restores the city creature to alive/full HP at battle end; the player's casualty result remains.
+
+Shared world hunting:
+- Current actual spawns are three shared Velkor targets. Kamneklyk and Dragor have catalog definitions/assets but are not spawned by world62.mjs.
+- Velkor food rewards before capacity adjustment: 1000/3000/8000. Antlers: 5/15/30. XP: 15/40/100. Base respawn six hours multiplied by level.
+- A reserved or still-defeated target cannot be attacked simultaneously.
+- World reward award() caps resource additions to available storage capacity. Therefore food can legitimately become 0 in the report when current food is at or above cap. This differs from city hunting, which adds food directly and can exceed production/storage limits. This is verified source behavior, not proof that it caused a particular iPhone complaint; it should be explicitly reviewed with the owner.
+- World victory awards antlers/XP and food; it does not follow the city branch's additional hides/rare-drop handling.
+
+PvP:
+- Both settlements need hall level at least II and competitive eligibility. Imported noncompetitive/legacy settlements are excluded.
+- Defender's healthy garrison is reserved on arrival, at most 200 units, iterated by sorted unit ID.
+- duel62 compares summed unit power. Attacker wins only when attacker power > defender power. A tie favors the defender.
+- PvP battle duration is 6000 ms. Casualty ratios are deterministic from power and seed: loser casualty ratio .85; winner ratio min(.65, opponentPower/ownPower*.55). Wounded share of casualties is .55 through .75 according to seed and side offset, with integer rounding.
+- Victorious attacker receives up to 30 coins only if defenders existed; victorious defender receives up to 30 coins. award() applies capacity limits. No resource plunder or city destruction is shown by this code.
+- Both players receive reports; surviving defenders return to garrison, wounded join their hospital pool, attacker survivors travel home.
+
+Training v92 compatibility:
+- Backend always passes chargeResources:true to recruit(). Public state advertises trainingUsesResources:true.
+- Unlimited legacy saves require paidTraining:true from the client to prevent a silent charge behind an older free-training UI.
+- Native 0.5.9 main.gd reads trainingUsesResources and sends paidTraining:true. This contract is compatible by source inspection.
+- Cancellation refunds stored charged cost and repeat requests do not duplicate refund. An old free order does not produce a paid refund.
+
+REPRODUCIBILITY RISKS / REQUIRED QUALIFICATIONS
+
+1. Native .github/workflows/drenovar-ios.yml expects branch native-ios-godot and a native-ios directory, but the supplied backend checkout exposes only main and no native sources. The workflow must be placed in the intended real repository layout; do not assume it is installed remotely.
+2. tools/fetch-web84-assets.mjs downloads mutable live-site URLs and verifies pinned SHA-256 hashes. The native manifest has 248 entries. Comparing them to this exact v92 checkout gave 247 matches and one mismatch: city/military.js. No pinned source file was absent after mapping creature-assets37 to gameplay37/assets. A clean CI fetch against v92's changed military.js can fail the pinned hash check. Do not silently update the hash without checking intended native data generation.
+3. Native source already contains project/assets. Preserve those packaged assets to avoid making this handoff depend solely on mutable website downloads. Regenerating game.json from v92 rules is a source change and requires a reviewed update/verification.
+4. Native pipeline downloads Godot 4.6.3/template and runs macOS/Xcode for a fresh IPA. Those external dependencies are not included just because source is archived.
+5. tools/repack-tested-engine.py needs a previous matching unsigned IPA plus newly exported PCK. It reuses the binary byte-for-byte; it is not an Xcode rebuild and deliberately removes prior signing/provisioning. Version is set to 0.5.9, build 19.
+6. Native README contains stale wording that session exists only in RAM; session_store.gd now persists it. The authoritative description should follow current code.
+7. Local loopback test uses an ephemeral realm and fake identity, not native browser authentication, real production D1 or physical iPhone networking.
+8. Native session TTL is 12 hours. Expiration requires reauthentication; distinguish that intended behavior from a spontaneous crash/reload. No diagnosis of the user's reload issue was made here.
+9. Whole-realm CAS, 8 MiB-character guard and growing reports/command receipts impose capacity risks. A full public multiplayer load benchmark was not performed.
+10. Source tests cannot certify Metal rendering, sustained iPhone 12 FPS, temperatures, input latency, App Store eligibility or code-signing success.
+
+VERIFICATION EXECUTED IN THIS AUDIT
+
+Node version: v24.22.1.
+Command: node gameplay37/tests/native-session.mjs
+Result: exit 0. Same account/realm, proof binding, origin validation, authoritative command, expiry and revocation assertions passed.
+
+Command: node gameplay37/tests/paid-training92.mjs
+Result: exit 0. Paid ordinary/imported training, balances, duration, refunds and retry assertions passed.
+
+Command: node gameplay37/tests/world62.mjs
+Result: exit 0. Hosted adapter with in-memory SQLite D1 fixture: two-player PvP, shared Velkor hunt, casualties/reports/rewards, relocation/names and legacy compatibility assertions passed.
+
+No new tests were written. No production requests were issued. No code or configuration was modified. Only this audit note was created outside the source checkout.

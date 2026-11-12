@@ -1,0 +1,67 @@
+{
+  "CFBundleIdentifier": "com.drenovar.game",
+  "CFBundleShortVersionString": "0.5.9",
+  "CFBundleVersion": "19",
+  "MinimumOSVersion": "16.0",
+  "UIDeviceFamily": [
+    1
+  ],
+  "UISupportedInterfaceOrientations": [
+    "UIInterfaceOrientationLandscapeLeft"
+  ],
+  "UISupportedInterfaceOrientations~ipad": [
+    "UIInterfaceOrientationLandscapeRight"
+  ],
+  "CFBundleExecutable": "DRENOVAR",
+  "CFBundleIcons": {
+    "CFBundlePrimaryIcon": {
+      "CFBundleIconFiles": [
+        "AppIcon60x60"
+      ],
+      "CFBundleIconName": "AppIcon"
+    }
+  },
+  "CFBundleIcons~ipad": {
+    "CFBundlePrimaryIcon": {
+      "CFBundleIconFiles": [
+        "AppIcon60x60",
+        "AppIcon76x76"
+      ]
+    }
+  },
+  "UIRequiredDeviceCapabilities": [
+    "iphone-ipad-minimum-performance-a12",
+    "arm64"
+  ],
+  "ipa_sha256": "987a47b049eda4c9bc1c522e48b95c80beb5dfbebec7e340156d0400b3b18ec3",
+  "signing_files": [],
+  "pck": [
+    {
+      "path": "Payload/DRENOVAR.app/DRENOVAR.pck",
+      "bytes": 165600868,
+      "sha256": "57ca2466888e79faced86392310bff7f03f7e92e4a5c4a5f6fa3cd7910264e7a"
+    }
+  ],
+  "native_executable": {
+    "path": "Payload/DRENOVAR.app/DRENOVAR",
+    "bytes": 85713008,
+    "sha256": "d9816f67f540bbebccfdb2a5ecf9460feda71c05247e4e80601caf44973bfaae"
+  },
+  "png_icons": [
+    {
+      "path": "Payload/DRENOVAR.app/AppIcon60x60@2x.png",
+      "bytes": 46007,
+      "width": 120,
+      "height": 120
+    },
+    {
+      "path": "Payload/DRENOVAR.app/AppIcon76x76@2x~ipad.png",
+      "bytes": 73429,
+      "width": 152,
+      "height": 152
+    }
+  ],
+  "asset_catalogs": [
+    "Payload/DRENOVAR.app/Assets.car"
+  ]
+}

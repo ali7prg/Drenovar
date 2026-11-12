@@ -1,0 +1,13 @@
+{
+  "command": [
+    "godot",
+    "--headless",
+    "--path",
+    "/workspace/scratch/74815c15c640/drenovar_handoff_work/validation/project",
+    "--editor",
+    "--import"
+  ],
+  "exit_code": 0,
+  "duration_seconds": 40.572,
+  "isolated_user_data": "/workspace/scratch/74815c15c640/drenovar_handoff_work/validation/isolated_user_data"
+}

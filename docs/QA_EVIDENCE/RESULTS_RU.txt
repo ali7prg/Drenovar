@@ -1,0 +1,20 @@
+ПРОВЕРКИ ПРИ ПЕРЕДАЧЕ — 12 НОЯБРЯ 2026
+
+Godot: 4.6.3.stable.official.7d41c59c4
+Node: v24.22.1
+Платформа проверки: Linux, headless. User data клиента изолирован.
+Исходный архив не изменялся; использовалась отдельная копия project/.
+
+Свежие результаты:
+- Clean import: exit 0; в журнале нет ERROR/WARNING.
+- qa_camera_hud.gd: 153 checks, 0 failures.
+- qa_runtime.gd: 21 checks, 0 failures.
+- Integrated native smoke + exact server v92: exit 0; явный http://127.0.0.1:8417, временный SQLite :memory:.
+- Existing backend native-session.mjs: exit 0 (аудит backend, запись в AUDIT_NOTES/backend_audit_notes.txt).
+- Existing backend paid-training92.mjs: exit 0 (аудит backend).
+- Existing backend world62.mjs: exit 0 (аудит backend).
+
+Нативный smoke включает мутации только временного loopback-мира. Production не запускался для игровых тестов.
+Сохранённые исходные verification/*.log — исторические результаты; они не обозначаются свежими.
+Новая компиляция Xcode, экспорт/подпись IPA, установка на телефон, Metal и физический iPhone 12 не проверялись.
+Показатели headless сценариев не являются FPS, нагревом или задержкой касания на телефоне.

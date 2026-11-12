@@ -1,0 +1,121 @@
+DRENOVAR Godot 0.5.9 — native source handoff audit
+Audit date: 12 November 2026 (Tbilisi user date)
+Scope: static inspection of extracted DRENOVAR-iOS-v0.5.9-source.zip. No game launch, no production requests, no physical iPhone testing, no source changes. All statements below describe source implementation, not a new runtime QA pass.
+Source root: drenovar_handoff_work/source_v0.5.9/DRENOVAR-iOS
+Godot resource root: DRENOVAR-iOS/project
+
+1. ENGINE, SCENE, INPUT AND STARTUP
+
+project/project.godot has 35 lines. config_version=5, application/config/name="DRENOVAR", application/config/version="0.5.9", config/features=PackedStringArray("4.6", "Mobile"). README explicitly names Godot 4.6.3. Exact patch version is therefore a documented build requirement; the project feature list itself specifies only 4.6.
+Main scene: res://main.tscn. It is 6 lines, one Node called Drenovar whose script is res://src/main.gd. There are no additional .tscn runtime scene definitions in this archive; the scene graph, UI, map geometry, actors and previews are constructed by code and imported .glb PackedScenes.
+project.godot contains no [autoload] and no [input] sections. There are no registered Autoload singletons or custom Input Map actions. RefCounted helpers and node scripts are preloaded from main.gd and landscape.gd.
+Display: viewport_width=1366, viewport_height=630, window/stretch/mode="canvas_items", window/handheld/orientation=0. No explicit stretch/aspect override or frame-rate setting is present. iOS renderer settings are mobile + metal; msaa_3d=1, import_etc2_astc=true.
+main.gd _ready(): disables accumulated input, allocates frame sample rings (240 general/120 moving), accepts a server override only if it begins http://127.0.0.1:, optionally enables --smoke, presents LaunchScreen for two frames, parses res://assets/game.json, uses embedded data.demo until login/restoration, builds HUD, restores saved session if present, opens city, fades splash.
+The display requirement is landscape. No custom portrait rotate-device overlay is implemented in src; app orientation is configured instead.
+
+Actual controls:
+- Tap a building, creature, march, city, plot, or nearby tree to inspect. Screen-space marker hit radii differ by type. A touch tap is accepted only when not cancelled and accumulated movement is below 10 logical pixels; mouse threshold is 8.
+- One-finger drag pans the camera using projection onto a ground plane. Two fingers pan/zoom around the pinch centre. There is no two-finger twist rotation gesture.
+- World map can be rotated in 45-degree steps by menu button. Zoom menu buttons and mouse wheel are also implemented; city zoom clamps to 24–120 and world zoom to 15–500 in landscape.gd.
+- Tapping the minimap centres the world camera. Follow-march, centre-city and world-overview actions exist.
+- Profile button is upper left; resources are upper right; bottom-right navigation presents city/map toggle, army, reports and menu. In resource dialogs the full balance appears, whereas HUD abbreviates thousands/millions.
+- Dialogs close by ×, some explicit back buttons, or desktop Escape. TouchScroll consumes modal touch events and synthesizes a mouse click on a short tap, supports vertical swipes and horizontal slider movement. Modal tap slop is 9 pixels. Opening/closing dialogs or app focus loss clears active camera gestures.
+
+2. EVERY RUNTIME SCRIPT'S RESPONSIBILITY
+
+res://src/main.gd (3205 lines): bootstrap; UI construction; economy/building/training/hospital/trade/starter panels; account/profile/session integration; HTTP transport and polling; city/world scene cache; touch and mouse routing; march preview and submission; reports/rewards UI; relocation; diagnostics; an embedded mutating smoke test.
+res://src/landscape.gd (1512 lines): city/world environments, cameras, terrain chunks, shaders/materials, rivers/roads, forest/meadow and MultiMesh batches; world settlement visuals; dynamic buildings/workers/parade/training units; creature patrols and battle animation; army formations and timeline-driven animation; visibility/LOD; camera direct manipulation.
+res://src/session_store.gd (50 lines): session token validation; device-derived encryption key; read/save/forget encrypted native session file.
+res://src/battle_results.gd (56 lines): per-player journal cursor for already announced reports; deduplication, delayed pending result queue, persistent cursor storage.
+res://src/formations.gd (90 lines): field and parade formation slots. Field representation is capped at 24 visible soldiers, proportionally distributed between unit IDs. This is an existing visual representation cap, not a 24-unit gameplay army limit. March UI allows up to 200 troops.
+res://src/touch_scroll.gd (88 lines): modal touch routing, vertical scroll, slider drag, tap dispatch, restoration of mouse-from-touch emulation.
+res://src/minimap.gd (56 lines): creates 260×208 RGBA minimap from embedded base64 bytes, draws cities/available creatures/armies/focus, emits chosen location.
+res://src/march_map.gd (26 lines): 2D route preview fitted into a panel.
+res://src/launch_screen.gd (98 lines): branded full-screen launch image, crest, titles, progress labels, fade-out.
+res://src/hud_action.gd (34 lines): circular HUD action icon rendering using one SVG per action and text caption.
+res://src/ui_theme.gd (84 lines): base palette, button/panel/field styles and shared UI Theme constructed in code.
+res://src/web_panel_theme.gd (66 lines): panel palette, cached raster gradient StyleBoxTextures and modal action styles.
+res://src/warrior_visual.gd (60 lines): applies material roughness/specular rules and anisotropic filtering to existing warrior meshes; creates a contact-shadow gradient plane for previews. It does not create new warrior geometry or rigs.
+Three separate runtime .gdshader files are preloaded by landscape.gd: water.gdshader, biome.gdshader, meadow.gdshader. Include them in the handoff even though the user specifically named .gd/.tscn/.tres.
+There are also 13 non-runtime .gd scripts: benchmark/QA entrypoints plus two historical landscape references in project/tests. They must not be confused with alternative current gameplay implementations. Parent inventory should enumerate all 26 .gd files.
+
+3. GAMEPLAY PRESENT IN THE CLIENT
+
+The source implements a persistent online settlement-building strategy client. The loop supported by screens and commands is: produce/collect resources, clear land, construct/upgrade buildings, train troops, compose a march, hunt creatures or attack eligible player cities, receive a server battle report, treat wounded and replace dead troops, continue settlement development.
+Resources are food, wood, stone, iron, coins. Wood is read from city.progress.wood; the other resource balances are in city.demo.wallet. This legacy field name does not mean all accounts are free-resource demos.
+The normal current progression UI upgrades buildings through level 5, checks town-hall prerequisites and construction queue availability. Level 20 is a longer-term requirement, not completed normal-progression support established by this client. Legacy settlement editor paths additionally expose legacy building variants/levels.
+Production display computes rates from buildingTerms and pauses the label once the stored amount reaches capacity for ordinary accounts. Capacity display is 1200 plus per-building storage contribution multiplied by level. Actual production and rewards are server responsibilities.
+Construction commands support clear/build/upgrade/collect, starter enter/skip, individual tree felling/preparing a plot, and clearing groves. landscape.gd filters felled trees and shows new plots, roads, workers and building upgrade detail.
+Training has separate infantry barracks, archery range and stable panels; 1–100 units per order; three queue slots; price/time quote; availability by hall/building level; pending feedback; cancellation/refund description; training speedups; active training character; roster and animated preview. Submission generates a persistent requestId for a pending quantity and marks paidTraining=true. Server build 92 is required for the documented paid-training path in migrated settlements.
+March UI allows 1–200 available healthy troops. It requests a server route preview and enables submission after receiving a path; preview is debounced 0.22 seconds for city/0.18 for world, times out after 5 seconds, can retry without losing selection, and ignores stale UI-generation/revision replies. Actual march commands are deploy (city), worldMarch with worldKind=velkor or pvp (world).
+Armies show outbound/fighting/returning/returned phases from server timestamps and paths. City outbound armies can be recalled. World PvP action is gated by both own and target city pvp eligibility fields. Native multiplayer transport is periodic HTTPS JSON, not Godot ENet/RPC/WebSocket networking.
+Four creature model groups are in game.json. Main world client flow uses worldKind=velkor; city creature panels use species-specific models. The code suppresses models/markers for defeated or zero-HP creatures and shows respawn countdowns from server data.
+Battle win/loss is report.outcome=="victory" versus other outcomes, determined by backend. Client does not compute the authoritative battle result. It animates server battle events, soldiers' attacks/hits/deaths, ranged shots, creature attacks and marches. Result window shows actual report.rewards.resources/items/xp and surviving/wounded/dead. Opening a report does not award items a second time.
+There is no campaign completion, overall victory, permanent game-over, restart-from-zero condition or world-ranking win condition implemented in src. Defeat of a single march is supported; its losses/wounded and recovery are displayed. Exact battle formula, raid losses and endgame rules cannot be established from native source alone.
+Hospital selects up to 200 wounded, previews food/coin healing cost and duration, and sends heal command. Market buy/sell quotes use tradePrices and enforce displayed capacity checks. Speedups cover construction and training, with confirmation when unused time would be wasted.
+Starter objective order in data.starterGoals is explicit: wood collection (+45 wood), completed recruit training (+60 food), hall level II (+80 coins), quarry (+60 stone), Tenerys I victory (+100 coins). Next unclaimed goal is displayed. It prevents reward claim if resource plus reward exceeds displayed capacity and sends starter71 objectiveId. Server state remains authoritative.
+Rename nickname/settlement, select another profile, found first settlement, browser login and logout are present. Relocation shows available world slots, checks current slot and occupancy, and sends relocateCity with slot/fromSlot.
+
+4. ROSTER AND CONTENT LIMITATIONS VERIFIED IN DATA
+
+game.json has 10 englishRoster entries and 10 unitModels mappings. Each mapping includes preview/field representations, not ten separate units per all seven cultures.
+Current English IDs: ENG-01 Копейщик; ENG-02 Мечник со щитом; ENG-03 Английский длиннолучник; ENG-04 Арбалетчик; ENG-05 Конный разведчик; ENG-06 Конный рыцарь; ENG-07 Тяжёлый пеший воин; ENG-08 Городской ополченец; ENG-09 Пеший новобранец; ENG-10 Лёгкий метатель дротиков.
+Only the English culture header has available=true. Tribal, Norman, Steppe, Viking, Arab and Ottoman headers appear as closed. Thus 70 complete combat units are not established by this archive.
+Each English roster item still carries production_asset_status="not_accepted" and balance_status="initial_founder_supplied_not_pvp_validated". Character production approval and PvP balance are explicitly unresolved in the data.
+There are discrepancies between legacy descriptive unlock text and current unitRequirements (for example ENG-10 description says barracks while training_building is RNG-01). The actual UI uses unitRequirements and trainingGroups, not the narrative unlock strings; future developers should reconcile documentation with server rules.
+All-ten-warrior 0.5.9 visual work is material/light/framing/phase work over the original geometry. The full anatomical/equipment/rig remodel requested on 11 November is not fulfilled by those functions.
+Audio player creation, music/sound settings and audio playback are absent from src. Do not claim implemented sound effects based solely on the user's requested direction.
+
+5. EXACT NETWORK DEPENDENCIES AND API CONTRACT
+
+LIVE_SERVER: https://drenovar.pink-lyric-9420.chatgpt.site
+Built-in override accepts only --server=http://127.0.0.1:<port>. It cannot redirect to a new remote staging hostname without editing the client constant/override policy.
+Production routes used:
+GET /api/native/approve?challenge=<sha256-of-proof> — external browser approval page; user enters displayed short code in same ChatGPT account.
+POST /api/native/exchange — body {proof}; returns validated session string or pending status.
+POST /api/native/logout — body {}.
+GET /api/native/game/state — authoritative settlement/world/reports state; used for startup restoration and polling.
+GET /api/native/game/account — profiles and nickname.
+POST /api/native/game/session/new — create settlement when needed.
+POST /api/native/game/profile/select — body {playerId}.
+POST /api/native/game/command — game command body.
+POST /api/native/game/march-preview — route quote body.
+Loopback equivalents are /api/state, /api/account, /api/session/new, /api/profile/select, /api/command, /api/march-preview. Test-only POST /test/clock?time=<milliseconds> is guarded by loopback&&smoke in advance_test_clock.
+Request headers: Accept: application/json; X-Drenovar-Player when player ID known; X-Drenovar-Session when logged in; Content-Type: application/json and Origin for POST; Idempotency-Key per mutation, reusing requestId for a command where supplied. Do not include an actual live session token in the handoff.
+Default timeout is 12 seconds; startup restoration and route preview use 5 seconds. Redirects are disabled, response body capped at 8 MiB. HTTPRequest uses threads except march-preview. Error strings distinguish timeout, TLS failure, unavailable server and unparseable response. 401 clears session.
+Polling runs about every 0.8 seconds when an active own/target march exists, otherwise every 5 seconds. Foreground requests increment request_generation; stale background state is ignored. Single command-in-progress and UI-generation guards reduce duplicate clicks and obsolete callbacks.
+Client accepts a state if city and world exist, then dereferences additional required fields. This is not a fully versioned/validated schema boundary. Contract changes must be coordinated with backend; malformed or incomplete JSON dictionaries can cause errors despite transport success.
+Native archive alone is not a standalone offline game server. It has tools/test-realm.mjs but this imports the separate web source. Parent should obtain the matching backend repository/revision or explicitly mark it as a missing dependency.
+
+6. SAVE / AUTHENTICATION
+
+Authoritative gameplay progress is server-side. Native source contains no complete local player save serializer, offline command journal, offline progression calculation, conflict merge or server DB backup.
+SessionStore stores only the authentication token, not settlement progress. Path user://drenovar-session.bin; token format exactly 129 characters, lower-case hex with dot at index 64. Encryption key is SHA256("DRENOVAR-iOS-session-v1:"+OS.get_unique_id()). Empty unique ID makes saving unavailable. Save uses FileAccess.open_encrypted to .tmp then rename; invalid token/decryption/read failure returns empty string. This is device-keyed encrypted local storage, not Apple Keychain integration. Logout removes both final and temporary files.
+Startup restores token, requests server state, handles 401 by reset and continues retry on transient restore failure. If new token cannot be stored, a profile warning says session will last only until application closure.
+BattleResults stores only the last announced report ID per player under [journal] in user://battle-results.cfg. First profile connection treats existing history as already announced. New report IDs queue once after 1650 ms; next() records the popped report ID. It does not persist full reports, awarded resources or pending report payloads. Full history comes from server.
+Camera target/zoom/yaw/layer state is kept in saved_views in memory when a cached scene is released. No disk persistence of view state is present.
+
+7. OPTIMIZATION AND ITS LIMITS
+
+Input.use_accumulated_input=false; direct touch changes camera pose immediately; automated focus changes use exponential smoothing. Visibility work is deferred to the render frame with thresholds, not performed for every touch event.
+City/world recent scene cache lifetime is 40 seconds when idle and at most 60 seconds, with immediate inactive-scene release on OS memory warning. Destruction drains at most 48 nodes and roughly 1000 microseconds per frame; urgent memory-warning cleanup is synchronous.
+MultiMesh clusters use frustum and distance/LOD selection, allocate growing instance capacity and upload only changed visibility masks. Existing tree/town/overview silhouette LOD and visibility rules remain implemented. Do not describe archive as rendering every source object at maximum detail at every distance.
+Hidden army/creature actors are reused for up to 10 seconds, with hidden caps 3 armies/8 creatures. Per-frame creation budgets are 6 field soldiers, 4 parade soldiers and 1 creature. Unit previews use ResourceLoader threaded requests after showing a portrait and render only while visible.
+Some loading/construction still calls synchronous load/instantiate and builds roads/forest/parade on state geometry changes. Thus source does not prove zero stalls. A full city geometry change recreates buildings/workers and forest/roads; this is a performance hotspot to profile, not a newly reproduced bug.
+On-device diagnostics report wall-clock frame durations from last 240 samples and 120 moving samples, p50/p95/max, last scene transition, batches/draw calls/primitives/renderer/GPU. They are not long-run thermal or input-to-photon latency measurements. No physical-device measurement was performed in this audit.
+
+8. CONFIRMED DOCUMENTATION GAPS / OPEN CHECKS
+
+- README "Текущий объём" is stale: says session only in RAM, but 0.5.9 source saves encrypted token; says inactive scene released after four seconds, but constants are 40/60 seconds. Use code as current authority.
+- show_application still labels compatibility as web build 91, whereas paid-training documentation requires server build 92 and CHANGES-0.5.9 references battle window from web92. Backend/native version relationship needs explicit handoff table.
+- There is no complete remodel of all troops; only 10 English units exist and all have not_accepted asset metadata.
+- Native source alone cannot establish server battle rules, persistence schema, auth approvals, idempotency correctness, production capacity, awards or actual PvP functioning. Those require matching server source/tests.
+- Overall campaign/endgame win/loss and normal level 6–20 progression are not implemented in the inspected client.
+- Music/audio are absent in src.
+- Exact physical iPhone installed build, Metal behavior, input responsiveness, sustained FPS, heating, memory-pressure reload elimination and visual match to Viking Rise remain unverified here. CHANGES-0.5.9 also explicitly leaves physical iPhone/visual comparison open.
+- run_smoke contains mutations (training, cancellation, marching). Its top-level entry does not itself enforce loopback. Use documented local --server argument for these tests; do not run --smoke against a logged-in production account. This is a test execution constraint, not evidence of a production incident.
+- Whole-source parse/import/export/run was not executed in this audit. Existing logs are historical evidence and must be labelled by their own version/device.
+
+9. RECOMMENDED NEXT ENGINEER WORK ORDER (REQUIREMENTS, NOT COMPLETED WORK)
+
+Establish native source/IPA/backend revision agreement; restore local test realm; reproduce user-reported input/camera/reload problems on iPhone 12; profile sustained device behavior; remove measured stalls without changing user-approved scene counts/distances/fidelity; rework all current troop meshes/rigs/animations and define honest inventory for unavailable cultures; regression-test real resource debit/refund, rewards, save/login, construction1–5, march/PvP/relocation; validate final integrated iPhone build and report remaining blockers. Native source package should remain byte-for-byte unchanged in a handoff task.

@@ -1,0 +1,520 @@
+{
+  "units": [
+    {
+      "unit": {
+        "id": "ENG-01",
+        "name": "Копейщик",
+        "name_en": "Levy Spearman",
+        "unit_class": "Пехота",
+        "power": 87,
+        "attack": 53,
+        "defense": 70,
+        "hp": 135,
+        "speed": 4,
+        "wood": 40,
+        "iron": 12,
+        "food": 30,
+        "coins": 35,
+        "train_seconds": 30,
+        "food_upkeep_per_hour": 0.08,
+        "unlocks_at": "Казармы ур. 1",
+        "role": "Дешёвая первая линия и противодействие коннице.",
+        "strengths": "Сдерживает кавалерию и прикрывает лучников.",
+        "weakness": "Уязвим к подготовленному огню дальнобойных отрядов и тяжёлой пехоте.",
+        "special": "+30% урона против конных целей (черновой бонус).",
+        "image_filename": "ENG-01_Levy_Spearman.png",
+        "approved_name_en": "English Spearman",
+        "training_building": "INF-01",
+        "source_unlock_text": "Казармы ур. 1",
+        "production_asset_status": "not_accepted",
+        "balance_status": "initial_founder_supplied_not_pvp_validated",
+        "legacyLevel": 1
+      },
+      "model_mapping": {
+        "preview": "res://assets/army/assets/ENG-01-spearman27-lod1.glb",
+        "field": "res://assets/army/assets/ENG-01-spearman27-lod2.glb",
+        "drill": "Spear_Drill"
+      },
+      "current_hall_building_requirement": [
+        2,
+        2
+      ]
+    },
+    {
+      "unit": {
+        "id": "ENG-02",
+        "name": "Мечник со щитом",
+        "name_en": "Shield Swordsman",
+        "unit_class": "Пехота",
+        "power": 107,
+        "attack": 77,
+        "defense": 78,
+        "hp": 156,
+        "speed": 4,
+        "wood": 35,
+        "iron": 25,
+        "food": 35,
+        "coins": 60,
+        "train_seconds": 45,
+        "food_upkeep_per_hour": 0.11,
+        "unlocks_at": "Казармы ур. 2",
+        "role": "Универсальный отряд ближнего боя.",
+        "strengths": "Устойчивее лёгкой пехоты, хорошо действует против налётчиков.",
+        "weakness": "Дороговат в железе, уязвим к массированным стрелкам.",
+        "special": "+15% эффективности против лёгкой пехоты.",
+        "image_filename": "ENG-02_Shield_Swordsman.png",
+        "approved_name_en": "English Shield Swordsman",
+        "training_building": "INF-01",
+        "source_unlock_text": "Казармы ур. 2",
+        "production_asset_status": "not_accepted",
+        "balance_status": "initial_founder_supplied_not_pvp_validated",
+        "legacyLevel": 2
+      },
+      "model_mapping": {
+        "preview": "res://assets/army/assets/ENG-02-swordsman27-lod1.glb",
+        "field": "res://assets/army/assets/ENG-02-swordsman27-lod2.glb",
+        "drill": "Sword_Drill"
+      },
+      "current_hall_building_requirement": [
+        3,
+        3
+      ]
+    },
+    {
+      "unit": {
+        "id": "ENG-03",
+        "name": "Английский длиннолучник",
+        "name_en": "English Longbowman",
+        "unit_class": "Дальний бой",
+        "power": 83,
+        "attack": 98,
+        "defense": 28,
+        "hp": 95,
+        "speed": 4,
+        "wood": 65,
+        "iron": 12,
+        "food": 35,
+        "coins": 70,
+        "train_seconds": 55,
+        "food_upkeep_per_hour": 0.07,
+        "unlocks_at": "Стрельбище ур. 1",
+        "role": "Основной стрелок, поражение целей до сближения.",
+        "strengths": "Эффективен против слабо бронированной пехоты.",
+        "weakness": "Слаб против конницы и в ближнем бою; против тяжёлой брони уступает арбалету.",
+        "special": "+25% против лёгких войск без тяжёлой брони.",
+        "image_filename": "ENG-03_English_Longbowman.png",
+        "approved_name_en": "English Longbowman",
+        "training_building": "RNG-01",
+        "source_unlock_text": "Стрельбище ур. 1",
+        "production_asset_status": "not_accepted",
+        "balance_status": "initial_founder_supplied_not_pvp_validated",
+        "legacyLevel": 1
+      },
+      "model_mapping": {
+        "preview": "res://assets/army/assets/ENG-03-longbowman27-lod1.glb",
+        "field": "res://assets/army/assets/ENG-03-longbowman27-lod2.glb",
+        "drill": "Bow_Draw"
+      },
+      "current_hall_building_requirement": [
+        4,
+        2
+      ]
+    },
+    {
+      "unit": {
+        "id": "ENG-04",
+        "name": "Арбалетчик",
+        "name_en": "Crossbowman",
+        "unit_class": "Дальний бой",
+        "power": 91,
+        "attack": 116,
+        "defense": 35,
+        "hp": 98,
+        "speed": 3,
+        "wood": 70,
+        "iron": 30,
+        "food": 45,
+        "coins": 90,
+        "train_seconds": 70,
+        "food_upkeep_per_hour": 0.08,
+        "unlocks_at": "Стрельбище ур. 3",
+        "role": "Медленный, но мощный стрелок против брони.",
+        "strengths": "Высокое пробитие защиты, полезен в осадах.",
+        "weakness": "Низкая скорость перезарядки, уязвим при прорыве линии обороны.",
+        "special": "Игнорирует 25% показателя защиты цели; скорость выстрела ниже лучника.",
+        "image_filename": "ENG-04_Crossbowman.png",
+        "approved_name_en": "English Crossbowman",
+        "training_building": "RNG-01",
+        "source_unlock_text": "Стрельбище ур. 3",
+        "production_asset_status": "not_accepted",
+        "balance_status": "initial_founder_supplied_not_pvp_validated",
+        "legacyLevel": 3
+      },
+      "model_mapping": {
+        "preview": "res://assets/army/assets/ENG-04-crossbow27-lod1.glb",
+        "field": "res://assets/army/assets/ENG-04-crossbow27-lod2.glb",
+        "drill": "Crossbow_Reload"
+      },
+      "current_hall_building_requirement": [
+        5,
+        3
+      ]
+    },
+    {
+      "unit": {
+        "id": "ENG-05",
+        "name": "Конный разведчик",
+        "name_en": "Mounted Scout",
+        "unit_class": "Лёгкая конница",
+        "power": 114,
+        "attack": 78,
+        "defense": 45,
+        "hp": 150,
+        "speed": 8,
+        "wood": 60,
+        "iron": 18,
+        "food": 75,
+        "coins": 110,
+        "train_seconds": 75,
+        "food_upkeep_per_hour": 0.16,
+        "unlocks_at": "Конюшня ур. 1",
+        "role": "Разведка, перехват обозов и быстрые походы.",
+        "strengths": "Высокая скорость марша, обнаружение целей.",
+        "weakness": "Слабее рыцарей и копейщиков в прямом бою.",
+        "special": "+20% к скорости похода отряда разведки, не к урону.",
+        "image_filename": "ENG-05_Mounted_Scout.png",
+        "approved_name_en": "English Mounted Scout",
+        "training_building": "CAV-01",
+        "source_unlock_text": "Конюшня ур. 1",
+        "production_asset_status": "not_accepted",
+        "balance_status": "initial_founder_supplied_not_pvp_validated",
+        "legacyLevel": 1
+      },
+      "model_mapping": {
+        "preview": "res://assets/army/assets/ENG-05-scout-lod1.glb",
+        "field": "res://assets/army/assets/ENG-05-scout-lod2.glb",
+        "drill": "Mounted_Drill"
+      },
+      "current_hall_building_requirement": [
+        5,
+        1
+      ]
+    },
+    {
+      "unit": {
+        "id": "ENG-06",
+        "name": "Конный рыцарь",
+        "name_en": "Mounted Knight",
+        "unit_class": "Тяжёлая конница",
+        "power": 200,
+        "attack": 150,
+        "defense": 125,
+        "hp": 250,
+        "speed": 7,
+        "wood": 120,
+        "iron": 80,
+        "food": 140,
+        "coins": 240,
+        "train_seconds": 180,
+        "food_upkeep_per_hour": 0.38,
+        "unlocks_at": "Конюшня ур. 5 + кузница ур. 3",
+        "role": "Дорогой ударный отряд для наступления.",
+        "strengths": "Сокрушительный первый удар на открытой местности, высокая живучесть.",
+        "weakness": "Уязвим к копейщикам; дорогой найм и содержание.",
+        "special": "+30% к первому удару против пехоты на открытой местности.",
+        "image_filename": "ENG-06_Mounted_Knight.png",
+        "approved_name_en": "English Mounted Knight",
+        "training_building": "CAV-01",
+        "source_unlock_text": "Конюшня ур. 5 + кузница ур. 3",
+        "production_asset_status": "not_accepted",
+        "balance_status": "initial_founder_supplied_not_pvp_validated",
+        "legacyLevel": 5
+      },
+      "model_mapping": {
+        "preview": "res://assets/army/assets/ENG-06-knight-lod1.glb",
+        "field": "res://assets/army/assets/ENG-06-knight-lod2.glb",
+        "drill": "Mounted_Drill"
+      },
+      "current_hall_building_requirement": [
+        5,
+        5
+      ]
+    },
+    {
+      "unit": {
+        "id": "ENG-07",
+        "name": "Тяжёлый пеший воин",
+        "name_en": "Man-at-Arms",
+        "unit_class": "Тяжёлая пехота",
+        "power": 140,
+        "attack": 97,
+        "defense": 115,
+        "hp": 210,
+        "speed": 3,
+        "wood": 60,
+        "iron": 65,
+        "food": 70,
+        "coins": 150,
+        "train_seconds": 110,
+        "food_upkeep_per_hour": 0.2,
+        "unlocks_at": "Казармы ур. 5 + кузница ур. 2",
+        "role": "Медленный защитник переднего ряда.",
+        "strengths": "Выдерживает сильные удары и удерживает проходы.",
+        "weakness": "Плохо преследует стрелков и конницу, дорогой в железе.",
+        "special": "+20% защиты при обороне ворот и узких проходов.",
+        "image_filename": "ENG-07_Man-at-Arms.png",
+        "approved_name_en": "English Men-at-Arms",
+        "training_building": "INF-01",
+        "source_unlock_text": "Казармы ур. 5 + кузница ур. 2",
+        "production_asset_status": "not_accepted",
+        "balance_status": "initial_founder_supplied_not_pvp_validated",
+        "legacyLevel": 5
+      },
+      "model_mapping": {
+        "preview": "res://assets/army/assets/ENG-07-authored-menatarms21-lod1.glb",
+        "field": "res://assets/army/assets/ENG-07-authored-menatarms21-lod2.glb",
+        "drill": "Sword_Drill"
+      },
+      "current_hall_building_requirement": [
+        5,
+        5
+      ]
+    },
+    {
+      "unit": {
+        "id": "ENG-08",
+        "name": "Городской ополченец",
+        "name_en": "Town Militia",
+        "unit_class": "Гарнизон",
+        "power": 70,
+        "attack": 48,
+        "defense": 48,
+        "hp": 110,
+        "speed": 4,
+        "wood": 25,
+        "iron": 7,
+        "food": 25,
+        "coins": 25,
+        "train_seconds": 25,
+        "food_upkeep_per_hour": 0.06,
+        "unlocks_at": "Ратуша ур. 1",
+        "role": "Массовая недорогая оборона поселения.",
+        "strengths": "Дешёвый гарнизон, полезен для защиты ресурсов.",
+        "weakness": "Слаб в длительном открытом бою против профессиональных воинов.",
+        "special": "+15% к защите при обороне собственного города.",
+        "image_filename": "ENG-08_Town_Militia.png",
+        "approved_name_en": "English Militia",
+        "training_building": "INF-01",
+        "source_unlock_text": "Ратуша ур. 1",
+        "production_asset_status": "not_accepted",
+        "balance_status": "initial_founder_supplied_not_pvp_validated",
+        "legacyLevel": 1
+      },
+      "model_mapping": {
+        "preview": "res://assets/army/assets/ENG-08-militia27-lod1.glb",
+        "field": "res://assets/army/assets/ENG-08-militia27-lod2.glb",
+        "drill": "Sword_Drill"
+      },
+      "current_hall_building_requirement": [
+        2,
+        2
+      ]
+    },
+    {
+      "unit": {
+        "id": "ENG-09",
+        "name": "Пеший новобранец",
+        "name_en": "Levy Footman",
+        "unit_class": "Лёгкая пехота",
+        "power": 60,
+        "attack": 42,
+        "defense": 38,
+        "hp": 100,
+        "speed": 4,
+        "wood": 25,
+        "iron": 5,
+        "food": 30,
+        "coins": 20,
+        "train_seconds": 18,
+        "food_upkeep_per_hour": 0.05,
+        "unlocks_at": "Ратуша ур. 1",
+        "role": "Первый и самый дешёвый солдат.",
+        "strengths": "Низкая стоимость, быстрое пополнение отрядов.",
+        "weakness": "Низкая стойкость и слабая эффективность против элиты.",
+        "special": "Быстрая подготовка, без дополнительных бонусов.",
+        "image_filename": "ENG-09_Levy_Footman.png",
+        "approved_name_en": "English Levy Footman",
+        "training_building": "INF-01",
+        "source_unlock_text": "Ратуша ур. 1",
+        "production_asset_status": "not_accepted",
+        "balance_status": "initial_founder_supplied_not_pvp_validated",
+        "legacyLevel": 1
+      },
+      "model_mapping": {
+        "preview": "res://assets/army/assets/ENG-09-footman27-lod1.glb",
+        "field": "res://assets/army/assets/ENG-09-footman27-lod2.glb",
+        "drill": "Sword_Drill"
+      },
+      "current_hall_building_requirement": [
+        1,
+        1
+      ]
+    },
+    {
+      "unit": {
+        "id": "ENG-10",
+        "name": "Лёгкий метатель дротиков",
+        "name_en": "Light Skirmisher",
+        "unit_class": "Лёгкие стрелки",
+        "power": 76,
+        "attack": 68,
+        "defense": 35,
+        "hp": 95,
+        "speed": 5,
+        "wood": 35,
+        "iron": 10,
+        "food": 25,
+        "coins": 45,
+        "train_seconds": 32,
+        "food_upkeep_per_hour": 0.07,
+        "unlocks_at": "Казармы ур. 2",
+        "role": "Быстрый отряд метательного оружия.",
+        "strengths": "Хорош для кратких стычек и беспокойства медленной пехоты.",
+        "weakness": "Уязвим против конницы и тяжёлых щитов.",
+        "special": "+20% к урону против медленной пехоты без щитов.",
+        "image_filename": "ENG-10_Light_Skirmisher.png",
+        "approved_name_en": "English Light Javelin Skirmisher",
+        "training_building": "RNG-01",
+        "source_unlock_text": "Казармы ур. 2",
+        "production_asset_status": "not_accepted",
+        "balance_status": "initial_founder_supplied_not_pvp_validated",
+        "legacyLevel": 2
+      },
+      "model_mapping": {
+        "preview": "res://assets/army/assets/ENG-10-javelin27-lod1.glb",
+        "field": "res://assets/army/assets/ENG-10-javelin27-lod2.glb",
+        "drill": "Javelin_Drill"
+      },
+      "current_hall_building_requirement": [
+        4,
+        1
+      ]
+    }
+  ],
+  "culture_headers": [
+    {
+      "tier": 1,
+      "id": "english",
+      "name": "Англия",
+      "short": "Англия",
+      "roman": "I",
+      "available": true
+    },
+    {
+      "tier": 2,
+      "id": "tribal",
+      "name": "Племенные народы",
+      "short": "Племена",
+      "roman": "II"
+    },
+    {
+      "tier": 3,
+      "id": "norman",
+      "name": "Нормандцы",
+      "short": "Нормандцы",
+      "roman": "III"
+    },
+    {
+      "tier": 4,
+      "id": "steppe",
+      "name": "Степные народы",
+      "short": "Степь",
+      "roman": "IV"
+    },
+    {
+      "tier": 5,
+      "id": "viking",
+      "name": "Викинги",
+      "short": "Викинги",
+      "roman": "V"
+    },
+    {
+      "tier": 6,
+      "id": "arab",
+      "name": "Арабские армии",
+      "short": "Арабские армии",
+      "roman": "VI"
+    },
+    {
+      "tier": 7,
+      "id": "ottoman",
+      "name": "Османская империя",
+      "short": "Османы",
+      "roman": "VII"
+    }
+  ],
+  "training_groups": {
+    "MIL-01": "INF-01",
+    "MIL-02": "RNG-01",
+    "MIL-03": "CAV-01"
+  },
+  "creature_models": {
+    "velkor": [
+      "res://assets/creature-assets37/VELKOR_L1_RIGGED_ANIMATED.glb",
+      "res://assets/creature-assets37/VELKOR_L2_RIGGED_ANIMATED.glb",
+      "res://assets/creature-assets37/VELKOR_L3_RIGGED_ANIMATED.glb"
+    ],
+    "tenerys": [
+      "res://assets/creature-assets37/TENERYS_L1_RIGGED_ANIMATED.glb",
+      "res://assets/creature-assets37/TENERYS_L2_RIGGED_ANIMATED.glb",
+      "res://assets/creature-assets37/TENERYS_L3_RIGGED_ANIMATED.glb"
+    ],
+    "kamneklyk": [
+      "res://assets/creature-assets37/KAMNEKLYK_L1_RIGGED_ANIMATED.glb",
+      "res://assets/creature-assets37/KAMNEKLYK_L2_RIGGED_ANIMATED.glb",
+      "res://assets/creature-assets37/KAMNEKLYK_L3_RIGGED_ANIMATED.glb"
+    ],
+    "dragor": [
+      "res://assets/creature-assets37/DRAGOR_L1_RIGGED_ANIMATED.glb",
+      "res://assets/creature-assets37/DRAGOR_L2_RIGGED_ANIMATED.glb",
+      "res://assets/creature-assets37/DRAGOR_L3_RIGGED_ANIMATED.glb"
+    ]
+  },
+  "starter_goals": [
+    {
+      "id": "wood",
+      "title": "Получите древесину в лагере лесорубов",
+      "reward": {
+        "wood": 45
+      }
+    },
+    {
+      "id": "train",
+      "title": "Завершите обучение новобранца",
+      "reward": {
+        "food": 60
+      }
+    },
+    {
+      "id": "hall",
+      "title": "Улучшите ратушу до уровня II",
+      "reward": {
+        "coins": 80
+      }
+    },
+    {
+      "id": "build",
+      "title": "Постройте каменоломню",
+      "reward": {
+        "stone": 60
+      }
+    },
+    {
+      "id": "hunt",
+      "title": "Победите Тенериса I",
+      "reward": {
+        "coins": 100
+      }
+    }
+  ]
+}

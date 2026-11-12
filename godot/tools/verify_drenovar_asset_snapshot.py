@@ -19,8 +19,7 @@ def collect_expected():
         return {item["resource_path"].removeprefix("res://assets/"): {"sha256": item["sha256"], "size": item["size_bytes"]} for item in j["assets"]}
     if len(parts) != 4:
         raise RuntimeError(f"Expected four inventory parts; found {len(parts)}")
-    for part in parts:
-        chunks.extend(re.split(r"\n={15,}\n", part.read_text(encoding="utf-8")))
+    chunks = re.split(r"\n={15,}\n", "".join(part.read_text(encoding="utf-8") for part in parts))
     out = {}
     for chunk in chunks:
         path = re.search(r"^Путь ресурса:\s*res://assets/([^\r\n]+)", chunk, re.M)

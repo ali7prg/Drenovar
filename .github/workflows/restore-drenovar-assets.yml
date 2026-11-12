@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - .github/workflows/restore-drenovar-assets.yml
+      - godot/tools/verify_drenovar_asset_snapshot.py
 
 permissions:
   contents: write

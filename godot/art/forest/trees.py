@@ -350,6 +350,23 @@ def write_glb(mesh, path, atlas_uri, name, cutoff=0.42):
         f.write(struct.pack("<II", len(body), 0x004E4942) + body)
 
 
+# 0.5.9 tree heights per variant: crowns must keep the scale of buildings and soldiers.
+TARGET_HEIGHT = {0: 8.3, 1: 8.7, 2: 9.1, 3: 7.8, 4: 8.2, 5: 8.7}
+
+
+def build_tree(variant, lod, rng):
+    if variant == 1:
+        mesh = conifer(variant, lod, rng)
+    elif variant in (0, 2):
+        mesh = pine(variant, lod, rng)
+    else:
+        mesh = broadleaf(variant, lod, rng)
+    top = max(p[1] for p in mesh.p)
+    factor = TARGET_HEIGHT[variant] / top
+    mesh.p = [np.asarray(p) * factor for p in mesh.p]
+    return mesh
+
+
 def impostor_sizes(out):
     """Sizes written by bake_impostors.gd; None until the far atlas has been baked."""
     path = Path(out).resolve().parents[1] / "environment" / "forest60-far.json"
@@ -373,12 +390,7 @@ def main(out_dir, atlas_uri):
                 write_glb(mesh, out / f"{name}.glb", FAR_URI, name, cutoff=0.5)
                 report[name] = mesh.tris()
                 continue
-            if variant == 1:
-                mesh = conifer(variant, lod, rng)
-            elif variant in (0, 2):
-                mesh = pine(variant, lod, rng)
-            else:
-                mesh = broadleaf(variant, lod, rng)
+            mesh = build_tree(variant, lod, rng)
             name = f"tree{variant}{lod}-v60"
             write_glb(mesh, out / f"{name}.glb", atlas_uri, name)
             report[name] = mesh.tris()
@@ -408,7 +420,7 @@ def build_world(game_json, out_dir, atlas_uri):
             if far_impostor:
                 mesh = impostor(variant, sizes)
             else:
-                mesh = conifer(variant, lod, rng) if variant == 1 else pine(variant, lod, rng) if variant in (0, 2) else broadleaf(variant, lod, rng)
+                mesh = build_tree(variant, lod, rng)
             mesh.p = [np.asarray(p) * scale for p in mesh.p]
             name = f"{species}{suffix}"
             write_glb(mesh, out / f"{name}.glb", FAR_URI if far_impostor else atlas_uri, name, cutoff=0.5 if far_impostor else 0.42)

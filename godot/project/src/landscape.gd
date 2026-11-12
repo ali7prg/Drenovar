@@ -26,6 +26,7 @@ var data: Dictionary
 var map_name := "city"
 var world_heights := PackedFloat32Array()
 var actors := Node3D.new()
+var battle_fx := BattleFx.new()
 var creatures := Node3D.new()
 var buildings := Node3D.new()
 var training := Node3D.new()
@@ -163,6 +164,7 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	add_child(parade)
 	add_child(workers)
 	add_child(effects)
+	add_child(battle_fx)
 	add_child(camera)
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL if is_city else Camera3D.PROJECTION_PERSPECTIVE
 	camera.fov = 43.0
@@ -1265,6 +1267,7 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 				elif at >= elapsed - 430.0 and at <= elapsed + 560.0 and attack == -INF:
 					attack = at
 					charge = kind == "antler_charge"
+			present_battle_fx(id, p, encounter, army, elapsed, events)
 			if attack > -INF:
 				clip = "Alert" if charge and elapsed < attack - 260.0 else "Attack"
 				clip_phase = (elapsed - attack + 560.0) / 300.0 if clip == "Alert" else (elapsed - attack + 260.0) / 690.0
@@ -1283,9 +1286,74 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			play_animation(actor, clip, "Idle", clip_phase)
 			actor.set_meta("clip", clip)
 	retain_hidden_actors(creatures, known, retained, MAX_HIDDEN_CREATURES)
+	battle_fx.finish()
 	for cue in effects.get_children():
 		if not cues.has(String(cue.name)):
 			cue.queue_free()
+
+# Damage timeline of one battle from the server events: soldier hits with the
+# creature's remaining hp, and the creature's strikes on formation members.
+var fx_timelines := {}
+
+func battle_timeline(army: Dictionary, encounter: Dictionary, events: Array) -> Dictionary:
+	var cached: Dictionary = fx_timelines.get(army.id, {})
+	if cached.get("source") == events:
+		return cached
+	var spec: Dictionary = encounter.get("spec", {})
+	var start_hp := float(spec.get("hp", encounter.get("maxHp", encounter.get("hp", 1))))
+	var hits: Array = []
+	var strikes: Array = []
+	var ordered := events.duplicate()
+	ordered.sort_custom(func(a, b): return (float(a[0]) if a is Array else float(a.at)) < (float(b[0]) if b is Array else float(b.at)))
+	var hp := start_hp
+	for event in ordered:
+		var e: Array = event if event is Array else [event.at, event.kind, event.get("unitId", ""), event.get("index", 0), event.get("hp")]
+		if e[1] == "soldier_attack":
+			var after: float = float(e[4]) if e.size() > 4 and e[4] != null else hp
+			hits.append([float(e[0]), maxf(0.0, hp - after), after])
+			hp = after
+		else:
+			strikes.append([float(e[0]), "%s:%d" % [e[2], int(e[3])], e[1]])
+	cached = {"source": events, "hits": hits, "strikes": strikes, "max": maxf(1.0, start_hp)}
+	fx_timelines[army.id] = cached
+	return cached
+
+func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dictionary, elapsed: float, events: Array) -> void:
+	var timeline := battle_timeline(army, encounter, events)
+	var route: Dictionary = army_routes.get(army.id, {})
+	var centre: Vector3 = route.get("position", p)
+	var members: Dictionary = route.get("member_at", {})
+	battle_fx.ring(p.lerp(centre, 0.5), maxf(7.5, p.distance_to(centre) * 0.5 + 6.0), Color("#62e07a"))
+	var hp := float(timeline.max)
+	var recent := hp
+	for hit in timeline.hits:
+		var at := float(hit[0])
+		if at > elapsed:
+			break
+		if elapsed - at > 600.0:
+			recent = float(hit[2])
+		hp = float(hit[2])
+		var age := elapsed - at
+		if age <= 900.0 and float(hit[1]) > 0.0:
+			# Fan consecutive numbers sideways so they never stack on one spot.
+			var side := 1.0 if int(at / 97.0) % 2 == 0 else -1.0
+			var fan := Vector3(side * (1.6 + fposmod(at * 0.0031, 1.0) * 1.2), 0.0, 0.0).rotated(Vector3.UP, camera_yaw)
+			battle_fx.number(p + fan, "-%d" % roundi(float(hit[1])), age / 900.0, Color("#ffe7a8"), float(hit[1]) >= timeline.max * 0.08)
+		if age <= 320.0:
+			battle_fx.spark(p, age / 320.0, Color("#ffb054"), 1.5, fposmod(at * 0.013, 1.0))
+	for strike in timeline.strikes:
+		var age := elapsed - float(strike[0])
+		if age < -380.0 or age > 420.0:
+			continue
+		var target: Vector3 = members.get(strike[1], centre)
+		battle_fx.slash(p, target, (age + 380.0) / 800.0, Color("#ff5a3c"), 3.4 if strike[2] == "antler_charge" else 2.8)
+		if age >= 0.0:
+			battle_fx.spark(target, age / 420.0, Color("#ff6a4a"), 1.3, fposmod(float(strike[0]) * 0.007, 1.0))
+	var spec: Dictionary = encounter.get("spec", {})
+	var title := "%s · %s" % [spec.get("name", encounter.get("species", "")), ["I", "II", "III"][clampi(int(encounter.get("level", 1)), 1, 3) - 1]]
+	var height := 2.6 + 0.5 * clampi(int(encounter.get("level", 1)), 1, 3)
+	battle_fx.health(p + Vector3.UP * height, title, hp / float(timeline.max), recent / float(timeline.max), Color("#d8402c"),
+		clampf(camera_zoom / 46.0, 0.6, 2.5) if map_name == "world" else clampf(camera_zoom / 40.0, 0.6, 2.5))
 
 func show_battle_cue(id: String, p: Vector3, color: Color, phase: float) -> void:
 	var cue := effects.get_node_or_null(NodePath(id)) as MeshInstance3D
@@ -1370,6 +1438,7 @@ func battle_events(army: Dictionary) -> Dictionary:
 	return {"members":by_member, "fallen":fallen}
 
 func present_armies(state: Dictionary, server_ms: float) -> void:
+	battle_fx.begin()
 	var alive := {}
 	var known := {}
 	var rows: Array = state.world.armies if map_name == "world" else state.get("armies", [])
@@ -1424,6 +1493,9 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		actor.process_mode = Node.PROCESS_MODE_INHERIT
 		actor.set_meta("last_visible_ticks", Time.get_ticks_msec())
 		actor.position = p
+		cache.position = p
+		if fighting:
+			cache.member_at = {}
 		var walking: bool = travelling and fraction >= 0.0 and fraction < 1.0
 		# Authoritative ground speed of the formation (world units per second).
 		var ground_speed := float(cache.distances[-1]) / (duration / 1000.0) if walking and cache.distances.size() > 1 else 0.0
@@ -1448,10 +1520,12 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			var side := float(slot.side) * (1.0 + spread * 0.22)
 			var rear := float(slot.rear) + spread * (4.0 if slot.ranged else 2.5)
 			var offset := Vector3(side * cos(heading) - rear * sin(heading), 0.0, -side * sin(heading) - rear * cos(heading))
-			if map_name == "city" and spread > 0.0:
+			if spread > 0.0:
 				var angle: float = TAU * i / cache.slots.size()
 				offset = offset.lerp(Vector3(cos(angle), 0.0, sin(angle)) * (7.5 if slot.mounted else 4.8), spread)
 			var place := ground_point(p + offset)
+			if fighting:
+				cache.member_at[key] = place
 			var facing := atan2(-offset.x, -offset.z) if fighting else heading
 			unit.transform = model_transform(place.x - p.x, place.y - p.y, place.z - p.z, facing, FIELD_UNIT_SCALE)
 			var clip := "walk" if walking else "idle"
@@ -1482,6 +1556,9 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				elif strike > -INF:
 					clip = "attack"
 					phase = (elapsed - strike + 490.0) / 1000.0
+					if not slot.ranged:
+						# Weapon sweep timed to the swing's contact frame (event time).
+						battle_fx.slash(place, p, (elapsed - strike + 260.0) / 420.0, Color("#ffd27a"), 2.3)
 				elif army.get("worldKind") == "pvp":
 					clip = "attack"
 					phase = fposmod(elapsed + i * 125.0, 1000.0) / 1000.0

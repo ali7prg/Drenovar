@@ -11,6 +11,19 @@ func run() -> void:
 	while (game.scene_loading or not is_instance_valid(game.stage)) and Time.get_ticks_msec() - t < 60000:
 		await process_frame
 	print("CITY ", is_instance_valid(game.stage), " batches ", game.stage.render_batches.size(), " parade_slots ", game.stage.parade_slots.size())
+	# Let the city run so the parade spawns its soldiers, then check which models they are.
+	var stage = game.stage
+	stage.target = stage.parade_center
+	stage.zoom = 40
+	stage.update_camera(0, true)
+	for i in 60:
+		await process_frame
+	var spawned := {}
+	for actor in stage.parade.get_children():
+		if actor is Node3D and String(actor.scene_file_path) != "":
+			spawned[String(actor.scene_file_path)] = true
+	var new_models: int = spawned.keys().filter(func(p): return p.contains("troops06")).size()
+	print("PARADE_MODELS ", spawned.keys(), " troops06=", new_models)
 	await game.show_scene("world")
 	print("WORLD ", game.map_name, " batches ", game.stage.render_batches.size())
 	var data: Dictionary = game.data

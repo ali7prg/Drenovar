@@ -63,6 +63,7 @@ jobs:
         run: |
           timeout 300 "$GODOT_BIN" --headless --main-pack "$RUNNER_TEMP/export/DRENOVAR.pck" -s "$GITHUB_WORKSPACE/godot/tools/verify_pck.gd" | tee "$RUNNER_TEMP/verify.log"
           grep -q "TROOP_SCENES_OK 20 of 20" "$RUNNER_TEMP/verify.log"
+          grep -qE "PARADE_MODELS .*troops06=[1-9]" "$RUNNER_TEMP/verify.log"
       - name: Repack onto the engine capsule
         run: |
           python3 godot/tools/repack_engine_capsule.py "$CAPSULE" "$RUNNER_TEMP/export/DRENOVAR.pck" \

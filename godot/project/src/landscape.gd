@@ -173,7 +173,7 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 		fit_world()
 		await build_world_scenery()
 		await get_tree().process_frame
-		build_towns()
+		await build_towns()
 		build_world_water()
 		await get_tree().process_frame
 		build_world_roads()
@@ -596,10 +596,24 @@ func inside_exclusions(x: float, z: float, exclusions: Array) -> bool:
 			return true
 	return false
 
+const SETUP_SLICE_USEC := 3500
+
+func setup_slice(started: int) -> int:
+	# Yields to the next frame once the current one has spent its setup budget.
+	if Time.get_ticks_usec() - started < SETUP_SLICE_USEC:
+		return started
+	await get_tree().process_frame
+	return Time.get_ticks_usec()
+
 func build_world_scenery() -> void:
 	var batches := {}
 	var distant_canopies := {}
+	var slice_started := Time.get_ticks_usec()
+	var counted := 0
 	for item in data.environment:
+		counted += 1
+		if counted % 256 == 0:
+			slice_started = await setup_slice(slice_started)
 		if not batches.has(item.id):
 			batches[item.id] = []
 		batches[item.id].append(model_transform(item.x, item.y, item.z, item.rotation, item.scale))
@@ -613,7 +627,7 @@ func build_world_scenery() -> void:
 		var transforms: Array = distant_canopies[key]
 		batch_silhouettes(scenery, data.distantModels[key], group_placements(transforms), transforms.size(),
 			{"far":true, "tree":true, "detail":false, "resource":false, "silhouette":true, "canopy":true})
-	var slice_started := Time.get_ticks_usec()
+		slice_started = await setup_slice(slice_started)
 	for id in batches:
 		var spec: Dictionary = data.environmentModels[id]
 		var transforms: Array = batches[id]
@@ -622,9 +636,7 @@ func build_world_scenery() -> void:
 		for far in [false, true]:
 			batch_model(scenery, spec.far if far else spec.near, transforms, scenery_material,
 				{"far":far, "tree":spec.tree, "detail":spec.detail, "resource":spec.resource, "canopy":has_silhouette}, cells)
-		if Time.get_ticks_usec() - slice_started >= 3500:
-			await get_tree().process_frame
-			slice_started = Time.get_ticks_usec()
+			slice_started = await setup_slice(slice_started)
 
 func toggle_scenery_layer(resources: bool) -> void:
 	if resources:
@@ -783,8 +795,10 @@ func build_towns() -> void:
 		batch_model(group, data.models[key].path, transforms, null, layer, cells)
 		if render_batches.size() > first_batch:
 			render_batches[first_batch].layer = layer.merged({"town_counter":true})
+		await get_tree().process_frame
 		batch_silhouettes(group, data.distantModels[key], cells, transforms.size(),
 			layer.merged({"far":true, "silhouette":true}, true))
+		await get_tree().process_frame
 
 func add_model(parent: Node3D, model_path: String, transform_value: Transform3D) -> Node3D:
 	var instance := scene_resource(model_path).instantiate() as Node3D

@@ -38,7 +38,7 @@ jobs:
           status=0
           for scenario in qa_camera_hud qa_runtime qa_batch_parity qa_optimization qa_warriors qa_web_panels \
               qa_city_parity qa_stability qa_panel_latency qa_diagnostics qa_gait qa_network qa_camera_fling qa_idempotency; do
-            if timeout 600 "$GODOT_BIN" --headless --path . -s "$scenario.gd" > "$RUNNER_TEMP/qa/$scenario.log" 2>&1; then
+            if timeout 300 "$GODOT_BIN" --headless --path . -s "$scenario.gd" > "$RUNNER_TEMP/qa/$scenario.log" 2>&1; then
               echo "PASS $scenario: $(grep -E '^QA_[A-Z_]+ ' "$RUNNER_TEMP/qa/$scenario.log" | grep -v REPORT | tail -1)"
             else
               status=1

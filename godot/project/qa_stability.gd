@@ -54,6 +54,8 @@ func run() -> void:
 	game.smoke = true
 	var first_world := await measure_switch(game, "world")
 	report.first_world = first_world
+	# Desktop CPU budget; the world build is time-sliced (0.5.9: ~70-105 ms frames).
+	check(first_world.worst_frame_ms < 60.0, "World load frame spike: %.1f ms" % first_world.worst_frame_ms)
 	var cached_city := await measure_switch(game, "city")
 	report.cached_city = cached_city
 	check(cached_city.ms < 200, "Cached city switch stalled: %d ms" % cached_city.ms)

@@ -25,15 +25,22 @@ func material_key(material: Material) -> String:
 		return "shader:" + material.shader.resource_path
 	return material.get_class()
 
-func batch_rows(stage: Node3D) -> Array:
+func batch_rows(stage: Node3D, raw := false) -> Array:
 	var rows: Array = []
 	for batch in stage.render_batches:
 		if not is_instance_valid(batch.node):
 			continue
 		var node: MultiMeshInstance3D = batch.node
-		var mesh_key := "%s#%d" % [node.multimesh.mesh.resource_path, node.multimesh.mesh.get_instance_id()]
+		var mesh: Mesh = node.multimesh.mesh
+		# Imported meshes are shared resources; generated quads are compared by shape.
+		var mesh_key := "%s#%d" % [mesh.resource_path, mesh.get_instance_id()] if not mesh.resource_path.is_empty() or not mesh is PrimitiveMesh \
+			else "%s:%s" % [mesh.get_class(), str(mesh.get_aabb())]
 		var head := "%s|%s|%s|%s|%s" % [mesh_key, material_key(node.material_override), str(batch.total),
 			JSON.stringify(batch.layer), str(node.cast_shadow)]
+		if raw:
+			var used: PackedFloat32Array = node.multimesh.buffer.slice(0, int(batch.visible) * 12) if node.visible else PackedFloat32Array()
+			rows.append(head + "|" + str(node.visible) + "|" + str(hash(used)))
+			continue
 		var instances: Array = []
 		if node.visible:
 			var buffer: PackedFloat32Array = node.multimesh.buffer
@@ -127,6 +134,28 @@ func run() -> void:
 		compare("step %d" % index, before, after)
 	check(vegetation_steps == [3, 4, 5], "Vegetation rebuilt on unexpected steps: " + str(vegetation_steps))
 	check(after.ground_rebuilds - ground_before == 2, "Ground cover rebuilt %d times, expected 2 (plot + grove)" % (after.ground_rebuilds - ground_before))
-	print("QA_CITY_PARITY steps=", steps.size(), " vegetation_rebuilds=", after.vegetation_rebuilds - rebuilds_before,
+	var vegetation_total: int = after.vegetation_rebuilds - rebuilds_before
+	before.free()
+	after.free()
+	await process_frame
+	# World map: identical batches at several poses after the time-sliced build.
+	var world_before = original.new()
+	var world_after = candidate.new()
+	root.add_child(world_before)
+	root.add_child(world_after)
+	await world_before.setup(data, data.demo, "world", {})
+	await world_after.setup(data, data.demo, "world", {})
+	check(world_before.render_batches.size() == world_after.render_batches.size(), "World batch count differs from 0.5.9")
+	for pose in [[Vector3.ZERO, 60.0, 0.0], [Vector3(40, 0, -30), 100.0, 0.7], [Vector3(-60, 0, 50), 260.0, 2.1], [Vector3(10, 0, 10), 45.0, -1.2]]:
+		for stage in [world_before, world_after]:
+			stage.target = pose[0]
+			stage.zoom = pose[1]
+			stage.world_yaw = pose[2]
+			stage.update_camera(0, true)
+			stage.update_visible_batches()
+		check(batch_rows(world_before, true) == batch_rows(world_after, true), "World batches differ from 0.5.9 at zoom %d" % int(pose[1]))
+		check(marker_rows(world_before.place_markers) == marker_rows(world_after.place_markers), "World markers differ")
+		check(marker_rows(world_before.empty_plots) == marker_rows(world_after.empty_plots), "World plots differ")
+	print("QA_CITY_PARITY steps=", steps.size(), " vegetation_rebuilds=", vegetation_total,
 		" checks=", checks, " failures=", failures.size())
 	quit(0 if failures.is_empty() else 1)

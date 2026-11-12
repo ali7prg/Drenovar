@@ -4,14 +4,14 @@ godot --headless --path . -s qa_batch_parity.gd -> exit=0 QA_BATCH_PARITY compar
 godot --headless --path . -s qa_optimization.gd -> exit=0 QA_OPTIMIZATION comparisons=13740 failures=0
 godot --headless --path . -s qa_warriors.gd -> exit=0 QA_WARRIORS checks=143 failures=0
 godot --headless --path . -s qa_web_panels.gd -> exit=0 QA_WEB_PANELS checks=37 failures=0
-godot --headless --path . -s qa_city_parity.gd -> exit=0 QA_CITY_PARITY steps=7 vegetation_rebuilds=3 checks=218 failures=0
-godot --headless --path . -s qa_stability.gd -> exit=0 QA_STABILITY checks=5 failures=0
+godot --headless --path . -s qa_city_parity.gd -> exit=0 QA_CITY_PARITY steps=7 vegetation_rebuilds=3 checks=231 failures=0
+godot --headless --path . -s qa_stability.gd -> exit=0 QA_STABILITY checks=6 failures=0
 godot --headless --path . -s qa_panel_latency.gd -> exit=0 QA_PANEL_LATENCY panels=26 checks=26 failures=0
 godot --headless --path . -s qa_diagnostics.gd -> exit=0 QA_DIAGNOSTICS checks=12 failures=0
 godot --headless --path . -s qa_gait.gd -> exit=0 QA_GAIT checks=156 failures=0
 godot --headless --path . -s qa_network.gd -> exit=0 QA_NETWORK checks=9 failures=0
 godot --headless --path . -s qa_camera_fling.gd -> exit=0 QA_CAMERA_FLING checks=9 failures=0
 godot --headless --path . -s qa_idempotency.gd -> exit=0 QA_IDEMPOTENCY checks=8 failures=0
-godot --headless --path . -s qa_web91.gd -> exit=1 (требует сервер v92 по loopback; исходники сервера недоступны в этом сеансе)
-godot --headless --path . -s qa_ios_startup.gd -> exit=1 (требует сервер v92 по loopback; исходники сервера недоступны в этом сеансе)
-godot --headless --path . -s qa_battle_rewards.gd -> exit=1 (требует сервер v92 по loopback; исходники сервера недоступны в этом сеансе)
+godot --headless --path . -s qa_web91.gd -> не запускался (требует сервер v92 по loopback; исходники сервера недоступны)
+godot --headless --path . -s qa_ios_startup.gd -> не запускался (требует сервер v92 по loopback; исходники сервера недоступны)
+godot --headless --path . -s qa_battle_rewards.gd -> не запускался (требует сервер v92 по loopback; исходники сервера недоступны)

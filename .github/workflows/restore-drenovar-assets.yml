@@ -1,0 +1,59 @@
+name: Restore pinned DRENOVAR Godot assets
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/restore-drenovar-assets.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: drenovar-pinned-source-assets
+  cancel-in-progress: false
+
+jobs:
+  restore-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout authoritative GitHub import
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch SHA256-pinned upstream assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node godot/tools/fetch-web84-assets.mjs "$RUNNER_TEMP/drenovar-web84"
+
+      - name: Regenerate deterministic Godot geometry and source assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          node godot/tools/import-web-assets.mjs "$RUNNER_TEMP/drenovar-web84"
+          git restore -- godot/project/assets/game.json godot/project/assets/original-assets.json
+
+      - name: Check every materialized asset against the original source inventory
+        run: python3 godot/tools/verify_drenovar_asset_snapshot.py --minimum-present 500
+
+      - name: Commit only assets proven byte-for-byte identical to version 0.5.9
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -f godot/project/assets docs/ASSET_RESTORE_CHECK.json
+          if git diff --cached --quiet; then
+            echo 'No new verified asset files to commit.'
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m 'Restore SHA256-verified DRENOVAR Godot assets from pinned sources'
+          git push origin HEAD:main

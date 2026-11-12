@@ -1,0 +1,1623 @@
+DRENOVAR 0.5.9 / build 19 — ПОЛНОЕ ДЕРЕВО ПОЛУЧЕННОГО ИСХОДНОГО АРХИВА
+Дата инвентаризации: 12 ноября 2026, Тбилиси.
+Корень Godot res:// соответствует DRENOVAR-iOS/project/.
+Показан каждый файл исходного ZIP. Скрытые служебные файлы включены по запросу полного проекта.
+Всего файлов: 1586. В res://: 1523.
+Все пути, точные байты и SHA-256: 02_FILE_MANIFEST.json.
+
+DRENOVAR-iOS/
+├── .github/
+│   └── workflows/
+│       └── drenovar-ios.yml
+├── project/
+│   ├── assets/
+│   │   ├── army/
+│   │   │   └── assets/
+│   │   │       ├── ENG-01-spearman27-lod1.glb
+│   │   │       ├── ENG-01-spearman27-lod1.glb.import
+│   │   │       ├── ENG-01-spearman27-lod2.glb
+│   │   │       ├── ENG-01-spearman27-lod2.glb.import
+│   │   │       ├── ENG-02-swordsman27-lod1.glb
+│   │   │       ├── ENG-02-swordsman27-lod1.glb.import
+│   │   │       ├── ENG-02-swordsman27-lod2.glb
+│   │   │       ├── ENG-02-swordsman27-lod2.glb.import
+│   │   │       ├── ENG-03-longbowman27-lod1.glb
+│   │   │       ├── ENG-03-longbowman27-lod1.glb.import
+│   │   │       ├── ENG-03-longbowman27-lod2.glb
+│   │   │       ├── ENG-03-longbowman27-lod2.glb.import
+│   │   │       ├── ENG-04-crossbow27-lod1.glb
+│   │   │       ├── ENG-04-crossbow27-lod1.glb.import
+│   │   │       ├── ENG-04-crossbow27-lod2.glb
+│   │   │       ├── ENG-04-crossbow27-lod2.glb.import
+│   │   │       ├── ENG-05-scout-lod1.glb
+│   │   │       ├── ENG-05-scout-lod1.glb.import
+│   │   │       ├── ENG-05-scout-lod1_campaignWool-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod1_campaignWool-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_campaignWool-normal.jpg
+│   │   │       ├── ENG-05-scout-lod1_campaignWool-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_campaignWool-orm.png
+│   │   │       ├── ENG-05-scout-lod1_campaignWool-orm.png.import
+│   │   │       ├── ENG-05-scout-lod1_eyeReal-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod1_eyeReal-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_eyeReal-normal.jpg
+│   │   │       ├── ENG-05-scout-lod1_eyeReal-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_eyeReal-orm.png
+│   │   │       ├── ENG-05-scout-lod1_eyeReal-orm.png.import
+│   │   │       ├── ENG-05-scout-lod1_forgeCloth-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod1_forgeCloth-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_forgeCloth-normal.jpg
+│   │   │       ├── ENG-05-scout-lod1_forgeCloth-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_forgeCloth-orm.png
+│   │   │       ├── ENG-05-scout-lod1_forgeCloth-orm.png.import
+│   │   │       ├── ENG-05-scout-lod1_forgeHair-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod1_forgeHair-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_forgeHair-normal.jpg
+│   │   │       ├── ENG-05-scout-lod1_forgeHair-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_forgeHair-orm.png
+│   │   │       ├── ENG-05-scout-lod1_forgeHair-orm.png.import
+│   │   │       ├── ENG-05-scout-lod1_forgeIron-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod1_forgeIron-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_forgeIron-normal.jpg
+│   │   │       ├── ENG-05-scout-lod1_forgeIron-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_forgeIron-orm.jpg
+│   │   │       ├── ENG-05-scout-lod1_forgeIron-orm.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_forgeLeather-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod1_forgeLeather-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_forgeLeather-normal.jpg
+│   │   │       ├── ENG-05-scout-lod1_forgeLeather-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_forgeLeather-orm.png
+│   │   │       ├── ENG-05-scout-lod1_forgeLeather-orm.png.import
+│   │   │       ├── ENG-05-scout-lod1_forgeSkin-scout-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod1_forgeSkin-scout-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_forgeSkin-scout-orm.png
+│   │   │       ├── ENG-05-scout-lod1_forgeSkin-scout-orm.png.import
+│   │   │       ├── ENG-05-scout-lod1_horseCoat-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod1_horseCoat-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_horseCoat-normal.jpg
+│   │   │       ├── ENG-05-scout-lod1_horseCoat-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod1_scanFace-normal.jpg
+│   │   │       ├── ENG-05-scout-lod1_scanFace-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod2.glb
+│   │   │       ├── ENG-05-scout-lod2.glb.import
+│   │   │       ├── ENG-05-scout-lod2_campaignWool-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod2_campaignWool-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_campaignWool-normal.jpg
+│   │   │       ├── ENG-05-scout-lod2_campaignWool-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_campaignWool-orm.png
+│   │   │       ├── ENG-05-scout-lod2_campaignWool-orm.png.import
+│   │   │       ├── ENG-05-scout-lod2_eyeReal-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod2_eyeReal-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_eyeReal-normal.jpg
+│   │   │       ├── ENG-05-scout-lod2_eyeReal-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_eyeReal-orm.png
+│   │   │       ├── ENG-05-scout-lod2_eyeReal-orm.png.import
+│   │   │       ├── ENG-05-scout-lod2_forgeCloth-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod2_forgeCloth-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_forgeCloth-normal.jpg
+│   │   │       ├── ENG-05-scout-lod2_forgeCloth-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_forgeCloth-orm.png
+│   │   │       ├── ENG-05-scout-lod2_forgeCloth-orm.png.import
+│   │   │       ├── ENG-05-scout-lod2_forgeHair-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod2_forgeHair-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_forgeHair-normal.jpg
+│   │   │       ├── ENG-05-scout-lod2_forgeHair-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_forgeHair-orm.png
+│   │   │       ├── ENG-05-scout-lod2_forgeHair-orm.png.import
+│   │   │       ├── ENG-05-scout-lod2_forgeIron-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod2_forgeIron-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_forgeIron-normal.jpg
+│   │   │       ├── ENG-05-scout-lod2_forgeIron-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_forgeIron-orm.jpg
+│   │   │       ├── ENG-05-scout-lod2_forgeIron-orm.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_forgeLeather-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod2_forgeLeather-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_forgeLeather-normal.jpg
+│   │   │       ├── ENG-05-scout-lod2_forgeLeather-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_forgeLeather-orm.png
+│   │   │       ├── ENG-05-scout-lod2_forgeLeather-orm.png.import
+│   │   │       ├── ENG-05-scout-lod2_forgeSkin-scout-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod2_forgeSkin-scout-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_forgeSkin-scout-orm.png
+│   │   │       ├── ENG-05-scout-lod2_forgeSkin-scout-orm.png.import
+│   │   │       ├── ENG-05-scout-lod2_horseCoat-albedo.jpg
+│   │   │       ├── ENG-05-scout-lod2_horseCoat-albedo.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_horseCoat-normal.jpg
+│   │   │       ├── ENG-05-scout-lod2_horseCoat-normal.jpg.import
+│   │   │       ├── ENG-05-scout-lod2_scanFace-normal.jpg
+│   │   │       ├── ENG-05-scout-lod2_scanFace-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod1.glb
+│   │   │       ├── ENG-06-knight-lod1.glb.import
+│   │   │       ├── ENG-06-knight-lod1_campaignWool-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod1_campaignWool-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_campaignWool-normal.jpg
+│   │   │       ├── ENG-06-knight-lod1_campaignWool-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_campaignWool-orm.png
+│   │   │       ├── ENG-06-knight-lod1_campaignWool-orm.png.import
+│   │   │       ├── ENG-06-knight-lod1_forgeCloth-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeCloth-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeCloth-normal.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeCloth-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeCloth-orm.png
+│   │   │       ├── ENG-06-knight-lod1_forgeCloth-orm.png.import
+│   │   │       ├── ENG-06-knight-lod1_forgeHair-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeHair-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeHair-normal.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeHair-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeHair-orm.png
+│   │   │       ├── ENG-06-knight-lod1_forgeHair-orm.png.import
+│   │   │       ├── ENG-06-knight-lod1_forgeIron-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeIron-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeIron-normal.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeIron-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeIron-orm.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeIron-orm.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeLeather-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeLeather-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeLeather-normal.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeLeather-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeLeather-orm.png
+│   │   │       ├── ENG-06-knight-lod1_forgeLeather-orm.png.import
+│   │   │       ├── ENG-06-knight-lod1_forgeShield-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeShield-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeShield-normal.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeShield-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeShield-orm.png
+│   │   │       ├── ENG-06-knight-lod1_forgeShield-orm.png.import
+│   │   │       ├── ENG-06-knight-lod1_forgeWood-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeWood-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeWood-normal.jpg
+│   │   │       ├── ENG-06-knight-lod1_forgeWood-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_forgeWood-orm.png
+│   │   │       ├── ENG-06-knight-lod1_forgeWood-orm.png.import
+│   │   │       ├── ENG-06-knight-lod1_horseCoat-normal.jpg
+│   │   │       ├── ENG-06-knight-lod1_horseCoat-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_horseCoatGray-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod1_horseCoatGray-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_mail20-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod1_mail20-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_mail20-normal.jpg
+│   │   │       ├── ENG-06-knight-lod1_mail20-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod1_mail20-orm.jpg
+│   │   │       ├── ENG-06-knight-lod1_mail20-orm.jpg.import
+│   │   │       ├── ENG-06-knight-lod2.glb
+│   │   │       ├── ENG-06-knight-lod2.glb.import
+│   │   │       ├── ENG-06-knight-lod2_campaignWool-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod2_campaignWool-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_campaignWool-normal.jpg
+│   │   │       ├── ENG-06-knight-lod2_campaignWool-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_campaignWool-orm.png
+│   │   │       ├── ENG-06-knight-lod2_campaignWool-orm.png.import
+│   │   │       ├── ENG-06-knight-lod2_forgeCloth-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeCloth-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeCloth-normal.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeCloth-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeCloth-orm.png
+│   │   │       ├── ENG-06-knight-lod2_forgeCloth-orm.png.import
+│   │   │       ├── ENG-06-knight-lod2_forgeHair-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeHair-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeHair-normal.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeHair-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeHair-orm.png
+│   │   │       ├── ENG-06-knight-lod2_forgeHair-orm.png.import
+│   │   │       ├── ENG-06-knight-lod2_forgeIron-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeIron-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeIron-normal.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeIron-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeIron-orm.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeIron-orm.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeLeather-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeLeather-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeLeather-normal.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeLeather-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeLeather-orm.png
+│   │   │       ├── ENG-06-knight-lod2_forgeLeather-orm.png.import
+│   │   │       ├── ENG-06-knight-lod2_forgeShield-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeShield-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeShield-normal.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeShield-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeShield-orm.png
+│   │   │       ├── ENG-06-knight-lod2_forgeShield-orm.png.import
+│   │   │       ├── ENG-06-knight-lod2_forgeWood-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeWood-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeWood-normal.jpg
+│   │   │       ├── ENG-06-knight-lod2_forgeWood-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_forgeWood-orm.png
+│   │   │       ├── ENG-06-knight-lod2_forgeWood-orm.png.import
+│   │   │       ├── ENG-06-knight-lod2_horseCoat-normal.jpg
+│   │   │       ├── ENG-06-knight-lod2_horseCoat-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_horseCoatGray-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod2_horseCoatGray-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_mail20-albedo.jpg
+│   │   │       ├── ENG-06-knight-lod2_mail20-albedo.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_mail20-normal.jpg
+│   │   │       ├── ENG-06-knight-lod2_mail20-normal.jpg.import
+│   │   │       ├── ENG-06-knight-lod2_mail20-orm.jpg
+│   │   │       ├── ENG-06-knight-lod2_mail20-orm.jpg.import
+│   │   │       ├── ENG-07-authored-menatarms21-lod1.glb
+│   │   │       ├── ENG-07-authored-menatarms21-lod1.glb.import
+│   │   │       ├── ENG-07-authored-menatarms21-lod2.glb
+│   │   │       ├── ENG-07-authored-menatarms21-lod2.glb.import
+│   │   │       ├── ENG-08-militia27-lod1.glb
+│   │   │       ├── ENG-08-militia27-lod1.glb.import
+│   │   │       ├── ENG-08-militia27-lod2.glb
+│   │   │       ├── ENG-08-militia27-lod2.glb.import
+│   │   │       ├── ENG-09-footman27-lod1.glb
+│   │   │       ├── ENG-09-footman27-lod1.glb.import
+│   │   │       ├── ENG-09-footman27-lod2.glb
+│   │   │       ├── ENG-09-footman27-lod2.glb.import
+│   │   │       ├── ENG-10-javelin27-lod1.glb
+│   │   │       ├── ENG-10-javelin27-lod1.glb.import
+│   │   │       ├── ENG-10-javelin27-lod2.glb
+│   │   │       ├── ENG-10-javelin27-lod2.glb.import
+│   │   │       ├── ENG07-authored21-image0.jpg
+│   │   │       ├── ENG07-authored21-image0.jpg.import
+│   │   │       ├── ENG07-authored21-image1.jpg
+│   │   │       ├── ENG07-authored21-image1.jpg.import
+│   │   │       ├── ENG07-authored21-image10.jpg
+│   │   │       ├── ENG07-authored21-image10.jpg.import
+│   │   │       ├── ENG07-authored21-image11.jpg
+│   │   │       ├── ENG07-authored21-image11.jpg.import
+│   │   │       ├── ENG07-authored21-image12.jpg
+│   │   │       ├── ENG07-authored21-image12.jpg.import
+│   │   │       ├── ENG07-authored21-image13.jpg
+│   │   │       ├── ENG07-authored21-image13.jpg.import
+│   │   │       ├── ENG07-authored21-image2.jpg
+│   │   │       ├── ENG07-authored21-image2.jpg.import
+│   │   │       ├── ENG07-authored21-image3.jpg
+│   │   │       ├── ENG07-authored21-image3.jpg.import
+│   │   │       ├── ENG07-authored21-image4.jpg
+│   │   │       ├── ENG07-authored21-image4.jpg.import
+│   │   │       ├── ENG07-authored21-image5.jpg
+│   │   │       ├── ENG07-authored21-image5.jpg.import
+│   │   │       ├── ENG07-authored21-image6.jpg
+│   │   │       ├── ENG07-authored21-image6.jpg.import
+│   │   │       ├── ENG07-authored21-image7.jpg
+│   │   │       ├── ENG07-authored21-image7.jpg.import
+│   │   │       ├── ENG07-authored21-image8.jpg
+│   │   │       ├── ENG07-authored21-image8.jpg.import
+│   │   │       ├── ENG07-authored21-image9.jpg
+│   │   │       ├── ENG07-authored21-image9.jpg.import
+│   │   │       ├── cloth20-albedo.png
+│   │   │       ├── cloth20-albedo.png.import
+│   │   │       ├── cloth20-normal.png
+│   │   │       ├── cloth20-normal.png.import
+│   │   │       ├── cloth20-orm.png
+│   │   │       ├── cloth20-orm.png.import
+│   │   │       ├── eyeReal-albedo.png
+│   │   │       ├── eyeReal-albedo.png.import
+│   │   │       ├── eyeReal-normal.png
+│   │   │       ├── eyeReal-normal.png.import
+│   │   │       ├── eyeReal-orm.png
+│   │   │       ├── eyeReal-orm.png.import
+│   │   │       ├── glove20-albedo.png
+│   │   │       ├── glove20-albedo.png.import
+│   │   │       ├── glove20-normal.png
+│   │   │       ├── glove20-normal.png.import
+│   │   │       ├── glove20-orm.png
+│   │   │       ├── glove20-orm.png.import
+│   │   │       ├── headSkin-albedo.png
+│   │   │       ├── headSkin-albedo.png.import
+│   │   │       ├── headSkin-normal.png
+│   │   │       ├── headSkin-normal.png.import
+│   │   │       ├── headSkin-orm.png
+│   │   │       ├── headSkin-orm.png.import
+│   │   │       ├── leather20-albedo.png
+│   │   │       ├── leather20-albedo.png.import
+│   │   │       ├── leather20-normal.png
+│   │   │       ├── leather20-normal.png.import
+│   │   │       ├── leather20-orm.png
+│   │   │       ├── leather20-orm.png.import
+│   │   │       ├── mail20-albedo.png
+│   │   │       ├── mail20-albedo.png.import
+│   │   │       ├── mail20-normal.png
+│   │   │       ├── mail20-normal.png.import
+│   │   │       ├── mail20-orm.png
+│   │   │       ├── mail20-orm.png.import
+│   │   │       ├── pants20-albedo.png
+│   │   │       ├── pants20-albedo.png.import
+│   │   │       ├── pants20-normal.png
+│   │   │       ├── pants20-normal.png.import
+│   │   │       ├── pants20-orm.png
+│   │   │       ├── pants20-orm.png.import
+│   │   │       ├── red20-albedo.png
+│   │   │       ├── red20-albedo.png.import
+│   │   │       ├── red20-normal.png
+│   │   │       ├── red20-normal.png.import
+│   │   │       ├── red20-orm.png
+│   │   │       ├── red20-orm.png.import
+│   │   │       ├── shieldPaint20-albedo.png
+│   │   │       ├── shieldPaint20-albedo.png.import
+│   │   │       ├── shieldPaint20-normal.png
+│   │   │       ├── shieldPaint20-normal.png.import
+│   │   │       ├── shieldPaint20-orm.png
+│   │   │       ├── shieldPaint20-orm.png.import
+│   │   │       ├── skin-albedo.png
+│   │   │       ├── skin-albedo.png.import
+│   │   │       ├── skin-normal.png
+│   │   │       ├── skin-normal.png.import
+│   │   │       ├── skin-orm.png
+│   │   │       ├── skin-orm.png.import
+│   │   │       ├── steel20-albedo.png
+│   │   │       ├── steel20-albedo.png.import
+│   │   │       ├── steel20-normal.png
+│   │   │       ├── steel20-normal.png.import
+│   │   │       ├── steel20-orm.png
+│   │   │       ├── steel20-orm.png.import
+│   │   │       ├── wood20-albedo.png
+│   │   │       ├── wood20-albedo.png.import
+│   │   │       ├── wood20-normal.png
+│   │   │       ├── wood20-normal.png.import
+│   │   │       ├── wood20-orm.png
+│   │   │       └── wood20-orm.png.import
+│   │   ├── city/
+│   │   │   └── premium/
+│   │   │       ├── architecture27/
+│   │   │       │   ├── academy27-ao.png
+│   │   │       │   ├── academy27-ao.png.import
+│   │   │       │   ├── barracks26-ao.png
+│   │   │       │   ├── barracks26-ao.png.import
+│   │   │       │   ├── farm-ao.png
+│   │   │       │   ├── farm-ao.png.import
+│   │   │       │   ├── fishing27-ao.png
+│   │   │       │   ├── fishing27-ao.png.import
+│   │   │       │   ├── garrison27-ao.png
+│   │   │       │   ├── garrison27-ao.png.import
+│   │   │       │   ├── gate27-ao.png
+│   │   │       │   ├── gate27-ao.png.import
+│   │   │       │   ├── hall-ao.png
+│   │   │       │   ├── hall-ao.png.import
+│   │   │       │   ├── hall-view.webp
+│   │   │       │   ├── hall-view.webp.import
+│   │   │       │   ├── herbal27-ao.png
+│   │   │       │   ├── herbal27-ao.png.import
+│   │   │       │   ├── hospital27-ao.png
+│   │   │       │   ├── hospital27-ao.png.import
+│   │   │       │   ├── house-ao.png
+│   │   │       │   ├── house-ao.png.import
+│   │   │       │   ├── house-view.webp
+│   │   │       │   ├── house-view.webp.import
+│   │   │       │   ├── hunt27-ao.png
+│   │   │       │   ├── hunt27-ao.png.import
+│   │   │       │   ├── ironmine27-ao.png
+│   │   │       │   ├── ironmine27-ao.png.import
+│   │   │       │   ├── lumber-ao.png
+│   │   │       │   ├── lumber-ao.png.import
+│   │   │       │   ├── market27-ao.png
+│   │   │       │   ├── market27-ao.png.import
+│   │   │       │   ├── quarry27-ao.png
+│   │   │       │   ├── quarry27-ao.png.import
+│   │   │       │   ├── range26-ao.png
+│   │   │       │   ├── range26-ao.png.import
+│   │   │       │   ├── smith-ao.png
+│   │   │       │   ├── smith-ao.png.import
+│   │   │       │   ├── stables26-ao.png
+│   │   │       │   ├── stables26-ao.png.import
+│   │   │       │   ├── starterHall-ao.png
+│   │   │       │   ├── starterHall-ao.png.import
+│   │   │       │   ├── warehouse-ao.png
+│   │   │       │   ├── warehouse-ao.png.import
+│   │   │       │   ├── watchtower27-ao.png
+│   │   │       │   ├── watchtower27-ao.png.import
+│   │   │       │   ├── well-ao.png
+│   │   │       │   ├── well-ao.png.import
+│   │   │       │   ├── workshop27-ao.png
+│   │   │       │   └── workshop27-ao.png.import
+│   │   │       ├── surfaces07/
+│   │   │       │   ├── clay-albedo.jpg
+│   │   │       │   ├── clay-albedo.jpg.import
+│   │   │       │   ├── clay-normal.png
+│   │   │       │   ├── clay-normal.png.import
+│   │   │       │   ├── clay-roughness.png
+│   │   │       │   ├── clay-roughness.png.import
+│   │   │       │   ├── dark_oak-albedo.jpg
+│   │   │       │   ├── dark_oak-albedo.jpg.import
+│   │   │       │   ├── dark_oak-normal.png
+│   │   │       │   ├── dark_oak-normal.png.import
+│   │   │       │   ├── dark_oak-roughness.png
+│   │   │       │   ├── dark_oak-roughness.png.import
+│   │   │       │   ├── drill20-albedo.webp
+│   │   │       │   ├── drill20-albedo.webp.import
+│   │   │       │   ├── drill20-normal.png
+│   │   │       │   ├── drill20-normal.png.import
+│   │   │       │   ├── drill20-roughness.png
+│   │   │       │   ├── drill20-roughness.png.import
+│   │   │       │   ├── grass-albedo.webp
+│   │   │       │   ├── grass-albedo.webp.import
+│   │   │       │   ├── grass-normal.png
+│   │   │       │   ├── grass-normal.png.import
+│   │   │       │   ├── grass-roughness.png
+│   │   │       │   ├── grass-roughness.png.import
+│   │   │       │   ├── grass20-albedo.webp
+│   │   │       │   ├── grass20-albedo.webp.import
+│   │   │       │   ├── grass20-normal.png
+│   │   │       │   ├── grass20-normal.png.import
+│   │   │       │   ├── grass20-roughness.png
+│   │   │       │   ├── grass20-roughness.png.import
+│   │   │       │   ├── oak-albedo.jpg
+│   │   │       │   ├── oak-albedo.jpg.import
+│   │   │       │   ├── oak-normal.png
+│   │   │       │   ├── oak-normal.png.import
+│   │   │       │   ├── oak-roughness.png
+│   │   │       │   ├── oak-roughness.png.import
+│   │   │       │   ├── path-albedo.webp
+│   │   │       │   ├── path-albedo.webp.import
+│   │   │       │   ├── path-normal.png
+│   │   │       │   ├── path-normal.png.import
+│   │   │       │   ├── path-roughness.png
+│   │   │       │   ├── path-roughness.png.import
+│   │   │       │   ├── plaster-albedo.jpg
+│   │   │       │   ├── plaster-albedo.jpg.import
+│   │   │       │   ├── plaster-normal.png
+│   │   │       │   ├── plaster-normal.png.import
+│   │   │       │   ├── plaster-roughness.png
+│   │   │       │   ├── plaster-roughness.png.import
+│   │   │       │   ├── slate-albedo.jpg
+│   │   │       │   ├── slate-albedo.jpg.import
+│   │   │       │   ├── slate-normal.png
+│   │   │       │   ├── slate-normal.png.import
+│   │   │       │   ├── slate-roughness.png
+│   │   │       │   ├── slate-roughness.png.import
+│   │   │       │   ├── soil-albedo.webp
+│   │   │       │   ├── soil-albedo.webp.import
+│   │   │       │   ├── soil-normal.png
+│   │   │       │   ├── soil-normal.png.import
+│   │   │       │   ├── soil-roughness.png
+│   │   │       │   ├── soil-roughness.png.import
+│   │   │       │   ├── stone-albedo.jpg
+│   │   │       │   ├── stone-albedo.jpg.import
+│   │   │       │   ├── stone-normal.png
+│   │   │       │   ├── stone-normal.png.import
+│   │   │       │   ├── stone-roughness.png
+│   │   │       │   └── stone-roughness.png.import
+│   │   │       ├── textures/
+│   │   │       │   ├── 0941fb6304b1ddfae4f4.png
+│   │   │       │   ├── 0941fb6304b1ddfae4f4.png.import
+│   │   │       │   ├── 0bd1e13807b6edd43c55.png
+│   │   │       │   ├── 0bd1e13807b6edd43c55.png.import
+│   │   │       │   ├── 0c682a9084f11b68f5bb.jpg
+│   │   │       │   ├── 0c682a9084f11b68f5bb.jpg.import
+│   │   │       │   ├── 6ed08d0707ac57a0955a.png
+│   │   │       │   ├── 6ed08d0707ac57a0955a.png.import
+│   │   │       │   ├── df191d083ae08473f40e.png
+│   │   │       │   ├── df191d083ae08473f40e.png.import
+│   │   │       │   ├── f53ed221686cf97b40f4.jpg
+│   │   │       │   └── f53ed221686cf97b40f4.jpg.import
+│   │   │       ├── Worker_Carrier-v07.glb
+│   │   │       ├── Worker_Carrier-v07.glb.import
+│   │   │       ├── Worker_Farmer-v07.glb
+│   │   │       ├── Worker_Farmer-v07.glb.import
+│   │   │       ├── Worker_Lumberjack-v07.glb
+│   │   │       ├── Worker_Lumberjack-v07.glb.import
+│   │   │       ├── Worker_Smith-v07.glb
+│   │   │       ├── Worker_Smith-v07.glb.import
+│   │   │       ├── academy27-polished27.glb
+│   │   │       ├── academy27-polished27.glb.import
+│   │   │       ├── barracks76.glb
+│   │   │       ├── barracks76.glb.import
+│   │   │       ├── farm-polished27.glb
+│   │   │       ├── farm-polished27.glb.import
+│   │   │       ├── fishing27-polished27.glb
+│   │   │       ├── fishing27-polished27.glb.import
+│   │   │       ├── garrison27-polished27.glb
+│   │   │       ├── garrison27-polished27.glb.import
+│   │   │       ├── gate27-polished27.glb
+│   │   │       ├── gate27-polished27.glb.import
+│   │   │       ├── hall-polished27.glb
+│   │   │       ├── hall-polished27.glb.import
+│   │   │       ├── herbal27-polished27.glb
+│   │   │       ├── herbal27-polished27.glb.import
+│   │   │       ├── hospital27-polished27.glb
+│   │   │       ├── hospital27-polished27.glb.import
+│   │   │       ├── house-polished27.glb
+│   │   │       ├── house-polished27.glb.import
+│   │   │       ├── hunt27-polished27.glb
+│   │   │       ├── hunt27-polished27.glb.import
+│   │   │       ├── ironmine27-polished27.glb
+│   │   │       ├── ironmine27-polished27.glb.import
+│   │   │       ├── lumber-polished27.glb
+│   │   │       ├── lumber-polished27.glb.import
+│   │   │       ├── market27-polished27.glb
+│   │   │       ├── market27-polished27.glb.import
+│   │   │       ├── quarry27-polished27.glb
+│   │   │       ├── quarry27-polished27.glb.import
+│   │   │       ├── range26-polished27.glb
+│   │   │       ├── range26-polished27.glb.import
+│   │   │       ├── smith-polished27.glb
+│   │   │       ├── smith-polished27.glb.import
+│   │   │       ├── stables26-polished27.glb
+│   │   │       ├── stables26-polished27.glb.import
+│   │   │       ├── starterHall-polished27.glb
+│   │   │       ├── starterHall-polished27.glb.import
+│   │   │       ├── tree0-v20.glb
+│   │   │       ├── tree0-v20.glb.import
+│   │   │       ├── tree0-v20.webp
+│   │   │       ├── tree0-v20.webp.import
+│   │   │       ├── tree0far-v50.glb
+│   │   │       ├── tree0far-v50.glb.import
+│   │   │       ├── tree0mid-v20.glb
+│   │   │       ├── tree0mid-v20.glb.import
+│   │   │       ├── tree1-v20.glb
+│   │   │       ├── tree1-v20.glb.import
+│   │   │       ├── tree1-v20.webp
+│   │   │       ├── tree1-v20.webp.import
+│   │   │       ├── tree1far-v50.glb
+│   │   │       ├── tree1far-v50.glb.import
+│   │   │       ├── tree1mid-v20.glb
+│   │   │       ├── tree1mid-v20.glb.import
+│   │   │       ├── tree2-v20.glb
+│   │   │       ├── tree2-v20.glb.import
+│   │   │       ├── tree2-v20.webp
+│   │   │       ├── tree2-v20.webp.import
+│   │   │       ├── tree2far-v50.glb
+│   │   │       ├── tree2far-v50.glb.import
+│   │   │       ├── tree2mid-v20.glb
+│   │   │       ├── tree2mid-v20.glb.import
+│   │   │       ├── tree3-v20.glb
+│   │   │       ├── tree3-v20.glb.import
+│   │   │       ├── tree3-v20.webp
+│   │   │       ├── tree3-v20.webp.import
+│   │   │       ├── tree3far-v50.glb
+│   │   │       ├── tree3far-v50.glb.import
+│   │   │       ├── tree3mid-v20.glb
+│   │   │       ├── tree3mid-v20.glb.import
+│   │   │       ├── tree4-v20.glb
+│   │   │       ├── tree4-v20.glb.import
+│   │   │       ├── tree4-v20.webp
+│   │   │       ├── tree4-v20.webp.import
+│   │   │       ├── tree4far-v50.glb
+│   │   │       ├── tree4far-v50.glb.import
+│   │   │       ├── tree4mid-v20.glb
+│   │   │       ├── tree4mid-v20.glb.import
+│   │   │       ├── tree5-v20.glb
+│   │   │       ├── tree5-v20.glb.import
+│   │   │       ├── tree5-v20.webp
+│   │   │       ├── tree5-v20.webp.import
+│   │   │       ├── tree5far-v50.glb
+│   │   │       ├── tree5far-v50.glb.import
+│   │   │       ├── tree5mid-v20.glb
+│   │   │       ├── tree5mid-v20.glb.import
+│   │   │       ├── warehouse-polished27.glb
+│   │   │       ├── warehouse-polished27.glb.import
+│   │   │       ├── watchtower27-polished27.glb
+│   │   │       ├── watchtower27-polished27.glb.import
+│   │   │       ├── well-polished27.glb
+│   │   │       ├── well-polished27.glb.import
+│   │   │       ├── workshop27-polished27.glb
+│   │   │       └── workshop27-polished27.glb.import
+│   │   ├── city-details/
+│   │   │   ├── ECO-01-2.glb
+│   │   │   ├── ECO-01-2.glb.import
+│   │   │   ├── ECO-01-3.glb
+│   │   │   ├── ECO-01-3.glb.import
+│   │   │   ├── ECO-01-4.glb
+│   │   │   ├── ECO-01-4.glb.import
+│   │   │   ├── ECO-01-5.glb
+│   │   │   ├── ECO-01-5.glb.import
+│   │   │   ├── ECO-02-2.glb
+│   │   │   ├── ECO-02-2.glb.import
+│   │   │   ├── ECO-02-3.glb
+│   │   │   ├── ECO-02-3.glb.import
+│   │   │   ├── ECO-02-4.glb
+│   │   │   ├── ECO-02-4.glb.import
+│   │   │   ├── ECO-02-5.glb
+│   │   │   ├── ECO-02-5.glb.import
+│   │   │   ├── ECO-03-2.glb
+│   │   │   ├── ECO-03-2.glb.import
+│   │   │   ├── ECO-03-3.glb
+│   │   │   ├── ECO-03-3.glb.import
+│   │   │   ├── ECO-03-4.glb
+│   │   │   ├── ECO-03-4.glb.import
+│   │   │   ├── ECO-03-5.glb
+│   │   │   ├── ECO-03-5.glb.import
+│   │   │   ├── ECO-04-2.glb
+│   │   │   ├── ECO-04-2.glb.import
+│   │   │   ├── ECO-04-3.glb
+│   │   │   ├── ECO-04-3.glb.import
+│   │   │   ├── ECO-04-4.glb
+│   │   │   ├── ECO-04-4.glb.import
+│   │   │   ├── ECO-04-5.glb
+│   │   │   ├── ECO-04-5.glb.import
+│   │   │   ├── ECO-05-2.glb
+│   │   │   ├── ECO-05-2.glb.import
+│   │   │   ├── ECO-05-3.glb
+│   │   │   ├── ECO-05-3.glb.import
+│   │   │   ├── ECO-05-4.glb
+│   │   │   ├── ECO-05-4.glb.import
+│   │   │   ├── ECO-05-5.glb
+│   │   │   ├── ECO-05-5.glb.import
+│   │   │   ├── MIL-01-2.glb
+│   │   │   ├── MIL-01-2.glb.import
+│   │   │   ├── MIL-01-3.glb
+│   │   │   ├── MIL-01-3.glb.import
+│   │   │   ├── MIL-01-4.glb
+│   │   │   ├── MIL-01-4.glb.import
+│   │   │   ├── MIL-01-5.glb
+│   │   │   ├── MIL-01-5.glb.import
+│   │   │   ├── MIL-02-2.glb
+│   │   │   ├── MIL-02-2.glb.import
+│   │   │   ├── MIL-02-3.glb
+│   │   │   ├── MIL-02-3.glb.import
+│   │   │   ├── MIL-02-4.glb
+│   │   │   ├── MIL-02-4.glb.import
+│   │   │   ├── MIL-02-5.glb
+│   │   │   ├── MIL-02-5.glb.import
+│   │   │   ├── MIL-03-2.glb
+│   │   │   ├── MIL-03-2.glb.import
+│   │   │   ├── MIL-03-3.glb
+│   │   │   ├── MIL-03-3.glb.import
+│   │   │   ├── MIL-03-4.glb
+│   │   │   ├── MIL-03-4.glb.import
+│   │   │   ├── MIL-03-5.glb
+│   │   │   ├── MIL-03-5.glb.import
+│   │   │   ├── MIL-04-2.glb
+│   │   │   ├── MIL-04-2.glb.import
+│   │   │   ├── MIL-04-3.glb
+│   │   │   ├── MIL-04-3.glb.import
+│   │   │   ├── MIL-04-4.glb
+│   │   │   ├── MIL-04-4.glb.import
+│   │   │   ├── MIL-04-5.glb
+│   │   │   ├── MIL-04-5.glb.import
+│   │   │   ├── MIL-05-2.glb
+│   │   │   ├── MIL-05-2.glb.import
+│   │   │   ├── MIL-05-3.glb
+│   │   │   ├── MIL-05-3.glb.import
+│   │   │   ├── MIL-05-4.glb
+│   │   │   ├── MIL-05-4.glb.import
+│   │   │   ├── MIL-05-5.glb
+│   │   │   ├── MIL-05-5.glb.import
+│   │   │   ├── RES-01-2.glb
+│   │   │   ├── RES-01-2.glb.import
+│   │   │   ├── RES-01-3.glb
+│   │   │   ├── RES-01-3.glb.import
+│   │   │   ├── RES-01-4.glb
+│   │   │   ├── RES-01-4.glb.import
+│   │   │   ├── RES-01-5.glb
+│   │   │   ├── RES-01-5.glb.import
+│   │   │   ├── RES-02-2.glb
+│   │   │   ├── RES-02-2.glb.import
+│   │   │   ├── RES-02-3.glb
+│   │   │   ├── RES-02-3.glb.import
+│   │   │   ├── RES-02-4.glb
+│   │   │   ├── RES-02-4.glb.import
+│   │   │   ├── RES-02-5.glb
+│   │   │   ├── RES-02-5.glb.import
+│   │   │   ├── RES-03-2.glb
+│   │   │   ├── RES-03-2.glb.import
+│   │   │   ├── RES-03-3.glb
+│   │   │   ├── RES-03-3.glb.import
+│   │   │   ├── RES-03-4.glb
+│   │   │   ├── RES-03-4.glb.import
+│   │   │   ├── RES-03-5.glb
+│   │   │   ├── RES-03-5.glb.import
+│   │   │   ├── RES-04-2.glb
+│   │   │   ├── RES-04-2.glb.import
+│   │   │   ├── RES-04-3.glb
+│   │   │   ├── RES-04-3.glb.import
+│   │   │   ├── RES-04-4.glb
+│   │   │   ├── RES-04-4.glb.import
+│   │   │   ├── RES-04-5.glb
+│   │   │   ├── RES-04-5.glb.import
+│   │   │   ├── RES-05-2.glb
+│   │   │   ├── RES-05-2.glb.import
+│   │   │   ├── RES-05-3.glb
+│   │   │   ├── RES-05-3.glb.import
+│   │   │   ├── RES-05-4.glb
+│   │   │   ├── RES-05-4.glb.import
+│   │   │   ├── RES-05-5.glb
+│   │   │   ├── RES-05-5.glb.import
+│   │   │   ├── SUP-01-2.glb
+│   │   │   ├── SUP-01-2.glb.import
+│   │   │   ├── SUP-01-3.glb
+│   │   │   ├── SUP-01-3.glb.import
+│   │   │   ├── SUP-01-4.glb
+│   │   │   ├── SUP-01-4.glb.import
+│   │   │   ├── SUP-01-5.glb
+│   │   │   ├── SUP-01-5.glb.import
+│   │   │   ├── SUP-02-2.glb
+│   │   │   ├── SUP-02-2.glb.import
+│   │   │   ├── SUP-02-3.glb
+│   │   │   ├── SUP-02-3.glb.import
+│   │   │   ├── SUP-02-4.glb
+│   │   │   ├── SUP-02-4.glb.import
+│   │   │   ├── SUP-02-5.glb
+│   │   │   ├── SUP-02-5.glb.import
+│   │   │   ├── SUP-03-2.glb
+│   │   │   ├── SUP-03-2.glb.import
+│   │   │   ├── SUP-03-3.glb
+│   │   │   ├── SUP-03-3.glb.import
+│   │   │   ├── SUP-03-4.glb
+│   │   │   ├── SUP-03-4.glb.import
+│   │   │   ├── SUP-03-5.glb
+│   │   │   ├── SUP-03-5.glb.import
+│   │   │   ├── SUP-04-2.glb
+│   │   │   ├── SUP-04-2.glb.import
+│   │   │   ├── SUP-04-3.glb
+│   │   │   ├── SUP-04-3.glb.import
+│   │   │   ├── SUP-04-4.glb
+│   │   │   ├── SUP-04-4.glb.import
+│   │   │   ├── SUP-04-5.glb
+│   │   │   ├── SUP-04-5.glb.import
+│   │   │   ├── SUP-05-2.glb
+│   │   │   ├── SUP-05-2.glb.import
+│   │   │   ├── SUP-05-3.glb
+│   │   │   ├── SUP-05-3.glb.import
+│   │   │   ├── SUP-05-4.glb
+│   │   │   ├── SUP-05-4.glb.import
+│   │   │   ├── SUP-05-5.glb
+│   │   │   ├── SUP-05-5.glb.import
+│   │   │   ├── berry_bush.glb
+│   │   │   ├── berry_bush.glb.import
+│   │   │   ├── fallen_branches.glb
+│   │   │   ├── fallen_branches.glb.import
+│   │   │   ├── fern.glb
+│   │   │   ├── fern.glb.import
+│   │   │   ├── meadow-flowers.glb
+│   │   │   ├── meadow-flowers.glb.import
+│   │   │   ├── meadow-grass.glb
+│   │   │   ├── meadow-grass.glb.import
+│   │   │   ├── meadow-rocks.glb
+│   │   │   ├── meadow-rocks.glb.import
+│   │   │   ├── mossy_rocks.glb
+│   │   │   ├── mossy_rocks.glb.import
+│   │   │   ├── round_bush.glb
+│   │   │   ├── round_bush.glb.import
+│   │   │   ├── scaffold.glb
+│   │   │   ├── scaffold.glb.import
+│   │   │   ├── tall_reeds.glb
+│   │   │   ├── tall_reeds.glb.import
+│   │   │   ├── tree_stump.glb
+│   │   │   └── tree_stump.glb.import
+│   │   ├── city-ground/
+│   │   │   ├── 0-0.glb
+│   │   │   ├── 0-0.glb.import
+│   │   │   ├── 0-124.glb
+│   │   │   ├── 0-124.glb.import
+│   │   │   ├── 0-155.glb
+│   │   │   ├── 0-155.glb.import
+│   │   │   ├── 0-186.glb
+│   │   │   ├── 0-186.glb.import
+│   │   │   ├── 0-217.glb
+│   │   │   ├── 0-217.glb.import
+│   │   │   ├── 0-31.glb
+│   │   │   ├── 0-31.glb.import
+│   │   │   ├── 0-62.glb
+│   │   │   ├── 0-62.glb.import
+│   │   │   ├── 0-93.glb
+│   │   │   ├── 0-93.glb.import
+│   │   │   ├── 124-0.glb
+│   │   │   ├── 124-0.glb.import
+│   │   │   ├── 124-124.glb
+│   │   │   ├── 124-124.glb.import
+│   │   │   ├── 124-155.glb
+│   │   │   ├── 124-155.glb.import
+│   │   │   ├── 124-186.glb
+│   │   │   ├── 124-186.glb.import
+│   │   │   ├── 124-217.glb
+│   │   │   ├── 124-217.glb.import
+│   │   │   ├── 124-31.glb
+│   │   │   ├── 124-31.glb.import
+│   │   │   ├── 124-62.glb
+│   │   │   ├── 124-62.glb.import
+│   │   │   ├── 124-93.glb
+│   │   │   ├── 124-93.glb.import
+│   │   │   ├── 155-0.glb
+│   │   │   ├── 155-0.glb.import
+│   │   │   ├── 155-124.glb
+│   │   │   ├── 155-124.glb.import
+│   │   │   ├── 155-155.glb
+│   │   │   ├── 155-155.glb.import
+│   │   │   ├── 155-186.glb
+│   │   │   ├── 155-186.glb.import
+│   │   │   ├── 155-217.glb
+│   │   │   ├── 155-217.glb.import
+│   │   │   ├── 155-31.glb
+│   │   │   ├── 155-31.glb.import
+│   │   │   ├── 155-62.glb
+│   │   │   ├── 155-62.glb.import
+│   │   │   ├── 155-93.glb
+│   │   │   ├── 155-93.glb.import
+│   │   │   ├── 186-0.glb
+│   │   │   ├── 186-0.glb.import
+│   │   │   ├── 186-124.glb
+│   │   │   ├── 186-124.glb.import
+│   │   │   ├── 186-155.glb
+│   │   │   ├── 186-155.glb.import
+│   │   │   ├── 186-186.glb
+│   │   │   ├── 186-186.glb.import
+│   │   │   ├── 186-217.glb
+│   │   │   ├── 186-217.glb.import
+│   │   │   ├── 186-31.glb
+│   │   │   ├── 186-31.glb.import
+│   │   │   ├── 186-62.glb
+│   │   │   ├── 186-62.glb.import
+│   │   │   ├── 186-93.glb
+│   │   │   ├── 186-93.glb.import
+│   │   │   ├── 217-0.glb
+│   │   │   ├── 217-0.glb.import
+│   │   │   ├── 217-124.glb
+│   │   │   ├── 217-124.glb.import
+│   │   │   ├── 217-155.glb
+│   │   │   ├── 217-155.glb.import
+│   │   │   ├── 217-186.glb
+│   │   │   ├── 217-186.glb.import
+│   │   │   ├── 217-217.glb
+│   │   │   ├── 217-217.glb.import
+│   │   │   ├── 217-31.glb
+│   │   │   ├── 217-31.glb.import
+│   │   │   ├── 217-62.glb
+│   │   │   ├── 217-62.glb.import
+│   │   │   ├── 217-93.glb
+│   │   │   ├── 217-93.glb.import
+│   │   │   ├── 31-0.glb
+│   │   │   ├── 31-0.glb.import
+│   │   │   ├── 31-124.glb
+│   │   │   ├── 31-124.glb.import
+│   │   │   ├── 31-155.glb
+│   │   │   ├── 31-155.glb.import
+│   │   │   ├── 31-186.glb
+│   │   │   ├── 31-186.glb.import
+│   │   │   ├── 31-217.glb
+│   │   │   ├── 31-217.glb.import
+│   │   │   ├── 31-31.glb
+│   │   │   ├── 31-31.glb.import
+│   │   │   ├── 31-62.glb
+│   │   │   ├── 31-62.glb.import
+│   │   │   ├── 31-93.glb
+│   │   │   ├── 31-93.glb.import
+│   │   │   ├── 62-0.glb
+│   │   │   ├── 62-0.glb.import
+│   │   │   ├── 62-124.glb
+│   │   │   ├── 62-124.glb.import
+│   │   │   ├── 62-155.glb
+│   │   │   ├── 62-155.glb.import
+│   │   │   ├── 62-186.glb
+│   │   │   ├── 62-186.glb.import
+│   │   │   ├── 62-217.glb
+│   │   │   ├── 62-217.glb.import
+│   │   │   ├── 62-31.glb
+│   │   │   ├── 62-31.glb.import
+│   │   │   ├── 62-62.glb
+│   │   │   ├── 62-62.glb.import
+│   │   │   ├── 62-93.glb
+│   │   │   ├── 62-93.glb.import
+│   │   │   ├── 93-0.glb
+│   │   │   ├── 93-0.glb.import
+│   │   │   ├── 93-124.glb
+│   │   │   ├── 93-124.glb.import
+│   │   │   ├── 93-155.glb
+│   │   │   ├── 93-155.glb.import
+│   │   │   ├── 93-186.glb
+│   │   │   ├── 93-186.glb.import
+│   │   │   ├── 93-217.glb
+│   │   │   ├── 93-217.glb.import
+│   │   │   ├── 93-31.glb
+│   │   │   ├── 93-31.glb.import
+│   │   │   ├── 93-62.glb
+│   │   │   ├── 93-62.glb.import
+│   │   │   ├── 93-93.glb
+│   │   │   └── 93-93.glb.import
+│   │   ├── creature-assets37/
+│   │   │   ├── DRAGOR_L1_RIGGED_ANIMATED.glb
+│   │   │   ├── DRAGOR_L1_RIGGED_ANIMATED.glb.import
+│   │   │   ├── DRAGOR_L1_RIGGED_ANIMATED_DRAGOR_AlbedoNoise.png
+│   │   │   ├── DRAGOR_L1_RIGGED_ANIMATED_DRAGOR_AlbedoNoise.png.import
+│   │   │   ├── DRAGOR_L1_RIGGED_ANIMATED_DRAGOR_MetalRough.png
+│   │   │   ├── DRAGOR_L1_RIGGED_ANIMATED_DRAGOR_MetalRough.png.import
+│   │   │   ├── DRAGOR_L1_RIGGED_ANIMATED_DRAGOR_Normal.png
+│   │   │   ├── DRAGOR_L1_RIGGED_ANIMATED_DRAGOR_Normal.png.import
+│   │   │   ├── DRAGOR_L2_RIGGED_ANIMATED.glb
+│   │   │   ├── DRAGOR_L2_RIGGED_ANIMATED.glb.import
+│   │   │   ├── DRAGOR_L2_RIGGED_ANIMATED_DRAGOR_AlbedoNoise.png
+│   │   │   ├── DRAGOR_L2_RIGGED_ANIMATED_DRAGOR_AlbedoNoise.png.import
+│   │   │   ├── DRAGOR_L2_RIGGED_ANIMATED_DRAGOR_MetalRough.png
+│   │   │   ├── DRAGOR_L2_RIGGED_ANIMATED_DRAGOR_MetalRough.png.import
+│   │   │   ├── DRAGOR_L2_RIGGED_ANIMATED_DRAGOR_Normal.png
+│   │   │   ├── DRAGOR_L2_RIGGED_ANIMATED_DRAGOR_Normal.png.import
+│   │   │   ├── DRAGOR_L3_RIGGED_ANIMATED.glb
+│   │   │   ├── DRAGOR_L3_RIGGED_ANIMATED.glb.import
+│   │   │   ├── DRAGOR_L3_RIGGED_ANIMATED_DRAGOR_AlbedoNoise.png
+│   │   │   ├── DRAGOR_L3_RIGGED_ANIMATED_DRAGOR_AlbedoNoise.png.import
+│   │   │   ├── DRAGOR_L3_RIGGED_ANIMATED_DRAGOR_MetalRough.png
+│   │   │   ├── DRAGOR_L3_RIGGED_ANIMATED_DRAGOR_MetalRough.png.import
+│   │   │   ├── DRAGOR_L3_RIGGED_ANIMATED_DRAGOR_Normal.png
+│   │   │   ├── DRAGOR_L3_RIGGED_ANIMATED_DRAGOR_Normal.png.import
+│   │   │   ├── KAMNEKLYK_L1_RIGGED_ANIMATED.glb
+│   │   │   ├── KAMNEKLYK_L1_RIGGED_ANIMATED.glb.import
+│   │   │   ├── KAMNEKLYK_L1_RIGGED_ANIMATED_KAMNEKLYK_AlbedoNoise.png
+│   │   │   ├── KAMNEKLYK_L1_RIGGED_ANIMATED_KAMNEKLYK_AlbedoNoise.png.import
+│   │   │   ├── KAMNEKLYK_L1_RIGGED_ANIMATED_KAMNEKLYK_MetalRough.png
+│   │   │   ├── KAMNEKLYK_L1_RIGGED_ANIMATED_KAMNEKLYK_MetalRough.png.import
+│   │   │   ├── KAMNEKLYK_L1_RIGGED_ANIMATED_KAMNEKLYK_Normal.png
+│   │   │   ├── KAMNEKLYK_L1_RIGGED_ANIMATED_KAMNEKLYK_Normal.png.import
+│   │   │   ├── KAMNEKLYK_L2_RIGGED_ANIMATED.glb
+│   │   │   ├── KAMNEKLYK_L2_RIGGED_ANIMATED.glb.import
+│   │   │   ├── KAMNEKLYK_L2_RIGGED_ANIMATED_KAMNEKLYK_AlbedoNoise.png
+│   │   │   ├── KAMNEKLYK_L2_RIGGED_ANIMATED_KAMNEKLYK_AlbedoNoise.png.import
+│   │   │   ├── KAMNEKLYK_L2_RIGGED_ANIMATED_KAMNEKLYK_MetalRough.png
+│   │   │   ├── KAMNEKLYK_L2_RIGGED_ANIMATED_KAMNEKLYK_MetalRough.png.import
+│   │   │   ├── KAMNEKLYK_L2_RIGGED_ANIMATED_KAMNEKLYK_Normal.png
+│   │   │   ├── KAMNEKLYK_L2_RIGGED_ANIMATED_KAMNEKLYK_Normal.png.import
+│   │   │   ├── KAMNEKLYK_L3_RIGGED_ANIMATED.glb
+│   │   │   ├── KAMNEKLYK_L3_RIGGED_ANIMATED.glb.import
+│   │   │   ├── KAMNEKLYK_L3_RIGGED_ANIMATED_KAMNEKLYK_AlbedoNoise.png
+│   │   │   ├── KAMNEKLYK_L3_RIGGED_ANIMATED_KAMNEKLYK_AlbedoNoise.png.import
+│   │   │   ├── KAMNEKLYK_L3_RIGGED_ANIMATED_KAMNEKLYK_MetalRough.png
+│   │   │   ├── KAMNEKLYK_L3_RIGGED_ANIMATED_KAMNEKLYK_MetalRough.png.import
+│   │   │   ├── KAMNEKLYK_L3_RIGGED_ANIMATED_KAMNEKLYK_Normal.png
+│   │   │   ├── KAMNEKLYK_L3_RIGGED_ANIMATED_KAMNEKLYK_Normal.png.import
+│   │   │   ├── TENERYS_L1_RIGGED_ANIMATED.glb
+│   │   │   ├── TENERYS_L1_RIGGED_ANIMATED.glb.import
+│   │   │   ├── TENERYS_L1_RIGGED_ANIMATED_TENERYS_AlbedoNoise.png
+│   │   │   ├── TENERYS_L1_RIGGED_ANIMATED_TENERYS_AlbedoNoise.png.import
+│   │   │   ├── TENERYS_L1_RIGGED_ANIMATED_TENERYS_MetalRough.png
+│   │   │   ├── TENERYS_L1_RIGGED_ANIMATED_TENERYS_MetalRough.png.import
+│   │   │   ├── TENERYS_L1_RIGGED_ANIMATED_TENERYS_Normal.png
+│   │   │   ├── TENERYS_L1_RIGGED_ANIMATED_TENERYS_Normal.png.import
+│   │   │   ├── TENERYS_L2_RIGGED_ANIMATED.glb
+│   │   │   ├── TENERYS_L2_RIGGED_ANIMATED.glb.import
+│   │   │   ├── TENERYS_L2_RIGGED_ANIMATED_TENERYS_AlbedoNoise.png
+│   │   │   ├── TENERYS_L2_RIGGED_ANIMATED_TENERYS_AlbedoNoise.png.import
+│   │   │   ├── TENERYS_L2_RIGGED_ANIMATED_TENERYS_MetalRough.png
+│   │   │   ├── TENERYS_L2_RIGGED_ANIMATED_TENERYS_MetalRough.png.import
+│   │   │   ├── TENERYS_L2_RIGGED_ANIMATED_TENERYS_Normal.png
+│   │   │   ├── TENERYS_L2_RIGGED_ANIMATED_TENERYS_Normal.png.import
+│   │   │   ├── TENERYS_L3_RIGGED_ANIMATED.glb
+│   │   │   ├── TENERYS_L3_RIGGED_ANIMATED.glb.import
+│   │   │   ├── TENERYS_L3_RIGGED_ANIMATED_TENERYS_AlbedoNoise.png
+│   │   │   ├── TENERYS_L3_RIGGED_ANIMATED_TENERYS_AlbedoNoise.png.import
+│   │   │   ├── TENERYS_L3_RIGGED_ANIMATED_TENERYS_MetalRough.png
+│   │   │   ├── TENERYS_L3_RIGGED_ANIMATED_TENERYS_MetalRough.png.import
+│   │   │   ├── TENERYS_L3_RIGGED_ANIMATED_TENERYS_Normal.png
+│   │   │   ├── TENERYS_L3_RIGGED_ANIMATED_TENERYS_Normal.png.import
+│   │   │   ├── VELKOR_L1_RIGGED_ANIMATED.glb
+│   │   │   ├── VELKOR_L1_RIGGED_ANIMATED.glb.import
+│   │   │   ├── VELKOR_L1_RIGGED_ANIMATED_VELKOR_AlbedoNoise.png
+│   │   │   ├── VELKOR_L1_RIGGED_ANIMATED_VELKOR_AlbedoNoise.png.import
+│   │   │   ├── VELKOR_L1_RIGGED_ANIMATED_VELKOR_MetalRough.png
+│   │   │   ├── VELKOR_L1_RIGGED_ANIMATED_VELKOR_MetalRough.png.import
+│   │   │   ├── VELKOR_L1_RIGGED_ANIMATED_VELKOR_Normal.png
+│   │   │   ├── VELKOR_L1_RIGGED_ANIMATED_VELKOR_Normal.png.import
+│   │   │   ├── VELKOR_L2_RIGGED_ANIMATED.glb
+│   │   │   ├── VELKOR_L2_RIGGED_ANIMATED.glb.import
+│   │   │   ├── VELKOR_L2_RIGGED_ANIMATED_VELKOR_AlbedoNoise.png
+│   │   │   ├── VELKOR_L2_RIGGED_ANIMATED_VELKOR_AlbedoNoise.png.import
+│   │   │   ├── VELKOR_L2_RIGGED_ANIMATED_VELKOR_MetalRough.png
+│   │   │   ├── VELKOR_L2_RIGGED_ANIMATED_VELKOR_MetalRough.png.import
+│   │   │   ├── VELKOR_L2_RIGGED_ANIMATED_VELKOR_Normal.png
+│   │   │   ├── VELKOR_L2_RIGGED_ANIMATED_VELKOR_Normal.png.import
+│   │   │   ├── VELKOR_L3_RIGGED_ANIMATED.glb
+│   │   │   ├── VELKOR_L3_RIGGED_ANIMATED.glb.import
+│   │   │   ├── VELKOR_L3_RIGGED_ANIMATED_VELKOR_AlbedoNoise.png
+│   │   │   ├── VELKOR_L3_RIGGED_ANIMATED_VELKOR_AlbedoNoise.png.import
+│   │   │   ├── VELKOR_L3_RIGGED_ANIMATED_VELKOR_MetalRough.png
+│   │   │   ├── VELKOR_L3_RIGGED_ANIMATED_VELKOR_MetalRough.png.import
+│   │   │   ├── VELKOR_L3_RIGGED_ANIMATED_VELKOR_Normal.png
+│   │   │   └── VELKOR_L3_RIGGED_ANIMATED_VELKOR_Normal.png.import
+│   │   ├── creatures37/
+│   │   │   ├── velkor63-1.webp
+│   │   │   ├── velkor63-1.webp.import
+│   │   │   ├── velkor63-2.webp
+│   │   │   ├── velkor63-2.webp.import
+│   │   │   ├── velkor63-3.webp
+│   │   │   └── velkor63-3.webp.import
+│   │   ├── environment/
+│   │   │   ├── atlas.webp
+│   │   │   ├── atlas.webp.import
+│   │   │   ├── surfaces20.png
+│   │   │   └── surfaces20.png.import
+│   │   ├── icons/
+│   │   │   ├── drenovar_icon_512.png
+│   │   │   └── drenovar_icon_512.png.import
+│   │   ├── intro/
+│   │   │   ├── keep-wide.png
+│   │   │   └── keep-wide.png.import
+│   │   ├── ui/
+│   │   │   ├── actions/
+│   │   │   │   ├── army.svg
+│   │   │   │   ├── army.svg.import
+│   │   │   │   ├── city.svg
+│   │   │   │   ├── city.svg.import
+│   │   │   │   ├── menu.svg
+│   │   │   │   ├── menu.svg.import
+│   │   │   │   ├── profile.svg
+│   │   │   │   ├── profile.svg.import
+│   │   │   │   ├── reports.svg
+│   │   │   │   ├── reports.svg.import
+│   │   │   │   ├── world.svg
+│   │   │   │   └── world.svg.import
+│   │   │   ├── web-panels/
+│   │   │   │   ├── ENG-01.png
+│   │   │   │   ├── ENG-01.png.import
+│   │   │   │   ├── ENG-02.png
+│   │   │   │   ├── ENG-02.png.import
+│   │   │   │   ├── ENG-03.png
+│   │   │   │   ├── ENG-03.png.import
+│   │   │   │   ├── ENG-04.png
+│   │   │   │   ├── ENG-04.png.import
+│   │   │   │   ├── ENG-05.png
+│   │   │   │   ├── ENG-05.png.import
+│   │   │   │   ├── ENG-06.png
+│   │   │   │   ├── ENG-06.png.import
+│   │   │   │   ├── ENG-07.png
+│   │   │   │   ├── ENG-07.png.import
+│   │   │   │   ├── ENG-08.png
+│   │   │   │   ├── ENG-08.png.import
+│   │   │   │   ├── ENG-09.png
+│   │   │   │   ├── ENG-09.png.import
+│   │   │   │   ├── ENG-10.png
+│   │   │   │   ├── ENG-10.png.import
+│   │   │   │   ├── velkor1.webp
+│   │   │   │   ├── velkor1.webp.import
+│   │   │   │   ├── velkor2.webp
+│   │   │   │   ├── velkor2.webp.import
+│   │   │   │   ├── velkor3.webp
+│   │   │   │   └── velkor3.webp.import
+│   │   │   ├── NotoSerif-LICENSE.txt
+│   │   │   ├── NotoSerif-Regular.ttf
+│   │   │   ├── NotoSerif-Regular.ttf.import
+│   │   │   ├── resources.png
+│   │   │   └── resources.png.import
+│   │   ├── world-ground/
+│   │   │   ├── 0-0.glb
+│   │   │   ├── 0-0.glb.import
+│   │   │   ├── 0-120.glb
+│   │   │   ├── 0-120.glb.import
+│   │   │   ├── 0-144.glb
+│   │   │   ├── 0-144.glb.import
+│   │   │   ├── 0-168.glb
+│   │   │   ├── 0-168.glb.import
+│   │   │   ├── 0-24.glb
+│   │   │   ├── 0-24.glb.import
+│   │   │   ├── 0-48.glb
+│   │   │   ├── 0-48.glb.import
+│   │   │   ├── 0-72.glb
+│   │   │   ├── 0-72.glb.import
+│   │   │   ├── 0-96.glb
+│   │   │   ├── 0-96.glb.import
+│   │   │   ├── 120-0.glb
+│   │   │   ├── 120-0.glb.import
+│   │   │   ├── 120-120.glb
+│   │   │   ├── 120-120.glb.import
+│   │   │   ├── 120-144.glb
+│   │   │   ├── 120-144.glb.import
+│   │   │   ├── 120-168.glb
+│   │   │   ├── 120-168.glb.import
+│   │   │   ├── 120-24.glb
+│   │   │   ├── 120-24.glb.import
+│   │   │   ├── 120-48.glb
+│   │   │   ├── 120-48.glb.import
+│   │   │   ├── 120-72.glb
+│   │   │   ├── 120-72.glb.import
+│   │   │   ├── 120-96.glb
+│   │   │   ├── 120-96.glb.import
+│   │   │   ├── 150-0.glb
+│   │   │   ├── 150-0.glb.import
+│   │   │   ├── 150-120.glb
+│   │   │   ├── 150-120.glb.import
+│   │   │   ├── 150-144.glb
+│   │   │   ├── 150-144.glb.import
+│   │   │   ├── 150-168.glb
+│   │   │   ├── 150-168.glb.import
+│   │   │   ├── 150-24.glb
+│   │   │   ├── 150-24.glb.import
+│   │   │   ├── 150-48.glb
+│   │   │   ├── 150-48.glb.import
+│   │   │   ├── 150-72.glb
+│   │   │   ├── 150-72.glb.import
+│   │   │   ├── 150-96.glb
+│   │   │   ├── 150-96.glb.import
+│   │   │   ├── 180-0.glb
+│   │   │   ├── 180-0.glb.import
+│   │   │   ├── 180-120.glb
+│   │   │   ├── 180-120.glb.import
+│   │   │   ├── 180-144.glb
+│   │   │   ├── 180-144.glb.import
+│   │   │   ├── 180-168.glb
+│   │   │   ├── 180-168.glb.import
+│   │   │   ├── 180-24.glb
+│   │   │   ├── 180-24.glb.import
+│   │   │   ├── 180-48.glb
+│   │   │   ├── 180-48.glb.import
+│   │   │   ├── 180-72.glb
+│   │   │   ├── 180-72.glb.import
+│   │   │   ├── 180-96.glb
+│   │   │   ├── 180-96.glb.import
+│   │   │   ├── 210-0.glb
+│   │   │   ├── 210-0.glb.import
+│   │   │   ├── 210-120.glb
+│   │   │   ├── 210-120.glb.import
+│   │   │   ├── 210-144.glb
+│   │   │   ├── 210-144.glb.import
+│   │   │   ├── 210-168.glb
+│   │   │   ├── 210-168.glb.import
+│   │   │   ├── 210-24.glb
+│   │   │   ├── 210-24.glb.import
+│   │   │   ├── 210-48.glb
+│   │   │   ├── 210-48.glb.import
+│   │   │   ├── 210-72.glb
+│   │   │   ├── 210-72.glb.import
+│   │   │   ├── 210-96.glb
+│   │   │   ├── 210-96.glb.import
+│   │   │   ├── 30-0.glb
+│   │   │   ├── 30-0.glb.import
+│   │   │   ├── 30-120.glb
+│   │   │   ├── 30-120.glb.import
+│   │   │   ├── 30-144.glb
+│   │   │   ├── 30-144.glb.import
+│   │   │   ├── 30-168.glb
+│   │   │   ├── 30-168.glb.import
+│   │   │   ├── 30-24.glb
+│   │   │   ├── 30-24.glb.import
+│   │   │   ├── 30-48.glb
+│   │   │   ├── 30-48.glb.import
+│   │   │   ├── 30-72.glb
+│   │   │   ├── 30-72.glb.import
+│   │   │   ├── 30-96.glb
+│   │   │   ├── 30-96.glb.import
+│   │   │   ├── 60-0.glb
+│   │   │   ├── 60-0.glb.import
+│   │   │   ├── 60-120.glb
+│   │   │   ├── 60-120.glb.import
+│   │   │   ├── 60-144.glb
+│   │   │   ├── 60-144.glb.import
+│   │   │   ├── 60-168.glb
+│   │   │   ├── 60-168.glb.import
+│   │   │   ├── 60-24.glb
+│   │   │   ├── 60-24.glb.import
+│   │   │   ├── 60-48.glb
+│   │   │   ├── 60-48.glb.import
+│   │   │   ├── 60-72.glb
+│   │   │   ├── 60-72.glb.import
+│   │   │   ├── 60-96.glb
+│   │   │   ├── 60-96.glb.import
+│   │   │   ├── 90-0.glb
+│   │   │   ├── 90-0.glb.import
+│   │   │   ├── 90-120.glb
+│   │   │   ├── 90-120.glb.import
+│   │   │   ├── 90-144.glb
+│   │   │   ├── 90-144.glb.import
+│   │   │   ├── 90-168.glb
+│   │   │   ├── 90-168.glb.import
+│   │   │   ├── 90-24.glb
+│   │   │   ├── 90-24.glb.import
+│   │   │   ├── 90-48.glb
+│   │   │   ├── 90-48.glb.import
+│   │   │   ├── 90-72.glb
+│   │   │   ├── 90-72.glb.import
+│   │   │   ├── 90-96.glb
+│   │   │   └── 90-96.glb.import
+│   │   ├── world-scenery/
+│   │   │   ├── abandoned_cottage-far.glb
+│   │   │   ├── abandoned_cottage-far.glb.import
+│   │   │   ├── abandoned_cottage.glb
+│   │   │   ├── abandoned_cottage.glb.import
+│   │   │   ├── abandoned_lookout-far.glb
+│   │   │   ├── abandoned_lookout-far.glb.import
+│   │   │   ├── abandoned_lookout.glb
+│   │   │   ├── abandoned_lookout.glb.import
+│   │   │   ├── ancient_columns-far.glb
+│   │   │   ├── ancient_columns-far.glb.import
+│   │   │   ├── ancient_columns.glb
+│   │   │   ├── ancient_columns.glb.import
+│   │   │   ├── ancient_gnarled_tree-far.glb
+│   │   │   ├── ancient_gnarled_tree-far.glb.import
+│   │   │   ├── ancient_gnarled_tree.glb
+│   │   │   ├── ancient_gnarled_tree.glb.import
+│   │   │   ├── berry_bush-far.glb
+│   │   │   ├── berry_bush-far.glb.import
+│   │   │   ├── berry_bush.glb
+│   │   │   ├── berry_bush.glb.import
+│   │   │   ├── broken_rock-far.glb
+│   │   │   ├── broken_rock-far.glb.import
+│   │   │   ├── broken_rock.glb
+│   │   │   ├── broken_rock.glb.import
+│   │   │   ├── broken_wagon-far.glb
+│   │   │   ├── broken_wagon-far.glb.import
+│   │   │   ├── broken_wagon.glb
+│   │   │   ├── broken_wagon.glb.import
+│   │   │   ├── campfire-far.glb
+│   │   │   ├── campfire-far.glb.import
+│   │   │   ├── campfire.glb
+│   │   │   ├── campfire.glb.import
+│   │   │   ├── cliff_edge-far.glb
+│   │   │   ├── cliff_edge-far.glb.import
+│   │   │   ├── cliff_edge.glb
+│   │   │   ├── cliff_edge.glb.import
+│   │   │   ├── cluster_boulders-far.glb
+│   │   │   ├── cluster_boulders-far.glb.import
+│   │   │   ├── cluster_boulders.glb
+│   │   │   ├── cluster_boulders.glb.import
+│   │   │   ├── dead_tree_large-far.glb
+│   │   │   ├── dead_tree_large-far.glb.import
+│   │   │   ├── dead_tree_large.glb
+│   │   │   ├── dead_tree_large.glb.import
+│   │   │   ├── deer-far.glb
+│   │   │   ├── deer-far.glb.import
+│   │   │   ├── deer.glb
+│   │   │   ├── deer.glb.import
+│   │   │   ├── dry_shrub-far.glb
+│   │   │   ├── dry_shrub-far.glb.import
+│   │   │   ├── dry_shrub.glb
+│   │   │   ├── dry_shrub.glb.import
+│   │   │   ├── dry_soil-far.glb
+│   │   │   ├── dry_soil-far.glb.import
+│   │   │   ├── dry_soil.glb
+│   │   │   ├── dry_soil.glb.import
+│   │   │   ├── exposed_roots-far.glb
+│   │   │   ├── exposed_roots-far.glb.import
+│   │   │   ├── exposed_roots.glb
+│   │   │   ├── exposed_roots.glb.import
+│   │   │   ├── fallen_branches-far.glb
+│   │   │   ├── fallen_branches-far.glb.import
+│   │   │   ├── fallen_branches.glb
+│   │   │   ├── fallen_branches.glb.import
+│   │   │   ├── fallen_log-far.glb
+│   │   │   ├── fallen_log-far.glb.import
+│   │   │   ├── fallen_log.glb
+│   │   │   ├── fallen_log.glb.import
+│   │   │   ├── farmland-far.glb
+│   │   │   ├── farmland-far.glb.import
+│   │   │   ├── farmland.glb
+│   │   │   ├── farmland.glb.import
+│   │   │   ├── fern-far.glb
+│   │   │   ├── fern-far.glb.import
+│   │   │   ├── fern.glb
+│   │   │   ├── fern.glb.import
+│   │   │   ├── flat_stone-far.glb
+│   │   │   ├── flat_stone-far.glb.import
+│   │   │   ├── flat_stone.glb
+│   │   │   ├── flat_stone.glb.import
+│   │   │   ├── forest_mushrooms-far.glb
+│   │   │   ├── forest_mushrooms-far.glb.import
+│   │   │   ├── forest_mushrooms.glb
+│   │   │   ├── forest_mushrooms.glb.import
+│   │   │   ├── giant_aspen-far.glb
+│   │   │   ├── giant_aspen-far.glb.import
+│   │   │   ├── giant_aspen.glb
+│   │   │   ├── giant_aspen.glb.import
+│   │   │   ├── giant_birch-far.glb
+│   │   │   ├── giant_birch-far.glb.import
+│   │   │   ├── giant_birch.glb
+│   │   │   ├── giant_birch.glb.import
+│   │   │   ├── giant_maple-far.glb
+│   │   │   ├── giant_maple-far.glb.import
+│   │   │   ├── giant_maple.glb
+│   │   │   ├── giant_maple.glb.import
+│   │   │   ├── giant_oak-far.glb
+│   │   │   ├── giant_oak-far.glb.import
+│   │   │   ├── giant_oak.glb
+│   │   │   ├── giant_oak.glb.import
+│   │   │   ├── giant_pine-far.glb
+│   │   │   ├── giant_pine-far.glb.import
+│   │   │   ├── giant_pine.glb
+│   │   │   ├── giant_pine.glb.import
+│   │   │   ├── giant_spruce-far.glb
+│   │   │   ├── giant_spruce-far.glb.import
+│   │   │   ├── giant_spruce.glb
+│   │   │   ├── giant_spruce.glb.import
+│   │   │   ├── gold_deposit-far.glb
+│   │   │   ├── gold_deposit-far.glb.import
+│   │   │   ├── gold_deposit.glb
+│   │   │   ├── gold_deposit.glb.import
+│   │   │   ├── grass_hill-far.glb
+│   │   │   ├── grass_hill-far.glb.import
+│   │   │   ├── grass_hill.glb
+│   │   │   ├── grass_hill.glb.import
+│   │   │   ├── grass_tuft-far.glb
+│   │   │   ├── grass_tuft-far.glb.import
+│   │   │   ├── grass_tuft.glb
+│   │   │   ├── grass_tuft.glb.import
+│   │   │   ├── green_plain-far.glb
+│   │   │   ├── green_plain-far.glb.import
+│   │   │   ├── green_plain.glb
+│   │   │   ├── green_plain.glb.import
+│   │   │   ├── iron_deposit-far.glb
+│   │   │   ├── iron_deposit-far.glb.import
+│   │   │   ├── iron_deposit.glb
+│   │   │   ├── iron_deposit.glb.import
+│   │   │   ├── jagged_spires-far.glb
+│   │   │   ├── jagged_spires-far.glb.import
+│   │   │   ├── jagged_spires.glb
+│   │   │   ├── jagged_spires.glb.import
+│   │   │   ├── lake-far.glb
+│   │   │   ├── lake-far.glb.import
+│   │   │   ├── lake.glb
+│   │   │   ├── lake.glb.import
+│   │   │   ├── large_boulder-far.glb
+│   │   │   ├── large_boulder-far.glb.import
+│   │   │   ├── large_boulder.glb
+│   │   │   ├── large_boulder.glb.import
+│   │   │   ├── marsh_ground-far.glb
+│   │   │   ├── marsh_ground-far.glb.import
+│   │   │   ├── marsh_ground.glb
+│   │   │   ├── marsh_ground.glb.import
+│   │   │   ├── medium_aspen-far.glb
+│   │   │   ├── medium_aspen-far.glb.import
+│   │   │   ├── medium_aspen.glb
+│   │   │   ├── medium_aspen.glb.import
+│   │   │   ├── medium_birch-far.glb
+│   │   │   ├── medium_birch-far.glb.import
+│   │   │   ├── medium_birch.glb
+│   │   │   ├── medium_birch.glb.import
+│   │   │   ├── medium_maple-far.glb
+│   │   │   ├── medium_maple-far.glb.import
+│   │   │   ├── medium_maple.glb
+│   │   │   ├── medium_maple.glb.import
+│   │   │   ├── medium_oak-far.glb
+│   │   │   ├── medium_oak-far.glb.import
+│   │   │   ├── medium_oak.glb
+│   │   │   ├── medium_oak.glb.import
+│   │   │   ├── medium_pine-far.glb
+│   │   │   ├── medium_pine-far.glb.import
+│   │   │   ├── medium_pine.glb
+│   │   │   ├── medium_pine.glb.import
+│   │   │   ├── medium_spruce-far.glb
+│   │   │   ├── medium_spruce-far.glb.import
+│   │   │   ├── medium_spruce.glb
+│   │   │   ├── medium_spruce.glb.import
+│   │   │   ├── mossy_rocks-far.glb
+│   │   │   ├── mossy_rocks-far.glb.import
+│   │   │   ├── mossy_rocks.glb
+│   │   │   ├── mossy_rocks.glb.import
+│   │   │   ├── pebbles-far.glb
+│   │   │   ├── pebbles-far.glb.import
+│   │   │   ├── pebbles.glb
+│   │   │   ├── pebbles.glb.import
+│   │   │   ├── ravine-far.glb
+│   │   │   ├── ravine-far.glb.import
+│   │   │   ├── ravine.glb
+│   │   │   ├── ravine.glb.import
+│   │   │   ├── river_segment-far.glb
+│   │   │   ├── river_segment-far.glb.import
+│   │   │   ├── river_segment.glb
+│   │   │   ├── river_segment.glb.import
+│   │   │   ├── rock_cave-far.glb
+│   │   │   ├── rock_cave-far.glb.import
+│   │   │   ├── rock_cave.glb
+│   │   │   ├── rock_cave.glb.import
+│   │   │   ├── rock_massif-far.glb
+│   │   │   ├── rock_massif-far.glb.import
+│   │   │   ├── rock_massif.glb
+│   │   │   ├── rock_massif.glb.import
+│   │   │   ├── rock_ridge-far.glb
+│   │   │   ├── rock_ridge-far.glb.import
+│   │   │   ├── rock_ridge.glb
+│   │   │   ├── rock_ridge.glb.import
+│   │   │   ├── rock_spire-far.glb
+│   │   │   ├── rock_spire-far.glb.import
+│   │   │   ├── rock_spire.glb
+│   │   │   ├── rock_spire.glb.import
+│   │   │   ├── round_bush-far.glb
+│   │   │   ├── round_bush-far.glb.import
+│   │   │   ├── round_bush.glb
+│   │   │   ├── round_bush.glb.import
+│   │   │   ├── sandy_ground-far.glb
+│   │   │   ├── sandy_ground-far.glb.import
+│   │   │   ├── sandy_ground.glb
+│   │   │   ├── sandy_ground.glb.import
+│   │   │   ├── sapling-far.glb
+│   │   │   ├── sapling-far.glb.import
+│   │   │   ├── sapling.glb
+│   │   │   ├── sapling.glb.import
+│   │   │   ├── single_stone-far.glb
+│   │   │   ├── single_stone-far.glb.import
+│   │   │   ├── single_stone.glb
+│   │   │   ├── single_stone.glb.import
+│   │   │   ├── small_hill-far.glb
+│   │   │   ├── small_hill-far.glb.import
+│   │   │   ├── small_hill.glb
+│   │   │   ├── small_hill.glb.import
+│   │   │   ├── small_pine-far.glb
+│   │   │   ├── small_pine-far.glb.import
+│   │   │   ├── small_pine.glb
+│   │   │   ├── small_pine.glb.import
+│   │   │   ├── small_pond-far.glb
+│   │   │   ├── small_pond-far.glb.import
+│   │   │   ├── small_pond.glb
+│   │   │   ├── small_pond.glb.import
+│   │   │   ├── small_spruce-far.glb
+│   │   │   ├── small_spruce-far.glb.import
+│   │   │   ├── small_spruce.glb
+│   │   │   ├── small_spruce.glb.import
+│   │   │   ├── small_timber_patch-far.glb
+│   │   │   ├── small_timber_patch-far.glb.import
+│   │   │   ├── small_timber_patch.glb
+│   │   │   ├── small_timber_patch.glb.import
+│   │   │   ├── snow_patch-far.glb
+│   │   │   ├── snow_patch-far.glb.import
+│   │   │   ├── snow_patch.glb
+│   │   │   ├── snow_patch.glb.import
+│   │   │   ├── snow_peak-far.glb
+│   │   │   ├── snow_peak-far.glb.import
+│   │   │   ├── snow_peak.glb
+│   │   │   ├── snow_peak.glb.import
+│   │   │   ├── stone_bridge-far.glb
+│   │   │   ├── stone_bridge-far.glb.import
+│   │   │   ├── stone_bridge.glb
+│   │   │   ├── stone_bridge.glb.import
+│   │   │   ├── stone_pile-far.glb
+│   │   │   ├── stone_pile-far.glb.import
+│   │   │   ├── stone_pile.glb
+│   │   │   ├── stone_pile.glb.import
+│   │   │   ├── stone_quarry-far.glb
+│   │   │   ├── stone_quarry-far.glb.import
+│   │   │   ├── stone_quarry.glb
+│   │   │   ├── stone_quarry.glb.import
+│   │   │   ├── stone_ruins-far.glb
+│   │   │   ├── stone_ruins-far.glb.import
+│   │   │   ├── stone_ruins.glb
+│   │   │   ├── stone_ruins.glb.import
+│   │   │   ├── stony_ground-far.glb
+│   │   │   ├── stony_ground-far.glb.import
+│   │   │   ├── stony_ground.glb
+│   │   │   ├── stony_ground.glb.import
+│   │   │   ├── tall_reeds-far.glb
+│   │   │   ├── tall_reeds-far.glb.import
+│   │   │   ├── tall_reeds.glb
+│   │   │   ├── tall_reeds.glb.import
+│   │   │   ├── timber_forest-far.glb
+│   │   │   ├── timber_forest-far.glb.import
+│   │   │   ├── timber_forest.glb
+│   │   │   ├── timber_forest.glb.import
+│   │   │   ├── tiny_stone-far.glb
+│   │   │   ├── tiny_stone-far.glb.import
+│   │   │   ├── tiny_stone.glb
+│   │   │   ├── tiny_stone.glb.import
+│   │   │   ├── tree_stump-far.glb
+│   │   │   ├── tree_stump-far.glb.import
+│   │   │   ├── tree_stump.glb
+│   │   │   ├── tree_stump.glb.import
+│   │   │   ├── waterfall-far.glb
+│   │   │   ├── waterfall-far.glb.import
+│   │   │   ├── waterfall.glb
+│   │   │   ├── waterfall.glb.import
+│   │   │   ├── wildflowers-far.glb
+│   │   │   ├── wildflowers-far.glb.import
+│   │   │   ├── wildflowers.glb
+│   │   │   ├── wildflowers.glb.import
+│   │   │   ├── wolf-far.glb
+│   │   │   ├── wolf-far.glb.import
+│   │   │   ├── wolf.glb
+│   │   │   ├── wolf.glb.import
+│   │   │   ├── wooden_fence-far.glb
+│   │   │   ├── wooden_fence-far.glb.import
+│   │   │   ├── wooden_fence.glb
+│   │   │   ├── wooden_fence.glb.import
+│   │   │   ├── young_broadleaf-far.glb
+│   │   │   ├── young_broadleaf-far.glb.import
+│   │   │   ├── young_broadleaf.glb
+│   │   │   └── young_broadleaf.glb.import
+│   │   ├── game.json
+│   │   ├── original-assets.json
+│   │   ├── world-roads.glb
+│   │   └── world-roads.glb.import
+│   ├── src/
+│   │   ├── battle_results.gd
+│   │   ├── battle_results.gd.uid
+│   │   ├── biome.gdshader
+│   │   ├── biome.gdshader.uid
+│   │   ├── formations.gd
+│   │   ├── formations.gd.uid
+│   │   ├── hud_action.gd
+│   │   ├── hud_action.gd.uid
+│   │   ├── landscape.gd
+│   │   ├── landscape.gd.uid
+│   │   ├── launch_screen.gd
+│   │   ├── launch_screen.gd.uid
+│   │   ├── main.gd
+│   │   ├── main.gd.uid
+│   │   ├── march_map.gd
+│   │   ├── march_map.gd.uid
+│   │   ├── meadow.gdshader
+│   │   ├── meadow.gdshader.uid
+│   │   ├── minimap.gd
+│   │   ├── minimap.gd.uid
+│   │   ├── session_store.gd
+│   │   ├── session_store.gd.uid
+│   │   ├── touch_scroll.gd
+│   │   ├── touch_scroll.gd.uid
+│   │   ├── ui_theme.gd
+│   │   ├── ui_theme.gd.uid
+│   │   ├── warrior_visual.gd
+│   │   ├── warrior_visual.gd.uid
+│   │   ├── water.gdshader
+│   │   ├── water.gdshader.uid
+│   │   ├── web_panel_theme.gd
+│   │   └── web_panel_theme.gd.uid
+│   ├── tests/
+│   │   ├── reference052/
+│   │   │   ├── landscape.gd
+│   │   │   └── landscape.gd.uid
+│   │   └── reference053/
+│   │       ├── landscape.gd
+│   │       └── landscape.gd.uid
+│   ├── benchmark.gd
+│   ├── benchmark.gd.uid
+│   ├── export_presets.cfg
+│   ├── extension_api.json
+│   ├── main.tscn
+│   ├── project.godot
+│   ├── qa_batch_parity.gd
+│   ├── qa_batch_parity.gd.uid
+│   ├── qa_battle_rewards.gd
+│   ├── qa_battle_rewards.gd.uid
+│   ├── qa_camera_hud.gd
+│   ├── qa_camera_hud.gd.uid
+│   ├── qa_ios_startup.gd
+│   ├── qa_ios_startup.gd.uid
+│   ├── qa_optimization.gd
+│   ├── qa_optimization.gd.uid
+│   ├── qa_profile.gd
+│   ├── qa_profile.gd.uid
+│   ├── qa_runtime.gd
+│   ├── qa_runtime.gd.uid
+│   ├── qa_warriors.gd
+│   ├── qa_warriors.gd.uid
+│   ├── qa_web91.gd
+│   ├── qa_web91.gd.uid
+│   ├── qa_web_panels.gd
+│   └── qa_web_panels.gd.uid
+├── tools/
+│   ├── capture-source-manifest.mjs
+│   ├── fetch-web84-assets.mjs
+│   ├── import-web-assets.mjs
+│   ├── ios-template.py
+│   ├── package-ios.sh
+│   ├── repack-tested-engine.py
+│   ├── starter-state.json
+│   ├── test-ios-session.mjs
+│   ├── test-realm.mjs
+│   └── web84-sources.json
+├── verification/
+│   ├── pack-startup.log
+│   ├── qa-camera-hud.log
+│   ├── qa-exported-pack.log
+│   ├── qa053-camera.log
+│   ├── qa053-pack-camera.log
+│   ├── qa053-pack-runtime.log
+│   ├── qa053-parity.log
+│   ├── qa053-runtime.log
+│   ├── qa054-camera.log
+│   ├── qa054-opt.log
+│   ├── qa054-pack-camera.log
+│   ├── qa054-pack-runtime.log
+│   ├── qa054-runtime.log
+│   ├── qa055-pack-camera.log
+│   ├── qa055-pack-runtime.log
+│   ├── qa055-pack-smoke.log
+│   ├── qa055-pack-web91.log
+│   ├── qa055-smoke.log
+│   ├── qa055-web91.log
+│   ├── qa056-pack-camera_hud.log
+│   ├── qa056-pack-runtime.log
+│   ├── qa056-pack-session.log
+│   ├── qa056-pack-smoke.log
+│   ├── qa057-pack-camera_hud.log
+│   ├── qa057-pack-panels.log
+│   ├── qa057-pack-runtime.log
+│   ├── qa057-pack-session.log
+│   ├── qa057-pack-smoke.log
+│   ├── qa057-pack-web91.log
+│   ├── qa058-camera_hud.log
+│   ├── qa058-paid-training.log
+│   ├── qa058-panels.log
+│   ├── qa058-runtime.log
+│   ├── qa058-session.log
+│   ├── qa058-smoke.log
+│   ├── qa059-battles.log
+│   ├── qa059-camera_hud.log
+│   ├── qa059-panels.log
+│   ├── qa059-runtime.log
+│   ├── qa059-smoke.log
+│   └── qa059-warriors.log
+├── .gitignore
+├── CHANGES-0.5.2.txt
+├── CHANGES-0.5.3.txt
+├── CHANGES-0.5.4.txt
+├── CHANGES-0.5.5.txt
+├── CHANGES-0.5.6.txt
+├── CHANGES-0.5.7.txt
+├── CHANGES-0.5.8.txt
+├── CHANGES-0.5.9.txt
+├── README.md
+└── asset-integrity.json

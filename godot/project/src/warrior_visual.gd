@@ -1,6 +1,26 @@
 extends RefCounted
 
 static var contact_material: StandardMaterial3D
+static var reflection_skies := {}
+
+static func add_reflections(env: Environment, horizon: Color) -> void:
+	"""Static procedural sky used only for specular reflections (background and ambient
+	light stay as they were). Shared per horizon colour, so the radiance map is built once."""
+	var key := horizon.to_html()
+	if not reflection_skies.has(key):
+		var material := ProceduralSkyMaterial.new()
+		material.sky_top_color = Color("#6f8fae")
+		material.sky_horizon_color = horizon.lightened(0.25)
+		material.ground_horizon_color = horizon.darkened(0.15)
+		material.ground_bottom_color = Color("#3b3a31")
+		material.sun_angle_max = 30.0
+		var sky := Sky.new()
+		sky.sky_material = material
+		sky.radiance_size = Sky.RADIANCE_SIZE_128
+		sky.process_mode = Sky.PROCESS_MODE_QUALITY
+		reflection_skies[key] = sky
+	env.sky = reflection_skies[key]
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 
 static func prepare(actor: Node3D) -> void:
 	for part: MeshInstance3D in actor.find_children("*", "MeshInstance3D", true, false):

@@ -1,0 +1,96 @@
+name: DRENOVAR native QA and iOS build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths: [godot/**, .github/workflows/drenovar-native.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: drenovar-native-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.6.3
+
+jobs:
+  headless-qa:
+    name: Headless regression (Linux)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot
+        run: |
+          curl -fL --retry 3 "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          echo "GODOT_BIN=$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" >> "$GITHUB_ENV"
+      - name: 3D textures are VRAM-compressed
+        run: python3 godot/tools/texture_import_policy.py godot/project --check
+      - name: Import assets
+        working-directory: godot/project
+        run: '"$GODOT_BIN" --headless --path . --import'
+      - name: Run client QA scenarios
+        working-directory: godot/project
+        run: |
+          mkdir -p "$RUNNER_TEMP/qa"
+          status=0
+          for scenario in qa_camera_hud qa_runtime qa_batch_parity qa_optimization qa_warriors qa_web_panels \
+              qa_city_parity qa_stability qa_panel_latency qa_diagnostics qa_gait qa_network qa_camera_fling qa_idempotency qa_troops06 \
+              qa_api_pool qa_touch_buttons qa_prewarm; do
+            if timeout 300 "$GODOT_BIN" --headless --path . -s "$scenario.gd" > "$RUNNER_TEMP/qa/$scenario.log" 2>&1; then
+              echo "PASS $scenario: $(grep -E '^QA_[A-Z_]+ ' "$RUNNER_TEMP/qa/$scenario.log" | grep -v REPORT | tail -1)"
+            else
+              status=1
+              echo "::error::FAIL $scenario"
+              grep -E 'ERROR|SCRIPT' "$RUNNER_TEMP/qa/$scenario.log" | head -20
+            fi
+          done
+          exit $status
+      - name: City update profile
+        if: always()
+        working-directory: godot/project
+        run: '"$GODOT_BIN" --headless --path . -s profile_city_updates.gd 2>&1 | grep PROFILE | tee "$RUNNER_TEMP/qa/city_update_profile.txt"'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: drenovar-qa-logs
+          path: ${{ runner.temp }}/qa
+          retention-days: 14
+
+  ios-unsigned:
+    name: Unsigned arm64 IPA (macOS)
+    needs: headless-qa
+    # GitHub never assigns a hosted macOS runner to this repository (annotations:
+    # "not acquired by Runner of type hosted", "configuration not supported"), so the
+    # Xcode build only runs on demand. Test IPAs come from ios-repack.yml (Linux).
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot and the matching iOS template
+        run: |
+          curl -fL --retry 3 "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_macos.universal.zip" -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          echo "GODOT_BIN=$RUNNER_TEMP/godot/Godot.app/Contents/MacOS/Godot" >> "$GITHUB_ENV"
+          templates="$HOME/Library/Application Support/Godot/export_templates/${GODOT_VERSION}.stable"
+          python3 godot/tools/ios-template.py "$templates/ios.zip"
+          echo "${GODOT_VERSION}.stable" > "$templates/version.txt"
+      - name: Build unsigned IPA
+        run: bash godot/tools/package-ios.sh "$RUNNER_TEMP/ios"
+      - name: Record build identity
+        run: |
+          shasum -a 256 "$RUNNER_TEMP/ios/DRENOVAR-unsigned.ipa" | tee "$RUNNER_TEMP/ios/SHA256.txt"
+          echo "commit=${GITHUB_SHA}" >> "$RUNNER_TEMP/ios/SHA256.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DRENOVAR-0.6.0-unsigned-ipa
+          path: |
+            ${{ runner.temp }}/ios/DRENOVAR-unsigned.ipa
+            ${{ runner.temp }}/ios/SHA256.txt
+          if-no-files-found: error
+          retention-days: 14

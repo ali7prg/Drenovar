@@ -62,11 +62,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Record GitHub-side documents before overlaying the exact original snapshot.
+          # Restore all original handoff documents, then put existing documented changes back.
+          git ls-tree -r --name-only HEAD -- docs/ > "$RUNNER_TEMP/existing-docs.txt"
           git restore --source=refs/remotes/handoff/main --staged --worktree -- .
-          # Preserve the handoff documents and GitHub automation already committed here.
           git restore --source=HEAD --staged --worktree -- \
-            README.md docs .github/workflows \
+            README.md .github/workflows \
             godot/tools/verify_drenovar_asset_snapshot.py
+          while IFS= read -r filepath; do
+            git restore --source=HEAD --staged --worktree -- "$filepath"
+          done < "$RUNNER_TEMP/existing-docs.txt"
+          # The original source bundle lists 29 handoff document files.
+          test "$(git ls-tree -r --name-only refs/remotes/handoff/main -- docs/ | wc -l | tr -d ' ')" = 29
+          while IFS= read -r filepath; do
+            test -f "$filepath" || { echo "Missing original handoff file: $filepath"; exit 1; }
+          done < <(git ls-tree -r --name-only refs/remotes/handoff/main -- docs/)
 
           python3 godot/tools/verify_drenovar_asset_snapshot.py --require-complete
           cat > docs/GITHUB_IMPORT_COMPLETED.md <<'EOF'

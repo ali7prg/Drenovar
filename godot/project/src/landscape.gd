@@ -148,9 +148,7 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 			mesh.material_override = ground_material
 			var bounds: AABB = mesh.transform * mesh.get_aabb()
 			terrain_bounds = bounds if not terrain_bounds.has_volume() else terrain_bounds.merge(bounds)
-		if Time.get_ticks_usec() - terrain_slice >= 3500:
-			await get_tree().process_frame
-			terrain_slice = Time.get_ticks_usec()
+		terrain_slice = await setup_slice(terrain_slice)
 	add_child(buildings)
 	add_child(actors)
 	add_child(creatures)
@@ -165,7 +163,7 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	camera.fov = 43.0
 	camera.near = 0.5
 	camera.far = 700.0 if is_city else 1100.0
-	await get_tree().process_frame
+	await yield_frame()
 	if is_city:
 		zoom = 70.0
 		target = Vector3(5, 0, -4)
@@ -173,10 +171,10 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	else:
 		fit_world()
 		await build_world_scenery()
-		await get_tree().process_frame
+		await yield_frame()
 		await build_towns()
 		build_world_water()
-		await get_tree().process_frame
+		await yield_frame()
 		build_world_roads()
 	if not saved_view.is_empty():
 		target = saved_view.target
@@ -509,7 +507,7 @@ func build_forest(city: Dictionary, exclusions: Array, rebuild_ground := true, s
 				"key": "tree" + str(int(tree.variant)) + str(detail), "model": "tree" + str(int(tree.variant)),
 				"detail": detail, "transform": model_transform(at.x, at.y, at.z, float(tree.angle), float(tree.scale))})
 		if staged:
-			await get_tree().process_frame
+			await yield_frame()
 	for entry: Dictionary in eligible_trees:
 		var tree: Dictionary = entry.tree
 		var p: Vector3 = entry.p
@@ -541,7 +539,7 @@ func build_forest(city: Dictionary, exclusions: Array, rebuild_ground := true, s
 	if not rebuild_ground:
 		return
 	if staged:
-		await get_tree().process_frame
+		await yield_frame()
 	var understory: Dictionary = {}
 	for prop in data.cityUnderstory:
 		if inside_exclusions(prop.x, prop.z, exclusions):
@@ -553,7 +551,7 @@ func build_forest(city: Dictionary, exclusions: Array, rebuild_ground := true, s
 		batch_model(city_ground_detail, data.cityDetails[key], understory[key], scenery_material,
 			{"city":true,"far":true,"detail":true,"resource":false})
 	if staged:
-		await get_tree().process_frame
+		await yield_frame()
 	build_meadow(exclusions)
 
 func build_meadow(exclusions: Array) -> void:
@@ -598,12 +596,27 @@ func inside_exclusions(x: float, z: float, exclusions: Array) -> bool:
 	return false
 
 const SETUP_SLICE_USEC := 3500
+const BACKGROUND_SLICE_USEC := 2000
+# Set while the scene is prepared in the background (the other scene is on
+# screen). It returns false while the player is touching or the camera moves, and
+# the build waits; cleared when the player asks for this scene, so it finishes at
+# full speed.
+var background_gate := Callable()
+
+func yield_frame() -> void:
+	# One frame; in a background build, also waits while the player interacts.
+	await get_tree().process_frame
+	while background_gate.is_valid() and not background_gate.call():
+		await get_tree().process_frame
 
 func setup_slice(started: int) -> int:
 	# Yields to the next frame once the current one has spent its setup budget.
-	if Time.get_ticks_usec() - started < SETUP_SLICE_USEC:
+	var budget := BACKGROUND_SLICE_USEC if background_gate.is_valid() else SETUP_SLICE_USEC
+	if Time.get_ticks_usec() - started < budget:
 		return started
 	await get_tree().process_frame
+	while background_gate.is_valid() and not background_gate.call():
+		await get_tree().process_frame
 	return Time.get_ticks_usec()
 
 func build_world_scenery() -> void:
@@ -796,10 +809,10 @@ func build_towns() -> void:
 		batch_model(group, data.models[key].path, transforms, null, layer, cells)
 		if render_batches.size() > first_batch:
 			render_batches[first_batch].layer = layer.merged({"town_counter":true})
-		await get_tree().process_frame
+		await yield_frame()
 		batch_silhouettes(group, data.distantModels[key], cells, transforms.size(),
 			layer.merged({"far":true, "silhouette":true}, true))
-		await get_tree().process_frame
+		await yield_frame()
 
 func add_model(parent: Node3D, model_path: String, transform_value: Transform3D) -> Node3D:
 	var instance := scene_resource(model_path).instantiate() as Node3D
@@ -934,7 +947,7 @@ func present_city(state: Dictionary, staged := false) -> void:
 			exclusions.append(Rect2(grove.x - half, grove.z - half, grove.size, grove.size))
 	sync_city_buildings(wanted_buildings)
 	if staged:
-		await get_tree().process_frame
+		await yield_frame()
 	sync_city_workers(wanted_workers)
 	var road_key := JSON.stringify([city.buildings.map(func(b): return [b.id, b.type, b.plotId]), plots.map(func(p): return [p.id, p.x, p.z])])
 	if road_key != geometries.get("road_signature", "") or not is_instance_valid(city_road_mesh):
@@ -948,7 +961,7 @@ func present_city(state: Dictionary, staged := false) -> void:
 		geometries["vegetation_signature"] = vegetation_key
 		geometries["ground_signature"] = ground_key
 		if staged:
-			await get_tree().process_frame
+			await yield_frame()
 			await build_forest(city, exclusions, rebuild_ground, true)
 		else:
 			build_forest(city, exclusions, rebuild_ground)

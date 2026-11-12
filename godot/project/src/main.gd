@@ -18,6 +18,13 @@ const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"�
 const RESOURCE_NAMES := {"food":"Еда","wood":"Дерево","stone":"Камень","iron":"Железо","coins":"Монеты"}
 const SCENE_REUSE_SECONDS := 40.0
 const SCENE_REUSE_HARD_LIMIT := 60.0
+# With VRAM-compressed textures both scenes fit together, so the inactive one is
+# kept (instant city <-> world) unless process + video memory exceeds this or iOS
+# sends a memory warning. Above it, the 0.5.9 timed release applies.
+const TWO_SCENE_MEMORY_MB := 1300.0
+# The other scene is prepared in the background after this much idle time.
+const PREWARM_IDLE_MSEC := 2500
+const PREWARM_QUIET_MSEC := 600
 const LIVE_SERVER := "https://drenovar.pink-lyric-9420.chatgpt.site"
 var data: Dictionary
 var state: Dictionary
@@ -27,6 +34,14 @@ var retired_nodes: Array[Node] = []
 var saved_views: Dictionary = {}
 var scene_loading := false
 var scene_switch_msec := 0
+var prewarm_name := ""
+var prewarm_stage: Landscape
+var prewarm_cancelled := false
+# After the inactive scene had to be released for memory, it is not rebuilt in the background.
+var prewarm_paused_until := 0
+var last_interaction_msec := 0
+var camera_moving_now := false
+signal prewarm_finished
 var map_name := "city"
 var hud := CanvasLayer.new()
 var resource_buttons: Dictionary = {}
@@ -68,6 +83,8 @@ var login_proof := ""
 var login_deadline := 0
 var login_link_used := false
 var busy := false
+var api := ApiPool.new()
+var last_command_ms := -1.0
 var polling_state := false
 var request_generation := 0
 var login_in_progress := false
@@ -127,6 +144,8 @@ func _ready() -> void:
 		if arg.begins_with("--diagnostics="):
 			diagnostics.path = arg.trim_prefix("--diagnostics=")
 	diagnostics.start(str(ProjectSettings.get_setting("application/config/version")), Time.get_unix_time_from_system())
+	api.name = "ApiPool"
+	add_child(api)
 	var launch := LaunchScreen.new()
 	add_child(launch)
 	# Give the branded screen a frame before parsing game data and loading meshes.
@@ -281,6 +300,7 @@ func build_ui() -> void:
 	inner.add_child(modal_tools)
 	var scroll := TouchScroll.new()
 	modal_scroll = scroll
+	scroll.press_root = modal
 	scroll.custom_minimum_size.y = 84
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -924,6 +944,17 @@ func show_scene(scene_name: String) -> void:
 	close_modal()
 	var next: Landscape = scene_cache.get(scene_name)
 	last_scene_label = ("город" if scene_name == "city" else "мир") + (", из кэша" if next != null else ", первая загрузка")
+	if next == null and prewarm_name == scene_name and not prewarm_cancelled:
+		# Prepared in the background: finish the remaining slices at full speed.
+		message.text = "Открываем карту…" if scene_name == "world" else "Открываем город…"
+		last_scene_label = ("город" if scene_name == "city" else "мир") + ", дозагрузка из фона"
+		prewarm_stage.background_gate = Callable()
+		await prewarm_finished
+		next = scene_cache.get(scene_name)
+	elif not prewarm_name.is_empty():
+		prewarm_stage.background_gate = Callable()
+		await prewarm_finished
+		next = scene_cache.get(scene_name)
 	if next == null:
 		message.text = "Открываем карту…" if scene_name == "world" else "Открываем город…"
 		await get_tree().process_frame
@@ -952,7 +983,52 @@ func show_scene(scene_name: String) -> void:
 	message.text = ""
 	refresh_hud()
 
+func memory_in_use_mb() -> float:
+	return (Performance.get_monitor(Performance.MEMORY_STATIC) + Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)) / 1048576.0
+
+func two_scenes_fit() -> bool:
+	return memory_in_use_mb() < TWO_SCENE_MEMORY_MB
+
+func prewarm_may_continue() -> bool:
+	return fingers.is_empty() and not dragging and not camera_moving_now and not scene_loading and \
+		Time.get_ticks_msec() - last_interaction_msec >= PREWARM_QUIET_MSEC
+
+func maybe_prewarm_other_scene() -> void:
+	if smoke or not prewarm_name.is_empty() or scene_loading or not is_instance_valid(stage) or Time.get_ticks_msec() < prewarm_paused_until:
+		return
+	var other := "world" if map_name == "city" else "city"
+	if scene_cache.has(other) or not two_scenes_fit():
+		return
+	if Time.get_ticks_msec() - maxi(last_interaction_msec, scene_switch_msec) < PREWARM_IDLE_MSEC or not prewarm_may_continue():
+		return
+	prewarm_scene(other)
+
+func prewarm_scene(scene_name: String) -> void:
+	# Builds the other scene inactive, in small slices, only while the player is idle.
+	prewarm_name = scene_name
+	prewarm_cancelled = false
+	var next := Landscape.new()
+	prewarm_stage = next
+	next.background_gate = prewarm_may_continue
+	next.set_active(false)
+	add_child(next)
+	await next.setup(data, state, scene_name, saved_views.get(scene_name, {}))
+	next.background_gate = Callable()
+	if prewarm_cancelled:
+		if get_viewport().size_changed.is_connected(next.update_visible_batches):
+			get_viewport().size_changed.disconnect(next.update_visible_batches)
+		retired_nodes.append(next)
+		retired_nodes.append_array(next.find_children("*", "", true, false))
+	else:
+		scene_cache[scene_name] = next
+	prewarm_name = ""
+	prewarm_stage = null
+	prewarm_finished.emit()
+
 func release_inactive_scene() -> void:
+	prewarm_paused_until = Time.get_ticks_msec() + 10 * 60 * 1000
+	if not prewarm_name.is_empty():
+		prewarm_cancelled = true
 	for name in scene_cache.keys():
 		var cached: Landscape = scene_cache[name]
 		if cached == stage:
@@ -2201,6 +2277,8 @@ func show_performance() -> void:
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0]
 	report += "\nПоследний переход: %s · время работы: %d мин" % [last_scene_label, Time.get_ticks_msec() / 60000]
+	report += "\nСвязь: последний запрос %s · запросов %d, из них по открытому соединению %d · новых соединений %d" % [
+		("%.0f мс" % last_command_ms) if last_command_ms >= 0.0 else "—", api.requests_total, api.requests_reused, api.connections_opened]
 	report += "\n" + diagnostics.summary()
 	row(modal_body, report)
 	button(modal_body, "Скопировать замер", func(): DisplayServer.clipboard_set(report))
@@ -2532,14 +2610,7 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	if foreground:
 		busy = true
 		request_generation += 1
-	var client := HTTPRequest.new()
-	client.timeout = timeout_seconds
-	# A stalled preview must not block cancellation while the server withholds headers.
-	client.use_threads = path.get_file() != "march-preview"
-	client.max_redirects = 0
-	client.body_size_limit = 8 * 1024 * 1024
-	add_child(client)
-	var headers := PackedStringArray(["Accept: application/json"])
+	var headers := PackedStringArray(["Accept: application/json", "Accept-Encoding: gzip"])
 	if player_id != "":
 		headers.append("X-Drenovar-Player: "+player_id)
 	if not session.is_empty():
@@ -2553,16 +2624,14 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 		if request_key.is_empty():
 			request_key = Crypto.new().generate_random_bytes(16).hex_encode()
 		headers.append("Idempotency-Key: "+request_key)
-	var error := client.request(endpoint+"/api/"+path,headers,HTTPClient.METHOD_GET if payload==null else HTTPClient.METHOD_POST,"" if payload==null else JSON.stringify(payload))
-	if error != OK:
-		client.queue_free()
-		if foreground:
-			busy = false
-		return {"error":"Сервер недоступен"}
-	var result: Array = await client.request_completed
-	client.queue_free()
+	# Kept-alive connections: a command no longer pays for a new TCP and TLS handshake.
+	api.configure(endpoint)
+	var started_us := Time.get_ticks_usec()
+	var result: Array = await api.request(HTTPClient.METHOD_GET if payload == null else HTTPClient.METHOD_POST, "/api/" + path,
+		headers, "" if payload == null else JSON.stringify(payload), timeout_seconds, 8 * 1024 * 1024)
 	if foreground:
 		busy = false
+		last_command_ms = (Time.get_ticks_usec() - started_us) / 1000.0
 	var transport_ok: bool = result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0 and int(result[1]) < 500
 	diagnostics.network_result(transport_ok, "timeout" if result[0] == HTTPRequest.RESULT_TIMEOUT else ("http_%d" % int(result[1]) if result[0] == HTTPRequest.RESULT_SUCCESS else "transport_%d" % int(result[0])),
 		Time.get_unix_time_from_system(), Time.get_ticks_msec())
@@ -2621,10 +2690,12 @@ func _process(delta: float) -> void:
 		absf(stage.camera_zoom - stage.zoom) >= 0.1 or absf(angle_difference(stage.camera_yaw, stage.world_yaw)) >= 0.01
 	update_fling(delta)
 	camera_moving = camera_moving or fling_velocity != Vector2.ZERO
+	camera_moving_now = camera_moving
 	stage.update_camera(delta)
 	if relocation_pins.visible and camera_moving:
 		relocation_pins.queue_redraw()
-	if scene_cache.size() > 1:
+	maybe_prewarm_other_scene()
+	if scene_cache.size() > 1 and not two_scenes_fit():
 		var inactive_seconds := (Time.get_ticks_msec() - scene_switch_msec) / 1000.0
 		if inactive_seconds >= SCENE_REUSE_HARD_LIMIT or (
 			inactive_seconds >= SCENE_REUSE_SECONDS and not camera_moving and fingers.is_empty()
@@ -2688,6 +2759,9 @@ func _process(delta: float) -> void:
 			await poll_account_state()
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventMouseButton or \
+			(event is InputEventMouseMotion and event.button_mask != 0):
+		last_interaction_msec = Time.get_ticks_msec()
 	# A finger lifted while a window opens or a scene loads must still be released.
 	# Otherwise the stale contact turns the next one-finger drag into a false pinch.
 	if event is InputEventScreenTouch and not event.pressed and fingers.has(event.index) and \

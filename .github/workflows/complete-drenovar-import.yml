@@ -1,0 +1,91 @@
+name: Complete exact DRENOVAR Godot import from GitHub Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: GitHub Release tag with the verified source bundle asset
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: drenovar-complete-native-source-import
+  cancel-in-progress: false
+
+jobs:
+  import-native-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout repository history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Download source bundle from a GitHub Release asset
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          test -n "$RELEASE_TAG"
+          gh release download "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern 'drenovar-godot-0.5.9.git.bundle' \
+            --dir "$RUNNER_TEMP"
+
+      - name: Validate archive checksum, Git refs and 1617 file source snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          bundle="$RUNNER_TEMP/drenovar-godot-0.5.9.git.bundle"
+          test -f "$bundle"
+          echo "9888e56de53cd2bc4936e5e19768a54de690afd30767869d0db429369c773366  $bundle" | sha256sum --check --status
+          git bundle verify "$bundle"
+          git fetch "$bundle" refs/heads/main:refs/remotes/handoff/main
+          test "$(git rev-parse refs/remotes/handoff/main)" = 5ae4bc3ec323d78212df7a4d2c17f44a8c0b54a8
+          test "$(git ls-tree -r --name-only refs/remotes/handoff/main | wc -l | tr -d ' ')" = 1617
+
+      - name: Restore exact source tree while retaining this GitHub import workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git restore --source=refs/remotes/handoff/main --staged --worktree -- .
+          git restore --source=HEAD --staged --worktree -- \
+            .github/workflows/complete-drenovar-import.yml \
+            godot/tools/verify_drenovar_asset_snapshot.py
+
+          python3 godot/tools/verify_drenovar_asset_snapshot.py --require-complete
+          cat > docs/GITHUB_IMPORT_COMPLETED.md <<'EOF'
+          # DRENOVAR Godot 0.5.9 source import — complete
+
+          Source commit: 5ae4bc3ec323d78212df7a4d2c17f44a8c0b54a8
+          Bundle SHA256: 9888e56de53cd2bc4936e5e19768a54de690afd30767869d0db429369c773366
+          Original full handoff: 1,617 files
+          Native assets: 732/732, all SHA256-verified
+          Godot import metadata: 729 original .import files included
+          Original GLB models: 447/447
+
+          This completion applies ONLY to the Godot native client snapshot 0.5.9 / iOS build 19.
+          Server source v92 is a separate deliverable and has NOT been imported here.
+          This import is not a physical iPhone 12 test or a new iOS build.
+          EOF
+
+          git add -A
+          test "$(find godot/project/assets -name '*.glb' -type f | wc -l | tr -d ' ')" = 447
+          test "$(find godot/project/assets -name '*.import' -type f | wc -l | tr -d ' ')" = 729
+          if git diff --cached --quiet; then
+            echo 'The full source tree is already present.'
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m 'Complete exact verified DRENOVAR Godot 0.5.9 source import'
+          git push origin HEAD:main

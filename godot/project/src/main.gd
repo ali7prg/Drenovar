@@ -801,7 +801,8 @@ func build_card_button(definition: Dictionary, option: Dictionary) -> Button:
 	var ready: bool = option.state == "ready"
 	var card := Button.new()
 	card.add_to_group("build_card")
-	card.custom_minimum_size = Vector2(176, 198)
+	card.custom_minimum_size = Vector2(196, 206)
+	card.clip_contents = true
 	card.accessibility_name = definition.ru
 	card.tooltip_text = definition.ru
 	var top: Color = {"ready": Color("#4a5a47"), "short": Color("#4a4440"), "locked": Color("#33363a"), "built": Color("#39434a")}[option.state]
@@ -819,7 +820,7 @@ func build_card_button(definition: Dictionary, option: Dictionary) -> Button:
 	glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	glow.stretch_mode = TextureRect.STRETCH_SCALE
 	glow.position = Vector2(8, 6)
-	glow.size = Vector2(160, 108)
+	glow.size = Vector2(180, 104)
 	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(glow)
 	var box := VBoxContainer.new()
@@ -843,14 +844,17 @@ func build_card_button(definition: Dictionary, option: Dictionary) -> Button:
 	var title := Label.new()
 	title.text = definition.ru
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 16)
+	title.add_theme_font_size_override("font_size", 16 if definition.ru.length() <= 16 else 14)
+	title.custom_minimum_size.x = 1
 	title.add_theme_color_override("font_color", WebPanels.IVORY if option.state != "locked" else Color("#c4bcae"))
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(title)
-	var foot := HBoxContainer.new()
-	foot.alignment = BoxContainer.ALIGNMENT_CENTER
-	foot.add_theme_constant_override("separation", 5)
+	# Cost wraps onto a second line instead of widening the card.
+	var foot := HFlowContainer.new()
+	foot.alignment = FlowContainer.ALIGNMENT_CENTER
+	foot.add_theme_constant_override("h_separation", 6)
+	foot.add_theme_constant_override("v_separation", 0)
 	foot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(foot)
 	match option.state:
@@ -863,15 +867,19 @@ func build_card_button(definition: Dictionary, option: Dictionary) -> Button:
 				var amount := int(option.terms.cost[resource])
 				if amount <= 0 or not resource_icons.has(resource):
 					continue
-				add_resource_icon(foot, resource, 20)
-				card_note(foot, compact_number(amount), Color("#fff0d4") if amount <= balance(resource) else Color("#ff8f7a"))
+				var item := HBoxContainer.new()
+				item.add_theme_constant_override("separation", 2)
+				item.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				foot.add_child(item)
+				add_resource_icon(item, resource, 18)
+				card_note(item, compact_number(amount), Color("#fff0d4") if amount <= balance(resource) else Color("#ff8f7a"), 14)
 	var time := HBoxContainer.new()
 	time.alignment = BoxContainer.ALIGNMENT_CENTER
 	time.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(time)
 	if option.state in ["ready", "short"]:
-		card_note(time, ("Выбрать место · %s" if ready else "Не хватает ресурсов · %s") % duration_label(int(option.terms.seconds)),
-			WebPanels.GOLD if ready else Color("#ffb08f"), 14)
+		card_note(time, ("Выбрать место · %s" if ready else "Мало ресурсов · %s") % duration_label(int(option.terms.seconds)),
+			WebPanels.GOLD if ready else Color("#ffb08f"), 13)
 	# Disable mouse capture on the whole subtree: the card itself takes the tap.
 	for child in card.find_children("*", "Control", true, false):
 		(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1523,6 +1531,9 @@ func show_scene(scene_name: String) -> void:
 		next = scene_cache.get(scene_name)
 	if next == null:
 		message.text = "Открываем карту…" if scene_name == "world" else "Открываем город…"
+		if single_scene:
+			release_inactive_scene()
+			free_current_scene()
 		await get_tree().process_frame
 		next = Landscape.new()
 		next.set_active(false)
@@ -1569,8 +1580,30 @@ func scene_memory_budget() -> float:
 			memory_budget_mb = minf(TWO_SCENE_MEMORY_MB, physical / 1048576.0 * 0.22)
 	return memory_budget_mb
 
+# On the phone only one scene lives in memory at a time. The device report showed
+# the city alone at ~510 MB of video memory with the engine's CPU counter at 0 in
+# release builds, so the budget could not see the real footprint; keeping the city
+# while the world loaded is what ended the app (last events before each
+# unexpected end: scene·world). Switching now frees the old scene first.
+var single_scene := OS.has_feature("mobile")
+
 func two_scenes_fit() -> bool:
+	if single_scene:
+		return false
 	return memory_in_use_mb() < scene_memory_budget()
+
+func free_current_scene() -> void:
+	if not is_instance_valid(stage):
+		return
+	saved_views[map_name] = stage.view_state()
+	scene_cache.erase(map_name)
+	stage.set_active(false)
+	if get_viewport().size_changed.is_connected(stage.update_visible_batches):
+		get_viewport().size_changed.disconnect(stage.update_visible_batches)
+	retired_nodes.append(stage)
+	retired_nodes.append_array(stage.find_children("*", "", true, false))
+	stage = null
+	drain_retired_scenes(true)
 
 func prewarm_may_continue() -> bool:
 	return fingers.is_empty() and not dragging and not camera_moving_now and not scene_loading and \
@@ -1907,7 +1940,7 @@ func place_modal(layout: String) -> void:
 		"sheet":
 			# Bottom sheet: the city stays visible above it.
 			anchors = Rect2(0, 1, 1, 0)
-			offsets = Rect2(40, -384, -80, 376)
+			offsets = Rect2(40, -396, -80, 388)
 	modal.anchor_left = anchors.position.x
 	modal.anchor_top = anchors.position.y
 	modal.anchor_right = anchors.end.x
@@ -3090,6 +3123,10 @@ func show_performance() -> void:
 	report += "\nОкно: %s · экран: %s · масштаб экрана: %.2f · растяжение: %.3f · 3D-масштаб: %.2f · %s" % [
 		DisplayServer.window_get_size(), DisplayServer.screen_get_size(), DisplayServer.screen_get_scale(),
 		window.content_scale_factor, get_viewport().scaling_3d_scale, str(get_viewport().get_visible_rect().size)]
+	var device_memory := OS.get_memory_info()
+	report += "\nПамять устройства: всего %.0f МБ · доступно %.0f МБ · одна сцена в памяти: %s" % [
+		float(device_memory.get("physical", -1)) / 1048576.0, float(device_memory.get("available", -1)) / 1048576.0,
+		"да" if single_scene else "нет"]
 	report += "\nПамять (CPU): %.0f МБ, пик %.0f МБ · видеопамять: %.0f МБ · текстуры: %.0f МБ" % [
 		Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, memory_peak_mb,
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,

@@ -72,8 +72,14 @@ func marker_rows(markers: Array) -> Array:
 	rows.sort()
 	return rows
 
+# Construction scaffolding is drawn by CityWorks since build 30 (timber frame
+# with the rising building), so the 0.5.9 scaffold model is left out of the
+# comparison; every other building node must still match.
+func without_scaffold(rows: Array) -> Array:
+	return rows.filter(func(row): return not String(row).contains("scaffold"))
+
 func snapshot(stage: Node3D) -> Dictionary:
-	return {"batches": batch_rows(stage), "buildings": node_rows(stage.buildings), "workers": node_rows(stage.workers),
+	return {"batches": batch_rows(stage), "buildings": without_scaffold(node_rows(stage.buildings)), "workers": node_rows(stage.workers),
 		"markers": marker_rows(stage.place_markers), "plots": marker_rows(stage.empty_plots),
 		"trees": stage.selectable_trees.map(func(t): return t.id), "standing": stage.standing_tree_cells.size(),
 		"parade": stage.parade_slots.map(func(s): return var_to_str(s.position)),

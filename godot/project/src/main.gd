@@ -13,6 +13,7 @@ const WarriorVisual = preload("res://src/warrior_visual.gd")
 const HudAction = preload("res://src/hud_action.gd")
 const SessionDiagnostics = preload("res://src/session_diagnostics.gd")
 const BuildingPlates = preload("res://src/building_plates.gd")
+const CityDefence = preload("res://src/city_defence.gd")
 const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
 const RECRUIT_ORDER := ["ENG-09", "ENG-08", "ENG-01", "ENG-02", "ENG-07", "ENG-10", "ENG-03", "ENG-04", "ENG-05", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
@@ -950,6 +951,49 @@ func start_placement(definition: Dictionary) -> void:
 	placement_bar.show()
 	refresh_placement()
 
+const MOVE_FEATURE := "moveBuilding"
+
+func move_supported() -> bool:
+	return MOVE_FEATURE in state.get("cityFeatures", [])
+
+# Moving a finished building: the same placement mode as a new building, onto a
+# free cleared plot inside the wall. Free of charge, no builder, no timer; the
+# server keeps the building's level, queues and production.
+func start_move(building: Dictionary) -> void:
+	close_modal()
+	action_ring.close()
+	if map_name != "city" or not is_instance_valid(stage):
+		return
+	var plots := []
+	for marker in stage.empty_plots:
+		if plot_cleared(marker.item):
+			plots.append({"position": marker.position, "plot": marker.item, "cleared": true})
+	if plots.is_empty():
+		message.text = "Нет свободного расчищенного участка внутри стен: расчистите участок."
+		return
+	var definition := building_definition(building.type)
+	var key: String = data.starterHall if building.type == "ECO-05" and int(building.level) == 1 else data.types.get(building.type, "")
+	if key.is_empty():
+		return
+	var asset: Dictionary = data.models[key]
+	var origin := Vector3.ZERO
+	for marker in stage.place_markers:
+		if marker.get("id") == building.id:
+			origin = marker.position - Vector3.UP * 5.0
+	var first: Dictionary = plots[0]
+	for entry in plots:
+		if entry.position.distance_squared_to(origin) < first.position.distance_squared_to(origin):
+			first = entry
+	stage.show_placement(asset.path, float(asset.scale) * (1 + 0.055 * (int(building.level) - 1)), plots)
+	placing = {"definition": definition, "move": building, "plots": plots, "plot": first.plot, "position": first.position,
+		"cleared": true, "free": first.position, "lifted": false}
+	stage.target = first.position
+	stage.zoom = minf(stage.zoom, 58.0)
+	ensure_placement_bar()
+	placement_title.text = "Перенос: %s" % building_title(building.type)
+	placement_bar.show()
+	refresh_placement()
+
 func ensure_placement_bar() -> void:
 	if is_instance_valid(placement_bar):
 		return
@@ -989,6 +1033,9 @@ func ensure_placement_bar() -> void:
 func refresh_placement() -> void:
 	if placing.is_empty():
 		return
+	if placing.has("move"):
+		refresh_move()
+		return
 	var definition: Dictionary = placing.definition
 	var terms: Dictionary = data.buildingTerms.get(definition.id, {"cost": {}, "seconds": 0})
 	var snapped: bool = placing.position.distance_to(placing.free) < 0.01
@@ -1008,6 +1055,27 @@ func refresh_placement() -> void:
 	placement_confirm.text = "Построить" if placing.cleared else "Расчистить"
 	var affordable: bool = can_afford(terms.cost) if placing.cleared else balance("food") >= 15
 	placement_confirm.disabled = not snapped or busy_builder or not affordable or player_id.is_empty() or command_in_progress
+
+func refresh_move() -> void:
+	var building: Dictionary = placing.move
+	var snapped: bool = placing.position.distance_to(placing.free) < 0.01
+	stage.move_placement(placing.free, "ready" if snapped else "none", placing.lifted)
+	var building_busy: bool = construction_order().get("buildingId") == building.id
+	if not snapped:
+		placement_info.text = "Отпустите здание над свободным участком"
+	elif building_busy:
+		placement_info.text = "Здание строится: перенос после завершения"
+	elif not move_supported():
+		placement_info.text = "Перенос заработает после обновления сервера"
+	else:
+		placement_info.text = "Бесплатно · уровень и очереди сохранятся — перетащите пальцем"
+	placement_confirm.text = "Переместить"
+	placement_confirm.disabled = not snapped or building_busy or not move_supported() or player_id.is_empty() or command_in_progress
+
+func move_order(building: Dictionary, plot_id: String) -> Dictionary:
+	if legacy_city():
+		return {"kind": "legacyBuilding", "action": "move", "buildingId": building.id, "plotId": plot_id}
+	return {"kind": "kingdom", "action": "move", "buildingId": building.id, "plotId": plot_id}
 
 func update_placement_bar() -> void:
 	if placing.is_empty() or not is_instance_valid(stage):
@@ -1115,6 +1183,13 @@ func confirm_placement() -> void:
 	var definition: Dictionary = placing.definition
 	var plot: Dictionary = placing.plot
 	var position: Vector3 = placing.position
+	if placing.has("move"):
+		var building: Dictionary = placing.move
+		cancel_placement()
+		stage.target = position
+		if await command(move_order(building, plot.id)):
+			message.text = "Здание перенесено: %s" % building_title(building.type)
+		return
 	var order := build_order(plot.id, definition.id) if placing.cleared else \
 		{"kind":"kingdom","action":"clear","plotId":plot.id}
 	# Instant: the placement closes, builders start on the plot at once and the
@@ -2158,6 +2233,10 @@ func open_building_ring(marker: Dictionary) -> void:
 		actions.append(["Обмен", "trade", show_trade])
 	if building.type == "SUP-01":
 		actions.append(["Лазарет", "heal", show_hospital])
+	if building_definition(building.type).get("base", building.type) in ["SUP-03", "SUP-04"]:
+		actions.append(["Оборона", "defence", show_city_defence])
+	if not marker.get("wall", false) and construction.get("buildingId") != building.id:
+		actions.append(["Переместить", "move", start_move.bind(building)])
 	if upgradable:
 		actions.append(["Сведения", "info", inspect_building.bind(building)])
 	action_ring.open(str(building.id), "%s · ур. %d" % [building_title(building.type), level], marker.position, stage.camera, actions)
@@ -2208,6 +2287,10 @@ func inspect_building(building: Dictionary) -> void:
 		button(modal_body, "Обменять ресурсы", show_trade, not player_id.is_empty())
 	if building.type == "SUP-01":
 		button(modal_body, "Лазарет", show_hospital)
+	var defence_base: String = building_definition(building.type).get("base", building.type)
+	if defence_base in ["SUP-03", "SUP-04"]:
+		add_defence_rows(modal_body, defence_base, level)
+		button(modal_body, "Оборона поселения", show_city_defence)
 	var group: String = data.trainingGroups.get(building_definition(building.type).get("base", building.type), "")
 	if group == "":
 		return
@@ -2224,6 +2307,92 @@ func inspect_building(building: Dictionary) -> void:
 			button(queue_row, "Ускорить", show_speedups.bind("training", order, building.id), not player_id.is_empty())
 		button(queue_row, "Отменить", confirm_cancel_training.bind(building, order), not player_id.is_empty())
 	panel_action(modal_body, "Подготовка войск", open_recruitment.bind(building))
+
+# ---------------------------------------------------------------- defence
+
+func defence_active() -> bool:
+	return CityDefence.FEATURE in state.get("cityFeatures", [])
+
+func built_level(base: String) -> int:
+	var level := 0
+	for building in state.city.buildings:
+		if building_definition(building.type).get("base", building.type) == base:
+			level = maxi(level, int(building.level))
+	return level
+
+func defence_table(parent: Container, rows: Array, next_rows: Array = []) -> void:
+	var grid := GridContainer.new()
+	grid.columns = 3 if not next_rows.is_empty() else 2
+	grid.add_theme_constant_override("h_separation", 18)
+	grid.add_theme_constant_override("v_separation", 4)
+	parent.add_child(grid)
+	for i in rows.size():
+		var name := card_note(grid, rows[i][0], Color("#e8dcc4"), 16)
+		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card_note(grid, rows[i][1], Color("#ffe3a1"), 17)
+		if not next_rows.is_empty():
+			var later: String = next_rows[i][1]
+			card_note(grid, "→ " + later if later != rows[i][1] else "", Color("#9fd27a"), 15)
+
+func add_defence_rows(parent: Container, base: String, level: int) -> void:
+	var towers: int = stage.walls.tower_count if is_instance_valid(stage) else 0
+	if base == "SUP-03":
+		card_note(parent, "Стены поселения · ур. %d" % level, Color("#f2dfac"), 18)
+		var now := CityDefence.wall_stats(hall_level(), level, towers)
+		var later := CityDefence.wall_stats(hall_level(), mini(level + 1, 5), towers)
+		defence_table(parent, CityDefence.rows_for_wall(now), CityDefence.rows_for_wall(later) if level < 5 else [])
+	else:
+		card_note(parent, "Сторожевая башня · ур. %d" % level, Color("#f2dfac"), 18)
+		var now := CityDefence.watchtower_stats(level)
+		var later := CityDefence.watchtower_stats(mini(level + 1, 5))
+		defence_table(parent, CityDefence.rows_for_watchtower(now), CityDefence.rows_for_watchtower(later) if level < 5 else [])
+	if not defence_active():
+		card_note(parent, "В бою сервер пока учитывает только гарнизон: бонус заработает после обновления сервера.", Color("#c9b58f"), 13).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+# The defence of the settlement in one panel: the wall, the yard it encloses and
+# the watchtower, with what the next level adds.
+func show_city_defence() -> void:
+	action_ring.close()
+	open_modal("Оборона поселения", "right", "СТЕНЫ И БАШНИ")
+	var hall := hall_level()
+	var walls = stage.walls if is_instance_valid(stage) and map_name == "city" else null
+	var wall_level := built_level("SUP-03")
+	var shown: bool = walls != null and walls.visible
+	card_note(modal_body, "Стены", Color("#f2dfac"), 20)
+	if shown:
+		var status := "Частокол с башнями стоит вокруг двора с ратуши II."
+		if wall_level > 0:
+			status = "Стены и ворота · ур. %d: стена выше, на башнях больше лучников." % wall_level
+		row(modal_body, status)
+		var now := CityDefence.wall_stats(hall, wall_level, walls.tower_count)
+		var later := CityDefence.wall_stats(hall, mini(wall_level + 1, 5), walls.tower_count)
+		defence_table(modal_body, CityDefence.rows_for_wall(now), CityDefence.rows_for_wall(later) if wall_level < 5 else [])
+		row(modal_body, "Башен на стене: %d · ворот: %d" % [walls.tower_count, walls.gates.size()])
+		if wall_level == 0:
+			var unlock := int(data.unlockLevels.get("SUP-03", 3))
+			row(modal_body, "Постройте «Стены и ворота» (ратуша %d), чтобы усилить стену." % unlock)
+	else:
+		row(modal_body, "Стены встанут вокруг двора, когда ратуша достигнет уровня %d." % 2)
+	card_note(modal_body, "Двор", Color("#f2dfac"), 20)
+	if walls != null:
+		var size: Vector2 = walls.yard_size()
+		row(modal_body, "Двор %d × %d м · ратуша ур. %d · свободных участков внутри: %d" % [roundi(size.x), roundi(size.y), hall, stage.empty_plots.size()])
+		if hall < 5:
+			var grow: float = walls.yard_extent(hall + 1) - walls.yard_extent(hall)
+			row(modal_body, "Ратуша ур. %d: стена отодвинется примерно на %d м, внутри появятся новые участки." % [hall + 1, roundi(grow)])
+		else:
+			row(modal_body, "Двор достиг наибольшего размера текущего этапа.")
+	card_note(modal_body, "Сторожевая башня", Color("#f2dfac"), 20)
+	var tower_level := built_level("SUP-04")
+	if tower_level > 0:
+		var now := CityDefence.watchtower_stats(tower_level)
+		var later := CityDefence.watchtower_stats(mini(tower_level + 1, 5))
+		defence_table(modal_body, CityDefence.rows_for_watchtower(now), CityDefence.rows_for_watchtower(later) if tower_level < 5 else [])
+	else:
+		row(modal_body, "Не построена · откроется с ратуши %d. Даёт обзор подступов и лучников при обороне." % int(data.unlockLevels.get("SUP-04", 3)))
+	if not defence_active():
+		card_note(modal_body, "Сейчас сервер в бою учитывает только гарнизон. Бонусы стен и башни заработают после обновления сервера (city-defence).", Color("#c9b58f"), 14).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	panel_action(modal_body, "Строить оборону", show_build_menu.bind("support"))
 
 func confirm_cancel_training(building: Dictionary, order: Dictionary) -> void:
 	open_modal("Отменить обучение?", "center", "ДРЕНОВАР · ОРУЖЕЙНАЯ")
@@ -3580,6 +3749,8 @@ func accept(response: Dictionary) -> void:
 	if not placing.is_empty() and is_instance_valid(stage) and map_name == "city":
 		var plots := []
 		for marker in stage.empty_plots:
+			if placing.has("move") and not plot_cleared(marker.item):
+				continue
 			plots.append({"position": marker.position, "plot": marker.item, "cleared": plot_cleared(marker.item)})
 		placing.plots = plots
 		var current: Dictionary = nearest_placement_plot(placing.free)
@@ -4251,6 +4422,9 @@ func pick_marker(screen_position: Vector2) -> void:
 	action_ring.close()
 	if best.get("kind","") == "building":
 		open_building_ring(best)
+	elif best.get("kind","") == "wall":
+		action_ring.open("city-walls", "Стены поселения", best.position, stage.camera,
+			[["Оборона", "defence", show_city_defence], ["Строить", "build", show_build_menu.bind("support")]])
 	elif best.get("kind","") == "encounter":
 		inspect_encounter(best.item)
 	elif best.get("kind","") == "settlement":

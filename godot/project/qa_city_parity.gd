@@ -78,9 +78,14 @@ func marker_rows(markers: Array) -> Array:
 func without_scaffold(rows: Array) -> Array:
 	return rows.filter(func(row): return not String(row).contains("scaffold"))
 
-func snapshot(stage: Node3D) -> Dictionary:
+# Since the city wall (build 36) only plots inside the yard are offered; the 0.5.9
+# plots are compared within the same yard.
+func yard_plots(plots: Array, yard) -> Array:
+	return plots.filter(func(m): return str(m.item.id).begins_with("site-") or yard.inside(m.position.x, m.position.z, 6.0))
+
+func snapshot(stage: Node3D, yard) -> Dictionary:
 	return {"batches": batch_rows(stage), "buildings": without_scaffold(node_rows(stage.buildings)), "workers": node_rows(stage.workers),
-		"markers": marker_rows(stage.place_markers), "plots": marker_rows(stage.empty_plots),
+		"markers": marker_rows(stage.place_markers), "plots": marker_rows(yard_plots(stage.empty_plots, yard)),
 		"trees": stage.selectable_trees.map(func(t): return t.id), "standing": stage.standing_tree_cells.size(),
 		"parade": stage.parade_slots.map(func(s): return var_to_str(s.position)),
 		"road": var_to_str(stage.city_road_mesh.mesh.get_faces()) if is_instance_valid(stage.city_road_mesh) else ""}
@@ -92,8 +97,8 @@ func compare(label: String, before: Node3D, after: Node3D) -> void:
 			stage.zoom = zoom
 			stage.update_camera(0, true)
 			stage.update_visible_batches()
-		var a := snapshot(before)
-		var b := snapshot(after)
+		var a := snapshot(before, after.walls)
+		var b := snapshot(after, after.walls)
 		for key in a:
 			check(a[key] == b[key], "%s zoom=%d: %s differs from 0.5.9" % [label, zoom, key])
 

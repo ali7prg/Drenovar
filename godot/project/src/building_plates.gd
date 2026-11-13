@@ -42,7 +42,7 @@ func _draw() -> void:
 	var order: Dictionary = game.construction_order()
 	var site: Dictionary = game.shown_site
 	for marker in stage.place_markers:
-		if marker.get("kind", "") != "building":
+		if not marker.get("kind", "") in ["building", "wall"]:
 			continue
 		var anchor: Vector3 = marker.position + Vector3.UP * 3.5
 		if camera.is_position_behind(anchor):
@@ -51,7 +51,7 @@ func _draw() -> void:
 		if at.x < -80 or at.y < -40 or at.x > view.x + 80 or at.y > view.y + 40:
 			continue
 		var building: Dictionary = marker.item
-		var title: String = game.building_title(building.type).get_slice("/", 0)
+		var title: String = "Стены" if marker.kind == "wall" else game.building_title(building.type).get_slice("/", 0)
 		draw_name(at, title, alpha)
 		draw_badge(at + Vector2(0, 17), int(building.get("level", 1)), alpha)
 		if site.get("key", "") == str(building.get("id", "_")):

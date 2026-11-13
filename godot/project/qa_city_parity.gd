@@ -83,8 +83,25 @@ func without_scaffold(rows: Array) -> Array:
 func yard_plots(plots: Array, yard) -> Array:
 	return plots.filter(func(m): return str(m.item.id).begins_with("site-") or yard.inside(m.position.x, m.position.z, 6.0))
 
+# Levels reworked from the architectural references (architecture-v2, game.json
+# "levelModels") intentionally replace the 0.5.9 model at their plot; both the new
+# scene and the old model standing at that spot are left out, every other building
+# node must still match.
+var reworked_spots := {}
+
+func without_reworked(rows: Array) -> Array:
+	return rows.filter(func(row):
+		var parts := String(row).split("|")
+		return parts.size() < 2 or not reworked_spots.has(parts[1]))
+
+func note_reworked(stage: Node3D) -> void:
+	reworked_spots.clear()
+	for child: Node3D in stage.buildings.get_children():
+		if child.scene_file_path.contains("/architecture-v2/"):
+			reworked_spots[var_to_str(child.transform.origin)] = true
+
 func snapshot(stage: Node3D, yard) -> Dictionary:
-	return {"batches": batch_rows(stage), "buildings": without_scaffold(node_rows(stage.buildings)), "workers": node_rows(stage.workers),
+	return {"batches": batch_rows(stage), "buildings": without_reworked(without_scaffold(node_rows(stage.buildings))), "workers": node_rows(stage.workers),
 		"markers": marker_rows(stage.place_markers), "plots": marker_rows(yard_plots(stage.empty_plots, yard)),
 		"trees": stage.selectable_trees.map(func(t): return t.id), "standing": stage.standing_tree_cells.size(),
 		"parade": stage.parade_slots.map(func(s): return var_to_str(s.position)),
@@ -97,6 +114,7 @@ func compare(label: String, before: Node3D, after: Node3D) -> void:
 			stage.zoom = zoom
 			stage.update_camera(0, true)
 			stage.update_visible_batches()
+		note_reworked(after)
 		var a := snapshot(before, after.walls)
 		var b := snapshot(after, after.walls)
 		for key in a:

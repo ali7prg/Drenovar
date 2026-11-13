@@ -19,6 +19,13 @@ const MEADOW_SHADER = preload("res://src/meadow.gdshader")
 const FOREST_SHADER = preload("res://src/forest.gdshader")
 const CityWorks = preload("res://src/city_works.gd")
 const CityWalls = preload("res://src/city_walls.gd")
+# B18 gate scenes are authored at plot scale; in the city wall they stand larger so
+# the carriageway and towers match the height of the ring curtain.
+const GATE_SCENE_SCALES := [1.9, 2.0, 2.0, 2.1, 2.2]
+const GATE_SCENE_HALF_SPAN := 5.9
+
+static func gate_scene_scale(level: int) -> float:
+	return GATE_SCENE_SCALES[clampi(level, 1, 5) - 1]
 var works := CityWorks.new()
 var walls := CityWalls.new()
 var forest_materials := {}
@@ -1019,13 +1026,20 @@ func present_city(state: Dictionary, staged := false) -> void:
 			if city_base_type(building.type) == "SUP-03" and walls_shown(hall_level, defence_level):
 				wall_markers.append(building)
 				break
-			var scale := float(asset.scale)*(1+0.055*(int(building.level)-1))
-			wanted_buildings.append(["model", asset.path, model_transform(x,y,z,0,scale)])
-			wanted_workers.append([id, Vector3(x,y,z)])
-			var levels: Dictionary = data.architecture.get(building.type, {})
-			var upgrade: String = levels.get(str(int(building.level)), "")
-			if not upgrade.is_empty():
-				wanted_buildings.append(["detail", upgrade, Transform3D(Basis.IDENTITY, Vector3(x,y,z))])
+			# Reworked levels (architecture-v2) are complete scenes per type and level, so they
+			# never alter the shared model or overlays used by other levels and types.
+			var level_model: Dictionary = level_model_for(building.type, int(building.level))
+			if not level_model.is_empty():
+				wanted_buildings.append(["model", level_model.path, model_transform(x,y,z,0,float(level_model.get("scale", 1.0)))])
+				wanted_workers.append([id, Vector3(x,y,z), level_worker_offset(level_model)])
+			else:
+				var scale := float(asset.scale)*(1+0.055*(int(building.level)-1))
+				wanted_buildings.append(["model", asset.path, model_transform(x,y,z,0,scale)])
+				wanted_workers.append([id, Vector3(x,y,z)])
+				var levels: Dictionary = data.architecture.get(building.type, {})
+				var upgrade: String = levels.get(str(int(building.level)), "")
+				if not upgrade.is_empty():
+					wanted_buildings.append(["detail", upgrade, Transform3D(Basis.IDENTITY, Vector3(x,y,z))])
 			place_markers.append({"position":Vector3(x,y+5,z),"id":building.id,"kind":"building","item":building})
 			break
 	# The wall ring: grows with the town hall, bulges around buildings, sites and
@@ -1038,7 +1052,15 @@ func present_city(state: Dictionary, staged := false) -> void:
 	for plot in plots:
 		if plot.id == order_plot or plot.id.begins_with("site-"):
 			obstacles.append([Vector2(float(plot.x), float(plot.z)), CityWalls.BUILDING_CLEARANCE])
+	# The main gate of the ring is the "walls and gate" building itself (B18 levels I-V).
+	var gate_scene: Dictionary = level_model_for("SUP-03", maxi(1, defence_level))
+	walls.custom_main_gate = not gate_scene.is_empty()
+	walls.main_gate_span = GATE_SCENE_HALF_SPAN * gate_scene_scale(defence_level)
 	walls.plan(hall_spot, hall_level, defence_level, walls_shown(hall_level, defence_level), obstacles, district, sample_city)
+	if walls.visible and walls.custom_main_gate:
+		var out := walls.main_gate_outward
+		var gate_basis := Basis(Vector3.UP, atan2(out.x, out.z)).scaled(Vector3.ONE * gate_scene_scale(defence_level))
+		wanted_buildings.append(["model", gate_scene.path, Transform3D(gate_basis, walls.main_gate)])
 	for building in wall_markers:
 		place_markers.append({"position": walls.main_gate + Vector3.UP * 7.0, "id": building.id, "kind": "building", "item": building, "wall": true})
 	if walls.visible and wall_markers.is_empty():
@@ -1144,12 +1166,12 @@ func sync_city_workers(wanted: Array) -> void:
 			existing[signature] = child
 	var kept := {}
 	for item in wanted:
-		var signature := "%s|%s" % [item[0], var_to_str(item[1])]
+		var signature := "%s|%s|%s" % [item[0], var_to_str(item[1]), var_to_str(item[2] if item.size() > 2 else null)]
 		if existing.has(signature) and not kept.has(signature):
 			kept[signature] = true
 			continue
 		var before := workers.get_child_count()
-		add_worker(item[0], item[1])
+		add_worker(item[0], item[1], item[2] if item.size() > 2 else null)
 		if workers.get_child_count() > before:
 			workers.get_child(workers.get_child_count() - 1).set_meta("city_signature", signature)
 			city_nodes_created += 1
@@ -1158,7 +1180,18 @@ func sync_city_workers(wanted: Array) -> void:
 		if not kept.has(signature):
 			existing[signature].free()
 
-func add_worker(building: String, base: Vector3) -> void:
+func level_worker_offset(level_model: Dictionary) -> Variant:
+	var w: Variant = level_model.get("worker")
+	return Vector3(float(w[0]), float(w[1]), float(w[2])) if w is Array and w.size() == 3 else null
+
+func level_model_for(type: String, level: int) -> Dictionary:
+	var levels: Variant = data.get("levelModels", {}).get(type)
+	if not levels is Dictionary:
+		return {}
+	var entry: Variant = levels.get(str(level))
+	return entry if entry is Dictionary else {}
+
+func add_worker(building: String, base: Vector3, offset_override: Variant = null) -> void:
 	var worker: String = {
 		"hall":"Worker_Carrier", "starterHall":"Worker_Carrier", "warehouse":"Worker_Carrier",
 		"market27":"Worker_Carrier", "quarry27":"Worker_Carrier", "ironmine27":"Worker_Carrier",
@@ -1169,6 +1202,9 @@ func add_worker(building: String, base: Vector3) -> void:
 	var offset := Vector3(3.2 if building == "farm" else (-3.4 if building == "lumber" else 0.0), 0.0, 2.8)
 	if building in ["hall", "starterHall"]:
 		offset.z = 4.1 if building == "starterHall" else 5.2
+	if offset_override is Vector3:
+		# reworked levels keep the worker on open ground clear of their new stairs and posts
+		offset = offset_override
 	var p := ground_point(base + offset)
 	var actor := add_model(workers, data.models[worker].path, model_transform(p.x, p.y, p.z, 0.0, 1.25))
 	actor.set_meta("base", base + offset)

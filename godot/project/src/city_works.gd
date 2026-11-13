@@ -260,6 +260,9 @@ func present_builders(site: Dictionary, now_ms: float) -> void:
 		build_site(site)
 	site_node.visible = true
 	site_node.position = centre
+	# The walls-and-gate upgrade wraps the main gate: frame stretched along the wall.
+	var frame: Vector3 = site.get("frame", Vector3.ONE)
+	site_node.basis = Basis(Vector3.UP, float(site.get("yaw", 0.0))) * Basis.from_scale(frame)
 	if is_instance_valid(site_model):
 		# Rises from 12 % (foundations) to full height as the timer runs.
 		var height := lerpf(0.12, 1.0, progress)

@@ -39,6 +39,11 @@ var gates: Array[int] = []
 var gate_roads: Array = []
 var main_gate := Vector3.ZERO
 var main_gate_outward := Vector3.BACK
+# When the "walls and gate" level scene stands in the main gate, the ring leaves an
+# opening of main_gate_span metres each side and draws no gate house of its own there.
+var custom_main_gate := false
+var main_gate_span := 0.0
+var main_gate_half := GATE_HALF
 var signature := ""
 var tower_count := 0
 var node: Node3D
@@ -104,10 +109,14 @@ func yard_size() -> Vector2:
 		high = high.max(p)
 	return high - low
 
+func gate_half(gate_index: int) -> int:
+	return main_gate_half if gate_index == 0 else GATE_HALF
+
 func is_gate_segment(i: int) -> bool:
-	for g in gates:
-		var offset := posmod(i - g + GATE_HALF, SAMPLES)
-		if offset < GATE_HALF * 2:
+	for k in gates.size():
+		var h := gate_half(k)
+		var offset := posmod(i - gates[k] + h, SAMPLES)
+		if offset < h * 2:
 			return true
 	return false
 
@@ -195,7 +204,7 @@ func plan(hall_position: Vector2, level: int, defence_level: int, show_wall: boo
 			eased[i] = minf(dry[i], maxf(required[i], (low + sum / 7.0) * 0.5))
 		radii = eased
 	plan_gates(obstacles, district)
-	var parts: Array = [visible, wall_level, Array(gates)]
+	var parts: Array = [visible, wall_level, Array(gates), custom_main_gate, main_gate_half]
 	for i in range(0, SAMPLES, 3):
 		parts.append(snappedf(radii[i], 0.1))
 	signature = JSON.stringify(parts)
@@ -226,6 +235,11 @@ func plan_gates(obstacles: Array, district: Variant) -> void:
 	if gates.is_empty():
 		gates.append(int(round(0.25 * SAMPLES)))
 	var g := gates[0]
+	main_gate_half = GATE_HALF
+	if custom_main_gate and main_gate_span > 0.0:
+		var step := wall_point(g).distance_to(wall_point(g + 1))
+		# the ring overlaps the ends of the gate wings slightly, so no gap shows
+		main_gate_half = maxi(GATE_HALF, floori(main_gate_span / maxf(step, 0.5)))
 	var at := wall_point(g)
 	var outward := direction(g)
 	main_gate = Vector3(at.x, float(height_at.call(at.x, at.y)), at.y)
@@ -257,6 +271,8 @@ func gate_blocked(i: int, obstacles: Array, district: Variant) -> bool:
 func material(key: String, tint: Color, scale: float) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_texture = load(TEXTURES + key + "-albedo.jpg")
+	m.normal_scale = 0.7
+	m.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_GREEN
 	m.normal_enabled = true
 	m.normal_texture = load(TEXTURES + key + "-normal.png")
 	m.roughness_texture = load(TEXTURES + key + "-roughness.png")
@@ -308,10 +324,36 @@ func span(a: Vector3, b: Vector3, bottom: float, height: float, thickness: float
 	var origin := (a + b) * 0.5 + Vector3.UP * (bottom + height * 0.5) + across * inward
 	return Transform3D(basis, origin)
 
-# Look of the wall by the level of "walls and gate" (0 = palisade of town hall II):
-# timber up to level 2, stone towers from level 3, a stone curtain at level 5.
+# Look of the wall by the level of "walls and gate" (1 = palisade of town hall II).
+# Every level follows the B18 references and grows in height, thickness and detail:
+# I   palisade of pointed logs on a low stone footing, timber watch towers;
+# II  taller, thicker palisade, heavy posts with caps, a fighting walkway;
+# III boarded timber curtain with crenellated timber parapet, towers on stone bases;
+# IV  stone curtain carrying a timber gallery on corbels, stone towers with timber tops;
+# V   high stone curtain with a covered gallery and battlements, tall stone towers.
+const STYLE := {
+	1: {"footing": 0.5, "height": 3.3, "thick": 0.5, "stake": 0.22, "tower": 3.4, "tower_height": 5.8, "spacing": 32.0},
+	2: {"footing": 0.7, "height": 3.9, "thick": 0.6, "stake": 0.27, "tower": 3.8, "tower_height": 6.8, "spacing": 28.0},
+	3: {"footing": 0.9, "height": 4.3, "thick": 0.7, "stake": 0.0, "tower": 4.2, "tower_height": 7.8, "spacing": 24.0},
+	4: {"footing": 1.0, "height": 3.8, "thick": 1.4, "stake": 0.0, "tower": 4.6, "tower_height": 8.8, "spacing": 22.0},
+	5: {"footing": 1.2, "height": 4.7, "thick": 1.7, "stake": 0.0, "tower": 5.0, "tower_height": 10.0, "spacing": 20.0},
+}
+
+static func style(level: int) -> Dictionary:
+	return STYLE[clampi(level, 1, 5)]
+
+# Top of the wall (walking level + parapet) above the ground, by level.
+static func wall_top(level: int) -> float:
+	var st := style(level)
+	var top: float = st.footing + st.height
+	if level == 4:
+		top += 1.5
+	elif level == 5:
+		top += 2.4
+	return top
+
 static func tier(level: int) -> String:
-	if level >= 5:
+	if level >= 4:
 		return "stone"
 	if level >= 3:
 		return "towers"
@@ -322,15 +364,30 @@ func put(parts: Dictionary, key: String, mesh: String, surface: String, transfor
 		parts[key] = {"mesh": mesh, "material": surface, "transforms": []}
 	parts[key].transforms.append(xform * transform_value)
 
+func noise(i: int, k: int) -> float:
+	var v := sin(float(i) * 12.9898 + float(k) * 78.233) * 43758.5453
+	return v - floor(v)
+
+func inward_of(a: Vector3, b: Vector3) -> Vector3:
+	var flat_along := Vector3(b.x - a.x, 0.0, b.z - a.z)
+	var across := flat_along.cross(Vector3.UP).normalized()
+	var to_center := Vector3(center.x, 0.0, center.y) - (a + b) * 0.5
+	to_center.y = 0.0
+	return across if across.dot(to_center) >= 0.0 else -across
+
+func piece(along: Vector3, inward: Vector3, size: Vector3, origin: Vector3) -> Transform3D:
+	return Transform3D(Basis(along * size.x, Vector3.UP * size.y, inward * size.z), origin)
+
 # Adds this wall to `parts` (one batch per part and material), moved by `xform`.
 func collect(parts: Dictionary, xform := Transform3D.IDENTITY) -> void:
 	tower_count = 0
 	if not visible or radii.is_empty():
 		return
-	var look := tier(wall_level)
-	var curtain := "stone_wall" if look == "stone" else "planks"
-	var wall_height := 4.4 + 0.3 * (wall_level - 1) + (0.8 if look == "stone" else 0.0)
-	var footing_height := 1.3
+	var level := clampi(wall_level, 1, 5)
+	var st := style(level)
+	var fh: float = st.footing
+	var h: float = st.height
+	var thick: float = st.thick
 	var points: Array = []
 	for i in SAMPLES:
 		points.append(ground(wall_point(i)))
@@ -339,36 +396,77 @@ func collect(parts: Dictionary, xform := Transform3D.IDENTITY) -> void:
 			continue
 		var a: Vector3 = points[i]
 		var b: Vector3 = points[(i + 1) % SAMPLES]
-		put(parts, "footing", "box", "stone", span(a, b, -2.6, 2.6 + footing_height, 1.9, 0.0, 0.25), xform)
-		put(parts, "curtain_" + curtain, "box", curtain, span(a, b, footing_height - 0.05, wall_height, 0.9 if look == "stone" else 0.75, 0.0, 0.08), xform)
-		put(parts, "walkway", "box", "timber", span(a, b, footing_height + wall_height - 0.95, 0.22, 1.5, 1.05, 0.05), xform)
-		put(parts, "rail", "box", "timber", span(a, b, footing_height + wall_height - 0.05, 0.12, 0.12, 1.7, 0.05), xform)
-		var along := b - a
-		var across := span(a, b, 0.0, 1.0, 1.0, 0.0).basis.z.normalized()
-		if look == "stone":
-			# Battlements: merlons along the top of the stone curtain.
-			var merlons := maxi(1, int(along.length() / 1.1))
+		var along := Vector3(b.x - a.x, b.y - a.y, b.z - a.z)
+		var length := along.length()
+		along = along.normalized()
+		var flat := Vector3(along.x, 0.0, along.z).normalized()
+		var inward := inward_of(a, b)
+		put(parts, "footing", "box", "stone", span(a, b, -2.6, 2.6 + fh, thick + 0.55, 0.0, 0.25), xform)
+		if level <= 2:
+			# palisade: round stakes with sharpened tops, rails on the inner side
+			var r: float = st.stake
+			var n := maxi(1, ceili(length / (r * 2.0)))
+			for k in n:
+				var t := (k + 0.5) / n
+				var p := a.lerp(b, t)
+				var hh := h * (0.95 + 0.1 * noise(i, k))
+				put(parts, "curtain_planks", "log", "logs", Transform3D(Basis.IDENTITY.scaled(Vector3(r * 2.0, hh, r * 2.0)), p + Vector3.UP * (fh + hh * 0.5)), xform)
+				put(parts, "stake_tips", "cone", "logs", Transform3D(Basis.IDENTITY.scaled(Vector3(r * 2.0, r * 2.6, r * 2.0)), p + Vector3.UP * (fh + hh + r * 1.3)), xform)
+			for y in [0.3, 0.72]:
+				put(parts, "rails", "box", "dark", span(a, b, fh + h * y, 0.16, 0.14, r + 0.08, 0.1), xform)
+			if level == 2:
+				put(parts, "walkway", "box", "timber", span(a, b, fh + h - 1.25, 0.2, 1.3, r + 0.75, 0.06), xform)
+				put(parts, "walkway_rail", "box", "dark", span(a, b, fh + h - 0.25, 0.1, 0.1, r + 1.35, 0.06), xform)
+				if i % 3 == 0:
+					var q := a + inward * (r + 0.1)
+					put(parts, "posts_heavy", "box", "planks", piece(flat, inward, Vector3(0.75, h + 1.2, 0.75), q + Vector3.UP * (fh + (h + 1.2) * 0.5)), xform)
+					put(parts, "post_caps", "pyramid", "timber", Transform3D(Basis(Vector3.UP, PI * 0.25).scaled(Vector3(0.2, 0.22, 0.2)), q + Vector3.UP * (fh + h + 1.2 + 0.32)), xform)
+					put(parts, "brackets", "box", "dark", piece(flat, inward, Vector3(0.14, 0.14, 1.3), q + inward * 0.6 + Vector3.UP * (fh + h - 1.5)), xform)
+		elif level == 3:
+			# boarded timber curtain, battens and rails outside, crenellated timber parapet
+			put(parts, "curtain_boards", "box", "planks", span(a, b, fh - 0.05, h, 0.55, 0.0, 0.06), xform)
+			var battens := maxi(1, roundi(length / 1.3))
+			for k in battens:
+				var p := a.lerp(b, (k + 0.5) / battens)
+				put(parts, "battens", "box", "dark", piece(flat, inward, Vector3(0.18, h, 0.1), p - inward * 0.32 + Vector3.UP * (fh + h * 0.5)), xform)
+			for y in [0.25, 0.65]:
+				put(parts, "rails", "box", "dark", span(a, b, fh + h * y, 0.18, 0.1, -0.33, 0.06), xform)
+			var merlons := maxi(1, int(length / 1.0))
 			for k in merlons:
-				var t := (k + 0.5) / merlons
-				var p := a.lerp(b, t) + Vector3.UP * (footing_height + wall_height + 0.4)
-				put(parts, "merlons", "box", "stone_wall", Transform3D(Basis(along.normalized() * 0.6, Vector3.UP * 0.8, across * 0.9), p), xform)
+				var p := a.lerp(b, (k + 0.5) / merlons)
+				put(parts, "parapet_timber", "box", "planks", piece(flat, inward, Vector3(0.55, 0.8, 0.5), p + Vector3.UP * (fh + h + 0.4)), xform)
+			put(parts, "walkway", "box", "timber", span(a, b, fh + h - 0.2, 0.2, 1.5, 0.95, 0.06), xform)
+			if i % 2 == 0:
+				put(parts, "walk_posts", "box", "dark", piece(flat, inward, Vector3(0.25, h, 0.25), a + inward * 1.55 + Vector3.UP * (fh + h * 0.5)), xform)
 		else:
-			# Pointed log tips along the top of the palisade.
-			var count := maxi(1, int(along.length() / 0.5))
-			for k in count:
-				var t := (k + 0.5) / count
-				var p := a.lerp(b, t) + Vector3.UP * (footing_height + wall_height + 0.28)
-				put(parts, "spikes", "prism", "planks", Transform3D(Basis(along.normalized() * 0.42, Vector3.UP * 0.56, across * 0.5), p - across * 0.12), xform)
-	if look != "stone":
-		# Upright logs on the outer face at every sample.
-		for i in SAMPLES:
-			if is_gate_segment(i) and is_gate_segment(i - 1):
-				continue
-			var p: Vector3 = points[i]
-			var out := Vector3(p.x - center.x, 0.0, p.z - center.y).normalized()
-			put(parts, "posts", "log", "planks", Transform3D(Basis.IDENTITY.scaled(Vector3(0.62, wall_height + 0.9, 0.62)),
-				p + Vector3.UP * (footing_height + (wall_height + 0.9) * 0.5 - 0.3) + out * 0.42), xform)
-	collect_towers(parts, xform, points, wall_height, footing_height, look)
+			# masonry curtain with a string course, corbels and a timber gallery on top
+			put(parts, "curtain_stone_wall", "box", "stone_wall", span(a, b, fh - 0.05, h, thick, 0.0, 0.08), xform)
+			put(parts, "stone_course", "box", "stone", span(a, b, fh + h - 0.05, 0.25, thick + 0.25, 0.0, 0.1), xform)
+			var top := fh + h + 0.2
+			put(parts, "gallery_deck", "box", "timber", span(a, b, top, 0.18, thick + 0.8, -0.25, 0.06), xform)
+			var corbels := maxi(1, roundi(length / 1.1))
+			for k in corbels:
+				var p := a.lerp(b, (k + 0.5) / corbels)
+				put(parts, "corbels", "box", "dark", piece(flat, inward, Vector3(0.22, 0.55, 0.5), p - inward * (thick * 0.5 + 0.3) + Vector3.UP * (top - 0.3)), xform)
+			var outer := -inward * (thick * 0.5 + 0.55)
+			if level == 4:
+				var boards := maxi(1, roundi(length / 0.6))
+				for k in boards:
+					var p := a.lerp(b, (k + 0.5) / boards)
+					var bh := 1.3 if k % 2 == 0 else 0.9
+					put(parts, "gallery_boards", "box", "planks", piece(flat, inward, Vector3(0.56, bh, 0.12), p + outer + Vector3.UP * (top + 0.18 + bh * 0.5)), xform)
+				put(parts, "gallery_rail", "box", "dark", span(a, b, top + 1.0, 0.12, 0.12, thick * 0.5 + 0.1, 0.06), xform)
+			else:
+				var merlons := maxi(1, int(length / 1.1))
+				for k in merlons:
+					var p := a.lerp(b, (k + 0.5) / merlons)
+					put(parts, "merlons", "box", "stone_wall", piece(flat, inward, Vector3(0.62, 0.95, 0.45), p + outer + Vector3.UP * (top + 0.18 + 0.47)), xform)
+				put(parts, "gallery_posts", "box", "timber", piece(flat, inward, Vector3(0.24, 2.2, 0.24), a + outer + inward * 0.25 + Vector3.UP * (top + 1.25)), xform)
+				put(parts, "gallery_posts", "box", "timber", piece(flat, inward, Vector3(0.24, 2.2, 0.24), a + inward * (thick * 0.5 + 0.2) + Vector3.UP * (top + 1.25)), xform)
+				# covered gallery: roof slab sloping down to the outside
+				var roof_basis := Basis(flat * (length + 0.12), Vector3.UP * 0.16, inward * (thick + 1.9)).rotated(flat, -0.38 if inward.cross(flat).y > 0.0 else 0.38)
+				put(parts, "gallery_roof", "box", "roof", Transform3D(roof_basis, (a + b) * 0.5 + Vector3.UP * (top + 2.55) - inward * 0.2), xform)
+	collect_towers(parts, xform, points, level)
 
 func build(parent: Node3D) -> void:
 	if is_instance_valid(node):
@@ -385,14 +483,18 @@ func build(parent: Node3D) -> void:
 
 static var shared_surfaces := {}
 
+# Same surface family as the reworked buildings (architecture-v2), mapped in world
+# space because every wall part is a scaled instance of one mesh.
 func surfaces() -> Dictionary:
 	if shared_surfaces.is_empty():
 		shared_surfaces = {
-			"stone": material("stone", Color("#b9b3a6"), 0.32),
-			"stone_wall": material("stone", Color("#bfb6a6"), 0.24),
-			"planks": material("dark_oak", Color("#a77a55"), 0.42),
-			"timber": material("oak", Color("#c49a6c"), 0.5),
-			"roof": material("slate", Color("#4f8f86"), 0.45),
+			"stone": material("stone", Color(0.78, 0.74, 0.67), 0.32),
+			"stone_wall": material("stone", Color(0.86, 0.81, 0.72), 0.26),
+			"planks": material("oak", Color(0.86, 0.76, 0.68), 0.45),
+			"logs": material("dark_oak", Color(1.3, 1.12, 0.92), 0.6),
+			"dark": material("dark_oak", Color(0.82, 0.78, 0.76), 0.5),
+			"timber": material("oak", Color(1.0, 0.9, 0.78), 0.5),
+			"roof": material("oak", Color(0.8, 0.74, 0.74), 0.9),
 			"banner": flat(Color("#2f4f8f")),
 			"trim": flat(Color("#d9b45c")),
 		}
@@ -405,6 +507,12 @@ func meshes() -> Dictionary:
 	log_mesh.height = 1.0
 	log_mesh.radial_segments = 8
 	log_mesh.rings = 1
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.0
+	cone.bottom_radius = 0.5
+	cone.height = 1.0
+	cone.radial_segments = 8
+	cone.rings = 1
 	var prism := PrismMesh.new()
 	prism.size = Vector3.ONE
 	var pyramid := CylinderMesh.new()
@@ -413,7 +521,7 @@ func meshes() -> Dictionary:
 	pyramid.height = 2.9
 	pyramid.radial_segments = 4
 	pyramid.rings = 1
-	return {"box": BoxMesh.new(), "log": log_mesh, "prism": prism, "pyramid": pyramid}
+	return {"box": BoxMesh.new(), "log": log_mesh, "cone": cone, "prism": prism, "pyramid": pyramid}
 
 func emit(parent: Node3D, parts: Dictionary) -> void:
 	var surface_set := surfaces()
@@ -424,31 +532,54 @@ func emit(parent: Node3D, parts: Dictionary) -> void:
 		var part: Dictionary = parts[key]
 		batch(parent, str(key), mesh_set[part.mesh], surface_set[part.material], part.transforms)
 
-func tower_at(parts: Dictionary, xform: Transform3D, p: Vector3, out: Vector3, size: float, height: float, footing_height: float, look: String) -> void:
+func tower_at(parts: Dictionary, xform: Transform3D, p: Vector3, out: Vector3, size: float, height: float, level: int) -> void:
 	var yaw := atan2(out.x, out.z)
 	var turn := Basis(Vector3.UP, yaw)
-	var body := "planks" if look == "timber" else "stone_wall"
-	put(parts, "tower_footing", "box", "stone", Transform3D(turn.scaled(Vector3(size + 0.8, 3.6 + footing_height, size + 0.8)), p + Vector3.UP * (footing_height - 2.6 + (3.6 + footing_height) * 0.5 - footing_height)), xform)
-	put(parts, "tower_body_" + body, "box", body, Transform3D(turn.scaled(Vector3(size, height, size)), p + Vector3.UP * (footing_height + height * 0.5)), xform)
-	var deck := footing_height + height
+	put(parts, "tower_footing", "box", "stone", Transform3D(turn.scaled(Vector3(size + 0.8, 3.4, size + 0.8)), p + Vector3.UP * (-1.0)), xform)
+	var deck := height
+	if level <= 3:
+		if level == 3:
+			put(parts, "tower_base_stone", "box", "stone_wall", Transform3D(turn.scaled(Vector3(size + 0.4, 1.8, size + 0.4)), p + Vector3.UP * 0.9), xform)
+		put(parts, "tower_body_planks", "box", "planks", Transform3D(turn.scaled(Vector3(size, height, size)), p + Vector3.UP * (height * 0.5)), xform)
+		for corner in [Vector3(-1, 0, -1), Vector3(1, 0, -1), Vector3(-1, 0, 1), Vector3(1, 0, 1)]:
+			var c: Vector3 = turn * (corner * (size * 0.5 + 0.05))
+			put(parts, "tower_corner_posts", "box", "dark", Transform3D(Basis.IDENTITY.scaled(Vector3(0.32, height, 0.32)), p + c + Vector3.UP * (height * 0.5)), xform)
+		for y in [0.35, 0.7]:
+			put(parts, "tower_bands", "box", "dark", Transform3D(turn.scaled(Vector3(size + 0.08, 0.18, size + 0.08)), p + Vector3.UP * (height * y)), xform)
+	else:
+		var stone_h := height if level == 5 else height - 2.2
+		put(parts, "tower_body_stone_wall", "box", "stone_wall", Transform3D(turn.scaled(Vector3(size, stone_h, size)), p + Vector3.UP * (stone_h * 0.5)), xform)
+		put(parts, "tower_course", "box", "stone", Transform3D(turn.scaled(Vector3(size + 0.3, 0.3, size + 0.3)), p + Vector3.UP * stone_h), xform)
+		if level == 4:
+			# jettied timber watch room on the masonry
+			put(parts, "tower_room", "box", "planks", Transform3D(turn.scaled(Vector3(size + 0.6, 2.2, size + 0.6)), p + Vector3.UP * (stone_h + 1.1)), xform)
+		else:
+			for side in 4:
+				var dir := turn * Vector3(cos(side * PI * 0.5), 0, sin(side * PI * 0.5))
+				var tangent := dir.cross(Vector3.UP)
+				for k in [-1.0, 0.0, 1.0]:
+					var c: Vector3 = p + dir * (size * 0.5 + 0.1) + tangent * k * size * 0.33
+					put(parts, "tower_merlons", "box", "stone_wall", Transform3D(turn.scaled(Vector3(0.6, 0.85, 0.6)), c + Vector3.UP * (height + 0.42)), xform)
 	put(parts, "tower_deck", "box", "timber", Transform3D(turn.scaled(Vector3(size + 0.9, 0.35, size + 0.9)), p + Vector3.UP * (deck + 0.17)), xform)
 	for corner in [Vector3(-1, 0, -1), Vector3(1, 0, -1), Vector3(-1, 0, 1), Vector3(1, 0, 1)]:
 		var c: Vector3 = turn * (corner * (size * 0.5 + 0.25))
 		put(parts, "tower_pillars", "box", "timber", Transform3D(Basis.IDENTITY.scaled(Vector3(0.3, 1.9, 0.3)), p + c + Vector3.UP * (deck + 1.25)), xform)
-	var roof_scale := size / 3.2
-	put(parts, "tower_roofs", "pyramid", "roof", Transform3D((turn * Basis(Vector3.UP, PI * 0.25)).scaled(Vector3(roof_scale, roof_scale, roof_scale)), p + Vector3.UP * (deck + 2.5 + 1.45 * roof_scale)), xform)
-	put(parts, "banners", "box", "banner", Transform3D(turn.scaled(Vector3(1.6, 3.0, 0.08)), p + Vector3.UP * (deck - 2.2) + out * (size * 0.5 + 0.06)), xform)
-	put(parts, "banner_trim", "box", "trim", Transform3D(turn.scaled(Vector3(0.7, 0.7, 0.1)), p + Vector3.UP * (deck - 1.9) + out * (size * 0.5 + 0.12)), xform)
+	var roof_scale := size / 3.2 * (1.0 + 0.05 * (level - 1))
+	put(parts, "tower_roofs", "pyramid", "roof", Transform3D((turn * Basis(Vector3.UP, PI * 0.25)).scaled(Vector3(roof_scale, roof_scale * (1.0 + 0.08 * level), roof_scale)), p + Vector3.UP * (deck + 2.5 + 1.45 * roof_scale * (1.0 + 0.08 * level))), xform)
+	if level >= 2:
+		put(parts, "banners", "box", "banner", Transform3D(turn.scaled(Vector3(1.6, 3.0, 0.08)), p + Vector3.UP * (deck - 2.2) + out * (size * 0.5 + 0.06)), xform)
+		put(parts, "banner_trim", "box", "trim", Transform3D(turn.scaled(Vector3(0.7, 0.7, 0.1)), p + Vector3.UP * (deck - 1.9) + out * (size * 0.5 + 0.12)), xform)
 
-func collect_towers(parts: Dictionary, xform: Transform3D, points: Array, wall_height: float, footing_height: float, look: String) -> void:
-	var tower_height := wall_height + 3.4 + 0.3 * (wall_level - 1)
+func collect_towers(parts: Dictionary, xform: Transform3D, points: Array, level: int) -> void:
+	var st := style(level)
+	var size: float = st.tower
+	var tower_height: float = st.tower_height
 	var near_gate := {}
-	for g in gates:
-		for k in range(-GATE_HALF - 6, GATE_HALF + 7):
-			near_gate[posmod(g + k, SAMPLES)] = true
-	# Plain towers at a steady spacing along the wall, away from the gates. From
-	# level 3 the towers stand closer together.
-	var spacing := TOWER_SPACING * (0.8 if look != "timber" else 1.0)
+	for gi in gates.size():
+		var h := gate_half(gi)
+		for k in range(-h - 6, h + 7):
+			near_gate[posmod(gates[gi] + k, SAMPLES)] = true
+	var spacing: float = st.spacing
 	var start := (gates[0] if not gates.is_empty() else 0) + SAMPLES / 2
 	var travelled := spacing * 0.5
 	var placed: Array = []
@@ -465,36 +596,40 @@ func collect_towers(parts: Dictionary, xform: Transform3D, points: Array, wall_h
 		travelled = 0.0
 		placed.append(p)
 		var out := Vector3(p.x - center.x, 0.0, p.z - center.y).normalized()
-		tower_at(parts, xform, p, out, 4.0, tower_height, footing_height, look)
+		tower_at(parts, xform, p, out, size, tower_height, level)
 		count += 1
-	# Gate houses: a tower each side, a covered bridge over the opening, open doors.
-	for g in gates:
-		var left: Vector3 = points[posmod(g - GATE_HALF, SAMPLES)]
-		var right: Vector3 = points[posmod(g + GATE_HALF, SAMPLES)]
+	var top := wall_top(level)
+	for gi in gates.size():
+		var g := gates[gi]
+		var h := gate_half(gi)
+		var left: Vector3 = points[posmod(g - h, SAMPLES)]
+		var right: Vector3 = points[posmod(g + h, SAMPLES)]
 		var mid := (left + right) * 0.5
 		var out := Vector3(mid.x - center.x, 0.0, mid.z - center.y).normalized()
-		tower_at(parts, xform, left, out, 4.6, tower_height + 1.4, footing_height, look)
-		tower_at(parts, xform, right, out, 4.6, tower_height + 1.4, footing_height, look)
+		# The main gate is the B18 scene with its own posts and towers; side gates get
+		# a tower on each side, a covered bridge and open leaves.
+		if gi == 0 and custom_main_gate:
+			continue
+		tower_at(parts, xform, left, out, size + 0.6, tower_height + 1.2, level)
+		tower_at(parts, xform, right, out, size + 0.6, tower_height + 1.2, level)
 		count += 2
-		var top := maxf(left.y, right.y)
-		var a := Vector3(left.x, top, left.z)
-		var b := Vector3(right.x, top, right.z)
-		put(parts, "gate_bridge", "box", "timber", span(a, b, footing_height + wall_height + 0.35, 1.1, 2.4, 0.0, -1.2), xform)
-		put(parts, "gate_roof", "box", "roof", span(a, b, footing_height + wall_height + 1.45, 1.6, 2.0, 0.0, -1.6), xform)
+		var y := maxf(left.y, right.y)
+		var a := Vector3(left.x, y, left.z)
+		var b := Vector3(right.x, y, right.z)
+		put(parts, "gate_bridge", "box", "timber", span(a, b, top + 0.35, 1.1, 2.4, 0.0, -1.2), xform)
+		put(parts, "gate_roof", "box", "roof", span(a, b, top + 1.45, 1.6, 2.0, 0.0, -1.6), xform)
 		var along := (right - left)
 		along.y = 0.0
 		var width := along.length()
 		along = along.normalized()
 		var inward := -out
-		# Two leaves hinged at the tower faces, swung open into the yard.
-		var opening := width - 4.6
+		var opening := width - (size + 0.6)
 		var leaf := opening * 0.5
 		for side: float in [-1.0, 1.0]:
 			var hinge: Vector3 = mid + along * side * (opening * 0.5)
 			hinge.y = minf(left.y, right.y)
 			var swing: Vector3 = (-along * side * cos(1.2) + inward * sin(1.2)).normalized()
 			var across: Vector3 = swing.cross(Vector3.UP).normalized()
-			var door_height: float = wall_height + footing_height
-			put(parts, "gate_doors", "box", "planks", Transform3D(Basis(swing * leaf, Vector3.UP * door_height, across * 0.3),
-				hinge + swing * (leaf * 0.5) + Vector3.UP * (door_height * 0.5)), xform)
+			put(parts, "gate_doors", "box", "planks", Transform3D(Basis(swing * leaf, Vector3.UP * top, across * 0.3),
+				hinge + swing * (leaf * 0.5) + Vector3.UP * (top * 0.5)), xform)
 	tower_count = count

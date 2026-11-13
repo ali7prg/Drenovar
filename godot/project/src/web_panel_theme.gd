@@ -52,6 +52,14 @@ static func make_theme(base: Theme) -> Theme:
 	theme.set_stylebox("scroll", "VScrollBar", Palette.style(Color("#272c31"), Color.TRANSPARENT, 3, 3, 2))
 	for state in ["grabber", "grabber_highlight", "grabber_pressed"]:
 		theme.set_stylebox(state, "VScrollBar", Palette.style(BRASS, Color.TRANSPARENT, 3, 3, 3))
+	# Quantity sliders: dark recessed track, gold fill.
+	var track := Palette.style(Color("#15181b"), Color("#5d4d36"), 5, 0, 0)
+	track.content_margin_top = 5
+	track.content_margin_bottom = 5
+	theme.set_stylebox("slider", "HSlider", track)
+	var fill := gradient_style(Color("#f3d48e"), Color("#a97a35"), Color("#f6dc9c"), 0, 5)
+	theme.set_stylebox("grabber_area", "HSlider", fill)
+	theme.set_stylebox("grabber_area_highlight", "HSlider", fill)
 	return theme
 
 static func primary(control: Button, danger := false) -> void:

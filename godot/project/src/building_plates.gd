@@ -55,6 +55,14 @@ func _draw() -> void:
 		draw_badge(at + Vector2(0, 17), int(building.get("level", 1)), alpha)
 		if order.get("buildingId", "") == building.get("id", "_") and order.has("endsAt"):
 			draw_progress(at + Vector2(0, 38), order, alpha)
+	# Tree being felled: progress bar over it.
+	var job: Dictionary = game.shown_job
+	if not job.is_empty():
+		var tree: Dictionary = stage.works.tree_by_id(job.tree)
+		if not tree.is_empty():
+			var at := camera.unproject_position(stage.array_point(tree.p) + Vector3.UP * 7.5)
+			draw_name(at, "Рубка", alpha)
+			draw_progress(at + Vector2(0, 8), {"startedAt": job.started, "endsAt": job.ends}, alpha)
 	# Plot of a new building under construction (no building yet).
 	if order.get("kind", "") == "build" and order.has("plotId"):
 		for plot in stage.empty_plots:

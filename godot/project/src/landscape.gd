@@ -17,6 +17,8 @@ const WATER_SHADER = preload("res://src/water.gdshader")
 const BIOME_SHADER = preload("res://src/biome.gdshader")
 const MEADOW_SHADER = preload("res://src/meadow.gdshader")
 const FOREST_SHADER = preload("res://src/forest.gdshader")
+const CityWorks = preload("res://src/city_works.gd")
+var works := CityWorks.new()
 var forest_materials := {}
 var focus_radius := 0.0
 var focus_centre := Vector3.ZERO
@@ -86,6 +88,7 @@ var city_nodes_created := 0
 var static_heights: Dictionary = {}
 # Trees that survive the exclusion and street filters for the current ground signature.
 var eligible_trees: Array = []
+var work_sites := {}
 
 func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_view: Dictionary) -> void:
 	data = game_data
@@ -172,6 +175,9 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	add_child(workers)
 	add_child(effects)
 	add_child(battle_fx)
+	if is_city:
+		works.setup(self, data)
+		add_child(works)
 	add_child(camera)
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL if is_city else Camera3D.PROJECTION_PERSPECTIVE
 	camera.fov = 43.0
@@ -956,6 +962,8 @@ func present_city(state: Dictionary, staged := false) -> void:
 		if data.treePlots.has(id):
 			plots.append(data.treePlots[id])
 	var occupied := {}
+	var plot_positions := {}
+	var upgrade_plot := ""
 	var exclusions: Array = []
 	# Descriptors of every static city node. Unchanged nodes are reused instead of
 	# re-instantiating GLB scenes after each authoritative state update.
@@ -965,6 +973,8 @@ func present_city(state: Dictionary, staged := false) -> void:
 		exclusions.append(Rect2(district.x - 15.7, district.z - 12.7, 31.4, 25.4))
 	for building in city.buildings:
 		occupied[building.plotId] = true
+		if order is Dictionary and order.get("buildingId", "") == building.id:
+			upgrade_plot = building.plotId
 		for plot in plots:
 			if plot.id != building.plotId:
 				continue
@@ -975,6 +985,7 @@ func present_city(state: Dictionary, staged := false) -> void:
 			var x := float(plot.x)
 			var z := float(plot.z)
 			var y := sample_city(x,z)
+			plot_positions[plot.id] = Vector3(x, y, z)
 			exclusions.append(Rect2(x - 7.0, z - 7.0, 14.0, 14.0))
 			var scale := float(asset.scale)*(1+0.055*(int(building.level)-1))
 			wanted_buildings.append(["model", asset.path, model_transform(x,y,z,0,scale)])
@@ -988,6 +999,12 @@ func present_city(state: Dictionary, staged := false) -> void:
 	for plot in plots:
 		if (kingdom is Dictionary and plot.id in kingdom.get("clearedPlots", [])) or plot.id.begins_with("site-"):
 			exclusions.append(Rect2(plot.x - 6.7, plot.z - 6.7, 13.4, 13.4))
+		if not plot_positions.has(plot.id):
+			plot_positions[plot.id] = Vector3(plot.x, sample_city(plot.x, plot.z), plot.z)
+		if upgrade_plot == plot.id:
+			# Upgrade in progress: scaffolding in front of the building.
+			wanted_buildings.append(["detail", data.scaffold, Transform3D(Basis.IDENTITY.scaled(Vector3(1.15, 1.6, 1.15)),
+				Vector3(plot.x, sample_city(plot.x, plot.z), plot.z + 4.6))])
 		if order is Dictionary and order.get("kind", "") != "clear" and order.get("plotId", "") == plot.id:
 			wanted_buildings.append(["detail", data.scaffold, Transform3D(Basis.IDENTITY, Vector3(plot.x, sample_city(plot.x, plot.z), plot.z))])
 		if not occupied.has(plot.id):
@@ -999,6 +1016,8 @@ func present_city(state: Dictionary, staged := false) -> void:
 			var half := float(grove.size) * 0.5
 			exclusions.append(Rect2(grove.x - half, grove.z - half, grove.size, grove.size))
 	sync_city_buildings(wanted_buildings)
+	works.observe_city(city, plot_positions)
+	work_sites = plot_positions
 	if staged:
 		await yield_frame()
 	sync_city_workers(wanted_workers)
@@ -1045,6 +1064,7 @@ func sync_city_buildings(wanted: Array) -> void:
 		if item[0] == "detail":
 			add_city_detail(buildings, item[1], item[2].origin)
 			node = buildings.get_child(buildings.get_child_count() - 1)
+			node.transform = item[2]
 		else:
 			node = add_model(buildings, item[1], item[2])
 		node.set_meta("city_signature", signature)

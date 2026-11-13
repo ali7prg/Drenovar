@@ -67,6 +67,7 @@ func heartbeat(scene: String, memory_mb: float, uptime_s: float, now_unix: float
 	record.session.scene = scene
 	record.session.memory_mb = snappedf(memory_mb, 0.1)
 	record.session.uptime_s = int(uptime_s)
+	record.session.peak_mb = snappedf(maxf(float(record.session.get("peak_mb", 0.0)), memory_mb), 0.1)
 	record.session.heartbeat = now_unix
 	save()
 
@@ -104,15 +105,18 @@ func summary() -> String:
 		"deliberate_reload": "намеренная перезагрузка", "ended_unexpectedly": "аварийное завершение или принудительная остановка"}
 	var text := "Предыдущий сеанс: %s" % names.get(previous_ending, previous_ending)
 	if not previous_session.is_empty() and previous_ending != "first_launch":
-		text += " (сцена %s, %d с, %.0f МБ)" % [previous_session.get("scene", "?"),
-			int(previous_session.get("uptime_s", 0)), float(previous_session.get("memory_mb", 0.0))]
+		text += " (сцена %s, %d с, %.0f МБ, пик %.0f МБ)" % [previous_session.get("scene", "?"),
+			int(previous_session.get("uptime_s", 0)), float(previous_session.get("memory_mb", 0.0)),
+			float(previous_session.get("peak_mb", 0.0))]
 	var counters: Dictionary = record.get("counters", {})
 	text += "\nАварийных завершений: %d · выгрузок в фоне: %d · штатных: %d" % [
 		int(counters.get("ended_unexpectedly", 0)), int(counters.get("terminated_in_background", 0)),
 		int(counters.get("clean_exit", 0))]
-	var recent: Array = record.get("events", []).slice(-6)
+	var recent: Array = record.get("events", []).slice(-10)
 	if not recent.is_empty():
-		text += "\nПоследние события: " + ", ".join(recent.map(func(event): return String(event.kind)))
+		text += "\nПоследние события: " + ", ".join(recent.map(func(event):
+			var detail: Dictionary = event.get("detail", {})
+			return String(event.kind) + (("·" + str(detail.get("action", ""))) if detail.has("action") else "")))
 	return text
 
 func save() -> void:

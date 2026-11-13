@@ -1086,15 +1086,13 @@ func confirm_placement() -> void:
 	var position: Vector3 = placing.position
 	var order := {"kind":"kingdom","action":"build","plotId":plot.id,"type":definition.id} if placing.cleared else \
 		{"kind":"kingdom","action":"clear","plotId":plot.id}
-	placement_confirm.disabled = true
-	placement_info.text = "Отправляем приказ…"
-	var done := await command(order, func(): pass)
+	# Instant: the placement closes, builders start on the plot at once and the
+	# server confirms in the background (a refusal is reported and undone).
+	cancel_placement()
+	stage.target = position
+	var done := await command(order)
 	if done:
-		cancel_placement()
-		stage.target = position
 		message.text = "Строительство началось: %s" % definition.ru if order.action == "build" else "Участок расчищается — затем здесь можно строить"
-	else:
-		refresh_placement()
 
 func free_build_plot() -> Dictionary:
 	var kingdom: Variant = state.city.get("kingdom")
@@ -1491,6 +1489,7 @@ func show_scene(scene_name: String) -> void:
 		close_modal()
 		return
 	scene_loading = true
+	diagnostics.log_event("scene", {"action": scene_name, "memory_mb": snappedf(memory_in_use_mb(), 1.0)}, Time.get_unix_time_from_system(), false)
 	action_ring.close()
 	cancel_placement()
 	var started_at := Time.get_ticks_msec()
@@ -1543,8 +1542,22 @@ func show_scene(scene_name: String) -> void:
 func memory_in_use_mb() -> float:
 	return (Performance.get_monitor(Performance.MEMORY_STATIC) + Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)) / 1048576.0
 
+# iOS ends an app that crosses its memory limit without a warning first, and the
+# engine counters do not include the graphics driver's own memory. Keeping the
+# second scene is therefore limited to a share of the device RAM (about 880 MB on
+# a 4 GB iPhone) as well as to TWO_SCENE_MEMORY_MB.
+var memory_budget_mb := -1.0
+
+func scene_memory_budget() -> float:
+	if memory_budget_mb < 0.0:
+		var physical := float(OS.get_memory_info().get("physical", -1))
+		memory_budget_mb = TWO_SCENE_MEMORY_MB
+		if physical > 0.0 and OS.has_feature("mobile"):
+			memory_budget_mb = minf(TWO_SCENE_MEMORY_MB, physical / 1048576.0 * 0.22)
+	return memory_budget_mb
+
 func two_scenes_fit() -> bool:
-	return memory_in_use_mb() < TWO_SCENE_MEMORY_MB
+	return memory_in_use_mb() < scene_memory_budget()
 
 func prewarm_may_continue() -> bool:
 	return fingers.is_empty() and not dragging and not camera_moving_now and not scene_loading and \
@@ -1561,6 +1574,7 @@ func maybe_prewarm_other_scene() -> void:
 	prewarm_scene(other)
 
 func prewarm_scene(scene_name: String) -> void:
+	diagnostics.log_event("prewarm", {"action": scene_name, "memory_mb": snappedf(memory_in_use_mb(), 1.0)}, Time.get_unix_time_from_system(), false)
 	# Builds the other scene inactive, in small slices, only while the player is idle.
 	prewarm_name = scene_name
 	prewarm_cancelled = false
@@ -3408,18 +3422,43 @@ func show_error(response: Dictionary) -> void:
 		modal_status.text = message.text
 		modal_status.show()
 
+# Orders that start visible work at once (the window closes and the work is
+# shown immediately); the server confirms in the background.
+const INSTANT_ACTIONS := ["tree", "site", "upgrade", "collect", "build", "clear", "area"]
+signal command_settled
+var pending_works := {}
+var shown_job := {}
+var queued_commands := 0
+
+func instant_order(order: Dictionary) -> bool:
+	return order.get("kind", "") in ["kingdom", "resource"] and order.get("action", "") in INSTANT_ACTIONS
+
 func command(order: Dictionary, after_success := Callable()) -> bool:
+	var instant := instant_order(order) and not after_success.is_valid()
+	if instant:
+		predict_work(order)
+		if modal.visible:
+			close_modal()
+		action_ring.close()
+	# Orders run one at a time: a second tap waits for the first one instead of
+	# being silently dropped.
 	if command_in_progress:
-		return false
+		queued_commands += 1
+		while command_in_progress:
+			await command_settled
+		queued_commands -= 1
 	command_in_progress = true
+	diagnostics.log_event("command", {"kind": str(order.get("kind", "")), "action": str(order.get("action", ""))},
+		Time.get_unix_time_from_system(), false)
 	var generation := modal_generation
 	# Only mention the server when it is actually slow: most commands answer well
 	# under half a second and a flashing status line reads as a problem.
-	var slow_notice := get_tree().create_timer(0.45)
-	slow_notice.timeout.connect(func():
-		if command_in_progress and generation == modal_generation and modal.visible:
-			modal_status.text = "Отправляем…"
-			modal_status.show())
+	if not instant:
+		var slow_notice := get_tree().create_timer(0.45)
+		slow_notice.timeout.connect(func():
+			if command_in_progress and generation == modal_generation and modal.visible:
+				modal_status.text = "Отправляем…"
+				modal_status.show())
 	var signature := JSON.stringify(order)
 	var key: String = str(order.get("requestId", ""))
 	if key.is_empty():
@@ -3438,11 +3477,19 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 		retry_keys.erase(signature)
 	if not response.has("city"):
 		command_in_progress = false
-		if generation == modal_generation:
+		command_settled.emit()
+		if instant:
+			forget_prediction(order)
+			message.text = "Не выполнено: " + str(response.get("error", "сервер не ответил"))
+		elif generation == modal_generation:
 			show_error(response)
 		return false
 	accept(response)
 	command_in_progress = false
+	command_settled.emit()
+	if instant:
+		message.text = ""
+		return true
 	if generation == modal_generation:
 		modal_status.hide()
 		if after_success.is_valid():
@@ -3451,6 +3498,77 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 			close_modal()
 	message.text = "Действие выполнено"
 	return true
+
+# Local forecast of the work an order starts, shown until the server state takes over.
+func predict_work(order: Dictionary) -> void:
+	var now := server_time()
+	match order.get("action", ""):
+		"tree":
+			var seconds := 5.0
+			for tree in stage.selectable_trees if is_instance_valid(stage) else []:
+				if tree.id == order.get("id", ""):
+					seconds = float(tree.get("durationMs", 5000)) / 1000.0
+			pending_works.tree = {"tree": str(order.id), "started": now, "ends": now + seconds * 1000.0, "order": order}
+		"upgrade", "build":
+			var key := str(order.get("buildingId", order.get("plotId", "")))
+			pending_works.site = {"key": key, "building": str(order.get("buildingId", "")), "plot": str(order.get("plotId", "")),
+				"started": now, "ends": now + 30000.0, "order": order}
+
+func forget_prediction(order: Dictionary) -> void:
+	for slot in pending_works.keys():
+		if pending_works[slot].get("order") == order:
+			pending_works.erase(slot)
+
+func job_tree_id(job: Variant) -> String:
+	if not job is Dictionary:
+		return ""
+	for field in ["treeId", "tree", "id", "target", "targetId"]:
+		var value: Variant = job.get(field)
+		if value is String and value.begins_with("tree"):
+			return value
+	for value in job.values():
+		if value is String and value.begins_with("tree-"):
+			return value
+	return ""
+
+# What the city shows as work right now: the server's job/order, else the local forecast.
+func current_works(now: float) -> Array:
+	var job := {}
+	var server_job: Variant = state.city.get("progress", {}).get("job")
+	var server_tree := job_tree_id(server_job)
+	if not server_tree.is_empty() and server_job.has("endsAt"):
+		var ends := float(server_job.endsAt)
+		job = {"tree": server_tree, "started": float(server_job.get("startedAt", ends - 5000.0)), "ends": ends}
+		var predicted: Dictionary = pending_works.get("tree", {})
+		if predicted.get("tree", "") == server_tree:
+			job.started = minf(job.started, float(predicted.started))
+		pending_works.erase("tree")
+	elif pending_works.has("tree"):
+		job = pending_works.tree
+		# Forecast lapses a few seconds after its expected end if the server never confirmed.
+		if now > float(job.ends) + 6000.0:
+			pending_works.erase("tree")
+			job = {}
+	var site := {}
+	var order := construction_order()
+	var key := ""
+	if not order.is_empty() and order.get("kind", "") != "clear":
+		key = str(order.get("buildingId", order.get("plotId", "")))
+	if key.is_empty() and pending_works.has("site"):
+		key = pending_works.site.key
+		if now > float(pending_works.site.ends):
+			pending_works.erase("site")
+			key = ""
+	elif not key.is_empty():
+		pending_works.erase("site")
+	if not key.is_empty() and is_instance_valid(stage):
+		var plot_id := key
+		for building in state.city.buildings:
+			if str(building.id) == key:
+				plot_id = str(building.plotId)
+		if stage.work_sites.has(plot_id):
+			site = {"key": key, "position": stage.work_sites[plot_id]}
+	return [job, site]
 
 func request(path: String, payload: Variant = null, idempotency_key := "") -> Dictionary:
 	if not connected():
@@ -3543,7 +3661,7 @@ func _process(delta: float) -> void:
 	advance_server_clock(delta)
 	drain_retired_scenes()
 	memory_peak_mb = maxf(memory_peak_mb, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0)
-	diagnostics.heartbeat(map_name, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
+	diagnostics.heartbeat(map_name, memory_in_use_mb(),
 		Time.get_ticks_msec() / 1000.0, Time.get_unix_time_from_system(), Time.get_ticks_msec())
 	if not is_instance_valid(stage) or scene_loading:
 		return
@@ -3609,6 +3727,9 @@ func _process(delta: float) -> void:
 	else:
 		stage.present_parade()
 		stage.present_workers(now / 1000.0)
+		var works := current_works(now)
+		shown_job = works[0]
+		stage.works.present(works[0], works[1], now, delta)
 	if map_name == "city" and now >= next_training_update:
 		stage.present_training(state, now)
 		next_training_update = now + 300.0

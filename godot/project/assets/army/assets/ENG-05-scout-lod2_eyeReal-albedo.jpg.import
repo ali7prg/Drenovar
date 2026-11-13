@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfrqxrvkl51id"
-path="res://.godot/imported/ENG-05-scout-lod2_eyeReal-albedo.jpg-6873b97cd0208ddfb6500ece761b413c.ctex"
+path.s3tc="res://.godot/imported/ENG-05-scout-lod2_eyeReal-albedo.jpg-6873b97cd0208ddfb6500ece761b413c.s3tc.ctex"
+path.etc2="res://.godot/imported/ENG-05-scout-lod2_eyeReal-albedo.jpg-6873b97cd0208ddfb6500ece761b413c.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "445d25b168dc6f9fea4fc38d65ad8583"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/army/assets/ENG-05-scout-lod2_eyeReal-albedo.jpg"
-dest_files=["res://.godot/imported/ENG-05-scout-lod2_eyeReal-albedo.jpg-6873b97cd0208ddfb6500ece761b413c.ctex"]
+dest_files=["res://.godot/imported/ENG-05-scout-lod2_eyeReal-albedo.jpg-6873b97cd0208ddfb6500ece761b413c.s3tc.ctex", "res://.godot/imported/ENG-05-scout-lod2_eyeReal-albedo.jpg-6873b97cd0208ddfb6500ece761b413c.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +42,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

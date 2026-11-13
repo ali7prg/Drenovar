@@ -30,6 +30,10 @@ var instant := false
 var horizontal := false
 # Called when a finger lands outside the panel (bottom sheets close on it).
 var outside_tap := Callable()
+# Touches that start right after the panel opened (the finger that opened it
+# rolling or a double tap) are ignored, so nothing inside is chosen by accident.
+const OPEN_GUARD_MSEC := 280
+var armed_at := 0
 
 func set_modal_active(enabled: bool) -> void:
 	cancel_touch()
@@ -37,6 +41,7 @@ func set_modal_active(enabled: bool) -> void:
 		return
 	active = enabled
 	if active:
+		armed_at = 0
 		emulation_before_modal = Input.emulate_mouse_from_touch
 		Input.emulate_mouse_from_touch = false
 	else:
@@ -63,6 +68,8 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventScreenTouch:
 		get_viewport().set_input_as_handled()
+		if event.pressed and Time.get_ticks_msec() < armed_at:
+			return
 		if event.pressed and finger == -1 and outside_tap.is_valid() and is_instance_valid(press_root) and \
 				not press_root.get_global_rect().has_point(event.position):
 			outside_tap.call_deferred()

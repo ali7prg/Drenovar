@@ -5,8 +5,9 @@ var symbol := "menu"
 var glyph: Texture2D
 
 func _ready() -> void:
-	# HUD buttons never start a drag: act on touch-down.
-	action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
+	# Act when the finger lifts (the pressed look shows at once on touch-down), so
+	# the window that opens is never under a finger that is still on the glass.
+	action_mode = BaseButton.ACTION_MODE_BUTTON_RELEASE
 	custom_minimum_size = Vector2(84, 88)
 	size_flags_horizontal = Control.SIZE_SHRINK_END
 	size_flags_vertical = Control.SIZE_SHRINK_CENTER

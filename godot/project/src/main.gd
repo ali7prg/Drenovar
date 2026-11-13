@@ -731,6 +731,7 @@ func show_build_menu(group := build_group) -> void:
 	modal_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	modal_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	modal_scroll.outside_tap = close_modal
+	modal_scroll.armed_at = Time.get_ticks_msec() + modal_scroll.OPEN_GUARD_MSEC
 	modal_tools.show()
 	modal_tools.add_theme_constant_override("separation", 6)
 	for entry in BUILD_GROUPS:
@@ -1501,7 +1502,7 @@ func show_scene(scene_name: String) -> void:
 		close_modal()
 		return
 	scene_loading = true
-	diagnostics.log_event("scene", {"action": scene_name, "memory_mb": snappedf(memory_in_use_mb(), 1.0)}, Time.get_unix_time_from_system(), false)
+	diagnostics.log_event("scene", {"action": scene_name, "memory_mb": snappedf(memory_in_use_mb(), 1.0)}, Time.get_unix_time_from_system())
 	action_ring.close()
 	cancel_placement()
 	var started_at := Time.get_ticks_msec()
@@ -3440,7 +3441,7 @@ const INSTANT_ACTIONS := ["tree", "site", "upgrade", "collect", "build", "clear"
 signal command_settled
 var pending_works := {}
 var shown_job := {}
-var last_due_poll := 0
+var next_due_poll_msec := 0
 var queued_commands := 0
 
 func instant_order(order: Dictionary) -> bool:
@@ -3462,7 +3463,7 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 		queued_commands -= 1
 	command_in_progress = true
 	diagnostics.log_event("command", {"kind": str(order.get("kind", "")), "action": str(order.get("action", ""))},
-		Time.get_unix_time_from_system(), false)
+		Time.get_unix_time_from_system())
 	var generation := modal_generation
 	# Only mention the server when it is actually slow: most commands answer well
 	# under half a second and a flashing status line reads as a problem.
@@ -3778,15 +3779,15 @@ func _process(delta: float) -> void:
 		stage.works.present(works[0], works[1], now, delta)
 		# The moment a timer reaches zero the server is asked at once, so the tree
 		# falls / the building appears exactly then, not at the next routine poll.
+		# After zero the server is asked every 1.5 s until it reports the work done
+		# (at most a minute), never more often.
+		var now_msec := Time.get_ticks_msec()
 		for work in works:
-			if work.is_empty():
+			if work.is_empty() or not connected() or player_id.is_empty():
 				continue
 			var due := float(work.ends)
-			if now >= due and now < due + 8000.0 and int(due) != last_due_poll and connected() and not player_id.is_empty():
-				last_due_poll = int(due)
-				poll = 1.0e6
-			elif now >= due + 1500.0 and now < due + 8000.0 and int(due) + 1 != last_due_poll and last_due_poll == int(due):
-				last_due_poll = int(due) + 1
+			if now >= due and now < due + 60000.0 and now_msec >= next_due_poll_msec:
+				next_due_poll_msec = now_msec + 1500
 				poll = 1.0e6
 	if map_name == "city" and now >= next_training_update:
 		stage.present_training(state, now)

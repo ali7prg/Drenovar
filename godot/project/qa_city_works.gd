@@ -165,5 +165,15 @@ func run() -> void:
 	check(legacy.get("kind") == "legacyBuilding" and legacy.get("action") == "place", "Legacy settlement got a kingdom build order")
 	city.kingdom = kingdom
 	check(game.build_order("p1", "SUP-04").get("kind") == "kingdom", "Kingdom settlement lost its build order")
+	# After a timer reaches zero the server is asked about every 1.5 s, no storm.
+	game.diagnostics.network_failures = 0
+	game.pending_works.tree = {"tree": tree.id, "started": game.server_time() - 6000.0, "ends": game.server_time() - 100.0, "order": {}}
+	var asked_before: int = game.api.requests_total
+	var until := Time.get_ticks_msec() + 4600
+	while Time.get_ticks_msec() < until:
+		await process_frame
+	var asked: int = game.api.requests_total - asked_before
+	check(asked >= 2 and asked <= 5, "Requests after zero: %d in 4.6 s (expected ~3)" % asked)
+	game.pending_works.erase("tree")
 	print("QA_CITY_WORKS checks=%d failures=%d" % [checks, failures])
 	quit(0 if failures == 0 else 1)

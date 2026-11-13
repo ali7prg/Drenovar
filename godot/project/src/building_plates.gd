@@ -95,7 +95,8 @@ func draw_progress(at: Vector2, order: Dictionary, alpha: float) -> void:
 	draw_rect(rect.grow(1.5), Color(BAR_BACK, 0.9 * alpha))
 	draw_rect(Rect2(rect.position, Vector2(rect.size.x * fraction, rect.size.y)), Color(BAR_FILL, alpha))
 	var left := maxi(0, ceili((ends - now) / 1000.0))
-	var label := "%d:%02d" % [left / 60, left % 60]
+	# At zero the server finishes the work; say so instead of a frozen 0:00.
+	var label := "%d:%02d" % [left / 60, left % 60] if now < ends else "Завершаем…"
 	var size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13)
 	var base := at + Vector2(-size.x * 0.5, 24)
 	draw_string_outline(font, base, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 4, Color(OUTLINE, alpha))

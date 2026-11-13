@@ -56,6 +56,17 @@ func run() -> void:
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(capture.path_join("build_menu.png"))
 	check(game.modal.anchor_top == 1.0, "Build window is not a bottom sheet over the city")
+	# A finger that lands on a card right after the sheet opened chooses nothing.
+	var early: Vector2 = cards(game)[0].get_global_rect().get_center()
+	game.show_build_menu()
+	await process_frame
+	early = cards(game)[0].get_global_rect().get_center()
+	touch(0, early, true)
+	touch(0, early, false)
+	await process_frame
+	await process_frame
+	check(game.placing.is_empty() and game.modal.visible and game.modal_title.text == "Строительство", "A touch right after opening picked a building")
+	await create_timer(0.35).timeout
 	check(game.modal_scroll.horizontal, "Cards are not a horizontal strip")
 	game.show_build_menu("military")
 	check(cards(game).size() == 5, "Military tab shows %d cards" % cards(game).size())

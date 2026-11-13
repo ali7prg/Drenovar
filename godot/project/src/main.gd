@@ -3240,7 +3240,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	var generation := modal_generation
 	var timer := Timer.new()
 	timer.one_shot = true
-	timer.wait_time = 0.22 if city else 0.18
+	timer.wait_time = 0.12 if city else 0.18
 	roster.add_child(timer)
 	var preview := {"revision": 0, "units": {}}
 	# A creature beside a building is out of reach only while its patrol keeps it in
@@ -3303,6 +3303,8 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			quote.text = "Выберите воинов"
 			return
 		quote.text = "Прокладываем путь…" if city else "Рассчитываем маршрут…"
+		if city and show_local_march(id, route_map):
+			quote.text = "Путь через главные ворота · уточняем время…"
 		timer.start()
 	var set_party := func(all_available: bool):
 		selection_batch.active = true
@@ -3391,8 +3393,9 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		elif not march_wall().is_empty():
 			order.wall = march_wall()
 		retry.hide()
-		quote.text = "Прокладываем путь…" if city else "Рассчитываем маршрут…"
-		var response := await send_request("march-preview" if loopback else "native/game/march-preview", order, false, 5.0)
+		if not (city and route_map.visible):
+			quote.text = "Прокладываем путь…" if city else "Рассчитываем маршрут…"
+		var response := await send_request("march-preview" if loopback else "native/game/march-preview", order, false, 8.0)
 		if generation != modal_generation or revision != preview.revision:
 			return
 		if response.get("httpStatus", 0) == 401 and not loopback:
@@ -3413,17 +3416,26 @@ func compose_march(kind: String, id: String, title: String) -> void:
 				if blocked.send:
 					blocked.send = false
 					send.text = "Марш"
+			# A slow or lost answer is only the preview: the order carries the same
+			# party and the server lays the route itself, so «Марш» stays available.
+			if response.get("transportFailure", false):
+				if city and (route_map.visible or show_local_march(id, route_map)):
+					quote.text = "Путь через главные ворота. Нажмите «Марш» — время пути рассчитает сервер."
+				else:
+					quote.text = "Маршрут ещё не рассчитан, но отряд можно отправить."
+					retry.show()
+				send.disabled = submit.sending
+				return
 			quote.text = response.get("error", "Путь недоступен")
 			retry.show()
 			# A refused route (not a lost connection) cannot be marched.
-			if not response.get("transportFailure", false):
-				send.disabled = true
+			send.disabled = true
 			return
 		quote.text = "Прибытие через %d с%s" % [ceili((float(response.get("travelMs", 0)) + 1400.0) / 1000.0),
 			" · через переправу" if response.get("usesFerry", false) else ""]
 		stage.show_route(response.path)
 		if city:
-			route_map.set_path(response.path)
+			route_map.set_path(stage.march_path(response.path))
 		order.requestId = Crypto.new().generate_random_bytes(16).hex_encode()
 		submit.order = order
 		send.set_meta("route_ready", true)
@@ -3477,6 +3489,23 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		set_party.call(true)
 	else:
 		update.call()
+
+# The route of a city march drawn by the client at once, from the troop base to the
+# creature through the main gate, before (or without) the server's preview.
+func show_local_march(id: String, route_map) -> bool:
+	if map_name != "city" or not is_instance_valid(stage) or stage.parade_center == Vector3.ZERO:
+		return false
+	var target: Dictionary = {}
+	for encounter in state.get("encounters", []):
+		if encounter.id == id:
+			target = encounter
+	if target.is_empty() or not (target.get("position") is Dictionary):
+		return false
+	var from: Vector3 = stage.parade_center
+	var path: Array = [{"x": from.x, "y": from.y, "z": from.z}, target.position]
+	stage.show_route(path)
+	route_map.set_path(stage.march_path(path))
+	return true
 
 const BLOCKED_ROUTE := "Нет безопасного пути к цели"
 # One patrol round of a city creature (server: 4 s rest + 16 s walk) and a margin.

@@ -312,9 +312,10 @@ func show_route(path: Array) -> void:
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
-	for i in range(1, path.size()):
-		var a := point(path[i - 1])
-		var b := point(path[i])
+	var line := march_points(path)
+	for i in range(1, line.size()):
+		var a := line[i - 1]
+		var b := line[i]
 		a.y = (terrain_y(a) if map_name == "world" else sample_city(a.x, a.z)) + 0.35
 		b.y = (terrain_y(b) if map_name == "world" else sample_city(b.x, b.z)) + 0.35
 		var half_width := Vector3(-(b.z - a.z), 0.0, b.x - a.x).normalized() * 0.36
@@ -1588,11 +1589,27 @@ func terrain_y(p: Vector3) -> float:
 		return field[a] + (field[a + 1] - field[a]) * dx + (field[b] - field[a]) * dz
 	return field[b + 1] + (field[b] - field[b + 1]) * (1.0 - dx) + (field[a + 1] - field[b + 1]) * (1.0 - dz)
 
-func route_for(path: Array) -> Dictionary:
+# The points of a march route; in the city a route through the wall goes out of
+# the main gate (CityWalls.gate_path).
+func march_points(path: Array) -> PackedVector3Array:
+	var points := PackedVector3Array()
+	for entry in path:
+		points.append(point(entry))
+	if map_name == "city":
+		points = walls.gate_path(points)
+	return points
+
+# Same as march_points, as {x, y, z} rows for the small route map of the march window.
+func march_path(path: Array) -> Array:
+	var rows: Array = []
+	for p in march_points(path):
+		rows.append({"x": p.x, "y": p.y, "z": p.z})
+	return rows
+
+func route_for(path: Array, through_gate := false) -> Dictionary:
 	var points := PackedVector3Array()
 	var distances := PackedFloat32Array()
-	for entry in path:
-		var next := point(entry)
+	for next in (march_points(path) if through_gate else PackedVector3Array(path.map(point))):
 		var total := 0.0
 		if not points.is_empty():
 			var previous := points[-1]
@@ -1652,7 +1669,8 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		var bag: Dictionary = army.get("returnUnits", army.units) if returning else army.units
 		var cache: Dictionary = army_routes.get(id, {})
 		if cache.get("source", []) != path:
-			cache.merge(route_for(path), true)
+			cache.merge(route_for(path, true), true)
+			cache.source = path
 		if cache.get("bag", {}) != bag or not cache.has("slots"):
 			cache.bag = bag
 			cache.slots = Formations.field_slots(bag, data.englishRoster)

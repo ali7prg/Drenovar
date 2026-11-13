@@ -633,3 +633,74 @@ func collect_towers(parts: Dictionary, xform: Transform3D, points: Array, level:
 			put(parts, "gate_doors", "box", "planks", Transform3D(Basis(swing * leaf, Vector3.UP * top, across * 0.3),
 				hinge + swing * (leaf * 0.5) + Vector3.UP * (top * 0.5)), xform)
 	tower_count = count
+
+# ---------------------------------------------------------------- march through the gate
+
+# Server v92 does not know the wall and returns a city march route straight through
+# it. The army is drawn leaving the yard through the main gate instead (and coming
+# back the same way). The timing stays the server's; only the drawn line changes.
+# A route that already crosses the wall only inside a gate opening is kept as is.
+func gate_path(points: PackedVector3Array) -> PackedVector3Array:
+	if not visible or radii.size() != SAMPLES or gates.is_empty() or points.size() < 2:
+		return points
+	var a := points[0]
+	var b := points[points.size() - 1]
+	var a_in := inside(a.x, a.z)
+	var b_in := inside(b.x, b.z)
+	if a_in == b_in or crosses_only_at_gates(points):
+		return points
+	if a_in:
+		return leave_through_gate(a, b)
+	var back := leave_through_gate(b, a)
+	back.reverse()
+	return back
+
+func crosses_only_at_gates(points: PackedVector3Array) -> bool:
+	for k in range(1, points.size()):
+		var p := Vector2(points[k - 1].x, points[k - 1].z)
+		var q := Vector2(points[k].x, points[k].z)
+		var steps := maxi(1, ceili(p.distance_to(q)))
+		var was := inside(p.x, p.y)
+		for s in range(1, steps + 1):
+			var at := p.lerp(q, float(s) / steps)
+			var now := inside(at.x, at.y)
+			if now != was and not is_gate_segment(int(round(sample_index(at.x, at.y))) % SAMPLES):
+				return false
+			was = now
+	return true
+
+# Whether the straight way between two points outside the yard stays outside.
+func clear_outside(p: Vector2, q: Vector2) -> bool:
+	var steps := maxi(1, ceili(p.distance_to(q)))
+	for s in range(steps + 1):
+		var at := p.lerp(q, float(s) / steps)
+		if inside(at.x, at.y, -2.0):
+			return false
+	return true
+
+func leave_through_gate(from: Vector3, to: Vector3) -> PackedVector3Array:
+	var g := gates[0]
+	var gate := wall_point(g)
+	var out := direction(g)
+	var result := PackedVector3Array([from])
+	for p in [gate - out * 6.0, gate, gate + out * 8.0]:
+		result.append(Vector3(p.x, 0.0, p.y))
+	# Walk around the wall, a few metres outside it, the shorter way to the target,
+	# until the target is in plain sight.
+	var target := Vector2(to.x, to.z)
+	var last := gate + out * 8.0
+	var goal := int(round(sample_index(to.x, to.z))) % SAMPLES
+	var span := posmod(goal - g, SAMPLES)
+	var step := 1 if span <= SAMPLES / 2 else -1
+	var i := g
+	var guard := 0
+	while not clear_outside(last, target) and guard < SAMPLES:
+		i = posmod(i + step * 3, SAMPLES)
+		guard += 3
+		var ring := center + direction(i) * (radii[i] + 7.0)
+		result.append(Vector3(ring.x, 0.0, ring.y))
+		last = ring
+		if posmod((goal - i) * step, SAMPLES) < 3:
+			break
+	result.append(to)
+	return result

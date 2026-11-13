@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-04-5-base.res" id="1_em7m0"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-04-5.res" id="2_mrukq"]
+
+[node name="RES_04_5" type="Node3D" unique_id=1186455721]
+metadata/series = "B09_Farm"
+metadata/lanes = [{
+"from": Vector3(4.6, 0, -2.4),
+"height": 1.9,
+"kind": "unit",
+"to": Vector3(4.6, 0, 3.5),
+"width": 0.8
+}]
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=2394773]
+mesh = ExtResource("1_em7m0")
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=932755062]
+mesh = ExtResource("2_mrukq")

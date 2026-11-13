@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-05-4-base.res" id="1_h47m6"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-05-4.res" id="2_3d2da"]
+
+[node name="MIL_05_4" type="Node3D" unique_id=2048596685]
+metadata/series = "B15_MilitaryAcademy"
+metadata/lanes = [{
+"from": Vector3(4.1, 0, 3.1999998),
+"height": 1.9,
+"kind": "unit",
+"to": Vector3(4.1, 0, 1.55),
+"width": 0.9
+}]
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=438395904]
+mesh = ExtResource("1_h47m6")
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=255993814]
+mesh = ExtResource("2_3d2da")

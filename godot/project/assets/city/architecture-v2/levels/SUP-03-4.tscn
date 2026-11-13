@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-03-4.res" id="1_ubrit"]
+
+[node name="SUP_03_4" type="Node3D" unique_id=1496812023]
+metadata/series = "B18_WallsAndGate"
+metadata/lanes = [{
+"from": Vector3(0, 0, 6.2),
+"height": 3.1,
+"kind": "cart",
+"to": Vector3(0, 0, -6.2),
+"width": 2.6
+}]
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1897508215]
+mesh = ExtResource("1_ubrit")

@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-02-5-base.res" id="1_2ldg2"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-02-5.res" id="2_e1p5v"]
+
+[node name="SUP_02_5" type="Node3D" unique_id=171990456]
+metadata/series = "B17_SiegeWorkshop"
+metadata/lanes = [{
+"from": Vector3(4.75, 0, 6.9),
+"height": 3.0,
+"kind": "cart",
+"to": Vector3(4.75, 0.38, -1.5),
+"width": 1.6
+}]
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1324730981]
+mesh = ExtResource("1_2ldg2")
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=985074257]
+mesh = ExtResource("2_e1p5v")

@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-03-5-base.res" id="1_1yf7c"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-03-5.res" id="2_scw6s"]
+
+[node name="RES_03_5" type="Node3D" unique_id=2105619499]
+metadata/series = "B08_IronMine"
+metadata/lanes = [{
+"from": Vector3(0.5, 0, 6.6),
+"height": 2.0,
+"kind": "rail",
+"to": Vector3(0.5, 0, 1.2),
+"width": 1.0
+}, {
+"from": Vector3(2.1, 0, 2.6),
+"height": 1.5,
+"kind": "unit",
+"to": Vector3(2.1, 0, 3.4),
+"width": 0.6
+}]
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=547590763]
+mesh = ExtResource("1_1yf7c")
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=661593285]
+mesh = ExtResource("2_scw6s")

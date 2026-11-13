@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-06-5-base.res" id="1_4paxb"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-06-5.res" id="2_cljk7"]
+
+[node name="ALT_06_5" type="Node3D" unique_id=350281044]
+metadata/series = "B23_HuntingLodge"
+metadata/lanes = [{
+"from": Vector3(3.6, 0, 3.4),
+"height": 1.75,
+"kind": "unit",
+"to": Vector3(3.6, 0, -0.45),
+"width": 0.9
+}]
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=591911434]
+mesh = ExtResource("1_4paxb")
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=2056467400]
+mesh = ExtResource("2_cljk7")

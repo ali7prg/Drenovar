@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-05-2-base.res" id="1_1v6xw"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-05-2.res" id="2_340wj"]
+
+[node name="ECO_05_2" type="Node3D" unique_id=120460437]
+metadata/series = "B01_TownHall"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-4.6, 0, 6.2)
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=142476236]
+mesh = ExtResource("1_1v6xw")
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1725405560]
+mesh = ExtResource("2_340wj")

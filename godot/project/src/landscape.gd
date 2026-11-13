@@ -833,13 +833,21 @@ func present(state: Dictionary) -> void:
 				var z := float(plot.z)
 				var y := sample_city(x,z)
 				exclusions.append(Rect2(x - 7.0, z - 7.0, 14.0, 14.0))
-				var scale := float(asset.scale)*(1+0.055*(int(building.level)-1))
-				add_model(buildings,asset.path,model_transform(x,y,z,0,scale))
-				add_worker(id, Vector3(x,y,z))
-				var levels: Dictionary = data.architecture.get(building.type, {})
-				var upgrade: String = levels.get(str(int(building.level)), "")
-				if not upgrade.is_empty():
-					add_city_detail(buildings, upgrade, Vector3(x,y,z))
+				# Reworked levels (architecture-v2) are complete scenes per type and level, so they
+				# never alter the shared model or overlays used by other levels and types.
+				var level_model: Dictionary = level_model_for(building.type, int(building.level))
+				var worker_offset: Variant = null
+				if not level_model.is_empty():
+					var level_scene := add_model(buildings, level_model.path, model_transform(x,y,z,0,float(level_model.get("scale", 1.0))))
+					worker_offset = level_scene.get_meta("worker_offset", null)
+				else:
+					var scale := float(asset.scale)*(1+0.055*(int(building.level)-1))
+					add_model(buildings,asset.path,model_transform(x,y,z,0,scale))
+					var levels: Dictionary = data.architecture.get(building.type, {})
+					var upgrade: String = levels.get(str(int(building.level)), "")
+					if not upgrade.is_empty():
+						add_city_detail(buildings, upgrade, Vector3(x,y,z))
+				add_worker(id, Vector3(x,y,z), worker_offset)
 				place_markers.append({"position":Vector3(x,y+5,z),"id":building.id,"kind":"building","item":building})
 				break
 		for plot in plots:
@@ -872,7 +880,14 @@ func present(state: Dictionary) -> void:
 				empty_plots.append({"position":point(site)+Vector3(0,2,0), "kind":"world-plot", "item":site})
 		present_armies(state, float(state.serverTime))
 
-func add_worker(building: String, base: Vector3) -> void:
+func level_model_for(type: String, level: int) -> Dictionary:
+	var levels: Variant = data.get("levelModels", {}).get(type)
+	if not levels is Dictionary:
+		return {}
+	var entry: Variant = levels.get(str(level))
+	return entry if entry is Dictionary else {}
+
+func add_worker(building: String, base: Vector3, offset_override: Variant = null) -> void:
 	var worker: String = {
 		"hall":"Worker_Carrier", "starterHall":"Worker_Carrier", "warehouse":"Worker_Carrier",
 		"market27":"Worker_Carrier", "quarry27":"Worker_Carrier", "ironmine27":"Worker_Carrier",
@@ -883,6 +898,9 @@ func add_worker(building: String, base: Vector3) -> void:
 	var offset := Vector3(3.2 if building == "farm" else (-3.4 if building == "lumber" else 0.0), 0.0, 2.8)
 	if building in ["hall", "starterHall"]:
 		offset.z = 4.1 if building == "starterHall" else 5.2
+	if offset_override is Vector3:
+		# reworked levels keep the worker on open ground clear of their new stairs and posts
+		offset = offset_override
 	var p := ground_point(base + offset)
 	var actor := add_model(workers, data.models[worker].path, model_transform(p.x, p.y, p.z, 0.0, 1.25))
 	actor.set_meta("base", base + offset)

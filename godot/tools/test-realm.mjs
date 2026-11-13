@@ -19,6 +19,8 @@ const paths=new Set(['state','command','session/new','march-preview']);
 let simulatedTime=null;
 let timeoutCityPreview=process.env.DRENOVAR_TEST_CITY_PREVIEW_TIMEOUT==='1';
 const battleFixture=process.env.DRENOVAR_TEST_BATTLE_FIXTURE==='1';
+// Proposed speedup grants (server patch speedups-v2); never on outside this isolated realm.
+const speedupGrantsV2=process.env.DRENOVAR_TEST_SPEEDUP_GRANTS==='1';
 const server=createServer(async (incoming,out)=>{
  try {
   const url=new URL(incoming.url,origin);
@@ -54,7 +56,7 @@ const server=createServer(async (incoming,out)=>{
    return;
   }
   const response=await handleGame(new Request(url,{method:incoming.method,headers,body}),db,{
-   worldEnabled:true,isolated:true,realmId:'native-loopback-only',clock:()=>simulatedTime??Date.now()
+   worldEnabled:true,isolated:true,realmId:'native-loopback-only',clock:()=>simulatedTime??Date.now(),speedupGrantsV2
   });
   if(battleFixture&&url.pathname==='/api/session/new'&&response.status===201){
    const record=sql.prepare('SELECT data FROM game_realm37 WHERE id=?').get('native-loopback-only');

@@ -115,11 +115,11 @@ func run() -> void:
 	game.pending_works.erase("tree")
 	# Upgrade: scaffolding + builders, completion burst.
 	var building: Dictionary = city.buildings[1]
-	var before: int = stage.buildings.get_child_count()
 	city.kingdom.order = {"kind": "upgrade", "buildingId": building.id, "endsAt": game.server_time() + 20000.0}
 	stage.present(game.state)
 	await frames(6)
-	check(stage.buildings.get_child_count() > before, "No scaffolding on the upgraded building")
+	check(is_instance_valid(works.site_node) and works.site_node.visible and works.site_frames.size() == 1, "No scaffolding on the upgraded building")
+	check(not is_instance_valid(works.site_model), "Upgrade must keep the building, not raise a new one")
 	check(works.builders.size() == 2 and works.builders.all(func(b): return b.visible), "No builders at the site")
 	stage.target = stage.work_sites[building.plotId]
 	if not capture.is_empty():
@@ -134,5 +134,36 @@ func run() -> void:
 	check(works.builders.all(func(b): return not b.visible), "Builders stayed after the work ended")
 	var cheers: Array = works.find_children("*", "Label3D", true, false).filter(func(l): return l.text.begins_with("Уровень"))
 	check(not cheers.is_empty(), "No completion effect")
+	# Server job naming a village tree is recognised (not only "tree-N" ids).
+	var village: Array = stage.selectable_trees.filter(func(t): return str(t.id).begins_with("village-"))
+	if not village.is_empty():
+		check(game.job_tree_id({"target": village[0].id, "endsAt": 1}) == village[0].id, "Village tree job not recognised")
+	# New building: rises inside the scaffolding with its timer.
+	var free_plot: Dictionary = stage.empty_plots[0].item
+	var now2: float = game.server_time()
+	city.kingdom.order = {"kind": "build", "plotId": free_plot.id, "type": "SUP-04", "endsAt": now2 + 100000.0, "startedAt": now2 - 50000.0}
+	stage.present(game.state)
+	await frames(4)
+	check(is_instance_valid(works.site_model), "New building does not rise on its plot")
+	if not capture.is_empty():
+		stage.target = stage.work_sites[free_plot.id]
+		stage.zoom = 34.0
+		await create_timer(0.8).timeout
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png(capture.path_join("works_rising.png"))
+	if is_instance_valid(works.site_model):
+		var height: float = works.site_model.scale.y / float(game.data.models[game.data.types["SUP-04"]].scale)
+		check(height > 0.3 and height < 0.8, "Rising height does not follow the timer (%.2f at one third)" % height)
+	city.kingdom.erase("order")
+	stage.present(game.state)
+	await frames(2)
+	check(not works.site_node.visible, "Construction site stayed after the order ended")
+	# Settlement of the earlier model: build goes as "legacyBuilding place".
+	var kingdom = city.kingdom
+	city.erase("kingdom")
+	var legacy: Dictionary = game.build_order("p1", "SUP-04")
+	check(legacy.get("kind") == "legacyBuilding" and legacy.get("action") == "place", "Legacy settlement got a kingdom build order")
+	city.kingdom = kingdom
+	check(game.build_order("p1", "SUP-04").get("kind") == "kingdom", "Kingdom settlement lost its build order")
 	print("QA_CITY_WORKS checks=%d failures=%d" % [checks, failures])
 	quit(0 if failures == 0 else 1)

@@ -700,7 +700,19 @@ func building_card(type: String) -> Texture2D:
 	return build_cards[key]
 
 # Status of a core building type for the construction window.
+func legacy_city() -> bool:
+	return not state.city.get("kingdom") is Dictionary
+
+# Settlements of the earlier model (duplicates allowed, no clearing, no hall gate)
+# take "legacyBuilding place"; kingdom settlements take "kingdom build".
+func build_order(plot_id: String, type: String) -> Dictionary:
+	if legacy_city():
+		return {"kind":"legacyBuilding", "action":"place", "type":type, "plotId":plot_id}
+	return {"kind":"kingdom","action":"build","plotId":plot_id,"type":type}
+
 func build_option(definition: Dictionary) -> Dictionary:
+	if legacy_city():
+		return {"state": "ready", "required": 1, "terms": data.buildingTerms.get(definition.id, {"cost": {}, "seconds": 0})}
 	var exists: bool = state.city.buildings.any(func(item): return building_definition(item.type).get("base", item.type) == definition.base)
 	var required := int(data.unlockLevels.get(definition.id, 3))
 	var terms: Dictionary = data.buildingTerms.get(definition.id, {"cost": {}, "seconds": 0})
@@ -1084,7 +1096,7 @@ func confirm_placement() -> void:
 	var definition: Dictionary = placing.definition
 	var plot: Dictionary = placing.plot
 	var position: Vector3 = placing.position
-	var order := {"kind":"kingdom","action":"build","plotId":plot.id,"type":definition.id} if placing.cleared else \
+	var order := build_order(plot.id, definition.id) if placing.cleared else \
 		{"kind":"kingdom","action":"clear","plotId":plot.id}
 	# Instant: the placement closes, builders start on the plot at once and the
 	# server confirms in the background (a refusal is reported and undone).
@@ -1162,7 +1174,7 @@ func show_build_details(definition: Dictionary) -> void:
 	if can_build:
 		button(info, "Построить на ближайшем участке", func():
 			stage.target = site.position
-			command({"kind":"kingdom","action":"build","plotId":site.plot.id,"type":definition.id}))
+			command(build_order(site.plot.id, definition.id)))
 	if not site.is_empty() and not site.cleared and option.state == "ready" and builder_ready:
 		button(info, "Расчистить участок · 15 еды", command.bind({"kind":"kingdom","action":"clear","plotId":site.plot.id}),
 			not player_id.is_empty() and balance("food") >= 15)
@@ -3424,14 +3436,15 @@ func show_error(response: Dictionary) -> void:
 
 # Orders that start visible work at once (the window closes and the work is
 # shown immediately); the server confirms in the background.
-const INSTANT_ACTIONS := ["tree", "site", "upgrade", "collect", "build", "clear", "area"]
+const INSTANT_ACTIONS := ["tree", "site", "upgrade", "collect", "build", "clear", "area", "place", "level"]
 signal command_settled
 var pending_works := {}
 var shown_job := {}
+var last_due_poll := 0
 var queued_commands := 0
 
 func instant_order(order: Dictionary) -> bool:
-	return order.get("kind", "") in ["kingdom", "resource"] and order.get("action", "") in INSTANT_ACTIONS
+	return order.get("kind", "") in ["kingdom", "resource", "legacyBuilding"] and order.get("action", "") in INSTANT_ACTIONS
 
 func command(order: Dictionary, after_success := Callable()) -> bool:
 	var instant := instant_order(order) and not after_success.is_valid()
@@ -3509,25 +3522,40 @@ func predict_work(order: Dictionary) -> void:
 				if tree.id == order.get("id", ""):
 					seconds = float(tree.get("durationMs", 5000)) / 1000.0
 			pending_works.tree = {"tree": str(order.id), "started": now, "ends": now + seconds * 1000.0, "order": order}
-		"upgrade", "build":
+		"upgrade", "build", "place", "level":
 			var key := str(order.get("buildingId", order.get("plotId", "")))
+			var seconds := 30.0
+			var terms: Dictionary = data.buildingTerms.get(str(order.get("type", "")), {})
+			if order.has("type") and terms.has("seconds"):
+				seconds = float(terms.seconds)
 			pending_works.site = {"key": key, "building": str(order.get("buildingId", "")), "plot": str(order.get("plotId", "")),
-				"started": now, "ends": now + 30000.0, "order": order}
+				"type": str(order.get("type", "")), "started": now, "ends": now + seconds * 1000.0, "order": order}
 
 func forget_prediction(order: Dictionary) -> void:
+	# A refused order removes its forecast (same action on the same target).
 	for slot in pending_works.keys():
-		if pending_works[slot].get("order") == order:
+		var predicted: Dictionary = pending_works[slot].get("order", {})
+		if predicted.get("action") == order.get("action") and predicted.get("id") == order.get("id") and \
+				predicted.get("plotId") == order.get("plotId") and predicted.get("buildingId") == order.get("buildingId"):
 			pending_works.erase(slot)
 
+var tree_ids := {}
+
+# The server job names its tree under some field; any value that is a known tree
+# id (forest "tree-N" or village "village-tree-N") identifies it.
 func job_tree_id(job: Variant) -> String:
-	if not job is Dictionary:
+	if not job is Dictionary or not is_instance_valid(stage):
 		return ""
-	for field in ["treeId", "tree", "id", "target", "targetId"]:
+	if tree_ids.size() != stage.selectable_trees.size():
+		tree_ids.clear()
+		for tree in stage.selectable_trees:
+			tree_ids[tree.id] = true
+	for field in ["treeId", "tree", "id", "target", "targetId", "resourceId"]:
 		var value: Variant = job.get(field)
-		if value is String and value.begins_with("tree"):
+		if value is String and tree_ids.has(value):
 			return value
 	for value in job.values():
-		if value is String and value.begins_with("tree-"):
+		if value is String and tree_ids.has(value):
 			return value
 	return ""
 
@@ -3551,23 +3579,41 @@ func current_works(now: float) -> Array:
 			job = {}
 	var site := {}
 	var order := construction_order()
-	var key := ""
+	var source := {}
 	if not order.is_empty() and order.get("kind", "") != "clear":
-		key = str(order.get("buildingId", order.get("plotId", "")))
-	if key.is_empty() and pending_works.has("site"):
-		key = pending_works.site.key
-		if now > float(pending_works.site.ends):
-			pending_works.erase("site")
-			key = ""
-	elif not key.is_empty():
+		source = {"key": str(order.get("buildingId", order.get("plotId", ""))), "kind": str(order.get("kind", "")),
+			"type": str(order.get("type", "")), "ends": float(order.get("endsAt", now)),
+			"started": float(order.get("startedAt", order.get("startsAt", 0.0)))}
+		var predicted: Dictionary = pending_works.get("site", {})
+		if predicted.get("key", "") == source.key and source.started <= 0.0:
+			source.started = float(predicted.started)
 		pending_works.erase("site")
-	if not key.is_empty() and is_instance_valid(stage):
-		var plot_id := key
+	elif pending_works.has("site"):
+		var predicted: Dictionary = pending_works.site
+		if now > float(predicted.ends) + 6000.0:
+			pending_works.erase("site")
+		else:
+			source = {"key": predicted.key, "kind": str(predicted.order.get("action", "")), "type": str(predicted.get("type", "")),
+				"ends": float(predicted.ends), "started": float(predicted.started)}
+	if not source.is_empty() and is_instance_valid(stage):
+		var plot_id: String = source.key
+		var existing := {}
 		for building in state.city.buildings:
-			if str(building.id) == key:
+			if str(building.id) == source.key:
 				plot_id = str(building.plotId)
+				existing = building
+		if source.started <= 0.0:
+			var terms: Dictionary = data.buildingTerms.get(source.type if existing.is_empty() else str(existing.type), {})
+			source.started = float(source.ends) - 1000.0 * float(terms.get("seconds", 30))
 		if stage.work_sites.has(plot_id):
-			site = {"key": key, "position": stage.work_sites[plot_id]}
+			site = source
+			site.position = stage.work_sites[plot_id]
+			# A new building rises inside the scaffolding; an upgrade keeps the building.
+			if existing.is_empty() and data.types.has(source.type):
+				var asset: Dictionary = data.models[data.types[source.type]]
+				site.model = asset.path
+				site.scale = float(asset.scale)
+			site.upgrade = not existing.is_empty()
 	return [job, site]
 
 func request(path: String, payload: Variant = null, idempotency_key := "") -> Dictionary:
@@ -3730,6 +3776,18 @@ func _process(delta: float) -> void:
 		var works := current_works(now)
 		shown_job = works[0]
 		stage.works.present(works[0], works[1], now, delta)
+		# The moment a timer reaches zero the server is asked at once, so the tree
+		# falls / the building appears exactly then, not at the next routine poll.
+		for work in works:
+			if work.is_empty():
+				continue
+			var due := float(work.ends)
+			if now >= due and now < due + 8000.0 and int(due) != last_due_poll and connected() and not player_id.is_empty():
+				last_due_poll = int(due)
+				poll = 1.0e6
+			elif now >= due + 1500.0 and now < due + 8000.0 and int(due) + 1 != last_due_poll and last_due_poll == int(due):
+				last_due_poll = int(due) + 1
+				poll = 1.0e6
 	if map_name == "city" and now >= next_training_update:
 		stage.present_training(state, now)
 		next_training_update = now + 300.0
@@ -4102,17 +4160,21 @@ func inspect_plot(plot: Dictionary) -> void:
 	button(modal_body, "К списку участков", show_construction)
 
 func pick_tree(screen_position: Vector2) -> void:
-	var distance := 18.0
+	var distance := 34.0
 	var selected := {}
 	var felled: Array = state.city.get("progress", {}).get("felled", [])
+	# A tree is tapped anywhere along its trunk or crown, not only at its foot.
+	distance = 34.0
 	for tree in stage.selectable_trees:
-		var p := stage.array_point(tree.p) + Vector3(0, 1, 0)
-		if p.distance_squared_to(stage.camera_target) > 68.0 * 68.0 or stage.camera.is_position_behind(p):
+		var base := stage.array_point(tree.p)
+		if base.distance_squared_to(stage.camera_target) > 90.0 * 90.0 or stage.camera.is_position_behind(base):
 			continue
-		var gap := stage.camera.unproject_position(p).distance_to(screen_position)
-		if gap < distance:
-			distance = gap
-			selected = tree
+		var height := 7.0 * float(tree.get("scale", 1.0))
+		for lift in [1.0, height * 0.45, height * 0.8]:
+			var gap := stage.camera.unproject_position(base + Vector3.UP * lift).distance_to(screen_position)
+			if gap < distance:
+				distance = gap
+				selected = tree
 	if selected.is_empty():
 		return
 	open_modal(selected.name)

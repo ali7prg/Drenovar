@@ -963,7 +963,6 @@ func present_city(state: Dictionary, staged := false) -> void:
 			plots.append(data.treePlots[id])
 	var occupied := {}
 	var plot_positions := {}
-	var upgrade_plot := ""
 	var exclusions: Array = []
 	# Descriptors of every static city node. Unchanged nodes are reused instead of
 	# re-instantiating GLB scenes after each authoritative state update.
@@ -973,8 +972,6 @@ func present_city(state: Dictionary, staged := false) -> void:
 		exclusions.append(Rect2(district.x - 15.7, district.z - 12.7, 31.4, 25.4))
 	for building in city.buildings:
 		occupied[building.plotId] = true
-		if order is Dictionary and order.get("buildingId", "") == building.id:
-			upgrade_plot = building.plotId
 		for plot in plots:
 			if plot.id != building.plotId:
 				continue
@@ -1001,12 +998,7 @@ func present_city(state: Dictionary, staged := false) -> void:
 			exclusions.append(Rect2(plot.x - 6.7, plot.z - 6.7, 13.4, 13.4))
 		if not plot_positions.has(plot.id):
 			plot_positions[plot.id] = Vector3(plot.x, sample_city(plot.x, plot.z), plot.z)
-		if upgrade_plot == plot.id:
-			# Upgrade in progress: scaffolding in front of the building.
-			wanted_buildings.append(["detail", data.scaffold, Transform3D(Basis.IDENTITY.scaled(Vector3(1.15, 1.6, 1.15)),
-				Vector3(plot.x, sample_city(plot.x, plot.z), plot.z + 4.6))])
-		if order is Dictionary and order.get("kind", "") != "clear" and order.get("plotId", "") == plot.id:
-			wanted_buildings.append(["detail", data.scaffold, Transform3D(Basis.IDENTITY, Vector3(plot.x, sample_city(plot.x, plot.z), plot.z))])
+		# Scaffolding, builders and the rising building are drawn by CityWorks.
 		if not occupied.has(plot.id):
 			var x := float(plot.x)
 			var z := float(plot.z)

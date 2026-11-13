@@ -77,8 +77,55 @@ func ensure_effects() -> void:
 	if chips == null:
 		chips = make_burst(Color("#c99a5b"), Color("#7a5530"), 10, 0.13, 3.2, 0.8, 9.0)
 		sparks = make_burst(Color("#fff2b0"), Color("#ff9a3a"), 8, 0.06, 3.6, 0.45, 6.0, true)
-		dust = make_burst(Color(0.85, 0.8, 0.7, 0.55), Color(0.7, 0.66, 0.6, 0.3), 14, 0.5, 1.2, 1.4, -0.4)
-		dust.spread = 180.0
+		dust = make_dust()
+
+# Soft dust: camera-facing round puffs that grow and fade (no hard cubes).
+func make_dust() -> CPUParticles3D:
+	var particles := CPUParticles3D.new()
+	particles.emitting = false
+	particles.one_shot = true
+	particles.explosiveness = 0.75
+	particles.amount = 12
+	particles.lifetime = 1.6
+	var quad := QuadMesh.new()
+	quad.size = Vector2(1.4, 1.4)
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	material.vertex_color_use_as_albedo = true
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	gradient.colors = PackedColorArray([Color(1, 1, 1, 0.85), Color(1, 1, 1, 0.35), Color(1, 1, 1, 0.0)])
+	var puff := GradientTexture2D.new()
+	puff.gradient = gradient
+	puff.fill = GradientTexture2D.FILL_RADIAL
+	puff.fill_from = Vector2(0.5, 0.5)
+	puff.fill_to = Vector2(1.0, 0.5)
+	puff.width = 64
+	puff.height = 64
+	material.albedo_texture = puff
+	quad.material = material
+	particles.mesh = quad
+	particles.direction = Vector3.UP
+	particles.spread = 60.0
+	particles.initial_velocity_min = 0.6
+	particles.initial_velocity_max = 1.6
+	particles.gravity = Vector3(0, 0.25, 0)
+	particles.damping_min = 0.6
+	particles.damping_max = 1.2
+	particles.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	particles.emission_sphere_radius = 0.9
+	var grow := Curve.new()
+	grow.add_point(Vector2(0.0, 0.45))
+	grow.add_point(Vector2(1.0, 1.6))
+	particles.scale_amount_curve = grow
+	var fade := Gradient.new()
+	fade.colors = PackedColorArray([Color(0.86, 0.8, 0.68, 0.7), Color(0.78, 0.74, 0.66, 0.0)])
+	particles.color_ramp = fade
+	particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(particles)
+	return particles
 
 static func limbs(actor: Node3D, part: String) -> Array[Node3D]:
 	var found: Array[Node3D] = []
@@ -160,6 +207,10 @@ func present_lumberjack(job: Dictionary, now_ms: float) -> void:
 		return
 	lumberjack.position = lumber_at
 	lumberjack.rotation.y = lumber_face
+	if now_ms >= lumber_ends and lumber_ends > 0.0:
+		# Work time is over: the axe rests until the tree falls.
+		pose(lumberjack, 0.0, 0.0)
+		return
 	# Raise slowly, strike fast: the axe hits at the bottom of each cycle.
 	var cycle := fposmod((seconds - WALK_SECONDS) * SWING_HZ, 1.0)
 	var arm := -2.3 * (cycle / 0.7) if cycle < 0.7 else -2.3 + 2.6 * ((cycle - 0.7) / 0.3)
@@ -173,11 +224,22 @@ func present_lumberjack(job: Dictionary, now_ms: float) -> void:
 			chips.global_position = trunk.lerp(lumber_at, 0.35) + Vector3.UP * 1.0
 			chips.restart()
 
+var site_node: Node3D
+var site_model: Node3D
+var site_model_path := ""
+var site_frames: Array[Node3D] = []
+
+# Construction site: scaffolding around the plot, a new building rising inside it
+# with the timer (from foundations to full height), builders hammering with
+# sparks, dust now and then. For an upgrade the building stays as it is and the
+# scaffolding stands around it.
 func present_builders(site: Dictionary, now_ms: float) -> void:
 	var key: String = site.get("key", "")
 	if key.is_empty():
 		for builder in builders:
 			builder.visible = false
+		if is_instance_valid(site_node):
+			site_node.visible = false
 		builder_site = ""
 		return
 	if builders.is_empty():
@@ -185,13 +247,23 @@ func present_builders(site: Dictionary, now_ms: float) -> void:
 		builders.append(make_worker("Worker_Carrier"))
 	var centre: Vector3 = site.position
 	seen_work[key] = true
+	var started := float(site.get("started", now_ms))
+	var ends := float(site.get("ends", now_ms + 1.0))
+	var progress := clampf((now_ms - started) / maxf(ends - started, 1.0), 0.0, 1.0)
 	if builder_site != key:
 		builder_site = key
-		var offsets := [Vector3(-3.6, 0, 3.4), Vector3(3.8, 0, 2.6)]
+		var offsets := [Vector3(-4.6, 0, 4.2), Vector3(4.8, 0, 3.6)]
 		for index in builders.size():
 			var p: Vector3 = stage.ground_point(centre + offsets[index])
 			builders[index].position = p
 			builders[index].rotation.y = atan2(centre.x - p.x, centre.z - p.z)
+		build_site(site)
+	site_node.visible = true
+	site_node.position = centre
+	if is_instance_valid(site_model):
+		# Rises from 12 % (foundations) to full height as the timer runs.
+		var height := lerpf(0.12, 1.0, progress)
+		site_model.scale = Vector3(float(site.get("scale", 1.0)), float(site.get("scale", 1.0)) * height, float(site.get("scale", 1.0)))
 	var seconds := now_ms / 1000.0
 	for index in builders.size():
 		var builder := builders[index]
@@ -203,14 +275,95 @@ func present_builders(site: Dictionary, now_ms: float) -> void:
 		if cycle > 0.96 and last_swing.get("builder%d" % index, -1) != hit:
 			last_swing["builder%d" % index] = hit
 			var forward := Vector3(sin(builder.rotation.y), 0, cos(builder.rotation.y))
-			sparks.global_position = builder.position + forward * 0.9 + Vector3.UP * 0.9
+			sparks.global_position = builder.position + forward * 1.0 + Vector3.UP * 1.1
 			sparks.restart()
-	# Dust drifts off the scaffolding now and then.
-	var puff := int(floor(seconds / 2.2))
+	var puff := int(floor(seconds / 2.6))
 	if last_swing.get("dust", -1) != puff:
 		last_swing.dust = puff
-		dust.global_position = centre + Vector3(randf_range(-2.5, 2.5), 1.2, randf_range(-2.0, 2.0))
+		dust.global_position = centre + Vector3(randf_range(-3.0, 3.0), 0.6, randf_range(-3.0, 3.0))
 		dust.restart()
+
+func build_site(site: Dictionary) -> void:
+	if not is_instance_valid(site_node):
+		site_node = Node3D.new()
+		site_node.name = "ConstructionSite"
+		add_child(site_node)
+	var wanted: String = site.get("model", "")
+	if wanted != site_model_path or not is_instance_valid(site_model):
+		if is_instance_valid(site_model):
+			site_model.queue_free()
+		site_model = null
+		site_model_path = wanted
+		if not wanted.is_empty():
+			site_model = stage.add_model(site_node, wanted, Transform3D.IDENTITY)
+	var half := 5.6 if site.get("upgrade", false) else 4.6
+	if site_frames.is_empty() or not is_equal_approx(float(site_node.get_meta("half", 0.0)), half):
+		for frame in site_frames:
+			frame.queue_free()
+		site_frames.clear()
+		var scaffold := build_scaffold(half, 7.4 if site.get("upgrade", false) else 6.4)
+		site_node.add_child(scaffold)
+		site_frames.append(scaffold)
+		site_node.set_meta("half", half)
+
+static func timber() -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color("#6b4f31")
+	material.roughness = 0.92
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return material
+
+# Timber scaffolding around a square plot: corner and middle poles, rails on three
+# levels, plank decks and a cross brace per side. One mesh (SurfaceTool), so it
+# costs a single draw call.
+static func build_scaffold(half: float, height: float) -> MeshInstance3D:
+	var tool := SurfaceTool.new()
+	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var beam := func(a: Vector3, b: Vector3, thickness: float) -> void:
+		var axis := b - a
+		var length := axis.length()
+		if length < 0.01:
+			return
+		var forward := axis / length
+		var side := forward.cross(Vector3.UP if absf(forward.y) < 0.9 else Vector3.RIGHT).normalized() * thickness * 0.5
+		var up := side.cross(forward).normalized() * thickness * 0.5
+		var corners := [a - side - up, a + side - up, a + side + up, a - side + up,
+			b - side - up, b + side - up, b + side + up, b - side + up]
+		for face in [[0, 1, 2, 3], [5, 4, 7, 6], [4, 0, 3, 7], [1, 5, 6, 2], [3, 2, 6, 7], [4, 5, 1, 0]]:
+			var p0: Vector3 = corners[face[0]]
+			var p1: Vector3 = corners[face[1]]
+			var p2: Vector3 = corners[face[2]]
+			var p3: Vector3 = corners[face[3]]
+			var normal := (p1 - p0).cross(p2 - p0).normalized()
+			for vertex in [p0, p2, p1, p0, p3, p2]:
+				tool.set_normal(-normal)
+				tool.add_vertex(vertex)
+	var levels := [height * 0.32, height * 0.64, height * 0.96]
+	for sx in [-1.0, 0.0, 1.0]:
+		for sz in [-1.0, 0.0, 1.0]:
+			if sx == 0.0 and sz == 0.0:
+				continue
+			beam.call(Vector3(sx * half, 0.0, sz * half), Vector3(sx * half, height, sz * half), 0.24)
+	for level in levels:
+		for side in 4:
+			var angle := side * PI * 0.5
+			var a := Vector3(-half, level, half).rotated(Vector3.UP, angle)
+			var b := Vector3(half, level, half).rotated(Vector3.UP, angle)
+			beam.call(a, b, 0.17)
+			# Plank deck just inside the rail.
+			var inward := Vector3(0, 0, -0.55).rotated(Vector3.UP, angle)
+			beam.call(a + inward - Vector3.UP * 0.12, b + inward - Vector3.UP * 0.12, 0.5)
+	for side in 4:
+		var angle := side * PI * 0.5
+		beam.call(Vector3(-half, 0.2, half + 0.05).rotated(Vector3.UP, angle),
+			Vector3(0.0, levels[1], half + 0.05).rotated(Vector3.UP, angle), 0.14)
+		beam.call(Vector3(half, 0.2, half + 0.05).rotated(Vector3.UP, angle),
+			Vector3(0.0, levels[1], half + 0.05).rotated(Vector3.UP, angle), 0.14)
+	var mesh := MeshInstance3D.new()
+	mesh.name = "Scaffold"
+	mesh.mesh = tool.commit()
+	mesh.material_override = timber()
+	return mesh
 
 # Called by the landscape after each authoritative city update.
 func observe_city(city: Dictionary, plots: Dictionary) -> void:

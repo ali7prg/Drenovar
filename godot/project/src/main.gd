@@ -2334,45 +2334,60 @@ func defence_table(parent: Container, rows: Array, next_rows: Array = []) -> voi
 			var later: String = next_rows[i][1]
 			card_note(grid, "→ " + later if later != rows[i][1] else "", Color("#9fd27a"), 15)
 
+func defence_note(parent: Container) -> void:
+	var text := "Действует, когда на город нападают с мировой карты: защита гарнизона, лучники на стенах и меньше потерь."
+	if not defence_active():
+		text = "Сервер ещё не обновлён: пока в бою за город считается только гарнизон. После обновления сервера (city-defence) эти показатели начнут действовать при нападении с мировой карты."
+	card_note(parent, text, Color("#c9b58f"), 14).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
 func add_defence_rows(parent: Container, base: String, level: int) -> void:
-	var towers: int = stage.walls.tower_count if is_instance_valid(stage) else 0
+	var hall := hall_level()
+	var wall := built_level("SUP-03")
+	var watch := built_level("SUP-04")
 	if base == "SUP-03":
 		card_note(parent, "Стены поселения · ур. %d" % level, Color("#f2dfac"), 18)
-		var now := CityDefence.wall_stats(hall_level(), level, towers)
-		var later := CityDefence.wall_stats(hall_level(), mini(level + 1, 5), towers)
-		defence_table(parent, CityDefence.rows_for_wall(now), CityDefence.rows_for_wall(later) if level < 5 else [])
+		var later := CityDefence.wall_rows(CityDefence.stats(hall, mini(wall + 1, 5), watch)) if wall < 5 else []
+		defence_table(parent, CityDefence.wall_rows(CityDefence.stats(hall, wall, watch)), later)
 	else:
 		card_note(parent, "Сторожевая башня · ур. %d" % level, Color("#f2dfac"), 18)
-		var now := CityDefence.watchtower_stats(level)
-		var later := CityDefence.watchtower_stats(mini(level + 1, 5))
-		defence_table(parent, CityDefence.rows_for_watchtower(now), CityDefence.rows_for_watchtower(later) if level < 5 else [])
-	if not defence_active():
-		card_note(parent, "В бою сервер пока учитывает только гарнизон: бонус заработает после обновления сервера.", Color("#c9b58f"), 13).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var later := CityDefence.watchtower_rows(hall, wall, mini(watch + 1, 5)) if watch < 5 else []
+		defence_table(parent, CityDefence.watchtower_rows(hall, wall, watch), later)
+	defence_note(parent)
 
-# The defence of the settlement in one panel: the wall, the yard it encloses and
-# the watchtower, with what the next level adds.
+# The defence of the settlement in one panel: what the wall and the watchtower give
+# when the city is attacked from the world map, what the next level adds, and the
+# yard inside the wall.
 func show_city_defence() -> void:
 	action_ring.close()
 	open_modal("Оборона поселения", "right", "СТЕНЫ И БАШНИ")
 	var hall := hall_level()
 	var walls = stage.walls if is_instance_valid(stage) and map_name == "city" else null
-	var wall_level := built_level("SUP-03")
-	var shown: bool = walls != null and walls.visible
+	var wall := built_level("SUP-03")
+	var watch := built_level("SUP-04")
+	var now := CityDefence.stats(hall, wall, watch)
 	card_note(modal_body, "Стены", Color("#f2dfac"), 20)
-	if shown:
+	if now.standing:
 		var status := "Частокол с башнями стоит вокруг двора с ратуши II."
-		if wall_level > 0:
-			status = "Стены и ворота · ур. %d: стена выше, на башнях больше лучников." % wall_level
+		if wall > 0:
+			status = "Стены и ворота · ур. %d. %s" % [wall, ["", "Деревянный частокол.", "Деревянный частокол выше.", "Каменные башни.", "Каменные башни, стена выше.", "Каменная стена с зубцами."][wall]]
 		row(modal_body, status)
-		var now := CityDefence.wall_stats(hall, wall_level, walls.tower_count)
-		var later := CityDefence.wall_stats(hall, mini(wall_level + 1, 5), walls.tower_count)
-		defence_table(modal_body, CityDefence.rows_for_wall(now), CityDefence.rows_for_wall(later) if wall_level < 5 else [])
-		row(modal_body, "Башен на стене: %d · ворот: %d" % [walls.tower_count, walls.gates.size()])
-		if wall_level == 0:
-			var unlock := int(data.unlockLevels.get("SUP-03", 3))
-			row(modal_body, "Постройте «Стены и ворота» (ратуша %d), чтобы усилить стену." % unlock)
+		var later := CityDefence.wall_rows(CityDefence.stats(hall, mini(wall + 1, 5), watch)) if wall < 5 else []
+		defence_table(modal_body, CityDefence.wall_rows(now), later)
+		if wall == 0:
+			row(modal_body, "Постройте «Стены и ворота» (ратуша %d) и улучшайте их: каждый уровень усиливает город." % int(data.unlockLevels.get("SUP-03", 3)))
+		elif wall < 5:
+			row(modal_body, "Справа — что даст следующий уровень «Стен и ворот».")
+		else:
+			row(modal_body, "Стены последнего уровня: наибольшая защита города.")
 	else:
-		row(modal_body, "Стены встанут вокруг двора, когда ратуша достигнет уровня %d." % 2)
+		row(modal_body, "Стены встанут вокруг двора, когда ратуша достигнет уровня 2. Пока город защищает только гарнизон.")
+	card_note(modal_body, "Сторожевая башня", Color("#f2dfac"), 20)
+	if watch > 0:
+		var later := CityDefence.watchtower_rows(hall, wall, mini(watch + 1, 5)) if watch < 5 else []
+		defence_table(modal_body, CityDefence.watchtower_rows(hall, wall, watch), later)
+	else:
+		row(modal_body, "Не построена · откроется с ратуши %d. Добавляет лучников и защиту гарнизону." % int(data.unlockLevels.get("SUP-04", 3)))
+	defence_note(modal_body)
 	card_note(modal_body, "Двор", Color("#f2dfac"), 20)
 	if walls != null:
 		var size: Vector2 = walls.yard_size()
@@ -2382,16 +2397,6 @@ func show_city_defence() -> void:
 			row(modal_body, "Ратуша ур. %d: стена отодвинется примерно на %d м, внутри появятся новые участки." % [hall + 1, roundi(grow)])
 		else:
 			row(modal_body, "Двор достиг наибольшего размера текущего этапа.")
-	card_note(modal_body, "Сторожевая башня", Color("#f2dfac"), 20)
-	var tower_level := built_level("SUP-04")
-	if tower_level > 0:
-		var now := CityDefence.watchtower_stats(tower_level)
-		var later := CityDefence.watchtower_stats(mini(tower_level + 1, 5))
-		defence_table(modal_body, CityDefence.rows_for_watchtower(now), CityDefence.rows_for_watchtower(later) if tower_level < 5 else [])
-	else:
-		row(modal_body, "Не построена · откроется с ратуши %d. Даёт обзор подступов и лучников при обороне." % int(data.unlockLevels.get("SUP-04", 3)))
-	if not defence_active():
-		card_note(modal_body, "Сейчас сервер в бою учитывает только гарнизон. Бонусы стен и башни заработают после обновления сервера (city-defence).", Color("#c9b58f"), 14).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	panel_action(modal_body, "Строить оборону", show_build_menu.bind("support"))
 
 func confirm_cancel_training(building: Dictionary, order: Dictionary) -> void:
@@ -3678,6 +3683,13 @@ func show_report(report: Dictionary, announced := false) -> void:
 		box.add_child(labels)
 		result_label(labels, format_balance(total_units(report.get(section[0], {}))), 33, WebPanels.IVORY, true)
 		result_label(labels, section[1], 15, Color("#b6c4ab"))
+	# Attack on a city: what its wall and watchtower added to the defenders.
+	var fort: Variant = report.get("fortification")
+	if fort is Dictionary:
+		var walls_text := "Стены города · ур. %d" % int(fort.get("wallLevel", 0)) if int(fort.get("wallLevel", 0)) > 0 else "Частокол города"
+		result_label(modal_body, "%s: защита +%d%%, мощь укреплений %s · оборона %s против %s" % [walls_text, int(fort.get("defencePct", 0)),
+			format_balance(int(fort.get("fortPower", 0))), format_balance(int(fort.get("defenderPower", 0))), format_balance(int(fort.get("attackerPower", 0)))],
+			15, Color("#e5c57d")).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var rewards: Dictionary = report.get("rewards", {})
 	var resources: Dictionary = rewards.get("resources", {})
 	var items: Dictionary = rewards.get("items", {})
@@ -4488,6 +4500,9 @@ func pick_world_feature(screen_position: Vector2) -> void:
 func inspect_settlement(item: Dictionary) -> void:
 	open_modal(item.name, "right", "ПОСЕЛЕНИЕ")
 	row(modal_body, "Ратуша · уровень %d" % int(item.level))
+	if item.has("wallLevel"):
+		var wall := int(item.wallLevel)
+		row(modal_body, "Стены и ворота · уровень %d" % wall if wall > 0 else ("Частокол без «Стен и ворот»" if int(item.level) >= 2 else "Без стен"))
 	if item.get("nickname") is String and not item.nickname.is_empty():
 		row(modal_body, "Игрок · " + item.nickname)
 	button(modal_body, "Рассмотреть на карте", focus_minimap.bind(Vector2(item.position.x, item.position.z)))

@@ -47,7 +47,12 @@
   native-session, world62, paid-training92, accounts40, founder42, server.
 - Клиент: `qa_move_building.gd` против `test-realm.mjs` с патчем — 14 проверок без ошибок.
 
-## Не входит в патч
+## Связанный патч
+
+Патч `city-defence-v1` (стены и сторожевая башня в бою) ставится после этого и
+добавляет в `cityFeatures` признак `cityDefence`.
+
+## Не входит в патч (раньше)
 
 - Бонусы стен и сторожевой башни в бою (`cityFeatures: cityDefence`). Клиент показывает их
   по таблице `godot/project/src/city_defence.gd` и пишет, что в бою v92 считает только

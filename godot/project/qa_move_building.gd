@@ -1,6 +1,7 @@
 extends SceneTree
 
-# Moving a building against the patched server (server-patches/move-building-v1 on
+# Moving a building against the patched server (server-patches/move-building-v1 and
+# city-defence-v1 on
 # a copy of v92, test realm, in memory). Run with: -- --server=http://127.0.0.1:8417
 #  - the server reports cityFeatures: moveBuilding;
 #  - "Переместить" in the ring of a building starts placement with free cleared plots;
@@ -58,6 +59,9 @@ func run() -> void:
 		return
 	await fresh_state()
 	check(game.move_supported(), "Server reports cityFeatures moveBuilding")
+	check(game.defence_active(), "Server reports cityFeatures cityDefence")
+	var own: Array = game.state.world.cities.filter(func(c): return c.id == game.player_id)
+	check(not own.is_empty() and own[0].has("wallLevel"), "World city carries wallLevel")
 	# A cleared free plot to move onto.
 	check(await game.command({"kind": "kingdom", "action": "clear", "plotId": "v1-4"}), "Plot v1-4 clearing ordered")
 	var order: Dictionary = game.construction_order()

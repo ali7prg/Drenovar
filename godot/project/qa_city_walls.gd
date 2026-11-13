@@ -123,8 +123,23 @@ func run() -> void:
 	check(walls.gates.size() >= 2, "hall IV: side gates")
 	await capture(game, out, "hall4_overview", Vector3(-5, 0, 4), 150.0)
 	await capture(game, out, "hall4_gate", walls.main_gate, 40.0)
+	# Same table as the server patch city-defence-v1 (gameplay37/tests/city-defence.mjs).
+	var CityDefence = load("res://src/city_defence.gd")
+	var s2: Dictionary = CityDefence.stats(2, 0, 0)
+	var s5: Dictionary = CityDefence.stats(5, 5, 5)
+	check(not CityDefence.stats(1, 0, 0).standing and CityDefence.stats(1, 0, 0).fort_power == 0, "defence table: no wall at hall I")
+	check(s2.towers == 8 and s2.archers == 16 and s2.fort_power == 288 and s2.defence_pct == 4 and s2.loss_cut_pct == 2, "defence table matches server at hall II")
+	check(s5.towers == 14 and s5.archers == 112 and s5.fort_power == 5376 and s5.defence_pct == 56 and s5.loss_cut_pct == 28, "defence table matches server at top level")
+	# The look follows the level of "walls and gate": stone towers from 3, a stone curtain at 5.
+	check(walls.node.get_node_or_null("curtain_planks") != null and walls.node.get_node_or_null("tower_body_planks") != null, "walls and gate I: timber palisade")
+	for building in game.state.city.buildings:
+		if building.type == "SUP-03":
+			building.level = 5
 	set_hall(game, 5)
 	await present(game)
+	check(walls.node.get_node_or_null("curtain_stone_wall") != null and walls.node.get_node_or_null("merlons") != null, "walls and gate V: stone curtain with battlements")
+	check(walls.node.get_node_or_null("tower_body_stone_wall") != null, "walls and gate V: stone towers")
+	await capture(game, out, "hall5_wall5_gate", walls.main_gate, 40.0)
 	check(ring_ok(stage), "hall V: closed ring")
 	await capture(game, out, "hall5_overview", Vector3(-5, 0, 4), 175.0)
 	# Defence panel: wall, yard and watchtower numbers.
@@ -134,7 +149,7 @@ func run() -> void:
 	var text := ""
 	for child in game.modal_body.find_children("*", "Label", true, false):
 		text += child.text + "\n"
-	check(text.contains("Прочность стен") and text.contains("Обзор подступов") and text.contains("Двор"), "defence panel shows wall, yard and watchtower")
+	check(text.contains("Мощь укреплений") and text.contains("Лучники на башне") and text.contains("Двор"), "defence panel shows wall, yard and watchtower")
 	check(text.contains("только гарнизон"), "defence panel says the server does not apply the bonus yet")
 	await capture(game, out, "defence_panel", walls.main_gate, 60.0)
 	game.close_modal()
@@ -147,7 +162,7 @@ func run() -> void:
 	text = ""
 	for child in game.modal_body.find_children("*", "Label", true, false):
 		text += child.text + "\n"
-	check(text.contains("Сторожевая башня · ур. 1") and text.contains("→ 90 м"), "watchtower panel shows its function and next level")
+	check(text.contains("Сторожевая башня · ур. 1") and text.contains("→ +6%"), "watchtower panel shows its function and next level")
 	game.close_modal()
 	print("RESULT failures=%d" % failures)
 	quit(1 if failures > 0 else 0)

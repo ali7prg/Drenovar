@@ -2267,7 +2267,7 @@ func inspect_building(building: Dictionary) -> void:
 					"buildingId":building.id, "type":variant.id}), not player_id.is_empty())
 	if level < 5 and building.type in data.upgradable:
 		var terms: Dictionary = data.buildingTerms[building.type].upgrades[level - 1]
-		row(modal_body, "Уровень %d · %s · %d сек." % [level + 1, cost_label(terms.cost), int(terms.seconds)])
+		add_upgrade_preview(modal_body, building, level, terms)
 		var available := can_afford(terms.cost) and construction_order().is_empty()
 		var base: String = building_definition(building.type).get("base", building.type)
 		if base == "ECO-05":
@@ -2918,6 +2918,155 @@ func load_unit_preview(preview: SubViewportContainer, visual: Dictionary, framin
 	camera.environment = fill
 	var clip: String = "Recruit_Showcase" if warrior and visual.drill == "Mounted_Drill" else visual.drill
 	stage.play_animation(unit, clip, visual.drill)
+	if DisplayServer.get_name() != "headless":
+		await RenderingServer.frame_post_draw
+	if is_instance_valid(preview) and preview.is_inside_tree():
+		preview.get_parent().get_node("PreviewFallback").hide()
+
+# ---------------------------------------------------------------- upgrade preview
+# Before "Улучшить": the building now and on the next level side by side (the same
+# scenes the city draws), the build time, the cost and what the level improves.
+func add_upgrade_preview(parent: Container, building: Dictionary, level: int, terms: Dictionary) -> void:
+	var title := Label.new()
+	title.text = "Улучшение: уровень %d → %d" % [level, level + 1]
+	title.add_theme_font_size_override("font_size", 19)
+	title.add_theme_color_override("font_color", Color("#f1d79a"))
+	parent.add_child(title)
+	var pair := HBoxContainer.new()
+	pair.add_theme_constant_override("separation", 6)
+	parent.add_child(pair)
+	for target in [level, level + 1]:
+		var column := VBoxContainer.new()
+		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		pair.add_child(column)
+		var preview := create_unit_preview(column, 170)
+		preview.name = "UpgradePreview%d" % target
+		var caption := Label.new()
+		caption.text = ("Сейчас · ур. %d" if target == level else "После · ур. %d") % target
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		caption.add_theme_color_override("font_color", Color("#d9cfb8") if target == level else Color("#9fe08a"))
+		column.add_child(caption)
+		load_building_preview(preview, building.type, target)
+	row(parent, "Время улучшения · %s" % duration_label(int(terms.seconds)))
+	row(parent, "Стоимость · %s" % cost_label(terms.cost))
+	for gain in upgrade_gains(building.type, level):
+		var label := Label.new()
+		label.text = "▲ " + str(gain)
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.add_theme_color_override("font_color", Color("#9fe08a"))
+		parent.add_child(label)
+
+func upgrade_gains(type: String, level: int) -> Array:
+	var gains: Array = []
+	var metrics: Dictionary = data.buildingTerms.get(type, {})
+	if metrics.get("production") != null:
+		var now := int(metrics.rates[clampi(level, 1, 5) - 1])
+		var next := int(metrics.rates[clampi(level + 1, 1, 5) - 1])
+		gains.append("%s · %d → %d/мин (+%d)" % [RESOURCE_NAMES[metrics.production], now, next, next - now])
+	if int(metrics.get("storage", 0)) > 0:
+		gains.append("Вместимость · %d → %d" % [int(metrics.storage) * level, int(metrics.storage) * (level + 1)])
+	var base: String = building_definition(type).get("base", type)
+	if base in ["SUP-01", "MIL-01", "MIL-02", "MIL-03", "MIL-05"]:
+		gains.append("Время лечения и обучения · −%d%% → −%d%%" % [(level - 1) * 8, level * 8])
+	if base in ["SUP-03", "SUP-04"]:
+		gains.append("Оборона поселения усиливается, стена становится выше и прочнее")
+	if base == "ECO-05":
+		gains.append("Двор и стена города расширяются, открываются новые постройки")
+	if gains.is_empty():
+		gains.append("Здание становится больше и получает новый облик")
+	return gains
+
+func building_preview_parts(type: String, level: int) -> Array:
+	## [[scene path, scale, material override?], ...] exactly as the city draws this level.
+	var entry: Variant = data.get("levelModels", {}).get(type, {}).get(str(level))
+	if entry is Dictionary:
+		return [[entry.path, float(entry.get("scale", 1.0)), false]]
+	var id: String = data.starterHall if type == "ECO-05" and level == 1 else data.types.get(type, "")
+	if id.is_empty():
+		return []
+	var asset: Dictionary = data.models[id]
+	var parts := [[asset.path, float(asset.scale) * (1.0 + 0.055 * (level - 1)), false]]
+	var overlay: String = data.architecture.get(type, {}).get(str(level), "")
+	if not overlay.is_empty():
+		parts.append([overlay, 1.0, true])
+	return parts
+
+func load_building_preview(preview: SubViewportContainer, type: String, level: int) -> void:
+	var parts := building_preview_parts(type, level)
+	if parts.is_empty() or not is_instance_valid(preview):
+		return
+	for part in parts:
+		ResourceLoader.load_threaded_request(part[0], "PackedScene")
+	if DisplayServer.get_name() == "headless":
+		await get_tree().process_frame
+	else:
+		await RenderingServer.frame_post_draw
+	for part in parts:
+		while ResourceLoader.load_threaded_get_status(part[0]) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			await get_tree().process_frame
+	if not is_instance_valid(preview) or not preview.is_inside_tree():
+		return
+	var viewport := SubViewport.new()
+	viewport.own_world_3d = true
+	viewport.transparent_bg = true
+	viewport.msaa_3d = Viewport.MSAA_2X
+	viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
+	preview.add_child(viewport)
+	var root := Node3D.new()
+	viewport.add_child(root)
+	var model := Node3D.new()
+	root.add_child(model)
+	for part in parts:
+		var scene := ResourceLoader.load_threaded_get(part[0]) as PackedScene
+		if scene == null:
+			continue
+		var node := scene.instantiate() as Node3D
+		node.scale = Vector3.ONE * float(part[1])
+		model.add_child(node)
+		if part[2]:
+			for mesh: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
+				mesh.material_override = stage.scenery_material
+	var bounds := AABB()
+	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		var box := mesh.global_transform * mesh.get_aabb()
+		bounds = box if not bounds.has_volume() else bounds.merge(box)
+	# Both columns use one fixed plot-sized frame, so growth between levels is visible.
+	var camera := Camera3D.new()
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.size = 16.0
+	root.add_child(camera)
+	var focus := Vector3(0, 2.6, 0)
+	camera.position = focus + Vector3(75, 83, 75).normalized() * 40.0
+	camera.look_at(focus)
+	camera.make_current()
+	var ground := MeshInstance3D.new()
+	var disc := CylinderMesh.new()
+	disc.top_radius = 7.4
+	disc.bottom_radius = 7.4
+	disc.height = 0.1
+	ground.mesh = disc
+	var turf := StandardMaterial3D.new()
+	turf.albedo_color = Color("#3f5a2c")
+	turf.roughness = 1.0
+	ground.material_override = turf
+	ground.position.y = -0.06
+	root.add_child(ground)
+	var light := DirectionalLight3D.new()
+	light.rotation_degrees = Vector3(-48, -32, 0)
+	light.light_color = Color("#ffe4b8")
+	light.light_energy = 1.7
+	light.shadow_enabled = true
+	root.add_child(light)
+	var fill := Environment.new()
+	fill.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	fill.ambient_light_color = Color("#d8e5ee")
+	fill.ambient_light_energy = 0.6
+	fill.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	camera.environment = fill
+	# slow turntable so every side of the new level can be seen
+	var spin := create_tween().set_loops()
+	spin.tween_property(model, "rotation:y", TAU, 24.0).from(0.0)
+	viewport.tree_exiting.connect(spin.kill)
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 	if is_instance_valid(preview) and preview.is_inside_tree():

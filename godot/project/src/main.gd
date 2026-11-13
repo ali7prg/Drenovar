@@ -490,7 +490,8 @@ func button(parent: Container, title: String, action: Callable, enabled := true)
 	value.text = title
 	value.custom_minimum_size = Vector2(48,42)
 	value.disabled = not enabled
-	value.pressed.connect(action)
+	if action.is_valid():
+		value.pressed.connect(action)
 	parent.add_child(value)
 	return value
 
@@ -502,14 +503,23 @@ func row(parent: Container, title: String) -> void:
 
 func bind_countdown(label: Label, title: String, ends_at: float) -> void:
 	var update := func():
-		var seconds := maxi(0, ceili((ends_at - server_time()) / 1000.0))
-		label.text = "%s · %d:%02d" % [title, floori(seconds / 60.0), seconds % 60]
+		var left := ends_at - timer_now()
+		if left <= 0.0:
+			label.text = "%s · %s" % [title, timer_end_label()]
+			return
+		var seconds := ceili(left / 1000.0)
+		label.text = "%s · %s" % [title, clock_text(seconds)]
 	var clock := Timer.new()
 	clock.wait_time = 1.0
 	clock.autostart = true
 	label.add_child(clock)
 	clock.timeout.connect(update)
 	update.call()
+
+static func clock_text(seconds: int) -> String:
+	if seconds >= 3600:
+		return "%d:%02d:%02d" % [seconds / 3600, (seconds / 60) % 60, seconds % 60]
+	return "%d:%02d" % [seconds / 60, seconds % 60]
 
 func countdown(title: String, ends_at: float) -> void:
 	var label := Label.new()
@@ -1276,26 +1286,27 @@ func show_starter_goals() -> void:
 		return
 	row(modal_body, "Все стартовые цели выполнены.")
 
-# Speedup tiers for every queue: construction, training and marches. The server
-# catalogue (data.speedItems) keeps its ids; missing tiers are added with ids of
-# the same form "<queue>-<n>". Only items the player owns (state.items) can be used.
+# Speedups. Usable items are exactly the server catalogue (data.speedItems, the same
+# as dist/city/upgrade-v1.js speedItems in server v92: construction and training,
+# 1, 5, 15 and 60 min) and the count is the server inventory (state.items). Tiers the
+# server does not know yet (30 min, 2 h, 5 h, 10 h, every march item) are listed as
+# unavailable with the reason; nothing pretends to use them.
 const SPEED_QUEUES := {"construction": "Строительство", "training": "Обучение войск", "march": "Марш"}
 const SPEED_TIERS := [60, 300, 900, 1800, 3600, 7200, 18000, 36000]
+const SPEED_SERVER_PENDING := "Появится после обновления сервера."
+var speedup_in_flight := false
 
+# The server's own catalogue when it sends one (speedCatalog, server patch
+# speedups-v2), else the v92 catalogue shipped with the game.
 func speed_catalog() -> Dictionary:
-	var catalog: Dictionary = data.get("speedItems", {}).duplicate(true)
-	for queue in SPEED_QUEUES:
-		var taken := {}
-		var next_index := 1
-		for id in catalog:
-			if catalog[id].kind == queue:
-				taken[int(catalog[id].seconds)] = true
-				next_index = maxi(next_index, int(str(id).get_slice("-", 1)) + 1)
-		for seconds in SPEED_TIERS:
-			if not taken.has(seconds):
-				catalog["%s-%d" % [queue, next_index]] = {"kind": queue, "seconds": seconds}
-				next_index += 1
-	return catalog
+	var catalog: Variant = state.get("speedCatalog")
+	return catalog if catalog is Dictionary and not catalog.is_empty() else data.get("speedItems", {})
+
+func server_speed_items(queue: String) -> Array:
+	var catalog := speed_catalog()
+	var ids: Array = catalog.keys().filter(func(id): return catalog[id].kind == queue)
+	ids.sort_custom(func(a, b): return int(catalog[a].seconds) < int(catalog[b].seconds))
+	return ids
 
 static func speed_duration(seconds: int) -> String:
 	if seconds >= 3600:
@@ -1305,44 +1316,69 @@ static func speed_duration(seconds: int) -> String:
 func show_speedups(queue: String, order: Dictionary, building_id: String) -> void:
 	open_modal("Ускорение · " + SPEED_QUEUES.get(queue, ""))
 	countdown("Осталось", order.endsAt)
-	var catalog := speed_catalog()
-	var ids: Array = catalog.keys().filter(func(id): return catalog[id].kind == queue)
-	ids.sort_custom(func(a, b): return int(catalog[a].seconds) < int(catalog[b].seconds))
+	var ids := server_speed_items(queue)
+	var known := {}
 	var owned_any := false
-	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 8)
-	grid.add_theme_constant_override("v_separation", 8)
-	modal_body.add_child(grid)
 	for id in ids:
-		var duration := int(catalog[id].seconds)
+		var duration := int(speed_catalog()[id].seconds)
+		known[duration] = true
 		var count := int(state.get("items", {}).get(id, 0))
 		owned_any = owned_any or count > 0
-		var label := "%s · ×%d" % [speed_duration(duration), count] if count > 0 else "%s · нет" % speed_duration(duration)
-		var use := button(grid, label, apply_speedup.bind(queue, order, building_id, id, duration),
-			count > 0 and not player_id.is_empty())
-		use.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if not owned_any:
-		row(modal_body, "Ускорителей для этой очереди пока нет. Их дают награды и задания.")
+		var label := "%s · в наличии %d" % [speed_duration(duration), count]
+		button(modal_body, label, preview_speedup.bind(queue, order, building_id, id),
+			count > 0 and not player_id.is_empty() and not speedup_in_flight)
+	if ids.is_empty():
+		row(modal_body, "Ускорение этой очереди сервер пока не поддерживает. " + SPEED_SERVER_PENDING)
+	elif not owned_any:
+		row(modal_body, "Ускорителей для этой очереди нет. Сервер выдаёт их за развитие поселения и обучение войск.")
+	var pending: Array = SPEED_TIERS.filter(func(seconds): return not known.has(seconds)).map(speed_duration)
+	if not pending.is_empty() and not ids.is_empty():
+		row(modal_body, "%s — %s" % [", ".join(pending), SPEED_SERVER_PENDING.to_lower()])
 
-func apply_speedup(queue: String, order: Dictionary, building_id: String, id: String, duration: int) -> void:
-	var remaining := float(order.endsAt) - server_time()
-	if remaining <= 0:
-		show_error({"error":"Уже завершено. Открой очередь заново."})
+# Before anything is spent: how much the remaining time shrinks.
+func preview_speedup(queue: String, order: Dictionary, building_id: String, id: String) -> void:
+	var duration := int(speed_catalog()[id].seconds)
+	var remaining := float(order.endsAt) - timer_now()
+	if remaining <= 0.0:
+		show_error({"error":"Таймер уже закончился. Ждём подтверждения сервера."})
 		return
+	var left := ceili(remaining / 1000.0)
+	var after := maxi(0, left - duration)
+	open_modal("Применить ускоритель?")
+	row(modal_body, "%s · в наличии %d" % [speed_duration(duration), int(state.get("items", {}).get(id, 0))])
+	if after > 0:
+		row(modal_body, "Осталось %s → станет %s" % [clock_text(left), clock_text(after)])
+	else:
+		row(modal_body, "Осталось %s → завершится сразу" % clock_text(left))
 	var payload := {"kind":"speedup", "queue":queue, "item":id, "buildingId":building_id,
 		"orderId":order.id if queue != "construction" else order.get("requestId", order.get("id", "")),
 		"expectedEndsAt":order.endsAt, "confirmUnused":false}
 	if queue == "march":
+		payload.erase("buildingId")
+		payload.erase("orderId")
 		payload.armyId = order.id
-	if duration * 1000 > remaining:
-		open_modal("Подтвердить ускорение")
-		row(modal_body, "Осталось меньше, чем %s: часть времени ускорения пропадёт." % speed_duration(duration))
+	if duration > left:
+		row(modal_body, "Неиспользованные %s пропадут." % clock_text(duration - left))
 		payload.confirmUnused = true
-		button(modal_body, "Применить", command.bind(payload))
-		button(modal_body, "Назад", show_speedups.bind(queue, order, building_id))
-	else:
-		command(payload)
+	var apply := button(modal_body, "Применить", Callable())
+	apply.pressed.connect(func(): apply_speedup(apply, payload))
+	button(modal_body, "Назад", show_speedups.bind(queue, order, building_id))
+
+# One press spends one item: the button locks at once, a second order cannot be sent
+# while the first is in flight, a lost answer is repeated with the same idempotency
+# key (the server never applies it twice), and expectedEndsAt makes the server refuse
+# any other copy once the timer has moved.
+func apply_speedup(apply: Button, payload: Dictionary) -> void:
+	if speedup_in_flight:
+		return
+	speedup_in_flight = true
+	apply.disabled = true
+	apply.text = "Применяем…"
+	await command(payload)
+	speedup_in_flight = false
+	if is_instance_valid(apply):
+		apply.disabled = false
+		apply.text = "Применить"
 
 func march_finish(army: Dictionary) -> Variant:
 	return army.get("returnsAt") if army.status == "returning" else (army.get("battleEndsAt") if army.status == "fighting" else army.get("arrivesAt"))
@@ -1351,7 +1387,7 @@ func show_march_speedups(army: Dictionary) -> void:
 	var finish: Variant = march_finish(army)
 	if finish == null:
 		return
-	show_speedups("march", {"id": army.id, "requestId": army.id, "endsAt": float(finish), "status": army.status}, "")
+	show_speedups("march", {"id": army.id, "endsAt": float(finish)}, "")
 
 func show_trade(resource := "") -> void:
 	open_modal("Рынок", "right")
@@ -2111,6 +2147,11 @@ func open_building_ring(marker: Dictionary) -> void:
 	var group: String = data.trainingGroups.get(building_definition(building.type).get("base", building.type), "")
 	if group != "":
 		actions.append(["Обучить", "train", open_recruitment.bind(building)])
+		# Active training in this building: speed up its running (first) order.
+		var queue: Array = state.city.get("military", {}).get("queues", {}).get(building.id, [])
+		if not queue.is_empty() and float(queue[0].get("endsAt", 0.0)) > timer_now() and not player_id.is_empty():
+			var title := "Ускорить" if construction.get("buildingId") != building.id else "Обучение"
+			actions.append([title, "speed", show_speedups.bind("training", queue[0], building.id)])
 	if building.type in data.producers and not player_id.is_empty():
 		actions.append(["Собрать", "collect", command.bind({"kind":"kingdom","action":"collect","buildingId":building.id})])
 	if building.type == "ECO-03":
@@ -3476,10 +3517,17 @@ func add_reward_chip(parent: Container, name: String, amount: int, icon := "") -
 func accept(response: Dictionary) -> void:
 	if not response.has("city") or not response.has("world"):
 		return
+	# A late answer (a poll sent before a command, a replayed command receipt) never
+	# replaces a newer confirmed state: timers would run again, felled trees return.
+	if not showing_cached_state and state.has("serverTime") and str(response.get("playerId", "")) == str(state.get("playerId", "")) \
+			and float(response.get("serverTime", 0.0)) < float(state.serverTime):
+		stale_responses += 1
+		return
 	state = response
 	player_id = state.playerId
 	showing_cached_state = false
-	settle_local_felling()
+	confirmed_server_ms = float(state.get("serverTime", 0.0))
+	confirmed_local_ms = Time.get_unix_time_from_system() * 1000.0
 	battle_results.observe(player_id, state.get("reports", []))
 	note_server_time(float(state.serverTime))
 	remember_state()
@@ -3528,14 +3576,15 @@ signal command_settled
 var pending_works := {}
 var shown_job := {}
 var next_due_poll_msec := 0
-# Felling finished on screen the moment its timer hit zero, kept until the server
-# reports the tree felled: tree id -> {"at": ticks msec, "wood": int}. Server states
-# that still carry the job are patched, so the timer never runs a second time.
-var local_felled := {}
-# Timing the player watched for a tree job (from the tap), used for the server job
-# of the same tree so the bar never jumps back when the server starts it later.
-var job_anchors := {}
-const LOCAL_FELLED_HOLD_MSEC := 120000
+var due_poll_streak := 0
+var shown_site := {}
+var stale_responses := 0
+# Latest confirmed server state: its serverTime and the local wall clock when it
+# arrived. Timers count from it, so zero on the phone is never before the server's
+# own end (the answer's time is older than now by the network delay, never newer).
+var confirmed_server_ms := 0.0
+var confirmed_local_ms := 0.0
+var timer_clock_last := 0.0
 var queued_commands := 0
 
 func instant_order(order: Dictionary) -> bool:
@@ -3616,7 +3665,8 @@ func predict_work(order: Dictionary) -> void:
 			for tree in stage.selectable_trees if is_instance_valid(stage) else []:
 				if tree.id == order.get("id", ""):
 					seconds = float(tree.get("durationMs", 5000)) / 1000.0
-			pending_works.tree = {"tree": str(order.id), "started": now, "ends": now + seconds * 1000.0, "order": order}
+			pending_works.tree = {"tree": str(order.id), "started": now, "ends": now + seconds * 1000.0, "order": order,
+				"sent": Time.get_ticks_msec()}
 		"upgrade", "build", "place", "level":
 			var key := str(order.get("buildingId", order.get("plotId", "")))
 			var seconds := 30.0
@@ -3624,22 +3674,10 @@ func predict_work(order: Dictionary) -> void:
 			if order.has("type") and terms.has("seconds"):
 				seconds = float(terms.seconds)
 			pending_works.site = {"key": key, "building": str(order.get("buildingId", "")), "plot": str(order.get("plotId", "")),
-				"type": str(order.get("type", "")), "started": now, "ends": now + seconds * 1000.0, "order": order}
+				"type": str(order.get("type", "")), "started": now, "ends": now + seconds * 1000.0, "order": order,
+				"sent": Time.get_ticks_msec()}
 
 func forget_prediction(order: Dictionary) -> void:
-	# A refused felling that already finished on screen is undone.
-	if order.get("action", "") == "tree" and local_felled.has(str(order.get("id", ""))):
-		var tree_id := str(order.id)
-		var entry: Dictionary = local_felled[tree_id]
-		local_felled.erase(tree_id)
-		var progress: Dictionary = state.city.get("progress", {})
-		var felled: Array = progress.get("felled", [])
-		if tree_id in felled:
-			felled.erase(tree_id)
-			progress.wood = maxi(0, int(progress.get("wood", 0)) - int(entry.wood))
-			if is_instance_valid(stage):
-				stage.present(state)
-			refresh_hud()
 	# A refused order removes its forecast (same action on the same target).
 	for slot in pending_works.keys():
 		var predicted: Dictionary = pending_works[slot].get("order", {})
@@ -3672,47 +3710,43 @@ func current_works(now: float) -> Array:
 	var job := {}
 	var server_job: Variant = state.city.get("progress", {}).get("job")
 	var server_tree := job_tree_id(server_job)
-	if not server_tree.is_empty() and server_job.has("endsAt") and not local_felled.has(server_tree):
+	if not server_tree.is_empty() and server_job.has("endsAt"):
+		# Only the server's job runs a countdown: its own start and end.
 		var ends := float(server_job.endsAt)
-		job = {"tree": server_tree, "started": float(server_job.get("startedAt", ends - 5000.0)), "ends": ends}
-		var predicted: Dictionary = pending_works.get("tree", {})
-		if predicted.get("tree", "") == server_tree:
-			# The forecast began at the tap, the server job when the order arrived
-			# (later by the network delay). Keep the timing the player is watching.
-			job_anchors[server_tree] = {"started": float(predicted.started), "ends": float(predicted.ends)}
+		job = {"tree": server_tree, "started": float(server_job.get("startedAt", ends - 5000.0)), "ends": ends,
+			"confirmed": true, "key": str(server_job.get("id", server_tree))}
+		if str(pending_works.get("tree", {}).get("tree", "")) == server_tree:
 			pending_works.erase("tree")
-		var anchor: Dictionary = job_anchors.get(server_tree, {})
-		if not anchor.is_empty() and absf(ends - float(anchor.ends)) < 20000.0:
-			job.started = anchor.started
-			job.ends = anchor.ends
-	elif pending_works.has("tree") and not local_felled.has(str(pending_works.tree.tree)):
-		job = pending_works.tree
 	elif pending_works.has("tree"):
-		pending_works.erase("tree")
-	# At zero the felling is over: the tree falls now, the server catches up.
-	if not job.is_empty() and now >= float(job.ends):
-		finish_felling(str(job.tree))
-		job = {}
+		var predicted: Dictionary = pending_works.tree
+		var felled: Array = state.city.get("progress", {}).get("felled", [])
+		if predicted.tree in felled or Time.get_ticks_msec() - int(predicted.get("sent", Time.get_ticks_msec())) > 20000:
+			# Already done on the server, or the server never took it: drop the forecast.
+			pending_works.erase("tree")
+		else:
+			# Sent, not yet confirmed: the worker walks to the tree, no countdown yet.
+			job = predicted.duplicate()
+			job.confirmed = false
 	var site := {}
 	var order := construction_order()
 	var source := {}
 	if not order.is_empty() and order.get("kind", "") != "clear":
 		source = {"key": str(order.get("buildingId", order.get("plotId", ""))), "kind": str(order.get("kind", "")),
 			"type": str(order.get("type", "")), "ends": float(order.get("endsAt", now)),
-			"started": float(order.get("startedAt", order.get("startsAt", 0.0)))}
-		var predicted: Dictionary = pending_works.get("site", {})
-		if predicted.get("key", "") == source.key and source.started <= 0.0:
-			source.started = float(predicted.started)
+			"started": float(order.get("startedAt", order.get("startsAt", 0.0))),
+			"confirmed": true, "id": str(order.get("requestId", "")), "plot": str(order.get("plotId", ""))}
 		pending_works.erase("site")
 	elif pending_works.has("site"):
 		var predicted: Dictionary = pending_works.site
-		if now > float(predicted.ends) + 6000.0:
+		if Time.get_ticks_msec() - int(predicted.get("sent", Time.get_ticks_msec())) > 20000:
 			pending_works.erase("site")
 		else:
+			# Sent, not yet confirmed: scaffolding and builders, no countdown yet.
 			source = {"key": predicted.key, "kind": str(predicted.order.get("action", "")), "type": str(predicted.get("type", "")),
-				"ends": float(predicted.ends), "started": float(predicted.started)}
+				"ends": float(predicted.ends), "started": float(predicted.started), "confirmed": false,
+				"plot": str(predicted.get("plot", ""))}
 	if not source.is_empty() and is_instance_valid(stage):
-		var plot_id: String = source.key
+		var plot_id: String = source.plot if not str(source.get("plot", "")).is_empty() else source.key
 		var existing := {}
 		for building in state.city.buildings:
 			if str(building.id) == source.key:
@@ -3732,50 +3766,54 @@ func current_works(now: float) -> Array:
 			site.upgrade = not existing.is_empty()
 	return [job, site]
 
-# The tree falls and its wood is counted the moment the timer reaches zero.
-func finish_felling(tree_id: String) -> void:
-	if tree_id.is_empty() or local_felled.has(tree_id):
-		return
-	var tree: Dictionary = stage.works.tree_by_id(tree_id) if is_instance_valid(stage) else {}
-	local_felled[tree_id] = {"at": Time.get_ticks_msec(), "wood": int(tree.get("wood", 0))}
-	job_anchors.erase(tree_id)
-	if str(pending_works.get("tree", {}).get("tree", "")) == tree_id:
-		pending_works.erase("tree")
-	patch_felling(tree_id, local_felled[tree_id])
-	if is_instance_valid(stage):
-		stage.present(state)
-	refresh_hud()
-	refresh_economy()
-	# Ask the server now; it is asked again every 1.5 s until it confirms.
-	next_due_poll_msec = Time.get_ticks_msec() + 1500
-	poll = 1.0e6
+# Clock for timers: server time, but never ahead of the latest confirmed answer plus
+# the wall time since it arrived, and never backward. After the app is suspended or
+# the clock jumps, the next answer sets it again.
+func timer_now() -> float:
+	var estimate := server_time()
+	if confirmed_local_ms > 0.0:
+		# Only small differences (clock slew, network delay) are taken from the last
+		# answer; a large one means that answer's clock is not the live one.
+		var anchored := confirmed_server_ms + Time.get_unix_time_from_system() * 1000.0 - confirmed_local_ms
+		if anchored < estimate and estimate - anchored < 5000.0:
+			estimate = anchored
+	if absf(estimate - timer_clock_last) > 60000.0 or estimate > timer_clock_last:
+		timer_clock_last = estimate
+	return timer_clock_last
 
-func patch_felling(tree_id: String, entry: Dictionary) -> void:
-	var progress: Dictionary = state.city.get("progress", {})
-	if not state.city.has("progress"):
-		state.city.progress = progress
-	var felled: Array = progress.get("felled", [])
-	if not progress.has("felled"):
-		progress.felled = felled
-	if tree_id in felled:
+# Every confirmed timer that has reached zero (felling, construction, the first
+# order of each training queue, healing): the server is asked at once, then every
+# 0.7 s for at most a minute, until its state no longer carries the finished work.
+func ask_server_at_zero(works: Array) -> void:
+	if not connected() or player_id.is_empty():
 		return
-	felled.append(tree_id)
-	progress.wood = int(progress.get("wood", 0)) + int(entry.wood)
-	if job_tree_id(progress.get("job")) == tree_id:
-		progress.job = null
+	var now := timer_now()
+	var ends: Array = []
+	for work in works:
+		if not work.is_empty() and work.get("confirmed", true):
+			ends.append(float(work.ends))
+	for queue in state.city.get("military", {}).get("queues", {}).values():
+		if queue is Array and not queue.is_empty():
+			ends.append(float(queue[0].get("endsAt", INF)))
+	for healing in state.get("healing", []):
+		ends.append(float(healing.get("endsAt", INF)))
+	var due := ends.any(func(at): return now >= at and now < at + 60000.0)
+	if not due:
+		due_poll_streak = 0
+		return
+	var now_msec := Time.get_ticks_msec()
+	if now_msec >= next_due_poll_msec:
+		next_due_poll_msec = now_msec + 700
+		due_poll_streak += 1
+		poll = 1.0e6
 
-# A fresh server state: fellings it already reports are confirmed; the rest are
-# still shown finished (until LOCAL_FELLED_HOLD_MSEC, then the server is right).
-func settle_local_felling() -> void:
-	if local_felled.is_empty() or not state.has("city"):
-		return
-	var felled: Array = state.city.get("progress", {}).get("felled", [])
-	var now := Time.get_ticks_msec()
-	for tree_id in local_felled.keys():
-		if tree_id in felled or now - int(local_felled[tree_id].at) > LOCAL_FELLED_HOLD_MSEC:
-			local_felled.erase(tree_id)
-		else:
-			patch_felling(tree_id, local_felled[tree_id])
+func server_reachable() -> bool:
+	return connected() and diagnostics.network_failures < 2 and not showing_cached_state
+
+# What a timer shows at and after zero: the server is asked; without a link the
+# result is not presented as done.
+func timer_end_label() -> String:
+	return "Завершаем…" if server_reachable() else "Нет связи · ждём сервер"
 
 func request(path: String, payload: Variant = null, idempotency_key := "") -> Dictionary:
 	if not connected():
@@ -3934,27 +3972,16 @@ func _process(delta: float) -> void:
 	else:
 		stage.present_parade()
 		stage.present_workers(now / 1000.0)
-		var works := current_works(now)
+		var timer := timer_now()
+		var works := current_works(timer)
 		shown_job = works[0]
-		stage.works.present(works[0], works[1], now, delta)
+		shown_site = works[1]
+		stage.works.present(works[0], works[1], timer, delta)
 		# The moment a timer reaches zero the server is asked at once, so the tree
 		# falls / the building appears exactly then, not at the next routine poll.
 		# After zero the server is asked every 1.5 s until it reports the work done
 		# (at most a minute), never more often.
-		var now_msec := Time.get_ticks_msec()
-		for work in works:
-			if work.is_empty() or not connected() or player_id.is_empty():
-				continue
-			var due := float(work.ends)
-			if now >= due and now < due + 60000.0 and now_msec >= next_due_poll_msec:
-				next_due_poll_msec = now_msec + 1500
-				poll = 1.0e6
-		for tree_id in local_felled.keys():
-			if now_msec - int(local_felled[tree_id].at) > LOCAL_FELLED_HOLD_MSEC:
-				local_felled.erase(tree_id)
-		if not local_felled.is_empty() and now_msec >= next_due_poll_msec and connected() and not player_id.is_empty():
-			next_due_poll_msec = now_msec + 1500
-			poll = 1.0e6
+		ask_server_at_zero(works)
 	if map_name == "city" and now >= next_training_update:
 		stage.present_training(state, now)
 		next_training_update = now + 300.0

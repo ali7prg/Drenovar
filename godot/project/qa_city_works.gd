@@ -94,57 +94,70 @@ func run() -> void:
 		await create_timer(0.5).timeout
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(capture.path_join("works_chop.png"))
-	# The server starts the job later than the tap (network delay): the bar keeps
-	# the timing the player watched instead of jumping back.
-	var tapped: Dictionary = game.pending_works.tree
-	var server_now: float = game.server_time()
+	# Before the server confirms: the worker goes to the tree, no countdown.
+	check(game.shown_job.get("confirmed", true) == false, "Unconfirmed felling shows a countdown")
+	# The server's job (started later than the tap by the network delay) is what
+	# runs the countdown: its own end, never the forecast.
+	game.state.serverTime = game.server_time()
+	var server_now: float = game.timer_now()
 	var city: Dictionary = game.state.city
-	city.progress.job = {"treeId": tree.id, "startedAt": server_now + 2000.0, "endsAt": server_now + 7000.0}
-	game.pending_works.tree = {"tree": tree.id, "started": server_now - 4000.0, "ends": server_now + 1000.0, "order": {}}
-	await frames(2)
-	check(is_equal_approx(float(game.shown_job.get("ends", 0.0)), server_now + 1000.0), "Server job moved the timer end (bar restarted)")
-	# At zero the felling ends at once: the tree falls, the wood is counted, the job
-	# is gone, without waiting for the server.
 	var wood_before: int = game.balance("wood")
-	var zero_at := Time.get_ticks_msec()
-	while game.shown_job.size() > 0 and Time.get_ticks_msec() - zero_at < 3000:
-		await process_frame
-	await frames(2)
-	check(tree.id in city.progress.felled, "Tree not felled at zero")
-	check(city.progress.job == null, "Job stayed after zero")
-	check(game.balance("wood") == wood_before + int(tree.wood), "Wood not counted at zero")
-	var falling: Array = works.find_children("Falling", "", true, false)
-	check(falling.size() == 1, "Tree did not topple")
-	# A server state that still carries the finished job does not restart it.
-	var stale: Dictionary = game.state.duplicate(true)
-	stale.city.progress.felled.erase(tree.id)
-	stale.city.progress.wood = wood_before
-	stale.city.progress.job = {"treeId": tree.id, "startedAt": server_now + 2000.0, "endsAt": server_now + 7000.0}
-	game.accept(stale)
+	var fresh: Dictionary = game.state.duplicate(true)
+	fresh.serverTime = float(game.state.get("serverTime", 0.0)) + 1.0
+	fresh.city.progress.job = {"id": "job-qa", "kind": "tree", "target": tree.id, "startedAt": server_now - 3800.0, "endsAt": server_now + 1200.0}
+	game.accept(fresh)
 	city = game.state.city
+	await frames(2)
+	check(game.shown_job.get("confirmed", false) and is_equal_approx(float(game.shown_job.ends), server_now + 1200.0), "Countdown does not follow the server job")
+	check(not game.pending_works.has("tree"), "Forecast kept after the server job arrived")
+	# Zero on the phone without a server answer: nothing is granted or felled.
+	var zero_at := Time.get_ticks_msec()
+	while game.timer_now() < server_now + 1400.0 and Time.get_ticks_msec() - zero_at < 4000:
+		await process_frame
 	await frames(3)
-	check(game.shown_job.is_empty(), "Finished felling restarted from a late server state")
-	check(tree.id in city.progress.felled and game.balance("wood") == wood_before + int(tree.wood), "Late server state undid the felling")
-	# Server confirms: the local record is dropped and the server's numbers stand.
+	check(not tree.id in city.progress.felled, "Tree felled on the phone without the server")
+	check(game.balance("wood") == wood_before, "Wood counted without the server")
+	check(city.progress.job != null and not game.shown_job.is_empty(), "Job vanished before the server confirmed")
+	game.diagnostics.network_failures = 3
+	check(game.timer_end_label() == "Нет связи · ждём сервер", "Offline zero shown as done: " + game.timer_end_label())
+	game.diagnostics.network_failures = 0
+	# A late answer (older server time) never replaces the newer confirmed state.
+	var stale: Dictionary = game.state.duplicate(true)
+	stale.serverTime = float(game.state.serverTime) - 5000.0
+	stale.city.progress.job = null
+	game.accept(stale)
+	check(game.state.city.progress.job != null and game.stale_responses >= 1, "Late answer replaced a newer state")
+	# The server confirms: tree felled and wood from the server's numbers only.
 	var confirmed: Dictionary = game.state.duplicate(true)
+	confirmed.serverTime = float(game.state.serverTime) + 2000.0
 	confirmed.city.progress.job = null
+	confirmed.city.progress.felled.append(tree.id)
 	confirmed.city.progress.wood = wood_before + int(tree.wood)
 	game.accept(confirmed)
 	city = game.state.city
-	check(game.local_felled.is_empty(), "Confirmed felling still held locally")
-	check(game.balance("wood") == wood_before + int(tree.wood), "Wood counted twice after confirmation")
+	await frames(3)
+	check(game.shown_job.is_empty(), "Job shown after the server finished it")
+	check(game.balance("wood") == wood_before + int(tree.wood), "Wood differs from the server")
+	var falling: Array = works.find_children("Falling", "", true, false)
+	check(falling.size() == 1, "Tree did not topple on the server's confirmation")
+	# A replayed older answer does not bring the tree or the timer back.
+	var replay: Dictionary = fresh.duplicate(true)
+	game.accept(replay)
+	await frames(2)
+	check(game.shown_job.is_empty() and tree.id in game.state.city.progress.felled, "Replayed answer restarted the felling")
 	var texts: Array = []
 	var wait_until := Time.get_ticks_msec() + 20000
 	while texts.is_empty() and Time.get_ticks_msec() < wait_until:
 		await process_frame
 		texts = works.find_children("*", "Label3D", true, false).filter(func(l): return l.text.begins_with("+"))
 	check(not texts.is_empty(), "No wood reward shown")
+	if texts.is_empty():
+		print("DBG labels ", works.find_children("*", "Label3D", true, false).map(func(l): return l.text), " falling ", works.find_children("Falling", "", true, false).size(), " lumber_ends ", works.lumber_ends, " last_now ", works.last_now, " tree ", works.lumber_tree)
 	await create_timer(0.3).timeout
 	if not capture.is_empty():
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(capture.path_join("works_fell.png"))
 	game.pending_works.erase("tree")
-	tapped.clear()
 	# Upgrade: scaffolding + builders, completion burst.
 	var building: Dictionary = city.buildings[1]
 	city.kingdom.order = {"kind": "upgrade", "buildingId": building.id, "endsAt": game.server_time() + 20000.0}
@@ -197,15 +210,17 @@ func run() -> void:
 	check(legacy.get("kind") == "legacyBuilding" and legacy.get("action") == "place", "Legacy settlement got a kingdom build order")
 	city.kingdom = kingdom
 	check(game.build_order("p1", "SUP-04").get("kind") == "kingdom", "Kingdom settlement lost its build order")
-	# After a timer reaches zero the server is asked about every 1.5 s, no storm.
+	# After a confirmed timer reaches zero the server is asked every 0.7 s, no storm.
 	game.diagnostics.network_failures = 0
-	game.pending_works.tree = {"tree": tree.id, "started": game.server_time() - 6000.0, "ends": game.server_time() - 100.0, "order": {}}
+	var standing: Array = stage.selectable_trees.filter(func(t): return not t.id in game.state.city.progress.felled)
+	game.state.city.progress.job = {"id": "job-due", "kind": "tree", "target": standing[0].id,
+		"startedAt": game.timer_now() - 5100.0, "endsAt": game.timer_now() - 100.0}
 	var asked_before: int = game.api.requests_total
 	var until := Time.get_ticks_msec() + 4600
 	while Time.get_ticks_msec() < until:
 		await process_frame
 	var asked: int = game.api.requests_total - asked_before
-	check(asked >= 2 and asked <= 5, "Requests after zero: %d in 4.6 s (expected ~3)" % asked)
-	game.pending_works.erase("tree")
+	check(asked >= 4 and asked <= 8, "Requests after zero: %d in 4.6 s (expected ~6)" % asked)
+	game.state.city.progress.job = null
 	print("QA_CITY_WORKS checks=%d failures=%d" % [checks, failures])
 	quit(0 if failures == 0 else 1)

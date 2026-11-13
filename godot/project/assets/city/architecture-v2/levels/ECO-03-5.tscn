@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" path="res://assets/city/premium/market27-polished27.glb" id="1_mc55s"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-03-5.res" id="2_pcvy8"]
 
-[node name="ECO_03_5" type="Node3D" unique_id=618330351]
+[node name="ECO_03_5" type="Node3D" unique_id=733001512]
 metadata/series = "B05_Marketplace"
 metadata/lanes = [{
 "from": Vector3(0.2, 0, 0.35),
@@ -16,5 +16,5 @@ metadata/lanes = [{
 [node name="Base" type="Node3D" parent="." unique_id=2073544806 instance=ExtResource("1_mc55s")]
 transform = Transform3D(1.2566, 0, 0, 0, 1.2566, 0, 0, 0, 1.2566, 0, 0, 0)
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=2005939318]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=316632778]
 mesh = ExtResource("2_pcvy8")

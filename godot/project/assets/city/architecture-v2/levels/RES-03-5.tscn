@@ -3,7 +3,7 @@
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-03-5-base.res" id="1_1yf7c"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-03-5.res" id="2_scw6s"]
 
-[node name="RES_03_5" type="Node3D" unique_id=2105619499]
+[node name="RES_03_5" type="Node3D" unique_id=292981188]
 metadata/series = "B08_IronMine"
 metadata/lanes = [{
 "from": Vector3(0.5, 0, 6.6),
@@ -19,8 +19,8 @@ metadata/lanes = [{
 "width": 0.6
 }]
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=547590763]
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1732865713]
 mesh = ExtResource("1_1yf7c")
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=661593285]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1130559439]
 mesh = ExtResource("2_scw6s")

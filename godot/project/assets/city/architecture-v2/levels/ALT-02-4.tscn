@@ -3,7 +3,7 @@
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-02-4-base.res" id="1_bawlj"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-02-4.res" id="2_g7gwd"]
 
-[node name="ALT_02_4" type="Node3D" unique_id=1744604794]
+[node name="ALT_02_4" type="Node3D" unique_id=1527615552]
 metadata/series = "B21_Sawmill"
 metadata/lanes = [{
 "from": Vector3(5.3, 0.55, 5.1),
@@ -13,8 +13,8 @@ metadata/lanes = [{
 "width": 1.0
 }]
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=1772345102]
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1895794061]
 mesh = ExtResource("1_bawlj")
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=809436431]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1922966751]
 mesh = ExtResource("2_g7gwd")

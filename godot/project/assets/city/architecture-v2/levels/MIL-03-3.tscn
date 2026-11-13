@@ -3,12 +3,12 @@
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-03-3-base.res" id="1_h4rnf"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-03-3.res" id="2_0m1x4"]
 
-[node name="MIL_03_3" type="Node3D" unique_id=2146383728]
+[node name="MIL_03_3" type="Node3D" unique_id=850846299]
 metadata/series = "B13_Stables"
 metadata/lanes = []
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=725660979]
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1429900837]
 mesh = ExtResource("1_h4rnf")
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1102566611]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=93018161]
 mesh = ExtResource("2_0m1x4")

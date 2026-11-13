@@ -3,7 +3,7 @@
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-02-5-base.res" id="1_2ldg2"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-02-5.res" id="2_e1p5v"]
 
-[node name="SUP_02_5" type="Node3D" unique_id=171990456]
+[node name="SUP_02_5" type="Node3D" unique_id=343692175]
 metadata/series = "B17_SiegeWorkshop"
 metadata/lanes = [{
 "from": Vector3(4.75, 0, 6.9),
@@ -13,8 +13,8 @@ metadata/lanes = [{
 "width": 1.6
 }]
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=1324730981]
+[node name="Base" type="MeshInstance3D" parent="." unique_id=417967618]
 mesh = ExtResource("1_2ldg2")
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=985074257]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=25437695]
 mesh = ExtResource("2_e1p5v")

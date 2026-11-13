@@ -3,7 +3,7 @@
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-04-4-base.res" id="1_oiydf"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-04-4.res" id="2_ibkgm"]
 
-[node name="MIL_04_4" type="Node3D" unique_id=1803292811]
+[node name="MIL_04_4" type="Node3D" unique_id=818937168]
 metadata/series = "B14_Blacksmith"
 metadata/lanes = [{
 "from": Vector3(4.922, 0, 4.2),
@@ -13,8 +13,8 @@ metadata/lanes = [{
 "width": 0.5
 }]
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=1582096677]
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1246923200]
 mesh = ExtResource("1_oiydf")
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1144548204]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1542618666]
 mesh = ExtResource("2_ibkgm")

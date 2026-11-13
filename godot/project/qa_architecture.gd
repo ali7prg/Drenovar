@@ -240,11 +240,24 @@ func check_presentation(table: Dictionary) -> void:
 	await process_frame
 
 func expected_paths(type: String, level: int, base_id: String, table: Dictionary) -> Array:
+	var paths := []
+	var base_type: String = type
+	for definition in data.buildings:
+		if definition.id == type:
+			base_type = str(definition.get("base", type))
+	# From town hall II (or with "walls and gate" built) the city wall stands; its main
+	# gate is the B18 scene of the current walls-and-gate level (I when none is built).
+	if (base_type == "ECO-05" and level >= 2) or base_type == "SUP-03":
+		var gate_level := level if base_type == "SUP-03" else 1
+		paths.append(table["SUP-03"][str(gate_level)].path)
+		if base_type == "SUP-03":
+			return paths
 	var entry: Variant = table.get(type, {}).get(str(level))
 	if entry is Dictionary:
-		return [entry.path]
+		paths.append(entry.path)
+		return paths
 	var id: String = data.starterHall if type == "ECO-05" and level == 1 else base_id
-	var paths := [data.models[id].path]
+	paths.append(data.models[id].path)
 	var overlay: String = data.architecture.get(type, {}).get(str(level), "")
 	if not overlay.is_empty():
 		paths.append(overlay)

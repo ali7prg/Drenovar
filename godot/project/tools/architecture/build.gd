@@ -23,11 +23,14 @@ func run() -> void:
 	var report := []
 	for entry in Recipes.ENTRIES:
 		var key := "%s-%d" % [entry.type, entry.level]
-		table.get_or_add(entry.type, {})[str(entry.level)] = {"path": OUT + key + ".tscn", "scale": 1.0, "series": entry.series}
+		var row := {"path": OUT + key + ".tscn", "scale": 1.0, "series": entry.series}
+		table.get_or_add(entry.type, {})[str(entry.level)] = row
 		if not only.is_empty() and not key in only:
 			continue
 		var kit = Kit.new(hash(key))
 		var spec: Dictionary = Callable(Recipes, entry.fn).call(kit, int(entry.level))
+		if spec.has("worker"):
+			row["worker"] = [spec.worker.x, spec.worker.y, spec.worker.z]
 		var root := Node3D.new()
 		root.name = key.replace("-", "_")
 		root.set_meta("series", entry.series)

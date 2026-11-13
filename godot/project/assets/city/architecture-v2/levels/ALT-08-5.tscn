@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" path="res://assets/city/premium/herbal27-polished27.glb" id="1_a5w1f"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-08-5.res" id="2_n0pck"]
 
-[node name="ALT_08_5" type="Node3D" unique_id=1746767637]
+[node name="ALT_08_5" type="Node3D" unique_id=953778983]
 metadata/series = "B25_HerbalGarden"
 metadata/lanes = [{
 "from": Vector3(0.2, 0, 4.6),
@@ -16,5 +16,5 @@ metadata/lanes = [{
 [node name="Base" type="Node3D" parent="." unique_id=164773370 instance=ExtResource("1_a5w1f")]
 transform = Transform3D(1.2566, 0, 0, 0, 1.2566, 0, 0, 0, 1.2566, 0, 0, 0)
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=352870013]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1142388055]
 mesh = ExtResource("2_n0pck")

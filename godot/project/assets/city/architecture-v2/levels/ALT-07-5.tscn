@@ -3,7 +3,7 @@
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-07-5-base.res" id="1_0n5yt"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-07-5.res" id="2_a1tgm"]
 
-[node name="ALT_07_5" type="Node3D" unique_id=498626447]
+[node name="ALT_07_5" type="Node3D" unique_id=627319200]
 metadata/series = "B24_FishingHut"
 metadata/lanes = [{
 "from": Vector3(1.3, 0.36, 0.25),
@@ -25,8 +25,8 @@ metadata/lanes = [{
 "width": 0.9
 }]
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=945041045]
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1959570217]
 mesh = ExtResource("1_0n5yt")
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1502822765]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=308015191]
 mesh = ExtResource("2_a1tgm")

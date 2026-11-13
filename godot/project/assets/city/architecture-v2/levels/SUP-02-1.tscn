@@ -3,12 +3,12 @@
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-02-1-base.res" id="1_skbu2"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-02-1.res" id="2_4rc45"]
 
-[node name="SUP_02_1" type="Node3D" unique_id=1460812358]
+[node name="SUP_02_1" type="Node3D" unique_id=15108038]
 metadata/series = "B17_SiegeWorkshop"
 metadata/lanes = []
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=557557553]
+[node name="Base" type="MeshInstance3D" parent="." unique_id=218794794]
 mesh = ExtResource("1_skbu2")
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=177091970]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=231521694]
 mesh = ExtResource("2_4rc45")

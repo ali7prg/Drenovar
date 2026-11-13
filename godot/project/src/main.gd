@@ -503,7 +503,7 @@ func row(parent: Container, title: String) -> void:
 
 func bind_countdown(label: Label, title: String, ends_at: float) -> void:
 	var update := func():
-		var left := ends_at - timer_now()
+		var left := display_end(ends_at) - timer_now()
 		if left <= 0.0:
 			label.text = "%s · %s" % [title, timer_end_label()]
 			return
@@ -2295,6 +2295,31 @@ func open_recruitment(building: Dictionary, unit_id := "", quantity := 1) -> voi
 	var selected: Dictionary = unit_for_id(unit_id) if not unit_id.is_empty() else units[0]
 	show_recruitment(building, selected, true, quantity)
 
+var pending_training := {}
+var recruitment_view := {}
+var last_command_error := ""
+
+var last_training_press_msec := -100000
+
+func send_training(building: Dictionary, unit: Dictionary, amount: int) -> void:
+	last_training_press_msec = Time.get_ticks_msec()
+	var key := Crypto.new().generate_random_bytes(16).hex_encode()
+	var list: Array = pending_training.get(building.id, [])
+	list.append({"unitId": unit.id, "quantity": amount, "key": key})
+	pending_training[building.id] = list
+	refresh_recruitment(building.id, unit.id, amount)
+	var ok: bool = await command({"kind":"train", "buildingId":building.id, "unitId":unit.id, "quantity":amount,
+		"requestId":key, "paidTraining":true}, func(): pass)
+	list = pending_training.get(building.id, [])
+	list = list.filter(func(entry): return entry.key != key)
+	pending_training[building.id] = list
+	message.text = "" if ok else "Найм не выполнен: " + last_command_error
+	if modal.visible and recruitment_view.get("building", "") == building.id and recruitment_view.get("generation", -1) == modal_generation:
+		refresh_recruitment(building.id, str(recruitment_view.unit), amount)
+		if not ok:
+			modal_status.text = message.text
+			modal_status.show()
+
 func refresh_recruitment(building_id: String, unit_id: String, quantity: int) -> void:
 	for building in recruitment_buildings():
 		if building.id == building_id:
@@ -2454,8 +2479,10 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	var paid_training: bool = not state.city.demo.get("unlimitedResources", false) or state.get("trainingUsesResources", false)
 	var unlocked := hall_level() >= int(levels[0]) and int(building.level) >= int(levels[1])
 	var queue: Array = state.city.get("military", {}).get("queues", {}).get(building.id, [])
-	queue_has_room = queue_has_room and queue.size() < 3
+	var sending: Array = pending_training.get(building.id, [])
+	queue_has_room = queue_has_room and queue.size() + sending.size() < 3
 	var submission := {"pending": false, "key": "", "quantity": 0}
+	recruitment_view = {"building": building.id, "unit": unit.id, "generation": modal_generation}
 	var update_quote := func(amount: float):
 		var costs := {}
 		for resource in ["wood", "food", "iron", "coins"]:
@@ -2468,8 +2495,10 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 		quote.text = "Время обучения · %d сек." % seconds
 		fill_cost_row(cost_row, costs)
 		var affordable := can_afford(costs)
-		train.disabled = submission.pending or player_id.is_empty() or not paid_training or not queue_has_room or not unlocked or not affordable
-		train.text = "Создаём заказ…" if submission.pending else "Обучить %d" % int(amount)
+		# A short pause after a press so one tap never becomes two orders.
+		var just_pressed := Time.get_ticks_msec() - last_training_press_msec < 600
+		train.disabled = submission.pending or just_pressed or player_id.is_empty() or not paid_training or not queue_has_room or not unlocked or not affordable
+		train.text = "Принято" if submission.pending else "Обучить %d" % int(amount)
 		reason.text = ""
 		if not paid_training:
 			reason.text = "Подключаем списание ресурсов для этого поселения."
@@ -2484,31 +2513,40 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 		reason.visible = not reason.text.is_empty()
 	update_quote.call(count.value)
 	count.value_changed.connect(update_quote)
+	if Time.get_ticks_msec() - last_training_press_msec < 600:
+		# The timer belongs to the button: a rebuilt window frees both together.
+		var unlock := Timer.new()
+		unlock.wait_time = 0.1
+		unlock.autostart = true
+		train.add_child(unlock)
+		unlock.timeout.connect(func():
+			if Time.get_ticks_msec() - last_training_press_msec >= 600:
+				unlock.stop()
+				update_quote.call(count.value))
+	# The order goes into the queue on screen at once (marked "отправляем…") and the
+	# server confirms in the background; the button is ready again right away, so
+	# nobody waits for the network. Resources, the timer and the soldiers stay the
+	# server's: the row turns into the real order when its answer arrives.
 	train.pressed.connect(func():
-		if train.disabled or command_in_progress:
+		if train.disabled:
 			return
 		count.apply()
 		if train.disabled:
 			return
 		var amount := int(count.value)
-		if submission.quantity != amount or submission.key.is_empty():
-			submission.key = Crypto.new().generate_random_bytes(16).hex_encode()
-			submission.quantity = amount
 		submission.pending = true
 		update_quote.call(count.value)
-		var generation := modal_generation
-		var submitted := await command(
-			{"kind":"train", "buildingId":building.id, "unitId":unit.id, "quantity":amount,
-				"requestId":submission.key, "paidTraining":true},
-			refresh_recruitment.bind(building.id, unit.id, amount))
-		if not submitted and generation == modal_generation:
-			submission.pending = false
-			update_quote.call(count.value))
+		send_training(building, unit, amount))
 	button(order, "Улучшить здание", inspect_building.bind(building))
-	row(order, "ОЧЕРЕДЬ %d / 3" % queue.size())
+	row(order, "ОЧЕРЕДЬ %d / 3" % mini(3, queue.size() + sending.size()))
 	for index in 3:
 		if index >= queue.size():
-			row(order, "%d · Свободное место" % (index + 1))
+			var waiting := index - queue.size()
+			if waiting < sending.size():
+				var entry: Dictionary = sending[waiting]
+				row(order, "%d · %s × %d · отправляем…" % [index + 1, unit_for_id(entry.unitId).get("name", entry.unitId), int(entry.quantity)])
+			else:
+				row(order, "%d · Свободное место" % (index + 1))
 			continue
 		var entry: Dictionary = queue[index]
 		var timer := Label.new()
@@ -3582,6 +3620,10 @@ var stale_responses := 0
 # Latest confirmed server state: its serverTime and the local wall clock when it
 # arrived. Timers count from it, so zero on the phone is never before the server's
 # own end (the answer's time is older than now by the network delay, never newer).
+var latency_samples: Array = []
+# Duration of a felling as the server sets it (v92: 5 s; server patch: 10 s).
+var tree_job_ms := 0.0
+var polls_in_flight := 0
 var confirmed_server_ms := 0.0
 var confirmed_local_ms := 0.0
 var timer_clock_last := 0.0
@@ -3633,6 +3675,7 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	else:
 		retry_keys.erase(signature)
 	if not response.has("city"):
+		last_command_error = str(response.get("error", "сервер не ответил"))
 		command_in_progress = false
 		command_settled.emit()
 		if instant:
@@ -3664,7 +3707,7 @@ func predict_work(order: Dictionary) -> void:
 			var seconds := 5.0
 			for tree in stage.selectable_trees if is_instance_valid(stage) else []:
 				if tree.id == order.get("id", ""):
-					seconds = float(tree.get("durationMs", 5000)) / 1000.0
+					seconds = (tree_job_ms if tree_job_ms > 0.0 else float(tree.get("durationMs", 5000))) / 1000.0
 			pending_works.tree = {"tree": str(order.id), "started": now, "ends": now + seconds * 1000.0, "order": order,
 				"sent": Time.get_ticks_msec()}
 		"upgrade", "build", "place", "level":
@@ -3715,6 +3758,7 @@ func current_works(now: float) -> Array:
 		var ends := float(server_job.endsAt)
 		job = {"tree": server_tree, "started": float(server_job.get("startedAt", ends - 5000.0)), "ends": ends,
 			"confirmed": true, "key": str(server_job.get("id", server_tree))}
+		tree_job_ms = ends - float(job.started)
 		if str(pending_works.get("tree", {}).get("tree", "")) == server_tree:
 			pending_works.erase("tree")
 	elif pending_works.has("tree"):
@@ -3805,7 +3849,20 @@ func ask_server_at_zero(works: Array) -> void:
 	if now_msec >= next_due_poll_msec:
 		next_due_poll_msec = now_msec + 700
 		due_poll_streak += 1
-		poll = 1.0e6
+		poll_account_state(true)
+
+# Round trip to the server now (75th percentile of the last answers): a timer on
+# screen runs this much longer than the server's end, so it reaches zero when the
+# answer that reports the work done arrives, not before it.
+func expected_latency_ms() -> float:
+	if latency_samples.is_empty():
+		return 350.0
+	var sorted: Array = latency_samples.duplicate()
+	sorted.sort()
+	return clampf(float(sorted[int(floor((sorted.size() - 1) * 0.75))]), 0.0, 6000.0)
+
+func display_end(ends_at: float) -> float:
+	return ends_at + expected_latency_ms()
 
 func server_reachable() -> bool:
 	return connected() and diagnostics.network_failures < 2 and not showing_cached_state
@@ -3854,9 +3911,14 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	var started_us := Time.get_ticks_usec()
 	var result: Array = await api.request(HTTPClient.METHOD_GET if payload == null else HTTPClient.METHOD_POST, "/api/" + path,
 		headers, "" if payload == null else JSON.stringify(payload), timeout_seconds, 8 * 1024 * 1024)
+	var elapsed_ms := (Time.get_ticks_usec() - started_us) / 1000.0
+	if result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0 and int(result[1]) < 500:
+		latency_samples.append(elapsed_ms)
+		if latency_samples.size() > 12:
+			latency_samples.pop_front()
 	if foreground:
 		busy = false
-		last_command_ms = (Time.get_ticks_usec() - started_us) / 1000.0
+		last_command_ms = elapsed_ms
 	var transport_ok: bool = result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0 and int(result[1]) < 500
 	diagnostics.network_result(transport_ok, "timeout" if result[0] == HTTPRequest.RESULT_TIMEOUT else ("http_%d" % int(result[1]) if result[0] == HTTPRequest.RESULT_SUCCESS else "transport_%d" % int(result[0])),
 		Time.get_unix_time_from_system(), Time.get_ticks_msec())
@@ -3882,14 +3944,24 @@ func update_connection_notice() -> void:
 	if is_instance_valid(connection_badge):
 		connection_badge.visible = offline
 
-func poll_account_state() -> void:
-	if polling_state or restore_running or busy or login_in_progress or not connected() or (player_id.is_empty() and not restoring_session):
+func poll_account_state(due := false) -> void:
+	if restore_running or login_in_progress or not connected() or (player_id.is_empty() and not restoring_session):
+		return
+	# A routine poll waits for the previous one and for commands (their answers carry
+	# the state). The poll at a timer's zero goes at once: a poll sent before the
+	# zero cannot report the work done, so waiting for it only adds its round trip.
+	if not due and (polling_state or busy):
+		return
+	if due and polls_in_flight >= 2:
 		return
 	polling_state = true
+	polls_in_flight += 1
 	var generation := request_generation
 	var response := await send_request("state" if loopback else "native/game/state", null, false)
-	polling_state = false
-	if generation != request_generation:
+	polls_in_flight -= 1
+	polling_state = polls_in_flight > 0
+	# An older answer never replaces a newer state: accept() compares serverTime.
+	if restoring_session and generation != request_generation:
 		return
 	if restoring_session:
 		if not restore_running:
@@ -4378,7 +4450,8 @@ func pick_tree(screen_position: Vector2) -> void:
 		var order := {"kind":"resource","action":"site","id":selected.id}
 		button(modal_body,"Подготовить участок",command.bind(order),not player_id.is_empty())
 	else:
-		row(modal_body, "%d дерева · %.0f сек." % [int(selected.wood), float(selected.durationMs) / 1000])
+		var seconds := (tree_job_ms if tree_job_ms > 0.0 else float(selected.durationMs)) / 1000.0
+		row(modal_body, "%d дерева · %.0f сек." % [int(selected.wood), seconds])
 		var order := {"kind":"resource","action":"tree","id":selected.id}
 		button(modal_body,"Срубить",command.bind(order),not player_id.is_empty())
 

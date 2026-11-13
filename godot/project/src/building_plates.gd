@@ -95,8 +95,9 @@ var bar_floor := {}
 
 func draw_progress(at: Vector2, work: Dictionary, alpha: float) -> void:
 	var now: float = game.timer_now()
-	var ends := float(work.get("ends", 0.0))
-	var starts := float(work.get("started", ends - 60000.0))
+	# The bar includes the network round trip, so it fills when the answer arrives.
+	var starts := float(work.get("started", float(work.get("ends", 0.0)) - 60000.0))
+	var ends: float = game.display_end(float(work.get("ends", 0.0)))
 	var confirmed: bool = work.get("confirmed", true)
 	var key := str(work.get("key", work.get("id", work.get("tree", ""))))
 	var fraction := 0.0

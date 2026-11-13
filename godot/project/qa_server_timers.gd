@@ -83,14 +83,19 @@ func run() -> void:
 			if game.timer_now() < ends - 50.0 and tree.id in game.state.city.progress.felled:
 				granted_early[0] = true
 			return tree.id in game.state.city.progress.felled, 15.0)
-		var late: float = game.timer_now() - ends
+		# Zero on screen is the server's end plus the measured round trip: the answer
+		# should arrive at that moment (within 0.5 s either side).
+		var late: float = game.timer_now() - game.display_end(ends)
 		check(done, "Felling %d: the server confirmed the tree" % (felled_count + 1))
 		check(not restarted[0], "Felling %d: the countdown never restarted" % (felled_count + 1))
 		check(not granted_early[0], "Felling %d: not felled before the timer end" % (felled_count + 1))
-		check(late < 1500.0, "Felling %d: finished %.0f ms after zero (< 1.5 s)" % [felled_count + 1, late])
+		check(absf(late) < 500.0, "Felling %d: done %.0f ms from zero on screen (|x| < 0.5 s, round trip %.0f ms)" % [felled_count + 1, late, game.expected_latency_ms()])
 		var gained: int = game.balance("wood") - wood_before
 		await fresh_state()
-		check(game.balance("wood") - wood_before == gained and gained > 0, "Felling %d: +%d wood, not doubled by the next state" % [felled_count + 1, gained])
+		# Production keeps adding a little wood every second; a second reward would add
+		# a whole tree (50+).
+		var drift: int = game.balance("wood") - wood_before - gained
+		check(gained > 0 and drift >= 0 and drift < 20, "Felling %d: +%d wood, not doubled by the next state (production +%d)" % [felled_count + 1, gained, drift])
 		check(game.shown_job.is_empty(), "Felling %d: no job after completion" % (felled_count + 1))
 		felled_count += 1
 	check(felled_count == 2, "Two trees felled in a row")
@@ -106,6 +111,31 @@ func run() -> void:
 	check(first_ok and not second_ok, "A second felling while one runs is refused")
 	check(game.message.text.begins_with("Не выполнено"), "The refusal is shown: " + game.message.text)
 	await wait_until(func(): return game.state.city.progress.job == null, 12.0)
+	# --- 2b. Training answers at once: the order is in the queue before the server
+	# replies, the button is free again, the server's answer replaces the row.
+	await fresh_state()
+	var range_building: Dictionary = game.state.city.buildings.filter(func(b): return b.type == "MIL-01")[0]
+	game.open_recruitment(range_building, "ENG-09", 1)
+	var food_before := int(game.state.city.demo.wallet.food)
+	var queued_before: int = game.state.city.military.queues.get(range_building.id, []).size()
+	var train_button: Button = game.modal_body.find_children("*", "Button", true, false).filter(func(b): return b.text.begins_with("Обучить"))[0]
+	var pressed_at := Time.get_ticks_msec()
+	train_button.pressed.emit()
+	var rows: String = " | ".join(game.modal_body.find_children("*", "Label", true, false).map(func(l): return l.text))
+	check("отправляем…" in rows, "Order shown in the queue at once (%d ms)" % (Time.get_ticks_msec() - pressed_at))
+	check(game.modal.visible, "Recruitment stays open")
+	await wait_until(func(): return game.pending_training.get(range_building.id, []).is_empty(), 15.0)
+	await process_frame
+	var queue_now: Array = game.state.city.military.queues.get(range_building.id, [])
+	check(queue_now.size() == queued_before + 1, "Server order replaced the row (%d → %d)" % [queued_before, queue_now.size()])
+	var spent: int = food_before - int(game.state.city.demo.wallet.food)
+	check(spent > 20 and spent <= 30, "Charged once by the server (food %d → %d; 30 minus farm production)" % [food_before, int(game.state.city.demo.wallet.food)])
+	await create_timer(0.7).timeout
+	var ready_again: Array = game.modal_body.find_children("*", "Button", true, false).filter(func(b): return b.text.begins_with("Обучить"))
+	check(not ready_again.is_empty() and not ready_again[0].disabled, "Train button ready again")
+	game.close_modal()
+	await set_clock(float(queue_now[-1].endsAt))
+	await fresh_state()
 	# --- 3. Lost answer repeated with the same key.
 	await fresh_state()
 	var wallet_before: Dictionary = game.state.city.demo.wallet.duplicate()

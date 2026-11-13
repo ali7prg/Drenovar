@@ -963,6 +963,20 @@ func present(state: Dictionary) -> void:
 			empty_plots.append({"position":point(site)+Vector3(0,2,0), "kind":"world-plot", "item":site})
 	present_armies(state, float(state.serverTime))
 
+# Every point a city creature stands on or patrols to: the wall stays inside them.
+# Defeated creatures keep their place, so the wall does not jump after a hunt.
+func creature_lairs(state: Dictionary) -> Array:
+	var points: Array = []
+	for encounter in state.get("encounters", []):
+		if encounter.get("position") is Dictionary:
+			var p: Dictionary = encounter.position
+			points.append(Vector2(float(p.get("x", 0)), float(p.get("z", 0))))
+		for step in encounter.get("patrol", []):
+			if step is Dictionary:
+				points.append(Vector2(float(step.get("x", 0)), float(step.get("z", 0))))
+	points.sort()
+	return points
+
 func present_city(state: Dictionary, staged := false) -> void:
 	# staged=true is used only by setup(): the first build yields between phases so
 	# no single frame carries the whole settlement. Later updates stay synchronous.
@@ -973,9 +987,10 @@ func present_city(state: Dictionary, staged := false) -> void:
 	var order: Variant = construction.get("order") if construction is Dictionary else null
 	var district: Variant = city.military.get("garrison")
 	var army: Dictionary = city.military.get("owned", {})
+	var lairs := creature_lairs(state)
 	var key := JSON.stringify([city.buildings, progress.get("sites", []), progress.get("felled", []),
 		progress.get("cleared", []), kingdom.get("clearedPlots", []) if kingdom is Dictionary else [],
-		order, district])
+		order, district, lairs])
 	if key == geometries.get("city_signature",""):
 		sync_parade(army, district)
 		return
@@ -1057,7 +1072,7 @@ func present_city(state: Dictionary, staged := false) -> void:
 	var gate_scene: Dictionary = level_model_for("SUP-03", maxi(1, defence_level))
 	walls.custom_main_gate = not gate_scene.is_empty()
 	walls.main_gate_span = GATE_SCENE_HALF_SPAN * gate_scene_scale(defence_level)
-	walls.plan(hall_spot, hall_level, defence_level, walls_shown(hall_level, defence_level), obstacles, district, sample_city)
+	walls.plan(hall_spot, hall_level, defence_level, walls_shown(hall_level, defence_level), obstacles, district, sample_city, lairs)
 	if walls.visible and walls.custom_main_gate:
 		var out := walls.main_gate_outward
 		var gate_basis := Basis(Vector3.UP, atan2(out.x, out.z)).scaled(Vector3.ONE * gate_scene_scale(defence_level))

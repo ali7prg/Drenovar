@@ -16,11 +16,17 @@ extends RefCounted
 
 const SAMPLES := 144
 # Half extent of the yard by town hall level (metres from the yard centre).
-const YARD_BY_HALL := {1: 31.0, 2: 37.0, 3: 44.0, 4: 51.0, 5: 58.0}
+# Kept compact: the creatures that live around the settlement stay outside the wall.
+const YARD_BY_HALL := {1: 31.0, 2: 34.0, 3: 38.0, 4: 42.0, 5: 46.0}
 const SHAPE_POWER := 2.6
 const ASPECT_X := 1.1
 const BUILDING_CLEARANCE := 12.0
 const DISTRICT_CLEARANCE := 4.5
+# Where a creature lives the wall keeps this far inside its patrol, so the creature
+# is always beyond the wall and the army reaches it through a gate. Near a creature a
+# building keeps only its own footprint inside the wall, not the full clearance.
+const CREATURE_CLEARANCE := 9.0
+const BUILDING_FOOTPRINT := 8.0
 # Cleared strip along the wall (no trees, bushes or grass): inside and outside.
 const BAND_INSIDE := 3.6
 const BAND_OUTSIDE := 8.0
@@ -32,6 +38,8 @@ const TEXTURES := "res://assets/city/premium/surfaces07/"
 var center := Vector2.ZERO
 var radii := PackedFloat32Array()
 var required := PackedFloat32Array()
+# The least radius that still keeps every building's footprint inside the wall.
+var footprint := PackedFloat32Array()
 var visible := false
 var hall_level := 1
 var wall_level := 1
@@ -121,7 +129,8 @@ func is_gate_segment(i: int) -> bool:
 	return false
 
 # obstacles: Array of [Vector2 position, float clearance]
-func plan(hall_position: Vector2, level: int, defence_level: int, show_wall: bool, obstacles: Array, district: Variant, heights: Callable) -> String:
+# creatures: Array of Vector2, every point a city creature stands on or patrols to.
+func plan(hall_position: Vector2, level: int, defence_level: int, show_wall: bool, obstacles: Array, district: Variant, heights: Callable, creatures: Array = []) -> String:
 	hall_level = level
 	wall_level = maxi(1, defence_level)
 	visible = show_wall
@@ -146,9 +155,11 @@ func plan(hall_position: Vector2, level: int, defence_level: int, show_wall: boo
 			z += step
 	radii.resize(SAMPLES)
 	required.resize(SAMPLES)
+	footprint.resize(SAMPLES)
 	for i in SAMPLES:
 		radii[i] = base_radius(i, half)
 		required[i] = 0.0
+		footprint[i] = 0.0
 	for entry in points:
 		var p: Vector2 = entry[0]
 		var clearance: float = entry[1]
@@ -161,6 +172,12 @@ func plan(hall_position: Vector2, level: int, defence_level: int, show_wall: boo
 		for k in range(-reach, reach + 1):
 			var i := posmod(int(round(mid)) + k, SAMPLES)
 			required[i] = maxf(required[i], need)
+		var body := minf(clearance, BUILDING_FOOTPRINT)
+		var body_spread := PI if distance <= body else asin(body / distance)
+		var body_reach := int(ceil(body_spread / TAU * SAMPLES))
+		for k in range(-body_reach, body_reach + 1):
+			var i := posmod(int(round(mid)) + k, SAMPLES)
+			footprint[i] = maxf(footprint[i], distance + body)
 	for i in SAMPLES:
 		radii[i] = maxf(radii[i], required[i])
 	# Soften the bulges: a widening pass, then two averaging passes.
@@ -203,12 +220,41 @@ func plan(hall_position: Vector2, level: int, defence_level: int, show_wall: boo
 				sum += radii[posmod(i + k, SAMPLES)]
 			eased[i] = minf(dry[i], maxf(required[i], (low + sum / 7.0) * 0.5))
 		radii = eased
+	keep_creatures_outside(creatures)
 	plan_gates(obstacles, district)
 	var parts: Array = [visible, wall_level, Array(gates), custom_main_gate, main_gate_half]
 	for i in range(0, SAMPLES, 3):
 		parts.append(snappedf(radii[i], 0.1))
 	signature = JSON.stringify(parts)
 	return signature
+
+# Pull the wall in front of every creature: inside its patrol by CREATURE_CLEARANCE,
+# easing back to the planned line on both sides. A building's footprint is never
+# cut; a creature standing closer to the hall than a building in the same direction
+# stays in the yard (the army then walks across the yard).
+func keep_creatures_outside(creatures: Array) -> void:
+	if creatures.is_empty():
+		return
+	var cap := PackedFloat32Array()
+	cap.resize(SAMPLES)
+	cap.fill(INF)
+	for p in creatures:
+		var offset: Vector2 = p - center
+		var distance := offset.length()
+		if distance < 1.0:
+			continue
+		var limit := distance - CREATURE_CLEARANCE
+		var spread := PI if distance <= CREATURE_CLEARANCE * 2.0 else asin(CREATURE_CLEARANCE * 2.0 / distance)
+		var mid := fposmod(atan2(offset.y, offset.x), TAU) / TAU * SAMPLES
+		var reach := maxi(1, int(ceil(spread / TAU * SAMPLES)))
+		for k in range(-reach, reach + 1):
+			var i := posmod(int(round(mid)) + k, SAMPLES)
+			# Full depth in front of the creature, rising smoothly towards the sides.
+			var t := float(absi(k)) / float(reach)
+			cap[i] = minf(cap[i], limit + (radii[i] - limit) * maxf(0.0, t * t * (3.0 - 2.0 * t)))
+	for i in SAMPLES:
+		if cap[i] < radii[i]:
+			radii[i] = maxf(maxf(cap[i], footprint[i]), 8.0)
 
 func plan_gates(obstacles: Array, district: Variant) -> void:
 	gates.clear()

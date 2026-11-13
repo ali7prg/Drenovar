@@ -3388,6 +3388,8 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		var order := {"kind":"deploy" if city else "worldMarch", "encounterId":id, "units":preview.units.duplicate()}
 		if not city:
 			order.worldKind = kind
+		elif not march_wall().is_empty():
+			order.wall = march_wall()
 		retry.hide()
 		quote.text = "Прокладываем путь…" if city else "Рассчитываем маршрут…"
 		var response := await send_request("march-preview" if loopback else "native/game/march-preview", order, false, 5.0)
@@ -3442,6 +3444,8 @@ func compose_march(kind: String, id: String, title: String) -> void:
 				"requestId": Crypto.new().generate_random_bytes(16).hex_encode()}
 			if not city:
 				direct.worldKind = kind
+			elif not march_wall().is_empty():
+				direct.wall = march_wall()
 			submit.order = direct
 		submit.sending = true
 		send.disabled = true
@@ -3477,6 +3481,20 @@ func compose_march(kind: String, id: String, title: String) -> void:
 const BLOCKED_ROUTE := "Нет безопасного пути к цели"
 # One patrol round of a city creature (server: 4 s rest + 16 s walk) and a margin.
 const BLOCKED_ROUTE_WAIT_MS := 22000
+
+# The city wall as drawn, for a city march: the army leaves the yard through a gate
+# and walks around the wall (server patch route-approach-v2; server v92 ignores it).
+func march_wall() -> Dictionary:
+	if map_name != "city" or not is_instance_valid(stage) or not stage.walls.visible or stage.walls.radii.size() != stage.walls.SAMPLES:
+		return {}
+	var walls = stage.walls
+	var radii: Array = []
+	for r in walls.radii:
+		radii.append(snappedf(r, 0.1))
+	var gates: Array = []
+	for k in walls.gates.size():
+		gates.append([int(walls.gates[k]), int(walls.gate_half(k))])
+	return {"cx": snappedf(walls.center.x, 0.01), "cz": snappedf(walls.center.y, 0.01), "radii": radii, "gates": gates}
 
 func fill_party(selected: Dictionary, all_available: bool) -> void:
 	var remaining := 200 if all_available else 0

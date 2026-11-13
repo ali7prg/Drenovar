@@ -10,8 +10,8 @@ extends SceneTree
 #              button and «Повторить расчёт» work again; no army, no soldiers lost.
 #   wait     - server v92, DRENOVAR_TEST_BLOCKED_CREATURE=moving: the order pressed
 #              while the creature is blocked leaves by itself once it walks out.
-#   approach - server with route-approach-v1, DRENOVAR_TEST_BLOCKED_CREATURE=1: the
-#              march leaves at once.
+#   approach - server with route-approach-v2, DRENOVAR_TEST_BLOCKED_CREATURE=1: the
+#              march leaves at once, through the gates of the city wall.
 
 const BLOCKED := "Нет безопасного пути к цели"
 var checks := 0
@@ -60,6 +60,32 @@ func open_march(target: Dictionary) -> bool:
 func armies() -> Array:
 	return game.state.get("armies", [])
 
+# Every step that crosses the wall line does it inside a gate opening; the route
+# crosses the wall exactly when the army and the target are on different sides.
+func wall_route(path: Array, target: Vector2, label: String) -> void:
+	var walls = game.stage.walls
+	var bad := 0
+	var crossings := 0
+	for i in range(1, path.size()):
+		var a := Vector2(float(path[i - 1].x), float(path[i - 1].z))
+		var b := Vector2(float(path[i].x), float(path[i].z))
+		for t in range(1, 11):
+			var p := a.lerp(b, float(t) / 10.0)
+			var q := a.lerp(b, float(t - 1) / 10.0)
+			if walls.inside(p.x, p.y) != walls.inside(q.x, q.y):
+				crossings += 1
+				var f: float = walls.sample_index(p.x, p.y)
+				var at_gate := false
+				for k in walls.gates.size():
+					var d := absf(f - float(walls.gates[k]))
+					at_gate = at_gate or minf(d, walls.SAMPLES - d) <= walls.gate_half(k) + 0.5
+				if not at_gate:
+					bad += 1
+	var inside_target: bool = walls.inside(target.x, target.y)
+	var inside_start: bool = walls.inside(float(path[0].x), float(path[0].z))
+	check(bad == 0, "%s: crosses the wall only through gates (%d crossings, target %s the wall)" % [label, crossings, "inside" if inside_target else "outside"])
+	check(crossings == (0 if inside_target == inside_start else 1), "%s: no needless crossing of the wall" % label)
+
 func fresh_state() -> void:
 	game.accept(await game.request("state"))
 
@@ -89,6 +115,16 @@ func run() -> void:
 		check(await wait_until(func(): return phase.call() > 6500.0, 5.0), "Creature walked into the clearance")
 	else:
 		check(Vector2(float(target.position.x), float(target.position.z)).distance_to(Vector2(-40, -40)) < 0.01, "Fixture: Tenerys I stands next to the building on v1-33")
+	if mode == "approach":
+		check(not game.march_wall().is_empty(), "City wall stands (town hall III): the order carries the wall")
+		# Creatures beyond the wall (server with the patch): the route preview leaves through a gate.
+		for other in game.state.encounters.filter(func(e): return int(e.level) == 2):
+			var preview: Dictionary = await game.send_request("march-preview", {"kind": "deploy", "encounterId": other.id, "units": {"ENG-09": 1}, "wall": game.march_wall()}, false, 5.0)
+			if preview.has("path"):
+				wall_route(preview.path, Vector2(float(other.position.x), float(other.position.z)), "Tenerys %d (preview)" % int(other.level))
+			else:
+				check(false, "Tenerys %d (preview): %s" % [int(other.level), preview.get("error", "")])
+	if mode != "wait":
 		check(await open_march(target), "March window opened from «Атаковать»")
 	var send := send_button()
 	check(not send.disabled, "Party can be sent at once")
@@ -135,6 +171,7 @@ func run() -> void:
 			check(int(game.state.healthy.get("ENG-09", 0)) < soldiers_before, "Soldiers left the garrison")
 			if army_ok:
 				var path: Array = armies().back().get("path", [])
+				wall_route(path, Vector2(-40, -40), "Tenerys I (order)")
 				check(path.size() > 2 and Vector2(float(path.back().x), float(path.back().z)).distance_to(Vector2(-40, -40)) < 0.01, "Route ends at the creature")
 	print("QA_MARCH_REFUSAL mode=", mode, " checks=", checks, " failures=", failures)
 	quit(0 if failures == 0 else 1)

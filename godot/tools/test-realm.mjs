@@ -78,13 +78,15 @@ const server=createServer(async (incoming,out)=>{
    sql.prepare('UPDATE game_realm37 SET data=?, revision=revision+1 WHERE id=?').run(JSON.stringify(snapshot),'native-loopback-only');
   }
   if(blockedCreatureFixture&&url.pathname==='/api/session/new'&&response.status===201){
-   // A building raised next to Tenerys I after it spawned (plot v1-33 at -38,-40),
+   // Town hall III with a building raised next to Tenerys I after it spawned (plot v1-33 at -38,-40),
    // the creature held at (-40,-40) inside the building's 5 m clearance; clock frozen.
    const record=sql.prepare('SELECT data FROM game_realm37 WHERE id=?').get('native-loopback-only');
    const snapshot=JSON.parse(record.data);
    const [id,entry]=snapshot.repository.players[0];
    const player=JSON.parse(entry.state);
    player.city.buildings.push({id:'building-v1-33',type:'ECO-03',plotId:'v1-33',level:1});
+   // Town hall III: the client draws the city wall (main and side gates) and sends it with a march.
+   player.city.buildings.find(building=>building.type==='ECO-05').level=3;
    player.city.military.owned={...player.city.military.owned,'ENG-09':20};
    snapshot.repository.players[0]=[id,{...entry,state:JSON.stringify(player)}];
    if(blockedCreatureFixture==='1')simulatedTime=simulatedTime??Date.now();

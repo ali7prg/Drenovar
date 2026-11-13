@@ -24,6 +24,8 @@ func run() -> void:
 	for entry in Recipes.ENTRIES:
 		var key := "%s-%d" % [entry.type, entry.level]
 		var row := {"path": OUT + key + ".tscn", "scale": 1.0, "series": entry.series}
+		if entry.get("carry", false):
+			row["carried"] = true
 		table.get_or_add(entry.type, {})[str(entry.level)] = row
 		if not only.is_empty() and not key in only:
 			continue
@@ -40,6 +42,19 @@ func run() -> void:
 		var tris := 0
 		if spec.has("base"):
 			tris += add_base(root, data, spec.base, int(entry.level), key)
+		if spec.has("overlay"):
+			# The original overlay GLB is referenced read-only; its mesh is placed exactly as
+			# landscape.add_city_detail() does (identity transform, scenery material).
+			var src: Node3D = load(spec.overlay).instantiate()
+			for m: MeshInstance3D in src.find_children("*", "MeshInstance3D", true, false):
+				var copy := MeshInstance3D.new()
+				copy.name = "Overlay"
+				copy.mesh = m.mesh if spec.get("overlay_masks", []).is_empty() else masked_mesh(m.mesh, m.transform, spec.overlay_masks)
+				copy.transform = m.transform
+				copy.material_override = load("res://assets/city/architecture-v2/materials/scenery.tres")
+				root.add_child(copy)
+				copy.owner = root
+			src.free()
 		var mesh: ArrayMesh = kit.bake()
 		ResourceSaver.save(mesh, OUT + key + ".res", ResourceSaver.FLAG_COMPRESS)
 		var arch := MeshInstance3D.new()
@@ -147,6 +162,23 @@ func add_base(root: Node3D, data: Dictionary, base: Dictionary, level: int, key:
 	inst.owner = root
 	print("MASKED ", key, " removed triangles: ", removed)
 	return 0
+
+func masked_mesh(mesh: Mesh, xf: Transform3D, masks: Array) -> ArrayMesh:
+	var out := ArrayMesh.new()
+	for si in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(si)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array(range(verts.size()))
+		var kept := PackedInt32Array()
+		for i in range(0, idx.size(), 3):
+			var c := (xf * verts[idx[i]] + xf * verts[idx[i + 1]] + xf * verts[idx[i + 2]]) / 3.0
+			if not masks.any(func(m: AABB): return m.has_point(c)):
+				kept.append(idx[i]); kept.append(idx[i + 1]); kept.append(idx[i + 2])
+		if kept.is_empty():
+			continue
+		arrays[Mesh.ARRAY_INDEX] = kept
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return out
 
 func _node_xf(n: Node3D, top: Node) -> Transform3D:
 	var t := n.transform

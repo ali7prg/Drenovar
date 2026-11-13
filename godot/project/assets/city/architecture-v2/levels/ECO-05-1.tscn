@@ -3,12 +3,12 @@
 [ext_resource type="PackedScene" path="res://assets/city/premium/starterHall-polished27.glb" id="1_qehwy"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-05-1.res" id="2_3p318"]
 
-[node name="ECO_05_1" type="Node3D" unique_id=1711628579]
+[node name="ECO_05_1" type="Node3D" unique_id=62785280]
 metadata/series = "B01_TownHall"
 metadata/lanes = []
 
 [node name="Base" type="Node3D" parent="." unique_id=2077677886 instance=ExtResource("1_qehwy")]
 transform = Transform3D(1.3, 0, 0, 0, 1.3, 0, 0, 0, 1.3, 0, 0, 0)
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=410479959]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=784396380]
 mesh = ExtResource("2_3p318")

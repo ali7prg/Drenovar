@@ -3,7 +3,7 @@
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-01-4-base.res" id="1_w4kkk"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-01-4.res" id="2_am3kv"]
 
-[node name="MIL_01_4" type="Node3D" unique_id=377859037]
+[node name="MIL_01_4" type="Node3D" unique_id=141534606]
 metadata/series = "B11_InfantryBarracks"
 metadata/lanes = [{
 "from": Vector3(-3.6, 0, 4.1),
@@ -13,8 +13,8 @@ metadata/lanes = [{
 "width": 2.6
 }]
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=20578880]
+[node name="Base" type="MeshInstance3D" parent="." unique_id=862822064]
 mesh = ExtResource("1_w4kkk")
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1336383080]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1192864104]
 mesh = ExtResource("2_am3kv")

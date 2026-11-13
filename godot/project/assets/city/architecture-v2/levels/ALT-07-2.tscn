@@ -3,12 +3,12 @@
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-07-2-base.res" id="1_5oihc"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-07-2.res" id="2_uft7e"]
 
-[node name="ALT_07_2" type="Node3D" unique_id=696981930]
+[node name="ALT_07_2" type="Node3D" unique_id=113906321]
 metadata/series = "B24_FishingHut"
 metadata/lanes = []
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=1321401477]
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1130460922]
 mesh = ExtResource("1_5oihc")
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=485517016]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=644533487]
 mesh = ExtResource("2_uft7e")

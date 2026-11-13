@@ -3,7 +3,7 @@
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-04-3-base.res" id="1_d035s"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-04-3.res" id="2_hrn0l"]
 
-[node name="RES_04_3" type="Node3D" unique_id=2055014204]
+[node name="RES_04_3" type="Node3D" unique_id=1931915213]
 metadata/series = "B09_Farm"
 metadata/lanes = [{
 "from": Vector3(4.6, 0, -2.4),
@@ -13,8 +13,8 @@ metadata/lanes = [{
 "width": 0.8
 }]
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=1790863566]
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1720216581]
 mesh = ExtResource("1_d035s")
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=950973920]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=624623171]
 mesh = ExtResource("2_hrn0l")

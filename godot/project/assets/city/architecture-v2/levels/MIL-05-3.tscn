@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" path="res://assets/city/premium/academy27-polished27.glb" id="1_pegtl"]
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-05-3.res" id="2_qifdy"]
 
-[node name="MIL_05_3" type="Node3D" unique_id=1249639572]
+[node name="MIL_05_3" type="Node3D" unique_id=1830618396]
 metadata/series = "B15_MilitaryAcademy"
 metadata/lanes = [{
 "from": Vector3(4.1, 0, 3.1999998),
@@ -16,5 +16,5 @@ metadata/lanes = [{
 [node name="Base" type="Node3D" parent="." unique_id=250668751 instance=ExtResource("1_pegtl")]
 transform = Transform3D(1.1433, 0, 0, 0, 1.1433, 0, 0, 0, 1.1433, 0, 0, 0)
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=2044442446]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=982427584]
 mesh = ExtResource("2_qifdy")

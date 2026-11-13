@@ -30,7 +30,13 @@ func run() -> void:
 	var count := 0
 	for type in table:
 		count += (table[type] as Dictionary).size()
-	check(count == 40, "Expected 40 reworked levels, found %d" % count)
+	var carried := 0
+	for type in table:
+		for level in table[type]:
+			carried += 1 if table[type][level].get("carried", false) else 0
+	# 40 positions from CHANGES.md + unchanged neighbours that carry them forward
+	check(count - carried == 40, "Expected 40 reworked levels from CHANGES.md, found %d" % (count - carried))
+	print("LEVEL_SCENES changes=%d carried=%d" % [count - carried, carried])
 	check_untouched_assets(table)
 	for type in table:
 		for level in table[type]:

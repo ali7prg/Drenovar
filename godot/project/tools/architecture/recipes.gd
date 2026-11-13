@@ -7,16 +7,21 @@ const ENTRIES := [
 	{"series": "B01_TownHall", "type": "ECO-05", "level": 1, "fn": "b01_hall"},
 	{"series": "B01_TownHall", "type": "ECO-05", "level": 2, "fn": "b01_hall"},
 	{"series": "B01_TownHall", "type": "ECO-05", "level": 5, "fn": "b01_hall"},
+	{"series": "B01_TownHall", "type": "ECO-05", "level": 3, "fn": "b01_hall", "carry": true},
+	{"series": "B01_TownHall", "type": "ECO-05", "level": 4, "fn": "b01_hall", "carry": true},
 	{"series": "B03_Warehouse", "type": "ECO-01", "level": 5, "fn": "b03_warehouse"},
 	{"series": "B05_Marketplace", "type": "ECO-03", "level": 5, "fn": "b05_market"},
 	{"series": "B06_LumberCamp", "type": "RES-01", "level": 5, "fn": "b06_lumber"},
 	{"series": "B07_StoneQuarry", "type": "RES-02", "level": 5, "fn": "b07_quarry"},
 	{"series": "B08_IronMine", "type": "RES-03", "level": 5, "fn": "b08_mine"},
 	{"series": "B09_Farm", "type": "RES-04", "level": 3, "fn": "b09_farm"},
+	{"series": "B09_Farm", "type": "RES-04", "level": 4, "fn": "b09_farm", "carry": true},
 	{"series": "B09_Farm", "type": "RES-04", "level": 5, "fn": "b09_farm"},
 	{"series": "B11_InfantryBarracks", "type": "MIL-01", "level": 4, "fn": "b11_barracks"},
 	{"series": "B11_InfantryBarracks", "type": "MIL-01", "level": 5, "fn": "b11_barracks"},
 	{"series": "B13_Stables", "type": "MIL-03", "level": 3, "fn": "b13_stables"},
+	{"series": "B13_Stables", "type": "MIL-03", "level": 4, "fn": "b13_stables", "carry": true},
+	{"series": "B13_Stables", "type": "MIL-03", "level": 5, "fn": "b13_stables", "carry": true},
 	{"series": "B14_Blacksmith", "type": "MIL-04", "level": 3, "fn": "b14_smith"},
 	{"series": "B14_Blacksmith", "type": "MIL-04", "level": 4, "fn": "b14_smith"},
 	{"series": "B14_Blacksmith", "type": "MIL-04", "level": 5, "fn": "b14_smith"},
@@ -24,6 +29,7 @@ const ENTRIES := [
 	{"series": "B15_MilitaryAcademy", "type": "MIL-05", "level": 2, "fn": "b15_academy"},
 	{"series": "B15_MilitaryAcademy", "type": "MIL-05", "level": 3, "fn": "b15_academy"},
 	{"series": "B15_MilitaryAcademy", "type": "MIL-05", "level": 4, "fn": "b15_academy"},
+	{"series": "B15_MilitaryAcademy", "type": "MIL-05", "level": 5, "fn": "b15_academy", "carry": true},
 	{"series": "B16_Infirmary", "type": "SUP-01", "level": 5, "fn": "b16_infirmary"},
 	{"series": "B17_SiegeWorkshop", "type": "SUP-02", "level": 1, "fn": "b17_workshop"},
 	{"series": "B17_SiegeWorkshop", "type": "SUP-02", "level": 4, "fn": "b17_workshop"},
@@ -44,10 +50,21 @@ const ENTRIES := [
 	{"series": "B24_FishingHut", "type": "ALT-07", "level": 5, "fn": "b24_fishing"},
 	{"series": "B25_HerbalGarden", "type": "ALT-08", "level": 5, "fn": "b25_herbal"},
 	{"series": "B26_StoneWorkshop", "type": "ALT-09", "level": 1, "fn": "b26_stoneworks"},
+	{"series": "B26_StoneWorkshop", "type": "ALT-09", "level": 2, "fn": "b26_stoneworks", "carry": true},
+	{"series": "B26_StoneWorkshop", "type": "ALT-09", "level": 3, "fn": "b26_stoneworks", "carry": true},
+	{"series": "B26_StoneWorkshop", "type": "ALT-09", "level": 4, "fn": "b26_stoneworks", "carry": true},
+	{"series": "B26_StoneWorkshop", "type": "ALT-09", "level": 5, "fn": "b26_stoneworks", "carry": true},
 ]
 
 static func base(id: String, masks: Array = []) -> Dictionary:
 	return {"base": {"id": id, "masks": masks}}
+
+static func with_overlay(spec: Dictionary, type: String, level: int) -> Dictionary:
+	## Keeps the level's own original upgrade overlay (city-details) in carried levels.
+	var path := "res://assets/city-details/%s-%d.glb" % [type, level]
+	if ResourceLoader.exists(path):
+		spec["overlay"] = path
+	return spec
 
 static func box_mask(from: Vector3, to: Vector3) -> AABB:
 	return AABB(Vector3(minf(from.x, to.x), minf(from.y, to.y), minf(from.z, to.z)), (to - from).abs())
@@ -297,13 +314,17 @@ static func b01_hall(k, L: int) -> Dictionary:
 			var a := PI * (0.15 + 0.7 * i / 8.0)
 			k.stone_block(Vector3(0.4 + cos(a) * 3.45, 0, 5.0 + sin(a) * 1.9), Vector3(0.4, 0.16, 0.3), rad_to_deg(-a))
 		return base("starterHall")
-	if L == 2:
-		# keep the plaza; replace the flat canopy by a gabled covered portal with a broad stair
+	if L >= 2 and L <= 4:
+		# keep the plaza; replace the flat canopy by a gabled covered portal with a broad stair.
+		# III and IV are not in CHANGES.md: they keep their own model and overlay and carry
+		# the level II portal forward so the hall never loses it on upgrade.
+		var dz := 4.3 * ((1.0 + 0.055 * (L - 1)) / 1.055 - 1.0)
 		var pts := PackedVector2Array()
 		for i in 22:
 			var a := TAU * i / 22.0
-			pts.append(Vector2(0.0 + cos(a) * 3.6, 6.0 + sin(a) * 1.1))
+			pts.append(Vector2(0.0 + cos(a) * 3.6, 6.0 + sin(a) * (1.1 if L == 2 else 0.95)))
 		k.ground_poly(pts, "path", 0.025)
+		k.push_at(Vector3(0, 0, dz))
 		k.paving(Vector3(-2.0, 0, 4.4), Vector3(2.0, 0, 6.8), 0.06, 0.5)
 		k.stairs(Vector3(0, 0, 6.75), 3.4, 3, 0.16, 0.42, 0, "stone_light")
 		var fy := 0.48
@@ -318,9 +339,10 @@ static func b01_hall(k, L: int) -> Dictionary:
 		k.gable_frame(Vector3(0, fy + 3.2, 0), 1.6, 3.9, 1.3)
 		k.pop()
 		k.banner(Vector3(0, fy + 3.95, 5.62), 0.55, 0.8, "cloth_blue")
-		var spec := base("hall", [box_mask(Vector3(-2.7, 2.2, 4.2), Vector3(2.7, 4.6, 6.4))])
-		spec["worker"] = Vector3(-4.6, 0.0, 6.2)
-		return spec
+		k.pop()
+		var spec := base("hall", [box_mask(Vector3(-2.7, 2.2, 4.2 + dz), Vector3(2.7, 4.6, 6.4 + dz))])
+		spec["worker"] = Vector3(-4.6, 0.0, 6.2 + dz * 0.5)
+		return with_overlay(spec, "ECO-05", L) if L > 2 else spec
 	# L5: bell tower whose stone piers run from the belfry down to the plinth; paved square with side galleries
 	k.paving(Vector3(-6.8, 0, 5.2), Vector3(6.8, 0, 7.0), 0.06, 0.55)
 	k.paving(Vector3(-6.8, 0, -1.0), Vector3(-4.9, 0, 5.2), 0.06, 0.55)
@@ -515,7 +537,7 @@ static func b08_mine(k, L: int) -> Dictionary:
 
 # ============================================================== B09 Farm (RES-04)
 static func b09_farm(k, L: int) -> Dictionary:
-	var s := 1.0 if L == 5 else 0.945
+	var s := (1.0 + 0.055 * (L - 1)) / 1.22
 	# dormer on the front roof slope
 	var roof_y := 3.6 * s
 	k.push_at(Vector3(-0.9 * s, roof_y, 2.0 * s))
@@ -529,8 +551,9 @@ static func b09_farm(k, L: int) -> Dictionary:
 	k.timber_house(Vector3(4.6, 0, -4.2), 2.4, 3.0, 2.6, 1.1, [{"at": 1.2, "w": 1.5, "y0": 0.0, "y1": 1.95, "kind": "open"}], [], [], [], "clay_roof", "plaster", 0.3)
 	k.box("plank", Vector3(4.6, 0.16, -4.2), Vector3(2.2, 0.02, 2.8))
 	k.door(Vector3(3.72, 0, -2.0), 0.7, 1.95, -85, 0.0)
-	k.road(Vector3(4.6, 0, -2.6), Vector3(4.6, 0, 4.3), 1.2, "path", 0.025, 0.2)
-	k.lane(Vector3(4.6, 0, -2.4), Vector3(4.6, 0, 3.5), 0.8, 1.9, "unit")
+	var px := 5.15 if L == 4 else 4.6
+	k.road(Vector3(px, 0, -2.6), Vector3(px, 0, 4.3), 1.2 if L != 4 else 0.8, "path", 0.025, 0.2)
+	k.lane(Vector3(px, 0, -2.4), Vector3(px, 0, 3.5), 0.8 if L != 4 else 0.55, 1.9, "unit")
 	k.barrel(Vector3(6.2, 0, -2.4))
 	if L == 5:
 		# wide right work bay: washing tub and a large table; water tank on a stand
@@ -550,7 +573,8 @@ static func b09_farm(k, L: int) -> Dictionary:
 			k.cyl("iron", t + Vector3(0, y, 0), t + Vector3(0, y + 0.05, 0), 0.77, 12, false)
 		k.cone("shingle", t + Vector3(0, 3.3, 0), 0.95, 0.6, 10)
 		k.beam("dark_oak", t + Vector3(0.6, 2.3, 0.4), Vector3(-4.6, 1.0, -2.0), 0.08, 0.08)
-	return base("farm", [box_mask(Vector3(3.6, -0.5, -2.2), Vector3(5.6, 2.0, 3.6))])
+	var farm := base("farm", [box_mask(Vector3(3.6, -0.5, -2.2), Vector3(5.6, 2.0, 3.6))])
+	return with_overlay(farm, "RES-04", L) if L == 4 else farm
 
 # ============================================================== B11 Infantry Barracks (MIL-01)
 static func b11_barracks(k, L: int) -> Dictionary:
@@ -626,7 +650,8 @@ static func b13_stables(k, L: int) -> Dictionary:
 		k.box("cloth_red" if i == 1 else "dark_oak", Vector3(5.85, 1.12, z), Vector3(0.5, 0.25, 0.42), 0, k.jitter(0.1))
 		k.box("rope", Vector3(5.95, 1.5, z + 0.3), Vector3(0.05, 0.6, 0.05))
 	k.weapon_rack(Vector3(4.6, 0, -2.9), 1.0, 0)
-	return base("stables26", [box_mask(Vector3(-4.2, -0.5, 1.0), Vector3(4.2, 3.0, 5.0)), box_mask(Vector3(3.0, -0.5, -2.8), Vector3(4.2, 3.0, 0.6))])
+	var stables := base("stables26", [box_mask(Vector3(-4.2, -0.5, 1.0), Vector3(4.2, 3.0, 5.0)), box_mask(Vector3(3.0, -0.5, -2.8), Vector3(4.2, 3.0, 0.6))])
+	return with_overlay(stables, "MIL-03", L) if L > 3 else stables
 
 # ============================================================== B14 Blacksmith (MIL-04)
 static func b14_smith(k, L: int) -> Dictionary:
@@ -695,7 +720,7 @@ static func b15_academy(k, L: int) -> Dictionary:
 		k.beam("oak", pc + Vector3(-1.6, 2.55, -1.25), pc + Vector3(1.6, 2.55, -1.25), 0.2, 0.24)
 		k.hip_roof("clay_roof", pc + Vector3(0, 2.65, 0), 3.2, 2.8, 1.2, 0.35)
 		k.map_table(pc + Vector3(0, 0.06, 0), 2.3, 1.4, 0)
-	k.lane(pc + Vector3(0, 0, 2.6), pc + Vector3(0, 0, 0.95), 0.9, 1.9, "unit")
+	k.lane(pc + Vector3(0, 0, 2.6 if L < 5 else 1.6), pc + Vector3(0, 0, 0.95), 0.9, 1.9, "unit")
 	if L >= 2:
 		# permanent covered gallery joining the block to the map area
 		var g0 := Vector3(bx, 0, -1.2)
@@ -718,7 +743,7 @@ static func b15_academy(k, L: int) -> Dictionary:
 	if L >= 3:
 		# new right gable wing behind the map bay
 		k.timber_house(Vector3(4.3, 0, -3.3), 3.0, 2.4, 2.9, 1.2, [{"at": 1.5, "w": 0.45, "y0": 0.9, "y1": 1.5, "kind": "window"}], [], [], [{"at": 1.2, "w": 0.45, "y0": 0.9, "y1": 1.5, "kind": "window"}], "slate_roof", "plaster", 0.35)
-	if L == 4:
+	if L >= 4:
 		# gallery wrapping the training court on the left
 		var gx := -4.9
 		for i in 5:
@@ -730,7 +755,13 @@ static func b15_academy(k, L: int) -> Dictionary:
 		k.pop()
 		k.ground(Vector3(gx - 0.5, 0, -2.8), Vector3(gx + 0.7, 0, 3.4), "stone_light", 0.05)
 		masks.append(box_mask(Vector3(-5.6, -0.5, -0.5), Vector3(-4.0, 3.0, 2.0)))
-	return base("academy27", masks)
+	var academy := base("academy27", masks)
+	if L < 5:
+		return academy
+	# the original V overlay keeps everything except the shed standing where the map pavilion is
+	academy = with_overlay(academy, "MIL-05", L)
+	academy["overlay_masks"] = [box_mask(pc + Vector3(-1.9, -0.5, -1.7), pc + Vector3(1.9, 4.5, 2.4))]
+	return academy
 
 # ============================================================== B16 Infirmary (SUP-01)
 static func b16_infirmary(k, L: int) -> Dictionary:
@@ -1076,6 +1107,19 @@ static func b25_herbal(k, L: int) -> Dictionary:
 
 # ============================================================== B26 Stone Workshop (ALT-09)
 static func b26_stoneworks(k, L: int) -> Dictionary:
+	if L > 1:
+		# II-V keep their quarry model; the level I work shelter stays beside the rock,
+		# reached from the front.
+		k.push_at(Vector3(4.1, 0, -0.6))
+		k.ground(Vector3(-1.4, 0, -1.8), Vector3(2.3, 0, 1.8), "earth", 0.02)
+		k.open_shed(Vector3(0.45, 0, -0.4), 3.0, 2.4, 2.5, 1.0, "shingle", 2, 2, true)
+		k.workbench(Vector3(0.45, 0, -0.9), 1.7, 0)
+		k.stone_block(Vector3(0.0, 0, 0.75), Vector3(0.7, 0.5, 0.55), 8)
+		k.stone_block(Vector3(1.3, 0, 1.05), Vector3(0.8, 0.65, 0.7), -12, true)
+		k.pop()
+		k.road(Vector3(4.6, 0, 6.6), Vector3(4.6, 0, 1.6), 1.4, "path", 0.02, 0.5)
+		k.lane(Vector3(4.6, 0, 6.4), Vector3(4.6, 0, 1.3), 0.9, 1.8, "unit")
+		return base("quarry27", [box_mask(Vector3(3.3, -0.5, 3.3), Vector3(5.4, 2.0, 4.4))])
 	# open work shelter; approach open from the left
 	k.ground(Vector3(-3.0, 0, -2.0), Vector3(2.8, 0, 2.4), "earth", 0.02)
 	k.open_shed(Vector3(0.6, 0, -0.4), 3.6, 2.6, 2.5, 1.0, "shingle", 2, 2, true)

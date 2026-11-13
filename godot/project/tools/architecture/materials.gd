@@ -81,6 +81,16 @@ static func build() -> Dictionary:
 		"sand": textured("soil", Color(1.08, 0.97, 0.78), 0.3, 1.0, 0.4),
 		"flower": flat(Color(0.86, 0.82, 0.7), 0.9),
 	}
+	# Same look as landscape.gd scenery_material, for original overlays kept in carried levels.
+	var scenery := StandardMaterial3D.new()
+	scenery.albedo_texture = load("res://assets/environment/surfaces20.png")
+	scenery.vertex_color_use_as_albedo = true
+	scenery.cull_mode = BaseMaterial3D.CULL_DISABLED
+	scenery.roughness = 0.95
+	scenery.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	scenery.alpha_scissor_threshold = 0.36
+	scenery.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	mats["scenery"] = scenery
 	for key in mats:
 		ResourceSaver.save(mats[key], OUT + key + ".tres")
 	return mats

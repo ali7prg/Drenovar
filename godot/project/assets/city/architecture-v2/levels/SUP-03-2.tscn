@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-03-2.res" id="1_pwjud"]
 
-[node name="SUP_03_2" type="Node3D" unique_id=932347693]
+[node name="SUP_03_2" type="Node3D" unique_id=1110156488]
 metadata/series = "B18_WallsAndGate"
 metadata/lanes = [{
 "from": Vector3(0, 0, 6.2),
@@ -12,5 +12,5 @@ metadata/lanes = [{
 "width": 2.6
 }]
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=133304631]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1690089073]
 mesh = ExtResource("1_pwjud")

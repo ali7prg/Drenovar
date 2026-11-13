@@ -1,0 +1,20 @@
+ok  Connected to the local server
+ok  Fixture: Tenerys I stands next to the building on v1-33
+ok  March window opened from «Атаковать»
+ok  Party can be sent at once
+ok  Button shows «Отправляем…» while the order is on its way
+ok  The order got an answer
+ok  Window stays open after the refusal
+ok  «Отправляем…» removed from the button after the refusal (text: Марш)
+ok  «Отправляем…» removed from the status line
+ok  Refusal shown: Нет безопасного пути к цели
+ok  No army created by the refused order
+ok  No soldiers lost
+ok  Route preview shows the refusal (Нет безопасного пути к цели)
+ok  «Повторить расчёт» offered after the refused route
+ok  Second route attempt answered by the server
+ok  March window reopened for another attempt
+ok  Send button usable on the new attempt
+ok  Second order refused cleanly, button reset
+ok  No order left hanging
+QA_MARCH_REFUSAL expect_refusal=true checks=19 failures=0

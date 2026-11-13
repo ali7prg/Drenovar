@@ -19,6 +19,8 @@ const paths=new Set(['state','command','session/new','march-preview']);
 let simulatedTime=null;
 let timeoutCityPreview=process.env.DRENOVAR_TEST_CITY_PREVIEW_TIMEOUT==='1';
 const battleFixture=process.env.DRENOVAR_TEST_BATTLE_FIXTURE==='1';
+// Route QA: Tenerys I stands next to a later building ("Нет безопасного пути к цели" in v92).
+const blockedCreatureFixture=process.env.DRENOVAR_TEST_BLOCKED_CREATURE==='1';
 // Proposed speedup grants (server patch speedups-v2); never on outside this isolated realm.
 const speedupGrantsV2=process.env.DRENOVAR_TEST_SPEEDUP_GRANTS==='1';
 // Simulated network delay of the hosted server (ms, each way split evenly), for timer QA.
@@ -71,6 +73,23 @@ const server=createServer(async (incoming,out)=>{
    player.city.demo.wallet.food=200;
    player.city.buildings=player.city.buildings.filter(building=>building.type!=='RES-04');
    snapshot.repository.players[0]=[id,{...entry,state:JSON.stringify(player)}];
+   sql.prepare('UPDATE game_realm37 SET data=?, revision=revision+1 WHERE id=?').run(JSON.stringify(snapshot),'native-loopback-only');
+  }
+  if(blockedCreatureFixture&&url.pathname==='/api/session/new'&&response.status===201){
+   // A building raised next to Tenerys I after it spawned (plot v1-33 at -38,-40),
+   // the creature held at (-40,-40) inside the building's 5 m clearance; clock frozen.
+   const record=sql.prepare('SELECT data FROM game_realm37 WHERE id=?').get('native-loopback-only');
+   const snapshot=JSON.parse(record.data);
+   const [id,entry]=snapshot.repository.players[0];
+   const player=JSON.parse(entry.state);
+   player.city.buildings.push({id:'building-v1-33',type:'ECO-03',plotId:'v1-33',level:1});
+   player.city.military.owned={...player.city.military.owned,'ENG-09':20};
+   snapshot.repository.players[0]=[id,{...entry,state:JSON.stringify(player)}];
+   simulatedTime=simulatedTime??Date.now();
+   for(const pair of snapshot.repository.encounters){
+    const encounter=JSON.parse(pair[1].state);
+    if(encounter.owner===id&&encounter.level===1){encounter.spawnedAt=simulatedTime-12000;encounter.position={x:-40,z:-40};pair[1]={...pair[1],state:JSON.stringify(encounter)};}
+   }
    sql.prepare('UPDATE game_realm37 SET data=?, revision=revision+1 WHERE id=?').run(JSON.stringify(snapshot),'native-loopback-only');
   }
   const text=await response.text();

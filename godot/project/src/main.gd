@@ -3265,7 +3265,12 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		if not result and generation == modal_generation:
 			submit.sending = false
 			send.text = "Марш" if city else "Отправить отряд"
-			send.disabled = preview.units.is_empty())
+			send.disabled = preview.units.is_empty()
+			# Sent before its route preview (stopped on press): the quote would keep
+			# saying «Прокладываем путь…». Show the server's reason and offer a retry.
+			if not send.get_meta("route_ready", false) and not preview.units.is_empty():
+				quote.text = last_command_error
+				retry.show())
 	if city:
 		set_party.call(true)
 	else:

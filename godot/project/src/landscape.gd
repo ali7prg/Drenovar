@@ -1343,6 +1343,10 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			focus_at = at
 			focus_wanted = 19.0 if map_name == "city" else 12.0
 	fight_positions.clear()
+	if is_instance_valid(placement_plate):
+		# Building being placed: open the canopy around it so the ghost and plot show.
+		focus_at = placement_position()
+		focus_wanted = 15.0
 	if focus_wanted > 0.0:
 		# Trees between the camera and the fight hide it most: shift the clearing toward the camera.
 		var toward := camera.global_position - focus_at
@@ -1858,3 +1862,77 @@ func zoom_at(amount: float, position: Vector2) -> void:
 func shift_camera_target(offset: Vector3) -> void:
 	target.x = clampf(target.x + offset.x, -147, 147)
 	target.z = clampf(target.z + offset.z, -118, 118)
+
+# --- Building placement (construction mode) ------------------------------------
+# A ghost of the chosen building that the player drags across the city with a
+# finger; free plots are outlined (green: ready, amber: forest to clear) and the
+# ghost snaps to the plot under it. Only visuals live here; main.gd owns input
+# and commands.
+var placement: Node3D
+var placement_ghost: Node3D
+var placement_plate: MeshInstance3D
+var placement_rings: Array[MeshInstance3D] = []
+var placement_overlay: StandardMaterial3D
+var placement_lift := 0.0
+
+static func placement_material(color: Color) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_color = color
+	material.no_depth_test = false
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return material
+
+func show_placement(model_path: String, model_scale: float, plots: Array) -> void:
+	clear_placement()
+	placement = Node3D.new()
+	placement.name = "Placement"
+	add_child(placement)
+	for plot in plots:
+		var ring := MeshInstance3D.new()
+		var torus := TorusMesh.new()
+		torus.inner_radius = 5.3
+		torus.outer_radius = 5.9
+		torus.rings = 48
+		torus.ring_segments = 6
+		ring.mesh = torus
+		ring.scale = Vector3(1.0, 0.12, 1.0)
+		ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		ring.material_override = placement_material(Color(0.45, 0.95, 0.55, 0.55) if plot.cleared else Color(1.0, 0.72, 0.3, 0.5))
+		ring.position = plot.position + Vector3.UP * 0.25
+		placement.add_child(ring)
+		placement_rings.append(ring)
+	placement_plate = MeshInstance3D.new()
+	var plate := PlaneMesh.new()
+	plate.size = Vector2(12.4, 12.4)
+	placement_plate.mesh = plate
+	placement_plate.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	placement_plate.material_override = placement_material(Color(0.4, 0.95, 0.5, 0.32))
+	placement.add_child(placement_plate)
+	placement_ghost = add_model(placement, model_path, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * model_scale), Vector3.ZERO))
+	placement_overlay = placement_material(Color(0.5, 1.0, 0.6, 0.18))
+	for part: MeshInstance3D in placement_ghost.find_children("*", "MeshInstance3D", true, false):
+		part.material_overlay = placement_overlay
+
+# valid: green plate (buildable); otherwise amber (forest, must be cleared) or red (no plot).
+func move_placement(at: Vector3, plate_state: String, lifted: bool) -> void:
+	if not is_instance_valid(placement):
+		return
+	var color := Color(0.4, 0.95, 0.5) if plate_state == "ready" else (Color(1.0, 0.7, 0.28) if plate_state == "forest" else Color(1.0, 0.36, 0.3))
+	(placement_plate.material_override as StandardMaterial3D).albedo_color = Color(color, 0.34)
+	placement_overlay.albedo_color = Color(color.lightened(0.2), 0.2)
+	placement_lift = 1.2 if lifted else 0.0
+	placement_plate.position = at + Vector3.UP * 0.18
+	placement_ghost.position = at + Vector3.UP * placement_lift
+
+func placement_position() -> Vector3:
+	return placement_plate.position - Vector3.UP * 0.18 if is_instance_valid(placement_plate) else Vector3.ZERO
+
+func clear_placement() -> void:
+	if is_instance_valid(placement):
+		placement.queue_free()
+	placement = null
+	placement_ghost = null
+	placement_plate = null
+	placement_rings.clear()

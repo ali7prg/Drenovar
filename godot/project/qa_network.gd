@@ -29,9 +29,9 @@ func run() -> void:
 	game.diagnostics.record.events = []
 	var logged_before: int = 0
 	await game.poll_account_state()
-	check(game.message.text != game.OFFLINE_NOTICE, "A single failure already reported offline")
+	check(not game.connection_badge.visible, "A single failure already reported offline")
 	await game.poll_account_state()
-	check(game.message.text == game.OFFLINE_NOTICE, "Outage not shown after two failures: " + game.message.text)
+	check(game.connection_badge.visible and game.message.text != game.OFFLINE_NOTICE, "Outage must show the small badge, not the centre message")
 	check(not game.busy and not game.polling_state, "Failed request left the client busy")
 	var started := Time.get_ticks_msec()
 	var response: Dictionary = await game.request("command", {"type": "qa"})
@@ -43,7 +43,7 @@ func run() -> void:
 	check(game.diagnostics.network_failures >= 3, "Failure counter not advanced")
 	game.diagnostics.network_result(true, "", Time.get_unix_time_from_system(), Time.get_ticks_msec())
 	game.update_connection_notice()
-	check(game.message.text == "Связь восстановлена", "Recovery not shown")
+	check(not game.connection_badge.visible, "Badge not hidden after recovery")
 	check(game.diagnostics.record.events[-1].kind == "network_recovered", "Recovery not logged")
 	DirAccess.remove_absolute(game.diagnostics.path)
 	print("QA_NETWORK checks=", checks, " failures=", failures.size())

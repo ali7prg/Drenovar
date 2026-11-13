@@ -26,6 +26,10 @@ var pressed_button: BaseButton
 var pressed_tint_from := Color.WHITE
 var scrolled := false
 var instant := false
+# Horizontal strip (construction cards) instead of a vertical list.
+var horizontal := false
+# Called when a finger lands outside the panel (bottom sheets close on it).
+var outside_tap := Callable()
 
 func set_modal_active(enabled: bool) -> void:
 	cancel_touch()
@@ -39,7 +43,7 @@ func set_modal_active(enabled: bool) -> void:
 		Input.emulate_mouse_from_touch = emulation_before_modal
 
 func content_scrolls() -> bool:
-	var bar := get_v_scroll_bar()
+	var bar: ScrollBar = get_h_scroll_bar() if horizontal else get_v_scroll_bar()
 	return bar.max_value - bar.page > 1.0
 
 func cancel_touch() -> void:
@@ -59,11 +63,15 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventScreenTouch:
 		get_viewport().set_input_as_handled()
+		if event.pressed and finger == -1 and outside_tap.is_valid() and is_instance_valid(press_root) and \
+				not press_root.get_global_rect().has_point(event.position):
+			outside_tap.call_deferred()
+			return
 		if event.pressed and finger == -1:
 			finger = event.index
 			origin = event.position
 			previous = origin
-			offset = float(scroll_vertical)
+			offset = float(scroll_horizontal if horizontal else scroll_vertical)
 			can_scroll = get_global_rect().has_point(origin)
 			finger_drag_started = false
 			slider = slider_at(origin) if can_scroll else null
@@ -101,6 +109,12 @@ func _input(event: InputEvent) -> void:
 		if sliding and is_instance_valid(slider):
 			var track := slider.get_global_rect()
 			slider.ratio = clampf((event.position.x - track.position.x) / track.size.x, 0.0, 1.0)
+		elif can_scroll and finger_drag_started and horizontal:
+			var hbar := get_h_scroll_bar()
+			offset = clampf(offset + previous.x - event.position.x, 0.0, maxf(0.0, hbar.max_value - hbar.page))
+			if roundi(offset) != scroll_horizontal:
+				scrolled = true
+			scroll_horizontal = roundi(offset)
 		elif can_scroll and finger_drag_started:
 			var bar := get_v_scroll_bar()
 			offset = clampf(offset + previous.y - event.position.y, 0.0, maxf(0.0, bar.max_value - bar.page))

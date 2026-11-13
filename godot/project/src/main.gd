@@ -116,8 +116,18 @@ var next_training_update := 0.0
 var followed_army := ""
 var next_minimap_draw := 0
 var diagnostics := SessionDiagnostics.new()
-const OFFLINE_NOTICE := "Нет связи с сервером. Переподключаемся…"
+const OFFLINE_NOTICE := "Нет сети · повторяем"
 var offline_notice_shown := false
+# Small pill under the resource bar; replaces the large centre message for link state.
+var connection_badge: Label
+# The city shown at launch may come from the encrypted local copy (the last state
+# the server sent); the server copy replaces it as soon as it arrives.
+var showing_cached_state := false
+var restore_running := false
+signal restore_finished
+const STATE_SAVE_INTERVAL_MSEC := 8000
+var state_saved_msec := -STATE_SAVE_INTERVAL_MSEC
+var state_save_pending := false
 # Kinetic camera glide after a quick one-finger swipe.
 const FLING_MIN_SPEED := 280.0
 const FLING_STOP_SPEED := 24.0
@@ -161,14 +171,23 @@ func _ready() -> void:
 	else:
 		session = SessionStore.read_session()
 		if not session.is_empty():
-			launch.show_step("Восстанавливаем поселение…", 38)
-			await restore_account()
-	launch.show_step("Готовим поселение…", 72)
+			# The saved city opens at once; the server is asked in parallel with the
+			# scene load and its answer replaces the copy without any waiting screen.
+			show_cached_state(SessionStore.read_state(session))
+			restore_account()
+	launch.show_step("Готовим поселение…", 52 if restore_running else 72)
 	await show_scene("city")
+	if restore_running and not showing_cached_state:
+		# First launch after an update (no local copy yet): wait a little for the
+		# server so the player lands in their own city, not in the demo one.
+		launch.show_step("Загружаем ваше поселение…", 86)
+		var deadline := Time.get_ticks_msec() + 6000
+		while restore_running and Time.get_ticks_msec() < deadline:
+			await get_tree().process_frame
 	launch.finish()
 	warm_panel_textures()
-	if restoring_session:
-		message.text = "Подключаемся к сохранённому поселению…"
+	if restoring_session and not showing_cached_state:
+		message.text = "Подключаемся к поселению…"
 	if smoke:
 		await run_smoke()
 
@@ -264,6 +283,18 @@ func build_ui() -> void:
 	message.add_theme_color_override("font_outline_color", Color("#121916"))
 	message.add_theme_constant_override("outline_size", 7)
 	outer.add_child(message)
+	connection_badge = Label.new()
+	connection_badge.name = "ConnectionBadge"
+	connection_badge.text = OFFLINE_NOTICE
+	connection_badge.add_theme_font_size_override("font_size", 15)
+	connection_badge.add_theme_color_override("font_color", Color("#ffd9a8"))
+	connection_badge.add_theme_stylebox_override("normal", Interface.style(Color("#1b1f22cc"), Color("#a8743f"), 1, 14, 5))
+	connection_badge.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	connection_badge.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	connection_badge.offset_top = 60
+	connection_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(connection_badge)
+	connection_badge.hide()
 	relocation_pins = Control.new()
 	relocation_pins.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(relocation_pins)
@@ -670,104 +701,391 @@ func build_option(definition: Dictionary) -> Dictionary:
 	var state_name := "built" if exists else ("locked" if required > hall_level() else ("short" if not can_afford(terms.cost) else "ready"))
 	return {"state": state_name, "required": required, "terms": terms}
 
-# Construction window: every building of the settlement as a card with its
-# portrait, cost and status; picking one shows details and builds on a free plot.
+# Construction window: a bottom sheet over the city (the settlement stays visible)
+# with category tabs and a horizontal strip of cards for every building. A card
+# that can be built starts placement mode: the building follows the finger and
+# snaps onto a free plot; "Построить" there sends the order.
 func show_build_menu(group := build_group) -> void:
 	build_group = group
-	open_modal("Строительство", "wide", "ДРЕНОВАР · ЗОДЧИЙ")
+	open_modal("Строительство", "sheet")
+	modal_title.add_theme_font_size_override("font_size", 25)
+	modal_scroll.horizontal = true
+	modal_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	modal_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	modal_scroll.outside_tap = close_modal
 	modal_tools.show()
+	modal_tools.add_theme_constant_override("separation", 6)
 	for entry in BUILD_GROUPS:
 		var tab := button(modal_tools, entry[1], show_build_menu.bind(entry[0]))
-		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tab.custom_minimum_size = Vector2(0, 40)
+		tab.add_theme_font_size_override("font_size", 16)
 		if entry[0] == group:
 			WebPanels.primary(tab)
+	var spring := Control.new()
+	spring.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	spring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	modal_tools.add_child(spring)
 	var order := construction_order()
+	var status := Label.new()
+	status.add_theme_font_size_override("font_size", 15)
+	status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	modal_tools.add_child(status)
 	if not order.is_empty():
-		var busy_row := HBoxContainer.new()
-		modal_body.add_child(busy_row)
-		var timer := Label.new()
-		timer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		busy_row.add_child(timer)
-		bind_countdown(timer, "Строитель занят", order.endsAt)
+		bind_countdown(status, "Строитель занят", order.endsAt)
+		status.add_theme_color_override("font_color", Color("#ffc28b"))
 		if order.kind != "clear":
-			button(busy_row, "Ускорить", show_speedups.bind("construction", order, ""))
-	var grid := GridContainer.new()
-	grid.columns = 4
-	grid.add_theme_constant_override("h_separation", 10)
-	grid.add_theme_constant_override("v_separation", 10)
-	modal_body.add_child(grid)
-	var shown := 0
+			var hurry := button(modal_tools, "Ускорить", show_speedups.bind("construction", order, ""))
+			hurry.add_theme_font_size_override("font_size", 16)
+	else:
+		status.text = "Ратуша · ур. %d" % hall_level()
+		status.add_theme_color_override("font_color", WebPanels.GOLD)
+	var strip := HBoxContainer.new()
+	strip.add_theme_constant_override("separation", 10)
+	strip.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	modal_body.add_child(strip)
+	var options := []
 	for definition in data.buildings:
 		if definition.variant != "core" or definition.base == "ECO-05" or not data.types.has(definition.id):
 			continue
 		if not group.is_empty() and definition.group != group:
 			continue
-		var option := build_option(definition)
-		var card := Button.new()
-		card.custom_minimum_size = Vector2(0, 196)
-		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		card.accessibility_name = definition.ru
-		card.tooltip_text = definition.ru
-		var ready: bool = option.state == "ready"
-		var top := Color("#3a4a3b") if ready else (Color("#3a3f45") if option.state != "locked" else Color("#2a2c2f"))
-		var edge := WebPanels.GOLD if ready else Color("#6f6250")
-		card.add_theme_stylebox_override("normal", WebPanels.gradient_style(top, Color("#15191c"), edge, 6))
-		card.add_theme_stylebox_override("hover", WebPanels.gradient_style(top.lightened(0.08), Color("#15191c"), WebPanels.GOLD, 6))
-		card.add_theme_stylebox_override("pressed", WebPanels.gradient_style(top.darkened(0.15), Color("#15191c"), WebPanels.GOLD, 6))
-		card.pressed.connect(show_build_details.bind(definition))
-		grid.add_child(card)
-		var box := VBoxContainer.new()
-		box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		box.offset_left = 6
-		box.offset_right = -6
-		box.offset_top = 4
-		box.offset_bottom = -6
-		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		box.add_theme_constant_override("separation", 2)
-		card.add_child(box)
-		var art := TextureRect.new()
-		art.texture = building_card(definition.id)
-		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		art.custom_minimum_size.y = 110
-		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		if option.state == "locked":
-			art.modulate = Color(0.55, 0.55, 0.55)
-		box.add_child(art)
-		var title := Label.new()
-		title.text = definition.ru
-		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		title.add_theme_font_size_override("font_size", 16)
-		title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		title.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		box.add_child(title)
-		var status := Label.new()
-		status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		status.add_theme_font_size_override("font_size", 14)
-		status.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		match option.state:
-			"built":
-				status.text = "Построено"
-				status.add_theme_color_override("font_color", Color("#9fd29a"))
-			"locked":
-				status.text = "Нужна ратуша %d" % option.required
-				status.add_theme_color_override("font_color", Color("#c9b9a0"))
-			_:
-				status.text = "%s · %d сек." % [cost_label(option.terms.cost), int(option.terms.seconds)]
-				status.add_theme_color_override("font_color", WebPanels.GOLD if ready else Color("#ff8f7a"))
-				status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		box.add_child(status)
-		shown += 1
-	if shown == 0:
+		options.append([definition, build_option(definition)])
+	# Buildable first, then short of resources, locked by hall level, built.
+	var rank := {"ready": 0, "short": 1, "locked": 2, "built": 3}
+	options.sort_custom(func(a, b):
+		if rank[a[1].state] != rank[b[1].state]:
+			return rank[a[1].state] < rank[b[1].state]
+		return int(a[1].required) < int(b[1].required))
+	for entry in options:
+		strip.add_child(build_card_button(entry[0], entry[1]))
+	if options.is_empty():
 		row(modal_body, "В этом разделе пока нечего строить.")
-	modal_footer.show()
+
+func build_card_glow(color: Color) -> GradientTexture2D:
+	var key := "glow:" + color.to_html()
+	if build_cards.has(key):
+		return build_cards[key]
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.62, 1.0])
+	gradient.colors = PackedColorArray([Color(color, 0.55), Color(color, 0.12), Color(color, 0.0)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.62)
+	texture.fill_to = Vector2(1.0, 0.62)
+	texture.width = 96
+	texture.height = 64
+	build_cards[key] = texture
+	return texture
+
+func build_card_button(definition: Dictionary, option: Dictionary) -> Button:
+	var ready: bool = option.state == "ready"
+	var card := Button.new()
+	card.add_to_group("build_card")
+	card.custom_minimum_size = Vector2(176, 198)
+	card.accessibility_name = definition.ru
+	card.tooltip_text = definition.ru
+	var top: Color = {"ready": Color("#4a5a47"), "short": Color("#4a4440"), "locked": Color("#33363a"), "built": Color("#39434a")}[option.state]
+	var edge := WebPanels.GOLD if ready else Color("#76664e")
+	card.add_theme_stylebox_override("normal", WebPanels.gradient_style(top, Color("#14181b"), edge, 6, 9))
+	card.add_theme_stylebox_override("hover", WebPanels.gradient_style(top.lightened(0.08), Color("#14181b"), WebPanels.GOLD, 6, 9))
+	card.add_theme_stylebox_override("pressed", WebPanels.gradient_style(top.darkened(0.15), Color("#14181b"), WebPanels.GOLD, 6, 9))
+	card.pressed.connect(func():
+		if build_option(definition).state == "ready" and construction_order().is_empty():
+			start_placement(definition)
+		else:
+			show_build_details(definition))
+	var glow := TextureRect.new()
+	glow.texture = build_card_glow({"ready": Color("#ffd889"), "short": Color("#e6a676"), "locked": Color("#9aa3ad"), "built": Color("#9fd2c8")}[option.state])
+	glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	glow.stretch_mode = TextureRect.STRETCH_SCALE
+	glow.position = Vector2(8, 6)
+	glow.size = Vector2(160, 108)
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(glow)
+	var box := VBoxContainer.new()
+	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	box.offset_left = 7
+	box.offset_right = -7
+	box.offset_top = 6
+	box.offset_bottom = -8
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_theme_constant_override("separation", 3)
+	card.add_child(box)
+	var art := TextureRect.new()
+	art.texture = building_card(definition.id)
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	art.custom_minimum_size.y = 100
+	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if option.state == "locked":
+		art.modulate = Color(0.5, 0.52, 0.55)
+	box.add_child(art)
+	var title := Label.new()
+	title.text = definition.ru
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 16)
+	title.add_theme_color_override("font_color", WebPanels.IVORY if option.state != "locked" else Color("#c4bcae"))
+	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(title)
+	var foot := HBoxContainer.new()
+	foot.alignment = BoxContainer.ALIGNMENT_CENTER
+	foot.add_theme_constant_override("separation", 5)
+	foot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(foot)
+	match option.state:
+		"built":
+			card_note(foot, "Построено", Color("#9fd29a"))
+		"locked":
+			card_note(foot, "Нужна ратуша %d" % option.required, Color("#d7c7a8"))
+		_:
+			for resource in option.terms.cost:
+				var amount := int(option.terms.cost[resource])
+				if amount <= 0 or not resource_icons.has(resource):
+					continue
+				add_resource_icon(foot, resource, 20)
+				card_note(foot, compact_number(amount), Color("#fff0d4") if amount <= balance(resource) else Color("#ff8f7a"))
+	var time := HBoxContainer.new()
+	time.alignment = BoxContainer.ALIGNMENT_CENTER
+	time.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(time)
+	if option.state in ["ready", "short"]:
+		card_note(time, ("Выбрать место · %s" if ready else "Не хватает ресурсов · %s") % duration_label(int(option.terms.seconds)),
+			WebPanels.GOLD if ready else Color("#ffb08f"), 14)
+	# Disable mouse capture on the whole subtree: the card itself takes the tap.
+	for child in card.find_children("*", "Control", true, false):
+		(child as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return card
+
+func card_note(parent: Container, text: String, color: Color, font_size := 15) -> Label:
 	var note := Label.new()
-	note.text = "Здание ставится на ближайший свободный участок. Участки расчищаются вырубкой леса."
-	note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.add_theme_font_size_override("font_size", 14)
-	modal_footer.add_child(note)
-	button(modal_footer, "Участки на карте", show_construction)
+	note.text = text
+	note.add_theme_font_size_override("font_size", font_size)
+	note.add_theme_color_override("font_color", color)
+	note.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(note)
+	return note
+
+func duration_label(seconds: int) -> String:
+	if seconds < 60:
+		return "%d с" % seconds
+	if seconds < 3600:
+		return "%d мин %02d с" % [seconds / 60, seconds % 60] if seconds % 60 else "%d мин" % (seconds / 60)
+	return "%d ч %02d мин" % [seconds / 3600, (seconds % 3600) / 60]
+
+# --- Placement mode -----------------------------------------------------------
+var placing := {}
+var placement_bar: PanelContainer
+var placement_title: Label
+var placement_info: Label
+var placement_confirm: Button
+var placement_finger := -1
+var placement_grab_offset := Vector2.ZERO
+const PLACEMENT_GRAB_RADIUS := 120.0
+const PLACEMENT_SNAP := 9.0
+const PLACEMENT_EDGE := 64.0
+
+func plot_cleared(plot: Dictionary) -> bool:
+	var kingdom: Variant = state.city.get("kingdom")
+	return not kingdom is Dictionary or plot.id in kingdom.get("clearedPlots", []) or str(plot.id).begins_with("site-")
+
+func start_placement(definition: Dictionary) -> void:
+	close_modal()
+	if map_name != "city" or not is_instance_valid(stage):
+		return
+	var plots := []
+	for marker in stage.empty_plots:
+		plots.append({"position": marker.position, "plot": marker.item, "cleared": plot_cleared(marker.item)})
+	if plots.is_empty():
+		message.text = "Нет свободного участка: сруби дерево и подготовь место."
+		return
+	var first := free_build_plot()
+	var asset: Dictionary = data.models[data.types[definition.id]]
+	stage.show_placement(asset.path, float(asset.scale), plots)
+	placing = {"definition": definition, "plots": plots, "plot": first.plot, "position": first.position,
+		"cleared": first.cleared, "free": first.position, "lifted": false}
+	stage.target = first.position
+	stage.zoom = minf(stage.zoom, 58.0)
+	action_ring.close()
+	ensure_placement_bar()
+	placement_title.text = definition.ru
+	placement_bar.show()
+	refresh_placement()
+
+func ensure_placement_bar() -> void:
+	if is_instance_valid(placement_bar):
+		return
+	placement_bar = PanelContainer.new()
+	placement_bar.name = "PlacementBar"
+	placement_bar.add_theme_stylebox_override("panel", WebPanels.gradient_style(Color("#353c43ee"), Color("#16191ce8"), WebPanels.GOLD, 9, 12))
+	placement_bar.mouse_filter = Control.MOUSE_FILTER_STOP
+	modal.get_parent().add_child(placement_bar)
+	modal.get_parent().move_child(placement_bar, dimmer.get_index())
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 5)
+	placement_bar.add_child(column)
+	placement_title = Label.new()
+	placement_title.add_theme_font_override("font", TITLE_FONT)
+	placement_title.add_theme_font_size_override("font_size", 21)
+	placement_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(placement_title)
+	placement_info = Label.new()
+	placement_info.add_theme_font_size_override("font_size", 14)
+	placement_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	placement_info.add_theme_color_override("font_color", Color("#e8dcc4"))
+	column.add_child(placement_info)
+	var actions := HBoxContainer.new()
+	actions.add_theme_constant_override("separation", 8)
+	column.add_child(actions)
+	var cancel := button(actions, "Отмена", cancel_placement)
+	cancel.name = "PlacementCancel"
+	cancel.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
+	cancel.custom_minimum_size = Vector2(128, 50)
+	WebPanels.primary(cancel, true)
+	placement_confirm = button(actions, "Построить", confirm_placement)
+	placement_confirm.name = "PlacementConfirm"
+	placement_confirm.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
+	placement_confirm.custom_minimum_size = Vector2(170, 50)
+	WebPanels.primary(placement_confirm)
+
+func refresh_placement() -> void:
+	if placing.is_empty():
+		return
+	var definition: Dictionary = placing.definition
+	var terms: Dictionary = data.buildingTerms.get(definition.id, {"cost": {}, "seconds": 0})
+	var snapped: bool = placing.position.distance_to(placing.free) < 0.01
+	var plate := "none"
+	if snapped:
+		plate = "ready" if placing.cleared else "forest"
+	stage.move_placement(placing.free, plate, placing.lifted)
+	var busy_builder: bool = not construction_order().is_empty() or state.city.progress.get("job") != null
+	if not snapped:
+		placement_info.text = "Отпустите здание над свободным участком"
+	elif busy_builder:
+		placement_info.text = "Строитель занят текущим заказом"
+	elif not placing.cleared:
+		placement_info.text = "Участок в лесу: сначала расчистка · 15 еды"
+	else:
+		placement_info.text = "%s · %s — перетащите пальцем, чтобы выбрать место" % [cost_label(terms.cost), duration_label(int(terms.seconds))]
+	placement_confirm.text = "Построить" if placing.cleared else "Расчистить"
+	var affordable: bool = can_afford(terms.cost) if placing.cleared else balance("food") >= 15
+	placement_confirm.disabled = not snapped or busy_builder or not affordable or player_id.is_empty() or command_in_progress
+
+func update_placement_bar() -> void:
+	if placing.is_empty() or not is_instance_valid(stage):
+		return
+	placement_bar.visible = not modal.visible
+	var anchor: Vector3 = placing.free
+	var screen := stage.camera.unproject_position(anchor)
+	var view := get_viewport().get_visible_rect().size
+	var bar_size := placement_bar.get_combined_minimum_size()
+	placement_bar.size = bar_size
+	var at := screen + Vector2(-bar_size.x * 0.5, 64)
+	if at.y + bar_size.y > view.y - 110:
+		at.y = screen.y - bar_size.y - 150
+	placement_bar.position = Vector2(clampf(at.x, 12, view.x - bar_size.x - 12), clampf(at.y, 70, view.y - bar_size.y - 12))
+
+func cancel_placement() -> void:
+	if placing.is_empty():
+		return
+	placing = {}
+	placement_finger = -1
+	if is_instance_valid(stage):
+		stage.clear_placement()
+	if is_instance_valid(placement_bar):
+		placement_bar.hide()
+
+func nearest_placement_plot(at: Vector3) -> Dictionary:
+	var best := {}
+	var best_gap := INF
+	for entry in placing.get("plots", []):
+		var gap: float = Vector2(at.x, at.z).distance_to(Vector2(entry.position.x, entry.position.z))
+		if gap < best_gap:
+			best_gap = gap
+			best = entry
+	best["gap"] = best_gap
+	return best
+
+func placement_screen_point() -> Vector2:
+	return stage.camera.unproject_position(placing.free + Vector3.UP * 3.0)
+
+# Finger down near the ghost: the building is picked up instead of the camera.
+func try_grab_placement(index: int, at: Vector2) -> bool:
+	if placing.is_empty() or placement_finger != -1 or not fingers.is_empty():
+		return false
+	var anchor := placement_screen_point()
+	if at.distance_to(anchor) > PLACEMENT_GRAB_RADIUS:
+		return false
+	placement_finger = index
+	placement_grab_offset = anchor - at
+	placing.lifted = true
+	refresh_placement()
+	return true
+
+func drag_placement(at: Vector2) -> void:
+	var ground := stage.ground_at(at + placement_grab_offset)
+	ground.y = stage.sample_city(ground.x, ground.z)
+	var near := nearest_placement_plot(ground)
+	if not near.is_empty() and near.gap <= PLACEMENT_SNAP:
+		placing.free = near.position
+		placing.position = near.position
+		placing.plot = near.plot
+		placing.cleared = near.cleared
+	else:
+		placing.free = ground
+		placing.position = Vector3.INF
+	# Near a screen edge the view follows the finger.
+	var view := get_viewport().get_visible_rect().size
+	var push := Vector2.ZERO
+	if at.x < PLACEMENT_EDGE: push.x = -1
+	elif at.x > view.x - PLACEMENT_EDGE: push.x = 1
+	if at.y < PLACEMENT_EDGE + 40: push.y = -1
+	elif at.y > view.y - PLACEMENT_EDGE: push.y = 1
+	placing["edge"] = push
+	refresh_placement()
+
+func release_placement(at: Vector2) -> void:
+	placement_finger = -1
+	placing.lifted = false
+	placing.erase("edge")
+	if placing.position == Vector3.INF:
+		var ground := stage.ground_at(at + placement_grab_offset)
+		var near := nearest_placement_plot(ground)
+		if not near.is_empty():
+			placing.free = near.position
+			placing.position = near.position
+			placing.plot = near.plot
+			placing.cleared = near.cleared
+	refresh_placement()
+
+func tap_placement(at: Vector2) -> void:
+	var ground := stage.ground_at(at)
+	var near := nearest_placement_plot(ground)
+	if not near.is_empty() and near.gap <= 14.0:
+		placing.free = near.position
+		placing.position = near.position
+		placing.plot = near.plot
+		placing.cleared = near.cleared
+		refresh_placement()
+
+func confirm_placement() -> void:
+	if placing.is_empty() or placement_confirm.disabled:
+		return
+	var definition: Dictionary = placing.definition
+	var plot: Dictionary = placing.plot
+	var position: Vector3 = placing.position
+	var order := {"kind":"kingdom","action":"build","plotId":plot.id,"type":definition.id} if placing.cleared else \
+		{"kind":"kingdom","action":"clear","plotId":plot.id}
+	placement_confirm.disabled = true
+	placement_info.text = "Отправляем приказ…"
+	var done := await command(order, func(): pass)
+	if done:
+		cancel_placement()
+		stage.target = position
+		message.text = "Строительство началось: %s" % definition.ru if order.action == "build" else "Участок расчищается — затем здесь можно строить"
+	else:
+		refresh_placement()
 
 func free_build_plot() -> Dictionary:
 	var kingdom: Variant = state.city.get("kingdom")
@@ -831,10 +1149,13 @@ func show_build_details(definition: Dictionary) -> void:
 		why.add_theme_color_override("font_color", WebPanels.GOLD)
 		info.add_child(why)
 	var can_build: bool = reason.is_empty() and not player_id.is_empty()
-	var build := panel_action(info, "Построить", func():
-		stage.target = site.position
-		command({"kind":"kingdom","action":"build","plotId":site.plot.id,"type":definition.id}), can_build)
+	var placeable: bool = option.state == "ready" and builder_ready and not site.is_empty()
+	var build := panel_action(info, "Выбрать место", start_placement.bind(definition), placeable)
 	build.name = "BuildConfirm"
+	if can_build:
+		button(info, "Построить на ближайшем участке", func():
+			stage.target = site.position
+			command({"kind":"kingdom","action":"build","plotId":site.plot.id,"type":definition.id}))
 	if not site.is_empty() and not site.cleared and option.state == "ready" and builder_ready:
 		button(info, "Расчистить участок · 15 еды", command.bind({"kind":"kingdom","action":"clear","plotId":site.plot.id}),
 			not player_id.is_empty() and balance("food") >= 15)
@@ -1162,6 +1483,7 @@ func show_scene(scene_name: String) -> void:
 		return
 	scene_loading = true
 	action_ring.close()
+	cancel_placement()
 	var started_at := Time.get_ticks_msec()
 	followed_army = ""
 	close_modal()
@@ -1303,6 +1625,8 @@ func _notification(what: int) -> void:
 		drain_retired_scenes(true)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
 		diagnostics.set_state("background", Time.get_unix_time_from_system())
+		if state_save_pending:
+			remember_state(true)
 		last_frame_us = 0
 		if is_instance_valid(modal_scroll):
 			modal_scroll.cancel_touch()
@@ -1321,6 +1645,10 @@ func reset_gestures() -> void:
 	tap_candidate = false
 	dragging = false
 	pointer_distance = 0
+	if placement_finger != -1:
+		placement_finger = -1
+		if not placing.is_empty():
+			release_placement(placement_screen_point())
 
 func close_modal() -> void:
 	result_open = false
@@ -1540,6 +1868,10 @@ func place_modal(layout: String) -> void:
 			offsets = Rect2(-480, 13, 960, -26)
 		"result":
 			offsets = Rect2(-310, -249, 620, 498)
+		"sheet":
+			# Bottom sheet: the city stays visible above it.
+			anchors = Rect2(0, 1, 1, 0)
+			offsets = Rect2(40, -384, -80, 376)
 	modal.anchor_left = anchors.position.x
 	modal.anchor_top = anchors.position.y
 	modal.anchor_right = anchors.end.x
@@ -1551,6 +1883,12 @@ func place_modal(layout: String) -> void:
 
 func open_modal(title: String, layout := "center", eyebrow := "") -> void:
 	action_ring.close()
+	cancel_placement()
+	modal_scroll.horizontal = false
+	modal_scroll.outside_tap = Callable()
+	modal_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	modal_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	modal_scroll.scroll_horizontal = 0
 	result_open = layout == "result"
 	modal_header.visible = not result_open
 	modal_divider.visible = not result_open
@@ -1568,6 +1906,7 @@ func open_modal(title: String, layout := "center", eyebrow := "") -> void:
 	if is_instance_valid(stage):
 		stage.clear_route()
 	modal_title.text = title
+	modal_title.add_theme_font_size_override("font_size", 31)
 	modal_eyebrow.text = eyebrow
 	modal_eyebrow.visible = not eyebrow.is_empty()
 	modal_status.hide()
@@ -1578,7 +1917,7 @@ func open_modal(title: String, layout := "center", eyebrow := "") -> void:
 	modal_footer.hide()
 	place_modal(layout)
 	modal_body.get_parent().set_deferred("scroll_vertical", 0)
-	dimmer.color = Color.TRANSPARENT if layout in ["left", "right", "city_target"] else Color("#101417a0")
+	dimmer.color = Color.TRANSPARENT if layout in ["left", "right", "city_target"] else (Color("#10141740") if layout == "sheet" else Color("#101417a0"))
 	if result_open:
 		dimmer.color = Color("#09140bc9")
 		result_notice.hide()
@@ -2796,10 +3135,34 @@ func finish_login(manual := false) -> void:
 		show_error(response)
 	login_in_progress = false
 
+func show_cached_state(cached: Dictionary) -> void:
+	if cached.is_empty():
+		return
+	var game_state: Dictionary = cached.state
+	# Game time continues from the offset measured when the copy was written; the
+	# first server answer snaps it to the exact value.
+	server_offset = float(cached.offset)
+	clock_target = server_offset
+	clock_ready = false
+	state = game_state
+	player_id = str(state.playerId)
+	showing_cached_state = true
+	battle_results.observe(player_id, state.get("reports", []))
+	refresh_hud()
+	if is_instance_valid(stage):
+		stage.present(state)
+
 func restore_account() -> void:
 	restoring_session = true
-	var response := await send_request("native/game/state", null, true, 5.0)
-	apply_restored_state(response)
+	restore_running = true
+	# Background request (does not block taps); the poll loop retries every ~1.5 s
+	# until the server answers.
+	var generation := request_generation
+	var response := await send_request("native/game/state", null, false, 8.0)
+	restore_running = false
+	if generation == request_generation and restoring_session:
+		apply_restored_state(response)
+	restore_finished.emit()
 
 func apply_restored_state(response: Dictionary) -> void:
 	if response.get("httpStatus", 0) == 401:
@@ -2810,7 +3173,8 @@ func apply_restored_state(response: Dictionary) -> void:
 	if response.has("city") and response.has("world"):
 		restoring_session = false
 		accept(response)
-		message.text = ""
+		if message.text.begins_with("Подключаемся"):
+			message.text = ""
 		if modal.visible and modal_title.text == "Твоё королевство":
 			show_account.call_deferred()
 	elif response.get("needsSettlement", false):
@@ -2986,8 +3350,10 @@ func accept(response: Dictionary) -> void:
 		return
 	state = response
 	player_id = state.playerId
+	showing_cached_state = false
 	battle_results.observe(player_id, state.get("reports", []))
 	note_server_time(float(state.serverTime))
+	remember_state()
 	refresh_hud()
 	if is_instance_valid(stage):
 		stage.present(state)
@@ -2996,6 +3362,29 @@ func accept(response: Dictionary) -> void:
 		show_starter_goals()
 	if relocation_pins.visible:
 		relocation_pins.queue_redraw()
+	if not placing.is_empty() and is_instance_valid(stage) and map_name == "city":
+		var plots := []
+		for marker in stage.empty_plots:
+			plots.append({"position": marker.position, "plot": marker.item, "cleared": plot_cleared(marker.item)})
+		placing.plots = plots
+		var current: Dictionary = nearest_placement_plot(placing.free)
+		if not current.is_empty() and current.gap < 0.5:
+			placing.cleared = current.cleared
+		elif placement_finger == -1:
+			placing.position = Vector3.INF
+		refresh_placement()
+
+func remember_state(force := false) -> void:
+	# Throttled: the copy only has to be recent, and writing it costs a few ms.
+	if loopback or session.is_empty() or showing_cached_state or not state.has("city"):
+		return
+	var now := Time.get_ticks_msec()
+	if not force and now - state_saved_msec < STATE_SAVE_INTERVAL_MSEC:
+		state_save_pending = true
+		return
+	state_saved_msec = now
+	state_save_pending = false
+	SessionStore.save_state(session, state, server_offset)
 
 func show_error(response: Dictionary) -> void:
 	message.text = response.get("error","Ответ сервера не удалось прочитать.")
@@ -3105,17 +3494,14 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 
 func update_connection_notice() -> void:
 	# Two consecutive transport failures mean the link is down, not a single blip.
+	# Shown as a small pill under the resources, never over the game.
 	var offline := diagnostics.network_failures >= 2 and connected()
-	if offline and not offline_notice_shown:
-		offline_notice_shown = true
-		message.text = OFFLINE_NOTICE
-	elif not offline and offline_notice_shown:
-		offline_notice_shown = false
-		if message.text == OFFLINE_NOTICE:
-			message.text = "Связь восстановлена"
+	offline_notice_shown = offline
+	if is_instance_valid(connection_badge):
+		connection_badge.visible = offline
 
 func poll_account_state() -> void:
-	if polling_state or busy or login_in_progress or not connected() or (player_id.is_empty() and not restoring_session):
+	if polling_state or restore_running or busy or login_in_progress or not connected() or (player_id.is_empty() and not restoring_session):
 		return
 	polling_state = true
 	var generation := request_generation
@@ -3124,7 +3510,8 @@ func poll_account_state() -> void:
 	if generation != request_generation:
 		return
 	if restoring_session:
-		apply_restored_state(response)
+		if not restore_running:
+			apply_restored_state(response)
 	elif not loopback and response.get("httpStatus", 0) == 401:
 		reset_session()
 	elif response.get("profileChanged", false):
@@ -3146,7 +3533,14 @@ func _process(delta: float) -> void:
 	update_fling(delta)
 	camera_moving = camera_moving or fling_velocity != Vector2.ZERO
 	camera_moving_now = camera_moving
+	if not placing.is_empty():
+		var push: Vector2 = placing.get("edge", Vector2.ZERO)
+		if push != Vector2.ZERO and placement_finger != -1:
+			var center := get_viewport().get_visible_rect().size * 0.5
+			stage.drag_between(center, center + push * 420.0 * delta)
+			drag_placement(fingers.get(placement_finger, center))
 	stage.update_camera(delta)
+	update_placement_bar()
 	if relocation_pins.visible and camera_moving:
 		relocation_pins.queue_redraw()
 	maybe_prewarm_other_scene()
@@ -3206,7 +3600,15 @@ func _process(delta: float) -> void:
 	active_march = active_march or state.get("armies", []).any(func(army): return army.status != "returned")
 	# Back off while the server is unreachable: 0.8/5 s normally, up to 15 s offline.
 	var interval := (0.8 if active_march else 5.0) * pow(2.0, mini(diagnostics.network_failures, 4))
-	if poll > minf(interval, maxf(15.0, 0.8 if active_march else 5.0)):
+	interval = minf(interval, maxf(15.0, 0.8 if active_march else 5.0))
+	if restoring_session:
+		# Still waiting for the first server answer: retry quickly, never 15 s.
+		interval = 1.5
+	elif diagnostics.network_failures > 0:
+		interval = minf(interval, 4.0)
+	if state_save_pending and Time.get_ticks_msec() - state_saved_msec >= STATE_SAVE_INTERVAL_MSEC:
+		remember_state()
+	if poll > interval:
 		poll = 0
 		if login_link_used and not login_proof.is_empty():
 			await finish_login()
@@ -3230,6 +3632,17 @@ func _input(event: InputEvent) -> void:
 		dragging = false
 		return
 	if not is_instance_valid(stage) or modal.visible or scene_loading:
+		return
+	if event is InputEventScreenDrag and event.index == placement_finger and not placing.is_empty():
+		fingers[event.index] = event.position
+		drag_placement(event.position)
+		get_viewport().set_input_as_handled()
+		return
+	if event is InputEventScreenTouch and not event.pressed and event.index == placement_finger:
+		fingers.erase(event.index)
+		tap_candidate = false
+		release_placement(event.position)
+		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventScreenDrag and fingers.has(event.index):
 		move_world_touch(event)
@@ -3305,11 +3718,19 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
 		return
 	if event is InputEventScreenTouch:
+		if event.pressed and not placing.is_empty() and placement_bar.visible and \
+				placement_bar.get_global_rect().grow(6).has_point(event.position):
+			return
 		if event.pressed:
 			if fingers.is_empty() and action_ring.is_open() and Time.get_ticks_msec() - action_ring.opened_at > 150:
 				action_ring.close()
 			fling_velocity = Vector2.ZERO
 			drag_samples.clear()
+			if try_grab_placement(event.index, event.position):
+				fingers[event.index] = event.position
+				tap_candidate = false
+				get_viewport().set_input_as_handled()
+				return
 			if fingers.is_empty():
 				stage.begin_direct_manipulation()
 			tap_candidate = fingers.is_empty()
@@ -3339,6 +3760,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		stage.drag_between(event.position - event.relative, event.position)
 
 func pick_marker(screen_position: Vector2) -> void:
+	if not placing.is_empty():
+		tap_placement(screen_position)
+		return
 	var distance := 38.0
 	var best := {}
 	if relocation_pins.visible:

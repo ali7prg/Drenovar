@@ -1,0 +1,6 @@
+QA_RUNTIME checks=21 failures=0
+QA_CAMERA_HUD checks=153 failures=0
+QA_BATCH_PARITY comparisons=5496 failures=0 reference_buffer_bytes=24456528 candidate_buffer_bytes=17209584
+QA_OPTIMIZATION comparisons=13740 failures=0
+QA_WEB_PANELS checks=37 failures=0
+QA_WARRIORS checks=143 failures=0

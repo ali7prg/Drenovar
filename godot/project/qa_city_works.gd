@@ -94,14 +94,45 @@ func run() -> void:
 		await create_timer(0.5).timeout
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(capture.path_join("works_chop.png"))
-	game.pending_works.tree.ends = game.server_time() + 300.0
-	await frames(2)
+	# The server starts the job later than the tap (network delay): the bar keeps
+	# the timing the player watched instead of jumping back.
+	var tapped: Dictionary = game.pending_works.tree
+	var server_now: float = game.server_time()
 	var city: Dictionary = game.state.city
-	city.progress.felled.append(tree.id)
-	stage.present(game.state)
+	city.progress.job = {"treeId": tree.id, "startedAt": server_now + 2000.0, "endsAt": server_now + 7000.0}
+	game.pending_works.tree = {"tree": tree.id, "started": server_now - 4000.0, "ends": server_now + 1000.0, "order": {}}
 	await frames(2)
+	check(is_equal_approx(float(game.shown_job.get("ends", 0.0)), server_now + 1000.0), "Server job moved the timer end (bar restarted)")
+	# At zero the felling ends at once: the tree falls, the wood is counted, the job
+	# is gone, without waiting for the server.
+	var wood_before: int = game.balance("wood")
+	var zero_at := Time.get_ticks_msec()
+	while game.shown_job.size() > 0 and Time.get_ticks_msec() - zero_at < 3000:
+		await process_frame
+	await frames(2)
+	check(tree.id in city.progress.felled, "Tree not felled at zero")
+	check(city.progress.job == null, "Job stayed after zero")
+	check(game.balance("wood") == wood_before + int(tree.wood), "Wood not counted at zero")
 	var falling: Array = works.find_children("Falling", "", true, false)
 	check(falling.size() == 1, "Tree did not topple")
+	# A server state that still carries the finished job does not restart it.
+	var stale: Dictionary = game.state.duplicate(true)
+	stale.city.progress.felled.erase(tree.id)
+	stale.city.progress.wood = wood_before
+	stale.city.progress.job = {"treeId": tree.id, "startedAt": server_now + 2000.0, "endsAt": server_now + 7000.0}
+	game.accept(stale)
+	city = game.state.city
+	await frames(3)
+	check(game.shown_job.is_empty(), "Finished felling restarted from a late server state")
+	check(tree.id in city.progress.felled and game.balance("wood") == wood_before + int(tree.wood), "Late server state undid the felling")
+	# Server confirms: the local record is dropped and the server's numbers stand.
+	var confirmed: Dictionary = game.state.duplicate(true)
+	confirmed.city.progress.job = null
+	confirmed.city.progress.wood = wood_before + int(tree.wood)
+	game.accept(confirmed)
+	city = game.state.city
+	check(game.local_felled.is_empty(), "Confirmed felling still held locally")
+	check(game.balance("wood") == wood_before + int(tree.wood), "Wood counted twice after confirmation")
 	var texts: Array = []
 	var wait_until := Time.get_ticks_msec() + 20000
 	while texts.is_empty() and Time.get_ticks_msec() < wait_until:
@@ -113,6 +144,7 @@ func run() -> void:
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(capture.path_join("works_fell.png"))
 	game.pending_works.erase("tree")
+	tapped.clear()
 	# Upgrade: scaffolding + builders, completion burst.
 	var building: Dictionary = city.buildings[1]
 	city.kingdom.order = {"kind": "upgrade", "buildingId": building.id, "endsAt": game.server_time() + 20000.0}

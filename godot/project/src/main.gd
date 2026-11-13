@@ -1276,36 +1276,82 @@ func show_starter_goals() -> void:
 		return
 	row(modal_body, "Все стартовые цели выполнены.")
 
+# Speedup tiers for every queue: construction, training and marches. The server
+# catalogue (data.speedItems) keeps its ids; missing tiers are added with ids of
+# the same form "<queue>-<n>". Only items the player owns (state.items) can be used.
+const SPEED_QUEUES := {"construction": "Строительство", "training": "Обучение войск", "march": "Марш"}
+const SPEED_TIERS := [60, 300, 900, 1800, 3600, 7200, 18000, 36000]
+
+func speed_catalog() -> Dictionary:
+	var catalog: Dictionary = data.get("speedItems", {}).duplicate(true)
+	for queue in SPEED_QUEUES:
+		var taken := {}
+		var next_index := 1
+		for id in catalog:
+			if catalog[id].kind == queue:
+				taken[int(catalog[id].seconds)] = true
+				next_index = maxi(next_index, int(str(id).get_slice("-", 1)) + 1)
+		for seconds in SPEED_TIERS:
+			if not taken.has(seconds):
+				catalog["%s-%d" % [queue, next_index]] = {"kind": queue, "seconds": seconds}
+				next_index += 1
+	return catalog
+
+static func speed_duration(seconds: int) -> String:
+	if seconds >= 3600:
+		return "%d ч" % (seconds / 3600)
+	return "%d мин" % (seconds / 60)
+
 func show_speedups(queue: String, order: Dictionary, building_id: String) -> void:
-	open_modal("Ускорение")
+	open_modal("Ускорение · " + SPEED_QUEUES.get(queue, ""))
 	countdown("Осталось", order.endsAt)
-	var available := false
-	for id in data.speedItems:
-		var item: Dictionary = data.speedItems[id]
+	var catalog := speed_catalog()
+	var ids: Array = catalog.keys().filter(func(id): return catalog[id].kind == queue)
+	ids.sort_custom(func(a, b): return int(catalog[a].seconds) < int(catalog[b].seconds))
+	var owned_any := false
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	modal_body.add_child(grid)
+	for id in ids:
+		var duration := int(catalog[id].seconds)
 		var count := int(state.get("items", {}).get(id, 0))
-		if item.kind != queue or count < 1:
-			continue
-		available = true
-		var duration := int(item.seconds)
-		var label := "%d мин · ×%d" % [duration / 60.0, count]
-		button(modal_body, label, func():
-			var remaining := float(order.endsAt) - server_time()
-			if remaining <= 0:
-				show_error({"error":"Заказ уже завершился. Открой очередь заново."})
-				return
-			var payload := {"kind":"speedup", "queue":queue, "item":id, "buildingId":building_id,
-				"orderId":order.id if queue == "training" else order.requestId,
-				"expectedEndsAt":order.endsAt, "confirmUnused":false}
-			if duration * 1000 > remaining:
-				open_modal("Подтвердить ускорение")
-				row(modal_body, "Часть времени ускорения останется неиспользованной.")
-				payload.confirmUnused = true
-				button(modal_body, "Применить", command.bind(payload))
-				button(modal_body, "Назад", show_speedups.bind(queue, order, building_id))
-			else:
-				command(payload))
-	if not available:
-		row(modal_body, "Для этой очереди пока нет ускорителей.")
+		owned_any = owned_any or count > 0
+		var label := "%s · ×%d" % [speed_duration(duration), count] if count > 0 else "%s · нет" % speed_duration(duration)
+		var use := button(grid, label, apply_speedup.bind(queue, order, building_id, id, duration),
+			count > 0 and not player_id.is_empty())
+		use.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if not owned_any:
+		row(modal_body, "Ускорителей для этой очереди пока нет. Их дают награды и задания.")
+
+func apply_speedup(queue: String, order: Dictionary, building_id: String, id: String, duration: int) -> void:
+	var remaining := float(order.endsAt) - server_time()
+	if remaining <= 0:
+		show_error({"error":"Уже завершено. Открой очередь заново."})
+		return
+	var payload := {"kind":"speedup", "queue":queue, "item":id, "buildingId":building_id,
+		"orderId":order.id if queue != "construction" else order.get("requestId", order.get("id", "")),
+		"expectedEndsAt":order.endsAt, "confirmUnused":false}
+	if queue == "march":
+		payload.armyId = order.id
+	if duration * 1000 > remaining:
+		open_modal("Подтвердить ускорение")
+		row(modal_body, "Осталось меньше, чем %s: часть времени ускорения пропадёт." % speed_duration(duration))
+		payload.confirmUnused = true
+		button(modal_body, "Применить", command.bind(payload))
+		button(modal_body, "Назад", show_speedups.bind(queue, order, building_id))
+	else:
+		command(payload)
+
+func march_finish(army: Dictionary) -> Variant:
+	return army.get("returnsAt") if army.status == "returning" else (army.get("battleEndsAt") if army.status == "fighting" else army.get("arrivesAt"))
+
+func show_march_speedups(army: Dictionary) -> void:
+	var finish: Variant = march_finish(army)
+	if finish == null:
+		return
+	show_speedups("march", {"id": army.id, "requestId": army.id, "endsAt": float(finish), "status": army.status}, "")
 
 func show_trade(resource := "") -> void:
 	open_modal("Рынок", "right")
@@ -1421,12 +1467,14 @@ func show_armies() -> void:
 		match army.status:
 			"outbound":
 				countdown(title + " · в пути", army.arrivesAt)
+				button(modal_body, "Ускорить марш", show_march_speedups.bind(army))
 				if not army.has("worldKind"):
 					button(modal_body, "Отозвать отряд", command.bind({"kind":"recall", "armyId":army.id}))
 			"fighting":
 				countdown(title + " · бой", army.battleEndsAt)
 			"returning":
 				countdown(title + " · возвращается", army.returnsAt)
+				button(modal_body, "Ускорить возвращение", show_march_speedups.bind(army))
 	for unit in data.englishRoster:
 		var available := int(state.get("healthy", {}).get(unit.id, 0))
 		if available > 0:
@@ -3431,6 +3479,7 @@ func accept(response: Dictionary) -> void:
 	state = response
 	player_id = state.playerId
 	showing_cached_state = false
+	settle_local_felling()
 	battle_results.observe(player_id, state.get("reports", []))
 	note_server_time(float(state.serverTime))
 	remember_state()
@@ -3479,6 +3528,14 @@ signal command_settled
 var pending_works := {}
 var shown_job := {}
 var next_due_poll_msec := 0
+# Felling finished on screen the moment its timer hit zero, kept until the server
+# reports the tree felled: tree id -> {"at": ticks msec, "wood": int}. Server states
+# that still carry the job are patched, so the timer never runs a second time.
+var local_felled := {}
+# Timing the player watched for a tree job (from the tap), used for the server job
+# of the same tree so the bar never jumps back when the server starts it later.
+var job_anchors := {}
+const LOCAL_FELLED_HOLD_MSEC := 120000
 var queued_commands := 0
 
 func instant_order(order: Dictionary) -> bool:
@@ -3570,6 +3627,19 @@ func predict_work(order: Dictionary) -> void:
 				"type": str(order.get("type", "")), "started": now, "ends": now + seconds * 1000.0, "order": order}
 
 func forget_prediction(order: Dictionary) -> void:
+	# A refused felling that already finished on screen is undone.
+	if order.get("action", "") == "tree" and local_felled.has(str(order.get("id", ""))):
+		var tree_id := str(order.id)
+		var entry: Dictionary = local_felled[tree_id]
+		local_felled.erase(tree_id)
+		var progress: Dictionary = state.city.get("progress", {})
+		var felled: Array = progress.get("felled", [])
+		if tree_id in felled:
+			felled.erase(tree_id)
+			progress.wood = maxi(0, int(progress.get("wood", 0)) - int(entry.wood))
+			if is_instance_valid(stage):
+				stage.present(state)
+			refresh_hud()
 	# A refused order removes its forecast (same action on the same target).
 	for slot in pending_works.keys():
 		var predicted: Dictionary = pending_works[slot].get("order", {})
@@ -3602,19 +3672,27 @@ func current_works(now: float) -> Array:
 	var job := {}
 	var server_job: Variant = state.city.get("progress", {}).get("job")
 	var server_tree := job_tree_id(server_job)
-	if not server_tree.is_empty() and server_job.has("endsAt"):
+	if not server_tree.is_empty() and server_job.has("endsAt") and not local_felled.has(server_tree):
 		var ends := float(server_job.endsAt)
 		job = {"tree": server_tree, "started": float(server_job.get("startedAt", ends - 5000.0)), "ends": ends}
 		var predicted: Dictionary = pending_works.get("tree", {})
 		if predicted.get("tree", "") == server_tree:
-			job.started = minf(job.started, float(predicted.started))
-		pending_works.erase("tree")
-	elif pending_works.has("tree"):
-		job = pending_works.tree
-		# Forecast lapses a few seconds after its expected end if the server never confirmed.
-		if now > float(job.ends) + 6000.0:
+			# The forecast began at the tap, the server job when the order arrived
+			# (later by the network delay). Keep the timing the player is watching.
+			job_anchors[server_tree] = {"started": float(predicted.started), "ends": float(predicted.ends)}
 			pending_works.erase("tree")
-			job = {}
+		var anchor: Dictionary = job_anchors.get(server_tree, {})
+		if not anchor.is_empty() and absf(ends - float(anchor.ends)) < 20000.0:
+			job.started = anchor.started
+			job.ends = anchor.ends
+	elif pending_works.has("tree") and not local_felled.has(str(pending_works.tree.tree)):
+		job = pending_works.tree
+	elif pending_works.has("tree"):
+		pending_works.erase("tree")
+	# At zero the felling is over: the tree falls now, the server catches up.
+	if not job.is_empty() and now >= float(job.ends):
+		finish_felling(str(job.tree))
+		job = {}
 	var site := {}
 	var order := construction_order()
 	var source := {}
@@ -3653,6 +3731,51 @@ func current_works(now: float) -> Array:
 				site.scale = float(asset.scale)
 			site.upgrade = not existing.is_empty()
 	return [job, site]
+
+# The tree falls and its wood is counted the moment the timer reaches zero.
+func finish_felling(tree_id: String) -> void:
+	if tree_id.is_empty() or local_felled.has(tree_id):
+		return
+	var tree: Dictionary = stage.works.tree_by_id(tree_id) if is_instance_valid(stage) else {}
+	local_felled[tree_id] = {"at": Time.get_ticks_msec(), "wood": int(tree.get("wood", 0))}
+	job_anchors.erase(tree_id)
+	if str(pending_works.get("tree", {}).get("tree", "")) == tree_id:
+		pending_works.erase("tree")
+	patch_felling(tree_id, local_felled[tree_id])
+	if is_instance_valid(stage):
+		stage.present(state)
+	refresh_hud()
+	refresh_economy()
+	# Ask the server now; it is asked again every 1.5 s until it confirms.
+	next_due_poll_msec = Time.get_ticks_msec() + 1500
+	poll = 1.0e6
+
+func patch_felling(tree_id: String, entry: Dictionary) -> void:
+	var progress: Dictionary = state.city.get("progress", {})
+	if not state.city.has("progress"):
+		state.city.progress = progress
+	var felled: Array = progress.get("felled", [])
+	if not progress.has("felled"):
+		progress.felled = felled
+	if tree_id in felled:
+		return
+	felled.append(tree_id)
+	progress.wood = int(progress.get("wood", 0)) + int(entry.wood)
+	if job_tree_id(progress.get("job")) == tree_id:
+		progress.job = null
+
+# A fresh server state: fellings it already reports are confirmed; the rest are
+# still shown finished (until LOCAL_FELLED_HOLD_MSEC, then the server is right).
+func settle_local_felling() -> void:
+	if local_felled.is_empty() or not state.has("city"):
+		return
+	var felled: Array = state.city.get("progress", {}).get("felled", [])
+	var now := Time.get_ticks_msec()
+	for tree_id in local_felled.keys():
+		if tree_id in felled or now - int(local_felled[tree_id].at) > LOCAL_FELLED_HOLD_MSEC:
+			local_felled.erase(tree_id)
+		else:
+			patch_felling(tree_id, local_felled[tree_id])
 
 func request(path: String, payload: Variant = null, idempotency_key := "") -> Dictionary:
 	if not connected():
@@ -3826,6 +3949,12 @@ func _process(delta: float) -> void:
 			if now >= due and now < due + 60000.0 and now_msec >= next_due_poll_msec:
 				next_due_poll_msec = now_msec + 1500
 				poll = 1.0e6
+		for tree_id in local_felled.keys():
+			if now_msec - int(local_felled[tree_id].at) > LOCAL_FELLED_HOLD_MSEC:
+				local_felled.erase(tree_id)
+		if not local_felled.is_empty() and now_msec >= next_due_poll_msec and connected() and not player_id.is_empty():
+			next_due_poll_msec = now_msec + 1500
+			poll = 1.0e6
 	if map_name == "city" and now >= next_training_update:
 		stage.present_training(state, now)
 		next_training_update = now + 300.0
@@ -4055,9 +4184,11 @@ func inspect_army(army: Dictionary) -> void:
 		if int(units[id]) > 0:
 			row(modal_body, "%s × %d" % [unit_for_id(id).get("name", id), int(units[id])])
 	button(modal_body, "Следить за отрядом", focus_army.bind(army))
-	var finish: Variant = army.get("returnsAt") if army.status == "returning" else (army.get("battleEndsAt") if army.status == "fighting" else army.get("arrivesAt"))
+	var finish: Variant = march_finish(army)
 	if finish != null:
 		countdown("До следующей фазы", float(finish))
+		if army.status in ["outbound", "returning"] and army.get("owner", player_id) == player_id and not player_id.is_empty():
+			button(modal_body, "Ускорить марш", show_march_speedups.bind(army))
 	if map_name == "city" and army.status == "outbound" and not player_id.is_empty():
 		button(modal_body, "Отозвать отряд", command.bind({"kind":"recall", "armyId":army.id}))
 

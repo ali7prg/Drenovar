@@ -1,0 +1,11 @@
+ok  Connected to the local server
+ok  Fixture: Tenerys I stands next to the building on v1-33
+ok  March window opened from «Атаковать»
+ok  Party can be sent at once
+ok  Button shows «Отправляем…» while the order is on its way
+ok  The order got an answer
+ok  Army marched to Tenerys I next to the building
+ok  March window closed after the order
+ok  Soldiers left the garrison
+ok  Route ends at the creature
+QA_MARCH_REFUSAL mode=approach checks=10 failures=0

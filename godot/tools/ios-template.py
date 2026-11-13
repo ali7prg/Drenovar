@@ -9,13 +9,17 @@ import tempfile
 import zipfile
 
 VERSION = "4.6.3"
-URL = (f"https://godot-releases.nbg1.your-objectstorage.com/{VERSION}-stable/"
-       f"Godot_v{VERSION}-stable_export_templates.tpz")
+MIRRORS = (
+    f"https://godot-releases.nbg1.your-objectstorage.com/{VERSION}-stable/"
+    f"Godot_v{VERSION}-stable_export_templates.tpz",
+    f"https://github.com/godotengine/godot/releases/download/{VERSION}-stable/"
+    f"Godot_v{VERSION}-stable_export_templates.tpz",
+)
 
 
 class RangeFile(io.RawIOBase):
     def __init__(self, url):
-        headers = subprocess.check_output(["curl", "-fsSI", "--max-time", "25", url], text=True)
+        headers = subprocess.check_output(["curl", "-fsSIL", "--max-time", "25", url], text=True)
         lengths = re.findall(r"^content-length:\s*(\d+)", headers, re.I | re.M)
         if not lengths:
             raise OSError("Godot mirror did not provide the template size")
@@ -48,7 +52,7 @@ class RangeFile(io.RawIOBase):
         with tempfile.TemporaryDirectory() as directory:
             header_path = Path(directory) / "headers"
             result = subprocess.check_output([
-                "curl", "-fsS", "--max-time", "45", "--retry", "1",
+                "curl", "-fsSL", "--max-time", "45", "--retry", "1",
                 "--range", f"{start}-{end}", "--dump-header", str(header_path),
                 f"{self.url}?drenovar-range={start}-{end}",
             ])
@@ -66,7 +70,16 @@ def main():
     parser.add_argument("output", type=Path)
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(RangeFile(URL)) as archive:
+    source_file = None
+    for url in MIRRORS:
+        try:
+            source_file = RangeFile(url)
+            break
+        except (OSError, subprocess.CalledProcessError) as error:
+            print(f"Mirror unavailable: {url} ({error})", flush=True)
+    if source_file is None:
+        raise SystemExit("No Godot export template mirror is reachable")
+    with zipfile.ZipFile(source_file) as archive:
         item = archive.getinfo("templates/ios.zip")
         print(f"iOS template: {item.file_size:,} bytes", flush=True)
         temp = args.output.with_suffix(".tmp")

@@ -3996,6 +3996,18 @@ func current_works(now: float) -> Array:
 					site.model = first_level.path
 					site.scale = float(first_level.get("scale", 1.0))
 			site.upgrade = not existing.is_empty()
+			# "Walls and gate" stands in the main gate of the city wall: the works go there.
+			var site_type: String = str(source.type) if existing.is_empty() else str(existing.type)
+			if stage.city_base_type(site_type) == "SUP-03" and stage.walls.visible:
+				var gate_level := maxi(1, int(existing.get("level", 1)))
+				var gate_scale: float = stage.gate_scene_scale(gate_level)
+				var out: Vector3 = stage.walls.main_gate_outward
+				var half := 5.6 if site.upgrade else 4.6
+				var tops := [4.1, 4.9, 7.3, 7.3, 8.6]
+				site.position = stage.walls.main_gate
+				site.yaw = atan2(out.x, out.z)
+				site.frame = Vector3(5.9 * gate_scale / half + 0.1, maxf(1.0, float(tops[gate_level - 1]) * gate_scale / 7.4 * 1.08), 1.9 * gate_scale / half)
+				site.erase("model")
 	return [job, site]
 
 # Clock for timers: server time, but never ahead of the latest confirmed answer plus

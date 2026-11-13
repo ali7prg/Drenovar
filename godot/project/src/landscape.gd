@@ -21,8 +21,11 @@ const CityWorks = preload("res://src/city_works.gd")
 const CityWalls = preload("res://src/city_walls.gd")
 # B18 gate scenes are authored at plot scale; in the city wall they stand larger so
 # the carriageway and towers match the height of the ring curtain.
-const GATE_SCENE_SCALE := 1.6
+const GATE_SCENE_SCALES := [1.9, 2.0, 2.0, 2.1, 2.2]
 const GATE_SCENE_HALF_SPAN := 5.9
+
+static func gate_scene_scale(level: int) -> float:
+	return GATE_SCENE_SCALES[clampi(level, 1, 5) - 1]
 var works := CityWorks.new()
 var walls := CityWalls.new()
 var forest_materials := {}
@@ -1052,11 +1055,11 @@ func present_city(state: Dictionary, staged := false) -> void:
 	# The main gate of the ring is the "walls and gate" building itself (B18 levels I-V).
 	var gate_scene: Dictionary = level_model_for("SUP-03", maxi(1, defence_level))
 	walls.custom_main_gate = not gate_scene.is_empty()
-	walls.main_gate_span = GATE_SCENE_HALF_SPAN * GATE_SCENE_SCALE
+	walls.main_gate_span = GATE_SCENE_HALF_SPAN * gate_scene_scale(defence_level)
 	walls.plan(hall_spot, hall_level, defence_level, walls_shown(hall_level, defence_level), obstacles, district, sample_city)
 	if walls.visible and walls.custom_main_gate:
 		var out := walls.main_gate_outward
-		var gate_basis := Basis(Vector3.UP, atan2(out.x, out.z)).scaled(Vector3.ONE * GATE_SCENE_SCALE)
+		var gate_basis := Basis(Vector3.UP, atan2(out.x, out.z)).scaled(Vector3.ONE * gate_scene_scale(defence_level))
 		wanted_buildings.append(["model", gate_scene.path, Transform3D(gate_basis, walls.main_gate)])
 	for building in wall_markers:
 		place_markers.append({"position": walls.main_gate + Vector3.UP * 7.0, "id": building.id, "kind": "building", "item": building, "wall": true})

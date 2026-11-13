@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cdmeryqochwkk"
-path="res://.godot/imported/ENG-06-knight-lod1_forgeCloth-albedo.jpg-bd1989fe16ff8147979426810eb9c9ba.ctex"
+path.s3tc="res://.godot/imported/ENG-06-knight-lod1_forgeCloth-albedo.jpg-bd1989fe16ff8147979426810eb9c9ba.s3tc.ctex"
+path.etc2="res://.godot/imported/ENG-06-knight-lod1_forgeCloth-albedo.jpg-bd1989fe16ff8147979426810eb9c9ba.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "8114f3ecd6ea5a6b1a52739bc58537fd"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/army/assets/ENG-06-knight-lod1_forgeCloth-albedo.jpg"
-dest_files=["res://.godot/imported/ENG-06-knight-lod1_forgeCloth-albedo.jpg-bd1989fe16ff8147979426810eb9c9ba.ctex"]
+dest_files=["res://.godot/imported/ENG-06-knight-lod1_forgeCloth-albedo.jpg-bd1989fe16ff8147979426810eb9c9ba.s3tc.ctex", "res://.godot/imported/ENG-06-knight-lod1_forgeCloth-albedo.jpg-bd1989fe16ff8147979426810eb9c9ba.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +42,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

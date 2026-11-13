@@ -1,0 +1,82 @@
+{
+  "format": "drenovar-engine-capsule-v1",
+  "source_ipa_filename": "DRENOVAR-iOS-v0.5.9-test.ipa",
+  "source_ipa_bytes": 188588487,
+  "source_ipa_sha256": "987a47b049eda4c9bc1c522e48b95c80beb5dfbebec7e340156d0400b3b18ec3",
+  "source_version": "0.5.9",
+  "source_build": "19",
+  "bundle_id": "com.drenovar.game",
+  "engine_version": "4.6.3",
+  "omitted_path": "Payload/DRENOVAR.app/DRENOVAR.pck",
+  "omitted_bytes": 165600868,
+  "omitted_sha256": "57ca2466888e79faced86392310bff7f03f7e92e4a5c4a5f6fa3cd7910264e7a",
+  "retained_files": [
+    {
+      "path": "Payload/DRENOVAR.app/en.lproj/InfoPlist.strings",
+      "bytes": 42,
+      "sha256": "9261ecceda608ef174256e5fdc774c1e6e3dcf533409c1bc393d490d01c713f1",
+      "external_attr": 2175008768
+    },
+    {
+      "path": "Payload/DRENOVAR.app/AppIcon60x60@2x.png",
+      "bytes": 46007,
+      "sha256": "1938acd8dbe18603e0c700c965be11bf6f1bc40528ec88236eb51c348d42aac5",
+      "external_attr": 2175008768
+    },
+    {
+      "path": "Payload/DRENOVAR.app/DRENOVAR",
+      "bytes": 85713008,
+      "sha256": "d9816f67f540bbebccfdb2a5ecf9460feda71c05247e4e80601caf44973bfaae",
+      "external_attr": 2179792896
+    },
+    {
+      "path": "Payload/DRENOVAR.app/Launch Screen.storyboardc/01J-lp-oVM-view-Ze5-6b-2t3.nib",
+      "bytes": 2104,
+      "sha256": "afe4570afdb564accc13cf54b2b3c941e12d105afc94dc355a2a8f2bcf2e3f3a",
+      "external_attr": 2175008768
+    },
+    {
+      "path": "Payload/DRENOVAR.app/Launch Screen.storyboardc/UIViewController-01J-lp-oVM.nib",
+      "bytes": 924,
+      "sha256": "54f3637f671feba5f19e82ec4f4a7fb448bb3cfc0fb180f089aa571fc8f053e2",
+      "external_attr": 2175008768
+    },
+    {
+      "path": "Payload/DRENOVAR.app/Launch Screen.storyboardc/Info.plist",
+      "bytes": 258,
+      "sha256": "1f255d5cc53b531e3f29a9406a8df49a958e2bf9443d3e20bd8374f707f7d5c8",
+      "external_attr": 2175008768
+    },
+    {
+      "path": "Payload/DRENOVAR.app/Assets.car",
+      "bytes": 3758799,
+      "sha256": "d17ceae49c2eb9415ecfb6c15a4014ee8d27afb86555855e7a38189c4d99b083",
+      "external_attr": 2175008768
+    },
+    {
+      "path": "Payload/DRENOVAR.app/AppIcon76x76@2x~ipad.png",
+      "bytes": 73429,
+      "sha256": "ca3c911cd93c8aaff961610c918da14693304ed5e499196916a73bf74f14f5bc",
+      "external_attr": 2175008768
+    },
+    {
+      "path": "Payload/DRENOVAR.app/PrivacyInfo.xcprivacy",
+      "bytes": 990,
+      "sha256": "4b61978794a0d6042d6fb5751bf9474cded649ab89956a1304667a1f0260ab2e",
+      "external_attr": 2175008768
+    },
+    {
+      "path": "Payload/DRENOVAR.app/Info.plist",
+      "bytes": 1758,
+      "sha256": "ebcc82e6287ddb6ab11308f5dabd3306b58fe9f347c6504b1531077233ba30f9",
+      "external_attr": 2175008768
+    },
+    {
+      "path": "Payload/DRENOVAR.app/PkgInfo",
+      "bytes": 8,
+      "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+      "external_attr": 2175008768
+    }
+  ],
+  "warning": "Not installable; not the full original IPA. A newly exported compatible PCK is required."
+}

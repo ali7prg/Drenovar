@@ -1,0 +1,13 @@
+PASS gameplay37/tests/server.mjs
+PASS gameplay37/tests/hosted.mjs
+PASS gameplay37/tests/accounts40.mjs
+PASS gameplay37/tests/economy62.mjs
+PASS gameplay37/tests/founder42.mjs
+PASS gameplay37/tests/world62.mjs
+PASS gameplay37/tests/native-session.mjs
+PASS gameplay37/tests/paid-training92.mjs
+PASS gameplay37/tests/closed-cycle61.mjs
+PASS gameplay37/tests/upgrades-v1.mjs
+PASS gameplay37/tests/performance43.mjs
+PASS gameplay37/tests/repeated43.mjs
+12/12 original test files passed on v24.22.1

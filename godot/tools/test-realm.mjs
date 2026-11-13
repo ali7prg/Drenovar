@@ -19,6 +19,11 @@ const paths=new Set(['state','command','session/new','march-preview']);
 let simulatedTime=null;
 let timeoutCityPreview=process.env.DRENOVAR_TEST_CITY_PREVIEW_TIMEOUT==='1';
 const battleFixture=process.env.DRENOVAR_TEST_BATTLE_FIXTURE==='1';
+// Proposed speedup grants (server patch speedups-v2); never on outside this isolated realm.
+const speedupGrantsV2=process.env.DRENOVAR_TEST_SPEEDUP_GRANTS==='1';
+// Simulated network delay of the hosted server (ms, each way split evenly), for timer QA.
+const delayMs=Number(process.env.DRENOVAR_TEST_DELAY_MS??0);
+const pause=ms=>ms>0?new Promise(resolve=>setTimeout(resolve,ms)):null;
 const server=createServer(async (incoming,out)=>{
  try {
   const url=new URL(incoming.url,origin);
@@ -53,8 +58,9 @@ const server=createServer(async (incoming,out)=>{
    timeoutCityPreview=false;
    return;
   }
+  await pause(delayMs/2);
   const response=await handleGame(new Request(url,{method:incoming.method,headers,body}),db,{
-   worldEnabled:true,isolated:true,realmId:'native-loopback-only',clock:()=>simulatedTime??Date.now()
+   worldEnabled:true,isolated:true,realmId:'native-loopback-only',clock:()=>simulatedTime??Date.now(),speedupGrantsV2
   });
   if(battleFixture&&url.pathname==='/api/session/new'&&response.status===201){
    const record=sql.prepare('SELECT data FROM game_realm37 WHERE id=?').get('native-loopback-only');
@@ -67,7 +73,9 @@ const server=createServer(async (incoming,out)=>{
    snapshot.repository.players[0]=[id,{...entry,state:JSON.stringify(player)}];
    sql.prepare('UPDATE game_realm37 SET data=?, revision=revision+1 WHERE id=?').run(JSON.stringify(snapshot),'native-loopback-only');
   }
-  out.writeHead(response.status,Object.fromEntries(response.headers)).end(await response.text());
+  const text=await response.text();
+  await pause(delayMs/2);
+  out.writeHead(response.status,Object.fromEntries(response.headers)).end(text);
  } catch (error) {
   console.error(error);
   if(!out.headersSent)out.writeHead(500,{'Content-Type':'application/json'}).end(JSON.stringify({error:'Local test realm error'}));

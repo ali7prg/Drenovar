@@ -25,6 +25,7 @@ var press_root: Control
 var pressed_button: BaseButton
 var pressed_tint_from := Color.WHITE
 var scrolled := false
+var instant := false
 
 func set_modal_active(enabled: bool) -> void:
 	cancel_touch()
@@ -37,7 +38,12 @@ func set_modal_active(enabled: bool) -> void:
 	else:
 		Input.emulate_mouse_from_touch = emulation_before_modal
 
+func content_scrolls() -> bool:
+	var bar := get_v_scroll_bar()
+	return bar.max_value - bar.page > 1.0
+
 func cancel_touch() -> void:
+	instant = false
 	release_highlight()
 	finger = -1
 	slider = null
@@ -64,8 +70,18 @@ func _input(event: InputEvent) -> void:
 			sliding = false
 			scrolled = false
 			highlight(button_at(origin))
+			# No scroll can start from here (fixed header/footer, or a list that fits):
+			# act on touch-down instead of waiting for the finger to lift.
+			if is_instance_valid(pressed_button) and slider == null and \
+					(not is_ancestor_of(pressed_button) or not content_scrolls()):
+				instant = true
+				tap.call_deferred(origin, gesture_revision)
+				hold_highlight()
 		elif not event.pressed and event.index == finger:
 			finger = -1
+			if instant:
+				instant = false
+				return
 			var on_button := is_instance_valid(pressed_button) and not scrolled and not sliding and \
 					pressed_button.get_global_rect().grow(BUTTON_MARGIN).has_point(event.position)
 			if not event.canceled and ((not finger_drag_started and event.position.distance_to(origin) < TAP_SLOP) or on_button):
@@ -76,7 +92,7 @@ func _input(event: InputEvent) -> void:
 				release_highlight()
 	elif event is InputEventScreenDrag:
 		get_viewport().set_input_as_handled()
-		if event.index != finger:
+		if event.index != finger or instant:
 			return
 		var travel: Vector2 = event.position - origin
 		if not finger_drag_started and travel.length() >= TAP_SLOP:

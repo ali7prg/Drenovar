@@ -1194,7 +1194,9 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 	var cues := {}
 	var created := false
 	for encounter in rows:
-		if encounter.status == "defeated" or int(encounter.get("hp", 1)) <= 0:
+		# A creature under attack stays on the field for the whole fight even when the
+		# server has already recorded the outcome (status/hp are final at battle start).
+		if (encounter.status == "defeated" or int(encounter.get("hp", 1)) <= 0) and not battles.has(encounter.id):
 			continue
 		var species: String = encounter.get("species", "velkor")
 		if not data.creatureModels.has(species):
@@ -1205,6 +1207,9 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 		var path: Array = encounter.get("patrol", [])
 		var id: String = encounter.id
 		known[id] = true
+		if battles.has(id):
+			path = []
+			moving = false
 		if map_name == "world" and encounter.status == "alive" and path.size() >= 2:
 			var phase := fposmod(server_ms, 16000.0)
 			var fraction := clampf(phase / 4000.0 - 1.0, 0.0, 1.0) if phase < 12000.0 else 4.0 - phase / 4000.0
@@ -1267,8 +1272,13 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 				elif at >= elapsed - 430.0 and at <= elapsed + 560.0 and attack == -INF:
 					attack = at
 					charge = kind == "antler_charge"
-			present_battle_fx(id, p, encounter, army, elapsed, events)
-			if attack > -INF:
+			var fallen_at := present_battle_fx(id, p, encounter, army, elapsed, events)
+			if fallen_at > -INF and elapsed >= fallen_at:
+				attack = -INF
+				hit = -INF
+				clip = "Death"
+				clip_phase = clampf((elapsed - fallen_at) / 1200.0, 0.0, 1.0)
+			elif attack > -INF:
 				clip = "Alert" if charge and elapsed < attack - 260.0 else "Attack"
 				clip_phase = (elapsed - attack + 560.0) / 300.0 if clip == "Alert" else (elapsed - attack + 260.0) / 690.0
 				var lunge := sin(PI * clampf((elapsed - attack + 210.0) / 590.0, 0.0, 1.0)) * (1.8 if charge else 0.5)
@@ -1318,7 +1328,7 @@ func battle_timeline(army: Dictionary, encounter: Dictionary, events: Array) -> 
 	fx_timelines[army.id] = cached
 	return cached
 
-func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dictionary, elapsed: float, events: Array) -> void:
+func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dictionary, elapsed: float, events: Array) -> float:
 	var timeline := battle_timeline(army, encounter, events)
 	var route: Dictionary = army_routes.get(army.id, {})
 	var centre: Vector3 = route.get("position", p)
@@ -1346,14 +1356,21 @@ func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dict
 		if age < -380.0 or age > 420.0:
 			continue
 		var target: Vector3 = members.get(strike[1], centre)
-		battle_fx.slash(p, target, (age + 380.0) / 800.0, Color("#ff5a3c"), 3.4 if strike[2] == "antler_charge" else 2.8)
+		battle_fx.slash(p, target, (age + 380.0) / 800.0, Color("#ff5a3c"), 4.4 if strike[2] == "antler_charge" else 3.8)
 		if age >= 0.0:
 			battle_fx.spark(target, age / 420.0, Color("#ff6a4a"), 1.3, fposmod(float(strike[0]) * 0.007, 1.0))
 	var spec: Dictionary = encounter.get("spec", {})
 	var title := "%s · %s" % [spec.get("name", encounter.get("species", "")), ["I", "II", "III"][clampi(int(encounter.get("level", 1)), 1, 3) - 1]]
 	var height := 2.6 + 0.5 * clampi(int(encounter.get("level", 1)), 1, 3)
-	battle_fx.health(p + Vector3.UP * height, title, hp / float(timeline.max), recent / float(timeline.max), Color("#d8402c"),
-		clampf(camera_zoom / 46.0, 0.6, 2.5) if map_name == "world" else clampf(camera_zoom / 40.0, 0.6, 2.5))
+	var fallen_at := -INF
+	if not timeline.hits.is_empty() and float(timeline.hits[-1][2]) <= 0.0:
+		fallen_at = float(timeline.hits[-1][0])
+	if fallen_at == -INF or elapsed < fallen_at + 900.0:
+		battle_fx.health(p + Vector3.UP * height, title, hp / float(timeline.max), recent / float(timeline.max), Color("#d8402c"),
+			clampf(camera_zoom / 46.0, 0.6, 2.5) if map_name == "world" else clampf(camera_zoom / 40.0, 0.6, 2.5))
+	battle_fx.last_battle_msec = Time.get_ticks_msec()
+	battle_fx.last_battle_events = events.size()
+	return fallen_at
 
 func show_battle_cue(id: String, p: Vector3, color: Color, phase: float) -> void:
 	var cue := effects.get_node_or_null(NodePath(id)) as MeshInstance3D
@@ -1558,7 +1575,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 					phase = (elapsed - strike + 490.0) / 1000.0
 					if not slot.ranged:
 						# Weapon sweep timed to the swing's contact frame (event time).
-						battle_fx.slash(place, p, (elapsed - strike + 260.0) / 420.0, Color("#ffd27a"), 2.3)
+						battle_fx.slash(place, p, (elapsed - strike + 260.0) / 420.0, Color("#ffd27a"), 3.2)
 				elif army.get("worldKind") == "pvp":
 					clip = "attack"
 					phase = fposmod(elapsed + i * 125.0, 1000.0) / 1000.0

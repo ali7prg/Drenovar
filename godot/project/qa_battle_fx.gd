@@ -84,6 +84,21 @@ func run() -> void:
 	stage.present_creatures(state, start + 9500.0, 0.016)
 	for kind in stage.battle_fx.POOL:
 		check(shown(stage, kind).is_empty(), "Effect left on screen after the battle: " + kind)
+	# Server already recorded the kill at battle start: creature still fights, then dies.
+	army.status = "fighting"
+	army.erase("returnPath")
+	enc.status = "defeated"
+	enc.hp = 0
+	events.append([300.0 + 30 * 120.0, "soldier_attack", "ENG-09", 0, 0])
+	stage.fx_timelines.clear()
+	stage.present_armies(state, start + 1200.0)
+	stage.present_creatures(state, start + 1200.0, 0.016)
+	var actor: Node3D = stage.creatures.get_node_or_null(NodePath(enc.id))
+	check(actor != null and actor.visible, "Creature hidden during the fight because the server marked it defeated")
+	check(shown(stage, "bar").size() == 1, "No health plate for a creature the server already marked defeated")
+	stage.present_armies(state, start + 300.0 + 30 * 120.0 + 500.0)
+	stage.present_creatures(state, start + 300.0 + 30 * 120.0 + 500.0, 0.016)
+	check(actor.get_meta("clip", "") == "Death", "Creature did not play its death after the last hit: " + str(actor.get_meta("clip", "")))
 	print("QA_BATTLE_FX worst_update_ms=", snappedf(worst, 0.01), " numbers=", recent_hits)
 	print("QA_BATTLE_FX checks=", checks, " failures=", failures)
 	quit(0 if failures == 0 else 1)

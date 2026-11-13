@@ -400,6 +400,7 @@ func setup_resource_icons() -> void:
 
 func add_resource_button(wallet: Container, key: String) -> void:
 	var control := button(wallet, "", show_economy.bind(key))
+	control.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	control.custom_minimum_size = Vector2(108, 44)
 	Interface.hud_button(control)
 	resource_buttons[key] = control
@@ -1529,6 +1530,38 @@ func unit_for_id(id: String) -> Dictionary:
 func server_time() -> float:
 	return Time.get_unix_time_from_system() * 1000 + server_offset
 
+# Server clock without jumps. Every response's serverTime is already old by its
+# network delay, which varies by hundreds of ms between polls; setting the offset
+# from each response made marching armies jump back and forth. The newest-sample
+# maximum over a short window is the least delayed estimate; the displayed offset
+# then slews toward it at most 8% of real time, so game time never runs backward.
+const CLOCK_WINDOW_MS := 20000
+const CLOCK_SLEW := 0.08
+const CLOCK_SNAP_MS := 2500.0
+var clock_samples: Array = []
+var clock_target := 0.0
+var clock_ready := false
+
+func note_server_time(server_ms: float) -> void:
+	var local := Time.get_unix_time_from_system() * 1000.0
+	var now := Time.get_ticks_msec()
+	clock_samples.append([now, server_ms - local])
+	while clock_samples.size() > 1 and now - int(clock_samples[0][0]) > CLOCK_WINDOW_MS:
+		clock_samples.pop_front()
+	clock_target = -INF
+	for sample in clock_samples:
+		clock_target = maxf(clock_target, float(sample[1]))
+	if not clock_ready or absf(clock_target - server_offset) > CLOCK_SNAP_MS:
+		# First contact, or a real jump (device clock changed, long suspension).
+		server_offset = clock_target
+		clock_ready = true
+
+func advance_server_clock(delta: float) -> void:
+	if not clock_ready:
+		return
+	var step := CLOCK_SLEW * delta * 1000.0
+	server_offset += clampf(clock_target - server_offset, -step, step)
+
 func recruitment_buildings() -> Array:
 	var result := []
 	for base in RECRUIT_FACILITIES:
@@ -2163,7 +2196,10 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		preview.units = units
 		submit.order = {}
 		retry.hide()
-		send.disabled = true
+		# The party can be sent at once; the route preview only draws the path and the
+		# arrival time, the server computes the real route for the order anyway.
+		send.disabled = total == 0 or submit.sending
+		send.set_meta("route_ready", false)
 		stage.clear_route()
 		route_map.set_path([])
 		if total == 0:
@@ -2269,6 +2305,9 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		if not response.has("path"):
 			quote.text = response.get("error", "Путь недоступен")
 			retry.show()
+			# A refused route (not a lost connection) cannot be marched.
+			if not response.get("transportFailure", false):
+				send.disabled = true
 			return
 		quote.text = "Прибытие через %d с%s" % [ceili((float(response.get("travelMs", 0)) + 1400.0) / 1000.0),
 			" · через переправу" if response.get("usesFerry", false) else ""]
@@ -2277,17 +2316,28 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			route_map.set_path(response.path)
 		order.requestId = Crypto.new().generate_random_bytes(16).hex_encode()
 		submit.order = order
+		send.set_meta("route_ready", true)
 		send.disabled = submit.sending)
 	send.pressed.connect(func():
-		if submit.order.is_empty() or submit.sending:
+		if submit.sending or preview.units.is_empty():
 			return
+		if submit.order.is_empty():
+			# Route preview still on its way: send the same order without waiting for it.
+			timer.stop()
+			var direct := {"kind":"deploy" if city else "worldMarch", "encounterId":id, "units":preview.units.duplicate(),
+				"requestId": Crypto.new().generate_random_bytes(16).hex_encode()}
+			if not city:
+				direct.worldKind = kind
+			submit.order = direct
 		submit.sending = true
 		send.disabled = true
+		send.text = "Отправляем…"
 		var order: Dictionary = submit.order
 		var result := await command(order, Callable() if city else show_world_directory)
 		if not result and generation == modal_generation:
 			submit.sending = false
-			send.disabled = submit.order.is_empty())
+			send.text = "Марш" if city else "Отправить отряд"
+			send.disabled = preview.units.is_empty())
 	if city:
 		set_party.call(true)
 	else:
@@ -2451,6 +2501,10 @@ func show_performance() -> void:
 		Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0]
 	report += "\nПоследний переход: %s · время работы: %d мин" % [last_scene_label, Time.get_ticks_msec() / 60000]
+	var fx: BattleFx = stage.battle_fx if is_instance_valid(stage) else null
+	report += "\nБой: эффекты %s · событий %d" % [
+		("%d с назад" % ((Time.get_ticks_msec() - fx.last_battle_msec) / 1000)) if fx != null and fx.last_battle_msec >= 0 else "ещё не показывались",
+		fx.last_battle_events if fx != null else 0]
 	report += "\nСвязь: последний запрос %s · запросов %d, из них по открытому соединению %d · новых соединений %d" % [
 		("%.0f мс" % last_command_ms) if last_command_ms >= 0.0 else "—", api.requests_total, api.requests_reused, api.connections_opened]
 	report += "\n" + diagnostics.summary()
@@ -2721,7 +2775,7 @@ func accept(response: Dictionary) -> void:
 	state = response
 	player_id = state.playerId
 	battle_results.observe(player_id, state.get("reports", []))
-	server_offset = float(state.serverTime)-Time.get_unix_time_from_system()*1000
+	note_server_time(float(state.serverTime))
 	refresh_hud()
 	if is_instance_valid(stage):
 		stage.present(state)
@@ -2775,7 +2829,13 @@ func request(path: String, payload: Variant = null, idempotency_key := "") -> Di
 		return {"error":"Сначала войди в аккаунт."}
 	var response := await send_request(path if loopback else "native/game/" + path, payload, true, 12.0, idempotency_key)
 	if not loopback and response.get("httpStatus", 0) == 401:
-		reset_session()
+		# One refused command must not sign the player out: only forget the saved
+		# login when the session itself is rejected by the state endpoint too.
+		var check := await send_request("native/game/state", null, false, 6.0)
+		if check.get("httpStatus", 0) == 401:
+			reset_session()
+		elif check.has("city"):
+			accept(check)
 	return response
 
 func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0, idempotency_key := "") -> Dictionary:
@@ -2854,6 +2914,7 @@ func poll_account_state() -> void:
 		accept(response)
 
 func _process(delta: float) -> void:
+	advance_server_clock(delta)
 	drain_retired_scenes()
 	memory_peak_mb = maxf(memory_peak_mb, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0)
 	diagnostics.heartbeat(map_name, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
@@ -3586,7 +3647,7 @@ func smoke_city_march_preview() -> bool:
 	var send := modal_footer.find_child("MarchSend", true, false) as Button
 	var quote := modal_body.find_child("MarchQuote", true, false) as Label
 	var quantity := modal_body.find_children("*", "SpinBox", true, false)[0] as SpinBox
-	if quantity.value <= 0 or not send.disabled or modal_title.text != "Создать войско":
+	if quantity.value <= 0 or send.get_meta("route_ready", false) or modal_title.text != "Создать войско":
 		return false
 	var clear_button := modal_footer.get_children().filter(func(child): return child is Button and child.text == "Очистить")[0] as Button
 	clear_button.pressed.emit()
@@ -3595,17 +3656,17 @@ func smoke_city_march_preview() -> bool:
 	quantity.value = 1
 	var deadline := Time.get_ticks_msec() + 8000
 	var retry := modal_body.find_children("*", "Button", true, false).filter(func(child): return child.text == "Повторить расчёт")[0] as Button
-	while send.disabled and not retry.visible and Time.get_ticks_msec() < deadline:
+	while not send.get_meta("route_ready", false) and not retry.visible and Time.get_ticks_msec() < deadline:
 		await get_tree().process_frame
 	if OS.get_environment("DRENOVAR_TEST_CITY_PREVIEW_TIMEOUT") == "1":
-		if not retry.visible or quantity.value != 1 or not send.disabled:
+		if not retry.visible or quantity.value != 1 or send.get_meta("route_ready", false):
 			return false
 		retry.pressed.emit()
 		deadline = Time.get_ticks_msec() + 8000
-		while send.disabled and Time.get_ticks_msec() < deadline:
+		while not send.get_meta("route_ready", false) and Time.get_ticks_msec() < deadline:
 			await get_tree().process_frame
 		print("DRENOVAR native smoke: recovered from city march preview timeout.")
-	var confirmed := not send.disabled and is_instance_valid(stage.route_preview) and quote.text.begins_with("Прибытие")
+	var confirmed: bool = send.get_meta("route_ready", false) and not send.disabled and is_instance_valid(stage.route_preview) and quote.text.begins_with("Прибытие")
 	if not confirmed:
 		printerr("The city march did not calculate the route inline: ", quote.text)
 	close_modal()

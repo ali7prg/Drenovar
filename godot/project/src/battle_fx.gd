@@ -17,6 +17,9 @@ const BAR := preload("res://src/fx_bar.gdshader")
 const POOL := {"slash": 14, "spark": 10, "number": 10, "ring": 3, "bar": 3, "plate": 3}
 
 var pools := {}
+# For the device report: when a battle was last drawn and with how many events.
+var last_battle_msec := -1
+var last_battle_events := 0
 var used := {}
 
 func _ready() -> void:

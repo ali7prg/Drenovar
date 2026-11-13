@@ -11,14 +11,34 @@ static func valid(token: String) -> bool:
 			return false
 	return true
 
-static func key() -> PackedByteArray:
+const KEY_PATH := "user://drenovar-session.key"
+
+# v1 derived the key from OS.get_unique_id() (identifierForVendor on iOS), which iOS
+# may change for a re-signed sideloaded app; the saved login then became unreadable.
+# v2 uses a random per-install secret kept next to the session (both live in the
+# app's private container). v1 files are still read once and re-saved as v2.
+static func legacy_key() -> PackedByteArray:
 	var device := OS.get_unique_id()
 	if device.is_empty():
 		return PackedByteArray()
 	return ("DRENOVAR-iOS-session-v1:" + device).sha256_buffer()
 
-static func read_session() -> String:
-	var encryption_key := key()
+static func key(create := false) -> PackedByteArray:
+	if FileAccess.file_exists(KEY_PATH):
+		var stored := FileAccess.get_file_as_bytes(KEY_PATH)
+		if stored.size() == 32:
+			return ("DRENOVAR-iOS-session-v2:" + stored.hex_encode()).sha256_buffer()
+	if not create:
+		return PackedByteArray()
+	var secret := Crypto.new().generate_random_bytes(32)
+	var file := FileAccess.open(KEY_PATH, FileAccess.WRITE)
+	if file == null:
+		return PackedByteArray()
+	file.store_buffer(secret)
+	file.close()
+	return ("DRENOVAR-iOS-session-v2:" + secret.hex_encode()).sha256_buffer()
+
+static func read_with(encryption_key: PackedByteArray) -> String:
 	if encryption_key.is_empty() or not FileAccess.file_exists(SESSION_PATH):
 		return ""
 	var file := FileAccess.open_encrypted(SESSION_PATH, FileAccess.READ, encryption_key)
@@ -27,10 +47,18 @@ static func read_session() -> String:
 	var token := file.get_as_text()
 	return token if valid(token) else ""
 
+static func read_session() -> String:
+	var token := read_with(key())
+	if token.is_empty():
+		token = read_with(legacy_key())
+		if not token.is_empty():
+			save_session(token)
+	return token
+
 static func save_session(token: String) -> Error:
 	if not valid(token):
 		return ERR_INVALID_DATA
-	var encryption_key := key()
+	var encryption_key := key(true)
 	if encryption_key.is_empty():
 		return ERR_UNAVAILABLE
 	var temporary := SESSION_PATH + ".tmp"
@@ -45,6 +73,6 @@ static func save_session(token: String) -> Error:
 	return result
 
 static func forget() -> void:
-	for path in [SESSION_PATH, SESSION_PATH + ".tmp"]:
+	for path in [SESSION_PATH, SESSION_PATH + ".tmp", KEY_PATH]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)

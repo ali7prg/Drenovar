@@ -51,6 +51,7 @@ func open(id: String, title: String, at: Vector3, view: Camera3D, actions: Array
 	for action in actions:
 		var control := Button.new()
 		control.flat = true
+		control.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 		control.custom_minimum_size = Vector2(BUTTON, BUTTON + 20)
 		control.size = control.custom_minimum_size
 		control.tooltip_text = action[0]

@@ -20,7 +20,9 @@ let simulatedTime=null;
 let timeoutCityPreview=process.env.DRENOVAR_TEST_CITY_PREVIEW_TIMEOUT==='1';
 const battleFixture=process.env.DRENOVAR_TEST_BATTLE_FIXTURE==='1';
 // Route QA: Tenerys I stands next to a later building ("Нет безопасного пути к цели" in v92).
-const blockedCreatureFixture=process.env.DRENOVAR_TEST_BLOCKED_CREATURE==='1';
+// '1': clock frozen with the creature in the blocked cell; 'moving': the clock runs and
+// the creature walks its patrol, in and out of the building's clearance.
+const blockedCreatureFixture=['1','moving'].includes(process.env.DRENOVAR_TEST_BLOCKED_CREATURE)?process.env.DRENOVAR_TEST_BLOCKED_CREATURE:'';
 // Proposed speedup grants (server patch speedups-v2); never on outside this isolated realm.
 const speedupGrantsV2=process.env.DRENOVAR_TEST_SPEEDUP_GRANTS==='1';
 // Simulated network delay of the hosted server (ms, each way split evenly), for timer QA.
@@ -85,10 +87,11 @@ const server=createServer(async (incoming,out)=>{
    player.city.buildings.push({id:'building-v1-33',type:'ECO-03',plotId:'v1-33',level:1});
    player.city.military.owned={...player.city.military.owned,'ENG-09':20};
    snapshot.repository.players[0]=[id,{...entry,state:JSON.stringify(player)}];
-   simulatedTime=simulatedTime??Date.now();
+   if(blockedCreatureFixture==='1')simulatedTime=simulatedTime??Date.now();
+   const fixtureNow=simulatedTime??Date.now();
    for(const pair of snapshot.repository.encounters){
     const encounter=JSON.parse(pair[1].state);
-    if(encounter.owner===id&&encounter.level===1){encounter.spawnedAt=simulatedTime-12000;encounter.position={x:-40,z:-40};pair[1]={...pair[1],state:JSON.stringify(encounter)};}
+    if(encounter.owner===id&&encounter.level===1){encounter.spawnedAt=fixtureNow-12000;encounter.position={x:-40,z:-40};pair[1]={...pair[1],state:JSON.stringify(encounter)};}
    }
    sql.prepare('UPDATE game_realm37 SET data=?, revision=revision+1 WHERE id=?').run(JSON.stringify(snapshot),'native-loopback-only');
   }

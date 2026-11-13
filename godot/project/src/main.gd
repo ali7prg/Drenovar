@@ -3243,7 +3243,21 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	timer.wait_time = 0.22 if city else 0.18
 	roster.add_child(timer)
 	var preview := {"revision": 0, "units": {}}
-	var retry := button(roster, "Повторить расчёт", func(): timer.start())
+	# A creature beside a building is out of reach only while its patrol keeps it in
+	# the building's clearance (server v92 refuses that route). Ask again while it walks
+	# its 20 s round; a refused order leaves as soon as a route is found.
+	var blocked := {"until": 0, "send": false, "orders": 0}
+	# Lives in the window: closing it ends the waiting.
+	var blocked_timer := Timer.new()
+	blocked_timer.one_shot = true
+	blocked_timer.wait_time = 1.2
+	roster.add_child(blocked_timer)
+	blocked_timer.timeout.connect(func():
+		if generation == modal_generation and not submit.sending and not preview.units.is_empty():
+			timer.start())
+	var retry := button(roster, "Повторить расчёт", func():
+		blocked.until = 0
+		timer.start())
 	retry.hide()
 	var update := func():
 		var units := {}
@@ -3272,6 +3286,11 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		preview.revision += 1
 		preview.units = units
 		submit.order = {}
+		blocked.until = 0
+		blocked.orders = 0
+		if blocked.send and not submit.sending:
+			send.text = "Марш"
+		blocked.send = false
 		retry.hide()
 		# The party can be sent at once; the route preview only draws the path and the
 		# arrival time, the server computes the real route for the order anyway.
@@ -3380,6 +3399,18 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			show_account()
 			return
 		if not response.has("path"):
+			if city and response.get("error", "") == BLOCKED_ROUTE and not submit.sending:
+				var now := Time.get_ticks_msec()
+				if blocked.until == 0:
+					blocked.until = now + BLOCKED_ROUTE_WAIT_MS
+				if now < blocked.until:
+					quote.text = "Путь к цели перекрыт постройкой. Ждём, пока зверь отойдёт…"
+					send.disabled = true
+					blocked_timer.start()
+					return
+				if blocked.send:
+					blocked.send = false
+					send.text = "Марш"
 			quote.text = response.get("error", "Путь недоступен")
 			retry.show()
 			# A refused route (not a lost connection) cannot be marched.
@@ -3394,7 +3425,13 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		order.requestId = Crypto.new().generate_random_bytes(16).hex_encode()
 		submit.order = order
 		send.set_meta("route_ready", true)
-		send.disabled = submit.sending)
+		send.disabled = submit.sending
+		blocked.until = 0
+		if blocked.send and not submit.sending:
+			# The order refused for a blocked route leaves now that a route is open.
+			blocked.send = false
+			send.text = "Марш"
+			send.pressed.emit())
 	send.pressed.connect(func():
 		if submit.sending or preview.units.is_empty():
 			return
@@ -3417,13 +3454,29 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			send.disabled = preview.units.is_empty()
 			# Sent before its route preview (stopped on press): the quote would keep
 			# saying «Прокладываем путь…». Show the server's reason and offer a retry.
-			if not send.get_meta("route_ready", false) and not preview.units.is_empty():
+			if city and last_command_error == BLOCKED_ROUTE and not preview.units.is_empty() and blocked.orders < 3:
+				# Keep the order: ask for the route again and send it once the way is open.
+				blocked.orders += 1
+				blocked.send = true
+				blocked.until = 0
+				submit.order = {}
+				send.set_meta("route_ready", false)
+				send.text = "Ждём путь…"
+				send.disabled = true
+				modal_status.text = "Путь перекрыт постройкой. Отряд выйдет, как только зверь отойдёт."
+				retry.hide()
+				timer.start()
+			elif not send.get_meta("route_ready", false) and not preview.units.is_empty():
 				quote.text = last_command_error
 				retry.show())
 	if city:
 		set_party.call(true)
 	else:
 		update.call()
+
+const BLOCKED_ROUTE := "Нет безопасного пути к цели"
+# One patrol round of a city creature (server: 4 s rest + 16 s walk) and a margin.
+const BLOCKED_ROUTE_WAIT_MS := 22000
 
 func fill_party(selected: Dictionary, all_available: bool) -> void:
 	var remaining := 200 if all_available else 0

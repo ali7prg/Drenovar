@@ -1,7 +1,7 @@
 extends SceneTree
 
 # A loopback TCP server records the Idempotency-Key of each command. It drops
-# the first two connections without answering (lost response), then answers a
+# the first connections without answering (lost response), then answers a
 # validation error. Retries of the same order must carry the same key; after a
 # real server answer the next attempt must use a fresh key.
 
@@ -56,8 +56,8 @@ func serve(count: int) -> void:
 		await serve_one()
 
 func attempt(game: Node, order: Dictionary) -> Dictionary:
-	# A lost response is retried once inside command() with the same key.
-	var requests := 2 if mode == "drop" else 1
+	# A lost response is retried twice inside command() with the same key.
+	var requests := 3 if mode == "drop" else 1
 	var expected := served + requests
 	serve(requests)
 	var outcome: bool = await game.command(order, func(): pass)
@@ -85,11 +85,11 @@ func run() -> void:
 	await attempt(game, order)
 	var other := {"kind": "trade", "resource": "stone", "amount": 100}
 	await attempt(game, other)
-	check(keys.size() == 7, "Server saw %d requests" % keys.size())
-	if keys.size() == 7:
-		check(keys.slice(0, 5).all(func(k): return k == keys[0]), "Retries after lost responses changed the key")
-		check(keys[5] != keys[4], "Key reused after the server answered")
-		check(keys[6] != keys[5], "Different order reused a key")
+	check(keys.size() == 9, "Server saw %d requests" % keys.size())
+	if keys.size() == 9:
+		check(keys.slice(0, 7).all(func(k): return k == keys[0]), "Retries after lost responses changed the key")
+		check(keys[7] != keys[6], "Key reused after the server answered")
+		check(keys[8] != keys[7], "Different order reused a key")
 	check(not game.busy and not game.command_in_progress, "Client stuck after failures")
 	check(game.retry_keys.is_empty(), "Retry keys leaked after answers")
 	server.stop()

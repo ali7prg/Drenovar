@@ -12,6 +12,7 @@ const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
 const HudAction = preload("res://src/hud_action.gd")
 const SessionDiagnostics = preload("res://src/session_diagnostics.gd")
+const BuildingPlates = preload("res://src/building_plates.gd")
 const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
 const RECRUIT_ORDER := ["ENG-09", "ENG-08", "ENG-01", "ENG-02", "ENG-07", "ENG-10", "ENG-03", "ENG-04", "ENG-05", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
@@ -120,6 +121,7 @@ const OFFLINE_NOTICE := "Нет сети · повторяем"
 var offline_notice_shown := false
 # Small pill under the resource bar; replaces the large centre message for link state.
 var connection_badge: Label
+var building_plates: Control
 # The city shown at launch may come from the encrypted local copy (the last state
 # the server sent); the server copy replaces it as soon as it arrives.
 var showing_cached_state := false
@@ -221,6 +223,10 @@ func build_ui() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(root)
 	root.add_child(make_vignette())
+	building_plates = BuildingPlates.new()
+	building_plates.name = "BuildingPlates"
+	building_plates.game = self
+	root.add_child(building_plates)
 	root.add_child(action_ring)
 	var outer := VBoxContainer.new()
 	outer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -1004,6 +1010,9 @@ func nearest_placement_plot(at: Vector3) -> Dictionary:
 		if gap < best_gap:
 			best_gap = gap
 			best = entry
+	if best.is_empty():
+		return {}
+	best = best.duplicate()
 	best["gap"] = best_gap
 	return best
 
@@ -1928,6 +1937,13 @@ func open_modal(title: String, layout := "center", eyebrow := "") -> void:
 		modal.modulate.a = 0.82
 		dialog_tween = create_tween()
 		dialog_tween.tween_property(modal, "modulate:a", 1.0, 0.13)
+		if layout == "sheet":
+			# Bottom sheet slides up from the screen edge.
+			var rest := modal.offset_top
+			modal.offset_top = rest + 60
+			modal.offset_bottom += 60
+			dialog_tween.parallel().tween_property(modal, "offset_top", rest, 0.16).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+			dialog_tween.parallel().tween_property(modal, "offset_bottom", modal.offset_bottom - 60, 0.16).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 func panel_action(parent: Container, caption: String, action: Callable, enabled := true, danger := false) -> Button:
 	var control := button(parent, caption, action, enabled)
@@ -3409,9 +3425,12 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	if key.is_empty():
 		key = retry_keys.get(signature, Crypto.new().generate_random_bytes(16).hex_encode())
 	var response: Dictionary = await request("command", order, key)
-	if response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500:
-		# One quiet retry with the same idempotency key (never applied twice).
-		await get_tree().create_timer(0.4).timeout
+	# Quiet retries with the same idempotency key (the server never applies an
+	# order twice): a dropped mobile connection is usually back within a second.
+	for pause in [0.4, 1.2]:
+		if not (response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500):
+			break
+		await get_tree().create_timer(pause).timeout
 		response = await request("command", order, key)
 	if response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500:
 		retry_keys[signature] = key

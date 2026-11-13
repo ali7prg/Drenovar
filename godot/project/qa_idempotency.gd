@@ -51,9 +51,15 @@ func serve_one() -> void:
 	peer.disconnect_from_host()
 	served += 1
 
+func serve(count: int) -> void:
+	for index in count:
+		await serve_one()
+
 func attempt(game: Node, order: Dictionary) -> Dictionary:
-	var expected := served + 1
-	serve_one()
+	# A lost response is retried once inside command() with the same key.
+	var requests := 2 if mode == "drop" else 1
+	var expected := served + requests
+	serve(requests)
 	var outcome: bool = await game.command(order, func(): pass)
 	while served < expected:
 		await process_frame
@@ -79,12 +85,11 @@ func run() -> void:
 	await attempt(game, order)
 	var other := {"kind": "trade", "resource": "stone", "amount": 100}
 	await attempt(game, other)
-	check(keys.size() == 5, "Server saw %d requests" % keys.size())
-	if keys.size() == 5:
-		check(keys[0] == keys[1], "Retry after lost response changed the key")
-		check(keys[1] == keys[2], "Second retry changed the key")
-		check(keys[3] != keys[2], "Key reused after the server answered")
-		check(keys[4] != keys[3], "Different order reused a key")
+	check(keys.size() == 7, "Server saw %d requests" % keys.size())
+	if keys.size() == 7:
+		check(keys.slice(0, 5).all(func(k): return k == keys[0]), "Retries after lost responses changed the key")
+		check(keys[5] != keys[4], "Key reused after the server answered")
+		check(keys[6] != keys[5], "Different order reused a key")
 	check(not game.busy and not game.command_in_progress, "Client stuck after failures")
 	check(game.retry_keys.is_empty(), "Retry keys leaked after answers")
 	server.stop()

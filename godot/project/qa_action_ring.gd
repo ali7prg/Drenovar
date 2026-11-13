@@ -65,7 +65,7 @@ func run() -> void:
 	check(not ring.is_open(), "Opening a window left the ring open")
 	game.close_modal()
 	game.pick_marker(stage.camera.unproject_position(marker.position))
-	await create_timer(0.2).timeout
+	await create_timer(0.35).timeout
 	var touch := InputEventScreenTouch.new()
 	touch.pressed = true
 	touch.position = Vector2(80, 560)

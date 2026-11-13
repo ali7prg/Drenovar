@@ -16,6 +16,13 @@ const MAX_HIDDEN_ARMIES := 3
 const WATER_SHADER = preload("res://src/water.gdshader")
 const BIOME_SHADER = preload("res://src/biome.gdshader")
 const MEADOW_SHADER = preload("res://src/meadow.gdshader")
+const FOREST_SHADER = preload("res://src/forest.gdshader")
+var forest_materials := {}
+var focus_radius := 0.0
+var focus_centre := Vector3.ZERO
+var fight_positions := {}
+var announced_fights := {}
+signal fight_started(army_id: String, position: Vector3)
 const Formations = preload("res://src/formations.gd")
 const GaitTable = preload("res://src/gait_table.gd")
 const FIELD_UNIT_SCALE := 1.15
@@ -402,7 +409,10 @@ func batch_model(parent: Node3D, path: String, transforms: Array, appearance: Ma
 	var instance := scene_resource(path).instantiate() as Node3D
 	prepare_model_materials(instance)
 	parent.add_child(instance)
+	var forest := path.contains("/forest60/")
 	for part in instance.find_children("*", "MeshInstance3D", true, false):
+		if forest:
+			appearance = forest_material(part)
 		var offset: Transform3D = instance.global_transform.affine_inverse() * part.global_transform
 		batch_mesh(parent, part.mesh, offset, cells, transforms.size(),
 			appearance if appearance != null else part.material_override, layer)
@@ -845,6 +855,31 @@ func add_warrior(parent: Node3D, model_path: String, transform_value: Transform3
 	instance.transform = transform_value
 	parent.add_child(instance)
 	return instance
+
+# Forest meshes share one shader material per atlas (forest.gdshader): same look as
+# the imported material, plus the clearing around a visible fight.
+func forest_material(part: MeshInstance3D) -> Material:
+	var source := part.get_active_material(0) as BaseMaterial3D
+	var texture: Texture2D = source.albedo_texture if source != null else null
+	var key := texture.resource_path if texture != null else ""
+	if forest_materials.has(key):
+		return forest_materials[key]
+	var material := ShaderMaterial.new()
+	material.shader = FOREST_SHADER
+	material.set_shader_parameter("albedo_tex", texture)
+	material.set_shader_parameter("cutoff", source.alpha_scissor_threshold if source != null else 0.42)
+	forest_materials[key] = material
+	return material
+
+
+# `battle_focus` is declared in project.godot [shader_globals].
+# Opens (radius > 0) or closes the forest clearing around the fight on screen.
+func update_battle_focus(centre: Vector3, wanted: float, delta: float) -> void:
+	if wanted > 0.0:
+		focus_centre = centre
+	focus_radius = move_toward(focus_radius, wanted, delta * 30.0)
+	RenderingServer.global_shader_parameter_set(&"battle_focus",
+		Vector4(focus_centre.x, focus_centre.y, focus_centre.z, focus_radius))
 
 func prepare_model_materials(instance: Node3D) -> void:
 	# Reuse original maps and geometry; preserve normal/ORM values and alpha settings.
@@ -1296,6 +1331,25 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			play_animation(actor, clip, "Idle", clip_phase)
 			actor.set_meta("clip", clip)
 	retain_hidden_actors(creatures, known, retained, MAX_HIDDEN_CREATURES)
+	# Clear the canopy around the fight closest to the camera centre.
+	var focus_wanted := 0.0
+	var focus_at := focus_centre
+	var best := INF
+	for fight_id in fight_positions:
+		var at: Vector3 = fight_positions[fight_id]
+		var gap := Vector2(at.x - camera_target.x, at.z - camera_target.z).length_squared()
+		if gap < best:
+			best = gap
+			focus_at = at
+			focus_wanted = 19.0 if map_name == "city" else 12.0
+	fight_positions.clear()
+	if focus_wanted > 0.0:
+		# Trees between the camera and the fight hide it most: shift the clearing toward the camera.
+		var toward := camera.global_position - focus_at
+		toward.y = 0.0
+		if toward.length_squared() > 0.01:
+			focus_at += toward.normalized() * focus_wanted * 0.35
+	update_battle_focus(focus_at, focus_wanted, delta)
 	battle_fx.finish()
 	for cue in effects.get_children():
 		if not cues.has(String(cue.name)):
@@ -1330,6 +1384,10 @@ func battle_timeline(army: Dictionary, encounter: Dictionary, events: Array) -> 
 
 func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dictionary, elapsed: float, events: Array) -> float:
 	var timeline := battle_timeline(army, encounter, events)
+	fight_positions[id] = p
+	if not announced_fights.has(army.id) and elapsed < 2500.0:
+		announced_fights[army.id] = true
+		fight_started.emit(str(army.id), p)
 	var route: Dictionary = army_routes.get(army.id, {})
 	var centre: Vector3 = route.get("position", p)
 	var members: Dictionary = route.get("member_at", {})
@@ -1350,7 +1408,7 @@ func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dict
 			var fan := Vector3(side * (1.6 + fposmod(at * 0.0031, 1.0) * 1.2), 0.0, 0.0).rotated(Vector3.UP, camera_yaw)
 			battle_fx.number(p + fan, "-%d" % roundi(float(hit[1])), age / 900.0, Color("#ffe7a8"), float(hit[1]) >= timeline.max * 0.08)
 		if age <= 320.0:
-			battle_fx.spark(p, age / 320.0, Color("#ffb054"), 1.5, fposmod(at * 0.013, 1.0))
+			battle_fx.spark(p, age / 320.0, Color("#ffb054"), 2.4, fposmod(at * 0.013, 1.0))
 	for strike in timeline.strikes:
 		var age := elapsed - float(strike[0])
 		if age < -380.0 or age > 420.0:
@@ -1358,7 +1416,7 @@ func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dict
 		var target: Vector3 = members.get(strike[1], centre)
 		battle_fx.slash(p, target, (age + 380.0) / 800.0, Color("#ff5a3c"), 4.4 if strike[2] == "antler_charge" else 3.8)
 		if age >= 0.0:
-			battle_fx.spark(target, age / 420.0, Color("#ff6a4a"), 1.3, fposmod(float(strike[0]) * 0.007, 1.0))
+			battle_fx.spark(target, age / 420.0, Color("#ff6a4a"), 2.0, fposmod(float(strike[0]) * 0.007, 1.0))
 	var spec: Dictionary = encounter.get("spec", {})
 	var title := "%s · %s" % [spec.get("name", encounter.get("species", "")), ["I", "II", "III"][clampi(int(encounter.get("level", 1)), 1, 3) - 1]]
 	var height := 2.6 + 0.5 * clampi(int(encounter.get("level", 1)), 1, 3)

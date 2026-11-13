@@ -28,5 +28,5 @@ void fragment() {
 	float core = 1.0 - smoothstep(0.0, width * 0.45, abs(r - 0.78));
 	float fade = 1.0 - smoothstep(0.65, 1.0, progress);
 	float alpha = band * trail * fade;
-	ALBEDO = mix(tint.rgb, vec3(1.0), core * 0.7) * alpha * 2.6;
+	ALBEDO = mix(tint.rgb, vec3(1.0), core * 0.7) * alpha * 3.6;
 }

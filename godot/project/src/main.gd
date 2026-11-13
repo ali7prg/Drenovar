@@ -232,6 +232,7 @@ func build_ui() -> void:
 	navigation.alignment = BoxContainer.ALIGNMENT_END
 	nav_buttons.city = hud_action(navigation, "Город", "city", show_scene.bind("city"))
 	nav_buttons.world = hud_action(navigation, "Карта", "world", show_scene.bind("world"))
+	nav_buttons.build = hud_action(navigation, "Строить", "build", show_build_menu)
 	hud_action(navigation, "Армия", "army", show_armies)
 	hud_action(navigation, "Отчёты", "reports", show_reports)
 	hud_action(navigation, "Меню", "menu", show_controls_menu)
@@ -525,7 +526,7 @@ func construction_order() -> Dictionary:
 
 func show_city_actions() -> void:
 	open_modal("Поселение")
-	button(modal_body, "Строить", show_construction)
+	button(modal_body, "Строить", show_build_menu)
 	button(modal_body, "Ресурсы и доход", show_economy)
 	button(modal_body, "Найти существо", show_city_hunt)
 	if not stage.parade_slots.is_empty():
@@ -647,6 +648,200 @@ func format_balance(value: int) -> String:
 		digits = digits.left(-3)
 	groups.insert(0, digits)
 	return " ".join(groups)
+
+const BUILD_GROUPS := [["", "Все"], ["resources", "Ресурсы"], ["civil", "Хозяйство"], ["military", "Войска"], ["support", "Оборона и помощь"]]
+var build_group := ""
+var build_cards := {}
+
+func building_card(type: String) -> Texture2D:
+	var key: String = data.types.get(type, "")
+	if key.is_empty():
+		return null
+	if not build_cards.has(key):
+		var path := "res://assets/ui/buildings/%s.png" % key
+		build_cards[key] = load(path) if ResourceLoader.exists(path) else null
+	return build_cards[key]
+
+# Status of a core building type for the construction window.
+func build_option(definition: Dictionary) -> Dictionary:
+	var exists: bool = state.city.buildings.any(func(item): return building_definition(item.type).get("base", item.type) == definition.base)
+	var required := int(data.unlockLevels.get(definition.id, 3))
+	var terms: Dictionary = data.buildingTerms.get(definition.id, {"cost": {}, "seconds": 0})
+	var state_name := "built" if exists else ("locked" if required > hall_level() else ("short" if not can_afford(terms.cost) else "ready"))
+	return {"state": state_name, "required": required, "terms": terms}
+
+# Construction window: every building of the settlement as a card with its
+# portrait, cost and status; picking one shows details and builds on a free plot.
+func show_build_menu(group := build_group) -> void:
+	build_group = group
+	open_modal("Строительство", "wide", "ДРЕНОВАР · ЗОДЧИЙ")
+	modal_tools.show()
+	for entry in BUILD_GROUPS:
+		var tab := button(modal_tools, entry[1], show_build_menu.bind(entry[0]))
+		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if entry[0] == group:
+			WebPanels.primary(tab)
+	var order := construction_order()
+	if not order.is_empty():
+		var busy_row := HBoxContainer.new()
+		modal_body.add_child(busy_row)
+		var timer := Label.new()
+		timer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		busy_row.add_child(timer)
+		bind_countdown(timer, "Строитель занят", order.endsAt)
+		if order.kind != "clear":
+			button(busy_row, "Ускорить", show_speedups.bind("construction", order, ""))
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	modal_body.add_child(grid)
+	var shown := 0
+	for definition in data.buildings:
+		if definition.variant != "core" or definition.base == "ECO-05" or not data.types.has(definition.id):
+			continue
+		if not group.is_empty() and definition.group != group:
+			continue
+		var option := build_option(definition)
+		var card := Button.new()
+		card.custom_minimum_size = Vector2(0, 196)
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.accessibility_name = definition.ru
+		card.tooltip_text = definition.ru
+		var ready: bool = option.state == "ready"
+		var top := Color("#3a4a3b") if ready else (Color("#3a3f45") if option.state != "locked" else Color("#2a2c2f"))
+		var edge := WebPanels.GOLD if ready else Color("#6f6250")
+		card.add_theme_stylebox_override("normal", WebPanels.gradient_style(top, Color("#15191c"), edge, 6))
+		card.add_theme_stylebox_override("hover", WebPanels.gradient_style(top.lightened(0.08), Color("#15191c"), WebPanels.GOLD, 6))
+		card.add_theme_stylebox_override("pressed", WebPanels.gradient_style(top.darkened(0.15), Color("#15191c"), WebPanels.GOLD, 6))
+		card.pressed.connect(show_build_details.bind(definition))
+		grid.add_child(card)
+		var box := VBoxContainer.new()
+		box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		box.offset_left = 6
+		box.offset_right = -6
+		box.offset_top = 4
+		box.offset_bottom = -6
+		box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		box.add_theme_constant_override("separation", 2)
+		card.add_child(box)
+		var art := TextureRect.new()
+		art.texture = building_card(definition.id)
+		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		art.custom_minimum_size.y = 110
+		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if option.state == "locked":
+			art.modulate = Color(0.55, 0.55, 0.55)
+		box.add_child(art)
+		var title := Label.new()
+		title.text = definition.ru
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		title.add_theme_font_size_override("font_size", 16)
+		title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		box.add_child(title)
+		var status := Label.new()
+		status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		status.add_theme_font_size_override("font_size", 14)
+		status.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		match option.state:
+			"built":
+				status.text = "Построено"
+				status.add_theme_color_override("font_color", Color("#9fd29a"))
+			"locked":
+				status.text = "Нужна ратуша %d" % option.required
+				status.add_theme_color_override("font_color", Color("#c9b9a0"))
+			_:
+				status.text = "%s · %d сек." % [cost_label(option.terms.cost), int(option.terms.seconds)]
+				status.add_theme_color_override("font_color", WebPanels.GOLD if ready else Color("#ff8f7a"))
+				status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(status)
+		shown += 1
+	if shown == 0:
+		row(modal_body, "В этом разделе пока нечего строить.")
+	modal_footer.show()
+	var note := Label.new()
+	note.text = "Здание ставится на ближайший свободный участок. Участки расчищаются вырубкой леса."
+	note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.add_theme_font_size_override("font_size", 14)
+	modal_footer.add_child(note)
+	button(modal_footer, "Участки на карте", show_construction)
+
+func free_build_plot() -> Dictionary:
+	var kingdom: Variant = state.city.get("kingdom")
+	var best := {}
+	var best_gap := INF
+	var hall := stage.target
+	for marker in stage.empty_plots:
+		var plot: Dictionary = marker.item
+		var cleared: bool = not kingdom is Dictionary or plot.id in kingdom.get("clearedPlots", []) or plot.id.begins_with("site-")
+		var gap: float = hall.distance_squared_to(marker.position) + (0.0 if cleared else 1.0e9)
+		if gap < best_gap:
+			best_gap = gap
+			best = {"plot": plot, "position": marker.position, "cleared": cleared}
+	return best
+
+func show_build_details(definition: Dictionary) -> void:
+	var option := build_option(definition)
+	open_modal(definition.ru, "wide", "ДРЕНОВАР · ЗОДЧИЙ")
+	var layout := HBoxContainer.new()
+	layout.add_theme_constant_override("separation", 14)
+	modal_body.add_child(layout)
+	var art_panel := panel(8)
+	art_panel.add_theme_stylebox_override("panel", WebPanels.gradient_style(Color("#3d4c45"), Color("#141b19"), WebPanels.BRASS, 8))
+	art_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	layout.add_child(art_panel)
+	var art := TextureRect.new()
+	art.texture = building_card(definition.id)
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	art.custom_minimum_size = Vector2(0, 240)
+	art_panel.add_child(art)
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	layout.add_child(info)
+	row(info, "Назначение · %s" % definition.get("function", ""))
+	var metrics: Dictionary = data.buildingTerms.get(definition.id, {})
+	if metrics.get("production") != null:
+		row(info, "Производство · +%d/мин" % int(metrics.rates[0]))
+	var cost_row := HBoxContainer.new()
+	cost_row.add_theme_constant_override("separation", 14)
+	info.add_child(cost_row)
+	fill_cost_row(cost_row, option.terms.cost)
+	row(info, "Время · %d сек." % int(option.terms.seconds))
+	var builder_ready: bool = construction_order().is_empty() and state.city.progress.get("job") == null
+	var site := free_build_plot()
+	var reason := ""
+	match option.state:
+		"built": reason = "Уже построено. Улучшение — в самом здании."
+		"locked": reason = "Нужна ратуша %d-го уровня." % option.required
+		"short": reason = "Недостаточно ресурсов."
+	if reason.is_empty() and not builder_ready:
+		reason = "Строитель занят текущим заказом."
+	if reason.is_empty() and site.is_empty():
+		reason = "Нет свободного участка: сруби дерево и подготовь место."
+	if reason.is_empty() and not site.cleared:
+		reason = "Ближайший участок в лесу: сначала его нужно расчистить."
+	if not reason.is_empty():
+		var why := Label.new()
+		why.text = reason
+		why.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		why.add_theme_color_override("font_color", WebPanels.GOLD)
+		info.add_child(why)
+	var can_build: bool = reason.is_empty() and not player_id.is_empty()
+	var build := panel_action(info, "Построить", func():
+		stage.target = site.position
+		command({"kind":"kingdom","action":"build","plotId":site.plot.id,"type":definition.id}), can_build)
+	build.name = "BuildConfirm"
+	if not site.is_empty() and not site.cleared and option.state == "ready" and builder_ready:
+		button(info, "Расчистить участок · 15 еды", command.bind({"kind":"kingdom","action":"clear","plotId":site.plot.id}),
+			not player_id.is_empty() and balance("food") >= 15)
+	if not site.is_empty():
+		button(info, "Показать участок", focus_build_plot.bind(site.plot, site.position))
+	modal_footer.show()
+	button(modal_footer, "← Все здания", show_build_menu.bind(build_group))
 
 func show_construction() -> void:
 	open_modal("Строительство", "right")
@@ -994,9 +1189,12 @@ func show_scene(scene_name: String) -> void:
 	if is_instance_valid(stage):
 		stage.set_active(false)
 	stage = next
+	if not stage.fight_started.is_connected(focus_fight):
+		stage.fight_started.connect(focus_fight)
 	map_name = scene_name
 	nav_buttons.city.visible = map_name != "city"
 	nav_buttons.world.visible = map_name != "world"
+	nav_buttons.build.visible = map_name == "city"
 	minimap.visible = map_name == "world"
 	frame_index = 0
 	frame_count = 0
@@ -1052,6 +1250,20 @@ func prewarm_scene(scene_name: String) -> void:
 	prewarm_name = ""
 	prewarm_stage = null
 	prewarm_finished.emit()
+
+# When one of the player's armies starts fighting near the view, glide the camera
+# onto the fight (only if the player is not touching or reading a window).
+func focus_fight(army_id: String, position: Vector3) -> void:
+	var own: bool = (state.get("armies", []) + state.get("world", {}).get("armies", [])).any(
+		func(army): return army.id == army_id and str(army.get("owner", player_id)) == player_id)
+	if not own or modal.visible or not fingers.is_empty() or dragging:
+		return
+	var near: bool = followed_army == army_id or Vector2(position.x - stage.target.x, position.z - stage.target.z).length() < 70.0
+	if not near:
+		return
+	followed_army = ""
+	stage.target = position
+	stage.zoom = minf(stage.zoom, 34.0 if map_name == "city" else 48.0)
 
 func release_inactive_scene() -> void:
 	prewarm_paused_until = Time.get_ticks_msec() + 10 * 60 * 1000
@@ -2796,14 +3008,22 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 		return false
 	command_in_progress = true
 	var generation := modal_generation
-	if modal.visible:
-		modal_status.text = "Отправляем запрос…"
-		modal_status.show()
+	# Only mention the server when it is actually slow: most commands answer well
+	# under half a second and a flashing status line reads as a problem.
+	var slow_notice := get_tree().create_timer(0.45)
+	slow_notice.timeout.connect(func():
+		if command_in_progress and generation == modal_generation and modal.visible:
+			modal_status.text = "Отправляем…"
+			modal_status.show())
 	var signature := JSON.stringify(order)
 	var key: String = str(order.get("requestId", ""))
 	if key.is_empty():
 		key = retry_keys.get(signature, Crypto.new().generate_random_bytes(16).hex_encode())
 	var response: Dictionary = await request("command", order, key)
+	if response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500:
+		# One quiet retry with the same idempotency key (never applied twice).
+		await get_tree().create_timer(0.4).timeout
+		response = await request("command", order, key)
 	if response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500:
 		retry_keys[signature] = key
 	else:

@@ -46,7 +46,7 @@ func make(kind: String, quad: QuadMesh) -> Node3D:
 		label.fixed_size = true
 		label.font_size = 64 if kind == "number" else 40
 		label.outline_size = 16 if kind == "number" else 12
-		label.pixel_size = 0.00042 if kind == "number" else 0.00036
+		label.pixel_size = 0.0007 if kind == "number" else 0.00055
 		label.outline_modulate = Color(0.06, 0.04, 0.03, 0.9)
 		node = label
 	else:
@@ -127,7 +127,7 @@ func number(at: Vector3, text: String, progress: float, tint: Color, big := fals
 	label.position = at + Vector3.UP * (1.2 + progress * 1.3)
 	label.modulate = Color(tint, 1.0 - smoothstep(0.6, 1.0, progress))
 	label.outline_modulate.a = label.modulate.a * 0.9
-	label.pixel_size = (0.00056 if big else 0.00042) * pop
+	label.pixel_size = (0.0009 if big else 0.0007) * pop
 
 func ring(centre: Vector3, radius: float, tint: Color) -> void:
 	var node := take("ring") as MeshInstance3D
@@ -148,7 +148,7 @@ func health(at: Vector3, title: String, ratio: float, recent: float, tint: Color
 	material.set_shader_parameter("ratio", clampf(ratio, 0.0, 1.0))
 	material.set_shader_parameter("recent", clampf(maxf(ratio, recent), 0.0, 1.0))
 	material.set_shader_parameter("fill", tint)
-	material.set_shader_parameter("size", Vector2(2.6, 0.28) * scale)
+	material.set_shader_parameter("size", Vector2(4.2, 0.45) * scale)
 	plate.text = title
-	plate.position = at + Vector3.UP * 0.55 * scale
+	plate.position = at + Vector3.UP * 0.8 * scale
 	plate.modulate = Color("#ffd9b0")

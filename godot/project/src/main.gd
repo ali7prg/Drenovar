@@ -3247,6 +3247,10 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	# the building's clearance (server v92 refuses that route). Ask again while it walks
 	# its 20 s round; a refused order leaves as soon as a route is found.
 	var blocked := {"until": 0, "send": false, "orders": 0}
+	# The client's forecast of when the creature is in the open (route_wait_ms). Off
+	# once the server refuses a route the forecast called open: then the window falls
+	# back to asking the server.
+	var forecast := {"on": city}
 	# Lives in the window: closing it ends the waiting.
 	var blocked_timer := Timer.new()
 	blocked_timer.one_shot = true
@@ -3393,6 +3397,17 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		elif not march_wall().is_empty():
 			order.wall = march_wall()
 		retry.hide()
+		if forecast.on and not submit.sending:
+			# The creature is beside a building right now: the server would refuse the
+			# route (and take long to do so). Ask again when the way is open.
+			var wait := route_wait_ms(id)
+			if wait > 300.0:
+				if not route_map.visible:
+					show_local_march(id, route_map)
+				quote.text = "Зверь у постройки, путь откроется через %d с. Нажмите «Марш» — отряд выйдет сам, как только путь будет свободен." % ceili(wait / 1000.0)
+				send.disabled = false
+				blocked_timer.start(minf(wait / 1000.0, 1.0))
+				return
 		if not (city and route_map.visible):
 			quote.text = "Прокладываем путь…" if city else "Рассчитываем маршрут…"
 		var response := await send_request("march-preview" if loopback else "native/game/march-preview", order, false, 8.0)
@@ -3405,13 +3420,14 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			return
 		if not response.has("path"):
 			if city and response.get("error", "") == BLOCKED_ROUTE and not submit.sending:
+				forecast.on = false
 				var now := Time.get_ticks_msec()
 				if blocked.until == 0:
 					blocked.until = now + BLOCKED_ROUTE_WAIT_MS
 				if now < blocked.until:
 					quote.text = "Путь к цели перекрыт постройкой. Ждём, пока зверь отойдёт…"
-					send.disabled = true
-					blocked_timer.start()
+					send.disabled = blocked.send
+					blocked_timer.start(1.2)
 					return
 				if blocked.send:
 					blocked.send = false
@@ -3446,7 +3462,41 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			blocked.send = false
 			send.text = "Марш"
 			send.pressed.emit())
+	# A city order waits for the moment the creature is in the open (route_wait_ms).
+	var departure := {"at": 0.0}
+	var countdown := Timer.new()
+	countdown.wait_time = 0.2
+	roster.add_child(countdown)
+	# Lambdas capture locals by value: the order sender lives in a shared dictionary.
+	var orders := {"dispatch": Callable()}
+	countdown.timeout.connect(func():
+		if generation != modal_generation:
+			countdown.stop()
+			return
+		var left := float(departure.at) - server_time()
+		if left > 0.0:
+			send.text = "Выход через %d с" % ceili(left / 1000.0)
+			return
+		countdown.stop()
+		submit.sending = false
+		orders.dispatch.call())
 	send.pressed.connect(func():
+		if submit.sending or preview.units.is_empty():
+			return
+		if forecast.on:
+			var wait := route_wait_ms(id)
+			if wait > 150.0:
+				submit.sending = true
+				send.disabled = true
+				timer.stop()
+				blocked_timer.stop()
+				departure.at = server_time() + wait
+				send.text = "Выход через %d с" % ceili(wait / 1000.0)
+				quote.text = "Зверь проходит у постройки. Отряд выйдет из главных ворот, как только путь будет свободен."
+				countdown.start()
+				return
+		orders.dispatch.call())
+	orders.dispatch = func():
 		if submit.sending or preview.units.is_empty():
 			return
 		if submit.order.is_empty():
@@ -3470,6 +3520,8 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			send.disabled = preview.units.is_empty()
 			# Sent before its route preview (stopped on press): the quote would keep
 			# saying «Прокладываем путь…». Show the server's reason and offer a retry.
+			if city and last_command_error == BLOCKED_ROUTE:
+				forecast.on = false
 			if city and last_command_error == BLOCKED_ROUTE and not preview.units.is_empty() and blocked.orders < 3:
 				# Keep the order: ask for the route again and send it once the way is open.
 				blocked.orders += 1
@@ -3484,7 +3536,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 				timer.start()
 			elif not send.get_meta("route_ready", false) and not preview.units.is_empty():
 				quote.text = last_command_error
-				retry.show())
+				retry.show()
 	if city:
 		set_party.call(true)
 	else:
@@ -3506,6 +3558,116 @@ func show_local_march(id: String, route_map) -> bool:
 	stage.show_route(path)
 	route_map.set_path(stage.march_path(path))
 	return true
+
+# ---------------------------------------------------------------- route window
+# Server v92 builds a city march route only to a creature cell (snapped to its 2 m
+# grid) that is not within 5 m (on both axes) of a building. A creature whose patrol
+# passes a building is out of reach only for part of its 20 s round. The client
+# knows the patrol, the round and the buildings, so it sends the order for the
+# moment the server will see the creature in the open.
+const PATROL_ROUND_MS := 20000.0
+const ROUTE_CLEARANCE := 5.0
+
+func plot_point(plot_id: String) -> Variant:
+	for plot in data.plots:
+		if plot.id == plot_id:
+			return Vector2(float(plot.x), float(plot.z))
+	if plot_id.begins_with("site-") and data.treePlots.has(plot_id.trim_prefix("site-")):
+		var tree: Dictionary = data.treePlots[plot_id.trim_prefix("site-")]
+		return Vector2(float(tree.x), float(tree.z))
+	if plot_id.begins_with("plot-"):
+		var n := int(plot_id.trim_prefix("plot-"))
+		if n < 36:
+			return Vector2((n % 6 - 2.5) * 12.0 * 0.82, (floor(n / 6.0) - 2.5) * 12.0 * 0.82)
+	return null
+
+func building_points() -> Array:
+	var points: Array = []
+	for building in state.get("city", {}).get("buildings", []):
+		var at: Variant = plot_point(str(building.get("plotId", "")))
+		if at != null:
+			points.append(at)
+	return points
+
+# Where the server places the creature at a server time (core.mjs refresh).
+func creature_point(encounter: Dictionary, server_ms: float) -> Vector2:
+	var patrol: Array = encounter.get("patrol", [])
+	if patrol.size() < 2:
+		var p: Dictionary = encounter.get("position", {})
+		return Vector2(float(p.get("x", 0)), float(p.get("z", 0)))
+	var cycle := fposmod(maxf(0.0, server_ms - float(encounter.get("spawnedAt", 0))), PATROL_ROUND_MS)
+	var fraction := clampf((cycle - 4000.0) / 16000.0, 0.0, 1.0)
+	var total := 0.0
+	for i in range(1, patrol.size()):
+		total += Vector2(float(patrol[i].x) - float(patrol[i - 1].x), float(patrol[i].z) - float(patrol[i - 1].z)).length()
+	var left := total * fraction
+	for i in range(1, patrol.size()):
+		var a := Vector2(float(patrol[i - 1].x), float(patrol[i - 1].z))
+		var b := Vector2(float(patrol[i].x), float(patrol[i].z))
+		var d := a.distance_to(b)
+		if left <= d:
+			return a.lerp(b, left / d if d > 0.0 else 0.0)
+		left -= d
+	return Vector2(float(patrol[-1].x), float(patrol[-1].z))
+
+func cell_open(p: Vector2, buildings: Array) -> bool:
+	# JavaScript Math.round: halves go up.
+	var cell := Vector2(floor(p.x / 2.0 + 0.5) * 2.0, floor(p.y / 2.0 + 0.5) * 2.0)
+	for b in buildings:
+		if absf(cell.x - b.x) < ROUTE_CLEARANCE and absf(cell.y - b.y) < ROUTE_CLEARANCE:
+			return false
+	return true
+
+# Milliseconds to wait before sending an order for this creature so that the server,
+# when it receives it, finds the creature in the open: 0 when it may go now, -1 when
+# the whole patrol is beside a building (then the server alone decides).
+func route_wait_ms(encounter_id: String) -> float:
+	var encounter: Dictionary = {}
+	for row in state.get("encounters", []):
+		if row.id == encounter_id:
+			encounter = row
+	if encounter.is_empty() or encounter.get("status", "alive") != "alive":
+		return 0.0
+	var buildings := building_points()
+	var latency := expected_latency_ms()
+	# The order reaches the server about one round trip after the local estimate of
+	# its clock; it must find the creature in the open over a margin around that.
+	var margin := 500.0 + latency * 0.5
+	var arrival := server_time() + latency
+	var any_open := false
+	var t := 0.0
+	while t <= PATROL_ROUND_MS:
+		var ok := true
+		var probe := -margin
+		while probe <= margin:
+			if not cell_open(creature_point(encounter, arrival + t + probe), buildings):
+				ok = false
+				break
+			probe += 100.0
+		if ok:
+			return t
+		if cell_open(creature_point(encounter, arrival + t), buildings):
+			any_open = true
+		t += 100.0
+	if any_open:
+		# Open only for moments shorter than the margin: aim at the middle of the
+		# longest open stretch.
+		var best := -1.0
+		var best_len := 0.0
+		var run_start := -1.0
+		t = 0.0
+		while t <= PATROL_ROUND_MS * 2.0:
+			if cell_open(creature_point(encounter, arrival + t), buildings):
+				if run_start < 0.0:
+					run_start = t
+				if t - run_start > best_len:
+					best_len = t - run_start
+					best = run_start + best_len * 0.5
+			else:
+				run_start = -1.0
+			t += 100.0
+		return maxf(0.0, best)
+	return -1.0
 
 const BLOCKED_ROUTE := "Нет безопасного пути к цели"
 # One patrol round of a city creature (server: 4 s rest + 16 s walk) and a margin.

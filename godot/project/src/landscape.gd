@@ -1631,7 +1631,96 @@ func route_for(path: Array, through_gate := false) -> Dictionary:
 			total = distances[-1] + Vector2(next.x - previous.x, next.z - previous.z).length()
 		points.append(next)
 		distances.append(total)
-	return {"source":path,"points":points,"distances":distances}
+	# Ferry legs of a city route (the server's ferry: one straight step across the
+	# river along a line of constant z, longer than a grid step, over water).
+	var ferry := PackedByteArray()
+	ferry.resize(points.size())
+	ferry.fill(0)
+	if map_name == "city":
+		for i in range(1, points.size()):
+			var a := points[i - 1]
+			var b := points[i]
+			var mid := (a + b) * 0.5
+			if absf(a.z - b.z) < 0.01 and absf(a.x - b.x) > 2.01 and sample_city(mid.x, mid.z) < -0.25:
+				ferry[i] = 1
+	return {"source":path,"points":points,"distances":distances,"ferry":ferry}
+
+# Whether the army at this fraction of its route is on a ferry leg, and how far
+# along that leg (0..1); the raft also covers a short stretch at both banks for
+# boarding and landing.
+func ferry_at(route: Dictionary, fraction: float) -> float:
+	var ferry: PackedByteArray = route.get("ferry", PackedByteArray())
+	if not ferry.has(1):
+		return -1.0
+	var distances: PackedFloat32Array = route.distances
+	var travelled := clampf(fraction, 0, 1) * distances[-1]
+	for i in range(1, ferry.size()):
+		if ferry[i] == 1 and travelled >= distances[i - 1] - 1.5 and travelled <= distances[i] + 1.5:
+			return clampf((travelled - distances[i - 1]) / maxf(0.01, distances[i] - distances[i - 1]), 0.0, 1.0)
+	return -1.0
+
+# A log raft with rails and a pair of sweeps: the ferry that carries a city army
+# over the river (no boat model ships with the game, so it is built from primitives).
+const FERRY_DECK := -0.9
+func make_raft(width: float, length: float) -> Node3D:
+	var raft := Node3D.new()
+	raft.name = "Ferry"
+	var wood := StandardMaterial3D.new()
+	wood.albedo_color = Color("#7a5634")
+	wood.roughness = 0.85
+	var dark := StandardMaterial3D.new()
+	dark.albedo_color = Color("#4f3620")
+	dark.roughness = 0.9
+	var logs := maxi(4, ceili(width / 0.62))
+	var log_mesh := CylinderMesh.new()
+	log_mesh.top_radius = 0.31
+	log_mesh.bottom_radius = 0.31
+	log_mesh.height = length
+	log_mesh.radial_segments = 8
+	log_mesh.rings = 1
+	log_mesh.material = wood
+	for k in logs:
+		var log := MeshInstance3D.new()
+		log.mesh = log_mesh
+		log.rotation = Vector3(PI * 0.5, 0.0, 0.0)
+		log.position = Vector3(-width * 0.5 + (k + 0.5) * width / logs, -0.32, 0.0)
+		raft.add_child(log)
+	var beam_mesh := BoxMesh.new()
+	beam_mesh.size = Vector3(width + 0.5, 0.16, 0.34)
+	beam_mesh.material = dark
+	for z in [-length * 0.42, 0.0, length * 0.42]:
+		var beam := MeshInstance3D.new()
+		beam.mesh = beam_mesh
+		beam.position = Vector3(0.0, 0.02, z)
+		raft.add_child(beam)
+	var rail_mesh := BoxMesh.new()
+	rail_mesh.size = Vector3(0.12, 0.12, length * 0.92)
+	rail_mesh.material = dark
+	var post_mesh := BoxMesh.new()
+	post_mesh.size = Vector3(0.14, 0.75, 0.14)
+	post_mesh.material = dark
+	for side in [-1.0, 1.0]:
+		var rail := MeshInstance3D.new()
+		rail.mesh = rail_mesh
+		rail.position = Vector3(side * (width * 0.5 + 0.1), 0.72, 0.0)
+		raft.add_child(rail)
+		for z in [-length * 0.44, -length * 0.15, length * 0.15, length * 0.44]:
+			var post := MeshInstance3D.new()
+			post.mesh = post_mesh
+			post.position = Vector3(side * (width * 0.5 + 0.1), 0.37, z)
+			raft.add_child(post)
+		# Long sweeps over the side, dipping into the water.
+		var sweep := MeshInstance3D.new()
+		var sweep_mesh := BoxMesh.new()
+		sweep_mesh.size = Vector3(3.2, 0.1, 0.22)
+		sweep_mesh.material = wood
+		sweep.mesh = sweep_mesh
+		sweep.position = Vector3(side * (width * 0.5 + 1.3), 0.1, -length * 0.3)
+		sweep.rotation = Vector3(0.0, 0.0, side * -0.32)
+		raft.add_child(sweep)
+	for child in raft.get_children():
+		(child as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	return raft
 
 func along_route(route: Dictionary, fraction: float) -> Vector3:
 	var points: PackedVector3Array = route.points
@@ -1702,6 +1791,9 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		var duration := maxf(1.0, end - start)
 		var fraction := (server_ms - start) / duration if travelling else 1.0
 		var p := ground_point(along_route(cache, fraction))
+		var crossing := ferry_at(cache, fraction) if travelling else -1.0
+		if crossing >= 0.0:
+			p.y = maxf(p.y, FERRY_DECK)
 		var before := along_route(cache, fraction - 250.0 / duration)
 		var after := along_route(cache, fraction + 250.0 / duration)
 		var direction := after - before
@@ -1724,7 +1816,8 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		cache.position = p
 		if fighting:
 			cache.member_at = {}
-		var walking: bool = travelling and fraction >= 0.0 and fraction < 1.0
+		var walking: bool = travelling and fraction >= 0.0 and fraction < 1.0 and crossing < 0.0
+		sync_raft(actor, cache, crossing, heading, server_ms)
 		# Authoritative ground speed of the formation (world units per second).
 		var ground_speed := float(cache.distances[-1]) / (duration / 1000.0) if walking and cache.distances.size() > 1 else 0.0
 		var elapsed := server_ms - float(army.get("battleAt", end))
@@ -1751,7 +1844,11 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			if spread > 0.0:
 				var angle: float = TAU * i / cache.slots.size()
 				offset = offset.lerp(Vector3(cos(angle), 0.0, sin(angle)) * (7.5 if slot.mounted else 4.8), spread)
+			if crossing >= 0.0:
+				offset *= RAFT_PACK
 			var place := ground_point(p + offset)
+			if crossing >= 0.0:
+				place.y = p.y
 			if fighting:
 				cache.member_at[key] = place
 			var facing := atan2(-offset.x, -offset.z) if fighting else heading
@@ -1805,12 +1902,38 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			elif shot != null:
 				shot.hide()
 		for unit in actor.get_children():
-			if not retained.has(String(unit.name)):
+			if not retained.has(String(unit.name)) and unit.name != &"Ferry":
 				unit.free()
 	retain_hidden_actors(actors, known, alive, MAX_HIDDEN_ARMIES)
 	for id in army_routes.keys():
 		if not rows.any(func(army): return army.id == id and army.status != "returned"):
 			army_routes.erase(id)
+
+# On the raft the formation stands closer together.
+const RAFT_PACK := 0.62
+
+func sync_raft(actor: Node3D, cache: Dictionary, crossing: float, heading: float, server_ms: float) -> void:
+	var raft := actor.get_node_or_null("Ferry") as Node3D
+	if crossing < 0.0:
+		if raft != null:
+			raft.hide()
+		return
+	if raft == null:
+		var width := 3.0
+		var length := 4.0
+		for slot in cache.slots:
+			width = maxf(width, absf(float(slot.side)) * RAFT_PACK * 2.0 + 2.2)
+			length = maxf(length, absf(float(slot.rear)) * RAFT_PACK + 3.4)
+		raft = make_raft(minf(width, 14.0), minf(length, 18.0))
+		actor.add_child(raft)
+	raft.show()
+	# Centred on the formation (its slots run backwards from the leader), bobbing gently.
+	var depth := 0.0
+	for slot in cache.slots:
+		depth = maxf(depth, float(slot.rear))
+	var back := Vector3(-sin(heading), 0.0, -cos(heading)) * depth * RAFT_PACK * 0.5
+	raft.position = back + Vector3.UP * (0.05 * sin(server_ms * 0.0021))
+	raft.rotation = Vector3(0.02 * sin(server_ms * 0.0017), heading, 0.015 * sin(server_ms * 0.0013))
 
 static func gait_for(unit_id: String, ground_speed: float) -> Array:
 	# Picks walk or run and the playback tempo at which planted feet travel at the

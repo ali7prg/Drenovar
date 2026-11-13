@@ -696,8 +696,10 @@ func gate_path(points: PackedVector3Array) -> PackedVector3Array:
 	if a_in == b_in or crosses_only_at_gates(points):
 		return points
 	if a_in:
-		return leave_through_gate(a, b)
-	var back := leave_through_gate(b, a)
+		return leave_through_gate(points)
+	var back := points.duplicate()
+	back.reverse()
+	back = leave_through_gate(back)
 	back.reverse()
 	return back
 
@@ -715,38 +717,55 @@ func crosses_only_at_gates(points: PackedVector3Array) -> bool:
 			was = now
 	return true
 
-# Whether the straight way between two points outside the yard stays outside.
+# Whether the straight way between two points outside the yard stays outside and
+# on dry ground.
 func clear_outside(p: Vector2, q: Vector2) -> bool:
 	var steps := maxi(1, ceili(p.distance_to(q)))
 	for s in range(steps + 1):
 		var at := p.lerp(q, float(s) / steps)
-		if inside(at.x, at.y, -2.0):
+		if inside(at.x, at.y, -2.0) or wet(at):
 			return false
 	return true
 
-func leave_through_gate(from: Vector3, to: Vector3) -> PackedVector3Array:
+func wet(p: Vector2) -> bool:
+	return height_at.is_valid() and float(height_at.call(p.x, p.y)) < -0.25
+
+# From the yard out of the main gate, around the wall a few metres outside it, until
+# the server's route is in plain sight; from there the server's route is followed
+# as it is (with its ferry over the river).
+func leave_through_gate(points: PackedVector3Array) -> PackedVector3Array:
+	var from := points[0]
+	# The server route's first point after its last step inside the yard.
+	var rejoin := points.size() - 1
+	for k in range(points.size() - 1, -1, -1):
+		if inside(points[k].x, points[k].z, -2.0):
+			break
+		rejoin = k
 	var g := gates[0]
 	var gate := wall_point(g)
 	var out := direction(g)
 	var result := PackedVector3Array([from])
 	for p in [gate - out * 6.0, gate, gate + out * 8.0]:
 		result.append(Vector3(p.x, 0.0, p.y))
-	# Walk around the wall, a few metres outside it, the shorter way to the target,
-	# until the target is in plain sight.
-	var target := Vector2(to.x, to.z)
+	var target := Vector2(points[rejoin].x, points[rejoin].z)
 	var last := gate + out * 8.0
-	var goal := int(round(sample_index(to.x, to.z))) % SAMPLES
-	var span := posmod(goal - g, SAMPLES)
-	var step := 1 if span <= SAMPLES / 2 else -1
+	var goal := int(round(sample_index(target.x, target.y))) % SAMPLES
+	var step := 1 if posmod(goal - g, SAMPLES) <= SAMPLES / 2 else -1
 	var i := g
 	var guard := 0
 	while not clear_outside(last, target) and guard < SAMPLES:
 		i = posmod(i + step * 3, SAMPLES)
 		guard += 3
+		# A few metres outside the wall, closer to it where the river runs by.
 		var ring := center + direction(i) * (radii[i] + 7.0)
+		for pull in [5.0, 3.5, 2.5]:
+			if not wet(ring):
+				break
+			ring = center + direction(i) * (radii[i] + pull)
 		result.append(Vector3(ring.x, 0.0, ring.y))
 		last = ring
 		if posmod((goal - i) * step, SAMPLES) < 3:
 			break
-	result.append(to)
+	for k in range(rejoin, points.size()):
+		result.append(points[k])
 	return result

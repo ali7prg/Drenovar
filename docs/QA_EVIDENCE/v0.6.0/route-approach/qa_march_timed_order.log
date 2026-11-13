@@ -1,0 +1,14 @@
+ok  Connected to the local server
+ok  Waited for the creature to rest at its corner
+ok  March window opened from «Атаковать»
+ok  Route ready while the creature rests
+ok  Creature walked into the clearance
+ok  Party can be sent at once
+ok  Order held until the way is open (Выход через 8 с)
+ok  Quote explains the wait: Зверь проходит у постройки. Отряд выйдет из главных ворот, как только путь будет свободен.
+ok  The army left by itself when the creature walked out
+ok  The server never refused the timed order
+ok  Army marches to Tenerys I
+ok  Soldiers left the garrison
+ok  March window closed after the order
+QA_MARCH_REFUSAL mode=wait checks=13 failures=0

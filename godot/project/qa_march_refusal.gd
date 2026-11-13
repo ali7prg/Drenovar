@@ -9,7 +9,9 @@ extends SceneTree
 #              away, the client waits one patrol round, then shows the refusal; the
 #              button and «Повторить расчёт» work again; no army, no soldiers lost.
 #   wait     - server v92, DRENOVAR_TEST_BLOCKED_CREATURE=moving: the order pressed
-#              while the creature is blocked leaves by itself once it walks out.
+#              while the creature is blocked is held by the client («Выход через N с»)
+#              and sent for the moment the creature is in the open: the server
+#              accepts it at once, never refusing it.
 #   approach - server with route-approach-v2, DRENOVAR_TEST_BLOCKED_CREATURE=1: the
 #              march leaves at once, through the gates of the city wall.
 
@@ -109,7 +111,7 @@ func run() -> void:
 		# has walked into the building's clearance (patrol phase > 5 s; it leaves at ~13 s).
 		var offset: float = float(game.state.serverTime) - Time.get_unix_time_from_system() * 1000.0
 		var phase := func() -> float: return fmod(Time.get_unix_time_from_system() * 1000.0 + offset - float(target.spawnedAt), 20000.0)
-		check(await wait_until(func(): return phase.call() > 2500.0 and phase.call() < 3000.0, 25.0), "Waited for the creature to rest at its corner")
+		check(await wait_until(func(): return phase.call() > 1200.0 and phase.call() < 2600.0, 25.0), "Waited for the creature to rest at its corner")
 		check(await open_march(target), "March window opened from «Атаковать»")
 		check(await wait_until(func(): return send_button().get_meta("route_ready", false), 3.0), "Route ready while the creature rests")
 		check(await wait_until(func(): return phase.call() > 6500.0, 5.0), "Creature walked into the clearance")
@@ -128,10 +130,34 @@ func run() -> void:
 		check(await open_march(target), "March window opened from «Атаковать»")
 	var send := send_button()
 	check(not send.disabled, "Party can be sent at once")
+	if mode == "wait":
+		var refusals := [0]
+		var watch := func():
+			if game.last_command_error == BLOCKED:
+				refusals[0] += 1
+		send.pressed.emit()
+		await process_frame
+		check(send.text.begins_with("Выход через") and send.disabled, "Order held until the way is open (%s)" % send.text)
+		check(quote().text.contains("главных ворот"), "Quote explains the wait: " + quote().text)
+		var left: bool = await wait_until(func():
+			watch.call()
+			return armies().size() == armies_before + 1, 30.0)
+		check(left, "The army left by itself when the creature walked out")
+		check(refusals[0] == 0 and game.last_command_error != BLOCKED, "The server never refused the timed order")
+		if left:
+			check(armies().back().get("target", "") == target.id, "Army marches to Tenerys I")
+			check(int(game.state.healthy.get("ENG-09", 0)) < soldiers_before, "Soldiers left the garrison")
+			check(not game.modal.visible or game.modal_title.text != "Создать войско", "March window closed after the order")
+		print("QA_MARCH_REFUSAL mode=", mode, " checks=", checks, " failures=", failures)
+		quit(0 if failures == 0 else 1)
+		return
 	send.pressed.emit()
 	await process_frame
-	check(send.text == "Отправляем…" and send.disabled, "Button shows «Отправляем…» while the order is on its way")
-	check(await wait_until(func(): return not game.command_in_progress, 20.0), "The order got an answer")
+	# With the clock frozen the client still expects the creature to walk on (the real
+	# server's clock never stops), so it may hold the order for the predicted opening.
+	check((send.text == "Отправляем…" or send.text.begins_with("Выход через") or send.text == "Ждём путь…") and send.disabled, "Button shows «Отправляем…», «Выход через N с» or, refused at once, «Ждём путь…» (%s)" % send.text)
+	# A held order («Выход через N с») is sent at its moment; then it gets an answer.
+	check(await wait_until(func(): return not send.text.begins_with("Выход через") and not send.text == "Отправляем…" and not game.command_in_progress, 30.0), "The order got an answer")
 	await process_frame
 	match mode:
 		"refused":

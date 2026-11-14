@@ -1,0 +1,8 @@
+ok  Game scene loaded
+ok  Client talks to a hosted server (not the loopback realm): http://127.0.0.1:8418
+ok  Device login without a browser step
+ok  Device session saved encrypted on the device
+ok  Settlement founded and loaded
+ok  Settlement has barracks
+ok  Training order accepted by the server (queued)
+QA_STAGING_DEVICE phase=first checks=7 failures=0 player=a96232cc-10f1-441e-aaff-57c7b78cb7da

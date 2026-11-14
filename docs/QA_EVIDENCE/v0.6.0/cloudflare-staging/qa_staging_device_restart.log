@@ -1,0 +1,11 @@
+ok  Game scene loaded
+ok  Client talks to a hosted server (not the loopback realm): http://127.0.0.1:8418
+ok  Saved device session read at start
+ok  Same settlement restored from the server
+ok  Tenerys I alive in the settlement
+ok  Soldiers available: 21
+ok  Creature panel offers «Атаковать»
+ok  March window opened
+ok  Army marched to Tenerys I (button: window closed)
+ok  No «Нет безопасного пути к цели»
+QA_STAGING_DEVICE phase=restart checks=10 failures=0 player=a96232cc-10f1-441e-aaff-57c7b78cb7da

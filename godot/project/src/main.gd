@@ -206,7 +206,7 @@ func _ready() -> void:
 		await sync_account(true)
 	else:
 		session = SessionStore.read_session()
-		if not session.is_empty() and not SessionStore.is_device(session) and endpoint != OLD_SERVER:
+		if not session.is_empty() and not SessionStore.is_device(session) and LIVE_SERVER != OLD_SERVER_URL and endpoint == LIVE_SERVER:
 			# A login of the old server: never sent to this one; offered for the transfer.
 			pending_old_session = session
 			session = ""

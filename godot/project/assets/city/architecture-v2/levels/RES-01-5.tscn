@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-01-5-base.res" id="1_hptfl"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-01-5.res" id="2_ximms"]
+
+[node name="RES_01_5" type="Node3D" unique_id=852765553]
+metadata/series = "B06_LumberCamp"
+metadata/lanes = [{
+"from": Vector3(5.4, 0, 6.9),
+"height": 1.9,
+"kind": "cart",
+"to": Vector3(5.4, 0.55, -0.4),
+"width": 1.6
+}]
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1039606557]
+mesh = ExtResource("1_hptfl")
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=921588077]
+mesh = ExtResource("2_ximms")

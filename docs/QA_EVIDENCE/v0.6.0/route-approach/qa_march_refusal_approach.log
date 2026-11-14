@@ -1,0 +1,17 @@
+ok  Connected to the local server
+ok  Fixture: Tenerys I stands next to the building on v1-33
+ok  City wall stands (town hall III): the order carries the wall
+ok  Tenerys 2 (preview): crosses the wall only through gates (1 crossings, target outside the wall)
+ok  Tenerys 2 (preview): no needless crossing of the wall
+ok  March window opened from «Атаковать»
+ok  Party can be sent at once
+ok  Button shows «Отправляем…», «Выход через N с» or, refused at once, «Ждём путь…» (Отправляем…)
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+ok  The order got an answer
+ok  Army marched to Tenerys I next to the building
+ok  March window closed after the order
+ok  Soldiers left the garrison
+ok  Tenerys I (order): crosses the wall only through gates (0 crossings, target inside the wall)
+ok  Tenerys I (order): no needless crossing of the wall
+ok  Route ends at the creature
+QA_MARCH_REFUSAL mode=approach checks=15 failures=0

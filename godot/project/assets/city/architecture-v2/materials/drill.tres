@@ -1,0 +1,19 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/city/premium/surfaces07/drill20-albedo.webp" id="1_ew1w8"]
+[ext_resource type="Texture2D" path="res://assets/city/premium/surfaces07/drill20-normal.png" id="2_fttyd"]
+[ext_resource type="Texture2D" path="res://assets/city/premium/surfaces07/drill20-roughness.png" id="3_5q6mf"]
+
+[resource]
+vertex_color_use_as_albedo = true
+albedo_color = Color(1.12, 1.02, 0.86, 1)
+albedo_texture = ExtResource("1_ew1w8")
+roughness_texture = ExtResource("3_5q6mf")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.5
+normal_texture = ExtResource("2_fttyd")
+uv1_scale = Vector3(0.25, 0.25, 0.25)
+uv1_triplanar = true
+uv1_triplanar_sharpness = 4.0
+texture_filter = 5

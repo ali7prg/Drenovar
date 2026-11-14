@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-01-4-base.res" id="1_w4kkk"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-01-4.res" id="2_am3kv"]
+
+[node name="MIL_01_4" type="Node3D" unique_id=141534606]
+metadata/series = "B11_InfantryBarracks"
+metadata/lanes = [{
+"from": Vector3(-3.6, 0, 4.1),
+"height": 2.0,
+"kind": "drill",
+"to": Vector3(3.2, 0, 4.1),
+"width": 2.6
+}]
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=862822064]
+mesh = ExtResource("1_w4kkk")
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1192864104]
+mesh = ExtResource("2_am3kv")

@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-02-5.res" id="1_cq4oc"]
+
+[node name="RES_02_5" type="Node3D" unique_id=1885832862]
+metadata/series = "B07_StoneQuarry"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-0.6, 0, 4.4)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=483268836]
+mesh = ExtResource("1_cq4oc")

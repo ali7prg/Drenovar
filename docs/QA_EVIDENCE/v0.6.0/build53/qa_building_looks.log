@@ -1,0 +1,12 @@
+STEP L1 ["ECO-01:ECO-01-1.tscn","ECO-02:ECO-02-1.tscn","ECO-03:market27-polished27.glb","RES-02:RES-02-1.tscn","RES-03:RES-03-1.tscn"]
+STEP L2 ["ECO-01:ECO-01-2.tscn","ECO-02:ECO-02-2.tscn","ECO-03:market27-polished27.glb","RES-02:RES-02-2.tscn","RES-03:RES-03-2.tscn"]
+STEP L3 ["ECO-01:ECO-01-3.tscn","ECO-02:ECO-02-3.tscn","ECO-03:ECO-03-3.tscn","RES-02:RES-02-3.tscn","RES-03:RES-03-3.tscn"]
+STEP L4 ["ECO-01:ECO-01-4.tscn","ECO-02:ECO-02-4.tscn","ECO-03:ECO-03-4.tscn","RES-02:RES-02-4.tscn","RES-03:RES-03-4.tscn"]
+STEP L5 ["ECO-01:ECO-01-5.tscn","ECO-02:ECO-02-5.tscn","ECO-03:ECO-03-5.tscn","RES-02:RES-02-5.tscn","RES-03:RES-03-5.tscn"]
+QA_BUILDING_LOOKS upgrade checks=180 failures=0
+RESTART building-ECO-01 L5 ECO-01-5.tscn plot=v1-1 marker=[-16.0, 6.57369709014893, -5.0] name=Склад
+RESTART building-ECO-02 L5 ECO-02-5.tscn plot=v1-2 marker=[7.0, 5.58242034912109, -4.0] name=Амбар
+RESTART building-ECO-03 L5 ECO-03-5.tscn plot=v1-5 marker=[9.0, 5.61362361907959, 11.0] name=Рынок
+RESTART building-RES-02 L5 RES-02-5.tscn plot=v1-3 marker=[-5.0, 5.44875383377075, 8.0] name=Каменоломня
+RESTART building-RES-03 L5 RES-03-5.tscn plot=v1-4 marker=[-19.0, 5.34629917144775, 10.0] name=Железная шахта
+QA_BUILDING_LOOKS restart checks=62 failures=0

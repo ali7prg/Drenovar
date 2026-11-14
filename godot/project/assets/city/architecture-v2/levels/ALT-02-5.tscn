@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-02-5-base.res" id="1_vyhsl"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-02-5.res" id="2_6d334"]
+
+[node name="ALT_02_5" type="Node3D" unique_id=540223981]
+metadata/series = "B21_Sawmill"
+metadata/lanes = [{
+"from": Vector3(5.3, 0.55, 5.1),
+"height": 1.75,
+"kind": "unit",
+"to": Vector3(5.3, 0.55, 3.7),
+"width": 1.0
+}]
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1518632998]
+mesh = ExtResource("1_vyhsl")
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1624427487]
+mesh = ExtResource("2_6d334")

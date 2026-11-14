@@ -1,0 +1,51 @@
+PASS hall I: no wall
+PASS hall II: wall is built
+PASS hall II: closed ring with sane radii
+PASS inside wall: ECO-05
+PASS inside wall: RES-01
+PASS inside wall: RES-04
+PASS inside wall: MIL-01
+PASS offered plot inside wall: v1-4
+PASS offered plot inside wall: v1-5
+PASS offered plot inside wall: v1-6
+PASS offered plot inside wall: v1-7
+PASS offered plot inside wall: v1-8
+PASS offered plot inside wall: v1-9
+PASS offered plot inside wall: v1-10
+PASS offered plot inside wall: v1-11
+PASS offered plot inside wall: v1-12
+PASS offered plot inside wall: v1-13
+PASS offered plot inside wall: v1-14
+PASS offered plot inside wall: v1-15
+PASS main gate exists
+PASS gate 18 on dry ground
+PASS no trees on the wall band
+CAPTURE walls_hall2_overview.png draw_calls=431.0
+CAPTURE walls_hall2_gate.png draw_calls=364.0
+PASS hall IV: closed ring
+PASS hall IV: yard is wider than at hall II
+PASS hall IV: at least as many plots as at hall I
+PASS hall IV inside wall: ECO-05
+PASS hall IV inside wall: RES-01
+PASS hall IV inside wall: RES-04
+PASS hall IV inside wall: MIL-01
+PASS hall IV inside wall: RES-02
+PASS hall IV inside wall: SUP-04
+PASS hall IV inside wall: RES-03
+PASS hall IV inside wall: ECO-03
+PASS wall clear of troop base corner (-14.0, -11.0)
+PASS wall clear of troop base corner (14.0, -11.0)
+PASS wall clear of troop base corner (-14.0, 11.0)
+PASS wall clear of troop base corner (14.0, 11.0)
+PASS walls-and-gate plate stands on the main gate
+PASS hall IV: side gates
+CAPTURE walls_hall4_overview.png draw_calls=578.0
+CAPTURE walls_hall4_gate.png draw_calls=408.0
+PASS hall V: closed ring
+CAPTURE walls_hall5_overview.png draw_calls=591.0
+PASS defence panel opens
+PASS defence panel shows wall, yard and watchtower
+PASS defence panel says the server does not apply the bonus yet
+CAPTURE walls_defence_panel.png draw_calls=423.0
+PASS watchtower panel shows its function and next level
+RESULT failures=0

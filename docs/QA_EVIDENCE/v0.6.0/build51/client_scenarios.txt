@@ -1,0 +1,30 @@
+PASS qa_camera_hud: QA_CAMERA_HUD checks=153 failures=0
+PASS qa_runtime: QA_RUNTIME checks=21 failures=0
+PASS qa_batch_parity: QA_BATCH_PARITY comparisons=5496 failures=0 reference_buffer_bytes=24455520 candidate_buffer_bytes=17142672
+PASS qa_optimization: QA_OPTIMIZATION comparisons=13740 failures=0 frustum_edge_cells=0
+PASS qa_warriors: QA_WARRIORS checks=143 failures=0
+PASS qa_web_panels: QA_WEB_PANELS checks=37 failures=0
+PASS qa_city_parity: QA_CITY_PARITY steps=7 vegetation_rebuilds=3 checks=231 failures=0
+PASS qa_stability: QA_STABILITY checks=6 failures=0
+PASS qa_panel_latency: QA_PANEL_LATENCY panels=26 checks=26 failures=0
+PASS qa_diagnostics: QA_DIAGNOSTICS checks=12 failures=0
+PASS qa_gait: QA_GAIT checks=156 failures=0
+PASS qa_network: QA_NETWORK checks=9 failures=0
+PASS qa_camera_fling: QA_CAMERA_FLING checks=9 failures=0
+PASS qa_idempotency: QA_IDEMPOTENCY checks=7 failures=0
+PASS qa_troops06: 
+PASS qa_api_pool: QA_API_POOL checks=32 failures=0
+PASS qa_touch_buttons: QA_TOUCH_BUTTONS checks=10 failures=0
+PASS qa_prewarm: QA_PREWARM checks=9 failures=0
+PASS qa_battle_fx: QA_BATTLE_FX checks=22 failures=0
+PASS qa_action_ring: QA_ACTION_RING checks=9 failures=0
+PASS qa_session_store: QA_SESSION_STORE checks=11 failures=0
+PASS qa_server_clock: QA_SERVER_CLOCK checks=3 failures=0
+PASS qa_build_menu: QA_BUILD_MENU checks=20 failures=0
+PASS qa_instant_start: QA_INSTANT_START checks=11 failures=0 launch_ms=747
+PASS qa_city_works: QA_CITY_WORKS checks=35 failures=0
+PASS qa_single_scene: QA_SINGLE_SCENE checks=8 failures=0
+PASS qa_hunt: QA_HUNT checks=50 failures=0
+PASS qa_world_hunt: QA_WORLD_HUNT checks=22 failures=0
+PASS qa_workers: QA_WORKERS checks=38 failures=0
+PASS qa_speedups: QA_SPEEDUPS checks=18 failures=0

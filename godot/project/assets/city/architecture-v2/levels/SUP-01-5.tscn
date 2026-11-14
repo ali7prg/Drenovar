@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-01-5-base.res" id="1_eh7bv"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-01-5.res" id="2_iudfj"]
+
+[node name="SUP_01_5" type="Node3D" unique_id=1965770941]
+metadata/series = "B16_Infirmary"
+metadata/lanes = [{
+"from": Vector3(5.1, 0, 7),
+"height": 2.1,
+"kind": "stretcher",
+"to": Vector3(5.1, 0.42, 0.6),
+"width": 1.4
+}]
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=1252953727]
+mesh = ExtResource("1_eh7bv")
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1346615147]
+mesh = ExtResource("2_iudfj")

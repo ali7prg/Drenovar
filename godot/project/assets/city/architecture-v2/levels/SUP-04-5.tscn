@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://assets/city/premium/watchtower27-polished27.glb" id="1_5gqik"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-04-5.res" id="2_y5egk"]
+
+[node name="SUP_04_5" type="Node3D" unique_id=1933716740]
+metadata/series = "B19_Watchtower"
+metadata/lanes = [{
+"from": Vector3(2.65, 4.15, 0.1),
+"height": 1.85,
+"kind": "unit",
+"to": Vector3(2.65, 4.15, -1.6),
+"width": 0.6
+}, {
+"from": Vector3(-2.65, 4.15, 2.5),
+"height": 1.85,
+"kind": "unit",
+"to": Vector3(-2.65, 4.15, -2.5),
+"width": 0.55
+}]
+
+[node name="Base" type="Node3D" parent="." unique_id=1896585454 instance=ExtResource("1_5gqik")]
+transform = Transform3D(1.2566, 0, 0, 0, 1.2566, 0, 0, 0, 1.2566, 0, 0, 0)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=2113497474]
+mesh = ExtResource("2_y5egk")

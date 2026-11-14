@@ -1,0 +1,15 @@
+ok  Game scene loaded
+ok  New server with a local old server
+ok  Server reports device login with transfer
+ok  Choice: transfer or a new settlement
+ok  Old-server login started for the transfer
+ok  Approval page is on the OLD server
+ok  Login screen explains the transfer
+ok  Player approved on the old server
+ok  Device account holds the transferred settlement
+ok  Device session saved on the phone
+ok  Soldiers moved: { "ENG-09": 110.0, "ENG-01": 90.0 }
+ok  Resources and nickname moved
+ok  Message: Поселение перенесено на новый сервер.
+ok  Town hall level moved: 2
+QA_TRANSFER checks=14 failures=0 player=0125273d-6496-4322-ac95-5acf2e8a3626

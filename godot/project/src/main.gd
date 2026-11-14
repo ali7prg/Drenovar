@@ -28,6 +28,10 @@ const TWO_SCENE_MEMORY_MB := 1300.0
 const PREWARM_IDLE_MSEC := 2500
 const PREWARM_QUIET_MSEC := 600
 const LIVE_SERVER := "https://drenovar.pink-lyric-9420.chatgpt.site"
+# The ChatGPT Sites server. On the Cloudflare server it is only used to move a
+# settlement: the player confirms the old login there, the new server reads it.
+const OLD_SERVER_URL := "https://drenovar.pink-lyric-9420.chatgpt.site"
+var OLD_SERVER := OLD_SERVER_URL
 var data: Dictionary
 var state: Dictionary
 var stage: Landscape
@@ -90,6 +94,15 @@ var login_deadline := 0
 var login_link_used := false
 var busy := false
 var api := ApiPool.new()
+# Connections to the old server during a settlement transfer.
+var old_api := ApiPool.new()
+# Login mode reported by the server (/api/auth/info): "device" on Cloudflare.
+var server_login := ""
+var server_transfer := false
+# The old-server login of the login screen moves a settlement instead of signing in.
+var login_for_transfer := false
+# A session of the old server saved by an earlier version of the app.
+var pending_old_session := ""
 var action_ring := ActionRing.new()
 var last_command_ms := -1.0
 var polling_state := false
@@ -160,6 +173,9 @@ func _ready() -> void:
 			elif override.begins_with("https://"):
 				# QA against a hosted test server (e.g. the Cloudflare staging Worker).
 				endpoint = override
+		if arg.begins_with("--old-server=http://127.0.0.1:"):
+			# QA: a local stand-in for the old server in transfer tests.
+			OLD_SERVER = arg.trim_prefix("--old-server=").trim_suffix("/")
 		if arg == "--hosted":
 			# QA: the 127.0.0.1 address is a forwarder to a hosted server
 			# (godot/tools/qa-hosted-forwarder.py), not the loopback test realm.
@@ -175,6 +191,8 @@ func _ready() -> void:
 	diagnostics.start(str(ProjectSettings.get_setting("application/config/version")), Time.get_unix_time_from_system())
 	api.name = "ApiPool"
 	add_child(api)
+	old_api.name = "OldApiPool"
+	add_child(old_api)
 	var launch := LaunchScreen.new()
 	add_child(launch)
 	# Give the branded screen a frame before parsing game data and loading meshes.
@@ -188,6 +206,10 @@ func _ready() -> void:
 		await sync_account(true)
 	else:
 		session = SessionStore.read_session()
+		if not session.is_empty() and not SessionStore.is_device(session) and endpoint != OLD_SERVER:
+			# A login of the old server: never sent to this one; offered for the transfer.
+			pending_old_session = session
+			session = ""
 		if not session.is_empty():
 			# The saved city opens at once; the server is asked in parallel with the
 			# scene load and its answer replaces the copy without any waiting screen.
@@ -3728,21 +3750,24 @@ func show_account() -> void:
 	open_modal("Твоё королевство", "profile", "ДРЕНОВАР · КОРОЛЕВСТВО")
 	if not connected():
 		if login_proof.is_empty():
-			row(modal_body, "Войди через ChatGPT, чтобы открыть свои поселения и общий мир.")
+			row(modal_body, "Войди в аккаунт, чтобы открыть свои поселения и общий мир." if server_login == "device" else "Войди через ChatGPT, чтобы открыть свои поселения и общий мир.")
 			panel_action(modal_body, "Начать вход", begin_login)
 			button(modal_body, "Проверка плавности", show_performance)
 		else:
 			var challenge := login_proof.sha256_text()
 			var code := challenge.left(8).to_upper()
 			row(modal_body, "Код подтверждения  " + code)
-			row(modal_body, "На странице DRENOVAR войди в тот же аккаунт ChatGPT, введи код и нажми «Разрешить вход».")
+			if login_for_transfer:
+				row(modal_body, "Перенос поселения: на странице старого сервера DRENOVAR войди в свой аккаунт ChatGPT, введи код и нажми «Разрешить вход». Потом нажми «Проверить вход».")
+			else:
+				row(modal_body, "На странице DRENOVAR войди в тот же аккаунт ChatGPT, введи код и нажми «Разрешить вход».")
 			button(modal_body, "Открыть страницу входа", open_login_page.bind(challenge))
 			var copy_buttons := HBoxContainer.new()
 			modal_body.add_child(copy_buttons)
 			button(copy_buttons, "Скопировать код", func(): DisplayServer.clipboard_set(code))
 			button(copy_buttons, "Скопировать ссылку", copy_login_link.bind(challenge))
 			button(modal_body, "Проверить вход", finish_login.bind(true))
-			button(modal_body, "Получить новый код", begin_login)
+			button(modal_body, "Получить новый код", restart_login)
 		return
 	if restoring_session:
 		row(modal_body, "Подключаемся к сохранённому поселению…")
@@ -3898,7 +3923,12 @@ func begin_login() -> void:
 	if not loopback:
 		var info := await send_request("auth/info", null, false, 6.0)
 		if info.get("login", "") == "device":
-			await device_login()
+			server_login = "device"
+			server_transfer = info.get("transfer", false)
+			if server_transfer:
+				show_transfer_choice()
+			else:
+				await device_login()
 			return
 	login_proof = Crypto.new().generate_random_bytes(32).hex_encode()
 	login_deadline = Time.get_ticks_msec() + 300000
@@ -3920,12 +3950,74 @@ func device_login() -> void:
 	if modal.visible and modal_title.text == "Твоё королевство":
 		await show_account()
 
+# A new confirmation code for the login in progress (sign-in or transfer).
+func restart_login() -> void:
+	if login_for_transfer:
+		await begin_transfer()
+	else:
+		await begin_login()
+
+func show_transfer_choice() -> void:
+	open_modal("Твоё королевство", "profile", "ДРЕНОВАР · НОВЫЙ СЕРВЕР")
+	row(modal_body, "DRENOVAR переехал на новый сервер. Аккаунт теперь хранится на этом телефоне.")
+	row(modal_body, "Поселение со старого сервера переносится целиком: постройки, войска, ресурсы, предметы и отчёты. Отряды должны быть дома.")
+	panel_action(modal_body, "Перенести поселение со старого сервера", begin_transfer)
+	button(modal_body, "Начать новое поселение", confirm_profile_action.bind(
+		"Новое поселение начнётся с нуля. Перенести старое потом тоже можно. Начать?", device_login))
+
+func begin_transfer() -> void:
+	if SessionStore.valid(pending_old_session) and not SessionStore.is_device(pending_old_session):
+		set_login_status("Переносим поселение…")
+		await import_old(pending_old_session)
+		return
+	login_for_transfer = true
+	login_proof = Crypto.new().generate_random_bytes(32).hex_encode()
+	login_deadline = Time.get_ticks_msec() + 300000
+	login_link_used = false
+	show_account()
+
+# Moves the settlement of an old-server login to this phone: the new server reads it
+# from the old server with that login and binds it to a new device account.
+func import_old(old_session: String) -> void:
+	if login_in_progress:
+		return
+	login_in_progress = true
+	var device := SessionStore.DEVICE_PREFIX + Crypto.new().generate_random_bytes(32).hex_encode()
+	session = device
+	var response := await send_request("auth/import-old", {"oldSession": old_session}, true, 25.0)
+	login_in_progress = false
+	if response.get("linked", false):
+		saved_session_error = SessionStore.save_session(device) != OK
+		pending_old_session = ""
+		login_for_transfer = false
+		login_proof = ""
+		message.text = "Поселение перенесено на новый сервер." if response.get("imported", false) else "Поселение снова на этом телефоне."
+		await sync_account()
+		await show_account()
+		return
+	session = ""
+	if response.get("oldLogin", false):
+		# The old login expired: confirm it again on the old server.
+		pending_old_session = ""
+		await begin_transfer()
+		set_login_status("Вход на старом сервере истёк. Подтверди его заново.")
+		return
+	login_for_transfer = false
+	login_proof = ""
+	show_account()
+	if response.get("armiesOut", false):
+		set_login_status("Отряды ещё в походе на старом сервере. Дождись их возвращения и повтори перенос.")
+	else:
+		show_error(response)
+
 func login_url(challenge: String) -> String:
+	if login_for_transfer:
+		return OLD_SERVER + "/api/native/approve?challenge=" + challenge
 	return endpoint + "/api/native/approve?challenge=" + challenge
 
 func copy_login_link(challenge: String) -> void:
 	if Time.get_ticks_msec() >= login_deadline:
-		begin_login()
+		await restart_login()
 		set_login_status("Код истёк. Открой страницу с новым кодом.")
 		return
 	DisplayServer.clipboard_set(login_url(challenge))
@@ -3934,7 +4026,7 @@ func copy_login_link(challenge: String) -> void:
 
 func open_login_page(challenge: String) -> void:
 	if Time.get_ticks_msec() >= login_deadline:
-		begin_login()
+		await restart_login()
 		set_login_status("Код истёк. Открой страницу с новым кодом.")
 		return
 	if OS.shell_open(login_url(challenge)) != OK:
@@ -3965,9 +4057,15 @@ func finish_login(manual := false) -> void:
 	login_in_progress = true
 	if manual:
 		set_login_status("Проверяем подтверждение…")
-	var response := await send_request("native/exchange", {"proof":proof})
+	var response := await send_request("native/exchange", {"proof":proof}, true, 12.0, "", OLD_SERVER if login_for_transfer else "")
 	if proof != login_proof:
 		login_in_progress = false
+		return
+	if login_for_transfer and response.get("session") is String and SessionStore.valid(response.session):
+		login_in_progress = false
+		login_proof = ""
+		set_login_status("Вход подтверждён. Переносим поселение…")
+		await import_old(response.session)
 		return
 	if response.get("session") is String and SessionStore.valid(response.session):
 		session = response.session
@@ -4559,22 +4657,27 @@ func request(path: String, payload: Variant = null, idempotency_key := "") -> Di
 			accept(check)
 	return response
 
-func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0, idempotency_key := "") -> Dictionary:
+func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0, idempotency_key := "", host := "") -> Dictionary:
 	if foreground and busy:
 		return {"error":"Подожди завершения предыдущего запроса."}
 	if foreground:
 		busy = true
 		request_generation += 1
 	var headers := PackedStringArray(["Accept: application/json", "Accept-Encoding: gzip"])
-	if player_id != "":
-		headers.append("X-Drenovar-Player: "+player_id)
-	if not session.is_empty():
-		headers.append("X-Drenovar-Session: " + session)
-	if not staging_key.is_empty():
-		headers.append("X-Drenovar-Staging-Key: " + staging_key)
+	# A request to another server (the old one, during a transfer) carries none of
+	# this server's credentials.
+	var base := endpoint if host.is_empty() else host
+	var pool: ApiPool = api if host.is_empty() else old_api
+	if host.is_empty():
+		if player_id != "":
+			headers.append("X-Drenovar-Player: "+player_id)
+		if not session.is_empty():
+			headers.append("X-Drenovar-Session: " + session)
+		if not staging_key.is_empty():
+			headers.append("X-Drenovar-Staging-Key: " + staging_key)
 	if payload != null:
 		headers.append("Content-Type: application/json")
-		headers.append("Origin: "+endpoint)
+		headers.append("Origin: "+base)
 		var request_key := idempotency_key
 		if request_key.is_empty() and path.get_file() == "command" and payload is Dictionary:
 			request_key = str(payload.get("requestId", ""))
@@ -4582,9 +4685,9 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 			request_key = Crypto.new().generate_random_bytes(16).hex_encode()
 		headers.append("Idempotency-Key: "+request_key)
 	# Kept-alive connections: a command no longer pays for a new TCP and TLS handshake.
-	api.configure(endpoint)
+	pool.configure(base)
 	var started_us := Time.get_ticks_usec()
-	var result: Array = await api.request(HTTPClient.METHOD_GET if payload == null else HTTPClient.METHOD_POST, "/api/" + path,
+	var result: Array = await pool.request(HTTPClient.METHOD_GET if payload == null else HTTPClient.METHOD_POST, "/api/" + path,
 		headers, "" if payload == null else JSON.stringify(payload), timeout_seconds, 8 * 1024 * 1024)
 	var elapsed_ms := (Time.get_ticks_usec() - started_us) / 1000.0
 	if result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0 and int(result[1]) < 500:

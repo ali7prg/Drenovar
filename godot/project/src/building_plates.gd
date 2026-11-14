@@ -39,8 +39,7 @@ func _draw() -> void:
 	var view := get_viewport_rect().size
 	# Fade the plates as the camera pulls back.
 	var alpha := clampf((MAX_ZOOM - stage.camera_zoom) / 20.0, 0.0, 1.0)
-	var order: Dictionary = game.construction_order()
-	var site: Dictionary = game.shown_site
+	var sites: Array = game.shown_sites
 	for marker in stage.place_markers:
 		if not marker.get("kind", "") in ["building", "wall"]:
 			continue
@@ -54,18 +53,22 @@ func _draw() -> void:
 		var title: String = "Стены" if marker.kind == "wall" else game.building_title(building.type).get_slice("/", 0)
 		draw_name(at, title, alpha)
 		draw_badge(at + Vector2(0, 17), int(building.get("level", 1)), alpha)
-		if site.get("key", "") == str(building.get("id", "_")):
-			draw_progress(at + Vector2(0, 38), site, alpha)
-	# Tree being felled: progress bar over it.
-	var job: Dictionary = game.shown_job
-	if not job.is_empty():
+		for site in sites:
+			if site.get("key", "") == str(building.get("id", "_")):
+				draw_progress(at + Vector2(0, 38), site, alpha)
+	# Trees being felled (one per busy worker): progress bar over each.
+	for job in game.shown_jobs:
 		var tree: Dictionary = stage.works.tree_by_id(job.tree)
 		if not tree.is_empty():
 			var at := camera.unproject_position(stage.array_point(tree.p) + Vector3.UP * 7.5)
+			if camera.is_position_behind(stage.array_point(tree.p)):
+				continue
 			draw_name(at, "Рубка", alpha)
 			draw_progress(at + Vector2(0, 8), job, alpha)
-	# Plot of a new building under construction (no building yet).
-	if not site.is_empty() and site.get("kind", "") in ["build", "place"]:
+	# Plots of new buildings under construction (no building yet).
+	for site in sites:
+		if not site.get("kind", "") in ["build", "place"]:
+			continue
 		for plot in stage.empty_plots:
 			if str(plot.item.id) == str(site.get("plot", "")) or str(plot.item.id) == str(site.key):
 				var at := camera.unproject_position(plot.position + Vector3.UP * 7.0)
@@ -87,10 +90,11 @@ func draw_badge(center: Vector2, level: int, alpha: float) -> void:
 	var size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 13)
 	draw_string(font, center + Vector2(-size.x * 0.5, 4.6), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(1, 1, 1, alpha))
 
-# Bar of a work: {started, ends, confirmed, key|id}. Before the server confirms the
-# order there is no countdown ("Отправляем…"); after zero the server is asked, and
-# without a link nothing is shown as done. The bar never moves backward for the same
-# work (clock corrections), and moves forward at once after a speedup.
+# Bar of a work: {started, ends, confirmed, predicted, key|id}. A work just ordered
+# counts down at once with its known duration (predicted); the server's order takes
+# over when it answers. After zero the server is asked, and without a link nothing is
+# shown as done. The bar never moves backward for the same work (clock corrections),
+# and moves forward at once after a speedup.
 var bar_floor := {}
 
 func draw_progress(at: Vector2, work: Dictionary, alpha: float) -> void:
@@ -98,7 +102,7 @@ func draw_progress(at: Vector2, work: Dictionary, alpha: float) -> void:
 	# The bar includes the network round trip, so it fills when the answer arrives.
 	var starts := float(work.get("started", float(work.get("ends", 0.0)) - 60000.0))
 	var ends: float = game.display_end(float(work.get("ends", 0.0)))
-	var confirmed: bool = work.get("confirmed", true)
+	var confirmed: bool = work.get("confirmed", true) or work.get("predicted", false)
 	var key := str(work.get("key", work.get("id", work.get("tree", ""))))
 	var fraction := 0.0
 	if confirmed:

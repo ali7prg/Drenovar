@@ -12,9 +12,10 @@ extends Node3D
 
 const SLASH := preload("res://src/fx_slash.gdshader")
 const SPARK := preload("res://src/fx_spark.gdshader")
+const DUST := preload("res://src/fx_dust.gdshader")
 const RING := preload("res://src/fx_ring.gdshader")
 const BAR := preload("res://src/fx_bar.gdshader")
-const POOL := {"slash": 14, "spark": 10, "number": 10, "ring": 3, "bar": 3, "plate": 3}
+const POOL := {"slash": 14, "spark": 10, "dust": 12, "number": 10, "ring": 3, "bar": 3, "plate": 3}
 
 var pools := {}
 # For the device report: when a battle was last drawn and with how many events.
@@ -53,7 +54,7 @@ func make(kind: String, quad: QuadMesh) -> Node3D:
 		var mesh := MeshInstance3D.new()
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var material := ShaderMaterial.new()
-		material.shader = {"slash": SLASH, "spark": SPARK, "ring": RING, "bar": BAR}[kind]
+		material.shader = {"slash": SLASH, "spark": SPARK, "dust": DUST, "ring": RING, "bar": BAR}[kind]
 		material.render_priority = 2 if kind != "ring" else 0
 		if kind == "ring":
 			var plane := PlaneMesh.new()
@@ -113,6 +114,20 @@ func spark(at: Vector3, progress: float, tint: Color, size := 1.3, seed := 0.0) 
 	material.set_shader_parameter("progress", progress)
 	material.set_shader_parameter("tint", tint)
 	material.set_shader_parameter("size", size)
+	material.set_shader_parameter("seed", seed)
+
+# Dust kicked up at the feet (a charge, a creature's lunge): a low, wide, soft puff.
+func dust(at: Vector3, progress: float, size := 1.5, seed := 0.0) -> void:
+	if progress < 0.0 or progress > 1.0:
+		return
+	var node := take("dust") as MeshInstance3D
+	if node == null:
+		return
+	node.position = at + Vector3.UP * (0.35 + progress * 0.45)
+	var material: ShaderMaterial = node.material_override
+	material.set_shader_parameter("progress", progress)
+	material.set_shader_parameter("tint", Color(0.72, 0.62, 0.46, 0.55))
+	material.set_shader_parameter("size", size * (0.8 + progress * 0.7))
 	material.set_shader_parameter("seed", seed)
 
 # Damage number that pops, rises and fades over ~0.9 s.

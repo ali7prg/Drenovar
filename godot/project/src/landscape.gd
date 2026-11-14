@@ -27,6 +27,8 @@ const GATE_SCENE_HALF_SPAN := 5.9
 static func gate_scene_scale(level: int) -> float:
 	return GATE_SCENE_SCALES[clampi(level, 1, 5) - 1]
 var works := CityWorks.new()
+# The second worker's crew (workers-v1: a second worker from «Жилой дом» III).
+var works2 := CityWorks.new()
 var walls := CityWalls.new()
 var forest_materials := {}
 var focus_radius := 0.0
@@ -205,6 +207,9 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	if is_city:
 		works.setup(self, data)
 		add_child(works)
+		works2.setup(self, data)
+		works2.name = "CityWorks2"
+		add_child(works2)
 	add_child(camera)
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL if is_city else Camera3D.PROJECTION_PERSPECTIVE
 	camera.fov = 43.0
@@ -1121,6 +1126,7 @@ func present_city(state: Dictionary, staged := false) -> void:
 		geometries["wall_signature"] = walls.signature
 		walls.build(self)
 	works.observe_city(city, plot_positions)
+	works2.observe_city(city, plot_positions)
 	work_sites = plot_positions
 	if staged:
 		await yield_frame()
@@ -1394,7 +1400,9 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 		var corpse: bool = slain and leaving.has(id) and not battles.has(id)
 		if slain and not battles.has(id) and not corpse:
 			continue
-		var species: String = encounter.get("species", "velkor")
+		var species := creature_species(encounter)
+		if species.is_empty():
+			species = "velkor"
 		if not data.creatureModels.has(species):
 			continue
 		var p := point(encounter.position)
@@ -1474,9 +1482,7 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			var elapsed := server_ms - float(army.battleAt)
 			var route: Dictionary = army_routes.get(army.id, {})
 			heading = float(plan.yaw) if not plan.is_empty() else float(route.get("heading", 0.0)) + PI
-			var events: Array = army.get("events", [])
-			if army.get("battle") is Dictionary:
-				events = army.battle.get("events", [])
+			var events: Array = army_battle_events(army)
 			var hit := -INF
 			var attack := -INF
 			var charge := false
@@ -1508,6 +1514,9 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 				clip_phase = (elapsed - attack + 560.0) / 300.0 if clip == "Alert" else (elapsed - attack + 260.0) / 690.0
 				var lunge := sin(PI * clampf((elapsed - attack + 210.0) / 590.0, 0.0, 1.0)) * (1.8 if charge else 0.6)
 				p = ground_point(p + Vector3(sin(heading), 0, cos(heading)) * lunge)
+				if charge or elapsed >= attack:
+					# The creature's stamp and lunge throw up dust at its feet.
+					battle_fx.dust(p, clampf((elapsed - attack + 210.0) / 900.0, 0.0, 1.0), 3.2 if charge else 2.4, float(attack) * 0.001)
 				cues[id] = true
 				show_battle_cue(id, p, Color("#fcc069") if charge else Color("#e89568"), clip_phase)
 			elif hit > -INF:
@@ -1584,13 +1593,16 @@ func battle_timeline(army: Dictionary, encounter: Dictionary, events: Array) -> 
 	var ordered := order.map(func(index): return events[index])
 	var hp := start_hp
 	for event in ordered:
-		var e: Array = event if event is Array else [event.at, event.kind, event.get("unitId", ""), event.get("index", 0), event.get("hp")]
+		var e := event_row(event)
 		if e[1] == "soldier_attack":
 			var after: float = float(e[4]) if e.size() > 4 and e[4] != null else hp
+			# The blow's own damage when the server names it (a world fight lists only
+			# the drawn soldiers, so the hp step between them includes unseen blows).
+			var damage: float = float(e[5]) if e.size() > 5 and e[5] != null else maxf(0.0, hp - after)
 			# Blows landing on the same server tick (a volley) get a rank, so their
 			# numbers pop one after another instead of printing over each other.
 			var rank: int = hits[-1][3] + 1 if not hits.is_empty() and float(hits[-1][0]) == float(e[0]) else 0
-			hits.append([float(e[0]), maxf(0.0, hp - after), after, rank])
+			hits.append([float(e[0]), damage, after, rank])
 			hp = after
 		else:
 			strikes.append([float(e[0]), "%s:%d" % [e[2], int(e[3])], e[1]])
@@ -1641,7 +1653,7 @@ func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dict
 		if age >= 0.0:
 			battle_fx.spark(target, age / 420.0, Color("#ff6a4a"), 2.0, fposmod(float(strike[0]) * 0.007, 1.0))
 	var spec: Dictionary = encounter.get("spec", {})
-	var title := "%s · %s" % [spec.get("name", encounter.get("species", "")), ["I", "II", "III"][clampi(int(encounter.get("level", 1)), 1, 3) - 1]]
+	var title := "%s · %s" % [spec.get("name", creature_species(encounter)), ["I", "II", "III"][clampi(int(encounter.get("level", 1)), 1, 3) - 1]]
 	var height := 2.6 + 0.5 * clampi(int(encounter.get("level", 1)), 1, 3)
 	var fallen_at := -INF
 	if not timeline.hits.is_empty() and float(timeline.hits[-1][2]) <= 0.0:
@@ -1824,14 +1836,53 @@ func ground_point(p: Vector3) -> Vector3:
 	p.y = terrain_y(p) if map_name == "world" else sample_city(p.x, p.z)
 	return p
 
+# Kind of a creature: city creatures carry "species"; the world-map sites (Велькор)
+# only name it in spec.id. Without this the world fight had no battle places, no
+# charge and no blows: the soldiers just stood beside the creature.
+static func creature_species(encounter: Dictionary) -> String:
+	var species := str(encounter.get("species", ""))
+	if species.is_empty() and encounter.get("spec") is Dictionary:
+		species = str(encounter.spec.get("id", ""))
+	return species
+
+# One server battle event as [at, kind, unitId, index, hp]. A city battle sends
+# objects whose soldier blows carry the creature's hp after the blow as
+# "creatureHP" (simulate() in combat.mjs); the world map sends rows already.
+static func event_row(event: Variant) -> Array:
+	if event is Array:
+		return event
+	var kind := str(event.get("kind", ""))
+	var hp: Variant = event.get("creatureHP", event.get("hp")) if kind == "soldier_attack" else event.get("hp")
+	return [float(event.get("at", 0.0)), kind, str(event.get("unitId", "")), int(event.get("index", 0)), hp, event.get("damage")]
+
+# Events of an army's fight. The world map sends only a window around the poll
+# (about -1.3 s .. +1.4 s); windows of successive polls are merged per army, so a
+# slow answer leaves no gap in the blows and numbers already seen stay known.
+func army_battle_events(army: Dictionary) -> Array:
+	if army.get("battle") is Dictionary:
+		return army.battle.get("events", [])
+	var window: Array = army.get("events", [])
+	var cache: Dictionary = army_routes.get(str(army.get("id", "")), {})
+	if cache.is_empty():
+		return window
+	var merged: Dictionary = cache.get("merged", {})
+	if cache.get("merged_window") != window or not cache.has("merged_rows"):
+		cache.merged_window = window.duplicate()
+		for event in window:
+			var e := event_row(event)
+			merged["%d|%s|%s|%d" % [roundi(float(e[0])), e[1], e[2], int(e[3])]] = e
+		cache.merged = merged
+		var rows: Array = merged.values()
+		rows.sort_custom(func(a, b): return float(a[0]) < float(b[0]))
+		cache.merged_rows = rows
+	return cache.merged_rows
+
 func battle_events(army: Dictionary) -> Dictionary:
 	var by_member := {}
 	var fallen := {}
-	var entries: Array = army.get("events", [])
-	if army.get("battle") is Dictionary:
-		entries = army.battle.get("events", [])
+	var entries: Array = army_battle_events(army)
 	for event in entries:
-		var e: Array = event if event is Array else [event.at, event.kind, event.unitId, event.index, event.get("hp")]
+		var e := event_row(event)
 		var key := "%s:%d" % [e[2], int(e[3])]
 		if not by_member.has(key):
 			by_member[key] = []
@@ -1864,6 +1915,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		known[id] = true
 		var bag: Dictionary = army.get("returnUnits", army.units) if returning else army.units
 		var cache: Dictionary = army_routes.get(id, {})
+		army_routes[id] = cache
 		if cache.get("source", []) != path:
 			cache.merge(route_for(path, true), true)
 			cache.source = path
@@ -1887,7 +1939,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		# Creature hunt: the column halts in front of the creature (never on it) and the
 		# soldiers run to battle places around it; after the fight they regroup.
 		var encounter: Dictionary = encounters.get(str(army.get("target", "")), {})
-		var hunt: bool = not encounter.is_empty() and data.creatureModels.has(encounter.get("species", "")) \
+		var hunt: bool = not encounter.is_empty() and data.creatureModels.has(creature_species(encounter)) \
 			and army.get("worldKind") != "pvp"
 		var plan: Dictionary = {}
 		if hunt and not returning:
@@ -1950,7 +2002,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		# The melee line swings until the creature falls (or, in a lost fight, to the end).
 		var slain_at := INF
 		if hunt and fighting:
-			var fx := battle_timeline(army, encounter, army.battle.get("events", []) if army.get("battle") is Dictionary else army.get("events", []))
+			var fx := battle_timeline(army, encounter, army_battle_events(army))
 			if not fx.hits.is_empty() and float(fx.hits[-1][2]) <= 0.0:
 				slain_at = float(fx.hits[-1][0])
 		var places: Dictionary = plan.get("places", {})
@@ -2012,6 +2064,9 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 						var gait := gait_for(slot.id, distance / (span / 1000.0) * 1.3)
 						clip = gait[0]
 						tempo = gait[1]
+						# Dust behind the running line (every third soldier, riders always).
+						if slot.mounted or i % 3 == 0:
+							battle_fx.dust(place, fposmod(charge_age / 520.0 + i * 0.37, 1.0), 1.9 if slot.mounted else 1.3, i * 0.618)
 					else:
 						engaged = true
 						clip = "idle"
@@ -2085,7 +2140,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 # and flanks, riders take the rear flanks, archers stand in lines behind the melee.
 # Places on water turn around the creature to dry ground. Cached per route and bag.
 func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
-	var key := [cache.source, encounter.get("position"), encounter.get("species"), encounter.get("level"), cache.bag]
+	var key := [cache.source, encounter.get("position"), creature_species(encounter), encounter.get("level"), cache.bag]
 	if cache.get("engage_key") == key:
 		return cache.engage
 	var beast := ground_point(point(encounter.position))
@@ -2210,7 +2265,7 @@ static func creature_scale(level: Variant) -> float:
 	return 1.02 + 0.16 * clampi(int(level), 1, 3)
 
 func creature_body(encounter: Dictionary) -> Vector2:
-	return CREATURE_BODY.get(encounter.get("species", ""), Vector2(2.7, 1.0)) * creature_scale(encounter.get("level", 1))
+	return CREATURE_BODY.get(creature_species(encounter), Vector2(2.7, 1.0)) * creature_scale(encounter.get("level", 1))
 
 # Flowing arrows over the part of the march route still ahead of the army.
 func update_march_line(id: String, cache: Dictionary, from_m: float, to_m: float) -> void:

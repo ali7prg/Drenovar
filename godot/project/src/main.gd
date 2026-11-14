@@ -611,6 +611,86 @@ func construction_order() -> Dictionary:
 		return construction.order
 	return {}
 
+# ---------------------------------------------------------------- workers
+# Builders and lumberjacks of the settlement. The server says how many there are
+# (server patch workers-v1: a second worker from «Жилой дом» III; an older server
+# has one and sends nothing). A worker holds one task: a construction order or a
+# forest job. Orders sent but not yet answered hold a worker too, so a second tap
+# never takes the worker the first order already uses (the old single forecast slot
+# was overwritten, and the first upgrade seemed to move to the second building).
+const WORKERS_HOUSING_LEVEL := 3
+
+func worker_total() -> int:
+	return clampi(int(state.get("workers", 1)), 1, 2)
+
+func construction_orders() -> Array:
+	var city: Dictionary = state.get("city", {})
+	var construction: Variant = city.get("kingdom", city.get("legacyUpgrades"))
+	var orders: Array = []
+	if construction is Dictionary:
+		for slot in ["order", "order2"]:
+			if construction.get(slot) is Dictionary:
+				orders.append(construction[slot])
+	return orders
+
+func server_jobs() -> Array:
+	var progress: Variant = state.get("city", {}).get("progress", {})
+	var jobs: Array = []
+	if progress is Dictionary:
+		for slot in ["job", "job2"]:
+			if progress.get(slot) is Dictionary:
+				jobs.append(progress[slot])
+	return jobs
+
+func busy_workers() -> int:
+	return construction_orders().size() + server_jobs().size() + pending_works.size()
+
+func free_workers() -> int:
+	return maxi(0, worker_total() - busy_workers())
+
+func builder_ready() -> bool:
+	return free_workers() > 0
+
+func workers_busy_text() -> String:
+	return "Все рабочие заняты" if worker_total() > 1 else "Строитель занят"
+
+# The order running (or sent) on one building, else {}.
+func building_order(building_id: String) -> Dictionary:
+	for order in construction_orders():
+		if str(order.get("buildingId", "")) == building_id:
+			return order
+	for slot in pending_works:
+		var predicted: Dictionary = pending_works[slot]
+		if str(predicted.get("building", "")) == building_id:
+			return {"kind": str(predicted.order.get("action", "")), "buildingId": building_id, "endsAt": float(predicted.ends),
+				"predicted": true}
+	return {}
+
+# When the next worker is free (the soonest end of the running tasks), or INF.
+func next_worker_free_at() -> float:
+	var soonest := INF
+	for order in construction_orders():
+		soonest = minf(soonest, float(order.get("endsAt", INF)))
+	for job in server_jobs():
+		soonest = minf(soonest, float(job.get("endsAt", INF)))
+	for slot in pending_works:
+		soonest = minf(soonest, float(pending_works[slot].get("ends", INF)))
+	return soonest
+
+# A line under a refused action: who is busy and, with one worker, how the second comes.
+func add_workers_note(parent: Container) -> void:
+	var ends := next_worker_free_at()
+	if ends < INF and ends > timer_now():
+		var label := Label.new()
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.add_theme_color_override("font_color", Color("#ffc28b"))
+		parent.add_child(label)
+		bind_countdown(label, workers_busy_text() + " · свободен через", ends)
+	else:
+		row(parent, workers_busy_text() + ".")
+	if worker_total() < 2 and int(state.get("workers", 0)) > 0:
+		row(parent, "Второй рабочий появится с «Жилым домом» %d уровня." % WORKERS_HOUSING_LEVEL)
+
 func show_city_actions() -> void:
 	open_modal("Поселение")
 	button(modal_body, "Строить", show_build_menu)
@@ -619,16 +699,17 @@ func show_city_actions() -> void:
 	if not stage.parade_slots.is_empty():
 		button(modal_body, "Парадный строй", focus_parade)
 	row(modal_body, "Предел производства на ресурс · %d" % capacity())
-	var order := construction_order()
-	if not order.is_empty():
+	if worker_total() > 1:
+		row(modal_body, "Рабочие · свободно %d из %d" % [free_workers(), worker_total()])
+	for order in construction_orders():
 		var title: String = {"clear":"Расчистка", "build":"Строительство", "upgrade":"Улучшение"}.get(order.kind, "Заказ")
 		countdown(title, order.endsAt)
 		button(modal_body, "Подробнее о заказе", inspect_construction_order.bind(order))
 		if order.kind != "clear":
 			button(modal_body, "Ускорить строительство", show_speedups.bind("construction", order, ""))
-	var job: Variant = state.city.progress.get("job")
-	if job is Dictionary and job.has("endsAt"):
-		countdown("Работа на участке", job.endsAt)
+	for job in server_jobs():
+		if job.has("endsAt"):
+			countdown("Работа на участке", job.endsAt)
 	if state.get("starterEligible71", false):
 		button(modal_body, "Первые шаги", show_starter_goals)
 	elif state.city.get("kingdom") is Dictionary and not state.city.kingdom.guide.get("skipped", false):
@@ -799,14 +880,16 @@ func show_build_menu(group := build_group) -> void:
 	status.add_theme_font_size_override("font_size", 15)
 	status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	modal_tools.add_child(status)
-	if not order.is_empty():
-		bind_countdown(status, "Строитель занят", order.endsAt)
+	if not builder_ready():
+		bind_countdown(status, workers_busy_text(), next_worker_free_at())
 		status.add_theme_color_override("font_color", Color("#ffc28b"))
-		if order.kind != "clear":
+		if not order.is_empty() and order.kind != "clear":
 			var hurry := button(modal_tools, "Ускорить", show_speedups.bind("construction", order, ""))
 			hurry.add_theme_font_size_override("font_size", 16)
 	else:
 		status.text = "Ратуша · ур. %d" % hall_level()
+		if worker_total() > 1:
+			status.text += " · рабочих свободно %d из %d" % [free_workers(), worker_total()]
 		status.add_theme_color_override("font_color", WebPanels.GOLD)
 	var strip := HBoxContainer.new()
 	strip.add_theme_constant_override("separation", 10)
@@ -861,7 +944,7 @@ func build_card_button(definition: Dictionary, option: Dictionary) -> Button:
 	card.add_theme_stylebox_override("hover", WebPanels.gradient_style(top.lightened(0.08), Color("#14181b"), WebPanels.GOLD, 6, 9))
 	card.add_theme_stylebox_override("pressed", WebPanels.gradient_style(top.darkened(0.15), Color("#14181b"), WebPanels.GOLD, 6, 9))
 	card.pressed.connect(func():
-		if build_option(definition).state == "ready" and construction_order().is_empty():
+		if build_option(definition).state == "ready" and builder_ready():
 			start_placement(definition)
 		else:
 			show_build_details(definition))
@@ -1082,11 +1165,11 @@ func refresh_placement() -> void:
 	if snapped:
 		plate = "ready" if placing.cleared else "forest"
 	stage.move_placement(placing.free, plate, placing.lifted)
-	var busy_builder: bool = not construction_order().is_empty() or state.city.progress.get("job") != null
+	var busy_builder: bool = not builder_ready()
 	if not snapped:
 		placement_info.text = "Отпустите здание над свободным участком"
 	elif busy_builder:
-		placement_info.text = "Строитель занят текущим заказом"
+		placement_info.text = "%s: дождитесь завершения" % workers_busy_text()
 	elif not placing.cleared:
 		placement_info.text = "Участок в лесу: сначала расчистка · 15 еды"
 	else:
@@ -1099,7 +1182,7 @@ func refresh_move() -> void:
 	var building: Dictionary = placing.move
 	var snapped: bool = placing.position.distance_to(placing.free) < 0.01
 	stage.move_placement(placing.free, "ready" if snapped else "none", placing.lifted)
-	var building_busy: bool = construction_order().get("buildingId") == building.id
+	var building_busy: bool = not building_order(str(building.id)).is_empty()
 	if not snapped:
 		placement_info.text = "Отпустите здание над свободным участком"
 	elif building_busy:
@@ -1281,15 +1364,15 @@ func show_build_details(definition: Dictionary) -> void:
 	info.add_child(cost_row)
 	fill_cost_row(cost_row, option.terms.cost)
 	row(info, "Время · %d сек." % int(option.terms.seconds))
-	var builder_ready: bool = construction_order().is_empty() and state.city.progress.get("job") == null
+	var worker_free := builder_ready()
 	var site := free_build_plot()
 	var reason := ""
 	match option.state:
 		"built": reason = "Уже построено. Улучшение — в самом здании."
 		"locked": reason = "Нужна ратуша %d-го уровня." % option.required
 		"short": reason = "Недостаточно ресурсов."
-	if reason.is_empty() and not builder_ready:
-		reason = "Строитель занят текущим заказом."
+	if reason.is_empty() and not worker_free:
+		reason = "%s: дождитесь завершения." % workers_busy_text()
 	if reason.is_empty() and site.is_empty():
 		reason = "Нет свободного участка: сруби дерево и подготовь место."
 	if reason.is_empty() and not site.cleared:
@@ -1301,14 +1384,14 @@ func show_build_details(definition: Dictionary) -> void:
 		why.add_theme_color_override("font_color", WebPanels.GOLD)
 		info.add_child(why)
 	var can_build: bool = reason.is_empty() and not player_id.is_empty()
-	var placeable: bool = option.state == "ready" and builder_ready and not site.is_empty()
+	var placeable: bool = option.state == "ready" and worker_free and not site.is_empty()
 	var build := panel_action(info, "Выбрать место", start_placement.bind(definition), placeable)
 	build.name = "BuildConfirm"
 	if can_build:
 		button(info, "Построить на ближайшем участке", func():
 			stage.target = site.position
 			command(build_order(site.plot.id, definition.id)))
-	if not site.is_empty() and not site.cleared and option.state == "ready" and builder_ready:
+	if not site.is_empty() and not site.cleared and option.state == "ready" and worker_free:
 		button(info, "Расчистить участок · 15 еды", command.bind({"kind":"kingdom","action":"clear","plotId":site.plot.id}),
 			not player_id.is_empty() and balance("food") >= 15)
 	if not site.is_empty():
@@ -1318,10 +1401,11 @@ func show_build_details(definition: Dictionary) -> void:
 
 func show_construction() -> void:
 	open_modal("Строительство", "right")
-	var order := construction_order()
-	if not order.is_empty():
-		countdown("Строитель занят", order.endsAt)
+	for order in construction_orders():
+		countdown({"clear":"Расчистка", "build":"Строительство", "upgrade":"Улучшение"}.get(order.kind, "Заказ"), order.endsAt)
 		button(modal_body, "Подробнее о заказе", inspect_construction_order.bind(order))
+	if not builder_ready():
+		add_workers_note(modal_body)
 	var plots: Array[Dictionary] = stage.empty_plots.duplicate()
 	var center := stage.target
 	plots.sort_custom(func(a, b): return center.distance_squared_to(a.position) < center.distance_squared_to(b.position))
@@ -1364,9 +1448,10 @@ func show_clearings() -> void:
 			if not state.city.get("kingdom") is Dictionary:
 				while level < 25 and int(state.city.progress.get("xp", 0)) >= 25 * level * (level + 1):
 					level += 1
+			if not builder_ready():
+				add_workers_note(modal_body)
 			button(modal_body, "Начать расчистку", command.bind({"kind":"resource", "action":"area", "id":grove.id}),
-				not player_id.is_empty() and level >= int(grove.level) and construction_order().is_empty()
-				and state.city.progress.get("job") == null))
+				not player_id.is_empty() and level >= int(grove.level) and builder_ready()))
 
 func show_starter_goals() -> void:
 	open_modal("Первые шаги", "right")
@@ -1428,6 +1513,9 @@ static func speed_duration(seconds: int) -> String:
 	return "%d мин" % (seconds / 60)
 
 func show_speedups(queue: String, order: Dictionary, building_id: String) -> void:
+	if order.get("predicted", false):
+		await wait_for_order(queue, order, building_id)
+		return
 	open_modal("Ускорение · " + SPEED_QUEUES.get(queue, ""))
 	countdown("Осталось", order.endsAt)
 	var ids := server_speed_items(queue)
@@ -1448,6 +1536,26 @@ func show_speedups(queue: String, order: Dictionary, building_id: String) -> voi
 	var pending: Array = SPEED_TIERS.filter(func(seconds): return not known.has(seconds)).map(speed_duration)
 	if not pending.is_empty() and not ids.is_empty():
 		row(modal_body, "%s — %s" % [", ".join(pending), SPEED_SERVER_PENDING.to_lower()])
+
+# «Ускорить» right after «Улучшить»: the server's order (its id and end) is needed for
+# the speedup, so the window waits for the answer that is already on its way.
+func wait_for_order(queue: String, order: Dictionary, building_id: String) -> void:
+	open_modal("Ускорение · " + SPEED_QUEUES.get(queue, ""))
+	row(modal_body, "Заказ отправлен, получаем его с сервера…")
+	var generation := modal_generation
+	var started := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - started < 15000:
+		await get_tree().create_timer(0.1).timeout
+		if generation != modal_generation:
+			return
+		var confirmed := building_order(str(order.get("buildingId", "")))
+		if not confirmed.is_empty() and not confirmed.get("predicted", false):
+			show_speedups(queue, confirmed, building_id)
+			return
+		if confirmed.is_empty():
+			break
+	if generation == modal_generation:
+		row(modal_body, "Заказ не подтверждён сервером. Попробуй ещё раз через несколько секунд.")
 
 # Before anything is spent: how much the remaining time shrinks.
 func preview_speedup(queue: String, order: Dictionary, building_id: String, id: String) -> void:
@@ -1478,21 +1586,89 @@ func preview_speedup(queue: String, order: Dictionary, building_id: String, id: 
 	apply.pressed.connect(func(): apply_speedup(apply, payload))
 	button(modal_body, "Назад", show_speedups.bind(queue, order, building_id))
 
-# One press spends one item: the button locks at once, a second order cannot be sent
-# while the first is in flight, a lost answer is repeated with the same idempotency
-# key (the server never applies it twice), and expectedEndsAt makes the server refuse
-# any other copy once the timer has moved.
+# One press spends one item and works at once: the timer moves by the same rule as
+# the server's (the order ends earlier by the item's time, never before now; an
+# upgrade that ends now takes its new level at once), the window closes, and the
+# server confirms in the background. A second speedup cannot be sent while the
+# first is in flight, a lost answer is repeated with the same idempotency key (the
+# server never applies it twice), and expectedEndsAt makes the server refuse any
+# other copy once the timer has moved. Answers to polls sent before the server
+# applied it keep the local result (speed_overrides); a refusal brings the server's
+# timer back.
+var speed_overrides: Array = []
+
 func apply_speedup(apply: Button, payload: Dictionary) -> void:
 	if speedup_in_flight:
 		return
 	speedup_in_flight = true
 	apply.disabled = true
-	apply.text = "Применяем…"
-	await command(payload)
+	var entry := {"payload": payload, "count": int(state.get("items", {}).get(payload.item, 0))}
+	speed_overrides.append(entry)
+	var changed := apply_speed_override(entry)
+	if changed:
+		after_local_change()
+	close_modal()
+	message.text = "Ускорение применено"
+	var ok := await command(payload)
+	speed_overrides.erase(entry)
 	speedup_in_flight = false
-	if is_instance_valid(apply):
-		apply.disabled = false
-		apply.text = "Применить"
+	if not ok:
+		message.text = "Ускорение не применено: " + last_command_error
+		if changed:
+			# The local timer goes: the server's state comes back at once.
+			poll_account_state(true)
+
+# The speedup on the current state, if the server has not applied it yet there
+# (the order still ends at expectedEndsAt). Returns whether anything changed.
+func apply_speed_override(entry: Dictionary) -> bool:
+	var payload: Dictionary = entry.payload
+	var shift_ms := float(speed_catalog().get(payload.item, {}).get("seconds", 0)) * 1000.0
+	var now := timer_now()
+	var expected := float(payload.get("expectedEndsAt", 0.0))
+	var applied := false
+	if payload.queue == "construction":
+		var construction: Variant = state.city.get("kingdom", state.city.get("legacyUpgrades"))
+		if not construction is Dictionary:
+			return false
+		for slot in ["order", "order2"]:
+			var order: Variant = construction.get(slot)
+			if not order is Dictionary or str(order.get("requestId", "")) != str(payload.get("orderId", "")) or float(order.endsAt) != expected:
+				continue
+			var ends := maxf(now, expected - shift_ms)
+			if ends <= now and order.get("kind", "") == "upgrade":
+				# Done now: the building takes its new level at once.
+				for building in state.city.buildings:
+					if str(building.id) == str(order.get("buildingId", "")):
+						building.level = int(order.get("level", int(building.level) + 1))
+				if slot == "order2":
+					construction.erase("order2")
+				else:
+					construction.order = construction.get("order2")
+					construction.erase("order2")
+			else:
+				order.endsAt = ends
+			applied = true
+			break
+	elif payload.queue == "training":
+		var queue: Array = state.city.get("military", {}).get("queues", {}).get(str(payload.get("buildingId", "")), [])
+		if not queue.is_empty() and str(queue[0].get("id", "")) == str(payload.get("orderId", "")) and float(queue[0].endsAt) == expected:
+			var shift := minf(shift_ms, maxf(0.0, expected - now))
+			queue[0].endsAt = expected - shift
+			for k in range(1, queue.size()):
+				queue[k].startsAt = float(queue[k].startsAt) - shift
+				queue[k].endsAt = float(queue[k].endsAt) - shift
+			applied = true
+	if applied:
+		var items: Dictionary = state.get("items", {})
+		if int(items.get(payload.item, 0)) == int(entry.count):
+			items[payload.item] = maxi(0, int(entry.count) - 1)
+	return applied
+
+# Local changes made before the server's answer: redraw the stores and the city.
+func after_local_change() -> void:
+	refresh_hud()
+	if is_instance_valid(stage) and map_name == "city":
+		stage.present(state)
 
 func march_finish(army: Dictionary) -> Variant:
 	return army.get("returnsAt") if army.status == "returning" else (army.get("battleEndsAt") if army.status == "fighting" else army.get("arrivesAt"))
@@ -2255,8 +2431,8 @@ func open_building_ring(marker: Dictionary) -> void:
 	var actions: Array = []
 	var upgradable: bool = level < 5 and building.type in data.upgradable
 	actions.append(["Улучшить" if upgradable else "Сведения", "upgrade" if upgradable else "info", inspect_building.bind(building)])
-	var construction := construction_order()
-	if construction.get("buildingId") == building.id:
+	var construction := building_order(str(building.id))
+	if not construction.is_empty() and construction.get("kind", "") != "clear":
 		actions.append(["Ускорить", "speed", show_speedups.bind("construction", construction, "")])
 	var group: String = data.trainingGroups.get(building_definition(building.type).get("base", building.type), "")
 	if group != "":
@@ -2289,8 +2465,8 @@ func inspect_building(building: Dictionary) -> void:
 		row(modal_body, "%s · +%d/мин" % [RESOURCE_NAMES[metrics.production], int(metrics.rates[clampi(level, 1, 5) - 1])])
 	if int(metrics.get("storage", 0)) > 0:
 		row(modal_body, "Вместимость · +%d" % (int(metrics.storage) * level))
-	var construction := construction_order()
-	if construction.get("buildingId") == building.id:
+	var construction := building_order(str(building.id))
+	if not construction.is_empty():
 		countdown("Улучшение в процессе", construction.endsAt)
 		button(modal_body, "Ускорить строительство", show_speedups.bind("construction", construction, ""))
 	if not state.city.get("kingdom") is Dictionary:
@@ -2307,7 +2483,7 @@ func inspect_building(building: Dictionary) -> void:
 	if level < 5 and building.type in data.upgradable:
 		var terms: Dictionary = data.buildingTerms[building.type].upgrades[level - 1]
 		add_upgrade_preview(modal_body, building, level, terms)
-		var available := can_afford(terms.cost) and construction_order().is_empty()
+		var available := can_afford(terms.cost) and construction.is_empty() and builder_ready()
 		var base: String = building_definition(building.type).get("base", building.type)
 		if base == "ECO-05":
 			for prerequisite in data.upgradeRequirements.get(str(level + 1), []):
@@ -2317,6 +2493,10 @@ func inspect_building(building: Dictionary) -> void:
 		elif level >= hall_level():
 			row(modal_body, "Требуется ратуша уровня %d." % (level + 1))
 			available = false
+		if construction.is_empty() and not builder_ready():
+			add_workers_note(modal_body)
+		elif construction.is_empty() and not can_afford(terms.cost):
+			row(modal_body, "Недостаточно ресурсов.")
 		panel_action(modal_body,"Улучшить",command.bind({"kind":"kingdom","action":"upgrade","buildingId":building.id,"expectedLevel":level}),not player_id.is_empty() and available)
 	elif level >= 5 and building.type in data.upgradable:
 		row(modal_body, "Достигнут максимальный уровень текущего этапа.")
@@ -4316,6 +4496,14 @@ func accept(response: Dictionary) -> void:
 		stale_responses += 1
 		return
 	state = response
+	# Orders sent but not in this answer yet (a poll that left before them): their
+	# local effect stays (costs of works just ordered, speedups in flight).
+	for slot in pending_works:
+		var predicted: Dictionary = pending_works[slot]
+		if not predicted.get("cost", {}).is_empty() and not prediction_settled(predicted):
+			spend_locally(predicted.cost)
+	for entry in speed_overrides:
+		apply_speed_override(entry)
 	player_id = state.playerId
 	showing_cached_state = false
 	confirmed_server_ms = float(state.get("serverTime", 0.0))
@@ -4369,6 +4557,9 @@ const INSTANT_ACTIONS := ["tree", "site", "upgrade", "collect", "build", "clear"
 signal command_settled
 var pending_works := {}
 var shown_job := {}
+# Every shown work (one per busy worker): forest jobs and construction sites.
+var shown_jobs: Array = []
+var shown_sites: Array = []
 var next_due_poll_msec := 0
 var due_poll_streak := 0
 var shown_site := {}
@@ -4444,6 +4635,10 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	command_in_progress = false
 	command_settled.emit()
 	if instant:
+		# The answer is in: a forecast the state does not carry goes after a moment.
+		for slot in pending_works:
+			if pending_works[slot].get("order", {}) == order:
+				pending_works[slot].answered = Time.get_ticks_msec()
 		message.text = ""
 		return true
 	if generation == modal_generation:
@@ -4456,25 +4651,67 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	return true
 
 # Local forecast of the work an order starts, shown until the server state takes over.
+# The countdown runs at once with the server's own duration (the same terms the
+# server uses), so «Улучшить» starts the work on the tap; the server's order replaces
+# the forecast when its answer arrives (the bar never moves backward: bar_floor).
+# Slots: "tree"/"tree2" (forest), "site"/"site2" (construction), one per worker.
 func predict_work(order: Dictionary) -> void:
 	var now := server_time()
-	match order.get("action", ""):
-		"tree":
+	var action: String = order.get("action", "")
+	match action:
+		"tree", "site", "area":
+			if order.get("kind", "") != "resource":
+				return
 			var seconds := 5.0
 			for tree in stage.selectable_trees if is_instance_valid(stage) else []:
 				if tree.id == order.get("id", ""):
 					seconds = (tree_job_ms if tree_job_ms > 0.0 else float(tree.get("durationMs", 5000))) / 1000.0
-			pending_works.tree = {"tree": str(order.id), "started": now, "ends": now + seconds * 1000.0, "order": order,
-				"sent": Time.get_ticks_msec()}
+			if tree_job_ms > 0.0:
+				seconds = tree_job_ms / 1000.0
+			pending_works[free_slot("tree")] = {"tree": str(order.id) if action != "area" else "", "started": now,
+				"ends": now + seconds * 1000.0, "order": order, "sent": Time.get_ticks_msec()}
 		"upgrade", "build", "place", "level":
 			var key := str(order.get("buildingId", order.get("plotId", "")))
+			var type := str(order.get("type", ""))
 			var seconds := 30.0
-			var terms: Dictionary = data.buildingTerms.get(str(order.get("type", "")), {})
-			if order.has("type") and terms.has("seconds"):
-				seconds = float(terms.seconds)
-			pending_works.site = {"key": key, "building": str(order.get("buildingId", "")), "plot": str(order.get("plotId", "")),
-				"type": str(order.get("type", "")), "started": now, "ends": now + seconds * 1000.0, "order": order,
-				"sent": Time.get_ticks_msec()}
+			var cost := {}
+			var expected := -1
+			if action == "upgrade":
+				for building in state.city.buildings:
+					if str(building.id) == str(order.get("buildingId", "")):
+						type = str(building.type)
+						expected = int(order.get("expectedLevel", building.level))
+						var upgrades: Array = data.buildingTerms.get(type, {}).get("upgrades", [])
+						if expected >= 1 and expected <= upgrades.size():
+							seconds = float(upgrades[expected - 1].seconds)
+							cost = upgrades[expected - 1].cost
+			elif data.buildingTerms.get(type, {}).has("seconds"):
+				seconds = float(data.buildingTerms[type].seconds)
+				if action == "build":
+					cost = data.buildingTerms[type].get("cost", {})
+			pending_works[free_slot("site")] = {"key": key, "building": str(order.get("buildingId", "")), "plot": str(order.get("plotId", "")),
+				"type": type, "started": now, "ends": now + seconds * 1000.0, "order": order, "cost": cost,
+				"level": expected, "sent": Time.get_ticks_msec()}
+			# The cost leaves the stores at once (the server charges the same terms).
+			spend_locally(cost)
+	if is_instance_valid(stage) and map_name == "city":
+		refresh_hud()
+
+func free_slot(prefix: String) -> String:
+	var index := 1
+	while pending_works.has(prefix if index == 1 else prefix + str(index)):
+		index += 1
+	return prefix if index == 1 else prefix + str(index)
+
+func spend_locally(cost: Dictionary, sign := 1) -> void:
+	for resource in cost:
+		var amount := int(cost[resource]) * sign
+		if amount == 0:
+			continue
+		if resource == "wood":
+			state.city.progress.wood = maxi(0, int(state.city.progress.get("wood", 0)) - amount)
+		elif state.city.get("demo") is Dictionary and state.city.demo.get("wallet") is Dictionary:
+			state.city.demo.wallet[resource] = maxi(0, int(state.city.demo.wallet.get(resource, 0)) - amount)
 
 func forget_prediction(order: Dictionary) -> void:
 	# A refused order removes its forecast (same action on the same target).
@@ -4482,7 +4719,10 @@ func forget_prediction(order: Dictionary) -> void:
 		var predicted: Dictionary = pending_works[slot].get("order", {})
 		if predicted.get("action") == order.get("action") and predicted.get("id") == order.get("id") and \
 				predicted.get("plotId") == order.get("plotId") and predicted.get("buildingId") == order.get("buildingId"):
+			# The cost taken from the stores on the tap comes back.
+			spend_locally(pending_works[slot].get("cost", {}), -1)
 			pending_works.erase(slot)
+	refresh_hud()
 
 var tree_ids := {}
 
@@ -4504,84 +4744,153 @@ func job_tree_id(job: Variant) -> String:
 			return value
 	return ""
 
-# What the city shows as work right now: the server's job/order, else the local forecast.
+# Whether the server state already carries (or has finished) the predicted work.
+func prediction_settled(predicted: Dictionary) -> bool:
+	var order: Dictionary = predicted.get("order", {})
+	if predicted.has("tree"):
+		var target := str(order.get("id", ""))
+		for job in server_jobs():
+			if str(job.get("target", "")) == target or (not predicted.tree.is_empty() and job_tree_id(job) == predicted.tree):
+				return true
+		var progress: Dictionary = state.city.get("progress", {})
+		return order.get("action") == "tree" and target in progress.get("felled", []) or \
+			order.get("action") == "area" and target in progress.get("cleared", []) or \
+			order.get("action") == "site" and target in progress.get("sites", [])
+	for server_order in construction_orders():
+		if not str(predicted.building).is_empty() and str(server_order.get("buildingId", "")) == predicted.building:
+			return true
+		if not str(predicted.plot).is_empty() and str(server_order.get("plotId", "")) == predicted.plot:
+			return true
+	for building in state.city.buildings:
+		if not str(predicted.building).is_empty() and str(building.id) == predicted.building and int(predicted.get("level", -1)) >= 1 \
+				and int(building.level) > int(predicted.level):
+			return true
+		# A level set directly (older settlements without construction orders).
+		if order.get("action") == "level" and str(building.id) == str(order.get("buildingId", "")) and int(building.level) == int(order.get("level", -1)):
+			return true
+		if not str(predicted.plot).is_empty() and str(building.get("plotId", "")) == predicted.plot:
+			return true
+	return false
+
+# What the city shows as work right now: the server's jobs and orders, then the
+# local forecasts not yet in the server state. Returns [jobs, sites].
 func current_works(now: float) -> Array:
-	var job := {}
-	var server_job: Variant = state.city.get("progress", {}).get("job")
-	var server_tree := job_tree_id(server_job)
-	if not server_tree.is_empty() and server_job.has("endsAt"):
-		# Only the server's job runs a countdown: its own start and end.
+	var jobs: Array = []
+	var sites: Array = []
+	for slot in pending_works.keys():
+		var predicted: Dictionary = pending_works[slot]
+		# Already in the server state, or answered and still not there: drop the
+		# forecast. While its order is on the way it stays (a slow link is no reason
+		# to take the work off the screen).
+		var answered := int(predicted.get("answered", 0))
+		if prediction_settled(predicted) or (answered > 0 and Time.get_ticks_msec() - answered > 3000) \
+				or Time.get_ticks_msec() - int(predicted.get("sent", Time.get_ticks_msec())) > 120000:
+			pending_works.erase(slot)
+	for server_job in server_jobs():
+		var server_tree := job_tree_id(server_job)
+		if server_tree.is_empty() or not server_job.has("endsAt"):
+			continue
+		# Only the server's job runs the confirmed countdown: its own start and end.
 		var ends := float(server_job.endsAt)
-		job = {"tree": server_tree, "started": float(server_job.get("startedAt", ends - 5000.0)), "ends": ends,
-			"confirmed": true, "key": str(server_job.get("id", server_tree))}
+		var job := {"tree": server_tree, "started": float(server_job.get("startedAt", ends - 5000.0)), "ends": ends,
+			"confirmed": true, "key": server_tree}
 		tree_job_ms = ends - float(job.started)
-		if str(pending_works.get("tree", {}).get("tree", "")) == server_tree:
-			pending_works.erase("tree")
-	elif pending_works.has("tree"):
-		var predicted: Dictionary = pending_works.tree
-		var felled: Array = state.city.get("progress", {}).get("felled", [])
-		if predicted.tree in felled or Time.get_ticks_msec() - int(predicted.get("sent", Time.get_ticks_msec())) > 20000:
-			# Already done on the server, or the server never took it: drop the forecast.
-			pending_works.erase("tree")
-		else:
-			# Sent, not yet confirmed: the worker walks to the tree, no countdown yet.
-			job = predicted.duplicate()
-			job.confirmed = false
-	var site := {}
-	var order := construction_order()
-	var source := {}
-	if not order.is_empty() and order.get("kind", "") != "clear":
-		source = {"key": str(order.get("buildingId", order.get("plotId", ""))), "kind": str(order.get("kind", "")),
+		jobs.append(job)
+	var sources: Array = []
+	for order in construction_orders():
+		if order.get("kind", "") == "clear":
+			continue
+		sources.append({"key": str(order.get("buildingId", order.get("plotId", ""))), "kind": str(order.get("kind", "")),
 			"type": str(order.get("type", "")), "ends": float(order.get("endsAt", now)),
 			"started": float(order.get("startedAt", order.get("startsAt", 0.0))),
-			"confirmed": true, "id": str(order.get("requestId", "")), "plot": str(order.get("plotId", ""))}
-		pending_works.erase("site")
-	elif pending_works.has("site"):
-		var predicted: Dictionary = pending_works.site
-		if Time.get_ticks_msec() - int(predicted.get("sent", Time.get_ticks_msec())) > 20000:
-			pending_works.erase("site")
+			"confirmed": true, "id": str(order.get("requestId", "")), "plot": str(order.get("plotId", ""))})
+	for slot in pending_works:
+		var predicted: Dictionary = pending_works[slot]
+		if predicted.has("tree"):
+			if not str(predicted.tree).is_empty():
+				# Sent, not yet confirmed: the worker walks to the tree, the timer runs.
+				var job: Dictionary = predicted.duplicate()
+				job.confirmed = false
+				job.predicted = true
+				job.key = str(predicted.tree)
+				jobs.append(job)
 		else:
-			# Sent, not yet confirmed: scaffolding and builders, no countdown yet.
-			source = {"key": predicted.key, "kind": str(predicted.order.get("action", "")), "type": str(predicted.get("type", "")),
-				"ends": float(predicted.ends), "started": float(predicted.started), "confirmed": false,
-				"plot": str(predicted.get("plot", ""))}
-	if not source.is_empty() and is_instance_valid(stage):
-		var plot_id: String = source.plot if not str(source.get("plot", "")).is_empty() else source.key
-		var existing := {}
-		for building in state.city.buildings:
-			if str(building.id) == source.key:
-				plot_id = str(building.plotId)
-				existing = building
-		if source.started <= 0.0:
-			var terms: Dictionary = data.buildingTerms.get(source.type if existing.is_empty() else str(existing.type), {})
-			source.started = float(source.ends) - 1000.0 * float(terms.get("seconds", 30))
-		if stage.work_sites.has(plot_id):
-			site = source
-			site.position = stage.work_sites[plot_id]
-			# A new building rises inside the scaffolding; an upgrade keeps the building.
-			if existing.is_empty() and data.types.has(source.type):
-				var asset: Dictionary = data.models[data.types[source.type]]
-				site.model = asset.path
-				site.scale = float(asset.scale)
-				# A reworked level I rises as its own scene (architecture-v2).
-				var first_level: Variant = data.get("levelModels", {}).get(source.type, {}).get("1")
-				if first_level is Dictionary:
-					site.model = first_level.path
-					site.scale = float(first_level.get("scale", 1.0))
-			site.upgrade = not existing.is_empty()
-			# "Walls and gate" stands in the main gate of the city wall: the works go there.
-			var site_type: String = str(source.type) if existing.is_empty() else str(existing.type)
-			if stage.city_base_type(site_type) == "SUP-03" and stage.walls.visible:
-				var gate_level := maxi(1, int(existing.get("level", 1)))
-				var gate_scale: float = stage.gate_scene_scale(gate_level)
-				var out: Vector3 = stage.walls.main_gate_outward
-				var half := 5.6 if site.upgrade else 4.6
-				var tops := [4.1, 4.9, 7.3, 7.3, 8.6]
-				site.position = stage.walls.main_gate
-				site.yaw = atan2(out.x, out.z)
-				site.frame = Vector3(5.9 * gate_scale / half + 0.1, maxf(1.0, float(tops[gate_level - 1]) * gate_scale / 7.4 * 1.08), 1.9 * gate_scale / half)
-				site.erase("model")
-	return [job, site]
+			# Sent, not yet confirmed: scaffolding and builders, the timer runs.
+			sources.append({"key": predicted.key, "kind": str(predicted.order.get("action", "")), "type": str(predicted.get("type", "")),
+				"ends": float(predicted.ends), "started": float(predicted.started), "confirmed": false, "predicted": true,
+				"plot": str(predicted.get("plot", ""))})
+	for source in sources:
+		var site := site_view(source)
+		if not site.is_empty():
+			sites.append(site)
+	return [jobs, sites]
+
+func site_view(source: Dictionary) -> Dictionary:
+	if not is_instance_valid(stage):
+		return {}
+	var site := {}
+	var plot_id: String = source.plot if not str(source.get("plot", "")).is_empty() else source.key
+	var existing := {}
+	for building in state.city.buildings:
+		if str(building.id) == source.key:
+			plot_id = str(building.plotId)
+			existing = building
+	if source.started <= 0.0:
+		var terms: Dictionary = data.buildingTerms.get(source.type if existing.is_empty() else str(existing.type), {})
+		source.started = float(source.ends) - 1000.0 * float(terms.get("seconds", 30))
+	if stage.work_sites.has(plot_id):
+		site = source
+		site.position = stage.work_sites[plot_id]
+		# A new building rises inside the scaffolding; an upgrade keeps the building.
+		if existing.is_empty() and data.types.has(source.type):
+			var asset: Dictionary = data.models[data.types[source.type]]
+			site.model = asset.path
+			site.scale = float(asset.scale)
+			# A reworked level I rises as its own scene (architecture-v2).
+			var first_level: Variant = data.get("levelModels", {}).get(source.type, {}).get("1")
+			if first_level is Dictionary:
+				site.model = first_level.path
+				site.scale = float(first_level.get("scale", 1.0))
+		site.upgrade = not existing.is_empty()
+		# "Walls and gate" stands in the main gate of the city wall: the works go there.
+		var site_type: String = str(source.type) if existing.is_empty() else str(existing.type)
+		if stage.city_base_type(site_type) == "SUP-03" and stage.walls.visible:
+			var gate_level := maxi(1, int(existing.get("level", 1)))
+			var gate_scale: float = stage.gate_scene_scale(gate_level)
+			var out: Vector3 = stage.walls.main_gate_outward
+			var half := 5.6 if site.upgrade else 4.6
+			var tops := [4.1, 4.9, 7.3, 7.3, 8.6]
+			site.position = stage.walls.main_gate
+			site.yaw = atan2(out.x, out.z)
+			site.frame = Vector3(5.9 * gate_scale / half + 0.1, maxf(1.0, float(tops[gate_level - 1]) * gate_scale / 7.4 * 1.08), 1.9 * gate_scale / half)
+			site.erase("model")
+	return site
+
+# Each crew keeps its work: a work that is already shown by one crew stays there
+# when another work finishes (the builders do not jump between sites).
+var crew_keys := ["", "", "", ""]
+
+func assign_crews(items: Array, index: int) -> Array:
+	var crews := [{}, {}]
+	var placed := {}
+	for crew in 2:
+		var wanted: String = crew_keys[crew * 2 + index] if crew_keys.size() > crew * 2 + index else ""
+		for item in items:
+			if not wanted.is_empty() and str(item.get("key", item.get("tree", ""))) == wanted and not placed.has(wanted):
+				crews[crew] = item
+				placed[wanted] = true
+	for item in items:
+		var key := str(item.get("key", item.get("tree", "")))
+		if placed.has(key):
+			continue
+		for crew in 2:
+			if crews[crew].is_empty():
+				crews[crew] = item
+				placed[key] = true
+				break
+	for crew in 2:
+		crew_keys[crew * 2 + index] = str(crews[crew].get("key", crews[crew].get("tree", "")))
+	return crews
 
 # Clock for timers: server time, but never ahead of the latest confirmed answer plus
 # the wall time since it arrived, and never backward. After the app is suspended or
@@ -4834,14 +5143,19 @@ func _process(delta: float) -> void:
 		stage.present_workers(now / 1000.0)
 		var timer := timer_now()
 		var works := current_works(timer)
-		shown_job = works[0]
-		shown_site = works[1]
-		stage.works.present(works[0], works[1], timer, delta)
+		shown_jobs = works[0]
+		shown_sites = works[1]
+		shown_job = shown_jobs[0] if not shown_jobs.is_empty() else {}
+		shown_site = shown_sites[0] if not shown_sites.is_empty() else {}
+		var jobs := assign_crews(shown_jobs, 0)
+		var sites := assign_crews(shown_sites, 1)
+		stage.works.present(jobs[0], sites[0], timer, delta)
+		stage.works2.present(jobs[1], sites[1], timer, delta)
 		# The moment a timer reaches zero the server is asked at once, so the tree
 		# falls / the building appears exactly then, not at the next routine poll.
 		# After zero the server is asked every 1.5 s until it reports the work done
 		# (at most a minute), never more often.
-		ask_server_at_zero(works)
+		ask_server_at_zero(shown_jobs + shown_sites)
 	if map_name == "city" and now >= next_training_update:
 		stage.present_training(state, now)
 		next_training_update = now + 300.0
@@ -5195,13 +5509,15 @@ func inspect_plot(plot: Dictionary) -> void:
 		for definition in data.buildings:
 			if definition.base != "ECO-05" and data.types.has(definition.id):
 				button(modal_body, definition.ru, command.bind({"kind":"legacyBuilding", "action":"place",
-					"type":definition.id, "plotId":plot.id}), not player_id.is_empty() and construction_order().is_empty())
+					"type":definition.id, "plotId":plot.id}), not player_id.is_empty() and builder_ready())
 		button(modal_body, "К списку участков", show_construction)
 		return
-	var builder_ready := construction_order().is_empty() and state.city.progress.get("job") == null
+	var worker_free := builder_ready()
+	if not worker_free:
+		add_workers_note(modal_body)
 	if plot.id not in kingdom.get("clearedPlots", []) and not plot.id.begins_with("site-"):
 		button(modal_body, "Расчистить · 15 еды · 6 сек.", command.bind({"kind":"kingdom","action":"clear","plotId":plot.id}),
-			not player_id.is_empty() and builder_ready and balance("food") >= 15)
+			not player_id.is_empty() and worker_free and balance("food") >= 15)
 		button(modal_body, "К списку участков", show_construction)
 		return
 	var existing := {}
@@ -5216,7 +5532,7 @@ func inspect_plot(plot: Dictionary) -> void:
 			var terms: Dictionary = data.buildingTerms[definition.id]
 			var order := {"kind":"kingdom","action":"build","plotId":plot.id,"type":definition.id}
 			button(modal_body, "%s · %s · %d сек." % [definition.ru, cost_label(terms.cost), int(terms.seconds)], command.bind(order),
-				not player_id.is_empty() and builder_ready and can_afford(terms.cost))
+				not player_id.is_empty() and worker_free and can_afford(terms.cost))
 		else:
 			row(modal_body, "%s · ратуша %d" % [definition.ru, required])
 	button(modal_body, "К списку участков", show_construction)
@@ -5240,14 +5556,20 @@ func pick_tree(screen_position: Vector2) -> void:
 	if selected.is_empty():
 		return
 	open_modal(selected.name)
+	var worked := pending_works.values().any(func(work): return str(work.get("tree", "")) == str(selected.id)) or \
+		server_jobs().any(func(job): return str(job.get("target", "")) == str(selected.id))
+	if worked:
+		row(modal_body, "Здесь уже работает рабочий.")
+	elif not builder_ready():
+		add_workers_note(modal_body)
 	if selected.id in felled:
 		var order := {"kind":"resource","action":"site","id":selected.id}
-		button(modal_body,"Подготовить участок",command.bind(order),not player_id.is_empty())
+		button(modal_body,"Подготовить участок",command.bind(order),not player_id.is_empty() and builder_ready() and not worked)
 	else:
 		var seconds := (tree_job_ms if tree_job_ms > 0.0 else float(selected.durationMs)) / 1000.0
 		row(modal_body, "%d дерева · %.0f сек." % [int(selected.wood), seconds])
 		var order := {"kind":"resource","action":"tree","id":selected.id}
-		button(modal_body,"Срубить",command.bind(order),not player_id.is_empty())
+		button(modal_body,"Срубить",command.bind(order),not player_id.is_empty() and builder_ready() and not worked)
 
 func run_smoke() -> void:
 	await get_tree().process_frame

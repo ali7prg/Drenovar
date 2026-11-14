@@ -57,7 +57,10 @@ func run() -> void:
 	apply.pressed.emit()
 	apply.pressed.emit()
 	await process_frame
-	check(apply.disabled or not is_instance_valid(apply), "Apply button not locked while sending")
+	# The window closes at once (build 51: the speedup works on the tap); a button
+	# still on screen must be locked.
+	check(not is_instance_valid(apply) or apply.disabled, "Apply button not locked while sending")
+	check(not game.modal.visible, "Speedup window still open after the tap")
 	while game.command_in_progress or game.speedup_in_flight:
 		await process_frame
 	sent[0] = game.api.requests_total - before

@@ -27,7 +27,9 @@ const TWO_SCENE_MEMORY_MB := 1300.0
 # The other scene is prepared in the background after this much idle time.
 const PREWARM_IDLE_MSEC := 2500
 const PREWARM_QUIET_MSEC := 600
-const LIVE_SERVER := "https://drenovar.pink-lyric-9420.chatgpt.site"
+# The game server on the owner's Cloudflare (device accounts, settlement transfer,
+# route-approach-v2). The old ChatGPT Sites server is OLD_SERVER_URL below.
+const LIVE_SERVER := "https://drenovar-game.ali069587.workers.dev"
 # The ChatGPT Sites server. On the Cloudflare server it is only used to move a
 # settlement: the player confirms the old login there, the new server reads it.
 const OLD_SERVER_URL := "https://drenovar.pink-lyric-9420.chatgpt.site"

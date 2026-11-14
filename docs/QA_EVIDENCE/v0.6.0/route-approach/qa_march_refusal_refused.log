@@ -1,0 +1,19 @@
+ok  Connected to the local server
+ok  Fixture: Tenerys I stands next to the building on v1-33
+ok  March window opened from «Атаковать»
+ok  Party can be sent at once
+ok  Button shows «Отправляем…», «Выход через N с» or, refused at once, «Ждём путь…» (Отправляем…)
+ok  The order got an answer
+ok  Refused order waits for an open route (button: Ждём путь…)
+ok  Status explains the wait: Путь перекрыт постройкой. Отряд выйдет, как только зверь отойдёт.
+ok  Route preview keeps asking: Путь к цели перекрыт постройкой. Ждём, пока зверь отойдёт…
+ok  No army, no soldiers lost while waiting
+ok  After one patrol round the refusal is shown (Нет безопасного пути к цели)
+ok  «Отправляем…»/«Ждём путь…» removed from the button (Марш)
+ok  No order left hanging
+ok  «Повторить расчёт» offered
+ok  «Повторить расчёт» asks the server again
+ok  March window reopened for another attempt
+ok  Send button usable on the new attempt
+ok  Closing the window stops the waiting
+QA_MARCH_REFUSAL mode=refused checks=18 failures=0

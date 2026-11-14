@@ -132,3 +132,27 @@ IPA: `tools/repack_engine_capsule.py` на капсуле движка 0.5.9 (б
   изменены); переделанные сцены уровней (architecture-v2) и модели зданий — без изменений.
 - Таблица габаритов: `godot --headless --path project -s tools/measure_footprints.gd -- --check`.
 - Проверка: `qa_town_plan.gd`.
+
+## Build 53: узнаваемые склад, амбар, рынок, каменоломня и шахта (QA 0.6.0 test 5, VIS-01…03)
+
+Добавлены 19 уровней (всего 59 переделанных позиций + 10 перенесённых), переписаны рецепты V этих серий,
+чтобы элементы предыдущих уровней не терялись при улучшении:
+
+| Серия | Тип | Уровни | Узнаваемые признаки |
+|---|---|---|---|
+| B03_Warehouse | ECO-01 (Склад) | I–V | низкий длинный корпус, широкие откатные ворота, погрузочная платформа и пандус; III+ слуховое окно с крюком, IV кран, V кладовая |
+| B04_Granary | ECO-02 (Амбар) | I–V | высокий корпус на каменных опорах, наружная лестница, жалюзи и вентиляционные башенки на коньке; V боковое крыло |
+| B05_Marketplace | ECO-03 (Рынок) | III–V | круглая площадь, прилавки вокруг центра, шатёр; IV галерея; V фонтан с обходом и арка |
+| B07_StoneQuarry | RES-02 (Каменоломня) | I–V | открытый забой со светлыми уступами, обращёнными к камере, скальный борт, площадка с блоками |
+| B08_IronMine | RES-03 (Железная шахта) | I–V | тёмный холм, портал штольни (крепь → каменная арка), рельсы к улице, вагонетка |
+
+Склад и амбар больше не используют общую модель `warehouse` (файл не изменён), каменоломня и шахта — `quarry27`/`ironmine27`,
+рынок III–V — `market27`. Утверждённая ранее серия B04 переделана по замечанию VIS-01.
+
+```bash
+godot --headless --path project -s tools/architecture/build.gd -- only=ECO-01-1,ECO-02-1   # пересборка
+godot --headless --path project -s tools/measure_footprints.gd -- --write                   # дворы
+godot --headless --path project -s qa_architecture.gd
+godot --headless --path project -s qa_building_looks.gd && godot --headless --path project -s qa_building_looks.gd -- --restart
+xvfb-run -s "-screen 0 1100x760x24" godot --rendering-driver opengl3 --path project -s profile_building_levels.gd -- --out=/abs/dir --tag=after --pairs
+```

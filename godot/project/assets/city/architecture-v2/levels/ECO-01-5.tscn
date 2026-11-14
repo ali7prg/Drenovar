@@ -1,20 +1,17 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-01-5-base.res" id="1_6ekq6"]
-[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-01-5.res" id="2_csfbf"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-01-5.res" id="1_ecxn2"]
 
-[node name="ECO_01_5" type="Node3D" unique_id=1098188329]
+[node name="ECO_01_5" type="Node3D" unique_id=452283110]
 metadata/series = "B03_Warehouse"
 metadata/lanes = [{
-"from": Vector3(4.75, 0, 6.9),
+"from": Vector3(1.036, 0, 6.7),
 "height": 1.9,
-"kind": "unit",
-"to": Vector3(4.75, 0, 4.1),
-"width": 1.2
+"kind": "cart",
+"to": Vector3(1.036, 0.73, 0.65),
+"width": 1.5
 }]
+metadata/worker_offset = Vector3(-4.2, 0, 4.6)
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=1869043926]
-mesh = ExtResource("1_6ekq6")
-
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1946802516]
-mesh = ExtResource("2_csfbf")
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1339398262]
+mesh = ExtResource("1_ecxn2")

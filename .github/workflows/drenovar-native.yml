@@ -50,6 +50,12 @@ jobs:
             fi
           done
           exit $status
+      - name: Building looks survive upgrade and client restart
+        working-directory: godot/project
+        run: |
+          timeout 300 "$GODOT_BIN" --headless --path . -s qa_building_looks.gd | grep -E '^(STEP|FAIL|QA_)'
+          timeout 300 "$GODOT_BIN" --headless --path . -s qa_building_looks.gd -- --restart | grep -E '^(RESTART|FAIL|QA_)'
+          timeout 600 "$GODOT_BIN" --headless --path . -s qa_architecture.gd | grep -E '^(FAIL|QA_|LEVEL_)'
       - name: City update profile
         if: always()
         working-directory: godot/project

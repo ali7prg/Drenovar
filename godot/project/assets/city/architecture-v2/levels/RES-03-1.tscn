@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-03-1.res" id="1_6wa61"]
+
+[node name="RES_03_1" type="Node3D" unique_id=1054821963]
+metadata/series = "B08_IronMine"
+metadata/lanes = [{
+"from": Vector3(-0.9, 0, 3),
+"height": 2.0,
+"kind": "rail",
+"to": Vector3(-0.9, 0, 0.85),
+"width": 1.0
+}]
+metadata/worker_offset = Vector3(2.4, 0, 4.3)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=762626034]
+mesh = ExtResource("1_6wa61")

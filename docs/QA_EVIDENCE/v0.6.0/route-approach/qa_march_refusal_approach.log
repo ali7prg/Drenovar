@@ -5,7 +5,8 @@ ok  Tenerys 2 (preview): crosses the wall only through gates (1 crossings, targe
 ok  Tenerys 2 (preview): no needless crossing of the wall
 ok  March window opened from «Атаковать»
 ok  Party can be sent at once
-ok  Button shows «Отправляем…» while the order is on its way
+ok  Button shows «Отправляем…», «Выход через N с» or, refused at once, «Ждём путь…» (Отправляем…)
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
 ok  The order got an answer
 ok  Army marched to Tenerys I next to the building
 ok  March window closed after the order

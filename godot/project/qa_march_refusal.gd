@@ -157,7 +157,7 @@ func run() -> void:
 	# server's clock never stops), so it may hold the order for the predicted opening.
 	check((send.text == "Отправляем…" or send.text.begins_with("Выход через") or send.text == "Ждём путь…") and send.disabled, "Button shows «Отправляем…», «Выход через N с» or, refused at once, «Ждём путь…» (%s)" % send.text)
 	# A held order («Выход через N с») is sent at its moment; then it gets an answer.
-	check(await wait_until(func(): return not send.text.begins_with("Выход через") and not send.text == "Отправляем…" and not game.command_in_progress, 30.0), "The order got an answer")
+	check(await wait_until(func(): return not is_instance_valid(send) or (not send.text.begins_with("Выход через") and not send.text == "Отправляем…" and not game.command_in_progress), 30.0), "The order got an answer")
 	await process_frame
 	match mode:
 		"refused":

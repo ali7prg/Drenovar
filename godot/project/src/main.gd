@@ -3250,7 +3250,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	# The client's forecast of when the creature is in the open (route_wait_ms). Off
 	# once the server refuses a route the forecast called open: then the window falls
 	# back to asking the server.
-	var forecast := {"on": city}
+	var forecast := {"on": city, "asked": false}
 	# Lives in the window: closing it ends the waiting.
 	var blocked_timer := Timer.new()
 	blocked_timer.one_shot = true
@@ -3397,10 +3397,13 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		elif not march_wall().is_empty():
 			order.wall = march_wall()
 		retry.hide()
-		if forecast.on and not submit.sending:
-			# The creature is beside a building right now: the server would refuse the
-			# route (and take long to do so). Ask again when the way is open.
-			var wait := route_wait_ms(id)
+		var predicted := route_wait_ms(id) if forecast.on else 0.0
+		if forecast.on and forecast.asked and not submit.sending:
+			# The creature is beside a building right now: server v92 would refuse the
+			# route (and take long to do so). Ask again when the way is open. The first
+			# preview always goes to the server: a server that reaches such a creature
+			# (route-approach patch) turns the forecast off.
+			var wait := predicted
 			if wait > 300.0:
 				if not route_map.visible:
 					show_local_march(id, route_map)
@@ -3408,6 +3411,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 				send.disabled = false
 				blocked_timer.start(minf(wait / 1000.0, 1.0))
 				return
+		forecast.asked = true
 		if not (city and route_map.visible):
 			quote.text = "Прокладываем путь…" if city else "Рассчитываем маршрут…"
 		var response := await send_request("march-preview" if loopback else "native/game/march-preview", order, false, 8.0)
@@ -3420,7 +3424,8 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			return
 		if not response.has("path"):
 			if city and response.get("error", "") == BLOCKED_ROUTE and not submit.sending:
-				forecast.on = false
+				if predicted <= 300.0:
+					forecast.on = false
 				var now := Time.get_ticks_msec()
 				if blocked.until == 0:
 					blocked.until = now + BLOCKED_ROUTE_WAIT_MS
@@ -3447,6 +3452,9 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			# A refused route (not a lost connection) cannot be marched.
 			send.disabled = true
 			return
+		if predicted > 300.0:
+			# The server reached a creature the forecast called blocked: no holding.
+			forecast.on = false
 		quote.text = "Прибытие через %d с%s" % [ceili((float(response.get("travelMs", 0)) + 1400.0) / 1000.0),
 			" · через переправу" if response.get("usesFerry", false) else ""]
 		stage.show_route(response.path)
@@ -3522,6 +3530,14 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			# saying «Прокладываем путь…». Show the server's reason and offer a retry.
 			if city and last_command_error == BLOCKED_ROUTE:
 				forecast.on = false
+				if route_wait_ms(id) < 0.0:
+					# The whole patrol runs beside a building: waiting cannot help with
+					# server v92 (route-approach-v2 lets the army stop next to the creature).
+					blocked.orders = 3
+					quote.text = "Зверь всё время ходит вплотную к постройке, и сервер не прокладывает к нему путь. Атака на этого зверя заработает после обновления сервера (route-approach-v2)."
+					modal_status.hide()
+					retry.show()
+					return
 			if city and last_command_error == BLOCKED_ROUTE and not preview.units.is_empty() and blocked.orders < 3:
 				# Keep the order: ask for the route again and send it once the way is open.
 				blocked.orders += 1

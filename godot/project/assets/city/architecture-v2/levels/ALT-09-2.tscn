@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-09-2-base.res" id="1_gu68g"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-09-2.res" id="2_7vaqi"]
+
+[node name="ALT_09_2" type="Node3D" unique_id=1690836412]
+metadata/series = "B26_StoneWorkshop"
+metadata/lanes = [{
+"from": Vector3(4.6, 0, 6.4),
+"height": 1.8,
+"kind": "unit",
+"to": Vector3(4.6, 0, 1.3),
+"width": 0.9
+}]
+
+[node name="Base" type="MeshInstance3D" parent="." unique_id=10352719]
+mesh = ExtResource("1_gu68g")
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=2113137194]
+mesh = ExtResource("2_7vaqi")

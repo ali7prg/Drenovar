@@ -1,0 +1,19 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ERROR: { "error": "Сначала войди в аккаунт." }
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://qa_battle_rewards.gd:15)
+       [1] check_battle (res://qa_battle_rewards.gd:36)
+       [2] run (res://qa_battle_rewards.gd:92)
+       [3] show_scene (res://src/main.gd:945)
+       [4] setup (res://src/landscape.gd:191)
+ERROR: { "error": "Сначала войди в аккаунт." }
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://qa_battle_rewards.gd:15)
+       [1] check_battle (res://qa_battle_rewards.gd:36)
+       [2] run (res://qa_battle_rewards.gd:94)
+       [3] show_scene (res://src/main.gd:945)
+       [4] setup (res://src/landscape.gd:191)
+QA_BATTLE_REWARDS checks=2 failures=2

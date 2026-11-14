@@ -264,9 +264,8 @@ func expected_paths(type: String, level: int, base_id: String, table: Dictionary
 		return paths
 	var id: String = data.starterHall if type == "ECO-05" and level == 1 else base_id
 	paths.append(data.models[id].path)
-	var overlay: String = data.architecture.get(type, {}).get(str(level), "")
-	if not overlay.is_empty():
-		paths.append(overlay)
+	# Build 52: the scattered level props (city-details overlays) are replaced by the
+	# yard dressing of the town plan, so no overlay node is expected.
 	return paths
 
 # ---------------------------------------------------------------- 3

@@ -3,6 +3,12 @@ extends SceneTree
 # Proves that the incremental city presentation (0.6.0) renders exactly what the
 # full-rebuild implementation from 0.5.9 renders, for a sequence of authoritative
 # state changes, while rebuilding vegetation only when it actually changes.
+# Build 52 (town plan) intentionally changes the town ground: yards and straight
+# streets replace the 0.5.9 roads, felled trees leave no stump, the scattered level
+# props (city-details overlays) are replaced by the yard dressing and the town is
+# cleared of undergrowth. Buildings, workers, markers and plots are still compared
+# with 0.5.9; the ground, vegetation and parade are compared with a fresh full
+# build of the current code (the incremental update must equal a rebuild).
 
 var failures: Array[String] = []
 var checks := 0
@@ -76,7 +82,7 @@ func marker_rows(markers: Array) -> Array:
 # with the rising building), so the 0.5.9 scaffold model is left out of the
 # comparison; every other building node must still match.
 func without_scaffold(rows: Array) -> Array:
-	return rows.filter(func(row): return not String(row).contains("scaffold"))
+	return rows.filter(func(row): return not String(row).contains("scaffold") and not String(row).contains("/city-details/"))
 
 # Since the city wall (build 36) only plots inside the yard are offered; the 0.5.9
 # plots are compared within the same yard.
@@ -101,15 +107,26 @@ func note_reworked(stage: Node3D) -> void:
 			reworked_spots[var_to_str(child.transform.origin)] = true
 
 func snapshot(stage: Node3D, yard) -> Dictionary:
-	return {"batches": batch_rows(stage), "buildings": without_reworked(without_scaffold(node_rows(stage.buildings))), "workers": node_rows(stage.workers),
-		"markers": marker_rows(stage.place_markers), "plots": marker_rows(yard_plots(stage.empty_plots, yard)),
-		"trees": stage.selectable_trees.map(func(t): return t.id), "standing": stage.standing_tree_cells.size(),
-		"parade": stage.parade_slots.map(func(s): return var_to_str(s.position)),
-		"road": var_to_str(stage.city_road_mesh.mesh.get_faces()) if is_instance_valid(stage.city_road_mesh) else ""}
+	return {"buildings": without_reworked(without_scaffold(node_rows(stage.buildings))), "workers": node_rows(stage.workers),
+		"markers": marker_rows(stage.place_markers), "plots": marker_rows(yard_plots(stage.empty_plots, yard))}
 
-func compare(label: String, before: Node3D, after: Node3D) -> void:
+func town_rows(stage: Node3D) -> Array:
+	var rows: Array = []
+	for node in stage.town.get_children():
+		if node is MeshInstance3D and node.mesh != null:
+			rows.append("%s|%d|%s" % [node.name, node.mesh.get_faces().size(), str(hash(node.mesh.get_faces()))])
+	rows.sort()
+	return rows
+
+func ground_snapshot(stage: Node3D) -> Dictionary:
+	return {"batches": batch_rows(stage), "trees": stage.selectable_trees.map(func(t): return t.id),
+		"standing": stage.standing_tree_cells.size(), "parade": stage.parade_slots.map(func(s): return var_to_str(s.position)),
+		"streets": var_to_str(stage.city_streets), "town": town_rows(stage),
+		"mask": str(hash(stage.town_plan.mask.get_data())) if stage.town_plan.mask != null else ""}
+
+func compare(label: String, before: Node3D, after: Node3D, fresh: Node3D) -> void:
 	for zoom in [32.0, 70.0, 110.0]:
-		for stage in [before, after]:
+		for stage in [before, after, fresh]:
 			stage.target = Vector3(4, 0, -6)
 			stage.zoom = zoom
 			stage.update_camera(0, true)
@@ -119,6 +136,16 @@ func compare(label: String, before: Node3D, after: Node3D) -> void:
 		var b := snapshot(after, after.walls)
 		for key in a:
 			check(a[key] == b[key], "%s zoom=%d: %s differs from 0.5.9" % [label, zoom, key])
+		var c := ground_snapshot(after)
+		var d := ground_snapshot(fresh)
+		for key in c:
+			check(c[key] == d[key], "%s zoom=%d: %s differs from a full rebuild" % [label, zoom, key])
+
+func rebuilt(data: Dictionary, state: Dictionary) -> Node3D:
+	var stage = load("res://src/landscape.gd").new()
+	root.add_child(stage)
+	await stage.setup(data, state.duplicate(true), "city", {})
+	return stage
 
 func run() -> void:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/game.json"))
@@ -131,7 +158,9 @@ func run() -> void:
 	var state: Dictionary = data.demo.duplicate(true)
 	await before.setup(data, state, "city", {})
 	await after.setup(data, state, "city", {})
-	compare("initial", before, after)
+	var fresh: Node3D = await rebuilt(data, state)
+	compare("initial", before, after, fresh)
+	fresh.free()
 	var steps: Array = []
 	# 1. Building upgrade: no vegetation change.
 	steps.append(func(s): s.city.buildings[1].level = 2)
@@ -163,7 +192,9 @@ func run() -> void:
 		after.present(state)
 		if after.vegetation_rebuilds != counted:
 			vegetation_steps.append(index)
-		compare("step %d" % index, before, after)
+		fresh = await rebuilt(data, state)
+		compare("step %d" % index, before, after, fresh)
+		fresh.free()
 	check(vegetation_steps == [3, 4, 5], "Vegetation rebuilt on unexpected steps: " + str(vegetation_steps))
 	check(after.ground_rebuilds - ground_before == 2, "Ground cover rebuilt %d times, expected 2 (plot + grove)" % (after.ground_rebuilds - ground_before))
 	var vegetation_total: int = after.vegetation_rebuilds - rebuilds_before

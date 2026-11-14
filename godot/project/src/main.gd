@@ -14,6 +14,7 @@ const HudAction = preload("res://src/hud_action.gd")
 const SessionDiagnostics = preload("res://src/session_diagnostics.gd")
 const BuildingPlates = preload("res://src/building_plates.gd")
 const CityDefence = preload("res://src/city_defence.gd")
+const TownGround = preload("res://src/town_ground.gd")
 const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
 const RECRUIT_ORDER := ["ENG-09", "ENG-08", "ENG-01", "ENG-02", "ENG-07", "ENG-10", "ENG-03", "ENG-04", "ENG-05", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
@@ -3204,11 +3205,8 @@ func building_preview_parts(type: String, level: int) -> Array:
 	if id.is_empty():
 		return []
 	var asset: Dictionary = data.models[id]
-	var parts := [[asset.path, float(asset.scale) * (1.0 + 0.055 * (level - 1)), false]]
-	var overlay: String = data.architecture.get(type, {}).get(str(level), "")
-	if not overlay.is_empty():
-		parts.append([overlay, 1.0, true])
-	return parts
+	# Level props are the yard dressing of the town plan (added by load_building_preview).
+	return [[asset.path, float(asset.scale) * (1.0 + 0.055 * (level - 1)), false]]
 
 func load_building_preview(preview: SubViewportContainer, type: String, level: int) -> void:
 	var parts := building_preview_parts(type, level)
@@ -3245,6 +3243,10 @@ func load_building_preview(preview: SubViewportContainer, type: String, level: i
 		if part[2]:
 			for mesh: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
 				mesh.material_override = stage.scenery_material
+	# The yard as the city draws it at this level (kerb, forecourt, posts, lanterns).
+	var lots: Variant = stage.get("town_lots") if is_instance_valid(stage) else null
+	if lots is Dictionary and lots.has(type) and building_definition(type).get("base", type) != "SUP-03":
+		model.add_child(TownGround.preview(lots, type, level))
 	var bounds := AABB()
 	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 		var box := mesh.global_transform * mesh.get_aabb()
@@ -3260,8 +3262,8 @@ func load_building_preview(preview: SubViewportContainer, type: String, level: i
 	camera.make_current()
 	var ground := MeshInstance3D.new()
 	var disc := CylinderMesh.new()
-	disc.top_radius = 7.4
-	disc.bottom_radius = 7.4
+	disc.top_radius = 9.4
+	disc.bottom_radius = 9.4
 	disc.height = 0.1
 	ground.mesh = disc
 	var turf := StandardMaterial3D.new()

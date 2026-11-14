@@ -71,6 +71,12 @@ func run() -> void:
 					stage.update_camera(0, true)
 					times[j].append((Time.get_ticks_usec() - start) / 1000.0)
 					counts[j] += submitted(stage)
+				# Build 52 changed what stands in the town (yards and straight streets, no
+				# stumps or undergrowth), so city batches no longer match 0.5.3 one to one.
+				# The culling itself is unchanged and is still compared on the world map,
+				# whose scenery is the same; the city reports its costs only.
+				if scene == "city":
+					continue
 				if before.render_batches.size() != after.render_batches.size() or not check_batches(before, after):
 					push_error("Placement, LOD or visibility changed in %s at %.0f" % [scene, zoom])
 					quit(1)

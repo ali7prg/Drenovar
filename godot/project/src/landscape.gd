@@ -19,6 +19,9 @@ const MEADOW_SHADER = preload("res://src/meadow.gdshader")
 const FOREST_SHADER = preload("res://src/forest.gdshader")
 const CityWorks = preload("res://src/city_works.gd")
 const CityWalls = preload("res://src/city_walls.gd")
+const TownPlan = preload("res://src/town_plan.gd")
+const TownGround = preload("res://src/town_ground.gd")
+const TOWN_LOTS := "res://assets/city/town_lots.json"
 # B18 gate scenes are authored at plot scale; in the city wall they stand larger so
 # the carriageway and towers match the height of the ring curtain.
 const GATE_SCENE_SCALES := [1.9, 2.0, 2.0, 2.1, 2.2]
@@ -30,6 +33,11 @@ var works := CityWorks.new()
 # The second worker's crew (workers-v1: a second worker from «Жилой дом» III).
 var works2 := CityWorks.new()
 var walls := CityWalls.new()
+# Yards, streets and their dressing (build 52): see src/town_plan.gd.
+var town_plan := TownPlan.new()
+var town := TownGround.new()
+var town_lots: Dictionary = {}
+var town_rebuilds := 0
 var forest_materials := {}
 var focus_radius := 0.0
 var focus_centre := Vector3.ZERO
@@ -205,6 +213,10 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	add_child(march_lines)
 	add_child(battle_fx)
 	if is_city:
+		town.name = "Town"
+		add_child(town)
+		var lots_table: Variant = JSON.parse_string(FileAccess.get_file_as_string(TOWN_LOTS))
+		town_lots = lots_table.get("types", {}) if lots_table is Dictionary else {}
 		works.setup(self, data)
 		add_child(works)
 		works2.setup(self, data)
@@ -364,56 +376,40 @@ func build_water() -> void:
 		strips.append([array_point(a[0]),array_point(a[1]),array_point(b[0]),array_point(b[1])])
 	path_mesh(strips, water_material(Color("#42777c")), 0.1)
 
-func build_city_roads(city: Dictionary, plots: Array) -> void:
-	if is_instance_valid(city_road_mesh):
-		city_road_mesh.free()
-	city_streets.clear()
-	var by_id := {}
-	for plot in plots:
-		by_id[plot.id] = Vector2(plot.x, plot.z)
-	var hall: Dictionary = city.buildings[0]
-	for building in city.buildings:
-		if building.type in ["ECO-05", "ALT-13"]:
-			hall = building
-			break
-	var a: Vector2 = by_id.get(hall.plotId, Vector2.ZERO)
-	a.y += 4.0
-	for building in city.buildings:
-		if building.id == hall.id or not by_id.has(building.plotId):
-			continue
-		var end: Vector2 = by_id[building.plotId] + Vector2(0.0, 3.5)
-		var previous := a
-		for i in range(1, 9):
-			var t := i / 8.0
-			var next := a.lerp(end, t) + sin(t * PI) * Vector2(1.1, 0.7)
-			city_streets.append([previous, next])
-			previous = next
-	# Roads through the wall gates; the main gate is joined to the town hall.
+# Yards and streets for the buildings on their plots (see src/town_plan.gd). Streets
+# depend only on where the buildings stand (each yard is sized for the largest of its
+# levels), so an upgrade restyles the yard without moving streets or vegetation.
+func plan_town(town_buildings: Array, plots: Array, district: Variant) -> void:
+	var gates: Array = []
 	if walls.visible:
-		for i in walls.gate_roads.size():
-			var road: Array = walls.gate_roads[i]
-			var start: Vector2 = road[0]
-			var finish: Vector2 = road[1]
-			for k in 6:
-				city_streets.append([start.lerp(finish, k / 6.0), start.lerp(finish, (k + 1) / 6.0)])
-			if i == 0:
-				var previous := a
-				for k in range(1, 11):
-					var t := k / 10.0
-					var next := a.lerp(start, t) + sin(t * PI) * Vector2(1.4, 0.0)
-					city_streets.append([previous, next])
-					previous = next
-	var strips: Array = []
-	for road in city_streets:
-		var start: Vector2 = road[0]
-		var end: Vector2 = road[1]
-		var n := (end-start).orthogonal().normalized()*0.7
-		var quad: Array = []
-		for p in [start+n,start-n,end+n,end-n]:
-			quad.append(Vector3(p.x,sample_city(p.x,p.y)+0.065,p.y))
-		strips.append(quad)
-	if not strips.is_empty():
-		city_road_mesh = path_mesh(strips,surface("path"),0.35)
+		for road in walls.gate_roads:
+			gates.append([road[0], road[1]])
+	var obstacles: Array = []
+	if district is Dictionary:
+		obstacles.append(Rect2(float(district.x) - 15.7, float(district.z) - 12.7, 31.4, 25.4))
+	var corners: Array = plots.map(func(p): return Vector2(float(p.x), float(p.z)))
+	var key := JSON.stringify([town_buildings, gates.map(func(g): return [g[0].x, g[0].y, g[1].x, g[1].y]),
+		obstacles.map(func(r: Rect2): return [r.position.x, r.position.y]), corners.map(func(c: Vector2): return [c.x, c.y])])
+	if key == geometries.get("town_signature", ""):
+		return
+	geometries["town_signature"] = key
+	town_plan.plan(town_buildings, town_lots, gates, corners, obstacles, town_ground_ok)
+	city_streets = town_plan.street_lines()
+
+func town_ground_ok(x: float, z: float) -> bool:
+	if maxf(absf(x), absf(z)) > 58.0 or static_height(x, z) < -0.2:
+		return false
+	return not walls.visible or walls.inside(x, z, 1.0)
+
+# Inside the town: no wild undergrowth or loose boulders (inside the wall, or near the
+# yards before the wall stands).
+func in_town(x: float, z: float) -> bool:
+	if walls.visible:
+		return walls.inside(x, z, -1.0)
+	for lot: Dictionary in town_plan.lots:
+		if lot.rect.grow(4.0).has_point(Vector2(x, z)):
+			return true
+	return false
 
 func build_world_water() -> void:
 	var plane := PlaneMesh.new()
@@ -592,10 +588,8 @@ func build_forest(city: Dictionary, exclusions: Array, rebuild_ground := true, s
 		var tree: Dictionary = entry.tree
 		var p: Vector3 = entry.p
 		selectable_trees.append(tree)
+		# A felled tree is cleared away completely (no stump is left in the town).
 		if felled.has(tree.id):
-			if not details.has("tree_stump"):
-				details.tree_stump = []
-			details.tree_stump.append(model_transform(p.x, p.y, p.z, 0.0, 0.7))
 			continue
 		var cell: Vector2i = entry.cell
 		if not standing_tree_cells.has(cell):
@@ -622,7 +616,7 @@ func build_forest(city: Dictionary, exclusions: Array, rebuild_ground := true, s
 		await yield_frame()
 	var understory: Dictionary = {}
 	for prop in data.cityUnderstory:
-		if inside_exclusions(prop.x, prop.z, exclusions) or walls.blocks(prop.x, prop.z):
+		if inside_exclusions(prop.x, prop.z, exclusions) or walls.blocks(prop.x, prop.z) or in_town(prop.x, prop.z):
 			continue
 		if not understory.has(prop.id):
 			understory[prop.id] = []
@@ -639,6 +633,8 @@ func build_meadow(exclusions: Array) -> void:
 		var transforms: Array = []
 		for item in data.groundCover[kind]:
 			if inside_exclusions(item.x, item.z, exclusions) or on_street(Vector2(item.x, item.z), 0.85) or walls.blocks(item.x, item.z):
+				continue
+			if town_plan.covered(item.x, item.z) or (kind == "rocks" and in_town(item.x, item.z)):
 				continue
 			var y := static_height(item.x, item.z)
 			var scale := float(item.size)
@@ -663,9 +659,11 @@ func static_height(x: float, z: float) -> float:
 	return cached
 
 func on_street(p: Vector2, width: float) -> bool:
+	# A street [a, b, half width] keeps clear its own width plus the half of `width`.
 	for segment in city_streets:
 		var near := Geometry2D.get_closest_point_to_segment(p, segment[0], segment[1])
-		if p.distance_squared_to(near) < width * width:
+		var limit: float = float(segment[2]) + width * 0.5 if segment.size() > 2 else width
+		if p.distance_squared_to(near) < limit * limit:
 			return true
 	return false
 
@@ -1046,6 +1044,7 @@ func present_city(state: Dictionary, staged := false) -> void:
 		elif base == "SUP-03":
 			defence_level = maxi(defence_level, int(building.level))
 	var wall_markers: Array = []
+	var town_buildings: Array = []
 	for building in city.buildings:
 		occupied[building.plotId] = true
 		for plot in plots:
@@ -1072,13 +1071,13 @@ func present_city(state: Dictionary, staged := false) -> void:
 				wanted_buildings.append(["model", level_model.path, model_transform(x,y,z,0,float(level_model.get("scale", 1.0)))])
 				wanted_workers.append([id, Vector3(x,y,z), level_worker_offset(level_model)])
 			else:
+				# The scattered level props of 0.5.9 (city-details/<type>-<level>.glb) are
+				# replaced by the yard dressing of the town plan, the same for every building.
 				var scale := float(asset.scale)*(1+0.055*(int(building.level)-1))
 				wanted_buildings.append(["model", asset.path, model_transform(x,y,z,0,scale)])
 				wanted_workers.append([id, Vector3(x,y,z)])
-				var levels: Dictionary = data.architecture.get(building.type, {})
-				var upgrade: String = levels.get(str(int(building.level)), "")
-				if not upgrade.is_empty():
-					wanted_buildings.append(["detail", upgrade, Transform3D(Basis.IDENTITY, Vector3(x,y,z))])
+			town_buildings.append({"id": building.id, "type": building.type, "level": int(building.level),
+				"x": x, "z": z, "hall": city_base_type(building.type) == "ECO-05"})
 			place_markers.append({"position":Vector3(x,y+5,z),"id":building.id,"kind":"building","item":building})
 			break
 	# The wall ring: grows with the town hall, bulges around buildings, sites and
@@ -1105,6 +1104,9 @@ func present_city(state: Dictionary, staged := false) -> void:
 	if walls.visible and wall_markers.is_empty():
 		place_markers.append({"position": walls.main_gate + Vector3.UP * 7.0, "id": "city-walls", "kind": "wall",
 			"item": {"type": "SUP-03", "level": 1, "wall": true}})
+	plan_town(town_buildings, plots, district)
+	for lot: Dictionary in town_plan.lots:
+		exclusions.append(lot.rect)
 	for plot in plots:
 		if (kingdom is Dictionary and plot.id in kingdom.get("clearedPlots", [])) or plot.id.begins_with("site-"):
 			exclusions.append(Rect2(plot.x - 6.7, plot.z - 6.7, 13.4, 13.4))
@@ -1131,11 +1133,11 @@ func present_city(state: Dictionary, staged := false) -> void:
 	if staged:
 		await yield_frame()
 	sync_city_workers(wanted_workers)
-	var road_key := JSON.stringify([city.buildings.map(func(b): return [b.id, b.type, b.plotId]), plots.map(func(p): return [p.id, p.x, p.z]),
-		walls.signature if walls.visible else ""])
-	if road_key != geometries.get("road_signature", "") or not is_instance_valid(city_road_mesh):
-		geometries["road_signature"] = road_key
-		build_city_roads(city, plots)
+	if geometries.get("town_built", "") != geometries.get("town_signature", "") or not is_instance_valid(city_road_mesh):
+		geometries["town_built"] = geometries.get("town_signature", "")
+		town.build(town_plan, static_height)
+		city_road_mesh = town.ground
+		town_rebuilds += 1
 	var ground_key := JSON.stringify([exclusions.map(func(r: Rect2): return [r.position.x, r.position.y, r.size.x, r.size.y]),
 		kingdom is Dictionary, city_streets.map(func(road): return [road[0].x, road[0].y, road[1].x, road[1].y]),
 		walls.signature if walls.visible else ""])

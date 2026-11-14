@@ -4614,6 +4614,13 @@ func ask_server_at_zero(works: Array) -> void:
 			ends.append(float(queue[0].get("endsAt", INF)))
 	for healing in state.get("healing", []):
 		ends.append(float(healing.get("endsAt", INF)))
+	# An army reaching its creature (or ending the fight): the server starts the
+	# battle only when asked, so ask at that moment instead of the next routine poll.
+	for army in state.get("armies", []) + state.get("world", {}).get("armies", []):
+		if army.status in ["outbound", "fighting"] and str(army.get("owner", player_id)) == player_id:
+			var finish: Variant = march_finish(army)
+			if finish != null:
+				ends.append(float(finish))
 	var due := ends.any(func(at): return now >= at and now < at + 60000.0)
 	if not due:
 		due_poll_streak = 0
@@ -4821,6 +4828,7 @@ func _process(delta: float) -> void:
 			minimap.focus = Vector2(stage.camera_target.x, stage.camera_target.z)
 			minimap.queue_redraw()
 			next_minimap_draw = now_ms + 50
+		ask_server_at_zero([])
 	else:
 		stage.present_parade()
 		stage.present_workers(now / 1000.0)

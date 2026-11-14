@@ -1,6 +1,26 @@
 extends RefCounted
 
 static var contact_material: StandardMaterial3D
+static var reflection_skies := {}
+
+static func add_reflections(env: Environment, horizon: Color) -> void:
+	"""Static procedural sky used only for specular reflections (background and ambient
+	light stay as they were). Shared per horizon colour, so the radiance map is built once."""
+	var key := horizon.to_html()
+	if not reflection_skies.has(key):
+		var material := ProceduralSkyMaterial.new()
+		material.sky_top_color = Color("#6f8fae")
+		material.sky_horizon_color = horizon.lightened(0.25)
+		material.ground_horizon_color = horizon.darkened(0.15)
+		material.ground_bottom_color = Color("#3b3a31")
+		material.sun_angle_max = 30.0
+		var sky := Sky.new()
+		sky.sky_material = material
+		sky.radiance_size = Sky.RADIANCE_SIZE_128
+		sky.process_mode = Sky.PROCESS_MODE_QUALITY
+		reflection_skies[key] = sky
+	env.sky = reflection_skies[key]
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 
 static func prepare(actor: Node3D) -> void:
 	for part: MeshInstance3D in actor.find_children("*", "MeshInstance3D", true, false):
@@ -58,3 +78,33 @@ static func ground_shadow(parent: Node3D, bounds: AABB) -> void:
 	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	shadow.position = Vector3(bounds.get_center().x, bounds.position.y - 0.01, bounds.get_center().z)
 	parent.add_child(shadow)
+
+
+# Stone display pedestal under a recruitment preview: a worn top slab on a wider
+# plinth, stone-textured, top surface just under the unit's feet.
+static func pedestal(parent: Node3D, bounds: AABB, stone: Texture2D) -> AABB:
+	var radius := maxf(0.5, minf(bounds.size.x, bounds.size.z) * 0.95)
+	var material := StandardMaterial3D.new()
+	material.albedo_texture = stone
+	material.albedo_color = Color("#857d70")
+	material.roughness = 0.88
+	material.uv1_triplanar = true
+	material.uv1_scale = Vector3.ONE * 1.6
+	var feet := bounds.position.y - 0.02
+	var parts := [[radius, radius * 1.04, 0.16, feet - 0.08], [radius * 1.12, radius * 1.16, 0.12, feet - 0.22]]
+	for part in parts:
+		var cylinder := CylinderMesh.new()
+		cylinder.top_radius = part[0]
+		cylinder.bottom_radius = part[1]
+		cylinder.height = part[2]
+		cylinder.radial_segments = 40
+		cylinder.rings = 1
+		var slab := MeshInstance3D.new()
+		slab.mesh = cylinder
+		slab.material_override = material
+		slab.position = Vector3(bounds.get_center().x, part[3], bounds.get_center().z)
+		parent.add_child(slab)
+	var grown := bounds
+	grown.position.y = feet - 0.28
+	grown.size.y += 0.28
+	return grown

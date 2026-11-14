@@ -2,14 +2,25 @@ extends RefCounted
 
 const SESSION_PATH := "user://drenovar-session.bin"
 const TOKEN_LENGTH := 129
+# Device account of the Cloudflare server: "device." + a 256-bit secret in hex.
+const DEVICE_PREFIX := "device."
+const DEVICE_LENGTH := 71
 
 static func valid(token: String) -> bool:
+	if token.length() == DEVICE_LENGTH and token.begins_with(DEVICE_PREFIX):
+		for index in range(DEVICE_PREFIX.length(), DEVICE_LENGTH):
+			if not token[index] in "0123456789abcdef":
+				return false
+		return true
 	if token.length() != TOKEN_LENGTH or token[64] != ".":
 		return false
 	for index in TOKEN_LENGTH:
 		if index != 64 and not token[index] in "0123456789abcdef":
 			return false
 	return true
+
+static func is_device(token: String) -> bool:
+	return token.begins_with(DEVICE_PREFIX) and valid(token)
 
 const KEY_PATH := "user://drenovar-session.key"
 
@@ -42,7 +53,7 @@ static func read_with(encryption_key: PackedByteArray) -> String:
 	if encryption_key.is_empty() or not FileAccess.file_exists(SESSION_PATH):
 		return ""
 	var file := FileAccess.open_encrypted(SESSION_PATH, FileAccess.READ, encryption_key)
-	if file == null or file.get_length() != TOKEN_LENGTH:
+	if file == null or not file.get_length() in [TOKEN_LENGTH, DEVICE_LENGTH]:
 		return ""
 	var token := file.get_as_text()
 	return token if valid(token) else ""

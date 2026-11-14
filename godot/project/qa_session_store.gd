@@ -34,5 +34,12 @@ func run() -> void:
 		check(SessionStore.read_with(SessionStore.key()) == token, "v1 session not migrated to v2")
 	SessionStore.forget()
 	check(not FileAccess.file_exists(SessionStore.SESSION_PATH) and not FileAccess.file_exists(SessionStore.KEY_PATH), "Forget left files")
+	# Device account of the Cloudflare server.
+	var device := "device." + "ab".repeat(32)
+	check(SessionStore.valid(device) and SessionStore.is_device(device), "device session format accepted")
+	check(not SessionStore.valid("device." + "ab".repeat(31)) and not SessionStore.valid("device." + "AB".repeat(32)), "malformed device sessions rejected")
+	check(not SessionStore.is_device("a".repeat(64) + "." + "b".repeat(64)), "old-server session is not a device session")
+	check(SessionStore.save_session(device) == OK and SessionStore.read_session() == device, "device session saved and read back")
+	SessionStore.forget()
 	print("QA_SESSION_STORE checks=", checks, " failures=", failures)
 	quit(0 if failures == 0 else 1)

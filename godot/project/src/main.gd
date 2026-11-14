@@ -78,6 +78,10 @@ var minimap: Minimap
 var environment_atlas: Texture2D
 var endpoint := LIVE_SERVER
 var loopback := false
+# QA only: key of a closed staging server, read from a file named on the command line
+# (--staging-key-file=). A shipped app has no command line, so it never sends one.
+var staging_key := ""
+var hosted_override := false
 var session := ""
 var restoring_session := false
 var saved_session_error := false
@@ -153,10 +157,21 @@ func _ready() -> void:
 			if override.begins_with("http://127.0.0.1:"):
 				endpoint = override
 				loopback = true
+			elif override.begins_with("https://"):
+				# QA against a hosted test server (e.g. the Cloudflare staging Worker).
+				endpoint = override
+		if arg == "--hosted":
+			# QA: the 127.0.0.1 address is a forwarder to a hosted server
+			# (godot/tools/qa-hosted-forwarder.py), not the loopback test realm.
+			hosted_override = true
+		if arg.begins_with("--staging-key-file="):
+			staging_key = FileAccess.get_file_as_string(arg.trim_prefix("--staging-key-file=")).strip_edges()
 		if arg == "--smoke":
 			smoke = true
 		if arg.begins_with("--diagnostics="):
 			diagnostics.path = arg.trim_prefix("--diagnostics=")
+	if hosted_override:
+		loopback = false
 	diagnostics.start(str(ProjectSettings.get_setting("application/config/version")), Time.get_unix_time_from_system())
 	api.name = "ApiPool"
 	add_child(api)
@@ -3732,7 +3747,7 @@ func show_account() -> void:
 	if restoring_session:
 		row(modal_body, "Подключаемся к сохранённому поселению…")
 		button(modal_body, "Повторить подключение", restore_account)
-		button(modal_body, "Выйти из аккаунта", confirm_profile_action.bind("Выйти из аккаунта на этом устройстве?", sign_out))
+		button(modal_body, "Выйти из аккаунта", confirm_profile_action.bind(sign_out_question(), sign_out))
 		return
 	if loopback:
 		row(modal_body, state.city.name)
@@ -3762,7 +3777,7 @@ func show_account() -> void:
 				button(modal_body, title, confirm_profile_action.bind("Открыть «%s»?" % item.name, select_profile.bind(item.id)))
 		if profile.profiles.is_empty():
 			button(modal_body, "Основать поселение", create_settlement)
-	button(modal_body, "Выйти из приложения", confirm_profile_action.bind("Выйти из аккаунта на этом устройстве?", sign_out))
+	button(modal_body, "Выйти из приложения", confirm_profile_action.bind(sign_out_question(), sign_out))
 
 func add_name_fields(profile: Dictionary) -> void:
 	var saved_nickname := str(profile.get("nickname")) if profile.get("nickname") != null else ""
@@ -3879,10 +3894,31 @@ func connected() -> bool:
 	return loopback or not session.is_empty()
 
 func begin_login() -> void:
+	# A server with device accounts (Cloudflare) signs in at once: no browser step.
+	if not loopback:
+		var info := await send_request("auth/info", null, false, 6.0)
+		if info.get("login", "") == "device":
+			await device_login()
+			return
 	login_proof = Crypto.new().generate_random_bytes(32).hex_encode()
 	login_deadline = Time.get_ticks_msec() + 300000
 	login_link_used = false
 	show_account()
+
+# The account lives on this phone: a random 256-bit secret, kept encrypted in the
+# app's private storage. The server knows only its hash.
+func device_login() -> void:
+	if login_in_progress:
+		return
+	login_in_progress = true
+	session = SessionStore.DEVICE_PREFIX + Crypto.new().generate_random_bytes(32).hex_encode()
+	saved_session_error = SessionStore.save_session(session) != OK
+	login_proof = ""
+	message.text = ""
+	await sync_account()
+	login_in_progress = false
+	if modal.visible and modal_title.text == "Твоё королевство":
+		await show_account()
 
 func login_url(challenge: String) -> String:
 	return endpoint + "/api/native/approve?challenge=" + challenge
@@ -4025,6 +4061,11 @@ func select_profile(id: String) -> void:
 	player_id = ""
 	await sync_account()
 	await show_account()
+
+func sign_out_question() -> String:
+	if SessionStore.is_device(session):
+		return "Аккаунт хранится только на этом телефоне. После выхода вернуться в это поселение будет нельзя. Выйти?"
+	return "Выйти из аккаунта на этом устройстве?"
 
 func sign_out() -> void:
 	var response := await send_request("native/logout", {})
@@ -4529,6 +4570,8 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 		headers.append("X-Drenovar-Player: "+player_id)
 	if not session.is_empty():
 		headers.append("X-Drenovar-Session: " + session)
+	if not staging_key.is_empty():
+		headers.append("X-Drenovar-Staging-Key: " + staging_key)
 	if payload != null:
 		headers.append("Content-Type: application/json")
 		headers.append("Origin: "+endpoint)

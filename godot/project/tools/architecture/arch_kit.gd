@@ -19,15 +19,26 @@ var ao_floor := 0.0
 var piece := 0
 var piece_when: Variant = null   # recipe override for the appear time of the next pieces
 var piece_times := {}            # piece id -> forced appear time
+# Build 59: recipes may also say when a part of this level is taken down on the upgrade
+# to the next level (upgrade clock 0..1); parts the next level keeps always stay.
+var piece_leave: Variant = null
+var leave_times := {}            # piece id -> forced leave time (upgrade out of this level)
 
 func next_piece() -> void:
 	piece += 1
 	if piece_when != null:
 		piece_times[piece] = float(piece_when)
+	if piece_leave != null:
+		leave_times[piece] = float(piece_leave)
 
 func when(t: Variant) -> void:
 	## Recipes may force the appear time (0..1) of what follows; null = automatic.
 	piece_when = t
+	next_piece()
+
+func leave(t: Variant) -> void:
+	## Recipes may force when what follows is taken down on the next upgrade; null = automatic.
+	piece_leave = t
 	next_piece()
 
 func _init(seed_value: int = 1) -> void:
@@ -1055,7 +1066,8 @@ const ROOF_MATS := ["shingle", "shingle_light", "slate_roof", "clay_roof", "that
 const FRAME_MATS := ["oak", "dark_oak", "log"]
 const CLAD_MATS := ["plank", "plaster", "oak_light", "shutter", "glass", "greenglass"]
 const DETAIL_MATS := ["canvas", "linen", "cloth_red", "cloth_blue", "cloth_teal", "cloth_wine", "rope", "parchment", "hay", "herb", "ore",
-	"brass", "glow", "water", "leaves", "flower", "lavender", "map_green", "map_blue", "ember", "greenglass"]
+	"brass", "glow", "water", "leaves", "flower", "lavender", "map_green", "map_blue", "ember", "greenglass",
+	"awning", "awning_wine", "awning_teal"]
 
 func build_times() -> Dictionary:
 	## Appear time (0..1) of every piece when the level is built from scratch:
@@ -1122,7 +1134,7 @@ func bake() -> ArrayMesh:
 				colors[t * 3 + k].a = when_t
 				# x: appear time when upgrading into this level (default: new part),
 				# y: leave time when upgrading out of it (2 = stays); build.gd refines both.
-				uv2[t * 3 + k] = Vector2(0.12 + 0.83 * when_t, 2.0)
+				uv2[t * 3 + k] = Vector2(0.12 + 0.83 * when_t, float(leave_times.get(g.p[t], 2.0)))
 		var arrays := []
 		arrays.resize(Mesh.ARRAY_MAX)
 		arrays[Mesh.ARRAY_VERTEX] = g.v

@@ -83,6 +83,10 @@ static func build() -> Dictionary:
 		"cloth_teal": flat(Color(0.19, 0.34, 0.32), 0.92),
 		"thatch": textured("oak", Color(1.18, 0.95, 0.52), 1.6, 1.0, 0.9),
 		"cloth_wine": flat(Color(0.5, 0.17, 0.19), 0.92),
+		# build 59: market awnings measured on the B05 drawings (muted cream, wine, sage teal)
+		"awning": flat(Color(0.5, 0.43, 0.33), 0.95),
+		"awning_wine": flat(Color(0.25, 0.09, 0.095), 0.93),
+		"awning_teal": flat(Color(0.15, 0.23, 0.21), 0.93),
 	}
 	# Same look as landscape.gd scenery_material, for original overlays kept in carried levels.
 	var scenery := StandardMaterial3D.new()

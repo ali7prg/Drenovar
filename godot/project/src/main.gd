@@ -4938,6 +4938,11 @@ func site_view(source: Dictionary) -> Dictionary:
 				site.to_model = after[0]
 				site.to_scale = after[1]
 				site.type = str(existing.type)
+				# Build 59: a level may lay out its own building site (scaffolding round
+				# the part that rises, piles and hoist on free ground).
+				var layout: Variant = stage.level_model_for(str(existing.type), level + 1).get("site")
+				if layout is Dictionary:
+					site.layout = layout
 		elif not site.upgrade:
 			site.type = str(source.type)
 		# "Walls and gate" stands in the main gate of the city wall: the works go there.

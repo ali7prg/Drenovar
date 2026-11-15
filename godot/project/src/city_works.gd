@@ -289,6 +289,9 @@ func present_builders(site: Dictionary, now_ms: float) -> void:
 		builder_site = key
 		build_site(site)
 		var offsets := [Vector3(site_box.position.x - 0.9, 0, site_box.end.z + 0.9), Vector3(site_box.end.x + 0.9, 0, site_box.end.z + 0.4)]
+		var spots: Array = site.get("layout", {}).get("builders", [])
+		if spots.size() >= 2 and not site.has("frame"):
+			offsets = [Vector3(float(spots[0][0]), 0, float(spots[0][1])), Vector3(float(spots[1][0]), 0, float(spots[1][1]))]
 		if site.has("frame"):
 			offsets = [Vector3(-4.6, 0, 4.2), Vector3(4.8, 0, 3.6)]
 		for index in builders.size():
@@ -385,14 +388,25 @@ func build_site(site: Dictionary) -> void:
 		hx = site_box.end.x
 		hz = site_box.end.z
 		height = site_box.end.y
-	site_scaffold = build_scaffold(hx, height, hz)
+	# Build 59: the level's own site layout (e.g. the market: scaffolding round the
+	# pavilion only, materials on the square clear of the walks).
+	var layout: Dictionary = site.get("layout", {}) if not legacy else {}
+	var at := Vector3.ZERO
+	if layout.has("scaffold"):
+		var sc: Array = layout.scaffold
+		at = Vector3(float(sc[0]), 0, float(sc[1]))
+		hx = float(sc[2])
+		hz = float(sc[3])
+		height = float(sc[4])
+	site_scaffold = build_scaffold(hx, height, hz, bool(layout.get("front_mid", true)))
+	site_scaffold.position = at
 	site_node.add_child(site_scaffold)
 	site_frames.append(site_scaffold as Node3D)
 	site_props = Node3D.new()
 	site_props.name = "SiteProps"
 	site_node.add_child(site_props)
 	if not legacy:
-		build_props(str(site.get("type", "")), hx, hz, height)
+		build_props(str(site.get("type", "")), hx, hz, height, layout, at)
 
 func model_box(model: Node3D) -> AABB:
 	var box := AABB()
@@ -467,10 +481,12 @@ func load_mesh(kind: String) -> Node3D:
 	return root
 
 # Material piles, a hoist with the type's load and a carrier: built once per site.
-func build_props(type: String, hx: float, hz: float, height: float) -> void:
+func build_props(type: String, hx: float, hz: float, height: float, layout: Dictionary = {}, at := Vector3.ZERO) -> void:
 	var kind := load_kind(type)
 	var front := hz + 1.4
 	var pile_at := [Vector3(-hx - 1.4, 0, front - 0.6), Vector3(-hx + 0.4, 0, front + 0.6)]
+	if layout.has("piles"):
+		pile_at = layout.piles.map(func(p: Array): return Vector3(float(p[0]), 0, float(p[1])))
 	for i in 2:
 		var pile := Node3D.new()
 		pile.position = pile_at[i]
@@ -483,7 +499,9 @@ func build_props(type: String, hx: float, hz: float, height: float) -> void:
 		site_piles.append(pile)
 	# hoist: mast at the front-right corner, jib over the scaffolding
 	site_hoist = Node3D.new()
-	site_hoist.position = Vector3(hx + 0.6, 0, hz + 0.6)
+	site_hoist.position = at + Vector3(hx + 0.6, 0, hz + 0.6)
+	if layout.has("hoist"):
+		site_hoist.position = Vector3(float(layout.hoist[0]), 0, float(layout.hoist[1]))
 	var mast := MeshInstance3D.new()
 	var mm := BoxMesh.new(); mm.size = Vector3(0.22, height + 1.6, 0.22); mast.mesh = mm
 	mast.position.y = (height + 1.6) * 0.5
@@ -507,6 +525,10 @@ func build_props(type: String, hx: float, hz: float, height: float) -> void:
 		site_carrier = make_worker("Worker_Carrier")
 	site_carrier.set_meta("from", Vector3(-hx - 1.0, 0, front + 1.6))
 	site_carrier.set_meta("to", Vector3(-hx * 0.4, 0, hz + 0.9))
+	if layout.has("carrier"):
+		var walk: Array = layout.carrier
+		site_carrier.set_meta("from", Vector3(float(walk[0][0]), 0, float(walk[0][1])))
+		site_carrier.set_meta("to", Vector3(float(walk[1][0]), 0, float(walk[1][1])))
 
 func animate_site(site: Dictionary, progress: float, now_ms: float) -> void:
 	var clock := build_clock(progress)
@@ -566,7 +588,7 @@ static func timber() -> StandardMaterial3D:
 # Timber scaffolding around a square plot: corner and middle poles, rails on three
 # levels, plank decks and a cross brace per side. One mesh (SurfaceTool), so it
 # costs a single draw call.
-static func build_scaffold(half: float, height: float, half_z := -1.0) -> MeshInstance3D:
+static func build_scaffold(half: float, height: float, half_z := -1.0, front_mid := true) -> MeshInstance3D:
 	if half_z < 0.0:
 		half_z = half
 	var tool := SurfaceTool.new()
@@ -594,6 +616,9 @@ static func build_scaffold(half: float, height: float, half_z := -1.0) -> MeshIn
 	for sx in [-1.0, 0.0, 1.0]:
 		for sz in [-1.0, 0.0, 1.0]:
 			if sx == 0.0 and sz == 0.0:
+				continue
+			# a stair or a door in the middle of the front keeps its way clear
+			if sx == 0.0 and sz == 1.0 and not front_mid:
 				continue
 			beam.call(Vector3(sx * half, 0.0, sz * half_z), Vector3(sx * half, height, sz * half_z), 0.18)
 	# sides as [corner a, corner b, inward]

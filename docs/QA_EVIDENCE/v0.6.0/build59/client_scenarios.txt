@@ -1,0 +1,6 @@
+qa_building_looks: QA_BUILDING_LOOKS upgrade checks=180 failures=0
+qa_building_looks_restart: QA_BUILDING_LOOKS restart checks=62 failures=0
+qa_city_works: QA_CITY_WORKS checks=38 failures=0
+qa_town_plan: QA_TOWN_PLAN checks=35 failures=0
+qa_city_parity: QA_CITY_PARITY steps=7 vegetation_rebuilds=3 checks=279 failures=0
+qa_build_menu: QA_BUILD_MENU checks=20 failures=0

@@ -126,6 +126,8 @@ func build_dressing(plan: TownPlan, height: Callable) -> void:
 		var door_x := float(lot.door_x)
 		near_segments = plan.segments.filter(func(sg): return plan.street_rect(sg).grow(0.6).intersects(r.grow(0.6)))
 		near_lots = plan.lots.filter(func(other): return other != lot and other.rect.grow(0.2).intersects(r.grow(0.2)))
+		if TownPlan.own_square(lot):
+			continue
 		if level >= 2 and not lot.hall:
 			var kerb := stone if level >= 4 else timber
 			var width := 0.3 if level >= 4 else 0.2

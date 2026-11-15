@@ -716,77 +716,392 @@ static func b04_granary(k, L: int) -> Dictionary:
 			_louvre(k, Vector3(wc.x + 1.67, fl + 1.6, wc.z - 0.7 + i * 1.4), 0.6, 0.5, 90)
 	return {"worker": Vector3(-3.6, 0.0, 3.0)}
 
-# ============================================================== B05 Marketplace (ECO-03) III-V
-## A round paved square that the trade grows around. III: ring of stalls with striped
-## awnings around an open centre, octagonal tent pavilion at the back, entrance posts at
-## the front. IV: covered gallery along the back half, two-tier pavilion, entrance gate.
-## V: fountain in the centre with a free walk around it, gallery round the sides, stone
-## entrance arch. The front sector stays low so the centre reads from the city camera.
-const MK_R := 5.5
-const MK_CZ := 0.0
+# ============================================================== B05 Marketplace (ECO-03)
+## Build 59 (pilot of the drawing-exact rework): drawings B05 III-V measured on their own
+## camera (front, about 33 degrees down). A ROUND paved square centred on the fountain
+## spot, ringed by an X-braced fence on stone-footed posts with planters outside; the
+## entrance gate on the front axis (+Z) with the approach path to the plot edge; the
+## pavilion on the axis at the back, its stair coming down towards the centre; straight
+## gallery sections closing the back corners; two big stalls either side of the centre.
+##   III  pavilion on a low base with one tent, open stall rows on the gallery lines.
+##   IV   pavilion on a stone podium (arched niches, wide stair), covered galleries on both
+##        sides, gate roof with finials, grass beds and a path ring round a produce table.
+##   V    two tiers: skirt roof, band, railed upper storey and a markedly raised upper roof
+##        with an open lantern cupola; the left gallery is joined to the pavilion by a lower
+##        roofed connector on timber posts; the right gallery keeps its front section (free
+##        walk behind the pavilion); fountain in the centre with a free ring round it;
+##        the square paved in rings.
+## Upgrade IV -> V on the plot (upgrade clock 0..1; k.when / k.leave, see _at):
+##   0.13-0.34  site works: table and grass beds cleared, ring kerbs laid round the centre,
+##              old tent and the back right gallery section taken down, posts of the upper
+##              storey and of the connector set up
+##   0.36-0.68  gallery and canvas: connector beams and roof, skirt roof panel by panel,
+##              band, upper floor and railing, upper roof panel by panel, cupola, lanterns
+##   0.70-0.94  fountain: basin, rim, pedestal, bowl, spouts and water, planters; the rings
+##              of setts round it finish the paving
+const MK_C := Vector3(0, 0, 1.75)       # centre of the round square (fountain spot)
+const MK_R := 4.9                      # fence ring
+const MK_P := Vector3(0, 0, -3.85)     # pavilion centre
+const MK_POD := 2.65                   # podium corner radius (flat face to the front)
+const MK_POST := 2.15                  # lower tier posts
+const MK_GATE_X := 1.25                # gate posts (2.2 m clear)
+# Gallery lines on the left (inner edge, plaza side); the right side mirrors them.
+const MK_GAL := [Vector2(-4.6, -0.1), Vector2(-4.3, -3.3), Vector2(-3.6, -4.6)]
+const MK_GAL_D := 1.45
 
-static func _mk_at(theta_deg: float, r: float, y := 0.0) -> Vector3:
-	var t = deg_to_rad(theta_deg)
-	return Vector3(cos(t) * r, y, MK_CZ + sin(t) * r)
+static func _at(k, x: Variant) -> void:
+	## Appear time of what follows on the upgrade INTO this level (upgrade clock 0..1).
+	k.when(null if x == null else (float(x) - 0.12) / 0.83)
 
-static func _mk_face(theta_deg: float) -> float:
-	## yaw that turns local +Z towards the centre of the square
-	var t = deg_to_rad(theta_deg)
-	return rad_to_deg(atan2(-cos(t), -sin(t)))
+static func _mkp(theta: float, r: float, c := MK_C, y := 0.0) -> Vector3:
+	var t = deg_to_rad(theta)
+	return Vector3(c.x + cos(t) * r, y, c.z + sin(t) * r)
 
-static func _gallery(k, a0: float, a1: float, r0: float, r1: float) -> void:
-	## Covered arcade on the ring between angles a0..a1 (deg): posts on the inner edge,
-	## closed plank back wall on the outer edge, roof falling towards the square, counters.
-	var n = maxi(1, ceili(absf(a1 - a0) / 15.0))
-	var hi = 2.95
-	var lo = 2.35
-	var prev_in = Vector3.ZERO
-	var prev_out = Vector3.ZERO
-	for i in n + 1:
-		var th = lerpf(a0, a1, float(i) / n)
-		var pin = _mk_at(th, r0)
-		var pout = _mk_at(th, r1)
-		k.box("stone", pin + Vector3(0, 0.1, 0), Vector3(0.3, 0.2, 0.3))
-		k.beam("oak", pin + Vector3(0, 0.2, 0), pin + Vector3(0, lo, 0), 0.18, 0.18)
-		k.beam("oak", pout, pout + Vector3(0, hi, 0), 0.18, 0.18)
-		if i > 0:
-			var ein = (r0 - 0.35) / r0
-			var eout = (r1 + 0.25) / r1
-			var c0 = Vector3(0, 0, MK_CZ)
-			var ri0 = c0 + (prev_in - c0) * ein
-			var ri1 = c0 + (pin - c0) * ein
-			var ro0 = c0 + (prev_out - c0) * eout
-			var ro1 = c0 + (pout - c0) * eout
-			k.next_piece()
-			_quad2(k, ["canvas", "cloth_teal", "canvas", "cloth_wine"][i % 4], ri0 + Vector3(0, lo - 0.1, 0), ri1 + Vector3(0, lo - 0.1, 0), ro1 + Vector3(0, hi + 0.15, 0), ro0 + Vector3(0, hi + 0.15, 0))
-			k.beam("oak", prev_in + Vector3(0, lo, 0), pin + Vector3(0, lo, 0), 0.14, 0.18)
-			var mid = (prev_out + pout) * 0.5
-			var seg = (pout - prev_out)
-			var yaw = rad_to_deg(atan2(-seg.z, seg.x))
-			var tm = deg_to_rad(lerpf(a0, a1, (i - 0.5) / n))
-			if cos(tm) + sin(tm) < 0.2:
-				k.box("plank", mid + Vector3(0, hi * 0.5, 0), Vector3(seg.length() + 0.05, hi, 0.1), yaw, k.jitter(0.08))
-			else:
-				# bays turned to the city camera stay open (low rail only), so the stalls show
-				k.box("plank", mid + Vector3(0, 0.45, 0), Vector3(seg.length() + 0.05, 0.9, 0.08), yaw, k.jitter(0.08))
-				k.beam("oak", prev_out + Vector3(0, hi - 0.1, 0), pout + Vector3(0, hi - 0.1, 0), 0.14, 0.18)
-			# counter facing the square
-			var cm = (prev_in + pin + prev_out + pout) * 0.25
-			cm = Vector3(0, 0, MK_CZ) + (cm - Vector3(0, 0, MK_CZ)) * 1.04
-			k.box("oak", cm + Vector3(0, 0.42, 0), Vector3(seg.length() * 0.7, 0.84, 0.5), yaw, k.jitter(0.08))
-			var goods = ["hay", "herb", "cloth_blue", "parchment", "ore"]
-			k.box(goods[i % goods.size()], cm + Vector3(0, 0.93, 0), Vector3(seg.length() * 0.5, 0.18, 0.35), yaw, k.jitter(0.1))
-		prev_in = pin
-		prev_out = pout
+static func _yaw_to(from: Vector3, to: Vector3) -> float:
+	## yaw that turns local +Z from 'from' towards 'to'
+	return rad_to_deg(atan2(to.x - from.x, to.z - from.z))
 
-static func _octagon(r: float, cz: float, n := 8) -> PackedVector2Array:
+static func _circle(c: Vector3, r: float, n := 40, rot := 0.0) -> PackedVector2Array:
 	var pts = PackedVector2Array()
 	for i in n:
-		var a = TAU * (i + 0.5) / n
-		pts.append(Vector2(cos(a) * r, cz + sin(a) * r))
+		var a = deg_to_rad(rot) + TAU * i / n
+		pts.append(Vector2(c.x + cos(a) * r, c.z + sin(a) * r))
 	return pts
 
-static func _striped_stall(k, p: Vector3, yaw: float, stripe: String, w := 2.0, goods := 0, big := true) -> void:
+static func _ellipse(c: Vector3, rx: float, rz: float, yaw: float, n := 20) -> PackedVector2Array:
+	var pts = PackedVector2Array()
+	var y = deg_to_rad(yaw)
+	for i in n:
+		var a = TAU * i / n
+		var p = Vector2(cos(a) * rx, sin(a) * rz).rotated(y)
+		pts.append(Vector2(c.x + p.x, c.z + p.y))
+	return pts
+
+static func _prism(k, mat: String, c: Vector3, r: float, y0: float, y1: float, n := 8, rot := 22.5, tint := Color.WHITE, r_top := -1.0, cap := true) -> void:
+	## Upright n-sided prism (flat face to the front with rot 22.5 for n = 8).
+	k.next_piece()
+	var rt = r if r_top < 0.0 else r_top
+	var ct = Vector3(c.x, y1, c.z)
+	for i in n:
+		var t0 = deg_to_rad(rot + 360.0 * i / n)
+		var t1 = deg_to_rad(rot + 360.0 * (i + 1) / n)
+		var b0 = Vector3(c.x + cos(t0) * r, y0, c.z + sin(t0) * r)
+		var b1 = Vector3(c.x + cos(t1) * r, y0, c.z + sin(t1) * r)
+		var u0 = Vector3(c.x + cos(t0) * rt, y1, c.z + sin(t0) * rt)
+		var u1 = Vector3(c.x + cos(t1) * rt, y1, c.z + sin(t1) * rt)
+		k.quad(mat, b1, b0, u0, u1, tint)
+		if cap:
+			k.tri(mat, ct, u1, u0, tint * Color(1.06, 1.03, 0.98))
+
+static func _ring(k, mat: String, c: Vector3, r0: float, r1: float, y: float, n := 36, from_t: Variant = null, to_t: Variant = null, gap := 0.0, alt := "") -> void:
+	## Flat ring band (kerb, paving course) laid segment by segment from the front round.
+	for i in n:
+		if from_t != null:
+			_at(k, lerpf(float(from_t), float(to_t), float(i) / maxf(1.0, n - 1.0)))
+		else:
+			k.next_piece()
+		var g = gap / maxf(r1, 0.1) * 0.5
+		var a0 = deg_to_rad(90.0 + 360.0 * i / n) + g
+		var a1 = deg_to_rad(90.0 + 360.0 * (i + 1) / n) - g
+		var i0 = Vector3(c.x + cos(a0) * r0, y, c.z + sin(a0) * r0)
+		var i1 = Vector3(c.x + cos(a1) * r0, y, c.z + sin(a1) * r0)
+		var o0 = Vector3(c.x + cos(a0) * r1, y, c.z + sin(a0) * r1)
+		var o1 = Vector3(c.x + cos(a1) * r1, y, c.z + sin(a1) * r1)
+		var m: String = mat if alt == "" or i % 2 == 0 else alt
+		var tn = k.jitter(0.07)
+		k.quad(m, i0, i1, o1, o0, tn)
+		k.quad(m, o0, o1, o1 - Vector3(0, 0.07, 0), o0 - Vector3(0, 0.07, 0), tn * Color(0.8, 0.8, 0.8))
+
+static func _tent(k, c: Vector3, r0: float, y0: float, r1: float, y1: float, times: Array = [], valance := true, ribs := true) -> void:
+	## Octagonal striped canvas roof of the drawings, from radius r0 at y0 up to r1 at y1
+	## (r1 = 0: pointed), flat face to the front: cream panels with a coloured middle
+	## stripe (wine and teal by turns), oak ribs on the hips, eave boards, scalloped
+	## valance. times: optional [from, to] upgrade clock over the eight panels.
+	for i in 8:
+		if times.size() == 2:
+			_at(k, lerpf(times[0], times[1], i / 7.0))
+		var t0 = deg_to_rad(22.5 + 45.0 * i)
+		var t1 = deg_to_rad(22.5 + 45.0 * (i + 1))
+		var b0 = Vector3(c.x + cos(t0) * r0, y0, c.z + sin(t0) * r0)
+		var b1 = Vector3(c.x + cos(t1) * r0, y0, c.z + sin(t1) * r0)
+		var u0 = Vector3(c.x + cos(t0) * r1, y1, c.z + sin(t0) * r1)
+		var u1 = Vector3(c.x + cos(t1) * r1, y1, c.z + sin(t1) * r1)
+		var stripe: String = "awning_wine" if i % 2 == 0 else "awning_teal"
+		var cuts = [0.0, 0.3, 0.7, 1.0]
+		for s in 3:
+			k.next_piece()
+			_quad2(k, stripe if s == 1 else "awning", b0.lerp(b1, cuts[s]), b0.lerp(b1, cuts[s + 1]), u0.lerp(u1, cuts[s + 1]), u0.lerp(u1, cuts[s]))
+		if ribs:
+			k.beam("oak", b0 + Vector3(0, 0.06, 0), u0 + Vector3(0, 0.06, 0), 0.11, 0.1)
+		k.beam("oak", b0 - Vector3(0, 0.04, 0), b1 - Vector3(0, 0.04, 0), 0.08, 0.14)
+		if valance:
+			for v in 4:
+				var q0 = b0.lerp(b1, v / 4.0) - Vector3(0, 0.1, 0)
+				var q1 = b0.lerp(b1, (v + 1) / 4.0) - Vector3(0, 0.1, 0)
+				_tri2(k, stripe if v % 2 == 0 else "awning", q0, q1, (q0 + q1) * 0.5 + Vector3(0, -0.24, 0))
+
+static func _finial(k, p: Vector3, h := 0.55) -> void:
+	k.cyl("oak", p, p + Vector3(0, 0.3, 0), 0.07, 6)
+	k.cyl("brass", p + Vector3(0, 0.28, 0), p + Vector3(0, 0.36, 0), 0.13, 8)
+	k.cone("brass", p + Vector3(0, 0.36, 0), 0.11, h, 8)
+
+static func _gallery_run(k, a: Vector2, b: Vector2, leave_t: Variant = null) -> void:
+	## One straight section of the covered trading gallery (drawings IV-V): low posts on
+	## stone footings with arched knee braces on the plaza side, tall posts and a closed
+	## plank back on the outer side (open rail where the back faces the city camera),
+	## striped canvas falling to the plaza with a scalloped valance, lanterns, counters.
+	## leave_t: taken down on the next upgrade (roof first, then frame, posts last).
+	var d = (b - a)
+	var length = d.length()
+	var dir = d / length
+	var out = Vector2(-dir.y, dir.x)
+	if out.dot((a + b) * 0.5 - Vector2(0, -1.5)) < 0.0:
+		out = -out
+	var n = maxi(1, ceili(length / 1.7))
+	var lo = 2.5
+	var hi = 3.05
+	var A = Vector3(a.x, 0, a.y)
+	var B = Vector3(b.x, 0, b.y)
+	var O = Vector3(out.x, 0, out.y) * MK_GAL_D
+	var yaw = rad_to_deg(atan2(-dir.y, dir.x))
+	var seen = Vector2(out.x, out.y).dot(Vector2(0.707, 0.707)) > 0.2
+	var lv = func(dt: float) -> void:
+		k.leave(null if leave_t == null else float(leave_t) + dt)
+	# floor of flags
+	lv.call(0.06)
+	k.ground_poly(PackedVector2Array([a, b, b + out * MK_GAL_D, a + out * MK_GAL_D]) if out.cross(dir) < 0.0 else PackedVector2Array([a, a + out * MK_GAL_D, b + out * MK_GAL_D, b]), "stone", 0.055)
+	for i in n + 1:
+		var pin = A.lerp(B, float(i) / n)
+		var pout = pin + O
+		lv.call(0.07)
+		k.box("stone", pin + Vector3(0, 0.12, 0), Vector3(0.34, 0.24, 0.34), yaw, k.jitter(0.05))
+		k.box("stone", pout + Vector3(0, 0.12, 0), Vector3(0.34, 0.24, 0.34), yaw, k.jitter(0.05))
+		k.beam("oak", pin + Vector3(0, 0.24, 0), pin + Vector3(0, lo, 0), 0.2, 0.2)
+		k.beam("oak", pout + Vector3(0, 0.24, 0), pout + Vector3(0, hi, 0), 0.2, 0.2)
+		lv.call(0.04)
+		k.beam("oak", pin + Vector3(0, lo - 0.05, 0), pout + Vector3(0, hi - 0.05, 0), 0.12, 0.16)
+		# arched knee braces either side of the post along the eave
+		for s in [-1.0, 1.0]:
+			if (i == 0 and s < 0) or (i == n and s > 0):
+				continue
+			var e = pin + Vector3(dir.x, 0, dir.y) * s * 0.55
+			k.beam("oak", pin + Vector3(0, lo - 0.62, 0), e + Vector3(0, lo - 0.12, 0), 0.1, 0.12)
+		lv.call(-0.02)
+		k.lantern(pin + Vector3(0, lo - 0.42, 0) - O.normalized() * 0.2)
+	lv.call(0.04)
+	k.beam("oak", A + Vector3(0, lo, 0), B + Vector3(0, lo, 0), 0.14, 0.2)
+	k.beam("oak", A + O + Vector3(0, hi, 0), B + O + Vector3(0, hi, 0), 0.14, 0.2)
+	# back: closed planks, or a low rail where the camera looks in
+	lv.call(0.02)
+	var mid = (A + B) * 0.5 + O
+	if seen:
+		k.box("plank", mid + Vector3(0, 0.55, 0), Vector3(length, 0.7, 0.08), yaw, k.jitter(0.08))
+	else:
+		k.box("plank", mid + Vector3(0, (hi + 0.24) * 0.5, 0), Vector3(length, hi - 0.24, 0.08), yaw, k.jitter(0.08))
+	# counters along the back, goods facing the plaza
+	lv.call(-0.03)
+	for i in n:
+		var cm = A.lerp(B, (i + 0.5) / n) + O * 0.68
+		k.box("oak", cm + Vector3(0, 0.42, 0), Vector3(length / n * 0.78, 0.84, 0.48), yaw, k.jitter(0.08))
+		var goods = [["cloth_red", "hay"], ["herb", "parchment"], ["hay", "awning_teal"], ["ore", "flower"]]
+		var g = goods[(i + roundi(a.x * 3.0)) % goods.size()]
+		k.box(g[0], cm + Vector3(0, 0.93, 0) + Vector3(dir.x, 0, dir.y) * -0.3, Vector3(0.5, 0.18, 0.34), yaw, k.jitter(0.1))
+		k.box(g[1], cm + Vector3(0, 0.93, 0) + Vector3(dir.x, 0, dir.y) * 0.3, Vector3(0.5, 0.18, 0.34), yaw, k.jitter(0.1))
+		k.barrel(cm + O.normalized() * -0.75 + Vector3(dir.x, 0, dir.y) * (length / n * 0.38))
+	# canvas falling to the square: strips down the slope, cream with a wine and a teal
+	# stripe per bay, scalloped valance on the low edge
+	lv.call(0.0)
+	var on = O.normalized()
+	var ri = A - on * 0.4 + Vector3(0, lo + 0.12, 0)
+	var rj = B - on * 0.4 + Vector3(0, lo + 0.12, 0)
+	var ro = A + O + on * 0.25 + Vector3(0, hi + 0.16, 0)
+	var rp = B + O + on * 0.25 + Vector3(0, hi + 0.16, 0)
+	var strips = n * 5
+	for s in strips:
+		var u0 = float(s) / strips
+		var u1 = float(s + 1) / strips
+		var m: String = ["awning", "awning_wine", "awning", "awning_teal", "awning"][s % 5]
+		k.next_piece()
+		_quad2(k, m, ri.lerp(rj, u0), ri.lerp(rj, u1), ro.lerp(rp, u1), ro.lerp(rp, u0))
+	for s in strips * 2:
+		var q0 = ri.lerp(rj, float(s) / (strips * 2)) - Vector3(0, 0.06, 0)
+		var q1 = ri.lerp(rj, float(s + 1) / (strips * 2)) - Vector3(0, 0.06, 0)
+		_tri2(k, "awning_wine" if s % 2 == 0 else "awning", q0, q1, (q0 + q1) * 0.5 + Vector3(0, -0.22, 0))
+	k.leave(null)
+
+static func _mk_ground(k) -> void:
+	## Round square, the apron round the pavilion and the approach through the gate.
+	k.ground_poly(_circle(MK_C, MK_R + 0.12, 48), "stone", 0.04, Color(0.95, 0.85, 0.74))
+	k.ground_poly(_circle(MK_P, 3.35, 8, 22.5), "stone", 0.035, Color(0.95, 0.85, 0.74))
+	var gz = MK_C.z + sqrt(MK_R * MK_R - MK_GATE_X * MK_GATE_X)
+	k.ground_poly(PackedVector2Array([Vector2(-1.15, gz - 0.6), Vector2(-1.25, 7.1), Vector2(1.25, 7.1), Vector2(1.15, gz - 0.6)]), "stone_light", 0.045)
+	# light kerb lines either side of the approach
+	for s in [-1.0, 1.0]:
+		k.box("stone", Vector3(s * 1.2, 0.05, (gz + 7.1) * 0.5), Vector3(0.14, 0.06, 7.1 - gz + 0.2))
+
+static func _mk_fence(k) -> void:
+	## X-braced timber fence on stone-footed posts round the front of the square, from the
+	## front end of each gallery to the gate; lavender planters outside it.
+	var gate_th = rad_to_deg(asin(MK_GATE_X / MK_R))
+	for side in [-1.0, 1.0]:
+		var a0: float = 90.0 - side * gate_th    # the gate post on this side
+		var front: Vector2 = Vector2(-MK_GAL[0].x, MK_GAL[0].y) if side > 0 else MK_GAL[0]
+		var g = Vector2(front.x, front.y) - Vector2(MK_C.x, MK_C.z)
+		var a1: float = rad_to_deg(atan2(g.y, g.x))
+		if side < 0 and a1 < 0.0:
+			a1 += 360.0
+		var span = absf(a1 - a0)
+		var n = maxi(2, ceili(span / 17.0))
+		var prev = Vector3.ZERO
+		for i in n + 1:
+			var th = lerpf(a0, a1, float(i) / n)
+			var p = _mkp(th, MK_R)
+			k.box("stone", p + Vector3(0, 0.16, 0), Vector3(0.36, 0.32, 0.36), -th, k.jitter(0.05))
+			k.beam("oak", p + Vector3(0, 0.3, 0), p + Vector3(0, 1.12, 0), 0.18, 0.18)
+			k.box("stone_light", p + Vector3(0, 1.17, 0), Vector3(0.26, 0.1, 0.26), -th)
+			if i > 0:
+				k.beam("oak", prev + Vector3(0, 0.95, 0), p + Vector3(0, 0.95, 0), 0.1, 0.12)
+				k.beam("oak", prev + Vector3(0, 0.38, 0), p + Vector3(0, 0.38, 0), 0.08, 0.1)
+				k.beam("oak", prev + Vector3(0, 0.4, 0), p + Vector3(0, 0.93, 0), 0.06, 0.07)
+				k.beam("oak", prev + Vector3(0, 0.93, 0), p + Vector3(0, 0.4, 0), 0.06, 0.07)
+				var pth = lerpf(a0, a1, (i - 0.5) / n)
+				if i % 2 == 1 and absf(pth - 90.0) > 32.0:
+					var pm = _mkp(pth, MK_R + 0.42)
+					var yaw = _yaw_to(pm, MK_C) + 90.0
+					k.box("plank", pm + Vector3(0, 0.2, 0), Vector3(1.0, 0.4, 0.38), yaw, k.jitter(0.08))
+					k.bush(pm + Vector3(0, 0.32, 0) + (pm - MK_C).normalized().cross(Vector3.UP) * 0.22, 0.22, "lavender")
+					k.bush(pm + Vector3(0, 0.3, 0) - (pm - MK_C).normalized().cross(Vector3.UP) * 0.22, 0.2, "flower")
+			prev = p
+
+static func _mk_gate(k, L: int) -> void:
+	## Entrance of the drawings: two square oak posts on two-course stone plinths, an arch
+	## of curved braces, the gable turned to the street with a diamond lattice, bunting
+	## and lanterns; IV-V a striped canvas roof on the gable and brass finials.
+	var gz = MK_C.z + sqrt(MK_R * MK_R - MK_GATE_X * MK_GATE_X)
+	var eave = 2.75
+	var apex = 3.42
+	var hw = MK_GATE_X + 0.38
+	for s in [-1.0, 1.0]:
+		var x = s * MK_GATE_X
+		k.box("stone", Vector3(x, 0.24, gz), Vector3(0.72, 0.48, 0.72), 0, k.jitter(0.04))
+		k.box("stone", Vector3(x, 0.66, gz), Vector3(0.62, 0.36, 0.62), 0, k.jitter(0.04))
+		k.box("stone_light", Vector3(x, 0.87, gz), Vector3(0.68, 0.07, 0.68))
+		k.beam("oak", Vector3(x, 0.9, gz), Vector3(x, eave + 0.1, gz), 0.36, 0.36)
+		k.box("oak", Vector3(x, eave + 0.16, gz), Vector3(0.46, 0.12, 0.46))
+		# lantern on a bracket on the street face
+		k.beam("iron", Vector3(x, 1.95, gz + 0.18), Vector3(x, 1.95, gz + 0.46), 0.04, 0.04)
+		k.lantern(Vector3(x, 1.75, gz + 0.46))
+		# curved braces from the post to the beam: the arch
+		for j in 3:
+			var t0 = j / 3.0
+			var t1 = (j + 1) / 3.0
+			var p0 = Vector3(x - s * (0.18 + 0.62 * (1.0 - cos(t0 * PI * 0.5))), 1.95 + 0.62 * sin(t0 * PI * 0.5), gz)
+			var p1 = Vector3(x - s * (0.18 + 0.62 * (1.0 - cos(t1 * PI * 0.5))), 1.95 + 0.62 * sin(t1 * PI * 0.5), gz)
+			k.beam("oak", p0, p1, 0.18, 0.22)
+	k.beam("oak", Vector3(-MK_GATE_X - 0.18, 2.6, gz), Vector3(MK_GATE_X + 0.18, 2.6, gz), 0.16, 0.2)
+	k.beam("oak", Vector3(-hw, eave, gz), Vector3(hw, eave, gz), 0.2, 0.22)
+	for i in 5:
+		var x = -0.8 + i * 0.4
+		var y = 2.58 - absf(x) * 0.06
+		_tri2(k, "awning_wine" if i % 2 == 0 else "awning_teal", Vector3(x - 0.15, y, gz + 0.03), Vector3(x + 0.15, y, gz + 0.03), Vector3(x, y - 0.3, gz + 0.03))
+	# gable to the street: rafters and a diamond lattice
+	for zz in [gz - 0.5, gz + 0.5]:
+		k.beam("oak", Vector3(-hw, eave + 0.02, zz), Vector3(0, apex, zz), 0.12, 0.16)
+		k.beam("oak", Vector3(hw, eave + 0.02, zz), Vector3(0, apex, zz), 0.12, 0.16)
+	for i in 4:
+		var x0 = -hw * 0.75 + i * hw * 0.5
+		var y0 = eave + 0.06
+		k.beam("oak", Vector3(x0 - hw * 0.25, y0, gz + 0.5), Vector3(x0 + hw * 0.25, y0 + minf(0.5, apex - eave - 0.1 - absf(x0) * 0.4), gz + 0.5), 0.05, 0.06)
+		k.beam("oak", Vector3(x0 + hw * 0.25, y0, gz + 0.5), Vector3(x0 - hw * 0.25, y0 + minf(0.5, apex - eave - 0.1 - absf(x0) * 0.4), gz + 0.5), 0.05, 0.06)
+	k.beam("oak", Vector3(0, apex, gz - 0.62), Vector3(0, apex, gz + 0.62), 0.14, 0.14)
+	if L >= 4:
+		for sx in [-1.0, 1.0]:
+			var e0 = Vector3(sx * (hw + 0.1), eave - 0.05, gz - 0.62)
+			var e1 = Vector3(sx * (hw + 0.1), eave - 0.05, gz + 0.62)
+			var r0 = Vector3(0, apex + 0.05, gz - 0.62)
+			var r1 = Vector3(0, apex + 0.05, gz + 0.62)
+			var cuts = [0.0, 0.26, 0.36, 1.0]
+			for i in 3:
+				k.next_piece()
+				_quad2(k, "awning_wine" if i == 0 else ("awning_teal" if i == 1 else "awning"), e0.lerp(r0, cuts[i]), e1.lerp(r1, cuts[i]), e1.lerp(r1, cuts[i + 1]), e0.lerp(r0, cuts[i + 1]))
+			_finial(k, Vector3(sx * MK_GATE_X, eave + 0.22, gz), 0.5)
+		_finial(k, Vector3(0, apex + 0.08, gz + 0.62), 0.55)
+
+static func _mk_pavilion_base(k, L: int) -> float:
+	## Podium, stair, lower tier of posts with arched braces, railing and the round counter.
+	## Returns the eave height of the lower tier.
+	var p = MK_P
+	var base_h: float = 0.35 if L == 3 else 0.95
+	var top: float = base_h + 2.5
+	var ap = MK_POD * cos(PI / 8.0)
+	_prism(k, "stone", p, MK_POD, -0.1, base_h - 0.08, 8, 22.5, k.jitter(0.03))
+	_prism(k, "stone_light", p, MK_POD + 0.08, base_h - 0.08, base_h + 0.01, 8, 22.5)
+	var steps = 2 if L == 3 else 4
+	var run = 0.32 if L == 3 else 0.26
+	k.stairs(Vector3(p.x, 0, p.z + ap + steps * run), 2.3, steps, base_h / steps, run, 0, "stone_light")
+	if L >= 4:
+		# arched niches with a lantern either side of the stair, pots and lantern posts
+		for th in [45.0, 135.0, 0.0, 180.0]:
+			var nrm = Vector3(cos(deg_to_rad(th)), 0, sin(deg_to_rad(th)))
+			var c = p + nrm * (ap + 0.01) + Vector3(0, 0.42, 0)
+			var yaw = rad_to_deg(atan2(nrm.x, nrm.z))
+			k.box("soot", c, Vector3(0.5, 0.5, 0.04), yaw)
+			k.box("soot", c + Vector3(0, 0.25, 0), Vector3(0.36, 0.14, 0.04), yaw)
+			k.box("stone_light", c + Vector3(0, 0.36, 0) + nrm * 0.02, Vector3(0.7, 0.1, 0.05), yaw)
+			k.box("glow", c + Vector3(0, -0.02, 0) + nrm * 0.02, Vector3(0.12, 0.18, 0.04), yaw)
+		for s in [-1.0, 1.0]:
+			var pp = Vector3(s * 1.45, 0, p.z + ap - 0.1)
+			k.box("stone_light", pp + Vector3(0, base_h + 0.15, 0), Vector3(0.45, 0.3, 0.45))
+			k.cyl("plank", pp + Vector3(0, base_h + 0.3, 0), pp + Vector3(0, base_h + 0.55, 0), 0.2, 8, true, Color(0.9, 0.75, 0.62), 0.25)
+			k.bush(pp + Vector3(0, base_h + 0.5, 0), 0.22, "lavender")
+			var lp = Vector3(s * 1.5, 0, p.z + ap + steps * run - 0.15)
+			k.box("stone", lp + Vector3(0, 0.15, 0), Vector3(0.3, 0.3, 0.3))
+			k.beam("dark_oak", lp + Vector3(0, 0.3, 0), lp + Vector3(0, 1.45, 0), 0.08, 0.08)
+			k.lantern(lp + Vector3(0, 1.55, 0))
+	var posts = []
+	for i in 8:
+		var a = deg_to_rad(22.5 + 45.0 * i)
+		var q = p + Vector3(cos(a) * MK_POST, 0, sin(a) * MK_POST)
+		posts.append(q)
+		k.box("stone", q + Vector3(0, base_h + 0.12, 0), Vector3(0.34, 0.24, 0.34), 22.5 + 45.0 * i)
+		k.beam("oak", q + Vector3(0, base_h + 0.24, 0), q + Vector3(0, top, 0), 0.24, 0.24)
+	for i in 8:
+		var q0: Vector3 = posts[i]
+		var q1: Vector3 = posts[(i + 1) % 8]
+		k.beam("oak", q0 + Vector3(0, top, 0), q1 + Vector3(0, top, 0), 0.18, 0.24)
+		# arched braces under every beam
+		k.beam("oak", q0 + Vector3(0, top - 0.75, 0), q0.lerp(q1, 0.3) + Vector3(0, top - 0.12, 0), 0.11, 0.13)
+		k.beam("oak", q1 + Vector3(0, top - 0.75, 0), q0.lerp(q1, 0.7) + Vector3(0, top - 0.12, 0), 0.11, 0.13)
+		# X-braced railing on every face but the front (the stair)
+		var face = 22.5 + 45.0 * (i + 0.5)
+		if absf(face - 90.0) < 1.0:
+			continue
+		k.beam("oak", q0 + Vector3(0, base_h + 0.85, 0), q1 + Vector3(0, base_h + 0.85, 0), 0.09, 0.11)
+		k.beam("oak", q0 + Vector3(0, base_h + 0.25, 0), q1 + Vector3(0, base_h + 0.25, 0), 0.07, 0.09)
+		k.beam("oak", q0.lerp(q1, 0.08) + Vector3(0, base_h + 0.27, 0), q0.lerp(q1, 0.92) + Vector3(0, base_h + 0.83, 0), 0.05, 0.06)
+		k.beam("oak", q0.lerp(q1, 0.08) + Vector3(0, base_h + 0.83, 0), q0.lerp(q1, 0.92) + Vector3(0, base_h + 0.27, 0), 0.05, 0.06)
+		# pennants under the eave beam
+		for j in 3:
+			var pm = q0.lerp(q1, 0.25 + j * 0.25) + Vector3(0, top - 0.14, 0)
+			var tg = (q1 - q0).normalized() * 0.13
+			_tri2(k, "awning_wine" if (i + j) % 2 == 0 else "awning_teal", pm - tg, pm + tg, pm + Vector3(0, -0.32, 0))
+	# round counter with cheese wheels, crocks and sacks; lanterns from the beams
+	_prism(k, "plank", p + Vector3(0, 0, 0.15), 1.05, base_h, base_h + 0.85, 8, 22.5, Color(1.0, 0.92, 0.82))
+	_prism(k, "oak", p + Vector3(0, 0, 0.15), 1.15, base_h + 0.85, base_h + 0.93, 8, 22.5)
+	for i in 6:
+		var a = deg_to_rad(40.0 + i * 20.0)
+		var g = p + Vector3(0, 0, 0.15) + Vector3(cos(a) * 0.75, base_h + 0.93, sin(a) * 0.75)
+		if i % 2 == 0:
+			k.cyl("hay", g, g + Vector3(0, 0.14, 0), 0.17, 10, true, Color(1.25, 1.12, 0.7))
+		else:
+			k.cyl("plank", g, g + Vector3(0, 0.26, 0), 0.12, 8, true, Color(0.75, 0.6, 0.45), 0.09)
+	k.box("awning_wine", p + Vector3(0, base_h + 0.55, 1.22), Vector3(0.5, 0.5, 0.02))
+	for i in 4:
+		var a = deg_to_rad(67.5 + 90.0 * i)
+		k.lantern(p + Vector3(cos(a) * 1.75, top - 0.45, sin(a) * 1.75))
+	return top
+
+static func _striped_stall(k, p: Vector3, yaw: float, stripe: String, w := 2.0, goods := 0, big := true, cream := "canvas") -> void:
 	## Market stall of the drawings: corner posts, plank counter with a cloth runner,
 	## cream awning with two coloured stripes sloping to the customers.
 	k.push_at(p, yaw)
@@ -810,86 +1125,20 @@ static func _striped_stall(k, p: Vector3, yaw: float, stripe: String, w := 2.0, 
 	var strips = 7
 	for i in strips:
 		var x = -w * 0.5 - 0.15 + (w + 0.3) * (i + 0.5) / strips
-		var m: String = stripe if i == 1 or i == strips - 2 else "canvas"
+		var m: String = stripe if i == 1 or i == strips - 2 else cream
 		k.box(m, Vector3(x, (hb + hf) * 0.5 + 0.08, 0.1), Vector3((w + 0.3) / strips + 0.01, 0.04, d + 0.55), 0, Color.WHITE, slope)
 	# scalloped valance
 	for i in 6:
-		k.box(stripe if i % 2 == 0 else "canvas", Vector3(-w * 0.5 + w * (i + 0.5) / 6.0, hf - 0.08, d * 0.5 + 0.32), Vector3(w / 6.0 - 0.02, 0.22, 0.02))
+		k.box(stripe if i % 2 == 0 else cream, Vector3(-w * 0.5 + w * (i + 0.5) / 6.0, hf - 0.08, d * 0.5 + 0.32), Vector3(w / 6.0 - 0.02, 0.22, 0.02))
 	var goods_mats = ["hay", "herb", "cloth_red", "ore", "parchment", "flower"]
 	for i in 3:
 		k.box(goods_mats[(goods + i) % goods_mats.size()], Vector3(-w * 0.3 + i * w * 0.3, 1.02, 0.3), Vector3(w * 0.22, 0.16, 0.4), 0, k.jitter(0.1))
 	k.box("oak", Vector3(-w * 0.25, 1.15, -0.2), Vector3(0.5, 0.3, 0.35))
 	k.pop()
 
-static func _octo_tent(k, c: Vector3, r: float, rise: float) -> void:
-	## Octagonal tent roof: cream panels with teal and wine stripes, scalloped edge.
-	var apex = c + Vector3(0, rise, 0)
-	var mats = ["canvas", "cloth_wine", "canvas", "cloth_teal"]
-	for i in 8:
-		var t0 = TAU * i / 8.0 + PI / 8.0
-		var t1 = TAU * (i + 1) / 8.0 + PI / 8.0
-		var p0 = c + Vector3(cos(t0) * r, 0, sin(t0) * r)
-		var p1 = c + Vector3(cos(t1) * r, 0, sin(t1) * r)
-		k.next_piece()
-		_tri2(k, mats[i % 4], p0, apex, p1)
-		k.next_piece()
-		_tri2(k, "cloth_wine" if i % 2 == 0 else "cloth_teal", p0, p1, (p0 + p1) * 0.5 + Vector3(0, -0.3, 0))
-	k.cyl("oak", apex - Vector3(0, 0.1, 0), apex + Vector3(0, 0.6, 0), 0.08, 6)
-	k.cone("brass", apex + Vector3(0, 0.55, 0), 0.14, 0.45, 8)
-
-static func _market_pavilion(k, pc: Vector3, L: int) -> void:
-	## The big octagonal pavilion at the back of the square (III-V), on stone steps.
-	var pr: float = [1.9, 2.0, 2.1][L - 3]
-	var base_h: float = [0.35, 0.75, 0.75][L - 3]
-	k.cyl("stone", pc, pc + Vector3(0, base_h, 0), pr + 0.45, 8, true, k.jitter(0.03))
-	k.cyl("stone_light", pc + Vector3(0, base_h - 0.06, 0), pc + Vector3(0, base_h, 0), pr + 0.5, 8)
-	var n = 2 if L == 3 else 4
-	var run = 0.32 if L < 5 else 0.25
-	k.stairs(Vector3(pc.x, 0, pc.z + pr + 0.45 + n * run), 2.2, n, base_h / n, run, 0, "stone_light")
-	var h = 3.0
-	var tops = []
-	for i in 8:
-		var a = TAU * i / 8.0 + PI / 8.0
-		var p = pc + Vector3(cos(a) * pr, base_h, sin(a) * pr)
-		k.beam("oak", p, p + Vector3(0, h, 0), 0.22, 0.22)
-		k.beam("oak", p + Vector3(0, h - 0.6, 0), p + Vector3(0, h, 0) + (pc - p).normalized() * 0.5 * Vector3(1, 0, 1), 0.1, 0.1)
-		tops.append(p + Vector3(0, h, 0))
-	for i in 8:
-		k.beam("oak", tops[i], tops[(i + 1) % 8], 0.16, 0.2)
-	# round counter inside
-	k.cyl("plank", pc + Vector3(0, base_h, 0), pc + Vector3(0, base_h + 0.9, 0), pr * 0.55, 8, true)
-	k.cyl("hay", pc + Vector3(0, base_h + 0.9, 0), pc + Vector3(0, base_h + 1.05, 0), pr * 0.45, 8)
-	k.lantern(pc + Vector3(0, base_h + h - 0.4, 0))
-	var ty = base_h + h
-	if L <= 4:
-		_octo_tent(k, pc + Vector3(0, ty, 0), pr + 0.5, 2.0)
-		# lantern drum on top
-		k.cyl("oak", pc + Vector3(0, ty + 1.6, 0), pc + Vector3(0, ty + 2.2, 0), 0.5, 8)
-		_octo_tent(k, pc + Vector3(0, ty + 2.2, 0), 0.75, 0.6)
-	else:
-		# two tiers: skirt roof, a railed upper storey and a tall tent
-		_octo_tent(k, pc + Vector3(0, ty, 0), pr + 0.7, 1.0)
-		var ur = pr * 0.62
-		k.cyl("plank", pc + Vector3(0, ty + 0.7, 0), pc + Vector3(0, ty + 0.85, 0), ur + 0.35, 8)
-		for i in 8:
-			var a = TAU * i / 8.0 + PI / 8.0
-			var p = pc + Vector3(cos(a) * ur, ty + 0.85, sin(a) * ur)
-			k.beam("oak", p, p + Vector3(0, 1.6, 0), 0.16, 0.16)
-			var q = pc + Vector3(cos(a + TAU / 8.0) * ur, ty + 0.85, sin(a + TAU / 8.0) * ur)
-			k.beam("oak", p + Vector3(0, 0.8, 0), q + Vector3(0, 0.8, 0), 0.08, 0.1)
-		k.lantern(pc + Vector3(0, ty + 1.9, 0))
-		_octo_tent(k, pc + Vector3(0, ty + 2.45, 0), ur + 0.55, 1.6)
-		k.cyl("oak", pc + Vector3(0, ty + 3.9, 0), pc + Vector3(0, ty + 4.4, 0), 0.4, 8)
-		_octo_tent(k, pc + Vector3(0, ty + 4.4, 0), 0.6, 0.6)
-
 static func b05_market(k, L: int) -> Dictionary:
 	## Drawings B05 I-V. I two stalls (teal and wine stripes) with bunting between
-	## them on trodden earth, II plus a central produce table. III an octagonal paved
-	## square with a low fence, planters and an entrance arch at the front; the big
-	## striped pavilion on steps at the back, stall rows along the back edges, two big
-	## stalls at the front sides facing the centre. IV the back rows become a covered
-	## gallery and the pavilion stands on a stone podium. V a fountain in the centre
-	## with a free walk round it, two-tier pavilion, roofed gate and lanterns.
+	## them on trodden earth, II plus a central produce table. III-V: see the section notes.
 	if L <= 2:
 		k.ground_poly(PackedVector2Array([Vector2(-4.6, -2.6), Vector2(4.6, -2.6), Vector2(5.0, 3.4), Vector2(-4.8, 3.6)]), "earth", 0.025)
 		_striped_stall(k, Vector3(-2.1, 0, -0.6), 0.0, "cloth_teal", 2.2, 0)
@@ -905,84 +1154,211 @@ static func b05_market(k, L: int) -> Dictionary:
 				k.box(["hay", "herb", "flower", "parchment"][i], Vector3(-0.6 + i * 0.4, 0.92, 1.4), Vector3(0.3, 0.14, 0.4), 0, k.jitter(0.1))
 			k.crate(Vector3(-0.8, 0, 2.4), 0.5); k.barrel(Vector3(0.9, 0, 2.3))
 		return {"worker": Vector3(-0.2, 0.0, 3.2)}
-	var R = 5.6
-	var cz = 0.0
-	k.ground_poly(_octagon(R + 0.2, cz), "stone_light", 0.04)
-	k.ground_poly(_octagon(2.6, cz + 0.3, 24), "path", 0.05)
-	k.ground_poly(_octagon(1.9, cz + 0.3, 24), "stone_light", 0.055)
-	# low fence on stone piers along the octagon, with planters, open at the front
-	var pts = _octagon(R, cz)
-	for i in 8:
-		var a = pts[i]
-		var b = pts[(i + 1) % 8]
-		var mid = (a + b) * 0.5
-		var pa = Vector3(a.x, 0, a.y)
-		var pb = Vector3(b.x, 0, b.y)
-		k.box("stone", pa + Vector3(0, 0.45, 0), Vector3(0.45, 0.9, 0.45), 0, k.jitter(0.05))
-		if mid.y > cz + R * 0.85:
-			continue    # front edge: the entrance
-		k.fence(pa.lerp(pb, 0.08), pa.lerp(pb, 0.92), 0.75)
-		var flower = pa.lerp(pb, 0.5) * 0.93
-		k.box("plank", flower + Vector3(0, 0.2, 0), Vector3(0.9, 0.4, 0.4), rad_to_deg(atan2(-(pb - pa).z, (pb - pa).x)))
-		k.bush(flower + Vector3(0, 0.3, 0), 0.25, "lavender")
-	# entrance arch at the front
-	var ez = cz + R * 0.92
-	for s in [-1.0, 1.0]:
-		k.box("stone", Vector3(s * 1.4, 0.35, ez), Vector3(0.6, 0.7, 0.6), 0, k.jitter(0.04))
-		k.beam("oak", Vector3(s * 1.4, 0.7, ez), Vector3(s * 1.4, 2.9, ez), 0.3, 0.3)
-		k.lantern(Vector3(s * 1.4, 2.4, ez + 0.25))
-	var span = PackedVector2Array()
-	for i in 9:
-		var t = PI * i / 8.0
-		span.append(Vector2(cos(t) * 1.4, 2.7 + sin(t) * 0.5))
-	for i in 8:
-		k.beam("oak", Vector3(span[i].x, span[i].y, ez), Vector3(span[i + 1].x, span[i + 1].y, ez), 0.22, 0.28)
-	k.box("oak", Vector3(0, 3.25, ez), Vector3(3.2, 0.12, 0.35))
-	for i in 5:
-		k.box("cloth_wine" if i % 2 == 0 else "cloth_teal", Vector3(-0.8 + i * 0.4, 2.55, ez + 0.05), Vector3(0.26, 0.32, 0.02), 0, Color.WHITE, 0, 180)
-	if L >= 4:
-		k.push_at(Vector3(0, 0, ez))
-		k.gable_roof("shingle", Vector3(0, 3.35, 0), 3.4, 0.9, 0.6, 0.15)
-		k.pop()
-		for s in [-1.0, 1.0]:
-			k.cone("brass", Vector3(s * 1.4, 2.9, ez), 0.18, 0.55, 8)
-	k.lane(Vector3(0, 0, 7.0), Vector3(0, 0, 4.4 if L == 5 else 3.4), 1.2, 1.8, "unit")
-	# pavilion at the back
-	var pc = Vector3(0, 0, cz - 2.9)
-	_market_pavilion(k, pc, L)
-	# stall rows along the back edges (III) or the covered gallery (IV-V)
-	if L == 3:
-		for side in [-1.0, 1.0]:
-			for i in 3:
-				var th: float = (-148.0 + i * 16.0) if side < 0 else (-32.0 - i * 16.0)
-				_striped_stall(k, _mk_at(th, 4.6) + Vector3(0, 0, 0.2), _mk_face(th), "cloth_teal" if i % 2 == 0 else "cloth_wine", 1.3, i, false)
-	else:
-		_gallery(k, -178.0, -122.0, 3.9, R - 0.2)
-		_gallery(k, -58.0, -2.0, 3.9, R - 0.2)
-	# the two big stalls at the front sides, facing the centre
+	var leaving: bool = L == 4      # IV parts that the upgrade to V takes down carry times
+	# ---- shared by III-V, emitted first and in the same order on every level, so the
+	# parts that stay match exactly and the upgrade keeps them standing
+	_mk_ground(k)
+	_mk_fence(k)
+	_mk_gate(k, mini(L, 4))
 	for side in [-1.0, 1.0]:
-		var th = 148.0 if side < 0 else 32.0
-		_striped_stall(k, _mk_at(th, 3.6) + Vector3(0, 0, 0.2), _mk_face(th), "cloth_teal" if side < 0 else "cloth_wine", 2.2, 2 if side < 0 else 4)
-		k.barrel(_mk_at(th + side * -14.0, 4.5))
-	if L <= 4:
-		k.table(Vector3(0, 0.05, cz + 0.6), 1.6, 0.8, 0.85, 0, "plank")
-		for i in 4:
-			k.box(["hay", "flower", "herb", "parchment"][i], Vector3(-0.55 + i * 0.37, 0.97, cz + 0.6), Vector3(0.28, 0.14, 0.4), 0, k.jitter(0.1))
+		var sp = _mkp(190.0 if side < 0 else -10.0, 3.65)
+		var yaw = 20.0 if side < 0 else -20.0
+		_striped_stall(k, sp, yaw, "awning_teal" if side < 0 else "awning_wine", 2.4, 2 if side < 0 else 4, true, "awning")
+		var back = sp + Vector3(sin(deg_to_rad(yaw)), 0, cos(deg_to_rad(yaw))) * -1.0
+		k.barrel(back + Vector3(side * 0.9, 0, 0.9))
+		k.crate(sp + Vector3(side * 0.9, 0, 1.3), 0.42, yaw)
+		k.lantern(sp + Vector3(sin(deg_to_rad(yaw)), 0, cos(deg_to_rad(yaw))) * 0.66 + Vector3(cos(deg_to_rad(yaw)), 0, -sin(deg_to_rad(yaw))) * 1.32 + Vector3(0, 1.75, 0))
+	var top = _mk_pavilion_base(k, L)
+	k.lane(Vector3(0, 0, 7.0), Vector3(0, 0, MK_C.z + 2.1), 1.2, 2.2, "unit")
+	var right: Array = MK_GAL.map(func(v: Vector2): return Vector2(-v.x, v.y))
+	if L == 3:
+		# open stall rows on the gallery lines
+		for line in [MK_GAL, right]:
+			for j in 2:
+				var a: Vector2 = line[j]
+				var b: Vector2 = line[j + 1]
+				var m = (a + b) * 0.5
+				var c3 = Vector3(m.x, 0, m.y)
+				var yaw3 = _yaw_to(c3, Vector3(0, 0, -0.5))
+				_striped_stall(k, c3 + (c3 - Vector3(0, 0, -1.5)).normalized() * 0.55, yaw3, "awning_teal" if j == 0 else "awning_wine", 1.8 if j == 0 else 1.4, j, false, "awning")
 	else:
-		# fountain with a free walk round it
-		var f = Vector3(0, 0, cz + 2.4)
-		k.cyl("stone_light", f, f + Vector3(0, 0.55, 0), 1.0, 8, true, k.jitter(0.03))
-		k.cyl("water", f + Vector3(0, 0.54, 0), f + Vector3(0, 0.58, 0), 0.85, 8)
-		k.cyl("stone", f + Vector3(0, 0.55, 0), f + Vector3(0, 1.7, 0), 0.22, 8)
-		k.cyl("stone_light", f + Vector3(0, 1.7, 0), f + Vector3(0, 1.88, 0), 0.6, 8)
-		k.cyl("water", f + Vector3(0, 1.87, 0), f + Vector3(0, 1.9, 0), 0.5, 8)
-		k.cone("stone_light", f + Vector3(0, 1.88, 0), 0.18, 0.55, 8)
-		k.lane(f, Vector3(1.35, 0, 1.35), 0.5, 1.8, "ring")
-		for th in [100.0, 80.0]:
-			var lp = _mk_at(th, 4.6)
-			k.cyl("dark_oak", lp, lp + Vector3(0, 2.2, 0), 0.05, 6)
-			k.lantern(lp + Vector3(0, 2.3, 0))
-	return {"worker": Vector3(-1.2, 0.0, 2.9)}
+		_gallery_run(k, MK_GAL[0], MK_GAL[1])
+		_gallery_run(k, MK_GAL[1], MK_GAL[2])
+		_gallery_run(k, right[0], right[1])
+	# ---- level-specific parts
+	if L <= 4:
+		if leaving:
+			# the back right gallery section makes room for the walk behind the pavilion
+			_gallery_run(k, right[1], right[2], 0.22)
+			k.leave(0.14)
+		# square of IV: grass beds either side of the approach, a path ring round a table
+		k.ground_poly(_ellipse(Vector3(-1.95, 0, 4.15), 0.95, 0.6, -35.0), "herb", 0.06)
+		k.ground_poly(_ellipse(Vector3(1.95, 0, 4.15), 0.95, 0.6, 35.0), "herb", 0.06)
+		_ring(k, "path", MK_C, 2.45, 2.7, 0.058, 36)
+		for s in [-1.0, 1.0]:
+			k.bush(Vector3(s * 1.95, 0.05, 4.15), 0.3, "flower")
+		if leaving:
+			k.leave(0.13)
+		k.table(MK_C + Vector3(0, 0.04, 0), 1.7, 0.85, 0.85, 0, "plank")
+		for i in 4:
+			k.box(["hay", "flower", "herb", "parchment"][i], MK_C + Vector3(-0.58 + i * 0.39, 0.97, 0), Vector3(0.3, 0.14, 0.4), 0, k.jitter(0.1))
+		k.crate(MK_C + Vector3(-0.5, 0, 0.75), 0.42); k.sack(MK_C + Vector3(0.45, 0, 0.7))
+		# tent roof with its lantern cupola (one tier)
+		if leaving:
+			k.leave(0.2)
+		var rise = 1.6 if L == 3 else 2.0
+		_tent(k, MK_P, 2.95, top, 0.55, top + rise)
+		if leaving:
+			k.leave(0.17)
+		for i in 8:
+			var a = deg_to_rad(22.5 + 45.0 * i)
+			var q = MK_P + Vector3(cos(a) * 0.5, top + rise - 0.1, sin(a) * 0.5)
+			k.beam("oak", q, q + Vector3(0, 0.6, 0), 0.08, 0.08)
+		_prism(k, "oak", MK_P, 0.6, top + rise + 0.5, top + rise + 0.6, 8)
+		_tent(k, MK_P, 0.8, top + rise + 0.6, 0.0, top + rise + 1.2, [], false, true)
+		_finial(k, MK_P + Vector3(0, top + rise + 1.18, 0), 0.5)
+		k.leave(null)
+		return {"worker": Vector3(-1.6, 0.0, 5.3)}
+	# ---- V
+	# 1. site works: ring kerbs round the centre, posts of the upper storey and connector
+	_ring(k, "stone_light", MK_C, 2.0, 2.3, 0.062, 28, 0.13, 0.2)
+	_ring(k, "stone_light", MK_C, 4.15, 4.45, 0.062, 40, 0.15, 0.24)
+	_ring(k, "stone", MK_C, 2.3, 4.15, 0.05, 40, 0.16, 0.26, 0.03)
+	_at(k, 0.2)
+	_ring(k, "stone_light", MK_C, 3.15, 3.3, 0.064, 40, 0.2, 0.27)
+	var ur = 1.55
+	var uy = top + 1.0          # floor of the upper storey
+	var uh = uy + 1.7           # its eave (the tier is raised, the roof stays low)
+	for i in 8:
+		_at(k, 0.27 + i * 0.008)
+		var a = deg_to_rad(22.5 + 45.0 * i)
+		var q = MK_P + Vector3(cos(a) * ur, 0, sin(a) * ur)
+		k.beam("oak", q + Vector3(0, top - 0.25, 0), q + Vector3(0, uh, 0), 0.2, 0.2)
+	var gb_in: Vector2 = MK_GAL[2]
+	var gb_out: Vector2 = gb_in + (Vector2(-0.881, -0.474)) * MK_GAL_D
+	var pv1 = Vector2(MK_P.x + cos(deg_to_rad(190.0)) * 2.3, MK_P.z + sin(deg_to_rad(190.0)) * 2.3)
+	var pv2 = Vector2(MK_P.x + cos(deg_to_rad(225.0)) * 2.3, MK_P.z + sin(deg_to_rad(225.0)) * 2.3)
+	var cp = [gb_in.lerp(pv1, 0.25), gb_in.lerp(pv1, 0.68), gb_out.lerp(pv2, 0.5)]
+	_at(k, 0.3)
+	for q2 in cp:
+		var q3 = Vector3(q2.x, 0, q2.y)
+		k.box("stone", q3 + Vector3(0, 0.12, 0), Vector3(0.32, 0.24, 0.32))
+		k.beam("oak", q3 + Vector3(0, 0.24, 0), q3 + Vector3(0, 2.62, 0), 0.22, 0.22)
+	_at(k, 0.33)
+	for j in 2:
+		var q3 = Vector3(cp[j].x, 0, cp[j].y)
+		for s in [-1.0, 1.0]:
+			var e = q3 + Vector3(pv1.x - gb_in.x, 0, pv1.y - gb_in.y).normalized() * s * 0.5
+			k.beam("oak", q3 + Vector3(0, 1.95, 0), e + Vector3(0, 2.5, 0), 0.1, 0.12)
+	# 2. gallery and canvas: connector, skirt roof, band, upper storey and roof, cupola
+	_at(k, 0.37)
+	var f0 = Vector3(gb_in.x, 2.5, gb_in.y)
+	var f1 = Vector3(pv1.x, 2.62, pv1.y)
+	var b0 = Vector3(gb_out.x, 2.8, gb_out.y)
+	var b1 = Vector3(pv2.x, 2.9, pv2.y)
+	k.beam("oak", f0, f1, 0.16, 0.2)
+	k.beam("oak", b0, b1, 0.16, 0.2)
+	k.beam("oak", f0, b0, 0.12, 0.16)
+	k.beam("oak", f1, b1, 0.12, 0.16)
+	for i in 5:
+		_at(k, 0.41 + i * 0.012)
+		var u0 = i / 5.0
+		var u1 = (i + 1) / 5.0
+		var lift = Vector3(0, 0.12, 0)
+		_quad2(k, ["awning", "awning_teal", "awning", "awning_wine", "awning"][i], f0.lerp(f1, u0) + lift, f0.lerp(f1, u1) + lift, b0.lerp(b1, u1) + lift, b0.lerp(b1, u0) + lift)
+	for i in 6:
+		var q0 = f0.lerp(f1, i / 6.0) + Vector3(0, 0.04, 0)
+		var q1 = f0.lerp(f1, (i + 1) / 6.0) + Vector3(0, 0.04, 0)
+		_tri2(k, "awning_wine" if i % 2 == 0 else "awning", q0, q1, (q0 + q1) * 0.5 + Vector3(0, -0.22, 0))
+	k.lantern(f0.lerp(f1, 0.5) + Vector3(0, -0.45, 0))
+	_at(k, 0.4)
+	for i in 8:
+		var a0 = deg_to_rad(22.5 + 45.0 * i)
+		var a1 = deg_to_rad(22.5 + 45.0 * (i + 1))
+		var q0 = MK_P + Vector3(cos(a0) * ur, uh, sin(a0) * ur)
+		var q1 = MK_P + Vector3(cos(a1) * ur, uh, sin(a1) * ur)
+		k.beam("oak", q0, q1, 0.16, 0.2)
+		k.beam("oak", MK_P + Vector3(cos(a0) * ur, uy - 0.05, sin(a0) * ur), MK_P + Vector3(cos(a1) * ur, uy - 0.05, sin(a1) * ur), 0.14, 0.18)
+	_tent(k, MK_P, 3.05, top, 1.72, top + 0.72, [0.44, 0.5])
+	_at(k, 0.52)
+	# the band that separates the two roofs
+	_prism(k, "oak", MK_P, 1.78, top + 0.66, uy, 8, 22.5, Color(0.92, 0.85, 0.8), -1.0, false)
+	_prism(k, "awning_wine", MK_P, 1.8, top + 0.74, top + 0.86, 8, 22.5, Color.WHITE, -1.0, false)
+	_prism(k, "plank", MK_P, 1.74, uy - 0.06, uy, 8, 22.5)
+	for i in 8:
+		_at(k, 0.54 + i * 0.003)
+		var a0 = deg_to_rad(22.5 + 45.0 * i)
+		var a1 = deg_to_rad(22.5 + 45.0 * (i + 1))
+		var q0 = MK_P + Vector3(cos(a0) * ur, uy, sin(a0) * ur)
+		var q1 = MK_P + Vector3(cos(a1) * ur, uy, sin(a1) * ur)
+		k.beam("oak", q0 + Vector3(0, 0.75, 0), q1 + Vector3(0, 0.75, 0), 0.08, 0.1)
+		k.beam("oak", q0 + Vector3(0, 0.12, 0), q1 + Vector3(0, 0.12, 0), 0.07, 0.08)
+		k.beam("oak", q0.lerp(q1, 0.1) + Vector3(0, 0.14, 0), q0.lerp(q1, 0.9) + Vector3(0, 0.73, 0), 0.05, 0.06)
+		k.beam("oak", q0.lerp(q1, 0.1) + Vector3(0, 0.73, 0), q0.lerp(q1, 0.9) + Vector3(0, 0.14, 0), 0.05, 0.06)
+		k.beam("oak", q0 + Vector3(0, 1.0, 0), q0.lerp(q1, 0.3) + Vector3(0, 1.45, 0), 0.08, 0.09)
+		k.beam("oak", q1 + Vector3(0, 1.0, 0), q0.lerp(q1, 0.7) + Vector3(0, 1.45, 0), 0.08, 0.09)
+	_tent(k, MK_P, 2.3, uh, 0.42, uh + 0.95, [0.57, 0.63])
+	_at(k, 0.63)
+	for i in 8:
+		var a = deg_to_rad(22.5 + 45.0 * i)
+		var q = MK_P + Vector3(cos(a) * 0.4, uh + 0.85, sin(a) * 0.4)
+		k.beam("oak", q, q + Vector3(0, 0.6, 0), 0.08, 0.08)
+	_prism(k, "oak", MK_P, 0.5, uh + 1.41, uh + 1.49, 8)
+	_at(k, 0.65)
+	_tent(k, MK_P, 0.7, uh + 1.49, 0.0, uh + 2.0, [], false, true)
+	_at(k, 0.66)
+	_finial(k, MK_P + Vector3(0, uh + 1.98, 0), 0.55)
+	_at(k, 0.67)
+	for i in 4:
+		var a = deg_to_rad(67.5 + 90.0 * i)
+		k.lantern(MK_P + Vector3(cos(a) * 1.15, uh - 0.35, sin(a) * 1.15))
+	k.lantern(MK_P + Vector3(0, uh + 1.1, 0))
+	# 3. fountain and the last of the paving
+	var f = MK_C
+	_at(k, 0.7)
+	_prism(k, "stone_light", f, 1.32, -0.05, 0.14, 8, 22.5, Color(1.05, 1.02, 0.98))
+	_prism(k, "stone_light", f, 0.95, 0.1, 0.5, 8, 22.5, k.jitter(0.03))
+	_at(k, 0.73)
+	_prism(k, "stone", f, 1.02, 0.5, 0.6, 8, 22.5, Color(1.08, 1.05, 1.0))
+	_prism(k, "water", f, 0.8, 0.6, 0.62, 8, 22.5)
+	_at(k, 0.76)
+	_prism(k, "stone", f, 0.27, 0.6, 1.3, 8, 22.5, k.jitter(0.03))
+	_prism(k, "stone_light", f, 0.36, 1.3, 1.42, 8, 22.5)
+	_at(k, 0.79)
+	_prism(k, "stone_light", f, 0.5, 1.42, 1.52, 8, 22.5, Color.WHITE, 0.56)
+	_prism(k, "water", f, 0.44, 1.52, 1.54, 8, 22.5)
+	_prism(k, "stone", f, 0.15, 1.52, 1.85, 8, 22.5)
+	k.cone("stone_light", f + Vector3(0, 1.85, 0), 0.17, 0.32, 8)
+	k.box("brass", f + Vector3(0, 2.2, 0), Vector3(0.1, 0.1, 0.1), 45)
+	_at(k, 0.81)
+	for i in 4:
+		var a = deg_to_rad(45.0 + 90.0 * i)
+		var dv = Vector3(cos(a), 0, sin(a))
+		k.cyl("brass", f + dv * 0.22 + Vector3(0, 1.05, 0), f + dv * 0.42 + Vector3(0, 1.05, 0), 0.04, 6)
+	_at(k, 0.84)
+	for i in 4:
+		var a = deg_to_rad(45.0 + 90.0 * i)
+		var dv = Vector3(cos(a), 0, sin(a))
+		k.beam("water", f + dv * 0.44 + Vector3(0, 1.05, 0), f + dv * 0.62 + Vector3(0, 0.62, 0), 0.06, 0.05)
+	for i in 8:
+		var a = deg_to_rad(22.5 + 45.0 * i)
+		k.beam("water", f + Vector3(cos(a) * 0.48, 1.52, sin(a) * 0.48), f + Vector3(cos(a) * 0.62, 0.66, sin(a) * 0.62), 0.05, 0.04)
+	for i in 2:
+		_at(k, 0.86 + i * 0.02)
+		var a = 0.0 if i == 0 else 180.0
+		var pp = _mkp(a, 1.12)
+		k.box("plank", pp + Vector3(0, 0.3, 0), Vector3(0.36, 0.34, 0.8), 0, Color(0.95, 0.85, 0.75))
+		k.bush(pp + Vector3(0, 0.42, -0.2), 0.22, "lavender")
+		k.bush(pp + Vector3(0, 0.42, 0.2), 0.2, "flower")
+	_ring(k, "stone_light", MK_C, 0.95, 1.45, 0.066, 24, 0.88, 0.91, 0.05, "stone")
+	_ring(k, "stone", MK_C, 1.45, 2.0, 0.066, 28, 0.91, 0.94, 0.05, "stone_light")
+	_at(k, null)
+	k.lane(MK_C, Vector3(1.7, 0, 1.7), 0.6, 1.8, "ring")
+	k.lane(Vector3(3.45, 0, -0.6), Vector3(3.45, 0, -6.2), 0.8, 2.0, "unit")
+	return {"worker": Vector3(-1.6, 0.0, 5.3),
+		"site": {"scaffold": [0.0, MK_P.z, 3.35, 3.0, 8.6], "front_mid": false,
+			"piles": [[-2.8, 4.9], [2.8, 4.9]], "hoist": [3.0, -0.3],
+			"builders": [[-2.3, -0.45], [2.25, -0.4]], "carrier": [[-2.5, 4.4], [-1.6, -0.55]]}}
 
 # ============================================================== B07 Stone Quarry (RES-02)
 ## Open pit face cut in pale stone, stepping down in benches towards the street (front)

@@ -26,6 +26,13 @@ const LANE := 1.8
 const STREET := 2.6
 const AVENUE := 3.2
 const DOOR_GAP := 2.8
+# Build 59: types whose level scene lays its own ground from level III (the market's
+# round square with its fence and gate). Their yard stays green: no rectangular paving,
+# kerb or gate posts of the town around the drawn square.
+const OWN_SQUARE := {"ECO-03": 3}
+
+static func own_square(lot: Dictionary) -> bool:
+	return int(lot.level) >= int(OWN_SQUARE.get(str(lot.get("type", "")), 99))
 const BODY_COST := 120.0
 const YARD_COST := 6.0
 
@@ -563,6 +570,10 @@ func paint() -> void:
 	# Yards: earth; fully paved at level V and for the town square.
 	for lot: Dictionary in lots:
 		var paved: bool = lot.hall or int(lot.level) >= 5
+		if own_square(lot):
+			# yard flag only: grass shows round the drawn square, nothing grows on it
+			fill(lot.rect, Color(0, 0, 1, 1))
+			continue
 		fill(lot.rect, Color(0, 1, 1, 1) if paved else Color(1, 0, 1, 1))
 	# Paved forecourts from level III: from the building to the yard front, door wide.
 	for lot: Dictionary in lots:

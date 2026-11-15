@@ -28,6 +28,12 @@ func run() -> void:
 			row["carried"] = true
 		table.get_or_add(entry.type, {})[str(entry.level)] = row
 		if not only.is_empty() and not key in only:
+			# not rebuilt: keep what the last full build wrote for it (worker spot, site)
+			var before: Variant = data.get("levelModels", {}).get(entry.type, {}).get(str(entry.level))
+			if before is Dictionary:
+				for field in ["worker", "site"]:
+					if before.has(field):
+						row[field] = before[field]
 			continue
 		# Seeded by type, so parts shared by neighbouring levels come out identical and
 		# the upgrade animation can tell what stays from what is new.
@@ -35,6 +41,9 @@ func run() -> void:
 		var spec: Dictionary = Callable(Recipes, entry.fn).call(kit, int(entry.level))
 		if spec.has("worker"):
 			row["worker"] = [spec.worker.x, spec.worker.y, spec.worker.z]
+		if spec.has("site"):
+			# building site layout of the upgrade INTO this level (scaffolding, piles, hoist)
+			row["site"] = spec.site
 		var root := Node3D.new()
 		root.name = key.replace("-", "_")
 		root.set_meta("series", entry.series)
@@ -70,7 +79,7 @@ func run() -> void:
 		var err := ResourceSaver.save(packed, OUT + key + ".tscn")
 		report.append("%s %s tris=%d lanes=%d err=%d" % [key, entry.series, tris, kit.lanes.size(), err])
 		root.free()
-	link_upgrades(table)
+	link_upgrades(table, only)
 	# levelModels table is written in a stable order so diffs stay small.
 	data["levelModels"] = table
 	var text := FileAccess.get_file_as_string("res://assets/game.json")
@@ -208,12 +217,15 @@ static func mesh_keys(mesh: ArrayMesh) -> Dictionary:
 			keys[tri_key(mat, v[t], v[t + 1], v[t + 2])] = true
 	return keys
 
-func link_upgrades(table: Dictionary) -> void:
+func link_upgrades(table: Dictionary, only: Array = []) -> void:
 	## For each level L with a kit-built level L-1: parts already standing in L-1 get
 	## UV2.x = 0 (not rebuilt); new parts keep their build time. In L-1, parts missing
 	## from L get UV2.y = an early dismantle time (roof first), the rest UV2.y = 2.
 	var linked := 0
 	for type in table:
+		# a partial build (only=...) relinks the types it rebuilt and leaves the rest as is
+		if not only.is_empty() and not only.any(func(key): return str(key).begins_with(type + "-")):
+			continue
 		for level in range(2, 6):
 			var prev := OUT + "%s-%d.res" % [type, level - 1]
 			var cur := OUT + "%s-%d.res" % [type, level]
@@ -235,7 +247,12 @@ func link_upgrades(table: Dictionary) -> void:
 				var h := clampf(((a.y + b.y + c.y) / 3.0) / top, 0.0, 1.0)
 				# replaced in place: a part is taken down just before the new parts at
 				# its height go up (walls course by course, the old roof with the new frame)
-				return Vector2(uv.x, 2.0 if ck.has(key) else 0.12 + 0.83 * (0.1 + 0.46 * pow(h, 0.85)) - 0.02))
+				if ck.has(key):
+					return Vector2(uv.x, 2.0)
+				# the recipe said when this part comes down (build 59), else by its height
+				if uv.y < 1.5:
+					return uv
+				return Vector2(uv.x, 0.12 + 0.83 * (0.1 + 0.46 * pow(h, 0.85)) - 0.02))
 			ResourceSaver.save(cm, cur, ResourceSaver.FLAG_COMPRESS)
 			ResourceSaver.save(pm, prev, ResourceSaver.FLAG_COMPRESS)
 			linked += 1

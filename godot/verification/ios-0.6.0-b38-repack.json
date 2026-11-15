@@ -1,0 +1,11 @@
+{
+  "output": "/tmp/claude-0/-home-user-Drenovar/2a1527ba-2459-5a36-affb-5d54db438276/scratchpad/ipa/DRENOVAR-iOS-v0.6.0-b38-test.ipa",
+  "bytes": 217952620,
+  "sha256": "671745d533b1d976b8b4c1aba08f68b26fd5cf615b387946fdbdd08ab8d2d7e7",
+  "engine_sha256": "d9816f67f540bbebccfdb2a5ecf9460feda71c05247e4e80601caf44973bfaae",
+  "pck_sha256": "a646bba2b570d0d1d9533d37befc1c6192f0e4e490d972a8518f7503934bfda8",
+  "version": "0.6.0",
+  "build": "38",
+  "signed": false,
+  "device_tested": false
+}

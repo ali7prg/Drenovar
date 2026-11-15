@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-06-2.res" id="1_g33om"]
+
+[node name="ALT_06_2" type="Node3D" unique_id=827206461]
+metadata/series = "B23_HuntingLodge"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-4.6, 0, 3.2)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=494798386]
+mesh = ExtResource("1_g33om")

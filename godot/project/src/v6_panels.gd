@@ -217,24 +217,42 @@ func metric_value(metric: String, value: Variant) -> String:
 	return str(value)
 
 func account() -> void:
-	ui.open_modal("Одно поселение на двух устройствах", "right", "DRENOVAR V6 · ТЕСТ")
-	if not ui.state.v6.get("legacy_building_archive", []).is_empty():
-		ui.button(ui.modal_body, "Архив прежних зданий", archive)
-	ui.row(ui.modal_body, "Приложение и браузер используют общий прогресс. Получите код здесь и введите его на другом устройстве. Код действует 10 минут.")
-	ui.button(ui.modal_body, "Получить код подключения", pairing_code)
+	ui.open_modal("Аккаунт", "profile", "DRENOVAR · ТЕСТОВАЯ ВЕРСИЯ")
+	ui.message.text = ""
+	ui.row(ui.modal_body, "Это отдельный тестовый мир V6. Поселения действующей игры здесь пока недоступны; их прогресс сохранён в действующей версии.")
+	ui.button(ui.modal_body, "Открыть действующую веб-версию", func(): OS.shell_open(ui.OLD_SERVER_URL))
+	if not ui.connected():
+		ui.button(ui.modal_body, "Подключиться к тестовому миру", func():
+			await ui.device_login()
+			account()
+		)
+		return
+	if ui.saved_session_error:
+		ui.row(ui.modal_body, "Не удалось сохранить вход на устройстве. Не закрывайте приложение до подключения второго устройства.")
+	if enabled():
+		ui.row(ui.modal_body, str(ui.state.city.name))
+		if not ui.state.v6.get("legacy_building_archive", []).is_empty():
+			ui.button(ui.modal_body, "Архив прежних зданий", archive)
+		ui.row(ui.modal_body, "Чтобы продолжить этот тестовый город в браузере, получите код и введите его в веб-версии V6. Код действует 10 минут.")
+		ui.button(ui.modal_body, "Получить код подключения", pairing_code)
+	else:
+		ui.row(ui.modal_body, "Введите код из аккаунта веб-версии V6 или создайте отдельное тестовое поселение.")
+		ui.button(ui.modal_body, "Создать тестовое поселение", ui.create_settlement)
 	var input := LineEdit.new()
-	input.placeholder_text = "16 знаков с другого устройства"
+	input.placeholder_text = "16 знаков из веб-версии V6"
 	input.max_length = 20
 	input.custom_minimum_size = Vector2(260, 48)
 	ui.modal_body.add_child(input)
-	ui.button(ui.modal_body, "Подключиться к этому поселению", func():
+	ui.button(ui.modal_body, "Подключить тестовое поселение", func():
 		var response: Dictionary = await ui.send_request("pair/accept", {"code":input.text})
 		if response.has("error"):
 			ui.show_error(response)
 		else:
-			ui.player_id = str(response.playerId)
-			await ui.sync_account(true)
+			ui.player_id = ""
+			await ui.sync_account()
+			account()
 	)
+	ui.button(ui.modal_body, "Выйти из аккаунта на устройстве", ui.confirm_profile_action.bind(ui.sign_out_question(), ui.sign_out))
 
 func archive() -> void:
 	await load_catalogue()

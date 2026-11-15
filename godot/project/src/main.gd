@@ -4000,7 +4000,7 @@ func fill_party(selected: Dictionary, all_available: bool) -> void:
 		remaining -= int(input.value)
 
 func show_account() -> void:
-	if v6_panels.enabled():
+	if is_instance_valid(v6_panels):
 		v6_panels.account()
 		return
 	open_modal("Твоё королевство", "profile", "ДРЕНОВАР · КОРОЛЕВСТВО")
@@ -4247,6 +4247,9 @@ func begin_refresh() -> void:
 	await begin_transfer(true)
 
 func begin_transfer(refresh := false) -> void:
+	if is_instance_valid(v6_panels):
+		v6_panels.account()
+		return
 	transfer_refresh = refresh
 	if SessionStore.valid(pending_old_session) and not SessionStore.is_device(pending_old_session):
 		set_login_status("Переносим поселение…")
@@ -4453,7 +4456,7 @@ func sync_account(create_if_needed := false) -> void:
 		show_error(response)
 		return
 	accept(response)
-	if SessionStore.is_device(session) and not web_link_hint_shown:
+	if not is_instance_valid(v6_panels) and SessionStore.is_device(session) and not web_link_hint_shown:
 		web_link_hint_shown = true
 		var account: Dictionary = await request("account")
 		var link = account.get("webLink")

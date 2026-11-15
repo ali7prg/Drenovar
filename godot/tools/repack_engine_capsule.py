@@ -50,8 +50,8 @@ def build(args):
         require(args.bundle_id in ('com.drenovar.game', 'com.drenovar.game.v6test'), 'Unsupported output Bundle ID')
         info['CFBundleIdentifier']=args.bundle_id
         if args.bundle_id == 'com.drenovar.game.v6test':
-            info['CFBundleDisplayName']='DRENOVAR V6 Test'
-            info['CFBundleName']='DRENOVAR V6 Test'
+            info['CFBundleDisplayName']='DRENOVAR'
+            info['CFBundleName']='DRENOVAR'
         info['CFBundleShortVersionString']=args.version
         info['CFBundleVersion']=args.build
         args.destination.parent.mkdir(parents=True,exist_ok=True)

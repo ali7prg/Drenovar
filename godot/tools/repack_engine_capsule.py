@@ -47,6 +47,11 @@ def build(args):
         binary=base.read(binary_name)
         require(sha(binary) == EXPECTED_EXECUTABLE, 'Executable differs from original recorded engine')
         require(binary[:4] == bytes.fromhex('cffaedfe') and struct.unpack_from('<I',binary,4)[0] == 0x0100000C, 'Expected arm64 Mach-O')
+        require(args.bundle_id in ('com.drenovar.game', 'com.drenovar.game.v6test'), 'Unsupported output Bundle ID')
+        info['CFBundleIdentifier']=args.bundle_id
+        if args.bundle_id == 'com.drenovar.game.v6test':
+            info['CFBundleDisplayName']='DRENOVAR V6 Test'
+            info['CFBundleName']='DRENOVAR V6 Test'
         info['CFBundleShortVersionString']=args.version
         info['CFBundleVersion']=args.build
         args.destination.parent.mkdir(parents=True,exist_ok=True)
@@ -69,7 +74,7 @@ def build(args):
                 require(sha(result.read(binary_name)) == EXPECTED_EXECUTABLE,'Engine changed during packaging')
                 require(result.read(PREFIX+'DRENOVAR.pck') == pack,'PCK differs from supplied pack')
                 written=plistlib.loads(result.read(PREFIX+'Info.plist'))
-                require(written['CFBundleIdentifier']=='com.drenovar.game','Output Bundle ID changed')
+                require(written['CFBundleIdentifier']==args.bundle_id,'Output Bundle ID mismatch')
                 require(written['CFBundleShortVersionString']==args.version and written['CFBundleVersion']==args.build,'Output version mismatch')
                 for name in expected:
                     if name != PREFIX+'Info.plist':
@@ -78,7 +83,7 @@ def build(args):
         finally:
             if os.path.exists(temp):
                 os.unlink(temp)
-    print(json.dumps({'output':str(args.destination),'bytes':args.destination.stat().st_size,'sha256':sha(args.destination.read_bytes()),'engine_sha256':EXPECTED_EXECUTABLE,'pck_sha256':sha(pack),'version':args.version,'build':args.build,'signed':False,'device_tested':False},indent=2))
+    print(json.dumps({'output':str(args.destination),'bytes':args.destination.stat().st_size,'sha256':sha(args.destination.read_bytes()),'engine_sha256':EXPECTED_EXECUTABLE,'pck_sha256':sha(pack),'version':args.version,'build':args.build,'bundle_identifier':args.bundle_id,'signed':False,'device_tested':False},indent=2))
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
@@ -87,6 +92,7 @@ def main():
     parser.add_argument('destination',type=Path)
     parser.add_argument('--version',required=True)
     parser.add_argument('--build',required=True)
+    parser.add_argument('--bundle-id',default='com.drenovar.game')
     parser.add_argument('--expect-capsule-sha256',required=True)
     args=parser.parse_args()
     try:

@@ -1,6 +1,6 @@
 extends RefCounted
 
-const SESSION_PATH := "user://drenovar-session.bin"
+const SESSION_PATH := "user://drenovar-v6-test-session.bin"
 const TOKEN_LENGTH := 129
 # Device account of the Cloudflare server: "device." + a 256-bit secret in hex.
 const DEVICE_PREFIX := "device."
@@ -22,7 +22,7 @@ static func valid(token: String) -> bool:
 static func is_device(token: String) -> bool:
 	return token.begins_with(DEVICE_PREFIX) and valid(token)
 
-const KEY_PATH := "user://drenovar-session.key"
+const KEY_PATH := "user://drenovar-v6-test-session.key"
 
 # v1 derived the key from OS.get_unique_id() (identifierForVendor on iOS), which iOS
 # may change for a re-signed sideloaded app; the saved login then became unreadable.
@@ -87,7 +87,7 @@ static func save_session(token: String) -> Error:
 # key. It lets the app open the player's own city immediately at launch while the
 # server is contacted in the background. It is bound to the session that wrote it:
 # a different login never sees another account's city.
-const STATE_PATH := "user://drenovar-state.bin"
+const STATE_PATH := "user://drenovar-v6-test-state.bin"
 const STATE_LIMIT := 16 * 1024 * 1024
 
 static func save_state(token: String, game_state: Dictionary, clock_offset: float) -> Error:

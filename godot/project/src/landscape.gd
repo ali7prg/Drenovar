@@ -28,6 +28,8 @@ const GATE_SCENE_SCALES := [1.9, 2.0, 2.0, 2.1, 2.2]
 const GATE_SCENE_HALF_SPAN := 5.9
 
 static func gate_scene_scale(level: int) -> float:
+	if level >= 6:
+		return 1.0
 	return GATE_SCENE_SCALES[clampi(level, 1, 5) - 1]
 var works := CityWorks.new()
 # The second worker's crew (workers-v1: a second worker from «Жилой дом» III).
@@ -1229,7 +1231,7 @@ func level_worker_offset(level_model: Dictionary) -> Variant:
 # [scene path, scale] that the city shows for a type at a level (level scene or the
 # shared model grown by level), or [] when the type has no model.
 func level_visual(type: String, level: int) -> Array:
-	if level < 1 or level > 5:
+	if level < 1 or level > 11:
 		return []
 	var entry := level_model_for(type, level)
 	if not entry.is_empty():
@@ -2129,6 +2131,11 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				play_animation(unit, clip, data.unitModels[slot.id].drill if clip == "attack" else "", phase,
 					fposmod(float(i) * 0.381966, 1.0))
 				unit.set_meta("clip", clip)
+			if slot.id == "SIEGE-RAM-01":
+				# Static authored machine: cosmetic recoil only at an actual server hit.
+				unit.rotation.z = PI / 3.0 if down else 0.0
+				if strike > -INF and not down:
+					unit.position += unit.basis.z * (sin(clampf((elapsed - strike + 490.0) / 1000.0, 0.0, 1.0) * PI) * 0.25)
 			if unit.get_meta("tempo", 1.0) != tempo:
 				unit.set_meta("tempo", tempo)
 				for player: AnimationPlayer in unit.get_meta("animation_players", []):
@@ -2635,3 +2642,11 @@ func clear_placement() -> void:
 	placement_ghost = null
 	placement_plate = null
 	placement_rings.clear()
+
+# City-only helpers are constructed with every Landscape, including the world.
+# Unparented helpers are not freed by Node's normal child destruction.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		for helper in [works, works2, town]:
+			if is_instance_valid(helper) and helper.get_parent() == null:
+				helper.free()

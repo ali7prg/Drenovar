@@ -1,0 +1,1901 @@
+{
+  "status": "passed",
+  "legacy_files_unchanged": 318,
+  "native_states": 297,
+  "visual_transitions": 270,
+  "III_IV_V_VI_X_XI": 81,
+  "source": "DRENOVAR-V6-C1.0/13_BUILDING_PASSPORTS_RU.md",
+  "transitions": [
+    {
+      "building_id": "B21",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B21",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B21",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B21",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B21",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B21",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B21",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B21",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B21",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B21",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B22",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B22",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B22",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B22",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B22",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B22",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B22",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B22",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B22",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B22",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B23",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B23",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B23",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B23",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B23",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B23",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B23",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B23",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B23",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B23",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B24",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B24",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B24",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B24",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B24",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B24",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B24",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B24",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B24",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B24",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B25",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B25",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B25",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B25",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B25",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B25",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B25",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B25",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B25",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B25",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B26",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B26",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B26",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B26",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B26",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B26",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B26",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B26",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B26",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B26",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B27",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B27",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B27",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B27",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B27",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B27",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B27",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B27",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B27",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B27",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B03",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B03",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B03",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B03",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B03",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B03",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B03",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B03",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B03",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B03",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B04",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B04",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B04",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B04",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B04",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B04",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B04",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B04",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B04",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B04",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B05",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B05",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B05",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B05",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B05",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B05",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B05",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B05",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B05",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B05",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B02",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B02",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B02",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B02",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B02",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B02",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B02",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B02",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B02",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B02",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B01",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B01",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B01",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B01",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B01",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B01",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B01",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B01",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B01",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B01",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B11",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B11",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B11",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B11",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B11",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B11",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B11",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B11",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B11",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B11",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B12",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B12",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B12",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B12",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B12",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B12",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B12",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B12",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B12",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B12",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B13",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B13",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B13",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B13",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B13",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B13",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B13",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B13",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B13",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B13",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B14",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B14",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B14",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B14",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B14",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B14",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B14",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B14",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B14",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B14",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B15",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B15",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B15",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B15",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B15",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B15",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B15",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B15",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B15",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B15",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B06",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B06",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B06",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B06",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B06",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B06",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B06",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B06",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B06",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B06",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B07",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B07",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B07",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B07",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B07",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B07",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B07",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B07",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B07",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B07",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B08",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B08",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B08",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B08",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B08",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B08",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B08",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B08",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B08",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B08",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B09",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B09",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B09",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B09",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B09",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B09",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B09",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B09",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B09",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B09",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B10",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B10",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B10",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B10",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B10",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B10",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B10",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B10",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B10",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B10",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B16",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B16",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B16",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B16",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B16",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B16",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B16",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B16",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B16",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B16",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B17",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B17",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B17",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B17",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B17",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B17",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B17",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B17",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B17",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B17",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B18",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B18",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B18",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B18",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B18",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B18",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B18",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B18",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B18",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B18",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B19",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B19",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B19",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B19",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B19",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B19",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B19",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B19",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B19",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B19",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B20",
+      "from": 1,
+      "to": 2,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B20",
+      "from": 2,
+      "to": 3,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B20",
+      "from": 3,
+      "to": 4,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B20",
+      "from": 4,
+      "to": 5,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B20",
+      "from": 5,
+      "to": 6,
+      "status": "passed",
+      "gate": true
+    },
+    {
+      "building_id": "B20",
+      "from": 6,
+      "to": 7,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B20",
+      "from": 7,
+      "to": 8,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B20",
+      "from": 8,
+      "to": 9,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B20",
+      "from": 9,
+      "to": 10,
+      "status": "passed",
+      "gate": false
+    },
+    {
+      "building_id": "B20",
+      "from": 10,
+      "to": 11,
+      "status": "passed",
+      "gate": true
+    }
+  ],
+  "scope": "Asset existence/continuity only; authoritative gameplay transitions are tested separately"
+}

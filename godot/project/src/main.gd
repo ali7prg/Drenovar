@@ -1,5 +1,8 @@
 extends Node
 
+const V6Panels = preload("res://src/v6_panels.gd")
+var v6_panels = V6Panels.new(self)
+
 const Landscape = preload("res://src/landscape.gd")
 const Minimap = preload("res://src/minimap.gd")
 const LaunchScreen = preload("res://src/launch_screen.gd")
@@ -30,7 +33,7 @@ const PREWARM_IDLE_MSEC := 2500
 const PREWARM_QUIET_MSEC := 600
 # The game server on the owner's Cloudflare (device accounts, settlement transfer,
 # route-approach-v2). The old ChatGPT Sites server is OLD_SERVER_URL below.
-const LIVE_SERVER := "https://drenovar-game.ali069587.workers.dev"
+const LIVE_SERVER := "https://drenovar-v92-staging.ali069587.workers.dev"
 # The ChatGPT Sites server. On the Cloudflare server it is only used to move a
 # settlement: the player confirms the old login there, the new server reads it.
 const OLD_SERVER_URL := "https://drenovar.pink-lyric-9420.chatgpt.site"
@@ -204,6 +207,17 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	data = JSON.parse_string(FileAccess.get_file_as_string("res://assets/game.json"))
+	# Generated from the versioned V6 art recipes before export. Original I–V
+	# entries stay untouched; VI–XI have their own full-size scenes.
+	var v6_art: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://assets/city/architecture-v6/manifest.json"))
+	if v6_art is Dictionary:
+		for type: String in v6_art.get("levels", {}):
+			if not data.levelModels.has(type):
+				data.levelModels[type] = {}
+			data.levelModels[type].merge(v6_art.levels[type], false)
+		for unit_id: String in v6_art.get("units", {}):
+			data.unitModels[unit_id] = {"field":v6_art.units[unit_id].path, "drill":""}
+			data.englishRoster.append({"id":unit_id,"name":"Таран","unit_class":"Осадная машина","training_building":"SIEGE","power":0})
 	state = data.demo
 	add_child(hud)
 	build_ui()
@@ -646,6 +660,8 @@ func server_jobs() -> Array:
 	return jobs
 
 func busy_workers() -> int:
+	if v6_panels.enabled():
+		return state.v6.orders.filter(func(o): return o.status == "pending" and o.kind in ["construction", "repair_wall"]).size() + server_jobs().size()
 	return construction_orders().size() + server_jobs().size() + pending_works.size()
 
 func free_workers() -> int:
@@ -745,6 +761,9 @@ func show_application() -> void:
 	button(modal_body, "Проверка плавности", show_performance)
 
 func show_economy(resource := "") -> void:
+	if v6_panels.enabled():
+		v6_panels.economy()
+		return
 	open_modal(RESOURCE_NAMES.get(resource, "Запасы поселения"), "left")
 	if not resource.is_empty():
 		add_economy_card(resource, true)
@@ -871,6 +890,9 @@ func build_option(definition: Dictionary) -> Dictionary:
 # that can be built starts placement mode: the building follows the finger and
 # snaps onto a free plot; "Построить" there sends the order.
 func show_build_menu(group := build_group) -> void:
+	if v6_panels.enabled():
+		v6_panels.catalog()
+		return
 	build_group = group
 	open_modal("Строительство", "sheet")
 	modal_title.add_theme_font_size_override("font_size", 25)
@@ -1470,6 +1492,9 @@ func show_clearings() -> void:
 				not player_id.is_empty() and level >= int(grove.level) and builder_ready()))
 
 func show_starter_goals() -> void:
+	if v6_panels.enabled():
+		v6_panels.objectives()
+		return
 	open_modal("Первые шаги", "right")
 	starter_panel_open = true
 	var guide: Dictionary = state.city.kingdom.guide
@@ -1696,6 +1721,9 @@ func show_march_speedups(army: Dictionary) -> void:
 	show_speedups("march", {"id": army.id, "endsAt": float(finish)}, "")
 
 func show_trade(resource := "") -> void:
+	if v6_panels.enabled():
+		v6_panels.trade()
+		return
 	open_modal("Рынок", "right")
 	var resources := OptionButton.new()
 	var keys: Array = data.tradePrices.keys()
@@ -1741,6 +1769,9 @@ func total_units(units: Dictionary) -> int:
 	return count
 
 func show_hospital() -> void:
+	if v6_panels.enabled():
+		v6_panels.services("B16")
+		return
 	open_modal("Лазарет", "right")
 	for order in state.get("healing", []):
 		countdown("Лечатся · %d" % total_units(order.units), order.endsAt)
@@ -1748,7 +1779,7 @@ func show_hospital() -> void:
 	for unit in data.englishRoster:
 		var count := int(state.get("wounded", {}).get(unit.id, 0))
 		if count > 0:
-			inputs[unit.id] = unit_quantity("%s · %d" % [unit.name, count], mini(count, 200))
+			inputs[unit.id] = unit_quantity("%s · %d" % [unit.name, count], mini(count, march_limit()))
 	if inputs.is_empty():
 		row(modal_body, "Нет раненых, ожидающих лечения.")
 		return
@@ -1765,8 +1796,8 @@ func show_hospital() -> void:
 			if inputs[id].value > 0:
 				units[id] = int(inputs[id].value)
 		var count := total_units(units)
-		if count < 1 or count > 200:
-			show_error({"error":"Выбери от 1 до 200 воинов."})
+		if count < 1 or count > march_limit():
+			show_error({"error":"Превышен размер похода: %d мест." % march_limit()})
 			return
 		open_modal("Подтвердить лечение")
 		var cost := {"food":count * 5, "coins":count * 2}
@@ -1790,6 +1821,9 @@ func unit_quantity(title: String, limit: int) -> SpinBox:
 	return quantity
 
 func show_armies() -> void:
+	if v6_panels.enabled():
+		v6_panels.army()
+		return
 	open_modal("Армия наготове", "garrison", "ГАРНИЗОН DRENOVAR")
 	row(modal_body, "Свободны · %d    Ранены · %d" % [total_units(state.get("healthy", {})), total_units(state.get("wounded", {}))])
 	panel_action(modal_body, "Найм", func():
@@ -1850,6 +1884,9 @@ func show_military_cultures() -> void:
 	button(modal_body, "К армии", show_armies)
 
 func show_training_buildings() -> void:
+	if v6_panels.enabled():
+		v6_panels.catalog()
+		return
 	open_modal("Военные здания")
 	button(modal_body, "I · Англия", show_military_cultures)
 	for type in ["MIL-01", "MIL-02", "MIL-03"]:
@@ -1892,6 +1929,15 @@ func refresh_hud() -> void:
 		resource_buttons[id].accessibility_name = resource_buttons[id].tooltip_text
 	if not connected():
 		message.text = ""
+	elif v6_panels.enabled():
+		var incoming: Array = state.v6.get("warnings", [])
+		if not incoming.is_empty():
+			var eta: int = int(incoming[0].eta_seconds)
+			for warning: Dictionary in incoming:
+				eta = mini(eta, int(warning.eta_seconds))
+			message.text = "Башня: нападение через %d с" % eta
+		elif message.text.begins_with("Башня:"):
+			message.text = ""
 
 func show_scene(scene_name: String) -> void:
 	if scene_loading:
@@ -2473,6 +2519,9 @@ func open_building_ring(marker: Dictionary) -> void:
 	action_ring.open(str(building.id), "%s · ур. %d" % [building_title(building.type), level], marker.position, stage.camera, actions)
 
 func inspect_building(building: Dictionary) -> void:
+	if v6_panels.enabled():
+		v6_panels.inspect(str(building.get("conceptType", "")))
+		return
 	open_modal(building_title(building.type), "right", "ПОСЕЛЕНИЕ")
 	var level := int(building.level)
 	row(modal_body,"Уровень %d" % level)
@@ -3420,6 +3469,9 @@ func append_hunt_targets(encounters: Array) -> void:
 		row(modal_body, "Здесь пока нет целей охоты.")
 
 func compose_march(kind: String, id: String, title: String) -> void:
+	if v6_panels.enabled() and kind == "pvp":
+		v6_panels.formation(id, title)
+		return
 	var city := kind == "city"
 	open_modal("Создать войско" if city else "Сбор отряда", "wide" if city else "right",
 		"DRENOVAR · ПОХОД" if city else "ДРЕНОВАР · ВОЕННЫЙ СОВЕТ")
@@ -3508,7 +3560,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 				units[unit_id] = count
 				power += count * int(unit_for_id(unit_id).power)
 		var total := total_units(units)
-		summary.text = "Мощь %s · войска %d / 200" % [compact_number(power), total]
+		summary.text = "Мощь %s · войска %d / %d" % [compact_number(power), total, march_limit()]
 		if city:
 			empty(slots)
 			for unit_id in units:
@@ -3559,6 +3611,8 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	button(modal_footer, "Очистить", set_party.bind(false))
 	var first_row_index := roster.get_child_count() - 1
 	for unit in data.englishRoster:
+		if unit.id == "SIEGE-RAM-01":
+			continue
 		var available := int(state.healthy.get(unit.id, 0))
 		if available < 1:
 			continue
@@ -3594,7 +3648,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		var amount := SpinBox.new()
 		button(controls, "−", func(): amount.value -= 1)
 		amount.min_value = 0
-		amount.max_value = mini(available, 200)
+		amount.max_value = mini(available, march_limit())
 		amount.custom_minimum_size.x = 70
 		amount.get_line_edit().editable = city
 		controls.add_child(amount)
@@ -3616,8 +3670,8 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			for other in selected:
 				if other != unit_id:
 					used += int(selected[other].value)
-			if value > 200 - used:
-				amount.set_value_no_signal(200 - used)
+			if value > march_limit() - used:
+				amount.set_value_no_signal(march_limit() - used)
 				amount.get_line_edit().text = str(int(amount.value))
 				(card.get_child(1) as HSlider).set_value_no_signal(amount.value)
 			update.call())
@@ -3940,12 +3994,15 @@ func march_wall() -> Dictionary:
 	return {"cx": snappedf(walls.center.x, 0.01), "cz": snappedf(walls.center.y, 0.01), "radii": radii, "gates": gates}
 
 func fill_party(selected: Dictionary, all_available: bool) -> void:
-	var remaining := 200 if all_available else 0
+	var remaining := march_limit() if all_available else 0
 	for input: SpinBox in selected.values():
 		input.value = minf(input.max_value, remaining)
 		remaining -= int(input.value)
 
 func show_account() -> void:
+	if v6_panels.enabled():
+		v6_panels.account()
+		return
 	open_modal("Твоё королевство", "profile", "ДРЕНОВАР · КОРОЛЕВСТВО")
 	if not connected() or (login_for_transfer and not login_proof.is_empty()):
 		if login_proof.is_empty():
@@ -4518,6 +4575,8 @@ func show_report(report: Dictionary, announced := false) -> void:
 			format_balance(int(fort.get("fortPower", 0))), format_balance(int(fort.get("defenderPower", 0))), format_balance(int(fort.get("attackerPower", 0)))],
 			15, Color("#e5c57d")).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var rewards: Dictionary = report.get("rewards", {})
+	if rewards.get("delivery", "") == "return":
+		row(modal_body, "Добыча поступает в город только по прибытии отряда.")
 	var resources: Dictionary = rewards.get("resources", {})
 	var items: Dictionary = rewards.get("items", {})
 	var loot := HFlowContainer.new()
@@ -4561,6 +4620,12 @@ func add_reward_chip(parent: Container, name: String, amount: int, icon := "") -
 	result_label(content, "%s +%s" % [name, format_balance(amount)], 17, WebPanels.IVORY)
 
 func accept(response: Dictionary) -> void:
+	if not loopback and response.has("city") and response.get("economy_version", "") != "DRENOVAR-V6-C1.0":
+		show_error({"error":"Сервер не поддерживает эту тестовую версию V6. Прогресс не изменён."})
+		return
+	if response.has("v6") and state.has("v6") and response.get("playerId", "") == state.get("playerId", "") and int(response.v6.revision) < int(state.v6.revision):
+		stale_responses += 1
+		return
 	if not response.has("city") or not response.has("world"):
 		return
 	# A late answer (a poll sent before a command, a replayed command receipt) never
@@ -4933,7 +4998,7 @@ func site_view(source: Dictionary) -> Dictionary:
 			var before: Array = stage.level_visual(str(existing.type), level)
 			var after: Array = stage.level_visual(str(existing.type), level + 1)
 			if not before.is_empty() and not after.is_empty():
-				site.from_model = before[0]
+				site.from_model = stage.level_model_for(str(existing.type), level + 1).get("upgrade_from_path", before[0])
 				site.from_scale = before[1]
 				site.to_model = after[0]
 				site.to_scale = after[1]
@@ -4953,9 +5018,14 @@ func site_view(source: Dictionary) -> Dictionary:
 			var out: Vector3 = stage.walls.main_gate_outward
 			var half := 5.6 if site.upgrade else 4.6
 			var tops := [4.1, 4.9, 7.3, 7.3, 8.6]
+			var top: float = float(tops[mini(gate_level, 5) - 1])
+			if gate_level >= 6:
+				var gate_bounds: Dictionary = stage.level_model_for(site_type, gate_level).get("bounds", {})
+				if gate_bounds.has("max"):
+					top = float(gate_bounds.max[1])
 			site.position = stage.walls.main_gate
 			site.yaw = atan2(out.x, out.z)
-			site.frame = Vector3(5.9 * gate_scale / half + 0.1, maxf(1.0, float(tops[gate_level - 1]) * gate_scale / 7.4 * 1.08), 1.9 * gate_scale / half)
+			site.frame = Vector3(5.9 * gate_scale / half + 0.1, maxf(1.0, top * gate_scale / 7.4 * 1.08), 1.9 * gate_scale / half)
 			site.erase("model")
 	return site
 
@@ -5075,6 +5145,8 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 		busy = true
 		request_generation += 1
 	var headers := PackedStringArray(["Accept: application/json", "Accept-Encoding: gzip"])
+	if host.is_empty():
+		headers.append("X-Drenovar-Economy: DRENOVAR-V6-C1.0")
 	# A request to another server (the old one, during a transfer) carries none of
 	# this server's credentials.
 	var base := endpoint if host.is_empty() else host
@@ -6005,3 +6077,6 @@ func advance_test_clock(value: int) -> void:
 	if client.request(endpoint + "/test/clock?time=" + str(value), [], HTTPClient.METHOD_POST) == OK:
 		await client.request_completed
 	client.queue_free()
+
+func march_limit() -> int:
+	return int(state.get("v6", {}).get("march_capacity", 200))

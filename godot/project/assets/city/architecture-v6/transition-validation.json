@@ -1,0 +1,276 @@
+{
+	"legacy_files_modified": 0,
+	"status": "passed",
+	"transitions": [
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ALT-02-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ALT-02"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ALT-05-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ALT-05"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ALT-06-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ALT-06"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ALT-07-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ALT-07"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ALT-08-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ALT-08"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ALT-09-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ALT-09"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ALT-10-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ALT-10"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ECO-01-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ECO-01"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ECO-02-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ECO-02"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ECO-03-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ECO-03"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ECO-04-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ECO-04"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/ECO-05-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "ECO-05"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/MIL-01-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "MIL-01"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/MIL-02-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "MIL-02"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/MIL-03-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "MIL-03"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/MIL-04-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "MIL-04"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/MIL-05-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "MIL-05"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/RES-01-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "RES-01"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/RES-02-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "RES-02"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/RES-03-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "RES-03"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/RES-04-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "RES-04"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/RES-05-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "RES-05"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/SUP-01-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "SUP-01"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/SUP-02-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "SUP-02"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/SUP-03-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "SUP-03"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/SUP-04-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "SUP-04"
+		},
+		{
+			"from": 5,
+			"leave_clock_max": 0.14,
+			"leave_clock_min": 0.04,
+			"legacy_geometry_unchanged": true,
+			"path": "res://assets/city/architecture-v6/transitions/SUP-05-5-to-6-from.tscn",
+			"status": "passed",
+			"to": 6,
+			"type": "SUP-05"
+		}
+	]
+}

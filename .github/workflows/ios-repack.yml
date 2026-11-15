@@ -9,6 +9,9 @@ name: DRENOVAR iOS test IPA (repack on Linux)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [codex/drenovar-v6-buildings-implementation]
+    paths: [godot/**, .github/workflows/ios-repack.yml]
   pull_request:
     branches: [main]
     paths: [godot/**, .github/workflows/ios-repack.yml]
@@ -54,6 +57,8 @@ jobs:
           templates="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
           python3 godot/tools/ios-template.py "$templates/ios.zip"
           echo "${GODOT_VERSION}.stable" > "$templates/version.txt"
+      - name: Generate and verify V6 native buildings and siege model
+        run: DRENOVAR_GODOT_BIN="$GODOT_BIN" python3 godot/art/buildings-v6/build_all.py --native-only --package-dir "$RUNNER_TEMP/v6-art"
       - name: Export the game pack from this commit
         run: |
           python3 godot/tools/texture_import_policy.py godot/project --check
@@ -63,12 +68,13 @@ jobs:
         run: |
           timeout 300 "$GODOT_BIN" --headless --main-pack "$RUNNER_TEMP/export/DRENOVAR.pck" -s "$GITHUB_WORKSPACE/godot/tools/verify_pck.gd" | tee "$RUNNER_TEMP/verify.log"
           grep -q "TROOP_SCENES_OK 20 of 20" "$RUNNER_TEMP/verify.log"
+          grep -q "V6_PACK_ASSETS_OK 163 of 163" "$RUNNER_TEMP/verify.log"
           grep -qE "PARADE_MODELS .*troops06=[1-9]" "$RUNNER_TEMP/verify.log"
       - name: Repack onto the engine capsule
         run: |
           python3 godot/tools/repack_engine_capsule.py "$CAPSULE" "$RUNNER_TEMP/export/DRENOVAR.pck" \
             "$RUNNER_TEMP/${{ steps.meta.outputs.ipa }}" --version "${{ steps.meta.outputs.version }}" \
-            --build "${{ steps.meta.outputs.build }}" --expect-capsule-sha256 "$CAPSULE_SHA" | tee "$RUNNER_TEMP/repack.json"
+            --build "${{ steps.meta.outputs.build }}" --bundle-id com.drenovar.game.v6test --expect-capsule-sha256 "$CAPSULE_SHA" | tee "$RUNNER_TEMP/repack.json"
           ( cd "$RUNNER_TEMP" && sha256sum "${{ steps.meta.outputs.ipa }}" > SHA256.txt && echo "commit ${GITHUB_SHA}" >> SHA256.txt && cat repack.json >> SHA256.txt )
       - uses: actions/upload-artifact@v4
         with:

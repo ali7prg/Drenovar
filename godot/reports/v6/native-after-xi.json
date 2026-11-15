@@ -1,0 +1,24 @@
+{
+	"building_count": 26,
+	"device": "Linux headless CPU; no GPU or physical iPhone measurements",
+	"engine": "4.6.3-stable (official)",
+	"level": 11,
+	"scenarios": [
+		{
+			"cpu_median_ms": 1.441,
+			"cpu_p95_ms": 1.977,
+			"load_ms": 1126.879,
+			"render_batches": 44,
+			"scene": "city",
+			"static_memory_bytes": 182195501
+		},
+		{
+			"cpu_median_ms": 3.354,
+			"cpu_p95_ms": 4.098,
+			"load_ms": 391.806,
+			"render_batches": 184,
+			"scene": "world",
+			"static_memory_bytes": 114509648
+		}
+	]
+}

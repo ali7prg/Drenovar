@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "generation_passes": 2,
+  "files": 564,
+  "different_files": [],
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "scope": "Two clean generator executions; same pinned toolchain and machine"
+}

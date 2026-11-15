@@ -1,0 +1,184 @@
+[
+  {
+    "id": "building-v1-0",
+    "type": "ECO-05",
+    "level": 11,
+    "plotId": "v1-0",
+    "conceptType": "B01"
+  },
+  {
+    "id": "building-v1-1",
+    "type": "RES-01",
+    "level": 11,
+    "plotId": "v1-1",
+    "conceptType": "B06"
+  },
+  {
+    "id": "building-v1-2",
+    "type": "RES-04",
+    "level": 11,
+    "plotId": "v1-2",
+    "conceptType": "B09"
+  },
+  {
+    "id": "building-v1-3",
+    "type": "MIL-01",
+    "level": 11,
+    "plotId": "v1-3",
+    "conceptType": "B11"
+  },
+  {
+    "id": "B03",
+    "type": "ECO-01",
+    "level": 11,
+    "plotId": "v1-5",
+    "conceptType": "B03"
+  },
+  {
+    "id": "B05",
+    "type": "ECO-03",
+    "level": 11,
+    "plotId": "v1-11",
+    "conceptType": "B05"
+  },
+  {
+    "id": "B04",
+    "type": "ECO-02",
+    "level": 11,
+    "plotId": "v1-7",
+    "conceptType": "B04"
+  },
+  {
+    "id": "B07",
+    "type": "RES-02",
+    "level": 11,
+    "plotId": "v1-6",
+    "conceptType": "B07"
+  },
+  {
+    "id": "B02",
+    "type": "ECO-04",
+    "level": 11,
+    "plotId": "v1-4",
+    "conceptType": "B02"
+  },
+  {
+    "id": "B08",
+    "type": "RES-03",
+    "level": 11,
+    "plotId": "v1-8",
+    "conceptType": "B08"
+  },
+  {
+    "id": "B20",
+    "type": "SUP-05",
+    "level": 11,
+    "plotId": "v1-21",
+    "conceptType": "B20"
+  },
+  {
+    "id": "B21",
+    "type": "ALT-02",
+    "level": 11,
+    "plotId": "v1-22",
+    "conceptType": "B21"
+  },
+  {
+    "id": "B10",
+    "type": "RES-05",
+    "level": 11,
+    "plotId": "v1-12",
+    "conceptType": "B10"
+  },
+  {
+    "id": "B16",
+    "type": "SUP-01",
+    "level": 11,
+    "plotId": "v1-19",
+    "conceptType": "B16"
+  },
+  {
+    "id": "B14",
+    "type": "MIL-04",
+    "level": 11,
+    "plotId": "v1-15",
+    "conceptType": "B14"
+  },
+  {
+    "id": "B19",
+    "type": "SUP-04",
+    "level": 11,
+    "plotId": "v1-10",
+    "conceptType": "B19"
+  },
+  {
+    "id": "FOOD_ESTATE",
+    "type": "ALT-05",
+    "level": 11,
+    "plotId": "v1-23",
+    "conceptType": "B22"
+  },
+  {
+    "id": "B26",
+    "type": "ALT-09",
+    "level": 11,
+    "plotId": "v1-17",
+    "conceptType": "B26"
+  },
+  {
+    "id": "B23",
+    "type": "ALT-06",
+    "level": 11,
+    "plotId": "v1-24",
+    "conceptType": "B23"
+  },
+  {
+    "id": "B12",
+    "type": "MIL-02",
+    "level": 11,
+    "plotId": "v1-13",
+    "conceptType": "B12"
+  },
+  {
+    "id": "B18",
+    "type": "SUP-03",
+    "level": 11,
+    "plotId": "v1-9",
+    "conceptType": "B18"
+  },
+  {
+    "id": "B25",
+    "type": "ALT-08",
+    "level": 11,
+    "plotId": "v1-25",
+    "conceptType": "B25"
+  },
+  {
+    "id": "B27",
+    "type": "ALT-10",
+    "level": 11,
+    "plotId": "v1-26",
+    "conceptType": "B27"
+  },
+  {
+    "id": "B13",
+    "type": "MIL-03",
+    "level": 11,
+    "plotId": "v1-14",
+    "conceptType": "B13"
+  },
+  {
+    "id": "B15",
+    "type": "MIL-05",
+    "level": 11,
+    "plotId": "v1-18",
+    "conceptType": "B15"
+  },
+  {
+    "id": "B17",
+    "type": "SUP-02",
+    "level": 11,
+    "plotId": "v1-20",
+    "conceptType": "B17"
+  }
+]

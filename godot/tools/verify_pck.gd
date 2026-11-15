@@ -28,12 +28,18 @@ func run() -> void:
 	print("WORLD ", game.map_name, " batches ", game.stage.render_batches.size())
 	var data: Dictionary = game.data
 	var ok := 0
+	var v6_ok := 0
 	for id in data.unitModels:
-		for role in ["preview", "field"]:
+		for role in (["field"] if id == "SIEGE-RAM-01" else ["preview", "field"]):
 			var scene := load(data.unitModels[id][role]) as PackedScene
 			if scene == null:
 				print("MISSING ", id, " ", role); continue
 			var m: Node3D = scene.instantiate()
+			if id == "SIEGE-RAM-01":
+				if m.find_children("*", "MeshInstance3D", true, false).size() > 0:
+					v6_ok += 1
+				m.free()
+				continue
 			var ap: AnimationPlayer = m.find_children("*", "AnimationPlayer", true, false)[0]
 			var clips := ap.get_animation_list()
 			if clips.has("Idle") and clips.has("Walk") and clips.has(data.unitModels[id].drill):
@@ -41,4 +47,19 @@ func run() -> void:
 			m.free()
 	print("TROOP_SCENES_OK ", ok, " of 20")
 	print("TROOP_PATH ", data.unitModels["ENG-01"].preview)
+	for type in data.levelModels:
+		for level in range(6, 12):
+			var entry = data.levelModels[type].get(str(level), {})
+			var packed = load(str(entry.get("path", ""))) as PackedScene
+			if packed != null:
+				var model = packed.instantiate()
+				if model.find_children("*", "MeshInstance3D", true, false).size() > 0:
+					v6_ok += 1
+				model.free()
+	print("V6_PACK_ASSETS_OK ", v6_ok, " of 163")
+	game.queue_free()
+	await process_frame
+	if ok != 20 or v6_ok != 163:
+		quit(1)
+		return
 	quit(0)

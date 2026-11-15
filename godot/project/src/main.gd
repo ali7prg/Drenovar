@@ -106,6 +106,7 @@ var server_transfer := false
 var login_for_transfer := false
 # A session of the old server saved by an earlier version of the app.
 var pending_old_session := ""
+var transfer_refresh := false
 var action_ring := ActionRing.new()
 var last_command_ms := -1.0
 var polling_state := false
@@ -3992,6 +3993,8 @@ func show_account() -> void:
 			# More settlements of the old server (e.g. a brother's, or another ChatGPT
 			# account) join the ones already on this phone.
 			button(modal_body, "Перенести поселения со старого сервера", begin_transfer)
+			button(modal_body, "Обновить с веб-версии", confirm_profile_action.bind(
+				"Поселения старого аккаунта на телефоне заменятся их состоянием на веб-версии. Прогресс, сделанный только на телефоне, заменится (копия сохранится на сервере). Обновить?", begin_refresh))
 	button(modal_body, "Выйти из приложения", confirm_profile_action.bind(sign_out_question(), sign_out))
 
 func add_name_fields(profile: Dictionary) -> void:
@@ -4143,7 +4146,7 @@ func device_login() -> void:
 # A new confirmation code for the login in progress (sign-in or transfer).
 func restart_login() -> void:
 	if login_for_transfer:
-		await begin_transfer()
+		await begin_transfer(transfer_refresh)
 	else:
 		await begin_login()
 
@@ -4155,7 +4158,11 @@ func show_transfer_choice() -> void:
 	button(modal_body, "Начать новое поселение", confirm_profile_action.bind(
 		"Новое поселение начнётся с нуля. Перенести старое потом тоже можно. Начать?", device_login))
 
-func begin_transfer() -> void:
+func begin_refresh() -> void:
+	await begin_transfer(true)
+
+func begin_transfer(refresh := false) -> void:
+	transfer_refresh = refresh
 	if SessionStore.valid(pending_old_session) and not SessionStore.is_device(pending_old_session):
 		set_login_status("Переносим поселение…")
 		await import_old(pending_old_session)
@@ -4176,7 +4183,7 @@ func import_old(old_session: String) -> void:
 	var previous := session if SessionStore.is_device(session) and SessionStore.valid(session) else ""
 	var device := previous if not previous.is_empty() else SessionStore.DEVICE_PREFIX + Crypto.new().generate_random_bytes(32).hex_encode()
 	session = device
-	var response := await send_request("auth/import-old", {"oldSession": old_session}, true, 45.0)
+	var response := await send_request("auth/import-old", {"oldSession": old_session, "refresh": transfer_refresh}, true, 45.0)
 	login_in_progress = false
 	if response.get("linked", false):
 		if previous.is_empty():
@@ -4185,6 +4192,7 @@ func import_old(old_session: String) -> void:
 		login_for_transfer = false
 		login_proof = ""
 		message.text = transfer_message(response)
+		transfer_refresh = false
 		player_id = ""
 		await sync_account()
 		await show_account()
@@ -4206,12 +4214,16 @@ func import_old(old_session: String) -> void:
 
 func cancel_transfer() -> void:
 	login_for_transfer = false
+	transfer_refresh = false
 	login_proof = ""
 	await show_account()
 
 func transfer_message(response: Dictionary) -> String:
 	var count := int(response.get("profiles", []).size())
+	var refreshed := int(response.get("refreshedProfiles", []).size())
 	var text := ("Со старого сервера перенесено поселений: %d." % count) if response.get("imported", false) else "Поселения снова на этом телефоне."
+	if refreshed > 0:
+		text = "Обновлено с веб-версии поселений: %d." % refreshed
 	var skipped: Array = response.get("skipped", [])
 	if not skipped.is_empty():
 		var names := PackedStringArray()

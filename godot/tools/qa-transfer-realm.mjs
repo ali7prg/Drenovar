@@ -64,6 +64,14 @@ await handleGame(new Request(OLD + '/api/session/new', {method: 'POST', body: '{
 createServer(async (incoming, out) => {
   try {
     const url = new URL(incoming.url, OLD);
+    if (url.pathname === '/__qa/web-play') {
+      // The player keeps playing on the web version: soldiers in every settlement change.
+      const row = oldDb.sql.prepare("SELECT data FROM game_realm37 WHERE id='development-37'").get();
+      const snap = JSON.parse(row.data);
+      for (const entry of snap.repository.players) { const p = JSON.parse(entry[1].state); p.city.military.owned['ENG-01'] = 500; entry[1].state = JSON.stringify(p); }
+      oldDb.sql.prepare("UPDATE game_realm37 SET data=?, revision=revision+1 WHERE id='development-37'").run(JSON.stringify(snap));
+      out.writeHead(200).end('ok'); return;
+    }
     if (url.pathname === '/__qa/approve') {
       // The player approves in Safari while signed in to ChatGPT on the old server.
       const challenge = url.searchParams.get('challenge');

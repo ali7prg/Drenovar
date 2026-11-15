@@ -844,8 +844,21 @@ func build_order(plot_id: String, type: String) -> Dictionary:
 		return {"kind":"legacyBuilding", "action":"place", "type":type, "plotId":plot_id}
 	return {"kind":"kingdom","action":"build","plotId":plot_id,"type":type}
 
+# An earlier-layout settlement moved to the new server builds through the paid queue,
+# one building per purpose, like a kingdom (server feature "legacyBuild").
+# Which building already holds this purpose (a variant counts: Сад травника is a Лазарет).
+func built_reason(definition: Dictionary) -> String:
+	for item in state.city.buildings:
+		var other := building_definition(item.type)
+		if other.get("base", item.type) == definition.get("base", definition.get("id", "")) and other.get("id", item.type) != definition.get("id", ""):
+			return "Уже есть: %s (%d ур.). Одно здание каждого назначения; улучшение — в самом здании." % [other.get("ru", item.type), int(item.level)]
+	return "Уже построено. Улучшение — в самом здании."
+
+func paid_legacy_build() -> bool:
+	return legacy_city() and state.get("city", {}).get("legacyUpgrades") is Dictionary and "legacyBuild" in state.get("cityFeatures", [])
+
 func build_option(definition: Dictionary) -> Dictionary:
-	if legacy_city():
+	if legacy_city() and not paid_legacy_build():
 		return {"state": "ready", "required": 1, "terms": data.buildingTerms.get(definition.id, {"cost": {}, "seconds": 0})}
 	var exists: bool = state.city.buildings.any(func(item): return building_definition(item.type).get("base", item.type) == definition.base)
 	var required := int(data.unlockLevels.get(definition.id, 3))
@@ -1371,7 +1384,7 @@ func show_build_details(definition: Dictionary) -> void:
 	var site := free_build_plot()
 	var reason := ""
 	match option.state:
-		"built": reason = "Уже построено. Улучшение — в самом здании."
+		"built": reason = built_reason(definition)
 		"locked": reason = "Нужна ратуша %d-го уровня." % option.required
 		"short": reason = "Недостаточно ресурсов."
 	if reason.is_empty() and not worker_free:

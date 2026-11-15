@@ -218,6 +218,8 @@ func metric_value(metric: String, value: Variant) -> String:
 
 func account() -> void:
 	ui.open_modal("Одно поселение на двух устройствах", "right", "DRENOVAR V6 · ТЕСТ")
+	if not ui.state.v6.get("legacy_building_archive", []).is_empty():
+		ui.button(ui.modal_body, "Архив прежних зданий", archive)
 	ui.row(ui.modal_body, "Приложение и браузер используют общий прогресс. Получите код здесь и введите его на другом устройстве. Код действует 10 минут.")
 	ui.button(ui.modal_body, "Получить код подключения", pairing_code)
 	var input := LineEdit.new()
@@ -233,6 +235,17 @@ func account() -> void:
 			ui.player_id = str(response.playerId)
 			await ui.sync_account(true)
 	)
+
+func archive() -> void:
+	await load_catalogue()
+	ui.open_modal("Архив прежних зданий", "right", "ТЕСТОВЫЙ ВАРИАНТ COMPAT-P2")
+	ui.row(ui.modal_body, "Исходные здания сохранены в архиве; они не дают второй игровой эффект. Компенсация за преобразование выдаётся один раз.")
+	for entry: Dictionary in ui.state.v6.get("legacy_building_archive", []):
+		var previous: Dictionary = entry.instance
+		var row: Dictionary = row_for(str(previous.to_type), int(previous.level))
+		ui.row(ui.modal_body, "%s · %s · прежний участок %s" % [str(row.get("name_ru", "Прежнее здание")), ROMAN[int(previous.level)-1], str(previous.plot)])
+		for resource: String in entry.proposed_compensation:
+			ui.row(ui.modal_body, "%s: %d" % [ui.RESOURCE_NAMES[resource], int(entry.proposed_compensation[resource])])
 
 func pairing_code() -> void:
 	var response: Dictionary = await ui.send_request("pair/create", {})

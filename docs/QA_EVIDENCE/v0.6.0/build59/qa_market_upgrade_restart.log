@@ -1,0 +1,13 @@
+ok   restart: signed in on the local server v92, market found
+client version 0.6.0
+market building-market-qa level 4 on plot v1-1, marker (-16.0, 6.573697, -5.0)
+[t+184.6 s] ok   after the restart the same order runs (endsAt 1794743772102.0)
+[t+200.6 s] ok   after the restart the stage of the time left is shown (clock 0.711, order clock 0.718, 67 % of the order)
+[t+202.6 s] ok   during the works the market is level IV on plot v1-1
+[t+362.9 s] ok   the order ended: market level V
+[t+362.9 s] ok   the market stays on plot v1-1
+[t+362.9 s] ok   the marker stays where it was ((-16.0, 6.573697, -5.0))
+[t+362.9 s] ok   scaffolding and the building site are gone
+[t+362.9 s] ok   one finished V scene stands (1)
+[t+362.9 s] ok   no IV scene is left
+[t+362.9 s] QA_MARKET_UPGRADE restart checks=10 failures=0

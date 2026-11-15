@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-09-3.res" id="1_ati70"]
+
+[node name="ALT_09_3" type="Node3D" unique_id=1006525793]
+metadata/series = "B26_StoneWorkshop"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-1.6, 0, 3.8)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=38865922]
+mesh = ExtResource("1_ati70")

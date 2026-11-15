@@ -1,0 +1,15 @@
+ok   start: signed in on the local server v92, market found
+client version 0.6.0
+market building-market-qa level 4 on plot v1-1, marker (-16.0, 6.573697, -5.0)
+ok   market starts at level IV
+ok   upgrade IV -> V accepted by the server: 
+ok   the server holds the upgrade order
+[t+ -0.0 s] order startedAt=1794743472102 endsAt=1794743772102 (300 s)
+[t+  9.9 s] ok   at the start the market IV stands on the plot (clock 0.000)
+[t+105.9 s] open the world map
+[t+143.1 s] world map opened at 35 % of the order
+[t+162.8 s] back to the city
+[t+175.5 s] ok   after the return the stage of the time left is shown (clock 0.609, order clock 0.616, 58 % of the order)
+[t+177.4 s] ok   after the return the marker stands where it stood ((-16.0, 6.573697, -5.0))
+[t+177.4 s] client closed at 59 % of the order (clock 0.616)
+[t+177.4 s] QA_MARKET_UPGRADE start checks=7 failures=0

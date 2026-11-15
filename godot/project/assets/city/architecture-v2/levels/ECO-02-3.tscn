@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-02-3.res" id="1_8xivn"]
+
+[node name="ECO_02_3" type="Node3D" unique_id=34418338]
+metadata/series = "B04_Granary"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-3.6, 0, 3)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1636437504]
+mesh = ExtResource("1_8xivn")

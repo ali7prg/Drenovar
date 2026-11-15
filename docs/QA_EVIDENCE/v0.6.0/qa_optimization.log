@@ -1,0 +1,9 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+{"cull_after_ms":1.48,"cull_before_ms":2.198,"instances_after":60035,"instances_before":60035,"scene":"city","triangles_after":13153858,"triangles_before":13153858,"zoom":32.0}
+{"cull_after_ms":1.522,"cull_before_ms":2.422,"instances_after":94977,"instances_before":94977,"scene":"city","triangles_after":20979868,"triangles_before":20979868,"zoom":70.0}
+{"cull_after_ms":1.664,"cull_before_ms":2.586,"instances_after":113295,"instances_before":113295,"scene":"city","triangles_after":29359960,"triangles_before":29359960,"zoom":110.0}
+{"cull_after_ms":3.157,"cull_before_ms":6.931,"instances_after":61662,"instances_before":61662,"scene":"world","triangles_after":53997411,"triangles_before":53997411,"zoom":60.0}
+{"cull_after_ms":2.923,"cull_before_ms":5.38,"instances_after":113532,"instances_before":113532,"scene":"world","triangles_after":35110052,"triangles_before":35110052,"zoom":100.0}
+{"cull_after_ms":1.296,"cull_before_ms":1.965,"instances_after":180696,"instances_before":180696,"scene":"world","triangles_after":1828866,"triangles_before":1828866,"zoom":260.0}
+QA_OPTIMIZATION comparisons=13740 failures=0

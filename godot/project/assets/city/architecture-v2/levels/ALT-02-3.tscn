@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-02-3.res" id="1_kgjca"]
+
+[node name="ALT_02_3" type="Node3D" unique_id=89903661]
+metadata/series = "B21_Sawmill"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-3.4, 0, 3.6)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1641105574]
+mesh = ExtResource("1_kgjca")

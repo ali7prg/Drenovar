@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-10-5.res" id="1_hu0gb"]
+
+[node name="ALT_10_5" type="Node3D" unique_id=1957210967]
+metadata/series = "B27_Smelter"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-2.6, 0, 3.6)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1067016204]
+mesh = ExtResource("1_hu0gb")

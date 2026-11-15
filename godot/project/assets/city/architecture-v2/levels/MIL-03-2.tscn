@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-03-2.res" id="1_h6wxe"]
+
+[node name="MIL_03_2" type="Node3D" unique_id=293728553]
+metadata/series = "B13_Stables"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-4, 0, 2.2)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=642579934]
+mesh = ExtResource("1_h6wxe")

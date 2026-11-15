@@ -1,0 +1,27 @@
+{
+ "city": {
+  "textures": 70,
+  "lossless_rgba8_mb": 213.8,
+  "vram_compressed_mb": 36.1
+ },
+ "environment": {
+  "textures": 1,
+  "lossless_rgba8_mb": 10.7,
+  "vram_compressed_mb": 2.7
+ },
+ "creature-assets37": {
+  "textures": 36,
+  "lossless_rgba8_mb": 48.0,
+  "vram_compressed_mb": 8.0
+ },
+ "army": {
+  "textures": 148,
+  "lossless_rgba8_mb": 279.4,
+  "vram_compressed_mb": 45.7
+ },
+ "troops06": {
+  "textures": 330,
+  "lossless_rgba8_mb": 646.3,
+  "vram_compressed_mb": 114.4
+ }
+}

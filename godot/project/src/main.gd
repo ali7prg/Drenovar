@@ -3944,7 +3944,7 @@ func show_account() -> void:
 			var code := challenge.left(8).to_upper()
 			row(modal_body, "Код подтверждения  " + code)
 			if login_for_transfer:
-				row(modal_body, "Перенос поселения: на странице старого сервера DRENOVAR войди в свой аккаунт ChatGPT, введи код и нажми «Разрешить вход». Потом нажми «Проверить вход».")
+				row(modal_body, "Подключение веб-версии: нажми «Открыть страницу входа», в Safari войди в тот же аккаунт ChatGPT, что и на сайте, введи код и нажми «Разрешить вход». Вернись в приложение — всё подключится само, или нажми «Проверить вход». Все поселения аккаунта (и брата) появятся на телефоне.")
 			else:
 				row(modal_body, "На странице DRENOVAR войди в тот же аккаунт ChatGPT, введи код и нажми «Разрешить вход».")
 			button(modal_body, "Открыть страницу входа", open_login_page.bind(challenge))
@@ -3954,6 +3954,9 @@ func show_account() -> void:
 			button(copy_buttons, "Скопировать ссылку", copy_login_link.bind(challenge))
 			button(modal_body, "Проверить вход", finish_login.bind(true))
 			button(modal_body, "Получить новый код", restart_login)
+			if login_for_transfer and not connected():
+				button(modal_body, "Нет аккаунта на веб-версии — начать новое поселение", confirm_profile_action.bind(
+					"Новое поселение начнётся с нуля. Подключить веб-версию можно и потом в профиле. Начать?", device_login))
 			if connected():
 				button(modal_body, "Отмена", cancel_transfer)
 		return
@@ -4006,8 +4009,6 @@ func show_account() -> void:
 				else:
 					row(modal_body, "Поселения с веб-версии (например, брата) появятся здесь после подключения веб-версии.")
 				panel_action(modal_body, "Подключить веб-версию", begin_transfer)
-			button(modal_body, "Обновить с веб-версии", confirm_profile_action.bind(
-				"Поселения старого аккаунта на телефоне заменятся их состоянием на веб-версии. Прогресс, сделанный только на телефоне, заменится (копия сохранится на сервере). Обновить?", begin_refresh))
 	button(modal_body, "Выйти из приложения", confirm_profile_action.bind(sign_out_question(), sign_out))
 
 func add_name_fields(profile: Dictionary) -> void:
@@ -4132,7 +4133,8 @@ func begin_login() -> void:
 			server_login = "device"
 			server_transfer = info.get("transfer", false)
 			if server_transfer:
-				show_transfer_choice()
+				# Straight to the web version's login: its settlements come to this phone.
+				await begin_transfer()
 			else:
 				await device_login()
 			return

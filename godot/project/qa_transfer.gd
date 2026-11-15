@@ -71,5 +71,23 @@ func run() -> void:
 		if building.type == "ECO-05":
 			level = int(building.level)
 	check(level == 2, "Town hall level moved: %d" % level)
+	var account: Dictionary = await game.request("account")
+	var names := []
+	for item in account.get("profiles", []):
+		names.append(item.name)
+	check(names.size() == 2 and names.has("Крепость брата"), "Both settlements of the old account on the phone: %s" % str(names))
+	# A second transfer while signed in keeps the same phone account.
+	var device_session: String = game.session
+	game.show_account()
+	await wait_until(func(): return modal_has("Перенести поселения со старого сервера"), 15.0)
+	check(modal_has("Перенести поселения со старого сервера"), "Signed-in account offers another transfer")
+	await game.begin_transfer()
+	check(modal_has("Код подтверждения") and modal_has("Отмена"), "Transfer code shown while signed in")
+	check(await approve(game.login_proof.sha256_text()) == 200, "Player approved again on the old server")
+	await game.finish_login(true)
+	check(await wait_until(func(): return not game.login_in_progress and game.login_proof.is_empty(), 30.0), "Second transfer finished")
+	check(game.session == device_session and SessionStore.read_session() == device_session, "Same phone account kept")
+	account = await game.request("account")
+	check(account.get("profiles", []).size() == 2, "Settlements still on the phone: %d" % account.get("profiles", []).size())
 	print("QA_TRANSFER checks=", checks, " failures=", failures, " player=", game.player_id)
 	quit(0 if failures == 0 else 1)

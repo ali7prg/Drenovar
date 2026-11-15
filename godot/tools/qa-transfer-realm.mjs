@@ -48,6 +48,19 @@ await handleGame(new Request(OLD + '/api/session/new', {method: 'POST', body: '{
   }
   oldDb.sql.prepare("UPDATE game_realm37 SET data=?, revision=revision+1 WHERE id='development-37'").run(JSON.stringify(snap));
 }
+// A second settlement on the same old account (e.g. a brother's), not the open one.
+{
+  const other = await (await handleGame(new Request(OLD + '/api/session/new', {method: 'POST', body: '{}', headers: {'content-type': 'application/json', origin: OLD}}), oldDb.db,
+    {worldEnabled: true, authenticatedUser: 'chatgpt-brother'})).json();
+  const city = (await (await handleGame(new Request(OLD + '/api/state'), oldDb.db, {worldEnabled: true, authenticatedUser: 'chatgpt-brother'})).json()).city;
+  city.name = 'Крепость брата';
+  const post = (path, body, player) => handleGame(new Request(OLD + path, {method: 'POST', body: JSON.stringify(body),
+    headers: {'content-type': 'application/json', origin: OLD, 'x-drenovar-player': player}}), oldDb.db, {worldEnabled: true, authenticatedUser: 'chatgpt-ali'});
+  const own = (await (await handleGame(new Request(OLD + '/api/account'), oldDb.db, {worldEnabled: true, authenticatedUser: 'chatgpt-ali'})).json()).playerId;
+  const added = await (await post('/api/profile/import', {city}, own)).json();
+  await post('/api/profile/select', {playerId: own}, added.playerId);
+  console.log('old account chatgpt-ali: settlements', own, added.playerId, '(brother of', other.playerId + ')');
+}
 createServer(async (incoming, out) => {
   try {
     const url = new URL(incoming.url, OLD);

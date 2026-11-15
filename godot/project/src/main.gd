@@ -3932,7 +3932,7 @@ func fill_party(selected: Dictionary, all_available: bool) -> void:
 
 func show_account() -> void:
 	open_modal("Твоё королевство", "profile", "ДРЕНОВАР · КОРОЛЕВСТВО")
-	if not connected():
+	if not connected() or (login_for_transfer and not login_proof.is_empty()):
 		if login_proof.is_empty():
 			row(modal_body, "Войди в аккаунт, чтобы открыть свои поселения и общий мир." if server_login == "device" else "Войди через ChatGPT, чтобы открыть свои поселения и общий мир.")
 			panel_action(modal_body, "Начать вход", begin_login)
@@ -3952,6 +3952,8 @@ func show_account() -> void:
 			button(copy_buttons, "Скопировать ссылку", copy_login_link.bind(challenge))
 			button(modal_body, "Проверить вход", finish_login.bind(true))
 			button(modal_body, "Получить новый код", restart_login)
+			if connected():
+				button(modal_body, "Отмена", cancel_transfer)
 		return
 	if restoring_session:
 		row(modal_body, "Подключаемся к сохранённому поселению…")
@@ -3986,6 +3988,10 @@ func show_account() -> void:
 				button(modal_body, title, confirm_profile_action.bind("Открыть «%s»?" % item.name, select_profile.bind(item.id)))
 		if profile.profiles.is_empty():
 			button(modal_body, "Основать поселение", create_settlement)
+		if SessionStore.is_device(session):
+			# More settlements of the old server (e.g. a brother's, or another ChatGPT
+			# account) join the ones already on this phone.
+			button(modal_body, "Перенести поселения со старого сервера", begin_transfer)
 	button(modal_body, "Выйти из приложения", confirm_profile_action.bind(sign_out_question(), sign_out))
 
 func add_name_fields(profile: Dictionary) -> void:
@@ -4166,20 +4172,24 @@ func import_old(old_session: String) -> void:
 	if login_in_progress:
 		return
 	login_in_progress = true
-	var device := SessionStore.DEVICE_PREFIX + Crypto.new().generate_random_bytes(32).hex_encode()
+	# The account already on this phone keeps its settlements: the old ones join it.
+	var previous := session if SessionStore.is_device(session) and SessionStore.valid(session) else ""
+	var device := previous if not previous.is_empty() else SessionStore.DEVICE_PREFIX + Crypto.new().generate_random_bytes(32).hex_encode()
 	session = device
-	var response := await send_request("auth/import-old", {"oldSession": old_session}, true, 25.0)
+	var response := await send_request("auth/import-old", {"oldSession": old_session}, true, 45.0)
 	login_in_progress = false
 	if response.get("linked", false):
-		saved_session_error = SessionStore.save_session(device) != OK
+		if previous.is_empty():
+			saved_session_error = SessionStore.save_session(device) != OK
 		pending_old_session = ""
 		login_for_transfer = false
 		login_proof = ""
-		message.text = "Поселение перенесено на новый сервер." if response.get("imported", false) else "Поселение снова на этом телефоне."
+		message.text = transfer_message(response)
+		player_id = ""
 		await sync_account()
 		await show_account()
 		return
-	session = ""
+	session = previous
 	if response.get("oldLogin", false):
 		# The old login expired: confirm it again on the old server.
 		pending_old_session = ""
@@ -4193,6 +4203,22 @@ func import_old(old_session: String) -> void:
 		set_login_status("Отряды ещё в походе на старом сервере. Дождись их возвращения и повтори перенос.")
 	else:
 		show_error(response)
+
+func cancel_transfer() -> void:
+	login_for_transfer = false
+	login_proof = ""
+	await show_account()
+
+func transfer_message(response: Dictionary) -> String:
+	var count := int(response.get("profiles", []).size())
+	var text := ("Со старого сервера перенесено поселений: %d." % count) if response.get("imported", false) else "Поселения снова на этом телефоне."
+	var skipped: Array = response.get("skipped", [])
+	if not skipped.is_empty():
+		var names := PackedStringArray()
+		for item in skipped:
+			names.append(str(item.get("name", "")) if str(item.get("name", "")) != "" else "без названия")
+		text += " Не перенесены: %s. Если там отряды в походе — дождись их и повтори перенос." % ", ".join(names)
+	return text
 
 func login_url(challenge: String) -> String:
 	if login_for_transfer:

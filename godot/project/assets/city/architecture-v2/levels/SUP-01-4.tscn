@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-01-4.res" id="1_2em3a"]
+
+[node name="SUP_01_4" type="Node3D" unique_id=1116695692]
+metadata/series = "B16_Infirmary"
+metadata/lanes = []
+metadata/worker_offset = Vector3(3.2, 0, 3.8)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=70215162]
+mesh = ExtResource("1_2em3a")

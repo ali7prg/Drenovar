@@ -1,0 +1,19 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/city/premium/surfaces07/oak-albedo.jpg" id="1_8g8u2"]
+[ext_resource type="Texture2D" path="res://assets/city/premium/surfaces07/oak-normal.png" id="2_t32mh"]
+[ext_resource type="Texture2D" path="res://assets/city/premium/surfaces07/oak-roughness.png" id="3_36cy8"]
+
+[resource]
+vertex_color_use_as_albedo = true
+albedo_color = Color(1.12, 1.02, 0.9, 1)
+albedo_texture = ExtResource("1_8g8u2")
+roughness_texture = ExtResource("3_36cy8")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_scale = 0.6
+normal_texture = ExtResource("2_t32mh")
+uv1_scale = Vector3(0.75, 0.75, 0.75)
+uv1_triplanar = true
+uv1_triplanar_sharpness = 4.0
+texture_filter = 5

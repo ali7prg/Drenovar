@@ -1,0 +1,39 @@
+ok  Connected to the local server v92
+ok  Felling 1: countdown from the server job
+ok  Felling 1: the server confirmed the tree
+ok  Felling 1: the countdown never restarted
+ok  Felling 1: not felled before the timer end
+ok  Felling 1: done 24 ms from zero on screen (|x| < 0.5 s, round trip 1511 ms)
+ok  Felling 1: +66 wood, not doubled by the next state (production +3)
+ok  Felling 1: no job after completion
+ok  Felling 2: countdown from the server job
+ok  Felling 2: the server confirmed the tree
+ok  Felling 2: the countdown never restarted
+ok  Felling 2: not felled before the timer end
+ok  Felling 2: done 22 ms from zero on screen (|x| < 0.5 s, round trip 1511 ms)
+ok  Felling 2: +81 wood, not doubled by the next state (production +3)
+ok  Felling 2: no job after completion
+ok  Two trees felled in a row
+ok  A second felling while one runs is refused
+ok  The refusal is shown: Не выполнено: Сначала повысьте уровень поселения
+ok  Order shown in the queue at once (11 ms)
+ok  Recruitment stays open
+ok  Server order replaced the row (0 → 1)
+ok  Charged once by the server (food 460 → 433; 30 minus farm production)
+ok  Train button ready again
+ok  Repeated command made one order
+ok  Repeated command charged once (food 469 → 409)
+ok  No soldiers 1 ms before the end
+ok  Soldiers at the end (6 → 8)
+ok  Soldiers granted once
+ok  An upgrade was accepted: 
+ok  Upgrade countdown from the server order
+ok  Server granted a construction speedup for the guide (items { "construction-1": 3.0, "training-1": 1.0 })
+ok  Double press spent one item (3 → 2)
+ok  Order shortened once (60000 ms)
+ok  Level unchanged 1 ms before the end
+ok  Level 1 → 2 exactly at the end
+ok  Level raised once
+ok  Offline zero label: Нет связи · ждём сервер
+ok  Link restored
+QA_SERVER_TIMERS checks=38 failures=0 stale=0

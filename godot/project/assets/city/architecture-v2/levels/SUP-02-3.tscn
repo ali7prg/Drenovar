@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-02-3.res" id="1_n81pm"]
+
+[node name="SUP_02_3" type="Node3D" unique_id=1164771404]
+metadata/series = "B17_SiegeWorkshop"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-1.2, 0, 4.4)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=736593316]
+mesh = ExtResource("1_n81pm")

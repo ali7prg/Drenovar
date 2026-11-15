@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-04-2.res" id="1_gq52p"]
+
+[node name="SUP_04_2" type="Node3D" unique_id=401121947]
+metadata/series = "B19_Watchtower"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-3.2, 0, 2.8)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1066551304]
+mesh = ExtResource("1_gq52p")

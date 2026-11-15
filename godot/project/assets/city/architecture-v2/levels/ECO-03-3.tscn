@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-03-3.res" id="1_lv0js"]
+
+[node name="ECO_03_3" type="Node3D" unique_id=1883339996]
+metadata/series = "B05_Marketplace"
+metadata/lanes = [{
+"from": Vector3(0, 0, 7),
+"height": 1.8,
+"kind": "unit",
+"to": Vector3(0, 0, 3.4),
+"width": 1.2
+}]
+metadata/worker_offset = Vector3(-1.2, 0, 2.9)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=290534078]
+mesh = ExtResource("1_lv0js")

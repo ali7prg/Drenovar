@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-08-4.res" id="1_o0bfu"]
+
+[node name="ALT_08_4" type="Node3D" unique_id=388530270]
+metadata/series = "B25_HerbalGarden"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-1, 0, 4.2)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=566746293]
+mesh = ExtResource("1_o0bfu")

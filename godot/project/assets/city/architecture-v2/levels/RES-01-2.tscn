@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-01-2.res" id="1_h3u3y"]
+
+[node name="RES_01_2" type="Node3D" unique_id=2105017364]
+metadata/series = "B06_LumberCamp"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-4, 0, 4.2)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1106510954]
+mesh = ExtResource("1_h3u3y")

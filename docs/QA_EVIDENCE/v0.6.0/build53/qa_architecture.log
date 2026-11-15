@@ -1,0 +1,40 @@
+LEVEL_SCENES changes=59 carried=10
+SHARED_ASSETS compared=108 of 108
+LANE ECO-01-1 cart lane (-0.9, 0.0, 6.2)->(-0.9, 0.73, 0.35) blocked=0 step=0.028 grade=0.183 samples=60
+WORKER ECO-01-1 warehouse points=1 hits=0
+LANE ECO-01-2 cart lane (-0.9, 0.0, 6.3)->(-0.9, 0.73, 0.45) blocked=0 step=0.028 grade=0.183 samples=60
+WORKER ECO-01-2 warehouse points=1 hits=0
+LANE ECO-01-3 cart lane (0.948, 0.0, 6.6)->(0.948, 0.73, 0.55) blocked=0 step=0.028 grade=0.183 samples=62
+WORKER ECO-01-3 warehouse points=1 hits=0
+LANE ECO-01-4 cart lane (1.036, 0.0, 6.7)->(1.036, 0.73, 0.65) blocked=0 step=0.028 grade=0.183 samples=62
+WORKER ECO-01-4 warehouse points=1 hits=0
+LANE ECO-01-5 cart lane (1.036, 0.0, 6.7)->(1.036, 0.73, 0.65) blocked=0 step=0.028 grade=0.183 samples=62
+WORKER ECO-01-5 warehouse points=1 hits=0
+WORKER ECO-02-1 warehouse points=1 hits=0
+WORKER ECO-02-2 warehouse points=1 hits=0
+WORKER ECO-02-3 warehouse points=1 hits=0
+WORKER ECO-02-4 warehouse points=1 hits=0
+WORKER ECO-02-5 warehouse points=1 hits=0
+LANE ECO-03-3 unit lane (0.0, 0.0, 6.9)->(0.0, 0.0, 0.5) blocked=0 step=0.040 grade=0.080 samples=66
+WORKER ECO-03-3 market27 points=1 hits=0
+LANE ECO-03-4 unit lane (0.0, 0.0, 6.9)->(0.0, 0.0, 0.5) blocked=0 step=0.040 grade=0.080 samples=66
+WORKER ECO-03-4 market27 points=1 hits=0
+LANE ECO-03-5 unit lane (0.0, 0.0, 6.9)->(0.0, 0.0, 3.0) blocked=0 step=0.040 grade=0.080 samples=41
+LANE ECO-03-5 ring lane (0.0, 0.0, 0.7)->(1.7, 0.0, 1.7) blocked=0 step=0.000 grade=0.000 samples=73
+WORKER ECO-03-5 market27 points=1 hits=0
+WORKER RES-02-1 quarry27 points=1 hits=0
+WORKER RES-02-2 quarry27 points=1 hits=0
+WORKER RES-02-3 quarry27 points=1 hits=0
+WORKER RES-02-4 quarry27 points=1 hits=0
+WORKER RES-02-5 quarry27 points=1 hits=0
+LANE RES-03-1 rail lane (-0.9, 0.0, 3.0)->(-0.9, 0.0, 0.85) blocked=0 step=0.080 grade=0.160 samples=23
+WORKER RES-03-1 ironmine27 points=1 hits=0
+LANE RES-03-2 rail lane (-0.9, 0.0, 3.0)->(-0.9, 0.0, 0.85) blocked=0 step=0.080 grade=0.160 samples=23
+WORKER RES-03-2 ironmine27 points=1 hits=0
+LANE RES-03-3 rail lane (-0.9, 0.0, 3.0)->(-0.9, 0.0, 0.85) blocked=0 step=0.080 grade=0.160 samples=23
+WORKER RES-03-3 ironmine27 points=1 hits=0
+LANE RES-03-4 rail lane (-0.9, 0.0, 3.0)->(-0.9, 0.0, 0.85) blocked=0 step=0.080 grade=0.160 samples=23
+WORKER RES-03-4 ironmine27 points=1 hits=0
+LANE RES-03-5 rail lane (-0.9, 0.0, 3.0)->(-0.9, 0.0, 0.85) blocked=0 step=0.080 grade=0.160 samples=23
+WORKER RES-03-5 ironmine27 points=1 hits=0
+QA_ARCHITECTURE checks=871 failures=0

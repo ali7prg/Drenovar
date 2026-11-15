@@ -1,0 +1,14 @@
+ok  Connected to the patched local server
+ok  Server catalogue enables 8 march items
+ok  Server catalogue enables 8 construction items
+ok  Starter kit from the server: march-1 ×3
+ok  Army sent: Действие выполнено
+ok  Garrison offers a march speedup
+ok  Only the owned march item is usable: ["1 мин · в наличии 3"]
+ok  Preview before spending: 1 мин · в наличии 3 | Осталось 0:23 → завершится сразу | Неиспользованные 0:37 пропадут.
+ok  Double press spent one item (2 left)
+ok  Arrival earlier by 20227 ms once
+ok  Army fighting at the new arrival time
+ok  No speedup offered during the battle
+ok  Return keeps the original walk time
+QA_SERVER_SPEEDUPS checks=13 failures=0

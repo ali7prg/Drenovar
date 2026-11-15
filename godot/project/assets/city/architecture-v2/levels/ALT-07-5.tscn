@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-07-5.res" id="1_pka1s"]
+
+[node name="ALT_07_5" type="Node3D" unique_id=1828484926]
+metadata/series = "B24_FishingHut"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-4.4, 0, 3.2)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=2027783342]
+mesh = ExtResource("1_pka1s")

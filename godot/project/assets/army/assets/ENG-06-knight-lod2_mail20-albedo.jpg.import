@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ce08y6u2kgpmp"
-path="res://.godot/imported/ENG-06-knight-lod2_mail20-albedo.jpg-66f53b4f02a3c50b264bf8bc7475742d.ctex"
+path.s3tc="res://.godot/imported/ENG-06-knight-lod2_mail20-albedo.jpg-66f53b4f02a3c50b264bf8bc7475742d.s3tc.ctex"
+path.etc2="res://.godot/imported/ENG-06-knight-lod2_mail20-albedo.jpg-66f53b4f02a3c50b264bf8bc7475742d.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "02ec06390569752ee935879eba2a41f4"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/army/assets/ENG-06-knight-lod2_mail20-albedo.jpg"
-dest_files=["res://.godot/imported/ENG-06-knight-lod2_mail20-albedo.jpg-66f53b4f02a3c50b264bf8bc7475742d.ctex"]
+dest_files=["res://.godot/imported/ENG-06-knight-lod2_mail20-albedo.jpg-66f53b4f02a3c50b264bf8bc7475742d.s3tc.ctex", "res://.godot/imported/ENG-06-knight-lod2_mail20-albedo.jpg-66f53b4f02a3c50b264bf8bc7475742d.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +42,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

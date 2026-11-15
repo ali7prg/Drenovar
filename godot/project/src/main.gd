@@ -107,6 +107,7 @@ var login_for_transfer := false
 # A session of the old server saved by an earlier version of the app.
 var pending_old_session := ""
 var transfer_refresh := false
+var web_link_hint_shown := false
 var action_ring := ActionRing.new()
 var last_command_ms := -1.0
 var polling_state := false
@@ -3981,8 +3982,12 @@ func show_account() -> void:
 	else:
 		if profile.playerId != null:
 			add_name_fields(profile)
+		var web_link: Dictionary = profile.get("webLink", {}) if profile.get("webLink") is Dictionary else {}
+		var followed: Array = web_link.get("follow", [])
 		for item in profile.profiles:
 			var title := "%s · %d воинов" % [item.name, int(item.troops)]
+			if followed.has(item.id) and web_link.get("on", false):
+				title += " · с веб-версии"
 			if item.active:
 				row(modal_body, title + " · текущее поселение")
 			else:
@@ -3992,7 +3997,15 @@ func show_account() -> void:
 		if SessionStore.is_device(session):
 			# More settlements of the old server (e.g. a brother's, or another ChatGPT
 			# account) join the ones already on this phone.
-			button(modal_body, "Перенести поселения со старого сервера", begin_transfer)
+			if web_link.get("on", false):
+				var until := Time.get_datetime_string_from_unix_time(int(float(web_link.get("until", 0)) / 1000.0 + Time.get_time_zone_from_system().get("bias", 0) * 60), true).right(8).left(5)
+				row(modal_body, "Трансляция с веб-версии включена до %s. Новые поселения и изменения с сайта приходят сами; поселение, в котором ты играешь на телефоне, остаётся основным." % until)
+			else:
+				if web_link.get("lastError", null) == "login":
+					row(modal_body, "Вход веб-версии истёк, трансляция остановлена. Подключи веб-версию снова.")
+				else:
+					row(modal_body, "Поселения с веб-версии (например, брата) появятся здесь после подключения веб-версии.")
+				panel_action(modal_body, "Подключить веб-версию", begin_transfer)
 			button(modal_body, "Обновить с веб-версии", confirm_profile_action.bind(
 				"Поселения старого аккаунта на телефоне заменятся их состоянием на веб-версии. Прогресс, сделанный только на телефоне, заменится (копия сохранится на сервере). Обновить?", begin_refresh))
 	button(modal_body, "Выйти из приложения", confirm_profile_action.bind(sign_out_question(), sign_out))
@@ -4368,6 +4381,12 @@ func sync_account(create_if_needed := false) -> void:
 		show_error(response)
 		return
 	accept(response)
+	if SessionStore.is_device(session) and not web_link_hint_shown:
+		web_link_hint_shown = true
+		var account: Dictionary = await request("account")
+		var link = account.get("webLink")
+		if link is Dictionary and not link.get("on", false):
+			message.text = "Чтобы поселения с веб-версии (например, брата) были на телефоне, открой профиль и нажми «Подключить веб-версию»."
 
 func create_settlement() -> void:
 	await sync_account(true)

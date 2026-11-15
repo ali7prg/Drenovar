@@ -86,7 +86,7 @@ createServer(async (incoming, out) => {
   } catch (e) { out.writeHead(500).end(String(e)); }
 }).listen(8420, '127.0.0.1');
 createServer(async (incoming, out) => {
-  try { await send(out, await worker.fetch(await toRequest(incoming, NEW), {DB: newDb.db, DRENOVAR_OLD_SERVER: OLD})); }
+  try { await send(out, await worker.fetch(await toRequest(incoming, NEW), {DB: newDb.db, DRENOVAR_OLD_SERVER: OLD, DRENOVAR_LINK_KEY: 'qa-link-key-'.padEnd(48, 'x'), DRENOVAR_LINK_EVERY_MS: '2000'})); }
   catch (e) { out.writeHead(500).end(String(e)); }
 }).listen(8421, '127.0.0.1');
 console.log('old server', OLD, 'new server', NEW);

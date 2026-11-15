@@ -76,11 +76,12 @@ func run() -> void:
 	for item in account.get("profiles", []):
 		names.append(item.name)
 	check(names.size() == 2 and names.has("Крепость брата"), "Both settlements of the old account on the phone: %s" % str(names))
-	# A second transfer while signed in keeps the same phone account.
+	check(account.get("webLink", {}).get("on", false) and account.webLink.follow.size() == 2, "Web link on, both web settlements follow the web (none played on this phone yet): %s" % str(account.get("webLink")))
 	var device_session: String = game.session
 	game.show_account()
-	await wait_until(func(): return modal_has("Перенести поселения со старого сервера"), 15.0)
-	check(modal_has("Перенести поселения со старого сервера"), "Signed-in account offers another transfer")
+	await wait_until(func(): return modal_has("Трансляция с веб-версии включена"), 15.0)
+	check(modal_has("Трансляция с веб-версии включена") and modal_has("с веб-версии"), "Account shows the web link and the followed settlement")
+	# A second transfer while signed in keeps the same phone account.
 	await game.begin_transfer()
 	check(modal_has("Код подтверждения") and modal_has("Отмена"), "Transfer code shown while signed in")
 	check(await approve(game.login_proof.sha256_text()) == 200, "Player approved again on the old server")
@@ -89,12 +90,27 @@ func run() -> void:
 	check(game.session == device_session and SessionStore.read_session() == device_session, "Same phone account kept")
 	account = await game.request("account")
 	check(account.get("profiles", []).size() == 2, "Settlements still on the phone: %d" % account.get("profiles", []).size())
-	# Progress made on the web version reaches the phone with "Обновить с веб-версии".
+	# The brother plays on the web: his settlement on the phone follows by itself.
 	var http := HTTPRequest.new()
 	root.add_child(http)
 	http.request(game.OLD_SERVER + "/__qa/web-play")
 	await http.request_completed
 	http.queue_free()
+	var brother_id := ""
+	for item in account.get("profiles", []):
+		if item.name == "Крепость брата":
+			brother_id = item.id
+	var followed := false
+	var deadline := Time.get_ticks_msec() + 30000
+	while Time.get_ticks_msec() < deadline and not followed:
+		await game.request("state")
+		var listed: Dictionary = await game.request("account")
+		for item in listed.get("profiles", []):
+			if item.id == brother_id and int(item.troops) >= 500:
+				followed = true
+		await create_timer(1.0).timeout
+	check(followed, "The web version's change reached the brother's settlement on the phone by itself")
+	# Progress made on the web version reaches the phone with "Обновить с веб-версии".
 	game.show_account()
 	await wait_until(func(): return modal_has("Обновить с веб-версии"), 15.0)
 	check(modal_has("Обновить с веб-версии"), "Account offers the web-version refresh")

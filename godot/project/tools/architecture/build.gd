@@ -29,7 +29,9 @@ func run() -> void:
 		table.get_or_add(entry.type, {})[str(entry.level)] = row
 		if not only.is_empty() and not key in only:
 			continue
-		var kit = Kit.new(hash(key))
+		# Seeded by type, so parts shared by neighbouring levels come out identical and
+		# the upgrade animation can tell what stays from what is new.
+		var kit = Kit.new(hash(entry.type))
 		var spec: Dictionary = Callable(Recipes, entry.fn).call(kit, int(entry.level))
 		if spec.has("worker"):
 			row["worker"] = [spec.worker.x, spec.worker.y, spec.worker.z]
@@ -68,6 +70,7 @@ func run() -> void:
 		var err := ResourceSaver.save(packed, OUT + key + ".tscn")
 		report.append("%s %s tris=%d lanes=%d err=%d" % [key, entry.series, tris, kit.lanes.size(), err])
 		root.free()
+	link_upgrades(table)
 	# levelModels table is written in a stable order so diffs stay small.
 	data["levelModels"] = table
 	var text := FileAccess.get_file_as_string("res://assets/game.json")
@@ -187,3 +190,69 @@ func _node_xf(n: Node3D, top: Node) -> Transform3D:
 		t = (p as Node3D).transform * t
 		p = p.get_parent()
 	return t
+
+# ---------------------------------------------------------------- upgrade order
+static func tri_key(mat: String, a: Vector3, b: Vector3, c: Vector3) -> String:
+	var m := (a + b + c) / 3.0
+	var n := (b - a).cross(c - a).normalized()
+	return "%s|%d|%d|%d|%d|%d|%d" % [mat, roundi(m.x * 33.0), roundi(m.y * 33.0), roundi(m.z * 33.0),
+		roundi(n.x * 8.0), roundi(n.y * 8.0), roundi(n.z * 8.0)]
+
+static func mesh_keys(mesh: ArrayMesh) -> Dictionary:
+	var keys := {}
+	for si in mesh.get_surface_count():
+		var arr := mesh.surface_get_arrays(si)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var mat := mesh.surface_get_name(si)
+		for t in range(0, v.size(), 3):
+			keys[tri_key(mat, v[t], v[t + 1], v[t + 2])] = true
+	return keys
+
+func link_upgrades(table: Dictionary) -> void:
+	## For each level L with a kit-built level L-1: parts already standing in L-1 get
+	## UV2.x = 0 (not rebuilt); new parts keep their build time. In L-1, parts missing
+	## from L get UV2.y = an early dismantle time (roof first), the rest UV2.y = 2.
+	var linked := 0
+	for type in table:
+		for level in range(2, 6):
+			var prev := OUT + "%s-%d.res" % [type, level - 1]
+			var cur := OUT + "%s-%d.res" % [type, level]
+			if not (table[type].has(str(level)) and table[type].has(str(level - 1))):
+				continue
+			if not (FileAccess.file_exists(prev) and FileAccess.file_exists(cur)):
+				continue
+			var pm: ArrayMesh = load(prev)
+			var cm: ArrayMesh = load(cur)
+			var pk := mesh_keys(pm)
+			var ck := mesh_keys(cm)
+			var top := 0.5
+			for si in pm.get_surface_count():
+				for v: Vector3 in pm.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+					top = maxf(top, v.y)
+			cm = relink(cm, func(key: String, uv: Vector2, a: Vector3, b: Vector3, c: Vector3) -> Vector2:
+				return Vector2(0.0 if pk.has(key) else uv.x, uv.y))
+			pm = relink(pm, func(key: String, uv: Vector2, a: Vector3, b: Vector3, c: Vector3) -> Vector2:
+				var h := clampf(((a.y + b.y + c.y) / 3.0) / top, 0.0, 1.0)
+				# replaced in place: a part is taken down just before the new parts at
+				# its height go up (walls course by course, the old roof with the new frame)
+				return Vector2(uv.x, 2.0 if ck.has(key) else 0.12 + 0.83 * (0.1 + 0.46 * pow(h, 0.85)) - 0.02))
+			ResourceSaver.save(cm, cur, ResourceSaver.FLAG_COMPRESS)
+			ResourceSaver.save(pm, prev, ResourceSaver.FLAG_COMPRESS)
+			linked += 1
+	print("UPGRADE_LINKS ", linked)
+
+static func relink(mesh: ArrayMesh, fn: Callable) -> ArrayMesh:
+	var out := ArrayMesh.new()
+	for si in mesh.get_surface_count():
+		var arr := mesh.surface_get_arrays(si)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV2]
+		var mat := mesh.surface_get_name(si)
+		for t in range(0, v.size(), 3):
+			var r: Vector2 = fn.call(tri_key(mat, v[t], v[t + 1], v[t + 2]), uv[t], v[t], v[t + 1], v[t + 2])
+			uv[t] = r; uv[t + 1] = r; uv[t + 2] = r
+		arr[Mesh.ARRAY_TEX_UV2] = uv
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+		out.surface_set_name(si, mat)
+		out.surface_set_material(si, mesh.surface_get_material(si))
+	return out

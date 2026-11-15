@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-04-3.res" id="1_0pjck"]
+
+[node name="ECO_04_3" type="Node3D" unique_id=723686304]
+metadata/series = "B02_House"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-3.6, 0, 3)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=822943554]
+mesh = ExtResource("1_0pjck")

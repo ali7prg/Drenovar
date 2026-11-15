@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-02-4.res" id="1_womud"]
+
+[node name="MIL_02_4" type="Node3D" unique_id=231807227]
+metadata/series = "B12_ArcheryRange"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-4.6, 0, 3.8)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1999914227]
+mesh = ExtResource("1_womud")

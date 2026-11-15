@@ -1,14 +1,11 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-03-3-base.res" id="1_h4rnf"]
-[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-03-3.res" id="2_0m1x4"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-03-3.res" id="1_oeiy3"]
 
-[node name="MIL_03_3" type="Node3D" unique_id=1455502946]
+[node name="MIL_03_3" type="Node3D" unique_id=59752158]
 metadata/series = "B13_Stables"
 metadata/lanes = []
+metadata/worker_offset = Vector3(-4, 0, 2.2)
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=529953554]
-mesh = ExtResource("1_h4rnf")
-
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=295544178]
-mesh = ExtResource("2_0m1x4")
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1273101238]
+mesh = ExtResource("1_oeiy3")

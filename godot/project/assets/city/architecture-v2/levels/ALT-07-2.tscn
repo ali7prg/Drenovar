@@ -1,14 +1,11 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-07-2-base.res" id="1_5oihc"]
-[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-07-2.res" id="2_uft7e"]
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ALT-07-2.res" id="1_7lrsl"]
 
-[node name="ALT_07_2" type="Node3D" unique_id=113906321]
+[node name="ALT_07_2" type="Node3D" unique_id=1220376164]
 metadata/series = "B24_FishingHut"
 metadata/lanes = []
+metadata/worker_offset = Vector3(-4.4, 0, 3.2)
 
-[node name="Base" type="MeshInstance3D" parent="." unique_id=1130460922]
-mesh = ExtResource("1_5oihc")
-
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=644533487]
-mesh = ExtResource("2_uft7e")
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1867343586]
+mesh = ExtResource("1_7lrsl")

@@ -106,8 +106,26 @@ func note_reworked(stage: Node3D) -> void:
 		if child.scene_file_path.contains("/architecture-v2/"):
 			reworked_spots[var_to_str(child.transform.origin)] = true
 
+# Build 54: a reworked level places its own worker (worker_offset of the level scene),
+# so workers on plots of reworked buildings are not compared with 0.5.9.
+func workers_of_original(stage: Node3D) -> Array:
+	var spots: Array = []
+	for key in reworked_spots:
+		spots.append(str_to_var(key))
+	var rows: Array = []
+	for child: Node3D in stage.workers.get_children():
+		var near := false
+		for spot: Vector3 in spots:
+			if Vector2(child.position.x - spot.x, child.position.z - spot.z).length() < 7.5:
+				near = true
+				break
+		if not near:
+			rows.append("%s|%s" % [child.scene_file_path, var_to_str(child.transform.origin)])
+	rows.sort()
+	return rows
+
 func snapshot(stage: Node3D, yard) -> Dictionary:
-	return {"buildings": without_reworked(without_scaffold(node_rows(stage.buildings))), "workers": node_rows(stage.workers),
+	return {"buildings": without_reworked(without_scaffold(node_rows(stage.buildings))), "workers": workers_of_original(stage),
 		"markers": marker_rows(stage.place_markers), "plots": marker_rows(yard_plots(stage.empty_plots, yard))}
 
 func town_rows(stage: Node3D) -> Array:

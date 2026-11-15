@@ -18,11 +18,28 @@ func bounds_of(node: Node3D, parent := Transform3D.IDENTITY) -> AABB:
 	var here := parent * node.transform
 	if node is MeshInstance3D and node.mesh != null:
 		box = here * node.get_aabb()
+		if node.name == "Architecture":
+			# Build 54: flat ground work of a level scene (paving, beds, sand) may be
+			# crossed by a street; only what stands above 0.3 m counts as the building.
+			box = standing_bounds(node.mesh, here)
 	for child in node.get_children():
 		if child is Node3D:
 			var inner := bounds_of(child, here)
 			if inner.has_surface():
 				box = inner if not box.has_surface() else box.merge(inner)
+	return box
+
+static func standing_bounds(mesh: Mesh, xf: Transform3D) -> AABB:
+	var box := AABB()
+	var faces := mesh.get_faces()
+	for i in range(0, faces.size(), 3):
+		var a := xf * faces[i]
+		var b := xf * faces[i + 1]
+		var c := xf * faces[i + 2]
+		if maxf(a.y, maxf(b.y, c.y)) < 0.3:
+			continue
+		var t := AABB(a, Vector3.ZERO).expand(b).expand(c)
+		box = t if box.size == Vector3.ZERO and box.position == Vector3.ZERO else box.merge(t)
 	return box
 
 static func level_parts(data: Dictionary, type: String, level: int) -> Array:

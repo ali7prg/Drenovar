@@ -1226,6 +1226,19 @@ func level_worker_offset(level_model: Dictionary) -> Variant:
 	var w: Variant = level_model.get("worker")
 	return Vector3(float(w[0]), float(w[1]), float(w[2])) if w is Array and w.size() == 3 else null
 
+# [scene path, scale] that the city shows for a type at a level (level scene or the
+# shared model grown by level), or [] when the type has no model.
+func level_visual(type: String, level: int) -> Array:
+	if level < 1 or level > 5:
+		return []
+	var entry := level_model_for(type, level)
+	if not entry.is_empty():
+		return [entry.path, float(entry.get("scale", 1.0))]
+	var id: String = data.starterHall if type == "ECO-05" and level == 1 else data.types.get(type, "")
+	if id.is_empty() or not data.models.has(id):
+		return []
+	return [data.models[id].path, float(data.models[id].scale) * (1 + 0.055 * (level - 1))]
+
 func level_model_for(type: String, level: int) -> Dictionary:
 	var levels: Variant = data.get("levelModels", {}).get(type)
 	if not levels is Dictionary:

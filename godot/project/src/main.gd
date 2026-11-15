@@ -4854,6 +4854,20 @@ func site_view(source: Dictionary) -> Dictionary:
 				site.model = first_level.path
 				site.scale = float(first_level.get("scale", 1.0))
 		site.upgrade = not existing.is_empty()
+		# Build 54: an upgrade rebuilds on the plot from the current level scene to the
+		# next one (what stays, what is taken down, what is added), so both are named.
+		if site.upgrade and str(source.get("kind", "")) in ["upgrade", "level", ""]:
+			var level := int(existing.get("level", 1))
+			var before: Array = stage.level_visual(str(existing.type), level)
+			var after: Array = stage.level_visual(str(existing.type), level + 1)
+			if not before.is_empty() and not after.is_empty():
+				site.from_model = before[0]
+				site.from_scale = before[1]
+				site.to_model = after[0]
+				site.to_scale = after[1]
+				site.type = str(existing.type)
+		elif not site.upgrade:
+			site.type = str(source.type)
 		# "Walls and gate" stands in the main gate of the city wall: the works go there.
 		var site_type: String = str(source.type) if existing.is_empty() else str(existing.type)
 		if stage.city_base_type(site_type) == "SUP-03" and stage.walls.visible:

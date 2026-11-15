@@ -3,10 +3,14 @@ extends Node3D
 # Visible work in the city:
 # - tree felling: a lumberjack walks to the tree and swings the axe, chips fly;
 #   when the tree is felled it topples, dust rises and "+N дерева" floats up;
-# - construction and upgrades: scaffolding, two builders hammering with sparks
-#   and dust; when the work finishes a golden burst and "Уровень N" appear.
+# - construction and upgrades: a small building site (delivery, scaffolding, the
+#   parts of the new level appearing in build order, a hoist with the building's
+#   load, builders hammering with sparks and dust, scaffolding taken down); when
+#   the work finishes a golden burst and "Уровень N" appear.
 # Everything is procedural on the existing low-poly worker models (their arm and
 # leg nodes are rotated), so no new animation assets are needed.
+
+const BuildReveal = preload("res://src/build_reveal.gd")
 
 var stage: Node3D
 var data: Dictionary
@@ -228,11 +232,39 @@ var site_node: Node3D
 var site_model: Node3D
 var site_model_path := ""
 var site_frames: Array[Node3D] = []
+# Build 54: the rising level scene(s) and their build clocks.
+var site_from: Node3D
+var site_to: Node3D
+var reveal_from: Array = []
+var reveal_to: Array = []
+var site_signature := ""
+var site_scaffold: Node3D
+var site_props: Node3D
+var site_piles: Array[Node3D] = []
+var site_hoist: Node3D
+var site_load: Node3D
+var site_hook: Node3D
+var site_carrier: Node3D
+var site_box := AABB(Vector3(-4, 0, -4), Vector3(8, 6, 8))
+var hidden_building: Node3D
 
-# Construction site: scaffolding around the plot, a new building rising inside it
-# with the timer (from foundations to full height), builders hammering with
-# sparks, dust now and then. For an upgrade the building stays as it is and the
-# scaffolding stands around it.
+# Share of the order: delivery and scaffolding, building, scaffolding taken down.
+const DELIVERY_END := 0.08
+const STRIP_START := 0.9
+
+static func build_clock(progress: float) -> float:
+	## Building clock of the level scene (0..1) inside the order's progress.
+	return clampf((progress - DELIVERY_END) / (STRIP_START - DELIVERY_END), 0.0, 1.0)
+
+# Construction site as a small scene (build 54):
+# - delivery: a carrier brings materials, piles fill, scaffolding goes up;
+# - building: the parts of the new level appear in build order (foundations, frame
+#   and walls course by course, roof from the eaves, then fittings), each one lowered
+#   into place; a hoist lifts the load of the building type; an upgrade first takes
+#   down what the new level replaces, keeps the rest and adds the new parts;
+# - finish: the scaffolding is taken down and the finished level stands.
+# Everything follows the order's own clock, so after leaving and coming back the
+# site shows the stage the order has reached.
 func present_builders(site: Dictionary, now_ms: float) -> void:
 	var key: String = site.get("key", "")
 	if key.is_empty():
@@ -240,6 +272,9 @@ func present_builders(site: Dictionary, now_ms: float) -> void:
 			builder.visible = false
 		if is_instance_valid(site_node):
 			site_node.visible = false
+		if is_instance_valid(site_carrier):
+			site_carrier.visible = false
+		restore_building()
 		builder_site = ""
 		return
 	if builders.is_empty():
@@ -250,27 +285,30 @@ func present_builders(site: Dictionary, now_ms: float) -> void:
 	var started := float(site.get("started", now_ms))
 	var ends := float(site.get("ends", now_ms + 1.0))
 	var progress := clampf((now_ms - started) / maxf(ends - started, 1.0), 0.0, 1.0)
-	if builder_site != key:
+	if builder_site != key or site_signature != site_key(site):
 		builder_site = key
-		var offsets := [Vector3(-4.6, 0, 4.2), Vector3(4.8, 0, 3.6)]
+		build_site(site)
+		var offsets := [Vector3(site_box.position.x - 0.9, 0, site_box.end.z + 0.9), Vector3(site_box.end.x + 0.9, 0, site_box.end.z + 0.4)]
+		if site.has("frame"):
+			offsets = [Vector3(-4.6, 0, 4.2), Vector3(4.8, 0, 3.6)]
 		for index in builders.size():
 			var p: Vector3 = stage.ground_point(centre + offsets[index])
 			builders[index].position = p
 			builders[index].rotation.y = atan2(centre.x - p.x, centre.z - p.z)
-		build_site(site)
 	site_node.visible = true
 	site_node.position = centre
 	# The walls-and-gate upgrade wraps the main gate: frame stretched along the wall.
 	var frame: Vector3 = site.get("frame", Vector3.ONE)
 	site_node.basis = Basis(Vector3.UP, float(site.get("yaw", 0.0))) * Basis.from_scale(frame)
-	if is_instance_valid(site_model):
-		# Rises from 12 % (foundations) to full height as the timer runs.
-		var height := lerpf(0.12, 1.0, progress)
-		site_model.scale = Vector3(float(site.get("scale", 1.0)), float(site.get("scale", 1.0)) * height, float(site.get("scale", 1.0)))
+	animate_site(site, progress, now_ms)
 	var seconds := now_ms / 1000.0
+	var working := progress > DELIVERY_END * 0.5 and progress < 1.0
 	for index in builders.size():
 		var builder := builders[index]
 		builder.visible = true
+		if not working:
+			pose(builder, 0.0, 0.0)
+			continue
 		var cycle := fposmod(seconds * (1.6 + index * 0.25) + index * 0.37, 1.0)
 		var arm := -1.9 * (cycle / 0.75) if cycle < 0.75 else -1.9 + 2.2 * ((cycle - 0.75) / 0.25)
 		pose(builder, arm, 0.0)
@@ -281,33 +319,242 @@ func present_builders(site: Dictionary, now_ms: float) -> void:
 			sparks.global_position = builder.position + forward * 1.0 + Vector3.UP * 1.1
 			sparks.restart()
 	var puff := int(floor(seconds / 2.6))
-	if last_swing.get("dust", -1) != puff:
+	if working and last_swing.get("dust", -1) != puff:
 		last_swing.dust = puff
 		dust.global_position = centre + Vector3(randf_range(-3.0, 3.0), 0.6, randf_range(-3.0, 3.0))
 		dust.restart()
+
+static func site_key(site: Dictionary) -> String:
+	return "%s|%s|%s|%s" % [site.get("key", ""), site.get("model", ""), site.get("from_model", ""), site.get("to_model", "")]
+
+# The building the city draws on the plot is hidden while its upgrade is rebuilt here.
+func hide_building(centre: Vector3) -> void:
+	restore_building()
+	for child in stage.buildings.get_children():
+		var p: Vector3 = (child as Node3D).global_position
+		if Vector2(p.x - centre.x, p.z - centre.z).length() < 0.6 and child.visible:
+			hidden_building = child
+			child.visible = false
+			return
+
+func restore_building() -> void:
+	if is_instance_valid(hidden_building):
+		hidden_building.visible = true
+	hidden_building = null
 
 func build_site(site: Dictionary) -> void:
 	if not is_instance_valid(site_node):
 		site_node = Node3D.new()
 		site_node.name = "ConstructionSite"
 		add_child(site_node)
-	var wanted: String = site.get("model", "")
-	if wanted != site_model_path or not is_instance_valid(site_model):
-		if is_instance_valid(site_model):
-			site_model.queue_free()
-		site_model = null
-		site_model_path = wanted
-		if not wanted.is_empty():
-			site_model = stage.add_model(site_node, wanted, Transform3D.IDENTITY)
-	var half := 5.6 if site.get("upgrade", false) else 4.6
-	if site_frames.is_empty() or not is_equal_approx(float(site_node.get_meta("half", 0.0)), half):
-		for frame in site_frames:
-			frame.queue_free()
-		site_frames.clear()
-		var scaffold := build_scaffold(half, 7.4 if site.get("upgrade", false) else 6.4)
-		site_node.add_child(scaffold)
-		site_frames.append(scaffold)
-		site_node.set_meta("half", half)
+	site_signature = site_key(site)
+	for node in [site_model, site_from, site_to, site_scaffold, site_props]:
+		if is_instance_valid(node):
+			node.queue_free()
+	site_model = null
+	site_from = null
+	site_to = null
+	reveal_from = []
+	reveal_to = []
+	site_piles.clear()
+	site_frames.clear()
+	restore_building()
+	site_node.position = site.position
+	site_node.basis = Basis.IDENTITY
+	var legacy := site.has("frame")
+	if not legacy and site.get("upgrade", false) and site.has("to_model"):
+		site_from = stage.add_model(site_node, site.from_model, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * float(site.from_scale)), Vector3.ZERO))
+		site_to = stage.add_model(site_node, site.to_model, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * float(site.to_scale)), Vector3.ZERO))
+		reveal_from = BuildReveal.dress(site_from, BuildReveal.LEAVE, BuildReveal.TAKE_DOWN)
+		reveal_to = BuildReveal.dress(site_to, BuildReveal.ARRIVE, BuildReveal.RISE)
+		hide_building(site.position)
+		site_box = model_box(site_to).merge(model_box(site_from))
+	elif not legacy and not str(site.get("model", "")).is_empty():
+		site_model_path = site.model
+		site_model = stage.add_model(site_node, site.model, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * float(site.get("scale", 1.0))), Vector3.ZERO))
+		reveal_to = BuildReveal.dress(site_model, BuildReveal.SCRATCH, BuildReveal.RISE)
+		site_box = model_box(site_model)
+	else:
+		var half := 5.6 if site.get("upgrade", false) else 4.6
+		site_box = AABB(Vector3(-half, 0, -half), Vector3(half * 2, 7.4 if site.get("upgrade", false) else 6.4, half * 2))
+	# scaffolding hugs the building that rises (not the whole plot)
+	var hx := clampf(maxf(absf(site_box.position.x), absf(site_box.end.x)) * 0.82, 2.4, 6.4)
+	var hz := clampf(maxf(absf(site_box.position.z), absf(site_box.end.z)) * 0.82, 2.4, 6.4)
+	var height := clampf(site_box.end.y * 0.85, 3.2, 9.5)
+	if legacy:
+		hx = site_box.end.x
+		hz = site_box.end.z
+		height = site_box.end.y
+	site_scaffold = build_scaffold(hx, height, hz)
+	site_node.add_child(site_scaffold)
+	site_frames.append(site_scaffold as Node3D)
+	site_props = Node3D.new()
+	site_props.name = "SiteProps"
+	site_node.add_child(site_props)
+	if not legacy:
+		build_props(str(site.get("type", "")), hx, hz, height)
+
+func model_box(model: Node3D) -> AABB:
+	var box := AABB()
+	for part: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if part.mesh == null:
+			continue
+		var b := (BuildReveal.local_xf(site_node, part)) * part.get_aabb()
+		box = b if not box.has_volume() else box.merge(b)
+	return box if box.has_volume() else AABB(Vector3(-4, 0, -4), Vector3(8, 6, 8))
+
+# What the hoist lifts: the load that tells which building rises.
+static func load_kind(type: String) -> String:
+	var base := type
+	if type in ["ECO-01", "ECO-02", "ALT-05"]:
+		return "crate" if type == "ECO-01" else "sack"
+	if type in ["RES-02", "ALT-09", "SUP-03", "SUP-04", "ECO-05"]:
+		return "stone"
+	if type in ["ECO-03"]:
+		return "canvas"
+	if type in ["RES-01", "ALT-02"]:
+		return "log"
+	if type in ["RES-03", "ALT-10", "MIL-04"]:
+		return "ore"
+	return "planks"
+
+static func prop_material(color: Color) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = color
+	m.roughness = 0.9
+	return m
+
+func load_mesh(kind: String) -> Node3D:
+	var root := Node3D.new()
+	var part := MeshInstance3D.new()
+	match kind:
+		"crate":
+			var b := BoxMesh.new(); b.size = Vector3(0.7, 0.6, 0.7); part.mesh = b
+			part.material_override = prop_material(Color("#9a6b3c"))
+		"sack":
+			var b := CapsuleMesh.new(); b.radius = 0.28; b.height = 0.8; part.mesh = b
+			part.material_override = prop_material(Color("#cdb88a"))
+		"stone":
+			var b := BoxMesh.new(); b.size = Vector3(0.9, 0.55, 0.65); part.mesh = b
+			part.material_override = prop_material(Color("#cfc6b4"))
+		"canvas":
+			var b := BoxMesh.new(); b.size = Vector3(1.8, 0.05, 1.2); part.mesh = b
+			part.material_override = prop_material(Color("#e6dcc2"))
+			var stripe := MeshInstance3D.new()
+			var sb := BoxMesh.new(); sb.size = Vector3(0.36, 0.06, 1.22); stripe.mesh = sb
+			stripe.material_override = prop_material(Color("#8c2a2a"))
+			for x in [-0.6, 0.0, 0.6]:
+				var s2 := stripe.duplicate() as MeshInstance3D
+				s2.position.x = x
+				root.add_child(s2)
+			stripe.free()
+		"log":
+			var b := CylinderMesh.new(); b.top_radius = 0.18; b.bottom_radius = 0.18; b.height = 2.4; part.mesh = b
+			part.rotation.z = PI * 0.5
+			part.material_override = prop_material(Color("#7a5634"))
+		"ore":
+			var b := CylinderMesh.new(); b.top_radius = 0.34; b.bottom_radius = 0.26; b.height = 0.5; part.mesh = b
+			part.material_override = prop_material(Color("#5a4632"))
+			var heap := MeshInstance3D.new()
+			var hb := SphereMesh.new(); hb.radius = 0.3; hb.height = 0.3; heap.mesh = hb
+			heap.position.y = 0.25
+			heap.material_override = prop_material(Color("#3a3230"))
+			root.add_child(heap)
+		_:
+			var b := BoxMesh.new(); b.size = Vector3(1.6, 0.24, 0.5); part.mesh = b
+			part.material_override = prop_material(Color("#b08654"))
+	root.add_child(part)
+	return root
+
+# Material piles, a hoist with the type's load and a carrier: built once per site.
+func build_props(type: String, hx: float, hz: float, height: float) -> void:
+	var kind := load_kind(type)
+	var front := hz + 1.4
+	var pile_at := [Vector3(-hx - 1.4, 0, front - 0.6), Vector3(-hx + 0.4, 0, front + 0.6)]
+	for i in 2:
+		var pile := Node3D.new()
+		pile.position = pile_at[i]
+		for k in 3:
+			var piece := load_mesh(kind if i == 0 else "planks")
+			piece.position = Vector3((k % 2) * 0.5 - 0.25, 0.3 + k * 0.45, (k / 2) * 0.3)
+			piece.rotation.y = k * 0.4
+			pile.add_child(piece)
+		site_props.add_child(pile)
+		site_piles.append(pile)
+	# hoist: mast at the front-right corner, jib over the scaffolding
+	site_hoist = Node3D.new()
+	site_hoist.position = Vector3(hx + 0.6, 0, hz + 0.6)
+	var mast := MeshInstance3D.new()
+	var mm := BoxMesh.new(); mm.size = Vector3(0.22, height + 1.6, 0.22); mast.mesh = mm
+	mast.position.y = (height + 1.6) * 0.5
+	mast.material_override = timber()
+	site_hoist.add_child(mast)
+	var jib := MeshInstance3D.new()
+	var jm := BoxMesh.new(); jm.size = Vector3(0.18, 0.18, 2.6); jib.mesh = jm
+	jib.position = Vector3(0, height + 1.5, -1.1)
+	jib.material_override = timber()
+	site_hoist.add_child(jib)
+	site_hook = MeshInstance3D.new()
+	var rope := CylinderMesh.new(); rope.top_radius = 0.025; rope.bottom_radius = 0.025; rope.height = 1.0
+	(site_hook as MeshInstance3D).mesh = rope
+	(site_hook as MeshInstance3D).material_override = prop_material(Color("#8a6a40"))
+	site_hoist.add_child(site_hook)
+	site_load = load_mesh(kind)
+	site_hoist.add_child(site_load)
+	site_hoist.set_meta("top", height + 1.4)
+	site_props.add_child(site_hoist)
+	if not is_instance_valid(site_carrier):
+		site_carrier = make_worker("Worker_Carrier")
+	site_carrier.set_meta("from", Vector3(-hx - 1.0, 0, front + 1.6))
+	site_carrier.set_meta("to", Vector3(-hx * 0.4, 0, hz + 0.9))
+
+func animate_site(site: Dictionary, progress: float, now_ms: float) -> void:
+	var clock := build_clock(progress)
+	BuildReveal.set_time(reveal_to, clock)
+	BuildReveal.set_time(reveal_from, clock)
+	# scaffolding goes up during delivery and comes down at the end
+	if is_instance_valid(site_scaffold):
+		var up := clampf(progress / DELIVERY_END, 0.0, 1.0)
+		var down := clampf((1.0 - progress) / (1.0 - STRIP_START), 0.0, 1.0)
+		var h := minf(up, down) if not site.has("frame") else 1.0
+		site_scaffold.scale = Vector3(1, maxf(h, 0.001), 1)
+		site_scaffold.visible = h > 0.01
+	# piles fill during delivery, then are used up as the parts go in
+	for pile in site_piles:
+		var fill := clampf(progress / (DELIVERY_END * 0.8), 0.0, 1.0) * (1.0 - clock * 0.85)
+		pile.scale = Vector3.ONE * maxf(fill, 0.001)
+		pile.visible = fill > 0.02
+	var seconds := now_ms / 1000.0
+	if is_instance_valid(site_hoist):
+		var busy := progress > DELIVERY_END and progress < STRIP_START
+		site_hoist.visible = progress > DELIVERY_END * 0.5 and progress < 0.97
+		var top: float = site_hoist.get_meta("top", 6.0)
+		var cycle := fposmod(seconds / 4.2, 1.0) if busy else 0.0
+		# hook at the pile, lift, swing over the scaffolding, set down, return
+		var lift := smoothstep(0.08, 0.45, cycle) * (1.0 - smoothstep(0.75, 0.95, cycle))
+		var reach := -0.3 - 2.0 * smoothstep(0.45, 0.6, cycle) * (1.0 - smoothstep(0.85, 0.98, cycle))
+		var y := lerpf(0.35, top - 1.2, lift)
+		site_load.position = Vector3(0, y, reach)
+		site_load.visible = busy and cycle < 0.72
+		site_load.rotation.y = sin(seconds * 0.9) * 0.25
+		var rope_len := maxf(top + 0.1 - y - 0.3, 0.1)
+		site_hook.position = Vector3(0, y + 0.3 + rope_len * 0.5, reach)
+		site_hook.scale = Vector3(1, rope_len, 1)
+	if is_instance_valid(site_carrier):
+		# the carrier walks between the material pile and the scaffolding
+		var carry := progress < STRIP_START + 0.06 and not site.has("frame")
+		site_carrier.visible = carry
+		if carry:
+			var from: Vector3 = site_node.to_global(site_carrier.get_meta("from", Vector3.ZERO))
+			var to: Vector3 = site_node.to_global(site_carrier.get_meta("to", Vector3.ZERO))
+			var walk := fposmod(seconds / 7.0, 1.0)
+			var leg := walk * 2.0 if walk < 0.5 else (1.0 - walk) * 2.0
+			var at := from.lerp(to, smoothstep(0.0, 1.0, leg))
+			site_carrier.position = stage.ground_point(at)
+			var dir := (to - from) if walk < 0.5 else (from - to)
+			site_carrier.rotation.y = atan2(dir.x, dir.z)
+			var stride := sin(seconds * 9.0)
+			pose(site_carrier, -1.2 if walk < 0.5 else stride * 0.4, stride * 0.5)
 
 static func timber() -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
@@ -319,7 +566,9 @@ static func timber() -> StandardMaterial3D:
 # Timber scaffolding around a square plot: corner and middle poles, rails on three
 # levels, plank decks and a cross brace per side. One mesh (SurfaceTool), so it
 # costs a single draw call.
-static func build_scaffold(half: float, height: float) -> MeshInstance3D:
+static func build_scaffold(half: float, height: float, half_z := -1.0) -> MeshInstance3D:
+	if half_z < 0.0:
+		half_z = half
 	var tool := SurfaceTool.new()
 	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var beam := func(a: Vector3, b: Vector3, thickness: float) -> void:
@@ -346,22 +595,30 @@ static func build_scaffold(half: float, height: float) -> MeshInstance3D:
 		for sz in [-1.0, 0.0, 1.0]:
 			if sx == 0.0 and sz == 0.0:
 				continue
-			beam.call(Vector3(sx * half, 0.0, sz * half), Vector3(sx * half, height, sz * half), 0.24)
+			beam.call(Vector3(sx * half, 0.0, sz * half_z), Vector3(sx * half, height, sz * half_z), 0.18)
+	# sides as [corner a, corner b, inward]
+	var sides := [[Vector3(-half, 0, half_z), Vector3(half, 0, half_z), Vector3(0, 0, -0.55)],
+		[Vector3(half, 0, half_z), Vector3(half, 0, -half_z), Vector3(-0.55, 0, 0)],
+		[Vector3(half, 0, -half_z), Vector3(-half, 0, -half_z), Vector3(0, 0, 0.55)],
+		[Vector3(-half, 0, -half_z), Vector3(-half, 0, half_z), Vector3(0.55, 0, 0)]]
+	# decks and rails on the back and left only: the camera side stays open, so the
+	# rising building is seen through the poles
 	for level in levels:
-		for side in 4:
-			var angle := side * PI * 0.5
-			var a := Vector3(-half, level, half).rotated(Vector3.UP, angle)
-			var b := Vector3(half, level, half).rotated(Vector3.UP, angle)
+		for side in [sides[2], sides[3]]:
+			var a: Vector3 = side[0] + Vector3.UP * level
+			var b: Vector3 = side[1] + Vector3.UP * level
 			beam.call(a, b, 0.17)
 			# Plank deck just inside the rail.
-			var inward := Vector3(0, 0, -0.55).rotated(Vector3.UP, angle)
-			beam.call(a + inward - Vector3.UP * 0.12, b + inward - Vector3.UP * 0.12, 0.5)
-	for side in 4:
-		var angle := side * PI * 0.5
-		beam.call(Vector3(-half, 0.2, half + 0.05).rotated(Vector3.UP, angle),
-			Vector3(0.0, levels[1], half + 0.05).rotated(Vector3.UP, angle), 0.14)
-		beam.call(Vector3(half, 0.2, half + 0.05).rotated(Vector3.UP, angle),
-			Vector3(0.0, levels[1], half + 0.05).rotated(Vector3.UP, angle), 0.14)
+			beam.call(a + side[2] - Vector3.UP * 0.12, b + side[2] - Vector3.UP * 0.12, 0.5)
+	for level in [levels[2]]:
+		for side in [sides[0], sides[1]]:
+			beam.call(side[0] + Vector3.UP * level, side[1] + Vector3.UP * level, 0.14)
+	for side in sides:
+		var a: Vector3 = side[0]
+		var b: Vector3 = side[1]
+		var out: Vector3 = -side[2].normalized() * 0.05
+		beam.call(a + Vector3.UP * 0.2 + out, (a + b) * 0.5 + Vector3.UP * levels[1] + out, 0.14)
+		beam.call(b + Vector3.UP * 0.2 + out, (a + b) * 0.5 + Vector3.UP * levels[1] + out, 0.14)
 	var mesh := MeshInstance3D.new()
 	mesh.name = "Scaffold"
 	mesh.mesh = tool.commit()

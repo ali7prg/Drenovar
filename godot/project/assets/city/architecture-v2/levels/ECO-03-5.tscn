@@ -2,22 +2,22 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-03-5.res" id="1_mw0bq"]
 
-[node name="ECO_03_5" type="Node3D" unique_id=121137694]
+[node name="ECO_03_5" type="Node3D" unique_id=1552494552]
 metadata/series = "B05_Marketplace"
 metadata/lanes = [{
-"from": Vector3(0, 0, 6.9),
+"from": Vector3(0, 0, 7),
 "height": 1.8,
 "kind": "unit",
-"to": Vector3(0, 0, 3),
+"to": Vector3(0, 0, 4.4),
 "width": 1.2
 }, {
-"from": Vector3(0, 0, 0.7),
+"from": Vector3(0, 0, 2.4),
 "height": 1.8,
 "kind": "ring",
-"to": Vector3(1.7, 0, 1.7),
+"to": Vector3(1.35, 0, 1.35),
 "width": 0.5
 }]
-metadata/worker_offset = Vector3(-0.95, 0, 2.45)
+metadata/worker_offset = Vector3(-1.2, 0, 2.9)
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1170790759]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=524964118]
 mesh = ExtResource("1_mw0bq")

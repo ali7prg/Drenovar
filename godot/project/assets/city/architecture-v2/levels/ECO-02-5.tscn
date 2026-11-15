@@ -2,10 +2,10 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-02-5.res" id="1_omga8"]
 
-[node name="ECO_02_5" type="Node3D" unique_id=595246446]
+[node name="ECO_02_5" type="Node3D" unique_id=1420132889]
 metadata/series = "B04_Granary"
 metadata/lanes = []
-metadata/worker_offset = Vector3(2.9, 0, 4.2)
+metadata/worker_offset = Vector3(-3.6, 0, 3)
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=757507549]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=264229191]
 mesh = ExtResource("1_omga8")

@@ -2,10 +2,10 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-02-2.res" id="1_fg6cl"]
 
-[node name="RES_02_2" type="Node3D" unique_id=920092926]
+[node name="RES_02_2" type="Node3D" unique_id=591157154]
 metadata/series = "B07_StoneQuarry"
 metadata/lanes = []
-metadata/worker_offset = Vector3(-0.6, 0, 4.4)
+metadata/worker_offset = Vector3(-2.2, 0, 4.6)
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=250028153]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=354814377]
 mesh = ExtResource("1_fg6cl")

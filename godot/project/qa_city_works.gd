@@ -164,7 +164,12 @@ func run() -> void:
 	stage.present(game.state)
 	await frames(6)
 	check(is_instance_valid(works.site_node) and works.site_node.visible and works.site_frames.size() == 1, "No scaffolding on the upgraded building")
-	check(not is_instance_valid(works.site_model), "Upgrade must keep the building, not raise a new one")
+	# Build 54: the upgrade is rebuilt on the plot, from the current level scene to the
+	# next one, while the city's own building on that plot is hidden.
+	check(not is_instance_valid(works.site_model), "Upgrade must not raise a building from scratch")
+	check(is_instance_valid(works.site_from) and is_instance_valid(works.site_to) and not works.reveal_to.is_empty(),
+		"Upgrade does not show the old and the new level on the plot")
+	check(is_instance_valid(works.hidden_building) and not works.hidden_building.visible, "The city building is not hidden under its upgrade")
 	check(works.builders.size() == 2 and works.builders.all(func(b): return b.visible), "No builders at the site")
 	stage.target = stage.work_sites[building.plotId]
 	if not capture.is_empty():
@@ -177,6 +182,7 @@ func run() -> void:
 	stage.present(game.state)
 	await frames(3)
 	check(works.builders.all(func(b): return not b.visible), "Builders stayed after the work ended")
+	check(works.hidden_building == null, "A building stayed hidden after its upgrade")
 	var cheers: Array = works.find_children("*", "Label3D", true, false).filter(func(l): return l.text.begins_with("Уровень"))
 	check(not cheers.is_empty(), "No completion effect")
 	# Server job naming a village tree is recognised (not only "tree-N" ids).
@@ -197,8 +203,11 @@ func run() -> void:
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(capture.path_join("works_rising.png"))
 	if is_instance_valid(works.site_model):
-		var height: float = works.site_model.scale.y / float(game.data.models[game.data.types["SUP-04"]].scale)
-		check(height > 0.3 and height < 0.8, "Rising height does not follow the timer (%.2f at one third)" % height)
+		# Build 54: the level scene is put up part by part on the order's build clock
+		var clock: float = works.build_clock(1.0 / 3.0)
+		var shown: float = float(works.reveal_to[0].get_shader_parameter("build_t")) if not works.reveal_to.is_empty() else -1.0
+		check(not works.reveal_to.is_empty() and absf(shown - clock) < 0.05 and clock > 0.2 and clock < 0.45,
+			"Build clock does not follow the timer (%.2f at one third, expected %.2f)" % [shown, clock])
 	city.kingdom.erase("order")
 	stage.present(game.state)
 	await frames(2)

@@ -13,6 +13,22 @@ var rng := RandomNumberGenerator.new()
 var lanes: Array = []
 var footprint := 6.3
 var ao_floor := 0.0
+# Build order (build 54): every triangle belongs to a "piece" (one box, beam, cylinder,
+# shingle course...). bake() turns pieces into appear times for the construction
+# animation (vertex colour alpha) and build.gd adds the upgrade times (UV2).
+var piece := 0
+var piece_when: Variant = null   # recipe override for the appear time of the next pieces
+var piece_times := {}            # piece id -> forced appear time
+
+func next_piece() -> void:
+	piece += 1
+	if piece_when != null:
+		piece_times[piece] = float(piece_when)
+
+func when(t: Variant) -> void:
+	## Recipes may force the appear time (0..1) of what follows; null = automatic.
+	piece_when = t
+	next_piece()
 
 func _init(seed_value: int = 1) -> void:
 	rng.seed = seed_value
@@ -35,7 +51,7 @@ func lane(from: Vector3, to: Vector3, width: float, height: float, kind := "unit
 # ---------------------------------------------------------------- low level emitters
 func _group(mat: String) -> Dictionary:
 	if not groups.has(mat):
-		groups[mat] = {"v": PackedVector3Array(), "n": PackedVector3Array(), "c": PackedColorArray()}
+		groups[mat] = {"v": PackedVector3Array(), "n": PackedVector3Array(), "c": PackedColorArray(), "p": PackedInt32Array()}
 	return groups[mat]
 
 func _shade(p: Vector3, tint: Color) -> Color:
@@ -58,6 +74,7 @@ func tri(mat: String, a: Vector3, b: Vector3, c: Vector3, tint := Color.WHITE) -
 	for i in 3:
 		g.n.append(n)
 	g.c.append(_shade(wa, tint)); g.c.append(_shade(wc, tint)); g.c.append(_shade(wb, tint))
+	g.p.append(piece)
 
 func quad(mat: String, a: Vector3, b: Vector3, c: Vector3, d: Vector3, tint := Color.WHITE) -> void:
 	## a,b,c,d counter-clockwise when seen from the side the face points to.
@@ -70,6 +87,7 @@ func jitter(amount := 0.07) -> Color:
 
 # ---------------------------------------------------------------- solids
 func box(mat: String, center: Vector3, size: Vector3, yaw_deg := 0.0, tint := Color.WHITE, pitch_deg := 0.0, roll_deg := 0.0) -> void:
+	next_piece()
 	var basis := Basis.from_euler(Vector3(deg_to_rad(pitch_deg), deg_to_rad(yaw_deg), deg_to_rad(roll_deg)))
 	var h := size * 0.5
 	var p := []
@@ -89,6 +107,7 @@ func aabb(mat: String, from: Vector3, to: Vector3, tint := Color.WHITE) -> void:
 
 func beam(mat: String, a: Vector3, b: Vector3, w := 0.16, h := -1.0, tint := Color.WHITE) -> void:
 	## Square/rectangular timber from a to b.
+	next_piece()
 	if h < 0:
 		h = w
 	var d := b - a
@@ -113,6 +132,7 @@ func beam(mat: String, a: Vector3, b: Vector3, w := 0.16, h := -1.0, tint := Col
 	quad(mat, p[4], p[5], p[7], p[6], tint)
 
 func cyl(mat: String, a: Vector3, b: Vector3, r: float, sides := 10, caps := true, tint := Color.WHITE, r2 := -1.0) -> void:
+	next_piece()
 	if r2 < 0:
 		r2 = r
 	var d := b - a
@@ -138,6 +158,7 @@ func cyl(mat: String, a: Vector3, b: Vector3, r: float, sides := 10, caps := tru
 			tri(mat, ring_b[0], ring_b[i], ring_b[i + 1], tint * Color(1.08, 1.0, 0.9))
 
 func cone(mat: String, base: Vector3, r: float, h: float, sides := 8, tint := Color.WHITE, yaw_deg := 0.0) -> void:
+	next_piece()
 	var apex := base + Vector3(0, h, 0)
 	var off := deg_to_rad(yaw_deg)
 	for i in sides:
@@ -147,6 +168,7 @@ func cone(mat: String, base: Vector3, r: float, h: float, sides := 8, tint := Co
 
 func extrude(mat: String, profile: PackedVector2Array, z0: float, z1: float, tint := Color.WHITE, caps := true) -> void:
 	## Extrudes an XY polygon (counter-clockwise) along Z from z0 to z1.
+	next_piece()
 	var n := profile.size()
 	for i in n:
 		var a := profile[i]
@@ -171,6 +193,7 @@ func shingle_slope(mat: String, eave_l: Vector3, eave_r: Vector3, ridge_l: Vecto
 	if normal.y < 0:
 		normal = -normal
 	for r in rows:
+		next_piece()
 		var t0 := float(r) / rows
 		var t1 := minf(1.0, float(r + 1) / rows + 0.35 / rows)
 		var l0 := eave_l.lerp(ridge_l, t0)
@@ -200,6 +223,7 @@ func shingle_slope(mat: String, eave_l: Vector3, eave_r: Vector3, ridge_l: Vecto
 			quad(mat, p00 + gap + drop, p00 + gap + lift, p01 + gap + lift * 0.35, p01 + gap, tn * Color(0.8, 0.8, 0.8))
 			quad(mat, p10 - gap + drop, p11 - gap, p11 - gap + lift * 0.35, p10 - gap + lift, tn * Color(0.8, 0.8, 0.8))
 	# underside board so the roof never shows holes from below
+	next_piece()
 	quad(mat, eave_l, ridge_l, ridge_r, eave_r, tint * Color(0.55, 0.55, 0.55))
 
 func gable_roof(mat: String, c: Vector3, length: float, depth: float, rise: float, overhang := 0.35, gable_mat := "", ridge_mat := "dark_oak", tint := Color.WHITE) -> void:
@@ -547,6 +571,7 @@ func ramp(from: Vector3, to: Vector3, width: float, mat := "oak", curbs := true,
 		var t1 := float(i + 1) / n
 		var p0 := from.lerp(to, t0)
 		var p1 := from.lerp(to, t1)
+		next_piece()
 		var tn := jitter(0.12)
 		var gap := (p1 - p0).normalized() * 0.01
 		var dn := Vector3(0, -0.05, 0)
@@ -1025,19 +1050,85 @@ func base_ground(radius := 6.0, mat := "earth") -> void:
 	pop()
 
 # ---------------------------------------------------------------- bake
+const GROUND_MATS := ["earth", "path", "sand", "soil", "drill"]
+const ROOF_MATS := ["shingle", "shingle_light", "slate_roof", "clay_roof", "thatch"]
+const FRAME_MATS := ["oak", "dark_oak", "log"]
+const CLAD_MATS := ["plank", "plaster", "oak_light", "shutter", "glass", "greenglass"]
+const DETAIL_MATS := ["canvas", "linen", "cloth_red", "cloth_blue", "cloth_teal", "cloth_wine", "rope", "parchment", "hay", "herb", "ore",
+	"brass", "glow", "water", "leaves", "flower", "lavender", "map_green", "map_blue", "ember", "greenglass"]
+
+func build_times() -> Dictionary:
+	## Appear time (0..1) of every piece when the level is built from scratch:
+	## ground works, foundations, frame and walls course by course, roof from the eaves
+	## up, then fittings, goods and textiles.
+	var stats := {}
+	var top := 0.5
+	for mat_name in groups:
+		var g: Dictionary = groups[mat_name]
+		for t in g.p.size():
+			var id: int = g.p[t]
+			var st: Dictionary = stats.get(id, {})
+			if st.is_empty():
+				st = {"mat": mat_name, "lo": Vector3.INF, "hi": -Vector3.INF}
+				stats[id] = st
+			for k in 3:
+				var v: Vector3 = g.v[t * 3 + k]
+				st.lo = st.lo.min(v)
+				st.hi = st.hi.max(v)
+				top = maxf(top, v.y)
+	var times := {}
+	for id in stats:
+		var st: Dictionary = stats[id]
+		var size: Vector3 = st.hi - st.lo
+		var cy: float = (st.lo.y + st.hi.y) * 0.5
+		var h := clampf(cy / top, 0.0, 1.0)
+		var noise := fposmod(sin(float(id) * 12.9898) * 43758.5453, 1.0)
+		var t: float
+		if piece_times.has(id):
+			t = piece_times[id]
+		elif st.mat in GROUND_MATS or (st.hi.y < 0.12 and size.y < 0.12):
+			t = 0.02 + 0.05 * noise
+		elif st.mat in ROOF_MATS:
+			t = 0.6 + 0.26 * h
+		elif st.mat in DETAIL_MATS or (maxf(size.x, maxf(size.y, size.z)) < 0.75 and st.lo.y < 1.4):
+			t = 0.86 + 0.12 * noise
+		elif st.mat.begins_with("stone") and cy < 0.7:
+			t = 0.06 + 0.08 * h
+		else:
+			t = 0.12 + 0.48 * pow(h, 0.85) + 0.03 * noise
+			# the frame of a course goes up first, its cladding follows
+			if st.mat in FRAME_MATS:
+				t -= 0.05
+			elif st.mat in CLAD_MATS:
+				t += 0.05
+		times[id] = clampf(t, 0.01, 0.99)
+	return times
+
 func bake() -> ArrayMesh:
 	var mesh := ArrayMesh.new()
 	var names := groups.keys()
 	names.sort()
+	var times := build_times()
 	for mat_name in names:
 		var g: Dictionary = groups[mat_name]
 		if g.v.is_empty():
 			continue
+		var colors := PackedColorArray(g.c)
+		var uv2 := PackedVector2Array()
+		uv2.resize(g.v.size())
+		for t in g.p.size():
+			var when_t: float = times[g.p[t]]
+			for k in 3:
+				colors[t * 3 + k].a = when_t
+				# x: appear time when upgrading into this level (default: new part),
+				# y: leave time when upgrading out of it (2 = stays); build.gd refines both.
+				uv2[t * 3 + k] = Vector2(0.12 + 0.83 * when_t, 2.0)
 		var arrays := []
 		arrays.resize(Mesh.ARRAY_MAX)
 		arrays[Mesh.ARRAY_VERTEX] = g.v
 		arrays[Mesh.ARRAY_NORMAL] = g.n
-		arrays[Mesh.ARRAY_COLOR] = g.c
+		arrays[Mesh.ARRAY_COLOR] = colors
+		arrays[Mesh.ARRAY_TEX_UV2] = uv2
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		var idx := mesh.get_surface_count() - 1
 		mesh.surface_set_name(idx, mat_name)

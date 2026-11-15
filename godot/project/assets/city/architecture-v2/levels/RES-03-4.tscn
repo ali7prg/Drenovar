@@ -2,16 +2,16 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/RES-03-4.res" id="1_aowci"]
 
-[node name="RES_03_4" type="Node3D" unique_id=915239964]
+[node name="RES_03_4" type="Node3D" unique_id=431369066]
 metadata/series = "B08_IronMine"
 metadata/lanes = [{
-"from": Vector3(-0.9, 0, 3),
+"from": Vector3(1.3, 0, 2.6),
 "height": 2.0,
 "kind": "rail",
-"to": Vector3(-0.9, 0, 0.85),
+"to": Vector3(1.3, 0, 0.7),
 "width": 1.0
 }]
-metadata/worker_offset = Vector3(0.9, 0, 3.1)
+metadata/worker_offset = Vector3(-1.4, 0, 3.6)
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1124719168]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=937759090]
 mesh = ExtResource("1_aowci")

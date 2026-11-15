@@ -34,10 +34,8 @@ func run() -> void:
 	for type in table:
 		for level in table[type]:
 			carried += 1 if table[type][level].get("carried", false) else 0
-	# 40 positions from CHANGES.md + 19 levels reworked after the 0.6.0 test 5 QA (VIS-01..03:
-	# warehouse I-IV, granary I-V, market III-IV, quarry I-IV, iron mine I-IV) + unchanged
-	# neighbours that carry them forward
-	check(count - carried == 59, "Expected 59 reworked levels, found %d" % (count - carried))
+	# Build 54: every level I-V of the 27 drawn types (B01-B27) is its own scene
+	check(count - carried == 135, "Expected 135 level scenes (27 types x 5), found %d" % (count - carried))
 	print("LEVEL_SCENES changes=%d carried=%d" % [count - carried, carried])
 	check_untouched_assets(table)
 	for type in table:

@@ -49,6 +49,9 @@ func shoot(game, placed: Array, target: Vector3, zoom: float, path: String) -> v
 	game.state = state_with(game.data, placed)
 	game.stage.present(game.state)
 	var stage = game.stage
+	# "Walls and gate" stands in the main gate of the city wall, not on its plot.
+	if placed.size() == 1 and stage.city_base_type(placed[0][0]) == "SUP-03" and stage.walls.visible:
+		target = stage.walls.main_gate
 	stage.target = target
 	stage.zoom = zoom
 	stage.update_camera(0, true)
@@ -74,6 +77,12 @@ func run() -> void:
 			pairs = true
 		elif arg.begins_with("--zoom="):
 			zoom = float(arg.trim_prefix("--zoom="))
+		elif arg == "--all":
+			wanted = {}
+			for t in ["ECO-05", "ECO-04", "ECO-01", "ECO-02", "ECO-03", "RES-01", "RES-02", "RES-03", "RES-04", "RES-05",
+					"MIL-01", "MIL-02", "MIL-03", "MIL-04", "MIL-05", "SUP-01", "SUP-02", "SUP-03", "SUP-04", "SUP-05",
+					"ALT-02", "ALT-05", "ALT-06", "ALT-07", "ALT-08", "ALT-09", "ALT-10"]:
+				wanted[t] = [1, 2, 3, 4, 5]
 		elif arg.begins_with("--set="):
 			wanted = {}
 			for item in arg.trim_prefix("--set=").split(","):

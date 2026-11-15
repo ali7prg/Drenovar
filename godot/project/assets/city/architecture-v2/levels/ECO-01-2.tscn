@@ -2,16 +2,16 @@
 
 [ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/ECO-01-2.res" id="1_cdmsu"]
 
-[node name="ECO_01_2" type="Node3D" unique_id=512687153]
+[node name="ECO_01_2" type="Node3D" unique_id=163265366]
 metadata/series = "B03_Warehouse"
 metadata/lanes = [{
-"from": Vector3(-0.9, 0, 6.3),
+"from": Vector3(1.95, 0, 6.6),
 "height": 1.9,
 "kind": "cart",
-"to": Vector3(-0.9, 0.73, 0.44999996),
-"width": 1.5
+"to": Vector3(1.95, 0.12, 5.9),
+"width": 1.2
 }]
-metadata/worker_offset = Vector3(-4.2, 0, 4.6)
+metadata/worker_offset = Vector3(-4.4, 0, 3.6)
 
-[node name="Architecture" type="MeshInstance3D" parent="." unique_id=646809222]
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=961173278]
 mesh = ExtResource("1_cdmsu")

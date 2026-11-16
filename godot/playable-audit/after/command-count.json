@@ -1,0 +1,18 @@
+{
+  "expected": 1,
+  "actual": 1,
+  "commands": [
+    {
+      "path": "/api/native/game/command",
+      "method": "POST",
+      "status": 200,
+      "at": 1794825824920,
+      "kind": "deploy",
+      "units": {
+        "ENG-03": 5,
+        "ENG-05": 2
+      },
+      "encounterId": "0f275df0-a788-4dd7-be7b-cbf1cb326061"
+    }
+  ]
+}

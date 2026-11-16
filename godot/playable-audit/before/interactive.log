@@ -1,0 +1,36 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+PLAYABLE_CHECK synthetic loopback only true
+PLAYABLE_CHECK normal game ready true
+PLAYABLE_CHECK interactive V6 account loaded true
+PLAYABLE_CHECK server supplies a reachable target true
+PLAYABLE_CHECK touch target within viewport: @Button@295 true
+PLAYABLE_CHECK Attack opens formation true
+PLAYABLE_CHECK touch target within viewport: @Button@320 true
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+PLAYABLE_CHECK selected formation has server route true
+PLAYABLE_CHECK touch target within viewport: MarchSend true
+PLAYABLE_CHECK one touch starts a real army true
+PLAYABLE_CHECK server army equals selected formation false
+PLAYABLE_CHECK one army from one touch true
+PLAYABLE_PHASE outbound
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+PLAYABLE_PHASE fighting
+PLAYABLE_PHASE returning
+PLAYABLE_CHECK real server battle produces a report true
+PLAYABLE_CHECK normal gameplay reaches march and combat true
+PLAYABLE_CHECK actual game renders scheduled attacks true
+PLAYABLE_CHECK result becomes available after visual contact true
+PLAYABLE_CHECK touch target within viewport: @Button@737 true
+PLAYABLE_CHECK Continue restores game control true
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:110)
+PLAYABLE_CHECK survivors return through real server clock true
+PLAYABLE_CHECK returned garrison matches report: ENG-03 true
+PLAYABLE_CHECK returned garrison matches report: ENG-05 true
+PLAYABLE_CHECK restart restores same settlement true
+{"checks":22,"clock":"wall clock, unchanged solver and travel time","device":"Linux Godot; no physical iPhone acceptance","entry":"main.tscn, interactive UI and HTTP","failures":["server army equals selected formation"],"observed_actions":["idle","trot","run","walk","attack"],"phases":{"fighting":1794825375547.57,"outbound":1794825362054.15,"returning":1794825379555.26},"status":"failed"}
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)

@@ -1,0 +1,21 @@
+{
+  "checks": 22,
+  "clip_samples": 4325,
+  "clock": "wall clock, unchanged solver and travel time",
+  "device": "Linux Godot; no physical iPhone acceptance",
+  "entry": "main.tscn, interactive UI and HTTP",
+  "failures": [],
+  "observed_actions": [
+    "idle",
+    "trot",
+    "run",
+    "walk",
+    "attack"
+  ],
+  "phases": {
+    "fighting": 1794825838442.73,
+    "outbound": 1794825824991.72,
+    "returning": 1794825842437.0
+  },
+  "status": "passed"
+}

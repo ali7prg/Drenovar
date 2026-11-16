@@ -166,9 +166,14 @@ func hold_highlight() -> void:
 	var tint := pressed_tint_from
 	pressed_button = null
 	if is_instance_valid(target) and is_inside_tree():
+		# A successful action can replace the whole panel before this timer fires.
+		# Capturing a freed Node in a GDScript lambda itself raises an error, even
+		# when its body calls is_instance_valid. Capture a WeakRef instead.
+		var target_ref: WeakRef = weakref(target)
 		get_tree().create_timer(PRESS_HOLD_SEC).timeout.connect(func():
-			if is_instance_valid(target):
-				target.self_modulate = tint)
+			var remaining := target_ref.get_ref() as BaseButton
+			if remaining != null:
+				remaining.self_modulate = tint)
 
 func release_highlight() -> void:
 	if is_instance_valid(pressed_button):

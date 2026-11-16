@@ -10,7 +10,7 @@ name: DRENOVAR iOS test IPA (repack on Linux)
 on:
   workflow_dispatch:
   push:
-    branches: [codex/drenovar-v6-buildings-implementation, codex/combat-presentation-20261116]
+    branches: [codex/drenovar-v6-buildings-implementation, codex/combat-presentation-20261116, codex/playable-combat-20261116]
     paths: [godot/**, .github/workflows/ios-repack.yml]
   pull_request:
     branches: [main]
@@ -40,7 +40,7 @@ jobs:
           build=$(grep -oP '^application/version="\K[^"]+' godot/project/export_presets.cfg)
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "build=$build" >> "$GITHUB_OUTPUT"
-          echo "ipa=DRENOVAR-combat-lab-$build.ipa" >> "$GITHUB_OUTPUT"
+          echo "ipa=DRENOVAR-game-$build.ipa" >> "$GITHUB_OUTPUT"
       - name: Verify the engine capsule (pinned hashes)
         run: |
           meta=godot/ios-engine/engine-capsule.json
@@ -64,49 +64,49 @@ jobs:
           python3 godot/tools/texture_import_policy.py godot/project --check
           bash godot/tools/package-ios.sh "$RUNNER_TEMP/export"
           test -s "$RUNNER_TEMP/export/DRENOVAR.pck"
-      - name: Verify offline lab entry, 77 fixtures and unchanged model coverage
+      - name: Verify interactive entry, account screen, both maps and unchanged model coverage
         run: |
-          timeout 300 "$GODOT_BIN" --headless --main-pack "$RUNNER_TEMP/export/DRENOVAR.pck" -s "$GITHUB_WORKSPACE/godot/tools/verify_combat_pack.gd" 2>&1 | tee "$RUNNER_TEMP/verify.log"
+          XDG_DATA_HOME="$RUNNER_TEMP/empty-game-profile" timeout 300 "$GODOT_BIN" --headless --main-pack "$RUNNER_TEMP/export/DRENOVAR.pck" -s "$GITHUB_WORKSPACE/godot/tools/verify_playable_pack.gd" 2>&1 | tee "$RUNNER_TEMP/verify.log"
           ! grep -q 'SCRIPT ERROR\|ERROR:' "$RUNNER_TEMP/verify.log"
           grep -q '"failures":\[\]' "$RUNNER_TEMP/verify.log"
-          cp "$RUNNER_TEMP/export/DRENOVAR.pck" "$RUNNER_TEMP/DRENOVAR-combat-1009.pck"
+          cp "$RUNNER_TEMP/export/DRENOVAR.pck" "$RUNNER_TEMP/DRENOVAR-game-${{ steps.meta.outputs.build }}.pck"
       - name: Repack onto the engine capsule
         run: |
           python3 godot/tools/repack_engine_capsule.py "$CAPSULE" "$RUNNER_TEMP/export/DRENOVAR.pck" \
             "$RUNNER_TEMP/${{ steps.meta.outputs.ipa }}" --version "${{ steps.meta.outputs.version }}" \
-            --build "${{ steps.meta.outputs.build }}" --bundle-id com.drenovar.game.combatlab --expect-capsule-sha256 "$CAPSULE_SHA" | tee "$RUNNER_TEMP/repack.json"
+            --build "${{ steps.meta.outputs.build }}" --bundle-id com.drenovar.game.v6test --expect-capsule-sha256 "$CAPSULE_SHA" | tee "$RUNNER_TEMP/repack.json"
           ( cd "$RUNNER_TEMP" && sha256sum "${{ steps.meta.outputs.ipa }}" > SHA256.txt && echo "commit ${GITHUB_SHA}" >> SHA256.txt && cat repack.json >> SHA256.txt )
       - name: Bundle review evidence
         run: |
           python3 - <<'PYCODE'
           from pathlib import Path
           import zipfile,os
-          root=Path('godot/combat-audit')
-          with zipfile.ZipFile(Path(os.environ['RUNNER_TEMP'])/'DRENOVAR-combat-evidence-1009.zip','w',zipfile.ZIP_DEFLATED) as z:
+          root=Path('godot/playable-audit')
+          with zipfile.ZipFile(Path(os.environ['RUNNER_TEMP'])/'DRENOVAR-game-evidence-${{ steps.meta.outputs.build }}.zip','w',zipfile.ZIP_DEFLATED) as z:
               for p in root.rglob('*'):
                   if p.is_file(): z.write(p,p.relative_to(root))
+              z.write(Path(os.environ['RUNNER_TEMP'])/'verify.log','exported-pack-verification.log')
           PYCODE
-          (cd "$RUNNER_TEMP" && sha256sum DRENOVAR-combat-1009.pck DRENOVAR-combat-evidence-1009.zip >> SHA256.txt)
+          (cd "$RUNNER_TEMP" && sha256sum DRENOVAR-game-${{ steps.meta.outputs.build }}.pck DRENOVAR-game-evidence-${{ steps.meta.outputs.build }}.zip >> SHA256.txt)
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.meta.outputs.ipa }}
           path: |
             ${{ runner.temp }}/${{ steps.meta.outputs.ipa }}
             ${{ runner.temp }}/SHA256.txt
-            ${{ runner.temp }}/DRENOVAR-combat-1009.pck
-            ${{ runner.temp }}/DRENOVAR-combat-evidence-1009.zip
+            ${{ runner.temp }}/DRENOVAR-game-${{ steps.meta.outputs.build }}.pck
+            ${{ runner.temp }}/DRENOVAR-game-evidence-${{ steps.meta.outputs.build }}.zip
           retention-days: 30
       - name: Publish as a test pre-release (direct download link)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="ios-test-v${{ steps.meta.outputs.version }}-b${{ steps.meta.outputs.build }}"
-          notes="Test build for SideStore (unsigned; SideStore re-signs on install). Repack, not an Xcode compilation: the Godot 4.6.3 arm64 engine and app files come byte-identical from the reduced engine capsule of the device-tested 0.5.9 IPA (DRENOVAR-engine-base-0.5.9.zip, not the original IPA); the game pack DRENOVAR.pck was exported from commit ${GITHUB_SHA}. Not an App Store release; not device-tested."
           # A published test build is immutable: a new IPA needs a new build number.
           if gh release view "$tag" --json assets --jq '.assets[].name' 2>/dev/null | grep -qx "${{ steps.meta.outputs.ipa }}"; then
             echo "::notice::$tag already holds ${{ steps.meta.outputs.ipa }}; not overwritten. Bump application/version in export_presets.cfg for a new IPA."
             exit 0
           fi
-          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease --target "${GITHUB_SHA}" --title "DRENOVAR iOS ${{ steps.meta.outputs.version }} (${{ steps.meta.outputs.build }}) test" --notes-file godot/combat-audit/RELEASE-RU.md
-          gh release upload "$tag" "$RUNNER_TEMP/${{ steps.meta.outputs.ipa }}" "$RUNNER_TEMP/SHA256.txt" "$RUNNER_TEMP/DRENOVAR-combat-1009.pck" "$RUNNER_TEMP/DRENOVAR-combat-evidence-1009.zip"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease --target "${GITHUB_SHA}" --title "DRENOVAR — игровая сборка ${{ steps.meta.outputs.build }}" --notes-file godot/playable-audit/RELEASE-RU.md
+          gh release upload "$tag" "$RUNNER_TEMP/${{ steps.meta.outputs.ipa }}" "$RUNNER_TEMP/SHA256.txt" "$RUNNER_TEMP/DRENOVAR-game-${{ steps.meta.outputs.build }}.pck" "$RUNNER_TEMP/DRENOVAR-game-evidence-${{ steps.meta.outputs.build }}.zip"
           echo "Download: https://github.com/${GITHUB_REPOSITORY}/releases/download/$tag/${{ steps.meta.outputs.ipa }}"

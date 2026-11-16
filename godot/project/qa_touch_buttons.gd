@@ -107,6 +107,13 @@ func run() -> void:
 	await process_frame
 	check(fired(side) == count, "Button fired after the finger left it")
 
+	# An accepted action may destroy its own button before the 90 ms tint timer.
+	var temporary: Button = game.panel_action(game.modal_footer, "Заменить панель", func(): game.close_modal())
+	await process_frame
+	await process_frame
+	await gesture(temporary, Vector2.ZERO)
+	await create_timer(0.15).timeout
+	check(not game.modal.visible, "Panel replacement on touch did not complete")
 	game.close_modal()
 	print("QA_TOUCH_BUTTONS checks=", checks, " failures=", failures)
 	quit(0 if failures == 0 else 1)

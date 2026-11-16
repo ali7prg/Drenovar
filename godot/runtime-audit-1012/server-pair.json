@@ -1,0 +1,10 @@
+{
+  "candidate_commit": "434bcfc2f11f0b66eaec153daecbd6c5b77b05a1",
+  "live_commit_observed": "e5062aa292da895653c07dab50ce9b85a2a4ee11",
+  "deployed": false,
+  "requires_server_health": {
+    "combatPresentation": 1,
+    "cityNavigation": "cached-grid-v1"
+  },
+  "iOS_build": 1012
+}

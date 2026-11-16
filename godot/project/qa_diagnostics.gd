@@ -49,6 +49,12 @@ func run() -> void:
 	var kinds: Array = e.record.events.slice(before).map(func(event): return event.kind)
 	check(kinds == ["network_error", "network_recovered"], "Network events not collapsed: " + str(kinds))
 	check(int(e.record.events[-1].detail.failures) == 5 and int(e.record.events[-1].detail.down_ms) == 2000, "Outage detail wrong")
+	before = e.record.events.size()
+	for i in 3: e.server_result(503, 5300 + i)
+	check(e.network_failures == 0 and e.server_failures == 3, "HTTP server errors reported as loss of network")
+	e.server_result(200, 5400)
+	kinds = e.record.events.slice(before).map(func(event): return event.kind)
+	check(kinds == ["server_error", "server_recovered"] and e.server_failures == 0, "Server recovery not collapsed")
 	for i in 100:
 		e.log_event("spam", {}, 6000 + i)
 	check(e.record.events.size() == Diagnostics.MAX_EVENTS, "Event log unbounded")

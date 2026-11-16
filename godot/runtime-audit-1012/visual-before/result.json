@@ -1,0 +1,40 @@
+{
+  "checks": 26,
+  "clip_samples": 35,
+  "clock": "test clock skips travel and respawn only; combat wall clock",
+  "device": "Linux Godot; no physical iPhone acceptance",
+  "entry": "main.tscn, interactive UI and HTTP",
+  "failures": [
+    "actual game renders scheduled attacks"
+  ],
+  "observed_actions": [
+    "idle",
+    "run",
+    "trot",
+    "walk"
+  ],
+  "phases": {
+    "returning": 1794830022839.84
+  },
+  "rounds": [
+    {
+      "actions": [
+        "idle",
+        "run",
+        "trot",
+        "walk"
+      ],
+      "level": 1,
+      "memory_static_mb": 128.610391616821,
+      "nodes": 1264.0,
+      "orphans": 0.0,
+      "phases": {
+        "returning": 1794830022839.84
+      },
+      "round": 1,
+      "samples": 35,
+      "trace": []
+    }
+  ],
+  "status": "failed"
+}

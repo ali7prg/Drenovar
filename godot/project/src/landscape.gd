@@ -2017,8 +2017,12 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		if fighting:
 			cache.identity_events = army_battle_events(army)
 		var timeline: Variant = [army.get("events"), army.get("fallen"), army.get("battle"), army.get("presentation")]
-		if cache.get("timeline") != timeline:
+		# A finished short battle can arrive as one packet. Its events are already
+		# known while the presentation clock still draws the approach. Rebuild on
+		# the phase transition too, even when that packet has not changed.
+		if cache.get("timeline") != timeline or cache.get("events_fighting", false) != fighting:
 			cache.timeline = timeline
+			cache.events_fighting = fighting
 			cache.events = battle_events(army) if fighting else {"members":{}, "fallen":{}}
 		army_routes[id] = cache
 		if cache.slots.is_empty():

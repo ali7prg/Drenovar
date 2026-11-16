@@ -1,0 +1,297 @@
+{
+  "checks": 26,
+  "clip_samples": 1284,
+  "clock": "test clock skips travel and respawn only; combat wall clock",
+  "device": "Linux Godot; no physical iPhone acceptance",
+  "entry": "main.tscn, interactive UI and HTTP",
+  "failures": [
+    "actual game renders scheduled attacks"
+  ],
+  "observed_actions": [
+    "idle",
+    "run",
+    "trot",
+    "walk"
+  ],
+  "phases": {
+    "fighting": 1794829810031.12,
+    "outbound": 1794829807148.8,
+    "returning": 1794829810363.28
+  },
+  "rounds": [
+    {
+      "actions": [
+        "idle",
+        "run",
+        "trot",
+        "walk"
+      ],
+      "level": 1,
+      "memory_static_mb": 227.305112838745,
+      "nodes": 1028.0,
+      "orphans": 0.0,
+      "phases": {
+        "fighting": 1794829810031.12,
+        "outbound": 1794829807148.8,
+        "returning": 1794829810363.28
+      },
+      "round": 1,
+      "samples": 1282,
+      "trace": [
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/0.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/1.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/2.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/3.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/4.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/5.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/6.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/7.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/8.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/9.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/10.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/11.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/12.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/13.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/14.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/15.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/16.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/17.0",
+          "phase": "release",
+          "received": 1794829813558.0,
+          "shown": 1794829809754.48
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/0.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/1.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/2.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/3.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/4.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/5.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/6.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/7.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/8.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/9.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/10.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/11.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/12.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/13.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/14.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/15.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/16.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        },
+        {
+          "at": 1794829810010.0,
+          "id": "ac08b533-6fa5-4e69-a96d-81a1eb1f364c/1794829810010.0/0.0/soldier_attack/ENG-03/17.0",
+          "phase": "contact",
+          "received": 1794829814360.0,
+          "shown": 1794829810016.72
+        }
+      ]
+    }
+  ],
+  "status": "failed"
+}

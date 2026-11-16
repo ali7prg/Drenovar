@@ -5338,11 +5338,15 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	if foreground:
 		busy = false
 		last_command_ms = elapsed_ms
-	var transport_ok: bool = result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0 and int(result[1]) < 500
+	# An HTTP 5xx response proves that the server was reached. Keep transport and
+	# server failures separate; Cloudflare CPU errors are not a lost connection.
+	var transport_ok: bool = result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0
 	diagnostics.network_result(transport_ok, "timeout" if result[0] == HTTPRequest.RESULT_TIMEOUT else ("http_%d" % int(result[1]) if result[0] == HTTPRequest.RESULT_SUCCESS else "transport_%d" % int(result[0])),
 		Time.get_unix_time_from_system(), Time.get_ticks_msec())
+	if transport_ok:
+		diagnostics.server_result(int(result[1]), Time.get_unix_time_from_system())
 	update_connection_notice()
-	if result[0] != HTTPRequest.RESULT_SUCCESS or result[3].is_empty():
+	if not transport_ok:
 		if result[0] == HTTPRequest.RESULT_TIMEOUT:
 			return {"error":"Сервер не ответил вовремя. Проверь соединение и повтори.", "transportFailure":true}
 		if result[0] == HTTPRequest.RESULT_TLS_HANDSHAKE_ERROR:
@@ -5353,7 +5357,9 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 		if int(result[1]) >= 400:
 			response.data.httpStatus = result[1]
 		return response.data
-	return {"error":"Сервер вернул неожиданный ответ (HTTP %d)." % int(result[1])}
+	# Preserve the status on HTML/empty error pages too, so the existing bounded
+	# retry keeps the original Idempotency-Key and cannot create another army.
+	return {"error":"Сервер временно перегружен. Повторите попытку." if int(result[1]) >= 500 else "Сервер вернул неожиданный ответ (HTTP %d)." % int(result[1]), "httpStatus":int(result[1])}
 
 func update_connection_notice() -> void:
 	# Two consecutive transport failures mean the link is down, not a single blip.
@@ -5361,7 +5367,8 @@ func update_connection_notice() -> void:
 	var offline := diagnostics.network_failures >= 2 and connected()
 	offline_notice_shown = offline
 	if is_instance_valid(connection_badge):
-		connection_badge.visible = offline
+		connection_badge.text = OFFLINE_NOTICE if offline else "Ошибка сервера · повторяем"
+		connection_badge.visible = offline or (diagnostics.server_failures >= 2 and connected())
 
 func poll_account_state(due := false) -> void:
 	if restore_running or login_in_progress or not connected() or (player_id.is_empty() and not restoring_session):

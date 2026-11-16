@@ -1,0 +1,53 @@
+{
+  "army": {
+    "ENG-01": 20.0,
+    "ENG-03": 20.0,
+    "ENG-05": 5.0
+  },
+  "creature": {
+    "level": 3.0,
+    "name": "Тенерис",
+    "species": "hunt"
+  },
+  "dead": {
+    "ENG-01": 1.0
+  },
+  "engine_version": "DRENOVAR-V6-C1.0-SIEGE-P1",
+  "finishedAt": 1794829718061.0,
+  "hospital_overflow": {
+
+  },
+  "id": "067bed38-bac7-4992-a89d-1e34beeb4103",
+  "location": {
+    "x": 46.6736899319943,
+    "z": 35.5284931878211
+  },
+  "map": "city",
+  "outcome": "victory",
+  "ram_conditions": [],
+  "rewards": {
+    "delivery": "battle",
+    "items": {
+      "claws": 30.0,
+      "hides": 60.0
+    },
+    "raid": null,
+    "receipt_id": "battle:067bed38-bac7-4992-a89d-1e34beeb4103",
+    "resources": {
+      "food": 10000.0
+    },
+    "xp": 100.0
+  },
+  "side": "attacker",
+  "startedAt": 1794829711261.0,
+  "surviving": {
+    "ENG-01": 18.0,
+    "ENG-03": 20.0,
+    "ENG-05": 4.0
+  },
+  "wall_damage": 0.0,
+  "wounded": {
+    "ENG-01": 1.0,
+    "ENG-05": 1.0
+  }
+}

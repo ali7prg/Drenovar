@@ -15,6 +15,8 @@ var previous_session: Dictionary = {}
 var next_heartbeat := 0
 var network_failures := 0
 var network_down_since := 0
+var server_failures := 0
+var server_status := 0
 var path := PATH
 
 func start(version: String, now_unix: float) -> void:
@@ -88,6 +90,20 @@ func network_result(ok: bool, kind: String, now_unix: float, now_msec: int) -> v
 		network_down_since = now_msec
 		log_event("network_error", {"kind": kind}, now_unix)
 	network_failures += 1
+
+func server_result(status: int, now_unix: float) -> void:
+	if status <= 0:
+		return
+	if status >= 500:
+		if server_failures == 0 or server_status != status:
+			log_event("server_error", {"http_status":status}, now_unix)
+		server_failures += 1
+		server_status = status
+	else:
+		if server_failures > 0:
+			log_event("server_recovered", {"failures":server_failures}, now_unix)
+		server_failures = 0
+		server_status = 0
 
 func log_event(kind: String, detail: Dictionary, now_unix: float, persist := true) -> void:
 	if not record.get("events") is Array:

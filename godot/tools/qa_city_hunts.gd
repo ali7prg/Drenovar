@@ -181,7 +181,7 @@ func hunt() -> void:
 				phases[a.status] = game.server_time()
 				print("PLAYABLE_PHASE ", a.status)
 				await shot("02-" + a.status)
-		if game.state.reports.any(func(r): return r.id == battle_id and game.stage.combat_view.frame_time >= float(r.finishedAt)+1200): break
+		if game.state.reports.any(func(r): return r.id == battle_id and game.stage.combat_view.frame_time >= game.stage.combat_view.visual_end(float(r.finishedAt))+1200): break
 		await process_frame
 	if not check(game.state.reports.any(func(r): return r.id == battle_id), "real server battle produces a report"): return
 	check(not observed_actions.is_empty(), "normal gameplay creates visual actors")

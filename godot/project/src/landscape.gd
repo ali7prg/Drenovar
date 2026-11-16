@@ -298,6 +298,38 @@ func scene_resource(path: String) -> PackedScene:
 		models[path] = load(path)
 	return models[path]
 
+# Background loading of troop models. A first-time load() of a troop model
+# (about 60-100 ms on a desktop CPU, several times more on a phone, ten types
+# in a mixed party) used to run on the main thread when the column appeared.
+var model_requests := {}
+
+func request_model(path: String) -> void:
+	if path.is_empty() or models.has(path) or model_requests.has(path) or not ResourceLoader.exists(path):
+		return
+	if ResourceLoader.load_threaded_request(path, "PackedScene") == OK:
+		model_requests[path] = true
+
+# True when the model can be instantiated without waiting. Starts loading it
+# in the background otherwise.
+func model_ready(path: String) -> bool:
+	if models.has(path):
+		return true
+	request_model(path)
+	if not model_requests.has(path):
+		return true # Not loadable in the background: scene_resource loads it.
+	var status := ResourceLoader.load_threaded_get_status(path)
+	if status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		return false
+	model_requests.erase(path)
+	if status == ResourceLoader.THREAD_LOAD_LOADED:
+		models[path] = ResourceLoader.load_threaded_get(path)
+	return true
+
+func prewarm_troops(unit_ids: Array) -> void:
+	for id in unit_ids:
+		if data.unitModels.has(id):
+			request_model(str(data.unitModels[id].field))
+
 func surface(key: String) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.albedo_texture = load(SURFACES + key + "-albedo.webp")
@@ -2162,7 +2194,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			var node_name := "%s_%d" % [slot.id, int(slot.index)]
 			var unit := actor.get_node_or_null(NodePath(node_name)) as Node3D
 			if unit == null:
-				if creation_budget <= 0:
+				if creation_budget <= 0 or not model_ready(str(data.unitModels[slot.id].field)):
 					continue
 				unit = add_warrior(actor, data.unitModels[slot.id].field, Transform3D.IDENTITY)
 				unit.name = node_name

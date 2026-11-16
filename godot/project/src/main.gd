@@ -3670,6 +3670,9 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	tools.add_child(heading)
 	button(tools, "Все доступные", set_party.bind(true))
 	var clear_party := button(modal_footer, "Очистить", set_party.bind(false))
+	# Load the models of every troop type on hand while the party is chosen.
+	if is_instance_valid(stage):
+		stage.prewarm_troops(state.get("healthy", {}).keys())
 	var first_row_index := roster.get_child_count() - 1
 	for unit in data.englishRoster:
 		if unit.id == "SIEGE-RAM-01":
@@ -4660,7 +4663,7 @@ func update_battle_result_notice() -> void:
 	var available := not battle_results.pending.is_empty() and Time.get_ticks_msec() >= battle_results.ready_at
 	if available and is_instance_valid(stage):
 		var report: Dictionary = battle_results.pending[0]
-		available = stage.combat_view.frame_time >= float(report.get("finishedAt",0)) + 1200.0
+		available = stage.combat_view.frame_time >= stage.combat_view.visual_end(float(report.get("finishedAt",0))) + 1200.0
 	result_notice.visible = available and modal.visible and not result_open
 	if available and not modal.visible and not relocation_pins.visible and not command_in_progress:
 		present_next_battle_result()

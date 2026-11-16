@@ -41,8 +41,17 @@ func _initialize() -> void:
 	var ended := {"playerId":"test","serverTime":2100,"armies":[defeat],"encounters":[{"id":"beast","status":"alive"}],"world":{"armies":[],"encounters":[]}}
 	tail.frame(ended,4000,"city")
 	check(tail.frame_state.armies.size()==1 and tail.frame_state.armies[0].status=="fighting","same-tick defeat retains terminal presentation")
-	tail.frame(ended,7000,"city")
+	# Frames keep coming (60 Hz); a stall is caught up, not jumped over.
+	var t := 4000.0
+	while t < 7000.0:
+		t += 16.0
+		tail.frame(ended,t,"city")
 	check(tail.frame_state.armies.is_empty(),"defeat tail is bounded")
+	# A long gap (app in the background) leaves at most MAX_LAG_MS of catching up.
+	var paused = Clock.new()
+	paused.frame(ended,4000,"city")
+	paused.frame(ended,60000,"city")
+	check(60000.0 - paused.delay_ms - paused.frame_time <= paused.MAX_LAG_MS + 1.0,"background gap does not replay minutes")
 	tail.frame(ended,7100,"world")
 	check(tail.frame_state.world.armies.is_empty(),"map switch never carries city actors into world")
 	print(JSON.stringify({"checks":checks,"failures":failures,"method":"headless presentation clock and identity; no device/render acceptance"}))

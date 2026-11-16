@@ -60,9 +60,18 @@ func run() -> void:
 		game.stage.target = game.stage.point(cur.position); game.stage.zoom = 34.0
 		var drawn := {}
 		var beast := {}
+		var fight_ms := 0.0
+		var worst := 0.0
+		var last := Time.get_ticks_usec()
 		var end := Time.get_ticks_msec() + int(float(army.arrivesAt) - game.server_time() + 15000)
 		while Time.get_ticks_msec() < end:
 			await process_frame
+			var tick := Time.get_ticks_usec()
+			var dt := (tick - last) / 1000.0
+			last = tick
+			worst = maxf(worst, dt)
+			for row in game.stage.combat_view.frame_state.get("armies", []):
+				if row.id == army.id and row.status == "fighting": fight_ms += dt
 			if game.modal.visible: game.close_modal()
 			var actor = game.stage.actors.get_node_or_null(NodePath(str(army.id)))
 			if actor:
@@ -84,7 +93,10 @@ func run() -> void:
 			check(beast.has(clip), "%s creature plays %s" % [label, clip])
 		for type in server:
 			check(drawn.has(type), "%s %s strikes shown" % [label, type])
-		report.append({"target":label,"creature":beast.keys(),"server_striking":server.keys(),"drawn_striking":drawn.keys()})
+		# The server fight lasts about a second; it must be watchable.
+		check(fight_ms >= 5000.0, "%s fight shown for %.1f s" % [label, fight_ms / 1000.0])
+		check(worst < 250.0, "%s no stall (worst %.0f ms)" % [label, worst])
+		report.append({"target":label,"fight_shown_ms":fight_ms,"worst_frame_ms":worst,"creature":beast.keys(),"server_striking":server.keys(),"drawn_striking":drawn.keys()})
 	print(JSON.stringify({"checks":checks,"failures":failures,"fights":report,"method":"Linux Godot headless main scene, real touch, loopback synthetic V6 server, all ten troop types; not iPhone acceptance"}))
 	game.queue_free(); await process_frame; await process_frame
 	quit(0 if failures.is_empty() else 1)

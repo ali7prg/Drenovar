@@ -41,6 +41,6 @@ fb2b63c09f2e38595708c34768e0c8d6b3d752fd4991cc6dd8bcc34f88ff9036        797  god
 af2fcd6527e92e66de82a45833f364b41dc6bf13d936003588856078a5420456         20  godot/project/combat_v010/tools/probe_seams.gd.uid
 7f1e87589a96d96bc4e7fa42197be1f0ad37e4add3716b54cbcf3a871de63397        848  godot/project/combat_v010/tools/probe_source_seams.gd
 d3b07fed2b53ded8f93ad5804bb534588dea6bdc18684cf059616c6fa0d9649b         20  godot/project/combat_v010/tools/probe_source_seams.gd.uid
-df9adc625834b35be1a87bf64d39b4a30ab77fd91ae18ce9300f7c6101fdb4e6       5123  godot/project/combat_v010/tools/record_battle.gd
+cadb4c75b03ce1444987f1bc896d2556ed541bc1f00e09307809ea4ea15aab46       5372  godot/project/combat_v010/tools/record_battle.gd
 731ffef9c1759150cc8c75935b0285bbd1ae5b84604227a13c39bef781943f8d      12150  godot/project/qa_combat_v010.gd
 e3693e6af2cf2b174500284c3f6918985b6bc083cc6bae8c8606d58407b137c0      72276  godot/project/tests/combat_v010/server_combat_cases.json

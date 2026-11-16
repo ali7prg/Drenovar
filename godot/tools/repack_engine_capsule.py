@@ -47,8 +47,10 @@ def build(args):
         binary=base.read(binary_name)
         require(sha(binary) == EXPECTED_EXECUTABLE, 'Executable differs from original recorded engine')
         require(binary[:4] == bytes.fromhex('cffaedfe') and struct.unpack_from('<I',binary,4)[0] == 0x0100000C, 'Expected arm64 Mach-O')
-        require(args.bundle_id in ('com.drenovar.game', 'com.drenovar.game.v6test'), 'Unsupported output Bundle ID')
+        require(args.bundle_id in ('com.drenovar.game', 'com.drenovar.game.v6test', 'com.drenovar.game.combatlab'), 'Unsupported output Bundle ID')
         info['CFBundleIdentifier']=args.bundle_id
+        if args.bundle_id == 'com.drenovar.game.combatlab':
+            info['CFBundleDisplayName']='DRENOVAR Combat Lab'
         if args.bundle_id == 'com.drenovar.game.v6test':
             info['CFBundleDisplayName']='DRENOVAR'
             info['CFBundleName']='DRENOVAR'

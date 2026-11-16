@@ -156,7 +156,9 @@ func run() -> void:
 	check(closest > 0.05, "A soldier stands inside the creature (%.2f)" % closest)
 	check(wet == 0, "%d soldiers stand in the river" % wet)
 	check(melee_close == melee, "Melee soldiers away from the creature: %d of %d close" % [melee_close, melee])
-	check(attacking >= 3, "Melee line idle during the fight: %d swinging" % attacking)
+	# This fixture has one melee event in its current action interval. Cosmetic
+	# swings without an authoritative contact must not count as fighting.
+	check(attacking == 1, "Expected one scheduled melee action, got %d" % attacking)
 	check(stage.battle_fx.pools["ring"].filter(func(node): return node.visible).size() == 1, "No ring under the creature during the fight")
 
 	# The creature falls at the last blow.

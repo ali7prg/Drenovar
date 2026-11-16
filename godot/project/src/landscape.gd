@@ -1,6 +1,10 @@
 extends Node3D
 
 const WarriorVisual = preload("res://src/warrior_visual.gd")
+var fallen_bodies: Array = []
+var combat_view = preload("res://src/combat_presentation.gd").new()
+var combat_debug: Node3D
+var next_combat_debug_ms := 0
 
 const SURFACES := "res://assets/city/premium/surfaces07/"
 const CAMERA_RESPONSE := 22.0
@@ -984,7 +988,8 @@ func present(state: Dictionary) -> void:
 	for site in data.sites:
 		if not occupied.has(site.slot):
 			empty_plots.append({"position":point(site)+Vector3(0,2,0), "kind":"world-plot", "item":site})
-	present_armies(state, float(state.serverTime))
+	var frame := combat_view.frame(state, float(state.serverTime), map_name)
+	present_armies(frame.state, frame.time)
 
 # Every point a city creature stands on or patrols to: the wall stays inside them.
 # Defeated creatures keep their place, so the wall does not jump after a hunt.
@@ -1585,6 +1590,12 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			focus_at += toward.normalized() * focus_wanted * 0.35
 	update_battle_focus(focus_at, focus_wanted, delta)
 	battle_fx.finish()
+	if "--combat-debug" in OS.get_cmdline_user_args() and Time.get_ticks_msec() >= next_combat_debug_ms:
+		if not is_instance_valid(combat_debug):
+			combat_debug = load("res://src/combat_debug.gd").new()
+			add_child(combat_debug)
+		combat_debug.sample(self)
+		next_combat_debug_ms = Time.get_ticks_msec() + 250
 	for cue in effects.get_children():
 		if not cues.has(String(cue.name)):
 			cue.queue_free()
@@ -1619,7 +1630,7 @@ func battle_timeline(army: Dictionary, encounter: Dictionary, events: Array) -> 
 			# Blows landing on the same server tick (a volley) get a rank, so their
 			# numbers pop one after another instead of printing over each other.
 			var rank: int = hits[-1][3] + 1 if not hits.is_empty() and float(hits[-1][0]) == float(e[0]) else 0
-			hits.append([float(e[0]), damage, after, rank])
+			hits.append([float(e[0]), damage, after, rank, combat_view.event_id(army,event)])
 			hp = after
 		else:
 			strikes.append([float(e[0]), "%s:%d" % [e[2], int(e[3])], e[1]])
@@ -1652,15 +1663,22 @@ func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dict
 			recent = float(hit[2])
 		hp = float(hit[2])
 		var age := elapsed - at
-		var rank := int(hit[3])
-		var shown := age - rank * 120.0
-		if shown >= 0.0 and shown <= 900.0 and float(hit[1]) > 0.0:
-			# Fan consecutive numbers sideways and up so they never stack on one spot.
-			var side := 1.0 if (int(at / 97.0) + rank) % 2 == 0 else -1.0
-			var fan := Vector3(side * (1.6 + fposmod(at * 0.0031 + rank * 0.29, 1.0) * 1.4), 0.45 * (rank % 4), 0.0).rotated(Vector3.UP, camera_yaw)
-			battle_fx.number(p + fan, "-%d" % roundi(float(hit[1])), shown / 900.0, Color("#ffe7a8"), float(hit[1]) >= timeline.max * 0.08)
 		if age <= 320.0:
 			battle_fx.spark(p, age / 320.0, Color("#ffb054"), 2.4, fposmod(at * 0.013, 1.0))
+	# Same target and exact authoritative tick only. Final contact remains separate.
+	var numbers := {}
+	for hit in timeline.hits:
+		var age := elapsed-float(hit[0])
+		if age < 0.0 or age > 900.0 or float(hit[1]) <= 0.0: continue
+		var final := float(hit[2]) <= 0.0
+		var key := str(hit[0])+('/final' if final else '/group')
+		if not numbers.has(key): numbers[key] = {"damage":0.0,"ids":[],"age":age,"final":final}
+		numbers[key].damage += float(hit[1])
+		numbers[key].ids.append(hit[4])
+	for number in numbers.values():
+		var caption := "-%d" % roundi(number.damage)
+		if number.ids.size() > 1: caption += " ×%d" % number.ids.size()
+		battle_fx.number(p,caption,number.age/900.0,Color("#ffe7a8"),number.final,number.ids,id,number.final)
 	for strike in timeline.strikes:
 		var age := elapsed - float(strike[0])
 		if age < -380.0 or age > 420.0:
@@ -1876,6 +1894,8 @@ static func event_row(event: Variant) -> Array:
 # (about -1.3 s .. +1.4 s); windows of successive polls are merged per army, so a
 # slow answer leaves no gap in the blows and numbers already seen stay known.
 func army_battle_events(army: Dictionary) -> Array:
+	if army.get("presentation") is Dictionary:
+		return army.presentation.get("events", [])
 	if army.get("battle") is Dictionary:
 		return army.battle.get("events", [])
 	var window: Array = army.get("events", [])
@@ -1910,6 +1930,13 @@ func battle_events(army: Dictionary) -> Dictionary:
 
 func present_armies(state: Dictionary, server_ms: float) -> void:
 	battle_fx.begin()
+	for body in fallen_bodies:
+		if is_instance_valid(body.node):
+			if server_ms >= body.until:
+				body.node.queue_free()
+			else:
+				play_animation(body.node, "death", "", (server_ms - body.at) / 1200.0)
+	fallen_bodies = fallen_bodies.filter(func(body): return is_instance_valid(body.node) and server_ms < body.until)
 	var alive := {}
 	var known := {}
 	var rows: Array = state.world.armies if map_name == "world" else state.get("armies", [])
@@ -1936,10 +1963,16 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		if cache.get("source", []) != path:
 			cache.merge(route_for(path, true), true)
 			cache.source = path
-		if cache.get("bag", {}) != bag or not cache.has("slots"):
+		if cache.get("bag", {}) != bag or not cache.has("slots") or cache.get("returning", false) != returning:
 			cache.bag = bag
-			cache.slots = Formations.field_slots(bag, data.englishRoster)
-		var timeline: Variant = [army.get("events"), army.get("fallen"), army.get("battle")]
+			cache.returning = returning
+			var identity_source: Dictionary = army.duplicate(false)
+			if returning and army.get("battle") == null and cache.has("identity_events"):
+				identity_source.battle = {"events":cache.identity_events}
+			cache.slots = Formations.returning_slots(identity_source, data.englishRoster) if returning else Formations.field_slots(bag, data.englishRoster)
+		if fighting:
+			cache.identity_events = army_battle_events(army)
+		var timeline: Variant = [army.get("events"), army.get("fallen"), army.get("battle"), army.get("presentation")]
 		if cache.get("timeline") != timeline:
 			cache.timeline = timeline
 			cache.events = battle_events(army) if fighting else {"members":{}, "fallen":{}}
@@ -2094,36 +2127,36 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			unit.transform = model_transform(place.x - p.x, place.y - p.y, place.z - p.z, facing, FIELD_UNIT_SCALE)
 			var phase := -1.0
 			var strike := -INF
+			# Authored ranged Attack releases at frame 15/30 (poses.py); its
+			# release must precede contact by the existing 260 ms flight interval.
+			var prepare := 760.0 if slot.ranged else 490.0
 			var hit := -INF
 			var down: bool = fighting and events.fallen.has(key)
 			if fighting:
 				for event in events.members.get(key, []):
 					var at := float(event[0])
 					if event[1] == "soldier_attack":
-						if elapsed >= at - 490.0 and elapsed <= at + 510.0:
+						if elapsed >= at - prepare and elapsed <= at + 1000.0 - prepare:
 							strike = at
 					elif at <= elapsed:
 						hit = at
 						down = down or event[4] == 0
 				if down:
 					clip = "death"
-					phase = 1.0 if hit == -INF else (elapsed - hit) / 700.0
+					phase = 1.0 if hit == -INF else (elapsed - hit) / 1200.0
+					if not unit.has_meta("death_at"):
+						unit.set_meta("death_at", server_ms if hit == -INF else float(army.battleAt) + hit)
+						unit.set_meta("death_transform", unit.global_transform)
+					unit.global_transform = unit.get_meta("death_transform")
 				elif elapsed - hit < 400.0:
 					clip = "hit"
 					phase = (elapsed - hit) / 400.0
 				elif strike > -INF:
 					clip = "attack"
-					phase = (elapsed - strike + 490.0) / 1000.0
+					phase = (elapsed - strike + prepare) / 1000.0
 					if not slot.ranged:
 						# Weapon sweep timed to the swing's contact frame (event time).
 						battle_fx.slash(place, beast if hunt else p, (elapsed - strike + 260.0) / 420.0, Color("#ffd27a"), 3.2)
-				elif hunt and engaged and not slot.ranged and elapsed >= 0.0 and elapsed < slain_at:
-					# Between the server's blows the melee line keeps fighting: each soldier
-					# swings in its own rhythm (no damage shown for these).
-					var swing := fposmod(elapsed + fposmod(i * 643.0, MELEE_SWING_MS), MELEE_SWING_MS)
-					if swing < 1000.0:
-						clip = "attack"
-						phase = swing / 1000.0
 				elif army.get("worldKind") == "pvp":
 					clip = "attack"
 					phase = fposmod(elapsed + i * 125.0, 1000.0) / 1000.0
@@ -2143,12 +2176,21 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			var shot := unit.get_node_or_null("Arrow") as MeshInstance3D
 			var firing: bool = slot.ranged and clip == "attack" and strike > -INF and elapsed >= strike - 260.0 and elapsed <= strike
 			if firing:
-				draw_arrow(unit, shot, beast if hunt else p, (elapsed - strike + 260.0) / 260.0)
+				draw_arrow(unit, shot, beast if hunt else p, (elapsed - strike + 260.0) / 260.0, slot.id, "%s/%s/%s" % [id,key,strike])
 			elif shot != null:
 				shot.hide()
+			if slot.id == "ENG-10":
+				var held := unit.find_child("Javelin",true,false) as Node3D
+				if held != null: held.visible = not (clip == "attack" and phase >= 0.5 and phase < 0.85)
 		for unit in actor.get_children():
 			if not retained.has(String(unit.name)) and unit.name != &"Ferry":
-				unit.free()
+				if unit.has_meta("death_at") and fallen_bodies.size() < Formations.FIELD_LIMIT:
+					var death_at := float(unit.get_meta("death_at"))
+					unit.reparent(self, true)
+					unit.global_transform = unit.get_meta("death_transform")
+					fallen_bodies.append({"node":unit, "at":death_at, "until":maxf(server_ms + 1200.0, death_at + 3200.0)})
+				else:
+					unit.free()
 	retain_hidden_actors(actors, known, alive, MAX_HIDDEN_ARMIES)
 	for line in march_lines.get_children():
 		if not lines.has(String(line.name)):
@@ -2156,6 +2198,8 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 	for id in army_routes.keys():
 		if not rows.any(func(army): return army.id == id and army.status != "returned"):
 			army_routes.erase(id)
+			fx_timelines.erase(id)
+			announced_fights.erase(id)
 
 # Where an army hunting a creature halts and where each soldier fights: the column
 # stops in front of the creature, melee soldiers close in on arcs around its head
@@ -2401,7 +2445,7 @@ func retain_hidden_actors(parent: Node3D, known: Dictionary, shown: Dictionary, 
 		for index in hidden.size() - maximum:
 			hidden[index].queue_free()
 
-func draw_arrow(unit: Node3D, shaft: MeshInstance3D, destination: Vector3, phase: float) -> void:
+func draw_arrow(unit: Node3D, shaft: MeshInstance3D, destination: Vector3, phase: float, unit_id := "ENG-03", event_id := "") -> void:
 	if shaft == null:
 		if shaft_mesh == null:
 			shaft_mesh = CylinderMesh.new()
@@ -2418,18 +2462,28 @@ func draw_arrow(unit: Node3D, shaft: MeshInstance3D, destination: Vector3, phase
 		shaft.mesh = shaft_mesh
 		shaft.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		unit.add_child(shaft)
-	var a := unit.global_position + Vector3.UP * 1.35
+	if shaft.get_meta("event_id", "") != event_id or not shaft.has_meta("origin"):
+		var origin := unit.global_position + Vector3.UP * 1.35
+		var bone_name := "wrist.R" if unit_id == "ENG-10" else "wrist.L"
+		for skeleton: Skeleton3D in unit.find_children("*","Skeleton3D",true,false):
+			var bone := skeleton.find_bone(bone_name)
+			if bone >= 0:
+				origin = (skeleton.global_transform*skeleton.get_bone_global_pose(bone)).origin
+				break
+		shaft.set_meta("origin",origin)
+		shaft.set_meta("event_id",event_id)
+	var a: Vector3 = shaft.get_meta("origin")
 	var b := destination + Vector3.UP * 1.45
-	var tail_phase := maxf(0.0, phase - 0.13)
 	var tip := a.lerp(b, phase) + Vector3.UP * sin(PI * phase) * 0.6
-	var tail := a.lerp(b, tail_phase) + Vector3.UP * sin(PI * tail_phase) * 0.6
-	var direction := tip - tail
+	var direction := (b-a).normalized()
+	var length := 1.5 if unit_id == "ENG-10" else 0.42 if unit_id == "ENG-04" else 0.85
+	var tail := tip-direction*length
 	if direction.length_squared() <= 0.00001:
 		shaft.hide()
 		return
 	var rotation := Basis(Quaternion(Vector3.UP, direction.normalized()))
 	shaft.global_transform = Transform3D(rotation.scaled(Vector3.ONE), (tip + tail) * 0.5)
-	shaft.scale.y = direction.length() / unit.scale.y
+	shaft.scale.y = length / unit.scale.y
 	shaft.show()
 
 func present_training(state: Dictionary, server_ms: float) -> void:

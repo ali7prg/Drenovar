@@ -160,7 +160,7 @@ func run() -> void:
 				attacking += 1
 	check(inside == 0, "%d soldiers inside Велькор" % inside)
 	check(melee_close == melee, "Melee soldiers away from Велькор: %d of %d" % [melee_close, melee])
-	check(attacking >= 3, "Melee line idle in the world fight: %d swinging" % attacking)
+	check(attacking == 2, "Expected two scheduled melee actions in this fixture, got %d" % attacking)
 	check(visible_count(stage, "number") > 0, "No damage numbers in the world fight")
 	var fx: Dictionary = stage.fx_timelines.get("world-hunt", {})
 	check(not fx.is_empty() and fx.hits.all(func(hit): return float(hit[1]) >= 60.0), "World blows lost their damage: " + str(fx.get("hits", []).slice(0, 3)))

@@ -172,6 +172,9 @@ var fling_velocity := Vector2.ZERO
 var fling_point := Vector2.ZERO
 
 func _ready() -> void:
+	if OS.has_feature("combat_lab"):
+		get_tree().change_scene_to_file.call_deferred("res://combat_lab.tscn")
+		return
 	Input.use_accumulated_input = false
 	frame_samples.resize(240)
 	motion_samples.resize(120)
@@ -4629,6 +4632,9 @@ func battle_outcome(report: Dictionary) -> String:
 
 func update_battle_result_notice() -> void:
 	var available := not battle_results.pending.is_empty() and Time.get_ticks_msec() >= battle_results.ready_at
+	if available and is_instance_valid(stage):
+		var report: Dictionary = battle_results.pending[0]
+		available = stage.combat_view.frame_time >= float(report.get("finishedAt",0)) + 1200.0
 	result_notice.visible = available and modal.visible and not result_open
 	if available and not modal.visible and not relocation_pins.visible and not command_in_progress:
 		present_next_battle_result()
@@ -5438,7 +5444,8 @@ func _process(delta: float) -> void:
 	else:
 		last_frame_us = 0
 	var now := server_time()
-	stage.present_armies(state, now)
+	var combat_frame: Dictionary = stage.combat_view.frame(state, now, map_name)
+	stage.present_armies(combat_frame.state, combat_frame.time)
 	if not followed_army.is_empty():
 		var found := false
 		for marker in stage.army_markers:
@@ -5448,7 +5455,7 @@ func _process(delta: float) -> void:
 				break
 		if not found:
 			followed_army = ""
-	stage.present_creatures(state, now, delta)
+	stage.present_creatures(combat_frame.state, combat_frame.time, delta)
 	if map_name == "world":
 		var now_ms := Time.get_ticks_msec()
 		if now_ms >= next_minimap_draw:

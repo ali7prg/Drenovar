@@ -22,6 +22,9 @@ var pools := {}
 var last_battle_msec := -1
 var last_battle_events := 0
 var used := {}
+var number_requests: Array = []
+var number_rects: Array[Rect2] = []
+var number_evidence: Array = []
 
 func _ready() -> void:
 	var quad := QuadMesh.new()
@@ -35,7 +38,16 @@ func _ready() -> void:
 
 func make(kind: String, quad: QuadMesh) -> Node3D:
 	var node: Node3D
-	if kind in ["number", "plate"]:
+	if kind == "number":
+		node = Node3D.new()
+		var label := Label.new()
+		label.name = "Text"
+		label.visible = false
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.add_theme_color_override("font_outline_color", Color("#16110c"))
+		label.add_theme_constant_override("outline_size", 4)
+		node.add_child(label)
+	elif kind == "plate":
 		var label := Label3D.new()
 		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		label.no_depth_test = true
@@ -76,17 +88,23 @@ func take(kind: String) -> Node3D:
 	used[kind] = index + 1
 	var node: Node3D = items[index]
 	node.visible = true
+	if kind == "number": node.get_node("Text").show()
 	return node
 
 func begin() -> void:
+	number_requests.clear()
+	number_rects.clear()
+	number_evidence.clear()
 	for kind in used:
 		used[kind] = 0
 
 func finish() -> void:
+	place_numbers()
 	for kind in pools:
 		var items: Array = pools[kind]
 		for index in range(used[kind], items.size()):
 			items[index].visible = false
+			if kind == "number": items[index].get_node("Text").hide()
 
 # Sweep from an attacker toward a target. progress 0..1 over the swing.
 func slash(at: Vector3, toward: Vector3, progress: float, tint: Color, size := 1.6) -> void:
@@ -131,18 +149,49 @@ func dust(at: Vector3, progress: float, size := 1.5, seed := 0.0) -> void:
 	material.set_shader_parameter("seed", seed)
 
 # Damage number that pops, rises and fades over ~0.9 s.
-func number(at: Vector3, text: String, progress: float, tint: Color, big := false) -> void:
+func number(at: Vector3, text: String, progress: float, tint: Color, big := false, ids: Array = [], target := "", final := false) -> void:
 	if progress < 0.0 or progress > 1.0:
 		return
-	var label := take("number") as Label3D
-	if label == null:
-		return
-	var pop := 1.0 + 0.45 * (1.0 - smoothstep(0.0, 0.18, progress))
-	label.text = text
-	label.position = at + Vector3.UP * (1.2 + progress * 1.3)
-	label.modulate = Color(tint, 1.0 - smoothstep(0.6, 1.0, progress))
-	label.outline_modulate.a = label.modulate.a * 0.9
-	label.pixel_size = (0.0009 if big else 0.0007) * pop
+	number_requests.append({"at":at,"text":text,"progress":progress,"tint":tint,"big":big,"ids":ids,"target":target,"final":final})
+
+func place_numbers() -> void:
+	var camera := get_viewport().get_camera_3d()
+	if camera == null: return
+	# Canvas-items stretch uses a 1366px design width. Express legibility and
+	# exclusion zones in actual viewport pixels, then convert to canvas units.
+	var pixel := 1.0 / maxf(0.01,get_viewport().get_stretch_transform().get_scale().x)
+	var viewport := get_viewport().get_visible_rect().grow(-8.0*pixel)
+	var protected: Array[Rect2] = []
+	for request in number_requests:
+		var contact := camera.unproject_position(request.at + Vector3.UP * 1.1)
+		protected.append(Rect2(contact-Vector2(38,30)*pixel,Vector2(76,60)*pixel))
+	number_requests.sort_custom(func(a,b): return a.final and not b.final)
+	for request in number_requests:
+		if int(used.number) >= POOL.number: break
+		if camera.is_position_behind(request.at): continue
+		var item: Node3D = pools.number[int(used.number)]
+		var label := item.get_node("Text") as Label
+		label.text = request.text
+		label.add_theme_font_size_override("font_size",roundi((20 if request.final else 18)*pixel))
+		label.add_theme_constant_override("outline_size",roundi(2.0*pixel))
+		label.reset_size()
+		var size := label.get_minimum_size() + Vector2(8,4)*pixel
+		var contact := camera.unproject_position(request.at + Vector3.UP * 1.1)
+		var placed := false
+		for row in 6:
+			for side in [1.0,-1.0]:
+				var centre := contact + Vector2(side*(52.0*pixel+size.x*0.5), -48.0*pixel-row*(size.y+4.0*pixel)+request.progress*8.0*pixel)
+				var rect := Rect2(centre-size*0.5,size)
+				if not viewport.encloses(rect) or protected.any(func(r):return r.intersects(rect)) or number_rects.any(func(r):return r.intersects(rect)):
+					continue
+				take("number")
+				label.position = rect.position+Vector2(4,2)*pixel
+				label.modulate = Color(request.tint,1.0-smoothstep(0.6,1.0,request.progress))
+				number_rects.append(rect)
+				number_evidence.append({"rect":rect,"event_ids":request.ids,"target":request.target,"text":request.text,"final":request.final})
+				placed = true
+				break
+			if placed: break
 
 func ring(centre: Vector3, radius: float, tint: Color) -> void:
 	var node := take("ring") as MeshInstance3D

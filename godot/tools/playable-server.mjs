@@ -43,7 +43,10 @@ createServer(async(req, res) => {
   if (response.ok && url.pathname.endsWith('/session/new')) {
    const row = await store.load(TEST_REALM), realm = JSON.parse(row.data);
    const entry = realm.repository.players.at(-1), player = JSON.parse(entry[1].state);
-   player.v6.healthy = {'ENG-03':300, 'ENG-05':300, 'ENG-01':300, 'ENG-02':300};
+   // DRENOVAR_QA_ALL_UNITS=1: every troop type (qa_all_troop_attacks.gd).
+   player.v6.healthy = process.env.DRENOVAR_QA_ALL_UNITS==='1'
+    ? Object.fromEntries(['ENG-01','ENG-02','ENG-03','ENG-04','ENG-05','ENG-06','ENG-07','ENG-08','ENG-09','ENG-10'].map(k=>[k,60]))
+    : {'ENG-03':300, 'ENG-05':300, 'ENG-01':300, 'ENG-02':300};
    player.v6.buildings.find(b => b.type === 'B01').level = 11;
    entry[1].state = JSON.stringify(project(player));
    await store.commit(TEST_REALM, row.revision, JSON.stringify(realm));

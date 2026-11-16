@@ -1978,19 +1978,44 @@ func army_battle_events(army: Dictionary) -> Array:
 		cache.merged_rows = rows
 	return cache.merged_rows
 
-func battle_events(army: Dictionary) -> Dictionary:
+func battle_events(army: Dictionary, slots: Array = [], reserves: Dictionary = {}) -> Dictionary:
 	var by_member := {}
 	var fallen := {}
+	var forced := {}
 	var entries: Array = army_battle_events(army)
+	# A large party is drawn by up to FIELD_LIMIT representatives. The server's
+	# swings of members without a model would be invisible (most of a 200-man
+	# fight stood idle); they are shown by a drawn soldier of the same type at
+	# the creature. Only attacks are lent: hits and deaths stay with their own
+	# member. A type whose every model waits in reserve swings from its place,
+	# so no type that the server has fighting looks idle.
+	var shown := {}
+	var all_drawn := {}
+	for slot in slots:
+		if not all_drawn.has(slot.id):
+			all_drawn[slot.id] = []
+		all_drawn[slot.id].append(int(slot.index))
+		if slot.ranged or not reserves.get("%s:%d" % [slot.id, int(slot.index)], false):
+			if not shown.has(slot.id):
+				shown[slot.id] = []
+			shown[slot.id].append(int(slot.index))
+	for id in all_drawn:
+		if not shown.has(id):
+			shown[id] = all_drawn[id]
+			for index in all_drawn[id]:
+				forced["%s:%d" % [id, index]] = true
 	for event in entries:
 		var e := event_row(event)
 		var key := "%s:%d" % [e[2], int(e[3])]
+		if e[1] == "soldier_attack" and shown.has(e[2]) and not int(e[3]) in shown[e[2]]:
+			var drawn: Array = shown[e[2]]
+			key = "%s:%d" % [e[2], drawn[int(e[3]) % drawn.size()]]
 		if not by_member.has(key):
 			by_member[key] = []
 		by_member[key].append(e)
 	for unit in army.get("fallen", []):
 		fallen["%s:%d" % [unit[0], int(unit[1])]] = true
-	return {"members":by_member, "fallen":fallen}
+	return {"members":by_member, "fallen":fallen, "forced":forced}
 
 func present_armies(state: Dictionary, server_ms: float) -> void:
 	battle_fx.begin()
@@ -2043,7 +2068,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		if cache.get("timeline") != timeline or cache.get("events_fighting", false) != fighting:
 			cache.timeline = timeline
 			cache.events_fighting = fighting
-			cache.events = battle_events(army) if fighting else {"members":{}, "fallen":{}}
+			cache.events = battle_events(army, cache.slots, cache.get("engage", {}).get("reserves", {})) if fighting else {"members":{}, "fallen":{}}
 		army_routes[id] = cache
 		if cache.slots.is_empty():
 			continue
@@ -2231,7 +2256,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				elif elapsed - hit < 400.0 and strike == -INF:
 					clip = "hit"
 					phase = (elapsed - hit) / 400.0
-				elif strike > -INF and (slot.ranged or not plan.get("reserves",{}).get(key,false)):
+				elif strike > -INF and (slot.ranged or not plan.get("reserves",{}).get(key,false) or events.get("forced",{}).has(key)):
 					clip = "attack"
 					phase = (elapsed - strike + prepare) / 1000.0
 					if not slot.ranged and slot.id not in ["ENG-01","ENG-05","ENG-06"]:

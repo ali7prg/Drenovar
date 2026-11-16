@@ -14,6 +14,7 @@ func run():
  cache.bag=source.units;cache.slots=load("res://src/formations.gd").field_slots(source.units,game.data.englishRoster)
  var encounter: Dictionary=game.state.encounters.filter(func(e):return int(e.level)==2)[0].duplicate(true)
  encounter.position=source.path[-1]
+ game.stage.engage_sync=true
  var plan: Dictionary=game.stage.engage_plan(cache,encounter)
  game.set_process(false)
  var army: Dictionary=source.duplicate(true)

@@ -1,0 +1,51 @@
+BUTTON_CHECK synthetic V6 account loaded true
+BUTTON_CHECK touch target on canvas: Меню true
+BUTTON_CHECK Меню dispatches while a command is busy true
+BUTTON_CHECK Меню opens a panel true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Армия true
+BUTTON_CHECK Армия dispatches while a command is busy true
+BUTTON_CHECK Армия opens a panel true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Строить true
+BUTTON_CHECK Строить dispatches while a command is busy true
+BUTTON_CHECK Строить opens a panel true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Отчёты true
+BUTTON_CHECK Отчёты dispatches while a command is busy true
+BUTTON_CHECK Отчёты opens a panel true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Меню true
+BUTTON_CHECK menu reopens after previous close true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Меню true
+BUTTON_CHECK menu reopens after previous close true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Меню true
+BUTTON_CHECK menu reopens after previous close true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Меню true
+BUTTON_CHECK menu reopens after previous close true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Карта true
+BUTTON_CHECK map starts despite a pending command true
+BUTTON_CHECK map opens true
+BUTTON_CHECK touch target on canvas: Город true
+BUTTON_CHECK city returns true
+{"checks":50,"failures":[],"method":"Linux Godot 4.6.3 headless; real Input.parse_input_event touch; synthetic V6 fixture; busy flag held; no device latency claim","timings":[{"button":"Меню","pressed_signal":true,"title":"Меню","touch_roundtrip_ms":41.699},{"button":"Армия","pressed_signal":true,"title":"Армия и осада","touch_roundtrip_ms":34.28},{"button":"Строить","pressed_signal":true,"title":"Строительство","touch_roundtrip_ms":34.269},{"button":"Отчёты","pressed_signal":true,"title":"Летопись сражений","touch_roundtrip_ms":34.324}]}

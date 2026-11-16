@@ -44,7 +44,10 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 		if not latest.is_empty():
 			# Idle polling is slower; it must not inflate an active-fight buffer.
 			var gap := stamp - float(latest.serverTime)
-			if gap <= 2000.0 or not armies.is_empty(): sample_gaps.append(gap)
+			# Rows already back home (kept for the report tail) do not make the
+			# 5 s idle polling a fight cadence; it held every march 4.5 s behind.
+			var moving := armies.values().any(func(a): return str(a.get("status", "")) != "returned")
+			if gap <= 2000.0 or moving: sample_gaps.append(gap)
 			if sample_gaps.size() > 32:
 				sample_gaps.pop_front()
 		var active := armies.values().any(func(a): return a.get("battleAt") != null and now < time_value(a,"returnsAt",INF))

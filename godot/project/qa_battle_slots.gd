@@ -10,12 +10,12 @@ func run() -> void:
 	var matrix: Array=JSON.parse_string(FileAccess.get_file_as_string("res://assets/combat-lab/matrix.json"))
 	cases.append_array([matrix[0],matrix[1],matrix[4]])
 	var data: Dictionary=load("res://src/combat_lab.gd").load_game_data()
-	var stage=load("res://src/landscape.gd").new();root.add_child(stage)
+	var stage=load("res://src/landscape.gd").new();stage.engage_sync=true;root.add_child(stage)
 	await stage.setup(data,cases[0].snapshots[0].state,"world",{})
 	for c in cases:
 		var state: Dictionary=c.snapshots[0].state
 		if stage.map_name!=c.map:
-			stage.free();stage=load("res://src/landscape.gd").new();root.add_child(stage);await stage.setup(data,state,c.map,{})
+			stage.free();stage=load("res://src/landscape.gd").new();stage.engage_sync=true;root.add_child(stage);await stage.setup(data,state,c.map,{})
 		var target: Dictionary=(state.world.encounters if c.map=="world" else state.encounters).filter(func(e):return e.id==c.target)[0]
 		stage.target=stage.ground_point(stage.point(target.position));stage.zoom=42;stage.update_camera(0,true)
 		var begin:=Time.get_ticks_usec()

@@ -72,6 +72,12 @@ const ENGAGE_GAP := 0.8
 const CHARGE_SPEED := 3.6
 const ROAR_MS := 1600.0
 const REGROUP_MS := 1400.0
+# Per-frame budget for refining a hunt's contact places while the column walks.
+const ENGAGE_SLICE_USEC := 2500
+# A moving target is re-planned only after it has left this radius.
+const ENGAGE_REPLAN_M := 3.0
+# Tools and tests that read a finished plan right after engage_plan().
+var engage_sync := false
 # How long the slain creature stays on the field after the army leaves.
 const CORPSE_MS := 4500.0
 const MELEE_SWING_MS := 1700.0
@@ -1023,12 +1029,26 @@ func present(state: Dictionary) -> void:
 func creature_lairs(state: Dictionary) -> Array:
 	var points: Array = []
 	for encounter in state.get("encounters", []):
+		var patrol: Array = []
+		for step in encounter.get("patrol", []):
+			if step is Dictionary:
+				patrol.append(Vector2(float(step.get("x", 0)), float(step.get("z", 0))))
+		if patrol.size() >= 2:
+			# The whole patrol line, sampled every 2 m. The live position lies on it
+			# and changes with every poll; using it rebuilt the town signature (and
+			# re-planned the wall) on each server answer while a creature walked.
+			points.append(patrol[0])
+			for i in range(1, patrol.size()):
+				var a: Vector2 = patrol[i - 1]
+				var b: Vector2 = patrol[i]
+				var pieces := maxi(1, ceili(a.distance_to(b) / 2.0))
+				for k in range(1, pieces + 1):
+					points.append(a.lerp(b, float(k) / pieces))
+			continue
+		points.append_array(patrol)
 		if encounter.get("position") is Dictionary:
 			var p: Dictionary = encounter.position
 			points.append(Vector2(float(p.get("x", 0)), float(p.get("z", 0))))
-		for step in encounter.get("patrol", []):
-			if step is Dictionary:
-				points.append(Vector2(float(step.get("x", 0)), float(step.get("z", 0))))
 	points.sort()
 	return points
 
@@ -2044,8 +2064,12 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			plan = engage_plan(cache, encounter)
 			plan.halt_at = start + duration * float(plan.stop) / total
 			travel = minf(travel, float(plan.stop))
+			if server_ms >= float(plan.halt_at):
+				# The charge has begun: contact places are final from here on.
+				plan.locked = true
 		elif returning and cache.has("engage"):
 			plan = cache.engage
+			plan.locked = true
 			if cache.get("leave_source") != path:
 				cache.leave_source = path
 				cache.leave = approach_distance(cache.points, cache.distances, plan.beast, float(plan.front), false)
@@ -2268,9 +2292,18 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 # and flanks, riders take the rear flanks, archers stand in lines behind the melee.
 # Places on water turn around the creature to dry ground. Cached per route and bag.
 func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
-	var key := [cache.source, encounter.get("position"), creature_species(encounter), encounter.get("level"), cache.bag]
-	if cache.get("engage_key") == key:
-		return cache.engage
+	# A patrolling target reports a new position on every poll. Rebuilding the
+	# plan for each small step restarted the whole collision search; keep it
+	# while the target stays within a few metres of the planned anchor.
+	var key := [cache.source, creature_species(encounter), encounter.get("level"), cache.bag]
+	var anchor := point(encounter.position)
+	if cache.get("engage_key") == key and cache.has("engage"):
+		var planned: Vector3 = cache.engage.get("anchor", anchor)
+		if cache.engage.get("locked", false) or Vector2(planned.x - anchor.x, planned.z - anchor.z).length() < ENGAGE_REPLAN_M:
+			return cache.engage
+	if cache.get("engage") is Dictionary:
+		# A replaced plan stops refining (its column changed route or party).
+		cache.engage.locked = true
 	var beast := ground_point(point(encounter.position))
 	var body := creature_body(encounter)
 	var front := body.x + ENGAGE_GAP + 1.0
@@ -2328,19 +2361,37 @@ func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
 		var local := Vector2(body.x + 5.4 + ring * 1.0 + row * 1.6, (k % per_row - (in_row - 1) * 0.5) * 1.45)
 		places[archers[k]] = battle_place(beast, face, side, local)
 	var plan := {"beast": beast, "face": face, "yaw": atan2(face.x, face.z), "body": body, "front": front,
-		"stop": stop, "places": places}
+		"stop": stop, "places": places, "anchor": anchor}
 	var solver := CombatSlots.new()
-	solver.prepare(self,beast,face,body)
 	plan.approaches={};plan.supports={};plan.reserves={};plan.slot_solver=solver
-	for slot in placement_slots:
-		var member := "%s:%d"%[slot.id,int(slot.index)]
-		var origin := ground_point(halt-side*float(slot.side)+face*float(slot.rear))
-		var result: Dictionary=solver.choose(member,places[member],origin,bool(slot.mounted))
-		places[member]=result.position;plan.approaches[member]=result.path
-		plan.supports[member]=result.basis;plan.reserves[member]=result.reserve
+	plan.solving=true
 	cache.engage_key = key
 	cache.engage = plan
+	# The arc places above are usable at once. The collision-checked refinement
+	# runs in slices while the column walks (engage_sync: whole plan now, for
+	# tools and tests). It never blocks a frame for more than the slice.
+	solver.slice_usec = 0 if engage_sync else ENGAGE_SLICE_USEC
+	refine_engage_plan(plan, solver, placement_slots, halt, side, face)
 	return plan
+
+# Collision-checked contact places and approaches, member by member (front
+# melee first). Members are only rewritten before the charge starts: once the
+# column halts, an unfinished member keeps its arc place instead of jumping.
+func refine_engage_plan(plan: Dictionary, solver, placement_slots: Array, halt: Vector3, side: Vector3, face: Vector3) -> void:
+	await solver.prepare(self,plan.beast,face,plan.body)
+	for slot in placement_slots:
+		if plan.get("locked", false) or not solver.space.is_valid():
+			break
+		var member := "%s:%d"%[slot.id,int(slot.index)]
+		var origin := ground_point(halt-side*float(slot.side)+face*float(slot.rear))
+		var result: Dictionary=await solver.choose(member,plan.places[member],origin,bool(slot.mounted))
+		if result.is_empty() or plan.get("locked", false):
+			break
+		plan.places[member]=result.position;plan.approaches[member]=result.path
+		plan.supports[member]=result.basis;plan.reserves[member]=result.reserve
+	plan.solving=false
+	if not engage_sync:
+		solver.release()
 
 # Route distance where the route meets a circle of `radius` around `centre`: the
 # last crossing inward on the way there, or the first outward on the way back.

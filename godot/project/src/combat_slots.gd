@@ -19,10 +19,40 @@ var debug_obstacles: Array = []
 var foot_shape := BoxShape3D.new()
 var horse_shape := BoxShape3D.new()
 const MARGIN := 0.10
+# Time slicing. 0 = run to completion in the calling frame (tests, lab tools).
+# Otherwise the planner yields to the next frame after this many microseconds,
+# so a departing march never stalls the game while contact places are prepared.
+var slice_usec := 0
+var slice_end := 0
+# Bounded local A*: one detour search per member, later candidates must be
+# reachable directly. Unbounded searches (320 sorted iterations of swept checks,
+# up to 16 per archer) held the main thread for 14 s on a desktop CPU.
+const ASTAR_ITERATIONS := 140
+const ASTAR_MAX_COST := 24.0
+const ASTAR_PER_MEMBER := 1
+var astar_left := ASTAR_PER_MEMBER
 
 func _init() -> void:
 	foot_shape.size=Vector3(0.88,2.15,1.0)
 	horse_shape.size=Vector3(1.3,3.4,3.6)
+
+# Called inside the planner's loops: hands the frame back once the slice is used.
+func pause() -> void:
+	if slice_usec <= 0 or Time.get_ticks_usec() < slice_end:
+		return
+	await stage.get_tree().process_frame
+	if not is_instance_valid(stage):
+		release()
+		return
+	slice_end = Time.get_ticks_usec() + slice_usec
+
+# Frees the private physics space once the plan is final. Diagnostics and the
+# obstacle list stay for the debug overlay and QA reports.
+func release() -> void:
+	for body in bodies: PhysicsServer3D.free_rid(body)
+	bodies.clear();shapes.clear();obstacle_ids.clear();mesh_shapes.clear();tree_proxies.clear()
+	if space.is_valid(): PhysicsServer3D.free_rid(space)
+	space=RID()
 
 func clear() -> void:
 	for body in bodies: PhysicsServer3D.free_rid(body)
@@ -37,11 +67,14 @@ func _notification(what: int) -> void:
 
 func prepare(owner_stage: Node3D, at: Vector3, face: Vector3, body: Vector2) -> void:
 	clear();stage=owner_stage;centre=at;target_face=face;target_body=body
+	slice_end=Time.get_ticks_usec()+slice_usec
 	space=PhysicsServer3D.space_create();PhysicsServer3D.space_set_active(space,true)
 	var near := AABB(at-Vector3(40,12,40),Vector3(80,36,80))
 	for parent in [stage.buildings,stage.scenery,stage.town,stage.walls.node]:
 		if not is_instance_valid(parent) or not parent is Node: continue
 		for mesh: MeshInstance3D in parent.find_children("*","MeshInstance3D",true,false):
+			await pause()
+			if not space.is_valid() or not is_instance_valid(mesh): return
 			if mesh.mesh==null or not near.intersects(mesh.global_transform*mesh.get_aabb()):continue
 			# TownGround is a walkable 8cm surface overlay, not a wall. Its
 			# coarse triangles are also alpha masked; query it as support only.
@@ -49,6 +82,8 @@ func prepare(owner_stage: Node3D, at: Vector3, face: Vector3, body: Vector2) -> 
 	# Original placement buffers include offscreen instances; camera uploads are
 	# deliberately not the collision source. Billboard/grass LODs have no volume.
 	for batch in stage.render_batches:
+		await pause()
+		if not space.is_valid(): return
 		if not is_instance_valid(batch.node): continue
 		var layer: Dictionary=batch.layer
 		if layer.get("silhouette",false) or layer.get("detail",false) or layer.get("resource",false): continue
@@ -187,15 +222,27 @@ func approach(a: Vector3, b: Vector3, mounted: bool) -> Array[Vector3]:
 		var direct: Array[Vector3]=[a,b]
 		if original!=a:direct.push_front(original)
 		return direct
+	if astar_left <= 0:
+		return []
+	astar_left -= 1
 	# Local deterministic A*: bounded search, never modifies the server path.
 	var step := 1.3 if mounted else 1.0
 	var start := Vector2i.ZERO
 	var open := [start];var cost := {start:0.0};var previous := {};var validity := {}
+	var in_open := {start:true}
 	var points := {start:a};var end := Vector2(b.x,b.z)
-	for iteration in 320:
+	for iteration in ASTAR_ITERATIONS:
 		if open.is_empty():break
-		open.sort_custom(func(x,y):return float(cost[x])+Vector2(points[x].x,points[x].z).distance_to(end)<float(cost[y])+Vector2(points[y].x,points[y].z).distance_to(end))
-		var cell: Vector2i=open.pop_front();var p: Vector3=points[cell]
+		await pause()
+		if not space.is_valid():return []
+		# Linear minimum instead of re-sorting the whole open list each iteration.
+		var best := 0
+		var best_score := INF
+		for k in open.size():
+			var x: Vector2i=open[k]
+			var score_x:=float(cost[x])+Vector2(points[x].x,points[x].z).distance_to(end)
+			if score_x<best_score:best_score=score_x;best=k
+		var cell: Vector2i=open[best];open.remove_at(best);in_open.erase(cell);var p: Vector3=points[cell]
 		if p.distance_to(b)<step*2.2 and segment_clear(p,b,mounted):
 			var path: Array[Vector3]=[p,b]
 			while previous.has(cell):cell=previous[cell];path.push_front(points[cell])
@@ -210,15 +257,16 @@ func approach(a: Vector3, b: Vector3, mounted: bool) -> Array[Vector3]:
 		for d in [Vector2i(1,0),Vector2i(-1,0),Vector2i(0,1),Vector2i(0,-1),Vector2i(1,1),Vector2i(-1,-1),Vector2i(1,-1),Vector2i(-1,1)]:
 			var n: Vector2i=cell+d;var q: Vector3=stage.ground_point(a+Vector3(n.x*step,0,n.y*step))
 			var added:=p.distance_to(q);var score:=float(cost[cell])+added
-			if score>=float(cost.get(n,INF)) or score>65:continue
+			if score>=float(cost.get(n,INF)) or score>ASTAR_MAX_COST:continue
 			var edge:=str(cell)+":"+str(n)
 			if not validity.has(edge):validity[edge]=segment_clear(p,q,mounted)
 			if not validity[edge]:continue
 			cost[n]=score;previous[n]=cell;points[n]=q
-			if not n in open:open.append(n)
+			if not in_open.has(n):open.append(n);in_open[n]=true
 	return []
 
 func choose(id: String, wanted: Vector3, from: Vector3, mounted: bool) -> Dictionary:
+	astar_left = ASTAR_PER_MEMBER
 	var offset:=wanted-centre
 	var rejected := {}
 	var across:=Vector3(target_face.z,0,-target_face.x)
@@ -233,10 +281,12 @@ func choose(id: String, wanted: Vector3, from: Vector3, mounted: bool) -> Dictio
 			var edge:=1.0/sqrt(pow(ray.dot(target_face)/target_body.x,2)+pow(ray.dot(across)/target_body.y,2))
 			var q:=centre+ray*(edge+gap+reserve*1.7)
 			var yaw:=atan2(centre.x-q.x,centre.z-q.z)
+			await pause()
+			if not space.is_valid():return {}
 			var result:=test(q,yaw,mounted)
 			if not result.valid:
 				rejected[result.reason]=int(rejected.get(result.reason,0))+1;continue
-			var path:=approach(from,result.position,mounted)
+			var path: Array[Vector3]=await approach(from,result.position,mounted)
 			if path.is_empty():rejected["approach"]=int(rejected.get("approach",0))+1;continue
 			result.path=path;result.reserve=reserve>0;result.id=id;result.rejected=rejected
 			result.march_prefix_verified=segment_clear(path[0],path[1],mounted)
@@ -249,6 +299,8 @@ func choose(id: String, wanted: Vector3, from: Vector3, mounted: bool) -> Dictio
 			var ray:=Vector3(sin(angle_step*TAU/32),0,cos(angle_step*TAU/32))
 			var q:=centre+ray*(8.0+radius_step*1.8)
 			var yaw:=atan2(centre.x-q.x,centre.z-q.z)
+			await pause()
+			if not space.is_valid():return {}
 			var result:=test(q,yaw,mounted)
 			if not result.valid:continue
 			var entering: Vector3=result.position+(from-result.position).normalized()*2.0

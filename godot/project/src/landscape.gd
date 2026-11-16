@@ -2285,7 +2285,19 @@ func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
 	var foot := []
 	var riders := []
 	var archers := []
-	for slot in cache.slots:
+	# PvE's current server solver starts each unit at x=-7-index%5*.6.
+	# The front lanes therefore deliver the first melee contacts. On a narrow
+	# bank, assigning every legal contact footprint to rear-lane members can
+	# leave the actual attackers in reserve for the whole short battle. Prioritise
+	# those existing front members when planning positions at march start; their
+	# identities, events and validated footprints/approaches remain unchanged.
+	var placement_slots: Array = cache.slots.duplicate()
+	var placement_order := {}
+	for i in placement_slots.size():
+		var slot: Dictionary = placement_slots[i]
+		placement_order["%s:%d" % [slot.id, int(slot.index)]] = i + (int(slot.index) % 5) * Formations.FIELD_LIMIT if not slot.mounted and not slot.ranged else 1000 + i
+	placement_slots.sort_custom(func(a,b): return placement_order["%s:%d" % [a.id,int(a.index)]] < placement_order["%s:%d" % [b.id,int(b.index)]])
+	for slot in placement_slots:
 		var slot_key := "%s:%d" % [slot.id, int(slot.index)]
 		if slot.mounted:
 			riders.append(slot_key)
@@ -2320,7 +2332,7 @@ func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
 	var solver := CombatSlots.new()
 	solver.prepare(self,beast,face,body)
 	plan.approaches={};plan.supports={};plan.reserves={};plan.slot_solver=solver
-	for slot in cache.slots:
+	for slot in placement_slots:
 		var member := "%s:%d"%[slot.id,int(slot.index)]
 		var origin := ground_point(halt-side*float(slot.side)+face*float(slot.rear))
 		var result: Dictionary=solver.choose(member,places[member],origin,bool(slot.mounted))

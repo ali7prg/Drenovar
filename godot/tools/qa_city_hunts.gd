@@ -17,11 +17,15 @@ var results := []
 var fast_travel := false
 var evidence_root := ""
 var attack_shots := 0
+var selected_units := {"ENG-01":20,"ENG-03":20,"ENG-05":5}
+var start_level := 1
 
 func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--qa-dir="): folder = arg.trim_prefix("--qa-dir=")
 		if arg == "--capture": capture = true
+		if arg == "--army-200": selected_units = {"ENG-01":105,"ENG-02":95}
+		if arg.begins_with("--start-level="): start_level = int(arg.trim_prefix("--start-level="))
 		if arg == "--fast-travel": fast_travel = true
 		if arg.begins_with("--rounds="): rounds = int(arg.trim_prefix("--rounds="))
 	call_deferred("run")
@@ -105,10 +109,10 @@ func run() -> void:
 		folder = evidence_root.path_join("hunt-%02d" % (i+1))
 		DirAccess.make_dir_recursive_absolute(folder)
 		phases = {}; observed_actions = {}; clip_samples = 0; battle_id = ""; attack_shots = 0
-		var target: Dictionary = game.state.encounters.filter(func(e): return int(e.level) == i % 3 + 1)[0]
+		var target: Dictionary = game.state.encounters.filter(func(e): return int(e.level) == (i + start_level - 1) % 3 + 1)[0]
 		if fast_travel and target.status == "defeated": await jump_clock(float(target.respawnAt) + 1.0)
 		await hunt()
-		results.append({"round":i+1,"level":i%3+1,"actions":observed_actions.keys(),"samples":clip_samples,"phases":phases.duplicate(),"trace":game.stage.combat_view.trace.duplicate(true),"memory_static_mb":Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0,"nodes":Performance.get_monitor(Performance.OBJECT_NODE_COUNT),"orphans":Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)})
+		results.append({"round":i+1,"level":(i+start_level-1)%3+1,"actions":observed_actions.keys(),"samples":clip_samples,"phases":phases.duplicate(),"trace":game.stage.combat_view.trace.duplicate(true),"memory_static_mb":Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0,"nodes":Performance.get_monitor(Performance.OBJECT_NODE_COUNT),"orphans":Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)})
 		if not failures.is_empty(): break
 	folder = evidence_root
 	check(game.diagnostics.network_failures == 0, "no false offline notice after a server error")
@@ -129,7 +133,7 @@ func run() -> void:
 func jump_clock(at: float) -> void:
 	var request := HTTPRequest.new()
 	root.add_child(request)
-	request.request(game.endpoint + "/qa/clock", ["Content-Type: application/json"], HTTPClient.METHOD_POST, JSON.stringify({"time":at}))
+	request.request(game.endpoint + "/qa/clock", ["Content-Type: application/json", "X-Drenovar-Staging-Key: " + game.staging_key], HTTPClient.METHOD_POST, JSON.stringify({"time":at}))
 	await request.request_completed
 	request.queue_free()
 	await game.poll_account_state(true)
@@ -141,8 +145,8 @@ func hunt() -> void:
 	# Pick an actually reachable city target through the same preview endpoint.
 	var chosen: Dictionary = {}
 	for target in game.state.encounters:
-		if int(target.level) != round_index % 3 + 1: continue
-		var preview: Dictionary = await game.send_request("march-preview", {"kind":"deploy", "encounterId":target.id, "units":{"ENG-01":20,"ENG-03":20,"ENG-05":5}, "wall":game.march_wall()}, false, 5.0)
+		if int(target.level) != (round_index + start_level - 1) % 3 + 1: continue
+		var preview: Dictionary = await game.send_request("march-preview", {"kind":"deploy", "encounterId":target.id, "units":selected_units, "wall":game.march_wall()}, false, 5.0)
 		if preview.has("path"): chosen = target; break
 	if not check(not chosen.is_empty(), "server supplies a reachable target"): return
 	game.inspect_encounter(chosen)
@@ -152,7 +156,7 @@ func hunt() -> void:
 	# Input values in the genuine roster controls. Final command is a touch.
 	var spins: Array = game.modal_body.find_children("*", "SpinBox", true, false)
 	var roster: Array = game.data.englishRoster.filter(func(unit): return int(garrison.get(unit.id, 0)) > 0)
-	for i in spins.size(): spins[i].value = 20 if roster[i].id in ["ENG-01","ENG-03"] else 5 if roster[i].id == "ENG-05" else 0
+	for i in spins.size(): spins[i].value = int(selected_units.get(roster[i].id, 0))
 	var send: Button = game.modal_footer.find_child("MarchSend", true, false)
 	if not check(await wait_until(func(): return send.get_meta("route_ready", false) and not send.disabled, 35), "selected formation has server route"): return
 	await shot("01-formation")
@@ -163,7 +167,7 @@ func hunt() -> void:
 	battle_id = army.id
 	if not process_frame.is_connected(observe_actions): process_frame.connect(observe_actions)
 	write_json("departed-army.json", army)
-	check(int(army.units.get("ENG-03",0)) == 20 and int(army.units.get("ENG-05",0)) == 5 and game.total_units(army.units) == 45, "server army equals selected formation")
+	check(army.units.size() == selected_units.size() and selected_units.keys().all(func(id): return int(army.units.get(id, 0)) == int(selected_units[id])), "server army equals selected formation")
 	check(game.state.armies.filter(func(a): return a.target == chosen.id and a.id not in old_ids).size() == 1, "one army from one touch")
 	game.close_modal()
 	game.followed_army = battle_id
@@ -195,7 +199,7 @@ func hunt() -> void:
 		if not current.is_empty(): await jump_clock(float(current[0].returnsAt) + 1.0)
 	check(await wait_until(func(): return game.state.armies.all(func(a): return a.id != battle_id or a.status == "returned"), 180), "survivors return through real server clock")
 	await game.sync_account()
-	for unit_id in ["ENG-01", "ENG-03", "ENG-05"]:
+	for unit_id in selected_units:
 		var expected: int = int(garrison.get(unit_id, 0)) - int(report.dead.get(unit_id, 0)) - int(report.wounded.get(unit_id, 0))
 		check(int(game.state.healthy.get(unit_id, 0)) == expected, "returned garrison matches report: " + unit_id)
 

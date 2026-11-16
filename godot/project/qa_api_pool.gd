@@ -90,6 +90,23 @@ func run() -> void:
 		var late := await get_json(pool, "/slow", 0.5)
 		check(late[0] == HTTPRequest.RESULT_TIMEOUT, "Timeout not reported: %d" % late[0])
 		check(pool.requests_reused > 0, "No request reused a connection")
+		# Obsolete previews never consume unbounded workers or all command slots.
+		var current := [true]
+		var completed := [0]
+		var background := func():
+			await pool.request(HTTPClient.METHOD_GET, "/slow", PackedStringArray(), "", 8.0, 1 << 20, false, func(): return current[0])
+			completed[0] += 1
+		for i in 6: background.call()
+		await process_frame
+		check(pool.threads.size() == 3, "Background requests exceeded three active workers")
+		fast_started = Time.get_ticks_msec()
+		fast = await get_json(pool, "/api/state")
+		check(fast[0] == HTTPRequest.RESULT_SUCCESS and Time.get_ticks_msec() - fast_started < 500, "A command waited behind obsolete previews")
+		var cancel_started := Time.get_ticks_msec()
+		current[0] = false
+		while completed[0] < 6 and Time.get_ticks_msec() - cancel_started < 1000: await process_frame
+		check(completed[0] == 6 and Time.get_ticks_msec() - cancel_started < 500, "Cancelled previews kept waiting for their HTTP timeout")
+		check(pool.peak_active <= 4 and pool.requests_cancelled >= 3, "Active worker bound/cancellation not enforced")
 		print("QA_API_POOL reused=", pool.requests_reused, " total=", pool.requests_total, " opened=", pool.connections_opened)
 	# Closed port: clean connection failure.
 	pool.configure("http://127.0.0.1:9")

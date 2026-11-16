@@ -43,21 +43,27 @@ createServer(async(req, res) => {
   if (response.ok && url.pathname.endsWith('/session/new')) {
    const row = await store.load(TEST_REALM), realm = JSON.parse(row.data);
    const entry = realm.repository.players.at(-1), player = JSON.parse(entry[1].state);
-   player.v6.healthy = {'ENG-03':300, 'ENG-05':300, 'ENG-01':300};
+   player.v6.healthy = {'ENG-03':300, 'ENG-05':300, 'ENG-01':300, 'ENG-02':300};
    player.v6.buildings.find(b => b.type === 'B01').level = 11;
    entry[1].state = JSON.stringify(project(player));
    await store.commit(TEST_REALM, row.revision, JSON.stringify(realm));
   }
   const command = body.length ? JSON.parse(body) : {};
+  // Regression controls for delayed previews racing a submitted command.
+  // Only this loopback fixture reads these variables.
+  const previewDelay=url.pathname.endsWith('/march-preview') ? Number(process.env.DRENOVAR_QA_PREVIEW_DELAY_MS??0) : 0;
+  const commandDelay=url.pathname.endsWith('/command') && command.kind==='deploy' ? Number(process.env.DRENOVAR_QA_COMMAND_DELAY_MS??0) : 0;
+  if(previewDelay||commandDelay)await new Promise(resolve=>setTimeout(resolve,previewDelay||commandDelay));
+  const previewFault=previewDelay>0 && process.env.DRENOVAR_QA_PREVIEW_ERROR==='1';
   // Simulate a response lost AFTER a successful commit. Real retries must use
   // the same receipt and must not create another army. Only this loopback tool.
   const fault=url.pathname.endsWith('/command') && response.ok && command.kind==='deploy' && failedDeploys>0;
   if(fault)failedDeploys--;
   // Never log auth headers/device secrets, even in the synthetic fixture.
-  requests.push({path:url.pathname,method:req.method,status:fault?503:response.status,at:Date.now()+offset,
+  requests.push({path:url.pathname,method:req.method,status:fault||previewFault?503:response.status,at:Date.now()+offset,
    receipt: createHash('sha256').update(req.headers['idempotency-key']??'').digest('hex'),
    ...(command.kind ? {kind:command.kind, units:command.units, encounterId:command.encounterId} : {})});
-  if(fault)res.writeHead(503,{'content-type':'text/html'}).end('<html>Worker exceeded resource limit</html>');
+  if(fault||previewFault)res.writeHead(503,{'content-type':'text/html'}).end('<html>Worker exceeded resource limit</html>');
   else res.writeHead(response.status, Object.fromEntries(response.headers)).end(data);
  } catch(e) {console.error(e.stack); if (!res.headersSent) res.writeHead(500).end(JSON.stringify({error:e.message}));}
 }).listen(port, '127.0.0.1', () => console.log(`SYNTHETIC_ONLY http://127.0.0.1:${port} source=${source}`));

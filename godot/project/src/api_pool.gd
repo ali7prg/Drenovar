@@ -18,6 +18,19 @@ signal _finished(id: int, outcome: Array)
 const MAX_CONNECTIONS := 4
 const POLL_USEC := 500
 
+class Cancellation extends RefCounted:
+	var mutex := Mutex.new()
+	var cancelled := false
+	func cancel() -> void:
+		mutex.lock()
+		cancelled = true
+		mutex.unlock()
+	func is_cancelled() -> bool:
+		mutex.lock()
+		var value := cancelled
+		mutex.unlock()
+		return value
+
 var host := ""
 var port := 443
 var tls := true
@@ -31,6 +44,8 @@ var shutting_down := false
 var connections_opened := 0
 var requests_reused := 0
 var requests_total := 0
+var peak_active := 0
+var requests_cancelled := 0
 
 func configure(base_url: String) -> void:
 	var url := base_url.strip_edges()
@@ -57,9 +72,19 @@ func configure(base_url: String) -> void:
 	host = rest
 	port = next_port
 
-func request(method: HTTPClient.Method, path: String, headers: PackedStringArray, body: String, timeout_seconds: float, body_limit: int) -> Array:
+func request(method: HTTPClient.Method, path: String, headers: PackedStringArray, body: String, timeout_seconds: float, body_limit: int, foreground := true, is_current := Callable()) -> Array:
 	if host.is_empty() or shutting_down:
 		return [HTTPRequest.RESULT_CANT_CONNECT, 0, PackedStringArray(), PackedByteArray()]
+	var deadline := Time.get_ticks_usec() + int(timeout_seconds * 1000000.0)
+	# Bound active workers as well as idle sockets. Background polling/previews
+	# leave one connection available for a user's command.
+	var capacity := MAX_CONNECTIONS if foreground else MAX_CONNECTIONS - 1
+	while threads.size() >= capacity:
+		if shutting_down or Time.get_ticks_usec() >= deadline or (is_current.is_valid() and not is_current.call()):
+			return [HTTPRequest.RESULT_TIMEOUT, 0, PackedStringArray(), PackedByteArray()]
+		await get_tree().process_frame
+	if is_current.is_valid() and not is_current.call():
+		return [HTTPRequest.RESULT_REQUEST_FAILED, 0, PackedStringArray(), PackedByteArray()]
 	var client: HTTPClient = idle.pop_back() if not idle.is_empty() else null
 	var reused := client != null
 	if client == null:
@@ -74,17 +99,23 @@ func request(method: HTTPClient.Method, path: String, headers: PackedStringArray
 	var job := {
 		"client": client, "reused": reused, "target": current_target, "host": host, "port": port, "tls": tls,
 		"method": method, "path": path, "headers": headers, "body": body,
-		"deadline": Time.get_ticks_usec() + int(timeout_seconds * 1000000.0), "limit": body_limit,
+		"deadline": deadline, "limit": body_limit, "cancel": Cancellation.new(),
 	}
 	var thread := Thread.new()
 	threads[id] = thread
+	peak_active = maxi(peak_active, threads.size())
+	var received := {"outcome": []}
+	var completed := func(done_id: int, value: Array):
+		if done_id == id: received.outcome = value
+	_finished.connect(completed)
 	thread.start(_run.bind(id, job))
-	var outcome: Array = []
-	while true:
-		var done: Array = await _finished
-		if done[0] == id:
-			outcome = done[1]
-			break
+	while received.outcome.is_empty():
+		if is_current.is_valid() and not is_current.call():
+			(job.cancel as Cancellation).cancel()
+		await get_tree().process_frame
+	_finished.disconnect(completed)
+	var outcome: Array = received.outcome
+	if (job.cancel as Cancellation).is_cancelled(): requests_cancelled += 1
 	thread.wait_to_finish()
 	threads.erase(id)
 	var keep: bool = outcome[4] and job.target == current_target
@@ -113,13 +144,13 @@ func _run(id: int, job: Dictionary) -> void:
 	# A server may silently drop an idle keep-alive connection. When nothing at all
 	# came back on a reused connection, the request is sent again on a fresh one.
 	# Commands carry an Idempotency-Key, so the server never applies one twice.
-	if job.reused and outcome[6]:
+	if job.reused and outcome[6] and not (job.cancel as Cancellation).is_cancelled():
 		(job.client as HTTPClient).close()
 		outcome = _perform(job, false)
 	_finished.emit.call_deferred(id, outcome)
 
 func _timed_out(job: Dictionary) -> bool:
-	return Time.get_ticks_usec() > int(job.deadline) or shutting_down
+	return Time.get_ticks_usec() > int(job.deadline) or shutting_down or (job.cancel as Cancellation).is_cancelled()
 
 # Returns [result, code, headers, body, keep_alive, opened_connection, nothing_received].
 func _perform(job: Dictionary, reuse: bool) -> Array:

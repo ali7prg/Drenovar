@@ -146,7 +146,7 @@ var next_training_update := 0.0
 var followed_army := ""
 var next_minimap_draw := 0
 var diagnostics := SessionDiagnostics.new()
-const OFFLINE_NOTICE := "Нет сети · повторяем"
+const OFFLINE_NOTICE := "Нет связи · повторяем"
 var offline_notice_shown := false
 # Small pill under the resource bar; replaces the large centre message for link state.
 var connection_badge: Label
@@ -3589,7 +3589,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	timer.one_shot = true
 	timer.wait_time = 0.12 if city else 0.18
 	roster.add_child(timer)
-	var preview := {"revision": 0, "units": {}}
+	var preview := {"revision": 0, "units": {}, "in_flight": false}
 	# A creature beside a building is out of reach only while its patrol keeps it in
 	# the building's clearance (server v92 refuses that route). Ask again while it walks
 	# its 20 s round; a refused order leaves as soon as a route is found.
@@ -3597,7 +3597,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	# The client's forecast of when the creature is in the open (route_wait_ms). Off
 	# once the server refuses a route the forecast called open: then the window falls
 	# back to asking the server.
-	var forecast := {"on": city, "asked": false}
+	var forecast := {"on": city and not is_v6_server(), "asked": false}
 	# Lives in the window: closing it ends the waiting.
 	var blocked_timer := Timer.new()
 	blocked_timer.one_shot = true
@@ -3611,6 +3611,8 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		timer.start())
 	retry.hide()
 	var update := func():
+		if submit.sending:
+			return
 		var units := {}
 		var power := 0
 		for unit_id in selected:
@@ -3667,7 +3669,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tools.add_child(heading)
 	button(tools, "Все доступные", set_party.bind(true))
-	button(modal_footer, "Очистить", set_party.bind(false))
+	var clear_party := button(modal_footer, "Очистить", set_party.bind(false))
 	var first_row_index := roster.get_child_count() - 1
 	for unit in data.englishRoster:
 		if unit.id == "SIEGE-RAM-01":
@@ -3736,8 +3738,20 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			update.call())
 	if selected.is_empty():
 		row(roster, "Свободных воинов нет. Откройте казармы и завершите обучение.")
+	var lock_party := func(locked: bool):
+		clear_party.disabled = locked
+		for control in roster.find_children("*", "Button", true, false): control.disabled = locked
+		if city:
+			for control in slots.find_children("*", "Button", true, false): control.disabled = locked
+		for control in roster.find_children("*", "SpinBox", true, false): control.editable = not locked
+		for control in roster.find_children("*", "HSlider", true, false): control.editable = not locked
 	timer.timeout.connect(func():
-		if preview.units.is_empty() or generation != modal_generation:
+		if preview.units.is_empty() or generation != modal_generation or submit.sending:
+			return
+		# Slider changes coalesce into the latest selection. Never leave a growing
+		# group of obsolete route requests competing with the actual command.
+		if preview.in_flight:
+			timer.start()
 			return
 		var revision: int = preview.revision
 		var order := {"kind":"deploy" if city else "worldMarch", "encounterId":id, "units":preview.units.duplicate()}
@@ -3763,8 +3777,14 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		forecast.asked = true
 		if not (city and route_map.visible):
 			quote.text = "Прокладываем путь…" if city else "Рассчитываем маршрут…"
-		var response := await send_request("march-preview" if loopback else "native/game/march-preview", order, false, 8.0)
-		if generation != modal_generation or revision != preview.revision:
+		preview.in_flight = true
+		var current := func(): return generation == modal_generation and revision == preview.revision and not submit.sending and modal.visible
+		var response := await send_request("march-preview" if loopback else "native/game/march-preview", order, false, 8.0, "", "", current)
+		preview.in_flight = false
+		if generation != modal_generation or submit.sending:
+			return
+		if revision != preview.revision:
+			if not preview.units.is_empty(): timer.start()
 			return
 		if response.get("httpStatus", 0) == 401 and not loopback:
 			reset_session()
@@ -3788,7 +3808,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 					send.text = "Марш"
 			# A slow or lost answer is only the preview: the order carries the same
 			# party and the server lays the route itself, so «Марш» stays available.
-			if response.get("transportFailure", false):
+			if response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500:
 				if city and (route_map.visible or show_local_march(id, route_map)):
 					quote.text = "Путь через главные ворота. Нажмите «Марш» — время пути рассчитает сервер."
 				else:
@@ -3856,6 +3876,9 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	orders.dispatch = func():
 		if submit.sending or preview.units.is_empty():
 			return
+		timer.stop()
+		blocked_timer.stop()
+		preview.revision += 1
 		if submit.order.is_empty():
 			# Route preview still on its way: send the same order without waiting for it.
 			timer.stop()
@@ -3867,12 +3890,18 @@ func compose_march(kind: String, id: String, title: String) -> void:
 				direct.wall = march_wall()
 			submit.order = direct
 		submit.sending = true
+		lock_party.call(true)
+		retry.hide()
 		send.disabled = true
 		send.text = "Отправляем…"
+		quote.text = "Отправляем отряд…"
+		modal_status.text = "Отправляем…"
+		modal_status.show()
 		var order: Dictionary = submit.order
 		var result := await command(order, Callable() if city else show_world_directory)
 		if not result and generation == modal_generation:
 			submit.sending = false
+			lock_party.call(false)
 			send.text = "Марш" if city else "Отправить отряд"
 			send.disabled = preview.units.is_empty()
 			# Sent before its route preview (stopped on press): the quote would keep
@@ -5294,7 +5323,7 @@ func request(path: String, payload: Variant = null, idempotency_key := "") -> Di
 			accept(check)
 	return response
 
-func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0, idempotency_key := "", host := "") -> Dictionary:
+func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0, idempotency_key := "", host := "", is_current := Callable()) -> Dictionary:
 	if foreground and busy:
 		return {"error":"Подожди завершения предыдущего запроса."}
 	if foreground:
@@ -5329,7 +5358,12 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	pool.configure(base)
 	var started_us := Time.get_ticks_usec()
 	var result: Array = await pool.request(HTTPClient.METHOD_GET if payload == null else HTTPClient.METHOD_POST, "/api/" + path,
-		headers, "" if payload == null else JSON.stringify(payload), timeout_seconds, 8 * 1024 * 1024)
+		headers, "" if payload == null else JSON.stringify(payload), timeout_seconds, 8 * 1024 * 1024, foreground, is_current)
+	# An obsolete read-only preview is cancelled deliberately. It must not report
+	# a network outage after its window closed or a newer request succeeded.
+	if is_current.is_valid() and not is_current.call():
+		if foreground: busy = false
+		return {"cancelled":true}
 	var elapsed_ms := (Time.get_ticks_usec() - started_us) / 1000.0
 	if result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0 and int(result[1]) < 500:
 		latency_samples.append(elapsed_ms)

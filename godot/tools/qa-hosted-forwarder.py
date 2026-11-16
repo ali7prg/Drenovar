@@ -13,7 +13,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 TARGET = sys.argv[1].rstrip('/')
 PORT = int(sys.argv[2]) if len(sys.argv) > 2 else 8418
 PASS = {'accept', 'accept-encoding', 'content-type', 'idempotency-key', 'x-drenovar-session',
-        'x-drenovar-player', 'x-drenovar-staging-key', 'authorization'}
+        'x-drenovar-player', 'x-drenovar-staging-key', 'authorization', 'x-drenovar-economy', 'x-drenovar-client', 'x-drenovar-client-build'}
 
 class Forward(BaseHTTPRequestHandler):
     def handle_one(self, method):

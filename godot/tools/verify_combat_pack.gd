@@ -6,6 +6,7 @@ func _initialize() -> void:
 func run() -> void:
 	var failures: Array = []
 	if not OS.has_feature("combat_lab"): failures.append("offline lab feature missing")
+	if ProjectSettings.get_setting_with_override("application/run/main_scene") != "res://combat_lab.tscn": failures.append("offline entry scene missing")
 	var lab = load("res://combat_lab.tscn").instantiate()
 	root.add_child(lab)
 	while lab.loading: await process_frame

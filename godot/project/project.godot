@@ -14,6 +14,7 @@ config/name="DRENOVAR"
 config/version="0.6.0"
 config/build_number="1008"
 run/main_scene="res://main.tscn"
+run/main_scene.combat_lab="res://combat_lab.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
 boot_splash/bg_color=Color(0.055, 0.047, 0.035, 1)
 boot_splash/stretch_mode=4

@@ -172,9 +172,6 @@ var fling_velocity := Vector2.ZERO
 var fling_point := Vector2.ZERO
 
 func _ready() -> void:
-	if OS.has_feature("combat_lab"):
-		get_tree().change_scene_to_file.call_deferred("res://combat_lab.tscn")
-		return
 	Input.use_accumulated_input = false
 	frame_samples.resize(240)
 	motion_samples.resize(120)

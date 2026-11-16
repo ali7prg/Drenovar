@@ -116,6 +116,8 @@ var last_command_ms := -1.0
 var polling_state := false
 var request_generation := 0
 var login_in_progress := false
+var client_update_required := false
+var pending_login_save_error := false
 var command_in_progress := false
 var player_id := ""
 var server_offset := 0.0
@@ -225,6 +227,7 @@ func _ready() -> void:
 		await sync_account(true)
 	else:
 		session = SessionStore.read_session()
+		resume_pending_main_login()
 		if not session.is_empty() and not SessionStore.is_device(session) and LIVE_SERVER != OLD_SERVER_URL and endpoint == LIVE_SERVER:
 			# A login of the old server: never sent to this one; offered for the transfer.
 			pending_old_session = session
@@ -233,7 +236,8 @@ func _ready() -> void:
 			# The saved city opens at once; the server is asked in parallel with the
 			# scene load and its answer replaces the copy without any waiting screen.
 			show_cached_state(SessionStore.read_state(session, endpoint))
-			restore_account()
+			if login_proof.is_empty():
+				restore_account()
 	launch.show_step("Готовим поселение…", 52 if restore_running else 72)
 	await show_scene("city")
 	if restore_running and not showing_cached_state:
@@ -247,7 +251,7 @@ func _ready() -> void:
 	warm_panel_textures()
 	if restoring_session and not showing_cached_state:
 		message.text = "Подключаемся к поселению…"
-	if endpoint == LIVE_SERVER and not v6_panels.enabled() and not smoke:
+	if endpoint == LIVE_SERVER and (not v6_panels.enabled() or not login_proof.is_empty()) and not smoke:
 		show_account()
 	if smoke:
 		await run_smoke()
@@ -757,7 +761,7 @@ func show_city_guide() -> void:
 
 func show_application() -> void:
 	open_modal("Приложение DRENOVAR")
-	row(modal_body, "Версия %s · совместимость с веб-сборкой 91" % ProjectSettings.get_setting("application/config/version"))
+	row(modal_body, "Версия %s · сборка %s · общий сервер" % [ProjectSettings.get_setting("application/config/version"), ProjectSettings.get_setting("application/config/build_number", "")])
 	row(modal_body, "Игровой прогресс сохраняется в серверном поселении аккаунта." if not player_id.is_empty() else "Войди в аккаунт, чтобы играть со своим поселением.")
 	button(modal_body, "Аккаунт", show_account)
 	button(modal_body, "Проверка плавности", show_performance)
@@ -4197,7 +4201,39 @@ func show_performance() -> void:
 func connected() -> bool:
 	return loopback or not session.is_empty()
 
+func resume_pending_main_login() -> void:
+	var pending := SessionStore.read_pending_login(endpoint, OLD_SERVER)
+	if pending.is_empty():
+		return
+	login_proof = pending.proof
+	login_for_transfer = true
+	login_link_used = true
+	login_deadline = Time.get_ticks_msec() + int((float(pending.expires_at) - Time.get_unix_time_from_system()) * 1000.0)
+
+func begin_main_login(open_browser := true) -> void:
+	if login_in_progress:
+		return
+	# Keep the last confirmed city and device key until ownership is confirmed.
+	# Ignore a late restore response while the player starts browser sign-in.
+	request_generation += 1
+	restoring_session = false
+	if SessionStore.valid(pending_old_session) and not SessionStore.is_device(pending_old_session):
+		await import_old(pending_old_session)
+		return
+	login_for_transfer = true
+	transfer_refresh = false
+	login_proof = Crypto.new().generate_random_bytes(32).hex_encode()
+	login_deadline = Time.get_ticks_msec() + 300000
+	login_link_used = false
+	pending_login_save_error = SessionStore.save_pending_login(login_proof, endpoint, OLD_SERVER, Time.get_unix_time_from_system() + 300.0) != OK
+	show_account()
+	if open_browser:
+		open_login_page(login_proof.sha256_text())
+
 func begin_login() -> void:
+	if endpoint == LIVE_SERVER:
+		await begin_main_login()
+		return
 	# A server with device accounts (Cloudflare) signs in at once: no browser step.
 	if not loopback:
 		var info := await send_request("auth/info", null, false, 6.0)
@@ -4232,7 +4268,9 @@ func device_login() -> void:
 
 # A new confirmation code for the login in progress (sign-in or transfer).
 func restart_login() -> void:
-	if login_for_transfer:
+	if endpoint == LIVE_SERVER:
+		await begin_main_login()
+	elif login_for_transfer:
 		await begin_transfer(transfer_refresh)
 	else:
 		await begin_login()
@@ -4249,6 +4287,9 @@ func begin_refresh() -> void:
 	await begin_transfer(true)
 
 func begin_transfer(refresh := false) -> void:
+	if endpoint == LIVE_SERVER:
+		await begin_main_login()
+		return
 	if is_instance_valid(v6_panels):
 		v6_panels.account()
 		return
@@ -4276,23 +4317,29 @@ func import_old(old_session: String) -> void:
 	var response := await send_request("auth/import-old", {"oldSession": old_session, "refresh": transfer_refresh}, true, 45.0)
 	login_in_progress = false
 	if response.get("linked", false):
+		SessionStore.forget_pending_login()
 		if previous.is_empty():
 			saved_session_error = SessionStore.save_session(device) != OK
 		pending_old_session = ""
 		login_for_transfer = false
 		login_proof = ""
-		message.text = transfer_message(response)
+		message.text = "Вход через ChatGPT выполнен. Открываем ваш основной город." if response.get("sharedServer", false) else transfer_message(response)
 		transfer_refresh = false
 		player_id = ""
 		await sync_account()
 		await show_account()
 		return
 	session = previous
+	if response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500:
+		show_account()
+		show_error(response)
+		return
+	SessionStore.forget_pending_login()
 	if response.get("oldLogin", false):
 		# The old login expired: confirm it again on the old server.
 		pending_old_session = ""
-		await begin_transfer()
-		set_login_status("Вход на старом сервере истёк. Подтверди его заново.")
+		await begin_main_login()
+		set_login_status("Подтвердите вход через ChatGPT ещё раз.")
 		return
 	login_for_transfer = false
 	login_proof = ""
@@ -4303,6 +4350,7 @@ func import_old(old_session: String) -> void:
 		show_error(response)
 
 func cancel_transfer() -> void:
+	SessionStore.forget_pending_login()
 	login_for_transfer = false
 	transfer_refresh = false
 	login_proof = ""
@@ -4361,6 +4409,7 @@ func finish_login(manual := false) -> void:
 		return
 	if Time.get_ticks_msec() >= login_deadline:
 		login_proof = ""
+		SessionStore.forget_pending_login()
 		if modal.visible and modal_title.text in ["Твоё королевство", "Аккаунт"]:
 			show_account()
 			set_login_status("Код истёк. Начни вход заново.")
@@ -4375,8 +4424,7 @@ func finish_login(manual := false) -> void:
 		return
 	if login_for_transfer and response.get("session") is String and SessionStore.valid(response.session):
 		login_in_progress = false
-		login_proof = ""
-		set_login_status("Вход подтверждён. Переносим поселение…")
+		set_login_status("Вход подтверждён. Открываем ваш основной город…")
 		await import_old(response.session)
 		return
 	if response.get("session") is String and SessionStore.valid(response.session):
@@ -4424,6 +4472,11 @@ func restore_account() -> void:
 	restore_finished.emit()
 
 func apply_restored_state(response: Dictionary) -> void:
+	if int(response.get("httpStatus", 0)) in [403, 426]:
+		restoring_session = false
+		client_update_required = int(response.get("httpStatus", 0)) == 426
+		show_account.call_deferred()
+		return
 	if response.get("httpStatus", 0) == 401:
 		reset_session()
 		if modal.visible and modal_title.text in ["Твоё королевство", "Аккаунт"]:
@@ -4479,6 +4532,8 @@ func select_profile(id: String) -> void:
 	await show_account()
 
 func sign_out_question() -> String:
+	if endpoint == LIVE_SERVER:
+		return "Выйти на этом устройстве? Город сохранится на сервере. Вернуться можно через ChatGPT или код подключения."
 	if SessionStore.is_device(session):
 		return "Аккаунт хранится только на этом телефоне. После выхода вернуться в это поселение будет нельзя. Выйти?"
 	return "Выйти из аккаунта на этом устройстве?"
@@ -4690,6 +4745,10 @@ func remember_state(force := false) -> void:
 	SessionStore.save_state(session, state, server_offset, endpoint)
 
 func show_error(response: Dictionary) -> void:
+	if int(response.get("httpStatus", 0)) == 426:
+		client_update_required = true
+		restoring_session = false
+		show_account.call_deferred()
 	message.text = response.get("error","Ответ сервера не удалось прочитать.")
 	if modal.visible:
 		modal_status.text = message.text
@@ -5152,6 +5211,8 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	var headers := PackedStringArray(["Accept: application/json", "Accept-Encoding: gzip"])
 	if host.is_empty():
 		headers.append("X-Drenovar-Economy: DRENOVAR-V6-C1.0")
+		headers.append("X-Drenovar-Client: godot")
+		headers.append("X-Drenovar-Client-Build: " + str(ProjectSettings.get_setting("application/config/build_number", "")))
 	# A request to another server (the old one, during a transfer) carries none of
 	# this server's credentials.
 	var base := endpoint if host.is_empty() else host
@@ -5337,8 +5398,8 @@ func _process(delta: float) -> void:
 	# Back off while the server is unreachable: 0.8/5 s normally, up to 15 s offline.
 	var interval := (0.8 if active_march else 5.0) * pow(2.0, mini(diagnostics.network_failures, 4))
 	interval = minf(interval, maxf(15.0, 0.8 if active_march else 5.0))
-	if restoring_session:
-		# Still waiting for the first server answer: retry quickly, never 15 s.
+	if restoring_session or not login_proof.is_empty():
+		# Retry a pending server restore or browser confirmation promptly.
 		interval = 1.5
 	elif diagnostics.network_failures > 0:
 		interval = minf(interval, 4.0)

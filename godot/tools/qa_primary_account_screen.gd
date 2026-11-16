@@ -24,11 +24,32 @@ func run() -> void:
 	assert(game.endpoint=="https://drenovar-game.ali069587.workers.dev")
 	assert(text.has("Открыть основной город в браузере"))
 	assert(text.has("Подключить устройство"))
+	assert(text.has("Войти через ChatGPT"))
+	assert(text.has("Версия 0.6.0 · сборка 1005"))
 	assert(not text.has("Создать тестовое поселение"))
 	assert(not text.has("Основать поселение"))
 	assert(not game.v6_panels.enabled())
 	assert(game.api.requests_total==0)
-	print("PRIMARY_ACCOUNT_SCREEN_OK 7; existing account connection, no free city, no network mutation")
+	game.restoring_session=true
+	game.apply_restored_state({"httpStatus":426,"error":"Обновите приложение"})
+	await process_frame
+	await process_frame
+	assert(not game.restoring_session)
+	assert(labels(game.modal_body).has("Войти через ChatGPT"))
+	assert(labels(game.modal_body).has("Открыть сборки DRENOVAR"))
+	game.session="device."+"a".repeat(64)
+	await game.begin_main_login(false)
+	assert(game.login_proof.length()==64)
+	assert(labels(game.modal_body).has("Открыть вход через ChatGPT"))
+	assert(labels(game.modal_body).has("Проверить вход"))
+	var original: String=game.session
+	await game.cancel_transfer()
+	assert(game.session==original)
+	assert(game.login_proof.is_empty())
+	assert(game.api.requests_total==0)
+	game.session=""
+	await create_timer(0.5).timeout
+	print("PRIMARY_ACCOUNT_SCREEN_OK 18; ChatGPT login and build visible, 426 exits waiting, cancelled login preserves device key, no network mutation")
 	game.queue_free()
 	await process_frame
 	await process_frame

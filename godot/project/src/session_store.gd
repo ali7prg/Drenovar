@@ -137,7 +137,61 @@ static func forget_state() -> void:
 			DirAccess.remove_absolute(path)
 
 static func forget() -> void:
+	forget_pending_login()
 	forget_state()
 	for path in [SESSION_PATH, SESSION_PATH + ".tmp", KEY_PATH]:
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
+
+# A browser sign-in can outlive the iOS process while Safari is in front.
+# Only the proof is retained, encrypted and bound to the selected servers.
+const LOGIN_PATH := "user://drenovar-v6-browser-login.bin"
+static func save_pending_login(proof: String, server_id: String, login_host: String, expires_at: float) -> Error:
+	if proof.length() != 64:
+		return ERR_INVALID_DATA
+	for letter in proof:
+		if not letter in "0123456789abcdef":
+			return ERR_INVALID_DATA
+	var encryption_key := key(true)
+	if encryption_key.is_empty():
+		return ERR_UNAVAILABLE
+	var temporary := LOGIN_PATH + ".tmp"
+	var file := FileAccess.open_encrypted(temporary, FileAccess.WRITE, encryption_key)
+	if file == null:
+		return FileAccess.get_open_error()
+	file.store_string(JSON.stringify({"proof":proof,"server":server_id,"login_host":login_host,"expires_at":expires_at}))
+	file.close()
+	var result := DirAccess.rename_absolute(temporary, LOGIN_PATH)
+	if result != OK:
+		DirAccess.remove_absolute(temporary)
+	return result
+
+static func read_pending_login(server_id: String, login_host: String, now := -1.0) -> Dictionary:
+	var encryption_key := key()
+	if encryption_key.is_empty() or not FileAccess.file_exists(LOGIN_PATH):
+		return {}
+	var file := FileAccess.open_encrypted(LOGIN_PATH, FileAccess.READ, encryption_key)
+	if file == null or file.get_length() > 2048:
+		return {}
+	var parser := JSON.new()
+	if parser.parse(file.get_as_text()) != OK or not parser.data is Dictionary:
+		return {}
+	var record: Dictionary = parser.data
+	if record.get("server", "") != server_id or record.get("login_host", "") != login_host:
+		return {}
+	var deadline := float(record.get("expires_at", 0.0))
+	var current := Time.get_unix_time_from_system() if now < 0.0 else now
+	if deadline <= current or deadline > current + 300.0:
+		return {}
+	var proof := str(record.get("proof", ""))
+	if proof.length() != 64:
+		return {}
+	for letter in proof:
+		if not letter in "0123456789abcdef":
+			return {}
+	return {"proof":proof,"expires_at":deadline}
+
+static func forget_pending_login() -> void:
+	for path in [LOGIN_PATH, LOGIN_PATH + ".tmp"]:
 		if FileAccess.file_exists(path):
 			DirAccess.remove_absolute(path)

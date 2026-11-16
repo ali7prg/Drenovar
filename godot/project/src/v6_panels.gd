@@ -220,7 +220,26 @@ func account() -> void:
 	var primary: bool = ui.endpoint == "https://drenovar-game.ali069587.workers.dev"
 	ui.open_modal("Аккаунт", "profile", "DRENOVAR · ОБЩИЙ ГОРОД" if primary else "DRENOVAR · ТЕСТОВАЯ ВЕРСИЯ")
 	ui.message.text = ""
-	ui.row(ui.modal_body, "Приложение и браузер открывают один город на общем сервере. В браузере войдите в основной аккаунт, откройте свой город и получите код подключения для телефона." if primary else "Это отдельный тестовый мир V6. Поселения действующей игры здесь пока недоступны; их прогресс сохранён в действующей версии.")
+	ui.row(ui.modal_body, "Версия %s · сборка %s" % [ProjectSettings.get_setting("application/config/version"), ProjectSettings.get_setting("application/config/build_number", "")])
+	if not ui.login_proof.is_empty():
+		var challenge: String = ui.login_proof.sha256_text()
+		var code: String = challenge.left(8).to_upper()
+		ui.row(ui.modal_body, "Код подтверждения: " + code)
+		if ui.pending_login_save_error:
+			ui.row(ui.modal_body, "Не удалось сохранить незавершённый вход. Если приложение перезапустится, начните вход заново.")
+		ui.row(ui.modal_body, "В Safari войдите в тот же аккаунт ChatGPT, которому принадлежит ваш город. Введите этот код и нажмите «Разрешить вход». Затем вернитесь в DRENOVAR — откроется существующий город.")
+		ui.button(ui.modal_body, "Открыть вход через ChatGPT", ui.open_login_page.bind(challenge))
+		ui.button(ui.modal_body, "Скопировать код", func(): DisplayServer.clipboard_set(code))
+		ui.button(ui.modal_body, "Проверить вход", ui.finish_login.bind(true))
+		ui.button(ui.modal_body, "Начать вход заново", ui.restart_login)
+		ui.button(ui.modal_body, "Отмена входа", ui.cancel_transfer)
+		return
+	if ui.client_update_required:
+		ui.row(ui.modal_body, "Сервер запросил обновление приложения. Здесь указан номер установленной сборки.")
+		ui.button(ui.modal_body, "Открыть сборки DRENOVAR", func(): OS.shell_open("https://github.com/ali7prg/Drenovar/releases"))
+	if primary and not enabled():
+		ui.button(ui.modal_body, "Войти через ChatGPT", ui.begin_main_login)
+	ui.row(ui.modal_body, "Войдите через ChatGPT, чтобы открыть свой существующий город. Здания, ресурсы и армия останутся на общем сервере. Подключение по коду — дополнительный способ входа." if primary else "Это отдельный тестовый мир V6. Поселения действующей игры здесь пока недоступны; их прогресс сохранён в действующей версии.")
 	ui.button(ui.modal_body, "Открыть основной город в браузере" if primary else "Открыть действующую веб-версию", func(): OS.shell_open(ui.OLD_SERVER_URL))
 	if ui.restoring_session:
 		ui.row(ui.modal_body, "Восстанавливаем подключение к вашему городу…")

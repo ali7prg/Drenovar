@@ -15,8 +15,8 @@ extends SceneTree
 
 const CombatV010 = preload("res://combat_v010/runtime/combat_v010_presenter.gd")
 const CombatPresentation = preload("res://src/combat_presentation.gd")
-const APPROACH_MS := 6000.0
-const TAIL_MS := 6000.0
+const APPROACH_MS := 4000.0
+const TAIL_MS := 4000.0
 
 var args := {}
 
@@ -50,8 +50,12 @@ func run() -> void:
 	enc.position = {"x": float(args.get("x", "-50")), "z": float(args.get("z", "-30"))}
 	enc.level = int(case.level)
 	var species_models: Dictionary = game.data.creatureModels
-	if species_models.has(case.species):
+	if species_models.has(case.species) and str(enc.spec.get("id", "")) != case.species:
+		# The demo encounter is a Velkor; use the case's species and a neutral label.
 		enc.species = case.species
+		enc.spec = enc.spec.duplicate(true)
+		enc.spec.id = case.species
+		enc.spec.name = str(case.species).capitalize()
 	var at: Vector3 = stage.point(enc.position)
 	var arrive := 200000.0
 	var walk := 14000.0
@@ -79,7 +83,7 @@ func run() -> void:
 	var begin := arrive - APPROACH_MS
 	var finish := ends + TAIL_MS
 	var frames := int((finish - begin) / (1000.0 / 30.0))
-	var only := float(args.get("only", "-1")) # preview: a few frames around this battle time (s)
+	var only := float(args.get("only", "-100000")) # preview: a few frames around this battle time (s)
 	for frame in frames:
 		var now := begin + frame * (1000.0 / 30.0)
 		if only > -1000.0 and absf((now - arrive) / 1000.0 - only) > 0.2 and frame > 3:

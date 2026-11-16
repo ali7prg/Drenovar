@@ -82,7 +82,7 @@ func run() -> void:
 				break
 		if not check(selected!=null,"service action exists "+type):return
 		selected.pressed.emit()
-		if not check(await wait_for(func():return game.modal_title.text=="Подтвердить работу" and not game.busy),"service quote "+type):return
+		if not check(await wait_for(func():return game.modal_title.text=="Подтвердить работу" and not game.busy and not texts(game.modal_body).has("Рассчитываем стоимость и время…")),"service quote "+type):return
 		if not check(button(game.modal,"Начать")!=null,"service available "+type+str(texts(game.modal_body))):return
 		button(game.modal,"Начать").pressed.emit()
 		if not check(await wait_for(func():return not game.command_in_progress and game.modal_title.text=="Очереди поселения" and game.state.v6.orders.any(func(o):return o.status=="pending")),"service accepted "+type):return

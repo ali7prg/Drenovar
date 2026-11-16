@@ -36,7 +36,9 @@ func run() -> void:
 	SessionStore.forget()
 	var token := "c".repeat(64) + "." + "d".repeat(64)
 	check(SessionStore.save_session(token) == OK, "Session save failed")
-	check(SessionStore.save_state(token, cached_state(), 1234.0) == OK, "State save failed")
+	# Saves are bound to the server they came from (V6, build 1004+).
+	check(SessionStore.save_state(token, cached_state(), 1234.0, "http://127.0.0.1:9") == OK, "State save failed")
+	check(SessionStore.read_state(token, "https://another.example").is_empty(), "Another server read this copy")
 	check(SessionStore.read_state("e".repeat(64) + "." + "f".repeat(64)).is_empty(), "Another login read this copy")
 	var started := Time.get_ticks_msec()
 	var game = launch()

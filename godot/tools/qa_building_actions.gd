@@ -81,7 +81,7 @@ func run() -> void:
 				cases.append({"type":type,"level":level,"status":"passed"})
 				continue
 			button(game.modal_body,"Проверить улучшение").pressed.emit()
-			if not check(await wait_for(func():return game.modal_title.text=="Подтвердить работу" and not game.busy),"quote response "+type+str(level)):return
+			if not check(await wait_for(func():return game.modal_title.text=="Подтвердить работу" and not game.busy and not texts(game.modal_body).has("Рассчитываем стоимость и время…")),"quote response "+type+str(level)):return
 			if not check(button(game.modal,"Начать")!=null,"upgrade available "+type+str(level)+" "+str(texts(game.modal_body))):return
 			for resource: String in setup.expected.cost:
 				if int(setup.expected.cost[resource]) > 0 and not check(cost_cards(game.modal_body).has(game.RESOURCE_NAMES[resource]+": "+str(int(setup.expected.cost[resource]))),"exact server cost "+type+resource):return

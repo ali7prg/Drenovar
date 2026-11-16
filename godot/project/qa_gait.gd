@@ -50,8 +50,13 @@ func run() -> void:
 		stage.target = Vector3.ZERO
 		stage.zoom = 40
 		stage.update_camera(0, true)
-		for frame in 3:
-			stage.present_armies(local_state, 5000 + frame * 16)
+		# Troop models load in the background; the column appears once they are in.
+		for frame in 240:
+			stage.present_armies(local_state, 5000 + mini(frame, 2) * 16)
+			var shown: Node3D = stage.actors.get_node_or_null(NodePath(army.id))
+			if frame >= 2 and shown != null and shown.get_child_count() == 4:
+				break
+			await process_frame
 		var group: Node3D = stage.actors.get_node_or_null(NodePath(army.id))
 		check(group != null and group.get_child_count() == 4, "Formation missing")
 		if group == null:

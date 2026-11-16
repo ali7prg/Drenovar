@@ -55,6 +55,7 @@ signal fight_started(army_id: String, position: Vector3)
 const Formations = preload("res://src/formations.gd")
 const GaitTable = preload("res://src/gait_table.gd")
 const CombatSlots = preload("res://src/combat_slots.gd")
+const CombatV010 = preload("res://combat_v010/runtime/combat_v010_presenter.gd")
 const FIELD_UNIT_SCALE := 1.15
 # Slowest walk tempo and fastest run tempo; between them feet match exactly.
 const WALK_TEMPO := Vector2(0.55, 0.0)
@@ -329,6 +330,7 @@ func prewarm_troops(unit_ids: Array) -> void:
 	for id in unit_ids:
 		if data.unitModels.has(id):
 			request_model(str(data.unitModels[id].field))
+	CombatV010.prewarm("troop", unit_ids.filter(func(id): return data.unitModels.has(id)))
 
 func surface(key: String) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
@@ -1554,13 +1556,15 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			if created:
 				continue
 			var variant := clampi(int(encounter.level), 1, 3)
-			var scene := scene_resource(data.creatureModels[species][variant - 1])
+			var model_path: String = data.creatureModels[species][variant - 1]
+			var scene := scene_resource(model_path)
 			actor = scene.instantiate() as Node3D
 			actor.name = id
 			actor.position = p
 			actor.rotation.y = heading + CREATURE_YAW
 			actor.scale = Vector3.ONE * creature_scale(variant)
 			creatures.add_child(actor)
+			CombatV010.install(actor, "creature", model_path)
 			created = true
 		retained[id] = true
 		actor.show()
@@ -1569,6 +1573,11 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 		var clip := "Walk" if moving else "Idle"
 		var clip_phase := -1.0
 		var turn_rate := 10.0
+		# Combat v0.1.0: exact clip and server-derived clip time for this creature.
+		var v010 := CombatV010.owns(actor)
+		var v010_clip := &""
+		var v010_time := -1.0
+		var bite := CombatV010.creature_attack_window(actor) if v010 else Vector2(560.0, 430.0)
 		if approaches.has(id) and not plan.is_empty():
 			# The army halts in front of it: the creature turns to face it and roars.
 			var halt_at := float(plan.get("halt_at", INF))
@@ -1588,13 +1597,16 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			var attack := -INF
 			var charge := false
 			var victim := ""
+			var striker := ""
+			var hit_span := 480.0 if v010 else 420.0
 			for event in events:
 				var at := float(event[0]) if event is Array else float(event.at)
 				var kind: String = event[1] if event is Array else event.kind
 				if kind == "soldier_attack":
-					if at <= elapsed and elapsed - at < 420.0:
+					if at <= elapsed and elapsed - at < hit_span:
 						hit = at
-				elif at >= elapsed - 430.0 and at <= elapsed + 560.0 and attack == -INF:
+						striker = "%s:%d" % [event[2], int(event[3])] if event is Array else "%s:%d" % [event.unitId, int(event.index)]
+				elif at >= elapsed - bite.y and at <= elapsed + bite.x and attack == -INF:
 					attack = at
 					charge = kind == "antler_charge"
 					victim = "%s:%d" % [event[2], int(event[3])] if event is Array else "%s:%d" % [event.unitId, int(event.index)]
@@ -1604,6 +1616,7 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 				hit = -INF
 				clip = "Death"
 				clip_phase = clampf((elapsed - fallen_at) / 1200.0, 0.0, 1.0)
+				v010_time = (elapsed - fallen_at) / 1000.0
 			elif attack > -INF:
 				# Strike at the soldier the server names, turning toward it within reach.
 				var target: Variant = route.get("member_at", {}).get(victim)
@@ -1613,6 +1626,10 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 				turn_rate = 14.0
 				clip = "Alert" if charge and elapsed < attack - 260.0 else "Attack"
 				clip_phase = (elapsed - attack + 560.0) / 300.0 if clip == "Alert" else (elapsed - attack + 260.0) / 690.0
+				if v010:
+					# One authored strike from windup to recovery; contact = event.at.
+					v010_clip = &"attack_b" if charge else &"attack_a"
+					v010_time = (elapsed - attack + bite.x) / 1000.0
 				var lunge := sin(PI * clampf((elapsed - attack + 210.0) / 590.0, 0.0, 1.0)) * (1.8 if charge else 0.6)
 				p = ground_point(p + Vector3(sin(heading), 0, cos(heading)) * lunge)
 				if charge or elapsed >= attack:
@@ -1623,6 +1640,9 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			elif hit > -INF:
 				clip = "Hit"
 				clip_phase = (elapsed - hit) / 420.0
+				if v010:
+					v010_clip = CombatV010.creature_hit_clip(actor, route.get("member_at", {}).get(striker), heading)
+					v010_time = (elapsed - hit) / 1000.0
 				cues[id] = true
 				show_battle_cue(id, p, Color("#f3d789"), clip_phase)
 			elif elapsed < ROAR_MS and float(plan.get("halt_at", INF)) > float(army.battleAt) - 200.0:
@@ -1641,12 +1661,24 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			p.y -= smoothstep(CORPSE_MS - 2400.0, CORPSE_MS, age) * 2.6 * actor.scale.y
 		actor.rotation.y = lerp_angle(actor.rotation.y, heading + CREATURE_YAW, 1.0 - exp(-turn_rate * delta))
 		actor.position = actor.position.lerp(p, 1.0 - exp(-5.0 * delta))
-		if clip_phase >= 0.0 or actor.get_meta("clip", "") != clip:
+		if v010:
+			if v010_clip.is_empty():
+				v010_clip = CombatV010.CREATURE_MAP.get(clip, &"idle")
+				if clip == "Idle" and battles.has(id):
+					v010_clip = &"combat_idle"
+			if clip == "Death" and v010_time < 0.0:
+				v010_time = INF # corpse: hold the grounded last frame
+			elif clip == "Roar":
+				v010_time = clip_phase * ROAR_MS / 1000.0
+			CombatV010.drive(actor, v010_clip, v010_time)
+			actor.set_meta("clip", clip)
+		elif clip_phase >= 0.0 or actor.get_meta("clip", "") != clip:
 			play_animation(actor, clip, "Idle", clip_phase)
 			actor.set_meta("clip", clip)
 		# A light contact overlays the spine without restarting Attack. Death has
 		# already won the state selection and never receives this additive layer.
-		if clip=="Attack" and battles.has(id):
+		# (Legacy only: v0.1.0 has no verified bone mask for an overlay.)
+		if clip=="Attack" and battles.has(id) and not v010:
 			var army: Dictionary=battles[id]
 			var elapsed:=server_ms-float(army.battleAt)
 			var last_hit:=-INF
@@ -2055,6 +2087,8 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		if is_instance_valid(body.node):
 			if server_ms >= body.until:
 				body.node.queue_free()
+			elif CombatV010.owns(body.node):
+				CombatV010.drive(body.node, &"death", (server_ms - body.at) / 1000.0)
 			else:
 				play_animation(body.node, "death", "", (server_ms - body.at) / 1200.0)
 	fallen_bodies = fallen_bodies.filter(func(body): return is_instance_valid(body.node) and server_ms < body.until)
@@ -2194,9 +2228,13 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			var node_name := "%s_%d" % [slot.id, int(slot.index)]
 			var unit := actor.get_node_or_null(NodePath(node_name)) as Node3D
 			if unit == null:
-				if creation_budget <= 0 or not model_ready(str(data.unitModels[slot.id].field)):
+				if creation_budget <= 0 or not model_ready(str(data.unitModels[slot.id].field)) \
+						or not CombatV010.ready_for("troop", slot.id):
 					continue
 				unit = add_warrior(actor, data.unitModels[slot.id].field, Transform3D.IDENTITY)
+				# Combat v0.1.0 (flag): the library goes onto the fresh player before
+				# anything has played on it; this soldier's pose belongs to it for life.
+				CombatV010.install(unit, "troop", slot.id)
 				unit.name = node_name
 				creation_budget -= 1
 			retained[node_name] = true
@@ -2266,6 +2304,11 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			# Authored ranged Attack releases at frame 15/30 (poses.py); its
 			# release must precede contact by the existing 260 ms flight interval.
 			var prepare := 760.0 if slot.ranged else 490.0
+			# Combat v0.1.0: windows come from the library manifest (contact/release).
+			var v010 := CombatV010.owns(unit)
+			var window := CombatV010.attack_window(unit, prepare)
+			prepare = window.x
+			var hit_ms := CombatV010.hit_window(unit, 400.0) if v010 else 400.0
 			var hit := -INF
 			var down: bool = fighting and events.fallen.has(key)
 			if fighting:
@@ -2273,11 +2316,14 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 					var at := float(event[0])
 					if event[1] == "soldier_attack":
 						if at<=elapsed:last_strike=at
-						if elapsed >= at - prepare and elapsed <= at + 1000.0 - prepare:
+						if elapsed >= at - prepare and elapsed <= at + window.y:
 							strike = at
 					elif at <= elapsed:
 						hit = at
 						down = down or event[4] == 0
+				if v010:
+					# Overlapping (lent) strikes: never cut a windup/contact (see pick_strike).
+					strike = CombatV010.pick_strike(unit, events.members.get(key, []), elapsed)
 				if down:
 					clip = "death"
 					phase = 1.0 if hit == -INF else (elapsed - hit) / 1200.0
@@ -2285,9 +2331,9 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 						unit.set_meta("death_at", server_ms if hit == -INF else float(army.battleAt) + hit)
 						unit.set_meta("death_transform", unit.global_transform)
 					unit.global_transform = unit.get_meta("death_transform")
-				elif elapsed - hit < 400.0 and strike == -INF:
+				elif elapsed - hit < hit_ms and strike == -INF:
 					clip = "hit"
-					phase = (elapsed - hit) / 400.0
+					phase = (elapsed - hit) / hit_ms
 				elif strike > -INF and (slot.ranged or not plan.get("reserves",{}).get(key,false) or events.get("forced",{}).has(key)):
 					clip = "attack"
 					phase = (elapsed - strike + prepare) / 1000.0
@@ -2297,15 +2343,40 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				elif army.get("worldKind") == "pvp":
 					clip = "attack"
 					phase = fposmod(elapsed + i * 125.0, 1000.0) / 1000.0
-				elif slot.id=="ENG-04" and elapsed-last_strike>=240.0 and elapsed-last_strike<2240.0:
+				elif slot.id=="ENG-04" and not v010 and elapsed-last_strike>=240.0 and elapsed-last_strike<2240.0:
+					# (v0.1.0 crossbow attack already contains the reload preparation.)
 					# The authored 2s reload fits between the existing 3.2s attacks:
 					# recovery ends +240, next preparation starts +2440.
 					clip="reload";phase=(elapsed-last_strike-240.0)/2000.0
-			if phase >= 0.0 or unit.get_meta("clip", "") != clip:
+			var clip_time := -1.0
+			if v010:
+				# Single pose owner: exact library clips, server-time driven.
+				var named := StringName(clip)
+				if clip == "attack":
+					if strike > -INF:
+						named = CombatV010.attack_clip(key, strike)
+						clip_time = CombatV010.attack_time(unit, elapsed, strike)
+						unit.set_meta("v010_strike", strike) # the server event this swing shows (QA)
+					else:
+						# Existing PvP stand-in swing (no individual server events): same
+						# staggered cadence, played at the clip's own speed.
+						named = &"attack_a"
+						clip_time = fposmod(elapsed + i * 125.0, window.x + window.y) / 1000.0
+						unit.set_meta("v010_strike", -INF)
+				elif clip == "death":
+					clip_time = INF if hit == -INF else (elapsed - hit) / 1000.0
+				elif clip == "hit":
+					clip_time = (elapsed - hit) / 1000.0
+				CombatV010.drive(unit, named, clip_time, tempo, fposmod(float(i) * 0.381966, 1.0))
+				unit.set_meta("clip", clip)
+				unit.set_meta("tempo", tempo)
+			elif phase >= 0.0 or unit.get_meta("clip", "") != clip:
 				play_animation(unit, data.unitModels[slot.id].drill if clip=="reload" else clip, data.unitModels[slot.id].drill if clip == "attack" else "", phase,
 					fposmod(float(i) * 0.381966, 1.0))
 				unit.set_meta("clip", clip)
-			if clip=="attack":additive_hit(unit,(elapsed-hit)/320.0)
+			# Legacy only: the spine overlay has no verified bone mask, so v0.1.0 shows
+			# a hit during an active swing by contact FX alone.
+			if clip=="attack" and not v010:additive_hit(unit,(elapsed-hit)/320.0)
 			if slot.id == "SIEGE-RAM-01":
 				# Static authored machine: cosmetic recoil only at an actual server hit.
 				unit.rotation.z = PI / 3.0 if down else 0.0
@@ -2323,7 +2394,11 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				shot.hide()
 			if slot.id == "ENG-10":
 				var held := unit.find_child("Javelin",true,false) as Node3D
-				if held != null: held.visible = not (clip == "attack" and phase >= 0.5 and phase < 0.85)
+				if held != null:
+					if v010:
+						held.visible = not (clip == "attack" and not CombatV010.javelin_in_hand(unit, clip_time))
+					else:
+						held.visible = not (clip == "attack" and phase >= 0.5 and phase < 0.85)
 			foot_contacts.sample(self,unit,clip,bool(slot.mounted),server_ms)
 		for unit in actor.get_children():
 			if not retained.has(String(unit.name)) and unit.name != &"Ferry":

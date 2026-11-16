@@ -16,6 +16,21 @@ var capture := ""
 func _initialize() -> void:
 	call_deferred("run")
 
+# Combat v0.1.0 (flag on): its attack spans the clip (1.7 s) rather than the legacy
+# 1.0 s window, so more swings overlap. The invariant stays: every swing shows an
+# authoritative server event of that same soldier, never a cosmetic one.
+const CombatV010 = preload("res://combat_v010/runtime/combat_v010_presenter.gd")
+func swings_are_authoritative(stage, army_id: String, units: Array) -> bool:
+	var members: Dictionary = stage.army_routes.get(army_id, {}).get("events", {}).get("members", {})
+	for unit: Node3D in units:
+		if unit.get_meta("clip", "") != "attack":
+			continue
+		var key := String(unit.name).replace("_", ":")
+		var strike := float(unit.get_meta("v010_strike", -INF))
+		if not members.get(key, []).any(func(e): return e[1] == "soldier_attack" and absf(float(e[0]) - strike) < 0.5):
+			return false
+	return true
+
 func check(condition: bool, description: String) -> void:
 	checks += 1
 	if not condition:
@@ -160,7 +175,10 @@ func run() -> void:
 				attacking += 1
 	check(inside == 0, "%d soldiers inside Велькор" % inside)
 	check(melee_close == melee, "Melee soldiers away from Велькор: %d of %d" % [melee_close, melee])
-	check(attacking == 2, "Expected two scheduled melee actions in this fixture, got %d" % attacking)
+	if CombatV010.enabled():
+		check(attacking >= 2 and swings_are_authoritative(stage, "world-hunt", units), "v0.1.0 swing without a server event (%d attacking)" % attacking)
+	else:
+		check(attacking == 2, "Expected two scheduled melee actions in this fixture, got %d" % attacking)
 	check(visible_count(stage, "number") > 0, "No damage numbers in the world fight")
 	var fx: Dictionary = stage.fx_timelines.get("world-hunt", {})
 	check(not fx.is_empty() and fx.hits.all(func(hit): return float(hit[1]) >= 60.0), "World blows lost their damage: " + str(fx.get("hits", []).slice(0, 3)))

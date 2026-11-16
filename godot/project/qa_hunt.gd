@@ -13,6 +13,21 @@ var failures := 0
 func _initialize() -> void:
 	call_deferred("run")
 
+# Combat v0.1.0 (flag on): its attack spans the clip (1.7 s) rather than the legacy
+# 1.0 s window, so more swings overlap. The invariant stays: every swing shows an
+# authoritative server event of that same soldier, never a cosmetic one.
+const CombatV010 = preload("res://combat_v010/runtime/combat_v010_presenter.gd")
+func swings_are_authoritative(stage, army_id: String, units: Array) -> bool:
+	var members: Dictionary = stage.army_routes.get(army_id, {}).get("events", {}).get("members", {})
+	for unit: Node3D in units:
+		if unit.get_meta("clip", "") != "attack":
+			continue
+		var key := String(unit.name).replace("_", ":")
+		var strike := float(unit.get_meta("v010_strike", -INF))
+		if not members.get(key, []).any(func(e): return e[1] == "soldier_attack" and absf(float(e[0]) - strike) < 0.5):
+			return false
+	return true
+
 func check(condition: bool, description: String) -> void:
 	checks += 1
 	if not condition:
@@ -158,7 +173,10 @@ func run() -> void:
 	check(melee_close == melee, "Melee soldiers away from the creature: %d of %d close" % [melee_close, melee])
 	# This fixture has one melee event in its current action interval. Cosmetic
 	# swings without an authoritative contact must not count as fighting.
-	check(attacking == 1, "Expected one scheduled melee action, got %d" % attacking)
+	if CombatV010.enabled():
+		check(attacking >= 1 and swings_are_authoritative(stage, "army-hunt", units), "v0.1.0 swing without a server event (%d attacking)" % attacking)
+	else:
+		check(attacking == 1, "Expected one scheduled melee action, got %d" % attacking)
 	check(stage.battle_fx.pools["ring"].filter(func(node): return node.visible).size() == 1, "No ring under the creature during the fight")
 
 	# The creature falls at the last blow.

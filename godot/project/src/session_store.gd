@@ -90,14 +90,14 @@ static func save_session(token: String) -> Error:
 const STATE_PATH := "user://drenovar-v6-test-state.bin"
 const STATE_LIMIT := 16 * 1024 * 1024
 
-static func save_state(token: String, game_state: Dictionary, clock_offset: float) -> Error:
+static func save_state(token: String, game_state: Dictionary, clock_offset: float, server_id := "") -> Error:
 	if not valid(token) or not game_state.has("city") or not game_state.has("world"):
 		return ERR_INVALID_DATA
 	var encryption_key := key(true)
 	if encryption_key.is_empty():
 		return ERR_UNAVAILABLE
 	var record := JSON.stringify({"owner": token.sha256_text(), "offset": clock_offset,
-		"savedAt": Time.get_unix_time_from_system(), "state": game_state})
+		"server": server_id, "savedAt": Time.get_unix_time_from_system(), "state": game_state})
 	var temporary := STATE_PATH + ".tmp"
 	var file := FileAccess.open_encrypted(temporary, FileAccess.WRITE, encryption_key)
 	if file == null:
@@ -111,7 +111,7 @@ static func save_state(token: String, game_state: Dictionary, clock_offset: floa
 
 # Returns {"state": Dictionary, "offset": float, "savedAt": float} or {} when there is
 # no usable copy for this session.
-static func read_state(token: String) -> Dictionary:
+static func read_state(token: String, server_id := "") -> Dictionary:
 	var encryption_key := key()
 	if not valid(token) or encryption_key.is_empty() or not FileAccess.file_exists(STATE_PATH):
 		return {}
@@ -123,6 +123,8 @@ static func read_state(token: String) -> Dictionary:
 		return {}
 	var record: Dictionary = parser.data
 	if record.get("owner", "") != token.sha256_text() or not record.get("state") is Dictionary:
+		return {}
+	if not server_id.is_empty() and record.get("server", "") != server_id:
 		return {}
 	var game_state: Dictionary = record.state
 	if not game_state.has("city") or not game_state.has("world") or not game_state.has("playerId"):

@@ -217,12 +217,17 @@ func metric_value(metric: String, value: Variant) -> String:
 	return str(value)
 
 func account() -> void:
-	ui.open_modal("Аккаунт", "profile", "DRENOVAR · ТЕСТОВАЯ ВЕРСИЯ")
+	var primary: bool = ui.endpoint == "https://drenovar-game.ali069587.workers.dev"
+	ui.open_modal("Аккаунт", "profile", "DRENOVAR · ОБЩИЙ ГОРОД" if primary else "DRENOVAR · ТЕСТОВАЯ ВЕРСИЯ")
 	ui.message.text = ""
-	ui.row(ui.modal_body, "Это отдельный тестовый мир V6. Поселения действующей игры здесь пока недоступны; их прогресс сохранён в действующей версии.")
-	ui.button(ui.modal_body, "Открыть действующую веб-версию", func(): OS.shell_open(ui.OLD_SERVER_URL))
+	ui.row(ui.modal_body, "Приложение и браузер открывают один город на общем сервере. В браузере войдите в основной аккаунт, откройте свой город и получите код подключения для телефона." if primary else "Это отдельный тестовый мир V6. Поселения действующей игры здесь пока недоступны; их прогресс сохранён в действующей версии.")
+	ui.button(ui.modal_body, "Открыть основной город в браузере" if primary else "Открыть действующую веб-версию", func(): OS.shell_open(ui.OLD_SERVER_URL))
+	if ui.restoring_session:
+		ui.row(ui.modal_body, "Восстанавливаем подключение к вашему городу…")
+		ui.button(ui.modal_body, "Повторить подключение", ui.restore_account)
+		return
 	if not ui.connected():
-		ui.button(ui.modal_body, "Подключиться к тестовому миру", func():
+		ui.button(ui.modal_body, "Подключить устройство" if primary else "Подключиться к тестовому миру", func():
 			await ui.device_login()
 			account()
 		)
@@ -233,17 +238,18 @@ func account() -> void:
 		ui.row(ui.modal_body, str(ui.state.city.name))
 		if not ui.state.v6.get("legacy_building_archive", []).is_empty():
 			ui.button(ui.modal_body, "Архив прежних зданий", archive)
-		ui.row(ui.modal_body, "Чтобы продолжить этот тестовый город в браузере, получите код и введите его в веб-версии V6. Код действует 10 минут.")
+		ui.row(ui.modal_body, "Чтобы открыть этот же город на другом устройстве, получите код и введите его там. Код действует 10 минут.")
 		ui.button(ui.modal_body, "Получить код подключения", pairing_code)
 	else:
-		ui.row(ui.modal_body, "Введите код из аккаунта веб-версии V6 или создайте отдельное тестовое поселение.")
-		ui.button(ui.modal_body, "Создать тестовое поселение", ui.create_settlement)
+		ui.row(ui.modal_body, "Введите код из своего города в веб-версии. Новое поселение для этого создавать не нужно." if primary else "Введите код из аккаунта веб-версии V6 или создайте отдельное тестовое поселение.")
+		if not primary:
+			ui.button(ui.modal_body, "Создать тестовое поселение", ui.create_settlement)
 	var input := LineEdit.new()
 	input.placeholder_text = "16 знаков из веб-версии V6"
 	input.max_length = 20
 	input.custom_minimum_size = Vector2(260, 48)
 	ui.modal_body.add_child(input)
-	ui.button(ui.modal_body, "Подключить тестовое поселение", func():
+	ui.button(ui.modal_body, "Открыть мой город" if primary else "Подключить тестовое поселение", func():
 		var response: Dictionary = await ui.send_request("pair/accept", {"code":input.text})
 		if response.has("error"):
 			ui.show_error(response)

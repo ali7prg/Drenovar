@@ -33,7 +33,7 @@ const PREWARM_IDLE_MSEC := 2500
 const PREWARM_QUIET_MSEC := 600
 # The game server on the owner's Cloudflare (device accounts, settlement transfer,
 # route-approach-v2). The old ChatGPT Sites server is OLD_SERVER_URL below.
-const LIVE_SERVER := "https://drenovar-v92-staging.ali069587.workers.dev"
+const LIVE_SERVER := "https://drenovar-game.ali069587.workers.dev"
 # The ChatGPT Sites server. On the Cloudflare server it is only used to move a
 # settlement: the player confirms the old login there, the new server reads it.
 const OLD_SERVER_URL := "https://drenovar.pink-lyric-9420.chatgpt.site"
@@ -232,7 +232,7 @@ func _ready() -> void:
 		if not session.is_empty():
 			# The saved city opens at once; the server is asked in parallel with the
 			# scene load and its answer replaces the copy without any waiting screen.
-			show_cached_state(SessionStore.read_state(session))
+			show_cached_state(SessionStore.read_state(session, endpoint))
 			restore_account()
 	launch.show_step("Готовим поселение…", 52 if restore_running else 72)
 	await show_scene("city")
@@ -247,6 +247,8 @@ func _ready() -> void:
 	warm_panel_textures()
 	if restoring_session and not showing_cached_state:
 		message.text = "Подключаемся к поселению…"
+	if endpoint == LIVE_SERVER and not v6_panels.enabled() and not smoke:
+		show_account()
 	if smoke:
 		await run_smoke()
 
@@ -4225,7 +4227,7 @@ func device_login() -> void:
 	message.text = ""
 	await sync_account()
 	login_in_progress = false
-	if modal.visible and modal_title.text == "Твоё королевство":
+	if modal.visible and modal_title.text in ["Твоё королевство", "Аккаунт"]:
 		await show_account()
 
 # A new confirmation code for the login in progress (sign-in or transfer).
@@ -4346,7 +4348,7 @@ func open_login_page(challenge: String) -> void:
 	set_login_status("Если браузер не открылся, скопируй ссылку и вставь её в Safari.")
 
 func set_login_status(value: String) -> void:
-	if modal.visible and modal_title.text == "Твоё королевство":
+	if modal.visible and modal_title.text in ["Твоё королевство", "Аккаунт"]:
 		modal_status.text = value
 		modal_status.show()
 
@@ -4359,7 +4361,7 @@ func finish_login(manual := false) -> void:
 		return
 	if Time.get_ticks_msec() >= login_deadline:
 		login_proof = ""
-		if modal.visible and modal_title.text == "Твоё королевство":
+		if modal.visible and modal_title.text in ["Твоё королевство", "Аккаунт"]:
 			show_account()
 			set_login_status("Код истёк. Начни вход заново.")
 		return
@@ -4383,12 +4385,12 @@ func finish_login(manual := false) -> void:
 		login_proof = ""
 		message.text = ""
 		await sync_account()
-		if modal.visible and modal_title.text == "Твоё королевство":
+		if modal.visible and modal_title.text in ["Твоё королевство", "Аккаунт"]:
 			await show_account()
 	elif response.get("pending", false):
 		if manual:
 			set_login_status("Подтверждение ещё не получено. В Safari введи код и нажми «Разрешить вход».")
-	elif modal.visible and modal_title.text == "Твоё королевство":
+	elif modal.visible and modal_title.text in ["Твоё королевство", "Аккаунт"]:
 		show_error(response)
 	login_in_progress = false
 
@@ -4424,7 +4426,7 @@ func restore_account() -> void:
 func apply_restored_state(response: Dictionary) -> void:
 	if response.get("httpStatus", 0) == 401:
 		reset_session()
-		if modal.visible and modal_title.text == "Твоё королевство":
+		if modal.visible and modal_title.text in ["Твоё королевство", "Аккаунт"]:
 			show_account.call_deferred()
 		return
 	if response.has("city") and response.has("world"):
@@ -4432,12 +4434,12 @@ func apply_restored_state(response: Dictionary) -> void:
 		accept(response)
 		if message.text.begins_with("Подключаемся"):
 			message.text = ""
-		if modal.visible and modal_title.text == "Твоё королевство":
+		if modal.visible and modal_title.text in ["Твоё королевство", "Аккаунт"]:
 			show_account.call_deferred()
 	elif response.get("needsSettlement", false):
 		restoring_session = false
-		message.text = "Открой профиль, чтобы основать поселение"
-		if modal.visible and modal_title.text == "Твоё королевство":
+		message.text = "Открой профиль, чтобы подключить свой город" if endpoint == LIVE_SERVER else "Открой профиль, чтобы основать поселение"
+		if modal.visible and modal_title.text in ["Твоё королевство", "Аккаунт"]:
 			show_account.call_deferred()
 
 func sync_account(create_if_needed := false) -> void:
@@ -4450,7 +4452,7 @@ func sync_account(create_if_needed := false) -> void:
 				return
 			response = await request("state")
 		else:
-			message.text = "Открой профиль в левом верхнем углу, чтобы основать поселение"
+			message.text = "Открой профиль, чтобы подключить свой основной город" if endpoint == LIVE_SERVER else "Открой профиль в левом верхнем углу, чтобы основать поселение"
 			return
 	if not response.has("city"):
 		show_error(response)
@@ -4685,7 +4687,7 @@ func remember_state(force := false) -> void:
 		return
 	state_saved_msec = now
 	state_save_pending = false
-	SessionStore.save_state(session, state, server_offset)
+	SessionStore.save_state(session, state, server_offset, endpoint)
 
 func show_error(response: Dictionary) -> void:
 	message.text = response.get("error","Ответ сервера не удалось прочитать.")

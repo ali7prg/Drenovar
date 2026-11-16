@@ -7,6 +7,7 @@ var catalogue: Dictionary = {}
 var catalogue_loading := false
 var quote_request := 0
 var navigation_request := 0
+var submitting := false
 
 func begin_view() -> int:
 	navigation_request += 1
@@ -176,14 +177,16 @@ func inspect(type: String) -> void:
 			ui.row(ui.modal_body, "%s: %s" % [str(catalogue.get("metrics", {}).get(metric, {}).get("name_ru", metric)), metric_value(metric, row.effects[metric])])
 	if level < 11:
 		var next: Dictionary = row_for(type, level + 1)
-		ui.row(ui.modal_body, "Следующий уровень: " + ROMAN[level])
+		section_title("Следующий уровень · " + ROMAN[level])
+		cost_cards(next.cost)
+		muted("Базовое время: " + duration(int(next.duration_seconds)))
 		for d: Dictionary in next.requirements:
 			var current: Dictionary = building(d.building_id)
 			var ok: bool = int(current.get("level", 0)) >= int(d.level)
 			ui.row(ui.modal_body, "%s %s ≥ %s" % ["✓" if ok else "•", row_for(d.building_id, 1).name_ru, ROMAN[int(d.level)-1]])
 		var action := {"kind":"construction", "building":type, "target":level+1}
 		if level > 0:
-			ui.button(ui.modal_body, "Проверить улучшение", confirm.bind(action))
+			ui.panel_action(ui.modal_body, "Проверить улучшение", confirm.bind(action))
 		else:
 			ui.row(ui.modal_body, "Выберите участок подходящей местности: " + str(next.environment))
 			for plot: String in ui.state.get("v6_plots", {}):
@@ -212,13 +215,15 @@ func confirm(action: Dictionary) -> void:
 	var navigation := begin_view()
 	quote_request += 1
 	var request_id := quote_request
+	ui.open_modal("Подтвердить работу", "right", "УЛУЧШЕНИЕ ПОСЕЛЕНИЯ")
 	var panel_generation: int = ui.modal_generation
+	ui.row(ui.modal_body, "Рассчитываем стоимость и время…")
 	var intent: Dictionary = action.duplicate(true)
 	intent.economy_version = VERSION
 	var response: Dictionary = await ui.request("command", {"kind":"v6quote", "intent":intent})
 	if request_id != quote_request or panel_generation != ui.modal_generation or navigation != navigation_request:
 		return
-	ui.open_modal("Подтвердить работу", "right", "РАСЧЁТ СЕРВЕРА")
+	ui.empty(ui.modal_body)
 	if not response.get("ok", false):
 		ui.row(ui.modal_body, str(response.get("reason", {}).get("message", response.get("error", "Нет ответа сервера"))))
 		var reason: Dictionary = response.get("reason", {})
@@ -226,14 +231,119 @@ func confirm(action: Dictionary) -> void:
 			ui.row(ui.modal_body, "%s: нужно %s, доступно %s" % [ui.RESOURCE_NAMES.get(reason.resource, reason.resource), str(reason.get("required", "")), str(reason.get("available", ""))])
 		elif reason.has("building"):
 			ui.row(ui.modal_body, "Требуется: " + str(row_for(str(reason.building),1).get("name_ru",reason.building)))
+		if response.has("error"):
+			ui.button(ui.modal_body, "Повторить расчёт", confirm.bind(action))
 		return
 	var q: Dictionary = response.quote
-	for resource: String in q.cost:
-		ui.row(ui.modal_body, "%s: %d" % [ui.RESOURCE_NAMES[resource], int(q.cost[resource])])
-	ui.row(ui.modal_body, "Базовое время: %d с · итоговое: %d с · скорость +%.2f%%" % [int(q.base_seconds), int(q.duration_seconds), float(q.speed_bp)/100.0])
-	ui.row(ui.modal_body, "Отмена вернёт оставшийся резерв. В ремонте стены выполненная часть уже оплачена." if action.kind == "repair_wall" else "Цена будет зарезервирована до завершения. Отмена возвращает сохранённый резерв.")
+	section_title("Стоимость работы")
+	cost_cards(q.cost)
+	time_card("До завершения", int(q.duration_seconds))
+	if int(q.speed_bp) > 0:
+		muted("Бонус скорости +%.2f%%" % (float(q.speed_bp)/100.0))
+	muted("Отмена вернёт резерв невыполненной части ремонта." if action.kind == "repair_wall" else "Ресурсы резервируются при начале работы. При отмене до завершения резерв возвращается.")
 	intent.expected_duration_seconds = int(q.duration_seconds)
-	ui.button(ui.modal_body, "Начать", send.bind(intent))
+	ui.modal_footer.show()
+	work_button(ui.modal_footer, "Начать", send.bind(intent), true)
+
+func duration(seconds: int) -> String:
+	seconds = maxi(0, seconds)
+	if seconds >= 3600:
+		return "%d ч %d мин" % [seconds / 3600, (seconds % 3600) / 60]
+	if seconds >= 60:
+		return "%d мин%s" % [seconds / 60, " %d с" % (seconds % 60) if seconds % 60 else ""]
+	return "%d с" % seconds
+
+func section_title(text: String) -> void:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_override("font", ui.TITLE_FONT)
+	label.add_theme_font_size_override("font_size", 22)
+	label.add_theme_color_override("font_color", Color("#ead4a8"))
+	ui.modal_body.add_child(label)
+
+func muted(text: String) -> void:
+	var label := Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_color_override("font_color", Color("#bcb6a6"))
+	ui.modal_body.add_child(label)
+
+func cost_cards(cost: Dictionary) -> void:
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	ui.modal_body.add_child(grid)
+	for resource: String in cost:
+		if int(cost[resource]) <= 0:
+			continue
+		var card: PanelContainer = ui.panel(10)
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.add_theme_stylebox_override("panel", ui.Interface.style(Color("#1b2026"), Color("#a4814d66"), 10, 12, 10))
+		grid.add_child(card)
+		var content := VBoxContainer.new()
+		card.add_child(content)
+		var line := HBoxContainer.new()
+		content.add_child(line)
+		ui.add_resource_icon(line, resource, 22)
+		var label := Label.new()
+		label.text = ui.RESOURCE_NAMES.get(resource, resource)
+		label.add_theme_font_size_override("font_size", 15)
+		label.add_theme_color_override("font_color", Color("#c3bba8"))
+		line.add_child(label)
+		var amount := Label.new()
+		amount.text = ui.format_balance(int(cost[resource]))
+		amount.add_theme_font_size_override("font_size", 22)
+		amount.add_theme_color_override("font_color", Color("#f3dfb5"))
+		content.add_child(amount)
+		card.tooltip_text = "%s: %d" % [ui.RESOURCE_NAMES.get(resource,resource), int(cost[resource])]
+
+func time_card(title: String, seconds: int, ends_at := 0.0) -> void:
+	var card: PanelContainer = ui.panel(12)
+	card.add_theme_stylebox_override("panel", ui.Interface.style(Color("#39362d"), Color("#a4814d66"), 10, 12, 10))
+	ui.modal_body.add_child(card)
+	var line := HBoxContainer.new()
+	card.add_child(line)
+	var label := Label.new()
+	label.text = title
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.add_theme_font_size_override("font_size", 17)
+	line.add_child(label)
+	var clock := Label.new()
+	clock.text = duration(seconds)
+	clock.add_theme_font_override("font", ui.TITLE_FONT)
+	clock.add_theme_font_size_override("font_size", 26)
+	clock.add_theme_color_override("font_color", Color("#f0d290"))
+	line.add_child(clock)
+	if ends_at > 0:
+		ui.bind_countdown(clock, "", ends_at)
+
+func work_button(parent: Container, title: String, action: Callable, primary := false) -> Button:
+	var control: Button = ui.button(parent, title, Callable())
+	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	control.custom_minimum_size.y = 52
+	if primary:
+		ui.WebPanels.primary(control)
+	control.pressed.connect(func():
+		if submitting or control.disabled:
+			return
+		submitting = true
+		var previous: Array = []
+		for root: Node in [ui.modal_body, ui.modal_footer]:
+			for item: Node in root.find_children("*", "Button", true, false):
+				previous.append([item, item.disabled])
+				item.disabled = true
+		control.text = "Выполняем…"
+		await action.call()
+		submitting = false
+		for entry: Array in previous:
+			if is_instance_valid(entry[0]):
+				entry[0].disabled = entry[1]
+		if is_instance_valid(control):
+			control.text = title
+	)
+	return control
 
 func send(action: Dictionary) -> void:
 	var navigation := navigation_request
@@ -246,7 +356,7 @@ func send(action: Dictionary) -> void:
 func queues() -> void:
 	var navigation := begin_view()
 	var generation: int = ui.modal_generation
-	if not await ui.ensure_v6_ready(true):
+	if not await ui.ensure_v6_ready():
 		return
 	if navigation != navigation_request or generation != ui.modal_generation:
 		return
@@ -437,16 +547,48 @@ func objectives() -> void:
 
 func speedups(order: Dictionary) -> void:
 	begin_view()
-	ui.open_modal("Ускорить работу", "right", "ПРЕДМЕТЫ АККАУНТА")
+	ui.open_modal("Ускорить работу", "right", "ПРЕДМЕТЫ УСКОРЕНИЯ")
 	var queue: String = "construction" if order.kind == "construction" else "training"
+	time_card("До завершения", ceili((float(order.ends_at)*1000.0-ui.timer_now())/1000.0), float(order.ends_at)*1000.0)
+	muted("Выберите ускоритель для текущей работы.")
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	ui.modal_body.add_child(grid)
 	var tiers := [60, 300, 900, 1800, 3600, 7200, 18000, 36000]
+	var confirmation := {"item":""}
+	var note := Label.new()
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.add_theme_color_override("font_color", Color("#efd297"))
+	note.add_theme_font_size_override("font_size", 16)
 	for index: int in tiers.size():
 		var item: String = queue + "-" + str(index+1)
 		var count: int = int(ui.state.items.get(item, 0))
 		if count > 0:
-			var body := {"kind":"speedup", "queue":queue, "item":item, "orderId":order.id, "expectedEndsAt":float(order.ends_at)*1000.0, "confirmUnused":true}
-			ui.row(ui.modal_body, "Остаток ускорения сверх таймера пропадёт.")
-			ui.button(ui.modal_body, "%d с · есть %d · использовать" % [int(tiers[index]), count], func(): await ui.command(body); queues())
+			var seconds: int = tiers[index]
+			var body := {"kind":"speedup", "queue":queue, "item":item, "orderId":order.id, "expectedEndsAt":float(order.ends_at)*1000.0, "confirmUnused":false}
+			var use := work_button(grid, "%s\nВ наличии: %d\nИспользовать →" % [duration(seconds), count], func():
+				var remaining: float = (float(order.ends_at)*1000.0-ui.timer_now())/1000.0
+				if remaining <= 0:
+					note.text = "Работа завершена. Обновляем состояние…"
+					await ui.ensure_v6_ready(true)
+					queues()
+					return
+				if seconds > remaining and confirmation.item != item:
+					confirmation.item = item
+					note.text = "Остаток %s пропадёт. Нажмите ускоритель ещё раз, чтобы подтвердить." % duration(ceili(seconds-remaining))
+					return
+				body.confirmUnused = seconds > remaining
+				if await ui.command(body):
+					queues()
+			)
+			use.custom_minimum_size.y = 106
+			use.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			use.add_theme_font_size_override("font_size", 18)
+			use.add_theme_stylebox_override("normal", ui.Interface.style(Color("#343b3c"), Color("#b99a6088"), 10, 14, 12))
+	muted("Неиспользованный остаток ускорения пропадёт." if grid.get_child_count() else "Ускорителей пока нет. Таймер продолжает идти.")
+	ui.modal_body.add_child(note)
 
 func army() -> void:
 	var navigation := begin_view()

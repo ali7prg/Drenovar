@@ -54,7 +54,7 @@ func run() -> void:
 	await admin("case",{"type":"B05","level":1,"poor":true})
 	await game.sync_account()
 	await game.v6_panels.confirm({"kind":"construction","building":"B05","target":2})
-	if not check(button(game.modal_body,"Начать")==null,"insufficient resources cannot start"):return
+	if not check(button(game.modal,"Начать")==null,"insufficient resources cannot start"):return
 	if not check(texts(game.modal_body).has("Недостаточно ресурсов"),"real resource reason displayed"):return
 	await admin("case",{"type":"B05","level":1})
 	await game.sync_account()
@@ -83,8 +83,8 @@ func run() -> void:
 		if not check(selected!=null,"service action exists "+type):return
 		selected.pressed.emit()
 		if not check(await wait_for(func():return game.modal_title.text=="Подтвердить работу" and not game.busy),"service quote "+type):return
-		if not check(button(game.modal_body,"Начать")!=null,"service available "+type+str(texts(game.modal_body))):return
-		button(game.modal_body,"Начать").pressed.emit()
+		if not check(button(game.modal,"Начать")!=null,"service available "+type+str(texts(game.modal_body))):return
+		button(game.modal,"Начать").pressed.emit()
 		if not check(await wait_for(func():return not game.command_in_progress and game.modal_title.text=="Очереди поселения" and game.state.v6.orders.any(func(o):return o.status=="pending")),"service accepted "+type):return
 		await game.v6_panels.queues()
 		button(game.modal_body,"Отменить работу").pressed.emit()

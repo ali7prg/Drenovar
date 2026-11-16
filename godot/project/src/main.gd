@@ -387,7 +387,7 @@ func build_ui() -> void:
 	dimmer.hide()
 	modal = PanelContainer.new()
 	modal.theme = WebPanels.make_theme(root.theme)
-	web_sheet_style = WebPanels.gradient_style(Color("#30353b"), Color("#1d2025"), WebPanels.BRASS, 12)
+	web_sheet_style = WebPanels.gradient_style(Color("#30353b"), Color("#1d2025"), WebPanels.BRASS, 18, 14)
 	result_sheet_style = WebPanels.gradient_style(Color("#354c34"), Color("#122a21"), Color("#e5c57d"), 20, 15)
 	modal.add_theme_stylebox_override("panel", web_sheet_style)
 	root.add_child(modal)
@@ -4748,6 +4748,8 @@ func accept(response: Dictionary) -> void:
 		stale_responses += 1
 		return
 	state = response
+	if v6_panels.enabled() and v6_panels.catalogue.is_empty() and not v6_panels.catalogue_loading:
+		v6_panels.load_catalogue.call_deferred()
 	v6_protocol_confirmed = response.get("economy_version", "") == "DRENOVAR-V6-C1.0"
 	# Orders sent but not in this answer yet (a poll that left before them): their
 	# local effect stays (costs of works just ordered, speedups in flight).

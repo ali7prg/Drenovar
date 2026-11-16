@@ -31,6 +31,12 @@ func texts(node: Node) -> Array[String]:
 	for child: Node in node.get_children():
 		out.append_array(texts(child))
 	return out
+func cost_cards(node: Node) -> Array[String]:
+	var out: Array[String]=[]
+	if node is PanelContainer and not node.tooltip_text.is_empty():
+		out.append(node.tooltip_text)
+	for child: Node in node.get_children():out.append_array(cost_cards(child))
+	return out
 func admin(path: String,body: Dictionary) -> Dictionary:
 	var request:=HTTPRequest.new()
 	root.add_child(request)
@@ -76,10 +82,10 @@ func run() -> void:
 				continue
 			button(game.modal_body,"Проверить улучшение").pressed.emit()
 			if not check(await wait_for(func():return game.modal_title.text=="Подтвердить работу" and not game.busy),"quote response "+type+str(level)):return
-			if not check(button(game.modal_body,"Начать")!=null,"upgrade available "+type+str(level)+" "+str(texts(game.modal_body))):return
+			if not check(button(game.modal,"Начать")!=null,"upgrade available "+type+str(level)+" "+str(texts(game.modal_body))):return
 			for resource: String in setup.expected.cost:
-				if not check(texts(game.modal_body).has(game.RESOURCE_NAMES[resource]+": "+str(int(setup.expected.cost[resource]))),"exact server cost "+type+resource):return
-			button(game.modal_body,"Начать").pressed.emit()
+				if int(setup.expected.cost[resource]) > 0 and not check(cost_cards(game.modal_body).has(game.RESOURCE_NAMES[resource]+": "+str(int(setup.expected.cost[resource]))),"exact server cost "+type+resource):return
+			button(game.modal,"Начать").pressed.emit()
 			if not check(await wait_for(func():return not game.command_in_progress and game.modal_title.text=="Очереди поселения" and game.state.v6.orders.any(func(o):return o.status=="pending")),"accepted order "+type+str(level)):return
 			var order: Dictionary=game.state.v6.orders.filter(func(o):return o.status=="pending")[0]
 			if not check(order.building==type and int(order.target)==level+1,"correct target instance"):return
@@ -88,7 +94,7 @@ func run() -> void:
 			if not check(await wait_for(func():return not game.command_in_progress and game.modal_title.text=="Очереди поселения" and game.state.v6.orders.all(func(o):return o.status!="pending")),"cancelled through UI"):return
 			if not check(game.state.v6.stock==setup.source_stock,"exact refund"):return
 			await game.v6_panels.confirm({"kind":"construction","building":type,"target":level+1})
-			button(game.modal_body,"Начать").pressed.emit()
+			button(game.modal,"Начать").pressed.emit()
 			if not check(await wait_for(func():return not game.command_in_progress and game.modal_title.text=="Очереди поселения" and game.state.v6.orders.any(func(o):return o.status=="pending")),"second accepted order"):return
 			order=game.state.v6.orders.filter(func(o):return o.status=="pending")[0]
 			if level in [3,5,10]:

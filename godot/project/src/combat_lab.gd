@@ -21,24 +21,51 @@ var updates: Array[float] = []
 var last_frame := 0
 var report: Array = []
 var captured := false
+var selector := OptionButton.new()
+
+static func load_game_data() -> Dictionary:
+	var result: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://assets/game.json"))
+	# Same manifest merge as the current main.gd entry (including levels VI–XI).
+	var art: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://assets/city/architecture-v6/manifest.json"))
+	for type: String in art.get("levels",{}):
+		if not result.levelModels.has(type):result.levelModels[type]={}
+		result.levelModels[type].merge(art.levels[type],false)
+	for id: String in art.get("units",{}):result.unitModels[id]={"field":art.units[id].path,"drill":""}
+	return result
 
 func _ready() -> void:
-	data = JSON.parse_string(FileAccess.get_file_as_string("res://assets/game.json"))
+	data = load_game_data()
 	cases = JSON.parse_string(FileAccess.get_file_as_string("res://assets/combat-lab/cases.json"))
+	cases.append_array(JSON.parse_string(FileAccess.get_file_as_string("res://assets/combat-lab/matrix.json")))
+	cases.append_array(JSON.parse_string(FileAccess.get_file_as_string("res://assets/combat-lab/regressions.json")))
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--soak="): soak = int(arg.trim_prefix("--soak="))
 		if arg.begins_with("--capture="): output = arg.trim_prefix("--capture=")
 	if not output.is_empty(): DirAccess.make_dir_recursive_absolute(output)
 	var canvas := CanvasLayer.new(); add_child(canvas)
-	var panel := PanelContainer.new(); canvas.add_child(panel); panel.position = Vector2(12,10)
+	var panel := PanelContainer.new(); canvas.add_child(panel)
+	var safe:=DisplayServer.get_display_safe_area()
+	var screen_size:=Vector2(DisplayServer.screen_get_size())
+	var ratio:=Vector2(get_viewport().size)/screen_size if screen_size.x>0 and screen_size.y>0 else Vector2.ONE
+	var inset:=Vector2(maxf(12,safe.position.x*ratio.x),maxf(10,safe.position.y*ratio.y))
+	panel.position=inset;panel.size=Vector2(get_viewport().size.x-inset.x*2,110)
 	var column := VBoxContainer.new(); panel.add_child(column)
 	column.add_child(title); title.add_theme_font_size_override("font_size",22)
+	title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	for c in cases:selector.add_item("%s · %s · %s"%[c.name,c.map,JSON.stringify(c.units)])
+	selector.fit_to_longest_item=false;selector.custom_minimum_size.y=44;column.add_child(selector)
+	selector.item_selected.connect(func(which):
+		if not loading:begin(which)
+	)
 	var buttons := HBoxContainer.new(); column.add_child(buttons)
-	for label in ["Предыдущий","Пауза","Следующий","Опоры"]:
-		var button := Button.new(); button.text=label; button.custom_minimum_size=Vector2(145,52); buttons.add_child(button)
+	for label in ["Предыдущий","Пауза","Следующий","Опоры","Звук"]:
+		var button := Button.new(); button.text=label; button.custom_minimum_size=Vector2(130,48);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;buttons.add_child(button)
 		button.pressed.connect(func():
 			if loading: return
 			match label:
+				"Звук":
+					stage.combat_audio.enabled=not stage.combat_audio.enabled
+					button.text="Звук: вкл" if stage.combat_audio.enabled else "Звук: выкл"
 				"Предыдущий": begin(posmod(index-1,cases.size()))
 				"Следующий": begin((index+1)%cases.size())
 				"Пауза":
@@ -54,8 +81,9 @@ func _ready() -> void:
 
 func begin(which: int) -> void:
 	loading=true;index=which;paused=false;captured=false
+	selector.select(which)
 	var c: Dictionary=cases[index]
-	title.text="Загрузка · автономная лаборатория 1008"
+	title.text="Загрузка · автономная лаборатория 1009"
 	if stage == null or stage.map_name != c.map:
 		if stage != null: stage.queue_free();await get_tree().process_frame
 		stage=load("res://src/landscape.gd").new();add_child(stage)
@@ -65,6 +93,8 @@ func begin(which: int) -> void:
 	var target: Dictionary=rows.filter(func(e):return e.id==c.target)[0]
 	stage.target=stage.ground_point(stage.point(target.position))+Vector3(-3,2,-3)
 	stage.zoom=23.0 if c.map=="city" else 42.0;stage.update_camera(0,true)
+	# Every new fixture has its own monotonic clock and event generation.
+	stage.combat_view=load("res://src/combat_presentation.gd").new()
 	started=Time.get_ticks_msec();next_packet=-INF;last_frame=0;samples.clear();updates.clear();loading=false
 
 func packet(c: Dictionary, elapsed: float) -> Dictionary:
@@ -113,7 +143,7 @@ func _process(delta: float) -> void:
 	updates.append((Time.get_ticks_usec()-t0)/1000.0)
 	if last_frame>0: samples.append(float(tick-last_frame))
 	last_frame=tick
-	title.text="1008 · %s · %s · %.1f c · запись аудита / 1×"%[c.name,JSON.stringify(c.units),elapsed/1000.0]
+	title.text="1009 · %s · %s · %.1f c · запись аудита / 1×"%[c.name,JSON.stringify(c.units),elapsed/1000.0]
 	if not captured and elapsed>=float(c.first_hit)+1800.0 and not output.is_empty():
 		captured=true;save_frame(c.name)
 	var final_state: Dictionary=c.snapshots[-1].state

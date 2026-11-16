@@ -1,0 +1,12 @@
+{
+  "output": "/workspace/drenovar-audit/after/DRENOVAR-combat-lab-1009-release.ipa",
+  "bytes": 248438526,
+  "sha256": "608fb2a7187f8129915e1625fee2eb12357b0c9c0a138354269cdadd7c899b77",
+  "engine_sha256": "d9816f67f540bbebccfdb2a5ecf9460feda71c05247e4e80601caf44973bfaae",
+  "pck_sha256": "ceb4144f0c18641b9de8083378a9f332c4e4212de9df6cc2037c988992422aa6",
+  "version": "0.6.0",
+  "build": "1009",
+  "bundle_identifier": "com.drenovar.game.combatlab",
+  "signed": false,
+  "device_tested": false
+}

@@ -1,0 +1,211 @@
+{
+  "input_zips": [
+    {
+      "name": "1-DRENOVAR-FULL-26-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "9014512c4489721a3b4703176d82b150b9595b73ceb56e75ac8f7dda885de46b",
+      "crc_ok": true
+    },
+    {
+      "name": "2-DRENOVAR-FULL-27-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "3c6451e5dcf7cc85d96a732ad7311110017482ef024099bd9805058eee86e103",
+      "crc_ok": true
+    },
+    {
+      "name": "3-DRENOVAR-FULL-28-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "b753846605de76592177330f0802410257011c303579a4e7350a14969ed5ef47",
+      "crc_ok": true
+    },
+    {
+      "name": "4-DRENOVAR-FULL-30-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "c9dcc1ac4adb697dfc6e4d59296047136a54cf26a5404ab332d7bdd4a9e7fb34",
+      "crc_ok": true
+    },
+    {
+      "name": "5-DRENOVAR-FULL-21-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "a68b06b487922f3f238c7f97b5229d22267f01cb3cacdce14362537778ec1bae",
+      "crc_ok": true
+    },
+    {
+      "name": "6-DRENOVAR-FULL-23-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "d4ec7927e4d1af8d4c67634e7a9a7c1e3eb9471730d432bea9946810eab52179",
+      "crc_ok": true
+    },
+    {
+      "name": "1-DRENOVAR-FULL-33-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "d2b0dca85cd7e582f098e1fc4d42bec150a83e226233b2f976ce80478c749863",
+      "crc_ok": true
+    },
+    {
+      "name": "2-DRENOVAR-FULL-15-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "9dc547fef04e71e1f1b220a881fc17ebba56d6103c3e358036df9d79a02112d0",
+      "crc_ok": true
+    },
+    {
+      "name": "3-DRENOVAR-FULL-25-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "897bc9a5737710b49d979b1e1726ce9a4ad1bebaf86f870a0eb6f0db09e75c22",
+      "crc_ok": true
+    },
+    {
+      "name": "4-DRENOVAR-FULL-29-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "8a2a35bdc20d984d718e2fa7737762c4ef68d00e9762d99580db1f6caf8d4b9b",
+      "crc_ok": true
+    },
+    {
+      "name": "5-DRENOVAR-FULL-32-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "c85d7b008dda3041b7f7d3a62413b2d05d851936bb65c5e36e58b749ce272b47",
+      "crc_ok": true
+    },
+    {
+      "name": "1-DRENOVAR-FULL-07-of-34.zip",
+      "bytes": 8000380,
+      "sha256": "bbde7f2114f5b29e398c5687b7581d942bfef61890b3d24b60ca1a068a4698bf",
+      "crc_ok": true
+    },
+    {
+      "name": "2-DRENOVAR-FULL-08-of-34.zip",
+      "bytes": 8000380,
+      "sha256": "0a3f8cbe47b62f00a5596d2793e4c75885ed1a574182172666a903b7efb34f16",
+      "crc_ok": true
+    },
+    {
+      "name": "3-DRENOVAR-FULL-10-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "5f900e1cd343cf399cc661eddd9914eeb20940625d23e0213168e1810fb54603",
+      "crc_ok": true
+    },
+    {
+      "name": "4-DRENOVAR-FULL-22-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "ebdcc05c0caac72224f406dfa3cb1c16b8e73a0ac5a6afd78fd8253eb8dc026d",
+      "crc_ok": true
+    },
+    {
+      "name": "5-DRENOVAR-FULL-24-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "1c7b3a17efb3a081b4dbdf5956d0ecd86d1de0665b749708b90d0db15f3b3f08",
+      "crc_ok": true
+    },
+    {
+      "name": "6-DRENOVAR-FULL-31-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "cf9eac5ae41ee03cd8176b3c2bdb6374f3d929c03c4451428fef8b61b8145f57",
+      "crc_ok": true
+    },
+    {
+      "name": "1-DRENOVAR-FULL-16-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "80b9a031cdfda0fee04ab256a86527f4d39b27ef4609fcc1e4f4aff00f68196b",
+      "crc_ok": true
+    },
+    {
+      "name": "2-DRENOVAR-FULL-17-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "883fd8adfa37f77f7c55975c247a8afcffb68d1ffe1db70e65ee40d6f7b7eb8f",
+      "crc_ok": true
+    },
+    {
+      "name": "3-DRENOVAR-FULL-18-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "9c92d6259bf4b0fde892c112194a92bb96a550779e8139e4b8ad72674309c5b6",
+      "crc_ok": true
+    },
+    {
+      "name": "4-DRENOVAR-FULL-19-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "9ffbc6c1275c2141bfe923c554c72f3d49bb68edf4bca232bd93bf14fb39ccc9",
+      "crc_ok": true
+    },
+    {
+      "name": "5-DRENOVAR-FULL-20-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "ddf127873d5ff00a60b4de60cf2e83d33718b0a9074d196a2bdd6011cdd1a886",
+      "crc_ok": true
+    },
+    {
+      "name": "6-DRENOVAR-FULL-13-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "ee409340a6b1b91778f67fc26b7fd3f1dbaa6dd29ae955608904498fc72fb578",
+      "crc_ok": true
+    },
+    {
+      "name": "1-DRENOVAR-FULL-06-of-34.zip",
+      "bytes": 8000380,
+      "sha256": "cda71a3763248fc4be83ac9aac3f465634bc48b9436b57ff2f161e73b3f01b8d",
+      "crc_ok": true
+    },
+    {
+      "name": "2-DRENOVAR-FULL-11-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "754bb7a9d6c34ac2632557d69c501809fdbaf7dba77344daf5bce40a73a1d7e9",
+      "crc_ok": true
+    },
+    {
+      "name": "3-DRENOVAR-FULL-14-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "eb95b353f393d4a3687c6b7802e8142e0b2be8bcfc17a8c463397794df0c6f61",
+      "crc_ok": true
+    },
+    {
+      "name": "4-DRENOVAR-FULL-34-of-34.zip",
+      "bytes": 6110186,
+      "sha256": "3109d4eaf1395da6e6372097af8bade52a35b530abacde1e930dc4304d859c43",
+      "crc_ok": true
+    },
+    {
+      "name": "5-DRENOVAR-FULL-01-of-34.zip",
+      "bytes": 8020155,
+      "sha256": "5bf03b3b64dcdf14acfde3d48befb8979b34ce510aa614fc33806cd30156c6ce",
+      "crc_ok": true
+    },
+    {
+      "name": "6-DRENOVAR-FULL-02-of-34.zip",
+      "bytes": 8000380,
+      "sha256": "f1df960ea57e67da73022b59b52fa1a571ca7d0538e59f6a796e107baaecec4f",
+      "crc_ok": true
+    },
+    {
+      "name": "2-DRENOVAR-FULL-03-of-34.zip",
+      "bytes": 8000380,
+      "sha256": "a0a903f8e6a095701042823c56ed1513831967957c5d5bca36a244395c3e6c70",
+      "crc_ok": true
+    },
+    {
+      "name": "3-DRENOVAR-FULL-04-of-34.zip",
+      "bytes": 8000380,
+      "sha256": "a8cbae52873fb5e98824d1c04f4f108a826d5314fddfb6718851a61499e4f1bc",
+      "crc_ok": true
+    },
+    {
+      "name": "4-DRENOVAR-FULL-05-of-34.zip",
+      "bytes": 8000380,
+      "sha256": "c863cf41015d2e1b74f98f633a8a728bb301987d3e77c3254ee205808dfd48b1",
+      "crc_ok": true
+    },
+    {
+      "name": "5-DRENOVAR-FULL-09-of-34.zip",
+      "bytes": 8000380,
+      "sha256": "cfaaace3b6869a717d7b8c1ed13d3a12684fe97d06a2ab8091d8277fa9f70ac4",
+      "crc_ok": true
+    },
+    {
+      "name": "6-DRENOVAR-FULL-12-of-34.zip",
+      "bytes": 8000381,
+      "sha256": "cb55b67912baabec6a05bf44eb62c9555386a8888f0e5944715cd80b0db16176",
+      "crc_ok": true
+    }
+  ],
+  "restore_stdout": "Restored and verified: /workspace/drenovar-audit/parts/DRENOVAR-ALL-FILES.zip ; files: 439\nExtract this ZIP into a separate folder, then read 00-START-HERE.txt and PROMPT-DEVELOPER.txt.\n",
+  "full_sha256": "75cccc1226ec0921840f258f75a69a605510997445e5ebc25ea5bb4b51ee8129",
+  "files": 439
+}

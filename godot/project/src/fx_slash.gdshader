@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode unshaded, blend_add, cull_disabled, depth_draw_never, shadows_disabled;
+render_mode unshaded, blend_mix, cull_disabled, depth_draw_never, shadows_disabled;
 
 // Weapon / claw sweep: a crescent whose bright head travels along the arc and
 // leaves a fading trail. Camera-facing quad; `angle` turns it in screen space.
@@ -28,5 +28,6 @@ void fragment() {
 	float core = 1.0 - smoothstep(0.0, width * 0.45, abs(r - 0.78));
 	float fade = 1.0 - smoothstep(0.65, 1.0, progress);
 	float alpha = band * trail * fade;
-	ALBEDO = mix(tint.rgb, vec3(1.0), core * 0.7) * alpha * 3.6;
+	ALBEDO = tint.rgb;
+	ALPHA = alpha * 0.28;
 }

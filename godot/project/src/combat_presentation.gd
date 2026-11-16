@@ -14,6 +14,7 @@ var missing_since := {}
 var previous_time := -INF
 var seen := {}
 var trace: Array = []
+var markers: Array = []
 var frame_state: Dictionary = {}
 var frame_time := 0.0
 var current_map := ""
@@ -34,6 +35,7 @@ static func event_id(army: Dictionary, event: Variant) -> String:
 	return "%s/%s/%s/%s/%s/%s" % [army.id,army.get("battleAt",army.get("arrivesAt",0)),e[0],e[1],e[2],e[3]]
 
 func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
+	markers.clear()
 	if latest.is_empty() or current_map != map_name or (str(state.get("playerId", "")) != str(latest.get("playerId", ""))):
 		latest = {}; armies.clear(); seen.clear(); missing_since.clear(); sample_gaps.clear(); previous_time = -INF
 		current_map = map_name
@@ -110,15 +112,17 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 					record({"id":key,"phase":"late-completion","at":at,"received":stamp,"shown":frame_time})
 			var kind: String = str(e[1]) if e is Array else str(e.kind)
 			var unit_id: String = str(e[2]) if e is Array else str(e.unitId)
-			var markers: Array = [{"name":"contact","time":at}]
+			var action_markers: Array = [{"name":"contact","time":at}]
 			if kind == "soldier_attack" and unit_id in ["ENG-03","ENG-04","ENG-10"]:
-				markers.push_front({"name":"release","time":at-260.0})
-			for marker in markers:
+				action_markers.push_front({"name":"release","time":at-260.0})
+			for marker in action_markers:
 				if frame_time >= marker.time and not seen[key][marker.name]:
 					seen[key][marker.name] = true
 					# A cold reconnect acknowledges old events without replaying FX/audio.
 					if previous_time > -INF:
 						record({"id":key,"phase":marker.name,"at":at,"received":stamp,"shown":frame_time})
+						var event: Dictionary=e if e is Dictionary else {"at":e[0],"kind":e[1],"unitId":e[2],"index":e[3],"hp":e[4] if e.size()>4 else 1,"creatureHP":e[4] if e.size()>4 else 1}
+						markers.append({"id":key,"phase":marker.name,"event":event,"target":a.target,"army_id":a.id,"lateness":frame_time-float(marker.time)})
 	frame_state = latest.duplicate(false)
 	var container: Dictionary = latest.get("world",{}).duplicate(false) if map_name == "world" else frame_state
 	container.armies = drawn

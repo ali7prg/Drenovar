@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode unshaded, blend_add, cull_disabled, depth_draw_never, shadows_disabled;
+render_mode unshaded, blend_mix, cull_disabled, depth_draw_never, shadows_disabled;
 
 // Impact flash: a hot core and radial rays that expand and fade. Camera-facing.
 uniform vec4 tint : source_color = vec4(1.0, 0.7, 0.3, 1.0);
@@ -21,5 +21,6 @@ void fragment() {
 	float ray = rays * (1.0 - smoothstep(reach * 0.4, reach, r)) * smoothstep(0.02, 0.1, r);
 	float core = exp(-r * r * 30.0) * (1.0 - progress);
 	float fade = 1.0 - progress;
-	ALBEDO = (tint.rgb * ray * 1.4 + vec3(1.0, 0.95, 0.85) * core * 2.0) * fade;
+	ALBEDO = tint.rgb;
+	ALPHA = min(0.72, (ray * 0.7 + core * 0.35) * fade);
 }

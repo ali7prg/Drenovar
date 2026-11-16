@@ -1,0 +1,1429 @@
+[
+  {
+    "case": "S14",
+    "members": [
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-01:0",
+        "obstacles": [],
+        "plane_residual_m": 0.0118323406204581,
+        "position": [
+          5.8216495513916,
+          7.62881994247437,
+          -9.97064113616943
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 4.50162945420706,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-01:1",
+        "obstacles": [],
+        "plane_residual_m": 0.00312332063913345,
+        "position": [
+          5.36640357971191,
+          7.46432781219482,
+          -8.46989631652832
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 10.4713635265058,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:2",
+        "obstacles": [],
+        "plane_residual_m": 0.0654706358909607,
+        "position": [
+          8.76288795471191,
+          7.54061603546143,
+          -6.0499415397644
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 10.6795292877057,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:3",
+        "obstacles": [],
+        "plane_residual_m": 0.012037524022162,
+        "position": [
+          9.48738670349121,
+          7.63622856140137,
+          -7.5344762802124
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 2.47037131350483,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:4",
+        "obstacles": [],
+        "plane_residual_m": 0.0568360090255737,
+        "position": [
+          7.23331022262573,
+          7.45778894424438,
+          -4.98424100875854
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 7.43542782782315,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-01:5",
+        "obstacles": [],
+        "plane_residual_m": 0.00507998187094927,
+        "position": [
+          5.21268558502197,
+          7.27140283584595,
+          -6.9091739654541
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 1.75658026271206,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:6",
+        "obstacles": [],
+        "plane_residual_m": 0.00105287460610271,
+        "position": [
+          7.90005874633789,
+          7.42970848083496,
+          -7.17350816726685
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 10.4816745896218,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:7",
+        "obstacles": [],
+        "plane_residual_m": 0.00434069521725178,
+        "position": [
+          7.95803451538086,
+          7.53930854797363,
+          -9.44382858276367
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 3.04677523710472,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-06:0",
+        "obstacles": [],
+        "plane_residual_m": 0.0344127267599106,
+        "position": [
+          1.83557605743408,
+          7.39575290679932,
+          -9.17222213745117
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 4.54635495500949,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-06:1",
+        "obstacles": [],
+        "plane_residual_m": 0.020911917090416,
+        "position": [
+          1.61268520355225,
+          7.22914552688599,
+          -6.9091739654541
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 4.40695599430572,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-06:2",
+        "obstacles": [],
+        "plane_residual_m": 0.050100103020668,
+        "position": [
+          4.8252010345459,
+          7.36665821075439,
+          -4.08137226104736
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 1.07410757992931,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-03:0",
+        "obstacles": [],
+        "plane_residual_m": 0.00515948608517647,
+        "position": [
+          4.2681941986084,
+          7.60623502731323,
+          -11.332667350769
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 3.50464616032453,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-03:1",
+        "obstacles": [],
+        "plane_residual_m": 0.00124621763825417,
+        "position": [
+          1.42228889465332,
+          7.09190940856934,
+          -4.5837197303772
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 5.59082538371213,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-03:2",
+        "obstacles": [],
+        "plane_residual_m": 0.0182081088423729,
+        "position": [
+          7.23243570327759,
+          7.56498098373413,
+          -14.7728023529053
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 6.47096327512578,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-03:3",
+        "obstacles": [],
+        "plane_residual_m": 0.000138643197715282,
+        "position": [
+          3.81141567230225,
+          7.22455835342407,
+          -5.30213737487793
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 4.12293315489064,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-03:4",
+        "obstacles": [],
+        "plane_residual_m": 0.00107169710099697,
+        "position": [
+          0.652617454528809,
+          7.14226341247559,
+          -2.792320728302
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 8.24924030857844,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-10:0",
+        "obstacles": [],
+        "plane_residual_m": 0.000557625666260719,
+        "position": [
+          5.68678522109985,
+          7.63173723220825,
+          -11.9391193389893
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.83749511381396,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-10:1",
+        "obstacles": [],
+        "plane_residual_m": 0.0133704990148544,
+        "position": [
+          3.20306873321533,
+          7.26132202148438,
+          -1.65061092376709
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 14.8959913991509,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-10:2",
+        "obstacles": [],
+        "plane_residual_m": 0.00615430064499378,
+        "position": [
+          1.44408798217773,
+          7.35992240905762,
+          -1.05989551544189
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 3.18739462061901,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-10:3",
+        "obstacles": [],
+        "plane_residual_m": 0.0116537362337112,
+        "position": [
+          2.20454788208008,
+          7.44686079025269,
+          -10.9811458587646
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 6.87192469155934,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-10:4",
+        "obstacles": [],
+        "plane_residual_m": 0.00908751785755157,
+        "position": [
+          3.45448112487793,
+          7.50268077850342,
+          -10.2745132446289
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 7.75906581429843,
+        "valid": true
+      }
+    ],
+    "method": "footprint support + private 3D triangle collision space, original static geometry, alpha-card trees explicitly use trunk footprint proxies",
+    "ms": 174.47
+  },
+  {
+    "case": "S15",
+    "members": [
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:0",
+        "obstacles": [],
+        "plane_residual_m": 0.00244151055812836,
+        "position": [
+          9.82315254211426,
+          7.66284132003784,
+          -44.4625015258789
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 5.95519286356519,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:1",
+        "obstacles": [],
+        "plane_residual_m": 0.00609966367483139,
+        "position": [
+          10.9734382629395,
+          7.70984983444214,
+          -47.284595489502
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 6.48234708729853,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:2",
+        "obstacles": [],
+        "plane_residual_m": 0.00482887867838144,
+        "position": [
+          10.6630887985229,
+          7.74235105514526,
+          -43.4857559204102
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 2.22043684125873,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-01:3",
+        "obstacles": [],
+        "plane_residual_m": 0.0135074332356453,
+        "position": [
+          16.4363098144531,
+          7.66184234619141,
+          -48.6135482788086
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 9.95980757031918,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:4",
+        "obstacles": [],
+        "plane_residual_m": 0.00225137546658516,
+        "position": [
+          11.8284721374512,
+          7.76854562759399,
+          -42.8908500671387
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 2.8482633963677,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-01:5",
+        "obstacles": [],
+        "plane_residual_m": 0.00140243396162987,
+        "position": [
+          15.3245048522949,
+          7.8019871711731,
+          -42.5886116027832
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 8.33649235862736,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-01:6",
+        "obstacles": [],
+        "plane_residual_m": 0.0038023442029953,
+        "position": [
+          16.753475189209,
+          7.91425704956055,
+          -43.1324234008789
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 7.31378327488527,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-01:7",
+        "obstacles": [],
+        "plane_residual_m": 0.00726538896560669,
+        "position": [
+          17.6672172546387,
+          7.60160970687866,
+          -48.2059936523438
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 12.3239217375422,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-06:0",
+        "obstacles": [],
+        "plane_residual_m": 0.00837346911430359,
+        "position": [
+          8.8753662109375,
+          7.44404458999634,
+          -41.2011375427246
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 7.82596418308744,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-06:1",
+        "obstacles": [],
+        "plane_residual_m": 0.0113095436245203,
+        "position": [
+          12.2039575576782,
+          7.11727809906006,
+          -57.060733795166
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 2.74152585179076,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-06:2",
+        "obstacles": [],
+        "plane_residual_m": 0.0432303547859192,
+        "position": [
+          20.1238594055176,
+          6.87282085418701,
+          -51.3404769897461
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 11.6516629295865,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-03:0",
+        "obstacles": [],
+        "plane_residual_m": 0.00796304829418659,
+        "position": [
+          3.84462547302246,
+          6.88222503662109,
+          -48.7519721984863
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 4.48436592614561,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-03:1",
+        "obstacles": [],
+        "plane_residual_m": 0.0000749384053051472,
+        "position": [
+          3.53250026702881,
+          6.95923328399658,
+          -45.0850791931152
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 6.21832796811371,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-03:2",
+        "obstacles": [],
+        "plane_residual_m": 0.00743365660309792,
+        "position": [
+          4.29359531402588,
+          6.95192956924438,
+          -43.7175369262695
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 8.00812518034926,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-03:3",
+        "obstacles": [],
+        "plane_residual_m": 0.00215228321030736,
+        "position": [
+          5.09793758392334,
+          6.99170017242432,
+          -42.4473037719727
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 10.0155521108174,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-03:4",
+        "obstacles": [],
+        "plane_residual_m": 0.0034363679587841,
+        "position": [
+          5.74964714050293,
+          7.11175489425659,
+          -41.2084121704102
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 6.8894559406303,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-10:0",
+        "obstacles": [],
+        "plane_residual_m": 0.00191096030175686,
+        "position": [
+          5.49921035766602,
+          6.93793201446533,
+          -49.8693237304688
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 3.24292689759515,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-10:1",
+        "obstacles": [],
+        "plane_residual_m": 0.0123364916071296,
+        "position": [
+          7.53802299499512,
+          6.93104362487793,
+          -37.9273834228516
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 10.8465102446265,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-10:2",
+        "obstacles": [],
+        "plane_residual_m": 0.00451123341917992,
+        "position": [
+          2.8286657333374,
+          6.80744218826294,
+          -43.2034187316895
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 3.22026950642482,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-10:3",
+        "obstacles": [],
+        "plane_residual_m": 0.00283571239560843,
+        "position": [
+          4.26169490814209,
+          6.95243835449219,
+          -40.9126091003418
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 4.14548161999787,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-10:4",
+        "obstacles": [],
+        "plane_residual_m": 0.00490993913263083,
+        "position": [
+          11.0320053100586,
+          7.20273542404175,
+          -55.0791778564453
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 5.23412746983192,
+        "valid": true
+      }
+    ],
+    "method": "footprint support + private 3D triangle collision space, original static geometry, alpha-card trees explicitly use trunk footprint proxies",
+    "ms": 1173.072
+  },
+  {
+    "case": "M-city-L1-ENG-01",
+    "members": [
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:0",
+        "obstacles": [],
+        "plane_residual_m": 0.00000357627868652344,
+        "position": [
+          32.0790557861328,
+          3.02301025390625,
+          44.93505859375
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.68121015492363,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:1",
+        "obstacles": [],
+        "plane_residual_m": 0.0000524292699992657,
+        "position": [
+          32.5904922485352,
+          3.02313947677612,
+          43.7902069091797
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.69107550777907,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:2",
+        "obstacles": [],
+        "plane_residual_m": 0.0000592176802456379,
+        "position": [
+          32.8957557678223,
+          3.06629228591919,
+          46.4380416870117
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.82606343557259,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:3",
+        "obstacles": [],
+        "plane_residual_m": 0.0198871307075024,
+        "position": [
+          34.2549018859863,
+          3.02674770355225,
+          43.3956146240234
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 4.08859034099225,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:4",
+        "obstacles": [],
+        "plane_residual_m": 0.0000644577667117119,
+        "position": [
+          33.9519386291504,
+          3.111323595047,
+          47.404857635498
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.88502136611135,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:5",
+        "obstacles": [],
+        "plane_residual_m": 0.000105675775557756,
+        "position": [
+          35.679759979248,
+          3.03343987464905,
+          43.5371513366699
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.97387565818026,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:6",
+        "obstacles": [],
+        "plane_residual_m": 0.000302752014249563,
+        "position": [
+          35.2926025390625,
+          3.15985107421875,
+          48.0184936523438
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.86707869871841,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:7",
+        "obstacles": [],
+        "plane_residual_m": 0.0000116766896098852,
+        "position": [
+          37.0313911437988,
+          3.08466839790344,
+          44.1262397766113
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 2.00818092338692,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:8",
+        "obstacles": [],
+        "plane_residual_m": 0.0197031311690807,
+        "position": [
+          36.8451499938965,
+          3.2082302570343,
+          48.3024520874023
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 3.68923497904092,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:9",
+        "obstacles": [],
+        "plane_residual_m": 0.0000937646254897118,
+        "position": [
+          38.2788467407227,
+          3.13686347007751,
+          45.093132019043
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.93492220303802,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:10",
+        "obstacles": [],
+        "plane_residual_m": 0.0000137035895022564,
+        "position": [
+          38.7091178894043,
+          3.18221592903137,
+          48.4392585754395
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.60413068064486,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-01:11",
+        "obstacles": [],
+        "plane_residual_m": 0.000111647415906191,
+        "position": [
+          40.2451705932617,
+          3.19090342521667,
+          44.6324424743652
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 1.75613456492224,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:12",
+        "obstacles": [],
+        "plane_residual_m": 0.0200189985334873,
+        "position": [
+          30.7078380584717,
+          2.982262134552,
+          44.3413696289062
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 4.39587548939327,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:13",
+        "obstacles": [],
+        "plane_residual_m": 0.00000655511394143105,
+        "position": [
+          31.2333354949951,
+          2.98256039619446,
+          43.1650505065918
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.41471538491316,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-01:14",
+        "obstacles": [],
+        "plane_residual_m": 0.0201196372509003,
+        "position": [
+          31.1395206451416,
+          2.97628211975098,
+          46.1594734191895
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 4.01058749018417,
+        "valid": true
+      }
+    ],
+    "method": "footprint support + private 3D triangle collision space, original static geometry, alpha-card trees explicitly use trunk footprint proxies",
+    "ms": 111.463
+  },
+  {
+    "case": "M-city-L1-ENG-02",
+    "members": [
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:0",
+        "obstacles": [],
+        "plane_residual_m": 0.00000357627868652344,
+        "position": [
+          32.0790557861328,
+          3.02301025390625,
+          44.93505859375
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.68121015492363,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:1",
+        "obstacles": [],
+        "plane_residual_m": 0.0000524292699992657,
+        "position": [
+          32.5904922485352,
+          3.02313947677612,
+          43.7902069091797
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.69107550777907,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:2",
+        "obstacles": [],
+        "plane_residual_m": 0.0000592176802456379,
+        "position": [
+          32.8957557678223,
+          3.06629228591919,
+          46.4380416870117
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.82606343557259,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:3",
+        "obstacles": [],
+        "plane_residual_m": 0.0198871307075024,
+        "position": [
+          34.2549018859863,
+          3.02674770355225,
+          43.3956146240234
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 4.08859034099225,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:4",
+        "obstacles": [],
+        "plane_residual_m": 0.0000644577667117119,
+        "position": [
+          33.9519386291504,
+          3.111323595047,
+          47.404857635498
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.88502136611135,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:5",
+        "obstacles": [],
+        "plane_residual_m": 0.000105675775557756,
+        "position": [
+          35.679759979248,
+          3.03343987464905,
+          43.5371513366699
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.97387565818026,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:6",
+        "obstacles": [],
+        "plane_residual_m": 0.000302752014249563,
+        "position": [
+          35.2926025390625,
+          3.15985107421875,
+          48.0184936523438
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.86707869871841,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:7",
+        "obstacles": [],
+        "plane_residual_m": 0.0000116766896098852,
+        "position": [
+          37.0313911437988,
+          3.08466839790344,
+          44.1262397766113
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 2.00818092338692,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:8",
+        "obstacles": [],
+        "plane_residual_m": 0.0197031311690807,
+        "position": [
+          36.8451499938965,
+          3.2082302570343,
+          48.3024520874023
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 3.68923497904092,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:9",
+        "obstacles": [],
+        "plane_residual_m": 0.0000937646254897118,
+        "position": [
+          38.2788467407227,
+          3.13686347007751,
+          45.093132019043
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.93492220303802,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:10",
+        "obstacles": [],
+        "plane_residual_m": 0.0000137035895022564,
+        "position": [
+          38.7091178894043,
+          3.18221592903137,
+          48.4392585754395
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.60413068064486,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-02:11",
+        "obstacles": [],
+        "plane_residual_m": 0.000111647415906191,
+        "position": [
+          40.2451705932617,
+          3.19090342521667,
+          44.6324424743652
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 1.75613456492224,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:12",
+        "obstacles": [],
+        "plane_residual_m": 0.0200189985334873,
+        "position": [
+          30.7078380584717,
+          2.982262134552,
+          44.3413696289062
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 4.39587548939327,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:13",
+        "obstacles": [],
+        "plane_residual_m": 0.00000655511394143105,
+        "position": [
+          31.2333354949951,
+          2.98256039619446,
+          43.1650505065918
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.41471538491316,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-02:14",
+        "obstacles": [],
+        "plane_residual_m": 0.0201196372509003,
+        "position": [
+          31.1395206451416,
+          2.97628211975098,
+          46.1594734191895
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 4.01058749018417,
+        "valid": true
+      }
+    ],
+    "method": "footprint support + private 3D triangle collision space, original static geometry, alpha-card trees explicitly use trunk footprint proxies",
+    "ms": 149.468
+  },
+  {
+    "case": "M-city-L1-ENG-05",
+    "members": [
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-05:0",
+        "obstacles": [],
+        "plane_residual_m": 0.0176263172179461,
+        "position": [
+          37.2151489257812,
+          3.2291784286499,
+          49.8445320129395
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.68225745946046,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-05:1",
+        "obstacles": [],
+        "plane_residual_m": 0.00441654026508331,
+        "position": [
+          36.7702751159668,
+          2.85762071609497,
+          42.2751655578613
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 6.83586726933163,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-05:2",
+        "obstacles": [],
+        "plane_residual_m": 0.000777981476858258,
+        "position": [
+          40.4668121337891,
+          3.19851899147034,
+          45.0160484313965
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.68504709015381,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-05:3",
+        "obstacles": [],
+        "plane_residual_m": 0.00128165783826262,
+        "position": [
+          41.6472778320312,
+          3.24412798881531,
+          47.2588195800781
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.27901265192694,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-05:4",
+        "obstacles": [],
+        "plane_residual_m": 0.000480408314615488,
+        "position": [
+          40.2147369384766,
+          3.2175829410553,
+          49.0731239318848
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.307010940054,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-05:5",
+        "obstacles": [],
+        "plane_residual_m": 0.00153311993926764,
+        "position": [
+          34.5465202331543,
+          3.12067651748657,
+          49.2574844360352
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 2.05623703465553,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": true,
+        "member": "ENG-05:6",
+        "obstacles": [],
+        "plane_residual_m": 0.0235606208443642,
+        "position": [
+          35.3011474609375,
+          3.18721580505371,
+          52.612735748291
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 2.88160691212441,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-05:7",
+        "obstacles": [],
+        "plane_residual_m": 0.000266723334789276,
+        "position": [
+          28.7581825256348,
+          2.90383315086365,
+          46.7470054626465
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.30266178534187,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-05:8",
+        "obstacles": [],
+        "plane_residual_m": 0.0189660228788853,
+        "position": [
+          40.7913017272949,
+          3.26615333557129,
+          52.1409378051758
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.06514330948701,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-05:9",
+        "obstacles": [],
+        "plane_residual_m": 0.000398783013224602,
+        "position": [
+          31.0619373321533,
+          3.03518795967102,
+          51.0946769714355
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.72306026362257,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-05:10",
+        "obstacles": [],
+        "plane_residual_m": 0.0000314582139253616,
+        "position": [
+          30.1702175140381,
+          2.97488689422607,
+          49.1766128540039
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 1.65173458492718,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-05:11",
+        "obstacles": [],
+        "plane_residual_m": 0.000763654243201017,
+        "position": [
+          45.7135963439941,
+          3.29772162437439,
+          48.9196128845215
+        ],
+        "reason": "ok",
+        "reserve": true,
+        "slope_degrees": 0.40734418898328,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-05:12",
+        "obstacles": [],
+        "plane_residual_m": 0.00300016719847918,
+        "position": [
+          39.584342956543,
+          3.20876932144165,
+          55.0432319641113
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 0.414486976653088,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-05:13",
+        "obstacles": [],
+        "plane_residual_m": 0.000963084399700165,
+        "position": [
+          46.4931526184082,
+          3.30666708946228,
+          46.6904602050781
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 0.234067977258895,
+        "valid": true
+      },
+      {
+        "last_approach_verified": true,
+        "march_prefix_verified": false,
+        "member": "ENG-05:14",
+        "obstacles": [],
+        "plane_residual_m": 0.000000239349901676178,
+        "position": [
+          44.2531776428223,
+          3.24438977241516,
+          53.4729766845703
+        ],
+        "reason": "ok",
+        "reserve": false,
+        "slope_degrees": 0.830394445088676,
+        "valid": true
+      }
+    ],
+    "method": "footprint support + private 3D triangle collision space, original static geometry, alpha-card trees explicitly use trunk footprint proxies",
+    "ms": 203.404
+  }
+]

@@ -5,8 +5,8 @@ extends SceneTree
 # measures how fast a planted foot travels relative to the root (model units/s
 # at scale 1). Usage: godot --headless --path . -s profile_gait.gd
 
-const CLIPS := ["walk", "run"]
-const STEPS := 60
+const CLIPS := ["walk", "trot", "run"]
+const STEPS := 240
 
 func _initialize() -> void:
 	call_deferred("run")
@@ -15,24 +15,28 @@ func stance_speed(model: Node3D, player: AnimationPlayer, clip: String) -> float
 	var anim := player.get_animation(clip)
 	var best := 0.0
 	for skeleton: Skeleton3D in model.find_children("*", "Skeleton3D", true, false):
+		var horse := skeleton.find_bone("HorseRoot") >= 0
+		var steps := STEPS if horse else 60
 		for bone in skeleton.get_bone_count():
 			var bone_name := skeleton.get_bone_name(bone).to_lower()
+			if horse and not "hoof" in bone_name:
+				continue
 			if not ("foot" in bone_name or "toe" in bone_name or "hoof" in bone_name):
 				continue
 			var samples: Array[Vector3] = []
-			for i in STEPS + 1:
+			for i in steps + 1:
 				player.play(clip)
-				player.seek(anim.length * i / STEPS, true)
+				player.seek(anim.length * i / steps, true)
 				samples.append((skeleton.global_transform * skeleton.get_bone_global_pose(bone)).origin)
 			var lowest := INF
 			for p in samples:
 				lowest = minf(lowest, p.y)
 			var distance := 0.0
 			var duration := 0.0
-			for i in STEPS:
-				if samples[i].y < lowest + 0.03 and samples[i + 1].y < lowest + 0.03:
+			for i in steps:
+				if samples[i].y < lowest + (0.003 if horse else 0.03) and samples[i + 1].y < lowest + (0.003 if horse else 0.03):
 					distance += Vector2(samples[i + 1].x - samples[i].x, samples[i + 1].z - samples[i].z).length()
-					duration += anim.length / STEPS
+					duration += anim.length / steps
 			if duration > 0.05:
 				best = maxf(best, distance / duration)
 	return best

@@ -1,0 +1,179 @@
+{
+  "tool": "original_server_local_http_smoke",
+  "source_commit_expected": "365276cc169943adc48847c0e9d86ae23e77fb3e",
+  "source_identity": "Verify source hashes separately using the included manifest.",
+  "network_scope": "127.0.0.1 only; no production requests",
+  "database": "fresh SQLite :memory: inside original test-realm.mjs",
+  "identity": "synthetic local QA identity; real browser sign-in not exercised",
+  "server_logic_modified": false,
+  "fixture_enabled": false,
+  "intentional_timeout_enabled": false,
+  "checks": [
+    {
+      "name": "node executable available",
+      "passed": true
+    },
+    {
+      "name": "Node 24 runtime",
+      "passed": true
+    },
+    {
+      "name": "original module available: gameplay37/server/hosted.mjs",
+      "passed": true
+    },
+    {
+      "name": "original module available: gameplay37/server/core.mjs",
+      "passed": true
+    },
+    {
+      "name": "original module available: dist/city/military.js",
+      "passed": true
+    },
+    {
+      "name": "original GitHub loopback adapter available",
+      "passed": true
+    },
+    {
+      "name": "fresh state needs settlement",
+      "passed": true,
+      "http_status": 404
+    },
+    {
+      "name": "freeze forward server clock",
+      "passed": true,
+      "http_status": 204
+    },
+    {
+      "name": "create fresh settlement",
+      "passed": true,
+      "http_status": 201
+    },
+    {
+      "name": "public state and paid training flag",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "world contains created settlement",
+      "passed": true
+    },
+    {
+      "name": "fresh infantry barracks exists",
+      "passed": true
+    },
+    {
+      "name": "read expected costs from original rules",
+      "passed": true
+    },
+    {
+      "name": "training accepted over HTTP",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "exact resource debit",
+      "passed": true,
+      "expected_cost": {
+        "wood": 25,
+        "food": 30,
+        "iron": 0,
+        "coins": 20
+      }
+    },
+    {
+      "name": "one queued paid order",
+      "passed": true
+    },
+    {
+      "name": "queue cost and duration agree with original rules",
+      "passed": true,
+      "duration_ms": 18000
+    },
+    {
+      "name": "same-key training replay has no extra debit or order",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "changed same-key payload rejected",
+      "passed": true,
+      "http_status": 409
+    },
+    {
+      "name": "foreign origin rejected",
+      "passed": true,
+      "http_status": 403
+    },
+    {
+      "name": "rejected commands preserve balance and queue",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "cancellation refunds exact original debit",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "repeated cancellation has no double refund: same key",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "repeated cancellation has no double refund: different key",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "second training debit accepted",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "advance clock to before completion",
+      "passed": true,
+      "http_status": 204
+    },
+    {
+      "name": "troop does not arrive before timer",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "advance clock to completion",
+      "passed": true,
+      "http_status": 204
+    },
+    {
+      "name": "training completes at exact server time",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "completed training replay has no duplicate troop or charge",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "test clock cannot move backwards",
+      "passed": true,
+      "http_status": 400
+    },
+    {
+      "name": "final state remains healthy",
+      "passed": true,
+      "http_status": 200
+    }
+  ],
+  "passed": true,
+  "node_version": "v24.22.1",
+  "inspected_file_sha256": {
+    "gameplay37/server/hosted.mjs": "2e77e0258f8dd4b283019def6afc00dd17a9c99c5670b4e6ba1fb0e438a3e501",
+    "gameplay37/server/core.mjs": "1250b878b802cfee8d1637510632c8ee9adbb728e4e5d4fa01d7183e2607d3bb",
+    "dist/city/military.js": "4c15218c8905e068e582bf5395b5038d5c9660b7dc6a8fd4f670032b6b8dd84b"
+  },
+  "runner_sha256": "40c11feadb5297b7c6873aa75c472b1e11c3135fda10b76f6a7bcf8ea656dd9e",
+  "local_process_stopped": true,
+  "elapsed_seconds": 0.422,
+  "check_count": 32
+}

@@ -31,7 +31,7 @@ func run() -> void:
 		for k in 9:
 			var speed := lerpf(low, high, k / 8.0)
 			var gait: Array = Landscape.gait_for(id, speed)
-			var foot := (walk if gait[0] == "walk" else run_speed) * float(gait[1])
+			var foot := float(stance[gait[0]]) * Landscape.FIELD_UNIT_SCALE * float(gait[1])
 			check(absf(foot - speed) / speed < 0.02, "%s skates at %.2f u/s: %s x%.2f gives %.2f" % [id, speed, gait[0], gait[1], foot])
 		check(Landscape.gait_for(id, walk)[0] == "walk", id + " should walk at natural walk speed")
 		check(Landscape.gait_for(id, run_speed)[0] == "run", id + " should run at natural run speed")

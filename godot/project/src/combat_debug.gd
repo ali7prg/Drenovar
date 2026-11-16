@@ -4,8 +4,11 @@ extends Node3D
 # bone origins are probes, not the soles of skinned meshes.
 var rows: Array = []
 var lines := MeshInstance3D.new()
+var volumes := Node3D.new()
+var volume_key := ""
 func _ready() -> void:
 	add_child(lines)
+	add_child(volumes)
 	lines.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -26,6 +29,31 @@ func sample(stage: Node3D) -> Array:
 	rows.clear()
 	var mesh := ImmediateMesh.new()
 	mesh.surface_begin(Mesh.PRIMITIVE_LINES)
+	var keys: Array = []
+	var solvers: Array = []
+	for cache in stage.army_routes.values():
+		var solver=cache.get("engage",{}).get("slot_solver")
+		if solver==null:continue
+		keys.append(str(solver.space));solvers.append(solver)
+		for slot in solver.diagnostics:
+			var tint:=Color.ORANGE if slot.reserve else Color.LIME_GREEN
+			var supports: Array=slot.get("points",[])
+			for pair in [[0,1],[1,3],[3,2],[2,0]]:
+				if supports.size()==4:line(mesh,supports[pair[0]]+Vector3.UP*.06,supports[pair[1]]+Vector3.UP*.06,tint)
+			for p: Vector3 in supports:line(mesh,p,p+slot.get("normal",Vector3.UP)*.7,Color.CYAN)
+			for i in range(1,slot.path.size()):
+				line(mesh,slot.path[i-1]+Vector3.UP*.12,slot.path[i]+Vector3.UP*.12,Color.RED if i==1 and not slot.get("march_prefix_verified",false) else tint)
+			rows.append({"member":slot.id,"kind":"planned_footprint","valid":slot.valid,"reserve":slot.reserve,"support_points":supports,"normal":slot.get("normal"),"march_prefix_verified":slot.get("march_prefix_verified",false),"approach":slot.path})
+	var key:=str(keys)
+	if key!=volume_key:
+		volume_key=key
+		for child in volumes.get_children():child.free()
+		for solver in solvers:
+			for obstacle in solver.debug_obstacles:
+				if obstacle.transform.origin.distance_to(solver.centre)>22 or volumes.get_child_count()>=96:continue
+				var shape:=MeshInstance3D.new();shape.mesh=obstacle.shape.get_debug_mesh();shape.transform=obstacle.transform
+				var mat:=StandardMaterial3D.new();mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED;mat.albedo_color=Color.MEDIUM_PURPLE if obstacle.proxy else Color.SALMON;mat.no_depth_test=true
+				shape.material_override=mat;shape.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;volumes.add_child(shape)
 	var obstacles: Array = []
 	for child in stage.buildings.get_children():
 		if child is Node3D:

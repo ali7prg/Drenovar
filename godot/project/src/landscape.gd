@@ -3,6 +3,8 @@ extends Node3D
 const WarriorVisual = preload("res://src/warrior_visual.gd")
 var fallen_bodies: Array = []
 var combat_view = preload("res://src/combat_presentation.gd").new()
+var combat_audio = preload("res://src/combat_audio.gd").new()
+var foot_contacts = preload("res://src/foot_contacts.gd").new()
 var combat_debug: Node3D
 var next_combat_debug_ms := 0
 
@@ -52,6 +54,7 @@ var announced_fights := {}
 signal fight_started(army_id: String, position: Vector3)
 const Formations = preload("res://src/formations.gd")
 const GaitTable = preload("res://src/gait_table.gd")
+const CombatSlots = preload("res://src/combat_slots.gd")
 const FIELD_UNIT_SCALE := 1.15
 # Slowest walk tempo and fastest run tempo; between them feet match exactly.
 const WALK_TEMPO := Vector2(0.55, 0.0)
@@ -218,6 +221,7 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 	add_child(effects)
 	add_child(march_lines)
 	add_child(battle_fx)
+	add_child(combat_audio)
 	if is_city:
 		town.name = "Town"
 		add_child(town)
@@ -950,6 +954,7 @@ func prepare_model_materials(instance: Node3D) -> void:
 				material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 
 func play_animation(model: Node3D, preferred: String, fallback := "", phase := -1.0, start_fraction := 0.0) -> void:
+	clear_additive_hit(model)
 	if not model.has_meta("animation_players"):
 		model.set_meta("animation_players", model.find_children("*", "AnimationPlayer", true, false))
 	for animation: AnimationPlayer in model.get_meta("animation_players"):
@@ -974,6 +979,28 @@ func play_animation(model: Node3D, preferred: String, fallback := "", phase := -
 				animation.play(selected)
 			animation.pause()
 			animation.seek(clampf(phase, 0.0, 0.999) * resource.length, true)
+
+func clear_additive_hit(model: Node3D) -> void:
+	if not model.has_meta("additive_hit"):return
+	var last: Dictionary=model.get_meta("additive_hit")
+	if is_instance_valid(last.skeleton):
+		# An animation may already have replaced this pose. Never undo its value.
+		if last.skeleton.get_bone_pose_rotation(last.bone).is_equal_approx(last.applied):
+			last.skeleton.set_bone_pose_rotation(last.bone,last.base)
+	model.remove_meta("additive_hit")
+
+func additive_hit(model: Node3D, phase: float) -> void:
+	clear_additive_hit(model)
+	if phase<0.0 or phase>1.0:return
+	for skeleton: Skeleton3D in model.find_children("*","Skeleton3D",true,false):
+		for bone in skeleton.get_bone_count():
+			var name:=skeleton.get_bone_name(bone).to_lower()
+			if "spine" in name or "chest" in name:
+				var rotation:=skeleton.get_bone_pose_rotation(bone)
+				var applied:=rotation*Quaternion(Vector3.RIGHT,sin(phase*PI)*.035*(1.0-phase))
+				skeleton.set_bone_pose_rotation(bone,applied)
+				model.set_meta("additive_hit",{"skeleton":skeleton,"bone":bone,"base":rotation,"applied":applied})
+				return
 
 func present(state: Dictionary) -> void:
 	if map_name == "city":
@@ -1565,6 +1592,16 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 		if clip_phase >= 0.0 or actor.get_meta("clip", "") != clip:
 			play_animation(actor, clip, "Idle", clip_phase)
 			actor.set_meta("clip", clip)
+		# A light contact overlays the spine without restarting Attack. Death has
+		# already won the state selection and never receives this additive layer.
+		if clip=="Attack" and battles.has(id):
+			var army: Dictionary=battles[id]
+			var elapsed:=server_ms-float(army.battleAt)
+			var last_hit:=-INF
+			for event in army_battle_events(army):
+				var row:=event_row(event)
+				if row[1]=="soldier_attack" and float(row[0])<=elapsed:last_hit=float(row[0])
+			additive_hit(actor,(elapsed-last_hit)/320.0)
 	retain_hidden_actors(creatures, known, retained, MAX_HIDDEN_CREATURES)
 	# Clear the canopy around the fight closest to the camera centre.
 	var focus_wanted := 0.0
@@ -1589,6 +1626,8 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 		if toward.length_squared() > 0.01:
 			focus_at += toward.normalized() * focus_wanted * 0.35
 	update_battle_focus(focus_at, focus_wanted, delta)
+	foot_contacts.draw(self,server_ms)
+	combat_audio.consume(self)
 	battle_fx.finish()
 	if "--combat-debug" in OS.get_cmdline_user_args() and Time.get_ticks_msec() >= next_combat_debug_ms:
 		if not is_instance_valid(combat_debug):
@@ -1630,10 +1669,10 @@ func battle_timeline(army: Dictionary, encounter: Dictionary, events: Array) -> 
 			# Blows landing on the same server tick (a volley) get a rank, so their
 			# numbers pop one after another instead of printing over each other.
 			var rank: int = hits[-1][3] + 1 if not hits.is_empty() and float(hits[-1][0]) == float(e[0]) else 0
-			hits.append([float(e[0]), damage, after, rank, combat_view.event_id(army,event)])
+			hits.append([float(e[0]), damage, after, rank, combat_view.event_id(army,event),str(e[2]),int(e[3])])
 			hp = after
 		else:
-			strikes.append([float(e[0]), "%s:%d" % [e[2], int(e[3])], e[1]])
+			strikes.append([float(e[0]), "%s:%d" % [e[2], int(e[3])], e[1],float(e[5]) if e.size()>5 and e[5]!=null else 0.0,float(e[4]) if e.size()>4 and e[4]!=null else 1.0,combat_view.event_id(army,event)])
 	cached = {"source": events, "hits": hits, "strikes": strikes, "max": maxf(1.0, start_hp)}
 	fx_timelines[army.id] = cached
 	return cached
@@ -1663,8 +1702,11 @@ func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dict
 			recent = float(hit[2])
 		hp = float(hit[2])
 		var age := elapsed - at
-		if age <= 320.0:
-			battle_fx.spark(p, age / 320.0, Color("#ffb054"), 2.4, fposmod(at * 0.013, 1.0))
+		if age <= 180.0:
+			var attacker: Vector3=members.get("%s:%d"%[hit[5],int(hit[6])],centre)
+			var direction: Vector3=(attacker-p).normalized()
+			var contact:=p+direction*minf(creature_body(encounter).y,attacker.distance_to(p)*.5)
+			battle_fx.spark(contact,age/180.0,Color("#9a8060") if creature_species(encounter) in ["dragor","kamneklyk"] else Color("#94745a"),.70 if str(hit[5]) in ["ENG-01","ENG-05","ENG-06"] else .45,fposmod(at*.013,1.0))
 	# Same target and exact authoritative tick only. Final contact remains separate.
 	var numbers := {}
 	for hit in timeline.hits:
@@ -1681,12 +1723,14 @@ func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dict
 		battle_fx.number(p,caption,number.age/900.0,Color("#ffe7a8"),number.final,number.ids,id,number.final)
 	for strike in timeline.strikes:
 		var age := elapsed - float(strike[0])
-		if age < -380.0 or age > 420.0:
+		if age < -80.0 or age > 900.0:
 			continue
 		var target: Vector3 = members.get(strike[1], centre)
-		battle_fx.slash(p, target, (age + 380.0) / 800.0, Color("#ff5a3c"), 4.4 if strike[2] == "antler_charge" else 3.8)
-		if age >= 0.0:
-			battle_fx.spark(target, age / 420.0, Color("#ff6a4a"), 2.0, fposmod(float(strike[0]) * 0.007, 1.0))
+		battle_fx.slash(p,target,(age+80.0)/200.0,Color("#a29a85"),1.2 if strike[2]=="antler_charge" else .8)
+		if age>=0.0 and age<=220.0:
+			battle_fx.spark(target,age/220.0,Color("#a69b83"),.65,fposmod(float(strike[0])*.007,1.0))
+		if age>=0.0 and float(strike[3])>0:
+			battle_fx.number(target,"-%d"%roundi(strike[3]),age/900.0,Color("#e8aa96"),strike[4]<=0,[strike[5]],id+"/"+str(strike[1]),strike[4]<=0)
 	var spec: Dictionary = encounter.get("spec", {})
 	var title := "%s · %s" % [spec.get("name", creature_species(encounter)), ["I", "II", "III"][clampi(int(encounter.get("level", 1)), 1, 3) - 1]]
 	var height := 2.6 + 0.5 * clampi(int(encounter.get("level", 1)), 1, 3)
@@ -2094,9 +2138,12 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			var engaged := false
 			if post != null:
 				var spot: Vector3 = post
+				var approach: Array = plan.get("approaches",{}).get(key,[])
 				if returning:
 					if regroup < 1.0:
-						var moved := spot.lerp(place, regroup * regroup * (3.0 - 2.0 * regroup))
+						var exit_path := approach.duplicate()
+						exit_path.reverse();exit_path.append(place)
+						var moved: Vector3 = CombatSlots.along(exit_path,regroup) if exit_path.size()>2 else spot.lerp(place,regroup)
 						if regroup < 0.6:
 							facing = atan2(place.x - spot.x, place.z - spot.z)
 							var gait := gait_for(slot.id, maxf(1.2, spot.distance_to(place) / (REGROUP_MS / 1000.0)))
@@ -2105,18 +2152,19 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 						place = moved
 				elif charge_age > -INF:
 					var distance := place.distance_to(spot)
+					if approach.size()>1:
+						distance=0.0
+						for n in range(1,approach.size()):distance+=approach[n-1].distance_to(approach[n])
 					var span := clampf(distance / CHARGE_SPEED * 1000.0, 300.0, 2600.0)
 					var w := clampf(charge_age / span, 0.0, 1.0)
 					var from := place
-					place = from.lerp(spot, w * w * (3.0 - 2.0 * w))
+					place = CombatSlots.along(approach,w*w*(3.0-2.0*w)) if approach.size()>1 else from.lerp(spot,w*w*(3.0-2.0*w))
 					if w < 1.0 and distance > 0.3:
-						facing = atan2(spot.x - from.x, spot.z - from.z)
-						var gait := gait_for(slot.id, distance / (span / 1000.0) * 1.3)
+						var next: Vector3=CombatSlots.along(approach,minf(1.0,w*w*(3.0-2.0*w)+0.015)) if approach.size()>1 else spot
+						facing = atan2(next.x-place.x,next.z-place.z)
+						var gait := gait_for(slot.id, distance / (span / 1000.0) * 6.0*w*(1.0-w))
 						clip = gait[0]
 						tempo = gait[1]
-						# Dust behind the running line (every third soldier, riders always).
-						if slot.mounted or i % 3 == 0:
-							battle_fx.dust(place, fposmod(charge_age / 520.0 + i * 0.37, 1.0), 1.9 if slot.mounted else 1.3, i * 0.618)
 					else:
 						engaged = true
 						clip = "idle"
@@ -2125,8 +2173,11 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			if fighting:
 				cache.member_at[key] = place
 			unit.transform = model_transform(place.x - p.x, place.y - p.y, place.z - p.z, facing, FIELD_UNIT_SCALE)
+			if engaged and plan.get("supports",{}).has(key):
+				unit.basis=plan.supports[key]*FIELD_UNIT_SCALE
 			var phase := -1.0
 			var strike := -INF
+			var last_strike := -INF
 			# Authored ranged Attack releases at frame 15/30 (poses.py); its
 			# release must precede contact by the existing 260 ms flight interval.
 			var prepare := 760.0 if slot.ranged else 490.0
@@ -2136,6 +2187,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				for event in events.members.get(key, []):
 					var at := float(event[0])
 					if event[1] == "soldier_attack":
+						if at<=elapsed:last_strike=at
 						if elapsed >= at - prepare and elapsed <= at + 1000.0 - prepare:
 							strike = at
 					elif at <= elapsed:
@@ -2148,22 +2200,27 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 						unit.set_meta("death_at", server_ms if hit == -INF else float(army.battleAt) + hit)
 						unit.set_meta("death_transform", unit.global_transform)
 					unit.global_transform = unit.get_meta("death_transform")
-				elif elapsed - hit < 400.0:
+				elif elapsed - hit < 400.0 and strike == -INF:
 					clip = "hit"
 					phase = (elapsed - hit) / 400.0
-				elif strike > -INF:
+				elif strike > -INF and (slot.ranged or not plan.get("reserves",{}).get(key,false)):
 					clip = "attack"
 					phase = (elapsed - strike + prepare) / 1000.0
-					if not slot.ranged:
+					if not slot.ranged and slot.id not in ["ENG-01","ENG-05","ENG-06"]:
 						# Weapon sweep timed to the swing's contact frame (event time).
-						battle_fx.slash(place, beast if hunt else p, (elapsed - strike + 260.0) / 420.0, Color("#ffd27a"), 3.2)
+						battle_fx.slash(place, beast if hunt else p,(elapsed-strike+70.0)/170.0,Color("#b7b8ac"),.85)
 				elif army.get("worldKind") == "pvp":
 					clip = "attack"
 					phase = fposmod(elapsed + i * 125.0, 1000.0) / 1000.0
+				elif slot.id=="ENG-04" and elapsed-last_strike>=240.0 and elapsed-last_strike<2240.0:
+					# The authored 2s reload fits between the existing 3.2s attacks:
+					# recovery ends +240, next preparation starts +2440.
+					clip="reload";phase=(elapsed-last_strike-240.0)/2000.0
 			if phase >= 0.0 or unit.get_meta("clip", "") != clip:
-				play_animation(unit, clip, data.unitModels[slot.id].drill if clip == "attack" else "", phase,
+				play_animation(unit, data.unitModels[slot.id].drill if clip=="reload" else clip, data.unitModels[slot.id].drill if clip == "attack" else "", phase,
 					fposmod(float(i) * 0.381966, 1.0))
 				unit.set_meta("clip", clip)
+			if clip=="attack":additive_hit(unit,(elapsed-hit)/320.0)
 			if slot.id == "SIEGE-RAM-01":
 				# Static authored machine: cosmetic recoil only at an actual server hit.
 				unit.rotation.z = PI / 3.0 if down else 0.0
@@ -2182,6 +2239,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			if slot.id == "ENG-10":
 				var held := unit.find_child("Javelin",true,false) as Node3D
 				if held != null: held.visible = not (clip == "attack" and phase >= 0.5 and phase < 0.85)
+			foot_contacts.sample(self,unit,clip,bool(slot.mounted),server_ms)
 		for unit in actor.get_children():
 			if not retained.has(String(unit.name)) and unit.name != &"Ferry":
 				if unit.has_meta("death_at") and fallen_bodies.size() < Formations.FIELD_LIMIT:
@@ -2255,6 +2313,15 @@ func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
 		places[archers[k]] = battle_place(beast, face, side, local)
 	var plan := {"beast": beast, "face": face, "yaw": atan2(face.x, face.z), "body": body, "front": front,
 		"stop": stop, "places": places}
+	var solver := CombatSlots.new()
+	solver.prepare(self,beast,face,body)
+	plan.approaches={};plan.supports={};plan.reserves={};plan.slot_solver=solver
+	for slot in cache.slots:
+		var member := "%s:%d"%[slot.id,int(slot.index)]
+		var origin := ground_point(halt-side*float(slot.side)+face*float(slot.rear))
+		var result: Dictionary=solver.choose(member,places[member],origin,bool(slot.mounted))
+		places[member]=result.position;plan.approaches[member]=result.path
+		plan.supports[member]=result.basis;plan.reserves[member]=result.reserve
 	cache.engage_key = key
 	cache.engage = plan
 	return plan
@@ -2421,8 +2488,14 @@ static func gait_for(unit_id: String, ground_speed: float) -> Array:
 	var stance: Dictionary = GaitTable.STANCE_SPEED.get(unit_id, {})
 	var walk := float(stance.get("walk", 0.0)) * FIELD_UNIT_SCALE
 	var run := float(stance.get("run", 0.0)) * FIELD_UNIT_SCALE
+	var trot := float(stance.get("trot", 0.0)) * FIELD_UNIT_SCALE
 	if walk <= 0.0 or ground_speed <= 0.0:
 		return ["walk", 1.0]
+	if trot > 0.0:
+		# New equine cycles have separate contact intervals. The normal 7/8 m/s
+		# march uses gallop near 1x; a mixed slow column uses walk or diagonal trot.
+		var chosen := "walk" if ground_speed < sqrt(walk*trot) else "trot" if ground_speed < sqrt(trot*run) else "run"
+		return [chosen, ground_speed/(float(stance[chosen])*FIELD_UNIT_SCALE)]
 	if run <= 0.0 or ground_speed < sqrt(walk * run):
 		return ["walk", clampf(ground_speed / walk, WALK_TEMPO.x, INF)]
 	return ["run", clampf(ground_speed / run, 0.0, RUN_TEMPO.y)]

@@ -1,0 +1,736 @@
+[
+  {
+    "case": "S14",
+    "members": [
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:0",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          9.4040699005127,
+          6.28585243225098,
+          -4.70596218109131
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 56.002875780458,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:1",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          8.9316520690918,
+          7.44599342346191,
+          -5.89307689666748
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 20.4255401019074,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:2",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          10.4867219924927,
+          4.13797473907471,
+          -3.99318814277649
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 61.6836802900712,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:3",
+        "obstacles": [],
+        "plane_residual_m": 0.0309007614850998,
+        "position": [
+          9.22852897644043,
+          7.64812231063843,
+          -7.15484046936035
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 4.99367283374885,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:4",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          11.7985973358154,
+          2.36330962181091,
+          -3.75608372688293
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 57.0390654977026,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:5",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          10.0187835693359,
+          7.6566309928894,
+          -8.22849559783936
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 18.9530593669225,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:6",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          13.0610580444336,
+          1.46211957931519,
+          -3.86174058914185
+        ],
+        "reason": "water",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:7",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          11.0086421966553,
+          6.73009204864502,
+          -9.0191593170166
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 48.8643580102368,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-06:0",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          10.8067188262939,
+          2.33809518814087,
+          -2.93852043151855
+        ],
+        "reason": "water",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-06:1",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          13.0009613037109,
+          2.46072626113892,
+          -11.5470542907715
+        ],
+        "reason": "water",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-06:2",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          12.0279016494751,
+          3.60501146316528,
+          -12.1960277557373
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 59.1169553127648,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-03:0",
+        "obstacles": [],
+        "plane_residual_m": 0.00195372104644775,
+        "position": [
+          2.53279209136963,
+          7.16531991958618,
+          -7.34086227416992
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 4.24200925964728,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-03:1",
+        "obstacles": [],
+        "plane_residual_m": 0.000375140458345413,
+        "position": [
+          3.06893157958984,
+          7.15776681900024,
+          -5.99362277984619
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 3.25780416225769,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-03:2",
+        "obstacles": [],
+        "plane_residual_m": 0.0027272067964077,
+        "position": [
+          3.60507106781006,
+          7.23872852325439,
+          -4.64638328552246
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 4.02433356767201,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-03:3",
+        "obstacles": [],
+        "plane_residual_m": 0.0153081193566322,
+        "position": [
+          4.14121055603027,
+          7.31699323654175,
+          -3.29914355278015
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 1.66424609850107,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-03:4",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          4.67735004425049,
+          6.97316789627075,
+          -1.95190382003784
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 39.7280042437955,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-10:0",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          5.2134895324707,
+          5.0480785369873,
+          -0.604664325714111
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 59.7272290015802,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-10:1",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          5.74962902069092,
+          2.67038702964783,
+          0.742574691772461
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 57.0969700081121,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-10:2",
+        "obstacles": [
+          "tree_footprint_proxy:(2.568159, -4.553828)"
+        ],
+        "plane_residual_m": null,
+        "position": [
+          2.11846256256104,
+          7.18070793151855,
+          -4.05478096008301
+        ],
+        "reason": "mesh_intersection",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-10:3",
+        "obstacles": [
+          "tree_footprint_proxy:(2.210598, -2.867753)",
+          "tree_footprint_proxy:(2.48929, -2.159841)",
+          "tree_footprint_proxy:(2.101475, -2.328852)"
+        ],
+        "plane_residual_m": null,
+        "position": [
+          2.65460205078125,
+          7.35019779205322,
+          -2.70754146575928
+        ],
+        "reason": "mesh_intersection",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-10:4",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          3.19074153900146,
+          7.2222900390625,
+          -1.36030197143555
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 21.6894852288111,
+        "valid": false
+      }
+    ],
+    "method": "footprint support + private 3D triangle collision space, original static geometry, alpha-card trees explicitly use trunk footprint proxies",
+    "ms": 325.526
+  },
+  {
+    "case": "S15",
+    "members": [
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:0",
+        "obstacles": [],
+        "plane_residual_m": 0.00244151055812836,
+        "position": [
+          9.82315254211426,
+          7.66596794128418,
+          -44.4625015258789
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 5.95519286356519,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:1",
+        "obstacles": [
+          "mesh:@MultiMeshInstance3D@244/18/0",
+          "mesh:@MultiMeshInstance3D@243/18/0",
+          "mesh:@MultiMeshInstance3D@242/18/0",
+          "mesh:@MultiMeshInstance3D@241/18/0",
+          "mesh:@MultiMeshInstance3D@245/18/0",
+          "mesh:@MultiMeshInstance3D@246/18/0",
+          "mesh:@MultiMeshInstance3D@247/18/0",
+          "mesh:@MultiMeshInstance3D@248/18/0"
+        ],
+        "plane_residual_m": null,
+        "position": [
+          9.66556739807129,
+          7.60499858856201,
+          -45.7355995178223
+        ],
+        "reason": "mesh_intersection",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:2",
+        "obstacles": [],
+        "plane_residual_m": 0.00482887867838144,
+        "position": [
+          10.6630887985229,
+          7.74387311935425,
+          -43.4857559204102
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 2.22043684125873,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:3",
+        "obstacles": [
+          "mesh:@MultiMeshInstance3D@244/18/0",
+          "mesh:@MultiMeshInstance3D@243/18/0",
+          "mesh:@MultiMeshInstance3D@242/18/0",
+          "mesh:@MultiMeshInstance3D@245/18/0",
+          "mesh:@MultiMeshInstance3D@246/18/0",
+          "mesh:@MultiMeshInstance3D@247/18/0",
+          "mesh:@MultiMeshInstance3D@248/18/0"
+        ],
+        "plane_residual_m": null,
+        "position": [
+          10.2419967651367,
+          7.63964366912842,
+          -46.8876609802246
+        ],
+        "reason": "mesh_intersection",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:4",
+        "obstacles": [],
+        "plane_residual_m": 0.00225137546658516,
+        "position": [
+          11.8284721374512,
+          7.76752424240112,
+          -42.8908500671387
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 2.8482633963677,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:5",
+        "obstacles": [],
+        "plane_residual_m": 0.000678323209285736,
+        "position": [
+          11.2271537780762,
+          7.72749853134155,
+          -47.7487640380859
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 6.04886299757158,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:6",
+        "obstacles": [],
+        "plane_residual_m": 0.00242428854107857,
+        "position": [
+          13.0905523300171,
+          7.75330257415771,
+          -42.6111679077148
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 3.99792097692931,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-01:7",
+        "obstacles": [
+          "mesh:@MultiMeshInstance3D@94/21/1"
+        ],
+        "plane_residual_m": null,
+        "position": [
+          12.3829498291016,
+          7.75392580032349,
+          -48.3277320861816
+        ],
+        "reason": "mesh_intersection",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-06:0",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          17.9081764221191,
+          7.71475791931152,
+          -42.2083015441895
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 29.7542738955576,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-06:1",
+        "obstacles": [
+          "tree_footprint_proxy:(16.36545, -50.15517)",
+          "tree_footprint_proxy:(16.36285, -50.33163)"
+        ],
+        "plane_residual_m": null,
+        "position": [
+          16.9569435119629,
+          7.41517543792725,
+          -49.8931045532227
+        ],
+        "reason": "mesh_intersection",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-06:2",
+        "obstacles": [],
+        "plane_residual_m": null,
+        "position": [
+          19.8940200805664,
+          7.52424573898315,
+          -43.7582778930664
+        ],
+        "reason": "slope",
+        "reserve": null,
+        "slope_degrees": 36.6925143785745,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-03:0",
+        "obstacles": [],
+        "plane_residual_m": 0.00796304829418659,
+        "position": [
+          3.84462547302246,
+          6.86816453933716,
+          -48.7519721984863
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 4.48436592614561,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-03:1",
+        "obstacles": [
+          "mesh:@MultiMeshInstance3D@244/17/0",
+          "mesh:@MultiMeshInstance3D@243/17/0",
+          "mesh:@MultiMeshInstance3D@242/17/0",
+          "mesh:@MultiMeshInstance3D@245/17/0",
+          "mesh:@MultiMeshInstance3D@246/17/0",
+          "mesh:@MultiMeshInstance3D@247/17/0",
+          "mesh:@MultiMeshInstance3D@248/17/0"
+        ],
+        "plane_residual_m": null,
+        "position": [
+          4.02274799346924,
+          6.82778024673462,
+          -47.3129539489746
+        ],
+        "reason": "mesh_intersection",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-03:2",
+        "obstacles": [
+          "mesh:@MultiMeshInstance3D@244/17/0",
+          "mesh:@MultiMeshInstance3D@243/17/0",
+          "mesh:@MultiMeshInstance3D@242/17/0",
+          "mesh:@MultiMeshInstance3D@241/17/0",
+          "mesh:@MultiMeshInstance3D@245/17/0",
+          "mesh:@MultiMeshInstance3D@246/17/0",
+          "mesh:@MultiMeshInstance3D@247/17/0",
+          "mesh:@MultiMeshInstance3D@248/17/0"
+        ],
+        "plane_residual_m": null,
+        "position": [
+          4.20087146759033,
+          6.99967622756958,
+          -45.8739356994629
+        ],
+        "reason": "mesh_intersection",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-03:3",
+        "obstacles": [],
+        "plane_residual_m": 0.00543712079524994,
+        "position": [
+          4.37899494171143,
+          7.03595304489136,
+          -44.4349174499512
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 9.73447778264266,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-03:4",
+        "obstacles": [],
+        "plane_residual_m": 0.00175691582262516,
+        "position": [
+          4.55711841583252,
+          6.90937757492065,
+          -42.9959030151367
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 6.45266503743551,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-10:0",
+        "obstacles": [],
+        "plane_residual_m": 0.0128558166325092,
+        "position": [
+          4.73524188995361,
+          6.9682765007019,
+          -41.556884765625
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 7.73253629363861,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-10:1",
+        "obstacles": [
+          "mesh:@MultiMeshInstance3D@95/21/0",
+          "mesh:@MultiMeshInstance3D@94/21/0"
+        ],
+        "plane_residual_m": null,
+        "position": [
+          4.91336441040039,
+          6.98520946502686,
+          -40.1178665161133
+        ],
+        "reason": "mesh_intersection",
+        "reserve": null,
+        "slope_degrees": 0.0,
+        "valid": false
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-10:2",
+        "obstacles": [],
+        "plane_residual_m": 0.00785762816667557,
+        "position": [
+          2.6129903793335,
+          6.85785341262817,
+          -45.6773872375488
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 5.34126061697308,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-10:3",
+        "obstacles": [],
+        "plane_residual_m": 0.00773035734891891,
+        "position": [
+          2.79111385345459,
+          6.85849666595459,
+          -44.2383689880371
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 6.90521039535516,
+        "valid": true
+      },
+      {
+        "last_approach_verified": null,
+        "march_prefix_verified": null,
+        "member": "ENG-10:4",
+        "obstacles": [],
+        "plane_residual_m": 0.0127374324947596,
+        "position": [
+          2.96923732757568,
+          6.80337905883789,
+          -42.7993507385254
+        ],
+        "reason": "ok",
+        "reserve": null,
+        "slope_degrees": 2.48632459019482,
+        "valid": true
+      }
+    ],
+    "method": "footprint support + private 3D triangle collision space, original static geometry, alpha-card trees explicitly use trunk footprint proxies",
+    "ms": 91.067
+  }
+]

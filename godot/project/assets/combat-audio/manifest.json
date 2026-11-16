@@ -1,0 +1,172 @@
+{
+  "source": "Original deterministic procedural contact cues; no third-party recordings",
+  "rate": 48000,
+  "channels": 1,
+  "voices": 8,
+  "voice_gain_db": -14,
+  "listening_acceptance": "OPEN on iPhone 12",
+  "files": [
+    {
+      "file": "foot-0.wav",
+      "duration_ms": 160.0,
+      "peak_dbfs": -6.935749724493125,
+      "rms_dbfs": -25.082716655293908
+    },
+    {
+      "file": "foot-1.wav",
+      "duration_ms": 160.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -24.596084819090635
+    },
+    {
+      "file": "foot-2.wav",
+      "duration_ms": 160.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -24.233286078348097
+    },
+    {
+      "file": "hoof-0.wav",
+      "duration_ms": 190.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -24.499685329756232
+    },
+    {
+      "file": "hoof-1.wav",
+      "duration_ms": 190.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -26.687737046077274
+    },
+    {
+      "file": "hoof-2.wav",
+      "duration_ms": 190.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -27.349235296184027
+    },
+    {
+      "file": "bow-0.wav",
+      "duration_ms": 140.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -25.796830441917905
+    },
+    {
+      "file": "bow-1.wav",
+      "duration_ms": 140.0,
+      "peak_dbfs": -6.935749724493125,
+      "rms_dbfs": -23.89508448136667
+    },
+    {
+      "file": "bow-2.wav",
+      "duration_ms": 140.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -25.95658500015734
+    },
+    {
+      "file": "crossbow-0.wav",
+      "duration_ms": 120.0,
+      "peak_dbfs": -6.935749724493128,
+      "rms_dbfs": -23.828888132636557
+    },
+    {
+      "file": "crossbow-1.wav",
+      "duration_ms": 120.0,
+      "peak_dbfs": -6.935749724493125,
+      "rms_dbfs": -23.813232123099922
+    },
+    {
+      "file": "crossbow-2.wav",
+      "duration_ms": 120.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -24.18040008223244
+    },
+    {
+      "file": "javelin-0.wav",
+      "duration_ms": 200.0,
+      "peak_dbfs": -6.935749724493128,
+      "rms_dbfs": -23.100342559027705
+    },
+    {
+      "file": "javelin-1.wav",
+      "duration_ms": 200.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -22.94743662378456
+    },
+    {
+      "file": "javelin-2.wav",
+      "duration_ms": 200.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -22.703839148255625
+    },
+    {
+      "file": "flesh-0.wav",
+      "duration_ms": 180.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -25.595251620310364
+    },
+    {
+      "file": "flesh-1.wav",
+      "duration_ms": 180.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -25.763618004985865
+    },
+    {
+      "file": "flesh-2.wav",
+      "duration_ms": 180.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -26.158563005472107
+    },
+    {
+      "file": "armor-0.wav",
+      "duration_ms": 260.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -26.549906019618923
+    },
+    {
+      "file": "armor-1.wav",
+      "duration_ms": 260.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -25.130043451635593
+    },
+    {
+      "file": "armor-2.wav",
+      "duration_ms": 260.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -24.86585261609442
+    },
+    {
+      "file": "wood-0.wav",
+      "duration_ms": 200.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -25.508803258313787
+    },
+    {
+      "file": "wood-1.wav",
+      "duration_ms": 200.0,
+      "peak_dbfs": -6.935749724493128,
+      "rms_dbfs": -24.01394924595676
+    },
+    {
+      "file": "wood-2.wav",
+      "duration_ms": 200.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -24.515320526579746
+    },
+    {
+      "file": "fall-0.wav",
+      "duration_ms": 420.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -24.70460347306573
+    },
+    {
+      "file": "fall-1.wav",
+      "duration_ms": 420.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -25.080316435872096
+    },
+    {
+      "file": "fall-2.wav",
+      "duration_ms": 420.0,
+      "peak_dbfs": -6.935749724493126,
+      "rms_dbfs": -24.23728403688637
+    }
+  ]
+}

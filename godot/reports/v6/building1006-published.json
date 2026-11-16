@@ -1,0 +1,125 @@
+{
+  "status": "passed",
+  "read_only": true,
+  "checks": [
+    {
+      "path": "/army/assets/ENG-01-spearman-lod0.glb",
+      "status": 200,
+      "bytes": 2984928,
+      "sha256": "f94030238673ad5792ea5ac0d9066ca9a4279a66c439338848cd304cf9e8ce0d",
+      "passed": true
+    },
+    {
+      "path": "/assets/city/architecture-v6/web/ALT-02-10.glb",
+      "status": 200,
+      "bytes": 1838440,
+      "sha256": "9364de083c4b46c0684a38b06cd63b1dd8bb7d49c04eba4689dbf91b3109a34a",
+      "passed": true
+    },
+    {
+      "path": "/assets/city/architecture-v6/web/SIEGE-RAM-01.glb",
+      "status": 200,
+      "bytes": 178492,
+      "sha256": "f4b780d7fcccc5c51222e3ee95258967ea127fd5cf3b62a6cadcaf1f36943594",
+      "passed": true
+    },
+    {
+      "path": "/v6-shared/army/assets/ENG-01-spearman-lod0.glb",
+      "status": 200,
+      "bytes": 2984928,
+      "sha256": "f94030238673ad5792ea5ac0d9066ca9a4279a66c439338848cd304cf9e8ce0d",
+      "passed": true
+    },
+    {
+      "path": "/v6-shared/v6/ui.mjs",
+      "status": 200,
+      "bytes": 20808,
+      "sha256": "9f8e21c1f53246e7c8d75a77b9186106b768dd25568536dee6f0381df97cf5b6",
+      "passed": true
+    },
+    {
+      "path": "/v6-shared/v6/ui.css",
+      "status": 200,
+      "bytes": 3206,
+      "sha256": "1cdfd78647d93fa68228cf587678cc81686bd2549362936e3d3b565f249eeaae",
+      "passed": true
+    },
+    {
+      "service": "primary",
+      "path": "/__health",
+      "status": 200,
+      "expected": 200,
+      "version_header": true,
+      "passed": true
+    },
+    {
+      "service": "primary",
+      "path": "/api/auth/info",
+      "status": 200,
+      "expected": 200,
+      "version_header": true,
+      "passed": true
+    },
+    {
+      "service": "primary",
+      "path": "/api/v6/version",
+      "status": 200,
+      "expected": 200,
+      "version_header": true,
+      "passed": true
+    },
+    {
+      "service": "primary",
+      "path": "/api/native/game/state",
+      "status": 404,
+      "expected": 404,
+      "version_header": true,
+      "passed": true
+    },
+    {
+      "service": "primary",
+      "path": "/api/native/game/account",
+      "status": 404,
+      "expected": 404,
+      "version_header": true,
+      "passed": true
+    },
+    {
+      "service": "primary",
+      "path": "/api/native/game/state",
+      "status": 426,
+      "expected": 426,
+      "version_header": false,
+      "passed": true
+    },
+    {
+      "service": "site-gateway",
+      "path": "/api/v6/version",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "service": "site-gateway",
+      "path": "/api/state",
+      "status": 404,
+      "expected": 404,
+      "passed": true
+    },
+    {
+      "service": "chatgpt-signin",
+      "path": "/api/native/approve",
+      "status": 302,
+      "expected": 302,
+      "passed": true
+    },
+    {
+      "service": "chatgpt-signin",
+      "path": "/api/native/exchange",
+      "status": 202,
+      "expected": 202,
+      "passed": true
+    }
+  ],
+  "production_data_writes": 0
+}

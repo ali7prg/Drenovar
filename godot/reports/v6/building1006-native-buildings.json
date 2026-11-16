@@ -1,0 +1,2305 @@
+{
+  "cases": [
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B05"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B05"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B05"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B05"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B05"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B05"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B05"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B05"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B05"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B05"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B05"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B01"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B01"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B01"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B01"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B01"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B01"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B01"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B01"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B01"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B01"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B01"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B02"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B02"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B02"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B02"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B02"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B02"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B02"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B02"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B02"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B02"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B02"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B03"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B03"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B03"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B03"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B03"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B03"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B03"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B03"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B03"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B03"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B03"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B04"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B04"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B04"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B04"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B04"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B04"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B04"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B04"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B04"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B04"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B04"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B06"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B06"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B06"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B06"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B06"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B06"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B06"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B06"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B06"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B06"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B06"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B07"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B07"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B07"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B07"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B07"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B07"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B07"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B07"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B07"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B07"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B07"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B08"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B08"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B08"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B08"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B08"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B08"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B08"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B08"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B08"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B08"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B08"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B09"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B09"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B09"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B09"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B09"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B09"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B09"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B09"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B09"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B09"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B09"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B10"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B10"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B10"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B10"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B10"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B10"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B10"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B10"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B10"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B10"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B10"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B11"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B11"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B11"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B11"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B11"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B11"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B11"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B11"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B11"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B11"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B11"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B12"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B12"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B12"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B12"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B12"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B12"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B12"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B12"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B12"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B12"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B12"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B13"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B13"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B13"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B13"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B13"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B13"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B13"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B13"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B13"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B13"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B13"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B14"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B14"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B14"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B14"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B14"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B14"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B14"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B14"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B14"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B14"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B14"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B15"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B15"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B15"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B15"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B15"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B15"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B15"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B15"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B15"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B15"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B15"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B16"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B16"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B16"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B16"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B16"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B16"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B16"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B16"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B16"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B16"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B16"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B17"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B17"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B17"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B17"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B17"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B17"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B17"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B17"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B17"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B17"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B17"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B18"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B18"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B18"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B18"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B18"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B18"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B18"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B18"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B18"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B18"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B18"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B19"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B19"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B19"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B19"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B19"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B19"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B19"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B19"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B19"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B19"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B19"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B20"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B20"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B20"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B20"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B20"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B20"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B20"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B20"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B20"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B20"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B20"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B21"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B21"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B21"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B21"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B21"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B21"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B21"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B21"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B21"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B21"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B21"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B22"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B22"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B22"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B22"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B22"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B22"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B22"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B22"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B22"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B22"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B22"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B23"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B23"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B23"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B23"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B23"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B23"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B23"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B23"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B23"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B23"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B23"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B24"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B24"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B24"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B24"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B24"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B24"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B24"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B24"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B24"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B24"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B24"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B25"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B25"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B25"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B25"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B25"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B25"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B25"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B25"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B25"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B25"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B25"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B26"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B26"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B26"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B26"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B26"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B26"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B26"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B26"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B26"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B26"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B26"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 1,
+      "status": "passed",
+      "target": 2,
+      "type": "B27"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 2,
+      "status": "passed",
+      "target": 3,
+      "type": "B27"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 3,
+      "status": "passed",
+      "target": 4,
+      "type": "B27"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 4,
+      "status": "passed",
+      "target": 5,
+      "type": "B27"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 5,
+      "status": "passed",
+      "target": 6,
+      "type": "B27"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 6,
+      "status": "passed",
+      "target": 7,
+      "type": "B27"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 7,
+      "status": "passed",
+      "target": 8,
+      "type": "B27"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 8,
+      "status": "passed",
+      "target": 9,
+      "type": "B27"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 9,
+      "status": "passed",
+      "target": 10,
+      "type": "B27"
+    },
+    {
+      "cancel": "passed",
+      "completion": "passed",
+      "level": 10,
+      "status": "passed",
+      "target": 11,
+      "type": "B27"
+    },
+    {
+      "level": 11,
+      "status": "passed",
+      "type": "B27"
+    }
+  ],
+  "checks": 4512,
+  "fixture": "synthetic localhost; real Godot menus/buttons and authoritative HTTP server; no real account writes",
+  "milestone_boundaries": 81,
+  "states": 297,
+  "status": "passed",
+  "transitions": 270
+}

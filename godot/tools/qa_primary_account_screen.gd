@@ -25,7 +25,7 @@ func run() -> void:
 	assert(text.has("Открыть основной город в браузере"))
 	assert(text.has("Подключить устройство"))
 	assert(text.has("Войти через ChatGPT"))
-	assert(text.has("Версия 0.6.0 · сборка 1005"))
+	assert(text.has("Версия 0.6.0 · сборка 1006"))
 	assert(not text.has("Создать тестовое поселение"))
 	assert(not text.has("Основать поселение"))
 	assert(not game.v6_panels.enabled())

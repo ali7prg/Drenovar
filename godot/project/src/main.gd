@@ -117,6 +117,7 @@ var polling_state := false
 var request_generation := 0
 var login_in_progress := false
 var client_update_required := false
+var v6_protocol_confirmed := false
 var pending_login_save_error := false
 var command_in_progress := false
 var player_id := ""
@@ -704,6 +705,11 @@ func next_worker_free_at() -> float:
 
 # A line under a refused action: who is busy and, with one worker, how the second comes.
 func add_workers_note(parent: Container) -> void:
+	if v6_panels.enabled():
+		row(parent, "Строители заняты. Откройте очереди, чтобы проверить оставшееся время или отменить работу.")
+		if int(state.workers) < 2:
+			row(parent, "Второй бесплатный строитель открывается с IV уровня ратуши.")
+		return
 	var ends := next_worker_free_at()
 	if ends < INF and ends > timer_now():
 		var label := Label.new()
@@ -717,6 +723,17 @@ func add_workers_note(parent: Container) -> void:
 		row(parent, "Второй рабочий появится с «Жилым домом» %d уровня." % WORKERS_HOUSING_LEVEL)
 
 func show_city_actions() -> void:
+	if is_v6_server():
+		if not await ensure_v6_ready():
+			return
+		open_modal("Поселение", "right", "ОБЩИЙ ГОРОД · I–XI")
+		button(modal_body, "Строить", v6_panels.catalog)
+		button(modal_body, "Очереди и отмена", v6_panels.queues)
+		button(modal_body, "Ресурсы и доход", v6_panels.economy)
+		button(modal_body, "Армия", v6_panels.army)
+		button(modal_body, "Найти существо", show_city_hunt)
+		row(modal_body, "Строители: %d · работники: %d / %d" % [int(state.workers), int(state.v6.workforce.used), int(state.v6.workforce.capacity)])
+		return
 	open_modal("Поселение")
 	button(modal_body, "Строить", show_build_menu)
 	button(modal_body, "Ресурсы и доход", show_economy)
@@ -743,6 +760,9 @@ func show_city_actions() -> void:
 	button(modal_body, "Гарнизон", show_armies)
 
 func show_city_guide() -> void:
+	if is_v6_server():
+		await v6_panels.objectives()
+		return
 	open_modal("Первые шаги", "right")
 	var guide: Dictionary = state.city.kingdom.guide
 	if not guide.get("entered", false):
@@ -767,7 +787,7 @@ func show_application() -> void:
 	button(modal_body, "Проверка плавности", show_performance)
 
 func show_economy(resource := "") -> void:
-	if v6_panels.enabled():
+	if is_v6_server():
 		v6_panels.economy()
 		return
 	open_modal(RESOURCE_NAMES.get(resource, "Запасы поселения"), "left")
@@ -896,7 +916,7 @@ func build_option(definition: Dictionary) -> Dictionary:
 # that can be built starts placement mode: the building follows the finger and
 # snaps onto a free plot; "Построить" there sends the order.
 func show_build_menu(group := build_group) -> void:
-	if v6_panels.enabled():
+	if is_v6_server():
 		v6_panels.catalog()
 		return
 	build_group = group
@@ -1126,6 +1146,9 @@ func move_supported() -> bool:
 # free cleared plot inside the wall. Free of charge, no builder, no timer; the
 # server keeps the building's level, queues and production.
 func start_move(building: Dictionary) -> void:
+	if is_v6_server():
+		await v6_panels.inspect_instance(str(building.id))
+		return
 	close_modal()
 	action_ring.close()
 	if map_name != "city" or not is_instance_valid(stage):
@@ -1444,6 +1467,9 @@ func show_build_details(definition: Dictionary) -> void:
 	button(modal_footer, "← Все здания", show_build_menu.bind(build_group))
 
 func show_construction() -> void:
+	if is_v6_server():
+		await v6_panels.catalog()
+		return
 	open_modal("Строительство", "right")
 	for order in construction_orders():
 		countdown({"clear":"Расчистка", "build":"Строительство", "upgrade":"Улучшение"}.get(order.kind, "Заказ"), order.endsAt)
@@ -1468,6 +1494,9 @@ func focus_build_plot(plot: Dictionary, position: Vector3) -> void:
 	inspect_plot(plot)
 
 func inspect_construction_order(order: Dictionary) -> void:
+	if is_v6_server():
+		await v6_panels.queues()
+		return
 	open_modal(building_title(order.type) if order.has("type") else "Расчистка участка")
 	var title: String = {"clear":"Расчистка", "build":"Строительство", "upgrade":"Улучшение"}.get(order.kind, "Заказ")
 	countdown(title, order.endsAt)
@@ -1498,7 +1527,7 @@ func show_clearings() -> void:
 				not player_id.is_empty() and level >= int(grove.level) and builder_ready()))
 
 func show_starter_goals() -> void:
-	if v6_panels.enabled():
+	if is_v6_server():
 		v6_panels.objectives()
 		return
 	open_modal("Первые шаги", "right")
@@ -1560,6 +1589,15 @@ static func speed_duration(seconds: int) -> String:
 	return "%d мин" % (seconds / 60)
 
 func show_speedups(queue: String, order: Dictionary, building_id: String) -> void:
+	if is_v6_server() and queue in ["construction", "training"]:
+		if not await ensure_v6_ready():
+			return
+		for current: Dictionary in state.v6.orders:
+			if current.id == order.get("requestId", order.get("id", "")) and current.status == "pending":
+				v6_panels.speedups(current)
+				return
+		await v6_panels.queues()
+		return
 	if order.get("predicted", false):
 		await wait_for_order(queue, order, building_id)
 		return
@@ -1727,7 +1765,7 @@ func show_march_speedups(army: Dictionary) -> void:
 	show_speedups("march", {"id": army.id, "endsAt": float(finish)}, "")
 
 func show_trade(resource := "") -> void:
-	if v6_panels.enabled():
+	if is_v6_server():
 		v6_panels.trade()
 		return
 	open_modal("Рынок", "right")
@@ -1775,7 +1813,7 @@ func total_units(units: Dictionary) -> int:
 	return count
 
 func show_hospital() -> void:
-	if v6_panels.enabled():
+	if is_v6_server():
 		v6_panels.services("B16")
 		return
 	open_modal("Лазарет", "right")
@@ -1827,7 +1865,7 @@ func unit_quantity(title: String, limit: int) -> SpinBox:
 	return quantity
 
 func show_armies() -> void:
-	if v6_panels.enabled():
+	if is_v6_server():
 		v6_panels.army()
 		return
 	open_modal("Армия наготове", "garrison", "ГАРНИЗОН DRENOVAR")
@@ -1890,7 +1928,7 @@ func show_military_cultures() -> void:
 	button(modal_body, "К армии", show_armies)
 
 func show_training_buildings() -> void:
-	if v6_panels.enabled():
+	if is_v6_server():
 		v6_panels.catalog()
 		return
 	open_modal("Военные здания")
@@ -2494,6 +2532,9 @@ func panel_texture(path: String) -> Texture2D:
 	return panel_textures[path]
 
 func open_building_ring(marker: Dictionary) -> void:
+	if is_v6_server():
+		await v6_panels.open_ring(marker)
+		return
 	var building: Dictionary = marker.item
 	var level := int(building.level)
 	var actions: Array = []
@@ -2525,8 +2566,11 @@ func open_building_ring(marker: Dictionary) -> void:
 	action_ring.open(str(building.id), "%s · ур. %d" % [building_title(building.type), level], marker.position, stage.camera, actions)
 
 func inspect_building(building: Dictionary) -> void:
-	if v6_panels.enabled():
-		v6_panels.inspect(str(building.get("conceptType", "")))
+	if is_v6_server():
+		if building.get("wall", false) and not building.has("id"):
+			await v6_panels.inspect("B18")
+		else:
+			await v6_panels.inspect_instance(str(building.id))
 		return
 	open_modal(building_title(building.type), "right", "ПОСЕЛЕНИЕ")
 	var level := int(building.level)
@@ -2648,6 +2692,9 @@ func add_defence_rows(parent: Container, base: String, level: int) -> void:
 # when the city is attacked from the world map, what the next level adds, and the
 # yard inside the wall.
 func show_city_defence() -> void:
+	if is_v6_server():
+		await v6_panels.inspect("B18")
+		return
 	action_ring.close()
 	open_modal("Оборона поселения", "right", "СТЕНЫ И БАШНИ")
 	var hall := hall_level()
@@ -2751,6 +2798,12 @@ func recruitment_buildings() -> Array:
 	return result
 
 func open_recruitment(building: Dictionary, unit_id := "", quantity := 1) -> void:
+	if is_v6_server():
+		if await ensure_v6_ready():
+			var current: Dictionary = v6_panels.instance(str(building.id))
+			if not current.is_empty():
+				await v6_panels.services(str(current.type))
+		return
 	var group: String = data.trainingGroups.get(building.type, data.trainingGroups.get(building_definition(building.type).get("base"), ""))
 	var units: Array = RECRUIT_ORDER.map(unit_for_id).filter(func(unit): return unit.training_building == group)
 	if units.is_empty():
@@ -4695,6 +4748,7 @@ func accept(response: Dictionary) -> void:
 		stale_responses += 1
 		return
 	state = response
+	v6_protocol_confirmed = response.get("economy_version", "") == "DRENOVAR-V6-C1.0"
 	# Orders sent but not in this answer yet (a poll that left before them): their
 	# local effect stays (costs of works just ordered, speedups in flight).
 	for slot in pending_works:
@@ -4783,6 +4837,18 @@ func instant_order(order: Dictionary) -> bool:
 	return order.get("kind", "") in ["kingdom", "resource", "legacyBuilding"] and order.get("action", "") in INSTANT_ACTIONS
 
 func command(order: Dictionary, after_success := Callable()) -> bool:
+	if is_v6_server() and order.get("kind", "") not in ["v6", "v6quote", "v6catalog", "deploy", "worldMarch", "recall", "retreat", "editNames", "relocateCity", "resource", "speedup", "starter71", "v6collect"]:
+		if not await ensure_v6_ready():
+			return false
+		if order.get("kind", "") == "trade":
+			await v6_panels.trade()
+		elif order.get("kind", "") == "cancelTraining":
+			await v6_panels.queues()
+		elif str(order.get("buildingId", "")) != "":
+			await v6_panels.inspect_instance(str(order.buildingId))
+		else:
+			await v6_panels.catalog()
+		return false
 	var instant := instant_order(order) and not after_success.is_valid()
 	if instant:
 		predict_work(order)
@@ -5188,10 +5254,31 @@ func server_reachable() -> bool:
 func timer_end_label() -> String:
 	return "Завершаем…" if server_reachable() else "Нет связи · ждём сервер"
 
+func is_v6_server() -> bool:
+	return endpoint == LIVE_SERVER or v6_protocol_confirmed or v6_panels.enabled()
+
+func ensure_v6_ready(force_refresh := false) -> bool:
+	if v6_panels.enabled() and not showing_cached_state and not force_refresh:
+		return true
+	if not connected():
+		show_account()
+		return false
+	var response := await send_request("state" if loopback else "native/game/state", null, false)
+	if response.has("city"):
+		accept(response)
+	if v6_panels.enabled() and not showing_cached_state:
+		return true
+	if response.get("needsSettlement", false) or int(response.get("httpStatus",0)) == 401:
+		show_account()
+	else:
+		show_error(response if response.has("error") else {"error":"Не удалось загрузить актуальное состояние города. Повторите подключение."})
+	return false
+
 func request(path: String, payload: Variant = null, idempotency_key := "") -> Dictionary:
 	if not connected():
 		return {"error":"Сначала войди в аккаунт."}
-	var response := await send_request(path if loopback else "native/game/" + path, payload, true, 12.0, idempotency_key)
+	var query_only: bool = payload is Dictionary and payload.get("kind", "") in ["v6catalog", "v6quote"]
+	var response := await send_request(path if loopback else "native/game/" + path, payload, not query_only, 20.0 if query_only else 12.0, idempotency_key)
 	if not loopback and response.get("httpStatus", 0) == 401:
 		# One refused command must not sign the player out: only forget the saved
 		# login when the session itself is rejected by the state endpoint too.
@@ -5733,6 +5820,9 @@ func show_relocation_list() -> void:
 			inspect_world_plot(site.item))
 
 func inspect_plot(plot: Dictionary) -> void:
+	if is_v6_server():
+		await v6_panels.catalog()
+		return
 	open_modal("Участок", "right")
 	row(modal_body, "Координаты · %d : %d" % [roundi(plot.x), roundi(plot.z)])
 	var kingdom: Variant = state.city.get("kingdom")

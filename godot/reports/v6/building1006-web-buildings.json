@@ -1,0 +1,1767 @@
+{
+  "status": "passed",
+  "states": 297,
+  "transitions": 270,
+  "milestone_boundaries": 81,
+  "poor_state": "passed",
+  "legacy_entry_redirect": "passed",
+  "errors": [],
+  "fixture": "actual browser V6 UI components and real HTTP/SQLite server; isolated synthetic data; 3D rendering independently covered",
+  "cases": [
+    {
+      "type": "B05",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B05",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B05",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B05",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B05",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B05",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B05",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B05",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B05",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B05",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B05",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B01",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B01",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B01",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B01",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B01",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B01",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B01",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B01",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B01",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B01",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B01",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B08",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B08",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B08",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B08",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B08",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B08",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B08",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B08",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B08",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B08",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B08",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B07",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B07",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B07",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B07",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B07",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B07",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B07",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B07",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B07",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B07",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B07",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B26",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B26",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B26",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B26",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B26",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B26",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B26",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B26",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B26",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B26",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B26",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B18",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B18",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B18",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B18",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B18",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B18",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B18",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B18",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B18",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B18",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B18",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B19",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B19",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B19",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B19",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B19",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B19",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B19",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B19",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B19",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B19",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B19",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B02",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B02",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B02",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B02",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B02",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B02",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B02",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B02",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B02",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B02",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B02",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B03",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B03",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B03",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B03",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B03",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B03",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B03",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B03",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B03",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B03",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B03",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B04",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B04",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B04",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B04",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B04",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B04",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B04",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B04",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B04",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B04",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B04",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B06",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B06",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B06",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B06",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B06",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B06",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B06",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B06",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B06",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B06",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B06",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B09",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B09",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B09",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B09",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B09",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B09",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B09",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B09",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B09",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B09",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B09",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B10",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B10",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B10",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B10",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B10",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B10",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B10",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B10",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B10",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B10",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B10",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B11",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B11",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B11",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B11",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B11",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B11",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B11",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B11",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B11",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B11",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B11",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B12",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B12",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B12",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B12",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B12",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B12",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B12",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B12",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B12",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B12",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B12",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B13",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B13",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B13",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B13",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B13",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B13",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B13",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B13",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B13",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B13",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B13",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B14",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B14",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B14",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B14",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B14",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B14",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B14",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B14",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B14",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B14",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B14",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B15",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B15",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B15",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B15",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B15",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B15",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B15",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B15",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B15",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B15",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B15",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B16",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B16",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B16",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B16",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B16",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B16",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B16",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B16",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B16",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B16",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B16",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B17",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B17",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B17",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B17",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B17",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B17",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B17",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B17",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B17",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B17",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B17",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B20",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B20",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B20",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B20",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B20",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B20",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B20",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B20",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B20",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B20",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B20",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B21",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B21",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B21",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B21",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B21",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B21",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B21",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B21",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B21",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B21",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B21",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B22",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B22",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B22",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B22",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B22",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B22",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B22",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B22",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B22",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B22",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B22",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B23",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B23",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B23",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B23",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B23",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B23",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B23",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B23",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B23",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B23",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B23",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B25",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B25",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B25",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B25",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B25",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B25",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B25",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B25",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B25",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B25",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B25",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B27",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B27",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B27",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B27",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B27",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B27",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B27",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B27",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B27",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B27",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B27",
+      "level": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B24",
+      "level": 1,
+      "target": 2,
+      "status": "passed"
+    },
+    {
+      "type": "B24",
+      "level": 2,
+      "target": 3,
+      "status": "passed"
+    },
+    {
+      "type": "B24",
+      "level": 3,
+      "target": 4,
+      "status": "passed"
+    },
+    {
+      "type": "B24",
+      "level": 4,
+      "target": 5,
+      "status": "passed"
+    },
+    {
+      "type": "B24",
+      "level": 5,
+      "target": 6,
+      "status": "passed"
+    },
+    {
+      "type": "B24",
+      "level": 6,
+      "target": 7,
+      "status": "passed"
+    },
+    {
+      "type": "B24",
+      "level": 7,
+      "target": 8,
+      "status": "passed"
+    },
+    {
+      "type": "B24",
+      "level": 8,
+      "target": 9,
+      "status": "passed"
+    },
+    {
+      "type": "B24",
+      "level": 9,
+      "target": 10,
+      "status": "passed"
+    },
+    {
+      "type": "B24",
+      "level": 10,
+      "target": 11,
+      "status": "passed"
+    },
+    {
+      "type": "B24",
+      "level": 11,
+      "status": "passed"
+    }
+  ]
+}

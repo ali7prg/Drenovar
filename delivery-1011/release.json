@@ -1,0 +1,35 @@
+{
+  "tag_name": "ios-test-v0.6.0-b1011",
+  "target_commitish": "aa514fdc30ac17e9157dd81385900788f01b9cb1",
+  "html_url": "https://github.com/ali7prg/Drenovar/releases/tag/ios-test-v0.6.0-b1011",
+  "assets": [
+    {
+      "name": "DRENOVAR-game-1011.ipa",
+      "size": 248422899,
+      "digest": "sha256:a6344f99dd42222a5a659fe941ee3742e2f0c25b31ff5909840000aa00ac20df",
+      "state": "uploaded",
+      "url": "https://github.com/ali7prg/Drenovar/releases/download/ios-test-v0.6.0-b1011/DRENOVAR-game-1011.ipa"
+    },
+    {
+      "name": "DRENOVAR-game-1011.pck",
+      "size": 339684512,
+      "digest": "sha256:6bb1408432323d89e09b11956871c5a69ba924d6e936312d2f31632a9a253f04",
+      "state": "uploaded",
+      "url": "https://github.com/ali7prg/Drenovar/releases/download/ios-test-v0.6.0-b1011/DRENOVAR-game-1011.pck"
+    },
+    {
+      "name": "DRENOVAR-game-evidence-1011.zip",
+      "size": 8339051,
+      "digest": "sha256:f878125cb1b664a8c274baf10d26ea378549736e7d479205efee22d0cc382597",
+      "state": "uploaded",
+      "url": "https://github.com/ali7prg/Drenovar/releases/download/ios-test-v0.6.0-b1011/DRENOVAR-game-evidence-1011.zip"
+    },
+    {
+      "name": "SHA256.txt",
+      "size": 799,
+      "digest": "sha256:ecb1e1830d0c75f07371301a14b7ee0edbe6684f4057d330b92aab7facea3139",
+      "state": "uploaded",
+      "url": "https://github.com/ali7prg/Drenovar/releases/download/ios-test-v0.6.0-b1011/SHA256.txt"
+    }
+  ]
+}

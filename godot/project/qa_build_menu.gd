@@ -36,6 +36,9 @@ func drag(index: int, from: Vector2, to: Vector2) -> void:
 func run() -> void:
 	root.size = Vector2i(1366, 630)
 	var game = load("res://main.tscn").instantiate()
+	# Offline demo on an unreachable loopback server (no session): the shared
+	# V6 server opens the account screen first for a signed-out player.
+	game.endpoint = "http://127.0.0.1:9"
 	root.add_child(game)
 	while game.scene_loading or not is_instance_valid(game.stage):
 		await process_frame

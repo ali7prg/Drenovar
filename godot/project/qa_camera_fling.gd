@@ -46,6 +46,9 @@ func swipe(game: Node, from: Vector2, step: Vector2, frames: int, hold_frames :=
 func run() -> void:
 	root.size = Vector2i(1366, 630)
 	var game = load("res://main.tscn").instantiate()
+	# Offline demo on an unreachable loopback server (no session): the shared
+	# V6 server opens the account screen first for a signed-out player.
+	game.endpoint = "http://127.0.0.1:9"
 	root.add_child(game)
 	while not is_instance_valid(game.stage) or game.scene_loading:
 		await process_frame

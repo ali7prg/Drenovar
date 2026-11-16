@@ -38,13 +38,12 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/qa"
           status=0
-          # qa_action_ring and qa_build_menu exercised the v92 ring and build menu,
-          # which the V6 client no longer opens (is_v6_server routes building taps to
-          # v6_panels). V6 buildings are covered by godot/tools/qa_building_actions.gd
-          # (297 states) and qa_building_services.gd against v6/tests/buildings-ui-local.mjs.
+          # These offline suites run the signed-out demo on an unreachable loopback
+          # endpoint. V6 building panels need a server: godot/tools/qa_building_actions.gd
+          # (297 states) and qa_building_services.gd with v6/tests/buildings-ui-local.mjs.
           for scenario in qa_camera_hud qa_runtime qa_batch_parity qa_optimization qa_warriors qa_web_panels \
               qa_city_parity qa_stability qa_panel_latency qa_diagnostics qa_gait qa_network qa_camera_fling qa_idempotency qa_troops06 \
-              qa_api_pool qa_touch_buttons qa_prewarm qa_battle_fx qa_session_store qa_server_clock qa_instant_start qa_city_works qa_single_scene qa_hunt qa_world_hunt qa_workers qa_speedups qa_town_plan qa_legacy_build; do
+              qa_api_pool qa_touch_buttons qa_prewarm qa_battle_fx qa_action_ring qa_session_store qa_server_clock qa_build_menu qa_instant_start qa_city_works qa_single_scene qa_hunt qa_world_hunt qa_workers qa_speedups qa_town_plan qa_legacy_build; do
             if timeout 300 "$GODOT_BIN" --headless --path . -s "$scenario.gd" > "$RUNNER_TEMP/qa/$scenario.log" 2>&1; then
               echo "PASS $scenario: $(grep -E '^QA_[A-Z_]+ ' "$RUNNER_TEMP/qa/$scenario.log" | grep -v REPORT | tail -1)"
             else

@@ -12,7 +12,7 @@ config_version=5
 
 config/name="DRENOVAR"
 config/version="0.6.0"
-config/build_number="1016"
+config/build_number="1017"
 run/main_scene="res://main.tscn"
 run/main_scene.combat_lab="res://combat_lab.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
@@ -23,7 +23,7 @@ config/icon="res://assets/icons/drenovar_icon_512.png"
 
 [drenovar]
 
-combat_v010/enabled=false
+combat_v010/enabled=true
 
 [display]
 

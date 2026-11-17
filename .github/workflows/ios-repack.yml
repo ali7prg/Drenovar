@@ -81,7 +81,7 @@ jobs:
           python3 - <<'PYCODE'
           from pathlib import Path
           import zipfile,os
-          root=Path('godot/runtime-audit-1016')
+          root=Path('godot/runtime-audit-1017')
           with zipfile.ZipFile(Path(os.environ['RUNNER_TEMP'])/'DRENOVAR-game-evidence-${{ steps.meta.outputs.build }}.zip','w',zipfile.ZIP_DEFLATED) as z:
               for p in root.rglob('*'):
                   if p.is_file(): z.write(p,p.relative_to(root))
@@ -107,6 +107,6 @@ jobs:
             echo "::notice::$tag already holds ${{ steps.meta.outputs.ipa }}; not overwritten. Bump application/version in export_presets.cfg for a new IPA."
             exit 0
           fi
-          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease --target "${GITHUB_SHA}" --title "DRENOVAR — игровая сборка ${{ steps.meta.outputs.build }}" --notes-file godot/runtime-audit-1016/RELEASE-RU.md
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease --target "${GITHUB_SHA}" --title "DRENOVAR — игровая сборка ${{ steps.meta.outputs.build }}" --notes-file godot/runtime-audit-1017/RELEASE-RU.md
           gh release upload "$tag" "$RUNNER_TEMP/${{ steps.meta.outputs.ipa }}" "$RUNNER_TEMP/SHA256.txt" "$RUNNER_TEMP/DRENOVAR-game-${{ steps.meta.outputs.build }}.pck" "$RUNNER_TEMP/DRENOVAR-game-evidence-${{ steps.meta.outputs.build }}.zip"
           echo "Download: https://github.com/${GITHUB_REPOSITORY}/releases/download/$tag/${{ steps.meta.outputs.ipa }}"

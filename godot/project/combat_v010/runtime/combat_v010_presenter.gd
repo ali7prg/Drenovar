@@ -25,6 +25,8 @@ const FLIGHT_MS := 260.0
 # Drift (s) tolerated between the playing clip and the server-derived time before a seek.
 const DRIFT_S := 0.05
 const BLEND_S := 0.12
+# Longest a soldier waits for its library before it is created on the legacy clips.
+const LOAD_DEADLINE_MS := 2000
 const RANGED := ["bow", "crossbow", "javelin"]
 const TROOP_CLIPS := ["idle", "walk", "run", "attack_a", "attack_b", "hit", "death"]
 const CREATURE_CLIPS := ["idle", "combat_idle", "walk", "run", "alert", "attack_a", "attack_b", "hit_front", "hit_left", "hit_right", "death"]
@@ -77,10 +79,13 @@ static func ready(kind: String, key: String) -> bool:
 		if ResourceLoader.load_threaded_request(path, "AnimationLibrary") != OK:
 			_libraries[path] = load(path)
 			return true
-		_requests[path] = true
+		_requests[path] = Time.get_ticks_msec()
 	var status := ResourceLoader.load_threaded_get_status(path)
 	if status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-		return false
+		# Never keep soldiers off the field: past the deadline they are created
+		# on the legacy clips (no library yet, see _library) and later ones get
+		# the library once the background load has finished.
+		return Time.get_ticks_msec() - int(_requests[path]) > LOAD_DEADLINE_MS
 	_requests.erase(path)
 	_libraries[path] = ResourceLoader.load_threaded_get(path) if status == ResourceLoader.THREAD_LOAD_LOADED else null
 	return true
@@ -92,6 +97,8 @@ static func prewarm(kind: String, keys: Array) -> void:
 
 static func _library(kind: String, key: String) -> AnimationLibrary:
 	var path := library_path(kind, key)
+	if _requests.has(path):
+		return null # still loading in the background: do not block the frame on it
 	if not _libraries.has(path):
 		_libraries[path] = load(path) if ResourceLoader.exists(path) else null
 	return _libraries[path]

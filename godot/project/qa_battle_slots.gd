@@ -24,7 +24,8 @@ func run() -> void:
 		for cache in stage.army_routes.values():
 			if not cache.has("engage"):continue
 			var plan: Dictionary=cache.engage
-			var solver=Slots.new();solver.prepare(stage,plan.beast,plan.face,plan.body)
+			# Same obstacles as the plan: trees on the crowd's cleared ground do not count (build 1020).
+			var solver=Slots.new();solver.clear_radius=float(plan.get("clear",0.0));solver.prepare(stage,plan.beast,plan.face,plan.body)
 			for slot in cache.slots:
 				var key:="%s:%d"%[slot.id,slot.index]
 				var position: Vector3=plan.places[key]

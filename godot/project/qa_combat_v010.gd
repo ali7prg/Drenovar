@@ -91,7 +91,10 @@ func run() -> void:
 		if shared.has(id):
 			check(shared[id] == library, "%s instances do not share one library resource" % id)
 		shared[id] = library
-		if not str(player_of(unit).assigned_animation).begins_with("combat_v010/"):
+		# The presenter's clips only: the library's, or the model's own authored
+		# Attack/Idle that the presenter maps for SOURCE_FIGHT families (build 1020).
+		var playing := StringName(player_of(unit).assigned_animation)
+		if not str(playing).begins_with("combat_v010/") and not CombatV010.info(unit).get("clips", {}).values().has(playing):
 			single_owner = false
 	check(types.size() == 10, "All ten troop types on the field: %s" % str(types.keys()))
 	check(single_owner, "A v0.1.0 soldier plays a legacy clip (two pose owners)")
@@ -125,11 +128,12 @@ func run() -> void:
 		var expected := float(CombatV010.info(unit).prepare_ms) / 1000.0
 		var spec := Registry.troop(String(e.unitId))
 		var name := str(player.assigned_animation)
-		check(name.begins_with("combat_v010/attack_"), "%s:%d not in an attack at its contact: %s" % [e.unitId, e.index, name])
+		var attacks := [str(CombatV010.animation_name(CombatV010.info(unit), &"attack_a")), str(CombatV010.animation_name(CombatV010.info(unit), &"attack_b"))]
+		check(name in attacks, "%s:%d not in an attack at its contact: %s" % [e.unitId, e.index, name])
 		check(absf(player.current_animation_position - expected) <= CombatV010.DRIFT_S + 0.001,
 			"%s:%d clip time %.3f at event.at, expected %.3f" % [e.unitId, e.index, player.current_animation_position, expected])
 		if spec.event == "release":
-			check(absf(expected - float(spec.contact_or_release_s) - CombatV010.FLIGHT_MS / 1000.0) < 0.001, "%s release not one flight before contact" % e.unitId)
+			check(absf(expected - float(CombatV010.info(unit).release_ms) / 1000.0 - CombatV010.FLIGHT_MS / 1000.0) < 0.001, "%s release not one flight before contact" % e.unitId)
 		# Same snapshot again (new object, same content) and a rewind: the swing is not restarted.
 		var copy: Dictionary = state.duplicate(true)
 		stage.present_armies(copy, start + float(e.at))

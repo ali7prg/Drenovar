@@ -16,6 +16,9 @@ var target_body := Vector2.ZERO
 var mesh_shapes := {}
 var tree_proxies := {}
 var debug_obstacles: Array = []
+# Forest trees within this distance of the creature are cleared while the fight is
+# shown (forest.gdshader battle_focus_core): no obstacle for the battle places.
+var clear_radius := 0.0
 var foot_shape := BoxShape3D.new()
 var horse_shape := BoxShape3D.new()
 const MARGIN := 0.10
@@ -104,6 +107,7 @@ func prepare(owner_stage: Node3D, at: Vector3, face: Vector3, body: Vector2) -> 
 					# transparent billboard triangle as physical intersection.
 					var key:=Vector2(transform.origin.x,transform.origin.z)
 					if tree_proxies.has(key):continue
+					if key.distance_to(Vector2(centre.x,centre.z))<clear_radius:continue
 					tree_proxies[key]=true
 					var shape:=CylinderShape3D.new();shape.radius=.22*transform.basis.x.length();shape.height=2.5
 					shapes.append(shape)

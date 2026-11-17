@@ -4261,7 +4261,10 @@ func show_performance() -> void:
 			movement[floori((motion_count - 1) * 0.5)], movement[floori((motion_count - 1) * 0.95)], motion_count]
 	report += "\nСцена: %s\nЭкземпляры в отрисовке: %d из %d" % ["город" if map_name == "city" else "мир", batches.x, batches.y]
 	report += "\nПоследний пересчёт окружения: %.2f мс" % stage.last_cull_ms
-	var output_size := get_viewport().get_texture().get_size()
+	# The 3D image actually drawn: the window's pixels times the 3D scale. (The root
+	# viewport texture's get_size() includes the canvas_items stretch: on an iPhone 12
+	# it reported 4694 × 2162 for a 2532 × 1170 render target.)
+	var output_size := Vector2(get_window().size) * get_viewport().scaling_3d_scale
 	report += "\nРазмер интерфейса: %d × %d\nРазмер буфера: %d × %d\nВызовы отрисовки: %d\nПримитивы: %d" % [
 		get_viewport().get_visible_rect().size.x, get_viewport().get_visible_rect().size.y,
 		output_size.x, output_size.y, draw_calls, primitives

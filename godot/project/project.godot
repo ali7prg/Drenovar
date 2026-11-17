@@ -12,7 +12,7 @@ config_version=5
 
 config/name="DRENOVAR"
 config/version="0.6.0"
-config/build_number="1019"
+config/build_number="1020"
 run/main_scene="res://main.tscn"
 run/main_scene.combat_lab="res://combat_lab.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
@@ -43,6 +43,10 @@ anti_aliasing/quality/msaa_3d=1
 [shader_globals]
 
 battle_focus={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+battle_focus_core={
 "type": "vec4",
 "value": Vector4(0, 0, 0, 0)
 }

@@ -49,7 +49,11 @@ var town_rebuilds := 0
 var forest_materials := {}
 var focus_radius := 0.0
 var focus_centre := Vector3.ZERO
+var focus_core := Vector3.ZERO
+var focus_core_radius := 0.0
 var fight_positions := {}
+# Hunts with battle places: the ground the crowd needs cleared of trees (metres).
+var fight_cores := {}
 var announced_fights := {}
 signal fight_started(army_id: String, position: Vector3)
 const Formations = preload("res://src/formations.gd")
@@ -1013,12 +1017,18 @@ func forest_material(part: MeshInstance3D) -> Material:
 
 # `battle_focus` is declared in project.godot [shader_globals].
 # Opens (radius > 0) or closes the forest clearing around the fight on screen.
-func update_battle_focus(centre: Vector3, wanted: float, delta: float) -> void:
+func update_battle_focus(centre: Vector3, wanted: float, delta: float, core := Vector3.ZERO, core_wanted := 0.0) -> void:
 	if wanted > 0.0:
 		focus_centre = centre
 	focus_radius = move_toward(focus_radius, wanted, delta * 30.0)
 	RenderingServer.global_shader_parameter_set(&"battle_focus",
 		Vector4(focus_centre.x, focus_centre.y, focus_centre.z, focus_radius))
+	# The crowd's own ground around a hunted creature (battle_focus_core in forest.gdshader).
+	if core_wanted > 0.0:
+		focus_core = core
+	focus_core_radius = move_toward(focus_core_radius, core_wanted, delta * 30.0)
+	RenderingServer.global_shader_parameter_set(&"battle_focus_core",
+		Vector4(focus_core.x, focus_core.y, focus_core.z, focus_core_radius))
 
 func prepare_model_materials(instance: Node3D) -> void:
 	# Reuse original maps and geometry; preserve normal/ORM values and alpha settings.
@@ -1589,8 +1599,10 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			if server_ms >= float(plan.get("halt_at", INF)) - 3000.0:
 				# Open the canopy before the column arrives, so the charge is seen.
 				fight_positions[id] = p
+				fight_cores[id] = float(plan.get("clear", 0.0))
 		if corpse:
 			fight_positions[id] = p
+			fight_cores[id] = float(plan.get("clear", 0.0))
 		if not close_enough or (map_name == "world" and camera_zoom > 132.0):
 			continue
 		var actor := creatures.get_node_or_null(NodePath(id)) as Node3D
@@ -1656,7 +1668,15 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 					attack = at
 					charge = kind == "antler_charge"
 					victim = "%s:%d" % [event[2], int(event[3])] if event is Array else "%s:%d" % [event.unitId, int(event.index)]
+			if attack == -INF:
+				# Between its server attacks it swipes at the shield wall (beast_feints).
+				for feint in route.get("feints", []):
+					if elapsed >= float(feint.at) - bite.x and elapsed <= float(feint.at) + bite.y:
+						attack = float(feint.at)
+						victim = str(feint.target)
+						charge = false
 			var fallen_at := present_battle_fx(id, p, encounter, army, elapsed, events)
+			fight_cores[id] = float(plan.get("clear", 0.0))
 			if fallen_at > -INF and elapsed >= fallen_at:
 				attack = -INF
 				hit = -INF
@@ -1737,6 +1757,8 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 	# Clear the canopy around the fight closest to the camera centre.
 	var focus_wanted := 0.0
 	var focus_at := focus_centre
+	var core_at := focus_core
+	var core_wanted := 0.0
 	var best := INF
 	for fight_id in fight_positions:
 		var at: Vector3 = fight_positions[fight_id]
@@ -1745,7 +1767,10 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			best = gap
 			focus_at = at
 			focus_wanted = 19.0 if map_name == "city" else 12.0
+			core_at = at
+			core_wanted = float(fight_cores.get(fight_id, 0.0))
 	fight_positions.clear()
+	fight_cores.clear()
 	if is_instance_valid(placement_plate):
 		# Building being placed: open the canopy around it so the ghost and plot show.
 		focus_at = placement_position()
@@ -1756,7 +1781,7 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 		toward.y = 0.0
 		if toward.length_squared() > 0.01:
 			focus_at += toward.normalized() * focus_wanted * 0.35
-	update_battle_focus(focus_at, focus_wanted, delta)
+	update_battle_focus(focus_at, focus_wanted, delta, core_at, core_wanted)
 	foot_contacts.draw(self,server_ms)
 	combat_audio.consume(self)
 	battle_fx.finish()
@@ -2191,6 +2216,83 @@ static func strike_slot_free(times: Array, at: float, prepare: float, follow := 
 			return false
 	return true
 
+# Between the server's blows every soldier standing at its battle place keeps
+# fighting (presentation only: no number, HP or outcome comes from these swings).
+# Up to build 1019 a soldier swung only for a server blow given to it: about one
+# swing each in a short hunt, while the crowd stood still around the creature.
+# The cadence is a pure function of the member key and the battle clock, so polls,
+# rewinds and other devices draw the same swings: one swing (plus the crossbow's
+# reload, `recover`) and a rest of 0.2-0.8 s, the phase spread per member; only
+# from `from` (the soldier stands at its place), no contact after `until` (the
+# creature falls), and never over a server blow this soldier shows: that blow's
+# windup, contact and follow-through stay MIN_FOLLOW_MS clear. Returns the contact
+# time (battle ms) of the swing whose busy span holds `elapsed`, or -INF.
+const AMBIENT_REST_MS := Vector2(200.0, 800.0)
+
+static func ambient_strike(key: String, elapsed: float, from: float, until: float, window: Vector2, recover: float, own: Array) -> float:
+	var seed := hash(key)
+	var busy := window.x + window.y + recover
+	var period := busy + lerpf(AMBIENT_REST_MS.x, AMBIENT_REST_MS.y, float(seed & 1023) / 1023.0)
+	var offset := float((seed >> 10) & 1023) / 1023.0 * period
+	var start := offset + floorf((elapsed - offset) / period) * period
+	if elapsed > start + busy or start < from or start + window.x > until - 120.0:
+		return -INF
+	for at in own:
+		if float(at) - window.x < start + busy + MIN_FOLLOW_MS and start < float(at) + window.y + MIN_FOLLOW_MS:
+			return -INF
+	return start + window.x
+
+# The creature fights back between its server attacks (presentation only: no
+# damage, number or death comes from these). Up to build 1019 a hunt showed just
+# the server's one or two creature attacks, and the creature stood still while the
+# crowd struck it. Now every 2.4-3.3 s it swipes at one of the foot soldiers in
+# front of it (within 80 degrees of its face), who takes the swipe on the raised
+# shield. A pure function of the army id, the plan and the battle clock, so every
+# poll and device draws the same; none within 2 s of a server creature attack,
+# none after the creature falls (`until`), only at soldiers who have a shield clip.
+const FEINT_PERIOD_MS := Vector2(2400.0, 3300.0)
+const FEINT_FIRST_MS := 2200.0
+const FEINT_CLEAR_MS := 2000.0
+const BLOCK_WINDOW := Vector2(420.0, 520.0)
+
+func beast_feints(army_id: String, plan: Dictionary, cache: Dictionary, rows: Array, until: float, bite: Vector2, fallen: Dictionary) -> Array:
+	var stamp := [rows.size(), until, bite, fallen.size(), plan.get("locked", false), cache.slots.size()]
+	if cache.get("feints_stamp") == stamp and cache.get("feints_all") is Array:
+		return cache.feints_all
+	var beast: Vector3 = plan.beast
+	var face: Vector3 = plan.face
+	var candidates: Array = []
+	for slot in cache.slots:
+		var key := "%s:%d" % [slot.id, int(slot.index)]
+		if slot.ranged or slot.mounted or fallen.has(key) or not plan.places.has(key) or plan.get("reserves", {}).get(key, false):
+			continue
+		if slot.id not in ["ENG-01", "ENG-02", "ENG-07", "ENG-08", "ENG-09"]:
+			continue # the shield bearers (their models have Shield_Block)
+		var place: Vector3 = plan.places[key]
+		var to := Vector3(place.x - beast.x, 0.0, place.z - beast.z)
+		if to.length_squared() > 0.01 and to.normalized().dot(face) >= cos(deg_to_rad(80.0)):
+			candidates.append(key)
+	candidates.sort()
+	var server: Array = []
+	for e in rows:
+		var row := event_row(e)
+		if row[1] != "soldier_attack":
+			server.append(float(row[0]))
+	var result: Array = []
+	var seed := hash(army_id)
+	var period := lerpf(FEINT_PERIOD_MS.x, FEINT_PERIOD_MS.y, float(seed & 1023) / 1023.0)
+	if not candidates.is_empty():
+		for n in 64:
+			var at := FEINT_FIRST_MS + n * period + float(hash("%s#%d" % [army_id, n]) & 1023) / 1023.0 * 0.25 * period
+			if at > until - 500.0:
+				break
+			if server.any(func(t): return absf(t - at) < FEINT_CLEAR_MS):
+				continue
+			result.append({"at": at, "target": candidates[hash("%s@%d" % [army_id, n]) % candidates.size()]})
+	cache.feints_stamp = stamp
+	cache.feints_all = result
+	return result
+
 # 0 at the reserve place, 1 at the creature: a far reserve comes in for a blow
 # with contact at `at` (battle ms) and goes back after it. It sets off `ride_ms`
 # before the windup, but never before `known_at`, when the client first had the
@@ -2511,15 +2613,31 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			# back): the old ring closes into the column.
 			spread = 1.0 - smoothstep(0.0, 700.0, server_ms - start)
 		var charge_age := server_ms - float(plan.halt_at) if halted else -INF
-		# The melee line swings until the creature falls (or, in a lost fight, to the end).
+		var battle_base := float(army.get("battleAt", end))
+		# The crowd keeps fighting until the creature falls (or, in a lost fight, to the end).
 		var slain_at := INF
 		if hunt and fighting:
 			var fx := battle_timeline(army, encounter, army_battle_events(army))
 			if not fx.hits.is_empty() and float(fx.hits[-1][2]) <= 0.0:
 				slain_at = float(fx.hits[-1][0])
+			elif army.get("battleEndsAt") != null:
+				slain_at = float(army.battleEndsAt) - battle_base
+		var ambient_sparks := 0
 		var places: Dictionary = plan.get("places", {})
 		var beast: Vector3 = plan.get("beast", p)
 		var events: Dictionary = cache.get("events", {"members":{}, "fallen":{}})
+		# The creature's own swipes between its server attacks, and who blocks them.
+		var feints: Array = []
+		if hunt and fighting and not plan.is_empty():
+			var beast_actor := creatures.get_node_or_null(NodePath(str(encounter.get("id", "")))) as Node3D
+			if beast_actor != null:
+				var bite := CombatV010.creature_attack_window(beast_actor) if CombatV010.owns(beast_actor) else Vector2(560.0, 430.0)
+				feints = beast_feints(id, plan, cache, army_battle_events(army), slain_at, bite, events.get("fallen", {}))
+		cache.feints = feints
+		var blocks := {}
+		for feint in feints:
+			if not blocks.has(feint.target): blocks[feint.target] = []
+			blocks[feint.target].append(float(feint.at))
 		var retained := {}
 		for i in range(cache.slots.size()):
 			var slot: Dictionary = cache.slots[i]
@@ -2560,6 +2678,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			# Where this soldier fights the creature, and whether it got there.
 			var post: Variant = places.get(key)
 			var engaged := false
+			var arrived_at := INF # battle ms from which it stands at its place
 			if post != null:
 				var spot: Vector3 = post
 				var approach: Array = plan.get("approaches",{}).get(key,[])
@@ -2619,6 +2738,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 					var span := maxf(clampf(distance / CHARGE_SPEED * 1000.0, 300.0, 2600.0),
 						distance / (CHARGE_MAX_RIDE if slot.mounted else CHARGE_MAX_RUN) * 1000.0)
 					var w := clampf(charge_age / span, 0.0, 1.0)
+					arrived_at = float(plan.halt_at) + (span if distance > 0.3 else 0.0) - battle_base
 					var from := place
 					place = CombatSlots.along(approach,w*w*(3.0-2.0*w)) if approach.size()>1 else from.lerp(spot,w*w*(3.0-2.0*w))
 					if w < 1.0 and distance > 0.3:
@@ -2694,10 +2814,23 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			var hit_ms := CombatV010.hit_window(unit, 400.0) if v010 else 400.0
 			var hit := -INF
 			var down: bool = fighting and events.fallen.has(key)
+			# Ambient swing (between the server's blows, see ambient_strike) and the
+			# crossbow's reload after a shot: contact times in battle ms.
+			var ambient := -INF
+			var reload_from := -INF
+			var recover := CombatV010.recover_ms(unit) if v010 else 0.0
+			# A creature's swipe at this soldier (beast_feints): the shield goes up.
+			var block := -INF
+			if fighting and v010 and engaged and blocks.has(key) and CombatV010.has_clip(unit, &"block"):
+				for at in blocks[key]:
+					if elapsed >= at - BLOCK_WINDOW.x and elapsed <= at + BLOCK_WINDOW.y:
+						block = at
 			if fighting:
+				var own_blows: Array = blocks.get(key, []).duplicate()
 				for event in events.members.get(key, []):
 					var at := float(event[0])
 					if event[1] == "soldier_attack":
+						own_blows.append(at)
 						if at<=elapsed:last_strike=at
 						if elapsed >= at - prepare and elapsed <= at + window.y:
 							strike = at
@@ -2707,6 +2840,14 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				if v010:
 					# Overlapping (lent) strikes: never cut a windup/contact (see pick_strike).
 					strike = CombatV010.pick_strike(unit, events.members.get(key, []), elapsed)
+					if hunt and engaged and not down and strike == -INF and elapsed - hit >= hit_ms:
+						ambient = ambient_strike(key, elapsed, maxf(arrived_at, -window.x), slain_at, window, recover, own_blows)
+						if ambient > -INF and elapsed > ambient + window.y:
+							reload_from = ambient + window.y
+							ambient = -INF
+					if recover > 0.0 and strike == -INF and ambient == -INF and reload_from == -INF \
+							and elapsed - last_strike > window.y and elapsed - last_strike < window.y + recover:
+						reload_from = last_strike + window.y
 				if down:
 					clip = "death"
 					phase = 1.0 if hit == -INF else (elapsed - hit) / 1200.0
@@ -2723,29 +2864,56 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 					if not slot.ranged and slot.id not in ["ENG-01","ENG-05","ENG-06"]:
 						# Weapon sweep timed to the swing's contact frame (event time).
 						battle_fx.slash(place, beast if hunt else p,(elapsed-strike+70.0)/170.0,Color("#b7b8ac"),.85)
+				elif block > -INF:
+					clip = "block"
+					phase = (elapsed - block + BLOCK_WINDOW.x) / 1000.0
+					# The claw meets the shield: no number, the swipe did no harm.
+					battle_fx.slash(beast, place, (elapsed - block + 80.0) / 200.0, Color("#a29a85"), .8)
+					if elapsed >= block and elapsed - block <= 200.0:
+						battle_fx.spark(place.lerp(beast, 0.15), (elapsed - block) / 200.0, Color("#e4dcc4"), .5, fposmod(block * .007, 1.0))
+				elif ambient > -INF:
+					clip = "attack"
+					phase = (elapsed - ambient + prepare) / 1000.0
+					if not slot.ranged:
+						if slot.id not in ["ENG-01","ENG-05","ENG-06"]:
+							battle_fx.slash(place, beast, (elapsed - ambient + 70.0) / 170.0, Color("#b7b8ac"), .75)
+						if elapsed >= ambient and elapsed - ambient <= 160.0 and ambient_sparks < 4:
+							# The blow lands on the creature's hide (no number: not a server blow).
+							ambient_sparks += 1
+							var toward := (place - beast).normalized()
+							battle_fx.spark(beast + toward * minf(float(plan.body.y), place.distance_to(beast) * 0.5), (elapsed - ambient) / 160.0,
+								Color("#94745a"), .32, fposmod(ambient * .011 + i * .17, 1.0))
 				elif army.get("worldKind") == "pvp":
 					clip = "attack"
 					phase = fposmod(elapsed + i * 125.0, 1000.0) / 1000.0
+				elif reload_from > -INF:
+					clip = "reload"
+					phase = (elapsed - reload_from) / maxf(1.0, recover)
 				elif slot.id=="ENG-04" and not v010 and elapsed-last_strike>=240.0 and elapsed-last_strike<2240.0:
-					# (v0.1.0 crossbow attack already contains the reload preparation.)
 					# The authored 2s reload fits between the existing 3.2s attacks:
 					# recovery ends +240, next preparation starts +2440.
 					clip="reload";phase=(elapsed-last_strike-240.0)/2000.0
+			var shown := strike if strike > -INF else ambient
 			var clip_time := -1.0
 			if v010:
-				# Single pose owner: exact library clips, server-time driven.
+				# Single pose owner: exact clips, server-time driven.
 				var named := StringName(clip)
 				if clip == "attack":
-					if strike > -INF:
-						named = CombatV010.attack_clip(key, strike)
-						clip_time = CombatV010.attack_time(unit, elapsed, strike)
+					if shown > -INF:
+						named = CombatV010.attack_clip(key, shown)
+						clip_time = CombatV010.attack_time(unit, elapsed, shown)
 						unit.set_meta("v010_strike", strike) # the server event this swing shows (QA)
+						unit.set_meta("ambient_strike", ambient)
 					else:
 						# Existing PvP stand-in swing (no individual server events): same
 						# staggered cadence, played at the clip's own speed.
 						named = &"attack_a"
 						clip_time = fposmod(elapsed + i * 125.0, window.x + window.y) / 1000.0
 						unit.set_meta("v010_strike", -INF)
+				elif clip == "reload":
+					clip_time = (elapsed - reload_from) / 1000.0
+				elif clip == "block":
+					clip_time = (elapsed - block + BLOCK_WINDOW.x) / 1000.0
 				elif clip == "death":
 					clip_time = INF if hit == -INF else (elapsed - hit) / 1000.0
 				elif clip == "hit":
@@ -2753,6 +2921,13 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				CombatV010.drive(unit, named, clip_time, tempo, fposmod(float(i) * 0.381966, 1.0))
 				unit.set_meta("clip", clip)
 				unit.set_meta("tempo", tempo)
+				if clip == "attack" and shown > -INF and engaged and not slot.ranged:
+					# The body goes into the blow: a short step (a rider's lunge) toward the
+					# creature through the contact and back. Feet stay planted in the clip.
+					var lunge := sin(PI * clampf((elapsed - shown + 320.0) / 720.0, 0.0, 1.0))
+					var toward := Vector3(beast.x - place.x, 0.0, beast.z - place.z)
+					if toward.length_squared() > 0.01:
+						unit.position += toward.normalized() * lunge * (0.55 if slot.mounted else 0.24)
 			elif phase >= 0.0 or unit.get_meta("clip", "") != clip:
 				play_animation(unit, data.unitModels[slot.id].drill if clip=="reload" else clip, data.unitModels[slot.id].drill if clip == "attack" else "", phase,
 					fposmod(float(i) * 0.381966, 1.0))
@@ -2770,9 +2945,9 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				for player: AnimationPlayer in unit.get_meta("animation_players", []):
 					player.speed_scale = tempo
 			var shot := unit.get_node_or_null("Arrow") as MeshInstance3D
-			var firing: bool = slot.ranged and clip == "attack" and strike > -INF and elapsed >= strike - 260.0 and elapsed <= strike
+			var firing: bool = slot.ranged and clip == "attack" and shown > -INF and elapsed >= shown - 260.0 and elapsed <= shown
 			if firing:
-				draw_arrow(unit, shot, beast if hunt else p, (elapsed - strike + 260.0) / 260.0, slot.id, "%s/%s/%s" % [id,key,strike])
+				draw_arrow(unit, shot, beast if hunt else p, (elapsed - shown + 260.0) / 260.0, slot.id, "%s/%s/%s" % [id,key,shown])
 			elif shot != null:
 				shot.hide()
 			if slot.id == "ENG-10":
@@ -2803,9 +2978,10 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			announced_fights.erase(id)
 
 # Where an army hunting a creature halts and where each soldier fights: the column
-# stops in front of the creature, melee soldiers close in on arcs around its head
-# and flanks, riders take the rear flanks, archers stand in lines behind the melee.
-# Places on water turn around the creature to dry ground. Cached per route and bag.
+# stops in front of the creature and the whole party closes in on it as one crowd
+# (crowd_places: foot and riders mixed in the ring at its body, archers mixed in the
+# next ring). Places on water turn around the creature to dry ground. Cached per
+# route and bag.
 func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
 	# A patrolling target reports a new position on every poll. Rebuilding the
 	# plan for each small step restarted the whole collision search; keep it
@@ -2830,9 +3006,6 @@ func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
 		face = Vector3(first.x - beast.x, 0.0, first.z - beast.z)
 	face = face.normalized() if face.length_squared() > 0.0001 else Vector3.BACK
 	var side := Vector3(face.z, 0.0, -face.x)
-	var foot := []
-	var riders := []
-	var archers := []
 	# PvE's current server solver starts each unit at x=-7-index%5*.6.
 	# The front lanes therefore deliver the first melee contacts. On a narrow
 	# bank, assigning every legal contact footprint to rear-lane members can
@@ -2845,39 +3018,27 @@ func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
 		var slot: Dictionary = placement_slots[i]
 		placement_order["%s:%d" % [slot.id, int(slot.index)]] = i + (int(slot.index) % 5) * Formations.FIELD_LIMIT if not slot.mounted and not slot.ranged else 1000 + i
 	placement_slots.sort_custom(func(a,b): return placement_order["%s:%d" % [a.id,int(a.index)]] < placement_order["%s:%d" % [b.id,int(b.index)]])
+	# Where each member stands in the halted column (the charge starts there).
+	var heading := route_heading(cache, stop, atan2(-face.x, -face.z))
+	var origins := {}
 	for slot in placement_slots:
-		var slot_key := "%s:%d" % [slot.id, int(slot.index)]
-		if slot.mounted:
-			riders.append(slot_key)
-		elif slot.ranged:
-			archers.append(slot_key)
-		else:
-			foot.append(slot_key)
+		var at: Vector3 = column_point(cache, stop, float(slot.side), float(slot.rear), heading)[0]
+		origins["%s:%d" % [slot.id, int(slot.index)]] = Vector2((at - beast).dot(face), (at - beast).dot(side))
 	var places := {}
-	var placed := 0
-	var ring := 0
-	while placed < foot.size():
-		var arc := ellipse_arc(body.x + ENGAGE_GAP + 0.3 + ring * 1.4, body.y + ENGAGE_GAP + 0.5 + ring * 1.4,
-			deg_to_rad(120.0 + ring * 10.0), 1.3)
-		var count := mini(foot.size() - placed, arc.size())
-		for k in count:
-			places[foot[placed + k]] = battle_place(beast, face, side, arc[k])
-		placed += count
-		ring += 1
-	for k in riders.size():
-		var angle := deg_to_rad(118.0 + 26.0 * (floori(k / 2.0) % 3))
-		var outward := 2.6 + 2.8 * floori(k / 6.0)
-		var local := Vector2((body.x + outward) * cos(angle), (body.y + outward) * sin(angle) * (1.0 if k % 2 == 0 else -1.0))
-		places[riders[k]] = battle_place(beast, face, side, local)
-	var per_row := 7
-	for k in archers.size():
-		var row := floori(float(k) / per_row)
-		var in_row := mini(per_row, archers.size() - row * per_row)
-		var local := Vector2(body.x + 5.4 + ring * 1.0 + row * 1.6, (k % per_row - (in_row - 1) * 0.5) * 1.45)
-		places[archers[k]] = battle_place(beast, face, side, local)
+	var local_places := crowd_places(placement_slots, origins, body)
+	# The crowd's ground: trees on it are cleared while the fight is on screen
+	# (battle_focus_core), so they do not push soldiers out of the crowd. Up to
+	# build 1019 their trunks still counted: on the wooded world map riders found
+	# no place near the creature and waited 8-15 m away.
+	var clear := 0.0
+	for slot in placement_slots:
+		var member := "%s:%d" % [slot.id, int(slot.index)]
+		places[member] = battle_place(beast, face, side, local_places[member])
+		clear = maxf(clear, (local_places[member] as Vector2).length() + (2.2 if slot.mounted else 1.0))
 	var plan := {"beast": beast, "face": face, "yaw": atan2(face.x, face.z), "body": body, "front": front,
-		"stop": stop, "places": places, "anchor": anchor}
+		"stop": stop, "places": places, "anchor": anchor, "clear": clear}
 	var solver := CombatSlots.new()
+	solver.clear_radius = clear
 	plan.approaches={};plan.supports={};plan.reserves={};plan.reserve_rows={};plan.slot_solver=solver
 	plan.solving=true
 	cache.engage_key = key
@@ -2886,7 +3047,7 @@ func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
 	# runs in slices while the column walks (engage_sync: whole plan now, for
 	# tools and tests). It never blocks a frame for more than the slice.
 	solver.slice_usec = 0 if engage_sync else ENGAGE_SLICE_USEC
-	refine_engage_plan(plan, solver, placement_slots, cache, stop, route_heading(cache, stop, atan2(-face.x, -face.z)))
+	refine_engage_plan(plan, solver, placement_slots, cache, stop, heading)
 	return plan
 
 # Collision-checked contact places and approaches, member by member (front
@@ -2939,28 +3100,139 @@ static func approach_distance(points: PackedVector3Array, distances: PackedFloat
 		return distances[i - 1] + (distances[i] - distances[i - 1]) * (low + high) * 0.5
 	return 0.0 if inbound else distances[-1]
 
-# Points on an ellipse (a ahead, b sideways) from the front outwards, alternating
-# sides, `spacing` apart along the curve, up to `span` radians off the front.
-static func ellipse_arc(a: float, b: float, span: float, spacing: float) -> Array:
-	var left := []
-	var right := []
-	var travelled := 0.0
-	var previous := Vector2(a, 0.0)
-	var mark := spacing * 0.5
-	for n in range(1, 161):
-		var phi := span * n / 160.0
-		var q := Vector2(a * cos(phi), b * sin(phi))
-		travelled += q.distance_to(previous)
-		previous = q
-		if travelled >= mark:
-			left.append(q)
-			right.append(Vector2(q.x, -q.y))
-			mark += spacing
-	var result := []
-	for k in left.size():
-		result.append(left[k])
-		result.append(right[k])
+# The party fights as one crowd around the creature (presentation only).
+# Up to build 1019 foot soldiers took 120-degree arcs in front of it, riders its
+# rear flanks and archers lines of seven behind the melee: on the phone each troop
+# type queued in its own row and the archers shot from the back. Now foot and
+# riders share one ring around the whole body, riders spread evenly among the foot;
+# melee that does not fit and the archers stand in the next ring, staggered and
+# mixed all round, a little irregular. Each member takes the free place of its kind
+# nearest to where it stands in the halted column. Returns member -> local
+# (x along the creature's face, y to its side); `origins` uses the same axes.
+const CROWD_FOOT_M := 1.25
+const CROWD_RIDER_M := 2.5
+const CROWD_RANGED_M := 1.6
+const CROWD_RING_M := 1.4
+const CROWD_RIDER_OUT := 1.3
+const CROWD_RANGED_OUT := 2.6
+
+static func crowd_places(slots: Array, origins: Dictionary, body: Vector2) -> Dictionary:
+	var foot: Array = []
+	var riders: Array = []
+	var ranged: Array = []
+	for slot in slots:
+		var key := "%s:%d" % [slot.id, int(slot.index)]
+		if slot.ranged:
+			ranged.append(key)
+		elif slot.mounted:
+			riders.append(key)
+		else:
+			foot.append(key)
+	# Riders spread evenly through the melee sequence (Bresenham).
+	var melee_kinds: Array = []
+	var total := foot.size() + riders.size()
+	for n in total:
+		melee_kinds.append("r" if riders.size() > 0 and floori((n + 1) * riders.size() / float(total)) > floori(n * riders.size() / float(total)) else "f")
+	var free := {"f": [], "r": [], "a": []}
+	var a := body.x + ENGAGE_GAP + 0.35
+	var b := body.y + ENGAGE_GAP + 0.55
+	var ring := 0
+	var queued := melee_kinds
+	while not queued.is_empty() and ring < 4:
+		var spacing: Array = queued.map(func(kind): return CROWD_RIDER_M if kind == "r" else CROWD_FOOT_M)
+		var placed: Array = ellipse_ring(a + ring * CROWD_RING_M, b + ring * CROWD_RING_M, spacing, 0.5 if ring % 2 else 0.0, ring * 17)
+		for n in placed.size():
+			var local: Vector2 = placed[n]
+			if queued[n] == "r":
+				local += ellipse_normal(a, b, local) * CROWD_RIDER_OUT
+			free[queued[n]].append(local)
+		queued = queued.slice(placed.size())
+		ring += 1
+	# Archers: one ring beyond the melee, spread round the crowd (the very back of
+	# the creature stays a little emptier), alternately a little nearer and farther
+	# (no straight lines). More archers than places go a ring further.
+	var out := a - body.x + CROWD_RANGED_OUT + maxi(0, ring - 1) * CROWD_RING_M
+	var ranged_ring := 0
+	while free.a.size() < ranged.size() and ranged_ring < 4:
+		var extra := out + ranged_ring * CROWD_RING_M
+		var want: Array = []
+		want.resize(ranged.size() - free.a.size())
+		var around := 2.0 * ellipse_half_length(body.x + extra, body.y + extra)
+		want.fill(clampf(0.82 * around / maxf(1.0, want.size()), CROWD_RANGED_M, CROWD_RANGED_M * 3.0))
+		var placed: Array = ellipse_ring(body.x + extra, body.y + extra, want, 0.5, 101 + ranged_ring * 13)
+		for n in placed.size():
+			var local: Vector2 = placed[n]
+			free.a.append(local + ellipse_normal(body.x + extra, body.y + extra, local) * (0.45 if n % 2 else -0.15))
+		ranged_ring += 1
+	var result := {}
+	for group in [[foot, "f"], [riders, "r"], [ranged, "a"]]:
+		var spots: Array = free[group[1]]
+		for key in group[0]:
+			if spots.is_empty():
+				break
+			var from: Vector2 = origins.get(key, Vector2(a + 6.0, 0.0))
+			var best := 0
+			for n in range(1, spots.size()):
+				if from.distance_squared_to(spots[n]) < from.distance_squared_to(spots[best]):
+					best = n
+			result[key] = spots[best]
+			spots.remove_at(best)
+	# Every member must have a place (the refinement reads them all): a party larger
+	# than four rings, which the field limit never draws, waits farther out.
+	var spare := 0
+	for slot in slots:
+		var key := "%s:%d" % [slot.id, int(slot.index)]
+		if not result.has(key):
+			result[key] = Vector2(a + 4.0 + floori(spare / 6.0) * CROWD_RING_M, (spare % 6 - 2.5) * CROWD_RANGED_M)
+			spare += 1
 	return result
+
+# Places around an ellipse (a ahead, b to the side) from its front, alternating
+# sides, each `spacing[n]` metres of the outline wide, until the two sides meet at
+# the back. `phase` (0..1 of the first spacing) staggers a ring against the one
+# inside it; `seed` adds a small fixed irregularity. Returns the places that fit.
+static func ellipse_ring(a: float, b: float, spacing: Array, phase: float, seed: int) -> Array:
+	var lengths := PackedFloat32Array([0.0])
+	var previous := Vector2(a, 0.0)
+	for k in range(1, 181):
+		var q := Vector2(a * cos(PI * k / 180.0), b * sin(PI * k / 180.0))
+		lengths.append(lengths[-1] + q.distance_to(previous))
+		previous = q
+	var half := lengths[-1]
+	var cursor := PackedFloat32Array([phase * float(spacing[0]) if not spacing.is_empty() else 0.0, 0.0])
+	var result: Array = []
+	for n in spacing.size():
+		var width := float(spacing[n])
+		var s := n % 2
+		if cursor[s] + width > half + 0.001:
+			s = 1 - s
+			if cursor[s] + width > half + 0.001:
+				break
+		var along: float = cursor[s] + width * 0.5
+		cursor[s] += width
+		var jitter := fposmod(sin(float(seed + n) * 12.9898) * 43758.5453, 1.0)
+		along = clampf(along + (jitter - 0.5) * 0.24 * width, 0.0, half)
+		var k := lengths.bsearch(along)
+		k = clampi(k, 1, 180)
+		var f := (along - lengths[k - 1]) / maxf(0.0001, lengths[k] - lengths[k - 1])
+		var phi := PI * (k - 1 + f) / 180.0
+		var q := Vector2(a * cos(phi), b * sin(phi) * (1.0 if s == 0 else -1.0))
+		var radial := (fposmod(jitter * 7.31, 1.0) - 0.5) * 0.36
+		result.append(q + ellipse_normal(a, b, q) * radial)
+	return result
+
+static func ellipse_half_length(a: float, b: float) -> float:
+	var length := 0.0
+	var previous := Vector2(a, 0.0)
+	for k in range(1, 91):
+		var q := Vector2(a * cos(PI * k / 90.0), b * sin(PI * k / 90.0))
+		length += q.distance_to(previous)
+		previous = q
+	return length
+
+static func ellipse_normal(a: float, b: float, q: Vector2) -> Vector2:
+	var n := Vector2(q.x / (a * a), q.y / (b * b))
+	return n.normalized() if n.length_squared() > 0.0 else Vector2.RIGHT
 
 func battle_place(beast: Vector3, face: Vector3, side: Vector3, local: Vector2) -> Vector3:
 	var offset := face * local.x + side * local.y

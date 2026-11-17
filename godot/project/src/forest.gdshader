@@ -8,6 +8,9 @@ render_mode cull_back, depth_draw_opaque;
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
 uniform float cutoff = 0.42;
 global uniform vec4 battle_focus;   // xyz centre, w radius; w = 0 when no fight is shown
+// The ground the fighting crowd stands on (xyz creature, w radius; 0 = none): trees
+// there are gone for the fight, so the battle places can use it (combat_slots.gd).
+global uniform vec4 battle_focus_core;
 varying vec3 tree_origin;
 
 void vertex() {
@@ -21,6 +24,10 @@ void fragment() {
 	if (battle_focus.w > 0.0) {
 		float distance_xz = length(tree_origin.xz - battle_focus.xz);
 		float keep = smoothstep(battle_focus.w * 0.55, battle_focus.w, distance_xz);
+		if (battle_focus_core.w > 0.0) {
+			float core_xz = length(tree_origin.xz - battle_focus_core.xz);
+			keep = min(keep, smoothstep(battle_focus_core.w, battle_focus_core.w * 1.3, core_xz));
+		}
 		// Ordered dither keeps it opaque (no blending, no sorting) while it fades.
 		float pattern = fract(dot(floor(FRAGCOORD.xy), vec2(0.7548777, 0.5698403)));
 		if (keep < 0.999 && keep <= pattern) {

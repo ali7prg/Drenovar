@@ -63,12 +63,13 @@ func _initialize() -> void:
 	var shown := short.duplicate(true); Clock.stretch(shown,{})
 	var ats: Array = shown.presentation.events.map(func(e):return float(e.at))
 	var sorted := ats.duplicate(); sorted.sort()
-	check(ats == sorted and ats[0] == 0.0 and ats[-1] > 5000.0 and ats[-1] < 6500.0,"one-step volley spread over the shown fight: "+str(ats))
+	check(ats == sorted and ats[0] == 0.0 and ats[-1] > 5000.0 and ats[-1] < Clock.MIN_FIGHT_MS,"one-step volley spread over the shown fight: "+str(ats))
 	check(range(17).all(func(i):return float(ats[i+1])-float(ats[i]) > 250.0),"volley blows are apart: "+str(ats))
 	check(shown.presentation.events.map(func(e):return e.creatureHP) == volley.map(func(e):return e.creatureHP),"volley HP sequence unchanged")
-	var kill := {"id":"kill","units":{"ENG-05":6},"startsAt":0,"arrivesAt":16000,"battleAt":16000,"battleEndsAt":16600,"returnStartsAt":16600,"presentation":{"events":[{"at":0,"kind":"soldier_attack","unitId":"ENG-03","index":0,"creatureHP":900},{"at":600,"kind":"soldier_attack","unitId":"ENG-05","index":0,"creatureHP":0}]}}
+	# A walk long enough for the whole stretch (the walk home may at most double its speed).
+	var kill := {"id":"kill","units":{"ENG-05":6},"startsAt":0,"arrivesAt":30000,"battleAt":30000,"battleEndsAt":30600,"returnStartsAt":30600,"presentation":{"events":[{"at":0,"kind":"soldier_attack","unitId":"ENG-03","index":0,"creatureHP":900},{"at":600,"kind":"soldier_attack","unitId":"ENG-05","index":0,"creatureHP":0}]}}
 	Clock.stretch(kill,{})
-	var shown_end := float(kill.battleEndsAt) - 16000.0
+	var shown_end := float(kill.battleEndsAt) - 30000.0
 	check(shown_end >= Clock.MIN_FIGHT_MS and shown_end - float(kill.presentation.events[-1].at) >= 800.0,"killing blow at the battle end is shown inside the fight: %s / %s"%[kill.presentation.events[-1].at, shown_end])
 	check(float(kill.returnStartsAt) == float(kill.battleEndsAt),"return starts at the shown fight end")
 	var later: Array = volley + [{"at":200,"kind":"creature_attack","unitId":"ENG-03","index":0,"hp":10}]

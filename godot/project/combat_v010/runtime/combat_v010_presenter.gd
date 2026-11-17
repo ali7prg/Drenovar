@@ -29,6 +29,29 @@ const BLEND_S := 0.12
 const LOAD_DEADLINE_MS := 2000
 const RANGED := ["bow", "crossbow", "javelin"]
 const TROOP_CLIPS := ["idle", "walk", "run", "attack_a", "attack_b", "hit", "death"]
+
+# Families that fight with the model's own authored clips instead of the library's
+# idle/attack. Measured on the wrist bone (build 1020): the library sword attack
+# (ENG-02/07/08/09) reached forward at 0.26 s while its contact key (0.64 s) found
+# the arm hanging, then raised the blade again after the contact; its idle froze a
+# drill frame with the blade held level behind the shoulder (spear: point on the
+# ground; crossbow: crouched in the reload, the bow never aimed). A crowd standing in
+# those frames read as "strange poses" on the phone. The authored Attack is an
+# overhead chop / thrust / aimed shot whose wrist reaches forward at `event` of its
+# length (sword and spear 0.47 s of 1.0 s, riders 0.60 s of 1.33 s and 0.69 s of
+# 1.54 s, crossbow release 0.5 s); Idle is the authored stance. Bow and javelin keep
+# the library clips (release at 0.86 s / 0.66 s, aimed stance).
+const SOURCE_FIGHT := {
+	"spear": {"attack": &"Attack", "guard": &"Idle", "event": 0.47},
+	"sword": {"attack": &"Attack", "guard": &"Idle", "event": 0.47},
+	"heavy": {"attack": &"Attack", "guard": &"Idle", "event": 0.47},
+	"mounted": {"attack": &"Attack", "guard": &"Idle", "event": 0.45},
+	"crossbow": {"attack": &"Attack", "guard": &"Idle", "event": 0.50, "reload": &"Crossbow_Reload"},
+}
+# Authored Attack lengths (s) of the troops06 models, for strike scheduling before
+# any soldier of the type exists; install() uses the clip itself.
+const SOURCE_ATTACK_S := {"ENG-05": 1.3333, "ENG-06": 1.5417}
+const SOURCE_RELOAD_S := 2.0
 const CREATURE_CLIPS := ["idle", "combat_idle", "walk", "run", "alert", "attack_a", "attack_b", "hit_front", "hit_left", "hit_right", "death"]
 
 static var _enabled := -1  # -1 = not resolved yet
@@ -129,14 +152,28 @@ static func install(model: Node3D, kind: String, key: String) -> bool:
 		return false
 	if not player.has_animation_library(Registry.NAMESPACE):
 		player.add_animation_library(Registry.NAMESPACE, library)
-	var info := {"kind": kind, "key": key, "generation": generation, "player": player, "clip": &"", "until": 0.0}
+	var info := {"kind": kind, "key": key, "generation": generation, "player": player, "clip": &"", "until": 0.0, "clips": {}}
 	if kind == "troop":
 		var spec := Registry.troop(key)
 		var length := float(spec.get("length_s", 1.7)) * 1000.0
 		var event := float(spec.get("contact_or_release_s", 0.64)) * 1000.0
-		var ranged: bool = spec.get("family", "") in RANGED
+		var family := str(spec.get("family", ""))
+		var fight: Dictionary = SOURCE_FIGHT.get(family, {})
+		if not fight.is_empty() and player.has_animation(fight.attack) and player.has_animation(fight.guard) \
+				and (not fight.has("reload") or player.has_animation(fight.reload)):
+			# The model's own Attack/Idle (see SOURCE_FIGHT); logical names stay the same.
+			length = player.get_animation(fight.attack).length * 1000.0
+			event = length * float(fight.event)
+			info.clips = {&"idle": fight.guard, &"attack_a": fight.attack, &"attack_b": fight.attack}
+			if player.has_animation(&"Shield_Block"):
+				# Shield held up against the creature's swipes (landscape.beast_feint).
+				info.clips[&"block"] = &"Shield_Block"
+			if fight.has("reload"):
+				info.clips[&"reload"] = fight.reload
+				info.reload_ms = player.get_animation(fight.reload).length * 1000.0
+		var ranged: bool = family in RANGED
 		info.ranged = ranged
-		info.family = str(spec.get("family", ""))
+		info.family = family
 		info.release_ms = event if ranged else -1.0
 		info.prepare_ms = event + (FLIGHT_MS if ranged else 0.0)
 		info.follow_ms = length - info.prepare_ms
@@ -205,8 +242,29 @@ static func strike_window(unit_id: String, ranged: bool) -> Vector2:
 		return Vector2(legacy, 1000.0 - legacy)
 	var length := float(spec.get("length_s", 1.7)) * 1000.0
 	var event := float(spec.get("contact_or_release_s", 0.64)) * 1000.0
+	var fight: Dictionary = SOURCE_FIGHT.get(str(spec.get("family", "")), {})
+	if not fight.is_empty():
+		length = float(SOURCE_ATTACK_S.get(unit_id, 1.0)) * 1000.0
+		event = length * float(fight.event)
 	var prepare := event + (FLIGHT_MS if spec.get("family", "") in RANGED else 0.0)
 	return Vector2(prepare, length - prepare)
+
+# Busy time after a shot's follow-through (the crossbow's reload), ms.
+static func recover_ms(model: Node3D) -> float:
+	return float(info(model).get("reload_ms", 0.0))
+
+static func has_clip(model: Node3D, clip: StringName) -> bool:
+	var i := info(model)
+	if i.get("clips", {}).has(clip):
+		return true
+	var player: AnimationPlayer = i.get("player")
+	return is_instance_valid(player) and player.has_animation(StringName("%s/%s" % [Registry.NAMESPACE, clip]))
+
+# Animation a logical clip name plays on this model: the library clip, or the
+# model's own authored clip for the families in SOURCE_FIGHT.
+static func animation_name(i: Dictionary, clip: StringName) -> StringName:
+	var mapped: Variant = i.get("clips", {}).get(clip)
+	return mapped if mapped != null else StringName("%s/%s" % [Registry.NAMESPACE, clip])
 
 static func hit_window(model: Node3D, legacy_ms: float) -> float:
 	return float(info(model).get("hit_ms", legacy_ms))
@@ -266,7 +324,7 @@ static func drive(model: Node3D, clip: StringName, time_s := -1.0, tempo := 1.0,
 	var player: AnimationPlayer = i.get("player")
 	if not is_instance_valid(player):
 		return
-	var name := StringName("%s/%s" % [Registry.NAMESPACE, clip])
+	var name := animation_name(i, clip)
 	var anim := player.get_animation(name)
 	if anim == null:
 		return
@@ -274,16 +332,22 @@ static func drive(model: Node3D, clip: StringName, time_s := -1.0, tempo := 1.0,
 	# No blend for the very first clip after hand-over (nothing of ours to blend from).
 	var blend := BLEND_S if str(i.clip) != "" else 0.0
 	if time_s < 0.0:
-		if player.assigned_animation != name or not player.is_playing():
+		if player.assigned_animation != name:
 			player.play(name, blend)
 			if start_fraction > 0.0:
 				player.seek(start_fraction * anim.length, true)
+		elif not player.is_playing():
+			# An authored stance (Idle) is not a looping resource: it starts over, unblended.
+			player.play(name)
+			player.seek(0.0, true)
 		i.clip = clip
 		return
 	var t := clampf(time_s, 0.0, anim.length)
 	if player.assigned_animation != name:
 		player.play(name, blend)
-		player.seek(t, true)
+		# The pose follows in the player's own update this frame: evaluating it here
+		# too doubled the work of every swing start (a crowd starts several a frame).
+		player.seek(t, false)
 	elif t >= anim.length:
 		if player.is_playing() or absf(player.current_animation_position - anim.length) > 0.001:
 			player.seek(anim.length, true)

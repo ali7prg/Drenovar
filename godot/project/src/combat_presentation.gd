@@ -40,7 +40,9 @@ var current_map := ""
 # back and the creature is dead". The fight is shown for at least this long:
 # its events are spread over the longer span and the walk home is quickened by
 # the same amount, so the army is still home at the server's returnsAt.
-const MIN_FIGHT_MS := 6500.0
+# 6.5 s (up to build 1019) showed one or two swings per soldier; the crowd now
+# fights continuously (landscape.ambient_strike), shown for 9.5 s.
+const MIN_FIGHT_MS := 9500.0
 const FINAL_HOLD_MS := 900.0
 # Shown fight end per authoritative battle end (report finishedAt).
 var visual_ends := {}

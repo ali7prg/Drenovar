@@ -14,8 +14,9 @@ func _initialize() -> void:
 	call_deferred("run")
 
 # Combat v0.1.0 (flag on): its attack spans the clip (1.7 s) rather than the legacy
-# 1.0 s window, so more swings overlap. The invariant stays: every swing shows an
-# authoritative server event of that same soldier, never a cosmetic one.
+# 1.0 s window, so more swings overlap. Every swing shows an authoritative server
+# event of that same soldier, or (build 1020) the soldier's own fighting cadence
+# between its server blows (landscape.ambient_strike), never near one of them.
 const CombatV010 = preload("res://combat_v010/runtime/combat_v010_presenter.gd")
 func swings_are_authoritative(stage, army_id: String, units: Array) -> bool:
 	var members: Dictionary = stage.army_routes.get(army_id, {}).get("events", {}).get("members", {})
@@ -24,6 +25,14 @@ func swings_are_authoritative(stage, army_id: String, units: Array) -> bool:
 			continue
 		var key := String(unit.name).replace("_", ":")
 		var strike := float(unit.get_meta("v010_strike", -INF))
+		if strike == -INF:
+			# Build 1020: between its server blows a soldier keeps fighting on its own
+			# cadence (landscape.ambient_strike); such a swing never comes near one of
+			# its server blows.
+			var ambient := float(unit.get_meta("ambient_strike", -INF))
+			if ambient == -INF or members.get(key, []).any(func(e): return e[1] == "soldier_attack" and absf(float(e[0]) - ambient) < 900.0):
+				return false
+			continue
 		if not members.get(key, []).any(func(e): return e[1] == "soldier_attack" and absf(float(e[0]) - strike) < 0.5):
 			return false
 	return true
@@ -171,10 +180,10 @@ func run() -> void:
 	check(closest > 0.05, "A soldier stands inside the creature (%.2f)" % closest)
 	check(wet == 0, "%d soldiers stand in the river" % wet)
 	check(melee_close == melee, "Melee soldiers away from the creature: %d of %d close" % [melee_close, melee])
-	# This fixture has one melee event in its current action interval. Cosmetic
-	# swings without an authoritative contact must not count as fighting.
+	# This fixture has one melee event in its current action interval; the other
+	# swings are the crowd's cadence and must keep clear of server blows.
 	if CombatV010.enabled():
-		check(attacking >= 1 and swings_are_authoritative(stage, "army-hunt", units), "v0.1.0 swing without a server event (%d attacking)" % attacking)
+		check(attacking >= 1 and swings_are_authoritative(stage, "army-hunt", units), "v0.1.0 swing neither a server blow nor the soldier's own cadence (%d attacking)" % attacking)
 	else:
 		check(attacking == 1, "Expected one scheduled melee action, got %d" % attacking)
 	check(stage.battle_fx.pools["ring"].filter(func(node): return node.visible).size() == 1, "No ring under the creature during the fight")

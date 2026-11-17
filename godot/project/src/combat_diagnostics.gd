@@ -291,13 +291,17 @@ func track_fighter(node: Node3D, key: String, kind: String, seen: Dictionary) ->
 		var attack := "attack" if kind == "soldier" else "Attack"
 		if clip != before.clip:
 			if clip == attack:
-				note(kind + "_attack_start", {"who": name, "strike": strike if strike > -INF else null, "on_screen": on_screen})
+				# "ambient": a swing of the soldier's own fighting cadence (build 1020), no server blow.
+				var ambient: float = float(node.get_meta("ambient_strike", -INF)) if strike == -INF else -INF
+				note(kind + "_attack_start", {"who": name, "strike": strike if strike > -INF else null, "ambient": ambient if ambient > -INF else null, "on_screen": on_screen})
 			elif before.clip == attack:
 				var length := float(before.get("len", 0.0))
 				var finished: bool = before.clip_at >= length - 0.25 or (clip in ["idle", "Idle", "walk", "Walk"] and before.clip_at >= length * 0.6)
 				note(kind + ("_attack_end" if finished else "_attack_cut"), {"who": name, "to": clip, "at_s": snappedf(before.clip_at, 0.01)})
 			if clip in ["death", "Death"]:
 				note(kind + "_death", {"who": name})
+			if clip == "block":
+				note("soldier_block", {"who": name})
 			if kind == "creature" and clip == "Hit":
 				note("creature_reaction", {"who": name})
 		elif kind == "soldier" and clip == attack and strike > -INF and before.strike > -INF and strike != before.strike:
@@ -418,7 +422,8 @@ func report() -> Dictionary:
 		"api": RenderingServer.get_video_adapter_api_version(),
 		"screen": [DisplayServer.screen_get_size().x, DisplayServer.screen_get_size().y], "scale": DisplayServer.screen_get_scale(),
 		"viewport": [viewport.get_visible_rect().size.x, viewport.get_visible_rect().size.y],
-		"buffer": [viewport.get_texture().get_size().x, viewport.get_texture().get_size().y], "msaa_3d": viewport.msaa_3d,
+		# Drawn 3D pixels (the texture's get_size() includes the canvas_items stretch).
+		"buffer": [viewport.get_window().size.x * viewport.scaling_3d_scale, viewport.get_window().size.y * viewport.scaling_3d_scale], "msaa_3d": viewport.msaa_3d,
 		"uptime_s": roundi(now_ms() / 1000.0), "map": str(game.map_name) if game != null else "",
 		"frames": frame_stats(), "worst_frames": worst,
 		"render_ms": {"cpu": RenderingServer.viewport_get_measured_render_time_cpu(viewport.get_viewport_rid()),

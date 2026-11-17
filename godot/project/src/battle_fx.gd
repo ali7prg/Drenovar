@@ -15,7 +15,7 @@ const SPARK := preload("res://src/fx_spark.gdshader")
 const DUST := preload("res://src/fx_dust.gdshader")
 const RING := preload("res://src/fx_ring.gdshader")
 const BAR := preload("res://src/fx_bar.gdshader")
-const POOL := {"slash": 14, "spark": 10, "dust": 12, "number": 10, "ring": 3, "bar": 3, "plate": 3}
+const POOL := {"slash": 16, "spark": 14, "dust": 12, "number": 10, "ring": 3, "bar": 3, "plate": 3}
 
 var pools := {}
 # For the device report: when a battle was last drawn and with how many events.

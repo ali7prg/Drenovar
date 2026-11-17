@@ -21,8 +21,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: ios-repack-${{ github.ref }}
-  cancel-in-progress: true
+  # One group per branch for push and pull_request alike (github.ref differs:
+  # refs/heads/X vs refs/pull/N/merge). Both events used to build the same
+  # build number at once and race on one release (1018: the push run failed on
+  # "asset already exists"). Queued, the second run finds the IPA published
+  # and leaves it untouched.
+  group: ios-repack-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
 
 env:
   GODOT_VERSION: 4.6.3

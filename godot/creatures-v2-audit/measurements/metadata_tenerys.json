@@ -8,16 +8,16 @@
  "pivot": "ground, body centre",
  "authored_bounds_m": {
   "x": [
-   -2.231,
-   1.5
+   -2.423,
+   1.543
   ],
-  "half_width": 0.527,
-  "top": 2.086
+  "half_width": 0.579,
+  "top": 2.281
  },
- "display_scale_in_game": 1.41,
+ "display_scale_in_game": 1.326,
  "battle_outline_m": [
-  2.63,
-  0.743
+  2.629,
+  0.768
  ],
  "bones": 44,
  "max_influences": 4,
@@ -40,11 +40,12 @@
  "lods": {
   "lod0": {
    "file": "tenerys_lod0.glb",
-   "bytes": 21532824,
-   "triangles": 39978,
+   "bytes": 22273168,
+   "triangles": 47122,
    "materials": [
     "M_Tenerys_Body_LOD0",
-    "M_Tenerys_Details_LOD0"
+    "M_Tenerys_Details_LOD0",
+    "M_Tenerys_FurCards_LOD0"
    ],
    "textures": [
     "tenerys_LOD0_body_BaseColor",
@@ -54,16 +55,21 @@
     "tenerys_LOD0_detail_BaseColor",
     "tenerys_LOD0_detail_Normal",
     "tenerys_LOD0_detail_ORM",
-    "tenerys_LOD0_detail_Emissive"
+    "tenerys_LOD0_detail_Emissive",
+    "tenerys_LOD0_fur_BaseColor",
+    "tenerys_LOD0_fur_Normal",
+    "tenerys_LOD0_fur_ORM",
+    "tenerys_LOD0_fur_Emissive"
    ]
   },
   "lod1": {
    "file": "tenerys_lod1.glb",
-   "bytes": 6979584,
-   "triangles": 18340,
+   "bytes": 7282496,
+   "triangles": 19036,
    "materials": [
     "M_Tenerys_Body_LOD1",
-    "M_Tenerys_Details_LOD1"
+    "M_Tenerys_Details_LOD1",
+    "M_Tenerys_FurCards_LOD1"
    ],
    "textures": [
     "tenerys_LOD1_body_BaseColor",
@@ -73,16 +79,21 @@
     "tenerys_LOD1_detail_BaseColor",
     "tenerys_LOD1_detail_Normal",
     "tenerys_LOD1_detail_ORM",
-    "tenerys_LOD1_detail_Emissive"
+    "tenerys_LOD1_detail_Emissive",
+    "tenerys_LOD1_fur_BaseColor",
+    "tenerys_LOD1_fur_Normal",
+    "tenerys_LOD1_fur_ORM",
+    "tenerys_LOD1_fur_Emissive"
    ]
   },
   "lod2": {
    "file": "tenerys_lod2.glb",
-   "bytes": 2285256,
-   "triangles": 5240,
+   "bytes": 2472196,
+   "triangles": 4992,
    "materials": [
     "M_Tenerys_Body_LOD2",
-    "M_Tenerys_Details_LOD2"
+    "M_Tenerys_Details_LOD2",
+    "M_Tenerys_FurCards_LOD2"
    ],
    "textures": [
     "tenerys_LOD2_body_BaseColor",
@@ -92,7 +103,11 @@
     "tenerys_LOD2_detail_BaseColor",
     "tenerys_LOD2_detail_Normal",
     "tenerys_LOD2_detail_ORM",
-    "tenerys_LOD2_detail_Emissive"
+    "tenerys_LOD2_detail_Emissive",
+    "tenerys_LOD2_fur_BaseColor",
+    "tenerys_LOD2_fur_Normal",
+    "tenerys_LOD2_fur_ORM",
+    "tenerys_LOD2_fur_Emissive"
    ]
   }
  },

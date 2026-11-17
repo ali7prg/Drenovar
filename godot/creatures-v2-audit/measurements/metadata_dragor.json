@@ -8,16 +8,16 @@
  "pivot": "ground, body centre",
  "authored_bounds_m": {
   "x": [
-   -4.199,
-   2.25
+   -3.351,
+   3.361
   ],
-  "half_width": 1.516,
-  "top": 3.912
+  "half_width": 1.381,
+  "top": 3.091
  },
- "display_scale_in_game": 0.977,
+ "display_scale_in_game": 0.939,
  "battle_outline_m": [
-  3.15,
-  1.481
+  3.151,
+  1.297
  ],
  "bones": 48,
  "max_influences": 4,
@@ -41,8 +41,8 @@
  "lods": {
   "lod0": {
    "file": "dragor_lod0.glb",
-   "bytes": 23160724,
-   "triangles": 68088,
+   "bytes": 27232708,
+   "triangles": 70330,
    "materials": [
     "M_Dragor_Skin_LOD0",
     "M_Dragor_Stone_LOD0"
@@ -60,8 +60,8 @@
   },
   "lod1": {
    "file": "dragor_lod1.glb",
-   "bytes": 9126824,
-   "triangles": 31060,
+   "bytes": 10006936,
+   "triangles": 27164,
    "materials": [
     "M_Dragor_Skin_LOD1",
     "M_Dragor_Stone_LOD1"
@@ -79,8 +79,8 @@
   },
   "lod2": {
    "file": "dragor_lod2.glb",
-   "bytes": 3228752,
-   "triangles": 8802,
+   "bytes": 3488444,
+   "triangles": 7958,
    "materials": [
     "M_Dragor_Skin_LOD2",
     "M_Dragor_Stone_LOD2"

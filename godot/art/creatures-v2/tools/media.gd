@@ -129,6 +129,74 @@ func run() -> void:
 				await snap(vp, "%s/%s/turn_%03d.png" % [out, species, i])
 			vp.queue_free()
 			await process_frame
+		if "views" in what:
+			# orthographic FRONT / LEFT SIDE / REAR views like the kit sheets (transparent, no floor), idle pose,
+			# for the side-by-side and overlay comparison with the sheet views (tools/refmatch.py compare)
+			var b: Dictionary = CreatureVisuals.entry(species).authored_bounds_m
+			var length: float = float(b.x[1]) - float(b.x[0])
+			var top := float(b.top)
+			var cx := (float(b.x[0]) + float(b.x[1])) * 0.5
+			for view in ["front", "side", "rear"]:
+				var vp := stage(Vector2i(900, 700), Color("#d6d1ca"))
+				vp.transparent_bg = true
+				for n in vp.get_children():
+					if n is MeshInstance3D:
+						n.queue_free()
+					elif n is WorldEnvironment:
+						n.environment.background_mode = Environment.BG_CLEAR_COLOR
+				var a := creature(vp, species, int(args.get("level", "1")))
+				pose(a, CreatureVisuals.clip_name(species, "Idle"), 0.0)
+				var cam := Camera3D.new()
+				cam.projection = Camera3D.PROJECTION_ORTHOGONAL
+				cam.size = maxf(top, length) * 1.12
+				vp.add_child(cam)
+				var c := Vector3(cx, top * 0.5, 0)
+				var eye := c + (Vector3(12, 0, 0) if view == "front" else (Vector3(-12, 0, 0) if view == "rear" else Vector3(0, 0, -12)))
+				cam.look_at_from_position(eye, c, Vector3.UP)
+				# studio light like the sheets: key from the camera side, high and to one side; the rim behind
+				var fwd := (eye - c).normalized()
+				var across := fwd.cross(Vector3.UP).normalized()
+				var lights := vp.get_children().filter(func(n): return n is DirectionalLight3D)
+				(lights[0] as DirectionalLight3D).look_at_from_position(c + fwd * 6.0 + Vector3.UP * 6.0 + across * 3.0, c, Vector3.UP)
+				(lights[1] as DirectionalLight3D).look_at_from_position(c - fwd * 5.0 + Vector3.UP * 2.0 - across * 3.0, c, Vector3.UP)
+				for i in 3:
+					await process_frame
+				await snap(vp, "%s/%s/view_%s.png" % [out, species, view])
+				vp.queue_free()
+				await process_frame
+		if "keys" in what:
+			# the four key poses of the sheet's attack sequence (preparation, launch, contact, recovery), seen from
+			# the right side like the sheet row, controller displacement applied; one wide strip per species
+			var attack: String = {"velkor": "attack_charge", "tenerys": "attack_pounce", "kamneklyk": "attack_charge",
+				"dragor": "attack_slam"}.get(species, "")
+			# key frames of the clip (30 fps) for the sheet's four poses
+			var keys: Array = {"velkor": [14, 26, 35, 50], "tenerys": [12, 25, 32, 42], "kamneklyk": [20, 32, 41, 58],
+				"dragor": [14, 32, 43, 62]}.get(species, [])
+			var kman := CreatureVisuals.manifest(species)
+			if attack != "" and kman.clips.has(attack):
+				var row: Dictionary = kman.clips[attack]
+				var b: Dictionary = CreatureVisuals.entry(species).authored_bounds_m
+				var top := float(b.top)
+				var length: float = float(b.x[1]) - float(b.x[0])
+				for i in keys.size():
+					var vp := stage(Vector2i(520, 420), Color("#d6d1ca"))
+					var a := creature(vp, species, 1)
+					var t: float = float(keys[i]) / 30.0
+					pose(a, StringName(str(row.name)), t)
+					var m := CreatureVisuals.motion_at(species, attack, t)
+					a.position = Vector3(m.x, 0, m.y)
+					var cam := Camera3D.new()
+					cam.projection = Camera3D.PROJECTION_ORTHOGONAL
+					cam.size = maxf(top * 1.25, length * 0.95)
+					vp.add_child(cam)
+					var c := Vector3(a.position.x + (float(b.x[0]) + float(b.x[1])) * 0.5, top * 0.5, 0)
+					var eye := c + Vector3(0, 1.5, 12)
+					cam.look_at_from_position(eye, c, Vector3.UP)
+					for k in 3:
+						await process_frame
+					await snap(vp, "%s/%s/key_%s_%d.png" % [out, species, attack, i])
+					vp.queue_free()
+					await process_frame
 		if "clips" in what:
 			var man := CreatureVisuals.manifest(species)
 			var shots: Array = str(args.get("clips", "")).split(",", false)

@@ -5,9 +5,9 @@
   {
    "file": "velkor/out/VELKOR_L3_RIGGED_ANIMATED.glb",
    "clips": 12,
-   "skinned": 4,
+   "skinned": 5,
    "bones": 41,
-   "tris": 21652,
+   "tris": 27692,
    "names": [
     "velkor__idle",
     "velkor__walk",
@@ -25,18 +25,18 @@
    "unbound": 0,
    "independent": true,
    "size": [
-    4.17,
-    3.55,
-    2.75
+    4.01,
+    3.25,
+    1.9
    ],
    "ok": true
   },
   {
    "file": "tenerys/out/TENERYS_L3_RIGGED_ANIMATED.glb",
    "clips": 14,
-   "skinned": 2,
+   "skinned": 3,
    "bones": 44,
-   "tris": 18340,
+   "tris": 19036,
    "names": [
     "tenerys__idle",
     "tenerys__walk",
@@ -56,18 +56,18 @@
    "unbound": 0,
    "independent": true,
    "size": [
-    3.73,
-    2.09,
-    1.01
+    4.09,
+    2.33,
+    1.34
    ],
    "ok": true
   },
   {
    "file": "kamneklyk/out/KAMNEKLYK_L3_RIGGED_ANIMATED.glb",
    "clips": 12,
-   "skinned": 3,
+   "skinned": 4,
    "bones": 40,
-   "tris": 21120,
+   "tris": 22848,
    "names": [
     "kamneklyk__idle",
     "kamneklyk__walk",
@@ -85,9 +85,9 @@
    "unbound": 0,
    "independent": true,
    "size": [
-    3.44,
-    1.98,
-    1.88
+    3.53,
+    2.13,
+    1.59
    ],
    "ok": true
   },
@@ -96,7 +96,7 @@
    "clips": 14,
    "skinned": 2,
    "bones": 48,
-   "tris": 31060,
+   "tris": 27164,
    "names": [
     "dragor__idle",
     "dragor__walk",
@@ -116,9 +116,9 @@
    "unbound": 0,
    "independent": true,
    "size": [
-    6.45,
-    3.93,
-    3.65
+    6.71,
+    3.11,
+    3.08
    ],
    "ok": true
   }

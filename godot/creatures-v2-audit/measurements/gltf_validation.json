@@ -3,15 +3,15 @@
  "files": [
   {
    "file": "velkor_lod0.glb",
-   "bytes": 26556692,
+   "bytes": 29150380,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 47074,
+   "materials": 3,
+   "tris": 62112,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -19,15 +19,15 @@
   },
   {
    "file": "velkor_lod1.glb",
-   "bytes": 8920452,
+   "bytes": 9946416,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 20302,
+   "materials": 3,
+   "tris": 26342,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -35,15 +35,15 @@
   },
   {
    "file": "velkor_lod2.glb",
-   "bytes": 2882436,
+   "bytes": 3193324,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 6026,
+   "materials": 3,
+   "tris": 6716,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -51,15 +51,15 @@
   },
   {
    "file": "velkor_runtime.glb",
-   "bytes": 11501404,
+   "bytes": 12837400,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 4,
-   "tris": 27678,
+   "materials": 6,
+   "tris": 34408,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -67,15 +67,15 @@
   },
   {
    "file": "VELKOR_L1_RIGGED_ANIMATED.glb",
-   "bytes": 8920428,
+   "bytes": 9946392,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 20302,
+   "materials": 3,
+   "tris": 26342,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -83,15 +83,15 @@
   },
   {
    "file": "VELKOR_L2_RIGGED_ANIMATED.glb",
-   "bytes": 8971280,
+   "bytes": 9994588,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 20932,
+   "materials": 3,
+   "tris": 26972,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -99,15 +99,15 @@
   },
   {
    "file": "VELKOR_L3_RIGGED_ANIMATED.glb",
-   "bytes": 9037668,
+   "bytes": 10061512,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 21652,
+   "materials": 3,
+   "tris": 27692,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -115,15 +115,15 @@
   },
   {
    "file": "tenerys_lod0.glb",
-   "bytes": 21532824,
+   "bytes": 22273168,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 14,
-   "materials": 2,
-   "tris": 39978,
+   "materials": 3,
+   "tris": 47122,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -131,15 +131,15 @@
   },
   {
    "file": "tenerys_lod1.glb",
-   "bytes": 6979584,
+   "bytes": 7282496,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 14,
-   "materials": 2,
-   "tris": 18340,
+   "materials": 3,
+   "tris": 19036,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -147,15 +147,15 @@
   },
   {
    "file": "tenerys_lod2.glb",
-   "bytes": 2285256,
+   "bytes": 2472196,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 14,
-   "materials": 2,
-   "tris": 5240,
+   "materials": 3,
+   "tris": 4992,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -163,15 +163,15 @@
   },
   {
    "file": "tenerys_runtime.glb",
-   "bytes": 8896108,
+   "bytes": 9386340,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 14,
-   "materials": 4,
-   "tris": 23580,
+   "materials": 6,
+   "tris": 24028,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -179,15 +179,15 @@
   },
   {
    "file": "TENERYS_L1_RIGGED_ANIMATED.glb",
-   "bytes": 6979560,
+   "bytes": 7282472,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 14,
-   "materials": 2,
-   "tris": 18340,
+   "materials": 3,
+   "tris": 19036,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -195,29 +195,29 @@
   },
   {
    "file": "TENERYS_L2_RIGGED_ANIMATED.glb",
-   "bytes": 7092924,
+   "bytes": 7449804,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 14,
-   "materials": 2,
-   "tris": 18340,
+   "materials": 3,
+   "tris": 19036,
    "maxInfluences": 4,
    "extensions": []
   },
   {
    "file": "TENERYS_L3_RIGGED_ANIMATED.glb",
-   "bytes": 7131476,
+   "bytes": 7496408,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 14,
-   "materials": 2,
-   "tris": 18340,
+   "materials": 3,
+   "tris": 19036,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -225,105 +225,105 @@
   },
   {
    "file": "kamneklyk_lod0.glb",
-   "bytes": 22373124,
+   "bytes": 26475724,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 45846,
+   "materials": 3,
+   "tris": 55644,
    "maxInfluences": 4,
    "extensions": []
   },
   {
    "file": "kamneklyk_lod1.glb",
-   "bytes": 7850744,
+   "bytes": 9144392,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 20740,
+   "materials": 3,
+   "tris": 22468,
    "maxInfluences": 4,
    "extensions": []
   },
   {
    "file": "kamneklyk_lod2.glb",
-   "bytes": 2599948,
+   "bytes": 3029012,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 6006,
+   "materials": 3,
+   "tris": 6328,
    "maxInfluences": 4,
    "extensions": []
   },
   {
    "file": "kamneklyk_runtime.glb",
-   "bytes": 10126968,
+   "bytes": 11851580,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 4,
-   "tris": 27126,
+   "materials": 6,
+   "tris": 29176,
    "maxInfluences": 4,
    "extensions": []
   },
   {
    "file": "KAMNEKLYK_L1_RIGGED_ANIMATED.glb",
-   "bytes": 7850720,
+   "bytes": 9144368,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 20740,
+   "materials": 3,
+   "tris": 22468,
    "maxInfluences": 4,
    "extensions": []
   },
   {
    "file": "KAMNEKLYK_L2_RIGGED_ANIMATED.glb",
-   "bytes": 7995572,
+   "bytes": 9277612,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 20740,
+   "materials": 3,
+   "tris": 22468,
    "maxInfluences": 4,
    "extensions": []
   },
   {
    "file": "KAMNEKLYK_L3_RIGGED_ANIMATED.glb",
-   "bytes": 8094428,
+   "bytes": 9388380,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
    "hints": 0,
    "codes": {},
    "animations": 12,
-   "materials": 2,
-   "tris": 21120,
+   "materials": 3,
+   "tris": 22848,
    "maxInfluences": 4,
    "extensions": []
   },
   {
    "file": "dragor_lod0.glb",
-   "bytes": 23160724,
+   "bytes": 27232708,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
@@ -331,7 +331,7 @@
    "codes": {},
    "animations": 14,
    "materials": 2,
-   "tris": 68088,
+   "tris": 70330,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -339,7 +339,7 @@
   },
   {
    "file": "dragor_lod1.glb",
-   "bytes": 9126824,
+   "bytes": 10006936,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
@@ -347,7 +347,7 @@
    "codes": {},
    "animations": 14,
    "materials": 2,
-   "tris": 31060,
+   "tris": 27164,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -355,7 +355,7 @@
   },
   {
    "file": "dragor_lod2.glb",
-   "bytes": 3228752,
+   "bytes": 3488444,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
@@ -363,7 +363,7 @@
    "codes": {},
    "animations": 14,
    "materials": 2,
-   "tris": 8802,
+   "tris": 7958,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -371,7 +371,7 @@
   },
   {
    "file": "dragor_runtime.glb",
-   "bytes": 11842104,
+   "bytes": 12981828,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
@@ -379,7 +379,7 @@
    "codes": {},
    "animations": 14,
    "materials": 4,
-   "tris": 39862,
+   "tris": 35122,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -387,7 +387,7 @@
   },
   {
    "file": "DRAGOR_L1_RIGGED_ANIMATED.glb",
-   "bytes": 9126800,
+   "bytes": 10006912,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
@@ -395,7 +395,7 @@
    "codes": {},
    "animations": 14,
    "materials": 2,
-   "tris": 31060,
+   "tris": 27164,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -403,7 +403,7 @@
   },
   {
    "file": "DRAGOR_L2_RIGGED_ANIMATED.glb",
-   "bytes": 9281100,
+   "bytes": 10273296,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
@@ -411,7 +411,7 @@
    "codes": {},
    "animations": 14,
    "materials": 2,
-   "tris": 31060,
+   "tris": 27164,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"
@@ -419,7 +419,7 @@
   },
   {
    "file": "DRAGOR_L3_RIGGED_ANIMATED.glb",
-   "bytes": 9365084,
+   "bytes": 10389104,
    "errors": 0,
    "warnings": 0,
    "infos": 0,
@@ -427,7 +427,7 @@
    "codes": {},
    "animations": 14,
    "materials": 2,
-   "tris": 31060,
+   "tris": 27164,
    "maxInfluences": 4,
    "extensions": [
     "KHR_materials_emissive_strength"

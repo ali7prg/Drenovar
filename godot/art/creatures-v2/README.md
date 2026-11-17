@@ -20,6 +20,7 @@ decimation, MikkTSpace tangents, Cycles normal/AO bakes), `xatlas` (UV charts), 
 | UV | `blender_ops.uv_xatlas` | xatlas charts per material atlas, packed per LOD. |
 | Bake | `blender_ops.bake_normal/bake_ao` | Cycles tangent-space normal (high-res sculpt -> low poly, per part) and AO. |
 | Texture | `texturing.py`, `shading.py`, `raster.py` | Own UV rasteriser gives every texel its rest position, normal and MikkTSpace frame; species shading functions produce BaseColor, roughness/metallic, emissive, a detail height (fur strands, bark grain, slate, scales) blended onto the baked normal (RNM), AO x cavity, and the level-variant mask. |
+| Fur cards | `furcards.py`, `species/<id>.py` (`FUR_CARDS`, `FUR_KEEP`) | Alpha-masked hair locks rooted on the outer sculpt (locks included), laid along the coat flow per region (mane, ruff, back ridge, legs, tail...); silhouette tufts get a second crossed strip. Both faces are explicit geometry with the outward surface normal (single-sided material, no back-face darkening in Godot/three.js/DCC). Vertex colour goes from the body BaseColor at the root to the region's tip colour; a strand atlas (pointed, split, wispy locks; a glow column whose strands are emissive). Card share, width and segments per LOD keep the triangle budgets; weights copied from the nearest body vertex. |
 | Rig / skin | `rig.py`, `export.py` | Skeleton per species (CreatureRoot -> MotionRoot -> Pelvis -> Spine_01/02 -> Chest -> Neck_01/02 -> Head -> Jaw; Shoulder/Hip -> UpperLeg -> LowerLeg -> Foot -> Toe; Tail_01..; ears, mane, belly, digit helpers) and sockets. Skin weights from the sculpt primitives' ownership (softmin), smoothed on the surface, 4 influences; rigid parts on one bone. |
 | Animation | `anim.py`, `clips.py`, `species/<id>.py` | Keyed poses (Hermite tracks), analytic leg IK with planted hooves/paws, gait generator (in place, stance feet move back at `speed_mps`), controller-consistent foot planning for turns/charge/pounce/dodge, spring tails/ears, death with per-frame ground contact on the skinned mesh. |
 | Export | `gltf.py`, `export.py` | Core glTF 2.0 + `KHR_materials_emissive_strength` only (no Draco/Meshopt/KTX2). |
@@ -40,11 +41,12 @@ decimation, MikkTSpace tangents, Cycles normal/AO bakes), `xatlas` (UV charts), 
 |---|---|---|---|---|
 | Clips | 12 | 12 | 14 | 14 |
 | Bones (skin joints) | 41 | 40 | 44 | 48 |
-| LOD0 / LOD1 / LOD2 triangles | 47 074 / 20 302 / 6 026 | 45 846 / 20 740 / 6 006 | 39 978 / 18 340 / 5 240 | 68 088 / 31 060 / 8 802 |
-| Materials per LOD | 2 (Body, AntlerBark) | 2 (Body, Stone) | 2 (Body, Details) | 2 (Skin, Stone) |
+| LOD0 / LOD1 / LOD2 triangles | 62 112 / 26 342 / 6 716 | 55 644 / 22 468 / 6 328 | 47 122 / 19 036 / 4 992 | 70 330 / 27 164 / 7 958 |
+| Materials per LOD | 3 (Body, AntlerBark, FurCards) | 3 (Body, Stone, FurCards) | 3 (Body, Details, FurCards) | 2 (Skin, Stone) |
 
-LOD1 of Dragor is 31 060 triangles against a 30 000 target (+3.5 %): the 22 rock plates and 13 spikes
-are kept whole at LOD1; LOD2 (8 802) is within its 9 000 budget.
+Proportions follow the kit sheets' drawings (see Reference match). The fur cards are what goes over the
+03 budgets: Velkor (shaggy all over on its sheet) 62 112 / 26 342 against 48 000 / 20 000, Tenerys LOD0
++2 %, Kamneklyk LOD0 +7 % and LOD1 +2 %; Dragor and every LOD2 are within budget.
 
 ## Rebuild
 
@@ -56,6 +58,13 @@ python3 godot/art/creatures-v2/write_import.py godot/project velkor
 (cd godot/project && godot --headless --path . --import && python3 ../tools/texture_import_policy.py . && godot --headless --path . --import)
 (cd godot/project && godot --headless --path . -s qa_creatures_v2.gd)
 ```
+
+Reference match: `tools/refmatch.py` segments the front / left side / rear views of the kit sheets
+(`refs`), rasterises the sculpt in the same views (`model`, coarse meshes, IoU after a best fit of scale
+and offset) and compares orthographic renders of the built model with the sheets (`compare`, from
+`tools/media.gd --what=views`): `<id>_compare.jpg` puts sheet, model and the silhouette overlay side by
+side (red: only on the sheet, blue: only on the model). Landmarks are read in metres off the sheet at
+112 / 127 / 145 / 80 px per metre (Velkor / Tenerys / Kamneklyk / Dragor).
 
 Checks: `tools/validate.mjs` (Khronos glTF-Validator), `tools/run_three.cjs` + `tools/index.html`
 (Three.js r171 GLTFLoader in Chromium), `tools/foot_check.py` (foot sliding / ground contact from

@@ -90,13 +90,28 @@ func run() -> void:
 		var mats_a := {}
 		var mats_b := {}
 		var overlays := 0
+		var fur := 0
 		for part: MeshInstance3D in a.find_children("*", "MeshInstance3D", true, false):
+			if String(part.name).contains("_FurCards_"):
+				# alpha-masked strands: imported material with alpha scissor and vertex colour; the back faces are
+				# explicit geometry (same outward normal), so the material culls back faces
+				fur += 1
+				var fm := part.mesh.surface_get_material(0) as BaseMaterial3D
+				check(fm != null and fm.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR and
+					fm.cull_mode == BaseMaterial3D.CULL_BACK and fm.vertex_color_use_as_albedo,
+					"%s: %s alpha-scissor, explicit back faces, vertex-coloured" % [species, part.name])
+				continue
 			if String(part.name).contains("VARIANT"):
 				overlays += 1
 				check(not part.visible, "%s: level I hides overlay %s" % [species, part.name])
 			mats_a[String(part.name)] = part.get_surface_override_material(0)
 			check(part.get_surface_override_material(0) is ShaderMaterial, "%s: %s uses the creature shader" % [species, part.name])
+		if species != "dragor":
+			check(fur >= 2, "%s: fur cards at LOD1 and LOD2 (%d)" % [species, fur])
+		row.fur_card_meshes = fur
 		for part: MeshInstance3D in b.find_children("*", "MeshInstance3D", true, false):
+			if String(part.name).contains("_FurCards_"):
+				continue
 			mats_b[String(part.name)] = part.get_surface_override_material(0)
 			if String(part.name).contains("VARIANT_L3") or String(part.name).contains("VARIANT_L2"):
 				check(part.visible, "%s: level III shows overlay %s" % [species, part.name])
@@ -128,6 +143,8 @@ func run() -> void:
 		CreatureVisuals.install(c, species, 1, 1.0)
 		var shared := true
 		for part: MeshInstance3D in c.find_children("*", "MeshInstance3D", true, false):
+			if String(part.name).contains("_FurCards_"):
+				continue
 			shared = shared and part.get_surface_override_material(0) == mats_a.get(String(part.name))
 		check(shared, species + ": instances of one level share their materials")
 		# LOD1 near / LOD2 far with hysteresis, exactly one LOD drawn, also for a creature first seen inside
@@ -195,6 +212,10 @@ func run() -> void:
 		await process_frame
 		var lowest := INF
 		for i in sa.get_bone_count():
+			# the motion root carries the death drop (it sinks below the standing height so the lying body touches
+			# the ground); body bones are what must stay above it
+			if sa.get_bone_name(i) in ["MotionRoot", "CreatureRoot"]:
+				continue
 			lowest = minf(lowest, (sa.global_transform * sa.get_bone_global_pose(i)).origin.y)
 		row.death_lowest_bone_m = snappedf(lowest, 0.001)
 		check(lowest > -0.12, "%s: dead pose bones above ground (lowest %.3f m)" % [species, lowest])

@@ -36,6 +36,15 @@ func life_of(actor: Node3D) -> float:
 			return float(v)
 	return 1.0 # never set: the shader default
 
+## Emission of the glowing fur strands as drawn (per-actor override while dying/dead), 0 when there are none.
+func fur_glow_of(actor: Node3D) -> float:
+	var top := 0.0
+	for part: MeshInstance3D in actor.find_children("*_FurCards_*", "MeshInstance3D", true, false):
+		var m := (part.material_override if part.material_override != null else part.mesh.surface_get_material(0)) as BaseMaterial3D
+		if m != null and m.emission_enabled:
+			top = maxf(top, m.emission_energy_multiplier)
+	return top
+
 func show_at(stage, state: Dictionary, at: float, frames := 3) -> void:
 	for i in frames:
 		stage.battle_fx.begin()
@@ -134,6 +143,7 @@ func run() -> void:
 		check(corpse != null and str(corpse.get_meta("clip", "")) == "Death", species + ": corpse lies in the death pose")
 		if corpse != null:
 			check(life_of(corpse) < 0.01, species + ": glow out on the corpse (life %.2f)" % life_of(corpse))
+			check(fur_glow_of(corpse) < 0.01, species + ": glowing fur strands out on the corpse (%.2f)" % fur_glow_of(corpse))
 		# 4) corpse removed after the army left
 		await show_at(stage, state, ends + CORPSE_MS + 400.0, 3)
 		check(stage.creatures.get_node_or_null(NodePath(enc.id)) == null, species + ": corpse removed")

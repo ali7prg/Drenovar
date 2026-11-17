@@ -5,20 +5,20 @@
    "name": "Лесной Велькор",
    "model": "res://assets/creatures-v2/velkor/velkor_runtime.gltf",
    "manifest": "res://assets/creatures-v2/velkor/clip_manifest.json",
-   "display_scale": 1.205,
+   "display_scale": 1.323,
    "body": [
-    2.509,
-    0.879
+    2.511,
+    0.851
    ],
    "authored_bounds_m": {
     "x": [
-     -2.061,
-     2.104
+     -1.76,
+     2.035
     ],
-    "half_width": 0.729,
-    "top": 3.549
+    "half_width": 0.644,
+    "top": 3.17
    },
-   "lod_switch_m": 31.9,
+   "lod_switch_m": 28.5,
    "groups": {
     "body": "Body",
     "horn": "AntlerBark"
@@ -80,20 +80,20 @@
    "name": "Тенерис",
    "model": "res://assets/creatures-v2/tenerys/tenerys_runtime.gltf",
    "manifest": "res://assets/creatures-v2/tenerys/clip_manifest.json",
-   "display_scale": 1.41,
+   "display_scale": 1.326,
    "body": [
-    2.63,
-    0.743
+    2.629,
+    0.768
    ],
    "authored_bounds_m": {
     "x": [
-     -2.231,
-     1.5
+     -2.423,
+     1.543
     ],
-    "half_width": 0.527,
-    "top": 2.086
+    "half_width": 0.579,
+    "top": 2.281
    },
-   "lod_switch_m": 18.8,
+   "lod_switch_m": 20.5,
    "groups": {
     "body": "Body",
     "detail": "Details"
@@ -158,20 +158,20 @@
    "name": "Горный Драгор",
    "model": "res://assets/creatures-v2/dragor/dragor_runtime.gltf",
    "manifest": "res://assets/creatures-v2/dragor/clip_manifest.json",
-   "display_scale": 0.977,
+   "display_scale": 0.939,
    "body": [
-    3.15,
-    1.481
+    3.151,
+    1.297
    ],
    "authored_bounds_m": {
     "x": [
-     -4.199,
-     2.25
+     -3.351,
+     3.361
     ],
-    "half_width": 1.516,
-    "top": 3.912
+    "half_width": 1.381,
+    "top": 3.091
    },
-   "lod_switch_m": 35.2,
+   "lod_switch_m": 27.8,
    "groups": {
     "skin": "Skin",
     "stone": "Stone"
@@ -258,20 +258,20 @@
    "name": "Камнеклык",
    "model": "res://assets/creatures-v2/kamneklyk/kamneklyk_runtime.gltf",
    "manifest": "res://assets/creatures-v2/kamneklyk/clip_manifest.json",
-   "display_scale": 1.525,
+   "display_scale": 1.511,
    "body": [
-    2.621,
-    1.081
+    2.62,
+    1.072
    ],
    "authored_bounds_m": {
     "x": [
-     -1.746,
-     1.691
+     -1.742,
+     1.726
     ],
-    "half_width": 0.709,
-    "top": 1.972
+    "half_width": 0.71,
+    "top": 2.02
    },
-   "lod_switch_m": 17.7,
+   "lod_switch_m": 18.2,
    "groups": {
     "body": "Body",
     "stone": "Stone"

@@ -143,7 +143,9 @@ def write(path, sp, sk, lod_sets, clips, level=1, generator="DRENOVAR creatures-
             tex = data["tex"]
             # textures (level-baked base colour / emissive when the file is a per-level export)
             base_path = data.get("base_override") or os.path.join(tex, f"{group}_basecolor.png")
-            b_bytes, b_mime = png_bytes(base_path, fmt=texture_format if texture_format == "JPEG" else "PNG")
+            alpha = bool(data.get("alpha"))
+            b_bytes, b_mime = png_bytes(base_path, fmt="PNG" if alpha else (texture_format if texture_format == "JPEG"
+                                                                              else "PNG"))
             ti_base = g.texture(g.image(b_bytes, b_mime, f"{sp.ID}_LOD{lod}_{group}_BaseColor"))
             n_bytes, n_mime = png_bytes(os.path.join(tex, f"{group}_normal.png"))
             ti_n = g.texture(g.image(n_bytes, n_mime, f"{sp.ID}_LOD{lod}_{group}_Normal"))
@@ -155,10 +157,12 @@ def write(path, sp, sk, lod_sets, clips, level=1, generator="DRENOVAR creatures-
             if os.path.exists(em_path):
                 e_bytes, e_mime = png_bytes(em_path)
                 ti_e = g.texture(g.image(e_bytes, e_mime, f"{sp.ID}_LOD{lod}_{group}_Emissive"))
-            mat_name = f"M_{sp.ID.capitalize()}_{sp.MATERIAL_NAMES[group]}_LOD{lod}"
+            label = sp.MATERIAL_NAMES.get(group, "FurCards")
+            mat_name = f"M_{sp.ID.capitalize()}_{label}_LOD{lod}"
             strength = level_params(sp, level, group).get("emission_strength", 1.0)
             mi = g.material(mat_name, base_tex=ti_base, normal_tex=ti_n, orm_tex=ti_o, emissive_tex=ti_e,
                             emissive=(1, 1, 1) if ti_e is not None else (0, 0, 0), emissive_strength=strength,
+                            alpha_mode="MASK" if alpha else None, alpha_cutoff=0.42,  # fur: back faces explicit
                             extras={"species": sp.ID, "group": group, "lod": lod, "level": level,
                                     "variant_mask": f"{group}_variant.png", "material_version": "creatures-v2"})
             # split by visibility tier: base / level II+ / level III overlays
@@ -182,9 +186,10 @@ def write(path, sp, sk, lod_sets, clips, level=1, generator="DRENOVAR creatures-
                 nrm, tan = unit_frames(mesh["nrm"][used], mesh["tan"][used])
                 prim = {"pos": mesh["pos"][used], "nrm": nrm, "tan": tan,
                         "uv": mesh["uv"][used], "joints": data["joints"][used], "weights": data["weights"][used],
-                        "idx": remap[faces], "material": mi}
+                        "idx": remap[faces], "material": mi,
+                        "color": mesh["color"][used] if mesh.get("color") is not None else None}
                 suffix = "" if tier == 1 else ("_VARIANT_L2" if tier == 2 else "_VARIANT_L3")
-                name = f"{sp.ID.upper()}_{sp.MATERIAL_NAMES[group]}_LOD{lod}{suffix}"
+                name = f"{sp.ID.upper()}_{label}_LOD{lod}{suffix}"
                 mx = g.mesh(name, [prim], extras={"lod": lod, "tier": int(tier)})
                 # skinned meshes are scene roots (their node transform is ignored by glTF skinning)
                 g.node(name, None, mesh=mx, skin=skin, extras={"lod": lod, "min_level": int(tier)})
@@ -313,6 +318,14 @@ def run(sp, work, lods, log=print, out_dir=None):
     rigid = np.isin(part_ids, list(rigid_parts))
     sampler = SkinSampler(sk, pos[keep], jj[keep], ww[keep], joints, count=6000, rigid=rigid[keep])
     rig = Quad(sk)
+    # fur cards (alpha strands) on the furry species, rooted on and skinned like the body of each LOD
+    import furcards
+    for lod in lods:
+        if "body" in lod_data[lod]:
+            fur = furcards.build_group(sp, lod, work, lod_data[lod]["body"], os.path.join(work, f"lod{lod}", "fur"))
+            if fur is not None:
+                lod_data[lod]["fur"] = fur
+                log(f"  fur cards LOD{lod}: {len(fur['mesh']['idx'])} tris")
     t = time.time()
     clips = sp.clips(rig, sampler)
     log(f"  clips: {len(clips)} in {time.time() - t:.1f}s")

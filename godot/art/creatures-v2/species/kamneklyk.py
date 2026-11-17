@@ -1,6 +1,8 @@
-"""Камнеклык (kamneklyk): armoured stone boar. L1 dimensions from 02_CREATURES.txt: withers 1.65 m, plate tops
-2.20 m, body with head 3.00 m, tail 0.35 m, body width 1.75 m, tusk span 1.85 m. Low centre of mass, front legs
-heavier, cloven hooves, 14 large slate plates (rigid to their bone), amber (non-glowing) eyes.
+"""Камнеклык (kamneklyk): armoured stone boar, sculpted to the kit sheet kamneklyk_reference.png (front / left
+side / rear read at 145 px per metre: withers 1.65 m, body with head 3.0 m as labelled). A pine cone of
+overlapping slate shards (59, rear tips lifted, crest standing up to ~2.1 m) over neck, shoulders, back and rump,
+shards on the brow, crescent main tusks curving out and up (~1.0 m span as drawn) and short lower tusks,
+dark brown shaggy coat, cloven hooves, thin tufted tail, amber (non-glowing) eyes.
 """
 import numpy as np
 
@@ -23,6 +25,12 @@ HIND = {"joints": [(-1.05, 1.15, 0.22), (-1.02, 1.00, 0.40), (-0.80, 0.66, 0.42)
                    (-1.08, 0.12, 0.40), (-0.98, 0.0, 0.40)]}
 
 
+# idle stance read off the side sheet (hoof contacts): near (left) fore forward, far fore back, far hind forward,
+# near hind back - the views are compared in this pose
+IDLE_STANCE = {("Front", "L"): {"dx": [(0, 0.08)]}, ("Front", "R"): {"dx": [(0, -0.18)]},
+               ("Hind", "L"): {"dx": [(0, -0.25)]}, ("Hind", "R"): {"dx": [(0, 0.30)]}}
+
+
 def side(p, s):
     return np.array([p[0], p[1], abs(p[2]) * s])
 
@@ -41,7 +49,7 @@ def skeleton():
     sk.add("Nose", "Head", (1.36, 0.94, 0), tail=(1.53, 0.86, 0))
     for nm, s in SIDES:
         sk.add(f"Ear_{nm}", "Head", (0.96, 1.36, 0.20 * s), tail=(0.90, 1.52, 0.30 * s))
-        sk.add(f"Tusk_{nm}", "Head", (1.40, 0.90, 0.12 * s), tail=(1.40, 1.30, 0.92 * s))
+        sk.add(f"Tusk_{nm}", "Head", (1.40, 0.90, 0.12 * s), tail=(1.66, 1.20, 0.52 * s))
     sk.add("Hump", "Chest", (0.30, 1.70, 0), tail=(0.0, 1.80, 0))
     sk.add("Belly", "Spine_02", (-0.20, 0.80, 0), tail=(-0.20, 0.66, 0))
     for nm, s in SIDES:
@@ -57,7 +65,7 @@ def skeleton():
     for nm, s in SIDES:
         sk.socket(f"socket_foot_front_{nm.lower()}", f"Toe_Front_{nm}", side(FRONT["joints"][5], s))
         sk.socket(f"socket_foot_hind_{nm.lower()}", f"Toe_Hind_{nm}", side(HIND["joints"][5], s))
-        sk.socket(f"socket_tusk_{nm.lower()}", f"Tusk_{nm}", (1.40, 1.30, 0.92 * s))
+        sk.socket(f"socket_tusk_{nm.lower()}", f"Tusk_{nm}", (1.66, 1.20, 0.52 * s))
     sk.socket("socket_tail_tip", "Tail_04", (-1.70, 0.74, 0))
     return sk
 
@@ -96,7 +104,7 @@ def body_core():
          Prim("ellipsoid", "Chest", k=0.14, c=(0.62, 0.98, 0), r=(0.32, 0.38, 0.52), name="chestfront"),
          Prim("ellipsoid", "Belly", k=0.18, c=(-0.25, 0.84, 0), r=(0.72, 0.22, 0.54), name="belly"),
          Prim("ellipsoid", "Pelvis", k=0.16, c=(-1.05, 1.05, 0), r=(0.44, 0.36, 0.52), name="rump"),
-         Prim("ellipsoid", "Hump", k=0.14, c=(0.25, 1.52, 0), r=(0.50, 0.18, 0.40), name="crest"),
+         Prim("ellipsoid", "Hump", k=0.14, c=(0.25, 1.56, 0), r=(0.55, 0.20, 0.42), name="crest"),
          Prim("cone", "Neck_01", k=0.14, a=(0.60, 1.22, 0), b=(0.95, 1.12, 0), ra=0.52, rb=0.42, name="neck"),
          # head: wedge skull, heavy brow, long snout ending in a disc
          Prim("ellipsoid", "Head", k=0.10, c=(1.04, 1.13, 0), r=(0.34, 0.31, 0.30), name="skull"),
@@ -200,29 +208,44 @@ def stone_plate(centre, n, back, L, W, T, bone, tilt, yaw, name, rng, mat="stone
 
 
 def build_plates(core, rng, level=1):
+    """Sheet armour: rows of slate shards from the neck to the croup, each row fanning from the spine down the
+    flanks (top shards steep, side shards flatter), alternate rows offset; a cluster of shards on the brow."""
+    rows = [(1.02, (0.0, 0.45, -0.45), 0.34, "Neck_01"),
+            (0.84, (0.2, -0.2, 0.62, -0.62, 1.0, -1.0), 0.42, "Chest"),
+            (0.62, (0.0, 0.40, -0.40, 0.80, -0.80, 1.18, -1.18), 0.50, "Hump"),
+            (0.40, (0.2, -0.2, 0.60, -0.60, 1.0, -1.0, 1.36, -1.36), 0.54, "Hump"),
+            (0.16, (0.0, 0.40, -0.40, 0.80, -0.80, 1.18, -1.18), 0.52, "Hump"),
+            (-0.08, (0.2, -0.2, 0.60, -0.60, 1.0, -1.0), 0.50, "Spine_02"),
+            (-0.34, (0.0, 0.40, -0.40, 0.80, -0.80, 1.15, -1.15), 0.46, "Spine_02"),
+            (-0.60, (0.2, -0.2, 0.60, -0.60, 0.98, -0.98), 0.42, "Spine_01"),
+            (-0.86, (0.0, 0.42, -0.42, 0.82, -0.82), 0.38, "Pelvis"),
+            (-1.10, (0.22, -0.22, 0.62, -0.62), 0.32, "Pelvis")]
     specs = []
-    # hump / back / rump: big plates, overlapping toward the rear
-    for (x, ang, L, W, bone) in ((0.70, 0.0, 0.62, 0.50, "Chest"), (0.46, 0.55, 0.62, 0.48, "Chest"),
-                                 (0.46, -0.55, 0.62, 0.48, "Chest"), (0.26, 0.0, 0.66, 0.54, "Hump"),
-                                 (0.00, 0.60, 0.60, 0.46, "Spine_02"), (0.00, -0.60, 0.60, 0.46, "Spine_02"),
-                                 (-0.22, 0.0, 0.62, 0.50, "Spine_02"), (-0.48, 0.58, 0.56, 0.44, "Spine_01"),
-                                 (-0.48, -0.58, 0.56, 0.44, "Spine_01"), (-0.72, 0.0, 0.56, 0.46, "Spine_01"),
-                                 (-0.98, 0.40, 0.50, 0.40, "Pelvis"), (-0.98, -0.40, 0.50, 0.40, "Pelvis")):
-        specs.append((np.array([x, 1.3 + 1.2 * np.cos(ang), 1.2 * np.sin(ang)]), L, W, bone))
-    for nm, s in SIDES:
-        specs.append((np.array([0.52, 1.20, 1.2 * s]), 0.40, 0.38, f"Shoulder_{nm}"))
+    for (x, angs, L, bone) in rows:
+        for a in angs:
+            b = bone
+            if abs(a) > 0.9 and 0.0 < x < 0.9:
+                b = "Shoulder_R" if a > 0 else "Shoulder_L"   # +Z is the right side
+            st = np.array([x + rng.normal(0, 0.02), 1.25 + 1.4 * np.cos(a), 1.4 * np.sin(a)])
+            specs.append((st, L * (0.9 + 0.2 * rng.random()), L * 0.56, b, a))
     starts = np.array([sp[0] for sp in specs], np.float32)
     pts, nrm = surface_points(core, starts, steps=14)
     P = []
-    for k, ((st, L, W, bone), p, n) in enumerate(zip(specs, pts, nrm)):
+    for k, ((st, L, W, bone, a), p, n) in enumerate(zip(specs, pts, nrm)):
         n = n / np.linalg.norm(n)
-        lift = 0.30 if abs(st[2]) < 0.2 else 0.16
-        P.append(stone_plate(p + n * 0.035, n, np.array([-1.0, -0.15, 0]), L, W, 0.036 + 0.01 * rng.random(), bone,
-                             lift + rng.normal(0, 0.04), rng.normal(0, 0.10), f"plate{k}", rng))
-    # brow plate (always) and the level III head shield (overlay)
+        lift = 0.62 - 0.24 * min(abs(a), 1.3)
+        P.append(stone_plate(p + n * 0.03, n, np.array([-1.0, -0.15, 0]), L, W, 0.028 + 0.008 * rng.random(), bone,
+                             lift + rng.normal(0, 0.05), rng.normal(0, 0.10), f"plate{k}", rng))
+    # brow: a column of shards from the brow to the crown, two at the sides, pointing back and up
+    brow_starts = np.array([[1.30, 1.55, 0.0], [1.18, 1.70, 0.0], [1.06, 1.80, 0.0], [1.22, 1.55, 0.30],
+                            [1.22, 1.55, -0.30]], np.float32)
+    bp, bn = surface_points(core, brow_starts, steps=14)
+    for k, (p, n) in enumerate(zip(bp, bn)):
+        n = n / np.linalg.norm(n)
+        L = 0.26 if k < 3 else 0.22
+        P.append(stone_plate(p + n * 0.03, n, np.array([-1.0, 0.45, 0]), L, L * 0.62, 0.035, "Head", 0.40, 0.0,
+                             f"brow{k}", rng))
     brow = surface_points(core, np.array([[1.15, 1.6, 0.0]], np.float32), steps=14)
-    P.append(stone_plate(brow[0][0] + brow[1][0] * 0.04, brow[1][0], np.array([-1.0, 0.3, 0]), 0.30, 0.34, 0.04,
-                         "Head", 0.12, 0.0, "browplate", rng))
     shield = stone_plate(brow[0][0] + brow[1][0] * 0.09 + np.array([0.04, 0.02, 0]), brow[1][0],
                          np.array([-1.0, 0.45, 0]), 0.46, 0.52, 0.045, "Head", 0.22, 0.0, "headshield", rng)
     return P, shield
@@ -232,8 +255,8 @@ def tusks_part():
     P = []
     for nm, s in SIDES:
         root = np.array([1.40, 0.90, 0.13 * s])
-        pts = bezier(root, np.array([1.64, 0.84, 0.42 * s]), np.array([1.74, 1.12, 0.80 * s]),
-                     np.array([1.52, 1.34, 0.925 * s]), 14)
+        pts = bezier(root, np.array([1.60, 0.78, 0.34 * s]), np.array([1.76, 0.96, 0.54 * s]),
+                     np.array([1.66, 1.20, 0.52 * s]), 14)
         P += chain(list(pts), list(np.linspace(0.088, 0.016, len(pts))), f"Tusk_{nm}", k=0.01, mat="tusk",
                    name=f"tusk{nm}")
         root2 = np.array([1.37, 0.84, 0.085 * s])
@@ -249,6 +272,28 @@ def eye_part():
                          for nm, s in SIDES], band=0.015)
 
 
+FUR_KEEP = {0: 0.9, 1: 0.55, 2: 0.15}   # shaggy everywhere on the sheet: more cards than the default
+FUR_CARDS = [  # sheet: long shaggy dark-brown coat with lighter tips, beard under the head, tufted tail
+    {"centre": (-0.20, 0.86, 0), "radii": (1.00, 0.30, 0.66), "count": 260, "length": 0.26, "width": 0.10,
+     "flow": lambda p, n: np.array([-0.5, -0.85, 0]), "lift": 0.12, "droop": 0.25, "tip": "#8a6e58"},  # flanks
+    {"centre": (-0.25, 0.62, 0), "radii": (0.75, 0.10, 0.50), "count": 90, "length": 0.24, "width": 0.09,
+     "flow": lambda p, n: np.array([-0.2, -1.0, 0]), "lift": 0.05, "gravity": 0.4, "droop": 0.2, "crossed": True,
+     "tip": "#7d6450"},                                                                             # belly hem
+    {"centre": (1.00, 1.05, 0), "radii": (0.25, 0.30, 0.36), "count": 140, "length": 0.26, "width": 0.10,
+     "flow": lambda p, n: np.array([-1.0, -0.5, 0]), "lift": 0.2, "droop": 0.2, "crossed": True,
+     "tip": "#8e7362"},                                                                             # neck, beard
+    {"centre": (0.52, 0.45, 0), "radii": (0.18, 0.40, 0.55), "count": 100, "length": 0.18, "width": 0.08,
+     "flow": lambda p, n: np.array([-0.3, -1.0, 0]), "lift": 0.18, "droop": 0.1, "crossed": True,
+     "tip": "#7a6250"},                                                                             # forelegs
+    {"centre": (-1.00, 0.50, 0), "radii": (0.25, 0.40, 0.50), "count": 100, "length": 0.18, "width": 0.08,
+     "flow": lambda p, n: np.array([-0.4, -1.0, 0]), "lift": 0.18, "droop": 0.1, "crossed": True,
+     "tip": "#7a6250"},                                                                             # hind legs
+    {"centre": (-1.15, 0.95, 0), "radii": (0.35, 0.35, 0.55), "count": 110, "length": 0.22, "width": 0.09,
+     "flow": lambda p, n: np.array([-1.0, -0.6, 0]), "lift": 0.15, "droop": 0.2, "tip": "#856a55"},   # rump
+    {"centre": (-1.66, 0.80, 0), "radii": (0.06, 0.10, 0.06), "count": 24, "length": 0.20, "width": 0.07,
+     "flow": lambda p, n: np.array([-0.2, -1.0, 0]), "lift": 0.2, "gravity": 0.5, "droop": 0.1, "crossed": True,
+     "tip": "#8e7362"}]                                                                             # tail tuft
+
 CLASSES = {"body": ["fur", "skin", "snout", "hoof", "mouth"], "stone": ["stone", "tusk", "eye"]}
 CLASS_OF = {"base": "fur"}
 AXIS_PRIMS = ("lock", "humerus", "forearm", "femur", "tibia", "cannon", "tail", "neck", "snout", "jaw", "tusk")
@@ -262,7 +307,7 @@ def build(rng=None):
     core = Part("core", body_core(), band=0.07)
     plates, shield = build_plates(core, rng)
     parts = [{"name": "body", "part": build_body(rng), "material": "body", "rigid": None,
-              "faces": (32000, 13500, 3900)},
+              "faces": (26000, 9000, 3000)},
              {"name": "eyes", "part": eye_part(), "material": "stone", "rigid": "Head", "faces": (240, 120, 40),
               "voxel": 0.003}]
     tp = tusks_part()
@@ -272,9 +317,16 @@ def build(rng=None):
                       "faces": (1400, 600, 180), "voxel": 0.004})
     parts.append({"name": "tusks_lower", "part": Part("tusks_lower", [q for q in tp if q.bone == "Jaw"], band=0.02),
                   "material": "stone", "rigid": "Jaw", "faces": (500, 220, 60), "voxel": 0.004})
-    for k, pr in enumerate(plates):
+    groups = []
+    for pr in plates:
+        if groups and groups[-1][0].bone == pr[0].bone and len(groups[-1]) < 3 * len(pr):
+            groups[-1] = groups[-1] + pr
+        else:
+            groups.append(list(pr))
+    for k, pr in enumerate(groups):
+        n = max(1, round(len(pr) / 6))
         parts.append({"name": f"plate{k}", "part": Part(f"plate{k}", pr, band=0.03), "material": "stone",
-                      "rigid": pr[0].bone, "faces": (900, 380, 110), "sharp": 40})
+                      "rigid": pr[0].bone, "faces": (240 * n, 100 * n, 30 * n), "sharp": 40})
     parts.append({"name": "headshield", "part": Part("headshield", shield, band=0.03), "material": "stone",
                   "rigid": "Head", "faces": (900, 380, 0), "level": 3, "sharp": 40})
     return sk, parts
@@ -320,14 +372,15 @@ def shade_body(ctx):
     lod = ctx.lod
     hfur = fur_height(flow, 1.6, 3 if lod == 0 else (2 if lod == 1 else 1), clumps=True, seed=7)
     h0 = hfur(P) / 0.0028
-    col = mix(lin("#3f2e21"), lin("#2c2018"), sstep(0.1, 0.8, N[:, 1]))
-    col = mix(col, lin("#4a3626"), sstep(-0.1, -0.7, N[:, 1]))
-    col = mix(col, lin("#251c15"), sstep(0.55, 0.25, y))
+    col = mix(lin("#4a3729"), lin("#36281e"), sstep(0.1, 0.8, N[:, 1]))
+    col = mix(col, lin("#5b4535"), sstep(-0.1, -0.7, N[:, 1]))
+    col = mix(col, lin("#33271f"), sstep(0.55, 0.25, y))
     col = col * (1.0 + 0.18 * noise.fbm(P * 2.5, 3, seed=31)[:, None])
-    col = col * (0.62 + 0.55 * sstep(-1.0, 1.0, h0))[:, None]
+    col = col * (0.68 + 0.55 * sstep(-1.0, 1.0, h0))[:, None]
+    col = col * np.array([1.38, 1.40, 1.36], np.float32)[None, :]   # sheet coat: mid brown, lighter strands
     col = mix(col, lin("#3a2c26"), w["skin"])
     col = mix(col, lin("#5a4440"), w["snout"])
-    hoof = mix(lin("#221c17"), lin("#4a3d31"), sstep(0.035, 0.0, y))
+    hoof = mix(lin("#3a302b"), lin("#6c5c57"), sstep(0.035, 0.0, y))
     col = mix(col, hoof, w["hoof"])
     col = mix(col, lin("#3a1c1a"), w["mouth"])
     rough = 0.84 + 0.06 * noise.perlin(P * 12, 3)
@@ -363,15 +416,15 @@ def shade_stone(ctx):
     flow = tangent_flow(ctx.flow, N)
     h_s, seam, cid = slate(P, N)
     # grey slate, darker mineral patches, light chipped edges where the normal turns away from the plate face
-    stone = mix(lin("#6c6b67"), lin("#55534f"), sstep(0.2, 0.8, cid))
+    stone = mix(lin("#8a868b"), lin("#6b676b"), sstep(0.2, 0.8, cid))   # sheet slate: blue-grey
     mineral = sstep(0.15, 0.55, noise.fbm(P * 2.2, 3, seed=40))
     stone = mix(stone, lin("#3e3c3a"), mineral * 0.35)
     edge = sstep(0.55, 0.15, np.abs(N[:, 1])) * sstep(0.2, 0.6, noise.fbm(P * 9, 2, seed=41) + 0.5)
-    stone = mix(stone, lin("#a7a196"), edge * 0.6)
+    stone = mix(stone, lin("#98745a"), edge * 0.22)                     # thin rust edges, not rust plates
     stone = stone * (0.92 + 0.16 * noise.perlin(P * np.array([20.0, 90.0, 20.0], np.float32), 19))[:, None]
     stone = mix(stone, lin("#2a2826"), seam * 0.85)
     veins = sstep(0.965, 0.995, 1 - np.abs(noise.perlin(noise.stretch_along(P * 4.0, flow, 3.0), 44)))
-    tusk = mix(lin("#e1d6bd"), lin("#a28f6c"), sstep(0.03, 0.07, rad))
+    tusk = mix(lin("#e8d8bd"), lin("#9c8466"), sstep(0.035, 0.075, rad))
     tusk = tusk * (0.92 + 0.1 * noise.ridged(noise.stretch_along(P * 50.0, flow, 0.3), 2, 6))[:, None]
     col = stone * w["stone"][:, None] + tusk * w["tusk"][:, None] + lin("#1a1210")[None, :] * w["eye"][:, None]
     for s in (-1, 1):
@@ -421,7 +474,8 @@ def clips(rig, sampler):
         "eary": [(0, 0.0), (55, 0.0), (58, 0.15), (66, 0.0), (90, 0.0)],
         "hy": [(0, 0.0), (35, 0.06), (60, 0.06), (90, 0.0)],
         "n1p": [(0, 0.0), (40, -0.04), (90, 0.0)],
-        "taily": [(0, 0.0), (15, 0.35), (25, -0.35), (35, 0.2), (45, 0.0), (90, 0.0)]}, loop=True))
+        "taily": [(0, 0.0), (15, 0.35), (25, -0.35), (35, 0.2), (45, 0.0), (90, 0.0)]}, loop=True,
+        legs_fn=C.leg_keys(rig, IDLE_STANCE, 90)))
 
     def walk_body(ph):
         w = 2 * np.pi * ph
@@ -503,13 +557,19 @@ def clips(rig, sampler):
         legs = pl(fr)
         if fr <= 21:
             legs[("Front", "R")] = scrape(fr, prm)[("Front", "R")]
+        if 37 <= fr <= 47:      # the forehand comes off the ground with the upward tusk toss
+            up = np.sin(np.pi * (fr - 37) / 10.0)
+            for k in (("Front", "L"), ("Front", "R")):
+                legs[k] = dict(legs[k], tip=legs[k]["tip"] + np.array([0.04 * up, 0.22 * up, 0.0]),
+                               toe=legs[k].get("toe", 0.0) - 0.5 * up)
         return legs
     out.append(C.standing(rig, g, pre + "attack_charge", N, {
-        "n1p": [(0, 0.0), (18, -0.30), (27, -0.38), (42, -0.34), (48, -0.28), (56, 0.08), (75, 0.0)],
-        "hp": [(0, 0.0), (18, -0.18), (27, -0.22), (48, -0.16), (56, 0.06), (75, 0.0)],
+        "n1p": [(0, 0.0), (18, -0.30), (27, -0.38), (37, -0.38), (41, 0.14), (45, 0.08), (50, -0.16), (56, -0.10),
+                (75, 0.0)],
+        "hp": [(0, 0.0), (18, -0.18), (27, -0.22), (37, -0.22), (41, 0.24), (45, 0.14), (50, -0.06), (75, 0.0)],
         "px": [(0, 0.0), (20, -0.10), (27, -0.12), (32, 0.08), (48, 0.10), (54, -0.08), (75, 0.0)],
-        "py": [(0, 0.0), (20, -0.06), (27, -0.07), (36, 0.0), (50, -0.06), (75, 0.0)],
-        "pp": [(0, 0.0), (27, 0.03), (36, -0.03), (52, 0.06), (75, 0.0)],
+        "py": [(0, 0.0), (20, -0.06), (27, -0.07), (36, 0.0), (41, 0.06), (50, -0.08), (75, 0.0)],
+        "pp": [(0, 0.0), (27, 0.03), (36, -0.03), (41, 0.16), (45, 0.12), (52, 0.02), (75, 0.0)],
         "earp": [(0, 0.0), (14, -0.45), (60, -0.3), (75, 0.0)],
         "nose": [(0, 0.0), (6, 0.08), (10, 0.0), (14, 0.08), (18, 0.0)],
         "tailp": [(0, 0.0), (24, 0.5), (50, 0.5), (75, 0.0)]},

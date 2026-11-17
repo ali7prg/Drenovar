@@ -8,16 +8,16 @@
  "pivot": "ground, body centre",
  "authored_bounds_m": {
   "x": [
-   -1.746,
-   1.691
+   -1.742,
+   1.726
   ],
-  "half_width": 0.709,
-  "top": 1.972
+  "half_width": 0.71,
+  "top": 2.02
  },
- "display_scale_in_game": 1.525,
+ "display_scale_in_game": 1.511,
  "battle_outline_m": [
-  2.621,
-  1.081
+  2.62,
+  1.072
  ],
  "bones": 40,
  "max_influences": 4,
@@ -40,11 +40,12 @@
  "lods": {
   "lod0": {
    "file": "kamneklyk_lod0.glb",
-   "bytes": 22373124,
-   "triangles": 45846,
+   "bytes": 26475724,
+   "triangles": 55644,
    "materials": [
     "M_Kamneklyk_Body_LOD0",
-    "M_Kamneklyk_Stone_LOD0"
+    "M_Kamneklyk_Stone_LOD0",
+    "M_Kamneklyk_FurCards_LOD0"
    ],
    "textures": [
     "kamneklyk_LOD0_body_BaseColor",
@@ -52,16 +53,20 @@
     "kamneklyk_LOD0_body_ORM",
     "kamneklyk_LOD0_stone_BaseColor",
     "kamneklyk_LOD0_stone_Normal",
-    "kamneklyk_LOD0_stone_ORM"
+    "kamneklyk_LOD0_stone_ORM",
+    "kamneklyk_LOD0_fur_BaseColor",
+    "kamneklyk_LOD0_fur_Normal",
+    "kamneklyk_LOD0_fur_ORM"
    ]
   },
   "lod1": {
    "file": "kamneklyk_lod1.glb",
-   "bytes": 7850744,
-   "triangles": 20740,
+   "bytes": 9144392,
+   "triangles": 22468,
    "materials": [
     "M_Kamneklyk_Body_LOD1",
-    "M_Kamneklyk_Stone_LOD1"
+    "M_Kamneklyk_Stone_LOD1",
+    "M_Kamneklyk_FurCards_LOD1"
    ],
    "textures": [
     "kamneklyk_LOD1_body_BaseColor",
@@ -69,16 +74,20 @@
     "kamneklyk_LOD1_body_ORM",
     "kamneklyk_LOD1_stone_BaseColor",
     "kamneklyk_LOD1_stone_Normal",
-    "kamneklyk_LOD1_stone_ORM"
+    "kamneklyk_LOD1_stone_ORM",
+    "kamneklyk_LOD1_fur_BaseColor",
+    "kamneklyk_LOD1_fur_Normal",
+    "kamneklyk_LOD1_fur_ORM"
    ]
   },
   "lod2": {
    "file": "kamneklyk_lod2.glb",
-   "bytes": 2599948,
-   "triangles": 6006,
+   "bytes": 3029012,
+   "triangles": 6328,
    "materials": [
     "M_Kamneklyk_Body_LOD2",
-    "M_Kamneklyk_Stone_LOD2"
+    "M_Kamneklyk_Stone_LOD2",
+    "M_Kamneklyk_FurCards_LOD2"
    ],
    "textures": [
     "kamneklyk_LOD2_body_BaseColor",
@@ -86,7 +95,10 @@
     "kamneklyk_LOD2_body_ORM",
     "kamneklyk_LOD2_stone_BaseColor",
     "kamneklyk_LOD2_stone_Normal",
-    "kamneklyk_LOD2_stone_ORM"
+    "kamneklyk_LOD2_stone_ORM",
+    "kamneklyk_LOD2_fur_BaseColor",
+    "kamneklyk_LOD2_fur_Normal",
+    "kamneklyk_LOD2_fur_ORM"
    ]
   }
  },

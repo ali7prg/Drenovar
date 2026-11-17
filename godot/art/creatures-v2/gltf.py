@@ -115,7 +115,7 @@ class GLB:
 
     def material(self, name, base_tex=None, normal_tex=None, orm_tex=None, emissive_tex=None, emissive=(0, 0, 0),
                  emissive_strength=1.0, roughness=1.0, metallic=0.0, base_color=(1, 1, 1, 1), extras=None,
-                 normal_scale=1.0, double_sided=False):
+                 normal_scale=1.0, double_sided=False, alpha_mode=None, alpha_cutoff=0.5):
         m = {"name": name, "pbrMetallicRoughness": {"baseColorFactor": [float(x) for x in base_color],
                                                      "metallicFactor": float(metallic), "roughnessFactor": float(roughness)}}
         if base_tex is not None:
@@ -129,11 +129,15 @@ class GLB:
             m["emissiveTexture"] = {"index": emissive_tex}
         if any(emissive):
             m["emissiveFactor"] = [float(x) for x in emissive]
-        if emissive_strength != 1.0:
+        if emissive_strength != 1.0 and any(float(c) > 0 for c in emissive):  # only with an emissive factor
             m.setdefault("extensions", {})["KHR_materials_emissive_strength"] = {"emissiveStrength": float(emissive_strength)}
             self.used_ext.add("KHR_materials_emissive_strength")
         if double_sided:
             m["doubleSided"] = True
+        if alpha_mode:
+            m["alphaMode"] = alpha_mode
+            if alpha_mode == "MASK":
+                m["alphaCutoff"] = float(alpha_cutoff)
         if extras:
             m["extras"] = extras
         self.j.setdefault("materials", []).append(m)
@@ -149,6 +153,9 @@ class GLB:
                 attrs["TANGENT"] = self.accessor(p["tan"].astype(np.float32), FLOAT, "VEC4", ARRAY_BUFFER)
             if p.get("uv") is not None:
                 attrs["TEXCOORD_0"] = self.accessor(p["uv"].astype(np.float32), FLOAT, "VEC2", ARRAY_BUFFER)
+            if p.get("color") is not None:
+                attrs["COLOR_0"] = self.accessor(np.clip(p["color"], 0, 1).astype(np.float32), FLOAT, "VEC4",
+                                                 ARRAY_BUFFER)
             if p.get("joints") is not None:
                 j = p["joints"]
                 ct = UBYTE if j.max() < 256 else USHORT

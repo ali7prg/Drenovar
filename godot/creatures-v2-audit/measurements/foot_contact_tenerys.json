@@ -5,56 +5,56 @@
    "frames": 90,
    "loop": true,
    "planted_steps": 360,
-   "max_slide_mm_per_frame": 0.0,
-   "mean_slide_mm_per_frame": 0.0,
+   "max_slide_mm_per_frame": 0.39,
+   "mean_slide_mm_per_frame": 0.062,
    "lowest_foot_m": -0.0
   },
   "walk": {
    "frames": 36,
    "loop": true,
    "planted_steps": 69,
-   "max_slide_mm_per_frame": 7.64,
-   "mean_slide_mm_per_frame": 0.287,
+   "max_slide_mm_per_frame": 5.1,
+   "mean_slide_mm_per_frame": 0.182,
    "lowest_foot_m": -0.0
   },
   "stalk": {
    "frames": 48,
    "loop": true,
-   "planted_steps": 144,
-   "max_slide_mm_per_frame": 9.64,
-   "mean_slide_mm_per_frame": 0.134,
+   "planted_steps": 142,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
    "lowest_foot_m": -0.0
   },
   "run": {
    "frames": 18,
    "loop": true,
-   "planted_steps": 12,
-   "max_slide_mm_per_frame": 0.0,
-   "mean_slide_mm_per_frame": 0.0,
+   "planted_steps": 14,
+   "max_slide_mm_per_frame": 8.28,
+   "mean_slide_mm_per_frame": 1.143,
    "lowest_foot_m": -0.0
   },
   "turn_left": {
    "frames": 18,
    "loop": false,
-   "planted_steps": 48,
-   "max_slide_mm_per_frame": 2.57,
-   "mean_slide_mm_per_frame": 0.054,
+   "planted_steps": 47,
+   "max_slide_mm_per_frame": 5.68,
+   "mean_slide_mm_per_frame": 0.141,
    "lowest_foot_m": -0.0
   },
   "turn_right": {
    "frames": 18,
    "loop": false,
-   "planted_steps": 48,
-   "max_slide_mm_per_frame": 2.57,
-   "mean_slide_mm_per_frame": 0.054,
+   "planted_steps": 47,
+   "max_slide_mm_per_frame": 5.68,
+   "mean_slide_mm_per_frame": 0.141,
    "lowest_foot_m": -0.0
   },
   "howl": {
    "frames": 75,
    "loop": false,
    "planted_steps": 300,
-   "max_slide_mm_per_frame": 0.0,
-   "mean_slide_mm_per_frame": 0.0,
+   "max_slide_mm_per_frame": 0.3,
+   "mean_slide_mm_per_frame": 0.019,
    "lowest_foot_m": -0.0
   },
   "attack_bite": {
@@ -68,9 +68,9 @@
   "attack_claw": {
    "frames": 30,
    "loop": false,
-   "planted_steps": 98,
+   "planted_steps": 93,
    "max_slide_mm_per_frame": 16.72,
-   "mean_slide_mm_per_frame": 0.306,
+   "mean_slide_mm_per_frame": 0.359,
    "lowest_foot_m": -0.0
   },
   "attack_pounce": {

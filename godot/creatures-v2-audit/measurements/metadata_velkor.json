@@ -8,16 +8,16 @@
  "pivot": "ground, body centre",
  "authored_bounds_m": {
   "x": [
-   -2.061,
-   2.104
+   -1.76,
+   2.035
   ],
-  "half_width": 0.729,
-  "top": 3.549
+  "half_width": 0.644,
+  "top": 3.17
  },
- "display_scale_in_game": 1.205,
+ "display_scale_in_game": 1.323,
  "battle_outline_m": [
-  2.509,
-  0.879
+  2.511,
+  0.851
  ],
  "bones": 41,
  "max_influences": 4,
@@ -40,11 +40,12 @@
  "lods": {
   "lod0": {
    "file": "velkor_lod0.glb",
-   "bytes": 26556692,
-   "triangles": 47074,
+   "bytes": 29150380,
+   "triangles": 62112,
    "materials": [
     "M_Velkor_Body_LOD0",
-    "M_Velkor_AntlerBark_LOD0"
+    "M_Velkor_AntlerBark_LOD0",
+    "M_Velkor_FurCards_LOD0"
    ],
    "textures": [
     "velkor_LOD0_body_BaseColor",
@@ -54,16 +55,20 @@
     "velkor_LOD0_horn_BaseColor",
     "velkor_LOD0_horn_Normal",
     "velkor_LOD0_horn_ORM",
-    "velkor_LOD0_horn_Emissive"
+    "velkor_LOD0_horn_Emissive",
+    "velkor_LOD0_fur_BaseColor",
+    "velkor_LOD0_fur_Normal",
+    "velkor_LOD0_fur_ORM"
    ]
   },
   "lod1": {
    "file": "velkor_lod1.glb",
-   "bytes": 8920452,
-   "triangles": 20302,
+   "bytes": 9946416,
+   "triangles": 26342,
    "materials": [
     "M_Velkor_Body_LOD1",
-    "M_Velkor_AntlerBark_LOD1"
+    "M_Velkor_AntlerBark_LOD1",
+    "M_Velkor_FurCards_LOD1"
    ],
    "textures": [
     "velkor_LOD1_body_BaseColor",
@@ -73,16 +78,20 @@
     "velkor_LOD1_horn_BaseColor",
     "velkor_LOD1_horn_Normal",
     "velkor_LOD1_horn_ORM",
-    "velkor_LOD1_horn_Emissive"
+    "velkor_LOD1_horn_Emissive",
+    "velkor_LOD1_fur_BaseColor",
+    "velkor_LOD1_fur_Normal",
+    "velkor_LOD1_fur_ORM"
    ]
   },
   "lod2": {
    "file": "velkor_lod2.glb",
-   "bytes": 2882436,
-   "triangles": 6026,
+   "bytes": 3193324,
+   "triangles": 6716,
    "materials": [
     "M_Velkor_Body_LOD2",
-    "M_Velkor_AntlerBark_LOD2"
+    "M_Velkor_AntlerBark_LOD2",
+    "M_Velkor_FurCards_LOD2"
    ],
    "textures": [
     "velkor_LOD2_body_BaseColor",
@@ -92,7 +101,10 @@
     "velkor_LOD2_horn_BaseColor",
     "velkor_LOD2_horn_Normal",
     "velkor_LOD2_horn_ORM",
-    "velkor_LOD2_horn_Emissive"
+    "velkor_LOD2_horn_Emissive",
+    "velkor_LOD2_fur_BaseColor",
+    "velkor_LOD2_fur_Normal",
+    "velkor_LOD2_fur_ORM"
    ]
   }
  },

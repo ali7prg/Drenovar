@@ -201,6 +201,11 @@ static func install(actor: Node3D, species: String, level: int, actor_scale: flo
 			if n.to_lower().contains("_" + str(e.groups[g]).to_lower() + "_"):
 				group = g
 		var lod := 2 if n.contains("_LOD2") else (0 if n.contains("_LOD0") else 1)
+		if n.contains("_FurCards_"):
+			# alpha-masked strands keep their imported material (alpha scissor, explicit back faces, coat colour
+			# per vertex, emissive glow strands)
+			parts.append([part, lod, tier])
+			continue
 		if part.mesh != null:
 			for s in part.mesh.get_surface_count():
 				var mat := part.mesh.surface_get_material(s)
@@ -271,3 +276,19 @@ static func set_life(actor: Node3D, value: float) -> void:
 	for part in info.get("meshes", []):
 		if is_instance_valid(part):
 			(part as GeometryInstance3D).set_instance_shader_parameter(&"life", value)
+	# glowing fur strands (imported material, shared): fade with a per-actor copy only while not fully alive
+	for entry in info.get("parts", []):
+		var fur := entry[0] as MeshInstance3D
+		if not is_instance_valid(fur) or not String(fur.name).contains("_FurCards_") or fur.mesh == null:
+			continue
+		var fm := fur.mesh.surface_get_material(0) as BaseMaterial3D
+		if fm == null or not fm.emission_enabled:
+			continue
+		if value >= 0.999:
+			fur.material_override = null
+			continue
+		var faded := fur.material_override as BaseMaterial3D
+		if faded == null:
+			faded = fm.duplicate() as BaseMaterial3D
+			fur.material_override = faded
+		faded.emission_energy_multiplier = fm.emission_energy_multiplier * clampf(value, 0.0, 1.0)

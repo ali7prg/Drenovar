@@ -1,3 +1,4 @@
+CI QA set (drenovar-native.yml scenarios), after the reference match, Godot 4.6.3 headless:
 PASS qa_camera_hud: QA_CAMERA_HUD checks=153 failures=0
 PASS qa_runtime: QA_RUNTIME checks=21 failures=0
 PASS qa_batch_parity: QA_BATCH_PARITY comparisons=5496 failures=0 reference_buffer_bytes=24455520 candidate_buffer_bytes=17142672
@@ -21,15 +22,16 @@ PASS qa_action_ring: QA_ACTION_RING checks=9 failures=0
 PASS qa_session_store: QA_SESSION_STORE checks=11 failures=0
 PASS qa_server_clock: QA_SERVER_CLOCK checks=3 failures=0
 PASS qa_build_menu: QA_BUILD_MENU checks=20 failures=0
-PASS qa_instant_start: QA_INSTANT_START checks=12 failures=0 launch_ms=1549
+PASS qa_instant_start: QA_INSTANT_START checks=12 failures=0 launch_ms=1454
 PASS qa_city_works: QA_CITY_WORKS checks=38 failures=0
 PASS qa_single_scene: QA_SINGLE_SCENE checks=8 failures=0
 PASS qa_hunt: QA_HUNT checks=50 failures=0
 PASS qa_world_hunt: QA_WORLD_HUNT checks=22 failures=0
-PASS qa_creatures_v2: CREATURES_V2_CHECKS 301 failures 0
-PASS qa_creatures_v2_lifecycle: 
+FAIL qa_creatures_v2
+PASS qa_creatures_v2_lifecycle: QA_CREATURES_LIFECYCLE checks=72 failures=0
 PASS qa_workers: QA_WORKERS checks=38 failures=0
 PASS qa_speedups: QA_SPEEDUPS checks=18 failures=0
 PASS qa_town_plan: QA_TOWN_PLAN checks=35 failures=0
 PASS qa_legacy_build: QA_LEGACY_BUILD checks=22 failures=0
-CI_QA_DONE
+qa_creatures_v2 rerun after the dead-pose check fix: QA_CREATURES checks=310 failures=0
+qa_creatures_v2_lifecycle final: QA_CREATURES_LIFECYCLE checks=72 failures=0

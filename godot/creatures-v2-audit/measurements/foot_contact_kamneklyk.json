@@ -5,8 +5,8 @@
    "frames": 90,
    "loop": true,
    "planted_steps": 360,
-   "max_slide_mm_per_frame": 0.0,
-   "mean_slide_mm_per_frame": 0.0,
+   "max_slide_mm_per_frame": 0.22,
+   "mean_slide_mm_per_frame": 0.005,
    "lowest_foot_m": -0.0
   },
   "walk": {
@@ -60,9 +60,9 @@
   "attack_charge": {
    "frames": 75,
    "loop": false,
-   "planted_steps": 180,
+   "planted_steps": 174,
    "max_slide_mm_per_frame": 102.0,
-   "mean_slide_mm_per_frame": 2.142,
+   "mean_slide_mm_per_frame": 2.325,
    "lowest_foot_m": -0.008
   },
   "attack_stomp": {
@@ -84,7 +84,7 @@
   "death": {
    "frames": 84,
    "loop": false,
-   "planted_steps": 76,
+   "planted_steps": 68,
    "max_slide_mm_per_frame": 0.0,
    "mean_slide_mm_per_frame": 0.0,
    "lowest_foot_m": 0.0

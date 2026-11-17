@@ -15,6 +15,7 @@ const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
 const HudAction = preload("res://src/hud_action.gd")
 const SessionDiagnostics = preload("res://src/session_diagnostics.gd")
+const CombatDiagnostics = preload("res://src/combat_diagnostics.gd")
 const BuildingPlates = preload("res://src/building_plates.gd")
 const CityDefence = preload("res://src/city_defence.gd")
 const TownGround = preload("res://src/town_ground.gd")
@@ -146,6 +147,9 @@ var next_training_update := 0.0
 var followed_army := ""
 var next_minimap_draw := 0
 var diagnostics := SessionDiagnostics.new()
+# Combat diagnostics overlay and event log (off unless switched on in the
+# smoothness panel or with --combat-diagnostics); see src/combat_diagnostics.gd.
+var combat_diagnostics: CanvasLayer = null
 const OFFLINE_NOTICE := "Нет связи · повторяем"
 var offline_notice_shown := false
 # Small pill under the resource bar; replaces the large centre message for link state.
@@ -200,6 +204,8 @@ func _ready() -> void:
 	if hosted_override:
 		loopback = false
 	diagnostics.start(str(ProjectSettings.get_setting("application/config/version")), Time.get_unix_time_from_system())
+	if "--combat-diagnostics" in OS.get_cmdline_user_args() or CombatDiagnostics.stored_enabled():
+		set_combat_diagnostics(true, false)
 	api.name = "ApiPool"
 	add_child(api)
 	old_api.name = "OldApiPool"
@@ -2163,6 +2169,13 @@ func drain_retired_scenes(urgent := false) -> void:
 		freed += 1
 
 func _notification(what: int) -> void:
+	if combat_diagnostics != null:
+		if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+			combat_diagnostics.note("app_background")
+		elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+			combat_diagnostics.note("app_foreground")
+		elif what == NOTIFICATION_OS_MEMORY_WARNING:
+			combat_diagnostics.note("memory_warning")
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		diagnostics.set_state("exited", Time.get_unix_time_from_system())
 	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
@@ -4282,6 +4295,31 @@ func show_performance() -> void:
 	report += "\n" + diagnostics.summary()
 	row(modal_body, report)
 	button(modal_body, "Скопировать замер", func(): DisplayServer.clipboard_set(report))
+	add_combat_diagnostics_buttons()
+
+func add_combat_diagnostics_buttons() -> void:
+	if combat_diagnostics == null:
+		button(modal_body, "Диагностика боя: включить", func():
+			set_combat_diagnostics(true)
+			show_performance())
+	else:
+		button(modal_body, "Скопировать отчёт боя", func(): combat_diagnostics.copy_report())
+		button(modal_body, "Диагностика боя: выключить", func():
+			set_combat_diagnostics(false)
+			show_performance())
+
+# On: an overlay with frame time, memory, counts and a selected fighter, and a
+# bounded event log for the report. Remembered across launches until switched off.
+func set_combat_diagnostics(on: bool, remember := true) -> void:
+	if remember:
+		CombatDiagnostics.store_enabled(on)
+	if on and combat_diagnostics == null:
+		combat_diagnostics = CombatDiagnostics.new()
+		combat_diagnostics.name = "CombatDiagnostics"
+		add_child(combat_diagnostics)
+	elif not on and combat_diagnostics != null:
+		combat_diagnostics.queue_free()
+		combat_diagnostics = null
 
 func connected() -> bool:
 	return loopback or not session.is_empty()
@@ -5485,8 +5523,10 @@ func _process(delta: float) -> void:
 	else:
 		last_frame_us = 0
 	var now := server_time()
+	var combat_started := Time.get_ticks_usec()
 	var combat_frame: Dictionary = stage.combat_view.frame(state, now, map_name)
 	stage.present_armies(combat_frame.state, combat_frame.time)
+	var combat_usec := Time.get_ticks_usec() - combat_started
 	if not followed_army.is_empty():
 		var found := false
 		for marker in stage.army_markers:
@@ -5496,7 +5536,11 @@ func _process(delta: float) -> void:
 				break
 		if not found:
 			followed_army = ""
+	var creatures_started := Time.get_ticks_usec()
 	stage.present_creatures(combat_frame.state, combat_frame.time, delta)
+	combat_usec += Time.get_ticks_usec() - creatures_started
+	if combat_diagnostics != null:
+		combat_diagnostics.frame(self, combat_usec)
 	if map_name == "world":
 		var now_ms := Time.get_ticks_msec()
 		if now_ms >= next_minimap_draw:

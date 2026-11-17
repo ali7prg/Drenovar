@@ -71,8 +71,14 @@ const CREATURE_YAW := -PI * 0.5
 const ENGAGE_GAP := 0.8
 # Run speed of soldiers going from the column to their battle places (m/s).
 const CHARGE_SPEED := 3.6
+const CHARGE_MAX_RUN := 8.0
+const CHARGE_MAX_RIDE := 11.0
 const ROAR_MS := 1600.0
 const REGROUP_MS := 1400.0
+# Running speeds back to the column after a hunt (m/s) and the longest regroup.
+const REGROUP_RUN := 4.5
+const REGROUP_RIDE := 7.0
+const REGROUP_MAX_MS := 8000.0
 # Per-frame budget for refining a hunt's contact places while the column walks.
 const ENGAGE_SLICE_USEC := 2500
 # A moving target is re-planned only after it has left this radius.
@@ -275,6 +281,37 @@ func set_active(active: bool) -> void:
 	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
 	if active:
 		camera.make_current()
+		if not fx_warmed:
+			fx_warmed = true
+			fx_warm_frames = 3
+
+# Battle effects, the arrow and the strike cue are first drawn by the first
+# blow; drawing them once (invisibly) when the scene opens moves their pipeline
+# compilation out of the fight (see BattleFx.warm).
+var fx_warmed := false
+var fx_warm_frames := 0
+var fx_warm_nodes: Array[Node] = []
+
+func warm_effects() -> void:
+	battle_fx.warm(camera)
+	if fx_warm_nodes.is_empty():
+		var at := camera.global_position - camera.global_transform.basis.z * (camera.near + 2.0)
+		# Under the stage, not `effects`: present_creatures frees unknown cues there.
+		var holder := Node3D.new()
+		holder.name = "FxWarmup"
+		add_child(holder)
+		fx_warm_nodes.append(holder)
+		draw_arrow(holder, null, at + camera.global_transform.basis.x * 0.02, 0.5)
+		var arrow := holder.get_node("Arrow") as MeshInstance3D
+		arrow.global_position = at
+		arrow.scale = Vector3.ONE * 0.001
+		show_battle_cue("FxWarmupCue", at, Color(1, 1, 1, 0.0), 1.0)
+		effects.get_node("FxWarmupCue").reparent(holder)
+	if fx_warm_frames == 0:
+		for node in fx_warm_nodes:
+			if is_instance_valid(node):
+				node.queue_free()
+		fx_warm_nodes.clear()
 
 func view_state() -> Dictionary:
 	return {"target": target, "zoom": zoom, "yaw": world_yaw, "resources": resource_layer, "details": detail_layer}
@@ -1476,6 +1513,7 @@ func present_parade() -> void:
 			made += 1
 
 func present_creatures(state: Dictionary, server_ms: float, delta: float) -> void:
+	refresh_view_planes()
 	var rows: Array = state.world.encounters if map_name == "world" else state.get("encounters", [])
 	var armies: Array = state.world.armies if map_name == "world" else state.get("armies", [])
 	var battles := {}
@@ -1537,8 +1575,12 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			moving = phase >= 4000.0
 		p = ground_point(p)
 		creature_markers.append({"position":p + Vector3.UP * 2.5, "id":id, "kind":"encounter", "item":encounter})
-		var range_limit := 54.0 if map_name == "city" else 64.0
-		var close_enough := Vector2(p.x - camera_target.x, p.z - camera_target.z).length_squared() <= range_limit * range_limit
+		# Drawn while its body is inside the camera frustum and nearer than the end
+		# of the depth fog (beyond it nothing is visible). A fixed 54/64 m radius
+		# around the camera target hid creatures that were still on screen: the
+		# phone's wide landscape view reaches ~76 m to the sides at the default zoom.
+		var close_enough := sphere_in_view(p + Vector3.UP * 1.5, creature_body(encounter).x + 2.5) \
+			and camera.global_position.distance_to(p) < camera.environment.fog_depth_end
 		var hunter: Dictionary = battles.get(id, approaches.get(id, leaving.get(id, {})))
 		var plan: Dictionary = army_routes.get(hunter.get("id", ""), {}).get("engage", {}) if not hunter.is_empty() else {}
 		if approaches.has(id) and not plan.is_empty() and not corpse:
@@ -1599,13 +1641,17 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			var victim := ""
 			var striker := ""
 			var hit_span := 480.0 if v010 else 420.0
+			for reaction in battle_timeline(army, encounter, events).reactions:
+				if float(reaction[0]) > elapsed:
+					break
+				if elapsed - float(reaction[0]) < hit_span:
+					hit = float(reaction[0])
+					striker = reaction[1]
 			for event in events:
 				var at := float(event[0]) if event is Array else float(event.at)
 				var kind: String = event[1] if event is Array else event.kind
 				if kind == "soldier_attack":
-					if at <= elapsed and elapsed - at < hit_span:
-						hit = at
-						striker = "%s:%d" % [event[2], int(event[3])] if event is Array else "%s:%d" % [event.unitId, int(event.index)]
+					continue
 				elif at >= elapsed - bite.y and at <= elapsed + bite.x and attack == -INF:
 					attack = at
 					charge = kind == "antler_charge"
@@ -1641,7 +1687,8 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 				clip = "Hit"
 				clip_phase = (elapsed - hit) / 420.0
 				if v010:
-					v010_clip = CombatV010.creature_hit_clip(actor, route.get("member_at", {}).get(striker), heading)
+					var shower := strike_shower(route, hit, striker.get_slice(":", 0), int(striker.get_slice(":", 1)))
+					v010_clip = CombatV010.creature_hit_clip(actor, route.get("member_at", {}).get(shower), heading)
 					v010_time = (elapsed - hit) / 1000.0
 				cues[id] = true
 				show_battle_cue(id, p, Color("#f3d789"), clip_phase)
@@ -1723,13 +1770,20 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 		if not cues.has(String(cue.name)):
 			cue.queue_free()
 
+const REACTION_GAP_MS := 360.0
+
 # Damage timeline of one battle from the server events: soldier hits with the
 # creature's remaining hp, and the creature's strikes on formation members.
 var fx_timelines := {}
 
 func battle_timeline(army: Dictionary, encounter: Dictionary, events: Array) -> Dictionary:
 	var cached: Dictionary = fx_timelines.get(army.id, {})
-	if cached.get("source") == events:
+	# Same list object and length as last frame (no new poll): no deep comparison.
+	if is_same(cached.get("source"), events) and int(cached.get("count", -1)) == events.size():
+		return cached
+	if not cached.is_empty() and cached.get("source") == events:
+		cached.source = events
+		cached.count = events.size()
 		return cached
 	var spec: Dictionary = encounter.get("spec", {})
 	var start_hp := float(spec.get("hp", encounter.get("maxHp", encounter.get("hp", 1))))
@@ -1757,7 +1811,15 @@ func battle_timeline(army: Dictionary, encounter: Dictionary, events: Array) -> 
 			hp = after
 		else:
 			strikes.append([float(e[0]), "%s:%d" % [e[2], int(e[3])], e[1],float(e[5]) if e.size()>5 and e[5]!=null else 0.0,float(e[4]) if e.size()>4 and e[4]!=null else 1.0,combat_view.event_id(army,event)])
-	cached = {"source": events, "hits": hits, "strikes": strikes, "max": maxf(1.0, start_hp)}
+	# The creature's reaction to blows: one reaction starts at a blow and is not
+	# restarted by the next blows for REACTION_GAP_MS. Restarting at every blow
+	# (a volley lands every 50-300 ms) kept the 0.48 s clip in its first 60-180 ms,
+	# 11-42 times per fight: the creature twitched instead of recoiling.
+	var reactions: Array = []
+	for hit in hits:
+		if reactions.is_empty() or float(hit[0]) - float(reactions[-1][0]) >= REACTION_GAP_MS:
+			reactions.append([float(hit[0]), "%s:%d" % [hit[5], int(hit[6])]])
+	cached = {"source": events, "count": events.size(), "hits": hits, "strikes": strikes, "reactions": reactions, "max": maxf(1.0, start_hp)}
 	fx_timelines[army.id] = cached
 	return cached
 
@@ -1787,7 +1849,8 @@ func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dict
 		hp = float(hit[2])
 		var age := elapsed - at
 		if age <= 180.0:
-			var attacker: Vector3=members.get("%s:%d"%[hit[5],int(hit[6])],centre)
+			# From the drawn soldier that shows this blow (it may be lent, see battle_events).
+			var attacker: Vector3=members.get(strike_shower(route,float(hit[0]),str(hit[5]),int(hit[6])),centre)
 			var direction: Vector3=(attacker-p).normalized()
 			var contact:=p+direction*minf(creature_body(encounter).y,attacker.distance_to(p)*.5)
 			battle_fx.spark(contact,age/180.0,Color("#9a8060") if creature_species(encounter) in ["dragor","kamneklyk"] else Color("#94745a"),.70 if str(hit[5]) in ["ENG-01","ENG-05","ENG-06"] else .45,fposmod(at*.013,1.0))
@@ -1910,6 +1973,29 @@ func route_for(path: Array, through_gate := false) -> Dictionary:
 # Whether the army at this fraction of its route is on a ferry leg, and how far
 # along that leg (0..1); the raft also covers a short stretch at both banks for
 # boarding and landing.
+# 0 on land, 1 on the raft, in between over FERRY_RAMP_M before boarding and
+# after landing. The formation packs onto the raft (RAFT_PACK) and stands on its
+# deck; switched in one frame at the bank, rear soldiers jumped ~6 m forward.
+const FERRY_RAMP_M := 4.0
+
+func ferry_weight(route: Dictionary, fraction: float) -> float:
+	var ferry: PackedByteArray = route.get("ferry", PackedByteArray())
+	if not ferry.has(1):
+		return 0.0
+	var distances: PackedFloat32Array = route.distances
+	var travelled := clampf(fraction, 0, 1) * distances[-1]
+	var weight := 0.0
+	for i in range(1, ferry.size()):
+		if ferry[i] != 1:
+			continue
+		var board := distances[i - 1] - 1.5
+		var land := distances[i] + 1.5
+		if travelled >= board and travelled <= land:
+			return 1.0
+		var gap := board - travelled if travelled < board else travelled - land
+		weight = maxf(weight, 1.0 - clampf(gap / FERRY_RAMP_M, 0.0, 1.0))
+	return smoothstep(0.0, 1.0, weight)
+
 func ferry_at(route: Dictionary, fraction: float) -> float:
 	var ferry: PackedByteArray = route.get("ferry", PackedByteArray())
 	if not ferry.has(1):
@@ -2018,6 +2104,16 @@ static func event_row(event: Variant) -> Array:
 	var hp: Variant = event.get("creatureHP", event.get("hp")) if kind == "soldier_attack" else event.get("hp")
 	return [float(event.get("at", 0.0)), kind, str(event.get("unitId", "")), int(event.get("index", 0)), hp, event.get("damage")]
 
+# True when two short lists hold the same objects (or equal values). Avoids a
+# deep comparison of whole fight timelines on every frame.
+static func same_items(a: Variant, b: Array) -> bool:
+	if not a is Array or a.size() != b.size():
+		return false
+	for i in b.size():
+		if not is_same(a[i], b[i]) and a[i] != b[i]:
+			return false
+	return true
+
 # Events of an army's fight. The world map sends only a window around the poll
 # (about -1.3 s .. +1.4 s); windows of successive polls are merged per army, so a
 # slow answer leaves no gap in the blows and numbers already seen stay known.
@@ -2031,6 +2127,10 @@ func army_battle_events(army: Dictionary) -> Array:
 	if cache.is_empty():
 		return window
 	var merged: Dictionary = cache.get("merged", {})
+	if is_same(cache.get("merged_window_ref"), window) and int(cache.get("merged_window_size", -1)) == window.size() and cache.has("merged_rows"):
+		return cache.merged_rows
+	cache.merged_window_ref = window
+	cache.merged_window_size = window.size()
 	if cache.get("merged_window") != window or not cache.has("merged_rows"):
 		cache.merged_window = window.duplicate()
 		for event in window:
@@ -2042,47 +2142,214 @@ func army_battle_events(army: Dictionary) -> Array:
 		cache.merged_rows = rows
 	return cache.merged_rows
 
-func battle_events(army: Dictionary, slots: Array = [], reserves: Dictionary = {}) -> Dictionary:
+# Which drawn soldier shows each server blow (presentation only; HP, numbers and
+# the outcome come from the events themselves).
+#
+# A large party is drawn by up to FIELD_LIMIT representatives, and a hunt puts
+# members without a contact place into reserve rows. Build 1018 gave every blow
+# of an undrawn or reserve member to a contact member of its type by index
+# modulo: one rider in contact received all 44 cavalry blows of a level-3 hunt
+# while five riders stood idle, and a soldier can show one swing per ~1.7 s, so
+# 1 of 44 cavalry blows and 35-56 % of all blows were drawn.
+#
+# Now each blow goes to a drawn soldier of its type that is free (its previous
+# swing has passed contact by MIN_FOLLOW_MS before this windup starts), in tiers:
+#   0: the member itself, then other members in contact (ranged: any place);
+#   1: first reserve row (one rank behind the contact arc, within weapon reach);
+#   2: second reserve row;
+#   3: far reserves (no room within reach): they ride or run in to the creature
+#      for the blow and back (time from the distance: 7 m/s mounted, 4.5 m/s on
+#      foot, never starting before the blow was known), so their busy window is
+#      longer. Build 1018 either left them idle or, when a
+#      type had nobody nearer, let them swing at the air 8+ m from the creature.
+# Blows nobody is free to show are not drawn (they still change HP/numbers).
+# Hits and deaths always stay with their own member. Decisions are remembered in
+# `memo` per event, so later polls (more events, merged world windows) never
+# move a blow that may already be on screen.
+const MIN_FOLLOW_MS: float = CombatV010.MIN_FOLLOW_MS
+
+# The drawn soldier that shows a server blow (decided in battle_events), or the
+# blow's own member: sparks and the creature's recoil come from where the swing is.
+static func strike_shower(route: Dictionary, at: float, unit: String, index: int) -> String:
+	var decided: Variant = route.get("strike_memo", {}).get("%d|%s|%d" % [roundi(at * 10.0), unit, index])
+	var shown: String = decided[0] if decided is Array else ""
+	return shown if not shown.is_empty() else "%s:%d" % [unit, index]
+const RIDE_LEAVE_MS := 250.0
+const RIDE_SPEED := 7.0
+const RUN_IN_SPEED := 4.5
+
+# True when a blow at `at` (contact, windup `prepare` before it) fits between the
+# blows already given to a soldier (sorted contact times) without cutting any
+# windup or contact. Usually the new blow is the latest: one comparison.
+static func strike_slot_free(times: Array, at: float, prepare: float, follow := MIN_FOLLOW_MS) -> bool:
+	if times.is_empty():
+		return true
+	if at >= float(times[-1]):
+		return at - prepare >= float(times[-1]) + follow
+	for u in times:
+		if not (at - prepare >= float(u) + follow or float(u) - prepare >= at + follow):
+			return false
+	return true
+
+# 0 at the reserve place, 1 at the creature: a far reserve comes in for a blow
+# with contact at `at` (battle ms) and goes back after it. It sets off `ride_ms`
+# before the windup, but never before `known_at`, when the client first had the
+# blow; a blow learnt too late is swung from the reserve place instead of jumping.
+static func ride_weight(elapsed: float, at: float, prepare: float, ride_ms: float, known_at: float, last_at := NAN) -> float:
+	var start := maxf(at - prepare - ride_ms, known_at)
+	if start > at - 300.0:
+		return 0.0
+	var arrived := minf(maxf(at - prepare, start + 300.0), at - 50.0)
+	var arrive := smoothstep(start, arrived, elapsed)
+	var until := at if is_nan(last_at) else last_at
+	var leave := smoothstep(until + RIDE_LEAVE_MS, until + RIDE_LEAVE_MS + ride_ms, elapsed)
+	return arrive * (1.0 - leave)
+
+# A far reserve stays at the creature between blows that follow closely (no time
+# to go back and come again): the blows form one visit from its first to its last.
+static func ride_visits(times: Array, prepare: float, ride_ms: float) -> Array:
+	var visits: Array = []
+	for at in times:
+		if not visits.is_empty() and float(at) - prepare - ride_ms <= float(visits[-1][1]) + RIDE_LEAVE_MS + ride_ms:
+			visits[-1][1] = float(at)
+		else:
+			visits.append([float(at), float(at)])
+	return visits
+
+# Where a far reserve meets the creature: its own direction from the creature,
+# at the contact gap outside the body outline.
+func contact_point(plan: Dictionary, from: Vector3, mounted: bool) -> Vector3:
+	var beast: Vector3 = plan.beast
+	var out := Vector3(from.x - beast.x, 0.0, from.z - beast.z)
+	out = out.normalized() if out.length_squared() > 0.01 else Vector3(plan.face)
+	var face: Vector3 = plan.face
+	var across := Vector3(face.z, 0.0, -face.x)
+	var body: Vector2 = plan.body
+	var edge := 1.0 / sqrt(pow(out.dot(face) / body.x, 2) + pow(out.dot(across) / body.y, 2))
+	return ground_point(beast + out * (edge + ENGAGE_GAP + (1.4 if mounted else 0.5)))
+
+func battle_events(army: Dictionary, slots: Array = [], plan: Dictionary = {}, memo: Dictionary = {}, known_at := -INF) -> Dictionary:
 	var by_member := {}
 	var fallen := {}
 	var forced := {}
+	var strikers := {}
 	var entries: Array = army_battle_events(army)
-	# A large party is drawn by up to FIELD_LIMIT representatives. The server's
-	# swings of members without a model would be invisible (most of a 200-man
-	# fight stood idle); they are shown by a drawn soldier of the same type at
-	# the creature. Only attacks are lent: hits and deaths stay with their own
-	# member. A type whose every model waits in reserve swings from its place,
-	# so no type that the server has fighting looks idle.
-	var shown := {}
-	var all_drawn := {}
+	var reserve_rows: Dictionary = plan.get("reserve_rows", {})
+	var reserves: Dictionary = plan.get("reserves", {})
+	var tiers := {}  # unit id -> [tier0 keys, tier1, tier2, tier3]
+	var window := {}  # unit id -> Vector2(prepare, follow)
+	var drawn := {}
 	for slot in slots:
-		if not all_drawn.has(slot.id):
-			all_drawn[slot.id] = []
-		all_drawn[slot.id].append(int(slot.index))
-		if slot.ranged or not reserves.get("%s:%d" % [slot.id, int(slot.index)], false):
-			if not shown.has(slot.id):
-				shown[slot.id] = []
-			shown[slot.id].append(int(slot.index))
-	for id in all_drawn:
-		if not shown.has(id):
-			shown[id] = all_drawn[id]
-			for index in all_drawn[id]:
-				forced["%s:%d" % [id, index]] = true
-	for event in entries:
-		var e := event_row(event)
-		var key := "%s:%d" % [e[2], int(e[3])]
-		if e[1] == "soldier_attack" and shown.has(e[2]) and not int(e[3]) in shown[e[2]]:
-			var drawn: Array = shown[e[2]]
-			key = "%s:%d" % [e[2], drawn[int(e[3]) % drawn.size()]]
-		if not by_member.has(key):
-			by_member[key] = []
-		by_member[key].append(e)
+		var key := "%s:%d" % [slot.id, int(slot.index)]
+		drawn[key] = true
+		if not tiers.has(slot.id):
+			tiers[slot.id] = [[], [], [], []]
+			window[slot.id] = CombatV010.strike_window(str(slot.id), bool(slot.ranged))
+		var row := 0 if slot.ranged or not reserves.get(key, false) else int(reserve_rows.get(key, 4))
+		tiers[slot.id][0 if row == 0 else (row if row <= 2 else 3)].append(key)
+	var far := {}
+	var ride_ms := {}
+	var mounted := {}
+	for slot in slots:
+		mounted["%s:%d" % [slot.id, int(slot.index)]] = bool(slot.get("mounted", false))
+	for id in tiers:
+		for key in tiers[id][3]:
+			far[key] = true
+			var place: Variant = plan.get("places", {}).get(key)
+			var distance := 6.0
+			if place is Vector3 and plan.has("beast"):
+				distance = (place as Vector3).distance_to(contact_point(plan, place, mounted[key]))
+			ride_ms[key] = clampf(distance / (RIDE_SPEED if mounted[key] else RUN_IN_SPEED) * 1000.0, 400.0, 1800.0)
+			if tiers[id][0].is_empty() and tiers[id][1].is_empty() and tiers[id][2].is_empty():
+				forced[key] = true
+	# Server order, stable across polls: time, then kind, unit and index.
+	var rows: Array = entries.map(func(event): return event_row(event))
+	var ordered := true
+	for n in range(1, rows.size()):
+		if float(rows[n][0]) < float(rows[n - 1][0]):
+			ordered = false
+			break
+	if not ordered:
+		rows.sort_custom(func(a, b):
+			if float(a[0]) != float(b[0]): return float(a[0]) < float(b[0])
+			if str(a[1]) != str(b[1]): return str(a[1]) < str(b[1])
+			if str(a[2]) != str(b[2]): return str(a[2]) < str(b[2])
+			return int(a[3]) < int(b[3]))
+	var assigned := {}  # member key -> contact times of the blows it shows
+	var pending: Array = []
+	for e in rows:
+		var own := "%s:%d" % [e[2], int(e[3])]
+		if e[1] != "soldier_attack" or not tiers.has(e[2]):
+			if not by_member.has(own): by_member[own] = []
+			by_member[own].append(e)
+			continue
+		var id := "%d|%s|%d" % [roundi(float(e[0]) * 10.0), e[2], int(e[3])]
+		if memo.has(id):
+			var kept: String = memo[id][0]
+			if not kept.is_empty():
+				if not by_member.has(kept): by_member[kept] = []
+				by_member[kept].append(e)
+				if not assigned.has(kept): assigned[kept] = []
+				assigned[kept].append(float(e[0]))
+				strikers[kept] = true
+		else:
+			pending.append([id, e, own])
+	for item in pending:
+		var e: Array = item[1]
+		var own: String = item[2]
+		var at := float(e[0])
+		var span: Vector2 = window[e[2]]
+		var chosen := ""
+		for tier in 4:
+			var keys: Array = tiers[e[2]][tier]
+			if keys.is_empty():
+				continue
+			var order: Array = []
+			if tier == 0 and keys.has(own):
+				order.append(own)
+			var start := int(e[3]) % keys.size()
+			for k in keys.size():
+				var candidate: String = keys[(start + k) % keys.size()]
+				if candidate != own or tier != 0:
+					order.append(candidate)
+			for candidate in order:
+				var free := strike_slot_free(assigned.get(candidate, []), at, span.x)
+				if free and tier == 3:
+					# Starting a new visit: the rider must be able to arrive before the windup.
+					var ride: float = ride_ms.get(candidate, 0.0)
+					var times: Array = assigned.get(candidate, [])
+					var visiting: bool = not times.is_empty() and at - span.x - ride <= float(times[-1]) + RIDE_LEAVE_MS + ride and at >= float(times[-1])
+					free = visiting or at - span.x - ride >= known_at
+				if free:
+					chosen = candidate
+					break
+			if not chosen.is_empty():
+				break
+		memo[item[0]] = [chosen, known_at]
+		if chosen.is_empty():
+			continue
+		if not by_member.has(chosen): by_member[chosen] = []
+		by_member[chosen].append(e)
+		if not assigned.has(chosen): assigned[chosen] = []
+		var times: Array = assigned[chosen]
+		times.insert(times.bsearch(at), at)
+		strikers[chosen] = true
+	for key in by_member:
+		var list: Array = by_member[key]
+		for n in range(1, list.size()):
+			if float(list[n][0]) < float(list[n - 1][0]):
+				list.sort_custom(func(a, b): return float(a[0]) < float(b[0]))
+				break
 	for unit in army.get("fallen", []):
 		fallen["%s:%d" % [unit[0], int(unit[1])]] = true
-	return {"members":by_member, "fallen":fallen, "forced":forced}
+	return {"members":by_member, "fallen":fallen, "forced":forced, "strikers":strikers, "far":far, "windows":window, "ride_ms":ride_ms}
 
 func present_armies(state: Dictionary, server_ms: float) -> void:
+	refresh_view_planes()
 	battle_fx.begin()
+	if fx_warm_frames > 0:
+		fx_warm_frames -= 1
+		warm_effects()
 	for body in fallen_bodies:
 		if is_instance_valid(body.node):
 			if server_ms >= body.until:
@@ -2119,22 +2386,44 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			cache.merge(route_for(path, true), true)
 			cache.source = path
 		if cache.get("bag", {}) != bag or not cache.has("slots") or cache.get("returning", false) != returning:
+			# A recalled march (no battle) turns back where it stands: remember each
+			# soldier's place so it walks to its new place in the homeward column
+			# instead of appearing there (the rows reverse their order on the way back).
+			cache.erase("turn_from")
+			cache.erase("turn_ms")
+			if returning and not cache.get("returning", false) and army.get("battleAt") == null:
+				var walking_actor := actors.get_node_or_null(NodePath(id)) as Node3D
+				if walking_actor != null and walking_actor.visible:
+					var from := {}
+					for unit in walking_actor.get_children():
+						if unit is Node3D and unit.name != &"Ferry":
+							from[String(unit.name)] = (unit as Node3D).global_position
+					cache.turn_from = from
 			cache.bag = bag
 			cache.returning = returning
 			var identity_source: Dictionary = army.duplicate(false)
 			if returning and army.get("battle") == null and cache.has("identity_events"):
 				identity_source.battle = {"events":cache.identity_events}
 			cache.slots = Formations.returning_slots(identity_source, data.englishRoster) if returning else Formations.field_slots(bag, data.englishRoster)
+			cache.extent = formation_extent(cache.slots)
+			cache.erase("strike_memo")
+			cache.erase("regroup_ms")
 		if fighting:
 			cache.identity_events = army_battle_events(army)
-		var timeline: Variant = [army.get("events"), army.get("fallen"), army.get("battle"), army.get("presentation")]
+		var timeline: Variant = [army.get("events"), army.get("fallen"), army.get("battle"), army.get("presentation"), army_battle_events(army).size()]
 		# A finished short battle can arrive as one packet. Its events are already
 		# known while the presentation clock still draws the approach. Rebuild on
 		# the phase transition too, even when that packet has not changed.
-		if cache.get("timeline") != timeline or cache.get("events_fighting", false) != fighting:
+		var unchanged := same_items(cache.get("timeline"), timeline)
+		if unchanged:
+			cache.timeline = timeline # keep the newest objects: next frame compares by identity
+		if not unchanged or cache.get("events_fighting", false) != fighting:
 			cache.timeline = timeline
 			cache.events_fighting = fighting
-			cache.events = battle_events(army, cache.slots, cache.get("engage", {}).get("reserves", {})) if fighting else {"members":{}, "fallen":{}}
+			if not cache.has("strike_memo"):
+				cache.strike_memo = {}
+			cache.events = battle_events(army, cache.slots, cache.get("engage", {}), cache.strike_memo,
+				server_ms - float(army.get("battleAt", server_ms))) if fighting else {"members":{}, "fallen":{}}
 		army_routes[id] = cache
 		if cache.slots.is_empty():
 			continue
@@ -2158,7 +2447,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			if server_ms >= float(plan.halt_at):
 				# The charge has begun: contact places are final from here on.
 				plan.locked = true
-		elif returning and cache.has("engage"):
+		elif returning and cache.has("engage") and army.get("battleAt") != null:
 			plan = cache.engage
 			plan.locked = true
 			if cache.get("leave_source") != path:
@@ -2166,7 +2455,12 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				cache.leave = approach_distance(cache.points, cache.distances, plan.beast, float(plan.front), false)
 			travel = float(cache.leave) + clampf(fraction, 0.0, 1.0) * (total - float(cache.leave))
 		var p := ground_point(along_route(cache, travel / total))
-		var crossing := ferry_at(cache, travel / total) if travelling else -1.0
+		# A hunt column halted at the bank stays on its raft through the fight: the
+		# ferry state follows the column's place on the route, not the march status
+		# (switching it off at the start of the fight dropped soldiers ~4 m).
+		var on_route: bool = travelling or (hunt and not returning)
+		var crossing := ferry_at(cache, travel / total) if on_route else -1.0
+		var packing := ferry_weight(cache, travel / total) if on_route else 0.0
 		if crossing >= 0.0:
 			p.y = maxf(p.y, FERRY_DECK)
 		var before := along_route(cache, (travel - 0.8) / total)
@@ -2182,7 +2476,13 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			var goal := float(plan.stop) if hunt and not returning else total
 			update_march_line(id, cache, travel, goal)
 			lines[id] = true
-		if not camera.is_position_in_frustum(p + Vector3.UP) or (map_name == "world" and camera_zoom > 132.0):
+		if map_name == "world" and camera_zoom > 132.0:
+			continue
+		# Whole formation (and a hunt's battle places), not the anchor point alone.
+		var in_view := sphere_in_view(p + Vector3.UP, float(cache.get("extent", 10.0)))
+		if not in_view and not plan.is_empty():
+			in_view = sphere_in_view(plan.beast + Vector3.UP, battle_reach(plan))
+		if not in_view:
 			continue
 		alive[id] = true
 		var actor := actors.get_node_or_null(NodePath(id)) as Node3D
@@ -2206,12 +2506,11 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			ground_speed *= (total - float(cache.leave)) / total
 		var elapsed := server_ms - float(army.get("battleAt", end))
 		var spread := smoothstep(0.0, 700.0, elapsed) if fighting and not hunt else 0.0
-		if returning and plan.is_empty():
+		if returning and plan.is_empty() and army.get("battleAt") != null:
 			# No battle places known (a fight with a city, or the app opened on the way
 			# back): the old ring closes into the column.
 			spread = 1.0 - smoothstep(0.0, 700.0, server_ms - start)
 		var charge_age := server_ms - float(plan.halt_at) if halted else -INF
-		var regroup := smoothstep(0.0, REGROUP_MS, server_ms - start) if returning and not plan.is_empty() else 1.0
 		# The melee line swings until the creature falls (or, in a lost fight, to the end).
 		var slain_at := INF
 		if hunt and fighting:
@@ -2238,18 +2537,20 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				unit.name = node_name
 				creation_budget -= 1
 			retained[node_name] = true
-			var side := float(slot.side) * (1.0 + spread * 0.22)
-			var rear := float(slot.rear) + spread * (4.0 if slot.ranged else 2.5)
-			var offset := Vector3(side * cos(heading) - rear * sin(heading), 0.0, -side * sin(heading) - rear * cos(heading))
+			var pack := lerpf(1.0, RAFT_PACK, packing)
+			var side := float(slot.side) * (1.0 + spread * 0.22) * pack
+			var rear := (float(slot.rear) + spread * (4.0 if slot.ranged else 2.5)) * pack
+			# Each row walks the route itself, `rear` metres behind the anchor.
+			var row: Array = column_point(cache, travel, side, rear, heading, returning and not plan.is_empty())
+			var place: Vector3 = row[0]
 			if spread > 0.0:
 				var angle: float = TAU * i / cache.slots.size()
-				offset = offset.lerp(Vector3(cos(angle), 0.0, sin(angle)) * (7.5 if slot.mounted else 4.8), spread)
-			if crossing >= 0.0:
-				offset *= RAFT_PACK
-			var place := ground_point(p + offset)
-			if crossing >= 0.0:
-				place.y = p.y
-			var facing := atan2(-offset.x, -offset.z) if fighting and not hunt else heading
+				place = place.lerp(p + Vector3(cos(angle), 0.0, sin(angle)) * (7.5 if slot.mounted else 4.8), spread)
+			var offset := place - p
+			place = ground_point(place)
+			if packing > 0.0:
+				place.y = lerpf(place.y, p.y, packing)
+			var facing := atan2(-offset.x, -offset.z) if fighting and not hunt else float(row[1])
 			var clip := "walk" if walking else "idle"
 			var tempo := 1.0
 			if walking:
@@ -2263,22 +2564,60 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				var spot: Vector3 = post
 				var approach: Array = plan.get("approaches",{}).get(key,[])
 				if returning:
-					if regroup < 1.0:
-						var exit_path := approach.duplicate()
-						exit_path.reverse();exit_path.append(place)
-						var moved: Vector3 = CombatSlots.along(exit_path,regroup) if exit_path.size()>2 else spot.lerp(place,regroup)
-						if regroup < 0.6:
-							facing = atan2(place.x - spot.x, place.z - spot.z)
-							var gait := gait_for(slot.id, maxf(1.2, spot.distance_to(place) / (REGROUP_MS / 1000.0)))
-							clip = gait[0]
-							tempo = gait[1]
+					# Back from the battle place to its place in the homeward column, at a
+					# run. The time follows the distance (it was a fixed 1.4 s: up to
+					# ~40 m/s). Straight when that stays on dry ground; otherwise back
+					# along the checked approach (which ends at the halt point, behind
+					# the way home). Chosen once per soldier, so the path never switches.
+					var regroup_ms: Dictionary = cache.get("regroup_ms", {})
+					cache.regroup_ms = regroup_ms
+					if not regroup_ms.has(key):
+						var detour := false
+						for k in range(1, 10):
+							if not dry_ground(spot.lerp(place, k / 10.0)):
+								detour = approach.size() > 1
+								break
+						var first: Array = [spot, place]
+						if detour:
+							first = approach.duplicate()
+							first.reverse()
+							first.append(place)
+						var length := 0.0
+						for n in range(1, first.size()):
+							length += (first[n - 1] as Vector3).distance_to(first[n])
+						regroup_ms[key] = [clampf(length / (REGROUP_RIDE if slot.mounted else REGROUP_RUN) * 1000.0, REGROUP_MS, REGROUP_MAX_MS), detour]
+					var span: float = regroup_ms[key][0]
+					var exit_path: Array = [spot, place]
+					if regroup_ms[key][1]:
+						exit_path = approach.duplicate()
+						exit_path.reverse()
+						exit_path.append(place)
+					var w := clampf((server_ms - start) / span, 0.0, 1.0)
+					if w < 1.0:
+						var along := w * w * (3.0 - 2.0 * w)
+						var moved: Vector3 = CombatSlots.along(exit_path, along)
+						var ahead: Vector3 = CombatSlots.along(exit_path, minf(1.0, along + 0.02))
+						if moved.distance_to(ahead) > 0.01:
+							facing = atan2(ahead.x - moved.x, ahead.z - moved.z)
+						var length := 0.0
+						for n in range(1, exit_path.size()):
+							length += (exit_path[n - 1] as Vector3).distance_to(exit_path[n])
+						var gait := gait_for(slot.id, maxf(1.2, length / (span / 1000.0) * 6.0 * w * (1.0 - w)))
+						clip = gait[0]
+						tempo = gait[1]
 						place = moved
 				elif charge_age > -INF:
+					if approach.size() > 1 and (approach[0] as Vector3).distance_to(place) > 0.05:
+						# Continuity: the charge starts where the soldier stands.
+						approach = [place] + approach
 					var distance := place.distance_to(spot)
 					if approach.size()>1:
 						distance=0.0
 						for n in range(1,approach.size()):distance+=approach[n-1].distance_to(approach[n])
-					var span := clampf(distance / CHARGE_SPEED * 1000.0, 300.0, 2600.0)
+					# At most 2.6 s, but never faster on average than a soldier or a horse
+					# can run: a 30 m approach squeezed into 2.6 s slid at ~17 m/s.
+					var span := maxf(clampf(distance / CHARGE_SPEED * 1000.0, 300.0, 2600.0),
+						distance / (CHARGE_MAX_RIDE if slot.mounted else CHARGE_MAX_RUN) * 1000.0)
 					var w := clampf(charge_age / span, 0.0, 1.0)
 					var from := place
 					place = CombatSlots.along(approach,w*w*(3.0-2.0*w)) if approach.size()>1 else from.lerp(spot,w*w*(3.0-2.0*w))
@@ -2293,11 +2632,55 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 						clip = "idle"
 						tempo = 1.0
 						facing = atan2(beast.x - place.x, beast.z - place.z)
+			if returning and cache.has("turn_from") and cache.turn_from.has(node_name):
+				var from: Vector3 = cache.turn_from[node_name]
+				var turn_ms: Dictionary = cache.get("turn_ms", {})
+				cache.turn_ms = turn_ms
+				if not turn_ms.has(node_name):
+					turn_ms[node_name] = clampf(from.distance_to(place) / (REGROUP_RIDE if slot.mounted else REGROUP_RUN) * 1000.0, REGROUP_MS, REGROUP_MAX_MS)
+				var turn := smoothstep(0.0, float(turn_ms[node_name]), server_ms - start)
+				if turn < 1.0:
+					var moved := from.lerp(place, turn)
+					if from.distance_to(place) > 0.3 and turn < 0.85:
+						facing = atan2(place.x - from.x, place.z - from.z)
+						var gait := gait_for(slot.id, maxf(1.2, from.distance_to(place) / (float(turn_ms[node_name]) / 1000.0)))
+						clip = gait[0]
+						tempo = gait[1]
+					place = moved
+			if fighting and post != null and events.get("far", {}).has(key) and not plan.is_empty():
+				# A far reserve rides in for each of its blows and back (see battle_events),
+				# from wherever it is, also while it is still on its way to its place.
+				var prepare_ms: float = (events.windows.get(slot.id, Vector2(490, 510)) as Vector2).x
+				var ride_ms: float = events.ride_ms.get(key, 800.0)
+				var ride := 0.0
+				var leaving := false
+				var blows: Array = events.members.get(key, []).filter(func(event): return event[1] == "soldier_attack")
+				var learnt_at := {}
+				for event in blows:
+					var decided: Variant = cache.get("strike_memo", {}).get("%d|%s|%d" % [roundi(float(event[0]) * 10.0), event[2], int(event[3])])
+					learnt_at[float(event[0])] = float(decided[1]) if decided is Array else -INF
+				for visit in ride_visits(blows.map(func(event): return float(event[0])), prepare_ms, ride_ms):
+					var weight := ride_weight(elapsed, visit[0], prepare_ms, ride_ms, learnt_at.get(visit[0], -INF), visit[1])
+					if weight > ride:
+						ride = weight
+						leaving = elapsed > float(visit[1]) + RIDE_LEAVE_MS
+				if ride > 0.0:
+					var rest := place
+					var contact := contact_point(plan, rest, bool(slot.mounted))
+					place = rest.lerp(contact, ride)
+					if ride < 0.98:
+						var gait := gait_for(slot.id, maxf(1.2, rest.distance_to(contact) / (ride_ms / 1000.0) * 1.5))
+						clip = gait[0]
+						tempo = gait[1]
+						if leaving and rest.distance_to(contact) > 0.5:
+							facing = atan2(rest.x - contact.x, rest.z - contact.z)
+					engaged = false # flat while it rides; the support tilt belongs to the reserve place
 			if fighting:
 				cache.member_at[key] = place
-			unit.transform = model_transform(place.x - p.x, place.y - p.y, place.z - p.z, facing, FIELD_UNIT_SCALE)
+			var shown_yaw := smooth_yaw(unit, facing, server_ms)
+			unit.transform = model_transform(place.x - p.x, place.y - p.y, place.z - p.z, shown_yaw, FIELD_UNIT_SCALE)
 			if engaged and plan.get("supports",{}).has(key):
-				unit.basis=plan.supports[key]*FIELD_UNIT_SCALE
+				unit.basis = support_basis(plan.supports[key], shown_yaw) * FIELD_UNIT_SCALE
 			var phase := -1.0
 			var strike := -INF
 			var last_strike := -INF
@@ -2334,7 +2717,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				elif elapsed - hit < hit_ms and strike == -INF:
 					clip = "hit"
 					phase = (elapsed - hit) / hit_ms
-				elif strike > -INF and (slot.ranged or not plan.get("reserves",{}).get(key,false) or events.get("forced",{}).has(key)):
+				elif strike > -INF and (slot.ranged or events.get("strikers",{}).has(key)):
 					clip = "attack"
 					phase = (elapsed - strike + prepare) / 1000.0
 					if not slot.ranged and slot.id not in ["ENG-01","ENG-05","ENG-06"]:
@@ -2495,7 +2878,7 @@ func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
 	var plan := {"beast": beast, "face": face, "yaw": atan2(face.x, face.z), "body": body, "front": front,
 		"stop": stop, "places": places, "anchor": anchor}
 	var solver := CombatSlots.new()
-	plan.approaches={};plan.supports={};plan.reserves={};plan.slot_solver=solver
+	plan.approaches={};plan.supports={};plan.reserves={};plan.reserve_rows={};plan.slot_solver=solver
 	plan.solving=true
 	cache.engage_key = key
 	cache.engage = plan
@@ -2503,24 +2886,25 @@ func engage_plan(cache: Dictionary, encounter: Dictionary) -> Dictionary:
 	# runs in slices while the column walks (engage_sync: whole plan now, for
 	# tools and tests). It never blocks a frame for more than the slice.
 	solver.slice_usec = 0 if engage_sync else ENGAGE_SLICE_USEC
-	refine_engage_plan(plan, solver, placement_slots, halt, side, face)
+	refine_engage_plan(plan, solver, placement_slots, cache, stop, route_heading(cache, stop, atan2(-face.x, -face.z)))
 	return plan
 
 # Collision-checked contact places and approaches, member by member (front
 # melee first). Members are only rewritten before the charge starts: once the
 # column halts, an unfinished member keeps its arc place instead of jumping.
-func refine_engage_plan(plan: Dictionary, solver, placement_slots: Array, halt: Vector3, side: Vector3, face: Vector3) -> void:
-	await solver.prepare(self,plan.beast,face,plan.body)
+func refine_engage_plan(plan: Dictionary, solver, placement_slots: Array, cache: Dictionary, stop: float, heading: float) -> void:
+	await solver.prepare(self,plan.beast,plan.face,plan.body)
 	for slot in placement_slots:
 		if plan.get("locked", false) or not solver.space.is_valid():
 			break
 		var member := "%s:%d"%[slot.id,int(slot.index)]
-		var origin := ground_point(halt-side*float(slot.side)+face*float(slot.rear))
+		var origin := ground_point(column_point(cache, stop, float(slot.side), float(slot.rear), heading)[0])
 		var result: Dictionary=await solver.choose(member,plan.places[member],origin,bool(slot.mounted))
 		if result.is_empty() or plan.get("locked", false):
 			break
 		plan.places[member]=result.position;plan.approaches[member]=result.path
 		plan.supports[member]=result.basis;plan.reserves[member]=result.reserve
+		plan.reserve_rows[member]=int(result.get("reserve_row", 4 if result.reserve else 0))
 	plan.solving=false
 	if not engage_sync:
 		solver.release()
@@ -2679,6 +3063,60 @@ func sync_raft(actor: Node3D, cache: Dictionary, crossing: float, heading: float
 	raft.position = back + Vector3.UP * (0.05 * sin(server_ms * 0.0021))
 	raft.rotation = Vector3(0.02 * sin(server_ms * 0.0017), heading, 0.015 * sin(server_ms * 0.0013))
 
+# Turning speed of a soldier: the shown heading follows the wanted one with this
+# rate (1/s), on the presentation clock. The wanted heading switches at once at
+# the start of a charge, on reaching the battle place and when the army turns
+# home; drawn directly, those were turns of up to 180 degrees within one frame.
+const TURN_RATE := 12.0
+
+func smooth_yaw(unit: Node3D, wanted: float, server_ms: float) -> float:
+	var at := float(unit.get_meta("yaw_at", -INF))
+	var yaw := wanted
+	if at > -INF and server_ms >= at and server_ms - at < 600.0:
+		yaw = lerp_angle(float(unit.get_meta("yaw", wanted)), wanted, 1.0 - exp(-TURN_RATE * (server_ms - at) / 1000.0))
+	unit.set_meta("yaw", yaw)
+	unit.set_meta("yaw_at", server_ms)
+	return yaw
+
+# The planner's ground support (tilt) with the shown heading.
+static func support_basis(support: Basis, yaw: float) -> Basis:
+	var normal := support.y.normalized()
+	var forward := Basis(Vector3.UP, yaw).z.slide(normal).normalized()
+	return Basis(normal.cross(forward).normalized(), normal, forward)
+
+# Heading of the route at a distance along it, sampled `window` metres both ways.
+func route_heading(cache: Dictionary, travel: float, fallback: float, window := 0.8) -> float:
+	var total := maxf(0.001, float(cache.distances[-1]))
+	var direction := along_route(cache, (travel + window) / total) - along_route(cache, (travel - window) / total)
+	return atan2(direction.x, direction.z) if direction.length_squared() > 0.0001 else fallback
+
+# Where a soldier `rear` metres behind the anchor and `side` metres across walks:
+# on the route itself at its own distance, so a column turns at a corner row by
+# row. Moving the whole formation rigidly with the anchor's heading swung the rear
+# rows around the anchor at every turn of the route (15 m behind the anchor, a
+# 90-degree corner moved them ~1.3 m per frame, about 200 m/s). The heading is
+# sampled over COLUMN_TURN_M both ways so a row turns over a few metres of
+# travel. Returns [position (not grounded), heading]. Behind the start of the
+# route, the first leg continues backwards. The battle planner starts each
+# approach from this same point at the halt (it used the creature's facing
+# instead, so at the start of a charge rear soldiers jumped up to ~6 m).
+const COLUMN_TURN_M := 2.5
+
+func column_point(cache: Dictionary, travel: float, side: float, rear: float, fallback: float, from_start := false) -> Array:
+	var total := maxf(0.001, float(cache.distances[-1]))
+	var at := travel - rear
+	if from_start:
+		# Leaving a hunt the column forms from the start of the way home; rows
+		# beyond it would stand on the far side of the creature.
+		at = maxf(at, 0.0)
+	var heading := route_heading(cache, maxf(at, 0.0), fallback, COLUMN_TURN_M)
+	var base: Vector3
+	if at >= 0.0:
+		base = along_route(cache, at / total)
+	else:
+		base = (cache.points[0] as Vector3) - Vector3(sin(heading), 0.0, cos(heading)) * (-at)
+	return [base + Vector3(cos(heading), 0.0, -sin(heading)) * side, heading]
+
 static func gait_for(unit_id: String, ground_speed: float) -> Array:
 	# Picks walk or run and the playback tempo at which planted feet travel at the
 	# formation's ground speed, so soldiers do not skate along the route. The gait
@@ -2698,6 +3136,43 @@ static func gait_for(unit_id: String, ground_speed: float) -> Array:
 	if run <= 0.0 or ground_speed < sqrt(walk * run):
 		return ["walk", clampf(ground_speed / walk, WALK_TEMPO.x, INF)]
 	return ["run", clampf(ground_speed / run, 0.0, RUN_TEMPO.y)]
+
+# Visibility of actors that move as a group. A single anchor point decided
+# whether a whole army was drawn: when the column's front (or the halt point of a
+# hunt) left the screen, every soldier vanished at once although most of them
+# were still in view. Now an actor is drawn while any part of its conservative
+# bounds is inside the camera frustum; the renderer still culls each soldier.
+var view_planes: Array[Plane] = []
+
+# Once per present_* call: the camera has its pose for this frame by then.
+func refresh_view_planes() -> void:
+	view_planes.assign(camera.get_frustum())
+
+func sphere_in_view(centre: Vector3, radius: float) -> bool:
+	for plane in view_planes:
+		if plane.distance_to(centre) > radius:
+			return false
+	return true
+
+# Farthest a soldier of this formation stands from its anchor (slot offsets,
+# the fight ring of a battle without places, a rider's length), plus a margin.
+static func formation_extent(slots: Array) -> float:
+	var extent := 0.0
+	for slot in slots:
+		extent = maxf(extent, Vector2(float(slot.side) * 1.22, float(slot.rear) + (4.0 if slot.ranged else 2.5)).length())
+	return maxf(extent, 7.5) + 3.0
+
+# Radius around the creature that holds every battle place of a hunt.
+static func battle_reach(plan: Dictionary) -> float:
+	if plan.has("reach"):
+		return float(plan.reach)
+	var beast: Vector3 = plan.get("beast", Vector3.ZERO)
+	var reach := 0.0
+	for place: Vector3 in plan.get("places", {}).values():
+		reach = maxf(reach, Vector2(place.x - beast.x, place.z - beast.z).length())
+	if plan.get("locked", false):
+		plan.reach = reach + 3.0
+	return reach + 3.0
 
 func retain_hidden_actors(parent: Node3D, known: Dictionary, shown: Dictionary, maximum: int) -> void:
 	var hidden: Array[Node] = []

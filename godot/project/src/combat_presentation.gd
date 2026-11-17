@@ -7,6 +7,18 @@ const PREPARE_MS := 760.0
 const MIN_DELAY_MS := 1650.0 # Local measured p95 response gap 857 + 760 ms preparation, rounded up.
 const MAX_DELAY_MS := 4500.0
 var delay_ms := MIN_DELAY_MS
+# The delay follows the measured response cadence, but never in one step: a poll
+# that moved it by 1.5 s froze every marching army for 1.5 s (or ran it at 1.6x
+# when it shrank). It slews at most this share of real time, so the shown clock
+# runs at 0.85x..1.08x while it adapts and never stops. A fight on screen keeps
+# its delay (see `fight_on_screen`).
+const DELAY_SLEW_UP := 0.15
+const DELAY_SLEW_DOWN := 0.08
+var delay_target := MIN_DELAY_MS
+var fight_on_screen := false
+# Diagnostics: real milliseconds the shown clock stood still or ran ahead.
+var held_ms := 0.0
+var caught_up_ms := 0.0
 var sample_gaps: Array[float] = []
 var latest: Dictionary = {}
 var armies := {}
@@ -16,6 +28,11 @@ var seen := {}
 var trace: Array = []
 var markers: Array = []
 var frame_state: Dictionary = {}
+# Per army: the event list the markers were prepared from and the markers not yet
+# reached. Rebuilt only when a poll brings a new list; each frame walks the
+# pending ones. (Formatting an id string and allocating marker dictionaries for
+# every event of every fight on every frame cost ~1 ms per 100 events.)
+var marker_cache := {}
 var frame_time := 0.0
 var current_map := ""
 # The server resolves a hunt in about one second (a 200-man fight measured on
@@ -132,7 +149,7 @@ static func event_id(army: Dictionary, event: Variant) -> String:
 func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 	markers.clear()
 	if latest.is_empty() or current_map != map_name or (str(state.get("playerId", "")) != str(latest.get("playerId", ""))):
-		latest = {}; armies.clear(); seen.clear(); missing_since.clear(); sample_gaps.clear(); previous_time = -INF
+		latest = {}; armies.clear(); seen.clear(); missing_since.clear(); sample_gaps.clear(); previous_time = -INF; marker_cache.clear()
 		current_map = map_name
 	var stamp := float(state.get("serverTime",now))
 	if latest.is_empty() or stamp > float(latest.get("serverTime",-INF)):
@@ -145,10 +162,9 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 			if gap <= 2000.0 or moving: sample_gaps.append(gap)
 			if sample_gaps.size() > 32:
 				sample_gaps.pop_front()
-		var active := armies.values().any(func(a): return a.get("battleAt") != null and now < time_value(a,"returnsAt",INF))
-		if not active and not sample_gaps.is_empty():
+		if not sample_gaps.is_empty():
 			var sorted := sample_gaps.duplicate(); sorted.sort()
-			delay_ms = clampf(float(sorted[mini(sorted.size()-1,ceili(sorted.size()*0.95)-1)]) + PREPARE_MS,MIN_DELAY_MS,MAX_DELAY_MS)
+			delay_target = clampf(float(sorted[mini(sorted.size()-1,ceili(sorted.size()*0.95)-1)]) + PREPARE_MS,MIN_DELAY_MS,MAX_DELAY_MS)
 		latest = state
 		var rows: Array = state.get("world",{}).get("armies",[]) if map_name == "world" else state.get("armies",[])
 		var present := {}
@@ -169,6 +185,11 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 			armies[str(source.id)] = copy
 		for id in armies:
 			if not present.has(id) and not missing_since.has(id): missing_since[id] = now
+	var real_step := clampf(now - previous_now, 0.0, 250.0) if previous_now > -INF else 0.0
+	if previous_time == -INF:
+		delay_ms = delay_target
+	elif not fight_on_screen and delay_ms != delay_target:
+		delay_ms = move_toward(delay_ms, delay_target, real_step * (DELAY_SLEW_UP if delay_target > delay_ms else DELAY_SLEW_DOWN))
 	var target := now - delay_ms
 	if previous_time > -INF and previous_now > -INF and target - previous_time > 50.0:
 		# Behind after a stalled frame: advance at most a normal frame's worth,
@@ -176,12 +197,18 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 		var step := clampf(now - previous_now, 0.0, 100.0) * CATCH_UP
 		target = maxf(minf(target, previous_time + maxf(step, 1.0)), target - MAX_LAG_MS)
 	frame_time = maxf(previous_time, target)
+	if previous_time > -INF and real_step > 0.0:
+		var advanced := frame_time - previous_time
+		if advanced < real_step * 0.5:
+			held_ms += real_step
+		elif advanced > real_step * 1.3 + 1.0:
+			caught_up_ms += real_step
 	previous_now = now
 	var drawn: Array = []
 	var fighting := {}
 	for id in armies.keys():
 		if missing_since.has(id) and now-float(missing_since[id]) > delay_ms+3200.0:
-			armies.erase(id); missing_since.erase(id)
+			armies.erase(id); missing_since.erase(id); marker_cache.erase(id)
 			for key in seen.keys():
 				if key.begins_with(str(id)+"/"): seen.erase(key)
 			continue
@@ -190,7 +217,7 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 		var ends := time_value(a,"returnStartsAt",time_value(a,"battleEndsAt",INF))
 		var returned := display_until(a)
 		if a.get("returnsAt") != null and frame_time >= returned:
-			armies.erase(id)
+			armies.erase(id); marker_cache.erase(id)
 			for key in seen.keys():
 				if key.begins_with(str(id)+"/"): seen.erase(key)
 			continue
@@ -208,27 +235,43 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 			a.units = a.presentation.originalUnits
 		drawn.append(a)
 		var events: Array = a.get("presentation",{}).get("events",[]) if a.get("presentation") is Dictionary else a.get("battle",{}).get("events",[]) if a.get("battle") is Dictionary else a.get("events",[])
-		for e in events:
-			var key := event_id(a,e)
-			var at := begin + (float(e[0]) if e is Array else float(e.at))
-			if not seen.has(key):
-				seen[key] = {"release":false,"contact":false}
-				if at < previous_time:
-					seen[key] = {"release":true,"contact":true}
-					record({"id":key,"phase":"late-completion","at":at,"received":stamp,"shown":frame_time})
-			var kind: String = str(e[1]) if e is Array else str(e.kind)
-			var unit_id: String = str(e[2]) if e is Array else str(e.unitId)
-			var action_markers: Array = [{"name":"contact","time":at}]
-			if kind == "soldier_attack" and unit_id in ["ENG-03","ENG-04","ENG-10"]:
-				action_markers.push_front({"name":"release","time":at-260.0})
-			for marker in action_markers:
-				if frame_time >= marker.time and not seen[key][marker.name]:
-					seen[key][marker.name] = true
+		var prepared: Dictionary = marker_cache.get(id, {})
+		if not is_same(prepared.get("events"), events) or prepared.get("begin") != begin:
+			var pending: Array = []
+			for e in events:
+				var key := event_id(a,e)
+				var at := begin + (float(e[0]) if e is Array else float(e.at))
+				if not seen.has(key):
+					seen[key] = {"release":false,"contact":false}
+					if at < previous_time:
+						seen[key] = {"release":true,"contact":true}
+						record({"id":key,"phase":"late-completion","at":at,"received":stamp,"shown":frame_time})
+				var kind: String = str(e[1]) if e is Array else str(e.kind)
+				var unit_id: String = str(e[2]) if e is Array else str(e.unitId)
+				var released: bool = kind == "soldier_attack" and unit_id in ["ENG-03","ENG-04","ENG-10"]
+				var flags: Dictionary = seen[key]
+				if not flags.contact or (released and not flags.release):
+					pending.append([key, at, released, e])
+			prepared = {"events": events, "begin": begin, "pending": pending}
+			marker_cache[id] = prepared
+		var waiting: Array = []
+		for item in prepared.pending:
+			var key: String = item[0]
+			var at: float = item[1]
+			var flags: Dictionary = seen.get(key, {"release":true,"contact":true})
+			for phase in (["release", "contact"] if item[2] else ["contact"]):
+				var time := at - 260.0 if phase == "release" else at
+				if frame_time >= time and not flags[phase]:
+					flags[phase] = true
 					# A cold reconnect acknowledges old events without replaying FX/audio.
 					if previous_time > -INF:
-						record({"id":key,"phase":marker.name,"at":at,"received":stamp,"shown":frame_time})
+						var e: Variant = item[3]
+						record({"id":key,"phase":phase,"at":at,"received":stamp,"shown":frame_time})
 						var event: Dictionary=e if e is Dictionary else {"at":e[0],"kind":e[1],"unitId":e[2],"index":e[3],"hp":e[4] if e.size()>4 else 1,"creatureHP":e[4] if e.size()>4 else 1}
-						markers.append({"id":key,"phase":marker.name,"event":event,"target":a.target,"army_id":a.id,"lateness":frame_time-float(marker.time)})
+						markers.append({"id":key,"phase":phase,"event":event,"target":a.target,"army_id":a.id,"lateness":frame_time-time})
+			if not flags.contact or (item[2] and not flags.release):
+				waiting.append(item)
+		prepared.pending = waiting
 	frame_state = latest.duplicate(false)
 	var container: Dictionary = latest.get("world",{}).duplicate(false) if map_name == "world" else frame_state
 	container.armies = drawn
@@ -238,6 +281,7 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 		if fighting.has(str(e.id)): e.status = "fighting"
 		container.encounters.append(e)
 	if map_name == "world": frame_state.world = container
+	fight_on_screen = not fighting.is_empty()
 	previous_time = frame_time
 	return {"state":frame_state,"time":frame_time}
 

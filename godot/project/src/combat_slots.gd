@@ -288,7 +288,7 @@ func choose(id: String, wanted: Vector3, from: Vector3, mounted: bool) -> Dictio
 				rejected[result.reason]=int(rejected.get(result.reason,0))+1;continue
 			var path: Array[Vector3]=await approach(from,result.position,mounted)
 			if path.is_empty():rejected["approach"]=int(rejected.get("approach",0))+1;continue
-			result.path=path;result.reserve=reserve>0;result.id=id;result.rejected=rejected
+			result.path=path;result.reserve=reserve>0;result.reserve_row=reserve;result.id=id;result.rejected=rejected
 			result.march_prefix_verified=segment_clear(path[0],path[1],mounted)
 			occupied.append({"id":id,"polygon":footprint(result.position,result.basis,result.half+Vector2.ONE*MARGIN)})
 			diagnostics.append(result);return result
@@ -305,13 +305,13 @@ func choose(id: String, wanted: Vector3, from: Vector3, mounted: bool) -> Dictio
 			if not result.valid:continue
 			var entering: Vector3=result.position+(from-result.position).normalized()*2.0
 			if not segment_clear(entering,result.position,mounted):continue
-			result.id=id;result.reserve=true;result.path=[from,entering,result.position]
+			result.id=id;result.reserve=true;result.reserve_row=3;result.path=[from,entering,result.position]
 			result.rejected=rejected;result.march_prefix_verified=segment_clear(from,entering,mounted)
 			occupied.append({"id":id,"polygon":footprint(result.position,result.basis,result.half+Vector2.ONE*MARGIN)})
 			diagnostics.append(result);return result
 	# No reachable reserve in the bounded search: expose the failure for review.
 	var fallback:=support(from,atan2(centre.x-from.x,centre.z-from.z),mounted)
-	fallback.id=id;fallback.reserve=true;fallback.path=[from];fallback.rejected=rejected
+	fallback.id=id;fallback.reserve=true;fallback.reserve_row=4;fallback.path=[from];fallback.rejected=rejected
 	fallback.position=stage.ground_point(from);fallback.basis=Basis(Vector3.UP,atan2(centre.x-from.x,centre.z-from.z))
 	diagnostics.append(fallback);return fallback
 

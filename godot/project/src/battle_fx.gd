@@ -193,6 +193,26 @@ func place_numbers() -> void:
 				break
 			if placed: break
 
+# First-use preparation. Every effect kind is drawn once, transparent or at a
+# negligible size, just in front of the camera when a scene opens, so its render
+# pipelines are compiled then and not on the frame of the first blow. Measured on
+# the Mobile renderer: the first fight compiled 3-6 surface/specialization
+# pipelines exactly when its effects first appeared. Nothing visible is drawn.
+func warm(camera: Camera3D) -> void:
+	var at := camera.global_position - camera.global_transform.basis.z * (camera.near + 2.0)
+	var side := camera.global_transform.basis.x * 0.01
+	slash(at, at + side, 0.999, Color(1, 1, 1, 0.0), 0.001)
+	spark(at, 0.999, Color(1, 1, 1, 0.0), 0.001)
+	dust(at, 0.999, 0.001)
+	ring(at, 0.001, Color(1, 1, 1, 0.0))
+	health(at, "·", 0.5, 0.6, Color(1, 1, 1, 0.0), 0.001)
+	var plate := pools.plate[maxi(0, int(used.plate) - 1)] as Label3D
+	plate.modulate = Color(1, 1, 1, 0.0)
+	plate.outline_modulate = Color(0, 0, 0, 0.0)
+	var label := take("number").get_node("Text") as Label
+	label.text = "-0123456789 ×"
+	label.modulate = Color(1, 1, 1, 0.0)
+
 func ring(centre: Vector3, radius: float, tint: Color) -> void:
 	var node := take("ring") as MeshInstance3D
 	if node == null:
@@ -216,3 +236,4 @@ func health(at: Vector3, title: String, ratio: float, recent: float, tint: Color
 	plate.text = title
 	plate.position = at + Vector3.UP * 0.8 * scale
 	plate.modulate = Color("#ffd9b0")
+	plate.outline_modulate = Color(0.06, 0.04, 0.03, 0.9)

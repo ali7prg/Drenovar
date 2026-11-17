@@ -143,6 +143,10 @@ static func install(model: Node3D, kind: String, key: String) -> bool:
 		info.hit_ms = library.get_animation("hit").length * 1000.0
 	model.set_meta(META, info)
 	model.set_meta("animation_players", [player])
+	# Dead references are dropped: every soldier of every fight passes through here
+	# (the list grew by ~26 objects per hunt over a 22-minute session).
+	if _owned.size() >= 128:
+		_owned = _owned.filter(func(ref): return (ref as WeakRef).get_ref() != null)
 	_owned.append(weakref(model))
 	return true
 
@@ -190,6 +194,19 @@ static func attack_window(model: Node3D, legacy_prepare: float) -> Vector2:
 	if i.is_empty():
 		return Vector2(legacy_prepare, 1000.0 - legacy_prepare)
 	return Vector2(i.prepare_ms, i.follow_ms)
+
+# Swing window of a troop type before any soldier exists (strike scheduling):
+# the same prepare/follow numbers install() puts on each soldier, or the legacy
+# 1 s swing when the flag is off.
+static func strike_window(unit_id: String, ranged: bool) -> Vector2:
+	var spec := Registry.troop(unit_id) if enabled() else {}
+	if spec.is_empty():
+		var legacy := 760.0 if ranged else 490.0
+		return Vector2(legacy, 1000.0 - legacy)
+	var length := float(spec.get("length_s", 1.7)) * 1000.0
+	var event := float(spec.get("contact_or_release_s", 0.64)) * 1000.0
+	var prepare := event + (FLIGHT_MS if spec.get("family", "") in RANGED else 0.0)
+	return Vector2(prepare, length - prepare)
 
 static func hit_window(model: Node3D, legacy_ms: float) -> float:
 	return float(info(model).get("hit_ms", legacy_ms))

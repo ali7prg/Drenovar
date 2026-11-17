@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "build": 1005,
+  "primary_screen_assertions": 18,
+  "encrypted_pending_proof_assertions": 9,
+  "process_restart": {
+    "checks": 9,
+    "device": "Godot Linux844x390; synthetic trusted Site identity; not physical iPhone",
+    "failures": [],
+    "flow": "process exits before browser approval; a new Godot process resumes encrypted proof and opens the same existing city as browser",
+    "status": "passed"
+  },
+  "native_browser_payment_flow_before_restart_test": {
+    "checks": 17,
+    "status": "passed",
+    "synthetic": true
+  },
+  "repeat_full_payment_flow_after_restart": "automation timeout on Chromium software GPU; separate restart login-only comparison passed",
+  "server_tests": 52,
+  "physical_iphone_tested": false,
+  "real_owner_ChatGPT_login_tested": false,
+  "save_migration_rerun": false,
+  "same_game_api": 6,
+  "same_economy": "DRENOVAR-V6-C1.0"
+}

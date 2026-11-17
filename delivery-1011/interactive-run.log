@@ -1,0 +1,34 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+PLAYABLE_CHECK synthetic loopback only true
+PLAYABLE_CHECK normal game ready true
+PLAYABLE_CHECK interactive V6 account loaded true
+PLAYABLE_CHECK server supplies a reachable target true
+PLAYABLE_CHECK touch target within viewport: @Button@315 true
+PLAYABLE_CHECK Attack opens formation true
+PLAYABLE_CHECK touch target within viewport: @Button@344 true
+PLAYABLE_CHECK selected formation has server route true
+PLAYABLE_CHECK touch target within viewport: MarchSend true
+PLAYABLE_CHECK one touch starts a real army true
+PLAYABLE_CHECK server army equals selected formation true
+PLAYABLE_CHECK one army from one touch true
+PLAYABLE_PHASE outbound
+PLAYABLE_PHASE fighting
+PLAYABLE_PHASE returning
+PLAYABLE_CHECK real server battle produces a report true
+PLAYABLE_CHECK normal gameplay reaches march and combat true
+PLAYABLE_CHECK actual game renders scheduled attacks true
+PLAYABLE_CHECK result becomes available after visual contact true
+PLAYABLE_CHECK touch target within viewport: @Button@512 true
+PLAYABLE_CHECK Continue restores game control true
+PLAYABLE_CHECK survivors return through real server clock true
+PLAYABLE_CHECK returned garrison matches report: ENG-03 true
+PLAYABLE_CHECK returned garrison matches report: ENG-05 true
+PLAYABLE_CHECK restart restores same settlement true
+PLAYABLE_CHECK restored account requests finish true
+{"checks":23,"clip_samples":4310,"clock":"wall clock, unchanged solver and travel time","device":"Linux Godot; no physical iPhone acceptance","entry":"main.tscn, interactive UI and HTTP","failures":[],"observed_actions":["idle","trot","run","walk","attack"],"phases":{"fighting":1794826246958.23,"outbound":1794826233500.55,"returning":1794826250959.89},"status":"passed"}
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.

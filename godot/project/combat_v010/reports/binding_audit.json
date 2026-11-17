@@ -1,0 +1,1750 @@
+{
+  "engine": "4.6.3-stable (official)",
+  "models": [
+    {
+      "id": "ENG-01",
+      "model": "res://assets/army/troops06/ENG-01-lod1.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999346733093,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-01.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.000690533954184502,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-01",
+      "model": "res://assets/army/troops06/ENG-01-lod2.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999346733093,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-01.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.000690533954184502,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-02",
+      "model": "res://assets/army/troops06/ENG-02-lod1.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999346733093,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-02.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.0009765625,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-02",
+      "model": "res://assets/army/troops06/ENG-02-lod2.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999346733093,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-02.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.0009765625,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-03",
+      "model": "res://assets/army/troops06/ENG-03-lod1.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999942779541,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-03.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.000690533954184502,
+      "clips": {
+        "attack_a": {
+          "length": 2.0,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 2.0,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-03",
+      "model": "res://assets/army/troops06/ENG-03-lod2.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999942779541,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-03.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.000690533954184502,
+      "clips": {
+        "attack_a": {
+          "length": 2.0,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 2.0,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-04",
+      "model": "res://assets/army/troops06/ENG-04-lod1.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.123837411403656,
+      "worst_bone": "attack_a/root",
+      "library": "res://combat_v010/animations/troops/ENG-04.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.0009765625,
+      "clips": {
+        "attack_a": {
+          "length": 3.20000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 3.20000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-04",
+      "model": "res://assets/army/troops06/ENG-04-lod2.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.123837411403656,
+      "worst_bone": "attack_a/root",
+      "library": "res://combat_v010/animations/troops/ENG-04.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.0009765625,
+      "clips": {
+        "attack_a": {
+          "length": 3.20000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 3.20000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-05",
+      "model": "res://assets/army/troops06/ENG-05-lod1.gltf",
+      "ok": true,
+      "tracks": 608,
+      "missing": [],
+      "rest_position_deviation_max": 0.187999993562698,
+      "worst_bone": "walk/HorseRoot",
+      "library": "res://combat_v010/animations/troops/ENG-05.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.0296136382967234,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 2.33333325386047,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.75,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.720000028610229,
+          "loop": true
+        },
+        "trot": {
+          "length": 0.779999971389771,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.20000004768372,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-05",
+      "model": "res://assets/army/troops06/ENG-05-lod2.gltf",
+      "ok": true,
+      "tracks": 608,
+      "missing": [],
+      "rest_position_deviation_max": 0.187999993562698,
+      "worst_bone": "walk/HorseRoot",
+      "library": "res://combat_v010/animations/troops/ENG-05.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.0296136382967234,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 2.33333325386047,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.75,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.720000028610229,
+          "loop": true
+        },
+        "trot": {
+          "length": 0.779999971389771,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.20000004768372,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-06",
+      "model": "res://assets/army/troops06/ENG-06-lod1.gltf",
+      "ok": true,
+      "tracks": 608,
+      "missing": [],
+      "rest_position_deviation_max": 0.187999993562698,
+      "worst_bone": "walk/HorseRoot",
+      "library": "res://combat_v010/animations/troops/ENG-06.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.0296136382967234,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 2.33333325386047,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.75,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.720000028610229,
+          "loop": true
+        },
+        "trot": {
+          "length": 0.779999971389771,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.20000004768372,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-06",
+      "model": "res://assets/army/troops06/ENG-06-lod2.gltf",
+      "ok": true,
+      "tracks": 608,
+      "missing": [],
+      "rest_position_deviation_max": 0.187999993562698,
+      "worst_bone": "walk/HorseRoot",
+      "library": "res://combat_v010/animations/troops/ENG-06.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.0296136382967234,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 2.33333325386047,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.75,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.720000028610229,
+          "loop": true
+        },
+        "trot": {
+          "length": 0.779999971389771,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.20000004768372,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-07",
+      "model": "res://assets/army/troops06/ENG-07-lod1.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999942779541,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-07.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.000690533954184502,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-07",
+      "model": "res://assets/army/troops06/ENG-07-lod2.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999942779541,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-07.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.000690533954184502,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-08",
+      "model": "res://assets/army/troops06/ENG-08-lod1.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999942779541,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-08.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.000690533954184502,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-08",
+      "model": "res://assets/army/troops06/ENG-08-lod2.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999942779541,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-08.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.000690533954184502,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-09",
+      "model": "res://assets/army/troops06/ENG-09-lod1.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0560000538825989,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-09.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.000690533954184502,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-09",
+      "model": "res://assets/army/troops06/ENG-09-lod2.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0560000538825989,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-09.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.000690533954184502,
+      "clips": {
+        "attack_a": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.70000004768372,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-10",
+      "model": "res://assets/army/troops06/ENG-10-lod1.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999346733093,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-10.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.0009765625,
+      "clips": {
+        "attack_a": {
+          "length": 2.0,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 2.0,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "ENG-10",
+      "model": "res://assets/army/troops06/ENG-10-lod2.gltf",
+      "ok": true,
+      "tracks": 378,
+      "missing": [],
+      "rest_position_deviation_max": 0.0559999346733093,
+      "worst_bone": "run/root",
+      "library": "res://combat_v010/animations/troops/ENG-10.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.0009765625,
+      "clips": {
+        "attack_a": {
+          "length": 2.0,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 2.0,
+          "loop": false
+        },
+        "death": {
+          "length": 1.20000004768372,
+          "loop": false
+        },
+        "hit": {
+          "length": 0.400000005960464,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "run": {
+          "length": 0.733333349227905,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.10000002384186,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "velkor",
+      "model": "res://assets/creature-assets37/VELKOR_L1_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/VELKOR_L1_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.64999997615814,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.64999997615814,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "velkor",
+      "model": "res://assets/creature-assets37/VELKOR_L2_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/VELKOR_L2_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.64999997615814,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.64999997615814,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "velkor",
+      "model": "res://assets/creature-assets37/VELKOR_L3_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/VELKOR_L3_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.64999997615814,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.64999997615814,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "tenerys",
+      "model": "res://assets/creature-assets37/TENERYS_L1_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/TENERYS_L1_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.29999995231628,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.29999995231628,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "tenerys",
+      "model": "res://assets/creature-assets37/TENERYS_L2_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/TENERYS_L2_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.29999995231628,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.29999995231628,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "tenerys",
+      "model": "res://assets/creature-assets37/TENERYS_L3_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/TENERYS_L3_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.29999995231628,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.29999995231628,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "kamneklyk",
+      "model": "res://assets/creature-assets37/KAMNEKLYK_L1_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/KAMNEKLYK_L1_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.54999995231628,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.54999995231628,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "kamneklyk",
+      "model": "res://assets/creature-assets37/KAMNEKLYK_L2_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/KAMNEKLYK_L2_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.54999995231628,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.54999995231628,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "kamneklyk",
+      "model": "res://assets/creature-assets37/KAMNEKLYK_L3_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/KAMNEKLYK_L3_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.54999995231628,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.54999995231628,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "dragor",
+      "model": "res://assets/creature-assets37/DRAGOR_L1_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/DRAGOR_L1_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.45000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.45000004768372,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "dragor",
+      "model": "res://assets/creature-assets37/DRAGOR_L2_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/DRAGOR_L2_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.45000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.45000004768372,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    },
+    {
+      "id": "dragor",
+      "model": "res://assets/creature-assets37/DRAGOR_L3_RIGGED_ANIMATED.glb",
+      "ok": true,
+      "tracks": 195,
+      "missing": [],
+      "rest_position_deviation_max": 0.0,
+      "worst_bone": "",
+      "library": "res://combat_v010/animations/animals/DRAGOR_L3_RIGGED_ANIMATED.res",
+      "player": "AnimationPlayer",
+      "bad_keys": 0,
+      "scale_tracks": 0,
+      "node_tracks": 0,
+      "loop_seam_max_rad": 0.456507414579391,
+      "clips": {
+        "alert": {
+          "length": 0.899999976158142,
+          "loop": false
+        },
+        "attack_a": {
+          "length": 1.45000004768372,
+          "loop": false
+        },
+        "attack_b": {
+          "length": 1.45000004768372,
+          "loop": false
+        },
+        "combat_idle": {
+          "length": 3.59999990463257,
+          "loop": true
+        },
+        "death": {
+          "length": 1.60000002384186,
+          "loop": false
+        },
+        "exit_combat": {
+          "length": 0.5,
+          "loop": false
+        },
+        "hit_front": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_left": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "hit_right": {
+          "length": 0.479999989271164,
+          "loop": false
+        },
+        "idle": {
+          "length": 3.20000004768372,
+          "loop": true
+        },
+        "recover": {
+          "length": 0.379999995231628,
+          "loop": false
+        },
+        "run": {
+          "length": 0.620000004768372,
+          "loop": true
+        },
+        "walk": {
+          "length": 1.0,
+          "loop": true
+        }
+      }
+    }
+  ],
+  "failures": 0
+}

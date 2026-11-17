@@ -1,0 +1,2168 @@
+{
+  "engine": "4.6.3",
+  "failures": [],
+  "models": [
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Head",
+        "bone_local_position": [
+          0.650801062583923,
+          -0.495036959648132,
+          0.202743470668793
+        ],
+        "mesh": "MESH_Fangs",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "restrained bite",
+          "contact": 0.52,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.42
+            },
+            {
+              "event": "contact",
+              "time": 0.52
+            },
+            {
+              "event": "recovery",
+              "time": 0.62
+            }
+          ],
+          "length": 1.3,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "restrained bite",
+          "contact": 0.52,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.42
+            },
+            {
+              "event": "contact",
+              "time": 0.52
+            },
+            {
+              "event": "recovery",
+              "time": 0.62
+            }
+          ],
+          "length": 1.3,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "TENERYS_L1_RIGGED_ANIMATED.tres",
+      "library_sha256": "b6b608382e29c008e4570bc36ad89b3b168b08a8a8926ecb86ff7883141b0db0",
+      "model": "assets/creature-assets37/TENERYS_L1_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "9b0b10e10a0bacb3df23145057b907fd02c1af6717effa6de082411e3d38b042",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000238418579101562,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.0218977890908718,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    },
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Head",
+        "bone_local_position": [
+          0.650801062583923,
+          -0.495036959648132,
+          0.202743470668793
+        ],
+        "mesh": "MESH_Fangs",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "restrained bite",
+          "contact": 0.52,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.42
+            },
+            {
+              "event": "contact",
+              "time": 0.52
+            },
+            {
+              "event": "recovery",
+              "time": 0.62
+            }
+          ],
+          "length": 1.3,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "restrained bite",
+          "contact": 0.52,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.42
+            },
+            {
+              "event": "contact",
+              "time": 0.52
+            },
+            {
+              "event": "recovery",
+              "time": 0.62
+            }
+          ],
+          "length": 1.3,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "TENERYS_L2_RIGGED_ANIMATED.tres",
+      "library_sha256": "9d5216304727c823259447e545ed8a61794a6fe007c6f962b182b47ce3524e53",
+      "model": "assets/creature-assets37/TENERYS_L2_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "98e1e46fc69b68fd2911eb3417b3ecb081fe21b01015bb598debe7d094cf5030",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000238418579101562,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.0218977890908718,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    },
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Head",
+        "bone_local_position": [
+          0.650801062583923,
+          -0.495036959648132,
+          0.202743470668793
+        ],
+        "mesh": "MESH_Fangs",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "restrained bite",
+          "contact": 0.52,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.42
+            },
+            {
+              "event": "contact",
+              "time": 0.52
+            },
+            {
+              "event": "recovery",
+              "time": 0.62
+            }
+          ],
+          "length": 1.3,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "restrained bite",
+          "contact": 0.52,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.42
+            },
+            {
+              "event": "contact",
+              "time": 0.52
+            },
+            {
+              "event": "recovery",
+              "time": 0.62
+            }
+          ],
+          "length": 1.3,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "TENERYS_L3_RIGGED_ANIMATED.tres",
+      "library_sha256": "8b85dc9f83d6a5294265666e9123afc51e03edd2a496d5f0104b529f0fa88579",
+      "model": "assets/creature-assets37/TENERYS_L3_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "b29ac99273a21673d8c4437083d6114ba7aa49d2dffcbec86f47fd0f88631746",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000238418579101562,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.0218977890908718,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    },
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Head",
+        "bone_local_position": [
+          0.472679615020752,
+          2.6933765411377,
+          1.17808854579926
+        ],
+        "mesh": "MESH_Antlers",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "antler push",
+          "contact": 0.72,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.62
+            },
+            {
+              "event": "contact",
+              "time": 0.72
+            },
+            {
+              "event": "recovery",
+              "time": 0.82
+            }
+          ],
+          "length": 1.65,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "antler push",
+          "contact": 0.72,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.62
+            },
+            {
+              "event": "contact",
+              "time": 0.72
+            },
+            {
+              "event": "recovery",
+              "time": 0.82
+            }
+          ],
+          "length": 1.65,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "VELKOR_L1_RIGGED_ANIMATED.tres",
+      "library_sha256": "9108f20781dac6742d29d2d0685d3f39056c325def176d03144eea8274803762",
+      "model": "assets/creature-assets37/VELKOR_L1_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "a6c91cf818d2a520150f8ce37a985c2ec451ef318379765676b1d21fafd717e7",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000298023223876953,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.0171564538031816,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    },
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Head",
+        "bone_local_position": [
+          0.472679615020752,
+          2.6933765411377,
+          1.17808854579926
+        ],
+        "mesh": "MESH_Antlers",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "antler push",
+          "contact": 0.72,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.62
+            },
+            {
+              "event": "contact",
+              "time": 0.72
+            },
+            {
+              "event": "recovery",
+              "time": 0.82
+            }
+          ],
+          "length": 1.65,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "antler push",
+          "contact": 0.72,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.62
+            },
+            {
+              "event": "contact",
+              "time": 0.72
+            },
+            {
+              "event": "recovery",
+              "time": 0.82
+            }
+          ],
+          "length": 1.65,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "VELKOR_L2_RIGGED_ANIMATED.tres",
+      "library_sha256": "e167766a969c08fe7582531ef7f0f082ff0c7af99c0631ba8b216d0cf9f02804",
+      "model": "assets/creature-assets37/VELKOR_L2_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "ef6bdd3ce69564c39987a6d810f27789a21faa12ba38cc57dc8abf978625fcab",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000298023223876953,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.0171564538031816,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    },
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Head",
+        "bone_local_position": [
+          0.472679615020752,
+          2.6933765411377,
+          1.17808854579926
+        ],
+        "mesh": "MESH_Antlers",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "antler push",
+          "contact": 0.72,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.62
+            },
+            {
+              "event": "contact",
+              "time": 0.72
+            },
+            {
+              "event": "recovery",
+              "time": 0.82
+            }
+          ],
+          "length": 1.65,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "antler push",
+          "contact": 0.72,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.62
+            },
+            {
+              "event": "contact",
+              "time": 0.72
+            },
+            {
+              "event": "recovery",
+              "time": 0.82
+            }
+          ],
+          "length": 1.65,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "VELKOR_L3_RIGGED_ANIMATED.tres",
+      "library_sha256": "34f92028761a2063ac4590c0e766464f130c6aa1978771d3f7b174bf8daed6cf",
+      "model": "assets/creature-assets37/VELKOR_L3_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "9ba1dea0842ad60ce56a16afcee7501a54665cb7b68ca18ade1e03b4e3295c94",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000298023223876953,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.0171564538031816,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    },
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Head",
+        "bone_local_position": [
+          0.885470271110535,
+          -0.281001806259155,
+          -0.816600680351257
+        ],
+        "mesh": "MESH_Tusks",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "tusk upward shove",
+          "contact": 0.66,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.56
+            },
+            {
+              "event": "contact",
+              "time": 0.66
+            },
+            {
+              "event": "recovery",
+              "time": 0.76
+            }
+          ],
+          "length": 1.55,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "tusk upward shove",
+          "contact": 0.66,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.56
+            },
+            {
+              "event": "contact",
+              "time": 0.66
+            },
+            {
+              "event": "recovery",
+              "time": 0.76
+            }
+          ],
+          "length": 1.55,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "KAMNEKLYK_L1_RIGGED_ANIMATED.tres",
+      "library_sha256": "548f3f6b4e7460f908b6383caa4cb024d2e63a971537651a20cc24318e30c32b",
+      "model": "assets/creature-assets37/KAMNEKLYK_L1_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "1f4a31ebe7d27b87f8d18c7d256ec2ec1777935fd22e748be7e24f1c9c713dcc",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000327825546264648,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.0198300145566463,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    },
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Head",
+        "bone_local_position": [
+          0.885470271110535,
+          -0.281001806259155,
+          -0.816600680351257
+        ],
+        "mesh": "MESH_Tusks",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "tusk upward shove",
+          "contact": 0.66,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.56
+            },
+            {
+              "event": "contact",
+              "time": 0.66
+            },
+            {
+              "event": "recovery",
+              "time": 0.76
+            }
+          ],
+          "length": 1.55,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "tusk upward shove",
+          "contact": 0.66,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.56
+            },
+            {
+              "event": "contact",
+              "time": 0.66
+            },
+            {
+              "event": "recovery",
+              "time": 0.76
+            }
+          ],
+          "length": 1.55,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "KAMNEKLYK_L2_RIGGED_ANIMATED.tres",
+      "library_sha256": "66a137b524c56142e4f50b51fad4002c1a8895d19b9c023a70581d5ebaa759fe",
+      "model": "assets/creature-assets37/KAMNEKLYK_L2_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "c56f47def0b0be127567b4b92a693d262f4951decebd4b7c0ef75150077f471e",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000327825546264648,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.0198300145566463,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    },
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Head",
+        "bone_local_position": [
+          0.885470271110535,
+          -0.281001806259155,
+          -0.816600680351257
+        ],
+        "mesh": "MESH_Tusks",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "tusk upward shove",
+          "contact": 0.66,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.56
+            },
+            {
+              "event": "contact",
+              "time": 0.66
+            },
+            {
+              "event": "recovery",
+              "time": 0.76
+            }
+          ],
+          "length": 1.55,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "tusk upward shove",
+          "contact": 0.66,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.56
+            },
+            {
+              "event": "contact",
+              "time": 0.66
+            },
+            {
+              "event": "recovery",
+              "time": 0.76
+            }
+          ],
+          "length": 1.55,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "KAMNEKLYK_L3_RIGGED_ANIMATED.tres",
+      "library_sha256": "3c65e9e2ec4ca2bbbd598e1042e02456d92451120cab573f88d16a65f2c2133d",
+      "model": "assets/creature-assets37/KAMNEKLYK_L3_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "e16550fc3d58ecbd7a060b68accdadff5489936d3238e314e18241eaebe91740",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000327825546264648,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.0198300145566463,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    },
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Jaw",
+        "bone_local_position": [
+          0.533759593963623,
+          0.100770711898804,
+          0.324063062667847
+        ],
+        "mesh": "MESH_JawsTeeth",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "heavy bite",
+          "contact": 0.6,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.5
+            },
+            {
+              "event": "contact",
+              "time": 0.6
+            },
+            {
+              "event": "recovery",
+              "time": 0.7
+            }
+          ],
+          "length": 1.45,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "heavy bite",
+          "contact": 0.6,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.5
+            },
+            {
+              "event": "contact",
+              "time": 0.6
+            },
+            {
+              "event": "recovery",
+              "time": 0.7
+            }
+          ],
+          "length": 1.45,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "DRAGOR_L1_RIGGED_ANIMATED.tres",
+      "library_sha256": "9d81babc551b3c941f5c1e1b15ce311634dd4e0041b95ec322d18d6bd57f1322",
+      "model": "assets/creature-assets37/DRAGOR_L1_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "16c1c31986a373bd5d2ee011bfa9c5dcd907dbe14244630b9b81043b2af4c417",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000298023223876953,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.024381373077631,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    },
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Jaw",
+        "bone_local_position": [
+          0.533759593963623,
+          0.100770711898804,
+          0.324063062667847
+        ],
+        "mesh": "MESH_JawsTeeth",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "heavy bite",
+          "contact": 0.6,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.5
+            },
+            {
+              "event": "contact",
+              "time": 0.6
+            },
+            {
+              "event": "recovery",
+              "time": 0.7
+            }
+          ],
+          "length": 1.45,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "heavy bite",
+          "contact": 0.6,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.5
+            },
+            {
+              "event": "contact",
+              "time": 0.6
+            },
+            {
+              "event": "recovery",
+              "time": 0.7
+            }
+          ],
+          "length": 1.45,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "DRAGOR_L2_RIGGED_ANIMATED.tres",
+      "library_sha256": "fc93d9bd580d5c900787cf7215eaf29d70b9fa7b7946e8a15a6788bd648f14f2",
+      "model": "assets/creature-assets37/DRAGOR_L2_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "5971dced39ce6790b4740fca9b7823eee6259ffaff417d48eea0bb04eb4a53fb",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000298023223876953,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.024381373077631,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    },
+    {
+      "animation_root": "..",
+      "attack_contact_anchor": {
+        "bone": "BONE_Jaw",
+        "bone_local_position": [
+          0.533759593963623,
+          0.100770711898804,
+          0.324063062667847
+        ],
+        "mesh": "MESH_JawsTeeth",
+        "selection": "forwardmost bind-pose vertex in actual contact mesh; representative surface anchor, target reach must be checked per encounter"
+      },
+      "clips": {
+        "alert": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.9,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_a": {
+          "attack_style": "heavy bite",
+          "contact": 0.6,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.5
+            },
+            {
+              "event": "contact",
+              "time": 0.6
+            },
+            {
+              "event": "recovery",
+              "time": 0.7
+            }
+          ],
+          "length": 1.45,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "attack_b": {
+          "attack_style": "heavy bite",
+          "contact": 0.6,
+          "events": [
+            {
+              "event": "windup",
+              "time": 0.0
+            },
+            {
+              "event": "whoosh",
+              "time": 0.5
+            },
+            {
+              "event": "contact",
+              "time": 0.6
+            },
+            {
+              "event": "recovery",
+              "time": 0.7
+            }
+          ],
+          "length": 1.45,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "combat_idle": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 3.6,
+          "loop": true,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "death": {
+          "contact": null,
+          "length": 1.60000002384186,
+          "loop": false,
+          "origin": "source Death; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "exit_combat": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.5,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_front": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_left": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "hit_right": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.48,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "idle": {
+          "contact": null,
+          "length": 3.20000004768372,
+          "loop": true,
+          "origin": "source Idle; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "recover": {
+          "attack_style": null,
+          "contact": null,
+          "events": [],
+          "length": 0.38,
+          "loop": false,
+          "origin": "new skeletal keyed poses, offline planted-ankle compensation"
+        },
+        "run": {
+          "contact": null,
+          "length": 0.620000004768372,
+          "loop": true,
+          "origin": "source Run; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        },
+        "walk": {
+          "contact": null,
+          "length": 1.0,
+          "loop": true,
+          "origin": "source Walk; horizontal root removed; complete reset tracks added; death support-grounded from actual skinned vertices"
+        }
+      },
+      "library": "DRAGOR_L3_RIGGED_ANIMATED.tres",
+      "library_sha256": "a7878429708e97ece9c48d0c8cff5c70ec4f6baef03a64ef7cf82d8b5a4c792a",
+      "model": "assets/creature-assets37/DRAGOR_L3_RIGGED_ANIMATED.glb",
+      "native_forward": "+X",
+      "native_up": "+Y",
+      "player_path": "AnimationPlayer",
+      "rig_bones": [
+        "BONE_Root",
+        "BONE_Spine",
+        "BONE_Head",
+        "BONE_Jaw",
+        "BONE_Tail",
+        "BONE_FrontLeg_L",
+        "BONE_FrontFoot_L",
+        "BONE_RearLeg_L",
+        "BONE_RearFoot_L",
+        "BONE_FrontLeg_R",
+        "BONE_FrontFoot_R",
+        "BONE_RearLeg_R",
+        "BONE_RearFoot_R"
+      ],
+      "root_motion": false,
+      "skeleton_path": "Skeleton3D",
+      "source_sha256": "c6ad18ee7fc1c3d9458a63392fabf360c9cf611f642e2f2a872cc9d0ec4c3ad8",
+      "units": "source GLB units; no scale conversion",
+      "verification": {
+        "death_support_max_error_source_units": 0.000000298023223876953,
+        "finite_keys": true,
+        "imported": true,
+        "paths_validated": true,
+        "planted_attack_ankle_max_error_source_units": 0.024381373077631,
+        "render_review": "See package QA; not certified on iPhone",
+        "sampled_clips": 13,
+        "samples_per_clip": 25
+      }
+    }
+  ],
+  "package": "DRENOVAR-combat-v0.1.0",
+  "source_commit": "3a316fe131630509652428ac997c3eb6cfe90017"
+}

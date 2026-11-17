@@ -1,0 +1,312 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+LEVEL_SCENES changes=40 carried=10
+SHARED_ASSETS compared=108 of 108
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] run (res://qa_architecture.gd:43)
+WORKER ALT-02-1 lumber points=1 hits=0
+LANE ALT-02-4 unit lane (5.3, 0.55, 5.1)->(5.3, 0.55, 3.7) blocked=0 step=0.000 grade=0.000 samples=15
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER ALT-02-4 lumber points=1 hits=0
+LANE ALT-02-5 unit lane (5.3, 0.55, 5.1)->(5.3, 0.55, 3.7) blocked=0 step=0.000 grade=0.000 samples=15
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER ALT-02-5 lumber points=1 hits=0
+LANE ALT-06-5 unit lane (3.6, 0.0, 3.4)->(3.6, 0.0, -0.45) blocked=0 step=0.000 grade=0.000 samples=40
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] run (res://qa_architecture.gd:43)
+       [2] check_level (res://qa_architecture.gd:81)
+LANE ALT-07-3 unit lane (1.3, 0.36, 0.25)->(4.6, 0.6, 0.25) blocked=0 step=0.013 grade=0.133 samples=34
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE ALT-07-4 unit lane (1.3, 0.36, 0.25)->(4.6, 0.6, 0.25) blocked=0 step=0.013 grade=0.133 samples=34
+LANE ALT-07-4 unit lane (3.2, 0.36, 3.7)->(6.0, 0.36, 3.7) blocked=0 step=0.000 grade=0.000 samples=29
+LANE ALT-07-4 unit lane (6.0, 0.36, 3.7)->(6.0, 0.36, 6.5) blocked=0 step=0.000 grade=0.000 samples=29
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE ALT-07-5 unit lane (1.3, 0.36, 0.25)->(4.6, 0.6, 0.25) blocked=0 step=0.013 grade=0.133 samples=34
+LANE ALT-07-5 unit lane (3.2, 0.36, 3.7)->(6.0, 0.36, 3.7) blocked=0 step=0.000 grade=0.000 samples=29
+LANE ALT-07-5 unit lane (6.0, 0.36, 3.7)->(6.0, 0.36, 6.5) blocked=0 step=0.000 grade=0.000 samples=29
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE ALT-08-5 unit lane (0.2, 0.0, 4.6)->(0.2, 0.0, 3.3) blocked=0 step=0.020 grade=0.040 samples=14
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE ALT-09-1 unit lane (-6.0, 0.0, -0.4)->(-0.6, 0.0, -0.4) blocked=0 step=0.000 grade=0.000 samples=56
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER ALT-09-1 quarry27 points=1 hits=0
+LANE ALT-09-2 unit lane (4.6, 0.0, 6.4)->(4.6, 0.0, 1.3) blocked=0 step=0.020 grade=0.040 samples=53
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER ALT-09-2 quarry27 points=1 hits=0
+LANE ALT-09-3 unit lane (4.6, 0.0, 6.4)->(4.6, 0.0, 1.3) blocked=0 step=0.020 grade=0.040 samples=53
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER ALT-09-3 quarry27 points=1 hits=0
+LANE ALT-09-4 unit lane (4.6, 0.0, 6.4)->(4.6, 0.0, 1.3) blocked=0 step=0.020 grade=0.040 samples=53
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER ALT-09-4 quarry27 points=1 hits=0
+LANE ALT-09-5 unit lane (4.6, 0.0, 6.4)->(4.6, 0.0, 1.3) blocked=0 step=0.020 grade=0.040 samples=53
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER ALT-09-5 quarry27 points=1 hits=0
+LANE ECO-01-5 unit lane (4.75, 0.0, 6.9)->(4.75, 0.0, 4.1) blocked=0 step=0.000 grade=0.000 samples=30
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER ECO-01-5 warehouse points=1 hits=0
+LANE ECO-03-5 ring lane (0.2, 0.0, 0.35)->(1.5, 0.0, 0.8) blocked=0 step=0.000 grade=0.000 samples=73
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER ECO-03-5 market27 points=1 hits=0
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] run (res://qa_architecture.gd:43)
+       [2] check_level (res://qa_architecture.gd:81)
+WORKER ECO-05-1 starterHall points=36 hits=0
+WORKER ECO-05-2 hall points=36 hits=0
+WORKER ECO-05-3 hall points=36 hits=0
+WORKER ECO-05-4 hall points=36 hits=0
+WORKER ECO-05-5 hall points=36 hits=0
+LANE MIL-01-4 drill lane (-3.6, 0.0, 4.1)->(3.2, 0.0, 4.1) blocked=0 step=0.000 grade=0.000 samples=70
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE MIL-01-5 drill lane (-3.6, 0.0, 4.1)->(3.2, 0.0, 4.1) blocked=0 step=0.000 grade=0.000 samples=70
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] run (res://qa_architecture.gd:43)
+       [2] check_level (res://qa_architecture.gd:81)
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] run (res://qa_architecture.gd:43)
+       [2] check_level (res://qa_architecture.gd:81)
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] run (res://qa_architecture.gd:43)
+       [2] check_level (res://qa_architecture.gd:81)
+LANE MIL-04-3 unit lane (4.724, 0.0, 4.2)->(4.724, 0.0, 0.2) blocked=0 step=0.000 grade=0.000 samples=41
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER MIL-04-3 smith points=1 hits=0
+LANE MIL-04-4 unit lane (4.922, 0.0, 4.2)->(4.922, 0.0, 0.2) blocked=0 step=0.000 grade=0.000 samples=41
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER MIL-04-4 smith points=1 hits=0
+LANE MIL-04-5 unit lane (5.12, 0.0, 4.2)->(5.12, 0.0, 0.2) blocked=0 step=0.000 grade=0.000 samples=41
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER MIL-04-5 smith points=1 hits=0
+LANE MIL-05-1 unit lane (4.1, 0.0, 3.2)->(4.1, 0.0, 1.55) blocked=0 step=0.060 grade=0.120 samples=18
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE MIL-05-2 unit lane (4.1, 0.0, 3.2)->(4.1, 0.0, 1.55) blocked=0 step=0.060 grade=0.120 samples=18
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE MIL-05-3 unit lane (4.1, 0.0, 3.2)->(4.1, 0.0, 1.55) blocked=0 step=0.060 grade=0.120 samples=18
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE MIL-05-4 unit lane (4.1, 0.0, 3.2)->(4.1, 0.0, 1.55) blocked=0 step=0.035 grade=0.130 samples=18
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE MIL-05-5 unit lane (4.1, 0.0, 2.2)->(4.1, 0.0, 1.55) blocked=0 step=0.000 grade=0.000 samples=8
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE RES-01-5 cart lane (5.4, 0.0, 6.9)->(5.4, 0.55, -0.4) blocked=0 step=0.029 grade=0.162 samples=75
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER RES-01-5 lumber points=1 hits=0
+LANE RES-02-5 stair lane (3.3, 0.0, 3.8)->(3.3, 3.0, -0.2) blocked=0 step=0.300 grade=1.200 samples=41
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER RES-02-5 quarry27 points=1 hits=0
+LANE RES-03-5 rail lane (0.5, 0.0, 6.6)->(0.5, 0.0, 1.2) blocked=0 step=0.119 grade=0.239 samples=55
+LANE RES-03-5 unit lane (2.1, 0.0, 2.6)->(2.1, 0.0, 3.4) blocked=0 step=0.000 grade=0.000 samples=10
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER RES-03-5 ironmine27 points=1 hits=0
+LANE RES-04-3 unit lane (4.6, 0.0, -2.4)->(4.6, 0.0, 3.5) blocked=0 step=0.000 grade=0.000 samples=61
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER RES-04-3 farm points=1 hits=0
+LANE RES-04-4 unit lane (5.15, 0.0, -2.4)->(5.15, 0.0, 3.5) blocked=0 step=0.000 grade=0.000 samples=61
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER RES-04-4 farm points=1 hits=0
+LANE RES-04-5 unit lane (4.6, 0.0, -2.4)->(4.6, 0.0, 3.5) blocked=0 step=0.000 grade=0.000 samples=61
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+WORKER RES-04-5 farm points=1 hits=0
+LANE SUP-01-5 stretcher lane (5.1, 0.0, 7.0)->(5.1, 0.42, 0.6) blocked=0 step=0.045 grade=0.172 samples=66
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] run (res://qa_architecture.gd:43)
+       [2] check_level (res://qa_architecture.gd:81)
+LANE SUP-02-4 stair lane (4.7, 0.0, 4.0)->(4.7, 0.38, -1.5) blocked=0 step=0.190 grade=0.760 samples=56
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE SUP-02-5 cart lane (4.75, 0.0, 6.9)->(4.75, 0.38, -1.5) blocked=0 step=0.010 grade=0.098 samples=85
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE SUP-03-1 cart lane (0.0, 0.0, 6.2)->(0.0, 0.0, -6.2) blocked=0 step=0.000 grade=0.000 samples=125
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE SUP-03-2 cart lane (0.0, 0.0, 6.2)->(0.0, 0.0, -6.2) blocked=0 step=0.000 grade=0.000 samples=125
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE SUP-03-3 cart lane (0.0, 0.0, 6.2)->(0.0, 0.0, -6.2) blocked=0 step=0.000 grade=0.000 samples=125
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE SUP-03-4 cart lane (0.0, 0.0, 6.2)->(0.0, 0.0, -6.2) blocked=0 step=0.000 grade=0.000 samples=125
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE SUP-03-5 cart lane (0.0, 0.0, 6.2)->(0.0, 0.0, -6.2) blocked=0 step=0.000 grade=0.000 samples=125
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE SUP-04-5 unit lane (2.65, 4.15, 0.1)->(2.65, 4.15, -1.6) blocked=0 step=0.000 grade=0.000 samples=19
+LANE SUP-04-5 unit lane (-2.65, 4.15, 2.5)->(-2.65, 4.15, -2.5) blocked=0 step=0.000 grade=0.000 samples=51
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+QA_ARCHITECTURE checks=774 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)

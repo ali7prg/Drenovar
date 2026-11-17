@@ -1,0 +1,40 @@
+name: DRENOVAR V6 authored assets
+on:
+  push:
+    branches: [codex/drenovar-v6-buildings-implementation]
+  pull_request:
+    branches: [main]
+    paths: [godot/art/buildings-v6/**, godot/project/src/**, .github/workflows/drenovar-v6-assets.yml]
+permissions:
+  contents: read
+jobs:
+  assets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned Godot
+        run: |
+          curl -fL --retry 3 https://github.com/godotengine/godot/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          echo "DRENOVAR_GODOT_BIN=$RUNNER_TEMP/godot/Godot_v4.6.3-stable_linux.x86_64" >> "$GITHUB_ENV"
+      - name: Generate, load and validate original-quality assets twice
+        run: python3 godot/art/buildings-v6/build_all.py --bootstrap --check-reproducible --package-dir "$RUNNER_TEMP/v6-art"
+      - name: Parse actual application scripts
+        run: "$DRENOVAR_GODOT_BIN --headless --path godot/project -s ../tools/check_v6.gd"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: drenovar-v6-native-and-web-art
+          path: |
+            ${{ runner.temp }}/v6-art/*.zip
+            godot/project/assets/city/architecture-v6/*validation*.json
+            godot/project/assets/city/architecture-v6/reproducibility.json
+            godot/project/assets/city/architecture-v6/toolchain.json
+          retention-days: 30
+# No production deployment or database credentials.

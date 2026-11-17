@@ -1,0 +1,326 @@
+{
+  "method": "Chromium real Three.js GLB skinning; 600 samples/cycle; no iPhone acceptance",
+  "hooves": [
+    {
+      "id": "ENG-05",
+      "lod": 1,
+      "clip": "Walk",
+      "rootSpeed": 1.55,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.0006169340946181579,
+      "heightRangeM": 0.000469929107395192
+    },
+    {
+      "id": "ENG-05",
+      "lod": 1,
+      "clip": "Trot",
+      "rootSpeed": 3.4,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.00013742348238608663,
+      "heightRangeM": 0.0001620791166881087
+    },
+    {
+      "id": "ENG-05",
+      "lod": 1,
+      "clip": "Run",
+      "rootSpeed": 6.25,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.0005065732671339294,
+      "heightRangeM": 0.00046932089575639924
+    },
+    {
+      "id": "ENG-05",
+      "lod": 2,
+      "clip": "Walk",
+      "rootSpeed": 1.55,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.0006169340946181579,
+      "heightRangeM": 0.000469929107395192
+    },
+    {
+      "id": "ENG-05",
+      "lod": 2,
+      "clip": "Trot",
+      "rootSpeed": 3.4,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.00013742348238608663,
+      "heightRangeM": 0.0001620791166881087
+    },
+    {
+      "id": "ENG-05",
+      "lod": 2,
+      "clip": "Run",
+      "rootSpeed": 6.25,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.0005065732671339294,
+      "heightRangeM": 0.00046932089575639924
+    },
+    {
+      "id": "ENG-06",
+      "lod": 1,
+      "clip": "Walk",
+      "rootSpeed": 1.55,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.0006169340946181579,
+      "heightRangeM": 0.000469929107395192
+    },
+    {
+      "id": "ENG-06",
+      "lod": 1,
+      "clip": "Trot",
+      "rootSpeed": 3.4,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.00013742348238608663,
+      "heightRangeM": 0.0001620791166881087
+    },
+    {
+      "id": "ENG-06",
+      "lod": 1,
+      "clip": "Run",
+      "rootSpeed": 6.25,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.0005065732671339294,
+      "heightRangeM": 0.00046932089575639924
+    },
+    {
+      "id": "ENG-06",
+      "lod": 2,
+      "clip": "Walk",
+      "rootSpeed": 1.55,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.0006169340946181579,
+      "heightRangeM": 0.000469929107395192
+    },
+    {
+      "id": "ENG-06",
+      "lod": 2,
+      "clip": "Trot",
+      "rootSpeed": 3.4,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.00013742348238608663,
+      "heightRangeM": 0.0001620791166881087
+    },
+    {
+      "id": "ENG-06",
+      "lod": 2,
+      "clip": "Run",
+      "rootSpeed": 6.25,
+      "soleVertices": 4,
+      "stanceDisplacementM": 0.0005065732671339294,
+      "heightRangeM": 0.00046932089575639924
+    }
+  ],
+  "poses": [
+    {
+      "id": "ENG-01",
+      "clip": "Attack",
+      "time": 0.25,
+      "duration": 1.649999976158142,
+      "sourcePhase": 0.15151515370448654
+    },
+    {
+      "id": "ENG-01",
+      "clip": "Attack",
+      "time": 0.6,
+      "duration": 1.649999976158142,
+      "sourcePhase": 0.36363636889076767
+    },
+    {
+      "id": "ENG-01",
+      "clip": "Attack",
+      "time": 0.7999999999999999,
+      "duration": 1.649999976158142,
+      "sourcePhase": 0.48484849185435686
+    },
+    {
+      "id": "ENG-02",
+      "clip": "Sword_Drill",
+      "time": 1.17,
+      "duration": 3.799999952316284,
+      "sourcePhase": 0.3078947407056751
+    },
+    {
+      "id": "ENG-02",
+      "clip": "Sword_Drill",
+      "time": 1.52,
+      "duration": 3.799999952316284,
+      "sourcePhase": 0.4000000050193386
+    },
+    {
+      "id": "ENG-02",
+      "clip": "Sword_Drill",
+      "time": 1.9025333333333332,
+      "duration": 3.799999952316284,
+      "sourcePhase": 0.5006666729492054
+    },
+    {
+      "id": "ENG-03",
+      "clip": "Bow_Draw",
+      "time": 1.8192660550458715,
+      "duration": 4,
+      "sourcePhase": 0.45481651376146787
+    },
+    {
+      "id": "ENG-03",
+      "clip": "Bow_Draw",
+      "time": 2.8375,
+      "duration": 4,
+      "sourcePhase": 0.709375
+    },
+    {
+      "id": "ENG-03",
+      "clip": "Bow_Draw",
+      "time": 3.2125,
+      "duration": 4,
+      "sourcePhase": 0.803125
+    },
+    {
+      "id": "ENG-04",
+      "clip": "Crossbow_Reload",
+      "time": 0.7189873417721518,
+      "duration": 5,
+      "sourcePhase": 0.14379746835443036
+    },
+    {
+      "id": "ENG-04",
+      "clip": "Crossbow_Reload",
+      "time": 3.06,
+      "duration": 5,
+      "sourcePhase": 0.612
+    },
+    {
+      "id": "ENG-04",
+      "clip": "Crossbow_Reload",
+      "time": 3.26,
+      "duration": 5,
+      "sourcePhase": 0.6519999999999999
+    },
+    {
+      "id": "ENG-05",
+      "clip": "Attack",
+      "time": 0.2434,
+      "duration": 1.3666666746139526,
+      "sourcePhase": 0.1780975599399569
+    },
+    {
+      "id": "ENG-05",
+      "clip": "Attack",
+      "time": 0.5934,
+      "duration": 1.3666666746139526,
+      "sourcePhase": 0.43419511942633704
+    },
+    {
+      "id": "ENG-05",
+      "clip": "Attack",
+      "time": 0.7934000000000001,
+      "duration": 1.3666666746139526,
+      "sourcePhase": 0.5805365819899828
+    },
+    {
+      "id": "ENG-06",
+      "clip": "Attack",
+      "time": 0.2434,
+      "duration": 1.5666667222976685,
+      "sourcePhase": 0.15536169661089777
+    },
+    {
+      "id": "ENG-06",
+      "clip": "Attack",
+      "time": 0.5934,
+      "duration": 1.5666667222976685,
+      "sourcePhase": 0.3787659439971518
+    },
+    {
+      "id": "ENG-06",
+      "clip": "Attack",
+      "time": 0.7934000000000001,
+      "duration": 1.5666667222976685,
+      "sourcePhase": 0.5064255139321541
+    },
+    {
+      "id": "ENG-07",
+      "clip": "Sword_Drill",
+      "time": 1.33,
+      "duration": 4.199999809265137,
+      "sourcePhase": 0.31666668104747053
+    },
+    {
+      "id": "ENG-07",
+      "clip": "Sword_Drill",
+      "time": 1.6800000000000002,
+      "duration": 4.199999809265137,
+      "sourcePhase": 0.40000001816522596
+    },
+    {
+      "id": "ENG-07",
+      "clip": "Sword_Drill",
+      "time": 2.0822891566265063,
+      "duration": 4.199999809265137,
+      "sourcePhase": 0.495783155045152
+    },
+    {
+      "id": "ENG-08",
+      "clip": "Sword_Drill",
+      "time": 1.2899999999999998,
+      "duration": 4.099999904632568,
+      "sourcePhase": 0.31463415365996367
+    },
+    {
+      "id": "ENG-08",
+      "clip": "Sword_Drill",
+      "time": 1.64,
+      "duration": 4.099999904632568,
+      "sourcePhase": 0.40000000930413987
+    },
+    {
+      "id": "ENG-08",
+      "clip": "Sword_Drill",
+      "time": 2.0373456790123456,
+      "duration": 4.099999904632568,
+      "sourcePhase": 0.4969135918052972
+    },
+    {
+      "id": "ENG-09",
+      "clip": "Sword_Drill",
+      "time": 1.45,
+      "duration": 4.5,
+      "sourcePhase": 0.3222222222222222
+    },
+    {
+      "id": "ENG-09",
+      "clip": "Sword_Drill",
+      "time": 1.8,
+      "duration": 4.5,
+      "sourcePhase": 0.4
+    },
+    {
+      "id": "ENG-09",
+      "clip": "Sword_Drill",
+      "time": 2.2171348314606742,
+      "duration": 4.5,
+      "sourcePhase": 0.4926966292134832
+    },
+    {
+      "id": "ENG-10",
+      "clip": "Javelin_Drill",
+      "time": 1.43,
+      "duration": 3.799999952316284,
+      "sourcePhase": 0.37631579419582506
+    },
+    {
+      "id": "ENG-10",
+      "clip": "Javelin_Drill",
+      "time": 1.9633333333333332,
+      "duration": 3.799999952316284,
+      "sourcePhase": 0.5166666731499789
+    },
+    {
+      "id": "ENG-10",
+      "clip": "Javelin_Drill",
+      "time": 2.166,
+      "duration": 3.799999952316284,
+      "sourcePhase": 0.5700000071525575
+    }
+  ],
+  "errors": []
+}

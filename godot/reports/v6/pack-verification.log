@@ -1,0 +1,9 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+VERSION 0.6.0
+CITY true batches 45 parade_slots 5
+PARADE_MODELS ["res://assets/army/troops06/ENG-09-lod2.gltf"] troops06=1
+WORLD world batches 184
+TROOP_SCENES_OK 20 of 20
+TROOP_PATH res://assets/army/troops06/ENG-01-lod1.gltf
+V6_PACK_ASSETS_OK 163 of 163

@@ -1,0 +1,54 @@
+[
+  {
+    "clip": "Run",
+    "ground_speed": 8.0,
+    "height_range_m": 0.00296252960106358,
+    "hoof_world_speed_p95": 0.749547382604046,
+    "lod": 1,
+    "method": "600 samples/cycle, actual skinned sole within 3mm of its cycle minimum, contiguous low-contact displacement; same geometric detector before/after",
+    "samples": 481,
+    "sole_vertices": 4,
+    "stance_displacement_max_m": 0.00680052489042282,
+    "tempo": 1.11798048006082,
+    "unit": "ENG-05"
+  },
+  {
+    "clip": "Run",
+    "ground_speed": 8.0,
+    "height_range_m": 0.00296252960106358,
+    "hoof_world_speed_p95": 0.749547382604046,
+    "lod": 2,
+    "method": "600 samples/cycle, actual skinned sole within 3mm of its cycle minimum, contiguous low-contact displacement; same geometric detector before/after",
+    "samples": 481,
+    "sole_vertices": 4,
+    "stance_displacement_max_m": 0.00680052489042282,
+    "tempo": 1.11798048006082,
+    "unit": "ENG-05"
+  },
+  {
+    "clip": "Run",
+    "ground_speed": 7.0,
+    "height_range_m": 0.00296252960106358,
+    "hoof_world_speed_p95": 0.65585395977854,
+    "lod": 1,
+    "method": "600 samples/cycle, actual skinned sole within 3mm of its cycle minimum, contiguous low-contact displacement; same geometric detector before/after",
+    "samples": 481,
+    "sole_vertices": 4,
+    "stance_displacement_max_m": 0.00680052489042282,
+    "tempo": 0.978232920053216,
+    "unit": "ENG-06"
+  },
+  {
+    "clip": "Run",
+    "ground_speed": 7.0,
+    "height_range_m": 0.00296252960106358,
+    "hoof_world_speed_p95": 0.65585395977854,
+    "lod": 2,
+    "method": "600 samples/cycle, actual skinned sole within 3mm of its cycle minimum, contiguous low-contact displacement; same geometric detector before/after",
+    "samples": 481,
+    "sole_vertices": 4,
+    "stance_displacement_max_m": 0.00680052489042282,
+    "tempo": 0.978232920053216,
+    "unit": "ENG-06"
+  }
+]

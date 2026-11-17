@@ -1,0 +1,14 @@
+# Intermediate Godot glTF exports are large and have a repaired albedo mapping.
+# Only the final verified GLBs and deduplicated source-resolution textures ship.
+web-staging/
+manifest-*.json
+web-validation-*.json
+web-pack-report-*.json
+gltf-spec-validation-*.json
+# Rebuilt by the existing CI before native/web packaging; never uploaded via
+# source-file connector APIs or accidentally embedded twice in a native PCK.
+levels/
+transitions/
+units/
+web/
+materials/

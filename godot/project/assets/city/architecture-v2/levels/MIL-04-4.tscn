@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-04-4.res" id="1_nhxxl"]
+
+[node name="MIL_04_4" type="Node3D" unique_id=206497452]
+metadata/series = "B14_Blacksmith"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-1, 0, 3.4)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1833370856]
+mesh = ExtResource("1_nhxxl")

@@ -1,0 +1,185 @@
+{
+  "status": "passed",
+  "textures": {
+    "8e41bad35e8c7c25effe9d84.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/dark_oak-albedo.jpg",
+      "source_sha256": "ed16dd95834c468fcd0aae7ed89de4acc6658f4d7cbd146141ce85b29e11feae",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "640927a6e67aecf6433046cef374d0b79fd9239d9e08d0447318cefd0fa280c2",
+      "same_pixels": true
+    },
+    "89793875b48c29ff31274201.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/dark_oak-roughness.png",
+      "source_sha256": "89793875b48c29ff3127420127ed68a1718cb33d0fe80258fa546607ce123cae",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "f797619f6bb972af3f2b54bdb71bbe23247e5ae912f94ecb89a7748a250b879f",
+      "same_pixels": true
+    },
+    "320d1ac87a3b66ada7469e3f.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/dark_oak-normal.png",
+      "source_sha256": "320d1ac87a3b66ada7469e3fca8a758ead7aa09a49643df6df3fa3d7208c86a2",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "8812daf9e6b83260c7e898032483e19c0f509f78eed21b93307bb3a00af11ca5",
+      "same_pixels": true
+    },
+    "2abf8e5805f18fe5ca27057b.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/soil-albedo.webp",
+      "source_sha256": "8844f941efea7cd6c20331b54e01b18ed2b83f171331b37fe92d63439f10d5d0",
+      "dimensions": [
+        512,
+        512
+      ],
+      "pixel_sha256": "e762b28f9c9710582391724fbd65769d51220a8cb007677eba6bcc532766f80a",
+      "same_pixels": true
+    },
+    "c7e756e22e686a9831b400f7.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/soil-roughness.png",
+      "source_sha256": "c7e756e22e686a9831b400f7809e3211259514f9cc311df1b40b3fa5ea7c9646",
+      "dimensions": [
+        512,
+        512
+      ],
+      "pixel_sha256": "4ba57517c6df3c7ab3852382f2c5ff90abcc52265b557bb36abeaf7d09ae4b65",
+      "same_pixels": true
+    },
+    "6d0b85ca91b9c7602abd4805.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/soil-normal.png",
+      "source_sha256": "6d0b85ca91b9c7602abd4805762537cb5e0d1e9227e9c959465b3e5430e6c147",
+      "dimensions": [
+        512,
+        512
+      ],
+      "pixel_sha256": "5879674ba1728ecb5b7e09cf4b5d6ea45cb967d85574ab8d517f3c9943ca5b7f",
+      "same_pixels": true
+    },
+    "eb431fda62e92bd006bb8492.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/oak-albedo.jpg",
+      "source_sha256": "3c5d8bd7b4c477f20bab128cffd935376e2513ad928c95d6f586647008fdd0fd",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "fb0ba8e6a41ad6d570c0a9812512bbab2614ce69fa55525ece8e8b06ae5457f5",
+      "same_pixels": true
+    },
+    "a0a5e65ce68d4f6a5220436e.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/path-albedo.webp",
+      "source_sha256": "f15f1ec519b827e20a7bdbb96e2e4711db49a120e656c42b17ea35f1aaa35901",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "pixel_sha256": "b750aeb6021d6a34ec7ea3beb4d636faa25d15d8aced96a2acc7704b790d3ca6",
+      "same_pixels": true
+    },
+    "6ac50a0d721f1e8bb637ed26.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/path-roughness.png",
+      "source_sha256": "6ac50a0d721f1e8bb637ed26546003414cfe7875038dfe8dc62eb760027b95e4",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "pixel_sha256": "b5ead297a18e2f727cda00708909661cafb415615c8f256652b987e3b87c3e78",
+      "same_pixels": true
+    },
+    "9b121e67dfad812dc09aa0eb.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/path-normal.png",
+      "source_sha256": "9b121e67dfad812dc09aa0eb9aaf05c40a92e3ad8acf4cfab4a1cdd377c12d32",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "pixel_sha256": "45b49c8870f518b7874630320f973166188d10936740b5691f11bb456b5c0fe0",
+      "same_pixels": true
+    },
+    "4a13591ab05c6da1fd1c9dc3.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/slate-albedo.jpg",
+      "source_sha256": "0e3dde3cf90254c4d27474c01704bbc0c7217e7430868af6cfb89f8cbeb5b83f",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "d7fe3fb86643f81c7c7ea04348256f0f765f0fdae23479f3f9eea5bd3f8a245d",
+      "same_pixels": true
+    },
+    "bca9fd92d4bda99f7e12a0a7.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/slate-normal.png",
+      "source_sha256": "bca9fd92d4bda99f7e12a0a7095c3fc9babd9a68d9c4a63a1383ab8be7e1d7d9",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "1474eab74cc76ba43f62347ee982bd64971f6203f2d941db74ed5d3ca15c84bd",
+      "same_pixels": true
+    },
+    "3dcc1854cd0b3b992601ff82.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/stone-albedo.jpg",
+      "source_sha256": "fbd7075c0c5ee1cbdbd976948a7794431d23e0b1809c4d95776c2ea43af49398",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "4dff0f84ba25e29ab188dab4e01fff7975a1cae4011b6c07116f5ed88b5c3eb8",
+      "same_pixels": true
+    },
+    "295b9557737c295519431dc4.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/stone-normal.png",
+      "source_sha256": "295b9557737c295519431dc48caaf964efe25df0417261796bce131e75be3481",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "7c47f87155d9e585f5a754333a50dff850083935a99314b25d365c579baa930c",
+      "same_pixels": true
+    },
+    "a20708a00ed407ae91322668.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/clay-albedo.jpg",
+      "source_sha256": "f3a17426d80a9ab5fde0d50c5caeee722841e636e68aaa04f65893a18fcfe5ea",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "0bc1e47ef58a80d9761b9706b20afe56ee3d2f2ffc72d66f69766687523197ed",
+      "same_pixels": true
+    },
+    "8c7fef7f6b5745e9a62bec10.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/drill20-albedo.webp",
+      "source_sha256": "d36066e342af43cc7ee9a92187a5d8b9e98cc5d6374a52221228679d81741fe6",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "9181661fad0d3cac99cece7a8791f394aa19719acd62d7a96c38ec4b5a6e6995",
+      "same_pixels": true
+    },
+    "0616c95905585a5233535c9b.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/drill20-roughness.png",
+      "source_sha256": "0616c95905585a5233535c9b22266c7f90b806ada956859dc2c55be18da8606b",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "f4979015c6867fb71942f4f6324d7deb7cd5c39bd02e42788346ca1d701d1613",
+      "same_pixels": true
+    },
+    "14d9f00c0025f0dc7a979a07.png": {
+      "source": "godot/project/assets/city/premium/surfaces07/drill20-normal.png",
+      "source_sha256": "14d9f00c0025f0dc7a979a07e483505479db2b78b7d43b88ec3d364687f99083",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "pixel_sha256": "be9d113a2b536f5474e886b94a68b9ef180a88112e6a7b61d19e41ddb48724c0",
+      "same_pixels": true
+    }
+  }
+}

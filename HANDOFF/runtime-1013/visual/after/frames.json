@@ -1,0 +1,148 @@
+{
+  "attacks": [
+    "ENG-02_0",
+    "ENG-02_5"
+  ],
+  "build": "1013",
+  "camera_position": "(61.57101, 29.03216, -10.73486)",
+  "camera_size": 33.0,
+  "frames": [
+    {
+      "attacks": [],
+      "clips": {
+        "ENG-01_0": "run",
+        "ENG-01_1": "run",
+        "ENG-01_10": "run",
+        "ENG-01_11": "run",
+        "ENG-01_12": "run",
+        "ENG-01_2": "run",
+        "ENG-01_3": "run",
+        "ENG-01_4": "idle",
+        "ENG-01_5": "run",
+        "ENG-01_6": "run",
+        "ENG-01_7": "run",
+        "ENG-01_8": "run",
+        "ENG-01_9": "run",
+        "ENG-02_0": "run",
+        "ENG-02_1": "run",
+        "ENG-02_10": "run",
+        "ENG-02_2": "run",
+        "ENG-02_3": "run",
+        "ENG-02_4": "run",
+        "ENG-02_5": "run",
+        "ENG-02_6": "run",
+        "ENG-02_7": "run",
+        "ENG-02_8": "run",
+        "ENG-02_9": "run"
+      },
+      "elapsed_ms": 0,
+      "file": "frame-0000.png"
+    },
+    {
+      "attacks": [],
+      "clips": {
+        "ENG-01_0": "run",
+        "ENG-01_1": "run",
+        "ENG-01_10": "run",
+        "ENG-01_11": "run",
+        "ENG-01_12": "run",
+        "ENG-01_2": "run",
+        "ENG-01_3": "run",
+        "ENG-01_4": "idle",
+        "ENG-01_5": "run",
+        "ENG-01_6": "run",
+        "ENG-01_7": "run",
+        "ENG-01_8": "run",
+        "ENG-01_9": "run",
+        "ENG-02_0": "run",
+        "ENG-02_1": "run",
+        "ENG-02_10": "run",
+        "ENG-02_2": "run",
+        "ENG-02_3": "run",
+        "ENG-02_4": "run",
+        "ENG-02_5": "run",
+        "ENG-02_6": "run",
+        "ENG-02_7": "run",
+        "ENG-02_8": "run",
+        "ENG-02_9": "run"
+      },
+      "elapsed_ms": 240,
+      "file": "frame-0240.png"
+    },
+    {
+      "attacks": [
+        "ENG-02_0",
+        "ENG-02_5"
+      ],
+      "clips": {
+        "ENG-01_0": "run",
+        "ENG-01_1": "run",
+        "ENG-01_10": "run",
+        "ENG-01_11": "run",
+        "ENG-01_12": "run",
+        "ENG-01_2": "run",
+        "ENG-01_3": "run",
+        "ENG-01_4": "idle",
+        "ENG-01_5": "run",
+        "ENG-01_6": "run",
+        "ENG-01_7": "run",
+        "ENG-01_8": "run",
+        "ENG-01_9": "run",
+        "ENG-02_0": "attack",
+        "ENG-02_1": "run",
+        "ENG-02_10": "run",
+        "ENG-02_2": "run",
+        "ENG-02_3": "run",
+        "ENG-02_4": "run",
+        "ENG-02_5": "attack",
+        "ENG-02_6": "run",
+        "ENG-02_7": "run",
+        "ENG-02_8": "run",
+        "ENG-02_9": "run"
+      },
+      "elapsed_ms": 480,
+      "file": "frame-0480.png"
+    },
+    {
+      "attacks": [
+        "ENG-02_0",
+        "ENG-02_5"
+      ],
+      "clips": {
+        "ENG-01_0": "run",
+        "ENG-01_1": "run",
+        "ENG-01_10": "run",
+        "ENG-01_11": "run",
+        "ENG-01_12": "run",
+        "ENG-01_2": "run",
+        "ENG-01_3": "run",
+        "ENG-01_4": "idle",
+        "ENG-01_5": "run",
+        "ENG-01_6": "run",
+        "ENG-01_7": "run",
+        "ENG-01_8": "run",
+        "ENG-01_9": "run",
+        "ENG-02_0": "attack",
+        "ENG-02_1": "run",
+        "ENG-02_10": "run",
+        "ENG-02_2": "run",
+        "ENG-02_3": "run",
+        "ENG-02_4": "run",
+        "ENG-02_5": "attack",
+        "ENG-02_6": "run",
+        "ENG-02_7": "run",
+        "ENG-02_8": "run",
+        "ENG-02_9": "run"
+      },
+      "elapsed_ms": 720,
+      "file": "frame-0720.png"
+    }
+  ],
+  "method": "same recorded authoritative server events and exact bank geometry; deterministic 40ms simulation steps; Godot4.6.3 Linux software OpenGL; no production or staging requests, local synthetic in-memory setup only; HUD hidden for capture; diagnostic labels overlay actor metadata; no device or realtime FPS claim",
+  "valid_contact_members": [
+    "ENG-02:0",
+    "ENG-02:5",
+    "ENG-01:2",
+    "ENG-01:8"
+  ]
+}

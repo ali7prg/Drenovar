@@ -1,0 +1,11 @@
+{
+  "time_utc": "2026-11-16T12:49:10.863814+00:00",
+  "worker": "drenovar-v92-staging",
+  "restored_version": "7478aa9e-24db-4dab-9cdc-b52c309a3f15",
+  "success": true,
+  "original_staging_database_direct_writes": 0,
+  "qa_database": "separate synthetic QA database retained",
+  "active_database_binding_matches_original": true,
+  "active_deploy_commit": "85508a72f2a3cbdd2ed00fc27489283659bf286e",
+  "verification_method": "100% deployment version resources and live /__migration/health. /settings represents latest uploaded candidate, not active rolled-back version."
+}

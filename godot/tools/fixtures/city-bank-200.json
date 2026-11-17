@@ -1,0 +1,996 @@
+{
+  "provenance": "Synthetic Cloudflare/local V6GameServer capture, 105ENG01+95ENG02, exact failed TenerysII far-bank path. Identifiers normalised; relative event times, damage and positions unchanged.",
+  "army": {
+    "arrivesAt": 1794832043491.0,
+    "attackBonuses": {
+      "attack": 0.0,
+      "construction": 0.0,
+      "defence": 0.0,
+      "garrison": 0.0,
+      "healing": 0.0
+    },
+    "battle": null,
+    "createdAt": 1794832023523.0,
+    "encounterId": "qa-bank-target",
+    "engine_version": "DRENOVAR-V6-C1.0-SIEGE-P1",
+    "hospital_capacity": 20.0,
+    "id": "qa-bank200",
+    "level": 2.0,
+    "map": "city",
+    "name": "Тенерис",
+    "owner": "synthetic",
+    "path": [
+      {
+        "x": 0.0,
+        "z": 16.0
+      },
+      {
+        "x": 0.0,
+        "z": 16.0
+      },
+      {
+        "x": 2.0,
+        "z": 14.0
+      },
+      {
+        "x": 4.0,
+        "z": 12.0
+      },
+      {
+        "x": 6.0,
+        "z": 10.0
+      },
+      {
+        "x": 8.0,
+        "z": 8.0
+      },
+      {
+        "x": 10.0,
+        "z": 6.0
+      },
+      {
+        "x": 12.0,
+        "z": 4.0
+      },
+      {
+        "x": 14.0,
+        "z": 2.0
+      },
+      {
+        "x": 16.0,
+        "z": 0.0
+      },
+      {
+        "x": 18.0,
+        "z": -2.0
+      },
+      {
+        "x": 20.0,
+        "z": -4.0
+      },
+      {
+        "x": 22.0,
+        "z": -6.0
+      },
+      {
+        "x": 24.0,
+        "z": -8.0
+      },
+      {
+        "x": 26.0,
+        "z": -10.0
+      },
+      {
+        "x": 28.0,
+        "z": -12.0
+      },
+      {
+        "x": 28.0,
+        "z": -14.0
+      },
+      {
+        "x": 28.0,
+        "z": -16.0
+      },
+      {
+        "x": 28.0,
+        "z": -18.0
+      },
+      {
+        "x": 28.0,
+        "z": -20.0
+      },
+      {
+        "x": 28.0,
+        "z": -22.0
+      },
+      {
+        "x": 28.0,
+        "z": -24.0
+      },
+      {
+        "x": 28.0,
+        "z": -26.0
+      },
+      {
+        "x": 28.0,
+        "z": -28.0
+      },
+      {
+        "x": 44.0,
+        "z": -28.0
+      },
+      {
+        "x": 46.57101208203,
+        "z": -28.7348630306996
+      }
+    ],
+    "position": {
+      "x": 0.0,
+      "z": 16.0
+    },
+    "ramConditions": [],
+    "speed": 4.0,
+    "startsAt": 1794832024923.0,
+    "status": "outbound",
+    "target": "qa-bank-target",
+    "total": 200.0,
+    "travelMs": 18568.0,
+    "units": {
+      "ENG-01": 105.0,
+      "ENG-02": 95.0
+    },
+    "usesFerry": true,
+    "workshop": 1.0,
+    "worldKind": null
+  },
+  "events": [
+    {
+      "at": 600.0,
+      "damage": 77.0,
+      "eventId": "qa-bank200/1794832043491.0/0",
+      "hp": 58.0,
+      "index": 0.0,
+      "kind": "creature_attack",
+      "memberId": "qa-bank200/ENG-01/0",
+      "sequence": 0.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3459.0,
+      "damage": 41.0,
+      "eventId": "qa-bank200/1794832043491.0/1",
+      "index": 0.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/0",
+      "sequence": 1.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3417.0,
+      "damage": 42.0,
+      "eventId": "qa-bank200/1794832043491.0/2",
+      "index": 1.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/1",
+      "sequence": 2.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3378.0,
+      "damage": 39.0,
+      "eventId": "qa-bank200/1794832043491.0/3",
+      "index": 5.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/5",
+      "sequence": 3.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3337.0,
+      "damage": 41.0,
+      "eventId": "qa-bank200/1794832043491.0/4",
+      "index": 6.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/6",
+      "sequence": 4.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3301.0,
+      "damage": 36.0,
+      "eventId": "qa-bank200/1794832043491.0/5",
+      "index": 10.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/10",
+      "sequence": 5.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3261.0,
+      "damage": 40.0,
+      "eventId": "qa-bank200/1794832043491.0/6",
+      "index": 11.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/11",
+      "sequence": 6.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3222.0,
+      "damage": 39.0,
+      "eventId": "qa-bank200/1794832043491.0/7",
+      "index": 15.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/15",
+      "sequence": 7.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3187.0,
+      "damage": 35.0,
+      "eventId": "qa-bank200/1794832043491.0/8",
+      "index": 16.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/16",
+      "sequence": 8.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3145.0,
+      "damage": 42.0,
+      "eventId": "qa-bank200/1794832043491.0/9",
+      "index": 20.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/20",
+      "sequence": 9.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3103.0,
+      "damage": 42.0,
+      "eventId": "qa-bank200/1794832043491.0/10",
+      "index": 21.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/21",
+      "sequence": 10.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3066.0,
+      "damage": 37.0,
+      "eventId": "qa-bank200/1794832043491.0/11",
+      "index": 25.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/25",
+      "sequence": 11.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 3031.0,
+      "damage": 35.0,
+      "eventId": "qa-bank200/1794832043491.0/12",
+      "index": 26.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/26",
+      "sequence": 12.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2994.0,
+      "damage": 37.0,
+      "eventId": "qa-bank200/1794832043491.0/13",
+      "index": 30.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/30",
+      "sequence": 13.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2953.0,
+      "damage": 41.0,
+      "eventId": "qa-bank200/1794832043491.0/14",
+      "index": 31.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/31",
+      "sequence": 14.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2918.0,
+      "damage": 35.0,
+      "eventId": "qa-bank200/1794832043491.0/15",
+      "index": 35.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/35",
+      "sequence": 15.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2878.0,
+      "damage": 40.0,
+      "eventId": "qa-bank200/1794832043491.0/16",
+      "index": 36.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/36",
+      "sequence": 16.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2843.0,
+      "damage": 35.0,
+      "eventId": "qa-bank200/1794832043491.0/17",
+      "index": 40.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/40",
+      "sequence": 17.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2806.0,
+      "damage": 37.0,
+      "eventId": "qa-bank200/1794832043491.0/18",
+      "index": 41.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/41",
+      "sequence": 18.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2767.0,
+      "damage": 39.0,
+      "eventId": "qa-bank200/1794832043491.0/19",
+      "index": 45.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/45",
+      "sequence": 19.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2729.0,
+      "damage": 38.0,
+      "eventId": "qa-bank200/1794832043491.0/20",
+      "index": 46.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/46",
+      "sequence": 20.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2691.0,
+      "damage": 38.0,
+      "eventId": "qa-bank200/1794832043491.0/21",
+      "index": 50.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/50",
+      "sequence": 21.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2651.0,
+      "damage": 40.0,
+      "eventId": "qa-bank200/1794832043491.0/22",
+      "index": 51.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/51",
+      "sequence": 22.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2610.0,
+      "damage": 41.0,
+      "eventId": "qa-bank200/1794832043491.0/23",
+      "index": 55.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/55",
+      "sequence": 23.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2574.0,
+      "damage": 36.0,
+      "eventId": "qa-bank200/1794832043491.0/24",
+      "index": 56.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/56",
+      "sequence": 24.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2533.0,
+      "damage": 41.0,
+      "eventId": "qa-bank200/1794832043491.0/25",
+      "index": 60.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/60",
+      "sequence": 25.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2493.0,
+      "damage": 40.0,
+      "eventId": "qa-bank200/1794832043491.0/26",
+      "index": 61.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/61",
+      "sequence": 26.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2458.0,
+      "damage": 35.0,
+      "eventId": "qa-bank200/1794832043491.0/27",
+      "index": 65.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/65",
+      "sequence": 27.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2420.0,
+      "damage": 38.0,
+      "eventId": "qa-bank200/1794832043491.0/28",
+      "index": 66.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/66",
+      "sequence": 28.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2385.0,
+      "damage": 35.0,
+      "eventId": "qa-bank200/1794832043491.0/29",
+      "index": 70.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/70",
+      "sequence": 29.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2346.0,
+      "damage": 39.0,
+      "eventId": "qa-bank200/1794832043491.0/30",
+      "index": 71.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/71",
+      "sequence": 30.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2308.0,
+      "damage": 38.0,
+      "eventId": "qa-bank200/1794832043491.0/31",
+      "index": 75.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/75",
+      "sequence": 31.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2273.0,
+      "damage": 35.0,
+      "eventId": "qa-bank200/1794832043491.0/32",
+      "index": 76.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/76",
+      "sequence": 32.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2235.0,
+      "damage": 38.0,
+      "eventId": "qa-bank200/1794832043491.0/33",
+      "index": 80.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/80",
+      "sequence": 33.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2194.0,
+      "damage": 41.0,
+      "eventId": "qa-bank200/1794832043491.0/34",
+      "index": 81.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/81",
+      "sequence": 34.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2156.0,
+      "damage": 38.0,
+      "eventId": "qa-bank200/1794832043491.0/35",
+      "index": 85.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/85",
+      "sequence": 35.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2119.0,
+      "damage": 37.0,
+      "eventId": "qa-bank200/1794832043491.0/36",
+      "index": 86.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/86",
+      "sequence": 36.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2081.0,
+      "damage": 38.0,
+      "eventId": "qa-bank200/1794832043491.0/37",
+      "index": 90.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/90",
+      "sequence": 37.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2045.0,
+      "damage": 36.0,
+      "eventId": "qa-bank200/1794832043491.0/38",
+      "index": 91.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/91",
+      "sequence": 38.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 2007.0,
+      "damage": 38.0,
+      "eventId": "qa-bank200/1794832043491.0/39",
+      "index": 95.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/95",
+      "sequence": 39.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1970.0,
+      "damage": 37.0,
+      "eventId": "qa-bank200/1794832043491.0/40",
+      "index": 96.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/96",
+      "sequence": 40.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1929.0,
+      "damage": 41.0,
+      "eventId": "qa-bank200/1794832043491.0/41",
+      "index": 100.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/100",
+      "sequence": 41.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1892.0,
+      "damage": 37.0,
+      "eventId": "qa-bank200/1794832043491.0/42",
+      "index": 101.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-01/101",
+      "sequence": 42.0,
+      "unitId": "ENG-01"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1839.0,
+      "damage": 53.0,
+      "eventId": "qa-bank200/1794832043491.0/43",
+      "index": 0.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/0",
+      "sequence": 43.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1788.0,
+      "damage": 51.0,
+      "eventId": "qa-bank200/1794832043491.0/44",
+      "index": 1.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/1",
+      "sequence": 44.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1731.0,
+      "damage": 57.0,
+      "eventId": "qa-bank200/1794832043491.0/45",
+      "index": 5.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/5",
+      "sequence": 45.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1676.0,
+      "damage": 55.0,
+      "eventId": "qa-bank200/1794832043491.0/46",
+      "index": 6.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/6",
+      "sequence": 46.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1622.0,
+      "damage": 54.0,
+      "eventId": "qa-bank200/1794832043491.0/47",
+      "index": 10.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/10",
+      "sequence": 47.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1563.0,
+      "damage": 59.0,
+      "eventId": "qa-bank200/1794832043491.0/48",
+      "index": 11.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/11",
+      "sequence": 48.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1505.0,
+      "damage": 58.0,
+      "eventId": "qa-bank200/1794832043491.0/49",
+      "index": 15.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/15",
+      "sequence": 49.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1453.0,
+      "damage": 52.0,
+      "eventId": "qa-bank200/1794832043491.0/50",
+      "index": 16.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/16",
+      "sequence": 50.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1399.0,
+      "damage": 54.0,
+      "eventId": "qa-bank200/1794832043491.0/51",
+      "index": 20.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/20",
+      "sequence": 51.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1340.0,
+      "damage": 59.0,
+      "eventId": "qa-bank200/1794832043491.0/52",
+      "index": 21.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/21",
+      "sequence": 52.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1287.0,
+      "damage": 53.0,
+      "eventId": "qa-bank200/1794832043491.0/53",
+      "index": 25.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/25",
+      "sequence": 53.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1226.0,
+      "damage": 61.0,
+      "eventId": "qa-bank200/1794832043491.0/54",
+      "index": 26.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/26",
+      "sequence": 54.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1172.0,
+      "damage": 54.0,
+      "eventId": "qa-bank200/1794832043491.0/55",
+      "index": 30.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/30",
+      "sequence": 55.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1115.0,
+      "damage": 57.0,
+      "eventId": "qa-bank200/1794832043491.0/56",
+      "index": 31.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/31",
+      "sequence": 56.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 1055.0,
+      "damage": 60.0,
+      "eventId": "qa-bank200/1794832043491.0/57",
+      "index": 35.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/35",
+      "sequence": 57.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 994.0,
+      "damage": 61.0,
+      "eventId": "qa-bank200/1794832043491.0/58",
+      "index": 36.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/36",
+      "sequence": 58.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 934.0,
+      "damage": 60.0,
+      "eventId": "qa-bank200/1794832043491.0/59",
+      "index": 40.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/40",
+      "sequence": 59.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 875.0,
+      "damage": 59.0,
+      "eventId": "qa-bank200/1794832043491.0/60",
+      "index": 41.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/41",
+      "sequence": 60.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 824.0,
+      "damage": 51.0,
+      "eventId": "qa-bank200/1794832043491.0/61",
+      "index": 45.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/45",
+      "sequence": 61.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 770.0,
+      "damage": 54.0,
+      "eventId": "qa-bank200/1794832043491.0/62",
+      "index": 46.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/46",
+      "sequence": 62.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 715.0,
+      "damage": 55.0,
+      "eventId": "qa-bank200/1794832043491.0/63",
+      "index": 50.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/50",
+      "sequence": 63.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 657.0,
+      "damage": 58.0,
+      "eventId": "qa-bank200/1794832043491.0/64",
+      "index": 51.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/51",
+      "sequence": 64.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 597.0,
+      "damage": 60.0,
+      "eventId": "qa-bank200/1794832043491.0/65",
+      "index": 55.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/55",
+      "sequence": 65.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 541.0,
+      "damage": 56.0,
+      "eventId": "qa-bank200/1794832043491.0/66",
+      "index": 56.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/56",
+      "sequence": 66.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 483.0,
+      "damage": 58.0,
+      "eventId": "qa-bank200/1794832043491.0/67",
+      "index": 60.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/60",
+      "sequence": 67.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 429.0,
+      "damage": 54.0,
+      "eventId": "qa-bank200/1794832043491.0/68",
+      "index": 61.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/61",
+      "sequence": 68.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 372.0,
+      "damage": 57.0,
+      "eventId": "qa-bank200/1794832043491.0/69",
+      "index": 65.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/65",
+      "sequence": 69.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 311.0,
+      "damage": 61.0,
+      "eventId": "qa-bank200/1794832043491.0/70",
+      "index": 66.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/66",
+      "sequence": 70.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 257.0,
+      "damage": 54.0,
+      "eventId": "qa-bank200/1794832043491.0/71",
+      "index": 70.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/70",
+      "sequence": 71.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 204.0,
+      "damage": 53.0,
+      "eventId": "qa-bank200/1794832043491.0/72",
+      "index": 71.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/71",
+      "sequence": 72.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 147.0,
+      "damage": 57.0,
+      "eventId": "qa-bank200/1794832043491.0/73",
+      "index": 75.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/75",
+      "sequence": 73.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 86.0,
+      "damage": 61.0,
+      "eventId": "qa-bank200/1794832043491.0/74",
+      "index": 76.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/76",
+      "sequence": 74.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 31.0,
+      "damage": 55.0,
+      "eventId": "qa-bank200/1794832043491.0/75",
+      "index": 80.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/80",
+      "sequence": 75.0,
+      "unitId": "ENG-02"
+    },
+    {
+      "at": 800.0,
+      "creatureHP": 0.0,
+      "damage": 51.0,
+      "eventId": "qa-bank200/1794832043491.0/76",
+      "index": 81.0,
+      "kind": "soldier_attack",
+      "memberId": "qa-bank200/ENG-02/81",
+      "sequence": 76.0,
+      "unitId": "ENG-02"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "failures": 0,
+  "libraries": [
+    {
+      "delivered": "res://combat_v010/animations/animals/DRAGOR_L1_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "9d81babc551b3c941f5c1e1b15ce311634dd4e0041b95ec322d18d6bd57f1322",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/DRAGOR_L1_RIGGED_ANIMATED.res",
+      "runtime_sha256": "2ae25d688537e02dade7bd0a0e9bbef9dd0dd4379f933789b04df9ff5689dc22"
+    },
+    {
+      "delivered": "res://combat_v010/animations/animals/DRAGOR_L2_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "fc93d9bd580d5c900787cf7215eaf29d70b9fa7b7946e8a15a6788bd648f14f2",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/DRAGOR_L2_RIGGED_ANIMATED.res",
+      "runtime_sha256": "08eca641c3cc60ff979c76445a8cd2c5b19ece0aa97f5f8fd646217e0a9d85b1"
+    },
+    {
+      "delivered": "res://combat_v010/animations/animals/DRAGOR_L3_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "a7878429708e97ece9c48d0c8cff5c70ec4f6baef03a64ef7cf82d8b5a4c792a",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/DRAGOR_L3_RIGGED_ANIMATED.res",
+      "runtime_sha256": "c3e7c226d73795c71e17f3b5690a08934d17003fa419a83e58774d829275c18c"
+    },
+    {
+      "delivered": "res://combat_v010/animations/animals/KAMNEKLYK_L1_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "548f3f6b4e7460f908b6383caa4cb024d2e63a971537651a20cc24318e30c32b",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/KAMNEKLYK_L1_RIGGED_ANIMATED.res",
+      "runtime_sha256": "07b6cec9ad3bb39778c737eeb2d8e9e800b3493759c2cdc80d4a2304d74ad7b8"
+    },
+    {
+      "delivered": "res://combat_v010/animations/animals/KAMNEKLYK_L2_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "66a137b524c56142e4f50b51fad4002c1a8895d19b9c023a70581d5ebaa759fe",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/KAMNEKLYK_L2_RIGGED_ANIMATED.res",
+      "runtime_sha256": "353308d2a6522cc566062e000d15aa9469cb890c8b7348475c52f6eb2076ac67"
+    },
+    {
+      "delivered": "res://combat_v010/animations/animals/KAMNEKLYK_L3_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "3c65e9e2ec4ca2bbbd598e1042e02456d92451120cab573f88d16a65f2c2133d",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/KAMNEKLYK_L3_RIGGED_ANIMATED.res",
+      "runtime_sha256": "bf094b9abef5a942c82db57795c4f48a52d5d6666b814aa6a08ed71d279d1c28"
+    },
+    {
+      "delivered": "res://combat_v010/animations/animals/TENERYS_L1_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "b6b608382e29c008e4570bc36ad89b3b168b08a8a8926ecb86ff7883141b0db0",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/TENERYS_L1_RIGGED_ANIMATED.res",
+      "runtime_sha256": "a962c2f6297b8139a21d6856612746bb2e2080ae32f9a7b2fff30036a57ca585"
+    },
+    {
+      "delivered": "res://combat_v010/animations/animals/TENERYS_L2_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "9d5216304727c823259447e545ed8a61794a6fe007c6f962b182b47ce3524e53",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/TENERYS_L2_RIGGED_ANIMATED.res",
+      "runtime_sha256": "82b77bb9adb8162a231beb83c642407ed413868a883182eafb45d7c89fd9e69f"
+    },
+    {
+      "delivered": "res://combat_v010/animations/animals/TENERYS_L3_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "8b85dc9f83d6a5294265666e9123afc51e03edd2a496d5f0104b529f0fa88579",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/TENERYS_L3_RIGGED_ANIMATED.res",
+      "runtime_sha256": "049b71003fa5fa66fd0d4c30f3bb5b48f84c20b454eff1ad86952a6f3e108d09"
+    },
+    {
+      "delivered": "res://combat_v010/animations/animals/VELKOR_L1_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "9108f20781dac6742d29d2d0685d3f39056c325def176d03144eea8274803762",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/VELKOR_L1_RIGGED_ANIMATED.res",
+      "runtime_sha256": "0cc711224db07f08031fa963e3ec58a63c3d91bd020f27a19090f43f79ac30f5"
+    },
+    {
+      "delivered": "res://combat_v010/animations/animals/VELKOR_L2_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "e167766a969c08fe7582531ef7f0f082ff0c7af99c0631ba8b216d0cf9f02804",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/VELKOR_L2_RIGGED_ANIMATED.res",
+      "runtime_sha256": "f3d8e71488ba69abeeeae31b1d3e45729dbf2dec6a2912a6a3524875fda9dbcb"
+    },
+    {
+      "delivered": "res://combat_v010/animations/animals/VELKOR_L3_RIGGED_ANIMATED.tres",
+      "delivered_sha256": "34f92028761a2063ac4590c0e766464f130c6aa1978771d3f7b174bf8daed6cf",
+      "differences": 0,
+      "runtime": "res://combat_v010/animations/animals/VELKOR_L3_RIGGED_ANIMATED.res",
+      "runtime_sha256": "54c6217f5586b3ff01e393fd9111f7a9dfd0c9d143076bd8946fd839bf7bb8dc"
+    }
+  ]
+}

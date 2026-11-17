@@ -1,0 +1,84 @@
+{
+  "method": "Node 24.22.1, same process, fresh route caches each call, one full warmup and five interleaved passes over216 synthetic routes; wall time, NOT Cloudflare CPU",
+  "baseline": "ba6e00b navigation source before1013",
+  "summary": {
+    "baseline": {
+      "n": 1080,
+      "p50_ms": 0.4342340000000604,
+      "p95_ms": 5.2296110000002045,
+      "p99_ms": 32.72599799999989,
+      "max_ms": 41.241529000000014,
+      "mean_ms": 1.550583894444451
+    },
+    "candidate": {
+      "n": 1080,
+      "p50_ms": 0.2588100000002669,
+      "p95_ms": 2.4572140000000218,
+      "p99_ms": 13.427386999999953,
+      "max_ms": 15.423290000000065,
+      "mean_ms": 0.7238551101851834
+    }
+  },
+  "worst": [
+    {
+      "index": 40,
+      "baseline_median_ms": 36.09215700000004,
+      "candidate_median_ms": 15.122926000000007
+    },
+    {
+      "index": 112,
+      "baseline_median_ms": 32.443616999999904,
+      "candidate_median_ms": 14.398420999999871
+    },
+    {
+      "index": 184,
+      "baseline_median_ms": 33.57472299999972,
+      "candidate_median_ms": 13.062276999999995
+    },
+    {
+      "index": 4,
+      "baseline_median_ms": 15.733818000000042,
+      "candidate_median_ms": 5.788956999999982
+    },
+    {
+      "index": 148,
+      "baseline_median_ms": 14.627114999999776,
+      "candidate_median_ms": 5.138245999999981
+    },
+    {
+      "index": 76,
+      "baseline_median_ms": 14.639023999999836,
+      "candidate_median_ms": 5.1202879999999595
+    },
+    {
+      "index": 41,
+      "baseline_median_ms": 5.926391000000194,
+      "candidate_median_ms": 3.1644390000001295
+    },
+    {
+      "index": 113,
+      "baseline_median_ms": 5.153976999999941,
+      "candidate_median_ms": 2.8407710000001316
+    },
+    {
+      "index": 47,
+      "baseline_median_ms": 4.641055999999935,
+      "candidate_median_ms": 2.480258000000049
+    },
+    {
+      "index": 119,
+      "baseline_median_ms": 5.237652999999909,
+      "candidate_median_ms": 2.358654999999999
+    },
+    {
+      "index": 185,
+      "baseline_median_ms": 5.508201999999983,
+      "candidate_median_ms": 2.298033999999916
+    },
+    {
+      "index": 191,
+      "baseline_median_ms": 5.255711000000247,
+      "candidate_median_ms": 2.269851000000017
+    }
+  ]
+}

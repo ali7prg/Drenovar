@@ -1,0 +1,34 @@
+{
+  "cases": [
+    {
+      "service": "B11",
+      "status": "passed"
+    },
+    {
+      "service": "B12",
+      "status": "passed"
+    },
+    {
+      "service": "B13",
+      "status": "passed"
+    },
+    {
+      "service": "B15",
+      "status": "passed"
+    },
+    {
+      "service": "B16",
+      "status": "passed"
+    },
+    {
+      "service": "B17",
+      "status": "passed"
+    }
+  ],
+  "checks": 46,
+  "fixture": "synthetic localhost; real Godot menus/buttons and authoritative HTTP server; no real account writes",
+  "market_trade": true,
+  "services": 6,
+  "states": 6,
+  "status": "passed"
+}

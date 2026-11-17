@@ -1,0 +1,48 @@
+{
+  "status": "published",
+  "client_source": "157eadfd65b85343a5abc4317910b3339520313e",
+  "client_build": 1006,
+  "release": "https://github.com/ali7prg/Drenovar/releases/tag/ios-test-v0.6.0-b1006",
+  "ipa": {
+    "url": "https://github.com/ali7prg/Drenovar/releases/download/ios-test-v0.6.0-b1006/DRENOVAR-iOS-v0.6.0-test.ipa",
+    "bytes": 246512405,
+    "sha256": "51e147738a66f1cf61ba85716352b0211fb14d2b450e792e4d229a61b51a34ec"
+  },
+  "ci": {
+    "ios": "https://github.com/ali7prg/Drenovar/actions/runs/43806320878",
+    "status": "success",
+    "pack_troops": "20/20",
+    "v6_pack_assets": "163/163",
+    "isolated_server": "https://github.com/ali7prg/drenovar-server/actions/runs/43806424533",
+    "isolated_server_status": "success",
+    "published_read_only": "https://github.com/ali7prg/drenovar-server/actions/runs/43805447452",
+    "published_status": "success"
+  },
+  "site": 97,
+  "site_source": "e517c3444f902dc4350731c5fd459b92ceb4fceb",
+  "site_deployment": "appgdep_6afa889cb7108191a06d4401d1542ef6",
+  "site_status": "SUCCEEDED",
+  "api_source": "e5062aa292da895653c07dab50ce9b85a2a4ee11",
+  "economy": "DRENOVAR-V6-C1.0",
+  "schema": 6,
+  "api": 6,
+  "native_ui": {
+    "states": 297,
+    "transitions": 270,
+    "checks": 4512,
+    "milestones": 81
+  },
+  "web_ui": {
+    "states": 297,
+    "transitions": 270,
+    "milestones": 81
+  },
+  "native_services": 46,
+  "primary_account_ui": 18,
+  "server_tests": 52,
+  "live_checks": 16,
+  "live_game_data_writes": 0,
+  "physical_iPhone12": "not tested",
+  "main_merge": false,
+  "broad_V6_release": false
+}

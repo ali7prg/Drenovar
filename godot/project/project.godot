@@ -11,13 +11,19 @@ config_version=5
 [application]
 
 config/name="DRENOVAR"
-config/version="0.5.9"
+config/version="0.6.0"
+config/build_number="1018"
 run/main_scene="res://main.tscn"
+run/main_scene.combat_lab="res://combat_lab.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
 boot_splash/bg_color=Color(0.055, 0.047, 0.035, 1)
 boot_splash/stretch_mode=4
 boot_splash/image="res://assets/intro/keep-wide.png"
 config/icon="res://assets/icons/drenovar_icon_512.png"
+
+[drenovar]
+
+combat_v010/enabled=true
 
 [display]
 
@@ -33,3 +39,10 @@ renderer/rendering_method.mobile="mobile"
 rendering_device/driver.ios="metal"
 textures/vram_compression/import_etc2_astc=true
 anti_aliasing/quality/msaa_3d=1
+
+[shader_globals]
+
+battle_focus={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}

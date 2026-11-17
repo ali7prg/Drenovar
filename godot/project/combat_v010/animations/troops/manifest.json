@@ -1,0 +1,397 @@
+{
+  "engine": "4.6.3-stable (official)",
+  "generator": "res://combat_v010/tools/build_troop_animations_troops06.gd",
+  "limitations": [
+    "Event time is authored pose timing; target surface contact requires per-instance staging.",
+    "Bowstring, bolt and thrown weapon geometry lack independent animation controls.",
+    "Package spear-aim correction measured on the 27-series rig is not ported; troops06 spear uses its own Attack direction.",
+    "No physical iPhone or browser performance measurements.",
+    "Inherited Hit/Death and locomotion retain original quality limitations."
+  ],
+  "models": [
+    {
+      "baked_attack_max_foot_error_m": 0.00022831118258182,
+      "bone_count": 67,
+      "clips": [
+        "attack_a",
+        "attack_b",
+        "death",
+        "hit",
+        "idle",
+        "run",
+        "walk"
+      ],
+      "contact_or_release_s": 0.64,
+      "event": "contact",
+      "family": "spear",
+      "file": "res://assets/army/troops06/ENG-01-lod1.gltf",
+      "id": "ENG-01",
+      "length_s": 1.7,
+      "library": "animations/troops/ENG-01.res",
+      "lod_validation": [
+        {
+          "bin_sha256": "7b2b48d821f276f0cc31b7b93f4b845c0f78b70cc662704fce5fcd029396e963",
+          "file": "res://assets/army/troops06/ENG-01-lod1.gltf",
+          "missing_bindings": [],
+          "sha256": "795ab55d42a13b937f94449adcd1d13d7e118d37ca2021cf990a7ce8c663bd39"
+        },
+        {
+          "bin_sha256": "788ec5fa1c9b23babef565e7faf989b02b1300e4607037263a07a309c592ddef",
+          "file": "res://assets/army/troops06/ENG-01-lod2.gltf",
+          "missing_bindings": [],
+          "sha256": "66cfa06034a81783ebb9f3e6c3ab6df1b7b143950fa0499e89573200b776f6af"
+        }
+      ],
+      "skeleton_path": "ENG01_Rig/Skeleton3D",
+      "source_attack": "Attack",
+      "source_sha256": "795ab55d42a13b937f94449adcd1d13d7e118d37ca2021cf990a7ce8c663bd39",
+      "validation": "Godot load, exact node/bone path checks LOD1+2, foot lock for infantry attacks; aesthetic review pending"
+    },
+    {
+      "baked_attack_max_foot_error_m": 0.000258761079749092,
+      "bone_count": 67,
+      "clips": [
+        "attack_a",
+        "attack_b",
+        "death",
+        "hit",
+        "idle",
+        "run",
+        "walk"
+      ],
+      "contact_or_release_s": 0.64,
+      "event": "contact",
+      "family": "sword",
+      "file": "res://assets/army/troops06/ENG-02-lod1.gltf",
+      "id": "ENG-02",
+      "length_s": 1.7,
+      "library": "animations/troops/ENG-02.res",
+      "lod_validation": [
+        {
+          "bin_sha256": "6f02d7e55f56204f7e066b669fb3b3d2aa373cc274c4074a41a786d1ffd24cd2",
+          "file": "res://assets/army/troops06/ENG-02-lod1.gltf",
+          "missing_bindings": [],
+          "sha256": "8cebc876972efdfa17873ede6f4e544076fc4b1bbab4a4c0b894483f63182bbb"
+        },
+        {
+          "bin_sha256": "365bc4a09b75df9aa54f42514e2a4f5ccbc8a6ffc885b263374a60b621ddaaaa",
+          "file": "res://assets/army/troops06/ENG-02-lod2.gltf",
+          "missing_bindings": [],
+          "sha256": "be839e72ce18197434b436345fde919d254ceed930040d7077d5f7dc9c28b461"
+        }
+      ],
+      "skeleton_path": "ENG02_Rig/Skeleton3D",
+      "source_attack": "Sword_Drill",
+      "source_sha256": "8cebc876972efdfa17873ede6f4e544076fc4b1bbab4a4c0b894483f63182bbb",
+      "validation": "Godot load, exact node/bone path checks LOD1+2, foot lock for infantry attacks; aesthetic review pending"
+    },
+    {
+      "baked_attack_max_foot_error_m": 0.00280615640804172,
+      "bone_count": 67,
+      "clips": [
+        "attack_a",
+        "attack_b",
+        "death",
+        "hit",
+        "idle",
+        "run",
+        "walk"
+      ],
+      "contact_or_release_s": 0.86,
+      "event": "release",
+      "family": "bow",
+      "file": "res://assets/army/troops06/ENG-03-lod1.gltf",
+      "id": "ENG-03",
+      "length_s": 2.0,
+      "library": "animations/troops/ENG-03.res",
+      "lod_validation": [
+        {
+          "bin_sha256": "44ebc7fe874fefd25a99bc2b0f7bc63fee3da4f29d54e2e4fff741c1d0dc868e",
+          "file": "res://assets/army/troops06/ENG-03-lod1.gltf",
+          "missing_bindings": [],
+          "sha256": "652bbad16aee53a6e32e51e5ba925ac7cc6fc8ec7478fa21627ae705a947d3d8"
+        },
+        {
+          "bin_sha256": "75b4e2fb29c1cb96c8c8de2887630520fd2cff2e3246497321a50cd4d1bd3861",
+          "file": "res://assets/army/troops06/ENG-03-lod2.gltf",
+          "missing_bindings": [],
+          "sha256": "2d06b035e2c4c0b8bf3643c756e619cdf1a8ba42dd3696579f6777aa55d73f33"
+        }
+      ],
+      "skeleton_path": "ENG03_Rig/Skeleton3D",
+      "source_attack": "Bow_Draw",
+      "source_sha256": "652bbad16aee53a6e32e51e5ba925ac7cc6fc8ec7478fa21627ae705a947d3d8",
+      "validation": "Godot load, exact node/bone path checks LOD1+2, foot lock for infantry attacks; aesthetic review pending"
+    },
+    {
+      "baked_attack_max_foot_error_m": 0.000264646369032562,
+      "bone_count": 67,
+      "clips": [
+        "attack_a",
+        "attack_b",
+        "death",
+        "hit",
+        "idle",
+        "run",
+        "walk"
+      ],
+      "contact_or_release_s": 0.72,
+      "event": "release",
+      "family": "crossbow",
+      "file": "res://assets/army/troops06/ENG-04-lod1.gltf",
+      "id": "ENG-04",
+      "length_s": 3.2,
+      "library": "animations/troops/ENG-04.res",
+      "lod_validation": [
+        {
+          "bin_sha256": "2015b29df3a692db12e6d25ae1ffb3658ef4745eb833977c0d996cb53d7912cd",
+          "file": "res://assets/army/troops06/ENG-04-lod1.gltf",
+          "missing_bindings": [],
+          "sha256": "5ed70cb2a421bb245bce2afc8a53939febb73950f96aeb82baf81e643e84bb4f"
+        },
+        {
+          "bin_sha256": "42cb9fcfbbb591e26b85d3fa59bbf7e097bf0fcc47c4e031acfda448579b90b9",
+          "file": "res://assets/army/troops06/ENG-04-lod2.gltf",
+          "missing_bindings": [],
+          "sha256": "2a3863c5513d3ed3a846153a8103b8c3c45e138fed736c69a4efba19a4e5f99d"
+        }
+      ],
+      "skeleton_path": "ENG04_Rig/Skeleton3D",
+      "source_attack": "Crossbow_Reload",
+      "source_sha256": "5ed70cb2a421bb245bce2afc8a53939febb73950f96aeb82baf81e643e84bb4f",
+      "validation": "Godot load, exact node/bone path checks LOD1+2, foot lock for infantry attacks; aesthetic review pending"
+    },
+    {
+      "baked_attack_max_foot_error_m": 0.0,
+      "bone_count": 91,
+      "clips": [
+        "attack_a",
+        "attack_b",
+        "death",
+        "hit",
+        "idle",
+        "run",
+        "trot",
+        "walk"
+      ],
+      "contact_or_release_s": 0.68,
+      "event": "contact",
+      "family": "mounted",
+      "file": "res://assets/army/troops06/ENG-05-lod1.gltf",
+      "id": "ENG-05",
+      "length_s": 1.7,
+      "library": "animations/troops/ENG-05.res",
+      "lod_validation": [
+        {
+          "bin_sha256": "53994d0aac95db9eb213465f5d056d77bdba75675395ba1d6581f066c46323f9",
+          "file": "res://assets/army/troops06/ENG-05-lod1.gltf",
+          "missing_bindings": [],
+          "sha256": "1c57a7646afd690e93ecbcacb951f087bb99b15f8bb6e590f2091a2a74f09615"
+        },
+        {
+          "bin_sha256": "47dbe382667545e481f5152ce334417fbf8a3fb69345e989af835ac7b41e5ade",
+          "file": "res://assets/army/troops06/ENG-05-lod2.gltf",
+          "missing_bindings": [],
+          "sha256": "68acf67353ae7a98ad87edc2ebee429eda12921dfb437e2b9f36031e5727dbb0"
+        }
+      ],
+      "skeleton_path": "ENG-05 Armature/Skeleton3D",
+      "source_attack": "Attack",
+      "source_sha256": "1c57a7646afd690e93ecbcacb951f087bb99b15f8bb6e590f2091a2a74f09615",
+      "validation": "Godot load, exact node/bone path checks LOD1+2, foot lock for infantry attacks; aesthetic review pending"
+    },
+    {
+      "baked_attack_max_foot_error_m": 0.0,
+      "bone_count": 91,
+      "clips": [
+        "attack_a",
+        "attack_b",
+        "death",
+        "hit",
+        "idle",
+        "run",
+        "trot",
+        "walk"
+      ],
+      "contact_or_release_s": 0.68,
+      "event": "contact",
+      "family": "mounted",
+      "file": "res://assets/army/troops06/ENG-06-lod1.gltf",
+      "id": "ENG-06",
+      "length_s": 1.7,
+      "library": "animations/troops/ENG-06.res",
+      "lod_validation": [
+        {
+          "bin_sha256": "1865aabc24b677186052c1906ad1f377ca676e491875ff3ecb5352724793fbd1",
+          "file": "res://assets/army/troops06/ENG-06-lod1.gltf",
+          "missing_bindings": [],
+          "sha256": "0401dca37722fe7d66b600c82176564288c7d8a3706b0a6237d2e33af64f67ba"
+        },
+        {
+          "bin_sha256": "fe93b6adcc4603e1bd5f0a8f40ae8b90b94b9e76b73d9c8153faa5113f3623a4",
+          "file": "res://assets/army/troops06/ENG-06-lod2.gltf",
+          "missing_bindings": [],
+          "sha256": "7aa4d4918cc57dcf94a82890ca471ec081ab8ce6b72bc2d26b792a46f294bc01"
+        }
+      ],
+      "skeleton_path": "ENG-06 Armature/Skeleton3D",
+      "source_attack": "Attack",
+      "source_sha256": "0401dca37722fe7d66b600c82176564288c7d8a3706b0a6237d2e33af64f67ba",
+      "validation": "Godot load, exact node/bone path checks LOD1+2, foot lock for infantry attacks; aesthetic review pending"
+    },
+    {
+      "baked_attack_max_foot_error_m": 0.000329104455886409,
+      "bone_count": 67,
+      "clips": [
+        "attack_a",
+        "attack_b",
+        "death",
+        "hit",
+        "idle",
+        "run",
+        "walk"
+      ],
+      "contact_or_release_s": 0.68,
+      "event": "contact",
+      "family": "sword",
+      "file": "res://assets/army/troops06/ENG-07-lod1.gltf",
+      "id": "ENG-07",
+      "length_s": 1.7,
+      "library": "animations/troops/ENG-07.res",
+      "lod_validation": [
+        {
+          "bin_sha256": "9605d862eafb0264596a403f622b75ba6bd3a29dfcd93f220bac9ea3395c11d5",
+          "file": "res://assets/army/troops06/ENG-07-lod1.gltf",
+          "missing_bindings": [],
+          "sha256": "ba649fe890e062d06d3505fb3670899975980004e23bbfcb53054d8bbc7ddf0e"
+        },
+        {
+          "bin_sha256": "654cd821501a06b2a3c4a83ad342c6fa03691025a0cc0fedc56287d49d22333d",
+          "file": "res://assets/army/troops06/ENG-07-lod2.gltf",
+          "missing_bindings": [],
+          "sha256": "19a92cd3b758ac4f2da2fb2989875c99bec4099c2ddc4094875501972384adfb"
+        }
+      ],
+      "skeleton_path": "ENG07_Rig/Skeleton3D",
+      "source_attack": "Sword_Drill",
+      "source_sha256": "ba649fe890e062d06d3505fb3670899975980004e23bbfcb53054d8bbc7ddf0e",
+      "validation": "Godot load, exact node/bone path checks LOD1+2, foot lock for infantry attacks; aesthetic review pending"
+    },
+    {
+      "baked_attack_max_foot_error_m": 0.000323883286910132,
+      "bone_count": 67,
+      "clips": [
+        "attack_a",
+        "attack_b",
+        "death",
+        "hit",
+        "idle",
+        "run",
+        "walk"
+      ],
+      "contact_or_release_s": 0.64,
+      "event": "contact",
+      "family": "sword",
+      "file": "res://assets/army/troops06/ENG-08-lod1.gltf",
+      "id": "ENG-08",
+      "length_s": 1.7,
+      "library": "animations/troops/ENG-08.res",
+      "lod_validation": [
+        {
+          "bin_sha256": "dcfe1194dadb315b647b1dcfb19443602697f1c99dc1fddae0ac53d5c01ab612",
+          "file": "res://assets/army/troops06/ENG-08-lod1.gltf",
+          "missing_bindings": [],
+          "sha256": "1b05da6762abce69f960162dd9cdbbd0995825cbeab5a115dc3a5751f2e5bcda"
+        },
+        {
+          "bin_sha256": "4403e9366894ac50b2a659445dfe073842bf3ea997a0a1a10f10333b4148e5ef",
+          "file": "res://assets/army/troops06/ENG-08-lod2.gltf",
+          "missing_bindings": [],
+          "sha256": "62db5a9a7bcfbf02f0b44deb2db3f765b1f0021eabc32c697cfc890ae127d416"
+        }
+      ],
+      "skeleton_path": "ENG08_Rig/Skeleton3D",
+      "source_attack": "Sword_Drill",
+      "source_sha256": "1b05da6762abce69f960162dd9cdbbd0995825cbeab5a115dc3a5751f2e5bcda",
+      "validation": "Godot load, exact node/bone path checks LOD1+2, foot lock for infantry attacks; aesthetic review pending"
+    },
+    {
+      "baked_attack_max_foot_error_m": 0.000283134257188067,
+      "bone_count": 67,
+      "clips": [
+        "attack_a",
+        "attack_b",
+        "death",
+        "hit",
+        "idle",
+        "run",
+        "walk"
+      ],
+      "contact_or_release_s": 0.72,
+      "event": "contact",
+      "family": "heavy",
+      "file": "res://assets/army/troops06/ENG-09-lod1.gltf",
+      "id": "ENG-09",
+      "length_s": 1.7,
+      "library": "animations/troops/ENG-09.res",
+      "lod_validation": [
+        {
+          "bin_sha256": "e675c2c5b02d324ec668b068648d1a82ac026512524674e1657382c90322a1d9",
+          "file": "res://assets/army/troops06/ENG-09-lod1.gltf",
+          "missing_bindings": [],
+          "sha256": "e9acadcf355c58ea49c4c3606eff0dcb0af0389b7537424b6774c02fabcd8c6f"
+        },
+        {
+          "bin_sha256": "e30442d461b50f9298459267953ff0e1d00d44ef9dc5ce7be188fc9e56516d35",
+          "file": "res://assets/army/troops06/ENG-09-lod2.gltf",
+          "missing_bindings": [],
+          "sha256": "7b02f62a35efb8d3578860b3197cd5e655a70d9a8ef90d30fb0ff86854e0037d"
+        }
+      ],
+      "skeleton_path": "ENG09_Rig/Skeleton3D",
+      "source_attack": "Sword_Drill",
+      "source_sha256": "e9acadcf355c58ea49c4c3606eff0dcb0af0389b7537424b6774c02fabcd8c6f",
+      "validation": "Godot load, exact node/bone path checks LOD1+2, foot lock for infantry attacks; aesthetic review pending"
+    },
+    {
+      "baked_attack_max_foot_error_m": 0.000239527333178557,
+      "bone_count": 67,
+      "clips": [
+        "attack_a",
+        "attack_b",
+        "death",
+        "hit",
+        "idle",
+        "run",
+        "walk"
+      ],
+      "contact_or_release_s": 0.66,
+      "event": "release",
+      "family": "javelin",
+      "file": "res://assets/army/troops06/ENG-10-lod1.gltf",
+      "id": "ENG-10",
+      "length_s": 2.0,
+      "library": "animations/troops/ENG-10.res",
+      "lod_validation": [
+        {
+          "bin_sha256": "82674d0724f2e5267cf296fa989f992e6b021d4e064944c1f92f0e336b448971",
+          "file": "res://assets/army/troops06/ENG-10-lod1.gltf",
+          "missing_bindings": [],
+          "sha256": "2d0a4918e42671f7139ebb90ad7fa88295da0c04fb4756ae1e2798704ccb212c"
+        },
+        {
+          "bin_sha256": "3ff19d1bf4bdd850e509c9d9b035fceb84b0b22c012f06a015045bfbff985cb9",
+          "file": "res://assets/army/troops06/ENG-10-lod2.gltf",
+          "missing_bindings": [],
+          "sha256": "6dddeb698992d36c14d93856659495697669f86bfa46264fade56a03de653bb0"
+        }
+      ],
+      "skeleton_path": "ENG10_Rig/Skeleton3D",
+      "source_attack": "Javelin_Drill",
+      "source_sha256": "2d0a4918e42671f7139ebb90ad7fa88295da0c04fb4756ae1e2798704ccb212c",
+      "validation": "Godot load, exact node/bone path checks LOD1+2, foot lock for infantry attacks; aesthetic review pending"
+    }
+  ],
+  "package": "DRENOVAR-combat-v0.1.0",
+  "rebuild": "troops06 rig port"
+}

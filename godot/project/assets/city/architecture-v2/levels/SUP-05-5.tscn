@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/SUP-05-5.res" id="1_dfd6y"]
+
+[node name="SUP_05_5" type="Node3D" unique_id=2120905544]
+metadata/series = "B20_Well"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-2.6, 0, 2.2)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1879400457]
+mesh = ExtResource("1_dfd6y")

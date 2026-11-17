@@ -1,0 +1,16 @@
+23d361d397c3f0506a27cb71c9aa8ad18667f69629f716c72db19dd2be264e4d  DRENOVAR-game-1012.ipa
+commit 7d1dbc0f330be5799d9742277ec353d52f44d7d2
+{
+  "output": "/home/runner/work/_temp/DRENOVAR-game-1012.ipa",
+  "bytes": 248423503,
+  "sha256": "23d361d397c3f0506a27cb71c9aa8ad18667f69629f716c72db19dd2be264e4d",
+  "engine_sha256": "d9816f67f540bbebccfdb2a5ecf9460feda71c05247e4e80601caf44973bfaae",
+  "pck_sha256": "502e2503f5f5b8a9fd2f4bf1354028ca32ba0351639f59804b39f8ef666a0216",
+  "version": "0.6.0",
+  "build": "1012",
+  "bundle_identifier": "com.drenovar.game.v6test",
+  "signed": false,
+  "device_tested": false
+}
+502e2503f5f5b8a9fd2f4bf1354028ca32ba0351639f59804b39f8ef666a0216  DRENOVAR-game-1012.pck
+a43ee5d7b98818811732d3c7644640773608730ae60c07da70ffe42500e62423  DRENOVAR-game-evidence-1012.zip

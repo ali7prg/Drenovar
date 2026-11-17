@@ -1,0 +1,17 @@
+extends SceneTree
+const Store=preload("res://src/session_store.gd")
+func _initialize() -> void:
+	var proof := "a".repeat(64)
+	assert(Store.save_pending_login(proof,"https://primary.invalid","https://login.invalid",1300.0)==OK)
+	assert(Store.read_pending_login("https://primary.invalid","https://login.invalid",1000.0).proof==proof)
+	assert(Store.read_pending_login("https://another.invalid","https://login.invalid",1000.0).is_empty())
+	assert(Store.read_pending_login("https://primary.invalid","https://another.invalid",1000.0).is_empty())
+	assert(Store.read_pending_login("https://primary.invalid","https://login.invalid",1300.0).is_empty())
+	assert(not FileAccess.get_file_as_bytes(Store.LOGIN_PATH).hex_encode().contains(proof.to_utf8_buffer().hex_encode()))
+	assert(Store.save_pending_login("bad","https://primary.invalid","https://login.invalid",1300.0)==ERR_INVALID_DATA)
+	assert(Store.read_pending_login("https://primary.invalid","https://login.invalid",1000.0).proof==proof)
+	Store.forget_pending_login()
+	assert(Store.read_pending_login("https://primary.invalid","https://login.invalid",1000.0).is_empty())
+	Store.forget()
+	print("PENDING_LOGIN_OK 9; encrypted proof survives process-local state, server-bound, expires, cleared on cancel")
+	quit()

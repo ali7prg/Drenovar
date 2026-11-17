@@ -1,0 +1,485 @@
+{
+ "id": "tenerys",
+ "name": "Тенерис",
+ "version": "creatures-v2 1.0 (2026-11-17)",
+ "units": "metre",
+ "up": "+Y",
+ "forward": "+X",
+ "pivot": "ground, body centre",
+ "authored_bounds_m": {
+  "x": [
+   -2.231,
+   1.5
+  ],
+  "half_width": 0.527,
+  "top": 2.086
+ },
+ "display_scale_in_game": 1.41,
+ "battle_outline_m": [
+  2.63,
+  0.743
+ ],
+ "bones": 44,
+ "max_influences": 4,
+ "sockets": [
+  "socket_head",
+  "socket_mouth",
+  "socket_chest",
+  "socket_foot_front_l",
+  "socket_foot_hind_l",
+  "socket_claw_l",
+  "socket_foot_front_r",
+  "socket_foot_hind_r",
+  "socket_claw_r",
+  "socket_tail_tip"
+ ],
+ "material_slots": [
+  "Body",
+  "Details"
+ ],
+ "lods": {
+  "lod0": {
+   "file": "tenerys_lod0.glb",
+   "bytes": 21532824,
+   "triangles": 39978,
+   "materials": [
+    "M_Tenerys_Body_LOD0",
+    "M_Tenerys_Details_LOD0"
+   ],
+   "textures": [
+    "tenerys_LOD0_body_BaseColor",
+    "tenerys_LOD0_body_Normal",
+    "tenerys_LOD0_body_ORM",
+    "tenerys_LOD0_body_Emissive",
+    "tenerys_LOD0_detail_BaseColor",
+    "tenerys_LOD0_detail_Normal",
+    "tenerys_LOD0_detail_ORM",
+    "tenerys_LOD0_detail_Emissive"
+   ]
+  },
+  "lod1": {
+   "file": "tenerys_lod1.glb",
+   "bytes": 6979584,
+   "triangles": 18340,
+   "materials": [
+    "M_Tenerys_Body_LOD1",
+    "M_Tenerys_Details_LOD1"
+   ],
+   "textures": [
+    "tenerys_LOD1_body_BaseColor",
+    "tenerys_LOD1_body_Normal",
+    "tenerys_LOD1_body_ORM",
+    "tenerys_LOD1_body_Emissive",
+    "tenerys_LOD1_detail_BaseColor",
+    "tenerys_LOD1_detail_Normal",
+    "tenerys_LOD1_detail_ORM",
+    "tenerys_LOD1_detail_Emissive"
+   ]
+  },
+  "lod2": {
+   "file": "tenerys_lod2.glb",
+   "bytes": 2285256,
+   "triangles": 5240,
+   "materials": [
+    "M_Tenerys_Body_LOD2",
+    "M_Tenerys_Details_LOD2"
+   ],
+   "textures": [
+    "tenerys_LOD2_body_BaseColor",
+    "tenerys_LOD2_body_Normal",
+    "tenerys_LOD2_body_ORM",
+    "tenerys_LOD2_body_Emissive",
+    "tenerys_LOD2_detail_BaseColor",
+    "tenerys_LOD2_detail_Normal",
+    "tenerys_LOD2_detail_ORM",
+    "tenerys_LOD2_detail_Emissive"
+   ]
+  }
+ },
+ "clips": {
+  "idle": {
+   "name": "tenerys__idle",
+   "frames": 90,
+   "length_s": 3.0,
+   "loop": true,
+   "events": []
+  },
+  "walk": {
+   "name": "tenerys__walk",
+   "frames": 36,
+   "length_s": 1.2,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 9,
+     "time": 0.3,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 18,
+     "time": 0.6,
+     "foot": "hind_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 27,
+     "time": 0.9,
+     "foot": "front_l"
+    }
+   ],
+   "speed_mps": 1.5
+  },
+  "stalk": {
+   "name": "tenerys__stalk",
+   "frames": 48,
+   "length_s": 1.6,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 12,
+     "time": 0.4,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 24,
+     "time": 0.8,
+     "foot": "hind_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 36,
+     "time": 1.2,
+     "foot": "front_l"
+    }
+   ],
+   "speed_mps": 0.75
+  },
+  "run": {
+   "name": "tenerys__run",
+   "frames": 18,
+   "length_s": 0.6,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 9,
+     "time": 0.3,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 10,
+     "time": 0.3333333333333333,
+     "foot": "front_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 17,
+     "time": 0.5666666666666667,
+     "foot": "hind_r"
+    }
+   ],
+   "speed_mps": 8.0
+  },
+  "turn_left": {
+   "name": "tenerys__turn_left",
+   "frames": 18,
+   "length_s": 0.6,
+   "loop": false,
+   "events": [],
+   "motion_keys": [
+    "yaw_deg",
+    "yaw"
+   ]
+  },
+  "turn_right": {
+   "name": "tenerys__turn_right",
+   "frames": 18,
+   "length_s": 0.6,
+   "loop": false,
+   "events": [],
+   "motion_keys": [
+    "yaw_deg",
+    "yaw"
+   ]
+  },
+  "howl": {
+   "name": "tenerys__howl",
+   "frames": 75,
+   "length_s": 2.5,
+   "loop": false,
+   "events": [
+    {
+     "event": "sound",
+     "frame": 18,
+     "time": 0.6
+    }
+   ]
+  },
+  "attack_bite": {
+   "name": "tenerys__attack_bite",
+   "frames": 24,
+   "length_s": 0.8,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "whoosh",
+     "frame": 8
+    },
+    {
+     "event": "contact",
+     "frame": 10
+    },
+    {
+     "event": "recovery",
+     "frame": 12
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     8
+    ],
+    "active": [
+     8,
+     12
+    ],
+    "recovery": [
+     12,
+     24
+    ],
+    "impact": 10
+   }
+  },
+  "attack_claw": {
+   "name": "tenerys__attack_claw",
+   "frames": 30,
+   "length_s": 1.0,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "whoosh",
+     "frame": 11
+    },
+    {
+     "event": "contact",
+     "frame": 13
+    },
+    {
+     "event": "recovery",
+     "frame": 16
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     10
+    ],
+    "active": [
+     10,
+     16
+    ],
+    "recovery": [
+     16,
+     30
+    ],
+    "impact": 13
+   }
+  },
+  "attack_pounce": {
+   "name": "tenerys__attack_pounce",
+   "frames": 48,
+   "length_s": 1.6,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "takeoff",
+     "frame": 15
+    },
+    {
+     "event": "contact",
+     "frame": 32
+    },
+    {
+     "event": "land",
+     "frame": 32
+    },
+    {
+     "event": "recovery",
+     "frame": 35
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     31
+    ],
+    "active": [
+     31,
+     35
+    ],
+    "recovery": [
+     35,
+     48
+    ],
+    "impact": 32
+   },
+   "motion_keys": [
+    "forward_m"
+   ]
+  },
+  "dodge": {
+   "name": "tenerys__dodge",
+   "frames": 24,
+   "length_s": 0.8,
+   "loop": false,
+   "events": [
+    {
+     "event": "push",
+     "frame": 5
+    },
+    {
+     "event": "land",
+     "frame": 16
+    }
+   ],
+   "motion_keys": [
+    "side_m",
+    "window"
+   ]
+  },
+  "hit": {
+   "name": "tenerys__hit",
+   "frames": 15,
+   "length_s": 0.5,
+   "loop": false,
+   "events": [
+    {
+     "event": "hit",
+     "frame": 2
+    }
+   ]
+  },
+  "death": {
+   "name": "tenerys__death",
+   "frames": 72,
+   "length_s": 2.4,
+   "loop": false,
+   "events": [
+    {
+     "event": "collapse",
+     "frame": 10
+    },
+    {
+     "event": "ground_contact",
+     "frame": 34
+    },
+    {
+     "event": "dead",
+     "frame": 72
+    }
+   ]
+  },
+  "alert": {
+   "name": "tenerys__alert",
+   "frames": 24,
+   "length_s": 0.8,
+   "loop": false,
+   "events": []
+  }
+ },
+ "semantic_states": {
+  "Idle": "idle",
+  "Walk": "walk",
+  "Run": "run",
+  "Alert": "alert",
+  "Attack": "attack_bite",
+  "Hit": "hit",
+  "Death": "death",
+  "Roar": "howl"
+ },
+ "server_events": {
+  "creature_attack": "attack_bite",
+  "pounce": "attack_pounce"
+ },
+ "levels": {
+  "1": {
+   "emission_strength": 0.85,
+   "tint_r": [
+    0.72,
+    0.8,
+    0.88,
+    0.0
+   ],
+   "emit_r": 0.0,
+   "emit_g": 0.0,
+   "emit_b": 0.0
+  },
+  "2": {
+   "emission_strength": 1.0,
+   "tint_r": [
+    0.52,
+    0.6,
+    0.7,
+    0.3
+   ],
+   "emit_r": 0.0,
+   "emit_g": 0.3,
+   "emit_b": 0.0
+  },
+  "3": {
+   "emission_strength": 1.2,
+   "tint_r": [
+    0.62,
+    0.72,
+    0.84,
+    0.4
+   ],
+   "emit_r": 0.04,
+   "emit_g": 0.75,
+   "emit_b": 0.9
+  }
+ },
+ "emission_color": "#61BDF4",
+ "gpu_texture_estimate_mb": {
+  "godot_runtime_lod1_lod2": 8.3,
+  "lod0": 26.7
+ },
+ "compression": "none (core glTF 2.0 + KHR_materials_emissive_strength); Godot imports textures as VRAM-compressed (ASTC/ETC2 on iOS)",
+ "licences": "All geometry, textures and animation generated by godot/art/creatures-v2 (DRENOVAR project). No third-party assets.",
+ "provenance": "Procedural SDF sculpt + QuadriFlow/decimation + xatlas + Cycles bakes + procedural PBR + IK keyed clips"
+}

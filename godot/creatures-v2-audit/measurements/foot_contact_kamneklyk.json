@@ -1,0 +1,101 @@
+{
+ "glb": "kamneklyk_lod1.glb",
+ "clips": {
+  "idle": {
+   "frames": 90,
+   "loop": true,
+   "planted_steps": 360,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "walk": {
+   "frames": 42,
+   "loop": true,
+   "planted_steps": 85,
+   "max_slide_mm_per_frame": 9.82,
+   "mean_slide_mm_per_frame": 0.471,
+   "lowest_foot_m": -0.0
+  },
+  "run": {
+   "frames": 24,
+   "loop": true,
+   "planted_steps": 29,
+   "max_slide_mm_per_frame": 21.75,
+   "mean_slide_mm_per_frame": 2.006,
+   "lowest_foot_m": -0.0
+  },
+  "turn_left": {
+   "frames": 30,
+   "loop": false,
+   "planted_steps": 86,
+   "max_slide_mm_per_frame": 16.08,
+   "mean_slide_mm_per_frame": 0.252,
+   "lowest_foot_m": -0.0
+  },
+  "turn_right": {
+   "frames": 30,
+   "loop": false,
+   "planted_steps": 86,
+   "max_slide_mm_per_frame": 16.08,
+   "mean_slide_mm_per_frame": 0.252,
+   "lowest_foot_m": -0.0
+  },
+  "roar": {
+   "frames": 60,
+   "loop": false,
+   "planted_steps": 240,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "attack_tusk": {
+   "frames": 36,
+   "loop": false,
+   "planted_steps": 128,
+   "max_slide_mm_per_frame": 0.76,
+   "mean_slide_mm_per_frame": 0.012,
+   "lowest_foot_m": -0.0
+  },
+  "attack_charge": {
+   "frames": 75,
+   "loop": false,
+   "planted_steps": 180,
+   "max_slide_mm_per_frame": 102.0,
+   "mean_slide_mm_per_frame": 2.142,
+   "lowest_foot_m": -0.008
+  },
+  "attack_stomp": {
+   "frames": 54,
+   "loop": false,
+   "planted_steps": 170,
+   "max_slide_mm_per_frame": 16.97,
+   "mean_slide_mm_per_frame": 2.138,
+   "lowest_foot_m": -0.0
+  },
+  "hit": {
+   "frames": 18,
+   "loop": false,
+   "planted_steps": 72,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": 0.0
+  },
+  "death": {
+   "frames": 84,
+   "loop": false,
+   "planted_steps": 76,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": 0.0
+  },
+  "alert": {
+   "frames": 30,
+   "loop": false,
+   "planted_steps": 120,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": 0.0
+  }
+ }
+}

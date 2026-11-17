@@ -1,0 +1,101 @@
+{
+ "glb": "velkor_lod1.glb",
+ "clips": {
+  "idle": {
+   "frames": 90,
+   "loop": true,
+   "planted_steps": 360,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "walk": {
+   "frames": 36,
+   "loop": true,
+   "planted_steps": 76,
+   "max_slide_mm_per_frame": 3.04,
+   "mean_slide_mm_per_frame": 0.134,
+   "lowest_foot_m": -0.0
+  },
+  "alert": {
+   "frames": 30,
+   "loop": false,
+   "planted_steps": 120,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "run": {
+   "frames": 21,
+   "loop": true,
+   "planted_steps": 25,
+   "max_slide_mm_per_frame": 8.59,
+   "mean_slide_mm_per_frame": 0.829,
+   "lowest_foot_m": -0.0
+  },
+  "turn_left": {
+   "frames": 24,
+   "loop": false,
+   "planted_steps": 63,
+   "max_slide_mm_per_frame": 2.48,
+   "mean_slide_mm_per_frame": 0.039,
+   "lowest_foot_m": -0.0
+  },
+  "turn_right": {
+   "frames": 24,
+   "loop": false,
+   "planted_steps": 63,
+   "max_slide_mm_per_frame": 2.48,
+   "mean_slide_mm_per_frame": 0.039,
+   "lowest_foot_m": -0.0
+  },
+  "roar": {
+   "frames": 72,
+   "loop": false,
+   "planted_steps": 288,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "attack_antler_sweep": {
+   "frames": 45,
+   "loop": false,
+   "planted_steps": 180,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "attack_charge": {
+   "frames": 66,
+   "loop": false,
+   "planted_steps": 162,
+   "max_slide_mm_per_frame": 5.34,
+   "mean_slide_mm_per_frame": 0.068,
+   "lowest_foot_m": -0.0
+  },
+  "hit": {
+   "frames": 18,
+   "loop": false,
+   "planted_steps": 72,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": 0.0
+  },
+  "death": {
+   "frames": 84,
+   "loop": false,
+   "planted_steps": 52,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": 0.0
+  },
+  "rest": {
+   "frames": 120,
+   "loop": true,
+   "planted_steps": 360,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  }
+ }
+}

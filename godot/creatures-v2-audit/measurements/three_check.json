@@ -1,0 +1,126 @@
+{
+ "three": "r171",
+ "errors": [],
+ "report": [
+  {
+   "file": "velkor/out/VELKOR_L1_RIGGED_ANIMATED.glb",
+   "clips": 12,
+   "skinned": 2,
+   "bones": 41,
+   "tris": 20302,
+   "names": [
+    "velkor__idle",
+    "velkor__walk",
+    "velkor__alert",
+    "velkor__run",
+    "velkor__turn_left",
+    "velkor__turn_right",
+    "velkor__roar",
+    "velkor__attack_antler_sweep",
+    "velkor__attack_charge",
+    "velkor__hit",
+    "velkor__death",
+    "velkor__rest"
+   ],
+   "unbound": 0,
+   "independent": true,
+   "size": [
+    4.17,
+    3.55,
+    2.75
+   ],
+   "ok": true
+  },
+  {
+   "file": "tenerys/out/TENERYS_L1_RIGGED_ANIMATED.glb",
+   "clips": 14,
+   "skinned": 2,
+   "bones": 44,
+   "tris": 18340,
+   "names": [
+    "tenerys__idle",
+    "tenerys__walk",
+    "tenerys__stalk",
+    "tenerys__run",
+    "tenerys__turn_left",
+    "tenerys__turn_right",
+    "tenerys__howl",
+    "tenerys__attack_bite",
+    "tenerys__attack_claw",
+    "tenerys__attack_pounce",
+    "tenerys__dodge",
+    "tenerys__hit",
+    "tenerys__death",
+    "tenerys__alert"
+   ],
+   "unbound": 0,
+   "independent": true,
+   "size": [
+    3.73,
+    2.09,
+    1.01
+   ],
+   "ok": true
+  },
+  {
+   "file": "kamneklyk/out/KAMNEKLYK_L1_RIGGED_ANIMATED.glb",
+   "clips": 12,
+   "skinned": 2,
+   "bones": 40,
+   "tris": 20740,
+   "names": [
+    "kamneklyk__idle",
+    "kamneklyk__walk",
+    "kamneklyk__run",
+    "kamneklyk__turn_left",
+    "kamneklyk__turn_right",
+    "kamneklyk__roar",
+    "kamneklyk__attack_tusk",
+    "kamneklyk__attack_charge",
+    "kamneklyk__attack_stomp",
+    "kamneklyk__hit",
+    "kamneklyk__death",
+    "kamneklyk__alert"
+   ],
+   "unbound": 0,
+   "independent": true,
+   "size": [
+    3.44,
+    1.98,
+    1.88
+   ],
+   "ok": true
+  },
+  {
+   "file": "dragor/out/DRAGOR_L1_RIGGED_ANIMATED.glb",
+   "clips": 14,
+   "skinned": 2,
+   "bones": 48,
+   "tris": 31060,
+   "names": [
+    "dragor__idle",
+    "dragor__walk",
+    "dragor__run",
+    "dragor__turn_left",
+    "dragor__turn_right",
+    "dragor__roar",
+    "dragor__attack_claw",
+    "dragor__attack_bite",
+    "dragor__attack_tail",
+    "dragor__attack_slam",
+    "dragor__stagger",
+    "dragor__hit",
+    "dragor__death",
+    "dragor__alert"
+   ],
+   "unbound": 0,
+   "independent": true,
+   "size": [
+    6.45,
+    3.93,
+    3.65
+   ],
+   "ok": true
+  }
+ ]
+}

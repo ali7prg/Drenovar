@@ -224,5 +224,5 @@ func run() -> void:
 		report[species] = row
 	print("CREATURES_V2 ", JSON.stringify(report))
 	print("CREATURES_V2_CHECKS ", checks, " failures ", failures)
-	print("QA_CREATURES_V2 checks=%d failures=%d" % [checks, failures])
+	print("QA_CREATURES checks=%d failures=%d" % [checks, failures])
 	quit(0 if failures == 0 else 1)

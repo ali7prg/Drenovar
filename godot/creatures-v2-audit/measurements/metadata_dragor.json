@@ -1,0 +1,519 @@
+{
+ "id": "dragor",
+ "name": "Горный Драгор",
+ "version": "creatures-v2 1.0 (2026-11-17)",
+ "units": "metre",
+ "up": "+Y",
+ "forward": "+X",
+ "pivot": "ground, body centre",
+ "authored_bounds_m": {
+  "x": [
+   -4.199,
+   2.25
+  ],
+  "half_width": 1.516,
+  "top": 3.912
+ },
+ "display_scale_in_game": 0.977,
+ "battle_outline_m": [
+  3.15,
+  1.481
+ ],
+ "bones": 48,
+ "max_influences": 4,
+ "sockets": [
+  "socket_head",
+  "socket_mouth",
+  "socket_chest",
+  "socket_slam_center",
+  "socket_foot_front_l",
+  "socket_foot_hind_l",
+  "socket_claw_l",
+  "socket_foot_front_r",
+  "socket_foot_hind_r",
+  "socket_claw_r",
+  "socket_tail_tip"
+ ],
+ "material_slots": [
+  "Skin",
+  "Stone"
+ ],
+ "lods": {
+  "lod0": {
+   "file": "dragor_lod0.glb",
+   "bytes": 23160724,
+   "triangles": 68088,
+   "materials": [
+    "M_Dragor_Skin_LOD0",
+    "M_Dragor_Stone_LOD0"
+   ],
+   "textures": [
+    "dragor_LOD0_skin_BaseColor",
+    "dragor_LOD0_skin_Normal",
+    "dragor_LOD0_skin_ORM",
+    "dragor_LOD0_skin_Emissive",
+    "dragor_LOD0_stone_BaseColor",
+    "dragor_LOD0_stone_Normal",
+    "dragor_LOD0_stone_ORM",
+    "dragor_LOD0_stone_Emissive"
+   ]
+  },
+  "lod1": {
+   "file": "dragor_lod1.glb",
+   "bytes": 9126824,
+   "triangles": 31060,
+   "materials": [
+    "M_Dragor_Skin_LOD1",
+    "M_Dragor_Stone_LOD1"
+   ],
+   "textures": [
+    "dragor_LOD1_skin_BaseColor",
+    "dragor_LOD1_skin_Normal",
+    "dragor_LOD1_skin_ORM",
+    "dragor_LOD1_skin_Emissive",
+    "dragor_LOD1_stone_BaseColor",
+    "dragor_LOD1_stone_Normal",
+    "dragor_LOD1_stone_ORM",
+    "dragor_LOD1_stone_Emissive"
+   ]
+  },
+  "lod2": {
+   "file": "dragor_lod2.glb",
+   "bytes": 3228752,
+   "triangles": 8802,
+   "materials": [
+    "M_Dragor_Skin_LOD2",
+    "M_Dragor_Stone_LOD2"
+   ],
+   "textures": [
+    "dragor_LOD2_skin_BaseColor",
+    "dragor_LOD2_skin_Normal",
+    "dragor_LOD2_skin_ORM",
+    "dragor_LOD2_skin_Emissive",
+    "dragor_LOD2_stone_BaseColor",
+    "dragor_LOD2_stone_Normal",
+    "dragor_LOD2_stone_ORM",
+    "dragor_LOD2_stone_Emissive"
+   ]
+  }
+ },
+ "clips": {
+  "idle": {
+   "name": "dragor__idle",
+   "frames": 120,
+   "length_s": 4.0,
+   "loop": true,
+   "events": []
+  },
+  "walk": {
+   "name": "dragor__walk",
+   "frames": 54,
+   "length_s": 1.8,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 14,
+     "time": 0.4666666666666667,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 27,
+     "time": 0.9,
+     "foot": "hind_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 40,
+     "time": 1.3333333333333333,
+     "foot": "front_l"
+    }
+   ],
+   "speed_mps": 1.3
+  },
+  "run": {
+   "name": "dragor__run",
+   "frames": 36,
+   "length_s": 1.2,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 9,
+     "time": 0.3,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 18,
+     "time": 0.6,
+     "foot": "hind_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 27,
+     "time": 0.9,
+     "foot": "front_l"
+    }
+   ],
+   "speed_mps": 3.2
+  },
+  "turn_left": {
+   "name": "dragor__turn_left",
+   "frames": 42,
+   "length_s": 1.4,
+   "loop": false,
+   "events": [],
+   "motion_keys": [
+    "yaw_deg",
+    "yaw"
+   ]
+  },
+  "turn_right": {
+   "name": "dragor__turn_right",
+   "frames": 42,
+   "length_s": 1.4,
+   "loop": false,
+   "events": [],
+   "motion_keys": [
+    "yaw_deg",
+    "yaw"
+   ]
+  },
+  "roar": {
+   "name": "dragor__roar",
+   "frames": 90,
+   "length_s": 3.0,
+   "loop": false,
+   "events": [
+    {
+     "event": "sound",
+     "frame": 24,
+     "time": 0.8
+    },
+    {
+     "event": "seams_flare",
+     "frame": 26
+    }
+   ]
+  },
+  "attack_claw": {
+   "name": "dragor__attack_claw",
+   "frames": 60,
+   "length_s": 2.0,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "whoosh",
+     "frame": 28
+    },
+    {
+     "event": "contact",
+     "frame": 31
+    },
+    {
+     "event": "recovery",
+     "frame": 36
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     27
+    ],
+    "active": [
+     27,
+     36
+    ],
+    "recovery": [
+     36,
+     60
+    ],
+    "impact": 31
+   }
+  },
+  "attack_bite": {
+   "name": "dragor__attack_bite",
+   "frames": 54,
+   "length_s": 1.8,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "whoosh",
+     "frame": 25
+    },
+    {
+     "event": "contact",
+     "frame": 27
+    },
+    {
+     "event": "recovery",
+     "frame": 31
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     24
+    ],
+    "active": [
+     24,
+     31
+    ],
+    "recovery": [
+     31,
+     54
+    ],
+    "impact": 27
+   }
+  },
+  "attack_tail": {
+   "name": "dragor__attack_tail",
+   "frames": 75,
+   "length_s": 2.5,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "whoosh",
+     "frame": 36
+    },
+    {
+     "event": "contact",
+     "frame": 40
+    },
+    {
+     "event": "recovery",
+     "frame": 48
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     33
+    ],
+    "active": [
+     33,
+     48
+    ],
+    "recovery": [
+     48,
+     75
+    ],
+    "impact": 40
+   }
+  },
+  "attack_slam": {
+   "name": "dragor__attack_slam",
+   "frames": 90,
+   "length_s": 3.0,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "contact",
+     "frame": 43
+    },
+    {
+     "event": "shockwave",
+     "frame": 43
+    },
+    {
+     "event": "dust",
+     "frame": 43
+    },
+    {
+     "event": "recovery",
+     "frame": 47
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     42
+    ],
+    "active": [
+     42,
+     47
+    ],
+    "recovery": [
+     47,
+     90
+    ],
+    "impact": 43
+   }
+  },
+  "stagger": {
+   "name": "dragor__stagger",
+   "frames": 45,
+   "length_s": 1.5,
+   "loop": false,
+   "events": [
+    {
+     "event": "stagger",
+     "frame": 0
+    },
+    {
+     "event": "footstep",
+     "frame": 22
+    }
+   ]
+  },
+  "hit": {
+   "name": "dragor__hit",
+   "frames": 24,
+   "length_s": 0.8,
+   "loop": false,
+   "events": [
+    {
+     "event": "hit",
+     "frame": 3
+    }
+   ]
+  },
+  "death": {
+   "name": "dragor__death",
+   "frames": 120,
+   "length_s": 4.0,
+   "loop": false,
+   "events": [
+    {
+     "event": "collapse",
+     "frame": 16
+    },
+    {
+     "event": "ground_contact",
+     "frame": 64
+    },
+    {
+     "event": "dust",
+     "frame": 64
+    },
+    {
+     "event": "seams_fade",
+     "frame": 70
+    },
+    {
+     "event": "dead",
+     "frame": 120
+    }
+   ]
+  },
+  "alert": {
+   "name": "dragor__alert",
+   "frames": 42,
+   "length_s": 1.4,
+   "loop": false,
+   "events": []
+  }
+ },
+ "semantic_states": {
+  "Idle": "idle",
+  "Walk": "walk",
+  "Run": "run",
+  "Alert": "alert",
+  "Attack": "attack_claw",
+  "Hit": "hit",
+  "Death": "death",
+  "Roar": "roar"
+ },
+ "server_events": {
+  "creature_attack": "attack_claw",
+  "shockwave": "attack_slam"
+ },
+ "levels": {
+  "1": {
+   "emission_strength": 0.8,
+   "tint_r": [
+    0.42,
+    0.4,
+    0.38,
+    0.0
+   ],
+   "tint_b": [
+    0.8,
+    0.76,
+    0.68,
+    0.0
+   ],
+   "emit_g": 0.0
+  },
+  "2": {
+   "emission_strength": 1.05,
+   "tint_r": [
+    0.3,
+    0.29,
+    0.28,
+    0.55
+   ],
+   "tint_b": [
+    0.8,
+    0.76,
+    0.68,
+    0.0
+   ],
+   "emit_g": 0.3,
+   "groups": {
+    "skin": {
+     "emit_g": 0.06
+    }
+   }
+  },
+  "3": {
+   "emission_strength": 1.3,
+   "tint_r": [
+    0.27,
+    0.26,
+    0.25,
+    0.65
+   ],
+   "tint_b": [
+    0.74,
+    0.7,
+    0.64,
+    0.6
+   ],
+   "emit_g": 0.65,
+   "groups": {
+    "skin": {
+     "emit_g": 0.16
+    }
+   }
+  }
+ },
+ "emission_color": "#F0A12D",
+ "gpu_texture_estimate_mb": {
+  "godot_runtime_lod1_lod2": 8.3,
+  "lod0": 26.7
+ },
+ "compression": "none (core glTF 2.0 + KHR_materials_emissive_strength); Godot imports textures as VRAM-compressed (ASTC/ETC2 on iOS)",
+ "licences": "All geometry, textures and animation generated by godot/art/creatures-v2 (DRENOVAR project). No third-party assets.",
+ "provenance": "Procedural SDF sculpt + QuadriFlow/decimation + xatlas + Cycles bakes + procedural PBR + IK keyed clips"
+}

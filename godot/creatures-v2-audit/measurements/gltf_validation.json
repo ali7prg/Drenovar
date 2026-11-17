@@ -1,0 +1,437 @@
+{
+ "validator": "Khronos glTF-Validator 2.0.0-dev.3.10",
+ "files": [
+  {
+   "file": "velkor_lod0.glb",
+   "bytes": 26556692,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 47074,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "velkor_lod1.glb",
+   "bytes": 8920452,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 20302,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "velkor_lod2.glb",
+   "bytes": 2882436,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 6026,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "velkor_runtime.glb",
+   "bytes": 11501404,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 4,
+   "tris": 27678,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "VELKOR_L1_RIGGED_ANIMATED.glb",
+   "bytes": 8920428,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 20302,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "VELKOR_L2_RIGGED_ANIMATED.glb",
+   "bytes": 8971280,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 20932,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "VELKOR_L3_RIGGED_ANIMATED.glb",
+   "bytes": 9037668,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 21652,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "tenerys_lod0.glb",
+   "bytes": 21532824,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 39978,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "tenerys_lod1.glb",
+   "bytes": 6979584,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 18340,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "tenerys_lod2.glb",
+   "bytes": 2285256,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 5240,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "tenerys_runtime.glb",
+   "bytes": 8896108,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 4,
+   "tris": 23580,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "TENERYS_L1_RIGGED_ANIMATED.glb",
+   "bytes": 6979560,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 18340,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "TENERYS_L2_RIGGED_ANIMATED.glb",
+   "bytes": 7092924,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 18340,
+   "maxInfluences": 4,
+   "extensions": []
+  },
+  {
+   "file": "TENERYS_L3_RIGGED_ANIMATED.glb",
+   "bytes": 7131476,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 18340,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "kamneklyk_lod0.glb",
+   "bytes": 22373124,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 45846,
+   "maxInfluences": 4,
+   "extensions": []
+  },
+  {
+   "file": "kamneklyk_lod1.glb",
+   "bytes": 7850744,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 20740,
+   "maxInfluences": 4,
+   "extensions": []
+  },
+  {
+   "file": "kamneklyk_lod2.glb",
+   "bytes": 2599948,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 6006,
+   "maxInfluences": 4,
+   "extensions": []
+  },
+  {
+   "file": "kamneklyk_runtime.glb",
+   "bytes": 10126968,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 4,
+   "tris": 27126,
+   "maxInfluences": 4,
+   "extensions": []
+  },
+  {
+   "file": "KAMNEKLYK_L1_RIGGED_ANIMATED.glb",
+   "bytes": 7850720,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 20740,
+   "maxInfluences": 4,
+   "extensions": []
+  },
+  {
+   "file": "KAMNEKLYK_L2_RIGGED_ANIMATED.glb",
+   "bytes": 7995572,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 20740,
+   "maxInfluences": 4,
+   "extensions": []
+  },
+  {
+   "file": "KAMNEKLYK_L3_RIGGED_ANIMATED.glb",
+   "bytes": 8094428,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 12,
+   "materials": 2,
+   "tris": 21120,
+   "maxInfluences": 4,
+   "extensions": []
+  },
+  {
+   "file": "dragor_lod0.glb",
+   "bytes": 23160724,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 68088,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "dragor_lod1.glb",
+   "bytes": 9126824,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 31060,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "dragor_lod2.glb",
+   "bytes": 3228752,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 8802,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "dragor_runtime.glb",
+   "bytes": 11842104,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 4,
+   "tris": 39862,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "DRAGOR_L1_RIGGED_ANIMATED.glb",
+   "bytes": 9126800,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 31060,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "DRAGOR_L2_RIGGED_ANIMATED.glb",
+   "bytes": 9281100,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 31060,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  },
+  {
+   "file": "DRAGOR_L3_RIGGED_ANIMATED.glb",
+   "bytes": 9365084,
+   "errors": 0,
+   "warnings": 0,
+   "infos": 0,
+   "hints": 0,
+   "codes": {},
+   "animations": 14,
+   "materials": 2,
+   "tris": 31060,
+   "maxInfluences": 4,
+   "extensions": [
+    "KHR_materials_emissive_strength"
+   ]
+  }
+ ]
+}

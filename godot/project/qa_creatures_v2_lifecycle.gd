@@ -156,5 +156,5 @@ func run() -> void:
 		check(count == 1, species + ": one actor per encounter id (%d)" % count)
 		state.world.encounters = []
 		await show_at(stage, state, ends + 70000.0, 2)
-	print("QA_CREATURES_V2_LIFECYCLE checks=%d failures=%d" % [checks, failures])
+	print("QA_CREATURES_LIFECYCLE checks=%d failures=%d" % [checks, failures])
 	quit(0 if failures == 0 else 1)

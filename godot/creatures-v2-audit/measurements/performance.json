@@ -1,0 +1,355 @@
+{
+ "probe": "godot/project/profile_creatures_v2.gd",
+ "creatures": 12,
+ "note": "Linux container, Xvfb, CPU rasterisers (OpenGL llvmpipe / Vulkan lavapipe); not a target device",
+ "results": [
+  {
+   "renderer": "gl_compatibility",
+   "result": {
+    "cold_load_ms": {
+     "res://assets/creatures-v2/dragor/dragor_runtime.gltf": 15.3,
+     "res://assets/creatures-v2/kamneklyk/kamneklyk_runtime.gltf": 13.7,
+     "res://assets/creatures-v2/tenerys/tenerys_runtime.gltf": 10.4,
+     "res://assets/creatures-v2/velkor/velkor_runtime.gltf": 12.1
+    },
+    "creatures": 12,
+    "flag": "creatures-v2",
+    "lod_counts": {
+     "1": 1,
+     "2": 11
+    },
+    "method": "Linux container, Xvfb, CPU rasteriser; not a target device",
+    "renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "runs": [
+     {
+      "draw_calls": 83,
+      "frames": 68,
+      "median_ms": 222.16,
+      "p95_ms": 251.68,
+      "primitives": 281554
+     },
+     {
+      "draw_calls": 83,
+      "frames": 66,
+      "median_ms": 228.95,
+      "p95_ms": 256.64,
+      "primitives": 281554
+     }
+    ],
+    "seconds": 15.0,
+    "static_mem_mb": 68.9,
+    "texture_mem_mb": 35.2,
+    "video_mem_mb": 47.6,
+    "view": "far"
+   }
+  },
+  {
+   "renderer": "gl_compatibility",
+   "result": {
+    "cold_load_ms": {
+     "res://assets/creature-assets37/DRAGOR_L1_RIGGED_ANIMATED.glb": 19.0,
+     "res://assets/creature-assets37/DRAGOR_L2_RIGGED_ANIMATED.glb": 19.4,
+     "res://assets/creature-assets37/DRAGOR_L3_RIGGED_ANIMATED.glb": 21.5,
+     "res://assets/creature-assets37/KAMNEKLYK_L1_RIGGED_ANIMATED.glb": 10.9,
+     "res://assets/creature-assets37/KAMNEKLYK_L2_RIGGED_ANIMATED.glb": 18.8,
+     "res://assets/creature-assets37/KAMNEKLYK_L3_RIGGED_ANIMATED.glb": 19.1,
+     "res://assets/creature-assets37/TENERYS_L1_RIGGED_ANIMATED.glb": 16.9,
+     "res://assets/creature-assets37/TENERYS_L2_RIGGED_ANIMATED.glb": 6.4,
+     "res://assets/creature-assets37/TENERYS_L3_RIGGED_ANIMATED.glb": 7.7,
+     "res://assets/creature-assets37/VELKOR_L1_RIGGED_ANIMATED.glb": 8.4,
+     "res://assets/creature-assets37/VELKOR_L2_RIGGED_ANIMATED.glb": 14.2,
+     "res://assets/creature-assets37/VELKOR_L3_RIGGED_ANIMATED.glb": 16.9
+    },
+    "creatures": 12,
+    "flag": "0.5.9 models",
+    "lod_counts": {
+     "0": 12
+    },
+    "method": "Linux container, Xvfb, CPU rasteriser; not a target device",
+    "renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "runs": [
+     {
+      "draw_calls": 950,
+      "frames": 18,
+      "median_ms": 880.03,
+      "p95_ms": 972.53,
+      "primitives": 871627
+     },
+     {
+      "draw_calls": 950,
+      "frames": 18,
+      "median_ms": 863.85,
+      "p95_ms": 914.76,
+      "primitives": 871721
+     }
+    ],
+    "seconds": 15.0,
+    "static_mem_mb": 73.2,
+    "texture_mem_mb": 19.6,
+    "video_mem_mb": 53.2,
+    "view": "far"
+   }
+  },
+  {
+   "renderer": "gl_compatibility",
+   "result": {
+    "cold_load_ms": {
+     "res://assets/creatures-v2/dragor/dragor_runtime.gltf": 13.8,
+     "res://assets/creatures-v2/kamneklyk/kamneklyk_runtime.gltf": 10.8,
+     "res://assets/creatures-v2/tenerys/tenerys_runtime.gltf": 11.6,
+     "res://assets/creatures-v2/velkor/velkor_runtime.gltf": 12.4
+    },
+    "creatures": 12,
+    "flag": "creatures-v2",
+    "lod_counts": {
+     "1": 10,
+     "2": 2
+    },
+    "method": "Linux container, Xvfb, CPU rasteriser; not a target device",
+    "renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "runs": [
+     {
+      "draw_calls": 100,
+      "frames": 36,
+      "median_ms": 419.98,
+      "p95_ms": 493.07,
+      "primitives": 842560
+     },
+     {
+      "draw_calls": 100,
+      "frames": 37,
+      "median_ms": 404.87,
+      "p95_ms": 464.04,
+      "primitives": 842560
+     }
+    ],
+    "seconds": 15.0,
+    "static_mem_mb": 68.9,
+    "texture_mem_mb": 35.2,
+    "video_mem_mb": 47.6,
+    "view": "near"
+   }
+  },
+  {
+   "renderer": "gl_compatibility",
+   "result": {
+    "cold_load_ms": {
+     "res://assets/creature-assets37/DRAGOR_L1_RIGGED_ANIMATED.glb": 14.0,
+     "res://assets/creature-assets37/DRAGOR_L2_RIGGED_ANIMATED.glb": 16.7,
+     "res://assets/creature-assets37/DRAGOR_L3_RIGGED_ANIMATED.glb": 12.0,
+     "res://assets/creature-assets37/KAMNEKLYK_L1_RIGGED_ANIMATED.glb": 10.6,
+     "res://assets/creature-assets37/KAMNEKLYK_L2_RIGGED_ANIMATED.glb": 10.2,
+     "res://assets/creature-assets37/KAMNEKLYK_L3_RIGGED_ANIMATED.glb": 8.6,
+     "res://assets/creature-assets37/TENERYS_L1_RIGGED_ANIMATED.glb": 11.9,
+     "res://assets/creature-assets37/TENERYS_L2_RIGGED_ANIMATED.glb": 8.7,
+     "res://assets/creature-assets37/TENERYS_L3_RIGGED_ANIMATED.glb": 7.8,
+     "res://assets/creature-assets37/VELKOR_L1_RIGGED_ANIMATED.glb": 13.5,
+     "res://assets/creature-assets37/VELKOR_L2_RIGGED_ANIMATED.glb": 8.1,
+     "res://assets/creature-assets37/VELKOR_L3_RIGGED_ANIMATED.glb": 7.4
+    },
+    "creatures": 12,
+    "flag": "0.5.9 models",
+    "lod_counts": {
+     "0": 12
+    },
+    "method": "Linux container, Xvfb, CPU rasteriser; not a target device",
+    "renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "runs": [
+     {
+      "draw_calls": 955,
+      "frames": 15,
+      "median_ms": 1074.45,
+      "p95_ms": 1191.95,
+      "primitives": 1574515
+     },
+     {
+      "draw_calls": 955,
+      "frames": 15,
+      "median_ms": 1029.49,
+      "p95_ms": 1110.09,
+      "primitives": 1574585
+     }
+    ],
+    "seconds": 15.0,
+    "static_mem_mb": 73.2,
+    "texture_mem_mb": 19.6,
+    "video_mem_mb": 53.2,
+    "view": "near"
+   }
+  },
+  {
+   "renderer": "mobile",
+   "result": {
+    "cold_load_ms": {
+     "res://assets/creatures-v2/dragor/dragor_runtime.gltf": 24.9,
+     "res://assets/creatures-v2/kamneklyk/kamneklyk_runtime.gltf": 26.3,
+     "res://assets/creatures-v2/tenerys/tenerys_runtime.gltf": 21.2,
+     "res://assets/creatures-v2/velkor/velkor_runtime.gltf": 28.0
+    },
+    "creatures": 12,
+    "flag": "creatures-v2",
+    "lod_counts": {
+     "1": 1,
+     "2": 11
+    },
+    "method": "Linux container, Xvfb, CPU rasteriser; not a target device",
+    "renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "runs": [
+     {
+      "draw_calls": 54,
+      "frames": 135,
+      "median_ms": 112.36,
+      "p95_ms": 125.93,
+      "primitives": 281554
+     },
+     {
+      "draw_calls": 54,
+      "frames": 131,
+      "median_ms": 114.04,
+      "p95_ms": 128.68,
+      "primitives": 281554
+     }
+    ],
+    "seconds": 15.0,
+    "static_mem_mb": 75.6,
+    "texture_mem_mb": 70.3,
+    "video_mem_mb": 118.4,
+    "view": "far"
+   }
+  },
+  {
+   "renderer": "mobile",
+   "result": {
+    "cold_load_ms": {
+     "res://assets/creature-assets37/DRAGOR_L1_RIGGED_ANIMATED.glb": 11.8,
+     "res://assets/creature-assets37/DRAGOR_L2_RIGGED_ANIMATED.glb": 35.8,
+     "res://assets/creature-assets37/DRAGOR_L3_RIGGED_ANIMATED.glb": 21.4,
+     "res://assets/creature-assets37/KAMNEKLYK_L1_RIGGED_ANIMATED.glb": 8.7,
+     "res://assets/creature-assets37/KAMNEKLYK_L2_RIGGED_ANIMATED.glb": 9.4,
+     "res://assets/creature-assets37/KAMNEKLYK_L3_RIGGED_ANIMATED.glb": 8.7,
+     "res://assets/creature-assets37/TENERYS_L1_RIGGED_ANIMATED.glb": 8.9,
+     "res://assets/creature-assets37/TENERYS_L2_RIGGED_ANIMATED.glb": 7.5,
+     "res://assets/creature-assets37/TENERYS_L3_RIGGED_ANIMATED.glb": 7.6,
+     "res://assets/creature-assets37/VELKOR_L1_RIGGED_ANIMATED.glb": 196.8,
+     "res://assets/creature-assets37/VELKOR_L2_RIGGED_ANIMATED.glb": 7.1,
+     "res://assets/creature-assets37/VELKOR_L3_RIGGED_ANIMATED.glb": 7.4
+    },
+    "creatures": 12,
+    "flag": "0.5.9 models",
+    "lod_counts": {
+     "0": 12
+    },
+    "method": "Linux container, Xvfb, CPU rasteriser; not a target device",
+    "renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "runs": [
+     {
+      "draw_calls": 632,
+      "frames": 60,
+      "median_ms": 249.32,
+      "p95_ms": 288.1,
+      "primitives": 871870
+     },
+     {
+      "draw_calls": 632,
+      "frames": 62,
+      "median_ms": 242.7,
+      "p95_ms": 273.12,
+      "primitives": 871797
+     }
+    ],
+    "seconds": 15.0,
+    "static_mem_mb": 84.8,
+    "texture_mem_mb": 54.7,
+    "video_mem_mb": 123.4,
+    "view": "far"
+   }
+  },
+  {
+   "renderer": "mobile",
+   "result": {
+    "cold_load_ms": {
+     "res://assets/creatures-v2/dragor/dragor_runtime.gltf": 22.1,
+     "res://assets/creatures-v2/kamneklyk/kamneklyk_runtime.gltf": 26.1,
+     "res://assets/creatures-v2/tenerys/tenerys_runtime.gltf": 20.9,
+     "res://assets/creatures-v2/velkor/velkor_runtime.gltf": 27.2
+    },
+    "creatures": 12,
+    "flag": "creatures-v2",
+    "lod_counts": {
+     "1": 10,
+     "2": 2
+    },
+    "method": "Linux container, Xvfb, CPU rasteriser; not a target device",
+    "renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "runs": [
+     {
+      "draw_calls": 52,
+      "frames": 75,
+      "median_ms": 200.4,
+      "p95_ms": 230.08,
+      "primitives": 842560
+     },
+     {
+      "draw_calls": 52,
+      "frames": 76,
+      "median_ms": 196.79,
+      "p95_ms": 235.88,
+      "primitives": 842560
+     }
+    ],
+    "seconds": 15.0,
+    "static_mem_mb": 75.6,
+    "texture_mem_mb": 70.3,
+    "video_mem_mb": 118.4,
+    "view": "near"
+   }
+  },
+  {
+   "renderer": "mobile",
+   "result": {
+    "cold_load_ms": {
+     "res://assets/creature-assets37/DRAGOR_L1_RIGGED_ANIMATED.glb": 11.2,
+     "res://assets/creature-assets37/DRAGOR_L2_RIGGED_ANIMATED.glb": 30.4,
+     "res://assets/creature-assets37/DRAGOR_L3_RIGGED_ANIMATED.glb": 11.5,
+     "res://assets/creature-assets37/KAMNEKLYK_L1_RIGGED_ANIMATED.glb": 10.7,
+     "res://assets/creature-assets37/KAMNEKLYK_L2_RIGGED_ANIMATED.glb": 11.3,
+     "res://assets/creature-assets37/KAMNEKLYK_L3_RIGGED_ANIMATED.glb": 8.5,
+     "res://assets/creature-assets37/TENERYS_L1_RIGGED_ANIMATED.glb": 17.1,
+     "res://assets/creature-assets37/TENERYS_L2_RIGGED_ANIMATED.glb": 7.2,
+     "res://assets/creature-assets37/TENERYS_L3_RIGGED_ANIMATED.glb": 7.7,
+     "res://assets/creature-assets37/VELKOR_L1_RIGGED_ANIMATED.glb": 24.8,
+     "res://assets/creature-assets37/VELKOR_L2_RIGGED_ANIMATED.glb": 8.6,
+     "res://assets/creature-assets37/VELKOR_L3_RIGGED_ANIMATED.glb": 7.3
+    },
+    "creatures": 12,
+    "flag": "0.5.9 models",
+    "lod_counts": {
+     "0": 12
+    },
+    "method": "Linux container, Xvfb, CPU rasteriser; not a target device",
+    "renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "runs": [
+     {
+      "draw_calls": 503,
+      "frames": 42,
+      "median_ms": 363.62,
+      "p95_ms": 422.85,
+      "primitives": 1574468
+     },
+     {
+      "draw_calls": 503,
+      "frames": 45,
+      "median_ms": 336.71,
+      "p95_ms": 369.85,
+      "primitives": 1574790
+     }
+    ],
+    "seconds": 15.0,
+    "static_mem_mb": 84.6,
+    "texture_mem_mb": 54.7,
+    "video_mem_mb": 123.4,
+    "view": "near"
+   }
+  }
+ ]
+}

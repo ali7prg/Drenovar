@@ -70,12 +70,13 @@ for sid in ("velkor", "tenerys", "kamneklyk", "dragor"):
                                       (os.path.join(o, "metadata.json"), f"{sid}/metadata/metadata.json")])
     pack(f"{sid}_3_web_levels", [(os.path.join(o, f"{sid.upper()}_L{l}_RIGGED_ANIMATED.glb"),
                                   f"{sid}/model/web/{sid.upper()}_L{l}_RIGGED_ANIMATED.glb") for l in (1, 2, 3)])
-    tex = []
+    # editable source: .blend + .fbx with their LOD0 PBR maps (BaseColor/Normal/ORM/Emissive, 2K masters),
+    # plus the level variant masks of every LOD (LOD1/LOD2 maps ship in the game repository)
+    src = files_in(os.path.join(dcc, sid), f"{sid}/source")
     for lod in (0, 1, 2):
-        tex += files_in(os.path.join(work, sid, f"lod{lod}"), f"{sid}/textures/lod{lod}",
-                        lambda f: f.endswith(".png") and "_view" not in f)
-    pack(f"{sid}_4_textures", tex)
-    pack(f"{sid}_5_source_blend_fbx", files_in(os.path.join(dcc, sid), f"{sid}/source"))
+        src += files_in(os.path.join(work, sid, f"lod{lod}"), f"{sid}/textures/lod{lod}",
+                        lambda f: f.endswith("_variant.png"))
+    pack(f"{sid}_4_source_blend_fbx_textures", src)
 # previews of all four in one archive: turntables, clip videos and sheets, level portraits, in-game hunts
 previews = []
 for sid in ("velkor", "tenerys", "kamneklyk", "dragor"):

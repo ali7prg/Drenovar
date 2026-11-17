@@ -1,0 +1,457 @@
+{
+ "id": "kamneklyk",
+ "name": "Камнеклык",
+ "version": "creatures-v2 1.0 (2026-11-17)",
+ "units": "metre",
+ "up": "+Y",
+ "forward": "+X",
+ "pivot": "ground, body centre",
+ "authored_bounds_m": {
+  "x": [
+   -1.746,
+   1.691
+  ],
+  "half_width": 0.709,
+  "top": 1.972
+ },
+ "display_scale_in_game": 1.525,
+ "battle_outline_m": [
+  2.621,
+  1.081
+ ],
+ "bones": 40,
+ "max_influences": 4,
+ "sockets": [
+  "socket_head",
+  "socket_mouth",
+  "socket_chest",
+  "socket_foot_front_l",
+  "socket_foot_hind_l",
+  "socket_tusk_l",
+  "socket_foot_front_r",
+  "socket_foot_hind_r",
+  "socket_tusk_r",
+  "socket_tail_tip"
+ ],
+ "material_slots": [
+  "Body",
+  "Stone"
+ ],
+ "lods": {
+  "lod0": {
+   "file": "kamneklyk_lod0.glb",
+   "bytes": 22373124,
+   "triangles": 45846,
+   "materials": [
+    "M_Kamneklyk_Body_LOD0",
+    "M_Kamneklyk_Stone_LOD0"
+   ],
+   "textures": [
+    "kamneklyk_LOD0_body_BaseColor",
+    "kamneklyk_LOD0_body_Normal",
+    "kamneklyk_LOD0_body_ORM",
+    "kamneklyk_LOD0_stone_BaseColor",
+    "kamneklyk_LOD0_stone_Normal",
+    "kamneklyk_LOD0_stone_ORM"
+   ]
+  },
+  "lod1": {
+   "file": "kamneklyk_lod1.glb",
+   "bytes": 7850744,
+   "triangles": 20740,
+   "materials": [
+    "M_Kamneklyk_Body_LOD1",
+    "M_Kamneklyk_Stone_LOD1"
+   ],
+   "textures": [
+    "kamneklyk_LOD1_body_BaseColor",
+    "kamneklyk_LOD1_body_Normal",
+    "kamneklyk_LOD1_body_ORM",
+    "kamneklyk_LOD1_stone_BaseColor",
+    "kamneklyk_LOD1_stone_Normal",
+    "kamneklyk_LOD1_stone_ORM"
+   ]
+  },
+  "lod2": {
+   "file": "kamneklyk_lod2.glb",
+   "bytes": 2599948,
+   "triangles": 6006,
+   "materials": [
+    "M_Kamneklyk_Body_LOD2",
+    "M_Kamneklyk_Stone_LOD2"
+   ],
+   "textures": [
+    "kamneklyk_LOD2_body_BaseColor",
+    "kamneklyk_LOD2_body_Normal",
+    "kamneklyk_LOD2_body_ORM",
+    "kamneklyk_LOD2_stone_BaseColor",
+    "kamneklyk_LOD2_stone_Normal",
+    "kamneklyk_LOD2_stone_ORM"
+   ]
+  }
+ },
+ "clips": {
+  "idle": {
+   "name": "kamneklyk__idle",
+   "frames": 90,
+   "length_s": 3.0,
+   "loop": true,
+   "events": []
+  },
+  "walk": {
+   "name": "kamneklyk__walk",
+   "frames": 42,
+   "length_s": 1.4,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 10,
+     "time": 0.3333333333333333,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 21,
+     "time": 0.7,
+     "foot": "hind_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 32,
+     "time": 1.0666666666666667,
+     "foot": "front_l"
+    }
+   ],
+   "speed_mps": 1.2
+  },
+  "run": {
+   "name": "kamneklyk__run",
+   "frames": 24,
+   "length_s": 0.8,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 11,
+     "time": 0.36666666666666664,
+     "foot": "front_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 12,
+     "time": 0.4,
+     "foot": "hind_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 23,
+     "time": 0.7666666666666667,
+     "foot": "front_r"
+    }
+   ],
+   "speed_mps": 4.2
+  },
+  "turn_left": {
+   "name": "kamneklyk__turn_left",
+   "frames": 30,
+   "length_s": 1.0,
+   "loop": false,
+   "events": [],
+   "motion_keys": [
+    "yaw_deg",
+    "yaw"
+   ]
+  },
+  "turn_right": {
+   "name": "kamneklyk__turn_right",
+   "frames": 30,
+   "length_s": 1.0,
+   "loop": false,
+   "events": [],
+   "motion_keys": [
+    "yaw_deg",
+    "yaw"
+   ]
+  },
+  "roar": {
+   "name": "kamneklyk__roar",
+   "frames": 60,
+   "length_s": 2.0,
+   "loop": false,
+   "events": [
+    {
+     "event": "sound",
+     "frame": 14,
+     "time": 0.4666666666666667
+    }
+   ]
+  },
+  "attack_tusk": {
+   "name": "kamneklyk__attack_tusk",
+   "frames": 36,
+   "length_s": 1.2,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "whoosh",
+     "frame": 13
+    },
+    {
+     "event": "contact",
+     "frame": 15
+    },
+    {
+     "event": "recovery",
+     "frame": 18
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     12
+    ],
+    "active": [
+     12,
+     18
+    ],
+    "recovery": [
+     18,
+     36
+    ],
+    "impact": 15
+   }
+  },
+  "attack_charge": {
+   "name": "kamneklyk__attack_charge",
+   "frames": 75,
+   "length_s": 2.5,
+   "loop": false,
+   "events": [
+    {
+     "event": "scrape",
+     "frame": 9
+    },
+    {
+     "event": "scrape",
+     "frame": 16
+    },
+    {
+     "event": "launch",
+     "frame": 27
+    },
+    {
+     "event": "contact",
+     "frame": 40
+    },
+    {
+     "event": "brake",
+     "frame": 51
+    },
+    {
+     "event": "recovery",
+     "frame": 51
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     27
+    ],
+    "active": [
+     27,
+     51
+    ],
+    "recovery": [
+     51,
+     75
+    ],
+    "impact": 40
+   },
+   "motion_keys": [
+    "forward_m"
+   ]
+  },
+  "attack_stomp": {
+   "name": "kamneklyk__attack_stomp",
+   "frames": 54,
+   "length_s": 1.8,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "contact",
+     "frame": 28
+    },
+    {
+     "event": "dust",
+     "frame": 28
+    },
+    {
+     "event": "recovery",
+     "frame": 31
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     27
+    ],
+    "active": [
+     27,
+     31
+    ],
+    "recovery": [
+     31,
+     54
+    ],
+    "impact": 28
+   }
+  },
+  "hit": {
+   "name": "kamneklyk__hit",
+   "frames": 18,
+   "length_s": 0.6,
+   "loop": false,
+   "events": [
+    {
+     "event": "hit",
+     "frame": 2
+    }
+   ]
+  },
+  "death": {
+   "name": "kamneklyk__death",
+   "frames": 84,
+   "length_s": 2.8,
+   "loop": false,
+   "events": [
+    {
+     "event": "collapse",
+     "frame": 10
+    },
+    {
+     "event": "ground_contact",
+     "frame": 44
+    },
+    {
+     "event": "dead",
+     "frame": 84
+    }
+   ]
+  },
+  "alert": {
+   "name": "kamneklyk__alert",
+   "frames": 30,
+   "length_s": 1.0,
+   "loop": false,
+   "events": []
+  }
+ },
+ "semantic_states": {
+  "Idle": "idle",
+  "Walk": "walk",
+  "Run": "run",
+  "Alert": "alert",
+  "Attack": "attack_tusk",
+  "Hit": "hit",
+  "Death": "death",
+  "Roar": "roar"
+ },
+ "server_events": {
+  "creature_attack": "attack_tusk",
+  "tusk_sweep": "attack_tusk"
+ },
+ "levels": {
+  "1": {
+   "emission_strength": 1.0,
+   "tint_r": [
+    0.3,
+    0.3,
+    0.32,
+    0.0
+   ],
+   "tint_g": [
+    0.55,
+    0.36,
+    0.2,
+    0.0
+   ],
+   "tint_b": [
+    0.78,
+    0.76,
+    0.72,
+    0.0
+   ]
+  },
+  "2": {
+   "emission_strength": 1.0,
+   "tint_r": [
+    0.24,
+    0.24,
+    0.26,
+    0.75
+   ],
+   "tint_g": [
+    0.55,
+    0.36,
+    0.2,
+    0.0
+   ],
+   "tint_b": [
+    0.8,
+    0.78,
+    0.74,
+    0.8
+   ]
+  },
+  "3": {
+   "emission_strength": 1.0,
+   "tint_r": [
+    0.22,
+    0.22,
+    0.24,
+    0.8
+   ],
+   "tint_g": [
+    0.58,
+    0.38,
+    0.2,
+    0.9
+   ],
+   "tint_b": [
+    0.82,
+    0.8,
+    0.76,
+    0.9
+   ]
+  }
+ },
+ "emission_color": "#E0A040",
+ "gpu_texture_estimate_mb": {
+  "godot_runtime_lod1_lod2": 8.3,
+  "lod0": 26.7
+ },
+ "compression": "none (core glTF 2.0 + KHR_materials_emissive_strength); Godot imports textures as VRAM-compressed (ASTC/ETC2 on iOS)",
+ "licences": "All geometry, textures and animation generated by godot/art/creatures-v2 (DRENOVAR project). No third-party assets.",
+ "provenance": "Procedural SDF sculpt + QuadriFlow/decimation + xatlas + Cycles bakes + procedural PBR + IK keyed clips"
+}

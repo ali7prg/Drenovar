@@ -1,0 +1,117 @@
+{
+ "glb": "tenerys_lod1.glb",
+ "clips": {
+  "idle": {
+   "frames": 90,
+   "loop": true,
+   "planted_steps": 360,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "walk": {
+   "frames": 36,
+   "loop": true,
+   "planted_steps": 69,
+   "max_slide_mm_per_frame": 7.64,
+   "mean_slide_mm_per_frame": 0.287,
+   "lowest_foot_m": -0.0
+  },
+  "stalk": {
+   "frames": 48,
+   "loop": true,
+   "planted_steps": 144,
+   "max_slide_mm_per_frame": 9.64,
+   "mean_slide_mm_per_frame": 0.134,
+   "lowest_foot_m": -0.0
+  },
+  "run": {
+   "frames": 18,
+   "loop": true,
+   "planted_steps": 12,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "turn_left": {
+   "frames": 18,
+   "loop": false,
+   "planted_steps": 48,
+   "max_slide_mm_per_frame": 2.57,
+   "mean_slide_mm_per_frame": 0.054,
+   "lowest_foot_m": -0.0
+  },
+  "turn_right": {
+   "frames": 18,
+   "loop": false,
+   "planted_steps": 48,
+   "max_slide_mm_per_frame": 2.57,
+   "mean_slide_mm_per_frame": 0.054,
+   "lowest_foot_m": -0.0
+  },
+  "howl": {
+   "frames": 75,
+   "loop": false,
+   "planted_steps": 300,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "attack_bite": {
+   "frames": 24,
+   "loop": false,
+   "planted_steps": 96,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "attack_claw": {
+   "frames": 30,
+   "loop": false,
+   "planted_steps": 98,
+   "max_slide_mm_per_frame": 16.72,
+   "mean_slide_mm_per_frame": 0.306,
+   "lowest_foot_m": -0.0
+  },
+  "attack_pounce": {
+   "frames": 48,
+   "loop": false,
+   "planted_steps": 115,
+   "max_slide_mm_per_frame": 37.26,
+   "mean_slide_mm_per_frame": 0.648,
+   "lowest_foot_m": -0.0
+  },
+  "dodge": {
+   "frames": 24,
+   "loop": false,
+   "planted_steps": 60,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "hit": {
+   "frames": 15,
+   "loop": false,
+   "planted_steps": 60,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  },
+  "death": {
+   "frames": 72,
+   "loop": false,
+   "planted_steps": 28,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": 0.0
+  },
+  "alert": {
+   "frames": 24,
+   "loop": false,
+   "planted_steps": 96,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
+   "lowest_foot_m": -0.0
+  }
+ }
+}

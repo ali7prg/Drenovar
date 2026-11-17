@@ -24,6 +24,7 @@ var current_map := ""
 # its events are spread over the longer span and the walk home is quickened by
 # the same amount, so the army is still home at the server's returnsAt.
 const MIN_FIGHT_MS := 6500.0
+const FINAL_HOLD_MS := 900.0
 # Shown fight end per authoritative battle end (report finishedAt).
 var visual_ends := {}
 # After a stall (asset upload, OS pause) the clock catches up gradually instead
@@ -53,18 +54,25 @@ static func stretch(a: Dictionary, ends: Dictionary) -> void:
 	# The walk home may at most double its speed (estimated from the walk out,
 	# so the stretch is the same before and after the server sends the return).
 	var walk := time_value(a, "arrivesAt", 0.0) - time_value(a, "startsAt", 0.0)
-	var extra := minf(MIN_FIGHT_MS - span, maxf(0.0, walk) * 0.5)
+	var extra := minf(MIN_FIGHT_MS + FINAL_HOLD_MS - span, maxf(0.0, walk) * 0.5)
 	if extra < 250.0:
 		return
-	var k := (span + extra) / span
+	# The server's last step (often the killing blow) is stamped at the battle end
+	# itself; scaled alone it landed on the last shown frame, so the army turned
+	# home mid-swing and the creature fell behind it. The blows end a little
+	# earlier and the swing and the fall finish inside the fight.
+	var hold := minf(FINAL_HOLD_MS, extra * 0.2)
+	var k := (span + extra - hold) / span
 	for holder in [a.get("battle"), a.get("presentation"), a]:
 		if holder is Dictionary and holder.get("events") is Array:
 			var scaled: Array = []
-			for e in holder.events:
+			var spread := step_offsets(holder.events, span)
+			for n in holder.events.size():
+				var e: Variant = holder.events[n]
 				if e is Array and e.size() > 0:
-					var row: Array = e.duplicate(); row[0] = float(row[0]) * k; scaled.append(row)
+					var row: Array = e.duplicate(); row[0] = (float(row[0]) + spread[n]) * k; scaled.append(row)
 				elif e is Dictionary and e.has("at"):
-					var row: Dictionary = e.duplicate(); row.at = float(row.at) * k; scaled.append(row)
+					var row: Dictionary = e.duplicate(); row.at = (float(row.at) + spread[n]) * k; scaled.append(row)
 				else:
 					scaled.append(e)
 			holder.events = scaled
@@ -75,6 +83,35 @@ static func stretch(a: Dictionary, ends: Dictionary) -> void:
 			a.returnsAt = a.returnStartsAt
 	ends[str(finish)] = finish + extra
 	a.stretched = k
+
+# The server resolves a fight in 200 ms steps and stamps every blow of a step
+# with the step's start. Scaled alone, a step stays one instant: a small creature
+# killed by the first volley (all 18 blows at 0 ms) was shown as one release and
+# then 6 s of soldiers standing idle. Before scaling, the blows of a step are laid
+# out across that step in server order (never past the battle end), so the
+# stretched fight shows them one after another. Pure function of one step's
+# blows: a step arrives whole in every poll, so a later poll never moves a blow
+# already shown. Order, HP after each blow and the outcome are unchanged.
+const STEP_MS := 200.0
+static func step_offsets(events: Array, span: float) -> Array:
+	var offsets: Array = []
+	offsets.resize(events.size())
+	offsets.fill(0.0)
+	var groups := {}
+	for n in events.size():
+		var e: Variant = events[n]
+		var at := float(e[0]) if e is Array and e.size() > 0 else float(e.get("at", 0.0)) if e is Dictionary else NAN
+		if is_nan(at):
+			continue
+		if not groups.has(at):
+			groups[at] = []
+		groups[at].append(n)
+	for at in groups:
+		var members: Array = groups[at]
+		var width := clampf(span - float(at), 0.0, STEP_MS)
+		for j in members.size():
+			offsets[members[j]] = width * j / members.size()
+	return offsets
 
 # When the shown fight of a report ends (report.finishedAt = battle end).
 func visual_end(finished_at: float) -> float:

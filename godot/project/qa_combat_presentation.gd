@@ -52,6 +52,27 @@ func _initialize() -> void:
 	paused.frame(ended,4000,"city")
 	paused.frame(ended,60000,"city")
 	check(60000.0 - paused.delay_ms - paused.frame_time <= paused.MAX_LAG_MS + 1.0,"background gap does not replay minutes")
+	# A small creature killed by the first volley (the live city shape: 18 blows
+	# all at 0 ms, fight 200 ms): the blows are shown one after another across the
+	# stretched fight, in server order, with the same HP after each blow; and a
+	# later poll with the same step keeps every shown time (no replay).
+	var volley := []
+	for i in 18:
+		volley.append({"at":0,"kind":"soldier_attack","unitId":"ENG-03","index":i,"damage":78,"creatureHP":maxi(0,1400-(i+1)*78)})
+	var short := {"id":"volley","units":{"ENG-03":18},"startsAt":0,"arrivesAt":16000,"battleAt":16000,"battleEndsAt":16200,"presentation":{"events":volley}}
+	var shown := short.duplicate(true); Clock.stretch(shown,{})
+	var ats: Array = shown.presentation.events.map(func(e):return float(e.at))
+	var sorted := ats.duplicate(); sorted.sort()
+	check(ats == sorted and ats[0] == 0.0 and ats[-1] > 5000.0 and ats[-1] < 6500.0,"one-step volley spread over the shown fight: "+str(ats))
+	check(range(17).all(func(i):return float(ats[i+1])-float(ats[i]) > 250.0),"volley blows are apart: "+str(ats))
+	check(shown.presentation.events.map(func(e):return e.creatureHP) == volley.map(func(e):return e.creatureHP),"volley HP sequence unchanged")
+	var kill := {"id":"kill","units":{"ENG-05":6},"startsAt":0,"arrivesAt":16000,"battleAt":16000,"battleEndsAt":16600,"returnStartsAt":16600,"presentation":{"events":[{"at":0,"kind":"soldier_attack","unitId":"ENG-03","index":0,"creatureHP":900},{"at":600,"kind":"soldier_attack","unitId":"ENG-05","index":0,"creatureHP":0}]}}
+	Clock.stretch(kill,{})
+	var shown_end := float(kill.battleEndsAt) - 16000.0
+	check(shown_end >= Clock.MIN_FIGHT_MS and shown_end - float(kill.presentation.events[-1].at) >= 800.0,"killing blow at the battle end is shown inside the fight: %s / %s"%[kill.presentation.events[-1].at, shown_end])
+	check(float(kill.returnStartsAt) == float(kill.battleEndsAt),"return starts at the shown fight end")
+	var later: Array = volley + [{"at":200,"kind":"creature_attack","unitId":"ENG-03","index":0,"hp":10}]
+	check(Clock.step_offsets(later,400.0).slice(0,18) == Clock.step_offsets(volley,200.0),"a step's spread does not depend on later steps")
 	tail.frame(ended,7100,"world")
 	check(tail.frame_state.world.armies.is_empty(),"map switch never carries city actors into world")
 	print(JSON.stringify({"checks":checks,"failures":failures,"method":"headless presentation clock and identity; no device/render acceptance"}))

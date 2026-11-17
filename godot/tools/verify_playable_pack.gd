@@ -23,6 +23,10 @@ func run() -> void:
 	if game.api.requests_total != 0: failures.append("fresh install must wait for account confirmation")
 	if not game.modal.visible or game.modal_title.text != "Аккаунт": failures.append("account entry missing")
 	if not is_instance_valid(game.stage.combat_view): failures.append("combat presentation missing from main game")
+	# Build 1021: data read at run time by the march lanes and the town plan.
+	for data_file in ["res://assets/environment/scenery-footprints.json", "res://assets/city/town_lots.json"]:
+		if not FileAccess.file_exists(data_file): failures.append("missing " + data_file)
+	if load("res://src/march_lanes.gd").footprint_table().size() < 70: failures.append("scenery footprints not loaded")
 	var models := 0
 	var architecture := 0
 	for id in game.data.unitModels:

@@ -294,7 +294,8 @@ func scene(game, stage) -> void:
 	# Trees on the crowd's ground are no obstacle (they are cleared for the fight).
 	var centre := Vector2(plan.beast.x, plan.beast.z)
 	var trees_in: Array = plan.slot_solver.debug_obstacles.filter(func(o): return o.proxy and Vector2(o.transform.origin.x, o.transform.origin.z).distance_to(centre) < float(plan.clear))
-	check(float(plan.get("clear", 0.0)) > 5.0 and trees_in.is_empty(), "cleared ground %.1f m, tree obstacles inside: %d" % [plan.get("clear", 0.0), trees_in.size()])
+	# Build 1021: the world map's crowd is half the city's size (stage.unit_k), so is its ground.
+	check(float(plan.get("clear", 0.0)) > 5.0 * stage.unit_k and trees_in.is_empty(), "cleared ground %.1f m, tree obstacles inside: %d" % [plan.get("clear", 0.0), trees_in.size()])
 	var feints: Array = cache.get("feints", [])
 	check(not feints.is_empty(), "the creature swipes between its server attacks")
 	var server_creature: Array = mixed.result.events.filter(func(e): return e.kind != "soldier_attack").map(func(e): return float(e.at) * float(army.get("stretched", 1.0)))

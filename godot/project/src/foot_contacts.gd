@@ -27,7 +27,7 @@ func sample(stage: Node3D, actor: Node3D, clip: String, mounted: bool, now: floa
 			var support: Vector3=stage.ground_point(position)
 			# Reject airborne/terrain-mismatched contacts, including steep march
 			# prefixes awaiting global route work. Do not hide them with dust.
-			if absf(position.y-support.y)>.22 or not stage.dry_ground(position):continue
+			if absf(position.y-support.y)>.22*float(stage.unit_k) or not stage.dry_ground(position):continue
 			var id:="step/%d/%d/%d"%[actor.get_instance_id(),roundi(now),k]
 			emit(stage,id,support,now,mounted,false)
 	elif not moving and not previous.is_empty() and previous.clip in ["walk","run","trot"] and clip!="death":
@@ -36,7 +36,8 @@ func sample(stage: Node3D, actor: Node3D, clip: String, mounted: bool, now: floa
 	actor.set_meta("foot_marker",{"clip":clip,"phase":phase,"at":now})
 
 func emit(stage: Node3D, id: String, position: Vector3, now: float, mounted: bool, stop: bool) -> void:
-	if puffs.size()<12:puffs.append({"position":position,"at":now,"duration":460.0 if mounted else 340.0,"size":.8 if mounted else .45,"seed":float(posmod(id.hash(),1000))*.001})
+	# Puffs follow the soldiers' size on this map (smaller on the world map).
+	if puffs.size()<12:puffs.append({"position":position,"at":now,"duration":460.0 if mounted else 340.0,"size":(.8 if mounted else .45)*float(stage.unit_k),"seed":float(posmod(id.hash(),1000))*.001})
 	stage.combat_audio.cue(id,"hoof" if mounted else "foot",position,1 if mounted or stop else 0)
 
 func draw(stage: Node3D, now: float) -> void:

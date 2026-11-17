@@ -46,6 +46,16 @@ const MIN_FIGHT_MS := 9500.0
 const FINAL_HOLD_MS := 900.0
 # Shown fight end per authoritative battle end (report finishedAt).
 var visual_ends := {}
+# A hunt's battle exists only from the server's first answer after the army
+# arrives (the server simulates it then), and an answer can take seconds. Up to
+# build 1020 the crowd stood still at its places until it came: 3.5 s in the city
+# and 6 s on the world map in the owner's recordings, and the first seconds of the
+# fight were then skipped. Now the soldiers fight from the moment they reach the
+# creature (landscape.ambient_strike), and the server's blows begin when the answer
+# is there: per army, how late (shown ms) that was against the planned start. Fixed
+# once known, so every later poll lays the blows out the same way (stretch).
+var late_starts := {}
+const MAX_LATE_MS := 9000.0
 # After a stall (asset upload, OS pause) the clock catches up gradually instead
 # of jumping over a whole fight; the lag is never more than MAX_LAG_MS (an app
 # returning from the background does not replay minutes of marching).
@@ -62,26 +72,36 @@ static func display_until(army: Dictionary) -> float:
 # Presentation copy only: spreads a short battle over MIN_FIGHT_MS. Battle
 # events are offsets from battleAt and are scaled; the battle end and the start
 # of the return move by the same extra time, returnsAt stays authoritative.
-static func stretch(a: Dictionary, ends: Dictionary) -> void:
+#
+# `late` (ms): the server's blows start that much after the battle start (see
+# late_starts). The return starts later by the same time when the walk home can
+# give it back; otherwise the blows are shown a little faster, never faster than
+# 1/MIN_PACE of the server, and only beyond that the first ones are not drawn.
+const MIN_PACE := 0.75
+
+static func stretch(a: Dictionary, ends: Dictionary, late := 0.0) -> void:
 	var begin := time_value(a, "battleAt", time_value(a, "arrivesAt", INF))
 	var finish := time_value(a, "battleEndsAt", time_value(a, "returnStartsAt", INF))
 	if is_inf(begin) or is_inf(finish):
 		return
 	var span := finish - begin
-	if span <= 0.0 or span >= MIN_FIGHT_MS:
+	if span <= 0.0:
 		return
+	late = maxf(0.0, late)
 	# The walk home may at most double its speed (estimated from the walk out,
 	# so the stretch is the same before and after the server sends the return).
 	var walk := time_value(a, "arrivesAt", 0.0) - time_value(a, "startsAt", 0.0)
-	var extra := minf(MIN_FIGHT_MS + FINAL_HOLD_MS - span, maxf(0.0, walk) * 0.5)
-	if extra < 250.0:
+	var longer := MIN_FIGHT_MS + FINAL_HOLD_MS - span if span < MIN_FIGHT_MS else 0.0
+	var extra := minf(longer + late, maxf(0.0, walk) * 0.5)
+	if extra < 250.0 and late <= 0.0:
 		return
 	# The server's last step (often the killing blow) is stamped at the battle end
 	# itself; scaled alone it landed on the last shown frame, so the army turned
 	# home mid-swing and the creature fell behind it. The blows end a little
 	# earlier and the swing and the fall finish inside the fight.
 	var hold := minf(FINAL_HOLD_MS, extra * 0.2)
-	var k := (span + extra - hold) / span
+	var lead := clampf(late, 0.0, maxf(0.0, span + extra - hold - span * MIN_PACE))
+	var k := (span + extra - hold - lead) / span
 	for holder in [a.get("battle"), a.get("presentation"), a]:
 		if holder is Dictionary and holder.get("events") is Array:
 			var scaled: Array = []
@@ -89,9 +109,9 @@ static func stretch(a: Dictionary, ends: Dictionary) -> void:
 			for n in holder.events.size():
 				var e: Variant = holder.events[n]
 				if e is Array and e.size() > 0:
-					var row: Array = e.duplicate(); row[0] = (float(row[0]) + spread[n]) * k; scaled.append(row)
+					var row: Array = e.duplicate(); row[0] = lead + (float(row[0]) + spread[n]) * k; scaled.append(row)
 				elif e is Dictionary and e.has("at"):
-					var row: Dictionary = e.duplicate(); row.at = (float(row.at) + spread[n]) * k; scaled.append(row)
+					var row: Dictionary = e.duplicate(); row.at = lead + (float(row.at) + spread[n]) * k; scaled.append(row)
 				else:
 					scaled.append(e)
 			holder.events = scaled
@@ -102,6 +122,7 @@ static func stretch(a: Dictionary, ends: Dictionary) -> void:
 			a.returnsAt = a.returnStartsAt
 	ends[str(finish)] = finish + extra
 	a.stretched = k
+	a.blows_from = lead
 
 # The server resolves a fight in 200 ms steps and stamps every blow of a step
 # with the step's start. Scaled alone, a step stays one instant: a small creature
@@ -151,7 +172,7 @@ static func event_id(army: Dictionary, event: Variant) -> String:
 func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 	markers.clear()
 	if latest.is_empty() or current_map != map_name or (str(state.get("playerId", "")) != str(latest.get("playerId", ""))):
-		latest = {}; armies.clear(); seen.clear(); missing_since.clear(); sample_gaps.clear(); previous_time = -INF; marker_cache.clear()
+		latest = {}; armies.clear(); seen.clear(); missing_since.clear(); sample_gaps.clear(); previous_time = -INF; marker_cache.clear(); late_starts.clear()
 		current_map = map_name
 	var stamp := float(state.get("serverTime",now))
 	if latest.is_empty() or stamp > float(latest.get("serverTime",-INF)):
@@ -176,8 +197,9 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 			if source.status == "returned" and now-delay_ms >= display_until(source):
 				continue
 			var copy: Dictionary = source.duplicate(true)
-			stretch(copy, visual_ends)
 			var old: Dictionary = armies.get(str(source.id),{})
+			note_late_start(source, old, now)
+			stretch(copy, visual_ends, float(late_starts.get(str(source.id), 0.0)))
 			# A returned city row drops battle history; retain it only for the bounded
 			# presentation tail. Full world history comes from the V6 projection.
 			if copy.get("battle") == null and old.get("battle") is Dictionary:
@@ -210,7 +232,7 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 	var fighting := {}
 	for id in armies.keys():
 		if missing_since.has(id) and now-float(missing_since[id]) > delay_ms+3200.0:
-			armies.erase(id); missing_since.erase(id); marker_cache.erase(id)
+			armies.erase(id); missing_since.erase(id); marker_cache.erase(id); late_starts.erase(id)
 			for key in seen.keys():
 				if key.begins_with(str(id)+"/"): seen.erase(key)
 			continue
@@ -219,7 +241,7 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 		var ends := time_value(a,"returnStartsAt",time_value(a,"battleEndsAt",INF))
 		var returned := display_until(a)
 		if a.get("returnsAt") != null and frame_time >= returned:
-			armies.erase(id); marker_cache.erase(id)
+			armies.erase(id); marker_cache.erase(id); late_starts.erase(id)
 			for key in seen.keys():
 				if key.begins_with(str(id)+"/"): seen.erase(key)
 			continue
@@ -286,6 +308,24 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 	fight_on_screen = not fighting.is_empty()
 	previous_time = frame_time
 	return {"state":frame_state,"time":frame_time}
+
+# The first answer that carries an army's battle: how late it is against the
+# planned start of the fight on the shown clock (0 when it came in time, or when
+# the army was not drawn on its way there: the app opened mid-fight).
+func note_late_start(source: Dictionary, old: Dictionary, now: float) -> void:
+	var id := str(source.get("id", ""))
+	if late_starts.has(id) or str(source.get("worldKind", "")) == "pvp":
+		return
+	var has_battle: bool = source.get("battle") is Dictionary or source.get("presentation") is Dictionary
+	if not has_battle and str(source.get("status", "")) != "fighting":
+		return
+	var waited: bool = not old.is_empty() and not (old.get("battle") is Dictionary or old.get("presentation") is Dictionary) \
+		and str(old.get("status", "")) == "outbound"
+	var planned := time_value(source, "battleAt", time_value(source, "arrivesAt", INF)) - PREPARE_MS
+	var shown := now - delay_ms
+	if previous_time > -INF:
+		shown = maxf(previous_time, shown)
+	late_starts[id] = clampf(shown - planned, 0.0, MAX_LATE_MS) if waited and not is_inf(planned) else 0.0
 
 func record(row: Dictionary) -> void:
 	trace.append(row)

@@ -25,14 +25,15 @@ func run() -> void:
 			if not cache.has("engage"):continue
 			var plan: Dictionary=cache.engage
 			# Same obstacles as the plan: trees on the crowd's cleared ground do not count (build 1020).
-			var solver=Slots.new();solver.clear_radius=float(plan.get("clear",0.0));solver.prepare(stage,plan.beast,plan.face,plan.body)
+			# Build 1021: the soldiers' size on this map too (smaller boxes on the world map).
+			var solver=Slots.new();solver.clear_radius=float(plan.get("clear",0.0));solver.set_unit_k(stage.unit_k);solver.prepare(stage,plan.beast,plan.face,plan.body)
 			for slot in cache.slots:
 				var key:="%s:%d"%[slot.id,slot.index]
 				var position: Vector3=plan.places[key]
 				var yaw:=atan2(plan.beast.x-position.x,plan.beast.z-position.z)
 				var check: Dictionary=solver.test(position,yaw,bool(slot.mounted))
 				if not check.valid:failures+=1
-				else:solver.occupied.append({"id":key,"polygon":Slots.footprint(check.position,check.basis,check.half+Vector2.ONE*Slots.MARGIN)})
+				else:solver.occupied.append({"id":key,"polygon":Slots.footprint(check.position,check.basis,check.half+Vector2.ONE*Slots.MARGIN*stage.unit_k)})
 				var chosen: Dictionary={}
 				if plan.has("slot_solver"):
 					for row in plan.slot_solver.diagnostics:

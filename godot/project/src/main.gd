@@ -246,7 +246,12 @@ func _ready() -> void:
 			if login_proof.is_empty():
 				restore_account()
 	launch.show_step("Готовим поселение…", 52 if restore_running else 72)
+	var launch_started := Time.get_ticks_msec()
+	# Under the launch screen the city is built in large slices (Landscape.launching).
+	Landscape.launching = true
 	await show_scene("city")
+	Landscape.launching = false
+	var city_built_ms := Time.get_ticks_msec() - launch_started
 	if restore_running and not showing_cached_state:
 		# First launch after an update (no local copy yet): wait a little for the
 		# server so the player lands in their own city, not in the demo one.
@@ -254,6 +259,9 @@ func _ready() -> void:
 		var deadline := Time.get_ticks_msec() + 6000
 		while restore_running and Time.get_ticks_msec() < deadline:
 			await get_tree().process_frame
+	var warm := await settle_first_frames(launch)
+	diagnostics.log_event("launch", {"city_ms": city_built_ms, "first_frames_ms": warm.x, "first_frames": warm.y,
+		"total_ms": Time.get_ticks_msec() - launch_started}, Time.get_unix_time_from_system(), false)
 	launch.finish()
 	warm_panel_textures()
 	if restoring_session and not showing_cached_state:
@@ -262,6 +270,35 @@ func _ready() -> void:
 		show_account()
 	if smoke:
 		await run_smoke()
+
+# The city's first frames are drawn behind the opaque launch screen, which fades only
+# once frames come at a normal pace. Up to build 1020 the fade started together with
+# the first frame of the city: that frame prepares the shaders of every building, tree
+# and the ground (Metal on the phone) and took seconds, so the launch screen stood
+# half faded over the city ("Поселение готово") until it was done. Returns
+# (milliseconds, frames) spent here; at most FIRST_FRAMES_MS.
+const FIRST_FRAMES_MS := 4000
+
+func settle_first_frames(launch) -> Vector2:
+	if DisplayServer.get_name() == "headless" or not is_instance_valid(launch):
+		return Vector2.ZERO
+	launch.show_step("Рисуем поселение…", 92)
+	var started := Time.get_ticks_msec()
+	var previous := Time.get_ticks_usec()
+	var frames := 0
+	var recent: Array[float] = []
+	while Time.get_ticks_msec() - started < FIRST_FRAMES_MS:
+		await get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		recent.append((now - previous) / 1000.0)
+		previous = now
+		frames += 1
+		if recent.size() > 3:
+			recent.pop_front()
+		# Three quick frames, or three alike (a slower device at its own steady pace).
+		if frames >= 4 and recent.size() == 3 and (recent.max() < 40.0 or recent.max() < recent.min() * 1.25):
+			break
+	return Vector2(Time.get_ticks_msec() - started, frames)
 
 func make_vignette() -> TextureRect:
 	# Soft darkening toward the screen edges frames the scene and keeps the eye on the
@@ -2140,7 +2177,9 @@ func focus_fight(army_id: String, position: Vector3) -> void:
 		return
 	followed_army = ""
 	stage.target = position
-	stage.zoom = minf(stage.zoom, 34.0 if map_name == "city" else 48.0)
+	# The world map's soldiers are half the city's size (build 1021): its fight is
+	# framed closer.
+	stage.zoom = minf(stage.zoom, 34.0 if map_name == "city" else 36.0)
 
 func release_inactive_scene() -> void:
 	prewarm_paused_until = Time.get_ticks_msec() + 10 * 60 * 1000

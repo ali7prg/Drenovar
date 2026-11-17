@@ -22,6 +22,9 @@ var clear_radius := 0.0
 var foot_shape := BoxShape3D.new()
 var horse_shape := BoxShape3D.new()
 const MARGIN := 0.10
+# Size of the soldiers on this map relative to the layout of 1.15 (landscape.unit_k):
+# the footprints, search steps and contact gaps below follow it.
+var unit_k := 1.0
 # Time slicing. 0 = run to completion in the calling frame (tests, lab tools).
 # Otherwise the planner yields to the next frame after this many microseconds,
 # so a departing march never stalls the game while contact places are prepared.
@@ -36,8 +39,12 @@ const ASTAR_PER_MEMBER := 1
 var astar_left := ASTAR_PER_MEMBER
 
 func _init() -> void:
-	foot_shape.size=Vector3(0.88,2.15,1.0)
-	horse_shape.size=Vector3(1.3,3.4,3.6)
+	set_unit_k(1.0)
+
+func set_unit_k(k: float) -> void:
+	unit_k=k
+	foot_shape.size=Vector3(0.88,2.15,1.0)*k
+	horse_shape.size=Vector3(1.3,3.4,3.6)*k
 
 # Called inside the planner's loops: hands the frame back once the slice is used.
 func pause() -> void:
@@ -82,6 +89,22 @@ func prepare(owner_stage: Node3D, at: Vector3, face: Vector3, body: Vector2) -> 
 			# TownGround is a walkable 8cm surface overlay, not a wall. Its
 			# coarse triangles are also alpha masked; query it as support only.
 			add_mesh(mesh.mesh,mesh.global_transform,str(mesh.get_path()),mesh==stage.town.ground)
+	# The city wall is drawn as MultiMesh parts (city_walls.gd), which the search above
+	# never saw: up to build 1020 a charge or a battle place could cross the palisade.
+	# Its footing and its towers stand on the ground; their boxes are obstacles.
+	if is_instance_valid(stage.walls.node):
+		for part in stage.walls.node.get_children():
+			if not part is MultiMeshInstance3D or not String(part.name) in ["footing","tower_footing","tower_base_stone"]:continue
+			var multi: MultiMesh=(part as MultiMeshInstance3D).multimesh
+			var bounds: AABB=multi.mesh.get_aabb()
+			for i in multi.instance_count:
+				var placed:Transform3D=part.global_transform*multi.get_instance_transform(i)
+				if not near.intersects(placed*bounds):continue
+				await pause()
+				if not space.is_valid():return
+				# Physics boxes take no scale: the instance's scale goes into the box size.
+				var box:=BoxShape3D.new();box.size=bounds.size*placed.basis.get_scale();shapes.append(box)
+				add_shape(box,Transform3D(placed.basis.orthonormalized(),placed*bounds.get_center()),"wall:%s/%d"%[part.name,i])
 	# Original placement buffers include offscreen instances; camera uploads are
 	# deliberately not the collision source. Billboard/grass LODs have no volume.
 	for batch in stage.render_batches:
@@ -149,7 +172,7 @@ func ground(p: Vector3) -> Vector3:
 	return p
 
 func support(p: Vector3, yaw: float, mounted: bool) -> Dictionary:
-	var half := Vector2(0.65,1.8) if mounted else Vector2(0.44,0.5)
+	var half := (Vector2(0.65,1.8) if mounted else Vector2(0.44,0.5))*unit_k
 	var basis := Basis(Vector3.UP,yaw)
 	var points: Array[Vector3]=[]
 	for x in [-half.x,half.x]:
@@ -169,7 +192,7 @@ func support(p: Vector3, yaw: float, mounted: bool) -> Dictionary:
 	for q in points: average+=q*0.25
 	var residual := 0.0
 	for q in points:residual=maxf(residual,absf(normal.dot(q-average)))
-	if residual>0.08:return {"valid":false,"reason":"terrain_break","residual":residual,"points":points}
+	if residual>0.08*unit_k:return {"valid":false,"reason":"terrain_break","residual":residual,"points":points}
 	var forward := basis.z.slide(normal).normalized()
 	basis=Basis(normal.cross(forward).normalized(),normal,forward)
 	p=ground(p)
@@ -180,14 +203,14 @@ func test(p: Vector3, yaw: float, mounted: bool, check_occupied := true, check_t
 	var result := support(p,yaw,mounted)
 	if not result.valid:return result
 	var shape: BoxShape3D=horse_shape if mounted else foot_shape
-	var transform := Transform3D(result.basis,result.position+result.normal*(shape.size.y*0.5+0.10))
-	var query := PhysicsShapeQueryParameters3D.new();query.shape=shape;query.transform=transform;query.margin=MARGIN
+	var transform := Transform3D(result.basis,result.position+result.normal*(shape.size.y*0.5+0.10*unit_k))
+	var query := PhysicsShapeQueryParameters3D.new();query.shape=shape;query.transform=transform;query.margin=MARGIN*unit_k
 	query.collision_mask=1
 	var hits := PhysicsServer3D.space_get_direct_state(space).intersect_shape(query,8)
 	if not hits.is_empty():
 		return {"valid":false,"reason":"mesh_intersection","obstacles":hits.map(func(h):return obstacle_ids.get(h.rid,"unknown"))}
 	if check_occupied:
-		var polygon := footprint(result.position,result.basis,result.half+Vector2.ONE*MARGIN)
+		var polygon := footprint(result.position,result.basis,result.half+Vector2.ONE*MARGIN*unit_k)
 		for other in occupied:
 			if not Geometry2D.intersect_polygons(polygon,other.polygon).is_empty():return {"valid":false,"reason":"occupied","neighbor":other.id}
 	if check_target:
@@ -195,7 +218,8 @@ func test(p: Vector3, yaw: float, mounted: bool, check_occupied := true, check_t
 		var across := Vector3(target_face.z,0,-target_face.x)
 		# A convex ellipse reservation prevents the final approach cutting through
 		# the target even before its asynchronously loaded mesh exists.
-		var ratio := pow(local.dot(target_face)/(target_body.x+(1.3 if mounted else .45)),2)+pow(local.dot(across)/(target_body.y+(1.3 if mounted else .45)),2)
+		var reach := (1.3 if mounted else .45)*unit_k
+		var ratio := pow(local.dot(target_face)/(target_body.x+reach),2)+pow(local.dot(across)/(target_body.y+reach),2)
 		if ratio<1.0:return {"valid":false,"reason":"target_body"}
 	return result
 
@@ -208,7 +232,7 @@ static func footprint(p: Vector3, basis: Basis, half: Vector2) -> PackedVector2A
 func segment_clear(a: Vector3, b: Vector3, mounted: bool) -> bool:
 	var distance := Vector2(b.x-a.x,b.z-a.z).length()
 	var yaw := atan2(b.x-a.x,b.z-a.z)
-	var steps := maxi(1,ceili(distance/0.65))
+	var steps := maxi(1,ceili(distance/(0.65*unit_k)))
 	for k in range(1,steps+1):
 		if not test(a.lerp(b,float(k)/steps),yaw,mounted,false).valid:return false
 	return true
@@ -219,8 +243,8 @@ func approach(a: Vector3, b: Vector3, mounted: bool) -> Array[Vector3]:
 	# march. An invalid earlier formation offset is recorded separately, and is
 	# not used as a reason to select an unsafe fighting footprint.
 	var original := a
-	if a.distance_to(b)>6.0:
-		var entering := b+(a-b).normalized()*6.0
+	if a.distance_to(b)>6.0*unit_k:
+		var entering := b+(a-b).normalized()*6.0*unit_k
 		if support(entering,atan2(b.x-a.x,b.z-a.z),mounted).valid:a=entering
 	if segment_clear(a,b,mounted):
 		var direct: Array[Vector3]=[a,b]
@@ -230,7 +254,7 @@ func approach(a: Vector3, b: Vector3, mounted: bool) -> Array[Vector3]:
 		return []
 	astar_left -= 1
 	# Local deterministic A*: bounded search, never modifies the server path.
-	var step := 1.3 if mounted else 1.0
+	var step := (1.3 if mounted else 1.0)*unit_k
 	var start := Vector2i.ZERO
 	var open := [start];var cost := {start:0.0};var previous := {};var validity := {}
 	var in_open := {start:true}
@@ -261,7 +285,7 @@ func approach(a: Vector3, b: Vector3, mounted: bool) -> Array[Vector3]:
 		for d in [Vector2i(1,0),Vector2i(-1,0),Vector2i(0,1),Vector2i(0,-1),Vector2i(1,1),Vector2i(-1,-1),Vector2i(1,-1),Vector2i(-1,1)]:
 			var n: Vector2i=cell+d;var q: Vector3=stage.ground_point(a+Vector3(n.x*step,0,n.y*step))
 			var added:=p.distance_to(q);var score:=float(cost[cell])+added
-			if score>=float(cost.get(n,INF)) or score>ASTAR_MAX_COST:continue
+			if score>=float(cost.get(n,INF)) or score>ASTAR_MAX_COST*unit_k:continue
 			var edge:=str(cell)+":"+str(n)
 			if not validity.has(edge):validity[edge]=segment_clear(p,q,mounted)
 			if not validity[edge]:continue
@@ -283,7 +307,7 @@ func choose(id: String, wanted: Vector3, from: Vector3, mounted: bool) -> Dictio
 			var turn:=ceili(step/2.0)*(1 if step%2 else -1)
 			var ray:=direction.rotated(Vector3.UP,turn*deg_to_rad(6))
 			var edge:=1.0/sqrt(pow(ray.dot(target_face)/target_body.x,2)+pow(ray.dot(across)/target_body.y,2))
-			var q:=centre+ray*(edge+gap+reserve*1.7)
+			var q:=centre+ray*(edge+gap+reserve*1.7*unit_k)
 			var yaw:=atan2(centre.x-q.x,centre.z-q.z)
 			await pause()
 			if not space.is_valid():return {}
@@ -294,24 +318,24 @@ func choose(id: String, wanted: Vector3, from: Vector3, mounted: bool) -> Dictio
 			if path.is_empty():rejected["approach"]=int(rejected.get("approach",0))+1;continue
 			result.path=path;result.reserve=reserve>0;result.reserve_row=reserve;result.id=id;result.rejected=rejected
 			result.march_prefix_verified=segment_clear(path[0],path[1],mounted)
-			occupied.append({"id":id,"polygon":footprint(result.position,result.basis,result.half+Vector2.ONE*MARGIN)})
+			occupied.append({"id":id,"polygon":footprint(result.position,result.basis,result.half+Vector2.ONE*MARGIN*unit_k)})
 			diagnostics.append(result);return result
 	# A reserve must still have a valid footprint. Keep the unsupported upstream
 	# march prefix explicit in diagnostics rather than parking on the bad slope.
 	for radius_step in range(12):
 		for angle_step in range(32):
 			var ray:=Vector3(sin(angle_step*TAU/32),0,cos(angle_step*TAU/32))
-			var q:=centre+ray*(8.0+radius_step*1.8)
+			var q:=centre+ray*(8.0+radius_step*1.8)*unit_k
 			var yaw:=atan2(centre.x-q.x,centre.z-q.z)
 			await pause()
 			if not space.is_valid():return {}
 			var result:=test(q,yaw,mounted)
 			if not result.valid:continue
-			var entering: Vector3=result.position+(from-result.position).normalized()*2.0
+			var entering: Vector3=result.position+(from-result.position).normalized()*2.0*unit_k
 			if not segment_clear(entering,result.position,mounted):continue
 			result.id=id;result.reserve=true;result.reserve_row=3;result.path=[from,entering,result.position]
 			result.rejected=rejected;result.march_prefix_verified=segment_clear(from,entering,mounted)
-			occupied.append({"id":id,"polygon":footprint(result.position,result.basis,result.half+Vector2.ONE*MARGIN)})
+			occupied.append({"id":id,"polygon":footprint(result.position,result.basis,result.half+Vector2.ONE*MARGIN*unit_k)})
 			diagnostics.append(result);return result
 	# No reachable reserve in the bounded search: expose the failure for review.
 	var fallback:=support(from,atan2(centre.x-from.x,centre.z-from.z),mounted)

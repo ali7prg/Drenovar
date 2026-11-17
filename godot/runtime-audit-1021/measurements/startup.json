@@ -1,0 +1,498 @@
+{
+ "tool": "godot/tools/profile_startup.gd",
+ "method": "real main.tscn, a saved login and a local copy of a city like the owner's (16 buildings at level V, the wall), offline; headless Linux --max-fps 60 (frames paced like a 60 Hz display, no GPU, no shader pipelines); 1020 = the runtime scripts of build 1020 (HEAD), 1021-cold = no town plan kept (first launch of the build), 1021-warm = the plan kept from the launch before",
+ "fields": {
+  "city_build_ms": "from the step 'Готовим поселение…' to the city shown",
+  "phases": "ms from the start of main.tscn",
+  "long_frames": "[ms, frame length ms, phase] for frames longer than 50 ms",
+  "first_answer_ms": "cost of applying the server's first answer"
+ },
+ "runs": [
+  {
+   "city_build_ms": 698.0,
+   "first_answer_ms": 30.1,
+   "frames": 109,
+   "frames_per_step": {
+    "no splash": 92,
+    "Готовим поселение… / scene": 15,
+    "Открываем земли семи знамён…": 1,
+    "Поселение готово": 1
+   },
+   "long_frames": [
+    [
+     1061.0,
+     108.0,
+     "loading"
+    ],
+    [
+     1574.0,
+     377.0,
+     "loading"
+    ],
+    [
+     1648.0,
+     73.0,
+     "loading"
+    ],
+    [
+     1877.0,
+     117.0,
+     "after city shown"
+    ]
+   ],
+   "phases": [
+    [
+     "city shown",
+     1760.0
+    ],
+    [
+     "splash gone",
+     1877.0
+    ]
+   ],
+   "build": "1020"
+  },
+  {
+   "city_build_ms": 732.0,
+   "first_answer_ms": 35.3,
+   "frames": 109,
+   "frames_per_step": {
+    "no splash": 93,
+    "Готовим поселение… / scene": 14,
+    "Открываем земли семи знамён…": 1,
+    "Поселение готово": 1
+   },
+   "long_frames": [
+    [
+     1113.0,
+     107.0,
+     "loading"
+    ],
+    [
+     1617.0,
+     383.0,
+     "loading"
+    ],
+    [
+     1729.0,
+     112.0,
+     "loading"
+    ],
+    [
+     1780.0,
+     51.0,
+     "loading"
+    ],
+    [
+     1974.0,
+     128.0,
+     "after city shown"
+    ]
+   ],
+   "phases": [
+    [
+     "city shown",
+     1845.0
+    ],
+    [
+     "splash gone",
+     1974.0
+    ]
+   ],
+   "build": "1020"
+  },
+  {
+   "city_build_ms": 677.0,
+   "first_answer_ms": 22.6,
+   "frames": 110,
+   "frames_per_step": {
+    "no splash": 93,
+    "Готовим поселение… / scene": 15,
+    "Открываем земли семи знамён…": 1,
+    "Поселение готово": 1
+   },
+   "long_frames": [
+    [
+     1157.0,
+     108.0,
+     "loading"
+    ],
+    [
+     1651.0,
+     359.0,
+     "loading"
+    ],
+    [
+     1727.0,
+     77.0,
+     "loading"
+    ],
+    [
+     1945.0,
+     111.0,
+     "after city shown"
+    ]
+   ],
+   "phases": [
+    [
+     "city shown",
+     1834.0
+    ],
+    [
+     "splash gone",
+     1945.0
+    ]
+   ],
+   "build": "1020"
+  },
+  {
+   "city_build_ms": 550.0,
+   "first_answer_ms": 20.8,
+   "frames": 100,
+   "frames_per_step": {
+    "no splash": 93,
+    "Готовим поселение… / scene": 5,
+    "Открываем земли семи знамён…": 1,
+    "Поселение готово": 1
+   },
+   "long_frames": [
+    [
+     1396.0,
+     153.0,
+     "loading"
+    ],
+    [
+     1459.0,
+     63.0,
+     "loading"
+    ],
+    [
+     1774.0,
+     315.0,
+     "loading"
+    ],
+    [
+     1844.0,
+     70.0,
+     "loading"
+    ],
+    [
+     1897.0,
+     53.0,
+     "loading"
+    ],
+    [
+     2049.0,
+     104.0,
+     "after city shown"
+    ]
+   ],
+   "phases": [
+    [
+     "city shown",
+     1945.0
+    ],
+    [
+     "splash gone",
+     2049.0
+    ]
+   ],
+   "build": "1021-cold"
+  },
+  {
+   "city_build_ms": 571.0,
+   "first_answer_ms": 34.9,
+   "frames": 99,
+   "frames_per_step": {
+    "no splash": 92,
+    "Готовим поселение… / scene": 5,
+    "Открываем земли семи знамён…": 1,
+    "Поселение готово": 1
+   },
+   "long_frames": [
+    [
+     1188.0,
+     134.0,
+     "loading"
+    ],
+    [
+     1247.0,
+     59.0,
+     "loading"
+    ],
+    [
+     1562.0,
+     314.0,
+     "loading"
+    ],
+    [
+     1634.0,
+     72.0,
+     "loading"
+    ],
+    [
+     1698.0,
+     64.0,
+     "loading"
+    ],
+    [
+     1759.0,
+     61.0,
+     "after city shown"
+    ],
+    [
+     1872.0,
+     113.0,
+     "after city shown"
+    ]
+   ],
+   "phases": [
+    [
+     "city shown",
+     1759.0
+    ],
+    [
+     "splash gone",
+     1872.0
+    ]
+   ],
+   "build": "1021-cold"
+  },
+  {
+   "city_build_ms": 549.0,
+   "first_answer_ms": 35.2,
+   "frames": 100,
+   "frames_per_step": {
+    "no splash": 93,
+    "Готовим поселение… / scene": 5,
+    "Открываем земли семи знамён…": 1,
+    "Поселение готово": 1
+   },
+   "long_frames": [
+    [
+     1107.0,
+     107.0,
+     "loading"
+    ],
+    [
+     1163.0,
+     56.0,
+     "loading"
+    ],
+    [
+     1464.0,
+     300.0,
+     "loading"
+    ],
+    [
+     1540.0,
+     76.0,
+     "loading"
+    ],
+    [
+     1656.0,
+     69.0,
+     "after city shown"
+    ],
+    [
+     1778.0,
+     122.0,
+     "after city shown"
+    ]
+   ],
+   "phases": [
+    [
+     "city shown",
+     1656.0
+    ],
+    [
+     "splash gone",
+     1778.0
+    ]
+   ],
+   "build": "1021-cold"
+  },
+  {
+   "city_build_ms": 328.0,
+   "first_answer_ms": 20.9,
+   "frames": 99,
+   "frames_per_step": {
+    "no splash": 92,
+    "Готовим поселение… / scene": 5,
+    "Открываем земли семи знамён…": 1,
+    "Поселение готово": 1
+   },
+   "long_frames": [
+    [
+     1101.0,
+     109.0,
+     "loading"
+    ],
+    [
+     1158.0,
+     57.0,
+     "loading"
+    ],
+    [
+     1238.0,
+     81.0,
+     "loading"
+    ],
+    [
+     1309.0,
+     71.0,
+     "loading"
+    ],
+    [
+     1376.0,
+     68.0,
+     "loading"
+    ],
+    [
+     1429.0,
+     52.0,
+     "after city shown"
+    ],
+    [
+     1532.0,
+     104.0,
+     "after city shown"
+    ]
+   ],
+   "phases": [
+    [
+     "city shown",
+     1429.0
+    ],
+    [
+     "splash gone",
+     1532.0
+    ]
+   ],
+   "build": "1021-warm"
+  },
+  {
+   "city_build_ms": 485.0,
+   "first_answer_ms": 20.3,
+   "frames": 102,
+   "frames_per_step": {
+    "no splash": 93,
+    "Готовим поселение… / scene": 7,
+    "Открываем земли семи знамён…": 1,
+    "Поселение готово": 1
+   },
+   "long_frames": [
+    [
+     1205.0,
+     171.0,
+     "loading"
+    ],
+    [
+     1278.0,
+     73.0,
+     "loading"
+    ],
+    [
+     1405.0,
+     116.0,
+     "loading"
+    ],
+    [
+     1515.0,
+     110.0,
+     "loading"
+    ],
+    [
+     1582.0,
+     67.0,
+     "loading"
+    ],
+    [
+     1639.0,
+     57.0,
+     "loading"
+    ],
+    [
+     1690.0,
+     51.0,
+     "after city shown"
+    ],
+    [
+     1841.0,
+     151.0,
+     "after city shown"
+    ]
+   ],
+   "phases": [
+    [
+     "city shown",
+     1690.0
+    ],
+    [
+     "splash gone",
+     1841.0
+    ]
+   ],
+   "build": "1021-warm"
+  },
+  {
+   "city_build_ms": 363.0,
+   "first_answer_ms": 22.7,
+   "frames": 100,
+   "frames_per_step": {
+    "no splash": 93,
+    "Готовим поселение… / scene": 5,
+    "Открываем земли семи знамён…": 1,
+    "Поселение готово": 1
+   },
+   "long_frames": [
+    [
+     1148.0,
+     113.0,
+     "loading"
+    ],
+    [
+     1209.0,
+     61.0,
+     "loading"
+    ],
+    [
+     1298.0,
+     89.0,
+     "loading"
+    ],
+    [
+     1395.0,
+     97.0,
+     "loading"
+    ],
+    [
+     1446.0,
+     50.0,
+     "loading"
+    ],
+    [
+     1511.0,
+     65.0,
+     "after city shown"
+    ],
+    [
+     1622.0,
+     111.0,
+     "after city shown"
+    ]
+   ],
+   "phases": [
+    [
+     "city shown",
+     1511.0
+    ],
+    [
+     "splash gone",
+     1622.0
+    ]
+   ],
+   "build": "1021-warm"
+  }
+ ]
+}

@@ -114,6 +114,14 @@ func plan(buildings: Array, table: Dictionary, gates: Array, all_plots: Array, o
 	ground_ok = ok
 	x_corridors = corridors(all_plots.map(func(p: Vector2): return p.x))
 	z_corridors = corridors(all_plots.map(func(p: Vector2): return p.y))
+	if load_cached(key, buildings.size()):
+		for i in buildings.size():
+			var b: Dictionary = buildings[i]
+			var now := level_of(table, b.type, int(b.level))
+			lots[i].level = int(b.level)
+			lots[i].body = Rect2(lots[i].at.x + now[0], lots[i].at.y + now[1], now[2] - now[0], now[3] - now[1])
+		paint()
+		return
 	for b: Dictionary in buildings:
 		var u := union_of(table, b.type)
 		var now := level_of(table, b.type, int(b.level))
@@ -192,6 +200,68 @@ func plan(buildings: Array, table: Dictionary, gates: Array, all_plots: Array, o
 		waiting.erase(best)
 		link_lot(best)
 	paint()
+	save_cached(key)
+
+# Laying out the streets above takes 0.3-0.4 s on a desktop for a town of 16
+# buildings at level V (about a second on the phone, in one frame of the launch,
+# under the launch screen). Its result depends only on the layout key, which does not
+# change between launches while no building is built or moved: the last plan is kept
+# on the device and the next launch only paints it (build 1021).
+const CACHE_PATH := "user://town-plan.json"
+const CACHE_VERSION := "town-plan-1"
+
+func save_cached(key: String) -> void:
+	var file := FileAccess.open(CACHE_PATH, FileAccess.WRITE)
+	if file == null:
+		return
+	file.store_string(JSON.stringify({"version": CACHE_VERSION, "key": key, "lots": pack(lots), "segments": pack(segments),
+		"attach": pack(attach), "plaza": pack(plaza)}, "", false, true))
+	file.close()
+
+func load_cached(key: String, count: int) -> bool:
+	if not FileAccess.file_exists(CACHE_PATH):
+		return false
+	var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(CACHE_PATH))
+	if not saved is Dictionary or saved.get("version") != CACHE_VERSION or saved.get("key") != key:
+		return false
+	var restored: Variant = unpack(saved.get("lots", []))
+	if not restored is Array or restored.size() != count:
+		return false
+	lots = restored
+	segments = unpack(saved.get("segments", []))
+	attach = unpack(saved.get("attach", []))
+	plaza = unpack(saved.get("plaza", {"r2": [0, 0, 0, 0]}))
+	return true
+
+static func pack(v: Variant) -> Variant:
+	if v is Vector2:
+		return {"v2": [v.x, v.y]}
+	if v is Rect2:
+		return {"r2": [v.position.x, v.position.y, v.size.x, v.size.y]}
+	if v is Array:
+		return v.map(func(item): return pack(item))
+	if v is Dictionary:
+		var out := {}
+		for k in v:
+			out[k] = pack(v[k])
+		return out
+	return v
+
+static func unpack(v: Variant) -> Variant:
+	if v is Dictionary:
+		if v.size() == 1 and v.has("v2"):
+			return Vector2(float(v.v2[0]), float(v.v2[1]))
+		if v.size() == 1 and v.has("r2"):
+			return Rect2(float(v.r2[0]), float(v.r2[1]), float(v.r2[2]), float(v.r2[3]))
+		var out := {}
+		for k in v:
+			out[k] = unpack(v[k])
+		if out.has("level"):
+			out.level = int(out.level)
+		return out
+	if v is Array:
+		return v.map(func(item): return unpack(item))
+	return v
 
 func door_of(lot: Dictionary) -> Vector2:
 	return Vector2(float(lot.door_x), lot.rect.end.y)

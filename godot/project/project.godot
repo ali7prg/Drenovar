@@ -12,7 +12,7 @@ config_version=5
 
 config/name="DRENOVAR"
 config/version="0.6.0"
-config/build_number="1020"
+config/build_number="1021"
 run/main_scene="res://main.tscn"
 run/main_scene.combat_lab="res://combat_lab.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
@@ -47,6 +47,14 @@ battle_focus={
 "value": Vector4(0, 0, 0, 0)
 }
 battle_focus_core={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+march_clear={
+"type": "sampler2D",
+"value": ""
+}
+march_clear_area={
 "type": "vec4",
 "value": Vector4(0, 0, 0, 0)
 }

@@ -301,12 +301,12 @@ from shading import lin, mix, sstep, fur_height, tangent_flow  # noqa: E402
 import noise  # noqa: E402
 
 EMISSION_COLOR = "#61BDF4"
-LEVELS = {
+LEVELS = {  # R: mane and shoulders (silver edges, II+), G: blue veins along the coat (glow), B: eyes (detail).
+    # Restrained: the coat stays black-blue; the glow is thin veins and eyes, readable without bloom.
     1: {"emission_strength": 0.85, "tint_r": (0.72, 0.80, 0.88, 0.0), "emit_r": 0.0, "emit_g": 0.0, "emit_b": 0.0},
-    2: {"emission_strength": 1.2, "tint_r": (0.70, 0.78, 0.86, 0.45), "emit_r": 0.25, "emit_g": 0.0,
-        "emit_b": 0.0},
-    3: {"emission_strength": 1.6, "tint_r": (0.82, 0.90, 0.98, 0.75), "emit_r": 0.45, "emit_g": 0.9,
-        "emit_b": 1.2},
+    2: {"emission_strength": 1.0, "tint_r": (0.52, 0.60, 0.70, 0.30), "emit_r": 0.0, "emit_g": 0.30, "emit_b": 0.0},
+    3: {"emission_strength": 1.2, "tint_r": (0.62, 0.72, 0.84, 0.40), "emit_r": 0.04, "emit_g": 0.75,
+        "emit_b": 0.9},
 }
 
 
@@ -507,9 +507,9 @@ def clips(rig, sampler):
         windows={"windup": [0, 8], "active": [8, 12], "recovery": [12, 24], "impact": 10}))
 
     claw_legs = C.leg_keys(rig, {("Front", "R"): {
-        "dx": [(0, 0.0), (8, -0.05), (12, 0.38), (15, 0.34), (22, 0.10), (30, 0.0, "hold")],
-        "dy": [(0, 0.0), (6, 0.22), (10, 0.42), (13, 0.10), (16, 0.04), (22, 0.0), (30, 0.0)],
-        "dz": [(0, 0.0), (8, 0.10), (13, -0.16), (16, -0.18), (24, 0.0), (30, 0.0)],
+        "dx": [(0, 0.0), (8, -0.05), (12, 0.38), (15, 0.34), (20, 0.10), (24, 0.0, "hold"), (30, 0.0, "hold")],
+        "dy": [(0, 0.0), (6, 0.22), (10, 0.42), (13, 0.12), (16, 0.08), (20, 0.06), (24, 0.0, "hold"), (30, 0.0)],
+        "dz": [(0, 0.0), (8, 0.10), (13, -0.16), (16, -0.18), (22, -0.04), (24, 0.0, "hold"), (30, 0.0)],
         "toe": [(0, 0.0), (8, -0.9), (11, 0.35), (14, 0.25), (22, 0.0)],
         "foot": [(0, 0.0), (8, -1.1), (11, -0.2), (16, 0.0), (22, 0.0)]}}, 30)
     out.append(C.standing(rig, g, pre + "attack_claw", 30, {

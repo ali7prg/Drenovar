@@ -3,16 +3,18 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cserl7nnj6ytl"
-path="res://.godot/imported/velkor_LOD2_horn_Normal.png-490155bf518f59f65d52aca51f0c5541.ctex"
+path.s3tc="res://.godot/imported/velkor_LOD2_horn_Normal.png-490155bf518f59f65d52aca51f0c5541.s3tc.ctex"
+path.etc2="res://.godot/imported/velkor_LOD2_horn_Normal.png-490155bf518f59f65d52aca51f0c5541.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={}
 
 [deps]
 
 source_file="res://assets/creatures-v2/velkor/velkor_textures/velkor_LOD2_horn_Normal.png"
-dest_files=["res://.godot/imported/velkor_LOD2_horn_Normal.png-490155bf518f59f65d52aca51f0c5541.ctex"]
+dest_files=["res://.godot/imported/velkor_LOD2_horn_Normal.png-490155bf518f59f65d52aca51f0c5541.s3tc.ctex", "res://.godot/imported/velkor_LOD2_horn_Normal.png-490155bf518f59f65d52aca51f0c5541.etc2.ctex"]
 
 [params]
 

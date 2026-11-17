@@ -3,16 +3,18 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b77o3rsovqdb4"
-path="res://.godot/imported/tenerys_LOD2_detail_Normal.png-95a3b876b7ae03269e83a178ccc054e9.ctex"
+path.s3tc="res://.godot/imported/tenerys_LOD2_detail_Normal.png-95a3b876b7ae03269e83a178ccc054e9.s3tc.ctex"
+path.etc2="res://.godot/imported/tenerys_LOD2_detail_Normal.png-95a3b876b7ae03269e83a178ccc054e9.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={}
 
 [deps]
 
 source_file="res://assets/creatures-v2/tenerys/tenerys_textures/tenerys_LOD2_detail_Normal.png"
-dest_files=["res://.godot/imported/tenerys_LOD2_detail_Normal.png-95a3b876b7ae03269e83a178ccc054e9.ctex"]
+dest_files=["res://.godot/imported/tenerys_LOD2_detail_Normal.png-95a3b876b7ae03269e83a178ccc054e9.s3tc.ctex", "res://.godot/imported/tenerys_LOD2_detail_Normal.png-95a3b876b7ae03269e83a178ccc054e9.etc2.ctex"]
 
 [params]
 

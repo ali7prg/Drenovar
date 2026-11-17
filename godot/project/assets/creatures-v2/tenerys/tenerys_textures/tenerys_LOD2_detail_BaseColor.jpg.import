@@ -3,16 +3,18 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dedqc5yhjw86g"
-path="res://.godot/imported/tenerys_LOD2_detail_BaseColor.jpg-97fa8402d8c4b1e1cc41d244b9c9da57.ctex"
+path.s3tc="res://.godot/imported/tenerys_LOD2_detail_BaseColor.jpg-97fa8402d8c4b1e1cc41d244b9c9da57.s3tc.ctex"
+path.etc2="res://.godot/imported/tenerys_LOD2_detail_BaseColor.jpg-97fa8402d8c4b1e1cc41d244b9c9da57.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={}
 
 [deps]
 
 source_file="res://assets/creatures-v2/tenerys/tenerys_textures/tenerys_LOD2_detail_BaseColor.jpg"
-dest_files=["res://.godot/imported/tenerys_LOD2_detail_BaseColor.jpg-97fa8402d8c4b1e1cc41d244b9c9da57.ctex"]
+dest_files=["res://.godot/imported/tenerys_LOD2_detail_BaseColor.jpg-97fa8402d8c4b1e1cc41d244b9c9da57.s3tc.ctex", "res://.godot/imported/tenerys_LOD2_detail_BaseColor.jpg-97fa8402d8c4b1e1cc41d244b9c9da57.etc2.ctex"]
 
 [params]
 

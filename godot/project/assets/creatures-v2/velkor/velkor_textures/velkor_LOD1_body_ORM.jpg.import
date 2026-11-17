@@ -3,16 +3,18 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://lheslv3uhpnd"
-path="res://.godot/imported/velkor_LOD1_body_ORM.jpg-634a0e8dbf580fcd652726620d2d27dc.ctex"
+path.s3tc="res://.godot/imported/velkor_LOD1_body_ORM.jpg-634a0e8dbf580fcd652726620d2d27dc.s3tc.ctex"
+path.etc2="res://.godot/imported/velkor_LOD1_body_ORM.jpg-634a0e8dbf580fcd652726620d2d27dc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={}
 
 [deps]
 
 source_file="res://assets/creatures-v2/velkor/velkor_textures/velkor_LOD1_body_ORM.jpg"
-dest_files=["res://.godot/imported/velkor_LOD1_body_ORM.jpg-634a0e8dbf580fcd652726620d2d27dc.ctex"]
+dest_files=["res://.godot/imported/velkor_LOD1_body_ORM.jpg-634a0e8dbf580fcd652726620d2d27dc.s3tc.ctex", "res://.godot/imported/velkor_LOD1_body_ORM.jpg-634a0e8dbf580fcd652726620d2d27dc.etc2.ctex"]
 
 [params]
 

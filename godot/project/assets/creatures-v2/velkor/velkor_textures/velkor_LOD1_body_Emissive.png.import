@@ -3,16 +3,18 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://qvcr3gxv6xxp"
-path="res://.godot/imported/velkor_LOD1_body_Emissive.png-3bd2701d4aaa2f73e942c5c4c426e8df.ctex"
+path.s3tc="res://.godot/imported/velkor_LOD1_body_Emissive.png-3bd2701d4aaa2f73e942c5c4c426e8df.s3tc.ctex"
+path.etc2="res://.godot/imported/velkor_LOD1_body_Emissive.png-3bd2701d4aaa2f73e942c5c4c426e8df.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={}
 
 [deps]
 
 source_file="res://assets/creatures-v2/velkor/velkor_textures/velkor_LOD1_body_Emissive.png"
-dest_files=["res://.godot/imported/velkor_LOD1_body_Emissive.png-3bd2701d4aaa2f73e942c5c4c426e8df.ctex"]
+dest_files=["res://.godot/imported/velkor_LOD1_body_Emissive.png-3bd2701d4aaa2f73e942c5c4c426e8df.s3tc.ctex", "res://.godot/imported/velkor_LOD1_body_Emissive.png-3bd2701d4aaa2f73e942c5c4c426e8df.etc2.ctex"]
 
 [params]
 

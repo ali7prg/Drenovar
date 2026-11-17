@@ -3,16 +3,18 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://kkx1te61q7dh"
-path="res://.godot/imported/dragor_LOD1_stone_Normal.png-ad837b50719420cbd515d62657b764cc.ctex"
+path.s3tc="res://.godot/imported/dragor_LOD1_stone_Normal.png-ad837b50719420cbd515d62657b764cc.s3tc.ctex"
+path.etc2="res://.godot/imported/dragor_LOD1_stone_Normal.png-ad837b50719420cbd515d62657b764cc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={}
 
 [deps]
 
 source_file="res://assets/creatures-v2/dragor/dragor_textures/dragor_LOD1_stone_Normal.png"
-dest_files=["res://.godot/imported/dragor_LOD1_stone_Normal.png-ad837b50719420cbd515d62657b764cc.ctex"]
+dest_files=["res://.godot/imported/dragor_LOD1_stone_Normal.png-ad837b50719420cbd515d62657b764cc.s3tc.ctex", "res://.godot/imported/dragor_LOD1_stone_Normal.png-ad837b50719420cbd515d62657b764cc.etc2.ctex"]
 
 [params]
 

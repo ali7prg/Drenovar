@@ -3,16 +3,18 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dx45sdatqyf84"
-path="res://.godot/imported/kamneklyk_LOD1_stone_ORM.jpg-17c90c818f04c992a8b17eaf226af22b.ctex"
+path.s3tc="res://.godot/imported/kamneklyk_LOD1_stone_ORM.jpg-17c90c818f04c992a8b17eaf226af22b.s3tc.ctex"
+path.etc2="res://.godot/imported/kamneklyk_LOD1_stone_ORM.jpg-17c90c818f04c992a8b17eaf226af22b.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={}
 
 [deps]
 
 source_file="res://assets/creatures-v2/kamneklyk/kamneklyk_textures/kamneklyk_LOD1_stone_ORM.jpg"
-dest_files=["res://.godot/imported/kamneklyk_LOD1_stone_ORM.jpg-17c90c818f04c992a8b17eaf226af22b.ctex"]
+dest_files=["res://.godot/imported/kamneklyk_LOD1_stone_ORM.jpg-17c90c818f04c992a8b17eaf226af22b.s3tc.ctex", "res://.godot/imported/kamneklyk_LOD1_stone_ORM.jpg-17c90c818f04c992a8b17eaf226af22b.etc2.ctex"]
 
 [params]
 

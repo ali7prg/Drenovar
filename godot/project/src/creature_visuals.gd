@@ -22,6 +22,8 @@ const V010 := {"idle": "Idle", "combat_idle": "Idle", "walk": "Walk", "run": "Ru
 	"attack_a": "Attack", "hit_front": "Hit", "hit_left": "Hit", "hit_right": "Hit", "death": "Death", "roar": "Roar"}
 # Server event kinds of a creature's special attack (gameplay37/server/catalog.mjs abilities).
 const SPECIAL_EVENTS := ["antler_charge", "pounce", "tusk_sweep", "shockwave"]
+## LOD1 <-> LOD2 hysteresis around the switch distance (fraction of it).
+const LOD_HYSTERESIS := 0.12
 
 static var _enabled := -1
 static var _registry := {}
@@ -156,7 +158,11 @@ static func _material(species: String, level: int, source: Material, group: Stri
 		return _materials[key]
 	var src := source as BaseMaterial3D
 	var e := entry(species)
-	var lv: Dictionary = e.get("levels", {}).get(str(level), {})
+	var lv: Dictionary = e.get("levels", {}).get(str(level), {}).duplicate()
+	# "groups": per material group overrides of the level (e.g. Dragor's skin creases glow less than plate seams)
+	var over = lv.get("groups", {}).get(group, {}) if lv.get("groups") is Dictionary else {}
+	if over is Dictionary:
+		lv.merge(over, true)
 	var m := ShaderMaterial.new()
 	m.shader = SHADER
 	m.set_shader_parameter("albedo_tex", src.albedo_texture)
@@ -186,10 +192,10 @@ static func install(actor: Node3D, species: String, level: int, actor_scale: flo
 	level = clampi(level, 1, 3)
 	var lod_m := float(e.get("lod_switch_m", 50.0)) * actor_scale
 	var meshes: Array = []
+	var parts: Array = []
 	for part: MeshInstance3D in actor.find_children("*", "MeshInstance3D", true, false):
 		var n := String(part.name)
 		var tier := 3 if n.contains("VARIANT_L3") else (2 if n.contains("VARIANT_L2") else 1)
-		part.visible = level >= tier
 		var group := ""
 		for g in e.get("groups", {}):
 			if n.to_lower().contains("_" + str(e.groups[g]).to_lower() + "_"):
@@ -200,15 +206,12 @@ static func install(actor: Node3D, species: String, level: int, actor_scale: flo
 				var mat := part.mesh.surface_get_material(s)
 				if mat != null:
 					part.set_surface_override_material(s, _material(species, level, mat, group, lod))
-		# LOD1 near, LOD2 far, with hysteresis (end/begin margins) so a creature on the
-		# boundary does not flicker between them.
-		if n.contains("_LOD2"):
-			part.visibility_range_begin = lod_m
-			part.visibility_range_begin_margin = lod_m * 0.12
-		elif n.contains("_LOD1"):
-			part.visibility_range_end = lod_m
-			part.visibility_range_end_margin = lod_m * 0.12
-		part.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
+		# LOD1 near, LOD2 far: switched by update_lod() (not by visibility-range margins: Godot starts a
+		# new instance hidden on both sides of the margin band, so a creature first seen 0.88-1.12 x the
+		# switch distance away stayed invisible until it left the band).
+		part.visibility_range_begin = 0.0
+		part.visibility_range_end = 0.0
+		parts.append([part, lod, tier])
 		meshes.append(part)
 	for player: AnimationPlayer in actor.find_children("*", "AnimationPlayer", true, false):
 		if _looped.has(species):
@@ -218,8 +221,38 @@ static func install(actor: Node3D, species: String, level: int, actor_scale: flo
 			if anim != null:
 				anim.loop_mode = Animation.LOOP_LINEAR if bool(clip.loop) else Animation.LOOP_NONE
 		_looped[species] = true
-	actor.set_meta(META, {"species": species, "level": level, "meshes": meshes})
+	actor.set_meta(META, {"species": species, "level": level, "meshes": meshes, "parts": parts, "lod_m": lod_m})
+	_show_lod(actor, 1)  # near until the first update_lod(): always one LOD drawn
 	set_life(actor, 1.0)
+
+## LOD by view distance with hysteresis from the shown LOD: LOD2 beyond (1 + h) x the switch distance,
+## LOD1 again under (1 - h) x; between them the shown one stays. Exactly one LOD is drawn at any time.
+## An orthographic camera (the city) counts as the perspective distance giving the same on-screen size.
+static func update_lod(actor: Node3D, camera: Camera3D) -> int:
+	if not owns(actor) or camera == null:
+		return 0
+	var info: Dictionary = actor.get_meta(META)
+	var shown := int(info.get("lod", 1))
+	var d := view_distance(camera, actor.global_position)
+	var switch_m := float(info.get("lod_m", 50.0))
+	if shown == 1 and d > switch_m * (1.0 + LOD_HYSTERESIS):
+		_show_lod(actor, 2)
+	elif shown == 2 and d < switch_m * (1.0 - LOD_HYSTERESIS):
+		_show_lod(actor, 1)
+	return int(info.get("lod", 1))
+
+static func view_distance(camera: Camera3D, at: Vector3) -> float:
+	if camera.projection == Camera3D.PROJECTION_ORTHOGONAL:
+		return camera.size / (2.0 * tan(deg_to_rad(camera.fov) * 0.5))
+	return camera.global_position.distance_to(at)
+
+static func _show_lod(actor: Node3D, lod: int) -> void:
+	var info: Dictionary = actor.get_meta(META)
+	info.lod = lod
+	for row in info.get("parts", []):
+		var part: MeshInstance3D = row[0]
+		if is_instance_valid(part):
+			part.visible = int(row[1]) == lod and int(info.level) >= int(row[2])
 
 static func owns(actor: Node3D) -> bool:
 	return actor != null and actor.has_meta(META)

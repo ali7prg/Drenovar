@@ -3,16 +3,18 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://jtjw4rqt7aqq"
-path="res://.godot/imported/kamneklyk_LOD2_body_BaseColor.jpg-8937de00e258b5f8d82f963c57926f69.ctex"
+path.s3tc="res://.godot/imported/kamneklyk_LOD2_body_BaseColor.jpg-8937de00e258b5f8d82f963c57926f69.s3tc.ctex"
+path.etc2="res://.godot/imported/kamneklyk_LOD2_body_BaseColor.jpg-8937de00e258b5f8d82f963c57926f69.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={}
 
 [deps]
 
 source_file="res://assets/creatures-v2/kamneklyk/kamneklyk_textures/kamneklyk_LOD2_body_BaseColor.jpg"
-dest_files=["res://.godot/imported/kamneklyk_LOD2_body_BaseColor.jpg-8937de00e258b5f8d82f963c57926f69.ctex"]
+dest_files=["res://.godot/imported/kamneklyk_LOD2_body_BaseColor.jpg-8937de00e258b5f8d82f963c57926f69.s3tc.ctex", "res://.godot/imported/kamneklyk_LOD2_body_BaseColor.jpg-8937de00e258b5f8d82f963c57926f69.etc2.ctex"]
 
 [params]
 

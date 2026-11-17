@@ -284,13 +284,15 @@ from shading import lin, mix, sstep, tangent_flow  # noqa: E402
 import noise  # noqa: E402
 
 EMISSION_COLOR = "#F0A12D"
-LEVELS = {  # R: shoulder plates + veins (II), G: chest/tail glow (III), B: light chips on spikes (III)
+LEVELS = {  # R: shoulder/forelimb plates (darker contrast, II+), G: deep seams in the plates and chest/tail skin
+    # creases (glow), B: light chips on plate edges and spikes (III). Light stays inside seams: never a whole
+    # glowing plate. "groups" overrides one material group: the skin creases glow far less than the plate seams.
     1: {"emission_strength": 0.8, "tint_r": (0.42, 0.40, 0.38, 0.0), "tint_b": (0.80, 0.76, 0.68, 0.0),
-        "emit_r": 0.0, "emit_g": 0.0},
-    2: {"emission_strength": 1.15, "tint_r": (0.30, 0.29, 0.28, 0.6), "tint_b": (0.80, 0.76, 0.68, 0.0),
-        "emit_r": 0.55, "emit_g": 0.0},
-    3: {"emission_strength": 1.5, "tint_r": (0.28, 0.27, 0.26, 0.7), "tint_b": (0.86, 0.82, 0.74, 0.85),
-        "emit_r": 0.8, "emit_g": 1.3},
+        "emit_g": 0.0},
+    2: {"emission_strength": 1.05, "tint_r": (0.30, 0.29, 0.28, 0.55), "tint_b": (0.80, 0.76, 0.68, 0.0),
+        "emit_g": 0.30, "groups": {"skin": {"emit_g": 0.06}}},
+    3: {"emission_strength": 1.3, "tint_r": (0.27, 0.26, 0.25, 0.65), "tint_b": (0.74, 0.70, 0.64, 0.6),
+        "emit_g": 0.65, "groups": {"skin": {"emit_g": 0.16}}},
 }
 
 
@@ -371,8 +373,8 @@ def shade_stone(ctx):
     em = (lin("#f0a12d")[None, :] * deep[:, None] * 0.9 + lin("#bd4b1d")[None, :] * (seam * (1 - deep) * 0.12)[:, None])
     rough = 0.88 - 0.10 * chip + 0.06 * cid
     shoulders = sstep(0.0, 0.6, np.abs(P[:, 2]) - 0.7) * sstep(0.1, 0.5, P[:, 0])
-    variant = np.stack([np.clip(shoulders + deep, 0, 1), np.zeros(ctx.n, np.float32),
-                        np.clip(chip * 0.7 + spike_tip, 0, 1), np.ones(ctx.n, np.float32)], 1)
+    variant = np.stack([np.clip(shoulders, 0, 1) * (1 - seam), np.clip(deep * 0.8 + seam * 0.25, 0, 1),
+                        np.clip(chip * 0.7 + spike_tip, 0, 1) * (1 - seam), np.ones(ctx.n, np.float32)], 1)
 
     def height(Q):
         a1, a2, ci = noise.worley(Q * 4.2, 23)

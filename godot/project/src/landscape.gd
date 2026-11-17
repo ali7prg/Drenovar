@@ -1702,6 +1702,8 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 		actor.show()
 		actor.process_mode = Node.PROCESS_MODE_INHERIT
 		actor.set_meta("last_visible_ticks", Time.get_ticks_msec())
+		# creatures-v2: LOD1/LOD2 by view distance, with hysteresis from the shown LOD.
+		CreatureVisuals.update_lod(actor, camera)
 		var clip := "Walk" if moving else "Idle"
 		var clip_phase := -1.0
 		var turn_rate := 10.0
@@ -1800,6 +1802,8 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 				clip = "Death"
 				clip_phase = clampf((elapsed - fallen_at) / 1200.0, 0.0, 1.0)
 				v010_time = (elapsed - fallen_at) / 1000.0
+				# The corpse that follows plays on the same fall (server time of the killing blow).
+				actor.set_meta("fell_at", float(army.battleAt) + fallen_at)
 			elif attack > -INF:
 				# Strike at the soldier the server names, turning toward it within reach.
 				var target: Variant = route.get("member_at", {}).get(victim)
@@ -1847,6 +1851,15 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 				heading = actor.rotation.y - CREATURE_YAW
 			clip = "Death"
 			clip_phase = 1.0
+			if v2:
+				# creatures-v2: the fall plays on from the killing blow instead of popping to the last frame.
+				# A long fight is not stretched (CombatPresentation) and ends on that blow, so the whole fall
+				# happens here; a stretched one began it inside the fight (fell_at) and continues seamlessly.
+				var ended := float(leaving[id].get("returnStartsAt", server_ms))
+				var fell := float(actor.get_meta("fell_at", ended))
+				if fell < float(leaving[id].get("battleAt", -INF)):
+					fell = ended # a mark from an earlier fight of this actor
+				v010_time = maxf(0.0, server_ms - fell) / 1000.0
 			p.y -= smoothstep(CORPSE_MS - 2400.0, CORPSE_MS, age) * 2.6 * actor.scale.y
 		actor.rotation.y = lerp_angle(actor.rotation.y, heading + CREATURE_YAW, 1.0 - exp(-turn_rate * delta))
 		if v2:

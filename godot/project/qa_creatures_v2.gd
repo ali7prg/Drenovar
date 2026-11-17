@@ -8,6 +8,7 @@ extends SceneTree
 # - combat v0.1.0 drives the authored clips (no animation library added) with manifest contact timing;
 # - two instances of one species play different clips independently; levels share textures, differ in
 #   material parameters and overlays; level materials are shared between instances of the same level;
+#   per-group level overrides (Dragor III skin vs plate seams) reach the right meshes;
 # - 20 spawn/despawn cycles do not accumulate nodes or resources; the death clip ends above the ground.
 # Run: godot --headless --path godot/project -s qa_creatures_v2.gd
 
@@ -105,6 +106,23 @@ func run() -> void:
 		var ma: ShaderMaterial = mats_a[any_name]
 		var mb: ShaderMaterial = mats_b[any_name]
 		check(ma.get_shader_parameter("albedo_tex") == mb.get_shader_parameter("albedo_tex"), species + ": levels share the same textures")
+		# per-group level overrides (registry "groups"), e.g. Dragor III: skin creases glow less than plate seams
+		var lv3: Dictionary = CreatureVisuals.entry(species).get("levels", {}).get("3", {})
+		var labels: Dictionary = CreatureVisuals.entry(species).get("groups", {})
+		var overridden := 0
+		for part_name: String in mats_b:
+			var group := ""
+			for g in labels:
+				if part_name.to_lower().contains("_" + str(labels[g]).to_lower() + "_"):
+					group = g
+			var over: Dictionary = lv3.get("groups", {}).get(group, {})
+			var want := Vector3(float(over.get("emit_r", lv3.get("emit_r", 0.0))), float(over.get("emit_g", lv3.get("emit_g", 0.0))),
+				float(over.get("emit_b", lv3.get("emit_b", 0.0))))
+			var got: Vector3 = (mats_b[part_name] as ShaderMaterial).get_shader_parameter("emit_masks")
+			check(got.is_equal_approx(want), "%s: level III %s glow %s = registry %s" % [species, part_name, got, want])
+			overridden += 1 if not over.is_empty() else 0
+		if not lv3.get("groups", {}).is_empty():
+			check(overridden > 0, "%s: level III group override reaches its meshes (%d)" % [species, overridden])
 		var c := scene.instantiate() as Node3D
 		root.add_child(c)
 		CreatureVisuals.install(c, species, 1, 1.0)
@@ -112,16 +130,46 @@ func run() -> void:
 		for part: MeshInstance3D in c.find_children("*", "MeshInstance3D", true, false):
 			shared = shared and part.get_surface_override_material(0) == mats_a.get(String(part.name))
 		check(shared, species + ": instances of one level share their materials")
-		# LOD ranges
+		# LOD1 near / LOD2 far with hysteresis, exactly one LOD drawn, also for a creature first seen inside
+		# the band (Godot's own range margins started it hidden on both LODs there)
 		var lods := {1: 0, 2: 0}
 		for part: MeshInstance3D in a.find_children("*", "MeshInstance3D", true, false):
 			if String(part.name).contains("_LOD1"):
 				lods[1] += 1
-				check(part.visibility_range_end > 0.0 and part.visibility_range_end_margin > 0.0, "%s: LOD1 range with hysteresis" % species)
 			elif String(part.name).contains("_LOD2"):
 				lods[2] += 1
-				check(part.visibility_range_begin > 0.0 and part.visibility_range_begin_margin > 0.0, "%s: LOD2 begins with hysteresis" % species)
 		check(lods[1] > 0 and lods[2] > 0, species + ": LOD1 and LOD2 meshes present")
+		var cam := Camera3D.new()
+		root.add_child(cam)
+		var switch_m := float(CreatureVisuals.entry(species).lod_switch_m)  # actor a has scale 1
+		var drawn := func(actor: Node3D) -> Array:
+			var shown := {1: 0, 2: 0}
+			for part: MeshInstance3D in actor.find_children("*", "MeshInstance3D", true, false):
+				var n := String(part.name)
+				if part.visible and part.is_visible_in_tree() and not n.contains("VARIANT"):
+					shown[2 if n.contains("_LOD2") else 1] += 1
+			return [shown[1], shown[2]]
+		var steps := [[0.5, 1], [1.05, 1], [1.2, 2], [1.05, 2], [0.95, 2], [0.8, 1], [1.0, 1]]
+		var lod_ok := true
+		for step in steps:
+			cam.global_position = a.global_position + Vector3(0, 0, float(step[0]) * switch_m)
+			var got := CreatureVisuals.update_lod(a, cam)
+			var shown: Array = drawn.call(a)
+			var one: bool = (int(shown[0]) > 0) != (int(shown[1]) > 0)
+			lod_ok = lod_ok and got == int(step[1]) and one and (int(shown[0]) > 0 if got == 1 else int(shown[1]) > 0)
+		check(lod_ok, species + ": LOD hysteresis 0.5/1.05/1.2/1.05/0.95/0.8/1.0 x switch -> 1/1/2/2/2/1/1, one LOD drawn")
+		var fresh := scene.instantiate() as Node3D
+		root.add_child(fresh)
+		CreatureVisuals.install(fresh, species, 1, 1.0)
+		cam.global_position = fresh.global_position + Vector3(0, 0, switch_m * 1.08)
+		CreatureVisuals.update_lod(fresh, cam)
+		var first: Array = drawn.call(fresh)
+		check(int(first[0]) > 0 or int(first[1]) > 0, species + ": a creature first seen inside the LOD band is drawn")
+		cam.projection = Camera3D.PROJECTION_ORTHOGONAL
+		cam.size = 2.0 * tan(deg_to_rad(cam.fov) * 0.5) * switch_m * 1.5
+		check(CreatureVisuals.update_lod(fresh, cam) == 2, species + ": orthographic view (city) uses its on-screen size for LOD")
+		fresh.queue_free()
+		cam.queue_free()
 		# combat v0.1.0 drives the authored clips: no library, manifest timing
 		check(CombatV010.install(a, "creature", path), species + ": combat v0.1.0 accepts the actor")
 		check(not player.has_animation_library(&"combat_v010"), species + ": no extra animation library (no duplicated tracks)")
@@ -176,4 +224,5 @@ func run() -> void:
 		report[species] = row
 	print("CREATURES_V2 ", JSON.stringify(report))
 	print("CREATURES_V2_CHECKS ", checks, " failures ", failures)
+	print("QA_CREATURES_V2 checks=%d failures=%d" % [checks, failures])
 	quit(0 if failures == 0 else 1)

@@ -121,11 +121,6 @@ def extras_level_overlays(extras):
     return bool(extras and extras.get("web_canonical"))
 
 
-def level_material_params(sp, level):
-    """Material factors baked into per-level files (Godot applies the same through its shader)."""
-    return sp.LEVELS[level]
-
-
 def write(path, sp, sk, lod_sets, clips, level=1, generator="DRENOVAR creatures-v2", texture_format="PNG",
           include_overlays=True, extras=None, gltf_external=False):
     """lod_sets: list of (lod, {group: dict(mesh=..., tex=dir, joints/weights)}). Writes a GLB, or with
@@ -142,7 +137,6 @@ def write(path, sp, sk, lod_sets, clips, level=1, generator="DRENOVAR creatures-
         m[:3, 3] = -b.head
         inv[i] = m.T  # glTF matrices are column-major
     skin = g.skin("CreatureSkin", [node_of[n] for n in joints], inv, skeleton=node_of[joints[0]])
-    params = sp.LEVELS[level]
     for lod, groups in lod_sets:
         for group, data in groups.items():
             mesh = data["mesh"]
@@ -162,7 +156,7 @@ def write(path, sp, sk, lod_sets, clips, level=1, generator="DRENOVAR creatures-
                 e_bytes, e_mime = png_bytes(em_path)
                 ti_e = g.texture(g.image(e_bytes, e_mime, f"{sp.ID}_LOD{lod}_{group}_Emissive"))
             mat_name = f"M_{sp.ID.capitalize()}_{sp.MATERIAL_NAMES[group]}_LOD{lod}"
-            strength = params.get("emission_strength", 1.0)
+            strength = level_params(sp, level, group).get("emission_strength", 1.0)
             mi = g.material(mat_name, base_tex=ti_base, normal_tex=ti_n, orm_tex=ti_o, emissive_tex=ti_e,
                             emissive=(1, 1, 1) if ti_e is not None else (0, 0, 0), emissive_strength=strength,
                             extras={"species": sp.ID, "group": group, "lod": lod, "level": level,
@@ -209,10 +203,17 @@ def luma(c):
     return c[..., 0] * 0.2126 + c[..., 1] * 0.7152 + c[..., 2] * 0.0722
 
 
+def level_params(sp, level, group):
+    """LEVELS[level] with that level's per-group overrides ("groups": {group: {...}}) applied."""
+    prm = {k: v for k, v in sp.LEVELS[level].items() if k != "groups"}
+    prm.update(sp.LEVELS[level].get("groups", {}).get(group, {}))
+    return prm
+
+
 def level_textures(sp, tex_dir, group, level, out_dir):
     """Bakes the level look (same formula as the Godot creature shader) into BaseColor/Emissive PNGs."""
     from texturing import srgb_to_linear, linear_to_srgb, hexcol
-    prm = sp.LEVELS[level]
+    prm = level_params(sp, level, group)
     base = np.asarray(Image.open(os.path.join(tex_dir, f"{group}_basecolor.png")).convert("RGB"), np.float32) / 255
     vpath = os.path.join(tex_dir, f"{group}_variant.png")
     if not os.path.exists(vpath):
@@ -236,8 +237,11 @@ def level_textures(sp, tex_dir, group, level, out_dir):
         em = srgb_to_linear(np.asarray(Image.open(em_src).convert("RGB"), np.float32) / 255)
         var_e = np.asarray(Image.open(vpath).convert("RGBA").resize(em.shape[1::-1], Image.BILINEAR), np.float32) / 255
         col = srgb_to_linear(hexcol(sp.EMISSION_COLOR))
-        em = em * prm.get("emission_strength", 1.0) / max(prm.get("emission_strength", 1.0), 1e-6)
-        em = em + col * (var_e[..., 0] * prm.get("emit_r", 0.0) + var_e[..., 2] * prm.get("emit_b", 0.0))[..., None]
+        # glTF multiplies the whole emissive texture by emissiveStrength; the shader adds the mask glow after the
+        # strength, so the mask term is divided by it here: tex * s == emissive * s + colour * masks (as in Godot).
+        s = max(prm.get("emission_strength", 1.0), 1e-6)
+        em = em + col * (var_e[..., 0] * prm.get("emit_r", 0.0) + var_e[..., 1] * prm.get("emit_g", 0.0) +
+                         var_e[..., 2] * prm.get("emit_b", 0.0))[..., None] / s
         epath = os.path.join(out_dir, f"{group}_emissive_L{level}.png")
         Image.fromarray((linear_to_srgb(np.clip(em, 0, 1)) * 255 + 0.5).astype(np.uint8)).save(epath, optimize=True)
     return bpath, epath

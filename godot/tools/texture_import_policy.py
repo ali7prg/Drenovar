@@ -13,7 +13,7 @@ import os
 import re
 import sys
 
-THREE_D = ("army/", "city/", "city-details/", "city-ground/", "creature-assets37/", "world-ground/",
+THREE_D = ("army/", "city/", "city-details/", "city-ground/", "creature-assets37/", "creatures-v2/", "world-ground/",
            "world-scenery/", "environment/surfaces20.png", "environment/forest60")
 TWO_D = ("ui/", "icons/", "intro/", "creatures37/", "environment/atlas.webp")
 

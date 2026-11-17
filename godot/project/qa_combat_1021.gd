@@ -12,6 +12,7 @@ extends SceneTree
 #     creature (about as tall as the trees) stands in a glade of faded crowns.
 const Clock = preload("res://src/combat_presentation.gd")
 const CombatV010 = preload("res://combat_v010/runtime/combat_v010_presenter.gd")
+const CreatureVisuals = preload("res://src/creature_visuals.gd")
 var checks := 0
 var failures: Array = []
 var notes := {}
@@ -294,7 +295,10 @@ func run() -> void:
 				check(is_equal_approx(unit.scale.y, 0.5) or unit.basis.get_scale().y < 0.51, "a world soldier is drawn at 0.5")
 				break
 	var beast: Node3D = stage.creatures.get_node_or_null(str(enc.id))
-	check(beast != null and absf(beast.scale.x - stage.creature_scale(1) * 0.6) < 0.01, "the world creature at 0.6 of its city size")
+	# World creature: 0.6 of its city size. creatures-v2 models are authored in metres and carry the
+	# species display adapter (creature_visuals.gd) on top, identical on both maps.
+	var adapter := CreatureVisuals.display_scale(stage.creature_species(enc))
+	check(beast != null and absf(beast.scale.x - stage.creature_scale(1) * 0.6 * adapter) < 0.01, "the world creature at 0.6 of its city size")
 	check(health_frames >= 60, "the creature shows its health from the start of the fight: %d frames" % health_frames)
 	notes.engaging = {"soldiers_swinging": swinging, "swings_each": counts, "health_frames": health_frames, "house_top_m": snappedf(house_top, 0.01)}
 	await ferry_rows()

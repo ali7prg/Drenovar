@@ -1,0 +1,1592 @@
+{
+ "engine": "gameplay37/server/combat.mjs simulate()",
+ "seed": 24301,
+ "parties": {
+  "recruits_25": {
+   "ENG-09": 25
+  },
+  "recruits_60": {
+   "ENG-09": 60
+  },
+  "spears_swords_120": {
+   "ENG-01": 60,
+   "ENG-02": 60
+  },
+  "mixed_200": {
+   "ENG-01": 60,
+   "ENG-02": 50,
+   "ENG-03": 50,
+   "ENG-05": 20,
+   "ENG-07": 20
+  },
+  "army_400": {
+   "ENG-01": 120,
+   "ENG-02": 100,
+   "ENG-03": 100,
+   "ENG-04": 30,
+   "ENG-06": 50
+  }
+ },
+ "rows": [
+  {
+   "species": "tenerys",
+   "level": 1,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 1400,
+    "attack": 80,
+    "defense": 25,
+    "outcome": "victory",
+    "duration_s": 3,
+    "dead": 0,
+    "wounded": 1,
+    "surviving": 24
+   },
+   "adapted": {
+    "hp": 1400,
+    "attack": 80,
+    "defense": 25,
+    "outcome": "victory",
+    "duration_s": 3,
+    "dead": 0,
+    "wounded": 1,
+    "surviving": 24
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 1,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 1400,
+    "attack": 80,
+    "defense": 25,
+    "outcome": "victory",
+    "duration_s": 1.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 60
+   },
+   "adapted": {
+    "hp": 1400,
+    "attack": 80,
+    "defense": 25,
+    "outcome": "victory",
+    "duration_s": 1.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 60
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 1,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 1400,
+    "attack": 80,
+    "defense": 25,
+    "outcome": "victory",
+    "duration_s": 0.8,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   },
+   "adapted": {
+    "hp": 1400,
+    "attack": 80,
+    "defense": 25,
+    "outcome": "victory",
+    "duration_s": 0.8,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 1,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 1400,
+    "attack": 80,
+    "defense": 25,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   },
+   "adapted": {
+    "hp": 1400,
+    "attack": 80,
+    "defense": 25,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 1,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 1400,
+    "attack": 80,
+    "defense": 25,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   },
+   "adapted": {
+    "hp": 1400,
+    "attack": 80,
+    "defense": 25,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 2,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 3500,
+    "attack": 136,
+    "defense": 38,
+    "outcome": "victory",
+    "duration_s": 8.6,
+    "dead": 2,
+    "wounded": 2,
+    "surviving": 21
+   },
+   "adapted": {
+    "hp": 2800,
+    "attack": 160,
+    "defense": 50,
+    "outcome": "victory",
+    "duration_s": 8.2,
+    "dead": 3,
+    "wounded": 2,
+    "surviving": 20
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 2,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 3500,
+    "attack": 136,
+    "defense": 38,
+    "outcome": "victory",
+    "duration_s": 3.2,
+    "dead": 0,
+    "wounded": 1,
+    "surviving": 59
+   },
+   "adapted": {
+    "hp": 2800,
+    "attack": 160,
+    "defense": 50,
+    "outcome": "victory",
+    "duration_s": 3,
+    "dead": 0,
+    "wounded": 2,
+    "surviving": 58
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 2,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 3500,
+    "attack": 136,
+    "defense": 38,
+    "outcome": "victory",
+    "duration_s": 1.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   },
+   "adapted": {
+    "hp": 2800,
+    "attack": 160,
+    "defense": 50,
+    "outcome": "victory",
+    "duration_s": 1,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 2,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 3500,
+    "attack": 136,
+    "defense": 38,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   },
+   "adapted": {
+    "hp": 2800,
+    "attack": 160,
+    "defense": 50,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 2,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 3500,
+    "attack": 136,
+    "defense": 38,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   },
+   "adapted": {
+    "hp": 2800,
+    "attack": 160,
+    "defense": 50,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 3,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 8400,
+    "attack": 240,
+    "defense": 55,
+    "outcome": "defeat",
+    "duration_s": 44,
+    "dead": 12,
+    "wounded": 13,
+    "surviving": 0
+   },
+   "adapted": {
+    "hp": 5600,
+    "attack": 320,
+    "defense": 100,
+    "outcome": "victory",
+    "duration_s": 29.8,
+    "dead": 6,
+    "wounded": 11,
+    "surviving": 8
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 3,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 8400,
+    "attack": 240,
+    "defense": 55,
+    "outcome": "victory",
+    "duration_s": 10,
+    "dead": 5,
+    "wounded": 1,
+    "surviving": 54
+   },
+   "adapted": {
+    "hp": 5600,
+    "attack": 320,
+    "defense": 100,
+    "outcome": "victory",
+    "duration_s": 8.4,
+    "dead": 1,
+    "wounded": 4,
+    "surviving": 55
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 3,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 8400,
+    "attack": 240,
+    "defense": 55,
+    "outcome": "victory",
+    "duration_s": 3,
+    "dead": 2,
+    "wounded": 0,
+    "surviving": 118
+   },
+   "adapted": {
+    "hp": 5600,
+    "attack": 320,
+    "defense": 100,
+    "outcome": "victory",
+    "duration_s": 2.8,
+    "dead": 1,
+    "wounded": 1,
+    "surviving": 118
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 3,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 8400,
+    "attack": 240,
+    "defense": 55,
+    "outcome": "victory",
+    "duration_s": 1.6,
+    "dead": 1,
+    "wounded": 0,
+    "surviving": 199
+   },
+   "adapted": {
+    "hp": 5600,
+    "attack": 320,
+    "defense": 100,
+    "outcome": "victory",
+    "duration_s": 1.4,
+    "dead": 0,
+    "wounded": 1,
+    "surviving": 199
+   }
+  },
+  {
+   "species": "tenerys",
+   "level": 3,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 8400,
+    "attack": 240,
+    "defense": 55,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   },
+   "adapted": {
+    "hp": 5600,
+    "attack": 320,
+    "defense": 100,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 1,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 1900,
+    "attack": 95,
+    "defense": 35,
+    "outcome": "victory",
+    "duration_s": 4.8,
+    "dead": 0,
+    "wounded": 1,
+    "surviving": 24
+   },
+   "adapted": {
+    "hp": 1900,
+    "attack": 95,
+    "defense": 35,
+    "outcome": "victory",
+    "duration_s": 4.8,
+    "dead": 0,
+    "wounded": 1,
+    "surviving": 24
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 1,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 1900,
+    "attack": 95,
+    "defense": 35,
+    "outcome": "victory",
+    "duration_s": 2.6,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 60
+   },
+   "adapted": {
+    "hp": 1900,
+    "attack": 95,
+    "defense": 35,
+    "outcome": "victory",
+    "duration_s": 2.6,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 60
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 1,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 1900,
+    "attack": 95,
+    "defense": 35,
+    "outcome": "victory",
+    "duration_s": 1,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   },
+   "adapted": {
+    "hp": 1900,
+    "attack": 95,
+    "defense": 35,
+    "outcome": "victory",
+    "duration_s": 1,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 1,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 1900,
+    "attack": 95,
+    "defense": 35,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   },
+   "adapted": {
+    "hp": 1900,
+    "attack": 95,
+    "defense": 35,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 1,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 1900,
+    "attack": 95,
+    "defense": 35,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   },
+   "adapted": {
+    "hp": 1900,
+    "attack": 95,
+    "defense": 35,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 2,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 4750,
+    "attack": 162,
+    "defense": 53,
+    "outcome": "victory",
+    "duration_s": 17,
+    "dead": 3,
+    "wounded": 9,
+    "surviving": 13
+   },
+   "adapted": {
+    "hp": 3800,
+    "attack": 190,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 14,
+    "dead": 6,
+    "wounded": 5,
+    "surviving": 14
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 2,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 4750,
+    "attack": 162,
+    "defense": 53,
+    "outcome": "victory",
+    "duration_s": 5,
+    "dead": 2,
+    "wounded": 0,
+    "surviving": 58
+   },
+   "adapted": {
+    "hp": 3800,
+    "attack": 190,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 5,
+    "dead": 2,
+    "wounded": 0,
+    "surviving": 58
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 2,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 4750,
+    "attack": 162,
+    "defense": 53,
+    "outcome": "victory",
+    "duration_s": 1.4,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   },
+   "adapted": {
+    "hp": 3800,
+    "attack": 190,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 1.4,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 2,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 4750,
+    "attack": 162,
+    "defense": 53,
+    "outcome": "victory",
+    "duration_s": 1,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   },
+   "adapted": {
+    "hp": 3800,
+    "attack": 190,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 0.8,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 2,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 4750,
+    "attack": 162,
+    "defense": 53,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   },
+   "adapted": {
+    "hp": 3800,
+    "attack": 190,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 3,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 11400,
+    "attack": 285,
+    "defense": 77,
+    "outcome": "defeat",
+    "duration_s": 31.6,
+    "dead": 9,
+    "wounded": 16,
+    "surviving": 0
+   },
+   "adapted": {
+    "hp": 7600,
+    "attack": 380,
+    "defense": 140,
+    "outcome": "defeat",
+    "duration_s": 31.6,
+    "dead": 9,
+    "wounded": 16,
+    "surviving": 0
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 3,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 11400,
+    "attack": 285,
+    "defense": 77,
+    "outcome": "victory",
+    "duration_s": 15.8,
+    "dead": 4,
+    "wounded": 7,
+    "surviving": 49
+   },
+   "adapted": {
+    "hp": 7600,
+    "attack": 380,
+    "defense": 140,
+    "outcome": "victory",
+    "duration_s": 14,
+    "dead": 4,
+    "wounded": 7,
+    "surviving": 49
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 3,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 11400,
+    "attack": 285,
+    "defense": 77,
+    "outcome": "victory",
+    "duration_s": 5,
+    "dead": 0,
+    "wounded": 2,
+    "surviving": 118
+   },
+   "adapted": {
+    "hp": 7600,
+    "attack": 380,
+    "defense": 140,
+    "outcome": "victory",
+    "duration_s": 4.6,
+    "dead": 2,
+    "wounded": 0,
+    "surviving": 118
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 3,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 11400,
+    "attack": 285,
+    "defense": 77,
+    "outcome": "victory",
+    "duration_s": 2.2,
+    "dead": 0,
+    "wounded": 1,
+    "surviving": 199
+   },
+   "adapted": {
+    "hp": 7600,
+    "attack": 380,
+    "defense": 140,
+    "outcome": "victory",
+    "duration_s": 2,
+    "dead": 0,
+    "wounded": 1,
+    "surviving": 199
+   }
+  },
+  {
+   "species": "velkor",
+   "level": 3,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 11400,
+    "attack": 285,
+    "defense": 77,
+    "outcome": "victory",
+    "duration_s": 1,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   },
+   "adapted": {
+    "hp": 7600,
+    "attack": 380,
+    "defense": 140,
+    "outcome": "victory",
+    "duration_s": 0.8,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 1,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 2300,
+    "attack": 110,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 8,
+    "dead": 3,
+    "wounded": 1,
+    "surviving": 21
+   },
+   "adapted": {
+    "hp": 2300,
+    "attack": 110,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 8,
+    "dead": 3,
+    "wounded": 1,
+    "surviving": 21
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 1,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 2300,
+    "attack": 110,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 3,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 60
+   },
+   "adapted": {
+    "hp": 2300,
+    "attack": 110,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 3,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 60
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 1,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 2300,
+    "attack": 110,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 1.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   },
+   "adapted": {
+    "hp": 2300,
+    "attack": 110,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 1.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 1,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 2300,
+    "attack": 110,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   },
+   "adapted": {
+    "hp": 2300,
+    "attack": 110,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 1,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 2300,
+    "attack": 110,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   },
+   "adapted": {
+    "hp": 2300,
+    "attack": 110,
+    "defense": 70,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 2,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 5750,
+    "attack": 187,
+    "defense": 105,
+    "outcome": "defeat",
+    "duration_s": 34.4,
+    "dead": 9,
+    "wounded": 16,
+    "surviving": 0
+   },
+   "adapted": {
+    "hp": 4600,
+    "attack": 220,
+    "defense": 140,
+    "outcome": "defeat",
+    "duration_s": 34.4,
+    "dead": 9,
+    "wounded": 16,
+    "surviving": 0
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 2,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 5750,
+    "attack": 187,
+    "defense": 105,
+    "outcome": "victory",
+    "duration_s": 10,
+    "dead": 5,
+    "wounded": 1,
+    "surviving": 54
+   },
+   "adapted": {
+    "hp": 4600,
+    "attack": 220,
+    "defense": 140,
+    "outcome": "victory",
+    "duration_s": 8.6,
+    "dead": 3,
+    "wounded": 3,
+    "surviving": 54
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 2,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 5750,
+    "attack": 187,
+    "defense": 105,
+    "outcome": "victory",
+    "duration_s": 3,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   },
+   "adapted": {
+    "hp": 4600,
+    "attack": 220,
+    "defense": 140,
+    "outcome": "victory",
+    "duration_s": 3,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 2,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 5750,
+    "attack": 187,
+    "defense": 105,
+    "outcome": "victory",
+    "duration_s": 1.6,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   },
+   "adapted": {
+    "hp": 4600,
+    "attack": 220,
+    "defense": 140,
+    "outcome": "victory",
+    "duration_s": 1.4,
+    "dead": 0,
+    "wounded": 1,
+    "surviving": 199
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 2,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 5750,
+    "attack": 187,
+    "defense": 105,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   },
+   "adapted": {
+    "hp": 4600,
+    "attack": 220,
+    "defense": 140,
+    "outcome": "victory",
+    "duration_s": 0.2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 3,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 13800,
+    "attack": 330,
+    "defense": 154,
+    "outcome": "defeat",
+    "duration_s": 34.4,
+    "dead": 9,
+    "wounded": 16,
+    "surviving": 0
+   },
+   "adapted": {
+    "hp": 9200,
+    "attack": 440,
+    "defense": 280,
+    "outcome": "defeat",
+    "duration_s": 34.4,
+    "dead": 9,
+    "wounded": 16,
+    "surviving": 0
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 3,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 13800,
+    "attack": 330,
+    "defense": 154,
+    "outcome": "victory",
+    "duration_s": 33.4,
+    "dead": 9,
+    "wounded": 13,
+    "surviving": 38
+   },
+   "adapted": {
+    "hp": 9200,
+    "attack": 440,
+    "defense": 280,
+    "outcome": "victory",
+    "duration_s": 33.6,
+    "dead": 6,
+    "wounded": 16,
+    "surviving": 38
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 3,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 13800,
+    "attack": 330,
+    "defense": 154,
+    "outcome": "victory",
+    "duration_s": 8.6,
+    "dead": 6,
+    "wounded": 0,
+    "surviving": 114
+   },
+   "adapted": {
+    "hp": 9200,
+    "attack": 440,
+    "defense": 280,
+    "outcome": "victory",
+    "duration_s": 8.6,
+    "dead": 3,
+    "wounded": 3,
+    "surviving": 114
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 3,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 13800,
+    "attack": 330,
+    "defense": 154,
+    "outcome": "victory",
+    "duration_s": 4.8,
+    "dead": 1,
+    "wounded": 1,
+    "surviving": 198
+   },
+   "adapted": {
+    "hp": 9200,
+    "attack": 440,
+    "defense": 280,
+    "outcome": "victory",
+    "duration_s": 5,
+    "dead": 0,
+    "wounded": 2,
+    "surviving": 198
+   }
+  },
+  {
+   "species": "kamneklyk",
+   "level": 3,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 13800,
+    "attack": 330,
+    "defense": 154,
+    "outcome": "victory",
+    "duration_s": 2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   },
+   "adapted": {
+    "hp": 9200,
+    "attack": 440,
+    "defense": 280,
+    "outcome": "victory",
+    "duration_s": 2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 1,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 6500,
+    "attack": 190,
+    "defense": 120,
+    "outcome": "defeat",
+    "duration_s": 40,
+    "dead": 14,
+    "wounded": 11,
+    "surviving": 0
+   },
+   "adapted": {
+    "hp": 6500,
+    "attack": 190,
+    "defense": 120,
+    "outcome": "defeat",
+    "duration_s": 40,
+    "dead": 14,
+    "wounded": 11,
+    "surviving": 0
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 1,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 6500,
+    "attack": 190,
+    "defense": 120,
+    "outcome": "victory",
+    "duration_s": 10.6,
+    "dead": 2,
+    "wounded": 4,
+    "surviving": 54
+   },
+   "adapted": {
+    "hp": 6500,
+    "attack": 190,
+    "defense": 120,
+    "outcome": "victory",
+    "duration_s": 10.6,
+    "dead": 2,
+    "wounded": 4,
+    "surviving": 54
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 1,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 6500,
+    "attack": 190,
+    "defense": 120,
+    "outcome": "victory",
+    "duration_s": 3.4,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   },
+   "adapted": {
+    "hp": 6500,
+    "attack": 190,
+    "defense": 120,
+    "outcome": "victory",
+    "duration_s": 3.4,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 120
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 1,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 6500,
+    "attack": 190,
+    "defense": 120,
+    "outcome": "victory",
+    "duration_s": 2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   },
+   "adapted": {
+    "hp": 6500,
+    "attack": 190,
+    "defense": 120,
+    "outcome": "victory",
+    "duration_s": 2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 200
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 1,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 6500,
+    "attack": 190,
+    "defense": 120,
+    "outcome": "victory",
+    "duration_s": 0.6,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   },
+   "adapted": {
+    "hp": 6500,
+    "attack": 190,
+    "defense": 120,
+    "outcome": "victory",
+    "duration_s": 0.6,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 2,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 16250,
+    "attack": 323,
+    "defense": 180,
+    "outcome": "defeat",
+    "duration_s": 40,
+    "dead": 14,
+    "wounded": 11,
+    "surviving": 0
+   },
+   "adapted": {
+    "hp": 13000,
+    "attack": 380,
+    "defense": 240,
+    "outcome": "defeat",
+    "duration_s": 40,
+    "dead": 14,
+    "wounded": 11,
+    "surviving": 0
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 2,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 16250,
+    "attack": 323,
+    "defense": 180,
+    "outcome": "victory",
+    "duration_s": 41,
+    "dead": 12,
+    "wounded": 13,
+    "surviving": 35
+   },
+   "adapted": {
+    "hp": 13000,
+    "attack": 380,
+    "defense": 240,
+    "outcome": "victory",
+    "duration_s": 39.4,
+    "dead": 12,
+    "wounded": 10,
+    "surviving": 38
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 2,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 16250,
+    "attack": 323,
+    "defense": 180,
+    "outcome": "victory",
+    "duration_s": 10.6,
+    "dead": 1,
+    "wounded": 5,
+    "surviving": 114
+   },
+   "adapted": {
+    "hp": 13000,
+    "attack": 380,
+    "defense": 240,
+    "outcome": "victory",
+    "duration_s": 10.4,
+    "dead": 1,
+    "wounded": 5,
+    "surviving": 114
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 2,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 16250,
+    "attack": 323,
+    "defense": 180,
+    "outcome": "victory",
+    "duration_s": 5.8,
+    "dead": 0,
+    "wounded": 2,
+    "surviving": 198
+   },
+   "adapted": {
+    "hp": 13000,
+    "attack": 380,
+    "defense": 240,
+    "outcome": "victory",
+    "duration_s": 5.4,
+    "dead": 2,
+    "wounded": 0,
+    "surviving": 198
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 2,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 16250,
+    "attack": 323,
+    "defense": 180,
+    "outcome": "victory",
+    "duration_s": 2.4,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   },
+   "adapted": {
+    "hp": 13000,
+    "attack": 380,
+    "defense": 240,
+    "outcome": "victory",
+    "duration_s": 2,
+    "dead": 0,
+    "wounded": 0,
+    "surviving": 400
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 3,
+   "party": "recruits_25",
+   "soldiers": 25,
+   "live": {
+    "hp": 39000,
+    "attack": 570,
+    "defense": 264,
+    "outcome": "defeat",
+    "duration_s": 40,
+    "dead": 14,
+    "wounded": 11,
+    "surviving": 0
+   },
+   "adapted": {
+    "hp": 26000,
+    "attack": 760,
+    "defense": 480,
+    "outcome": "defeat",
+    "duration_s": 40,
+    "dead": 14,
+    "wounded": 11,
+    "surviving": 0
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 3,
+   "party": "recruits_60",
+   "soldiers": 60,
+   "live": {
+    "hp": 39000,
+    "attack": 570,
+    "defense": 264,
+    "outcome": "defeat",
+    "duration_s": 98.8,
+    "dead": 20,
+    "wounded": 40,
+    "surviving": 0
+   },
+   "adapted": {
+    "hp": 26000,
+    "attack": 760,
+    "defense": 480,
+    "outcome": "defeat",
+    "duration_s": 98.8,
+    "dead": 20,
+    "wounded": 40,
+    "surviving": 0
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 3,
+   "party": "spears_swords_120",
+   "soldiers": 120,
+   "live": {
+    "hp": 39000,
+    "attack": 570,
+    "defense": 264,
+    "outcome": "victory",
+    "duration_s": 35.6,
+    "dead": 7,
+    "wounded": 14,
+    "surviving": 99
+   },
+   "adapted": {
+    "hp": 26000,
+    "attack": 760,
+    "defense": 480,
+    "outcome": "victory",
+    "duration_s": 37.6,
+    "dead": 13,
+    "wounded": 9,
+    "surviving": 98
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 3,
+   "party": "mixed_200",
+   "soldiers": 200,
+   "live": {
+    "hp": 39000,
+    "attack": 570,
+    "defense": 264,
+    "outcome": "victory",
+    "duration_s": 17.8,
+    "dead": 2,
+    "wounded": 9,
+    "surviving": 189
+   },
+   "adapted": {
+    "hp": 26000,
+    "attack": 760,
+    "defense": 480,
+    "outcome": "victory",
+    "duration_s": 18.6,
+    "dead": 1,
+    "wounded": 10,
+    "surviving": 189
+   }
+  },
+  {
+   "species": "dragor",
+   "level": 3,
+   "party": "army_400",
+   "soldiers": 400,
+   "live": {
+    "hp": 39000,
+    "attack": 570,
+    "defense": 264,
+    "outcome": "victory",
+    "duration_s": 8,
+    "dead": 1,
+    "wounded": 3,
+    "surviving": 396
+   },
+   "adapted": {
+    "hp": 26000,
+    "attack": 760,
+    "defense": 480,
+    "outcome": "victory",
+    "duration_s": 8,
+    "dead": 2,
+    "wounded": 3,
+    "surviving": 395
+   }
+  }
+ ]
+}

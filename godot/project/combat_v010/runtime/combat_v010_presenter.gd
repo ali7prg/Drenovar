@@ -18,6 +18,7 @@ extends RefCounted
 # the legacy path (meta "clip" cleared so it re-selects its clip next frame).
 
 const Registry := preload("res://combat_v010/runtime/combat_v010_registry.gd")
+const CreatureVisuals := preload("res://src/creature_visuals.gd")
 const SETTING := "drenovar/combat_v010/enabled"
 const META := &"combat_v010"
 # Visual arrow flight already used by landscape.draw_arrow (release precedes contact).
@@ -137,6 +138,8 @@ static func _player(model: Node3D) -> AnimationPlayer:
 static func install(model: Node3D, kind: String, key: String) -> bool:
 	if not enabled() or model == null:
 		return false
+	if kind == "creature" and CreatureVisuals.owns(model):
+		return _install_v2(model, key)
 	var library := _library(kind, key)
 	var player := _player(model)
 	if library == null or player == null:
@@ -194,6 +197,31 @@ static func install(model: Node3D, kind: String, key: String) -> bool:
 # With the flag off this is always true and nothing changes.
 # Creatures are not gated: their GLB is already loaded synchronously by
 # landscape.scene_resource and the binary library adds ~2 ms once per model.
+# creatures-v2: the model's own authored clips (exactly 12/14 per species) serve the
+# logical creature clips through CreatureVisuals' semantic map; no library is added and
+# no animation track is duplicated (several logical names may share one clip).
+static func _install_v2(model: Node3D, key: String) -> bool:
+	var player := _player(model)
+	var species := CreatureVisuals.species_of(model)
+	if player == null:
+		_warn("creature %s: single AnimationPlayer missing" % key)
+		return false
+	var clips := {}
+	for clip in CREATURE_CLIPS + ["attack_b", "roar"]:
+		var name := CreatureVisuals.clip_name(species, clip)
+		if name == &"" or not player.has_animation(name):
+			_warn("creature %s: clip for %s missing" % [key, clip])
+			return false
+		clips[StringName(clip)] = name
+	var info := {"kind": "creature", "key": key, "generation": generation, "player": player, "clip": &"",
+		"until": 0.0, "clips": clips, "species": species}
+	model.set_meta(META, info)
+	model.set_meta("animation_players", [player])
+	if _owned.size() >= 128:
+		_owned = _owned.filter(func(ref): return (ref as WeakRef).get_ref() != null)
+	_owned.append(weakref(model))
+	return true
+
 static func ready_for(kind: String, key: String) -> bool:
 	return not enabled() or ready(kind, key)
 
@@ -213,7 +241,7 @@ static func release(model: Node3D) -> bool:
 	var player: AnimationPlayer = info.player
 	if is_instance_valid(player):
 		player.stop()
-		if player.has_animation_library(Registry.NAMESPACE):
+		if player.has_animation_library(Registry.NAMESPACE) and not info.has("species"):
 			player.remove_animation_library(Registry.NAMESPACE)
 		player.speed_scale = 1.0
 	model.remove_meta(META)
@@ -363,8 +391,17 @@ static func drive(model: Node3D, clip: StringName, time_s := -1.0, tempo := 1.0,
 
 const CREATURE_MAP := {"Idle": &"idle", "Walk": &"walk", "Run": &"run", "Roar": &"alert", "Alert": &"alert", "Attack": &"attack_a", "Hit": &"hit_front", "Death": &"death"}
 
-static func creature_attack_window(model: Node3D) -> Vector2:
-	var clip := Registry.animal_clip(str(info(model).get("key", "")), "attack_a")
+# Logical clip for an old semantic state: creatures-v2 shows Roar with its own roar/howl.
+static func creature_clip(model: Node3D, semantic: String) -> StringName:
+	if info(model).has("species") and semantic == "Roar":
+		return &"roar"
+	return CREATURE_MAP.get(semantic, &"idle")
+
+static func creature_attack_window(model: Node3D, logical := &"attack_a") -> Vector2:
+	var i := info(model)
+	if i.has("species"):
+		return CreatureVisuals.attack_window(str(i.species), String(logical))
+	var clip := Registry.animal_clip(str(i.get("key", "")), "attack_a")
 	var contact := float(clip.get("contact", 0.52)) * 1000.0
 	return Vector2(contact, float(clip.get("length", 1.3)) * 1000.0 - contact)
 

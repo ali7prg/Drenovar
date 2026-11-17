@@ -155,7 +155,10 @@ func run() -> void:
 		await process_frame
 	if creature != null:
 		var cp := player_of(creature)
-		check(str(cp.assigned_animation) == "combat_v010/death", "Creature not dying with v0.1.0: " + str(cp.assigned_animation))
+		# The death clip the presenter maps for this creature: the library's "combat_v010/death", or
+		# the creature's own authored "<species>__death" for creatures-v2 models (no library added).
+		var death_clip := str(CombatV010.animation_name(CombatV010.info(creature), &"death"))
+		check(str(cp.assigned_animation) == death_clip, "Creature not dying with v0.1.0: %s (expected %s)" % [cp.assigned_animation, death_clip])
 		check(cp.current_animation_position >= cp.get_animation(cp.assigned_animation).length - 0.001 or not cp.is_playing(), "Creature death not held at its last frame")
 	check(JSON.stringify(state) == before, "Presentation changed the server state")
 

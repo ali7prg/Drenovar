@@ -69,6 +69,7 @@ const LANE_CORRIDOR := 8.0
 # The main gate scene of the wall (march_lanes: its passage is the way out).
 var gate_node: Node3D
 const CombatV010 = preload("res://combat_v010/runtime/combat_v010_presenter.gd")
+const CreatureVisuals = preload("res://src/creature_visuals.gd")
 # Size of a field soldier (march and hunt) on each map. Up to build 1020 both maps
 # drew every soldier at 1.15: 2.0-2.2 m on foot, 3.1-3.3 m mounted (measured from
 # the GLB models, godot/tools/measure_field_scale.gd). In the city that is larger
@@ -1095,6 +1096,13 @@ func prepare_model_materials(instance: Node3D) -> void:
 
 func play_animation(model: Node3D, preferred: String, fallback := "", phase := -1.0, start_fraction := 0.0) -> void:
 	clear_additive_hit(model)
+	if CreatureVisuals.owns(model):
+		# creatures-v2: the semantic state resolves to one exact authored clip (no substring guess).
+		var species := CreatureVisuals.species_of(model)
+		var exact := CreatureVisuals.clip_name(species, preferred)
+		if exact != &"":
+			preferred = String(exact)
+			fallback = String(CreatureVisuals.clip_name(species, "Idle"))
 	if not model.has_meta("animation_players"):
 		model.set_meta("animation_players", model.find_children("*", "AnimationPlayer", true, false))
 	for animation: AnimationPlayer in model.get_meta("animation_players"):
@@ -1619,6 +1627,7 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 		var p := point(encounter.position)
 		var heading := 0.0
 		var moving: bool = encounter.get("behavior", "") == "roaming"
+		var ground_speed := 0.0
 		var path: Array = encounter.get("patrol", [])
 		known[id] = true
 		if battles.has(id) or corpse:
@@ -1632,6 +1641,7 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			p = a.lerp(b, fraction)
 			heading = atan2(b.x - a.x, b.z - a.z) + (PI if phase >= 8000.0 else 0.0)
 			moving = (phase >= 4000.0 and phase < 8000.0) or phase >= 12000.0
+			ground_speed = Vector2(b.x - a.x, b.z - a.z).length() / 4.0
 		elif encounter.status == "alive" and path.size() > 2:
 			var route: Dictionary = patrol_routes.get(id, {})
 			if route.get("source", []) != path:
@@ -1643,6 +1653,7 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			var direction := along_route(route, fraction + 0.02) - p
 			heading = atan2(direction.x, direction.z)
 			moving = phase >= 4000.0
+			ground_speed = float(route.distances[-1]) / 16.0 if not route.distances.is_empty() else 0.0
 		p = ground_point(p)
 		creature_markers.append({"position":p + Vector3.UP * 2.5, "id":id, "kind":"encounter", "item":encounter})
 		# Drawn while its body is inside the camera frustum and nearer than the end
@@ -1675,14 +1686,16 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			if created:
 				continue
 			var variant := clampi(int(encounter.level), 1, 3)
-			var model_path: String = data.creatureModels[species][variant - 1]
+			var model_path := CreatureVisuals.model_path(species, variant, data.creatureModels[species][variant - 1])
 			var scene := scene_resource(model_path)
 			actor = scene.instantiate() as Node3D
 			actor.name = id
 			actor.position = p
 			actor.rotation.y = heading + CREATURE_YAW
-			actor.scale = Vector3.ONE * creature_scale(variant) * beast_k
+			var actor_k := creature_scale(variant) * beast_k * CreatureVisuals.display_scale(species)
+			actor.scale = Vector3.ONE * actor_k
 			creatures.add_child(actor)
+			CreatureVisuals.install(actor, species, variant, actor_k)
 			CombatV010.install(actor, "creature", model_path)
 			created = true
 		retained[id] = true
@@ -1697,6 +1710,11 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 		var v010_clip := &""
 		var v010_time := -1.0
 		var bite := CombatV010.creature_attack_window(actor) if v010 else Vector2(560.0, 430.0)
+		# creatures-v2: the special attack (charge, pounce, tusk sweep, shockwave) has its own clip timing.
+		var special := CombatV010.creature_attack_window(actor, &"attack_b") if v010 else bite
+		var v2 := CreatureVisuals.owns(actor)
+		var attack_w := bite
+		var motion := Vector2.ZERO
 		if approaches.has(id) and not plan.is_empty():
 			# The army halts in front of it: the creature turns to face it and roars.
 			var halt_at := float(plan.get("halt_at", INF))
@@ -1736,7 +1754,7 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 						v010_clip = &"combat_idle"
 				var spec: Dictionary = encounter.get("spec", {})
 				var title := "%s · %s" % [spec.get("name", species), ["I", "II", "III"][clampi(int(encounter.get("level", 1)), 1, 3) - 1]]
-				battle_fx.health(p + Vector3.UP * (2.6 + 0.5 * clampi(int(encounter.get("level", 1)), 1, 3)) * beast_k, title, 1.0, 1.0, Color("#d8402c"),
+				battle_fx.health(p + Vector3.UP * creature_top(encounter, actor), title, 1.0, 1.0, Color("#d8402c"),
 					clampf(camera_zoom / 46.0, 0.6, 2.5) if map_name == "world" else clampf(camera_zoom / 40.0, 0.6, 2.5))
 		if battles.has(id):
 			var army: Dictionary = battles[id]
@@ -1759,11 +1777,13 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			for event in events:
 				var at := float(event[0]) if event is Array else float(event.at)
 				var kind: String = event[1] if event is Array else event.kind
+				var w := special if v2 and CreatureVisuals.is_special(kind) else bite
 				if kind == "soldier_attack":
 					continue
-				elif at >= elapsed - bite.y and at <= elapsed + bite.x and attack == -INF:
+				elif at >= elapsed - w.y and at <= elapsed + w.x and attack == -INF:
 					attack = at
-					charge = kind == "antler_charge"
+					attack_w = w
+					charge = CreatureVisuals.is_special(kind) if v2 else kind == "antler_charge"
 					victim = "%s:%d" % [event[2], int(event[3])] if event is Array else "%s:%d" % [event.unitId, int(event.index)]
 			if attack == -INF:
 				# Between its server attacks it swipes at the shield wall (beast_feints).
@@ -1787,14 +1807,19 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 					var toward := atan2((target as Vector3).x - p.x, (target as Vector3).z - p.z)
 					heading += clampf(angle_difference(heading, toward), -0.75, 0.75)
 				turn_rate = 14.0
-				clip = "Alert" if charge and elapsed < attack - 260.0 else "Attack"
+				clip = "Alert" if charge and elapsed < attack - 260.0 and not v2 else "Attack"
 				clip_phase = (elapsed - attack + 560.0) / 300.0 if clip == "Alert" else (elapsed - attack + 260.0) / 690.0
 				if v010:
 					# One authored strike from windup to recovery; contact = event.at.
 					v010_clip = &"attack_b" if charge else &"attack_a"
-					v010_time = (elapsed - attack + bite.x) / 1000.0
-				var lunge := sin(PI * clampf((elapsed - attack + 210.0) / 590.0, 0.0, 1.0)) * (1.8 if charge else 0.6) * beast_k
-				p = ground_point(p + Vector3(sin(heading), 0, cos(heading)) * lunge)
+					v010_time = (elapsed - attack + attack_w.x) / 1000.0
+				if v2:
+					# The clip is in place; its manifest says how far the presenter carries the body
+					# (charge, pounce): one source of motion, no extra lunge on top.
+					motion = CreatureVisuals.motion_at(species, "attack_b" if charge else "attack_a", maxf(0.0, v010_time)) * actor.scale.x
+				else:
+					var lunge := sin(PI * clampf((elapsed - attack + 210.0) / 590.0, 0.0, 1.0)) * (1.8 if charge else 0.6) * beast_k
+					p = ground_point(p + Vector3(sin(heading), 0, cos(heading)) * lunge)
 				if charge or elapsed >= attack:
 					# The creature's stamp and lunge throw up dust at its feet.
 					battle_fx.dust(p, clampf((elapsed - attack + 210.0) / 900.0, 0.0, 1.0), (3.2 if charge else 2.4) * beast_k, float(attack) * 0.001)
@@ -1824,17 +1849,34 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 			clip_phase = 1.0
 			p.y -= smoothstep(CORPSE_MS - 2400.0, CORPSE_MS, age) * 2.6 * actor.scale.y
 		actor.rotation.y = lerp_angle(actor.rotation.y, heading + CREATURE_YAW, 1.0 - exp(-turn_rate * delta))
-		actor.position = actor.position.lerp(p, 1.0 - exp(-5.0 * delta))
+		if v2:
+			# Smoothed anchor (server position) plus the clip's own controller motion.
+			var anchor: Vector3 = actor.get_meta("anchor", actor.position)
+			anchor = anchor.lerp(p, 1.0 - exp(-5.0 * delta))
+			actor.set_meta("anchor", anchor)
+			var yaw := actor.rotation.y - CREATURE_YAW
+			var offset := Vector3(sin(yaw), 0, cos(yaw)) * motion.x + Vector3(-cos(yaw), 0, sin(yaw)) * motion.y
+			actor.position = ground_point(anchor + offset) if motion != Vector2.ZERO else anchor
+		else:
+			actor.position = actor.position.lerp(p, 1.0 - exp(-5.0 * delta))
 		if v010:
 			if v010_clip.is_empty():
-				v010_clip = CombatV010.CREATURE_MAP.get(clip, &"idle")
+				v010_clip = CombatV010.creature_clip(actor, clip)
 				if clip == "Idle" and battles.has(id):
 					v010_clip = &"combat_idle"
 			if clip == "Death" and v010_time < 0.0:
 				v010_time = INF # corpse: hold the grounded last frame
 			elif clip == "Roar":
 				v010_time = clip_phase * ROAR_MS / 1000.0
-			CombatV010.drive(actor, v010_clip, v010_time)
+			var tempo := 1.0
+			if v2 and clip == "Walk" and ground_speed > 0.0:
+				# Walk tempo follows the patrol's real ground speed: hooves and paws stay planted.
+				tempo = clampf(ground_speed / maxf(0.05, CreatureVisuals.clip_speed(species, "Walk") * actor.scale.x), 0.35, 2.5)
+			CombatV010.drive(actor, v010_clip, v010_time, tempo)
+			if v2:
+				# Runes, veins and seams go out over the death clip and stay out on the corpse.
+				var death_s := float(CreatureVisuals.clip_row(species, "death").get("length_s", 2.0))
+				CreatureVisuals.set_life(actor, 0.0 if clip == "Death" and v010_time >= death_s else (1.0 - clampf(v010_time / death_s, 0.0, 1.0) if clip == "Death" else 1.0))
 			actor.set_meta("clip", clip)
 		elif clip_phase >= 0.0 or actor.get_meta("clip", "") != clip:
 			play_animation(actor, clip, "Idle", clip_phase)
@@ -2004,7 +2046,7 @@ func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dict
 			battle_fx.number(target,"-%d"%roundi(strike[3]),age/900.0,Color("#e8aa96"),strike[4]<=0,[strike[5]],id+"/"+str(strike[1]),strike[4]<=0)
 	var spec: Dictionary = encounter.get("spec", {})
 	var title := "%s · %s" % [spec.get("name", creature_species(encounter)), ["I", "II", "III"][clampi(int(encounter.get("level", 1)), 1, 3) - 1]]
-	var height := (2.6 + 0.5 * clampi(int(encounter.get("level", 1)), 1, 3)) * beast_k
+	var height := creature_top(encounter, creatures.get_node_or_null(NodePath(id)) as Node3D)
 	var fallen_at := -INF
 	if not timeline.hits.is_empty() and float(timeline.hits[-1][2]) <= 0.0:
 		fallen_at = float(timeline.hits[-1][0])
@@ -3578,7 +3620,18 @@ static func creature_scale(level: Variant) -> float:
 	return 1.02 + 0.16 * clampi(int(level), 1, 3)
 
 func creature_body(encounter: Dictionary) -> Vector2:
-	return CREATURE_BODY.get(creature_species(encounter), Vector2(2.7, 1.0)) * creature_scale(encounter.get("level", 1)) * beast_k
+	var species := creature_species(encounter)
+	return CreatureVisuals.body(species, CREATURE_BODY.get(species, Vector2(2.7, 1.0))) * creature_scale(encounter.get("level", 1)) * beast_k
+
+# Height of the health bar above a creature: the creatures-v2 model's own top (it is
+# authored in metres and scaled by the display adapter), the 0.5.9 heights otherwise.
+func creature_top(encounter: Dictionary, actor: Node3D) -> float:
+	var species := creature_species(encounter)
+	var level := clampi(int(encounter.get("level", 1)), 1, 3)
+	if CreatureVisuals.active(species) and actor != null:
+		var top := float(CreatureVisuals.entry(species).get("authored_bounds_m", {}).get("top", 3.0))
+		return top * actor.scale.y + 0.35 * beast_k
+	return (2.6 + 0.5 * level) * beast_k
 
 # Flowing arrows over the part of the march route still ahead of the army.
 func update_march_line(id: String, cache: Dictionary, from_m: float, to_m: float) -> void:

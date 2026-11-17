@@ -13,6 +13,7 @@ const WebPanels = preload("res://src/web_panel_theme.gd")
 const MarchMap = preload("res://src/march_map.gd")
 const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
+const CreatureVisuals = preload("res://src/creature_visuals.gd")
 const HudAction = preload("res://src/hud_action.gd")
 const SessionDiagnostics = preload("res://src/session_diagnostics.gd")
 const CombatDiagnostics = preload("res://src/combat_diagnostics.gd")
@@ -3270,6 +3271,9 @@ func load_unit_preview(preview: SubViewportContainer, visual: Dictionary, framin
 	if warrior:
 		WarriorVisual.prepare(unit)
 	root.add_child(unit)
+	if visual.has("creature"):
+		# creatures-v2 preview: the same level materials and authored idle as on the field.
+		CreatureVisuals.install(unit, str(visual.creature), int(visual.get("level", 1)), 1.0)
 	var bounds := AABB()
 	for part: MeshInstance3D in unit.find_children("*", "MeshInstance3D", true, false):
 		var box := part.global_transform * part.get_aabb()
@@ -3496,12 +3500,26 @@ func inspect_encounter(encounter: Dictionary) -> void:
 		var preview := create_unit_preview(portrait, 145)
 		var species: String = encounter.get("species", spec.get("id", ""))
 		if data.creatureModels.has(species):
-			var model: String = data.creatureModels[species][int(encounter.level) - 1]
-			load_unit_preview.call_deferred(preview, {"preview":model, "drill":"idle"}, 0.63)
+			var tier := clampi(int(encounter.level), 1, 3)
+			var model: String = CreatureVisuals.model_path(species, tier, data.creatureModels[species][tier - 1])
+			load_unit_preview.call_deferred(preview, {"preview":model, "drill":"idle", "creature":species, "level":tier}, 0.63)
 		row(portrait, "УР. %d" % int(encounter.level))
 	else:
 		modal_body.add_child(art_panel)
-		panel_art(art_panel, "velkor%d.webp" % int(encounter.level), Vector2(0, 148))
+		var art_species := str(encounter.get("species", spec.get("id", "velkor")))
+		var portraits: Array = CreatureVisuals.entry(art_species).get("portraits", []) if CreatureVisuals.active(art_species) else []
+		var portrait_path := str(portraits[clampi(int(encounter.level), 1, 3) - 1]) if portraits.size() == 3 else ""
+		if not portrait_path.is_empty() and ResourceLoader.exists(portrait_path):
+			# creatures-v2: the portrait is rendered from the same model and level look as the field.
+			var art := TextureRect.new()
+			art.texture = load(portrait_path)
+			art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			art.custom_minimum_size = Vector2(0, 148)
+			art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			art_panel.add_child(art)
+		else:
+			panel_art(art_panel, "velkor%d.webp" % int(encounter.level), Vector2(0, 148))
 	var tiers := HBoxContainer.new()
 	details.add_child(tiers)
 	var encounters: Array = state.get("encounters", []) if city_hunt else state.world.encounters
@@ -3533,7 +3551,8 @@ func inspect_encounter(encounter: Dictionary) -> void:
 		dossier.hide()
 		row(dossier, "Мощь %d · Атака %d · Защита %d" % [int(spec.strength), int(spec.attack), int(spec.defense)])
 	else:
-		row(details, "Рывком бьёт по передней линии. Копейщики могут принять удар, пока стрелки ведут огонь.")
+		var about := str(CreatureVisuals.entry(str(encounter.get("species", spec.get("id", "")))).get("description", ""))
+		row(details, about if not about.is_empty() else "Рывком бьёт по передней линии. Копейщики могут принять удар, пока стрелки ведут огонь.")
 	if encounter.status == "reserved":
 		row(details, "Эту цель уже преследует другой отряд.")
 	elif not available:
@@ -3557,9 +3576,15 @@ func inspect_encounter(encounter: Dictionary) -> void:
 		stage.zoom = minf(stage.zoom, 42.0 if city_hunt else 85.0)
 	modal_footer.show()
 	var attack := panel_action(modal_footer, "Атаковать" if city_hunt else "Собрать отряд",
-		compose_march.bind("city" if city_hunt else "velkor", encounter.id, encounter_title(encounter)),
+		compose_march.bind("city" if city_hunt else world_kind(encounter), encounter.id, encounter_title(encounter)),
 		not player_id.is_empty() and available and encounter.status == "alive" and hall_level() >= level)
 	attack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+# Server worldKind of a world hunt: "velkor" for the Velkor sites (the only kind server v92
+# knows); other world creatures (server patch creatures-world-v1) are addressed by species.
+func world_kind(encounter: Dictionary) -> String:
+	var species := str(encounter.get("species", encounter.get("spec", {}).get("id", "velkor")))
+	return "velkor" if species.is_empty() or species == "velkor" else species
 
 func show_city_hunt() -> void:
 	open_modal("Цели охоты", "garrison", "ДИКИЕ ЗЕМЛИ")
@@ -4816,6 +4841,7 @@ func show_report(report: Dictionary, announced := false) -> void:
 			add_reward_chip(loot, RESOURCE_NAMES[id], int(resources[id]), id)
 	var item_names := {"horn":"Рог", "velkor-horn":"Рог Велькора", "hides":"Шкуры", "claws":"Когти",
 		"antlers":"Рога", "bones":"Кости", "armor_plates":"Пластины", "dusk_crystal":"Сумеречный кристалл",
+		"stone":"Камень", "iron":"Железо",
 		"forest_crystal":"Лесной кристалл", "stone_crystal":"Каменный кристалл", "ember_crystal":"Огненный кристалл"}
 	for id in items:
 		if int(items[id]) > 0:

@@ -1,0 +1,55 @@
+<!doctype html><html><head><meta charset="utf-8"><title>three.js GLB check</title>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+<style>body{margin:0;background:#cfcac0}canvas{display:block}</style></head><body>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+const files = new URLSearchParams(location.search).get('files').split(',');
+const renderer = new THREE.WebGLRenderer({antialias: true, preserveDrawingBuffer: true});
+renderer.setSize(1600, 460); renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0xcfcac0);
+scene.add(new THREE.HemisphereLight(0xdfe6f0, 0x5a5040, 1.4));
+const sun = new THREE.DirectionalLight(0xfff2de, 2.4); sun.position.set(4, 8, 6); scene.add(sun);
+const cam = new THREE.PerspectiveCamera(28, 1600 / 460, 0.1, 200);
+cam.position.set(0, 4.5, 30); cam.lookAt(0, 1.8, 0);
+const loader = new GLTFLoader();
+const report = [];
+let x = -13.5;
+const mixers = [];
+for (const f of files) {
+  const row = {file: f};
+  try {
+    const gltf = await loader.loadAsync('work/' + f);
+    const root = gltf.scene;
+    let skinned = 0, bones = new Set(), tris = 0;
+    root.traverse(o => { if (o.isSkinnedMesh) { skinned++; o.skeleton.bones.forEach(b => bones.add(b.name)); tris += o.geometry.index.count / 3; } });
+    row.clips = gltf.animations.length; row.skinned = skinned; row.bones = bones.size; row.tris = tris;
+    row.names = gltf.animations.map(a => a.name);
+    // every track must bind to an existing node
+    const names = new Set(); root.traverse(o => names.add(o.name));
+    row.unbound = gltf.animations.flatMap(a => a.tracks.map(t => t.name.split('.')[0])).filter(n => !names.has(n)).length;
+    // two independent instances
+    const a = SkeletonUtils.clone(root), b = SkeletonUtils.clone(root);
+    const ma = new THREE.AnimationMixer(a), mb = new THREE.AnimationMixer(b);
+    const walk = gltf.animations.find(c => c.name.endsWith('__walk')), atk = gltf.animations.find(c => /__attack_/.test(c.name));
+    ma.clipAction(walk).play(); mb.clipAction(atk).play();
+    ma.update(0.37); mb.update(0.53);
+    const ha = a.getObjectByName('Head'), hb = b.getObjectByName('Head');
+    a.updateMatrixWorld(true); b.updateMatrixWorld(true);
+    row.independent = !new THREE.Vector3().setFromMatrixPosition(ha.matrixWorld).equals(new THREE.Vector3().setFromMatrixPosition(hb.matrixWorld));
+    for (const clip of gltf.animations) { const m = new THREE.AnimationMixer(SkeletonUtils.clone(root)); m.clipAction(clip).play(); m.update(clip.duration * 0.5); }
+    const box = new THREE.Box3().setFromObject(root);
+    row.size = box.getSize(new THREE.Vector3()).toArray().map(v => +v.toFixed(2));
+    const s = 4.2 / Math.max(row.size[0], row.size[1]);
+    a.scale.setScalar(s); a.position.set(x, 0, 0); a.rotation.y = -0.6; scene.add(a); x += 9;
+    mixers.push(ma);
+    row.ok = row.unbound === 0 && row.independent && skinned > 0;
+  } catch (e) { row.error = String(e); row.ok = false; }
+  report.push(row);
+}
+renderer.render(scene, cam);
+window.__report = report;
+document.title = 'DONE';
+</script></body></html>

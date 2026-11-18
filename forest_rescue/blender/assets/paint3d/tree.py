@@ -724,10 +724,11 @@ class TreeBuilder:
         Z = np.array([0, 0, 1.0])
         cards = []
 
-        def add(P3, n, ti, size, roll, ao, kind="fill", flip=None):
+        def add(P3, n, ti, size, roll, ao, kind="fill", flip=None, top_part=False):
             ok = False
+            tp = self.cfg.get("top_part", 0.6) if top_part else 1.0
             for attempt in range(3):
-                Vc = self._fill_quad(P3, n, ti, size, roll)
+                Vc = self._fill_quad(P3, n, ti, size, roll, hfrac=tp)
                 if self.card_footprint_ok(Vc, ref.fg, foot, front_dm) >= foot:
                     ok = True
                     break
@@ -735,7 +736,7 @@ class TreeBuilder:
             if not ok:
                 return False
             cards.append(dict(kind=kind, P=P3, n=n, tile=ti, flip=bool(rng.random() < 0.5) if flip is None else flip,
-                              size=size, roll=roll, ao=ao))
+                              size=size, roll=roll, ao=ao, hfrac=tp))
             return True
 
         def pick(eta, mode, depth_k):
@@ -763,8 +764,8 @@ class TreeBuilder:
                 eta = (cv - v0) / max(v1 - v0, 1)
                 # top-facing card, pushed behind the front card
                 Pt = C + ref.view.d * (0.5 * hs + 0.2) + Z * 0.15 * hs
-                add(Pt, nrm(Z + rng.normal(0, 0.12, 3)), pick(eta, "top", 1.0), hs / max(info[ti]["w_m"], 1e-3) * 0.95,
-                    rng.uniform(-np.pi, np.pi), 1.0)
+                add(Pt, nrm(Z + rng.normal(0, 0.12, 3)), pick(eta, "top", 1.0), hs / max(info[ti]["w_m"], 1e-3) * 1.1,
+                    rng.uniform(-np.pi, np.pi), 1.0, top_part=True)
                 # oblique card (45 deg, outward + up)
                 out = c["n"] - np.dot(c["n"], Z) * Z
                 out = nrm(out) if np.linalg.norm(out) > 1e-3 else -ref.view.d
@@ -788,6 +789,11 @@ class TreeBuilder:
         tt = ref.kd * ref.R[vi] * kk * np.sin(ph)
         ui = np.clip(np.round(uu).astype(int), 0, ref.W - 1)
         ok = ref.fg[vi, ui] & (tt > front_dm[vi, ui] + 0.25 * ref.ppm)
+        eta_all = (vv - v0) / max(v1 - v0, 1)
+        low = eta_all > self.cfg.get("low_eta", 0.58)
+        lobe_az = rng.uniform(-np.pi, np.pi, self.cfg.get("low_lobes", 5))
+        dphi = np.min(np.abs((ph[:, None] - lobe_az[None, :] + np.pi) % (2 * np.pi) - np.pi), axis=1)
+        ok &= ~low | ((dphi < 0.45) & (kk > 0.6))
         cand = np.nonzero(ok)[0]
         centres = []
         grid = {}
@@ -817,7 +823,7 @@ class TreeBuilder:
             n_out = ref.world_dir(ref.normal_cam(uu[c], vv[c], tt[c]))
             horiz = n_out - np.dot(n_out, Z) * Z
             horiz = nrm(horiz) if np.linalg.norm(horiz) > 1e-3 else nrm(rng.normal(0, 1, 3) * [1, 1, 0])
-            ao = 1.0 if k > 0.8 else (0.86 if k > 0.55 else 0.7)
+            ao = 1.0 if k > 0.72 else (0.93 if k > 0.45 else 0.82)
             size = typ * rng.uniform(0.95, 1.2) * (1.0 if k > 0.55 else 0.9)
             # three crossed cards
             n_top = nrm(Z + rng.normal(0, 0.15, 3))
@@ -827,15 +833,142 @@ class TreeBuilder:
                                   (n_side, "side", rng.normal(0, 0.15))):
                 ti = pick(eta, mode, k)
                 sz = size / max(info[ti]["w_m"], 1e-3)
-                add(P3 + rng.normal(0, 0.12 * typ, 3), n, ti, sz, roll, ao)
+                if mode == "top":
+                    sz *= self.cfg.get("top_scale", 1.25)
+                add(P3 + rng.normal(0, 0.12 * typ, 3), n, ti, sz, roll, ao, top_part=(mode == "top"))
             n_ok += 1
             if n_ok >= n_clumps or (max_cards and len(cards) >= max_cards):
                 break
         return cards
 
-    def _fill_quad(self, P3, n, ti, size, roll):
+    def mass_cards(self, front_cards, front_dm, size_k=1.0, seed=5, n_masses=12, mass_r=0.34, clumps_per=26,
+                   foot=0.86, front_extra_frac=0.6, max_cards=None, core_cards=40):
+        """Cumulus crown: big flattened masses (ellipsoids) of crossed clump cards. Card normals radiate from
+        each mass centre (painted-light shading -> bright top, darker underside), AO falls toward the
+        underside, gaps between masses show the limbs / dark core."""
+        ref, p = self.ref, self.p
+        cfg = self.cfg
+        rng = np.random.default_rng(seed)
+        info = p.info
+        areas = np.array([q["area"] for q in info], float)
+        etas = np.array([q["eta"] for q in info])
+        lums = np.array([q["lum"] for q in info])
+        tlums = np.array([q["top_lum"] for q in info])
+        lum_med = np.median(lums)
+        lp = cfg.get("lum_pref", 4.0)
+        v0, v1 = ref.crown_rows
+        Z = np.array([0, 0, 1.0])
+        cards = []
+
+        def pick(eta, mode):
+            w = np.sqrt(areas) * np.exp(-((etas - eta) / 0.35) ** 2)
+            if mode == "top":
+                w *= np.exp(np.clip((tlums - np.median(tlums)) / (lp * 0.8), -5, 5))
+            elif mode == "under":
+                w *= np.exp(np.clip(-(lums - lum_med) / 6.0, -4, 4))
+            else:
+                w *= np.exp(np.clip((lums - lum_med) / (lp * 1.3), -4, 4))
+            w /= w.sum()
+            return int(rng.choice(len(info), p=w))
+
+        def add(P3, n, ti, size, roll, ao, nshade, hfrac=1.0):
+            for attempt in range(3):
+                Vc = self._fill_quad(P3, n, ti, size, roll, hfrac=hfrac)
+                if self.card_footprint_ok(Vc, ref.fg, foot, front_dm) >= foot:
+                    cards.append(dict(kind="fill", P=P3, n=n, tile=ti, flip=bool(rng.random() < 0.5), size=size,
+                                      roll=roll, ao=ao, hfrac=hfrac, nshade=nshade))
+                    return True
+                size *= 0.82
+            return False
+
+        # front clumps: crossed top + oblique cards behind them (same painted area)
+        order = np.argsort([-info[c["tile"]]["area"] for c in front_cards])
+        for j in order[: int(len(order) * front_extra_frac)]:
+            c = front_cards[j]
+            ti = c["tile"]
+            cu, cv = c["c"]
+            C = ref.cam_to_world(np.array([cu]), np.array([cv]), np.array([c["t_px"]]))[0]
+            hs = max(info[ti]["w_m"], info[ti]["h_m"])
+            eta = (cv - v0) / max(v1 - v0, 1)
+            Pt = C + ref.view.d * (0.5 * hs + 0.2) + Z * 0.15 * hs
+            tt = pick(eta, "top")
+            add(Pt, nrm(Z + rng.normal(0, 0.12, 3)), tt, hs / max(info[tt]["w_m"], 1e-3) * 1.1,
+                rng.uniform(-np.pi, np.pi), 1.0, None, hfrac=cfg.get("top_part", 0.6))
+            out = c["n"] - np.dot(c["n"], Z) * Z
+            out = nrm(out) if np.linalg.norm(out) > 1e-3 else -ref.view.d
+            add(C + ref.view.d * (0.4 * hs + 0.2), nrm(out + Z + rng.normal(0, 0.1, 3)), ti, 1.0,
+                rng.normal(0, 0.2), 1.0, None)
+        # mass centres on the upper / outer crown
+        Rmax = float(ref.R[v0:v1 + 1].max())
+        masses = []
+        n_top = max(1, n_masses // 5)
+        for i in range(n_masses):
+            if i < n_top:
+                eta = rng.uniform(0.04, 0.2)
+                ph = rng.uniform(-np.pi, np.pi)
+                k = rng.uniform(0.0, 0.45)
+            else:
+                eta = rng.uniform(0.18, cfg.get("mass_eta_max", 0.62))
+                ph = -np.pi / 2 + (i - n_top + 0.5) * 2 * np.pi / (n_masses - n_top) + rng.normal(0, 0.2)
+                k = rng.uniform(0.5, 0.78)
+            v = v0 + eta * (v1 - v0)
+            vi = int(np.clip(round(v), 0, ref.H - 1))
+            u = ref.xc[vi] + ref.R[vi] * k * np.cos(ph)
+            tq = ref.kd * ref.R[vi] * k * np.sin(ph)
+            C = ref.cam_to_world(np.array([u]), np.array([v]), np.array([tq]))[0]
+            r = mass_r * Rmax / ref.ppm * rng.uniform(0.85, 1.2)
+            masses.append((C, r, eta))
+        typ = np.median([q["w_m"] for q in info if q["area"] > np.median(areas)]) * size_k
+        for (C, r, eta) in masses:
+            got = 0
+            tries = 0
+            pts = []
+            while got < clumps_per and tries < clumps_per * 30:
+                tries += 1
+                dvec = nrm(rng.normal(0, 1, 3))
+                rad = rng.random() ** 0.35                      # denser near the mass surface
+                P3 = C + dvec * np.array([r, r, r * 0.68]) * rad
+                if any(np.sum((P3 - q) ** 2) < (0.55 * typ) ** 2 for q in pts):
+                    continue
+                rel = (P3 - C) / np.array([r, r, r * 0.68])
+                nshade = nrm(rel / np.array([r, r, r * 0.68]))
+                zrel = rel[2]
+                ao = float(np.clip(0.86 + 0.2 * zrel, 0.72, 1.0)) if rad > 0.55 else 0.8
+                horiz = nrm(rel * np.array([1, 1, 0])) if np.linalg.norm(rel[:2]) > 1e-3 else nrm(rng.normal(0, 1, 3) * [1, 1, 0])
+                size = typ * rng.uniform(0.95, 1.2)
+                placed = 0
+                for n, mode, roll, hf in ((nrm(Z + rng.normal(0, 0.15, 3)), "top" if zrel > -0.2 else "under",
+                                           rng.uniform(-np.pi, np.pi), cfg.get("top_part", 0.6) if zrel > -0.2 else 1.0),
+                                          (nrm(horiz + Z * 0.9 + rng.normal(0, 0.12, 3)), "obl", rng.normal(0, 0.2), 1.0),
+                                          (nrm(horiz + rng.normal(0, 0.15, 3)), "side" if zrel > -0.3 else "under",
+                                           rng.normal(0, 0.15), 1.0)):
+                    ti = pick(eta, mode)
+                    sz = size / max(info[ti]["w_m"], 1e-3) * (cfg.get("top_scale", 1.25) if mode == "top" else 1.0)
+                    placed += add(P3 + rng.normal(0, 0.1 * typ, 3), n, ti, sz, roll, ao, nshade, hfrac=hf)
+                if placed:
+                    pts.append(P3)
+                    got += 1
+                if max_cards and len(cards) >= max_cards:
+                    break
+            if max_cards and len(cards) >= max_cards:
+                break
+        # dark core (gaps between masses show leaves, not the ground)
+        for i in range(core_cards):
+            vq = rng.uniform(v0 + 0.15 * (v1 - v0), v0 + 0.6 * (v1 - v0))
+            vi = int(vq)
+            a = rng.uniform(-np.pi, np.pi)
+            k = rng.uniform(0.0, 0.45)
+            u = ref.xc[vi] + ref.R[vi] * k * np.cos(a)
+            tq = ref.kd * ref.R[vi] * k * np.sin(a)
+            P3 = ref.cam_to_world(np.array([u]), np.array([vq]), np.array([tq]))[0]
+            ti = pick((vq - v0) / max(v1 - v0, 1), "under")
+            add(P3, nrm(Z * 0.8 + rng.normal(0, 0.4, 3)), ti, rng.uniform(1.0, 1.3) * size_k, rng.uniform(-np.pi, np.pi),
+                0.72, None)
+        return cards
+
+    def _fill_quad(self, P3, n, ti, size, roll, hfrac=1.0):
         w = self.p.info[ti]["w_m"] * size
-        h = self.p.info[ti]["h_m"] * size
+        h = self.p.info[ti]["h_m"] * size * hfrac
         up = np.array([0, 0, 1.0])
         rt = nrm(np.cross(up, n)) if abs(np.dot(up, n)) < 0.97 else nrm(np.cross([1.0, 0, 0], n))
         upv = nrm(np.cross(n, rt))
@@ -892,8 +1025,12 @@ class TreeBuilder:
                                                  np.zeros(4), flip=False)
                 ao = 1.0
             else:
+                hf = c.get("hfrac", 1.0)
                 w = p.info[ti]["w_m"] * c["size"]
-                h = p.info[ti]["h_m"] * c["size"]
+                h = p.info[ti]["h_m"] * c["size"] * hf
+                if hf < 1.0:          # upper (bright) part of the tile only
+                    u0_, v0_, u1_, v1_ = uvr
+                    uvr = (u0_, v1_ - (v1_ - v0_) * hf, u1_, v1_)
                 up = np.array([0, 0, 1.0])
                 n = c["n"]
                 rt = nrm(np.cross(up, n)) if abs(np.dot(up, n)) < 0.97 else nrm(np.cross([1.0, 0, 0], n))
@@ -901,8 +1038,11 @@ class TreeBuilder:
                 upv = upv * np.cos(c["roll"]) + rt * np.sin(c["roll"])
                 V, T, UV, _, N = geom.free_card(c["P"], n, upv, w, h, uvr, np.zeros(4), flip=c["flip"])
                 ao = c.get("ao", 0.9 if c["kind"] == "fill" else 0.78)
-            # smoothed crown normals (ellipsoid around the crown centre), blended with the card normal
+            # smoothed crown normals (ellipsoid around the crown centre), blended with the card normal;
+            # mass cards use their mass normal (cumulus shading)
             sn = nrm((V - crown_c) / crown_ax ** 2)
+            if c.get("nshade") is not None:
+                sn = nrm(sn * 0.35 + np.asarray(c["nshade"]) * 0.65)
             Nn = nrm(sn * 0.75 + N * 0.25)
             cen = V.mean(0)
             fl = 0.45 + 0.55 * np.linalg.norm(V - cen, axis=1) / max(np.linalg.norm(V[0] - cen), 1e-6)

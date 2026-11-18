@@ -10,10 +10,22 @@ from frlib import core, paths, render as frr
 
 RT = os.path.join(paths.RUNTIME, "forest")
 
+LODS_MASS = {
+    0: dict(trunk_step_m=0.35, trunk_sides=12, limb_step_m=0.3, limb_sides=5, limb_min_r_px=1.5, limb_budget=560,
+            copies=True, copy_min_r_px=3.0, front_frac=1.0, front_scale=1.0, n_masses=13, clumps_per=26,
+            fill_size=1.35, front_extra=0.6, max_cards=1250, core_cards=40),
+    1: dict(trunk_step_m=0.7, trunk_sides=8, limb_step_m=0.6, limb_sides=4, limb_min_r_px=3.0, limb_budget=200,
+            copies=True, copy_min_r_px=4.5, front_frac=0.55, front_scale=1.15, n_masses=11, clumps_per=12,
+            fill_size=1.7, front_extra=0.3, max_cards=480, core_cards=14),
+    2: dict(trunk_step_m=1.6, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
+            copies=False, front_frac=0.16, front_scale=1.5, n_masses=9, clumps_per=4, fill_size=2.2,
+            front_extra=0.0, max_cards=104, core_cards=4),
+}
+
 LODS_VOLUME = {
     0: dict(trunk_step_m=0.35, trunk_sides=12, limb_step_m=0.3, limb_sides=5, limb_min_r_px=1.5, limb_budget=560,
-            copies=True, copy_min_r_px=3.0, front_frac=1.0, front_scale=1.0, n_clumps=330, fill_size=1.25,
-            front_extra=0.6, min_dist_k=0.62, max_cards=1180),
+            copies=True, copy_min_r_px=3.0, front_frac=1.0, front_scale=1.0, n_clumps=260, fill_size=1.45,
+            front_extra=0.6, min_dist_k=0.6, max_cards=1250),
     1: dict(trunk_step_m=0.7, trunk_sides=8, limb_step_m=0.6, limb_sides=4, limb_min_r_px=3.0, limb_budget=200,
             copies=True, copy_min_r_px=4.5, front_frac=0.55, front_scale=1.15, n_clumps=120, fill_size=1.6,
             front_extra=0.35, min_dist_k=0.75, max_cards=500),
@@ -37,7 +49,7 @@ TREES = {
                  fork_row=245, wood=dict(ratio=0.85, Lmax=64, hue_rng=(61, 95)), float_min_r=2.2, keep_x=(0, 428),
                  crown_kd=0.9, front_bias=0.45, trunk_kd=0.9, seed=7, root_zone=34, root_k=0.8, n_lobes=13, top_weight=1.6, lum_pref=3.5, mass_up=0.55, front_tilt_max=30),
         n_patches=110, min_px=50, region="golden_oak", bark="oak", swatch=(20, 798, 318, 984), paintedLightMix=0.4,
-        height_hint=13.3, crown_hint=7.2, lods=LODS_VOLUME, crown_mode="volume",
+        height_hint=13.3, crown_hint=7.2, lods=LODS_MASS, crown_mode="mass", mass_r=0.34,
         single_refs="oak",
         tint_note="art/02 palette (orange-gold); for art/07 / art/01 look tint foliage toward warm yellow: "
                   "hue +0.02..+0.035, saturation x1.10, value x1.08 (INSTANCE_CUSTOM r,g,b)",

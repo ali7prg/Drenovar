@@ -112,7 +112,12 @@ def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
         keep = set(range(n)) - drop
     fronts = B.front_cards(scale=L["front_scale"], keep=keep, seed=vs["seed"])
     dm = B.front_depth_map(front_all)
-    if sp.get("crown_mode", "volume") == "volume":
+    if sp.get("crown_mode") == "mass":
+        fills = B.mass_cards(fronts, dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod, n_masses=L["n_masses"],
+                             mass_r=sp.get("mass_r", 0.34), clumps_per=L["clumps_per"],
+                             front_extra_frac=L.get("front_extra", 0.6), max_cards=L.get("max_cards"),
+                             core_cards=L.get("core_cards", 30))
+    elif sp.get("crown_mode", "volume") == "volume":
         fills = B.volume_cards(L["n_clumps"], fronts, dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod,
                                min_dist_k=L.get("min_dist_k", 0.7), front_extra_frac=L.get("front_extra", 0.65),
                                shell_pow=sp.get("shell_pow", 1.4), top_boost=sp.get("top_boost", 1.2),

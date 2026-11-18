@@ -9,9 +9,9 @@
         "lf_env_golden_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3200,
-        "LOD1": 1116,
-        "LOD2": 170
+        "LOD0": 2806,
+        "LOD1": 1166,
+        "LOD2": 168
       },
       "materials": {
         "LOD0": [
@@ -28,16 +28,16 @@
         ]
       },
       "height_m": 13.59,
-      "crown_radius_m": 8.89,
+      "crown_radius_m": 8.99,
       "bounds_m_blender": [
         [
-          -5.93,
+          -6.29,
           -5.81,
           -0.3
         ],
         [
-          8.89,
-          7.38,
+          8.99,
+          8.07,
           13.59
         ]
       ],
@@ -66,9 +66,9 @@
         "lf_env_golden_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3192,
-        "LOD1": 1156,
-        "LOD2": 178
+        "LOD0": 2804,
+        "LOD1": 1192,
+        "LOD2": 174
       },
       "materials": {
         "LOD0": [
@@ -85,21 +85,21 @@
         ]
       },
       "height_m": 13.6,
-      "crown_radius_m": 8.86,
+      "crown_radius_m": 8.76,
       "bounds_m_blender": [
         [
-          -8.86,
-          -5.83,
+          -8.5,
+          -5.92,
           -0.3
         ],
         [
-          6.51,
-          7.58,
+          6.46,
+          8.76,
           13.6
         ]
       ],
       "display_offset_gltf": [
-        17.37,
+        17.276,
         0.0,
         0.0
       ],
@@ -124,9 +124,9 @@
         "lf_env_golden_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3228,
-        "LOD1": 1104,
-        "LOD2": 176
+        "LOD0": 2816,
+        "LOD1": 1156,
+        "LOD2": 174
       },
       "materials": {
         "LOD0": [
@@ -143,21 +143,21 @@
         ]
       },
       "height_m": 14.41,
-      "crown_radius_m": 7.65,
+      "crown_radius_m": 8.13,
       "bounds_m_blender": [
         [
-          -5.56,
+          -5.48,
           -5.19,
           -0.32
         ],
         [
-          7.65,
-          7.46,
+          8.13,
+          7.45,
           14.41
         ]
       ],
       "display_offset_gltf": [
-        34.74,
+        34.552,
         0.0,
         0.0
       ],
@@ -180,9 +180,9 @@
     }
   },
   "tris": {
-    "LOD0": 3228,
-    "LOD1": 1156,
-    "LOD2": 178
+    "LOD0": 2816,
+    "LOD1": 1192,
+    "LOD2": 174
   },
   "bones": 0,
   "materials": [

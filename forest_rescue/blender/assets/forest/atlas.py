@@ -313,12 +313,15 @@ def paint_clump(w, h, r, palette, kind="oak", n_leaves=300, leaf_len=(0.10, 0.15
     wts = np.array([p[0] for p in palette], float)
     wts /= wts.sum()
     R = radius * L
+    k1, k2 = r.integers(3, 6), r.integers(6, 9)
+    f1, f2 = r.uniform(0, 6.28, 2)
+    lobe = lambda th: 1 + 0.2 * np.sin(k1 * th + f1) + 0.09 * np.sin(k2 * th + f2)      # lumpy, non-circular outline
     for i in range(n_leaves):
         layer = i / max(1, n_leaves - 1)
-        rr = R * np.sqrt(r.random()) * (0.96 if layer > 0.5 else 1.02)
         ang0 = r.uniform(0, 2 * np.pi)
+        rr = R * lobe(ang0) * np.sqrt(r.random()) * (0.96 if layer > 0.5 else 1.02)
         p = c + rr * np.array([math.cos(ang0), math.sin(ang0)])
-        edge = rr / R
+        edge = rr / (R * lobe(ang0))
         ang = ang0 + np.pi / 2 + r.normal(0, 1.4 * (1 - edge) + 0.35)
         ln = r.uniform(*leaf_len) * L * (0.85 + 0.3 * edge)
         tipp = p + np.array([math.sin(ang), -math.cos(ang)]) * ln
@@ -709,12 +712,12 @@ def paint_bramble_open(w, h, r):
 
 # art/02 oak crown k-means (painted, lit): (0.83,0.56,0.20) light, (0.62,0.39,0.15) ochre, (0.47,0.28,0.11)
 # brown-orange, (0.29,0.19,0.10) shadow.  Albedo = lit tone without the painted shading.
-OAK_CLUMP_PAL = {
-    "light": [(3, (0.90, 0.66, 0.22)), (2, (0.95, 0.74, 0.30)), (1, (0.80, 0.54, 0.16))],
-    "gold": [(3, (0.84, 0.57, 0.18)), (2, (0.90, 0.65, 0.24)), (1, (0.70, 0.45, 0.13))],
-    "ochre": [(3, (0.74, 0.46, 0.15)), (2, (0.82, 0.53, 0.18)), (1, (0.62, 0.36, 0.12))],
-    "dark": [(3, (0.58, 0.33, 0.12)), (2, (0.66, 0.40, 0.14)), (1, (0.46, 0.25, 0.09))],
-    "red": [(3, (0.72, 0.32, 0.11)), (2, (0.80, 0.40, 0.14)), (1, (0.58, 0.24, 0.09))],
+OAK_CLUMP_PAL = {   # chroma raised ~10% after iter08 (render C* 37 vs art/02 41, a* 11.6 vs 15.9)
+    "light": [(3, (0.94, 0.64, 0.18)), (2, (0.97, 0.72, 0.26)), (1, (0.84, 0.52, 0.13))],
+    "gold": [(3, (0.88, 0.55, 0.14)), (2, (0.93, 0.62, 0.20)), (1, (0.74, 0.42, 0.11))],
+    "ochre": [(3, (0.78, 0.43, 0.12)), (2, (0.85, 0.50, 0.15)), (1, (0.64, 0.33, 0.10))],
+    "dark": [(3, (0.60, 0.31, 0.10)), (2, (0.68, 0.37, 0.12)), (1, (0.48, 0.23, 0.08))],
+    "red": [(3, (0.76, 0.30, 0.10)), (2, (0.84, 0.38, 0.12)), (1, (0.60, 0.22, 0.08))],
 }
 BIRCH_CLUMP_PAL = {
     "light": [(3, (0.78, 0.70, 0.32)), (2, (0.84, 0.76, 0.38)), (1, (0.66, 0.60, 0.26))],
@@ -735,8 +738,8 @@ def build_atlas(barks=None, seed=7):
     pal_of = {"light": "light", "gold": "gold", "ochre": "ochre", "dark": "dark", "red": "red"}
     for i, name in enumerate(OAK_CLUMPS):
         key = name.split("_")[2]
-        put(name, paint_clump(256, 256, rng(seed + 10 + i), OAK_CLUMP_PAL[pal_of[key]], "oak", n_leaves=320,
-                              leaf_len=(0.10, 0.15)))
+        put(name, paint_clump(256, 256, rng(seed + 10 + i), OAK_CLUMP_PAL[pal_of[key]], "oak", n_leaves=200,
+                              leaf_len=(0.13, 0.19), radius=0.27))
     for i, (name, key) in enumerate([("oak_dense_gold", "gold"), ("oak_dense_amber", "ochre"),
                                      ("oak_dense_orange", "dark"), ("oak_dense_rust", "red"), ("oak_green_a", "light")]):
         put(name, paint_clump(256, 256, rng(seed + 30 + i), OAK_CLUMP_PAL[key], "oak", n_leaves=360,

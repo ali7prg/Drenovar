@@ -158,20 +158,20 @@
    "name": "Горный Драгор",
    "model": "res://assets/creatures-v2/dragor/dragor_runtime.gltf",
    "manifest": "res://assets/creatures-v2/dragor/clip_manifest.json",
-   "display_scale": 0.899,
+   "display_scale": 0.933,
    "body": [
     3.151,
-    1.652
+    1.715
    ],
    "authored_bounds_m": {
     "x": [
      -3.5,
-     3.51
+     3.254
     ],
     "half_width": 1.838,
-    "top": 3.048
+    "top": 3.057
    },
-   "lod_switch_m": 27.4,
+   "lod_switch_m": 27.5,
    "groups": {
     "skin": "Skin",
     "stone": "Stone"

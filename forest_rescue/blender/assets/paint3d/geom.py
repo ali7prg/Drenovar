@@ -93,18 +93,11 @@ def elevated_dir(elev_deg):
 
 def world_at_y(view, u, v, y):
     """World point on the camera ray through pixel (u,v) with world Y == y (elevated ortho view)."""
-    u = np.asarray(u, float)
-    v = np.asarray(v, float)
-    y = np.broadcast_to(np.asarray(y, float), u.shape) if np.ndim(u) else float(y)
-    P0 = view.world_of_pixel(u[..., None] if np.ndim(u) else u, v[..., None] if np.ndim(v) else v, 0.0) \
-        if False else None
-    # ray: P(t) = A + t d with A = world_of_pixel(u, v, 0)
-    A = (view.anchor + ((u - view.ax) / view.ppm)[..., None] * view.right
-         + ((view.ay - v) / view.ppm)[..., None] * view.up) if np.ndim(u) else \
-        view.anchor + ((u - view.ax) / view.ppm) * view.right + ((view.ay - v) / view.ppm) * view.up
-    dy = view.d[1]
-    t = (y - A[..., 1]) / dy
-    return A + np.asarray(t)[..., None] * view.d if np.ndim(u) else A + t * view.d
+    u = np.atleast_1d(np.asarray(u, float))
+    v = np.atleast_1d(np.asarray(v, float))
+    A = pix_to_world(view, u, v, np.zeros(u.shape))
+    t = (np.broadcast_to(np.asarray(y, float), u.shape) - A[..., 1]) / view.d[1]
+    return A + t[..., None] * view.d
 
 
 def pix_to_world(view, u, v, t):

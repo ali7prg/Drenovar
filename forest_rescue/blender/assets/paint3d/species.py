@@ -56,9 +56,9 @@ LODS_TREE = {
 }
 
 # grove oaks (art/01 look): broad, flat, lifted crown of yellow lobes, trunk + limbs visible below
-GROVE_CFG = dict(placement="anchors", mass_r=0.26, mass_zscale=0.6, ao_under=0.66, ao_side=0.82, side_mode="shade", p_hires=0.5,
-                 limbs_connected_only=True, limb_keep_r=2.6, anchor_min_r=2.6, anchor_min_z=7.2, mass_min_dist=2.5,
-                 trunk_r_k=0.8, lobe_zf_min=-0.3)
+GROVE_CFG = dict(placement="anchors", mass_r=0.25, mass_zscale=0.58, ao_under=0.68, ao_side=0.84, side_mode="shade", p_hires=0.6,
+                 limbs_connected_only=True, limb_keep_r=2.2, anchor_min_r=2.2, anchor_min_z=7.6, mass_min_dist=2.7,
+                 trunk_r_k=0.78, lobe_zf_min=-0.25, anchor_radial_k=1.12, anchor_step_m=1.2)
 GROVE_LODS = {0: dict(n_masses=9, clumps_per=58, core_cards=0, max_cards=1250, copy_min_r_px=2.6),
               1: dict(n_masses=8, clumps_per=26, core_cards=0, max_cards=470),
               2: dict(n_masses=7, clumps_per=11, core_cards=0, max_cards=110)}
@@ -75,16 +75,16 @@ TREES = {
         paintedLightMixByMaterial={"lf_foliage_vol": 0.5},
         hires=dict(region="oak_top", sheet="07_fog_exploration_interface.png", box=(518, 100, 800, 530), rosette_px=800,
                    m_per_px=1 / 50.0, l_shift=5.0, n_composite=16, keep_original=True),
-        palettes=[dict(name="grove", region="oak_grove", lab=dict(dh=12.0, dl=-3.0, kc=0.72))],
+        palettes=[dict(name="grove", region="oak_grove", lab=dict(dh=12.0, dl=2.0, kc=0.78))],
         single_refs="oak",
         tint_note="art/02 palette (orange-gold); for art/07 / art/01 look tint foliage toward warm yellow: "
                   "hue +0.02..+0.035, saturation x1.10, value x1.08 (INSTANCE_CUSTOM r,g,b)",
         variants={1: dict(seed=5, copies=[(125, 0.92), (-125, 0.9)]),
-                  2: dict(seed=6, mirror=True, copies=[(90, 0.95), (180, 0.9), (-90, 0.95)], scale=(1.08, 1.14), palette="grove",
+                  2: dict(seed=6, mirror=True, copies=[(90, 0.95), (180, 0.9), (-90, 0.95)], scale=(1.08, 1.2), palette="grove",
                           no_front=True, cfg=GROVE_CFG, lods=GROVE_LODS),
-                  3: dict(seed=8, copies=[(100, 0.95), (200, 0.9), (-80, 0.95)], scale=(1.02, 1.18), palette="grove",
+                  3: dict(seed=8, copies=[(100, 0.95), (200, 0.9), (-80, 0.95)], scale=(1.02, 1.24), palette="grove",
                           no_front=True, cfg=GROVE_CFG, lods=GROVE_LODS),
-                  4: dict(seed=9, mirror=True, copies=[(120, 0.9), (-120, 0.9)], scale=(1.14, 1.1), palette="grove",
+                  4: dict(seed=9, mirror=True, copies=[(120, 0.9), (-120, 0.9)], scale=(1.14, 1.16), palette="grove",
                           no_front=True, cfg=GROVE_CFG, lods=GROVE_LODS)},
         patch=dict(refs=[("07_fog_exploration_interface.png", (518, 110, 1020, 720), "art/07 panel 2"),
                          ("01_world_masterplan.png", (0, 0, 560, 330), "art/01 NW golden-oak grove")],

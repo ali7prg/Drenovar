@@ -9,9 +9,9 @@
         "lf_env_golden_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3312,
-        "LOD1": 1256,
-        "LOD2": 170
+        "LOD0": 3210,
+        "LOD1": 1236,
+        "LOD2": 162
       },
       "materials": {
         "LOD0": [
@@ -30,18 +30,18 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 13.69,
-      "crown_radius_m": 8.79,
+      "height_m": 13.87,
+      "crown_radius_m": 8.6,
       "bounds_m_blender": [
         [
-          -6.31,
-          -5.81,
+          -6.12,
+          -5.94,
           -0.3
         ],
         [
           8.5,
-          8.79,
-          13.69
+          8.6,
+          13.87
         ]
       ],
       "display_offset_gltf": [
@@ -69,8 +69,8 @@
         "lf_env_golden_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3216,
-        "LOD1": 1230,
+        "LOD0": 1320,
+        "LOD1": 400,
         "LOD2": 138
       },
       "materials": {
@@ -90,22 +90,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 12.54,
-      "crown_radius_m": 7.6,
+      "height_m": 13.11,
+      "crown_radius_m": 7.81,
       "bounds_m_blender": [
         [
-          -7.6,
-          -5.32,
-          -0.34
+          -7.81,
+          -5.35,
+          -0.36
         ],
         [
-          4.49,
-          5.39,
-          12.54
+          3.83,
+          5.19,
+          13.11
         ]
       ],
       "display_offset_gltf": [
-        16.814,
+        16.621,
         0.0,
         0.0
       ],
@@ -127,25 +127,27 @@
         ],
         "scale": [
           1.08,
-          1.14
+          1.2
         ],
         "palette": "grove",
         "no_front": true,
         "cfg": {
           "placement": "anchors",
-          "mass_r": 0.26,
-          "mass_zscale": 0.6,
-          "ao_under": 0.66,
-          "ao_side": 0.82,
+          "mass_r": 0.25,
+          "mass_zscale": 0.58,
+          "ao_under": 0.68,
+          "ao_side": 0.84,
           "side_mode": "shade",
-          "p_hires": 0.5,
+          "p_hires": 0.6,
           "limbs_connected_only": true,
-          "limb_keep_r": 2.6,
-          "anchor_min_r": 2.6,
-          "anchor_min_z": 7.2,
-          "mass_min_dist": 2.5,
-          "trunk_r_k": 0.8,
-          "lobe_zf_min": -0.3
+          "limb_keep_r": 2.2,
+          "anchor_min_r": 2.2,
+          "anchor_min_z": 7.6,
+          "mass_min_dist": 2.7,
+          "trunk_r_k": 0.78,
+          "lobe_zf_min": -0.25,
+          "anchor_radial_k": 1.12,
+          "anchor_step_m": 1.2
         },
         "lods": {
           "0": {
@@ -177,8 +179,8 @@
         "lf_env_golden_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3090,
-        "LOD1": 1180,
+        "LOD0": 1316,
+        "LOD1": 450,
         "LOD2": 138
       },
       "materials": {
@@ -198,22 +200,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 13.23,
-      "crown_radius_m": 6.83,
+      "height_m": 14.14,
+      "crown_radius_m": 7.03,
       "bounds_m_blender": [
         [
-          -3.67,
-          -6.09,
-          -0.35
+          -2.96,
+          -6.65,
+          -0.37
         ],
         [
-          6.83,
-          3.87,
-          13.23
+          7.03,
+          5.13,
+          14.14
         ]
       ],
       "display_offset_gltf": [
-        33.628,
+        33.241,
         0.0,
         0.0
       ],
@@ -234,25 +236,27 @@
         ],
         "scale": [
           1.02,
-          1.18
+          1.24
         ],
         "palette": "grove",
         "no_front": true,
         "cfg": {
           "placement": "anchors",
-          "mass_r": 0.26,
-          "mass_zscale": 0.6,
-          "ao_under": 0.66,
-          "ao_side": 0.82,
+          "mass_r": 0.25,
+          "mass_zscale": 0.58,
+          "ao_under": 0.68,
+          "ao_side": 0.84,
           "side_mode": "shade",
-          "p_hires": 0.5,
+          "p_hires": 0.6,
           "limbs_connected_only": true,
-          "limb_keep_r": 2.6,
-          "anchor_min_r": 2.6,
-          "anchor_min_z": 7.2,
-          "mass_min_dist": 2.5,
-          "trunk_r_k": 0.8,
-          "lobe_zf_min": -0.3
+          "limb_keep_r": 2.2,
+          "anchor_min_r": 2.2,
+          "anchor_min_z": 7.6,
+          "mass_min_dist": 2.7,
+          "trunk_r_k": 0.78,
+          "lobe_zf_min": -0.25,
+          "anchor_radial_k": 1.12,
+          "anchor_step_m": 1.2
         },
         "lods": {
           "0": {
@@ -284,9 +288,9 @@
         "lf_env_golden_oak_v4_LOD2"
       ],
       "tris": {
-        "LOD0": 2558,
-        "LOD1": 1016,
-        "LOD2": 158
+        "LOD0": 1356,
+        "LOD1": 442,
+        "LOD2": 160
       },
       "materials": {
         "LOD0": [
@@ -305,22 +309,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 12.47,
-      "crown_radius_m": 7.96,
+      "height_m": 13.03,
+      "crown_radius_m": 7.9,
       "bounds_m_blender": [
         [
-          -7.96,
-          -6.19,
-          -0.33
+          -7.9,
+          -6.46,
+          -0.35
         ],
         [
-          2.53,
-          5.56,
-          12.47
+          4.02,
+          6.93,
+          13.03
         ]
       ],
       "display_offset_gltf": [
-        50.442,
+        49.862,
         0.0,
         0.0
       ],
@@ -338,25 +342,27 @@
         ],
         "scale": [
           1.14,
-          1.1
+          1.16
         ],
         "palette": "grove",
         "no_front": true,
         "cfg": {
           "placement": "anchors",
-          "mass_r": 0.26,
-          "mass_zscale": 0.6,
-          "ao_under": 0.66,
-          "ao_side": 0.82,
+          "mass_r": 0.25,
+          "mass_zscale": 0.58,
+          "ao_under": 0.68,
+          "ao_side": 0.84,
           "side_mode": "shade",
-          "p_hires": 0.5,
+          "p_hires": 0.6,
           "limbs_connected_only": true,
-          "limb_keep_r": 2.6,
-          "anchor_min_r": 2.6,
-          "anchor_min_z": 7.2,
-          "mass_min_dist": 2.5,
-          "trunk_r_k": 0.8,
-          "lobe_zf_min": -0.3
+          "limb_keep_r": 2.2,
+          "anchor_min_r": 2.2,
+          "anchor_min_z": 7.6,
+          "mass_min_dist": 2.7,
+          "trunk_r_k": 0.78,
+          "lobe_zf_min": -0.25,
+          "anchor_radial_k": 1.12,
+          "anchor_step_m": 1.2
         },
         "lods": {
           "0": {
@@ -383,9 +389,9 @@
     }
   },
   "tris": {
-    "LOD0": 3312,
-    "LOD1": 1256,
-    "LOD2": 170
+    "LOD0": 3210,
+    "LOD1": 1236,
+    "LOD2": 162
   },
   "bones": 0,
   "materials": [

@@ -104,7 +104,21 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
             q = simplify_path(p, max(L["limb_step_m"], 2.2 * float(np.max(p["r"]))))
         ps.append(q)
     if B.cfg.get("limbs_connected_only"):
-        ps = [q for q in ps if q["kind"] == "trunk" or (q.get("parent", -1) != -2 and q.get("r_px", 0) >= B.cfg.get("limb_keep_r", 0))]
+        # keep a limb only if it and its whole ancestor chain are connected to the trunk and thick enough
+        byid = {q["id"]: q for q in ps}
+        ok = {}
+
+        def keep(q):
+            if q["kind"] == "trunk":
+                return True
+            if q["id"] in ok:
+                return ok[q["id"]]
+            par = q.get("parent", -1)
+            r = q.get("r_px", 0) >= B.cfg.get("limb_keep_r", 0) and par != -2 and \
+                (par == -1 or (par + 1 in byid and keep(byid[par + 1])))
+            ok[q["id"]] = r
+            return r
+        ps = [q for q in ps if keep(q)]
     if B.cfg.get("trunk_r_k"):
         for q in ps:
             if q["kind"] == "trunk":
@@ -147,11 +161,15 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
                     and p.get("r_px", 0) >= B.cfg.get("anchor_min_r", sp.get("anchor_min_r", 1.5))
                     and p["P"][-1][2] > B.cfg.get("anchor_min_z", 0.0)
                     and not (B.cfg.get("limbs_connected_only") and p.get("parent", -1) == -2)]
-            if sp.get("anchor_step_m"):
+            if B.cfg.get("anchor_step_m", sp.get("anchor_step_m")):
+                step_ = B.cfg.get("anchor_step_m", sp.get("anchor_step_m"))
                 for p_ in base_paths:
                     if p_["kind"] != "limb":
                         continue
-                    Ps_, s_ = geom.resample_polyline(p_["P"], sp["anchor_step_m"])
+                    if B.cfg.get("limbs_connected_only") and (p_.get("parent", -1) == -2 or
+                                                              p_.get("r_px", 0) < B.cfg.get("anchor_min_r", 0)):
+                        continue
+                    Ps_, s_ = geom.resample_polyline(p_["P"], step_)
                     tips += [q for q in Ps_[1:] if q[2] > B.cfg.get("anchor_min_z", sp.get("anchor_min_z", 3.0))]
             if B.cfg.get("anchor_source") == "patches":
                 # painted clump centres (crown envelope of the painting) at the painted plane, + rotated copies
@@ -162,6 +180,10 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
             anchors = list(tips)
             for (Rm, tv, mir, sc) in copies:
                 anchors += [((tp - tv) * sc) @ Rm.T + tv for tp in tips]
+            rk = B.cfg.get("anchor_radial_k", 1.0)
+            if rk != 1.0 and copies:
+                tv0 = copies[0][1]
+                anchors = [np.array([tv0[0] + (q[0] - tv0[0]) * rk, tv0[1] + (q[1] - tv0[1]) * rk, q[2]]) for q in anchors]
         fills = B.mass_cards(fronts, dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod, n_masses=L["n_masses"],
                              mass_r=B.cfg.get("mass_r", sp.get("mass_r", 0.34)), clumps_per=L["clumps_per"],
                              front_extra_frac=L.get("front_extra", 0.6), max_cards=L.get("max_cards"),

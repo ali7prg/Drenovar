@@ -9,9 +9,9 @@
         "lf_env_fallen_branches_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 1106,
-        "LOD1": 750,
-        "LOD2": 342
+        "LOD0": 1158,
+        "LOD1": 482,
+        "LOD2": 78
       },
       "materials": {
         "LOD0": [
@@ -32,7 +32,7 @@
       "bounds_m_blender": [
         [
           -0.87,
-          -1.22,
+          -1.23,
           -0.04
         ],
         [
@@ -54,9 +54,9 @@
         "lf_env_fallen_branches_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 674,
-        "LOD1": 348,
-        "LOD2": 348
+        "LOD0": 726,
+        "LOD1": 208,
+        "LOD2": 66
       },
       "materials": {
         "LOD0": [
@@ -87,16 +87,16 @@
         ]
       ],
       "display_offset_gltf": [
-        5.11,
+        5.121,
         0.0,
         0.0
       ]
     }
   },
   "tris": {
-    "LOD0": 1106,
-    "LOD1": 750,
-    "LOD2": 348
+    "LOD0": 1158,
+    "LOD1": 482,
+    "LOD2": 78
   },
   "bones": 0,
   "materials": [

@@ -299,68 +299,76 @@ def build(name, it):
         objs = []
         info[vn] = {}
         for lod, frac in ((0, 1.0), (1, 0.38), (2, 0.11)):
-            md = geom.Mesh()
-            parts = [body_blocks[i] for i in vd["blocks"]] + \
-                ([b_ for b_ in blocks if b_["kind"] == "stone"] if vd.get("stones") else [])
-            for b_ in parts:
-                o = b_["obj"]
-                if frac < 1.0:
-                    oc = o.copy()
-                    oc.data = o.data.copy()
-                    core.link(oc)
-                    decimate(oc, max(16 if lod == 2 else 30, int(core.tri_count(o) * frac)))
-                    V, T, N = arrays(oc)
-                    bpy.data.objects.remove(oc, do_unlink=True)
-                else:
-                    V, T, N = arrays(o)
-                Vu, Tu, UVu, Nu, kind = slab.planar_uvs(V, T, N, ref.view, ref.W, ref.H, tex_clip)
-                Cw = np.zeros((len(Vu), 4))
-                Cw[:, 3] = np.where(np.repeat(kind, 3) == 2, 1.0, 0.92)
-                md.add(Vu, Tu, UVu, Cw, Nu, 0)
-            if name == "moss_rock" and vd.get("plants") and P is not None and lod < 2:
-                keep = []
-                bx = [body_blocks[i] for i in vd["blocks"]]
-                for i in range(P.n):
-                    cu, cv_ = P.info[i]["c"]
-                    if min(abs(cu - b_["cx"]) + 0.5 * abs(cv_ - b_["cy"]) for b_ in bx) < 70:
-                        keep.append(i)
-                if lod == 1:
-                    keep = sorted(keep, key=lambda i: -P.info[i]["area"])[: max(1, len(keep) // 2)]
-                md.extend(plant_cards(ref, P, zb, keep, copies=((55, 0.9), (-60, 0.85)) if lod == 0 else ((70, 0.9),)))
-            if vd.get("rot_copy"):
-                ang, sc = vd["rot_copy"]
-                Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
-                used = np.unique(Tt)
-                cen = Vv[used].mean(0)
-                cen[2] = 0.0
-                R = geom.rot_z(math.radians(ang))
-                V2 = ((Vv - cen) * sc) @ R.T + cen - ref.view.d * 0.0 + np.array([0, 0, 0]) 
-                V2 = V2 + (R @ np.array([0.0, 1.0, 0.0])) * 0.0
-                md2 = geom.Mesh()
-                md2.add(V2 + np.array([0.0, 0.6 * np.ptp(Vv[used][:, 0]) * 0.25, 0.0]), Tt, UVv, Cc, Nn @ R.T, 0)
-                md2.M = [Mm]
-                md.extend(md2)
-            if vd.get("cut_x"):
-                # shorter log: keep the part right of cut_x (fraction of the crop width) -> drop root plate
-                Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
-                xcut = geom.pix_to_world(ref.view, np.array([vd["cut_x"] * ref.W]), np.array([0.0]), np.array([0.0]))[0][0]
-                keep_t = Vv[Tt].mean(1)[:, 0] > xcut
-                md = geom.Mesh()
-                md.add(Vv, Tt[keep_t], UVv, Cc, Nn, 0)
-                md.M = [Mm[keep_t]]
-            if vd.get("mirror"):
-                md = md.transformed(mirror_x=True)
-            Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
-            if vd.get("center") and len(Vv):
-                used = np.unique(Tt)
-                off = Vv[used].mean(0)
-                off[2] = 0.0
-                md = geom.Mesh()
-                md.add(Vv - off, Tt, UVv, Cc, Nn, 0)
-                md.M = [Mm]
-            o = pblend.obj_from_mesh(f"{asset}_{vn}_LOD{lod}", md, mats)
-            objs.append(o)
-            info[vn][f"LOD{lod}"] = dict(tris=md.tris())
+          for attempt in range(6):
+              md = geom.Mesh()
+              parts = [body_blocks[i] for i in vd["blocks"]] + \
+                  ([b_ for b_ in blocks if b_["kind"] == "stone"] if vd.get("stones") else [])
+              if lod == 2:
+                  amax = max(b_["area"] for b_ in parts)
+                  parts = [b_ for b_ in parts if b_["area"] >= (0.22 if vd.get("rot_copy") else 0.12) * amax]
+              for b_ in parts:
+                  o = b_["obj"]
+                  if frac < 1.0:
+                      oc = o.copy()
+                      oc.data = o.data.copy()
+                      core.link(oc)
+                      decimate(oc, max(8 if lod == 2 else 30, int(core.tri_count(o) * frac)))
+                      V, T, N = arrays(oc)
+                      bpy.data.objects.remove(oc, do_unlink=True)
+                  else:
+                      V, T, N = arrays(o)
+                  Vu, Tu, UVu, Nu, kind = slab.planar_uvs(V, T, N, ref.view, ref.W, ref.H, tex_clip)
+                  Cw = np.zeros((len(Vu), 4))
+                  Cw[:, 3] = np.where(np.repeat(kind, 3) == 2, 1.0, 0.92)
+                  md.add(Vu, Tu, UVu, Cw, Nu, 0)
+              if name == "moss_rock" and vd.get("plants") and P is not None and lod < 2:
+                  keep = []
+                  bx = [body_blocks[i] for i in vd["blocks"]]
+                  for i in range(P.n):
+                      cu, cv_ = P.info[i]["c"]
+                      if min(abs(cu - b_["cx"]) + 0.5 * abs(cv_ - b_["cy"]) for b_ in bx) < 70:
+                          keep.append(i)
+                  if lod == 1:
+                      keep = sorted(keep, key=lambda i: -P.info[i]["area"])[: max(1, len(keep) // 2)]
+                  md.extend(plant_cards(ref, P, zb, keep, copies=((55, 0.9), (-60, 0.85)) if lod == 0 else ((70, 0.9),)))
+              if vd.get("rot_copy"):
+                  ang, sc = vd["rot_copy"]
+                  Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
+                  used = np.unique(Tt)
+                  cen = Vv[used].mean(0)
+                  cen[2] = 0.0
+                  R = geom.rot_z(math.radians(ang))
+                  V2 = ((Vv - cen) * sc) @ R.T + cen - ref.view.d * 0.0 + np.array([0, 0, 0]) 
+                  V2 = V2 + (R @ np.array([0.0, 1.0, 0.0])) * 0.0
+                  md2 = geom.Mesh()
+                  md2.add(V2 + np.array([0.0, 0.6 * np.ptp(Vv[used][:, 0]) * 0.25, 0.0]), Tt, UVv, Cc, Nn @ R.T, 0)
+                  md2.M = [Mm]
+                  md.extend(md2)
+              if vd.get("cut_x"):
+                  # shorter log: keep the part right of cut_x (fraction of the crop width) -> drop root plate
+                  Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
+                  xcut = geom.pix_to_world(ref.view, np.array([vd["cut_x"] * ref.W]), np.array([0.0]), np.array([0.0]))[0][0]
+                  keep_t = Vv[Tt].mean(1)[:, 0] > xcut
+                  md = geom.Mesh()
+                  md.add(Vv, Tt[keep_t], UVv, Cc, Nn, 0)
+                  md.M = [Mm[keep_t]]
+              if vd.get("mirror"):
+                  md = md.transformed(mirror_x=True)
+              Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
+              if vd.get("center") and len(Vv):
+                  used = np.unique(Tt)
+                  off = Vv[used].mean(0)
+                  off[2] = 0.0
+                  md = geom.Mesh()
+                  md.add(Vv - off, Tt, UVv, Cc, Nn, 0)
+                  md.M = [Mm]
+              budget = (4000, 1500, 290)[lod]
+              if md.tris() <= budget or lod == 0:
+                  break
+              frac *= 0.8 * budget / max(md.tris(), 1)
+          o = pblend.obj_from_mesh(f"{asset}_{vn}_LOD{lod}", md, mats)
+          objs.append(o)
+          info[vn][f"LOD{lod}"] = dict(tris=md.tris())
         built[vn] = objs
         print(f"[{asset}] {vn}: " + ", ".join(f"LOD{l}={info[vn][f'LOD{l}']['tris']}" for l in range(3)), flush=True)
     for b_ in blocks:

@@ -51,7 +51,12 @@ def entry(asset, variants=None):
     vs = m["variants"]
     names = variants or list(vs)
     out = dict(glb=f"{asset}.glb", meta=f"{asset}.meta.json", role=INFO[asset]["role"],
-               variants={}, recommendedScale=list(INFO[asset]["scale"]))
+               variants={}, recommendedScale=list(m.get("recommendedScale", INFO[asset]["scale"])))
+    # v2 painted kit: shading contract for the world layer (textures carry the painted light)
+    for key in ("paintedLightMix", "paintedLightMixByMaterial", "edgeFade", "aoFormula", "recommendedTint", "heroScale",
+                "heroNote", "generation"):
+        if m.get(key) is not None:
+            out[key] = m[key]
     for vn in names:
         v = vs[vn]
         canopy = v.get("crown_radius_m", v.get("footprint_radius_m"))
@@ -59,6 +64,8 @@ def entry(asset, variants=None):
         out["variants"][vn] = dict(nodes=v["nodes"], tris=v["tris"], height_m=v.get("height_m"),
                                    canopyRadius_m=canopy, footprintRadius_m=round(min(fp, canopy or fp), 2),
                                    materials=v.get("materials"))
+        if v.get("recipe"):
+            out["variants"][vn]["recipe"] = v["recipe"]
     return out
 
 
@@ -69,9 +76,13 @@ def main():
         "group": "forest",
         "note": "Mesh resources per variant/LOD; node translations in the GLBs are preview offsets only. "
                 "Instance with deterministic transforms (seeded yaw 0..2pi, scale inside recommendedScale).",
-        "sharedTextures": {"foliageAtlas": "lf_foliage_atlas.png (2048, RGBA, alpha cutoff 0.5)",
-                           "bark": "lf_bark_{oak,pine,birch,hollow,willow}_{c.jpg,n.png,r.png} (1024)",
+        "sharedTextures": {"foliageAtlas": "lf_foliage_atlas.png (2048, RGBA, alpha cutoff 0.5, painted tiles only)",
+                           "bark": "lf_bark_{oak,pine,birch,hollow,willow,bramble,fallen}_{c.jpg,n.png,r.png} (1024)",
                            "rock": "lf_rock_limestone_{c.jpg,n.png,r.png} (1024)"},
+        "shading": {"model": "v2 painted kit: albedo * mix(1, max(dot(N, L), 0), paintedLightMix) * mix(0.42, 1, COLOR_0.a^2)",
+                    "paintedLightMix": "per asset (trees 0.3; materials lf_foliage_vol 0.5; props 0.35)",
+                    "edgeFade": "foliage alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|)",
+                    "reference": "forest_rescue/blender/assets/paint3d/godot_city_viewer/lf_painted.gdshader"},
         "wind": {"clip": "lf_forest_wind", "seconds": 8.0, "shader": "lf_forest_wind.gdshader",
                  "COLOR_0": "R sway (0 trunk base -> 1 tips), G leaf flutter, B per-branch phase, A crown AO"},
         "lodPolicy": {"LOD0": "near (bark + foliage surfaces)", "LOD1": "mid, single foliage-atlas surface (≈40%)",
@@ -80,12 +91,17 @@ def main():
         "ambientCandidates": {},
         "resourceTrees": {"oak «Дуб»": entry("lf_env_golden_oak"), "pine «Сосна»": entry("lf_env_dark_pine")},
         "biomeTreeMix": {
-            "birch": {"asset": "lf_env_birch", "variants": ["v1", "v2", "v3"]},
-            "pine": {"asset": "lf_env_dark_pine", "variants": ["v1", "v2", "v3", "v4"]},
-            "fir": {"asset": "lf_env_dark_pine", "variants": ["v1", "v3"], "note": "spruce/fir silhouettes"},
-            "ancient_pine": {"asset": "lf_env_dark_pine", "variants": ["v4", "v2"], "scale": [1.1, 1.35]},
+            "birch": {"asset": "lf_env_birch", "variants": ["v2", "v3", "v1"],
+                      "note": "v2/v3 open high crowns (white stems visible from the city camera); v1 = art/02 hero"},
+            "pine": {"asset": "lf_env_dark_pine", "variants": ["v2", "v3", "v4"],
+                     "note": "art/01 dark blue-green palette; v1 (art/02 olive) is the resource-tree hero"},
+            "fir": {"asset": "lf_env_dark_pine", "variants": ["v3", "v4"], "note": "slim spires"},
+            "ancient_pine": {"asset": "lf_env_dark_pine", "variants": ["v2"], "scale": [1.1, 1.35]},
+            "grove_oak": {"asset": "lf_env_golden_oak", "variants": ["v2", "v3", "v4"],
+                          "note": "art/01 grove oaks (umbrella crown, baked golden-ochre palette); v1 = art/02 hero"},
             "alder": {"asset": "lf_env_birch", "variants": ["v2", "v3"], "note": "no dedicated alder: slender birch stand-in"},
-            "willow": {"asset": "lf_env_willow", "variants": ["v1", "v2", "v3"]},
+            "willow": {"asset": "lf_env_willow", "variants": ["v2", "v3", "v1"],
+                       "note": "v2/v3 art/01 east-river green palette; v1 = art/02 olive"},
             "fern": {"asset": "lf_env_reed_fern", "variants": ["fern_v1", "fern_v2"]},
             "deadwood": {"asset": "lf_env_fallen_trunk", "variants": ["v2"], "extra": ["lf_env_fallen_branches",
                                                                                        "lf_env_hollow_oak v3 (snag)"]},

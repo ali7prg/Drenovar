@@ -27,7 +27,7 @@
           "lf_foliage"
         ]
       },
-      "height_m": 4.05,
+      "height_m": 4.04,
       "footprint_radius_m": 5.34,
       "bounds_m_blender": [
         [
@@ -38,7 +38,7 @@
         [
           5.34,
           1.2,
-          4.05
+          4.04
         ]
       ],
       "display_offset_gltf": [
@@ -54,9 +54,9 @@
         "lf_env_fallen_trunk_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 1547,
-        "LOD1": 595,
-        "LOD2": 174
+        "LOD0": 1546,
+        "LOD1": 588,
+        "LOD2": 177
       },
       "materials": {
         "LOD0": [
@@ -72,22 +72,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 4.05,
-      "footprint_radius_m": 6.63,
+      "height_m": 4.04,
+      "footprint_radius_m": 6.61,
       "bounds_m_blender": [
         [
-          -6.63,
-          -0.94,
+          -6.61,
+          -0.93,
           0.8
         ],
         [
-          3.47,
-          0.93,
-          4.05
+          3.49,
+          0.94,
+          4.04
         ]
       ],
       "display_offset_gltf": [
-        13.043,
+        13.042,
         0.0,
         0.0
       ]
@@ -101,7 +101,7 @@
       "tris": {
         "LOD0": 2758,
         "LOD1": 1130,
-        "LOD2": 452
+        "LOD2": 290
       },
       "materials": {
         "LOD0": [
@@ -117,7 +117,7 @@
           "lf_foliage"
         ]
       },
-      "height_m": 4.05,
+      "height_m": 4.04,
       "footprint_radius_m": 5.71,
       "bounds_m_blender": [
         [
@@ -128,11 +128,11 @@
         [
           5.71,
           1.2,
-          4.05
+          4.04
         ]
       ],
       "display_offset_gltf": [
-        26.085,
+        26.084,
         0.0,
         0.0
       ]
@@ -141,7 +141,7 @@
   "tris": {
     "LOD0": 2758,
     "LOD1": 1130,
-    "LOD2": 452
+    "LOD2": 290
   },
   "bones": 0,
   "materials": [
@@ -178,7 +178,7 @@
       ],
       "size": [
         10.11,
-        4.05,
+        4.04,
         1.87
       ],
       "variant": "v1"
@@ -192,7 +192,7 @@
       ],
       "size": [
         10.1,
-        4.05,
+        4.04,
         1.87
       ],
       "variant": "v2"
@@ -206,7 +206,7 @@
       ],
       "size": [
         11.05,
-        4.05,
+        4.04,
         1.87
       ],
       "variant": "v3_stream"

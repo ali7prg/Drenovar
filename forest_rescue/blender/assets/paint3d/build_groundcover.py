@@ -162,7 +162,7 @@ def mushrooms(tiles, n, radius, size_k, seed, segs=10):
     return md
 
 
-def branches(limbs_px, ppm, uvs, ids, n, seed, bark_mat_index=0):
+def branches(limbs_px, ppm, uvs, ids, n, seed, bark_mat_index=0, sides=5, step_k=2.5):
     """Painted oak limbs (2-D skeleton polylines + radii) laid on the ground as tapered tubes."""
     rng = np.random.default_rng(seed)
     md = geom.Mesh()
@@ -184,11 +184,11 @@ def branches(limbs_px, ppm, uvs, ids, n, seed, bark_mat_index=0):
         Z = rr * 0.8 + 0.03 * np.sin(np.linspace(0, math.pi, len(X)))     # resting on the ground, slight arch
         P = np.stack([X, Y, Z], 1)
         P[:, :2] += rng.uniform(-0.8, 0.8, 2)
-        Ps, ss = geom.resample_polyline(P, max(0.08, 2.5 * rr.mean()))
+        Ps, ss = geom.resample_polyline(P, max(0.08, step_k * rr.mean()))
         rs = np.interp(ss, np.r_[0, np.cumsum(np.linalg.norm(np.diff(P, axis=0), axis=1))], rr)
         if len(Ps) < 3:
             continue
-        V, T, UV, C, N = geom.tube(Ps, rs, 5 if rs.max() > 0.03 else 4, uvs[lid], np.zeros(4))
+        V, T, UV, C, N = geom.tube(Ps, rs, sides if rs.max() > 0.03 else max(3, sides - 1), uvs[lid], np.zeros(4))
         C = np.zeros((len(V), 4))
         C[:, 3] = 0.9
         md.add(V, T, UV, C, N, bark_mat_index)
@@ -265,8 +265,8 @@ def main():
     FB = {}
     for v, (n0, seed) in {"v1": (6, 7), "v2": (4, 8)}.items():
         lods = []
-        for lod, frac in ((0, 1.0), (1, 0.7), (2, 0.4)):
-            md = branches(limbs, ref.ppm, bark_uv, ids, max(2, int(n0 * frac)), seed)
+        for lod, frac, sides, stk in ((0, 1.0, 5, 2.5), (1, 0.7, 4, 5.0), (2, 0.35, 3, 12.0)):
+            md = branches(limbs, ref.ppm, bark_uv, ids, max(2, int(n0 * frac)), seed, sides=sides, step_k=stk)
             if lod == 0:
                 md.extend(tuft(grass, 4, 0.8, 0.8, seed + 50, PPM_GRASS))
             lods.append(md)

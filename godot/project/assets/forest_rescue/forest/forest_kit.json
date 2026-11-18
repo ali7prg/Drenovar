@@ -3,9 +3,15 @@
  "group": "forest",
  "note": "Mesh resources per variant/LOD; node translations in the GLBs are preview offsets only. Instance with deterministic transforms (seeded yaw 0..2pi, scale inside recommendedScale).",
  "sharedTextures": {
-  "foliageAtlas": "lf_foliage_atlas.png (2048, RGBA, alpha cutoff 0.5)",
-  "bark": "lf_bark_{oak,pine,birch,hollow,willow}_{c.jpg,n.png,r.png} (1024)",
+  "foliageAtlas": "lf_foliage_atlas.png (2048, RGBA, alpha cutoff 0.5, painted tiles only)",
+  "bark": "lf_bark_{oak,pine,birch,hollow,willow,bramble,fallen}_{c.jpg,n.png,r.png} (1024)",
   "rock": "lf_rock_limestone_{c.jpg,n.png,r.png} (1024)"
+ },
+ "shading": {
+  "model": "v2 painted kit: albedo * mix(1, max(dot(N, L), 0), paintedLightMix) * mix(0.42, 1, COLOR_0.a^2)",
+  "paintedLightMix": "per asset (trees 0.3; materials lf_foliage_vol 0.5; props 0.35)",
+  "edgeFade": "foliage alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|)",
+  "reference": "forest_rescue/blender/assets/paint3d/godot_city_viewer/lf_painted.gdshader"
  },
  "wind": {
   "clip": "lf_forest_wind",
@@ -101,6 +107,8 @@
     0.8,
     1.45
    ],
+   "paintedLightMix": 0.35,
+   "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)",
    "candidateCount": 377,
    "candidateScaleRange": [
     0.801,
@@ -142,6 +150,18 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        120,
+        0.95
+       ],
+       [
+        -120,
+        0.9
+       ]
+      ]
      }
     },
     "v2": {
@@ -174,6 +194,54 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [
+       [
+        72,
+        0.95
+       ],
+       [
+        144,
+        0.9
+       ],
+       [
+        -72,
+        0.95
+       ],
+       [
+        -144,
+        0.9
+       ]
+      ],
+      "no_front": true,
+      "cfg": {
+       "anchor_min_z": 5.2,
+       "mass_min_dist": 2.0,
+       "ao_under": 0.88,
+       "anchor_source": "patches",
+       "mass_r": 0.105
+      },
+      "lods": {
+       "0": {
+        "n_masses": 24,
+        "clumps_per": 12,
+        "max_cards": 930,
+        "core_cards": 0,
+        "copy_min_r_px": 2.6,
+        "limb_budget": 700
+       },
+       "1": {
+        "n_masses": 24,
+        "clumps_per": 10,
+        "core_cards": 0
+       },
+       "2": {
+        "n_masses": 12,
+        "clumps_per": 6
+       }
+      }
      }
     },
     "v3": {
@@ -206,6 +274,57 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        60,
+        0.9
+       ],
+       [
+        130,
+        0.95
+       ],
+       [
+        -60,
+        0.95
+       ],
+       [
+        -130,
+        0.9
+       ]
+      ],
+      "scale": [
+       0.92,
+       1.05
+      ],
+      "no_front": true,
+      "cfg": {
+       "anchor_min_z": 5.5,
+       "mass_min_dist": 2.0,
+       "ao_under": 0.88,
+       "anchor_source": "patches",
+       "mass_r": 0.105
+      },
+      "lods": {
+       "0": {
+        "n_masses": 22,
+        "clumps_per": 12,
+        "max_cards": 1000,
+        "core_cards": 0,
+        "copy_min_r_px": 2.6,
+        "limb_budget": 700
+       },
+       "1": {
+        "n_masses": 22,
+        "clumps_per": 10,
+        "core_cards": 0
+       },
+       "2": {
+        "n_masses": 12,
+        "clumps_per": 6
+       }
+      }
      }
     }
    },
@@ -213,6 +332,17 @@
     0.8,
     1.35
    ],
+   "paintedLightMix": 0.3,
+   "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+     0.1,
+     0.3
+    ]
+   },
+   "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+   "recommendedTint": "art/02 palette (yellow-green); world birch tint deepens green",
+   "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)",
    "candidateCount": 407,
    "candidateScaleRange": [
     0.8,
@@ -254,6 +384,9 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": []
      }
     },
     "v2": {
@@ -286,6 +419,11 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [],
+      "palette": "dark"
      }
     },
     "v3": {
@@ -318,6 +456,14 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [],
+      "scale": [
+       0.74,
+       1.08
+      ],
+      "palette": "dark"
      }
     },
     "v4": {
@@ -350,6 +496,15 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [],
+      "scale": [
+       0.66,
+       1.14
+      ],
+      "palette": "dark"
      }
     }
    },
@@ -357,6 +512,17 @@
     0.75,
     1.3
    ],
+   "paintedLightMix": 0.3,
+   "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+     0.1,
+     0.3
+    ]
+   },
+   "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+   "recommendedTint": "art/02 palette (dark blue-green spruce); world tint as forest_world.gd conifers is fine",
+   "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)",
    "candidateCount": 356,
    "candidateScaleRange": [
     0.807,
@@ -400,6 +566,18 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        125,
+        0.92
+       ],
+       [
+        -125,
+        0.9
+       ]
+      ]
      }
     },
     "v2": {
@@ -432,6 +610,80 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [
+       [
+        90,
+        0.95
+       ],
+       [
+        180,
+        0.9
+       ],
+       [
+        -90,
+        0.95
+       ]
+      ],
+      "scale": [
+       1.08,
+       1.2
+      ],
+      "palette": "grove",
+      "no_front": true,
+      "cfg": {
+       "placement": "umbrella",
+       "umb_n": 8,
+       "umb_rk": 1.0,
+       "umb_base": 0.5,
+       "umb_lobe_r": 0.3,
+       "mass_r": 0.25,
+       "mass_zscale": 0.58,
+       "ao_under": 0.68,
+       "ao_side": 0.84,
+       "side_mode": "shade",
+       "p_hires": 0.6,
+       "limbs_connected_only": true,
+       "limb_keep_r": 2.2,
+       "anchor_min_r": 2.2,
+       "anchor_min_z": 7.6,
+       "mass_min_dist": 2.7,
+       "trunk_r_k": [
+        1.06,
+        0.9
+       ],
+       "lobe_zf_min": -0.25,
+       "anchor_radial_k": 1.25,
+       "anchor_step_m": 1.2,
+       "lobe_limbs": true,
+       "lobe_limb_r0": 0.5,
+       "limb_min_top_z": 6.5
+      },
+      "lods": {
+       "0": {
+        "n_masses": 9,
+        "clumps_per": 62,
+        "core_cards": 0,
+        "max_cards": 1250,
+        "copy_min_r_px": 2.6
+       },
+       "1": {
+        "n_masses": 8,
+        "clumps_per": 28,
+        "core_cards": 0,
+        "max_cards": 470,
+        "lobe_limb_pts": 4
+       },
+       "2": {
+        "n_masses": 7,
+        "clumps_per": 11,
+        "core_cards": 0,
+        "max_cards": 110,
+        "lobe_limb_pts": 2
+       }
+      }
      }
     },
     "v3": {
@@ -464,6 +716,79 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        100,
+        0.95
+       ],
+       [
+        200,
+        0.9
+       ],
+       [
+        -80,
+        0.95
+       ]
+      ],
+      "scale": [
+       1.02,
+       1.24
+      ],
+      "palette": "grove",
+      "no_front": true,
+      "cfg": {
+       "placement": "umbrella",
+       "umb_n": 8,
+       "umb_rk": 1.0,
+       "umb_base": 0.5,
+       "umb_lobe_r": 0.3,
+       "mass_r": 0.25,
+       "mass_zscale": 0.58,
+       "ao_under": 0.68,
+       "ao_side": 0.84,
+       "side_mode": "shade",
+       "p_hires": 0.6,
+       "limbs_connected_only": true,
+       "limb_keep_r": 2.2,
+       "anchor_min_r": 2.2,
+       "anchor_min_z": 7.6,
+       "mass_min_dist": 2.7,
+       "trunk_r_k": [
+        1.06,
+        0.9
+       ],
+       "lobe_zf_min": -0.25,
+       "anchor_radial_k": 1.25,
+       "anchor_step_m": 1.2,
+       "lobe_limbs": true,
+       "lobe_limb_r0": 0.5,
+       "limb_min_top_z": 6.5
+      },
+      "lods": {
+       "0": {
+        "n_masses": 9,
+        "clumps_per": 62,
+        "core_cards": 0,
+        "max_cards": 1250,
+        "copy_min_r_px": 2.6
+       },
+       "1": {
+        "n_masses": 8,
+        "clumps_per": 28,
+        "core_cards": 0,
+        "max_cards": 470,
+        "lobe_limb_pts": 4
+       },
+       "2": {
+        "n_masses": 7,
+        "clumps_per": 11,
+        "core_cards": 0,
+        "max_cards": 110,
+        "lobe_limb_pts": 2
+       }
+      }
      }
     },
     "v4": {
@@ -496,13 +821,94 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [
+       [
+        120,
+        0.9
+       ],
+       [
+        -120,
+        0.9
+       ]
+      ],
+      "scale": [
+       1.14,
+       1.16
+      ],
+      "palette": "grove",
+      "no_front": true,
+      "cfg": {
+       "placement": "umbrella",
+       "umb_n": 8,
+       "umb_rk": 1.0,
+       "umb_base": 0.5,
+       "umb_lobe_r": 0.3,
+       "mass_r": 0.25,
+       "mass_zscale": 0.58,
+       "ao_under": 0.68,
+       "ao_side": 0.84,
+       "side_mode": "shade",
+       "p_hires": 0.6,
+       "limbs_connected_only": true,
+       "limb_keep_r": 2.2,
+       "anchor_min_r": 2.2,
+       "anchor_min_z": 7.6,
+       "mass_min_dist": 2.7,
+       "trunk_r_k": [
+        1.06,
+        0.9
+       ],
+       "lobe_zf_min": -0.25,
+       "anchor_radial_k": 1.25,
+       "anchor_step_m": 1.2,
+       "lobe_limbs": true,
+       "lobe_limb_r0": 0.5,
+       "limb_min_top_z": 6.5
+      },
+      "lods": {
+       "0": {
+        "n_masses": 9,
+        "clumps_per": 62,
+        "core_cards": 0,
+        "max_cards": 1250,
+        "copy_min_r_px": 2.6
+       },
+       "1": {
+        "n_masses": 8,
+        "clumps_per": 28,
+        "core_cards": 0,
+        "max_cards": 470,
+        "lobe_limb_pts": 4
+       },
+       "2": {
+        "n_masses": 7,
+        "clumps_per": 11,
+        "core_cards": 0,
+        "max_cards": 110,
+        "lobe_limb_pts": 2
+       }
+      }
      }
     }
    },
    "recommendedScale": [
     0.65,
     1.1
-   ]
+   ],
+   "paintedLightMix": 0.3,
+   "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+     0.1,
+     0.3
+    ]
+   },
+   "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+   "recommendedTint": "art/02 palette (orange-gold); for art/07 / art/01 look tint foliage toward warm yellow: hue +0.02..+0.035, saturation x1.10, value x1.08 (INSTANCE_CUSTOM r,g,b)",
+   "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)"
   },
   "pine «Сосна»": {
    "glb": "lf_env_dark_pine.glb",
@@ -539,6 +945,9 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": []
      }
     },
     "v2": {
@@ -571,6 +980,11 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [],
+      "palette": "dark"
      }
     },
     "v3": {
@@ -603,6 +1017,14 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [],
+      "scale": [
+       0.74,
+       1.08
+      ],
+      "palette": "dark"
      }
     },
     "v4": {
@@ -635,51 +1057,80 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [],
+      "scale": [
+       0.66,
+       1.14
+      ],
+      "palette": "dark"
      }
     }
    },
    "recommendedScale": [
     0.75,
     1.3
-   ]
+   ],
+   "paintedLightMix": 0.3,
+   "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+     0.1,
+     0.3
+    ]
+   },
+   "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+   "recommendedTint": "art/02 palette (dark blue-green spruce); world tint as forest_world.gd conifers is fine",
+   "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)"
   }
  },
  "biomeTreeMix": {
   "birch": {
    "asset": "lf_env_birch",
    "variants": [
-    "v1",
     "v2",
-    "v3"
-   ]
+    "v3",
+    "v1"
+   ],
+   "note": "v2/v3 open high crowns (white stems visible from the city camera); v1 = art/02 hero"
   },
   "pine": {
    "asset": "lf_env_dark_pine",
    "variants": [
-    "v1",
     "v2",
     "v3",
     "v4"
-   ]
+   ],
+   "note": "art/01 dark blue-green palette; v1 (art/02 olive) is the resource-tree hero"
   },
   "fir": {
    "asset": "lf_env_dark_pine",
    "variants": [
-    "v1",
-    "v3"
+    "v3",
+    "v4"
    ],
-   "note": "spruce/fir silhouettes"
+   "note": "slim spires"
   },
   "ancient_pine": {
    "asset": "lf_env_dark_pine",
    "variants": [
-    "v4",
     "v2"
    ],
    "scale": [
     1.1,
     1.35
    ]
+  },
+  "grove_oak": {
+   "asset": "lf_env_golden_oak",
+   "variants": [
+    "v2",
+    "v3",
+    "v4"
+   ],
+   "note": "art/01 grove oaks (umbrella crown, baked golden-ochre palette); v1 = art/02 hero"
   },
   "alder": {
    "asset": "lf_env_birch",
@@ -692,10 +1143,11 @@
   "willow": {
    "asset": "lf_env_willow",
    "variants": [
-    "v1",
     "v2",
-    "v3"
-   ]
+    "v3",
+    "v1"
+   ],
+   "note": "v2/v3 art/01 east-river green palette; v1 = art/02 olive"
   },
   "fern": {
    "asset": "lf_env_reed_fern",
@@ -771,6 +1223,18 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        125,
+        0.92
+       ],
+       [
+        -125,
+        0.9
+       ]
+      ]
      }
     },
     "v2": {
@@ -803,6 +1267,80 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [
+       [
+        90,
+        0.95
+       ],
+       [
+        180,
+        0.9
+       ],
+       [
+        -90,
+        0.95
+       ]
+      ],
+      "scale": [
+       1.08,
+       1.2
+      ],
+      "palette": "grove",
+      "no_front": true,
+      "cfg": {
+       "placement": "umbrella",
+       "umb_n": 8,
+       "umb_rk": 1.0,
+       "umb_base": 0.5,
+       "umb_lobe_r": 0.3,
+       "mass_r": 0.25,
+       "mass_zscale": 0.58,
+       "ao_under": 0.68,
+       "ao_side": 0.84,
+       "side_mode": "shade",
+       "p_hires": 0.6,
+       "limbs_connected_only": true,
+       "limb_keep_r": 2.2,
+       "anchor_min_r": 2.2,
+       "anchor_min_z": 7.6,
+       "mass_min_dist": 2.7,
+       "trunk_r_k": [
+        1.06,
+        0.9
+       ],
+       "lobe_zf_min": -0.25,
+       "anchor_radial_k": 1.25,
+       "anchor_step_m": 1.2,
+       "lobe_limbs": true,
+       "lobe_limb_r0": 0.5,
+       "limb_min_top_z": 6.5
+      },
+      "lods": {
+       "0": {
+        "n_masses": 9,
+        "clumps_per": 62,
+        "core_cards": 0,
+        "max_cards": 1250,
+        "copy_min_r_px": 2.6
+       },
+       "1": {
+        "n_masses": 8,
+        "clumps_per": 28,
+        "core_cards": 0,
+        "max_cards": 470,
+        "lobe_limb_pts": 4
+       },
+       "2": {
+        "n_masses": 7,
+        "clumps_per": 11,
+        "core_cards": 0,
+        "max_cards": 110,
+        "lobe_limb_pts": 2
+       }
+      }
      }
     },
     "v3": {
@@ -835,6 +1373,79 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        100,
+        0.95
+       ],
+       [
+        200,
+        0.9
+       ],
+       [
+        -80,
+        0.95
+       ]
+      ],
+      "scale": [
+       1.02,
+       1.24
+      ],
+      "palette": "grove",
+      "no_front": true,
+      "cfg": {
+       "placement": "umbrella",
+       "umb_n": 8,
+       "umb_rk": 1.0,
+       "umb_base": 0.5,
+       "umb_lobe_r": 0.3,
+       "mass_r": 0.25,
+       "mass_zscale": 0.58,
+       "ao_under": 0.68,
+       "ao_side": 0.84,
+       "side_mode": "shade",
+       "p_hires": 0.6,
+       "limbs_connected_only": true,
+       "limb_keep_r": 2.2,
+       "anchor_min_r": 2.2,
+       "anchor_min_z": 7.6,
+       "mass_min_dist": 2.7,
+       "trunk_r_k": [
+        1.06,
+        0.9
+       ],
+       "lobe_zf_min": -0.25,
+       "anchor_radial_k": 1.25,
+       "anchor_step_m": 1.2,
+       "lobe_limbs": true,
+       "lobe_limb_r0": 0.5,
+       "limb_min_top_z": 6.5
+      },
+      "lods": {
+       "0": {
+        "n_masses": 9,
+        "clumps_per": 62,
+        "core_cards": 0,
+        "max_cards": 1250,
+        "copy_min_r_px": 2.6
+       },
+       "1": {
+        "n_masses": 8,
+        "clumps_per": 28,
+        "core_cards": 0,
+        "max_cards": 470,
+        "lobe_limb_pts": 4
+       },
+       "2": {
+        "n_masses": 7,
+        "clumps_per": 11,
+        "core_cards": 0,
+        "max_cards": 110,
+        "lobe_limb_pts": 2
+       }
+      }
      }
     },
     "v4": {
@@ -867,13 +1478,94 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [
+       [
+        120,
+        0.9
+       ],
+       [
+        -120,
+        0.9
+       ]
+      ],
+      "scale": [
+       1.14,
+       1.16
+      ],
+      "palette": "grove",
+      "no_front": true,
+      "cfg": {
+       "placement": "umbrella",
+       "umb_n": 8,
+       "umb_rk": 1.0,
+       "umb_base": 0.5,
+       "umb_lobe_r": 0.3,
+       "mass_r": 0.25,
+       "mass_zscale": 0.58,
+       "ao_under": 0.68,
+       "ao_side": 0.84,
+       "side_mode": "shade",
+       "p_hires": 0.6,
+       "limbs_connected_only": true,
+       "limb_keep_r": 2.2,
+       "anchor_min_r": 2.2,
+       "anchor_min_z": 7.6,
+       "mass_min_dist": 2.7,
+       "trunk_r_k": [
+        1.06,
+        0.9
+       ],
+       "lobe_zf_min": -0.25,
+       "anchor_radial_k": 1.25,
+       "anchor_step_m": 1.2,
+       "lobe_limbs": true,
+       "lobe_limb_r0": 0.5,
+       "limb_min_top_z": 6.5
+      },
+      "lods": {
+       "0": {
+        "n_masses": 9,
+        "clumps_per": 62,
+        "core_cards": 0,
+        "max_cards": 1250,
+        "copy_min_r_px": 2.6
+       },
+       "1": {
+        "n_masses": 8,
+        "clumps_per": 28,
+        "core_cards": 0,
+        "max_cards": 470,
+        "lobe_limb_pts": 4
+       },
+       "2": {
+        "n_masses": 7,
+        "clumps_per": 11,
+        "core_cards": 0,
+        "max_cards": 110,
+        "lobe_limb_pts": 2
+       }
+      }
      }
     }
    },
    "recommendedScale": [
     0.65,
     1.1
-   ]
+   ],
+   "paintedLightMix": 0.3,
+   "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+     0.1,
+     0.3
+    ]
+   },
+   "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+   "recommendedTint": "art/02 palette (orange-gold); for art/07 / art/01 look tint foliage toward warm yellow: hue +0.02..+0.035, saturation x1.10, value x1.08 (INSTANCE_CUSTOM r,g,b)",
+   "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)"
   },
   "lf_env_dark_pine": {
    "glb": "lf_env_dark_pine.glb",
@@ -910,6 +1602,9 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": []
      }
     },
     "v2": {
@@ -942,6 +1637,11 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [],
+      "palette": "dark"
      }
     },
     "v3": {
@@ -974,6 +1674,14 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [],
+      "scale": [
+       0.74,
+       1.08
+      ],
+      "palette": "dark"
      }
     },
     "v4": {
@@ -1006,13 +1714,33 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [],
+      "scale": [
+       0.66,
+       1.14
+      ],
+      "palette": "dark"
      }
     }
    },
    "recommendedScale": [
     0.75,
     1.3
-   ]
+   ],
+   "paintedLightMix": 0.3,
+   "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+     0.1,
+     0.3
+    ]
+   },
+   "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+   "recommendedTint": "art/02 palette (dark blue-green spruce); world tint as forest_world.gd conifers is fine",
+   "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)"
   },
   "lf_env_birch": {
    "glb": "lf_env_birch.glb",
@@ -1049,6 +1777,18 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        120,
+        0.95
+       ],
+       [
+        -120,
+        0.9
+       ]
+      ]
      }
     },
     "v2": {
@@ -1081,6 +1821,54 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [
+       [
+        72,
+        0.95
+       ],
+       [
+        144,
+        0.9
+       ],
+       [
+        -72,
+        0.95
+       ],
+       [
+        -144,
+        0.9
+       ]
+      ],
+      "no_front": true,
+      "cfg": {
+       "anchor_min_z": 5.2,
+       "mass_min_dist": 2.0,
+       "ao_under": 0.88,
+       "anchor_source": "patches",
+       "mass_r": 0.105
+      },
+      "lods": {
+       "0": {
+        "n_masses": 24,
+        "clumps_per": 12,
+        "max_cards": 930,
+        "core_cards": 0,
+        "copy_min_r_px": 2.6,
+        "limb_budget": 700
+       },
+       "1": {
+        "n_masses": 24,
+        "clumps_per": 10,
+        "core_cards": 0
+       },
+       "2": {
+        "n_masses": 12,
+        "clumps_per": 6
+       }
+      }
      }
     },
     "v3": {
@@ -1113,13 +1901,75 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        60,
+        0.9
+       ],
+       [
+        130,
+        0.95
+       ],
+       [
+        -60,
+        0.95
+       ],
+       [
+        -130,
+        0.9
+       ]
+      ],
+      "scale": [
+       0.92,
+       1.05
+      ],
+      "no_front": true,
+      "cfg": {
+       "anchor_min_z": 5.5,
+       "mass_min_dist": 2.0,
+       "ao_under": 0.88,
+       "anchor_source": "patches",
+       "mass_r": 0.105
+      },
+      "lods": {
+       "0": {
+        "n_masses": 22,
+        "clumps_per": 12,
+        "max_cards": 1000,
+        "core_cards": 0,
+        "copy_min_r_px": 2.6,
+        "limb_budget": 700
+       },
+       "1": {
+        "n_masses": 22,
+        "clumps_per": 10,
+        "core_cards": 0
+       },
+       "2": {
+        "n_masses": 12,
+        "clumps_per": 6
+       }
+      }
      }
     }
    },
    "recommendedScale": [
     0.8,
     1.35
-   ]
+   ],
+   "paintedLightMix": 0.3,
+   "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+     0.1,
+     0.3
+    ]
+   },
+   "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+   "recommendedTint": "art/02 palette (yellow-green); world birch tint deepens green",
+   "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)"
   },
   "lf_env_willow": {
    "glb": "lf_env_willow.glb",
@@ -1156,6 +2006,18 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        115,
+        0.92
+       ],
+       [
+        -120,
+        0.9
+       ]
+      ]
      }
     },
     "v2": {
@@ -1188,6 +2050,20 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [
+       [
+        100,
+        0.9
+       ],
+       [
+        -140,
+        0.95
+       ]
+      ],
+      "palette": "green"
      }
     },
     "v3": {
@@ -1220,13 +2096,41 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        140,
+        0.9
+       ],
+       [
+        -100,
+        0.95
+       ]
+      ],
+      "scale": [
+       0.9,
+       1.06
+      ],
+      "palette": "green"
      }
     }
    },
    "recommendedScale": [
     0.8,
     1.2
-   ]
+   ],
+   "paintedLightMix": 0.3,
+   "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+     0.1,
+     0.3
+    ]
+   },
+   "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+   "recommendedTint": "art/02 palette (olive-green weeping willow)",
+   "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)"
   },
   "lf_env_hollow_oak": {
    "glb": "lf_env_hollow_oak.glb",
@@ -1263,6 +2167,30 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        92,
+        0.9
+       ],
+       [
+        -88,
+        0.92
+       ]
+      ],
+      "upper_copies": [
+       [
+        -90,
+        0.85,
+        "left"
+       ],
+       [
+        90,
+        0.85,
+        "right"
+       ]
+      ]
      }
     },
     "v2": {
@@ -1294,6 +2222,32 @@
        "lf_bark_hollow",
        "lf_foliage",
        "lf_foliage_vol"
+      ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [
+       [
+        95,
+        0.92
+       ],
+       [
+        -140,
+        0.9
+       ]
+      ],
+      "umbrella": true,
+      "upper_copies": [
+       [
+        -90,
+        0.85,
+        "left"
+       ],
+       [
+        90,
+        0.85,
+        "right"
+       ]
       ]
      }
     },
@@ -1327,13 +2281,55 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        130,
+        0.9
+       ],
+       [
+        -100,
+        0.95
+       ]
+      ],
+      "scale": [
+       0.95,
+       0.96
+      ],
+      "umbrella": true,
+      "upper_copies": [
+       [
+        -90,
+        0.85,
+        "left"
+       ],
+       [
+        90,
+        0.85,
+        "right"
+       ]
+      ]
      }
     }
    },
    "recommendedScale": [
-    0.9,
-    1.05
-   ]
+    1.7,
+    2.0
+   ],
+   "paintedLightMix": 0.3,
+   "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+     0.1,
+     0.3
+    ]
+   },
+   "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+   "recommendedTint": "art/02 palette (copper-orange autumn crown); hero landmark tree (landmark budget 6k/1.5k/400)",
+   "heroScale": 1.8,
+   "heroNote": "art/01 cave oak is a HERO: about 1.7-2x a grove oak (its trunk alone about as wide as a grove oak's crown). Model is authored at art/02 scale (1.8 m human); instance it at heroScale 1.7-2.0 (e.g. world height about 24-27 m instead of normalising it to the generic tree height).",
+   "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)"
   },
   "lf_env_fallen_trunk": {
    "glb": "lf_env_fallen_trunk.glb",
@@ -1351,7 +2347,7 @@
       "LOD1": 874,
       "LOD2": 252
      },
-     "height_m": 4.05,
+     "height_m": 4.04,
      "canopyRadius_m": 5.34,
      "footprintRadius_m": 5.2,
      "materials": {
@@ -1376,12 +2372,12 @@
       "lf_env_fallen_trunk_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 1547,
-      "LOD1": 595,
-      "LOD2": 174
+      "LOD0": 1546,
+      "LOD1": 588,
+      "LOD2": 177
      },
-     "height_m": 4.05,
-     "canopyRadius_m": 6.63,
+     "height_m": 4.04,
+     "canopyRadius_m": 6.61,
      "footprintRadius_m": 5.2,
      "materials": {
       "LOD0": [
@@ -1407,9 +2403,9 @@
      "tris": {
       "LOD0": 2758,
       "LOD1": 1130,
-      "LOD2": 452
+      "LOD2": 290
      },
-     "height_m": 4.05,
+     "height_m": 4.04,
      "canopyRadius_m": 5.71,
      "footprintRadius_m": 5.2,
      "materials": {
@@ -1431,7 +2427,9 @@
    "recommendedScale": [
     0.8,
     1.2
-   ]
+   ],
+   "paintedLightMix": 0.35,
+   "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)"
   },
   "lf_env_moss_rock": {
    "glb": "lf_env_moss_rock.glb",
@@ -1447,7 +2445,7 @@
      "tris": {
       "LOD0": 2908,
       "LOD1": 1150,
-      "LOD2": 458
+      "LOD2": 282
      },
      "height_m": 5.5,
      "canopyRadius_m": 4.91,
@@ -1476,7 +2474,7 @@
      "tris": {
       "LOD0": 3672,
       "LOD1": 1444,
-      "LOD2": 560
+      "LOD2": 296
      },
      "height_m": 5.5,
      "canopyRadius_m": 3.02,
@@ -1505,7 +2503,7 @@
      "tris": {
       "LOD0": 3348,
       "LOD1": 1316,
-      "LOD2": 540
+      "LOD2": 344
      },
      "height_m": 5.5,
      "canopyRadius_m": 3.24,
@@ -1529,7 +2527,9 @@
    "recommendedScale": [
     0.7,
     1.3
-   ]
+   ],
+   "paintedLightMix": 0.35,
+   "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)"
   },
   "lf_env_bramble": {
    "glb": "lf_env_bramble.glb",
@@ -1566,6 +2566,18 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        100,
+        0.9
+       ],
+       [
+        -110,
+        0.85
+       ]
+      ]
      }
     },
     "v2": {
@@ -1597,6 +2609,19 @@
        "lf_bark_bramble",
        "lf_foliage",
        "lf_foliage_vol"
+      ]
+     },
+     "recipe": {
+      "mirror": true,
+      "copies": [
+       [
+        80,
+        0.9
+       ],
+       [
+        -130,
+        0.9
+       ]
       ]
      }
     },
@@ -1630,13 +2655,40 @@
        "lf_foliage",
        "lf_foliage_vol"
       ]
+     },
+     "recipe": {
+      "copies": [
+       [
+        120,
+        0.85
+       ],
+       [
+        -90,
+        0.9
+       ]
+      ],
+      "scale": [
+       0.8,
+       1.1
+      ]
      }
     }
    },
    "recommendedScale": [
     0.8,
     1.3
-   ]
+   ],
+   "paintedLightMix": 0.35,
+   "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+     0.1,
+     0.3
+    ]
+   },
+   "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+   "recommendedTint": "art/02 palette (olive leaves, red berries, red-brown canes)",
+   "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)"
   },
   "lf_env_reed_fern": {
    "glb": "lf_env_reed_fern.glb",
@@ -1792,7 +2844,9 @@
    "recommendedScale": [
     0.8,
     1.45
-   ]
+   ],
+   "paintedLightMix": 0.35,
+   "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)"
   },
   "lf_env_grass_tuft": {
    "glb": "lf_env_grass_tuft.glb",
@@ -1890,7 +2944,9 @@
    "recommendedScale": [
     0.8,
     1.5
-   ]
+   ],
+   "paintedLightMix": 0.35,
+   "generation": "v2: painted tiles from art/02 (grass bases / bracket fungi) and painted golden-oak limbs"
   },
   "lf_env_fallen_branches": {
    "glb": "lf_env_fallen_branches.glb",
@@ -1904,9 +2960,9 @@
       "lf_env_fallen_branches_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 1106,
-      "LOD1": 750,
-      "LOD2": 342
+      "LOD0": 1158,
+      "LOD1": 482,
+      "LOD2": 78
      },
      "height_m": 0.44,
      "canopyRadius_m": 2.08,
@@ -1933,9 +2989,9 @@
       "lf_env_fallen_branches_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 674,
-      "LOD1": 348,
-      "LOD2": 348
+      "LOD0": 726,
+      "LOD1": 208,
+      "LOD2": 66
      },
      "height_m": 0.32,
      "canopyRadius_m": 1.71,
@@ -1959,7 +3015,9 @@
    "recommendedScale": [
     0.8,
     1.3
-   ]
+   ],
+   "paintedLightMix": 0.35,
+   "generation": "v2: painted tiles from art/02 (grass bases / bracket fungi) and painted golden-oak limbs"
   },
   "lf_env_mushrooms": {
    "glb": "lf_env_mushrooms.glb",
@@ -2028,7 +3086,9 @@
    "recommendedScale": [
     0.8,
     1.6
-   ]
+   ],
+   "paintedLightMix": 0.35,
+   "generation": "v2: painted tiles from art/02 (grass bases / bracket fungi) and painted golden-oak limbs"
   }
  }
 }

@@ -1,5 +1,6 @@
 {
   "id": "lf_env_dark_pine",
+  "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)",
   "variants": {
     "v1": {
       "nodes": [
@@ -8,41 +9,49 @@
         "lf_env_dark_pine_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2711,
-        "LOD1": 968,
-        "LOD2": 235
+        "LOD0": 2044,
+        "LOD1": 720,
+        "LOD2": 206
       },
       "materials": {
         "LOD0": [
           "lf_bark_pine",
-          "lf_foliage"
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD1": [
-          "lf_foliage"
+          "lf_bark_pine",
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD2": [
-          "lf_foliage"
+          "lf_bark_pine",
+          "lf_foliage",
+          "lf_foliage_vol"
         ]
       },
-      "height_m": 14.24,
-      "crown_radius_m": 3.62,
+      "height_m": 14.17,
+      "crown_radius_m": 4.09,
       "bounds_m_blender": [
         [
-          -3.11,
-          -3.44,
+          -3.76,
+          -3.1,
           -0.3
         ],
         [
-          3.62,
-          3.29,
-          14.24
+          3.44,
+          4.09,
+          14.17
         ]
       ],
       "display_offset_gltf": [
         0.0,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "copies": []
+      }
     },
     "v2": {
       "nodes": [
@@ -51,41 +60,50 @@
         "lf_env_dark_pine_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 2407,
-        "LOD1": 956,
-        "LOD2": 245
+        "LOD0": 2012,
+        "LOD1": 732,
+        "LOD2": 216
       },
       "materials": {
         "LOD0": [
           "lf_bark_pine",
-          "lf_foliage"
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD1": [
-          "lf_foliage"
+          "lf_bark_pine",
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD2": [
-          "lf_foliage"
+          "lf_bark_pine",
+          "lf_foliage",
+          "lf_foliage_vol"
         ]
       },
-      "height_m": 16.74,
-      "crown_radius_m": 3.74,
+      "height_m": 14.17,
+      "crown_radius_m": 4.63,
       "bounds_m_blender": [
         [
-          -3.54,
-          -3.73,
+          -3.44,
+          -2.89,
           -0.3
         ],
         [
-          3.74,
-          3.6,
-          16.74
+          3.81,
+          4.63,
+          14.17
         ]
       ],
       "display_offset_gltf": [
-        10.707,
+        9.647,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "mirror": true,
+        "copies": []
+      }
     },
     "v3": {
       "nodes": [
@@ -94,41 +112,53 @@
         "lf_env_dark_pine_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 2143,
-        "LOD1": 798,
-        "LOD2": 215
+        "LOD0": 2040,
+        "LOD1": 704,
+        "LOD2": 216
       },
       "materials": {
         "LOD0": [
           "lf_bark_pine",
-          "lf_foliage"
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD1": [
-          "lf_foliage"
+          "lf_bark_pine",
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD2": [
-          "lf_foliage"
+          "lf_bark_pine",
+          "lf_foliage",
+          "lf_foliage_vol"
         ]
       },
-      "height_m": 8.74,
-      "crown_radius_m": 3.79,
+      "height_m": 15.3,
+      "crown_radius_m": 3.81,
       "bounds_m_blender": [
         [
-          -3.59,
-          -3.79,
-          -2.31
+          -3.38,
+          -2.62,
+          -0.32
         ],
         [
-          3.77,
-          3.53,
-          8.74
+          3.02,
+          3.81,
+          15.3
         ]
       ],
       "display_offset_gltf": [
-        21.415,
+        19.294,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "copies": [],
+        "scale": [
+          0.88,
+          1.08
+        ]
+      }
     },
     "v4": {
       "nodes": [
@@ -137,52 +167,66 @@
         "lf_env_dark_pine_v4_LOD2"
       ],
       "tris": {
-        "LOD0": 2177,
-        "LOD1": 886,
-        "LOD2": 235
+        "LOD0": 2014,
+        "LOD1": 714,
+        "LOD2": 218
       },
       "materials": {
         "LOD0": [
           "lf_bark_pine",
-          "lf_foliage"
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD1": [
-          "lf_foliage"
+          "lf_bark_pine",
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD2": [
-          "lf_foliage"
+          "lf_bark_pine",
+          "lf_foliage",
+          "lf_foliage_vol"
         ]
       },
-      "height_m": 13.24,
-      "crown_radius_m": 4.55,
+      "height_m": 12.75,
+      "crown_radius_m": 4.18,
       "bounds_m_blender": [
         [
-          -3.96,
-          -4.15,
-          -0.57
+          -3.72,
+          -3.21,
+          -0.27
         ],
         [
-          4.44,
-          4.55,
-          13.24
+          3.93,
+          4.18,
+          12.75
         ]
       ],
       "display_offset_gltf": [
-        32.122,
+        28.941,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "mirror": true,
+        "copies": [],
+        "scale": [
+          1.06,
+          0.9
+        ]
+      }
     }
   },
   "tris": {
-    "LOD0": 2711,
-    "LOD1": 968,
-    "LOD2": 245
+    "LOD0": 2044,
+    "LOD1": 732,
+    "LOD2": 218
   },
   "bones": 0,
   "materials": [
     "lf_bark_pine",
-    "lf_foliage"
+    "lf_foliage",
+    "lf_foliage_vol"
   ],
   "textures": {
     "lf_foliage_atlas.png": 2048,
@@ -198,14 +242,23 @@
       "double_sided": true
     }
   },
+  "paintedLightMix": 0.3,
+  "paintedLightNote": "Textures carry the painted light. Shade as albedo * mix(1, lambert, paintedLightMix) (lambert = max(dot(N, L), 0)); foliage normals are smoothed crown normals.",
+  "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+      0.1,
+      0.3
+    ]
+  },
+  "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+  "recommendedTint": "art/02 palette (dark blue-green spruce); world tint as forest_world.gd conifers is fine",
   "wind": {
     "attribute": "COLOR_0 (RGBA float, linear)",
-    "R": "branch sway weight: 0 at trunk base -> 1 at branch tips (path length along the skeleton, ^1.35)",
-    "G": "leaf flutter weight: 0 on bark, 0.25-0.3 at a card's attachment edge -> 0.8-1.0 at its free edge",
-    "B": "per-branch phase 0..1 (first-order branch random, sub-branches inherit +-0.06); trunk 0",
-    "A": "crown ambient occlusion 0.45..1 (1 = outer/top of crown); multiply albedo in the shader",
-    "clip": "lf_forest_wind, 8 s seamless loop: use TIME*2pi/8 with integer harmonics (see lf_forest_wind.gdshader)",
-    "godot_note": "Godot's glTF importer enables vertex_color_use_as_albedo when COLOR_0 exists: use the provided ShaderMaterial (or disable that flag) or the wind mask tints the albedo."
+    "R": "sway weight 0 at the trunk base -> 1 at crown tips",
+    "G": "leaf flutter (cards 0.45..1, bark 0)",
+    "B": "per-branch / crown-sector phase 0..1",
+    "A": "ambient occlusion (1 outer front/top cards, 0.9 fill, 0.78 inner, bark 1)"
   },
   "clips": {
     "lf_forest_wind": {
@@ -214,14 +267,13 @@
       "type": "shader (vertex colour driven)"
     }
   },
-  "layout_note": "Variants are laid out along +X (display_offset_gltf); the three LOD meshes of a variant share the variant origin (overlapping, show one per distance). Mesh origin = trunk base on the ground.",
-  "lod_note": "LOD0: bark+foliage (2 surfaces); LOD1/LOD2: single foliage-atlas surface (bark strip in atlas).",
-  "export_scale_vs_art02": 1.0,
+  "layout_note": "Variants laid out along +X (display_offset_gltf); the three LODs of a variant share its origin (trunk base on the ground).",
+  "scale_note": "Real scale from the 1.8 m figure on art/02 (29.8 px/m).",
   "glb_images": [
     "lf_bark_pine_n.png",
     "lf_bark_pine_c.jpg",
     "lf_bark_pine_r.png",
-    "lf_foliage_atlas.png"
+    "<embedded image/png>"
   ],
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_trees.py dark_pine"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py dark_pine"
 }

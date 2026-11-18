@@ -12,14 +12,14 @@ RT = os.path.join(paths.RUNTIME, "forest")
 
 LODS_MASS_OAK = {
     0: dict(trunk_step_m=0.35, trunk_sides=12, limb_step_m=0.3, limb_sides=5, limb_min_r_px=1.5, limb_budget=600,
-            copies=True, copy_min_r_px=2.5, front_frac=1.0, front_scale=1.0, n_masses=12, clumps_per=34,
-            fill_size=1.5, front_extra=0.6, max_cards=1100, core_cards=14),
+            copies=True, copy_min_r_px=2.5, front_frac=1.0, front_scale=1.0, n_masses=14, clumps_per=52,
+            fill_size=1.55, front_extra=0.6, max_cards=1350, core_cards=16),
     1: dict(trunk_step_m=0.7, trunk_sides=8, limb_step_m=0.6, limb_sides=4, limb_min_r_px=3.0, limb_budget=220,
-            copies=True, copy_min_r_px=4.0, front_frac=0.55, front_scale=1.15, n_masses=10, clumps_per=16,
-            fill_size=1.9, front_extra=0.3, max_cards=430, core_cards=6),
+            copies=True, copy_min_r_px=4.0, front_frac=0.55, front_scale=1.15, n_masses=12, clumps_per=22,
+            fill_size=1.95, front_extra=0.3, max_cards=480, core_cards=6),
     2: dict(trunk_step_m=1.6, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
-            copies=False, front_frac=0.16, front_scale=1.5, n_masses=8, clumps_per=7, fill_size=2.4,
-            front_extra=0.0, max_cards=100, core_cards=2),
+            copies=False, front_frac=0.16, front_scale=1.5, n_masses=9, clumps_per=10, fill_size=2.5,
+            front_extra=0.0, max_cards=110, core_cards=2),
 }
 
 LODS_MASS = {
@@ -60,10 +60,10 @@ TREES = {
         cfg=dict(name="golden_oak", box=(0, 0, 430, 445), exclude=[(284, 360, 320, 432)], clip_row=410, ground_row=421,
                  fork_row=245, wood=dict(ratio=0.85, Lmax=64, hue_rng=(61, 95)), float_min_r=2.2, keep_x=(0, 428),
                  crown_kd=0.9, front_bias=0.45, trunk_kd=0.9, seed=7, root_zone=34, root_k=0.8, n_lobes=13, top_weight=1.6, lum_pref=2.6, mass_up=0.55, front_tilt_max=30, top_part=0.6, obl_part=0.75, vol_material=True,
-                 mass_eta_min=0.05, mass_eta_max=0.4, core_eta_max=0.42, front_extra_eta=0.5, ao_under=0.8,
+                 mass_eta_min=0.04, mass_eta_max=0.45, core_eta_max=0.42, front_extra_eta=0.5, ao_under=0.8,
                  mass_zscale=0.55, p_hires=0.75, top_scale=1.0),
         n_patches=110, min_px=50, region="golden_oak", bark="oak", swatch=(20, 798, 318, 984), paintedLightMix=0.3,
-        height_hint=13.3, crown_hint=7.2, lods=LODS_MASS_OAK, crown_mode="mass", mass_r=0.4,
+        height_hint=13.3, crown_hint=7.2, lods=LODS_MASS_OAK, crown_mode="mass", mass_r=0.42,
         paintedLightMixByMaterial={"lf_foliage_vol": 0.5},
         hires=dict(region="oak_top", sheet="07_fog_exploration_interface.png", box=(518, 100, 800, 530), rosette_px=800,
                    m_per_px=1 / 50.0, l_shift=5.0, n_composite=16),
@@ -78,6 +78,67 @@ TREES = {
                    ground=(0.42, 0.44, 0.24), n=30, area=78.0, spacing=12.0),
     ),
 }
+
+
+LODS_PINE = {
+    0: dict(trunk_step_m=0.4, trunk_sides=10, limb_step_m=0.3, limb_sides=4, limb_min_r_px=1.4, limb_budget=200,
+            copies=False, front_frac=1.0, front_scale=1.0, n_masses=0, clumps_per=11, fill_size=1.25,
+            front_extra=0.55, max_cards=1300, core_cards=10),
+    1: dict(trunk_step_m=0.9, trunk_sides=6, limb_step_m=0.6, limb_sides=3, limb_min_r_px=3.0, limb_budget=0,
+            copies=False, front_frac=0.55, front_scale=1.15, n_masses=0, clumps_per=5, fill_size=1.7,
+            front_extra=0.25, max_cards=520, core_cards=4),
+    2: dict(trunk_step_m=2.5, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
+            copies=False, front_frac=0.18, front_scale=1.5, n_masses=0, clumps_per=2, fill_size=2.3,
+            front_extra=0.0, max_cards=105, core_cards=0),
+}
+
+LODS_BIRCH = {
+    0: dict(trunk_step_m=0.35, trunk_sides=10, limb_step_m=0.25, limb_sides=5, limb_min_r_px=1.2, limb_budget=900,
+            copies=True, copy_min_r_px=1.8, front_frac=1.0, front_scale=1.0, n_masses=26, clumps_per=20,
+            fill_size=1.1, front_extra=0.5, max_cards=1150, core_cards=8),
+    1: dict(trunk_step_m=0.7, trunk_sides=6, limb_step_m=0.5, limb_sides=4, limb_min_r_px=2.6, limb_budget=260,
+            copies=True, copy_min_r_px=3.5, front_frac=0.55, front_scale=1.15, n_masses=18, clumps_per=10,
+            fill_size=1.5, front_extra=0.25, max_cards=450, core_cards=3),
+    2: dict(trunk_step_m=2.0, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
+            copies=False, front_frac=0.18, front_scale=1.5, n_masses=10, clumps_per=5, fill_size=2.2,
+            front_extra=0.0, max_cards=100, core_cards=0),
+}
+
+TREES["dark_pine"] = dict(
+    cfg=dict(name="dark_pine", box=(428, 0, 640, 445), exclude=[(580, 362, 612, 430)], clip_row=410, ground_row=423,
+             fork_row=40, wood=dict(mode="hue", hue_max=73, Lmax=60), keep_x=(430, 634), trunk_close=3, float_min_r=2.0,
+             crown_kd=0.95, front_bias=0.45, trunk_kd=0.95, seed=11, root_zone=22, root_k=0.75, trunk_taper=0.1,
+             lum_pref=3.5, front_tilt_max=30, top_part=0.65, obl_part=0.8, vol_material=True, n_tiers=10,
+             tier_mass_px=24, mass_zscale=0.32, ao_under=0.8, front_extra_eta=0.95, core_eta_max=0.9),
+    n_patches=130, min_px=40, region="dark_pine", bark="pine", swatch=(356, 798, 612, 984), paintedLightMix=0.3,
+    paintedLightMixByMaterial={"lf_foliage_vol": 0.5},
+    height_hint=14.0, crown_hint=3.4, lods=LODS_PINE, crown_mode="mass", placement="tiers", mass_r=0.3,
+    tint_note="art/02 palette (dark blue-green spruce); world tint as forest_world.gd conifers is fine",
+    variants={1: dict(seed=5, copies=[]), 2: dict(seed=6, mirror=True, copies=[]),
+              3: dict(seed=8, copies=[], scale=(0.88, 1.08)), 4: dict(seed=9, mirror=True, copies=[], scale=(1.06, 0.9))},
+    patch=dict(refs=[("01_world_masterplan.png", (430, 640, 960, 1000), "art/01 south pine forest"),
+                     ("07_fog_exploration_interface.png", (900, 110, 1020, 330), "art/07 p2 conifers")],
+               ground=(0.30, 0.33, 0.16)),
+)
+
+TREES["birch"] = dict(
+    cfg=dict(name="birch", box=(628, 28, 880, 445), exclude=[(805, 355, 845, 432)], clip_row=410, ground_row=427,
+             fork_row=250, wood=dict(mode="hue", hue_max=80, Lmax=95, white=(62, 26)), keep_x=(630, 866), trunk_close=2,
+             float_min_r=1.6, crown_kd=0.85, front_bias=0.45, trunk_kd=0.95, seed=13, root_zone=20, root_k=0.7,
+             lum_pref=3.0, front_tilt_max=30, top_part=0.65, obl_part=0.8, vol_material=True, mass_zscale=0.7,
+             ao_under=0.82, front_extra_eta=0.6, core_eta_max=0.5),
+    n_patches=140, min_px=35, region="birch", bark="birch", swatch=(650, 798, 844, 984), paintedLightMix=0.3,
+    paintedLightMixByMaterial={"lf_foliage_vol": 0.5},
+    height_hint=13.0, crown_hint=4.4, lods=LODS_BIRCH, crown_mode="mass", placement="anchors", mass_r=0.17,
+    anchor_min_r=1.3,
+    tint_note="art/02 palette (yellow-green); world birch tint deepens green",
+    variants={1: dict(seed=5, copies=[(120, 0.95), (-120, 0.9)]),
+              2: dict(seed=6, mirror=True, copies=[(100, 0.9), (-140, 0.95)]),
+              3: dict(seed=8, copies=[(150, 0.92), (-100, 0.95)], scale=(0.9, 1.07))},
+    patch=dict(refs=[("02_forest_modular_kit.png", (620, 28, 886, 445), "art/02 birch"),
+                     ("01_world_masterplan.png", (150, 360, 520, 600), "art/01 mixed broadleaf")],
+               ground=(0.33, 0.36, 0.17)),
+)
 
 
 def export_kit(asset, built, sp, info, kind, k, args):

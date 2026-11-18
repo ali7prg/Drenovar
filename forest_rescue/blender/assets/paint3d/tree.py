@@ -127,6 +127,10 @@ class TreeRef:
         self.trunk_rows = rows
         self.axis_x = _smooth1d(ax, cfg.get("trunk_smooth", 4))
         r = _smooth1d(rad, 2)
+        if cfg.get("trunk_taper"):
+            rb = float(np.median(r[-12:]))
+            f = (rows - rows[0]) / max(rows[-1] - rows[0], 1)
+            r = np.minimum(r, rb * (cfg["trunk_taper"] + (1 - cfg["trunk_taper"]) * f))
         # root flare: widen the lowest rows towards the painted half-width
         self.trunk_r = r * cfg.get("trunk_r_scale", 1.0)
         band = np.zeros_like(self.wood_raw)

@@ -1,5 +1,6 @@
 {
   "id": "lf_env_birch",
+  "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)",
   "variants": {
     "v1": {
       "nodes": [
@@ -8,41 +9,58 @@
         "lf_env_birch_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3185,
-        "LOD1": 1240,
-        "LOD2": 202
+        "LOD0": 3246,
+        "LOD1": 782,
+        "LOD2": 120
       },
       "materials": {
         "LOD0": [
           "lf_bark_birch",
-          "lf_foliage"
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD1": [
-          "lf_foliage"
+          "lf_bark_birch",
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD2": [
-          "lf_foliage"
+          "lf_bark_birch",
+          "lf_foliage",
+          "lf_foliage_vol"
         ]
       },
-      "height_m": 12.82,
-      "crown_radius_m": 4.43,
+      "height_m": 13.08,
+      "crown_radius_m": 4.92,
       "bounds_m_blender": [
         [
-          -4.15,
-          -3.8,
-          -0.39
+          -3.26,
+          -2.76,
+          -0.3
         ],
         [
-          4.43,
-          3.78,
-          12.82
+          4.92,
+          2.84,
+          13.08
         ]
       ],
       "display_offset_gltf": [
         0.0,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "copies": [
+          [
+            120,
+            0.95
+          ],
+          [
+            -120,
+            0.9
+          ]
+        ]
+      }
     },
     "v2": {
       "nodes": [
@@ -51,41 +69,59 @@
         "lf_env_birch_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3139,
-        "LOD1": 1219,
-        "LOD2": 184
+        "LOD0": 3100,
+        "LOD1": 742,
+        "LOD2": 120
       },
       "materials": {
         "LOD0": [
           "lf_bark_birch",
-          "lf_foliage"
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD1": [
-          "lf_foliage"
+          "lf_bark_birch",
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD2": [
-          "lf_foliage"
+          "lf_bark_birch",
+          "lf_foliage",
+          "lf_foliage_vol"
         ]
       },
-      "height_m": 13.2,
-      "crown_radius_m": 3.43,
+      "height_m": 13.09,
+      "crown_radius_m": 4.92,
       "bounds_m_blender": [
         [
-          -3.26,
-          -3.19,
-          -0.31
+          -4.92,
+          -2.77,
+          -0.3
         ],
         [
-          3.25,
-          3.43,
-          13.2
+          3.26,
+          2.84,
+          13.09
         ]
       ],
       "display_offset_gltf": [
-        11.789,
+        10.188,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "mirror": true,
+        "copies": [
+          [
+            100,
+            0.9
+          ],
+          [
+            -140,
+            0.95
+          ]
+        ]
+      }
     },
     "v3": {
       "nodes": [
@@ -94,52 +130,74 @@
         "lf_env_birch_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3146,
-        "LOD1": 1226,
-        "LOD2": 204
+        "LOD0": 3154,
+        "LOD1": 718,
+        "LOD2": 136
       },
       "materials": {
         "LOD0": [
           "lf_bark_birch",
-          "lf_foliage"
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD1": [
-          "lf_foliage"
+          "lf_bark_birch",
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD2": [
-          "lf_foliage"
+          "lf_bark_birch",
+          "lf_foliage",
+          "lf_foliage_vol"
         ]
       },
-      "height_m": 12.04,
-      "crown_radius_m": 4.98,
+      "height_m": 14.0,
+      "crown_radius_m": 4.43,
       "bounds_m_blender": [
         [
-          -4.98,
-          -3.04,
-          -0.42
+          -2.94,
+          -2.44,
+          -0.32
         ],
         [
-          4.81,
-          2.74,
-          12.04
+          4.43,
+          1.8,
+          14.0
         ]
       ],
       "display_offset_gltf": [
-        23.578,
+        20.376,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "copies": [
+          [
+            150,
+            0.92
+          ],
+          [
+            -100,
+            0.95
+          ]
+        ],
+        "scale": [
+          0.9,
+          1.07
+        ]
+      }
     }
   },
   "tris": {
-    "LOD0": 3185,
-    "LOD1": 1240,
-    "LOD2": 204
+    "LOD0": 3246,
+    "LOD1": 782,
+    "LOD2": 136
   },
   "bones": 0,
   "materials": [
     "lf_bark_birch",
-    "lf_foliage"
+    "lf_foliage",
+    "lf_foliage_vol"
   ],
   "textures": {
     "lf_foliage_atlas.png": 2048,
@@ -155,14 +213,23 @@
       "double_sided": true
     }
   },
+  "paintedLightMix": 0.3,
+  "paintedLightNote": "Textures carry the painted light. Shade as albedo * mix(1, lambert, paintedLightMix) (lambert = max(dot(N, L), 0)); foliage normals are smoothed crown normals.",
+  "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+      0.1,
+      0.3
+    ]
+  },
+  "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+  "recommendedTint": "art/02 palette (yellow-green); world birch tint deepens green",
   "wind": {
     "attribute": "COLOR_0 (RGBA float, linear)",
-    "R": "branch sway weight: 0 at trunk base -> 1 at branch tips (path length along the skeleton, ^1.35)",
-    "G": "leaf flutter weight: 0 on bark, 0.25-0.3 at a card's attachment edge -> 0.8-1.0 at its free edge",
-    "B": "per-branch phase 0..1 (first-order branch random, sub-branches inherit +-0.06); trunk 0",
-    "A": "crown ambient occlusion 0.45..1 (1 = outer/top of crown); multiply albedo in the shader",
-    "clip": "lf_forest_wind, 8 s seamless loop: use TIME*2pi/8 with integer harmonics (see lf_forest_wind.gdshader)",
-    "godot_note": "Godot's glTF importer enables vertex_color_use_as_albedo when COLOR_0 exists: use the provided ShaderMaterial (or disable that flag) or the wind mask tints the albedo."
+    "R": "sway weight 0 at the trunk base -> 1 at crown tips",
+    "G": "leaf flutter (cards 0.45..1, bark 0)",
+    "B": "per-branch / crown-sector phase 0..1",
+    "A": "ambient occlusion (1 outer front/top cards, 0.9 fill, 0.78 inner, bark 1)"
   },
   "clips": {
     "lf_forest_wind": {
@@ -171,14 +238,13 @@
       "type": "shader (vertex colour driven)"
     }
   },
-  "layout_note": "Variants are laid out along +X (display_offset_gltf); the three LOD meshes of a variant share the variant origin (overlapping, show one per distance). Mesh origin = trunk base on the ground.",
-  "lod_note": "LOD0: bark+foliage (2 surfaces); LOD1/LOD2: single foliage-atlas surface (bark strip in atlas).",
-  "export_scale_vs_art02": 1.0,
+  "layout_note": "Variants laid out along +X (display_offset_gltf); the three LODs of a variant share its origin (trunk base on the ground).",
+  "scale_note": "Real scale from the 1.8 m figure on art/02 (29.8 px/m).",
   "glb_images": [
     "lf_bark_birch_n.png",
     "lf_bark_birch_c.jpg",
     "lf_bark_birch_r.png",
     "lf_foliage_atlas.png"
   ],
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_trees.py birch"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py birch"
 }

@@ -39,7 +39,9 @@ def uv_rect(px_rect):
 def save_region(key, region_img, meta=None):
     os.makedirs(REGION_DIR, exist_ok=True)
     a = (np.clip(region_img, 0, 1) * 255 + 0.5).astype(np.uint8)
-    Image.fromarray(a, "RGBA").save(os.path.join(REGION_DIR, f"{key}.png"))
+    p = os.path.join(REGION_DIR, f"{key}.png")
+    Image.fromarray(a, "RGBA").save(p + ".tmp.png")
+    os.replace(p + ".tmp.png", p)
     if meta is not None:
         with open(os.path.join(REGION_DIR, f"{key}.json"), "w") as f:
             json.dump(meta, f)
@@ -74,7 +76,9 @@ def assemble(out_dir=RUNTIME):
             known |= grow
         atlas[..., :3] = np.clip(small, 0, 255).astype(np.uint8)
         path = os.path.join(out_dir, ATLAS)
-        Image.fromarray(atlas, "RGBA").save(path, optimize=True)
+        tmp = path + f".tmp{os.getpid()}.png"
+        Image.fromarray(atlas, "RGBA").save(tmp, optimize=True)
+        os.replace(tmp, path)          # atomic: readers never see a half-written atlas
         return path
     finally:
         fcntl.flock(lock, fcntl.LOCK_UN)

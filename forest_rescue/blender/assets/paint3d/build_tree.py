@@ -329,7 +329,6 @@ def main():
         lab_[..., 0] = Lc + w_ * (tgt + 0.25 * (Lc - tgt) - Lc)
         lab_[..., 1:] *= (1 - 0.45 * w_)[..., None]
         col = np.clip(skc.lab2rgb(lab_), 0, 1).astype(np.float32)
-        cv2.imwrite(cpath, cv2.cvtColor((col * 255).astype(np.uint8), cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, 90])
     nmap, rmap = tree.bark_maps(col)
     kind = sp["bark"]
     cpath = os.path.join(RT, f"lf_bark_{kind}_c.jpg")

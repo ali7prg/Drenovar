@@ -31,16 +31,16 @@ KEYMAP = {  # family -> {variant: key id}
 SOCKET_KIND = {"stone_rune": "circle", "bronze_seal": "hex", "amber_crystal": "diamond", "bone_key": "keyhole"}
 IMG = "loot_artifact_families.png"
 REF = {  # family -> view -> (box, mask params)
-    "stone_rune": {"hero": (75, 140, 345, 368), "front": (40, 393, 180, 523), "side": (203, 393, 243, 500),
+    "stone_rune": {"hero": (75, 140, 345, 368), "front": (40, 393, 180, 523), "side": (200, 388, 246, 505),
                    "socket": (110, 560, 257, 667)},
-    "bronze_seal": {"hero": (450, 143, 707, 360), "front": (413, 393, 560, 520), "side": (583, 393, 627, 503),
+    "bronze_seal": {"hero": (450, 143, 707, 360), "front": (413, 393, 560, 520), "side": (580, 390, 630, 504),
                     "socket": (493, 560, 637, 667)},
-    "amber_crystal": {"hero": (853, 137, 1080, 360), "front": (807, 387, 930, 523), "side": (960, 393, 1003, 520),
+    "amber_crystal": {"hero": (853, 137, 1080, 360), "front": (807, 387, 930, 523), "side": (957, 390, 1006, 517),
                       "socket": (863, 557, 1027, 663)},
-    "bone_key": {"hero": (1187, 147, 1513, 357), "front": (1170, 423, 1340, 490), "side": (1357, 393, 1383, 520),
+    "bone_key": {"hero": (1187, 147, 1513, 357), "front": (1170, 423, 1340, 490), "side": (1354, 390, 1386, 515),
                  "socket": (1263, 563, 1390, 667)},
 }
-MASK = dict(thresh=0.085, shadow=0.30, fill_holes=True, sat_weight=2.2, blur=1.4, close_px=3)
+MASK = dict(method="flood", tol=3)
 
 
 def fine(fn, scale):
@@ -101,8 +101,9 @@ def build_family(fam):
     pk.pack_atlas(A.lod0_objects(), margin=0.006)
     worst = pk.transfer_atlas_uv(A)
     tex, tx = pk.synthesize(A, SHADERS, size=2048)
-    ao = pk.bake_ao(A, size=1024, samples=24, distance=0.03)
-    imgs = pk.finalize_textures(A, tex, ao=ao, ao_strength=0.55, sizes={"base": 1024, "orm": 512, "normal": 1024})
+    ao = pk.bake_ao(A, size=1024, samples=24, distance=0.03, isolate=("*",))
+    imgs = pk.finalize_textures(A, tex, ao=ao, ao_strength=0.5, sizes={"base": 1024, "orm": 512, "normal": 1024},
+                                cavity=(0.0025, 0.0022, 0.75), normal_strength=1.4)
     pk.make_material(A, imgs)
     return A
 
@@ -223,8 +224,9 @@ def qa_family(A, fam, it, cams):
         lay_flat(A, n, fam)
     mn, mx = core.bounds(lod0)
     c = (mn + mx) / 2
+    span = float(np.max(mx - mn))
     for nm, (yaw, pitch) in (("lineup_top", (0.0, 1.45)), ("lineup_34", (-0.35, 0.75))):
-        cam = pk.cam_from_params([yaw, pitch, 0, 1.3, 2.6, 0, 0, *c], 1400, 520)
+        cam = pk.cam_from_params([yaw, pitch, 0, span * 2.3, 1.3, 0, 0, *c], 1400, 520)
         pk.blender_camera(cam)
         rgba = pk.render_rgba(qa.out(asset_id, "_tmp.png"))
         g = rgba[..., :3].mean(2, keepdims=True)

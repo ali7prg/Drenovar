@@ -31,7 +31,7 @@ FRONT = Rx(math.pi / 2)          # local XY outline, local +Z toward the viewer 
 EMERALD = pk.srgb((74, 142, 92))
 
 DIMS = {
-    "stone_rune": dict(R=0.060, t=0.027, recess=("circle", 0.0635), recess_d=0.020),
+    "stone_rune": dict(R=0.060, t=0.032, recess=("circle", 0.0635), recess_d=0.024),
     "bronze_seal": dict(R=0.050, t=0.022, recess=("hex", 0.0525), recess_d=0.016),
     "amber_crystal": dict(H=0.110, W=0.090, t=0.022, recess=("diamond", 0.116, 0.096), recess_d=0.018),
     "bone_key": dict(L=0.153, recess=("keyhole",), recess_d=0.030),

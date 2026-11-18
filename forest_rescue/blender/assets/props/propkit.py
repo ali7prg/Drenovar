@@ -821,7 +821,8 @@ class Asset:
     def mesh_name(self, node, lod):
         if node == "root":
             return f"{self.id}_LOD{lod}"
-        return f"{self.id}_{self.spec[node].get('export_name', node)}_LOD{lod}"
+        ex = self.spec[node].get("export_name", node)
+        return f"{ex}_LOD{lod}" if ex.startswith(self.id) else f"{self.id}_{ex}_LOD{lod}"
 
     def compile(self, build_fn):
         """build_fn(lod) -> Builder. Creates LOD0..2 objects; LOD1/2 UVs transferred from LOD0."""
@@ -1112,8 +1113,20 @@ class Ctx:
                     yield m, v
 
 
-def finalize_textures(asset, tex, ao=None, ao_strength=0.7, out_dir=None, sizes=None, log=print):
-    """Pad, add AO, build normal map; write master PNGs + runtime images; return bpy images."""
+def cavity_from_height(h, valid, texel_m, radius_m, depth_m):
+    from scipy import ndimage as ndi
+    hp = texproj.fill(h[..., None], valid)[..., 0]
+    r_px = max(1.0, radius_m / texel_m)
+    blur = ndi.gaussian_filter(hp, r_px)
+    return 1.0 - np.clip((blur - hp) / depth_m, 0, 1)
+
+
+def finalize_textures(asset, tex, ao=None, ao_strength=0.7, out_dir=None, sizes=None, log=print, cavity=None,
+                      normal_strength=1.0):
+    """Pad, add AO (+ cavity from the height map), build normal map; write masters + runtime images.
+
+    cavity: (radius_m, depth_m, strength) darkens engraved recesses in the albedo (mobile has no SSAO).
+    """
     sizes = sizes or {"base": 2048, "orm": 1024, "normal": 1024}
     valid = tex["valid"]
     H, W = valid.shape
@@ -1121,11 +1134,15 @@ def finalize_textures(asset, tex, ao=None, ao_strength=0.7, out_dir=None, sizes=
     if ao is not None:
         a = ao if ao.shape[:2] == (H, W) else _resize(ao, W, H)
         alb = alb * (1 - ao_strength + ao_strength * a[..., None])
+    if cavity is not None:
+        cv_ = cavity_from_height(tex["height"], valid, tex["texel_m"], cavity[0], cavity[1])
+        alb = alb * (1 - cavity[2] + cavity[2] * cv_[..., None])
+        tex["cavity"] = cv_
     alb = texproj.dilate_margin(alb, valid, 12)
     rough = texproj.dilate_margin(tex["rough"][..., None], valid, 12)[..., 0]
     metal = texproj.dilate_margin(tex["metal"][..., None], valid, 12)[..., 0]
     h = tex["height"]
-    nrm = texproj.height_to_normal(h, valid, strength=1.0, texel_m=tex["texel_m"])
+    nrm = texproj.height_to_normal(h, valid, strength=normal_strength, texel_m=tex["texel_m"])
     nrm = texproj.dilate_margin(nrm, valid, 12)
     # fill empty atlas space with neutral values
     far = ~valid & ~(np.abs(nrm - 0.5).sum(2) > 0)
@@ -1176,7 +1193,7 @@ def make_material(asset, imgs):
 
 # =============================================================================== AO bake (Cycles)
 
-def bake_ao(asset, size=1024, samples=24, distance=0.35, hide_for_static=()):
+def bake_ao(asset, size=1024, samples=24, distance=0.35, hide_for_static=(), isolate=()):
     """Bake ambient occlusion of the LOD0 atlas. Static root is baked with `hide_for_static`
     nodes hidden (so an opened door leaves no phantom shadow)."""
     scene = bpy.context.scene
@@ -1208,6 +1225,11 @@ def bake_ao(asset, size=1024, samples=24, distance=0.35, hide_for_static=()):
     first = True
     for node_name, o in asset.meshes[0].items():
         hidden = []
+        if node_name in isolate or "*" in isolate:
+            for n2, oo in asset.meshes[0].items():
+                if oo is not o and not oo.hide_render:
+                    oo.hide_render = True
+                    hidden.append(oo)
         if node_name == "root":
             for hn in hide_for_static:
                 for oo in [asset.meshes[0].get(hn)] + _descendant_meshes(asset, hn):
@@ -1585,6 +1607,9 @@ def compare_panels(ref_rgb, rgba, ref_mask, out_png, title, bg=None, extra_text=
         metrics["iou_raw"] = round(iou(ref_mask, rm), 4)
         both = ref_mask & rm
         metrics["mean_abs_colour_error"] = round(float(np.abs(comp[both] - ref_rgb[both]).mean()), 4) if both.any() else None
+        if both.any():
+            metrics["mean_rgb_ref"] = [round(float(x), 3) for x in ref_rgb[both].mean(0)]
+            metrics["mean_rgb_render"] = [round(float(x), 3) for x in comp[both].mean(0)]
         diff = np.repeat(ref_rgb.mean(axis=2, keepdims=True) * 0.5 + 0.35, 3, axis=2)
         diff[rf & mf] = diff[rf & mf] * 0.5 + np.array([0.15, 0.55, 0.15]) * 0.5
         diff[rf & ~mf] = (0.85, 0.15, 0.15)

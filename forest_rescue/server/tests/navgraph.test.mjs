@@ -59,11 +59,12 @@ test('water is crossed only on the approved 27 m deck of lf_route_10_11', () => 
   r.samples[40] = {...r.samples[40], x: 90.48, z: 20};
   r.samples[41] = {...r.samples[41], x: 90.5, z: 20.2};
   assert.throws(() => buildNavGraph(broken), e => ['NAV_WATER_OUTSIDE_BRIDGE', 'NAV_SPACING'].includes(e.code));
+  // The same river crossing 3 units beside the approved deck rectangle is not a bridge.
   const water = structuredClone(atlas);
   const w = water.routes.find(x => x.id === 'lf_route_10_11');
-  // the same water outside the deck rectangle (z shifted by 3) is not approved geometry
-  for (const s of w.samples) if (s.z === 20 && s.x > 85 && s.x < 95) s.z = 20.0001 + 0; // still on deck: allowed
-  assert.doesNotThrow(() => buildNavGraph(water));
+  for (const s of w.samples) if (s.z === 20 && s.x >= 77 && s.x <= 104) s.z = 23;
+  assert.throws(() => buildNavGraph(water), e => /^NAV_/.test(e.code));
+  assert.doesNotThrow(() => buildNavGraph(structuredClone(atlas)));
   const sparse = structuredClone(atlas);
   sparse.routes[0].samples.splice(5, 3);
   assert.throws(() => buildNavGraph(sparse), e => e.code === 'NAV_SPACING');

@@ -27,12 +27,43 @@ def out(asset_id, name):
     return paths.compare(asset_id, name)
 
 
-def crop_and_mask(image, box, thresh=0.1, exclude=None, clip_below=None, shadow=None, keep="largest",
-                  fill_holes=400, sat_weight=1.5, bg=None, open_px=1, close_px=2, blur=1.0):
+def flood_mask(img, tol=3, step=4, blur=0.8, exclude=None, clip_below=None, keep="largest", fill=True, min_area=60):
+    """Foreground = everything not reachable from the crop border through smooth background
+    (floating-range flood fill follows soft painted shadows but stops at object edges)."""
+    import cv2
+    im = (np.clip(ndi.gaussian_filter(img, (blur, blur, 0)), 0, 1) * 255).astype(np.uint8).copy()
+    H, W = im.shape[:2]
+    mask = np.zeros((H + 2, W + 2), np.uint8)
+    flags = 4 | cv2.FLOODFILL_MASK_ONLY | (255 << 8)
+    pts = [(x, 0) for x in range(0, W, step)] + [(x, H - 1) for x in range(0, W, step)] + \
+          [(0, y) for y in range(0, H, step)] + [(W - 1, y) for y in range(0, H, step)]
+    for x, y in pts:
+        if mask[y + 1, x + 1] == 0:
+            cv2.floodFill(im, mask, (x, y), (0, 0, 0), (tol,) * 3, (tol,) * 3, flags)
+    fg = mask[1:-1, 1:-1] == 0
+    if exclude:
+        for x0, y0, x1, y1 in exclude:
+            fg[y0:y1, x0:x1] = False
+    if clip_below is not None:
+        fg[clip_below:] = False
+    fg = ndi.binary_opening(fg, iterations=1)
+    lab, n = ndi.label(fg)
+    if n:
+        sz = ndi.sum(fg, lab, range(1, n + 1))
+        if keep == "largest":
+            fg = lab == (int(np.argmax(sz)) + 1)
+        else:
+            fg = np.isin(lab, np.nonzero(sz >= min_area)[0] + 1)
+    return ndi.binary_fill_holes(fg) if fill else fg
+
+
+def crop_and_mask(image, box, method="flood", tol=3, exclude=None, clip_below=None, keep="largest", fill=True,
+                  **kw):
     img = pk.ref_crop(image, box)
-    m = refs.silhouette(img, bg=bg, thresh=thresh, exclude=exclude, clip_below=clip_below,
-                        shadow_luma_drop=shadow, keep=keep, fill_holes=fill_holes, sat_weight=sat_weight,
-                        open_px=open_px, close_px=close_px, blur=blur)
+    if method == "flood":
+        m = flood_mask(img, tol=tol, exclude=exclude, clip_below=clip_below, keep=keep, fill=fill)
+    else:
+        m = refs.silhouette(img, exclude=exclude, clip_below=clip_below, keep=keep, **kw)
     return img, m
 
 

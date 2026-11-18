@@ -457,6 +457,16 @@ def tail_fringe_cards(lod=0, seed=7, drop=None):
     return cs
 
 
+def _feather_w(path, fet, fh, s):
+    """Above the fetlock joint the tuft follows the cannon, below it the pastern."""
+    out = []
+    for p in path:
+        t = float(np.clip((fet[2] + 0.03 - p[2]) / 0.06, 0.0, 1.0))
+        out.append({f"cannon_{fh}_{s}": 1.0 - t, f"pastern_{fh}_{s}": t} if t < 1.0 else
+                   {f"pastern_{fh}_{s}": 1.0})
+    return out
+
+
 def feather_cards(J, lod=0, seed=9):
     """Draft feathering: tufts from the fetlock falling over the coronet onto the hoof wall,
     around the back and sides of every leg, longer on the hind legs."""
@@ -469,14 +479,14 @@ def feather_cards(J, lod=0, seed=9):
         for s in ("L", "R"):
             sx = 1.0 if s == "L" else -1.0
             fet = J[f"fetlock_{fh}_{s}"]
-            top = 0.07 if fh == "F" else 0.12             # hind tufts start higher (longer)
+            top = 0.05 if fh == "F" else 0.09             # hind tufts start higher (longer)
             bone = f"pastern_{fh}_{s}"
             for k in range(n):
                 ang = math.radians(35 + 290 * k / max(n - 1, 1))   # skip the front of the pastern
                 c, sn = math.cos(ang + math.pi / 2), math.sin(ang + math.pi / 2)
                 # angle 0 = front (-Y): direction (sin, -cos)
                 dx, dy = math.sin(ang) * sx, -math.cos(ang)
-                r0, r1 = 0.058, 0.080
+                r0, r1 = 0.052, 0.072
                 root = fet + V(dx * r0, dy * r0 + 0.012, top)
                 tip = V(fet[0] + dx * r1, fet[1] + dy * r1 + 0.01, 0.035 + rng.uniform(-0.008, 0.01))
                 path = np.array([root + (tip - root) * f + V(dx, dy, 0) * 0.015 * math.sin(math.pi * f)
@@ -484,7 +494,7 @@ def feather_cards(J, lod=0, seed=9):
                 nrm = np.tile(V(dx, dy, 0.0), (4, 1))
                 wk = 1.45 if abs(math.degrees(ang) - 180.0) < 70.0 else 1.0   # fuller at the back
                 cs.add_card(path, np.array([0.032, 0.036, 0.034, 0.028]) * wk, nrm, STRIP["tail_wisp"],
-                            [{bone: 1.0}] * 4, twist=rng.normal(0, 0.2), flip=bool(rng.integers(2)))
+                            _feather_w(path, fet, fh, s), twist=rng.normal(0, 0.2), flip=bool(rng.integers(2)))
             # fringe hanging behind the fetlock (reads as the feathering mass in the profiles)
             for k in range({0: 3, 1: 1}[lod]):
                 f = (k / 2.0 - 0.5) if lod == 0 else 0.0
@@ -494,5 +504,5 @@ def feather_cards(J, lod=0, seed=9):
                                  for t in np.linspace(0, 1, 4)])
                 nrm = np.tile(V(1.0, 0.25 * f, 0.0), (4, 1))
                 cs.add_card(path, np.array([0.045, 0.055, 0.055, 0.045]), nrm, STRIP["feather"],
-                            [{bone: 1.0}] * 4, twist=rng.normal(0, 0.15), flip=bool(rng.integers(2)))
+                            _feather_w(path, fet, fh, s), twist=rng.normal(0, 0.15), flip=bool(rng.integers(2)))
     return cs

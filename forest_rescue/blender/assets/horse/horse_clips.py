@@ -212,7 +212,7 @@ def gait_loop(cb, G, name):
                  yaw=1.0 * DEG * math.sin(2 * math.pi * ph), head_pitch=-7 * DEG)
             pose.add_rot("pelvis", (0, 1, 0), 2.5 * DEG * math.sin(2 * math.pi * (ph + 0.25)))
             pose.add_rot("spine_03", (0, 1, 0), -1.5 * DEG * math.sin(2 * math.pi * (ph + 0.25)))
-            tail_base, tail_stream = 12 * DEG, 40 * DEG
+            tail_base, tail_stream = 10 * DEG, 27 * DEG
             ears(pose, cb.skel, l_back=-4 * DEG, r_back=-4 * DEG)
         else:
             # walk: two dips per stride, lateral sway, head nod synced with fore stance

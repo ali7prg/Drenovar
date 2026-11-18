@@ -332,12 +332,12 @@ class TreeBuilder:
         rb = r_px[-1]
         ext = []
         if bottom[2] > -0.25:
-            for zz in (0.5 * bottom[2] - 0.05, -0.4):
+            for zz in (0.45 * bottom[2], -0.3):
                 q = bottom.copy()
                 q[2] = zz
                 ext.append(q)
         Pw = np.vstack([Pw, ext]) if ext else Pw
-        fl = cfg.get("flare", 1.12)
+        fl = cfg.get("flare", 1.0)
         r_px = np.r_[r_px, [rb * fl, rb * fl * 1.08][:len(ext)]]
         Pw = Pw[::-1]
         r_m = r_px[::-1] / ref.ppm
@@ -395,8 +395,11 @@ class TreeBuilder:
             t = -D * rng.uniform(0.82, 1.0)
             n_cam = ref.normal_cam(cu, cv, t)
             n_cam = nrm(n_cam + np.array([0, 0, -1.0]) * self.cfg.get("front_bias", 0.8))
-            if n_cam[2] > -0.42:            # keep <= ~65 deg from the reference axis
-                n_cam = nrm(n_cam + np.array([0, 0, -1.0]) * (0.42 + n_cam[2] + 0.05))
+            lim = -np.cos(np.radians(self.cfg.get("front_tilt_max", 50)))
+            for _ in range(6):              # keep the tilt from the reference axis <= front_tilt_max
+                if n_cam[2] <= lim:
+                    break
+                n_cam = nrm(n_cam + np.array([0, 0, -0.25]))
             n_w = ref.world_dir(n_cam)
             cards.append(dict(kind="front", rect=(x0, y0, x1, y1), c=(cu, cv), t_px=t, n=n_w, tile=i,
                               flip=False))

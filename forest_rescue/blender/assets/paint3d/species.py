@@ -16,7 +16,7 @@ LODS_TREE = {
     1: dict(trunk_step_m=0.6, trunk_sides=8, limb_step_m=0.5, limb_sides=4, limb_min_r_px=3.0, limb_budget=260,
             copies=True, front_frac=0.6, front_scale=1.12, n_fill=170, fill_size=1.75, n_inner=12, min_dist_k=0.6),
     2: dict(trunk_step_m=1.6, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
-            copies=False, front_frac=0.22, front_scale=1.5, n_fill=62, fill_size=2.0, n_inner=0, min_dist_k=0.7),
+            copies=False, front_frac=0.18, front_scale=1.5, n_fill=96, fill_size=1.9, n_inner=0, min_dist_k=0.6),
 }
 
 TREES = {

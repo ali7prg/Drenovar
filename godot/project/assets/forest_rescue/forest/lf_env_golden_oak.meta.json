@@ -1,5 +1,6 @@
 {
   "id": "lf_env_golden_oak",
+  "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)",
   "variants": {
     "v1": {
       "nodes": [
@@ -8,9 +9,9 @@
         "lf_env_golden_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2944,
-        "LOD1": 1070,
-        "LOD2": 174
+        "LOD0": 3798,
+        "LOD1": 1260,
+        "LOD2": 194
       },
       "materials": {
         "LOD0": [
@@ -18,31 +19,45 @@
           "lf_foliage"
         ],
         "LOD1": [
+          "lf_bark_oak",
           "lf_foliage"
         ],
         "LOD2": [
+          "lf_bark_oak",
           "lf_foliage"
         ]
       },
-      "height_m": 9.77,
-      "crown_radius_m": 6.89,
+      "height_m": 13.58,
+      "crown_radius_m": 9.11,
       "bounds_m_blender": [
         [
-          -5.17,
-          -4.79,
-          -0.31
+          -6.02,
+          -6.21,
+          -0.3
         ],
         [
-          6.89,
-          4.91,
-          9.77
+          9.11,
+          7.89,
+          13.58
         ]
       ],
       "display_offset_gltf": [
         0.0,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "copies": [
+          [
+            125,
+            0.92
+          ],
+          [
+            -125,
+            0.9
+          ]
+        ]
+      }
     },
     "v2": {
       "nodes": [
@@ -51,9 +66,9 @@
         "lf_env_golden_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 2953,
-        "LOD1": 1082,
-        "LOD2": 174
+        "LOD0": 3816,
+        "LOD1": 1270,
+        "LOD2": 192
       },
       "materials": {
         "LOD0": [
@@ -61,31 +76,46 @@
           "lf_foliage"
         ],
         "LOD1": [
+          "lf_bark_oak",
           "lf_foliage"
         ],
         "LOD2": [
+          "lf_bark_oak",
           "lf_foliage"
         ]
       },
-      "height_m": 10.54,
-      "crown_radius_m": 4.27,
+      "height_m": 13.59,
+      "crown_radius_m": 8.89,
       "bounds_m_blender": [
         [
-          -4.19,
-          -3.84,
-          -0.28
+          -8.5,
+          -6.51,
+          -0.3
         ],
         [
-          4.27,
-          4.27,
-          10.54
+          6.13,
+          8.89,
+          13.59
         ]
       ],
       "display_offset_gltf": [
-        14.065,
+        17.4,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "mirror": true,
+        "copies": [
+          [
+            105,
+            0.9
+          ],
+          [
+            -150,
+            0.92
+          ]
+        ]
+      }
     },
     "v3": {
       "nodes": [
@@ -94,9 +124,9 @@
         "lf_env_golden_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 2952,
-        "LOD1": 1066,
-        "LOD2": 174
+        "LOD0": 3764,
+        "LOD1": 1262,
+        "LOD2": 206
       },
       "materials": {
         "LOD0": [
@@ -104,80 +134,55 @@
           "lf_foliage"
         ],
         "LOD1": [
-          "lf_foliage"
-        ],
-        "LOD2": [
-          "lf_foliage"
-        ]
-      },
-      "height_m": 8.76,
-      "crown_radius_m": 6.29,
-      "bounds_m_blender": [
-        [
-          -4.3,
-          -3.6,
-          -0.3
-        ],
-        [
-          6.29,
-          3.43,
-          8.76
-        ]
-      ],
-      "display_offset_gltf": [
-        28.131,
-        0.0,
-        0.0
-      ]
-    },
-    "v4": {
-      "nodes": [
-        "lf_env_golden_oak_v4_LOD0",
-        "lf_env_golden_oak_v4_LOD1",
-        "lf_env_golden_oak_v4_LOD2"
-      ],
-      "tris": {
-        "LOD0": 2399,
-        "LOD1": 884,
-        "LOD2": 138
-      },
-      "materials": {
-        "LOD0": [
           "lf_bark_oak",
           "lf_foliage"
         ],
-        "LOD1": [
-          "lf_foliage"
-        ],
         "LOD2": [
+          "lf_bark_oak",
           "lf_foliage"
         ]
       },
-      "height_m": 6.18,
-      "crown_radius_m": 2.95,
+      "height_m": 14.4,
+      "crown_radius_m": 7.83,
       "bounds_m_blender": [
         [
-          -2.95,
-          -2.83,
-          -0.24
+          -5.33,
+          -6.04,
+          -0.32
         ],
         [
-          2.77,
-          2.87,
-          6.18
+          7.65,
+          7.83,
+          14.4
         ]
       ],
       "display_offset_gltf": [
-        42.196,
+        34.801,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "copies": [
+          [
+            140,
+            0.9
+          ],
+          [
+            -110,
+            0.95
+          ]
+        ],
+        "scale": [
+          0.9,
+          1.06
+        ]
+      }
     }
   },
   "tris": {
-    "LOD0": 2953,
-    "LOD1": 1082,
-    "LOD2": 174
+    "LOD0": 3816,
+    "LOD1": 1270,
+    "LOD2": 206
   },
   "bones": 0,
   "materials": [
@@ -198,14 +203,14 @@
       "double_sided": true
     }
   },
+  "paintedLightMix": 0.4,
+  "paintedLightNote": "Textures carry the painted light. Shade as albedo * mix(1, lambert, paintedLightMix) (lambert = max(dot(N, L), 0)); foliage normals are smoothed crown normals.",
   "wind": {
     "attribute": "COLOR_0 (RGBA float, linear)",
-    "R": "branch sway weight: 0 at trunk base -> 1 at branch tips (path length along the skeleton, ^1.35)",
-    "G": "leaf flutter weight: 0 on bark, 0.25-0.3 at a card's attachment edge -> 0.8-1.0 at its free edge",
-    "B": "per-branch phase 0..1 (first-order branch random, sub-branches inherit +-0.06); trunk 0",
-    "A": "crown ambient occlusion 0.45..1 (1 = outer/top of crown); multiply albedo in the shader",
-    "clip": "lf_forest_wind, 8 s seamless loop: use TIME*2pi/8 with integer harmonics (see lf_forest_wind.gdshader)",
-    "godot_note": "Godot's glTF importer enables vertex_color_use_as_albedo when COLOR_0 exists: use the provided ShaderMaterial (or disable that flag) or the wind mask tints the albedo."
+    "R": "sway weight 0 at the trunk base -> 1 at crown tips",
+    "G": "leaf flutter (cards 0.45..1, bark 0)",
+    "B": "per-branch / crown-sector phase 0..1",
+    "A": "ambient occlusion (1 outer front/top cards, 0.9 fill, 0.78 inner, bark 1)"
   },
   "clips": {
     "lf_forest_wind": {
@@ -214,14 +219,13 @@
       "type": "shader (vertex colour driven)"
     }
   },
-  "layout_note": "Variants are laid out along +X (display_offset_gltf); the three LOD meshes of a variant share the variant origin (overlapping, show one per distance). Mesh origin = trunk base on the ground.",
-  "lod_note": "LOD0: bark+foliage (2 surfaces); LOD1/LOD2: single foliage-atlas surface (bark strip in atlas).",
-  "export_scale_vs_art02": 0.72,
+  "layout_note": "Variants laid out along +X (display_offset_gltf); the three LODs of a variant share its origin (trunk base on the ground).",
+  "scale_note": "Real scale from the 1.8 m figure on art/02 (29.8 px/m).",
   "glb_images": [
     "lf_bark_oak_n.png",
     "lf_bark_oak_c.jpg",
     "lf_bark_oak_r.png",
     "lf_foliage_atlas.png"
   ],
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_trees.py golden_oak"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py golden_oak"
 }

@@ -2,7 +2,7 @@
   "left": {
     "view": "left",
     "iou": 0.9337,
-    "mean_abs_colour_error": 0.065,
+    "mean_abs_colour_error": 0.0648,
     "ref_pixels": 95912,
     "render_pixels": 94070
   },
@@ -16,14 +16,14 @@
   "rear": {
     "view": "rear",
     "iou": 0.8986,
-    "mean_abs_colour_error": 0.089,
+    "mean_abs_colour_error": 0.087,
     "ref_pixels": 41867,
     "render_pixels": 42491
   },
   "right": {
     "view": "right",
     "iou": 0.8984,
-    "mean_abs_colour_error": 0.0602,
+    "mean_abs_colour_error": 0.0601,
     "ref_pixels": 98323,
     "render_pixels": 94081
   }

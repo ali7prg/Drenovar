@@ -1,75 +1,75 @@
 {
- "oak_gold_a": {
+ "oak_clump_light_a": {
   "rect": [
    0,
    0,
    256,
    256
   ],
-  "attach": "bottom"
+  "attach": "center"
  },
- "oak_gold_b": {
+ "oak_clump_light_b": {
   "rect": [
    256,
    0,
    256,
    256
   ],
-  "attach": "bottom"
+  "attach": "center"
  },
- "oak_amber_a": {
+ "oak_clump_gold_a": {
   "rect": [
    512,
    0,
    256,
    256
   ],
-  "attach": "bottom"
+  "attach": "center"
  },
- "oak_amber_b": {
+ "oak_clump_gold_b": {
   "rect": [
    768,
    0,
    256,
    256
   ],
-  "attach": "bottom"
+  "attach": "center"
  },
- "oak_orange_a": {
+ "oak_clump_ochre_a": {
   "rect": [
    1024,
    0,
    256,
    256
   ],
-  "attach": "bottom"
+  "attach": "center"
  },
- "oak_orange_b": {
+ "oak_clump_ochre_b": {
   "rect": [
    1280,
    0,
    256,
    256
   ],
-  "attach": "bottom"
+  "attach": "center"
  },
- "oak_rust_a": {
+ "oak_clump_dark_a": {
   "rect": [
    1536,
    0,
    256,
    256
   ],
-  "attach": "bottom"
+  "attach": "center"
  },
- "oak_rust_b": {
+ "oak_clump_red_a": {
   "rect": [
    1792,
    0,
    256,
    256
   ],
-  "attach": "bottom"
+  "attach": "center"
  },
  "pine_spray_a": {
   "rect": [
@@ -107,41 +107,41 @@
   ],
   "attach": "bottom"
  },
- "birch_a": {
+ "birch_clump_light": {
   "rect": [
    1024,
    256,
    256,
    256
   ],
-  "attach": "top"
+  "attach": "center"
  },
- "birch_b": {
+ "birch_clump_mid": {
   "rect": [
    1280,
    256,
    256,
    256
   ],
-  "attach": "top"
+  "attach": "center"
  },
- "birch_c": {
+ "birch_clump_dark": {
   "rect": [
    1536,
    256,
    256,
    256
   ],
-  "attach": "top"
+  "attach": "center"
  },
- "birch_yellow": {
+ "birch_clump_gold": {
   "rect": [
    1792,
    256,
    256,
    256
   ],
-  "attach": "top"
+  "attach": "center"
  },
  "willow_strand_0": {
   "rect": [
@@ -546,7 +546,7 @@
    256,
    256
   ],
-  "attach": "bottom"
+  "attach": "center"
  },
  "pine_spray_e": {
   "rect": [
@@ -557,19 +557,145 @@
   ],
   "attach": "bottom"
  },
- "birch_green": {
+ "birch_spare": {
   "rect": [
    1152,
    1792,
    256,
    256
   ],
-  "attach": "top"
+  "attach": "center"
  },
  "pine_top": {
   "rect": [
    1408,
    1792,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "water": {
+  "rect": [
+   1664,
+   1792,
+   256,
+   256
+  ],
+  "attach": "none"
+ },
+ "oak_gold_a": {
+  "rect": [
+   512,
+   0,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "oak_gold_b": {
+  "rect": [
+   768,
+   0,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "oak_amber_a": {
+  "rect": [
+   1024,
+   0,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "oak_amber_b": {
+  "rect": [
+   1280,
+   0,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "oak_orange_a": {
+  "rect": [
+   1280,
+   0,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "oak_orange_b": {
+  "rect": [
+   1792,
+   0,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "oak_rust_a": {
+  "rect": [
+   1536,
+   0,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "oak_rust_b": {
+  "rect": [
+   1792,
+   0,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "birch_a": {
+  "rect": [
+   1280,
+   256,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "birch_b": {
+  "rect": [
+   1024,
+   256,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "birch_c": {
+  "rect": [
+   1536,
+   256,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "birch_yellow": {
+  "rect": [
+   1792,
+   256,
+   256,
+   256
+  ],
+  "attach": "center"
+ },
+ "birch_green": {
+  "rect": [
+   1536,
+   256,
    256,
    256
   ],

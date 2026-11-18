@@ -1,0 +1,8 @@
+{
+  "view": "golden_oak",
+  "iou": 0.7603,
+  "mean_abs_colour_error": 0.1785,
+  "ref_pixels": 103722,
+  "render_pixels": 89107,
+  "iou_closed_r4": 0.7808
+}

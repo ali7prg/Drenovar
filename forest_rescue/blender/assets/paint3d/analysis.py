@@ -58,11 +58,19 @@ def fit_ground_ellipse(fg, row_min, cols=None):
     return dict(cx=float(cx), cy=float(cy), a=float(a), b=float(b), elev=e, n=len(xs))
 
 
-def wood_mask(img, fg, ratio=0.85, Lmax=64, blur=1.2, min_area=150, Cmax=None, hue_rng=None):
-    """Bark pixels: low chroma relative to lightness (C/L < ratio) and not too bright."""
+def wood_mask(img, fg, ratio=0.85, Lmax=64, blur=1.2, min_area=150, Cmax=None, hue_rng=None, hue_max=None,
+              white=None, mode="ratio"):
+    """Bark pixels. mode 'ratio': low chroma relative to lightness (C/L < ratio), L < Lmax (warm foliage);
+    mode 'hue': hue below hue_max (brown bark vs green foliage); white=(Lmin, Cmax): pale birch bark."""
     L = seg.lab(ndi.gaussian_filter(img, (blur, blur, 0)))
     C = np.hypot(L[..., 1], L[..., 2])
-    w = fg & (C / np.maximum(L[..., 0], 1) < ratio) & (L[..., 0] < Lmax)
+    if mode == "hue":
+        H = np.degrees(np.arctan2(L[..., 2], L[..., 1])) % 360
+        w = fg & (H < hue_max) & (L[..., 0] < Lmax)
+        if white is not None:
+            w |= fg & (L[..., 0] > white[0]) & (C < white[1])
+    else:
+        w = fg & (C / np.maximum(L[..., 0], 1) < ratio) & (L[..., 0] < Lmax)
     if Cmax is not None:
         w &= C < Cmax
     if hue_rng is not None:

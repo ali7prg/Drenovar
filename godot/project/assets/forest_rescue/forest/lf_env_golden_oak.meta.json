@@ -8,8 +8,8 @@
         "lf_env_golden_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2912,
-        "LOD1": 1128,
+        "LOD0": 2908,
+        "LOD1": 1132,
         "LOD2": 234
       },
       "materials": {
@@ -24,18 +24,18 @@
           "lf_foliage"
         ]
       },
-      "height_m": 10.42,
-      "crown_radius_m": 6.68,
+      "height_m": 10.06,
+      "crown_radius_m": 5.88,
       "bounds_m_blender": [
         [
-          -5.13,
-          -5.58,
+          -4.09,
+          -4.86,
           -0.31
         ],
         [
-          6.68,
-          5.39,
-          10.42
+          5.88,
+          4.97,
+          10.06
         ]
       ],
       "display_offset_gltf": [
@@ -51,8 +51,8 @@
         "lf_env_golden_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 2920,
-        "LOD1": 1138,
+        "LOD0": 2918,
+        "LOD1": 1130,
         "LOD2": 234
       },
       "materials": {
@@ -67,22 +67,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 11.94,
-      "crown_radius_m": 4.12,
+      "height_m": 11.58,
+      "crown_radius_m": 3.85,
       "bounds_m_blender": [
         [
-          -4.08,
-          -3.8,
+          -3.85,
+          -3.63,
           -0.25
         ],
         [
-          4.09,
-          4.12,
-          11.94
+          3.51,
+          3.53,
+          11.58
         ]
       ],
       "display_offset_gltf": [
-        13.808,
+        12.293,
         0.0,
         0.0
       ]
@@ -94,8 +94,8 @@
         "lf_env_golden_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 2923,
-        "LOD1": 1144,
+        "LOD0": 2919,
+        "LOD1": 1136,
         "LOD2": 234
       },
       "materials": {
@@ -110,22 +110,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 9.54,
-      "crown_radius_m": 6.1,
+      "height_m": 9.18,
+      "crown_radius_m": 5.79,
       "bounds_m_blender": [
         [
-          -4.59,
-          -3.52,
+          -4.51,
+          -3.21,
           -0.32
         ],
         [
-          6.1,
-          3.71,
-          9.54
+          5.79,
+          3.46,
+          9.18
         ]
       ],
       "display_offset_gltf": [
-        27.616,
+        24.587,
         0.0,
         0.0
       ]
@@ -137,8 +137,8 @@
         "lf_env_golden_oak_v4_LOD2"
       ],
       "tris": {
-        "LOD0": 2370,
-        "LOD1": 941,
+        "LOD0": 2372,
+        "LOD1": 931,
         "LOD2": 218
       },
       "materials": {
@@ -153,30 +153,30 @@
           "lf_foliage"
         ]
       },
-      "height_m": 6.42,
-      "crown_radius_m": 2.88,
+      "height_m": 6.2,
+      "crown_radius_m": 2.72,
       "bounds_m_blender": [
         [
-          -2.78,
-          -2.66,
+          -2.71,
+          -2.72,
           -0.21
         ],
         [
-          2.88,
-          2.59,
-          6.42
+          2.7,
+          2.62,
+          6.2
         ]
       ],
       "display_offset_gltf": [
-        41.424,
+        36.88,
         0.0,
         0.0
       ]
     }
   },
   "tris": {
-    "LOD0": 2923,
-    "LOD1": 1144,
+    "LOD0": 2919,
+    "LOD1": 1136,
     "LOD2": 234
   },
   "bones": 0,

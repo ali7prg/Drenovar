@@ -336,12 +336,12 @@
       "lf_env_golden_oak_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2912,
-      "LOD1": 1128,
+      "LOD0": 2908,
+      "LOD1": 1132,
       "LOD2": 234
      },
-     "height_m": 10.42,
-     "canopyRadius_m": 6.68,
+     "height_m": 10.06,
+     "canopyRadius_m": 5.88,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
@@ -363,12 +363,12 @@
       "lf_env_golden_oak_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 2920,
-      "LOD1": 1138,
+      "LOD0": 2918,
+      "LOD1": 1130,
       "LOD2": 234
      },
-     "height_m": 11.94,
-     "canopyRadius_m": 4.12,
+     "height_m": 11.58,
+     "canopyRadius_m": 3.85,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
@@ -390,12 +390,12 @@
       "lf_env_golden_oak_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 2923,
-      "LOD1": 1144,
+      "LOD0": 2919,
+      "LOD1": 1136,
       "LOD2": 234
      },
-     "height_m": 9.54,
-     "canopyRadius_m": 6.1,
+     "height_m": 9.18,
+     "canopyRadius_m": 5.79,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
@@ -417,12 +417,12 @@
       "lf_env_golden_oak_v4_LOD2"
      ],
      "tris": {
-      "LOD0": 2370,
-      "LOD1": 941,
+      "LOD0": 2372,
+      "LOD1": 931,
       "LOD2": 218
      },
-     "height_m": 6.42,
-     "canopyRadius_m": 2.88,
+     "height_m": 6.2,
+     "canopyRadius_m": 2.72,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
@@ -667,12 +667,12 @@
       "lf_env_golden_oak_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2912,
-      "LOD1": 1128,
+      "LOD0": 2908,
+      "LOD1": 1132,
       "LOD2": 234
      },
-     "height_m": 10.42,
-     "canopyRadius_m": 6.68,
+     "height_m": 10.06,
+     "canopyRadius_m": 5.88,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
@@ -694,12 +694,12 @@
       "lf_env_golden_oak_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 2920,
-      "LOD1": 1138,
+      "LOD0": 2918,
+      "LOD1": 1130,
       "LOD2": 234
      },
-     "height_m": 11.94,
-     "canopyRadius_m": 4.12,
+     "height_m": 11.58,
+     "canopyRadius_m": 3.85,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
@@ -721,12 +721,12 @@
       "lf_env_golden_oak_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 2923,
-      "LOD1": 1144,
+      "LOD0": 2919,
+      "LOD1": 1136,
       "LOD2": 234
      },
-     "height_m": 9.54,
-     "canopyRadius_m": 6.1,
+     "height_m": 9.18,
+     "canopyRadius_m": 5.79,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
@@ -748,12 +748,12 @@
       "lf_env_golden_oak_v4_LOD2"
      ],
      "tris": {
-      "LOD0": 2370,
-      "LOD1": 941,
+      "LOD0": 2372,
+      "LOD1": 931,
       "LOD2": 218
      },
-     "height_m": 6.42,
-     "canopyRadius_m": 2.88,
+     "height_m": 6.2,
+     "canopyRadius_m": 2.72,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [

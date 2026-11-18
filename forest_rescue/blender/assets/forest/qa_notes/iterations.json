@@ -71,6 +71,29 @@
    "lod2_iou": 0.693,
    "diff": "silhouette within the art envelope; limbs show through gaps; LOD2 flatter/brighter than LOD0 at 55deg; trunk bark lighter than painted",
    "change": "exported (LOD0<=2950, LOD1<=1150, LOD2<=290 tris); AO in COLOR_0.a darkens inner cards in-engine"
+  },
+  {
+   "iter": 7,
+   "note": "palette golden-ochre (in-game review: lemon-yellow), crown AO gradients, export scale 0.72 (game normalises to TREE_HEIGHT/TREE_CROWN anyway)"
+  },
+  {
+   "iter": 8,
+   "iou": 0.76,
+   "diff": "first clump crown (22 cumulus clumps, spherified normals 70% clump / 30% hull): clumps read as separate balls, colour dull (C* 37 vs 41)",
+   "change": "cumulus (flattened) clumps, lobed leafy clump tiles, +10% chroma, 28 clumps"
+  },
+  {
+   "iter": 9,
+   "iou": 0.708,
+   "diff": "FPS on twig nodes + push-to-surface left big gaps (balls on sticks), dark-brown",
+   "change": "clump centres sampled by FPS inside the crown shell (overlapping), AO floor 0.58, golden palette, 46 clumps"
+  },
+  {
+   "iter": 10,
+   "iou": 0.759,
+   "front_dE": 5.89,
+   "diff": "continuous cumulus crown with dark pockets and visible limbs; slight overshoot at the top corners; red accent clumps read as dots from the top camera",
+   "change": "clumps sit deeper (shell depth 0.8-2.1 m), accent 5% and softer rust"
   }
  ],
  "lf_env_hollow_oak": [
@@ -93,6 +116,13 @@
    "iou_closed": 0.743,
    "diff": "leaders look like cut posts, limbs are thin tubes hidden by scattered foliage; LOD2 917 tris (budget 300) because marching-cubes islands block decimation",
    "change": "leaders + 5 main limbs as smooth round-cone chains inside the SDF trunk (to 13.4 m); tubes only for twig ends from the SDF limb tips; drop small mesh islands; moss caps"
+  },
+  {
+   "iter": 4,
+   "iou": 0.693,
+   "front_dE": 2.6,
+   "diff": "taller arch (3.7 m), burls, moss shell, sparse orange-red clumps; LOD2 295 tris via coarse re-mesh",
+   "change": "-"
   }
  ],
  "lf_env_fallen_trunk": [
@@ -109,6 +139,16 @@
    "iou_closed": 0.617,
    "diff": "body proportions now right; root end lacks the tall splintered root plate; moss cards read as bright floating 'lily pads'",
    "change": "root-plate ellipsoid + taller splinters; moss as 'caps' (up-facing faces duplicated +1.5 cm and mapped into the opaque centre of the moss tile, noise-patchy) instead of cards; darker, larger moss tile"
+  },
+  {
+   "iter": 3,
+   "iou": 0.601,
+   "change": "moss as displaced shell (SDF dilation on up-facing, noise-patchy), splintered break end, torn root plate, stream-bed variant v3"
+  },
+  {
+   "iter": 4,
+   "iou": 0.68,
+   "change": "thicker log (r 0.95..0.62), higher arch, taller root plate, darker moss"
   }
  ],
  "lf_env_moss_rock": [
@@ -126,6 +166,16 @@
    "iou_closed": 0.799,
    "diff": "slab tilt overdone (art: near-level block with vertical cleft face); moss cards float like lily pads; shrubs ok",
    "change": "slab tilt -0.12 rad, block taller; moss caps on up-facing faces + a few edge cards"
+  },
+  {
+   "iter": 3,
+   "iou": 0.774,
+   "change": "angular convex polytopes with plane cuts (planar fracture faces), moss shells, limestone v2 texture"
+  },
+  {
+   "iter": 4,
+   "iou": 0.777,
+   "change": "thicker moss shells, fewer polygonal cracks"
   }
  ],
  "lf_env_bramble": [
@@ -142,6 +192,16 @@
    "iou_closed": 0.567,
    "diff": "vase-shaped (canes rise from a narrow base); art is a broad ground-hugging mound",
    "change": "canes start across the footprint and arch down to the edges; 65% of leaf cards fill a half-ellipsoid dome"
+  },
+  {
+   "iter": 3,
+   "iou": 0.57,
+   "change": "open arching canes + leaves along canes (fountain shape)"
+  },
+  {
+   "iter": 4,
+   "iou": 0.671,
+   "change": "canes from across the footprint, thinner, 40% mound-filling leaves, berries"
   }
  ],
  "lf_env_reed_fern": [
@@ -158,6 +218,86 @@
    "iou_closed": 0.671,
    "diff": "ferns now visible but each frond reads as a solid paddle (atlas pinnae merge)",
    "change": "atlas fern: 24 narrower pinnae angled towards the tip (gaps between pinnae)"
+  },
+  {
+   "iter": 3,
+   "iou": 0.595,
+   "change": "fern = radial rosette of arching pinnate fronds (new frond tile with leaflets)"
+  },
+  {
+   "iter": 4,
+   "iou": 0.598,
+   "change": "fronds rise higher, bend less, larger in the mixed patch"
+  }
+ ],
+ "lf_env_dark_pine": [
+  {
+   "iter": 1,
+   "iou": 0.649,
+   "diff": "zig-zag trunk (v2), blobby irregular tiers, flat horizontal plates, too blue",
+   "change": "conifer v2: straight trunk, regular whorls (6 per whorl), drooping branch FANS + tip skirts, cone-hull spherified normals"
+  },
+  {
+   "iter": 3,
+   "iou": 0.712,
+   "diff": "regular drooping tiers; bottom tiers too wide/low, top gaps, colour grey-teal",
+   "change": "profile looked up at drooped tip height, crown base 3.3 m, leader cards"
+  },
+  {
+   "iter": 4,
+   "iou": 0.712,
+   "front_dE": 2.98,
+   "diff": "colour matched (olive), tips too pale",
+   "change": "subtler light tips"
+  },
+  {
+   "iter": 6,
+   "iou": 0.712,
+   "lod2_iou": 0.483,
+   "front_dE": 4.09,
+   "diff": "LOD2 tier petals had side gaps (0.365)",
+   "change": "10 tiers x 8 petals"
+  }
+ ],
+ "lf_env_birch": [
+  {
+   "iter": 3,
+   "iou": 0.733,
+   "front_dE": 10.74,
+   "diff": "clump crown too dark/olive (L 39 vs 48.6)",
+   "change": "+20% lighter yellow-green clump tiles, flatter airy clumps, 60 clumps, swatch bark (white + black lenticels), dark base via COLOR_0.a, orange shrub at the foot"
+  },
+  {
+   "iter": 4,
+   "iou": 0.713,
+   "front_dE": 2.47,
+   "diff": "colour matched; crown still made of discrete balls, less airy than art/02",
+   "change": "-"
+  }
+ ],
+ "lf_env_willow": [
+  {
+   "iter": 3,
+   "iou": 0.677,
+   "diff": "now weeping curtains along 46 arching branch curves; strands too thin/sparse ('rain streaks'), dome top missing",
+   "change": "52 arcs, wider strand cards (0.40-0.55 m), 5 drape cards per arc over the dome"
+  },
+  {
+   "iter": 4,
+   "iou": 0.714,
+   "front_dE": 6.98,
+   "diff": "curtain silhouette closer; top view of the dome reads as radial streaks",
+   "change": "-"
+  }
+ ],
+ "landmarks": [
+  {
+   "iter": 1,
+   "note": "all 11 landmark/prop GLBs built from kitbash builders + QA (3/4 side-by-side, inset silhouette IoU, strategic 55deg)"
+  },
+  {
+   "iter": 2,
+   "note": "limestone v2 for landmark stone, carved knot grooves (no pasted panel), thicker standing stones, thicker mossy shelter roof, sagging lean-to tarp, closer bridge QA camera"
   }
  ]
 }

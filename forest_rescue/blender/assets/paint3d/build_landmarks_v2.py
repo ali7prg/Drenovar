@@ -105,7 +105,20 @@ def run(name, it, fit=True):
     asset = f"lf_env_{name}"
     BL.build(name, it, export=True, qa=True)
     if not fit:
-        return None
+        # metrics sheet at the hand-matched art/06 camera (painted-light QA material)
+        objs = [o for o in bpy.data.objects if o.type == "MESH" and o.name.startswith(asset) and o.name.endswith("LOD0")]
+        box = BL.REFS[name]["main"]
+        ref = refs.crop(refs.load(BL.SHEET), box)
+        bg = refs.border_color(ref)
+        m_ref = refs.silhouette(ref, bg=bg, thresh=0.12, keep="all", min_area=60, fill_holes=400)
+        pblend.use_painted(objs, 0.35)
+        met = three_quarter_fitted(asset, it, objs, box, BL.CAMS[name], m_ref)
+        met["camera"] = dict(location=list(BL.CAMS[name][0]), look_at=list(BL.CAMS[name][1]), lens_mm=BL.CAMS[name][2],
+                             note="hand-matched to the art/06 main view (reference mask includes the painted ground base)")
+        core.write_json(v2_path(asset, it, "threequarter_fitted").replace(".png", ".json"), met)
+        print(f"[{asset}] art/06 view: IoU {met['iou']:.3f} colour err {met['colour_err']:.3f} SSIM {met['ssim']:.3f}",
+              flush=True)
+        return met
     # fitted camera comparison (painted-light QA material on the exported LOD0)
     if name not in BL.REFS:
         return None

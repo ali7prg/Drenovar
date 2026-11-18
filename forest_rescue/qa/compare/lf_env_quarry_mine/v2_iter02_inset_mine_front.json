@@ -1,0 +1,7 @@
+{
+  "view": "mine_front",
+  "iou": 0.7122,
+  "mean_abs_colour_error": 0.1508,
+  "ref_pixels": 74439,
+  "render_pixels": 58536
+}

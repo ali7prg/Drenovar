@@ -594,8 +594,8 @@ def stone_menhir(k, c, w, h, t, yaw, knot, lod, seed):
 
 def build_stones(lod):
     k = Kit(seed=51 + lod, bevel=(lod == 0))
-    spec = [(-3.2, -1.2, 1.15, 2.2, "knot_a"), (-2.0, 1.9, 0.95, 2.0, "knot_b"), (0.4, 2.9, 1.35, 2.75, "knot_a"),
-            (3.0, 1.6, 0.95, 2.1, "knot_b"), (2.6, -1.6, 1.05, 2.3, "knot_a")]
+    spec = [(-3.2, -1.2, 1.35, 2.2, "knot_a"), (-2.0, 1.9, 1.15, 2.0, "knot_b"), (0.4, 2.9, 1.55, 2.75, "knot_a"),
+            (3.0, 1.6, 1.15, 2.1, "knot_b"), (2.6, -1.6, 1.25, 2.3, "knot_a")]
     for i, (x, y, w, h, knot) in enumerate(spec):
         yaw = math.atan2(-y, -x) - math.pi / 2         # carved face toward the circle centre
         stone_menhir(k, (x, y, 0), w, h, 0.62 * w, yaw + math.pi, knot, lod, seed=500 + i)

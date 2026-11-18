@@ -1,12 +1,13 @@
 {
   "id": "lf_env_bridge27m",
   "tris": {
-    "LOD0": 6916,
-    "LOD1": 872,
-    "LOD2": 320
+    "LOD0": 5880,
+    "LOD1": 1012,
+    "LOD2": 392
   },
   "bones": 0,
   "materials": [
+    "lm_misc",
     "lm_stone",
     "lm_wood"
   ],
@@ -16,7 +17,10 @@
     "lm_stone_r.png",
     "lm_wood_n.png",
     "lm_wood_c.jpg",
-    "lm_wood_r.png"
+    "lm_wood_r.png",
+    "lm_misc_n.png",
+    "lm_misc_c.png",
+    "lm_misc_r.png"
   ],
   "textures": {
     "lm_stone_c.jpg": 1024,
@@ -52,13 +56,13 @@
   "bounds_m_gltf": [
     [
       -16.715,
-      -1.729,
-      -2.715
+      -1.707,
+      -3.209
     ],
     [
       16.717,
-      2.155,
-      2.725
+      5.5,
+      3.213
     ]
   ],
   "collision": [
@@ -157,6 +161,62 @@
         27.0,
         0.1,
         4.0
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        -7.25,
+        2.1,
+        2.55
+      ],
+      "size": [
+        1.1,
+        4.5,
+        1.1
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        -7.25,
+        2.1,
+        -2.55
+      ],
+      "size": [
+        1.1,
+        4.5,
+        1.1
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        7.25,
+        2.1,
+        2.55
+      ],
+      "size": [
+        1.1,
+        4.5,
+        1.1
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        7.25,
+        2.1,
+        -2.55
+      ],
+      "size": [
+        1.1,
+        4.5,
+        1.1
       ],
       "yaw_deg": 0.0
     }

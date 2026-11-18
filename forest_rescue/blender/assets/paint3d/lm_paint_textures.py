@@ -217,6 +217,14 @@ def main():
                             ("wood", SRC["wood"], None),
                             ("roof", SRC["roof"], dict(patch=64, overlap=16, n=7, scale=2.0))):
         alb = quilt(boxes, **kw) if kw is not None else planks(boxes)
+        if name == "stone":
+            # the painted landmark masonry (mine / ruin / bridge piers / menhirs) is light grey-beige: Lab-match the
+            # jointless stone quilt to the measured painted block faces (L p50 ~ 63, chroma ~ 10)
+            from skimage import color as skc
+            lab_ = seg.lab(alb)
+            lab_[..., 0] = (lab_[..., 0] - lab_[..., 0].mean()) * 0.9 + 61.0
+            lab_[..., 1:] = (lab_[..., 1:] - lab_[..., 1:].mean((0, 1))) * 0.6 + np.array([2.2, 8.8])
+            alb = np.clip(skc.lab2rgb(lab_), 0, 1).astype(np.float32)
         h, r = height_of(alb)
         nrm = ftex.height_to_normal_wrap(h, 4.0)
         rough = np.stack([np.ones_like(r), r, np.zeros_like(r)], -1)

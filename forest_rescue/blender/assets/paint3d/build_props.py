@@ -42,7 +42,7 @@ K = 0.35
 
 CFG = {
     "moss_rock": dict(box=(470, 480, 892, 728), human=(470, 590, 515, 700), clip=220, ground=232, elev=9.4,
-                      side_sw=(600, 568, 720, 668), top_sw=(588, 512, 668, 548), tex="lf_rock_limestone"),
+                      side_sw=(600, 568, 720, 668), top_sw=(604, 524, 652, 545), tex="lf_rock_limestone"),
     "fallen_trunk": dict(box=(0, 520, 470, 740), human=(0, 580, 50, 690), clip=148, ground=180,
                          side_sw=(100, 615, 230, 650), top_sw=(130, 596, 200, 612), tex="lf_bark_fallen"),
 }

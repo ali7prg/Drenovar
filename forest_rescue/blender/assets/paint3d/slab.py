@@ -17,13 +17,13 @@ EXTRA = (0.0, 0.0, 1.0, 0.29)      # free band (limb strips, extra parts)
 
 
 def mirror_wrap(a3):
-    """Per-face wrap of coordinates (M,3) into [0,1]: each face is shifted by whole periods so its minimum corner
-    lies in [0,1) (faces smaller than one period never straddle the region border; mirrored for odd periods)."""
-    k = np.floor(a3.min(1, keepdims=True))
-    a = a3 - k
-    odd = (np.mod(k, 2) == 1)
-    a = np.where(odd, 1.0 - np.clip(a, 0, 1), a)
-    return np.clip(a, 0, 1)
+    """Per-face placement of coordinates (M,3) inside [0,1]: each face keeps its metric size, is shifted so that it
+    lies fully inside the region (offset from its own position), never straddling the region border."""
+    lo = a3.min(1, keepdims=True)
+    span = np.clip(a3.max(1, keepdims=True) - lo, 0, 1)
+    free = 1.0 - span
+    off = np.mod(lo * 0.618 + 0.13, 1.0) * free
+    return np.clip(a3 - lo + off, 0, 1)
 
 
 def planar_uvs(V, T, N, view, W, H, clip, front_thresh=0.42, top_thresh=0.62, per_side=2.5, per_top=2.5,

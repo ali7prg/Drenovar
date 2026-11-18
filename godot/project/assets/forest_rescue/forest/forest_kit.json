@@ -2343,12 +2343,12 @@
       "lf_env_fallen_trunk_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2300,
-      "LOD1": 874,
+      "LOD0": 2298,
+      "LOD1": 872,
       "LOD2": 252
      },
-     "height_m": 3.15,
-     "canopyRadius_m": 5.36,
+     "height_m": 3.12,
+     "canopyRadius_m": 5.37,
      "footprintRadius_m": 5.2,
      "materials": {
       "LOD0": [
@@ -2372,11 +2372,11 @@
       "lf_env_fallen_trunk_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 1544,
-      "LOD1": 596,
-      "LOD2": 172
+      "LOD0": 1546,
+      "LOD1": 594,
+      "LOD2": 177
      },
-     "height_m": 3.15,
+     "height_m": 3.12,
      "canopyRadius_m": 6.63,
      "footprintRadius_m": 5.2,
      "materials": {
@@ -2401,11 +2401,11 @@
       "lf_env_fallen_trunk_v3_stream_LOD2"
      ],
      "tris": {
-      "LOD0": 2758,
-      "LOD1": 1130,
+      "LOD0": 2756,
+      "LOD1": 1128,
       "LOD2": 286
      },
-     "height_m": 4.06,
+     "height_m": 4.05,
      "canopyRadius_m": 5.71,
      "footprintRadius_m": 5.2,
      "materials": {

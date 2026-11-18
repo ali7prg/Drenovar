@@ -5,40 +5,40 @@
    "frames": 90,
    "loop": true,
    "planted_steps": 360,
-   "max_slide_mm_per_frame": 0.22,
-   "mean_slide_mm_per_frame": 0.005,
+   "max_slide_mm_per_frame": 0.51,
+   "mean_slide_mm_per_frame": 0.045,
    "lowest_foot_m": -0.0
   },
   "walk": {
    "frames": 42,
    "loop": true,
-   "planted_steps": 85,
-   "max_slide_mm_per_frame": 9.82,
-   "mean_slide_mm_per_frame": 0.471,
+   "planted_steps": 83,
+   "max_slide_mm_per_frame": 7.96,
+   "mean_slide_mm_per_frame": 0.408,
    "lowest_foot_m": -0.0
   },
   "run": {
    "frames": 24,
    "loop": true,
-   "planted_steps": 29,
-   "max_slide_mm_per_frame": 21.75,
-   "mean_slide_mm_per_frame": 2.006,
+   "planted_steps": 25,
+   "max_slide_mm_per_frame": 0.0,
+   "mean_slide_mm_per_frame": 0.0,
    "lowest_foot_m": -0.0
   },
   "turn_left": {
    "frames": 30,
    "loop": false,
    "planted_steps": 86,
-   "max_slide_mm_per_frame": 16.08,
-   "mean_slide_mm_per_frame": 0.252,
+   "max_slide_mm_per_frame": 4.67,
+   "mean_slide_mm_per_frame": 0.054,
    "lowest_foot_m": -0.0
   },
   "turn_right": {
    "frames": 30,
    "loop": false,
    "planted_steps": 86,
-   "max_slide_mm_per_frame": 16.08,
-   "mean_slide_mm_per_frame": 0.252,
+   "max_slide_mm_per_frame": 4.67,
+   "mean_slide_mm_per_frame": 0.054,
    "lowest_foot_m": -0.0
   },
   "roar": {
@@ -53,16 +53,16 @@
    "frames": 36,
    "loop": false,
    "planted_steps": 128,
-   "max_slide_mm_per_frame": 0.76,
-   "mean_slide_mm_per_frame": 0.012,
+   "max_slide_mm_per_frame": 2.79,
+   "mean_slide_mm_per_frame": 0.044,
    "lowest_foot_m": -0.0
   },
   "attack_charge": {
    "frames": 75,
    "loop": false,
-   "planted_steps": 174,
+   "planted_steps": 153,
    "max_slide_mm_per_frame": 102.0,
-   "mean_slide_mm_per_frame": 2.325,
+   "mean_slide_mm_per_frame": 2.562,
    "lowest_foot_m": -0.008
   },
   "attack_stomp": {
@@ -84,7 +84,7 @@
   "death": {
    "frames": 84,
    "loop": false,
-   "planted_steps": 68,
+   "planted_steps": 56,
    "max_slide_mm_per_frame": 0.0,
    "mean_slide_mm_per_frame": 0.0,
    "lowest_foot_m": 0.0

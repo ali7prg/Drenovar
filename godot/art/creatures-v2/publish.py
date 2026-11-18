@@ -42,7 +42,13 @@ def measure(work, species):
     x = np.concatenate(xs)
     zz = np.concatenate(zs)
     y = np.concatenate(ys)
-    return float(x.min()), float(x.max()), float(np.abs(zz).max()), float(y.max())
+    x0 = float(x.min())
+    # a long, low tail (dragor: 3.6 m of 9.4 m on its creature-references sheet) is left out of the battle
+    # footprint beyond FOOTPRINT_X_MIN, so the display adapter keeps the body's in-game size and the tail
+    # simply trails behind the old outline
+    if getattr(sp, "FOOTPRINT_X_MIN", None) is not None:
+        x0 = max(x0, float(sp.FOOTPRINT_X_MIN))
+    return x0, float(x.max()), float(np.abs(zz).max()), float(y.max())
 
 
 def main():

@@ -43,8 +43,11 @@ def smax(a, b, k):
 class Prim:
     """One primitive. kinds: sphere, ellipsoid, capsule, cone (round cone), box."""
 
-    def __init__(self, kind, bone, k=0.04, mat="base", name="", neg=False, **p):
+    def __init__(self, kind, bone, k=0.04, mat="base", name="", neg=False, grp=None, **p):
         self.kind, self.bone, self.k, self.mat, self.name, self.neg = kind, bone, float(k), mat, name, neg
+        # grp: primitives of one group blend and carve only each other (a plate's cut-outs never bite into the
+        # plates it overlaps); groups are joined with a plain union, shared primitives (grp None) as before
+        self.grp = grp
         self.p = {key: (_v(v) if isinstance(v, (list, tuple, np.ndarray)) else v) for key, v in p.items()}
         self.bounds = self._bounds()
 
@@ -151,7 +154,9 @@ class Part:
         big = F(1e3)
         d = np.full(n, big, F)
         D = np.full((n, len(self.prims)), big, F) if keep else None
+        groups = {}
         for j, pr in enumerate(self.prims):
+            acc = d if pr.grp is None else groups.setdefault(pr.grp, np.full(n, big, F))
             if cull:
                 lo, hi = pr.bounds
                 m = pr.k + self.band + 0.02
@@ -165,9 +170,11 @@ class Part:
             if keep:
                 D[idx, j] = dj
             if pr.neg:
-                d[idx] = smax(d[idx], -dj, pr.k)
+                acc[idx] = smax(acc[idx], -dj, pr.k)
             else:
-                d[idx] = smin(d[idx], dj, pr.k)
+                acc[idx] = smin(acc[idx], dj, pr.k)
+        for acc in groups.values():
+            d = np.minimum(d, acc)
         if displace and self.displace is not None:
             near = np.abs(d) < self.band
             if near.any():

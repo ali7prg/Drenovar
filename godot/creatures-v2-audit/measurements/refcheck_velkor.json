@@ -1,0 +1,142 @@
+{
+ "views": {
+  "iou": {
+   "side": 0.741,
+   "front": 0.696,
+   "rear": 0.69
+  },
+  "median_colour": {
+   "side": {
+    "reference": "#6e5843",
+    "model": "#7b6855"
+   },
+   "front": {
+    "reference": "#775d45",
+    "model": "#7d6d56"
+   },
+   "rear": {
+    "reference": "#7b634c",
+    "model": "#645641"
+   }
+  },
+  "px_per_m": {
+   "side": 246.67,
+   "front": 232.85,
+   "rear": 232.85
+  }
+ },
+ "glbposes": {
+  "camera": {
+   "az": 165.0,
+   "el": 4.0,
+   "dist": 8.952050113375837
+  },
+  "iou": {
+   "preparation": 0.564,
+   "launch": 0.582,
+   "contact": 0.524,
+   "recovery": 0.607
+  }
+ },
+ "feet": {
+  "glb": "velkor_lod1.glb",
+  "clips": {
+   "idle": {
+    "frames": 90,
+    "loop": true,
+    "planted_steps": 360,
+    "max_slide_mm_per_frame": 0.22,
+    "mean_slide_mm_per_frame": 0.007,
+    "lowest_foot_m": -0.0
+   },
+   "walk": {
+    "frames": 36,
+    "loop": true,
+    "planted_steps": 73,
+    "max_slide_mm_per_frame": 8.27,
+    "mean_slide_mm_per_frame": 0.254,
+    "lowest_foot_m": -0.0
+   },
+   "alert": {
+    "frames": 30,
+    "loop": false,
+    "planted_steps": 120,
+    "max_slide_mm_per_frame": 0.0,
+    "mean_slide_mm_per_frame": 0.0,
+    "lowest_foot_m": -0.0
+   },
+   "run": {
+    "frames": 21,
+    "loop": true,
+    "planted_steps": 23,
+    "max_slide_mm_per_frame": 9.51,
+    "mean_slide_mm_per_frame": 0.711,
+    "lowest_foot_m": -0.0
+   },
+   "turn_left": {
+    "frames": 24,
+    "loop": false,
+    "planted_steps": 61,
+    "max_slide_mm_per_frame": 3.64,
+    "mean_slide_mm_per_frame": 0.084,
+    "lowest_foot_m": -0.0
+   },
+   "turn_right": {
+    "frames": 24,
+    "loop": false,
+    "planted_steps": 61,
+    "max_slide_mm_per_frame": 3.64,
+    "mean_slide_mm_per_frame": 0.084,
+    "lowest_foot_m": -0.0
+   },
+   "roar": {
+    "frames": 72,
+    "loop": false,
+    "planted_steps": 288,
+    "max_slide_mm_per_frame": 0.0,
+    "mean_slide_mm_per_frame": 0.0,
+    "lowest_foot_m": -0.0
+   },
+   "attack_antler_sweep": {
+    "frames": 45,
+    "loop": false,
+    "planted_steps": 180,
+    "max_slide_mm_per_frame": 0.0,
+    "mean_slide_mm_per_frame": 0.0,
+    "lowest_foot_m": -0.0
+   },
+   "attack_charge": {
+    "frames": 66,
+    "loop": false,
+    "planted_steps": 106,
+    "max_slide_mm_per_frame": 21.44,
+    "mean_slide_mm_per_frame": 0.405,
+    "lowest_foot_m": -0.0
+   },
+   "hit": {
+    "frames": 18,
+    "loop": false,
+    "planted_steps": 72,
+    "max_slide_mm_per_frame": 0.0,
+    "mean_slide_mm_per_frame": 0.0,
+    "lowest_foot_m": 0.0
+   },
+   "death": {
+    "frames": 84,
+    "loop": false,
+    "planted_steps": 62,
+    "max_slide_mm_per_frame": 192.2,
+    "mean_slide_mm_per_frame": 5.524,
+    "lowest_foot_m": 0.0
+   },
+   "rest": {
+    "frames": 120,
+    "loop": true,
+    "planted_steps": 360,
+    "max_slide_mm_per_frame": 0.0,
+    "mean_slide_mm_per_frame": 0.0,
+    "lowest_foot_m": -0.0
+   }
+  }
+ }
+}

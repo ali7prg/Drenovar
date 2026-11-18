@@ -289,3 +289,24 @@ def death(rig, sp, sampler, name, N, keys, fk_angles, buckle_end=20, fk_start=18
                                                         {"event": "dead", "frame": N}])
     clip["ground_lift"] = [float(v) for v in lift_log]
     return clip
+
+
+def step_offsets(table):
+    """Stance changes made as steps, never slides. table: {(kind, side): [(f0, f1, dx0, dx1, lift), ...]} - the
+    foot moves from dx0 to dx1 (metres along +X) between f0 and f1 with an arc of `lift` (use 0 when the move
+    rides on a swing that already lifts the foot). Returns fn(fr, key) -> (dx, dy, toe)."""
+    from qmath import ease
+
+    def fn(fr, key):
+        rows = table.get(key, [])
+        dx = 0.0
+        for f0, f1, a, b, lift in rows:
+            if fr <= f0:
+                return a, 0.0, 0.0
+            if fr < f1:
+                s = (fr - f0) / float(f1 - f0)
+                arc = np.sin(np.pi * s)
+                return a + (b - a) * ease(s), lift * arc, -0.8 * arc * (1.0 if lift > 0 else 0.0)
+            dx = b
+        return dx, 0.0, 0.0
+    return fn

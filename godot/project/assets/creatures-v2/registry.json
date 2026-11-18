@@ -5,20 +5,20 @@
    "name": "Лесной Велькор",
    "model": "res://assets/creatures-v2/velkor/velkor_runtime.gltf",
    "manifest": "res://assets/creatures-v2/velkor/clip_manifest.json",
-   "display_scale": 1.323,
+   "display_scale": 1.32,
    "body": [
-    2.511,
-    0.851
+    2.51,
+    0.735
    ],
    "authored_bounds_m": {
     "x": [
-     -1.76,
-     2.035
+     -1.762,
+     2.041
     ],
-    "half_width": 0.644,
-    "top": 3.17
+    "half_width": 0.557,
+    "top": 2.924
    },
-   "lod_switch_m": 28.5,
+   "lod_switch_m": 26.3,
    "groups": {
     "body": "Body",
     "horn": "AntlerBark"
@@ -80,20 +80,20 @@
    "name": "Тенерис",
    "model": "res://assets/creatures-v2/tenerys/tenerys_runtime.gltf",
    "manifest": "res://assets/creatures-v2/tenerys/clip_manifest.json",
-   "display_scale": 1.326,
+   "display_scale": 1.27,
    "body": [
-    2.629,
-    0.768
+    2.631,
+    0.481
    ],
    "authored_bounds_m": {
     "x": [
-     -2.423,
-     1.543
+     -2.743,
+     1.4
     ],
-    "half_width": 0.579,
-    "top": 2.281
+    "half_width": 0.378,
+    "top": 1.863
    },
-   "lod_switch_m": 20.5,
+   "lod_switch_m": 16.8,
    "groups": {
     "body": "Body",
     "detail": "Details"
@@ -158,20 +158,20 @@
    "name": "Горный Драгор",
    "model": "res://assets/creatures-v2/dragor/dragor_runtime.gltf",
    "manifest": "res://assets/creatures-v2/dragor/clip_manifest.json",
-   "display_scale": 0.939,
+   "display_scale": 0.899,
    "body": [
     3.151,
-    1.297
+    1.652
    ],
    "authored_bounds_m": {
     "x": [
-     -3.351,
-     3.361
+     -3.5,
+     3.51
     ],
-    "half_width": 1.381,
-    "top": 3.091
+    "half_width": 1.838,
+    "top": 3.048
    },
-   "lod_switch_m": 27.8,
+   "lod_switch_m": 27.4,
    "groups": {
     "skin": "Skin",
     "stone": "Stone"
@@ -198,8 +198,8 @@
      ],
      "tint_b": [
       0.8,
-      0.76,
-      0.68,
+      0.7,
+      0.52,
       0.0
      ],
      "emit_g": 0.0
@@ -214,8 +214,8 @@
      ],
      "tint_b": [
       0.8,
-      0.76,
-      0.68,
+      0.7,
+      0.52,
       0.0
      ],
      "emit_g": 0.3,
@@ -234,9 +234,9 @@
       0.65
      ],
      "tint_b": [
-      0.74,
-      0.7,
-      0.64,
+      0.86,
+      0.72,
+      0.5,
       0.6
      ],
      "emit_g": 0.65,
@@ -258,20 +258,20 @@
    "name": "Камнеклык",
    "model": "res://assets/creatures-v2/kamneklyk/kamneklyk_runtime.gltf",
    "manifest": "res://assets/creatures-v2/kamneklyk/clip_manifest.json",
-   "display_scale": 1.511,
+   "display_scale": 1.444,
    "body": [
-    2.62,
-    1.072
+    2.619,
+    1.038
    ],
    "authored_bounds_m": {
     "x": [
-     -1.742,
-     1.726
+     -1.914,
+     1.714
     ],
-    "half_width": 0.71,
-    "top": 2.02
+    "half_width": 0.719,
+    "top": 2.015
    },
-   "lod_switch_m": 18.2,
+   "lod_switch_m": 18.1,
    "groups": {
     "body": "Body",
     "stone": "Stone"

@@ -41,12 +41,17 @@ decimation, MikkTSpace tangents, Cycles normal/AO bakes), `xatlas` (UV charts), 
 |---|---|---|---|---|
 | Clips | 12 | 12 | 14 | 14 |
 | Bones (skin joints) | 41 | 40 | 44 | 48 |
-| LOD0 / LOD1 / LOD2 triangles | 62 112 / 26 342 / 6 716 | 55 644 / 22 468 / 6 328 | 47 122 / 19 036 / 4 992 | 70 330 / 27 164 / 7 958 |
+| LOD0 / LOD1 / LOD2 triangles | 93 748 / 37 288 / 8 740 | 76 440 / 30 536 / 8 072 | 58 736 / 24 476 / 6 230 | 72 578 / 27 378 / 7 430 |
 | Materials per LOD | 3 (Body, AntlerBark, FurCards) | 3 (Body, Stone, FurCards) | 3 (Body, Details, FurCards) | 2 (Skin, Stone) |
 
-Proportions follow the kit sheets' drawings (see Reference match). The fur cards are what goes over the
-03 budgets: Velkor (shaggy all over on its sheet) 62 112 / 26 342 against 48 000 / 20 000, Tenerys LOD0
-+2 %, Kamneklyk LOD0 +7 % and LOD1 +2 %; Dragor and every LOD2 are within budget.
+Shapes, materials and attack keys follow the creature-references sheets (section below). The fur cards, moss
+strands and denser plates are what goes over the 03 budgets (Velkor LOD1 37 288 against 20 000, Kamneklyk
+30 536 / 22 000, Tenerys 24 476 / 19 000; Dragor is within budget); `FUR_KEEP` per LOD is the knob to trade
+coat density for triangles.
+
+* `deliver/<id>/` — per creature: `<id>.blend` (Blender 5.3, LOD1 meshes, armature, every clip as an action,
+  PBR materials with packed textures; `tools/dcc_blend.py`), `<id>_animated.glb` (LOD1, all clips, level I look)
+  and `clip_manifest.json`. LOD0 / LOD2 and the L1–L3 web files are rebuilt by the pipeline (not stored).
 
 ## Rebuild
 
@@ -59,12 +64,54 @@ python3 godot/art/creatures-v2/write_import.py godot/project velkor
 (cd godot/project && godot --headless --path . -s qa_creatures_v2.gd)
 ```
 
-Reference match: `tools/refmatch.py` segments the front / left side / rear views of the kit sheets
+Kit-sheet match (previous references, kept for history): `tools/refmatch.py` segments the front / left side / rear views of the kit sheets
 (`refs`), rasterises the sculpt in the same views (`model`, coarse meshes, IoU after a best fit of scale
 and offset) and compares orthographic renders of the built model with the sheets (`compare`, from
 `tools/media.gd --what=views`): `<id>_compare.jpg` puts sheet, model and the silhouette overlay side by
 side (red: only on the sheet, blue: only on the model). Landmarks are read in metres off the sheet at
 112 / 127 / 145 / 80 px per metre (Velkor / Tenerys / Kamneklyk / Dragor).
+
+## creature-references (drenovar-server, branch `creature-references`)
+
+The current shapes, materials and attack keys follow `creature-references/manifest.json` and its images: one
+turnaround `model.png` per creature (side / front / rear, Dragar and Teneris also top) and four attack poses in
+the manifest's order (`01-preparation`, `02-launch`, `03-contact`, `04-recovery`). The art ids `dragar` and
+`teneris` map to the project ids `dragor` and `tenerys`.
+
+```bash
+R=<checkout of creature-references>/creature-references        # manifest.json + 20 PNG
+PY=.venv/bin/python
+$PY -I tools/refcheck.py refs $R /tmp/rc                        # masks, ground lines, px/m of every view
+$PY -I tools/proof.py sculpt <id> /tmp/rc /tmp/proof            # coarse sculpt + fur strips in the sheet views
+$PY -I tools/proof.py glb <id> <work>/<id>/out/<id>_lod0.glb /tmp/rc /tmp/glb idle:0   # built model, Cycles
+$PY -I tools/proof.py glbposes <id> <work>/<id>/out/<id>_lod0.glb /tmp/rc /tmp/glb     # the 4 attack poses
+$PY -I tools/proof.py cycle <id> /tmp/rc /tmp/cycles idle,walk,run                     # filmstrips
+$PY -I tools/slide_check.py <id> [clip,...]                     # foot sliding before export
+python3 -I tools/refsheet.py /tmp/rc /tmp/glb <audit images> <audit measurements> <id> ...
+```
+
+* **Scale.** Every sheet is read at one metric scale from the manifest: Velkor 246.7 px/m (nose to tail tip
+  3.6 m), Teneris 225.6 (3.95 m), Kamneklyk 315 (snout to rump 3.0 m), Dragar 121.6 (no numbers in the
+  manifest: the dorsal scutes over the shoulders at 3.1 m, the shoulder height of the kit sheet with its 1.8 m
+  man). Front / rear / top views are drawn with their own perspective; each is read at the scale where it agrees
+  with the side view as orthographic views must (same highest point, same nose-to-tail length).
+* **Renders.** Blender 5.3 Cycles, orthographic, at the sheet's own px/m, the model's ground on the sheet's
+  ground line; only a horizontal shift is searched. Overlay: red - only the reference, cyan - only the model.
+  Attack poses: one perspective camera per creature (azimuth / elevation / distance fitted on the recovery
+  pose), the same camera for all four poses; the controller travel of charge / pounce is left out because the
+  pose images are framed on the creature.
+* **Proportions.** `warp.py` re-proportions a built creature with one smooth space warp (skeleton, sculpt
+  primitives, sockets and fur-card regions together; rigid parts move without shear; ops can be limited to
+  bones, e.g. the Teneris tail warp leaves the hind feet that stand under it). Species set `WARP`; the
+  shading functions receive unwarped texel positions. Parts marked `"warp": False` are authored directly in
+  the new proportions (the Velkor antler crown).
+* **Plates.** `sdf.Prim(grp=...)`: the cut-outs of a plate / shard / scute carve only that plate, never the
+  neighbours it overlaps. Baked normals on rigid parts tilted more than ~70 degrees from the low poly are bake
+  errors (a ray hit a neighbouring plate) and are replaced by the surface normal (`texturing.run`).
+* **Stance changes are steps.** `clips.step_offsets` moves a foot to a new stance only while it is lifted (an
+  extra quick step, or riding on a planned swing), so a wide attack stance never slides the feet.
+* **Footprint.** `FOOTPRINT_X_MIN` (Dragor -3.5 m) leaves the far part of a long, low tail out of the battle
+  footprint, so `display_scale` keeps the body's in-game size and the tail trails behind the old outline.
 
 Checks: `tools/validate.mjs` (Khronos glTF-Validator), `tools/run_three.cjs` + `tools/index.html`
 (Three.js r171 GLTFLoader in Chromium), `tools/foot_check.py` (foot sliding / ground contact from

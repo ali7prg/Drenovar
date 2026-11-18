@@ -182,7 +182,7 @@ def run(sp, work, lod, sizes, log=print):
             continue
         t = time.time()
         mesh = dict(np.load(mpath))
-        W, FL, RAD = material_weights(sp, group, mesh)
+        W, FL, RAD = material_weights(sp, group, mesh, tau=getattr(sp, "MATW_TAU", {}).get(group, 0.025))
         np.save(os.path.join(d, f"{group}_matw.npy"), W)
         ctx = Ctx(mesh, W, size_c, lod, FL, RAD)
         ctx.group = group
@@ -192,6 +192,15 @@ def run(sp, work, lod, sizes, log=print):
         base = base * 2.0 - 1.0
         base_flat = base[ctx.mask]
         base_flat /= np.maximum(np.linalg.norm(base_flat, axis=1, keepdims=True), 1e-9)
+        # rigid plates / shards / scutes overlap: some bake rays hit a neighbouring plate and return a normal
+        # facing away (black patches in the render). The low poly of a rigid part follows its sculpt closely, so
+        # a baked normal tilted more than ~70 degrees from it is a bake error: use the surface normal there.
+        _sk, _parts = sp.build_cached()
+        rigid_idx = [q["index"] for q in _parts if q["rigid"] is not None]
+        bad = np.isin(ctx.part, rigid_idx) & (base_flat[:, 2] < 0.35)
+        base_flat[bad] = np.array([0.0, 0.0, 1.0], np.float32)
+        if bad.any():
+            log(f"  {group}: {int(bad.sum())} baked normals on rigid parts replaced (bake ray hit a neighbour)")
         if "height" in out:
             det = detail_normal(ctx, out["height"], out.get("height_eps", 0.004))
             nrm = rnm(base_flat, det)

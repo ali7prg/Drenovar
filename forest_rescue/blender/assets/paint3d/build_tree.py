@@ -112,8 +112,13 @@ def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
         keep = set(range(n)) - drop
     fronts = B.front_cards(scale=L["front_scale"], keep=keep, seed=vs["seed"])
     dm = B.front_depth_map(front_all)
-    fills = B.fill_cards(L["n_fill"], dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod, n_inner=L["n_inner"],
-                         min_dist_k=L.get("min_dist_k", 0.55))
+    if sp.get("crown_mode", "lobes") == "lobes":
+        fills = B.lobe_cards(L["n_fill"], dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod,
+                             n_lobes=L.get("n_lobes", sp["cfg"].get("n_lobes", 12)), lobe_r=sp.get("lobe_r", 0.32),
+                             min_dist_k=L.get("min_dist_k", 0.45), inset=sp.get("lobe_inset", 0.74))
+    else:
+        fills = B.fill_cards(L["n_fill"], dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod, n_inner=L["n_inner"],
+                             min_dist_k=L.get("min_dist_k", 0.55))
     H = sp.get("height_hint", 12.0)
     Rc = sp.get("crown_hint", 6.0)
     bark, leaf = B.assemble(ps, fronts + fills, bark_uv, sides_trunk=L["trunk_sides"], sides_limb=L["limb_sides"],

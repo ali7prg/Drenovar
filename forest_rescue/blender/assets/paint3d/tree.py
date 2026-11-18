@@ -597,6 +597,99 @@ class TreeBuilder:
             n_in += 1
         return cards
 
+    def lobe_cards(self, n_cards, front_dm, size_k=1.0, seed=5, n_lobes=12, lobe_r=0.32, min_dist_k=0.45,
+                   foot=0.86, up_bias=0.45, inset=0.74, n_inner=0):
+        """Foliage masses: cards clustered on hemispherical caps around lobe centres on the crown dome
+        (gaps between masses show the limbs, as in the painted top views)."""
+        ref, p = self.ref, self.p
+        rng = np.random.default_rng(seed)
+        v0, v1 = ref.crown_rows
+        info = p.info
+        areas = np.array([q["area"] for q in info], float)
+        etas = np.array([q["eta"] for q in info])
+        rhos = np.array([q["rho"] for q in info])
+        lums = np.array([q["lum"] for q in info])
+        edges = np.array([q["edge"] for q in info])
+        lum_med = np.median(lums)
+        Rmax = float(ref.R[v0:v1 + 1].max())
+        rl_px = lobe_r * Rmax
+        # lobe centres (camera px): apex lobe + ring(s)
+        lobes = [(-np.pi / 2 + rng.normal(0, 0.3), 0.06)]
+        ring = []
+        for i in range(n_lobes - 1):
+            ph = -np.pi / 2 + (i + 0.5) * 2 * np.pi / (n_lobes - 1) + rng.normal(0, 0.18)
+            eta = rng.uniform(0.18, 0.62)
+            ring.append((ph, eta))
+        lobes += ring
+        L = []
+        for ph, eta in lobes:
+            v = v0 + eta * (v1 - v0)
+            vi = int(np.clip(round(v), 0, ref.H - 1))
+            k = inset * rng.uniform(0.92, 1.05)
+            u = ref.xc[vi] + ref.R[vi] * k * np.cos(ph)
+            tt = ref.kd * ref.R[vi] * k * np.sin(ph)
+            if eta < 0.1:
+                v = v0 + rl_px * 0.9
+                u = ref.xc[int(v)] + rng.normal(0, 0.1) * ref.R[int(v)]
+                tt = rng.normal(0, 0.15) * ref.R[int(v)]
+            c = ref.cam_to_world(np.array([u]), np.array([v]), np.array([tt]))[0]
+            ax = ref.world_dir(ref.normal_cam(u, v, tt))
+            ax = nrm(ax + np.array([0, 0, 0.5]))
+            L.append((c, ax, eta))
+        typ = np.median([q["w_m"] for q in info if q["area"] > np.median(areas)]) * size_k
+        rmin = typ * min_dist_k
+        per = max(4, n_cards // max(1, len(L)))
+        cards = []
+        placed_pts = []
+        for li, (c, ax, eta) in enumerate(L):
+            got = 0
+            tries = 0
+            rl = rl_px / ref.ppm * rng.uniform(0.85, 1.15)
+            while got < per and tries < per * 25:
+                tries += 1
+                # direction in the cap around the lobe axis (polar angle up to ~105 deg)
+                d = nrm(rng.normal(0, 1, 3))
+                if np.dot(d, ax) < -0.25:
+                    d = d - 1.6 * np.dot(d, ax) * ax
+                    d = nrm(d)
+                P3 = c + d * rl * rng.uniform(0.75, 1.05)
+                if any(np.sum((P3 - q) ** 2) < rmin * rmin for q in placed_pts[-400:]):
+                    continue
+                u, v, tdep = ref.view.project(P3[None])
+                u, v, tdep = float(u[0]), float(v[0]), float(tdep[0]) * ref.ppm
+                ui, vi = int(round(u)), int(round(v))
+                if not (0 <= ui < ref.W and 0 <= vi < ref.H) or not ref.fg[vi, ui]:
+                    continue
+                if tdep < front_dm[vi, ui] + 0.3 * ref.ppm:
+                    continue
+                uw = self.cfg.get("mass_up", 0.55)
+                n_w = nrm(d * (1 - uw) + uw * np.array([0, 0, 1.0]) + rng.normal(0, 0.08, 3))
+                wgt = np.sqrt(areas) * np.exp(-((etas - eta) / 0.35) ** 2)
+                wgt *= np.exp(np.clip((lums - lum_med) / self.cfg.get("lum_pref", 5.0) * (0.6 + 0.6 * max(n_w[2], 0)), -4, 4))
+                side = abs(np.dot(d, ref.view.right))
+                if side > 0.6:
+                    wgt *= np.where(edges, 2.0, 0.8)
+                wgt /= wgt.sum()
+                ti = int(rng.choice(len(info), p=wgt))
+                size = rng.uniform(0.9, 1.15) * size_k
+                roll = rng.normal(0, 0.25) + (np.pi if n_w[2] > self.cfg.get("flip_top_nz", 0.4) else 0.0)
+                ok = False
+                for attempt in range(3):
+                    Vc = self._fill_quad(P3, n_w, ti, size, roll)
+                    if self.card_footprint_ok(Vc, ref.fg, foot) >= foot:
+                        ok = True
+                        break
+                    P3 = c + (P3 - c) * 0.8
+                    size *= 0.8
+                if not ok:
+                    continue
+                flip = bool(rng.random() < 0.5)
+                cards.append(dict(kind="fill", P=P3, n=n_w, tile=ti, flip=flip, size=size, roll=roll, c=(u, v),
+                                  t_px=tdep))
+                placed_pts.append(P3)
+                got += 1
+        return cards
+
     def _fill_quad(self, P3, n, ti, size, roll):
         w = self.p.info[ti]["w_m"] * size
         h = self.p.info[ti]["h_m"] * size
@@ -736,6 +829,8 @@ def bark_texture(ref, bark_mesh_orig, path_ids, size=1024, swatch_box=None, wood
     own = path_ids[Tx.tri[yy, xx]]
     wm = ref.wood_cov if wood_mask is None else wood_mask
     ok = wm[vi, ui]
+    facing = np.abs(Tx.nrm[yy, xx] @ ref.view.d)
+    ok &= facing > 0.38          # grazing texels would smear the painted outline -> fill instead
     match = np.zeros(len(ui), bool)
     for dy in (-1, 0, 1):
         for dx in (-1, 0, 1):

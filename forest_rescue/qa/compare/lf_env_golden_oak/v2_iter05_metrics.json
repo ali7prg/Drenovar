@@ -1,0 +1,96 @@
+{
+  "metrics": {
+    "v1_LOD0_painted": {
+      "iou": 0.9492,
+      "colour_err": 0.0649,
+      "ssim": 0.8003,
+      "ref_px": 98612,
+      "render_px": 102025
+    },
+    "v1_LOD0_albedo": {
+      "iou": 0.9492,
+      "colour_err": 0.0498,
+      "ssim": 0.8155,
+      "ref_px": 98612,
+      "render_px": 102025
+    },
+    "v1_LOD1_painted": {
+      "iou": 0.8942,
+      "colour_err": 0.1046,
+      "ssim": 0.5121,
+      "ref_px": 98612,
+      "render_px": 98945
+    },
+    "v1_LOD2_painted": {
+      "iou": 0.757,
+      "colour_err": 0.1404,
+      "ssim": 0.343,
+      "ref_px": 98612,
+      "render_px": 87373
+    }
+  },
+  "lods": {
+    "1": {
+      "LOD0": {
+        "tris": 4022,
+        "fronts": 151,
+        "fills": 150,
+        "limb_min_r": 3.3
+      },
+      "LOD1": {
+        "tris": 1206,
+        "fronts": 90,
+        "fills": 57,
+        "limb_min_r": 4.5
+      },
+      "LOD2": {
+        "tris": 178,
+        "fronts": 33,
+        "fills": 31,
+        "limb_min_r": 99
+      }
+    },
+    "2": {
+      "LOD0": {
+        "tris": 3996,
+        "fronts": 151,
+        "fills": 137,
+        "limb_min_r": 3.3
+      },
+      "LOD1": {
+        "tris": 1216,
+        "fronts": 90,
+        "fills": 62,
+        "limb_min_r": 4.5
+      },
+      "LOD2": {
+        "tris": 172,
+        "fronts": 33,
+        "fills": 28,
+        "limb_min_r": 99
+      }
+    },
+    "3": {
+      "LOD0": {
+        "tris": 3988,
+        "fronts": 151,
+        "fills": 133,
+        "limb_min_r": 3.3
+      },
+      "LOD1": {
+        "tris": 1210,
+        "fronts": 90,
+        "fills": 59,
+        "limb_min_r": 4.5
+      },
+      "LOD2": {
+        "tris": 178,
+        "fronts": 33,
+        "fills": 31,
+        "limb_min_r": 99
+      }
+    }
+  },
+  "atlas_scale": 0.7163929600000001,
+  "patches": 151
+}

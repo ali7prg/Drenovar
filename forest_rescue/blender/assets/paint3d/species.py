@@ -163,7 +163,7 @@ TREES["birch"] = dict(
     variants={1: dict(seed=5, copies=[(120, 0.95), (-120, 0.9)]),
               2: dict(seed=6, mirror=True, copies=[(72, 0.95), (144, 0.9), (-72, 0.95), (-144, 0.9)], no_front=True,
                       cfg=dict(anchor_min_z=4.5, mass_min_dist=1.35, ao_under=0.86, anchor_source="patches"),
-                      lods={0: dict(n_masses=40, clumps_per=18, max_cards=1000, core_cards=0, copy_min_r_px=2.6,
+                      lods={0: dict(n_masses=40, clumps_per=18, max_cards=930, core_cards=0, copy_min_r_px=2.6,
                                     limb_budget=700),
                             1: dict(n_masses=24, clumps_per=10, core_cards=0), 2: dict(n_masses=12, clumps_per=6)}),
               3: dict(seed=8, copies=[(60, 0.9), (130, 0.95), (-60, 0.95), (-130, 0.9)], scale=(0.92, 1.05),

@@ -1,0 +1,105 @@
+{
+  "metrics": {
+    "v1_LOD0_painted": {
+      "iou": 0.9401,
+      "colour_err": 0.0659,
+      "ssim": 0.8181,
+      "ref_px": 51514,
+      "render_px": 51992
+    },
+    "v1_LOD0_albedo": {
+      "iou": 0.9401,
+      "colour_err": 0.0541,
+      "ssim": 0.8337,
+      "ref_px": 51514,
+      "render_px": 51992
+    },
+    "v1_LOD1_painted": {
+      "iou": 0.8625,
+      "colour_err": 0.1157,
+      "ssim": 0.4616,
+      "ref_px": 51514,
+      "render_px": 52049
+    },
+    "v1_LOD2_painted": {
+      "iou": 0.6934,
+      "colour_err": 0.1408,
+      "ssim": 0.3077,
+      "ref_px": 51514,
+      "render_px": 43648
+    },
+    "acceptance": {
+      "top_coverage": 0.8487,
+      "holes_55": {
+        "0": 0.0212,
+        "90": 0.0479,
+        "180": 0.0361,
+        "270": 0.0354
+      }
+    }
+  },
+  "lods": {
+    "1": {
+      "LOD0": {
+        "tris": 3966,
+        "fronts": 168,
+        "fills": 343,
+        "limb_min_r": 1.2
+      },
+      "LOD1": {
+        "tris": 1014,
+        "fronts": 92,
+        "fills": 115,
+        "limb_min_r": 2.85
+      },
+      "LOD2": {
+        "tris": 144,
+        "fronts": 30,
+        "fills": 22,
+        "limb_min_r": 99
+      }
+    },
+    "2": {
+      "LOD0": {
+        "tris": 4052,
+        "fronts": 0,
+        "fills": 590,
+        "limb_min_r": 2.2
+      },
+      "LOD1": {
+        "tris": 1276,
+        "fronts": 0,
+        "fills": 210,
+        "limb_min_r": 2.85
+      },
+      "LOD2": {
+        "tris": 158,
+        "fronts": 0,
+        "fills": 59,
+        "limb_min_r": 99
+      }
+    },
+    "3": {
+      "LOD0": {
+        "tris": 3902,
+        "fronts": 0,
+        "fills": 515,
+        "limb_min_r": 2.2
+      },
+      "LOD1": {
+        "tris": 1208,
+        "fronts": 0,
+        "fills": 176,
+        "limb_min_r": 2.85
+      },
+      "LOD2": {
+        "tris": 154,
+        "fronts": 0,
+        "fills": 57,
+        "limb_min_r": 99
+      }
+    }
+  },
+  "atlas_scale": 0.5132188731375618,
+  "patches": 168
+}

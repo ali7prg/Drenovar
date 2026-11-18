@@ -1,0 +1,69 @@
+{
+  "metrics": {
+    "mixed_v1_front_LOD0": {
+      "view": "reed_fern",
+      "iou": 0.5978,
+      "mean_abs_colour_error": 0.1507,
+      "ref_pixels": 35276,
+      "render_pixels": 23469,
+      "iou_closed_r4": 0.7075
+    }
+  },
+  "tris": {
+    "reed_v1": {
+      "LOD0": {
+        "tris": 398
+      },
+      "LOD1": {
+        "tris": 144
+      },
+      "LOD2": {
+        "tris": 8
+      }
+    },
+    "reed_v2": {
+      "LOD0": {
+        "tris": 398
+      },
+      "LOD1": {
+        "tris": 144
+      },
+      "LOD2": {
+        "tris": 8
+      }
+    },
+    "fern_v1": {
+      "LOD0": {
+        "tris": 104
+      },
+      "LOD1": {
+        "tris": 36
+      },
+      "LOD2": {
+        "tris": 12
+      }
+    },
+    "fern_v2": {
+      "LOD0": {
+        "tris": 104
+      },
+      "LOD1": {
+        "tris": 36
+      },
+      "LOD2": {
+        "tris": 12
+      }
+    },
+    "mixed_v1": {
+      "LOD0": {
+        "tris": 478
+      },
+      "LOD1": {
+        "tris": 172
+      },
+      "LOD2": {
+        "tris": 18
+      }
+    }
+  }
+}

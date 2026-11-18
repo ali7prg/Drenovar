@@ -49,9 +49,9 @@
       "LOD1": 36,
       "LOD2": 12
      },
-     "height_m": 0.26,
-     "canopyRadius_m": 1.0,
-     "footprintRadius_m": 1.0,
+     "height_m": 0.49,
+     "canopyRadius_m": 0.98,
+     "footprintRadius_m": 0.98,
      "materials": {
       "LOD0": [
        "lf_foliage"
@@ -75,9 +75,9 @@
       "LOD1": 36,
       "LOD2": 12
      },
-     "height_m": 0.22,
-     "canopyRadius_m": 0.79,
-     "footprintRadius_m": 0.79,
+     "height_m": 0.39,
+     "canopyRadius_m": 0.76,
+     "footprintRadius_m": 0.76,
      "materials": {
       "LOD0": [
        "lf_foliage"
@@ -212,7 +212,7 @@
      "tris": {
       "LOD0": 2711,
       "LOD1": 968,
-      "LOD2": 171
+      "LOD2": 235
      },
      "height_m": 14.24,
      "canopyRadius_m": 3.62,
@@ -239,7 +239,7 @@
      "tris": {
       "LOD0": 2407,
       "LOD1": 956,
-      "LOD2": 181
+      "LOD2": 245
      },
      "height_m": 16.74,
      "canopyRadius_m": 3.74,
@@ -266,7 +266,7 @@
      "tris": {
       "LOD0": 2143,
       "LOD1": 798,
-      "LOD2": 151
+      "LOD2": 215
      },
      "height_m": 8.74,
      "canopyRadius_m": 3.79,
@@ -293,7 +293,7 @@
      "tris": {
       "LOD0": 2177,
       "LOD1": 886,
-      "LOD2": 171
+      "LOD2": 235
      },
      "height_m": 13.24,
      "canopyRadius_m": 4.55,
@@ -457,7 +457,7 @@
      "tris": {
       "LOD0": 2711,
       "LOD1": 968,
-      "LOD2": 171
+      "LOD2": 235
      },
      "height_m": 14.24,
      "canopyRadius_m": 3.62,
@@ -484,7 +484,7 @@
      "tris": {
       "LOD0": 2407,
       "LOD1": 956,
-      "LOD2": 181
+      "LOD2": 245
      },
      "height_m": 16.74,
      "canopyRadius_m": 3.74,
@@ -511,7 +511,7 @@
      "tris": {
       "LOD0": 2143,
       "LOD1": 798,
-      "LOD2": 151
+      "LOD2": 215
      },
      "height_m": 8.74,
      "canopyRadius_m": 3.79,
@@ -538,7 +538,7 @@
      "tris": {
       "LOD0": 2177,
       "LOD1": 886,
-      "LOD2": 171
+      "LOD2": 235
      },
      "height_m": 13.24,
      "canopyRadius_m": 4.55,
@@ -788,7 +788,7 @@
      "tris": {
       "LOD0": 2711,
       "LOD1": 968,
-      "LOD2": 171
+      "LOD2": 235
      },
      "height_m": 14.24,
      "canopyRadius_m": 3.62,
@@ -815,7 +815,7 @@
      "tris": {
       "LOD0": 2407,
       "LOD1": 956,
-      "LOD2": 181
+      "LOD2": 245
      },
      "height_m": 16.74,
      "canopyRadius_m": 3.74,
@@ -842,7 +842,7 @@
      "tris": {
       "LOD0": 2143,
       "LOD1": 798,
-      "LOD2": 151
+      "LOD2": 215
      },
      "height_m": 8.74,
      "canopyRadius_m": 3.79,
@@ -869,7 +869,7 @@
      "tris": {
       "LOD0": 2177,
       "LOD1": 886,
-      "LOD2": 171
+      "LOD2": 235
      },
      "height_m": 13.24,
      "canopyRadius_m": 4.55,
@@ -997,12 +997,12 @@
       "lf_env_willow_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 3552,
-      "LOD1": 1352,
-      "LOD2": 300
+      "LOD0": 3418,
+      "LOD1": 1444,
+      "LOD2": 278
      },
      "height_m": 10.74,
-     "canopyRadius_m": 9.6,
+     "canopyRadius_m": 9.52,
      "footprintRadius_m": 1.2,
      "materials": {
       "LOD0": [
@@ -1024,12 +1024,12 @@
       "lf_env_willow_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 3461,
-      "LOD1": 1352,
-      "LOD2": 298
+      "LOD0": 3429,
+      "LOD1": 1448,
+      "LOD2": 286
      },
-     "height_m": 8.85,
-     "canopyRadius_m": 8.59,
+     "height_m": 8.91,
+     "canopyRadius_m": 8.78,
      "footprintRadius_m": 1.2,
      "materials": {
       "LOD0": [
@@ -1051,12 +1051,12 @@
       "lf_env_willow_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 2374,
-      "LOD1": 866,
-      "LOD2": 198
+      "LOD0": 2372,
+      "LOD1": 934,
+      "LOD2": 188
      },
-     "height_m": 8.83,
-     "canopyRadius_m": 4.89,
+     "height_m": 8.86,
+     "canopyRadius_m": 4.83,
      "footprintRadius_m": 1.2,
      "materials": {
       "LOD0": [
@@ -1183,10 +1183,10 @@
      "tris": {
       "LOD0": 2536,
       "LOD1": 950,
-      "LOD2": 332
+      "LOD2": 446
      },
-     "height_m": 2.62,
-     "canopyRadius_m": 6.56,
+     "height_m": 3.35,
+     "canopyRadius_m": 6.75,
      "footprintRadius_m": 5.2,
      "materials": {
       "LOD0": [
@@ -1212,9 +1212,9 @@
       "LOD1": 950,
       "LOD2": 250
      },
-     "height_m": 1.61,
-     "canopyRadius_m": 4.62,
-     "footprintRadius_m": 4.62,
+     "height_m": 2.04,
+     "canopyRadius_m": 4.88,
+     "footprintRadius_m": 4.88,
      "materials": {
       "LOD0": [
        "lf_bark_hollow",
@@ -1236,11 +1236,11 @@
      ],
      "tris": {
       "LOD0": 2858,
-      "LOD1": 952,
-      "LOD2": 328
+      "LOD1": 950,
+      "LOD2": 432
      },
-     "height_m": 2.73,
-     "canopyRadius_m": 5.95,
+     "height_m": 3.42,
+     "canopyRadius_m": 6.14,
      "footprintRadius_m": 5.2,
      "materials": {
       "LOD0": [
@@ -1276,11 +1276,11 @@
      "tris": {
       "LOD0": 3040,
       "LOD1": 1070,
-      "LOD2": 574
+      "LOD2": 642
      },
-     "height_m": 5.69,
-     "canopyRadius_m": 5.66,
-     "footprintRadius_m": 5.66,
+     "height_m": 5.86,
+     "canopyRadius_m": 5.64,
+     "footprintRadius_m": 5.64,
      "materials": {
       "LOD0": [
        "lf_rock_limestone",
@@ -1305,9 +1305,9 @@
      "tris": {
       "LOD0": 1644,
       "LOD1": 610,
-      "LOD2": 326
+      "LOD2": 344
      },
-     "height_m": 2.71,
+     "height_m": 2.81,
      "canopyRadius_m": 2.68,
      "footprintRadius_m": 2.68,
      "materials": {
@@ -1334,9 +1334,9 @@
      "tris": {
       "LOD0": 770,
       "LOD1": 284,
-      "LOD2": 132
+      "LOD2": 138
      },
-     "height_m": 1.62,
+     "height_m": 1.7,
      "canopyRadius_m": 1.57,
      "footprintRadius_m": 1.57,
      "materials": {
@@ -1372,13 +1372,13 @@
       "lf_env_bramble_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2260,
-      "LOD1": 520,
-      "LOD2": 164
+      "LOD0": 2520,
+      "LOD1": 580,
+      "LOD2": 176
      },
-     "height_m": 2.08,
-     "canopyRadius_m": 1.85,
-     "footprintRadius_m": 1.85,
+     "height_m": 2.07,
+     "canopyRadius_m": 2.0,
+     "footprintRadius_m": 2.0,
      "materials": {
       "LOD0": [
        "lf_foliage"
@@ -1398,11 +1398,11 @@
       "lf_env_bramble_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 1748,
-      "LOD1": 424,
-      "LOD2": 164
+      "LOD0": 2008,
+      "LOD1": 484,
+      "LOD2": 176
      },
-     "height_m": 1.7,
+     "height_m": 1.81,
      "canopyRadius_m": 1.4,
      "footprintRadius_m": 1.4,
      "materials": {
@@ -1424,13 +1424,13 @@
       "lf_env_bramble_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 1876,
-      "LOD1": 448,
-      "LOD2": 164
+      "LOD0": 2136,
+      "LOD1": 508,
+      "LOD2": 176
      },
-     "height_m": 1.48,
-     "canopyRadius_m": 1.82,
-     "footprintRadius_m": 1.82,
+     "height_m": 1.44,
+     "canopyRadius_m": 1.95,
+     "footprintRadius_m": 1.95,
      "materials": {
       "LOD0": [
        "lf_foliage"
@@ -1517,9 +1517,9 @@
       "LOD1": 36,
       "LOD2": 12
      },
-     "height_m": 0.26,
-     "canopyRadius_m": 1.0,
-     "footprintRadius_m": 1.0,
+     "height_m": 0.49,
+     "canopyRadius_m": 0.98,
+     "footprintRadius_m": 0.98,
      "materials": {
       "LOD0": [
        "lf_foliage"
@@ -1543,9 +1543,9 @@
       "LOD1": 36,
       "LOD2": 12
      },
-     "height_m": 0.22,
-     "canopyRadius_m": 0.79,
-     "footprintRadius_m": 0.79,
+     "height_m": 0.39,
+     "canopyRadius_m": 0.76,
+     "footprintRadius_m": 0.76,
      "materials": {
       "LOD0": [
        "lf_foliage"
@@ -1570,8 +1570,8 @@
       "LOD2": 18
      },
      "height_m": 2.58,
-     "canopyRadius_m": 1.76,
-     "footprintRadius_m": 1.76,
+     "canopyRadius_m": 1.83,
+     "footprintRadius_m": 1.83,
      "materials": {
       "LOD0": [
        "lf_foliage"

@@ -8,9 +8,9 @@
         "lf_env_bramble_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2260,
-        "LOD1": 520,
-        "LOD2": 164
+        "LOD0": 2520,
+        "LOD1": 580,
+        "LOD2": 176
       },
       "display_offset_gltf": [
         0.0,
@@ -28,30 +28,30 @@
           "lf_foliage"
         ]
       },
-      "height_m": 2.08,
-      "footprint_radius_m": 1.85,
+      "height_m": 2.07,
+      "footprint_radius_m": 2.0,
       "bounds_m_blender": [
         [
-          -1.85,
-          -1.68,
-          -0.16
+          -1.95,
+          -1.67,
+          -0.51
         ],
         [
-          1.81,
-          1.65,
-          2.08
+          2.0,
+          1.61,
+          2.07
         ]
       ],
       "wind": true,
       "info": {
         "LOD0": {
-          "tris": 2260
+          "tris": 2520
         },
         "LOD1": {
-          "tris": 520
+          "tris": 580
         },
         "LOD2": {
-          "tris": 164
+          "tris": 176
         }
       }
     },
@@ -62,12 +62,12 @@
         "lf_env_bramble_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 1748,
-        "LOD1": 424,
-        "LOD2": 164
+        "LOD0": 2008,
+        "LOD1": 484,
+        "LOD2": 176
       },
       "display_offset_gltf": [
-        4.652,
+        4.952,
         0.0,
         0.0
       ],
@@ -82,30 +82,30 @@
           "lf_foliage"
         ]
       },
-      "height_m": 1.7,
+      "height_m": 1.81,
       "footprint_radius_m": 1.4,
       "bounds_m_blender": [
         [
-          -1.27,
-          -1.22,
-          -0.47
+          -1.36,
+          -1.26,
+          -0.5
         ],
         [
           1.38,
           1.4,
-          1.7
+          1.81
         ]
       ],
       "wind": true,
       "info": {
         "LOD0": {
-          "tris": 1748
+          "tris": 2008
         },
         "LOD1": {
-          "tris": 424
+          "tris": 484
         },
         "LOD2": {
-          "tris": 164
+          "tris": 176
         }
       }
     },
@@ -116,12 +116,12 @@
         "lf_env_bramble_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 1876,
-        "LOD1": 448,
-        "LOD2": 164
+        "LOD0": 2136,
+        "LOD1": 508,
+        "LOD2": 176
       },
       "display_offset_gltf": [
-        9.303,
+        9.905,
         0.0,
         0.0
       ],
@@ -136,38 +136,38 @@
           "lf_foliage"
         ]
       },
-      "height_m": 1.48,
-      "footprint_radius_m": 1.82,
+      "height_m": 1.44,
+      "footprint_radius_m": 1.95,
       "bounds_m_blender": [
         [
-          -1.82,
-          -1.32,
-          -0.37
+          -1.95,
+          -1.42,
+          -0.62
         ],
         [
-          1.5,
-          1.25,
-          1.48
+          1.56,
+          1.36,
+          1.44
         ]
       ],
       "wind": true,
       "info": {
         "LOD0": {
-          "tris": 1876
+          "tris": 2136
         },
         "LOD1": {
-          "tris": 448
+          "tris": 508
         },
         "LOD2": {
-          "tris": 164
+          "tris": 176
         }
       }
     }
   },
   "tris": {
-    "LOD0": 2260,
-    "LOD1": 520,
-    "LOD2": 164
+    "LOD0": 2520,
+    "LOD1": 580,
+    "LOD2": 176
   },
   "bones": 0,
   "materials": [

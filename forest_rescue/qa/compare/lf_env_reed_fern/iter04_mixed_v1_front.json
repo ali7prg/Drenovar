@@ -1,0 +1,8 @@
+{
+  "view": "reed_fern",
+  "iou": 0.5978,
+  "mean_abs_colour_error": 0.1507,
+  "ref_pixels": 35276,
+  "render_pixels": 23469,
+  "iou_closed_r4": 0.7075
+}

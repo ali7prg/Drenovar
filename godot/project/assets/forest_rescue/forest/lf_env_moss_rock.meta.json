@@ -1,10 +1,10 @@
 {
   "id": "lf_env_moss_rock",
   "generation": "v2: SDF fractured limestone mound (Voronoi cells seeded at the painted art/02 blocks, crack gap 6 cm, rounded edges, rough faces); front row = projected painting, sides = quilted painted limestone, up faces = painted moss; v2/v3 in an art/01 quarry palette copy",
-  "heightM": 5.75,
+  "heightM": 5.73,
   "footprintM": [
-    10.09,
-    6.53
+    9.4,
+    6.52
   ],
   "scaleNote": "real metres from the 1.8 m figure on art/02 (understory without a figure: realistic height, see build script); world layer should respect heightM instead of normalising",
   "variants": {
@@ -15,9 +15,9 @@
         "lf_env_moss_rock_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3732,
-        "LOD1": 1444,
-        "LOD2": 1080
+        "LOD0": 3730,
+        "LOD1": 1164,
+        "LOD2": 234
       },
       "materials": {
         "LOD0": [
@@ -33,18 +33,18 @@
           "lf_foliage"
         ]
       },
-      "height_m": 5.75,
-      "footprint_radius_m": 5.32,
+      "height_m": 5.73,
+      "footprint_radius_m": 4.94,
       "bounds_m_blender": [
         [
-          -4.76,
+          -4.46,
           -3.25,
-          -0.27
+          -0.26
         ],
         [
-          5.32,
+          4.94,
           3.27,
-          5.75
+          5.73
         ]
       ],
       "display_offset_gltf": [
@@ -52,10 +52,10 @@
         0.0,
         0.0
       ],
-      "heightM": 5.75,
+      "heightM": 5.73,
       "footprintM": [
-        10.09,
-        6.53
+        9.4,
+        6.52
       ]
     },
     "v2": {
@@ -65,9 +65,9 @@
         "lf_env_moss_rock_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3600,
+        "LOD0": 3598,
         "LOD1": 1400,
-        "LOD2": 280
+        "LOD2": 224
       },
       "materials": {
         "LOD0": [
@@ -84,28 +84,28 @@
         ]
       },
       "height_m": 2.44,
-      "footprint_radius_m": 2.5,
+      "footprint_radius_m": 2.1,
       "bounds_m_blender": [
         [
-          -2.5,
+          -2.1,
           -1.78,
           -0.27
         ],
         [
-          2.48,
-          1.78,
+          2.1,
+          1.75,
           2.44
         ]
       ],
       "display_offset_gltf": [
-        12.086,
+        11.398,
         0.0,
         0.0
       ],
       "heightM": 2.44,
       "footprintM": [
-        4.98,
-        3.57
+        4.2,
+        3.54
       ]
     },
     "v3": {
@@ -116,8 +116,8 @@
       ],
       "tris": {
         "LOD0": 3600,
-        "LOD1": 1398,
-        "LOD2": 392
+        "LOD1": 1400,
+        "LOD2": 222
       },
       "materials": {
         "LOD0": [
@@ -133,36 +133,36 @@
           "lf_foliage"
         ]
       },
-      "height_m": 1.56,
-      "footprint_radius_m": 4.65,
+      "height_m": 1.55,
+      "footprint_radius_m": 4.25,
       "bounds_m_blender": [
         [
-          -4.65,
+          -4.25,
           -1.91,
           -0.27
         ],
         [
-          4.59,
+          4.25,
           1.91,
-          1.56
+          1.55
         ]
       ],
       "display_offset_gltf": [
-        24.173,
+        22.796,
         0.0,
         0.0
       ],
-      "heightM": 1.56,
+      "heightM": 1.55,
       "footprintM": [
-        9.25,
+        8.5,
         3.82
       ]
     }
   },
   "tris": {
-    "LOD0": 3732,
-    "LOD1": 1444,
-    "LOD2": 1080
+    "LOD0": 3730,
+    "LOD1": 1400,
+    "LOD2": 234
   },
   "bones": 0,
   "materials": [
@@ -203,12 +203,12 @@
       "type": "box",
       "centre": [
         0.0,
-        2.88,
+        2.87,
         0.0
       ],
       "size": [
-        10.08,
-        5.75,
+        9.4,
+        5.73,
         6.52
       ],
       "variant": "v1"
@@ -221,9 +221,9 @@
         0.0
       ],
       "size": [
-        4.98,
+        4.2,
         2.44,
-        3.56
+        3.53
       ],
       "variant": "v2"
     },
@@ -235,8 +235,8 @@
         0.0
       ],
       "size": [
-        9.24,
-        1.56,
+        8.5,
+        1.55,
         3.82
       ],
       "variant": "v3"
@@ -247,29 +247,29 @@
     "v1": {
       "uv_stretch_max": 1.067,
       "uv_stretch_median": 1.067,
-      "components": 280,
-      "kept": 2,
-      "min_dim_kept": 0.236,
-      "painted_front_faces": 1,
-      "moss_faces": 556
+      "components": 8,
+      "kept": 7,
+      "min_dim_kept": 0.849,
+      "painted_front_faces": 284,
+      "moss_faces": 725
     },
     "v2": {
       "uv_stretch_max": 1.067,
       "uv_stretch_median": 1.067,
-      "components": 40,
-      "kept": 1,
-      "min_dim_kept": 3.006,
+      "components": 4,
+      "kept": 4,
+      "min_dim_kept": 0.959,
       "painted_front_faces": 0,
-      "moss_faces": 722
+      "moss_faces": 752
     },
     "v3": {
       "uv_stretch_max": 1.067,
       "uv_stretch_median": 1.067,
-      "components": 15,
-      "kept": 1,
-      "min_dim_kept": 2.031,
+      "components": 6,
+      "kept": 6,
+      "min_dim_kept": 1.187,
       "painted_front_faces": 0,
-      "moss_faces": 954
+      "moss_faces": 776
     }
   }
 }

@@ -29,6 +29,25 @@ def main():
                         extra=dict(export_force_sampling=False, export_optimize_animation_size=False,
                                    export_image_format="AUTO", export_tangents=True))
         print("PREVIEW", out, os.path.getsize(out) // 1024, "KB")
+    # head-only copies (LOD0/LOD1) so the Godot viewer frames the head for eye/halter close-ups
+    import bmesh
+    for lod in (0, 1):
+        src = bpy.data.objects[f"{ASSET}_LOD{lod}"]
+        head = src.copy()
+        head.data = src.data.copy()
+        head.name = f"{ASSET}_head_LOD{lod}"
+        for c in src.users_collection:
+            c.objects.link(head)
+        bm = bmesh.new()
+        bm.from_mesh(head.data)
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.y > -0.88 or v.co.z < 1.25], context="VERTS")
+        bm.to_mesh(head.data)
+        bm.free()
+        out = os.path.join(out_dir, f"{ASSET}_head_LOD{lod}.glb")
+        core.export_glb(out, [arm, head],
+                        extra=dict(export_force_sampling=False, export_optimize_animation_size=False,
+                                   export_image_format="AUTO", export_tangents=True))
+        print("PREVIEW", out, os.path.getsize(out) // 1024, "KB")
 
 
 if __name__ == "__main__":

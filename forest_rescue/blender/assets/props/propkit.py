@@ -1428,6 +1428,14 @@ def export(asset, glb_path, extra_objects=()):
             for tr in obj.animation_data.nla_tracks:
                 tr.mute = False
     objs = list(asset.pivots.values()) + asset.all_meshes() + [m[0] for m in asset.markers.values()] + list(extra_objects)
+    # game GLB must carry the atlas UV as TEXCOORD_0 (Godot ignores texCoord 1): drop the parametric UV layer
+    for o in asset.all_meshes():
+        uvl = o.data.uv_layers
+        if "UVParam" in uvl:
+            uvl.remove(uvl["UVParam"])
+        if "UVMap" in uvl:
+            uvl.active = uvl["UVMap"]
+            uvl["UVMap"].active_render = True
     bpy.context.preferences.edit.use_negative_frames = True
     bpy.context.scene.frame_set(-10)          # outside every NLA strip -> nodes evaluate at rest
     core.export_glb(glb_path, objs, extra={"export_animation_mode": "NLA_TRACKS", "export_optimize_animation_size": False,

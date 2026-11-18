@@ -20,7 +20,7 @@ os.makedirs(CACHE, exist_ok=True)
 HIGH_VOXEL = float(os.environ.get("MAW_VOXEL", "0.016"))
 LOD_TRIS = (48000, 24000, 9000)
 BODY_TRIS_LOD0 = 41500          # body share of LOD0 (rest: teeth, claws, eyes, tongue)
-TEX_MASTER = 4096
+TEX_MASTER = 2048   # 4096 was OOM-killed on the shared 15 GB box
 TEX_RUNTIME = 2048
 
 

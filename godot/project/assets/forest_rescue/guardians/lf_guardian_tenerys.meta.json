@@ -5,9 +5,9 @@
   "source": "forest_rescue/blender/sources/guardians/lf_guardian_tenerys.blend",
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/guardians/build_lf_guardian_tenerys.py",
   "tris": {
-    "LOD0": 16790,
-    "LOD1": 8742,
-    "LOD2": 3202
+    "LOD0": 17525,
+    "LOD1": 9072,
+    "LOD2": 3307
   },
   "bones": 38,
   "bones_used_by_lod": {
@@ -25,9 +25,9 @@
     "orm": "1024 PNG (G=roughness, B=metal=0)"
   },
   "albedo_gain_vs_sheet": [
-    1.041,
-    1.041,
-    1.041
+    1.016,
+    1.016,
+    1.016
   ],
   "bounds_m": {
     "min": [
@@ -37,11 +37,11 @@
     ],
     "max": [
       0.617,
-      2.018,
+      2.033,
       2.038
     ],
     "length_m": 5.028,
-    "height_m": 2.028,
+    "height_m": 2.043,
     "width_m": 1.235
   },
   "coordinate_space": "glTF: +Y up, +Z forward (head), metres; root bone at the origin on the ground",
@@ -89,15 +89,15 @@
         }
       },
       "footSlip_cm_max": {
-        "fore_L": 1.07,
-        "fore_R": 1.4,
+        "fore_L": 8.11,
+        "fore_R": 5.12,
         "hind_L": 0.0,
         "hind_R": 0.0
       },
-      "ikReachError_cm_max": 6.45,
+      "ikReachError_cm_max": 0.0,
       "ground": {
-        "min_z_m": -0.113,
-        "end_min_z_m": -0.105,
+        "min_z_m": -0.03,
+        "end_min_z_m": -0.011,
         "bind_min_z_m": -0.01
       }
     },
@@ -105,34 +105,34 @@
       "seconds": 0.6667,
       "loop": true,
       "frames": 21,
-      "groundSpeed_mps": 5.2,
-      "strideLength_m": 3.467,
-      "duty": 0.29,
+      "groundSpeed_mps": 3.8,
+      "strideLength_m": 2.533,
+      "duty": 0.33,
       "footfalls": {
         "hind_L": {
           "touchdown": 0.0,
-          "liftoff": 0.193
+          "liftoff": 0.22
         },
         "hind_R": {
           "touchdown": 0.06,
-          "liftoff": 0.253
+          "liftoff": 0.28
         },
         "fore_R": {
           "touchdown": 0.28,
-          "liftoff": 0.473
+          "liftoff": 0.5
         },
         "fore_L": {
           "touchdown": 0.34,
-          "liftoff": 0.533
+          "liftoff": 0.56
         }
       },
       "footSlip_cm_max": {
-        "fore_L": 7.0,
-        "fore_R": 6.73,
+        "fore_L": 14.79,
+        "fore_R": 13.15,
         "hind_L": 0.0,
         "hind_R": 0.0
       },
-      "ikReachError_cm_max": 38.36,
+      "ikReachError_cm_max": 6.53,
       "ground": {
         "min_z_m": -0.015,
         "end_min_z_m": -0.006,
@@ -171,8 +171,8 @@
       },
       "ikReachError_cm_max": 60.04,
       "ground": {
-        "min_z_m": -0.014,
-        "end_min_z_m": -0.009,
+        "min_z_m": -0.017,
+        "end_min_z_m": -0.008,
         "bind_min_z_m": -0.01
       }
     },
@@ -186,7 +186,7 @@
         "hind_L": 0.0,
         "hind_R": 0.0
       },
-      "ikReachError_cm_max": 9.59,
+      "ikReachError_cm_max": 0.39,
       "ground": {
         "min_z_m": -0.01,
         "end_min_z_m": -0.01,
@@ -198,12 +198,12 @@
       "loop": false,
       "frames": 61,
       "footSlip_cm_max": {
-        "fore_L": 0.0,
-        "fore_R": 0.0,
+        "fore_L": 0.18,
+        "fore_R": 0.18,
         "hind_L": 0.0,
         "hind_R": 0.0
       },
-      "ikReachError_cm_max": 12.07,
+      "ikReachError_cm_max": 0.8,
       "ground": {
         "min_z_m": -0.011,
         "end_min_z_m": -0.01,
@@ -222,8 +222,8 @@
       },
       "ikReachError_cm_max": 0.0,
       "ground": {
-        "min_z_m": -0.16,
-        "end_min_z_m": -0.136,
+        "min_z_m": -0.042,
+        "end_min_z_m": -0.001,
         "bind_min_z_m": -0.01
       }
     }
@@ -315,9 +315,12 @@
     "lf_guardian_tenerys_LOD1",
     "lf_guardian_tenerys_LOD2"
   ],
+  "lod_usage": "LOD0 visible by default; LOD1/LOD2 are hidden (KHR_node_visibility). Integration: set visible=true and GeometryInstance3D.visibility_range_begin/end per LOD (suggested 0-35 m, 35-80 m, >80 m at strategic zoom).",
   "level_nodes_hidden_by_default": [
     "lf_guardian_tenerys_L2",
-    "lf_guardian_tenerys_L3"
+    "lf_guardian_tenerys_L3",
+    "lf_guardian_tenerys_LOD1",
+    "lf_guardian_tenerys_LOD2"
   ],
   "glb_stats": {
     "meshes": {
@@ -334,22 +337,22 @@
         "hidden": true
       },
       "lf_guardian_tenerys_LOD0": {
-        "tris": 16790,
+        "tris": 17525,
         "joints_used": 37,
         "max_influences": 4,
         "hidden": false
       },
       "lf_guardian_tenerys_LOD1": {
-        "tris": 8742,
+        "tris": 9072,
         "joints_used": 25,
         "max_influences": 4,
-        "hidden": false
+        "hidden": true
       },
       "lf_guardian_tenerys_LOD2": {
-        "tris": 3202,
+        "tris": 3307,
         "joints_used": 16,
         "max_influences": 4,
-        "hidden": false
+        "hidden": true
       }
     },
     "animations": {

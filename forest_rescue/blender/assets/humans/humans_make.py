@@ -70,12 +70,12 @@ def reference_compare(ctx, tag, lod0, extra_objs=()):
 # --------------------------------------------------------------------------- clips
 
 def thigh_flex(M, side):
+    """Thigh flexion/abduction (deg) relative to the pelvis frame (Hips bone: Y up, Z forward, X left)."""
     hips = M["Hips"][:3, :3]
+    up, fwd, lat = hips[:, 1], hips[:, 2], hips[:, 0]
     d = M[f"{side}LowerLeg"][:3, 3] - M[f"{side}UpperLeg"][:3, 3]
     d = d / np.linalg.norm(d)
-    down = -hips[:, 1] if False else -np.array(hips @ np.array([0, 0, 1.0]))
-    fwd = hips @ np.array([0, -1.0, 0])
-    lat = hips @ np.array([1.0, 0, 0])
+    down = -up
     flex = math.degrees(math.atan2(np.dot(d, fwd), np.dot(d, down)))
     abd = math.degrees(math.atan2(np.dot(d, lat) * (1 if side == "Left" else -1), np.dot(d, down)))
     return flex, abd
@@ -217,6 +217,7 @@ def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032,
     hi = [PL.obj_from_piece(p, "hi_" + p.name) for p in ctx.pieces if p.meta.get("sdf") and p.name in ("body", "head")]
     tex = PL.texture_lod0(ctx, lod0, classes, size=tex_size, hi_objs=hi)
     tp = PL.save_textures(asset, tex)
+    core.save_rgba(paths.texture_master("humans", f"{asset}_albedo_preview.png"), tex["albedo_raw"])
     mats, imgs = PL.make_materials(asset, lod0, classes, spec, tp, tex["factors"])
     main, optional = split_optional(ctx, lod0)
     aux = split_optional.aux
@@ -251,7 +252,8 @@ def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032,
     main.name = asset + "_LOD0"
     lods = [main]
     tri0 = core.tri_count(main)
-    for li, keep in ((1, SK.LOD1_KEEP), (2, SK.LOD2_KEEP)):
+    lod2_keep = SK.LOD2_KEEP + (["LeftProp", "RightProp"] if group == "soldier" else [])
+    for li, keep in ((1, SK.LOD1_KEEP), (2, lod2_keep)):
         target = budgets[li] * 0.96
         r = target / max(tri0, 1)
         lod, Wl = RG.make_lod(main, f"{asset}_LOD{li}", r * 0.95, r * 1.05, keep, main["pieces"].split(","))
@@ -262,7 +264,7 @@ def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032,
         nm = o.name
         o.name = nm + "_LOD0"
         opt_lods.append(o)
-        for li, keep in ((1, SK.LOD1_KEEP), (2, SK.LOD2_KEEP)):
+        for li, keep in ((1, SK.LOD1_KEEP), (2, lod2_keep)):
             r = (0.55, 0.25)[li - 1]
             lod, Wl = RG.make_lod(o, f"{nm}_LOD{li}", r, r, keep, o["pieces"].split(","))
             RG.bind(lod, arm, Wl)
@@ -415,6 +417,10 @@ def export_all(asset, ctx, arm, lods, opt_lods, mats, tex, tp, clip_meta, classe
     for o in opt_lods:
         o.hide_render = False
     core.export_glb(glb, objs)
+    qd = os.environ.get("HUMANS_QA_GLB_DIR")
+    if qd:   # LOD0-only copy for clean in-engine screenshots (the viewer draws every LOD at once)
+        core.export_glb(os.path.join(qd, f"{asset}_lod0.glb"),
+                        [arm, lods[0]] + [o for o in opt_lods if o.name.endswith("_LOD0")])
     tris = {f"LOD{i}": core.tri_count(l) for i, l in enumerate(lods)}
     used = {}
     for i, l in enumerate(lods):

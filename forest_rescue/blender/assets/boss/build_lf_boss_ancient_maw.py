@@ -20,7 +20,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 args = sys.argv[1:]
 it = args[args.index("--iter") + 1] if "--iter" in args else "final"
-stages = ["maw_stage_mesh.py --voxel 0.016 --no-lod", "maw_stage_rig.py", "maw_stage_tex.py --size 4096 --ao-samples 24",
+stages = ["maw_stage_mesh.py --voxel 0.016 --no-lod", "maw_stage_rig.py", "maw_stage_tex.py --size 2048 --ao-samples 24",
           "maw_stage_anim.py", "maw_stage_export.py", f"maw_qa.py --iter {it} --what compare,head,keyposes"]
 if "--no-videos" not in args:
     stages.append("maw_stage_videos.py")

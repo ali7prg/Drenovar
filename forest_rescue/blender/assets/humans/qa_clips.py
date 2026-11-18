@@ -38,6 +38,22 @@ def open_master(asset):
     return arm
 
 
+def preview_albedo(asset):
+    """Workbench shows the active image node without the tint factor: swap in the un-normalised
+    preview albedo so videos show the real colours."""
+    pth = paths.texture_master("humans", f"{asset}_albedo_preview.png")
+    if not os.path.exists(pth):
+        return
+    img = bpy.data.images.load(pth, check_existing=True)
+    for m in bpy.data.materials:
+        if not m.use_nodes or not m.name.startswith(asset):
+            continue
+        nt = m.node_tree
+        n = nt.nodes.new("ShaderNodeTexImage")
+        n.image = img
+        nt.nodes.active = n
+
+
 def ground(size=8.0):
     if bpy.data.objects.get("qa_ground"):
         return bpy.data.objects["qa_ground"]
@@ -78,6 +94,7 @@ def clip_camera(kind="side34", h=1.0):
 
 def render_all_clips(asset):
     arm = open_master(asset)
+    preview_albedo(asset)
     ground()
     workbench_textured()
     out = {}

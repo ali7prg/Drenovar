@@ -52,6 +52,8 @@ var dead_guardians: Dictionary = {}
 var arrival_until: Dictionary = {}
 var lod_zoom := -1.0
 var horse_wait_ticks := 0
+var horse_was_walking := false
+var horse_transition_until := 0
 var guardian_alerted: Dictionary = {}
 
 func setup(owner_game: Node) -> void:
@@ -317,7 +319,15 @@ func update_horse(now: float, delta: float) -> void:
 		moving = not sample.arrived
 	var speed := place("horse", actor, target, yaw, delta)
 	var mood := String(horse.get("mood", "calm"))
-	if moving or speed > 0.25:
+	var walking := moving or speed > 0.25
+	# Authored start/stop clips carry the weight shift between standing and walking.
+	if walking != horse_was_walking:
+		horse_was_walking = walking
+		if actor.play(["lf_horse_start"] if walking else ["lf_horse_stop"], 0.15, true):
+			horse_transition_until = Time.get_ticks_msec() + int(1000.0 * actor.clip_length(["lf_horse_start"] if walking else ["lf_horse_stop"]) * 0.85)
+	if Time.get_ticks_msec() < horse_transition_until:
+		pass
+	elif walking:
 		actor.locomote(speed, HORSE_CLIPS)
 		horse_wait_ticks = 0
 	else:

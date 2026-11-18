@@ -114,5 +114,28 @@
    "UVs from a smoothed twin (large islands); cloth shading compression; AO 32 spp; normal bake only from SDF pieces",
    "rounder boot toe box with turned cuff; projection power 5, grazing texels take class colour"
   ]
+ },
+ {
+  "tag": "iter06",
+  "metrics": {
+   "front": {
+    "iou": 0.8942,
+    "colour_error": 0.1121
+   },
+   "back": {
+    "iou": 0.8756,
+    "colour_error": 0.0936
+   }
+  },
+  "differences": [
+   "silhouette improved (IoU .894/.876) but face still looks faceted: normal map baked from all hi pieces (garments caught the rays) -> wrong normals; face spread over many small UV islands",
+   "hair/skull blocky: face protection took 57% of the head vertices"
+  ],
+  "changes_for_next": [
+   "normal bake only from body/head hi meshes, 75% strength",
+   "front-planar UV island for the face (1:1 with portrait projection)",
+   "face protection weight 0.6 -> 0.32",
+   "Workbench preview albedo for clip videos"
+  ]
  }
 ]

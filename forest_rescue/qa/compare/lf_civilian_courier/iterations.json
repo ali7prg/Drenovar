@@ -12,13 +12,18 @@
    }
   },
   "differences": [
-   "head sliced flat by the silhouette hull -> boxy, faceted face; texture smeared",
-   "hands sliced by the hull",
-   "IoU low (0.80): cape/satchel/arm gaps"
+   "head sliced flat by the hull; face texture smeared",
+   "trouser legs ~2-3 cm too thin per side; boots small/narrow",
+   "arms too close to the body and too thin",
+   "cape hem too wide (blue at the hem corners)",
+   "hair volume/bun too small"
   ],
   "changes_for_next": [
-   "head mesh built without hull carving; hands/boots added after the hull; softer hull",
-   "same texture fixes as miller iter05->06"
+   "head mesh without hull carving; hands/boots after the hull; softer hull (2.2 cm)",
+   "thigh/shin radii +15-25%; boot shaft r 0.063/0.065, width 1.08, height 1.15",
+   "shoulders ±0.174, elbows ±0.248, wrists ±0.284; sleeve/forearm/bracer radii +10%",
+   "cape flare 0.14 -> 0.07",
+   "hair shell 16 mm + larger bun"
   ]
  }
 ]

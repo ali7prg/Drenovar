@@ -629,5 +629,6 @@ def group_material(name, imgs, factor):
     nm = nt.nodes.new("ShaderNodeNormalMap")
     nt.links.new(tn.outputs["Color"], nm.inputs["Color"])
     nt.links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
+    nt.nodes.active = ta            # Workbench texture mode shows the albedo
     mat["tint_factor"] = list(factor)
     return mat

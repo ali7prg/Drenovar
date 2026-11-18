@@ -23,9 +23,9 @@ FACE_PAINT = {"lip_tint": (1.06, 0.88, 0.86)}
 
 L = dict(
     crown=1.690, top=1.73, eye=1.600, mouth=1.535, chin=1.500, neck=1.445,
-    shoulder_l=(0.165, 1.395), shoulder_r=(-0.165, 1.395),
-    elbow_l=(0.232, 1.125), elbow_r=(-0.232, 1.125),
-    wrist_l=(0.262, 0.905), wrist_r=(-0.262, 0.905),
+    shoulder_l=(0.174, 1.395), shoulder_r=(-0.174, 1.395),
+    elbow_l=(0.248, 1.125), elbow_r=(-0.248, 1.125),
+    wrist_l=(0.284, 0.905), wrist_r=(-0.284, 0.905),
     hip_l=(0.085, 0.865), hip_r=(-0.085, 0.865),
     knee_l=(0.085, 0.470), knee_r=(-0.088, 0.470),
     ankle_l=(0.098, 0.080), ankle_r=(-0.102, 0.080),
@@ -47,17 +47,17 @@ def body_parts(J, L):
         cls="tunic", disp=K.folds_disp(0.003, (24.0, 9.0), seed=8)))
     for S_, sx in (("Left", 1), ("Right", -1)):
         P += K.shoulders(J, S_, sx, r=(0.058, 0.056, 0.062), cls="tunic", off=0.010)
-        P.append(K.upper_arm(J, S_, [(0.0, 0.054), (0.5, 0.050), (1.0, 0.046)], cls="tunic"))
-        P.append(K.forearm(J, S_, [(0.0, 0.044, 0.042), (0.3, 0.046, 0.042), (0.75, 0.040, 0.036), (1.0, 0.033, 0.028)],
+        P.append(K.upper_arm(J, S_, [(0.0, 0.062), (0.5, 0.057), (1.0, 0.052)], cls="tunic"))
+        P.append(K.forearm(J, S_, [(0.0, 0.050, 0.047), (0.3, 0.052, 0.047), (0.75, 0.045, 0.040), (1.0, 0.035, 0.030)],
                            cls="tunic"))
         # leather bracers over the forearms (wrist to 2/3 up)
-        P.append(H.limb(J[f"{S_}LowerArm"], J[f"{S_}Hand"], [(0.30, 0.050, 0.047), (0.65, 0.046, 0.042),
-                                                           (0.95, 0.040, 0.036)], cls="leather", bone=f"{S_}LowerArm",
+        P.append(H.limb(J[f"{S_}LowerArm"], J[f"{S_}Hand"], [(0.30, 0.056, 0.052), (0.65, 0.051, 0.047),
+                                                           (0.95, 0.043, 0.039)], cls="leather", bone=f"{S_}LowerArm",
                         k=0.004, name=f"bracer_{S_}"))
-        P.append(K.thigh(J, S_, [(0.0, 0.092, 0.098), (0.5, 0.078, 0.082), (1.0, 0.064, 0.066)]))
-        P.append(K.shin(J, S_, [(0.0, 0.064, 0.066), (0.4, 0.060, 0.062), (1.0, 0.046, 0.050)]))
-        P += K.boot(J, S_, sx, L, top_z=0.40, cls="boot", shaft_r=(0.054, 0.056), width=0.98, height=1.05,
-                    shaft_flare=1.12, cuff=0.010, round_toe=1.1)
+        P.append(K.thigh(J, S_, [(0.0, 0.106, 0.110), (0.5, 0.093, 0.096), (1.0, 0.078, 0.080)]))
+        P.append(K.shin(J, S_, [(0.0, 0.077, 0.079), (0.4, 0.071, 0.073), (1.0, 0.058, 0.060)]))
+        P += K.boot(J, S_, sx, L, top_z=0.40, cls="boot", shaft_r=(0.063, 0.065), width=1.08, height=1.15,
+                    shaft_flare=1.12, cuff=0.011, round_toe=1.12)
     return P
 
 
@@ -65,8 +65,8 @@ def head_extras(ctx):
     lm = ctx.lm
     s = lm["scale"]
     reg = G.hair_region(lm, front=0.074, temple_drop=0.20, side=-0.010, back=-0.050, noise=0.003, seed=4)
-    out = [K.hair_shell(ctx, thick=0.011, region=reg, taper=0.004)]
-    out.append(K.bun(ctx, offset=(0.0, 0.150, 0.045), radii=(0.040, 0.034, 0.038)))
+    out = [K.hair_shell(ctx, thick=0.016, region=reg, top_extra=0.004, taper=0.004)]
+    out.append(K.bun(ctx, offset=(0.0, 0.155, 0.050), radii=(0.048, 0.040, 0.046)))
     locks = [[(0.055, 0.010, 0.050), (0.068, 0.020, -0.010), (0.066, 0.030, -0.060)],
              [(-0.055, 0.010, 0.050), (-0.070, 0.022, -0.010), (-0.068, 0.034, -0.070)],
              [(0.020, -0.020, 0.090), (0.045, -0.015, 0.060), (0.058, 0.0, 0.020)]]
@@ -87,7 +87,7 @@ def garments(ctx):
     def region(th, z):
         return np.abs(th) > (0.10 + 0.55 * np.clip((1.405 - z) / 0.25, 0, 1))
     D = C.drape(ctx.body_fn, cxy, (-math.pi, math.pi), lambda th: np.full_like(th, 1.425), hem, nu=48, nv=12,
-                closed=True, clearance=0.018, slack=0.30, flare=0.14, folds=[(12, 0.007, 0.0), (19, 0.003, 0.7)],
+                closed=True, clearance=0.018, slack=0.30, flare=0.07, folds=[(12, 0.007, 0.0), (19, 0.003, 0.7)],
                 ragged=0.004, seed=9, region=region, fit=(ctx.hull_fn, 1.17, 1.38, 0, 0.30), part="cape")
     out.append(G.piece_from_drape("cape", D, "cloak", 0.005, {"type": "cape", "top_z": 1.42, "hem_z": 1.14}, ax))
     # emerald trim band along the hem

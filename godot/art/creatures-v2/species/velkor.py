@@ -137,7 +137,7 @@ def body_core():
           Prim("cone", "Nose", k=0.06, a=(1.68, 2.19, 0), b=(1.97, 2.09, 0), ra=0.100, rb=0.046, name="muzzle"),
           Prim("ellipsoid", "Head", k=0.04, c=(1.80, 2.20, 0), r=(0.18, 0.052, 0.09), R=rot_z(-0.34),
                name="nasal"),
-          Prim("ellipsoid", "Nose", k=0.012, mat="nose", c=(1.996, 2.098, 0), r=(0.040, 0.040, 0.052),
+          Prim("ellipsoid", "Nose", k=0.012, mat="nose", c=(2.004, 2.098, 0), r=(0.050, 0.048, 0.066),
                name="nosepad"),
           Prim("cone", "Jaw", k=0.04, a=(1.60, 2.05, 0), b=(1.92, 2.005, 0), ra=0.09, rb=0.042, name="jaw"),
           Prim("sphere", "Jaw", k=0.03, mat="skin", c=(1.94, 2.005, 0), r=0.044, name="chin")]
@@ -149,8 +149,8 @@ def body_core():
               Prim("cone", "Nose", k=0.03, mat="skin", a=(1.76, 2.035, 0.10 * s), b=(1.93, 2.025, 0.048 * s),
                    ra=0.036, rb=0.025, name=f"lip{nm}"),
               Prim("sphere", "Head", k=0.015, neg=True, c=(1.718, 2.252, 0.124 * s), r=0.038, name=f"socket{nm}")]
-        ec = np.array([1.40, 2.41, 0.19 * s])
-        Re = rot_x(-0.30 * s) @ rot_z(0.14)     # upright, a little outward: the sheets show both ears
+        ec = np.array([1.38, 2.37, 0.21 * s])
+        Re = rot_x(0.95 * s) @ rot_z(0.10)     # upright, a little outward: the sheets show both ears
         P += [Prim("ellipsoid", f"Ear_{nm}", k=0.03, c=ec, r=(0.055, 0.16, 0.085), R=Re, name=f"ear{nm}"),
               Prim("cone", f"Ear_{nm}", k=0.03, a=ec, b=ec + Re @ np.array([0.0, 0.19, 0.0]), ra=0.058, rb=0.012,
                    name=f"eartip{nm}"),
@@ -263,8 +263,10 @@ def antler_prims(s):
         d = np.array([d[0], d[1], d[2] * s], float)
         d /= np.linalg.norm(d)
         fwd = np.array([1.0, 0.0, 0.0])
-        curve = bezier(root, root + d * L * 0.50, root + d * L * 0.95 + fwd * hook * 0.35 + np.array([0, 0, -hin * 0.4 * s]),
-                       root + d * L * 0.92 + fwd * hook + np.array([0, -0.02, -hin * s]), 12)
+        # sickle: the tine leans back off the beam, then sweeps forward and in to the tip (creature-references views)
+        curve = bezier(root, root + d * L * 0.45 - fwd * L * 0.12,
+                       root + d * L * 1.00 + fwd * hook * 0.45 + np.array([0, 0, -hin * 0.6 * s]),
+                       root + d * L * 0.86 + fwd * hook * 1.55 + np.array([0, -0.03, -hin * 1.4 * s]), 12)
         P += chain(list(curve), list(np.linspace(r0, 0.009, len(curve))), bone, k=0.02, mat="antler", name=f"tine{i}")
     rng = np.random.default_rng(11 if s < 0 else 12)
     from common import _frame
@@ -350,14 +352,14 @@ _hang = lambda p, n: np.array([-0.45, -1.0, 0])  # noqa: E731
 _back = lambda p, n: np.array([-1.0, -0.30, 0])  # noqa: E731
 FUR_KEEP = {0: 0.75, 1: 0.45, 2: 0.12}   # shaggy everywhere on the sheet: more cards than the default
 FUR_CARDS = [  # sheet: shaggy grey-brown coat everywhere, long pale chest mane, leg feathering, moss drips
-    {"centre": (1.10, 1.62, 0), "radii": (0.32, 0.45, 0.42), "count": 460, "length": 0.48, "width": 0.13,
+    {"centre": (1.10, 1.62, 0), "radii": (0.32, 0.45, 0.42), "count": 380, "length": 0.42, "width": 0.12,
      "flow": _hang, "lift": 0.15, "gravity": 0.35, "droop": 0.2, "crossed": True, "tip": "#dccbb0",
      "root": "#9c8468", "root_k": 1.0},                                                             # chest mane
     {"centre": (1.20, 2.00, 0), "radii": (0.30, 0.28, 0.38), "count": 120, "length": 0.30, "width": 0.11,
      "flow": lambda p, n: np.array([-1.0, -0.5, 0]), "lift": 0.25, "droop": 0.15, "crossed": True,
      "tip": "#a8927a"},                                                                             # neck ruff
-    {"centre": (0.00, 1.45, 0), "radii": (1.10, 0.40, 0.56), "count": 560, "length": 0.24, "width": 0.10,
-     "flow": _back, "lift": 0.15, "droop": 0.2, "tip": "#b29e86", "root_k": 0.92,
+    {"centre": (0.00, 1.45, 0), "radii": (1.10, 0.40, 0.56), "count": 500, "length": 0.22, "width": 0.09,
+     "flow": _back, "lift": 0.10, "droop": 0.2, "tip": "#b29e86", "root_k": 0.92,
      "segments": {1: 1, 2: 1}},                                                                     # back, flanks
     {"centre": (1.55, 2.18, 0), "radii": (0.34, 0.20, 0.26), "count": 170, "length": 0.10, "width": 0.06,
      "flow": lambda p, n: np.array([-1.0, -0.15, 0]), "lift": 0.18, "droop": 0.05, "tip": "#a3917c",
@@ -366,21 +368,21 @@ FUR_CARDS = [  # sheet: shaggy grey-brown coat everywhere, long pale chest mane,
      "flow": lambda p, n: np.array([-0.3, -1.0, 0]), "lift": 0.05, "gravity": 0.45, "droop": 0.25,
      "crossed": True, "tip": "#a39079"},                                                            # belly fringe
     {"centre": (-1.00, 1.25, 0), "radii": (0.42, 0.44, 0.50), "count": 240, "length": 0.26, "width": 0.09,
-     "flow": lambda p, n: np.array([-0.6, -1.0, 0]), "lift": 0.15, "droop": 0.2, "tip": "#9d8770"},  # haunches
+     "flow": lambda p, n: np.array([-0.6, -1.0, 0]), "lift": 0.10, "droop": 0.2, "tip": "#9d8770"},  # haunches
 ] + [  # leg fur per leg, seeded outside each leg (a midline region roots almost every card on the inner faces)
-    {"centre": (0.96, 0.66, 0.46 * s), "radii": (0.26, 0.60, 0.17), "count": 220, "length": 0.24, "width": 0.10,
-     "flow": lambda p, n: np.array([-0.3, -1.0, 0]), "lift": 0.15, "gravity": 0.2, "droop": 0.1,
-     "crossed": True, "tip": "#a8957f", "root": "#5e4e40", "root_k": 1.0} for s in (1, -1)          # forelegs
+    {"centre": (0.96, 0.66, 0.46 * s), "radii": (0.26, 0.60, 0.17), "count": 160, "length": 0.17, "width": 0.08,
+     "flow": lambda p, n: np.array([-0.3, -1.0, 0]), "lift": 0.06, "gravity": 0.05, "droop": 0.08,
+     "tip": "#a8957f", "root": "#5e4e40", "root_k": 1.0} for s in (1, -1)                           # forelegs
 ] + [
-    {"centre": (-0.95, 0.66, 0.46 * s), "radii": (0.34, 0.58, 0.17), "count": 210, "length": 0.22, "width": 0.10,
-     "flow": lambda p, n: np.array([-0.4, -1.0, 0]), "lift": 0.15, "droop": 0.1, "crossed": True,
+    {"centre": (-0.95, 0.66, 0.46 * s), "radii": (0.34, 0.58, 0.17), "count": 150, "length": 0.16, "width": 0.08,
+     "flow": lambda p, n: np.array([-0.4, -1.0, 0]), "lift": 0.06, "droop": 0.08,
      "tip": "#a08b74", "root": "#5e4e40", "root_k": 1.0} for s in (1, -1)                           # hind legs
 ] + [
-    {"centre": (cx, 0.24, 0.42 * s), "radii": (0.18, 0.14, 0.14), "count": 60, "length": 0.17, "width": 0.08,
-     "flow": lambda p, n: np.array([0.0, -1.0, 0]), "lift": 0.3, "droop": 0.05, "crossed": True,
+    {"centre": (cx, 0.24, 0.42 * s), "radii": (0.18, 0.14, 0.14), "count": 45, "length": 0.12, "width": 0.07,
+     "flow": lambda p, n: np.array([0.0, -1.0, 0]), "lift": 0.2, "droop": 0.05, "crossed": True,
      "tip": "#b5a38d"} for s in (1, -1) for cx in (1.02, -1.02)                                     # fetlock tufts
 ] + [
-    {"centre": (-1.52, 1.24, 0), "radii": (0.24, 0.44, 0.20), "count": 340, "length": 0.50, "width": 0.14,
+    {"centre": (-1.52, 1.24, 0), "radii": (0.24, 0.44, 0.20), "count": 260, "length": 0.46, "width": 0.13,
      "flow": lambda p, n: np.array([-0.3, -1.0, 0]), "lift": 0.25, "droop": 0.2, "crossed": True,
      "tip": "#e2d4be", "root": "#7a6652", "root_k": 1.0},                                                                             # tail brush
     {"centre": (1.55, 2.16, 0), "radii": (0.16, 0.14, 0.22), "count": 50, "length": 0.12, "width": 0.06,

@@ -297,14 +297,14 @@ FUR_CARDS = [  # sheet: long shaggy dark-brown coat with lighter tips, beard und
      "tip": "#9a7052"},                                                                             # belly hem
     {"centre": (0.98, 0.92, 0), "radii": (0.24, 0.24, 0.36), "count": 200, "length": 0.28, "width": 0.09,
      "flow": lambda p, n: np.array([-1.0, -0.5, 0]), "lift": 0.2, "droop": 0.2, "crossed": True,
-     "tip": "#b08666"},                                                                             # neck, beard
+     "tip": "#8e6a4e", "root": "#3e2a1e", "root_k": 1.0},                                          # neck, beard
 ] + [  # leg fur per leg, seeded outside each leg (a midline region roots almost every card on the inner faces)
-    {"centre": (0.55, 0.66, 0.64 * s), "radii": (0.24, 0.36, 0.20), "count": 200, "length": 0.22, "width": 0.10,
-     "flow": lambda p, n: np.array([-0.3, -1.0, 0]), "lift": 0.12, "droop": 0.1, "crossed": True,
+    {"centre": (0.55, 0.66, 0.60 * s), "radii": (0.24, 0.36, 0.20), "count": 200, "length": 0.21, "width": 0.10,
+     "flow": lambda p, n: np.array([-0.3, -1.0, 0]), "lift": 0.07, "droop": 0.1, "crossed": True,
      "tip": "#966c4e"} for s in (1, -1)                                                             # forelegs
 ] + [
-    {"centre": (-1.00, 0.68, 0.62 * s), "radii": (0.30, 0.36, 0.20), "count": 200, "length": 0.22, "width": 0.10,
-     "flow": lambda p, n: np.array([-0.4, -1.0, 0]), "lift": 0.12, "droop": 0.1, "crossed": True,
+    {"centre": (-1.00, 0.68, 0.58 * s), "radii": (0.30, 0.36, 0.20), "count": 200, "length": 0.21, "width": 0.10,
+     "flow": lambda p, n: np.array([-0.4, -1.0, 0]), "lift": 0.07, "droop": 0.1, "crossed": True,
      "tip": "#966c4e"} for s in (1, -1)                                                             # hind legs
 ] + [
     {"centre": (cx, 0.24, 0.58 * s), "radii": (0.18, 0.07, 0.16), "count": 60, "length": 0.11, "width": 0.08,
@@ -413,7 +413,7 @@ def shade_body(ctx):
     col = col * (0.80 + 0.28 * sstep(-1.0, 1.0, h0))[:, None] * (0.80 + 0.32 * (streak * 0.5 + 0.5))[:, None]
     col = col * np.array([1.30, 1.12, 0.98], np.float32)[None, :]   # creature-references coat: warm red-brown
     col = mix(col, lin("#3a2c26"), w["skin"])
-    col = mix(col, lin("#5a4440"), w["snout"])
+    col = mix(col, lin("#3e2c26"), w["snout"])
     rings = 0.5 + 0.5 * np.sin(y * 110.0 + noise.perlin(P * 12, 12) * 2.0)
     hoof = mix(lin("#241c17"), lin("#6e5440"), np.clip(rings * 0.55 + sstep(0.06, 0.0, y) * 0.3, 0, 1))
     hoof = mix(hoof, lin("#9a744c"), sstep(0.80, 0.97, rings) * 0.45)          # bronze growth ridges
@@ -476,8 +476,9 @@ def shade_stone(ctx):
     veins = sstep(0.965, 0.995, 1 - np.abs(noise.perlin(noise.stretch_along(P * 4.0, flow, 3.0), 44)))
     tusk = mix(lin("#e8d8bd"), lin("#9c8466"), sstep(0.035, 0.075, rad))
     tusk = tusk * (0.92 + 0.1 * noise.ridged(noise.stretch_along(P * 50.0, flow, 0.3), 2, 6))[:, None]
-    cracks = sstep(0.86, 0.97, noise.ridged(noise.stretch_along(P * 16.0, flow, 0.10), 2, 63))
-    tusk = mix(tusk, lin("#5e4c3a"), cracks * 0.75)                     # creature-references: cracked segments
+    cracks = sstep(0.76, 0.92, noise.ridged(noise.stretch_along(P * 16.0, flow, 0.10), 2, 63))
+    rings = sstep(0.82, 0.97, 0.5 + 0.5 * np.cos(rad * (2 * np.pi / 0.0125) + noise.perlin(P * 9.0, 64) * 0.8))
+    tusk = mix(tusk, lin("#6b5844"), np.clip(rings * 0.8 + cracks * 0.45, 0, 1))   # creature-references: segments
     col = stone * w["stone"][:, None] + tusk * w["tusk"][:, None] + lin("#1a1210")[None, :] * w["eye"][:, None]
     for s in (-1, 1):
         c = np.array([1.17, 1.19, 0.262 * s], np.float32)

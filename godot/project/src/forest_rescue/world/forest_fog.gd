@@ -14,9 +14,10 @@ const BYTES := 392
 const REVEAL_SECONDS := 2.0
 const LAYERS := [
 	# lift (m), alpha, threshold, drift, edge softness
-	{"name": "FogHaze", "height": 2.6, "lift": 2.0, "alpha": 0.78, "threshold": 0.00, "drift": 0.45, "soft": 0.26},
-	{"name": "FogBank", "height": 8.2, "lift": 6.6, "alpha": 0.80, "threshold": 0.16, "drift": 0.65, "soft": 0.26},
-	{"name": "FogCrest", "height": 13.0, "lift": 11.0, "alpha": 0.72, "threshold": 0.36, "drift": 0.95, "soft": 0.30},
+	# height = shell top above ground in deep fog (canopy ≈ 9–10.5 m); banks rise with depth.
+	{"name": "FogHaze", "height": 9.0, "lift": 0.0, "alpha": 0.80, "threshold": 0.00, "drift": 0.45, "soft": 0.26},
+	{"name": "FogBank", "height": 13.0, "lift": 0.0, "alpha": 0.84, "threshold": 0.10, "drift": 0.65, "soft": 0.26},
+	{"name": "FogCrest", "height": 16.5, "lift": 0.0, "alpha": 0.90, "threshold": 0.22, "drift": 0.95, "soft": 0.30},
 ]
 
 static var _noise_texture: ImageTexture
@@ -60,7 +61,7 @@ func build(height_fn: Callable, light_dir: Vector3) -> void:
 		material.set_shader_parameter("layer", float(i))
 		material.set_shader_parameter("layer_alpha", spec.alpha)
 		material.set_shader_parameter("layer_threshold", spec.threshold)
-		material.set_shader_parameter("layer_lift", spec.lift)
+		material.set_shader_parameter("layer_height", spec.height)
 		material.set_shader_parameter("drift_speed", spec.drift)
 		material.set_shader_parameter("edge_softness", spec.soft)
 		material.set_shader_parameter("light_dir", light_dir.normalized())
@@ -69,7 +70,7 @@ func build(height_fn: Callable, light_dir: Vector3) -> void:
 		var shell := MeshInstance3D.new()
 		shell.name = spec.name
 		shell.mesh = _shell_mesh
-		shell.position.y = spec.height
+		shell.position.y = 0.0
 		shell.material_override = material
 		shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		shell.extra_cull_margin = 16.0
@@ -225,13 +226,41 @@ static func count_bits(bytes: PackedByteArray) -> int:
 	return total
 
 
+## Depth into the fog per cell: chamfer distance (cells) to the nearest clear cell, /6 → 0..1.
+static func fog_depth(bits: PackedByteArray) -> PackedFloat32Array:
+	var d := PackedFloat32Array()
+	d.resize(COLUMNS * ROWS)
+	for row in ROWS:
+		for column in COLUMNS:
+			d[row * COLUMNS + column] = 0.0 if bit(bits, column, row) else 99.0
+	for pass_index in 2:
+		var rows := range(ROWS) if pass_index == 0 else range(ROWS - 1, -1, -1)
+		var columns := range(COLUMNS) if pass_index == 0 else range(COLUMNS - 1, -1, -1)
+		var step := -1 if pass_index == 0 else 1
+		for row in rows:
+			for column in columns:
+				var k: int = row * COLUMNS + column
+				var best := d[k]
+				for o in [Vector2i(step, 0), Vector2i(0, step), Vector2i(step, step), Vector2i(-step, step)]:
+					var c: int = column + o.x
+					var r: int = row + o.y
+					if c >= 0 and r >= 0 and c < COLUMNS and r < ROWS:
+						best = minf(best, d[r * COLUMNS + c] + (1.4142 if o.x != 0 and o.y != 0 else 1.0))
+				d[k] = best
+	for k in d.size():
+		d[k] = clampf(d[k] / 6.0, 0.0, 1.0)
+	return d
+
+
 ## Sets the displayed target. animate=false snaps (reduced motion / first frame).
+## State texel: R previous clear, G target clear, B previous depth, A target depth.
 func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, seconds := REVEAL_SECONDS) -> void:
 	if bits.size() != BYTES:
 		return
 	var previous := target_bits
 	target_bits = bits
 	anchor_bits = anchors if anchors.size() == BYTES else PackedByteArray()
+	var depth := fog_depth(bits)
 	var grows := false
 	for row in ROWS:
 		for column in COLUMNS:
@@ -242,8 +271,12 @@ func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, 
 			# During an unfinished reveal, continue from what is shown now.
 			var shown := state_image.get_pixel(column, row)
 			var start := lerpf(shown.r, shown.g, smoothstep(0.0, 1.0, reveal_t)) if revealing else (1.0 if before else 0.0)
+			var start_depth := lerpf(shown.b, shown.a, smoothstep(0.0, 1.0, reveal_t)) if revealing else shown.a
+			var target_depth := depth[row * COLUMNS + column]
+			if previous.size() != BYTES:
+				start_depth = target_depth
 			state_image.set_pixel(column, row, Color(start if animate else (1.0 if after else 0.0), 1.0 if after else 0.0,
-				1.0 if bit(anchor_bits, column, row) else 0.0, 1.0))
+				start_depth if animate else target_depth, target_depth))
 	state_texture.update(state_image)
 	if animate and grows and not reduced_motion:
 		reveal_seconds = maxf(0.05, seconds)
@@ -261,7 +294,7 @@ func _settle() -> void:
 	for row in ROWS:
 		for column in COLUMNS:
 			var p := state_image.get_pixel(column, row)
-			state_image.set_pixel(column, row, Color(p.g, p.g, p.b, 1.0))
+			state_image.set_pixel(column, row, Color(p.g, p.g, p.a, p.a))
 	state_texture.update(state_image)
 
 

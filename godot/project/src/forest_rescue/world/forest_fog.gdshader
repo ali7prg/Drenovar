@@ -3,8 +3,9 @@ render_mode unshaded, blend_mix, depth_draw_never, cull_back, shadows_disabled, 
 
 // «Лес потерянных» exploration fog (lf_vfx_fog). Terrain-following shells, no particles,
 // no raymarch. State texture (56×56, 4 m cells over [-112,112)²):
-//   R = previous clear mask, G = target clear mask (server projection), B = anchor (town /
-//   property, never dimmed). The reveal (lf_fog_reveal, ~2 s) blends R→G per pixel with a
+//   R = previous clear mask, G = target clear mask (server projection), B/A = previous/target
+//   depth into the fog (distance to the nearest clear cell, 0..24 m → 0..1): banks are thin
+//   and low next to clear ground (town stays readable) and rise above the canopy deeper in. The reveal (lf_fog_reveal, ~2 s) blends R→G per pixel with a
 //   noise delay so cleared fog rolls away in billows; the edge is warped by drifting noise
 //   (wisps). Outside the atlas the forest is always fogged.
 
@@ -15,7 +16,7 @@ uniform vec4 domain = vec4(-112.0, -112.0, 224.0, 224.0);
 uniform float layer = 0.0;               // 0 haze, 1 bank, 2 crest
 uniform float layer_alpha = 0.9;
 uniform float layer_threshold = 0.0;     // higher layers need deeper fog
-uniform float layer_lift = 4.0;          // metres the shell rises above the ground in deep fog
+uniform float layer_height = 12.0;       // shell height above ground in deep fog
 uniform float drift_speed = 0.6;
 uniform vec2 wind = vec2(0.83, 0.56);
 uniform float reveal_t = 1.0;
@@ -24,10 +25,10 @@ uniform float dim_strength = 0.0;        // explored but not in current sight
 uniform vec4 sights[8];
 uniform int sight_count = 0;
 uniform vec3 light_dir = vec3(0.45, 0.74, 0.5);
-uniform vec3 lit_color : source_color = vec3(0.70, 0.75, 0.81);
-uniform vec3 shade_color : source_color = vec3(0.31, 0.37, 0.46);
-uniform vec3 haze_color : source_color = vec3(0.47, 0.54, 0.62);
-uniform vec3 warm_rim : source_color = vec3(0.92, 0.86, 0.76);
+uniform vec3 lit_color : source_color = vec3(0.788, 0.824, 0.839);    // #c9d2d6 highlights
+uniform vec3 shade_color : source_color = vec3(0.373, 0.435, 0.478);  // #5f6f7a valleys
+uniform vec3 haze_color : source_color = vec3(0.561, 0.627, 0.671);   // #8fa0ab body
+uniform vec3 warm_rim : source_color = vec3(0.90, 0.87, 0.80);
 uniform float edge_softness = 0.16;
 uniform bool soft_depth = true;
 uniform float soft_distance = 2.5;
@@ -80,14 +81,19 @@ float clear_at(vec2 p, float delay_noise) {
 	return mix(s.r, s.g, local_t) * inside_domain(p);
 }
 
+varying float vertex_depth;
+
 void vertex() {
 	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec4 s = state_bicubic((world.xz - domain.xy) / domain.zw);
-	float clear = mix(s.r, s.g, reveal_t) * inside_domain(world.xz);
+	float inside = inside_domain(world.xz);
+	float clear = mix(s.r, s.g, reveal_t) * inside;
 	vertex_fog = 1.0 - clear;
-	// Shells dip to the ground at the bank edge and swell in deep fog → rolling bank profile.
-	float swell = smoothstep(0.05, 0.85, vertex_fog);
-	world.y += layer_lift * (swell - 1.0) + reveal_curl * (1.0 - swell) * 1.5;
+	vertex_depth = mix(mix(s.b, s.a, reveal_t), 1.0, 1.0 - inside);
+	// Banks hug the ground at the clear edge and rise above the canopy deeper in the fog.
+	float swell = smoothstep(0.0, 0.85, vertex_fog) * (0.22 + 0.78 * smoothstep(0.0, 1.0, vertex_depth));
+	float billow = texture(noise_tex, world.xz / 47.0 + vec2(0.37 * layer, 0.11)).r;
+	world.y += layer_height * swell * (0.85 + 0.3 * billow) + reveal_curl * (1.0 - swell) * 2.0;
 	VERTEX = (inverse(MODEL_MATRIX) * vec4(world, 1.0)).xyz;
 }
 
@@ -106,7 +112,7 @@ void fragment() {
 	float clear = clear_at(p + edge_warp, delay);
 	float fog = 1.0 - clear;
 	float billow = big * 0.66 + mid * 0.27 + fine * 0.07;
-	float body = fog * (0.66 + 0.62 * billow) - layer_threshold;
+	float body = fog * (0.62 + 0.62 * billow) * (0.55 + 0.45 * smoothstep(0.0, 0.5, vertex_depth)) - layer_threshold;
 	float alpha = smoothstep(0.0, edge_softness, body) * layer_alpha;
 	// Lighting from the noise height field (cheap normal) + bank slope.
 	float hx = texture(noise_tex, (p + vec2(1.2, 0.0) + warp + drift) / 47.0 + vec2(0.37 * layer, 0.11)).r - big;
@@ -130,7 +136,8 @@ void fragment() {
 			vec4 q = sights[i];
 			sight = max(sight, (1.0 - smoothstep(q.z * 0.75, q.z, distance(p, q.xy))) * q.w);
 		}
-		float veil = dim_strength * clear * (1.0 - s.b) * (1.0 - sight) * (0.75 + 0.5 * billow);
+		float town = step(max(abs(p.x), abs(p.y)), 56.0);
+		float veil = dim_strength * clear * (1.0 - town) * (1.0 - sight) * (0.75 + 0.5 * billow);
 		alpha = max(alpha, veil);
 		color = mix(color, haze_color, veil);
 	}

@@ -92,6 +92,18 @@ LODS_PINE = {
             front_extra=0.0, max_cards=105, core_cards=0),
 }
 
+LODS_WHORL = {
+    0: dict(trunk_step_m=0.4, trunk_sides=10, limb_step_m=0.3, limb_sides=4, limb_min_r_px=1.4, limb_budget=160,
+            copies=False, front_frac=1.0, front_scale=1.0, density=1.0, width_k=1.0, keep_every=1, max_cards=None,
+            inner=True),
+    1: dict(trunk_step_m=0.9, trunk_sides=6, limb_step_m=0.6, limb_sides=3, limb_min_r_px=3.0, limb_budget=0,
+            copies=False, front_frac=0.5, front_scale=1.15, density=0.6, width_k=1.35, keep_every=1, max_cards=None,
+            inner=True),
+    2: dict(trunk_step_m=2.5, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
+            copies=False, front_frac=0.15, front_scale=1.5, density=0.32, width_k=1.7, keep_every=2, max_cards=40,
+            inner=False),
+}
+
 LODS_BIRCH = {
     0: dict(trunk_step_m=0.35, trunk_sides=10, limb_step_m=0.25, limb_sides=5, limb_min_r_px=1.2, limb_budget=900,
             copies=True, copy_min_r_px=1.8, front_frac=1.0, front_scale=1.0, n_masses=26, clumps_per=20,
@@ -112,7 +124,7 @@ TREES["dark_pine"] = dict(
              tier_mass_px=24, mass_zscale=0.32, ao_under=0.8, front_extra_eta=0.95, core_eta_max=0.9),
     n_patches=130, min_px=40, region="dark_pine", bark="pine", swatch=(356, 798, 612, 984), paintedLightMix=0.3,
     paintedLightMixByMaterial={"lf_foliage_vol": 0.5},
-    height_hint=14.0, crown_hint=3.4, lods=LODS_PINE, crown_mode="mass", placement="tiers", mass_r=0.3,
+    height_hint=14.0, crown_hint=3.4, lods=LODS_WHORL, crown_mode="whorls",
     tint_note="art/02 palette (dark blue-green spruce); world tint as forest_world.gd conifers is fine",
     variants={1: dict(seed=5, copies=[]), 2: dict(seed=6, mirror=True, copies=[]),
               3: dict(seed=8, copies=[], scale=(0.88, 1.08)), 4: dict(seed=9, mirror=True, copies=[], scale=(1.06, 0.9))},
@@ -124,13 +136,14 @@ TREES["dark_pine"] = dict(
 TREES["birch"] = dict(
     cfg=dict(name="birch", box=(628, 28, 880, 445), exclude=[(805, 355, 845, 432)], clip_row=410, ground_row=427,
              fork_row=250, wood=dict(mode="hue", hue_max=80, Lmax=95, white=(62, 26)), keep_x=(630, 866), trunk_close=2,
-             float_min_r=1.6, crown_kd=0.85, front_bias=0.45, trunk_kd=0.95, seed=13, root_zone=20, root_k=0.7,
+             float_min_r=1.6, crown_kd=0.85, front_bias=0.45, trunk_kd=0.95, seed=13, root_zone=0, ground_limbs=True,
+             ground_limb_min_r=2.5,
              lum_pref=3.0, front_tilt_max=30, top_part=0.65, obl_part=0.8, vol_material=True, mass_zscale=0.7,
              ao_under=0.82, front_extra_eta=0.6, core_eta_max=0.5),
     n_patches=140, min_px=35, region="birch", bark="birch", swatch=(650, 798, 844, 984), paintedLightMix=0.3,
     paintedLightMixByMaterial={"lf_foliage_vol": 0.5},
-    height_hint=13.0, crown_hint=4.4, lods=LODS_BIRCH, crown_mode="mass", placement="anchors", mass_r=0.17,
-    anchor_min_r=1.3,
+    height_hint=13.0, crown_hint=4.4, lods=LODS_BIRCH, crown_mode="mass", placement="anchors", mass_r=0.15,
+    anchor_min_r=1.3, anchor_step_m=0.9, anchor_min_z=3.5,
     tint_note="art/02 palette (yellow-green); world birch tint deepens green",
     variants={1: dict(seed=5, copies=[(120, 0.95), (-120, 0.9)]),
               2: dict(seed=6, mirror=True, copies=[(100, 0.9), (-140, 0.95)]),

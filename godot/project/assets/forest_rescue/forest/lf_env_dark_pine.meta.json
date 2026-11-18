@@ -9,9 +9,9 @@
         "lf_env_dark_pine_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2042,
-        "LOD1": 704,
-        "LOD2": 214
+        "LOD0": 1636,
+        "LOD1": 574,
+        "LOD2": 142
       },
       "materials": {
         "LOD0": [
@@ -31,16 +31,16 @@
         ]
       },
       "height_m": 14.17,
-      "crown_radius_m": 4.0,
+      "crown_radius_m": 3.78,
       "bounds_m_blender": [
         [
-          -3.79,
+          -3.78,
           -3.1,
           -0.3
         ],
         [
-          3.45,
-          4.0,
+          3.44,
+          3.6,
           14.17
         ]
       ],
@@ -60,9 +60,9 @@
         "lf_env_dark_pine_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 2046,
-        "LOD1": 712,
-        "LOD2": 210
+        "LOD0": 1642,
+        "LOD1": 598,
+        "LOD2": 142
       },
       "materials": {
         "LOD0": [
@@ -82,21 +82,21 @@
         ]
       },
       "height_m": 14.17,
-      "crown_radius_m": 3.93,
+      "crown_radius_m": 3.68,
       "bounds_m_blender": [
         [
           -3.44,
-          -2.91,
+          -3.02,
           -0.3
         ],
         [
           3.68,
-          3.93,
+          3.67,
           14.17
         ]
       ],
       "display_offset_gltf": [
-        10.191,
+        9.541,
         0.0,
         0.0
       ],
@@ -112,9 +112,9 @@
         "lf_env_dark_pine_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 2044,
-        "LOD1": 724,
-        "LOD2": 216
+        "LOD0": 1648,
+        "LOD1": 604,
+        "LOD2": 148
       },
       "materials": {
         "LOD0": [
@@ -134,21 +134,21 @@
         ]
       },
       "height_m": 15.3,
-      "crown_radius_m": 3.66,
+      "crown_radius_m": 3.24,
       "bounds_m_blender": [
         [
-          -3.42,
+          -3.24,
           -2.62,
           -0.32
         ],
         [
-          3.06,
-          3.66,
+          3.02,
+          3.21,
           15.3
         ]
       ],
       "display_offset_gltf": [
-        20.382,
+        19.082,
         0.0,
         0.0
       ],
@@ -167,9 +167,9 @@
         "lf_env_dark_pine_v4_LOD2"
       ],
       "tris": {
-        "LOD0": 2010,
-        "LOD1": 706,
-        "LOD2": 196
+        "LOD0": 1678,
+        "LOD1": 588,
+        "LOD2": 142
       },
       "materials": {
         "LOD0": [
@@ -189,7 +189,7 @@
         ]
       },
       "height_m": 12.75,
-      "crown_radius_m": 4.98,
+      "crown_radius_m": 3.9,
       "bounds_m_blender": [
         [
           -3.64,
@@ -197,13 +197,13 @@
           -0.27
         ],
         [
-          4.26,
-          4.98,
+          3.9,
+          3.79,
           12.75
         ]
       ],
       "display_offset_gltf": [
-        30.573,
+        28.623,
         0.0,
         0.0
       ],
@@ -218,9 +218,9 @@
     }
   },
   "tris": {
-    "LOD0": 2046,
-    "LOD1": 724,
-    "LOD2": 216
+    "LOD0": 1678,
+    "LOD1": 604,
+    "LOD2": 148
   },
   "bones": 0,
   "materials": [

@@ -292,6 +292,57 @@ class Patches:
     def preview(self, path):
         seg.save(path, seg.label_preview(self.lbl, self.ref.img, 0.45))
 
+    def add_fronds(self, max_tiers=12, min_gap_m=0.45, scale=2):
+        """Side-view tier fronds cut from the painted conifer: band between consecutive tier tips, from the trunk
+        axis to the silhouette edge, per side. Appended as extra tiles (kind 'frond')."""
+        ref = self.ref
+        fg = ref.fg & ~ref.trunk_band
+        v0, v1 = ref.crown_rows
+        fr = []
+        for side in (-1, 1):
+            Rs = np.zeros(ref.H)
+            for v in range(v0, v1 + 1):
+                ax = ref.axis_at(v)
+                ax = ref.axis_x[0] if ax is None else ax
+                cols = np.nonzero(ref.fg[v])[0]
+                c = cols[cols > ax] - ax if side > 0 else ax - cols[cols < ax]
+                Rs[v] = c.max() if len(c) else 0
+            Rsm = ndi.gaussian_filter1d(Rs, 2.0)
+            from scipy.signal import find_peaks
+            pk, _ = find_peaks(Rsm[v0:v1 + 1], distance=max(3, int(min_gap_m * ref.ppm)), prominence=1.5)
+            pk = pk + v0
+            prev = v0
+            for vt in pk:
+                b0, b1 = int(prev), int(min(ref.clip - 1, vt + 4))
+                if b1 - b0 < 6:
+                    prev = vt
+                    continue
+                ax = ref.axis_at(vt)
+                ax = ref.axis_x[0] if ax is None else ax
+                m = np.zeros_like(fg)
+                m[b0:b1] = fg[b0:b1]
+                xx = np.arange(ref.W)
+                m &= (xx[None, :] > ax - 2) if side > 0 else (xx[None, :] < ax + 2)
+                if m.sum() < 60:
+                    prev = vt
+                    continue
+                fr.append(dict(mask=m, side=side, v_tip=float(vt), R_px=float(Rs[int(vt)]), band=(b0, b1), ax=float(ax)))
+                prev = vt - int(0.25 * (vt - prev))
+        self.fronds = []
+        fr = [f for f in fr if (f["v_tip"] - v0) / max(v1 - v0, 1) < self.ref.cfg.get("frond_eta_max", 0.93)]
+        for f in fr:
+            tile, rect = seg.make_tile(ref.img, ref.fg, f["mask"], margin=1, scale=scale, bg=ref.bg)
+            x0, y0, x1, y1 = rect
+            eta = (f["v_tip"] - v0) / max(v1 - v0, 1)
+            self.tiles.append(tile)
+            self.rects.append(rect)
+            self.info.append(dict(c=((x0 + x1) / 2, (y0 + y1) / 2), area=int(f["mask"].sum()), rho=float(f["side"]),
+                                  eta=float(eta), lum=60.0, top_lum=60.0, edge=True, w_m=(x1 - x0) / ref.ppm,
+                                  h_m=(y1 - y0) / ref.ppm, frond=True, side=f["side"], R_m=f["R_px"] / ref.ppm,
+                                  ax_frac=float(np.clip((f["ax"] - x0) / max(x1 - x0, 1), 0, 1))))
+            self.fronds.append(len(self.tiles) - 1)
+        return len(self.fronds)
+
     def add_hires(self, key, sheet, box, target_mask=None, rosette_px=800, m_per_px=None, l_shift=4.0, hue=(70, 100),
                   n_composite=14):
         """Append colour-matched hi-res clump tiles from another painting (top/oblique card sources)."""
@@ -401,6 +452,12 @@ class TreeBuilder:
             Pw = geom.world_at_y(ref.view, Ps[:, 0], Ps[:, 1], y)
             # taper: radius never grows toward the tip
             rr = np.minimum.accumulate(np.maximum(rs, 0.8)) / ref.ppm
+            if cfg.get("ground_limbs") and Ps[0, 1] >= ref.clip - 8 and rs[0] >= cfg.get("ground_limb_min_r", 3.0):
+                # a stem (e.g. birch side trunk) cut by the clip row: continue it vertically into the ground
+                q = Pw[0].copy()
+                q[2] = -0.3
+                Pw = np.vstack([q[None], Pw])
+                rr = np.r_[rr[0] * 1.05, rr]
             ypos[li] = (y0, float(y[-1]))
             slopes[li] = slope
             paths.append(dict(P=Pw, r=rr, kind="limb", id=li + 1, parent=par, level=l["level"],
@@ -1054,6 +1111,92 @@ class TreeBuilder:
                 0.85, None)
         return cards
 
+    def whorl_cards(self, front_dm, seed=5, density=1.0, droop=(14, 30), keep_every=1, max_cards=None, inner=True,
+                    foot=0.86, width_k=1.0, len_k=1.0):
+        """Conifer: drooping radial frond cards per whorl (tier), textured with painted side-view tier fronds.
+        Frond cards facing the reference camera are shortened so the painted front layer stays in front."""
+        ref, p = self.ref, self.p
+        rng = np.random.default_rng(seed)
+        cfg = self.cfg
+        info = p.info
+        fronds = [i for i, q in enumerate(info) if q.get("frond")]
+        if not fronds:
+            return []
+        Z = np.array([0, 0, 1.0])
+        tips = sorted(set(round(info[i]["eta"], 2) for i in fronds))
+        cards = []
+        v0, v1 = ref.crown_rows
+        etas = np.array([info[i]["eta"] for i in fronds])
+        # whorls: every painted tier tip (both sides merged) + an extra interleaved whorl between tips
+        wh = sorted(set([float(e) for e in etas]))
+        merged = []
+        for e in wh:
+            if not merged or e - merged[-1] > 0.035:
+                merged.append(e)
+        extra = [(a + b) / 2 for a, b in zip(merged[:-1], merged[1:])] if cfg.get("interleave", True) else []
+        whorls = sorted(merged + extra)[::keep_every]
+        for wi, eta in enumerate(whorls):
+            v = v0 + eta * (v1 - v0)
+            vi = int(np.clip(round(v), 0, ref.H - 1))
+            ax = ref.axis_at(v)
+            ax = ref.axis_x[0] if ax is None else ax
+            Rpx = float(ref.R[vi])
+            # trunk point of this whorl (world, on the axis plane y=0) and frond length
+            base = geom.world_at_y(ref.view, np.array([ax]), np.array([v - 0.35 * Rpx * np.tan(np.radians(22))]),
+                                   np.array([0.0]))[0]
+            j = fronds[int(np.argmin(np.abs(etas - eta)))]
+            L = max(0.35, info[j]["R_m"] if abs(info[j]["eta"] - eta) < 0.06 else Rpx / ref.ppm) * len_k
+            Hm = info[j]["h_m"]
+            m = int(np.clip(round(2 * np.pi * 0.75 * L / max(0.55 * Hm * width_k, 0.3) * density), 4, 18))
+            off = rng.uniform(0, 2 * np.pi)
+            for k in range(m):
+                phi = off + 2 * np.pi * k / m + rng.normal(0, 0.12)
+                dirr = np.array([np.cos(phi), np.sin(phi), 0.0])
+                toward_cam = -np.dot(dirr, ref.view.d) / np.linalg.norm(ref.view.d[:2])
+                Lk = L * rng.uniform(0.88, 1.05) * (0.72 if toward_cam > 0.55 else 1.0)
+                cand = [i for i in fronds if abs(info[i]["eta"] - eta) < 0.09] or [j]
+                ti = int(rng.choice(cand))
+                dr = np.radians(rng.uniform(*droop))
+                s = np.linspace(0, 1, 4)
+                P = base[None] + (Lk * s)[:, None] * dirr[None] - Z[None] * (Lk * np.tan(dr) * s ** 1.6)[:, None]
+                P[:, 2] += rng.normal(0, 0.05)
+                tang = nrm(np.gradient(P, axis=0))
+                sidev = nrm(np.cross(Z, dirr))
+                nn = nrm(np.cross(tang, sidev))
+                nn[nn[:, 2] < 0] *= -1
+                wk = info[ti]["h_m"] * width_k * rng.uniform(0.9, 1.1)
+                widths = wk * np.array([0.55, 0.85, 1.0, 0.9])
+                # footprint / depth test on the card outline
+                Lv = P - sidev * widths[:, None] / 2
+                Rv = P + sidev * widths[:, None] / 2
+                quad = np.vstack([Lv[0], Lv[-1], Rv[-1], Rv[0]])
+                if self.card_footprint_ok(quad, ref.fg, foot, front_dm, margin_m=0.1) < foot:
+                    Lk *= 0.8
+                    P = base[None] + (Lk * s)[:, None] * dirr[None] - Z[None] * (Lk * np.tan(dr) * s ** 1.6)[:, None]
+                    Lv = P - sidev * widths[:, None] / 2
+                    Rv = P + sidev * widths[:, None] / 2
+                    quad = np.vstack([Lv[0], Lv[-1], Rv[-1], Rv[0]])
+                    if self.card_footprint_ok(quad, ref.fg, foot, front_dm, margin_m=0.1) < foot:
+                        continue
+                ao = 1.0 if eta < 0.5 else 0.94
+                cards.append(dict(kind="frond", P=P, widths=widths, n=nn, side=sidev, tile=ti, ao=ao,
+                                  flipv=bool(rng.random() < 0.5)))
+                if max_cards and len(cards) >= max_cards:
+                    return cards
+            # inner dark disk (blocks see-through between fronds): 2 crossed horizontal cards of an under tile
+            if inner and L > 0.8:
+                under = [i for i, q in enumerate(info) if not q.get("frond") and not q.get("hires")]
+                lums = np.array([info[i]["lum"] for i in under])
+                ti = under[int(np.argmin(np.abs(lums - np.percentile(lums, 25))))]
+                for a in (0.0, np.pi / 2):
+                    c0 = base - Z * 0.25 * L * np.tan(np.radians(22))
+                    n0 = nrm(Z + rng.normal(0, 0.05, 3))
+                    sz = 1.1 * L / max(info[ti]["w_m"], 1e-3)
+                    Vq = self._fill_quad(c0, n0, ti, sz, a)
+                    if self.card_footprint_ok(Vq, ref.fg, foot, front_dm, margin_m=0.1) >= foot:
+                        cards.append(dict(kind="fill", P=c0, n=n0, tile=ti, flip=False, size=sz, roll=a, ao=0.8))
+        return cards
+
     def _fill_quad(self, P3, n, ti, size, roll, hfrac=1.0):
         w = self.p.info[ti]["w_m"] * size
         h = self.p.info[ti]["h_m"] * size * hfrac
@@ -1108,6 +1251,41 @@ class TreeBuilder:
         for c in cards:
             ti = c["tile"]
             uvr = p.uv[ti]
+            if c["kind"] == "frond":
+                P_, wv, nn, sv = c["P"], c["widths"], c["n"], c["side"]
+                kq = len(P_)
+                Vf = np.empty((2 * kq, 3))
+                Vf[0::2] = P_ - sv * wv[:, None] / 2
+                Vf[1::2] = P_ + sv * wv[:, None] / 2
+                u0_, v0_, u1_, v1_ = uvr
+                inf = p.info[ti]
+                axf = inf.get("ax_frac", 0.0)
+                s_ = np.linspace(0, 1, kq)
+                # along the frond = tile x from the trunk axis to the tip (mirrored for left-side tiles)
+                if inf.get("side", 1) > 0:
+                    us = u0_ + (u1_ - u0_) * (axf + (1 - axf) * s_)
+                else:
+                    us = u1_ - (u1_ - u0_) * ((1 - axf) + axf * s_ - (1 - axf)) if False else \
+                        u0_ + (u1_ - u0_) * (axf - axf * s_)
+                va, vb = (v0_, v1_) if not c.get("flipv") else (v1_, v0_)
+                UVf = np.empty((2 * kq, 2))
+                UVf[0::2, 0] = us
+                UVf[1::2, 0] = us
+                UVf[0::2, 1] = va
+                UVf[1::2, 1] = vb
+                Tf = []
+                for i in range(kq - 1):
+                    a_, b_, c_, d_ = 2 * i, 2 * i + 1, 2 * i + 3, 2 * i + 2
+                    Tf += [[a_, b_, c_], [a_, c_, d_]]
+                Nf = np.repeat(nn, 2, axis=0)
+                Nf = nrm(Nf * 0.7 + nrm(Vf - crown_c) * 0.3)
+                rr_ = np.linalg.norm(Vf[:, :2] - Vf[:1, :2], axis=1)
+                fl = 0.3 + 0.7 * rr_ / max(rr_.max(), 1e-6)
+                sector = (np.arctan2(P_[-1, 1], P_[-1, 0]) / (2 * np.pi) + 0.5)
+                ph = (np.floor(sector * 7) / 7 + 0.37 * np.floor(P_[0, 2] / 2.5)) % 1.0
+                Cf = wind_rgba(Vf, H, Rc, "leaf", ph, c.get("ao", 1.0), flutter=fl)
+                leaf.add(Vf, np.array(Tf), UVf, Cf, Nf, MAT_LEAF_VOL if self.cfg.get("vol_material") else MAT_LEAF)
+                continue
             if c["kind"] == "front":
                 V, T, UV, _, N = geom.front_card(ref.view, c["rect"], c["c"], c["t_px"] / ref.ppm, c["n"], uvr,
                                                  np.zeros(4), flip=False)

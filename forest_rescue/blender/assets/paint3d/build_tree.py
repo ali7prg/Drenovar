@@ -112,10 +112,19 @@ def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
         keep = set(range(n)) - drop
     fronts = B.front_cards(scale=L["front_scale"], keep=keep, seed=vs["seed"])
     dm = B.front_depth_map(front_all)
-    if sp.get("crown_mode") == "mass":
+    if sp.get("crown_mode") == "whorls":
+        fills = B.whorl_cards(dm, seed=vs["seed"] * 7 + lod, density=L.get("density", 1.0), keep_every=L.get("keep_every", 1),
+                              max_cards=L.get("max_cards"), inner=L.get("inner", True), width_k=L.get("width_k", 1.0))
+    elif sp.get("crown_mode") == "mass":
         anchors = None
         if sp.get("placement") == "anchors":
             tips = [p["P"][-1] for p in base_paths if p["kind"] == "limb" and p.get("r_px", 0) >= sp.get("anchor_min_r", 1.5)]
+            if sp.get("anchor_step_m"):
+                for p_ in base_paths:
+                    if p_["kind"] != "limb":
+                        continue
+                    Ps_, s_ = geom.resample_polyline(p_["P"], sp["anchor_step_m"])
+                    tips += [q for q in Ps_[1:] if q[2] > sp.get("anchor_min_z", 3.0)]
             anchors = list(tips)
             for (Rm, tv, mir, sc) in copies:
                 anchors += [((tp - tv) * sc) @ Rm.T + tv for tp in tips]
@@ -176,6 +185,8 @@ def main():
     ref.masks_preview(qa_path(asset, a.iter, "masks.png"))
     P = tree.Patches(ref, n_target=sp["n_patches"], min_px=sp.get("min_px", 50), margin=sp.get("margin", 3),
                      scale=sp.get("tile_scale", 2))
+    if sp.get("crown_mode") == "whorls":
+        print(f"[{asset}] fronds: {P.add_fronds()}", flush=True)
     P.preview(qa_path(asset, a.iter, "patches.png"))
     reg_img, s = P.pack(sp["region"])
     atl.save_region(sp["region"], reg_img, {"asset": asset, "scale": s, "tiles": P.n})

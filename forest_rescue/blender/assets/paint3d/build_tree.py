@@ -114,7 +114,8 @@ def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
     dm = B.front_depth_map(front_all)
     if sp.get("crown_mode") == "whorls":
         fills = B.whorl_cards(dm, seed=vs["seed"] * 7 + lod, density=L.get("density", 1.0), keep_every=L.get("keep_every", 1),
-                              max_cards=L.get("max_cards"), inner=L.get("inner", True), width_k=L.get("width_k", 1.0))
+                              max_cards=L.get("max_cards"), inner=L.get("inner", True), width_k=L.get("width_k", 1.0),
+                              segs=L.get("segs", 3))
     elif sp.get("crown_mode") == "mass":
         anchors = None
         if sp.get("placement") == "anchors":

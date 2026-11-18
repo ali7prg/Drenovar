@@ -100,8 +100,8 @@ LODS_WHORL = {
             copies=False, front_frac=0.5, front_scale=1.15, density=0.6, width_k=1.35, keep_every=1, max_cards=None,
             inner=True),
     2: dict(trunk_step_m=2.5, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
-            copies=False, front_frac=0.3, front_scale=1.55, density=0.42, width_k=1.6, keep_every=1, max_cards=48,
-            inner=False),
+            copies=False, front_frac=0.24, front_scale=1.6, density=0.42, width_k=1.6, keep_every=1, max_cards=44,
+            inner=False, segs=2),
 }
 
 LODS_BIRCH = {

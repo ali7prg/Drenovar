@@ -9,9 +9,9 @@
         "lf_env_birch_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3822,
-        "LOD1": 988,
-        "LOD2": 138
+        "LOD0": 3970,
+        "LOD1": 934,
+        "LOD2": 150
       },
       "materials": {
         "LOD0": [
@@ -35,12 +35,12 @@
       "bounds_m_blender": [
         [
           -2.7,
-          -2.74,
+          -2.79,
           -0.3
         ],
         [
           5.49,
-          2.57,
+          2.3,
           13.08
         ]
       ],
@@ -69,9 +69,9 @@
         "lf_env_birch_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3966,
-        "LOD1": 978,
-        "LOD2": 132
+        "LOD0": 3886,
+        "LOD1": 890,
+        "LOD2": 156
       },
       "materials": {
         "LOD0": [
@@ -90,22 +90,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 13.09,
+      "height_m": 13.08,
       "crown_radius_m": 5.49,
       "bounds_m_blender": [
         [
           -5.49,
-          -2.57,
+          -2.77,
           -0.3
         ],
         [
-          2.7,
-          2.65,
-          13.09
+          2.76,
+          2.85,
+          13.08
         ]
       ],
       "display_offset_gltf": [
-        10.188,
+        10.243,
         0.0,
         0.0
       ],
@@ -130,9 +130,9 @@
         "lf_env_birch_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 4002,
-        "LOD1": 968,
-        "LOD2": 140
+        "LOD0": 3970,
+        "LOD1": 918,
+        "LOD2": 160
       },
       "materials": {
         "LOD0": [
@@ -152,21 +152,21 @@
         ]
       },
       "height_m": 14.0,
-      "crown_radius_m": 4.94,
+      "crown_radius_m": 4.98,
       "bounds_m_blender": [
         [
-          -2.43,
-          -2.42,
+          -2.49,
+          -2.46,
           -0.32
         ],
         [
-          4.94,
-          2.25,
+          4.98,
+          2.4,
           14.0
         ]
       ],
       "display_offset_gltf": [
-        20.376,
+        20.486,
         0.0,
         0.0
       ],
@@ -189,9 +189,9 @@
     }
   },
   "tris": {
-    "LOD0": 4002,
-    "LOD1": 988,
-    "LOD2": 140
+    "LOD0": 3970,
+    "LOD1": 934,
+    "LOD2": 160
   },
   "bones": 0,
   "materials": [

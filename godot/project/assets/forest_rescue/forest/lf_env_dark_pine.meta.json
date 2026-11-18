@@ -9,9 +9,9 @@
         "lf_env_dark_pine_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 1680,
-        "LOD1": 552,
-        "LOD2": 260
+        "LOD0": 1786,
+        "LOD1": 710,
+        "LOD2": 344
       },
       "materials": {
         "LOD0": [
@@ -31,10 +31,10 @@
         ]
       },
       "height_m": 14.17,
-      "crown_radius_m": 3.76,
+      "crown_radius_m": 3.69,
       "bounds_m_blender": [
         [
-          -3.76,
+          -3.69,
           -3.1,
           -0.3
         ],
@@ -60,9 +60,9 @@
         "lf_env_dark_pine_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 1680,
-        "LOD1": 580,
-        "LOD2": 278
+        "LOD0": 1816,
+        "LOD1": 676,
+        "LOD2": 350
       },
       "materials": {
         "LOD0": [
@@ -82,7 +82,7 @@
         ]
       },
       "height_m": 14.17,
-      "crown_radius_m": 3.78,
+      "crown_radius_m": 3.74,
       "bounds_m_blender": [
         [
           -3.44,
@@ -90,8 +90,8 @@
           -0.3
         ],
         [
-          3.78,
-          3.59,
+          3.74,
+          3.56,
           14.17
         ]
       ],
@@ -112,9 +112,9 @@
         "lf_env_dark_pine_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 1690,
-        "LOD1": 544,
-        "LOD2": 290
+        "LOD0": 1816,
+        "LOD1": 644,
+        "LOD2": 350
       },
       "materials": {
         "LOD0": [
@@ -134,16 +134,16 @@
         ]
       },
       "height_m": 15.3,
-      "crown_radius_m": 3.32,
+      "crown_radius_m": 3.24,
       "bounds_m_blender": [
         [
-          -3.32,
+          -3.24,
           -2.62,
           -0.32
         ],
         [
           3.02,
-          3.15,
+          3.23,
           15.3
         ]
       ],
@@ -167,9 +167,9 @@
         "lf_env_dark_pine_v4_LOD2"
       ],
       "tris": {
-        "LOD0": 1630,
-        "LOD1": 544,
-        "LOD2": 266
+        "LOD0": 1772,
+        "LOD1": 658,
+        "LOD2": 344
       },
       "materials": {
         "LOD0": [
@@ -198,7 +198,7 @@
         ],
         [
           3.9,
-          3.87,
+          3.72,
           12.75
         ]
       ],
@@ -218,9 +218,9 @@
     }
   },
   "tris": {
-    "LOD0": 1690,
-    "LOD1": 580,
-    "LOD2": 290
+    "LOD0": 1816,
+    "LOD1": 710,
+    "LOD2": 350
   },
   "bones": 0,
   "materials": [

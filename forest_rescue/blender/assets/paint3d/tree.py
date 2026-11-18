@@ -539,7 +539,8 @@ class TreeBuilder:
             H, W = fg.shape
             for uu, vv, t_ in zip(u, v, tq):
                 ui, vi = int(round(uu)), int(round(vv))
-                if 0 <= ui < W and 0 <= vi < H and t_ * self.ref.ppm < front_dm[vi, ui] + margin_m * self.ref.ppm:
+                if 0 <= ui < W and 0 <= vi < H and np.isfinite(front_dm[vi, ui]) and \
+                        t_ * self.ref.ppm < front_dm[vi, ui] + margin_m * self.ref.ppm:
                     return 0.0
         pts = np.stack([u, v], 1)
         x0, y0 = np.floor(pts.min(0)).astype(int) - 1
@@ -1120,7 +1121,7 @@ class TreeBuilder:
         return cards
 
     def whorl_cards(self, front_dm, seed=5, density=1.0, droop=(4, 14), keep_every=1, max_cards=None, inner=True,
-                    foot=0.86, width_k=1.0, len_k=1.0):
+                    foot=0.86, width_k=1.0, len_k=1.0, segs=3):
         """Conifer: drooping radial frond cards per whorl (tier), textured with painted side-view tier fronds.
         Frond cards facing the reference camera are shortened so the painted front layer stays in front."""
         ref, p = self.ref, self.p
@@ -1165,7 +1166,7 @@ class TreeBuilder:
                 cand = [i for i in fronds if abs(info[i]["eta"] - eta) < 0.09] or [j]
                 ti = int(rng.choice(cand))
                 dr = np.radians(rng.uniform(*droop))
-                s = np.linspace(0, 1, 4)
+                s = np.linspace(0, 1, segs + 1)
                 P = base[None] + (Lk * s)[:, None] * dirr[None] - Z[None] * (Lk * np.tan(dr) * s ** 1.6)[:, None]
                 P[:, 2] += rng.normal(0, 0.05)
                 tang = nrm(np.gradient(P, axis=0))
@@ -1173,7 +1174,7 @@ class TreeBuilder:
                 nn = nrm(np.cross(tang, sidev))
                 nn[nn[:, 2] < 0] *= -1
                 wk = info[ti]["h_m"] * width_k * rng.uniform(0.9, 1.1)
-                widths = wk * np.array([0.55, 0.85, 1.0, 0.9])
+                widths = wk * np.interp(s, [0, 0.33, 0.66, 1.0], [0.55, 0.85, 1.0, 0.9])
                 # footprint / depth test on the card outline
                 Lv = P - sidev * widths[:, None] / 2
                 Rv = P + sidev * widths[:, None] / 2

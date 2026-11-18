@@ -1,0 +1,8 @@
+{
+  "view": "fallen_trunk",
+  "iou": 0.3717,
+  "mean_abs_colour_error": 0.2063,
+  "ref_pixels": 29424,
+  "render_pixels": 13661,
+  "iou_closed_r4": 0.3838
+}

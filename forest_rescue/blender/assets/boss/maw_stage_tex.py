@@ -121,10 +121,10 @@ def main():
     t0 = time.time()
     views = [R.side_view(corrected=False), R.side_view_mirrored(), R.front_view()]
     for v in views:
-        v.image = ndi.gaussian_filter(v.image, (0.9, 0.9, 0))
+        v.image = ndi.gaussian_filter(v.image, (0.45, 0.45, 0))
     views[2].weight = 0.8
     zbs = {v.name: texproj.zbuffer(V, tris, v) for v in views}
-    col, w = texproj.project(T, views, zbs, power=2.5, depth_eps=0.04, min_facing=0.12)
+    col, w = texproj.project(T, views, zbs, power=2.5, depth_eps=0.04, min_facing=0.22, mask_erode=3)
     log(f"projection {time.time() - t0:.1f}s, covered {(w[yy, xx] > 0).mean():.2f}")
     col = texproj.delight(col, T, light_dir=(0.25, -0.45, 0.86), ambient=0.45, strength=0.45,
                           mask=T.valid & (w > 0))
@@ -149,7 +149,7 @@ def main():
     wL = np.clip(reg["neck_sh"] * 0.9 + reg["head"] * 0.8 + reg["dorsal"] * 0.5, 0, 1)
     wF = np.clip(reg["ventral"] + reg["inner"] * 0.8, 0, 1) * (1 - reg["head"] * 0.7)
     wM = np.clip(1 - wL - wF, 0, 1)
-    for cell, depth, wgt_, seed in ((0.085, 0.0065, wL, 1), (0.036, 0.0042, wM, 2), (0.013, 0.0022, wF, 3)):
+    for cell, depth, wgt_, seed in ((0.075, 0.0095, wL, 1), (0.034, 0.0055, wM, 2), (0.013, 0.0026, wF, 3)):
         h, g, idc = MT.scale_layer(P, cell, seed, depth)
         Hs += h * wgt_
         Gs += g * wgt_[:, None]
@@ -188,14 +188,22 @@ def main():
     # ---------------------------------------------------------------- colour composition
     col3 = C3.copy()
     lum = col3 @ np.array([0.299, 0.587, 0.114])
-    col3 *= (0.86 + 0.16 * np.clip(groove, 0, 1))[:, None]
+    gdark = 0.86 - 0.12 * reg["head"]
+    col3 *= (gdark + (1.02 - gdark) * np.clip(groove, 0, 1))[:, None]
     col3 *= (0.93 + 0.14 * tint)[:, None]
     bronze = np.array([0.60, 0.48, 0.30])
     col3 = col3 * (1 - 0.6 * knob[:, None]) + (bronze * (0.75 + 0.6 * lum[:, None])) * 0.6 * knob[:, None]
     mouth_col = np.array([0.42, 0.17, 0.17]) * (0.6 + 0.4 * np.clip((P[:, 1] + 3.2) / -1.0, 0, 1))[:, None]
     col3 = col3 * (1 - mouth[:, None]) + mouth_col * mouth[:, None]
+    # burnt-umber throat/chest (sheet palette) on the ventral front half
+    umber = np.array([0.50, 0.27, 0.13])
+    vz = reg["ventral"] * MT.smoothstep(-0.6, -1.4, P[:, 1]) * MT.smoothstep(-3.6, -3.1, P[:, 1])
+    vz = np.maximum(vz, MT.smoothstep(0.2, 0.7, -N[:, 1]) * MT.smoothstep(-1.2, -1.8, P[:, 1])
+                    * MT.smoothstep(2.9, 2.5, P[:, 2]) * (np.abs(P[:, 0]) < 0.55) * (P[:, 2] > 1.4))
+    lumv = (col3 @ np.array([0.299, 0.587, 0.114]))[:, None]
+    col3 = col3 * (1 - 0.45 * vz[:, None]) + umber * (lumv / 0.30) * 0.45 * vz[:, None]
     fib = 0.85 + 0.15 * np.sin(scar_d * 900.0)
-    scar_col = np.array([0.80, 0.66, 0.66]) * fib[:, None]
+    scar_col = np.array([0.86, 0.70, 0.70]) * fib[:, None]
     col3 = col3 * (1 - 0.95 * scar[:, None]) + scar_col * 0.95 * scar[:, None]
     aov = ao[yy, xx]
     col3 *= (0.70 + 0.30 * aov)[:, None]
@@ -220,7 +228,7 @@ def main():
     orm = texproj.dilate_margin(orm, T.valid, px=12)
 
     # ---------------------------------------------------------------- save masters + runtime
-    tdir = paths.ensure(paths.TEXTURE_SOURCES, C.GROUP)
+    tdir = paths.ensure(C.cache("tex"))      # copied to forest_rescue/blender/textures/boss by the export stage
     rdir = paths.ensure(tdir, "runtime")
     core.save_rgba(os.path.join(tdir, f"{AID}_basecolor_{S}.png"), col_img)
     core.save_rgba(os.path.join(tdir, f"{AID}_normal_{S}.png"), nrm_img)
@@ -271,6 +279,7 @@ def main():
     for m in list(bpy.data.materials):
         if m.name.endswith("_old") or m.name == "M_bake_tmp":
             bpy.data.materials.remove(m)
+    bpy.ops.file.pack_all()
     bpy.ops.wm.save_as_mainfile(filepath=C.cache("maw_tex.blend"), compress=True)
     log("saved maw_tex.blend")
 

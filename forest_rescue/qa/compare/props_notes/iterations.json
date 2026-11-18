@@ -1,0 +1,160 @@
+{
+ "lf_artifact_stone_rune": {
+  "iter01": {
+   "approach": "procedural outline (circle R60), plain extrude with 4.5 mm chamfer, procedural limestone + engraved spiral normal map only",
+   "diffs": [
+    "thin flat disc vs chunky pillow medallion",
+    "spiral only faint (normal map), no deep carving",
+    "render far too dark: AO baked with the 3 variants overlapping at the origin",
+    "reference masks lost bright stone (threshold mask)"
+   ],
+   "fixes_next": [
+    "flood-fill masks",
+    "AO isolation per node",
+    "outline traced from the front view, thickness 37.7 mm from the side view",
+    "projection of the sheet's front/side/hero views",
+    "painted relief -> displaced x256 high-res copy -> Cycles normal+AO bake"
+   ]
+  },
+  "iter02": {
+   "approach": "traced outline + pillow rim (rounded extrusion, grid front cap), projection front/side/hero, painted relief baked from displaced high-poly",
+   "diffs": [
+    "texture blurrier than the drawing (front view only 138 px wide)",
+    "13% darker than the reference",
+    "green inlay muted",
+    "v2/v3 plain/pale (procedural)"
+   ],
+   "fixes_next": [
+    "hero view weight 3x (2x resolution)",
+    "AO 0.55->0.38, lights +12%",
+    "painted swatch for unpainted texels"
+   ]
+  },
+  "iter03": {
+   "approach": "hero-weighted projection, swatch tiling",
+   "diffs": [
+    "hero now matches (mean colour 0.512 vs 0.513)",
+    "swatch tiling created a visible mirrored quilt pattern on v2/v3/socket"
+   ],
+   "fixes_next": [
+    "swatch used only as low-amplitude high-pass detail on the class-calibrated base",
+    "artifacts scaled x1.33 to the cage-sheet socket size"
+   ]
+  }
+ },
+ "lf_artifact_bronze_seal": {
+  "iter01": {
+   "approach": "hexagon traced from the front view, thickness from the side view (31 mm at 100 mm), rounded rim, projection front/side/hero + painted relief baked from a displaced x256 copy",
+   "diffs": [
+    "front IoU 0.995 / hero 0.938 good",
+    "sprig relief weaker than the drawing (raised leaves cast clear shadows)",
+    "bronze lighter and less saturated than the drawn orange-gold",
+    "side IoU 0.844 - reference side mask lost its dark bottom band (flood mask leak), not a model error"
+   ],
+   "fixes_next": [
+    "painted relief gain 0.010 -> 0.016",
+    "side views masked with a tighter flood tolerance",
+    "warmer/darker procedural bronze for v2/v3"
+   ]
+  },
+  "iter02": {
+   "approach": "stronger painted relief",
+   "diffs": [
+    "sprig and interlace now read in relief",
+    "still slightly desaturated vs drawing; seal smaller than the cage-sheet hex socket"
+   ],
+   "fixes_next": [
+    "bronze palette (158,100,36)/(222,160,72)",
+    "all artifacts scaled x1.3 to the cage-sheet sockets"
+   ]
+  }
+ },
+ "lf_artifact_amber_crystal": {
+  "iter01": {
+   "approach": "parametric rhombus frame (oak) + faceted crystal + 4 bronze corner caps, projection + painted relief",
+   "diffs": [
+    "front IoU 0.759: the drawn frame is a rounded/bulging diamond, ours a sharp rhombus",
+    "black wedges at the crystal tips from displacing tiny facet islands in the relief bake",
+    "side IoU 0.755 (frame clamped at 32 mm, drawing 35 mm)"
+   ],
+   "fixes_next": [
+    "frame outline traced from the front view",
+    "no displacement on the crystal (relief only on frame/caps)",
+    "thickness from the side view without clamping"
+   ]
+  },
+  "iter02": {
+   "approach": "frame outline traced from the front view, thickness 35 mm unclamped, crystal excluded from displacement",
+   "diffs": [
+    "front IoU 0.759 -> 0.897, hero 0.879 -> 0.912",
+    "black wedges at the crystal tips remain: Cycles selected-to-active rays between converging thin facets (AO/normal), not the displacement",
+    "crystal a little less luminous than the drawn amber"
+   ],
+   "fixes_next": [
+    "crystal texels get flat normals and no baked AO",
+    "x1.3 scale to the cage-sheet diamond socket"
+   ]
+  }
+ },
+ "lf_artifact_bone_key": {
+  "iter01": {
+   "approach": "parametric key (bow ring, collared lathe shaft with knot band, notched bit) tuned to the measured front-view profile",
+   "diffs": [
+    "LOD0 868-1028 tris > 800 budget",
+    "hero camera fit fell into a wrong local optimum (IoU 0.79)",
+    "side view thinner bow ring than drawn"
+   ],
+   "fixes_next": [
+    "lower lathe/bow tessellation",
+    "hero camera initialised from the drawn orientation (bit near, bow far)",
+    "elliptic bow section 1.45x thicker out of plane"
+   ]
+  },
+  "iter02": {
+   "approach": "reduced tessellation (612-692 tris LOD0), elliptic bow section, hero camera re-initialised",
+   "diffs": [
+    "budget now met (<=692 tris)",
+    "hero fit converged to a mirrored pose (bow near / bit far): IoU 0.67 - initial yaw wrong",
+    "side 0.66: the drawn side view shows the bow ring edge-on as a forked silhouette"
+   ],
+   "fixes_next": [
+    "hero camera re-initialised at yaw -0.8 (iter01 orientation was right)",
+    "x1.25 scale to the cage keyhole plate"
+   ]
+  }
+ },
+ "lf_cage_wood": {
+  "iter01": {
+   "approach": "parametric oak cage (posts on limestone plinths, low stone walls, curved knee braces, iron bars with gothic arches + tracery rings, stepped shingle hip roof, emerald plaque), door on the left-hinged pivot, cameras fitted to the closed/open drawings, projection of both views + painted relief bake",
+   "diffs": [
+    "render looked translucent: projection used the hole-filled silhouette, so parchment seen between bars was painted onto slightly mis-registered posts",
+    "LOD0 10,032 tris (budget 6k); LOD1/2 only -25/-55 %",
+    "socket was the loot-sheet rounded-square plate; drawing shows a round segmented stone ring with a square loop",
+    "hinge strap too small/plain, texels 6.7 mm -> blurry close-ups",
+    "open view: drawn door hinged on the right (sheet inconsistency) - our door follows the left-hinge rule"
+   ],
+   "fixes_next": [
+    "paint mask rejects background-coloured pixels (+1 px erosion)",
+    "4-sided arches/braces, capless 5-sided bars, tips/tracery LOD0-only, no rail chamfers, LOD2 without chamfers",
+    "cage-style sockets (oak: segmented ring + loop) around x1.33 artifact recesses",
+    "hinge proportions measured on the inset (root 0.15 m, knuckle r 0.032, riveted jamb leaf), 4x texel density",
+    "hinge/socket insets projected 1:1 (ortho views anchored on measured pixels)"
+   ]
+  },
+  "iter02": {
+   "approach": "paint mask without background pixels, trimmed budget, cage-style round segmented socket ring + loop, measured hinge proportions, hinge/socket insets projected, artifacts x1.33",
+   "diffs": [
+    "still translucent look: wireframe overlay (iter02_closed34_wire.png) shows the silhouette-only camera converged to a ~45 deg view while the drawing is more frontal - internal members mis-register by 10-30 px",
+    "LOD0 7,454 tris (root 5,622)",
+    "GLB rest pose had the door open: NLA frame-0 evaluation was exported as node TRS"
+   ],
+   "fixes_next": [
+    "camera solved from 9 measured landmarks (posts, hinge post, apex) then silhouette-refined with a landmark penalty",
+    "joint landmark fit: drawing's door is ~1.6 m wide -> hinge post moved to x=-0.33",
+    "thin iron (bars/rails/arches/tips/tracery) no longer projected (procedural iron); per-material colour gate (2.2 MAD) rejects outlier paint",
+    "3-sided spear tips, lighter tracery/arches, unchamfered boards",
+    "export at a frame outside all NLA strips (export_current_frame) + keep constant channels"
+   ]
+  }
+ }
+}

@@ -184,15 +184,7 @@ def parts_field(parts, lo, hi, voxel, names=None, exclude=None):
 
 def hull_xz_fn(views, dilate_px=0.0):
     """2-D signed distance (m) to the intersection of the views' silhouettes at (x, z)."""
-    import cv2
-    maps = []
-    for v in views:
-        m = v.mask
-        if dilate_px:
-            m = ndi.binary_dilation(m, iterations=int(dilate_px))
-        dpos = ndi.distance_transform_edt(~m)
-        dneg = ndi.distance_transform_edt(m)
-        maps.append(((dpos - dneg) / v.ppm).astype(np.float32))
+    maps = [H.smooth_sdf_2d(v.mask, v.ppm, dilate_px=dilate_px) for v in views]
 
     def fn(x, z):
         x = np.asarray(x, float)
@@ -200,11 +192,9 @@ def hull_xz_fn(views, dilate_px=0.0):
         shp = x.shape
         P = np.stack([x.ravel(), np.zeros(x.size), z.ravel()], -1)
         out = np.full(x.size, -1e3)
-        for v, sd in zip(views, maps):
+        for v, (sd, up) in zip(views, maps):
             u, vv, _ = v.project(P)
-            s = cv2.remap(sd, u.astype(np.float32).reshape(-1, 1), vv.astype(np.float32).reshape(-1, 1),
-                          cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0.5).ravel()
-            out = np.maximum(out, s)
+            out = np.maximum(out, H.sample_sdf_2d(sd, up, u, vv).ravel())
         return out.reshape(shp)
     return fn
 
@@ -363,3 +353,45 @@ def hair_region(lm, front=0.064, temple_drop=0.30, side=0.018, back=-0.070, side
             hz = hz + noise * (np.sin(x * 140 + ph[0]) * np.sin(y * 120 + ph[1]) + 0.5 * np.sin(x * 260 + ph[2]))
         return (hz - z) * s
     return fn
+
+
+def wraps_piece(name, fn, J, S_, z0, z1, turns=4, width=0.022, thick=0.003, cls="leather", cross=True, seed=0):
+    """Leg wraps / bindings: helical bands (and a counter-helix for criss-cross) on the shin."""
+    an = J[f"{S_}Foot"]
+    kn = J[f"{S_}LowerLeg"]
+    pieces = []
+    for k, sg in enumerate((1, -1) if cross else (1,)):
+        n = int(18 * turns)
+        t = np.linspace(0, 1, n)
+        z = z0 + (z1 - z0) * t
+        a = sg * 2 * math.pi * turns * t + k * 1.3
+        f = (z - an[2]) / max(kn[2] - an[2], 1e-3)
+        cx = an[0] + (kn[0] - an[0]) * f
+        cy = an[1] + (kn[1] - an[1]) * f
+        pts, nrm = [], []
+        for i in range(n):
+            d = np.array([math.cos(a[i]), math.sin(a[i]), 0.0])
+            c = np.array([cx[i], cy[i], z[i]])
+            p = C.surface_point(fn, c, d, rmax=0.16, step=0.0015, clearance=0.002)
+            pts.append(p)
+            nrm.append(d)
+        pieces.append(band_piece(f"{name}_{k}", np.array(pts), np.array(nrm), width, thick, cls,
+                                 {"type": "body"}))
+    return merge_pieces(name, pieces)
+
+
+def laces_piece(name, fn, J, S_, z0, z1, n=6, half=0.022, r=0.0025, cls="leather"):
+    """Criss-cross boot laces on the front of the shaft."""
+    an = J[f"{S_}Foot"]
+    kn = J[f"{S_}LowerLeg"]
+    pts = []
+    for i in range(n + 1):
+        z = z0 + (z1 - z0) * i / n
+        f = (z - an[2]) / max(kn[2] - an[2], 1e-3)
+        c = an + (kn - an) * f
+        for sx in ((-1, 1) if i % 2 == 0 else (1, -1)):
+            d = np.array([sx * half * 8, -1.0, 0.0])
+            d /= np.linalg.norm(d)
+            p = C.surface_point(fn, np.array([c[0], c[1], z]), d, rmax=0.16, step=0.0015, clearance=0.001)
+            pts.append(p)
+    return tube_piece(name, np.array(pts), r, cls, {"type": "body"}, sides=5)

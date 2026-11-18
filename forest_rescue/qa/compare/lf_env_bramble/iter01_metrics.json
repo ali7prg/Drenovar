@@ -1,0 +1,47 @@
+{
+  "metrics": {
+    "v1_front_LOD0": {
+      "view": "bramble",
+      "iou": 0.7092,
+      "mean_abs_colour_error": 0.192,
+      "ref_pixels": 40104,
+      "render_pixels": 47868,
+      "iou_closed_r4": 0.7613
+    }
+  },
+  "tris": {
+    "v1": {
+      "LOD0": {
+        "tris": 1696
+      },
+      "LOD1": {
+        "tris": 534
+      },
+      "LOD2": {
+        "tris": 162
+      }
+    },
+    "v2": {
+      "LOD0": {
+        "tris": 1408
+      },
+      "LOD1": {
+        "tris": 462
+      },
+      "LOD2": {
+        "tris": 162
+      }
+    },
+    "v3": {
+      "LOD0": {
+        "tris": 1480
+      },
+      "LOD1": {
+        "tris": 480
+      },
+      "LOD2": {
+        "tris": 162
+      }
+    }
+  }
+}

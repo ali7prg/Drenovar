@@ -1,0 +1,23 @@
+{
+  "left": {
+    "view": "left",
+    "iou": 0.9392,
+    "mean_abs_colour_error": 0.0653,
+    "ref_pixels": 101675,
+    "render_pixels": 101907
+  },
+  "left_raw": {
+    "view": "left_raw",
+    "iou": 0.8796,
+    "mean_abs_colour_error": 0.0653,
+    "ref_pixels": 108866,
+    "render_pixels": 101907
+  },
+  "front": {
+    "view": "front",
+    "iou": 0.8859,
+    "mean_abs_colour_error": 0.0806,
+    "ref_pixels": 49530,
+    "render_pixels": 45702
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_amber_crystal v1 hero34 (fitted perspective)",
+  "iou_filled": 0.8791,
+  "iou_raw": 0.8791,
+  "mean_abs_colour_error": 0.1391,
+  "mean_rgb_ref": [
+    0.53,
+    0.341,
+    0.171
+  ],
+  "mean_rgb_render": [
+    0.589,
+    0.401,
+    0.257
+  ]
+}

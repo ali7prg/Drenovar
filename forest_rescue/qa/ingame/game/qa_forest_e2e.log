@@ -1,0 +1,196 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ForestWorld: ready { &"data": 26.261, &"terrain": 1005.367, &"tiles": 42.462, &"visuals": 193.08, &"total": 1305.691 } kit=0 missing kit assets
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/horse/lf_horse_origin.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+ForestWorld: ready { &"data": 5.631, &"terrain": 0.021, &"tiles": 6.655, &"visuals": 32.96, &"total": 87.489 } kit=0 missing kit assets
+E2E reload 1 (intro interrupted) ok
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/humans/lf_squad_captain.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/humans/lf_squad_shield_guard.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/humans/lf_squad_scout.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/guardians/lf_guardian_tenerys.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/humans/lf_civilian_miller.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/humans/lf_civilian_herbalist.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/humans/lf_civilian_ferryman.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+E2E lf_site_01 discover → step 1
+ForestWorld: ready { &"data": 1.166, &"terrain": 0.016, &"tiles": 0.56, &"visuals": 39.788, &"total": 98.164 } kit=0 missing kit assets
+E2E reload 2 (lf_site_01 after discover) ok
+E2E lf_site_01 recover_artifact → step 2
+ForestWorld: ready { &"data": 0.905, &"terrain": 0.014, &"tiles": 0.375, &"visuals": 31.107, &"total": 62.953 } kit=0 missing kit assets
+E2E reload 3 (lf_site_01 after recover_artifact) ok
+ForestWorld: ready { &"data": 29.042, &"terrain": 0.018, &"tiles": 0.498, &"visuals": 50.855, &"total": 337.063 } kit=0 missing kit assets
+E2E reload 4 (mid-battle engage_guardian) ok
+E2E lf_site_01 defeat_guardian → step 3
+ForestWorld: ready { &"data": 0.748, &"terrain": 0.016, &"tiles": 0.443, &"visuals": 33.906, &"total": 72.487 } kit=0 missing kit assets
+E2E reload 5 (lf_site_01 after defeat_guardian) ok
+E2E lf_site_01 unlock_cage → step 4
+ForestWorld: ready { &"data": 0.906, &"terrain": 0.013, &"tiles": 0.378, &"visuals": 28.101, &"total": 64.102 } kit=0 missing kit assets
+E2E reload 6 (lf_site_01 after unlock_cage) ok
+ForestWorld: ready { &"data": 1.334, &"terrain": 0.017, &"tiles": 0.544, &"visuals": 37.954, &"total": 91.746 } kit=0 missing kit assets
+E2E reload 7 (escort walking) ok
+E2E lf_site_01 escort_home → step 5
+ForestWorld: ready { &"data": 0.865, &"terrain": 0.014, &"tiles": 0.386, &"visuals": 27.484, &"total": 65.168 } kit=0 missing kit assets
+E2E reload 8 (lf_site_01 after escort_home) ok
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/humans/lf_civilian_courier.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/humans/lf_civilian_cooper.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/humans/lf_civilian_quarry_worker.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+E2E lf_site_02 discover → step 1
+E2E lf_site_02 recover_artifact → step 2
+E2E lf_site_02 defeat_guardian → step 3
+E2E lf_site_02 unlock_cage → step 4
+ForestWorld: ready { &"data": 0.997, &"terrain": 0.042, &"tiles": 0.479, &"visuals": 35.492, &"total": 76.885 } kit=0 missing kit assets
+E2E reload 9 (lf_site_02 after unlock_cage) ok
+E2E lf_site_02 escort_home → step 5
+E2E lf_site_03 discover → step 1
+E2E lf_site_03 recover_artifact → step 2
+E2E lf_site_03 defeat_guardian → step 3
+E2E lf_site_03 unlock_cage → step 4
+ForestWorld: ready { &"data": 0.882, &"terrain": 0.013, &"tiles": 0.48, &"visuals": 35.946, &"total": 75.64 } kit=0 missing kit assets
+E2E reload 10 (lf_site_03 after unlock_cage) ok
+E2E lf_site_03 escort_home → step 5
+E2E lf_site_04 discover → step 1
+E2E lf_site_04 recover_artifact → step 2
+E2E lf_site_04 defeat_guardian → step 3
+E2E lf_site_04 unlock_cage → step 4
+ForestWorld: ready { &"data": 0.788, &"terrain": 0.012, &"tiles": 0.337, &"visuals": 24.482, &"total": 52.825 } kit=0 missing kit assets
+E2E reload 11 (lf_site_04 after unlock_cage) ok
+E2E lf_site_04 escort_home → step 5
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/guardians/lf_guardian_velkor.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+E2E lf_site_05 discover → step 1
+E2E lf_site_05 recover_artifact → step 2
+E2E lf_site_05 defeat_guardian → step 3
+E2E lf_site_05 unlock_cage → step 4
+ForestWorld: ready { &"data": 4.935, &"terrain": 0.015, &"tiles": 0.426, &"visuals": 42.702, &"total": 86.363 } kit=0 missing kit assets
+E2E reload 12 (lf_site_05 after unlock_cage) ok
+E2E lf_site_05 escort_home → step 5
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/guardians/lf_guardian_kamneklyk.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+E2E lf_site_06 discover → step 1
+E2E lf_site_06 recover_artifact → step 2
+E2E lf_site_06 defeat_guardian → step 3
+E2E lf_site_06 unlock_cage → step 4
+ForestWorld: ready { &"data": 1.457, &"terrain": 0.014, &"tiles": 0.559, &"visuals": 154.631, &"total": 207.006 } kit=0 missing kit assets
+E2E reload 13 (lf_site_06 after unlock_cage) ok
+E2E lf_site_06 escort_home → step 5
+E2E lf_site_07 discover → step 1
+E2E lf_site_07 recover_artifact → step 2
+E2E lf_site_07 defeat_guardian → step 3
+E2E lf_site_07 unlock_cage → step 4
+ForestWorld: ready { &"data": 1.347, &"terrain": 0.019, &"tiles": 1.679, &"visuals": 49.541, &"total": 120.896 } kit=0 missing kit assets
+E2E reload 14 (lf_site_07 after unlock_cage) ok
+E2E lf_site_07 escort_home → step 5
+E2E lf_site_08 discover → step 1
+E2E lf_site_08 recover_artifact → step 2
+E2E lf_site_08 defeat_guardian → step 3
+E2E lf_site_08 unlock_cage → step 4
+ForestWorld: ready { &"data": 0.937, &"terrain": 0.015, &"tiles": 0.468, &"visuals": 24.689, &"total": 66.419 } kit=0 missing kit assets
+E2E reload 15 (lf_site_08 after unlock_cage) ok
+E2E lf_site_08 escort_home → step 5
+E2E lf_site_09 discover → step 1
+E2E lf_site_09 recover_artifact → step 2
+E2E lf_site_09 defeat_guardian → step 3
+E2E lf_site_09 unlock_cage → step 4
+ForestWorld: ready { &"data": 0.92, &"terrain": 0.015, &"tiles": 0.458, &"visuals": 51.905, &"total": 96.628 } kit=0 missing kit assets
+E2E reload 16 (lf_site_09 after unlock_cage) ok
+E2E lf_site_09 escort_home → step 5
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/guardians/lf_guardian_dragor.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+E2E lf_site_10 discover → step 1
+E2E lf_site_10 recover_artifact → step 2
+E2E lf_site_10 defeat_guardian → step 3
+E2E lf_site_10 unlock_cage → step 4
+ForestWorld: ready { &"data": 0.938, &"terrain": 0.012, &"tiles": 0.363, &"visuals": 32.468, &"total": 65.235 } kit=0 missing kit assets
+E2E reload 17 (lf_site_10 after unlock_cage) ok
+E2E lf_site_10 escort_home → step 5
+E2E lf_site_11 discover → step 1
+E2E lf_site_11 recover_artifact → step 2
+E2E lf_site_11 defeat_guardian → step 3
+E2E lf_site_11 unlock_cage → step 4
+ForestWorld: ready { &"data": 0.854, &"terrain": 0.014, &"tiles": 0.406, &"visuals": 34.224, &"total": 74.439 } kit=0 missing kit assets
+E2E reload 18 (lf_site_11 after unlock_cage) ok
+E2E lf_site_11 escort_home → step 5
+E2E lf_site_12 discover → step 1
+E2E lf_site_12 recover_artifact → step 2
+E2E lf_site_12 defeat_guardian → step 3
+E2E lf_site_12 unlock_cage → step 4
+ForestWorld: ready { &"data": 1.311, &"terrain": 0.026, &"tiles": 0.437, &"visuals": 34.16, &"total": 80.268 } kit=0 missing kit assets
+E2E reload 19 (lf_site_12 after unlock_cage) ok
+WARNING: Forest rescue asset missing (presentation skipped until it lands): res://assets/forest_rescue/boss/lf_boss_ancient_maw.glb
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] fetch (res://src/forest_rescue/game/actor_rig.gd:49)
+         [1] poll_load (res://src/forest_rescue/game/actor_rig.gd:112)
+         [2] _process (res://src/forest_rescue/game/actor_rig.gd:107)
+E2E lf_site_12 escort_home → step 5
+ForestWorld: ready { &"data": 1.295, &"terrain": 0.017, &"tiles": 0.529, &"visuals": 34.023, &"total": 91.224 } kit=0 missing kit assets
+E2E reload 20 (mid-battle engage_boss) ok
+ForestWorld: ready { &"data": 1.011, &"terrain": 0.018, &"tiles": 0.453, &"visuals": 48.809, &"total": 110.285 } kit=0 missing kit assets
+E2E reload 21 (completed) ok
+QA_FOREST_E2E steps=214 reloads=21 commands=2 checks=882 failures=0

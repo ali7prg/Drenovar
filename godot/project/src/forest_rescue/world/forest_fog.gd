@@ -14,9 +14,9 @@ const BYTES := 392
 const REVEAL_SECONDS := 2.0
 const LAYERS := [
 	# lift (m), alpha, threshold, drift, edge softness
-	{"name": "FogHaze", "height": 1.3, "lift": 0.9, "alpha": 0.86, "threshold": 0.00, "drift": 0.45, "soft": 0.20},
-	{"name": "FogBank", "height": 4.6, "lift": 3.6, "alpha": 0.90, "threshold": 0.16, "drift": 0.65, "soft": 0.18},
-	{"name": "FogCrest", "height": 8.4, "lift": 6.8, "alpha": 0.84, "threshold": 0.38, "drift": 0.95, "soft": 0.22},
+	{"name": "FogHaze", "height": 2.6, "lift": 2.0, "alpha": 0.78, "threshold": 0.00, "drift": 0.45, "soft": 0.26},
+	{"name": "FogBank", "height": 8.2, "lift": 6.6, "alpha": 0.80, "threshold": 0.16, "drift": 0.65, "soft": 0.26},
+	{"name": "FogCrest", "height": 13.0, "lift": 11.0, "alpha": 0.72, "threshold": 0.36, "drift": 0.95, "soft": 0.30},
 ]
 
 static var _noise_texture: ImageTexture

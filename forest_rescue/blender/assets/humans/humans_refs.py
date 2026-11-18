@@ -248,3 +248,49 @@ def make_view(asset_id, which, height=None, ground=None, exclude=None, ppm=None,
     v.weight = weight
     v.box = box
     return v
+
+
+# Portrait insets: (right-eye px, left-eye px, mouth px) in sheet coordinates.  "right" = the
+# character's right eye = image-left.  Read on 3x zoomed grids of the expression portraits.
+PORTRAIT_LM = {
+    "lf_civilian_miller": ((417, 147), (456, 147), (441, 171)),
+    "lf_civilian_herbalist": ((912, 152), (952, 151), (936, 178)),
+    "lf_civilian_ferryman": ((1418, 145), (1462, 143), (1447, 172)),
+    "lf_civilian_courier": ((414, 601), (452, 600), (436, 626)),
+    "lf_civilian_cooper": ((911, 603), (951, 601), (936, 628)),
+    "lf_civilian_quarry_worker": ((1421, 601), (1459, 598), (1446, 626)),
+}
+
+
+class AffineView(refs.View):
+    """Front-facing view whose pixel mapping is an affine map of world (x, z) (portrait insets)."""
+
+    def __init__(self, name, image, mask, A, weight=1.0):
+        super().__init__(name=name, image=image, mask=mask, d=np.array([0.0, 1.0, 0.0]), ppm=1.0, ax=0.0, ay=0.0,
+                         weight=weight)
+        self.A = np.asarray(A, float)       # 2x3: [u, v] = A @ [x, z, 1]
+
+    def project(self, P):
+        P = np.asarray(P, float)
+        x, z = P[..., 0], P[..., 2]
+        u = self.A[0, 0] * x + self.A[0, 1] * z + self.A[0, 2]
+        v = self.A[1, 0] * x + self.A[1, 1] * z + self.A[1, 2]
+        return u, v, P[..., 1]
+
+
+def portrait_view(asset_id, lm, weight=6.0):
+    """Affine-registered portrait (eyes + mouth) onto the model's 3-D face landmarks."""
+    if asset_id not in PORTRAIT_LM:
+        return None
+    p = PANELS[asset_id]
+    x0, y0, x1, y1 = p["inset"]
+    img = refs.crop(sheet(p["sheet"]), p["inset"])
+    (rx, ry), (lx, ly), (mx, my) = PORTRAIT_LM[asset_id]
+    src = np.array([[lm["eye_r"][0], lm["eye_r"][2], 1.0], [lm["eye_l"][0], lm["eye_l"][2], 1.0],
+                    [lm["mouth"][0], lm["mouth"][2], 1.0]])
+    dst = np.array([[rx - x0, ry - y0], [lx - x0, ly - y0], [mx - x0, my - y0]], float)
+    A = np.linalg.solve(src, dst).T     # 2x3
+    mask = np.ones(img.shape[:2], bool)
+    mask[:3] = mask[-3:] = False
+    mask[:, :3] = mask[:, -3:] = False
+    return AffineView("portrait", img, mask, A, weight=weight)

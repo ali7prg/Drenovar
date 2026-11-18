@@ -85,7 +85,11 @@ _IMG_CACHE = {}
 def image(path, colorspace="sRGB"):
     key = (path, colorspace)
     if key in _IMG_CACHE:
-        return _IMG_CACHE[key]
+        try:
+            _IMG_CACHE[key].name
+            return _IMG_CACHE[key]
+        except ReferenceError:
+            del _IMG_CACHE[key]
     img = bpy.data.images.load(path, check_existing=False)
     img.name = os.path.splitext(os.path.basename(path))[0]
     img.colorspace_settings.name = colorspace

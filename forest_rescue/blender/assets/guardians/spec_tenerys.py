@@ -81,7 +81,7 @@ def skeleton():
     bone("head", AT, S(40, 150), "neck_02", up)
     bone("jaw", S(110, 160), S(45, 182), "head", (0, 0, -1))
     for s, sx in (("L", 1), ("R", -1)):
-        bone(f"ear_{s}", S(120, 98, 0.20 * sx), S(101, 46, 0.355 * sx), "head", fwd)
+        bone(f"ear_{s}", S(112, 98, 0.20 * sx), S(97, 46, 0.355 * sx), "head", fwd)
     bone("mane_01", S(132, 96), S(152, 40), "neck_02", fwd)
     bone("mane_02", S(190, 104), S(214, 30), "neck_01", fwd)
     bone("mane_03", S(262, 104), S(292, 38), "spine_03", fwd)
@@ -93,12 +93,12 @@ def skeleton():
     for s, sx in (("L", 1), ("R", -1)):
         bone(f"scapula_{s}", S(255, 100, 0.16 * sx), S(215, 175, 0.31 * sx), "spine_03", fwd)
         bone(f"upperarm_{s}", S(215, 175, 0.31 * sx), S(262, 240, 0.33 * sx), f"scapula_{s}", fwd)
-        bone(f"forearm_{s}", S(262, 240, 0.34 * sx), S(258, 322, 0.35 * sx), f"upperarm_{s}", fwd)
+        bone(f"forearm_{s}", S(262, 240, 0.33 * sx), S(258, 322, 0.35 * sx), f"upperarm_{s}", fwd)
         bone(f"hand_{s}", S(258, 322, 0.35 * sx), S(243, 352, 0.355 * sx), f"forearm_{s}", fwd)
         bone(f"fingers_{s}", S(243, 352, 0.355 * sx), S(190, 360, 0.36 * sx), f"hand_{s}", up)
         bone(f"thigh_{s}", S(575, 125, 0.26 * sx), S(548, 218, 0.35 * sx), "hips", fwd)
         bone(f"shin_{s}", S(548, 218, 0.35 * sx), S(630, 268, 0.37 * sx), f"thigh_{s}", fwd)
-        bone(f"foot_{s}", S(630, 268, 0.375 * sx), S(612, 350, 0.40 * sx), f"shin_{s}", fwd)
+        bone(f"foot_{s}", S(630, 268, 0.37 * sx), S(612, 350, 0.40 * sx), f"shin_{s}", fwd)
         bone(f"toes_{s}", S(612, 350, 0.40 * sx), S(560, 359, 0.405 * sx), f"foot_{s}", up)
     return grig.Skeleton(B)
 
@@ -131,8 +131,8 @@ def body_parts(sk):
     # ---- head
     head = "head"
     P.append(Part(sdf.ellipsoid(S(95, 116), (0.21, 0.17, 0.16)), head, k=0.06, tag="cranium"))
-    P.append(Part(sdf.ellipsoid(S(72, 114), (0.16, 0.11, 0.115)), head, k=0.05, tag="brow"))
-    P.append(Part(sdf.ellipsoid(S(54, 128), (0.10, 0.09, 0.105)), head, k=0.05, tag="nasalbridge"))
+    P.append(Part(sdf.ellipsoid(S(74, 108), (0.16, 0.12, 0.125)), head, k=0.05, tag="brow"))
+    P.append(Part(sdf.ellipsoid(S(54, 125), (0.10, 0.09, 0.11)), head, k=0.05, tag="nasalbridge"))
     for sx in (1, -1):
         P.append(Part(sdf.ellipsoid(S(92, 146, 0.11 * sx), (0.12, 0.13, 0.12)), head, k=0.05, tag="cheek"))
         P.append(Part(sdf.ellipsoid(S(66, 118, 0.085 * sx), (0.06, 0.06, 0.045)), head, k=0.03, tag="browridge"))
@@ -140,7 +140,7 @@ def body_parts(sk):
     P.append(Part(sdf.ellipsoid(S(31, 156), (0.055, 0.04, 0.042)), head, k=0.02, tag="nose"))
     P.append(Part(sdf.round_cone(S(112, 158), S(46, 179), 0.075, 0.048), "jaw", k=0.03, tag="jaw"))
     # mouth slit (upper lip / jaw separation) and eye sockets
-    mouth = sdf.box(S(64, 171), (0.15, 0.115, 0.0065), rot=(math.radians(-8), 0, 0), rounding=0.005)
+    mouth = sdf.box(S(64, 171), (0.15, 0.115, 0.0045), rot=(math.radians(-8), 0, 0), rounding=0.004)
     P.append(Part(mouth, head, k=0.008, op="subtract", tag="mouth"))
     for sx in (1, -1):
         P.append(Part(sdf.ellipsoid(S(40, 163, 0.052 * sx), (0.055, 0.06, 0.045)), head, k=0.03, tag="whiskerpad"))
@@ -171,7 +171,7 @@ def body_parts(sk):
         Sj, E, Wr, M = sk.head(ua), sk.head(fa), sk.head(ha), sk.head(fi)
         T = sk.tail(fi)
         P.append(Part(sdf.ellipsoid(S(240, 160, 0.31 * sx), (0.20, 0.23, 0.29)), sc, k=0.08, tag="shoulder"))
-        P.append(Part(sdf.ellipsoid(S(258, 205, 0.33 * sx), (0.19, 0.16, 0.19)), ua, k=0.07, tag="triceps"))
+        P.append(Part(sdf.ellipsoid(S(256, 198, 0.33 * sx), (0.19, 0.15, 0.16)), ua, k=0.07, tag="triceps"))
         P.append(Part(stretch(sdf.round_cone(Sj, E, 0.125, 0.115), 1.2, center=Sj), ua, k=0.05, tag="upperarm"))
         Mid = E + (Wr - E) * 0.45
         P.append(Part(stretch(sdf.round_cone(E, Mid, 0.145, 0.135), 1.08, center=E), fa, k=0.05, tag="forearm"))
@@ -183,9 +183,12 @@ def body_parts(sk):
         th, sh, ft, to = LEGS[f"hind_{s}"][1:]
         H, K, Hk, Mt = sk.head(th), sk.head(sh), sk.head(ft), sk.head(to)
         Tt = sk.tail(to)
-        P.append(Part(sdf.ellipsoid(S(566, 158, 0.28 * sx), (0.20, 0.30, 0.33), rot=(math.radians(18), 0, 0)), th,
-                      k=0.09, tag="thigh_m"))
-        P.append(Part(sdf.ellipsoid(S(596, 200, 0.27 * sx), (0.15, 0.14, 0.22)), th, k=0.07, tag="hamstring"))
+        # haunch (gluteal mass) stays with the pelvis; lower thigh follows the femur
+        P.append(Part(sdf.ellipsoid(S(572, 140, 0.26 * sx), (0.20, 0.27, 0.22), rot=(math.radians(12), 0, 0)), "hips",
+                      k=0.09, tag="haunch"))
+        P.append(Part(sdf.ellipsoid(H + (K - H) * 0.55 + np.array([0, 0.03, 0]), (0.17, 0.19, 0.21)), th, k=0.08,
+                      tag="thigh_m"))
+        P.append(Part(sdf.ellipsoid(S(594, 196, 0.27 * sx), (0.14, 0.12, 0.19)), th, k=0.07, tag="hamstring"))
         P.append(Part(sdf.round_cone(H, K, 0.15, 0.13), th, k=0.06, tag="thigh"))
         P.append(Part(stretch(sdf.round_cone(K, Hk, 0.15, 0.12), 0.85, center=K), sh, k=0.05, tag="shin"))
         P.append(Part(sdf.ellipsoid(K + (Hk - K) * 0.28, (0.12, 0.15, 0.13)), sh, k=0.06, tag="gaskin"))
@@ -233,7 +236,7 @@ def toe_tips(sk, side, hind=False, scale=1.0, latf=None):
     out = []
     latf = (1.15 if hind else 1.12) if latf is None else latf
     for j, (ox, of) in TOES:
-        p = c + (lat * ox * sx * latf + fwd * (of + 0.06)) * scale + np.array([0, 0, 0.06 * scale])
+        p = c + (lat * ox * sx * latf + fwd * (of + 0.06)) * scale + np.array([0, 0, 0.075 * scale])
         out.append((p, fwd, lat * sx))
     return out
 
@@ -248,7 +251,7 @@ def side_stance(sk, pose=None):
     legs = {
         "fore_L": ((124, 352), (-0.45, 1.0)),    # reaching forward
         "fore_R": ((284, 352), (-0.20, 1.0)),    # planted under the shoulder
-        "hind_L": ((678, 352), (-0.14, 1.0)),    # extended back
+        "hind_L": ((672, 352), (0.0, 1.0)),      # extended back
         "hind_R": ((462, 352), (-0.70, 1.0)),    # stepping forward under the belly
     }
     girdle = {"fore_L": 2.0, "fore_R": 22.0}
@@ -273,7 +276,7 @@ def side_stance(sk, pose=None):
 
 SEED = 909
 VOXEL = 0.011
-BODY_TRIS = (8600, 4300, 2050)
+BODY_TRIS = (7600, 4100, 1950)
 CLUMP_KEEP = (1.0, 0.45, 0.12)
 CLUMP_WIDTH = (1.0, 1.3, 1.8)
 CLUMP_UV_SCALE = 0.6
@@ -307,9 +310,9 @@ def fur(sk, hv, hf, pans, rng):
     # ---- dorsal mane: neck crest -> withers -> back ridge
     def w_mane(c, n):
         x, y = sheet_xy(c)
-        return (_ss(78, 96, x) * (1 - _ss(560, 590, x)) * _ss(0.05, 0.35, n[:, 2]) *
+        return (_ss(112, 128, x) * (1 - _ss(560, 590, x)) * _ss(0.05, 0.35, n[:, 2]) *
                 (1 - _ss(0.20, 0.27, np.abs(c[:, 0]))) * (1 + 1.5 * _ss(100, 180, x) * (1 - _ss(300, 440, x))))
-    r, nr = _roots(hv, hf, rng, 255, w_mane, 0.034)
+    r, nr = _roots(hv, hf, rng, 300, w_mane, 0.030)
     # keep the big lynx ears clear
     for s_ in ("L", "R"):
         eb = sk.head(f"ear_{s_}")
@@ -318,7 +321,7 @@ def fur(sk, hv, hf, pans, rng):
 
     def d_mane(p, n, rng):
         x, _ = sheet_xy(p)
-        th = math.radians(np.interp(x[0], [90, 150, 220, 280, 340, 420, 500, 580], [58, 52, 46, 36, 26, 18, 12, 8]))
+        th = math.radians(np.interp(x[0], [90, 150, 220, 280, 340, 420, 500, 580], [58, 52, 46, 40, 32, 20, 12, 8]))
         d = np.array([0.0, math.cos(th), math.sin(th)])
         d[0] += n[0] * 0.65
         d += rng.normal(0, 0.07, 3)
@@ -330,12 +333,12 @@ def fur(sk, hv, hf, pans, rng):
     import gref
     mane_views = [gref.morph_view(side, -1), gref.morph_view(front, 5), gref.morph_view(rear, 5)]
     C += gfur.make_clumps("mane", r, nr, d_mane, rng, mane_views, 0.66, min_len=0.05,
-                          width=(0.04, 0.072), flat=0.45, bend_fn=b_mane,
+                          width=(0.03, 0.056), flat=0.5, bend_fn=b_mane,
                           up_fn=lambda p, n, d: np.array([0.0, 1.0, 0.0]), jag=(0.86, 1.0))
     # midline crest (tall spikes between the ears and over the withers, seen in front/rear)
     def w_crest(c, n):
         x, y = sheet_xy(c)
-        return _ss(100, 125, x) * (1 - _ss(250, 290, x)) * (np.abs(c[:, 0]) < 0.07) * _ss(0.3, 0.6, n[:, 2])
+        return _ss(118, 132, x) * (1 - _ss(250, 290, x)) * (np.abs(c[:, 0]) < 0.07) * _ss(0.3, 0.6, n[:, 2])
     r2, nr2 = _roots(hv, hf, rng, 40, w_crest, 0.03)
 
     def d_crest(p, n, rng):
@@ -366,16 +369,16 @@ def fur(sk, hv, hf, pans, rng):
         d, _ = tail_t(c)
         x, _ = sheet_xy(c)
         return (d < 0.14) * _ss(600, 625, x)
-    r, nr = _roots(hv, hf, rng, 140, w_tail, 0.045)
+    r, nr = _roots(hv, hf, rng, 190, w_tail, 0.038)
     _, tg = tail_t(r)
 
     def d_tail(p, n, rng):
         _, t = tail_t(p[None])
-        return t[0] * 0.85 + n * 0.55 + rng.normal(0, 0.08, 3)
+        return t[0] * 0.8 + n * 0.7 + rng.normal(0, 0.08, 3)
 
-    C += gfur.make_clumps("tail", r, nr, d_tail, rng, [side], 0.42, min_len=0.08, width=(0.07, 0.11),
-                          flat=0.5, bend_fn=lambda p, n, d, rng: n * 0.12,
-                          up_fn=lambda p, n, d: np.cross(d, n), jag=(0.75, 1.0))
+    C += gfur.make_clumps("tail", r, nr, d_tail, rng, [side], 0.50, min_len=0.08, width=(0.045, 0.072),
+                          flat=0.6, bend_fn=lambda p, n, d, rng: n * 0.12,
+                          up_fn=lambda p, n, d: np.cross(d, n), jag=(0.88, 1.0))
     # tail-tip brush
     tip = sk.tail("tail_06")
     tdir = (sk.tail("tail_06") - sk.head("tail_06"))
@@ -405,9 +408,9 @@ def fur(sk, hv, hf, pans, rng):
     # ---- chest tuft (dark, front view hangs to ~0.45 m above ground)
     def w_chest(c, n):
         x, y = sheet_xy(c)
-        return (_ss(160, 172, x) * (1 - _ss(212, 228, x)) * _ss(195, 210, y) * (1 - _ss(0.10, 0.16, np.abs(c[:, 0]))) *
+        return (_ss(176, 186, x) * (1 - _ss(204, 214, x)) * _ss(195, 210, y) * (1 - _ss(0.06, 0.10, np.abs(c[:, 0]))) *
                 _ss(0.0, 0.4, -n[:, 1] - n[:, 2] * 0.5))
-    r, nr = _roots(hv, hf, rng, 20, w_chest, 0.035)
+    r, nr = _roots(hv, hf, rng, 16, w_chest, 0.03)
     C += gfur.make_clumps("chest", r, nr, lambda p, n, rng: np.array([0, -0.12, -1.0]) + rng.normal(0, 0.08, 3),
                           rng, [side, front], 0.55, min_len=0.08, width=(0.055, 0.085), flat=0.4,
                           bend_fn=lambda p, n, d, rng: np.array([0, 0.18, 0.0]),
@@ -450,15 +453,15 @@ def details(sk):
                       lods=(0, 1, 2)))
         D.append(dict(mesh=gb.uv_sphere(S(66, 129, 0.114 * sx), 0.034, 8, 6, scale=(0.8, 1.0, 0.72)), bone="head",
                       kind="eye", lods=(0, 1, 2)))
-        D.append(dict(mesh=gfur.horn(S(43, 162, 0.046 * sx), np.array([0, -0.12, -1.0]), np.zeros(3), 0.032, 0.012,
+        D.append(dict(mesh=gfur.horn(S(47, 158, 0.044 * sx), np.array([0, -0.12, -1.0]), np.zeros(3), 0.028, 0.011,
                                      sides=4, n=3), bone="head", kind="tooth", lods=(0,)))
-        D.append(dict(mesh=gfur.horn(S(50, 176, 0.040 * sx), np.array([0, -0.05, 1.0]), np.zeros(3), 0.026, 0.010,
+        D.append(dict(mesh=gfur.horn(S(53, 180, 0.038 * sx), np.array([0, -0.05, 1.0]), np.zeros(3), 0.022, 0.009,
                                      sides=4, n=3), bone="jaw", kind="tooth", lods=(0,)))
-        for k, (dz, dy) in enumerate(((0.06, 0.30), (-0.05, 0.40))):
+        for k, (dz, dy) in enumerate(((0.05, 0.10), (-0.04, 0.16))):
             root = S(38 + 4 * k, 162 + 3 * k, 0.085 * sx)
-            D.append(dict(mesh=gb.tube(gb.catmull([root, root + np.array([0.07 * sx, 0.04, dz * 0.4]),
-                                                   root + np.array([0.14 * sx, dy * 0.22, dz])], 4),
-                                       np.array([0.0022, 0.0019, 0.0014, 0.0008]), sides=3, up=(0, 1, 0)),
+            D.append(dict(mesh=gb.tube(gb.catmull([root, root + np.array([0.07 * sx, 0.01, dz * 0.4]),
+                                                   root + np.array([0.15 * sx, dy * 0.22, dz])], 4),
+                                       np.array([0.0014, 0.0012, 0.0009, 0.0005]), sides=3, up=(0, 1, 0)),
                           bone="head", kind="whisker", lods=(0,)))
     return D
 
@@ -582,11 +585,13 @@ def texture_overrides(B, col, T, lab):
         ang = math.radians(-8)
         R = np.array([[1, 0, 0], [0, math.cos(ang), -math.sin(ang)], [0, math.sin(ang), math.cos(ang)]])
         lq = (q - c0) @ R
-        inside = (np.abs(lq[:, 0]) < 0.10) & (np.abs(lq[:, 1]) < 0.15) & (np.abs(lq[:, 2]) < 0.030)
+        inside = (np.abs(lq[:, 0]) < 0.075) & (lq[:, 1] > -0.07) & (lq[:, 1] < 0.12) & (np.abs(lq[:, 2]) < 0.022)
         nz = T.nrm[m][:, 2]
-        inner = inside & (np.abs(nz) > 0.55)
+        inner = inside & (np.abs(nz) > 0.6)
+        lip = (np.abs(lq[:, 0]) < 0.11) & (np.abs(lq[:, 1]) < 0.13) & (np.abs(lq[:, 2]) < 0.012) & ~inner
         tmp = out[m]
-        tmp[inner] = np.array([0.32, 0.10, 0.10])
+        tmp[lip] = tmp[lip] * 0.45
+        tmp[inner] = np.array([0.30, 0.09, 0.09])
         out[m] = tmp
     return out
 
@@ -605,3 +610,156 @@ def projection_filter(B, vname, Tb):
     if vname == "front":
         return np.clip((-0.25 - y) / 0.3, 0, 1)
     return np.ones_like(y)
+
+
+# --------------------------------------------------------------------------- animation
+
+TAIL = [f"tail_{i:02d}" for i in range(1, 7)]
+PIVOT = S(390, 160)
+ANIM = dict(
+    spine=["spine_01", "spine_02", "spine_03"], neck=["neck_01", "neck_02"], tail=TAIL,
+    mane=["mane_01", "mane_02", "mane_03"],
+    bones={"jaw", "ear_L", "ear_R"},
+    tail_base=[0.0] * 6, tail_lag=0.07, idle_tail_sway=7.0, idle_tail_curl=5.0,
+    walk=dict(T=33 / 30, speed=1.6, duty=0.62,
+              touchdown={"hind_L": 0.0, "fore_L": 0.25, "hind_R": 0.5, "fore_R": 0.75},
+              lift_f=0.15, lift_h=0.13, bob=0.016, sway=0.018, pitch=1.0, roll=1.6, yaw=2.0, spine_yaw=2.2,
+              tail_sway=7.0, tail_lift=6.0, tail_bounce=2.0, ears=4.0, mane_bounce=3.0),
+    run=dict(T=20 / 30, speed=5.2, duty=0.29,
+             touchdown={"hind_L": 0.0, "hind_R": 0.09, "fore_R": 0.42, "fore_L": 0.51},
+             lift_f=0.30, lift_h=0.26, fold_f=85.0, fold_h=60.0, bob=0.05, bob_phase=-0.9, sway=0.0,
+             pitch=4.0, pitch_phase=0.6, roll=1.0, yaw=1.0, spine_yaw=1.0, flex=9.0, flex_mult=1,
+             flex_phase=0.3, tail_sway=3.0, tail_lift=10.0, tail_bounce=6.0, ears=-18.0, mane_bounce=7.0,
+             head_pitch=2.0, sweep_f=1.0, sweep_h=1.0, height=-0.07, girdle=1.4),
+    alert_pose=dict(body=(0.0, 0.06, -0.12, -3.0, 0.0, 0.0),
+                    rot={"neck_01": (7.0, 0, 0), "neck_02": (4.0, 0, 0), "head": (-9.0, 0, 0),
+                         "spine_01": (-2.0, 0, 0), "spine_03": (2.0, 0, 0)}, tail_lift=12.0),
+    death_lie=(-0.66, 86.0), roar_neck=12.0, roar_head=14.0, roar_jaw=38.0, mane_bristle=18.0,
+)
+
+
+def attack(C, P):
+    """Pounce (art/09 bottom strip): compress anticipation -> leap with extended forelegs ->
+    cushioned landing; front-paw strike = contact marker 0.70 s; hop back to the start pose."""
+    import ganim
+    from ganim import keys_cr, keys_smooth
+    A = P["alert_pose"]
+    a_body = tuple(A["body"])
+    body_k = [(0.00, a_body), (0.15, (0, 0.10, -0.17, -2.0, 0, 0)), (0.38, (0, 0.20, -0.36, -5.0, 0, 0)),
+              (0.50, (0, -0.10, -0.10, 10.0, 0, 0)), (0.61, (0, -0.70, 0.32, 3.0, 0, 0)),
+              (0.70, (0, -1.02, 0.05, -9.0, 0, 0)), (0.82, (0, -1.12, -0.24, -7.0, 0, 0)),
+              (0.98, (0, -0.98, -0.14, -3.0, 0, 0)), (1.12, (0, -0.48, -0.10, -2.0, 0, 0)), (1.30, a_body)]
+    spine_k = {"spine_01": [(0, (-2, 0, 0)), (0.38, (8, 0, 0)), (0.52, (-8, 0, 0)), (0.62, (-10, 0, 0)),
+                            (0.72, (4, 0, 0)), (0.85, (6, 0, 0)), (1.1, (0, 0, 0)), (1.3, (-2, 0, 0))],
+               "spine_02": [(0, (0, 0, 0)), (0.38, (6, 0, 0)), (0.55, (-7, 0, 0)), (0.7, (3, 0, 0)),
+                            (0.85, (5, 0, 0)), (1.3, (0, 0, 0))],
+               "spine_03": [(0, (2, 0, 0)), (0.38, (-4, 0, 0)), (0.6, (-6, 0, 0)), (0.72, (6, 0, 0)),
+                            (0.86, (8, 0, 0)), (1.3, (2, 0, 0))],
+               "neck_01": [(0, (7, 0, 0)), (0.38, (14, 0, 0)), (0.6, (-6, 0, 0)), (0.7, (12, 0, 0)),
+                           (0.82, (10, 0, 0)), (1.1, (6, 0, 0)), (1.3, (7, 0, 0))],
+               "neck_02": [(0, (4, 0, 0)), (0.38, (8, 0, 0)), (0.6, (-6, 0, 0)), (0.7, (8, 0, 0)),
+                           (1.3, (4, 0, 0))],
+               "head": [(0, (-9, 0, 0)), (0.38, (-16, 0, 0)), (0.6, (-4, 0, 0)), (0.7, (-2, 0, 0)),
+                        (0.82, (-10, 0, 0)), (1.3, (-9, 0, 0))],
+               "jaw": [(0, (1, 0, 0)), (0.42, (2, 0, 0)), (0.56, (34, 0, 0)), (0.68, (36, 0, 0)), (0.74, (6, 0, 0)),
+                       (0.86, (16, 0, 0)), (1.05, (3, 0, 0)), (1.3, (1, 0, 0))],
+               "ear_L": [(0, (-22, 0, 0)), (0.3, (-40, 0, 0)), (1.0, (-40, 0, 0)), (1.3, (-22, 0, 0))],
+               "ear_R": [(0, (-22, 0, 0)), (0.3, (-40, 0, 0)), (1.0, (-40, 0, 0)), (1.3, (-22, 0, 0))]}
+    for b in P["mane"]:
+        spine_k[b] = [(0, (18, 0, 0)), (0.38, (22, 0, 0)), (0.62, (-8, 0, 0)), (0.75, (14, 0, 0)), (1.3, (18, 0, 0))]
+    tail_k = [(0, 12.0), (0.38, 30.0), (0.55, 4.0), (0.65, -6.0), (0.8, 10.0), (1.0, 16.0), (1.3, 12.0)]
+    # feet: (time, forward offset m (+ = forward), height m, meta, toe)
+    fwd_land_f, fwd_land_h = 1.42, 1.05
+    feetk = {
+        "fore_L": [(0, 0, 0, -6, 0), (0.44, 0, 0, -6, 0), (0.52, 0.30, 0.30, 70, 35), (0.62, 1.20, 0.34, -30, -20),
+                   (0.69, fwd_land_f, 0.0, -10, -10), (0.94, fwd_land_f, 0.0, -6, 0),
+                   (1.04, 0.80, 0.18, 50, 25), (1.13, 0.0, 0.0, -6, 0), (1.30, 0, 0, -6, 0)],
+        "fore_R": [(0, 0, 0, -6, 0), (0.45, 0, 0, -6, 0), (0.53, 0.32, 0.28, 70, 35), (0.63, 1.18, 0.33, -30, -20),
+                   (0.71, fwd_land_f - 0.05, 0.0, -10, -10), (0.97, fwd_land_f - 0.05, 0.0, -6, 0),
+                   (1.07, 0.75, 0.18, 50, 25), (1.17, 0.0, 0.0, -6, 0), (1.30, 0, 0, -6, 0)],
+        "hind_L": [(0, 0, 0, -6, 0), (0.52, 0, 0, 25, 0), (0.58, 0.08, 0.20, 70, 30), (0.68, 0.55, 0.30, 40, 20),
+                   (0.80, fwd_land_h, 0.0, -6, 0), (1.04, fwd_land_h, 0.0, -6, 0), (1.14, 0.5, 0.15, 40, 20),
+                   (1.24, 0.0, 0.0, -6, 0), (1.30, 0, 0, -6, 0)],
+        "hind_R": [(0, 0, 0, -6, 0), (0.53, 0, 0, 25, 0), (0.59, 0.08, 0.20, 70, 30), (0.69, 0.55, 0.30, 40, 20),
+                   (0.82, fwd_land_h - 0.04, 0.0, -6, 0), (1.07, fwd_land_h - 0.04, 0.0, -6, 0),
+                   (1.17, 0.5, 0.15, 40, 20), (1.27, 0.0, 0.0, -6, 0), (1.30, 0, 0, -6, 0)],
+    }
+
+    def frame(t):
+        body = tuple(keys_cr(t, body_k))
+        rot = {b: tuple(keys_cr(t, k)) for b, k in spine_k.items()}
+        lift = float(keys_cr(t, tail_k))
+        lash = lambda i, tt: (-6.0 * math.sin(2 * math.pi * 2.2 * (tt - 0.06 * i)) * (1 if t < 0.45 else 0.3),
+                              4.0 * math.sin(2 * math.pi * 1.3 * (tt - 0.07 * i)))
+        import gclips
+        rot.update(gclips.tail_rot(P, t, lift=lift, extra=lash))
+        feet = {}
+        for leg, ks in feetk.items():
+            v = keys_smooth(t, [(k[0], np.array(k[1:])) for k in ks])
+            n = C.neutral[leg]
+            feet[leg] = dict(pos=n + np.array([0.0, -v[0], v[1]]), meta=float(v[2]), toe=float(v[3]),
+                             girdle=(-14.0 * min(1.0, v[0] / 1.2) if leg in C.front else 0.0))
+        return dict(body=body, rot=rot, feet=feet)
+    return ganim.sample(frame, 1.3), {"markers": {"contact": 0.70}}
+
+
+STRIP = {   # motion-strip panels (sheet boxes) and the Attack time each panel corresponds to
+    "crouch": ((0, 790, 405, 1012), 0.38),
+    "leap": ((440, 758, 985, 1000), 0.61),
+    "landing": ((1030, 800, 1530, 1015), 0.82),
+}
+
+
+# --------------------------------------------------------------------------- levels, sockets, QA views
+
+LEVELS = {
+    "L1": {"game_scale": 1.18, "sites": ["lf_site_01", "lf_site_02", "lf_site_03"],
+           "baseColorFactor": [1.0, 1.0, 1.0, 1.0], "show_nodes": [],
+           "look": "base striped dark-brown coat, small horn nubs"},
+    "L2": {"game_scale": 1.34, "sites": ["lf_site_04"],
+           "baseColorFactor": [0.84, 0.82, 0.83, 1.0], "show_nodes": ["lf_guardian_tenerys_L2"],
+           "look": "darker coat (material tint), longer back-swept horns"},
+    "L3": {"game_scale": 1.50, "sites": ["lf_site_07"],
+           "baseColorFactor": [0.70, 0.68, 0.71, 1.0], "show_nodes": ["lf_guardian_tenerys_L3"],
+           "look": "near-black coat (material tint), large curved horns + bony dorsal spurs"},
+}
+NOTES = ("Level scale is applied by the game (landscape.gd: actor.scale = 1.02 + 0.16*level); the GLB keeps "
+         "the ~5 m footprint of the original TENERYS prototype.  Level looks: multiply the material albedo "
+         "by levels.Lx.baseColorFactor and set visible=true on levels.Lx.show_nodes (hidden by default with "
+         "KHR_node_visibility).  LOD0/1/2 are sibling nodes: enable one per distance band (visibility ranges). "
+         "Clips are in place; Walk/Run strides and footfalls are in clips.*; Attack contact marker 0.70 s.  "
+         "Hit is 14 frames (0.467 s): 0.45 s is not a whole number of 30 fps frames.")
+
+
+def sockets(sk):
+    return {"mouth": S(32, 170), "head_top": S(100, 40), "chest": S(190, 205), "hit_center": S(390, 160),
+            "tail_tip": sk.tail("tail_06"), "paw_fore_L": sk.head("fingers_L")}
+
+
+def level_geometry(B):
+    import gfur
+    hl, hr = 16, 22   # detail indices of the L1 horns (UV islands reused: same tube topology)
+    out = {"L2": [], "L3": []}
+    for sx, src in ((1, hl), (-1, hr)):
+        base = S(63, 111, 0.092 * sx)
+        out["L2"].append((gfur.horn(base, np.array([0.30 * sx, 0.55, 0.78]), np.array([0.0, 0.55, -0.32]),
+                                    0.23, 0.040, sides=6, n=7, ridges=0.12), src, "head"))
+        out["L3"].append((gfur.horn(base, np.array([0.36 * sx, 0.50, 0.80]), np.array([0.05 * sx, 0.75, -0.55]),
+                                    0.33, 0.048, sides=6, n=7, ridges=0.14), src, "head"))
+    for i, (x, b) in enumerate(((300, "spine_03"), (345, "spine_03"), (390, "spine_02"), (435, "spine_02"),
+                                (480, "spine_01"))):
+        y = np.interp(x, [300, 345, 390, 435, 480], [100, 96, 92, 87, 82]) + 6
+        out["L3"].append((gfur.horn(S(x, y), np.array([0.0, 0.45, 0.9]), np.array([0.0, 0.3, -0.1]),
+                                    0.20 - 0.015 * i, 0.035, sides=6, n=7, ridges=0.08), hl, b))
+    return out
+
+
+STRIP_GROUND = {"crouch": 1001, "leap": 1000, "landing": 1007}
+_EYE = S(66, 129)
+HEAD_VIEWS = {
+    "front": {"sheet": "09", "box": (540, 392, 888, 755), "kind": "ortho", "dir": "front",
+              "ppm": 98.0 / (2 * 0.114), "anchor_px": (701 - 540, 565 - 392),
+              "anchor_world": (0.0, _EYE[1], _EYE[2])},
+    "side": {"sheet": "09", "box": (15, 392, 495, 755), "kind": "persp",
+             "cam": S(85, 140) + np.array([-1.45, -0.62, 0.10]), "look": S(80, 140), "lens": 70.0},
+}

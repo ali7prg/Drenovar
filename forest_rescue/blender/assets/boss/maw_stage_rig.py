@@ -40,14 +40,10 @@ def make_lod0(table):
     t0 = time.time()
     body = core.decimate_to(high, C.BODY_TRIS_LOD0, name=f"{AID}_LOD0")
     log("body LOD0", core.tri_count(body), f"{time.time() - t0:.1f}s")
-    core.smart_uv(body, angle=78.0, margin=0.002)
-    core.select_only([body])
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.select_all(action="SELECT")
-    bpy.ops.uv.pack_islands(rotate=True, rotate_method="ANY", scale=True, margin_method="SCALED",
-                            margin=0.002, shape_method="CONCAVE")
-    bpy.ops.object.mode_set(mode="OBJECT")
+    import maw_uv
+    names = [b["name"] for b in B.bone_table()]
+    ns, nr = maw_uv.region_unwrap(body, names)
+    log("region unwrap: seams", ns, "regions", nr)
     set_rigid(body, table)
     mats = materials()
     body.data.materials.clear()

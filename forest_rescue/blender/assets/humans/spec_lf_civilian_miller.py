@@ -8,6 +8,9 @@ import humans_sdf as H
 
 ASSET = "lf_civilian_miller"
 GROUP = "civilian"
+CLASS_GROUP = {"shirt": "garment"}
+BUDGET = {"head": 2500}
+FACE_PAINT = {"lip_tint": (1.05, 0.9, 0.88)}
 
 # landmarks read from the world-grid resampled front panel (metres; +x = character's left)
 L = dict(
@@ -154,52 +157,17 @@ def garments(ctx):
 
 
 def head_extras(ctx):
-    """Hair joins the body field (no hidden scalp); beard is a separate optional shell."""
+    """Curly dark hair + full beard, both merged into the head mesh (tapered, seamless)."""
     import humans_geo as G
-    from frlib import sdf as fsdf
+    import humans_kit as K
     lm = ctx.lm
     s = lm["scale"]
     reg = G.hair_region(lm, front=0.066, temple_drop=0.25, side=0.000, back=-0.072, noise=0.004, seed=5)
-
-    def hair_fn(P):
-        return np.maximum(ctx.head_fn(P) - 0.017 * s, reg(P))
-    hair = H.tag(fsdf.Prim(hair_fn, lm["origin"] - 0.16, lm["origin"] + 0.20), cls="hair", bone="Head", k=0.004,
-                 name="hair_shell")
-    cl = G.curls(lm, ctx.head_fn, reg, 150, 0.007 * s, 0.012 * s, 0.013 * s, seed=11)
+    out = [K.hair_shell(ctx, thick=0.016, region=reg, taper=0.004)]
+    cl = G.curls(lm, ctx.head_fn, lambda P: reg(P) + 0.004 * s, 120, 0.007 * s, 0.011 * s, 0.013 * s, seed=11)
     for c in cl:
-        c.k = 0.008
-    return [hair] + cl
-
-
-def beard(ctx):
-    import humans_geo as G
-    from frlib import sdf as fsdf
-    lm = ctx.lm
-    s = lm["scale"]
-    O = lm["origin"]
-
-    def region(P):
-        Q = (np.asarray(P, float) - O) / s
-        x, y, z = Q[..., 0], Q[..., 1], Q[..., 2]
-        # below the cheekbone line, in front of the ears, around the jaw & chin, open mouth slot
-        top = -0.040 + 0.28 * np.maximum(np.abs(x) - 0.020, 0) - 0.010
-        r1 = z - top
-        r2 = y - 0.085                      # not behind the jaw angle
-        mouth = np.maximum(np.abs(x) - 0.020, np.abs(z - (lm["mouth"][2] - O[2]) / s + 0.002) - 0.0045)
-        return np.maximum(np.maximum(r1, r2), -mouth) * s
-
-    def fn(P):
-        return np.maximum(ctx.head_fn(P) - 0.020 * s, region(P))
-    prims = [H.tag(fsdf.Prim(fn, O - 0.14, O + 0.14), cls="beard", bone="Jaw", k=0.004)]
-    cl = G.curls(lm, ctx.head_fn, region, 90, 0.006 * s, 0.010 * s, 0.016 * s, seed=21, bone="Jaw", cls="beard")
-    for c in cl:
-        c.k = 0.008
-    prims += cl
-    # moustache (merges into the beard at the mouth corners)
-    m = lm["mouth"]
-    for sx in (1, -1):
-        prims.append(H.capsule(m + np.array([0, -0.006, 0.012]), m + np.array([sx * 0.028, 0.004, -0.004]),
-                               0.0095, 0.0080, cls="beard", bone="Head", k=0.008))
-    lo = O + np.array([-0.10, -0.06, -0.16]) * s
-    hi = O + np.array([0.10, 0.12, 0.0]) * s
-    return G.sdf_piece("beard", prims, lo, hi, 0.0022, "beard", {"type": "body"}, smooth=0.7)
+        c.k = 0.007
+    out += cl
+    out += K.beard_prims(ctx, thick=0.017, curls=70, seed=21, top=-0.036, slope=0.30, back=0.080, lift=0.012,
+                         taper=0.010)
+    return out

@@ -82,7 +82,7 @@ class Poser:
         self.q[n] = (U.inverted() @ r @ cur).to_quaternion()
 
     # ------------------------------------------------------------------ IK
-    def leg_ik(self, side, ankle, ball, pole_dir=(0.15, -1.0, 0.0), toes_flat=True, toe_curl=0.0):
+    def leg_ik(self, side, ankle, ball, pole_dir=(0.15, -1.0, 0.0), toes_flat=True, toe_curl=0.0, heading=0.0):
         """Place the ankle at `ankle` and the metatarsus end at `ball` (armature space)."""
         th, sh, ft = f"thigh_{side}", f"shin_{side}", f"foot_{side}"
         P = self.matrices()
@@ -95,6 +95,8 @@ class Poser:
         pole = Vector(pole_dir)
         if side == "R":
             pole.x = -pole.x
+        if heading:
+            pole = Quaternion(Vector((0, 0, 1)), math.radians(heading)) @ pole
         pole = (pole - dn * pole.dot(dn)).normalized()
         a = (L1 * L1 + dist * dist - L2 * L2) / (2 * dist)
         h = math.sqrt(max(L1 * L1 - a * a, 0.0))
@@ -106,16 +108,18 @@ class Poser:
         self.aim(ft, Vector(ball) - self.head(ft, P), P, keep_twist=False)
         P = self.matrices()
         if toes_flat:
-            self.toes_flat(side, P, curl=toe_curl)
+            self.toes_flat(side, P, curl=toe_curl, heading=heading)
         return K
 
-    def toes_flat(self, side, P=None, curl=0.0):
+    def toes_flat(self, side, P=None, curl=0.0, heading=0.0):
         """Toes keep their rest world direction (flat on the ground); curl (deg) bends them down."""
         P = P or self.matrices()
         for t in ("toe2", "toe3", "toe4"):
             for seg in ("a", "b"):
                 n = f"{t}{seg}_{side}"
                 rest_dir = (self.rest3[n] @ Vector((0, 1, 0))).normalized()
+                if heading:
+                    rest_dir = Quaternion(Vector((0, 0, 1)), math.radians(heading)) @ rest_dir
                 if curl:
                     axis = rest_dir.cross(Vector((0, 0, 1))).normalized()
                     rest_dir = Quaternion(axis, math.radians(-curl * (1.0 if seg == "a" else 1.6))) @ rest_dir

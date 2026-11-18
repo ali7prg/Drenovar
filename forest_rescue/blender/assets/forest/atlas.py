@@ -436,7 +436,7 @@ def paint_blades(w, h, r, cols, n=34, height=(0.55, 0.98), width=(3.5, 7.0), see
 
 def paint_bramble(w, h, r, dense=False):
     cv = Canvas(w, h)
-    leaf_cols = [(0.30, 0.36, 0.14), (0.40, 0.42, 0.16), (0.48, 0.24, 0.12), (0.55, 0.20, 0.12), (0.36, 0.30, 0.13)]
+    leaf_cols = [(0.27, 0.30, 0.12), (0.34, 0.34, 0.14), (0.40, 0.21, 0.12), (0.44, 0.17, 0.11), (0.32, 0.25, 0.12)]
     centre = np.array([w / 2, h * (0.55 if not dense else 0.5)])
     # canes
     for k in range(6 if not dense else 3):

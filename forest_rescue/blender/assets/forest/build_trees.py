@@ -56,6 +56,7 @@ def main():
     ap.add_argument("--no-qa", action="store_true")
     ap.add_argument("--samples", type=int, default=20)
     ap.add_argument("--variants", default="")
+    ap.add_argument("--quick", action="store_true", help="intermediate iteration: fewer QA renders")
     a = ap.parse_args(sys.argv[1:])
     sp = SPECIES[a.species]
     asset = f"lf_env_{a.species}"
@@ -86,7 +87,7 @@ def main():
             m, _ = fqa.compare_view(view, [built[1][1][0]], fqa.iter_path(asset, a.iter, "v1_front"),
                                     f"{asset} v1 LOD0 vs art/02 (iter {a.iter})")
             metrics["v1_front_LOD0"] = m
-            for lod in (1, 2):
+            for lod in (() if a.quick else (1, 2)):
                 m, _ = fqa.compare_view(view, [built[1][1][lod]], fqa.iter_path(asset, a.iter, f"v1_front_LOD{lod}"),
                                         f"{asset} v1 LOD{lod} vs art/02")
                 metrics[f"v1_front_LOD{lod}"] = m
@@ -111,13 +112,19 @@ def main():
             o.location.x = 0
         # LOD lineup of v1
         v1 = variants[0]
-        objs = built[v1][1]
+        if a.quick:
+            core.write_json(paths.compare(asset, f"iter{a.iter:02d}_metrics.json"),
+                            {"metrics": metrics, "tris": {f"v{v}": info[v] for v in variants}})
+            print(json.dumps({k: (v["iou"], v["iou_closed_r4"]) for k, v in metrics.items()}), flush=True)
+            v1 = None
+        objs = built[v1 or variants[0]][1]
         lo, hi = core.bounds([objs[0]])
         w = hi[0] - lo[0] + 1.5
         for i, o in enumerate(objs):
             o.location.x = i * w
         bpy.context.view_layer.update()
-        fqa.ortho_shot(objs, fqa.iter_path(asset, a.iter, "lods_front"), direction=(0, 1, 0), res=(1500, 600),
+        if not a.quick:
+          fqa.ortho_shot(objs, fqa.iter_path(asset, a.iter, "lods_front"), direction=(0, 1, 0), res=(1500, 600),
                        label=f"{asset} v{v1} LOD0 | LOD1 | LOD2")
         fqa.ortho_shot(objs, fqa.iter_path(asset, a.iter, "lods_strategic55"), pitch_deg=55, yaw_deg=20,
                        res=(1500, 600), label=f"{asset} v{v1} LOD0 | LOD1 | LOD2 strategic 55deg")

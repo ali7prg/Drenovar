@@ -201,10 +201,14 @@ def fk_and_basis(skel, pose, leg_solver):
 # --------------------------------------------------------------------------- leg IK
 
 
+OVERREACH = [0.0]
+
+
 def _circle_ik(a, c, la, lb, bend_dir):
     """2-bone IK in 3-D: joint b with |b-a|=la, |c-b|=lb, bending toward bend_dir."""
     ac = c - a
     D = np.linalg.norm(ac)
+    OVERREACH[0] = max(OVERREACH[0], D - (la + lb))
     D = min(max(D, abs(la - lb) + 1e-4), la + lb - 1e-4)
     u = ac / max(np.linalg.norm(ac), 1e-9)
     x = (la * la - lb * lb + D * D) / (2 * D)
@@ -235,6 +239,8 @@ class Legs:
                            f"cannon_H_{s}", f"pastern_H_{s}", f"hoof_H_{s}"}
         # chains are solved right after their parent bone is posed
         self.chain_roots = {"spine_03": ["F_L", "F_R"], "pelvis": ["H_L", "H_R"]}
+        self.last_over = {}
+        self.toe_actual = {}
         sk = skel
         self.toe_rest = {}
         for s in ("L", "R"):
@@ -293,6 +299,7 @@ class Legs:
         kappa = rest_rel + prm.get("knee", 0.0)
         # virtual link elbow->fetlock
         Lv = math.sqrt(Lf * Lf + Lc * Lc + 2 * Lf * Lc * math.cos(kappa))
+        Mh, coffin, fet = self._reach(f"F_{s}", shoulder, fet, Lh + Lv, Mh, coffin)
         back = np.cross(lat, np.array([0, 0, 1.0]))   # lateral x up = -Y? -> ensure +Y (back)
         if back[1] < 0:
             back = -back
@@ -304,6 +311,22 @@ class Legs:
         knee = elbow + uf * Lf
         joints = [top, shoulder, elbow, knee, fet, coffin]
         self._emit(sk, names, joints, Mh, lat, M, basis, Rs)
+
+    def _reach(self, leg, root, fet, reach, Mh, coffin):
+        """Pull an unreachable hoof toward the limb root (keeps the chain connected)."""
+        D = np.linalg.norm(fet - root)
+        over = D - (reach - 0.002)
+        self.last_over[leg] = over
+        if over > 0:
+            shift = (fet - root) / D * over
+            fet = fet - shift
+            coffin = coffin - shift
+            Mh = Mh.copy()
+            Mh[:3, 3] -= shift
+        hoof = f"hoof_{leg[0]}_{leg[2]}"
+        Rh = self.skel.R[hoof]
+        self.toe_actual[leg] = Mh[:3, :3] @ (Rh[:3, :3].T @ (self.toe_rest[leg] - Rh[:3, 3])) + Mh[:3, 3]
+        return Mh, coffin, fet
 
     def _hind(self, skel, prm, M, basis, s):
         sk = skel
@@ -319,6 +342,18 @@ class Legs:
         rootrot = M["pelvis"][:3, :3] @ sk.R["pelvis"][:3, :3].T
         dc = _axis_rot(lat, prm.get("cannon", 0.0)) @ (rootrot @ dc_rest)
         hock = fet - dc * Lc
+        D = np.linalg.norm(hock - hip)
+        over = D - (Lf + Lt - 0.002)
+        self.last_over[f"H_{s}"] = over
+        if over > 0:
+            shift = (hock - hip) / D * over
+            hock = hock - shift
+            fet = fet - shift
+            coffin = coffin - shift
+            Mh = Mh.copy()
+            Mh[:3, 3] -= shift
+        self.toe_actual[f"H_{s}"] = Mh[:3, :3] @ (sk.R[names[4]][:3, :3].T @
+                                                  (self.toe_rest[f"H_{s}"] - sk.R[names[4]][:3, 3])) + Mh[:3, 3]
         fwd = -np.cross(lat, np.array([0, 0, 1.0]))
         if fwd[1] > 0:
             fwd = -fwd
@@ -464,8 +499,8 @@ class ClipBuilder:
     def neutral_toes(self, narrow=0.92):
         """Symmetric walking stance (hind legs square) used by locomotion."""
         t = {}
-        fy = 0.5 * (self.toe0["F_L"][1] + self.toe0["F_R"][1])
-        hy = 0.5 * (self.toe0["H_L"][1] + self.toe0["H_R"][1])
+        fy = 0.5 * (self.toe0["F_L"][1] + self.toe0["F_R"][1]) - 0.05
+        hy = 0.5 * (self.toe0["H_L"][1] + self.toe0["H_R"][1]) - 0.06
         for leg, v in self.toe0.items():
             y = fy if leg[0] == "F" else hy
             t[leg] = np.array([v[0] * narrow, y])
@@ -479,12 +514,37 @@ class ClipBuilder:
         st["yaw"] = st["yaw"] - yaw
         return st
 
+    def compensate(self, frames, loop, gain=1.15, passes=2):
+        """Lower the body where planted legs cannot reach (stride extremes)."""
+        n = len(frames)
+        for _ in range(passes):
+            need = np.zeros(n)
+            for k, pose in enumerate(frames):
+                fk_and_basis(self.skel, pose, self.legs)
+                o = [self.legs.last_over.get(leg, 0.0) for leg, prm in pose.ik.items()
+                     if prm.get("_stance", -1.0) >= 0]
+                need[k] = max([0.0] + o)
+            if need.max() <= 0.003:
+                break
+            # widen + smooth the requirement (circular for loops)
+            from scipy import ndimage as ndi
+            mode = "wrap" if loop else "nearest"
+            need = ndi.maximum_filter1d(need, 5, mode=mode)
+            need = ndi.gaussian_filter1d(need, 1.5, mode=mode)
+            for k, pose in enumerate(frames):
+                l = pose.loc.get("spine_02", np.zeros(3)).copy()
+                l[2] -= gain * need[k]
+                pose.loc["spine_02"] = l
+        return frames
+
     def evaluate(self, frames_inputs):
         """frames_inputs: list of Pose -> list of {bone: (loc, quat, scale)}."""
         out = []
         prev = {}
+        self.toe_track = []
         for pose in frames_inputs:
             basis, M = fk_and_basis(self.skel, pose, self.legs)
+            self.toe_track.append({k: v.copy() for k, v in self.legs.toe_actual.items()})
             fr = {}
             for n, (l, q, s) in basis.items():
                 if n in prev and prev[n] @ q < 0:

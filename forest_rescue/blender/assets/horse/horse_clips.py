@@ -15,10 +15,10 @@ LEGS = ("F_L", "F_R", "H_L", "H_R")
 HIP_Y = 0.47
 SHOULDER_Y = -0.62
 
-WALK = dict(T=1.2, v=1.45, duty=0.62, offsets={"H_L": 0.0, "F_L": 0.25, "H_R": 0.5, "F_R": 0.75},
+WALK = dict(T=1.2, v=1.30, duty=0.60, offsets={"H_L": 0.0, "F_L": 0.25, "H_R": 0.5, "F_R": 0.75},
             lift={"F": 0.115, "H": 0.095}, knee=62 * DEG, fet_swing=0.75, fet_load=0.18,
             swing_pitch=0.85)
-TROT = dict(T=0.72, v=3.3, duty=0.40, offsets={"F_L": 0.0, "H_R": 0.0, "F_R": 0.5, "H_L": 0.5},
+TROT = dict(T=0.72, v=3.2, duty=0.38, offsets={"F_L": 0.0, "H_R": 0.0, "F_R": 0.5, "H_L": 0.5},
             lift={"F": 0.24, "H": 0.19}, knee=98 * DEG, fet_swing=1.0, fet_load=0.30,
             swing_pitch=1.05)
 
@@ -38,7 +38,7 @@ def leg_ik(cb, leg, st, toe_rest_y):
     else:
         sw = st["swing"]
         flex = 0.42 * math.sin(math.pi * min(1.0, sw / 0.85)) if sw >= 0 else 0.0
-        prm["cannon"] = 0.62 * (math.atan2(toe[1] - HIP_Y, 1.1) -
+        prm["cannon"] = 0.90 * (math.atan2(toe[1] - HIP_Y, 1.1) -
                                 math.atan2(toe_rest_y - HIP_Y, 1.1)) + flex
     return prm
 
@@ -203,6 +203,7 @@ def gait_loop(cb, G, name):
         tail_pose(pose, cb.skel, lift=tail_base)
         frames.append(pose)
         root.append((rp, 0.0))
+    cb.compensate(frames, True)
     secondary(cb, frames, times, True, root=root, tail_amp=1.3 if trot else 1.0)
     stride = v * T
     meta = dict(seconds=T, loop=True, groundSpeed_mps=round(v, 3), strideLength_m=round(stride, 3),
@@ -312,6 +313,7 @@ def start(cb):
         tail_pose(pose, cb.skel, lift=4 * DEG * smooth(u))
         frames.append(pose)
         root.append((rp, 0.0))
+    cb.compensate(frames, False)
     secondary(cb, frames, times, False, root=root)
     meta = dict(seconds=T, loop=False, groundSpeed_mps=round(D / T, 3), strideLength_m=0.0,
                 markers={"lift_LH": 0.02, "lift_LF": 0.12, "land_LH": 0.30, "lift_RH": 0.42,
@@ -359,6 +361,7 @@ def stop(cb):
         tail_pose(pose, cb.skel, lift=4 * DEG * (1 - smooth(u)))
         frames.append(pose)
         root.append((rp, 0.0))
+    cb.compensate(frames, False)
     secondary(cb, frames, times, False, root=root)
     meta = dict(seconds=T, loop=False, groundSpeed_mps=round(D / T, 3), strideLength_m=0.0,
                 markers={"land_RH": 0.30, "land_LF": 0.42, "land_RF": 0.60, "square_LH": 0.72},
@@ -375,27 +378,34 @@ def turn(cb, direction):
     times = cb.times(T)
     sgn = 1.0 if direction == "left" else -1.0
     total = 90 * DEG * sgn
-    yaw_f = lambda t: total * smoother(t / T)    # noqa: E731
+    yaw_f = lambda t: total * smooth(t / T)    # noqa: E731
     rest = {leg: np.array([cb.toe0[leg][0], cb.toe0[leg][1]]) for leg in LEGS}
 
     def tgt(leg, t):
         return HA.rotz(yaw_f(t))[:2, :2] @ rest[leg]
 
+    # three quick steps per leg in alternating diagonal pairs; each landing aims at the
+    # middle of the coming stance so planted hooves stay close to their rest placement
     pairs = [("F_L", "H_R"), ("F_R", "H_L")] if sgn > 0 else [("F_R", "H_L"), ("F_L", "H_R")]
-    steps = [(0.04, 0.34), (0.30, 0.60), (0.56, 0.86), (0.80, 1.08)]
-    contacts = {leg: [(-1.0, None, rest[leg], 0.0)] for leg in LEGS}
-    for i, (tl, tn) in enumerate(steps):
-        for leg in pairs[i % 2]:
-            prev = contacts[leg][-1]
-            contacts[leg][-1] = (prev[0], tl, prev[2], prev[3])
-            aim = min(T, tn + 0.18) if i < 3 else T
-            contacts[leg].append((tn, None, tgt(leg, aim), yaw_f(aim)))
+    A = [(0.00, 0.19), (0.33, 0.52), (0.66, 0.85)]
+    Bs = [(0.165, 0.355), (0.495, 0.685), (0.825, 1.015)]
     plans = {}
-    for leg in LEGS:
-        cs = [(a, (b if b is not None else 9.0), p, y) for a, b, p, y in contacts[leg]]
-        plans[leg] = HA.LegPlan(cs, lift=0.075 if leg[0] == "F" else 0.06,
-                                knee=40 * DEG if leg[0] == "F" else 0.0, swing_pitch=0.6,
-                                fet_swing=0.5)
+    for pair, steps in ((pairs[0], A), (pairs[1], Bs)):
+        for leg in pair:
+            cs = []
+            prev_land = -1.0
+            pos = rest[leg]
+            yw = 0.0
+            for i, (tl, tn) in enumerate(steps):
+                cs.append((prev_land, tl, pos, yw))
+                nxt = steps[i + 1][0] if i + 1 < len(steps) else T
+                aim = 0.5 * (tn + nxt) if i + 1 < len(steps) else T
+                pos, yw, prev_land = tgt(leg, aim), yaw_f(aim), tn
+            cs.append((prev_land, 9.0, pos, yw))
+            plans[leg] = HA.LegPlan(cs, lift=0.08 if leg[0] == "F" else 0.065,
+                                    knee=45 * DEG if leg[0] == "F" else 0.0, swing_pitch=0.6,
+                                    fet_swing=0.5, bo=0.15)
+    steps = A + Bs
     frames, root = [], []
     for t in times:
         u = t / T
@@ -413,12 +423,13 @@ def turn(cb, direction):
         ears(pose, cb.skel, l_out=sgn * 8 * DEG * lead, r_out=-sgn * 8 * DEG * lead)
         frames.append(pose)
         root.append((np.zeros(2), yaw))
+    cb.compensate(frames, False)
     secondary(cb, frames, times, False, root=root)
     meta = dict(seconds=T, loop=False, groundSpeed_mps=0.0, strideLength_m=0.0,
                 rootYawDeg=round(math.degrees(total), 1),
-                yawCurve="yaw(t) = rootYawDeg * smootherstep(t/1.1) about the root origin "
+                yawCurve="yaw(t) = rootYawDeg * smoothstep(t/1.1) about the root origin "
                          "(apply to the node while the clip plays; hooves are planted in that frame)",
-                markers={f"step_{i + 1}": s[1] for i, s in enumerate(steps)})
+                markers={f"land_{i + 1}": round(st[1], 3) for i, st in enumerate(sorted(steps))})
     return dict(name=f"lf_horse_turn_{direction}", T=T, loop=False, frames=frames, times=times,
                 root=root, meta=meta, plans=plans)
 

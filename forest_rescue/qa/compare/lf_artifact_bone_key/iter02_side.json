@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_bone_key v1 side (ortho)",
+  "iou_filled": 0.6575,
+  "iou_raw": 0.6575,
+  "mean_abs_colour_error": 0.1515,
+  "mean_rgb_ref": [
+    0.727,
+    0.601,
+    0.449
+  ],
+  "mean_rgb_render": [
+    0.837,
+    0.705,
+    0.537
+  ]
+}

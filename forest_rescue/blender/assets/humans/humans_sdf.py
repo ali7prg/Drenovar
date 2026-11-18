@@ -381,12 +381,12 @@ def boot_parts(J, S_, side, L, top_z, cls="leather", shaft_r=(0.058, 0.050), toe
     a = np.array([back[0], back[1], 0.0]) - fwd * 0.012 * s
     b = np.array([tip[0], tip[1], 0.0]) + fwd * 0.018 * s
     hh = height
-    st = [dict(t=0.0, w=0.036 * s * width, d=0.052 * s * hh, n=2.2),
-          dict(t=0.18, w=0.042 * s * width, d=0.074 * s * hh, n=2.4),
-          dict(t=0.45, w=0.046 * s * width, d=0.064 * s * hh, n=2.6),
-          dict(t=0.72, w=0.050 * s * width, d=0.048 * s * hh, n=2.6),
-          dict(t=0.92, w=0.044 * s * width, d=0.037 * s * round_toe * hh, n=2.2),
-          dict(t=1.0, w=0.030 * s * width, d=0.026 * s * round_toe * hh, n=2.0)]
+    st = [dict(t=0.0, w=0.036 * s * width, d=0.050 * s * hh, n=2.2),
+          dict(t=0.16, w=0.043 * s * width, d=0.078 * s * hh, n=2.4),
+          dict(t=0.42, w=0.047 * s * width, d=0.070 * s * hh, n=2.5),
+          dict(t=0.70, w=0.052 * s * width, d=0.054 * s * hh, n=2.4),
+          dict(t=0.88, w=0.049 * s * width, d=0.046 * s * round_toe * hh, n=2.1),
+          dict(t=1.0, w=0.034 * s * width, d=0.034 * s * round_toe * hh, n=2.0)]
     # depth axis = up (so 'd' is height), section centre raised so the sole sits on z=0
     foot = loft(a, b, st, depth_axis=(0, 0, 1.0), cls=cls, bone=bone_foot or f"{S_}Foot", k=0.0, name=f"boot_{S_}")
     def boot_fn(Pp, f=foot.fn):
@@ -421,14 +421,49 @@ def boot_parts(J, S_, side, L, top_z, cls="leather", shaft_r=(0.058, 0.050), toe
     P.append(shaft)
     if cuff > 0:
         c = ax + up * (h / max(up[2], 0.5))
-        P.append(tag(fsdf.torus(c - up * 0.01 * s, shaft_r[1] * s * shaft_flare + 0.002, cuff, axis=up), cls=cls,
-                     bone=f"{S_}LowerLeg", k=0.006))
+        R_ = shaft_r[1] * s * shaft_flare + 0.004
+        P.append(tag(fsdf.torus(c - up * 0.008 * s, R_, cuff, axis=up), cls=cls, bone=f"{S_}LowerLeg", k=0.006))
+        # turned-down fold below the rim
+        P.append(tag(loft(c - up * 0.055 * s, c - up * 0.008 * s,
+                          [dict(t=0.0, w=R_ - 0.002, d=R_ - 0.002), dict(t=1.0, w=R_ + 0.004, d=R_ + 0.004)]),
+                     cls=cls, bone=f"{S_}LowerLeg", k=0.004))
     return P
 
 
 # --------------------------------------------------------------------------- silhouette hull
 
-def hull2d(field, views, dilate_px=1.0, blur_px=0.8):
+def smooth_sdf_2d(mask, ppm, up=4, blur_px=1.2, dilate_px=0.6):
+    """Sub-pixel smooth signed distance (metres) of a binary mask: anti-alias (gaussian),
+    upsample x`up`, threshold, EDT -> no pixel staircase on carved surfaces."""
+    import cv2
+    m = ndi.gaussian_filter(mask.astype(np.float32), blur_px)
+    H, W = m.shape
+    mu = cv2.resize(m, (W * up, H * up), interpolation=cv2.INTER_CUBIC)
+    inside = mu > (0.5 - 0.25 * dilate_px)
+    dpos = ndi.distance_transform_edt(~inside)
+    dneg = ndi.distance_transform_edt(inside)
+    sd = (dpos - dneg) / (ppm * up)
+    return sd.astype(np.float32), up
+
+
+def sample_sdf_2d(sd, up, u, v):
+    import cv2
+    uu = ((np.asarray(u, np.float32) + 0.5) * up - 0.5).ravel()
+    vv = ((np.asarray(v, np.float32) + 0.5) * up - 0.5).ravel()
+    shp = np.shape(u)
+    n = uu.size
+    cols = 4096
+    rows = max(1, -(-n // cols))
+    mx = np.zeros(rows * cols, np.float32)
+    my = np.zeros(rows * cols, np.float32)
+    mx[:n] = uu
+    my[:n] = vv
+    out = cv2.remap(sd, mx.reshape(rows, cols), my.reshape(rows, cols), cv2.INTER_LINEAR,
+                    borderMode=cv2.BORDER_CONSTANT, borderValue=0.5)
+    return out.ravel()[:n].reshape(shp)
+
+
+def hull2d(field, views, dilate_px=0.6, blur_px=1.2):
     """Signed distance (metres) to the intersection of the views' silhouettes, extruded along
     each view direction (all our views look along +-Y).  Returns a full Field-shaped volume."""
     nx, ny, nz = field.n
@@ -437,21 +472,9 @@ def hull2d(field, views, dilate_px=1.0, blur_px=0.8):
     P = np.stack([X, np.zeros_like(X), Z], -1).reshape(-1, 3)
     out = np.full(X.shape, -1e3, np.float32)
     for v in views:
-        m = v.mask
-        if dilate_px > 0:
-            m = ndi.binary_dilation(m, iterations=int(round(dilate_px)))
-        mf = m.astype(np.float64)
-        if blur_px:
-            mf = ndi.gaussian_filter(mf, blur_px)
-        inside = mf > 0.5
-        dpos = ndi.distance_transform_edt(~inside)
-        dneg = ndi.distance_transform_edt(inside)
-        sd = (dpos - dneg) / v.ppm
-        import cv2
+        sd, up = smooth_sdf_2d(v.mask, v.ppm, blur_px=blur_px, dilate_px=dilate_px)
         u, vv, _ = v.project(P)
-        samp = cv2.remap(sd.astype(np.float32), u.reshape(X.shape).astype(np.float32),
-                         vv.reshape(X.shape).astype(np.float32), cv2.INTER_LINEAR,
-                         borderMode=cv2.BORDER_CONSTANT, borderValue=0.5)
+        samp = sample_sdf_2d(sd, up, u.reshape(X.shape), vv.reshape(X.shape))
         out = np.maximum(out, samp)
     return np.broadcast_to(out[:, None, :], (nx, ny, nz)).astype(np.float32)
 

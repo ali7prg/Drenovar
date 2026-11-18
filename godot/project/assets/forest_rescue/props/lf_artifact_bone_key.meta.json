@@ -1,0 +1,119 @@
+{
+  "id": "lf_artifact_bone_key",
+  "tris": {
+    "LOD0": 2120,
+    "LOD1": 1436,
+    "LOD2": 880
+  },
+  "tris_per_variant": {
+    "v1": {
+      "LOD0": 612,
+      "LOD1": 404,
+      "LOD2": 220
+    },
+    "v2": {
+      "LOD0": 692,
+      "LOD1": 456,
+      "LOD2": 268
+    },
+    "v3": {
+      "LOD0": 636,
+      "LOD1": 428,
+      "LOD2": 244
+    }
+  },
+  "tris_socket": {
+    "LOD0": 180,
+    "LOD1": 148,
+    "LOD2": 148
+  },
+  "budget": "artifact <= 800 tris (LOD0, per variant)",
+  "bones": 0,
+  "materials": [
+    "lf_artifact_bone_key_mat"
+  ],
+  "textures": {
+    "baseColor": "1024 JPEG",
+    "metallicRoughness": "512 JPEG (G rough, B metal)",
+    "normal": "1024 PNG"
+  },
+  "coordinate_space": "glTF (Y up, metres); artifact front faces +Z; origin = key-slot insertion point",
+  "variants": {
+    "v1": {
+      "node": "lf_artifact_bone_key_v1",
+      "key_id": "lf_key_01",
+      "lods": [
+        "lf_artifact_bone_key_v1_LOD0",
+        "lf_artifact_bone_key_v1_LOD1",
+        "lf_artifact_bone_key_v1_LOD2"
+      ]
+    },
+    "v2": {
+      "node": "lf_artifact_bone_key_v2",
+      "key_id": "lf_key_07",
+      "lods": [
+        "lf_artifact_bone_key_v2_LOD0",
+        "lf_artifact_bone_key_v2_LOD1",
+        "lf_artifact_bone_key_v2_LOD2"
+      ]
+    },
+    "v3": {
+      "node": "lf_artifact_bone_key_v3",
+      "key_id": "lf_key_12",
+      "lods": [
+        "lf_artifact_bone_key_v3_LOD0",
+        "lf_artifact_bone_key_v3_LOD1",
+        "lf_artifact_bone_key_v3_LOD2"
+      ]
+    }
+  },
+  "socket": {
+    "node": "lf_artifact_bone_key_socket",
+    "shape": "keyhole",
+    "recess_depth_m": 0.03,
+    "key_slot": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "normal": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "note": "socket origin = recess floor centre; artifact origin goes exactly here with identity rotation",
+    "insertion": "key enters along -Z (glTF); bit hangs toward -Y; 90 deg turn about Z unlocks"
+  },
+  "clips": {},
+  "bounds_m": {
+    "min": [
+      -0.075,
+      -0.095,
+      0.1147
+    ],
+    "max": [
+      0.075,
+      0.095,
+      -0.041
+    ]
+  },
+  "glb_nodes": [
+    "lf_artifact_bone_key_socket_LOD0",
+    "lf_artifact_bone_key_socket_LOD1",
+    "lf_artifact_bone_key_socket_LOD2",
+    "lf_artifact_bone_key_socket",
+    "lf_artifact_bone_key_v1_LOD0",
+    "lf_artifact_bone_key_v1_LOD1",
+    "lf_artifact_bone_key_v1_LOD2",
+    "lf_artifact_bone_key_v1",
+    "lf_artifact_bone_key_v2_LOD0",
+    "lf_artifact_bone_key_v2_LOD1",
+    "lf_artifact_bone_key_v2_LOD2",
+    "lf_artifact_bone_key_v2",
+    "lf_artifact_bone_key_v3_LOD0",
+    "lf_artifact_bone_key_v3_LOD1",
+    "lf_artifact_bone_key_v3_LOD2",
+    "lf_artifact_bone_key_v3"
+  ],
+  "notes": "All three variants sit at the origin; show exactly one variant node per key (meta.variants). bone_key: shaft along -Z of glTF (into the lock), turn = rotation about the glTF Z axis. LOD1/LOD2 are lower-tessellation rebuilds sharing the LOD0 atlas (parametric UV transfer)."
+}

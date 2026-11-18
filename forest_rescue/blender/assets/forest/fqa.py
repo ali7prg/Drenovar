@@ -45,7 +45,7 @@ def compare_view(view, objs, out_png, title):
     return m, rgba
 
 
-def ortho_shot(objs, out_png, direction=(0, 1, 0), up=(0, 0, 1), res=(1400, 700), margin=1.08, bg=True, label=None,
+def ortho_shot(objs, out_png, direction=(0, 1, 0), up=(0, 0, 1), res=(1400, 700), margin=1.04, bg=True, label=None,
                pitch_deg=None, yaw_deg=0.0):
     """Orthographic shot framing objs. direction = camera view dir; or pitch/yaw (strategic camera)."""
     only(objs)
@@ -60,8 +60,14 @@ def ortho_shot(objs, out_png, direction=(0, 1, 0), up=(0, 0, 1), res=(1400, 700)
     loc = Vector(c) - d * size * 2
     cam = render.perspective_camera(tuple(loc), tuple(c), res=res, ortho_scale=1.0)
     bpy.context.view_layer.update()
-    # fit ortho scale to the projected bounds
-    corners = np.array([[x, y, z] for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])])
+    # fit ortho scale to the projected mesh vertices (tight framing at any pitch/yaw)
+    pts = []
+    for o in objs:
+        v, _, _, _ = core.mesh_arrays(o, evaluated=True, world=True)
+        if len(v) > 4000:
+            v = v[:: len(v) // 4000 + 1]
+        pts.append(v)
+    corners = np.concatenate(pts) if pts else np.array([[x, y, z] for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])])
     R = np.array(cam.matrix_world.to_3x3())
     q = (corners - np.array(loc)) @ R
     w = (q[:, 0].max() - q[:, 0].min())

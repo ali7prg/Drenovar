@@ -49,6 +49,8 @@ var anchors_cache: Dictionary = {}
 var site_post_steps: Dictionary = {}
 var boss_arena_state := ""
 var entered_session := false
+var mirrored_message := ""
+var guide_timer := 0.0
 
 func setup(host: Node) -> void:
 	main = host
@@ -370,10 +372,14 @@ func _process(delta: float) -> void:
 	intro.tick(delta)
 	mech.tick(delta)
 	schedule_settle_poll()
-	var guide_now := guide()
-	var signature := JSON.stringify([guide_now.get("caption", ""), guide_now.get("hint", ""), guide_now.get("enabled", false), guide_now.get("title", "")])
-	if signature != guide_signature:
-		apply_guide(guide_now)
+	# The next-step guide is cheap but string-heavy: refresh at 5 Hz or right after a new state.
+	guide_timer -= delta
+	if guide_timer <= 0.0 or guide_signature.is_empty():
+		guide_timer = 0.2
+		var guide_now := guide()
+		var signature := JSON.stringify([guide_now.get("caption", ""), guide_now.get("hint", ""), guide_now.get("enabled", false), guide_now.get("title", "")])
+		if signature != guide_signature:
+			apply_guide(guide_now)
 	audio.set_forest_ambience(client.unlocked() and foreground and camera_over_forest())
 
 func camera_over_forest() -> bool:
@@ -391,10 +397,12 @@ func update_visibility() -> void:
 		hud.bar.visible = show_bar
 		hud.layout()
 	hud.hint.visible = show_bar and not hud.hint_label.text.is_empty()
-	if show_bar or presenting:
-		main.message.modulate.a = 0.0 if show_bar else 1.0
-	else:
-		main.message.modulate.a = 1.0
+	# The adventure row covers the bottom message line: mirror its text as a toast instead.
+	main.message.modulate.a = 0.0 if show_bar else 1.0
+	if show_bar and main.message.text != mirrored_message:
+		mirrored_message = main.message.text
+		if not mirrored_message.is_empty():
+			hud.toast(mirrored_message, "info", 3.5)
 	if modal_open or presenting or unlocked:
 		if hud.locked_card.visible:
 			hud.hide_locked()
@@ -526,7 +534,7 @@ func guide() -> Dictionary:
 		result.enabled = true
 		result.action = "resume"
 		return result
-	if not fight.is_empty() and String(fight.get("outcome", "pending")) == "pending":
+	if not fight.is_empty() and String(fight.get("outcome", "pending")) == "pending" and bool(fight.get("active", true)):
 		result.hint = content.text("boss.warning") if String(fight.get("species", "")) == "ancient_maw" else String(content.site(String(fight.get("siteId", ""))).get("guardianTactics", ""))
 		return result
 	if moving:
@@ -558,20 +566,21 @@ func guide() -> Dictionary:
 				result.hint = content.text("act.locked")
 				return result
 			return rescue_step(result, next_site, next_task, node)
-		"boss_unlocked":
+		"boss_unlocked", "boss_active":
 			result.target = BOSS_TARGET
-			if client.hall_level() < int(adv.get("boss", {}).get("requiredHall", 5)):
-				result.hint = content.text("site.requiredHall", {"level":int(adv.get("boss", {}).get("requiredHall", 5))}) + " " + content.text("boss.warning")
+			var required := int(adv.get("boss", {}).get("requiredHall", 5))
+			if client.hall_level() < required:
+				result.hint = content.text("site.requiredHall", {"level":required}) + " " + content.text("boss.warning")
 				return result
-			if node != BOSS_TARGET:
-				return finish_with(result, "boss.begin", "move", {"targetId":BOSS_TARGET}, content.text("boss.noPrisoners"))
-			return finish_with(result, "boss.begin", "begin_boss", {}, content.text("boss.warning"))
-		"boss_active":
-			result.target = BOSS_TARGET
-			if not fight.is_empty() and String(fight.get("outcome", "")) == "victory":
+			# The server names the finale step: begin_boss → engage_boss → finish_boss.
+			var finale := next_task if next_task in ["begin_boss", "engage_boss", "finish_boss"] else ("begin_boss" if current_phase == "boss_unlocked" else "engage_boss")
+			var boss_fight := not fight.is_empty() and (String(fight.get("kind", "")) == "boss" or String(fight.get("species", "")) == "ancient_maw")
+			if finale == "finish_boss" or (boss_fight and String(fight.get("outcome", "")) == "victory"):
 				return finish_with(result, "boss.begin", "finish_boss", {}, content.text("objective.boss_active"))
 			if node != BOSS_TARGET:
-				return finish_with(result, "boss.begin", "move", {"targetId":BOSS_TARGET}, content.text("objective.boss_active"))
+				return finish_with(result, "boss.begin", "move", {"targetId":BOSS_TARGET}, content.text("boss.noPrisoners") if current_phase == "boss_unlocked" else content.text("objective.boss_active"))
+			if finale == "begin_boss":
+				return finish_with(result, "boss.begin", "begin_boss", {}, content.text("boss.warning"))
 			return finish_with(result, "boss.begin", "engage_boss", {}, content.text("objective.boss_active"))
 		"completed":
 			result.hint = content.text("objective.completed")
@@ -658,6 +667,7 @@ func apply_guide(value: Dictionary) -> void:
 	hud.set_hint(String(value.get("hint", "")))
 	var target := String(value.get("target", ""))
 	actors.set_beacon(target)
+	actors.set_preview(target if String(value.get("action", "")) == "move" else "")
 	var position := target_position(target) if not target.is_empty() else Vector3.INF
 	hud.set_arrow(position + Vector3.UP * 1.5 if position != Vector3.INF else Vector3.INF, target_name(target) if not target.is_empty() else "")
 
@@ -707,10 +717,22 @@ func open_town_hall() -> void:
 			main.inspect_building(building)
 			return
 
+## Waits (bounded) until no adventure command is in flight.
+func wait_idle() -> void:
+	var waited := 0
+	while (acting or client.in_flight) and waited < 900:
+		await get_tree().process_frame
+		waited += 1
+
 ## Sends one authoritative command; UI feedback only. Returns the client result.
 func request_action(action: String, fields: Dictionary = {}, kind := "adventure") -> Dictionary:
-	if acting:
-		return {"ok":false, "error":"LOCAL_BUSY"}
+	# Commands are serialized: a tap during another command waits for it (bounded), never drops.
+	var waited := 0
+	while (acting or client.in_flight) and waited < 900:
+		await get_tree().process_frame
+		waited += 1
+	if acting or client.in_flight:
+		return {"ok":false, "error":"LOCAL_BUSY", "message":content.text("network.pending")}
 	acting = true
 	hud.continue_button.disabled = true
 	var result: Dictionary = await client.send(action, fields, kind)
@@ -725,7 +747,7 @@ func request_action(action: String, fields: Dictionary = {}, kind := "adventure"
 	return result
 
 func retry_last() -> void:
-	if not client.has_pending_retry():
+	if not client.has_pending_retry() or acting:
 		return
 	acting = true
 	var result: Dictionary = await client.retry_pending()

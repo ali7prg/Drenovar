@@ -108,21 +108,32 @@ def build_lod0(ctx, budget):
     objs = []
     piece_names = []
     ppart = [p for p in ctx.parts if getattr(p, "cls", None) and getattr(p, "geom", True)]
-    body_budget = budget["body"]
+    # budget: body gets whatever the LOD0 target leaves after fixed garments, head and headwear
+    total = budget.get("total", 12000)
+    fixed = sum(p.ntris for p in ctx.pieces if not p.meta.get("sdf")
+                and not (p.meta.get("optional") and not p.meta.get("default_on")))
+    sdf_other = sum(budget.get(p.name, 400) for p in ctx.pieces if p.meta.get("sdf") and p.name not in ("body", "head")
+                    and not (p.meta.get("optional") and not p.meta.get("default_on")))
+    budget = dict(budget)
+    budget["body"] = int(max(3000, total - fixed - sdf_other - budget.get("head", 2500) - 120))
+    log(ctx.asset, "budget fixed %d, sdf extra %d, head %d, body %d" % (fixed, sdf_other, budget.get("head", 2500),
+                                                                          budget["body"]))
     for pi, p in enumerate(ctx.pieces):
-        if p.meta.get("optional"):
-            continue
         obj = obj_from_piece(p)
         if p.meta.get("sdf"):
+            V = p.verts
+            lm = ctx.lm
             if p.name == "body":
-                V = p.verts
-                lm = ctx.lm
-                d_face = np.linalg.norm((V - (lm["origin"] + np.array([0, 0.03, -0.03]))) * np.array([1, 1, 0.8]), axis=1)
-                prot = np.clip(1.4 - d_face / 0.09, 0, 1)
+                prot = np.zeros(len(V))
                 for S_ in ("Left", "Right"):
                     dh = np.linalg.norm(V - ctx.J[f"{S_}Hand_end"], axis=1)
-                    prot = np.maximum(prot, np.clip(1.3 - dh / 0.08, 0, 1) * 0.8)
-                decimate(obj, body_budget, protect=prot, protect_factor=4.0)
+                    prot = np.maximum(prot, np.clip(1.3 - dh / 0.075, 0, 1) * 0.55)
+                decimate(obj, budget.get("body", 5600), protect=prot, protect_factor=1.0)
+            elif p.name == "head":
+                Q = (V - lm["origin"]) / lm["scale"]
+                face = np.sqrt((Q[:, 0] / 0.06) ** 2 + ((Q[:, 2] + 0.03) / 0.08) ** 2) * (Q[:, 1] < 0.03)
+                prot = np.clip(1.25 - face, 0, 1) * 0.6 * (Q[:, 1] < 0.03)
+                decimate(obj, budget.get("head", 2600), protect=prot, protect_factor=1.0)
             else:
                 decimate(obj, budget.get(p.name, 400))
         objs.append((p, obj))
@@ -134,7 +145,7 @@ def build_lod0(ctx, budget):
         cent = np.empty(nf * 3)
         me.polygons.foreach_get("center", cent)
         cent = cent.reshape(-1, 3)
-        if p.name == "body":
+        if p.name in ("body", "head"):
             idx, _ = H.owner(ppart, cent)
             cls = [ppart[i].cls if i >= 0 else "skin" for i in idx]
             # override by class regions declared in the spec (texture-driven material zones)
@@ -149,19 +160,15 @@ def build_lod0(ctx, budget):
                 classes.append(c)
         set_face_attr(obj, "cls", [classes.index(c) for c in cls])
         set_face_attr(obj, "piece", [piece_names.index(p.name)] * nf)
-    # UVs for SDF pieces (body split: head gets its own denser islands)
+        noproj = 1 if ((p.meta.get("optional") and not p.meta.get("default_on")) or p.meta.get("no_compare")) else 0
+        set_face_attr(obj, "noproj", [noproj] * nf)
+    # UVs for SDF pieces from a smoothed twin (large clean islands); head islands get more texels
     final = []
     for p, obj in objs:
         if p.meta.get("sdf"):
-            if p.name == "body":
-                zc = ctx.L["chin"] - 0.035
-                head, rest = split_by(obj, lambda c: c[:, 2] > zc, "body_head", "body_rest")
-                T.smart_uv(head, angle=55)
-                T.smart_uv(rest, angle=62)
-                set_face_attr(head, "uvboost", [1] * len(head.data.polygons))
-                final += [head, rest]
-                continue
-            T.smart_uv(obj, angle=60)
+            smooth_uv(obj, angle=60 if p.name == "head" else 64)
+            if p.name == "head":
+                set_face_attr(obj, "uvboost", [1] * len(obj.data.polygons))
         final.append(obj)
     lod0 = core.join(final, ctx.asset + "_LOD0")
     core.select_only([lod0])
@@ -176,6 +183,27 @@ def build_lod0(ctx, budget):
     lod0["pieces"] = ",".join(piece_names)
     log(ctx.asset, "LOD0 %d tris, %d classes, %.1fs" % (core.tri_count(lod0), len(classes), time.time() - t0))
     return lod0, classes
+
+
+def smooth_uv(obj, angle=64.0, iters=40):
+    """Smart-project a smoothed copy (same topology) and copy its UVs back."""
+    tw = obj.copy()
+    tw.data = obj.data.copy()
+    core.link(tw)
+    m = tw.modifiers.new("sm", "SMOOTH")
+    m.factor = 0.9
+    m.iterations = iters
+    core.select_only([tw])
+    bpy.ops.object.modifier_apply(modifier="sm")
+    if not tw.data.uv_layers:
+        tw.data.uv_layers.new(name="UVMap")
+    T.smart_uv(tw, angle=angle)
+    uv = np.empty(len(tw.data.loops) * 2)
+    tw.data.uv_layers.active.data.foreach_get("uv", uv)
+    if not obj.data.uv_layers:
+        obj.data.uv_layers.new(name="UVMap")
+    obj.data.uv_layers.active.data.foreach_set("uv", uv)
+    bpy.data.objects.remove(tw, do_unlink=True)
 
 
 def split_by(obj, pred, name_a, name_b):
@@ -222,18 +250,36 @@ def boost_uvs(obj, attr, factor):
 
 # --------------------------------------------------------------------------- textures
 
+PROP_COLORS = {"wood": (0.40, 0.28, 0.17), "metal": (0.46, 0.46, 0.47), "leather_dark": (0.21, 0.15, 0.10),
+               "leather": (0.36, 0.24, 0.15), "rope": (0.56, 0.46, 0.31), "feather": (0.84, 0.81, 0.74),
+               "brass": (0.64, 0.50, 0.24), "linen": (0.70, 0.65, 0.56), "hood": (0.27, 0.30, 0.18),
+               "cloak": (0.22, 0.30, 0.20), "hair": (0.22, 0.15, 0.10)}
+
 def texture_lod0(ctx, lod0, classes, size=2048, hi_objs=None):
     """Projection + procedural maps -> images (albedo, orm, normal) and per-group factors."""
     spec = ctx.spec
     t0 = time.time()
     V, tri, uv, vn, poly = mesh_np(lod0)
     fcls = get_face_attr(lod0, "cls")
-    Tx, col, w, cls_img = T.project_colours(V, tri, uv, vn, ctx.views, size, fcls, poly)
+    noproj = get_face_attr(lod0, "noproj") > 0
+    Tx, col, w, cls_img = T.project_colours(V, tri, uv, vn, ctx.views, size, fcls, poly, noproj)
     valid = Tx.valid
     w = T.reject_outliers(col, w, cls_img, valid)
     col = T.fill_by_class(col, w, cls_img, valid)
+    col = T.compress_shading(col, cls_img, valid, classes, keep=getattr(spec, "SHADING_KEEP", 0.55))
+    col = project_portrait(ctx, Tx, V, tri, col, cls_img, classes)
     col = texproj.delight(col, Tx, light_dir=(-0.45, -0.55, 0.70), ambient=0.55, strength=0.45, mask=valid)
     # spec colour overrides / painting hooks (e.g. tint unseen areas, emblems)
+    # optional (default-off) parts: spec colour per class (no reference pixels exist for them)
+    optc = dict(PROP_COLORS)
+    optc.update(getattr(spec, "OPTIONAL_COLORS", {}))
+    if noproj.any():
+        yy0, xx0 = np.nonzero(Tx.valid)
+        fl = noproj[poly[Tx.tri[yy0, xx0]]]
+        for ci, c in enumerate(classes):
+            m = fl & (cls_img[yy0, xx0] == ci)
+            if m.any():
+                col[yy0[m], xx0[m]] = np.array(optc.get(c, (0.45, 0.38, 0.30)))
     if hasattr(spec, "paint"):
         col = spec.paint(ctx, Tx, col, cls_img, classes)
     paint_face(ctx, Tx, col, cls_img, classes)
@@ -264,16 +310,18 @@ def texture_lod0(ctx, lod0, classes, size=2048, hi_objs=None):
     rough[yy, xx] = np.clip(rv, 0.05, 1.0)
     metal[yy, xx] = mv
     # AO (Cycles bake on LOD0) multiplies the albedo lightly
-    ao = bake_ao(lod0, size // 2)
+    ao = bake_ao(lod0, size // 2, samples=32)
     if ao is not None:
+        ao = ndi.gaussian_filter(ao, 1.2)
         ao_full = cv2.resize(ao, (size, size), interpolation=cv2.INTER_LINEAR)
-        col = col * (0.62 + 0.38 * ao_full[..., None])
+        col = col * (0.70 + 0.30 * ao_full[..., None])
     col = np.clip(col, 0, 1)
     # group factors (tintable groups normalised)
     groups = [T.class_group(c, spec) for c in classes]
     gimg = np.full(valid.shape, -1, np.int32)
     gimg[yy, xx] = np.array([T.GROUPS.index(groups[c]) for c in cidx])
     factors = {}
+    medians = {}
     out = col.copy()
     for gi, g in enumerate(T.GROUPS):
         m = gimg == gi
@@ -281,6 +329,7 @@ def texture_lod0(ctx, lod0, classes, size=2048, hi_objs=None):
             factors[g] = (1.0, 1.0, 1.0)
             continue
         mean = np.median(col[m], axis=0)
+        medians[g] = tuple(float(x) for x in mean)
         f = mean / max(mean.max(), 1e-3) * 0.97
         hi_ = np.percentile(col[m] / np.maximum(f, 1e-3), 99.0)
         f = f * max(hi_, 1.0) if hi_ > 1.0 else f
@@ -293,6 +342,14 @@ def texture_lod0(ctx, lod0, classes, size=2048, hi_objs=None):
     nrm_detail = texproj.height_to_normal(hmap, valid, strength=1.2)
     nrm_bake = bake_normal(lod0, hi_objs, size) if hi_objs else None
     if nrm_bake is not None:
+        # keep baked normals only on texels of SDF pieces (garment shells would catch the body)
+        fpc = get_face_attr(lod0, "piece")
+        names = lod0["pieces"].split(",")
+        sdf_ids = [i for i, n in enumerate(names) if n in ("body", "head")]
+        pimg = np.full(valid.shape, -1)
+        pimg[yy, xx] = fpc[poly[Tx.tri[yy, xx]]]
+        keep = np.isin(pimg, sdf_ids)
+        nrm_bake = np.where(keep[..., None], nrm_bake, np.array([0.5, 0.5, 1.0]))
         nrm = blend_normals(nrm_bake, nrm_detail)
     else:
         nrm = nrm_detail
@@ -300,7 +357,8 @@ def texture_lod0(ctx, lod0, classes, size=2048, hi_objs=None):
     orm = texproj.dilate_margin(orm, valid, px=8)
     nrm = texproj.dilate_margin(nrm, valid, px=8)
     log(ctx.asset, "textures %.1fs" % (time.time() - t0))
-    return dict(albedo=out, albedo_raw=col, orm=orm, normal=nrm, factors=factors, valid=valid, cls_img=cls_img,
+    return dict(albedo=out, albedo_raw=col, orm=orm, normal=nrm, factors=factors, medians=medians, valid=valid,
+                cls_img=cls_img,
                 group_img=gimg, texels=Tx)
 
 
@@ -364,6 +422,40 @@ def bake_normal(obj, hi_objs, size):
     return n
 
 
+# --------------------------------------------------------------------------- portrait
+
+def project_portrait(ctx, Tx, V, tri, col, cls_img, classes):
+    """Overlay the registered expression portrait onto the frontal face (eyes, brows, beard)."""
+    import humans_refs as R
+    pv = R.portrait_view(ctx.asset, ctx.lm)
+    if pv is None:
+        return col
+    zb = texproj.zbuffer(V, tri, pv)
+    pc, pw = texproj.project(Tx, [pv], {pv.name: zb}, power=2.0, depth_eps=0.02, min_facing=0.25, mask_erode=0)
+    lm = ctx.lm
+    s = lm["scale"]
+    O = lm["origin"]
+    ok = [classes.index(c) for c in ("skin", "lip", "eye", "beard", "hair", "brow") if c in classes]
+    yy, xx = np.nonzero(Tx.valid & (pw > 0))
+    P = Tx.pos[yy, xx]
+    Q = (P - O) / s
+    # feathered face ellipse (x, z in head units), front half only
+    r = np.sqrt((Q[:, 0] / 0.075) ** 2 + ((Q[:, 2] + 0.035) / 0.095) ** 2)
+    f = np.clip((1.0 - r) / 0.18, 0, 1) * (Q[:, 1] < 0.06)
+    f *= np.isin(cls_img[yy, xx], ok)
+    f *= np.clip(pw[yy, xx] / 0.3, 0, 1)
+    # match the portrait's overall colour to the body projection (lighting differs per panel)
+    if f.sum() > 50:
+        a = pc[yy, xx][f > 0.5]
+        b = col[yy, xx][f > 0.5]
+        gain = np.median(b, axis=0) / np.maximum(np.median(a, axis=0), 1e-3)
+        gain = np.clip(gain, 0.7, 1.4)
+    else:
+        gain = np.ones(3)
+    col[yy, xx] = col[yy, xx] * (1 - f[:, None]) + np.clip(pc[yy, xx] * gain, 0, 1) * f[:, None]
+    return col
+
+
 # --------------------------------------------------------------------------- face painting
 
 def paint_face(ctx, Tx, col, cls_img, classes):
@@ -374,8 +466,10 @@ def paint_face(ctx, Tx, col, cls_img, classes):
     P = Tx.pos[yy, xx]
     cid = cls_img[yy, xx]
     s = lm["scale"]
+    import humans_refs as R
+    has_portrait = ctx.asset in R.PORTRAIT_LM
     iris = np.array(fp.get("iris", (0.28, 0.20, 0.13)))
-    if "eye" in classes:
+    if "eye" in classes and not has_portrait:
         ei = classes.index("eye")
         sel = cid == ei
         for key in ("eye_l", "eye_r"):
@@ -393,7 +487,7 @@ def paint_face(ctx, Tx, col, cls_img, classes):
                             np.where((a < 24)[:, None], iris * (0.75 + 0.25 * (a[:, None] / 24)), sclera))
             col[yy[idx], xx[idx]] = colv
     # eyebrows on skin texels (arched strokes above each eye)
-    if "skin" in classes and fp.get("brows", True):
+    if "skin" in classes and fp.get("brows", True) and not has_portrait:
         si = classes.index("skin")
         sel = np.nonzero(cid == si)[0]
         Q = P[sel]

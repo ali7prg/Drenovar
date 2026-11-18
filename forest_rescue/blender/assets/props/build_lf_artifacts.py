@@ -64,8 +64,8 @@ SHADERS.update({
     "rune_stone": fine(rune_stone, 5.0),
     "limestone_fine": fine(lambda c: sh.limestone(c, base=sh.C(160, 144, 124), light=sh.C(200, 188, 170),
                                                   dark=sh.C(112, 98, 84)), 3.0),
-    "bronze": fine(lambda c: sh.bronze(c, base=sh.C(150, 104, 48), hi=sh.C(212, 164, 88), patina=sh.C(70, 104, 80),
-                                       dark=sh.C(70, 46, 22), patina_amt=0.55), 3.0),
+    "bronze": fine(lambda c: sh.bronze(c, base=sh.C(158, 100, 36), hi=sh.C(222, 160, 72), patina=sh.C(64, 92, 66),
+                                       dark=sh.C(66, 40, 16), patina_amt=0.6), 3.0),
     "oak_fine": fine(lambda c: sh.oak(c, base=sh.C(120, 84, 54), light=sh.C(164, 120, 80), dark=sh.C(66, 44, 28),
                                       grey=sh.C(140, 118, 96), weather=0.12), 4.0),
     "amber": sh.gem,
@@ -73,9 +73,9 @@ SHADERS.update({
 })
 
 
-HEIGHT_GAIN = {"stone_rune": 0.022, "bronze_seal": 0.010, "amber_crystal": 0.008, "bone_key": 0.004}
+HEIGHT_GAIN = {"stone_rune": 0.022, "bronze_seal": 0.016, "amber_crystal": 0.010, "bone_key": 0.005}
 HERO_X0 = {"stone_rune": [-0.25, 0.75, 0, 0.5, 2.2, 0, 0], "bronze_seal": [-0.3, 0.7, 0, 0.45, 2.2, 0, 0],
-           "amber_crystal": [-0.35, 0.95, 0, 0.5, 2.2, 0, 0], "bone_key": [-0.9, 0.8, 0, 0.55, 2.2, 0, 0]}
+           "amber_crystal": [-0.35, 0.95, 0, 0.5, 2.2, 0, 0], "bone_key": [-0.8, 0.8, 0, 0.7, 2.2, 0, 0]}
 VIEWS = {}   # family -> computed views/cameras (shared by projection and QA)
 
 
@@ -83,7 +83,7 @@ def trace(fam):
     """Outline/thickness of the drawn design (variant v1) from the sheet's front and side views."""
     box = REF[fam]
     fimg, fm = qa.crop_and_mask(IMG, box["front"], **MASK)
-    simg, sm = qa.crop_and_mask(IMG, box["side"], **MASK)
+    simg, sm = qa.crop_and_mask(IMG, box["side"], method="flood", tol=2)
     fx0, fy0, fx1, fy1, fw, fh = pp.mask_extent(fm)
     sx0, sy0, sx1, sy1, sw, shh = pp.mask_extent(sm)
     info = {"front_px": [fw, fh], "side_px": [sw, shh]}
@@ -98,7 +98,9 @@ def trace(fam):
         W = ak.DIMS[fam]["W"]
         H = W * fh / fw
         t = sw / shh * H
-        ak.TRACE[fam] = dict(H=float(H), W=W, t=float(min(t, 0.032)))
+        ppm = fw / W
+        outline = pp.outline_metres(pp.mask_outline(fm, 160), ((fx0 + fx1) / 2, (fy0 + fy1) / 2), ppm)
+        ak.TRACE[fam] = dict(H=float(H), W=W, t=float(t), outline=outline)
         info.update(H_m=float(H), W_m=W, thickness_m=float(t))
     else:
         info.update(length_m=ak.DIMS[fam]["L"], aspect=float(fh / fw))
@@ -124,7 +126,7 @@ def make_views(A, fam, cams):
     so = [A.meshes[0]["socket"]]
     V = {}
     fimg, fm = qa.crop_and_mask(IMG, box["front"], **MASK)
-    simg, sm = qa.crop_and_mask(IMG, box["side"], **MASK)
+    simg, sm = qa.crop_and_mask(IMG, box["side"], method="flood", tol=2)
     mn, mx = core.bounds(v1)
     size = mx - mn
     if fam == "bone_key":
@@ -204,7 +206,7 @@ def build_family(fam, cams):
     files, info = pp.paint_relief_textures(A, SHADERS, specs, size=2048, height_gain=HEIGHT_GAIN[fam],
                                            sizes={"base": 1024, "orm": 512, "normal": 1024}, relief_levels=4,
                                            ao_distance=0.012, ao_strength=0.38, edge_fade_m=0.0012, samples=10,
-                                           swatches=swatch_for(fam, V))
+                                           swatches=swatch_for(fam, V), no_relief_cls=("amber",))
     pk.make_material(A, files)
     A.trace_info = tinfo
     A.paint_info = info
@@ -334,10 +336,18 @@ def main():
             summary[fam]["trace"] = A.trace_info
             summary[fam]["paint"] = A.paint_info
             print("[artifacts-qa]", fam, summary[fam])
-        # QA layout GLB (variants side by side) for the Godot viewer
+        # QA layout GLB (variants side by side, lying flat like the drawing) for the Godot viewer
         place_layout(A, True)
+        for n in ("v1", "v2", "v3", "socket"):
+            lay_flat(A, n, fam)
+            A.pivots[n]["rest_rot"] = tuple(A.pivots[n].rotation_euler)
+            A.pivots[n]["rest_loc"] = list(A.pivots[n].location)
         qa_glb = os.path.join(paths.ensure(paths.QA_COMPARE, A.id), f"{A.id}_layout_qa.glb")
         pk.export(A, qa_glb)
+        for n in ("v1", "v2", "v3", "socket"):
+            del A.pivots[n]["rest_rot"]
+            del A.pivots[n]["rest_loc"]
+            lay_flat(A, n, fam, False)
         place_layout(A, False)
         core.save_blend(paths.source(pk.GROUP, f"{A.id}.blend"))
     core.write_json(os.path.join(paths.ensure(paths.QA_COMPARE, "props_cams"), f"artifacts_iter{it:02d}.json"), summary)

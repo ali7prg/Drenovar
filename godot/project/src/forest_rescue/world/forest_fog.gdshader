@@ -24,10 +24,10 @@ uniform float dim_strength = 0.0;        // explored but not in current sight
 uniform vec4 sights[8];
 uniform int sight_count = 0;
 uniform vec3 light_dir = vec3(0.45, 0.74, 0.5);
-uniform vec3 lit_color : source_color = vec3(0.90, 0.92, 0.95);
-uniform vec3 shade_color : source_color = vec3(0.47, 0.54, 0.64);
-uniform vec3 haze_color : source_color = vec3(0.64, 0.70, 0.78);
-uniform vec3 warm_rim : source_color = vec3(1.0, 0.93, 0.80);
+uniform vec3 lit_color : source_color = vec3(0.70, 0.75, 0.81);
+uniform vec3 shade_color : source_color = vec3(0.31, 0.37, 0.46);
+uniform vec3 haze_color : source_color = vec3(0.47, 0.54, 0.62);
+uniform vec3 warm_rim : source_color = vec3(0.92, 0.86, 0.76);
 uniform float edge_softness = 0.16;
 uniform bool soft_depth = true;
 uniform float soft_distance = 2.5;
@@ -102,10 +102,10 @@ void fragment() {
 	float mid = texture(noise_tex, (p - warp * 0.7 + drift * 1.6) / 19.0 + vec2(0.5, 0.23 * layer)).g;
 	float fine = texture(noise_tex, (p + warp * 0.4 + drift * 2.3) / 7.5).b;
 	float delay = texture(noise_tex, p / 33.0).a;
-	vec2 edge_warp = (vec2(mid, big) - 0.5) * (3.2 + layer * 1.6 + reveal_curl * 6.0);
+	vec2 edge_warp = (vec2(mid, big) - 0.5) * (7.0 + layer * 2.5 + reveal_curl * 6.0) + (w.ba - 0.5) * 4.0;
 	float clear = clear_at(p + edge_warp, delay);
 	float fog = 1.0 - clear;
-	float billow = big * 0.62 + mid * 0.28 + fine * 0.10;
+	float billow = big * 0.66 + mid * 0.27 + fine * 0.07;
 	float body = fog * (0.66 + 0.62 * billow) - layer_threshold;
 	float alpha = smoothstep(0.0, edge_softness, body) * layer_alpha;
 	// Lighting from the noise height field (cheap normal) + bank slope.
@@ -113,8 +113,10 @@ void fragment() {
 	float hz = texture(noise_tex, (p + vec2(0.0, 1.2) + warp + drift) / 47.0 + vec2(0.37 * layer, 0.11)).r - big;
 	vec3 n = normalize(vec3(-hx * 7.0, 1.0, -hz * 7.0));
 	float ndl = clamp(dot(n, normalize(light_dir)) * 0.5 + 0.5, 0.0, 1.0);
-	float height_light = 0.55 + 0.22 * layer + 0.25 * billow;
-	vec3 color = mix(shade_color, lit_color, clamp(ndl * height_light * 1.25, 0.0, 1.0));
+	// Cauliflower shading: billow tops catch the sun, valleys stay blue-grey.
+	float tops = pow(clamp(billow, 0.0, 1.0), 0.8);
+	float light = clamp(tops * (0.55 + 0.18 * layer) + (ndl - 0.5) * 0.55 + 0.12 * layer, 0.0, 1.0);
+	vec3 color = mix(shade_color, lit_color, light);
 	// Thin edges glow softly from the sun side (backlit wisps).
 	float thin = 1.0 - smoothstep(0.0, edge_softness * 2.5, body);
 	color = mix(color, warm_rim, thin * 0.35 * ndl);

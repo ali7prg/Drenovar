@@ -164,6 +164,17 @@ func _load_kit(asset_id: String) -> Dictionary:
 	var variants := {}       # variant number -> [Mesh, Mesh, Mesh]
 	var lod_regex := RegEx.create_from_string("(?i)_LOD(\\d)")
 	var variant_regex := RegEx.create_from_string("(?i)_v(\\d)")
+	# Kit GLBs lay variants side by side for display; meta.json carries that offset per variant.
+	var offsets := {}
+	var meta_path := KIT_DIR + asset_id + ".meta.json"
+	if FileAccess.file_exists(meta_path):
+		var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(meta_path))
+		if meta is Dictionary and meta.get("variants") is Dictionary:
+			for key in meta.variants:
+				var info: Dictionary = meta.variants[key]
+				var number := int(String(key).trim_prefix("v"))
+				var offset: Array = info.get("display_offset_gltf", [0, 0, 0])
+				offsets[number] = Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
 	for file in files:
 		var scene: Variant = load(file)
 		if not scene is PackedScene:
@@ -187,6 +198,7 @@ func _load_kit(asset_id: String) -> Dictionary:
 					if node is Node3D:
 						transform = (node as Node3D).transform * transform
 					node = node.get_parent()
+				transform.origin -= offsets.get(variant, Vector3.ZERO)
 				variants[variant][lod] = _wind_mesh(part.mesh, transform)
 		root.free()
 	if variants.is_empty():

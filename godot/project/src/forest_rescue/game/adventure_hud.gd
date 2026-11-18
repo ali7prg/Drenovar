@@ -86,7 +86,7 @@ func text(key: String, args := {}) -> String:
 func build_bar() -> void:
 	bar = HBoxContainer.new()
 	bar.name = "AdventureBar"
-	bar.add_theme_constant_override("separation", 10)
+	bar.add_theme_constant_override("separation", 8)
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bar)
 	task_card = PanelContainer.new()
@@ -100,7 +100,7 @@ func build_bar() -> void:
 	row.add_theme_constant_override("separation", 10)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	task_card.add_child(row)
-	task_icon = Art.new("banner", Vector2(40, 56))
+	task_icon = Art.new("banner", Vector2(38, 54))
 	row.add_child(task_icon)
 	var column := VBoxContainer.new()
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -108,7 +108,7 @@ func build_bar() -> void:
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(column)
-	task_title = Style.label("", 17, Style.PARCHMENT_INK, true)
+	task_title = Style.label("", 15, Style.PARCHMENT_INK, true)
 	task_title.name = "TaskTitle"
 	task_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	task_title.max_lines_visible = 2
@@ -146,7 +146,7 @@ func build_bar() -> void:
 	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	reward_strip.add_child(strip)
 	strip.add_child(Art.new("chest", Vector2(36, 40)))
-	reward_caption = Style.label(text("hud.rewardFor"), 14, Style.IVORY, true)
+	reward_caption = Style.label(text("hud.rewardFor"), 13, Style.IVORY, true)
 	reward_caption.name = "RewardCaption"
 	reward_caption.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	strip.add_child(reward_caption)
@@ -201,7 +201,7 @@ func make_action_button(id: String, icon_kind: String, caption: String, style: S
 	var icon := Art.new(icon_kind, Vector2(30, 30))
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	column.add_child(icon)
-	var label := Style.label(caption, 16, Style.IVORY, true, 2)
+	var label := Style.label(caption, 14, Style.IVORY, true, 2)
 	label.name = "Caption"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(label)
@@ -325,7 +325,6 @@ func build_banner() -> void:
 	banner.offset_right = 300
 	banner.offset_top = 70
 	banner.offset_bottom = 190
-	banner.draw.connect(draw_banner_ribbons)
 	add_child(banner)
 	var column := VBoxContainer.new()
 	banner_column = column
@@ -342,6 +341,7 @@ func build_banner() -> void:
 	plate.add_theme_stylebox_override("panel", Style.green_banner())
 	plate.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plate.draw.connect(draw_banner_ribbons)
 	column.add_child(plate)
 	var words := VBoxContainer.new()
 	words.add_theme_constant_override("separation", 0)
@@ -359,24 +359,24 @@ func build_banner() -> void:
 	banner.hide()
 
 func draw_banner_ribbons() -> void:
-	if banner_plate == null:
-		return
-	var rect := Rect2(banner_plate.position + banner_column.position, banner_plate.size)
+	# Red ribbon tails behind the plate edges (art/18 centre), drawn in the plate's own space.
+	var rect := Rect2(Vector2.ZERO, banner_plate.size)
 	for side in [-1.0, 1.0]:
-		var x := rect.position.x if side < 0 else rect.end.x
-		var y := rect.position.y + 8.0
-		var h := rect.size.y - 4.0
-		var out: float = x + side * 34.0
-		var tail := PackedVector2Array([Vector2(x - side * 6.0, y), Vector2(out, y + 8.0), Vector2(out - side * 12.0, y + h * 0.55),
-			Vector2(out, y + h), Vector2(x - side * 6.0, y + h - 6.0)])
-		banner.draw_colored_polygon(tail, Color("#8b2a1c"))
-		banner.draw_polyline(PackedVector2Array([tail[0], tail[1], tail[2], tail[3], tail[4]]), Color("#4f150e"), 2.0, true)
+		var x: float = rect.position.x if side < 0 else rect.end.x
+		var y := rect.position.y + 10.0
+		var h := rect.size.y - 6.0
+		var out: float = x + side * 30.0
+		var tail := PackedVector2Array([Vector2(x, y), Vector2(out, y + 6.0), Vector2(out - side * 11.0, y + h * 0.55),
+			Vector2(out, y + h), Vector2(x, y + h - 4.0)])
+		banner_plate.draw_colored_polygon(tail, Color("#8b2a1c"))
+		banner_plate.draw_polyline(PackedVector2Array([tail[0], tail[1], tail[2], tail[3], tail[4]]), Color("#4f150e"), 2.0, true)
 
 func show_banner(title: String, subtitle := "", seconds := 4.0) -> void:
 	banner_title.text = title
 	banner_sub.text = subtitle
 	banner_sub.visible = not subtitle.is_empty()
 	banner.show()
+	toasts.offset_top = 196
 	banner.modulate.a = 0.0
 	var tween := create_tween()
 	tween.tween_property(banner, "modulate:a", 1.0, 0.35)
@@ -386,6 +386,7 @@ func show_banner(title: String, subtitle := "", seconds := 4.0) -> void:
 func hide_banner() -> void:
 	banner_until = 0.0
 	banner.hide()
+	toasts.offset_top = 64
 
 # ---------------------------------------------------------------- locked card (art/18 left)
 func build_locked_card() -> void:
@@ -538,13 +539,40 @@ func set_arrow(target: Vector3, caption: String) -> void:
 	arrow_label = caption
 	arrow.queue_redraw()
 
+func draw_tags(camera: Camera3D) -> void:
+	# Name plates over revealed places (site, Iskra, landmarks, boss) — readable from the top camera.
+	var font: Font = Style.TITLE_FONT
+	var view := get_viewport_rect().size
+	for tag in game.actors.tags:
+		var p: Vector3 = tag.position
+		if camera.is_position_behind(p):
+			continue
+		var at := camera.unproject_position(p)
+		if at.x < -40 or at.y < 40 or at.x > view.x + 40 or at.y > view.y - 100:
+			continue
+		var caption := String(tag.text)
+		var kind := String(tag.get("kind", "site"))
+		var size := 15 if kind in ["site", "boss"] else 14
+		if kind == "site" and int(tag.get("step", 0)) > 0:
+			caption += "  %d/5" % int(tag.step)
+		var width := font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+		var box := Rect2(at - Vector2(width * 0.5 + 9, 13), Vector2(width + 18, 24))
+		var fill := Color("#f1e3c1e6") if kind == "site" else (Color("#2a2219e0") if kind != "landmark" else Color("#3d2f14e8"))
+		var ink := Color("#3a2716") if kind == "site" else Color("#f6ead0")
+		arrow.draw_style_box(Style.frame(fill, fill.darkened(0.08), Color("#8b6a3c"), 6, 1, Vector4(0, 0, 0, 0)), box)
+		arrow.draw_string(font, Vector2(box.position.x + 9, box.position.y + 17), caption, HORIZONTAL_ALIGNMENT_LEFT, -1, size, ink)
+		if kind == "landmark":
+			arrow.draw_circle(at + Vector2(0, 22), 5.0, Color(1.0, 0.8, 0.35, 0.6 + 0.4 * sin(Time.get_ticks_msec() / 200.0)))
+
 func draw_arrow() -> void:
-	if arrow_target == Vector3.INF or not bar.visible:
-		return
 	var stage = game.main.stage
-	if not is_instance_valid(stage):
+	if not is_instance_valid(stage) or not game.client.unlocked() or not game.city_active():
 		return
 	var camera: Camera3D = stage.camera
+	if game.actors != null and not game.intro.presenting():
+		draw_tags(camera)
+	if arrow_target == Vector3.INF or not bar.visible:
+		return
 	if camera.is_position_behind(arrow_target):
 		return
 	var at := camera.unproject_position(arrow_target)
@@ -591,18 +619,18 @@ func layout() -> void:
 	var available := right_edge - 52.0
 	# One row like art/07: task card, reward strip (fills the rest), three buttons; the existing
 	# DRENOVAR navigation keeps the bottom-right corner, so the row ends where it begins.
-	var buttons_width := 80.0 + 80.0 + 104.0 + 12.0
-	var strip_min := 34.0 + 6.0 + 48.0 * 5.0 + 4.0 * 13.0 + 20.0
-	compact = available < 214.0 + 12.0 + strip_min + 82.0 + buttons_width
+	var buttons_width := 76.0 + 76.0 + 100.0 + 16.0
+	var strip_min := 36.0 + 6.0 + 46.0 * 5.0 + 4.0 * 13.0 + 24.0
+	compact = available < 200.0 + 16.0 + strip_min + 84.0 + buttons_width
 	reward_caption.visible = not compact and not reward_caption.text.is_empty()
-	task_card.custom_minimum_size.x = 214.0
+	task_card.custom_minimum_size.x = 200.0
 	for key in reward_cells:
-		reward_cells[key].custom_minimum_size.x = 48.0
-	route_button.custom_minimum_size.x = 80.0
-	squad_button.custom_minimum_size.x = 80.0
-	continue_button.custom_minimum_size.x = 104.0
+		reward_cells[key].custom_minimum_size.x = 46.0
+	route_button.custom_minimum_size.x = 76.0
+	squad_button.custom_minimum_size.x = 76.0
+	continue_button.custom_minimum_size.x = 100.0
 	reward_strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	reward_strip.visible = available >= 214.0 + 12.0 + strip_min + buttons_width
+	reward_strip.visible = available >= 200.0 + 16.0 + strip_min + buttons_width
 	bar.position = Vector2(52, view.y - 84 - 8)
 	bar.size = Vector2(maxf(available, 300.0), 84)
 	layout_hint()
@@ -611,7 +639,7 @@ func layout() -> void:
 		var card := locked_card.get_combined_minimum_size()
 		locked_card.position = Vector2((view.x - card.x) * 0.5, view.y - card.y - 110.0)
 	invite_button.reset_size()
-	invite_button.position = Vector2(52, view.y - 150)
+	invite_button.position = Vector2((view.x - invite_button.size.x) * 0.5, 70)
 	if battle_header.visible:
 		battle_header.reset_size()
 		var size_now := battle_header.get_combined_minimum_size()
@@ -640,6 +668,5 @@ func tick(_delta: float) -> void:
 	if banner.visible and now > banner_until:
 		banner.modulate.a = maxf(0.0, banner.modulate.a - 0.04)
 		if banner.modulate.a <= 0.01:
-			banner.hide()
-	if arrow_target != Vector3.INF:
-		arrow.queue_redraw()
+			hide_banner()
+	arrow.queue_redraw()

@@ -61,9 +61,13 @@ def compare(iter_tag):
     setup_scene(32)
     out = {}
     for v in (R.side_view(corrected=True), R.side_view(corrected=False), R.front_view()):
-        if v.name == "front":   # the front drawing stands symmetric: bind stance, jaw closed
+        if v.name == "front":   # the front drawing stands symmetric: bind stance, jaw closed, hands raised
             ps.reset()
             ps.rot("jaw", (1, 0, 0), -2.0)
+            for s, sg in (("L", 1), ("R", -1)):
+                ps.rot(f"upperarm_{s}", (0, 1, 0), -14 * sg)
+                ps.rot(f"forearm_{s}", (1, 0, 0), -38)
+                ps.rot(f"hand_{s}", (1, 0, 0), 25)
             ps.apply()
             bpy.context.view_layer.update()
         render.camera_for_view(v)

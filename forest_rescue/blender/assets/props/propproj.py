@@ -67,15 +67,25 @@ class TexelSet:
 
 # =============================================================================== views
 
+def paint_mask_of(image, mask, tol=0.075):
+    """Foreground pixels that are NOT background-coloured (parchment/grey seen through bars, gaps)."""
+    from frlib import refs as _refs
+    bg = _refs.border_color(image, 3)
+    d = np.linalg.norm(ndi.gaussian_filter(image, (0.7, 0.7, 0)) - bg[None, None, :], axis=2)
+    return mask & (d > tol)
+
+
 class ViewSpec:
     def __init__(self, name, image, mask, objects, kind="ortho", view=None, cam=None, pose=None, unpose=None,
                  weight=1.0, light=(-0.55, 0.6, 0.55), delight=0.35, height=True, power=2.0, min_facing=0.12,
-                 erode=2, depth_eps=None):
+                 erode=2, depth_eps=None, parts=None, paint_mask=None):
         self.name, self.image, self.mask, self.objects = name, image, mask, objects
         self.kind, self.view, self.cam = kind, view, cam
         self.pose, self.unpose = pose, unpose
         self.weight, self.light, self.delight, self.height = weight, light, delight, height
         self.power, self.min_facing, self.erode, self.depth_eps = power, min_facing, erode, depth_eps
+        self.paint_mask = paint_mask_of(image, mask) if paint_mask is None else paint_mask
+        self.parts = parts
 
     # image-space mapping ---------------------------------------------------------
     def project(self, P):
@@ -172,6 +182,13 @@ def project_views(ts, specs, relief_px=(0.8, 6.0), log=print):
         bpy.context.view_layer.update()
         P, N = ts.positions()
         sel = ts.owner_mask(sp.objects)
+        A_ = ts.asset
+        if sp.parts is not None:
+            ids = [pid for nm, pid in A_.part_ids.items() if any(nm.startswith(pr) for pr in sp.parts)]
+            sel &= np.isin(ts.part, ids)
+        else:
+            nop = [pid for nm, pid in A_.part_ids.items() if A_.part_meta.get(nm, {}).get("no_paint")]
+            sel &= ~np.isin(ts.part, nop)
         H, W = sp.mask.shape
         tris = pk.world_triangles(sp.objects)
         zb = zbuffer(tris, sp, W, H)
@@ -184,7 +201,7 @@ def project_views(ts, specs, relief_px=(0.8, 6.0), log=print):
         span = np.ptp(tris.reshape(-1, 3), axis=0).max()
         eps = sp.depth_eps if sp.depth_eps is not None else 0.012 * span
         vis = ok & (d <= zv + eps)
-        m = ndi.binary_erosion(sp.mask, iterations=sp.erode) if sp.erode else sp.mask
+        m = ndi.binary_erosion(sp.paint_mask, iterations=sp.erode) if sp.erode else sp.paint_mask
         inm = np.zeros(len(u), bool)
         inm[ok] = m[vi[ok], ui[ok]]
         tocam = sp.to_camera_dir(P[sel])
@@ -368,7 +385,7 @@ def relief_bake(asset, height_img, texel_m, objs=None, levels=3, samples=12, ao_
 def paint_relief_textures(asset, shaders, specs, size=2048, height_gain=0.02, sizes=None, relief_levels=3,
                           ao_distance=0.02, ao_strength=0.6, delight_match=True, edge_fade_m=0.0015,
                           paint_alpha_w=0.25, height_owner_only=True, normal_extra=0.0, samples=12, log=print,
-                          swatches=None):
+                          swatches=None, no_relief_cls=(), gate=None):
     """Procedural PBR + projected reference colour + painted relief -> displaced high-res copy ->
     baked normal/AO. Returns bpy images {base, orm, normal} (also writes masters/runtime files)."""
     from PIL import Image
@@ -383,6 +400,21 @@ def paint_relief_textures(asset, shaders, specs, size=2048, height_gain=0.02, si
     else:
         col, w, hpaint, hw = np.zeros((ts.n, 3)), np.zeros(ts.n), np.zeros(ts.n), np.zeros(ts.n)
     alpha = pk.smoothstep(w / paint_alpha_w)
+    # colour-consistency gate: per material class, painted colours far from the class's robust median (e.g. iron bars
+    # or parchment painted onto a mis-registered oak post) are rejected
+    if gate is not None:
+        for cid in np.unique(tx.cls):
+            sel = (tx.cls == cid) & (alpha > 0.3)
+            if sel.sum() < 300:
+                continue
+            c = col[sel]
+            med = np.median(c, axis=0)
+            dist = np.linalg.norm(c - med, axis=1)
+            mad = np.median(dist) * 1.4826 + 1e-3
+            keep = np.exp(-np.clip(dist / (gate * mad) - 1.0, 0, None) ** 2 * 4.0)
+            a = alpha[sel]
+            alpha[sel] = a * keep
+        log(f"[paint] colour gate {gate} MAD applied")
     # colour match the procedural layer to the painting per material class (for unpainted sides/variants)
     out = proc.copy()
     if delight_match and (alpha > 0.5).any():
@@ -416,12 +448,23 @@ def paint_relief_textures(asset, shaders, specs, size=2048, height_gain=0.02, si
     # relief: painted band-pass height where painted (front/hero), procedural elsewhere
     hpa = pk.smoothstep(hw / paint_alpha_w)
     height = hproc * (1 - hpa) + (hpaint * height_gain) * hpa
+    for cname in no_relief_cls:
+        if cname in asset.cls_ids:
+            height[tx.cls == asset.cls_ids[cname]] = 0.0
     H_img = ts.to_img(height)
     W, H = ts.size
     fade = edge_fade(ts.valid, tex["texel_m"], edge_fade_m)
     H_img = texproj.fill(H_img[..., None], ts.valid)[..., 0] * fade
     nrm, ao = relief_bake(asset, H_img, tex["texel_m"], levels=relief_levels, ao_distance=ao_distance,
                           samples=samples, log=log)
+    # classes without relief (crystals): baked rays between thin converging facets are unreliable -> flat normal, no AO
+    for cname in no_relief_cls:
+        if cname in asset.cls_ids:
+            m = ts.to_img((tx.cls == asset.cls_ids[cname]).astype(float)) > 0.5
+            if m.any():
+                m = ndi.binary_dilation(m, iterations=3) & ~ts.to_img((tx.cls != asset.cls_ids[cname]).astype(float)).astype(bool)
+                nrm[m] = (0.5, 0.5, 1.0)
+                ao[m] = 1.0
     if normal_extra > 0:   # add sub-texel micro detail on top of the baked macro relief
         micro = texproj.height_to_normal(tex["height"] * 0.35, ts.valid, strength=normal_extra, texel_m=tex["texel_m"])
         n = nrm * 2 - 1

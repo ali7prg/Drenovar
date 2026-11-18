@@ -84,8 +84,8 @@ func _apply_wind(n: Node) -> void:
 		var m: Mesh = mi.mesh
 		var arrays_has_color := false
 		for i in m.get_surface_count():
-			var fmt := m.surface_get_format(i)
-			if fmt & Mesh.ARRAY_FORMAT_COLOR:
+			var arr: Array = m.surface_get_arrays(i)
+			if arr[Mesh.ARRAY_COLOR] != null and arr[Mesh.ARRAY_COLOR].size() > 0:
 				arrays_has_color = true
 		if not arrays_has_color:
 			continue
@@ -180,6 +180,9 @@ func _shots() -> void:
 		for _f in 8:
 			await get_tree().process_frame
 		var img := get_viewport().get_texture().get_image()
-		img.save_png(out.path_join("shot_yaw%03d.png" % yaws[i]))
+		var pz := str(args.get("pitch", "18"))
+		if args.has("pitches"):
+			pz = str(args["pitches"]).split(",")[i]
+		img.save_png(out.path_join("shot_%02d_yaw%03d_p%s.png" % [i, yaws[i], pz]))
 	print("VIEWER_SHOTS_DONE ", out)
 	get_tree().quit()

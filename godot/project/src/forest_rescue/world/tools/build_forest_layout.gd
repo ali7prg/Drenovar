@@ -61,18 +61,18 @@ func insert(grid: Dictionary, store: Array, entry: Array) -> int:
 func blocked_exact(x: float, z: float, tree: bool) -> bool:
 	if maxf(absf(x), absf(z)) < CORE + (0.8 if tree else 0.3):
 		return true
-	for gz in range(floori((z - 2.0) / masks.cell), floori((z + 2.0) / masks.cell) + 1):
-		for gx in range(floori((x - 2.0) / masks.cell), floori((x + 2.0) / masks.cell) + 1):
+	for gz in range(floori((z - 4.2) / masks.cell), floori((z + 4.2) / masks.cell) + 1):
+		for gx in range(floori((x - 4.2) / masks.cell), floori((x + 4.2) / masks.cell) + 1):
 			for index in masks.grid.get(Vector2i(gx, gz), PackedInt32Array()):
 				var mask: Dictionary = masks.masks[index]
 				var margin := 0.0
 				match String(mask.get("kind", "")):
 					"route":
-						margin = 0.6 if tree else 0.0
+						margin = 3.4 if tree else 0.0
 					"glade":
-						margin = 1.6 if tree else 0.3
+						margin = 3.8 if tree else 0.3
 					"arena":
-						margin = 2.0 if tree else 0.5
+						margin = 3.0 if tree else 0.5
 					"bridge":
 						margin = 0.5
 				if ForestMasks.inside_mask(x, z, mask, margin):
@@ -104,7 +104,7 @@ func spacing_at(x: float, z: float) -> float:
 
 
 func is_clearing(x: float, z: float) -> bool:
-	return (clearing.get_noise_2d(x, z) + 1.0) * 0.5 < 0.24
+	return (clearing.get_noise_2d(x, z) + 1.0) * 0.5 < 0.17
 
 
 func run() -> void:

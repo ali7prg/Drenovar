@@ -1,0 +1,182 @@
+{
+  "id": "lf_env_moss_rock",
+  "variants": {
+    "v1": {
+      "nodes": [
+        "lf_env_moss_rock_v1_LOD0",
+        "lf_env_moss_rock_v1_LOD1",
+        "lf_env_moss_rock_v1_LOD2"
+      ],
+      "tris": {
+        "LOD0": 3027,
+        "LOD1": 1147,
+        "LOD2": 757
+      },
+      "materials": {
+        "LOD0": [
+          "lf_rock_limestone",
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_rock_limestone",
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_rock_limestone",
+          "lf_foliage"
+        ]
+      },
+      "height_m": 6.33,
+      "footprint_radius_m": 7.15,
+      "bounds_m_blender": [
+        [
+          -6.92,
+          -4.86,
+          -1.46
+        ],
+        [
+          7.15,
+          4.57,
+          6.33
+        ]
+      ],
+      "wind": false,
+      "info": {
+        "LOD0": {
+          "tris": 3028
+        },
+        "LOD1": {
+          "tris": 1148
+        },
+        "LOD2": {
+          "tris": 758
+        }
+      }
+    },
+    "v2": {
+      "nodes": [
+        "lf_env_moss_rock_v2_LOD0",
+        "lf_env_moss_rock_v2_LOD1",
+        "lf_env_moss_rock_v2_LOD2"
+      ],
+      "tris": {
+        "LOD0": 1667,
+        "LOD1": 661,
+        "LOD2": 425
+      },
+      "materials": {
+        "LOD0": [
+          "lf_rock_limestone",
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_rock_limestone",
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_rock_limestone",
+          "lf_foliage"
+        ]
+      },
+      "height_m": 3.11,
+      "footprint_radius_m": 3.86,
+      "bounds_m_blender": [
+        [
+          -2.79,
+          -2.49,
+          -0.27
+        ],
+        [
+          3.86,
+          2.35,
+          3.11
+        ]
+      ],
+      "wind": false,
+      "info": {
+        "LOD0": {
+          "tris": 1670
+        },
+        "LOD1": {
+          "tris": 664
+        },
+        "LOD2": {
+          "tris": 428
+        }
+      }
+    },
+    "v3": {
+      "nodes": [
+        "lf_env_moss_rock_v3_LOD0",
+        "lf_env_moss_rock_v3_LOD1",
+        "lf_env_moss_rock_v3_LOD2"
+      ],
+      "tris": {
+        "LOD0": 763,
+        "LOD1": 301,
+        "LOD2": 99
+      },
+      "materials": {
+        "LOD0": [
+          "lf_rock_limestone",
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_rock_limestone",
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_rock_limestone",
+          "lf_foliage"
+        ]
+      },
+      "height_m": 1.66,
+      "footprint_radius_m": 1.61,
+      "bounds_m_blender": [
+        [
+          -1.56,
+          -1.61,
+          -0.24
+        ],
+        [
+          1.07,
+          1.35,
+          1.66
+        ]
+      ],
+      "wind": false,
+      "info": {
+        "LOD0": {
+          "tris": 764
+        },
+        "LOD1": {
+          "tris": 302
+        },
+        "LOD2": {
+          "tris": 100
+        }
+      }
+    }
+  },
+  "tris": {
+    "LOD0": 3027,
+    "LOD1": 1147,
+    "LOD2": 757
+  },
+  "bones": 0,
+  "materials": [
+    "lf_foliage",
+    "lf_rock_limestone"
+  ],
+  "glb_images": [
+    "lf_rock_limestone_n.png",
+    "lf_rock_limestone_c.jpg",
+    "lf_rock_limestone_r.png",
+    "lf_foliage_atlas.png"
+  ],
+  "texture_mode": "external shared files next to the GLB (relative URIs)",
+  "wind": "static (no COLOR_0)",
+  "layout_note": "Node translations are preview offsets only; mesh origin = ground contact centre.",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_groundcover.py moss_rock",
+  "collision": "use a convex hull / capsule of LOD2 (see footprint_radius_m, height_m)"
+}

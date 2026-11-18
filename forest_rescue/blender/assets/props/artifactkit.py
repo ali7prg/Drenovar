@@ -44,6 +44,13 @@ def _M(M, R=None, t=(0, 0, 0)):
 
 # =============================================================================== stone rune
 
+SCALE = {"stone_rune": 1.33, "bronze_seal": 1.30, "amber_crystal": 1.30, "bone_key": 1.25}   # sized to the cage-sheet sockets
+
+
+def S4(fam):
+    return M4(None, (0, 0, 0), SCALE[fam])
+
+
 TRACE = {}   # filled by the build script from the reference masks: {family: dict(outline=(k,2) m, t=m, ...)}
 
 
@@ -138,7 +145,7 @@ def build_rune(B, node, v, M=np.eye(4), cls="rune_stone"):
     body = pk.extrude_round(outline, t - 0.0025, r_front=0.0075, r_back=0.005, seg=(2 if B.lod == 0 else 1),
                             cap_spacing=(0.013 if B.lod == 0 else (0.022 if B.lod == 1 else None)), dome=dome)
     meta = {"motif": rune_motifs(v)} if v != 1 else {"painted": 1}
-    B.add(node, f"{node}_body", cls, body.transformed(_M(M, FRONT)), meta=meta)
+    B.add(node, f"{node}_body", cls, body.transformed(_M(M, FRONT) @ S4("stone_rune")), meta=meta)
 
 
 # =============================================================================== bronze seal
@@ -206,10 +213,10 @@ def build_seal(B, node, v, M=np.eye(4), cls="bronze"):
         boss = pk.extrude_round(pk.ngon(d["R"] * 0.72, 6, 0.0), 0.0045, r_front=0.0015, r_back=0.0005, seg=1,
                                 cap_spacing=sp)
         boss = boss.transformed(M4(None, (0, 0, t - 0.0047)))
-        B.add(node, f"{node}_body", cls, Piece_merge(body, boss).transformed(_M(M, FRONT)), meta=meta)
+        B.add(node, f"{node}_body", cls, Piece_merge(body, boss).transformed(_M(M, FRONT) @ S4("bronze_seal")), meta=meta)
     else:
         body = pk.extrude_round(outline, t, r_front=0.0028, r_back=0.002, seg=(2 if B.lod == 0 else 1), cap_spacing=sp)
-        B.add(node, f"{node}_body", cls, body.transformed(_M(M, FRONT)), meta=meta)
+        B.add(node, f"{node}_body", cls, body.transformed(_M(M, FRONT) @ S4("bronze_seal")), meta=meta)
 
 
 def Piece_merge(*ps):
@@ -291,13 +298,19 @@ def crystal_piece(outline, z0, z1, apex_z, kind, lod):
 
 
 def build_amber(B, node, v, M=np.eye(4)):
+    M = np.asarray(M, float) @ S4("amber_crystal")
     d = DIMS["amber_crystal"]
     tr = TRACE.get("amber_crystal", {})
     H, W, t = tr.get("H", d["H"]), tr.get("W", d["W"]), tr.get("t", d["t"])
     outer = pk.ccw(diamond(H, W))
-    fw = 0.0165
+    fw = 0.0175
     inner = pk.offset_poly(outer, -fw)
-    frame = pk.extrude(outer, t, chamfer=0.0022, hole=inner)
+    traced = tr.get("outline")
+    if traced is not None:
+        fo = pk.resample_closed(traced, {0: 48, 1: 28, 2: 16}[B.lod])
+        frame = pk.extrude(fo, t, chamfer=0.0022, hole=inner)
+    else:
+        frame = pk.extrude(outer, t, chamfer=0.0022, hole=inner)
     B.add(node, f"{node}_frame", "oak_fine", frame.transformed(_M(M, FRONT)),
           meta=({"motif": amber_frame_motif()} if v != 1 else {"painted": 1}))
     gem_out = pk.offset_poly(outer, -fw + 0.0025)
@@ -382,8 +395,8 @@ def key_motif():
 
 def build_key(B, node, v, M=np.eye(4)):
     # local presentation frame: shaft along +X, bit plane XZ, teeth -Z; then Rz(90): +X -> +Y
-    Mk = np.asarray(M, float) @ M4(Rz(math.pi / 2))
-    seg = B.seg(10, 7, 5)
+    Mk = np.asarray(M, float) @ S4("bone_key") @ M4(Rz(math.pi / 2))
+    seg = B.seg(8, 6, 4)
     kp, kv = key_profile(B.lod)
     shaft = pk.lathe(kp, seg, smooth=True, v_values=kv, ref_R=0.0128)
     shaft = shaft.transformed(M4(Ry(math.pi / 2)))   # lathe axis Z -> X ; r=0 rows at x=-0.0805 and 0.0528
@@ -391,26 +404,28 @@ def build_key(B, node, v, M=np.eye(4)):
     B.add(node, f"{node}_shaft", "bone", shaft.transformed(Mk), meta={"motif": key_motif()})
     # bow
     bc = np.array([(0.172 - 0.73) * KEY_L, 0.0, 0.0])
-    nseg = B.seg(28, 18, 12)
-    sides = B.seg(8, 6, 5)
+    nseg = B.seg(22, 14, 10)
+    sides = B.seg(6, 5, 4)
+    bow_prof = lambda r: np.array([[r * math.cos(a), 1.45 * r * math.sin(a)] for a in
+                                   np.linspace(0, 2 * math.pi, sides, endpoint=False) + math.pi / sides])
     if v == 1:
         th = np.linspace(0, 2 * math.pi, nseg, endpoint=False)
         R = 0.0206
         path = np.stack([bc[0] + R * np.cos(th), np.zeros(nseg), R * np.sin(th)], 1)
-        bow = pk.tube(path, 0.0064, sides, closed_path=True, up=(0, 1, 0))
+        bow = pk.sweep(path, bow_prof(0.0064), closed_path=True, up=(0, 1, 0), smooth=True, ref_perim=0.05)
     elif v == 2:
-        th = np.linspace(0, 2 * math.pi, int(nseg * 1.3), endpoint=False)
+        th = np.linspace(0, 2 * math.pi, int(nseg * 1.2), endpoint=False)
         R = 0.0185 * (1 + 0.30 * np.cos(3 * th))
         path = np.stack([bc[0] - 0.002 + R * np.cos(th), np.zeros(len(th)), R * np.sin(th)], 1)
-        bow = pk.tube(path, 0.0050, sides, closed_path=True, up=(0, 1, 0))
+        bow = pk.sweep(path, bow_prof(0.0052), closed_path=True, up=(0, 1, 0), smooth=True, ref_perim=0.045)
     else:
         s = 0.0205
         sq = pk.rounded_rect(2 * s, 2 * s, 0.008, seg=max(2, nseg // 8))
         sq = pk.resample_closed(sq, nseg)
         path = np.stack([bc[0] + sq[:, 0], np.zeros(len(sq)), sq[:, 1]], 1)
-        bow = pk.tube(path, 0.0052, sides, closed_path=True, up=(0, 1, 0))
-        B.add(node, f"{node}_bowx", "bone", pk.rod((bc[0] - s, 0, 0), (bc[0] + s, 0, 0), 0.0032, max(4, sides - 2)).transformed(Mk))
-        B.add(node, f"{node}_bowx", "bone", pk.rod((bc[0], 0, -s), (bc[0], 0, s), 0.0032, max(4, sides - 2)).transformed(Mk))
+        bow = pk.sweep(path, bow_prof(0.0054), closed_path=True, up=(0, 1, 0), smooth=True, ref_perim=0.046)
+        B.add(node, f"{node}_bowx", "bone", pk.rod((bc[0] - s, 0, 0), (bc[0] + s, 0, 0), 0.0034, 4).transformed(Mk))
+        B.add(node, f"{node}_bowx", "bone", pk.rod((bc[0], 0, -s), (bc[0], 0, s), 0.0034, 4).transformed(Mk))
     B.add(node, f"{node}_bow", "bone", bow.transformed(Mk))
     # bit (XZ outline, thickness along Y)
     if v == 1:
@@ -454,7 +469,15 @@ def recess_outline(kind, n=48):
     raise ValueError(kind)
 
 
-def socket_plate_outline(kind):
+def socket_plate_outline(kind, style=None):
+    if style == "cage":      # cage-mounted plates as drawn on the cage sheet
+        if kind == "circle":
+            return pk.circle(0.122, 40)
+        if kind == "hex":
+            return pk.ngon(0.104, 6, 0.0)
+        if kind == "diamond":
+            return pk.ccw(diamond(0.250, 0.162))
+        return pk.rect(0.165, 0.205, 0.028)
     if kind == "circle":
         return pk.rounded_rect(0.205, 0.205, 0.03, 3)
     if kind == "hex":
@@ -466,7 +489,22 @@ def socket_plate_outline(kind):
     raise ValueError(kind)
 
 
-def socket_motif(kind):
+def socket_motif(kind, style=None):
+    if style == "cage" and kind == "circle":   # segmented stone ring (oak cage drawing)
+        bb = (-0.125, -0.125, 0.125, 0.125)
+        cv = mo.Canvas(bb, ppm=3000)
+        for k in range(14):
+            a = 2 * math.pi * k / 14 + 0.1
+            cv.line(np.array([[0.086 * math.cos(a), 0.086 * math.sin(a)], [0.125 * math.cos(a), 0.125 * math.sin(a)]]), 0.003)
+        cv.ring((0, 0), 0.088, 0.004)
+        return [dict(mask=cv.mask(0.0008), bbox=bb, isl=(2,), depth=0.004, mode="cut", colour=pk.srgb((80, 70, 58)), tint=0.6)]
+    if style == "cage" and kind in ("hex", "diamond", "keyhole"):
+        bb = (-0.12, -0.12, 0.12, 0.12)
+        cv = mo.Canvas(bb, ppm=3000)
+        out = socket_plate_outline(kind, "cage")
+        inner = pk.offset_poly(pk.ccw(out), -0.016)
+        cv.line(np.vstack([inner, inner[:1]]), 0.003)
+        return [dict(mask=cv.mask(0.0006), bbox=bb, isl=(2,), depth=0.0015, mode="cut")]
     if kind == "circle":
         bb = (-0.105, -0.105, 0.105, 0.105)
         cv = mo.Canvas(bb, ppm=6000)
@@ -510,20 +548,40 @@ def socket_motif(kind):
 
 
 def build_socket(B, node, kind, M=np.eye(4), cls="limestone_fine", prefix=None, plate=True, floor_cls=None,
-                 plate_t=0.036):
+                 plate_t=0.036, style=None, density=1.0):
     """Socket plate with recess (frame: recess floor at origin, plate front at -Y = -recess_d)."""
     prefix = prefix or node
     key = {"circle": "stone_rune", "hex": "bronze_seal", "diamond": "amber_crystal", "keyhole": "bone_key"}[kind]
-    rd = DIMS[key]["recess_d"]
-    n = B.seg(48, 28, 16)
-    rec = recess_outline(kind, n)
+    Sf = SCALE[key]
+    rd = DIMS[key]["recess_d"] * Sf
+    n = B.seg(48, 28, 16) if style is None else B.seg(28, 20, 12)
+    rec = recess_outline(kind, n) * Sf
+    if style == "cage":
+        plate_t = rd + 0.012
     if plate:
-        out = socket_plate_outline(kind)
+        out = socket_plate_outline(kind, style)
+        if style is None:
+            out = out * Sf
         if kind == "circle":
-            out = pk.resample_closed(out, B.seg(40, 24, 16))
-        p = pk.extrude(out, plate_t, chamfer=0.004, hole=rec)
+            out = pk.resample_closed(out, B.seg(40, 24, 16) if style is None else B.seg(28, 20, 12))
+        p = pk.extrude(out, plate_t, chamfer=0.004 if style is None else 0.008, hole=rec)
         p = p.transformed(M4(None, (0, 0, rd - plate_t)))
-        B.add(node, f"{prefix}_plate", cls, p.transformed(_M(M, FRONT)), meta={"motif": socket_motif(kind)})
+        mot = socket_motif(kind, style)
+        if style is None:
+            mot = [dict(m_, bbox=tuple(np.asarray(m_["bbox"]) * Sf)) for m_ in mot]
+        meta = {"motif": mot, "no_paint": 1 if style else 0}
+        B.add(node, f"{prefix}_plate", cls, p.transformed(_M(M, FRONT)), meta=meta, density=density)
+        if style == "cage" and kind in ("hex", "diamond"):     # corner rivet heads
+            for q in socket_plate_outline(kind, "cage"):
+                c = q * 0.88
+                rv = pk.lathe(np.array([[0.011, 0], [0.01, 0.005], [0.006, 0.009], [0, 0.011]]), B.seg(8, 6, 4))
+                B.add(node, f"{prefix}_rivets", cls, rv.transformed(_M(M, FRONT) @ M4(None, (c[0], c[1], rd))), max_lod=1,
+                      meta={"no_paint": 1}, density=density)
+        if style == "cage" and kind == "circle":               # square loop on the left of the ring (drawing)
+            loop = pk.extrude(pk.rect(0.06, 0.07, 0.006), 0.03, chamfer=0.004, hole=pk.rect(0.03, 0.04))
+            B.add(node, f"{prefix}_loop", cls, loop.transformed(_M(M, FRONT) @ M4(None, (-0.143, 0.0, rd - 0.03))),
+                  meta={"no_paint": 1}, density=density)
     floor = pk.extrude(rec * 1.02, 0.004).transformed(M4(None, (0, 0, -0.004)))
-    B.add(node, f"{prefix}_floor", floor_cls or cls, floor.transformed(_M(M, FRONT)), meta={"floor": 1})
+    B.add(node, f"{prefix}_floor", floor_cls or cls, floor.transformed(_M(M, FRONT)), meta={"floor": 1, "no_paint": 1 if style else 0},
+          density=density)
     return rd

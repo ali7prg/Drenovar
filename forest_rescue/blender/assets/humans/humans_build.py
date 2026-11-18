@@ -51,27 +51,39 @@ def assemble(asset, voxel=0.0035, with_garments=True):
     extras = spec.head_extras(ctx) if hasattr(spec, "head_extras") else []
     parts_all = parts + extras
     ctx.parts = parts_all
+
+    def is_head(p):
+        return getattr(p, "bone", None) in ("Head", "Jaw", "Neck") or getattr(p, "cls", None) in ("hair", "beard") \
+            or getattr(p, "head_mesh", False)
+    head_parts = [p for p in parts_all if is_head(p)]
+    body_parts = [p for p in parts_all if not is_head(p)]
     lo, hi = HB.field_bounds(L)
-    F = HB.build_field(parts_all, subs, lo, hi, voxel, views=views, hull_k=getattr(spec, "HULL_K", 0.010))
+    F = HB.build_field(body_parts, subs, lo, hi, voxel, views=views, hull_k=getattr(spec, "HULL_K", 0.010))
+    s_ = L["crown"] / 1.75
+    hlo = np.array([-0.17 * s_, O[1] - 0.10, J["Neck"][2] - 0.07])
+    hhi = np.array([0.17 * s_, O[1] + 0.30, L.get("top", L["crown"] + 0.05)])
+    Fhd = HB.build_field(head_parts, [], hlo, hhi, getattr(spec, "HEAD_VOXEL", 0.0021), views=views,
+                         hull_k=getattr(spec, "HULL_K", 0.010))
+    # body_fn = union of both (for garment fitting)
     ctx.body_field = F
-    ctx.body_fn = G.FieldFn(F)
+    fb, fh = G.FieldFn(F), G.FieldFn(Fhd)
+    ctx.body_fn = lambda P, fb=fb, fh=fh: np.minimum(fb(P), fh(P))
+    ctx.head_mesh_fn = fh
     Ft = G.parts_field(parts_all, lo, hi, 0.006, names=TORSO_NAMES + tuple(getattr(spec, "DRAPE_EXTRA", ())))
     ctx.torso_fn = G.FieldFn(Ft)
     log(asset, "fields %.1fs" % (time.time() - t0))
     v, f = F.mesh()
     body = G.Piece("body", v, f.tolist(), [[(0, 0)] * 3 for _ in range(len(f))], "body", {"type": "body"},
                    meta={"sdf": True})
-    pieces = [body]
+    hv, hf = Fhd.mesh()
+    head = G.Piece("head", hv, hf.tolist(), [[(0, 0)] * 3 for _ in range(len(hf))], "skin", {"type": "body"},
+                   meta={"sdf": True})
+    pieces = [body, head]
     if with_garments and hasattr(spec, "garments"):
         pieces += spec.garments(ctx)
-    if with_garments and hasattr(spec, "beard"):
-        b = spec.beard(ctx)
-        if b is not None:
-            b.meta["optional"] = "beard"
-            pieces.append(b)
     if with_garments and hasattr(spec, "optional_parts"):
         for p in spec.optional_parts(ctx):
             pieces.append(p)
     ctx.pieces = pieces
-    log(asset, "assembled %d pieces, body %d tris, %.1fs" % (len(pieces), len(f), time.time() - t0))
+    log(asset, "assembled %d pieces, body %d + head %d tris, %.1fs" % (len(pieces), len(f), len(hf), time.time() - t0))
     return ctx

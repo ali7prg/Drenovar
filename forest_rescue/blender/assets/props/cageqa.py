@@ -2,6 +2,7 @@
 import json
 import math
 import os
+import re
 import sys
 
 import bpy
@@ -22,6 +23,24 @@ REF = {
              "socket": (784, 772, 960, 948), "artifact": "bronze_seal", "x0": [-0.75, 0.30, 0, 15.0, 2.6, 0, 0]},
     "root": {"closed": (1062, 100, 1490, 426), "open": (1062, 424, 1490, 742), "hinge": (1037, 772, 1218, 948),
              "socket": (1244, 772, 1430, 948), "artifact": "amber_crystal", "x0": [-0.75, 0.28, 0, 15.0, 2.6, 0, 0]},
+}
+# landmarks on the CLOSED drawing (Blender point -> crop pixel): corner post axes top/bottom, hinge post, apex
+LANDMARKS = {
+    "oak": [((-1.5, -1.5, 3.18), (122.5, 32.5)), ((-1.5, -1.5, 0.58), (122.5, 257.5)), ((1.5, -1.5, 3.18), (334, 55)),
+            ((1.5, -1.5, 0.58), (334, 250)), ((-1.5, 1.5, 3.18), (23.5, 65)), ((-1.5, 1.5, 0.58), (23.5, 250)),
+            ((-0.33, -1.5, 0.0), (202.5, 305)), ((-0.33, -1.5, 2.66), (202.5, 87.5)), ((0.0, 0.0, 4.32), (195, 10))],
+    "iron": [((-1.48, -1.48, 2.97), (127.5, 37.5)), ((-1.48, -1.48, 3.35), (124, 11)), ((-1.48, -1.48, 0.30), (127.5, 280)),
+             ((1.48, -1.48, 2.97), (322.5, 52.5)), ((1.48, -1.48, 0.30), (322.5, 265)), ((-1.48, 1.48, 2.97), (17.5, 65)),
+             ((-1.48, 1.48, 0.30), (17.5, 260)), ((1.48, 1.48, 3.35), (181, 11)), ((-0.42, -1.48, 0.30), (185, 272))],
+    "root": [((-1.48, -1.48, 2.5), (165, 50)), ((-1.48, -1.48, 0.05), (165, 300)), ((1.48, -1.48, 2.5), (362, 65)),
+             ((1.48, -1.48, 0.05), (362, 295)), ((-1.48, 1.48, 2.5), (40, 75)), ((-1.48, 1.48, 0.05), (40, 280)),
+             ((-0.36, -1.48, 0.0), (240, 300)), ((-0.36, -1.48, 2.32), (240, 117)), ((1.30, -1.48, 0.0), (345, 300))],
+}
+# high-res insets: (box, crop px of the anchor, px per metre, parts prefixes, anchor key)
+INSETS = {
+    "oak": [((60, 772, 270, 948), (88.5, 99.5), 422.0, "hinge"), ((294, 772, 472, 948), (101.7, 90.0), 516.0, "socket")],
+    "iron": [((550, 772, 710, 948), (69.5, 93.5), 458.0, "hinge"), ((784, 772, 960, 948), (93.0, 87.0), 596.0, "socket")],
+    "root": [((1037, 772, 1218, 948), (64.0, 95.0), 391.0, "hinge"), ((1244, 772, 1430, 948), (71.7, 89.0), 640.0, "socket")],
 }
 # reference door region in the OPEN crop (drawn hinged on the right: production rule overrides) -> excluded
 OPEN_DOOR_EXCLUDE = {"oak": (285, 85, 400, 310), "iron": (290, 85, 388, 300), "root": (300, 85, 428, 318)}
@@ -62,6 +81,28 @@ def import_artifact(fam, variant=1):
     return keep
 
 
+def wire_overlay(A, cam, img, out_png, pose=None, lod=2):
+    """Reference with the model's LOD2 edges projected by the fitted camera (alignment check)."""
+    import cv2
+    from frlib import core as _core
+    im = (np.clip(img, 0, 1) * 255).astype(np.uint8).copy()
+    cols = [(255, 60, 60), (60, 200, 255), (255, 220, 40), (120, 255, 120), (255, 120, 255), (255, 255, 255), (200, 160, 255)]
+    for k, (node, o) in enumerate(A.meshes[lod].items()):
+        if o.hide_render and node in ("keyhole", "keyhole_core"):
+            continue
+        me = o.data
+        M = np.array(o.matrix_world)
+        co = np.array([v.co[:] for v in me.vertices])
+        P = co @ M[:3, :3].T + M[:3, 3]
+        uv, z = pk.project_points(P, cam)
+        for e in me.edges:
+            a, b = e.vertices
+            p0, p1 = uv[a], uv[b]
+            cv2.line(im, (int(p0[0]), int(p0[1])), (int(p1[0]), int(p1[1])), cols[k % len(cols)], 1, cv2.LINE_AA)
+    big = cv2.resize(im, (im.shape[1] * 2, im.shape[0] * 2), interpolation=cv2.INTER_NEAREST)
+    _core.save_rgba(out_png, big / 255.0)
+
+
 def run(asset_id, build_fn, hinge, latch, sock, kind, door, front_y, interior, clear_h, ref_key):
     it = qa.iteration()
     pre = f"iter{it:02d}_"
@@ -71,6 +112,10 @@ def run(asset_id, build_fn, hinge, latch, sock, kind, door, front_y, interior, c
     A.dirt_scale = 1.0
     A.compile(build_fn)
     # keyhole socket collapsed by default (client enables it for bone-key sites)
+    # thin iron members are not projected (mis-registration would paint bars/background onto them): procedural iron
+    for nm in A.part_ids:
+        if re.match(r"(bars_|rails_|arches_|bar_tips_|tracery_|door_bars|knots_|fleurs_|ridge|latch_keeper)", nm):
+            A.part_meta.setdefault(nm, {})["no_paint"] = 1
     pk.pack_atlas(A.lod0_objects(), margin=0.002, shape="CONCAVE")
     pk.transfer_atlas_uv(A)
     # markers
@@ -98,12 +143,20 @@ def run(asset_id, build_fn, hinge, latch, sock, kind, door, front_y, interior, c
         tris = pk.world_triangles(objs)
         c = tris.reshape(-1, 3).mean(0)
         key = f"{asset_id}:{state}"
-        if key in cams and not qa.flag("--refit"):
-            start = np.array(cams[key])
-            x, sc = pk.fit_camera(tris, m, start, fixed=(2,), iters=1)
+        H0, W0 = m.shape
+        if state == "closed":
+            LM = LANDMARKS[ref_key]
+            P3 = [a for a, b in LM]
+            p2 = [b for a, b in LM]
+            xs, err = pk.fit_camera_points(P3, p2, W0, H0, np.array(R["x0"] + list(c)), fixed=(2,))
+            x, sc = pk.fit_camera(tris, m, xs, fixed=(2,), iters=1, landmarks=(P3, p2), lam=0.004)
+            e2 = np.linalg.norm(pk.landmark_errors(x, P3, p2, W0, H0), axis=1)
+            print(f"[cage] {asset_id} landmark residuals after refinement (px): {np.round(e2, 1).tolist()}")
+            core.write_json(qa.out(asset_id, pre + "landmarks.json"), {"points": [list(a) for a in P3], "pixels": [list(b) for b in p2],
+                                                                      "residual_px": [round(float(v), 2) for v in e2]})
         else:
-            start = np.array(list(cams.get(f"{asset_id}:closed", R["x0"] + list(c)))) if state == "open" else np.array(R["x0"] + list(c))
-            x, sc = pk.fit_camera(tris, m, start, fixed=(2,), iters=2)
+            start = np.array(cams.get(f"{asset_id}:closed"))
+            x, sc = pk.fit_camera(tris, m, start, fixed=(0, 1, 2), iters=1)
         cams[key] = [float(a) for a in x]
         H, W = m.shape
         fits[state] = (img, m, pk.cam_from_params(x, W, H), sc)
@@ -113,14 +166,34 @@ def run(asset_id, build_fn, hinge, latch, sock, kind, door, front_y, interior, c
     allobj = A.lod0_objects()
     static = [A.meshes[0]["root"]]
     specs = [pp.ViewSpec("closed", fits["closed"][0], fits["closed"][1], allobj, "persp", cam=fits["closed"][2],
-                         weight=1.0, erode=0, delight=0.3, min_facing=0.15, depth_eps=0.03),
+                         weight=1.0, erode=1, delight=0.3, min_facing=0.15, depth_eps=0.03),
              pp.ViewSpec("open", fits["open"][0], fits["open"][1], static, "persp", cam=fits["open"][2],
-                         pose=lambda: open_pose(A), unpose=lambda: closed_pose(A), weight=0.8, erode=0, delight=0.3,
+                         pose=lambda: open_pose(A), unpose=lambda: closed_pose(A), weight=0.8, erode=1, delight=0.3,
                          min_facing=0.15, depth_eps=0.03)]
+    from frlib import refs as _refs
+    for box, cpx, ppm, what in INSETS[ref_key]:
+        img = pk.ref_crop(IMG, box)
+        H_, W_ = img.shape[:2]
+        full = np.ones((H_, W_), bool)
+        pm = full.copy()
+        pm[:5] = pm[-5:] = False
+        pm[:, :5] = pm[:, -5:] = False
+        if what == "hinge":
+            zs = getattr(build_fn, "hinge_z", None) or [0.54, 2.04]
+            anchors = [(f"hinge{i}_", (hinge[0], hinge[1], z)) for i, z in enumerate(zs)]
+            objs_i = [A.meshes[0]["root"], A.meshes[0]["door"]]
+        else:
+            anchors = [("sock_native_plate", tuple(sock)), ("sock_native_loop", tuple(sock)), ("sock_native_rivets", tuple(sock))]
+            objs_i = [A.meshes[0]["socket"]]
+        for pref, anc in anchors:
+            v = _refs.View(name=f"inset_{what}", image=img, mask=full, d=np.array([0.0, 1.0, 0.0]), ppm=ppm, ax=cpx[0], ay=cpx[1],
+                           anchor=np.asarray(anc, float))
+            specs.append(pp.ViewSpec(f"inset_{what}_{pref}", img, full, objs_i, "ortho", view=v, weight=4.0, erode=0,
+                                     delight=0.15, min_facing=0.05, parts=[pref], paint_mask=pm, height=True))
     files, info = pp.paint_relief_textures(A, shaders(), specs, size=2048, height_gain=0.03,
                                            sizes={"base": 2048, "orm": 1024, "normal": 2048}, relief_levels=2,
                                            ao_distance=0.35, ao_strength=0.6, edge_fade_m=0.01, samples=8,
-                                           paint_alpha_w=0.3)
+                                           paint_alpha_w=0.3, gate=2.2)
     pk.make_material(A, files)
     # ---------------- clips
     ck.add_cage_clips(A, latch_travel=0.12)
@@ -160,6 +233,7 @@ def run(asset_id, build_fn, hinge, latch, sock, kind, door, front_y, interior, c
         pk.blender_camera(cam)
         rgba = pk.render_rgba(qa.out(asset_id, "_tmp.png"))
         mm = m.copy()
+        wire_overlay(A, cam, img, qa.out(asset_id, pre + f"{state}34_wire.png"))
         res[state] = pk.compare_panels(img, rgba, mm, qa.out(asset_id, pre + f"{state}34.png"),
                                        f"{asset_id} {state} 3/4 (camera fitted)" + (" - drawn door hinge side ignored" if state == "open" else ""))
     closed_pose(A)

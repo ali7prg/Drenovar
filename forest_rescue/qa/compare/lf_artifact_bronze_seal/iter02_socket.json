@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_bronze_seal v1 socket (fitted perspective)",
+  "iou_filled": 0.9066,
+  "iou_raw": 0.9066,
+  "mean_abs_colour_error": 0.1247,
+  "mean_rgb_ref": [
+    0.524,
+    0.436,
+    0.337
+  ],
+  "mean_rgb_render": [
+    0.604,
+    0.504,
+    0.398
+  ]
+}

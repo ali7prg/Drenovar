@@ -53,7 +53,7 @@ def ribbon_points():
 
 
 def throat_ring():
-    return V(0.018, -1.085, 1.488)
+    return V(0.072, -1.092, 1.505)
 
 
 def bones(J=None):

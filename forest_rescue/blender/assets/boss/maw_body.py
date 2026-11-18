@@ -362,8 +362,8 @@ def head_prim(Yh, ztop, zm, zj, cap=HEAD_CAP):
     f = np.sqrt(np.clip(1 - t * t, 0, 1))
     wu = wu * np.maximum(f, 0.05)
     wl = wl * np.maximum(f, 0.05)
-    pu = np.interp(Yu, [-4.5, -4.2, -3.9, -3.1], [3.0, 3.0, 2.6, 2.2])
-    pl = np.interp(Yu, [-4.5, -3.1], [2.3, 2.1])
+    pu = np.interp(Yu, [-4.5, -4.2, -3.9, -3.1], [3.2, 3.2, 2.9, 2.5])
+    pl = np.interp(Yu, [-4.5, -3.8, -3.1], [2.8, 2.9, 2.5])
     T = [zt, zmm, zb, wu, wl, pu, pl]
 
     def fn(P):
@@ -596,6 +596,8 @@ def leg_parts(side):
     out.append(sdf.sphere(knee + np.array([0.02 * sx, -0.02, 0.0]), 0.25, k=0.10, name="knee", bone=b("shin")))
     # shin + calf (calf mass behind the upper shin)
     out.append(sdf.round_cone(knee, ankle, 0.25, 0.215, k=0.10, name="shin", bone=b("shin")))
+    out.append(sdf.round_cone(knee + np.array([0.0, -0.10, -0.12]), ankle + np.array([0.0, -0.09, 0.10]), 0.13, 0.10,
+                              k=0.10, name="tibialis", bone=b("shin")))
     calf_c = knee + (ankle - knee) * 0.45 + np.array([0, 0.13, 0.0])
     out.append(oriented_ellipsoid(calf_c, ankle - knee, 0.47, 0.19, 0.18, k=0.12, name="calf", bone=b("shin")))
     # ankle bulge + metatarsus (massive, scutate; nearly vertical column in the drawing)

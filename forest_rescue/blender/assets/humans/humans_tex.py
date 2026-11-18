@@ -29,6 +29,8 @@ CLASS_PBR = {
     "boot": (0.62, 0.0, "leather"), "leather": (0.6, 0.0, "leather"), "leather_dark": (0.58, 0.0, "leather"),
     "sole": (0.8, 0.0, "leather"), "metal": (0.38, 1.0, "metal"), "brass": (0.42, 1.0, "metal"),
     "wood": (0.72, 0.0, "wood"), "chainmail": (0.45, 1.0, "mail"), "gambeson": (0.9, 0.0, "quilt"),
+    "wraps": (0.88, 0.0, "wool"), "flower_purple": (0.7, 0.0, "linen"), "flower_yellow": (0.7, 0.0, "linen"),
+    "vest": (0.62, 0.0, "leather"), "cap": (0.9, 0.0, "wool"), "hood": (0.9, 0.0, "wool"),
     "tabard": (0.88, 0.0, "wool"), "felt": (0.9, 0.0, "wool"), "herbs": (0.8, 0.0, "linen"),
     "feather": (0.8, 0.0, "linen"), "body": (0.8, 0.0, "linen"),
 }
@@ -152,11 +154,16 @@ def detail_maps(kind, P, N, seed=0):
 
 # --------------------------------------------------------------------------- projection
 
-def project_colours(verts, tris, uv, vnorm, views, size, face_cls, tri_face):
+def project_colours(verts, tris, uv, vnorm, views, size, face_cls, tri_face, noproj=None):
     """Projected colour + weight per texel and per-texel class index."""
     T = texproj.rasterize_uv(verts, tris, uv, size, vnorm)
-    zbs = {v.name: texproj.zbuffer(verts, tris, v) for v in views}
-    col, w = texproj.project(T, views, zbs, power=3.0, depth_eps=0.02, min_facing=0.32, mask_erode=2)
+    ztris = tris if noproj is None else tris[~noproj[tri_face]]
+    zbs = {v.name: texproj.zbuffer(verts, ztris, v) for v in views}
+    col, w = texproj.project(T, views, zbs, power=5.0, depth_eps=0.02, min_facing=0.25, mask_erode=2)
+    if noproj is not None:
+        yy, xx = np.nonzero(T.valid)
+        bad = noproj[tri_face[T.tri[yy, xx]]]
+        w[yy[bad], xx[bad]] = 0.0
     cls_img = np.full(T.valid.shape, -1, np.int32)
     yy, xx = np.nonzero(T.valid)
     cls_img[yy, xx] = face_cls[tri_face[T.tri[yy, xx]]]
@@ -182,20 +189,21 @@ def reject_outliers(col, w, cls_img, valid, k=3.2):
     return w
 
 
-def fill_by_class(col, w, cls_img, valid, thresh=0.15, min_known=40):
-    """Low-confidence texels are filled per class: pull-push inside the class + class median."""
+def fill_by_class(col, w, cls_img, valid, lo=0.02, hi=0.22, min_known=40):
+    """Grazing/unseen texels take the class's sampled colour (median of confidently projected
+    texels of that class), blended by confidence; detail comes later from procedural maps."""
     out = col.copy()
-    known_all = (w > thresh) & valid
+    conf = np.clip((w - lo) / (hi - lo), 0, 1)
     for c in np.unique(cls_img[valid]):
         m = (cls_img == c) & valid
-        k = m & known_all
+        k = m & (w > hi)
         if k.sum() < min_known:
+            k = m & (w > lo)
+        if k.sum() < 10:
             continue
         med = np.median(col[k], axis=0)
-        filled = texproj.fill(np.where(k[..., None], col, med), k | ~m)
-        # blend toward the class median where confidence is low
-        conf = np.clip(w / thresh, 0, 1)[..., None]
-        out[m] = (filled * conf + (0.6 * filled + 0.4 * med) * (1 - conf))[m]
+        cc = conf[m][:, None]
+        out[m] = col[m] * cc + med * (1 - cc)
     return out
 
 
@@ -206,3 +214,26 @@ def class_medians(col, w, cls_img, valid, thresh=0.3):
         if k.sum() > 30:
             med[int(c)] = np.median(col[k], axis=0)
     return med
+
+
+NO_COMPRESS = ("skin", "lip", "eye", "hair", "beard", "brow", "metal", "brass", "flower_purple", "flower_yellow")
+
+
+def compress_shading(col, cls_img, valid, classes, keep=0.55, sigma=10.0, detail_keep=0.8):
+    """Reduce painted fold/light shading on cloth: per class, large-scale deviation from the
+    class median is scaled by `keep`, small-scale detail (stains, weave) by `detail_keep`."""
+    out = col.copy()
+    for ci, c in enumerate(classes):
+        if c in NO_COMPRESS:
+            continue
+        m = (cls_img == ci) & valid
+        if m.sum() < 50:
+            continue
+        mf = m.astype(np.float64)
+        num = np.stack([ndi.gaussian_filter(col[..., k] * mf, sigma) for k in range(3)], -1)
+        den = ndi.gaussian_filter(mf, sigma)[..., None]
+        low = num / np.maximum(den, 1e-6)
+        med = np.median(col[m], axis=0)
+        new = med + (low - med) * keep + (col - low) * detail_keep
+        out[m] = np.clip(new[m], 0, 1)
+    return out

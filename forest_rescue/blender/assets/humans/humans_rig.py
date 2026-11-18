@@ -132,8 +132,9 @@ def cape_weights(V, Wbody_t, bones, top_z, hem_z, side_bones=False, center=(0.0,
     return limit(mix)
 
 
-def compute_weights(ctx, lod0, pieces_order):
-    """Per-vertex weights for the joined LOD0 according to each piece's rule."""
+def compute_weights(ctx, lod0, pieces_order, body_ref=None):
+    """Per-vertex weights for the joined LOD0 according to each piece's rule.
+    body_ref=(V, W) reuses the main mesh's body weights (for optional-part objects)."""
     bones = SK.BONES
     V, tri, uv, vn, poly = PL.mesh_np(lod0)
     me = lod0.data
@@ -145,25 +146,30 @@ def compute_weights(ctx, lod0, pieces_order):
         vpiece[f] = pi
     names = pieces_order
     rules = {p.name: p.rule for p in ctx.pieces}
-    body_ids = [i for i, n in enumerate(names) if n == "body"]
+    body_ids = [i for i, n in enumerate(names) if n in ("body", "head")]
     parts = [p for p in ctx.parts if getattr(p, "bone", None)] + weight_parts(ctx.J, ctx.L)
     bmask = np.isin(vpiece, body_ids)
     bidx = np.nonzero(bmask)[0]
-    remap = -np.ones(nv, int)
-    remap[bidx] = np.arange(len(bidx))
-    bfaces = [[remap[i] for i in f] for f, pi in zip(faces, fpiece) if pi in body_ids]
-    Wb = body_weights(V[bidx], bfaces, parts, bones)
     W = np.zeros((nv, len(bones)))
-    W[bidx] = Wb
+    if body_ref is None:
+        remap = -np.ones(nv, int)
+        remap[bidx] = np.arange(len(bidx))
+        bfaces = [[remap[i] for i in f] for f, pi in zip(faces, fpiece) if pi in body_ids]
+        Wb = body_weights(V[bidx], bfaces, parts, bones)
+        W[bidx] = Wb
+        Vb = V[bidx]
+        compute_weights.last_body = (Vb, Wb)
+    else:
+        Vb, Wb = body_ref
     for pi, nm in enumerate(names):
-        if nm == "body":
+        if nm in ("body", "head"):
             continue
         sel = np.nonzero(vpiece == pi)[0]
         if len(sel) == 0:
             continue
         rule = rules.get(nm, {"type": "body"})
         t = rule.get("type", "body")
-        Wt = transfer(V[bidx], Wb, V[sel])
+        Wt = transfer(Vb, Wb, V[sel])
         if t == "rigid":
             w = np.zeros((len(sel), len(bones)))
             w[:, bones.index(rule["bone"])] = 1.0

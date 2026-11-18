@@ -1,0 +1,522 @@
+{
+  "schemaVersion": 1,
+  "campaignId": "forest_rescue_v1",
+  "status": "proposal by the props production pass (art-side mapping; server ids unchanged)",
+  "rules": {
+    "cage_by": "site biome / story (see cage_reason)",
+    "socket": "native socket of the cage matches its artifact family (oak=circle/stone_rune, iron=hex/bronze_seal, root=diamond/amber_crystal); bone keys use the keyhole plate (socket_keyhole_pivot, scale 0 by default) of whichever cage the site has",
+    "door": "hinge on the left jamb seen from outside, opens outward 95 deg; door side faces the atlas escapeApproachOffset (+Z)",
+    "families_balanced": "4 families x 3 variants = 12 keys; each cage type hosts 3 native + 1 bone key"
+  },
+  "cage_reason": {
+    "oak": "built clearings near paths / stone ground (birch watch, stone pocket, fir hollow, broken terrace)",
+    "iron": "forged, portable cages for chapel/charcoal/ford/river-terrace sites",
+    "root": "living-forest sites (resin lowland, grass labyrinth, fern ledge, ancient grove)"
+  },
+  "sites": {
+    "lf_site_01": {
+      "name": "Берёзовая просека",
+      "act": 1,
+      "variation": "trail_cache",
+      "biome": "lf_biome_1",
+      "cage": {
+        "type": "oak",
+        "glb": "lf_cage_wood.glb",
+        "socket_shape": "keyhole",
+        "socket_node": "socket_keyhole_pivot",
+        "key_slot_node": "key_slot_keyhole",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_01",
+        "name": "Берестяная печать",
+        "family": "bone_key",
+        "variant": 1,
+        "glb": "lf_artifact_bone_key.glb",
+        "node": "lf_artifact_bone_key_v1",
+        "why": "«Берестяная печать» - first site: a literal pale key teaches 'artifact = key' (round bow)"
+      },
+      "mechanism": {
+        "kind": "trail_cache",
+        "glb": "lf_mechanism_trail_cache.glb",
+        "solution": [
+          "split_birch",
+          "white_moss",
+          "fallen_trunk"
+        ]
+      }
+    },
+    "lf_site_02": {
+      "name": "Каменный карман",
+      "act": 1,
+      "variation": "rune_lock",
+      "biome": "lf_biome_1",
+      "cage": {
+        "type": "oak",
+        "glb": "lf_cage_wood.glb",
+        "socket_shape": "circle",
+        "socket_node": "socket_pivot",
+        "key_slot_node": "key_slot",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_02",
+        "name": "Печать трёх граней",
+        "family": "stone_rune",
+        "variant": 2,
+        "glb": "lf_artifact_stone_rune.glb",
+        "node": "lf_artifact_stone_rune_v2",
+        "why": "«Печать трёх граней» - three facets -> triskele with three rim notches"
+      },
+      "mechanism": {
+        "kind": "rune_lock",
+        "glb": "lf_mechanism_rune_lock.glb",
+        "solution": [
+          "mountain",
+          "river",
+          "leaf"
+        ]
+      }
+    },
+    "lf_site_03": {
+      "name": "Пепельная часовня",
+      "act": 1,
+      "variation": "winch_sequence",
+      "biome": "lf_biome_2",
+      "cage": {
+        "type": "iron",
+        "glb": "lf_cage_iron.glb",
+        "socket_shape": "hex",
+        "socket_node": "socket_pivot",
+        "key_slot_node": "key_slot",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_03",
+        "name": "Печать тихого колокола",
+        "family": "bronze_seal",
+        "variant": 2,
+        "glb": "lf_artifact_bronze_seal.glb",
+        "node": "lf_artifact_bronze_seal_v2",
+        "why": "«Печать тихого колокола» - bells are bronze -> bell emblem, notched corners"
+      },
+      "mechanism": {
+        "kind": "winch_sequence",
+        "glb": "lf_mechanism_winch_sequence.glb",
+        "solution": [
+          "brake",
+          "pawl",
+          "raise"
+        ]
+      }
+    },
+    "lf_site_04": {
+      "name": "Шёпот елей",
+      "act": 2,
+      "variation": "paired_latch",
+      "biome": "lf_biome_3",
+      "cage": {
+        "type": "oak",
+        "glb": "lf_cage_wood.glb",
+        "socket_shape": "circle",
+        "socket_node": "socket_pivot",
+        "key_slot_node": "key_slot",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_04",
+        "name": "Печать елового круга",
+        "family": "stone_rune",
+        "variant": 3,
+        "glb": "lf_artifact_stone_rune.glb",
+        "node": "lf_artifact_stone_rune_v3",
+        "why": "«Печать елового круга» - spruce circle -> fir sprig in a ring, scalloped rim"
+      },
+      "mechanism": {
+        "kind": "paired_latch",
+        "glb": "lf_mechanism_paired_latch.glb",
+        "solution": [
+          "left_plate",
+          "right_plate",
+          "center_latch"
+        ]
+      }
+    },
+    "lf_site_05": {
+      "name": "Смоляная низина",
+      "act": 2,
+      "variation": "trail_cache",
+      "biome": "lf_biome_3",
+      "cage": {
+        "type": "root",
+        "glb": "lf_cage_root.glb",
+        "socket_shape": "diamond",
+        "socket_node": "socket_pivot",
+        "key_slot_node": "key_slot",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_05",
+        "name": "Янтарная печать",
+        "family": "amber_crystal",
+        "variant": 1,
+        "glb": "lf_artifact_amber_crystal.glb",
+        "node": "lf_artifact_amber_crystal_v1",
+        "why": "«Янтарная печать» in «Смоляная низина» - the drawn amber crystal"
+      },
+      "mechanism": {
+        "kind": "trail_cache",
+        "glb": "lf_mechanism_trail_cache.glb",
+        "solution": [
+          "resin_pine",
+          "double_stump",
+          "resin_bowl"
+        ]
+      }
+    },
+    "lf_site_06": {
+      "name": "Угольный круг",
+      "act": 2,
+      "variation": "rune_lock",
+      "biome": "lf_biome_4",
+      "cage": {
+        "type": "iron",
+        "glb": "lf_cage_iron.glb",
+        "socket_shape": "hex",
+        "socket_node": "socket_pivot",
+        "key_slot_node": "key_slot",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_06",
+        "name": "Печать возвращённого огня",
+        "family": "bronze_seal",
+        "variant": 3,
+        "glb": "lf_artifact_bronze_seal.glb",
+        "node": "lf_artifact_bronze_seal_v3",
+        "why": "«Печать возвращённого огня» - charcoal/forge site -> flame emblem, raised boss"
+      },
+      "mechanism": {
+        "kind": "rune_lock",
+        "glb": "lf_mechanism_rune_lock.glb",
+        "solution": [
+          "coal",
+          "seed",
+          "tree"
+        ]
+      }
+    },
+    "lf_site_07": {
+      "name": "Ольховый брод",
+      "act": 3,
+      "variation": "winch_sequence",
+      "biome": "lf_biome_4",
+      "cage": {
+        "type": "iron",
+        "glb": "lf_cage_iron.glb",
+        "socket_shape": "keyhole",
+        "socket_node": "socket_keyhole_pivot",
+        "key_slot_node": "key_slot_keyhole",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_07",
+        "name": "Печать мелкой воды",
+        "family": "bone_key",
+        "variant": 2,
+        "glb": "lf_artifact_bone_key.glb",
+        "node": "lf_artifact_bone_key_v2",
+        "why": "«Печать мелкой воды» - trefoil bow, two-notch bit"
+      },
+      "mechanism": {
+        "kind": "winch_sequence",
+        "glb": "lf_mechanism_winch_sequence.glb",
+        "solution": [
+          "brake",
+          "pawl",
+          "raise"
+        ]
+      }
+    },
+    "lf_site_08": {
+      "name": "Травяной лабиринт",
+      "act": 3,
+      "variation": "paired_latch",
+      "biome": "lf_biome_5",
+      "cage": {
+        "type": "root",
+        "glb": "lf_cage_root.glb",
+        "socket_shape": "diamond",
+        "socket_node": "socket_pivot",
+        "key_slot_node": "key_slot",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_08",
+        "name": "Печать двух троп",
+        "family": "amber_crystal",
+        "variant": 2,
+        "glb": "lf_artifact_amber_crystal.glb",
+        "node": "lf_artifact_amber_crystal_v2",
+        "why": "«Печать двух троп» - two crystals split by a bronze bar"
+      },
+      "mechanism": {
+        "kind": "paired_latch",
+        "glb": "lf_mechanism_paired_latch.glb",
+        "solution": [
+          "left_plate",
+          "right_plate",
+          "center_latch"
+        ]
+      }
+    },
+    "lf_site_09": {
+      "name": "Папоротниковый уступ",
+      "act": 3,
+      "variation": "trail_cache",
+      "biome": "lf_biome_5",
+      "cage": {
+        "type": "root",
+        "glb": "lf_cage_root.glb",
+        "socket_shape": "diamond",
+        "socket_node": "socket_pivot",
+        "key_slot_node": "key_slot",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_09",
+        "name": "Печать трёх уступов",
+        "family": "amber_crystal",
+        "variant": 3,
+        "glb": "lf_artifact_amber_crystal.glb",
+        "node": "lf_artifact_amber_crystal_v3",
+        "why": "«Печать трёх уступов» - three-step terraced crystal"
+      },
+      "mechanism": {
+        "kind": "trail_cache",
+        "glb": "lf_mechanism_trail_cache.glb",
+        "solution": [
+          "bent_fern",
+          "flat_slab",
+          "three_notches"
+        ]
+      }
+    },
+    "lf_site_10": {
+      "name": "Изломанная терраса",
+      "act": 4,
+      "variation": "rune_lock",
+      "biome": "lf_biome_6",
+      "cage": {
+        "type": "oak",
+        "glb": "lf_cage_wood.glb",
+        "socket_shape": "circle",
+        "socket_node": "socket_pivot",
+        "key_slot_node": "key_slot",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_10",
+        "name": "Печать каменного дыхания",
+        "family": "stone_rune",
+        "variant": 1,
+        "glb": "lf_artifact_stone_rune.glb",
+        "node": "lf_artifact_stone_rune_v1",
+        "why": "«Печать каменного дыхания» - stone; classic spiral (the drawn medallion)"
+      },
+      "mechanism": {
+        "kind": "rune_lock",
+        "glb": "lf_mechanism_rune_lock.glb",
+        "solution": [
+          "sun",
+          "stone",
+          "root"
+        ]
+      }
+    },
+    "lf_site_11": {
+      "name": "Речные ступени",
+      "act": 4,
+      "variation": "winch_sequence",
+      "biome": "lf_biome_7",
+      "cage": {
+        "type": "iron",
+        "glb": "lf_cage_iron.glb",
+        "socket_shape": "hex",
+        "socket_node": "socket_pivot",
+        "key_slot_node": "key_slot",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_11",
+        "name": "Печать дальнего берега",
+        "family": "bronze_seal",
+        "variant": 1,
+        "glb": "lf_artifact_bronze_seal.glb",
+        "node": "lf_artifact_bronze_seal_v1",
+        "why": "«Печать дальнего берега» - the drawn three-leaf sprig seal"
+      },
+      "mechanism": {
+        "kind": "winch_sequence",
+        "glb": "lf_mechanism_winch_sequence.glb",
+        "solution": [
+          "brake",
+          "pawl",
+          "raise"
+        ]
+      }
+    },
+    "lf_site_12": {
+      "name": "Роща старых костей",
+      "act": 4,
+      "variation": "paired_latch",
+      "biome": "lf_biome_8",
+      "cage": {
+        "type": "root",
+        "glb": "lf_cage_root.glb",
+        "socket_shape": "keyhole",
+        "socket_node": "socket_keyhole_pivot",
+        "key_slot_node": "key_slot_keyhole",
+        "placement": {
+          "cageOffset": {
+            "x": 0,
+            "z": -2
+          },
+          "escapeApproachOffset": {
+            "x": 0,
+            "z": 7.5
+          },
+          "door_faces": "+Z (glTF) = toward escapeApproachOffset"
+        }
+      },
+      "artifact": {
+        "key": "lf_key_12",
+        "name": "Печать последней двери",
+        "family": "bone_key",
+        "variant": 3,
+        "glb": "lf_artifact_bone_key.glb",
+        "node": "lf_artifact_bone_key_v3",
+        "why": "«Печать последней двери» in «Роща старых костей» - bone key, square bow with cross"
+      },
+      "mechanism": {
+        "kind": "paired_latch",
+        "glb": "lf_mechanism_paired_latch.glb",
+        "solution": [
+          "left_plate",
+          "right_plate",
+          "center_latch"
+        ]
+      }
+    }
+  }
+}

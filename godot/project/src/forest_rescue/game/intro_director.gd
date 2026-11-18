@@ -14,7 +14,7 @@ extends Node
 const Style = preload("res://src/forest_rescue/game/hud_style.gd")
 const Art = preload("res://src/forest_rescue/game/hud_art.gd")
 const ENTRANCE := Vector3(-10.0, 0.0, -57.5)
-const HORSE_FROM := Vector2(-15.5, -64.0)
+const HORSE_FROM := Vector2(-13.6, -62.0)
 const HORSE_TO := Vector2(-8.0, -55.0)
 
 var game: Node
@@ -199,8 +199,24 @@ func build_card() -> void:
 	card.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	card.offset_top = -262
 	card.offset_bottom = 0
-	card.draw.connect(draw_card_shade)
 	game.hud.add_child(card)
+	var shade := TextureRect.new()
+	shade.name = "Shade"
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color(0.03, 0.03, 0.025, 0.0))
+	gradient.set_color(1, Color(0.03, 0.03, 0.025, 0.82))
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill_from = Vector2(0, 0)
+	texture.fill_to = Vector2(0, 1)
+	texture.width = 8
+	texture.height = 128
+	shade.texture = texture
+	shade.stretch_mode = TextureRect.STRETCH_SCALE
+	shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(shade)
 	var column := VBoxContainer.new()
 	column.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	column.offset_left = -330
@@ -362,6 +378,7 @@ func on_follow() -> void:
 	finish_presentation()
 	if was_replay:
 		return
+	await game.wait_idle()
 	var attempt := int(intro_state().get("attempt", 0))
 	var result: Dictionary = await game.request_action("finish_intro", {"attempt":attempt} if attempt > 0 else {}, "adventure_intro")
 	if not bool(result.get("ok", false)) and String(intro_state().get("status", "")) == "playing":
@@ -405,6 +422,29 @@ func show_hall_glow(on: bool) -> void:
 		return
 	glow = Node3D.new()
 	glow.name = "HallGlow"
+	var halo := MeshInstance3D.new()
+	var quad := QuadMesh.new()
+	quad.size = Vector2(16, 16)
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color(1.0, 0.86, 0.5, 0.85))
+	gradient.set_color(1, Color(1.0, 0.7, 0.3, 0.0))
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(0.5, 0.0)
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	material.albedo_texture = texture
+	material.no_depth_test = true
+	quad.material = material
+	halo.mesh = quad
+	halo.position = Vector3(0, 7, 0)
+	halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	glow.add_child(halo)
 	var light := OmniLight3D.new()
 	light.light_color = Color("#ffd27a")
 	light.light_energy = 3.0

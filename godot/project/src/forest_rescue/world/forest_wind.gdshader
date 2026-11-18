@@ -25,9 +25,11 @@ uniform float loop_seconds = 8.0;
 uniform vec3 tint = vec3(1.0);
 
 varying float ao;
+varying vec4 tone;      // INSTANCE_CUSTOM: hue shift, saturation scale, value scale, unused
 
 void vertex() {
 	vec3 origin = MODEL_MATRIX[3].xyz;
+	tone = INSTANCE_CUSTOM;
 	float instance_phase = fract(dot(origin.xz, vec2(0.0713, 0.1131)));
 	float sway_weight;
 	float flutter_weight;
@@ -60,7 +62,21 @@ void fragment() {
 	if (use_albedo_texture) {
 		base *= texture(albedo_texture, UV);
 	}
-	ALBEDO = base.rgb * tint * mix(0.62, 1.0, ao);
+	vec3 color = base.rgb;
+	if (foliage && (tone.r != 0.0 || tone.g != 1.0 || tone.b != 1.0)) {
+		// rgb -> hsv, shift, back (per-instance seasonal variety of the shared foliage atlas)
+		vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+		vec4 p = mix(vec4(color.bg, K.wz), vec4(color.gb, K.xy), step(color.b, color.g));
+		vec4 q = mix(vec4(p.xyw, color.r), vec4(color.r, p.yzx), step(p.x, color.r));
+		float d = q.x - min(q.w, q.y);
+		vec3 hsv = vec3(abs(q.z + (q.w - q.y) / (6.0 * d + 1e-10)), d / (q.x + 1e-10), q.x);
+		hsv.x = fract(hsv.x + tone.r);
+		hsv.y = clamp(hsv.y * tone.g, 0.0, 1.0);
+		hsv.z = clamp(hsv.z * tone.b, 0.0, 1.0);
+		vec3 rgb = clamp(abs(mod(hsv.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+		color = hsv.z * mix(vec3(1.0), rgb, hsv.y);
+	}
+	ALBEDO = color * tint * mix(0.62, 1.0, ao);
 	if (use_roughness_texture) {
 		ROUGHNESS = texture(roughness_texture, UV).g;
 	} else {

@@ -400,17 +400,17 @@ def limestone(S=1024, seed=61):
     """Pale weathered limestone: blocky fractures, pits, lichen; tileable."""
     wx = (fbm(S, S, 8, 8, seed + 1, 4) - 0.5) * S * 0.03
     jit = (fbm(S, S, 64, 64, seed + 9, 3) - 0.5) * 4.0
-    f1, f2, cid = cellular(S, S, 18, seed + 2)
-    crack = 1 - smoothstep(0.0, 0.035, warp(f2 - f1, wx + jit, wx + jit))
+    f1, f2, cid = cellular(S, S, 9, seed + 2)
+    crack = 1 - smoothstep(0.0, 0.025, warp(f2 - f1, wx + jit, wx + jit))
     f1b, f2b, _ = cellular(S, S, 90, seed + 3)
     crack2 = 1 - smoothstep(0.0, 0.03, warp(f2b - f1b, wx * 0.5 + jit, wx * 0.5 + jit))
     crack2 *= smoothstep(0.45, 0.6, fbm(S, S, 6, 6, seed + 10, 3))
     n1 = fbm(S, S, 8, 8, seed + 4, 7)
     pits = smoothstep(0.74, 0.8, fbm(S, S, 96, 96, seed + 5, 2))
     tone = rng(seed + 6).random(cid.max() + 1)[cid]
-    h = 0.8 - 0.55 * crack - 0.25 * crack2 + 0.22 * n1 - 0.1 * pits
-    alb = ramp(n1 * 0.6 + tone * 0.4, [(0, (0.55, 0.51, 0.45)), (0.5, (0.70, 0.66, 0.58)), (1, (0.82, 0.79, 0.71))])
-    alb = alb * (1 - 0.6 * crack[..., None] - 0.3 * crack2[..., None] - 0.25 * pits[..., None])
+    h = 0.8 - 0.45 * crack - 0.12 * crack2 + 0.26 * n1 - 0.1 * pits
+    alb = ramp(n1 * 0.6 + tone * 0.4, [(0, (0.50, 0.44, 0.35)), (0.5, (0.66, 0.59, 0.48)), (1, (0.78, 0.72, 0.60))])
+    alb = alb * (1 - 0.42 * crack[..., None] - 0.12 * crack2[..., None] - 0.2 * pits[..., None])
     stain = smoothstep(0.55, 0.8, fbm(S, S, 4, 4, seed + 7, 4))
     alb = alb * (1 - 0.22 * stain[..., None]) + np.array([0.58, 0.48, 0.33]) * 0.22 * stain[..., None]
     lich = _lichen(S, seed + 8, n=60, rmin=2, rmax=9)

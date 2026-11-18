@@ -1,0 +1,457 @@
+{
+  "id": "lf_mechanism_paired_latch",
+  "tris": {
+    "LOD0": 2328,
+    "LOD1": 1692,
+    "LOD2": 1188
+  },
+  "tris_by_node": {
+    "LOD0": {
+      "root": 660,
+      "plate_l": 140,
+      "spring_l0": 284,
+      "spring_l1": 284,
+      "plate_r": 140,
+      "spring_r0": 284,
+      "spring_r1": 284,
+      "latch": 140,
+      "lever_l": 56,
+      "lever_r": 56
+    },
+    "LOD1": {
+      "root": 568,
+      "plate_l": 140,
+      "spring_l0": 156,
+      "spring_l1": 156,
+      "plate_r": 140,
+      "spring_r0": 156,
+      "spring_r1": 156,
+      "latch": 124,
+      "lever_l": 48,
+      "lever_r": 48
+    },
+    "LOD2": {
+      "root": 496,
+      "plate_l": 140,
+      "spring_l0": 56,
+      "spring_l1": 56,
+      "plate_r": 140,
+      "spring_r0": 56,
+      "spring_r1": 56,
+      "latch": 108,
+      "lever_l": 40,
+      "lever_r": 40
+    }
+  },
+  "budget": "mechanism LOD0 <= 6000 tris",
+  "bones": 0,
+  "materials": [
+    "lf_mechanism_paired_latch_mat"
+  ],
+  "textures": {
+    "baseColor": "2048 JPEG",
+    "metallicRoughness": "1024 JPEG (G rough, B metal)",
+    "normal": "2048 PNG"
+  },
+  "coordinate_space": "glTF (Y up, metres); operator/front side faces +Z",
+  "bounds_m": {
+    "min": [
+      -2.35,
+      0.0,
+      0.825
+    ],
+    "max": [
+      2.35,
+      1.3378,
+      -0.925
+    ]
+  },
+  "clips": {
+    "lf_latch_left_plate": {
+      "seconds": 0.5,
+      "frames": 15,
+      "loop": false,
+      "markers": {
+        "plate_down": 0.4
+      },
+      "glb_seconds": 0.5
+    },
+    "lf_latch_right_plate": {
+      "seconds": 0.5,
+      "frames": 15,
+      "loop": false,
+      "markers": {
+        "plate_down": 0.4
+      },
+      "glb_seconds": 0.5
+    },
+    "lf_lock_mechanism": {
+      "seconds": 1.8,
+      "frames": 54,
+      "loop": false,
+      "markers": {
+        "latch_released": 0.2,
+        "niche_open": 1.2
+      },
+      "glb_seconds": 1.8
+    }
+  },
+  "glb_nodes": [
+    "artifact_spot",
+    "lf_mechanism_paired_latch_lever_left_LOD0",
+    "lf_mechanism_paired_latch_lever_left_LOD1",
+    "lf_mechanism_paired_latch_lever_left_LOD2",
+    "lever_left",
+    "lf_mechanism_paired_latch_lever_right_LOD0",
+    "lf_mechanism_paired_latch_lever_right_LOD1",
+    "lf_mechanism_paired_latch_lever_right_LOD2",
+    "lever_right",
+    "lf_mechanism_paired_latch_latch_bar_LOD0",
+    "lf_mechanism_paired_latch_latch_bar_LOD1",
+    "lf_mechanism_paired_latch_latch_bar_LOD2",
+    "latch_bar",
+    "lf_mechanism_paired_latch_LOD0",
+    "lf_mechanism_paired_latch_LOD1",
+    "lf_mechanism_paired_latch_LOD2",
+    "lf_mechanism_paired_latch_plate_left_LOD0",
+    "lf_mechanism_paired_latch_plate_left_LOD1",
+    "lf_mechanism_paired_latch_plate_left_LOD2",
+    "plate_left",
+    "lf_mechanism_paired_latch_plate_right_LOD0",
+    "lf_mechanism_paired_latch_plate_right_LOD1",
+    "lf_mechanism_paired_latch_plate_right_LOD2",
+    "plate_right",
+    "lf_mechanism_paired_latch_spring_l0_LOD0",
+    "lf_mechanism_paired_latch_spring_l0_LOD1",
+    "lf_mechanism_paired_latch_spring_l0_LOD2",
+    "spring_l0",
+    "lf_mechanism_paired_latch_spring_l1_LOD0",
+    "lf_mechanism_paired_latch_spring_l1_LOD1",
+    "lf_mechanism_paired_latch_spring_l1_LOD2",
+    "spring_l1",
+    "lf_mechanism_paired_latch_spring_r0_LOD0",
+    "lf_mechanism_paired_latch_spring_r0_LOD1",
+    "lf_mechanism_paired_latch_spring_r0_LOD2",
+    "spring_r0",
+    "lf_mechanism_paired_latch_spring_r1_LOD0",
+    "lf_mechanism_paired_latch_spring_r1_LOD1",
+    "lf_mechanism_paired_latch_spring_r1_LOD2",
+    "spring_r1"
+  ],
+  "glb_animations": {
+    "lf_lock_mechanism": [
+      [
+        "latch_bar",
+        "translation"
+      ],
+      [
+        "latch_bar",
+        "rotation"
+      ],
+      [
+        "latch_bar",
+        "scale"
+      ],
+      [
+        "lever_left",
+        "translation"
+      ],
+      [
+        "lever_left",
+        "rotation"
+      ],
+      [
+        "lever_left",
+        "scale"
+      ],
+      [
+        "lever_right",
+        "translation"
+      ],
+      [
+        "lever_right",
+        "rotation"
+      ],
+      [
+        "lever_right",
+        "scale"
+      ],
+      [
+        "plate_left",
+        "translation"
+      ],
+      [
+        "plate_left",
+        "rotation"
+      ],
+      [
+        "plate_left",
+        "scale"
+      ],
+      [
+        "plate_right",
+        "translation"
+      ],
+      [
+        "plate_right",
+        "rotation"
+      ],
+      [
+        "plate_right",
+        "scale"
+      ],
+      [
+        "spring_l0",
+        "translation"
+      ],
+      [
+        "spring_l0",
+        "rotation"
+      ],
+      [
+        "spring_l0",
+        "scale"
+      ],
+      [
+        "spring_l1",
+        "translation"
+      ],
+      [
+        "spring_l1",
+        "rotation"
+      ],
+      [
+        "spring_l1",
+        "scale"
+      ],
+      [
+        "spring_r0",
+        "translation"
+      ],
+      [
+        "spring_r0",
+        "rotation"
+      ],
+      [
+        "spring_r0",
+        "scale"
+      ],
+      [
+        "spring_r1",
+        "translation"
+      ],
+      [
+        "spring_r1",
+        "rotation"
+      ],
+      [
+        "spring_r1",
+        "scale"
+      ]
+    ],
+    "lf_latch_left_plate": [
+      [
+        "lever_left",
+        "translation"
+      ],
+      [
+        "lever_left",
+        "rotation"
+      ],
+      [
+        "lever_left",
+        "scale"
+      ],
+      [
+        "plate_left",
+        "translation"
+      ],
+      [
+        "plate_left",
+        "rotation"
+      ],
+      [
+        "plate_left",
+        "scale"
+      ],
+      [
+        "spring_l0",
+        "translation"
+      ],
+      [
+        "spring_l0",
+        "rotation"
+      ],
+      [
+        "spring_l0",
+        "scale"
+      ],
+      [
+        "spring_l1",
+        "translation"
+      ],
+      [
+        "spring_l1",
+        "rotation"
+      ],
+      [
+        "spring_l1",
+        "scale"
+      ]
+    ],
+    "lf_latch_right_plate": [
+      [
+        "lever_right",
+        "translation"
+      ],
+      [
+        "lever_right",
+        "rotation"
+      ],
+      [
+        "lever_right",
+        "scale"
+      ],
+      [
+        "plate_right",
+        "translation"
+      ],
+      [
+        "plate_right",
+        "rotation"
+      ],
+      [
+        "plate_right",
+        "scale"
+      ],
+      [
+        "spring_r0",
+        "translation"
+      ],
+      [
+        "spring_r0",
+        "rotation"
+      ],
+      [
+        "spring_r0",
+        "scale"
+      ],
+      [
+        "spring_r1",
+        "translation"
+      ],
+      [
+        "spring_r1",
+        "rotation"
+      ],
+      [
+        "spring_r1",
+        "scale"
+      ]
+    ]
+  },
+  "markers": {
+    "artifact_spot": {
+      "position": [
+        0.0,
+        0.72,
+        0.05
+      ],
+      "parent": "root"
+    }
+  },
+  "projection": {
+    "painted_fraction": 0.048,
+    "texel_mm": 3.251
+  },
+  "camera_fit_iou": {
+    "unpressed": 0.8814,
+    "held": 0.7179
+  },
+  "notes": "Soldiers in the 'held' drawing are excluded from its mask (approximate boxes).",
+  "symbol_targets": {
+    "left_plate": {
+      "clip": "lf_latch_left_plate",
+      "nodes": {
+        "plate_left": {
+          "translation_offset": [
+            0,
+            -0.09,
+            0
+          ]
+        },
+        "lever_left": {
+          "rotation_z_deg_glTF": 4.881
+        },
+        "spring_l0/l1": {
+          "scale_y": 0.6786
+        }
+      }
+    },
+    "right_plate": {
+      "clip": "lf_latch_right_plate",
+      "nodes": {
+        "plate_right": {
+          "translation_offset": [
+            0,
+            -0.09,
+            0
+          ]
+        },
+        "lever_right": {
+          "rotation_z_deg_glTF": -4.881
+        },
+        "spring_r0/r1": {
+          "scale_y": 0.6786
+        }
+      }
+    },
+    "center_latch": {
+      "clip": "lf_lock_mechanism",
+      "nodes": {
+        "latch_bar": {
+          "translation_offset": [
+            0,
+            -0.24,
+            0
+          ]
+        },
+        "lever_left": {
+          "rotation_z_deg_glTF": -8.826
+        },
+        "lever_right": {
+          "rotation_z_deg_glTF": 8.826
+        }
+      }
+    },
+    "note": "Blender rotation about +Y equals glTF rotation about -Z; values above are glTF-space Euler Z (sign already converted). Plates may be released after the solve: the latch stays down.",
+    "occupy_plates": "server splits the squad over both plates; play both plate clips together",
+    "sites": [
+      "lf_site_04",
+      "lf_site_08",
+      "lf_site_12"
+    ],
+    "order": [
+      "left_plate",
+      "right_plate",
+      "center_latch"
+    ]
+  },
+  "sockets": {
+    "plate_left_stand": [
+      -1.62,
+      0.38,
+      -0.0
+    ],
+    "plate_right_stand": [
+      1.62,
+      0.38,
+      -0.0
+    ],
+    "artifact_spot": [
+      0.0,
+      0.72,
+      0.05
+    ]
+  }
+}

@@ -95,17 +95,17 @@ def teeth():
     g = 0.018  # half gap of the mouth slit (see maw_body.mouth_cavity)
     rng = np.random.default_rng(3)
     # upper row (head bone): premaxillary (4) + maxillary (9) per side
-    ys_up = np.concatenate([[-4.475, -4.455, -4.425, -4.39], np.linspace(-4.31, -3.55, 9)])
+    ys_up = np.concatenate([[-4.488, -4.478, -4.462, -4.44, -4.412, -4.38], np.linspace(-4.31, -3.55, 9)])
     for sx in (1, -1):
         for i, y in enumerate(ys_up):
             wu, wl = B.lip_outline(y)
             zm = float(B.mouth_z(y))
             front = y < -4.36
             x = sx * (float(wu) - (0.04 if not front else 0.035))
-            L = (0.085 + 0.02 * rng.random()) if front else float(np.interp(y, [-4.3, -4.0, -3.75, -3.55],
-                                                                              [0.12, 0.145, 0.12, 0.08]))
-            L *= 0.92 + 0.16 * rng.random()
-            r0 = 0.032 if front else float(np.interp(y, [-4.3, -3.95, -3.55], [0.038, 0.042, 0.03]))
+            L = (0.052 + 0.012 * rng.random()) if front else float(np.interp(y, [-4.3, -4.0, -3.75, -3.55],
+                                                                                [0.12, 0.145, 0.12, 0.08]))
+            L *= (0.92 + 0.16 * rng.random()) * 1.3
+            r0 = 1.22 * (0.022 if front else float(np.interp(y, [-4.3, -3.95, -3.55], [0.038, 0.042, 0.03])))
             base = np.array([x, y, zm + g + 0.004])
             direction = np.array([sx * (0.12 if front else 0.08), -0.10 if front else 0.04, -1.0])
             out.append(curved_cone(base, direction, L, r0, bend_dir=[0, 1, 0], bend=0.16, sides=7, rings=4,
@@ -118,8 +118,8 @@ def teeth():
             wu, wl = B.lip_outline(y)
             zm = float(B.mouth_z(y))
             x = sx * (float(wl) - 0.035)
-            L = float(np.interp(y, [-4.45, -4.1, -3.8, -3.62], [0.08, 0.11, 0.095, 0.065])) * (0.9 + 0.2 * rng.random())
-            r0 = float(np.interp(y, [-4.45, -4.0, -3.62], [0.03, 0.035, 0.026]))
+            L = 1.3 * float(np.interp(y, [-4.45, -4.1, -3.8, -3.62], [0.08, 0.11, 0.095, 0.065])) * (0.9 + 0.2 * rng.random())
+            r0 = 1.2 * float(np.interp(y, [-4.45, -4.0, -3.62], [0.03, 0.035, 0.026]))
             base = np.array([x, y, zm - g - 0.004])
             direction = np.array([sx * 0.08, -0.08, 1.0])
             out.append(curved_cone(base, direction, L, r0, bend_dir=[0, 1, 0], bend=0.15, sides=6, rings=4,
@@ -146,11 +146,11 @@ def claws():
                                bend_dir=[0, -0.3, -1], bend=0.35, sides=7, rings=4, flat=0.72, region="claws",
                                bone=f"dewclaw_{side}", embed=0.04))
         ap = B.arm_points(side)
-        for f, (L, r0) in {"finger1": (0.22, 0.045), "finger2": (0.24, 0.05)}.items():
+        for f, (L, r0) in {"finger1": (0.19, 0.045), "finger2": (0.21, 0.05)}.items():
             b0, b1 = ap[f"{f}b_{side}"]
             dvec = (b1 - b0) / np.linalg.norm(b1 - b0)
-            out.append(curved_cone(b1 - (b1 - b0) * 0.25, dvec + np.array([0, -0.25, 0]), L, r0,
-                                   bend_dir=[0, 0.7, -0.3], bend=0.45, sides=7, rings=5, flat=0.65,
+            out.append(curved_cone(b1 - (b1 - b0) * 0.25, dvec + np.array([0, -0.45, 0.1]), L, r0,
+                                   bend_dir=[0, 0.8, -0.2], bend=0.65, sides=7, rings=5, flat=0.65,
                                    region="claws", bone=f"{f}b_{side}", embed=0.03))
         f0, f1 = ap[f"finger3_{side}"]
         dvec = (f1 - f0) / np.linalg.norm(f1 - f0)

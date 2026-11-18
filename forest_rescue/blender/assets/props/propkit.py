@@ -396,7 +396,8 @@ def sweep(path, profile, closed_path=False, scale=None, up=(0, 0, 1), caps=True,
         # nearest path point
         d = np.linalg.norm(path - c, axis=1)
         return path[int(np.argmin(d))]
-    _orient_faces_outward(piece, range(first_side, nside), centre)
+    # CCW profile in the right-handed (N, B, T) frame -> side quads already face outward (also for concave
+    # profiles such as troughs), so no centroid-based flipping here.
     if caps and not closed_path:
         for which, ri, isl in ((0, 0, 1), (1, n - 1, 2)):
             cb = piece.append_verts(ring[ri])
@@ -415,10 +416,21 @@ def sweep(path, profile, closed_path=False, scale=None, up=(0, 0, 1), caps=True,
     return piece
 
 
-def beam(p0, p1, w, h, chamfer=0.0, up=(0, 0, 1), caps=True, segs=1, bend=None):
-    """Rectangular timber/iron bar from p0 to p1 (w along N(up-ish), h along B)."""
+def beam(p0, p1, w, h, chamfer=0.0, up=None, caps=True, segs=1, bend=None, force_up=False):
+    """Rectangular timber/iron bar from p0 to p1.
+
+    Automatic section frame: vertical members -> w along world X, h along world Y;
+    other members -> w = horizontal width (perpendicular to the bar), h = vertical height.
+    (`up` is ignored unless force_up=True.)
+    """
     p0 = np.asarray(p0, float)
     p1 = np.asarray(p1, float)
+    T = unit(p1 - p0)
+    if not force_up or up is None:
+        if abs(T[2]) > 0.9:
+            up = (1.0, 0.0, 0.0)
+        else:
+            up = tuple(unit(np.cross([0.0, 0.0, 1.0], T)))
     t = np.linspace(0, 1, segs + 1)
     path = p0[None] + (p1 - p0)[None] * t[:, None]
     if bend is not None:
@@ -428,6 +440,14 @@ def beam(p0, p1, w, h, chamfer=0.0, up=(0, 0, 1), caps=True, segs=1, bend=None):
     if chamfer > 0:
         flags = [0, 1] * 4  # rect() alternates main/chamfer edges starting with +x side
     return sweep(path, prof, up=up, caps=caps, smooth=False, edge_flags=flags)
+
+
+def rect_face_v(w, h, c, face):
+    """Parametric v (perimeter metres) of a face centre of a rect(w, h, c) sweep profile.
+    faces: '+N', '+B', '-N', '-B' (beam(): +N = +X for vertical members, Z x T for others; B ~ up)."""
+    a, b, d = h - 2 * c, w - 2 * c, c * math.sqrt(2)
+    start = {"+N": 0.0, "+B": a + d, "-N": a + b + 2 * d, "-B": 2 * a + b + 3 * d}[face]
+    return start + (a / 2 if face in ("+N", "-N") else b / 2)
 
 
 def rod(p0, p1, r, sides=6, caps=True, up=(0, 0, 1), r1=None, segs=1):
@@ -597,6 +617,18 @@ def ellipsoid(c, radii, nu=12, nv=8, deform=None):
             P = deform(P, u, v)
         return P + c
     return grid(fn, nu, nv, Lu=2 * math.pi * r[:2].mean(), Lv=math.pi * r.mean(), wrap_u=True)
+
+
+def orient_toward(piece, direction):
+    """Flip faces whose normal points against `direction` (e.g. ground discs -> +Z)."""
+    d = np.asarray(direction, float)
+    for fi, f in enumerate(piece.F):
+        pts = piece.V[list(f)]
+        n = np.cross(pts[1] - pts[0], pts[2] - pts[0])
+        if np.dot(n, d) < 0:
+            piece.F[fi] = tuple(reversed(f))
+            piece.UV[fi] = list(reversed(piece.UV[fi]))
+    return piece
 
 
 def mesh_piece(V, F, smooth=True):
@@ -1315,7 +1347,8 @@ def add_clip(asset, clip, tracks, frames, markers=None, loop=False):
         obj.animation_data.action = None
         tr = obj.animation_data.nla_tracks.new()
         tr.name = clip
-        tr.strips.new(clip, 0, act)
+        st = tr.strips.new(clip, 0, act)
+        st.extrapolation = "NOTHING"      # no influence outside the clip -> rest pose exports as the node TRS
         tr.mute = False
         asset.actions[clip][node] = act
         obj.location = tuple(rest_loc)
@@ -1356,7 +1389,7 @@ def rest_pose(asset):
                 tr.mute = False
         if "rest_loc" in obj:
             obj.location = tuple(obj["rest_loc"])
-        obj.rotation_euler = (0, 0, 0)
+        obj.rotation_euler = tuple(obj.get("rest_rot", (0, 0, 0)))
         obj.scale = tuple(obj.get("rest_scale", (1, 1, 1)))
     bpy.context.scene.frame_set(0)
 
@@ -1395,8 +1428,12 @@ def export(asset, glb_path, extra_objects=()):
             for tr in obj.animation_data.nla_tracks:
                 tr.mute = False
     objs = list(asset.pivots.values()) + asset.all_meshes() + [m[0] for m in asset.markers.values()] + list(extra_objects)
+    bpy.context.preferences.edit.use_negative_frames = True
+    bpy.context.scene.frame_set(-10)          # outside every NLA strip -> nodes evaluate at rest
     core.export_glb(glb_path, objs, extra={"export_animation_mode": "NLA_TRACKS", "export_optimize_animation_size": False,
-                                           "export_def_bones": False, "export_skins": False})
+                                           "export_def_bones": False, "export_skins": False,
+                                           "export_current_frame": True, "export_optimize_animation_keep_anim_object": True})
+    bpy.context.scene.frame_set(0)
     return glb_path
 
 
@@ -1489,8 +1526,35 @@ def world_triangles(objs):
     return np.concatenate(out, 0)
 
 
-def fit_camera(tris, ref_mask, x0, fixed=(), bounds=None, fill=True, iters=2, log=print):
-    """Optimise camera params to maximise silhouette IoU against a reference mask."""
+def fit_camera_points(P3, p2, W, H, x0, fixed=(2,), log=print):
+    """Least-squares camera from 3-D landmarks (Blender) and their drawing pixels (crop coords)."""
+    from scipy.optimize import least_squares
+    P3 = np.asarray(P3, float)
+    p2 = np.asarray(p2, float)
+    x0 = np.asarray(x0, float)
+    free = [i for i in range(len(x0)) if i not in fixed]
+
+    def res(z):
+        x = x0.copy()
+        x[free] = z
+        uv, _ = project_points(P3, cam_from_params(x, W, H))
+        return (uv - p2).ravel()
+    r = least_squares(res, x0[free], method="lm", max_nfev=4000)
+    x = x0.copy()
+    x[free] = r.x
+    e = np.linalg.norm(res(r.x).reshape(-1, 2), axis=1)
+    log(f"[propkit] landmark camera: mean err {e.mean():.1f}px max {e.max():.1f}px; per point {np.round(e, 1).tolist()}")
+    return x, e
+
+
+def landmark_errors(x, P3, p2, W, H):
+    uv, _ = project_points(np.asarray(P3, float), cam_from_params(x, W, H))
+    return uv - np.asarray(p2, float)
+
+
+def fit_camera(tris, ref_mask, x0, fixed=(), bounds=None, fill=True, iters=2, log=print, landmarks=None, lam=0.0):
+    """Optimise camera params to maximise silhouette IoU against a reference mask
+    (optionally + lam * mean landmark reprojection error in pixels)."""
     from scipy import ndimage as ndi
     from scipy.optimize import minimize
     H, W = ref_mask.shape
@@ -1509,7 +1573,11 @@ def fit_camera(tris, ref_mask, x0, fixed=(), bounds=None, fill=True, iters=2, lo
             m = ndi.binary_fill_holes(m)
         inter = np.logical_and(m, ref).sum()
         uni = np.logical_or(m, ref).sum()
-        return 1.0 - inter / max(uni, 1)
+        pen = 0.0
+        if landmarks is not None and lam > 0:
+            uv, _ = project_points(np.asarray(landmarks[0], float), cam)
+            pen = lam * float(np.linalg.norm(uv - np.asarray(landmarks[1], float), axis=1).mean())
+        return 1.0 - inter / max(uni, 1) + pen
 
     best = x0[free].copy()
     for it in range(iters):
@@ -1518,8 +1586,12 @@ def fit_camera(tris, ref_mask, x0, fixed=(), bounds=None, fill=True, iters=2, lo
         best = best + res.x * scales[free]
     x = x0.copy()
     x[free] = best
-    log(f"[propkit] camera fit IoU(filled)={1 - score(best):.4f}")
-    return x, 1 - score(best)
+    sc = score(best)
+    if landmarks is not None and lam > 0:
+        uv, _ = project_points(np.asarray(landmarks[0], float), cam_from_params(x, W, H))
+        sc -= lam * float(np.linalg.norm(uv - np.asarray(landmarks[1], float), axis=1).mean())
+    log(f"[propkit] camera fit IoU(filled)={1 - sc:.4f}")
+    return x, 1 - sc
 
 
 def blender_camera(cam, name="fr_cam", clip_end=200.0):

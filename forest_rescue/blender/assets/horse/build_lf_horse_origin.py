@@ -38,7 +38,7 @@ GROUP = "horse"
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
 FAST = "--fast" in ARGS
 TEX = int(ARGS[ARGS.index("--tex-size") + 1]) if "--tex-size" in ARGS else (1024 if FAST else 2048)
-BODY_TRIS = {0: 10400, 1: 5300, 2: 2150}
+BODY_TRIS = {0: 10000, 1: 5100, 2: 2100}
 T0 = time.time()
 
 
@@ -269,7 +269,7 @@ def body_textures(lo, hi, views, J, tack_objs):
         (TEX // 2, TEX // 2), Image.LANCZOS))
     Image.fromarray(small).save(tex_path("body_orm.png"))
     # bake AO lightly into albedo (mobile: no SSAO guarantee)
-    col2 = col * (0.72 + 0.28 * ao[..., None])
+    col2 = col * (0.85 + 0.15 * ao[..., None])
     Image.fromarray((np.clip(col2, 0, 1) * 255 + 0.5).astype(np.uint8)).save(
         tex_path("body_color.jpg"), quality=90)
     bpy.data.materials.remove(tmp)
@@ -326,6 +326,7 @@ def write_clip(arm, clip, frames_basis):
             if bname == "belly":
                 pb.scale = tuple(map(float, sc))
                 pb.keyframe_insert("scale", frame=f, group=bname)
+    _linear_keys(act, arm)
     act.use_frame_range = True
     act.frame_start = 0.0
     act.frame_end = float(times[-1] * HA.FPS)
@@ -336,8 +337,23 @@ def write_clip(arm, clip, frames_basis):
     return act
 
 
+def _linear_keys(act, arm):
+    """Dense keys -> LINEAR interpolation (glTF LINEAR samplers, no cubic overshoot)."""
+    fcs = []
+    try:
+        from bpy_extras import anim_utils
+        cbag = anim_utils.action_get_channelbag_for_slot(act, arm.animation_data.action_slot)
+        fcs = list(cbag.fcurves) if cbag else []
+    except Exception:
+        fcs = list(getattr(act, "fcurves", []))
+    for fc in fcs:
+        for kp in fc.keyframe_points:
+            kp.interpolation = "LINEAR"
+    return len(fcs)
+
+
 def hoof_slip(clip, cb, frames_basis):
-    """Max horizontal travel (m) of each planted toe in world space during stance."""
+    """Max horizontal travel (m) of each planted toe (actual solved hoof) in world space."""
     res = {}
     for leg in HC.LEGS:
         segs = []
@@ -347,7 +363,8 @@ def hoof_slip(clip, cb, frames_basis):
             if prm is None:
                 continue
             rp, yaw = clip["root"][k]
-            w = HA.rotz(yaw) @ prm["toe"] + np.array([rp[0], rp[1], 0.0])
+            toe = cb.toe_track[k].get(leg, prm["toe"])
+            w = HA.rotz(yaw) @ toe + np.array([rp[0], rp[1], 0.0])
             planted = prm["toe"][2] < 0.002 and prm.get("pitch", 0) < 0.02
             if planted:
                 cur.append(w[:2])
@@ -412,6 +429,8 @@ def main():
     m_body = core.material(f"{ASSET}_body", base_tex=core.load_image(body_col),
                            normal_tex=core.load_image(body_nrm, "Non-Color"),
                            rough_tex=(orm := core.load_image(body_orm, "Non-Color")), metal_tex=orm)
+    bsdf = next(n for n in m_body.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    bsdf.inputs["Specular IOR Level"].default_value = 0.30
     m_hair = alpha_clip_material(f"{ASSET}_hair", core.load_image(hair_png))
     m_tack = core.material(f"{ASSET}_tack", base_tex=core.load_image(tack_col),
                            normal_tex=core.load_image(tack_nrm, "Non-Color"),
@@ -448,10 +467,13 @@ def main():
     clips = HC.all_clips(cb)
     meta_clips = {}
     for clip in clips:
+        HA.OVERREACH[0] = 0.0
         fb = cb.evaluate(clip["frames"])
+        log(f"  {clip['name']} IK over-reach max {HA.OVERREACH[0]*100:.1f} cm")
         write_clip(arm, clip, fb)
         m = dict(clip["meta"])
         m["hoofSlip_m"] = hoof_slip(clip, cb, fb)
+        m["ikOverreach_m"] = round(max(HA.OVERREACH[0], 0.0), 4)
         meta_clips[clip["name"]] = m
     arm.animation_data.action = None
     for pb in arm.pose.bones:

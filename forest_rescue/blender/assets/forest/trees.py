@@ -96,7 +96,8 @@ def finish_broadleaf(sk, env, spec, rng):
             if corder[ci] > maxorder:
                 continue
             nodes = list(ch)
-            if corder[ci] == 0 and spec.get("skip_order0"):
+            if spec.get("skip_order0") and (corder[ci] == 0 or (corder[ci] == 1 and corder[cpar[ci]] == 0
+                                                                 and nodes[0] == chains[cpar[ci]][0])):
                 nodes = nodes[1:]
                 if len(nodes) < 2:
                     continue
@@ -213,7 +214,7 @@ def finish_broadleaf(sk, env, spec, rng):
                 d = rng.normal(0, 1, 3)
                 d[2] = abs(d[2]) * 0.9 + 0.15 if rng.random() < 0.8 else d[2]
                 d = normalize(d)
-                p = pc + d * rc * rng.uniform(0.45, 1.0)
+                p = pc + d * rc * rng.uniform(0.3, 0.85)
                 for _k in range(4):
                     if env.inside_depth(p[None])[0] > 0:
                         break
@@ -327,7 +328,7 @@ OAK_DENSE = {"oak_gold_a": "oak_dense_gold", "oak_gold_b": "oak_dense_gold", "oa
 def oak_spec(seed, budget=(2950, 1150, 290), r_base=0.85, **kw):
     s = dict(bark="oak", r_base=r_base, alpha=1.0, gamma=2.25, cull=(0.045, 0.16, 0.35), max_order=[9, 2, 1],
              flare=(1.3, 1.1, 5, 1.0), roots=(8, 2.6, 0.5), card_size=(1.1, 1.5), moods=OAK_MOODS_GOLD,
-             dense_frac=0.6, dense_scale=1.3,
+             dense_frac=0.55, dense_scale=1.1, bark_frac=(0.44, 0.3, 0.16),
              dense_map=OAK_DENSE, budget=budget, leaf_tip_dist=1.6, leaf_r_max=0.09, site_spacing=0.42,
              side_frac=0.45, sph=0.62, up_bias=0.22, seed=seed, bark_tile=(1.5, 1.5), leaf_z_min=2.0)
     s.update(kw)
@@ -352,7 +353,7 @@ def build_golden_oak(variant, view=None):
         for mid, end in limbs:
             pts = _bezier(top, mid, end, 7)
             sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=4.0)
-        puffs = env.sample_even(46, rng, dmin=0.6, dmax=1.6)
+        puffs = env.sample_even(46, rng, dmin=0.9, dmax=1.9)
         att = env.sample(1700, rng, shell=2.3, inner_weight=0.12, clumps=puffs, clump_r=1.9)
         spec = oak_spec(seed, puffs=puffs, trunk_r=lambda p: 0.85 * (1.0 - 0.18 * min(p[2], 4.4) / 4.4), trunk_ids=tid)
         tg.space_colonize(sk, att, D=0.38, di=3.2, dk=0.85, iters=160, tropism=(0, 0, 1), trop_w=0.12, rng=rng)
@@ -629,21 +630,29 @@ def pine_profile_from_view(view, H):
     """Branch length per height from the reference silhouette half-widths (avg of both sides)."""
     m = view.mask
     rows = np.nonzero(m.any(axis=1))[0]
-    zs, hw = [], []
+    zs, left, right = [], [], []
     for r in rows:
         cols = np.nonzero(m[r])[0]
         z = (view.ay - r) / view.ppm
-        hw.append(max(view.ax - cols.min(), cols.max() - view.ax) / view.ppm * 0.5
-                  + (cols.max() - cols.min()) / view.ppm * 0.25)
+        left.append(max(view.ax - cols.min(), 0) / view.ppm)
+        right.append(max(cols.max() - view.ax, 0) / view.ppm)
         zs.append(z)
     zs = np.array(zs)
-    hw = np.array(hw)
     o = np.argsort(zs)
-    zs, hw = zs[o], hw[o]
+    zs = zs[o]
     from scipy.ndimage import uniform_filter1d
-    hw = uniform_filter1d(hw, 9)
+    left = uniform_filter1d(np.array(left)[o], 7)
+    right = uniform_filter1d(np.array(right)[o], 7)
     scale = H / zs.max()
-    return lambda z, az: float(np.interp(z / scale, zs, hw)) * 0.93
+
+    def prof(z, az):
+        # +X (right in the front view) uses the right half-width, -X the left; depth (Y) the mean
+        c = math.cos(az)
+        wl = float(np.interp(z / scale, zs, left))
+        wr = float(np.interp(z / scale, zs, right))
+        wm = 0.5 * (wl + wr)
+        return (wr * max(c, 0) + wl * max(-c, 0) + wm * (1 - abs(c))) * 0.95
+    return prof
 
 
 def build_dark_pine(variant, view=None):
@@ -657,10 +666,10 @@ def build_dark_pine(variant, view=None):
     if variant == 1:
         H = 14.0
         prof = pine_profile_from_view(view, H)
-        spec = dict(base, H=H, crown_base=2.2, r_base=0.30, profile=prof, Lmax=3.6,
+        spec = dict(base, H=H, crown_base=2.9, r_base=0.30, profile=prof, Lmax=3.6,
                     whorl_dz=lambda f: 0.62 - 0.30 * f, per_whorl=5,
-                    pitch=lambda f: -0.38 + 0.95 * f ** 1.5, droop=lambda f: 0.32 * (1 - f) + 0.05,
-                    tip_up=0.10, missing=0.05)
+                    pitch=lambda f: -0.22 + 0.85 * f ** 1.5, droop=lambda f: 0.20 * (1 - f) + 0.05,
+                    tip_up=0.10, missing=0.05, flare=(0.9, 0.8, 6, 0.6))
     elif variant == 2:
         H = 16.5
         def prof(z, az, H=H):
@@ -760,11 +769,12 @@ def build_willow(variant, view=None):
         env = tg.envelope_from_mask(view.mask, view.ppm, view.ay, view.ax, z_min=4.0, depth_scale=0.9, voxel=0.25,
                                     row_lo=int(view.ay - 6.0 * view.ppm))
         trunk = [(-0.4, 0, -0.3), (-0.35, 0, 1.0), (0.1, 0.0, 2.2), (0.9, 0.05, 3.3), (1.5, 0.1, 4.4), (1.8, 0.1, 5.4)]
-        hem = 2.2
+        hem = 1.8
         rb = 0.62
         limbs = [((0.6, 0.2, 6.6), (-1.2, 0.4, 8.6)), ((2.4, -0.3, 6.8), (2.8, -0.6, 9.8)),
                  ((2.8, 0.3, 6.0), (4.6, 0.6, 7.6)), ((1.2, 1.4, 6.2), (1.4, 3.0, 7.8)),
-                 ((1.4, -1.5, 6.4), (1.6, -3.2, 8.2))]
+                 ((1.4, -1.5, 6.4), (1.6, -3.2, 8.2)), ((0.0, 0.4, 6.4), (-3.6, 0.6, 7.6)),
+                 ((0.2, -0.8, 6.2), (-3.0, -2.2, 7.2)), ((-0.4, 0.6, 7.4), (-4.4, 1.0, 8.2))]
     elif variant == 2:
         env = tg.envelope_ellipsoid((-1.2, 0, 6.0), (5.6, 4.6, 2.9), voxel=0.25,
                                     noise=lambda X, Y, Z: 0.12 * np.sin(1.1 * X + 0.6 * Y) * np.cos(0.9 * Z))
@@ -789,7 +799,7 @@ def build_willow(variant, view=None):
         sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=3.5)
     puffs = env.sample_even(26, rng, dmin=0.7, dmax=1.8)
     att = env.sample(1300, rng, shell=1.6, inner_weight=0.1, clumps=puffs, clump_r=1.5)
-    tg.space_colonize(sk, att, D=0.36, di=2.8, dk=0.8, iters=150, tropism=(0, 0, 1), trop_w=0.1, rng=rng)
+    tg.space_colonize(sk, att, D=0.36, di=3.6, dk=0.8, iters=150, tropism=(0, 0, 1), trop_w=0.1, rng=rng)
     W_TILES = ["willow_top_a"]
     spec = dict(puffs=puffs, puff_r=(1.2, 1.8), puff_frac=0.75, bark="willow", r_base=rb, alpha=1.0, gamma=2.3, cull=(0.04, 0.12, 0.28), max_order=[9, 2, 1],
                 flare=(0.45, 0.7, 4, 0.6), roots=(5, 1.6, rb * 0.35), card_size=(1.2, 1.6),
@@ -820,7 +830,7 @@ def build_willow(variant, view=None):
             out = normalize(np.array([p[0] - crown_c[0], p[1] - crown_c[1], 0]) + rng2.normal(0, 0.2, 3))
             out[2] = 0
             out = normalize(out)
-            length = max(1.2, (p[2] - hem) * rng2.uniform(0.75, 1.0))
+            length = max(1.2, (p[2] - hem) * rng2.uniform(0.88, 1.04))
             w = rng2.uniform(0.55, 0.8) * (1.0 if lod == 0 else 1.5 if lod == 1 else 2.2)
             tile = f"willow_strand_{rng2.integers(6)}"
             u0, v0, u1, v1 = atlas.uv_rect(tile)

@@ -296,6 +296,21 @@ func dedupe(events: Array, action := "") -> Array:
 		seen.erase(seen_queue.pop_front())
 	return fresh
 
+## Latest pending settle time (ms) of all timed objects; INF if none (QA clock stepping).
+func last_settle_ms() -> float:
+	var latest := -INF
+	for movable in [squad().get("move"), adv.get("horse", {}).get("move"), escort().get("move")]:
+		if movable is Dictionary and movable.has("arriveAt"):
+			latest = maxf(latest, float(movable.arriveAt))
+	var fight := battle()
+	if not fight.is_empty() and String(fight.get("outcome", "pending")) == "pending" and fight.has("endsAt"):
+		latest = maxf(latest, float(fight.endsAt))
+	for entry in adv.get("pois", []):
+		var plates: Variant = entry.get("mechanism", {}).get("plates")
+		if plates is Dictionary and plates.get("readyAt") != null and String(plates.get("state", "")) != "held":
+			latest = maxf(latest, float(plates.readyAt))
+	return latest if latest > -INF else INF
+
 ## Earliest server time (ms) at which a timed object settles (arriveAt/endsAt); INF if none.
 func next_settle_ms() -> float:
 	var best := INF

@@ -54,6 +54,5 @@ def build_field(parts, subs, lo, hi, voxel, hull=None, hull_k=0.012, views=None,
     if views is not None:
         hv = H.hull2d(F, views)
         F.intersect(hv, k=hull_k)
-    if smooth:
-        F.smooth(smooth)
+    F.smooth(smooth or 0.65)
     return F

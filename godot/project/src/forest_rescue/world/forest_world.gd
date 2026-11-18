@@ -23,7 +23,8 @@ const API_VERSION := 2
 const DIM_EXPLORED := 0.24
 const SIGHT_RADIUS := 10.0
 ## Visual target heights (m) so kit trees keep the town's proportions (legacy trees ≈ 8.5 m).
-const TREE_HEIGHT := [8.8, 10.2, 8.6, 8.0, 9.6]
+const TREE_HEIGHT := [9.5, 10.5, 9.0, 8.0, 10.0]
+const TREE_CROWN := [4.3, 3.2, 3.4, 4.5, 5.0]
 const UNDER_HEIGHT := {"fern": 0.95, "reed": 1.6, "bramble": 1.15, "rock": 1.25, "trunk": 0.75, "stump": 0.7}
 
 static var _cache: Dictionary = {}        # shared across city-scene rebuilds (versioned keys)
@@ -171,8 +172,8 @@ func _build_paths() -> void:
 	var colors := PackedColorArray()
 	var normals := PackedVector3Array()
 	var indices := PackedInt32Array()
-	var half := 1.25
-	var fringe := 0.75
+	var half := 1.45
+	var fringe := 0.9
 	for r in atlas.routes.size():
 		var points: PackedVector3Array = atlas.routes[r].points
 		var on_deck: PackedByteArray = terrain.road_on_deck[r]
@@ -198,7 +199,7 @@ func _build_paths() -> void:
 			if run_start >= 0:
 				var prev := base - 4
 				for k in 3:
-					indices.append_array(PackedInt32Array([prev + k, prev + k + 1, base + k, prev + k + 1, base + k + 1, base + k]))
+					indices.append_array(PackedInt32Array([prev + k, base + k, prev + k + 1, prev + k + 1, base + k, base + k + 1]))
 			run_start = i
 	if vertices.is_empty():
 		return
@@ -258,20 +259,40 @@ func apply_state_hint(state: Dictionary) -> void:
 var _last_hint := ""
 
 
-func _mesh_for(asset: Dictionary, key: String, kind: int, variant: int, target_height: float) -> Array:
+func _mesh_for(asset: Dictionary, key: String, kind: int, variant: int, target_height: float, target_crown := 0.0) -> Array:
 	if mesh_keys.has(key):
 		return mesh_keys[key]
 	var variants: Array = asset.variants
 	var entry: Dictionary = variants[(maxi(variant, 1) - 1) % variants.size()]
 	var index: int = canopy.register_mesh(key, entry.lods, entry.tris, kind, entry.radius, entry.height)
 	var norm := target_height / maxf(0.2, float(entry.height))
+	if target_crown > 0.0:
+		norm = minf(norm, target_crown / maxf(0.2, float(entry.radius)))
 	mesh_keys[key] = [index, norm]
 	return mesh_keys[key]
 
 
 func _tree_mesh(species: int, variant: int) -> Array:
 	var id: String = Rules.SPECIES[species]
-	return _mesh_for(kit.tree_asset(id), "tree:%s:v%d" % [id, variant], ForestCanopy.KIND_TREE, variant, TREE_HEIGHT[species])
+	return _mesh_for(kit.tree_asset(id), "tree:%s:v%d" % [id, variant], ForestCanopy.KIND_TREE, variant, TREE_HEIGHT[species], TREE_CROWN[species])
+
+
+## Per-instance foliage tone (INSTANCE_CUSTOM): golden oaks stay golden in the north-west
+## (birch watch / limestone / ancient grove, as in art/01) and turn summer-green elsewhere.
+func _tone(species: int, x: float, z: float) -> Color:
+	var h := fposmod(sin(x * 12.9898 + z * 78.233) * 43758.5453, 1.0)
+	var h2 := fposmod(sin(x * 39.346 + z * 11.135) * 24634.6345, 1.0)
+	if species == Rules.OAK or species == Rules.HOLLOW_OAK:
+		var golden := 0.5
+		if maxf(absf(x), absf(z)) > 56.0:
+			var w: PackedFloat32Array = atlas.biome_weights(x, z)
+			golden = clampf(w[0] * 0.9 + w[1] * 0.9 + w[7] * 0.7 + w[3] * 0.35, 0.0, 1.0)
+		if species == Rules.HOLLOW_OAK or h < golden * 0.85 + 0.08:
+			if h2 < 0.22:
+				return Color(-0.035, 1.08, 0.92, 0.0)    # copper-orange
+			return Color(h2 * 0.03 - 0.012, 1.0, 1.0, 0.0)
+		return Color(0.15 + 0.04 * h2, 0.72 + 0.12 * h, 0.60 + 0.12 * h2, 0.0)  # summer green oak
+	return Color((h - 0.5) * 0.03, 0.92 + 0.14 * h2, 0.9 + 0.12 * h, 0.0)
 
 
 func _under_mesh(kind_index: int, variant: int) -> Array:
@@ -334,7 +355,8 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 		var variant := Rules.kit_variant_for_legacy(int(tree.variant))
 		var mesh := _tree_mesh(species, variant)
 		var scale := float(tree.scale) * float(mesh[1]) * (0.92 + 0.16 * fposmod(float(tree.angle) * 1.37, 1.0))
-		canopy.add_instance(mesh[0], Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * scale), Vector3(xz.x, y - 0.05, xz.y)))
+		canopy.add_instance(mesh[0], Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * scale), Vector3(xz.x, y - 0.05, xz.y)),
+			_tone(species, xz.x, xz.y))
 		occupied.append(xz)
 	for item in layout.get("trees", []):
 		var xz := Vector2(float(item[0]), float(item[1]))
@@ -343,7 +365,7 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 		var mesh := _tree_mesh(int(item[2]), int(item[3]))
 		var transform := Transform3D(Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(Vector3.ONE * float(item[5]) * float(mesh[1])),
 			Vector3(xz.x, height_at(xz.x, xz.y) - 0.05, xz.y))
-		canopy.add_instance(mesh[0], transform)
+		canopy.add_instance(mesh[0], transform, _tone(int(item[2]), xz.x, xz.y))
 	for list_name in ["understory", "innerUnderstory"]:
 		var inner: bool = list_name == "innerUnderstory"
 		for item in layout.get(list_name, []):

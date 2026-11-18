@@ -68,7 +68,7 @@ def light_dir_for(view):
     return L / np.linalg.norm(L)
 
 
-def project_body(T, verts, tris, views, excl, power=3.0, min_facing=0.12, delight=0.45,
+def project_body(T, verts, tris, views, excl, power=3.0, min_facing=0.12, delight=0.22,
                  ambient=0.55):
     """Blend de-lit reference colours onto texels; returns colour (H,W,3), weight (H,W)."""
     Wt, Ht = T.size
@@ -99,7 +99,15 @@ def project_body(T, verts, tris, views, excl, power=3.0, min_facing=0.12, deligh
         acc[yy, xx] += w[:, None] * col
         wsum[yy, xx] += w
     out = acc / np.maximum(wsum, 1e-9)[..., None]
-    return out, wsum
+    # keep the painted mean brightness (de-lighting only evens out light/shadow sides)
+    m = wsum > 0
+    if m.any():
+        raw = np.zeros_like(out)
+        out_mean = out[m].mean(0)
+        ref_mean = np.mean([v.image[ndi.binary_erosion(v.mask, iterations=3)].mean(0)
+                            for v in views.values()], axis=0)
+        out = out * (ref_mean / np.maximum(out_mean, 1e-4))[None, None, :]
+    return np.clip(out, 0, 1), wsum
 
 
 # --------------------------------------------------------------------------- procedural detail

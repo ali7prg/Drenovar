@@ -286,12 +286,12 @@ func locomote(speed: float, clips: Dictionary) -> void:
 func set_lod(level: int) -> void:
 	if level == lod_level or load_state != "ready":
 		return
+	lod_level = level
 	var available := level
 	while available > 0 and lods[available].is_empty():
 		available -= 1
 	if lods[available].is_empty():
 		return
-	lod_level = level
 	for index in 3:
 		for mesh in lods[index]:
 			if is_instance_valid(mesh):
@@ -335,10 +335,12 @@ func dispatch_markers() -> void:
 		return
 	var wrapped := position < previous
 	for marker_name in markers:
-		var at := float(markers[marker_name])
-		var crossed := (at > previous and at <= position) if not wrapped else (at > previous or at <= position)
-		if crossed:
-			marker.emit(self, current_id, String(marker_name))
+		var times: Variant = markers[marker_name]
+		for at_value in (times if times is Array else [times]):
+			var at := float(at_value)
+			var crossed := (at > previous and at <= position) if not wrapped else (at > previous or at <= position)
+			if crossed:
+				marker.emit(self, current_id, String(marker_name))
 
 func set_active(active: bool) -> void:
 	if visible != active:

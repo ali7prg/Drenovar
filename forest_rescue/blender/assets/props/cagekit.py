@@ -40,7 +40,7 @@ def add_sockets(B, kind, socket_world, plate_cls, core_cls=None, keyhole_cls=Non
     """Native + keyhole socket plates at socket_world (recess floor centre), normal -Y."""
     M = M4(None, socket_world)
     ak.build_socket(B, "socket", kind, M=M, cls=plate_cls, prefix="sock_native", plate=True,
-                    floor_cls=core_cls or plate_cls)
+                    floor_cls=core_cls or plate_cls, style="cage", density=4.0)
     # move the recess floor into the pressing core node
     if "socket" in B.nodes:
         keep, move = [], []
@@ -48,7 +48,8 @@ def add_sockets(B, kind, socket_world, plate_cls, core_cls=None, keyhole_cls=Non
             (move if p.name.endswith("_floor") else keep).append(p)
         B.nodes["socket"] = keep
         B.nodes.setdefault("socket_core", []).extend(move)
-    ak.build_socket(B, "keyhole", "keyhole", M=M, cls=keyhole_cls or plate_cls, prefix="sock_keyhole", plate=True)
+    ak.build_socket(B, "keyhole", "keyhole", M=M, cls=keyhole_cls or plate_cls, prefix="sock_keyhole", plate=True,
+                    style="cage", density=4.0)
     if "keyhole" in B.nodes:
         keep, move = [], []
         for p in B.nodes["keyhole"]:
@@ -58,33 +59,44 @@ def add_sockets(B, kind, socket_world, plate_cls, core_cls=None, keyhole_cls=Non
 
 
 def hinge_set(B, axis_xy, z_list, strap_len, strap_w, door_face_y, jamb_face_y, cls="bronze", knuckle_r=0.028,
-              knuckle_h=0.075, leaf="door", static="root", strap_motif=None, jamb_dir=-1):
-    """Barrel hinges on a vertical axis: alternating knuckles (jamb, door, jamb), jamb leaf plate on the
-    static jamb, decorative strap with scroll end on the door (extends +X across the leaf)."""
+              knuckle_h=0.075, leaf="door", static="root", strap_motif=None, jamb_dir=-1, density=4.0):
+    """Barrel hinges on a vertical axis: alternating knuckles (jamb, door, jamb), riveted jamb leaf plate,
+    waisted scroll strap with a rounded end and rivet heads on the door (extends +X across the leaf)."""
     ax, ay = axis_xy
     seg = B.seg(10, 7, 5)
+    meta0 = {"no_paint": 1}
+    riv_prof = np.array([[0.012, 0], [0.008, 0.008], [0, 0.011]])
     for i, zc in enumerate(z_list):
         for k in range(3):
             z0 = zc - 1.5 * knuckle_h + k * knuckle_h
             node = static if k != 1 else leaf
             kn = pk.rod((ax, ay, z0 + 0.003), (ax, ay, z0 + knuckle_h - 0.003), knuckle_r, seg)
-            B.add(node, f"hinge{i}_knuckle_{'d' if node == leaf else 's'}", cls, kn)
-        # pin caps
-        for zz, nm in ((zc - 1.5 * knuckle_h - 0.012, "a"), (zc + 1.5 * knuckle_h, "b")):
-            cap = pk.lathe(np.array([[knuckle_r * 0.75, 0], [knuckle_r * 0.8, 0.006], [knuckle_r * 0.5, 0.012], [0, 0.014]]), seg)
-            B.add(static, f"hinge{i}_caps", cls, cap.transformed(M4(None, (ax, ay, zz))))
-        # jamb leaf (static plate on the jamb face, toward -X)
-        plate = pk.extrude(pk.rect(0.11, knuckle_h * 3.0, 0.012), 0.008, chamfer=0.002)
-        Mj = M4(Rx(math.pi / 2), (ax - 0.065, jamb_face_y, zc))
-        B.add(static, f"hinge{i}_jambleaf", cls, plate.transformed(Mj))
-        # door strap: tapered scroll strap along +X on the door face
-        L = strap_len
-        w = strap_w
-        pts = [(0.0, -w / 2), (L * 0.55, -w * 0.42), (L * 0.78, -w * 0.62), (L * 0.92, -w * 0.5), (L, 0.0),
-               (L * 0.92, w * 0.5), (L * 0.78, w * 0.62), (L * 0.55, w * 0.42), (0.0, w / 2)]
+            B.add(node, f"hinge{i}_knuckle_{'d' if node == leaf else 's'}", cls, kn, meta=meta0, density=density)
+        for zz in (zc - 1.5 * knuckle_h - 0.012, zc + 1.5 * knuckle_h):
+            cap = pk.lathe(np.array([[knuckle_r * 0.8, 0], [knuckle_r * 0.5, 0.012], [0, 0.014]]), B.seg(8, 6, 4))
+            B.add(static, f"hinge{i}_caps", cls, cap.transformed(M4(None, (ax, ay, zz))), meta=meta0, density=density)
+        # jamb leaf: tall plate with two rivets (drawing: 0.075 x 0.29)
+        plate = pk.extrude(pk.rect(0.075, knuckle_h * 3.9, 0.01), 0.008, chamfer=0.002)
+        Mj = M4(Rx(math.pi / 2), (ax - knuckle_r - 0.04, jamb_face_y, zc))
+        B.add(static, f"hinge{i}_jambleaf", cls, plate.transformed(Mj), meta=meta0, density=density)
+        for dz in (-0.1, 0.1):
+            rv = pk.lathe(riv_prof, 6)
+            B.add(static, f"hinge{i}_rivets_s", cls, rv.transformed(M4(Rx(-math.pi / 2), (ax - knuckle_r - 0.04, jamb_face_y - 0.008, zc + dz))),
+                  max_lod=1, meta=meta0, density=density)
+        # waisted strap: root height w, waist 0.62 w at 35 %, flare 0.9 w at 70 %, rounded end
+        L, w = strap_len, strap_w
+        pts = [(0.0, -w / 2), (L * 0.35, -w * 0.31), (L * 0.62, -w * 0.45), (L * 0.78, -w * 0.42)]
+        for a in np.linspace(-math.pi / 2, math.pi / 2, 5):
+            pts.append((L * 0.80 + w * 0.42 * math.cos(a), w * 0.42 * math.sin(a)))
+        pts += [(L * 0.78, w * 0.42), (L * 0.62, w * 0.45), (L * 0.35, w * 0.31), (0.0, w / 2)]
         strap = pk.extrude(np.array(pts), 0.009, chamfer=0.0025)
         Ms = M4(Rx(math.pi / 2), (ax + knuckle_r * 0.6, door_face_y, zc))
-        B.add(leaf, f"hinge{i}_strap", cls, strap.transformed(Ms), meta={"motif": strap_motif} if strap_motif else None)
+        B.add(leaf, f"hinge{i}_strap", cls, strap.transformed(Ms),
+              meta=dict({"motif": strap_motif} if strap_motif else {}, no_paint=1), density=density)
+        for fx in (0.16, 0.80):
+            rv = pk.lathe(riv_prof, 6)
+            B.add(leaf, f"hinge{i}_rivets_d", cls, rv.transformed(M4(Rx(-math.pi / 2), (ax + knuckle_r * 0.6 + L * fx, door_face_y - 0.009, zc))),
+                  max_lod=1, meta=meta0, density=density)
 
 
 def door_angle_open(f, frames):
@@ -153,7 +165,7 @@ def cage_meta(A, asset_id, kind, hinge, door_width, door_height, socket_world, l
             "hinge_axis": {"node": "door_pivot", "point": pk.b2g(hinge), "direction": [0.0, 1.0, 0.0],
                            "side": "left jamb seen from outside (glTF -X side of the opening)"},
             "door_open_deg": OPEN_DEG,
-            "door_rotation": "door_pivot rotates about glTF +Y; open = -95 deg about Blender Z = rotation_y(-95deg) in glTF? see poses",
+            "door_rotation": "door_pivot rotates about its local +Y (glTF up) axis, which passes exactly through the hinge pins; closed = 0 deg, open = -95 deg (outward, free edge swings toward +Z)",
             "key_slot": {"node": "key_slot", "parent": "socket_core", "position_closed": pk.b2g(key_slot_native),
                          "normal": [0.0, 0.0, 1.0], "height_above_ground_m": round(float(socket_world[2]), 3),
                          "shape": kind, "fits_family": {"circle": "stone_rune", "hex": "bronze_seal",

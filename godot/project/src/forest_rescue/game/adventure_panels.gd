@@ -55,7 +55,8 @@ func open_route() -> void:
 	if move is Dictionary:
 		var left := maxi(0, ceili((float(move.get("arriveAt", 0)) - client.server_now()) / 1000.0))
 		body_label("%s → %s · %d:%02d" % [t("hud.squad"), game.target_name(String(move.get("targetId", ""))), left / 60, left % 60])
-		action(t("hud.stop"), close_then(func(): game.request_action("stop")))
+		if String(squad.get("busy", "")) != "escort":
+			action(t("hud.stop"), close_then(func(): game.request_action("stop")))
 	var step: Dictionary = game.guide()
 	var suggested := String(step.get("target", ""))
 	if not suggested.is_empty() and String(step.get("action", "")) == "move":
@@ -79,7 +80,8 @@ func open_route() -> void:
 		var site_entry: Dictionary = client.site_state(id)
 		if not site_entry.is_empty():
 			caption += " · " + t("site.progress", {"count":int(site_entry.get("step", 0))})
-		var enabled: bool = not (move is Dictionary) and String(squad.get("node", "")) != id and game.total_units(squad.get("units", {})) > 0
+		# CONTRACT v1.1: a move while moving redirects from the next graph point.
+		var enabled: bool = squad.get("busy") == null and String(squad.get("node", "")) != id and game.total_units(squad.get("units", {})) > 0
 		action(caption, close_then(func(): game.request_action("move", {"targetId":id})), enabled)
 
 # ------------------------------------------------------------------ squad («Отряд»)

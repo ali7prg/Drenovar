@@ -1,41 +1,118 @@
 {
-  "stone_rune": {
+  "bronze_seal": {
     "front": {
-      "iou_filled": 0.9683,
-      "iou_raw": 0.9683,
-      "mean_abs_colour_error": 0.1464
+      "iou_filled": 0.9946,
+      "iou_raw": 0.9946,
+      "mean_abs_colour_error": 0.127
     },
     "side": {
-      "iou_filled": 0.928,
-      "iou_raw": 0.9282,
-      "mean_abs_colour_error": 0.0934
+      "iou_filled": 0.8444,
+      "iou_raw": 0.8444,
+      "mean_abs_colour_error": 0.0954
     },
     "hero34": {
-      "iou_filled": 0.9472,
-      "iou_raw": 0.9472,
-      "mean_abs_colour_error": 0.1263
+      "iou_filled": 0.9382,
+      "iou_raw": 0.9382,
+      "mean_abs_colour_error": 0.0924
     },
     "socket": {
-      "iou_filled": 0.9047,
-      "iou_raw": 0.9047,
-      "mean_abs_colour_error": 0.1027
+      "iou_filled": 0.9066,
+      "iou_raw": 0.9066,
+      "mean_abs_colour_error": 0.1247
     },
     "trace": {
       "front_px": [
-        138,
-        129
+        141,
+        122
       ],
       "side_px": [
-        37,
-        110
+        39,
+        109
       ],
-      "diameter_m": 0.12,
-      "height_m": 0.11217391304347826,
-      "thickness_m": 0.03773122529644269
+      "diameter_m": 0.1,
+      "height_m": 0.08652482269503546,
+      "thickness_m": 0.03095842279914113
     },
     "paint": {
-      "painted_fraction": 0.205,
-      "texel_mm": 0.32
+      "painted_fraction": 0.171,
+      "texel_mm": 0.3
+    }
+  },
+  "amber_crystal": {
+    "front": {
+      "iou_filled": 0.8969,
+      "iou_raw": 0.8969,
+      "mean_abs_colour_error": 0.1475
+    },
+    "side": {
+      "iou_filled": 0.7453,
+      "iou_raw": 0.7453,
+      "mean_abs_colour_error": 0.1236
+    },
+    "hero34": {
+      "iou_filled": 0.912,
+      "iou_raw": 0.912,
+      "mean_abs_colour_error": 0.1449
+    },
+    "socket": {
+      "iou_filled": 0.8786,
+      "iou_raw": 0.8786,
+      "mean_abs_colour_error": 0.1255
+    },
+    "trace": {
+      "front_px": [
+        120,
+        135
+      ],
+      "side_px": [
+        43,
+        123
+      ],
+      "H_m": 0.10125,
+      "W_m": 0.09,
+      "thickness_m": 0.03539634146341464
+    },
+    "paint": {
+      "painted_fraction": 0.111,
+      "texel_mm": 0.3
+    }
+  },
+  "bone_key": {
+    "front": {
+      "iou_filled": 0.9096,
+      "iou_raw": 0.8369,
+      "mean_abs_colour_error": 0.1779
+    },
+    "side": {
+      "iou_filled": 0.6575,
+      "iou_raw": 0.6575,
+      "mean_abs_colour_error": 0.1515
+    },
+    "hero34": {
+      "iou_filled": 0.6736,
+      "iou_raw": 0.6045,
+      "mean_abs_colour_error": 0.1503
+    },
+    "socket": {
+      "iou_filled": 0.8688,
+      "iou_raw": 0.8688,
+      "mean_abs_colour_error": 0.1673
+    },
+    "trace": {
+      "front_px": [
+        167,
+        62
+      ],
+      "side_px": [
+        24,
+        120
+      ],
+      "length_m": 0.153,
+      "aspect": 0.3712574850299401
+    },
+    "paint": {
+      "painted_fraction": 0.226,
+      "texel_mm": 0.247
     }
   }
 }

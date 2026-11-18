@@ -1,0 +1,8 @@
+{
+  "view": "hollow_oak",
+  "iou": 0.7223,
+  "mean_abs_colour_error": 0.1734,
+  "ref_pixels": 91306,
+  "render_pixels": 85674,
+  "iou_closed_r4": 0.75
+}

@@ -1,0 +1,176 @@
+{
+  "id": "lf_env_grass_tuft",
+  "variants": {
+    "v1": {
+      "nodes": [
+        "lf_env_grass_tuft_v1_LOD0",
+        "lf_env_grass_tuft_v1_LOD1",
+        "lf_env_grass_tuft_v1_LOD2"
+      ],
+      "tris": {
+        "LOD0": 10,
+        "LOD1": 6,
+        "LOD2": 4
+      },
+      "materials": {
+        "LOD0": [
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_foliage"
+        ]
+      },
+      "height_m": 0.63,
+      "footprint_radius_m": 0.45,
+      "bounds_m_blender": [
+        [
+          -0.33,
+          -0.4,
+          -0.03
+        ],
+        [
+          0.45,
+          0.33,
+          0.63
+        ]
+      ],
+      "wind": true,
+      "info": {
+        "LOD0": {
+          "tris": 10
+        },
+        "LOD1": {
+          "tris": 6
+        },
+        "LOD2": {
+          "tris": 4
+        }
+      }
+    },
+    "v2": {
+      "nodes": [
+        "lf_env_grass_tuft_v2_LOD0",
+        "lf_env_grass_tuft_v2_LOD1",
+        "lf_env_grass_tuft_v2_LOD2"
+      ],
+      "tris": {
+        "LOD0": 10,
+        "LOD1": 6,
+        "LOD2": 4
+      },
+      "materials": {
+        "LOD0": [
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_foliage"
+        ]
+      },
+      "height_m": 0.62,
+      "footprint_radius_m": 0.55,
+      "bounds_m_blender": [
+        [
+          -0.28,
+          -0.55,
+          -0.03
+        ],
+        [
+          0.28,
+          0.38,
+          0.62
+        ]
+      ],
+      "wind": true,
+      "info": {
+        "LOD0": {
+          "tris": 10
+        },
+        "LOD1": {
+          "tris": 6
+        },
+        "LOD2": {
+          "tris": 4
+        }
+      }
+    },
+    "v3": {
+      "nodes": [
+        "lf_env_grass_tuft_v3_LOD0",
+        "lf_env_grass_tuft_v3_LOD1",
+        "lf_env_grass_tuft_v3_LOD2"
+      ],
+      "tris": {
+        "LOD0": 10,
+        "LOD1": 6,
+        "LOD2": 4
+      },
+      "materials": {
+        "LOD0": [
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_foliage"
+        ]
+      },
+      "height_m": 0.85,
+      "footprint_radius_m": 0.56,
+      "bounds_m_blender": [
+        [
+          -0.47,
+          -0.56,
+          -0.03
+        ],
+        [
+          0.39,
+          0.47,
+          0.85
+        ]
+      ],
+      "wind": true,
+      "info": {
+        "LOD0": {
+          "tris": 10
+        },
+        "LOD1": {
+          "tris": 6
+        },
+        "LOD2": {
+          "tris": 4
+        }
+      }
+    }
+  },
+  "tris": {
+    "LOD0": 10,
+    "LOD1": 6,
+    "LOD2": 4
+  },
+  "bones": 0,
+  "materials": [
+    "lf_foliage"
+  ],
+  "glb_images": [
+    "lf_foliage_atlas.png"
+  ],
+  "texture_mode": "external shared files next to the GLB (relative URIs)",
+  "wind": {
+    "attribute": "COLOR_0 (RGBA float, linear)",
+    "R": "branch sway weight: 0 at trunk base -> 1 at branch tips (path length along the skeleton, ^1.35)",
+    "G": "leaf flutter weight: 0 on bark, 0.25-0.3 at a card's attachment edge -> 0.8-1.0 at its free edge",
+    "B": "per-branch phase 0..1 (first-order branch random, sub-branches inherit +-0.06); trunk 0",
+    "A": "crown ambient occlusion 0.45..1 (1 = outer/top of crown); multiply albedo in the shader",
+    "clip": "lf_forest_wind, 8 s seamless loop: use TIME*2pi/8 with integer harmonics (see lf_forest_wind.gdshader)",
+    "godot_note": "Godot's glTF importer enables vertex_color_use_as_albedo when COLOR_0 exists: use the provided ShaderMaterial (or disable that flag) or the wind mask tints the albedo."
+  },
+  "layout_note": "Node translations are preview offsets only; mesh origin = ground contact centre.",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_groundcover.py grass_tuft"
+}

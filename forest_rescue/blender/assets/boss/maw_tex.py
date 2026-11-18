@@ -127,7 +127,7 @@ def scar_mask(P):
         t = np.clip(((P - a) @ ab) / (ab @ ab), 0, 1)
         d = np.linalg.norm(P - (a + t[:, None] * ab), axis=1)
         best = np.minimum(best, d)
-    return smoothstep(0.045, 0.012, best) * (P[:, 0] > 0.05), best
+    return smoothstep(0.055, 0.016, best) * (P[:, 0] > 0.05), best
 
 
 def knob_mask(P):

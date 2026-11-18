@@ -61,7 +61,10 @@ static func cell_center(cell: int) -> Vector2:
 	return Vector2(-EXTENT + (cell % CELLS + 0.5) * CELL, -EXTENT + (cell / CELLS + 0.5) * CELL)
 
 
-func add_instance(mesh_index: int, transform: Transform3D) -> void:
+const STRIDE := 16                    # 12 transform floats + 4 INSTANCE_CUSTOM floats
+
+
+func add_instance(mesh_index: int, transform: Transform3D, custom := Color(0, 1, 1, 0)) -> void:
 	var cell := cell_of(transform.origin.x, transform.origin.z)
 	if not cell_buffers.has(cell):
 		cell_buffers[cell] = {}
@@ -73,7 +76,8 @@ func add_instance(mesh_index: int, transform: Transform3D) -> void:
 	var b := transform.basis
 	var o := transform.origin
 	var buffer: PackedFloat32Array = buffers[mesh_index]
-	buffer.append_array(PackedFloat32Array([b.x.x, b.y.x, b.z.x, o.x, b.x.y, b.y.y, b.z.y, o.y, b.x.z, b.y.z, b.z.z, o.z]))
+	buffer.append_array(PackedFloat32Array([b.x.x, b.y.x, b.z.x, o.x, b.x.y, b.y.y, b.z.y, o.y, b.x.z, b.y.z, b.z.z, o.z,
+		custom.r, custom.g, custom.b, custom.a]))
 	buffers[mesh_index] = buffer
 	var spec: Dictionary = meshes[mesh_index]
 	var s := b.x.length()
@@ -86,7 +90,7 @@ func instance_count() -> int:
 	var total := 0
 	for cell in cell_buffers:
 		for buffer: PackedFloat32Array in cell_buffers[cell].values():
-			total += buffer.size() / 12
+			total += buffer.size() / STRIDE
 	return total
 
 
@@ -96,15 +100,15 @@ func lod_for(kind: int, cls: String, zoom: float, distance: float) -> int:
 	match cls:
 		"full":
 			if kind == KIND_TREE or kind == KIND_STUMP:
-				if z <= 46.0 and distance <= 36.0:
+				if z <= 40.0 and distance <= 22.0:
 					return 0
-				return 1 if z <= 96.0 else 2
+				return 1 if z <= 62.0 and distance <= 40.0 else 2
 			if kind == KIND_ROCK:
 				return 0 if z <= 46.0 else (1 if z <= 100.0 else -1)
 			return (0 if z <= 40.0 else 1) if z <= 78.0 else -1
 		"proxy":
 			if kind == KIND_TREE or kind == KIND_STUMP:
-				return 1 if z <= 52.0 else 2
+				return 2
 			if kind == KIND_ROCK:
 				return 1 if z <= 70.0 else -1
 			return -1
@@ -145,7 +149,7 @@ func update_view(camera: Camera3D, target: Vector3, zoom: float) -> void:
 			if not wanted.has(key):
 				wanted[key] = PackedInt32Array()
 			wanted[key].append(cell)
-			var count: int = buffers[mesh_index].size() / 12
+			var count: int = buffers[mesh_index].size() / STRIDE
 			instances[lod] += count
 			tris += count * int(spec.tris[lod])
 	for key in nodes.keys():
@@ -186,7 +190,7 @@ func _apply(key: Vector2i, cells: PackedInt32Array) -> void:
 		transforms.append_array(cell_buffers[cell][key.x])
 		low = low.min(cell_low[cell])
 		high = high.max(cell_high[cell])
-	var count := transforms.size() / 12
+	var count := transforms.size() / STRIDE
 	var multi := node.multimesh
 	var cap: int = capacity.get(key, 0)
 	if count > cap:
@@ -195,7 +199,7 @@ func _apply(key: Vector2i, cells: PackedInt32Array) -> void:
 			cap *= 2
 		capacity[key] = cap
 		multi.instance_count = cap
-	transforms.resize(cap * 12)
+	transforms.resize(cap * STRIDE)
 	multi.buffer = transforms
 	multi.visible_instance_count = count
 	multi.custom_aabb = AABB(low, high - low)
@@ -208,6 +212,7 @@ func _make_node(key: Vector2i) -> MultiMeshInstance3D:
 	var spec: Dictionary = meshes[key.x]
 	var multi := MultiMesh.new()
 	multi.transform_format = MultiMesh.TRANSFORM_3D
+	multi.use_custom_data = true
 	multi.mesh = spec.lods[key.y]
 	multi.instance_count = 0
 	var node := MultiMeshInstance3D.new()

@@ -38,6 +38,11 @@ func wanted(name: String) -> bool:
 func shoot(name: String, settle := 0.6) -> void:
 	await create_timer(settle).timeout
 	await RenderingServer.frame_post_draw
+	var summary: PackedStringArray = []
+	for id in forest.actors.rigs:
+		var rig = forest.actors.rigs[id]
+		summary.append("%s:%s:%s" % [id, rig.load_state, "v" if rig.visible else "h"])
+	print("SHOT ", name, " world=", forest.world != null, " actors=", ", ".join(summary))
 	var path := out.path_join(prefix + name + ".png")
 	root.get_texture().get_image().save_png(path)
 	saved.append(path)
@@ -63,6 +68,16 @@ func preload_actors(seconds := 1.2) -> void:
 	var until := Time.get_ticks_msec() + int(seconds * 1000)
 	while Time.get_ticks_msec() < until:
 		await process_frame
+	for i in 30:
+		var loading := false
+		for id in forest.actors.rigs:
+			var rig = forest.actors.rigs[id]
+			if is_instance_valid(rig) and rig.load_state == "loading":
+				rig.poll_load(true)
+				loading = loading or rig.load_state == "loading"
+		await process_frame
+		if not loading:
+			break
 
 func run() -> void:
 	for argument in OS.get_cmdline_user_args():

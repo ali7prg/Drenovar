@@ -31,7 +31,7 @@ P = dict(
     post_top=3.18, cap_h=0.10, finial_h=0.24,
     beam_z0=2.66, beam_h=0.27, beam_w=0.23, beam_over=0.16,
     roof_over=0.16, roof_apex=3.95, roof_t=0.07,
-    hinge_x=0.03,              # hinge post centre x
+    hinge_x=-0.33,             # hinge post centre x (drawing: door ~1.6 m wide, left bay ~0.9 m)
     door_h=2.30, door_arch=0.14, door_t=0.075,
     rail_z=(1.12, 2.06),
 )
@@ -45,7 +45,7 @@ def build(lod):
     # ---------------- stone footing: corner plinths + low walls + floor + threshold
     for sx in (-1, 1):
         for sy in (-1, 1):
-            pl = pk.beam((sx * pc, sy * pc, 0), (sx * pc, sy * pc, p["plinth_h"]), p["plinth"], p["plinth"], chamfer=0.02,
+            pl = pk.beam((sx * pc, sy * pc, 0), (sx * pc, sy * pc, p["plinth_h"]), p["plinth"], p["plinth"], chamfer=(0.02 if lod < 2 else 0.0),
                          up=(0, 1, 0))
             B.add("root", f"plinth_{sx}{sy}", "limestone", pl, meta={"block_len": 0.26, "course_h": 0.29, "moss": 0.5})
     hx = p["hinge_x"]
@@ -59,21 +59,21 @@ def build(lod):
         a2 = a + d * p["plinth"] / 2
         b2 = b - d * (p["plinth"] / 2 if i != 0 else 0.0)
         wl = pk.beam((a2[0], a2[1], p["wall_h"] / 2), (b2[0], b2[1], p["wall_h"] / 2), p["wall_t"], p["wall_h"],
-                     chamfer=0.015, up=(0, 0, 1))
+                     chamfer=(0.015 if lod < 2 else 0.0), up=(0, 0, 1))
         B.add("root", f"wall_{i}", "limestone", wl, meta={"block_len": 0.42, "course_h": 0.23, "moss": 0.45})
     fl = pk.beam((-pc + 0.12, 0, p["floor_z"] / 2), (pc - 0.12, 0, p["floor_z"] / 2), 2 * pc - 0.24, p["floor_z"],
                  chamfer=0.0, up=(0, 0, 1))
     B.add("root", "floor", "limestone", fl, meta={"flag_size": 0.45, "moss": 0.15})
-    thr = pk.beam((hx + 0.1, front - 0.12, 0.05), (pc - 0.1, front - 0.12, 0.05), 0.42, 0.10, chamfer=0.015)
+    thr = pk.beam((hx + 0.1, front - 0.12, 0.05), (pc - 0.1, front - 0.12, 0.05), 0.42, 0.10, chamfer=(0.015 if lod < 2 else 0.0))
     B.add("root", "threshold", "limestone", thr, meta={"block_len": 0.4, "course_h": 0.2, "moss": 0.3})
     # ---------------- timber posts, caps, finials
     tops = []
     for sx in (-1, 1):
         for sy in (-1, 1):
             x, y = sx * pc, sy * pc
-            po = pk.beam((x, y, p["plinth_h"]), (x, y, p["post_top"]), post, post, chamfer=0.03, up=(0, 1, 0))
+            po = pk.beam((x, y, p["plinth_h"]), (x, y, p["post_top"]), post, post, chamfer=(0.03 if lod < 2 else 0.0), up=(0, 1, 0))
             B.add("root", f"post_{sx}{sy}", "oak", po, meta={"moss": 0.1})
-            cap = pk.beam((x, y, p["post_top"]), (x, y, p["post_top"] + p["cap_h"]), post + 0.06, post + 0.06, chamfer=0.02,
+            cap = pk.beam((x, y, p["post_top"]), (x, y, p["post_top"] + p["cap_h"]), post + 0.06, post + 0.06, chamfer=0.0,
                           up=(0, 1, 0))
             B.add("root", "post_caps", "oak", cap)
             fin = pk.lathe(np.array([[0.13, 0], [0.13, 0.03], [0.0, p["finial_h"]]]), 4, a0=math.pi / 4,
@@ -81,7 +81,7 @@ def build(lod):
             B.add("root", "finials", "oak", fin.transformed(M4(None, (x, y, p["post_top"] + p["cap_h"]))))
             tops.append((x, y))
     # hinge post (left jamb of the door, seen from outside)
-    hp = pk.beam((hx, front, 0.0), (hx, front, p["beam_z0"]), 0.24, 0.26, chamfer=0.025, up=(0, 1, 0))
+    hp = pk.beam((hx, front, 0.0), (hx, front, p["beam_z0"]), 0.24, 0.26, chamfer=(0.025 if lod < 2 else 0.0), up=(0, 1, 0))
     B.add("root", "hinge_post", "oak", hp)
     # ---------------- top beams (plates) with overhang
     z0, bh, bw = p["beam_z0"], p["beam_h"], p["beam_w"]
@@ -90,11 +90,12 @@ def build(lod):
     for i, (a, b) in enumerate([((-pc - ov, -pc), (pc + ov, -pc)), ((-pc - ov, pc), (pc + ov, pc)),
                                 ((-pc, -pc - ov), (-pc, pc + ov)), ((pc, -pc - ov), (pc, pc + ov))]):
         zz = zc if i < 2 else zc + 0.0
-        be = pk.beam((a[0], a[1], zz), (b[0], b[1], zz), bw, bh, chamfer=0.025, up=(0, 0, 1))
-        B.add("root", f"beam_{i}", "oak", be, meta={"rivets": {"du": 0.42, "v": [bw * 0.5 + 0.02], "r": 0.022,
-                                                              "u0": 0.21}})
+        be = pk.beam((a[0], a[1], zz), (b[0], b[1], zz), bw, bh, chamfer=(0.025 if lod < 2 else 0.0), up=(0, 0, 1))
+        B.add("root", f"beam_{i}", "oak", be, meta={"rivets": {"du": 0.42, "v": [pk.rect_face_v(bw, bh, 0.025, "+N"),
+                                                                                   pk.rect_face_v(bw, bh, 0.025, "-N")],
+                                                              "r": 0.022, "u0": 0.21}})
     # ---------------- curved knee braces (gothic arch braces) and iron bays
-    nb = B.seg(9, 6, 3)
+    nb = B.seg(7, 5, 3)
     bays = []   # (axis 'x' or 'y', fixed coord, a, b)
     bays.append(("x", -pc, -pc + post / 2, hx - 0.12))            # front-left bay
     bays.append(("x", pc, -pc + post / 2, pc - post / 2))         # back
@@ -111,8 +112,8 @@ def build(lod):
             ang = t * math.pi / 2
             rx, rz = 0.55, 0.62
             pts = np.array([W2(s0 + sgn * rx * (1 - np.cos(q)), spring + rz * np.sin(q)) for q in ang])
-            br = pk.sweep(pts, pk.rect(0.13, 0.11, 0.015), up=(0, 0, 1) if axis == "x" else (0, 0, 1), smooth=False,
-                          edge_flags=[0, 1] * 4)
+            br = pk.sweep(pts, pk.rect(0.13, 0.11, 0.015 if lod == 0 else 0.0), up=(0, 0, 1), smooth=False,
+                          edge_flags=([0, 1] * 4 if lod == 0 else None))
             B.add("root", f"brace_{bi}{side}", "oak", br)
         # iron bars
         z_bot = p["wall_h"] if not (bi == 0) else p["wall_h"]
@@ -129,20 +130,21 @@ def build(lod):
             ca = a + arch_w * (k + 0.5)
             u = (xx - ca) / (arch_w / 2)
             top = arch_spring + (apex - arch_spring) * max(0.0, 1 - abs(u) ** 1.6)
-            bar = pk.rod(W2(xx, z_bot - 0.02), W2(xx, top + 0.02), bar_r, B.seg(6, 5, 4))
+            bar = pk.rod(W2(xx, z_bot - 0.02), W2(xx, top + 0.02), bar_r, B.seg(5, 4, 3), caps=False)
             B.add("root", f"bars_{bi}", "iron", bar)
             if lod < 2:
-                tip = pk.lathe(np.array([[0.028, 0.0], [0.006, 0.07], [0.0, 0.075]]), 4)
-                B.add("root", f"bar_tips_{bi}", "iron", tip.transformed(M4(None, W2(xx, p["rail_z"][1] + 0.02))), max_lod=1)
+                tip = pk.lathe(np.array([[0.028, 0.0], [0.0, 0.075]]), 3)
+                B.add("root", f"bar_tips_{bi}", "iron", tip.transformed(M4(None, W2(xx, p["rail_z"][1] + 0.02))), max_lod=0)
         for rz in (z_bot + 0.02,) + tuple(p["rail_z"]):
-            rail = pk.beam(W2(a, rz), W2(b, rz), 0.035, 0.05, chamfer=0.008, up=(0, 0, 1) if axis == "x" else (0, 0, 1))
-            B.add("root", f"rails_{bi}", "iron", rail, meta={"rivets": {"du": 0.135, "v": [0.0175 + 0.025], "r": 0.009}})
+            rail = pk.beam(W2(a, rz), W2(b, rz), 0.035, 0.05, chamfer=0.0)
+            B.add("root", f"rails_{bi}", "iron", rail, meta={"rivets": {"du": 0.135, "v": [pk.rect_face_v(0.035, 0.05, 0.0, "+N"),
+                                                                                       pk.rect_face_v(0.035, 0.05, 0.0, "-N")], "r": 0.009}})
         # gothic pointed arches (iron) and a small trefoil tracery ring per arch
         for k in range(n_arch):
             s0 = a + arch_w * k
             s1 = s0 + arch_w
             cen = (s0 + s1) / 2
-            n2 = B.seg(10, 7, 4)
+            n2 = B.seg(5, 4, 3)
             for sgn in (-1, 1):
                 t = np.linspace(0, 1, n2)
                 rr = arch_w * 0.85
@@ -152,13 +154,13 @@ def build(lod):
                 angs = ang0 + (ang1 - ang0) * t
                 pts = np.array([W2(c0 + sgn * rr * math.cos(q), arch_spring + (apex - arch_spring) * math.sin(q) / math.sin(ang1))
                                 for q in angs])
-                arc = pk.sweep(pts, pk.rect(0.045, 0.06, 0.008), up=(0, 0, 1), smooth=False)
+                arc = pk.sweep(pts, pk.rect(0.045, 0.06, 0.0), up=(0, 0, 1), smooth=False)
                 B.add("root", f"arches_{bi}", "iron", arc)
             if lod < 2:
                 ring = np.array([W2(cen + 0.12 * math.cos(q), apex - 0.22 + 0.12 * math.sin(q)) for q in
-                                 np.linspace(0, 2 * math.pi, B.seg(14, 9, 6), endpoint=False)])
-                B.add("root", f"tracery_{bi}", "iron", pk.tube(ring, 0.014, B.seg(5, 4, 3), closed_path=True,
-                                                               up=(0, 1, 0) if axis == "x" else (1, 0, 0)), max_lod=1)
+                                 np.linspace(0, 2 * math.pi, 8, endpoint=False)])
+                B.add("root", f"tracery_{bi}", "iron", pk.tube(ring, 0.014, 3, closed_path=True,
+                                                               up=(0, 1, 0) if axis == "x" else (1, 0, 0)), max_lod=0)
     # ---------------- hip roof with shingle steps
     rz0 = z0 + bh
     e = pc + p["roof_over"] + p["beam_over"] * 0.2
@@ -186,13 +188,13 @@ def build(lod):
                 pcs.add_face((4, 5, 1, 0), [(-xa, va), (xa, va), (xa, va - drop), (-xa, va - drop)], 0, False, 1)
             B.add("root", f"roof_{q}", "shingles", pcs, meta={"row_h": slope / nsteps / 2.0, "shingle_w": 0.17, "moss": 0.2})
         # hip ridge boards
-        hip = pk.beam(np.array([e, -e, rz0 + 0.02]) @ R.T, np.array([0, 0, apex + 0.03]) @ R.T, 0.09, 0.06, chamfer=0.01,
+        hip = pk.beam(np.array([e, -e, rz0 + 0.02]) @ R.T, np.array([0, 0, apex + 0.03]) @ R.T, 0.09, 0.06, chamfer=0.0,
                       up=(0, 0, 1))
         B.add("root", "roof_hips", "oak", hip)
     # eave fascia boards
     for q in range(4):
         R = Rz(q * math.pi / 2)
-        fa = pk.beam(np.array([-e, -e, rz0 - 0.02]) @ R.T, np.array([e, -e, rz0 - 0.02]) @ R.T, 0.05, 0.1, chamfer=0.01)
+        fa = pk.beam(np.array([-e, -e, rz0 - 0.02]) @ R.T, np.array([e, -e, rz0 - 0.02]) @ R.T, 0.05, 0.1, chamfer=0.0)
         B.add("root", "fascia", "oak", fa)
     fin = pk.lathe(np.array([[0.1, 0], [0.1, 0.12], [0.13, 0.14], [0.0, 0.42]]), 4, a0=math.pi / 4,
                    a1=math.pi / 4 + 2 * math.pi, smooth=False)
@@ -200,7 +202,7 @@ def build(lod):
     # ---------------- plaque (emerald enamel half-disc with bronze tree) on the front beam
     pq = np.array([[0.36 * math.cos(q), 0.30 * math.sin(q)] for q in np.linspace(0, math.pi, B.seg(14, 9, 6))])
     pq = np.vstack([pq, [[-0.36, 0.0]]])[:-1]
-    plaque = pk.extrude(np.vstack([pq, [[-0.36, -0.02], [0.36, -0.02]]]), 0.04, chamfer=0.01)
+    plaque = pk.extrude(np.vstack([pq, [[-0.36, -0.02], [0.36, -0.02]]]), 0.04, chamfer=(0.01 if lod < 2 else 0.0))
     Mp = M4(Rx(math.pi / 2), (0.08, -pc - bw / 2 - 0.0, z0 + 0.02))
     cv = mo.Canvas((-0.37, -0.03, 0.37, 0.31), ppm=1500)
     mo.tree_emblem(cv, (0.0, 0.14), 0.24, 0.016)
@@ -216,10 +218,10 @@ def build(lod):
     dz0, dh = p["floor_z"] + 0.02, p["door_h"]
     stile = 0.11
     for nm, x in (("stile_h", dx0 + stile / 2), ("stile_l", dx1 - stile / 2)):
-        st = pk.beam((x, dfy + dt / 2, dz0), (x, dfy + dt / 2, dz0 + dh), stile, dt, chamfer=0.012, up=(0, 1, 0))
+        st = pk.beam((x, dfy + dt / 2, dz0), (x, dfy + dt / 2, dz0 + dh), stile, dt, chamfer=(0.012 if lod < 2 else 0.0), up=(0, 1, 0))
         B.add("door", f"door_{nm}", "oak", st)
     for nm, z, h in (("rail_bot", dz0 + 0.08, 0.16), ("rail_mid", dz0 + 0.98, 0.09)):
-        ra = pk.beam((dx0 + stile, dfy + dt / 2, z), (dx1 - stile, dfy + dt / 2, z), dt, h, chamfer=0.01, up=(0, 1, 0))
+        ra = pk.beam((dx0 + stile, dfy + dt / 2, z), (dx1 - stile, dfy + dt / 2, z), dt, h, chamfer=(0.01 if lod < 2 else 0.0), up=(0, 1, 0))
         B.add("door", f"door_{nm}", "oak", ra)
     # arched top rail
     na = B.seg(10, 6, 3)
@@ -230,24 +232,24 @@ def build(lod):
     nbar = 6
     for k, xx in enumerate(np.linspace(dx0 + stile + 0.07, dx1 - stile - 0.07, nbar)):
         ztop = dz0 + dh - 0.06 + p["door_arch"] * math.sin(math.pi * (xx - xs_[0]) / (xs_[-1] - xs_[0]))
-        bar = pk.rod((xx, dfy + dt / 2, dz0 + 0.15), (xx, dfy + dt / 2, ztop - 0.03), 0.017, B.seg(6, 5, 4))
+        bar = pk.rod((xx, dfy + dt / 2, dz0 + 0.15), (xx, dfy + dt / 2, ztop - 0.03), 0.017, B.seg(5, 4, 3), caps=False)
         B.add("door", "door_bars", "iron", bar)
     # hinges: axis on the left jamb, outside of the door face
     hinge = (dx0 - 0.012, dfy - 0.03, 0.0)
-    strap_cv = mo.Canvas((0.0, -0.06, 0.5, 0.06), ppm=2500)
-    for k in range(3):
-        x = 0.1 + k * 0.12
-        strap_cv.line(np.array([[x, 0.0], [x + 0.03, 0.025], [x + 0.06, 0.0], [x + 0.03, -0.025], [x, 0.0]]), 0.006)
-        strap_cv.circle((x + 0.03, 0.0), 0.012)
-    strap_motif = [{"mask": strap_cv.mask(0.001), "bbox": (0.0, -0.06, 0.5, 0.06), "isl": (2,), "depth": 0.002,
+    strap_cv = mo.Canvas((0.0, -0.08, 0.5, 0.08), ppm=2500)
+    for k, sg in enumerate((1, -1)):   # enamel scroll: two S-curved leaves along the strap (drawing inset)
+        x0 = 0.07 + k * 0.16
+        strap_cv.poly(mo.leaf_shape((x0, -0.012 * sg), (x0 + 0.15, 0.022 * sg), 0.022))
+        strap_cv.line(mo.bezier((x0 - 0.02, 0.0), (x0 + 0.06, 0.04 * sg), (x0 + 0.17, -0.01 * sg)), 0.004)
+    strap_motif = [{"mask": strap_cv.mask(0.001), "bbox": (0.0, -0.08, 0.5, 0.08), "isl": (2,), "depth": 0.002,
                     "mode": "cut", "colour": sh.C(52, 108, 80), "tint": 0.95, "rough": 0.35, "metal": 0.0}]
-    ck.hinge_set(B, (hinge[0], hinge[1]), [dz0 + 0.42, dz0 + 1.92], 0.50, 0.11, dfy, -pc - post / 2,
-                 cls="bronze", knuckle_r=0.03, strap_motif=strap_motif)
+    ck.hinge_set(B, (hinge[0], hinge[1]), [dz0 + 0.42, dz0 + 1.92], 0.46, 0.15, dfy, -pc - post / 2,
+                 cls="bronze", knuckle_r=0.032, strap_motif=strap_motif)
     # latch: lock box under the socket + sliding bolt into a keeper on the right corner post
     sz = 1.25
-    lock = pk.beam((dx1 - 0.2, dfy - 0.02, sz - 0.25), (dx1 - 0.04, dfy - 0.02, sz - 0.25), 0.07, 0.045, chamfer=0.008)
-    B.add("door", "lock_box", "iron", lock, meta={"rivets": {"du": 0.05, "v": [0.04], "r": 0.008}})
-    bolt = pk.beam((dx1 - 0.16, dfy - 0.035, sz - 0.25), (dx1 + 0.10, dfy - 0.035, sz - 0.25), 0.03, 0.03, chamfer=0.006)
+    lock = pk.beam((dx1 - 0.2, dfy - 0.02, sz - 0.25), (dx1 - 0.04, dfy - 0.02, sz - 0.25), 0.045, 0.07, chamfer=(0.008 if lod < 2 else 0.0))
+    B.add("door", "lock_box", "iron", lock, meta={"rivets": {"du": 0.05, "v": [pk.rect_face_v(0.045, 0.07, 0.008, "-N")], "r": 0.008}})
+    bolt = pk.beam((dx1 - 0.16, dfy - 0.035, sz - 0.25), (dx1 + 0.10, dfy - 0.035, sz - 0.25), 0.03, 0.03, chamfer=(0.006 if lod < 2 else 0.0))
     B.add("latch", "latch_bolt", "bronze", bolt)
     kn = pk.lathe(np.array([[0.022, 0], [0.022, 0.03], [0.0, 0.036]]), B.seg(8, 6, 4))
     B.add("latch", "latch_bolt", "bronze", kn.transformed(M4(Rx(math.pi / 2), (dx1 - 0.08, dfy - 0.05, sz - 0.25))))
@@ -262,6 +264,9 @@ def build(lod):
 
 
 GEOM = {}
+
+
+build.hinge_z = [0.54, 2.04]
 
 
 def main():

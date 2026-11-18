@@ -48,26 +48,54 @@ def skeleton():
         J[f"ear_{s}"] = V(0.062 * sx, ey, 1.925)
         J[f"ear_tip_{s}"] = V(0.122 * sx, ey - 0.04, 2.045)
         J[f"eye_{s}"] = V(0.118 * sx, -1.255, 1.75)
-        # fore limb: left fore slightly behind the right fore (turnaround stance)
-        dy = 0.04 if s == "L" else -0.035
+        # ---- fore limb: one neutral leg (equal bone lengths both sides), posed per side
         J[f"scap_top_{s}"] = V(0.115 * sx, -0.38, 1.47)
         J[f"shoulder_{s}"] = V(0.19 * sx, -0.78, 1.08)
-        J[f"elbow_{s}"] = V(0.155 * sx, -0.565 + dy, 0.86)
-        J[f"knee_{s}"] = V(0.13 * sx, -0.60 + dy, 0.49)
-        J[f"fetlock_F_{s}"] = V(0.125 * sx, -0.59 + dy, 0.19)
-        J[f"coffin_F_{s}"] = V(0.125 * sx, -0.625 + dy, 0.07)
-        J[f"toe_F_{s}"] = V(0.125 * sx, -0.705 + dy, 0.0)
-        J[f"heel_F_{s}"] = V(0.125 * sx, -0.555 + dy, 0.0)
-    # hind limbs: left hind back (near leg of the left profile), right hind forward
+        nf = dict(elbow=V(0.155 * sx, -0.565, 0.86), knee=V(0.13 * sx, -0.60, 0.49),
+                  fet=V(0.125 * sx, -0.59, 0.19), coffin=V(0.125 * sx, -0.625, 0.07),
+                  toe=V(0.125 * sx, -0.705, 0.0), heel=V(0.125 * sx, -0.555, 0.0))
+        dy = 0.04 if s == "L" else -0.035      # left fore slightly behind the right fore
+        sh = J[f"shoulder_{s}"]
+        for k, nm in (("fet", "fetlock_F"), ("coffin", "coffin_F"), ("toe", "toe_F"), ("heel", "heel_F")):
+            J[f"{nm}_{s}"] = nf[k] + V(0, dy, 0)
+        th = math.asin(dy / (sh[2] - nf["fet"][2]))
+        knee = J[f"fetlock_F_{s}"] - _rotx(nf["fet"] - nf["knee"], th)
+        J[f"knee_{s}"] = knee
+        J[f"elbow_{s}"] = _ik2(sh, knee, np.linalg.norm(nf["elbow"] - sh),
+                               np.linalg.norm(nf["knee"] - nf["elbow"]), V(0, 1, 0), nf["elbow"])
+    # ---- hind limbs: neutral leg posed so the left hind stands back, the right hind forward
     for s, sx, dy in (("L", 1.0, 0.12), ("R", -1.0, -0.13)):
-        J[f"hip_{s}"] = V(0.20 * sx, 0.47, 1.21)
-        J[f"stifle_{s}"] = V(0.215 * sx, 0.415 + 0.15 * dy, 0.84)
-        J[f"hock_{s}"] = V(0.165 * sx, 0.62 + dy, 0.55)
-        J[f"fetlock_H_{s}"] = V(0.160 * sx, 0.585 + dy, 0.19)
-        J[f"coffin_H_{s}"] = V(0.160 * sx, 0.55 + dy, 0.07)
-        J[f"toe_H_{s}"] = V(0.160 * sx, 0.47 + dy, 0.0)
-        J[f"heel_H_{s}"] = V(0.160 * sx, 0.615 + dy, 0.0)
+        hip = V(0.20 * sx, 0.47, 1.21)
+        nh = dict(stifle=V(0.215 * sx, 0.415, 0.84), hock=V(0.165 * sx, 0.62, 0.55),
+                  fet=V(0.160 * sx, 0.585, 0.19), coffin=V(0.160 * sx, 0.55, 0.07),
+                  toe=V(0.160 * sx, 0.47, 0.0), heel=V(0.160 * sx, 0.615, 0.0))
+        J[f"hip_{s}"] = hip
+        for k, nm in (("fet", "fetlock_H"), ("coffin", "coffin_H"), ("toe", "toe_H"), ("heel", "heel_H")):
+            J[f"{nm}_{s}"] = nh[k] + V(0, dy, 0)
+        th = math.asin(dy / (hip[2] - nh["fet"][2]))
+        hock = J[f"fetlock_H_{s}"] - _rotx(nh["fet"] - nh["hock"], th)
+        J[f"hock_{s}"] = hock
+        J[f"stifle_{s}"] = _ik2(hip, hock, np.linalg.norm(nh["stifle"] - hip),
+                                np.linalg.norm(nh["hock"] - nh["stifle"]), V(0, -1, 0), nh["stifle"])
     return J
+
+
+def _rotx(v, ang):
+    """Rotate a vector about the lateral X axis (positive moves a downward vector backward)."""
+    c, sn = math.cos(ang), math.sin(ang)
+    return np.array([v[0], c * v[1] - sn * v[2], sn * v[1] + c * v[2]])
+
+
+def _ik2(a, c, la, lb, bend, near):
+    """Joint b with |b-a|=la, |c-b|=lb on the side of `bend` (planar-ish leg solve)."""
+    ac = c - a
+    D = min(np.linalg.norm(ac), la + lb - 1e-4)
+    u = ac / np.linalg.norm(ac)
+    x = (la * la - lb * lb + D * D) / (2 * D)
+    h = math.sqrt(max(la * la - x * x, 0.0))
+    w = bend - (bend @ u) * u
+    w /= np.linalg.norm(w)
+    return a + u * x + w * h
 
 
 # --------------------------------------------------------------------------- helpers
@@ -129,7 +157,7 @@ def body_parts(J=None):
     # croup and hindquarters (draft "double" rump: two gluteal masses with a groove)
     add(ell((0, 0.40, 1.40), (0.235, 0.31, 0.17), bone="pelvis", name="croup"), 0.16)
     for sx in (1, -1):
-        add(ell((0.19 * sx, 0.49, 1.20), (0.175, 0.30, 0.30), bone="pelvis", name="haunch"), 0.16)
+        add(ell((0.197 * sx, 0.49, 1.19), (0.186, 0.30, 0.305), bone="pelvis", name="haunch"), 0.16)
         add(ell((0.24 * sx, 0.18, 1.36), (0.06, 0.09, 0.06), bone="pelvis", name="hip_point"), 0.15)
         add(ell((0.22 * sx, 0.16, 1.09), (0.11, 0.19, 0.155), bone="spine_01", name="flank"), 0.15)
     # tail head (dock root)
@@ -203,15 +231,15 @@ def body_parts(J=None):
         add(ell(kn + V(0, -0.005, 0.0), (0.068, 0.064, 0.072), bone=f"cannon_F_{s}",
                 name="knee"), 0.04)
         # cannon (deep front-back because of the tendons) + feathered fetlock
-        add(flat_cone(kn + V(0, 0.005, -0.03), fe + V(0, 0.01, 0.03), 0.058, 0.058, 0.95,
+        add(flat_cone(kn + V(0, 0.005, -0.03), fe + V(0, 0.01, 0.03), 0.063, 0.063, 0.95,
                       bone=f"cannon_F_{s}", name="cannon"), 0.04)
-        add(flat_cone(kn + V(0, 0.04, -0.07), fe + V(0, 0.045, 0.04), 0.034, 0.04, 0.95,
+        add(flat_cone(kn + V(0, 0.045, -0.07), fe + V(0, 0.05, 0.04), 0.040, 0.046, 0.95,
                       bone=f"cannon_F_{s}", name="tendon"), 0.04)
-        add(ell(fe + V(0, 0.012, 0.0), (0.072, 0.078, 0.07), bone=f"pastern_F_{s}",
+        add(ell(fe + V(0, 0.014, 0.0), (0.078, 0.086, 0.075), bone=f"pastern_F_{s}",
                 name="fetlock"), 0.04)
         add(ell(fe + V(0, 0.07, -0.04), (0.06, 0.05, 0.05), bone=f"pastern_F_{s}",
                 name="feather"), 0.05)
-        add(round_cone(fe + V(0, 0.0, -0.02), co + V(0, 0.005, 0.01), 0.066, 0.064,
+        add(round_cone(fe + V(0, 0.0, -0.02), co + V(0, 0.005, 0.01), 0.070, 0.068,
                        bone=f"pastern_F_{s}", name="pastern"), 0.03)
         for p in hoof(co, J[f"toe_F_{s}"], J[f"heel_F_{s}"], s, f"hoof_F_{s}"):
             add(p, 0.02)
@@ -231,15 +259,15 @@ def body_parts(J=None):
                        bone=f"tibia_{s}", name="hamstring"), 0.08)
         add(ell(hk + V(0, 0.01, 0.0), (0.066, 0.075, 0.08), bone=f"cannon_H_{s}", name="hock"), 0.04)
         add(sphere(hk + V(0, 0.07, 0.05), 0.042, bone=f"cannon_H_{s}", name="point_of_hock"), 0.04)
-        add(flat_cone(hk + V(0, 0.005, -0.04), fe + V(0, 0.01, 0.03), 0.06, 0.058, 0.95,
+        add(flat_cone(hk + V(0, 0.005, -0.04), fe + V(0, 0.01, 0.03), 0.066, 0.064, 0.95,
                       bone=f"cannon_H_{s}", name="cannon_h"), 0.04)
-        add(flat_cone(hk + V(0, 0.045, -0.07), fe + V(0, 0.045, 0.04), 0.035, 0.04, 0.95,
+        add(flat_cone(hk + V(0, 0.05, -0.07), fe + V(0, 0.05, 0.04), 0.042, 0.046, 0.95,
                       bone=f"cannon_H_{s}", name="tendon_h"), 0.04)
-        add(ell(fe + V(0, 0.012, 0.0), (0.072, 0.078, 0.07), bone=f"pastern_H_{s}",
+        add(ell(fe + V(0, 0.014, 0.0), (0.078, 0.086, 0.075), bone=f"pastern_H_{s}",
                 name="fetlock_h"), 0.04)
         add(ell(fe + V(0, 0.07, -0.04), (0.06, 0.05, 0.05), bone=f"pastern_H_{s}",
                 name="feather_h"), 0.05)
-        add(round_cone(fe + V(0, 0.0, -0.02), co + V(0, 0.005, 0.01), 0.066, 0.064,
+        add(round_cone(fe + V(0, 0.0, -0.02), co + V(0, 0.005, 0.01), 0.070, 0.068,
                        bone=f"pastern_H_{s}", name="pastern_h"), 0.03)
         for p in hoof(co, J[f"toe_H_{s}"], J[f"heel_H_{s}"], s, f"hoof_H_{s}", 0.97):
             add(p, 0.02)

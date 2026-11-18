@@ -36,7 +36,11 @@ def trunk_sdf_mesh(profile, depth_k=0.72, arch=ARCH, cavity=CAVITY, voxel=0.1, s
     zmax = prof[-1, 0]
     hwmax = prof[:, 2].max()
     lo = np.array([prof[:, 1].min() - hwmax - 1.5, -hwmax * depth_k - 1.5, -0.6])
-    hi = np.array([prof[:, 1].max() + hwmax + 1.5, hwmax * depth_k + 1.5, zmax + 3.5])
+    allp = np.array([p for ch in leaders for p in ch[0]] + [[0, 0, zmax]], float)
+    ztop = allp[:, 2].max() + 1.2
+    hi = np.array([max(prof[:, 1].max() + hwmax, np.abs(allp[:, 0]).max()) + 1.5,
+                   max(hwmax * depth_k, np.abs(allp[:, 1]).max()) + 1.5, ztop])
+    lo[0] = min(lo[0], -np.abs(allp[:, 0]).max() - 1.5)
     F = sdf.Field(lo, hi, voxel)
     rng = np.random.default_rng(seed)
 
@@ -67,12 +71,14 @@ def trunk_sdf_mesh(profile, depth_k=0.72, arch=ARCH, cavity=CAVITY, voxel=0.1, s
         b = np.array([c0 + (hw0 + rng.uniform(0.8, 1.8)) * math.cos(th),
                       (hw0 * depth_k + rng.uniform(0.8, 1.8)) * math.sin(th), -0.35])
         prims.append(sdf.round_cone(a, b, rng.uniform(0.75, 1.0), rng.uniform(0.22, 0.35), k=0.55))
-    for (a, b, ra, rb) in leaders:
-        a = np.array(a, float)
-        b = np.array(b, float)
+    for chain in leaders:
+        pts = [np.array(p, float) for p in chain[0]]
+        rads = chain[1]
         if mirror:
-            a[0], b[0] = -a[0], -b[0]
-        prims.append(sdf.round_cone(a, b, ra, rb, k=0.6))
+            for p in pts:
+                p[0] = -p[0]
+        for i in range(len(pts) - 1):
+            prims.append(sdf.round_cone(pts[i], pts[i + 1], rads[i], rads[i + 1], k=0.45 if i == 0 else 0.25))
     for p in prims:
         F.apply(p)
     # arch tunnel (2D arch in XZ extruded along Y) and inner cavity
@@ -106,8 +112,27 @@ def trunk_sdf_mesh(profile, depth_k=0.72, arch=ARCH, cavity=CAVITY, voxel=0.1, s
         if False else F.d
     F.smooth(0.7)
     V, Fc = F.mesh()
-    keep = V[:, 2] > -0.5
+    V, Fc = largest_components(V, Fc)
     return V, Fc, dict(arch=arch, cavity=cavity, prof=prof)
+
+
+def largest_components(V, Fc, min_frac=0.02):
+    """Drop small floating islands (marching-cubes noise bubbles) so decimation can reach low budgets."""
+    from scipy.sparse import coo_matrix
+    from scipy.sparse.csgraph import connected_components
+    f = np.asarray(Fc)
+    e = np.concatenate([f[:, [0, 1]], f[:, [1, 2]], f[:, [2, 0]]])
+    A = coo_matrix((np.ones(len(e)), (e[:, 0], e[:, 1])), shape=(len(V), len(V)))
+    n, lab = connected_components(A, directed=False)
+    if n <= 1:
+        return V, Fc
+    cnt = np.bincount(lab)
+    keepc = np.nonzero(cnt >= max(cnt.max() * min_frac, 50))[0]
+    keepv = np.isin(lab, keepc)
+    fk = keepv[f].all(1)
+    remap = -np.ones(len(V), int)
+    remap[keepv] = np.arange(keepv.sum())
+    return V[keepv], remap[f[fk]]
 
 
 def decimate_bpy(V, Fc, target, name="tmp_trunk"):
@@ -197,45 +222,44 @@ def build_hollow_oak(variant, view=None, budget=(6800, 2700, 300)):
     rng = np.random.default_rng(seed)
     mirror = variant == 2
     sgn = -1.0 if mirror else 1.0
-    leaders = [((-0.4, 0, 5.6), (-1.9, -0.2, 10.4), 1.2, 0.5), ((1.9, 0.1, 5.6), (3.2, 0.3, 11.0), 1.3, 0.55),
-               ((2.4, 0.0, 5.2), (4.8, 0.2, 5.5), 0.75, 0.38), ((-0.8, 0.1, 6.4), (-3.4, 0.2, 7.6), 0.8, 0.4)]
+    leaders = [  # art/02: two massive leaders + gnarled limbs (smooth-unioned into the trunk)
+        ([(-0.4, 0, 5.6), (-1.4, -0.2, 8.6), (-1.9, -0.1, 10.8), (-2.2, 0.0, 12.6)], [1.25, 0.8, 0.52, 0.3]),
+        ([(1.9, 0.1, 5.6), (2.8, 0.3, 9.0), (3.3, 0.4, 11.6), (3.6, 0.2, 13.4)], [1.3, 0.85, 0.55, 0.3]),
+        ([(-0.8, 0.1, 6.6), (-3.0, 0.3, 7.6), (-4.8, 0.2, 8.4)], [0.85, 0.48, 0.26]),
+        ([(3.0, 0.2, 7.6), (5.4, 0.3, 8.6), (8.0, 0.4, 9.6)], [0.8, 0.42, 0.22]),
+        ([(3.6, 0.2, 5.4), (5.2, 0.2, 5.4), (6.4, 0.2, 5.0)], [0.65, 0.4, 0.22]),
+        ([(1.0, 1.0, 7.0), (1.5, 3.0, 8.4), (1.9, 4.3, 9.6)], [0.7, 0.4, 0.22]),
+        ([(0.5, -1.0, 7.2), (0.7, -3.0, 8.6), (0.9, -4.2, 10.0)], [0.7, 0.4, 0.22])]
     broken = None
     prof = PROFILE_V1
     if variant == 3:
-        leaders = [((1.6, 0.1, 5.4), (2.4, 0.2, 7.6), 1.1, 0.7)]
+        leaders = [([(1.6, 0.1, 5.4), (2.4, 0.2, 7.4)], [1.1, 0.75]),
+                   ([(2.2, 0.2, 6.8), (4.2, 0.4, 8.2), (5.8, 0.6, 9.4)], [0.7, 0.4, 0.22]),
+                   ([(0.4, -0.3, 6.6), (-1.8, -0.4, 7.4), (-3.4, -0.2, 8.4)], [0.75, 0.42, 0.22])]
         broken = 7.3
         prof = [(z, cx, hw * 0.92) for z, cx, hw in PROFILE_V1]
     V, T, tinfo = trunk_sdf_mesh(prof, seed=seed, leaders=leaders, mirror=mirror, broken_top=broken)
-    # skeleton for limbs (tubes): seeded leaders continuing from the SDF stubs
+    # twig skeleton: seeds at the SDF limb tips; short gnarled branches grow into sparse foliage puffs
     sk = tg.Skeleton()
     root = sk.add(np.array([sgn * 0.6, 0, 5.6]), -1, fixed=True, can_grow=False)
+    base = np.array([sgn * 0.6, 0, 5.6])
+    for chain in leaders:
+        tp = np.array(chain[0][-1], float) * np.array([sgn, 1, 1])
+        prev = np.array(chain[0][-2], float) * np.array([sgn, 1, 1])
+        d = normalize(tp - prev)
+        pts = [tp - d * 0.5, tp, tp + d * 0.9 + np.array([0, 0, 0.35])]
+        sk.add_polyline(pts, parent=root, can_grow_from_z=5.0)
     if variant in (1, 2):
-        limb_defs = [  # (start, mid, end)
-            ((-1.4, -0.2, 8.6), (-2.0, -0.3, 10.6), (-2.2, -0.1, 12.6)),
-            ((-0.9, 0.1, 7.2), (-3.0, 0.3, 7.6), (-4.8, 0.2, 8.4)),
-            ((2.8, 0.3, 9.0), (3.3, 0.4, 11.6), (3.6, 0.2, 13.6)),
-            ((3.0, 0.2, 7.6), (5.4, 0.3, 8.6), (8.2, 0.4, 9.6)),
-            ((4.3, 0.2, 5.6), (5.3, 0.2, 5.4), (6.4, 0.2, 5.0)),
-            ((1.2, 1.4, 7.4), (1.6, 3.2, 8.6), (2.0, 4.4, 9.8)),
-            ((0.6, -1.4, 7.6), (0.8, -3.0, 8.8), (0.9, -4.4, 10.2)),
-        ]
         att_env = tg.envelope_from_mask(view.mask, view.ppm, view.ay, view.ax, z_min=6.5, depth_scale=0.75,
                                         voxel=0.25, mirror=mirror)
     else:
-        limb_defs = [((2.2, 0.2, 7.2), (3.6, 0.4, 8.6), (5.6, 0.6, 9.8)),
-                     ((0.2, -0.3, 6.8), (-1.8, -0.4, 7.4), (-3.6, -0.2, 8.6)),
-                     ((2.0, 0.6, 7.4), (2.4, 2.2, 8.8), (2.2, 3.4, 10.4))]
         att_env = tg.envelope_ellipsoid((sgn * 1.4, 0, 8.6), (5.0, 3.8, 2.4), voxel=0.25)
-    for a, m, e in limb_defs:
-        a, m, e = (np.array(p) * np.array([sgn, 1, 1]) for p in (a, m, e))
-        pts = trees._bezier(a, m, e, 7)
-        sk.add_polyline(list(pts), parent=root, can_grow_from_z=6.0)
     puffs = att_env.sample(18 if variant != 3 else 10, rng, shell=1.2)
     att = att_env.sample(900 if variant != 3 else 500, rng, shell=1.8, inner_weight=0.1, clumps=puffs, clump_r=1.6)
     tg.space_colonize(sk, att, D=0.42, di=2.6, dk=0.8, iters=90, tropism=(0, 0, 0.6), trop_w=0.15, rng=rng,
                       jitter=0.25)
-    spec = dict(bark="hollow", r_base=0.75, r_tip=0.02, gamma=2.3, cull=(0.05, 0.14, 0.3), max_order=[9, 2, 1],
-                flare=None, roots=None, card_size=(0.85, 1.2), moods=HOLLOW_MOODS, dense_map=trees.OAK_DENSE,
+    spec = dict(bark="hollow", r_base=0.55, r_tip=0.02, gamma=2.3, cull=(0.05, 0.14, 0.3), max_order=[9, 2, 1],
+                flare=None, roots=None, card_size=(0.75, 1.05), moods=HOLLOW_MOODS, dense_map=trees.OAK_DENSE,
                 dense_frac=0.35, dense_scale=1.2, puff_max_gap=1.3,
                 leaf_tip_dist=1.2, leaf_r_max=0.08, site_spacing=0.5, side_frac=0.5, sph=0.6, up_bias=0.2,
                 seed=seed, bark_tile=(1.6, 1.6), leaf_z_min=5.0, puffs=puffs, puff_r=(1.0, 1.6), puff_frac=0.75,
@@ -244,6 +268,7 @@ def build_hollow_oak(variant, view=None, budget=(6800, 2700, 300)):
     if variant == 3:
         trunk_targets = {0: 3300, 1: 1150, 2: 170}
     spec["budget"] = tuple(budget[l] - trunk_targets[l] - (60 if l == 0 else 0) for l in range(3))
+    spec["bark_frac"] = (0.62, 0.4, 0.2)
     res = trees.finish_broadleaf(sk, att_env, spec, rng)
     res.env = att_env
     # trunk per LOD

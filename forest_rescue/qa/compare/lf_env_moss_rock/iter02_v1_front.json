@@ -1,0 +1,8 @@
+{
+  "view": "moss_rock",
+  "iou": 0.7834,
+  "mean_abs_colour_error": 0.1889,
+  "ref_pixels": 59936,
+  "render_pixels": 64135,
+  "iou_closed_r4": 0.799
+}

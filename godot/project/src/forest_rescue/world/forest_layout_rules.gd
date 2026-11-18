@@ -27,7 +27,7 @@ const RESOURCE_SPECIES := {"Дуб": OAK, "Сосна": PINE}
 
 ## Per-biome (atlas zones lf_biome_1..8, in atlas order) minimum tree spacing (m) and
 ## weighted species mix for *ambient* slots. Resource trees keep their own species.
-const BIOME_SPACING := [4.1, 5.0, 3.6, 4.7, 5.0, 4.1, 4.5, 4.6]
+const BIOME_SPACING := [3.7, 4.5, 3.3, 4.3, 4.5, 3.7, 4.1, 4.2]
 const BIOME_MIX := [
 	{OAK: 0.22, PINE: 0.23, BIRCH: 0.55},                 # Берёзовый дозор
 	{PINE: 0.72, BIRCH: 0.13, OAK: 0.15},                  # Ломаный известняк

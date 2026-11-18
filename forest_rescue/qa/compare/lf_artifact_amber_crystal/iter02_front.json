@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_amber_crystal v1 front (ortho)",
+  "iou_filled": 0.8969,
+  "iou_raw": 0.8969,
+  "mean_abs_colour_error": 0.1475,
+  "mean_rgb_ref": [
+    0.533,
+    0.335,
+    0.161
+  ],
+  "mean_rgb_render": [
+    0.566,
+    0.382,
+    0.247
+  ]
+}

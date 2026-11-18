@@ -165,7 +165,7 @@ def do_clips(arm):
             for i in range(n + 1):
                 t = min(i / 30.0, T)
                 u = t / T
-                s = u * u * u * (u * (6 * u - 15) + 10)
+                s = u * u * (3 - 2 * u)
                 arm.rotation_euler = (0, 0, math.radians(yaw) * s)
                 scene.frame_set(i)
                 scene.render.filepath = os.path.join(tmp, f"f{i:05d}.png")

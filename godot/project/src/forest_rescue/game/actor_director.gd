@@ -40,6 +40,9 @@ var beacon: Node3D
 var beacon_target := ""
 var ribbon: MultiMeshInstance3D
 var ribbon_signature := ""
+var preview: MultiMeshInstance3D
+var preview_signature := ""
+var preview_target := ""
 var telegraphs: Telegraphs
 var intro_horse: Dictionary = {}
 var variants: Dictionary = {}
@@ -72,6 +75,10 @@ func on_stage_changed() -> void:
 		beacon.queue_free()
 	if is_instance_valid(ribbon):
 		ribbon.queue_free()
+	if is_instance_valid(preview):
+		preview.queue_free()
+	preview = null
+	preview_signature = ""
 	if telegraphs != null and is_instance_valid(telegraphs):
 		telegraphs.queue_free()
 	beacon = null
@@ -221,18 +228,20 @@ func tick(delta: float) -> void:
 	update_boss(now, delta)
 	update_beacon(delta)
 	update_ribbon()
+	update_preview()
 	update_battle_hud(now)
 	run_choreography(delta)
 
 func update_lod() -> void:
+	# Orthographic size decides the LOD (hysteresis 4 units); new rigs pick it up immediately.
 	var zoom: float = float(game.stage.camera_zoom)
-	if absf(zoom - lod_zoom) < 4.0:
-		return
-	lod_zoom = zoom
-	var level := 0 if zoom < 42.0 else (1 if zoom < 85.0 else 2)
+	if absf(zoom - lod_zoom) >= 4.0:
+		lod_zoom = zoom
+	var level := 0 if lod_zoom < 42.0 else (1 if lod_zoom < 85.0 else 2)
 	for id in rigs:
-		if is_instance_valid(rigs[id]):
-			rigs[id].set_lod(level)
+		var actor: Rig = rigs[id]
+		if is_instance_valid(actor) and actor.is_ready() and actor.lod_level != level:
+			actor.set_lod(level)
 
 func squad_member_count() -> int:
 	var squad: Dictionary = game.client.squad()
@@ -285,7 +294,8 @@ func update_horse(now: float, delta: float) -> void:
 			actor.play(["lf_horse_stop", "lf_horse_idle", "Idle"], 0.2)
 		else:
 			actor.play(["lf_horse_look_back", "lf_horse_idle", "Idle"], 0.3)
-		show_actor(actor, actor.position)
+		# The entrance corridor is opening right now: the mare walks out of the mist.
+		actor.set_active(actor.is_ready() and visible_in_view(actor.position))
 		markers.append({"position":actor.position + Vector3.UP * 1.6, "kind":"horse", "id":"horse"})
 		return
 	if move is Dictionary and not (move.get("path", []) as Array).is_empty():
@@ -383,6 +393,8 @@ func update_squad(now: float, delta: float) -> void:
 		var leader: Dictionary = motion.get("squad_0", {})
 		if not leader.is_empty():
 			game.pin("lf_squad", leader.position, 16.0)
+			if game.fog_clear(leader.position):
+				tags.append({"position":leader.position + Vector3.UP * 2.6, "text":game.content.text("hud.squad"), "kind":"squad"})
 
 func squad_pose(index: int, now: float) -> Dictionary:
 	var squad: Dictionary = game.client.squad()
@@ -947,6 +959,71 @@ func update_ribbon() -> void:
 	progress = float(sample_now.distance)
 	(ribbon.material_override as ShaderMaterial).set_shader_parameter("travelled", progress)
 
+## Faint golden dots along the authored route to the next suggested target (art/07 panel 3).
+func set_preview(target_id: String) -> void:
+	preview_target = target_id
+
+func route_index(node: String) -> int:
+	var base := node.get_slice(":", 0).get_slice("#", 0)
+	if base in ["lf_horse_origin", "lf_home_reception"]:
+		return 0
+	if base.begins_with("lf_site_"):
+		return int(base.trim_prefix("lf_site_"))
+	if base.begins_with("lf_key_"):
+		return int(base.trim_prefix("lf_key_"))
+	if base == "lf_boss_ancient_maw":
+		return 13
+	return -1
+
+func update_preview() -> void:
+	var squad: Dictionary = game.client.squad()
+	var from := route_index(String(squad.get("node", "")))
+	var to := route_index(preview_target)
+	var show_it := preview_target != "" and not (squad.get("move") is Dictionary) and from >= 0 and to >= 0 and absi(to - from) == 1
+	var signature := "%d>%d" % [from, to]
+	if not show_it:
+		if is_instance_valid(preview):
+			preview.hide()
+		return
+	if preview == null or not is_instance_valid(preview):
+		preview = build_ribbon()
+		preview.name = "RoutePreview"
+		(preview.material_override as ShaderMaterial).set_shader_parameter("dim", 0.55)
+		(preview.material_override as ShaderMaterial).set_shader_parameter("travelled", -1.0)
+		root.add_child(preview)
+		preview_signature = ""
+	preview.show()
+	if signature == preview_signature:
+		return
+	preview_signature = signature
+	var low := mini(from, to)
+	var route_id := "lf_route_entry" if low == 0 else ("lf_route_boss" if low == 12 else "lf_route_%02d_%02d" % [low, low + 1])
+	var value: Variant = game.world_call("route_points", [route_id])
+	var points: Array = []
+	if value is PackedVector3Array and value.size() >= 2:
+		for p in value:
+			points.append(p)
+	else:
+		var a: Vector3 = game.target_position(String(squad.get("node", "")))
+		var b: Vector3 = game.target_position(preview_target)
+		if a == Vector3.INF or b == Vector3.INF:
+			preview.hide()
+			return
+		points = [a, b]
+	if to < from:
+		points.reverse()
+	var route := PathMotion.build(points)
+	var total := float(route.total)
+	var count := clampi(int(total / 1.4), 2, 300)
+	var multimesh := preview.multimesh
+	multimesh.instance_count = count
+	for i in count:
+		var d := total * float(i) / float(count - 1)
+		var sample := PathMotion.sample(route, d)
+		var p: Vector3 = game.ground(sample.position.x, sample.position.z) + Vector3.UP * 0.16
+		multimesh.set_instance_transform(i, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * 0.8), p))
+		multimesh.set_instance_custom_data(i, Color(d / maxf(total, 0.01), d, 0, 0))
+
 func build_ribbon() -> MultiMeshInstance3D:
 	var node := MultiMeshInstance3D.new()
 	node.name = "RouteDots"
@@ -965,6 +1042,7 @@ func build_ribbon() -> MultiMeshInstance3D:
 shader_type spatial;
 render_mode unshaded, blend_add, depth_draw_never, shadows_disabled;
 uniform float travelled = 0.0;
+uniform float dim = 1.0;
 varying float along;
 void vertex() {
 	along = INSTANCE_CUSTOM.g;
@@ -973,7 +1051,7 @@ void fragment() {
 	float ahead = step(travelled, along);
 	float wave = 0.55 + 0.45 * sin(along * 1.7 - TIME * 5.0);
 	ALBEDO = mix(vec3(0.55, 0.42, 0.2), vec3(1.0, 0.8, 0.36), ahead);
-	ALPHA = (0.25 + 0.75 * ahead) * wave;
+	ALPHA = (0.25 + 0.75 * ahead) * wave * dim;
 }
 """
 	var material := ShaderMaterial.new()
@@ -1151,6 +1229,7 @@ func run_key_insert(beat: Dictionary) -> bool:
 		game.fx.burst_world(socket, "socket")
 	return float(beat.t) > 1.8
 
+## art/rescue_animation_storyboard «2. DISCOVER»: the captain reaches into the cache and lifts the seal.
 func run_key_pickup(beat: Dictionary) -> bool:
 	var site_id := String(beat.site)
 	var key_prop: Rig = rigs.get("artifact_" + site_id)
@@ -1159,7 +1238,17 @@ func run_key_pickup(beat: Dictionary) -> bool:
 	var target := squad_focus()
 	if target == Vector3.INF:
 		return true
-	var f := clampf(float(beat.t) / 1.1, 0.0, 1.0)
+	if not beat.has("reached"):
+		beat.reached = true
+		var captain: Rig = rigs.get("squad_0")
+		if captain != null and is_instance_valid(captain):
+			captain.play(["lf_soldier_help", "lf_soldier_unlock", "Idle"], 0.2, true)
+	if float(beat.t) < 0.7:
+		key_prop.set_active(key_prop.is_ready())
+		game.fx.glow_world("artifact_" + site_id, key_prop.position)
+		return false
+	game.fx.glow_world("artifact_" + site_id, Vector3.INF)
+	var f := clampf((float(beat.t) - 0.7) / 1.1, 0.0, 1.0)
 	key_prop.position = (beat.from as Vector3).lerp(target + Vector3.UP * 1.2, f) + Vector3.UP * sin(PI * f) * 1.4
 	key_prop.set_active(key_prop.is_ready())
 	if f >= 1.0:

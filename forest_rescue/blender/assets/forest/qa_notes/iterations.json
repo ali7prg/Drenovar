@@ -1,0 +1,128 @@
+{
+ "forest_bark": [
+  {
+   "iter": "pre-1 (scratch)",
+   "diff": "first procedural barks blurry/low-frequency, blob moss",
+   "change": "sharper cellular plates, ragged warped edges, finer fbm, lichen rosettes"
+  },
+  {
+   "iter": "pre-2..4 (scratch)",
+   "diff": "oak plates stringy + inverted 'breaks' mask (dark lenses); birch peels star-shaped; pine flakes smeared horizontally; willow lacked deep gaps",
+   "change": "wider oak plates (200 cells, aniso 0.42x2.4), fixed breaks mask, Fourier-smooth birch peels + chevron scars, vertical pine flake layers, braided willow strands with relief; Lab histogram match to art/02 swatches (contrast 0.8)"
+  },
+  {
+   "iter": 1,
+   "diff": "Lab mean dE vs swatches: oak 1.4, pine 1.2, birch 4.5, hollow 2.4, willow 1.6 (texture level); moss on oak too faint",
+   "change": "kept; rendered close-ups pending"
+  }
+ ],
+ "forest_atlas": [
+  {
+   "iter": "pre-1 (scratch)",
+   "diff": "oak clusters bouquet-shaped and clipped at tile top; fern pinnae merged into one leaf; pine dense tiles sparse",
+   "change": "puff-centred clusters with leaves kept inside the tile, narrower fern pinnae, fuller pine dense tiles"
+  },
+  {
+   "iter": 1,
+   "diff": "atlas complete: 9 oak + 4 dense oak, 5 pine sprays + 3 dense, 5 birch + dense, 6 willow strands + top/dense, fern, reed, grass, bramble, shrub, moss, mushroom, bracket fungus, litter, 5 bark strips",
+   "change": "-"
+  }
+ ],
+ "lf_env_golden_oak": [
+  {
+   "iter": 1,
+   "iou": 0.463,
+   "diff": "limbs as thick as the trunk (trunk taper applied to seeded limbs), LOD0 12.6k tris, only 8 cards; strategic/top shots blank (stale camera matrix)",
+   "change": "taper only on trunk nodes; automatic pipe-radius exponent (tips 1.4 cm); bark budget loop (<=36% of LOD0); camera depsgraph update"
+  },
+  {
+   "iter": 2,
+   "iou": 0.771,
+   "iou_closed": null,
+   "diff": "crown a uniform mass with streaky edge-on cards; trunk flare narrow; foliage too dark/olive; lineup shot dark (camera inside row)",
+   "change": "clumped 'puff' cards on clump spheres, tilted normals, more flare/roots, less green mood; fixed camera re-centring"
+  },
+  {
+   "iter": 3,
+   "iou": 0.702,
+   "iou_closed": 0.765,
+   "diff": "puffs overshoot the envelope top, low side lobes missing, spike-like surface roots (strategic view)",
+   "change": "farthest-point puff sampling inside the hull, card centres clamped into the envelope, buttress roots that sink into the ground"
+  },
+  {
+   "iter": 4,
+   "iou": 0.774,
+   "iou_closed": 0.837,
+   "diff": "stalk-cluster cards look streaky/blurred; base flare still narrower than art; missing low side lobes",
+   "change": "60% round dense-clump tiles, stronger flare (1.3) + 8 roots, 46 puffs"
+  },
+  {
+   "iter": 5,
+   "iou": 0.768,
+   "iou_closed": 0.813,
+   "diff": "dense cards overshoot envelope (blue) at top/sides; limbs hidden; top-down view now rich layered golden canopy without card edges",
+   "change": "dense cards 1.1x, puffs deeper (0.9-1.9 m), 44% budget to limbs"
+  },
+  {
+   "iter": 6,
+   "iou": 0.77,
+   "iou_closed": 0.83,
+   "lod1_iou": 0.768,
+   "lod2_iou": 0.693,
+   "diff": "silhouette within the art envelope; limbs show through gaps; LOD2 flatter/brighter than LOD0 at 55deg; trunk bark lighter than painted",
+   "change": "exported (LOD0<=2950, LOD1<=1150, LOD2<=290 tris); AO in COLOR_0.a darkens inner cards in-engine"
+  }
+ ],
+ "lf_env_hollow_oak": [
+  {
+   "iter": 1,
+   "iou": 0.738,
+   "iou_closed": 0.766,
+   "diff": "arch + trunk mass match; bark pale/fine; foliage too dense hiding gnarled leaders; stray floating cards; fungi too small",
+   "change": "taller/thicker SDF leaders, deeper ridges, bark tile 2.4 m, sparser smaller cards, drop puffs >1.3 m from branches, bigger fungi"
+  },
+  {
+   "iter": 2,
+   "iou": 0.722,
+   "diff": "left leader cut flat by the SDF field top; foliage still dense and big; limbs thin",
+   "change": "field top above leaders, limb r_base 1.1, cards 0.75-1.05 m, bark share 62%"
+  }
+ ],
+ "lf_env_fallen_trunk": [
+  {
+   "iter": 1,
+   "iou": 0.372,
+   "iou_closed": 0.384,
+   "diff": "log far too low/thin (art: ~1.3 m thick, arching ~2 m above the stream mid-span); root splinters short; moss reads as spots",
+   "change": "radius 0.78->0.42 m, arch centre 0.75->1.95 m, splinters 1.2-2.8 m pointing up, moss carpets 0.9-1.5 m"
+  }
+ ],
+ "lf_env_moss_rock": [
+  {
+   "iter": 1,
+   "iou": 0.791,
+   "iou_closed": 0.802,
+   "colour_err": 0.309,
+   "diff": "main slab not tilted (yaw instead of tilt), regular crazy-paving crack net, rock too pale, moss/shrubs tiny and sparse",
+   "change": "slab tilted -0.34 rad (top rising right) + lower right terrace, softer sparse cracks + warmer limestone, moss carpets 1.6-2.6 m (170), 44 shrubs 0.9-1.6 m"
+  }
+ ],
+ "lf_env_bramble": [
+  {
+   "iter": 1,
+   "iou": 0.709,
+   "iou_closed": 0.761,
+   "diff": "dense saturated leaf blob, overshoots top; arching thorny canes hidden",
+   "change": "36 thicker canes arching past the foliage, 230 smaller leaf cards concentrated low, darker olive/maroon palette"
+  }
+ ],
+ "lf_env_reed_fern": [
+  {
+   "iter": 1,
+   "iou": 0.46,
+   "iou_closed": 0.552,
+   "diff": "fern fronds droop below ground (right half empty); reed clump too narrow",
+   "change": "frond profile rises to ~1.25 m and arches (L 1.8 m, width 0.55-0.72), reed clump radius 0.5 m with 34 blade cards"
+  }
+ ]
+}

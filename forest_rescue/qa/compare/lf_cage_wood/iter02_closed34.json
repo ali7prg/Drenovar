@@ -1,0 +1,16 @@
+{
+  "title": "lf_cage_wood closed 3/4 (camera fitted)",
+  "iou_filled": 0.9356,
+  "iou_raw": 0.8693,
+  "mean_abs_colour_error": 0.1606,
+  "mean_rgb_ref": [
+    0.464,
+    0.395,
+    0.327
+  ],
+  "mean_rgb_render": [
+    0.476,
+    0.406,
+    0.336
+  ]
+}

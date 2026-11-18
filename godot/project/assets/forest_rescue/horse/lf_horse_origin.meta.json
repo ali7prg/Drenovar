@@ -1,9 +1,9 @@
 {
   "id": "lf_horse_origin",
   "tris": {
-    "LOD0": 14546,
-    "LOD1": 7186,
-    "LOD2": 2602
+    "LOD0": 14918,
+    "LOD1": 7083,
+    "LOD2": 2595
   },
   "bones": {
     "deform": 52,
@@ -52,14 +52,14 @@
   },
   "bounds_m": {
     "min": [
-      -0.362,
+      -0.372,
       -1.516,
-      -0.008
+      -0.007
     ],
     "max": [
-      0.362,
-      0.992,
-      2.013
+      0.371,
+      0.97,
+      2.01
     ]
   },
   "clips": {
@@ -82,29 +82,31 @@
         "F_R": 0.0,
         "H_L": 0.0,
         "H_R": 0.0
-      }
+      },
+      "ikOverreach_m": 0.0
     },
     "lf_horse_walk": {
       "seconds": 1.2,
       "loop": true,
-      "groundSpeed_mps": 1.45,
-      "strideLength_m": 1.74,
+      "groundSpeed_mps": 1.35,
+      "strideLength_m": 1.62,
       "markers": {
         "footfall_LH": 0.0,
-        "liftoff_LH": 0.744,
+        "liftoff_LH": 0.72,
         "footfall_LF": 0.3,
-        "liftoff_LF": 1.044,
+        "liftoff_LF": 1.02,
         "footfall_RH": 0.6,
-        "liftoff_RH": 0.144,
+        "liftoff_RH": 0.12,
         "footfall_RF": 0.9,
-        "liftoff_RF": 0.444
+        "liftoff_RF": 0.42
       },
       "hoofSlip_m": {
         "F_L": 0.0,
         "F_R": 0.0,
         "H_L": 0.0,
         "H_R": 0.0
-      }
+      },
+      "ikOverreach_m": 0.106
     },
     "lf_horse_trot": {
       "seconds": 0.72,
@@ -126,12 +128,13 @@
         "F_R": 0.0,
         "H_L": 0.0,
         "H_R": 0.0
-      }
+      },
+      "ikOverreach_m": 0.1467
     },
     "lf_horse_start": {
       "seconds": 0.65,
       "loop": false,
-      "groundSpeed_mps": 0.674,
+      "groundSpeed_mps": 0.628,
       "strideLength_m": 0.0,
       "markers": {
         "lift_LH": 0.02,
@@ -140,18 +143,19 @@
         "lift_RH": 0.42,
         "land_LF": 0.56
       },
-      "speedProfile": "v(t)=1.45 m/s*(t/0.65)^1.15; distance 0.438 m",
+      "speedProfile": "v(t)=1.35 m/s*(t/0.65)^1.15; distance 0.408 m",
       "hoofSlip_m": {
         "F_L": 0.0,
         "F_R": 0.0,
         "H_L": 0.0,
         "H_R": 0.0
-      }
+      },
+      "ikOverreach_m": 0.2068
     },
     "lf_horse_stop": {
       "seconds": 0.8,
       "loop": false,
-      "groundSpeed_mps": 0.558,
+      "groundSpeed_mps": 0.519,
       "strideLength_m": 0.0,
       "markers": {
         "land_RH": 0.3,
@@ -159,13 +163,14 @@
         "land_RF": 0.6,
         "square_LH": 0.72
       },
-      "speedProfile": "v(t)=1.45 m/s*(1-t/0.8)^1.6; distance 0.446 m",
+      "speedProfile": "v(t)=1.35 m/s*(1-t/0.8)^1.6; distance 0.415 m",
       "hoofSlip_m": {
         "F_L": 0.0,
         "F_R": 0.0,
         "H_L": 0.0,
         "H_R": 0.0
-      }
+      },
+      "ikOverreach_m": 0.0943
     },
     "lf_horse_turn_left": {
       "seconds": 1.1,
@@ -185,7 +190,8 @@
         "F_R": 0.0,
         "H_L": 0.0,
         "H_R": 0.0
-      }
+      },
+      "ikOverreach_m": 0.0575
     },
     "lf_horse_turn_right": {
       "seconds": 1.1,
@@ -205,7 +211,8 @@
         "F_R": 0.0,
         "H_L": 0.0,
         "H_R": 0.0
-      }
+      },
+      "ikOverreach_m": 0.0643
     },
     "lf_horse_alert": {
       "seconds": 1.4,
@@ -221,7 +228,8 @@
         "F_R": 0.0,
         "H_L": 0.0,
         "H_R": 0.0
-      }
+      },
+      "ikOverreach_m": 0.0
     },
     "lf_horse_look_back": {
       "seconds": 1.8,
@@ -237,7 +245,8 @@
         "F_R": 0.0,
         "H_L": 0.0,
         "H_R": 0.0
-      }
+      },
+      "ikOverreach_m": 0.0
     },
     "lf_horse_call": {
       "seconds": 2.0,
@@ -254,14 +263,15 @@
         "F_R": 0.0,
         "H_L": 0.0,
         "H_R": 0.0
-      }
+      },
+      "ikOverreach_m": 0.0
     }
   },
   "sockets": {
     "ribbon_ring": [
-      0.018,
-      -1.085,
-      1.488
+      0.072,
+      -1.092,
+      1.505
     ],
     "lead_ring_chin": [
       0.0,

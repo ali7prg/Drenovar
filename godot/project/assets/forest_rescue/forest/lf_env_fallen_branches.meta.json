@@ -1,0 +1,119 @@
+{
+  "id": "lf_env_fallen_branches",
+  "variants": {
+    "v1": {
+      "nodes": [
+        "lf_env_fallen_branches_v1_LOD0",
+        "lf_env_fallen_branches_v1_LOD1",
+        "lf_env_fallen_branches_v1_LOD2"
+      ],
+      "tris": {
+        "LOD0": 232,
+        "LOD1": 122,
+        "LOD2": 22
+      },
+      "materials": {
+        "LOD0": [
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_foliage"
+        ]
+      },
+      "height_m": 0.2,
+      "footprint_radius_m": 2.08,
+      "bounds_m_blender": [
+        [
+          -1.32,
+          -1.62,
+          -0.01
+        ],
+        [
+          1.98,
+          2.08,
+          0.2
+        ]
+      ],
+      "wind": false,
+      "info": {
+        "LOD0": {
+          "tris": 232
+        },
+        "LOD1": {
+          "tris": 122
+        },
+        "LOD2": {
+          "tris": 22
+        }
+      }
+    },
+    "v2": {
+      "nodes": [
+        "lf_env_fallen_branches_v2_LOD0",
+        "lf_env_fallen_branches_v2_LOD1",
+        "lf_env_fallen_branches_v2_LOD2"
+      ],
+      "tris": {
+        "LOD0": 179,
+        "LOD1": 84,
+        "LOD2": 13
+      },
+      "materials": {
+        "LOD0": [
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_foliage"
+        ]
+      },
+      "height_m": 0.2,
+      "footprint_radius_m": 1.98,
+      "bounds_m_blender": [
+        [
+          -1.98,
+          -1.41,
+          -0.01
+        ],
+        [
+          1.77,
+          1.55,
+          0.2
+        ]
+      ],
+      "wind": false,
+      "info": {
+        "LOD0": {
+          "tris": 179
+        },
+        "LOD1": {
+          "tris": 84
+        },
+        "LOD2": {
+          "tris": 13
+        }
+      }
+    }
+  },
+  "tris": {
+    "LOD0": 232,
+    "LOD1": 122,
+    "LOD2": 22
+  },
+  "bones": 0,
+  "materials": [
+    "lf_foliage"
+  ],
+  "glb_images": [
+    "lf_foliage_atlas.png"
+  ],
+  "texture_mode": "external shared files next to the GLB (relative URIs)",
+  "wind": "static (no COLOR_0)",
+  "layout_note": "Node translations are preview offsets only; mesh origin = ground contact centre.",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_groundcover.py fallen_branches"
+}

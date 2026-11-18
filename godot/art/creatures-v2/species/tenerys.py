@@ -8,6 +8,7 @@ import numpy as np
 from sdf import Prim, Part, chain, bezier, rot_x, rot_y, rot_z
 from rig import Skeleton
 from common import SIDES, leg_bones, locks, scatter_on, surface_points, _frame
+from eyes import lid_prims, iris as eye_tex
 
 ID = "tenerys"
 NAME = "Тенерис"
@@ -122,6 +123,8 @@ def body_core():
          Prim("cone", "Nose", k=0.05, a=(1.30, 1.665, 0), b=(1.52, 1.57, 0), ra=0.085, rb=0.040, name="muzzle"),
          Prim("ellipsoid", "Head", k=0.035, c=(1.40, 1.67, 0), r=(0.13, 0.04, 0.06), R=rot_z(-0.30), name="nasal"),
          Prim("sphere", "Nose", k=0.012, mat="nose", c=(1.548, 1.572, 0), r=0.042, name="nosepad"),
+         Prim("sphere", "Nose", k=0.005, neg=True, mat="nose", c=(1.584, 1.579, 0.017), r=0.011, name="nostrilL"),
+         Prim("sphere", "Nose", k=0.005, neg=True, mat="nose", c=(1.584, 1.579, -0.017), r=0.011, name="nostrilR"),
          Prim("cone", "Jaw", k=0.035, a=(1.22, 1.56, 0), b=(1.49, 1.49, 0), ra=0.060, rb=0.027, name="jaw"),
          Prim("box", "Head", k=0.006, neg=True, mat="mouth", c=(1.41, 1.53, 0), h=(0.16, 0.012, 0.05), round=0.004,
               R=rot_z(-0.22), name="mouthslit")]
@@ -133,6 +136,9 @@ def body_core():
               Prim("cone", "Nose", k=0.02, mat="skin", a=(1.33, 1.565, 0.062 * s), b=(1.51, 1.548, 0.026 * s),
                    ra=0.022, rb=0.015, name=f"lip{nm}"),
               Prim("sphere", "Head", k=0.01, neg=True, c=(1.31, 1.715, 0.128 * s), r=0.031, name=f"socket{nm}")]
+        # eyelids over the eyeball: an almond opening, not a marble (creature-references: narrow, slanted wolf eyes)
+        P += lid_prims((1.307, 1.715, 0.120 * s), 0.029, (0.62, 0.0, 0.78 * s), "Head", f"eye{nm}", mat="skin",
+                       upper=0.70, lower=0.84)
         # tall pointed ears, the opening turned forward and a little outward (front view: the cupped inner ear)
         ec = np.array([1.12, 1.98, 0.115 * s])
         Re = rot_x(-0.20 * s) @ rot_y(-0.30 * s) @ rot_z(-0.08)
@@ -228,8 +234,8 @@ def teeth_part():
     for nm, s in SIDES:
         root = np.array([1.39, 1.556, 0.058 * s])
         pts = bezier(root, root + np.array([0.02, -0.10, 0.004 * s]), root + np.array([0.0, -0.22, 0.008 * s]),
-                     root + np.array([-0.045, -0.30, 0.006 * s]), 8)
-        P += chain(list(pts), list(np.linspace(0.021, 0.004, len(pts))), "Head", k=0.01, mat="fang",
+                     root + np.array([-0.045, -0.30, 0.006 * s]), 14)
+        P += chain(list(pts), list(np.linspace(0.021, 0.004, len(pts))), "Head", k=0.0, mat="fang",
                    name=f"sabre{nm}")
         for i, (x, ln) in enumerate(((1.48, 0.035), (1.38, 0.03), (1.33, 0.025))):
             a = np.array([x, 1.545, (0.035 + 0.01 * i) * s])
@@ -252,8 +258,8 @@ def claw_parts():
                 base = j[5] + np.array([-0.01 + (0.03 if abs(dz) < 0.03 else 0.0), 0.034, dz * 1.45])
                 L = 0.165 if kind == "Front" else 0.13
                 pts = bezier(base, base + np.array([0.05, 0.01, 0]), base + np.array([L * 0.8, -0.005, 0]),
-                             base + np.array([L, -0.035, 0]), 6)
-                P += chain(list(pts), list(np.linspace(0.021, 0.0035, len(pts))), f"Toe_{kind}_{nm}", k=0.004,
+                             base + np.array([L, -0.035, 0]), 10)
+                P += chain(list(pts), list(np.linspace(0.021, 0.0035, len(pts))), f"Toe_{kind}_{nm}", k=0.0,
                            mat="claw", name=f"claw{i}")
             parts.append((f"claws_{kind}_{nm}", Part(f"claws_{kind}_{nm}", P, band=0.02), f"Toe_{kind}_{nm}"))
     return parts
@@ -266,8 +272,26 @@ def eye_part():
 
 
 _SHORT = {1: 1, 2: 1}   # short coat cards lie flat: one strip segment is enough at LOD1 / LOD2
+_FACE = {0: 2, 1: 1, 2: 1}
+
+
+def _face_keep(p, muzzle=False):
+    """Face fur roots (warped position p): not on the eyes, the ears, the nose leather or the lips."""
+    x, y, z = _warp.inverse_points(WARP, np.asarray(p, float)[None, :])[0]
+    for s in (-1, 1):
+        if np.linalg.norm(np.array([x - 1.307, y - 1.715, z - 0.120 * s])) < 0.055:
+            return False
+    if y > 1.86 or (x > 1.50 and y < 1.62) or (y < 1.585 and x > 1.30):
+        return False
+    return (x < 1.50) if muzzle else True
 FUR_CARDS = [  # creature-references: swept-back mane behind the head (ears and face stay clear), glowing strands,
     # silver cheek ruff, dark furred legs to the paws, huge silver brush tail with white tips
+    {"centre": (1.22, 1.70, 0), "radii": (0.20, 0.13, 0.17), "count": 420, "length": 0.07, "width": 0.035,
+     "flow": lambda p, n: np.array([-1.0, 0.12, 0]), "lift": 0.10, "droop": 0.02, "tip": "#a3a5b2",
+     "root_k": 0.9, "segments": _FACE, "keep": _face_keep},                                       # face fur
+    {"centre": (1.42, 1.62, 0), "radii": (0.11, 0.06, 0.08), "count": 220, "length": 0.04, "width": 0.025,
+     "flow": lambda p, n: np.array([-1.0, 0.25, 0]), "lift": 0.06, "droop": 0.0, "tip": "#c9cbd4",
+     "root_k": 0.9, "segments": _FACE, "keep": lambda p: _face_keep(p, True)},                    # muzzle fur
     {"centre": (0.55, 1.70, 0), "radii": (0.42, 0.26, 0.32), "count": 460, "length": 0.35, "width": 0.12,
      "flow": lambda p, n: np.array([-1.0, 0.22, 0]), "lift": 0.24, "droop": 0.05, "crossed": True,
      "tip": "#b9bdcb", "root_k": 0.88},                                                             # mane
@@ -460,7 +484,7 @@ def shade_body(ctx):
     furw = w["fur"] + w["fur_long"]
 
     def height(Q):
-        return hfur(Q) * furw * 1.5 + noise.perlin(Q * 140, 13) * 0.0003 * (w["skin"] + w["nose"])
+        return hfur(Q) * furw * 2.4 + noise.perlin(Q * 140, 13) * 0.0003 * (w["skin"] + w["nose"])
     cavity = 1.0 - 0.3 * furw * sstep(0.2, -0.9, h0)
     mane = (w["fur_long"] * sstep(1.35, 1.55, y)).astype(np.float32)
     shoulders = sstep(1.30, 1.50, y) * sstep(-0.1, 0.3, x) * sstep(0.85, 0.55, x)
@@ -485,19 +509,15 @@ def shade_detail(ctx):
     em = np.zeros((ctx.n, 3), np.float32)
     eyeglow = np.zeros(ctx.n, np.float32)
     for s in (-1, 1):
-        c = np.array([1.307, 1.715, 0.120 * s], np.float32)
-        ax = np.array([0.62, 0.0, 0.78 * s], np.float32)
-        ax /= np.linalg.norm(ax)
-        rel = P - c
-        cosang = np.sum(rel * ax, 1) / np.maximum(np.linalg.norm(rel, axis=1), 1e-6)
-        near = (np.linalg.norm(rel, axis=1) < 0.038).astype(np.float32) * w["eye"]
-        iris = sstep(0.70, 0.80, cosang) * near
-        pupil = sstep(0.94, 0.97, cosang) * near
-        col = mix(col, lin("#4cb4f0"), iris)
-        col = mix(col, lin("#06080a"), pupil)
-        em += lin("#5cc0ff")[None, :] * (iris * (1 - pupil) * 1.4)[:, None]
-        eyeglow = np.maximum(eyeglow, iris)
-    rough = w["fang"] * (0.35 + 0.15 * (1 - ring)) + w["claw"] * 0.42 + w["eye"] * 0.08
+        # ice-blue glowing iris with radial fibres, a dark limbal ring and a round pupil (eyes.iris)
+        ec, irisw, pu, near = eye_tex(P, (1.307, 1.715, 0.120 * s), (0.62, 0.0, 0.78 * s), 0.029, "#c9f2ff", "#2f8fd8",
+                                      ring="#0a1c2e", pupil="round", pupil_size=0.26, iris_ang=0.95, noise=noise,
+                                      seed=17)
+        m = near * w["eye"]
+        col = col * (1 - m[:, None]) + ec * m[:, None]
+        em += ec * (irisw * w["eye"] * 0.9)[:, None]
+        eyeglow = np.maximum(eyeglow, irisw * w["eye"])
+    rough = w["fang"] * (0.35 + 0.15 * (1 - ring)) + w["claw"] * 0.42 + w["eye"] * 0.04
 
     def height(Q):
         return noise.ridged(noise.stretch_along(Q * 90.0, flow, 0.25), 2, seed=5) * 0.0004 * (w["fang"] + w["claw"])

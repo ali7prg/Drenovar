@@ -9,6 +9,7 @@ import numpy as np
 from sdf import Prim, Part, chain, bezier, rot_x, rot_y, rot_z
 from rig import Skeleton
 from common import SIDES, leg_bones, locks, scatter_on, surface_points, plate_frame, _frame
+from eyes import lid_prims, iris as eye_tex
 
 ID = "kamneklyk"
 NAME = "Камнеклык"
@@ -128,6 +129,9 @@ def body_core():
         P += [Prim("ellipsoid", "Jaw", k=0.07, c=(1.06, 1.00, 0.20 * s), r=(0.20, 0.16, 0.10), name=f"jowl{nm}"),
               Prim("sphere", "Nose", k=0.01, neg=True, c=(1.565, 0.865, 0.055 * s), r=0.026, name=f"nostril{nm}"),
               Prim("sphere", "Head", k=0.012, neg=True, c=(1.175, 1.19, 0.282 * s), r=0.042, name=f"socket{nm}")]
+        # heavy lids: the small, deep-set boar eye under the brow (creature-references)
+        P += lid_prims((1.17, 1.19, 0.262 * s), 0.036, (0.45, 0.05, 0.89 * s), "Head", f"eye{nm}", mat="skin",
+                       upper=0.66, lower=0.80, thick=1.2)
         ec = np.array([0.95, 1.43, 0.24 * s])
         Re = rot_x(-0.75 * s) @ rot_z(0.35)
         P += [Prim("ellipsoid", f"Ear_{nm}", k=0.03, c=ec, r=(0.055, 0.17, 0.095), R=Re, name=f"ear{nm}"),
@@ -273,12 +277,12 @@ def tusks_part():
         root = np.array([1.40, 0.90, 0.13 * s])
         pts = bezier(root, np.array([1.62, 0.76, 0.32 * s]), np.array([1.76, 0.92, 0.54 * s]),
                      np.array([1.58, 1.33, 0.47 * s]), 16)
-        P += chain(list(pts), list(np.linspace(0.105, 0.018, len(pts))), f"Tusk_{nm}", k=0.01, mat="tusk",
+        P += chain(list(pts), list(np.linspace(0.105, 0.018, len(pts))), f"Tusk_{nm}", k=0.0, mat="tusk",
                    name=f"tusk{nm}")
         root2 = np.array([1.37, 0.84, 0.085 * s])
         pts2 = bezier(root2, root2 + np.array([0.06, 0.02, 0.05 * s]), root2 + np.array([0.09, 0.10, 0.09 * s]),
-                      root2 + np.array([0.06, 0.18, 0.12 * s]), 6)
-        P += chain(list(pts2), list(np.linspace(0.032, 0.008, len(pts2))), "Jaw", k=0.008, mat="tusk",
+                      root2 + np.array([0.06, 0.18, 0.12 * s]), 10)
+        P += chain(list(pts2), list(np.linspace(0.032, 0.008, len(pts2))), "Jaw", k=0.0, mat="tusk",
                    name=f"tusk2{nm}")
     return P
 
@@ -289,7 +293,22 @@ def eye_part():
 
 
 FUR_KEEP = {0: 0.9, 1: 0.55, 2: 0.15}   # shaggy everywhere on the sheet: more cards than the default
+_FACE = {0: 2, 1: 1, 2: 1}
+
+
+def _face_keep(p):
+    """Face bristle roots (warped p): not on the eyes, the snout bridge / disc or under the forehead plates."""
+    x, y, z = _warp.inverse_points(WARP, np.asarray(p, float)[None, :])[0]
+    for s in (-1, 1):
+        if np.linalg.norm(np.array([x - 1.17, y - 1.19, z - 0.262 * s])) < 0.065:
+            return False
+    return x < 1.28 and y < 1.36
+
+
 FUR_CARDS = [  # sheet: long shaggy dark-brown coat with lighter tips, beard under the head, tufted tail
+    {"centre": (1.12, 1.10, 0), "radii": (0.22, 0.20, 0.30), "count": 420, "length": 0.09, "width": 0.04,
+     "flow": lambda p, n: np.array([-1.0, -0.2, 0]), "lift": 0.14, "droop": 0.04, "tip": "#8e6a4e",
+     "root": "#3e2a1e", "root_k": 1.0, "segments": _FACE, "keep": _face_keep},                   # face bristles
     {"centre": (-0.20, 0.86, 0), "radii": (1.00, 0.30, 0.66), "count": 380, "length": 0.30, "width": 0.09,
      "flow": lambda p, n: np.array([-0.5, -0.85, 0]), "lift": 0.12, "droop": 0.25, "tip": "#a87c5a"},  # flanks
     {"centre": (-0.25, 0.62, 0), "radii": (0.75, 0.10, 0.50), "count": 140, "length": 0.28, "width": 0.09,
@@ -416,10 +435,10 @@ def shade_body(ctx):
     col = mix(col, lin("#3e2c26"), w["snout"])
     rings = 0.5 + 0.5 * np.sin(y * 110.0 + noise.perlin(P * 12, 12) * 2.0)
     hoof = mix(lin("#241c17"), lin("#6e5440"), np.clip(rings * 0.55 + sstep(0.06, 0.0, y) * 0.3, 0, 1))
-    hoof = mix(hoof, lin("#9a744c"), sstep(0.80, 0.97, rings) * 0.45)          # bronze growth ridges
+    hoof = mix(hoof, lin("#9a744c"), sstep(0.80, 0.97, rings) * 0.22)          # bronze growth ridges
     col = mix(col, hoof, w["hoof"])
     groove = snout_grooves(P)                                                   # wrinkled snout bridge
-    col = mix(col, lin("#2c1f19"), groove * 0.6)
+    col = mix(col, lin("#2c1f19"), groove * 0.30)
     col = mix(col, lin("#3a1c1a"), w["mouth"])
     rough = 0.84 + 0.06 * noise.perlin(P * 12, 3)
     rough = mix(rough, 0.62, w["skin"])
@@ -428,8 +447,9 @@ def shade_body(ctx):
     rough = mix(rough, 0.45, w["mouth"])
 
     def height(Q):
-        return (hfur(Q) * w["fur"] * 1.7 + noise.perlin(Q * 120, 9) * 0.0005 * (w["skin"] + w["snout"]) +
-                np.sin(Q[:, 1] * 240.0) * 0.0004 * w["hoof"] - snout_grooves(Q) * 0.004)
+        return (hfur(Q) * w["fur"] * 2.6 + noise.perlin(Q * 120, 9) * 0.0005 * (w["skin"] + w["snout"]) +
+                np.sin(Q[:, 1] * 110.0 + noise.perlin(Q * 12, 12) * 2.0) * 0.0014 * w["hoof"]
+                - snout_grooves(Q) * 0.007)
     cavity = 1.0 - 0.3 * w["fur"] * sstep(0.2, -0.9, h0)
     variant = np.zeros((ctx.n, 4), np.float32)
     variant[:, 3] = 1
@@ -478,22 +498,22 @@ def shade_stone(ctx):
     tusk = tusk * (0.92 + 0.1 * noise.ridged(noise.stretch_along(P * 50.0, flow, 0.3), 2, 6))[:, None]
     cracks = sstep(0.76, 0.92, noise.ridged(noise.stretch_along(P * 16.0, flow, 0.10), 2, 63))
     rings = sstep(0.82, 0.97, 0.5 + 0.5 * np.cos(rad * (2 * np.pi / 0.0125) + noise.perlin(P * 9.0, 64) * 0.8))
-    tusk = mix(tusk, lin("#6b5844"), np.clip(rings * 0.8 + cracks * 0.45, 0, 1))   # creature-references: segments
+    tusk = mix(tusk, lin("#7a6650"), np.clip(rings * 0.35 + cracks * 0.30, 0, 1))  # creature-references: segments
+    tusk_ring_h = rings
     col = stone * w["stone"][:, None] + tusk * w["tusk"][:, None] + lin("#1a1210")[None, :] * w["eye"][:, None]
     for s in (-1, 1):
-        c = np.array([1.17, 1.19, 0.262 * s], np.float32)
-        ax = np.array([0.45, 0.05, 0.89 * s], np.float32)
-        ax /= np.linalg.norm(ax)
-        rel = P - c
-        cosang = np.sum(rel * ax, 1) / np.maximum(np.linalg.norm(rel, axis=1), 1e-6)
-        near = (np.linalg.norm(rel, axis=1) < 0.05).astype(np.float32) * w["eye"]
-        col = mix(col, lin("#d0891e"), sstep(0.70, 0.78, cosang) * near)
-        col = mix(col, lin("#070505"), sstep(0.93, 0.96, cosang) * near)
-    rough = w["stone"] * (0.86 + 0.08 * cid - 0.08 * edge) + w["tusk"] * 0.45 + w["eye"] * 0.10
+        # amber iris with fibres, dark ring and pupil (eyes.iris)
+        ec, irisw, pu, near = eye_tex(P, (1.17, 1.19, 0.262 * s), (0.45, 0.05, 0.89 * s), 0.036, "#f6c25a", "#a4601a",
+                                      ring="#2a1606", pupil="round", pupil_size=0.32, iris_ang=0.95, noise=noise,
+                                      seed=29)
+        m = near * w["eye"]
+        col = col * (1 - m[:, None]) + ec * m[:, None]
+    rough = w["stone"] * (0.86 + 0.08 * cid - 0.08 * edge) + w["tusk"] * 0.45 + w["eye"] * 0.04
 
     def height(Q):
         hs, _s, _c = slate(Q, N)
-        return hs * w["stone"] + noise.ridged(noise.stretch_along(Q * 50.0, flow, 0.3), 2, 6) * 0.0006 * w["tusk"]
+        return (hs * w["stone"] + noise.ridged(noise.stretch_along(Q * 50.0, flow, 0.3), 2, 6) * 0.0006 * w["tusk"]
+                - tusk_ring_h * 0.0020 * w["tusk"])
     cavity = 1.0 - 0.35 * seam * w["stone"]
     variant = np.stack([mineral * w["stone"], veins * w["stone"], edge * w["stone"], np.ones(ctx.n, np.float32)], 1)
     return {"albedo": np.clip(col, 0, 1), "roughness": np.clip(rough, 0, 1), "height": height, "height_eps": 0.002,

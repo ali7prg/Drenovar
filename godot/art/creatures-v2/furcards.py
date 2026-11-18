@@ -110,14 +110,18 @@ def _frame(d, n):
 
 def cards(surface, regions, rng, keep=1.0, widen=1.0):
     """regions: dicts {centre, radii, count, length, width, flow(p, n), lift, gravity, droop, crossed, tip, tip_k,
-    root, root_k, glow} (tip / root: sRGB hex overriding the body colour at the root). Seeds are projected onto `surface` (the outer body: core + sculpted locks)."""
+    root, root_k, glow, segments, keep} (tip / root: sRGB hex overriding the body colour at the root; keep(p): a
+    root position filter). Seeds are projected onto `surface` (the outer body: core + sculpted locks)."""
     from common import scatter_on, surface_points
     out = []
     for reg in regions:
         seeds = scatter_on(surface, reg["centre"], reg["radii"], reg["count"], rng)
         pts, nrm = surface_points(surface, seeds, steps=10)
+        mask = reg.get("keep")      # optional keep(p) -> bool: no cards on eyes, nose leather, lips
         for p, n in zip(pts, nrm):
             if rng.random() > keep:
+                continue
+            if mask is not None and not mask(p):
                 continue
             n = n / max(np.linalg.norm(n), 1e-6)
             f = np.asarray(reg["flow"](p, n), float)
@@ -156,7 +160,7 @@ def card_mesh(card_list, crossed_ok=True, segments=3, lod=None):
             for k in range(segments + 1):
                 t = k / float(segments)
                 ctr = c["root"] + d * c["L"] * t + np.array([0, -c["droop"] * c["L"] * t * t, 0])
-                wk = c["W"] * (1.0 - 0.2 * t)
+                wk = c["W"] * (1.0 - 0.55 * t)      # tufts narrow to the tip (strips read as paper)
                 for sgn, u in ((-1, u0), (1, u1)):
                     P.append(ctr + across * sgn * wk * 0.5)
                     N.append(c["n"])

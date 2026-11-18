@@ -72,11 +72,24 @@ class Skeleton:
         return pos, rot
 
 
-def two_bone_ik(a, l1, l2, target, pole):
-    """Positions of the middle joint for a two-segment chain from a to target, bending toward pole."""
+SOFT_IK = 0.05   # fraction of the reach where the chain eases out instead of locking straight
+
+
+def two_bone_ik(a, l1, l2, target, pole, soft=None):
+    """Positions of the middle joint for a two-segment chain from a to target, bending toward pole.
+    Soft IK: within the last `soft` of the reach the effective distance eases toward full extension instead of
+    hitting it - near a straight knee the joint angle is extremely sensitive to the distance, and a hard clamp
+    makes the knee snap tens of degrees in one frame when the foot lifts off (smooth_check.py)."""
     d = target - a
     dist = np.linalg.norm(d)
-    dist_c = np.clip(dist, abs(l1 - l2) + 1e-4, l1 + l2 - 1e-4)
+    dmax = l1 + l2
+    s = (SOFT_IK if soft is None else soft) * dmax
+    da = dmax - s
+    if s > 0 and dist > da:
+        dist_e = da + s * (1.0 - np.exp(-(dist - da) / s))
+    else:
+        dist_e = dist
+    dist_c = np.clip(dist_e, abs(l1 - l2) + 1e-4, l1 + l2 - 1e-4)
     dn = d / max(dist, 1e-9)
     # angle at a between chain and upper segment
     cos_a = (l1 * l1 + dist_c * dist_c - l2 * l2) / (2 * l1 * dist_c)
@@ -91,7 +104,7 @@ def two_bone_ik(a, l1, l2, target, pole):
     p /= pn
     mid = a + dn * (cos_a * l1) + p * (sin_a * l1)
     end = a + dn * dist_c
-    return mid, end, dist > l1 + l2 - 1e-3
+    return mid, end, dist_c < dist - 1e-3
 
 
 def aim_local(skel, name, parent_rot, child_name, direction, twist_axis=None):

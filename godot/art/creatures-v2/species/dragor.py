@@ -10,6 +10,7 @@ legs and belly are charcoal skin of rounded cobble scales.
 import numpy as np
 
 from sdf import Prim, Part, chain, bezier, rot_x, rot_y, rot_z
+from eyes import lid_prims, iris as eye_tex
 from rig import Skeleton
 from common import SIDES, leg_bones, surface_points, plate_frame
 
@@ -181,6 +182,9 @@ def body_core():
                    R=rot_z(-0.30), name=f"scapula{nm}"),
               Prim("ellipsoid", f"UpperLeg_Hind_{nm}", k=0.22, c=side((-2.00, 1.40, 0.80), s), r=(0.80, 0.70, 0.42),
                    R=rot_z(0.20), name=f"haunch{nm}")]
+        # scaly lids over the eyeball under the brow ridge (creature-references: a slit-pupilled reptile eye)
+        P += lid_prims((2.575, 2.16, 0.300 * s), 0.062, (0.45, 0.05, 0.89 * s), "Head", f"eye{nm}", mat="skin",
+                       upper=0.72, lower=0.86, k=0.012)
         P += leg_prims("Front", nm, s, FRONT["joints"])
         P += leg_prims("Hind", nm, s, HIND["joints"])
     P += chain(TAIL, TAIL_R, None, k=0.14, name="tail", bones=[f"Tail_0{i + 1}" for i in range(6)])
@@ -281,21 +285,33 @@ def build_armor(core, rng):
 
 
 def teeth_part():
-    """Rows of sharp teeth along the slightly open jaws (upper pointing down, lower up), longest at the front."""
+    """Rows of sharp, slightly hooked teeth along the open jaws (upper pointing down, lower up): uneven lengths, a
+    few gaps and fangs as on the sheet - a row of identical cones reads as a comb."""
+    rng = np.random.default_rng(41)
     P = []
     for nm, s in SIDES:
         for i in range(12):
+            if i in (4, 9):
+                continue                       # gaps
             t = i / 11.0
             a = np.array([3.15 - 0.72 * t, 1.76 + 0.05 * t, (0.10 + 0.17 * t) * s])
-            L = 0.15 if i in (1, 2, 5) else (0.12 if i < 7 else 0.09)
-            P.append(Prim("cone", "Head", k=0.006, mat="tooth", name=f"tu{nm}{i}", a=a,
-                          b=a + np.array([0.02, -L, 0]), ra=0.034, rb=0.005))
+            L = (0.17 if i in (1, 5) else (0.12 if i < 7 else 0.09)) * (0.8 + 0.4 * rng.random())
+            lean = np.array([0.025 + 0.02 * rng.random(), 0, 0.01 * s * rng.standard_normal()])
+            pts = bezier(a, a + np.array([0.0, -L * 0.45, 0]), a + np.array([0.0, -L * 0.85, 0]) + lean * 0.5,
+                         a + np.array([0.0, -L, 0]) + lean, 5)
+            P += chain(list(pts), list(np.linspace(0.030, 0.004, len(pts))), "Head", k=0.0, mat="tooth",
+                       name=f"tu{nm}{i}")
         for i in range(10):
+            if i in (3, 7):
+                continue
             t = i / 9.0
             a2 = np.array([3.05 - 0.60 * t, 1.655 + 0.07 * t, (0.08 + 0.13 * t) * s])
-            L = 0.12 if i in (1, 2, 4) else 0.085
-            P.append(Prim("cone", "Jaw", k=0.006, mat="tooth", name=f"tl{nm}{i}", a=a2,
-                          b=a2 + np.array([0.012, L, 0]), ra=0.030, rb=0.005))
+            L = (0.13 if i in (1, 4) else 0.085) * (0.8 + 0.4 * rng.random())
+            lean = np.array([0.02 + 0.015 * rng.random(), 0, 0.01 * s * rng.standard_normal()])
+            pts = bezier(a2, a2 + np.array([0.0, L * 0.45, 0]), a2 + np.array([0.0, L * 0.85, 0]) + lean * 0.5,
+                         a2 + np.array([0.0, L, 0]) + lean, 5)
+            P += chain(list(pts), list(np.linspace(0.027, 0.004, len(pts))), "Jaw", k=0.0, mat="tooth",
+                       name=f"tl{nm}{i}")
     return P
 
 
@@ -307,8 +323,8 @@ def claws_part(kind, nm, s):
         base = j[5] + np.array([-0.12 - 0.10 * abs(dz) / 0.29, 0.16, dz * s])
         L = 0.44 if kind == "Front" else 0.36
         pts = bezier(base, base + np.array([0.10, 0.05, 0]), base + np.array([L * 0.75, 0.01, 0]),
-                     base + np.array([L * 0.95, -0.16, 0]), 7)
-        P += chain(list(pts), list(np.linspace(0.105, 0.014, len(pts))), bone, k=0.006, mat="claw", name=f"claw{i}")
+                     base + np.array([L * 0.95, -0.16, 0]), 11)
+        P += chain(list(pts), list(np.linspace(0.105, 0.014, len(pts))), bone, k=0.0, mat="claw", name=f"claw{i}")
     return P
 
 
@@ -395,12 +411,26 @@ def shade(group, ctx):
     return shade_skin(ctx) if group == "skin" else shade_stone(ctx)
 
 
-def scales(P, size=1.0, seed=5):
-    """Rounded cobble scales (sheet skin): Voronoi cells, domed, dark gaps."""
-    f1, f2, cid = noise.worley(P * (8.5 / size), seed)
-    edge = 1 - sstep(0.0, 0.14, f2 - f1)
-    dome = np.sqrt(sstep(0.0, 0.9, f2 - f1))
-    h = dome * 0.013 * (0.7 + 0.3 * cid) - edge * 0.004
+def scale_size(P):
+    """Scale size factor: big cobbles on the body, smaller on the legs, the neck and the head (sheet)."""
+    x, y = P[:, 0], P[:, 1]
+    legs = sstep(1.05, 0.55, y)
+    head = sstep(1.85, 2.35, x)
+    return (1.0 - 0.42 * np.maximum(legs, head)).astype(np.float32)
+
+
+def scales(P, size=None, seed=5):
+    """Raised cobble scales (sheet skin): Voronoi cells domed up between deep gaps - the relief carries the pattern,
+    the albedo only darkens the gaps a little (ink lines read as a drawing)."""
+    size = scale_size(P) if size is None else size
+    q = P * (8.5 / np.asarray(size, np.float32))[..., None] if np.ndim(size) else P * (8.5 / size)
+    f1, f2, cid = noise.worley(q, seed)
+    gap = f2 - f1
+    edge = 1 - sstep(0.0, 0.12, gap)
+    t = sstep(0.0, 0.75, gap)
+    dome = 1.0 - (1.0 - t) ** 2                               # rounded crown, steep sides
+    sz = np.asarray(size, np.float32) if np.ndim(size) else np.float32(size)
+    h = (dome * 0.026 * (0.75 + 0.25 * cid) - edge * 0.008) * sz
     return h, edge, cid
 
 
@@ -429,7 +459,8 @@ def shade_skin(ctx):
     # sheet skin: dark charcoal-brown cobbles with lighter, warm grey crowns and black gaps
     col = mix(lin("#231a14"), lin("#433428"), cid * 0.55 + 0.30 * sstep(0.2, 0.8, 1 - edge))
     col = mix(col, lin("#2c221b"), sstep(-0.1, -0.7, N[:, 1]) * 0.6)
-    col = mix(col, lin("#120d0b"), edge * 0.85)
+    col = mix(col, lin("#120d0b"), edge * 0.45)
+    col = col * (0.88 + 0.22 * sstep(0.004, 0.022, h_s))[:, None]     # lighter crowns
     col = col * (1.0 + 0.14 * noise.fbm(P * 1.2, 3, seed=50)[:, None])
     crease = edge * sstep(0.35, 0.65, noise.fbm(P * 2.4, 2, seed=52) + 0.5) * sstep(1.2, 1.9, y)
     tooth = mix(lin("#d6c7a6"), lin("#7d6a4c"), sstep(0.014, 0.034, rad))
@@ -437,14 +468,16 @@ def shade_skin(ctx):
     col = mix(col, lin("#3b1712"), w["mouth"])
     col = mix(col, tooth, w["tooth"])
     col = mix(col, claw, w["claw"])
-    col = mix(col, lin("#140c08"), w["eye"])
-    iris, slit = eye_iris(P)
-    iris = iris * w["eye"]
-    slit = slit * w["eye"]
-    col = mix(col, lin("#e0881c"), iris)
-    col = mix(col, lin("#050302"), slit)
-    em = lin("#f0a12d")[None, :] * (iris * (1 - slit) * 0.6)[:, None]
-    rough = w["skin"] * (0.74 + 0.10 * cid) + w["mouth"] * 0.45 + w["tooth"] * 0.40 + w["claw"] * 0.48 + w["eye"] * 0.1
+    em = np.zeros((ctx.n, 3), np.float32)
+    for s in (-1, 1):
+        # amber-gold iris with fibres and a vertical slit pupil (eyes.iris), a faint inner glow
+        ec, irisw, pu, near = eye_tex(P, (2.575, 2.16, 0.300 * s), (0.45, 0.05, 0.89 * s), 0.062, "#ffd36a", "#c06612",
+                                      ring="#2a1000", pupil="slit", pupil_size=0.30, iris_ang=1.0, noise=noise,
+                                      seed=31)
+        m = near * w["eye"]
+        col = col * (1 - m[:, None]) + ec * m[:, None]
+        em += ec * (irisw * w["eye"] * 0.35)[:, None]
+    rough = w["skin"] * (0.74 + 0.10 * cid) + w["mouth"] * 0.45 + w["tooth"] * 0.40 + w["claw"] * 0.48 + w["eye"] * 0.04
     chest = sstep(1.1, 1.8, y) * sstep(1.0, 1.8, P[:, 0]) * sstep(0.0, -0.6, N[:, 1] - 0.3)
     tailg = sstep(-2.6, -3.4, P[:, 0])
     variant = np.stack([np.zeros(ctx.n, np.float32), np.clip((chest + tailg * 0.8) * crease * 3.0, 0, 1),
@@ -454,7 +487,7 @@ def shade_skin(ctx):
         hs, _e, _c = scales(Q)
         return hs * w["skin"] + noise.ridged(Q * 60.0, 2, seed=8) * 0.0005 * (w["tooth"] + w["claw"])
     return {"albedo": np.clip(col, 0, 1), "roughness": np.clip(rough, 0, 1), "emissive": em, "height": height,
-            "height_eps": 0.003, "cavity": 1.0 - 0.32 * edge * w["skin"], "variant": variant}
+            "height_eps": 0.003, "cavity": 1.0 - 0.50 * edge * w["skin"], "variant": variant}
 
 
 _AX = np.array([p[0] for p in TAIL[::-1]] + [p[0] for p in SPINE_Y[1:]], np.float32)

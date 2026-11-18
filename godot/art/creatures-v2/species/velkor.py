@@ -9,6 +9,7 @@ import numpy as np
 from sdf import Prim, Part, chain, bezier, rot_x, rot_y, rot_z
 from rig import Skeleton
 from common import SIDES, leg_bones, strands, locks, scatter_on, surface_points, plate_frame, scale_plate
+from eyes import lid_prims, iris as eye_tex
 
 ID = "velkor"
 NAME = "Лесной Велькор"
@@ -139,6 +140,8 @@ def body_core():
                name="nasal"),
           Prim("ellipsoid", "Nose", k=0.012, mat="nose", c=(2.004, 2.098, 0), r=(0.050, 0.048, 0.066),
                name="nosepad"),
+          Prim("sphere", "Nose", k=0.006, neg=True, mat="nose", c=(2.047, 2.103, 0.024), r=0.013, name="nostrilL"),
+          Prim("sphere", "Nose", k=0.006, neg=True, mat="nose", c=(2.047, 2.103, -0.024), r=0.013, name="nostrilR"),
           Prim("cone", "Jaw", k=0.04, a=(1.60, 2.05, 0), b=(1.92, 2.005, 0), ra=0.09, rb=0.042, name="jaw"),
           Prim("sphere", "Jaw", k=0.03, mat="skin", c=(1.94, 2.005, 0), r=0.044, name="chin")]
     for nm, s in SIDES:
@@ -149,6 +152,9 @@ def body_core():
               Prim("cone", "Nose", k=0.03, mat="skin", a=(1.76, 2.035, 0.10 * s), b=(1.93, 2.025, 0.048 * s),
                    ra=0.036, rb=0.025, name=f"lip{nm}"),
               Prim("sphere", "Head", k=0.015, neg=True, c=(1.718, 2.252, 0.124 * s), r=0.038, name=f"socket{nm}")]
+        # eyelids: the deer-like eye of the sheet, dark-rimmed, not a bead
+        P += lid_prims((1.712, 2.252, 0.118 * s), 0.034, (0.55, 0.06, 0.83 * s), "Head", f"eye{nm}", mat="skin",
+                       upper=0.74, lower=0.88)
         ec = np.array([1.38, 2.37, 0.21 * s])
         Re = rot_x(0.95 * s) @ rot_z(0.10)     # upright, a little outward: the sheets show both ears
         P += [Prim("ellipsoid", f"Ear_{nm}", k=0.03, c=ec, r=(0.055, 0.16, 0.085), R=Re, name=f"ear{nm}"),
@@ -245,7 +251,7 @@ def antler_prims(s):
     radii = np.linspace(0.066, 0.030, len(beam))
     P = [Prim("ellipsoid", bone, k=0.0, mat="antler", c=base + np.array([0, 0.03, 0.01 * s]), r=(0.085, 0.04, 0.085),
               name="burr")]
-    P += chain(list(beam), list(radii), bone, k=0.02, mat="antler", name="beam")
+    P += chain(list(beam), list(radii), bone, k=0.0, mat="antler", name="beam")
     # (position along the beam, rise direction (x fwd, y up, z out), length, forward hook, inward hook at the tip)
     tines = [(0.04, (0.90, 0.40, 0.10), 0.50, 0.10, 0.02),     # brow tine over the muzzle
              (0.13, (0.45, 0.88, 0.04), 0.44, 0.20, 0.04),
@@ -266,8 +272,8 @@ def antler_prims(s):
         # sickle: the tine leans back off the beam, then sweeps forward and in to the tip (creature-references views)
         curve = bezier(root, root + d * L * 0.45 - fwd * L * 0.12,
                        root + d * L * 1.00 + fwd * hook * 0.45 + np.array([0, 0, -hin * 0.6 * s]),
-                       root + d * L * 0.86 + fwd * hook * 1.55 + np.array([0, -0.03, -hin * 1.4 * s]), 12)
-        P += chain(list(curve), list(np.linspace(r0, 0.009, len(curve))), bone, k=0.02, mat="antler", name=f"tine{i}")
+                       root + d * L * 0.86 + fwd * hook * 1.55 + np.array([0, -0.03, -hin * 1.4 * s]), 18)
+        P += chain(list(curve), list(np.linspace(r0, 0.009, len(curve))), bone, k=0.0, mat="antler", name=f"tine{i}")
     rng = np.random.default_rng(11 if s < 0 else 12)
     from common import _frame
     for i in range(48):
@@ -351,7 +357,27 @@ def carved_part(rng):
 _hang = lambda p, n: np.array([-0.45, -1.0, 0])  # noqa: E731
 _back = lambda p, n: np.array([-1.0, -0.30, 0])  # noqa: E731
 FUR_KEEP = {0: 0.75, 1: 0.45, 2: 0.12}   # shaggy everywhere on the sheet: more cards than the default
+_FACE = {0: 2, 1: 1, 2: 1}
+
+
+def _face_keep(p, muzzle=False):
+    """Face fur roots (warped p): not on the eyes, the nose leather, the lips, the antler burrs or the ears."""
+    x, y, z = _warp.inverse_points(WARP, np.asarray(p, float)[None, :])[0]
+    for s in (-1, 1):
+        if np.linalg.norm(np.array([x - 1.712, y - 2.252, z - 0.118 * s])) < 0.065:
+            return False
+    if x > 1.95 or (x < 1.58 and y > 2.30) or (y < 2.085 and x > 1.80):
+        return False
+    return True
+
+
 FUR_CARDS = [  # sheet: shaggy grey-brown coat everywhere, long pale chest mane, leg feathering, moss drips
+    {"centre": (1.70, 2.22, 0), "radii": (0.20, 0.13, 0.15), "count": 420, "length": 0.06, "width": 0.035,
+     "flow": lambda p, n: np.array([-1.0, 0.10, 0]), "lift": 0.10, "droop": 0.02, "tip": "#a89784",
+     "root_k": 0.9, "segments": _FACE, "keep": _face_keep},                                       # face fur
+    {"centre": (1.88, 2.14, 0), "radii": (0.10, 0.07, 0.09), "count": 180, "length": 0.035, "width": 0.025,
+     "flow": lambda p, n: np.array([-1.0, 0.20, 0]), "lift": 0.05, "droop": 0.0, "tip": "#c4b8a6",
+     "root_k": 0.9, "segments": _FACE, "keep": lambda p: _face_keep(p, True)},                    # muzzle fur
     {"centre": (1.10, 1.62, 0), "radii": (0.32, 0.45, 0.42), "count": 380, "length": 0.42, "width": 0.12,
      "flow": _hang, "lift": 0.15, "gravity": 0.35, "droop": 0.2, "crossed": True, "tip": "#dccbb0",
      "root": "#9c8468", "root_k": 1.0},                                                             # chest mane
@@ -517,14 +543,14 @@ def shade_body(ctx):
     rough = mix(rough, 0.80 + 0.06 * h0.clip(-1, 1), w["fur_long"])
     rough = mix(rough, 0.62, w["skin"])
     rough = mix(rough, 0.42, w["nose"])
-    rough = mix(rough, 0.36 + 0.15 * sstep(0.035, 0.0, y), w["hoof"])
+    rough = mix(rough, 0.58 + 0.15 * sstep(0.035, 0.0, y), w["hoof"])        # horn, not lacquer
     rough = mix(rough, 0.95, w["moss"])
     furw = w["fur"] + w["fur_long"]
 
     def height(Q):
-        h = hfur(Q) * furw * 1.6
+        h = hfur(Q) * furw * 2.5
         h = h + noise.perlin(Q * 120, 13) * 0.0004 * (w["skin"] + w["nose"])
-        h = h + np.sin(Q[:, 1] * 260.0) * 0.0004 * w["hoof"]
+        h = h + np.sin(Q[:, 1] * 120.0 + noise.perlin(Q * 14, 21) * 2.0) * 0.0013 * w["hoof"]   # growth ridges
         h = h + noise.fbm(Q * 35, 2, seed=8) * 0.002 * w["moss"]
         return h
     cavity = 1.0 - 0.28 * furw * sstep(0.2, -0.9, h0)
@@ -569,17 +595,13 @@ def shade_horn(ctx):
     # eyes: emerald iris + dark pupil, glossy
     em = np.zeros((ctx.n, 3), np.float32)
     for s in (-1, 1):
-        c = np.array([1.712, 2.252, 0.118 * s], np.float32)
-        ax = np.array([0.55, 0.06, 0.83 * s], np.float32)
-        ax /= np.linalg.norm(ax)
-        rel = P - c
-        cosang = np.sum(rel * ax, 1) / np.maximum(np.linalg.norm(rel, axis=1), 1e-6)
-        near = (np.linalg.norm(rel, axis=1) < 0.05).astype(np.float32) * w["eye"]
-        iris = sstep(0.80, 0.86, cosang) * near
-        pupil = sstep(0.955, 0.975, cosang) * near
-        col = mix(col, lin("#2e8a4a"), iris)
-        col = mix(col, lin("#050505"), pupil)
-        em += lin("#55d675")[None, :] * (iris * (1 - pupil) * 0.9)[:, None]
+        # emerald iris with fibres, dark ring and pupil (eyes.iris), a soft glow as on the sheet
+        ec, irisw, pu, near = eye_tex(P, (1.712, 2.252, 0.118 * s), (0.55, 0.06, 0.83 * s), 0.034, "#d8ff9e", "#2f9a3c",
+                                      ring="#0c2208", pupil="round", pupil_size=0.30, iris_ang=0.95, noise=noise,
+                                      seed=23)
+        m = near * w["eye"]
+        col = col * (1 - m[:, None]) + ec * m[:, None]
+        em += ec * (irisw * w["eye"] * 0.7)[:, None]
     # carved runes on the level III plates: emerald grooves along a spiral
     carved_w = w["carved"]
     cl_line = np.zeros(ctx.n, np.float32)
@@ -592,7 +614,7 @@ def shade_horn(ctx):
         col = mix(col, col * 0.45, cl_line)
         em += lin("#55d675")[None, :] * cl_line[:, None]
     rough = (w["antler"] * (0.72 + 0.16 * (1 - groove)) + w["bark"] * (0.90 - 0.05 * edge) + w["moss"] * 0.95
-             + w["eye"] * 0.12 + w["carved"] * 0.86)
+             + w["eye"] * 0.04 + w["carved"] * 0.86)
     rough = mix(rough, 0.95, mm * w["antler"] + bm * w["bark"])
 
     def height(Q):

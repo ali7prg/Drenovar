@@ -20,7 +20,8 @@ RT = os.path.join(REPO, "godot", "project", "assets", "forest_rescue", "forest")
 ART = os.path.join(REPO, "forest_rescue", "delivery", "art")
 sys.path.insert(0, HERE)
 
-TAGS = {"golden_oak": "oak", "dark_pine": "pine", "birch": "birch", "willow": "willow", "hollow_oak": "hollow"}
+TAGS = {"golden_oak": "oak", "dark_pine": "pine", "birch": "birch", "willow": "willow", "hollow_oak": "hollow",
+        "moss_rock": "rock", "fallen_trunk": "trunk", "bramble": "bramble", "reed_fern": "reed"}
 # art/01 reference crops (native art/01 px ~= 10.6 px/m = city zoom 68 at 1280x720)
 ART01 = {
     "grove": (0, 0, 640, 330),
@@ -35,6 +36,7 @@ ART01_SETS = {
 ART01.update({"east_river": (1000, 280, 1536, 700), "sw_quarry": (0, 620, 520, 1024)})
 ART01_SPECIES = {   # single-species crops for colour stats
     "hollow": [(250, 120, 330, 200)],
+    "rock": [(60, 800, 200, 900), (300, 860, 420, 960)],
     "willow": [(1290, 470, 1350, 540)],
     "oak": [(438, 126, 588, 228), (880, 290, 1000, 400)],
     "pine": [(0, 40, 120, 200), (560, 650, 700, 780)],
@@ -62,7 +64,8 @@ def layout(species, n=40, area=64.0, spacing=8.5, seed=4):
     for i, j in enumerate(order):
         sp, v = keys[i % len(keys)]
         x, z = pts[j]
-        inst.append(dict(glb=f"lf_env_{sp}.glb", node=f"lf_env_{sp}_v{v}_LOD0", x=float(x), z=float(z),
+        vname = v if isinstance(v, str) else f"v{v}"
+        inst.append(dict(glb=f"lf_env_{sp}.glb", node=f"lf_env_{sp}_{vname}_LOD0", x=float(x), z=float(z),
                          yaw=float(rng.uniform(0, 2 * np.pi)), s=float(rng.uniform(0.85, 1.1)), tag=TAGS.get(sp, sp)))
     return inst
 
@@ -193,7 +196,7 @@ if __name__ == "__main__":
     species = []
     for s in a.species:
         name, vs = s.split(":")
-        species.append((name, [int(v) for v in vs.split(",")]))
+        species.append((name, [int(v) if v.isdigit() else v for v in vs.split(",")]))
     tags = [TAGS.get(sp, sp) for sp, _ in species]
     LAYOUT_KW.update(area=a.area, spacing=a.spacing)
     od = run(a.out_prefix, species, a.n, a.k, a.k_vol, only_tags=tags)

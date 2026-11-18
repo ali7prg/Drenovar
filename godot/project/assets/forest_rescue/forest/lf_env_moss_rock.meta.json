@@ -9,9 +9,9 @@
         "lf_env_moss_rock_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2906,
-        "LOD1": 1148,
-        "LOD2": 468
+        "LOD0": 2908,
+        "LOD1": 1150,
+        "LOD2": 458
       },
       "materials": {
         "LOD0": [
@@ -28,16 +28,16 @@
         ]
       },
       "height_m": 5.5,
-      "footprint_radius_m": 4.93,
+      "footprint_radius_m": 4.91,
       "bounds_m_blender": [
         [
           -4.46,
-          -0.93,
-          0.15
+          -0.9,
+          0.14
         ],
         [
-          4.93,
-          1.21,
+          4.91,
+          1.41,
           5.5
         ]
       ],
@@ -54,9 +54,9 @@
         "lf_env_moss_rock_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 1392,
-        "LOD1": 540,
-        "LOD2": 230
+        "LOD0": 3672,
+        "LOD1": 1444,
+        "LOD2": 560
       },
       "materials": {
         "LOD0": [
@@ -73,21 +73,21 @@
         ]
       },
       "height_m": 5.5,
-      "footprint_radius_m": 4.25,
+      "footprint_radius_m": 3.02,
       "bounds_m_blender": [
         [
-          -3.65,
-          -1.19,
-          0.15
+          -3.02,
+          -2.07,
+          0.12
         ],
         [
-          4.25,
-          0.82,
+          3.01,
+          3.01,
           5.5
         ]
       ],
       "display_offset_gltf": [
-        11.391,
+        11.371,
         0.0,
         0.0
       ]
@@ -99,9 +99,9 @@
         "lf_env_moss_rock_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 1106,
-        "LOD1": 428,
-        "LOD2": 160
+        "LOD0": 3348,
+        "LOD1": 1316,
+        "LOD2": 540
       },
       "materials": {
         "LOD0": [
@@ -117,31 +117,31 @@
           "lf_foliage"
         ]
       },
-      "height_m": 3.07,
-      "footprint_radius_m": 4.77,
+      "height_m": 5.5,
+      "footprint_radius_m": 3.24,
       "bounds_m_blender": [
         [
-          -4.77,
-          -1.05,
-          0.31
+          -3.24,
+          -2.02,
+          0.11
         ],
         [
-          4.5,
-          0.96,
-          3.07
+          3.06,
+          2.9,
+          5.5
         ]
       ],
       "display_offset_gltf": [
-        22.783,
+        22.742,
         0.0,
         0.0
       ]
     }
   },
   "tris": {
-    "LOD0": 2906,
-    "LOD1": 1148,
-    "LOD2": 468
+    "LOD0": 3672,
+    "LOD1": 1444,
+    "LOD2": 560
   },
   "bones": 0,
   "materials": [
@@ -179,9 +179,9 @@
         0.0
       ],
       "size": [
-        9.39,
+        9.37,
         5.5,
-        2.14
+        2.31
       ],
       "variant": "v1"
     },
@@ -193,9 +193,9 @@
         0.0
       ],
       "size": [
-        7.9,
+        6.03,
         5.5,
-        2.01
+        5.08
       ],
       "variant": "v2"
     },
@@ -203,13 +203,13 @@
       "type": "box",
       "centre": [
         0.0,
-        1.53,
+        2.75,
         0.0
       ],
       "size": [
-        9.27,
-        3.07,
-        2.01
+        6.3,
+        5.5,
+        4.92
       ],
       "variant": "v3"
     }

@@ -27,7 +27,7 @@
           "lf_foliage"
         ]
       },
-      "height_m": 4.04,
+      "height_m": 4.05,
       "footprint_radius_m": 5.34,
       "bounds_m_blender": [
         [
@@ -38,7 +38,7 @@
         [
           5.34,
           1.2,
-          4.04
+          4.05
         ]
       ],
       "display_offset_gltf": [
@@ -54,9 +54,9 @@
         "lf_env_fallen_trunk_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 1536,
-        "LOD1": 591,
-        "LOD2": 180
+        "LOD0": 1547,
+        "LOD1": 595,
+        "LOD2": 174
       },
       "materials": {
         "LOD0": [
@@ -72,7 +72,7 @@
           "lf_foliage"
         ]
       },
-      "height_m": 4.04,
+      "height_m": 4.05,
       "footprint_radius_m": 6.63,
       "bounds_m_blender": [
         [
@@ -81,13 +81,13 @@
           0.8
         ],
         [
-          3.48,
+          3.47,
           0.93,
-          4.04
+          4.05
         ]
       ],
       "display_offset_gltf": [
-        13.031,
+        13.043,
         0.0,
         0.0
       ]
@@ -117,22 +117,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 4.04,
-      "footprint_radius_m": 5.69,
+      "height_m": 4.05,
+      "footprint_radius_m": 5.71,
       "bounds_m_blender": [
         [
           -5.34,
           -0.67,
-          -0.87
+          -0.86
         ],
         [
-          5.69,
+          5.71,
           1.2,
-          4.04
+          4.05
         ]
       ],
       "display_offset_gltf": [
-        26.062,
+        26.085,
         0.0,
         0.0
       ]
@@ -178,7 +178,7 @@
       ],
       "size": [
         10.11,
-        4.04,
+        4.05,
         1.87
       ],
       "variant": "v1"
@@ -191,8 +191,8 @@
         0.0
       ],
       "size": [
-        10.11,
-        4.04,
+        10.1,
+        4.05,
         1.87
       ],
       "variant": "v2"
@@ -205,8 +205,8 @@
         0.0
       ],
       "size": [
-        11.03,
-        4.04,
+        11.05,
+        4.05,
         1.87
       ],
       "variant": "v3_stream"

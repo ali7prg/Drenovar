@@ -1,0 +1,67 @@
+{
+  "metrics": {
+    "v1_LOD0_painted": {
+      "iou": 0.9696,
+      "colour_err": 0.0597,
+      "ssim": 0.8408,
+      "ref_px": 58207,
+      "render_px": 57447
+    },
+    "v1_LOD0_albedo": {
+      "iou": 0.9696,
+      "colour_err": 0.0341,
+      "ssim": 0.8695,
+      "ref_px": 58207,
+      "render_px": 57447
+    },
+    "v1_LOD1_painted": {
+      "iou": 0.9487,
+      "colour_err": 0.0609,
+      "ssim": 0.8109,
+      "ref_px": 58207,
+      "render_px": 56118
+    },
+    "v1_LOD2_painted": {
+      "iou": 0.7194,
+      "colour_err": 0.0629,
+      "ssim": 0.6166,
+      "ref_px": 58207,
+      "render_px": 42391
+    }
+  },
+  "lods": {
+    "v1": {
+      "LOD0": {
+        "tris": 2908
+      },
+      "LOD1": {
+        "tris": 1150
+      },
+      "LOD2": {
+        "tris": 458
+      }
+    },
+    "v2": {
+      "LOD0": {
+        "tris": 3672
+      },
+      "LOD1": {
+        "tris": 1444
+      },
+      "LOD2": {
+        "tris": 560
+      }
+    },
+    "v3": {
+      "LOD0": {
+        "tris": 3348
+      },
+      "LOD1": {
+        "tris": 1316
+      },
+      "LOD2": {
+        "tris": 540
+      }
+    }
+  }
+}

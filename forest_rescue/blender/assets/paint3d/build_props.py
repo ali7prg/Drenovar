@@ -86,8 +86,13 @@ def blocks_of(ref, body, min_dist=16, min_area=450, face_L=44):
     return seg.relabel(lbl)
 
 
-def inflate_slab(ref, mask, t_off_m, k=1.6, dmax_frac=0.42, back=0.85, voxel=2.0):
+def inflate_slab(ref, mask, t_off_m, k=1.6, dmax_frac=0.42, back=0.85, voxel=2.0, body_depth=None):
     h = slab.slab_depth(mask, k=k, dmax_frac=dmax_frac)
+    if body_depth is not None:
+        # block = a piece of the thick outcrop: flat bevelled front face, depth of the whole mass behind it
+        dt = ndi.distance_transform_edt(mask)
+        h = np.minimum(np.minimum(k * dt + 2.0, body_depth), body_depth) * mask
+        h = ndi.gaussian_filter(h, 0.8) * mask
     t0 = np.full(mask.shape, t_off_m * ref.ppm)
     V, F = geom.inflate(mask, ref.view, voxel_px=voxel, depth_px=h, back_scale=back, t_offset_px=t0, smooth=0)
     return V, F
@@ -218,12 +223,17 @@ def build(name, it):
     # ---------------------------------------------------------------- geometry per block
     core.reset()
     blocks = []
+    body_depth = None
+    if name == "moss_rock":
+        # outcrop mass depth: mesa profile of the whole body (deep, flat-backed) ~ 0.5 x its height
+        rows = np.nonzero(body.any(1))[0]
+        body_depth = slab.slab_depth(body, k=1.3, dmax_px=0.55 * (rows.max() - rows.min()), smooth=2.0)
     for b in range(1, nb + 1):
         m = lbl == b
         if m.sum() < 150:
             continue
         if name == "moss_rock":
-            V, F = inflate_slab(ref, m, rng.uniform(-0.25, 0.2), k=1.5, dmax_frac=rng.uniform(0.38, 0.5))
+            V, F = inflate_slab(ref, m, rng.uniform(-0.3, 0.15), k=1.6, body_depth=body_depth, back=1.0)
         else:
             V, F = inflate_round(ref, m, kd=0.9)
         if len(F) == 0:
@@ -237,7 +247,7 @@ def build(name, it):
             m = st_lbl == b
             if m.sum() < 120:
                 continue
-            V, F = inflate_slab(ref, m, 0.0, k=1.2, dmax_frac=0.45)
+            V, F = inflate_round(ref, m, kd=0.8)
             o = to_obj(f"stone{b}", V, F)
             smooth(o, 2, 0.5)
             ys, xs = np.nonzero(m)
@@ -269,11 +279,13 @@ def build(name, it):
         xs_ = np.array([b_["cx"] for b_ in body_blocks])
         ys_ = np.array([b_["cy"] for b_ in body_blocks])
         big = int(np.argmax([b_["area"] for b_ in body_blocks]))
+        left = [i for i in range(len(body_blocks)) if xs_[i] < 0.55 * ref.W]
+        right = [i for i in range(len(body_blocks)) if xs_[i] >= 0.5 * ref.W]
         variants = {
             "v1": dict(blocks=list(range(len(body_blocks))), plants=True),
-            "v2": dict(blocks=[i for i in range(len(body_blocks)) if abs(xs_[i] - xs_[big]) < 95 and ys_[i] < 175],
-                       plants=True, center=True),
-            "v3": dict(blocks=[i for i in range(len(body_blocks)) if ys_[i] > 150], plants=False, center=True),
+            # compact boulders: a painted block group + a copy of it rotated behind (outcrop depth ~ width)
+            "v2": dict(blocks=left, plants=True, center=True, rot_copy=(95, 0.85)),
+            "v3": dict(blocks=right, plants=True, center=True, rot_copy=(-100, 0.8), mirror=True),
         }
     else:
         variants = {
@@ -310,11 +322,24 @@ def build(name, it):
                 bx = [body_blocks[i] for i in vd["blocks"]]
                 for i in range(P.n):
                     cu, cv_ = P.info[i]["c"]
-                    if min(abs(cu - b_["cx"]) + 0.5 * abs(cv_ - b_["cy"]) for b_ in bx) < 120:
+                    if min(abs(cu - b_["cx"]) + 0.5 * abs(cv_ - b_["cy"]) for b_ in bx) < 70:
                         keep.append(i)
                 if lod == 1:
                     keep = sorted(keep, key=lambda i: -P.info[i]["area"])[: max(1, len(keep) // 2)]
                 md.extend(plant_cards(ref, P, zb, keep, copies=((55, 0.9), (-60, 0.85)) if lod == 0 else ((70, 0.9),)))
+            if vd.get("rot_copy"):
+                ang, sc = vd["rot_copy"]
+                Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
+                used = np.unique(Tt)
+                cen = Vv[used].mean(0)
+                cen[2] = 0.0
+                R = geom.rot_z(math.radians(ang))
+                V2 = ((Vv - cen) * sc) @ R.T + cen - ref.view.d * 0.0 + np.array([0, 0, 0]) 
+                V2 = V2 + (R @ np.array([0.0, 1.0, 0.0])) * 0.0
+                md2 = geom.Mesh()
+                md2.add(V2 + np.array([0.0, 0.6 * np.ptp(Vv[used][:, 0]) * 0.25, 0.0]), Tt, UVv, Cc, Nn @ R.T, 0)
+                md2.M = [Mm]
+                md.extend(md2)
             if vd.get("cut_x"):
                 # shorter log: keep the part right of cut_x (fraction of the crop width) -> drop root plate
                 Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()

@@ -55,6 +55,13 @@ LODS_TREE = {
             copies=False, front_frac=0.18, front_scale=1.5, n_fill=96, fill_size=1.9, n_inner=0, min_dist_k=0.6),
 }
 
+# grove oaks (art/01 look): broad, flat, lifted crown of yellow lobes, trunk + limbs visible below
+GROVE_CFG = dict(mass_eta_min=0.0, mass_eta_max=0.34, mass_zscale=0.5, core_eta_max=0.3, ao_under=0.74, p_hires=0.8,
+                 grove_k=(0.5, 0.95))
+GROVE_LODS = {0: dict(n_masses=11, clumps_per=46, core_cards=10, max_cards=1250),
+              1: dict(n_masses=10, clumps_per=20, core_cards=4, max_cards=460),
+              2: dict(n_masses=8, clumps_per=10, core_cards=0, max_cards=110)}
+
 TREES = {
     "golden_oak": dict(
         cfg=dict(name="golden_oak", box=(0, 0, 430, 445), exclude=[(284, 360, 320, 432)], clip_row=410, ground_row=421,
@@ -66,13 +73,18 @@ TREES = {
         height_hint=13.3, crown_hint=7.2, lods=LODS_MASS_OAK, crown_mode="mass", mass_r=0.42,
         paintedLightMixByMaterial={"lf_foliage_vol": 0.5},
         hires=dict(region="oak_top", sheet="07_fog_exploration_interface.png", box=(518, 100, 800, 530), rosette_px=800,
-                   m_per_px=1 / 50.0, l_shift=5.0, n_composite=16),
+                   m_per_px=1 / 50.0, l_shift=5.0, n_composite=16, keep_original=True),
+        palettes=[dict(name="grove", region="oak_grove", lab=dict(dh=13.0, dl=8.0, kc=1.0))],
         single_refs="oak",
         tint_note="art/02 palette (orange-gold); for art/07 / art/01 look tint foliage toward warm yellow: "
                   "hue +0.02..+0.035, saturation x1.10, value x1.08 (INSTANCE_CUSTOM r,g,b)",
         variants={1: dict(seed=5, copies=[(125, 0.92), (-125, 0.9)]),
-                  2: dict(seed=6, mirror=True, copies=[(105, 0.9), (-150, 0.92)]),
-                  3: dict(seed=8, copies=[(140, 0.9), (-110, 0.95)], scale=(0.9, 1.06))},
+                  2: dict(seed=6, mirror=True, copies=[(105, 0.95), (-150, 0.95)], scale=(1.12, 0.96), palette="grove",
+                          no_front=True, cfg=GROVE_CFG, lods=GROVE_LODS),
+                  3: dict(seed=8, copies=[(140, 0.95), (-110, 0.95)], scale=(1.05, 1.02), palette="grove",
+                          no_front=True, cfg=GROVE_CFG, lods=GROVE_LODS),
+                  4: dict(seed=9, mirror=True, copies=[(120, 0.9), (-120, 0.9)], scale=(1.18, 0.92), palette="grove",
+                          no_front=True, cfg=GROVE_CFG, lods=GROVE_LODS)},
         patch=dict(refs=[("07_fog_exploration_interface.png", (518, 110, 1020, 720), "art/07 panel 2"),
                          ("01_world_masterplan.png", (0, 0, 560, 330), "art/01 NW golden-oak grove")],
                    ground=(0.42, 0.44, 0.24), n=30, area=78.0, spacing=12.0),
@@ -152,6 +164,18 @@ TREES["birch"] = dict(
                      ("01_world_masterplan.png", (150, 360, 520, 600), "art/01 mixed broadleaf")],
                ground=(0.33, 0.36, 0.17)),
 )
+
+
+def lab_transform(dh=0.0, dl=0.0, kc=1.0, kl=1.0):
+    """Lab colour grade: hue rotation (deg), lightness offset/scale, chroma scale (painted structure kept)."""
+    def fn(lab):
+        L = lab[..., 0] * kl + dl
+        a, b = lab[..., 1], lab[..., 2]
+        C = np.hypot(a, b) * kc
+        h = np.arctan2(b, a) + np.radians(dh)
+        out = np.stack([np.clip(L, 0, 100), C * np.cos(h), C * np.sin(h)], -1)
+        return out
+    return fn
 
 
 def export_kit(asset, built, sp, info, kind, k, args):

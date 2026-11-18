@@ -344,8 +344,50 @@ class Patches:
             self.fronds.append(len(self.tiles) - 1)
         return len(self.fronds)
 
+    def add_palette_copy(self, key, name, lab_fn, scale=None):
+        """Recoloured copies of all current tiles (Lab transform lab_fn(lab)->lab) packed into region `key`.
+        Copies get info['palette'] = name and keep the geometry metadata; self.pal[name] = index offset map."""
+        import p3atlas
+        from skimage import color as skc
+        region = p3atlas.REGIONS[key]
+        src_ids = list(range(len(self.tiles)))
+        tiles = []
+        for i in src_ids:
+            t_ = self.tiles[i]
+            lab = seg.lab(t_[..., :3])
+            lab = lab_fn(lab)
+            rgb = np.clip(skc.lab2rgb(np.clip(lab, [0, -128, -128], [100, 127, 127])), 0, 1).astype(np.float32)
+            tiles.append(np.concatenate([rgb, t_[..., 3:4]], 2))
+        sizes = [(t_.shape[1], t_.shape[0]) for t_ in tiles]
+        pos, s = seg.pack_rects(sizes, (0, 0, region[2], region[3]), pad=3)
+        img = np.zeros((region[3], region[2], 4), np.float32)
+        mp = {}
+        for i, t_, p_ in zip(src_ids, tiles, pos):
+            if s < 0.999:
+                t_ = cv2.resize(t_, (max(1, int(np.ceil(t_.shape[1] * s))), max(1, int(np.ceil(t_.shape[0] * s)))),
+                                interpolation=cv2.INTER_AREA)
+            h, w = t_.shape[:2]
+            img[p_[1]:p_[1] + h, p_[0]:p_[0] + w] = t_
+            ax0, ay0 = region[0] + p_[0], region[1] + p_[1]
+            inf = dict(self.info[i])
+            inf["palette"] = name
+            lab0 = seg.lab(t_[..., :3])
+            al = t_[..., 3] > 0.5
+            if al.any():
+                inf["lum"] = float(lab0[..., 0][al].mean())
+                inf["top_lum"] = inf["lum"] + (self.info[i]["top_lum"] - self.info[i]["lum"])
+            self.info.append(inf)
+            self.uv.append(p3atlas.uv_rect((ax0 + 0.5, ay0 + 0.5, ax0 + w - 0.5, ay0 + h - 0.5)))
+            self.tiles.append(t_)
+            mp[i] = len(self.info) - 1
+        p3atlas.save_region(key, img, {"palette": name, "tiles": len(tiles), "scale": s})
+        if not hasattr(self, "pal"):
+            self.pal = {}
+        self.pal[name] = mp
+        return s
+
     def add_hires(self, key, sheet, box, target_mask=None, rosette_px=800, m_per_px=None, l_shift=4.0, hue=(70, 100),
-                  n_composite=14):
+                  n_composite=14, keep_original=False):
         """Append colour-matched hi-res clump tiles from another painting (top/oblique card sources)."""
         import hires
         import p3atlas
@@ -353,18 +395,34 @@ class Patches:
         Lab = seg.lab(self.ref.img)
         C = np.hypot(Lab[..., 1], Lab[..., 2])
         sel = (C > 35) & (Lab[..., 0] > 52) & self.ref.fg if target_mask is None else target_mask
+        orig = [dict(t_) for t_ in tiles]
         tiles = hires.match_palette(tiles, Lab[sel], l_shift=l_shift)
         tiles = hires.composite(tiles, n=n_composite) + tiles
-        img, uvs, s = hires.pack(tiles, key)
-        p3atlas.save_region(key, img, {"source": sheet, "box": box, "tiles": len(tiles)})
+        pal_tiles = []
+        if keep_original:
+            # the same rosettes/composites in their original art/07 colours (grove palette)
+            pal_tiles = hires.composite(orig, n=n_composite) + orig
+        allt = tiles + pal_tiles
+        img, uvs, s = hires.pack(allt, key)
+        p3atlas.save_region(key, img, {"source": sheet, "box": box, "tiles": len(allt)})
         mpp = m_per_px or (1.0 / self.ref.ppm)
-        for tl, uv in zip(tiles, uvs):
+        for j, (tl, uv) in enumerate(zip(allt, uvs)):
             h, w = tl["rgba"].shape[:2]
-            self.info.append(dict(c=(0, 0), area=tl["area"], rho=0.0, eta=0.0, lum=tl["lum"] + l_shift,
-                                  top_lum=tl["lum"] + l_shift + 6, edge=False, w_m=w * mpp, h_m=h * mpp, hires=True))
+            inf = dict(c=(0, 0), area=tl["area"], rho=0.0, eta=0.0, lum=tl["lum"] + l_shift,
+                       top_lum=tl["lum"] + l_shift + 6, edge=False, w_m=w * mpp, h_m=h * mpp, hires=True)
+            if j >= len(tiles):
+                inf["palette"] = "grove"
+            self.info.append(inf)
             self.uv.append(uv)
-        self.n_hires = len(tiles)
-        return len(tiles)
+        self.n_hires = len(allt)
+        if keep_original:
+            if not hasattr(self, "pal"):
+                self.pal = {}
+            mp = self.pal.setdefault("grove", {})
+            base0 = len(self.info) - len(allt)
+            for j in range(len(tiles)):
+                mp[base0 + j] = base0 + len(tiles) + j
+        return len(allt)
 
 
 # ====================================================================== geometry assembly
@@ -947,7 +1005,9 @@ class TreeBuilder:
         Z = np.array([0, 0, 1.0])
         cards = []
 
-        hires_m = np.array([bool(q.get("hires")) for q in info])
+        base_m = np.array([not q.get("palette") for q in info])
+        hires_m = np.array([bool(q.get("hires")) for q in info]) & base_m
+        chs_all = np.array([q.get("chroma", 40.0) for q in info])
         p_hi = cfg.get("p_hires", 0.75)
 
         def pick(eta, mode):
@@ -956,10 +1016,13 @@ class TreeBuilder:
                 w = w * np.exp(np.clip((lums - np.median(lums[hires_m])) / 6.0, -3, 3))
                 w /= w.sum()
                 return int(rng.choice(len(info), p=w))
-            w = np.where(hires_m, 0.0, np.sqrt(areas) * np.exp(-((etas - eta) / 0.35) ** 2))
-            if mode == "top":
+            w = np.where(hires_m | ~base_m, 0.0, np.sqrt(areas) * np.exp(-((etas - eta) / 0.35) ** 2))
+            if mode == "top" and cfg.get("top_by_chroma"):
+                ref_c = np.percentile(chs_all[base_m & ~hires_m], 65)
+                w *= np.exp(np.clip((chs_all - ref_c) / 5.0, -6, 4)) * np.exp(-((lums - np.percentile(lums[base_m], 60)) / 12.0) ** 2)
+            elif mode == "top":
                 # brightest-topped painted clumps (top quartile)
-                w *= np.exp(np.clip((tlums - np.percentile(tlums[~hires_m], 70)) / (lp * 0.6), -6, 4))
+                w *= np.exp(np.clip((tlums - np.percentile(tlums[~hires_m & base_m], 70)) / (lp * 0.6), -6, 4))
             elif mode == "under":
                 chs = np.array([q.get("chroma", 40.0) for q in info])
                 w *= np.exp(-((lums - np.percentile(lums[~hires_m], 30)) / 5.0) ** 2)
@@ -1044,7 +1107,7 @@ class TreeBuilder:
             else:
                 eta = rng.uniform(cfg.get("mass_eta_min", 0.18), cfg.get("mass_eta_max", 0.62))
                 ph = -np.pi / 2 + (i - n_top + 0.5) * 2 * np.pi / (n_masses - n_top) + rng.normal(0, 0.2)
-                k = rng.uniform(0.5, 0.78)
+                k = rng.uniform(*cfg.get("grove_k", (0.5, 0.78)))
             v = v0 + eta * (v1 - v0)
             vi = int(np.clip(round(v), 0, ref.H - 1))
             u = ref.xc[vi] + ref.R[vi] * k * np.cos(ph)
@@ -1128,7 +1191,7 @@ class TreeBuilder:
         rng = np.random.default_rng(seed)
         cfg = self.cfg
         info = p.info
-        fronds = [i for i, q in enumerate(info) if q.get("frond")]
+        fronds = [i for i, q in enumerate(info) if q.get("frond") and not q.get("palette")]
         if not fronds:
             return []
         Z = np.array([0, 0, 1.0])
@@ -1194,7 +1257,7 @@ class TreeBuilder:
                     return cards
             # inner dark disk (blocks see-through between fronds): 2 crossed horizontal cards of an under tile
             if inner and L > 0.8:
-                under = [i for i, q in enumerate(info) if not q.get("frond") and not q.get("hires")]
+                under = [i for i, q in enumerate(info) if not q.get("frond") and not q.get("hires") and not q.get("palette")]
                 lums = np.array([info[i]["lum"] for i in under])
                 ti = under[int(np.argmin(np.abs(lums - np.percentile(lums, 25))))]
                 for a in (0.0, np.pi / 2):

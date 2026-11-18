@@ -1,0 +1,125 @@
+{
+  "metrics": {
+    "v1_LOD0_painted": {
+      "iou": 0.9434,
+      "colour_err": 0.052,
+      "ssim": 0.8117,
+      "ref_px": 98612,
+      "render_px": 101661
+    },
+    "v1_LOD0_albedo": {
+      "iou": 0.9434,
+      "colour_err": 0.0411,
+      "ssim": 0.8243,
+      "ref_px": 98612,
+      "render_px": 101661
+    },
+    "v1_LOD1_painted": {
+      "iou": 0.8756,
+      "colour_err": 0.1035,
+      "ssim": 0.4701,
+      "ref_px": 98612,
+      "render_px": 96895
+    },
+    "v1_LOD2_painted": {
+      "iou": 0.5916,
+      "colour_err": 0.1438,
+      "ssim": 0.3601,
+      "ref_px": 98612,
+      "render_px": 65149
+    },
+    "acceptance": {
+      "top_coverage": 0.9512,
+      "holes_55": {
+        "0": 0.0174,
+        "90": 0.0202,
+        "180": 0.0138,
+        "270": 0.0132
+      }
+    }
+  },
+  "lods": {
+    "1": {
+      "LOD0": {
+        "tris": 3462,
+        "fronts": 153,
+        "fills": 438,
+        "limb_min_r": 3.5
+      },
+      "LOD1": {
+        "tris": 1192,
+        "fronts": 78,
+        "fills": 126,
+        "limb_min_r": 4.75
+      },
+      "LOD2": {
+        "tris": 152,
+        "fronts": 14,
+        "fills": 37,
+        "limb_min_r": 99
+      }
+    },
+    "2": {
+      "LOD0": {
+        "tris": 2694,
+        "fronts": 0,
+        "fills": 207,
+        "limb_min_r": 3.5
+      },
+      "LOD1": {
+        "tris": 936,
+        "fronts": 0,
+        "fills": 76,
+        "limb_min_r": 4.75
+      },
+      "LOD2": {
+        "tris": 110,
+        "fronts": 0,
+        "fills": 30,
+        "limb_min_r": 99
+      }
+    },
+    "3": {
+      "LOD0": {
+        "tris": 2896,
+        "fronts": 0,
+        "fills": 308,
+        "limb_min_r": 3.5
+      },
+      "LOD1": {
+        "tris": 980,
+        "fronts": 0,
+        "fills": 98,
+        "limb_min_r": 4.75
+      },
+      "LOD2": {
+        "tris": 110,
+        "fronts": 0,
+        "fills": 30,
+        "limb_min_r": 99
+      }
+    },
+    "4": {
+      "LOD0": {
+        "tris": 2664,
+        "fronts": 0,
+        "fills": 192,
+        "limb_min_r": 3.5
+      },
+      "LOD1": {
+        "tris": 986,
+        "fronts": 0,
+        "fills": 101,
+        "limb_min_r": 4.75
+      },
+      "LOD2": {
+        "tris": 116,
+        "fronts": 0,
+        "fills": 33,
+        "limb_min_r": 99
+      }
+    }
+  },
+  "atlas_scale": 0.7163929600000001,
+  "patches": 153
+}

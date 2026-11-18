@@ -81,8 +81,20 @@ def simplify_path(p, step_m):
 
 def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
     ref, P = B.ref, B.p
-    L = sp["lods"][lod]
     vs = sp["variants"][variant]
+    L = dict(sp["lods"][lod])
+    L.update(vs.get("lods", {}).get(lod, {}))
+    cfg0 = B.cfg
+    B.cfg = dict(cfg0)
+    B.cfg.update(vs.get("cfg", {}))
+    try:
+        return _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs)
+    finally:
+        B.cfg = cfg0
+
+
+def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
+    ref, P = B.ref, B.p
     # wood
     ps = []
     for p in base_paths:
@@ -111,7 +123,12 @@ def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
         drop = set(rng.choice(n, int(n * vs["drop_front"]), replace=False).tolist())
         keep = set(range(n)) - drop
     fronts = B.front_cards(scale=L["front_scale"], keep=keep, seed=vs["seed"])
-    dm = B.front_depth_map(front_all)
+    if vs.get("front_eta_max") is not None:
+        v0_, v1_ = ref.crown_rows
+        fronts = [c for c in fronts if (c["c"][1] - v0_) / max(v1_ - v0_, 1) <= vs["front_eta_max"]]
+    if vs.get("no_front"):
+        fronts = []
+    dm = B.front_depth_map(front_all) if not vs.get("no_front") else np.full((ref.H, ref.W), np.inf)
     if sp.get("crown_mode") == "whorls":
         fills = B.whorl_cards(dm, seed=vs["seed"] * 7 + lod, density=L.get("density", 1.0), keep_every=L.get("keep_every", 1),
                               max_cards=L.get("max_cards"), inner=L.get("inner", True), width_k=L.get("width_k", 1.0),
@@ -146,6 +163,10 @@ def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
     else:
         fills = B.fill_cards(L["n_fill"], dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod, n_inner=L["n_inner"],
                              min_dist_k=L.get("min_dist_k", 0.55))
+    if vs.get("palette"):
+        mp = P.pal[vs["palette"]]
+        for c in fronts + fills:
+            c["tile"] = mp.get(c["tile"], c["tile"])
     H = sp.get("height_hint", 12.0)
     Rc = sp.get("crown_hint", 6.0)
     bark, leaf = B.assemble(ps, fronts + fills, bark_uv, sides_trunk=L["trunk_sides"], sides_limb=L["limb_sides"],
@@ -191,11 +212,14 @@ def main():
     P.preview(qa_path(asset, a.iter, "patches.png"))
     reg_img, s = P.pack(sp["region"])
     atl.save_region(sp["region"], reg_img, {"asset": asset, "scale": s, "tiles": P.n})
+    for pal in sp.get("palettes", []):
+        ps = P.add_palette_copy(pal["region"], pal["name"], SP.lab_transform(**pal["lab"]))
+        print(f"[{asset}] palette {pal['name']} -> {pal['region']} (scale {ps:.3f})", flush=True)
     if sp.get("hires"):
         hr = sp["hires"]
         nh = P.add_hires(hr["region"], hr["sheet"], hr["box"], rosette_px=hr.get("rosette_px", 800),
                          m_per_px=hr.get("m_per_px"), l_shift=hr.get("l_shift", 4.0), hue=hr.get("hue", (70, 100)),
-                         n_composite=hr.get("n_composite", 14))
+                         n_composite=hr.get("n_composite", 14), keep_original=hr.get("keep_original", False))
         print(f"[{asset}] hi-res top tiles: {nh}", flush=True)
     atlas_path = atl.assemble()
     print(f"[{asset}] patches={P.n} atlas_scale={s:.3f} limbs={len(ref.limbs)} ({time.time() - t0:.1f}s)", flush=True)

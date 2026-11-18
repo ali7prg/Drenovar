@@ -9,9 +9,9 @@
         "lf_env_golden_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3296,
-        "LOD1": 1248,
-        "LOD2": 150
+        "LOD0": 3462,
+        "LOD1": 1192,
+        "LOD2": 152
       },
       "materials": {
         "LOD0": [
@@ -30,8 +30,8 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 13.87,
-      "crown_radius_m": 8.61,
+      "height_m": 13.73,
+      "crown_radius_m": 8.72,
       "bounds_m_blender": [
         [
           -6.14,
@@ -40,8 +40,8 @@
         ],
         [
           8.5,
-          8.61,
-          13.87
+          8.72,
+          13.73
         ]
       ],
       "display_offset_gltf": [
@@ -69,9 +69,9 @@
         "lf_env_golden_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3230,
-        "LOD1": 1184,
-        "LOD2": 138
+        "LOD0": 2694,
+        "LOD1": 936,
+        "LOD2": 110
       },
       "materials": {
         "LOD0": [
@@ -90,22 +90,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 13.6,
-      "crown_radius_m": 8.5,
+      "height_m": 13.22,
+      "crown_radius_m": 8.82,
       "bounds_m_blender": [
         [
-          -8.5,
-          -6.01,
-          -0.3
+          -8.66,
+          -7.81,
+          -0.29
         ],
         [
-          5.93,
-          7.17,
-          13.6
+          2.95,
+          8.82,
+          13.22
         ]
       ],
       "display_offset_gltf": [
-        16.643,
+        18.964,
         0.0,
         0.0
       ],
@@ -114,13 +114,51 @@
         "copies": [
           [
             105,
-            0.9
+            0.95
           ],
           [
             -150,
-            0.92
+            0.95
           ]
-        ]
+        ],
+        "scale": [
+          1.12,
+          0.96
+        ],
+        "palette": "grove",
+        "no_front": true,
+        "cfg": {
+          "mass_eta_min": 0.0,
+          "mass_eta_max": 0.34,
+          "mass_zscale": 0.5,
+          "core_eta_max": 0.3,
+          "ao_under": 0.74,
+          "p_hires": 0.8,
+          "grove_k": [
+            0.5,
+            0.95
+          ]
+        },
+        "lods": {
+          "0": {
+            "n_masses": 11,
+            "clumps_per": 46,
+            "core_cards": 10,
+            "max_cards": 1250
+          },
+          "1": {
+            "n_masses": 10,
+            "clumps_per": 20,
+            "core_cards": 4,
+            "max_cards": 460
+          },
+          "2": {
+            "n_masses": 8,
+            "clumps_per": 10,
+            "core_cards": 0,
+            "max_cards": 110
+          }
+        }
       }
     },
     "v3": {
@@ -130,9 +168,9 @@
         "lf_env_golden_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3076,
-        "LOD1": 1210,
-        "LOD2": 150
+        "LOD0": 2896,
+        "LOD1": 980,
+        "LOD2": 110
       },
       "materials": {
         "LOD0": [
@@ -151,22 +189,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 14.67,
-      "crown_radius_m": 7.65,
+      "height_m": 14.52,
+      "crown_radius_m": 8.07,
       "bounds_m_blender": [
         [
-          -5.34,
-          -5.39,
-          -0.32
+          -4.83,
+          -7.32,
+          -0.31
         ],
         [
-          7.65,
-          6.72,
-          14.67
+          8.07,
+          7.95,
+          14.52
         ]
       ],
       "display_offset_gltf": [
-        33.286,
+        37.929,
         0.0,
         0.0
       ],
@@ -174,7 +212,7 @@
         "copies": [
           [
             140,
-            0.9
+            0.95
           ],
           [
             -110,
@@ -182,16 +220,149 @@
           ]
         ],
         "scale": [
-          0.9,
-          1.06
+          1.05,
+          1.02
+        ],
+        "palette": "grove",
+        "no_front": true,
+        "cfg": {
+          "mass_eta_min": 0.0,
+          "mass_eta_max": 0.34,
+          "mass_zscale": 0.5,
+          "core_eta_max": 0.3,
+          "ao_under": 0.74,
+          "p_hires": 0.8,
+          "grove_k": [
+            0.5,
+            0.95
+          ]
+        },
+        "lods": {
+          "0": {
+            "n_masses": 11,
+            "clumps_per": 46,
+            "core_cards": 10,
+            "max_cards": 1250
+          },
+          "1": {
+            "n_masses": 10,
+            "clumps_per": 20,
+            "core_cards": 4,
+            "max_cards": 460
+          },
+          "2": {
+            "n_masses": 8,
+            "clumps_per": 10,
+            "core_cards": 0,
+            "max_cards": 110
+          }
+        }
+      }
+    },
+    "v4": {
+      "nodes": [
+        "lf_env_golden_oak_v4_LOD0",
+        "lf_env_golden_oak_v4_LOD1",
+        "lf_env_golden_oak_v4_LOD2"
+      ],
+      "tris": {
+        "LOD0": 2664,
+        "LOD1": 986,
+        "LOD2": 116
+      },
+      "materials": {
+        "LOD0": [
+          "lf_bark_oak",
+          "lf_foliage",
+          "lf_foliage_vol"
+        ],
+        "LOD1": [
+          "lf_bark_oak",
+          "lf_foliage",
+          "lf_foliage_vol"
+        ],
+        "LOD2": [
+          "lf_bark_oak",
+          "lf_foliage",
+          "lf_foliage_vol"
         ]
+      },
+      "height_m": 12.65,
+      "crown_radius_m": 8.85,
+      "bounds_m_blender": [
+        [
+          -8.85,
+          -8.14,
+          -0.28
+        ],
+        [
+          5.75,
+          8.83,
+          12.65
+        ]
+      ],
+      "display_offset_gltf": [
+        56.893,
+        0.0,
+        0.0
+      ],
+      "recipe": {
+        "mirror": true,
+        "copies": [
+          [
+            120,
+            0.9
+          ],
+          [
+            -120,
+            0.9
+          ]
+        ],
+        "scale": [
+          1.18,
+          0.92
+        ],
+        "palette": "grove",
+        "no_front": true,
+        "cfg": {
+          "mass_eta_min": 0.0,
+          "mass_eta_max": 0.34,
+          "mass_zscale": 0.5,
+          "core_eta_max": 0.3,
+          "ao_under": 0.74,
+          "p_hires": 0.8,
+          "grove_k": [
+            0.5,
+            0.95
+          ]
+        },
+        "lods": {
+          "0": {
+            "n_masses": 11,
+            "clumps_per": 46,
+            "core_cards": 10,
+            "max_cards": 1250
+          },
+          "1": {
+            "n_masses": 10,
+            "clumps_per": 20,
+            "core_cards": 4,
+            "max_cards": 460
+          },
+          "2": {
+            "n_masses": 8,
+            "clumps_per": 10,
+            "core_cards": 0,
+            "max_cards": 110
+          }
+        }
       }
     }
   },
   "tris": {
-    "LOD0": 3296,
-    "LOD1": 1248,
-    "LOD2": 150
+    "LOD0": 3462,
+    "LOD1": 1192,
+    "LOD2": 152
   },
   "bones": 0,
   "materials": [

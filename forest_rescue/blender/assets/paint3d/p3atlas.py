@@ -15,18 +15,24 @@ SIZE = 2048
 
 # fixed regions (x, y, w, h) in atlas pixels; tiles are scaled down automatically to fit
 REGIONS = {
-    "golden_oak": (0, 0, 1024, 832),
-    "hollow_oak": (1024, 0, 1024, 640),
-    "birch": (1024, 640, 640, 576),
-    "willow": (0, 832, 640, 640),
-    "dark_pine": (640, 832, 384, 640),
-    "bramble": (1024, 1216, 640, 448),
-    "reed_fern": (1664, 640, 384, 640),
-    "moss": (1664, 1280, 384, 384),
-    "groundcover": (0, 1472, 640, 576),
-    "fallen_trunk": (640, 1472, 384, 576),
-    "oak_top": (1024, 1664, 640, 384),
-    "spare": (1664, 1664, 384, 384),
+    # column A (x 0..1024)
+    "golden_oak": (0, 0, 1024, 832),        # art/02 oak patches (hero v1)
+    "oak_grove": (0, 832, 1024, 512),       # same oak patches, art/01/07 grove palette (grove variants)
+    "willow": (0, 1344, 640, 512),
+    "fallen_trunk": (640, 1344, 384, 384),
+    "fern": (640, 1728, 384, 320),
+    "grass": (0, 1856, 640, 192),
+    # column B (x 1024..1664)
+    "oak_top": (1024, 0, 640, 384),         # hi-res art/07 rosettes: art/02-matched + original yellow
+    "hollow_oak": (1024, 384, 640, 448),
+    "birch": (1024, 832, 640, 576),
+    "bramble": (1024, 1408, 640, 384),
+    "groundcover": (1024, 1792, 640, 256),
+    # column C (x 1664..2048)
+    "moss": (1664, 0, 384, 384),
+    "dark_pine": (1664, 384, 384, 640),     # art/02 pine (hero v1)
+    "pine_dark": (1664, 1024, 384, 640),    # pine tiles in the art/01 dark blue-green conifer palette
+    "reed_fern": (1664, 1664, 384, 384),
 }
 
 

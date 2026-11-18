@@ -161,7 +161,7 @@ def do_clips(arm):
     core.link(g)
     gm = core.material("qa_ground_mat", base=(0.42, 0.38, 0.30, 1))
     core.assign(g, gm)
-    cam = render.perspective_camera((-4.2, -2.6, 1.7), (0, -0.15, 0.95), lens=40, res=(960, 540))
+    cam = render.perspective_camera((-5.6, -3.5, 1.9), (0, -0.2, 0.98), lens=40, res=(960, 540))
     meta = json.load(open(paths.runtime("horse", f"{ASSET}.meta.json")))
     for act in sorted(a.name for a in bpy.data.actions if a.name.startswith("lf_horse_")):
         if ONLY and act not in ONLY:

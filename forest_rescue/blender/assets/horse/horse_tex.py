@@ -228,8 +228,6 @@ def details(T, col, J=None, seed=41):
     t = np.clip((P[:, 2] - (cz - 0.10)) / 0.05, 0, 1) * band
     roots = np.array([0.13, 0.09, 0.065]) * (0.85 + 0.3 * hair)[:, None]
     c = c * (1 - 0.85 * t[:, None]) + roots * 0.85 * t[:, None]
-    dock = (P[:, 1] > 0.66) & (P[:, 2] > 1.28) & (np.abs(P[:, 0]) < 0.10)
-    c[dock] = roots[dock]
     # white forehead star
     sm = _star_mask(P, N, J)
     white = np.array([0.93, 0.90, 0.84]) * (0.92 + 0.1 * hair)[:, None]

@@ -1,9 +1,9 @@
 {
   "id": "lf_horse_origin",
   "tris": {
-    "LOD0": 14999,
-    "LOD1": 7008,
-    "LOD2": 2604
+    "LOD0": 14739,
+    "LOD1": 7178,
+    "LOD2": 3050
   },
   "bones": {
     "deform": 52,
@@ -20,6 +20,13 @@
     "lf_horse_origin_hair",
     "lf_horse_origin_tack"
   ],
+  "hairMaterial": {
+    "name": "lf_horse_origin_hair",
+    "alphaMode": "MASK",
+    "alphaCutoff": 0.5,
+    "doubleSided": true,
+    "note": "fringe cards only (mane/tail wisps, forelock, feathering); the mane/tail/forelock MASS is opaque geometry in lf_horse_origin_body. Atlas colour is dilated into transparent texels."
+  },
   "textures": {
     "lf_horse_origin_body_color.jpg": [
       2048,
@@ -53,13 +60,13 @@
   "bounds_m": {
     "min": [
       -0.381,
-      -1.516,
+      -1.515,
       -0.007
     ],
     "max": [
       0.384,
-      0.969,
-      2.021
+      0.988,
+      2.017
     ]
   },
   "clips": {
@@ -83,7 +90,7 @@
         "H_L": 0.0,
         "H_R": 0.0
       },
-      "loopSeamMaxQuatDiff": 6.938893903907228e-18,
+      "loopSeamMaxQuatDiff": 3.469446951953614e-18,
       "ikOverreach_m": 0.0
     },
     "lf_horse_walk": {

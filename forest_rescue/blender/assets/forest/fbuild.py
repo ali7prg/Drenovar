@@ -94,6 +94,8 @@ def image(path, colorspace="sRGB"):
     img.name = os.path.splitext(os.path.basename(path))[0]
     img.colorspace_settings.name = colorspace
     img.pack()                                    # read pixels NOW (no lazy load at render time -> no magenta)
+    if not img.has_data and img.size[0] > 0:
+        _ = img.pixels[0]                         # after a factory reset bpy 5.3 loads the buffer lazily: force it
     if not img.has_data or img.size[0] == 0:
         raise RuntimeError(f"texture failed to load: {path}")
     _IMG_CACHE[key] = img

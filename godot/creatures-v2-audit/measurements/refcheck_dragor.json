@@ -1,23 +1,23 @@
 {
  "views": {
   "iou": {
-   "side": 0.832,
-   "front": 0.759,
-   "rear": 0.753,
+   "side": 0.849,
+   "front": 0.762,
+   "rear": 0.754,
    "top": 0.791
   },
   "median_colour": {
    "side": {
     "reference": "#4f413a",
-    "model": "#4f4740"
+    "model": "#49413b"
    },
    "front": {
     "reference": "#534640",
-    "model": "#514841"
+    "model": "#473f3a"
    },
    "rear": {
     "reference": "#554740",
-    "model": "#4d4036"
+    "model": "#483e35"
    },
    "top": {
     "reference": "#564b46",
@@ -35,13 +35,13 @@
   "camera": {
    "az": 46.0,
    "el": 0.0,
-   "dist": 11.961302558389248
+   "dist": 12.150222110176703
   },
   "iou": {
-   "preparation": 0.794,
-   "launch": 0.66,
-   "contact": 0.75,
-   "recovery": 0.682
+   "preparation": 0.784,
+   "launch": 0.671,
+   "contact": 0.748,
+   "recovery": 0.679
   }
  },
  "feet": {

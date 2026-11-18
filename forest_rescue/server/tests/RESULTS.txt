@@ -1,0 +1,73 @@
+# «Лес потерянных» (forest_rescue_v1) server — real test run
+# date: 2026-11-18T08:54:41Z   node: v22.23.5   platform: Linux x86_64
+# cwd: forest_rescue/server
+# command: node --test --test-reporter=spec "tests/*.test.mjs"
+
+✔ hall I/II: locked projection, every adventure/intro command refused before receipt replay, saved bytes untouched (335.925688ms)
+✔ hall III opens only the entrance corridor; hidden or unavailable targets are unknown (404, no leak) (319.808965ms)
+✔ a hall upgrade 2→3 unlocks only when the server construction order completes (134.060017ms)
+✔ intro lifecycle: start/finish, skip, defer, interrupted playing → deferred on entry, no auto-replay, no rewards (363.146703ms)
+✔ existing campaign progress without an intro namespace migrates to acknowledged(existing_progress) without touching progress (82.087072ms)
+✔ same inputs → identical report; the seed only jitters details (2.438305ms)
+✔ outcome follows the real troop stats: more/better units win, a starter squad loses (8.781203ms)
+✔ boss: hunt → fury → last_stand with the exact telegraph/active/recovery seconds of campaign.json (1.197452ms)
+✔ losses split wounded/dead deterministically; retreat counts only hits so far (0.265122ms)
+✔ claim retried after a conflicting spend recomputes the transfer from the fresh wallet (1187.711706ms)
+✔ retry re-applies the hall gate and the durable task step from the fresh snapshot (88.759512ms)
+✔ persistent conflicts end with CAS_CONFLICT_RETRY and no effect of the losing command (219.876356ms)
+✔ troop stats mirror docs/06_TROOP_CATALOG.json (2.039246ms)
+✔ tenerys/velkor specs mirror the v92 specs exported to the client (0.78534ms)
+✔ city rules mirror the client game data and the delivered economy figures (59.955967ms)
+✔ content model matches the delivered campaign data and FSM (0.851351ms)
+✔ CONTRACT §3 shape holds at every step of a full campaign; §4 events carry their fields (12060.115045ms)
+✔ v92 wiring: gate before receipt replay for adventure kinds only; receipts, replay, mismatch; publicState (44.39681ms)
+✔ v92 wiring: legacy import never carries adventure namespaces; auto-refill hook for paid branches (0.875917ms)
+# delivered suite: tests 74 pass 74 fail 0
+✔ delivered reference suite: 74/74 pass unchanged (1861.750028ms)
+✔ full warehouse: claim moves only free capacity, keeps the remainder, never cuts an over-cap balance (1592.497712ms)
+✔ claim formula at a 2000 capacity (new-city storage) through the module ports (1.02778ms)
+✔ auto-refill: off by default; opt-in refills from escrow only after a real paid command; never on polls or below hall III (1118.901479ms)
+✔ order, arrival and proofs: nothing completes without the server records (596.343555ms)
+✔ defeat and retreat keep keys, people and rewards; losses hit the real army; a wiped squad returns home (941.780313ms)
+✔ paired latch: needs two members held simultaneously; moving away releases the plates (2618.377986ms)
+✔ higher guardians keep their hall requirement (HALL_LEVEL_TOO_LOW, not a silent lock) (4749.398677ms)
+✔ stop at the next graph node, redirect, pause, escort rules, squad reservation (489.405257ms)
+✔ lost response: same key + same body replays the current state without effects (also after restart); changed body → 409 (571.430742ms)
+✔ two concurrent claims transfer the free capacity once; a concurrent same-key retry has no second effect (892.070633ms)
+✔ double cage open (sequential and concurrent) spends the key and pays once (443.847826ms)
+✔ repeated victory: a campaign guardian never respawns; a report cannot pay twice (369.843088ms)
+✔ second profile of the same account is fully isolated (namespaces, receipts, hall gate) (182.08177ms)
+✔ strict allowlist: client-declared success, rewards, wallet, owner, time, positions or proofs are refused without effects (268.923319ms)
+✔ every CONTRACT target id exists (per-site key/cage/guardian, plates, trail landmarks, bridge, boss, home) (1.91662ms)
+✔ all 13 routes are ways with ≤0.5 spacing and y taken from the atlas samples (deck y only on the bridge) (4.755707ms)
+✔ water is crossed only on the approved 27 m deck of lf_route_10_11 (14.303735ms)
+✔ Dijkstra: home → sites follow the authored chain; the east bank is reached only over the bridge (8.10945ms)
+✔ fine nodes: canonical junction names; graph id is stable (5.629678ms)
+✔ corrupt and future-schema namespaces → explicit error on read and write, never a silent reset (886.35638ms)
+✔ only absent namespaces are lazily initialised; existing ones are kept verbatim (134.68613ms)
+✔ real process restart (SIGTERM) keeps fog, movement, progress and rewards (455.3933ms)
+# playthrough steps 204 restart checks 204 events 305 army left {"ENG-06":5346,"ENG-09":5} wounded {"ENG-06":982,"ENG-09":1}
+✔ complete campaign: 12 sites, 4 mechanisms, boss, exact 7,515,000 reward, restart after every step (8017.127694ms)
+✔ vendored files match SHA256SUMS (12.009078ms)
+✔ vendored files are byte-identical to the delivery package and its manifest (2.007692ms)
+✔ server sources import the reference modules only through src/vendor.mjs (10.967579ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 18034.730775
+
+# ---------------------------------------------------------------------------
+# delivered reference suite, unchanged, from forest_rescue/delivery:
+# command: node --test "tests/*.test.mjs"
+ℹ tests 74
+ℹ suites 0
+ℹ pass 74
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 978.66241

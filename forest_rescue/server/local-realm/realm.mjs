@@ -161,15 +161,20 @@ export function createRealm({dbPath, idFactory = () => randomUUID(), buildSecond
     return transact(async data => {
       const p = selectPlayer(data, login, selected);
       const now = clock(data);
-      await readyPlayer(p, now); // v92 readyPlayer62: settle with server now
+      const ready = await readyPlayer(p, now); // v92 readyPlayer62: settle with server now
       const receipts = receiptsFor(data, p);
       if (fr.isAdventureKind(body.kind)) {
         // fr.command applies the hall gate BEFORE the receipt lookup, then replay/409, then effects.
         const r = await fr.command({p, body, key, now, receipts});
         if (r.receipt) receipts.insert(r.receipt, now);
-        return {status: 200, body: {...publicState(data, p, now), events: r.events, replayed: r.replayed}};
+        // Cues committed by this transaction's settle (arrivals, fog, battle results) + the command's own.
+        return {status: 200, body: {...publicState(data, p, now), events: [...ready.events, ...r.events], replayed: r.replayed}};
       }
-      if (body.kind === 'kingdom') return kingdomCommand(data, p, now, key, body, receipts);
+      if (body.kind === 'kingdom') {
+        const out = await kingdomCommand(data, p, now, key, body, receipts);
+        out.body.events = [...ready.events, ...out.body.events];
+        return out;
+      }
       throw httpError(400, 'UNSUPPORTED_IN_LOCAL_REALM', UNSUPPORTED, {kind: body.kind ?? null});
     });
   }

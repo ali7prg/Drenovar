@@ -2,7 +2,8 @@
 // «Лес потерянных» local realm — loopback HTTP server the Godot client can play against:
 //   godot --path godot/project -- --server=http://127.0.0.1:8418
 // Env: DRENOVAR_FR_PORT (default 8418, 0 = random), DRENOVAR_FR_DB (default <tmpdir>/drenovar-forest-rescue-realm.json),
-//      DRENOVAR_FR_BUILD_SECONDS (hall upgrade timer, default 10), DRENOVAR_FR_START_TIME (fixed simulated start clock, ms).
+//      DRENOVAR_FR_BUILD_SECONDS (hall upgrade timer, default 10), DRENOVAR_FR_START_TIME (fixed simulated start clock, ms),
+//      DRENOVAR_FR_TEST_ENDPOINTS=0 disables the /test/* helpers.
 import {createServer} from 'node:http';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
@@ -46,6 +47,7 @@ export function createHandler(realm) {
       if (url.pathname === '/api/state' && method === 'GET') r = await realm.getState(who);
       else if (url.pathname === '/api/session/new' && method === 'POST') r = await realm.sessionNew({...who, body: await readBody(incoming)});
       else if (url.pathname === '/api/command' && method === 'POST') r = await realm.command({...who, key: header('idempotency-key'), body: await readBody(incoming)});
+      else if (url.pathname.startsWith('/test/') && process.env.DRENOVAR_FR_TEST_ENDPOINTS === '0') r = {status: 404, body: {error: 'NOT_FOUND', message: 'Тестовые адреса отключены.'}};
       else if (url.pathname === '/api/march-preview' && method === 'POST') {
         await readBody(incoming);
         r = {status: 404, body: {error: 'UNSUPPORTED_IN_LOCAL_REALM', message: 'Походы и охота недоступны в локальном мире приключения.'}};

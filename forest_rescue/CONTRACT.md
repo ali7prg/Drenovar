@@ -161,3 +161,48 @@ re-polls `/api/state` at `arriveAt + 250 ms`. Animations never commit anything.
 ## Changelog
 
 * v1 (2026-11-18): initial contract.
+* v1.1 (2026-11-18, server — `forest_rescue/server`): **additive only**; every v1 field, command and code keeps its meaning.
+  * **Requests.** Optional `requestId` in adventure/adventure_intro bodies; when present it MUST equal the
+    `Idempotency-Key` header (it is part of the signed body), so Godot's `send_request` reuses it as the retry key.
+    `finish_intro` takes optional `attempt` (default: the attempt currently `playing`); `start_intro` takes
+    optional `reducedMotion: bool` (→ `intro_present.mode = "static_cards"`). Key format `[-\w]{8,128}`.
+  * **Targets.** Trail-cache sites (01/05/09) add `lf_site_NN:landmark:<symbol>`; the artifact spot of those sites
+    is reachable only along centre → landmark 1 → 2 → 3 → key (clue order). `:plate_left/right` exist only on
+    paired-latch sites (04/08/12). `lf_home_reception` = (-8, 6.783, -52). Glade sub-targets (key/cage/guardian/
+    plates/landmarks) are known only after `discover`; a site centre is a known target when its act is available
+    or it is revealed; `lf_bridge_crossing` when act 4 is open or revealed; `lf_boss_ancient_maw` from
+    `boss_unlocked` or when revealed. Everything else → `404 TARGET_UNKNOWN`. After `stop` the squad may rest on a
+    fine graph node `"<wayId>#<index>"` (valid `squad.node`/`move.targetId`, not a valid `targetId` to send).
+  * **Movement.** `move` while moving redirects from the next graph point (no stop needed). `stop` during an escort
+    → `SQUAD_BUSY`. While paused only `move` to `lf_home_reception`, `stop`, `retreat`, `form_squad`, `claim_rewards`,
+    `set_auto_refill`, `pause/resume` (and intro actions) are accepted. `form_squad` only while the squad stands at `lf_home_reception`.
+    `move.path` is simplified for transport (≤5 cm deviation); interpolate by horizontal (XZ) arc-length fraction
+    `(t-departAt)/(arriveAt-departAt)`. Squad speed = 0.6 × slowest troop speed (ENG-09 → 2.4); escort ≤ 1.6.
+    The horse follows the same path and arrives up to 1.5 s earlier (`mood:"waiting"`).
+  * **Projection additions.** `adventure.revision` (event dedup key), `adventure.recentEvents` (last 32 committed
+    cues, `fog_revealed` there carries only `count`); `intro.invitation|continueRequired|attempt|acknowledgment`;
+    `fog.boundaryFog`; `squad.position`, `move.kind|length`; `horse.position|joined`; POI extras: `name, number,
+    act, step, available, discovered, targets{center,cage,guardian,key,plate_left,plate_right,landmarks[{id,x,y,z,
+    symbol,observed}]}` (sub-targets after discover), `guardian.name|requiredHall|attempts`, `artifact.name|held`,
+    `mechanism.clue|observed|plates{state:free|walking|held, readyAt}`; `captives` is `[]` until discovered;
+    `symbols` is a stable shuffle of the solution. POI kinds: `home, horse_origin, site, bridge, boss_arena`.
+    `battle.kind|active|units|hp|hpMax|phase|modifier`, `loot.overflow`; `escort.departAt|arriveAt|arrivedAt`;
+    `boss.attempts|name`. `nextTask` uses `{"siteId":null,"taskId":"discover_horse"}` in the prologue and
+    `{"siteId":"lf_boss_ancient_maw","taskId":"begin_boss|engage_boss|finish_boss"}` for the finale. On a corrupt or
+    future-schema save `state.adventure` = `{campaignId, schemaVersion, serverTime, error:{error,message,detail},
+    access:{unlocked:false,…}, pois:[], horse:{visible:false}, fog:{explorationLocked:true,…}}` (send no commands).
+  * **Timeline.** Extra types `recovery` (boss, `until`) and `retreat`; events may carry `target, damage, hp,
+    knocked{unitId:n}, survivors, attack, phase, shape, telegraphSeconds, activeSeconds, recoverySeconds, wave`.
+    `t` is seconds from `startedAt`; the outcome is applied by the server at `endsAt` (settle), never by a clip.
+  * **Events.** Every event has `seq` and `revision`. `fog_revealed {cells:[bit indices], count}`;
+    `transfer_rewards {resources, capacity, storageFull, auto?}`; `task_completed.reward`; `battle_report
+    {reportId, siteId, outcome[, endsAt]}`. New cues: `move_started, squad_arrived, squad_formed, landmark_observed,
+    plates_occupied, plates_released, artifact_found, escort_started, boss_defeated, squad_returned_home,
+    intro_deferred`. Command responses also carry the cues committed by the settle of the same transaction
+    (arrivals, fog, battle results, boss phases); `GET /api/state` carries none (use `recentEvents`).
+  * **Errors.** HTTP 400 `BAD_FIELDS`; 403 `FOREST_LOCKED_HALL_LEVEL`, `HALL_LEVEL_TOO_LOW` (`detail.requiredHall`);
+    404 `TARGET_UNKNOWN`; 409 all others; 500 `INTERNAL_ERROR`. New codes: `GUARDIAN_DEFEATED`, `UNITS_UNAVAILABLE`,
+    `INTRO_NOT_SAFE`, `INTRO_STALE_ATTEMPT`, `INTERNAL_ERROR`. Bodies may include `detail`.
+  * **Session entry.** `POST /api/session/new` for a login that already has a settlement returns it (200) and
+    counts as a new foreground entry (an interrupted `playing` intro becomes a deferred invitation); clients
+    should call it once per app launch. Local realm only: body `{"additional":true}` creates another profile.

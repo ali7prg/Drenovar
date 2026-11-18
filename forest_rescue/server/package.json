@@ -8,7 +8,7 @@
   "main": "src/index.mjs",
   "scripts": {
     "realm": "node local-realm/server.mjs",
-    "test": "node --test --test-concurrency=1 tests/",
-    "test:delivered": "node --test ../delivery/tests/"
+    "test": "node --test \"tests/*.test.mjs\"",
+    "test:delivered": "cd ../delivery && node --test \"tests/*.test.mjs\""
   }
 }

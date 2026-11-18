@@ -116,13 +116,15 @@ export class Journey {
     return r;
   }
 
-  async completeSite(siteId) {
+  /** stopBefore ∈ mechanism|recover_artifact|engage|defeat_guardian|unlock_cage|escort|escort_home */
+  async completeSite(siteId, {stopBefore = null} = {}) {
     const site = SITES.find(s => s.id === siteId);
     const key = site.artifact.id, solution = site.artifact.puzzle.solution;
     const s0 = await this.client.state();
     if (s0.adventure.squad.node === 'lf_home_reception') await this.formAtHome();
     await this.moveTo(siteId);
     await this.task(siteId, 'discover');
+    if (stopBefore === 'mechanism') return;
     if (site.variation === 'trail_cache') {
       await this.moveTo(key); // the only way to the cache passes the three landmarks in order
       for (const symbol of solution) await this.input(siteId, symbol);
@@ -136,13 +138,18 @@ export class Journey {
       for (const symbol of solution) await this.input(siteId, symbol);
       await this.moveTo(key);
     }
+    if (stopBefore === 'recover_artifact') return;
     await this.task(siteId, 'recover_artifact');
     await this.moveTo(siteId + ':guardian');
+    if (stopBefore === 'engage') return;
     await this.battle('engage_guardian', {siteId});
+    if (stopBefore === 'defeat_guardian') return;
     await this.task(siteId, 'defeat_guardian');
     await this.moveTo(siteId + ':cage');
+    if (stopBefore === 'unlock_cage') return;
     const unlocked = await this.task(siteId, 'unlock_cage');
     assert.ok(unlocked.events.some(e => e.type === 'cage_opened' && e.siteId === siteId));
+    if (stopBefore === 'escort') return;
     await this.step('escort:' + siteId, async () => {
       const r = await this.client.ok('escort_start', {siteId});
       assert.equal(r.adventure.escort.siteId, siteId);
@@ -154,6 +161,7 @@ export class Journey {
       assert.equal(s.adventure.squad.node, 'lf_home_reception');
       return r;
     });
+    if (stopBefore === 'escort_home') return;
     await this.task(siteId, 'escort_home');
   }
 }

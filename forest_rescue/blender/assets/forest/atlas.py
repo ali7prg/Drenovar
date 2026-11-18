@@ -20,15 +20,17 @@ def _reg(name, x, y, w, h, attach="bottom"):
     LAYOUT[name] = dict(rect=(x, y, w, h), attach=attach)
 
 
-# row A: oak clusters (256)
-for i, n in enumerate(["oak_gold_a", "oak_gold_b", "oak_amber_a", "oak_amber_b", "oak_orange_a", "oak_orange_b",
-                       "oak_rust_a", "oak_rust_b"]):
-    _reg(n, i * 256, 0, 256, 256)
+# row A: oak leaf CLUMPS (dense round clusters, low transparency) by crown position
+OAK_CLUMPS = ["oak_clump_light_a", "oak_clump_light_b", "oak_clump_gold_a", "oak_clump_gold_b", "oak_clump_ochre_a",
+              "oak_clump_ochre_b", "oak_clump_dark_a", "oak_clump_red_a"]
+for i, n in enumerate(OAK_CLUMPS):
+    _reg(n, i * 256, 0, 256, 256, attach="center")
 # row B: pine sprays + birch clusters
 for i, n in enumerate(["pine_spray_a", "pine_spray_b", "pine_spray_c", "pine_spray_d"]):
     _reg(n, i * 256, 256, 256, 256)
-for i, n in enumerate(["birch_a", "birch_b", "birch_c", "birch_yellow"]):
-    _reg(n, 1024 + i * 256, 256, 256, 256, attach="top")
+BIRCH_CLUMPS = ["birch_clump_light", "birch_clump_mid", "birch_clump_dark", "birch_clump_gold"]
+for i, n in enumerate(BIRCH_CLUMPS):
+    _reg(n, 1024 + i * 256, 256, 256, 256, attach="center")
 # row C (512 tall): willow strands, fern fronds, reed blades
 for i in range(6):
     _reg(f"willow_strand_{i}", i * 128, 512, 128, 512, attach="top")
@@ -65,10 +67,18 @@ _reg("bramble_dense", 1152, 1536, 256, 256, attach="center")
 _reg("grass_dense", 1408, 1536, 256, 256, attach="center")
 _reg("shrub_dense", 1664, 1536, 256, 256, attach="center")
 _reg("reed_dense", 1920, 1536, 128, 512, attach="bottom")
-_reg("oak_green_a", 640, 1792, 256, 256)
+_reg("oak_green_a", 640, 1792, 256, 256, attach="center")
 _reg("pine_spray_e", 896, 1792, 256, 256)
-_reg("birch_green", 1152, 1792, 256, 256, attach="top")
+_reg("birch_spare", 1152, 1792, 256, 256, attach="center")
 _reg("pine_top", 1408, 1792, 256, 256, attach="center")
+_reg("water", 1664, 1792, 256, 256, attach="none")
+# aliases (older names used by builders)
+for _old, _new in {"oak_gold_a": "oak_clump_gold_a", "oak_gold_b": "oak_clump_gold_b", "oak_amber_a": "oak_clump_ochre_a",
+                   "oak_amber_b": "oak_clump_ochre_b", "oak_orange_a": "oak_clump_ochre_b", "oak_orange_b": "oak_clump_red_a",
+                   "oak_rust_a": "oak_clump_dark_a", "oak_rust_b": "oak_clump_red_a", "birch_a": "birch_clump_mid",
+                   "birch_b": "birch_clump_light", "birch_c": "birch_clump_dark", "birch_yellow": "birch_clump_gold",
+                   "birch_green": "birch_clump_dark"}.items():
+    LAYOUT[_old] = LAYOUT[_new]
 
 
 def uv_rect(name, pad=1.5):
@@ -91,41 +101,59 @@ class Canvas:
         self.rgb = np.zeros((h * ss, w * ss, 3), np.float32)
         self.a = np.zeros((h * ss, w * ss), np.float32)
 
-    def _mask(self, draw):
-        m = np.zeros(self.a.shape, np.uint8)
-        draw(m)
-        return m.astype(np.float32) / 255.0
+    def _bbox(self, pts, pad):
+        p = np.asarray(pts, float) * self.ss
+        H, W = self.a.shape
+        x0 = int(max(0, np.floor(p[:, 0].min() - pad)))
+        y0 = int(max(0, np.floor(p[:, 1].min() - pad)))
+        x1 = int(min(W, np.ceil(p[:, 0].max() + pad)))
+        y1 = int(min(H, np.ceil(p[:, 1].max() + pad)))
+        return x0, y0, x1, y1
+
+    def _comp(self, m, col, alpha, x0, y0):
+        h, w = m.shape
+        mm = (m * alpha)[..., None]
+        c = np.asarray(col, np.float32)
+        R = self.rgb[y0:y0 + h, x0:x0 + w]
+        A = self.a[y0:y0 + h, x0:x0 + w]
+        self.rgb[y0:y0 + h, x0:x0 + w] = R * (1 - mm) + c * mm
+        self.a[y0:y0 + h, x0:x0 + w] = A + mm[..., 0] * (1 - A)
 
     def comp(self, m, col, alpha=1.0):
-        m = m * alpha
-        ys, xs = np.nonzero(m > 0.001)
-        if len(ys) == 0:
-            return
-        y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
-        mm = m[y0:y1, x0:x1, None]
-        c = col if np.ndim(col) == 1 else col[y0:y1, x0:x1]
-        self.rgb[y0:y1, x0:x1] = self.rgb[y0:y1, x0:x1] * (1 - mm) + np.asarray(c, np.float32) * mm
-        self.a[y0:y1, x0:x1] = self.a[y0:y1, x0:x1] + mm[..., 0] * (1 - self.a[y0:y1, x0:x1])
+        self._comp(m, col, alpha, 0, 0)
 
     def poly(self, pts, col, alpha=1.0, shade=None):
-        p = (np.asarray(pts) * self.ss * 16).astype(np.int32)
-        m = self._mask(lambda m: cv2.fillPoly(m, [p], 255, cv2.LINE_AA, shift=4))
+        x0, y0, x1, y1 = self._bbox(pts, 3)
+        if x1 <= x0 or y1 <= y0:
+            return None
+        m = np.zeros((y1 - y0, x1 - x0), np.uint8)
+        p = ((np.asarray(pts) * self.ss - [x0, y0]) * 16).astype(np.int32)
+        cv2.fillPoly(m, [p], 255, cv2.LINE_AA, shift=4)
+        m = m.astype(np.float32) / 255.0
         if shade is not None:
             col = shade(m, col)
-        self.comp(m, col, alpha)
+        self._comp(m, col, alpha, x0, y0)
         return m
 
     def line(self, pts, width, col, alpha=1.0):
-        p = (np.asarray(pts) * self.ss * 16).astype(np.int32)
         wd = max(1, int(round(width * self.ss)))
-        m = self._mask(lambda m: cv2.polylines(m, [p], False, 255, wd, cv2.LINE_AA, shift=4))
-        self.comp(m, col, alpha)
+        x0, y0, x1, y1 = self._bbox(pts, wd + 3)
+        if x1 <= x0 or y1 <= y0:
+            return
+        m = np.zeros((y1 - y0, x1 - x0), np.uint8)
+        p = ((np.asarray(pts) * self.ss - [x0, y0]) * 16).astype(np.int32)
+        cv2.polylines(m, [p], False, 255, wd, cv2.LINE_AA, shift=4)
+        self._comp(m.astype(np.float32) / 255.0, col, alpha, x0, y0)
 
     def circle(self, c, r, col, alpha=1.0):
-        cc = (int(c[0] * self.ss * 16), int(c[1] * self.ss * 16))
-        m = self._mask(lambda m: cv2.circle(m, cc, int(r * self.ss * 16), 255, -1, cv2.LINE_AA, shift=4))
-        self.comp(m, col, alpha)
-        return m
+        pts = np.array([[c[0] - r, c[1] - r], [c[0] + r, c[1] + r]])
+        x0, y0, x1, y1 = self._bbox(pts, 3)
+        if x1 <= x0 or y1 <= y0:
+            return
+        m = np.zeros((y1 - y0, x1 - x0), np.uint8)
+        cc = (int((c[0] * self.ss - x0) * 16), int((c[1] * self.ss - y0) * 16))
+        cv2.circle(m, cc, int(r * self.ss * 16), 255, -1, cv2.LINE_AA, shift=4)
+        self._comp(m.astype(np.float32) / 255.0, col, alpha, x0, y0)
 
     def result(self):
         """Downsample with premultiplied alpha -> (h, w, 4) float."""
@@ -275,6 +303,46 @@ def paint_broadleaf_cluster(w, h, r, kind, palette, n_leaves=46, leaf_len=(0.17,
     return cv.result()
 
 
+def paint_clump(w, h, r, palette, kind="oak", n_leaves=300, leaf_len=(0.10, 0.15), radius=0.43, gap=0.06,
+                width_scale=1.0):
+    """Dense ROUND leaf clump (card for spherified-normal crowns): leaves fill a disc, edge leaves point
+    outward (leafy silhouette), back leaves darker -> soft depth; ~90% alpha coverage inside the disc."""
+    cv = Canvas(w, h)
+    L = min(w, h)
+    c = np.array([w / 2, h / 2])
+    wts = np.array([p[0] for p in palette], float)
+    wts /= wts.sum()
+    R = radius * L
+    for i in range(n_leaves):
+        layer = i / max(1, n_leaves - 1)
+        rr = R * np.sqrt(r.random()) * (0.96 if layer > 0.5 else 1.02)
+        ang0 = r.uniform(0, 2 * np.pi)
+        p = c + rr * np.array([math.cos(ang0), math.sin(ang0)])
+        edge = rr / R
+        ang = ang0 + np.pi / 2 + r.normal(0, 1.4 * (1 - edge) + 0.35)
+        ln = r.uniform(*leaf_len) * L * (0.85 + 0.3 * edge)
+        tipp = p + np.array([math.sin(ang), -math.cos(ang)]) * ln
+        m = 3.0
+        lo = np.minimum(p, tipp) - 0.25 * ln
+        hi = np.maximum(p, tipp) + 0.25 * ln
+        p = p + np.maximum(0, m - lo) - np.maximum(0, hi - np.array([w - m, h - m]))
+        col = jitter_col(palette[r.choice(len(palette), p=wts)][1], r, 0.06)
+        dark = 0.55 + 0.5 * layer ** 0.9
+        pts = place(leaf_outline(kind, r), p, ang, ln, width_scale=r.uniform(0.85, 1.15) * width_scale,
+                    bend=r.uniform(-0.06, 0.06))
+        cv.poly(pts, col, shade=leaf_shade(col, r, dark))
+        if layer > 0.6 and kind in ("oak", "birch", "bramble") and ln > 8:
+            mid = place(np.array([[0, 0.05], [0, 0.85]]), p, ang, ln)
+            cv.line(mid, 0.8, np.clip(np.asarray(col) * dark * 0.7, 0, 1), alpha=0.5)
+    out = cv.result()
+    # a few dark gaps between leaf groups (depth), never fully transparent inside
+    yy, xx = np.mgrid[0:h, 0:w]
+    gapn = fbm(h, w, 8, 8, int(r.integers(1e6)), 3)
+    g = smoothstep(0.62, 0.72, gapn) * gap * 6
+    out[..., :3] *= (1 - np.clip(g, 0, 0.45))[..., None]
+    return out
+
+
 def paint_pine_spray(w, h, r, cols, n_side=11, dense=False):
     """Spruce/pine needle spray: main twig bottom->top, pinnate side twigs, needles as short strokes."""
     cv = Canvas(w, h)
@@ -306,7 +374,8 @@ def paint_pine_spray(w, h, r, cols, n_side=11, dense=False):
             ln = nlen * r.uniform(0.7, 1.15) * (0.75 + 0.25 * (1 - s / tot))
             q = p + nd * ln
             tone = r.random()
-            c = (dark * (1 - tone) + mid * tone) if r.random() < 0.8 else light
+            tipw = min(1.0, (s / tot) ** 2 * 1.3) if tot > 0 else 0
+            c = (dark * (1 - tone) + mid * tone) if r.random() < 0.8 - 0.5 * tipw else light
             c = c * (0.72 + 0.4 * layer)
             cv.line([p, q], r.uniform(1.0, 1.6), np.clip(c, 0, 1))
 

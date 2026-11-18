@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_bronze_seal v1 front (ortho)",
+  "iou_filled": 0.9946,
+  "iou_raw": 0.9946,
+  "mean_abs_colour_error": 0.1307,
+  "mean_rgb_ref": [
+    0.451,
+    0.338,
+    0.208
+  ],
+  "mean_rgb_render": [
+    0.457,
+    0.338,
+    0.212
+  ]
+}

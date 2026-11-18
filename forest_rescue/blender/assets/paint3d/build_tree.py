@@ -293,7 +293,7 @@ def main():
     ref.masks_preview(qa_path(asset, a.iter, "masks.png"))
     P = tree.Patches(ref, n_target=sp["n_patches"], min_px=sp.get("min_px", 50), margin=sp.get("margin", 3),
                      scale=sp.get("tile_scale", 2), mode=sp.get("patch_mode", "clumps"), strip_w=sp.get("strip_w", 12),
-                     strip_h=sp.get("strip_h", 90))
+                     strip_h=sp.get("strip_h", 90), dehalo=sp.get("dehalo", False))
     if sp.get("crown_mode") == "whorls":
         print(f"[{asset}] fronds: {P.add_fronds()}", flush=True)
     if sp.get("tile_grade"):

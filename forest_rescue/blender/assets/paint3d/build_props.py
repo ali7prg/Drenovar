@@ -26,6 +26,7 @@ from skimage import feature, morphology, segmentation  # noqa: E402
 from frlib import core, paths, refs, render as frr  # noqa: E402
 
 import geom  # noqa: E402
+import prism  # noqa: E402
 import p3atlas as atl  # noqa: E402
 import seg  # noqa: E402
 import slab  # noqa: E402
@@ -40,7 +41,7 @@ ELEV_MID = 8.0
 K = 0.35
 
 CFG = {
-    "moss_rock": dict(box=(470, 480, 892, 728), human=(470, 590, 515, 700), clip=220, ground=232,
+    "moss_rock": dict(box=(470, 480, 892, 728), human=(470, 590, 515, 700), clip=220, ground=232, elev=9.4,
                       side_sw=(600, 568, 720, 668), top_sw=(588, 512, 668, 548), tex="lf_rock_limestone"),
     "fallen_trunk": dict(box=(0, 520, 470, 740), human=(0, 580, 50, 690), clip=148, ground=180,
                          side_sw=(100, 615, 230, 650), top_sw=(130, 596, 200, 612), tex="lf_bark_fallen"),
@@ -63,7 +64,7 @@ def make_ref(name):
     Hh = np.degrees(np.arctan2(lab[..., 2], lab[..., 1])) % 360
     ys, xs = np.nonzero(fg_clip)
     cx = float(xs.mean())
-    view = refs.View(name=name, image=img, mask=fg_clip, d=geom.elevated_dir(ELEV_MID), ppm=PPM_MID, ax=cx,
+    view = refs.View(name=name, image=img, mask=fg_clip, d=geom.elevated_dir(c.get("elev", ELEV_MID)), ppm=PPM_MID, ax=cx,
                      ay=float(c["ground"]))
     return types.SimpleNamespace(name=name, img=img, fg_full=fg, fg=fg_clip, H=H, W=W, clip=c["clip"],
                                  ground=c["ground"], view=view, ppm=PPM_MID, bg=bg, L=lab[..., 0], C=Cc, Hu=Hh, cfg=c)
@@ -233,13 +234,19 @@ def build(name, it):
         if m.sum() < 150:
             continue
         if name == "moss_rock":
-            V, F = inflate_slab(ref, m, rng.uniform(-0.3, 0.15), k=1.6, body_depth=body_depth, back=1.0)
+            top_like = (((ref.Hu > 75) & (ref.Hu < 118) & (ref.C > 14)) | (ref.L > 64))
+            mg = ndi.binary_dilation(m, iterations=3) & ndi.binary_dilation(ref.fg, iterations=1)
+            res_ = prism.block_solid(ref.view, mg, top_like, ref.ppm, c["elev"], y0=rng.uniform(-0.15, 0.15), rng=rng)
+            if res_ is None:
+                continue
+            V, F, binfo = res_
         else:
-            V, F = inflate_round(ref, m, kd=0.9)
+            V, F = inflate_round(ref, m, kd=1.0)
         if len(F) == 0:
             continue
         o = to_obj(f"blk{b}", V, F)
-        smooth(o, 1, 0.4)
+        if name != "moss_rock":
+            smooth(o, 1, 0.4)
         ys, xs = np.nonzero(m)
         blocks.append(dict(obj=o, area=int(m.sum()), cx=float(xs.mean()), cy=float(ys.mean()), kind="body"))
     if name == "fallen_trunk":
@@ -284,13 +291,13 @@ def build(name, it):
         variants = {
             "v1": dict(blocks=list(range(len(body_blocks))), plants=True),
             # compact boulders: a painted block group + a copy of it rotated behind (outcrop depth ~ width)
-            "v2": dict(blocks=left, plants=True, center=True, rot_copy=(165, 0.85)),
-            "v3": dict(blocks=right, plants=True, center=True, rot_copy=(-160, 0.8), mirror=True),
+            "v2": dict(blocks=left, plants=True, center=True),
+            "v3": dict(blocks=right, plants=True, center=True, mirror=True),
         }
     else:
         variants = {
-            "v1": dict(blocks=list(range(len(body_blocks))), stones=False),
-            "v2": dict(blocks=list(range(len(body_blocks))), stones=False, cut_x=0.36, center=True),
+            "v1": dict(blocks=list(range(len(body_blocks))), stones=False, flatten=True),
+            "v2": dict(blocks=list(range(len(body_blocks))), stones=False, cut_x=0.36, center=True, flatten=True),
             "v3_stream": dict(blocks=list(range(len(body_blocks))), stones=True, mirror=True),
         }
     built = {}
@@ -305,7 +312,7 @@ def build(name, it):
                   ([b_ for b_ in blocks if b_["kind"] == "stone"] if vd.get("stones") else [])
               if lod == 2:
                   amax = max(b_["area"] for b_ in parts)
-                  parts = [b_ for b_ in parts if b_["area"] >= (0.22 if vd.get("rot_copy") else 0.12) * amax]
+                  parts = [b_ for b_ in parts if b_["area"] >= (0.22 if vd.get("rot_copy") else 0.05) * amax]
               for b_ in parts:
                   o = b_["obj"]
                   if frac < 1.0:
@@ -317,9 +324,15 @@ def build(name, it):
                       bpy.data.objects.remove(oc, do_unlink=True)
                   else:
                       V, T, N = arrays(o)
-                  Vu, Tu, UVu, Nu, kind = slab.planar_uvs(V, T, N, ref.view, ref.W, ref.H, tex_clip)
+                  if name == "moss_rock":
+                      fnrm = geom.nrm(np.cross(V[T[:, 1]] - V[T[:, 0]], V[T[:, 2]] - V[T[:, 0]]))
+                      Vu, Tu, UVu, Nu, kind = slab.planar_uvs(V, T, N, ref.view, ref.W, ref.H, tex_clip,
+                                                              per_side=3.0, per_top=2.2)
+                      Nu = np.repeat(fnrm, 3, axis=0)
+                  else:
+                      Vu, Tu, UVu, Nu, kind = slab.planar_uvs(V, T, N, ref.view, ref.W, ref.H, tex_clip)
                   Cw = np.zeros((len(Vu), 4))
-                  Cw[:, 3] = np.where(np.repeat(kind, 3) == 2, 1.0, 0.92)
+                  Cw[:, 3] = np.where(np.isin(np.repeat(kind, 3), (2, 3)), 1.0, 0.9)
                   md.add(Vu, Tu, UVu, Cw, Nu, 0)
               if name == "moss_rock" and vd.get("plants") and P is not None and lod < 2:
                   keep = []
@@ -331,6 +344,27 @@ def build(name, it):
                   if lod == 1:
                       keep = sorted(keep, key=lambda i: -P.info[i]["area"])[: max(1, len(keep) // 2)]
                   md.extend(plant_cards(ref, P, zb, keep, copies=((55, 0.9), (-60, 0.85)) if lod == 0 else ((70, 0.9),)))
+              if vd.get("flatten"):
+                  # lay the log on the ground along its whole length: remove the painted stream arch
+                  Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
+                  xs_v = Vv[:, 0]
+                  bins = np.linspace(xs_v.min(), xs_v.max(), 40)
+                  idx = np.clip(np.digitize(xs_v, bins) - 1, 0, len(bins) - 2)
+                  bottom = np.full(len(bins) - 1, np.nan)
+                  for bi in range(len(bins) - 1):
+                      sel = idx == bi
+                      if sel.any():
+                          bottom[bi] = Vv[sel, 2].min()
+                  ok_ = ~np.isnan(bottom)
+                  bottom = np.interp(np.arange(len(bottom)), np.nonzero(ok_)[0], bottom[ok_])
+                  sink = 0.08
+                  off = np.clip(bottom + sink, 0, None)
+                  off = ndi.gaussian_filter1d(off, 1.5)
+                  # the root plate (ends that already reach the ground) keeps its height -> tilted up
+                  dz = off[idx]
+                  md = geom.Mesh()
+                  md.add(Vv - np.stack([np.zeros_like(dz), np.zeros_like(dz), dz], 1), Tt, UVv, Cc, Nn, 0)
+                  md.M = [Mm]
               if vd.get("rot_copy"):
                   ang, sc = vd["rot_copy"]
                   Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
@@ -440,7 +474,9 @@ def export(asset, built, info, texname):
                          "height_m": round(float(hi[2]), 2),
                          "footprint_radius_m": round(float(max(-lo[0], hi[0], -lo[1], hi[1])), 2),
                          "bounds_m_blender": [np.round(lo, 2).tolist(), np.round(hi, 2).tolist()],
-                         "display_offset_gltf": [round(i * spacing, 3), 0.0, 0.0]}
+                         "display_offset_gltf": [round(i * spacing, 3), 0.0, 0.0],
+                         "heightM": round(float(hi[2]), 2),
+                         "footprintM": [round(float(hi[0] - lo[0]), 2), round(float(hi[1] - lo[1]), 2)]}
     out = os.path.join(RT, f"{asset}.glb")
     ext = {"lf_foliage_atlas": "lf_foliage_atlas.png", f"{texname}_c": f"{texname}_c.jpg",
            f"{texname}_n": f"{texname}_n.png", f"{texname}_r": f"{texname}_r.png"}
@@ -449,7 +485,12 @@ def export(asset, built, info, texname):
                                export_active_vertex_color_when_no_material=False, export_image_format="AUTO"))
     glbx.externalize(out, ext)
     gi = glbx.info(out)
-    meta = {"id": asset, "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)",
+    meta = {"id": asset, "generation": "v2 image-based reconstruction from art/02 (solid painted blocks / logs)",
+            "heightM": max(mv["heightM"] for mv in meta_vars.values()),
+            "footprintM": [max(mv["footprintM"][0] for mv in meta_vars.values()),
+                           max(mv["footprintM"][1] for mv in meta_vars.values())],
+            "scaleNote": "real metres from the 1.8 m figure on art/02 (understory without a figure: realistic "
+                         "height, see build script); world layer should respect heightM instead of normalising",
             "variants": meta_vars,
             "tris": {f"LOD{l}": max(mv["tris"][f"LOD{l}"] for mv in meta_vars.values()) for l in range(3)},
             "bones": 0, "materials": sorted(set(gi["materials"])), "glb_images": gi["images"],

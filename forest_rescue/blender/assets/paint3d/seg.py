@@ -245,7 +245,8 @@ def bleed(rgb, known, iters=None):
     return texproj.fill(rgb.astype(np.float64), known).astype(np.float32)
 
 
-def make_tile(img, fg, patch, margin=3, scale=2, sharpen=0.6, alpha_erode=0.0, grow_fg=False, bg=None, bg_thresh=16.0):
+def make_tile(img, fg, patch, margin=3, scale=2, sharpen=0.6, alpha_erode=0.0, grow_fg=False, bg=None, bg_thresh=16.0,
+              dehalo=False):
     """RGBA tile of one patch: alpha = (patch dilated by `margin` px) & fg (true outer edge kept).
 
     RGB = painted pixels, bled outward from fg so edges carry foliage colour, Lanczos x`scale`
@@ -268,6 +269,17 @@ def make_tile(img, fg, patch, margin=3, scale=2, sharpen=0.6, alpha_erode=0.0, g
         strict = (dist < bg_thresh) | ((Lp[..., 0] > Lb[0] - 14) & (Cp < 24))
         bglike = (strict & interior) | (dist < 10.5)
         f &= ~bglike
+    if dehalo:
+        # anti-aliased strand edges blended with the light background: drop light, low-chroma texels from the alpha
+        # and bleed the strand colour into them (mip-safe edges, no grey/white halos)
+        Lp = lab(rgb)
+        Cp = np.hypot(Lp[..., 1], Lp[..., 2])
+        if (p & f).any():
+            mL = np.median(Lp[..., 0][p & f])
+            mC = np.median(Cp[p & f])
+            halo = (Lp[..., 0] > mL + 10) & (Cp < 0.75 * mC)
+            f = f & ~halo
+            f = f & ~(ndi.binary_dilation(halo, iterations=1) & ~ndi.binary_erosion(f, iterations=1))
     grown = ndi.binary_dilation(p, structure=morphology.disk(margin)) if margin else p
     a = grown & f
     rgb = bleed(rgb, f)

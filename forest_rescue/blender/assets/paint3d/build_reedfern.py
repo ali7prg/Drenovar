@@ -179,10 +179,22 @@ def main():
     mixed.add(Vb + view.d * 0.6, Tb, UVb, Cb, Nb, 1)
     fern_rosette(fern_ids, 7, fcx, md=mixed, scale=0.9, seed=2, reach=0.85)
     variants["mixed_v1"] = mixed
-    variants["reed_v1"] = reed_clump(reed_ids, (0, 60, 120), rcx, scale=1.0, seed=3, radius=0.8)
-    variants["reed_v2"] = reed_clump(reed_ids[::2], (20, 80, 140, 170), rcx, scale=0.85, seed=4, radius=0.6)
-    variants["fern_v1"] = fern_rosette(fern_ids, 11, fcx, scale=1.0, seed=5)
-    variants["fern_v2"] = fern_rosette(fern_ids, 8, fcx, scale=0.8, seed=6, reach=1.1)
+    # reed BEDS (art/01 east river: golden clusters a few metres across, ~2-2.4 m tall)
+    variants["reed_v1"] = reed_clump(reed_ids, (0, 36, 72, 108, 144), rcx, scale=1.0, seed=3, radius=1.7)
+    variants["reed_v2"] = reed_clump(reed_ids, (20, 80, 140, 170), rcx, scale=0.9, seed=4, radius=1.3)
+    # fern clusters: several arching rosettes
+    f1 = geom.Mesh()
+    for k_, (dx, dy, sc_) in enumerate(((0, 0, 1.0), (1.1, 0.4, 0.85), (-0.9, 0.7, 0.9), (0.3, -1.0, 0.8))):
+        fr = fern_rosette(fern_ids, 9, fcx, scale=sc_, seed=5 + k_)
+        Vf, Tf, UVf, Cf, Nf, Mf = fr.arrays()
+        f1.add(Vf + np.array([dx, dy, 0.0]), Tf, UVf, Cf, Nf, 1)
+    variants["fern_v1"] = f1
+    f2 = geom.Mesh()
+    for k_, (dx, dy, sc_) in enumerate(((0, 0, 0.9), (0.9, -0.5, 0.8), (-0.7, -0.6, 0.75))):
+        fr = fern_rosette(fern_ids, 8, fcx, scale=sc_, seed=11 + k_, reach=1.1)
+        Vf, Tf, UVf, Cf, Nf, Mf = fr.arrays()
+        f2.add(Vf + np.array([dx, dy, 0.0]), Tf, UVf, Cf, Nf, 1)
+    variants["fern_v2"] = f2
     built = {}
     info = {}
     for vn, md in variants.items():

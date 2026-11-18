@@ -216,7 +216,8 @@ TREES["willow"] = dict(
              limb_min_top_z=4.0, limb_max_z=8.8),
     n_patches=150, min_px=30, region="willow", bark="willow", swatch=(1260, 798, 1516, 984), paintedLightMix=0.3,
     paintedLightMixByMaterial={"lf_foliage_vol": 0.5}, patch_mode="strips", strip_w=8, strip_h=120,
-    palettes=[dict(name="green", region="willow_green", lab=dict(dh=18.0, dl=-8.0, kc=0.68))],
+    palettes=[dict(name="green", region="willow_green", lab=dict(dh=12.0, dl=-2.0, kc=0.8))],
+    dehalo=True,
     height_hint=11.5, crown_hint=6.0, lods=LODS_WILLOW, crown_mode="mass", placement="dome", mass_r=0.3,
     tint_note="art/02 palette (olive-green weeping willow)",
     variants={1: dict(seed=5, copies=[(115, 0.92), (-120, 0.9)]),
@@ -292,7 +293,9 @@ def export_kit(asset, built, sp, info, kind, k, args):
             "crown_radius_m": round(float(max(-lo[0], hi[0], -lo[1], hi[1])), 2),
             "bounds_m_blender": [np.round(lo, 2).tolist(), np.round(hi, 2).tolist()],
             "display_offset_gltf": [round(i * spacing, 3), 0.0, 0.0],
-            "recipe": {kk: vv for kk, vv in sp["variants"][v].items() if kk != "seed"},
+            "heightM": round(float(hi[2]), 2),
+            "footprintM": [round(float(hi[0] - lo[0]), 2), round(float(hi[1] - lo[1]), 2)],
+            "recipe": {kk: vv for kk, vv in sp["variants"][v].items() if kk not in ("seed", "cfg", "lods")},
         }
     bpy.context.view_layer.update()
     out = os.path.join(RT, f"{asset}.glb")
@@ -307,6 +310,9 @@ def export_kit(asset, built, sp, info, kind, k, args):
     meta = {
         "id": asset,
         "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)",
+        "heightM": max(mv["heightM"] for mv in meta_vars.values()),
+        "footprintM": [max(mv["footprintM"][0] for mv in meta_vars.values()),
+                       max(mv["footprintM"][1] for mv in meta_vars.values())],
         "variants": meta_vars,
         "tris": {f"LOD{l}": max(mv["tris"][f"LOD{l}"] for mv in meta_vars.values()) for l in range(3)},
         "bones": 0,

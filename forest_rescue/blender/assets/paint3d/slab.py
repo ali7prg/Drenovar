@@ -23,7 +23,7 @@ def mirror_wrap(a3):
 
 
 def planar_uvs(V, T, N, view, W, H, clip, front_thresh=0.42, top_thresh=0.62, per_side=2.5, per_top=2.5,
-               exclude_mask=None, regions=(FRONT, SIDE, TOP)):
+               exclude_mask=None, regions=(FRONT, SIDE, TOP), top_paint_mask=None):
     """Un-indexed (per-face) UVs. Returns V3 (M*3,3), T3, UV3 (M*3,2), N3, kind (M,) 0 front 1 side 2 top."""
     FR, SR, TR = regions
     Vc = V[T]
@@ -54,7 +54,14 @@ def planar_uvs(V, T, N, view, W, H, clip, front_thresh=0.42, top_thresh=0.62, pe
     ut = mirror_wrap(P_[..., 0] / per_top)
     vt = mirror_wrap(P_[..., 1] / (per_top * (TR[3] - TR[1]) / (TR[2] - TR[0])))
     uv_t = np.stack([TR[0] + (TR[2] - TR[0]) * ut, TR[1] + (TR[3] - TR[1]) * vt], -1)
-    UV = np.where((kind == 0)[:, None, None], uv_f, np.where((kind == 2)[:, None, None], uv_t, uv_s))
+    if top_paint_mask is not None:
+        # top faces the elevated reference camera sees inside the painting: texture = the painted top
+        ui = np.clip(np.round(uc).astype(int), 0, W - 1)
+        vi = np.clip(np.round(vc).astype(int), 0, H - 1)
+        seen = top_paint_mask[vi, ui] & (vc >= 0) & (vc < clip)
+        kind = np.where((kind == 2) & seen, 3, kind)
+    UV = np.where(((kind == 0) | (kind == 3))[:, None, None], uv_f,
+                  np.where((kind == 2)[:, None, None], uv_t, uv_s))
     M = len(T)
     return Vc.reshape(-1, 3), np.arange(M * 3).reshape(-1, 3), UV.reshape(-1, 2), Nc.reshape(-1, 3), kind
 

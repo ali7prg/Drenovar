@@ -1,6 +1,12 @@
 {
   "id": "lf_env_fallen_trunk",
-  "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)",
+  "generation": "v2 image-based reconstruction from art/02 (solid painted blocks / logs)",
+  "heightM": 4.05,
+  "footprintM": [
+    11.07,
+    2.07
+  ],
+  "scaleNote": "real metres from the 1.8 m figure on art/02 (understory without a figure: realistic height, see build script); world layer should respect heightM instead of normalising",
   "variants": {
     "v1": {
       "nodes": [
@@ -27,24 +33,29 @@
           "lf_foliage"
         ]
       },
-      "height_m": 4.04,
-      "footprint_radius_m": 5.34,
+      "height_m": 3.14,
+      "footprint_radius_m": 5.37,
       "bounds_m_blender": [
         [
-          -4.77,
-          -0.67,
-          0.8
+          -4.76,
+          -0.77,
+          -0.53
         ],
         [
-          5.34,
-          1.2,
-          4.04
+          5.37,
+          1.3,
+          3.14
         ]
       ],
       "display_offset_gltf": [
         0.0,
         0.0,
         0.0
+      ],
+      "heightM": 3.14,
+      "footprintM": [
+        10.13,
+        2.07
       ]
     },
     "v2": {
@@ -54,9 +65,9 @@
         "lf_env_fallen_trunk_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 1546,
-        "LOD1": 588,
-        "LOD2": 177
+        "LOD0": 1542,
+        "LOD1": 594,
+        "LOD2": 170
       },
       "materials": {
         "LOD0": [
@@ -72,24 +83,29 @@
           "lf_foliage"
         ]
       },
-      "height_m": 4.04,
-      "footprint_radius_m": 6.61,
+      "height_m": 3.14,
+      "footprint_radius_m": 6.64,
       "bounds_m_blender": [
         [
-          -6.61,
-          -0.93,
-          0.8
+          -6.64,
+          -1.04,
+          -0.53
         ],
         [
-          3.49,
-          0.94,
-          4.04
+          3.48,
+          1.03,
+          3.14
         ]
       ],
       "display_offset_gltf": [
-        13.042,
+        13.072,
         0.0,
         0.0
+      ],
+      "heightM": 3.14,
+      "footprintM": [
+        10.13,
+        2.07
       ]
     },
     "v3_stream": {
@@ -101,7 +117,7 @@
       "tris": {
         "LOD0": 2758,
         "LOD1": 1130,
-        "LOD2": 290
+        "LOD2": 286
       },
       "materials": {
         "LOD0": [
@@ -117,31 +133,36 @@
           "lf_foliage"
         ]
       },
-      "height_m": 4.04,
+      "height_m": 4.05,
       "footprint_radius_m": 5.71,
       "bounds_m_blender": [
         [
-          -5.34,
-          -0.67,
+          -5.37,
+          -0.77,
           -0.86
         ],
         [
           5.71,
-          1.2,
-          4.04
+          1.3,
+          4.05
         ]
       ],
       "display_offset_gltf": [
-        26.084,
+        26.145,
         0.0,
         0.0
+      ],
+      "heightM": 4.05,
+      "footprintM": [
+        11.07,
+        2.07
       ]
     }
   },
   "tris": {
     "LOD0": 2758,
     "LOD1": 1130,
-    "LOD2": 290
+    "LOD2": 286
   },
   "bones": 0,
   "materials": [
@@ -173,13 +194,13 @@
       "type": "box",
       "centre": [
         0.0,
-        2.02,
+        1.57,
         0.0
       ],
       "size": [
-        10.11,
-        4.04,
-        1.87
+        10.13,
+        3.14,
+        2.07
       ],
       "variant": "v1"
     },
@@ -187,13 +208,13 @@
       "type": "box",
       "centre": [
         0.0,
-        2.02,
+        1.57,
         0.0
       ],
       "size": [
-        10.1,
-        4.04,
-        1.87
+        10.12,
+        3.14,
+        2.07
       ],
       "variant": "v2"
     },
@@ -205,9 +226,9 @@
         0.0
       ],
       "size": [
-        11.05,
-        4.04,
-        1.87
+        11.08,
+        4.05,
+        2.07
       ],
       "variant": "v3_stream"
     }

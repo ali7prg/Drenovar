@@ -1,6 +1,12 @@
 {
   "id": "lf_env_moss_rock",
-  "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)",
+  "generation": "v2 image-based reconstruction from art/02 (solid painted blocks / logs)",
+  "heightM": 5.49,
+  "footprintM": [
+    9.28,
+    2.31
+  ],
+  "scaleNote": "real metres from the 1.8 m figure on art/02 (understory without a figure: realistic height, see build script); world layer should respect heightM instead of normalising",
   "variants": {
     "v1": {
       "nodes": [
@@ -9,9 +15,9 @@
         "lf_env_moss_rock_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2908,
-        "LOD1": 1150,
-        "LOD2": 282
+        "LOD0": 1908,
+        "LOD1": 870,
+        "LOD2": 168
       },
       "materials": {
         "LOD0": [
@@ -27,24 +33,29 @@
           "lf_foliage"
         ]
       },
-      "height_m": 5.5,
-      "footprint_radius_m": 4.91,
+      "height_m": 5.49,
+      "footprint_radius_m": 4.82,
       "bounds_m_blender": [
         [
           -4.46,
-          -0.9,
+          -0.22,
           0.14
         ],
         [
-          4.91,
-          1.41,
-          5.5
+          4.82,
+          2.09,
+          5.49
         ]
       ],
       "display_offset_gltf": [
         0.0,
         0.0,
         0.0
+      ],
+      "heightM": 5.49,
+      "footprintM": [
+        9.28,
+        2.31
       ]
     },
     "v2": {
@@ -54,9 +65,9 @@
         "lf_env_moss_rock_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3672,
-        "LOD1": 1444,
-        "LOD2": 280
+        "LOD0": 1206,
+        "LOD1": 536,
+        "LOD2": 110
       },
       "materials": {
         "LOD0": [
@@ -72,24 +83,29 @@
           "lf_foliage"
         ]
       },
-      "height_m": 5.5,
-      "footprint_radius_m": 3.02,
+      "height_m": 5.49,
+      "footprint_radius_m": 3.08,
       "bounds_m_blender": [
         [
-          -3.02,
-          -1.65,
-          0.12
+          -2.84,
+          -1.06,
+          0.14
         ],
         [
-          3.01,
-          1.77,
-          5.5
+          3.08,
+          1.25,
+          5.49
         ]
       ],
       "display_offset_gltf": [
-        11.371,
+        11.275,
         0.0,
         0.0
+      ],
+      "heightM": 5.49,
+      "footprintM": [
+        5.92,
+        2.31
       ]
     },
     "v3": {
@@ -99,9 +115,9 @@
         "lf_env_moss_rock_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3348,
-        "LOD1": 1316,
-        "LOD2": 272
+        "LOD0": 1026,
+        "LOD1": 464,
+        "LOD2": 92
       },
       "materials": {
         "LOD0": [
@@ -117,31 +133,36 @@
           "lf_foliage"
         ]
       },
-      "height_m": 5.5,
-      "footprint_radius_m": 3.24,
+      "height_m": 5.49,
+      "footprint_radius_m": 3.11,
       "bounds_m_blender": [
         [
-          -3.24,
-          -1.57,
-          0.11
+          -3.11,
+          -0.86,
+          0.14
         ],
         [
-          3.06,
-          1.97,
-          5.5
+          3.09,
+          1.29,
+          5.49
         ]
       ],
       "display_offset_gltf": [
-        22.742,
+        22.55,
         0.0,
         0.0
+      ],
+      "heightM": 5.49,
+      "footprintM": [
+        6.2,
+        2.15
       ]
     }
   },
   "tris": {
-    "LOD0": 3672,
-    "LOD1": 1444,
-    "LOD2": 282
+    "LOD0": 1908,
+    "LOD1": 870,
+    "LOD2": 168
   },
   "bones": 0,
   "materials": [
@@ -179,8 +200,8 @@
         0.0
       ],
       "size": [
-        9.37,
-        5.5,
+        9.28,
+        5.49,
         2.31
       ],
       "variant": "v1"
@@ -193,9 +214,9 @@
         0.0
       ],
       "size": [
-        6.03,
-        5.5,
-        3.42
+        5.92,
+        5.49,
+        2.31
       ],
       "variant": "v2"
     },
@@ -207,9 +228,9 @@
         0.0
       ],
       "size": [
-        6.3,
-        5.5,
-        3.54
+        6.2,
+        5.49,
+        2.15
       ],
       "variant": "v3"
     }

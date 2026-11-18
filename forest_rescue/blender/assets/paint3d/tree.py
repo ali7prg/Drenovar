@@ -240,7 +240,7 @@ class TreeRef:
 
 class Patches:
     def __init__(self, ref, n_target, min_px=40, max_px=None, margin=3, scale=2, region_key=None, extra_masks=(),
-                 mode="clumps", strip_w=12, strip_h=90):
+                 mode="clumps", strip_w=12, strip_h=90, dehalo=False):
         self.ref = ref
         card_region = ref.fg & ~ndi.binary_erosion(ref.wood_cov, iterations=1)
         if mode == "strips":
@@ -256,7 +256,7 @@ class Patches:
         v0, v1 = ref.crown_rows
         for i in range(1, self.n + 1):
             m = lbl == i
-            tile, rect = seg.make_tile(ref.img, ref.fg, m, margin=margin, scale=scale, bg=ref.bg)
+            tile, rect = seg.make_tile(ref.img, ref.fg, m, margin=margin, scale=scale, bg=ref.bg, dehalo=dehalo)
             ys, xs = np.nonzero(m)
             cu, cv = float(xs.mean()), float(ys.mean())
             vi = int(np.clip(round(cv), 0, ref.H - 1))

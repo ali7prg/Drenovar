@@ -119,11 +119,12 @@ def hoof(coffin, toe, heel, side, bone, scale=1.0):
     parts = []
     gc = (toe + heel) * 0.5                     # ground centre
     top = coffin + V(0, 0.01, 0.025)
-    r_bot = 0.095 * scale
-    r_top = 0.068 * scale
-    parts.append(flat_cone(gc + V(0, -0.008, 0.024), top, r_bot, r_top, 0.9, axis=(0, 1, 0),
+    r_bot = 0.100 * scale
+    r_top = 0.070 * scale
+    # wider front-to-back than side-to-side (side views show long hooves, front/rear narrow)
+    parts.append(flat_cone(gc + V(0, -0.008, 0.024), top, r_bot, r_top, 0.90, axis=(1, 0, 0),
                            bone=bone, name=f"hoof_{side}"))
-    parts.append(ell(gc + V(0, -0.012, 0.02), (r_bot * 1.0, r_bot * 1.06, 0.022), bone=bone,
+    parts.append(ell(gc + V(0, -0.012, 0.02), (r_bot * 0.90, r_bot * 1.05, 0.022), bone=bone,
                      name=f"hoof_sole_{side}"))
     return parts
 
@@ -157,7 +158,7 @@ def body_parts(J=None):
     # croup and hindquarters (draft "double" rump: two gluteal masses with a groove)
     add(ell((0, 0.40, 1.40), (0.262, 0.31, 0.17), bone="pelvis", name="croup"), 0.16)
     for sx in (1, -1):
-        add(ell((0.197 * sx, 0.49, 1.19), (0.186, 0.30, 0.305), bone="pelvis", name="haunch"), 0.16)
+        add(ell((0.199 * sx, 0.49, 1.19), (0.192, 0.30, 0.305), bone="pelvis", name="haunch"), 0.16)
         add(ell((0.24 * sx, 0.18, 1.36), (0.06, 0.09, 0.06), bone="pelvis", name="hip_point"), 0.15)
         add(ell((0.22 * sx, 0.16, 1.09), (0.11, 0.19, 0.155), bone="spine_01", name="flank"), 0.15)
     # tail head (dock root)

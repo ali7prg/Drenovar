@@ -402,7 +402,7 @@ def tail_cards(lod=0, seed=7, drop=None):
         for k in range(n_ang):
             ang = 2 * math.pi * (k + 0.5 * si + rng.uniform(-0.25, 0.25)) / n_ang
             t0 = 0.05 + rng.uniform(0.0, 0.10) + 0.06 * si
-            t1 = rng.uniform(0.80, 1.0) if si == 0 else rng.uniform(0.68, 0.93)
+            t1 = rng.uniform(0.88, 1.0) if si == 0 else rng.uniform(0.80, 0.97)
             ts = np.linspace(t0, t1, segs + 1)
             c = _tail_center(ts)
             # cross-section: hugs the dock, full in the middle, spreading loose toward the tip

@@ -304,10 +304,10 @@ def claws_part(kind, nm, s):
     P = []
     for i, dz in enumerate(TOE_SPREAD):
         bone = f"Digit_In_{kind}_{nm}" if i == 0 else (f"Digit_Out_{kind}_{nm}" if i == 4 else f"Toe_{kind}_{nm}")
-        base = j[5] + np.array([-0.12 - 0.10 * abs(dz) / 0.29, 0.10, dz * s])
+        base = j[5] + np.array([-0.12 - 0.10 * abs(dz) / 0.29, 0.16, dz * s])
         L = 0.44 if kind == "Front" else 0.36
-        pts = bezier(base, base + np.array([0.10, 0.03, 0]), base + np.array([L * 0.8, -0.02, 0]),
-                     base + np.array([L, -0.10, 0]), 6)
+        pts = bezier(base, base + np.array([0.10, 0.05, 0]), base + np.array([L * 0.75, 0.01, 0]),
+                     base + np.array([L * 0.95, -0.16, 0]), 7)
         P += chain(list(pts), list(np.linspace(0.105, 0.014, len(pts))), bone, k=0.006, mat="claw", name=f"claw{i}")
     return P
 
@@ -427,13 +427,13 @@ def shade_skin(ctx):
     rad = getattr(ctx, "rad", np.full(ctx.n, 0.1, np.float32))
     h_s, edge, cid = scales(P)
     # sheet skin: dark charcoal-brown cobbles with lighter, warm grey crowns and black gaps
-    col = mix(lin("#281e18"), lin("#4c3b2e"), cid * 0.55 + 0.30 * sstep(0.2, 0.8, 1 - edge))
-    col = mix(col, lin("#4e3d30"), sstep(-0.1, -0.7, N[:, 1]) * 0.5)
+    col = mix(lin("#231a14"), lin("#433428"), cid * 0.55 + 0.30 * sstep(0.2, 0.8, 1 - edge))
+    col = mix(col, lin("#2c221b"), sstep(-0.1, -0.7, N[:, 1]) * 0.6)
     col = mix(col, lin("#120d0b"), edge * 0.85)
     col = col * (1.0 + 0.14 * noise.fbm(P * 1.2, 3, seed=50)[:, None])
     crease = edge * sstep(0.35, 0.65, noise.fbm(P * 2.4, 2, seed=52) + 0.5) * sstep(1.2, 1.9, y)
     tooth = mix(lin("#d6c7a6"), lin("#7d6a4c"), sstep(0.014, 0.034, rad))
-    claw = mix(lin("#e6d6bd"), lin("#5a4838"), sstep(0.025, 0.085, rad))
+    claw = mix(lin("#c9ae86"), lin("#3e2f22"), sstep(0.022, 0.080, rad))
     col = mix(col, lin("#3b1712"), w["mouth"])
     col = mix(col, tooth, w["tooth"])
     col = mix(col, claw, w["claw"])

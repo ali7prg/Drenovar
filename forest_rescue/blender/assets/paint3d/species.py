@@ -226,6 +226,36 @@ TREES["willow"] = dict(
 )
 
 
+LODS_BRAMBLE = {
+    0: dict(trunk_step_m=0.3, trunk_sides=5, limb_step_m=0.12, limb_sides=4, limb_min_r_px=0.8, limb_budget=900,
+            copies=True, copy_min_r_px=1.0, front_frac=1.0, front_scale=1.0, n_masses=14, clumps_per=58,
+            fill_size=1.0, front_extra=0.6, max_cards=1100, core_cards=16),
+    1: dict(trunk_step_m=0.6, trunk_sides=4, limb_step_m=0.25, limb_sides=3, limb_min_r_px=1.4, limb_budget=220,
+            copies=True, copy_min_r_px=1.6, front_frac=0.5, front_scale=1.15, n_masses=10, clumps_per=14,
+            fill_size=1.4, front_extra=0.25, max_cards=420, core_cards=6),
+    2: dict(trunk_step_m=2.0, trunk_sides=3, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
+            copies=False, front_frac=0.2, front_scale=1.5, n_masses=6, clumps_per=5, fill_size=2.0,
+            front_extra=0.0, max_cards=80, core_cards=0),
+}
+
+TREES["bramble"] = dict(
+    cfg=dict(name="bramble", box=(893, 492, 1228, 728), exclude=[], clip_row=718, ground_row=726, fork_row=712,
+             wood=dict(ratio=0.95, Lmax=56, blur=0.6, min_area=25, thin_only=2), keep_x=(895, 1226), trunk_close=0,
+             foot=0.72,
+             float_min_r=0.9, float_min_len=6, limb_min_r=0.8, crown_kd=0.8, front_bias=0.45, trunk_kd=0.9, seed=31,
+             root_zone=0, trunk_r_scale=0.25, lum_pref=3.0, front_tilt_max=30, top_part=1.0, vol_material=True,
+             mass_zscale=0.6, ao_under=0.82, ao_side=0.92, front_extra_eta=0.9, core_eta_max=0.7,
+             mass_eta_min=0.1, mass_eta_max=0.75, grove_k=(0.45, 0.85), ppm=111.0, elev=8.0),
+    n_patches=90, min_px=30, region="bramble", bark="bramble", swatch=(990, 650, 1050, 700), paintedLightMix=0.35,
+    paintedLightMixByMaterial={"lf_foliage_vol": 0.5},
+    height_hint=2.0, crown_hint=1.6, lods=LODS_BRAMBLE, crown_mode="mass", placement="dome", mass_r=0.38,
+    tint_note="art/02 palette (olive leaves, red berries, red-brown canes)",
+    variants={1: dict(seed=5, copies=[(100, 0.9), (-110, 0.85)]),
+              2: dict(seed=6, mirror=True, copies=[(80, 0.9), (-130, 0.9)]),
+              3: dict(seed=8, copies=[(120, 0.85), (-90, 0.9)], scale=(0.8, 1.1))},
+)
+
+
 def export_kit(asset, built, sp, info, kind, k, args):
     from frlib import paths as P
     import fbuild  # noqa: F401 (forest helpers path)

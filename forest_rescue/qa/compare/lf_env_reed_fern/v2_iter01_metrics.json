@@ -1,0 +1,89 @@
+{
+  "metrics": {
+    "mixed_v1_LOD0_painted": {
+      "iou": 0.9003,
+      "colour_err": 0.0877,
+      "ssim": 0.6347,
+      "ref_px": 35718,
+      "render_px": 33897
+    },
+    "mixed_v1_LOD0_albedo": {
+      "iou": 0.9003,
+      "colour_err": 0.0908,
+      "ssim": 0.634,
+      "ref_px": 35718,
+      "render_px": 33897
+    },
+    "mixed_v1_LOD1_painted": {
+      "iou": 0.7483,
+      "colour_err": 0.0854,
+      "ssim": 0.5597,
+      "ref_px": 35718,
+      "render_px": 27714
+    },
+    "mixed_v1_LOD2_painted": {
+      "iou": 0.4959,
+      "colour_err": 0.0894,
+      "ssim": 0.4722,
+      "ref_px": 35718,
+      "render_px": 18191
+    }
+  },
+  "lods": {
+    "mixed_v1": {
+      "LOD0": {
+        "tris": 492
+      },
+      "LOD1": {
+        "tris": 246
+      },
+      "LOD2": {
+        "tris": 124
+      }
+    },
+    "reed_v1": {
+      "LOD0": {
+        "tris": 396
+      },
+      "LOD1": {
+        "tris": 198
+      },
+      "LOD2": {
+        "tris": 100
+      }
+    },
+    "reed_v2": {
+      "LOD0": {
+        "tris": 198
+      },
+      "LOD1": {
+        "tris": 100
+      },
+      "LOD2": {
+        "tris": 50
+      }
+    },
+    "fern_v1": {
+      "LOD0": {
+        "tris": 72
+      },
+      "LOD1": {
+        "tris": 36
+      },
+      "LOD2": {
+        "tris": 18
+      }
+    },
+    "fern_v2": {
+      "LOD0": {
+        "tris": 56
+      },
+      "LOD1": {
+        "tris": 28
+      },
+      "LOD2": {
+        "tris": 14
+      }
+    }
+  }
+}

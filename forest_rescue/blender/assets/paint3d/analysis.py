@@ -59,7 +59,7 @@ def fit_ground_ellipse(fg, row_min, cols=None):
 
 
 def wood_mask(img, fg, ratio=0.85, Lmax=64, blur=1.2, min_area=150, Cmax=None, hue_rng=None, hue_max=None,
-              white=None, mode="ratio"):
+              white=None, mode="ratio", thin_only=0):
     """Bark pixels. mode 'ratio': low chroma relative to lightness (C/L < ratio), L < Lmax (warm foliage);
     mode 'hue': hue below hue_max (brown bark vs green foliage); white=(Lmin, Cmax): pale birch bark."""
     L = seg.lab(ndi.gaussian_filter(img, (blur, blur, 0)))
@@ -88,6 +88,10 @@ def wood_mask(img, fg, ratio=0.85, Lmax=64, blur=1.2, min_area=150, Cmax=None, h
         w &= (H >= hue_rng[0]) & (H <= hue_rng[1])
     w = ndi.binary_opening(w, structure=morphology.disk(1))
     w = ndi.binary_closing(w, structure=morphology.disk(1))
+    if thin_only:
+        # canes: keep only thin structures (dense dark interiors stay foliage/patch pixels)
+        w = w & ~ndi.binary_opening(w, structure=morphology.disk(thin_only))
+        w = ndi.binary_opening(w, structure=np.ones((2, 2)))
     lab_, n = ndi.label(w)
     if n:
         sizes = ndi.sum(w, lab_, np.arange(1, n + 1))

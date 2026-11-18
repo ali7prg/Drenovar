@@ -1,0 +1,247 @@
+"""Reeds + fern (art/02 middle row, right): reeds = vertical strand cards (painted strips) in crossed planes,
+fern = arching frond cards (painted frond patches on bent strips radiating from the crown).
+
+python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_reedfern.py [--iter N]
+Variants (names kept for forest_kit.gd / forest_kit.json): reed_v1, reed_v2, fern_v1, fern_v2, mixed_v1 (= art/02).
+"""
+import argparse
+import math
+import os
+import sys
+import time
+import types
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import pblend  # noqa: E402
+import bpy  # noqa: E402
+import numpy as np  # noqa: E402
+from scipy import ndimage as ndi  # noqa: E402
+from frlib import core, paths, refs, render as frr  # noqa: E402
+
+import geom  # noqa: E402
+import p3atlas as atl  # noqa: E402
+import seg  # noqa: E402
+import tree  # noqa: E402
+import build_tree as BT  # noqa: E402
+import build_props as BPR  # noqa: E402
+
+RT = os.path.join(paths.RUNTIME, "forest")
+ASSET = "lf_env_reed_fern"
+BOX = (1228, 478, 1536, 728)
+CLIP = 236            # crop rows: painted ground mound below
+GROUND = 244
+PPM = 94.0            # tallest cattail ~2.4 m
+SPLIT_X = 158         # crop col: reeds left of it, fern right (+ overlap handled by hue)
+K = 0.35
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--iter", type=int, default=1)
+    a = ap.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:])
+    t0 = time.time()
+    qa = lambda n: BT.qa_path(ASSET, a.iter, n)  # noqa: E731
+    S = seg.sheet("02_forest_modular_kit.png")
+    bg = seg.bg_colour(S)
+    x0, y0, x1, y1 = BOX
+    img = S[y0:y1, x0:x1].astype(np.float32)
+    fg_full, _ = seg.fg_mask(img, bg, thresh=10, min_area=60)
+    fg = fg_full.copy()
+    fg[CLIP:] = False
+    H, W = fg.shape
+    Lab = seg.lab(ndi.gaussian_filter(img, (0.8, 0.8, 0)))
+    Hu = np.degrees(np.arctan2(Lab[..., 2], Lab[..., 1])) % 360
+    xx = np.arange(W)[None, :]
+    # fern: bright yellow-green fronds right of the split; reeds: everything else (blades + cattails)
+    fern = fg & (xx >= SPLIT_X - 30) & (Hu > 84) & (Lab[..., 0] > 40)
+    fern = ndi.binary_closing(fern, iterations=2) & fg
+    fern &= (xx >= SPLIT_X - 30)
+    lab_, n = ndi.label(fern)
+    if n:
+        sz = ndi.sum(fern, lab_, np.arange(1, n + 1))
+        fern = np.isin(lab_, np.nonzero(sz > 150)[0] + 1)
+    fern = ndi.binary_fill_holes(fern) & fg
+    reed = fg & ~fern
+    view = refs.View(name="reed_fern", image=img, mask=fg, d=geom.elevated_dir(8.0), ppm=PPM, ax=W / 2.0, ay=float(GROUND))
+    # patches: reeds = vertical strips, fern = frond clumps
+    reed_lbl = seg.strip_patches(img, reed, width=9, max_h=200, min_px=40)
+    fern_lbl = seg.clump_patches(img, fern, n_target=14, min_px=120, compactness=0.002, max_k=0)
+    lbl = reed_lbl.copy()
+    lbl[fern_lbl > 0] = fern_lbl[fern_lbl > 0] + reed_lbl.max()
+    n_reed = int(reed_lbl.max())
+    pref = types.SimpleNamespace(img=img, fg=fg, wood_cov=np.zeros_like(fg), crown_rows=(0, H - 1),
+                                 xc=np.full(H, W / 2.0), R=np.full(H, W / 2.0), H=H, W=W, ppm=PPM, bg=bg)
+    P = tree.Patches.__new__(tree.Patches)
+    P.ref = pref
+    P.lbl = seg.relabel(lbl)
+    P.n = int(P.lbl.max())
+    P.tiles, P.rects, P.info = [], [], []
+    for i in range(1, P.n + 1):
+        m = P.lbl == i
+        tile, rect = seg.make_tile(img, fg, m, margin=2, scale=2, bg=bg)
+        ys, xs = np.nonzero(m)
+        P.tiles.append(tile)
+        P.rects.append(rect)
+        P.info.append(dict(c=(float(xs.mean()), float(ys.mean())), area=int(m.sum()), kind="reed" if i <= n_reed else "fern",
+                           w_m=(rect[2] - rect[0]) / PPM, h_m=(rect[3] - rect[1]) / PPM, y1=int(ys.max()),
+                           y0=int(ys.min())))
+    reg, s = P.pack("reed_fern")
+    atl.save_region("reed_fern", reg, {"asset": ASSET, "tiles": P.n, "scale": s})
+    atlas_path = atl.assemble()
+    seg.save(qa("patches.png"), seg.label_preview(P.lbl, img, 0.45))
+    print(f"[{ASSET}] reed strips {n_reed} fern fronds {P.n - n_reed} atlas scale {s:.3f} ({time.time() - t0:.1f}s)",
+          flush=True)
+    core.reset()
+    fol = pblend.export_material("lf_foliage", atlas_path, alpha_clip=0.5, double_sided=True)
+    reed_ids = [i for i in range(P.n) if P.info[i]["kind"] == "reed"]
+    fern_ids = [i for i in range(P.n) if P.info[i]["kind"] == "fern"]
+    fcx = np.mean([P.info[i]["c"][0] for i in fern_ids]) if fern_ids else W * 0.75
+    rcx = np.mean([P.info[i]["c"][0] for i in reed_ids]) if reed_ids else W * 0.3
+
+    def wind(V, base_z=0.0, top=2.4, phase=0.0, ao=1.0):
+        C = np.zeros((len(V), 4))
+        C[:, 0] = np.clip((V[:, 2] - base_z) / top, 0, 1) ** 1.3
+        C[:, 1] = np.clip((V[:, 2] - base_z) / top, 0, 1) * 0.8
+        C[:, 2] = phase
+        C[:, 3] = ao
+        return C
+
+    def front(ids, t_m=0.0, md=None, shift=None):
+        md = md or geom.Mesh()
+        for i in ids:
+            rect = P.rects[i]
+            cu, cv_ = P.info[i]["c"]
+            n = geom.nrm(-view.d)
+            V, T, UV, _, N = geom.front_card(view, rect, (cu, cv_), t_m, n, P.uv[i], np.zeros(4))
+            if shift is not None:
+                V = V + shift
+            md.add(V, T, UV, wind(V, phase=(i * 0.137) % 1), geom.nrm(N + np.array([0, 0, 0.3])), 1)
+        return md
+
+    def reed_clump(ids, angles, center_px, md=None, scale=1.0, seed=0):
+        """Painted strips in crossed vertical planes through the clump axis (each strip keeps its painted x offset)."""
+        rng = np.random.default_rng(seed)
+        md = md or geom.Mesh()
+        c_w = geom.world_at_y(view, np.array([center_px]), np.array([float(GROUND)]), np.array([0.0]))[0]
+        c_w[2] = 0.0
+        for ang in angles:
+            R = geom.rot_z(math.radians(ang))
+            for i in ids:
+                rect = P.rects[i]
+                cu, cv_ = P.info[i]["c"]
+                V, T, UV, _, N = geom.front_card(view, rect, (cu, cv_), 0.0, -view.d, P.uv[i], np.zeros(4))
+                V = ((V - c_w) * scale) @ R.T + c_w + rng.normal(0, 0.05, 3) * np.array([1, 1, 0])
+                N = N @ R.T
+                md.add(V, T, UV, wind(V, phase=rng.random()), geom.nrm(N + np.array([0, 0, 0.3])), 1)
+        return md
+
+    def fern_rosette(ids, n_fronds, center_px, md=None, scale=1.0, seed=0, reach=1.0):
+        """Arching frond cards: each painted frond patch laid on a bent strip from the crown outward."""
+        rng = np.random.default_rng(seed)
+        md = md or geom.Mesh()
+        c_w = geom.world_at_y(view, np.array([center_px]), np.array([float(GROUND)]), np.array([0.0]))[0]
+        c_w[2] = 0.05
+        big = sorted(ids, key=lambda i: -P.info[i]["area"])
+        for k in range(n_fronds):
+            i = big[k % len(big)]
+            inf = P.info[i]
+            L = max(inf["w_m"], inf["h_m"]) * scale * reach * rng.uniform(0.9, 1.1)
+            Wd = min(inf["w_m"], inf["h_m"]) * scale * 0.9
+            phi = 2 * math.pi * k / n_fronds + rng.normal(0, 0.15)
+            dirr = np.array([math.cos(phi), math.sin(phi), 0.0])
+            rise = rng.uniform(0.45, 0.7)
+            s_ = np.linspace(0, 1, 5)
+            # arch: up and out, then drooping tip
+            Pq = c_w[None] + (L * s_)[:, None] * dirr[None] * 0.85 + np.array([0, 0, 1.0])[None] * \
+                (L * (rise * np.sin(np.pi * s_ * 0.85) + 0.05))[:, None]
+            side = geom.nrm(np.cross(np.array([0, 0, 1.0]), dirr))
+            tang = geom.nrm(np.gradient(Pq, axis=0))
+            nn = geom.nrm(np.cross(side, tang))
+            nn[nn[:, 2] < 0] *= -1
+            widths = Wd * np.array([0.35, 0.8, 1.0, 0.85, 0.45])
+            V, T, UV, C, N = geom.bent_card(Pq, widths, nn, P.uv[i], np.zeros(4), flip=bool(rng.random() < 0.5))
+            md.add(V, T, UV, wind(V, top=1.3, phase=(k * 0.21) % 1), N, 1)
+        return md
+
+    variants = {}
+    # mixed_v1 = art/02: front strips/fronds + crossed reed planes + fern rosette behind
+    mixed = front(reed_ids + fern_ids)
+    reed_clump(reed_ids, (60, 120), rcx, md=mixed, scale=0.92, seed=1)
+    fern_rosette(fern_ids, 7, fcx, md=mixed, scale=0.9, seed=2, reach=0.85)
+    variants["mixed_v1"] = mixed
+    variants["reed_v1"] = reed_clump(reed_ids, (0, 60, 120), rcx, scale=1.0, seed=3)
+    variants["reed_v2"] = reed_clump(reed_ids[::2], (20, 80, 140), rcx, scale=0.85, seed=4)
+    variants["fern_v1"] = fern_rosette(fern_ids, 9, fcx, scale=1.0, seed=5)
+    variants["fern_v2"] = fern_rosette(fern_ids, 7, fcx, scale=0.8, seed=6, reach=1.1)
+    built = {}
+    info = {}
+    for vn, md in variants.items():
+        Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
+        used = np.unique(Tt)
+        off = Vv[used].mean(0) if vn != "mixed_v1" else np.zeros(3)
+        off[2] = 0.0
+        objs = []
+        info[vn] = {}
+        for lod in range(3):
+            if lod == 0:
+                keep = np.arange(len(Tt))
+            else:
+                # fewer cards: keep every 2nd (LOD1) / 4th (LOD2) card (2 tris per quad, 8 per bent frond)
+                step = 2 if lod == 1 else 4
+                quad = np.arange(len(Tt)) // 2
+                keep = np.nonzero(quad % step == 0)[0]
+            m = geom.Mesh()
+            m.add(Vv - off, Tt[keep], UVv, Cc, Nn, 0)
+            m.M = [Mm[keep]]
+            o = pblend.obj_from_mesh(f"{ASSET}_{vn}_LOD{lod}", m, [fol, fol])
+            objs.append(o)
+            info[vn][f"LOD{lod}"] = dict(tris=m.tris())
+        built[vn] = objs
+        print(f"[{ASSET}] {vn}: " + ", ".join(f"LOD{l}={info[vn][f'LOD{l}']['tris']}" for l in range(3)), flush=True)
+    pblend.setup_render(16)
+    allobjs = [o for v in built.values() for o in v]
+    metrics = {}
+    for lod in range(3):
+        for kk, tag in ((K, "painted"), (0.0, "albedo")):
+            if lod > 0 and tag == "albedo":
+                continue
+            pblend.use_painted(allobjs, kk)
+            rgba = pblend.render_view(view, [built["mixed_v1"][lod]])
+            rgba[CLIP:, :, 3] = 0
+            mm = pblend.compare_sheet(img, fg, rgba, bg, qa(f"front_mixed_v1_LOD{lod}_{tag}.png"),
+                                      f"{ASSET} mixed_v1 LOD{lod} vs art/02 ({tag} k={kk}) iter {a.iter}")
+            metrics[f"mixed_v1_LOD{lod}_{tag}"] = mm
+            print(f"[{ASSET}] LOD{lod} {tag}: {mm}", flush=True)
+    pblend.use_painted(allobjs, K)
+    lineup = [built[v][0] for v in built]
+    x = 0.0
+    for o in lineup:
+        lo, hi = core.bounds([o])
+        o.location.x = x - lo[0]
+        x += hi[0] - lo[0] + 0.8
+    bpy.context.view_layer.update()
+    for nm_, pitch, yaw in (("variants_front", 0, 0), ("variants_38", 38, 45), ("variants_top", 90, 0)):
+        pblend.only(lineup)
+        pblend.ortho_frame(lineup, pitch, yaw, res=(1600, 700))
+        pblend.save_shot(frr.render_rgba(), qa(f"{nm_}.png"), text=f"{ASSET} variants {nm_}")
+    for o in lineup:
+        o.location.x = 0
+    bpy.context.view_layer.update()
+    core.write_json(qa("metrics.json"), {"metrics": metrics, "lods": info})
+    pblend.use_painted(allobjs, K, on=False)
+    BPR.export(ASSET, built, info, "lf_foliage_only")
+    # meta: no bark texture for this asset
+    import json as _json
+    mp = os.path.join(RT, f"{ASSET}.meta.json")
+    meta = _json.load(open(mp))
+    meta["textures"] = {"lf_foliage_atlas.png": 2048}
+    meta["paintedLightMix"] = K
+    meta["build"] = "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_reedfern.py"
+    meta.pop("collision", None)
+    core.write_json(mp, meta)
+    print(f"[{ASSET}] exported ({time.time() - t0:.1f}s)", flush=True)
+
+
+if __name__ == "__main__":
+    main()

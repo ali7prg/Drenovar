@@ -324,6 +324,7 @@ def compare(species, rc, out, tag, renders, grid_info=None):
         refimg = Image.open(os.path.join(rc, f"{species}_{view}_ref.png")).convert("RGB")
         bg = Image.new("RGBA", (W, H), tuple(int(c) for c in np.asarray(refimg)[3, 3]) + (255,))
         bg.alpha_composite(crop)
+        bg.convert("RGB").save(os.path.join(out, f"{species}_{tag}_{view}_aligned.png"))   # for tools/detail.py
         cut = Image.open(os.path.join(rc, f"{species}_{view}_cut.png"))
         ov = refcheck.overlay(ref, m, cut)
         ra = np.asarray(refimg).reshape(-1, 3)[ref.ravel()]
@@ -909,6 +910,7 @@ def cmd_poses_glb(species, glb, rc, out, voxel=0.035):
         refimg = PImage.open(os.path.join(rc, f"{species}_pose_{ph}_ref.png")).convert("RGB")
         bg = PImage.new("RGBA", (W, H), tuple(int(c) for c in np.asarray(refimg)[3, 3]) + (255,))
         bg.alpha_composite(PImage.fromarray(rgba))
+        bg.convert("RGB").save(os.path.join(out, f"{species}_glbpose_{ph}_aligned.png"))  # for tools/detail.py
         cut = PImage.open(os.path.join(rc, f"{species}_pose_{ph}_cut.png"))
         ov = refcheck.overlay(ref, moved, cut)
         rows.append([refcheck.label(refimg.copy(), f"{ph}: reference"),

@@ -292,10 +292,10 @@ FUR_CARDS = [  # sheet: long shaggy dark-brown coat with lighter tips, beard und
     {"centre": (1.00, 1.05, 0), "radii": (0.25, 0.30, 0.36), "count": 200, "length": 0.28, "width": 0.09,
      "flow": lambda p, n: np.array([-1.0, -0.5, 0]), "lift": 0.2, "droop": 0.2, "crossed": True,
      "tip": "#b08666"},                                                                             # neck, beard
-    {"centre": (0.55, 0.50, 0), "radii": (0.22, 0.45, 0.62), "count": 260, "length": 0.24, "width": 0.09,
+    {"centre": (0.55, 0.46, 0), "radii": (0.24, 0.52, 0.64), "count": 420, "length": 0.26, "width": 0.10,
      "flow": lambda p, n: np.array([-0.3, -1.0, 0]), "lift": 0.18, "droop": 0.1, "crossed": True,
      "tip": "#966c4e"},                                                                             # forelegs
-    {"centre": (-1.00, 0.55, 0), "radii": (0.28, 0.45, 0.60), "count": 260, "length": 0.24, "width": 0.09,
+    {"centre": (-1.00, 0.50, 0), "radii": (0.30, 0.52, 0.62), "count": 420, "length": 0.26, "width": 0.10,
      "flow": lambda p, n: np.array([-0.4, -1.0, 0]), "lift": 0.18, "droop": 0.1, "crossed": True,
      "tip": "#966c4e"},                                                                             # hind legs
     {"centre": (-1.15, 0.95, 0), "radii": (0.35, 0.35, 0.55), "count": 170, "length": 0.26, "width": 0.09,
@@ -361,7 +361,7 @@ PROOF_COLORS = {"base": "#4a3627", "fur": "#4a3627", "fur_long": "#5a4231", "ski
 
 
 # ---------------------------------------------------------------- surface
-from shading import lin, mix, sstep, fur_height, tangent_flow  # noqa: E402
+from shading import lin, mix, sstep, fur_height, fur_streaks, tangent_flow  # noqa: E402
 import noise  # noqa: E402
 
 EMISSION_COLOR = "#E0A040"
@@ -396,17 +396,19 @@ def shade_body(ctx):
     col = mix(col, lin("#6a4430"), sstep(-0.1, -0.7, N[:, 1]))
     col = mix(col, lin("#33271f"), sstep(0.55, 0.25, y))
     col = col * (1.0 + 0.18 * noise.fbm(P * 2.5, 3, seed=31)[:, None])
-    col = col * (0.68 + 0.55 * sstep(-1.0, 1.0, h0))[:, None]
+    streak = fur_streaks(P, flow, 0.9, seed=23)
+    col = col * (0.80 + 0.28 * sstep(-1.0, 1.0, h0))[:, None] * (0.80 + 0.32 * (streak * 0.5 + 0.5))[:, None]
     col = col * np.array([1.30, 1.12, 0.98], np.float32)[None, :]   # creature-references coat: warm red-brown
     col = mix(col, lin("#3a2c26"), w["skin"])
     col = mix(col, lin("#5a4440"), w["snout"])
-    hoof = mix(lin("#4a3a2c"), lin("#8a6c4c"), sstep(0.16, 0.02, y) * (0.7 + 0.3 * noise.perlin(P * 30, 11)))
+    rings = 0.5 + 0.5 * np.sin(y * 95.0 + noise.perlin(P * 12, 12) * 2.0)
+    hoof = mix(lin("#2a211b"), lin("#5e4a38"), np.clip(sstep(0.18, 0.02, y) * 0.6 + rings * 0.35, 0, 1))
     col = mix(col, hoof, w["hoof"])
     col = mix(col, lin("#3a1c1a"), w["mouth"])
     rough = 0.84 + 0.06 * noise.perlin(P * 12, 3)
     rough = mix(rough, 0.62, w["skin"])
     rough = mix(rough, 0.50, w["snout"])
-    rough = mix(rough, 0.48 + 0.12 * sstep(0.035, 0.0, y), w["hoof"])
+    rough = mix(rough, 0.40 + 0.12 * sstep(0.035, 0.0, y), w["hoof"])
     rough = mix(rough, 0.45, w["mouth"])
 
     def height(Q):

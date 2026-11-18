@@ -99,7 +99,7 @@ def leg_prims(kind, nm, s, J):
     for i, dz in enumerate((-0.062, -0.022, 0.022, 0.062)):
         tip = j[5] + np.array([-0.01 + (0.03 if abs(dz) < 0.03 else 0.0), 0.032, dz * 1.45])
         out.append(Prim("cone", T, k=0.025, name=f"toe{i}", a=j[4] + np.array([0.03, -0.01, dz * 0.8]),
-                        b=tip, ra=0.038, rb=0.031))
+                        b=tip, ra=0.043, rb=0.035))
     out.append(Prim("box", T, k=0.004, neg=True, name="sole", c=np.array([j[5][0] - 0.05, -0.10, j[5][2]]),
                     h=(0.25, 0.10, 0.20), round=0.0))
     return out
@@ -117,29 +117,30 @@ def body_core():
          Prim("cone", "Neck_02", k=0.10, a=(0.98, 1.60, 0), b=(1.14, 1.70, 0), ra=0.26, rb=0.21, name="neck2"),
          Prim("ellipsoid", "Throat", k=0.10, c=(0.96, 1.48, 0), r=(0.15, 0.16, 0.16), name="throat"),
          # head: long wolf muzzle, heavy brow, flat crown; mouth a little open (snarl, sabres show)
-         Prim("ellipsoid", "Head", k=0.06, c=(1.20, 1.73, 0), r=(0.22, 0.155, 0.16), name="cranium"),
+         Prim("ellipsoid", "Head", k=0.06, c=(1.20, 1.73, 0), r=(0.22, 0.150, 0.145), name="cranium"),
          Prim("ellipsoid", "Head", k=0.05, c=(1.15, 1.81, 0), r=(0.15, 0.075, 0.12), name="crown"),
-         Prim("cone", "Nose", k=0.05, a=(1.30, 1.66, 0), b=(1.49, 1.565, 0), ra=0.10, rb=0.05, name="muzzle"),
+         Prim("cone", "Nose", k=0.05, a=(1.30, 1.665, 0), b=(1.52, 1.57, 0), ra=0.085, rb=0.040, name="muzzle"),
          Prim("ellipsoid", "Head", k=0.035, c=(1.40, 1.67, 0), r=(0.13, 0.04, 0.06), R=rot_z(-0.30), name="nasal"),
-         Prim("sphere", "Nose", k=0.015, mat="nose", c=(1.50, 1.556, 0), r=0.038, name="nosepad"),
-         Prim("cone", "Jaw", k=0.035, a=(1.22, 1.56, 0), b=(1.50, 1.47, 0), ra=0.072, rb=0.033, name="jaw"),
+         Prim("sphere", "Nose", k=0.012, mat="nose", c=(1.535, 1.565, 0), r=0.036, name="nosepad"),
+         Prim("cone", "Jaw", k=0.035, a=(1.22, 1.56, 0), b=(1.49, 1.49, 0), ra=0.060, rb=0.027, name="jaw"),
          Prim("box", "Head", k=0.006, neg=True, mat="mouth", c=(1.41, 1.53, 0), h=(0.16, 0.012, 0.05), round=0.004,
               R=rot_z(-0.22), name="mouthslit")]
     for nm, s in SIDES:
-        P += [Prim("ellipsoid", f"Cheek_{nm}", k=0.05, c=(1.24, 1.62, 0.10 * s), r=(0.13, 0.09, 0.065),
+        P += [Prim("ellipsoid", f"Cheek_{nm}", k=0.05, c=(1.22, 1.625, 0.09 * s), r=(0.11, 0.08, 0.06),
                    name=f"cheek{nm}"),
               Prim("ellipsoid", "Head", k=0.03, c=(1.30, 1.76, 0.065 * s), r=(0.08, 0.035, 0.045), R=rot_z(-0.2),
                    name=f"brow{nm}"),
-              Prim("cone", "Nose", k=0.02, mat="skin", a=(1.33, 1.56, 0.07 * s), b=(1.50, 1.54, 0.03 * s),
-                   ra=0.026, rb=0.018, name=f"lip{nm}"),
+              Prim("cone", "Nose", k=0.02, mat="skin", a=(1.33, 1.565, 0.062 * s), b=(1.51, 1.548, 0.026 * s),
+                   ra=0.022, rb=0.015, name=f"lip{nm}"),
               Prim("sphere", "Head", k=0.01, neg=True, c=(1.31, 1.715, 0.085 * s), r=0.026, name=f"socket{nm}")]
-        ec = np.array([1.13, 1.97, 0.12 * s])
-        Re = rot_x(-0.18 * s) @ rot_z(-0.05)
-        P += [Prim("ellipsoid", f"Ear_{nm}", k=0.025, c=ec, r=(0.085, 0.17, 0.08), R=Re, name=f"ear{nm}"),
-              Prim("cone", f"Ear_{nm}", k=0.02, a=ec, b=ec + Re @ np.array([0.0, 0.31, 0.0]), ra=0.075, rb=0.006,
+        # tall pointed ears, the opening turned forward and a little outward (front view: the cupped inner ear)
+        ec = np.array([1.12, 1.98, 0.115 * s])
+        Re = rot_x(-0.20 * s) @ rot_y(-0.30 * s) @ rot_z(-0.08)
+        P += [Prim("ellipsoid", f"Ear_{nm}", k=0.025, c=ec, r=(0.062, 0.19, 0.088), R=Re, name=f"ear{nm}"),
+              Prim("cone", f"Ear_{nm}", k=0.02, a=ec, b=ec + Re @ np.array([-0.01, 0.34, 0.0]), ra=0.062, rb=0.006,
                    name=f"eartip{nm}"),
-              Prim("ellipsoid", f"Ear_{nm}", k=0.008, neg=True, mat="skin", c=ec + Re @ np.array([0.03, 0.02, 0.0]),
-                   r=(0.024, 0.12, 0.045), R=Re, name=f"earcav{nm}")]
+              Prim("ellipsoid", f"Ear_{nm}", k=0.008, neg=True, mat="skin", c=ec + Re @ np.array([0.052, 0.04, 0.0]),
+                   r=(0.032, 0.16, 0.058), R=Re, name=f"earcav{nm}")]
         P += [Prim("ellipsoid", f"Shoulder_{nm}", k=0.12, c=side((0.56, 1.34, 0.24), s), r=(0.26, 0.38, 0.15),
                    R=rot_z(-0.45), name=f"scapula{nm}"),
               Prim("ellipsoid", f"UpperLeg_Hind_{nm}", k=0.14, c=side((-0.96, 1.14, 0.21), s), r=(0.27, 0.34, 0.14),
@@ -225,10 +226,10 @@ def teeth_part():
     """Sabre fangs (0.30 m), canines/incisors and claws are rigid details (M_Tenerys_Details)."""
     P = []
     for nm, s in SIDES:
-        root = np.array([1.44, 1.555, 0.052 * s])
+        root = np.array([1.39, 1.556, 0.058 * s])
         pts = bezier(root, root + np.array([0.02, -0.10, 0.004 * s]), root + np.array([0.0, -0.22, 0.008 * s]),
                      root + np.array([-0.045, -0.30, 0.006 * s]), 8)
-        P += chain(list(pts), list(np.linspace(0.024, 0.004, len(pts))), "Head", k=0.01, mat="fang",
+        P += chain(list(pts), list(np.linspace(0.021, 0.004, len(pts))), "Head", k=0.01, mat="fang",
                    name=f"sabre{nm}")
         for i, (x, ln) in enumerate(((1.48, 0.035), (1.38, 0.03), (1.33, 0.025))):
             a = np.array([x, 1.545, (0.035 + 0.01 * i) * s])
@@ -249,61 +250,72 @@ def claw_parts():
             P = []
             for i, dz in enumerate((-0.062, -0.022, 0.022, 0.062)):
                 base = j[5] + np.array([-0.01 + (0.03 if abs(dz) < 0.03 else 0.0), 0.034, dz * 1.45])
-                L = 0.13 if kind == "Front" else 0.10
-                pts = bezier(base, base + np.array([0.04, 0.0, 0]), base + np.array([L * 0.8, -0.01, 0]),
-                             base + np.array([L, -0.03, 0]), 5)
-                P += chain(list(pts), list(np.linspace(0.016, 0.003, len(pts))), f"Toe_{kind}_{nm}", k=0.004,
+                L = 0.165 if kind == "Front" else 0.13
+                pts = bezier(base, base + np.array([0.05, 0.01, 0]), base + np.array([L * 0.8, -0.005, 0]),
+                             base + np.array([L, -0.035, 0]), 6)
+                P += chain(list(pts), list(np.linspace(0.021, 0.0035, len(pts))), f"Toe_{kind}_{nm}", k=0.004,
                            mat="claw", name=f"claw{i}")
             parts.append((f"claws_{kind}_{nm}", Part(f"claws_{kind}_{nm}", P, band=0.02), f"Toe_{kind}_{nm}"))
     return parts
 
 
 def eye_part():
-    P = [Prim("sphere", "Head", k=0.0, mat="eye", c=(1.305, 1.715, 0.081 * s), r=0.024, name=f"eye{nm}")
+    P = [Prim("sphere", "Head", k=0.0, mat="eye", c=(1.307, 1.715, 0.083 * s), r=0.027, name=f"eye{nm}")
          for nm, s in SIDES]
     return Part("eyes", P, band=0.015)
 
 
-FUR_CARDS = [  # sheet: long swept-back mane with glowing strands, back ridge, hanging throat ruff, huge silver tail
-    {"centre": (0.70, 1.72, 0), "radii": (0.50, 0.28, 0.34), "count": 420, "length": 0.32, "width": 0.11,
+_SHORT = {1: 1, 2: 1}   # short coat cards lie flat: one strip segment is enough at LOD1 / LOD2
+FUR_CARDS = [  # creature-references: swept-back mane behind the head (ears and face stay clear), glowing strands,
+    # silver cheek ruff, dark furred legs to the paws, huge silver brush tail with white tips
+    {"centre": (0.55, 1.70, 0), "radii": (0.42, 0.26, 0.32), "count": 420, "length": 0.32, "width": 0.11,
      "flow": lambda p, n: np.array([-1.0, 0.22, 0]), "lift": 0.24, "droop": 0.05, "crossed": True,
      "tip": "#b9bdcb", "root_k": 0.88},                                                             # mane
-    {"centre": (0.62, 1.80, 0), "radii": (0.45, 0.16, 0.24), "count": 110, "length": 0.28, "width": 0.07,
+    {"centre": (0.50, 1.78, 0), "radii": (0.40, 0.16, 0.24), "count": 110, "length": 0.28, "width": 0.07,
      "flow": lambda p, n: np.array([-1.0, 0.15, 0]), "lift": 0.22, "droop": 0.05, "crossed": True,
      "glow": True, "tip": "#a6d6ff"},                                                               # glowing strands
     {"centre": (-0.45, 1.64, 0), "radii": (0.70, 0.10, 0.16), "count": 220, "length": 0.16, "width": 0.09,
      "flow": lambda p, n: np.array([-1.0, 0.12, 0]), "lift": 0.14, "droop": 0.04, "crossed": True,
-     "tip": "#a7aab8", "root_k": 0.88},                                                                             # back ridge
+     "tip": "#a7aab8", "root_k": 0.88},                                                             # back ridge
     {"centre": (-0.45, 1.66, 0), "radii": (0.70, 0.08, 0.10), "count": 60, "length": 0.14, "width": 0.06,
      "flow": lambda p, n: np.array([-1.0, 0.05, 0]), "lift": 0.22, "crossed": True, "glow": True,
      "tip": "#8fb4dc"},                                                                             # ridge glow
-    {"centre": (1.00, 1.54, 0), "radii": (0.24, 0.20, 0.30), "count": 90, "length": 0.10, "width": 0.09,
+    {"centre": (1.00, 1.54, 0), "radii": (0.24, 0.20, 0.30), "count": 110, "length": 0.11, "width": 0.09,
      "flow": lambda p, n: np.array([-0.35, -1.0, 0]), "lift": 0.12, "gravity": 0.2, "droop": 0.15,
      "crossed": True, "tip": "#c6c8d4", "root_k": 0.9},                                            # throat ruff
-    {"centre": (1.16, 1.60, 0), "radii": (0.12, 0.14, 0.20), "count": 60, "length": 0.22, "width": 0.08,
-     "flow": lambda p, n: np.array([-1.0, -0.35, 0]), "lift": 0.30, "droop": 0.05, "crossed": True,
-     "tip": "#c2c4ce", "root_k": 0.9},                                                             # cheek ruff
-    {"centre": (0.55, 1.38, 0), "radii": (0.32, 0.22, 0.36), "count": 230, "length": 0.24, "width": 0.08,
+    {"centre": (1.12, 1.60, 0), "radii": (0.10, 0.12, 0.18), "count": 70, "length": 0.16, "width": 0.07,
+     "flow": lambda p, n: np.array([-1.0, -0.30, 0]), "lift": 0.22, "droop": 0.05, "crossed": True,
+     "tip": "#d0d2dc", "root_k": 0.95},                                                            # cheek ruff
+    {"centre": (1.18, 1.80, 0), "radii": (0.14, 0.06, 0.12), "count": 60, "length": 0.06, "width": 0.05,
+     "flow": lambda p, n: np.array([-1.0, 0.05, 0]), "lift": 0.12, "droop": 0.02, "tip": "#77757f",
+     "root_k": 1.0, "segments": _SHORT},                                                            # crown
+    {"centre": (0.55, 1.38, 0), "radii": (0.32, 0.22, 0.36), "count": 280, "length": 0.24, "width": 0.08,
      "flow": lambda p, n: np.array([-0.8, -0.6, 0]), "lift": 0.10, "droop": 0.1, "tip": "#77757f",
      "root_k": 0.9},                                                                                # shoulders
-    {"centre": (-0.20, 1.30, 0), "radii": (0.95, 0.30, 0.34), "count": 420, "length": 0.13, "width": 0.075,
+    {"centre": (-0.20, 1.30, 0), "radii": (0.95, 0.30, 0.34), "count": 520, "length": 0.13, "width": 0.08,
      "flow": lambda p, n: np.array([-1.0, -0.30, 0]), "lift": 0.10, "droop": 0.08, "tip": "#6e6c78",
-     "root_k": 0.95},                                                                               # coat
-    {"centre": (-0.95, 1.22, 0), "radii": (0.36, 0.30, 0.32), "count": 140, "length": 0.17, "width": 0.08,
+     "root_k": 0.95, "segments": _SHORT},                                                           # coat
+    {"centre": (-0.95, 1.22, 0), "radii": (0.36, 0.30, 0.32), "count": 200, "length": 0.17, "width": 0.08,
      "flow": lambda p, n: np.array([-1.0, -0.55, 0]), "lift": 0.12, "droop": 0.12, "tip": "#7b7985",
      "root_k": 0.92},                                                                               # croup, flanks
-    {"centre": (0.48, 0.70, 0), "radii": (0.16, 0.42, 0.36), "count": 200, "length": 0.16, "width": 0.08,
-     "flow": lambda p, n: np.array([-0.4, -1.0, 0]), "lift": 0.18, "gravity": 0.2, "droop": 0.1, "crossed": True,
-     "tip": "#83818e", "root_k": 0.92},                                                                             # forearms
+    {"centre": (0.50, 0.62, 0), "radii": (0.22, 0.52, 0.36), "count": 380, "length": 0.16, "width": 0.085,
+     "flow": lambda p, n: np.array([-0.4, -1.0, 0]), "lift": 0.16, "gravity": 0.15, "droop": 0.1,
+     "tip": "#83818e", "root_k": 0.92, "segments": _SHORT},                                         # forelegs
+    {"centre": (0.50, 0.22, 0), "radii": (0.20, 0.20, 0.36), "count": 150, "length": 0.09, "width": 0.07,
+     "flow": lambda p, n: np.array([0.25, -1.0, 0]), "lift": 0.10, "droop": 0.02, "tip": "#6e6c78",
+     "root_k": 0.95, "segments": _SHORT},                                                           # fore paws
     {"centre": (-0.05, 1.09, 0), "radii": (0.50, 0.07, 0.24), "count": 80, "length": 0.11, "width": 0.07,
      "flow": lambda p, n: np.array([-0.5, -1.0, 0]), "lift": 0.05, "gravity": 0.3, "droop": 0.15,
-     "tip": "#4b4852"},                                                                             # belly fringe
-    {"centre": (-1.05, 0.90, 0), "radii": (0.24, 0.45, 0.34), "count": 190, "length": 0.17, "width": 0.08,
+     "tip": "#4b4852", "segments": _SHORT},                                                         # belly fringe
+    {"centre": (-1.00, 0.85, 0), "radii": (0.30, 0.50, 0.34), "count": 380, "length": 0.17, "width": 0.085,
      "flow": lambda p, n: np.array([-0.6, -1.0, 0]), "lift": 0.15, "droop": 0.1, "crossed": True,
-     "tip": "#83818e", "root_k": 0.92},                                                                             # thighs, hocks
-    {"centre": (-1.80, 0.90, 0), "radii": (0.48, 0.44, 0.20), "count": 440, "length": 0.33, "width": 0.13,
+     "tip": "#83818e", "root_k": 0.92},                                                             # thighs, hocks
+    {"centre": (-1.18, 0.28, 0), "radii": (0.20, 0.28, 0.34), "count": 150, "length": 0.10, "width": 0.07,
+     "flow": lambda p, n: np.array([-0.3, -1.0, 0]), "lift": 0.10, "droop": 0.02, "tip": "#6e6c78",
+     "root_k": 0.95, "segments": _SHORT},                                                           # hind feet
+    {"centre": (-1.80, 0.90, 0), "radii": (0.48, 0.44, 0.20), "count": 520, "length": 0.33, "width": 0.14,
      "flow": lambda p, n: np.array([-0.78, -0.62, 0]), "lift": 0.10, "droop": 0.02, "crossed": True,
-     "tip": "#e4e7ef", "root_k": 0.9, "bone": "Tail_03"},                                                             # tail brush
+     "tip": "#eef0f6", "root": "#5d5b66", "root_k": 1.0, "bone": "Tail_03"},                        # tail brush
     {"centre": (-1.72, 0.96, 0), "radii": (0.44, 0.36, 0.16), "count": 50, "length": 0.30, "width": 0.06, "bone": "Tail_03",
      "flow": lambda p, n: np.array([-0.6, -0.8, 0]), "lift": 0.2, "crossed": True, "glow": True,
      "tip": "#a9c8ec"}]                                                                             # tail glow
@@ -353,7 +365,7 @@ PROOF_COLORS = {"base": "#3a383d", "fur": "#3a383d", "fur_long": "#3f3d44", "ski
 
 
 # ---------------------------------------------------------------- surface
-from shading import lin, mix, sstep, fur_height, tangent_flow  # noqa: E402
+from shading import lin, mix, sstep, fur_height, fur_streaks, tangent_flow  # noqa: E402
 import noise  # noqa: E402
 
 EMISSION_COLOR = "#61BDF4"
@@ -413,8 +425,20 @@ def shade_body(ctx):
     col = mix(col, lin("#6a6670"), sstep(1.38, 1.50, x) * sstep(1.62, 1.54, y) * 0.6)
     tailtip = sstep(-1.55, -1.95, x)
     col = mix(col, mix(lin("#5d5a62"), lin("#a7a9b4"), tips), tailtip * w["fur_long"] * 0.7)
-    col = col * (0.68 + 0.50 * sstep(-1.0, 1.0, h0))[:, None]
+    streak = fur_streaks(P, flow, 1.0, seed=31)
+    col = col * (0.82 + 0.22 * sstep(-1.0, 1.0, h0))[:, None] * (0.80 + 0.32 * (streak * 0.5 + 0.5))[:, None]
+    # creature-references face: silver-white muzzle and chin, silver cheeks, dark mask round the eyes and brow
+    muzzle = sstep(1.30, 1.42, x) * sstep(1.70, 1.62, y)
+    chin = sstep(1.20, 1.32, x) * sstep(1.60, 1.53, y)
+    col = mix(col, lin("#a9a8b2") * (0.85 + 0.25 * (streak * 0.5 + 0.5))[:, None], np.clip(muzzle * 0.8 + chin * 0.8, 0, 1))
+    cheek = sstep(1.08, 1.20, x) * sstep(1.50, 1.60, y) * sstep(1.72, 1.64, y) * sstep(0.05, 0.10, np.abs(z))
+    col = mix(col, lin("#8d8b96"), cheek * 0.7)
+    for sgn in (-1.0, 1.0):
+        d_eye = np.linalg.norm(P - np.array([1.31, 1.715, 0.085 * sgn], np.float32), axis=1)
+        col = mix(col, lin("#141215"), sstep(0.075, 0.035, d_eye) * 0.85)
+    col = mix(col, lin("#2a2629"), sstep(1.97, 2.05, y) * (1 - w["skin"]) * 0.7)     # dark ear backs
     col = mix(col, lin("#2b2224"), w["skin"])
+    col = mix(col, lin("#8d8b96"), w["skin"] * sstep(1.90, 1.97, y))                # pale fur in the ear cup
     col = mix(col, lin("#0b0b0c"), w["nose"])
     col = mix(col, lin("#3a1418"), w["mouth"])
     vn = veins(P, N, flow) * (w["fur"] + w["fur_long"])
@@ -447,7 +471,7 @@ def shade_detail(ctx):
     ring = noise.ridged(noise.stretch_along(P * 90.0, flow, 0.25), 2, seed=5)
     fang = mix(lin("#c9bfa8"), lin("#efe8d8"), sstep(0.02, 0.006, rad))
     fang = fang * (0.9 + 0.12 * ring)[:, None]
-    claw = mix(lin("#3a3430"), lin("#b9ad98"), sstep(0.012, 0.004, rad))
+    claw = mix(lin("#4a4038"), lin("#e2d8c4"), sstep(0.017, 0.007, rad))
     eye = lin("#0e1216")
     col = fang * w["fang"][:, None] + claw * w["claw"][:, None] + eye * w["eye"][:, None]
     em = np.zeros((ctx.n, 3), np.float32)
@@ -463,7 +487,7 @@ def shade_detail(ctx):
         pupil = sstep(0.93, 0.96, cosang) * near
         col = mix(col, lin("#b8e5ff"), iris)
         col = mix(col, lin("#06080a"), pupil)
-        em += lin("#b8e5ff")[None, :] * (iris * (1 - pupil) * 0.8)[:, None]
+        em += lin("#b8e5ff")[None, :] * (iris * (1 - pupil) * 1.6)[:, None]
         eyeglow = np.maximum(eyeglow, iris)
     rough = w["fang"] * (0.35 + 0.15 * (1 - ring)) + w["claw"] * 0.42 + w["eye"] * 0.08
 

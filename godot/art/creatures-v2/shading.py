@@ -49,6 +49,15 @@ def fur_height(flow, scale=1.0, octaves=3, clumps=True, seed=0):
     return h
 
 
+def fur_streaks(P, flow, scale=1.0, seed=11):
+    """Albedo streaks of individual hairs: thin, high-contrast lines along `flow` (no clumps), -1..1. The coat under
+    the fur cards reads as hair instead of marbled skin."""
+    q = noise.stretch_along(P * (70.0 * scale), flow.astype(np.float32), 14.0)
+    a = noise.perlin(q, seed)
+    b = noise.perlin(q * 1.93 + 2.3, seed + 1)
+    return np.clip((0.65 * a + 0.35 * b) * 2.2, -1.0, 1.0)
+
+
 def rune_glyph(u, v, size):
     """Distance (m) to a spiral rune with a stem and two leaves, centred at (0,0); `size` = outer radius."""
     r = np.sqrt(u * u + v * v)

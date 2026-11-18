@@ -77,14 +77,14 @@ def skeleton():
     sk.add("Spine_01", "Pelvis", (-1.05, 1.90, 0))
     sk.add("Spine_02", "Spine_01", (-0.05, 2.12, 0))
     sk.add("Chest", "Spine_02", (0.95, 2.08, 0))
-    sk.add("Neck_01", "Chest", (1.85, 2.02, 0))
-    sk.add("Neck_02", "Neck_01", (2.30, 1.98, 0))
-    sk.add("Head", "Neck_02", (2.58, 1.98, 0), tail=(3.46, 1.86, 0))
-    sk.add("Jaw", "Head", (2.62, 1.74, 0), tail=(3.36, 1.56, 0))
-    sk.add("Tongue", "Jaw", (2.80, 1.70, 0), tail=(3.20, 1.62, 0))
-    sk.add("Throat", "Neck_02", (2.25, 1.55, 0), tail=(2.55, 1.50, 0))
+    sk.add("Neck_01", "Chest", (1.65, 2.04, 0))
+    sk.add("Neck_02", "Neck_01", (1.95, 2.02, 0))
+    sk.add("Head", "Neck_02", (2.21, 2.04, 0), tail=(3.09, 1.92, 0))
+    sk.add("Jaw", "Head", (2.25, 1.74, 0), tail=(3.05, 1.55, 0))
+    sk.add("Tongue", "Jaw", (2.43, 1.70, 0), tail=(2.85, 1.64, 0))
+    sk.add("Throat", "Neck_02", (1.95, 1.58, 0), tail=(2.25, 1.52, 0))
     for nm, s in SIDES:
-        sk.add(f"Cheek_{nm}", "Head", (2.70, 1.88, 0.36 * s), tail=(3.00, 1.82, 0.32 * s))
+        sk.add(f"Cheek_{nm}", "Head", (2.33, 1.88, 0.36 * s), tail=(2.63, 1.82, 0.32 * s))
     sk.add("Belly", "Spine_02", (-0.40, 1.35, 0), tail=(-0.40, 1.20, 0))
     for nm, s in SIDES:
         leg_bones(sk, "Front", "Chest", None, [side(j, s) for j in FRONT["joints"]], nm)
@@ -97,8 +97,8 @@ def skeleton():
                    tail=side(J["joints"][5], s) + np.array([-0.06, 0, 0.26 * s]))
     for i in range(6):
         sk.add(f"Tail_0{i + 1}", "Pelvis" if i == 0 else f"Tail_0{i}", TAIL[i], tail=TAIL[6] if i == 5 else None)
-    sk.socket("socket_head", "Head", (2.70, 2.45, 0))
-    sk.socket("socket_mouth", "Jaw", (3.30, 1.68, 0))
+    sk.socket("socket_head", "Head", (2.36, 2.50, 0))
+    sk.socket("socket_mouth", "Jaw", (2.95, 1.66, 0))
     sk.socket("socket_chest", "Chest", (1.90, 1.40, 0))
     sk.socket("socket_slam_center", "Chest", (2.30, 0.0, 0))
     for nm, s in SIDES:
@@ -160,22 +160,22 @@ def body_core():
          Prim("ellipsoid", "Belly", k=0.26, c=(-0.50, 1.38, 0), r=(1.35, 0.60, 0.84), name="belly"),
          Prim("ellipsoid", "Spine_01", k=0.26, c=(-1.15, 1.82, 0), r=(1.05, 0.56, 0.80), name="loin"),
          Prim("ellipsoid", "Pelvis", k=0.24, c=(-2.05, 1.58, 0), r=(0.88, 0.55, 0.74), name="hips"),
-         Prim("cone", "Neck_01", k=0.22, a=(1.70, 1.96, 0), b=(2.42, 1.94, 0), ra=0.72, rb=0.52, name="neck"),
-         Prim("ellipsoid", "Throat", k=0.18, c=(2.28, 1.62, 0), r=(0.52, 0.30, 0.52), name="dewlap"),
+         Prim("cone", "Neck_01", k=0.22, a=(1.62, 1.97, 0), b=(2.02, 1.98, 0), ra=0.72, rb=0.48, name="neck"),
+         Prim("ellipsoid", "Throat", k=0.18, c=(1.95, 1.66, 0), r=(0.45, 0.26, 0.48), name="dewlap"),
          # crocodile-dragon head held low: broad skull, long tapering upper jaw, heavy lower jaw, mouth a little open
-         Prim("ellipsoid", "Head", k=0.14, c=(2.68, 2.00, 0), r=(0.48, 0.29, 0.54), name="skull"),
-         Prim("ellipsoid", "Head", k=0.12, c=(3.10, 1.93, 0), r=(0.40, 0.15, 0.26), name="snout"),
-         Prim("ellipsoid", "Head", k=0.06, c=(3.42, 1.87, 0), r=(0.07, 0.10, 0.13), name="nosetip"),
-         Prim("ellipsoid", "Jaw", k=0.10, c=(2.98, 1.66, 0), r=(0.42, 0.12, 0.34), R=rot_z(-0.22), name="jaw"),
-         Prim("box", "Head", k=0.012, neg=True, mat="mouth", c=(2.98, 1.74, 0), h=(0.50, 0.045, 0.40), round=0.025,
-              R=rot_z(-0.16), name="mouthgap")]
+         Prim("ellipsoid", "Head", k=0.14, c=(2.31, 2.10, 0), r=(0.46, 0.28, 0.44), name="skull"),
+         Prim("ellipsoid", "Head", k=0.12, c=(2.77, 1.93, 0), r=(0.48, 0.15, 0.24), name="snout"),
+         Prim("ellipsoid", "Head", k=0.06, c=(3.17, 1.86, 0), r=(0.08, 0.09, 0.13), name="nosetip"),
+         Prim("ellipsoid", "Jaw", k=0.08, c=(2.65, 1.65, 0), r=(0.50, 0.13, 0.22), R=rot_z(-0.12), name="jaw"),
+         Prim("box", "Head", k=0.012, neg=True, mat="mouth", c=(2.75, 1.745, 0), h=(0.46, 0.045, 0.26),
+              round=0.02, R=rot_z(-0.12), name="mouthgap")]
     for nm, s in SIDES:
-        P += [Prim("ellipsoid", f"Cheek_{nm}", k=0.10, c=(2.66, 1.86, 0.40 * s), r=(0.32, 0.22, 0.18),
+        P += [Prim("ellipsoid", f"Cheek_{nm}", k=0.10, c=(2.30, 1.80, 0.32 * s), r=(0.30, 0.20, 0.16),
                    name=f"cheek{nm}"),
-              Prim("ellipsoid", "Head", k=0.07, c=(2.92, 2.14, 0.24 * s), r=(0.28, 0.09, 0.14), R=rot_z(-0.18),
+              Prim("ellipsoid", "Head", k=0.07, c=(2.55, 2.24, 0.26 * s), r=(0.28, 0.09, 0.14), R=rot_z(-0.18),
                    name=f"brow{nm}"),
-              Prim("sphere", "Head", k=0.015, neg=True, c=(2.94, 2.06, 0.305 * s), r=0.06, name=f"socket{nm}"),
-              Prim("cone", "Head", k=0.03, a=(3.30, 1.92, 0.10 * s), b=(3.42, 1.90, 0.07 * s), ra=0.035, rb=0.02,
+              Prim("sphere", "Head", k=0.015, neg=True, c=(2.57, 2.16, 0.315 * s), r=0.06, name=f"socket{nm}"),
+              Prim("cone", "Head", k=0.03, a=(3.07, 1.91, 0.08 * s), b=(3.19, 1.89, 0.06 * s), ra=0.033, rb=0.02,
                    neg=True, name=f"nostril{nm}"),
               Prim("ellipsoid", f"Shoulder_{nm}", k=0.22, c=side((1.15, 1.80, 0.84), s), r=(0.70, 0.52, 0.40),
                    R=rot_z(-0.30), name=f"scapula{nm}"),
@@ -210,10 +210,10 @@ def scute(centre, n, back, L, W, T, bone, tilt, yaw, name, mat="stone"):
 
 def body_bone(x, a):
     """Bone that carries a dorsal scute at x, `a` radians round the body from the spine."""
-    if x > 2.35:
+    if x > 1.98:
         return "Head"
     if x > 1.75:
-        return "Neck_01" if x < 2.15 else "Neck_02"
+        return "Neck_01" if x < 1.82 else "Neck_02"
     if abs(a) > 0.95 and 0.55 < x < 1.75:
         return "Shoulder_R" if a > 0 else "Shoulder_L"
     if x > 0.45:
@@ -233,7 +233,7 @@ def build_armor(core, rng):
     back and down); small scutes in rows over the skull up to a crest. Returns a list of scutes (prim lists)."""
     specs = []
     # (x, count, max angle from the spine, length) along neck, back and croup
-    rows = [(2.22, 7, 1.40, 0.46), (1.97, 9, 1.55, 0.56), (1.71, 11, 1.70, 0.66), (1.44, 12, 1.74, 0.74),
+    rows = [(1.97, 9, 1.55, 0.52), (1.71, 11, 1.70, 0.66), (1.44, 12, 1.74, 0.74),
             (1.17, 13, 1.76, 0.80), (0.90, 13, 1.78, 0.84), (0.63, 13, 1.80, 0.86), (0.36, 13, 1.80, 0.86),
             (0.09, 13, 1.80, 0.84), (-0.18, 13, 1.78, 0.82), (-0.45, 12, 1.74, 0.80), (-0.72, 12, 1.70, 0.78),
             (-0.99, 11, 1.60, 0.75), (-1.26, 11, 1.50, 0.72), (-1.53, 10, 1.42, 0.69), (-1.80, 10, 1.36, 0.66),
@@ -251,14 +251,14 @@ def build_armor(core, rng):
             st = np.array([x + rng.normal(0, 0.012), axis_y(x) + R0 * np.cos(a), R0 * np.sin(a)])
             specs.append((st, L * (0.95 + 0.10 * rng.random()), body_bone(x, a), a, x))
     # head: small scutes over the skull and the snout ridge, rising to a crest at the back of the head
-    head = [(3.10, 1, 0.0, 0.11), (2.94, 2, 0.35, 0.14), (2.78, 3, 0.55, 0.17), (2.60, 3, 0.65, 0.21),
-            (2.42, 4, 0.80, 0.27)]
+    head = [(3.05, 1, 0.0, 0.09), (2.91, 2, 0.40, 0.10), (2.77, 3, 0.60, 0.12), (2.63, 3, 0.70, 0.13),
+            (2.49, 4, 0.85, 0.15), (2.35, 4, 0.95, 0.18), (2.21, 5, 1.05, 0.22), (2.07, 5, 1.10, 0.27)]
     for (x, n, amax, L) in head:
         for i in range(n):
             u = (i + 0.5) / n if n > 1 else 0.5
             a = (u * 2 - 1) * amax if n > 1 else 0.0
-            st = np.array([x, 2.0 + 1.0 * np.cos(a), 1.0 * np.sin(a)])
-            specs.append((st, L, "Head" if x > 2.35 else "Neck_02", a, x + 10.0))   # x + 10: head scute marker
+            st = np.array([x, 2.05 + 1.0 * np.cos(a), 1.0 * np.sin(a)])
+            specs.append((st, L, "Head" if x > 1.98 else "Neck_02", a, x + 10.0))   # x + 10: head scute marker
     starts = np.array([sp[0] for sp in specs], np.float32)
     pts, nrm = surface_points(core, starts, steps=18)
     out = []
@@ -266,8 +266,8 @@ def build_armor(core, rng):
         n = n / np.linalg.norm(n)
         if x > 9.0:   # head scutes: small, lying flat, only the crest at the back of the skull lifts
             x -= 10.0
-            lift = 0.12 + 0.20 * float(x < 2.6)
-            out.append(scute(p + n * 0.02, n, np.array([-1.0, -0.1, 0]), L, L * 0.6, 0.022, bone,
+            lift = 0.16 + 0.14 * float(x < 2.33)
+            out.append(scute(p + n * 0.022, n, np.array([-1.0, -0.1, 0]), L * 1.2, L * 0.7, 0.026, bone,
                              lift, rng.normal(0, 0.04), f"sc{k}"))
             continue
         side_f = min(abs(a) / 1.70, 1.0)
@@ -284,16 +284,16 @@ def teeth_part():
     """Rows of sharp teeth along the slightly open jaws (upper pointing down, lower up), longest at the front."""
     P = []
     for nm, s in SIDES:
-        for i in range(9):
-            t = i / 8.0
-            a = np.array([3.36 - 0.62 * t, 1.80 - 0.02 * t, (0.08 + 0.30 * t) * s])
-            L = 0.15 if i in (1, 2) else (0.12 if i < 5 else 0.08)
+        for i in range(12):
+            t = i / 11.0
+            a = np.array([3.15 - 0.72 * t, 1.76 + 0.05 * t, (0.10 + 0.17 * t) * s])
+            L = 0.15 if i in (1, 2, 5) else (0.12 if i < 7 else 0.09)
             P.append(Prim("cone", "Head", k=0.006, mat="tooth", name=f"tu{nm}{i}", a=a,
                           b=a + np.array([0.02, -L, 0]), ra=0.034, rb=0.005))
-        for i in range(8):
-            t = i / 7.0
-            a2 = np.array([3.24 - 0.52 * t, 1.66 + 0.05 * t, (0.07 + 0.28 * t) * s])
-            L = 0.12 if i in (1, 2) else 0.08
+        for i in range(10):
+            t = i / 9.0
+            a2 = np.array([3.05 - 0.60 * t, 1.655 + 0.07 * t, (0.08 + 0.13 * t) * s])
+            L = 0.12 if i in (1, 2, 4) else 0.085
             P.append(Prim("cone", "Jaw", k=0.006, mat="tooth", name=f"tl{nm}{i}", a=a2,
                           b=a2 + np.array([0.012, L, 0]), ra=0.030, rb=0.005))
     return P
@@ -313,7 +313,7 @@ def claws_part(kind, nm, s):
 
 
 def eye_part():
-    return Part("eyes", [Prim("sphere", "Head", k=0.0, mat="eye", c=(2.945, 2.06, 0.292 * s), r=0.062, name=f"eye{nm}")
+    return Part("eyes", [Prim("sphere", "Head", k=0.0, mat="eye", c=(2.575, 2.16, 0.300 * s), r=0.062, name=f"eye{nm}")
                          for nm, s in SIDES], band=0.02)
 
 
@@ -408,7 +408,7 @@ def eye_iris(P):
     out = np.zeros(len(P), np.float32)
     slit = np.zeros(len(P), np.float32)
     for s in (-1, 1):
-        c = np.array([2.945, 2.06, 0.292 * s], np.float32)
+        c = np.array([2.575, 2.16, 0.300 * s], np.float32)
         ax = np.array([0.45, 0.05, 0.89 * s], np.float32)
         ax /= np.linalg.norm(ax)
         rel = P - c
@@ -725,7 +725,7 @@ ATTACK_KEYS = {"clip": "attack_slam", "frames": [14, 32, 43, 62], "az": 34, "el"
 # ~2.0 m); the head and the front of the neck move down 0.12 m (rigid teeth and eyes follow without shear).
 import warp as _warp  # noqa: E402
 
-WARP = [("move", (0.0, -0.12, 0.0), [("x", 2.05, 2.55), ("y", 0.95, 1.30)])]   # head only, not the forefeet
+WARP = [("move", (0.0, -0.12, 0.0), [("x", 1.68, 2.18), ("y", 0.95, 1.30)])]   # head only, not the forefeet
 shade = _warp.unwarped_shade(WARP, shade)
 
 # battle footprint / display adapter (publish.py): the body plus the first metre of the tail

@@ -69,10 +69,11 @@ def hair_atlas(out_dir, glow_rgb=None, w=512, h=1024, seed=0):
     col_w = w // ATLAS_COLUMNS
     alpha, lum, glow = (Image.new("L", (w, h), 0) for _ in range(3))
     da, dl, dg = ImageDraw.Draw(alpha), ImageDraw.Draw(lum), ImageDraw.Draw(glow)
-    specs = [dict(n=95, tips=[0.5], length=(0.55, 1.0), width=(2.0, 3.6), spread=0.04),          # pointed lock
-             dict(n=105, tips=[0.27, 0.73], length=(0.5, 0.97), width=(2.0, 3.4), spread=0.05),   # split lock
-             dict(n=120, tips=[0.5], length=(0.35, 1.0), width=(1.5, 2.8), wisp=True),            # wispy strands
-             dict(n=90, tips=[0.5], length=(0.6, 1.0), width=(1.8, 3.2), spread=0.045)]           # glow lock
+    # tufts, not needles: many strands, wide at the root, tips spread over a third of the column
+    specs = [dict(n=150, tips=[0.38, 0.62], length=(0.55, 1.0), width=(2.4, 4.4), spread=0.10),   # full lock
+             dict(n=160, tips=[0.22, 0.5, 0.78], length=(0.5, 0.97), width=(2.4, 4.2), spread=0.09),  # split lock
+             dict(n=170, tips=[0.5], length=(0.35, 1.0), width=(2.0, 3.4), wisp=True),            # wispy strands
+             dict(n=120, tips=[0.5], length=(0.6, 1.0), width=(2.0, 3.6), spread=0.07)]           # glow lock
     for c, spec in enumerate(specs):
         for pts, wdt, shade in _strands(rng, col_w, h, c * col_w, **spec):
             lit = c == GLOW_COLUMN and rng.random() < 0.5
@@ -133,15 +134,21 @@ def cards(surface, regions, rng, keep=1.0, widen=1.0):
                         "col": GLOW_COLUMN if reg.get("glow") else int(rng.integers(0, GLOW_COLUMN)),
                         "tip": reg.get("tip"), "tip_k": reg.get("tip_k", 1.5), "root_k": reg.get("root_k", 0.8),
                         "root_hex": reg.get("root"),
+                        "segs": reg.get("segments"),
                         "jitter": 0.9 + 0.2 * rng.random()})
     return out
 
 
-def card_mesh(card_list, crossed_ok=True, segments=3):
+def card_mesh(card_list, crossed_ok=True, segments=3, lod=None):
     """Curved strips (crossed pairs for silhouette tufts), each face emitted twice with opposite winding.
-    Returns pos, nrm, uv, idx, card index per vertex and t (0 root .. 1 tip) per vertex."""
+    Returns pos, nrm, uv, idx, card index per vertex and t (0 root .. 1 tip) per vertex. A card's region may set
+    its own strip segments per LOD ("segments": {lod: n}) - short coat cards lie flat and need fewer."""
     P, N, UV, I, ROOT, T = [], [], [], [], [], []
+    default_segments = segments
     for ci, c in enumerate(card_list):
+        segments = default_segments
+        if lod is not None and c.get("segs") and lod in c["segs"]:
+            segments = c["segs"][lod]
         d, up, side = _frame(c["d"], c["n"])
         u0, u1 = c["col"] / ATLAS_COLUMNS, (c["col"] + 1) / ATLAS_COLUMNS
         for across in ([side, up] if crossed_ok and c["crossed"] else [side]):
@@ -203,7 +210,7 @@ def build_group(sp, lod, work, body, out_dir, seed=21):
     clist = cards(outer_surface(sp), sp.FUR_CARDS, rng, getattr(sp, "FUR_KEEP", KEEP)[lod], WIDEN[lod])
     if not clist:
         return None
-    pos, nrm, uv, idx, rootv, tv = card_mesh(clist, crossed_ok=lod < 2, segments=SEGMENTS[lod])
+    pos, nrm, uv, idx, rootv, tv = card_mesh(clist, crossed_ok=lod < 2, segments=SEGMENTS[lod], lod=lod)
     roots = np.array([c["root"] for c in clist], np.float32)
     root_srgb, nearest = body_colours(roots, body["mesh"], os.path.join(body["tex"], "body_basecolor.png"))
     col = vertex_colours(clist, root_srgb, rootv, tv)

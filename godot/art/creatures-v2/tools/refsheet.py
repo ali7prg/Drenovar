@@ -4,7 +4,8 @@ creature (turnaround views, then the four attack poses), plus the measurements a
   python3 -I refsheet.py <rc dir> <glb renders dir> <out images dir> <out measurements dir> <species> [...]
 
 Inputs come from tools/refcheck.py refs (rc dir), tools/proof.py glb (<id>_model_idle_0.jpg, IoU printed in its log)
-and tools/proof.py glbposes (<id>_glbposes.jpg / .json), tools/foot_check.py (<id>_feet.json).
+and tools/proof.py glbposes (<id>_glbposes.jpg / .json), tools/foot_check.py (<id>_feet.json), tools/detail.py
+(<id>_detail_<view or pose>.jpg close-ups -> images/closeup_<id>.jpg).
 """
 import json
 import os
@@ -64,6 +65,11 @@ def main():
         if os.path.exists(cycles):
             page([(f"{TITLE[sid]}: idle / walk / run (LOD1, Cycles, the same 3/4 camera)", cycles)]).save(
                 os.path.join(img_out, f"cycles_{sid}.jpg"), quality=84)
+        # close-ups from tools/detail.py: heads, fur, feet and tails cut from the same frames, reference | model
+        details = [(f"{TITLE[sid]}: {view} close-ups: reference | model", os.path.join(renders, f"{sid}_detail_{view}.jpg"))
+                   for view in ("side", "front", "rear", "top", "preparation", "launch", "contact", "recovery")]
+        if any(os.path.exists(p) for _t, p in details):
+            page(details, width=1400).save(os.path.join(img_out, f"closeup_{sid}.jpg"), quality=80)
         before = os.path.join(renders, "..", "before", f"{sid}_model_idle_0.jpg")
         if os.path.exists(before):
             page([(f"{TITLE[sid]}: BEFORE (the 17.11 kit-sheet model) in the creature-references views", before),

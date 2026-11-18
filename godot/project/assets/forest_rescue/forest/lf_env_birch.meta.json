@@ -60,7 +60,12 @@
             0.9
           ]
         ]
-      }
+      },
+      "heightM": 13.08,
+      "footprintM": [
+        8.28,
+        5.88
+      ]
     },
     "v2": {
       "nodes": [
@@ -156,7 +161,12 @@
             "clumps_per": 6
           }
         }
-      }
+      },
+      "heightM": 12.72,
+      "footprintM": [
+        7.24,
+        8.49
+      ]
     },
     "v3": {
       "nodes": [
@@ -255,7 +265,12 @@
             "clumps_per": 6
           }
         }
-      }
+      },
+      "heightM": 13.02,
+      "footprintM": [
+        6.89,
+        6.87
+      ]
     }
   },
   "tris": {
@@ -316,5 +331,11 @@
     "lf_bark_birch_r.png",
     "lf_foliage_atlas.png"
   ],
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py birch"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py birch",
+  "heightM": 13.08,
+  "footprintM": [
+    8.28,
+    8.49
+  ],
+  "scaleNote": "real metres (art/02 1.8 m figure; understory without a figure at realistic size); world layer should respect heightM per variant instead of normalising"
 }

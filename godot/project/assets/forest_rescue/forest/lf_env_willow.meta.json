@@ -1,6 +1,11 @@
 {
   "id": "lf_env_willow",
   "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)",
+  "heightM": 12.19,
+  "footprintM": [
+    11.41,
+    10.87
+  ],
   "variants": {
     "v1": {
       "nodes": [
@@ -9,9 +14,9 @@
         "lf_env_willow_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 1510,
-        "LOD1": 540,
-        "LOD2": 114
+        "LOD0": 1424,
+        "LOD1": 502,
+        "LOD2": 112
       },
       "materials": {
         "LOD0": [
@@ -30,24 +35,29 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 11.51,
+      "height_m": 11.52,
       "crown_radius_m": 7.77,
       "bounds_m_blender": [
         [
           -3.51,
-          -4.84,
+          -4.72,
           -0.3
         ],
         [
           7.77,
-          5.36,
-          11.51
+          5.8,
+          11.52
         ]
       ],
       "display_offset_gltf": [
         0.0,
         0.0,
         0.0
+      ],
+      "heightM": 11.52,
+      "footprintM": [
+        11.28,
+        10.52
       ],
       "recipe": {
         "copies": [
@@ -69,9 +79,9 @@
         "lf_env_willow_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 1610,
-        "LOD1": 504,
-        "LOD2": 126
+        "LOD0": 1504,
+        "LOD1": 486,
+        "LOD2": 132
       },
       "materials": {
         "LOD0": [
@@ -90,24 +100,29 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 11.5,
-      "crown_radius_m": 7.86,
+      "height_m": 11.49,
+      "crown_radius_m": 7.9,
       "bounds_m_blender": [
         [
-          -7.86,
-          -4.73,
+          -7.9,
+          -4.74,
           -0.3
         ],
         [
           3.51,
-          6.02,
-          11.5
+          6.13,
+          11.49
         ]
       ],
       "display_offset_gltf": [
-        13.364,
+        13.41,
         0.0,
         0.0
+      ],
+      "heightM": 11.49,
+      "footprintM": [
+        11.41,
+        10.87
       ],
       "recipe": {
         "mirror": true,
@@ -131,8 +146,8 @@
         "lf_env_willow_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 1556,
-        "LOD1": 532,
+        "LOD0": 1382,
+        "LOD1": 484,
         "LOD2": 132
       },
       "materials": {
@@ -157,19 +172,24 @@
       "bounds_m_blender": [
         [
           -3.16,
-          -4.12,
+          -4.19,
           -0.32
         ],
         [
           6.99,
-          5.85,
+          6.11,
           12.19
         ]
       ],
       "display_offset_gltf": [
-        26.729,
+        26.82,
         0.0,
         0.0
+      ],
+      "heightM": 12.19,
+      "footprintM": [
+        10.15,
+        10.3
       ],
       "recipe": {
         "copies": [
@@ -191,8 +211,8 @@
     }
   },
   "tris": {
-    "LOD0": 1610,
-    "LOD1": 540,
+    "LOD0": 1504,
+    "LOD1": 502,
     "LOD2": 132
   },
   "bones": 0,
@@ -248,5 +268,6 @@
     "lf_bark_willow_r.png",
     "lf_foliage_atlas.png"
   ],
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py willow"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py willow",
+  "scaleNote": "real metres (art/02 1.8 m figure; understory without a figure at realistic size); world layer should respect heightM per variant instead of normalising"
 }

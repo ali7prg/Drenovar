@@ -296,9 +296,9 @@ def build(name, it):
         }
     else:
         variants = {
-            "v1": dict(blocks=list(range(len(body_blocks))), stones=False, flatten=True),
+            "v1": dict(blocks=list(range(len(body_blocks))), stones=False, flatten=True, mirror=True),
             "v2": dict(blocks=list(range(len(body_blocks))), stones=False, cut_x=0.36, center=True, flatten=True),
-            "v3_stream": dict(blocks=list(range(len(body_blocks))), stones=True, mirror=True),
+            "v3_stream": dict(blocks=list(range(len(body_blocks))), stones=True),
         }
     built = {}
     info = {}
@@ -327,7 +327,7 @@ def build(name, it):
                   if name == "moss_rock":
                       fnrm = geom.nrm(np.cross(V[T[:, 1]] - V[T[:, 0]], V[T[:, 2]] - V[T[:, 0]]))
                       Vu, Tu, UVu, Nu, kind = slab.planar_uvs(V, T, N, ref.view, ref.W, ref.H, tex_clip,
-                                                              per_side=3.0, per_top=2.2)
+                                                              per_side=7.5, per_top=7.5)
                       Nu = np.repeat(fnrm, 3, axis=0)
                   else:
                       Vu, Tu, UVu, Nu, kind = slab.planar_uvs(V, T, N, ref.view, ref.W, ref.H, tex_clip)
@@ -416,11 +416,12 @@ def build(name, it):
             if lod > 0 and tag == "albedo":
                 continue
             pblend.use_painted(allobjs, kk)
-            rgba = pblend.render_view(ref.view, [built["v1"][lod]])
+            cmp_v = "v3_stream" if name == "fallen_trunk" else "v1"
+            rgba = pblend.render_view(ref.view, [built[cmp_v][lod]])
             rgba[ref.clip:, :, 3] = 0
-            mm = pblend.compare_sheet(ref.img, ref.fg, rgba, ref.bg, qa(f"front_v1_LOD{lod}_{tag}.png"),
-                                      f"{asset} v1 LOD{lod} vs art/02 ({tag} k={kk}) iter {it}")
-            metrics[f"v1_LOD{lod}_{tag}"] = mm
+            mm = pblend.compare_sheet(ref.img, ref.fg, rgba, ref.bg, qa(f"front_{cmp_v}_LOD{lod}_{tag}.png"),
+                                      f"{asset} {cmp_v} LOD{lod} vs art/02 ({tag} k={kk}) iter {it}")
+            metrics[f"{cmp_v}_LOD{lod}_{tag}"] = mm
             print(f"[{asset}] LOD{lod} {tag}: {mm}", flush=True)
     pblend.use_painted(allobjs, K)
     lineup = [built[v][0] for v in built]

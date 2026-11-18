@@ -45,6 +45,11 @@
         0.0,
         0.0,
         0.0
+      ],
+      "heightM": 0.44,
+      "footprintM": [
+        2.95,
+        3.12
       ]
     },
     "v2": {
@@ -90,6 +95,11 @@
         5.121,
         0.0,
         0.0
+      ],
+      "heightM": 0.32,
+      "footprintM": [
+        2.82,
+        2.08
       ]
     }
   },
@@ -125,5 +135,11 @@
     "A": "AO"
   },
   "layout_note": "Variants laid out along +X (display_offset_gltf); the LODs of a variant share its origin.",
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_groundcover.py"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_groundcover.py",
+  "heightM": 0.44,
+  "footprintM": [
+    2.95,
+    3.12
+  ],
+  "scaleNote": "real metres (art/02 1.8 m figure; understory without a figure at realistic size); world layer should respect heightM per variant instead of normalising"
 }

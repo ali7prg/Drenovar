@@ -60,7 +60,12 @@
             0.9
           ]
         ]
-      }
+      },
+      "heightM": 13.63,
+      "footprintM": [
+        14.55,
+        13.98
+      ]
     },
     "v2": {
       "nodes": [
@@ -182,7 +187,12 @@
             "lobe_limb_pts": 2
           }
         }
-      }
+      },
+      "heightM": 16.25,
+      "footprintM": [
+        13.19,
+        18.35
+      ]
     },
     "v3": {
       "nodes": [
@@ -303,7 +313,12 @@
             "lobe_limb_pts": 2
           }
         }
-      }
+      },
+      "heightM": 16.9,
+      "footprintM": [
+        14.59,
+        17.08
+      ]
     },
     "v4": {
       "nodes": [
@@ -421,7 +436,12 @@
             "lobe_limb_pts": 2
           }
         }
-      }
+      },
+      "heightM": 15.91,
+      "footprintM": [
+        13.28,
+        17.16
+      ]
     }
   },
   "tris": {
@@ -482,5 +502,11 @@
     "lf_bark_oak_r.png",
     "lf_foliage_atlas.png"
   ],
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py golden_oak"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py golden_oak",
+  "heightM": 16.9,
+  "footprintM": [
+    14.59,
+    18.35
+  ],
+  "scaleNote": "real metres (art/02 1.8 m figure; understory without a figure at realistic size); world layer should respect heightM per variant instead of normalising"
 }

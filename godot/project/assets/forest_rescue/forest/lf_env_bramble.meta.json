@@ -60,7 +60,12 @@
             0.85
           ]
         ]
-      }
+      },
+      "heightM": 2.06,
+      "footprintM": [
+        2.99,
+        2.59
+      ]
     },
     "v2": {
       "nodes": [
@@ -121,7 +126,12 @@
             0.9
           ]
         ]
-      }
+      },
+      "heightM": 2.06,
+      "footprintM": [
+        3.02,
+        2.65
+      ]
     },
     "v3": {
       "nodes": [
@@ -185,7 +195,12 @@
           0.8,
           1.1
         ]
-      }
+      },
+      "heightM": 2.27,
+      "footprintM": [
+        2.4,
+        1.96
+      ]
     }
   },
   "tris": {
@@ -246,5 +261,11 @@
     "lf_bark_bramble_r.png",
     "lf_foliage_atlas.png"
   ],
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py bramble"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py bramble",
+  "heightM": 2.27,
+  "footprintM": [
+    3.02,
+    2.65
+  ],
+  "scaleNote": "real metres (art/02 1.8 m figure; understory without a figure at realistic size); world layer should respect heightM per variant instead of normalising"
 }

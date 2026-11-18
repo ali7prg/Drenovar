@@ -51,7 +51,12 @@
       ],
       "recipe": {
         "copies": []
-      }
+      },
+      "heightM": 14.17,
+      "footprintM": [
+        7.13,
+        6.66
+      ]
     },
     "v2": {
       "nodes": [
@@ -104,7 +109,12 @@
         "mirror": true,
         "copies": [],
         "palette": "dark"
-      }
+      },
+      "heightM": 14.17,
+      "footprintM": [
+        7.18,
+        6.45
+      ]
     },
     "v3": {
       "nodes": [
@@ -160,7 +170,12 @@
           1.08
         ],
         "palette": "dark"
-      }
+      },
+      "heightM": 15.3,
+      "footprintM": [
+        5.26,
+        4.92
+      ]
     },
     "v4": {
       "nodes": [
@@ -217,7 +232,12 @@
           1.14
         ],
         "palette": "dark"
-      }
+      },
+      "heightM": 16.15,
+      "footprintM": [
+        4.7,
+        4.32
+      ]
     }
   },
   "tris": {
@@ -278,5 +298,11 @@
     "lf_bark_pine_r.png",
     "lf_foliage_atlas.png"
   ],
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py dark_pine"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py dark_pine",
+  "heightM": 16.15,
+  "footprintM": [
+    7.18,
+    6.66
+  ],
+  "scaleNote": "real metres (art/02 1.8 m figure; understory without a figure at realistic size); world layer should respect heightM per variant instead of normalising"
 }

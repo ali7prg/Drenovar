@@ -51,13 +51,13 @@
       "lf_env_reed_fern_fern_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 88,
-      "LOD1": 44,
-      "LOD2": 22
+      "LOD0": 288,
+      "LOD1": 144,
+      "LOD2": 72
      },
      "height_m": 0.73,
-     "canopyRadius_m": 0.94,
-     "footprintRadius_m": 0.94,
+     "canopyRadius_m": 1.73,
+     "footprintRadius_m": 1.73,
      "materials": {
       "LOD0": [
        "lf_foliage",
@@ -80,13 +80,13 @@
       "lf_env_reed_fern_fern_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 64,
-      "LOD1": 32,
-      "LOD2": 16
+      "LOD0": 192,
+      "LOD1": 96,
+      "LOD2": 48
      },
-     "height_m": 0.58,
-     "canopyRadius_m": 0.78,
-     "footprintRadius_m": 0.78,
+     "height_m": 0.68,
+     "canopyRadius_m": 1.58,
+     "footprintRadius_m": 1.58,
      "materials": {
       "LOD0": [
        "lf_foliage",
@@ -108,7 +108,7 @@
     1.45
    ],
    "paintedLightMix": 0.35,
-   "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)",
+   "generation": "v2 image-based reconstruction from art/02 (solid painted blocks / logs)",
    "candidateCount": 377,
    "candidateScaleRange": [
     0.801,
@@ -1983,11 +1983,11 @@
       "lf_env_willow_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 1510,
-      "LOD1": 540,
-      "LOD2": 114
+      "LOD0": 1424,
+      "LOD1": 502,
+      "LOD2": 112
      },
-     "height_m": 11.51,
+     "height_m": 11.52,
      "canopyRadius_m": 7.77,
      "footprintRadius_m": 1.2,
      "materials": {
@@ -2027,12 +2027,12 @@
       "lf_env_willow_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 1610,
-      "LOD1": 504,
-      "LOD2": 126
+      "LOD0": 1504,
+      "LOD1": 486,
+      "LOD2": 132
      },
-     "height_m": 11.5,
-     "canopyRadius_m": 7.86,
+     "height_m": 11.49,
+     "canopyRadius_m": 7.9,
      "footprintRadius_m": 1.2,
      "materials": {
       "LOD0": [
@@ -2073,8 +2073,8 @@
       "lf_env_willow_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 1556,
-      "LOD1": 532,
+      "LOD0": 1382,
+      "LOD1": 484,
       "LOD2": 132
      },
      "height_m": 12.19,
@@ -2347,8 +2347,8 @@
       "LOD1": 874,
       "LOD2": 252
      },
-     "height_m": 4.04,
-     "canopyRadius_m": 5.34,
+     "height_m": 3.15,
+     "canopyRadius_m": 5.36,
      "footprintRadius_m": 5.2,
      "materials": {
       "LOD0": [
@@ -2372,12 +2372,12 @@
       "lf_env_fallen_trunk_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 1546,
-      "LOD1": 588,
-      "LOD2": 177
+      "LOD0": 1544,
+      "LOD1": 596,
+      "LOD2": 172
      },
-     "height_m": 4.04,
-     "canopyRadius_m": 6.61,
+     "height_m": 3.15,
+     "canopyRadius_m": 6.63,
      "footprintRadius_m": 5.2,
      "materials": {
       "LOD0": [
@@ -2403,9 +2403,9 @@
      "tris": {
       "LOD0": 2758,
       "LOD1": 1130,
-      "LOD2": 290
+      "LOD2": 286
      },
-     "height_m": 4.04,
+     "height_m": 4.06,
      "canopyRadius_m": 5.71,
      "footprintRadius_m": 5.2,
      "materials": {
@@ -2429,7 +2429,7 @@
     1.2
    ],
    "paintedLightMix": 0.35,
-   "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)"
+   "generation": "v2 image-based reconstruction from art/02 (solid painted blocks / logs)"
   },
   "lf_env_moss_rock": {
    "glb": "lf_env_moss_rock.glb",
@@ -2443,13 +2443,13 @@
       "lf_env_moss_rock_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2908,
-      "LOD1": 1150,
-      "LOD2": 282
+      "LOD0": 1918,
+      "LOD1": 848,
+      "LOD2": 218
      },
-     "height_m": 5.5,
-     "canopyRadius_m": 4.91,
-     "footprintRadius_m": 4.91,
+     "height_m": 5.48,
+     "canopyRadius_m": 4.84,
+     "footprintRadius_m": 4.84,
      "materials": {
       "LOD0": [
        "lf_rock_limestone",
@@ -2472,13 +2472,13 @@
       "lf_env_moss_rock_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 3672,
-      "LOD1": 1444,
-      "LOD2": 280
+      "LOD0": 1146,
+      "LOD1": 506,
+      "LOD2": 134
      },
-     "height_m": 5.5,
-     "canopyRadius_m": 3.02,
-     "footprintRadius_m": 3.02,
+     "height_m": 5.48,
+     "canopyRadius_m": 3.1,
+     "footprintRadius_m": 3.1,
      "materials": {
       "LOD0": [
        "lf_rock_limestone",
@@ -2501,13 +2501,13 @@
       "lf_env_moss_rock_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 3348,
-      "LOD1": 1316,
-      "LOD2": 272
+      "LOD0": 1088,
+      "LOD1": 464,
+      "LOD2": 116
      },
-     "height_m": 5.5,
-     "canopyRadius_m": 3.24,
-     "footprintRadius_m": 3.24,
+     "height_m": 5.48,
+     "canopyRadius_m": 3.2,
+     "footprintRadius_m": 3.2,
      "materials": {
       "LOD0": [
        "lf_rock_limestone",
@@ -2529,7 +2529,7 @@
     1.3
    ],
    "paintedLightMix": 0.35,
-   "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)"
+   "generation": "v2 image-based reconstruction from art/02 (solid painted blocks / logs)"
   },
   "lf_env_bramble": {
    "glb": "lf_env_bramble.glb",
@@ -2731,13 +2731,13 @@
       "lf_env_reed_fern_reed_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 378,
-      "LOD1": 190,
-      "LOD2": 96
+      "LOD0": 630,
+      "LOD1": 316,
+      "LOD2": 158
      },
      "height_m": 2.44,
-     "canopyRadius_m": 0.86,
-     "footprintRadius_m": 0.86,
+     "canopyRadius_m": 1.79,
+     "footprintRadius_m": 1.79,
      "materials": {
       "LOD0": [
        "lf_foliage",
@@ -2760,13 +2760,13 @@
       "lf_env_reed_fern_reed_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 256,
-      "LOD1": 128,
-      "LOD2": 64
+      "LOD0": 504,
+      "LOD1": 252,
+      "LOD2": 126
      },
-     "height_m": 2.07,
-     "canopyRadius_m": 0.62,
-     "footprintRadius_m": 0.62,
+     "height_m": 2.19,
+     "canopyRadius_m": 1.27,
+     "footprintRadius_m": 1.27,
      "materials": {
       "LOD0": [
        "lf_foliage",
@@ -2789,13 +2789,13 @@
       "lf_env_reed_fern_fern_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 88,
-      "LOD1": 44,
-      "LOD2": 22
+      "LOD0": 288,
+      "LOD1": 144,
+      "LOD2": 72
      },
      "height_m": 0.73,
-     "canopyRadius_m": 0.94,
-     "footprintRadius_m": 0.94,
+     "canopyRadius_m": 1.73,
+     "footprintRadius_m": 1.73,
      "materials": {
       "LOD0": [
        "lf_foliage",
@@ -2818,13 +2818,13 @@
       "lf_env_reed_fern_fern_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 64,
-      "LOD1": 32,
-      "LOD2": 16
+      "LOD0": 192,
+      "LOD1": 96,
+      "LOD2": 48
      },
-     "height_m": 0.58,
-     "canopyRadius_m": 0.78,
-     "footprintRadius_m": 0.78,
+     "height_m": 0.68,
+     "canopyRadius_m": 1.58,
+     "footprintRadius_m": 1.58,
      "materials": {
       "LOD0": [
        "lf_foliage",
@@ -2846,7 +2846,7 @@
     1.45
    ],
    "paintedLightMix": 0.35,
-   "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)"
+   "generation": "v2 image-based reconstruction from art/02 (solid painted blocks / logs)"
   },
   "lf_env_grass_tuft": {
    "glb": "lf_env_grass_tuft.glb",

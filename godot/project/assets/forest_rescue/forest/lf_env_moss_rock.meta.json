@@ -1,10 +1,10 @@
 {
   "id": "lf_env_moss_rock",
   "generation": "v2 image-based reconstruction from art/02 (solid painted blocks / logs)",
-  "heightM": 5.49,
+  "heightM": 5.48,
   "footprintM": [
-    9.28,
-    2.31
+    9.3,
+    2.34
   ],
   "scaleNote": "real metres from the 1.8 m figure on art/02 (understory without a figure: realistic height, see build script); world layer should respect heightM instead of normalising",
   "variants": {
@@ -15,9 +15,9 @@
         "lf_env_moss_rock_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 1908,
-        "LOD1": 870,
-        "LOD2": 168
+        "LOD0": 1918,
+        "LOD1": 848,
+        "LOD2": 218
       },
       "materials": {
         "LOD0": [
@@ -33,18 +33,18 @@
           "lf_foliage"
         ]
       },
-      "height_m": 5.49,
-      "footprint_radius_m": 4.82,
+      "height_m": 5.48,
+      "footprint_radius_m": 4.84,
       "bounds_m_blender": [
         [
           -4.46,
-          -0.22,
-          0.14
+          -0.28,
+          0.16
         ],
         [
-          4.82,
-          2.09,
-          5.49
+          4.84,
+          2.06,
+          5.48
         ]
       ],
       "display_offset_gltf": [
@@ -52,10 +52,10 @@
         0.0,
         0.0
       ],
-      "heightM": 5.49,
+      "heightM": 5.48,
       "footprintM": [
-        9.28,
-        2.31
+        9.3,
+        2.34
       ]
     },
     "v2": {
@@ -65,9 +65,9 @@
         "lf_env_moss_rock_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 1206,
-        "LOD1": 536,
-        "LOD2": 110
+        "LOD0": 1146,
+        "LOD1": 506,
+        "LOD2": 134
       },
       "materials": {
         "LOD0": [
@@ -83,29 +83,29 @@
           "lf_foliage"
         ]
       },
-      "height_m": 5.49,
-      "footprint_radius_m": 3.08,
+      "height_m": 5.48,
+      "footprint_radius_m": 3.1,
       "bounds_m_blender": [
         [
-          -2.84,
-          -1.06,
-          0.14
+          -2.9,
+          -1.09,
+          0.16
         ],
         [
-          3.08,
+          3.1,
           1.25,
-          5.49
+          5.48
         ]
       ],
       "display_offset_gltf": [
-        11.275,
+        11.3,
         0.0,
         0.0
       ],
-      "heightM": 5.49,
+      "heightM": 5.48,
       "footprintM": [
-        5.92,
-        2.31
+        6.0,
+        2.34
       ]
     },
     "v3": {
@@ -115,9 +115,9 @@
         "lf_env_moss_rock_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 1026,
+        "LOD0": 1088,
         "LOD1": 464,
-        "LOD2": 92
+        "LOD2": 116
       },
       "materials": {
         "LOD0": [
@@ -133,36 +133,36 @@
           "lf_foliage"
         ]
       },
-      "height_m": 5.49,
-      "footprint_radius_m": 3.11,
+      "height_m": 5.48,
+      "footprint_radius_m": 3.2,
       "bounds_m_blender": [
         [
-          -3.11,
-          -0.86,
-          0.14
+          -3.1,
+          -0.95,
+          0.18
         ],
         [
-          3.09,
-          1.29,
-          5.49
+          3.2,
+          1.38,
+          5.48
         ]
       ],
       "display_offset_gltf": [
-        22.55,
+        22.6,
         0.0,
         0.0
       ],
-      "heightM": 5.49,
+      "heightM": 5.48,
       "footprintM": [
-        6.2,
-        2.15
+        6.3,
+        2.33
       ]
     }
   },
   "tris": {
-    "LOD0": 1908,
-    "LOD1": 870,
-    "LOD2": 168
+    "LOD0": 1918,
+    "LOD1": 848,
+    "LOD2": 218
   },
   "bones": 0,
   "materials": [
@@ -196,13 +196,13 @@
       "type": "box",
       "centre": [
         0.0,
-        2.75,
+        2.74,
         0.0
       ],
       "size": [
-        9.28,
-        5.49,
-        2.31
+        9.3,
+        5.48,
+        2.34
       ],
       "variant": "v1"
     },
@@ -210,13 +210,13 @@
       "type": "box",
       "centre": [
         0.0,
-        2.75,
+        2.74,
         0.0
       ],
       "size": [
-        5.92,
-        5.49,
-        2.31
+        6.0,
+        5.48,
+        2.34
       ],
       "variant": "v2"
     },
@@ -224,13 +224,13 @@
       "type": "box",
       "centre": [
         0.0,
-        2.75,
+        2.74,
         0.0
       ],
       "size": [
-        6.2,
-        5.49,
-        2.15
+        6.3,
+        5.48,
+        2.33
       ],
       "variant": "v3"
     }

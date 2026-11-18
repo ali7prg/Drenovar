@@ -277,9 +277,8 @@ def make_tile(img, fg, patch, margin=3, scale=2, sharpen=0.6, alpha_erode=0.0, g
         if (p & f).any():
             mL = np.median(Lp[..., 0][p & f])
             mC = np.median(Cp[p & f])
-            halo = (Lp[..., 0] > mL + 10) & (Cp < 0.75 * mC)
+            halo = (Lp[..., 0] > mL + 14) & (Cp < 0.6 * mC)
             f = f & ~halo
-            f = f & ~(ndi.binary_dilation(halo, iterations=1) & ~ndi.binary_erosion(f, iterations=1))
     grown = ndi.binary_dilation(p, structure=morphology.disk(margin)) if margin else p
     a = grown & f
     rgb = bleed(rgb, f)

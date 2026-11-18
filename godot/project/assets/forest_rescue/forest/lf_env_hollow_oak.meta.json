@@ -72,7 +72,12 @@
             "right"
           ]
         ]
-      }
+      },
+      "heightM": 14.12,
+      "footprintM": [
+        13.02,
+        11.36
+      ]
     },
     "v2": {
       "nodes": [
@@ -146,7 +151,12 @@
             "right"
           ]
         ]
-      }
+      },
+      "heightM": 14.11,
+      "footprintM": [
+        13.04,
+        13.42
+      ]
     },
     "v3": {
       "nodes": [
@@ -223,7 +233,12 @@
             "right"
           ]
         ]
-      }
+      },
+      "heightM": 13.54,
+      "footprintM": [
+        12.37,
+        12.46
+      ]
     }
   },
   "tris": {
@@ -290,5 +305,11 @@
     1.7,
     2.0
   ],
-  "heroNote": "art/01 cave oak is a HERO: about 1.7-2x a grove oak (its trunk alone about as wide as a grove oak's crown). Model is authored at art/02 scale (1.8 m human); instance it at heroScale 1.7-2.0 (e.g. world height about 24-27 m instead of normalising it to the generic tree height)."
+  "heroNote": "art/01 cave oak is a HERO: about 1.7-2x a grove oak (its trunk alone about as wide as a grove oak's crown). Model is authored at art/02 scale (1.8 m human); instance it at heroScale 1.7-2.0 (e.g. world height about 24-27 m instead of normalising it to the generic tree height).",
+  "heightM": 14.12,
+  "footprintM": [
+    13.04,
+    13.42
+  ],
+  "scaleNote": "real metres (art/02 1.8 m figure; understory without a figure at realistic size); world layer should respect heightM per variant instead of normalising"
 }

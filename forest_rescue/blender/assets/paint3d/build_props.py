@@ -466,8 +466,8 @@ def straight_log_parts(ref, tex, tex_clip):
     hgt = np.array([np.ptp(np.nonzero(m[:, x])[0]) + 1 if m[:, x].any() else 0 for x in range(ref.W)])
     med = np.median(hgt[x0:x1])
     tall = np.nonzero(hgt > 1.6 * med)[0]
-    x_root = int(tall[tall < (x0 + x1) / 2].max()) + 4 if len(tall[tall < (x0 + x1) / 2]) else x0 + 10
-    x_end = x1 - 4
+    x_root = int(tall[tall < (x0 + x1) / 2].max()) + 10 if len(tall[tall < (x0 + x1) / 2]) else x0 + 16
+    x_end = x1 - 16
     xs, cs, rs = logbuild.painted_log(ref.img, m, x_root, x_end)
     TEX = tex.shape[0]
     ex0, ey0, ex1, ey1 = int(slab.EXTRA[0] * TEX), int((1 - slab.EXTRA[3]) * TEX), int(slab.EXTRA[2] * TEX), int((1 - slab.EXTRA[1]) * TEX)

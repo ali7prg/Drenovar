@@ -1,0 +1,89 @@
+{
+  "metrics": {
+    "mixed_v1_LOD0_painted": {
+      "iou": 0.8768,
+      "colour_err": 0.0824,
+      "ssim": 0.5784,
+      "ref_px": 35718,
+      "render_px": 35767
+    },
+    "mixed_v1_LOD0_albedo": {
+      "iou": 0.8768,
+      "colour_err": 0.0819,
+      "ssim": 0.5834,
+      "ref_px": 35718,
+      "render_px": 35767
+    },
+    "mixed_v1_LOD1_painted": {
+      "iou": 0.7782,
+      "colour_err": 0.0871,
+      "ssim": 0.5219,
+      "ref_px": 35718,
+      "render_px": 30420
+    },
+    "mixed_v1_LOD2_painted": {
+      "iou": 0.5991,
+      "colour_err": 0.0954,
+      "ssim": 0.4671,
+      "ref_px": 35718,
+      "render_px": 22689
+    }
+  },
+  "lods": {
+    "mixed_v1": {
+      "LOD0": {
+        "tris": 474
+      },
+      "LOD1": {
+        "tris": 238
+      },
+      "LOD2": {
+        "tris": 120
+      }
+    },
+    "reed_v1": {
+      "LOD0": {
+        "tris": 1070
+      },
+      "LOD1": {
+        "tris": 536
+      },
+      "LOD2": {
+        "tris": 268
+      }
+    },
+    "reed_v2": {
+      "LOD0": {
+        "tris": 824
+      },
+      "LOD1": {
+        "tris": 412
+      },
+      "LOD2": {
+        "tris": 206
+      }
+    },
+    "fern_v1": {
+      "LOD0": {
+        "tris": 320
+      },
+      "LOD1": {
+        "tris": 160
+      },
+      "LOD2": {
+        "tris": 80
+      }
+    },
+    "fern_v2": {
+      "LOD0": {
+        "tris": 216
+      },
+      "LOD1": {
+        "tris": 108
+      },
+      "LOD2": {
+        "tris": 54
+      }
+    }
+  }
+}

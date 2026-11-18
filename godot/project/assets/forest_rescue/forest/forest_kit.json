@@ -51,13 +51,13 @@
       "lf_env_reed_fern_fern_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 288,
-      "LOD1": 144,
-      "LOD2": 72
+      "LOD0": 320,
+      "LOD1": 160,
+      "LOD2": 80
      },
-     "height_m": 0.73,
-     "canopyRadius_m": 1.73,
-     "footprintRadius_m": 1.73,
+     "height_m": 1.0,
+     "canopyRadius_m": 2.41,
+     "footprintRadius_m": 2.41,
      "materials": {
       "LOD0": [
        "lf_foliage",
@@ -80,13 +80,13 @@
       "lf_env_reed_fern_fern_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 192,
-      "LOD1": 96,
-      "LOD2": 48
+      "LOD0": 216,
+      "LOD1": 108,
+      "LOD2": 54
      },
-     "height_m": 0.68,
-     "canopyRadius_m": 1.58,
-     "footprintRadius_m": 1.58,
+     "height_m": 0.98,
+     "canopyRadius_m": 2.27,
+     "footprintRadius_m": 2.27,
      "materials": {
       "LOD0": [
        "lf_foliage",
@@ -2343,13 +2343,13 @@
       "lf_env_fallen_trunk_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2298,
-      "LOD1": 872,
-      "LOD2": 252
+      "LOD0": 710,
+      "LOD1": 248,
+      "LOD2": 82
      },
-     "height_m": 3.12,
-     "canopyRadius_m": 5.37,
-     "footprintRadius_m": 5.2,
+     "height_m": 2.89,
+     "canopyRadius_m": 5.03,
+     "footprintRadius_m": 5.03,
      "materials": {
       "LOD0": [
        "lf_bark_fallen",
@@ -2372,13 +2372,13 @@
       "lf_env_fallen_trunk_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 1546,
-      "LOD1": 594,
-      "LOD2": 177
+      "LOD0": 638,
+      "LOD1": 200,
+      "LOD2": 50
      },
-     "height_m": 3.12,
-     "canopyRadius_m": 6.63,
-     "footprintRadius_m": 5.2,
+     "height_m": 1.76,
+     "canopyRadius_m": 3.52,
+     "footprintRadius_m": 3.52,
      "materials": {
       "LOD0": [
        "lf_bark_fallen",
@@ -2401,11 +2401,11 @@
       "lf_env_fallen_trunk_v3_stream_LOD2"
      ],
      "tris": {
-      "LOD0": 2756,
-      "LOD1": 1128,
+      "LOD0": 2758,
+      "LOD1": 1130,
       "LOD2": 286
      },
-     "height_m": 4.05,
+     "height_m": 4.06,
      "canopyRadius_m": 5.71,
      "footprintRadius_m": 5.2,
      "materials": {
@@ -2443,13 +2443,13 @@
       "lf_env_moss_rock_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 1918,
-      "LOD1": 848,
-      "LOD2": 218
+      "LOD0": 756,
+      "LOD1": 668,
+      "LOD2": 250
      },
-     "height_m": 5.48,
-     "canopyRadius_m": 4.84,
-     "footprintRadius_m": 4.84,
+     "height_m": 5.46,
+     "canopyRadius_m": 4.82,
+     "footprintRadius_m": 4.82,
      "materials": {
       "LOD0": [
        "lf_rock_limestone",
@@ -2472,13 +2472,13 @@
       "lf_env_moss_rock_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 1146,
-      "LOD1": 506,
-      "LOD2": 134
+      "LOD0": 394,
+      "LOD1": 356,
+      "LOD2": 250
      },
-     "height_m": 5.48,
-     "canopyRadius_m": 3.1,
-     "footprintRadius_m": 3.1,
+     "height_m": 5.06,
+     "canopyRadius_m": 3.14,
+     "footprintRadius_m": 3.14,
      "materials": {
       "LOD0": [
        "lf_rock_limestone",
@@ -2501,13 +2501,13 @@
       "lf_env_moss_rock_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 1088,
-      "LOD1": 464,
-      "LOD2": 116
+      "LOD0": 374,
+      "LOD1": 320,
+      "LOD2": 250
      },
-     "height_m": 5.48,
-     "canopyRadius_m": 3.2,
-     "footprintRadius_m": 3.2,
+     "height_m": 5.44,
+     "canopyRadius_m": 2.97,
+     "footprintRadius_m": 2.97,
      "materials": {
       "LOD0": [
        "lf_rock_limestone",
@@ -2529,7 +2529,7 @@
     1.3
    ],
    "paintedLightMix": 0.35,
-   "generation": "v2 image-based reconstruction from art/02 (solid painted blocks / logs)"
+   "generation": "v2: fractured limestone mound from the art/02 outcrop (painted front, painted-limestone sides and painted moss tops by patch synthesis, isometric per-face UVs)"
   },
   "lf_env_bramble": {
    "glb": "lf_env_bramble.glb",
@@ -2543,13 +2543,13 @@
       "lf_env_bramble_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 1128,
-      "LOD1": 268,
+      "LOD0": 936,
+      "LOD1": 256,
       "LOD2": 54
      },
      "height_m": 2.06,
-     "canopyRadius_m": 1.52,
-     "footprintRadius_m": 1.52,
+     "canopyRadius_m": 1.51,
+     "footprintRadius_m": 1.51,
      "materials": {
       "LOD0": [
        "lf_bark_bramble",
@@ -2587,8 +2587,8 @@
       "lf_env_bramble_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 1168,
-      "LOD1": 274,
+      "LOD0": 1100,
+      "LOD1": 232,
       "LOD2": 68
      },
      "height_m": 2.06,
@@ -2632,8 +2632,8 @@
       "lf_env_bramble_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 950,
-      "LOD1": 276,
+      "LOD0": 954,
+      "LOD1": 288,
       "LOD2": 80
      },
      "height_m": 2.27,
@@ -2731,13 +2731,13 @@
       "lf_env_reed_fern_reed_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 630,
-      "LOD1": 316,
-      "LOD2": 158
+      "LOD0": 1070,
+      "LOD1": 536,
+      "LOD2": 268
      },
      "height_m": 2.44,
-     "canopyRadius_m": 1.79,
-     "footprintRadius_m": 1.79,
+     "canopyRadius_m": 1.82,
+     "footprintRadius_m": 1.82,
      "materials": {
       "LOD0": [
        "lf_foliage",
@@ -2760,13 +2760,13 @@
       "lf_env_reed_fern_reed_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 504,
-      "LOD1": 252,
-      "LOD2": 126
+      "LOD0": 824,
+      "LOD1": 412,
+      "LOD2": 206
      },
      "height_m": 2.19,
-     "canopyRadius_m": 1.27,
-     "footprintRadius_m": 1.27,
+     "canopyRadius_m": 1.25,
+     "footprintRadius_m": 1.25,
      "materials": {
       "LOD0": [
        "lf_foliage",
@@ -2789,13 +2789,13 @@
       "lf_env_reed_fern_fern_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 288,
-      "LOD1": 144,
-      "LOD2": 72
+      "LOD0": 320,
+      "LOD1": 160,
+      "LOD2": 80
      },
-     "height_m": 0.73,
-     "canopyRadius_m": 1.73,
-     "footprintRadius_m": 1.73,
+     "height_m": 1.0,
+     "canopyRadius_m": 2.41,
+     "footprintRadius_m": 2.41,
      "materials": {
       "LOD0": [
        "lf_foliage",
@@ -2818,13 +2818,13 @@
       "lf_env_reed_fern_fern_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 192,
-      "LOD1": 96,
-      "LOD2": 48
+      "LOD0": 216,
+      "LOD1": 108,
+      "LOD2": 54
      },
-     "height_m": 0.68,
-     "canopyRadius_m": 1.58,
-     "footprintRadius_m": 1.58,
+     "height_m": 0.98,
+     "canopyRadius_m": 2.27,
+     "footprintRadius_m": 2.27,
      "materials": {
       "LOD0": [
        "lf_foliage",

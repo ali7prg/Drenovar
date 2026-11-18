@@ -3,8 +3,8 @@
   "generation": "v2 image-based reconstruction from art/02 (solid painted blocks / logs)",
   "heightM": 2.44,
   "footprintM": [
-    3.52,
-    3.47
+    4.67,
+    3.92
   ],
   "scaleNote": "real metres from the 1.8 m figure on art/02 (understory without a figure: realistic height, see build script); world layer should respect heightM instead of normalising",
   "variants": {
@@ -65,9 +65,9 @@
         "lf_env_reed_fern_reed_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 630,
-        "LOD1": 316,
-        "LOD2": 158
+        "LOD0": 1070,
+        "LOD1": 536,
+        "LOD2": 268
       },
       "materials": {
         "LOD0": [
@@ -84,27 +84,27 @@
         ]
       },
       "height_m": 2.44,
-      "footprint_radius_m": 1.79,
+      "footprint_radius_m": 1.82,
       "bounds_m_blender": [
         [
-          -1.79,
-          -1.79,
-          0.01
+          -1.76,
+          -1.77,
+          -0.02
         ],
         [
-          1.73,
-          1.68,
+          1.82,
+          1.7,
           2.44
         ]
       ],
       "display_offset_gltf": [
-        5.519,
+        6.676,
         0.0,
         0.0
       ],
       "heightM": 2.44,
       "footprintM": [
-        3.52,
+        3.58,
         3.47
       ]
     },
@@ -115,9 +115,9 @@
         "lf_env_reed_fern_reed_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 504,
-        "LOD1": 252,
-        "LOD2": 126
+        "LOD0": 824,
+        "LOD1": 412,
+        "LOD2": 206
       },
       "materials": {
         "LOD0": [
@@ -134,21 +134,21 @@
         ]
       },
       "height_m": 2.19,
-      "footprint_radius_m": 1.27,
+      "footprint_radius_m": 1.25,
       "bounds_m_blender": [
         [
-          -1.27,
           -1.25,
-          0.01
+          -1.24,
+          -0.02
         ],
         [
-          1.19,
-          1.22,
+          1.21,
+          1.23,
           2.19
         ]
       ],
       "display_offset_gltf": [
-        11.038,
+        13.351,
         0.0,
         0.0
       ],
@@ -165,9 +165,9 @@
         "lf_env_reed_fern_fern_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 288,
-        "LOD1": 144,
-        "LOD2": 72
+        "LOD0": 320,
+        "LOD1": 160,
+        "LOD2": 80
       },
       "materials": {
         "LOD0": [
@@ -183,29 +183,29 @@
           "lf_foliage"
         ]
       },
-      "height_m": 0.73,
-      "footprint_radius_m": 1.73,
+      "height_m": 1.0,
+      "footprint_radius_m": 2.41,
       "bounds_m_blender": [
         [
-          -1.68,
-          -1.45,
-          0.07
+          -2.26,
+          -1.99,
+          0.08
         ],
         [
-          1.73,
-          1.44,
-          0.73
+          2.41,
+          1.93,
+          1.0
         ]
       ],
       "display_offset_gltf": [
-        16.557,
+        20.027,
         0.0,
         0.0
       ],
-      "heightM": 0.73,
+      "heightM": 1.0,
       "footprintM": [
-        3.41,
-        2.89
+        4.67,
+        3.92
       ]
     },
     "fern_v2": {
@@ -215,9 +215,9 @@
         "lf_env_reed_fern_fern_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 192,
-        "LOD1": 96,
-        "LOD2": 48
+        "LOD0": 216,
+        "LOD1": 108,
+        "LOD2": 54
       },
       "materials": {
         "LOD0": [
@@ -233,36 +233,36 @@
           "lf_foliage"
         ]
       },
-      "height_m": 0.68,
-      "footprint_radius_m": 1.58,
+      "height_m": 0.98,
+      "footprint_radius_m": 2.27,
       "bounds_m_blender": [
         [
-          -1.32,
-          -0.72,
-          0.07
+          -1.84,
+          -1.08,
+          0.08
         ],
         [
-          1.58,
-          1.22,
-          0.68
+          2.27,
+          1.71,
+          0.98
         ]
       ],
       "display_offset_gltf": [
-        22.076,
+        26.703,
         0.0,
         0.0
       ],
-      "heightM": 0.68,
+      "heightM": 0.98,
       "footprintM": [
-        2.9,
-        1.94
+        4.11,
+        2.79
       ]
     }
   },
   "tris": {
-    "LOD0": 630,
-    "LOD1": 316,
-    "LOD2": 158
+    "LOD0": 1070,
+    "LOD1": 536,
+    "LOD2": 268
   },
   "bones": 0,
   "materials": [

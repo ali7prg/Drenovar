@@ -86,6 +86,36 @@ def main():
         P.info.append(dict(c=(float(xs.mean()), float(ys.mean())), area=int(m.sum()), kind="reed" if i <= n_reed else "fern",
                            w_m=(rect[2] - rect[0]) / PPM, h_m=(rect[3] - rect[1]) / PPM, y1=int(ys.max()),
                            y0=int(ys.min())))
+    from skimage import color as skc
+    n0 = P.n
+    for i in range(n0):
+        inf = P.info[i]
+        t_ = P.tiles[i]
+        if inf["kind"] == "reed":
+            # golden copy (art/01 reed-bed colour): Lab hue -6 deg, L +7, chroma x1.15
+            lab_ = seg.lab(t_[..., :3])
+            C_ = np.hypot(lab_[..., 1], lab_[..., 2]) * 1.15
+            h_ = np.arctan2(lab_[..., 2], lab_[..., 1]) - np.radians(6)
+            lab_ = np.stack([np.clip(lab_[..., 0] + 7, 0, 100), C_ * np.cos(h_), C_ * np.sin(h_)], -1)
+            P.tiles.append(np.concatenate([np.clip(skc.lab2rgb(lab_), 0, 1).astype(np.float32), t_[..., 3:4]], 2))
+            P.rects.append(P.rects[i])
+            P.info.append(dict(inf, kind="gold"))
+            # green base: lower 45 % of the strip (painted green blades at the base)
+            hh = t_.shape[0]
+            P.tiles.append(t_[int(hh * 0.55):].copy())
+            r_ = P.rects[i]
+            P.rects.append((r_[0], r_[1] + int((r_[3] - r_[1]) * 0.55), r_[2], r_[3]))
+            P.info.append(dict(inf, kind="base", h_m=inf["h_m"] * 0.45))
+        elif inf["kind"] == "fern":
+            # golden-green fern copy (lighter, more saturated)
+            lab_ = seg.lab(t_[..., :3])
+            C_ = np.hypot(lab_[..., 1], lab_[..., 2]) * 1.12
+            h_ = np.arctan2(lab_[..., 2], lab_[..., 1]) - np.radians(4)
+            lab_ = np.stack([np.clip(lab_[..., 0] + 6, 0, 100), C_ * np.cos(h_), C_ * np.sin(h_)], -1)
+            P.tiles.append(np.concatenate([np.clip(skc.lab2rgb(lab_), 0, 1).astype(np.float32), t_[..., 3:4]], 2))
+            P.rects.append(P.rects[i])
+            P.info.append(dict(inf, kind="fern_gold"))
+    P.n = len(P.tiles)
     reg, s = P.pack("reed_fern")
     atl.save_region("reed_fern", reg, {"asset": ASSET, "tiles": P.n, "scale": s})
     atlas_path = atl.assemble()
@@ -96,6 +126,9 @@ def main():
     fol = pblend.export_material("lf_foliage", atlas_path, alpha_clip=0.5, double_sided=True)
     reed_ids = [i for i in range(P.n) if P.info[i]["kind"] == "reed"]
     fern_ids = [i for i in range(P.n) if P.info[i]["kind"] == "fern"]
+    gold_ids = [i for i in range(P.n) if P.info[i]["kind"] == "gold"]
+    base_ids = [i for i in range(P.n) if P.info[i]["kind"] == "base"]
+    fern_gold = [i for i in range(P.n) if P.info[i]["kind"] == "fern_gold"]
     fcx = np.mean([P.info[i]["c"][0] for i in fern_ids]) if fern_ids else W * 0.75
     rcx = np.mean([P.info[i]["c"][0] for i in reed_ids]) if reed_ids else W * 0.3
 
@@ -179,19 +212,37 @@ def main():
     mixed.add(Vb + view.d * 0.6, Tb, UVb, Cb, Nb, 1)
     fern_rosette(fern_ids, 7, fcx, md=mixed, scale=0.9, seed=2, reach=0.85)
     variants["mixed_v1"] = mixed
-    # reed BEDS (art/01 east river: golden clusters a few metres across, ~2-2.4 m tall)
-    variants["reed_v1"] = reed_clump(reed_ids, (0, 36, 72, 108, 144), rcx, scale=1.0, seed=3, radius=1.7)
-    variants["reed_v2"] = reed_clump(reed_ids, (20, 80, 140, 170), rcx, scale=0.9, seed=4, radius=1.3)
+    # reed BEDS (art/01 east river: dense golden clusters a few metres across, ~2-2.4 m tall, green at the base)
+    def reed_bed(angles, scale, seed, radius, base_n):
+        md = reed_clump(gold_ids, angles, rcx, scale=scale, seed=seed, radius=radius)
+        rngb = np.random.default_rng(seed + 100)
+        c_w = geom.world_at_y(view, np.array([rcx]), np.array([float(GROUND)]), np.array([0.0]))[0]
+        c_w[2] = 0.0
+        for k in range(base_n):                         # dense green base blades (lower halves of the strips)
+            i = base_ids[rngb.integers(len(base_ids))]
+            inf = P.info[i]
+            w, h = inf["w_m"] * scale, inf["h_m"] * scale
+            rho = radius * scale * math.sqrt(rngb.random())
+            phi = rngb.uniform(0, 2 * math.pi)
+            yaw = rngb.uniform(0, math.pi)
+            n = np.array([math.sin(yaw), -math.cos(yaw), 0.0])
+            pos = c_w + np.array([rho * math.cos(phi), rho * math.sin(phi), -0.02])
+            V, T, UV, _, N = geom.free_card(pos, n, np.array([0, 0, 1.0]), w, h, P.uv[i], np.zeros(4),
+                                            flip=bool(rngb.random() < 0.5), pivot_v=0.0)
+            md.add(V, T, UV, wind(V, phase=rngb.random()), geom.nrm(N + np.array([0, 0, 0.3])), 1)
+        return md
+    variants["reed_v1"] = reed_bed((0, 36, 72, 108, 144), 1.0, 3, 1.7, 220)
+    variants["reed_v2"] = reed_bed((20, 80, 140, 170), 0.9, 4, 1.3, 160)
     # fern clusters: several arching rosettes
     f1 = geom.Mesh()
-    for k_, (dx, dy, sc_) in enumerate(((0, 0, 1.0), (1.1, 0.4, 0.85), (-0.9, 0.7, 0.9), (0.3, -1.0, 0.8))):
-        fr = fern_rosette(fern_ids, 9, fcx, scale=sc_, seed=5 + k_)
+    for k_, (dx, dy, sc_) in enumerate(((0, 0, 1.4), (1.5, 0.5, 1.2), (-1.3, 0.9, 1.25), (0.4, -1.4, 1.1))):
+        fr = fern_rosette(fern_gold, 10, fcx, scale=sc_, seed=5 + k_)
         Vf, Tf, UVf, Cf, Nf, Mf = fr.arrays()
         f1.add(Vf + np.array([dx, dy, 0.0]), Tf, UVf, Cf, Nf, 1)
     variants["fern_v1"] = f1
     f2 = geom.Mesh()
-    for k_, (dx, dy, sc_) in enumerate(((0, 0, 0.9), (0.9, -0.5, 0.8), (-0.7, -0.6, 0.75))):
-        fr = fern_rosette(fern_ids, 8, fcx, scale=sc_, seed=11 + k_, reach=1.1)
+    for k_, (dx, dy, sc_) in enumerate(((0, 0, 1.3), (1.3, -0.7, 1.15), (-1.0, -0.9, 1.1))):
+        fr = fern_rosette(fern_gold, 9, fcx, scale=sc_, seed=11 + k_, reach=1.1)
         Vf, Tf, UVf, Cf, Nf, Mf = fr.arrays()
         f2.add(Vf + np.array([dx, dy, 0.0]), Tf, UVf, Cf, Nf, 1)
     variants["fern_v2"] = f2

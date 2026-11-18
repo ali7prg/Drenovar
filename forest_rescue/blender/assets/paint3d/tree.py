@@ -286,7 +286,7 @@ class Patches:
     def pack(self, key):
         region = atl.REGIONS[key]
         sizes = [(t.shape[1], t.shape[0]) for t in self.tiles]
-        pos, s = seg.pack_rects(sizes, (0, 0, region[2], region[3]), pad=3)
+        pos, s = seg.pack_rects(sizes, (0, 0, region[2], region[3]), pad=3, max_tries=40)
         img = np.zeros((region[3], region[2], 4), np.float32)
         self.uv = []
         for t, p in zip(self.tiles, pos):
@@ -372,7 +372,7 @@ class Patches:
             rgb = np.clip(skc.lab2rgb(np.clip(lab, [0, -128, -128], [100, 127, 127])), 0, 1).astype(np.float32)
             tiles.append(np.concatenate([rgb, t_[..., 3:4]], 2))
         sizes = [(t_.shape[1], t_.shape[0]) for t_ in tiles]
-        pos, s = seg.pack_rects(sizes, (0, 0, region[2], region[3]), pad=3)
+        pos, s = seg.pack_rects(sizes, (0, 0, region[2], region[3]), pad=3, max_tries=40)
         img = np.zeros((region[3], region[2], 4), np.float32)
         mp = {}
         for i, t_, p_ in zip(src_ids, tiles, pos):

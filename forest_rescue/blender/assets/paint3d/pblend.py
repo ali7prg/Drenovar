@@ -165,15 +165,19 @@ def painted_material(src, k=0.4, light=PAINT_LIGHT, name=None):
     return m
 
 
+KMAP = {}     # material name -> paintedLightMix override (e.g. lf_foliage_vol)
+
+
 def use_painted(objs, k=0.4, light=PAINT_LIGHT, on=True, tag=""):
     for o in objs:
         if o.type != "MESH":
             continue
         for i, s in enumerate(o.material_slots):
             src = o.data.materials[i]
+            kk = KMAP.get(src.name, k) if k > 0 else 0.0
             if on:
                 s.link = "OBJECT"
-                s.material = painted_material(src, k, light, name=f"{src.name}_paint{k:.2f}{tag}")
+                s.material = painted_material(src, kk, light, name=f"{src.name}_paint{kk:.2f}{tag}")
             else:
                 s.link = "DATA"
 

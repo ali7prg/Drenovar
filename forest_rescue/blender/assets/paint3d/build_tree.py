@@ -93,7 +93,7 @@ def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
         ps.append(q)
     mr, est = limit_paths(ps, L["limb_budget"], L["limb_sides"], L["limb_min_r_px"])
     copies = []
-    if L.get("copies"):
+    if L.get("copies") or sp.get("placement") == "anchors":
         axis_top = ref.axis_x[0]
         tv = geom.world_at_y(ref.view, np.array([axis_top]), np.array([float(ref.trunk_rows[0])]), np.array([0.0]))[0]
         tv[2] = 0.0
@@ -113,10 +113,17 @@ def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
     fronts = B.front_cards(scale=L["front_scale"], keep=keep, seed=vs["seed"])
     dm = B.front_depth_map(front_all)
     if sp.get("crown_mode") == "mass":
+        anchors = None
+        if sp.get("placement") == "anchors":
+            tips = [p["P"][-1] for p in base_paths if p["kind"] == "limb" and p.get("r_px", 0) >= sp.get("anchor_min_r", 1.5)]
+            anchors = list(tips)
+            for (Rm, tv, mir, sc) in copies:
+                anchors += [((tp - tv) * sc) @ Rm.T + tv for tp in tips]
         fills = B.mass_cards(fronts, dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod, n_masses=L["n_masses"],
                              mass_r=sp.get("mass_r", 0.34), clumps_per=L["clumps_per"],
                              front_extra_frac=L.get("front_extra", 0.6), max_cards=L.get("max_cards"),
-                             core_cards=L.get("core_cards", 30))
+                             core_cards=L.get("core_cards", 30), placement=sp.get("placement", "dome"),
+                             anchors=anchors, curtains=L.get("curtains", 0))
     elif sp.get("crown_mode", "volume") == "volume":
         fills = B.volume_cards(L["n_clumps"], fronts, dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod,
                                min_dist_k=L.get("min_dist_k", 0.7), front_extra_frac=L.get("front_extra", 0.65),
@@ -132,7 +139,7 @@ def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
     H = sp.get("height_hint", 12.0)
     Rc = sp.get("crown_hint", 6.0)
     bark, leaf = B.assemble(ps, fronts + fills, bark_uv, sides_trunk=L["trunk_sides"], sides_limb=L["limb_sides"],
-                            min_limb_r_px=mr if L["limb_budget"] > 0 else 999, copies=copies if L.get("copies") else None,
+                            min_limb_r_px=mr if L["limb_budget"] > 0 else 999, copies=copies if L.get("copies") and copies else None,
                             tree_h=H, crown_r=Rc, seed=vs["seed"], copy_min_r_px=L.get("copy_min_r_px", 0.0))
     if L["limb_budget"] <= 0:
         # trunk only
@@ -172,6 +179,11 @@ def main():
     P.preview(qa_path(asset, a.iter, "patches.png"))
     reg_img, s = P.pack(sp["region"])
     atl.save_region(sp["region"], reg_img, {"asset": asset, "scale": s, "tiles": P.n})
+    if sp.get("hires"):
+        hr = sp["hires"]
+        nh = P.add_hires(hr["region"], hr["sheet"], hr["box"], rosette_px=hr.get("rosette_px", 800),
+                         m_per_px=hr.get("m_per_px"), l_shift=hr.get("l_shift", 4.0), hue=hr.get("hue", (70, 100)))
+        print(f"[{asset}] hi-res top tiles: {nh}", flush=True)
     atlas_path = atl.assemble()
     print(f"[{asset}] patches={P.n} atlas_scale={s:.3f} limbs={len(ref.limbs)} ({time.time() - t0:.1f}s)", flush=True)
     B = tree.TreeBuilder(ref, P, sp["cfg"])
@@ -204,6 +216,8 @@ def main():
     core.reset()
     fol = pblend.export_material("lf_foliage", atlas_path, alpha_clip=0.5, double_sided=True)
     bark = pblend.export_material(f"lf_bark_{kind}", cpath, normal_path=npath, rough_path=rpath)
+    fol_vol = pblend.export_material("lf_foliage_vol", atlas_path, alpha_clip=0.5, double_sided=True) \
+        if sp["cfg"].get("vol_material") else fol
     built = {}
     info = {}
     for vi in sorted(sp["variants"]):
@@ -211,13 +225,14 @@ def main():
         info[vi] = {}
         for lod in range(3):
             m, st = build_lod(B, base_paths, bark_uv, sp, lod, vi, front_all)
-            o = pblend.obj_from_mesh(f"{asset}_v{vi}_LOD{lod}", m, [bark, fol])
+            o = pblend.obj_from_mesh(f"{asset}_v{vi}_LOD{lod}", m, [bark, fol, fol_vol] if fol_vol is not fol else [bark, fol])
             objs.append(o)
             info[vi][f"LOD{lod}"] = dict(tris=m.tris(), **st)
         built[vi] = objs
         print(f"[{asset}] v{vi}: " + ", ".join(f"LOD{l}={info[vi][f'LOD{l}']['tris']}" for l in range(3)), flush=True)
     # ---------------------------------------------------------------- QA
     k = sp.get("paintedLightMix", 0.4)
+    pblend.KMAP.update(sp.get("paintedLightMixByMaterial", {}))
     pblend.setup_render(a.samples)
     allobjs = [o for v in built.values() for o in v]
     metrics = {}

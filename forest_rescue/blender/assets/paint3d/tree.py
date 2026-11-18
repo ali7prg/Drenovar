@@ -23,7 +23,7 @@ from frlib import refs, texproj
 SHEET = "02_forest_modular_kit.png"
 PPM_TOP = 29.8
 ELEV_TOP = 3.5
-MAT_BARK, MAT_LEAF = 0, 1
+MAT_BARK, MAT_LEAF, MAT_LEAF_VOL = 0, 1, 2
 
 
 def _smooth1d(a, s):
@@ -286,6 +286,26 @@ class Patches:
 
     def preview(self, path):
         seg.save(path, seg.label_preview(self.lbl, self.ref.img, 0.45))
+
+    def add_hires(self, key, sheet, box, target_mask=None, rosette_px=800, m_per_px=None, l_shift=4.0, hue=(70, 100)):
+        """Append colour-matched hi-res clump tiles from another painting (top/oblique card sources)."""
+        import hires
+        import p3atlas
+        tiles = hires.extract(sheet, box, rosette_px=rosette_px, hue=hue)
+        Lab = seg.lab(self.ref.img)
+        C = np.hypot(Lab[..., 1], Lab[..., 2])
+        sel = (C > 35) & (Lab[..., 0] > 52) & self.ref.fg if target_mask is None else target_mask
+        tiles = hires.match_palette(tiles, Lab[sel], l_shift=l_shift)
+        img, uvs, s = hires.pack(tiles, key)
+        p3atlas.save_region(key, img, {"source": sheet, "box": box, "tiles": len(tiles)})
+        mpp = m_per_px or (1.0 / self.ref.ppm)
+        for tl, uv in zip(tiles, uvs):
+            h, w = tl["rgba"].shape[:2]
+            self.info.append(dict(c=(0, 0), area=tl["area"], rho=0.0, eta=0.0, lum=tl["lum"] + l_shift,
+                                  top_lum=tl["lum"] + l_shift + 6, edge=False, w_m=w * mpp, h_m=h * mpp, hires=True))
+            self.uv.append(uv)
+        self.n_hires = len(tiles)
+        return len(tiles)
 
 
 # ====================================================================== geometry assembly
@@ -842,7 +862,8 @@ class TreeBuilder:
         return cards
 
     def mass_cards(self, front_cards, front_dm, size_k=1.0, seed=5, n_masses=12, mass_r=0.34, clumps_per=26,
-                   foot=0.86, front_extra_frac=0.6, max_cards=None, core_cards=40):
+                   foot=0.86, front_extra_frac=0.6, max_cards=None, core_cards=40, placement="dome", anchors=None,
+                   curtains=0):
         """Cumulus crown: big flattened masses (ellipsoids) of crossed clump cards. Card normals radiate from
         each mass centre (painted-light shading -> bright top, darker underside), AO falls toward the
         underside, gaps between masses show the limbs / dark core."""
@@ -860,12 +881,21 @@ class TreeBuilder:
         Z = np.array([0, 0, 1.0])
         cards = []
 
+        hires_m = np.array([bool(q.get("hires")) for q in info])
+        p_hi = cfg.get("p_hires", 0.75)
+
         def pick(eta, mode):
-            w = np.sqrt(areas) * np.exp(-((etas - eta) / 0.35) ** 2)
+            if mode in ("top", "obl") and hires_m.any() and rng.random() < p_hi:
+                w = np.where(hires_m, np.sqrt(areas), 0.0)
+                w = w * np.exp(np.clip((lums - np.median(lums[hires_m])) / 6.0, -3, 3))
+                w /= w.sum()
+                return int(rng.choice(len(info), p=w))
+            w = np.where(hires_m, 0.0, np.sqrt(areas) * np.exp(-((etas - eta) / 0.35) ** 2))
             if mode == "top":
-                w *= np.exp(np.clip((tlums - np.median(tlums)) / (lp * 0.8), -5, 5))
+                # brightest-topped painted clumps (top quartile)
+                w *= np.exp(np.clip((tlums - np.percentile(tlums[~hires_m], 70)) / (lp * 0.6), -6, 4))
             elif mode == "under":
-                w *= np.exp(np.clip(-(lums - lum_med) / 6.0, -4, 4))
+                w *= np.exp(np.clip(-(lums - np.percentile(lums[~hires_m], 30)) / 4.0, -6, 4))
             else:
                 w *= np.exp(np.clip((lums - lum_med) / (lp * 1.3), -4, 4))
             w /= w.sum()
@@ -890,6 +920,8 @@ class TreeBuilder:
             C = ref.cam_to_world(np.array([cu]), np.array([cv]), np.array([c["t_px"]]))[0]
             hs = max(info[ti]["w_m"], info[ti]["h_m"])
             eta = (cv - v0) / max(v1 - v0, 1)
+            if eta > cfg.get("front_extra_eta", 0.55):
+                continue
             Pt = C + ref.view.d * (0.5 * hs + 0.2) + Z * 0.15 * hs
             tt = pick(eta, "top")
             add(Pt, nrm(Z + rng.normal(0, 0.12, 3)), tt, hs / max(info[tt]["w_m"], 1e-3) * 1.1,
@@ -901,6 +933,33 @@ class TreeBuilder:
         # mass centres on the upper / outer crown
         Rmax = float(ref.R[v0:v1 + 1].max())
         masses = []
+        zsq = cfg.get("mass_zscale", 0.68)
+        if placement == "tiers":
+            # conifer: flat whorl tiers on the cone surface (seen from above as stacked layers)
+            n_t = cfg.get("n_tiers", 9)
+            for ti_ in range(n_t):
+                eta = 0.06 + 0.9 * (ti_ + 0.5) / n_t
+                v = v0 + eta * (v1 - v0)
+                vi = int(np.clip(round(v), 0, ref.H - 1))
+                Rv = ref.R[vi]
+                m = max(3, int(round(2 * np.pi * 0.7 * Rv / (cfg.get("tier_mass_px", 26)))))
+                off = rng.uniform(0, 2 * np.pi)
+                for j in range(m):
+                    ph = off + 2 * np.pi * j / m
+                    u = ref.xc[vi] + Rv * 0.72 * np.cos(ph)
+                    tq = ref.kd * Rv * 0.72 * np.sin(ph)
+                    C = ref.cam_to_world(np.array([u]), np.array([v]), np.array([tq]))[0]
+                    masses.append((C, max(0.35 * Rv / ref.ppm, 0.45), eta))
+            n_masses = 0
+        elif placement == "anchors" and anchors is not None and len(anchors):
+            A = np.asarray(anchors)
+            sel = rng.choice(len(A), size=min(n_masses, len(A)), replace=False)
+            for i in sel:
+                C = A[i]
+                u, v, _ = ref.view.project(C[None])
+                eta = float(np.clip((v[0] - v0) / max(v1 - v0, 1), 0, 1))
+                masses.append((C, mass_r * Rmax / ref.ppm * rng.uniform(0.8, 1.2), eta))
+            n_masses = 0
         n_top = max(1, n_masses // 5)
         for i in range(n_masses):
             if i < n_top:
@@ -908,7 +967,7 @@ class TreeBuilder:
                 ph = rng.uniform(-np.pi, np.pi)
                 k = rng.uniform(0.0, 0.45)
             else:
-                eta = rng.uniform(0.18, cfg.get("mass_eta_max", 0.62))
+                eta = rng.uniform(cfg.get("mass_eta_min", 0.18), cfg.get("mass_eta_max", 0.62))
                 ph = -np.pi / 2 + (i - n_top + 0.5) * 2 * np.pi / (n_masses - n_top) + rng.normal(0, 0.2)
                 k = rng.uniform(0.5, 0.78)
             v = v0 + eta * (v1 - v0)
@@ -927,13 +986,14 @@ class TreeBuilder:
                 tries += 1
                 dvec = nrm(rng.normal(0, 1, 3))
                 rad = rng.random() ** 0.35                      # denser near the mass surface
-                P3 = C + dvec * np.array([r, r, r * 0.68]) * rad
+                P3 = C + dvec * np.array([r, r, r * zsq]) * rad
                 if any(np.sum((P3 - q) ** 2) < (0.55 * typ) ** 2 for q in pts):
                     continue
-                rel = (P3 - C) / np.array([r, r, r * 0.68])
-                nshade = nrm(rel / np.array([r, r, r * 0.68]))
+                rel = (P3 - C) / np.array([r, r, r * zsq])
+                nshade = nrm(rel / np.array([r, r, r * zsq]))
                 zrel = rel[2]
-                ao = float(np.clip(0.95 + 0.15 * zrel, 0.85, 1.0)) if rad > 0.55 else 0.86
+                au = cfg.get("ao_under", 0.85)
+                ao = float(np.clip(1.0 + (1.0 - au) * min(zrel, 0.0) / 0.7, au, 1.0)) if rad > 0.55 else 0.5 * (1 + au)
                 horiz = nrm(rel * np.array([1, 1, 0])) if np.linalg.norm(rel[:2]) > 1e-3 else nrm(rng.normal(0, 1, 3) * [1, 1, 0])
                 size = typ * rng.uniform(0.95, 1.2)
                 placed = 0
@@ -953,9 +1013,29 @@ class TreeBuilder:
                     break
             if max_cards and len(cards) >= max_cards:
                 break
+        # hanging curtains around the rim (willow): outward-facing cards, strand patches of the lower crown
+        if curtains:
+            edges = np.array([q["edge"] for q in info])
+            for i in range(curtains):
+                eta = rng.uniform(cfg.get("curtain_eta", (0.3, 0.85))[0], cfg.get("curtain_eta", (0.3, 0.85))[1])
+                v = v0 + eta * (v1 - v0)
+                vi = int(np.clip(round(v), 0, ref.H - 1))
+                ph = rng.uniform(-np.pi, np.pi)
+                k = rng.uniform(0.82, 0.98)
+                u = ref.xc[vi] + ref.R[vi] * k * np.cos(ph)
+                tq = ref.kd * ref.R[vi] * k * np.sin(ph)
+                P3 = ref.cam_to_world(np.array([u]), np.array([v]), np.array([tq]))[0]
+                n_out = ref.world_dir(ref.normal_cam(u, v, tq))
+                horiz = n_out - np.dot(n_out, Z) * Z
+                horiz = nrm(horiz) if np.linalg.norm(horiz) > 1e-3 else nrm(rng.normal(0, 1, 3) * [1, 1, 0])
+                w = np.sqrt(areas) * np.exp(-((etas - eta) / 0.25) ** 2) * np.where(edges, 2.0, 1.0)
+                w /= w.sum()
+                ti = int(rng.choice(len(info), p=w))
+                add(P3, nrm(horiz + Z * 0.25 + rng.normal(0, 0.08, 3)), ti, rng.uniform(1.0, 1.25) * size_k,
+                    rng.normal(0, 0.08), 0.95, None)
         # dark core (gaps between masses show leaves, not the ground)
         for i in range(core_cards):
-            vq = rng.uniform(v0 + 0.15 * (v1 - v0), v0 + 0.6 * (v1 - v0))
+            vq = rng.uniform(v0 + 0.15 * (v1 - v0), v0 + cfg.get("core_eta_max", 0.6) * (v1 - v0))
             vi = int(vq)
             a = rng.uniform(-np.pi, np.pi)
             k = rng.uniform(0.0, 0.45)
@@ -1050,7 +1130,7 @@ class TreeBuilder:
             sector = (np.arctan2(cen[1], cen[0]) / (2 * np.pi) + 0.5)
             ph = (np.floor(sector * 7) / 7 + 0.37 * np.floor(cen[2] / 2.5)) % 1.0
             C = wind_rgba(V, H, Rc, "leaf", ph, ao, flutter=fl)
-            leaf.add(V, T, UV, C, Nn, MAT_LEAF)
+            leaf.add(V, T, UV, C, Nn, MAT_LEAF if (c["kind"] == "front" or not self.cfg.get("vol_material")) else MAT_LEAF_VOL)
         return bark, leaf
 
 

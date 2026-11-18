@@ -113,7 +113,7 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
             copies.append((geom.rot_z(math.radians(ang)), tv, False, sc))
     # cards
     if L["front_frac"] < 1.0:
-        order = np.argsort([-q["area"] for q in P.info])
+        order = np.argsort([-P.info[i]["area"] for i in range(P.n)])
         keep = set(order[: max(4, int(len(order) * L["front_frac"]))].tolist())
     else:
         keep = None
@@ -136,13 +136,14 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
     elif sp.get("crown_mode") == "mass":
         anchors = None
         if sp.get("placement") == "anchors":
-            tips = [p["P"][-1] for p in base_paths if p["kind"] == "limb" and p.get("r_px", 0) >= sp.get("anchor_min_r", 1.5)]
+            tips = [p["P"][-1] for p in base_paths if p["kind"] == "limb" and p.get("r_px", 0) >= sp.get("anchor_min_r", 1.5)
+                    and p["P"][-1][2] > B.cfg.get("anchor_min_z", 0.0)]
             if sp.get("anchor_step_m"):
                 for p_ in base_paths:
                     if p_["kind"] != "limb":
                         continue
                     Ps_, s_ = geom.resample_polyline(p_["P"], sp["anchor_step_m"])
-                    tips += [q for q in Ps_[1:] if q[2] > sp.get("anchor_min_z", 3.0)]
+                    tips += [q for q in Ps_[1:] if q[2] > B.cfg.get("anchor_min_z", sp.get("anchor_min_z", 3.0))]
             anchors = list(tips)
             for (Rm, tv, mir, sc) in copies:
                 anchors += [((tp - tv) * sc) @ Rm.T + tv for tp in tips]

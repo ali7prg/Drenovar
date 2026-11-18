@@ -1084,7 +1084,17 @@ class TreeBuilder:
             n_masses = 0
         elif placement == "anchors" and anchors is not None and len(anchors):
             A = np.asarray(anchors)
-            sel = rng.choice(len(A), size=min(n_masses, len(A)), replace=False)
+            md = cfg.get("mass_min_dist", 0.0)
+            if md > 0:      # separated clusters: Poisson-disk selection of anchors
+                order_ = rng.permutation(len(A))
+                sel = []
+                for i in order_:
+                    if all(np.linalg.norm(A[i] - A[j]) >= md for j in sel):
+                        sel.append(i)
+                    if len(sel) >= n_masses:
+                        break
+            else:
+                sel = rng.choice(len(A), size=min(n_masses, len(A)), replace=False)
             for i in sel:
                 C = A[i].copy()
                 r_m = mass_r * Rmax / ref.ppm * rng.uniform(0.8, 1.2)

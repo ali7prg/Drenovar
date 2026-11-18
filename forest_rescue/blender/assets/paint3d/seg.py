@@ -263,9 +263,10 @@ def make_tile(img, fg, patch, margin=3, scale=2, sharpen=0.6, alpha_erode=0.0, g
         d = lab(rgb) - Lb
         Lp = lab(rgb)
         Cp = np.hypot(Lp[..., 1], Lp[..., 2])
-        bglike = (np.sqrt(d[..., 0] ** 2 + 1.4 * (d[..., 1] ** 2 + d[..., 2] ** 2)) < bg_thresh) | \
-                 ((Lp[..., 0] > Lb[0] - 14) & (Cp < 24))
-        bglike = ndi.binary_dilation(bglike, iterations=1) & ~ndi.binary_erosion(f, iterations=2) | bglike
+        dist = np.sqrt(d[..., 0] ** 2 + 1.4 * (d[..., 1] ** 2 + d[..., 2] ** 2))
+        interior = ndi.binary_erosion(f, iterations=2)
+        strict = (dist < bg_thresh) | ((Lp[..., 0] > Lb[0] - 14) & (Cp < 24))
+        bglike = (strict & interior) | (dist < 10.5)
         f &= ~bglike
     grown = ndi.binary_dilation(p, structure=morphology.disk(margin)) if margin else p
     a = grown & f

@@ -9,9 +9,9 @@
         "lf_env_golden_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3798,
-        "LOD1": 1260,
-        "LOD2": 194
+        "LOD0": 3438,
+        "LOD1": 1150,
+        "LOD2": 180
       },
       "materials": {
         "LOD0": [
@@ -27,18 +27,18 @@
           "lf_foliage"
         ]
       },
-      "height_m": 13.58,
-      "crown_radius_m": 9.11,
+      "height_m": 13.59,
+      "crown_radius_m": 8.84,
       "bounds_m_blender": [
         [
-          -6.02,
-          -6.21,
+          -6.17,
+          -5.81,
           -0.3
         ],
         [
-          9.11,
-          7.89,
-          13.58
+          8.84,
+          8.67,
+          13.59
         ]
       ],
       "display_offset_gltf": [
@@ -66,9 +66,9 @@
         "lf_env_golden_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3816,
-        "LOD1": 1270,
-        "LOD2": 192
+        "LOD0": 3430,
+        "LOD1": 1162,
+        "LOD2": 180
       },
       "materials": {
         "LOD0": [
@@ -84,22 +84,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 13.59,
-      "crown_radius_m": 8.89,
+      "height_m": 13.6,
+      "crown_radius_m": 8.5,
       "bounds_m_blender": [
         [
           -8.5,
-          -6.51,
+          -5.88,
           -0.3
         ],
         [
-          6.13,
-          8.89,
-          13.59
+          6.07,
+          8.03,
+          13.6
         ]
       ],
       "display_offset_gltf": [
-        17.4,
+        17.005,
         0.0,
         0.0
       ],
@@ -124,9 +124,9 @@
         "lf_env_golden_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3764,
-        "LOD1": 1262,
-        "LOD2": 206
+        "LOD0": 3406,
+        "LOD1": 1142,
+        "LOD2": 182
       },
       "materials": {
         "LOD0": [
@@ -142,22 +142,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 14.4,
-      "crown_radius_m": 7.83,
+      "height_m": 14.41,
+      "crown_radius_m": 7.65,
       "bounds_m_blender": [
         [
           -5.33,
-          -6.04,
+          -5.31,
           -0.32
         ],
         [
           7.65,
-          7.83,
-          14.4
+          7.49,
+          14.41
         ]
       ],
       "display_offset_gltf": [
-        34.801,
+        34.009,
         0.0,
         0.0
       ],
@@ -180,9 +180,9 @@
     }
   },
   "tris": {
-    "LOD0": 3816,
-    "LOD1": 1270,
-    "LOD2": 206
+    "LOD0": 3438,
+    "LOD1": 1162,
+    "LOD2": 182
   },
   "bones": 0,
   "materials": [

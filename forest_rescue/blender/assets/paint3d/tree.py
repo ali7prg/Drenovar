@@ -445,8 +445,14 @@ class TreeBuilder:
             g[..., 1] += w * de / se
         return b, g
 
-    def card_footprint_ok(self, V, fg, thresh):
-        u, v, _ = self.ref.view.project(V)
+    def card_footprint_ok(self, V, fg, thresh, front_dm=None, margin_m=0.15):
+        u, v, tq = self.ref.view.project(V)
+        if front_dm is not None:
+            H, W = fg.shape
+            for uu, vv, t_ in zip(u, v, tq):
+                ui, vi = int(round(uu)), int(round(vv))
+                if 0 <= ui < W and 0 <= vi < H and t_ * self.ref.ppm < front_dm[vi, ui] + margin_m * self.ref.ppm:
+                    return 0.0
         pts = np.stack([u, v], 1)
         x0, y0 = np.floor(pts.min(0)).astype(int) - 1
         x1, y1 = np.ceil(pts.max(0)).astype(int) + 2
@@ -679,7 +685,7 @@ class TreeBuilder:
                 ok = False
                 for attempt in range(3):
                     Vc = self._fill_quad(P3, n_w, ti, size, roll)
-                    if self.card_footprint_ok(Vc, ref.fg, foot) >= foot:
+                    if self.card_footprint_ok(Vc, ref.fg, foot, front_dm) >= foot:
                         ok = True
                         break
                     P3 = c + (P3 - c) * 0.8

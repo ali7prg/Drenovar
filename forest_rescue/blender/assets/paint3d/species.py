@@ -11,8 +11,8 @@ from frlib import core, paths, render as frr
 RT = os.path.join(paths.RUNTIME, "forest")
 
 LODS_TREE = {
-    0: dict(trunk_step_m=0.3, trunk_sides=12, limb_step_m=0.25, limb_sides=6, limb_min_r_px=1.3, limb_budget=950,
-            copies=True, front_frac=1.0, front_scale=1.0, n_fill=330, fill_size=1.6, n_inner=40, min_dist_k=0.5),
+    0: dict(trunk_step_m=0.3, trunk_sides=12, limb_step_m=0.25, limb_sides=6, limb_min_r_px=1.3, limb_budget=820,
+            copies=True, front_frac=1.0, front_scale=1.0, n_fill=390, fill_size=1.6, n_inner=40, min_dist_k=0.5),
     1: dict(trunk_step_m=0.6, trunk_sides=8, limb_step_m=0.5, limb_sides=4, limb_min_r_px=3.0, limb_budget=260,
             copies=True, front_frac=0.6, front_scale=1.12, n_fill=170, fill_size=1.75, n_inner=12, min_dist_k=0.6),
     2: dict(trunk_step_m=1.6, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
@@ -23,7 +23,7 @@ TREES = {
     "golden_oak": dict(
         cfg=dict(name="golden_oak", box=(0, 0, 430, 445), exclude=[(284, 360, 320, 432)], clip_row=410, ground_row=421,
                  fork_row=245, wood=dict(ratio=0.85, Lmax=64, hue_rng=(61, 95)), float_min_r=2.2, keep_x=(0, 428),
-                 crown_kd=0.9, front_bias=0.45, trunk_kd=0.9, seed=7, root_zone=34, root_k=0.8, n_lobes=13, top_weight=1.6, lum_pref=3.5, mass_up=0.55),
+                 crown_kd=0.9, front_bias=0.45, trunk_kd=0.9, seed=7, root_zone=34, root_k=0.8, n_lobes=13, top_weight=1.6, lum_pref=3.5, mass_up=0.55, front_tilt_max=30),
         n_patches=110, min_px=50, region="golden_oak", bark="oak", swatch=(20, 798, 318, 984), paintedLightMix=0.4,
         height_hint=13.3, crown_hint=7.2, lods=LODS_TREE,
         variants={1: dict(seed=5, copies=[(125, 0.92), (-125, 0.9)]),

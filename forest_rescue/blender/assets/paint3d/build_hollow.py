@@ -438,6 +438,15 @@ def main():
     sp = dict(variants=VARIANTS, tint_note="art/02 palette (copper-orange autumn crown); hero landmark tree "
                                            "(landmark budget 6k/1.5k/400)")
     SP.export_kit(ASSET, built, sp, info, "hollow", K, a)
+    import json as _json
+    mp = os.path.join(RT, f"{ASSET}.meta.json")
+    meta = _json.load(open(mp))
+    meta["heroScale"] = 1.8
+    meta["recommendedScale"] = [1.7, 2.0]
+    meta["heroNote"] = ("art/01 cave oak is a HERO: about 1.7-2x a grove oak (its trunk alone about as wide as a grove oak's "
+                        "crown). Model is authored at art/02 scale (1.8 m human); instance it at heroScale 1.7-2.0 "
+                        "(e.g. world height about 24-27 m instead of normalising it to the generic tree height).")
+    core.write_json(mp, meta)
     print(f"[{ASSET}] exported ({time.time() - t0:.1f}s)", flush=True)
 
 

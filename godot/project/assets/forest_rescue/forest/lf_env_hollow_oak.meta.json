@@ -9,9 +9,9 @@
         "lf_env_hollow_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 4346,
-        "LOD1": 1320,
-        "LOD2": 308
+        "LOD0": 4366,
+        "LOD1": 1294,
+        "LOD2": 318
       },
       "materials": {
         "LOD0": [
@@ -36,11 +36,11 @@
         [
           -5.82,
           -5.68,
-          -0.6
+          -0.57
         ],
         [
           7.2,
-          6.58,
+          5.68,
           14.12
         ]
       ],
@@ -81,9 +81,9 @@
         "lf_env_hollow_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 4832,
-        "LOD1": 1430,
-        "LOD2": 412
+        "LOD0": 4844,
+        "LOD1": 1422,
+        "LOD2": 392
       },
       "materials": {
         "LOD0": [
@@ -107,17 +107,17 @@
       "bounds_m_blender": [
         [
           -7.2,
-          -6.84,
-          -0.6
+          -6.85,
+          -0.57
         ],
         [
-          5.82,
-          6.89,
+          5.84,
+          6.57,
           14.11
         ]
       ],
       "display_offset_gltf": [
-        15.731,
+        15.42,
         0.0,
         0.0
       ],
@@ -155,8 +155,8 @@
         "lf_env_hollow_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 4692,
-        "LOD1": 1454,
+        "LOD0": 4718,
+        "LOD1": 1464,
         "LOD2": 350
       },
       "materials": {
@@ -181,17 +181,17 @@
       "bounds_m_blender": [
         [
           -5.53,
-          -6.65,
-          -0.58
+          -6.25,
+          -0.55
         ],
         [
           6.84,
-          6.2,
+          6.21,
           13.54
         ]
       ],
       "display_offset_gltf": [
-        31.462,
+        30.841,
         0.0,
         0.0
       ],
@@ -227,9 +227,9 @@
     }
   },
   "tris": {
-    "LOD0": 4832,
-    "LOD1": 1454,
-    "LOD2": 412
+    "LOD0": 4844,
+    "LOD1": 1464,
+    "LOD2": 392
   },
   "bones": 0,
   "materials": [
@@ -284,5 +284,11 @@
     "lf_bark_hollow_r.png",
     "lf_foliage_atlas.png"
   ],
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py hollow_oak"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py hollow_oak",
+  "heroScale": 1.8,
+  "recommendedScale": [
+    1.7,
+    2.0
+  ],
+  "heroNote": "art/01 cave oak is a HERO: about 1.7-2x a grove oak (its trunk alone about as wide as a grove oak's crown). Model is authored at art/02 scale (1.8 m human); instance it at heroScale 1.7-2.0 (e.g. world height about 24-27 m instead of normalising it to the generic tree height)."
 }

@@ -77,9 +77,13 @@ def trunk_field(ref, wood_closed, thick, tunnel, lathe_top, voxel=2.0, kd_lathe=
     ok = ~np.isnan(xl)
     xl = np.interp(vv, vv[ok], xl[ok])
     xr = np.interp(vv, vv[ok], xr[ok])
-    # below the clip row: keep the clip-row extents down to the ground
-    xl[clip:] = xl[clip - 1]
-    xr[clip:] = xr[clip - 1]
+    # below the clip row: root flare spreading onto the ground (radius +35% at z = 0 and below)
+    gr = max(ground - clip, 4)
+    for v in range(clip, H + 200):
+        f = min(1.0, (v - clip) / gr)
+        c_ = 0.5 * (xl[clip - 1] + xr[clip - 1])
+        a_ = 0.5 * (xr[clip - 1] - xl[clip - 1]) * (1.0 + 0.12 * f ** 1.5)
+        xl[v], xr[v] = c_ - a_, c_ + a_
     xl = ndi.gaussian_filter1d(xl, 2.0)
     xr = ndi.gaussian_filter1d(xr, 2.0)
     a = np.maximum((xr - xl) / 2.0, 1.0)
@@ -97,7 +101,11 @@ def trunk_field(ref, wood_closed, thick, tunnel, lathe_top, voxel=2.0, kd_lathe=
     # lathe field (rows >= lathe_top)
     A = a[yi]
     XC = xc[yi]
-    f_l = A[..., None] * (1.0 - np.sqrt(((X - XC) / A)[..., None] ** 2 + (ts[None, None, :] / (kd_lathe * A[..., None])) ** 2))
+    # depth semi-axis capped at the trunk's own depth: the painted root spread widens left-right only, so the base
+    # does not become a wide flat platform when seen from above
+    a_ref = float(np.median(a[lathe_top:lathe_top + 40]))
+    Bd = np.minimum(kd_lathe * A, 1.2 * kd_lathe * a_ref + 0.25 * (A - a_ref).clip(0))
+    f_l = A[..., None] * (1.0 - np.sqrt(((X - XC) / A)[..., None] ** 2 + (ts[None, None, :] / Bd[..., None]) ** 2))
     # above lathe_top: conical cap (radius shrinks 1.2 px per px) -> smooth merge into the inflated trunk
     f_l = f_l - np.clip(lathe_top - Y, 0, None)[..., None] * 1.2
     # inflated thick wood (rows < clip)

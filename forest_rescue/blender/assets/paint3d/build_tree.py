@@ -122,9 +122,16 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
         if B.cfg.get("limb_min_top_z"):
             ps = [q for q in ps if q["kind"] == "trunk" or q["P"][:, 2].max() >= B.cfg["limb_min_top_z"]]
     if B.cfg.get("trunk_r_k"):
+        kk_ = B.cfg["trunk_r_k"]
         for q in ps:
             if q["kind"] == "trunk":
-                q["r"] = q["r"] * B.cfg["trunk_r_k"]
+                if isinstance(kk_, (tuple, list)):
+                    # gnarled taper: k_base at the root flare -> k_top at the fork
+                    z_ = q["P"][:, 2]
+                    f_ = np.clip((z_ - z_.min()) / max(z_.max() - z_.min(), 1e-3), 0, 1)
+                    q["r"] = q["r"] * (kk_[1] + (kk_[0] - kk_[1]) * (1 - f_) ** 1.5)
+                else:
+                    q["r"] = q["r"] * kk_
     mr, est = limit_paths(ps, L["limb_budget"], L["limb_sides"], L["limb_min_r_px"])
     copies = []
     placement = B.cfg.get("placement", sp.get("placement", "dome"))

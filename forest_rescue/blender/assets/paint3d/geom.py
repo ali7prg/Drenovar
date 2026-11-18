@@ -198,7 +198,7 @@ def bent_card(points, widths, normals, uv_rect, col, nrm_v=None, flip=False):
 def frames(P):
     """Parallel-transport frames along a polyline: tangents, normals, binormals."""
     P = np.asarray(P, float)
-    T = nrm(np.gradient(P, axis=0))
+    T = nrm(np.gradient(P, axis=0)) if len(P) > 2 else np.repeat(nrm(P[-1:] - P[:1]), len(P), axis=0)
     Nn = np.zeros_like(T)
     a = np.array([0, 0, 1.0]) if abs(T[0, 2]) < 0.9 else np.array([1.0, 0, 0])
     Nn[0] = nrm(np.cross(T[0], a))

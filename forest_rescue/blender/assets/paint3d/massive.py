@@ -8,10 +8,16 @@ from skimage import measure, morphology
 import geom
 
 
-def arch_mask(wood_closed, fg, row_min, min_area=200):
-    """Background-coloured hole enclosed by the trunk (the walk-through arch), largest one below row_min."""
-    filled = ndi.binary_fill_holes(wood_closed)
-    holes = filled & ~wood_closed & ~fg
+def arch_mask(wood_closed, fg, row_min, min_area=200, clip=None):
+    """Background-coloured hole enclosed by the trunk (the walk-through arch), largest one below row_min.
+    The arch opens onto the ground: close the outline along the clip row first."""
+    wc = wood_closed.copy()
+    if clip is not None:
+        cols = np.nonzero(wc[clip - 6:clip].any(0))[0]
+        if len(cols):
+            wc[clip - 2:clip + 1, cols.min():cols.max() + 1] = True
+    filled = ndi.binary_fill_holes(wc)
+    holes = filled & ~wc & ~fg
     holes[:row_min] = False
     lab, n = ndi.label(holes)
     if not n:

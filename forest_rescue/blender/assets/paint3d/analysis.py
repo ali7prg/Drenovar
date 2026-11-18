@@ -64,6 +64,16 @@ def wood_mask(img, fg, ratio=0.85, Lmax=64, blur=1.2, min_area=150, Cmax=None, h
     mode 'hue': hue below hue_max (brown bark vs green foliage); white=(Lmin, Cmax): pale birch bark."""
     L = seg.lab(ndi.gaussian_filter(img, (blur, blur, 0)))
     C = np.hypot(L[..., 1], L[..., 2])
+    if mode == "notfoliage":
+        H = np.degrees(np.arctan2(L[..., 2], L[..., 1])) % 360
+        fol = fg & (H < hue_max) & (C > (Cmax or 28))
+        fol = ndi.binary_opening(fol, iterations=1)
+        w = fg & ~fol
+        lab_, n = ndi.label(w)
+        if n:
+            sizes = ndi.sum(w, lab_, np.arange(1, n + 1))
+            w = np.isin(lab_, np.nonzero(sizes > min_area)[0] + 1)
+        return w
     if mode == "hue":
         H = np.degrees(np.arctan2(L[..., 2], L[..., 1])) % 360
         w = fg & (H < hue_max) & (L[..., 0] < Lmax)

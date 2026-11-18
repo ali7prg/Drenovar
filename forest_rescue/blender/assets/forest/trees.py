@@ -69,7 +69,7 @@ def finish_broadleaf(sk, env, spec, rng):
             if k == 0 and cpar[ci] >= 0:
                 continue
             node_chain[n] = ci
-    ao = tg.crown_ao(P, env=env, floor=0.5)
+    ao = tg.crown_ao(P, env=env, floor=0.38)
     ch_list = tg.children_lists(parent)
     # distance (path) to nearest tip below each node
     tipd = np.full(len(P), 1e9)
@@ -235,7 +235,7 @@ def finish_broadleaf(sk, env, spec, rng):
                 ph = ph_chain[node_chain[node]]
                 cards.append(dict(c=c, n=n, up=upv, w=s, h=s, tile=tile,
                                   wind=np.array([min(1.0, sway[node] + 0.08), 0, ph]),
-                                  ao=float(np.clip(tg.crown_ao(p[None], env=env, floor=0.5)[0] * (0.8 + 0.2 * (d[2] + 1) / 2), 0.45, 1)),
+                                  ao=float(np.clip(tg.crown_ao(p[None], env=env, floor=0.38)[0] * (0.72 + 0.28 * (d[2] + 1) / 2), 0.36, 1)),
                                   attach=att, flutter=(0.3, 1.0)))
         return cards
 

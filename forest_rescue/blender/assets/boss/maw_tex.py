@@ -127,7 +127,7 @@ def scar_mask(P):
         t = np.clip(((P - a) @ ab) / (ab @ ab), 0, 1)
         d = np.linalg.norm(P - (a + t[:, None] * ab), axis=1)
         best = np.minimum(best, d)
-    return smoothstep(0.055, 0.016, best) * (P[:, 0] > 0.05), best
+    return smoothstep(0.075, 0.022, best) * (P[:, 0] > 0.05), best
 
 
 def knob_mask(P):
@@ -160,8 +160,8 @@ def keratin_atlas(size=512, seed=5):
     T = (v >= 0.25) & (u < 0.5)
     t = np.clip((v - 0.25) / 0.75, 0, 1)
     base = np.array([0.50, 0.40, 0.27])
-    mid = np.array([0.86, 0.80, 0.66])
-    tip = np.array([0.93, 0.89, 0.79])
+    mid = np.array([0.90, 0.84, 0.69])
+    tip = np.array([0.96, 0.92, 0.82])
     c = np.where((t < 0.3)[..., None], base + (mid - base) * (t / 0.3)[..., None],
                  mid + (tip - mid) * ((t - 0.3) / 0.7)[..., None])
     c = c * (1 + 0.05 * streak[..., None])

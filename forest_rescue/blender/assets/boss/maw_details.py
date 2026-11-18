@@ -104,10 +104,11 @@ def teeth():
             x = sx * (float(wu) - (0.04 if not front else 0.035))
             L = (0.052 + 0.012 * rng.random()) if front else float(np.interp(y, [-4.3, -4.0, -3.75, -3.55],
                                                                                 [0.12, 0.145, 0.12, 0.08]))
-            L *= (0.92 + 0.16 * rng.random()) * 1.3
-            r0 = 1.22 * (0.022 if front else float(np.interp(y, [-4.3, -3.95, -3.55], [0.038, 0.042, 0.03])))
+            L *= (0.82 + 0.42 * rng.random()) * 1.5
+            r0 = 1.35 * (0.022 if front else float(np.interp(y, [-4.3, -3.95, -3.55], [0.038, 0.042, 0.03])))
             base = np.array([x, y, zm + g + 0.004])
-            direction = np.array([sx * (0.12 if front else 0.08), -0.10 if front else 0.04, -1.0])
+            direction = np.array([sx * (0.12 if front else 0.08) + rng.normal(0, 0.06),
+                                  (-0.10 if front else 0.04) + rng.normal(0, 0.07), -1.0])
             out.append(curved_cone(base, direction, L, r0, bend_dir=[0, 1, 0], bend=0.16, sides=7, rings=4,
                                    flat=0.72, region="teeth", bone="head",
                                    u_slot=(0.0, 0.5) if sx > 0 else (0.5, 1.0)))
@@ -118,8 +119,8 @@ def teeth():
             wu, wl = B.lip_outline(y)
             zm = float(B.mouth_z(y))
             x = sx * (float(wl) - 0.035)
-            L = 1.3 * float(np.interp(y, [-4.45, -4.1, -3.8, -3.62], [0.08, 0.11, 0.095, 0.065])) * (0.9 + 0.2 * rng.random())
-            r0 = 1.2 * float(np.interp(y, [-4.45, -4.0, -3.62], [0.03, 0.035, 0.026]))
+            L = 1.5 * float(np.interp(y, [-4.45, -4.1, -3.8, -3.62], [0.08, 0.11, 0.095, 0.065])) * (0.8 + 0.4 * rng.random())
+            r0 = 1.32 * float(np.interp(y, [-4.45, -4.0, -3.62], [0.03, 0.035, 0.026]))
             base = np.array([x, y, zm - g - 0.004])
             direction = np.array([sx * 0.08, -0.08, 1.0])
             out.append(curved_cone(base, direction, L, r0, bend_dir=[0, 1, 0], bend=0.15, sides=6, rings=4,

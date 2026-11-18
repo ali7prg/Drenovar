@@ -33,6 +33,7 @@ var scenery_material: Material          # landscape material for legacy city det
 var missing: Dictionary = {}            # asset id -> reason
 var loaded: Dictionary = {}             # asset id -> source path
 var wind_enabled := true
+static var materials: Array = []         # every wind ShaderMaterial (canopy fade uniforms)
 
 
 func _init(game_data: Dictionary, legacy_detail_material: Material) -> void:
@@ -279,7 +280,22 @@ func wind_material(original: Material, has_colors: bool) -> Material:
 	material.set_shader_parameter("alpha_cut", base.alpha_scissor_threshold if foliage else 0.0)
 	material.set_shader_parameter("vertex_wind", has_colors)
 	material.set_shader_parameter("wind_strength", 1.0 if wind_enabled else 0.0)
+	materials.append(material)
 	return material
+
+
+## Pushes fade circles (Vector4 x, ground y, z, radius) to every kit/impostor material.
+static func set_fade_circles(circles: Array, extra: Array = []) -> void:
+	var packed: Array[Vector4] = []
+	for c in circles.slice(0, 8):
+		packed.append(c)
+	var count := packed.size()
+	while packed.size() < 8:
+		packed.append(Vector4.ZERO)
+	for material: ShaderMaterial in materials + extra:
+		if material != null:
+			material.set_shader_parameter("fade_circles", packed)
+			material.set_shader_parameter("fade_count", count)
 
 
 func _legacy_tree(asset_id: String) -> Dictionary:

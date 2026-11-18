@@ -23,6 +23,20 @@ uniform float flutter_amplitude = 0.055;
 uniform vec2 wind_direction = vec2(0.83, 0.56);
 uniform float loop_seconds = 8.0;
 uniform vec3 tint = vec3(1.0);
+// Dithered canopy fade around actors / pinned areas: (x, ground y, z, radius). Fragments whose
+// view ray reaches the ground inside a circle are dithered away above 1.2 m (crowns), so actors
+// under trees stay visible from the fixed city camera.
+uniform vec4 fade_circles[8];
+uniform int fade_count = 0;
+varying vec3 world_pos;
+const vec3 VIEW_DIR = vec3(-0.5414, -0.5991, -0.5414);
+
+float bayer4(vec2 p) {
+	int x = int(mod(p.x, 4.0));
+	int y = int(mod(p.y, 4.0));
+	float m[16] = float[16](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
+	return (m[x + y * 4] + 0.5) / 16.0;
+}
 
 varying float ao;
 varying vec4 tone;      // INSTANCE_CUSTOM: hue shift, saturation scale, value scale, unused
@@ -55,6 +69,7 @@ void vertex() {
 	float scale = length(MODEL_MATRIX[0].xyz);
 	VERTEX += local_wind * (gust * 0.55 + 0.45) * sway_weight * sway_amplitude * wind_strength / max(scale, 0.01);
 	VERTEX += NORMAL * flutter * flutter_weight * flutter_amplitude * wind_strength;
+	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 }
 
 void fragment() {
@@ -62,8 +77,18 @@ void fragment() {
 	if (use_albedo_texture) {
 		base *= texture(albedo_texture, UV);
 	}
+	for (int i = 0; i < 8; i++) {
+		if (i >= fade_count) break;
+		vec4 f = fade_circles[i];
+		float t = (world_pos.y - f.y) / -VIEW_DIR.y;
+		vec2 ground = world_pos.xz + VIEW_DIR.xz * t;
+		float k = 1.0 - smoothstep(f.w * 0.55, f.w, distance(ground, f.xz));
+		if (world_pos.y > f.y + 1.2 && k * 0.92 > bayer4(FRAGCOORD.xy)) {
+			discard;
+		}
+	}
 	vec3 color = base.rgb;
-	if (foliage && (tone.r != 0.0 || tone.g != 1.0 || tone.b != 1.0)) {
+	if (foliage && tone.b > 0.0 && (tone.r != 0.0 || tone.g != 1.0 || tone.b != 1.0)) {
 		// rgb -> hsv, shift, back (per-instance seasonal variety of the shared foliage atlas)
 		vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
 		vec4 p = mix(vec4(color.bg, K.wz), vec4(color.gb, K.xy), step(color.b, color.g));
@@ -76,7 +101,7 @@ void fragment() {
 		vec3 rgb = clamp(abs(mod(hsv.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
 		color = hsv.z * mix(vec3(1.0), rgb, hsv.y);
 	}
-	ALBEDO = color * tint * mix(0.62, 1.0, ao);
+	ALBEDO = color * tint * mix(0.42, 1.0, ao * ao);
 	if (use_roughness_texture) {
 		ROUGHNESS = texture(roughness_texture, UV).g;
 	} else {

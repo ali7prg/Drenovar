@@ -29,7 +29,7 @@ import trees  # noqa: E402
 import trees_hollow  # noqa: E402
 
 SPECIES = {
-    "golden_oak": dict(fn=trees.build_golden_oak, variants=[1, 2, 3, 4], bark="oak", ref="golden_oak"),
+    "golden_oak": dict(fn=trees.build_golden_oak, variants=[1, 2, 3, 4], bark="oak", ref="golden_oak", scale=0.72),
     "dark_pine": dict(fn=trees.build_dark_pine, variants=[1, 2, 3, 4], bark="pine", ref="dark_pine"),
     "birch": dict(fn=trees.build_birch, variants=[1, 2, 3], bark="birch", ref="birch"),
     "willow": dict(fn=trees.build_willow, variants=[1, 2, 3], bark="willow", ref="willow"),
@@ -62,7 +62,8 @@ def main():
     asset = f"lf_env_{a.species}"
     t0 = time.time()
     core.reset()
-    view = refsetup.kit_view(sp["ref"])
+    scale = sp.get("scale", 1.0)
+    view = refsetup.kit_view(sp["ref"])          # builders use the art/02 scale (1.8 m human)
     fol = fbuild.foliage_material()
     bark = fbuild.bark_material(sp["bark"])
     variants = [int(v) for v in a.variants.split(",")] if a.variants else sp["variants"]
@@ -70,6 +71,9 @@ def main():
     info = {}
     for v in variants:
         res = sp["fn"](v, view=view)
+        if scale != 1.0:
+            for lod in range(3):
+                res.lods[lod].V = [vv * scale for vv in res.lods[lod].V]
         objs = []
         for lod in range(3):
             mats = [bark, fol] if lod == 0 else [fol]
@@ -82,6 +86,10 @@ def main():
     # ------------------------------------------------------------------ QA
     if not a.no_qa:
         fqa.studio(a.samples)
+        fqa.use_ao([o for v in variants for o in built[v][1]], True)
+        if scale != 1.0:
+            # exported at `scale` x the sheet size by design: compare silhouettes at matched scale
+            view = refsetup.kit_view(sp["ref"], ppm=refsetup.PPM_TOP / scale)
         metrics = {}
         if 1 in built:
             m, _ = fqa.compare_view(view, [built[1][1][0]], fqa.iter_path(asset, a.iter, "v1_front"),
@@ -135,6 +143,7 @@ def main():
         print(json.dumps({k: (v["iou"], v["iou_closed_r4"]) for k, v in metrics.items()}), flush=True)
     if a.no_export:
         return
+    fqa.use_ao([o for v in variants for o in built[v][1]], False)
     # ------------------------------------------------------------------ export layout + meta
     root = fbuild.empty(asset)
     spacing = 0.0
@@ -187,6 +196,7 @@ def main():
         "layout_note": "Node translations are preview offsets only (variants along +X, LOD1/LOD2 rows behind). "
                        "Instance the Mesh resources with your own transforms; mesh origin = trunk base on the ground.",
         "lod_note": "LOD0: bark+foliage (2 surfaces); LOD1/LOD2: single foliage-atlas surface (bark strip in atlas).",
+        "export_scale_vs_art02": scale,
         "glb_images": gi["images"],
         "build": f"python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_trees.py {a.species}",
     }

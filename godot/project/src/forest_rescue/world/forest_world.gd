@@ -288,9 +288,9 @@ func _tone(species: int, x: float, z: float) -> Color:
 			var w: PackedFloat32Array = atlas.biome_weights(x, z)
 			golden = clampf(w[0] * 0.9 + w[1] * 0.9 + w[7] * 0.7 + w[3] * 0.35, 0.0, 1.0)
 		if species == Rules.HOLLOW_OAK or h < golden * 0.85 + 0.08:
-			if h2 < 0.22:
-				return Color(-0.035, 1.08, 0.92, 0.0)    # copper-orange
-			return Color(h2 * 0.03 - 0.012, 1.0, 1.0, 0.0)
+			if h2 < 0.24:
+				return Color(-0.04, 0.95, 0.80, 0.0)     # copper-orange
+			return Color(h2 * 0.025 - 0.02, 0.82, 0.84, 0.0)  # golden ochre
 		return Color(0.15 + 0.04 * h2, 0.72 + 0.12 * h, 0.60 + 0.12 * h2, 0.0)  # summer green oak
 	return Color((h - 0.5) * 0.03, 0.92 + 0.14 * h2, 0.9 + 0.12 * h, 0.0)
 

@@ -298,9 +298,11 @@ def head_profiles():
     # skull top skin line (brow knobs excluded) — read from mask, closed
     _crop, m = R.side_mask(corrected=True)
     x0, y0 = R.SIDE_BOX[:2]
-    us = np.arange(46, 200)
+    us = np.arange(51, 200)
     top = np.array([np.nonzero(m[:, u - x0])[0].min() + y0 for u in us], float)
     top = ndi.gaussian_filter1d(_closing_profile(top, 11), 3.0)
+    # taller snout (close-up): raise the snout roof up to 4.5 px, fading out behind the eye
+    top = top - 4.5 * np.clip((125 - us) / 30.0, 0, 1) * np.clip((us - 51) / 12.0, 0, 1)
     # snout front: blunt rounded tip (mask gives it)
     mouth_u = [44, 60, 80, 100, 115, 130, 142, 152]
     mouth_r = [211, 212, 212, 211, 209, 205, 200, 197]          # upper lip line (teeth row)
@@ -334,7 +336,7 @@ def head_widths(y):
     return wu, wl
 
 
-HEAD_Y0 = (46 - R.SIDE_HIP_COL) / PPM
+HEAD_Y0 = (51 - R.SIDE_HIP_COL) / PPM
 HEAD_CAP = 0.07
 
 
@@ -417,8 +419,10 @@ def build_parts(detail=True):
         add.append(sdf.round_cone([sx * 0.33, -3.78, 3.18], [sx * 0.40, -3.48, 3.22], 0.05, 0.06, k=0.05,
                                   name="cheekbone", bone="head"))
         # nostril pits
-        sub.append(oriented_ellipsoid([sx * 0.13, -4.42, 3.10], [0, -1, 0.3], 0.07, 0.045, 0.035, k=0.015,
-                                      name="nostril"))
+        sub.append(oriented_ellipsoid([sx * 0.215, -4.33, 3.10], [sx * 0.55, -0.8, 0.15], 0.085, 0.06, 0.042,
+                                      k=0.012, name="nostril"))
+        add.append(oriented_ellipsoid([sx * 0.19, -4.33, 3.11], [sx * 0.55, -0.8, 0.15], 0.11, 0.085, 0.062,
+                                      k=0.035, name="nostril_rim", bone="head"))
         # eye socket + eyelid ring (the eye mesh sits inside, see maw_details.eye_centre)
         sub.append(sdf.sphere([sx * 0.315, -3.62, 3.27], 0.062, k=0.015, name="orbit"))
         ax = np.array([sx * 0.80, -0.56, 0.12])
@@ -471,7 +475,7 @@ def brow_knobs():
     for sx in (1, -1):
         for i, t in enumerate(np.linspace(0, 1, 5)):
             p = np.array([sx * (0.25 + 0.03 * t), -3.88 + 0.40 * t, 3.36 + 0.11 * t])
-            h = 0.045 + 0.025 * math.sin(math.pi * t) + 0.012 * rng.random()
+            h = 0.063 + 0.035 * math.sin(math.pi * t) + 0.015 * rng.random()
             out.append(oriented_ellipsoid(p + [sx * 0.015, 0, 0.03], [0, 0.3, 1], h, 0.035, 0.03, k=0.03,
                                           name="brow_knob", bone="head"))
         # horn-like tip at the rear-top of the ridge (front view)
@@ -481,7 +485,7 @@ def brow_knobs():
     for sx in (1, -1):
         for j, y in enumerate(np.linspace(-3.55, -3.05, 5)):
             z = np.interp(y, [-3.6, -3.3, -3.0], [3.53, 3.57, 3.52])
-            sz = 0.055 + 0.012 * rng.random()
+            sz = 0.072 + 0.016 * rng.random()
             out.append(oriented_ellipsoid([sx * (0.17 + 0.03 * j / 4), y, z], [0, 1, 0.2], sz * 1.3, sz, sz * 0.9,
                                           k=0.03, name="roof_knob", bone="head"))
     for i, y in enumerate(np.linspace(-4.30, -3.30, 9)):
@@ -494,17 +498,17 @@ def brow_knobs():
 def scar_ridge():
     """Healed scar over the LEFT eye (+X side): raised pale fibrous ridge (geometry + texture mask)."""
     pts = scar_points()
-    out = sdf.chain(pts, [0.016, 0.02, 0.021, 0.02, 0.015], bones="head", k=0.012, name="scar")
+    out = sdf.chain(pts, [0.022, 0.026, 0.028, 0.028, 0.026, 0.02], bones="head", k=0.012, name="scar")
     return out
 
 
 def scar_points():
     # side-view scar line projected onto the left head surface (x from the skull half width)
-    line = [(120, 155), (127, 167), (133, 178), (139, 189), (145, 200)]
+    line = [(118, 147), (120, 155), (127, 167), (133, 178), (139, 189), (145, 200)]
     out = []
     for u, r in line:
         y, z = S(u, r)
-        x = {155: 0.26, 167: 0.33, 178: 0.40, 189: 0.44, 200: 0.46}[r]
+        x = {147: 0.19, 155: 0.27, 167: 0.335, 178: 0.40, 189: 0.44, 200: 0.46}[r]
         out.append(np.array([x, y, z]))
     return out
 

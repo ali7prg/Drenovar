@@ -89,6 +89,7 @@ def build(name, it, export=True, qa=True, samples=20):
     metrics = {}
     if qa:
         fqa.studio(samples)
+        fqa.use_ao([o for r, os_ in built.values() for o in os_], True)
         if spec.get("ref"):
             rv = spec["ref_variant"]
             obj = built[rv][1][0]
@@ -129,6 +130,7 @@ def build(name, it, export=True, qa=True, samples=20):
         print(json.dumps({k: (v["iou"], v["iou_closed_r4"]) for k, v in metrics.items()}), flush=True)
     if not export:
         return
+    fqa.use_ao([o for r, os_ in built.values() for o in os_], False)
     root = fbuild.empty(asset)
     spacing = 0.0
     for vn, (res, objs) in built.items():

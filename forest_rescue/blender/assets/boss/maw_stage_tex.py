@@ -188,9 +188,18 @@ def main():
     # ---------------------------------------------------------------- colour composition
     col3 = C3.copy()
     lum = col3 @ np.array([0.299, 0.587, 0.114])
-    gdark = 0.86 - 0.12 * reg["head"]
-    col3 *= (gdark + (1.02 - gdark) * np.clip(groove, 0, 1))[:, None]
-    col3 *= (0.93 + 0.14 * tint)[:, None]
+    gdark = 0.86 - 0.20 * reg["head"] - 0.08 * reg["dorsal"]
+    col3 *= (gdark + (1.04 - gdark) * np.clip(groove, 0, 1))[:, None]
+    # large rough scales: per-scale olive-iron / charcoal alternation with bronze centres (head, neck, back)
+    big = np.clip(reg["head"] + reg["neck_sh"] + 0.7 * reg["dorsal"], 0, 1)
+    olive = np.array([0.40, 0.38, 0.28])
+    charcoal = np.array([0.17, 0.17, 0.16])
+    lum0 = (col3 @ np.array([0.299, 0.587, 0.114]))[:, None]
+    pal = np.where((tint > 0.55)[:, None], olive, charcoal) * (lum0 / 0.26)
+    col3 = col3 * (1 - 0.35 * big[:, None]) + pal * 0.35 * big[:, None]
+    col3 *= (1 + (0.16 * big + 0.07) * (tint - 0.5))[:, None]
+    ctr = np.clip(groove, 0, 1) ** 3 * big
+    col3 = col3 * (1 - 0.18 * ctr[:, None]) + np.array([0.55, 0.45, 0.30]) * 0.18 * ctr[:, None]
     bronze = np.array([0.60, 0.48, 0.30])
     col3 = col3 * (1 - 0.6 * knob[:, None]) + (bronze * (0.75 + 0.6 * lum[:, None])) * 0.6 * knob[:, None]
     mouth_col = np.array([0.42, 0.17, 0.17]) * (0.6 + 0.4 * np.clip((P[:, 1] + 3.2) / -1.0, 0, 1))[:, None]
@@ -203,7 +212,7 @@ def main():
     lumv = (col3 @ np.array([0.299, 0.587, 0.114]))[:, None]
     col3 = col3 * (1 - 0.45 * vz[:, None]) + umber * (lumv / 0.30) * 0.45 * vz[:, None]
     fib = 0.85 + 0.15 * np.sin(scar_d * 900.0)
-    scar_col = np.array([0.86, 0.70, 0.70]) * fib[:, None]
+    scar_col = np.array([0.90, 0.76, 0.74]) * fib[:, None]
     col3 = col3 * (1 - 0.95 * scar[:, None]) + scar_col * 0.95 * scar[:, None]
     aov = ao[yy, xx]
     col3 *= (0.70 + 0.30 * aov)[:, None]

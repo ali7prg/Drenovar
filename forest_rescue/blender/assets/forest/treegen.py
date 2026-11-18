@@ -524,7 +524,7 @@ def crown_ao(P, env=None, centre=None, radii=None, zrange=None, floor=0.45):
     if env is not None:
         d = env.inside_depth(P)
         dd = np.clip(d / 2.2, 0, 1)
-        ao = 1.0 - 0.5 * dd
+        ao = 1.0 - 0.6 * dd
         zr = (env.pmin[2], env.pmax[2])
     else:
         q = np.linalg.norm((P - centre) / radii, axis=1)
@@ -532,7 +532,7 @@ def crown_ao(P, env=None, centre=None, radii=None, zrange=None, floor=0.45):
         zr = zrange
     if zr is not None:
         h = np.clip((P[:, 2] - zr[0]) / max(zr[1] - zr[0], 1e-3), 0, 1)
-        ao *= 0.78 + 0.22 * h
+        ao *= 0.6 + 0.4 * h ** 0.8            # lighter sunlit tops, shadowed crown underside
     return np.clip(ao, floor, 1.0)
 
 

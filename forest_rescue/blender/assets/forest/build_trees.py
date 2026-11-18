@@ -29,7 +29,7 @@ import trees  # noqa: E402
 import trees_hollow  # noqa: E402
 
 SPECIES = {
-    "golden_oak": dict(fn=trees.build_golden_oak, variants=[1, 2, 3, 4], bark="oak", ref="golden_oak", scale=0.72),
+    "golden_oak": dict(fn=trees.build_golden_oak2, variants=[1, 2, 3, 4], bark="oak", ref="golden_oak", scale=0.72),
     "dark_pine": dict(fn=trees.build_dark_pine2, variants=[1, 2, 3, 4], bark="pine", ref="dark_pine"),
     "birch": dict(fn=trees.build_birch, variants=[1, 2, 3], bark="birch", ref="birch"),
     "willow": dict(fn=trees.build_willow, variants=[1, 2, 3], bark="willow", ref="willow"),

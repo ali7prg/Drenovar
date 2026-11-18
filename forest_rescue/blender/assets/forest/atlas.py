@@ -29,8 +29,8 @@ for i, n in enumerate(OAK_CLUMPS):
 for i, n in enumerate(["pine_spray_a", "pine_spray_b", "pine_spray_c", "pine_spray_d"]):
     _reg(n, i * 256, 256, 256, 256)
 BIRCH_CLUMPS = ["birch_clump_light", "birch_clump_mid", "birch_clump_dark", "birch_clump_gold"]
-for i, n in enumerate(BIRCH_CLUMPS):
-    _reg(n, 1024 + i * 256, 256, 256, 256, attach="center")
+for i, n in enumerate(BIRCH_CLUMPS):          # small sparse HANGING leaf clusters on drooping twigs (attach top)
+    _reg(n, 1024 + i * 256, 256, 256, 256, attach="top")
 # row C (512 tall): willow strands, fern fronds, reed blades
 for i in range(6):
     _reg(f"willow_strand_{i}", i * 128, 512, 128, 512, attach="top")
@@ -752,8 +752,9 @@ def build_atlas(barks=None, seed=7):
     put("pine_top", paint_pine_dense(256, 256, rng(seed + 62), PINE_COLS))
     for i, name in enumerate(BIRCH_CLUMPS):
         key = name.split("_")[2]
-        put(name, paint_clump(256, 256, rng(seed + 70 + i), BIRCH_CLUMP_PAL[key], "birch", n_leaves=150,
-                              leaf_len=(0.09, 0.13), radius=0.30, gap=0.16))
+        put(name, paint_broadleaf_cluster(256, 256, rng(seed + 70 + i), "birch", BIRCH_CLUMP_PAL[key], n_leaves=46,
+                                          leaf_len=(0.11, 0.16), attach="top", droop=0.9, spread=0.36,
+                                          twig_col=(0.30, 0.24, 0.18)))
     put("birch_dense", paint_clump(256, 256, rng(seed + 79), BIRCH_CLUMP_PAL["mid"], "birch", n_leaves=300,
                                    leaf_len=(0.07, 0.1), radius=0.45))
     put("birch_spare", paint_clump(256, 256, rng(seed + 78), BIRCH_CLUMP_PAL["gold"], "birch", n_leaves=230,

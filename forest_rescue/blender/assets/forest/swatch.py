@@ -111,6 +111,12 @@ def bark_from_swatch(kind, size=1024, seed=0, micro=0.25):
     # quilt at native resolution, n x step ~ 2x the swatch height (repetition hidden by the cuts)
     q = quilt_tileable(ref, n=8, patch=72 if kind != "birch" else 64, overlap=16, seed=seed + 7)
     q = ftex.match_to_reference(q, ref, amount=1.0, contrast=0.95)     # restore the swatch tonal spread
+    if kind == "birch":
+        # read at game distance: push lenticels / peel patches towards black, bark towards white
+        lum = q @ np.array([0.3, 0.55, 0.15])
+        dark = np.clip((0.55 - lum) / 0.3, 0, 1) ** 0.8
+        q = q * (1 - 0.75 * dark[..., None]) + np.array([0.06, 0.05, 0.05]) * 0.75 * dark[..., None]
+        q = np.clip(q * (1 + 0.12 * (1 - dark[..., None])), 0, 1)
     alb = upscale_wrap(q, size)
     lum = alb @ np.array([0.3, 0.55, 0.15])
     pad = 64

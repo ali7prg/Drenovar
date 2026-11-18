@@ -60,6 +60,9 @@ def finish_broadleaf(sk, env, spec, rng):
     for i in spec.get("trunk_ids", []):
         if "trunk_r" in spec:
             R[i] = max(R[i], spec["trunk_r"](P[i]))
+    for ids_l, r0, r1 in spec.get("limbs", []):           # thick gnarled main limbs
+        for j, i in enumerate(ids_l):
+            R[i] = max(R[i], r0 + (r1 - r0) * j / max(len(ids_l) - 1, 1))
     chains, cpar, corder = tg.build_chains(P, parent, R)
     L = tg.path_lengths(P, parent)
     Lmax = L.max()
@@ -129,6 +132,9 @@ def finish_broadleaf(sk, env, spec, rng):
                 kidx = kidx[:len(pts2)]
             ids = [keep[k] for k in kidx]
             aw = ao[ids].copy()
+            if spec.get("junction_dark") and cpar[ci] >= 0 and len(aw) > 1:
+                aw[0] = min(aw[0], 0.3)
+                aw[1] = min(aw[1], 0.55)
             if spec.get("base_dark"):
                 bh, bv = spec["base_dark"]
                 aw = np.minimum(aw, bv + (1 - bv) * np.clip(pts2[:len(ids), 2] / bh, 0, 1))
@@ -312,6 +318,34 @@ def finish_broadleaf(sk, env, spec, rng):
         if spec.get("foliage") == "none":
             out[lod] = md
             res.info[f"LOD{lod}"] = dict(tris=md.tris(), bark_tris=bt, cards=0)
+            continue
+        if spec.get("n_pads"):
+            if lod == 0:
+                PC, PR, PY, PN = pick_pads(P, R, tipd, env, spec, rng)
+                acc_p = rng.random(len(PC)) < spec.get("accent_frac", 0.05)
+                zr = (env.pmin[2], env.pmax[2])
+                hull_c = (env.pmin + env.pmax) / 2
+                hull_r = np.maximum((env.pmax - env.pmin) / 2, 0.5)
+                res.pads = dict(C=PC, R=PR)
+            if lod == 2 and len(PC) > spec.get("lod2_max_clumps", 24):
+                kk = spec.get("lod2_max_clumps", 24)
+                cent, lab = kmeans2(PC, kk, minit="++", seed=int(rng.integers(1 << 30)))
+                C2, R2, Y2, N2, A2 = [], [], [], [], []
+                for q in range(kk):
+                    idq = np.nonzero(lab == q)[0]
+                    if len(idq) == 0:
+                        continue
+                    c = PC[idq].mean(0)
+                    ext = np.abs(PC[idq] - c).max(0)
+                    rr = np.maximum(PR[idq].max(0), ext + PR[idq].mean(0) * 0.7)
+                    C2.append(c); R2.append(rr); Y2.append(PY[idq[0]]); N2.append(PN[idq[0]]); A2.append(False)
+                cards = pad_cards(np.array(C2), np.array(R2), np.array(Y2), np.array(N2), n_cards, lod, spec, rng, sway,
+                                  ph_chain, node_chain, zr, np.array(A2))
+            else:
+                cards = pad_cards(PC, PR, PY, PN, n_cards, lod, spec, rng, sway, ph_chain, node_chain, zr, acc_p)
+            emit_pad_cards(md, cards, hull_c, hull_r, 1 if lod == 0 else 0, zr, spec.get("k_clump", 0.7))
+            out[lod] = md
+            res.info[f"LOD{lod}"] = dict(tris=md.tris(), bark_tris=bt, cards=len(cards))
             continue
         if spec.get("n_clumps"):
             if lod == 0:
@@ -949,16 +983,16 @@ def build_birch(variant, view=None):
         trunk_ids += sk.add_polyline(pts, parent=root, can_grow_from_z=3.2 if variant != 2 else 4.0)
     puffs = env.sample_even(26, rng, dmin=0.7, dmax=1.8)
     att = env.sample(1300, rng, shell=1.6, inner_weight=0.18, clumps=puffs, clump_r=1.4)
-    tg.space_colonize(sk, att, D=0.32, di=2.6, dk=0.7, iters=150, tropism=(0, 0, -1), trop_w=0.05, rng=rng)
-    spec = dict(puffs=puffs, puff_r=(1.0, 1.5), puff_frac=0.7, bark="birch", n_clumps=60 if variant == 1 else 44,
+    tg.space_colonize(sk, att, D=0.32, di=3.4, dk=0.6, iters=170, tropism=(0, 0, -1), trop_w=0.05, rng=rng)
+    spec = dict(puffs=puffs, puff_r=(0.8, 1.3), puff_frac=0.45, bark="birch", n_clumps=0, junction_dark=True,
                 clump_r=(0.7, 1.1), clump_kind="birch", accent_frac=0.15, clump_tip=1.4, lod2_cards=3, k_clump=0.55,
                 clump_flat=0.62, clump_card_k=1.15,
                 lod2_max_clumps=26,
-                base_dark=(1.1, 0.38), r_base=spec_r * (1.6 if variant == 1 else 1.0), alpha=1.0, gamma=2.3,
+                base_dark=(1.5, 0.2), r_base=spec_r * (1.6 if variant == 1 else 1.0), alpha=1.0, gamma=2.3,
                 cull=(0.03, 0.08, 0.15), max_order=[9, 2, 1], flare=(0.25, 0.4, 4, 0.3), roots=None,
-                card_size=(0.85, 1.15), moods=BIRCH_MOODS, dense_map=BIRCH_DENSE, budget=(3200, 1250, 290),
-                leaf_tip_dist=1.4, leaf_r_max=0.05, site_spacing=0.38, side_frac=0.55, sph=0.6, up_bias=0.2,
-                seed=seed, bark_tile=(0.9, 0.9), hang=1.0, leaf_z_min=3.5, bark_frac=(0.42, 0.32, 0.18),
+                card_size=(0.7, 1.0), moods=BIRCH_MOODS, dense_map=BIRCH_DENSE, budget=(3200, 1250, 290),
+                leaf_tip_dist=1.6, leaf_r_max=0.05, site_spacing=0.3, side_frac=0.55, sph=0.6, up_bias=0.2,
+                seed=seed, bark_tile=(1.5, 1.5), hang=1.0, leaf_z_min=3.5, bark_frac=(0.5, 0.36, 0.18),
                 trunk_r=lambda p: spec_r * (1.0 - 0.55 * min(max(p[2], 0), 12) / 12), trunk_ids=trunk_ids)
     res = finish_broadleaf(sk, env, spec, rng)
     if variant == 1:   # small orange autumn shrub at the foot of the cluster (art/02)
@@ -1368,4 +1402,204 @@ def build_dark_pine2(variant, view=None):
                     droop=lambda f: 0.45 * (1 - f) + 0.12, flare=(0.6, 0.7, 5, 0.6), lean=(0.35, 0.1), missing=0.12)
     res = build_conifer2(spec, rng)
     res.spec = spec
+    return res
+
+
+# ============================================================================ pads (flattened cumulus foliage at branch ends)
+
+def pick_pads(P, R, tipd, env, spec, rng):
+    """Pad centres on branch ends (FPS over twig tips), flattened ellipsoid radii (rx, ry, rz) and yaw."""
+    n = spec["n_pads"]
+    lo, hi = spec["pad_r"]
+    depth = env.inside_depth(P)
+    zmin = spec.get("leaf_z_min", 1.0)
+    ok = (tipd <= spec.get("pad_tip", 0.7)) & (R <= spec.get("leaf_r_max", 0.09) * 1.3) & (P[:, 2] > zmin) & (depth > 0.05)
+    ids = np.nonzero(ok)[0]
+    if len(ids) < n:
+        ids = np.nonzero((P[:, 2] > zmin) & (depth > 0.0))[0]
+    w = np.exp(-((depth[ids] - spec.get("pad_depth", 0.9)) / 1.0) ** 2)
+    sel = [ids[int(np.argmax(P[ids, 2]))]]
+    dmin = np.linalg.norm((P[ids] - P[sel[0]]) * np.array([1, 1, 1.6]), axis=1)
+    for _ in range(n - 1):
+        k = int(np.argmax(dmin * (0.4 + w)))
+        sel.append(ids[k])
+        dmin = np.minimum(dmin, np.linalg.norm((P[ids] - P[ids[k]]) * np.array([1, 1, 1.6]), axis=1))
+    sel = np.array(sel)
+    rx = rng.uniform(lo, hi, len(sel))
+    radii = np.stack([rx, rx * rng.uniform(0.75, 1.2, len(sel)), rx * rng.uniform(*spec.get("pad_flat", (0.38, 0.52)), len(sel))], 1)
+    C = P[sel] + np.stack([np.zeros(len(sel)), np.zeros(len(sel)), radii[:, 2] * 0.35], 1)
+    yaw = rng.uniform(0, np.pi, len(sel))
+    return C, radii, yaw, sel
+
+
+def _rotz(a):
+    c, s = math.cos(a), math.sin(a)
+    return np.array([[c, -s, 0], [s, c, 0], [0, 0, 1.0]])
+
+
+def pad_cards(C, radii, yaw, nodes, n_target, lod, spec, rng, sway, ph_chain, node_chain, zr, accent):
+    """Cards on flattened pads: bumpy top, flat sparse bottom, fringe cards breaking the outline."""
+    tiles = CLUMP_TILES[spec.get("clump_kind", "oak")]
+    fringe_tiles = spec.get("fringe_tiles", ["oak_clump_gold_a", "oak_clump_ochre_a", "oak_clump_light_b"])
+    area = radii[:, 0] * radii[:, 1]
+    share = area / area.sum()
+    cards = []
+    for k in range(len(C)):
+        Rk = _rotz(yaw[k])
+        rad = radii[k]
+        hk = (C[k][2] - zr[0]) / max(zr[1] - zr[0], 1e-3)
+        node = nodes[k]
+        wind = np.array([min(1.0, sway[node] + 0.06), 0, ph_chain[node_chain[node]]])
+        if lod == 2:
+            m = spec.get("lod2_cards", 3)
+            dirs = [np.array([0, 0, 1.0])] + [normalize(np.array([math.cos(a), math.sin(a), 0.15]))
+                                               for a in np.linspace(0, np.pi, m - 1, endpoint=False) + rng.uniform(0, 3)]
+            nfr = 0
+        else:
+            m = max([6, 3][lod], int(round(n_target * share[k] * (1 - spec.get("fringe_frac", 0.25)))))
+            nfr = max(1, int(round(n_target * share[k] * spec.get("fringe_frac", 0.25)))) if lod == 0 else \
+                max(1, int(round(n_target * share[k] * 0.15)))
+            g = (1 + 5 ** 0.5) / 2
+            rot = rng.uniform(0, 2 * np.pi)
+            dirs = []
+            i = 0
+            while len(dirs) < m and i < 6 * m:
+                z = 1 - 2 * (i + 0.5) / (1.6 * m)
+                i += 1
+                if z < -1:
+                    break
+                if z < -0.3 and rng.random() < 0.7:
+                    continue                                    # flat, sparse underside
+                rr = math.sqrt(max(0, 1 - z * z))
+                a = 2 * np.pi * i / g + rot
+                dirs.append(normalize(np.array([rr * math.cos(a), rr * math.sin(a), z]) + rng.normal(0, 0.12, 3)))
+        for d in dirs:
+            if accent[k]:
+                cat = "red" if d[2] > 0.2 else "ochre"
+            else:
+                s = 0.65 * d[2] + 0.45 * (hk - 0.5) + 0.25 * float(np.dot(d, SUN)) + rng.normal(0, 0.12)
+                cat = "light" if s > 0.30 else "gold" if s > -0.12 else "ochre" if s > -0.45 else "dark"
+            tl = tiles[cat]
+            bump = 1.0 + 0.18 * math.sin(3 * math.atan2(d[1], d[0]) + k) * (d[2] > 0)
+            p = C[k] + Rk @ (d * rad * (rng.uniform(0.45, 0.75) if lod < 2 else 0.1) * bump)
+            nrm_local = normalize(d / rad)
+            nrm = normalize(Rk @ nrm_local + rng.normal(0, 0.15, 3)) if lod < 2 else normalize(Rk @ d)
+            sz = rad[0] * rng.uniform(0.85, 1.15) * [1.0, 1.35, 2.1][lod] * spec.get("pad_card_k", 1.0)
+            upv = normalize(np.cross(nrm, rng.normal(0, 1, 3)))
+            cards.append(dict(c=p, n=nrm, up=upv, w=sz, h=sz * rng.uniform(0.8, 1.0), tile=tl[rng.integers(len(tl))],
+                              C=C[k], radii=rad, R=Rk, wind=wind, attach="center"))
+        for j in range(nfr):                                       # fringe: small clusters sticking out of the rim
+            a = rng.uniform(0, 2 * np.pi)
+            d = np.array([math.cos(a), math.sin(a), rng.uniform(-0.25, 0.45)])
+            p = C[k] + Rk @ (d * rad * np.array([rng.uniform(0.95, 1.2), rng.uniform(0.95, 1.2), 1.0]))
+            nrm = normalize(Rk @ normalize(d / rad) + np.array([0, 0, 0.35]) + rng.normal(0, 0.2, 3))
+            sz = rad[0] * rng.uniform(0.38, 0.55) * [1.0, 1.4][lod]
+            upv = normalize(Rk @ np.array([math.cos(a), math.sin(a), 0.2]))
+            cards.append(dict(c=p, n=nrm, up=upv, w=sz, h=sz, tile=fringe_tiles[rng.integers(len(fringe_tiles))],
+                              C=C[k], radii=rad, R=Rk, wind=wind, attach="center"))
+    return cards
+
+
+def emit_pad_cards(md, cards, hull_c, hull_r, mat, zr, k_pad=0.7):
+    """Quads; per-vertex normals 70% from the flattened pad ellipsoid gradient, 30% from the crown hull."""
+    for cc in cards:
+        n = normalize(cc["n"])
+        t = normalize(cc["up"] - n * np.dot(cc["up"], n))
+        b = normalize(np.cross(t, n))
+        c = cc["c"]
+        w, h = cc["w"], cc["h"]
+        corners = np.array([c - b * w / 2 - t * h / 2, c + b * w / 2 - t * h / 2, c + b * w / 2 + t * h / 2,
+                            c - b * w / 2 + t * h / 2])
+        u0, v0, u1, v1 = atlas.uv_rect(cc["tile"])
+        uv = [(u0, v0), (u1, v0), (u1, v1), (u0, v1)]
+        local = (corners - cc["C"]) @ cc["R"]
+        ne = normalize((local / (cc["radii"] ** 2)) @ cc["R"].T)
+        nh = normalize((corners - hull_c) / (hull_r ** 2))
+        nn = normalize(k_pad * ne + (1 - k_pad) * nh)
+        col = np.zeros((4, 4))
+        col[:, 0] = cc["wind"][0]
+        dist = np.linalg.norm(local / cc["radii"], axis=1)
+        col[:, 1] = np.clip(0.25 + 0.6 * dist, 0.25, 1.0)
+        col[:, 2] = cc["wind"][2]
+        hz = np.clip((corners[:, 2] - zr[0]) / max(zr[1] - zr[0], 1e-3), 0, 1)
+        col[:, 3] = np.clip(0.55 + 0.30 * (0.5 + 0.5 * nn[:, 2]) + 0.15 * hz, 0.5, 1.0)
+        md.add(corners, [(0, 1, 2, 3)], [uv], mat, col, normals=nn)
+
+
+def gnarled_limb(base, mid, end, n, rng, kink=0.35):
+    """Bezier limb with random perpendicular kinks (gnarled)."""
+    pts = _bezier(base, mid, end, n)
+    d = normalize(np.asarray(end, float) - np.asarray(base, float))
+    side = perp(d)
+    up = np.cross(d, side)
+    for i in range(1, n - 1):
+        t = i / (n - 1)
+        amp = kink * math.sin(np.pi * t)
+        pts[i] = pts[i] + side * amp * rng.normal(0, 0.6) + up * amp * rng.normal(0, 0.4)
+    return pts
+
+
+def perp(v):
+    v = normalize(v)
+    a = np.array([1.0, 0, 0]) if abs(v[0]) < 0.9 else np.array([0, 1.0, 0])
+    return normalize(np.cross(v, a))
+
+
+# ============================================================================ golden oak v2: branchy tree + flattened pads
+
+def build_golden_oak2(variant, view=None):
+    """Short massive trunk splitting low into 3-5 thick gnarled limbs; secondary/tertiary branches by space
+    colonisation; foliage = irregular flattened pads at the branch ends (+ fringe cards), broad dome."""
+    seed = {1: 1101, 2: 1202, 3: 1303, 4: 1404}[variant]
+    rng = np.random.default_rng(seed)
+    sk = tg.Skeleton()
+    if variant == 1:
+        env = tg.envelope_from_mask(view.mask, view.ppm, view.ay, view.ax, z_min=3.0, depth_scale=0.9, voxel=0.25)
+        top_z, rb = 3.4, 0.95
+        limb_defs = [((-1.8, 0.3, 5.0), (-5.2, 0.5, 7.0), 0.52), ((-0.6, -1.4, 5.6), (-2.4, -3.8, 9.6), 0.46),
+                     ((0.4, 0.5, 6.0), (0.6, 1.0, 11.2), 0.5), ((1.6, -0.6, 5.4), (4.2, -1.2, 9.4), 0.48),
+                     ((1.9, 1.0, 4.8), (5.6, 2.2, 6.8), 0.44)]
+        n_pads, pad_r = 40, (1.2, 1.9)
+    elif variant == 2:
+        env = tg.envelope_ellipsoid((0, 0, 9.0), (5.0, 4.6, 5.0), voxel=0.25,
+                                    noise=lambda X, Y, Z: 0.12 * np.sin(1.2 * X + 0.6 * Z) * np.cos(1.1 * Y))
+        top_z, rb = 4.2, 0.72
+        limb_defs = [((-1.0, 0.3, 6.4), (-3.4, 0.6, 10.2), 0.4), ((1.0, -0.4, 6.6), (3.2, -0.9, 10.6), 0.4),
+                     ((0.2, 0.2, 7.0), (0.3, 0.4, 13.2), 0.42), ((0.4, 1.3, 6.2), (1.2, 3.6, 9.4), 0.34)]
+        n_pads, pad_r = 26, (1.05, 1.7)
+    elif variant == 3:
+        env1 = tg.envelope_ellipsoid((2.0, 0.3, 7.4), (5.8, 4.2, 3.4), voxel=0.25,
+                                     noise=lambda X, Y, Z: 0.15 * np.sin(0.9 * X + 1.7 * Y) * np.cos(0.8 * Z))
+        env2 = tg.envelope_ellipsoid((-2.6, -0.4, 9.2), (3.0, 3.0, 2.4), voxel=0.25)
+        env = _union_env(env1, env2)
+        top_z, rb = 3.0, 0.82
+        limb_defs = [((1.8, 0.2, 4.4), (5.6, 0.4, 6.4), 0.46), ((1.0, -0.3, 5.6), (3.0, -0.8, 9.4), 0.42),
+                     ((-0.8, 0.0, 5.8), (-2.8, -0.4, 10.2), 0.44), ((0.6, 1.6, 4.8), (1.6, 3.8, 6.8), 0.34)]
+        n_pads, pad_r = 28, (1.1, 1.75)
+    else:
+        env = tg.envelope_ellipsoid((0, 0, 5.2), (3.6, 3.4, 2.7), voxel=0.2,
+                                    noise=lambda X, Y, Z: 0.12 * np.sin(1.7 * X) * np.cos(1.9 * Y + Z))
+        top_z, rb = 2.3, 0.4
+        limb_defs = [((-0.9, 0.2, 3.4), (-2.6, 0.5, 4.8), 0.22), ((0.9, -0.4, 3.6), (2.5, -0.8, 5.2), 0.22),
+                     ((0.1, 0.9, 3.8), (0.3, 2.0, 6.6), 0.22)]
+        n_pads, pad_r = 16, (0.85, 1.35)
+    trunk = _subdiv([(0, 0, -0.3), (0.05, 0, top_z * 0.5), (0.12, 0.04, top_z)], 0.6)
+    tid = sk.add_polyline(trunk, can_grow_from_z=top_z + 0.4)
+    top = np.array(trunk[-1])
+    limbs = []
+    for mid, end, r0 in limb_defs:
+        pts = gnarled_limb(top, np.array(mid), np.array(end), 9, rng, kink=0.45)
+        ids = sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=top_z + 0.8)
+        limbs.append((ids, r0, r0 * 0.3))
+    att = env.sample(1600 if variant != 4 else 900, rng, shell=2.2, inner_weight=0.15)
+    tg.space_colonize(sk, att, D=0.4 if variant != 4 else 0.32, di=3.0, dk=0.85, iters=150, tropism=(0, 0, 1),
+                      trop_w=0.1, rng=rng, jitter=0.16)
+    spec = oak_spec(seed, r_base=rb, trunk_r=lambda p: rb * (1.0 - 0.25 * min(max(p[2], 0), top_z) / top_z),
+                    trunk_ids=tid, limbs=limbs, n_pads=n_pads, pad_r=pad_r, n_clumps=0, clump_kind="oak",
+                    accent_frac=0.05, bark_frac=(0.46, 0.32, 0.16), pad_tip=0.8, pad_depth=0.9, leaf_z_min=top_z - 0.3,
+                    fringe_frac=0.25, lod2_cards=3, lod2_max_clumps=22,
+                    roots=(6, 2.6 if variant != 4 else 1.2, rb * 0.55), flare=(1.2, 1.1, 5, 1.0),
+                    budget=(2950, 1150, 290) if variant != 4 else (2400, 950, 240))
+    res = finish_broadleaf(sk, env, spec, rng)
+    res.env = env
     return res

@@ -51,20 +51,28 @@ def trunk_field(ref, wood_closed, thick, tunnel, lathe_top, voxel=2.0, kd_lathe=
     rows_all = np.nonzero(thick.any(1))[0]
     v_start = int(min(rows_all.min(), lathe_top)) - 3
     ys = np.arange(v_start, v_end, voxel)
-    cols = np.nonzero((thick | wood_closed)[lathe_top:clip].any(0))[0]
+    cols = np.nonzero((thick | wood_closed)[:clip].any(0))[0]
     xs = np.arange(max(0, cols.min() - 6), min(W, cols.max() + 7), voxel)
-    # per-row outer extents of the lower trunk (largest run of closed wood incl. the tunnel)
+    # per-row outer extents of the lower trunk: run of closed wood (incl. the tunnel) containing the trunk
+    # centre column; the half-width may not jump wider going up (side stumps are inflated, not revolved)
     body = (wood_closed | tunnel)
+    tc = np.nonzero(tunnel.any(0))[0]
+    cx0 = float(tc.mean()) if len(tc) else float(np.nonzero(body[clip - 1])[0].mean())
     xl = np.full(H + 200, np.nan)
     xr = np.full(H + 200, np.nan)
-    for v in range(lathe_top, clip):
+    for v in range(clip - 1, lathe_top - 1, -1):
         lab, n = ndi.label(body[v])
         if not n:
             continue
-        sizes = ndi.sum(body[v], lab, np.arange(1, n + 1))
-        k = int(np.argmax(sizes)) + 1
+        k = lab[int(round(cx0))]
+        if k == 0:
+            continue
         run = np.nonzero(lab == k)[0]
-        xl[v], xr[v] = run.min(), run.max()
+        l_, r_ = float(run.min()), float(run.max())
+        if v + 1 < clip and not np.isnan(xl[v + 1]):
+            l_ = max(l_, xl[v + 1] - 1.0)
+            r_ = min(r_, xr[v + 1] + 1.0)
+        xl[v], xr[v] = l_, r_
     vv = np.arange(H + 200)
     ok = ~np.isnan(xl)
     xl = np.interp(vv, vv[ok], xl[ok])
@@ -90,7 +98,8 @@ def trunk_field(ref, wood_closed, thick, tunnel, lathe_top, voxel=2.0, kd_lathe=
     A = a[yi]
     XC = xc[yi]
     f_l = A[..., None] * (1.0 - np.sqrt(((X - XC) / A)[..., None] ** 2 + (ts[None, None, :] / (kd_lathe * A[..., None])) ** 2))
-    f_l[Y < lathe_top] = -50.0
+    # above lathe_top: conical cap (radius shrinks 1.2 px per px) -> smooth merge into the inflated trunk
+    f_l = f_l - np.clip(lathe_top - Y, 0, None)[..., None] * 1.2
     # inflated thick wood (rows < clip)
     yc = np.clip(np.round(Y).astype(int), 0, H - 1)
     xcix = np.clip(np.round(X).astype(int), 0, W - 1)

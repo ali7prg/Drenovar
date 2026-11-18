@@ -115,6 +115,10 @@ def main():
     thick &= ~(np.arange(H)[:, None] >= ref.clip)
     arch = massive.arch_mask(wood_c, ref.fg_full, 250, clip=ref.clip)
     tunnel = massive.open_bottom(arch, ref.clip + 30)
+    # asset origin / rotation pivot = trunk centre (the arch centre column), not one arch leg
+    tcols = np.nonzero(tunnel.any(0))[0]
+    if len(tcols):
+        ref.view.ax = float(tcols.mean())
     # thin limbs = wood not covered by the thick region
     thin = wood & ~ndi.binary_dilation(thick, iterations=1)
     segs, jc, sk, dist = skel.segments(thin)
@@ -172,15 +176,27 @@ def main():
         in_tun = tun_d[np.clip(vci, 0, H - 1), uci] & (vci < H)
         side = (np.abs(fn @ ref.view.d) < 0.42) | in_tun
         uu, vv, _ = ref.view.project(Vc.reshape(-1, 3))
+        vv = np.clip(vv, 0, ref.clip - 2)          # ground band below the crop: continue the lowest painted rows
+        uu = np.clip(uu, 0, W - 1)
         uv_f = np.stack([FR[0] + (FR[2] - FR[0]) * uu / W, FR[3] - (FR[3] - FR[1]) * vv / H], -1).reshape(-1, 3, 2)
-        if not side_ext:
-            side_ext["y"] = (V[:, 1].min() - 0.2, V[:, 1].max() + 0.2)
-            side_ext["z"] = (min(-0.5, V[:, 2].min()), V[:, 2].max() + 0.2)
-        y0_, y1_ = side_ext["y"]
-        z0_, z1_ = side_ext["z"]
+        # side faces: tri-planar swatch mapping by the dominant normal axis (x -> (y,z) plane, z -> (x,y) plane),
+        # 0.9 m of bark per swatch-region unit, wrapped into the side region by mirroring (seamless swatch)
         P_ = Vc.reshape(-1, 3)
-        uv_s = np.stack([SR[0] + (SR[2] - SR[0]) * np.clip((P_[:, 1] - y0_) / (y1_ - y0_), 0, 1),
-                         SR[1] + (SR[3] - SR[1]) * np.clip((P_[:, 2] - z0_) / (z1_ - z0_), 0, 1)], -1).reshape(-1, 3, 2)
+        dom_z = (np.abs(fn[:, 2]) > np.abs(fn[:, 0]))
+        a_ = np.where(np.repeat(dom_z, 3), P_[:, 0], P_[:, 1])
+        b_ = np.where(np.repeat(dom_z, 3), P_[:, 1], P_[:, 2])
+        per = 3.2                                              # metres of bark across the side region
+        def mirror01(x):
+            t_ = np.mod(x, 2.0)
+            return np.where(t_ > 1.0, 2.0 - t_, t_)
+        # per-face consistent wrap: offset by the face's first-corner period to avoid a mirror flip inside a face
+        a3 = a_.reshape(-1, 3) / per
+        b3 = b_.reshape(-1, 3) / (per * (SR[3] - SR[1]) / (SR[2] - SR[0]))
+        a3 = a3 - 2.0 * np.floor(a3[:, :1] / 2.0)
+        b3 = b3 - 2.0 * np.floor(b3[:, :1] / 2.0)
+        ua = np.clip(np.where(a3[:, :1] > 1.0, 2.0 - a3, a3), 0, 1)
+        vb = np.clip(np.where(b3[:, :1] > 1.0, 2.0 - b3, b3), 0, 1)
+        uv_s = np.stack([SR[0] + (SR[2] - SR[0]) * ua, SR[1] + (SR[3] - SR[1]) * vb], -1)
         UVc = np.where(side[:, None, None], uv_s, uv_f)
         return Vc.reshape(-1, 3), np.arange(len(T) * 3).reshape(-1, 3), UVc.reshape(-1, 2), Nc.reshape(-1, 3), in_tun
 

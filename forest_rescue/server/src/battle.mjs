@@ -100,7 +100,8 @@ export function simulateGuardian({units, spec, modifier = null, seed}) {
       tVolley += BATTLE_TUNING.volleyInterval;
     } else {
       attacks++;
-      const special = attacks % telegraphEvery === 0;
+      // Signature ability: 2nd strike, then every `telegraphEvery` strikes (always shown once).
+      const special = attacks === 2 || (attacks > 2 && (attacks - 2) % telegraphEvery === 0);
       if (special) push({t: Math.max(0, tHit - g.windup - g.abilityTelegraph), type: 'telegraph', actor: 'guardian', attack: spec.ability, telegraphSeconds: g.abilityTelegraph});
       push({t: tHit - g.windup, type: special ? 'ability' : 'attack', actor: 'guardian', attack: special ? spec.ability : 'strike', target: 'squad'});
       const pool = c.poolPerSecond * spec.cooldown * c.jit() * (special ? g.abilityMultiplier : 1);

@@ -1,0 +1,765 @@
+"""Species builders: golden oak, dark pine (spruce), birch, willow -> LOD0/1/2 MeshData per variant.
+
+Material slots: LOD0 = [bark, foliage]; LOD1/LOD2 = [foliage] only (bark mapped to the atlas bark
+strip so far LODs are a single draw call).  All units metres, Z up, trunk base at the origin.
+"""
+import math
+import numpy as np
+
+import atlas
+import treegen as tg
+from treegen import MeshData, normalize
+
+
+# ============================================================================ common broadleaf finishing
+
+def _subdiv(pts, step=0.6):
+    pts = [np.asarray(p, float) for p in pts]
+    out = [pts[0]]
+    for a, b in zip(pts[:-1], pts[1:]):
+        n = max(1, int(math.ceil(np.linalg.norm(b - a) / step)))
+        for k in range(1, n + 1):
+            out.append(a + (b - a) * k / n)
+    return out
+
+
+def _bezier(p0, p1, p2, n):
+    t = np.linspace(0, 1, n)[:, None]
+    return (1 - t) ** 2 * np.asarray(p0) + 2 * t * (1 - t) * np.asarray(p1) + t ** 2 * np.asarray(p2)
+
+
+class Result:
+    def __init__(self):
+        self.lods = {}
+        self.info = {}
+
+
+def _pick(rng, items):
+    w = np.array([i[0] for i in items], float)
+    return items[rng.choice(len(items), p=w / w.sum())][1]
+
+
+def finish_broadleaf(sk, env, spec, rng):
+    """Skeleton + envelope -> LOD0/1/2 MeshData following `spec` (see oak specs below)."""
+    P, parent, fixed, can = sk.arrays()
+    P = tg.smooth_skeleton(P, parent, fixed, iters=spec.get("smooth", 3))
+    order = tg.topo_order(parent)
+    R = tg.pipe_radii(parent, r_tip=0.01, gamma=spec.get("gamma", 2.3), order=order[::-1])
+    root = order[0]
+    # remap radii: trunk base radius fixed, power curve keeps limbs chunky
+    Rb = R[root]
+    R = spec["r_base"] * (R / Rb) ** spec.get("alpha", 1.0)
+    # authored trunk/limb nodes: enforce the specified taper
+    for i in np.nonzero(fixed)[0]:
+        if "trunk_r" in spec:
+            R[i] = max(R[i], spec["trunk_r"](P[i]))
+    chains, cpar, corder = tg.build_chains(P, parent, R)
+    L = tg.path_lengths(P, parent)
+    Lmax = L.max()
+    sway = np.clip((L - 0.4) / max(Lmax - 0.4, 1e-3), 0, 1) ** 1.35
+    ph_chain = tg.branch_phases(chains, cpar, rng)
+    node_chain = np.zeros(len(P), int)
+    for ci, ch in enumerate(chains):
+        for k, n in enumerate(ch):
+            if k == 0 and cpar[ci] >= 0:
+                continue
+            node_chain[n] = ci
+    ao = tg.crown_ao(P, env=env, floor=0.5)
+    ch_list = tg.children_lists(parent)
+    # distance (path) to nearest tip below each node
+    tipd = np.full(len(P), 1e9)
+    for i in order[::-1]:
+        if not ch_list[i]:
+            tipd[i] = 0.0
+        else:
+            tipd[i] = min(tipd[c] + np.linalg.norm(P[c] - P[i]) for c in ch_list[i])
+    crown_c = env.centre.copy()
+    crown_c[2] = env.pmin[2] + (env.pmax[2] - env.pmin[2]) * spec.get("crown_c_h", 0.45)
+    res = Result()
+    res.skel = dict(P=P, parent=parent, R=R)
+
+    def bark(md, lod):
+        cull = spec["cull"][lod]
+        segtab = [tg.SEG_LOD0, tg.SEG_LOD1, tg.SEG_LOD2][lod]
+        mat = 0
+        uvmode = "tile" if lod == 0 else "atlas"
+        rect = atlas.uv_rect("bark_" + spec["bark"]) if lod > 0 else None
+        maxorder = spec.get("max_order", [9, 3, 1])[lod]
+        for ci, ch in enumerate(chains):
+            if corder[ci] > maxorder:
+                continue
+            nodes = list(ch)
+            if cpar[ci] >= 0 and len(nodes) > 1:
+                r0 = R[nodes[1]]
+            else:
+                r0 = R[nodes[0]]
+            if r0 < cull:
+                continue
+            keep = [nodes[0]]
+            for n in nodes[1:]:
+                if R[n] < cull * 0.55:
+                    break
+                keep.append(n)
+            if len(keep) < 2:
+                continue
+            pts = P[keep].copy()
+            rad = R[keep].copy()
+            if cpar[ci] >= 0:
+                rad[0] = rad[1] * 1.05
+                # start slightly inside the parent so the joint is hidden
+                pts[0] = pts[0] + normalize(pts[1] - pts[0]) * min(0.15, rad[0])
+            step = (lambda r: np.clip(r * [7, 12, 20][lod], [0.25, 0.6, 1.2][lod], [1.4, 2.5, 4.0][lod]))
+            pts2, rad2, kidx = tg.resample_chain(pts, rad, step, min_angle_deg=[7, 14, 25][lod])
+            if lod == 2:
+                pts2, rad2 = pts2[: max(2, min(len(pts2), 3 if corder[ci] else 4))], rad2[: max(2, min(len(rad2), 3 if corder[ci] else 4))]
+                kidx = kidx[:len(pts2)]
+            ids = [keep[k] for k in kidx]
+            wind = np.stack([sway[ids], np.zeros(len(ids)), np.full(len(ids), ph_chain[ci]), ao[ids]], -1)
+            segs = tg.seg_count(rad2[0], segtab)
+            flare = None
+            if corder[ci] == 0 and spec.get("flare"):
+                fa, fh, lobes, la = spec["flare"]
+                th0 = rng.uniform(0, 6.28)
+                zs = pts2[:, 2]
+
+                def flare(i, th, zs=zs, fa=fa, fh=fh, lobes=lobes, la=la, th0=th0):
+                    e = math.exp(-max(zs[i], 0) / fh)
+                    lob = max(0.0, math.cos(lobes * (th - th0))) ** 2
+                    return 1 + fa * e * (1 + la * lob)
+                # add extra flare rings near the ground for LOD0/1
+                if lod < 2 and len(pts2) > 1:
+                    z0 = pts2[0, 2]
+                    extra = [z for z in (0.25, 0.6, 1.1) if z > z0 + 0.05 and z < pts2[1, 2] - 0.1]
+                    if extra:
+                        a, b = pts2[0], pts2[1]
+                        ins = [a + (b - a) * ((z - a[2]) / (b[2] - a[2])) for z in extra]
+                        rins = [rad2[0] + (rad2[1] - rad2[0]) * ((z - a[2]) / (b[2] - a[2])) for z in extra]
+                        pts2 = np.vstack([pts2[:1], ins, pts2[1:]])
+                        rad2 = np.concatenate([rad2[:1], rins, rad2[1:]])
+                        wind = np.vstack([wind[:1], np.repeat(wind[:1], len(extra), 0), wind[1:]])
+                        zs = pts2[:, 2]
+
+                        def flare(i, th, zs=zs, fa=fa, fh=fh, lobes=lobes, la=la, th0=th0):
+                            e = math.exp(-max(zs[i], 0) / fh)
+                            lob = max(0.0, math.cos(lobes * (th - th0))) ** 2
+                            return 1 + fa * e * (1 + la * lob)
+            tg.tube(md, pts2, rad2, segs, mat, wind, uvmode, tile=spec.get("bark_tile", (1.4, 1.4)), flare=flare,
+                    cap_tip=True, atlas_rect=rect)
+        # surface roots
+        if spec.get("roots") and lod < 2:
+            nroot, rlen, rr = spec["roots"]
+            rng2 = np.random.default_rng(spec.get("seed", 0) + 99)
+            for k in range(nroot):
+                th = 2 * np.pi * k / nroot + rng2.normal(0, 0.25)
+                d = np.array([math.cos(th), math.sin(th), 0])
+                ln = rlen * rng2.uniform(0.6, 1.2)
+                p0 = np.array([0, 0, 0.55]) + d * spec["r_base"] * 0.55
+                pts = _bezier(p0, p0 + d * ln * 0.45 + np.array([0, 0, -0.35]), p0 + d * ln + np.array([0, 0, -0.75]),
+                              5 if lod == 0 else 3)
+                rad = np.linspace(rr, rr * 0.25, len(pts))
+                wind = np.zeros((len(pts), 4))
+                wind[:, 3] = 0.8
+                tg.tube(md, pts, rad, 6 if lod == 0 else 4, 0, wind, uvmode, tile=spec.get("bark_tile", (1.4, 1.4)),
+                        atlas_rect=rect, cap_tip=False)
+
+    # ---------------- leaf sites
+    leafy = np.nonzero((tipd <= spec.get("leaf_tip_dist", 1.4)) & (R <= spec.get("leaf_r_max", 0.07)))[0]
+    leafy = leafy[P[leafy, 2] > spec.get("leaf_z_min", 1.0)]
+    rng.shuffle(leafy)
+    from scipy.spatial import cKDTree
+    acc = []
+    dmin = spec.get("site_spacing", 0.45)
+    if len(leafy):
+        tree_pts = []
+        for i in leafy:
+            if tree_pts:
+                if cKDTree(np.array(tree_pts)).query(P[i])[0] < dmin:
+                    continue
+            tree_pts.append(P[i])
+            acc.append(i)
+    acc = np.array(acc, int)
+    res.info["leaf_sites"] = int(len(acc))
+
+    def make_cards(n_target):
+        cards = []
+        if len(acc) == 0:
+            return cards
+        reps = int(math.ceil(n_target / len(acc)))
+        sel = np.concatenate([rng.permutation(acc) for _ in range(reps)])[:n_target]
+        moods = spec["moods"]
+        chain_mood = {}
+        for i in sel:
+            ci = node_chain[i]
+            # first-order ancestor chain -> colour mood (clumped colour variation)
+            c0 = ci
+            while cpar[c0] >= 0 and cpar[cpar[c0]] >= 0:
+                c0 = cpar[c0]
+            if c0 not in chain_mood:
+                chain_mood[c0] = _pick(rng, moods)
+            tiles = chain_mood[c0]
+            tile = tiles[rng.integers(len(tiles))]
+            p = P[i]
+            par = parent[i] if parent[i] >= 0 else i
+            bdir = normalize(P[i] - P[par]) if par != i else np.array([0, 0, 1.0])
+            out = normalize(p - crown_c)
+            side = rng.random() < spec.get("side_frac", 0.45)
+            if side:
+                n = normalize(out * 0.85 + np.array([0, 0, 0.15]) + rng.normal(0, 0.25, 3))
+            else:
+                n = normalize(out * 0.45 + np.array([0, 0, 0.75]) + rng.normal(0, 0.25, 3))
+            att = atlas.LAYOUT[tile]["attach"]
+            if att == "top":
+                up = normalize(out * 0.5 + np.array([0, 0, -1.0]) * spec.get("hang", 0.8) + bdir * 0.2)
+            else:
+                up = normalize(bdir * 0.55 + out * 0.45 + np.array([0, 0, 0.25]))
+            s = rng.uniform(*spec["card_size"])
+            c = p - up * s * spec.get("card_back", 0.12)
+            ph = ph_chain[node_chain[i]]
+            cards.append(dict(c=c, n=n, up=up, w=s, h=s, tile=tile, wind=np.array([min(1.0, sway[i] + 0.05), 0, ph]),
+                              ao=float(ao[i]), attach=att, flutter=(0.3, 1.0)))
+        return cards
+
+    budgets = spec["budget"]
+    out = {}
+    for lod in range(3):
+        md = MeshData()
+        bark(md, lod)
+        bt = md.tris()
+        n_cards = max(8, (budgets[lod] - bt) // 2)
+        if lod == 0:
+            cards0 = make_cards(n_cards)
+            cards = cards0
+        else:
+            cards = tg.merge_cards(cards0, n_cards, spec["dense_map"], rng, size_gain=spec.get("merge_gain", 0.9),
+                                   min_size=spec["card_size"][1] * (1.1 if lod == 1 else 1.6),
+                                   max_size=spec["card_size"][1] * (2.6 if lod == 1 else 4.0))
+        tg.emit_cards(md, cards, crown_c, mat=1 if lod == 0 else 0, sph=spec.get("sph", 0.65),
+                      up_bias=spec.get("up_bias", 0.25))
+        out[lod] = md
+        res.info[f"LOD{lod}"] = dict(tris=md.tris(), bark_tris=bt, cards=len(cards))
+    res.lods = out
+    res.crown_c = crown_c
+    return res
+
+
+# ============================================================================ golden oak
+
+OAK_MOODS_GOLD = [(5, ["oak_gold_a", "oak_gold_b", "oak_gold_a", "oak_amber_a"]),
+                  (3, ["oak_amber_a", "oak_amber_b", "oak_gold_b"]),
+                  (1.5, ["oak_orange_a", "oak_amber_b", "oak_orange_b"]),
+                  (1, ["oak_green_a", "oak_gold_a"])]
+OAK_DENSE = {"oak_gold_a": "oak_dense_gold", "oak_gold_b": "oak_dense_gold", "oak_amber_a": "oak_dense_amber",
+             "oak_amber_b": "oak_dense_amber", "oak_orange_a": "oak_dense_orange", "oak_orange_b": "oak_dense_orange",
+             "oak_rust_a": "oak_dense_rust", "oak_rust_b": "oak_dense_rust", "oak_green_a": "oak_dense_gold"}
+
+
+def oak_spec(seed, budget=(2950, 1150, 290), r_base=0.85, **kw):
+    s = dict(bark="oak", r_base=r_base, alpha=1.0, gamma=2.25, cull=(0.045, 0.16, 0.35), max_order=[9, 2, 1],
+             flare=(0.55, 0.9, 5, 0.6), roots=(6, 2.4, 0.32), card_size=(1.25, 1.75), moods=OAK_MOODS_GOLD,
+             dense_map=OAK_DENSE, budget=budget, leaf_tip_dist=1.6, leaf_r_max=0.09, site_spacing=0.42,
+             side_frac=0.45, sph=0.62, up_bias=0.22, seed=seed, bark_tile=(1.5, 1.5), leaf_z_min=2.0)
+    s.update(kw)
+    return s
+
+
+def build_golden_oak(variant, view=None):
+    """v1: reference broad oak (hull of art/02 silhouette); v2: tall ovoid; v3: wind-swept two-leader;
+    v4: young compact oak."""
+    seed = {1: 101, 2: 202, 3: 303, 4: 404}[variant]
+    rng = np.random.default_rng(seed)
+    sk = tg.Skeleton()
+    if variant == 1:
+        env = tg.envelope_from_mask(view.mask, view.ppm, view.ay, view.ax, z_min=2.4, depth_scale=0.92, voxel=0.25)
+        trunk = _subdiv([(0, 0, -0.3), (0.0, 0, 1.6), (0.08, 0.05, 3.2), (0.15, 0.0, 4.3)], 0.7)
+        tid = sk.add_polyline(trunk, can_grow_from_z=3.6)
+        limbs = [((-2.4, 0.4, 5.0), (-5.2, 0.5, 6.2)), ((-1.3, -0.6, 6.6), (-3.0, -1.2, 9.4)),
+                 ((0.2, 0.3, 7.4), (0.3, 0.6, 11.4)), ((1.6, -0.3, 6.6), (3.6, -0.4, 9.6)),
+                 ((2.6, 0.5, 5.2), (5.6, 0.8, 6.6)), ((0.3, 2.1, 6.0), (0.4, 4.6, 7.8)),
+                 ((-0.5, -2.2, 5.8), (-0.8, -4.6, 7.4))]
+        top = trunk[-1]
+        for mid, end in limbs:
+            pts = _bezier(top, mid, end, 7)
+            sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=4.0)
+        att = env.sample(1700, rng, shell=2.3, inner_weight=0.12,
+                         clumps=env.sample(34, rng, shell=1.2), clump_r=1.9)
+        spec = oak_spec(seed, trunk_r=lambda p: 0.85 * (1.0 - 0.18 * min(p[2], 4.4) / 4.4))
+        tg.space_colonize(sk, att, D=0.38, di=3.2, dk=0.85, iters=160, tropism=(0, 0, 1), trop_w=0.12, rng=rng)
+    elif variant == 2:
+        # tall ovoid crown, straight bole, crown base 3.5 m, 15 m tall
+        env = tg.envelope_ellipsoid((0, 0, 9.3), (4.4, 4.2, 5.9), voxel=0.25,
+                                    noise=lambda X, Y, Z: 0.10 * np.sin(1.3 * X + 0.7 * Z) * np.cos(1.1 * Y))
+        trunk = _subdiv([(0, 0, -0.3), (0, 0, 2.5), (-0.1, 0.05, 5.0), (-0.15, 0, 6.2)], 0.7)
+        tid = sk.add_polyline(trunk, can_grow_from_z=4.0)
+        top = trunk[-1]
+        for mid, end in [((-1.2, 0.3, 7.8), (-2.6, 0.5, 10.5)), ((1.0, -0.4, 8.0), (2.4, -0.6, 11.0)),
+                         ((0.1, 0.2, 9.0), (0.0, 0.3, 13.6)), ((0.6, 1.3, 7.6), (1.0, 3.0, 9.6)),
+                         ((-0.4, -1.4, 7.4), (-0.6, -3.0, 9.4))]:
+            pts = _bezier(top, mid, end, 7)
+            sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=4.0)
+        att = env.sample(1500, rng, shell=2.0, inner_weight=0.12, clumps=env.sample(30, rng, shell=1.0), clump_r=1.7)
+        spec = oak_spec(seed, r_base=0.62, trunk_r=lambda p: 0.62 * (1.0 - 0.2 * min(p[2], 6) / 6), roots=(5, 1.8, 0.24),
+                        flare=(0.45, 0.8, 5, 0.5), crown_c_h=0.5)
+        tg.space_colonize(sk, att, D=0.38, di=3.0, dk=0.85, iters=160, tropism=(0, 0, 1), trop_w=0.18, rng=rng)
+    elif variant == 3:
+        # wind-swept, two leaders, crown pushed to +X, low wide skirt on one side
+        env1 = tg.envelope_ellipsoid((2.0, 0.3, 7.6), (5.6, 4.0, 3.6), voxel=0.25,
+                                     noise=lambda X, Y, Z: 0.15 * np.sin(0.9 * X + 1.7 * Y) * np.cos(0.8 * Z))
+        env2 = tg.envelope_ellipsoid((-2.6, -0.4, 9.6), (3.0, 3.0, 2.6), voxel=0.25)
+        env = _union_env(env1, env2)
+        trunk = _subdiv([(0, 0, -0.3), (0.1, 0, 1.8), (0.4, 0.05, 3.0)], 0.7)
+        tid = sk.add_polyline(trunk, can_grow_from_z=2.6)
+        top = trunk[-1]
+        for mid, end in [((1.6, 0.2, 4.6), (4.5, 0.4, 6.4)), ((0.9, -0.2, 6.0), (2.6, -0.6, 9.8)),
+                         ((-0.6, 0.0, 6.2), (-2.6, -0.4, 10.6)), ((0.4, 1.6, 5.2), (1.2, 3.6, 7.0)),
+                         ((3.0, -0.8, 5.4), (6.8, -1.0, 6.4))]:
+            pts = _bezier(top, mid, end, 8)
+            sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=3.0)
+        att = env.sample(1600, rng, shell=2.2, inner_weight=0.12, clumps=env.sample(32, rng, shell=1.2), clump_r=1.8)
+        spec = oak_spec(seed, r_base=0.78, trunk_r=lambda p: 0.78 * (1 - 0.15 * min(p[2], 3) / 3), crown_c_h=0.4)
+        tg.space_colonize(sk, att, D=0.38, di=3.2, dk=0.85, iters=160, tropism=(0.25, 0, 1), trop_w=0.12, rng=rng)
+    else:
+        # young compact oak, 8 m, round crown
+        env = tg.envelope_ellipsoid((0, 0, 5.2), (3.4, 3.2, 2.9), voxel=0.2,
+                                    noise=lambda X, Y, Z: 0.12 * np.sin(1.7 * X) * np.cos(1.9 * Y + Z))
+        trunk = _subdiv([(0, 0, -0.2), (0.05, 0, 1.5), (0.1, 0.05, 2.6)], 0.6)
+        tid = sk.add_polyline(trunk, can_grow_from_z=2.2)
+        top = trunk[-1]
+        for mid, end in [((-1.0, 0.2, 3.6), (-2.3, 0.4, 4.8)), ((0.9, -0.3, 3.8), (2.2, -0.5, 5.4)),
+                         ((0.1, 0.1, 4.4), (0.2, 0.2, 7.2)), ((0.2, 1.1, 3.6), (0.4, 2.3, 5.0))]:
+            pts = _bezier(top, mid, end, 6)
+            sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=2.4)
+        att = env.sample(1000, rng, shell=1.6, inner_weight=0.15, clumps=env.sample(20, rng, shell=0.9), clump_r=1.3)
+        spec = oak_spec(seed, r_base=0.36, trunk_r=lambda p: 0.36 * (1 - 0.2 * min(p[2], 2.6) / 2.6),
+                        roots=(5, 1.0, 0.14), flare=(0.4, 0.6, 5, 0.4), card_size=(1.0, 1.4),
+                        cull=(0.03, 0.10, 0.2), budget=(2400, 950, 240), crown_c_h=0.45, leaf_z_min=1.6)
+        tg.space_colonize(sk, att, D=0.3, di=2.4, dk=0.65, iters=150, tropism=(0, 0, 1), trop_w=0.12, rng=rng)
+    res = finish_broadleaf(sk, env, spec, rng)
+    res.env = env
+    return res
+
+
+def _union_env(e1, e2):
+    lo = np.minimum(e1.lo, e2.lo)
+    hi = np.maximum(e1.lo + np.array(e1.occ.shape) * e1.voxel, e2.lo + np.array(e2.occ.shape) * e2.voxel)
+    vox = e1.voxel
+    n = np.ceil((hi - lo) / vox).astype(int) + 1
+    occ = np.zeros(n, bool)
+    for e in (e1, e2):
+        o = np.round((e.lo - lo) / vox).astype(int)
+        s = e.occ.shape
+        occ[o[0]:o[0] + s[0], o[1]:o[1] + s[1], o[2]:o[2] + s[2]] |= e.occ
+    return tg.Envelope(occ, lo, vox)
+
+
+# ============================================================================ conifer (spruce / pine)
+
+def build_conifer(spec, rng):
+    """Whorled conifer. spec: H, crown_base, r_base, profile(z)->branch length, droop, whorl_dz,
+    per_whorl, budget, tiles, top_tiles, card sizes, missing (fraction of skipped branches)."""
+    H = spec["H"]
+    res = Result()
+    trunk_pts = [np.array([0, 0, -0.3])]
+    lean = np.asarray(spec.get("lean", (0, 0)), float)
+    zs = np.linspace(0, H, int(H / 0.9) + 2)
+    for z in zs:
+        wob = spec.get("wobble", 0.05)
+        trunk_pts.append(np.array([lean[0] * z / H + rng.normal(0, wob) * (z > 0.5),
+                                   lean[1] * z / H + rng.normal(0, wob) * (z > 0.5), z]))
+    trunk_pts = np.array(trunk_pts)
+    trunk_pts[-1, :2] = trunk_pts[-2, :2]
+    rb = spec["r_base"]
+    trunk_r = np.array([rb * max(0.02 / rb, (1 - max(p[2], 0) / H) ** 1.15) for p in trunk_pts])
+    trunk_sway = np.clip(trunk_pts[:, 2] / H, 0, 1) ** 2.0 * spec.get("trunk_sway", 0.5)
+    # whorls
+    z = spec["crown_base"]
+    whorls = []
+    k = 0
+    golden = 2.39996
+    while z < H - 0.35:
+        n = spec["per_whorl"] + rng.integers(-1, 2)
+        frac = (z - spec["crown_base"]) / max(H - spec["crown_base"], 1e-3)
+        whorl = []
+        for j in range(n):
+            if rng.random() < spec.get("missing", 0.0) * (1 - frac * 0.5):
+                continue
+            az = k * golden + j * 2 * np.pi / n + rng.normal(0, 0.25)
+            Lb = spec["profile"](z, az) * rng.uniform(0.85, 1.12)
+            if Lb < 0.25:
+                continue
+            whorl.append((az, Lb))
+        whorls.append((z, frac, whorl))
+        z += spec["whorl_dz"](frac) * rng.uniform(0.85, 1.15)
+        k += 1
+    branches = []
+    for (z, frac, whorl) in whorls:
+        ti = np.searchsorted(trunk_pts[:, 2], z)
+        ti = min(max(ti, 1), len(trunk_pts) - 1)
+        tz0, tz1 = trunk_pts[ti - 1, 2], trunk_pts[ti, 2]
+        f = (z - tz0) / max(tz1 - tz0, 1e-6)
+        base = trunk_pts[ti - 1] * (1 - f) + trunk_pts[ti] * f
+        for az, Lb in whorl:
+            d = np.array([math.cos(az), math.sin(az), 0])
+            pitch = spec["pitch"](frac) + rng.normal(0, 0.06)
+            droop = spec["droop"](frac)
+            nseg = 4
+            pts = []
+            for s in range(nseg + 1):
+                t = s / nseg
+                horiz = d * Lb * t
+                vert = Lb * (math.sin(pitch) * t - droop * t * t + spec.get("tip_up", 0.12) * max(0, t - 0.75) * 4 * t)
+                pts.append(base + horiz + np.array([0, 0, vert]))
+            pts = np.array(pts)
+            rr = (0.018 + 0.05 * Lb / max(spec["Lmax"], 1e-3)) * spec.get("branch_r", 1.0)
+            branches.append(dict(pts=pts, r=rr, L=Lb, z=z, frac=frac, az=az, phase=rng.random()))
+    res.info["branches"] = len(branches)
+    crown_c = np.array([0, 0, spec["crown_base"] + (H - spec["crown_base"]) * 0.4])
+    crown_r = np.array([spec["Lmax"], spec["Lmax"], (H - spec["crown_base"]) * 0.6])
+
+    def aof(p):
+        return tg.crown_ao(np.atleast_2d(p), centre=crown_c, radii=crown_r,
+                           zrange=(spec["crown_base"], H), floor=0.5)
+
+    def bark(md, lod):
+        rect = atlas.uv_rect("bark_" + spec["bark"]) if lod > 0 else None
+        mode = "tile" if lod == 0 else "atlas"
+        segs = [10, 6, 5][lod]
+        stride = [1, 2, 3][lod]
+        tp = trunk_pts[::stride]
+        if not np.allclose(tp[-1], trunk_pts[-1]):
+            tp = np.vstack([tp, trunk_pts[-1]])
+        tr = np.interp(tp[:, 2], trunk_pts[:, 2], trunk_r)
+        ts = np.interp(tp[:, 2], trunk_pts[:, 2], trunk_sway)
+        wind = np.stack([ts, np.zeros(len(tp)), np.zeros(len(tp)), aof(tp)], -1)
+        fa = spec.get("flare", (0.5, 0.7, 6, 0.5))
+        th0 = rng.uniform(0, 6)
+        zz = tp[:, 2]
+
+        def flare(i, th):
+            e = math.exp(-max(zz[i], 0) / fa[1])
+            return 1 + fa[0] * e * (1 + fa[3] * max(0, math.cos(fa[2] * (th - th0))) ** 2)
+        if lod < 2:
+            # extra rings near the base for the flare
+            ins_z = [0.2, 0.5]
+            pts2, r2, w2 = [tp[0]], [tr[0]], [wind[0]]
+            for zz_ in ins_z:
+                if zz_ < tp[1, 2]:
+                    pts2.append(np.array([tp[0, 0], tp[0, 1], zz_]))
+                    r2.append(np.interp(zz_, tp[:, 2], tr))
+                    w2.append(wind[0])
+            tp = np.vstack([pts2, tp[1:]])
+            tr = np.concatenate([r2, tr[1:]])
+            wind = np.vstack([w2, wind[1:]])
+            zz = tp[:, 2]
+        tg.tube(md, tp, tr, segs, 0, wind, mode, tile=spec.get("bark_tile", (1.0, 1.0)), flare=flare, atlas_rect=rect)
+        # branch stems: only longer, lower branches get geometry
+        lmin = spec.get("stem_min_L", [1.2, 2.4, 99][lod])
+        for b in branches:
+            if b["L"] < lmin or b["frac"] > [0.85, 0.6, 0][lod]:
+                continue
+            pts = b["pts"][:: (1 if lod == 0 else 2)]
+            r = np.linspace(b["r"], b["r"] * 0.3, len(pts))
+            sw = np.interp(pts[:, 2], trunk_pts[:, 2], trunk_sway) + np.linspace(0.15, 0.85, len(pts)) * 0.7
+            w = np.stack([np.clip(sw, 0, 1), np.zeros(len(pts)), np.full(len(pts), b["phase"]), aof(pts)], -1)
+            tg.tube(md, pts, r, 3 if lod == 0 else 3, 0, w, mode, tile=(0.6, 0.6), atlas_rect=rect, cap_tip=False)
+
+    def spray_cards(n_target):
+        """Needle sprays laid along branches + leader cards."""
+        cards = []
+        tiles = spec["tiles"]
+        per = []
+        for b in branches:
+            L = b["L"]
+            cnt = max(1, int(round(L / spec.get("spray_spacing", 0.75))))
+            per.append(cnt)
+        total = sum(per) + spec.get("leader_cards", 4)
+        scale = n_target / max(total, 1)
+        for b, cnt in zip(branches, per):
+            pts = b["pts"]
+            seglen = np.linalg.norm(np.diff(pts, axis=0), axis=1)
+            cum = np.concatenate([[0], np.cumsum(seglen)])
+            m = max(1, int(round(cnt * scale)))
+            for j in range(m):
+                t = (j + 0.5) / m * 0.92 + 0.08 * rng.random() if m > 1 else 0.6
+                s = t * cum[-1]
+                i = min(np.searchsorted(cum, s) - 1, len(seglen) - 1)
+                i = max(i, 0)
+                f = (s - cum[i]) / max(seglen[i], 1e-6)
+                p = pts[i] + (pts[i + 1] - pts[i]) * f
+                bd = normalize(pts[i + 1] - pts[i])
+                side = normalize(np.cross(bd, np.array([0, 0, 1.0])))
+                roll = rng.normal(0, 0.35)
+                n = normalize(np.array([0, 0, 1.0]) * math.cos(roll) + side * math.sin(roll) - bd * 0.15)
+                w = rng.uniform(*spec["spray_w"]) * (0.65 + 0.35 * min(1, b["L"] / spec["Lmax"] * 1.5))
+                h = w * rng.uniform(1.0, 1.25)
+                c = p - bd * h * 0.35
+                sw = float(np.interp(p[2], trunk_pts[:, 2], trunk_sway)) + 0.25 + 0.6 * t
+                cards.append(dict(c=c, n=n, up=bd, w=w, h=h, tile=tiles[rng.integers(len(tiles))],
+                                  wind=np.array([min(1, sw), 0, b["phase"]]), ao=float(aof(p)[0]), attach="bottom",
+                                  flutter=(0.25, 0.8)))
+                # vertical side spray for volume when seen from the side
+                if rng.random() < spec.get("side_spray", 0.35):
+                    n2 = normalize(side * (1 if rng.random() < 0.5 else -1) + np.array([0, 0, 0.2]))
+                    cards.append(dict(c=c, n=n2, up=normalize(bd + np.array([0, 0, -0.25])), w=w * 0.85, h=h * 0.9,
+                                      tile=tiles[rng.integers(len(tiles))], wind=np.array([min(1, sw), 0, b["phase"]]),
+                                      ao=float(aof(p)[0]) * 0.95, attach="bottom", flutter=(0.25, 0.8)))
+        # leader: crossed vertical sprays around the top
+        ntop = spec.get("leader_cards", 4)
+        for j in range(ntop):
+            az = j * np.pi / ntop * 2 + rng.normal(0, 0.2)
+            n = np.array([math.cos(az), math.sin(az), 0.15])
+            hz = spec.get("leader_h", 1.6)
+            c = np.array([trunk_pts[-1, 0], trunk_pts[-1, 1], H - hz])
+            cards.append(dict(c=c, n=normalize(n), up=np.array([0, 0, 1.0]), w=hz * 0.55, h=hz, tile=spec["top_tile"],
+                              wind=np.array([trunk_sway[-1], 0, 0.0]), ao=1.0, attach="bottom", flutter=(0.2, 0.6)))
+        return cards
+
+    out = {}
+    budgets = spec["budget"]
+    for lod in range(3):
+        md = MeshData()
+        bark(md, lod)
+        bt = md.tris()
+        n_cards = max(8, (budgets[lod] - bt) // 2)
+        if lod == 0:
+            cards0 = spray_cards(n_cards)
+            if len(cards0) > n_cards:
+                idx = rng.permutation(len(cards0))[:n_cards]
+                cards0 = [cards0[i] for i in sorted(idx)]
+            cards = cards0
+        else:
+            cards = tg.merge_cards(cards0, n_cards, spec["dense_map"], rng, size_gain=0.95,
+                                   min_size=spec["spray_w"][1] * (1.2 if lod == 1 else 1.8),
+                                   max_size=spec["spray_w"][1] * (2.4 if lod == 1 else 3.6))
+            # merged conifer cards lie flatter (tiers read from above)
+            for c in cards:
+                c["n"] = normalize(c["n"] * 0.5 + np.array([0, 0, 1.0]) * 0.5)
+        tg.emit_cards(md, cards, crown_c, mat=1 if lod == 0 else 0, sph=spec.get("sph", 0.45), up_bias=0.3)
+        out[lod] = md
+        res.info[f"LOD{lod}"] = dict(tris=md.tris(), bark_tris=bt, cards=len(cards))
+    res.lods = out
+    res.crown_c = crown_c
+    return res
+
+
+PINE_DENSE = {"pine_spray_a": "pine_dense_a", "pine_spray_b": "pine_dense_b", "pine_spray_c": "pine_dense_a",
+              "pine_spray_d": "pine_dense_b", "pine_spray_e": "pine_dense_a", "pine_top": "pine_dense_a"}
+
+
+def pine_profile_from_view(view, H):
+    """Branch length per height from the reference silhouette half-widths (avg of both sides)."""
+    m = view.mask
+    rows = np.nonzero(m.any(axis=1))[0]
+    zs, hw = [], []
+    for r in rows:
+        cols = np.nonzero(m[r])[0]
+        z = (view.ay - r) / view.ppm
+        hw.append(max(view.ax - cols.min(), cols.max() - view.ax) / view.ppm * 0.5
+                  + (cols.max() - cols.min()) / view.ppm * 0.25)
+        zs.append(z)
+    zs = np.array(zs)
+    hw = np.array(hw)
+    o = np.argsort(zs)
+    zs, hw = zs[o], hw[o]
+    from scipy.ndimage import uniform_filter1d
+    hw = uniform_filter1d(hw, 9)
+    scale = H / zs.max()
+    return lambda z, az: float(np.interp(z / scale, zs, hw)) * 0.93
+
+
+def build_dark_pine(variant, view=None):
+    """v1: reference spruce (art/02 silhouette); v2: tall Scots-pine-like with high open crown;
+    v3: young broad spruce with skirts to the ground; v4: old irregular pine, broken whorls, lean."""
+    seed = {1: 111, 2: 222, 3: 333, 4: 444}[variant]
+    rng = np.random.default_rng(seed)
+    base = dict(bark="pine", tiles=["pine_spray_a", "pine_spray_b", "pine_spray_c", "pine_spray_d", "pine_spray_e"],
+                top_tile="pine_spray_c", dense_map=PINE_DENSE, budget=(2900, 1150, 290), spray_w=(0.85, 1.15),
+                bark_tile=(1.0, 1.0))
+    if variant == 1:
+        H = 14.0
+        prof = pine_profile_from_view(view, H)
+        spec = dict(base, H=H, crown_base=2.2, r_base=0.30, profile=prof, Lmax=3.6,
+                    whorl_dz=lambda f: 0.62 - 0.30 * f, per_whorl=5,
+                    pitch=lambda f: -0.38 + 0.95 * f ** 1.5, droop=lambda f: 0.32 * (1 - f) + 0.05,
+                    tip_up=0.10, missing=0.05)
+    elif variant == 2:
+        H = 16.5
+        def prof(z, az, H=H):
+            f = (z - 7.0) / (H - 7.0)
+            return max(0.0, 2.9 * math.sin(np.pi * min(max(f, 0), 1) ** 0.75) ** 0.8 + 0.5 * math.sin(3 * az + z)) \
+                * (1.0 if f > 0 else 0)
+        spec = dict(base, H=H, crown_base=7.0, r_base=0.27, profile=prof, Lmax=3.4,
+                    whorl_dz=lambda f: 0.75 - 0.25 * f, per_whorl=4,
+                    pitch=lambda f: 0.10 + 0.5 * f, droop=lambda f: 0.10, tip_up=0.25, missing=0.25,
+                    spray_w=(0.95, 1.3), leader_cards=3, leader_h=1.2, top_tile="pine_spray_a", wobble=0.12)
+    elif variant == 3:
+        H = 8.5
+        def prof(z, az, H=H):
+            f = z / H
+            return 3.1 * (1 - f) ** 0.95 + 0.15
+        spec = dict(base, H=H, crown_base=0.35, r_base=0.19, profile=prof, Lmax=3.2,
+                    whorl_dz=lambda f: 0.42 - 0.15 * f, per_whorl=6,
+                    pitch=lambda f: -0.15 + 0.7 * f ** 1.4, droop=lambda f: 0.22 * (1 - f) + 0.03, tip_up=0.15,
+                    missing=0.02, budget=(2600, 1050, 280), spray_w=(0.8, 1.05), flare=(0.3, 0.5, 6, 0.3))
+    else:
+        H = 13.0
+        def prof(z, az, H=H):
+            f = (z - 3.5) / (H - 3.5)
+            if f < 0:
+                return 0.0
+            side = 1.0 + 0.45 * math.cos(az - 0.6)          # one-sided (wind-pruned)
+            return (2.8 * (1 - f) ** 0.8 + 0.3) * side * (0.75 + 0.25 * math.sin(7 * z))
+        spec = dict(base, H=H, crown_base=3.5, r_base=0.36, profile=prof, Lmax=3.8,
+                    whorl_dz=lambda f: 0.7 - 0.2 * f, per_whorl=5, lean=(0.9, 0.3),
+                    pitch=lambda f: -0.25 + 0.75 * f, droop=lambda f: 0.25 * (1 - f) + 0.05, tip_up=0.1,
+                    missing=0.32, wobble=0.1, spray_w=(0.9, 1.2), flare=(0.7, 0.8, 5, 0.7))
+    res = build_conifer(spec, rng)
+    res.spec = spec
+    return res
+
+
+# ============================================================================ birch
+
+BIRCH_MOODS = [(5, ["birch_a", "birch_b", "birch_a"]), (2, ["birch_yellow", "birch_a"]),
+               (2, ["birch_c", "birch_green", "birch_b"])]
+BIRCH_DENSE = {"birch_a": "birch_dense", "birch_b": "birch_dense", "birch_c": "birch_dense",
+               "birch_yellow": "birch_dense", "birch_green": "birch_dense"}
+
+
+def build_birch(variant, view=None):
+    """v1: three-trunk cluster (art/02); v2: single slender birch; v3: two trunks in a V."""
+    seed = {1: 121, 2: 232, 3: 343}[variant]
+    rng = np.random.default_rng(seed)
+    sk = tg.Skeleton()
+    root = sk.add(np.array([0, 0, -0.3]), -1, fixed=True, can_grow=False)
+    if variant == 1:
+        env = tg.envelope_from_mask(view.mask, view.ppm, view.ay, view.ax, z_min=3.2, depth_scale=0.9, voxel=0.22)
+        trunks = [[(0, 0, 0.0), (0.05, 0.0, 3.0), (0.15, 0.1, 6.0), (0.2, 0.1, 9.0), (0.25, 0.1, 11.5)],
+                  [(-0.4, 0.15, 0.0), (-1.0, 0.25, 3.0), (-1.7, 0.35, 6.0), (-2.2, 0.4, 8.5)],
+                  [(0.45, -0.15, 0.0), (1.2, -0.25, 3.0), (1.9, -0.3, 6.0), (2.4, -0.4, 8.6)]]
+        spec_r = 0.20
+    elif variant == 2:
+        env = tg.envelope_ellipsoid((0.2, 0, 8.6), (2.6, 2.5, 4.4), voxel=0.22,
+                                    noise=lambda X, Y, Z: 0.12 * np.sin(1.5 * X + Z) * np.cos(1.3 * Y))
+        trunks = [[(0, 0, 0.0), (0.1, 0, 3.0), (0.25, 0.05, 6.5), (0.3, 0.05, 10.0), (0.35, 0.0, 12.8)]]
+        spec_r = 0.19
+    else:
+        env1 = tg.envelope_ellipsoid((-2.1, 0.2, 8.0), (2.3, 2.2, 3.4), voxel=0.22)
+        env2 = tg.envelope_ellipsoid((2.0, -0.2, 7.4), (2.2, 2.2, 3.2), voxel=0.22)
+        env = _union_env(env1, env2)
+        trunks = [[(-0.2, 0, 0.0), (-0.8, 0.05, 3.0), (-1.7, 0.1, 6.0), (-2.4, 0.2, 9.5)],
+                  [(0.2, 0, 0.0), (0.9, -0.05, 3.0), (1.7, -0.1, 6.0), (2.3, -0.2, 9.0)]]
+        spec_r = 0.18
+    for tpts in trunks:
+        pts = _subdiv(tpts, 0.6)
+        sk.add_polyline(pts, parent=root, can_grow_from_z=3.2 if variant != 2 else 4.0)
+    att = env.sample(1300, rng, shell=1.6, inner_weight=0.18, clumps=env.sample(26, rng, shell=1.0), clump_r=1.4)
+    tg.space_colonize(sk, att, D=0.32, di=2.6, dk=0.7, iters=150, tropism=(0, 0, -1), trop_w=0.05, rng=rng)
+    spec = dict(bark="birch", r_base=spec_r * (1.6 if variant == 1 else 1.0), alpha=1.0, gamma=2.3,
+                cull=(0.03, 0.08, 0.15), max_order=[9, 2, 1], flare=(0.25, 0.4, 4, 0.3), roots=None,
+                card_size=(1.0, 1.35), moods=BIRCH_MOODS, dense_map=BIRCH_DENSE, budget=(3200, 1250, 290),
+                leaf_tip_dist=1.4, leaf_r_max=0.05, site_spacing=0.38, side_frac=0.55, sph=0.6, up_bias=0.2,
+                seed=seed, bark_tile=(0.9, 0.9), hang=1.0, leaf_z_min=2.5,
+                trunk_r=lambda p: spec_r * (1.0 - 0.55 * min(max(p[2], 0), 12) / 12))
+    res = finish_broadleaf(sk, env, spec, rng)
+    res.env = env
+    return res
+
+
+# ============================================================================ willow
+
+def build_willow(variant, view=None):
+    """Bent leaning trunk, arching limbs, dome of hanging foliage + long curtain strips.
+    v1: art/02 reference (lean to +X); v2: mirrored, broader & lower; v3: young upright willow."""
+    seed = {1: 131, 2: 242, 3: 353}[variant]
+    rng = np.random.default_rng(seed)
+    sk = tg.Skeleton()
+    mir = -1.0 if variant == 2 else 1.0
+    if variant == 1:
+        env = tg.envelope_from_mask(view.mask, view.ppm, view.ay, view.ax, z_min=4.0, depth_scale=0.9, voxel=0.25,
+                                    row_lo=int(view.ay - 6.0 * view.ppm))
+        trunk = [(-0.4, 0, -0.3), (-0.35, 0, 1.0), (0.1, 0.0, 2.2), (0.9, 0.05, 3.3), (1.5, 0.1, 4.4), (1.8, 0.1, 5.4)]
+        hem = 2.2
+        rb = 0.62
+        limbs = [((0.6, 0.2, 6.6), (-1.2, 0.4, 8.6)), ((2.4, -0.3, 6.8), (2.8, -0.6, 9.8)),
+                 ((2.8, 0.3, 6.0), (4.6, 0.6, 7.6)), ((1.2, 1.4, 6.2), (1.4, 3.0, 7.8)),
+                 ((1.4, -1.5, 6.4), (1.6, -3.2, 8.2))]
+    elif variant == 2:
+        env = tg.envelope_ellipsoid((-1.2, 0, 6.0), (5.6, 4.6, 2.9), voxel=0.25,
+                                    noise=lambda X, Y, Z: 0.12 * np.sin(1.1 * X + 0.6 * Y) * np.cos(0.9 * Z))
+        trunk = [(0.3, 0, -0.3), (0.25, 0, 1.0), (-0.3, 0.0, 2.0), (-0.9, 0.05, 3.0), (-1.3, 0.1, 3.8)]
+        hem = 1.8
+        rb = 0.70
+        limbs = [((-2.6, 0.2, 5.0), (-5.0, 0.4, 6.4)), ((0.6, -0.2, 5.4), (2.8, -0.5, 7.0)),
+                 ((-1.4, 0.1, 6.0), (-1.2, 0.2, 8.4)), ((-1.0, 1.8, 5.0), (-1.2, 3.6, 6.4)),
+                 ((-1.0, -1.8, 5.0), (-1.2, -3.6, 6.2))]
+    else:
+        env = tg.envelope_ellipsoid((0.2, 0, 6.2), (3.2, 3.0, 2.8), voxel=0.22)
+        trunk = [(0, 0, -0.3), (0.05, 0, 1.5), (0.2, 0.0, 3.0), (0.3, 0.05, 4.0)]
+        hem = 1.8
+        rb = 0.36
+        limbs = [((-0.8, 0.2, 5.2), (-2.0, 0.3, 6.6)), ((1.2, -0.2, 5.4), (2.4, -0.4, 6.8)),
+                 ((0.3, 0.1, 5.8), (0.4, 0.2, 8.4)), ((0.4, 1.2, 5.0), (0.5, 2.4, 6.4))]
+    trunk = _subdiv(trunk, 0.6)
+    tid = sk.add_polyline(trunk, can_grow_from_z=3.6 if variant != 3 else 3.0)
+    top = trunk[-1]
+    for mid, end in limbs:
+        pts = _bezier(top, mid, end, 7)
+        sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=3.5)
+    att = env.sample(1300, rng, shell=1.6, inner_weight=0.1, clumps=env.sample(26, rng, shell=0.8), clump_r=1.5)
+    tg.space_colonize(sk, att, D=0.36, di=2.8, dk=0.8, iters=150, tropism=(0, 0, 1), trop_w=0.1, rng=rng)
+    W_TILES = ["willow_top_a"]
+    spec = dict(bark="willow", r_base=rb, alpha=1.0, gamma=2.3, cull=(0.04, 0.12, 0.28), max_order=[9, 2, 1],
+                flare=(0.45, 0.7, 4, 0.6), roots=(5, 1.6, rb * 0.35), card_size=(1.2, 1.6),
+                moods=[(1, W_TILES)], dense_map={"willow_top_a": "willow_dense"}, budget=(3300, 1300, 295),
+                leaf_tip_dist=1.2, leaf_r_max=0.06, site_spacing=0.55, side_frac=0.3, sph=0.6, up_bias=0.2,
+                seed=seed, bark_tile=(1.3, 1.3), hang=0.6, leaf_z_min=3.0,
+                trunk_r=lambda p: rb * (1 - 0.25 * min(max(p[2], 0), 5) / 5))
+    # reserve budget for curtains: strips are added after finish_broadleaf
+    curt_budget = {0: 1100, 1: 380, 2: 80}
+    spec["budget"] = (spec["budget"][0] - curt_budget[0], spec["budget"][1] - curt_budget[1],
+                      spec["budget"][2] - curt_budget[2])
+    res = finish_broadleaf(sk, env, spec, rng)
+    res.env = env
+    P, parent, R = res.skel["P"], res.skel["parent"], res.skel["R"]
+    ch = tg.children_lists(parent)
+    tips = [i for i in range(len(P)) if not ch[i] and P[i, 2] > hem + 1.5]
+    rng2 = np.random.default_rng(seed + 7)
+    L = tg.path_lengths(P, parent)
+    sway = np.clip((L - 0.4) / max(L.max() - 0.4, 1e-3), 0, 1) ** 1.35
+    crown_c = res.crown_c
+    for lod in range(3):
+        md = res.lods[lod]
+        nseg = [3, 2, 1][lod]
+        n_strips = curt_budget[lod] // (2 * nseg)
+        sel = rng2.choice(tips, size=min(len(tips), n_strips), replace=len(tips) < n_strips)
+        for i in sel:
+            p = P[i] + rng2.normal(0, 0.15, 3)
+            out = normalize(np.array([p[0] - crown_c[0], p[1] - crown_c[1], 0]) + rng2.normal(0, 0.2, 3))
+            out[2] = 0
+            out = normalize(out)
+            length = max(1.2, (p[2] - hem) * rng2.uniform(0.75, 1.0))
+            w = rng2.uniform(0.55, 0.8) * (1.0 if lod == 0 else 1.5 if lod == 1 else 2.2)
+            tile = f"willow_strand_{rng2.integers(6)}"
+            u0, v0, u1, v1 = atlas.uv_rect(tile)
+            side = normalize(np.cross(out, np.array([0, 0, 1.0])))
+            # strip hangs: slight outward bow, then straight down
+            verts, uvs, cols, nrms = [], [], [], []
+            for k in range(nseg + 1):
+                t = k / nseg
+                c = p + out * 0.35 * math.sin(np.pi * t * 0.6) * length * 0.25 + np.array([0, 0, -length * t])
+                for sgn in (-1, 1):
+                    verts.append(c + side * sgn * w * 0.5)
+                    uvs.append((u0 if sgn < 0 else u1, v1 - (v1 - v0) * t))
+                    g = 0.3 + 0.7 * t
+                    cols.append([min(1, sway[i] + 0.1 * t), g, rng2.random() * 0 + (i % 97) / 97.0,
+                                 float(np.clip(0.6 + 0.4 * (1 - t) * 0.5 + 0.2, 0.5, 1))])
+                    nrms.append(normalize(out * 0.8 + np.array([0, 0, 0.25])))
+            faces, fuv = [], []
+            for k in range(nseg):
+                a = 2 * k
+                faces.append((a, a + 1, a + 3, a + 2))
+                fuv.append([uvs[a], uvs[a + 1], uvs[a + 3], uvs[a + 2]])
+            md.add(np.array(verts), faces, fuv, 1 if lod == 0 else 0, np.array(cols), normals=np.array(nrms))
+        res.info[f"LOD{lod}"]["tris"] = md.tris()
+        res.info[f"LOD{lod}"]["curtain_strips"] = len(sel)
+    return res

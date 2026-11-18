@@ -76,8 +76,10 @@ export function buildNavGraph(atlas = data.atlas) {
     if (hdist(pts[0], from) > EPS || hdist(pts[pts.length - 1], to) > EPS) throw navError('NAV_ROUTE_ENDPOINT', {route: route.id});
     const junctions = [];
     if (route.id === BRIDGE_ROUTE) {
-      const half = bridge.deckWidth / 2, c = bridge.center;
-      const onDeck = p => Math.abs(p.z - c.z) <= half + EPS && p.x >= bridge.west.x - EPS && p.x <= bridge.east.x + EPS;
+      // Approved geometry: the samples ON the bridge axis between the two bank entries
+      // (west (77,20) … east (104,20); the atlas road profile there is the 1.1 deck).
+      const c = bridge.center;
+      const onDeck = p => Math.abs(p.z - c.z) < EPS && p.x >= bridge.west.x - EPS && p.x <= bridge.east.x + EPS;
       for (const p of pts) if (onDeck(p)) { p.y = bridge.structuralHeight; p.deck = true; }
       // Insert the named bridge-centre junction exactly at the authored centre.
       const k = pts.findIndex((p, i) => i > 0 && p.deck && pts[i - 1].deck && pts[i - 1].x <= c.x && p.x >= c.x && Math.abs(p.z - c.z) < EPS);

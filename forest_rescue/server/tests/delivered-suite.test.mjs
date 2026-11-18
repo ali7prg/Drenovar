@@ -9,7 +9,9 @@ const root = fileURLToPath(new URL('../../delivery/', import.meta.url));
 
 test('delivered reference suite: 74/74 pass unchanged', {skip: !existsSync(root) && 'delivery package not present', timeout: 120000}, () => {
   const files = readdirSync(root + 'tests').filter(f => f.endsWith('.test.mjs')).map(f => 'tests/' + f);
-  const run = spawnSync(process.execPath, ['--test', ...files], {cwd: root, encoding: 'utf8', timeout: 110000});
+  const env = {...process.env};
+  delete env.NODE_TEST_CONTEXT; // run as an independent top-level test runner
+  const run = spawnSync(process.execPath, ['--test', '--test-reporter=tap', ...files], {cwd: root, encoding: 'utf8', timeout: 110000, env});
   const out = run.stdout + run.stderr;
   const count = key => Number(new RegExp('^# ' + key + ' (\\d+)', 'm').exec(out)?.[1]);
   console.log('# delivered suite: tests', count('tests'), 'pass', count('pass'), 'fail', count('fail'));

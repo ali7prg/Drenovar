@@ -96,10 +96,10 @@ def skeleton():
         bone(f"forearm_{s}", S(262, 240, 0.35 * sx), S(258, 322, 0.375 * sx), f"upperarm_{s}", fwd)
         bone(f"hand_{s}", S(258, 322, 0.375 * sx), S(243, 352, 0.385 * sx), f"forearm_{s}", fwd)
         bone(f"fingers_{s}", S(243, 352, 0.385 * sx), S(203, 360, 0.39 * sx), f"hand_{s}", up)
-        bone(f"thigh_{s}", S(575, 125, 0.26 * sx), S(548, 210, 0.35 * sx), "hips", fwd)
-        bone(f"shin_{s}", S(548, 210, 0.35 * sx), S(620, 258, 0.37 * sx), f"thigh_{s}", fwd)
-        bone(f"foot_{s}", S(620, 258, 0.37 * sx), S(608, 350, 0.385 * sx), f"shin_{s}", fwd)
-        bone(f"toes_{s}", S(608, 350, 0.385 * sx), S(570, 359, 0.39 * sx), f"foot_{s}", up)
+        bone(f"thigh_{s}", S(575, 125, 0.26 * sx), S(548, 218, 0.35 * sx), "hips", fwd)
+        bone(f"shin_{s}", S(548, 218, 0.35 * sx), S(630, 268, 0.37 * sx), f"thigh_{s}", fwd)
+        bone(f"foot_{s}", S(630, 268, 0.37 * sx), S(612, 350, 0.385 * sx), f"shin_{s}", fwd)
+        bone(f"toes_{s}", S(612, 350, 0.385 * sx), S(572, 359, 0.39 * sx), f"foot_{s}", up)
     return grig.Skeleton(B)
 
 
@@ -118,8 +118,8 @@ def body_parts(sk):
     # torso + neck loft (skin under the fur), sheet x -> (top y, bottom y, half-width m)
     prof = [
         (106, 104, 176, 0.13), (120, 102, 178, 0.18), (150, 105, 188, 0.22), (190, 109, 204, 0.26),
-        (230, 110, 226, 0.30), (280, 106, 240, 0.32), (330, 100, 240, 0.315), (380, 93, 232, 0.30),
-        (420, 86, 214, 0.28), (460, 80, 196, 0.27), (500, 76, 182, 0.285), (540, 73, 172, 0.30),
+        (230, 110, 220, 0.30), (280, 106, 232, 0.32), (330, 100, 233, 0.315), (380, 93, 224, 0.30),
+        (420, 86, 203, 0.28), (460, 80, 188, 0.27), (500, 76, 178, 0.285), (540, 73, 170, 0.30),
         (570, 76, 170, 0.29), (600, 88, 176, 0.26), (622, 104, 186, 0.20), (636, 122, 186, 0.12),
         (642, 140, 176, 0.05)]
     Y = [(x - CX) / PPM for x, *_ in prof]
@@ -139,8 +139,10 @@ def body_parts(sk):
     P.append(Part(sdf.ellipsoid(S(31, 156), (0.055, 0.04, 0.042)), head, k=0.02, tag="nose"))
     P.append(Part(sdf.round_cone(S(112, 158), S(46, 179), 0.075, 0.048), "jaw", k=0.03, tag="jaw"))
     # mouth slit (upper lip / jaw separation) and eye sockets
-    mouth = sdf.box(S(54, 170), (0.16, 0.15, 0.011), rot=(math.radians(-8), 0, 0), rounding=0.008)
-    P.append(Part(mouth, head, k=0.012, op="subtract", tag="mouth"))
+    mouth = sdf.box(S(56, 170), (0.15, 0.14, 0.0065), rot=(math.radians(-8), 0, 0), rounding=0.005)
+    P.append(Part(mouth, head, k=0.008, op="subtract", tag="mouth"))
+    for sx in (1, -1):
+        P.append(Part(sdf.ellipsoid(S(40, 163, 0.052 * sx), (0.055, 0.06, 0.045)), head, k=0.03, tag="whiskerpad"))
     for sx in (1, -1):
         P.append(Part(sdf.ellipsoid(S(66, 129, 0.118 * sx), (0.034, 0.042, 0.027)), head, k=0.012, op="subtract",
                       tag="eyesocket"))
@@ -168,11 +170,11 @@ def body_parts(sk):
         T = sk.tail(fi)
         P.append(Part(sdf.ellipsoid(S(240, 160, 0.27 * sx), (0.15, 0.23, 0.29)), sc, k=0.08, tag="shoulder"))
         P.append(Part(sdf.ellipsoid(S(258, 205, 0.30 * sx), (0.16, 0.17, 0.20)), ua, k=0.07, tag="triceps"))
-        P.append(Part(sdf.round_cone(Sj, E, 0.14, 0.13), ua, k=0.05, tag="upperarm"))
-        P.append(Part(stretch(sdf.round_cone(E, Wr, 0.145, 0.105), 1.25, center=E), fa, k=0.05, tag="forearm"))
-        P.append(Part(sdf.ellipsoid(E + (Wr - E) * 0.22 + np.array([0, 0.01, 0]), (0.165, 0.14, 0.18)), fa, k=0.06,
+        P.append(Part(stretch(sdf.round_cone(Sj, E, 0.125, 0.115), 1.2, center=Sj), ua, k=0.05, tag="upperarm"))
+        P.append(Part(stretch(sdf.round_cone(E, Wr, 0.12, 0.085), 1.5, center=E), fa, k=0.05, tag="forearm"))
+        P.append(Part(sdf.ellipsoid(E + (Wr - E) * 0.22 + np.array([0, 0.01, 0]), (0.16, 0.115, 0.17)), fa, k=0.06,
                       tag="forearm_m"))
-        P.append(Part(stretch(sdf.round_cone(Wr, M, 0.105, 0.105), 1.25, center=Wr), ha, k=0.04, tag="hand"))
+        P.append(Part(stretch(sdf.round_cone(Wr, M, 0.085, 0.09), 1.5, center=Wr), ha, k=0.04, tag="hand"))
         _paw(P, M, T, fi, sx, scale=1.0)
         th, sh, ft, to = LEGS[f"hind_{s}"][1:]
         H, K, Hk, Mt = sk.head(th), sk.head(sh), sk.head(ft), sk.head(to)
@@ -181,9 +183,9 @@ def body_parts(sk):
                       k=0.09, tag="thigh_m"))
         P.append(Part(sdf.ellipsoid(S(606, 192, 0.27 * sx), (0.16, 0.17, 0.26)), th, k=0.07, tag="hamstring"))
         P.append(Part(sdf.round_cone(H, K, 0.15, 0.13), th, k=0.06, tag="thigh"))
-        P.append(Part(sdf.round_cone(K, Hk, 0.14, 0.085), sh, k=0.05, tag="shin"))
-        P.append(Part(sdf.ellipsoid(K + (Hk - K) * 0.3, (0.14, 0.15, 0.13)), sh, k=0.06, tag="gaskin"))
-        P.append(Part(stretch(sdf.round_cone(Hk, Mt, 0.092, 0.098), 1.3, center=Hk), ft, k=0.04, tag="metatarsus"))
+        P.append(Part(stretch(sdf.round_cone(K, Hk, 0.12, 0.075), 1.25, center=K), sh, k=0.05, tag="shin"))
+        P.append(Part(sdf.ellipsoid(K + (Hk - K) * 0.28, (0.14, 0.12, 0.12)), sh, k=0.06, tag="gaskin"))
+        P.append(Part(stretch(sdf.round_cone(Hk, Mt, 0.075, 0.085), 1.55, center=Hk), ft, k=0.04, tag="metatarsus"))
         _paw(P, Mt, Tt, to, sx, scale=0.92)
     # ---- tail core
     tb = ["hips"] + [f"tail_{i:02d}" for i in range(1, 7)]
@@ -194,7 +196,7 @@ def body_parts(sk):
     return P
 
 
-TOES = list(enumerate(((-0.15, 0.11), (-0.055, 0.17), (0.055, 0.17), (0.15, 0.11))))
+TOES = list(enumerate(((-0.155, 0.12), (-0.058, 0.185), (0.058, 0.185), (0.155, 0.12))))
 
 
 def _paw(P, M, T, bone, sx, scale=1.0):
@@ -204,11 +206,11 @@ def _paw(P, M, T, bone, sx, scale=1.0):
     fwd /= np.linalg.norm(fwd)
     lat = np.array([1.0, 0, 0])
     c = np.array([M[0], M[1], 0.0]) + fwd * 0.05 * scale
-    P.append(Part(sdf.ellipsoid(c + np.array([0, 0, 0.085 * scale]), (0.18 * scale, 0.18 * scale, 0.085 * scale)),
+    P.append(Part(sdf.ellipsoid(c + np.array([0, 0, 0.09 * scale]), (0.19 * scale, 0.20 * scale, 0.09 * scale)),
                   bone, k=0.05, tag="paw"))
     for j, (ox, of) in TOES:
         p = c + (lat * ox * sx + fwd * of) * scale + np.array([0, 0, 0.055 * scale])
-        P.append(Part(sdf.ellipsoid(p, (0.058 * scale, 0.075 * scale, 0.058 * scale)), bone, k=0.03, tag="toe"))
+        P.append(Part(sdf.ellipsoid(p, (0.062 * scale, 0.08 * scale, 0.062 * scale)), bone, k=0.03, tag="toe"))
 
 
 def toe_tips(sk, side, hind=False, scale=1.0):
@@ -302,21 +304,26 @@ def fur(sk, hv, hf, pans, rng):
         x, y = sheet_xy(c)
         return (_ss(78, 96, x) * (1 - _ss(560, 590, x)) * _ss(0.05, 0.35, n[:, 2]) *
                 (1 - _ss(0.20, 0.30, np.abs(c[:, 0]))) * (1 + 1.5 * _ss(120, 200, x) * (1 - _ss(330, 460, x))))
-    r, nr = _roots(hv, hf, rng, 200, w_mane, 0.042)
+    r, nr = _roots(hv, hf, rng, 255, w_mane, 0.034)
+    # keep the big lynx ears clear
+    for s_ in ("L", "R"):
+        eb = sk.head(f"ear_{s_}")
+        far = np.linalg.norm(r - eb, axis=1) > 0.11
+        r, nr = r[far], nr[far]
 
     def d_mane(p, n, rng):
         x, _ = sheet_xy(p)
-        th = math.radians(np.interp(x[0], [90, 160, 260, 380, 480, 580], [62, 52, 42, 30, 22, 14]))
+        th = math.radians(np.interp(x[0], [90, 160, 260, 380, 480, 580], [50, 42, 32, 22, 15, 10]))
         d = np.array([0.0, math.cos(th), math.sin(th)])
-        d[0] += n[0] * 1.1
-        d += rng.normal(0, 0.10, 3)
+        d[0] += n[0] * 0.9
+        d += rng.normal(0, 0.07, 3)
         return d
 
     def b_mane(p, n, d, rng):
         return np.array([0.0, 0.28, -0.10]) + rng.normal(0, 0.05, 3)
 
-    C += gfur.make_clumps("mane", r, nr, d_mane, rng, [side, front, rear], 0.72, min_len=0.05,
-                          width=(0.045, 0.085), flat=0.42, bend_fn=b_mane,
+    C += gfur.make_clumps("mane", r, nr, d_mane, rng, [side, front, rear], 0.62, min_len=0.05,
+                          width=(0.04, 0.072), flat=0.38, bend_fn=b_mane,
                           up_fn=lambda p, n, d: np.array([0.0, 1.0, 0.0]), jag=(0.70, 1.0))
     # ---- tail bush (side view only: the rear sheet draws the tail hanging, inconsistent)
     tail_bones = [f"tail_{i:02d}" for i in range(1, 7)]
@@ -339,14 +346,14 @@ def fur(sk, hv, hf, pans, rng):
         d, _ = tail_t(c)
         x, _ = sheet_xy(c)
         return (d < 0.14) * _ss(600, 625, x)
-    r, nr = _roots(hv, hf, rng, 125, w_tail, 0.05)
+    r, nr = _roots(hv, hf, rng, 140, w_tail, 0.045)
     _, tg = tail_t(r)
 
     def d_tail(p, n, rng):
         _, t = tail_t(p[None])
         return t[0] * 0.85 + n * 0.55 + rng.normal(0, 0.08, 3)
 
-    C += gfur.make_clumps("tail", r, nr, d_tail, rng, [side], 0.34, min_len=0.06, width=(0.05, 0.085),
+    C += gfur.make_clumps("tail", r, nr, d_tail, rng, [side], 0.36, min_len=0.07, width=(0.065, 0.10),
                           flat=0.5, bend_fn=lambda p, n, d, rng: n * 0.12,
                           up_fn=lambda p, n, d: np.cross(d, n), jag=(0.75, 1.0))
     # tail-tip brush
@@ -370,7 +377,7 @@ def fur(sk, hv, hf, pans, rng):
         x, y = sheet_xy(c)
         return (_ss(68, 88, x) * (1 - _ss(165, 185, x)) * _ss(128, 145, y) * (1 - _ss(200, 215, y)) *
                 (_ss(0.04, 0.10, np.abs(c[:, 0])) + _ss(-0.2, -0.6, n[:, 2])))
-    r, nr = _roots(hv, hf, rng, 60, w_ruff, 0.045)
+    r, nr = _roots(hv, hf, rng, 75, w_ruff, 0.04)
     C += gfur.make_clumps("ruff", r, nr, lambda p, n, rng: np.array([n[0] * 0.9, 0.55, -0.85]) + n * 0.3 +
                           rng.normal(0, 0.1, 3), rng, [side, front], 0.30, min_len=0.05,
                           width=(0.04, 0.07), flat=0.45, bend_fn=lambda p, n, d, rng: np.array([0, 0.12, -0.12]),
@@ -380,16 +387,16 @@ def fur(sk, hv, hf, pans, rng):
         x, y = sheet_xy(c)
         return (_ss(160, 172, x) * (1 - _ss(212, 228, x)) * _ss(195, 210, y) * (1 - _ss(0.10, 0.16, np.abs(c[:, 0]))) *
                 _ss(0.0, 0.4, -n[:, 1] - n[:, 2] * 0.5))
-    r, nr = _roots(hv, hf, rng, 22, w_chest, 0.035)
+    r, nr = _roots(hv, hf, rng, 20, w_chest, 0.035)
     C += gfur.make_clumps("chest", r, nr, lambda p, n, rng: np.array([0, -0.12, -1.0]) + rng.normal(0, 0.08, 3),
-                          rng, [side, front], 0.55, min_len=0.08, width=(0.04, 0.065), flat=0.5,
+                          rng, [side, front], 0.55, min_len=0.08, width=(0.055, 0.085), flat=0.4,
                           bend_fn=lambda p, n, d, rng: np.array([0, 0.18, 0.0]),
                           up_fn=lambda p, n, d: np.array([1.0, 0, 0]), jag=(0.75, 1.0))
     # ---- belly fringe
     def w_belly(c, n):
         x, y = sheet_xy(c)
         return _ss(290, 305, x) * (1 - _ss(425, 440, x)) * _ss(0.4, 0.8, -n[:, 2]) * (np.abs(c[:, 0]) < 0.24)
-    r, nr = _roots(hv, hf, rng, 26, w_belly, 0.06)
+    r, nr = _roots(hv, hf, rng, 22, w_belly, 0.06)
     C += gfur.make_clumps("belly", r, nr, lambda p, n, rng: np.array([0, 0.35, -1.0]) + rng.normal(0, 0.1, 3),
                           rng, [side], 0.11, min_len=0.03, width=(0.035, 0.06), flat=0.5,
                           up_fn=lambda p, n, d: np.array([1.0, 0, 0]), jag=(0.7, 1.0))
@@ -414,24 +421,24 @@ def details(sk):
         for hind in (False, True):
             bone = f"toes_{s}" if hind else f"fingers_{s}"
             for p, fw, lat in toe_tips(sk, s, hind):
-                D.append(dict(mesh=gfur.claw(p, fw, length=0.115 if not hind else 0.10, base_r=0.024,
+                D.append(dict(mesh=gfur.claw(p, fw, length=0.135 if not hind else 0.12, base_r=0.026,
                                              curl=1.0, lat=lat), bone=bone, kind="claw", lods=(0, 1)))
     for s, sx in (("L", 1), ("R", -1)):
         base = S(63, 111, 0.092 * sx)
         D.append(dict(mesh=gfur.horn(base, np.array([0.28 * sx, 0.45, 0.85]), np.array([0.0, 0.42, -0.25]),
                                      0.135, 0.032, sides=6, n=7, ridges=0.10), bone="head", kind="horn",
                       lods=(0, 1, 2)))
-        D.append(dict(mesh=gb.uv_sphere(S(66, 129, 0.118 * sx), 0.034, 8, 6, scale=(0.85, 1.0, 1.0)), bone="head",
+        D.append(dict(mesh=gb.uv_sphere(S(66, 129, 0.114 * sx), 0.034, 8, 6, scale=(0.8, 1.0, 0.72)), bone="head",
                       kind="eye", lods=(0, 1, 2)))
-        D.append(dict(mesh=gfur.horn(S(41, 166, 0.048 * sx), np.array([0, -0.12, -1.0]), np.zeros(3), 0.05, 0.013,
+        D.append(dict(mesh=gfur.horn(S(43, 162, 0.046 * sx), np.array([0, -0.12, -1.0]), np.zeros(3), 0.032, 0.012,
                                      sides=4, n=3), bone="head", kind="tooth", lods=(0,)))
-        D.append(dict(mesh=gfur.horn(S(48, 174, 0.042 * sx), np.array([0, -0.05, 1.0]), np.zeros(3), 0.036, 0.011,
+        D.append(dict(mesh=gfur.horn(S(50, 176, 0.040 * sx), np.array([0, -0.05, 1.0]), np.zeros(3), 0.026, 0.010,
                                      sides=4, n=3), bone="jaw", kind="tooth", lods=(0,)))
-        for k, (dz, dy) in enumerate(((0.10, 0.30), (0.0, 0.38), (-0.10, 0.42))):
-            root = S(37 + 3 * k, 161 + 2 * k, 0.062 * sx)
-            D.append(dict(mesh=gb.tube(gb.catmull([root, root + np.array([0.09 * sx, 0.04, dz * 0.4]),
-                                                   root + np.array([0.18 * sx, dy * 0.25, dz])], 4),
-                                       np.array([0.0035, 0.003, 0.0022, 0.001]), sides=3, up=(0, 1, 0)),
+        for k, (dz, dy) in enumerate(((0.06, 0.30), (-0.05, 0.40))):
+            root = S(38 + 4 * k, 162 + 3 * k, 0.085 * sx)
+            D.append(dict(mesh=gb.tube(gb.catmull([root, root + np.array([0.07 * sx, 0.04, dz * 0.4]),
+                                                   root + np.array([0.14 * sx, dy * 0.22, dz])], 4),
+                                       np.array([0.0022, 0.0019, 0.0014, 0.0008]), sides=3, up=(0, 1, 0)),
                           bone="head", kind="whisker", lods=(0,)))
     return D
 
@@ -531,7 +538,7 @@ def texture_overrides(B, col, T, lab):
         q = P[m]
         out_e = np.zeros((len(q), 3))
         for sx in (1, -1):
-            c = S(66, 129, 0.118 * sx)
+            c = S(66, 129, 0.114 * sx)
             ax = np.array([0.55 * sx, -1.0, 0.05])
             ax /= np.linalg.norm(ax)
             sel = (q[:, 0] * sx) > 0
@@ -543,7 +550,7 @@ def texture_overrides(B, col, T, lab):
             e = np.where((ang > 46)[:, None], np.array([0.10, 0.07, 0.05]), e)
             out_e[sel] = e
         out[m] = out_e
-    for nm, c in (("tooth", (0.90, 0.87, 0.78)), ("whisker", (0.82, 0.80, 0.76))):
+    for nm, c in (("tooth", (0.90, 0.87, 0.78)), ("whisker", (0.72, 0.70, 0.66))):
         m = region(nm)
         if m.any():
             out[m] = c

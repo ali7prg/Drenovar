@@ -45,21 +45,24 @@
       "lf_env_reed_fern_fern_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 104,
-      "LOD1": 36,
-      "LOD2": 12
+      "LOD0": 88,
+      "LOD1": 44,
+      "LOD2": 22
      },
-     "height_m": 0.49,
-     "canopyRadius_m": 0.98,
-     "footprintRadius_m": 0.98,
+     "height_m": 0.73,
+     "canopyRadius_m": 0.94,
+     "footprintRadius_m": 0.94,
      "materials": {
       "LOD0": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_foliage",
        "lf_foliage"
       ]
      }
@@ -71,21 +74,24 @@
       "lf_env_reed_fern_fern_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 104,
-      "LOD1": 36,
-      "LOD2": 12
+      "LOD0": 64,
+      "LOD1": 32,
+      "LOD2": 16
      },
-     "height_m": 0.39,
-     "canopyRadius_m": 0.76,
-     "footprintRadius_m": 0.76,
+     "height_m": 0.58,
+     "canopyRadius_m": 0.78,
+     "footprintRadius_m": 0.78,
      "materials": {
       "LOD0": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_foliage",
        "lf_foliage"
       ]
      }
@@ -113,23 +119,28 @@
       "lf_env_birch_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 3185,
-      "LOD1": 1240,
-      "LOD2": 202
+      "LOD0": 3830,
+      "LOD1": 1022,
+      "LOD2": 160
      },
-     "height_m": 12.82,
-     "canopyRadius_m": 4.43,
+     "height_m": 13.08,
+     "canopyRadius_m": 5.49,
      "footprintRadius_m": 0.9,
      "materials": {
       "LOD0": [
        "lf_bark_birch",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -140,23 +151,28 @@
       "lf_env_birch_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 3139,
-      "LOD1": 1219,
-      "LOD2": 184
+      "LOD0": 2904,
+      "LOD1": 1134,
+      "LOD2": 128
      },
-     "height_m": 13.2,
-     "canopyRadius_m": 3.43,
+     "height_m": 12.72,
+     "canopyRadius_m": 5.08,
      "footprintRadius_m": 0.9,
      "materials": {
       "LOD0": [
        "lf_bark_birch",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -167,23 +183,28 @@
       "lf_env_birch_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 3146,
-      "LOD1": 1226,
-      "LOD2": 204
+      "LOD0": 2850,
+      "LOD1": 1110,
+      "LOD2": 152
      },
-     "height_m": 12.04,
-     "canopyRadius_m": 4.98,
+     "height_m": 13.02,
+     "canopyRadius_m": 5.14,
      "footprintRadius_m": 0.9,
      "materials": {
       "LOD0": [
        "lf_bark_birch",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     }
@@ -210,23 +231,28 @@
       "lf_env_dark_pine_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2711,
-      "LOD1": 968,
-      "LOD2": 235
+      "LOD0": 1780,
+      "LOD1": 734,
+      "LOD2": 274
      },
-     "height_m": 14.24,
-     "canopyRadius_m": 3.62,
+     "height_m": 14.17,
+     "canopyRadius_m": 3.69,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -237,23 +263,28 @@
       "lf_env_dark_pine_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 2407,
-      "LOD1": 956,
-      "LOD2": 245
+      "LOD0": 1816,
+      "LOD1": 700,
+      "LOD2": 286
      },
-     "height_m": 16.74,
+     "height_m": 14.17,
      "canopyRadius_m": 3.74,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -264,23 +295,28 @@
       "lf_env_dark_pine_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 2143,
-      "LOD1": 798,
-      "LOD2": 215
+      "LOD0": 1816,
+      "LOD1": 668,
+      "LOD2": 286
      },
-     "height_m": 8.74,
-     "canopyRadius_m": 3.79,
+     "height_m": 15.3,
+     "canopyRadius_m": 2.72,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -291,23 +327,28 @@
       "lf_env_dark_pine_v4_LOD2"
      ],
      "tris": {
-      "LOD0": 2177,
-      "LOD1": 886,
-      "LOD2": 235
+      "LOD0": 1772,
+      "LOD1": 682,
+      "LOD2": 282
      },
-     "height_m": 13.24,
-     "canopyRadius_m": 4.55,
+     "height_m": 16.15,
+     "canopyRadius_m": 2.43,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     }
@@ -336,23 +377,28 @@
       "lf_env_golden_oak_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2908,
-      "LOD1": 1132,
-      "LOD2": 234
+      "LOD0": 3232,
+      "LOD1": 1240,
+      "LOD2": 168
      },
-     "height_m": 10.06,
-     "canopyRadius_m": 5.88,
+     "height_m": 13.63,
+     "canopyRadius_m": 8.5,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
        "lf_bark_oak",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -363,23 +409,28 @@
       "lf_env_golden_oak_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 2918,
-      "LOD1": 1130,
-      "LOD2": 234
+      "LOD0": 2658,
+      "LOD1": 1054,
+      "LOD2": 106
      },
-     "height_m": 11.58,
-     "canopyRadius_m": 3.85,
+     "height_m": 16.25,
+     "canopyRadius_m": 9.68,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
        "lf_bark_oak",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -390,23 +441,28 @@
       "lf_env_golden_oak_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 2919,
-      "LOD1": 1136,
-      "LOD2": 234
+      "LOD0": 2788,
+      "LOD1": 1088,
+      "LOD2": 144
      },
-     "height_m": 9.18,
-     "canopyRadius_m": 5.79,
+     "height_m": 16.9,
+     "canopyRadius_m": 9.48,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
        "lf_bark_oak",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -418,22 +474,27 @@
      ],
      "tris": {
       "LOD0": 2372,
-      "LOD1": 931,
-      "LOD2": 218
+      "LOD1": 902,
+      "LOD2": 122
      },
-     "height_m": 6.2,
-     "canopyRadius_m": 2.72,
+     "height_m": 15.91,
+     "canopyRadius_m": 9.24,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
        "lf_bark_oak",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     }
@@ -455,23 +516,28 @@
       "lf_env_dark_pine_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2711,
-      "LOD1": 968,
-      "LOD2": 235
+      "LOD0": 1780,
+      "LOD1": 734,
+      "LOD2": 274
      },
-     "height_m": 14.24,
-     "canopyRadius_m": 3.62,
+     "height_m": 14.17,
+     "canopyRadius_m": 3.69,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -482,23 +548,28 @@
       "lf_env_dark_pine_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 2407,
-      "LOD1": 956,
-      "LOD2": 245
+      "LOD0": 1816,
+      "LOD1": 700,
+      "LOD2": 286
      },
-     "height_m": 16.74,
+     "height_m": 14.17,
      "canopyRadius_m": 3.74,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -509,23 +580,28 @@
       "lf_env_dark_pine_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 2143,
-      "LOD1": 798,
-      "LOD2": 215
+      "LOD0": 1816,
+      "LOD1": 668,
+      "LOD2": 286
      },
-     "height_m": 8.74,
-     "canopyRadius_m": 3.79,
+     "height_m": 15.3,
+     "canopyRadius_m": 2.72,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -536,23 +612,28 @@
       "lf_env_dark_pine_v4_LOD2"
      ],
      "tris": {
-      "LOD0": 2177,
-      "LOD1": 886,
-      "LOD2": 235
+      "LOD0": 1772,
+      "LOD1": 682,
+      "LOD2": 282
      },
-     "height_m": 13.24,
-     "canopyRadius_m": 4.55,
+     "height_m": 16.15,
+     "canopyRadius_m": 2.43,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     }
@@ -667,23 +748,28 @@
       "lf_env_golden_oak_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2908,
-      "LOD1": 1132,
-      "LOD2": 234
+      "LOD0": 3232,
+      "LOD1": 1240,
+      "LOD2": 168
      },
-     "height_m": 10.06,
-     "canopyRadius_m": 5.88,
+     "height_m": 13.63,
+     "canopyRadius_m": 8.5,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
        "lf_bark_oak",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -694,23 +780,28 @@
       "lf_env_golden_oak_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 2918,
-      "LOD1": 1130,
-      "LOD2": 234
+      "LOD0": 2658,
+      "LOD1": 1054,
+      "LOD2": 106
      },
-     "height_m": 11.58,
-     "canopyRadius_m": 3.85,
+     "height_m": 16.25,
+     "canopyRadius_m": 9.68,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
        "lf_bark_oak",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -721,23 +812,28 @@
       "lf_env_golden_oak_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 2919,
-      "LOD1": 1136,
-      "LOD2": 234
+      "LOD0": 2788,
+      "LOD1": 1088,
+      "LOD2": 144
      },
-     "height_m": 9.18,
-     "canopyRadius_m": 5.79,
+     "height_m": 16.9,
+     "canopyRadius_m": 9.48,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
        "lf_bark_oak",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -749,22 +845,27 @@
      ],
      "tris": {
       "LOD0": 2372,
-      "LOD1": 931,
-      "LOD2": 218
+      "LOD1": 902,
+      "LOD2": 122
      },
-     "height_m": 6.2,
-     "canopyRadius_m": 2.72,
+     "height_m": 15.91,
+     "canopyRadius_m": 9.24,
      "footprintRadius_m": 1.6,
      "materials": {
       "LOD0": [
        "lf_bark_oak",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_oak",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     }
@@ -786,23 +887,28 @@
       "lf_env_dark_pine_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2711,
-      "LOD1": 968,
-      "LOD2": 235
+      "LOD0": 1780,
+      "LOD1": 734,
+      "LOD2": 274
      },
-     "height_m": 14.24,
-     "canopyRadius_m": 3.62,
+     "height_m": 14.17,
+     "canopyRadius_m": 3.69,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -813,23 +919,28 @@
       "lf_env_dark_pine_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 2407,
-      "LOD1": 956,
-      "LOD2": 245
+      "LOD0": 1816,
+      "LOD1": 700,
+      "LOD2": 286
      },
-     "height_m": 16.74,
+     "height_m": 14.17,
      "canopyRadius_m": 3.74,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -840,23 +951,28 @@
       "lf_env_dark_pine_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 2143,
-      "LOD1": 798,
-      "LOD2": 215
+      "LOD0": 1816,
+      "LOD1": 668,
+      "LOD2": 286
      },
-     "height_m": 8.74,
-     "canopyRadius_m": 3.79,
+     "height_m": 15.3,
+     "canopyRadius_m": 2.72,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -867,23 +983,28 @@
       "lf_env_dark_pine_v4_LOD2"
      ],
      "tris": {
-      "LOD0": 2177,
-      "LOD1": 886,
-      "LOD2": 235
+      "LOD0": 1772,
+      "LOD1": 682,
+      "LOD2": 282
      },
-     "height_m": 13.24,
-     "canopyRadius_m": 4.55,
+     "height_m": 16.15,
+     "canopyRadius_m": 2.43,
      "footprintRadius_m": 0.7,
      "materials": {
       "LOD0": [
        "lf_bark_pine",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_pine",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     }
@@ -905,23 +1026,28 @@
       "lf_env_birch_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 3185,
-      "LOD1": 1240,
-      "LOD2": 202
+      "LOD0": 3830,
+      "LOD1": 1022,
+      "LOD2": 160
      },
-     "height_m": 12.82,
-     "canopyRadius_m": 4.43,
+     "height_m": 13.08,
+     "canopyRadius_m": 5.49,
      "footprintRadius_m": 0.9,
      "materials": {
       "LOD0": [
        "lf_bark_birch",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -932,23 +1058,28 @@
       "lf_env_birch_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 3139,
-      "LOD1": 1219,
-      "LOD2": 184
+      "LOD0": 2904,
+      "LOD1": 1134,
+      "LOD2": 128
      },
-     "height_m": 13.2,
-     "canopyRadius_m": 3.43,
+     "height_m": 12.72,
+     "canopyRadius_m": 5.08,
      "footprintRadius_m": 0.9,
      "materials": {
       "LOD0": [
        "lf_bark_birch",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -959,23 +1090,28 @@
       "lf_env_birch_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 3146,
-      "LOD1": 1226,
-      "LOD2": 204
+      "LOD0": 2850,
+      "LOD1": 1110,
+      "LOD2": 152
      },
-     "height_m": 12.04,
-     "canopyRadius_m": 4.98,
+     "height_m": 13.02,
+     "canopyRadius_m": 5.14,
      "footprintRadius_m": 0.9,
      "materials": {
       "LOD0": [
        "lf_bark_birch",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_birch",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     }
@@ -997,23 +1133,28 @@
       "lf_env_willow_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 3418,
-      "LOD1": 1444,
-      "LOD2": 278
+      "LOD0": 1510,
+      "LOD1": 540,
+      "LOD2": 114
      },
-     "height_m": 10.74,
-     "canopyRadius_m": 9.52,
+     "height_m": 11.51,
+     "canopyRadius_m": 7.77,
      "footprintRadius_m": 1.2,
      "materials": {
       "LOD0": [
        "lf_bark_willow",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_willow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_willow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -1024,23 +1165,28 @@
       "lf_env_willow_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 3429,
-      "LOD1": 1448,
-      "LOD2": 286
+      "LOD0": 1610,
+      "LOD1": 504,
+      "LOD2": 126
      },
-     "height_m": 8.91,
-     "canopyRadius_m": 8.78,
+     "height_m": 11.5,
+     "canopyRadius_m": 7.86,
      "footprintRadius_m": 1.2,
      "materials": {
       "LOD0": [
        "lf_bark_willow",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_willow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_willow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -1051,23 +1197,28 @@
       "lf_env_willow_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 2372,
-      "LOD1": 934,
-      "LOD2": 188
+      "LOD0": 1556,
+      "LOD1": 532,
+      "LOD2": 132
      },
-     "height_m": 8.86,
-     "canopyRadius_m": 4.83,
+     "height_m": 12.19,
+     "canopyRadius_m": 6.99,
      "footprintRadius_m": 1.2,
      "materials": {
       "LOD0": [
        "lf_bark_willow",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_willow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_willow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     }
@@ -1089,23 +1240,28 @@
       "lf_env_hollow_oak_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 6750,
-      "LOD1": 2669,
-      "LOD2": 295
+      "LOD0": 4366,
+      "LOD1": 1294,
+      "LOD2": 318
      },
-     "height_m": 14.33,
-     "canopyRadius_m": 8.18,
+     "height_m": 14.12,
+     "canopyRadius_m": 7.2,
      "footprintRadius_m": 4.6,
      "materials": {
       "LOD0": [
        "lf_bark_hollow",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_hollow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_hollow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -1116,23 +1272,28 @@
       "lf_env_hollow_oak_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 6741,
-      "LOD1": 2677,
-      "LOD2": 296
+      "LOD0": 4844,
+      "LOD1": 1422,
+      "LOD2": 392
      },
-     "height_m": 14.35,
-     "canopyRadius_m": 8.86,
+     "height_m": 14.11,
+     "canopyRadius_m": 7.2,
      "footprintRadius_m": 4.6,
      "materials": {
       "LOD0": [
        "lf_bark_hollow",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_hollow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_hollow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -1143,23 +1304,28 @@
       "lf_env_hollow_oak_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 6721,
-      "LOD1": 2660,
-      "LOD2": 254
+      "LOD0": 4718,
+      "LOD1": 1464,
+      "LOD2": 350
      },
-     "height_m": 11.67,
-     "canopyRadius_m": 6.97,
+     "height_m": 13.54,
+     "canopyRadius_m": 6.84,
      "footprintRadius_m": 4.6,
      "materials": {
       "LOD0": [
        "lf_bark_hollow",
-       "lf_foliage"
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_hollow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_hollow",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     }
@@ -1181,22 +1347,24 @@
       "lf_env_fallen_trunk_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2536,
-      "LOD1": 950,
-      "LOD2": 446
+      "LOD0": 2300,
+      "LOD1": 874,
+      "LOD2": 252
      },
-     "height_m": 3.35,
-     "canopyRadius_m": 6.75,
+     "height_m": 4.05,
+     "canopyRadius_m": 5.34,
      "footprintRadius_m": 5.2,
      "materials": {
       "LOD0": [
-       "lf_bark_hollow",
+       "lf_bark_fallen",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_bark_fallen",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_bark_fallen",
        "lf_foliage"
       ]
      }
@@ -1208,22 +1376,24 @@
       "lf_env_fallen_trunk_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 2536,
-      "LOD1": 950,
-      "LOD2": 250
+      "LOD0": 1547,
+      "LOD1": 595,
+      "LOD2": 174
      },
-     "height_m": 2.04,
-     "canopyRadius_m": 4.88,
-     "footprintRadius_m": 4.88,
+     "height_m": 4.05,
+     "canopyRadius_m": 6.63,
+     "footprintRadius_m": 5.2,
      "materials": {
       "LOD0": [
-       "lf_bark_hollow",
+       "lf_bark_fallen",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_bark_fallen",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_bark_fallen",
        "lf_foliage"
       ]
      }
@@ -1235,23 +1405,24 @@
       "lf_env_fallen_trunk_v3_stream_LOD2"
      ],
      "tris": {
-      "LOD0": 2858,
-      "LOD1": 950,
-      "LOD2": 432
+      "LOD0": 2758,
+      "LOD1": 1130,
+      "LOD2": 452
      },
-     "height_m": 3.42,
-     "canopyRadius_m": 6.14,
+     "height_m": 4.05,
+     "canopyRadius_m": 5.71,
      "footprintRadius_m": 5.2,
      "materials": {
       "LOD0": [
-       "lf_bark_hollow",
-       "lf_foliage",
-       "lf_rock_limestone"
+       "lf_bark_fallen",
+       "lf_foliage"
       ],
       "LOD1": [
+       "lf_bark_fallen",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_bark_fallen",
        "lf_foliage"
       ]
      }
@@ -1274,13 +1445,13 @@
       "lf_env_moss_rock_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 3040,
-      "LOD1": 1070,
-      "LOD2": 642
+      "LOD0": 2908,
+      "LOD1": 1150,
+      "LOD2": 458
      },
-     "height_m": 5.86,
-     "canopyRadius_m": 5.64,
-     "footprintRadius_m": 5.64,
+     "height_m": 5.5,
+     "canopyRadius_m": 4.91,
+     "footprintRadius_m": 4.91,
      "materials": {
       "LOD0": [
        "lf_rock_limestone",
@@ -1303,13 +1474,13 @@
       "lf_env_moss_rock_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 1644,
-      "LOD1": 610,
-      "LOD2": 344
+      "LOD0": 3672,
+      "LOD1": 1444,
+      "LOD2": 560
      },
-     "height_m": 2.81,
-     "canopyRadius_m": 2.68,
-     "footprintRadius_m": 2.68,
+     "height_m": 5.5,
+     "canopyRadius_m": 3.02,
+     "footprintRadius_m": 3.02,
      "materials": {
       "LOD0": [
        "lf_rock_limestone",
@@ -1332,13 +1503,13 @@
       "lf_env_moss_rock_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 770,
-      "LOD1": 284,
-      "LOD2": 138
+      "LOD0": 3348,
+      "LOD1": 1316,
+      "LOD2": 540
      },
-     "height_m": 1.7,
-     "canopyRadius_m": 1.57,
-     "footprintRadius_m": 1.57,
+     "height_m": 5.5,
+     "canopyRadius_m": 3.24,
+     "footprintRadius_m": 3.24,
      "materials": {
       "LOD0": [
        "lf_rock_limestone",
@@ -1372,22 +1543,28 @@
       "lf_env_bramble_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 2520,
-      "LOD1": 580,
-      "LOD2": 176
+      "LOD0": 1128,
+      "LOD1": 268,
+      "LOD2": 54
      },
-     "height_m": 2.07,
-     "canopyRadius_m": 2.0,
-     "footprintRadius_m": 2.0,
+     "height_m": 2.06,
+     "canopyRadius_m": 1.52,
+     "footprintRadius_m": 1.52,
      "materials": {
       "LOD0": [
-       "lf_foliage"
+       "lf_bark_bramble",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_bramble",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_bramble",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -1398,22 +1575,28 @@
       "lf_env_bramble_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 2008,
-      "LOD1": 484,
-      "LOD2": 176
+      "LOD0": 1168,
+      "LOD1": 274,
+      "LOD2": 68
      },
-     "height_m": 1.81,
-     "canopyRadius_m": 1.4,
-     "footprintRadius_m": 1.4,
+     "height_m": 2.06,
+     "canopyRadius_m": 1.52,
+     "footprintRadius_m": 1.52,
      "materials": {
       "LOD0": [
-       "lf_foliage"
+       "lf_bark_bramble",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_bramble",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_bramble",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     },
@@ -1424,22 +1607,28 @@
       "lf_env_bramble_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 2136,
-      "LOD1": 508,
-      "LOD2": 176
+      "LOD0": 950,
+      "LOD1": 276,
+      "LOD2": 80
      },
-     "height_m": 1.44,
-     "canopyRadius_m": 1.95,
-     "footprintRadius_m": 1.95,
+     "height_m": 2.27,
+     "canopyRadius_m": 1.21,
+     "footprintRadius_m": 1.21,
      "materials": {
       "LOD0": [
-       "lf_foliage"
+       "lf_bark_bramble",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD1": [
-       "lf_foliage"
+       "lf_bark_bramble",
+       "lf_foliage",
+       "lf_foliage_vol"
       ],
       "LOD2": [
-       "lf_foliage"
+       "lf_bark_bramble",
+       "lf_foliage",
+       "lf_foliage_vol"
       ]
      }
     }
@@ -1454,6 +1643,35 @@
    "meta": "lf_env_reed_fern.meta.json",
    "role": "reeds (wet banks) and fern clusters",
    "variants": {
+    "mixed_v1": {
+     "nodes": [
+      "lf_env_reed_fern_mixed_v1_LOD0",
+      "lf_env_reed_fern_mixed_v1_LOD1",
+      "lf_env_reed_fern_mixed_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 474,
+      "LOD1": 238,
+      "LOD2": 120
+     },
+     "height_m": 2.41,
+     "canopyRadius_m": 1.64,
+     "footprintRadius_m": 1.64,
+     "materials": {
+      "LOD0": [
+       "lf_foliage",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage",
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage",
+       "lf_foliage"
+      ]
+     }
+    },
     "reed_v1": {
      "nodes": [
       "lf_env_reed_fern_reed_v1_LOD0",
@@ -1461,21 +1679,24 @@
       "lf_env_reed_fern_reed_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 398,
-      "LOD1": 144,
-      "LOD2": 8
+      "LOD0": 378,
+      "LOD1": 190,
+      "LOD2": 96
      },
-     "height_m": 2.58,
-     "canopyRadius_m": 1.52,
-     "footprintRadius_m": 1.52,
+     "height_m": 2.44,
+     "canopyRadius_m": 0.86,
+     "footprintRadius_m": 0.86,
      "materials": {
       "LOD0": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_foliage",
        "lf_foliage"
       ]
      }
@@ -1487,21 +1708,24 @@
       "lf_env_reed_fern_reed_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 398,
-      "LOD1": 144,
-      "LOD2": 8
+      "LOD0": 256,
+      "LOD1": 128,
+      "LOD2": 64
      },
-     "height_m": 1.89,
-     "canopyRadius_m": 1.65,
-     "footprintRadius_m": 1.65,
+     "height_m": 2.07,
+     "canopyRadius_m": 0.62,
+     "footprintRadius_m": 0.62,
      "materials": {
       "LOD0": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_foliage",
        "lf_foliage"
       ]
      }
@@ -1513,21 +1737,24 @@
       "lf_env_reed_fern_fern_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 104,
-      "LOD1": 36,
-      "LOD2": 12
+      "LOD0": 88,
+      "LOD1": 44,
+      "LOD2": 22
      },
-     "height_m": 0.49,
-     "canopyRadius_m": 0.98,
-     "footprintRadius_m": 0.98,
+     "height_m": 0.73,
+     "canopyRadius_m": 0.94,
+     "footprintRadius_m": 0.94,
      "materials": {
       "LOD0": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_foliage",
        "lf_foliage"
       ]
      }
@@ -1539,47 +1766,24 @@
       "lf_env_reed_fern_fern_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 104,
-      "LOD1": 36,
-      "LOD2": 12
+      "LOD0": 64,
+      "LOD1": 32,
+      "LOD2": 16
      },
-     "height_m": 0.39,
-     "canopyRadius_m": 0.76,
-     "footprintRadius_m": 0.76,
+     "height_m": 0.58,
+     "canopyRadius_m": 0.78,
+     "footprintRadius_m": 0.78,
      "materials": {
       "LOD0": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD2": [
-       "lf_foliage"
-      ]
-     }
-    },
-    "mixed_v1": {
-     "nodes": [
-      "lf_env_reed_fern_mixed_v1_LOD0",
-      "lf_env_reed_fern_mixed_v1_LOD1",
-      "lf_env_reed_fern_mixed_v1_LOD2"
-     ],
-     "tris": {
-      "LOD0": 478,
-      "LOD1": 172,
-      "LOD2": 18
-     },
-     "height_m": 2.58,
-     "canopyRadius_m": 1.83,
-     "footprintRadius_m": 1.83,
-     "materials": {
-      "LOD0": [
-       "lf_foliage"
-      ],
-      "LOD1": [
-       "lf_foliage"
-      ],
-      "LOD2": [
+       "lf_foliage",
        "lf_foliage"
       ]
      }
@@ -1602,21 +1806,24 @@
       "lf_env_grass_tuft_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 10,
-      "LOD1": 6,
-      "LOD2": 4
+      "LOD0": 24,
+      "LOD1": 12,
+      "LOD2": 6
      },
-     "height_m": 0.63,
-     "canopyRadius_m": 0.45,
+     "height_m": 0.54,
+     "canopyRadius_m": 0.33,
      "footprintRadius_m": 0.3,
      "materials": {
       "LOD0": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_foliage",
        "lf_foliage"
       ]
      }
@@ -1628,21 +1835,24 @@
       "lf_env_grass_tuft_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 10,
-      "LOD1": 6,
-      "LOD2": 4
+      "LOD0": 32,
+      "LOD1": 16,
+      "LOD2": 8
      },
-     "height_m": 0.62,
-     "canopyRadius_m": 0.55,
+     "height_m": 0.74,
+     "canopyRadius_m": 0.48,
      "footprintRadius_m": 0.3,
      "materials": {
       "LOD0": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_foliage",
        "lf_foliage"
       ]
      }
@@ -1654,21 +1864,24 @@
       "lf_env_grass_tuft_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 10,
-      "LOD1": 6,
+      "LOD0": 20,
+      "LOD1": 10,
       "LOD2": 4
      },
-     "height_m": 0.85,
-     "canopyRadius_m": 0.56,
+     "height_m": 0.69,
+     "canopyRadius_m": 0.48,
      "footprintRadius_m": 0.3,
      "materials": {
       "LOD0": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_foliage",
        "lf_foliage"
       ]
      }
@@ -1691,21 +1904,24 @@
       "lf_env_fallen_branches_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 232,
-      "LOD1": 122,
-      "LOD2": 22
+      "LOD0": 1106,
+      "LOD1": 750,
+      "LOD2": 342
      },
-     "height_m": 0.2,
+     "height_m": 0.44,
      "canopyRadius_m": 2.08,
      "footprintRadius_m": 1.2,
      "materials": {
       "LOD0": [
+       "lf_bark_oak",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_bark_oak",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_bark_oak",
        "lf_foliage"
       ]
      }
@@ -1717,21 +1933,24 @@
       "lf_env_fallen_branches_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 179,
-      "LOD1": 84,
-      "LOD2": 13
+      "LOD0": 674,
+      "LOD1": 348,
+      "LOD2": 348
      },
-     "height_m": 0.2,
-     "canopyRadius_m": 1.98,
+     "height_m": 0.32,
+     "canopyRadius_m": 1.71,
      "footprintRadius_m": 1.2,
      "materials": {
       "LOD0": [
+       "lf_bark_oak",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_bark_oak",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_bark_oak",
        "lf_foliage"
       ]
      }
@@ -1754,21 +1973,24 @@
       "lf_env_mushrooms_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 224,
-      "LOD1": 96,
-      "LOD2": 32
+      "LOD0": 360,
+      "LOD1": 172,
+      "LOD2": 99
      },
-     "height_m": 0.22,
-     "canopyRadius_m": 0.44,
-     "footprintRadius_m": 0.3,
+     "height_m": 0.21,
+     "canopyRadius_m": 0.24,
+     "footprintRadius_m": 0.24,
      "materials": {
       "LOD0": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_foliage",
        "lf_foliage"
       ]
      }
@@ -1780,21 +2002,24 @@
       "lf_env_mushrooms_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 160,
-      "LOD1": 72,
-      "LOD2": 16
+      "LOD0": 600,
+      "LOD1": 301,
+      "LOD2": 165
      },
-     "height_m": 0.38,
-     "canopyRadius_m": 0.5,
+     "height_m": 0.15,
+     "canopyRadius_m": 0.33,
      "footprintRadius_m": 0.3,
      "materials": {
       "LOD0": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD1": [
+       "lf_foliage",
        "lf_foliage"
       ],
       "LOD2": [
+       "lf_foliage",
        "lf_foliage"
       ]
      }

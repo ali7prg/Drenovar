@@ -114,6 +114,7 @@ def mushrooms(tiles, n, radius, size_k, seed, segs=10):
     """Mushroom cluster: domed caps (painted fungus tile mapped top-down) on short pale stems (painted cap edge)."""
     rng = np.random.default_rng(seed)
     md = geom.Mesh()
+    tiles = [t for t in tiles if t.get("cap")] or tiles
     for k in range(n):
         t = tiles[rng.integers(len(tiles))]
         u0, v0, u1, v1 = t["uv"]
@@ -205,6 +206,19 @@ def main():
                        min_px=25)
     grass = sorted(grass, key=lambda t: -t["area"])[:28]
     fungi = sorted(fungi, key=lambda t: -t["area"])[:14]
+    # cap tiles: painted fungus colours (pull-push bled RGB of each fungus tile) inside an opaque disc
+    caps = []
+    for t in fungi[:4]:
+        tl = t["tile"].copy()
+        h, w = tl.shape[:2]
+        s_ = min(h, w)
+        y0_, x0_ = (h - s_) // 2, (w - s_) // 2
+        sq = tl[y0_:y0_ + s_, x0_:x0_ + s_].copy()
+        yy, xx = np.mgrid[0:s_, 0:s_]
+        disc = ((yy - s_ / 2 + 0.5) ** 2 + (xx - s_ / 2 + 0.5) ** 2) <= (s_ / 2 - 1) ** 2
+        sq[..., 3] = disc.astype(np.float32)
+        caps.append(dict(tile=sq, w=s_, h=s_, area=int(disc.sum()), cap=True))
+    fungi = caps + fungi
     g_img, gs = pack(grass, "grass")
     f_img, fs = pack(fungi, "groundcover", sub=(0.0, 0.5))
     atl.save_region("grass", g_img, {"tiles": len(grass), "scale": gs})

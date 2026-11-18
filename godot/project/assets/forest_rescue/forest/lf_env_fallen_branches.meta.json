@@ -9,9 +9,9 @@
         "lf_env_fallen_branches_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 1008,
-        "LOD1": 820,
-        "LOD2": 412
+        "LOD0": 1106,
+        "LOD1": 750,
+        "LOD2": 342
       },
       "materials": {
         "LOD0": [
@@ -28,16 +28,16 @@
         ]
       },
       "height_m": 0.44,
-      "footprint_radius_m": 1.7,
+      "footprint_radius_m": 2.08,
       "bounds_m_blender": [
         [
-          -1.48,
-          -1.7,
+          -0.87,
+          -1.22,
           -0.04
         ],
         [
-          1.51,
-          1.47,
+          2.08,
+          1.89,
           0.44
         ]
       ],
@@ -54,9 +54,9 @@
         "lf_env_fallen_branches_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 768,
-        "LOD1": 400,
-        "LOD2": 400
+        "LOD0": 674,
+        "LOD1": 348,
+        "LOD2": 348
       },
       "materials": {
         "LOD0": [
@@ -73,30 +73,30 @@
         ]
       },
       "height_m": 0.32,
-      "footprint_radius_m": 1.57,
+      "footprint_radius_m": 1.71,
       "bounds_m_blender": [
         [
-          -1.07,
-          -1.57,
+          -1.71,
+          -1.26,
           -0.04
         ],
         [
-          1.06,
-          0.92,
+          1.11,
+          0.82,
           0.32
         ]
       ],
       "display_offset_gltf": [
-        5.168,
+        5.11,
         0.0,
         0.0
       ]
     }
   },
   "tris": {
-    "LOD0": 1008,
-    "LOD1": 820,
-    "LOD2": 412
+    "LOD0": 1106,
+    "LOD1": 750,
+    "LOD2": 348
   },
   "bones": 0,
   "materials": [

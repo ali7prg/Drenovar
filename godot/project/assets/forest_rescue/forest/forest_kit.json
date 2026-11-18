@@ -1,0 +1,1781 @@
+{
+ "schema": 1,
+ "group": "forest",
+ "note": "Mesh resources per variant/LOD; node translations in the GLBs are preview offsets only. Instance with deterministic transforms (seeded yaw 0..2pi, scale inside recommendedScale).",
+ "sharedTextures": {
+  "foliageAtlas": "lf_foliage_atlas.png (2048, RGBA, alpha cutoff 0.5)",
+  "bark": "lf_bark_{oak,pine,birch,hollow,willow}_{c.jpg,n.png,r.png} (1024)",
+  "rock": "lf_rock_limestone_{c.jpg,n.png,r.png} (1024)"
+ },
+ "wind": {
+  "clip": "lf_forest_wind",
+  "seconds": 8.0,
+  "shader": "lf_forest_wind.gdshader",
+  "COLOR_0": "R sway (0 trunk base -> 1 tips), G leaf flutter, B per-branch phase, A crown AO"
+ },
+ "lodPolicy": {
+  "LOD0": "near (bark + foliage surfaces)",
+  "LOD1": "mid, single foliage-atlas surface (≈40%)",
+  "LOD2": "far card-cloud, single surface (≤300 tris)",
+  "suggestedVisibilityRange_m": {
+   "LOD0": [
+    0,
+    45
+   ],
+   "LOD1": [
+    40,
+    110
+   ],
+   "LOD2": [
+    100,
+    400
+   ]
+  }
+ },
+ "ambientCandidates": {
+  "lf_fern_cluster": {
+   "glb": "lf_env_reed_fern.glb",
+   "meta": "lf_env_reed_fern.meta.json",
+   "role": "reeds (wet banks) and fern clusters",
+   "variants": {
+    "fern_v1": {
+     "nodes": [
+      "lf_env_reed_fern_fern_v1_LOD0",
+      "lf_env_reed_fern_fern_v1_LOD1",
+      "lf_env_reed_fern_fern_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 78,
+      "LOD1": 36,
+      "LOD2": 10
+     },
+     "height_m": 1.46,
+     "canopyRadius_m": 1.48,
+     "footprintRadius_m": 1.48,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "fern_v2": {
+     "nodes": [
+      "lf_env_reed_fern_fern_v2_LOD0",
+      "lf_env_reed_fern_fern_v2_LOD1",
+      "lf_env_reed_fern_fern_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 78,
+      "LOD1": 36,
+      "LOD2": 10
+     },
+     "height_m": 1.15,
+     "canopyRadius_m": 1.16,
+     "footprintRadius_m": 1.16,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.8,
+    1.45
+   ],
+   "candidateCount": 377,
+   "candidateScaleRange": [
+    0.801,
+    1.449
+   ]
+  },
+  "lf_tree_birch": {
+   "glb": "lf_env_birch.glb",
+   "meta": "lf_env_birch.meta.json",
+   "role": "ambient birch (lf_tree_birch)",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_birch_v1_LOD0",
+      "lf_env_birch_v1_LOD1",
+      "lf_env_birch_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 3199,
+      "LOD1": 1250,
+      "LOD2": 290
+     },
+     "height_m": 12.81,
+     "canopyRadius_m": 4.82,
+     "footprintRadius_m": 0.9,
+     "materials": {
+      "LOD0": [
+       "lf_bark_birch",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_birch_v2_LOD0",
+      "lf_env_birch_v2_LOD1",
+      "lf_env_birch_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 3199,
+      "LOD1": 1249,
+      "LOD2": 290
+     },
+     "height_m": 13.5,
+     "canopyRadius_m": 3.52,
+     "footprintRadius_m": 0.9,
+     "materials": {
+      "LOD0": [
+       "lf_bark_birch",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_birch_v3_LOD0",
+      "lf_env_birch_v3_LOD1",
+      "lf_env_birch_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 3200,
+      "LOD1": 1250,
+      "LOD2": 290
+     },
+     "height_m": 11.92,
+     "canopyRadius_m": 5.19,
+     "footprintRadius_m": 0.9,
+     "materials": {
+      "LOD0": [
+       "lf_bark_birch",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.8,
+    1.35
+   ],
+   "candidateCount": 407,
+   "candidateScaleRange": [
+    0.8,
+    1.447
+   ]
+  },
+  "lf_tree_pine": {
+   "glb": "lf_env_dark_pine.glb",
+   "meta": "lf_env_dark_pine.meta.json",
+   "role": "resource tree «Сосна» + ambient pine/spruce/fir",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_dark_pine_v1_LOD0",
+      "lf_env_dark_pine_v1_LOD1",
+      "lf_env_dark_pine_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2899,
+      "LOD1": 1150,
+      "LOD2": 289
+     },
+     "height_m": 14.03,
+     "canopyRadius_m": 3.74,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_dark_pine_v2_LOD0",
+      "lf_env_dark_pine_v2_LOD1",
+      "lf_env_dark_pine_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2899,
+      "LOD1": 1150,
+      "LOD2": 289
+     },
+     "height_m": 16.85,
+     "canopyRadius_m": 4.36,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_dark_pine_v3_LOD0",
+      "lf_env_dark_pine_v3_LOD1",
+      "lf_env_dark_pine_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2599,
+      "LOD1": 1050,
+      "LOD2": 279
+     },
+     "height_m": 8.53,
+     "canopyRadius_m": 3.84,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v4": {
+     "nodes": [
+      "lf_env_dark_pine_v4_LOD0",
+      "lf_env_dark_pine_v4_LOD1",
+      "lf_env_dark_pine_v4_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2899,
+      "LOD1": 1150,
+      "LOD2": 289
+     },
+     "height_m": 13.03,
+     "canopyRadius_m": 3.62,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.75,
+    1.3
+   ],
+   "candidateCount": 356,
+   "candidateScaleRange": [
+    0.807,
+    1.449
+   ]
+  }
+ },
+ "resourceTrees": {
+  "oak «Дуб»": {
+   "glb": "lf_env_golden_oak.glb",
+   "meta": "lf_env_golden_oak.meta.json",
+   "role": "resource tree «Дуб» + ambient oak",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_golden_oak_v1_LOD0",
+      "lf_env_golden_oak_v1_LOD1",
+      "lf_env_golden_oak_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2950,
+      "LOD1": 1150,
+      "LOD2": 290
+     },
+     "height_m": 13.52,
+     "canopyRadius_m": 8.02,
+     "footprintRadius_m": 1.6,
+     "materials": {
+      "LOD0": [
+       "lf_bark_oak",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_golden_oak_v2_LOD0",
+      "lf_env_golden_oak_v2_LOD1",
+      "lf_env_golden_oak_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2950,
+      "LOD1": 1150,
+      "LOD2": 290
+     },
+     "height_m": 15.43,
+     "canopyRadius_m": 5.61,
+     "footprintRadius_m": 1.6,
+     "materials": {
+      "LOD0": [
+       "lf_bark_oak",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_golden_oak_v3_LOD0",
+      "lf_env_golden_oak_v3_LOD1",
+      "lf_env_golden_oak_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2949,
+      "LOD1": 1150,
+      "LOD2": 290
+     },
+     "height_m": 13.04,
+     "canopyRadius_m": 8.31,
+     "footprintRadius_m": 1.6,
+     "materials": {
+      "LOD0": [
+       "lf_bark_oak",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v4": {
+     "nodes": [
+      "lf_env_golden_oak_v4_LOD0",
+      "lf_env_golden_oak_v4_LOD1",
+      "lf_env_golden_oak_v4_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2400,
+      "LOD1": 949,
+      "LOD2": 240
+     },
+     "height_m": 8.81,
+     "canopyRadius_m": 4.32,
+     "footprintRadius_m": 1.6,
+     "materials": {
+      "LOD0": [
+       "lf_bark_oak",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.65,
+    1.1
+   ]
+  },
+  "pine «Сосна»": {
+   "glb": "lf_env_dark_pine.glb",
+   "meta": "lf_env_dark_pine.meta.json",
+   "role": "resource tree «Сосна» + ambient pine/spruce/fir",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_dark_pine_v1_LOD0",
+      "lf_env_dark_pine_v1_LOD1",
+      "lf_env_dark_pine_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2899,
+      "LOD1": 1150,
+      "LOD2": 289
+     },
+     "height_m": 14.03,
+     "canopyRadius_m": 3.74,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_dark_pine_v2_LOD0",
+      "lf_env_dark_pine_v2_LOD1",
+      "lf_env_dark_pine_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2899,
+      "LOD1": 1150,
+      "LOD2": 289
+     },
+     "height_m": 16.85,
+     "canopyRadius_m": 4.36,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_dark_pine_v3_LOD0",
+      "lf_env_dark_pine_v3_LOD1",
+      "lf_env_dark_pine_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2599,
+      "LOD1": 1050,
+      "LOD2": 279
+     },
+     "height_m": 8.53,
+     "canopyRadius_m": 3.84,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v4": {
+     "nodes": [
+      "lf_env_dark_pine_v4_LOD0",
+      "lf_env_dark_pine_v4_LOD1",
+      "lf_env_dark_pine_v4_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2899,
+      "LOD1": 1150,
+      "LOD2": 289
+     },
+     "height_m": 13.03,
+     "canopyRadius_m": 3.62,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.75,
+    1.3
+   ]
+  }
+ },
+ "biomeTreeMix": {
+  "birch": {
+   "asset": "lf_env_birch",
+   "variants": [
+    "v1",
+    "v2",
+    "v3"
+   ]
+  },
+  "pine": {
+   "asset": "lf_env_dark_pine",
+   "variants": [
+    "v1",
+    "v2",
+    "v3",
+    "v4"
+   ]
+  },
+  "fir": {
+   "asset": "lf_env_dark_pine",
+   "variants": [
+    "v1",
+    "v3"
+   ],
+   "note": "spruce/fir silhouettes"
+  },
+  "ancient_pine": {
+   "asset": "lf_env_dark_pine",
+   "variants": [
+    "v4",
+    "v2"
+   ],
+   "scale": [
+    1.1,
+    1.35
+   ]
+  },
+  "alder": {
+   "asset": "lf_env_birch",
+   "variants": [
+    "v2",
+    "v3"
+   ],
+   "note": "no dedicated alder: slender birch stand-in"
+  },
+  "willow": {
+   "asset": "lf_env_willow",
+   "variants": [
+    "v1",
+    "v2",
+    "v3"
+   ]
+  },
+  "fern": {
+   "asset": "lf_env_reed_fern",
+   "variants": [
+    "fern_v1",
+    "fern_v2"
+   ]
+  },
+  "deadwood": {
+   "asset": "lf_env_fallen_trunk",
+   "variants": [
+    "v2"
+   ],
+   "extra": [
+    "lf_env_fallen_branches",
+    "lf_env_hollow_oak v3 (snag)"
+   ]
+  },
+  "charcoal_stump": {
+   "asset": null,
+   "note": "not in this kit (no reference); use lf_env_fallen_branches + lf_env_hollow_oak v3 tinted, or request a stump asset"
+  },
+  "bone_rock": {
+   "asset": "lf_env_moss_rock",
+   "variants": [
+    "v1",
+    "v2",
+    "v3"
+   ]
+  },
+  "reed_bank_palette": {
+   "asset": "lf_env_reed_fern",
+   "variants": [
+    "reed_v1",
+    "reed_v2",
+    "mixed_v1"
+   ]
+  }
+ },
+ "assets": {
+  "lf_env_golden_oak": {
+   "glb": "lf_env_golden_oak.glb",
+   "meta": "lf_env_golden_oak.meta.json",
+   "role": "resource tree «Дуб» + ambient oak",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_golden_oak_v1_LOD0",
+      "lf_env_golden_oak_v1_LOD1",
+      "lf_env_golden_oak_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2950,
+      "LOD1": 1150,
+      "LOD2": 290
+     },
+     "height_m": 13.52,
+     "canopyRadius_m": 8.02,
+     "footprintRadius_m": 1.6,
+     "materials": {
+      "LOD0": [
+       "lf_bark_oak",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_golden_oak_v2_LOD0",
+      "lf_env_golden_oak_v2_LOD1",
+      "lf_env_golden_oak_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2950,
+      "LOD1": 1150,
+      "LOD2": 290
+     },
+     "height_m": 15.43,
+     "canopyRadius_m": 5.61,
+     "footprintRadius_m": 1.6,
+     "materials": {
+      "LOD0": [
+       "lf_bark_oak",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_golden_oak_v3_LOD0",
+      "lf_env_golden_oak_v3_LOD1",
+      "lf_env_golden_oak_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2949,
+      "LOD1": 1150,
+      "LOD2": 290
+     },
+     "height_m": 13.04,
+     "canopyRadius_m": 8.31,
+     "footprintRadius_m": 1.6,
+     "materials": {
+      "LOD0": [
+       "lf_bark_oak",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v4": {
+     "nodes": [
+      "lf_env_golden_oak_v4_LOD0",
+      "lf_env_golden_oak_v4_LOD1",
+      "lf_env_golden_oak_v4_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2400,
+      "LOD1": 949,
+      "LOD2": 240
+     },
+     "height_m": 8.81,
+     "canopyRadius_m": 4.32,
+     "footprintRadius_m": 1.6,
+     "materials": {
+      "LOD0": [
+       "lf_bark_oak",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.65,
+    1.1
+   ]
+  },
+  "lf_env_dark_pine": {
+   "glb": "lf_env_dark_pine.glb",
+   "meta": "lf_env_dark_pine.meta.json",
+   "role": "resource tree «Сосна» + ambient pine/spruce/fir",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_dark_pine_v1_LOD0",
+      "lf_env_dark_pine_v1_LOD1",
+      "lf_env_dark_pine_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2899,
+      "LOD1": 1150,
+      "LOD2": 289
+     },
+     "height_m": 14.03,
+     "canopyRadius_m": 3.74,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_dark_pine_v2_LOD0",
+      "lf_env_dark_pine_v2_LOD1",
+      "lf_env_dark_pine_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2899,
+      "LOD1": 1150,
+      "LOD2": 289
+     },
+     "height_m": 16.85,
+     "canopyRadius_m": 4.36,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_dark_pine_v3_LOD0",
+      "lf_env_dark_pine_v3_LOD1",
+      "lf_env_dark_pine_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2599,
+      "LOD1": 1050,
+      "LOD2": 279
+     },
+     "height_m": 8.53,
+     "canopyRadius_m": 3.84,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v4": {
+     "nodes": [
+      "lf_env_dark_pine_v4_LOD0",
+      "lf_env_dark_pine_v4_LOD1",
+      "lf_env_dark_pine_v4_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2899,
+      "LOD1": 1150,
+      "LOD2": 289
+     },
+     "height_m": 13.03,
+     "canopyRadius_m": 3.62,
+     "footprintRadius_m": 0.7,
+     "materials": {
+      "LOD0": [
+       "lf_bark_pine",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.75,
+    1.3
+   ]
+  },
+  "lf_env_birch": {
+   "glb": "lf_env_birch.glb",
+   "meta": "lf_env_birch.meta.json",
+   "role": "ambient birch (lf_tree_birch)",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_birch_v1_LOD0",
+      "lf_env_birch_v1_LOD1",
+      "lf_env_birch_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 3199,
+      "LOD1": 1250,
+      "LOD2": 290
+     },
+     "height_m": 12.81,
+     "canopyRadius_m": 4.82,
+     "footprintRadius_m": 0.9,
+     "materials": {
+      "LOD0": [
+       "lf_bark_birch",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_birch_v2_LOD0",
+      "lf_env_birch_v2_LOD1",
+      "lf_env_birch_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 3199,
+      "LOD1": 1249,
+      "LOD2": 290
+     },
+     "height_m": 13.5,
+     "canopyRadius_m": 3.52,
+     "footprintRadius_m": 0.9,
+     "materials": {
+      "LOD0": [
+       "lf_bark_birch",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_birch_v3_LOD0",
+      "lf_env_birch_v3_LOD1",
+      "lf_env_birch_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 3200,
+      "LOD1": 1250,
+      "LOD2": 290
+     },
+     "height_m": 11.92,
+     "canopyRadius_m": 5.19,
+     "footprintRadius_m": 0.9,
+     "materials": {
+      "LOD0": [
+       "lf_bark_birch",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.8,
+    1.35
+   ]
+  },
+  "lf_env_willow": {
+   "glb": "lf_env_willow.glb",
+   "meta": "lf_env_willow.meta.json",
+   "role": "riverbank willow",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_willow_v1_LOD0",
+      "lf_env_willow_v1_LOD1",
+      "lf_env_willow_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2878,
+      "LOD1": 1300,
+      "LOD2": 294
+     },
+     "height_m": 11.32,
+     "canopyRadius_m": 8.56,
+     "footprintRadius_m": 1.2,
+     "materials": {
+      "LOD0": [
+       "lf_bark_willow",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_willow_v2_LOD0",
+      "lf_env_willow_v2_LOD1",
+      "lf_env_willow_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2907,
+      "LOD1": 1300,
+      "LOD2": 294
+     },
+     "height_m": 9.65,
+     "canopyRadius_m": 7.39,
+     "footprintRadius_m": 1.2,
+     "materials": {
+      "LOD0": [
+       "lf_bark_willow",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_willow_v3_LOD0",
+      "lf_env_willow_v3_LOD1",
+      "lf_env_willow_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2620,
+      "LOD1": 1200,
+      "LOD2": 294
+     },
+     "height_m": 9.63,
+     "canopyRadius_m": 3.91,
+     "footprintRadius_m": 1.2,
+     "materials": {
+      "LOD0": [
+       "lf_bark_willow",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.8,
+    1.2
+   ]
+  },
+  "lf_env_hollow_oak": {
+   "glb": "lf_env_hollow_oak.glb",
+   "meta": "lf_env_hollow_oak.meta.json",
+   "role": "hero landmark tree (walk-through hollow)",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_hollow_oak_v1_LOD0",
+      "lf_env_hollow_oak_v1_LOD1",
+      "lf_env_hollow_oak_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 6782,
+      "LOD1": 2699,
+      "LOD2": 917
+     },
+     "height_m": 14.13,
+     "canopyRadius_m": 9.2,
+     "footprintRadius_m": 4.6,
+     "materials": {
+      "LOD0": [
+       "lf_bark_hollow",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_hollow_oak_v2_LOD0",
+      "lf_env_hollow_oak_v2_LOD1",
+      "lf_env_hollow_oak_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 6782,
+      "LOD1": 2700,
+      "LOD2": 926
+     },
+     "height_m": 13.64,
+     "canopyRadius_m": 8.6,
+     "footprintRadius_m": 4.6,
+     "materials": {
+      "LOD0": [
+       "lf_bark_hollow",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_hollow_oak_v3_LOD0",
+      "lf_env_hollow_oak_v3_LOD1",
+      "lf_env_hollow_oak_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 6782,
+      "LOD1": 2699,
+      "LOD2": 748
+     },
+     "height_m": 11.14,
+     "canopyRadius_m": 6.89,
+     "footprintRadius_m": 4.6,
+     "materials": {
+      "LOD0": [
+       "lf_bark_hollow",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.9,
+    1.05
+   ]
+  },
+  "lf_env_fallen_trunk": {
+   "glb": "lf_env_fallen_trunk.glb",
+   "meta": "lf_env_fallen_trunk.meta.json",
+   "role": "feature: fallen trunk / log bridge",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_fallen_trunk_v1_LOD0",
+      "lf_env_fallen_trunk_v1_LOD1",
+      "lf_env_fallen_trunk_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2617,
+      "LOD1": 1010,
+      "LOD2": 340
+     },
+     "height_m": 2.63,
+     "canopyRadius_m": 6.33,
+     "footprintRadius_m": 5.2,
+     "materials": {
+      "LOD0": [
+       "lf_bark_hollow",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_fallen_trunk_v2_LOD0",
+      "lf_env_fallen_trunk_v2_LOD1",
+      "lf_env_fallen_trunk_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 3060,
+      "LOD1": 1196,
+      "LOD2": 317
+     },
+     "height_m": 1.59,
+     "canopyRadius_m": 4.31,
+     "footprintRadius_m": 4.31,
+     "materials": {
+      "LOD0": [
+       "lf_bark_hollow",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.8,
+    1.2
+   ]
+  },
+  "lf_env_moss_rock": {
+   "glb": "lf_env_moss_rock.glb",
+   "meta": "lf_env_moss_rock.meta.json",
+   "role": "limestone outcrop / boulders",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_moss_rock_v1_LOD0",
+      "lf_env_moss_rock_v1_LOD1",
+      "lf_env_moss_rock_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 3466,
+      "LOD1": 1308,
+      "LOD2": 917
+     },
+     "height_m": 6.05,
+     "canopyRadius_m": 6.45,
+     "footprintRadius_m": 6.45,
+     "materials": {
+      "LOD0": [
+       "lf_rock_limestone",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_rock_limestone",
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_rock_limestone",
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_moss_rock_v2_LOD0",
+      "lf_env_moss_rock_v2_LOD1",
+      "lf_env_moss_rock_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 2040,
+      "LOD1": 805,
+      "LOD2": 534
+     },
+     "height_m": 3.13,
+     "canopyRadius_m": 3.54,
+     "footprintRadius_m": 3.54,
+     "materials": {
+      "LOD0": [
+       "lf_rock_limestone",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_rock_limestone",
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_rock_limestone",
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_moss_rock_v3_LOD0",
+      "lf_env_moss_rock_v3_LOD1",
+      "lf_env_moss_rock_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 743,
+      "LOD1": 293,
+      "LOD2": 93
+     },
+     "height_m": 1.59,
+     "canopyRadius_m": 1.28,
+     "footprintRadius_m": 1.28,
+     "materials": {
+      "LOD0": [
+       "lf_rock_limestone",
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_rock_limestone",
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_rock_limestone",
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.7,
+    1.3
+   ]
+  },
+  "lf_env_bramble": {
+   "glb": "lf_env_bramble.glb",
+   "meta": "lf_env_bramble.meta.json",
+   "role": "thorn bramble with berries",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_bramble_v1_LOD0",
+      "lf_env_bramble_v1_LOD1",
+      "lf_env_bramble_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 1756,
+      "LOD1": 544,
+      "LOD2": 162
+     },
+     "height_m": 1.97,
+     "canopyRadius_m": 2.27,
+     "footprintRadius_m": 2.27,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_bramble_v2_LOD0",
+      "lf_env_bramble_v2_LOD1",
+      "lf_env_bramble_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 1396,
+      "LOD1": 454,
+      "LOD2": 162
+     },
+     "height_m": 1.56,
+     "canopyRadius_m": 1.54,
+     "footprintRadius_m": 1.54,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_bramble_v3_LOD0",
+      "lf_env_bramble_v3_LOD1",
+      "lf_env_bramble_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 1468,
+      "LOD1": 472,
+      "LOD2": 162
+     },
+     "height_m": 1.34,
+     "canopyRadius_m": 1.89,
+     "footprintRadius_m": 1.89,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.8,
+    1.3
+   ]
+  },
+  "lf_env_reed_fern": {
+   "glb": "lf_env_reed_fern.glb",
+   "meta": "lf_env_reed_fern.meta.json",
+   "role": "reeds (wet banks) and fern clusters",
+   "variants": {
+    "reed_v1": {
+     "nodes": [
+      "lf_env_reed_fern_reed_v1_LOD0",
+      "lf_env_reed_fern_reed_v1_LOD1",
+      "lf_env_reed_fern_reed_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 398,
+      "LOD1": 144,
+      "LOD2": 8
+     },
+     "height_m": 2.58,
+     "canopyRadius_m": 1.52,
+     "footprintRadius_m": 1.52,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "reed_v2": {
+     "nodes": [
+      "lf_env_reed_fern_reed_v2_LOD0",
+      "lf_env_reed_fern_reed_v2_LOD1",
+      "lf_env_reed_fern_reed_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 398,
+      "LOD1": 144,
+      "LOD2": 8
+     },
+     "height_m": 1.89,
+     "canopyRadius_m": 1.65,
+     "footprintRadius_m": 1.65,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "fern_v1": {
+     "nodes": [
+      "lf_env_reed_fern_fern_v1_LOD0",
+      "lf_env_reed_fern_fern_v1_LOD1",
+      "lf_env_reed_fern_fern_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 78,
+      "LOD1": 36,
+      "LOD2": 10
+     },
+     "height_m": 1.46,
+     "canopyRadius_m": 1.48,
+     "footprintRadius_m": 1.48,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "fern_v2": {
+     "nodes": [
+      "lf_env_reed_fern_fern_v2_LOD0",
+      "lf_env_reed_fern_fern_v2_LOD1",
+      "lf_env_reed_fern_fern_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 78,
+      "LOD1": 36,
+      "LOD2": 10
+     },
+     "height_m": 1.15,
+     "canopyRadius_m": 1.16,
+     "footprintRadius_m": 1.16,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "mixed_v1": {
+     "nodes": [
+      "lf_env_reed_fern_mixed_v1_LOD0",
+      "lf_env_reed_fern_mixed_v1_LOD1",
+      "lf_env_reed_fern_mixed_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 452,
+      "LOD1": 168,
+      "LOD2": 18
+     },
+     "height_m": 2.62,
+     "canopyRadius_m": 2.05,
+     "footprintRadius_m": 2.05,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.8,
+    1.45
+   ]
+  },
+  "lf_env_grass_tuft": {
+   "glb": "lf_env_grass_tuft.glb",
+   "meta": "lf_env_grass_tuft.meta.json",
+   "role": "near-chunk grass scatter",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_grass_tuft_v1_LOD0",
+      "lf_env_grass_tuft_v1_LOD1",
+      "lf_env_grass_tuft_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 10,
+      "LOD1": 6,
+      "LOD2": 4
+     },
+     "height_m": 0.63,
+     "canopyRadius_m": 0.45,
+     "footprintRadius_m": 0.3,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_grass_tuft_v2_LOD0",
+      "lf_env_grass_tuft_v2_LOD1",
+      "lf_env_grass_tuft_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 10,
+      "LOD1": 6,
+      "LOD2": 4
+     },
+     "height_m": 0.62,
+     "canopyRadius_m": 0.55,
+     "footprintRadius_m": 0.3,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v3": {
+     "nodes": [
+      "lf_env_grass_tuft_v3_LOD0",
+      "lf_env_grass_tuft_v3_LOD1",
+      "lf_env_grass_tuft_v3_LOD2"
+     ],
+     "tris": {
+      "LOD0": 10,
+      "LOD1": 6,
+      "LOD2": 4
+     },
+     "height_m": 0.85,
+     "canopyRadius_m": 0.56,
+     "footprintRadius_m": 0.3,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.8,
+    1.5
+   ]
+  },
+  "lf_env_fallen_branches": {
+   "glb": "lf_env_fallen_branches.glb",
+   "meta": "lf_env_fallen_branches.meta.json",
+   "role": "near-chunk deadwood scatter",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_fallen_branches_v1_LOD0",
+      "lf_env_fallen_branches_v1_LOD1",
+      "lf_env_fallen_branches_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 232,
+      "LOD1": 122,
+      "LOD2": 22
+     },
+     "height_m": 0.2,
+     "canopyRadius_m": 2.08,
+     "footprintRadius_m": 1.2,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_fallen_branches_v2_LOD0",
+      "lf_env_fallen_branches_v2_LOD1",
+      "lf_env_fallen_branches_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 179,
+      "LOD1": 84,
+      "LOD2": 13
+     },
+     "height_m": 0.2,
+     "canopyRadius_m": 1.98,
+     "footprintRadius_m": 1.2,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.8,
+    1.3
+   ]
+  },
+  "lf_env_mushrooms": {
+   "glb": "lf_env_mushrooms.glb",
+   "meta": "lf_env_mushrooms.meta.json",
+   "role": "near-chunk mushroom scatter",
+   "variants": {
+    "v1": {
+     "nodes": [
+      "lf_env_mushrooms_v1_LOD0",
+      "lf_env_mushrooms_v1_LOD1",
+      "lf_env_mushrooms_v1_LOD2"
+     ],
+     "tris": {
+      "LOD0": 224,
+      "LOD1": 96,
+      "LOD2": 32
+     },
+     "height_m": 0.22,
+     "canopyRadius_m": 0.44,
+     "footprintRadius_m": 0.3,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    },
+    "v2": {
+     "nodes": [
+      "lf_env_mushrooms_v2_LOD0",
+      "lf_env_mushrooms_v2_LOD1",
+      "lf_env_mushrooms_v2_LOD2"
+     ],
+     "tris": {
+      "LOD0": 160,
+      "LOD1": 72,
+      "LOD2": 16
+     },
+     "height_m": 0.38,
+     "canopyRadius_m": 0.5,
+     "footprintRadius_m": 0.3,
+     "materials": {
+      "LOD0": [
+       "lf_foliage"
+      ],
+      "LOD1": [
+       "lf_foliage"
+      ],
+      "LOD2": [
+       "lf_foliage"
+      ]
+     }
+    }
+   },
+   "recommendedScale": [
+    0.8,
+    1.6
+   ]
+  }
+ }
+}

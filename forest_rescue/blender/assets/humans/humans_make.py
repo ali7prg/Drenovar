@@ -202,7 +202,8 @@ def clip_specs(rig, role, name, dur):
 
 # --------------------------------------------------------------------------- main
 
-def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032):
+def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032, tex_size=2048, only_clips=None,
+         out_glb=None):
     t0 = time.time()
     ctx = HBLD.assemble(asset, voxel=voxel)
     spec = ctx.spec
@@ -214,7 +215,7 @@ def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032)
     budget["total"] = budgets[0]
     lod0, classes = PL.build_lod0(ctx, budget)
     hi = [PL.obj_from_piece(p, "hi_" + p.name) for p in ctx.pieces if p.meta.get("sdf") and p.name in ("body", "head")]
-    tex = PL.texture_lod0(ctx, lod0, classes, size=2048, hi_objs=hi)
+    tex = PL.texture_lod0(ctx, lod0, classes, size=tex_size, hi_objs=hi)
     tp = PL.save_textures(asset, tex)
     mats, imgs = PL.make_materials(asset, lod0, classes, spec, tp, tex["factors"])
     main, optional = split_optional(ctx, lod0)
@@ -251,7 +252,7 @@ def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032)
     lods = [main]
     tri0 = core.tri_count(main)
     for li, keep in ((1, SK.LOD1_KEEP), (2, SK.LOD2_KEEP)):
-        target = budgets[li]
+        target = budgets[li] * 0.96
         r = target / max(tri0, 1)
         lod, Wl = RG.make_lod(main, f"{asset}_LOD{li}", r * 0.95, r * 1.05, keep, main["pieces"].split(","))
         RG.bind(lod, arm, Wl)
@@ -274,6 +275,8 @@ def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032)
         clist = CL.CIVILIAN if group == "civilian" else CL.SOLDIER
         props_fn = getattr(spec, "props_pose", None)
         for name, dur, loop in clist:
+            if only_clips and name not in only_clips:
+                continue
             tc = time.time()
             specs, extra = clip_specs(rig, role, name, dur)
             pf = (lambda P, t, nm=name: props_fn(rig, P, t, nm)) if props_fn else None
@@ -289,7 +292,7 @@ def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032)
         arm.animation_data.action = None
         RG_rest(arm)
     # ---------------- export
-    out = export_all(asset, ctx, arm, lods, opt_lods, mats, tex, tp, clip_meta, classes, group)
+    out = export_all(asset, ctx, arm, lods, opt_lods, mats, tex, tp, clip_meta, classes, group, out_glb=out_glb)
     res.update(out)
     res["build_seconds"] = round(time.time() - t0, 1)
     log(asset, "done", json.dumps({k: v for k, v in res.items() if k != "clips"})[:400])
@@ -405,8 +408,8 @@ def write_action(arm, name, frames, loop):
     return act
 
 
-def export_all(asset, ctx, arm, lods, opt_lods, mats, tex, tp, clip_meta, classes, group):
-    glb = paths.runtime("humans", f"{asset}.glb")
+def export_all(asset, ctx, arm, lods, opt_lods, mats, tex, tp, clip_meta, classes, group, out_glb=None):
+    glb = out_glb or paths.runtime("humans", f"{asset}.glb")
     arm.name = asset + "_rig"
     objs = [arm] + lods + opt_lods
     for o in opt_lods:
@@ -439,6 +442,9 @@ def export_all(asset, ctx, arm, lods, opt_lods, mats, tex, tp, clip_meta, classe
                  "Seated clips assume a 0.45 m seat behind the root (cage bench/log). Tintable materials carry "
                  "colour in baseColorFactor (albedo atlas normalised) for captive variants.",
     }
+    if out_glb:
+        core.write_json(out_glb.replace(".glb", ".meta.json"), meta)
+        return {"glb": glb, "tris": tris, "bones_used": used}
     core.write_json(paths.runtime("humans", f"{asset}.meta.json"), meta)
     blend = paths.source("humans", f"{asset}.blend")
     core.save_blend(blend)

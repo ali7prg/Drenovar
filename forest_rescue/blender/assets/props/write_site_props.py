@@ -19,12 +19,12 @@ CAGE = {"lf_site_01": "oak", "lf_site_02": "oak", "lf_site_04": "oak", "lf_site_
         "lf_site_03": "iron", "lf_site_06": "iron", "lf_site_07": "iron", "lf_site_11": "iron",
         "lf_site_05": "root", "lf_site_08": "root", "lf_site_09": "root", "lf_site_12": "root"}
 # artifact family + variant per key (3 per family); bone keys go into the keyhole plate of any cage
-ARTIFACT = {"lf_key_10": ("stone_rune", 1), "lf_key_02": ("stone_rune", 2), "lf_key_04": ("stone_rune", 3),
+ARTIFACT = {"lf_key_01": ("stone_rune", 1), "lf_key_02": ("stone_rune", 2), "lf_key_04": ("stone_rune", 3),
             "lf_key_11": ("bronze_seal", 1), "lf_key_03": ("bronze_seal", 2), "lf_key_06": ("bronze_seal", 3),
             "lf_key_05": ("amber_crystal", 1), "lf_key_08": ("amber_crystal", 2), "lf_key_09": ("amber_crystal", 3),
-            "lf_key_01": ("bone_key", 1), "lf_key_07": ("bone_key", 2), "lf_key_12": ("bone_key", 3)}
+            "lf_key_10": ("bone_key", 1), "lf_key_07": ("bone_key", 2), "lf_key_12": ("bone_key", 3)}
 WHY = {
-    "lf_key_10": "«Печать каменного дыхания» - stone; classic spiral (the drawn medallion)",
+    "lf_key_01": "«Берестяная печать» - first site, oak cage: the drawn spiral stone medallion in the cage's native round socket (vertical slice)",
     "lf_key_02": "«Печать трёх граней» - three facets -> triskele with three rim notches",
     "lf_key_04": "«Печать елового круга» - spruce circle -> fir sprig in a ring, scalloped rim",
     "lf_key_11": "«Печать дальнего берега» - the drawn three-leaf sprig seal",
@@ -33,7 +33,7 @@ WHY = {
     "lf_key_05": "«Янтарная печать» in «Смоляная низина» - the drawn amber crystal",
     "lf_key_08": "«Печать двух троп» - two crystals split by a bronze bar",
     "lf_key_09": "«Печать трёх уступов» - three-step terraced crystal",
-    "lf_key_01": "«Берестяная печать» - first site: a literal pale key teaches 'artifact = key' (round bow)",
+    "lf_key_10": "«Печать каменного дыхания» (late act 4, oak cage) - bone key with round bow in the keyhole plate",
     "lf_key_07": "«Печать мелкой воды» - trefoil bow, two-notch bit",
     "lf_key_12": "«Печать последней двери» in «Роща старых костей» - bone key, square bow with cross",
 }

@@ -421,9 +421,11 @@ func height_at(x: float, z: float) -> float:
 	var outside := Vector2(maxf(maxf(deck.position.x - x, x - deck.end.x), 0.0), maxf(maxf(deck.position.y - z, z - deck.end.y), 0.0)).length()
 	if outside <= 0.0:
 		return maxf(h, atlas.BRIDGE_DECK_Y)
-	if outside < 1.5 and h < atlas.BRIDGE_DECK_Y and h > atlas.BRIDGE_DECK_Y - 0.8:
-		# Abutment apron: walkable height eases off the deck edge (bridge mesh covers the seam).
-		return lerpf(atlas.BRIDGE_DECK_Y, h, smoothstep(0.0, 1.5, outside))
+	if outside < 1.5 and h < atlas.BRIDGE_DECK_Y:
+		# Abutment apron: walkable height eases off the deck edge (bridge mesh covers the seam);
+		# continuous in both distance and depth (fades out over water/gorge).
+		var w := (1.0 - smoothstep(0.0, 1.5, outside)) * (1.0 - smoothstep(0.5, 1.0, atlas.BRIDGE_DECK_Y - h))
+		return lerpf(h, atlas.BRIDGE_DECK_Y, w)
 	return h
 
 

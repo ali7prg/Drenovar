@@ -6,7 +6,7 @@ teeth pointing -Z.  Socket frame: origin = recess floor centre (= key_slot), pla
 y = -recess_depth, plate normal -Y.
 
 Variant mapping (see site_props.json): readable without colour by outline + relief.
-  stone_rune   v1 single spiral, chipped round rim        (lf_key_10)
+  stone_rune   v1 single spiral, chipped round rim        (lf_key_01)
                v2 triskele, three V-notches in the rim     (lf_key_02)
                v3 fir-sprig in a ring, 8-lobed scalloped rim (lf_key_04)
   bronze_seal  v1 three-leaf sprig, plain hexagon          (lf_key_11)
@@ -15,7 +15,7 @@ Variant mapping (see site_props.json): readable without colour by outline + reli
   amber_crystal v1 single faceted crystal, 4 bronze caps   (lf_key_05)
                v2 two crystals split by a bronze bar        (lf_key_08)
                v3 three-step terraced crystal              (lf_key_09)
-  bone_key     v1 round bow, one-notch bit                 (lf_key_01)
+  bone_key     v1 round bow, one-notch bit                 (lf_key_10)
                v2 trefoil bow, two-notch bit               (lf_key_07)
                v3 square bow with cross, stepped bit       (lf_key_12)
 """

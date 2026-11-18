@@ -26,6 +26,14 @@ GC = {"bramble": ["v1", "v2", "v3"], "reed_fern": ["fern_v1", "fern_v2"], "moss_
       "grass_tuft": ["v1", "v2", "v3"], "fallen_branches": ["v1", "v2"], "mushrooms": ["v1"]}
 
 
+def kit_variants(asset):
+    import json
+    p = os.path.join(RT, f"lf_env_{asset}.meta.json")
+    if not os.path.exists(p):
+        return []
+    return list(json.load(open(p)).get("variants", {}).keys())
+
+
 def import_meshes(asset):
     path = os.path.join(RT, f"lf_env_{asset}.glb")
     if not os.path.exists(path):
@@ -105,6 +113,11 @@ def main():
     meshes = {}
     for asset in list(KIT) + list(GC):
         meshes.update(import_meshes(asset))
+        have = kit_variants(asset)
+        if asset in KIT and have:
+            KIT[asset] = [v for v in KIT[asset] if v in have] or have[:1]
+        if asset in GC and have:
+            GC[asset] = [v for v in GC[asset] if v in have] or have[:1]
     print("imported", len(meshes), flush=True)
     rng = np.random.default_rng(42)
     path_pts = [(-34, -10 + 6 * math.sin(t * 0.25)) for t in range(0)] or \
@@ -154,6 +167,7 @@ def main():
     g = ground()
     pth = path_strip(path_pts)
     fqa.studio(a.samples)
+    fqa.use_ao([o for l in range(3) for o in placed[l]], True)
     sc = bpy.context.scene
     sc.render.film_transparent = False
     sc.world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.55, 0.6, 0.65, 1)

@@ -22,9 +22,9 @@
       "cage": {
         "type": "oak",
         "glb": "lf_cage_wood.glb",
-        "socket_shape": "keyhole",
-        "socket_node": "socket_keyhole_pivot",
-        "key_slot_node": "key_slot_keyhole",
+        "socket_shape": "circle",
+        "socket_node": "socket_pivot",
+        "key_slot_node": "key_slot",
         "placement": {
           "cageOffset": {
             "x": 0,
@@ -40,11 +40,11 @@
       "artifact": {
         "key": "lf_key_01",
         "name": "Берестяная печать",
-        "family": "bone_key",
+        "family": "stone_rune",
         "variant": 1,
-        "glb": "lf_artifact_bone_key.glb",
-        "node": "lf_artifact_bone_key_v1",
-        "why": "«Берестяная печать» - first site: a literal pale key teaches 'artifact = key' (round bow)"
+        "glb": "lf_artifact_stone_rune.glb",
+        "node": "lf_artifact_stone_rune_v1",
+        "why": "«Берестяная печать» - first site, oak cage: the drawn spiral stone medallion in the cage's native round socket (vertical slice)"
       },
       "mechanism": {
         "kind": "trail_cache",
@@ -53,7 +53,31 @@
           "split_birch",
           "white_moss",
           "fallen_trunk"
-        ]
+        ],
+        "targets": {
+          "split_birch": {
+            "node": "mark_landmark_a",
+            "where": "split birch stump",
+            "clip": "lf_trail_mark_1",
+            "visible_scale": 1
+          },
+          "white_moss": {
+            "node": "mark_landmark_b",
+            "where": "white-moss boulder",
+            "clip": "lf_trail_mark_2",
+            "visible_scale": 1
+          },
+          "fallen_trunk": {
+            "node": "cache_lid",
+            "where": "hollow log cache",
+            "clip": "lf_lock_mechanism",
+            "open_translation_offset": [
+              0.55,
+              0,
+              0
+            ]
+          }
+        }
       }
     },
     "lf_site_02": {
@@ -95,7 +119,27 @@
           "mountain",
           "river",
           "leaf"
-        ]
+        ],
+        "targets": {
+          "step1": {
+            "symbol": "mountain",
+            "node": "ring_1",
+            "rotation_y_deg": -36.0,
+            "clip": "lf_rune_ring1_mountain"
+          },
+          "step2": {
+            "symbol": "river",
+            "node": "ring_2",
+            "rotation_y_deg": -72.0,
+            "clip": "lf_rune_ring2_river"
+          },
+          "step3": {
+            "symbol": "leaf",
+            "node": "ring_3",
+            "rotation_y_deg": -108.0,
+            "clip": "lf_rune_ring3_leaf"
+          }
+        }
       }
     },
     "lf_site_03": {
@@ -137,7 +181,44 @@
           "brake",
           "pawl",
           "raise"
-        ]
+        ],
+        "targets": {
+          "brake": {
+            "node": "brake_lever",
+            "rotation_x_deg": -48.0,
+            "clip": "lf_winch_brake"
+          },
+          "pawl": {
+            "node": "pawl",
+            "rotation_x_deg": -24.0,
+            "clip": "lf_winch_pawl"
+          },
+          "raise": {
+            "clip": "lf_rope_release",
+            "nodes": {
+              "drum": {
+                "rotation_x_deg": -357.75
+              },
+              "crank": {
+                "rotation_x_deg": -357.75
+              },
+              "rope": {
+                "scale_y": 0.3333,
+                "note": "rope node scales along its own length (glTF Y)"
+              },
+              "chest": {
+                "translation_offset": [
+                  0,
+                  1.28,
+                  0
+                ]
+              },
+              "brake_lever": {
+                "rotation_x_deg": 0.0
+              }
+            }
+          }
+        }
       }
     },
     "lf_site_04": {
@@ -179,7 +260,63 @@
           "left_plate",
           "right_plate",
           "center_latch"
-        ]
+        ],
+        "targets": {
+          "left_plate": {
+            "clip": "lf_latch_left_plate",
+            "nodes": {
+              "plate_left": {
+                "translation_offset": [
+                  0,
+                  -0.09,
+                  0
+                ]
+              },
+              "lever_left": {
+                "rotation_z_deg_glTF": 4.881
+              },
+              "spring_l0/l1": {
+                "scale_y": 0.6786
+              }
+            }
+          },
+          "right_plate": {
+            "clip": "lf_latch_right_plate",
+            "nodes": {
+              "plate_right": {
+                "translation_offset": [
+                  0,
+                  -0.09,
+                  0
+                ]
+              },
+              "lever_right": {
+                "rotation_z_deg_glTF": -4.881
+              },
+              "spring_r0/r1": {
+                "scale_y": 0.6786
+              }
+            }
+          },
+          "center_latch": {
+            "clip": "lf_lock_mechanism",
+            "nodes": {
+              "latch_bar": {
+                "translation_offset": [
+                  0,
+                  -0.24,
+                  0
+                ]
+              },
+              "lever_left": {
+                "rotation_z_deg_glTF": -8.826
+              },
+              "lever_right": {
+                "rotation_z_deg_glTF": 8.826
+              }
+            }
+          }
+        }
       }
     },
     "lf_site_05": {
@@ -221,7 +358,31 @@
           "resin_pine",
           "double_stump",
           "resin_bowl"
-        ]
+        ],
+        "targets": {
+          "resin_pine": {
+            "node": "mark_landmark_a",
+            "where": "split birch stump",
+            "clip": "lf_trail_mark_1",
+            "visible_scale": 1
+          },
+          "double_stump": {
+            "node": "mark_landmark_b",
+            "where": "white-moss boulder",
+            "clip": "lf_trail_mark_2",
+            "visible_scale": 1
+          },
+          "resin_bowl": {
+            "node": "cache_lid",
+            "where": "hollow log cache",
+            "clip": "lf_lock_mechanism",
+            "open_translation_offset": [
+              0.55,
+              0,
+              0
+            ]
+          }
+        }
       }
     },
     "lf_site_06": {
@@ -263,7 +424,27 @@
           "coal",
           "seed",
           "tree"
-        ]
+        ],
+        "targets": {
+          "step1": {
+            "symbol": "coal",
+            "node": "ring_1",
+            "rotation_y_deg": -144.0,
+            "clip": "lf_rune_ring1_coal"
+          },
+          "step2": {
+            "symbol": "seed",
+            "node": "ring_2",
+            "rotation_y_deg": -180.0,
+            "clip": "lf_rune_ring2_seed"
+          },
+          "step3": {
+            "symbol": "tree",
+            "node": "ring_3",
+            "rotation_y_deg": -216.0,
+            "clip": "lf_rune_ring3_tree"
+          }
+        }
       }
     },
     "lf_site_07": {
@@ -305,7 +486,44 @@
           "brake",
           "pawl",
           "raise"
-        ]
+        ],
+        "targets": {
+          "brake": {
+            "node": "brake_lever",
+            "rotation_x_deg": -48.0,
+            "clip": "lf_winch_brake"
+          },
+          "pawl": {
+            "node": "pawl",
+            "rotation_x_deg": -24.0,
+            "clip": "lf_winch_pawl"
+          },
+          "raise": {
+            "clip": "lf_rope_release",
+            "nodes": {
+              "drum": {
+                "rotation_x_deg": -357.75
+              },
+              "crank": {
+                "rotation_x_deg": -357.75
+              },
+              "rope": {
+                "scale_y": 0.3333,
+                "note": "rope node scales along its own length (glTF Y)"
+              },
+              "chest": {
+                "translation_offset": [
+                  0,
+                  1.28,
+                  0
+                ]
+              },
+              "brake_lever": {
+                "rotation_x_deg": 0.0
+              }
+            }
+          }
+        }
       }
     },
     "lf_site_08": {
@@ -347,7 +565,63 @@
           "left_plate",
           "right_plate",
           "center_latch"
-        ]
+        ],
+        "targets": {
+          "left_plate": {
+            "clip": "lf_latch_left_plate",
+            "nodes": {
+              "plate_left": {
+                "translation_offset": [
+                  0,
+                  -0.09,
+                  0
+                ]
+              },
+              "lever_left": {
+                "rotation_z_deg_glTF": 4.881
+              },
+              "spring_l0/l1": {
+                "scale_y": 0.6786
+              }
+            }
+          },
+          "right_plate": {
+            "clip": "lf_latch_right_plate",
+            "nodes": {
+              "plate_right": {
+                "translation_offset": [
+                  0,
+                  -0.09,
+                  0
+                ]
+              },
+              "lever_right": {
+                "rotation_z_deg_glTF": -4.881
+              },
+              "spring_r0/r1": {
+                "scale_y": 0.6786
+              }
+            }
+          },
+          "center_latch": {
+            "clip": "lf_lock_mechanism",
+            "nodes": {
+              "latch_bar": {
+                "translation_offset": [
+                  0,
+                  -0.24,
+                  0
+                ]
+              },
+              "lever_left": {
+                "rotation_z_deg_glTF": -8.826
+              },
+              "lever_right": {
+                "rotation_z_deg_glTF": 8.826
+              }
+            }
+          }
+        }
       }
     },
     "lf_site_09": {
@@ -389,7 +663,31 @@
           "bent_fern",
           "flat_slab",
           "three_notches"
-        ]
+        ],
+        "targets": {
+          "bent_fern": {
+            "node": "mark_landmark_a",
+            "where": "split birch stump",
+            "clip": "lf_trail_mark_1",
+            "visible_scale": 1
+          },
+          "flat_slab": {
+            "node": "mark_landmark_b",
+            "where": "white-moss boulder",
+            "clip": "lf_trail_mark_2",
+            "visible_scale": 1
+          },
+          "three_notches": {
+            "node": "cache_lid",
+            "where": "hollow log cache",
+            "clip": "lf_lock_mechanism",
+            "open_translation_offset": [
+              0.55,
+              0,
+              0
+            ]
+          }
+        }
       }
     },
     "lf_site_10": {
@@ -400,9 +698,9 @@
       "cage": {
         "type": "oak",
         "glb": "lf_cage_wood.glb",
-        "socket_shape": "circle",
-        "socket_node": "socket_pivot",
-        "key_slot_node": "key_slot",
+        "socket_shape": "keyhole",
+        "socket_node": "socket_keyhole_pivot",
+        "key_slot_node": "key_slot_keyhole",
         "placement": {
           "cageOffset": {
             "x": 0,
@@ -418,11 +716,11 @@
       "artifact": {
         "key": "lf_key_10",
         "name": "Печать каменного дыхания",
-        "family": "stone_rune",
+        "family": "bone_key",
         "variant": 1,
-        "glb": "lf_artifact_stone_rune.glb",
-        "node": "lf_artifact_stone_rune_v1",
-        "why": "«Печать каменного дыхания» - stone; classic spiral (the drawn medallion)"
+        "glb": "lf_artifact_bone_key.glb",
+        "node": "lf_artifact_bone_key_v1",
+        "why": "«Печать каменного дыхания» (late act 4, oak cage) - bone key with round bow in the keyhole plate"
       },
       "mechanism": {
         "kind": "rune_lock",
@@ -431,7 +729,27 @@
           "sun",
           "stone",
           "root"
-        ]
+        ],
+        "targets": {
+          "step1": {
+            "symbol": "sun",
+            "node": "ring_1",
+            "rotation_y_deg": -252.0,
+            "clip": "lf_rune_ring1_sun"
+          },
+          "step2": {
+            "symbol": "stone",
+            "node": "ring_2",
+            "rotation_y_deg": -288.0,
+            "clip": "lf_rune_ring2_stone"
+          },
+          "step3": {
+            "symbol": "root",
+            "node": "ring_3",
+            "rotation_y_deg": -324.0,
+            "clip": "lf_rune_ring3_root"
+          }
+        }
       }
     },
     "lf_site_11": {
@@ -473,7 +791,44 @@
           "brake",
           "pawl",
           "raise"
-        ]
+        ],
+        "targets": {
+          "brake": {
+            "node": "brake_lever",
+            "rotation_x_deg": -48.0,
+            "clip": "lf_winch_brake"
+          },
+          "pawl": {
+            "node": "pawl",
+            "rotation_x_deg": -24.0,
+            "clip": "lf_winch_pawl"
+          },
+          "raise": {
+            "clip": "lf_rope_release",
+            "nodes": {
+              "drum": {
+                "rotation_x_deg": -357.75
+              },
+              "crank": {
+                "rotation_x_deg": -357.75
+              },
+              "rope": {
+                "scale_y": 0.3333,
+                "note": "rope node scales along its own length (glTF Y)"
+              },
+              "chest": {
+                "translation_offset": [
+                  0,
+                  1.28,
+                  0
+                ]
+              },
+              "brake_lever": {
+                "rotation_x_deg": 0.0
+              }
+            }
+          }
+        }
       }
     },
     "lf_site_12": {
@@ -515,7 +870,63 @@
           "left_plate",
           "right_plate",
           "center_latch"
-        ]
+        ],
+        "targets": {
+          "left_plate": {
+            "clip": "lf_latch_left_plate",
+            "nodes": {
+              "plate_left": {
+                "translation_offset": [
+                  0,
+                  -0.09,
+                  0
+                ]
+              },
+              "lever_left": {
+                "rotation_z_deg_glTF": 4.881
+              },
+              "spring_l0/l1": {
+                "scale_y": 0.6786
+              }
+            }
+          },
+          "right_plate": {
+            "clip": "lf_latch_right_plate",
+            "nodes": {
+              "plate_right": {
+                "translation_offset": [
+                  0,
+                  -0.09,
+                  0
+                ]
+              },
+              "lever_right": {
+                "rotation_z_deg_glTF": -4.881
+              },
+              "spring_r0/r1": {
+                "scale_y": 0.6786
+              }
+            }
+          },
+          "center_latch": {
+            "clip": "lf_lock_mechanism",
+            "nodes": {
+              "latch_bar": {
+                "translation_offset": [
+                  0,
+                  -0.24,
+                  0
+                ]
+              },
+              "lever_left": {
+                "rotation_z_deg_glTF": -8.826
+              },
+              "lever_right": {
+                "rotation_z_deg_glTF": 8.826
+              }
+            }
+          }
+        }
       }
     }
   }

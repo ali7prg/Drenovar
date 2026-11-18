@@ -104,7 +104,7 @@ def iter_path(asset_id, it, name):
     return paths.compare(asset_id, f"iter{it:02d}_{name}.png")
 
 
-def _ao_copy(mat):
+def _ao_copy(mat, layer="Col"):
     """QA-only copy of a material multiplying base colour by COLOR_0 alpha (crown AO), like lf_forest_wind."""
     m = mat.copy()
     m.name = mat.name + "_qa_ao"
@@ -114,7 +114,7 @@ def _ao_copy(mat):
         return m
     src = bsdf.inputs["Base Color"].links[0].from_socket
     attr = nt.nodes.new("ShaderNodeVertexColor")
-    attr.layer_name = "Col"
+    attr.layer_name = layer
     mix = nt.nodes.new("ShaderNodeMix")
     mix.data_type = "RGBA"
     mix.blend_type = "MULTIPLY"
@@ -128,13 +128,14 @@ def _ao_copy(mat):
 def use_ao(objs, on=True):
     """Swap material slots to AO-multiplied QA copies (on) or back to the export materials (off)."""
     for o in objs:
-        if o.type != "MESH" or "Col" not in o.data.color_attributes:
+        if o.type != "MESH" or len(o.data.color_attributes) == 0:
             continue
+        layer = o.data.color_attributes[0].name
         for s in o.material_slots:
             if s.material is None:
                 continue
             if on and not s.material.name.endswith("_qa_ao"):
-                qa = bpy.data.materials.get(s.material.name + "_qa_ao") or _ao_copy(s.material)
+                qa = bpy.data.materials.get(s.material.name + "_qa_ao") or _ao_copy(s.material, layer)
                 s.link = "OBJECT"
                 s.material = qa
             elif not on:

@@ -1,4 +1,16 @@
 {
  "intro": "Production pass for the «Лес потерянных» cages, artifacts, sockets, supplies and the four artifact mechanisms (Blender 5.3 headless, scripts in `forest_rescue/blender/assets/props/`). Method: geometry is procedural hard-surface (propkit: sweeps/lathes/extrusions with LOD-independent parametric UVs, LOD1/LOD2 re-tessellated and mapped into the LOD0 atlas), outlines/thicknesses traced from the drawings' front/side views where they exist, cameras fitted to every 3/4 drawing by silhouette optimisation, colour projected from those views (texproj-style visibility/facing blend, partial de-lighting, background pixels rejected), high-res insets projected onto hinges/sockets, painted relief (band-passed luminance) displacing a subdivided copy that Cycles bakes into tangent normals + AO, procedural PBR for everything the drawings do not show. Every comparison iteration is kept (`iterNN_*`). IoU 'filled' compares hole-filled silhouettes, 'raw' the drawn mask with holes (bars/gaps).",
- "sections": []
+ "sections": [
+  {
+   "title": "Site mapping (site_props.json)",
+   "lines": [
+    "* File: `godot/project/assets/forest_rescue/props/site_props.json` (generator `write_site_props.py`).",
+    "* Cages: oak = sites 01, 02, 04, 10; iron = 03, 06, 07, 11; root = 05, 08, 09, 12 (by biome/story).",
+    "* Native sockets: oak circle (stone_rune), iron hexagon (bronze_seal), root diamond (amber_crystal); bone keys use each cage's keyhole plate (`socket_keyhole_pivot`, scale 0 by default).",
+    "* Keys: stone_rune v1/v2/v3 = lf_key_01/02/04, bronze_seal v1/v2/v3 = lf_key_11/03/06, amber_crystal v1/v2/v3 = lf_key_05/08/09, bone_key v1/v2/v3 = lf_key_10/07/12.",
+    "* Vertical slice (coordinator priority): site 01 Берёзовая просека = lf_cage_wood + lf_artifact_stone_rune v1 in the native round socket + lf_mechanism_trail_cache (A=split birch, B=white moss, C=fallen trunk cache).",
+    "* Change log: lf_key_01 was first proposed as bone key v1; switched to stone_rune v1 for the site-1 vertical slice (the oak drawing shows the spiral medallion in its socket); bone key v1 moved to lf_key_10."
+   ]
+  }
+ ]
 }

@@ -151,13 +151,13 @@ class Composer:
 
 # --------------------------------------------------------------------------- gaits
 
-def foot_gait(phase, duty, sweep, lift, front=True, fold=None):
+def foot_gait(phase, duty, sweep, lift, front=True, fold=None, heel=34.0):
     """Returns (forward offset m, height m, meta deg, toe deg, girdle deg, in_stance)."""
     ph = phase % 1.0
     if ph < duty:
         s = ph / duty
         fwd = sweep * (0.5 - s)
-        meta = -6.0 + 34.0 * ss((s - 0.55) / 0.45)
+        meta = -6.0 + heel * ss((s - 0.55) / 0.45)
         return fwd, 0.0, meta, 0.0, -10.0 + 20.0 * s if front else 0.0, True
     s = (ph - duty) / (1 - duty)
     e = 0.5 - 0.5 * math.cos(math.pi * s)
@@ -165,7 +165,7 @@ def foot_gait(phase, duty, sweep, lift, front=True, fold=None):
     h = lift * math.sin(math.pi * min(1.0, s * 1.08)) ** 0.85
     fmax = fold if fold is not None else (72.0 if front else 48.0)
     if s < 0.32:
-        meta = lerp(28.0, fmax, ss(s / 0.32))
+        meta = lerp(heel - 6.0, fmax, ss(s / 0.32))
         toe = lerp(0.0, 12.0, ss(s / 0.32))
     elif s < 0.78:
         u = ss((s - 0.32) / 0.46)

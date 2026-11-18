@@ -24,10 +24,10 @@ from frlib import core, paths, refs
 
 FAMILIES = ["stone_rune", "bronze_seal", "amber_crystal", "bone_key"]
 KEYMAP = {  # family -> {variant: key id}
-    "stone_rune": {1: "lf_key_10", 2: "lf_key_02", 3: "lf_key_04"},
+    "stone_rune": {1: "lf_key_01", 2: "lf_key_02", 3: "lf_key_04"},
     "bronze_seal": {1: "lf_key_11", 2: "lf_key_03", 3: "lf_key_06"},
     "amber_crystal": {1: "lf_key_05", 2: "lf_key_08", 3: "lf_key_09"},
-    "bone_key": {1: "lf_key_01", 2: "lf_key_07", 3: "lf_key_12"},
+    "bone_key": {1: "lf_key_10", 2: "lf_key_07", 3: "lf_key_12"},
 }
 SOCKET_KIND = {"stone_rune": "circle", "bronze_seal": "hex", "amber_crystal": "diamond", "bone_key": "keyhole"}
 IMG = "loot_artifact_families.png"

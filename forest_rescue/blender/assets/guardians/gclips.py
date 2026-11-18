@@ -90,7 +90,8 @@ def locomotion(C, P, kind="walk"):
             front = leg in C.front
             fwd, h, meta, toe, gird, st = ganim.foot_gait(ph - off, duty, sweep * g.get("sweep_f" if front else "sweep_h", 1.0),
                                                           g["lift_f" if front else "lift_h"], front=front,
-                                                          fold=g.get("fold_f" if front else "fold_h"))
+                                                          fold=g.get("fold_f" if front else "fold_h"),
+                                                          heel=g.get("heel", 34.0))
             n = C.neutral[leg]
             feet[leg] = dict(pos=n + np.array([0.0, -fwd, h]), meta=meta, toe=toe, girdle=gird * g.get("girdle", 1.0),
                              stance=st)

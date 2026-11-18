@@ -78,3 +78,120 @@ def body_parts(J, L):
         P += H.boot_parts(J, S_, sx, L, top_z=0.225, cls="boot", shaft_r=(0.062, 0.060), width=1.05,
                           shaft_flare=1.08, cuff=0.010)
     return P
+
+
+# ----------------------------------------------------------------------------- garments
+def garments(ctx):
+    import humans_cloth as C
+    import humans_geo as G
+    from frlib import sdf as fsdf
+    J, L, s = ctx.J, ctx.L, 1.0
+    cxy = ctx.center
+    out = []
+
+    def axis_center(c):
+        return np.array([cxy[0], cxy[1], c[2]])
+
+    # --- apron skirt: wraps front+sides, open at the back (back view: edges at x~+-0.22)
+    def zhem(th):
+        a = np.minimum(np.abs(th), np.pi / 2)
+        return 0.352 + 0.112 * np.sin(a) ** 2 - 0.055 * np.clip((np.abs(th) - np.pi / 2) / 0.75, 0, 1)
+
+    D = C.drape(ctx.torso_fn, cxy, (-2.28, 2.28), lambda th: np.full_like(th, 1.112), zhem, nu=30, nv=18,
+                clearance=0.013, slack=0.06, flare=0.085, flare_pow=1.6,
+                folds=[(9, 0.0055, 0.4), (15, 0.0025, 1.3)], ragged=0.006, seed=3,
+                fit=(ctx.hull_fn, 0.40, 1.02, 0, 0.30), part="apron")
+    out.append(G.piece_from_drape("apron_skirt", D, "apron", 0.0045,
+                                  {"type": "skirt", "top_z": 1.11, "hem_z": 0.35, "follow": 0.55}, axis_center))
+    # --- bib (front, chest to waist), narrowing toward the top
+    def bib_region(th, z):
+        w = np.interp(z, [1.08, 1.20, 1.40], [0.150, 0.118, 0.084])
+        return np.abs(np.sin(th)) * 0.150 < w
+    Db = C.drape(ctx.torso_fn, cxy, (-0.95, 0.95), lambda th: np.full_like(th, 1.405), lambda th: np.full_like(th, 1.085),
+                 nu=16, nv=12, clearance=0.009, slack=0.25, folds=[(7, 0.002, 0.0)], region=bib_region, part="bib")
+    out.append(G.piece_from_drape("apron_bib", Db, "apron", 0.004, {"type": "body"}, axis_center))
+    # --- neck strap: bib corners -> over the trapezius -> around the back of the neck
+    th = np.concatenate([np.linspace(-0.55, -2.2, 10), np.linspace(-2.4, 2.4, 9), np.linspace(2.2, 0.55, 10)])
+    zz = np.concatenate([np.linspace(1.40, 1.468, 10), np.full(9, 1.478), np.linspace(1.468, 1.40, 10)])
+    P, N = G.curve_on_body(ctx.body_fn, cxy, th, zz, clearance=0.006)
+    out.append(G.band_piece("apron_strap", P, N, 0.024, 0.003, "apron", {"type": "body"}))
+    # --- waist tie (closed ring) + bow and tails at the back
+    th = np.linspace(-np.pi, np.pi, 40, endpoint=False)
+    P, N = G.curve_on_body(ctx.torso_fn, cxy, th, np.full_like(th, 1.112), clearance=0.017)
+    out.append(G.band_piece("apron_tie", P, N, 0.028, 0.003, "apron", {"type": "body"}, closed=True))
+    back = G.surface_point_body = None
+    bc = C.surface_point(ctx.torso_fn, np.array([0, 0.02, 1.095]), np.array([0, 1.0, 0]), clearance=0.02)
+    for sx in (1, -1):
+        loop = [bc + np.array([sx * dx, 0.012 + 0.010 * np.sin(np.pi * dx / 0.075), dz]) for dx, dz in
+                zip(np.linspace(0.0, 0.075, 7), 0.02 * np.sin(np.linspace(0, np.pi, 7)))]
+        loop += [bc + np.array([sx * dx, 0.012, -0.012 * np.sin(np.pi * dx / 0.075)]) for dx in np.linspace(0.07, 0.0, 6)]
+        out.append(G.tube_piece(f"apron_bow_{sx}", np.array(loop), 0.010, "apron", {"type": "body"}, sides=6))
+    for sx, (dx, zend) in ((1, (0.020, 0.74)), (-1, (0.040, 0.72))):
+        zs = np.linspace(1.085, zend, 12)
+        ths = np.pi - sx * np.linspace(0.02, dx * 4.0, 12)
+        P, N = G.curve_on_body(ctx.torso_fn, cxy, ths, zs, clearance=0.020)
+        out.append(G.band_piece(f"apron_tail_{sx}", P, N, 0.030, 0.003, "apron",
+                                {"type": "skirt", "top_z": 1.09, "hem_z": 0.72, "follow": 0.4}))
+    # --- hanging canvas pouch at the front-right waist
+    top = C.surface_point(ctx.torso_fn, np.array([-0.115, 0.0, 0.975]), np.array([0, -1.0, 0]), clearance=0.025)
+    R = G.rot_from((1.0, 0.0, 0.12), (0, -1.0, 0.0))
+    out.append(G.box_piece("pouch", top + np.array([0, -0.030, -0.080]), (0.095, 0.048, 0.150), R, "canvas",
+                           {"type": "rigid", "bone": "Bag"}, bevel=0.55, segs=2))
+    st = np.array([top + np.array([0.004, -0.010, 0.14]), top + np.array([0.004, -0.020, 0.06]),
+                   top + np.array([0.0, -0.028, 0.0])])
+    out.append(G.tube_piece("pouch_cord", st, 0.006, "canvas", {"type": "rigid", "bone": "Bag"}, sides=6))
+    tie = np.array([top + np.array([0.02, -0.036, -0.150]), top + np.array([0.026, -0.040, -0.20]),
+                    top + np.array([0.020, -0.038, -0.255])])
+    out.append(G.tube_piece("pouch_tie", tie, 0.007, "canvas", {"type": "rigid", "bone": "Bag"}, sides=6))
+    # --- emerald armband, LEFT upper arm
+    P, N = G.ring_on_limb(ctx.body_fn, J["LeftUpperArm"], J["LeftLowerArm"], 0.50, n=20, clearance=0.003)
+    out.append(G.band_piece("armband", P, N, 0.060, 0.004, "armband", {"type": "rigid", "bone": "LeftUpperArm"},
+                            closed=True, segs_w=2))
+    return out
+
+
+def head_extras(ctx):
+    """Hair joins the body field (no hidden scalp); beard is a separate optional shell."""
+    import humans_geo as G
+    from frlib import sdf as fsdf
+    lm = ctx.lm
+    s = lm["scale"]
+    reg = G.hair_region(lm, front=0.066, temple_drop=0.25, side=0.000, back=-0.072, noise=0.004, seed=5)
+
+    def hair_fn(P):
+        return np.maximum(ctx.head_fn(P) - 0.017 * s, reg(P))
+    hair = H.tag(fsdf.Prim(hair_fn, lm["origin"] - 0.16, lm["origin"] + 0.20), cls="hair", bone="Head", k=0.004,
+                 name="hair_shell")
+    cl = G.curls(lm, ctx.head_fn, reg, 70, 0.009 * s, 0.015 * s, 0.012 * s, seed=11)
+    return [hair] + cl
+
+
+def beard(ctx):
+    import humans_geo as G
+    from frlib import sdf as fsdf
+    lm = ctx.lm
+    s = lm["scale"]
+    O = lm["origin"]
+
+    def region(P):
+        Q = (np.asarray(P, float) - O) / s
+        x, y, z = Q[..., 0], Q[..., 1], Q[..., 2]
+        # below the cheekbone line, in front of the ears, around the jaw & chin, open mouth slot
+        top = -0.040 + 0.28 * np.maximum(np.abs(x) - 0.020, 0) - 0.010
+        r1 = z - top
+        r2 = y - 0.085                      # not behind the jaw angle
+        mouth = np.maximum(np.abs(x) - 0.020, np.abs(z - (lm["mouth"][2] - O[2]) / s + 0.002) - 0.0045)
+        return np.maximum(np.maximum(r1, r2), -mouth) * s
+
+    def fn(P):
+        return np.maximum(ctx.head_fn(P) - 0.016 * s, region(P))
+    prims = [H.tag(fsdf.Prim(fn, O - 0.14, O + 0.14), cls="beard", bone="Jaw", k=0.004)]
+    prims += G.curls(lm, ctx.head_fn, region, 46, 0.007 * s, 0.012 * s, 0.010 * s, seed=21, bone="Jaw", cls="beard")
+    # moustache
+    m = lm["mouth"]
+    for sx in (1, -1):
+        prims.append(H.capsule(m + np.array([0, -0.004, 0.011]) * s, m + np.array([sx * 0.030, 0.003, 0.0]) * s,
+                               0.0075 * s, 0.0055 * s, cls="beard", bone="Head", k=0.006))
+    lo = O + np.array([-0.10, -0.06, -0.16]) * s
+    hi = O + np.array([0.10, 0.12, 0.0]) * s
+    return G.sdf_piece("beard", prims, lo, hi, 0.0022, "beard", {"type": "body"}, smooth=0.7)

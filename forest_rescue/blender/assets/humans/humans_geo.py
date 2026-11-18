@@ -255,3 +255,100 @@ def curls(lm, head_fn, region_fn, count, rmin, rmax, lift, seed=0, bone="Head", 
         r = rng.uniform(rmin, rmax)
         out.append(H.tag(fsdf.sphere(p + d * (lift + r * 0.25) * jitter, r), cls=cls, bone=bone, k=0.006))
     return out
+
+
+def ring_on_limb(fn, a, b, t, n=24, clearance=0.004, rmax=0.2):
+    """Closed ring hugging a limb at parameter t along a->b; returns points, outward normals."""
+    a = np.asarray(a, float)
+    b = np.asarray(b, float)
+    e = (b - a) / np.linalg.norm(b - a)
+    ref = np.array([0, 1.0, 0]) if abs(e[1]) < 0.9 else np.array([1.0, 0, 0])
+    u = np.cross(e, ref)
+    u /= np.linalg.norm(u)
+    w = np.cross(e, u)
+    c = a + (b - a) * t
+    pts, nrm = [], []
+    for k in range(n):
+        ang = 2 * math.pi * k / n
+        d = math.cos(ang) * u + math.sin(ang) * w
+        p = C.surface_point(fn, c, d, rmax=rmax, step=0.0015, clearance=clearance)
+        pts.append(p)
+        nrm.append(d)
+    return np.array(pts), np.array(nrm)
+
+
+def band_piece(name, pts, nrm, width, thick, cls, rule, closed=False, segs_w=1, lift=0.0):
+    P = np.asarray(pts, float) + np.asarray(nrm, float) * lift
+    V, F, U = C.band(P, nrm, width, closed=closed, segs_w=segs_w)
+    nn = np.asarray(nrm, float)
+    nn_rep = np.tile(nn, (segs_w + 1, 1))
+    cen = V - nn_rep * 0.05
+
+    def cfn(c, V=V, cen=cen):
+        i = int(np.argmin(np.linalg.norm(V - c, axis=1)))
+        return cen[i]
+    F, U = orient_outward(V, F, U, cfn)
+    if thick > 0:
+        V, F, U = solidify(V, F, U, thick, inner_uv_scale=0.6)
+    return Piece(name, V, F, U, cls, rule)
+
+
+def tube_piece(name, pts, radius, cls, rule, sides=8, closed=False, caps=True):
+    V, F, U = C.tube(pts, radius, sides=sides, closed=closed, caps=caps)
+    return Piece(name, V, F, U, cls, rule)
+
+
+def box_piece(name, center, size, rot, cls, rule, bevel=0.35, segs=1):
+    V, F, U = C.rbox(center, size, rot=rot, bevel=bevel, segs=segs)
+    return Piece(name, V, F, U, cls, rule)
+
+
+def lathe_piece(name, profile, origin, axis, cls, rule, sides=16, ref=None):
+    V, F, U = C.lathe(profile, origin, axis, sides=sides, ref=ref)
+    return Piece(name, V, F, U, cls, rule)
+
+
+def rot_from(x_axis, z_axis):
+    """3x3 rotation (columns = local x,y,z) from desired local x and z directions."""
+    x = np.asarray(x_axis, float)
+    x /= np.linalg.norm(x)
+    z = np.asarray(z_axis, float)
+    z = z - np.dot(z, x) * x
+    z /= np.linalg.norm(z)
+    y = np.cross(z, x)
+    return np.stack([x, y, z], 1)
+
+
+def curve_on_body(fn, center_xy, thetas, zs, clearance=0.004, smooth=1):
+    """Polyline hugging the body along (theta, z) samples (rays from the vertical axis)."""
+    th = np.asarray(thetas, float)
+    zz = np.asarray(zs, float)
+    r = C.ray_radius(fn, center_xy, th, zz, clearance=clearance)
+    r = np.where(np.isfinite(r), r, np.nanmedian(r))
+    if smooth:
+        r = ndi.gaussian_filter1d(r, smooth, mode="nearest")
+    P = np.stack([center_xy[0] + r * np.sin(th), center_xy[1] - r * np.cos(th), zz], -1)
+    N = np.stack([np.sin(th), -np.cos(th), np.zeros_like(th)], -1)
+    return P, N
+
+
+def hair_region(lm, front=0.064, temple_drop=0.30, side=0.018, back=-0.070, side_y=(0.03, 0.13), noise=0.0,
+                seed=0, ear_clear=True):
+    """Signed region function (negative inside hair) in head-frame units."""
+    O = lm["origin"]
+    s = lm["scale"]
+    rng = np.random.default_rng(seed)
+    ph = rng.uniform(0, 6.28, 6)
+
+    def fn(P):
+        Q = (np.asarray(P, float) - O) / s
+        x, y, z = Q[..., 0], Q[..., 1], Q[..., 2]
+        hz_front = front - temple_drop * np.maximum(np.abs(x) - 0.030, 0)
+        t1 = np.clip((y - side_y[0]) / 0.03, 0, 1)
+        t2 = np.clip((y - side_y[1]) / 0.03, 0, 1)
+        hz = hz_front * (1 - t1) + side * t1
+        hz = hz * (1 - t2) + back * t2
+        if noise:
+            hz = hz + noise * (np.sin(x * 140 + ph[0]) * np.sin(y * 120 + ph[1]) + 0.5 * np.sin(x * 260 + ph[2]))
+        return (hz - z) * s
+    return fn

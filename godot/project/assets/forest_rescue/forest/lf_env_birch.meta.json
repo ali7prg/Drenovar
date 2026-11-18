@@ -9,9 +9,9 @@
         "lf_env_birch_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3928,
-        "LOD1": 964,
-        "LOD2": 142
+        "LOD0": 4118,
+        "LOD1": 952,
+        "LOD2": 146
       },
       "materials": {
         "LOD0": [
@@ -31,16 +31,16 @@
         ]
       },
       "height_m": 13.08,
-      "crown_radius_m": 5.52,
+      "crown_radius_m": 5.49,
       "bounds_m_blender": [
         [
-          -2.7,
-          -2.74,
+          -2.72,
+          -2.77,
           -0.3
         ],
         [
-          5.52,
-          2.78,
+          5.49,
+          2.48,
           13.08
         ]
       ],
@@ -69,8 +69,8 @@
         "lf_env_birch_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3878,
-        "LOD1": 1194,
+        "LOD0": 3502,
+        "LOD1": 1178,
         "LOD2": 148
       },
       "materials": {
@@ -90,22 +90,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 12.88,
-      "crown_radius_m": 5.06,
+      "height_m": 12.78,
+      "crown_radius_m": 5.49,
       "bounds_m_blender": [
         [
-          -5.06,
-          -3.69,
+          -5.49,
+          -4.37,
           -0.3
         ],
         [
-          2.19,
-          4.53,
-          12.88
+          2.02,
+          4.58,
+          12.78
         ]
       ],
       "display_offset_gltf": [
-        10.225,
+        10.95,
         0.0,
         0.0
       ],
@@ -131,15 +131,16 @@
         ],
         "no_front": true,
         "cfg": {
-          "anchor_min_z": 4.5,
-          "mass_min_dist": 1.35,
+          "anchor_min_z": 4.8,
+          "mass_min_dist": 1.75,
           "ao_under": 0.86,
-          "anchor_source": "patches"
+          "anchor_source": "patches",
+          "mass_r": 0.12
         },
         "lods": {
           "0": {
-            "n_masses": 40,
-            "clumps_per": 18,
+            "n_masses": 30,
+            "clumps_per": 13,
             "max_cards": 930,
             "core_cards": 0,
             "copy_min_r_px": 2.6,
@@ -164,9 +165,9 @@
         "lf_env_birch_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3748,
-        "LOD1": 1166,
-        "LOD2": 154
+        "LOD0": 3414,
+        "LOD1": 1172,
+        "LOD2": 128
       },
       "materials": {
         "LOD0": [
@@ -185,22 +186,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 13.44,
-      "crown_radius_m": 5.05,
+      "height_m": 13.29,
+      "crown_radius_m": 5.1,
       "bounds_m_blender": [
         [
-          -2.62,
-          -3.48,
+          -2.38,
+          -3.23,
           -0.31
         ],
         [
-          5.05,
-          3.44,
-          13.44
+          5.1,
+          3.38,
+          13.29
         ]
       ],
       "display_offset_gltf": [
-        20.45,
+        21.9,
         0.0,
         0.0
       ],
@@ -229,15 +230,16 @@
         ],
         "no_front": true,
         "cfg": {
-          "anchor_min_z": 5.0,
-          "mass_min_dist": 1.35,
+          "anchor_min_z": 5.2,
+          "mass_min_dist": 1.8,
           "ao_under": 0.86,
-          "anchor_source": "patches"
+          "anchor_source": "patches",
+          "mass_r": 0.12
         },
         "lods": {
           "0": {
-            "n_masses": 36,
-            "clumps_per": 18,
+            "n_masses": 28,
+            "clumps_per": 13,
             "max_cards": 1000,
             "core_cards": 0,
             "copy_min_r_px": 2.6,
@@ -257,9 +259,9 @@
     }
   },
   "tris": {
-    "LOD0": 3928,
-    "LOD1": 1194,
-    "LOD2": 154
+    "LOD0": 4118,
+    "LOD1": 1178,
+    "LOD2": 148
   },
   "bones": 0,
   "materials": [

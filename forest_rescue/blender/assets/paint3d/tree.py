@@ -1023,6 +1023,8 @@ class TreeBuilder:
             elif mode == "top":
                 # brightest-topped painted clumps (top quartile)
                 w *= np.exp(np.clip((tlums - np.percentile(tlums[~hires_m & base_m], 70)) / (lp * 0.6), -6, 4))
+            elif mode == "shade":
+                w *= np.exp(-((lums - np.percentile(lums[base_m & ~hires_m], 35)) / 6.0) ** 2)
             elif mode == "under":
                 chs = np.array([q.get("chroma", 40.0) for q in info])
                 w *= np.exp(-((lums - np.percentile(lums[~hires_m], 30)) / 5.0) ** 2)
@@ -1143,7 +1145,7 @@ class TreeBuilder:
                     mode, hf, ao = "top", cfg.get("top_part", 0.6), 1.0
                     n = nrm(nshade + Z * 0.6)
                 elif zf > -0.15:
-                    mode, hf, ao = "side", 1.0, 0.95
+                    mode, hf, ao = cfg.get("side_mode", "side"), 1.0, cfg.get("ao_side", 0.95)
                     n = nrm(nshade + Z * 0.35)
                 else:
                     mode, hf, ao = "under", 1.0, cfg.get("ao_under", 0.8)
@@ -1445,7 +1447,8 @@ def swatch(box, size=None):
     return sw
 
 
-def bark_texture(ref, bark_mesh_orig, path_ids, size=1024, swatch_box=None, wood_mask=None, delight_floor=18.0):
+def bark_texture(ref, bark_mesh_orig, path_ids, size=1024, swatch_box=None, wood_mask=None, delight_floor=18.0,
+                 swatch_px_per_m=None, swatch_m=0.6):
     """Project the painting onto the (original, non-copied) wood mesh; fill unseen texels from visible
     painted bark (pull-push) + high-pass detail of the art/02 bark swatch."""
     V, T, UV, C, N, M = bark_mesh_orig.arrays()
@@ -1485,15 +1488,27 @@ def bark_texture(ref, bark_mesh_orig, path_ids, size=1024, swatch_box=None, wood
     out = filled.copy()
     if swatch_box is not None:
         sw = swatch(swatch_box)
+        if swatch_px_per_m and swatch_m:
+            s_ = swatch_px_per_m * swatch_m / sw.shape[1]
+            sw = cv2.resize(sw, (max(8, int(sw.shape[1] * s_)), max(8, int(sw.shape[0] * s_))),
+                            interpolation=cv2.INTER_AREA if s_ < 1 else cv2.INTER_LANCZOS4)
         sh, sw_w = sw.shape[:2]
-        # tile the swatch over the texture (scale ~ painted bark density)
         reps_y = int(np.ceil(size / sh)) + 1
         reps_x = int(np.ceil(size / sw_w)) + 1
-        tiled = np.tile(sw, (reps_y, reps_x, 1))[:size, :size]
-        hp = tiled - cv2.GaussianBlur(tiled, (0, 0), 6)
+        # mirrored tiling (seamless) of the painted swatch
+        tile2 = np.concatenate([np.concatenate([sw, sw[:, ::-1]], 1), np.concatenate([sw[::-1], sw[::-1, ::-1]], 1)], 0)
+        tiled = np.tile(tile2, (reps_y // 2 + 1, reps_x // 2 + 1, 1))[:size, :size]
         unknown = Tx.valid & ~known
-        soft = cv2.GaussianBlur(unknown.astype(np.float32), (0, 0), 2.0)
-        out = out + hp * soft[..., None] * 0.9
+        if known.any():
+            # colour-match the swatch to the projected painted bark of this tree (mean/std per channel)
+            kp = col[known]
+            m_s, s_s = tiled.reshape(-1, 3).mean(0), tiled.reshape(-1, 3).std(0) + 1e-4
+            m_k, s_k = kp.mean(0), kp.std(0) + 1e-4
+            k_ = np.clip(s_k / s_s, 0.6, 1.4)
+            tiled = np.clip((tiled - m_s) * k_ + m_k, 0, 1)
+        soft = cv2.GaussianBlur(unknown.astype(np.float32), (0, 0), 3.0)
+        soft = np.where(unknown, np.maximum(soft, 0.65), soft * 0.5)
+        out = out * (1 - soft[..., None]) + tiled * soft[..., None]
     out = np.clip(out, 0, 1)
     bl = cv2.GaussianBlur(out, (0, 0), 1.0)
     out = np.clip(out + 0.35 * (out - bl), 0, 1)

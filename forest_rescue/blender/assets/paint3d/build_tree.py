@@ -103,9 +103,16 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
         else:
             q = simplify_path(p, max(L["limb_step_m"], 2.2 * float(np.max(p["r"]))))
         ps.append(q)
+    if B.cfg.get("limbs_connected_only"):
+        ps = [q for q in ps if q["kind"] == "trunk" or (q.get("parent", -1) != -2 and q.get("r_px", 0) >= B.cfg.get("limb_keep_r", 0))]
+    if B.cfg.get("trunk_r_k"):
+        for q in ps:
+            if q["kind"] == "trunk":
+                q["r"] = q["r"] * B.cfg["trunk_r_k"]
     mr, est = limit_paths(ps, L["limb_budget"], L["limb_sides"], L["limb_min_r_px"])
     copies = []
-    if L.get("copies") or sp.get("placement") == "anchors":
+    placement = B.cfg.get("placement", sp.get("placement", "dome"))
+    if L.get("copies") or placement == "anchors":
         axis_top = ref.axis_x[0]
         tv = geom.world_at_y(ref.view, np.array([axis_top]), np.array([float(ref.trunk_rows[0])]), np.array([0.0]))[0]
         tv[2] = 0.0
@@ -135,9 +142,11 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
                               segs=L.get("segs", 3))
     elif sp.get("crown_mode") == "mass":
         anchors = None
-        if sp.get("placement") == "anchors":
-            tips = [p["P"][-1] for p in base_paths if p["kind"] == "limb" and p.get("r_px", 0) >= sp.get("anchor_min_r", 1.5)
-                    and p["P"][-1][2] > B.cfg.get("anchor_min_z", 0.0)]
+        if placement == "anchors":
+            tips = [p["P"][-1] for p in base_paths if p["kind"] == "limb"
+                    and p.get("r_px", 0) >= B.cfg.get("anchor_min_r", sp.get("anchor_min_r", 1.5))
+                    and p["P"][-1][2] > B.cfg.get("anchor_min_z", 0.0)
+                    and not (B.cfg.get("limbs_connected_only") and p.get("parent", -1) == -2)]
             if sp.get("anchor_step_m"):
                 for p_ in base_paths:
                     if p_["kind"] != "limb":
@@ -154,9 +163,9 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
             for (Rm, tv, mir, sc) in copies:
                 anchors += [((tp - tv) * sc) @ Rm.T + tv for tp in tips]
         fills = B.mass_cards(fronts, dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod, n_masses=L["n_masses"],
-                             mass_r=sp.get("mass_r", 0.34), clumps_per=L["clumps_per"],
+                             mass_r=B.cfg.get("mass_r", sp.get("mass_r", 0.34)), clumps_per=L["clumps_per"],
                              front_extra_frac=L.get("front_extra", 0.6), max_cards=L.get("max_cards"),
-                             core_cards=L.get("core_cards", 30), placement=sp.get("placement", "dome"),
+                             core_cards=L.get("core_cards", 30), placement=placement,
                              anchors=anchors, curtains=L.get("curtains", 0))
     elif sp.get("crown_mode", "volume") == "volume":
         fills = B.volume_cards(L["n_clumps"], fronts, dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod,
@@ -244,7 +253,8 @@ def main():
                                    depth_scale=p.get("depth_scale"), ref_side=ref.view.d)
         orig.add(V, T, UV, C, N, 0)
         ids += [p["id"]] * len(T)
-    col, known, Tx = tree.bark_texture(ref, orig, np.array(ids), size=1024, swatch_box=sp["swatch"])
+    col, known, Tx = tree.bark_texture(ref, orig, np.array(ids), size=1024, swatch_box=sp["swatch"],
+                                       swatch_px_per_m=dens, swatch_m=sp.get("swatch_m", 0.6))
     nmap, rmap = tree.bark_maps(col)
     kind = sp["bark"]
     cpath = os.path.join(RT, f"lf_bark_{kind}_c.jpg")

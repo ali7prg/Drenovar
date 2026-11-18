@@ -69,7 +69,7 @@ def main():
         details = [(f"{TITLE[sid]}: {view} close-ups: reference | model", os.path.join(renders, f"{sid}_detail_{view}.jpg"))
                    for view in ("side", "front", "rear", "top", "preparation", "launch", "contact", "recovery")]
         if any(os.path.exists(p) for _t, p in details):
-            page(details, width=1400).save(os.path.join(img_out, f"closeup_{sid}.jpg"), quality=80)
+            page(details, width=1400).save(os.path.join(img_out, f"closeup_{sid}.jpg"), quality=70)
         before = os.path.join(renders, "..", "before", f"{sid}_model_idle_0.jpg")
         if os.path.exists(before):
             page([(f"{TITLE[sid]}: BEFORE (the 17.11 kit-sheet model) in the creature-references views", before),

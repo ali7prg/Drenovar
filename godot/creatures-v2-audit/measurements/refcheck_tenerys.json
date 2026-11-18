@@ -1,27 +1,27 @@
 {
  "views": {
   "iou": {
-   "side": 0.682,
-   "front": 0.726,
-   "rear": 0.77,
-   "top": 0.648
+   "side": 0.697,
+   "front": 0.739,
+   "rear": 0.743,
+   "top": 0.719
   },
   "median_colour": {
    "side": {
     "reference": "#44424b",
-    "model": "#545155"
+    "model": "#4d4b4e"
    },
    "front": {
     "reference": "#423e44",
-    "model": "#504e52"
+    "model": "#4c4a4e"
    },
    "rear": {
     "reference": "#4c4d5a",
-    "model": "#434244"
+    "model": "#3a393c"
    },
    "top": {
     "reference": "#484955",
-    "model": "#49494c"
+    "model": "#4b4a4e"
    }
   },
   "px_per_m": {
@@ -34,14 +34,14 @@
  "glbposes": {
   "camera": {
    "az": 22.0,
-   "el": 4.0,
-   "dist": 8.957492095892498
+   "el": 10.0,
+   "dist": 9.66024172872214
   },
   "iou": {
-   "preparation": 0.546,
-   "launch": 0.505,
-   "contact": 0.507,
-   "recovery": 0.543
+   "preparation": 0.547,
+   "launch": 0.506,
+   "contact": 0.495,
+   "recovery": 0.54
   }
  },
  "feet": {
@@ -146,7 +146,7 @@
    "death": {
     "frames": 72,
     "loop": false,
-    "planted_steps": 4,
+    "planted_steps": 0,
     "max_slide_mm_per_frame": 0.0,
     "mean_slide_mm_per_frame": 0.0,
     "lowest_foot_m": 0.0

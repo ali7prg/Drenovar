@@ -9,9 +9,9 @@
         "lf_env_hollow_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 4354,
-        "LOD1": 1652,
-        "LOD2": 312
+        "LOD0": 4346,
+        "LOD1": 1320,
+        "LOD2": 308
       },
       "materials": {
         "LOD0": [
@@ -40,7 +40,7 @@
         ],
         [
           7.2,
-          6.88,
+          6.58,
           14.12
         ]
       ],
@@ -81,9 +81,9 @@
         "lf_env_hollow_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 5028,
-        "LOD1": 1972,
-        "LOD2": 306
+        "LOD0": 4832,
+        "LOD1": 1430,
+        "LOD2": 412
       },
       "materials": {
         "LOD0": [
@@ -107,17 +107,17 @@
       "bounds_m_blender": [
         [
           -7.2,
-          -5.68,
+          -6.84,
           -0.6
         ],
         [
           5.82,
-          5.68,
+          6.89,
           14.11
         ]
       ],
       "display_offset_gltf": [
-        15.02,
+        15.731,
         0.0,
         0.0
       ],
@@ -133,6 +133,7 @@
             0.9
           ]
         ],
+        "umbrella": true,
         "upper_copies": [
           [
             -90,
@@ -143,11 +144,6 @@
             90,
             0.85,
             "right"
-          ],
-          [
-            180,
-            0.7,
-            null
           ]
         ]
       }
@@ -159,9 +155,9 @@
         "lf_env_hollow_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 5042,
-        "LOD1": 1966,
-        "LOD2": 314
+        "LOD0": 4692,
+        "LOD1": 1454,
+        "LOD2": 350
       },
       "materials": {
         "LOD0": [
@@ -185,17 +181,17 @@
       "bounds_m_blender": [
         [
           -5.53,
-          -5.56,
+          -6.65,
           -0.58
         ],
         [
           6.84,
-          5.49,
+          6.2,
           13.54
         ]
       ],
       "display_offset_gltf": [
-        30.04,
+        31.462,
         0.0,
         0.0
       ],
@@ -214,25 +210,26 @@
           0.95,
           0.96
         ],
+        "umbrella": true,
         "upper_copies": [
           [
-            -80,
-            0.9,
-            null
+            -90,
+            0.85,
+            "left"
           ],
           [
-            100,
+            90,
             0.85,
-            null
+            "right"
           ]
         ]
       }
     }
   },
   "tris": {
-    "LOD0": 5042,
-    "LOD1": 1972,
-    "LOD2": 314
+    "LOD0": 4832,
+    "LOD1": 1454,
+    "LOD2": 412
   },
   "bones": 0,
   "materials": [
@@ -264,7 +261,7 @@
     ]
   },
   "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
-  "recommendedTint": "art/02 palette (copper-orange autumn crown)",
+  "recommendedTint": "art/02 palette (copper-orange autumn crown); hero landmark tree (landmark budget 6k/1.5k/400)",
   "wind": {
     "attribute": "COLOR_0 (RGBA float, linear)",
     "R": "sway weight 0 at the trunk base -> 1 at crown tips",

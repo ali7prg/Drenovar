@@ -26,14 +26,28 @@ ART01 = {
     "grove": (0, 0, 640, 330),
     "south_pines": (430, 640, 960, 1000),
 }
+ART01_SETS = {
+    "default": ["grove", "south_pines"],
+    "hollow": ["grove"],
+    "willow": ["east_river"],
+    "rocks": ["sw_quarry"],
+}
+ART01.update({"east_river": (1000, 280, 1536, 700), "sw_quarry": (0, 620, 520, 1024)})
 ART01_SPECIES = {   # single-species crops for colour stats
+    "hollow": [(250, 120, 330, 200)],
+    "willow": [(1290, 470, 1350, 540)],
     "oak": [(438, 126, 588, 228), (880, 290, 1000, 400)],
     "pine": [(0, 40, 120, 200), (560, 650, 700, 780)],
     "birch": [(1100, 560, 1200, 660)],
 }
 
 
+LAYOUT_KW = {}
+
+
 def layout(species, n=40, area=64.0, spacing=8.5, seed=4):
+    area = LAYOUT_KW.get("area", area)
+    spacing = LAYOUT_KW.get("spacing", spacing)
     rng = np.random.default_rng(seed)
     pts = []
     tries = 0
@@ -94,7 +108,7 @@ def lab_stats(img, mask):
             "mean_rgb": np.round(px.mean(0), 3).tolist(), "n": int(len(px))}
 
 
-def sheet(outdir, out_png, species_tags):
+def sheet(outdir, out_png, species_tags, art_set="default"):
     import cv2
     art01 = np.asarray(Image.open(os.path.join(ART, "01_world_masterplan.png")).convert("RGB"), np.float32) / 255
     panels = []
@@ -104,7 +118,8 @@ def sheet(outdir, out_png, species_tags):
         if not os.path.exists(p):
             continue
         g = np.asarray(Image.open(p).convert("RGB"), np.float32) / 255
-        for name, box in ART01.items():
+        for name in ART01_SETS.get(art_set, ART01_SETS["default"]):
+            box = ART01[name]
             x0, y0, x1, y1 = box
             c = art01[y0:y1, x0:x1]
             c = cv2.resize(c, (int(c.shape[1] * sc), int(c.shape[0] * sc)), interpolation=cv2.INTER_CUBIC)
@@ -171,12 +186,16 @@ if __name__ == "__main__":
     ap.add_argument("--species", nargs="+", default=["golden_oak:2,3", "dark_pine:1,2,3,4", "birch:1,2,3"])
     ap.add_argument("--k", type=float, default=0.3)
     ap.add_argument("--k_vol", type=float, default=0.5)
+    ap.add_argument("--art", default="default")
+    ap.add_argument("--area", type=float, default=64.0)
+    ap.add_argument("--spacing", type=float, default=8.5)
     a = ap.parse_args()
     species = []
     for s in a.species:
         name, vs = s.split(":")
         species.append((name, [int(v) for v in vs.split(",")]))
     tags = [TAGS.get(sp, sp) for sp, _ in species]
+    LAYOUT_KW.update(area=a.area, spacing=a.spacing)
     od = run(a.out_prefix, species, a.n, a.k, a.k_vol, only_tags=tags)
-    st = sheet(od, os.path.abspath(a.out_prefix) + "_city_patch.png", tags)
+    st = sheet(od, os.path.abspath(a.out_prefix) + "_city_patch.png", tags, a.art)
     print(json.dumps(st, indent=1))

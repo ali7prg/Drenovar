@@ -44,10 +44,10 @@ K = 0.3
 # copies: thin limbs (rotated) ; upper_copies: (angle, scale, side) of the inflated upper limbs; v1 sends the left
 # limbs -90 deg and the right limbs +90 deg so both land BEHIND the trunk (art/02 front stays exact)
 VARIANTS = {1: dict(seed=5, copies=[(92, 0.9), (-88, 0.92)], upper_copies=[(-90, 0.85, "left"), (90, 0.85, "right")]),
-            2: dict(seed=6, mirror=True, copies=[(95, 0.92), (-140, 0.9)],
-                    upper_copies=[(-90, 0.85, "left"), (90, 0.85, "right"), (180, 0.7, None)]),
-            3: dict(seed=8, copies=[(130, 0.9), (-100, 0.95)], scale=(0.95, 0.96),
-                    upper_copies=[(-80, 0.9, None), (100, 0.85, None)])}
+            2: dict(seed=6, mirror=True, copies=[(95, 0.92), (-140, 0.9)], umbrella=True,
+                    upper_copies=[(-90, 0.85, "left"), (90, 0.85, "right")]),
+            3: dict(seed=8, copies=[(130, 0.9), (-100, 0.95)], scale=(0.95, 0.96), umbrella=True,
+                    upper_copies=[(-90, 0.85, "left"), (90, 0.85, "right")])}
 
 
 def massive_mesh(ref, wood_c, thick, tunnel):
@@ -293,7 +293,7 @@ def main():
     trunk_axis = geom.world_at_y(ref.view, np.array([ref.view.ax]), np.array([float(LATHE_TOP)]), np.array([0.0]))[0]
     trunk_axis[2] = 0.0
     lod_md = {}
-    for lod_, frac in ((0, 1.0), (1, 0.42), (2, 0.1)):
+    for lod_, frac in ((0, 1.0), (1, 0.3), (2, 0.1)):
         lod_md[lod_] = {}
         for key, o in (("massive", om), ("upper", ou)):
             if o is None:
@@ -313,10 +313,10 @@ def main():
             bpy.data.objects.remove(c, do_unlink=True)
     built = {}
     info = {}
-    LODS = {0: dict(limb_budget=700, limb_sides=5, limb_min_r_px=1.3, front_frac=1.0, front_scale=1.0, n_masses=22,
-                    clumps_per=12, max_cards=640, massive=1.0, upper_copies=True),
-            1: dict(limb_budget=200, limb_sides=4, limb_min_r_px=2.4, front_frac=0.55, front_scale=1.15, n_masses=14,
-                    clumps_per=6, max_cards=220, massive=0.45, upper_copies=True),
+    LODS = {0: dict(limb_budget=600, limb_sides=5, limb_min_r_px=1.3, front_frac=1.0, front_scale=1.0, n_masses=22,
+                    clumps_per=12, max_cards=520, massive=1.0, upper_copies=True),
+            1: dict(limb_budget=150, limb_sides=4, limb_min_r_px=2.4, front_frac=0.5, front_scale=1.15, n_masses=12,
+                    clumps_per=6, max_cards=170, massive=0.3, upper_copies=True),
             2: dict(limb_budget=0, limb_sides=3, limb_min_r_px=99, front_frac=0.2, front_scale=1.5, n_masses=8,
                     clumps_per=3, max_cards=48, massive=0.1, upper_copies=False)}
     for vi_, vs in VARIANTS.items():
@@ -365,6 +365,14 @@ def main():
             fills = B.mass_cards(fronts, dm, size_k=1.2, seed=vs["seed"] * 7 + lod, n_masses=L["n_masses"],
                                  mass_r=0.1, clumps_per=L["clumps_per"], front_extra_frac=0.4,
                                  max_cards=L["max_cards"], core_cards=0, placement="anchors", anchors=anchors)
+            if vs.get("umbrella"):
+                # art/01 cave oak: broad full crown of domed lobes (same painted tiles) above the limbs
+                B.cfg = dict(CFG, umb_n=max(5, 9 - lod), umb_base=0.48, umb_lobe_r=0.3, mass_zscale=0.55,
+                             ao_under=0.7, ao_side=0.86, side_mode="shade", lobe_zf_min=-0.25, umb_rk=1.05)
+                ucards = B.mass_cards([], np.full((H, W), np.inf), size_k=1.35, seed=vs["seed"] * 11 + lod, n_masses=0,
+                                      mass_r=0.3, clumps_per=(46, 18, 8)[lod], front_extra_frac=0.0,
+                                      max_cards=(520, 190, 60)[lod], core_cards=0, placement="umbrella")
+                fills = fills + ucards
             barkm, leaf = B.assemble(ps, fronts + fills, bark_uv, sides_trunk=6, sides_limb=L["limb_sides"],
                                      min_limb_r_px=mr if L["limb_budget"] > 0 else 999,
                                      copies=copies if L["limb_budget"] > 0 else None, tree_h=16.0, crown_r=7.0,
@@ -427,7 +435,8 @@ def main():
     if a.no_export:
         return
     pblend.use_painted(allobjs, K, on=False)
-    sp = dict(variants=VARIANTS, tint_note="art/02 palette (copper-orange autumn crown)")
+    sp = dict(variants=VARIANTS, tint_note="art/02 palette (copper-orange autumn crown); hero landmark tree "
+                                           "(landmark budget 6k/1.5k/400)")
     SP.export_kit(ASSET, built, sp, info, "hollow", K, a)
     print(f"[{ASSET}] exported ({time.time() - t0:.1f}s)", flush=True)
 

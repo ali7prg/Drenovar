@@ -110,7 +110,30 @@ def uv_mesh(V, T, ref, clip):
     return Vc, UV, kind, fn
 
 
+def rock_profile(ref, body):
+    """Front-view height profile (world x, max height z) of the painted outcrop body."""
+    cols = np.nonzero(body.any(0))[0]
+    px, ph = [], []
+    for x in cols:
+        top = np.nonzero(body[:, x])[0].min()
+        P = geom.world_at_y(ref.view, np.array([float(x)]), np.array([float(top)]), np.array([0.0]))[0]
+        G = geom.world_at_y(ref.view, np.array([float(x)]), np.array([float(ref.ground)]), np.array([0.0]))[0]
+        px.append(P[0])
+        ph.append(max(0.0, P[2] - G[2]))
+    px, ph = np.array(px), ndi.gaussian_filter1d(np.array(ph), 3)
+    return px, ph
+
+
+def lab_grade(img, dl=0.0, kc=1.0):
+    from skimage import color as skc
+    lab_ = seg.lab(np.clip(img, 0, 1))
+    lab_[..., 0] = np.clip(lab_[..., 0] + dl, 0, 100)
+    lab_[..., 1:] *= kc
+    return np.clip(skc.lab2rgb(lab_), 0, 1).astype(np.float32)
+
+
 def main():
+    import rockfield
     ap = argparse.ArgumentParser()
     ap.add_argument("--iter", type=int, default=1)
     a = ap.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:])
@@ -124,37 +147,41 @@ def main():
     body0 = morphology.remove_small_objects(body0, max_size=300)
     plants_card = plants & ~ndi.binary_erosion(body0, iterations=3)
     body = body0 | (plants & ndi.binary_erosion(body0, iterations=3))
-    lbl = BPR.blocks_of(ref, body, min_dist=26, min_area=1400)
+    lbl = BPR.blocks_of(ref, body, min_dist=22, min_area=900)
     paint_mask = ref.fg & ~plants_card
-    # ------------------------------------------------------------ textures (all painted pixels)
+    # ------------------------------------------------------------ textures: painting / quilted limestone / moss
     stone_px = body & (ref.C < 17) & (ref.L > 40)
     moss_px = body & (ref.Hu > 75) & (ref.Hu < 118) & (ref.C > 14)
     sw = best_windows(stone_px, (36, 36), n=3)
     mw = best_windows(moss_px, (32, 18), n=3)
     TEX = 1024
-    tex = np.zeros((TEX, TEX, 3), np.float32)
 
     def box(R):
         return int(R[0] * TEX), int((1 - R[3]) * TEX), int(R[2] * TEX), int((1 - R[1]) * TEX)
+    tex = np.zeros((TEX, TEX, 3), np.float32)
     x0, y0, x1, y1 = box(slab.FRONT)
     tex[y0:y1, x0:x1] = slab.front_texture(ref.img, paint_mask, ref.clip, (x1 - x0, y1 - y0))
     x0, y0, x1, y1 = box(slab.SIDE)
     side = quilt_from(ref.img, sw, max(x1 - x0, y1 - y0))
     tex[y0:y1, x0:x1] = side[:y1 - y0, :x1 - x0]
     x0, y0, x1, y1 = box(slab.TOP)
-    top = quilt_from(ref.img, mw + sw[:2], max(x1 - x0, y1 - y0), scale=2.5, patch=40, overlap=10)
+    top = quilt_from(ref.img, mw + sw[:1], max(x1 - x0, y1 - y0), scale=2.5, patch=40, overlap=10)
     tex[y0:y1, x0:x1] = top[:y1 - y0, :x1 - x0]
-    cpath = os.path.join(RT, "lf_rock_limestone_c.jpg")
-    cv2.imwrite(cpath, cv2.cvtColor((np.clip(tex, 0, 1) * 255).astype(np.uint8), cv2.COLOR_RGB2BGR),
-                [cv2.IMWRITE_JPEG_QUALITY, 90])
-    nmap, rmap = tree.bark_maps(tex)
-    npath = os.path.join(RT, "lf_rock_limestone_n.png")
-    rpath = os.path.join(RT, "lf_rock_limestone_r.png")
-    seg.save(npath, nmap)
-    seg.save(rpath, np.stack([rmap] * 3, -1))
-    seg.save(qa("tex.png"), tex)
-    print(f"[{ASSET}] stone windows {sw} moss windows {mw} ({time.time() - t0:.1f}s)", flush=True)
-    # ------------------------------------------------------------ plant cards (atlas region)
+    variants_tex = {"lf_rock_limestone": tex,
+                    "lf_rock_quarry": lab_grade(tex, dl=8.0, kc=0.65)}     # art/01 SW quarry: lighter, greyer
+    paths_ = {}
+    for nm, tx in variants_tex.items():
+        cpath = os.path.join(RT, f"{nm}_c.jpg")
+        cv2.imwrite(cpath, cv2.cvtColor((np.clip(tx, 0, 1) * 255).astype(np.uint8), cv2.COLOR_RGB2BGR),
+                    [cv2.IMWRITE_JPEG_QUALITY, 90])
+        nmap, rmap = tree.bark_maps(tx)
+        npath = os.path.join(RT, f"{nm}_n.png")
+        rpath = os.path.join(RT, f"{nm}_r.png")
+        seg.save(npath, nmap)
+        seg.save(rpath, np.stack([rmap] * 3, -1))
+        paths_[nm] = (cpath, npath, rpath)
+    seg.save(qa("tex.png"), np.concatenate([tex, variants_tex["lf_rock_quarry"]], 1))
+    # ------------------------------------------------------------ plant cards
     pref = types.SimpleNamespace(img=ref.img, fg=plants_card, wood_cov=np.zeros_like(plants_card),
                                  crown_rows=(0, ref.H - 1), xc=np.full(ref.H, ref.W / 2.0), R=np.full(ref.H, ref.W / 2.0),
                                  H=ref.H, W=ref.W, ppm=ref.ppm, bg=ref.bg)
@@ -162,77 +189,130 @@ def main():
     reg, s = P.pack("rock_plants")
     atl.save_region("rock_plants", reg, {"asset": ASSET, "tiles": P.n, "scale": s})
     atlas_path = atl.assemble()
-    # ------------------------------------------------------------ variants
+    # ------------------------------------------------------------ fractured mound geometry
+    px, ph = rock_profile(ref, body)
+    xc_w = 0.5 * (px.min() + px.max())
+    Wm = float(px.max() - px.min())
+    cents = []
+    for b in range(1, int(lbl.max()) + 1):
+        m = lbl == b
+        if m.sum() < 200:
+            continue
+        cy, cx = ndi.center_of_mass(m)
+        Pw = geom.world_at_y(ref.view, np.array([cx]), np.array([cy]), np.array([0.0]))[0]
+        cents.append((Pw[0] - xc_w, Pw[2]))
+    D = 0.7 * Wm
+    seeds = []
+    for (sx, sz) in cents:                      # front row at the painted block centres
+        seeds.append((sx, -0.28 * D + rng.uniform(-0.05, 0.05) * D, sz))
+    for k in range(max(0, 13 - len(seeds))):    # cells spread through the depth
+        sx, sz = cents[rng.integers(len(cents))]
+        seeds.append((sx + rng.normal(0, 0.12 * Wm), rng.uniform(-0.05, 0.3) * D, max(0.2, sz * rng.uniform(0.6, 1.1))))
+    seeds = np.array(seeds)
+    specs = {
+        "v1": dict(prof=(px - xc_w, ph), W=Wm, seeds=seeds, depth=0.7, tex="lf_rock_limestone", painted=True),
+    }
+    # v2: compact boulder pile (4 cells) ; v3: long low ledge (7 cells)
+    Wb = 4.2
+    xb = np.linspace(-Wb / 2, Wb / 2, 60)
+    hb = 2.4 * np.sqrt(np.clip(1 - (2 * xb / Wb) ** 2, 0, None)) ** 0.6
+    sb = np.array([(-0.9, -0.5, 0.8), (0.8, -0.4, 0.9), (0.1, 0.5, 1.4), (-0.2, -0.2, 2.0)])
+    specs["v2"] = dict(prof=(xb, hb), W=Wb, seeds=sb, depth=0.85, tex="lf_rock_quarry", painted=False)
+    Wl = 8.5
+    xl = np.linspace(-Wl / 2, Wl / 2, 80)
+    hl = 1.35 * np.sqrt(np.clip(1 - (2 * xl / Wl) ** 6, 0, None)) * (1 + 0.12 * np.sin(xl * 1.3))
+    sl = np.array([(x_, rng.uniform(-0.6, 0.6), 0.7) for x_ in np.linspace(-Wl / 2 + 0.7, Wl / 2 - 0.7, 7)])
+    specs["v3"] = dict(prof=(xl, hl), W=Wl, seeds=sl, depth=0.45, tex="lf_rock_quarry", painted=False)
     core.reset()
-    rock_mat = pblend.export_material("lf_rock_limestone", cpath, normal_path=npath, rough_path=rpath)
     fol = pblend.export_material("lf_foliage", atlas_path, alpha_clip=0.5, double_sided=True)
-    ys_, xs_ = np.nonzero(body)
-    xmid = 0.5 * (xs_.min() + xs_.max())
-    groups = {"v1": (body, lbl, 0.72, None),
-              "v2": None, "v3": None}
-    cents = {b: np.array(ndi.center_of_mass(lbl == b)) for b in range(1, lbl.max() + 1)}
-    left = [b for b, c in cents.items() if c[1] < 0.55 * ref.W]
-    right = [b for b, c in cents.items() if c[1] >= 0.5 * ref.W]
-    for vn, ids in (("v2", left), ("v3", right)):
-        m = np.isin(lbl, ids) & body
-        m = ndi.binary_closing(m, iterations=2)
-        groups[vn] = (m, np.where(m, lbl, 0), 0.8, True)
-    built, info, stretch = {}, {}, {}
-    for vn, (bm, bl, dfrac, center) in groups.items():
-        Vf, F = build_mound_mesh(ref, bm, bl, dfrac, rng=rng)
-        o = BPR.to_obj(f"tmp_{vn}", Vf, F)
+    mats = {nm: pblend.export_material(nm, paths_[nm][0], normal_path=paths_[nm][1], rough_path=paths_[nm][2])
+            for nm in paths_}
+    built, info, report = {}, {}, {}
+    for vn, spc in specs.items():
+        Vg, Fg, crack, cell = rockfield.fractured_mound(spc["prof"][0], spc["prof"][1], spc["W"], spc["seeds"],
+                                                        depth_frac=spc["depth"], seed=11 + len(vn))
+        Fg, rep = rockfield.drop_thin(Vg, Fg, 0.2)
+        if spc["painted"]:
+            Vg = Vg + np.array([xc_w, 0.0, 0.0])
+        o = BPR.to_obj(f"tmp_{vn}", Vg, Fg)
+        # crack AO as a vertex attribute carried through decimation: store in a float colour layer
+        ca = o.data.color_attributes.new("ao", "FLOAT_COLOR", "POINT")
+        aov = np.clip(1.0 + crack / 0.12, 0.45, 1.0)
+        cols = np.zeros((len(Vg), 4), np.float32)
+        cols[:, 0] = aov
+        cols[:, 3] = 1.0
+        ca.data.foreach_set("color", cols.ravel())
         objs = []
         info[vn] = {}
-        for lod, target in ((0, 3600), (1, 1300), (2, 250)):
+        for lod, target in ((0, 3600), (1, 1400), (2, 280)):
             oc = o.copy()
             oc.data = o.data.copy()
             core.link(oc)
             BPR.decimate(oc, target)
-            V, T, N = BPR.arrays(oc)
+            for _ in range(4):
+                if core.tri_count(oc) <= target * 1.08:
+                    break
+                BPR.decimate(oc, int(target * 0.8))
+            me = oc.data
+            V = np.array([v.co[:] for v in me.vertices])
+            me.calc_loop_triangles()
+            T = np.array([t.vertices[:] for t in me.loop_triangles])
+            aol = np.zeros(len(me.vertices) * 4, np.float32)
+            me.color_attributes["ao"].data.foreach_get("color", aol)
+            aov2 = aol.reshape(-1, 4)[:, 0]
+            Mw = np.array(oc.matrix_world)
+            V = V @ Mw[:3, :3].T + Mw[:3, 3]
             bpy.data.objects.remove(oc, do_unlink=True)
-            Vc, UVc, kind, fn = uv_mesh(V, T, ref, ref.clip)
+            Vc = V[T]
+            fn = geom.nrm(np.cross(Vc[:, 1] - Vc[:, 0], Vc[:, 2] - Vc[:, 0]))
+            cen = Vc.mean(1)
+            # front row seen by the art/02 camera keeps the painting; noisy moss threshold on up faces
+            facing = fn @ (-ref.view.d)
+            if spc["painted"]:
+                _, zb = tree.tri_id_buffer(V, T, np.arange(len(T)), ref.view)
+                uu, vv, dd = ref.view.project(cen)
+                ui = np.clip(np.round(uu).astype(int), 0, ref.W - 1)
+                vi = np.clip(np.round(vv).astype(int), 0, ref.H - 1)
+                vis = np.isfinite(zb[vi, ui]) & (dd <= zb[vi, ui] + 0.25) & paint_mask[vi, ui]
+                front = (facing >= FRONT_T) & vis
+            else:
+                front = np.zeros(len(T), bool)
+            nz_thr = 0.55 + 0.12 * rockfield.noise3(cen, 0.9, 5, octaves=2)
+            kind = np.where(front, 0, np.where(fn[:, 2] >= nz_thr, 2, 1))
+            uu, vv, _ = ref.view.project(Vc.reshape(-1, 3))
+            vv = np.clip(vv, 0, ref.clip - 2)
+            uu = np.clip(uu, 0, ref.W - 1)
+            FR, SR, TR = slab.FRONT, slab.SIDE, slab.TOP
+            uv_f = np.stack([FR[0] + (FR[2] - FR[0]) * uu / ref.W, FR[3] - (FR[3] - FR[1]) * vv / ref.H], -1).reshape(-1, 3, 2)
+            uv_s = mound.isometric_uvs(Vc, SR, period_m=3.0)
+            uv_t = mound.isometric_uvs(Vc, TR, period_m=3.0)
+            UVc = np.where((kind == 0)[:, None, None], uv_f, np.where((kind == 2)[:, None, None], uv_t, uv_s))
             if lod == 0:
-                rs, rm = mound.stretch_ratio(Vc[kind != 0], UVc[kind != 0], (0.3 * 1024, 0.32 * 1024))
-                rf, rfm = mound.stretch_ratio(Vc[kind == 0], UVc[kind == 0], (0.7 * 1024 * 3.0, 0.7 * 1024 * 3.0))
-                stretch[vn] = dict(side_top_max=round(rs, 3), side_top_median=round(rm, 3),
-                                   front_faces=int((kind == 0).sum()), other_faces=int((kind != 0).sum()))
+                rs_, rm_ = mound.stretch_ratio(Vc[kind != 0], UVc[kind != 0], (0.3 * 1024, 0.32 * 1024))
+                report[vn] = dict(uv_stretch_max=round(rs_, 3), uv_stretch_median=round(rm_, 3), **rep,
+                                  painted_front_faces=int((kind == 0).sum()), moss_faces=int((kind == 2).sum()))
             md = geom.Mesh()
             Cw = np.zeros((len(Vc) * 3, 4))
-            Cw[:, 3] = np.where(np.repeat(kind, 3) == 2, 1.0, 0.9)
+            Cw[:, 3] = aov2[T].reshape(-1)
             md.add(Vc.reshape(-1, 3), np.arange(len(Vc) * 3).reshape(-1, 3), UVc.reshape(-1, 2), Cw,
                    np.repeat(fn, 3, axis=0), 0)
-            if lod < 2 and P.n:
-                keep = []
-                for i in range(P.n):
-                    cu, cv_ = P.info[i]["c"]
-                    ui, vi = int(np.clip(cu, 0, ref.W - 1)), int(np.clip(cv_, 0, ref.H - 1))
-                    if ndi.binary_dilation(bm, iterations=12)[vi, ui]:
-                        keep.append(i)
+            if spc["painted"] and lod < 2 and P.n:
+                keep = [i for i in range(P.n)]
                 if lod == 1:
                     keep = sorted(keep, key=lambda i: -P.info[i]["area"])[: max(1, len(keep) // 2)]
                 _, zb = tree.tri_id_buffer(V, T, np.arange(len(T)), ref.view)
                 md.extend(BPR.plant_cards(ref, P, zb, keep, copies=((55, 0.9), (-60, 0.85)) if lod == 0 else ((70, 0.9),)))
-            Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
-            if center:
-                used = np.unique(Tt)
-                off = Vv[used].mean(0)
-                off[2] = 0.0
-                md = geom.Mesh()
-                md.add(Vv - off, Tt, UVv, Cc, Nn, 0)
-                md.M = [Mm]
-            if vn == "v3":
-                md = md.transformed(mirror_x=True)
-            ob = pblend.obj_from_mesh(f"{ASSET}_{vn}_LOD{lod}", md, [rock_mat, fol])
+            ob = pblend.obj_from_mesh(f"{ASSET}_{vn}_LOD{lod}", md, [mats[spc["tex"]], fol])
             objs.append(ob)
             info[vn][f"LOD{lod}"] = dict(tris=md.tris())
         bpy.data.objects.remove(o, do_unlink=True)
         built[vn] = objs
         print(f"[{ASSET}] {vn}: " + ", ".join(f"LOD{l}={info[vn][f'LOD{l}']['tris']}" for l in range(3)) +
-              f" stretch {stretch[vn]}", flush=True)
+              f" {report[vn]}", flush=True)
     # ------------------------------------------------------------ QA
     pblend.setup_render(16)
     allobjs = [o for v in built.values() for o in v]
-    metrics = {"uv_stretch": stretch}
+    metrics = {"report": report}
     for lod in range(3):
         for kk, tag in ((K, "painted"), (0.0, "albedo")):
             if lod > 0 and tag == "albedo":
@@ -262,12 +342,19 @@ def main():
     core.write_json(qa("metrics.json"), {"metrics": metrics, "lods": info})
     pblend.use_painted(allobjs, K, on=False)
     BPR.export(ASSET, built, info, "lf_rock_limestone")
+    import glbx
+    out = os.path.join(RT, f"{ASSET}.glb")
+    glbx.externalize(out, {f"lf_rock_quarry_{s_}": f"lf_rock_quarry_{s_}.{'jpg' if s_ == 'c' else 'png'}"
+                           for s_ in ("c", "n", "r")})
     import json as _json
     mp = os.path.join(RT, f"{ASSET}.meta.json")
     meta = _json.load(open(mp))
-    meta["generation"] = "v2: fractured limestone mound from the art/02 outcrop (painted front, painted-limestone " \
-                         "sides and painted moss tops by patch synthesis, isometric per-face UVs)"
-    meta["uvStretch"] = stretch
+    meta["glb_images"] = glbx.info(out)["images"]
+    meta["textures"].update({"lf_rock_quarry_c.jpg": 1024, "lf_rock_quarry_n.png": 1024, "lf_rock_quarry_r.png": 1024})
+    meta["generation"] = ("v2: SDF fractured limestone mound (Voronoi cells seeded at the painted art/02 blocks, crack gap "
+                          "6 cm, rounded edges, rough faces); front row = projected painting, sides = quilted painted "
+                          "limestone, up faces = painted moss; v2/v3 in an art/01 quarry palette copy")
+    meta["rockReport"] = report
     meta["build"] = "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_rock.py"
     core.write_json(mp, meta)
     print(f"[{ASSET}] exported ({time.time() - t0:.1f}s)", flush=True)

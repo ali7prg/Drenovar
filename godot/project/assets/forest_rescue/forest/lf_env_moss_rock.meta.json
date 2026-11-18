@@ -1,10 +1,10 @@
 {
   "id": "lf_env_moss_rock",
-  "generation": "v2: fractured limestone mound from the art/02 outcrop (painted front, painted-limestone sides and painted moss tops by patch synthesis, isometric per-face UVs)",
-  "heightM": 5.46,
+  "generation": "v2: SDF fractured limestone mound (Voronoi cells seeded at the painted art/02 blocks, crack gap 6 cm, rounded edges, rough faces); front row = projected painting, sides = quilted painted limestone, up faces = painted moss; v2/v3 in an art/01 quarry palette copy",
+  "heightM": 5.75,
   "footprintM": [
-    9.28,
-    2.92
+    10.09,
+    6.53
   ],
   "scaleNote": "real metres from the 1.8 m figure on art/02 (understory without a figure: realistic height, see build script); world layer should respect heightM instead of normalising",
   "variants": {
@@ -15,9 +15,9 @@
         "lf_env_moss_rock_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 756,
-        "LOD1": 668,
-        "LOD2": 250
+        "LOD0": 3732,
+        "LOD1": 1444,
+        "LOD2": 1080
       },
       "materials": {
         "LOD0": [
@@ -33,18 +33,18 @@
           "lf_foliage"
         ]
       },
-      "height_m": 5.46,
-      "footprint_radius_m": 4.82,
+      "height_m": 5.75,
+      "footprint_radius_m": 5.32,
       "bounds_m_blender": [
         [
-          -4.46,
-          -0.3,
-          0.15
+          -4.76,
+          -3.25,
+          -0.27
         ],
         [
-          4.82,
-          2.62,
-          5.46
+          5.32,
+          3.27,
+          5.75
         ]
       ],
       "display_offset_gltf": [
@@ -52,10 +52,10 @@
         0.0,
         0.0
       ],
-      "heightM": 5.46,
+      "heightM": 5.75,
       "footprintM": [
-        9.28,
-        2.92
+        10.09,
+        6.53
       ]
     },
     "v2": {
@@ -65,47 +65,47 @@
         "lf_env_moss_rock_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 394,
-        "LOD1": 356,
-        "LOD2": 250
+        "LOD0": 3600,
+        "LOD1": 1400,
+        "LOD2": 280
       },
       "materials": {
         "LOD0": [
-          "lf_rock_limestone",
+          "lf_rock_quarry",
           "lf_foliage"
         ],
         "LOD1": [
-          "lf_rock_limestone",
+          "lf_rock_quarry",
           "lf_foliage"
         ],
         "LOD2": [
-          "lf_rock_limestone",
+          "lf_rock_quarry",
           "lf_foliage"
         ]
       },
-      "height_m": 5.06,
-      "footprint_radius_m": 3.14,
+      "height_m": 2.44,
+      "footprint_radius_m": 2.5,
       "bounds_m_blender": [
         [
-          -2.84,
-          -1.11,
-          0.13
+          -2.5,
+          -1.78,
+          -0.27
         ],
         [
-          3.14,
-          1.45,
-          5.06
+          2.48,
+          1.78,
+          2.44
         ]
       ],
       "display_offset_gltf": [
-        11.275,
+        12.086,
         0.0,
         0.0
       ],
-      "heightM": 5.06,
+      "heightM": 2.44,
       "footprintM": [
-        5.98,
-        2.56
+        4.98,
+        3.57
       ]
     },
     "v3": {
@@ -115,71 +115,78 @@
         "lf_env_moss_rock_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 374,
-        "LOD1": 320,
-        "LOD2": 250
+        "LOD0": 3600,
+        "LOD1": 1398,
+        "LOD2": 392
       },
       "materials": {
         "LOD0": [
-          "lf_rock_limestone",
+          "lf_rock_quarry",
           "lf_foliage"
         ],
         "LOD1": [
-          "lf_rock_limestone",
+          "lf_rock_quarry",
           "lf_foliage"
         ],
         "LOD2": [
-          "lf_rock_limestone",
+          "lf_rock_quarry",
           "lf_foliage"
         ]
       },
-      "height_m": 5.44,
-      "footprint_radius_m": 2.97,
+      "height_m": 1.56,
+      "footprint_radius_m": 4.65,
       "bounds_m_blender": [
         [
-          -2.58,
-          -0.91,
-          0.31
+          -4.65,
+          -1.91,
+          -0.27
         ],
         [
-          2.97,
-          1.17,
-          5.44
+          4.59,
+          1.91,
+          1.56
         ]
       ],
       "display_offset_gltf": [
-        22.55,
+        24.173,
         0.0,
         0.0
       ],
-      "heightM": 5.44,
+      "heightM": 1.56,
       "footprintM": [
-        5.55,
-        2.08
+        9.25,
+        3.82
       ]
     }
   },
   "tris": {
-    "LOD0": 756,
-    "LOD1": 668,
-    "LOD2": 250
+    "LOD0": 3732,
+    "LOD1": 1444,
+    "LOD2": 1080
   },
   "bones": 0,
   "materials": [
     "lf_foliage",
-    "lf_rock_limestone"
+    "lf_rock_limestone",
+    "lf_rock_quarry"
   ],
   "glb_images": [
     "lf_rock_limestone_n.png",
     "lf_rock_limestone_c.jpg",
     "lf_rock_limestone_r.png",
-    "lf_foliage_atlas.png"
+    "lf_foliage_atlas.png",
+    "lf_rock_quarry_n.png",
+    "lf_rock_quarry_c.jpg",
+    "lf_rock_quarry_r.png"
   ],
   "textures": {
     "lf_rock_limestone_c.jpg": 1024,
     "lf_rock_limestone_n.png": 1024,
     "lf_rock_limestone_r.png": 1024,
-    "lf_foliage_atlas.png": 2048
+    "lf_foliage_atlas.png": 2048,
+    "lf_rock_quarry_c.jpg": 1024,
+    "lf_rock_quarry_n.png": 1024,
+    "lf_rock_quarry_r.png": 1024
   },
   "paintedLightMix": 0.35,
   "paintedLightNote": "Texture = the painting (front/back), painted swatches on sides/tops. Shade as albedo * mix(1, lambert, paintedLightMix).",
@@ -196,13 +203,13 @@
       "type": "box",
       "centre": [
         0.0,
-        2.73,
+        2.88,
         0.0
       ],
       "size": [
-        9.28,
-        5.46,
-        2.92
+        10.08,
+        5.75,
+        6.52
       ],
       "variant": "v1"
     },
@@ -210,13 +217,13 @@
       "type": "box",
       "centre": [
         0.0,
-        2.53,
+        1.22,
         0.0
       ],
       "size": [
-        5.98,
-        5.06,
-        2.56
+        4.98,
+        2.44,
+        3.56
       ],
       "variant": "v2"
     },
@@ -224,36 +231,45 @@
       "type": "box",
       "centre": [
         0.0,
-        2.72,
+        0.78,
         0.0
       ],
       "size": [
-        5.55,
-        5.44,
-        2.08
+        9.24,
+        1.56,
+        3.82
       ],
       "variant": "v3"
     }
   ],
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_rock.py",
-  "uvStretch": {
+  "rockReport": {
     "v1": {
-      "side_top_max": 1.067,
-      "side_top_median": 1.067,
-      "front_faces": 158,
-      "other_faces": 466
+      "uv_stretch_max": 1.067,
+      "uv_stretch_median": 1.067,
+      "components": 280,
+      "kept": 2,
+      "min_dim_kept": 0.236,
+      "painted_front_faces": 1,
+      "moss_faces": 556
     },
     "v2": {
-      "side_top_max": 1.067,
-      "side_top_median": 1.067,
-      "front_faces": 79,
-      "other_faces": 261
+      "uv_stretch_max": 1.067,
+      "uv_stretch_median": 1.067,
+      "components": 40,
+      "kept": 1,
+      "min_dim_kept": 3.006,
+      "painted_front_faces": 0,
+      "moss_faces": 722
     },
     "v3": {
-      "side_top_max": 1.067,
-      "side_top_median": 1.067,
-      "front_faces": 68,
-      "other_faces": 228
+      "uv_stretch_max": 1.067,
+      "uv_stretch_median": 1.067,
+      "components": 15,
+      "kept": 1,
+      "min_dim_kept": 2.031,
+      "painted_front_faces": 0,
+      "moss_faces": 954
     }
   }
 }

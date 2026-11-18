@@ -117,7 +117,8 @@ def standing_ik(cb):
                       fet=0.0, knee=0.0, scap=0.0, cannon=0.0, _stance=0.5) for leg in LEGS}
 
 
-def secondary(cb, frames, times, loop, root=None, tail_amp=1.0, ribbon_amp=1.0, mane_amp=1.0):
+def secondary(cb, frames, times, loop, root=None, tail_amp=1.0, ribbon_amp=1.0, mane_amp=1.0,
+              tail_phase=None):
     """Spring follow-through for ribbon, mane and tail from the primary motion."""
     dt = times[1] - times[0]
     # primary FK pass to sample attachment points
@@ -130,6 +131,9 @@ def secondary(cb, frames, times, loop, root=None, tail_amp=1.0, ribbon_amp=1.0, 
         neck_p.append(M["neck_02"][:3, 3] + rp)
         pel.append(M["pelvis"][:3, 3] + rp)
     ring_p, neck_p, pel = map(np.array, (ring_p, neck_p, pel))
+    from scipy import ndimage as ndi
+    mode = "wrap" if loop else "nearest"
+    ring_p, neck_p, pel = (ndi.gaussian_filter1d(a, 2.0, axis=0, mode=mode) for a in (ring_p, neck_p, pel))
     g = 9.81
     a_ring = np.stack([HA.accel(ring_p[:, i], dt) for i in range(3)], 1)
     a_neck = HA.accel(neck_p[:, 2], dt)
@@ -148,15 +152,23 @@ def secondary(cb, frames, times, loop, root=None, tail_amp=1.0, ribbon_amp=1.0, 
     tail_up = HA.spring_track(-a_pel[:, 2] / g, dt, freq=1.8, zeta=0.35,
                               gain=(2 * math.pi * 1.8) ** 2, periodic=loop)
     for k, pose in enumerate(frames):
-        ribbon(pose, cb.skel, np.clip(rib_fwd[k], -0.6, 0.6) * ribbon_amp,
-               np.clip(rib_side[k], -0.5, 0.5) * ribbon_amp)
+        ribbon(pose, cb.skel, np.clip(0.5 * rib_fwd[k], -0.25, 0.25) * ribbon_amp,
+               np.clip(0.5 * rib_side[k], -0.22, 0.22) * ribbon_amp)
         m = np.clip(0.35 * mane_l[k], -0.10, 0.10) * mane_amp
         mane(pose, cb.skel, m, m)
         # tail: cascade lag along the chain
-        lag = [np.clip(tail_sw[max(0, k - 2 * i) if not loop else (k - 2 * i) % len(frames)], -0.4, 0.4)
-               * tail_amp * (0.3 + 0.15 * i) for i in range(6)]
-        lift = [np.clip(tail_up[k], -0.25, 0.25) * tail_amp * (0.5 if i < 2 else 0.25)
-                for i in range(6)]
+        if tail_phase is not None:
+            # locomotion: phase-locked swing with lag down the chain (exactly periodic)
+            ph = times[k] / times[-1]
+            lag = [tail_phase[0] * DEG * math.sin(2 * math.pi * (ph - 0.12 - 0.05 * i)) * (0.5 + 0.12 * i)
+                   for i in range(6)]
+            lift = [tail_phase[1] * DEG * math.sin(2 * math.pi * (tail_phase[2] * ph - 0.2 - 0.06 * i))
+                    * (0.6 if i < 2 else 0.35) for i in range(6)]
+        else:
+            lag = [np.clip(0.5 * tail_sw[max(0, k - 2 * i)], -0.10, 0.10) * tail_amp * (0.5 + 0.12 * i)
+                   for i in range(6)]
+            lift = [np.clip(0.5 * tail_up[k], -0.05, 0.05) * tail_amp * (0.6 if i < 2 else 0.3)
+                    for i in range(6)]
         tail_pose(pose, cb.skel, lag_swish=lag, lift_chain=lift)
 
 
@@ -211,7 +223,8 @@ def gait_loop(cb, G, name):
         frames.append(pose)
         root.append((rp, 0.0))
     cb.compensate(frames, True)
-    secondary(cb, frames, times, True, root=root, tail_amp=1.3 if trot else 1.0)
+    secondary(cb, frames, times, True, root=root,
+              tail_phase=(2.8, 2.5, 2) if trot else (4.0, 1.5, 2))
     stride = v * T
     meta = dict(seconds=T, loop=True, groundSpeed_mps=round(v, 3), strideLength_m=round(stride, 3),
                 markers=_footfall_markers(G, T))
@@ -251,12 +264,12 @@ def idle(cb):
         ears(pose, cb.skel, l_back=32 * DEG * flick_l, r_back=-6 * DEG + 10 * DEG * flick_r,
              r_out=22 * DEG * flick_r)
         sw = env(t, 2.0, 2.35, 2.45, 3.2)
-        swish = [20 * DEG * sw * math.sin(2 * math.pi * (t - 2.0) / 1.2 - 0.6 * i) * (0.4 + 0.15 * i)
+        swish = [5.5 * DEG * sw * math.sin(2 * math.pi * (t - 2.0) / 1.2 - 0.6 * i) * (0.4 + 0.15 * i)
                  for i in range(6)]
         tail_pose(pose, cb.skel, lift=2 * DEG, lag_swish=swish)
         pose.add_rot("jaw", (1, 0, 0), 2.0 * DEG * bump(t, 4.0, 4.6))
         frames.append(pose)
-    secondary(cb, frames, times, True, tail_amp=0.6)
+    secondary(cb, frames, times, True, tail_amp=0.6, tail_phase=(1.5, 1.0, 1))
     meta = dict(seconds=T, loop=True, groundSpeed_mps=0.0, strideLength_m=0.0,
                 markers={"ear_flick_L": 1.15, "ear_flick_R": 3.25, "tail_swish": 2.4,
                          "breath_in": [1.25, 3.75]})
@@ -489,7 +502,7 @@ def look_back(cb):
         body(pose, dx=0.012 * e, dy=0.02 * e, roll=1.0 * DEG * e)
         flick = bump(t, 0.85, 1.15)
         ears(pose, cb.skel, l_back=-10 * DEG * e + 18 * DEG * flick, r_back=-12 * DEG * e)
-        tail_pose(pose, cb.skel, lift=3 * DEG * e, swish=-8 * DEG * e)
+        tail_pose(pose, cb.skel, lift=3 * DEG * e, swish=-3 * DEG * e)
         frames.append(pose)
     secondary(cb, frames, times, False)
     meta = dict(seconds=T, loop=False, groundSpeed_mps=0.0, strideLength_m=0.0,

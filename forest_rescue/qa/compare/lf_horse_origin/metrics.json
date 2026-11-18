@@ -1,10 +1,10 @@
 {
   "left": {
     "view": "left",
-    "iou": 0.932,
-    "mean_abs_colour_error": 0.064,
+    "iou": 0.9323,
+    "mean_abs_colour_error": 0.0639,
     "ref_pixels": 95912,
-    "render_pixels": 94212
+    "render_pixels": 94154
   },
   "front": {
     "view": "front",
@@ -16,15 +16,15 @@
   "rear": {
     "view": "rear",
     "iou": 0.8923,
-    "mean_abs_colour_error": 0.0888,
+    "mean_abs_colour_error": 0.0877,
     "ref_pixels": 41867,
     "render_pixels": 43143
   },
   "right": {
     "view": "right",
-    "iou": 0.8911,
+    "iou": 0.8916,
     "mean_abs_colour_error": 0.0596,
     "ref_pixels": 98323,
-    "render_pixels": 94237
+    "render_pixels": 94183
   }
 }

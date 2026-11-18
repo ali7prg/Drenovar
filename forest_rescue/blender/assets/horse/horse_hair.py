@@ -280,15 +280,15 @@ def mane_cards(guide, lod=0, seed=3):
                             STRIP[strip_name], weights, twist=rng.normal(0, 0.35),
                             flip=bool(rng.integers(2)))
     # crest volume: arching cards from the midline over to each side (mass above the crest)
-    n_crest = {0: 14, 1: 8, 2: 0}[lod]
+    n_crest = {0: 9, 1: 5, 2: 0}[lod]
     for k in range(n_crest):
         t = (k + rng.uniform(0.2, 0.8)) / max(n_crest, 1)
         y = y_poll + (y_with + 0.05 - y_poll) * t
         root = _crest_point(guide, y, 0.0)
         for sx in (1.0, -1.0):
             s = "L" if sx > 0 else "R"
-            up = 0.02 + 0.02 * math.sin(math.pi * t)
-            L = rng.uniform(0.08, 0.11)
+            up = 0.012 + 0.012 * math.sin(math.pi * t)
+            L = rng.uniform(0.06, 0.09)
             f = np.linspace(0, 1, 4)
             path = np.array([root + V(sx * L * 0.75 * ff, rng.uniform(-0.01, 0.02) * ff,
                                       up * math.sin(math.pi * ff * 0.8) - 0.05 * ff * ff) for ff in f])

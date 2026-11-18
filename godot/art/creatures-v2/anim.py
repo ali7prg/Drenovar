@@ -190,26 +190,34 @@ def channels(baked, frames, translate=("MotionRoot", "Pelvis"), eps=1e-5):
 
 # ------------------------------------------------------------------ gait
 def gait_tip(quad, kind, side, phase, stride, duty, lift, reach=0.0, lateral=0.0):
-    """Foot tip position for a gait phase in [0,1): stance first (back-moving), then swing."""
+    """Foot tip position for a gait phase in [0,1): stance first (back-moving), then swing.
+    Every curve is continuous across lift-off and touch-down - position, its speed, and the toe / foot angles - so
+    nothing snaps between two frames (smooth_check.py): the swing leaves with the stance's backward speed and lands
+    with it (Hermite), the foot rises from rest, the push-off toe angle carries into the swing and the landing toe
+    angle into the stance."""
     rest = quad.rest_tip(kind, side)
+    f_push = -0.15 if kind == "Front" else 0.10
+    f_flex = -0.9 if kind == "Front" else 0.75
     if phase < duty:
         s = phase / duty
         x = stride * (0.5 - s)
         y = 0.0
-        toe = 0.0
-        foot = 0.0
-        # heel lift / push-off at the end of stance
-        push = ease((s - 0.7) / 0.3)
-        toe = -0.55 * push
-        foot = -0.15 * push if kind == "Front" else 0.10 * push
+        land = 1.0 - ease(s / 0.15)                 # landing toe angle eases out after touch-down
+        push = ease((s - 0.7) / 0.3)                # heel lift / push-off at the end of stance
+        toe = 0.25 * land - 0.55 * push
+        foot = f_push * push
     else:
         s = (phase - duty) / (1 - duty)
-        e = ease(s)
-        x = stride * (-0.5 + e) + reach * np.sin(np.pi * s)
-        y = lift * np.sin(np.pi * s) ** 0.85
-        flex = np.sin(np.pi * min(1.0, s * 1.15)) ** 1.2
-        toe = -1.2 * flex + 0.25 * ease((s - 0.75) / 0.25)
-        foot = (-0.9 if kind == "Front" else 0.75) * flex
+        # cubic Hermite from the lift-off point to the touch-down point, leaving and arriving with the stance speed
+        m = -stride * (1 - duty) / duty
+        h00, h10, h01, h11 = 2 * s ** 3 - 3 * s ** 2 + 1, s ** 3 - 2 * s ** 2 + s, -2 * s ** 3 + 3 * s ** 2, s ** 3 - s ** 2
+        x = h00 * (-0.5 * stride) + h10 * m + h01 * (0.5 * stride) + h11 * m + reach * np.sin(np.pi * s) ** 2
+        y = lift * np.sin(np.pi * s) ** 1.6
+        flex = np.sin(np.pi * min(1.0, s * 1.15)) ** 2
+        lift0 = 1.0 - ease(s / 0.25)                # the push-off pose carries into the swing
+        land = ease((s - 0.75) / 0.25)
+        toe = -0.55 * lift0 - 1.2 * flex + 0.25 * land
+        foot = f_push * lift0 + f_flex * flex
     return rest + np.array([x, y, lateral]), toe, foot
 
 
@@ -311,9 +319,10 @@ def plan_feet(rig, frames, motion, swings, lift=0.18, stance_mid=True):
                         p1 = local_of(world[i + 1], b)
                         e = ease(s)
                         tip = p0 + (p1 - p0) * e
-                        tip = tip + np.array([0, lift * np.sin(np.pi * s) ** 0.85, 0])
-                        flex = np.sin(np.pi * s)
-                        toe = -1.1 * flex
+                        tip = tip + np.array([0, lift * np.sin(np.pi * s) ** 1.6, 0])
+                        # continuous with the push-off before (toe -0.5) and the flat landing after: no snap
+                        flex = np.sin(np.pi * s) ** 2
+                        toe = -0.5 * (1.0 - ease(s / 0.3)) - 1.1 * flex
                         foot = (-0.8 if key[0] == "Front" else 0.7) * flex
                         break
             out[key] = {"tip": tip, "toe": toe, "foot": foot}

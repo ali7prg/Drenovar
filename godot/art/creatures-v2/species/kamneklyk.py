@@ -131,7 +131,7 @@ def body_core():
               Prim("sphere", "Head", k=0.012, neg=True, c=(1.175, 1.19, 0.282 * s), r=0.042, name=f"socket{nm}")]
         # heavy lids: the small, deep-set boar eye under the brow (creature-references)
         P += lid_prims((1.17, 1.19, 0.262 * s), 0.036, (0.45, 0.05, 0.89 * s), "Head", f"eye{nm}", mat="skin",
-                       upper=0.66, lower=0.80, thick=1.2)
+                       upper=0.86, lower=0.96, thick=1.0)
         ec = np.array([0.95, 1.43, 0.24 * s])
         Re = rot_x(-0.75 * s) @ rot_z(0.35)
         P += [Prim("ellipsoid", f"Ear_{nm}", k=0.03, c=ec, r=(0.055, 0.17, 0.095), R=Re, name=f"ear{nm}"),

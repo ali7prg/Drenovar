@@ -305,7 +305,7 @@ def step_offsets(table):
                 return a, 0.0, 0.0
             if fr < f1:
                 s = (fr - f0) / float(f1 - f0)
-                arc = np.sin(np.pi * s)
+                arc = np.sin(np.pi * s) ** 2         # leaves and lands with zero vertical speed (no hitch)
                 return a + (b - a) * ease(s), lift * arc, -0.8 * arc * (1.0 if lift > 0 else 0.0)
             dx = b
         return dx, 0.0, 0.0

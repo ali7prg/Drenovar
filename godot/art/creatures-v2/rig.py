@@ -72,7 +72,9 @@ class Skeleton:
         return pos, rot
 
 
-SOFT_IK = 0.05   # fraction of the reach where the chain eases out instead of locking straight
+import os as _os
+SOFT_IK = float(_os.environ.get("CV2_SOFT_IK", "0.05"))   # fraction of the reach where the chain eases out
+                                                            # instead of locking straight
 
 
 def two_bone_ik(a, l1, l2, target, pole, soft=None):

@@ -268,7 +268,7 @@ def eye_part():
 _SHORT = {1: 1, 2: 1}   # short coat cards lie flat: one strip segment is enough at LOD1 / LOD2
 FUR_CARDS = [  # creature-references: swept-back mane behind the head (ears and face stay clear), glowing strands,
     # silver cheek ruff, dark furred legs to the paws, huge silver brush tail with white tips
-    {"centre": (0.55, 1.70, 0), "radii": (0.42, 0.26, 0.32), "count": 460, "length": 0.37, "width": 0.12,
+    {"centre": (0.55, 1.70, 0), "radii": (0.42, 0.26, 0.32), "count": 460, "length": 0.35, "width": 0.12,
      "flow": lambda p, n: np.array([-1.0, 0.22, 0]), "lift": 0.24, "droop": 0.05, "crossed": True,
      "tip": "#b9bdcb", "root_k": 0.88},                                                             # mane
     {"centre": (0.50, 1.78, 0), "radii": (0.40, 0.16, 0.24), "count": 110, "length": 0.28, "width": 0.07,
@@ -290,13 +290,13 @@ FUR_CARDS = [  # creature-references: swept-back mane behind the head (ears and 
      "flow": lambda p, n: np.array([-1.0, 0.05, 0]), "lift": 0.12, "droop": 0.02, "tip": "#77757f",
      "root_k": 1.0, "segments": _SHORT},                                                            # crown
     {"centre": (0.55, 1.38, 0), "radii": (0.32, 0.22, 0.36), "count": 280, "length": 0.29, "width": 0.08,
-     "flow": lambda p, n: np.array([-0.8, -0.6, 0]), "lift": 0.20, "gravity": 0.10, "droop": 0.12,
+     "flow": lambda p, n: np.array([-0.8, -0.6, 0]), "lift": 0.16, "gravity": 0.10, "droop": 0.12,
      "crossed": True, "tip": "#77757f", "root_k": 0.9},                                             # shoulders
     {"centre": (-0.20, 1.30, 0), "radii": (0.95, 0.30, 0.34), "count": 520, "length": 0.18, "width": 0.08,
-     "flow": lambda p, n: np.array([-1.0, -0.30, 0]), "lift": 0.18, "gravity": 0.10, "droop": 0.10, "tip": "#6e6c78",
+     "flow": lambda p, n: np.array([-1.0, -0.30, 0]), "lift": 0.14, "gravity": 0.10, "droop": 0.10, "tip": "#6e6c78",
      "root_k": 0.95, "segments": _SHORT},                                                           # coat
     {"centre": (-0.95, 1.22, 0), "radii": (0.36, 0.30, 0.32), "count": 220, "length": 0.22, "width": 0.08,
-     "flow": lambda p, n: np.array([-1.0, -0.55, 0]), "lift": 0.18, "gravity": 0.08, "droop": 0.12, "tip": "#7b7985",
+     "flow": lambda p, n: np.array([-1.0, -0.55, 0]), "lift": 0.14, "gravity": 0.08, "droop": 0.12, "tip": "#7b7985",
      "root_k": 0.92},                                                                               # croup, flanks
 ] + [{"centre": (0.50, 0.62, 0.42 * s), "radii": (0.22, 0.52, 0.16), "count": 200, "length": 0.19, "width": 0.085,
       "flow": lambda p, n: np.array([-0.4, -1.0, 0]), "lift": 0.22, "gravity": 0.15, "droop": 0.1, "crossed": True,
@@ -491,11 +491,11 @@ def shade_detail(ctx):
         rel = P - c
         cosang = np.sum(rel * ax, 1) / np.maximum(np.linalg.norm(rel, axis=1), 1e-6)
         near = (np.linalg.norm(rel, axis=1) < 0.038).astype(np.float32) * w["eye"]
-        iris = sstep(0.62, 0.72, cosang) * near
-        pupil = sstep(0.93, 0.96, cosang) * near
-        col = mix(col, lin("#b8e5ff"), iris)
+        iris = sstep(0.70, 0.80, cosang) * near
+        pupil = sstep(0.94, 0.97, cosang) * near
+        col = mix(col, lin("#4cb4f0"), iris)
         col = mix(col, lin("#06080a"), pupil)
-        em += lin("#b8e5ff")[None, :] * (iris * (1 - pupil) * 1.6)[:, None]
+        em += lin("#5cc0ff")[None, :] * (iris * (1 - pupil) * 1.4)[:, None]
         eyeglow = np.maximum(eyeglow, iris)
     rough = w["fang"] * (0.35 + 0.15 * (1 - ring)) + w["claw"] * 0.42 + w["eye"] * 0.08
 

@@ -5,20 +5,20 @@
    "name": "Лесной Велькор",
    "model": "res://assets/creatures-v2/velkor/velkor_runtime.gltf",
    "manifest": "res://assets/creatures-v2/velkor/clip_manifest.json",
-   "display_scale": 1.32,
+   "display_scale": 1.282,
    "body": [
     2.51,
-    0.735
+    0.713
    ],
    "authored_bounds_m": {
     "x": [
-     -1.762,
-     2.041
+     -1.848,
+     2.068
     ],
-    "half_width": 0.557,
-    "top": 2.924
+    "half_width": 0.556,
+    "top": 2.905
    },
-   "lod_switch_m": 26.3,
+   "lod_switch_m": 26.1,
    "groups": {
     "body": "Body",
     "horn": "AntlerBark"
@@ -80,20 +80,20 @@
    "name": "Тенерис",
    "model": "res://assets/creatures-v2/tenerys/tenerys_runtime.gltf",
    "manifest": "res://assets/creatures-v2/tenerys/clip_manifest.json",
-   "display_scale": 1.27,
+   "display_scale": 1.254,
    "body": [
-    2.631,
-    0.481
+    2.63,
+    0.475
    ],
    "authored_bounds_m": {
     "x": [
      -2.743,
-     1.4
+     1.451
     ],
     "half_width": 0.378,
-    "top": 1.863
+    "top": 1.898
    },
-   "lod_switch_m": 16.8,
+   "lod_switch_m": 17.1,
    "groups": {
     "body": "Body",
     "detail": "Details"
@@ -258,18 +258,18 @@
    "name": "Камнеклык",
    "model": "res://assets/creatures-v2/kamneklyk/kamneklyk_runtime.gltf",
    "manifest": "res://assets/creatures-v2/kamneklyk/clip_manifest.json",
-   "display_scale": 1.444,
+   "display_scale": 1.445,
    "body": [
-    2.619,
-    1.038
+    2.62,
+    1.039
    ],
    "authored_bounds_m": {
     "x": [
-     -1.914,
+     -1.913,
      1.714
     ],
     "half_width": 0.719,
-    "top": 2.015
+    "top": 2.013
    },
    "lod_switch_m": 18.1,
    "groups": {

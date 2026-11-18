@@ -1,0 +1,87 @@
+{
+  "metrics": {
+    "uv_stretch": {
+      "v1": {
+        "side_top_max": 1.067,
+        "side_top_median": 1.067,
+        "front_faces": 531,
+        "other_faces": 2769
+      },
+      "v2": {
+        "side_top_max": 1.067,
+        "side_top_median": 1.067,
+        "front_faces": 571,
+        "other_faces": 2729
+      },
+      "v3": {
+        "side_top_max": 1.067,
+        "side_top_median": 1.067,
+        "front_faces": 557,
+        "other_faces": 2743
+      }
+    },
+    "v1_LOD0_painted": {
+      "iou": 0.9147,
+      "colour_err": 0.1553,
+      "ssim": 0.2681,
+      "ref_px": 58207,
+      "render_px": 57764
+    },
+    "v1_LOD0_albedo": {
+      "iou": 0.9147,
+      "colour_err": 0.1639,
+      "ssim": 0.2654,
+      "ref_px": 58207,
+      "render_px": 57764
+    },
+    "v1_LOD1_painted": {
+      "iou": 0.8983,
+      "colour_err": 0.157,
+      "ssim": 0.247,
+      "ref_px": 58207,
+      "render_px": 55202
+    },
+    "v1_LOD2_painted": {
+      "iou": 0.8907,
+      "colour_err": 0.1639,
+      "ssim": 0.2385,
+      "ref_px": 58207,
+      "render_px": 54470
+    }
+  },
+  "lods": {
+    "v1": {
+      "LOD0": {
+        "tris": 3432
+      },
+      "LOD1": {
+        "tris": 1344
+      },
+      "LOD2": {
+        "tris": 946
+      }
+    },
+    "v2": {
+      "LOD0": {
+        "tris": 3354
+      },
+      "LOD1": {
+        "tris": 1316
+      },
+      "LOD2": {
+        "tris": 604
+      }
+    },
+    "v3": {
+      "LOD0": {
+        "tris": 3378
+      },
+      "LOD1": {
+        "tris": 1324
+      },
+      "LOD2": {
+        "tris": 558
+      }
+    }
+  }
+}

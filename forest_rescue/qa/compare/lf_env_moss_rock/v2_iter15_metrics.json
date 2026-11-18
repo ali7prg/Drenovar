@@ -1,0 +1,87 @@
+{
+  "metrics": {
+    "uv_stretch": {
+      "v1": {
+        "side_top_max": 1.067,
+        "side_top_median": 1.067,
+        "front_faces": 187,
+        "other_faces": 653
+      },
+      "v2": {
+        "side_top_max": 1.067,
+        "side_top_median": 1.067,
+        "front_faces": 107,
+        "other_faces": 369
+      },
+      "v3": {
+        "side_top_max": 1.067,
+        "side_top_median": 1.067,
+        "front_faces": 104,
+        "other_faces": 364
+      }
+    },
+    "v1_LOD0_painted": {
+      "iou": 0.9432,
+      "colour_err": 0.0616,
+      "ssim": 0.7843,
+      "ref_px": 58207,
+      "render_px": 56631
+    },
+    "v1_LOD0_albedo": {
+      "iou": 0.9432,
+      "colour_err": 0.0425,
+      "ssim": 0.7997,
+      "ref_px": 58207,
+      "render_px": 56631
+    },
+    "v1_LOD1_painted": {
+      "iou": 0.9423,
+      "colour_err": 0.0616,
+      "ssim": 0.7818,
+      "ref_px": 58207,
+      "render_px": 56569
+    },
+    "v1_LOD2_painted": {
+      "iou": 0.7685,
+      "colour_err": 0.0686,
+      "ssim": 0.6011,
+      "ref_px": 58207,
+      "render_px": 45662
+    }
+  },
+  "lods": {
+    "v1": {
+      "LOD0": {
+        "tris": 972
+      },
+      "LOD1": {
+        "tris": 884
+      },
+      "LOD2": {
+        "tris": 250
+      }
+    },
+    "v2": {
+      "LOD0": {
+        "tris": 530
+      },
+      "LOD1": {
+        "tris": 492
+      },
+      "LOD2": {
+        "tris": 250
+      }
+    },
+    "v3": {
+      "LOD0": {
+        "tris": 546
+      },
+      "LOD1": {
+        "tris": 492
+      },
+      "LOD2": {
+        "tris": 250
+      }
+    }
+  }
+}

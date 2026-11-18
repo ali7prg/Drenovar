@@ -1,10 +1,10 @@
 {
   "id": "lf_env_moss_rock",
-  "generation": "v2 image-based reconstruction from art/02 (solid painted blocks / logs)",
-  "heightM": 5.48,
+  "generation": "v2: fractured limestone mound from the art/02 outcrop (painted front, painted-limestone sides and painted moss tops by patch synthesis, isometric per-face UVs)",
+  "heightM": 5.46,
   "footprintM": [
-    9.3,
-    2.34
+    9.28,
+    2.9
   ],
   "scaleNote": "real metres from the 1.8 m figure on art/02 (understory without a figure: realistic height, see build script); world layer should respect heightM instead of normalising",
   "variants": {
@@ -15,9 +15,9 @@
         "lf_env_moss_rock_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 1918,
-        "LOD1": 848,
-        "LOD2": 218
+        "LOD0": 756,
+        "LOD1": 668,
+        "LOD2": 250
       },
       "materials": {
         "LOD0": [
@@ -33,18 +33,18 @@
           "lf_foliage"
         ]
       },
-      "height_m": 5.48,
-      "footprint_radius_m": 4.84,
+      "height_m": 5.46,
+      "footprint_radius_m": 4.82,
       "bounds_m_blender": [
         [
           -4.46,
           -0.28,
-          0.16
+          0.15
         ],
         [
-          4.84,
-          2.06,
-          5.48
+          4.82,
+          2.62,
+          5.46
         ]
       ],
       "display_offset_gltf": [
@@ -52,10 +52,10 @@
         0.0,
         0.0
       ],
-      "heightM": 5.48,
+      "heightM": 5.46,
       "footprintM": [
-        9.3,
-        2.34
+        9.28,
+        2.9
       ]
     },
     "v2": {
@@ -65,9 +65,9 @@
         "lf_env_moss_rock_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 1146,
-        "LOD1": 506,
-        "LOD2": 134
+        "LOD0": 394,
+        "LOD1": 356,
+        "LOD2": 250
       },
       "materials": {
         "LOD0": [
@@ -83,29 +83,29 @@
           "lf_foliage"
         ]
       },
-      "height_m": 5.48,
-      "footprint_radius_m": 3.1,
+      "height_m": 5.06,
+      "footprint_radius_m": 3.18,
       "bounds_m_blender": [
         [
-          -2.9,
-          -1.09,
-          0.16
+          -2.8,
+          -1.12,
+          0.15
         ],
         [
-          3.1,
-          1.25,
-          5.48
+          3.18,
+          1.53,
+          5.06
         ]
       ],
       "display_offset_gltf": [
-        11.3,
+        11.275,
         0.0,
         0.0
       ],
-      "heightM": 5.48,
+      "heightM": 5.06,
       "footprintM": [
-        6.0,
-        2.34
+        5.97,
+        2.65
       ]
     },
     "v3": {
@@ -115,9 +115,9 @@
         "lf_env_moss_rock_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 1088,
-        "LOD1": 464,
-        "LOD2": 116
+        "LOD0": 374,
+        "LOD1": 320,
+        "LOD2": 250
       },
       "materials": {
         "LOD0": [
@@ -133,36 +133,36 @@
           "lf_foliage"
         ]
       },
-      "height_m": 5.48,
-      "footprint_radius_m": 3.2,
+      "height_m": 5.44,
+      "footprint_radius_m": 2.95,
       "bounds_m_blender": [
         [
-          -3.1,
-          -0.95,
-          0.18
+          -2.6,
+          -0.91,
+          0.31
         ],
         [
-          3.2,
-          1.38,
-          5.48
+          2.95,
+          1.17,
+          5.44
         ]
       ],
       "display_offset_gltf": [
-        22.6,
+        22.55,
         0.0,
         0.0
       ],
-      "heightM": 5.48,
+      "heightM": 5.44,
       "footprintM": [
-        6.3,
-        2.33
+        5.55,
+        2.08
       ]
     }
   },
   "tris": {
-    "LOD0": 1918,
-    "LOD1": 848,
-    "LOD2": 218
+    "LOD0": 756,
+    "LOD1": 668,
+    "LOD2": 250
   },
   "bones": 0,
   "materials": [
@@ -196,13 +196,13 @@
       "type": "box",
       "centre": [
         0.0,
-        2.74,
+        2.73,
         0.0
       ],
       "size": [
-        9.3,
-        5.48,
-        2.34
+        9.28,
+        5.46,
+        2.9
       ],
       "variant": "v1"
     },
@@ -210,13 +210,13 @@
       "type": "box",
       "centre": [
         0.0,
-        2.74,
+        2.53,
         0.0
       ],
       "size": [
-        6.0,
-        5.48,
-        2.34
+        5.98,
+        5.06,
+        2.65
       ],
       "variant": "v2"
     },
@@ -224,16 +224,36 @@
       "type": "box",
       "centre": [
         0.0,
-        2.74,
+        2.72,
         0.0
       ],
       "size": [
-        6.3,
-        5.48,
-        2.33
+        5.55,
+        5.44,
+        2.08
       ],
       "variant": "v3"
     }
   ],
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_props.py moss_rock"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_rock.py",
+  "uvStretch": {
+    "v1": {
+      "side_top_max": 1.067,
+      "side_top_median": 1.067,
+      "front_faces": 144,
+      "other_faces": 480
+    },
+    "v2": {
+      "side_top_max": 1.067,
+      "side_top_median": 1.067,
+      "front_faces": 80,
+      "other_faces": 260
+    },
+    "v3": {
+      "side_top_max": 1.067,
+      "side_top_median": 1.067,
+      "front_faces": 67,
+      "other_faces": 229
+    }
+  }
 }

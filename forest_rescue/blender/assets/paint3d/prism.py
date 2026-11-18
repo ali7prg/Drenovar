@@ -36,7 +36,7 @@ def top_band(region, top_like, min_cols_frac=0.3, lo_frac=0.08, hi_frac=0.45):
 
 
 def block_solid(view, region, top_like, ppm, elev_deg, y0=0.0, eps_px=1.6, taper=0.86, min_depth_k=0.7,
-                max_depth_k=1.5, rng=None):
+                max_depth_k=1.5, rng=None, depth_mul=1.0):
     """Returns (verts (N,3), faces list) of the solid block in Blender world space, or None."""
     rng = rng or np.random.default_rng(0)
     ys, xs = np.nonzero(region)
@@ -53,7 +53,7 @@ def block_solid(view, region, top_like, ppm, elev_deg, y0=0.0, eps_px=1.6, taper
     else:
         D = min_depth_k * w_px / ppm
         front = region
-    D = float(np.clip(D, min_depth_k * w_px / ppm, max_depth_k * w_px / ppm))
+    D = float(np.clip(D, min_depth_k * w_px / ppm, max_depth_k * w_px / ppm)) * depth_mul
     front = ndi.binary_opening(front, iterations=1)
     lab, n = ndi.label(front)
     if n == 0:

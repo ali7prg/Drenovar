@@ -227,9 +227,11 @@ def body_parts(J=None):
                        bone=f"forearm_{s}", name="forearm"), 0.06)
         add(ell(el + V(-0.01 * sx, -0.06, -0.09), (0.08, 0.085, 0.17), bone=f"forearm_{s}",
                 name="forearm_muscle"), 0.08)
-        # knee (carpus)
+        # knee (carpus) + accessory carpal bone bump at the back of the knee
         add(ell(kn + V(0, -0.005, 0.0), (0.068, 0.064, 0.072), bone=f"cannon_F_{s}",
                 name="knee"), 0.04)
+        add(ell(kn + V(0, 0.052, 0.012), (0.042, 0.040, 0.05), bone=f"cannon_F_{s}",
+                name="accessory_carpal"), 0.04)
         # cannon (deep front-back because of the tendons) + feathered fetlock
         add(flat_cone(kn + V(0, 0.008, -0.03), fe + V(0, 0.014, 0.03), 0.068, 0.068, 0.80,
                       bone=f"cannon_F_{s}", name="cannon"), 0.04)

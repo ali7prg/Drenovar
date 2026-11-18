@@ -245,7 +245,7 @@ def mane_cards(guide, lod=0, seed=3):
     """Layered clump cards: under/mid/top layers falling to both sides + crest volume."""
     rng = np.random.default_rng(seed + lod)
     cs = CardSet()
-    y_poll, y_with = -1.115, -0.32
+    y_poll, y_with = -1.115, -0.36
     segs = {0: 6, 1: 4, 2: 3}[lod]
     layers = {0: [(40, 0.006, 1.0, "mane_dense"), (30, 0.013, 1.06, "mane_wavy"),
                   (16, 0.020, 1.10, "mane_wisp")],
@@ -260,10 +260,13 @@ def mane_cards(guide, lod=0, seed=3):
                 # length: reach the sheet's mane-bottom line (curving over the crest), irregular
                 bottom = float(np.interp(y, *MANE_BOTTOM))
                 length = max(0.12, (root[2] - bottom) * 1.32) * lmul * rng.uniform(0.75, 1.18)
+                # the mane falls mainly to the horse's right (front/rear views of the sheet)
+                length *= 1.10 if s == "R" else 0.88
                 width = rng.uniform(0.050, 0.072) * (1.25 if lod == 2 else 1.0)
-                d0 = V(sx * 0.85, rng.uniform(0.0, 0.15), 0.02)
-                path = _strand_on_surface(guide, root, d0, length, segs, off, rng, sx,
-                                          stiff=0.50, off_gain=0.008 + 0.004 * li)
+                d0 = V(sx * (0.85 if s == "R" else 0.6), rng.uniform(0.0, 0.15), 0.02)
+                path = _strand_on_surface(guide, root, d0, length, segs,
+                                          off if s == "R" else off * 0.7, rng, sx, stiff=0.50,
+                                          off_gain=(0.008 + 0.004 * li) * (1.0 if s == "R" else 0.6))
                 keep = path[:, 2] > bottom - 0.07
                 keep[:2] = True
                 path = path[:max(2, int(np.argmin(keep)) if not keep.all() else len(path))]
@@ -385,7 +388,7 @@ def tail_cards(lod=0, seed=7, drop=None):
     """Full flowing tail: dock cover + outer/inner clump shells + cross cards, wavy ends."""
     rng = np.random.default_rng(seed)
     cs = CardSet()
-    cfg = {0: dict(shells=[(20, 1.0, 12), (12, 0.6, 10)], cross=6, dock=14, dseg=5),
+    cfg = {0: dict(shells=[(24, 1.0, 12), (12, 0.6, 10)], cross=6, dock=14, dseg=5),
            1: dict(shells=[(12, 1.0, 8), (7, 0.6, 6)], cross=3, dock=5, dseg=3),
            2: dict(shells=[(7, 1.0, 4)], cross=2, dock=0, dseg=2)}[lod]
 
@@ -405,7 +408,7 @@ def tail_cards(lod=0, seed=7, drop=None):
             # cross-section: hugs the dock, full in the middle, spreading loose toward the tip
             rad = (0.045 + 0.065 * np.sin(np.pi * np.clip(ts * 0.8, 0, 1)) ** 0.7 + 0.05 * ts ** 2) * \
                 rscale * rng.uniform(0.85, 1.1)
-            ox = np.cos(ang) * rad * 0.95
+            ox = np.cos(ang) * rad * 1.12
             oy = np.sin(ang) * rad * 0.72 - 0.015
             wav = rng.uniform(0.015, 0.04)
             ph = rng.uniform(0, 6.28)

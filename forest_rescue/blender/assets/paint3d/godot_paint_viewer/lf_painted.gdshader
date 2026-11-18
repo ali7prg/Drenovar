@@ -6,6 +6,7 @@ shader_type spatial;
 render_mode unshaded, cull_disabled, depth_draw_opaque;
 
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform vec4 albedo_color : source_color = vec4(1.0);
 uniform bool alpha_test = true;
 uniform float alpha_cutoff : hint_range(0.0, 1.0) = 0.5;
 uniform float painted_light_mix : hint_range(0.0, 1.0) = 0.4;
@@ -36,7 +37,7 @@ void vertex() {
 }
 
 void fragment() {
-	vec4 c = texture(albedo_tex, UV);
+	vec4 c = texture(albedo_tex, UV) * albedo_color;
 	if (alpha_test) {
 		// cards seen edge-on fade out (face normal from screen derivatives)
 		vec3 fn = normalize(cross(dFdx(VERTEX), dFdy(VERTEX)));

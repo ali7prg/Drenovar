@@ -119,6 +119,8 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
             ok[q["id"]] = r
             return r
         ps = [q for q in ps if keep(q)]
+        if B.cfg.get("limb_min_top_z"):
+            ps = [q for q in ps if q["kind"] == "trunk" or q["P"][:, 2].max() >= B.cfg["limb_min_top_z"]]
     if B.cfg.get("trunk_r_k"):
         for q in ps:
             if q["kind"] == "trunk":
@@ -211,15 +213,32 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
         uv_id = thick[0]["id"] if thick else 0
         rng_l = np.random.default_rng(vs["seed"] * 13 + lod)
         nid = 10000
-        for (C, r_m, eta) in B.last_masses:
-            Cl = F + (C - F) * 0.88
-            d_ = Cl - F
-            M = F + d_ * 0.45 + np.array([0, 0, 1.0]) * 0.25 * np.linalg.norm(d_) + rng_l.normal(0, 0.15, 3)
-            s_ = np.linspace(0, 1, L.get("lobe_limb_pts", 6))[:, None]
-            Pq = (1 - s_) ** 2 * F + 2 * (1 - s_) * s_ * M + s_ ** 2 * Cl
-            rr = np.linspace(r_top * B.cfg.get("lobe_limb_r0", 0.45), 0.07, len(s_))
+        masses_ = sorted(B.last_masses, key=lambda m: np.arctan2(m[0][1] - F[1], m[0][0] - F[0]))
+        prev = None
+        npts = L.get("lobe_limb_pts", 6)
+        for k_, (C, r_m, eta) in enumerate(masses_):
+            dirh = C[:2] - F[:2]
+            nh = np.linalg.norm(dirh)
+            dirh = dirh / nh if nh > 1e-3 else np.array([1.0, 0.0])
+            if prev is not None and k_ % 2 == 1 and np.linalg.norm(C - prev[0][-1]) < 6.0:
+                # secondary limb branching off the previous primary limb (oak fork structure)
+                j_ = max(1, int(0.45 * (len(prev[0]) - 1)))
+                S = prev[0][j_]
+                r0 = float(prev[1][j_]) * 0.8
+            else:
+                # primary limb leaving the upper trunk at staggered heights, from the trunk surface
+                zdrop = rng_l.uniform(0.0, 1.8)
+                S = F - np.array([0, 0, zdrop]) + np.r_[dirh * r_top * 0.6, 0.0]
+                r0 = r_top * B.cfg.get("lobe_limb_r0", 0.45) * rng_l.uniform(0.85, 1.1)
+            Cl = S + (C - S) * 0.86
+            d_ = Cl - S
+            M = S + d_ * 0.5 + np.array([0, 0, 1.0]) * 0.18 * np.linalg.norm(d_) + rng_l.normal(0, 0.2, 3)
+            s_ = np.linspace(0, 1, npts)[:, None]
+            Pq = (1 - s_) ** 2 * S + 2 * (1 - s_) * s_ * M + s_ ** 2 * Cl
+            rr = np.linspace(r0, 0.07, npts)
             bark_uv[nid] = bark_uv[uv_id]
             ps.append(dict(P=Pq, r=rr, kind="limb", id=nid, parent=-1, r_px=float(rr[0] * ref.ppm), level=1))
+            prev = (Pq, rr)
             nid += 1
     if vs.get("palette"):
         mp = P.pal[vs["palette"]]
@@ -299,6 +318,18 @@ def main():
         ids += [p["id"]] * len(T)
     col, known, Tx = tree.bark_texture(ref, orig, np.array(ids), size=1024, swatch_box=sp["swatch"],
                                        swatch_px_per_m=dens, swatch_m=sp.get("swatch_m", 0.6))
+    if sp.get("bark_whiten"):
+        # birch: painted white bark de-lit to white (shaded side lifted), black lenticels / marks kept
+        from skimage import color as skc
+        lab_ = seg.lab(col)
+        Lc = lab_[..., 0]
+        lo, hi, tgt = sp["bark_whiten"]
+        w_ = np.clip((Lc - lo) / max(hi - lo, 1e-3), 0, 1)
+        w_ = w_ * w_ * (3 - 2 * w_)
+        lab_[..., 0] = Lc + w_ * (tgt + 0.25 * (Lc - tgt) - Lc)
+        lab_[..., 1:] *= (1 - 0.45 * w_)[..., None]
+        col = np.clip(skc.lab2rgb(lab_), 0, 1).astype(np.float32)
+        cv2.imwrite(cpath, cv2.cvtColor((col * 255).astype(np.uint8), cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, 90])
     nmap, rmap = tree.bark_maps(col)
     kind = sp["bark"]
     cpath = os.path.join(RT, f"lf_bark_{kind}_c.jpg")

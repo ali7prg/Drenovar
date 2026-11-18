@@ -260,8 +260,9 @@ class Patches:
             ytop = ys.min() + (ys.max() - ys.min()) / 3.0
             top_px = m & (np.arange(ref.H)[:, None] <= ytop)
             top_lum = float(Lab[..., 0][top_px].mean()) if top_px.any() else float(Lab[..., 0][m].mean())
+            chroma = float(np.hypot(Lab[..., 1][m], Lab[..., 2][m]).mean())
             self.info.append(dict(c=(cu, cv), area=int(m.sum()), rho=float(rho), eta=float(eta),
-                                  lum=float(Lab[..., 0][m].mean()), top_lum=top_lum, edge=edge,
+                                  lum=float(Lab[..., 0][m].mean()), top_lum=top_lum, edge=edge, chroma=chroma,
                                   w_m=(rect[2] - rect[0]) / ref.ppm, h_m=(rect[3] - rect[1]) / ref.ppm))
         self.extra = []
 
@@ -895,7 +896,9 @@ class TreeBuilder:
                 # brightest-topped painted clumps (top quartile)
                 w *= np.exp(np.clip((tlums - np.percentile(tlums[~hires_m], 70)) / (lp * 0.6), -6, 4))
             elif mode == "under":
-                w *= np.exp(np.clip(-(lums - np.percentile(lums[~hires_m], 30)) / 4.0, -6, 4))
+                chs = np.array([q.get("chroma", 40.0) for q in info])
+                w *= np.exp(-((lums - np.percentile(lums[~hires_m], 30)) / 5.0) ** 2)
+                w *= (chs > np.median(chs[~hires_m]) * 0.9)
             else:
                 w *= np.exp(np.clip((lums - lum_med) / (lp * 1.3), -4, 4))
             w /= w.sum()

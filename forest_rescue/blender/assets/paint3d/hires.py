@@ -55,6 +55,8 @@ def match_palette(tiles, target_lab_pixels, l_shift=0.0):
     for t in tiles:
         lab = seg.lab(t["rgba"][..., :3])
         lab = (lab - ms) / ss * st + mt
+        # keep the source lightness contrast (crisp rosettes): only shift L, transfer chroma/hue
+        lab[..., 0] = seg.lab(t["rgba"][..., :3])[..., 0] - ms[0] + mt[0]
         lab[..., 0] += l_shift
         rgb = np.clip(skc.lab2rgb(np.clip(lab, [0, -128, -128], [100, 127, 127])), 0, 1).astype(np.float32)
         t = dict(t)

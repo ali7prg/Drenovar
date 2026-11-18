@@ -1,0 +1,130 @@
+﻿asset_id,path,format,status,purpose,suggested_destination
+CLAUDE_CODE_IMPLEMENTATION_BRIEF_RU.md,CLAUDE_CODE_IMPLEMENTATION_BRIEF_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/CLAUDE_CODE_IMPLEMENTATION_BRIEF_RU.md
+START_HERE_RU.md,START_HERE_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/START_HERE_RU.md
+art::01_world_masterplan.png,art/01_world_masterplan.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/01_world_masterplan.png
+art::02_forest_modular_kit.png,art/02_forest_modular_kit.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/02_forest_modular_kit.png
+art::03_boss_ancient_maw_turnaround.png,art/03_boss_ancient_maw_turnaround.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/03_boss_ancient_maw_turnaround.png
+art::04_expedition_squad_turnaround.png,art/04_expedition_squad_turnaround.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/04_expedition_squad_turnaround.png
+art::05_boss_motion_keyposes.png,art/05_boss_motion_keyposes.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/05_boss_motion_keyposes.png
+art::06_environment_landmarks.png,art/06_environment_landmarks.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/06_environment_landmarks.png
+art::07_fog_exploration_interface.png,art/07_fog_exploration_interface.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/07_fog_exploration_interface.png
+art::08_final_boss_arena.png,art/08_final_boss_arena.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/08_final_boss_arena.png
+art::09_tenerys_guardian_direction.png,art/09_tenerys_guardian_direction.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/09_tenerys_guardian_direction.png
+art::10_artifact_mechanisms.png,art/10_artifact_mechanisms.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/10_artifact_mechanisms.png
+art::11_other_guardians_direction.png,art/11_other_guardians_direction.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/11_other_guardians_direction.png
+art::12_civilian_rescue_motion.png,art/12_civilian_rescue_motion.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/12_civilian_rescue_motion.png
+art::18_hall3_unlock_intro.png,art/18_hall3_unlock_intro.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/18_hall3_unlock_intro.png
+art::cage_variants_gate_sockets.png,art/cage_variants_gate_sockets.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/cage_variants_gate_sockets.png
+art::civilian_survivors_turnaround_expressions.png,art/civilian_survivors_turnaround_expressions.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/civilian_survivors_turnaround_expressions.png
+art::horse_guide_turnaround_motion.png,art/horse_guide_turnaround_motion.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/horse_guide_turnaround_motion.png
+art::loot_artifact_families.png,art/loot_artifact_families.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/loot_artifact_families.png
+art::rescue_animation_storyboard.png,art/rescue_animation_storyboard.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/art/rescue_animation_storyboard.png
+assets::audio::audio_metadata.json,assets/audio/audio_metadata.json,json,requires_engine_setup,Игровой ресурс; подключить к сцене/материалу/событию,dist/adventure/forest-rescue/audio/audio_metadata.json
+assets::audio::audio_validation.json,assets/audio/audio_validation.json,json,requires_engine_setup,Игровой ресурс; подключить к сцене/материалу/событию,dist/adventure/forest-rescue/audio/audio_validation.json
+assets::audio::fr_artifact_discovery.m4a,assets/audio/fr_artifact_discovery.m4a,m4a,requires_engine_setup,Игровой ресурс; подключить к сцене/материалу/событию,dist/adventure/forest-rescue/audio/fr_artifact_discovery.m4a
+assets::audio::fr_cage_latch.m4a,assets/audio/fr_cage_latch.m4a,m4a,requires_engine_setup,Игровой ресурс; подключить к сцене/материалу/событию,dist/adventure/forest-rescue/audio/fr_cage_latch.m4a
+assets::audio::fr_distant_rumble.m4a,assets/audio/fr_distant_rumble.m4a,m4a,requires_engine_setup,Игровой ресурс; подключить к сцене/материалу/событию,dist/adventure/forest-rescue/audio/fr_distant_rumble.m4a
+assets::audio::fr_forest_wind.m4a,assets/audio/fr_forest_wind.m4a,m4a,requires_engine_setup,Игровой ресурс; подключить к сцене/материалу/событию,dist/adventure/forest-rescue/audio/fr_forest_wind.m4a
+assets::audio::fr_forest_wind.wav,assets/audio/fr_forest_wind.wav,wav,requires_engine_setup,Игровой ресурс; подключить к сцене/материалу/событию,dist/adventure/forest-rescue/audio/fr_forest_wind.wav
+assets::audio::fr_gate_creak.m4a,assets/audio/fr_gate_creak.m4a,m4a,requires_engine_setup,Игровой ресурс; подключить к сцене/материалу/событию,dist/adventure/forest-rescue/audio/fr_gate_creak.m4a
+assets::audio::fr_horse_hoof.m4a,assets/audio/fr_horse_hoof.m4a,m4a,requires_engine_setup,Игровой ресурс; подключить к сцене/материалу/событию,dist/adventure/forest-rescue/audio/fr_horse_hoof.m4a
+assets::audio::fr_large_reward.m4a,assets/audio/fr_large_reward.m4a,m4a,requires_engine_setup,Игровой ресурс; подключить к сцене/материалу/событию,dist/adventure/forest-rescue/audio/fr_large_reward.m4a
+assets::audio::fr_people_rescued.m4a,assets/audio/fr_people_rescued.m4a,m4a,requires_engine_setup,Игровой ресурс; подключить к сцене/материалу/событию,dist/adventure/forest-rescue/audio/fr_people_rescued.m4a
+code::adventure-access.mjs,code/adventure-access.mjs,mjs,requires_engine_setup,Проверенный самостоятельный модуль; адаптер проекта ещё не реализован,handoff/code/adventure-access.mjs
+code::fog.mjs,code/fog.mjs,mjs,requires_engine_setup,Проверенный самостоятельный модуль; адаптер проекта ещё не реализован,handoff/code/fog.mjs
+code::forest-rescue.mjs,code/forest-rescue.mjs,mjs,requires_engine_setup,Проверенный самостоятельный модуль; адаптер проекта ещё не реализован,handoff/code/forest-rescue.mjs
+code::intro-migration.mjs,code/intro-migration.mjs,mjs,requires_engine_setup,Проверенный самостоятельный модуль; адаптер проекта ещё не реализован,handoff/code/intro-migration.mjs
+code::mechanisms.mjs,code/mechanisms.mjs,mjs,requires_engine_setup,Проверенный самостоятельный модуль; адаптер проекта ещё не реализован,handoff/code/mechanisms.mjs
+code::reference-transaction.mjs,code/reference-transaction.mjs,mjs,requires_engine_setup,Проверенный самостоятельный модуль; адаптер проекта ещё не реализован,handoff/code/reference-transaction.mjs
+code::reserve-refill.mjs,code/reserve-refill.mjs,mjs,requires_engine_setup,Проверенный самостоятельный модуль; адаптер проекта ещё не реализован,handoff/code/reserve-refill.mjs
+code::world-layout.mjs,code/world-layout.mjs,mjs,requires_engine_setup,Проверенный самостоятельный модуль; адаптер проекта ещё не реализован,handoff/code/world-layout.mjs
+data::ambient-candidates.json,data/ambient-candidates.json,json,requires_engine_setup,Авторские конфигурации; подключить адаптеры,handoff/data/ambient-candidates.json
+data::animation_manifest.json,data/animation_manifest.json,json,requires_engine_setup,Авторские конфигурации; подключить адаптеры,handoff/data/animation_manifest.json
+data::asset-production-plan.json,data/asset-production-plan.json,json,requires_engine_setup,Авторские конфигурации; подключить адаптеры,handoff/data/asset-production-plan.json
+data::campaign.json,data/campaign.json,json,requires_engine_setup,Авторские конфигурации; подключить адаптеры,handoff/data/campaign.json
+data::dialogue.ru.json,data/dialogue.ru.json,json,requires_engine_setup,Авторские конфигурации; подключить адаптеры,handoff/data/dialogue.ru.json
+data::economy.json,data/economy.json,json,requires_engine_setup,Авторские конфигурации; подключить адаптеры,handoff/data/economy.json
+data::persistence-contract.json,data/persistence-contract.json,json,requires_engine_setup,Авторские конфигурации; подключить адаптеры,handoff/data/persistence-contract.json
+data::terrain-audit.json,data/terrain-audit.json,json,requires_engine_setup,Авторские конфигурации; подключить адаптеры,handoff/data/terrain-audit.json
+data::ui.ru.json,data/ui.ru.json,json,requires_engine_setup,Авторские конфигурации; подключить адаптеры,handoff/data/ui.ru.json
+data::unlock-intro.json,data/unlock-intro.json,json,requires_engine_setup,Авторские конфигурации; подключить адаптеры,handoff/data/unlock-intro.json
+data::world-atlas.json,data/world-atlas.json,json,requires_engine_setup,Авторские конфигурации; подключить адаптеры,handoff/data/world-atlas.json
+docs::ANIMATION_PRODUCTION_RU.md,docs/ANIMATION_PRODUCTION_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/ANIMATION_PRODUCTION_RU.md
+docs::ART_PRODUCTION_RU.md,docs/ART_PRODUCTION_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/ART_PRODUCTION_RU.md
+docs::ART_REFERENCE_NOTES_MODEL_AGENT_RU.md,docs/ART_REFERENCE_NOTES_MODEL_AGENT_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/ART_REFERENCE_NOTES_MODEL_AGENT_RU.md
+docs::AUDIO_RU.md,docs/AUDIO_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/AUDIO_RU.md
+docs::CAMPAIGN_BIBLE_RU.md,docs/CAMPAIGN_BIBLE_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/CAMPAIGN_BIBLE_RU.md
+docs::CHANGELOG_1_1_RU.md,docs/CHANGELOG_1_1_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/CHANGELOG_1_1_RU.md
+docs::CODE_AND_PERSISTENCE_RU.md,docs/CODE_AND_PERSISTENCE_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/CODE_AND_PERSISTENCE_RU.md
+docs::CONCEPT_RU.md,docs/CONCEPT_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/CONCEPT_RU.md
+docs::ECONOMY_RU.md,docs/ECONOMY_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/ECONOMY_RU.md
+docs::HALL3_UNLOCK_AND_INTRO_RU.md,docs/HALL3_UNLOCK_AND_INTRO_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/HALL3_UNLOCK_AND_INTRO_RU.md
+docs::NARRATIVE_RU.md,docs/NARRATIVE_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/NARRATIVE_RU.md
+docs::PERFORMANCE_AUDIT_RU.md,docs/PERFORMANCE_AUDIT_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/PERFORMANCE_AUDIT_RU.md
+docs::WORLD_LAYOUT_AND_FOG_RU.md,docs/WORLD_LAYOUT_AND_FOG_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/docs/WORLD_LAYOUT_AND_FOG_RU.md
+previews::world-atlas.png,previews/world-atlas.png,png,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/previews/world-atlas.png
+previews::world-atlas.svg,previews/world-atlas.svg,svg,visual_reference,Просмотр постановки; не импортировать как игровую геометрию,handoff/previews/world-atlas.svg
+qa::ART_INVENTORY.json,qa/ART_INVENTORY.json,json,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/qa/ART_INVENTORY.json
+qa::HALL3_REVIEW.json,qa/HALL3_REVIEW.json,json,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/qa/HALL3_REVIEW.json
+qa::INDEPENDENT_REVIEW.json,qa/INDEPENDENT_REVIEW.json,json,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/qa/INDEPENDENT_REVIEW.json
+qa::READINESS_RU.md,qa/READINESS_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/qa/READINESS_RU.md
+qa::animation_manifest_validation.json,qa/animation_manifest_validation.json,json,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/qa/animation_manifest_validation.json
+qa::art::REFERENCE_SHEETS_MODEL_AGENT.json,qa/art/REFERENCE_SHEETS_MODEL_AGENT.json,json,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/qa/art/REFERENCE_SHEETS_MODEL_AGENT.json
+qa::cross-review-tests.txt,qa/cross-review-tests.txt,txt,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/qa/cross-review-tests.txt
+qa::final-all-tests.txt,qa/final-all-tests.txt,txt,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/qa/final-all-tests.txt
+qa::logic-tests.txt,qa/logic-tests.txt,txt,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/qa/logic-tests.txt
+qa::performance-probe-tests.txt,qa/performance-probe-tests.txt,txt,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/qa/performance-probe-tests.txt
+qa::reward-total.json,qa/reward-total.json,json,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/qa/reward-total.json
+references::REQUIRED_WEB_ASSETS_480.json,references/REQUIRED_WEB_ASSETS_480.json,json,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/references/REQUIRED_WEB_ASSETS_480.json
+sources::art::01_world_masterplan_prompt.txt,sources/art/01_world_masterplan_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/01_world_masterplan_prompt.txt
+sources::art::02_forest_modular_kit_prompt.txt,sources/art/02_forest_modular_kit_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/02_forest_modular_kit_prompt.txt
+sources::art::03_boss_ancient_maw_turnaround_prompt.txt,sources/art/03_boss_ancient_maw_turnaround_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/03_boss_ancient_maw_turnaround_prompt.txt
+sources::art::04_expedition_squad_turnaround_prompt.txt,sources/art/04_expedition_squad_turnaround_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/04_expedition_squad_turnaround_prompt.txt
+sources::art::05_boss_motion_keyposes_prompt.txt,sources/art/05_boss_motion_keyposes_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/05_boss_motion_keyposes_prompt.txt
+sources::art::06_environment_landmarks_prompt.txt,sources/art/06_environment_landmarks_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/06_environment_landmarks_prompt.txt
+sources::art::07_fog_exploration_interface_prompt.txt,sources/art/07_fog_exploration_interface_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/07_fog_exploration_interface_prompt.txt
+sources::art::07_fog_exploration_interface_revision.txt,sources/art/07_fog_exploration_interface_revision.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/07_fog_exploration_interface_revision.txt
+sources::art::08_final_boss_arena_prompt.txt,sources/art/08_final_boss_arena_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/08_final_boss_arena_prompt.txt
+sources::art::09_tenerys_guardian_direction_prompt.txt,sources/art/09_tenerys_guardian_direction_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/09_tenerys_guardian_direction_prompt.txt
+sources::art::10_artifact_mechanisms_prompt.txt,sources/art/10_artifact_mechanisms_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/10_artifact_mechanisms_prompt.txt
+sources::art::11_other_guardians_direction_prompt.txt,sources/art/11_other_guardians_direction_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/11_other_guardians_direction_prompt.txt
+sources::art::12_civilian_rescue_motion_prompt.txt,sources/art/12_civilian_rescue_motion_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/12_civilian_rescue_motion_prompt.txt
+sources::art::18_hall3_unlock_intro_prompt.txt,sources/art/18_hall3_unlock_intro_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/18_hall3_unlock_intro_prompt.txt
+sources::art::cages_prompt.txt,sources/art/cages_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/cages_prompt.txt
+sources::art::civilians_prompt.txt,sources/art/civilians_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/civilians_prompt.txt
+sources::art::horse_guide_prompt.txt,sources/art/horse_guide_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/horse_guide_prompt.txt
+sources::art::loot_artifacts_prompt.txt,sources/art/loot_artifacts_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/loot_artifacts_prompt.txt
+sources::art::rescue_storyboard_correction_prompt.txt,sources/art/rescue_storyboard_correction_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/rescue_storyboard_correction_prompt.txt
+sources::art::rescue_storyboard_initial_prompt.txt,sources/art/rescue_storyboard_initial_prompt.txt,txt,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/art/rescue_storyboard_initial_prompt.txt
+sources::audio::generate_audio.py,sources/audio/generate_audio.py,py,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/audio/generate_audio.py
+sources::audio::masters::fr_artifact_discovery.wav,sources/audio/masters/fr_artifact_discovery.wav,wav,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/audio/masters/fr_artifact_discovery.wav
+sources::audio::masters::fr_cage_latch.wav,sources/audio/masters/fr_cage_latch.wav,wav,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/audio/masters/fr_cage_latch.wav
+sources::audio::masters::fr_distant_rumble.wav,sources/audio/masters/fr_distant_rumble.wav,wav,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/audio/masters/fr_distant_rumble.wav
+sources::audio::masters::fr_forest_wind.wav,sources/audio/masters/fr_forest_wind.wav,wav,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/audio/masters/fr_forest_wind.wav
+sources::audio::masters::fr_gate_creak.wav,sources/audio/masters/fr_gate_creak.wav,wav,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/audio/masters/fr_gate_creak.wav
+sources::audio::masters::fr_horse_hoof.wav,sources/audio/masters/fr_horse_hoof.wav,wav,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/audio/masters/fr_horse_hoof.wav
+sources::audio::masters::fr_large_reward.wav,sources/audio/masters/fr_large_reward.wav,wav,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/audio/masters/fr_large_reward.wav
+sources::audio::masters::fr_people_rescued.wav,sources/audio/masters/fr_people_rescued.wav,wav,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/audio/masters/fr_people_rescued.wav
+sources::audio::verify_audio.py,sources/audio/verify_audio.py,py,ready_to_import,Редактируемый исходник/генератор; открыть в указанном инструменте,handoff/sources/audio/verify_audio.py
+tests::adventure-access.test.mjs,tests/adventure-access.test.mjs,mjs,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/adventure-access.test.mjs
+tests::campaign.test.mjs,tests/campaign.test.mjs,mjs,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/campaign.test.mjs
+tests::content-contract.test.mjs,tests/content-contract.test.mjs,mjs,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/content-contract.test.mjs
+tests::fixtures::01_prologue.json,tests/fixtures/01_prologue.json,json,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/fixtures/01_prologue.json
+tests::fixtures::02_key_recovered.json,tests/fixtures/02_key_recovered.json,json,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/fixtures/02_key_recovered.json
+tests::fixtures::03_completed_unclaimed.json,tests/fixtures/03_completed_unclaimed.json,json,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/fixtures/03_completed_unclaimed.json
+tests::fixtures::README_RU.md,tests/fixtures/README_RU.md,md,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/fixtures/README_RU.md
+tests::fixtures.mjs,tests/fixtures.mjs,mjs,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/fixtures.mjs
+tests::mechanisms.test.mjs,tests/mechanisms.test.mjs,mjs,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/mechanisms.test.mjs
+tests::performance-probe.test.mjs,tests/performance-probe.test.mjs,mjs,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/performance-probe.test.mjs
+tests::reserve-refill.test.mjs,tests/reserve-refill.test.mjs,mjs,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/reserve-refill.test.mjs
+tests::world-results.txt,tests/world-results.txt,txt,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/world-results.txt
+tests::world.test.mjs,tests/world.test.mjs,mjs,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tests/world.test.mjs
+tools::build_art_inventory.py,tools/build_art_inventory.py,py,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tools/build_art_inventory.py
+tools::build_atlas.mjs,tools/build_atlas.mjs,mjs,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tools/build_atlas.mjs
+tools::build_delivery.py,tools/build_delivery.py,py,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tools/build_delivery.py
+tools::generate_campaign.py,tools/generate_campaign.py,py,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tools/generate_campaign.py
+tools::generate_dialogue.py,tools/generate_dialogue.py,py,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tools/generate_dialogue.py
+tools::performance-probe.mjs,tools/performance-probe.mjs,mjs,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tools/performance-probe.mjs
+tools::render_map.mjs,tools/render_map.mjs,mjs,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tools/render_map.mjs
+tools::validate_animation_manifest.py,tools/validate_animation_manifest.py,py,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tools/validate_animation_manifest.py
+tools::verify_delivery.py,tools/verify_delivery.py,py,ready_to_import,"Документ, проверка или инженерный инструмент; готов к чтению/запуску по инструкции",handoff/tools/verify_delivery.py

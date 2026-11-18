@@ -1,0 +1,16 @@
+✔ histogram retains long stalls and bounded size (7.357147ms)
+✔ wrapper preserves receiver args return and thrown identity (1.849708ms)
+✔ boundary excludes background gap but retains active stall (0.572234ms)
+✔ dispose restores owned wrappers without overwriting later wrappers (0.48525ms)
+✔ series cap prevents unbounded label growth (0.671726ms)
+✔ city hooks whole tick and counts only matching submitted scene (1.486644ms)
+✔ world wraps existing loop without scheduling another frame (1.704024ms)
+✔ frame and renderer labels are bounded too (0.54856ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 122.166525

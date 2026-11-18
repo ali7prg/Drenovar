@@ -1,0 +1,213 @@
+{
+  "passed": true,
+  "campaign_id": "forest_rescue_v1",
+  "files_checked": 17,
+  "checks": [
+    "all files decoded with ffmpeg",
+    "48kHz stereo",
+    "finite PCM",
+    "no clipping",
+    "exact PCM sample counts",
+    "AAC padding <=2048 samples",
+    "loop boundary <= max internal step",
+    "exact file sizes <=30000000 bytes"
+  ],
+  "not_checked": [
+    "human listening",
+    "engine playback",
+    "visual sync",
+    "Safari decoding",
+    "iPhone 12"
+  ],
+  "assets": [
+    {
+      "id": "fr_forest_wind",
+      "kind": "master",
+      "path": "sources/audio/masters/fr_forest_wind.wav",
+      "bytes": 3456044,
+      "sha256": "703c4e19f592983a94e8840e149861d760f9433bf65158c64d8d8a4a23f575da",
+      "decoded_samples_per_channel": 576000,
+      "decoder_padding_samples": 0,
+      "peak_dbfs": -15.999999046325684,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_forest_wind",
+      "kind": "game_aac",
+      "path": "assets/audio/fr_forest_wind.m4a",
+      "bytes": 195627,
+      "sha256": "3c659038ea6c32830df51a19b4ffe41ce8e6f1e610429db204e2e7b8fbdac9e7",
+      "decoded_samples_per_channel": 576512,
+      "decoder_padding_samples": 512,
+      "peak_dbfs": -15.968086242675781,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_forest_wind",
+      "kind": "game_loop_pcm",
+      "path": "assets/audio/fr_forest_wind.wav",
+      "bytes": 2304044,
+      "sha256": "9bb369b8e858162758f8fbbd6f0f5eb14caff49b2e7b29e2fce21b516dd0e08c",
+      "decoded_samples_per_channel": 576000,
+      "decoder_padding_samples": 0,
+      "peak_dbfs": -16.00063133239746,
+      "clipped_samples": 0,
+      "loop_boundary_step": 0.003631591796875,
+      "largest_internal_step": 0.030731201171875
+    },
+    {
+      "id": "fr_distant_rumble",
+      "kind": "master",
+      "path": "sources/audio/masters/fr_distant_rumble.wav",
+      "bytes": 576044,
+      "sha256": "bb51a747c9c26097c577c43ff00fc859619993ebd8e8297fd2f23d3748ad1910",
+      "decoded_samples_per_channel": 96000,
+      "decoder_padding_samples": 0,
+      "peak_dbfs": -12.0,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_distant_rumble",
+      "kind": "game_aac",
+      "path": "assets/audio/fr_distant_rumble.m4a",
+      "bytes": 32936,
+      "sha256": "7afb4d7478276e3f24a8a2a1fc92d728c411e0d28b44209cc97cc72a48153167",
+      "decoded_samples_per_channel": 96256,
+      "decoder_padding_samples": 256,
+      "peak_dbfs": -11.998231887817383,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_horse_hoof",
+      "kind": "master",
+      "path": "sources/audio/masters/fr_horse_hoof.wav",
+      "bytes": 129644,
+      "sha256": "35335159363d7cb4503a323311ecfd9cacd8ace7c48b4ff665c0c84d852d02ce",
+      "decoded_samples_per_channel": 21600,
+      "decoder_padding_samples": 0,
+      "peak_dbfs": -9.000001907348633,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_horse_hoof",
+      "kind": "game_aac",
+      "path": "assets/audio/fr_horse_hoof.m4a",
+      "bytes": 8067,
+      "sha256": "70d6678e19282070a23a3d10e7e389e7a9c6284d4cf526aa9eff804c7c9014a3",
+      "decoded_samples_per_channel": 22528,
+      "decoder_padding_samples": 928,
+      "peak_dbfs": -9.010509490966797,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_artifact_discovery",
+      "kind": "master",
+      "path": "sources/audio/masters/fr_artifact_discovery.wav",
+      "bytes": 432044,
+      "sha256": "7c218431b19b50578bb1fb69e0a158ed68b4c845c85bbb5df353b1b39388f2e4",
+      "decoded_samples_per_channel": 72000,
+      "decoder_padding_samples": 0,
+      "peak_dbfs": -7.000001907348633,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_artifact_discovery",
+      "kind": "game_aac",
+      "path": "assets/audio/fr_artifact_discovery.m4a",
+      "bytes": 23738,
+      "sha256": "f5a7b06e1e66c589cb1859b2c7ac9f9c19eb63e91914c97b6bda4d146f0d4782",
+      "decoded_samples_per_channel": 72704,
+      "decoder_padding_samples": 704,
+      "peak_dbfs": -6.318966865539551,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_cage_latch",
+      "kind": "master",
+      "path": "sources/audio/masters/fr_cage_latch.wav",
+      "bytes": 288044,
+      "sha256": "32ae1c5831b06f2d17ac03ff00ff7b367e024b3b733fd3b36cfb272ca828890b",
+      "decoded_samples_per_channel": 48000,
+      "decoder_padding_samples": 0,
+      "peak_dbfs": -9.000001907348633,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_cage_latch",
+      "kind": "game_aac",
+      "path": "assets/audio/fr_cage_latch.m4a",
+      "bytes": 14598,
+      "sha256": "e79d1b594b3762add711c083cb18b9a7abd92294412ffd07706a67e588673d71",
+      "decoded_samples_per_channel": 48128,
+      "decoder_padding_samples": 128,
+      "peak_dbfs": -8.913461685180664,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_gate_creak",
+      "kind": "master",
+      "path": "sources/audio/masters/fr_gate_creak.wav",
+      "bytes": 576044,
+      "sha256": "64bcc5a89bc22c15aae793988d6ca990da91552045eb75f2290c52b8f16a657c",
+      "decoded_samples_per_channel": 96000,
+      "decoder_padding_samples": 0,
+      "peak_dbfs": -11.0,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_gate_creak",
+      "kind": "game_aac",
+      "path": "assets/audio/fr_gate_creak.m4a",
+      "bytes": 32368,
+      "sha256": "dcd93d843dd653282b2f8f9ddc4da5e52219a9c7a43d8159a489eff57bf0af95",
+      "decoded_samples_per_channel": 96256,
+      "decoder_padding_samples": 256,
+      "peak_dbfs": -10.882863998413086,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_people_rescued",
+      "kind": "master",
+      "path": "sources/audio/masters/fr_people_rescued.wav",
+      "bytes": 432044,
+      "sha256": "fa098783c06b87aae1fb11c043bb8c42d0f2355c91d71e24c392c44c08906c5d",
+      "decoded_samples_per_channel": 72000,
+      "decoder_padding_samples": 0,
+      "peak_dbfs": -8.0,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_people_rescued",
+      "kind": "game_aac",
+      "path": "assets/audio/fr_people_rescued.m4a",
+      "bytes": 23197,
+      "sha256": "a5c7be6490b2f6cddb493e252cd7df50514f6d2ac1fb76817e8a07f82abf65c3",
+      "decoded_samples_per_channel": 72704,
+      "decoder_padding_samples": 704,
+      "peak_dbfs": -6.545041084289551,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_large_reward",
+      "kind": "master",
+      "path": "sources/audio/masters/fr_large_reward.wav",
+      "bytes": 576044,
+      "sha256": "c860e6a516a7dc0e89435c9bd9ca0a4a5258aed4ed8f3358ffcca4da35a19dc7",
+      "decoded_samples_per_channel": 96000,
+      "decoder_padding_samples": 0,
+      "peak_dbfs": -7.000001907348633,
+      "clipped_samples": 0
+    },
+    {
+      "id": "fr_large_reward",
+      "kind": "game_aac",
+      "path": "assets/audio/fr_large_reward.m4a",
+      "bytes": 31851,
+      "sha256": "3e140f3e2d9433ac2c22a779404c6647696d78774128a92d5ead71a7c37cbb75",
+      "decoded_samples_per_channel": 96256,
+      "decoder_padding_samples": 256,
+      "peak_dbfs": -7.104884147644043,
+      "clipped_samples": 0
+    }
+  ]
+}

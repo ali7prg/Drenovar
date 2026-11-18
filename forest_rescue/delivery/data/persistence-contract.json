@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "campaignId": "forest_rescue_v1",
+  "status": "proposed integration contract for tested reference modules; not installed in live game",
+  "authoritativeStateNamespace": "p.adventures.forest_rescue_v1",
+  "stateKeys": [
+    "schemaVersion",
+    "campaignId",
+    "phase",
+    "paused",
+    "revision",
+    "sites",
+    "rescuedIds",
+    "usedBattleProofs",
+    "escrow"
+  ],
+  "perSiteKeys": [
+    "step",
+    "artifact"
+  ],
+  "siteSteps": {
+    "0": "undiscovered",
+    "1": "discovered",
+    "2": "artifact_recovered",
+    "3": "guardian_defeated",
+    "4": "cage_opened",
+    "5": "rescued"
+  },
+  "artifactInvariant": "artifact == 1 exactly when step is 2 or 3; otherwise 0",
+  "mechanismNamespace": "p.adventureMechanisms.forest_rescue_v1",
+  "preferenceNamespace": "p.rewardReservePrefs.forest_rescue_v1.autoRefill",
+  "autoRefillDefault": false,
+  "commands": {
+    "discover_horse": [],
+    "attempt_task": [
+      "siteId",
+      "taskId"
+    ],
+    "begin_boss": [],
+    "finish_boss": [],
+    "claim_rewards": [],
+    "pause": [],
+    "resume": []
+  },
+  "httpBodyExample": {
+    "kind": "adventure",
+    "campaignId": "forest_rescue_v1",
+    "action": "attempt_task",
+    "siteId": "lf_site_01",
+    "taskId": "recover_artifact"
+  },
+  "clientForbiddenAuthority": [
+    "evidence",
+    "battleProof",
+    "mechanismProof",
+    "escortProof",
+    "arrival",
+    "state",
+    "reward",
+    "wallet",
+    "capacity",
+    "authenticatedPlayerId",
+    "hallLevel",
+    "serverTime"
+  ],
+  "trustedArrival": [
+    "ownerId matches authenticatedPlayerId",
+    "targetId matches expected object",
+    "serverVerified is true",
+    "routeValid is true",
+    "actual server-controlled squad arrival is verified by adapter"
+  ],
+  "trustedBattle": [
+    "ownerId matches authenticatedPlayerId",
+    "siteId matches site or boss",
+    "encounterId matches server expectedEncounterId",
+    "species and level match campaign configuration",
+    "modifier matches configuration",
+    "finalized victory",
+    "serverVerified is true",
+    "unique unused reportId"
+  ],
+  "trustedMechanism": [
+    "ownerId matches authenticatedPlayerId",
+    "siteId matches",
+    "serverVerified is true",
+    "solved is true",
+    "server checks actual landmark or simultaneous plate occupancy"
+  ],
+  "trustedEscort": [
+    "ownerId matches authenticatedPlayerId",
+    "siteId matches",
+    "serverVerified is true",
+    "arrivedHome is true",
+    "exact three distinct captive IDs for site"
+  ],
+  "escrowKeys": [
+    "earned",
+    "claimed",
+    "pending"
+  ],
+  "escrowInvariant": "for each resource: earned == claimed + pending; earned equals sum of uniquely completed task awards plus prologue and final when eligible",
+  "commitAtomicity": [
+    "quest state transition",
+    "artifact acquisition or consumption",
+    "unique battle proof record",
+    "escrow award or partial transfer",
+    "real project wallet modification when claiming",
+    "command receipt"
+  ],
+  "requestReplay": "same owner and request key with same body returns current authoritative state and no repeated effects; changed body rejects",
+  "concurrency": "integrate within existing CoreGameServer transaction and hosted CAS, no separate non-atomic write",
+  "timestamps": "optional server audit metadata stored outside strict campaign state",
+  "migration": "initialize only missing namespace; reject unsupported or corrupt state without overwriting bytes; never trust legacy client imports for rewards",
+  "fogPersistence": "keep persistent explored state and current visibility separate; use code/fog.mjs contract and data/world-atlas.json; camera and client mask cannot award discovery",
+  "pause": "only adventure command availability/UI; existing world travel, combat and queues continue",
+  "ordinaryCombatRewards": "retain genuine first combat rewards separately from guaranteed campaign totals; no campaign guardian respawn farming; idempotent each source",
+  "references": [
+    "code/forest-rescue.mjs",
+    "code/reference-transaction.mjs",
+    "code/mechanisms.mjs",
+    "code/reserve-refill.mjs",
+    "code/fog.mjs",
+    "docs/CODE_AND_PERSISTENCE_RU.md",
+    "data/unlock-intro.json",
+    "code/adventure-access.mjs",
+    "code/intro-migration.mjs",
+    "docs/HALL3_UNLOCK_AND_INTRO_RU.md"
+  ],
+  "contentVersion": "1.1.0",
+  "minimumHallLevel": 3,
+  "requiresCompletedHallUpgrade": true,
+  "accessAuthority": "selected authenticated server player p.city completed hall level; not local timer, queued upgrade or client JSON",
+  "introNamespace": "p.adventureAccess.forest_rescue_v1",
+  "introStateKeys": [
+    "schemaVersion",
+    "campaignId",
+    "status",
+    "attempts",
+    "deferred",
+    "acknowledgment",
+    "revision"
+  ],
+  "introStates": [
+    "pending",
+    "playing",
+    "acknowledged"
+  ],
+  "introAcknowledgments": [
+    "finished",
+    "skipped",
+    "existing_progress"
+  ],
+  "introCommands": {
+    "start_intro": [],
+    "finish_intro": [
+      "attempt"
+    ],
+    "skip_intro": [],
+    "defer_intro": []
+  },
+  "introHttpBodyExample": {
+    "kind": "adventure_intro",
+    "campaignId": "forest_rescue_v1",
+    "action": "start_intro"
+  },
+  "introRules": [
+    "no rewards for viewing, finishing or skipping",
+    "intro acknowledgment never blocks unlocked campaign",
+    "autoplay only once on safe city foreground; after interruption offer Continue",
+    "publish present_intro only after successful state+receipt CAS",
+    "UI readiness is presentation input, never access or reward authority",
+    "explicit migration of missing intro namespace with validated existing campaign phase != prologue marks existing_progress",
+    "acknowledged replay is local presentation only at hall >=3; no server mutation or rewards"
+  ],
+  "lockedPolicy": "All adventure mutations, mechanisms, route entry, fog reveal and campaign claims require hall>=3. Hide quest POIs and horse. Preserve existing bytes and reserve. Auto-refill below3 transfers zero and does not undo unrelated spending.",
+  "bossAndHighGuardianGate": "Keep original level3 guardians and both begin_boss/finish_boss at hall>=5"
+}

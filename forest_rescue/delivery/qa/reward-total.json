@@ -1,0 +1,13 @@
+{
+  "campaignId": "forest_rescue_v1",
+  "expectedReward": {
+    "food": 2325000,
+    "wood": 2385000,
+    "stone": 1590000,
+    "iron": 1025000,
+    "coins": 190000
+  },
+  "totalUnits": 7515000,
+  "verifiedBy": "actual reducer completion; 60 task awards + prologue + final",
+  "synthetic": true
+}

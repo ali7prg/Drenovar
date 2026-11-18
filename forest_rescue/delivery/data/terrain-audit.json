@@ -1,0 +1,308 @@
+{
+  "sourcePath": "DRENOVAR-Server-v92/dist/city/landform.js",
+  "sourceSha256": "676b4ef42c0148b2b0d989dc6f9ec21ba09e035b754608ceabae519b1ce733a7",
+  "kind": "offline mathematical samples from original terrain; no runtime integration",
+  "poiAudit": [
+    {
+      "id": "lf_site_01",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 1.9217703256456666,
+      "heightSpread": 0.3637267244880462,
+      "requiresAuthoredPad": true,
+      "center": {
+        "x": -20,
+        "y": 6.541880045103037,
+        "z": -65
+      }
+    },
+    {
+      "id": "lf_site_02",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 46.25143789873052,
+      "heightSpread": 4.081052718716811,
+      "requiresAuthoredPad": true,
+      "center": {
+        "x": -43,
+        "y": 10.458988902086197,
+        "z": -67
+      }
+    },
+    {
+      "id": "lf_site_03",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 2.855716637732647,
+      "heightSpread": 0.17136444176927057,
+      "requiresAuthoredPad": false,
+      "center": {
+        "x": -67,
+        "y": 12.591316456367277,
+        "z": -63
+      }
+    },
+    {
+      "id": "lf_site_04",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 36.560608910828094,
+      "heightSpread": 1.0008617135563904,
+      "requiresAuthoredPad": true,
+      "center": {
+        "x": -84,
+        "y": 6.35427128858343,
+        "z": -32
+      }
+    },
+    {
+      "id": "lf_site_05",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 1.661781524569707,
+      "heightSpread": 0.15662865922676783,
+      "requiresAuthoredPad": false,
+      "center": {
+        "x": -86,
+        "y": 6.153796319374566,
+        "z": 0
+      }
+    },
+    {
+      "id": "lf_site_06",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 25.820714469980008,
+      "heightSpread": 2.206248134163687,
+      "requiresAuthoredPad": true,
+      "center": {
+        "x": -81,
+        "y": 6.411153373738038,
+        "z": 35
+      }
+    },
+    {
+      "id": "lf_site_07",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 1.7343467972133664,
+      "heightSpread": 0.28112843666136733,
+      "requiresAuthoredPad": false,
+      "center": {
+        "x": -62,
+        "y": 8.94528758624163,
+        "z": 70
+      }
+    },
+    {
+      "id": "lf_site_08",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 27.98481535994186,
+      "heightSpread": 2.080912660650804,
+      "requiresAuthoredPad": true,
+      "center": {
+        "x": -25,
+        "y": 6.785103038980269,
+        "z": 86
+      }
+    },
+    {
+      "id": "lf_site_09",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 1.8348714789183997,
+      "heightSpread": 0.3392646099997503,
+      "requiresAuthoredPad": false,
+      "center": {
+        "x": 20,
+        "y": 3.14334779563396,
+        "z": 87
+      }
+    },
+    {
+      "id": "lf_site_10",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 0.8160416703980625,
+      "heightSpread": 0.14159758625417895,
+      "requiresAuthoredPad": false,
+      "center": {
+        "x": 64,
+        "y": 2.985582153690406,
+        "z": 72
+      }
+    },
+    {
+      "id": "lf_site_11",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 19.715237031215548,
+      "heightSpread": 0.2612206771564183,
+      "requiresAuthoredPad": true,
+      "center": {
+        "x": 101,
+        "y": 0.5010610865383573,
+        "z": -3
+      }
+    },
+    {
+      "id": "lf_site_12",
+      "sampleCount": 149,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 1.0658403028548586,
+      "heightSpread": 0.08423104246713109,
+      "requiresAuthoredPad": false,
+      "center": {
+        "x": 78,
+        "y": 6.831463923337402,
+        "z": -49
+      }
+    },
+    {
+      "id": "lf_boss_arena",
+      "sampleCount": 709,
+      "allSamplesPlantable": true,
+      "maximumSlopeDegrees": 1.5552400334657157,
+      "heightSpread": 0.38829012027152565,
+      "requiresAuthoredPad": true,
+      "center": {
+        "x": 75,
+        "y": 6.545627597111355,
+        "z": -86
+      }
+    }
+  ],
+  "routeAudit": [
+    {
+      "id": "lf_route_entry",
+      "sampleCount": 33,
+      "sourceMaximumGradeDegrees": 1.8572150469694622,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 0.11988869823405324,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": false
+    },
+    {
+      "id": "lf_route_01_02",
+      "sampleCount": 48,
+      "sourceMaximumGradeDegrees": 43.15711922807684,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 2.113515110112564,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": true
+    },
+    {
+      "id": "lf_route_02_03",
+      "sampleCount": 50,
+      "sourceMaximumGradeDegrees": 28.482554376870432,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 0.6932147244452977,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": true
+    },
+    {
+      "id": "lf_route_03_04",
+      "sampleCount": 76,
+      "sourceMaximumGradeDegrees": 40.16599597790088,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 1.861011607354623,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": true
+    },
+    {
+      "id": "lf_route_04_05",
+      "sampleCount": 66,
+      "sourceMaximumGradeDegrees": 0.9029651974156638,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 0.023502626804247306,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": false
+    },
+    {
+      "id": "lf_route_05_06",
+      "sampleCount": 72,
+      "sourceMaximumGradeDegrees": 1.6942222557807751,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 0.10045426612198671,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": false
+    },
+    {
+      "id": "lf_route_06_07",
+      "sampleCount": 83,
+      "sourceMaximumGradeDegrees": 25.417609936990655,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 1.2031250667724445,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": true
+    },
+    {
+      "id": "lf_route_07_08",
+      "sampleCount": 82,
+      "sourceMaximumGradeDegrees": 24.191791122354697,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 0.9705618659881852,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": true
+    },
+    {
+      "id": "lf_route_08_09",
+      "sampleCount": 92,
+      "sourceMaximumGradeDegrees": 43.20680685517677,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 1.4091473374610906,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": true
+    },
+    {
+      "id": "lf_route_09_10",
+      "sampleCount": 96,
+      "sourceMaximumGradeDegrees": 1.4117806485352726,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 0.08198510068508558,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": false
+    },
+    {
+      "id": "lf_route_10_11",
+      "sampleCount": 210,
+      "sourceMaximumGradeDegrees": 23.60853316835231,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 3.9288319987910203,
+      "gradeProfileStatus": "bridge-profile requires continuous bank-ramp authoring; not fully slope-certified",
+      "requiresRegrade": true
+    },
+    {
+      "id": "lf_route_11_12",
+      "sampleCount": 106,
+      "sourceMaximumGradeDegrees": 37.77010940861986,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 1.6313363443041555,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": true
+    },
+    {
+      "id": "lf_route_boss",
+      "sampleCount": 77,
+      "sourceMaximumGradeDegrees": 0.5689536839411237,
+      "nonPlantableSamplesOutsideBridge": 0,
+      "staticCoreCenterlineHits": 0,
+      "maximumSuggestedProfileDelta": 0.03614900807132937,
+      "gradeProfileStatus": "suggested road profile; endpoints must be tied to authored site pads and collision verified",
+      "requiresRegrade": false
+    }
+  ]
+}

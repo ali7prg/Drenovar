@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "campaignId": "forest_rescue_v1",
+  "phase": "prologue",
+  "paused": false,
+  "revision": 0,
+  "sites": {
+    "lf_site_01": {
+      "step": 0,
+      "artifact": 0
+    },
+    "lf_site_02": {
+      "step": 0,
+      "artifact": 0
+    },
+    "lf_site_03": {
+      "step": 0,
+      "artifact": 0
+    },
+    "lf_site_04": {
+      "step": 0,
+      "artifact": 0
+    },
+    "lf_site_05": {
+      "step": 0,
+      "artifact": 0
+    },
+    "lf_site_06": {
+      "step": 0,
+      "artifact": 0
+    },
+    "lf_site_07": {
+      "step": 0,
+      "artifact": 0
+    },
+    "lf_site_08": {
+      "step": 0,
+      "artifact": 0
+    },
+    "lf_site_09": {
+      "step": 0,
+      "artifact": 0
+    },
+    "lf_site_10": {
+      "step": 0,
+      "artifact": 0
+    },
+    "lf_site_11": {
+      "step": 0,
+      "artifact": 0
+    },
+    "lf_site_12": {
+      "step": 0,
+      "artifact": 0
+    }
+  },
+  "rescuedIds": [],
+  "usedBattleProofs": [],
+  "escrow": {
+    "earned": {
+      "food": 0,
+      "wood": 0,
+      "stone": 0,
+      "iron": 0,
+      "coins": 0
+    },
+    "claimed": {
+      "food": 0,
+      "wood": 0,
+      "stone": 0,
+      "iron": 0,
+      "coins": 0
+    },
+    "pending": {
+      "food": 0,
+      "wood": 0,
+      "stone": 0,
+      "iron": 0,
+      "coins": 0
+    }
+  }
+}

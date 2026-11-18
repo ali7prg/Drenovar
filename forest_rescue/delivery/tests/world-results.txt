@@ -1,0 +1,28 @@
+✔ fog starts with existing base visible, distant forest hidden (2.945449ms)
+✔ committed server traversal reveals persistently and repeat is idempotent (2.760244ms)
+✔ forged coordinate commands, ownership, and uncommitted movement rejected (1.239109ms)
+✔ version, bad bitset, sparse jumping paths and NaN are rejected (1.813026ms)
+✔ fog monotonically expands between routes without exposing boss on camera move (0.98836ms)
+✔ chunks cover every authored POI exactly once (0.409147ms)
+✔ scatter repeats by seed and respects reserved property and road corridor (3.593546ms)
+✔ no scatter on water, cliffs, or fully reserved chunk (1.914883ms)
+✔ streaming budgets never evict pinned squad or pause simulation (8.953976ms)
+✔ unknown unpinned chunks use fog only, not full geometry (0.468415ms)
+✔ atlas path endpoints match linked POIs and boss (4.139994ms)
+✔ scatter refuses unconfirmed masks (0.349784ms)
+✔ malformed or negative reserve mask never silently opens protected terrain (0.344791ms)
+✔ same-login profiles cannot reveal fog for another selected settlement (0.213028ms)
+✔ hall1 hall2 missing invalid and client-forged levels deny exploration before traversal resolution (0.897011ms)
+✔ hall3 reveals via authoritative traversal; upgrading does not expose the entire map (1.890275ms)
+✔ locked projection masks legacy progress and all POIs while preserving town and saved bytes (2.169179ms)
+✔ camera and old mask cannot bypass hall gate; unauthenticated projection denied (0.790531ms)
+✔ protected town property outside the default core stays visible while forest remains locked (0.395857ms)
+✔ atlas gate and entrance match shared code constants (0.170783ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 143.676596

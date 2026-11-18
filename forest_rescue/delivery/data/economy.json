@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "campaignId": "forest_rescue_v1",
+  "resources": [
+    "food",
+    "wood",
+    "stone",
+    "iron",
+    "coins"
+  ],
+  "baseTaskRewards": {
+    "discover": {
+      "food": 2000,
+      "wood": 2000,
+      "stone": 1000,
+      "iron": 500,
+      "coins": 100
+    },
+    "defeat_guardian": {
+      "food": 10000,
+      "wood": 8000,
+      "stone": 5000,
+      "iron": 2000,
+      "coins": 500
+    },
+    "recover_artifact": {
+      "food": 4000,
+      "wood": 6000,
+      "stone": 4000,
+      "iron": 3000,
+      "coins": 300
+    },
+    "unlock_cage": {
+      "food": 8000,
+      "wood": 10000,
+      "stone": 6000,
+      "iron": 4000,
+      "coins": 700
+    },
+    "escort_home": {
+      "food": 20000,
+      "wood": 20000,
+      "stone": 12000,
+      "iron": 8000,
+      "coins": 1400
+    }
+  },
+  "siteMultiplierByNumber": [
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    4,
+    4,
+    4
+  ],
+  "prologue": {
+    "food": 5000,
+    "wood": 5000,
+    "stone": 0,
+    "iron": 0,
+    "coins": 0
+  },
+  "final": {
+    "food": 1000000,
+    "wood": 1000000,
+    "stone": 750000,
+    "iron": 500000,
+    "coins": 100000
+  },
+  "totals": {
+    "food": 2325000,
+    "wood": 2385000,
+    "stone": 1590000,
+    "iron": 1025000,
+    "coins": 190000
+  },
+  "totalAllResources": 7515000,
+  "awardCount": 62,
+  "additionalHiddenCampaignAwards": false,
+  "ordinaryFirstCombatLoot": "retained separately under original rules; excluded from guaranteed totals",
+  "xpAward": 0,
+  "rewardDelivery": "server escrow first; atomic partial manual claims; optional opt-in automatic refill after real successful spend, default false",
+  "verifiedCapacityExamples": {
+    "newKingdomEachResource": 2000,
+    "oneOfEachSupportedStorageAtLevel5EachResource": 17700,
+    "note": "second example is one-of-each capacity calculation, not claimed absolute possible maximum"
+  },
+  "walletMapping": {
+    "wood": "city.progress.wood",
+    "food": "city.demo.wallet.food",
+    "stone": "city.demo.wallet.stone",
+    "iron": "city.demo.wallet.iron",
+    "coins": "city.demo.wallet.coins"
+  },
+  "claimFormula": "transfer[r] = min(pending[r], max(0, capacity(city)-balance(city,r)))",
+  "economicStatus": "User-directed very generous campaign. Escrow prevents overflow loss but does not establish economy balance. Do not silently reduce awards.",
+  "campaignMinimumHallLevel": 3,
+  "introReward": {
+    "food": 0,
+    "wood": 0,
+    "stone": 0,
+    "iron": 0,
+    "coins": 0
+  }
+}

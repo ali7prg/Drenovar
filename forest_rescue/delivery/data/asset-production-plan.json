@@ -1,0 +1,501 @@
+{
+  "schemaVersion": 1,
+  "campaignId": "forest_rescue_v1",
+  "actual_models_in_this_delivery": 0,
+  "production_owner": "Claude Code per final user instruction",
+  "items": [
+    {
+      "id": "lf_env_golden_oak",
+      "purpose": "дуб",
+      "reference_images": [
+        "art/02_forest_modular_kit.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_dark_pine",
+      "purpose": "сосна",
+      "reference_images": [
+        "art/02_forest_modular_kit.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_birch",
+      "purpose": "берёза",
+      "reference_images": [
+        "art/02_forest_modular_kit.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_hollow_oak",
+      "purpose": "полый дуб",
+      "reference_images": [
+        "art/02_forest_modular_kit.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_willow",
+      "purpose": "ива",
+      "reference_images": [
+        "art/02_forest_modular_kit.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_fallen_trunk",
+      "purpose": "поваленный ствол",
+      "reference_images": [
+        "art/02_forest_modular_kit.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_moss_rock",
+      "purpose": "скалы",
+      "reference_images": [
+        "art/02_forest_modular_kit.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_bramble",
+      "purpose": "кусты",
+      "reference_images": [
+        "art/02_forest_modular_kit.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_reed_fern",
+      "purpose": "камыш и папоротники",
+      "reference_images": [
+        "art/02_forest_modular_kit.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_bridge27m",
+      "purpose": "bridge27m",
+      "reference_images": [
+        "art/06_environment_landmarks.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_hunter_shelter",
+      "purpose": "hunter_shelter",
+      "reference_images": [
+        "art/06_environment_landmarks.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_quarry_mine",
+      "purpose": "quarry_mine",
+      "reference_images": [
+        "art/06_environment_landmarks.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_ruined_watchpost",
+      "purpose": "ruined_watchpost",
+      "reference_images": [
+        "art/06_environment_landmarks.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_standing_stones",
+      "purpose": "standing_stones",
+      "reference_images": [
+        "art/06_environment_landmarks.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_env_camp_props",
+      "purpose": "camp_props",
+      "reference_images": [
+        "art/06_environment_landmarks.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_cage_wood",
+      "purpose": "модуль клетки, дверь, замок, гнездо",
+      "reference_images": [
+        "art/cage_variants_gate_sockets.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_cage_iron",
+      "purpose": "модуль клетки, дверь, замок, гнездо",
+      "reference_images": [
+        "art/cage_variants_gate_sockets.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_cage_root",
+      "purpose": "модуль клетки, дверь, замок, гнездо",
+      "reference_images": [
+        "art/cage_variants_gate_sockets.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_mechanism_trail_cache",
+      "purpose": "trail_cache",
+      "reference_images": [
+        "art/10_artifact_mechanisms.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_mechanism_rune_lock",
+      "purpose": "rune_lock",
+      "reference_images": [
+        "art/10_artifact_mechanisms.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_mechanism_winch_sequence",
+      "purpose": "winch_sequence",
+      "reference_images": [
+        "art/10_artifact_mechanisms.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_mechanism_paired_latch",
+      "purpose": "paired_latch",
+      "reference_images": [
+        "art/10_artifact_mechanisms.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_artifact_stone_rune",
+      "purpose": "семейство, три различимых варианта для12ключей",
+      "reference_images": [
+        "art/loot_artifact_families.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_artifact_bronze_seal",
+      "purpose": "семейство, три различимых варианта для12ключей",
+      "reference_images": [
+        "art/loot_artifact_families.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_artifact_amber_crystal",
+      "purpose": "семейство, три различимых варианта для12ключей",
+      "reference_images": [
+        "art/loot_artifact_families.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_artifact_bone_key",
+      "purpose": "семейство, три различимых варианта для12ключей",
+      "reference_images": [
+        "art/loot_artifact_families.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_horse_origin",
+      "purpose": "гнедая Искра, без седла/всадника",
+      "reference_images": [
+        "art/horse_guide_turnaround_motion.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_squad_captain",
+      "purpose": "captain",
+      "reference_images": [
+        "art/04_expedition_squad_turnaround.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "adapt_existing_units_without_gameplay_changes",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_squad_scout",
+      "purpose": "scout",
+      "reference_images": [
+        "art/04_expedition_squad_turnaround.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "adapt_existing_units_without_gameplay_changes",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_squad_shield_guard",
+      "purpose": "shield_guard",
+      "reference_images": [
+        "art/04_expedition_squad_turnaround.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "adapt_existing_units_without_gameplay_changes",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_civilian_miller",
+      "purpose": "основа для36индивидуальных NPC",
+      "reference_images": [
+        "art/civilian_survivors_turnaround_expressions.png",
+        "art/12_civilian_rescue_motion.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_civilian_herbalist",
+      "purpose": "основа для36индивидуальных NPC",
+      "reference_images": [
+        "art/civilian_survivors_turnaround_expressions.png",
+        "art/12_civilian_rescue_motion.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_civilian_ferryman",
+      "purpose": "основа для36индивидуальных NPC",
+      "reference_images": [
+        "art/civilian_survivors_turnaround_expressions.png",
+        "art/12_civilian_rescue_motion.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_civilian_courier",
+      "purpose": "основа для36индивидуальных NPC",
+      "reference_images": [
+        "art/civilian_survivors_turnaround_expressions.png",
+        "art/12_civilian_rescue_motion.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_civilian_cooper",
+      "purpose": "основа для36индивидуальных NPC",
+      "reference_images": [
+        "art/civilian_survivors_turnaround_expressions.png",
+        "art/12_civilian_rescue_motion.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_civilian_quarry_worker",
+      "purpose": "основа для36индивидуальных NPC",
+      "reference_images": [
+        "art/civilian_survivors_turnaround_expressions.png",
+        "art/12_civilian_rescue_motion.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_guardian_tenerys",
+      "purpose": "сверить оригинал; предлагаемый upgrade",
+      "reference_images": [
+        "art/09_tenerys_guardian_direction.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "validated original or upgraded riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "compare_original_before_redesign",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_guardian_velkor",
+      "purpose": "сверить оригинал; предлагаемый upgrade",
+      "reference_images": [
+        "art/11_other_guardians_direction.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "validated original or upgraded riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "compare_original_before_redesign",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_guardian_kamneklyk",
+      "purpose": "сверить оригинал; предлагаемый upgrade",
+      "reference_images": [
+        "art/11_other_guardians_direction.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "validated original or upgraded riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "compare_original_before_redesign",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_guardian_dragor",
+      "purpose": "сверить оригинал; предлагаемый upgrade",
+      "reference_images": [
+        "art/11_other_guardians_direction.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "validated original or upgraded riggedGLB+source+clips+PBR+LOD",
+      "production_mode": "compare_original_before_redesign",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_boss_ancient_maw",
+      "purpose": "новый огромный двуногий Пращур",
+      "reference_images": [
+        "art/03_boss_ancient_maw_turnaround.png",
+        "art/05_boss_motion_keyposes.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "riggedGLB+source+all boss clips+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_boss_arena",
+      "purpose": "арена, модули стены, ископаемая скала, укрытие",
+      "reference_images": [
+        "art/08_final_boss_arena.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "GLB+editable source+PBR+LOD",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_vfx_fog",
+      "purpose": "постоянное исследование+мягкая визуальная маска",
+      "reference_images": [
+        "art/07_fog_exploration_interface.png",
+        "art/18_hall3_unlock_intro.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "shader+mask renderer+state adapter+hall3 intro presentation",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    },
+    {
+      "id": "lf_vfx_rewards",
+      "purpose": "частицы находки и награды",
+      "reference_images": [
+        "art/loot_artifact_families.png",
+        "art/07_fog_exploration_interface.png"
+      ],
+      "status": "requires_further_development",
+      "expected_output": "bounded pooledVFX+accessibleUI",
+      "production_mode": "new",
+      "animation_spec": "data/animation_manifest.json"
+    }
+  ]
+}

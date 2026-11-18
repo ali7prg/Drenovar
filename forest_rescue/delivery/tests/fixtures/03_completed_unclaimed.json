@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "campaignId": "forest_rescue_v1",
+  "phase": "completed",
+  "paused": false,
+  "revision": 63,
+  "sites": {
+    "lf_site_01": {
+      "step": 5,
+      "artifact": 0
+    },
+    "lf_site_02": {
+      "step": 5,
+      "artifact": 0
+    },
+    "lf_site_03": {
+      "step": 5,
+      "artifact": 0
+    },
+    "lf_site_04": {
+      "step": 5,
+      "artifact": 0
+    },
+    "lf_site_05": {
+      "step": 5,
+      "artifact": 0
+    },
+    "lf_site_06": {
+      "step": 5,
+      "artifact": 0
+    },
+    "lf_site_07": {
+      "step": 5,
+      "artifact": 0
+    },
+    "lf_site_08": {
+      "step": 5,
+      "artifact": 0
+    },
+    "lf_site_09": {
+      "step": 5,
+      "artifact": 0
+    },
+    "lf_site_10": {
+      "step": 5,
+      "artifact": 0
+    },
+    "lf_site_11": {
+      "step": 5,
+      "artifact": 0
+    },
+    "lf_site_12": {
+      "step": 5,
+      "artifact": 0
+    }
+  },
+  "rescuedIds": [
+    "lf_captive_01_a",
+    "lf_captive_01_b",
+    "lf_captive_01_c",
+    "lf_captive_02_a",
+    "lf_captive_02_b",
+    "lf_captive_02_c",
+    "lf_captive_03_a",
+    "lf_captive_03_b",
+    "lf_captive_03_c",
+    "lf_captive_04_a",
+    "lf_captive_04_b",
+    "lf_captive_04_c",
+    "lf_captive_05_a",
+    "lf_captive_05_b",
+    "lf_captive_05_c",
+    "lf_captive_06_a",
+    "lf_captive_06_b",
+    "lf_captive_06_c",
+    "lf_captive_07_a",
+    "lf_captive_07_b",
+    "lf_captive_07_c",
+    "lf_captive_08_a",
+    "lf_captive_08_b",
+    "lf_captive_08_c",
+    "lf_captive_09_a",
+    "lf_captive_09_b",
+    "lf_captive_09_c",
+    "lf_captive_10_a",
+    "lf_captive_10_b",
+    "lf_captive_10_c",
+    "lf_captive_11_a",
+    "lf_captive_11_b",
+    "lf_captive_11_c",
+    "lf_captive_12_a",
+    "lf_captive_12_b",
+    "lf_captive_12_c"
+  ],
+  "usedBattleProofs": [
+    {
+      "reportId": "battle-lf_site_01",
+      "siteId": "lf_site_01"
+    },
+    {
+      "reportId": "battle-lf_site_02",
+      "siteId": "lf_site_02"
+    },
+    {
+      "reportId": "battle-lf_site_03",
+      "siteId": "lf_site_03"
+    },
+    {
+      "reportId": "battle-lf_site_04",
+      "siteId": "lf_site_04"
+    },
+    {
+      "reportId": "battle-lf_site_05",
+      "siteId": "lf_site_05"
+    },
+    {
+      "reportId": "battle-lf_site_06",
+      "siteId": "lf_site_06"
+    },
+    {
+      "reportId": "battle-lf_site_07",
+      "siteId": "lf_site_07"
+    },
+    {
+      "reportId": "battle-lf_site_08",
+      "siteId": "lf_site_08"
+    },
+    {
+      "reportId": "battle-lf_site_09",
+      "siteId": "lf_site_09"
+    },
+    {
+      "reportId": "battle-lf_site_10",
+      "siteId": "lf_site_10"
+    },
+    {
+      "reportId": "battle-lf_site_11",
+      "siteId": "lf_site_11"
+    },
+    {
+      "reportId": "battle-lf_site_12",
+      "siteId": "lf_site_12"
+    },
+    {
+      "reportId": "battle-final-boss",
+      "siteId": "lf_boss_ancient_maw"
+    }
+  ],
+  "escrow": {
+    "earned": {
+      "food": 2325000,
+      "wood": 2385000,
+      "stone": 1590000,
+      "iron": 1025000,
+      "coins": 190000
+    },
+    "claimed": {
+      "food": 0,
+      "wood": 0,
+      "stone": 0,
+      "iron": 0,
+      "coins": 0
+    },
+    "pending": {
+      "food": 2325000,
+      "wood": 2385000,
+      "stone": 1590000,
+      "iron": 1025000,
+      "coins": 190000
+    }
+  }
+}

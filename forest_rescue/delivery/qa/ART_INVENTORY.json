@@ -1,0 +1,205 @@
+{
+  "images": [
+    {
+      "path": "art/01_world_masterplan.png",
+      "bytes": 3897052,
+      "sha256": "a6cf62f08f69c675c960c3b21359ee521c333ac516e01186342a6211caf2c952",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/02_forest_modular_kit.png",
+      "bytes": 3044055,
+      "sha256": "51fefbb284b54772d9f4f664f088da9e43242e71f5a4b4e10f3fae641b2f050f",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/03_boss_ancient_maw_turnaround.png",
+      "bytes": 2577975,
+      "sha256": "e577ec6444e3baca2e92e96bd05cf1a2ad5df06a854e6b8dc62ae19063faa778",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/04_expedition_squad_turnaround.png",
+      "bytes": 2575084,
+      "sha256": "df9dc331b463a2a76461b9e59e26d1b03da3b7a3142ec252a05dc4a218d641de",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/05_boss_motion_keyposes.png",
+      "bytes": 2114128,
+      "sha256": "2ce8e3f1c0c6613b466b4bba63683c53eaf179c4f596a27f8ff8ff8ffc18fb89",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/06_environment_landmarks.png",
+      "bytes": 2985090,
+      "sha256": "8cca8e4393590f488da538b11dfc0727614d1ecc89ef5a119ba2914326e2c9f2",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/07_fog_exploration_interface.png",
+      "bytes": 2996670,
+      "sha256": "8e4748b5125efce774ea68c4c5cf82f4fb620b5ba3a3c515eb7dd51205f7627a",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/08_final_boss_arena.png",
+      "bytes": 3664281,
+      "sha256": "b4f23d30144330e072a5d313dcb72e933e2376e18dd2a4a580e4331f4cd408d6",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/09_tenerys_guardian_direction.png",
+      "bytes": 2195259,
+      "sha256": "5ea57195c60b02e4bae6c0d8b368a36f549e1d791dcf97b7973220a4fc3677b0",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/10_artifact_mechanisms.png",
+      "bytes": 3158751,
+      "sha256": "b88d89c774f8a7ee68e3c56875dc5fb709ed107e3996884831ccace7a23c02c8",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/11_other_guardians_direction.png",
+      "bytes": 2756627,
+      "sha256": "ca1cfd5727007fcea692ccce4c421aabb40b6656e22913bc86a125d0aff6ac8e",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/12_civilian_rescue_motion.png",
+      "bytes": 2312379,
+      "sha256": "40096bf22abac16a7c83ef348297d5e178e6c7cb056bf6c1e1e148020babcd5e",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/18_hall3_unlock_intro.png",
+      "bytes": 3002372,
+      "sha256": "f82ecaacf0b1207d6a3df194be753d245717711b14f9e533aa060d7ec693ace8",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/cage_variants_gate_sockets.png",
+      "bytes": 3281637,
+      "sha256": "7c28fcc49719882ca2975ec58e2e589df3e7c7b06cfa88491ef8509faef3117e",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/civilian_survivors_turnaround_expressions.png",
+      "bytes": 3247192,
+      "sha256": "4d8979d7d4b0433d4ad938d37e3cd09f3543eb05b183c86f4f8aa054edc2c698",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/horse_guide_turnaround_motion.png",
+      "bytes": 3007038,
+      "sha256": "31645495b889fedd6a090e78e067ca4db918cc8e5c6293aae20df4ffd702bc2a",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/loot_artifact_families.png",
+      "bytes": 3435470,
+      "sha256": "5364fc423c6017e569784ec27501e7be416aa6ee220f3e232318844be4d00a76",
+      "pixel_dimensions": [
+        1536,
+        1024
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    },
+    {
+      "path": "art/rescue_animation_storyboard.png",
+      "bytes": 3310782,
+      "sha256": "f779182e4fd284cc73e0e795cf51369f28412f42480f1376ed5e9b97bbc388b4",
+      "pixel_dimensions": [
+        1672,
+        941
+      ],
+      "status": "visual_reference",
+      "preserved_native_png": true
+    }
+  ],
+  "count": 18,
+  "new_delivered_3d_models": 0,
+  "new_delivered_animation_clips": 0
+}

@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "campaignId": "forest_rescue_v1",
+  "contentVersion": "1.1.0",
+  "minimumHallLevel": 3,
+  "requiresCompletedHallUpgrade": true,
+  "serverHallAuthority": "selected player p.city, never client JSON or local timer",
+  "locked": {
+    "levels": [
+      1,
+      2
+    ],
+    "titleKey": "forest.locked.title",
+    "bodyKey": "forest.locked.body",
+    "ctaKey": "forest.locked.cta",
+    "presentation": "animated blue-grey boundary fog outside protected settlement; no hidden quest markers, horse, loot, guardian silhouettes or NPC names",
+    "townAlwaysVisible": true,
+    "allowCameraPan": true,
+    "revealExploration": false,
+    "allowQuestCommands": false,
+    "allowCampaignRewardClaims": false,
+    "preloadHeavyQuestActors": false
+  },
+  "unlock": {
+    "condition": "authoritative completed hallLevel >=3, including first login already >=3",
+    "showOncePerSettlement": true,
+    "serverStateNamespace": "p.adventureAccess.forest_rescue_v1",
+    "entryCorridorAuthority": "code/fog.mjs ENTRANCE_CORRIDOR and data/world-atlas.json",
+    "wholeForestReveal": false,
+    "onInterrupted": "return a short invitation/Continue; do not auto-replay full introduction",
+    "skipAllowed": true,
+    "rewardForWatchingOrSkipping": false,
+    "blockCampaignUntilIntroAcknowledged": false
+  },
+  "presentation": {
+    "durationSeconds": 12,
+    "startOnlyInSafeCityForeground": true,
+    "deferDuring": [
+      "active_combat",
+      "loading",
+      "modal",
+      "background",
+      "world_view"
+    ],
+    "noAutomaticMarchOrCombat": true,
+    "reduceMotion": "static illustrated cards, no forced camera motion; same explanation and skip",
+    "cameraRestoredAfter": 12,
+    "textRemainsUntilUserAction": true,
+    "reusesExistingClipSpecification": true,
+    "newSkeletalClipsRequired": 0,
+    "shots": [
+      {
+        "start": 0,
+        "end": 2,
+        "id": "hall_ready",
+        "textKey": "forest.unlocked.title",
+        "visual": "small town hall glow with existing soft synthetic artifact cue; calm notification; no reward shower"
+      },
+      {
+        "start": 2,
+        "end": 5,
+        "id": "entrance_mist",
+        "textKey": "intro.line1",
+        "visual": "camera eases toward northern entrance while only entrance fog feathers open in1200ms"
+      },
+      {
+        "start": 5,
+        "end": 8,
+        "id": "horse_waits",
+        "textKey": "intro.line2",
+        "visual": "riderless bay mare with white star and green halter ribbon walks, stops, looks back"
+      },
+      {
+        "start": 8,
+        "end": 12,
+        "id": "quest_invitation",
+        "textKey": "intro.line3",
+        "visual": "brief task card; camera returns to player control; Follow button only sends real requested action"
+      }
+    ],
+    "audio": {
+      "hall_ready": "assets/audio/fr_artifact_discovery.m4a",
+      "ambient": "assets/audio/fr_forest_wind.m4a",
+      "horse_foot_contact": "assets/audio/fr_horse_hoof.m4a",
+      "policy": "Existing authored synthetic cues, not new natural recordings. Play tone once, footsteps only at contact, respect mute/background/autoplay policy; no repeated unlock sound per frame."
+    }
+  },
+  "texts": {
+    "forest.locked.title": "Лес потерянных",
+    "forest.locked.body": "Достигните 3-го уровня ратуши, чтобы открыть приключение.",
+    "forest.locked.cta": "К ратуше",
+    "forest.locked.progress": "Ратуша: уровень {level} из 3",
+    "forest.unlocked.title": "Лес потерянных открыт",
+    "intro.line1": "За стенами поселения скрываются люди, которым нужна помощь.",
+    "intro.line2": "Из леса вышла лошадь без всадника. Она зовёт вас за собой.",
+    "intro.line3": "Следуйте за Искрой. Находите печати, побеждайте стражей и возвращайте людей домой.",
+    "intro.start": "Открыть приключение",
+    "intro.follow": "Следовать за лошадью",
+    "intro.skip": "Пропустить",
+    "intro.later": "Позже",
+    "intro.continue": "Продолжить вступление",
+    "intro.replay": "Посмотреть вступление снова",
+    "intro.rewardsNote": "За задания и спасение людей вы получите большие награды.",
+    "error.forestLocked": "Приключение откроется на 3-м уровне ратуши."
+  },
+  "existingHighTierGates": "level3 guardians and final boss still require hall5 per original campaign",
+  "artReference": "art/18_hall3_unlock_intro.png"
+}

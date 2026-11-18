@@ -1,0 +1,110 @@
+{
+  "generated_and_inspected": 5,
+  "images": [
+    {
+      "asset_id": "guide_horse",
+      "file": "art/horse_guide_turnaround_motion.png",
+      "status": "visual_reference",
+      "format": "PNG",
+      "native_resolution": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "exact_bytes": 3007038,
+      "sha256": "31645495b889fedd6a090e78e067ca4db918cc8e5c6293aae20df4ffd702bc2a",
+      "method": "image_gen generated image; original native PNG copied unchanged; no resizing or recompression",
+      "inspection": "Visually inspected in tool image output",
+      "contents": "4views +3 keyposes +material details",
+      "production_limitations": "The walk and trot drawings are keypose guides, not a validated gait cycle; rigging and foot contact must be authored."
+    },
+    {
+      "asset_id": "civilian_survivors",
+      "file": "art/civilian_survivors_turnaround_expressions.png",
+      "status": "visual_reference",
+      "format": "PNG",
+      "native_resolution": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "exact_bytes": 3247192,
+      "sha256": "4d8979d7d4b0433d4ad938d37e3cd09f3543eb05b183c86f4f8aa054edc2c698",
+      "method": "image_gen generated image; original native PNG copied unchanged; no resizing or recompression",
+      "inspection": "Visually inspected in tool image output",
+      "contents": "6adult roles, each front/back and expression",
+      "production_limitations": "The miller and ferryman faces are similar. Differentiate their face sculpts. These are relaxed stances, not exact orthographic calibration."
+    },
+    {
+      "asset_id": "cage_variants",
+      "file": "art/cage_variants_gate_sockets.png",
+      "status": "visual_reference",
+      "format": "PNG",
+      "native_resolution": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "exact_bytes": 3281637,
+      "sha256": "7c28fcc49719882ca2975ec58e2e589df3e7c7b06cfa88491ef8509faef3117e",
+      "method": "image_gen generated image; original native PNG copied unchanged; no resizing or recompression",
+      "inspection": "Visually inspected in tool image output",
+      "contents": "3styles closed/open, hinge and socket details",
+      "production_limitations": "Closed/open views disagree on hinge side. Use authoritative production rule: fixed left jamb from exterior, door outward by95degrees, consistent local pivot; reference images are not mechanical drawings."
+    },
+    {
+      "asset_id": "artifact_families",
+      "file": "art/loot_artifact_families.png",
+      "status": "visual_reference",
+      "format": "PNG",
+      "native_resolution": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "exact_bytes": 3435470,
+      "sha256": "5364fc423c6017e569784ec27501e7be416aa6ee220f3e232318844be4d00a76",
+      "method": "image_gen generated image; original native PNG copied unchanged; no resizing or recompression",
+      "inspection": "Visually inspected in tool image output",
+      "contents": "4artifact families with front/side/socket +recovered supplies",
+      "production_limitations": "Treat depicted reward quantities as art only, never economy or item catalog data."
+    },
+    {
+      "asset_id": "rescue_storyboard",
+      "file": "art/rescue_animation_storyboard.png",
+      "status": "visual_reference",
+      "format": "PNG",
+      "native_resolution": [
+        1672,
+        941
+      ],
+      "mode": "RGB",
+      "exact_bytes": 3310782,
+      "sha256": "f779182e4fd284cc73e0e795cf51369f28412f42480f1376ed5e9b97bbc388b4",
+      "method": "image_gen generated image; original native PNG copied unchanged; no resizing or recompression",
+      "inspection": "Visually inspected in tool image output",
+      "contents": "5narrative keyframes; canonical squad clothing, exploratory quadruped guardian",
+      "production_limitations": "Guardian is an exploratory silhouette, not verified Tenerys anatomy. Storyboard is visual staging, not gameplay proof, timing track, or animation asset. Panel3 scout spear is incidental illustration; use authoritative equipment data for production."
+    }
+  ],
+  "generation_events": [
+    {
+      "sheet": "cage_variants",
+      "initial_attempt": "image generation rejected at output stage: moderation_blocked / violence",
+      "request_id": "4020f808-951e-4d01-8de1-c7631e5cea17",
+      "result": "No image from failed attempt. A clarified request for empty static architectural props succeeded."
+    },
+    {
+      "sheet": "rescue_storyboard",
+      "correction": "Initial generated dinosaur/long-haired-heroine draft superseded by edited version with root squad reference and generic quadruped guardian. Draft excluded from final art, both prompts retained."
+    }
+  ],
+  "claims_excluded": [
+    "3D model production",
+    "rigging",
+    "texture atlas production",
+    "animation clips",
+    "engine import",
+    "device testing"
+  ]
+}

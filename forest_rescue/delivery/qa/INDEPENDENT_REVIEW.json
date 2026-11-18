@@ -1,0 +1,45 @@
+{
+  "reviewedAtUTC": "2026-11-17",
+  "scope": "Independent cross-file review of forest_rescue_v1 package, not game integration",
+  "checks": {
+    "allNodeTests": {
+      "command": "node --test tests/*.test.mjs",
+      "passed": 54,
+      "failed": 0,
+      "log": "qa/cross-review-tests.txt"
+    },
+    "animationSpecification": {
+      "command": "python3 tools/validate_animation_manifest.py",
+      "passed": true,
+      "authoredClipSpecs": 60,
+      "deliveredAnimationFiles": 0
+    },
+    "missingLiteralInternalDocumentPaths": [],
+    "campaignGuaranteedResourceTotal": 7515000,
+    "ordinaryFirstCombatLoot": "separate original-system drops; excluded from guaranteed campaign total",
+    "rescueCount": 36,
+    "rescueSites": 12,
+    "tasksPerSite": 5,
+    "finalBossCaptives": 0
+  },
+  "resolvedFindings": [
+    "Horse canonical appearance matches brown riderless no-saddle halter/green-ribbon sheet; removed rider clip assumptions",
+    "Horse target canonical lf_horse_origin in data and logic",
+    "Artifact obtained before guardian; cage consumes key only after verified victory",
+    "Fog ownership scoped to authenticated selected settlement p.id, with same-login profile-isolation regression",
+    "110k environment triangles distinguished from180k total added visible geometry",
+    "Boss candidate stats revised above existing DragorIII raw stats, still unaccepted balance",
+    "Economy schema rename reflected in explicit content-contract tests; current full suite green"
+  ],
+  "notIntegratedOrVerified": [
+    "Original480 graphics restoration",
+    "New modeled/rigged/skinned/animated characters and environment production from references",
+    "Server-owned movement, mechanism occupancy, battle and escort adapters",
+    "New boss combat controller and actual balance simulation/playtest",
+    "Native D1/HTTP integration and migrations",
+    "Terrain changes, bridge, actual saved-property mask collision review",
+    "Safari/iPhone12 CPU/GPU/memory/thermal and artistic acceptance"
+  ],
+  "originalProjectModified": false,
+  "noClaimLagFixed": true
+}

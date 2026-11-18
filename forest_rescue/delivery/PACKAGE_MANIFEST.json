@@ -1,0 +1,886 @@
+{
+  "schemaVersion": 1,
+  "title": "DRENOVAR — Лес потерянных",
+  "contentVersion": "1.1.0",
+  "limit_bytes": 30000000,
+  "split_resources": [],
+  "self_integrity": {
+    "reason": "A ZIP cannot contain its own SHA-256. All exact ZIP sizes and hashes, including Start, are in external DELIVERY_INDEX.json. Manifest itself is covered by Start SHA-256.",
+    "external_index": "DELIVERY_INDEX.json"
+  },
+  "packages": [
+    {
+      "filename": "DRENOVAR_Forest_Rescue_00_Start.zip",
+      "bytes": null,
+      "sha256": null,
+      "integrity": "DELIVERY_INDEX.json",
+      "depends_on": [],
+      "group": "Start"
+    },
+    {
+      "filename": "DRENOVAR_Forest_Rescue_01_Concept.zip",
+      "bytes": 791167,
+      "sha256": "1e7dbcc90204cf22a47d97d550e8eb97580fff664edac5da1e7b0a45d8494723",
+      "depends_on": [
+        "DRENOVAR_Forest_Rescue_00_Start.zip"
+      ],
+      "group": "Concept",
+      "files": [
+        "DRENOVAR_Forest_Rescue/data/ambient-candidates.json",
+        "DRENOVAR_Forest_Rescue/data/animation_manifest.json",
+        "DRENOVAR_Forest_Rescue/data/asset-production-plan.json",
+        "DRENOVAR_Forest_Rescue/data/campaign.json",
+        "DRENOVAR_Forest_Rescue/data/dialogue.ru.json",
+        "DRENOVAR_Forest_Rescue/data/economy.json",
+        "DRENOVAR_Forest_Rescue/data/persistence-contract.json",
+        "DRENOVAR_Forest_Rescue/data/terrain-audit.json",
+        "DRENOVAR_Forest_Rescue/data/ui.ru.json",
+        "DRENOVAR_Forest_Rescue/data/unlock-intro.json",
+        "DRENOVAR_Forest_Rescue/data/world-atlas.json",
+        "DRENOVAR_Forest_Rescue/docs/ANIMATION_PRODUCTION_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/ART_PRODUCTION_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/ART_REFERENCE_NOTES_MODEL_AGENT_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/AUDIO_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/CAMPAIGN_BIBLE_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/CHANGELOG_1_1_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/CODE_AND_PERSISTENCE_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/CONCEPT_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/ECONOMY_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/HALL3_UNLOCK_AND_INTRO_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/NARRATIVE_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/PERFORMANCE_AUDIT_RU.md",
+        "DRENOVAR_Forest_Rescue/docs/WORLD_LAYOUT_AND_FOG_RU.md",
+        "DRENOVAR_Forest_Rescue/previews/world-atlas.png",
+        "DRENOVAR_Forest_Rescue/previews/world-atlas.svg",
+        "DRENOVAR_Forest_Rescue/references/REQUIRED_WEB_ASSETS_480.json",
+        "DRENOVAR_Forest_Rescue/sources/art/01_world_masterplan_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/02_forest_modular_kit_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/03_boss_ancient_maw_turnaround_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/04_expedition_squad_turnaround_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/05_boss_motion_keyposes_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/06_environment_landmarks_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/07_fog_exploration_interface_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/07_fog_exploration_interface_revision.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/08_final_boss_arena_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/09_tenerys_guardian_direction_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/10_artifact_mechanisms_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/11_other_guardians_direction_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/12_civilian_rescue_motion_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/18_hall3_unlock_intro_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/cages_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/civilians_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/horse_guide_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/loot_artifacts_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/rescue_storyboard_correction_prompt.txt",
+        "DRENOVAR_Forest_Rescue/sources/art/rescue_storyboard_initial_prompt.txt"
+      ]
+    },
+    {
+      "filename": "DRENOVAR_Forest_Rescue_02_WorldArt.zip",
+      "bytes": 25835685,
+      "sha256": "9ca7dce7ff3996c78461e05475794741c0b98a66a9113dcc7fda211d369e96b5",
+      "depends_on": [
+        "DRENOVAR_Forest_Rescue_00_Start.zip",
+        "DRENOVAR_Forest_Rescue_01_Concept.zip"
+      ],
+      "group": "WorldArt",
+      "files": [
+        "DRENOVAR_Forest_Rescue/art/01_world_masterplan.png",
+        "DRENOVAR_Forest_Rescue/art/02_forest_modular_kit.png",
+        "DRENOVAR_Forest_Rescue/art/06_environment_landmarks.png",
+        "DRENOVAR_Forest_Rescue/art/07_fog_exploration_interface.png",
+        "DRENOVAR_Forest_Rescue/art/08_final_boss_arena.png",
+        "DRENOVAR_Forest_Rescue/art/10_artifact_mechanisms.png",
+        "DRENOVAR_Forest_Rescue/art/cage_variants_gate_sockets.png",
+        "DRENOVAR_Forest_Rescue/art/loot_artifact_families.png"
+      ]
+    },
+    {
+      "filename": "DRENOVAR_Forest_Rescue_03_CharacterArt.zip",
+      "bytes": 14076170,
+      "sha256": "0ccbf56fa5b9319c134207e561b49e58665e54f8e80e1b8db951f3482be753f4",
+      "depends_on": [
+        "DRENOVAR_Forest_Rescue_00_Start.zip",
+        "DRENOVAR_Forest_Rescue_01_Concept.zip"
+      ],
+      "group": "CharacterArt",
+      "files": [
+        "DRENOVAR_Forest_Rescue/art/04_expedition_squad_turnaround.png",
+        "DRENOVAR_Forest_Rescue/art/12_civilian_rescue_motion.png",
+        "DRENOVAR_Forest_Rescue/art/civilian_survivors_turnaround_expressions.png",
+        "DRENOVAR_Forest_Rescue/art/horse_guide_turnaround_motion.png",
+        "DRENOVAR_Forest_Rescue/art/rescue_animation_storyboard.png"
+      ]
+    },
+    {
+      "filename": "DRENOVAR_Forest_Rescue_04_CreatureArt.zip",
+      "bytes": 9143806,
+      "sha256": "102914730af16c1fc7500f7499b62286b9d2a70f0699ef327b7187d442d4354f",
+      "depends_on": [
+        "DRENOVAR_Forest_Rescue_00_Start.zip",
+        "DRENOVAR_Forest_Rescue_01_Concept.zip"
+      ],
+      "group": "CreatureArt",
+      "files": [
+        "DRENOVAR_Forest_Rescue/art/03_boss_ancient_maw_turnaround.png",
+        "DRENOVAR_Forest_Rescue/art/05_boss_motion_keyposes.png",
+        "DRENOVAR_Forest_Rescue/art/09_tenerys_guardian_direction.png",
+        "DRENOVAR_Forest_Rescue/art/11_other_guardians_direction.png"
+      ]
+    },
+    {
+      "filename": "DRENOVAR_Forest_Rescue_05_Audio.zip",
+      "bytes": 8299077,
+      "sha256": "0a5e22b19c45a1902d13e5e5bda070d3133327e19decc10083502f2dc6139323",
+      "depends_on": [
+        "DRENOVAR_Forest_Rescue_00_Start.zip",
+        "DRENOVAR_Forest_Rescue_01_Concept.zip"
+      ],
+      "group": "Audio",
+      "files": [
+        "DRENOVAR_Forest_Rescue/assets/audio/audio_metadata.json",
+        "DRENOVAR_Forest_Rescue/assets/audio/audio_validation.json",
+        "DRENOVAR_Forest_Rescue/assets/audio/fr_artifact_discovery.m4a",
+        "DRENOVAR_Forest_Rescue/assets/audio/fr_cage_latch.m4a",
+        "DRENOVAR_Forest_Rescue/assets/audio/fr_distant_rumble.m4a",
+        "DRENOVAR_Forest_Rescue/assets/audio/fr_forest_wind.m4a",
+        "DRENOVAR_Forest_Rescue/assets/audio/fr_forest_wind.wav",
+        "DRENOVAR_Forest_Rescue/assets/audio/fr_gate_creak.m4a",
+        "DRENOVAR_Forest_Rescue/assets/audio/fr_horse_hoof.m4a",
+        "DRENOVAR_Forest_Rescue/assets/audio/fr_large_reward.m4a",
+        "DRENOVAR_Forest_Rescue/assets/audio/fr_people_rescued.m4a",
+        "DRENOVAR_Forest_Rescue/sources/audio/generate_audio.py",
+        "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_artifact_discovery.wav",
+        "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_cage_latch.wav",
+        "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_distant_rumble.wav",
+        "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_forest_wind.wav",
+        "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_gate_creak.wav",
+        "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_horse_hoof.wav",
+        "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_large_reward.wav",
+        "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_people_rescued.wav",
+        "DRENOVAR_Forest_Rescue/sources/audio/verify_audio.py"
+      ]
+    },
+    {
+      "filename": "DRENOVAR_Forest_Rescue_06_Code.zip",
+      "bytes": 94551,
+      "sha256": "839c88140dbe7638b2e4d5e02817297e8988a8785e687a880dd32760ed865062",
+      "depends_on": [
+        "DRENOVAR_Forest_Rescue_00_Start.zip",
+        "DRENOVAR_Forest_Rescue_01_Concept.zip"
+      ],
+      "group": "Code",
+      "files": [
+        "DRENOVAR_Forest_Rescue/code/adventure-access.mjs",
+        "DRENOVAR_Forest_Rescue/code/fog.mjs",
+        "DRENOVAR_Forest_Rescue/code/forest-rescue.mjs",
+        "DRENOVAR_Forest_Rescue/code/intro-migration.mjs",
+        "DRENOVAR_Forest_Rescue/code/mechanisms.mjs",
+        "DRENOVAR_Forest_Rescue/code/reference-transaction.mjs",
+        "DRENOVAR_Forest_Rescue/code/reserve-refill.mjs",
+        "DRENOVAR_Forest_Rescue/code/world-layout.mjs",
+        "DRENOVAR_Forest_Rescue/qa/ART_INVENTORY.json",
+        "DRENOVAR_Forest_Rescue/qa/HALL3_REVIEW.json",
+        "DRENOVAR_Forest_Rescue/qa/INDEPENDENT_REVIEW.json",
+        "DRENOVAR_Forest_Rescue/qa/READINESS_RU.md",
+        "DRENOVAR_Forest_Rescue/qa/animation_manifest_validation.json",
+        "DRENOVAR_Forest_Rescue/qa/art/REFERENCE_SHEETS_MODEL_AGENT.json",
+        "DRENOVAR_Forest_Rescue/qa/cross-review-tests.txt",
+        "DRENOVAR_Forest_Rescue/qa/final-all-tests.txt",
+        "DRENOVAR_Forest_Rescue/qa/logic-tests.txt",
+        "DRENOVAR_Forest_Rescue/qa/performance-probe-tests.txt",
+        "DRENOVAR_Forest_Rescue/qa/reward-total.json",
+        "DRENOVAR_Forest_Rescue/tests/adventure-access.test.mjs",
+        "DRENOVAR_Forest_Rescue/tests/campaign.test.mjs",
+        "DRENOVAR_Forest_Rescue/tests/content-contract.test.mjs",
+        "DRENOVAR_Forest_Rescue/tests/fixtures/01_prologue.json",
+        "DRENOVAR_Forest_Rescue/tests/fixtures/02_key_recovered.json",
+        "DRENOVAR_Forest_Rescue/tests/fixtures/03_completed_unclaimed.json",
+        "DRENOVAR_Forest_Rescue/tests/fixtures/README_RU.md",
+        "DRENOVAR_Forest_Rescue/tests/fixtures.mjs",
+        "DRENOVAR_Forest_Rescue/tests/mechanisms.test.mjs",
+        "DRENOVAR_Forest_Rescue/tests/performance-probe.test.mjs",
+        "DRENOVAR_Forest_Rescue/tests/reserve-refill.test.mjs",
+        "DRENOVAR_Forest_Rescue/tests/world-results.txt",
+        "DRENOVAR_Forest_Rescue/tests/world.test.mjs",
+        "DRENOVAR_Forest_Rescue/tools/build_art_inventory.py",
+        "DRENOVAR_Forest_Rescue/tools/build_atlas.mjs",
+        "DRENOVAR_Forest_Rescue/tools/build_delivery.py",
+        "DRENOVAR_Forest_Rescue/tools/generate_campaign.py",
+        "DRENOVAR_Forest_Rescue/tools/generate_dialogue.py",
+        "DRENOVAR_Forest_Rescue/tools/performance-probe.mjs",
+        "DRENOVAR_Forest_Rescue/tools/render_map.mjs",
+        "DRENOVAR_Forest_Rescue/tools/validate_animation_manifest.py"
+      ]
+    },
+    {
+      "filename": "DRENOVAR_Forest_Rescue_07_UnlockArt.zip",
+      "bytes": 2956469,
+      "sha256": "d0f60668bd059881c4e0db31c8277b1f32c4712950c0d2f039706900e4b2be22",
+      "depends_on": [
+        "DRENOVAR_Forest_Rescue_00_Start.zip",
+        "DRENOVAR_Forest_Rescue_01_Concept.zip"
+      ],
+      "group": "UnlockArt",
+      "files": [
+        "DRENOVAR_Forest_Rescue/art/18_hall3_unlock_intro.png"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "DRENOVAR_Forest_Rescue/ASSET_REGISTRY.csv",
+      "bytes": 33452,
+      "sha256": "d68c3145bb205c699e11d9e13991ae40ddd74777a704ee1a1539fcc8ee75040c"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/CLAUDE_CODE_IMPLEMENTATION_BRIEF_RU.md",
+      "bytes": 33081,
+      "sha256": "0a940774134900cf0dbd9b5edefdfaacf79b813d64a57d46ffe6af7c70f3354d"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/START_HERE_RU.md",
+      "bytes": 6902,
+      "sha256": "0c785dafc524eb39a1dab1e216719862d0d4fd45acb3eac0a9da45e1bcb00d61"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/01_world_masterplan.png",
+      "bytes": 3897052,
+      "sha256": "a6cf62f08f69c675c960c3b21359ee521c333ac516e01186342a6211caf2c952"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/02_forest_modular_kit.png",
+      "bytes": 3044055,
+      "sha256": "51fefbb284b54772d9f4f664f088da9e43242e71f5a4b4e10f3fae641b2f050f"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/03_boss_ancient_maw_turnaround.png",
+      "bytes": 2577975,
+      "sha256": "e577ec6444e3baca2e92e96bd05cf1a2ad5df06a854e6b8dc62ae19063faa778"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/04_expedition_squad_turnaround.png",
+      "bytes": 2575084,
+      "sha256": "df9dc331b463a2a76461b9e59e26d1b03da3b7a3142ec252a05dc4a218d641de"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/05_boss_motion_keyposes.png",
+      "bytes": 2114128,
+      "sha256": "2ce8e3f1c0c6613b466b4bba63683c53eaf179c4f596a27f8ff8ff8ffc18fb89"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/06_environment_landmarks.png",
+      "bytes": 2985090,
+      "sha256": "8cca8e4393590f488da538b11dfc0727614d1ecc89ef5a119ba2914326e2c9f2"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/07_fog_exploration_interface.png",
+      "bytes": 2996670,
+      "sha256": "8e4748b5125efce774ea68c4c5cf82f4fb620b5ba3a3c515eb7dd51205f7627a"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/08_final_boss_arena.png",
+      "bytes": 3664281,
+      "sha256": "b4f23d30144330e072a5d313dcb72e933e2376e18dd2a4a580e4331f4cd408d6"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/09_tenerys_guardian_direction.png",
+      "bytes": 2195259,
+      "sha256": "5ea57195c60b02e4bae6c0d8b368a36f549e1d791dcf97b7973220a4fc3677b0"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/10_artifact_mechanisms.png",
+      "bytes": 3158751,
+      "sha256": "b88d89c774f8a7ee68e3c56875dc5fb709ed107e3996884831ccace7a23c02c8"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/11_other_guardians_direction.png",
+      "bytes": 2756627,
+      "sha256": "ca1cfd5727007fcea692ccce4c421aabb40b6656e22913bc86a125d0aff6ac8e"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/12_civilian_rescue_motion.png",
+      "bytes": 2312379,
+      "sha256": "40096bf22abac16a7c83ef348297d5e178e6c7cb056bf6c1e1e148020babcd5e"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/18_hall3_unlock_intro.png",
+      "bytes": 3002372,
+      "sha256": "f82ecaacf0b1207d6a3df194be753d245717711b14f9e533aa060d7ec693ace8"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/cage_variants_gate_sockets.png",
+      "bytes": 3281637,
+      "sha256": "7c28fcc49719882ca2975ec58e2e589df3e7c7b06cfa88491ef8509faef3117e"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/civilian_survivors_turnaround_expressions.png",
+      "bytes": 3247192,
+      "sha256": "4d8979d7d4b0433d4ad938d37e3cd09f3543eb05b183c86f4f8aa054edc2c698"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/horse_guide_turnaround_motion.png",
+      "bytes": 3007038,
+      "sha256": "31645495b889fedd6a090e78e067ca4db918cc8e5c6293aae20df4ffd702bc2a"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/loot_artifact_families.png",
+      "bytes": 3435470,
+      "sha256": "5364fc423c6017e569784ec27501e7be416aa6ee220f3e232318844be4d00a76"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/art/rescue_animation_storyboard.png",
+      "bytes": 3310782,
+      "sha256": "f779182e4fd284cc73e0e795cf51369f28412f42480f1376ed5e9b97bbc388b4"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/assets/audio/audio_metadata.json",
+      "bytes": 6303,
+      "sha256": "5e8998fcf8fecc98aeff3ace0ed1a339679f797eb7d3219712a9cc4fd9c0f142"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/assets/audio/audio_validation.json",
+      "bytes": 6973,
+      "sha256": "a2cbf42e79e6bcf812662b2c814f5d5cb15dd0eda36e0bbc89e6da3dcf524f15"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/assets/audio/fr_artifact_discovery.m4a",
+      "bytes": 23738,
+      "sha256": "f5a7b06e1e66c589cb1859b2c7ac9f9c19eb63e91914c97b6bda4d146f0d4782"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/assets/audio/fr_cage_latch.m4a",
+      "bytes": 14598,
+      "sha256": "e79d1b594b3762add711c083cb18b9a7abd92294412ffd07706a67e588673d71"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/assets/audio/fr_distant_rumble.m4a",
+      "bytes": 32936,
+      "sha256": "7afb4d7478276e3f24a8a2a1fc92d728c411e0d28b44209cc97cc72a48153167"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/assets/audio/fr_forest_wind.m4a",
+      "bytes": 195627,
+      "sha256": "3c659038ea6c32830df51a19b4ffe41ce8e6f1e610429db204e2e7b8fbdac9e7"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/assets/audio/fr_forest_wind.wav",
+      "bytes": 2304044,
+      "sha256": "9bb369b8e858162758f8fbbd6f0f5eb14caff49b2e7b29e2fce21b516dd0e08c"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/assets/audio/fr_gate_creak.m4a",
+      "bytes": 32368,
+      "sha256": "dcd93d843dd653282b2f8f9ddc4da5e52219a9c7a43d8159a489eff57bf0af95"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/assets/audio/fr_horse_hoof.m4a",
+      "bytes": 8067,
+      "sha256": "70d6678e19282070a23a3d10e7e389e7a9c6284d4cf526aa9eff804c7c9014a3"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/assets/audio/fr_large_reward.m4a",
+      "bytes": 31851,
+      "sha256": "3e140f3e2d9433ac2c22a779404c6647696d78774128a92d5ead71a7c37cbb75"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/assets/audio/fr_people_rescued.m4a",
+      "bytes": 23197,
+      "sha256": "a5c7be6490b2f6cddb493e252cd7df50514f6d2ac1fb76817e8a07f82abf65c3"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/code/adventure-access.mjs",
+      "bytes": 5706,
+      "sha256": "0c8a30bc8097b14c5911f56b27a46ec52358b9ba00548eb893165bdb03798677"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/code/fog.mjs",
+      "bytes": 7863,
+      "sha256": "99d7c1b2f4152679fbf1f8c0db944418a7867ec50139798374dfca534f7aaf5a"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/code/forest-rescue.mjs",
+      "bytes": 12725,
+      "sha256": "7ffe98fb4fc9c0bd6c492dc3d8db938899f6b11d87b1467f7f0433b25adab33d"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/code/intro-migration.mjs",
+      "bytes": 747,
+      "sha256": "daccd6fbe87fb2b22b3d417f657e06b93cf2192e06524fd203bb484e0fbb6945"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/code/mechanisms.mjs",
+      "bytes": 3157,
+      "sha256": "9d5d50af143bcd1043cb991f597b52eaabb462f380895436921ddd9c402ac1a6"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/code/reference-transaction.mjs",
+      "bytes": 3270,
+      "sha256": "8d844a9b1a8484e196e079d0b6d3b0ed8a08b55778647bd13db0b1f1732da91b"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/code/reserve-refill.mjs",
+      "bytes": 1826,
+      "sha256": "a19b6a04f82d28f247d4c912d82abd53593eb8824fc6d5e3e1d4a3aac25e7405"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/code/world-layout.mjs",
+      "bytes": 4696,
+      "sha256": "90ce89bc847148791daa476ad43604b1dfa08657bd0e6af4146696b27f99d368"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/data/ambient-candidates.json",
+      "bytes": 388052,
+      "sha256": "db0ad8d9c57a4f1b588921de1752329a2f29f7f83af0231470d34bf932db9964"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/data/animation_manifest.json",
+      "bytes": 27721,
+      "sha256": "5eb9ae908a71a63d089cb4afc9a5755231dfda5d86ac41d8b0922be81c81d57c"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/data/asset-production-plan.json",
+      "bytes": 17797,
+      "sha256": "4c26663188668b28f2ffed3486032754ef283f6a6576d9d2a643cc6d184dd5a3"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/data/campaign.json",
+      "bytes": 95776,
+      "sha256": "69e42d8f86f50fd46a881219b58a148e62c7e5421ebaf24b3bf7314bf8f39a65"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/data/dialogue.ru.json",
+      "bytes": 19959,
+      "sha256": "0c826a772a3f7030e012f00b049cc5193063d4e62783cf0af4796e06066088c8"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/data/economy.json",
+      "bytes": 2489,
+      "sha256": "398bf470c87b4dc79a4324b99c576ec96e87091c856b63f3060d44c5a8ba0328"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/data/persistence-contract.json",
+      "bytes": 6120,
+      "sha256": "fe5dd736a7e1507cd97bf69a537094402c70bd39f2fd19f0b04b0accaeb9471d"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/data/terrain-audit.json",
+      "bytes": 9825,
+      "sha256": "6e13696e47a280bdb1f932e4ff43e58391623030be09ac0851ea07a32ad7cafd"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/data/ui.ru.json",
+      "bytes": 8850,
+      "sha256": "a5dfed8a08f41e6c10fb6a06fff4645a83c3304801379aa793edce6b38e2914f"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/data/unlock-intro.json",
+      "bytes": 4747,
+      "sha256": "fba5b445d317efd99fc410c64933ad4e672db82b8f02bed8355d7584e11637ae"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/data/world-atlas.json",
+      "bytes": 229813,
+      "sha256": "918d0bcc0570b857cde5d2ce1c9cae805301715659e576648bf50eb4eded68c9"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/ANIMATION_PRODUCTION_RU.md",
+      "bytes": 26033,
+      "sha256": "ebee05f84f9e74dc3bc55b4b361c8f7ebf99112b1bbb947ed9ca60ff48cf2cf0"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/ART_PRODUCTION_RU.md",
+      "bytes": 11906,
+      "sha256": "e2853dee8a6759e8ead079a4e10c68913463c59590e0a7192934d1048a64d3fb"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/ART_REFERENCE_NOTES_MODEL_AGENT_RU.md",
+      "bytes": 5633,
+      "sha256": "4e402b56ffcad60d531c2cfe036ef906d1ad8952d0fc959104671201a7581bec"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/AUDIO_RU.md",
+      "bytes": 15136,
+      "sha256": "82f8343fe2890f5c145e5d3abd2ed683abf4229b66e6b72da4d43865640e2fbe"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/CAMPAIGN_BIBLE_RU.md",
+      "bytes": 18582,
+      "sha256": "240d253a65002caa7efae3212a7fa9b184eb0d5f57d976479b90c48bfa30f6c0"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/CHANGELOG_1_1_RU.md",
+      "bytes": 2494,
+      "sha256": "50221fa3e150186fb49fae90ccdcfd347e8b74fab3903fd5b2a0b9a8958f49bb"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/CODE_AND_PERSISTENCE_RU.md",
+      "bytes": 37483,
+      "sha256": "b98f0c6e7d5671c12161dd4c2250f9fe47b5fa23c5b3c859eeedecb1a876bb95"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/CONCEPT_RU.md",
+      "bytes": 12541,
+      "sha256": "38d62e73df1c460448f732172b2b45cf4846ff9162260da7f6ba0c8f92712718"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/ECONOMY_RU.md",
+      "bytes": 10263,
+      "sha256": "73253f9de3c232f513b5db42eda1bbf56c8fed5953de0fd045aac7ae92753a2e"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/HALL3_UNLOCK_AND_INTRO_RU.md",
+      "bytes": 10753,
+      "sha256": "78682dc08e890214a325963aa5348c5f8fd8be1b278492b20aa30357e0ae76bf"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/NARRATIVE_RU.md",
+      "bytes": 28623,
+      "sha256": "fb2f9a03546b390217232f6197104a24fa31991563f9a8884c6b9a3e89958d7f"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/PERFORMANCE_AUDIT_RU.md",
+      "bytes": 23006,
+      "sha256": "7bcf955ae69d4fb582df6b334057382e89ba4ba8ba134c9fe6566389122b7f7c"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/docs/WORLD_LAYOUT_AND_FOG_RU.md",
+      "bytes": 32473,
+      "sha256": "a78d3d9779462ebc6bef5d71cf32956e7e56ccacebe536106c2a041cc81efbf2"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/previews/world-atlas.png",
+      "bytes": 474306,
+      "sha256": "21c41fed7200c5151ffd4809997af2c081e3cd646ba48d06854cafb8054455c8"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/previews/world-atlas.svg",
+      "bytes": 356236,
+      "sha256": "6148fb90fec97994529a70c2e0299d30498f92c1d2b4f7b8e7e001d95ed8fce4"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/qa/ART_INVENTORY.json",
+      "bytes": 5645,
+      "sha256": "08a9709e81d4482677d590e403a2f4aa89d7c84fd007c13bf3f7d38458fc26bd"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/qa/HALL3_REVIEW.json",
+      "bytes": 9090,
+      "sha256": "2b3a6247d49712947d889d57e0a1e529835a08092c8d18272c1c0570a890420e"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/qa/INDEPENDENT_REVIEW.json",
+      "bytes": 2082,
+      "sha256": "a05baf60e599daef713d0f68898f294b69c08b0c08ff6293227a68fd20c3bed4"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/qa/READINESS_RU.md",
+      "bytes": 7134,
+      "sha256": "18ba2b912c1ecbc2dc46ed8cd3da57149d9409858e31aee04504cc7daee74da5"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/qa/animation_manifest_validation.json",
+      "bytes": 133,
+      "sha256": "abc8bed2c799a9b57fb8cea81af4900248face83b829892f26f7efce97e008db"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/qa/art/REFERENCE_SHEETS_MODEL_AGENT.json",
+      "bytes": 4872,
+      "sha256": "90c843f653cc2ba25f1303e85fa4c39309ba5d66b0ff71fe4d1c089b14e7b8c4"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/qa/cross-review-tests.txt",
+      "bytes": 4944,
+      "sha256": "b3b702a6862af37a1fdf4fc580320c00d2743023c328df89560bdc416b605a74"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/qa/final-all-tests.txt",
+      "bytes": 7101,
+      "sha256": "b6bb528f28468a77ca5f8843d28202690191b02304cf342a6d1503a6ebff5c6b"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/qa/logic-tests.txt",
+      "bytes": 4827,
+      "sha256": "fda94b3c3d892276b2843dcc85e962436825f43557442cf67aeee7b98bb247e1"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/qa/performance-probe-tests.txt",
+      "bytes": 687,
+      "sha256": "f2d213e1112215fb1a715563ae1aa90610fde5cf6cf8e5665846f74e12ec8dda"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/qa/reward-total.json",
+      "bytes": 297,
+      "sha256": "3e6519b8d5c7a621f9a24ae1519dcf4d3dc14c675952689c355465180fd5edc6"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/references/REQUIRED_WEB_ASSETS_480.json",
+      "bytes": 96713,
+      "sha256": "cca9a83a34d5937f63b6c344bc1a349f4bf49fe6ad36519d1d6db8e8a4e89461"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/01_world_masterplan_prompt.txt",
+      "bytes": 1230,
+      "sha256": "8bf809c1dec1f1bd212eb3c955b05806b5f25f644597d0960b9eea680eb4e93f"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/02_forest_modular_kit_prompt.txt",
+      "bytes": 1263,
+      "sha256": "1367ead3d12293b243f605788db3b05224c589c17f83a930a2eecada8842d7ac"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/03_boss_ancient_maw_turnaround_prompt.txt",
+      "bytes": 1393,
+      "sha256": "04aa9b5411b0ea064a833fba4d4beb751c41242c85104ed20370b506f3d8e599"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/04_expedition_squad_turnaround_prompt.txt",
+      "bytes": 1316,
+      "sha256": "8b40b72b0fb7769e62fe3770eef6200d4afdd4e7d4b85a99f8d8216738a76cc4"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/05_boss_motion_keyposes_prompt.txt",
+      "bytes": 1292,
+      "sha256": "bd3a8badad5a69e96e72e4e5b16d3b9f38acb029573b712f1995a2e913d53a83"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/06_environment_landmarks_prompt.txt",
+      "bytes": 1218,
+      "sha256": "7b1dac14b42dd27c66d657fb6b7e3b98084c010028bc63d4758e7d41a4920567"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/07_fog_exploration_interface_prompt.txt",
+      "bytes": 1327,
+      "sha256": "3b9c01f7560fe924d1e8b3a76dc5b91a0b6ab5808dededebfa26e91063aed796"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/07_fog_exploration_interface_revision.txt",
+      "bytes": 628,
+      "sha256": "6382291b3761699960784099050a15afacf0e7f0c8c5fd0728bb98ac00437f71"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/08_final_boss_arena_prompt.txt",
+      "bytes": 1136,
+      "sha256": "e73cba11725f4ed0ca0b8efdb5169c6b6bd93ffa7abe3f7d59d7ef9c59c4d725"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/09_tenerys_guardian_direction_prompt.txt",
+      "bytes": 1163,
+      "sha256": "b34d8ac1e4d6cf0ffbe9b6e77cd5cee64a7a42260ca4bb8c7c24de6ee4c39db3"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/10_artifact_mechanisms_prompt.txt",
+      "bytes": 1433,
+      "sha256": "0eb949b81e051cf6e7ae4d36a7ab92d8f915751b517e530d5bd91642e48ef1d0"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/11_other_guardians_direction_prompt.txt",
+      "bytes": 1279,
+      "sha256": "75228b782c293b0602aed27a95a8bc083528152496c0776ff97531f332094e60"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/12_civilian_rescue_motion_prompt.txt",
+      "bytes": 1217,
+      "sha256": "c19c7b3d6b5bd4c02efa27a34427aef0302def8b7dd28abdf4ad95dc3b2b8846"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/18_hall3_unlock_intro_prompt.txt",
+      "bytes": 2042,
+      "sha256": "85b405d83ebfd9f5cc2c7bb8d9ffefeba938468b9b6bfb3ea7fc3a6b0db07b5b"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/cages_prompt.txt",
+      "bytes": 1475,
+      "sha256": "e61c0aa90e80b85a1947dec14345c37f4cdd7201264b18385babd99f032ba41a"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/civilians_prompt.txt",
+      "bytes": 1948,
+      "sha256": "b38e79805ad46f5f66ba0f48740a374899f5338b952ef6ed0c26ef6401563fc5"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/horse_guide_prompt.txt",
+      "bytes": 1767,
+      "sha256": "48d4d136b63500fe68cd69c4a2b97db9d31a98251e8fb9d0627e2c1df1581d08"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/loot_artifacts_prompt.txt",
+      "bytes": 2148,
+      "sha256": "e9612b5dab3d2114a9f4805d71510fa262c69908da774eafe89ca98abb285527"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/rescue_storyboard_correction_prompt.txt",
+      "bytes": 1814,
+      "sha256": "dcd6418aba7acdcec7fe15b2557526e6b824ea680c286a6fbf47bd9c0b941f8d"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/art/rescue_storyboard_initial_prompt.txt",
+      "bytes": 2498,
+      "sha256": "5bc8e192e2df863b0922ecfcbbed54c5b268223ba6dac105f74a7fc72a003224"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/audio/generate_audio.py",
+      "bytes": 7995,
+      "sha256": "1b7c8d880cf2c716cd68fc9216841dcf88b4c93af2aaed566b9993cb14707cd2"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_artifact_discovery.wav",
+      "bytes": 432044,
+      "sha256": "7c218431b19b50578bb1fb69e0a158ed68b4c845c85bbb5df353b1b39388f2e4"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_cage_latch.wav",
+      "bytes": 288044,
+      "sha256": "32ae1c5831b06f2d17ac03ff00ff7b367e024b3b733fd3b36cfb272ca828890b"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_distant_rumble.wav",
+      "bytes": 576044,
+      "sha256": "bb51a747c9c26097c577c43ff00fc859619993ebd8e8297fd2f23d3748ad1910"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_forest_wind.wav",
+      "bytes": 3456044,
+      "sha256": "703c4e19f592983a94e8840e149861d760f9433bf65158c64d8d8a4a23f575da"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_gate_creak.wav",
+      "bytes": 576044,
+      "sha256": "64bcc5a89bc22c15aae793988d6ca990da91552045eb75f2290c52b8f16a657c"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_horse_hoof.wav",
+      "bytes": 129644,
+      "sha256": "35335159363d7cb4503a323311ecfd9cacd8ace7c48b4ff665c0c84d852d02ce"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_large_reward.wav",
+      "bytes": 576044,
+      "sha256": "c860e6a516a7dc0e89435c9bd9ca0a4a5258aed4ed8f3358ffcca4da35a19dc7"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/audio/masters/fr_people_rescued.wav",
+      "bytes": 432044,
+      "sha256": "fa098783c06b87aae1fb11c043bb8c42d0f2355c91d71e24c392c44c08906c5d"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/sources/audio/verify_audio.py",
+      "bytes": 2458,
+      "sha256": "6fc1b8312b5f4273167f3b16d5b2643ad85250e5b40da2e57052423aed8a91fc"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/adventure-access.test.mjs",
+      "bytes": 13812,
+      "sha256": "5269d3389b5c8a7eb1b5b35d591d25a2dbaf0ae908e4d7e7fbd563298f676840"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/campaign.test.mjs",
+      "bytes": 14393,
+      "sha256": "dc6f315e15fe82cab1761c04a04c06c4bc60d0e5d25c1f8ced5d27edbc8d8f9c"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/content-contract.test.mjs",
+      "bytes": 4413,
+      "sha256": "e0c7a555bad59b60b932c6ed8034af4bd5a2746062698e2e13ceb2662dc262aa"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/fixtures/01_prologue.json",
+      "bytes": 1298,
+      "sha256": "de938fd09e155fca5c90347587e02264fd877f90d30664bdc5de99acb19645c8"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/fixtures/02_key_recovered.json",
+      "bytes": 1328,
+      "sha256": "e24650601a32f32093c276e9c074c16dedcb582f538f0e424afce43f9297bac1"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/fixtures/03_completed_unclaimed.json",
+      "bytes": 3252,
+      "sha256": "973085d3ef9c90623d2c7f23fa974204940c49a71646c62ce39979ef5d73b580"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/fixtures/README_RU.md",
+      "bytes": 1194,
+      "sha256": "6c2d0a4afd33ad0ae540cfb50ebb5ca3c22c12bc93e8e04c5dbc25a556b513e4"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/fixtures.mjs",
+      "bytes": 2325,
+      "sha256": "8b1e09d0e89ca636a4d1f9bda8dca49ef0a1914bacf6e0749c91c36fe4aa65b6"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/mechanisms.test.mjs",
+      "bytes": 3172,
+      "sha256": "8dc0950c0a42c1c184cb1cee8cf036abc0a1250644d12d11006037aa09087fbd"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/performance-probe.test.mjs",
+      "bytes": 3264,
+      "sha256": "73e0291b394d2db40a919fc5a3acf9ddb31b1c814e5eafb019fa9c3b47b339e3"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/reserve-refill.test.mjs",
+      "bytes": 3014,
+      "sha256": "1811caabe06f5e4ec34e109adc80e774990b2f88fe0aed78e4e530dcea5876a6"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/world-results.txt",
+      "bytes": 1815,
+      "sha256": "187603b9466f4a2e0d474f5e1e6727381729dbd646bdb8113b3935fcfb5f6c70"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tests/world.test.mjs",
+      "bytes": 10604,
+      "sha256": "3ca0fcf3a5f387478348521b7212ce8188d6654295b9aee85dc6f543c150ba34"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tools/build_art_inventory.py",
+      "bytes": 4156,
+      "sha256": "a3a4d0ba7110049e993bdc64837c6d9934e3a72ea4dbc79a2f97a94e036da46c"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tools/build_atlas.mjs",
+      "bytes": 10771,
+      "sha256": "2501403c213f3271a10faea34c153092029fc0d7c14c209fd0f6381dc4a9e361"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tools/build_delivery.py",
+      "bytes": 6502,
+      "sha256": "b7314756a8f949ec55b6fd4aa5a43d0d17b7331e0c9ee9c226c73e05f9267553"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tools/generate_campaign.py",
+      "bytes": 37137,
+      "sha256": "ce58e677ee8d9f6ffa7f87f5be7544a0c235978593d702b65dcd18552ae42de4"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tools/generate_dialogue.py",
+      "bytes": 9677,
+      "sha256": "34128252c5f0e97fa7939c03ddc87c3d9a2258f8ae11ee1a67eead77d5515d78"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tools/performance-probe.mjs",
+      "bytes": 5829,
+      "sha256": "f34db8cd6331cf9dbdd923e10bdddf60bc434dbee2de9e632623bf8053db1305"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tools/render_map.mjs",
+      "bytes": 6695,
+      "sha256": "e06862c5734c711bc2b9fb4f380f0814fdbeff70ce6d460f840d839fc00d65de"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tools/validate_animation_manifest.py",
+      "bytes": 1985,
+      "sha256": "71bd2fe3f7d6375b8715e4a5ce0b1272ada4795cdb4534fd7d7b8f678571a94f"
+    },
+    {
+      "path": "DRENOVAR_Forest_Rescue/tools/verify_delivery.py",
+      "bytes": 3245,
+      "sha256": "b388b89c91d8a21d8353de0b04a47124e3f29e979dd36ad1b9585106ea4a8afa"
+    }
+  ],
+  "external_project_dependencies": [
+    "authorized full DRENOVAR checkout at integration revision",
+    "480 baseline graphical files enumerated by original repository REQUIRED_WEB_ASSETS_480.json"
+  ]
+}

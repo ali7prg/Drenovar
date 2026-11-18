@@ -1,0 +1,140 @@
+{
+  "review": "Независимая проверка открытия на ратуше III и сохраняемого вступления",
+  "reviewedAtUtc": "2026-11-17T07:10:16.673805+00:00",
+  "contentVersion": "1.1.0",
+  "result": "PASS_REFERENCE_SCOPE",
+  "summary": "Блокирующих дефектов проверенных самостоятельных модулей не выявлено. Проверка не подтверждает внедрение в игру, реальный D1 CAS или работу постановки на устройстве.",
+  "originalProject": {
+    "branch": "work",
+    "commit": "56dce339b8adf527244c5d59fdc64a0f701ac64b",
+    "gitStatusClean": true,
+    "sourceVerifier": {
+      "originalFiles": 407,
+      "unchanged": 407,
+      "approvedModified": 0
+    }
+  },
+  "automatedTests": {
+    "command": "node --test tests/*.test.mjs",
+    "tests": 74,
+    "passed": 74,
+    "failed": 0,
+    "skipped": 0,
+    "resultFile": "qa/final-all-tests.txt",
+    "independentlyExecuted": true
+  },
+  "independentAdditionalProbes": {
+    "campaignTransitionDenialsAtHall1And2": 126,
+    "existingReceiptReplayDenialsAtHall1And2": 126,
+    "mechanismDenialsAtHall1And2": 24,
+    "beginAndFinishBossDenialsAtHall3And4": 4,
+    "introActionDenialsAtHall1And2": 8,
+    "realSettleKingdomFunctionOnSyntheticSave": {
+      "hallBeforeEndsAt": 2,
+      "hallAtEndsAt": 3,
+      "orderCleared": true,
+      "receiptCompleted": true,
+      "inputUnchanged": true
+    },
+    "result": "PASS"
+  },
+  "verifiedContracts": [
+    {
+      "id": "hall_access",
+      "result": "PASS",
+      "evidence": "Все 63 последовательных сюжетных действия и их повторные receipts отклонены при hall1/2 до изменения снимка. claim/pause/resume, механизмы, intro и fog дополнительно покрыты suite. Автопополнение нижеIII переводит0, сохраняя обычную успешную трату."
+    },
+    {
+      "id": "higher_combat_gates",
+      "result": "PASS",
+      "evidence": "Новые победы стражейIII и переходы begin_boss/finish_boss требуютV. Идемпотентный повтор уже совершённого перехода может вернуть неизменный state при III/IV, не запускает бой и не выдаёт награду."
+    },
+    {
+      "id": "intro_lifecycle",
+      "result": "PASS",
+      "evidence": "Старт только в safe city foreground; playing не порождает повторный present_intro. Новый вход переводит прерванное playing в pending/deferred с ручным Continue. Попытка finish старого attempt отклоняется. Finish/skip сохраняются, новых rewards и блокировки кампании нет. Локальный replay после acknowledged является отдельной presentation."
+    },
+    {
+      "id": "migration",
+      "result": "PASS",
+      "evidence": "Только отсутствующий intro namespace при валидированном campaign.phase != prologue мигрирует в acknowledged(existing_progress). Существующий intro и данные кампании не перезаписываются; corrupt/future schema отвергаются."
+    },
+    {
+      "id": "fog",
+      "result": "PASS",
+      "evidence": "Низкий/некорректный hall блокирует reveal до вызова traversal resolver. Проекция скрывает POI/старую разведку, сохраняя город, protected property и байты. HallIII открывает входной коридор, не весь лес; actor/route принадлежат выбранному p.id."
+    },
+    {
+      "id": "presentation_data",
+      "result": "PASS",
+      "evidence": "12-секундная непрерывная последовательность, safe-city/defer/reduced-motion/skip правила, отсутствие наград, отдельный namespace и существующие ссылки на art18 и3 из8 synthetic audio cues согласованы. Настоящие камера, renderer и проигрывание ещё не реализованы."
+    },
+    {
+      "id": "cas_reference",
+      "result": "PASS_WITH_INTEGRATION_REQUIRED",
+      "evidence": "Два кандидата start могут подготовить эффекты; только победитель commit публикуется, проигравший пересчитывается и не выдаёт вторую presentation. Это проверено моделированием rebase. reference-transaction сам не реализует SQL/D1 CAS, HTTP/auth и reconnect lifecycle; внедрять в реальный hosted CAS."
+    }
+  ],
+  "sourceIntegrationEvidence": [
+    {
+      "path": "DRENOVAR-Server-v92/dist/city/kingdom29.js",
+      "line": 14,
+      "symbol": "hallLevel",
+      "fact": "Фактический level здания baseType ECO-05 в c.buildings; не order.level."
+    },
+    {
+      "path": "DRENOVAR-Server-v92/dist/city/kingdom29.js",
+      "line": 36,
+      "symbol": "settleKingdom",
+      "fact": "При server now>=order.endsAt переносит o.level в building.level, завершает receipt и очищает order."
+    },
+    {
+      "path": "DRENOVAR-Server-v92/gameplay37/server/core.mjs",
+      "line": 35,
+      "symbol": "CoreGameServer.settle",
+      "fact": "Вызывает settleKingdom с серверным now."
+    },
+    {
+      "path": "DRENOVAR-Server-v92/gameplay37/server/core.mjs",
+      "line": 51,
+      "symbol": "CoreGameServer.readyPlayer62",
+      "fact": "Вызывает settle до чтения состояния."
+    },
+    {
+      "path": "DRENOVAR-Server-v92/gameplay37/server/core.mjs",
+      "line": 66,
+      "symbol": "CoreGameServer.command",
+      "fact": "Новый gate для adventure/adventure_intro внедрять после readyPlayer62 и ДО SELECT commands; обычные команды не ограничивать."
+    },
+    {
+      "path": "DRENOVAR-Server-v92/gameplay37/server/catalog.mjs",
+      "line": 9,
+      "symbol": "creatureSpec",
+      "fact": "requiredHall для уровней1/2/3 соответственно1/3/5; ранний доступ кампании добавляет собственный минимум3."
+    }
+  ],
+  "codeFindings": [],
+  "resolvedDocumentationFindings": [
+    {
+      "id": "gate_before_receipt",
+      "status": "FIXED_AND_REREAD",
+      "detail": "Старый порядок интеграционного псевдокода мог оставить gate после replay. Parent уточнил docs/CODE_AND_PERSISTENCE_RU.md, основной brief и intro guide: после readyPlayer62, до SELECTcommands."
+    }
+  ],
+  "scopeLimitations": [
+    "Новый набор не внедрён в действующий проект. Существующие его407файлов не изменены.",
+    "Реальные movement/battle/escort adapters, route-entry gate, безопасный publicState, запись intro reconcile/migration в транзакцию, клиентская presentation и device QA остаются интеграцией Claude Code.",
+    "Ни реальный D1-конфликт, ни два настоящих браузера, ни устройство iPhone12 не проверялись. CAS проверен только на моделируемом snapshot/rebase.",
+    "Проигрывание физических кадров ровно один раз на нескольких устройствах не обещается; durable ack, подавление клиентских дубликатов и публикация effects после commit обязательны.",
+    "Изображение art18 — визуальный ориентир. Новых готовых моделей/скелетных клипов эта редакция не добавляет. Звуки являются существующими синтетическими cues."
+  ],
+  "reviewedCodeSha256": {
+    "code/adventure-access.mjs": "0c8a30bc8097b14c5911f56b27a46ec52358b9ba00548eb893165bdb03798677",
+    "code/intro-migration.mjs": "daccd6fbe87fb2b22b3d417f657e06b93cf2192e06524fd203bb484e0fbb6945",
+    "code/reference-transaction.mjs": "8d844a9b1a8484e196e079d0b6d3b0ed8a08b55778647bd13db0b1f1732da91b",
+    "code/forest-rescue.mjs": "7ffe98fb4fc9c0bd6c492dc3d8db938899f6b11d87b1467f7f0433b25adab33d",
+    "code/mechanisms.mjs": "9d5d50af143bcd1043cb991f597b52eaabb462f380895436921ddd9c402ac1a6",
+    "code/reserve-refill.mjs": "a19b6a04f82d28f247d4c912d82abd53593eb8824fc6d5e3e1d4a3aac25e7405",
+    "code/fog.mjs": "99d7c1b2f4152679fbf1f8c0db944418a7867ec50139798374dfca534f7aaf5a"
+  }
+}

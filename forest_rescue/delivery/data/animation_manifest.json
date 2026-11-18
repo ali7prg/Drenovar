@@ -1,0 +1,897 @@
+{
+  "schemaVersion": 1,
+  "campaignId": "forest_rescue_v1",
+  "status": "production_specification_not_delivered_animation_files",
+  "sourceImages": "See package image registry; images are visual references, not meshes or rigs.",
+  "coordinateConvention": {
+    "up": "+Y",
+    "forward": "+Z",
+    "unit": "metre; map to real DRENOVAR world scale during integration",
+    "rootMotion": "Gameplay root follows authoritative route; clips in place unless a separately tagged cinematic track is used only for presentation."
+  },
+  "groups": [
+    {
+      "id": "guide_horse",
+      "rigs": [
+        "horse"
+      ],
+      "maximumDeformBonesByLOD": [
+        64,
+        38,
+        24
+      ],
+      "triangleTargetsByLOD": [
+        16000,
+        8000,
+        3200
+      ],
+      "maxSkinInfluences": 4,
+      "clips": [
+        {
+          "id": "lf_horse_idle",
+          "durationSeconds": 5.0,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "guide_stationary",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Дыхание грудной клетки, микроперенос веса; четыре копыта устойчиво на земле."
+        },
+        {
+          "id": "lf_horse_walk",
+          "durationSeconds": 1.2,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "guide_walk",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Четырёхтактный шаг; stride из реального authored clip, не универсальная константа."
+        },
+        {
+          "id": "lf_horse_trot",
+          "durationSeconds": 0.72,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "guide_trot",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Двухтактная диагональная рысь; гнедая лошадь без всадника и седла, недоуздок с зелёной лентой."
+        },
+        {
+          "id": "lf_horse_start",
+          "durationSeconds": 0.65,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "guide_begin_route",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_horse_stop",
+          "durationSeconds": 0.8,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "guide_finish_route",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_horse_turn_left",
+          "durationSeconds": 1.1,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "guide_tight_turn_left",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_horse_turn_right",
+          "durationSeconds": 1.1,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "guide_tight_turn_right",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_horse_alert",
+          "durationSeconds": 1.4,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "guardian_revealed",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_horse_look_back",
+          "durationSeconds": 1.8,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "guide_waits_for_squad",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Поворачивает голову к отряду, ноги сохраняют опору."
+        },
+        {
+          "id": "lf_horse_call",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "guide_marks_route",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Короткое ржание/движение головы; не добавлять человеческого всадника или жест рукой."
+        }
+      ],
+      "visualReference": "art/horse_guide_turnaround_motion.png",
+      "canonicalAppearance": "Bay/brown coat, dark mane and tail, white forehead star, worn halter with green ribbon; no saddle, no rider."
+    },
+    {
+      "id": "soldier",
+      "rigs": [
+        "human_shared"
+      ],
+      "maximumDeformBonesByLOD": [
+        52,
+        34,
+        20
+      ],
+      "triangleTargetsByLOD": [
+        14000,
+        7000,
+        2500
+      ],
+      "maxSkinInfluences": 4,
+      "clips": [
+        {
+          "id": "lf_soldier_idle",
+          "durationSeconds": 4,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "guard_stationary",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_soldier_walk",
+          "durationSeconds": 1.0,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "escort_walk",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_soldier_jog",
+          "durationSeconds": 0.7,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "escort_catch_up",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_soldier_guard",
+          "durationSeconds": 3.2,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "escort_guard",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_soldier_attack",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "server_attack_event",
+          "markers": [
+            {
+              "name": "weapon_contact",
+              "timeSeconds": 0.65,
+              "authority": "presentation_only"
+            }
+          ],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_soldier_hit",
+          "durationSeconds": 0.5,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "server_hit_event",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_soldier_death",
+          "durationSeconds": 2,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "server_death_event",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_soldier_unlock",
+          "durationSeconds": 2.4,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "unlock_cage_accepted",
+          "markers": [
+            {
+              "name": "latch_release",
+              "timeSeconds": 1.6,
+              "authority": "presentation_only"
+            }
+          ],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_soldier_help",
+          "durationSeconds": 2.8,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "release_assist",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_soldier_salute",
+          "durationSeconds": 1.8,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "escort_home_accepted",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "civilian",
+      "rigs": [
+        "human_shared"
+      ],
+      "maximumDeformBonesByLOD": [
+        50,
+        30,
+        18
+      ],
+      "triangleTargetsByLOD": [
+        12000,
+        6000,
+        2200
+      ],
+      "maxSkinInfluences": 4,
+      "clips": [
+        {
+          "id": "lf_civilian_cage_sit",
+          "durationSeconds": 5.4,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "cage_locked",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_civilian_cage_stand",
+          "durationSeconds": 4.8,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "cage_locked",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_civilian_cage_wait",
+          "durationSeconds": 6.1,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "cage_locked",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_civilian_react",
+          "durationSeconds": 1.4,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "guardian_defeated",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_civilian_stand_up",
+          "durationSeconds": 2.2,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "unlock_cage_accepted",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_civilian_exit",
+          "durationSeconds": 2.8,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "release_route_started",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Выход по размеченному local corridor; дверь должна уже быть открыта, stop point вне клетки."
+        },
+        {
+          "id": "lf_civilian_follow",
+          "durationSeconds": 1.1,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "escort_route_active",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_civilian_follow_tired",
+          "durationSeconds": 1.25,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "escort_route_active",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_civilian_wait",
+          "durationSeconds": 4.4,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "escort_route_paused",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_civilian_look_back",
+          "durationSeconds": 1.6,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "escort_reacts",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_civilian_arrive",
+          "durationSeconds": 2.6,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "escort_home_accepted",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_civilian_thank",
+          "durationSeconds": 2.3,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "escort_home_accepted",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "tenerys",
+      "rigs": [
+        "existing_tenerys_or_verified_retarget"
+      ],
+      "maximumDeformBonesByLOD": [
+        46,
+        30,
+        18
+      ],
+      "triangleTargetsByLOD": [
+        18000,
+        9000,
+        3500
+      ],
+      "maxSkinInfluences": 4,
+      "clips": [
+        {
+          "id": "Idle",
+          "durationSeconds": 4,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "guardian_idle",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Имя поддерживается CreatureActor; содержание исходного GLB пока не проверено."
+        },
+        {
+          "id": "Walk",
+          "durationSeconds": 1.1,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "guardian_patrol",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "Alert",
+          "durationSeconds": 1.2,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "guardian_engaged",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "Attack",
+          "durationSeconds": 1.3,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "server_guardian_attack",
+          "markers": [
+            {
+              "name": "contact",
+              "timeSeconds": 0.7,
+              "authority": "presentation_only"
+            }
+          ],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "Hit",
+          "durationSeconds": 0.45,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "server_guardian_hit",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "Roar",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "guardian_tier_revealed",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "Death",
+          "durationSeconds": 2.8,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "server_guardian_defeated",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "boss_dinosaur",
+      "speciesId": "ancient_maw",
+      "encounterId": "lf_boss_ancient_maw",
+      "rigs": [
+        "new_dinosaur_boss"
+      ],
+      "maximumDeformBonesByLOD": [
+        80,
+        50,
+        28
+      ],
+      "triangleTargetsByLOD": [
+        48000,
+        24000,
+        9000
+      ],
+      "maxSkinInfluences": 4,
+      "clips": [
+        {
+          "id": "lf_boss_idle",
+          "durationSeconds": 5,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "boss_idle",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_boss_walk",
+          "durationSeconds": 1.6,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "boss_move",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_boss_turn_left",
+          "durationSeconds": 1.3,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "boss_turn_left",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_boss_turn_right",
+          "durationSeconds": 1.3,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "boss_turn_right",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_boss_awaken",
+          "durationSeconds": 4.2,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "boss_encounter_started",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_boss_phase_roar",
+          "durationSeconds": 2.8,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "phase_changed",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_boss_hit",
+          "durationSeconds": 0.55,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "boss_hit_feedback",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_boss_stagger",
+          "durationSeconds": 1.8,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "server_stagger_event",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_boss_death",
+          "durationSeconds": 5.2,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "boss_defeated",
+          "markers": [
+            {
+              "name": "ground_contact",
+              "timeSeconds": 3.7,
+              "authority": "presentation_only"
+            }
+          ],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_boss_jaw_arc",
+          "durationSeconds": 4.25,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "attack_scheduled:jaw_arc",
+          "markers": [
+            {
+              "name": "telegraph_begin",
+              "timeSeconds": 0,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "active_begin",
+              "timeSeconds": 2.4,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "active_end",
+              "timeSeconds": 2.85,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "recovery_end",
+              "timeSeconds": 4.25,
+              "authority": "presentation_only"
+            }
+          ],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Gameplay intervals are authored by server; these markers synchronize presentation only."
+        },
+        {
+          "id": "lf_boss_tail_sweep",
+          "durationSeconds": 5.45,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "attack_scheduled:tail_sweep",
+          "markers": [
+            {
+              "name": "telegraph_begin",
+              "timeSeconds": 0,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "active_begin",
+              "timeSeconds": 3.0,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "active_end",
+              "timeSeconds": 3.65,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "recovery_end",
+              "timeSeconds": 5.45,
+              "authority": "presentation_only"
+            }
+          ],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Gameplay intervals are authored by server; these markers synchronize presentation only."
+        },
+        {
+          "id": "lf_boss_lane_charge",
+          "durationSeconds": 5.9,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "attack_scheduled:lane_charge",
+          "markers": [
+            {
+              "name": "telegraph_begin",
+              "timeSeconds": 0,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "active_begin",
+              "timeSeconds": 2.8,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "active_end",
+              "timeSeconds": 3.9,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "recovery_end",
+              "timeSeconds": 5.9,
+              "authority": "presentation_only"
+            }
+          ],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Gameplay intervals are authored by server; these markers synchronize presentation only."
+        },
+        {
+          "id": "lf_boss_stomp_waves",
+          "durationSeconds": 6.9,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "attack_scheduled:stomp_waves",
+          "markers": [
+            {
+              "name": "telegraph_begin",
+              "timeSeconds": 0,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "wave_1_begin",
+              "timeSeconds": 3.2,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "wave_1_end",
+              "timeSeconds": 3.6,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "wave_2_begin",
+              "timeSeconds": 4.1,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "wave_2_end",
+              "timeSeconds": 4.5,
+              "authority": "presentation_only"
+            },
+            {
+              "name": "recovery_end",
+              "timeSeconds": 6.9,
+              "authority": "presentation_only"
+            }
+          ],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "environment",
+      "rigs": [
+        "node_animation_or_shader"
+      ],
+      "maximumDeformBonesByLOD": [
+        0,
+        0,
+        0
+      ],
+      "triangleTargetsByLOD": null,
+      "maxSkinInfluences": 0,
+      "clips": [
+        {
+          "id": "lf_cage_unlock",
+          "durationSeconds": 1.0,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "unlock_cage_accepted",
+          "markers": [
+            {
+              "name": "latch_clear",
+              "timeSeconds": 0.7,
+              "authority": "presentation_only"
+            }
+          ],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_cage_gate_open",
+          "durationSeconds": 1.6,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "unlock_cage_accepted",
+          "markers": [
+            {
+              "name": "passage_clear",
+              "timeSeconds": 1.2,
+              "authority": "presentation_only"
+            }
+          ],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Start after latch clear. Collision authoritative; visual gate cannot award rescue."
+        },
+        {
+          "id": "lf_cage_gate_settle",
+          "durationSeconds": 0.4,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "gate_open_end",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_forest_wind",
+          "durationSeconds": 8,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "ambient_visible",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Shader phase; separate trunk branch leaf amplitudes; not a per-tree JS bone loop."
+        },
+        {
+          "id": "lf_fog_reveal",
+          "durationSeconds": 2.0,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "server_region_discovered",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": "Visual blend only; authoritative discovery persists immediately."
+        },
+        {
+          "id": "lf_lock_mechanism",
+          "durationSeconds": 1.8,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "mechanism_accepted",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_rope_release",
+          "durationSeconds": 1.3,
+          "loop": false,
+          "rootTranslation": "in_place",
+          "trigger": "mechanism_accepted",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        },
+        {
+          "id": "lf_banner_wind",
+          "durationSeconds": 4.5,
+          "loop": true,
+          "rootTranslation": "in_place",
+          "trigger": "ambient_visible",
+          "markers": [],
+          "productionStatus": "requires_model_rig_animation_production",
+          "notes": ""
+        }
+      ]
+    }
+  ],
+  "bossPhases": [
+    {
+      "id": "hunt",
+      "hpAboveFraction": 0.7,
+      "hpAtMostFraction": 1,
+      "attacks": [
+        "jaw_arc",
+        "lane_charge"
+      ]
+    },
+    {
+      "id": "fury",
+      "hpAboveFraction": 0.35,
+      "hpAtMostFraction": 0.7,
+      "attacks": [
+        "jaw_arc",
+        "tail_sweep",
+        "lane_charge"
+      ]
+    },
+    {
+      "id": "last_stand",
+      "hpAboveFraction": 0,
+      "hpAtMostFraction": 0.35,
+      "attacks": [
+        "tail_sweep",
+        "stomp_waves",
+        "jaw_arc"
+      ]
+    }
+  ],
+  "authority": "Proposed new event identifiers must map to actual campaign code. Animation callbacks never commit damage, rescue, loot or completion.",
+  "notDelivered": [
+    "new humanoid/horse/dinosaur meshes",
+    "deform rigs and skin weights",
+    "production GLB clips",
+    "device-validated animation LOD",
+    "original missing game assets"
+  ]
+}

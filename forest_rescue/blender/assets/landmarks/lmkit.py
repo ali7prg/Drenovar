@@ -27,10 +27,68 @@ def rotm(rx=0.0, ry=0.0, rz=0.0):
 
 
 class Kit:
-    def __init__(self, seed=0):
+    def __init__(self, seed=0, bevel=False):
         self.md = MeshData()
         self.rng = np.random.default_rng(seed)
         self.colliders = []
+        self.bevel = bevel          # LOD0: chamfered, slightly irregular blocks for masonry
+
+    def bblock(self, c, size, R=None, mat=STONE, tile=1.6, chamfer=None, jitter=0.018):
+        """Chamfered (bevelled) block with per-corner jitter (chipped, irregular). 44 tris."""
+        c = np.asarray(c, float)
+        h = np.asarray(size, float) / 2
+        R = np.eye(3) if R is None else R
+        ch = min(h.min() * 0.45, 0.07 if chamfer is None else chamfer) * self.rng.uniform(0.7, 1.3)
+        V, idx = [], {}
+        for sx in (-1, 1):
+            for sy in (-1, 1):
+                for sz in (-1, 1):
+                    jit = self.rng.normal(0, jitter, 3)
+                    s = np.array([sx, sy, sz], float)
+                    for ax in range(3):
+                        p = s * (h - ch)
+                        p[ax] = s[ax] * h[ax]
+                        idx[(sx, sy, sz, ax)] = len(V)
+                        V.append(p + jit)
+        V = np.array(V)
+        faces = []
+        for ax in range(3):                                   # main faces
+            for s in (-1, 1):
+                o = [a for a in range(3) if a != ax]
+                quad = []
+                for a_s, b_s in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
+                    key = [0, 0, 0]
+                    key[ax], key[o[0]], key[o[1]] = s, a_s, b_s
+                    quad.append(idx[(key[0], key[1], key[2], ax)])
+                faces.append(quad)
+        for ax in range(3):                                   # edge chamfers (edge runs along ax)
+            o = [a for a in range(3) if a != ax]
+            for s1 in (-1, 1):
+                for s2 in (-1, 1):
+                    def kk(sa, comp):
+                        key = [0, 0, 0]
+                        key[ax], key[o[0]], key[o[1]] = sa, s1, s2
+                        return idx[(key[0], key[1], key[2], comp)]
+                    faces.append([kk(-1, o[0]), kk(1, o[0]), kk(1, o[1]), kk(-1, o[1])])
+        for sx in (-1, 1):                                    # corner triangles
+            for sy in (-1, 1):
+                for sz in (-1, 1):
+                    faces.append([idx[(sx, sy, sz, 0)], idx[(sx, sy, sz, 1)], idx[(sx, sy, sz, 2)]])
+        out_f = []
+        for f in faces:                                       # outward winding
+            p = V[f]
+            n = np.cross(p[1] - p[0], p[2] - p[0])
+            out_f.append(tuple(f) if np.dot(n, p.mean(0)) >= 0 else tuple(f[::-1]))
+        W = V @ R.T + c
+        off = self.rng.random(2) * 4
+        uvs = []
+        for f in out_f:
+            p = V[list(f)]
+            n = np.cross(p[1] - p[0], p[2] - p[0])
+            a = int(np.argmax(np.abs(n)))
+            o = [x for x in range(3) if x != a]
+            uvs.append([(off[0] + q[o[0]] / tile, off[1] + q[o[1]] / tile) for q in p])
+        self.md.add(W, out_f, uvs, mat, np.ones((len(W), 4)))
 
     # ------------------------------------------------------------------ primitives
     def box(self, c, size, R=None, mat=STONE, tile=1.0, rect=None, skip=(), uv_jitter=True, grain_axis=None):
@@ -161,7 +219,10 @@ class Kit:
                         if axis == "y":
                             cc = np.array([cc[1], cc[0], cc[2]])
                             sz = np.array([sz[1], sz[0], sz[2]])
-                        self.box(R @ cc + o, sz, R @ Rl, mat, tile=1.6)
+                        if self.bevel:
+                            self.bblock(R @ cc + o, sz, R @ Rl, mat, tile=1.6)
+                        else:
+                            self.box(R @ cc + o, sz, R @ Rl, mat, tile=1.6)
                 x += L
 
     def arch(self, cx, z_spring, span, thick, depth, n=11, y=0.0, mat=STONE, R=None, origin=(0, 0, 0)):
@@ -176,7 +237,10 @@ class Kit:
             c = np.array([cx + r_mid * math.cos(am), y, z_spring + r_mid * math.sin(am)])
             L = 2 * r_mid * math.sin((a1 - a0) / 2) - 0.03
             Rl = rotm(0, -(am - np.pi / 2), 0)
-            self.box(R @ c + o, (L, depth, thick), R @ Rl, mat, tile=1.6)
+            if self.bevel:
+                self.bblock(R @ c + o, (L, depth, thick), R @ Rl, mat, tile=1.6, chamfer=0.05)
+            else:
+                self.box(R @ c + o, (L, depth, thick), R @ Rl, mat, tile=1.6)
 
     def stairs(self, x0, z0, n, run, rise, width, y0=0.0, dirx=1.0, mat=STONE, R=None, origin=(0, 0, 0)):
         R = np.eye(3) if R is None else R

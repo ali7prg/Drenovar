@@ -90,6 +90,36 @@ def box_uv(V):
 
 # ============================================================================ angular limestone
 
+def polyhedron(center, half, yaw, rng, n_planes=13, tilt=(0.0, 0.0), squash=1.0):
+    """Irregular fractured block: convex hull of random planes tangent to a tilted ellipsoid; a few planes
+    are pushed in further (fracture facets), so faces are planar but not box-like."""
+    c = np.asarray(center, float)
+    h = np.asarray(half, float)
+    cy, sy = math.cos(yaw), math.sin(yaw)
+    Rz = np.array([[cy, -sy, 0], [sy, cy, 0], [0, 0, 1]])
+    ax, ay = tilt
+    Rx = np.array([[1, 0, 0], [0, math.cos(ax), -math.sin(ax)], [0, math.sin(ax), math.cos(ax)]])
+    Ry = np.array([[math.cos(ay), 0, math.sin(ay)], [0, 1, 0], [-math.sin(ay), 0, math.cos(ay)]])
+    Rm = Rz @ Ry @ Rx
+    N = [np.array([0, 0, 1.0]), np.array([0, 0, -1.0])]              # roughly flat top/bottom beds
+    N[0] = normalize(N[0] + rng.normal(0, 0.12, 3))
+    g = (1 + 5 ** 0.5) / 2
+    for i in range(n_planes):
+        z = 1 - 2 * (i + 0.5) / n_planes
+        rr = math.sqrt(max(0, 1 - z * z))
+        a = 2 * np.pi * i / g + rng.uniform(0, 0.6)
+        N.append(normalize(np.array([rr * math.cos(a), rr * math.sin(a), z * 0.55]) + rng.normal(0, 0.15, 3)))
+    N = np.array(N)
+    D = np.sqrt(((N * h) ** 2).sum(1)) * rng.uniform(0.86, 1.0, len(N))
+    D[2 + rng.choice(n_planes, 3, replace=False)] *= rng.uniform(0.75, 0.88, 3)      # fracture facets
+
+    def fn(P):
+        q = (P - c) @ Rm
+        return (q @ N.T - D).max(-1)
+    ext = np.linalg.norm(h)
+    return sdf.Prim(fn, c - ext, c + ext, k=0.0)
+
+
 def polytope(center, half, yaw, rng, n_cuts=7, chip=0.18, tilt=(0.0, 0.0)):
     """Convex polytope SDF (box + random corner/edge plane cuts) -> planar fracture faces, chipped edges."""
     c = np.asarray(center, float)
@@ -123,11 +153,12 @@ def polytope(center, half, yaw, rng, n_cuts=7, chip=0.18, tilt=(0.0, 0.0)):
 def build_moss_rock(variant):
     rng = np.random.default_rng(1600 + variant)
     res = gc._res(["rock", "foliage"], wind=False)
-    if variant == 1:     # art/02: high block (top rising to the right, vertical cleft face) + lower right terrace
-        blocks = [((-1.0, 0.3, 2.5), (1.6, 1.2, 1.4), 0.08, (0.0, -0.10)), ((1.2, 0.1, 2.5), (0.9, 1.0, 1.95), 0.15, (0, 0.06)),
-                  ((3.1, 0.4, 0.95), (1.2, 1.1, 0.95), -0.1, (0, 0.05)), ((-3.4, 0.4, 0.8), (0.8, 0.9, 0.8), 0.3, (0, 0)),
-                  ((0.0, -1.5, 0.45), (1.6, 0.6, 0.5), 0.05, (0, 0)), ((4.3, -0.9, 0.5), (0.6, 0.6, 0.55), 0.4, (0, 0)),
-                  ((-2.0, -1.4, 0.35), (0.55, 0.45, 0.4), 0.7, (0, 0)), ((2.4, -1.6, 0.3), (0.45, 0.4, 0.32), 1.2, (0, 0))]
+    if variant == 1:     # art/02: leaning fractured blocks, high mass left-centre, lower terrace right
+        blocks = [((-1.2, 0.3, 2.4), (1.5, 1.3, 1.45), 0.15, (0.05, -0.16)), ((0.9, 0.2, 2.6), (1.0, 1.1, 1.9), 0.25, (0.04, 0.10)),
+                  ((-2.9, 0.5, 1.0), (0.9, 1.0, 1.0), 0.5, (0.12, 0.18)), ((3.0, 0.4, 1.0), (1.3, 1.1, 1.0), -0.2, (-0.06, 0.12)),
+                  ((1.9, -1.2, 0.55), (0.8, 0.6, 0.6), 0.6, (0.15, -0.1)), ((-0.6, -1.5, 0.5), (1.0, 0.6, 0.55), 0.1, (-0.1, 0.0)),
+                  ((4.4, -0.8, 0.5), (0.6, 0.6, 0.55), 0.9, (0.1, 0.2)), ((-2.3, -1.4, 0.35), (0.55, 0.45, 0.4), 0.7, (0.2, 0)),
+                  ((2.6, -1.9, 0.3), (0.45, 0.4, 0.32), 1.2, (0.1, 0.1)), ((-3.8, -0.7, 0.4), (0.6, 0.5, 0.42), 2.0, (0.1, 0.15))]
         size = (11, 6, 6)
         vox = 0.075
     elif variant == 2:
@@ -139,7 +170,7 @@ def build_moss_rock(variant):
         blocks = [((0, 0, 0.42), (0.75, 0.55, 0.48), 0.4, (0.1, 0.05))]
         size = (3, 3, 2)
         vox = 0.04
-    prims = [polytope(c, h, yaw, rng, n_cuts=8, chip=0.22, tilt=tl) for (c, h, yaw, tl) in blocks]
+    prims = [polyhedron(c, h, yaw, rng, n_planes=13, tilt=tl) for (c, h, yaw, tl) in blocks]
     lo = np.array([-size[0] / 2 - 1, -size[1] / 2 - 1, -0.5])
     hi = np.array([size[0] / 2 + 1, size[1] / 2 + 1, size[2]])
     F = sdf.Field(lo, hi, vox)
@@ -147,7 +178,8 @@ def build_moss_rock(variant):
         F.apply(p, op="union", k=0.0)
     P = _grid(F)
     # bevel/weathering noise + a few fracture slots
-    F.d = (F.d + 0.035 * (texproj.fbm(P, 2.5, 3, seed=variant) - 0.5)).astype(np.float32)
+    F.d = (F.d + 0.05 * (texproj.fbm(P, 2.5, 3, seed=variant) - 0.5)
+           + 0.03 * (texproj.fbm(P, 7.0, 2, seed=variant + 5) - 0.5)).astype(np.float32)        # chipped edges
     f1, f2 = texproj.voronoi(P * np.array([1.0, 1.0, 1.4]), 0.45, seed=variant + 3)
     F.d = (F.d + np.clip(0.04 - (f2 - f1), 0, None) * 1.2).astype(np.float32)
     F.d = np.maximum(F.d, -P[..., 2] - 0.2).astype(np.float32)
@@ -163,6 +195,8 @@ def build_moss_rock(variant):
         emit_split(md, v, t, moss, 0, 1, box_uv(v), rng)
         fn = normalize(np.cross(v[t[:, 1]] - v[t[:, 0]], v[t[:, 2]] - v[t[:, 0]]))
         if lod < 2:
+            moss_fringe(md, v, t, moss, rng, {1: [70, 24], 2: [30, 10], 3: [12, 5]}[variant][lod],
+                        {1: (0.5, 0.9), 2: (0.4, 0.7), 3: (0.3, 0.5)}[variant])
             shrub = {1: [30, 10], 2: [12, 5], 3: [5, 2]}[variant][lod]
             ssz = {1: (0.8, 1.4), 2: (0.6, 1.0), 3: (0.45, 0.7)}[variant]
             gc._cards_on_surface(md, v, t, fn, rng, shrub, ["shrub_orange", "shrub_orange", "grass_a", "grass_b"]
@@ -176,6 +210,32 @@ def build_moss_rock(variant):
         res.lods[lod] = md
         res.info[f"LOD{lod}"] = dict(tris=md.tris(), moss_faces=int(moss.sum()))
     return res
+
+
+def moss_fringe(md, V, T, moss, rng, n, size, mat=1):
+    """Fringe cards hanging over the moss-shell borders (moss faces adjacent to bare, steep faces)."""
+    if not moss.any():
+        return
+    fn = normalize(np.cross(V[T[:, 1]] - V[T[:, 0]], V[T[:, 2]] - V[T[:, 0]]))
+    cen = V[T].mean(1)
+    mi = np.nonzero(moss & (fn[:, 2] < 0.75) & (fn[:, 2] > -0.2))[0]
+    if len(mi) == 0:
+        mi = np.nonzero(moss)[0]
+    pick = rng.choice(mi, size=min(n, len(mi)), replace=len(mi) < n)
+    for f in pick:
+        nn = fn[f]
+        out = normalize(np.array([nn[0], nn[1], 0.0]) + rng.normal(0, 0.2, 3) * np.array([1, 1, 0]))
+        s = rng.uniform(*size)
+        top = cen[f] + nn * 0.02
+        side = normalize(np.cross(out, np.array([0, 0, 1.0])))
+        down = normalize(np.array([0, 0, -1.0]) + out * 0.25)
+        corners = np.array([top - side * s / 2, top + side * s / 2, top + side * s / 2 + down * s, top - side * s / 2 + down * s])
+        u0, v0, u1, v1 = atlas.uv_rect("moss_fringe")
+        uv = [(u0, v1), (u1, v1), (u1, v0), (u0, v0)]
+        col = np.ones((4, 4))
+        col[:, 3] = 0.85
+        nrm = np.tile(normalize(out + np.array([0, 0, 0.5])), (4, 1))
+        md.add(corners, [(0, 1, 2, 3)], [uv], mat, col, normals=nrm)
 
 
 def _pebble(c, r, rng):
@@ -207,8 +267,8 @@ def build_fallen_trunk(variant):
     L = 10.0 if arch else 7.5
     xs = np.linspace(-L / 2, L / 2, 13)
     if arch:
-        zc = 0.95 + 1.15 * np.sin(np.pi * (xs + L / 2) / L) ** 1.1
-        rr = np.interp(xs, [-L / 2, -L / 2 + 1.5, L / 2 - 1.5, L / 2], [0.95, 0.82, 0.70, 0.62])
+        zc = 1.05 + 1.1 * np.sin(np.pi * (xs + L / 2) / L) ** 1.1
+        rr = np.interp(xs, [-L / 2, -L / 2 + 1.5, L / 2 - 1.5, L / 2], [1.05, 0.9, 0.78, 0.7])
     else:
         zc = 0.45 + 0.02 * xs
         rr = np.interp(xs, [-L / 2, L / 2], [0.5, 0.36])
@@ -218,7 +278,15 @@ def build_fallen_trunk(variant):
         prims.append(sdf.round_cone((xs[i], ys[i], zc[i]), (xs[i + 1], ys[i + 1], zc[i + 1]), rr[i], rr[i + 1], k=0.25))
     x0, z0 = xs[0], zc[0]
     # torn root plate (left)
-    prims.append(sdf.ellipsoid((x0 - 0.3, ys[0], z0 + 0.55), (0.6, 1.4 if arch else 0.9, 1.75 if arch else 1.0), k=0.35))
+    prims.append(sdf.ellipsoid((x0 - 0.35, ys[0], z0 + 0.6), (0.7, 1.8 if arch else 1.0, 2.1 if arch else 1.1), k=0.35))
+    for k in range(16 if arch else 8):                       # root tendrils radiating out of the torn plate
+        a = 2 * np.pi * k / (16 if arch else 8) + rng.normal(0, 0.2)
+        dirr = normalize(np.array([-0.35, math.cos(a), math.sin(a) * 1.1]))
+        b = np.array([x0 - 0.5, ys[0], z0 + 0.6]) + np.array([0, math.cos(a) * 1.4, math.sin(a) * 1.7]) * (1 if arch else 0.6)
+        mid = b + dirr * rng.uniform(0.5, 0.9) + np.array([0, 0, -0.25])
+        tip = mid + normalize(dirr + np.array([0, 0, -0.6])) * rng.uniform(0.5, 1.1)
+        prims.append(sdf.round_cone(b, mid, 0.14, 0.08, k=0.12))
+        prims.append(sdf.round_cone(mid, tip, 0.08, 0.04, k=0.06))
     for k in range(12 if arch else 7):
         a = rng.uniform(0, 2 * np.pi)
         d = normalize(np.array([-0.5 - 0.5 * rng.random(), math.cos(a) * 0.9, math.sin(a) * 0.9 + 0.2]))
@@ -226,12 +294,12 @@ def build_fallen_trunk(variant):
         prims.append(sdf.round_cone(b, b + d * rng.uniform(0.8, 2.2) * (1 if arch else 0.6), 0.16, 0.03, k=0.12))
     # splintered, jagged broken end (right): long spikes continuing the log direction
     x1, z1 = xs[-1], zc[-1]
-    for k in range(9):
+    for k in range(14):                                     # jagged splintered break (long sharp splinters)
         a = rng.uniform(0, 2 * np.pi)
-        off = np.array([0, math.cos(a), math.sin(a)]) * rr[-1] * rng.uniform(0.2, 0.8)
-        d = normalize(np.array([1.0, rng.normal(0, 0.25), rng.normal(0.15, 0.25)]))
-        b = np.array([x1 - 0.3, ys[-1], z1]) + off
-        prims.append(sdf.round_cone(b, b + d * rng.uniform(0.4, 1.4), rr[-1] * 0.35, 0.02, k=0.08))
+        off = np.array([0, math.cos(a), math.sin(a)]) * rr[-1] * rng.uniform(0.15, 0.85)
+        d = normalize(np.array([1.0, rng.normal(0, 0.3), rng.normal(0.2, 0.3)]))
+        b = np.array([x1 - 0.4, ys[-1], z1]) + off
+        prims.append(sdf.round_cone(b, b + d * rng.uniform(0.5, 1.8), rr[-1] * rng.uniform(0.18, 0.3), 0.015, k=0.05))
     for k in range(5):                                         # branch stubs
         x = rng.uniform(-L * 0.3, L * 0.4)
         zz, yy, rad = np.interp(x, xs, zc), np.interp(x, xs, ys), np.interp(x, xs, rr)
@@ -244,11 +312,13 @@ def build_fallen_trunk(variant):
     F = sdf.Field(lo, hi, 0.07)
     F.union_all(prims)
     P = _grid(F)
-    ridge = np.abs(np.sin(np.arctan2(P[..., 2] - 0.8, P[..., 1]) * 9 + P[..., 0] * 0.15))
-    F.d = (F.d + 0.05 * ridge ** 0.6 + 0.08 * (texproj.fbm(P, 0.7, 3, seed=variant) - 0.5)).astype(np.float32)
+    ridge = np.abs(np.sin(np.arctan2(P[..., 2] - 1.0, P[..., 1]) * 13 + P[..., 0] * 0.2
+                          + 1.2 * texproj.fbm(P * np.array([0.3, 1.0, 1.0]), 1.0, 2, seed=variant + 3)))
+    F.d = (F.d + 0.09 * ridge ** 0.55 + 0.10 * (texproj.fbm(P, 0.7, 3, seed=variant) - 0.5)
+           + 0.03 * (texproj.fbm(P, 4.0, 2, seed=variant + 9) - 0.5)).astype(np.float32)
     F.d = np.maximum(F.d, -P[..., 2] - 0.25).astype(np.float32)
     F.smooth(0.6)
-    bare = moss_dilate(F, 0.16, seed=variant + 20, up_lo=0.2, cover=0.75, freq=0.6)
+    bare = moss_dilate(F, 0.12, seed=variant + 20, up_lo=0.5, cover=0.42, freq=0.8)
     V, T = F.mesh()
     V, T = th.largest_components(V, T, min_frac=0.002)
     targets = {0: 2500, 1: 950, 2: 250}
@@ -279,6 +349,8 @@ def build_fallen_trunk(variant):
                 zz, yy, rad = np.interp(x, xs, zc), np.interp(x, xs, ys), np.interp(x, xs, rr)
                 anchors.append((np.array([x, yy - rad * 0.95, zz + rng.uniform(-0.25, 0.1)]), (0, -1), rng.uniform(0.2, 0.32)))
             th.fungi(md, rng, anchors, 1, "tile")
+        if lod < 2:
+            moss_fringe(md, v, t, moss, rng, [26, 8][lod], (0.35, 0.6), mat=1 if lod == 0 else 0)
         if variant == 3 and lod < 2:
             _stream_bed(md, rng, L, lod)
         res.lods[lod] = md
@@ -397,13 +469,13 @@ def build_reed_fern(kind, variant):
             md.merge(base_res.lods[lod])
         nf = [13, 9, 6][lod] if kind == "fern" else [10, 7, 5][lod]
         cx = 0.75 if kind == "mixed" else 0.0
-        L = (1.0 if variant == 1 else 0.75) * (1.45 if kind == "mixed" else 1.0)
+        L = (1.0 if variant == 1 else 0.8) * (1.75 if kind == "mixed" else 1.0)
         centre = np.array([cx, 0, 0.25])
         for j in range(nf):
             az = 2 * np.pi * j / nf + rng.normal(0, 0.2)
             tile = ["fern_frond_a", "fern_frond_b"][int(rng.random() < (0.35 if variant == 1 else 0.7))]
             _frond(md, np.array([cx, 0, 0.03]) + rng.normal(0, 0.05, 3) * np.array([1, 1, 0]), az,
-                   L * rng.uniform(0.8, 1.15), tile, rng, [4, 2, 1][lod], rng.uniform(1.0, 1.3),
+                   L * rng.uniform(0.8, 1.15), tile, rng, [4, 2, 1][lod], rng.uniform(1.15, 1.4),
                    L * rng.uniform(0.26, 0.34) * [1, 1.15, 1.3][lod], ph=rng.random(), centre=centre)
         res.lods[lod] = md
         res.info[f"LOD{lod}"] = dict(tris=md.tris())

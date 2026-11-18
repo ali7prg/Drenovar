@@ -49,11 +49,28 @@ def wood(seed=3):
     return np.clip(alb, 0, 1), h, rough
 
 
+MASONRY_SRC = (1363, 413, 1496, 487)     # art/06 ruin-wall close-up: grey limestone blocks, mortar joints, moss
+
+
 def stone(seed=5):
-    """Weathered limestone (shared with the forest rocks: long cracks + lichen, colour of the art/02 rock)."""
+    """Grey limestone masonry synthesised from the art/06 close-up inset: crop -> de-light -> 2x -> toroidal
+    quilting (~4 courses per 1.6 m texture tile) -> 1024 + sharpen; height from luminance high-pass."""
     import swatch
-    alb, nrm, rough, h = swatch.limestone2(S, seed + 61)
-    return np.clip(alb * 1.03, 0, 1), ftex.normalize01(h), rough[..., 1]
+    from frlib import refs
+    img = refs.load("06_environment_landmarks.png")
+    x0, y0, x1, y1 = MASONRY_SRC
+    src = swatch.delight(img[y0:y1, x0:x1], sigma=14.0, k=0.8)
+    src = cv2.resize(src.astype(np.float32), (src.shape[1] * 2, src.shape[0] * 2), interpolation=cv2.INTER_CUBIC)
+    q = swatch.quilt_tileable(src.astype(np.float64), n=4, patch=64, overlap=16, seed=seed + 3)
+    q = ftex.match_to_reference(q, img[y0:y1, x0:x1], amount=1.0, contrast=0.95)
+    alb = swatch.upscale_wrap(q, S, sharpen=0.9)
+    lum = alb @ np.array([0.3, 0.55, 0.15])
+    pad = 64
+    lp = np.pad(lum, pad, mode="wrap").astype(np.float32)
+    hp = lum - cv2.GaussianBlur(lp, (0, 0), 14)[pad:-pad, pad:-pad].astype(np.float64)
+    h = np.clip(0.5 + 1.8 * hp, 0, 1)
+    rough = np.clip(0.95 - 0.25 * lum, 0.6, 1.0)
+    return np.clip(alb, 0, 1), h, rough
 
 
 def roof(seed=7):
@@ -156,10 +173,31 @@ def misc(seed=9):
                      ("charcoal", [(0, (0.06, 0.05, 0.05)), (1, (0.30, 0.18, 0.10))]),
                      ("plaster", [(0, (0.55, 0.50, 0.42)), (1, (0.72, 0.68, 0.60))]),
                      ("cloth_dark", [(0, (0.22, 0.18, 0.14)), (1, (0.38, 0.30, 0.22))]),
-                     ("leaves", [(0, (0.45, 0.24, 0.10)), (1, (0.80, 0.56, 0.20))])):
+                    ):
         x, y, w, h = MISC[nm]
         n = noise(w, h, 24, seed + len(nm) * 3, 5)
         put(nm, ramp(n, cols), h=n, r=0.95)
+    # ivy: hanging strands of dark-green/olive heart-shaped leaves (alpha) for ruin and mine walls
+    x, y, w, h = MISC["leaves"]
+    rr = np.random.default_rng(seed + 77)
+    ivy_rgb = np.zeros((h, w, 3))
+    ivy_a = np.zeros((h, w))
+    yy, xx = np.mgrid[0:h, 0:w]
+    for s in range(7):
+        x0 = rr.uniform(20, w - 20)
+        ln = rr.uniform(0.5, 1.0) * h
+        ts = np.linspace(0, 1, 40)
+        xs = x0 + 10 * np.sin(ts * rr.uniform(3, 7) + rr.uniform(0, 6))
+        ys = ts * ln
+        for k in range(int(ln / 9)):
+            j = int(k * 9 / ln * 39)
+            cx, cy = xs[j] + rr.normal(0, 4), ys[j] + rr.normal(0, 2)
+            rad = rr.uniform(5, 9)
+            m = ((xx - cx) ** 2 + ((yy - cy) * 1.2) ** 2) < rad ** 2
+            col = np.array([0.20, 0.30, 0.10]) * rr.uniform(0.7, 1.3) + np.array([0.12, 0.08, 0]) * (rr.random() < 0.2)
+            ivy_rgb[m] = np.clip(col * (0.85 + 0.3 * (yy[m] < cy)[..., None].squeeze()[:, None] if False else col), 0, 1)
+            ivy_a[m] = 1.0
+    put("leaves", ivy_rgb, h=ivy_a * 0.5, a=ivy_a, r=0.85)
     # sign board: wood with carved arrow-less plain board (no text)
     x, y, w, h = MISC["sign"]
     wa, wh, wr = wood(seed + 11)

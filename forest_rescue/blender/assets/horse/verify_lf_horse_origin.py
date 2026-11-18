@@ -28,7 +28,7 @@ ASSET = "lf_horse_origin"
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
 ITER = int(ARGS[ARGS.index("--iter") + 1]) if "--iter" in ARGS else None
 SAMPLES = int(ARGS[ARGS.index("--samples") + 1]) if "--samples" in ARGS else 40
-ENGINE = ARGS[ARGS.index("--engine") + 1] if "--engine" in ARGS else "eevee"
+ENGINE = ARGS[ARGS.index("--engine") + 1] if "--engine" in ARGS else "workbench"
 ONLY = ARGS[ARGS.index("--only") + 1].split(",") if "--only" in ARGS else None
 ALL = not any(a in ARGS for a in ("--compare", "--poses", "--clips", "--lods"))
 
@@ -147,7 +147,12 @@ def do_clips(arm):
         sh.light = "STUDIO"
         sh.color_type = "TEXTURE"
         sh.show_shadows = True
+        sh.shadow_intensity = 0.35
         sh.show_cavity = False
+        sh.background_type = "VIEWPORT"
+        sh.background_color = (0.78, 0.75, 0.69)
+        scene.view_settings.view_transform = "Standard"
+        scene.view_settings.exposure = 0.9
         eng = "BLENDER_WORKBENCH"
     # ground plane
     me = bpy.data.meshes.new("qa_ground")

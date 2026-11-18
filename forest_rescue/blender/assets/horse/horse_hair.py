@@ -247,8 +247,8 @@ def mane_cards(guide, lod=0, seed=3):
     cs = CardSet()
     y_poll, y_with = -1.075, -0.32
     segs = {0: 6, 1: 4, 2: 3}[lod]
-    layers = {0: [(40, 0.008, 1.0, "mane_dense"), (30, 0.019, 1.08, "mane_wavy"),
-                  (16, 0.030, 1.14, "mane_wisp")],
+    layers = {0: [(40, 0.006, 1.0, "mane_dense"), (30, 0.013, 1.06, "mane_wavy"),
+                  (16, 0.020, 1.10, "mane_wisp")],
               1: [(22, 0.010, 1.0, "mane_dense"), (16, 0.022, 1.1, "mane_wavy")],
               2: [(11, 0.014, 1.05, "mane_dense")]}[lod]
     for s, sx in (("L", 1.0), ("R", -1.0)):
@@ -263,7 +263,7 @@ def mane_cards(guide, lod=0, seed=3):
                 width = rng.uniform(0.050, 0.072) * (1.25 if lod == 2 else 1.0)
                 d0 = V(sx * 0.85, rng.uniform(0.0, 0.15), 0.02)
                 path = _strand_on_surface(guide, root, d0, length, segs, off, rng, sx,
-                                          stiff=0.50, off_gain=0.012 + 0.006 * li)
+                                          stiff=0.50, off_gain=0.008 + 0.004 * li)
                 keep = path[:, 2] > bottom - 0.07
                 keep[:2] = True
                 path = path[:max(2, int(np.argmin(keep)) if not keep.all() else len(path))]
@@ -465,8 +465,8 @@ def feather_cards(J, lod=0, seed=9):
             bone = f"pastern_{fh}_{s}"
             for k in range(n):
                 f = k / max(n - 1, 1) - 0.5
-                root = fet + V(sx * (0.035 * f * 2), 0.055, 0.10 + 0.03 * rng.random())
-                tip = fet + V(sx * (0.05 * f * 2), 0.085 + 0.02 * rng.random(), -0.13)
+                root = fet + V(sx * (0.032 * f * 2), 0.06, 0.13 + 0.03 * rng.random())
+                tip = fet + V(sx * (0.045 * f * 2), 0.10 + 0.02 * rng.random(), -0.14)
                 path = np.array([root + (tip - root) * t + V(0, 0.02 * math.sin(math.pi * t), 0)
                                  for t in np.linspace(0, 1, 4)])
                 nrm = np.tile(V(1.0, 0.25 * f, 0.0), (4, 1))

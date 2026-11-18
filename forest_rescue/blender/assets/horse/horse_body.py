@@ -231,11 +231,11 @@ def body_parts(J=None):
         add(ell(kn + V(0, -0.005, 0.0), (0.068, 0.064, 0.072), bone=f"cannon_F_{s}",
                 name="knee"), 0.04)
         # cannon (deep front-back because of the tendons) + feathered fetlock
-        add(flat_cone(kn + V(0, 0.005, -0.03), fe + V(0, 0.01, 0.03), 0.063, 0.063, 0.95,
+        add(flat_cone(kn + V(0, 0.008, -0.03), fe + V(0, 0.014, 0.03), 0.068, 0.068, 0.80,
                       bone=f"cannon_F_{s}", name="cannon"), 0.04)
         add(flat_cone(kn + V(0, 0.052, -0.07), fe + V(0, 0.058, 0.04), 0.044, 0.05, 0.95,
                       bone=f"cannon_F_{s}", name="tendon"), 0.04)
-        add(ell(fe + V(0, 0.014, 0.0), (0.078, 0.086, 0.075), bone=f"pastern_F_{s}",
+        add(ell(fe + V(0, 0.018, 0.0), (0.071, 0.096, 0.078), bone=f"pastern_F_{s}",
                 name="fetlock"), 0.04)
         add(ell(fe + V(0, 0.07, -0.04), (0.06, 0.05, 0.05), bone=f"pastern_F_{s}",
                 name="feather"), 0.05)
@@ -259,11 +259,11 @@ def body_parts(J=None):
                        bone=f"tibia_{s}", name="hamstring"), 0.08)
         add(ell(hk + V(0, 0.01, 0.0), (0.066, 0.075, 0.08), bone=f"cannon_H_{s}", name="hock"), 0.04)
         add(sphere(hk + V(0, 0.07, 0.05), 0.042, bone=f"cannon_H_{s}", name="point_of_hock"), 0.04)
-        add(flat_cone(hk + V(0, 0.005, -0.04), fe + V(0, 0.01, 0.03), 0.066, 0.064, 0.95,
+        add(flat_cone(hk + V(0, 0.008, -0.04), fe + V(0, 0.014, 0.03), 0.071, 0.069, 0.80,
                       bone=f"cannon_H_{s}", name="cannon_h"), 0.04)
         add(flat_cone(hk + V(0, 0.055, -0.07), fe + V(0, 0.058, 0.04), 0.046, 0.05, 0.95,
                       bone=f"cannon_H_{s}", name="tendon_h"), 0.04)
-        add(ell(fe + V(0, 0.014, 0.0), (0.078, 0.086, 0.075), bone=f"pastern_H_{s}",
+        add(ell(fe + V(0, 0.018, 0.0), (0.071, 0.096, 0.078), bone=f"pastern_H_{s}",
                 name="fetlock_h"), 0.04)
         add(ell(fe + V(0, 0.07, -0.04), (0.06, 0.05, 0.05), bone=f"pastern_H_{s}",
                 name="feather_h"), 0.05)

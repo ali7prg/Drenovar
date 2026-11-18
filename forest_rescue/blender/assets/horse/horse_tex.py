@@ -248,3 +248,31 @@ def colour_balance(col, valid, target_mean=None):
     m = col[valid].mean(0)
     gain = np.asarray(target_mean) / np.maximum(m, 1e-4)
     return np.clip(col * gain, 0, 1)
+
+
+def sheet_palette(views):
+    """Mane / tail / hoof colours sampled from the turnaround sheet (side views).
+
+    Returns {name: (dark p20, median, highlight p90)} as sRGB float triples.
+    """
+    pix = {"mane": [], "tail": [], "hoof": []}
+    for name in ("left", "right"):
+        v = views[name]
+        rr, uu = _px_world(v)
+        RR, UU = np.meshgrid(rr, uu)
+        Y = RR if name == "left" else -RR
+        img = v.image
+        luma = img @ np.array([0.299, 0.587, 0.114])
+        m = ndi.binary_erosion(v.mask, iterations=2)
+        mane_line = np.interp(Y, [-1.10, -0.95, -0.80, -0.62, -0.45], [1.86, 1.67, 1.555, 1.495, 1.50])
+        mane = m & (UU > mane_line + 0.03) & (Y > -1.05) & (Y < -0.45) & (luma < 0.42)
+        tail = m & (Y > 0.86) & (UU > 0.30) & (UU < 1.25) & (luma < 0.42)
+        hoof = m & (UU > 0.008) & (UU < 0.055)
+        pix["mane"].append(img[mane])
+        pix["tail"].append(img[tail])
+        pix["hoof"].append(img[hoof])
+    out = {}
+    for k, lst in pix.items():
+        a = np.concatenate(lst)
+        out[k] = (np.percentile(a, 20, 0), np.median(a, 0), np.percentile(a, 90, 0), len(a))
+    return out

@@ -18,18 +18,19 @@ from frlib import core, paths  # noqa: E402
 import fqa  # noqa: E402
 import refsetup  # noqa: E402
 import groundcover as gc  # noqa: E402
+import groundcover2 as gc2  # noqa: E402
 from build_trees import WIND_DOC  # noqa: E402
 
 ASSETS = {
-    "fallen_trunk": dict(variants={"v1": lambda: gc.build_fallen_trunk(1), "v2": lambda: gc.build_fallen_trunk(2)},
-                         ref="fallen_trunk", ref_variant="v1"),
-    "moss_rock": dict(variants={f"v{i}": (lambda i=i: gc.build_moss_rock(i)) for i in (1, 2, 3)}, ref="moss_rock",
+    "fallen_trunk": dict(variants={"v1": lambda: gc2.build_fallen_trunk(1), "v2": lambda: gc2.build_fallen_trunk(2),
+                                   "v3_stream": lambda: gc2.build_fallen_trunk(3)}, ref="fallen_trunk", ref_variant="v1"),
+    "moss_rock": dict(variants={f"v{i}": (lambda i=i: gc2.build_moss_rock(i)) for i in (1, 2, 3)}, ref="moss_rock",
                       ref_variant="v1"),
-    "bramble": dict(variants={f"v{i}": (lambda i=i: gc.build_bramble(i)) for i in (1, 2, 3)}, ref="bramble",
+    "bramble": dict(variants={f"v{i}": (lambda i=i: gc2.build_bramble(i)) for i in (1, 2, 3)}, ref="bramble",
                     ref_variant="v1", fit_height=True),
     "reed_fern": dict(variants={"reed_v1": lambda: gc.build_reed_fern("reed", 1), "reed_v2": lambda: gc.build_reed_fern("reed", 2),
-                                "fern_v1": lambda: gc.build_reed_fern("fern", 1), "fern_v2": lambda: gc.build_reed_fern("fern", 2),
-                                "mixed_v1": lambda: gc.build_reed_fern("mixed", 1)}, ref="reed_fern", ref_variant="mixed_v1",
+                                "fern_v1": lambda: gc2.build_reed_fern("fern", 1), "fern_v2": lambda: gc2.build_reed_fern("fern", 2),
+                                "mixed_v1": lambda: gc2.build_reed_fern("mixed", 1)}, ref="reed_fern", ref_variant="mixed_v1",
                       fit_height=True),
     "grass_tuft": dict(variants={f"v{i}": (lambda i=i: gc.build_grass_tuft(i)) for i in (1, 2, 3)}),
     "fallen_branches": dict(variants={f"v{i}": (lambda i=i: gc.build_fallen_branches(i)) for i in (1, 2)}),

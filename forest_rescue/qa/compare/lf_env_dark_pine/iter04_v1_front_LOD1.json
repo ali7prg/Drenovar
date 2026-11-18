@@ -1,0 +1,8 @@
+{
+  "view": "dark_pine",
+  "iou": 0.6686,
+  "mean_abs_colour_error": 0.1698,
+  "ref_pixels": 46412,
+  "render_pixels": 39675,
+  "iou_closed_r4": 0.786
+}

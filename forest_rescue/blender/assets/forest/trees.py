@@ -461,7 +461,7 @@ def clump_cards(C, rad, nodes, n_target, lod, spec, rng, sway, ph_chain, node_ch
         node = nodes[k]
         for d in dirs:
             if accent[k]:
-                cat = "red" if d[2] > -0.2 else "dark"
+                cat = "red" if d[2] > 0.2 else "ochre" if d[2] > -0.3 else "dark"
             else:
                 s = 0.6 * d[2] + 0.5 * (hk - 0.5) + 0.25 * float(np.dot(d, SUN)) + rng.normal(0, 0.12)
                 cat = "light" if s > 0.30 else "gold" if s > -0.12 else "ochre" if s > -0.45 else "dark"
@@ -522,7 +522,7 @@ def oak_spec(seed, budget=(2950, 1150, 290), r_base=0.85, **kw):
     s = dict(bark="oak", r_base=r_base, alpha=1.0, gamma=2.25, cull=(0.045, 0.16, 0.35), max_order=[9, 2, 1],
              flare=(1.3, 1.1, 5, 1.0), roots=(6, 2.6, 0.55), card_size=(1.1, 1.5), moods=OAK_MOODS_GOLD,
              dense_frac=0.55, dense_scale=1.1, bark_frac=(0.42, 0.3, 0.16),
-             n_clumps=46, clump_r=(1.35, 2.1), clump_kind="oak", accent_frac=0.08, clump_tip=1.8,
+             n_clumps=46, clump_r=(1.35, 2.1), clump_kind="oak", accent_frac=0.05, clump_tip=1.8, clump_depth=(0.8, 2.1),
              dense_map=OAK_DENSE, budget=budget, leaf_tip_dist=1.6, leaf_r_max=0.09, site_spacing=0.42,
              side_frac=0.45, sph=0.62, up_bias=0.22, seed=seed, bark_tile=(1.5, 1.5), leaf_z_min=2.0)
     s.update(kw)

@@ -22,7 +22,7 @@ from frlib import sdf, texproj  # noqa: E402
 PROFILE_V1 = [(-0.4, 0.6, 5.0), (0.0, 0.6, 4.9), (0.8, 0.65, 4.6), (1.4, 0.45, 4.0), (2.0, 0.45, 3.6),
               (2.6, 0.45, 3.4), (3.2, 0.4, 3.2), (3.8, 0.4, 3.05), (4.4, 0.7, 2.85), (5.0, 0.85, 2.7),
               (5.6, 0.95, 2.5), (6.2, 1.0, 2.25), (6.8, 1.0, 1.9), (7.2, 1.0, 1.4)]
-ARCH = dict(x=0.9, w=1.7, h=3.1)            # clear walk-through opening (doorway), along Y
+ARCH = dict(x=0.9, w=1.9, h=3.7)            # clear walk-through opening (doorway), along Y
 CAVITY = dict(c=(0.85, 0.0, 2.3), r=(1.55, 1.25, 2.6))
 
 
@@ -79,6 +79,13 @@ def trunk_sdf_mesh(profile, depth_k=0.72, arch=ARCH, cavity=CAVITY, voxel=0.1, s
                 p[0] = -p[0]
         for i in range(len(pts) - 1):
             prims.append(sdf.round_cone(pts[i], pts[i + 1], rads[i], rads[i + 1], k=0.45 if i == 0 else 0.25))
+    for k in range(9):                       # burls / gnarls on the trunk surface
+        z = rng.uniform(1.0, 6.2)
+        cxz = np.interp(z, prof[:, 0], prof[:, 1])
+        hwz = np.interp(z, prof[:, 0], prof[:, 2])
+        a = rng.uniform(0, 2 * np.pi)
+        cpt = np.array([cxz + math.cos(a) * hwz * 0.92, math.sin(a) * hwz * depth_k * 0.92, z])
+        prims.append(sdf.sphere(cpt, rng.uniform(0.3, 0.6), k=0.35))
     for p in prims:
         F.apply(p)
     # arch tunnel (2D arch in XZ extruded along Y) and inner cavity
@@ -111,9 +118,11 @@ def trunk_sdf_mesh(profile, depth_k=0.72, arch=ARCH, cavity=CAVITY, voxel=0.1, s
     F.d = np.maximum(F.d, (lo[2] + 0.25 + 0.15) - np.stack(np.meshgrid(*F.axes, indexing="ij"), -1)[..., 2]).astype(np.float32) \
         if False else F.d
     F.smooth(0.7)
+    import groundcover2 as gc2
+    bare = gc2.moss_dilate(F, 0.07, seed=seed + 31, up_lo=0.15, cover=0.45, freq=0.55)
     V, Fc = F.mesh()
     V, Fc = largest_components(V, Fc)
-    return V, Fc, dict(arch=arch, cavity=cavity, prof=prof)
+    return V, Fc, dict(arch=arch, cavity=cavity, prof=prof, bare=bare, field=F)
 
 
 def largest_components(V, Fc, min_frac=0.02):
@@ -145,7 +154,7 @@ def decimate_bpy(V, Fc, target, name="tmp_trunk"):
     return v, t, n
 
 
-def trunk_meshdata(md, V, T, N, mode, tile, info, mat=0, ao_c=None):
+def trunk_meshdata(md, V, T, N, mode, tile, info, mat=0, ao_c=None, moss_mat=None):
     """Per-face cylindrical (sides) / planar (tops) tiling UVs; COLOR_0 R=0 (static), A=cavity AO."""
     prof = info["prof"]
     cxz = lambda z: np.interp(np.clip(z, prof[0, 0], prof[-1, 0]), prof[:, 0], prof[:, 1])
@@ -168,7 +177,19 @@ def trunk_meshdata(md, V, T, N, mode, tile, info, mat=0, ao_c=None):
     col = np.zeros((len(V), 4))
     col[:, 3] = ao
     faces, uvs = [], []
-    for f, n in zip(T, fn):
+    mfaces, muvs = [], []
+    moss = np.zeros(len(T), bool)
+    if moss_mat is not None and info.get("bare") is not None:
+        import groundcover2 as gc2
+        moss = gc2.split_moss(V, T, info["bare"], info["field"])
+    mu0, mv0, mu1, mv1 = atlas.uv_rect("moss_clump")
+    mcu, mcv, mhw = (mu0 + mu1) / 2, (mv0 + mv1) / 2, (mu1 - mu0) * 0.2
+    for f, n, ism in zip(T, fn, moss):
+        if ism:
+            mfaces.append(tuple(int(i) for i in f))
+            muvs.append([(mcu + ((V[i, 0] * 0.45 + V[i, 2] * 0.2) % 1.0 - 0.5) * mhw,
+                          mcv + ((V[i, 1] * 0.45 + V[i, 2] * 0.2) % 1.0 - 0.5) * mhw) for i in f])
+            continue
         if abs(n[2]) > 0.75:
             uv = [(V[i, 0] / tile[0], V[i, 1] / tile[1]) for i in f]
         else:
@@ -189,6 +210,8 @@ def trunk_meshdata(md, V, T, N, mode, tile, info, mat=0, ao_c=None):
         faces.append(tuple(int(i) for i in f))
         uvs.append(uv)
     md.add(V, faces, uvs, mat, col, normals=None)
+    if mfaces:
+        md.add(V, mfaces, muvs, moss_mat, col, normals=None)
 
 
 def fungi(md, rng, anchors, mat, mode):
@@ -263,7 +286,8 @@ def build_hollow_oak(variant, view=None, budget=(6800, 2700, 300)):
                 dense_frac=0.35, dense_scale=1.2, puff_max_gap=1.3,
                 leaf_tip_dist=1.2, leaf_r_max=0.08, site_spacing=0.5, side_frac=0.5, sph=0.6, up_bias=0.2,
                 seed=seed, bark_tile=(1.6, 1.6), leaf_z_min=5.0, puffs=puffs, puff_r=(1.0, 1.6), puff_frac=0.75,
-                skip_order0=True, bark_frac=(0.45, 0.35, 0.2))
+                skip_order0=True, bark_frac=(0.45, 0.35, 0.2), n_clumps=16 if variant != 3 else 9,
+                clump_r=(0.8, 1.3), clump_kind="hollow", accent_frac=0.2, clump_depth=(0.3, 1.4), clump_flat=0.75)
     trunk_targets = {0: 3900, 1: 1350, 2: 170}
     if variant == 3:
         trunk_targets = {0: 3300, 1: 1150, 2: 170}
@@ -275,7 +299,8 @@ def build_hollow_oak(variant, view=None, budget=(6800, 2700, 300)):
     for lod in range(3):
         v, t, n = decimate_bpy(V, T, trunk_targets[lod])
         md = MeshData()
-        trunk_meshdata(md, v, t, n, "tile" if lod == 0 else "atlas", (2.4, 2.4), tinfo, mat=0)
+        trunk_meshdata(md, v, t, n, "tile" if lod == 0 else "atlas", (2.4, 2.4), tinfo, mat=0,
+                       moss_mat=1 if lod == 0 else 0)
         if lod == 0:
             anchors = []
             for j in range(7):

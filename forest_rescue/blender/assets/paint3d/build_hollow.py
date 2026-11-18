@@ -41,9 +41,13 @@ THICK_R = 6              # px: wood thicker than this radius is inflated (trunk 
 SWATCH = (882, 798, 1222, 984)
 K = 0.3
 
-VARIANTS = {1: dict(seed=5, copies=[(110, 0.9), (-115, 0.92)]),
-            2: dict(seed=6, mirror=True, copies=[(95, 0.92), (-140, 0.9)]),
-            3: dict(seed=8, copies=[(130, 0.9), (-100, 0.95)], scale=(0.95, 0.96))}
+# copies: thin limbs (rotated) ; upper_copies: (angle, scale, side) of the inflated upper limbs; v1 sends the left
+# limbs -90 deg and the right limbs +90 deg so both land BEHIND the trunk (art/02 front stays exact)
+VARIANTS = {1: dict(seed=5, copies=[(92, 0.9), (-88, 0.92)], upper_copies=[(-90, 0.85, "left"), (90, 0.85, "right")]),
+            2: dict(seed=6, mirror=True, copies=[(95, 0.92), (-140, 0.9)],
+                    upper_copies=[(-90, 0.85, "left"), (90, 0.85, "right"), (180, 0.7, None)]),
+            3: dict(seed=8, copies=[(130, 0.9), (-100, 0.95)], scale=(0.95, 0.96),
+                    upper_copies=[(-80, 0.9, None), (100, 0.85, None)])}
 
 
 def massive_mesh(ref, wood_c, thick, tunnel):
@@ -148,109 +152,99 @@ def main():
         decimate(ou, 700)
     print(f"[{ASSET}] massive tris {core.tri_count(om)} upper {core.tri_count(ou) if ou else 0} ({time.time() - t0:.1f}s)",
           flush=True)
-    # UVs: massive + upper share the left 76% of the bark texture, limb strips the right 22%
-    for o in [om] + ([ou] if ou else []):
-        o.data.uv_layers.new(name="UVMap")
-    joined_src = [om] + ([ou] if ou else [])
-    core.select_only(joined_src, om)
-    for o in joined_src:
-        o.select_set(True)
-    bpy.context.view_layer.objects.active = om
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.uv.smart_project(angle_limit=math.radians(55), island_margin=0.006, scale_to_bounds=True)
-    bpy.ops.object.mode_set(mode="OBJECT")
-    for o in joined_src:
-        uv = o.data.uv_layers.active.data
-        arr = np.empty(len(uv) * 2, np.float32)
-        uv.foreach_get("uv", arr)
-        arr = arr.reshape(-1, 2)
-        arr[:, 0] *= 0.76
-        uv.foreach_set("uv", arr.ravel())
-    # limbs (thin skeleton tubes) via the tree builder; bark layout restricted to u in [0.78, 1]
+    # ------------------------------------------------------------ per-face planar UVs + bark texture
+    # texture layout (1024^2): front planar (painting) u 0..0.62 v 0.28..1 | side planar (swatch) u 0.62..1 v 0.28..1
+    #                          | limb strips v 0..0.27
+    FR = (0.0, 0.28, 0.62, 1.0)
+    SR = (0.62, 0.28, 1.0, 1.0)
+    LR = (0.0, 0.0, 1.0, 0.27)
+    tun_d = ndi.binary_dilation(tunnel, iterations=4)
+    side_ext = {}
+
+    def planar_uv(V, T, N):
+        Vc = V[T]                                   # (M,3,3) un-indexed
+        Nc = N[T]
+        fn = geom.nrm(np.cross(Vc[:, 1] - Vc[:, 0], Vc[:, 2] - Vc[:, 0]))
+        cen = Vc.mean(1)
+        u_c, v_c, _ = ref.view.project(cen)
+        uci = np.clip(np.round(u_c).astype(int), 0, W - 1)
+        vci = np.clip(np.round(v_c).astype(int), 0, H + 100 - 1)
+        in_tun = tun_d[np.clip(vci, 0, H - 1), uci] & (vci < H)
+        side = (np.abs(fn @ ref.view.d) < 0.42) | in_tun
+        uu, vv, _ = ref.view.project(Vc.reshape(-1, 3))
+        uv_f = np.stack([FR[0] + (FR[2] - FR[0]) * uu / W, FR[3] - (FR[3] - FR[1]) * vv / H], -1).reshape(-1, 3, 2)
+        if not side_ext:
+            side_ext["y"] = (V[:, 1].min() - 0.2, V[:, 1].max() + 0.2)
+            side_ext["z"] = (min(-0.5, V[:, 2].min()), V[:, 2].max() + 0.2)
+        y0_, y1_ = side_ext["y"]
+        z0_, z1_ = side_ext["z"]
+        P_ = Vc.reshape(-1, 3)
+        uv_s = np.stack([SR[0] + (SR[2] - SR[0]) * np.clip((P_[:, 1] - y0_) / (y1_ - y0_), 0, 1),
+                         SR[1] + (SR[3] - SR[1]) * np.clip((P_[:, 2] - z0_) / (z1_ - z0_), 0, 1)], -1).reshape(-1, 3, 2)
+        UVc = np.where(side[:, None, None], uv_s, uv_f)
+        return Vc.reshape(-1, 3), np.arange(len(T) * 3).reshape(-1, 3), UVc.reshape(-1, 2), Nc.reshape(-1, 3), in_tun
+
+    # front region texture = the painting itself (wood pixels), filled into non-wood pixels
+    img = ref.img.astype(np.float32)
+    wm = (wood_c & ~tunnel) | ref.trunk_band if hasattr(ref, "trunk_band") else (wood_c & ~tunnel)
+    wm = wood_c & ~tunnel
+    front_full = np.zeros((H + 100, W, 3), np.float32)
+    known_full = np.zeros((H + 100, W), bool)
+    front_full[:H] = img
+    known_full[:H] = wm
+    known_full[ref.clip:H] = False
+    # below the clip row (ground band): continue the lowest painted trunk rows downward
+    front_full[ref.clip:] = img[ref.clip - 6:ref.clip - 1].mean(0)[None]
+    known_full[ref.clip:] = (wood_c[ref.clip - 3])[None, :]
+    ff = texproj.fill(front_full.astype(np.float64), known_full).astype(np.float32)
+    TEX = 1024
+    tex = np.zeros((TEX, TEX, 3), np.float32)
+    fx0, fy0 = int(FR[0] * TEX), int((1 - FR[3]) * TEX)
+    fx1, fy1 = int(FR[2] * TEX), int((1 - FR[1]) * TEX)
+    tex[fy0:fy1, fx0:fx1] = cv2.resize(ff[:H], (fx1 - fx0, fy1 - fy0), interpolation=cv2.INTER_LANCZOS4)
+    # side region: art/02 hollow-oak bark swatch, mirrored tiling, colour-matched to the painted trunk
+    sw = tree.swatch(SWATCH)
+    sw = cv2.resize(sw, (int(sw.shape[1] * 0.6), int(sw.shape[0] * 0.6)), interpolation=cv2.INTER_AREA)
+    tile2 = np.concatenate([np.concatenate([sw, sw[:, ::-1]], 1), np.concatenate([sw[::-1], sw[::-1, ::-1]], 1)], 0)
+    sx0, sy0 = int(SR[0] * TEX), int((1 - SR[3]) * TEX)
+    sx1, sy1 = int(SR[2] * TEX), int((1 - SR[1]) * TEX)
+    tiled = np.tile(tile2, ((sy1 - sy0) // tile2.shape[0] + 1, (sx1 - sx0) // tile2.shape[1] + 1, 1))[:sy1 - sy0, :sx1 - sx0]
+    kp = img[wm]
+    tiled = np.clip((tiled - tiled.reshape(-1, 3).mean(0)) * np.clip(kp.std(0) / (tiled.reshape(-1, 3).std(0) + 1e-4),
+                                                                      0.6, 1.4) + kp.mean(0) * 0.92, 0, 1)
+    tex[sy0:sy1, sx0:sx1] = tiled
+    # limbs: strips sampled from the painting along each painted limb axis (front half exact, back mirrored)
     B = tree.TreeBuilder(ref, P, CFG)
     ref.trunk_rows = np.array([ref.clip - 1])
     ref.axis_x = np.array([ref.view.ax])
     ref.trunk_r = np.array([1.0])
     paths_ = [p for p in B.wood_paths() if p["kind"] == "limb"]
-    for p in paths_:
-        # limbs start on the inflated surface: keep them in the painted plane (y from wood_paths)
-        pass
-    uvl, dens = BT.bark_layout(paths_, ref.ppm, size=1024)
-    bark_uv = {k: (0.78 + 0.22 * u0, v0, 0.78 + 0.22 * u1, v1) for k, (u0, v0, u1, v1) in uvl.items()}
-    # ------------------------------------------------------------ bark texture: project the painting
-    Vt, Tt, UVt, Nt = [], [], [], []
-    ids = []
-    base = 0
-    for i, o in enumerate(joined_src):
-        V, T, UV, N = obj_arrays(o)
-        Vt.append(V)
-        Tt.append(T + base)
-        UVt.append(UV)
-        Nt.append(N)
-        ids += [i] * len(T)
-        base += len(V)
-    limb_mesh = geom.Mesh()
-    for p in paths_:
-        q = BT.simplify_path(p, max(0.1, 1.5 * float(np.max(p["r"]))))
-        if len(q["P"]) < 3:
-            q = BT.simplify_path(p, max(0.02, float(np.linalg.norm(p["P"][-1] - p["P"][0])) / 3))
-        if len(q["P"]) < 3:
+    uvl, dens = BT.bark_layout(paths_, ref.ppm, size=TEX)
+    bark_uv = {k: (LR[0] + (LR[2] - LR[0]) * u0, LR[1] + (LR[3] - LR[1]) * v0, LR[0] + (LR[2] - LR[0]) * u1,
+                   LR[1] + (LR[3] - LR[1]) * v1) for k, (u0, v0, u1, v1) in uvl.items()}
+    for l, p in zip([ref.limbs[p["id"] - 1] for p in paths_], paths_):
+        u0, v0, u1, v1 = bark_uv[p["id"]]
+        x0, x1 = int(round(u0 * TEX)), int(round(u1 * TEX))
+        y0, y1 = int(round((1 - v1) * TEX)), int(round((1 - v0) * TEX))
+        if x1 - x0 < 2 or y1 - y0 < 2:
             continue
-        V, T, UV, C, N = geom.tube(q["P"], q["r"], 8, bark_uv[p["id"]], np.ones(4), ref_side=ref.view.d)
-        limb_mesh.add(V, T, UV, C, N, 0)
-        ids += [100 + p["id"]] * len(T)
-    Vl, Tl, UVl, Cl, Nl, Ml = limb_mesh.arrays()
-    V = np.concatenate(Vt + [Vl])
-    T = np.concatenate(Tt + [Tl + base])
-    UV = np.concatenate(UVt + [UVl[Tl]])
-    N = np.concatenate(Nt + [Nl])
-    ids = np.array(ids)
-    Tx = texproj.rasterize_uv(V, T, UV, 1024, N)
-    ib, zb = tree.tri_id_buffer(V, T, np.arange(len(T)), ref.view)
-    yy, xx = np.nonzero(Tx.valid)
-    Pp = Tx.pos[yy, xx]
-    u, v, dep = ref.view.project(Pp)
-    ui = np.clip(np.round(u).astype(int), 0, W - 1)
-    vi = np.clip(np.round(v).astype(int), 0, H - 1)
-    tri = Tx.tri[yy, xx]
-    woodpx = (wood_c & ~tunnel)[vi, ui]
-    # front-visible texels: own triangle is the nearest at that pixel (3x3 tolerance)
-    vis = np.zeros(len(ui), bool)
-    for dy in (-1, 0, 1):
-        for dx in (-1, 0, 1):
-            vis |= ib[np.clip(vi + dy, 0, H - 1), np.clip(ui + dx, 0, W - 1)] == tri
-    facing = np.abs(Tx.nrm[yy, xx] @ ref.view.d)
-    # massive back side = mirrored front (same pixel), limbs: front only
-    is_massive = ids[tri] < 100
-    ok = woodpx & (facing > 0.3) & (vis | (is_massive & (Tx.nrm[yy, xx] @ ref.view.d > 0.3)))
-    col = np.zeros((1024, 1024, 3), np.float32)
-    known = np.zeros((1024, 1024), bool)
-    samp = texproj._bilinear(ref.img.astype(np.float32), u, v)[:, :3]
-    col[yy[ok], xx[ok]] = samp[ok]
-    known[yy[ok], xx[ok]] = True
-    filled = texproj.fill(col.astype(np.float64), known).astype(np.float32)
-    sw = tree.swatch(SWATCH)
-    sw = cv2.resize(sw, (int(sw.shape[1] * 0.55), int(sw.shape[0] * 0.55)), interpolation=cv2.INTER_AREA)
-    tile2 = np.concatenate([np.concatenate([sw, sw[:, ::-1]], 1), np.concatenate([sw[::-1], sw[::-1, ::-1]], 1)], 0)
-    tiled = np.tile(tile2, (1024 // tile2.shape[0] + 1, 1024 // tile2.shape[1] + 1, 1))[:1024, :1024]
-    kp = col[known]
-    tiled = np.clip((tiled - tiled.reshape(-1, 3).mean(0)) * np.clip(kp.std(0) / (tiled.reshape(-1, 3).std(0) + 1e-4), 0.6, 1.4)
-                    + kp.mean(0), 0, 1)
-    unknown = Tx.valid & ~known
-    soft = cv2.GaussianBlur(unknown.astype(np.float32), (0, 0), 3.0)
-    soft = np.where(unknown, np.maximum(soft, 0.65), soft * 0.5)
-    out = filled * (1 - soft[..., None]) + tiled * soft[..., None]
-    # tunnel interior: darken texels inside / near the tunnel volume (seen through the arch)
-    tun_px = ndi.binary_dilation(tunnel, iterations=3)[vi, ui]
-    deep = np.abs(dep * ref.ppm) < 0.6 * np.abs(geom.pix_to_world(ref.view, np.array([0.0]), np.array([0.0]), np.array([0.0]))[0][1] * 0 + 40)
-    dark = np.zeros((1024, 1024), np.float32)
-    dark[yy[tun_px & ~ok], xx[tun_px & ~ok]] = 1.0
-    dark = cv2.GaussianBlur(dark, (0, 0), 2.0)
-    out = out * (1 - 0.55 * dark[..., None])
-    bl = cv2.GaussianBlur(out, (0, 0), 1.0)
-    out = np.clip(out + 0.3 * (out - bl), 0, 1)
-    out = texproj.dilate_margin(out.astype(np.float64), Tx.valid, px=6).astype(np.float32)
+        P2 = l["P"].astype(float)
+        seglen = np.r_[0, np.cumsum(np.linalg.norm(np.diff(P2, axis=0), axis=1))]
+        s_tex = np.linspace(0, seglen[-1], y1 - y0)[::-1]     # v0 (bottom row) = limb start
+        px = np.interp(s_tex, seglen, P2[:, 0])
+        py = np.interp(s_tex, seglen, P2[:, 1])
+        rr = np.interp(s_tex, seglen, l["r"])
+        tg = np.stack([np.gradient(px), np.gradient(py)], -1)
+        tg /= np.maximum(np.linalg.norm(tg, axis=1, keepdims=True), 1e-6)
+        nx, ny = -tg[:, 1], tg[:, 0]
+        th = np.linspace(0, 2 * np.pi, x1 - x0)
+        off = np.sin(th - np.pi)                              # ring angle -> image offset (front at u=0.5)
+        sx = px[:, None] + nx[:, None] * rr[:, None] * off[None, :]
+        sy = py[:, None] + ny[:, None] * rr[:, None] * off[None, :]
+        smp = texproj._bilinear(img, sx.ravel(), sy.ravel())[:, :3].reshape(y1 - y0, x1 - x0, 3)
+        tex[y0:y1, x0:x1] = smp
+    bl = cv2.GaussianBlur(tex, (0, 0), 1.0)
+    out = np.clip(tex + 0.25 * (tex - bl), 0, 1)
     cpath = os.path.join(RT, "lf_bark_hollow_c.jpg")
     cv2.imwrite(cpath, cv2.cvtColor((out * 255).astype(np.uint8), cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, 90])
     nmap, rmap = tree.bark_maps(out)
@@ -258,8 +252,18 @@ def main():
     rpath = os.path.join(RT, "lf_bark_hollow_r.png")
     seg.save(npath, nmap)
     seg.save(rpath, np.stack([rmap] * 3, -1))
-    seg.save(qa("bark_known.png"), np.where(known[..., None], out, out * 0.3 + 0.2))
-    print(f"[{ASSET}] bark projected {known.sum() / max(1, Tx.valid.sum()):.2f} ({time.time() - t0:.1f}s)", flush=True)
+    seg.save(qa("bark_tex.png"), out)
+    print(f"[{ASSET}] bark texture assembled ({time.time() - t0:.1f}s)", flush=True)
+    # massive + upper meshes with per-face UVs (as Mesh data)
+    massive_md = {}
+    for key, o in (("massive", om), ("upper", ou)):
+        if o is None:
+            continue
+        V, T, _, N = obj_arrays(o)
+        Vu_, Tu_, UVu_, Nu_, in_tun = planar_uv(V, T, N)
+        ao = np.ones(len(Vu_))
+        ao[np.repeat(in_tun, 3)] = 0.55
+        massive_md[key] = (Vu_, Tu_, UVu_, Nu_, ao)
     # ------------------------------------------------------------ assemble variants / LODs
     fol = pblend.export_material("lf_foliage", atlas_path, alpha_clip=0.5, double_sided=True)
     fol_vol = pblend.export_material("lf_foliage_vol", atlas_path, alpha_clip=0.5, double_sided=True)
@@ -272,6 +276,25 @@ def main():
     dm = np.minimum(dm, np.where(np.isfinite(zbm), zbm * ref.ppm, np.inf))
     trunk_axis = geom.world_at_y(ref.view, np.array([ref.view.ax]), np.array([float(LATHE_TOP)]), np.array([0.0]))[0]
     trunk_axis[2] = 0.0
+    lod_md = {}
+    for lod_, frac in ((0, 1.0), (1, 0.42), (2, 0.1)):
+        lod_md[lod_] = {}
+        for key, o in (("massive", om), ("upper", ou)):
+            if o is None:
+                continue
+            if frac >= 1.0:
+                lod_md[lod_][key] = massive_md[key]
+                continue
+            c = o.copy()
+            c.data = o.data.copy()
+            core.link(c)
+            decimate(c, max(60, int(core.tri_count(o) * frac)))
+            V, T, _, N = obj_arrays(c)
+            Vu_, Tu_, UVu_, Nu_, in_tun = planar_uv(V, T, N)
+            ao = np.ones(len(Vu_))
+            ao[np.repeat(in_tun, 3)] = 0.55
+            lod_md[lod_][key] = (Vu_, Tu_, UVu_, Nu_, ao)
+            bpy.data.objects.remove(c, do_unlink=True)
     built = {}
     info = {}
     LODS = {0: dict(limb_budget=700, limb_sides=5, limb_min_r_px=1.3, front_frac=1.0, front_scale=1.0, n_masses=22,
@@ -285,33 +308,32 @@ def main():
         info[vi_] = {}
         for lod, L in LODS.items():
             rng = np.random.default_rng(vs["seed"] * 31 + lod)
-            # wood: massive (decimated per LOD) + upper limb copies + skeleton limbs
-            parts = []
-            mo = om.copy()
-            mo.data = om.data.copy()
-            core.link(mo)
-            decimate(mo, int(core.tri_count(om) * L["massive"]))
-            parts.append(mo)
-            if ou is not None and L["upper_copies"]:
-                for ang, sc in vs["copies"]:
-                    c = ou.copy()
-                    c.data = ou.data.copy()
-                    core.link(c)
-                    if lod > 0:
-                        decimate(c, int(core.tri_count(ou) * L["massive"]))
-                    Rm = geom.rot_z(math.radians(ang))
-                    Vc = np.array([list(vv.co) for vv in c.data.vertices])
-                    Vc = ((Vc - trunk_axis) * sc) @ Rm.T + trunk_axis
-                    c.data.vertices.foreach_set("co", Vc.ravel())
-                    c.data.update()
-                    parts.append(c)
+            # wood: massive (per-LOD decimated copy) + upper limb copies (behind for v1) + skeleton limbs
             wood_md = geom.Mesh()
-            for pobj in parts:
-                Vp, Tp, UVp, Np = obj_arrays(pobj)
-                Cw = tree.wind_rgba(Vp, 16.0, 7.0, "trunk", 0.0, 1.0)
-                wood_md.add(Vp, Tp, UVp[np.argsort(np.concatenate([Tp.ravel()]))[:0]] if False else
-                            _vertex_uv(Vp, Tp, UVp), Cw, Np, tree.MAT_BARK)
-                bpy.data.objects.remove(pobj, do_unlink=True)
+            for key in ("massive", "upper"):
+                if key not in lod_md[lod]:
+                    continue
+                Vq, Tq, UVq, Nq, aoq = lod_md[lod][key]
+                reps = [(None, 1.0, None)] if key == "massive" else \
+                    ([(ang, sc, side) for ang, sc, side in vs["upper_copies"]] if L["upper_copies"] else [])
+                for ang, sc, side in reps:
+                    Vr = Vq
+                    Tr = Tq
+                    if ang is not None:
+                        if side is not None:
+                            cen_x = Vq[Tq].mean(1)[:, 0]
+                            keep_t = (cen_x < trunk_axis[0]) if side == "left" else (cen_x >= trunk_axis[0])
+                            Tr = Tq[keep_t]
+                        Rm = geom.rot_z(math.radians(ang))
+                        Vr = ((Vq - trunk_axis) * sc) @ Rm.T + trunk_axis
+                        Nr = Nq @ Rm.T
+                    else:
+                        Nr = Nq
+                    if len(Tr) == 0:
+                        continue
+                    Cw = tree.wind_rgba(Vr, 16.0, 7.0, "trunk", 0.0, 1.0)
+                    Cw[:, 3] = aoq
+                    wood_md.add(Vr, Tr, UVq, Cw, Nr, tree.MAT_BARK)
             # limbs + cards through the tree builder
             ps = [BT.simplify_path(p, max(0.25 if lod == 0 else 0.5, 2.2 * float(np.max(p["r"])))) for p in paths_]
             mr, est = BT.limit_paths(ps, L["limb_budget"], L["limb_sides"], L["limb_min_r_px"])

@@ -9,9 +9,9 @@
         "lf_env_golden_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3364,
-        "LOD1": 1278,
-        "LOD2": 170
+        "LOD0": 3232,
+        "LOD1": 1240,
+        "LOD2": 168
       },
       "materials": {
         "LOD0": [
@@ -30,18 +30,18 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 13.8,
-      "crown_radius_m": 8.61,
+      "height_m": 13.63,
+      "crown_radius_m": 8.5,
       "bounds_m_blender": [
         [
-          -6.36,
-          -5.81,
+          -6.05,
+          -5.83,
           -0.3
         ],
         [
           8.5,
-          8.61,
-          13.8
+          8.15,
+          13.63
         ]
       ],
       "display_offset_gltf": [
@@ -69,9 +69,9 @@
         "lf_env_golden_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 2650,
-        "LOD1": 910,
-        "LOD2": 112
+        "LOD0": 2658,
+        "LOD1": 1054,
+        "LOD2": 106
       },
       "materials": {
         "LOD0": [
@@ -90,22 +90,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 16.55,
-      "crown_radius_m": 9.22,
+      "height_m": 16.25,
+      "crown_radius_m": 9.68,
       "bounds_m_blender": [
         [
           -8.6,
-          -9.22,
+          -9.68,
           -0.36
         ],
         [
           4.59,
-          8.68,
-          16.55
+          8.67,
+          16.25
         ]
       ],
       "display_offset_gltf": [
-        19.9,
+        20.353,
         0.0,
         0.0
       ],
@@ -148,7 +148,10 @@
           "anchor_min_r": 2.2,
           "anchor_min_z": 7.6,
           "mass_min_dist": 2.7,
-          "trunk_r_k": 0.78,
+          "trunk_r_k": [
+            1.06,
+            0.9
+          ],
           "lobe_zf_min": -0.25,
           "anchor_radial_k": 1.25,
           "anchor_step_m": 1.2,
@@ -188,9 +191,9 @@
         "lf_env_golden_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 2786,
-        "LOD1": 1084,
-        "LOD2": 146
+        "LOD0": 2788,
+        "LOD1": 1088,
+        "LOD2": 144
       },
       "materials": {
         "LOD0": [
@@ -209,22 +212,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 16.92,
-      "crown_radius_m": 9.28,
+      "height_m": 16.9,
+      "crown_radius_m": 9.48,
       "bounds_m_blender": [
         [
-          -5.91,
-          -9.28,
+          -6.01,
+          -9.48,
           -0.37
         ],
         [
-          8.56,
-          7.45,
-          16.92
+          8.58,
+          7.6,
+          16.9
         ]
       ],
       "display_offset_gltf": [
-        39.801,
+        40.705,
         0.0,
         0.0
       ],
@@ -266,7 +269,10 @@
           "anchor_min_r": 2.2,
           "anchor_min_z": 7.6,
           "mass_min_dist": 2.7,
-          "trunk_r_k": 0.78,
+          "trunk_r_k": [
+            1.06,
+            0.9
+          ],
           "lobe_zf_min": -0.25,
           "anchor_radial_k": 1.25,
           "anchor_step_m": 1.2,
@@ -306,9 +312,9 @@
         "lf_env_golden_oak_v4_LOD2"
       ],
       "tris": {
-        "LOD0": 2380,
-        "LOD1": 906,
-        "LOD2": 120
+        "LOD0": 2372,
+        "LOD1": 902,
+        "LOD2": 122
       },
       "materials": {
         "LOD0": [
@@ -327,22 +333,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 15.84,
-      "crown_radius_m": 9.41,
+      "height_m": 15.91,
+      "crown_radius_m": 9.24,
       "bounds_m_blender": [
         [
-          -9.41,
-          -8.53,
+          -9.24,
+          -8.39,
           -0.35
         ],
         [
-          4.2,
-          8.7,
-          15.84
+          4.04,
+          8.77,
+          15.91
         ]
       ],
       "display_offset_gltf": [
-        59.701,
+        61.058,
         0.0,
         0.0
       ],
@@ -381,7 +387,10 @@
           "anchor_min_r": 2.2,
           "anchor_min_z": 7.6,
           "mass_min_dist": 2.7,
-          "trunk_r_k": 0.78,
+          "trunk_r_k": [
+            1.06,
+            0.9
+          ],
           "lobe_zf_min": -0.25,
           "anchor_radial_k": 1.25,
           "anchor_step_m": 1.2,
@@ -416,9 +425,9 @@
     }
   },
   "tris": {
-    "LOD0": 3364,
-    "LOD1": 1278,
-    "LOD2": 170
+    "LOD0": 3232,
+    "LOD1": 1240,
+    "LOD2": 168
   },
   "bones": 0,
   "materials": [

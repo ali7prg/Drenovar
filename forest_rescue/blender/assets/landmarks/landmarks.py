@@ -158,6 +158,36 @@ def build_bridge(lod):
                 k.beam((x0, yy * (HALF_W + 0.1), z0 + 0.05), (x1, yy * (HALF_W + 0.1), z1 + 0.05), 0.18, 0.16)
         k.collider("ramp", ((x0 + x1) / 2, 0, (z0 + z1) / 2), (ramp_len, 2 * HALF_W, 0.1), yaw=0.0)
     k.collider("box", (0, 0, DECK_TOP - 0.05), (27.0, 4.0, 0.1))
+    # ---------------- art/01: stone tower piers with red banners on the banks (beside the deck at the bank piers)
+    for px in piers:
+        for s in (-1, 1):
+            ty = s * (HALF_W + 0.55)
+            zb = bank_z(px) - 0.3
+            ht = DECK_TOP + 3.1
+            if lod == 0:
+                k.block_wall(px - 0.55, px + 0.55, zb, ht - zb, 1.1, course=0.45, block=(0.5, 0.7), y=ty, gap=0.03)
+                k.bblock((px, ty, ht + 0.1), (1.3, 1.3, 0.2), None, STONE, tile=1.6, chamfer=0.04)
+            else:
+                k.box((px, ty, (zb + ht) / 2), (1.1, 1.1, ht - zb), None, STONE, tile=1.6)
+            # pyramidal cap
+            cz = ht + (0.2 if lod == 0 else 0.0)
+            a, b, c_, d = ((px - 0.62, ty - 0.62, cz), (px + 0.62, ty - 0.62, cz), (px + 0.62, ty + 0.62, cz),
+                           (px - 0.62, ty + 0.62, cz))
+            apex = (px, ty, cz + 0.9)
+            for p0, p1 in ((a, b), (b, c_), (c_, d), (d, a)):
+                k.quad([p0, p1, apex, apex], [(0.1, 0.1), (0.9, 0.1), (0.5, 0.9), (0.5, 0.9)], STONE)
+        # red banner on a pole beside the downstream tower (art/01)
+        pole_x = px + (0.95 if px > 0 else -0.95)
+        pole_y = -(HALF_W + 0.55)
+        k.cyl((pole_x, pole_y, bank_z(pole_x) - 0.2), (pole_x, pole_y, DECK_TOP + 4.4), 0.07, segs=6 if lod == 0 else 4)
+        k.beam((pole_x - 0.45, pole_y, DECK_TOP + 4.2), (pole_x + 0.45, pole_y, DECK_TOP + 4.2), 0.07, 0.07)
+        bu0, bv0, bu1, bv1 = lmt.uv("cloth_dark")
+        top, bot = DECK_TOP + 4.15, DECK_TOP + 2.0
+        k.quad([(pole_x - 0.42, pole_y - 0.02, bot), (pole_x + 0.42, pole_y - 0.02, bot),
+                (pole_x + 0.42, pole_y - 0.02, top), (pole_x - 0.42, pole_y - 0.02, top)],
+               [(bu0, bv0), (bu1, bv0), (bu1, bv1), (bu0, bv1)], MISC)
+        k.collider("box", (px, -(HALF_W + 0.55), (DECK_TOP + 3.1) / 2), (1.1, 1.1, DECK_TOP + 3.4))
+        k.collider("box", (px, HALF_W + 0.55, (DECK_TOP + 3.1) / 2), (1.1, 1.1, DECK_TOP + 3.4))
     return k
 
 
@@ -470,7 +500,7 @@ def stone_slab(k, c, w, h, t, yaw, knot, lod):
     k.md.add(np.array(verts), faces, uvs, STONE, np.ones((len(verts), 4)))
     if knot and lod < 2:
         u0, v0, u1, v1 = lmt.uv(knot)
-        pw, ph = w * 0.62, h * 0.55
+        pw, ph = w * 0.5, h * 0.5
         z0 = h * 0.22
         quad = [R @ np.array([x, -t / 2 - 0.006, z]) + c + np.array([0, 0, -0.25]) for x, z in
                 ((-pw / 2, z0), (pw / 2, z0), (pw / 2, z0 + ph), (-pw / 2, z0 + ph))]
@@ -554,7 +584,7 @@ def stone_menhir(k, c, w, h, t, yaw, knot, lod, seed):
         k.md.add(W, mf, mu, MISC, col)
     if knot and lod < 2:                                   # normal-mapped knot decal flush with the carved panel
         u0, v0, u1, v1 = lmt.uv(knot)
-        pw, ph = w * 0.62, h * 0.55
+        pw, ph = w * 0.5, h * 0.5
         z0 = h * 0.22
         yb = -t / 2 * (1 - 0.16 * (z0 + ph / 2) / h) - 0.012
         quad = [R @ np.array([xq, yb, zq]) + np.asarray(c, float) for xq, zq in

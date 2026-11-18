@@ -21,6 +21,26 @@ import fqa  # noqa: E402
 import build_landmarks as BL  # noqa: E402
 
 IT = 1
+BUDGET = {0: 6000, 1: 1500, 2: 400}
+_orig_kit_object = BL.kit_object
+
+
+def kit_object_budget(name, kit):
+    """Landmark budgets (LOD0 <= 6k, LOD1 <= 1.5k, LOD2 <= 400 incl. extra objects): collapse-decimate."""
+    o = _orig_kit_object(name, kit)
+    lod = int(name[-1]) if name[-1].isdigit() else 0
+    target = BUDGET[lod] - (180 if "camp_props" in name and lod > 0 else (300 if "camp_props" in name else 0))
+    n = core.tri_count(o)
+    if n > target:
+        m = o.modifiers.new("dec", "DECIMATE")
+        m.ratio = max(0.02, target / n * 0.98)
+        m.use_collapse_triangulate = True
+        core.select_only([o])
+        bpy.ops.object.modifier_apply(modifier="dec")
+    return o
+
+
+BL.kit_object = kit_object_budget
 
 
 def v2_path(asset, it, name):

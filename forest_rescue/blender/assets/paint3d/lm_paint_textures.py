@@ -31,9 +31,9 @@ SHEET = "06_environment_landmarks.png"
 S = 1024
 
 SRC = {   # art/06 sheet boxes (x0, y0, x1, y1)
-    "wood": [(1128, 902, 1302, 948), (1453, 906, 1521, 976)],
+    "wood": [(544, 899, 586, 926), (544, 956, 586, 978)],
     "roof": [(1376, 104, 1508, 174)],
-    "stone": [(1365, 418, 1494, 485), (718, 167, 765, 252)],
+    "stone": [(626, 782, 700, 826), (72, 690, 124, 772)],
     "canvas": (1281, 717, 1387, 830),
     "rope": (632, 899, 742, 972),
     "lantern": (1402, 717, 1478, 830),
@@ -132,7 +132,16 @@ def misc_atlas():
     post, _ = painted(SRC["post_band"])
     put("rail", post[:, : post.shape[1] // 2], rough=0.6)
     put("sign", painted(SRC["sign"])[0], rough=0.85)
-    put("cloth_dark", np.clip(can * 0.62, 0, 1), rough=0.95)
+    # red banner cloth (art/01 bridge banners: Lab L 38, C 43, hue 51) = the painted canvas recoloured
+    from skimage import color as skc
+    lab_ = seg.lab(can)
+    C_ = np.hypot(lab_[..., 1], lab_[..., 2])
+    Cm, Lm = np.median(C_), np.median(lab_[..., 0])
+    h_ = np.radians(51.0) + (np.arctan2(lab_[..., 2], lab_[..., 1]) - np.median(np.arctan2(lab_[..., 2], lab_[..., 1])))
+    Cn = C_ / max(Cm, 1e-3) * 43.0
+    Ln = lab_[..., 0] - Lm + 38.0
+    banner = np.clip(skc.lab2rgb(np.stack([Ln, Cn * np.cos(h_), Cn * np.sin(h_)], -1)), 0, 1).astype(np.float32)
+    put("cloth_dark", banner, rough=0.95)
     ms, _ = painted(SRC["mossstone"])
     put("moss", ms[: ms.shape[0] // 2], rough=0.95)
     gr, _ = painted(SRC["grass"])
@@ -174,14 +183,40 @@ def misc_atlas():
     return A, H, R
 
 
+def planks(boxes, size=S, n_planks=8, seed=4):
+    """Vertical-grain planks from the painted post close-ups: each plank = a painted strip stretched along its grain,
+    random mirror / offset / slight tone per plank, dark joint between planks."""
+    rng = np.random.default_rng(seed)
+    strips = []
+    for b in boxes:
+        im, _ = painted(b)
+        strips.append(im[2:-2, 2:-2])
+    W = size // n_planks
+    out = np.zeros((size, size, 3), np.float32)
+    for k in range(n_planks):
+        s = strips[k % len(strips)]
+        if rng.random() < 0.5:
+            s = s[:, ::-1]
+        if rng.random() < 0.5:
+            s = s[::-1]
+        p = cv2.resize(s, (W, size // 2), interpolation=cv2.INTER_CUBIC)
+        p = np.concatenate([p, p[::-1]], 0)
+        p = np.roll(p, int(rng.integers(0, size)), axis=0)
+        p = p * rng.uniform(0.9, 1.08)
+        p[:, :2] *= 0.55
+        p[:, -2:] *= 0.7
+        out[:, k * W:(k + 1) * W] = p
+    return np.clip(out, 0, 1)
+
+
 def main():
     os.makedirs(MASTER, exist_ok=True)
     os.makedirs(QA, exist_ok=True)
     out = {}
-    for name, boxes, kw in (("stone", SRC["stone"], dict(patch=60, overlap=16, n=8, scale=2.0)),
-                            ("wood", SRC["wood"], dict(patch=52, overlap=14, n=8, scale=2.0)),
+    for name, boxes, kw in (("stone", SRC["stone"], dict(patch=56, overlap=14, n=6, scale=2.5)),
+                            ("wood", SRC["wood"], None),
                             ("roof", SRC["roof"], dict(patch=64, overlap=16, n=7, scale=2.0))):
-        alb = quilt(boxes, **kw)
+        alb = quilt(boxes, **kw) if kw is not None else planks(boxes)
         h, r = height_of(alb)
         nrm = ftex.height_to_normal_wrap(h, 4.0)
         rough = np.stack([np.ones_like(r), r, np.zeros_like(r)], -1)

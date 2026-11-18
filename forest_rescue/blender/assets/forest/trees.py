@@ -303,21 +303,159 @@ def finish_broadleaf(sk, env, spec, rng):
             k *= 1.22
         res.info[f"cull_k{lod}"] = round(k, 2)
         n_cards = max(8, (budgets[lod] - bt) // 2)
-        if lod == 0:
-            cards0 = make_cards(n_cards)
-            cards = cards0
+        if spec.get("n_clumps"):
+            if lod == 0:
+                CL, RL, NL = pick_clumps(P, R, tipd, env, spec, rng)
+                acc_fl = rng.random(len(CL)) < spec.get("accent_frac", 0.1)
+                zr = (env.pmin[2], env.pmax[2])
+                hull_c = (env.pmin + env.pmax) / 2
+                hull_r = np.maximum((env.pmax - env.pmin) / 2, 0.5)
+                res.clumps = dict(C=CL, R=RL)
+            cards = clump_cards(CL, RL, NL, n_cards, lod, spec, rng, sway, ph_chain, node_chain, zr, acc_fl)
+            emit_clump_cards(md, cards, hull_c, hull_r, 1 if lod == 0 else 0, zr, spec.get("k_clump", 0.7))
         else:
-            cards = tg.merge_cards(cards0, n_cards, spec["dense_map"], rng, size_gain=spec.get("merge_gain", 0.9),
-                                   min_size=spec["card_size"][1] * (1.1 if lod == 1 else 1.6),
-                                   max_size=spec["card_size"][1] * (2.6 if lod == 1 else 4.0))
-        tg.emit_cards(md, cards, crown_c, mat=1 if lod == 0 else 0, sph=spec.get("sph", 0.65),
-                      up_bias=spec.get("up_bias", 0.25))
+            if lod == 0:
+                cards0 = make_cards(n_cards)
+                cards = cards0
+            else:
+                cards = tg.merge_cards(cards0, n_cards, spec["dense_map"], rng, size_gain=spec.get("merge_gain", 0.9),
+                                       min_size=spec["card_size"][1] * (1.1 if lod == 1 else 1.6),
+                                       max_size=spec["card_size"][1] * (2.6 if lod == 1 else 4.0))
+            tg.emit_cards(md, cards, crown_c, mat=1 if lod == 0 else 0, sph=spec.get("sph", 0.65),
+                          up_bias=spec.get("up_bias", 0.25))
         out[lod] = md
         res.info[f"LOD{lod}"] = dict(tris=md.tris(), bark_tris=bt, cards=len(cards))
     res.lods = out
     res.crown_c = crown_c
     return res
 
+
+
+# ============================================================================ clump crowns (spherified normals)
+
+CLUMP_TILES = {
+    "oak": {"light": ["oak_clump_light_a", "oak_clump_light_b"], "gold": ["oak_clump_gold_a", "oak_clump_gold_b"],
+            "ochre": ["oak_clump_ochre_a", "oak_clump_ochre_b"], "dark": ["oak_clump_dark_a"], "red": ["oak_clump_red_a"]},
+    "birch": {"light": ["birch_clump_light", "birch_clump_gold"], "gold": ["birch_clump_mid", "birch_clump_gold"],
+              "ochre": ["birch_clump_mid"], "dark": ["birch_clump_dark"], "red": ["birch_clump_gold"]},
+    "hollow": {"light": ["oak_clump_gold_b", "oak_clump_ochre_a"], "gold": ["oak_clump_ochre_a", "oak_clump_ochre_b"],
+               "ochre": ["oak_clump_ochre_b", "oak_clump_red_a"], "dark": ["oak_clump_dark_a"], "red": ["oak_clump_red_a"]},
+}
+SUN = normalize(np.array([-0.45, -0.55, 0.0]))     # sun side (key light from front-left like the sheets)
+
+
+def pick_clumps(P, R, tipd, env, spec, rng):
+    """Clump centres at branch ends (FPS), radius per clump; returns (centres, radii, node ids)."""
+    n = spec["n_clumps"]
+    rlo, rhi = spec["clump_r"]
+    depth = env.inside_depth(P)
+    ok = (tipd <= spec.get("clump_tip", 1.8)) & (R <= spec.get("leaf_r_max", 0.09) * 1.6) & (depth > 0.3)
+    ok &= P[:, 2] > spec.get("leaf_z_min", 1.0)
+    ids = np.nonzero(ok)[0]
+    if len(ids) < n:
+        ids = np.nonzero((depth > 0.1) & (P[:, 2] > spec.get("leaf_z_min", 1.0)))[0]
+    # prefer the outer shell: weight by closeness of depth to the target (~0.6 * mean radius)
+    target = 0.6 * (rlo + rhi) / 2
+    w = np.exp(-((depth[ids] - target) / max(target, 0.3)) ** 2)
+    sel = [ids[int(np.argmax(w))]]
+    dmin = np.linalg.norm(P[ids] - P[sel[0]], axis=1)
+    for _ in range(n - 1):
+        score = dmin * (0.35 + w)
+        k = int(np.argmax(score))
+        sel.append(ids[k])
+        dmin = np.minimum(dmin, np.linalg.norm(P[ids] - P[ids[k]], axis=1))
+    C = P[sel].copy()
+    rad = rng.uniform(rlo, rhi, len(sel))
+    # push centres so the clump surface meets the envelope surface (silhouette), never outside
+    cc = env.centre.copy()
+    for i in range(len(C)):
+        d = C[i] - cc
+        d[2] *= 0.6
+        d = normalize(d)
+        for _ in range(6):
+            dep = env.inside_depth(C[i][None])[0]
+            if dep > rad[i] * 0.75:
+                C[i] = C[i] + d * 0.25
+            elif dep < rad[i] * 0.45:
+                C[i] = C[i] - d * 0.25
+            else:
+                break
+    return C, rad, np.array(sel)
+
+
+def clump_cards(C, rad, nodes, n_target, lod, spec, rng, sway, ph_chain, node_chain, zr, accent):
+    """Cards on each clump ball; tile by position (light top/sun side -> dark underside); LODs share clumps."""
+    tiles = CLUMP_TILES[spec.get("clump_kind", "oak")]
+    area = rad ** 2
+    share = area / area.sum()
+    cards = []
+    size_k = [1.0, 1.35, 2.0][lod]
+    for k in range(len(C)):
+        m = 4 if lod == 2 else max([5, 3][lod], int(round(n_target * share[k])))
+        if lod == 2:
+            a0 = rng.uniform(0, 2 * np.pi)
+            dirs = [np.array([0, 0, 1.0])] + [normalize(np.array([math.cos(a0 + j * 2.094), math.sin(a0 + j * 2.094), 0.3]))
+                                               for j in range(3)]
+            dirs = [normalize(dd + rng.normal(0, 0.1, 3)) for dd in dirs]
+        else:
+            g = (1 + 5 ** 0.5) / 2
+            rot = rng.uniform(0, 2 * np.pi)
+            dirs = []
+            i = 0
+            while len(dirs) < m and i < 4 * m:
+                z = 1 - 2 * (i + 0.5) / (1.35 * m)
+                i += 1
+                if z < -1:
+                    break
+                rr = math.sqrt(max(0, 1 - z * z))
+                a = 2 * np.pi * i / g + rot
+                dirs.append(normalize(np.array([rr * math.cos(a), rr * math.sin(a), z]) + rng.normal(0, 0.12, 3)))
+        hk = (C[k][2] - zr[0]) / max(zr[1] - zr[0], 1e-3)
+        node = nodes[k]
+        for d in dirs:
+            if accent[k]:
+                cat = "red" if d[2] > -0.2 else "dark"
+            else:
+                s = 0.6 * d[2] + 0.5 * (hk - 0.5) + 0.25 * float(np.dot(d, SUN)) + rng.normal(0, 0.12)
+                cat = "light" if s > 0.42 else "gold" if s > 0.02 else "ochre" if s > -0.32 else "dark"
+            tl = tiles[cat]
+            tile = tl[rng.integers(len(tl))]
+            sz = rad[k] * rng.uniform(1.0, 1.3) * size_k * spec.get("clump_card_k", 1.0)
+            if lod == 2:
+                c = C[k] + d * rad[k] * 0.15
+            else:
+                c = C[k] + d * rad[k] * rng.uniform(0.35, 0.6)
+            nrm = normalize(d + rng.normal(0, 0.18, 3)) if lod < 2 else d
+            upv = normalize(np.cross(nrm, rng.normal(0, 1, 3)))
+            cards.append(dict(c=c, n=nrm, up=upv, w=sz, h=sz, tile=tile, C=C[k], rad=rad[k],
+                              wind=np.array([min(1.0, sway[node] + 0.06), 0, ph_chain[node_chain[node]]]),
+                              hk=hk, attach="center"))
+    return cards
+
+
+def emit_clump_cards(md, cards, hull_c, hull_r, mat, zr, k_clump=0.7):
+    """Quads with per-vertex spherified normals: 70% from the clump centre, 30% from the crown hull."""
+    for cc in cards:
+        n = normalize(cc["n"])
+        t = normalize(cc["up"] - n * np.dot(cc["up"], n))
+        b = normalize(np.cross(t, n))
+        c = cc["c"]
+        w, h = cc["w"], cc["h"]
+        corners = np.array([c - b * w / 2 - t * h / 2, c + b * w / 2 - t * h / 2, c + b * w / 2 + t * h / 2,
+                            c - b * w / 2 + t * h / 2])
+        u0, v0, u1, v1 = atlas.uv_rect(cc["tile"])
+        uv = [(u0, v0), (u1, v0), (u1, v1), (u0, v1)]
+        nc = normalize(corners - cc["C"])
+        nh = normalize((corners - hull_c) / (hull_r ** 2))
+        nn = normalize(k_clump * nc + (1 - k_clump) * nh)
+        col = np.zeros((4, 4))
+        col[:, 0] = cc["wind"][0]
+        dist = np.linalg.norm(corners - cc["C"], axis=1) / max(cc["rad"], 1e-3)
+        col[:, 1] = np.clip(0.25 + 0.6 * dist, 0.25, 1.0)
+        col[:, 2] = cc["wind"][2]
+        hz = np.clip((corners[:, 2] - zr[0]) / max(zr[1] - zr[0], 1e-3), 0, 1)
+        col[:, 3] = np.clip(0.36 + 0.36 * (0.5 + 0.5 * nn[:, 2]) + 0.28 * hz, 0.36, 1.0)
+        md.add(corners, [(0, 1, 2, 3)], [uv], mat, col, normals=nn)
 
 # ============================================================================ golden oak
 
@@ -332,8 +470,9 @@ OAK_DENSE = {"oak_gold_a": "oak_dense_gold", "oak_gold_b": "oak_dense_gold", "oa
 
 def oak_spec(seed, budget=(2950, 1150, 290), r_base=0.85, **kw):
     s = dict(bark="oak", r_base=r_base, alpha=1.0, gamma=2.25, cull=(0.045, 0.16, 0.35), max_order=[9, 2, 1],
-             flare=(1.3, 1.1, 5, 1.0), roots=(8, 2.6, 0.5), card_size=(1.1, 1.5), moods=OAK_MOODS_GOLD,
-             dense_frac=0.55, dense_scale=1.1, bark_frac=(0.44, 0.3, 0.16),
+             flare=(1.3, 1.1, 5, 1.0), roots=(6, 2.6, 0.55), card_size=(1.1, 1.5), moods=OAK_MOODS_GOLD,
+             dense_frac=0.55, dense_scale=1.1, bark_frac=(0.42, 0.3, 0.16),
+             n_clumps=22, clump_r=(1.5, 2.6), clump_kind="oak", accent_frac=0.12, clump_tip=1.8,
              dense_map=OAK_DENSE, budget=budget, leaf_tip_dist=1.6, leaf_r_max=0.09, site_spacing=0.42,
              side_frac=0.45, sph=0.62, up_bias=0.22, seed=seed, bark_tile=(1.5, 1.5), leaf_z_min=2.0)
     s.update(kw)
@@ -376,7 +515,8 @@ def build_golden_oak(variant, view=None):
             sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=4.0)
         puffs = env.sample_even(30, rng, dmin=0.7, dmax=1.8)
         att = env.sample(1500, rng, shell=2.0, inner_weight=0.12, clumps=puffs, clump_r=1.7)
-        spec = oak_spec(seed, puffs=puffs, r_base=0.62, trunk_r=lambda p: 0.62 * (1.0 - 0.2 * min(p[2], 6) / 6), roots=(5, 1.8, 0.24), trunk_ids=tid,
+        spec = oak_spec(seed, puffs=puffs, r_base=0.62, trunk_r=lambda p: 0.62 * (1.0 - 0.2 * min(p[2], 6) / 6), roots=(5, 1.8, 0.3), trunk_ids=tid,
+                        n_clumps=18, clump_r=(1.4, 2.3),
                         flare=(0.45, 0.8, 5, 0.5), crown_c_h=0.5)
         tg.space_colonize(sk, att, D=0.38, di=3.0, dk=0.85, iters=160, tropism=(0, 0, 1), trop_w=0.18, rng=rng)
     elif variant == 3:
@@ -395,7 +535,8 @@ def build_golden_oak(variant, view=None):
             sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=3.0)
         puffs = env.sample_even(32, rng, dmin=0.7, dmax=1.8)
         att = env.sample(1600, rng, shell=2.2, inner_weight=0.12, clumps=puffs, clump_r=1.8)
-        spec = oak_spec(seed, puffs=puffs, r_base=0.78, trunk_r=lambda p: 0.78 * (1 - 0.15 * min(p[2], 3) / 3), crown_c_h=0.4, trunk_ids=tid)
+        spec = oak_spec(seed, puffs=puffs, r_base=0.78, trunk_r=lambda p: 0.78 * (1 - 0.15 * min(p[2], 3) / 3), crown_c_h=0.4, trunk_ids=tid,
+                        n_clumps=20, clump_r=(1.5, 2.5))
         tg.space_colonize(sk, att, D=0.38, di=3.2, dk=0.85, iters=160, tropism=(0.25, 0, 1), trop_w=0.12, rng=rng)
     else:
         # young compact oak, 8 m, round crown
@@ -412,7 +553,8 @@ def build_golden_oak(variant, view=None):
         att = env.sample(1000, rng, shell=1.6, inner_weight=0.15, clumps=puffs, clump_r=1.3)
         spec = oak_spec(seed, puffs=puffs, r_base=0.36, trunk_r=lambda p: 0.36 * (1 - 0.2 * min(p[2], 2.6) / 2.6), trunk_ids=tid,
                         roots=(5, 1.0, 0.14), flare=(0.4, 0.6, 5, 0.4), card_size=(1.0, 1.4),
-                        cull=(0.03, 0.10, 0.2), budget=(2400, 950, 240), crown_c_h=0.45, leaf_z_min=1.6)
+                        cull=(0.03, 0.10, 0.2), budget=(2400, 950, 240), crown_c_h=0.45, leaf_z_min=1.6,
+                        n_clumps=12, clump_r=(1.1, 1.7))
         tg.space_colonize(sk, att, D=0.3, di=2.4, dk=0.65, iters=150, tropism=(0, 0, 1), trop_w=0.12, rng=rng)
     res = finish_broadleaf(sk, env, spec, rng)
     res.env = env

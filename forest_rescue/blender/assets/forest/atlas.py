@@ -303,7 +303,7 @@ def paint_broadleaf_cluster(w, h, r, kind, palette, n_leaves=46, leaf_len=(0.17,
     return cv.result()
 
 
-def paint_clump(w, h, r, palette, kind="oak", n_leaves=300, leaf_len=(0.10, 0.15), radius=0.43, gap=0.06,
+def paint_clump(w, h, r, palette, kind="oak", n_leaves=300, leaf_len=(0.10, 0.15), radius=0.31, gap=0.06,
                 width_scale=1.0):
     """Dense ROUND leaf clump (card for spherified-normal crowns): leaves fill a disc, edge leaves point
     outward (leafy silhouette), back leaves darker -> soft depth; ~90% alpha coverage inside the disc."""
@@ -620,15 +620,15 @@ def paint_willow_thin(w, h, r, cols, n_strands=4):
         axis = np.stack([xs, ys], -1)
         layer = s / max(1, n_strands - 1)
         cv.line(axis, 1.0, (0.36, 0.30, 0.14), 0.9)
-        nleaf = int(h / 7)
+        nleaf = int(h / 10)
         for k in range(nleaf):
             t = k / nleaf
             p = axis[int(t * 39)]
             for side in (-1, 1):
-                ang = np.pi - side * r.uniform(0.35, 0.7)
-                ln = r.uniform(0.045, 0.07) * h * (1.0 - 0.3 * t)
+                ang = np.pi - side * r.uniform(0.3, 0.55)
+                ln = r.uniform(0.035, 0.05) * h * (1.0 - 0.3 * t)
                 c = jitter_col(cols[r.integers(len(cols))], r, 0.08)
-                pts = place(leaf_outline("willow", r), p, ang, ln, width_scale=1.25)
+                pts = place(leaf_outline("willow", r), p, ang, ln, width_scale=0.95)
                 cv.poly(pts, c, shade=leaf_shade(c, r, 0.72 + 0.35 * layer))
     return cv.result()
 
@@ -642,7 +642,7 @@ def paint_fern_frond(w, h, r, cols, golden=0.3):
     xs = base[0] + w * 0.04 * np.sin(tt * 2.2)
     ys = base[1] - tt * (h - 8)
     axis = np.stack([xs, ys], -1)
-    npairs = 22
+    npairs = 15
     for k in range(npairs):
         t = 0.08 + 0.9 * k / npairs
         j = int(t * 49)
@@ -651,7 +651,7 @@ def paint_fern_frond(w, h, r, cols, golden=0.3):
         ln = (0.46 * math.sin(np.pi * (0.10 + 0.9 * (1 - t))) ** 0.7 + 0.03) * w
         for side in (-1, 1):
             nrm = np.array([-d[1], d[0]]) * side
-            dirv = nrm * 0.82 + d * 0.5
+            dirv = nrm * 0.72 + d * 0.62
             ang = math.atan2(dirv[1], dirv[0]) + np.pi / 2
             mix = np.clip(golden + 0.35 * t + r.normal(0, 0.08), 0, 1)
             col = jitter_col(np.asarray(cols[0]) * (1 - mix) + np.asarray(cols[1]) * mix, r, 0.05)
@@ -663,10 +663,10 @@ def paint_fern_frond(w, h, r, cols, golden=0.3):
             for m_ in range(npin):
                 f = (m_ + 0.5) / npin
                 qq = q0 + (q1 - q0) * f
-                pl = (1 - f) ** 0.6 * 0.16 * ln + 1.6
+                pl = (1 - f) ** 0.6 * 0.10 * ln + 1.2
                 for s2 in (-1, 1):
-                    a2 = ang + s2 * 0.9
-                    pts = place(leaf_outline("shrub", r), qq, a2, pl, width_scale=1.4)
+                    a2 = ang + s2 * 0.75
+                    pts = place(leaf_outline("shrub", r), qq, a2, pl, width_scale=0.9)
                     cv.poly(pts, col, shade=leaf_shade(col, r, 0.8 + 0.25 * f))
     cv.line(axis, 1.8, (0.42, 0.34, 0.15))
     return cv.result()

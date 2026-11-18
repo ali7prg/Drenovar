@@ -140,3 +140,60 @@ def use_ao(objs, on=True):
                 s.material = qa
             elif not on:
                 s.link = "DATA"
+
+
+# ----------------------------------------------------------------------------- strategic references + colour stats
+
+STRATEGIC_REFS = {   # (sheet, box) crops of the strategic-camera paintings
+    "oak": [("07_fog_exploration_interface.png", (762, 500, 972, 710), "art/07 p2 oak"),
+            ("01_world_masterplan.png", (380, 112, 506, 238), "art/01 oak grove")],
+    "pine": [("01_world_masterplan.png", (0, 40, 120, 200), "art/01 conifers"),
+             ("07_fog_exploration_interface.png", (930, 120, 1022, 330), "art/07 p2 conifers")],
+    "birch": [("07_fog_exploration_interface.png", (780, 130, 960, 300), "art/07 p2 trees"),
+              ("01_world_masterplan.png", (380, 112, 506, 238), "art/01 grove")],
+}
+HUE = {"oak": (8, 34), "pine": (25, 95), "birch": (18, 45), "willow": (18, 45), "hollow": (4, 30)}
+
+
+def foliage_mask(rgb, hue, smin=0.3, vmin=0.12):
+    import cv2
+    hsv = cv2.cvtColor((np.clip(rgb[..., :3], 0, 1) * 255).astype(np.uint8), cv2.COLOR_RGB2HSV)
+    h, s, v = hsv[..., 0], hsv[..., 1] / 255.0, hsv[..., 2] / 255.0
+    return (h >= hue[0]) & (h <= hue[1]) & (s > smin) & (v > vmin)
+
+
+def lab_stats(rgb, mask):
+    from skimage import color as skc
+    px = np.clip(rgb[..., :3][mask], 0, 1)
+    if len(px) < 20:
+        return None
+    lab = skc.rgb2lab(px[None])[0]
+    return {"mean": np.round(lab.mean(0), 2).tolist(), "std": np.round(lab.std(0), 2).tolist(), "n": int(len(px))}
+
+
+def de(a, b):
+    return round(float(np.linalg.norm(np.array(a["mean"]) - np.array(b["mean"]))), 2) if a and b else None
+
+
+def strategic_compare(objs_by_lod, species, out_png, label, res=(700, 700), pitch=55, yaw=20):
+    """Side-by-side [strategic-art crops | render LOD0 | LOD1 | LOD2] (ortho 55deg), plus foliage colour stats."""
+    from frlib import refs
+    imgs, labels, stats = [], [], {}
+    hue = HUE.get(species, (8, 40))
+    for sheet, box, lab in STRATEGIC_REFS.get(species, STRATEGIC_REFS["oak"]):
+        im = refs.crop(refs.load(sheet), box)
+        imgs.append(im)
+        labels.append(lab)
+        stats[lab] = lab_stats(im, foliage_mask(im, hue))
+    for lod, objs in enumerate(objs_by_lod):
+        rgba = ortho_shot(objs, "/tmp/_strat.png", pitch_deg=pitch, yaw_deg=yaw, res=res, bg=False)
+        img = rgba[..., :3] * rgba[..., 3:4] + np.array([0.40, 0.42, 0.24]) * (1 - rgba[..., 3:4])
+        imgs.append(img)
+        labels.append(f"kit LOD{lod} {pitch}deg")
+        m = (rgba[..., 3] > 0.5) & foliage_mask(rgba[..., :3], hue)
+        stats[f"LOD{lod}"] = lab_stats(rgba[..., :3], m)
+    render.side_by_side(imgs, labels, out_png, height=420)
+    ref0 = stats[labels[0]]
+    out = {k: dict(v or {}, dE_vs_first_ref=de(v, ref0)) for k, v in stats.items()}
+    core.write_json(out_png.replace(".png", ".json"), out)
+    return out

@@ -48,6 +48,10 @@ WIND_DOC = {
 }
 
 
+def spec_crown_base(species):
+    return {"golden_oak": 4.0, "dark_pine": 2.5, "birch": 3.5, "willow": 3.0, "hollow_oak": 6.0}[species]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("species")
@@ -138,9 +142,38 @@ def main():
                        res=(1500, 600), label=f"{asset} v{v1} LOD0 | LOD1 | LOD2 strategic 55deg")
         for o in objs:
             o.location.x = 0
+        # strategic-camera comparison vs art/07 + art/01 crops (v1 LODs) and front crown colour stats
+        sp_key = {"golden_oak": "oak", "dark_pine": "pine", "birch": "birch", "willow": "willow",
+                  "hollow_oak": "hollow"}[a.species]
+        v1o = built[variants[0]][1]
+        try:
+            metrics["strategic_colour"] = fqa.strategic_compare([[v1o[0]], [v1o[1]], [v1o[2]]], sp_key,
+                                                                fqa.iter_path(asset, a.iter, "strategic_vs_refs"), asset)
+        except Exception as e:  # noqa
+            print("strategic compare failed", e, flush=True)
+        try:
+            from frlib import render as _r
+            fqa.only([v1o[0]])
+            _r.camera_for_view(view)
+            rgba = _r.render_rgba()
+            hue = fqa.HUE.get(sp_key, (8, 40))
+            crown_rows = slice(0, int(view.ay - spec_crown_base(a.species) * view.ppm))
+            mref = np.zeros(view.mask.shape, bool)
+            mref[crown_rows] = view.mask[crown_rows]
+            mren = np.zeros(view.mask.shape, bool)
+            mren[crown_rows] = rgba[crown_rows][..., 3] > 0.5
+            mref &= fqa.foliage_mask(view.image, hue)
+            mren &= fqa.foliage_mask(rgba[..., :3], hue)
+            sr, sn = fqa.lab_stats(view.image, mref), fqa.lab_stats(rgba[..., :3], mren)
+            metrics["front_crown_colour"] = {"ref": sr, "render": sn, "dE_mean": fqa.de(sr, sn)}
+        except Exception as e:  # noqa
+            print("front colour failed", e, flush=True)
         core.write_json(paths.compare(asset, f"iter{a.iter:02d}_metrics.json"),
                         {"metrics": metrics, "tris": {f"v{v}": info[v] for v in variants}})
-        print(json.dumps({k: (v["iou"], v["iou_closed_r4"]) for k, v in metrics.items()}), flush=True)
+        print(json.dumps({k: (v["iou"], v["iou_closed_r4"]) for k, v in metrics.items() if "iou" in v}), flush=True)
+        print(json.dumps({"front_dE": metrics.get("front_crown_colour", {}).get("dE_mean"),
+                          "strategic": {k: v.get("dE_vs_first_ref") for k, v in metrics.get("strategic_colour", {}).items()}}),
+              flush=True)
     if a.no_export:
         return
     fqa.use_ao([o for v in variants for o in built[v][1]], False)

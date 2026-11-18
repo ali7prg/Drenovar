@@ -37,20 +37,19 @@ def main():
     t0 = time.time()
     stats = {}
     barks = {}
-    for kind, fn in list(ftex.BARKS.items()) + [("limestone", ftex.limestone)]:
-        d = fn(1024)
+    import swatch
+    for kind in list(ftex.BARKS) + ["limestone"]:
         if kind in ftex.BARK_SWATCH:
-            alb, nrm, rough = ftex.finish_bark(kind, d)
+            alb, nrm, rough, hgt = swatch.bark_from_swatch(kind, 1024)       # painted art/02 swatch, quilted
             ref = ftex.load_swatch(kind)
             m1, s1 = ftex.colour_stats(ref)
             m2, s2 = ftex.colour_stats(alb)
             stats[kind] = {"ref_lab_mean": np.round(m1, 2).tolist(), "ref_lab_std": np.round(s1, 2).tolist(),
                            "tex_lab_mean": np.round(m2, 2).tolist(), "tex_lab_std": np.round(s2, 2).tolist(),
-                           "deltaE_mean": round(ftex.delta_e(m1, m2), 2)}
+                           "deltaE_mean": round(ftex.delta_e(m1, m2), 2), "source": "art/02 swatch quilting"}
         else:
-            alb = d["albedo"]
-            nrm = ftex.height_to_normal_wrap(d["height"], 4.0)
-            rough = np.stack([np.ones_like(d["rough"]), d["rough"], np.zeros_like(d["rough"])], -1)
+            alb, nrm, rough, hgt = swatch.limestone2(1024)
+        d = {"height": hgt}
         barks[kind] = alb
         pre = "lf_rock_" if kind == "limestone" else "lf_bark_"
         for base, folder in ((RUNTIME, "rt"), (MASTER, "m")):

@@ -181,7 +181,7 @@ def details(T, col, J=None, seed=41):
     hz = P[:, 2]
     hoofm = hz < 0.072
     growth = texproj.fbm(P * np.array([1.0, 1.0, 0.08]), 140.0, 3, seed=seed + 9)
-    horn = np.array([0.36, 0.30, 0.25]) * (0.8 + 0.4 * growth)[:, None]
+    horn = np.array([0.47, 0.40, 0.32]) * (0.8 + 0.4 * growth)[:, None]
     c[hoofm] = horn[hoofm] * np.clip((hz[hoofm] / 0.072) * 0.4 + 0.75, 0, 1)[:, None]
     rough[hoofm] = 0.45
     height[hoofm] += 0.5 * growth[hoofm]
@@ -220,6 +220,16 @@ def details(T, col, J=None, seed=41):
         dist = np.linalg.norm(P - (b + ax[None] * tt[:, None]), axis=1)
         inner = (dist < 0.05) & ((N @ np.array([0.3 * sx, -1.0, 0.0])) > 0.2) & (tt > 0.05)
         c[inner] *= 0.55
+    # dark hair roots under the mane (crest band) and on the dock, so card gaps never show coat
+    import horse_rig as HRig
+    crest = np.array(HRig.mane_roots())
+    cz = np.interp(P[:, 1], crest[::-1, 1], crest[::-1, 2])
+    band = (P[:, 1] > -1.13) & (P[:, 1] < -0.36) & (P[:, 2] > cz - 0.10)
+    t = np.clip((P[:, 2] - (cz - 0.10)) / 0.05, 0, 1) * band
+    roots = np.array([0.13, 0.09, 0.065]) * (0.85 + 0.3 * hair)[:, None]
+    c = c * (1 - 0.85 * t[:, None]) + roots * 0.85 * t[:, None]
+    dock = (P[:, 1] > 0.66) & (P[:, 2] > 1.28) & (np.abs(P[:, 0]) < 0.10)
+    c[dock] = roots[dock]
     # white forehead star
     sm = _star_mask(P, N, J)
     white = np.array([0.93, 0.90, 0.84]) * (0.92 + 0.1 * hair)[:, None]

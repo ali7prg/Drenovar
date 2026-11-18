@@ -245,7 +245,7 @@ def mane_cards(guide, lod=0, seed=3):
     """Layered clump cards: under/mid/top layers falling to both sides + crest volume."""
     rng = np.random.default_rng(seed + lod)
     cs = CardSet()
-    y_poll, y_with = -1.075, -0.32
+    y_poll, y_with = -1.115, -0.32
     segs = {0: 6, 1: 4, 2: 3}[lod]
     layers = {0: [(40, 0.006, 1.0, "mane_dense"), (30, 0.013, 1.06, "mane_wavy"),
                   (16, 0.020, 1.10, "mane_wisp")],
@@ -259,7 +259,7 @@ def mane_cards(guide, lod=0, seed=3):
                 root = _crest_point(guide, y, sx)
                 # length: reach the sheet's mane-bottom line (curving over the crest), irregular
                 bottom = float(np.interp(y, *MANE_BOTTOM))
-                length = max(0.06, (root[2] - bottom) * 1.32) * lmul * rng.uniform(0.75, 1.18)
+                length = max(0.12, (root[2] - bottom) * 1.32) * lmul * rng.uniform(0.75, 1.18)
                 width = rng.uniform(0.050, 0.072) * (1.25 if lod == 2 else 1.0)
                 d0 = V(sx * 0.85, rng.uniform(0.0, 0.15), 0.02)
                 path = _strand_on_surface(guide, root, d0, length, segs, off, rng, sx,
@@ -385,7 +385,7 @@ def tail_cards(lod=0, seed=7, drop=None):
     """Full flowing tail: dock cover + outer/inner clump shells + cross cards, wavy ends."""
     rng = np.random.default_rng(seed)
     cs = CardSet()
-    cfg = {0: dict(shells=[(20, 1.0, 12), (12, 0.6, 10)], cross=6, dock=10, dseg=5),
+    cfg = {0: dict(shells=[(20, 1.0, 12), (12, 0.6, 10)], cross=6, dock=14, dseg=5),
            1: dict(shells=[(12, 1.0, 8), (7, 0.6, 6)], cross=3, dock=5, dseg=3),
            2: dict(shells=[(7, 1.0, 4)], cross=2, dock=0, dseg=2)}[lod]
 
@@ -431,10 +431,10 @@ def tail_cards(lod=0, seed=7, drop=None):
     # dock cover: short hair lying along the dock, falling over the buttocks
     tp = HRig.tail_points()
     for k in range(cfg["dock"]):
-        a = math.pi * (0.15 + 0.7 * k / max(cfg["dock"] - 1, 1))       # top half around the dock
-        f0 = rng.uniform(0.0, 0.35)
-        root = tp[1] + (tp[2] - tp[1]) * f0 + V(math.cos(a) * 0.04, -math.sin(a) * 0.01,
-                                                 math.sin(a) * 0.035)
+        a = math.pi * (0.10 + 0.8 * k / max(cfg["dock"] - 1, 1))       # top half around the dock
+        f0 = rng.uniform(-0.35, 0.30)                                   # from the tail head on
+        base = tp[1] + (tp[2] - tp[1]) * f0 if f0 >= 0 else tp[1] + (tp[1] - tp[0]) * f0
+        root = base + V(math.cos(a) * 0.05, -math.sin(a) * 0.01, math.sin(a) * 0.045)
         L = rng.uniform(0.32, 0.48)
         f = np.linspace(0, 1, cfg["dseg"] + 1)
         side = math.cos(a)

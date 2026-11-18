@@ -46,7 +46,7 @@ def skeleton():
         # ears: right ear turned slightly forward (both profiles show one ear ahead)
         ey = -1.195 if s == "L" else -1.245
         J[f"ear_{s}"] = V(0.062 * sx, ey, 1.925)
-        J[f"ear_tip_{s}"] = V(0.122 * sx, ey - 0.04, 2.045)
+        J[f"ear_tip_{s}"] = V(0.13 * sx, ey - 0.04, 2.058)
         J[f"eye_{s}"] = V(0.118 * sx, -1.255, 1.75)
         # ---- fore limb: one neutral leg (equal bone lengths both sides), posed per side
         J[f"scap_top_{s}"] = V(0.115 * sx, -0.38, 1.47)
@@ -173,7 +173,7 @@ def body_parts(J=None):
     for i in range(4):
         add(flat_cone(neck[i], neck[i + 1], nr[i], nr[i + 1], 0.5 * (nf[i] + nf[i + 1]),
                       bone=nb[i], name=f"neck_{i}"), 0.10)
-    crest = [V(0, -0.40, 1.48), V(0, -0.58, 1.59), V(0, -0.76, 1.715), V(0, -0.93, 1.815),
+    crest = [V(0, -0.40, 1.465), V(0, -0.58, 1.575), V(0, -0.76, 1.705), V(0, -0.93, 1.81),
              V(0, -1.06, 1.87)]
     cr = [0.10, 0.10, 0.085, 0.07, 0.06]
     cb = ["spine_03", "neck_01", "neck_02", "neck_03"]

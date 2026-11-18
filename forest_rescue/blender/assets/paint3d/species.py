@@ -193,6 +193,37 @@ def lab_transform(dh=0.0, dl=0.0, kc=1.0, kl=1.0):
     return fn
 
 
+LODS_WILLOW = {
+    0: dict(trunk_step_m=0.35, trunk_sides=10, limb_step_m=0.3, limb_sides=5, limb_min_r_px=1.4, limb_budget=520,
+            copies=True, copy_min_r_px=2.0, front_frac=1.0, front_scale=1.0, n_masses=12, clumps_per=26,
+            fill_size=1.15, front_extra=0.45, max_cards=1300, core_cards=14, curtains=230),
+    1: dict(trunk_step_m=0.7, trunk_sides=6, limb_step_m=0.6, limb_sides=4, limb_min_r_px=2.6, limb_budget=160,
+            copies=True, copy_min_r_px=3.5, front_frac=0.55, front_scale=1.15, n_masses=9, clumps_per=12,
+            fill_size=1.5, front_extra=0.2, max_cards=480, core_cards=4, curtains=70),
+    2: dict(trunk_step_m=2.0, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
+            copies=False, front_frac=0.2, front_scale=1.5, n_masses=7, clumps_per=5, fill_size=2.2,
+            front_extra=0.0, max_cards=110, core_cards=0, curtains=24),
+}
+
+TREES["willow"] = dict(
+    cfg=dict(name="willow", box=(1196, 80, 1536, 445), exclude=[(1375, 355, 1420, 430)], clip_row=410, ground_row=423,
+             fork_row=230, wood=dict(mode="hue", hue_max=84, Lmax=52, min_area=260), keep_x=(1198, 1536), trunk_close=3,
+             foot=0.96,
+             float_min_r=1.8, crown_kd=0.9, front_bias=0.45, trunk_kd=0.95, seed=17, root_zone=18, root_k=0.75,
+             lum_pref=3.0, front_tilt_max=30, top_part=1.0, obl_part=1.0, vol_material=True, mass_zscale=0.55,
+             ao_under=0.9, ao_side=0.95, front_extra_eta=0.5, core_eta_max=0.45, curtain_eta=(0.25, 0.9),
+             mass_eta_min=0.03, mass_eta_max=0.45, grove_k=(0.5, 0.85), limbs_connected_only=True, limb_keep_r=2.0),
+    n_patches=150, min_px=30, region="willow", bark="willow", swatch=(1260, 798, 1516, 984), paintedLightMix=0.3,
+    paintedLightMixByMaterial={"lf_foliage_vol": 0.5}, patch_mode="strips", strip_w=11, strip_h=80,
+    height_hint=11.5, crown_hint=6.0, lods=LODS_WILLOW, crown_mode="mass", placement="dome", mass_r=0.3,
+    tint_note="art/02 palette (olive-green weeping willow)",
+    variants={1: dict(seed=5, copies=[(115, 0.92), (-120, 0.9)]),
+              2: dict(seed=6, mirror=True, copies=[(100, 0.9), (-140, 0.95)]),
+              3: dict(seed=8, copies=[(140, 0.9), (-100, 0.95)], scale=(0.9, 1.06))},
+    patch=dict(refs=[("01_world_masterplan.png", (1000, 280, 1536, 700), "art/01 east river")], ground=(0.33, 0.36, 0.17)),
+)
+
+
 def export_kit(asset, built, sp, info, kind, k, args):
     from frlib import paths as P
     import fbuild  # noqa: F401 (forest helpers path)

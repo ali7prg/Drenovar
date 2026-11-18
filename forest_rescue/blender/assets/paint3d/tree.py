@@ -239,10 +239,14 @@ class TreeRef:
 # ====================================================================== patches & tiles
 
 class Patches:
-    def __init__(self, ref, n_target, min_px=40, max_px=None, margin=3, scale=2, region_key=None, extra_masks=()):
+    def __init__(self, ref, n_target, min_px=40, max_px=None, margin=3, scale=2, region_key=None, extra_masks=(),
+                 mode="clumps", strip_w=12, strip_h=90):
         self.ref = ref
         card_region = ref.fg & ~ndi.binary_erosion(ref.wood_cov, iterations=1)
-        lbl = seg.clump_patches(ref.img, card_region, n_target=n_target, min_px=min_px)
+        if mode == "strips":
+            lbl = seg.strip_patches(ref.img, card_region, width=strip_w, max_h=strip_h, min_px=min_px)
+        else:
+            lbl = seg.clump_patches(ref.img, card_region, n_target=n_target, min_px=min_px)
         if max_px:
             lbl = seg.split_large(lbl, ref.img, max_px)
         self.lbl = lbl
@@ -1047,6 +1051,8 @@ class TreeBuilder:
                 w *= np.exp(np.clip((lums - lum_med) / (lp * 1.3), -4, 4))
             w /= w.sum()
             return int(rng.choice(len(info), p=w))
+
+        foot = cfg.get("foot", foot)
 
         def add(P3, n, ti, size, roll, ao, nshade, hfrac=1.0):
             for attempt in range(3):

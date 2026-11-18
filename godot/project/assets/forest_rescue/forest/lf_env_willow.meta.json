@@ -1,5 +1,6 @@
 {
   "id": "lf_env_willow",
+  "generation": "v2 image-based reconstruction from art/02 (painted cards + projected bark)",
   "variants": {
     "v1": {
       "nodes": [
@@ -8,41 +9,58 @@
         "lf_env_willow_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3418,
-        "LOD1": 1444,
-        "LOD2": 278
+        "LOD0": 1934,
+        "LOD1": 586,
+        "LOD2": 136
       },
       "materials": {
         "LOD0": [
           "lf_bark_willow",
-          "lf_foliage"
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD1": [
-          "lf_foliage"
+          "lf_bark_willow",
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD2": [
-          "lf_foliage"
+          "lf_bark_willow",
+          "lf_foliage",
+          "lf_foliage_vol"
         ]
       },
-      "height_m": 10.74,
-      "crown_radius_m": 9.52,
+      "height_m": 11.61,
+      "crown_radius_m": 8.15,
       "bounds_m_blender": [
         [
-          -6.16,
-          -6.15,
-          -0.34
+          -3.57,
+          -4.66,
+          -0.3
         ],
         [
-          9.52,
-          6.3,
-          10.74
+          8.15,
+          5.53,
+          11.61
         ]
       ],
       "display_offset_gltf": [
         0.0,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "copies": [
+          [
+            115,
+            0.92
+          ],
+          [
+            -120,
+            0.9
+          ]
+        ]
+      }
     },
     "v2": {
       "nodes": [
@@ -51,41 +69,59 @@
         "lf_env_willow_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3429,
-        "LOD1": 1448,
-        "LOD2": 286
+        "LOD0": 1958,
+        "LOD1": 592,
+        "LOD2": 148
       },
       "materials": {
         "LOD0": [
           "lf_bark_willow",
-          "lf_foliage"
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD1": [
-          "lf_foliage"
+          "lf_bark_willow",
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD2": [
-          "lf_foliage"
+          "lf_bark_willow",
+          "lf_foliage",
+          "lf_foliage_vol"
         ]
       },
-      "height_m": 8.91,
-      "crown_radius_m": 8.78,
+      "height_m": 11.62,
+      "crown_radius_m": 9.06,
       "bounds_m_blender": [
         [
-          -8.78,
-          -6.04,
-          -0.34
+          -9.06,
+          -4.6,
+          -0.3
         ],
         [
-          5.65,
-          5.95,
-          8.91
+          3.57,
+          5.57,
+          11.62
         ]
       ],
       "display_offset_gltf": [
-        17.678,
+        14.627,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "mirror": true,
+        "copies": [
+          [
+            100,
+            0.9
+          ],
+          [
+            -140,
+            0.95
+          ]
+        ]
+      }
     },
     "v3": {
       "nodes": [
@@ -94,52 +130,74 @@
         "lf_env_willow_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 2372,
-        "LOD1": 934,
-        "LOD2": 188
+        "LOD0": 1906,
+        "LOD1": 550,
+        "LOD2": 158
       },
       "materials": {
         "LOD0": [
           "lf_bark_willow",
-          "lf_foliage"
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD1": [
-          "lf_foliage"
+          "lf_bark_willow",
+          "lf_foliage",
+          "lf_foliage_vol"
         ],
         "LOD2": [
-          "lf_foliage"
+          "lf_bark_willow",
+          "lf_foliage",
+          "lf_foliage_vol"
         ]
       },
-      "height_m": 8.86,
-      "crown_radius_m": 4.83,
+      "height_m": 12.17,
+      "crown_radius_m": 7.57,
       "bounds_m_blender": [
         [
-          -4.55,
-          -4.15,
-          -0.31
+          -3.21,
+          -4.05,
+          -0.32
         ],
         [
-          4.6,
-          4.83,
-          8.86
+          7.57,
+          5.86,
+          12.17
         ]
       ],
       "display_offset_gltf": [
-        35.357,
+        29.255,
         0.0,
         0.0
-      ]
+      ],
+      "recipe": {
+        "copies": [
+          [
+            140,
+            0.9
+          ],
+          [
+            -100,
+            0.95
+          ]
+        ],
+        "scale": [
+          0.9,
+          1.06
+        ]
+      }
     }
   },
   "tris": {
-    "LOD0": 3429,
-    "LOD1": 1448,
-    "LOD2": 286
+    "LOD0": 1958,
+    "LOD1": 592,
+    "LOD2": 158
   },
   "bones": 0,
   "materials": [
     "lf_bark_willow",
-    "lf_foliage"
+    "lf_foliage",
+    "lf_foliage_vol"
   ],
   "textures": {
     "lf_foliage_atlas.png": 2048,
@@ -155,14 +213,23 @@
       "double_sided": true
     }
   },
+  "paintedLightMix": 0.3,
+  "paintedLightNote": "Textures carry the painted light. Shade as albedo * mix(1, lambert, paintedLightMix) (lambert = max(dot(N, L), 0)); foliage normals are smoothed crown normals.",
+  "edgeFade": {
+    "what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+      0.1,
+      0.3
+    ]
+  },
+  "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+  "recommendedTint": "art/02 palette (olive-green weeping willow)",
   "wind": {
     "attribute": "COLOR_0 (RGBA float, linear)",
-    "R": "branch sway weight: 0 at trunk base -> 1 at branch tips (path length along the skeleton, ^1.35)",
-    "G": "leaf flutter weight: 0 on bark, 0.25-0.3 at a card's attachment edge -> 0.8-1.0 at its free edge",
-    "B": "per-branch phase 0..1 (first-order branch random, sub-branches inherit +-0.06); trunk 0",
-    "A": "crown ambient occlusion 0.45..1 (1 = outer/top of crown); multiply albedo in the shader",
-    "clip": "lf_forest_wind, 8 s seamless loop: use TIME*2pi/8 with integer harmonics (see lf_forest_wind.gdshader)",
-    "godot_note": "Godot's glTF importer enables vertex_color_use_as_albedo when COLOR_0 exists: use the provided ShaderMaterial (or disable that flag) or the wind mask tints the albedo."
+    "R": "sway weight 0 at the trunk base -> 1 at crown tips",
+    "G": "leaf flutter (cards 0.45..1, bark 0)",
+    "B": "per-branch / crown-sector phase 0..1",
+    "A": "ambient occlusion (1 outer front/top cards, 0.9 fill, 0.78 inner, bark 1)"
   },
   "clips": {
     "lf_forest_wind": {
@@ -171,14 +238,13 @@
       "type": "shader (vertex colour driven)"
     }
   },
-  "layout_note": "Variants are laid out along +X (display_offset_gltf); the three LOD meshes of a variant share the variant origin (overlapping, show one per distance). Mesh origin = trunk base on the ground.",
-  "lod_note": "LOD0: bark+foliage (2 surfaces); LOD1/LOD2: single foliage-atlas surface (bark strip in atlas).",
-  "export_scale_vs_art02": 1.0,
+  "layout_note": "Variants laid out along +X (display_offset_gltf); the three LODs of a variant share its origin (trunk base on the ground).",
+  "scale_note": "Real scale from the 1.8 m figure on art/02 (29.8 px/m).",
   "glb_images": [
     "lf_bark_willow_n.png",
     "lf_bark_willow_c.jpg",
     "lf_bark_willow_r.png",
     "lf_foliage_atlas.png"
   ],
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_trees.py willow"
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_tree.py willow"
 }

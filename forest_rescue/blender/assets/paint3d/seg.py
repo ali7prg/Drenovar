@@ -350,3 +350,45 @@ def pack_rects(sizes, region, pad=2, max_tries=14):
             return pos, s
         s *= 0.92
     raise RuntimeError("cannot pack rects")
+
+
+def strip_patches(img, mask, width=12, max_h=90, min_px=30, smooth=1.0):
+    """Weeping-willow strand patches: vertical bands of `width` px; each band component is cut at its darkest
+    rows into pieces of at most max_h px (hanging strand tiles). Returns labels (0 outside)."""
+    L = ndi.gaussian_filter(lab(img)[..., 0], smooth)
+    H, W = mask.shape
+    out = np.zeros((H, W), np.int32)
+    nxt = 1
+    # band edges follow the darkest columns near each nominal boundary (between strands)
+    colL = np.where(mask, L, 100).mean(0)
+    edges = [0]
+    x = width
+    while x < W:
+        lo, hi = max(edges[-1] + width // 2, x - width // 3), min(W - 1, x + width // 3)
+        e = lo + int(np.argmin(colL[lo:hi + 1])) if hi > lo else x
+        edges.append(e)
+        x = e + width
+    edges.append(W)
+    for a, b in zip(edges[:-1], edges[1:]):
+        band = np.zeros_like(mask)
+        band[:, a:b] = mask[:, a:b]
+        lab_, n = ndi.label(band)
+        for i in range(1, n + 1):
+            comp = lab_ == i
+            ys = np.nonzero(comp.any(1))[0]
+            y0, y1 = ys.min(), ys.max() + 1
+            cuts = [y0]
+            while y1 - cuts[-1] > max_h:
+                s0 = cuts[-1] + int(max_h * 0.6)
+                s1 = min(y1 - 10, cuts[-1] + max_h)
+                rowL = np.where(comp[s0:s1], L[s0:s1], 100).mean(1) if s1 > s0 else np.array([0])
+                cuts.append(s0 + int(np.argmin(rowL)))
+            cuts.append(y1)
+            for c0, c1 in zip(cuts[:-1], cuts[1:]):
+                piece = comp.copy()
+                piece[:c0] = False
+                piece[c1:] = False
+                if piece.sum() >= min_px:
+                    out[piece] = nxt
+                    nxt += 1
+    return out

@@ -13,7 +13,7 @@ from scipy import ndimage as ndi
 from skimage import morphology
 
 import analysis
-import atlas as atl
+import p3atlas as atl
 import geom
 import seg
 import skel
@@ -630,8 +630,7 @@ def bark_texture(ref, bark_mesh_orig, path_ids, size=1024, swatch_box=None, wood
     col = np.zeros((size, size, 3), np.float32)
     known = np.zeros((size, size), bool)
     img = ref.img.astype(np.float32)
-    samp = cv2.remap(img, u.astype(np.float32).reshape(1, -1), v.astype(np.float32).reshape(1, -1),
-                     cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)[0]
+    samp = texproj._bilinear(img, u, v)[:, :3]
     col[yy[ok], xx[ok]] = samp[ok]
     known[yy[ok], xx[ok]] = True
     # de-light only the extreme shadows (Lab L floor)

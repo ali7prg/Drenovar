@@ -9,7 +9,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..")))
-sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "forest")))
+sys.path.append(os.path.abspath(os.path.join(HERE, "..", "forest")))
 from frlib import core, render  # noqa: E402
 
 # painting key light (upper-left-front) used for the painted-light QA shading

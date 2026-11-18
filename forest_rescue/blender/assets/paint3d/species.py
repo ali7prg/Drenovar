@@ -47,8 +47,8 @@ TREES = {
     "golden_oak": dict(
         cfg=dict(name="golden_oak", box=(0, 0, 430, 445), exclude=[(284, 360, 320, 432)], clip_row=410, ground_row=421,
                  fork_row=245, wood=dict(ratio=0.85, Lmax=64, hue_rng=(61, 95)), float_min_r=2.2, keep_x=(0, 428),
-                 crown_kd=0.9, front_bias=0.45, trunk_kd=0.9, seed=7, root_zone=34, root_k=0.8, n_lobes=13, top_weight=1.6, lum_pref=3.5, mass_up=0.55, front_tilt_max=30),
-        n_patches=110, min_px=50, region="golden_oak", bark="oak", swatch=(20, 798, 318, 984), paintedLightMix=0.4,
+                 crown_kd=0.9, front_bias=0.45, trunk_kd=0.9, seed=7, root_zone=34, root_k=0.8, n_lobes=13, top_weight=1.6, lum_pref=2.6, mass_up=0.55, front_tilt_max=30, top_part=0.6, obl_part=0.75),
+        n_patches=110, min_px=50, region="golden_oak", bark="oak", swatch=(20, 798, 318, 984), paintedLightMix=0.3,
         height_hint=13.3, crown_hint=7.2, lods=LODS_MASS, crown_mode="mass", mass_r=0.34,
         single_refs="oak",
         tint_note="art/02 palette (orange-gold); for art/07 / art/01 look tint foliage toward warm yellow: "

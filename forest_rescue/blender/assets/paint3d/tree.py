@@ -933,13 +933,14 @@ class TreeBuilder:
                 rel = (P3 - C) / np.array([r, r, r * 0.68])
                 nshade = nrm(rel / np.array([r, r, r * 0.68]))
                 zrel = rel[2]
-                ao = float(np.clip(0.86 + 0.2 * zrel, 0.72, 1.0)) if rad > 0.55 else 0.8
+                ao = float(np.clip(0.95 + 0.15 * zrel, 0.85, 1.0)) if rad > 0.55 else 0.86
                 horiz = nrm(rel * np.array([1, 1, 0])) if np.linalg.norm(rel[:2]) > 1e-3 else nrm(rng.normal(0, 1, 3) * [1, 1, 0])
                 size = typ * rng.uniform(0.95, 1.2)
                 placed = 0
                 for n, mode, roll, hf in ((nrm(Z + rng.normal(0, 0.15, 3)), "top" if zrel > -0.2 else "under",
                                            rng.uniform(-np.pi, np.pi), cfg.get("top_part", 0.6) if zrel > -0.2 else 1.0),
-                                          (nrm(horiz + Z * 0.9 + rng.normal(0, 0.12, 3)), "obl", rng.normal(0, 0.2), 1.0),
+                                          (nrm(horiz + Z * 0.9 + rng.normal(0, 0.12, 3)), "top" if zrel > 0.1 else "obl",
+                                           rng.normal(0, 0.2), cfg.get("obl_part", 0.75) if zrel > -0.2 else 1.0),
                                           (nrm(horiz + rng.normal(0, 0.15, 3)), "side" if zrel > -0.3 else "under",
                                            rng.normal(0, 0.15), 1.0)):
                     ti = pick(eta, mode)
@@ -963,7 +964,7 @@ class TreeBuilder:
             P3 = ref.cam_to_world(np.array([u]), np.array([vq]), np.array([tq]))[0]
             ti = pick((vq - v0) / max(v1 - v0, 1), "under")
             add(P3, nrm(Z * 0.8 + rng.normal(0, 0.4, 3)), ti, rng.uniform(1.0, 1.3) * size_k, rng.uniform(-np.pi, np.pi),
-                0.72, None)
+                0.78, None)
         return cards
 
     def _fill_quad(self, P3, n, ti, size, roll, hfrac=1.0):

@@ -131,37 +131,55 @@ def label_preview(labels, img=None, alpha=0.5, seed=3):
 
 # ------------------------------------------------------------------ clump patches
 
-def clump_patches(img, mask, n_target=80, smooth=1.5, min_px=40, compact_merge=True, seed_footprint=None):
-    """Cut a painted foliage mask into clump patches: watershed of luminance basins.
+def clump_patches(img, mask, n_target=80, smooth=1.5, min_px=40, compactness=0.01, min_comp=10, max_k=2.6):
+    """Cut a painted foliage mask into clump patches: compact watershed of luminance basins.
 
-    Bright clump tops are seeds; the dark gaps between clumps become the boundaries.
-    Returns int label image (0 = outside, 1..n patches)."""
+    Bright clump tops are seeds (peaks, min distance from the target patch size), extra seeds keep
+    every area covered; dark gaps between clumps become boundaries. Returns labels (0 outside)."""
+    from skimage.feature import peak_local_max
     L = lab(img)[..., 0]
     Ls = ndi.gaussian_filter(L, smooth)
-    area = mask.sum()
-    # seed spacing from target count: average patch ~ area / n -> radius
-    r = max(3, int(np.sqrt(area / max(n_target, 1) / np.pi) * 0.75))
-    fp = morphology.disk(r) if seed_footprint is None else seed_footprint
-    mx = ndi.maximum_filter(Ls, footprint=fp)
-    seeds = (Ls >= mx - 1e-3) & mask
-    # thin seeds: one per connected blob
-    sl, ns = ndi.label(seeds)
+    area = int(mask.sum())
+    r = max(3.0, np.sqrt(area / max(n_target, 1) / np.pi))
+    pk = peak_local_max(np.where(mask, Ls, -1e3), min_distance=max(2, int(r * 0.85)), labels=mask.astype(int),
+                        exclude_border=False)
     markers = np.zeros(mask.shape, np.int32)
-    if ns:
-        com = ndi.center_of_mass(seeds, sl, np.arange(1, ns + 1))
-        for i, (cy, cx) in enumerate(com):
-            markers[int(round(cy)), int(round(cx))] = i + 1
-    # make sure every mask component has a marker
+    for i, (y, x) in enumerate(pk):
+        markers[y, x] = i + 1
+    nxt = len(pk) + 1
+    # one marker per uncovered connected component
     cl, cn = ndi.label(mask)
-    for i in range(1, cn + 1):
-        comp = cl == i
-        if not (markers[comp] > 0).any():
-            ys, xs = np.nonzero(comp)
+    if cn:
+        has = ndi.maximum(markers > 0, cl, np.arange(1, cn + 1))
+        sizes = ndi.sum(mask, cl, np.arange(1, cn + 1))
+        for i in np.nonzero((~np.asarray(has, bool)) & (np.asarray(sizes) >= min_comp))[0]:
+            ys, xs = np.nonzero(cl == i + 1)
             j = len(ys) // 2
-            markers[ys[j], xs[j]] = markers.max() + 1
-    lbl = segmentation.watershed(-Ls, markers, mask=mask)
-    # merge tiny patches into the neighbour sharing the longest border
+            markers[ys[j], xs[j]] = nxt
+            nxt += 1
+    # coverage: seeds where far from any seed
+    for _ in range(6):
+        dist = ndi.distance_transform_edt(markers == 0)
+        far = mask & (dist > 1.7 * r)
+        if not far.any():
+            break
+        g = np.zeros_like(far)
+        step = max(2, int(r))
+        g[::step, ::step] = True
+        add = far & g
+        if not add.any():
+            ys, xs = np.nonzero(far)
+            add = np.zeros_like(far)
+            add[ys[0], xs[0]] = True
+        for y, x in zip(*np.nonzero(add)):
+            markers[y, x] = nxt
+            nxt += 1
+    lbl = segmentation.watershed(-Ls, markers, mask=mask, compactness=compactness)
     lbl = merge_small(lbl, min_px)
+    ids, cnt = np.unique(lbl[lbl > 0], return_counts=True)
+    lbl[np.isin(lbl, ids[cnt < min_comp])] = 0
+    if max_k:
+        lbl = split_large(relabel(lbl), img, int(max_k * area / max(n_target, 1)))
     return relabel(lbl)
 
 

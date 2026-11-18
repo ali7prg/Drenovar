@@ -42,6 +42,19 @@ def kit_object_budget(name, kit):
 
 BL.kit_object = kit_object_budget
 
+# LOD0 masonry with chamfered blocks (44 tris/block) exceeds the 6k landmark budget for the bridge and the ruin:
+# use plain blocks there instead of collapse-decimating (decimation melts the block edges and UVs)
+import landmarks as _L  # noqa: E402
+_orig_kit_init = _L.Kit.__init__
+NO_BEVEL = set()
+
+
+def _kit_init(self, seed=0, bevel=False):
+    _orig_kit_init(self, seed=seed, bevel=bevel and not NO_BEVEL)
+
+
+_L.Kit.__init__ = _kit_init
+
 
 def v2_path(asset, it, name):
     return paths.compare(asset, f"v2_iter{it:02d}_{name}.png")
@@ -103,6 +116,9 @@ def three_quarter_fitted(asset, it, objs, box, cam, m_ref):
 
 def run(name, it, fit=True):
     asset = f"lf_env_{name}"
+    NO_BEVEL.clear()
+    if name in ("bridge27m", "ruined_watchpost"):
+        NO_BEVEL.add(name)
     BL.build(name, it, export=True, qa=True)
     if not fit:
         # metrics sheet at the hand-matched art/06 camera (painted-light QA material)

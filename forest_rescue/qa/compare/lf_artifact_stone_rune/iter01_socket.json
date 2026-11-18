@@ -1,0 +1,18 @@
+{
+  "title": "lf_artifact_stone_rune socket (circle)",
+  "iou_filled": 0.8607,
+  "iou_raw": 0.8607,
+  "mean_abs_colour_error": 0.2056,
+  "camera_params": [
+    0.06794,
+    1.59657,
+    0.0,
+    0.58289,
+    2.17734,
+    -1.15335,
+    12.84527,
+    -0.0014,
+    -0.00189,
+    -0.0162
+  ]
+}

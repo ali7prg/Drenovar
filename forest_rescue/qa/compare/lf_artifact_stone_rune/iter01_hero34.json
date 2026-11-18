@@ -1,0 +1,18 @@
+{
+  "title": "lf_artifact_stone_rune v1 hero 3/4 (camera fitted to silhouette)",
+  "iou_filled": 0.8125,
+  "iou_raw": 0.8125,
+  "mean_abs_colour_error": 0.1759,
+  "camera_params": [
+    -0.22888,
+    1.46784,
+    0.0,
+    0.28828,
+    2.10285,
+    -8.2886,
+    5.69273,
+    0.00018,
+    -0.00011,
+    0.0226
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "view": "rear",
+  "iou": 0.7686,
+  "mean_abs_colour_error": 0.0783,
+  "ref_pixels": 52216,
+  "render_pixels": 43862
+}

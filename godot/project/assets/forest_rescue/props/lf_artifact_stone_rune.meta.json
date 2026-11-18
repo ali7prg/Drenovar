@@ -1,0 +1,118 @@
+{
+  "id": "lf_artifact_stone_rune",
+  "tris": {
+    "LOD0": 2224,
+    "LOD1": 1264,
+    "LOD2": 720
+  },
+  "tris_per_variant": {
+    "v1": {
+      "LOD0": 508,
+      "LOD1": 284,
+      "LOD2": 156
+    },
+    "v2": {
+      "LOD0": 508,
+      "LOD1": 284,
+      "LOD2": 156
+    },
+    "v3": {
+      "LOD0": 508,
+      "LOD1": 284,
+      "LOD2": 156
+    }
+  },
+  "tris_socket": {
+    "LOD0": 700,
+    "LOD1": 412,
+    "LOD2": 252
+  },
+  "budget": "artifact <= 800 tris (LOD0, per variant)",
+  "bones": 0,
+  "materials": [
+    "lf_artifact_stone_rune_mat"
+  ],
+  "textures": {
+    "baseColor": "1024 JPEG",
+    "metallicRoughness": "512 JPEG (G rough, B metal)",
+    "normal": "1024 PNG"
+  },
+  "coordinate_space": "glTF (Y up, metres); artifact front faces +Z; origin = key-slot insertion point",
+  "variants": {
+    "v1": {
+      "node": "lf_artifact_stone_rune_v1",
+      "key_id": "lf_key_10",
+      "lods": [
+        "lf_artifact_stone_rune_v1_LOD0",
+        "lf_artifact_stone_rune_v1_LOD1",
+        "lf_artifact_stone_rune_v1_LOD2"
+      ]
+    },
+    "v2": {
+      "node": "lf_artifact_stone_rune_v2",
+      "key_id": "lf_key_02",
+      "lods": [
+        "lf_artifact_stone_rune_v2_LOD0",
+        "lf_artifact_stone_rune_v2_LOD1",
+        "lf_artifact_stone_rune_v2_LOD2"
+      ]
+    },
+    "v3": {
+      "node": "lf_artifact_stone_rune_v3",
+      "key_id": "lf_key_04",
+      "lods": [
+        "lf_artifact_stone_rune_v3_LOD0",
+        "lf_artifact_stone_rune_v3_LOD1",
+        "lf_artifact_stone_rune_v3_LOD2"
+      ]
+    }
+  },
+  "socket": {
+    "node": "lf_artifact_stone_rune_socket",
+    "shape": "circle",
+    "recess_depth_m": 0.02,
+    "key_slot": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "normal": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "note": "socket origin = recess floor centre; artifact origin goes exactly here with identity rotation"
+  },
+  "clips": {},
+  "bounds_m": {
+    "min": [
+      -0.1025,
+      -0.1025,
+      0.027
+    ],
+    "max": [
+      0.1025,
+      0.1025,
+      -0.016
+    ]
+  },
+  "glb_nodes": [
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_socket_LOD0",
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_socket_LOD1",
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_socket_LOD2",
+    "lf_artifact_stone_rune_socket",
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_v1_LOD0",
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_v1_LOD1",
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_v1_LOD2",
+    "lf_artifact_stone_rune_v1",
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_v2_LOD0",
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_v2_LOD1",
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_v2_LOD2",
+    "lf_artifact_stone_rune_v2",
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_v3_LOD0",
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_v3_LOD1",
+    "lf_artifact_stone_rune_lf_artifact_stone_rune_v3_LOD2",
+    "lf_artifact_stone_rune_v3"
+  ],
+  "notes": "All three variants sit at the origin; show exactly one variant node per key (meta.variants). bone_key: shaft along -Z of glTF (into the lock), turn = rotation about the glTF Z axis. LOD1/LOD2 are lower-tessellation rebuilds sharing the LOD0 atlas (parametric UV transfer)."
+}

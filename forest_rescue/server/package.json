@@ -1,0 +1,14 @@
+{
+  "name": "drenovar-forest-rescue-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Authoritative server module and local loopback realm for the DRENOVAR adventure «Лес потерянных» (forest_rescue_v1).",
+  "type": "module",
+  "engines": {"node": ">=22"},
+  "main": "src/index.mjs",
+  "scripts": {
+    "realm": "node local-realm/server.mjs",
+    "test": "node --test --test-concurrency=1 tests/",
+    "test:delivered": "node --test ../delivery/tests/"
+  }
+}

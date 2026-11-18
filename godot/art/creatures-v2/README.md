@@ -41,12 +41,12 @@ decimation, MikkTSpace tangents, Cycles normal/AO bakes), `xatlas` (UV charts), 
 |---|---|---|---|---|
 | Clips | 12 | 12 | 14 | 14 |
 | Bones (skin joints) | 41 | 40 | 44 | 48 |
-| LOD0 / LOD1 / LOD2 triangles | 93 748 / 37 288 / 8 740 | 76 440 / 30 536 / 8 072 | 58 736 / 24 476 / 6 230 | 72 578 / 27 378 / 7 430 |
+| LOD0 / LOD1 / LOD2 triangles | 93 014 / 36 098 / 8 942 | 89 726 / 34 956 / 8 602 | 82 450 / 29 778 / 6 840 | 74 064 / 27 716 / 7 474 |
 | Materials per LOD | 3 (Body, AntlerBark, FurCards) | 3 (Body, Stone, FurCards) | 3 (Body, Details, FurCards) | 2 (Skin, Stone) |
 
 Shapes, materials and attack keys follow the creature-references sheets (section below). The fur cards, moss
-strands and denser plates are what goes over the 03 budgets (Velkor LOD1 37 288 against 20 000, Kamneklyk
-30 536 / 22 000, Tenerys 24 476 / 19 000; Dragor is within budget); `FUR_KEEP` per LOD is the knob to trade
+strands and denser plates are what goes over the 03 budgets (Velkor LOD1 36 098 against 20 000, Kamneklyk
+34 956 / 22 000, Tenerys 29 778 / 19 000; Dragor is within budget); `FUR_KEEP` per LOD is the knob to trade
 coat density for triangles.
 
 * `deliver/<id>/` — per creature: `<id>.blend` (Blender 5.3, LOD1 meshes, armature, every clip as an action,

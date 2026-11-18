@@ -409,6 +409,9 @@ func squad_pose(index: int, now: float) -> Dictionary:
 			var side := Vector3(tangent.z, 0, -tangent.x)
 			return {"position":sample.position + side * [0.0, -0.9, 0.9][index], "yaw":PathMotion.yaw_of(tangent), "moving":not sample.arrived, "speed":sample.speed}
 	var center: Vector3 = game.target_position(node)
+	var rest: Variant = squad.get("position")
+	if rest is Dictionary and (center == Vector3.INF or node.contains("#")):
+		center = game.ground(float(rest.get("x", 0)), float(rest.get("z", 0)))
 	if center == Vector3.INF:
 		center = game.target_position("lf_horse_origin")
 	var focus := focus_for_node(node, center)

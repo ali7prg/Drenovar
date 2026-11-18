@@ -115,11 +115,11 @@ class Solver:
             else:
                 Mn = base.copy()
                 Mn[:3, :3] = spec
-            if n == "Hips" and "Hips_pos" in pose:
-                Mn[:3, 3] = pose["Hips_pos"]
+            if n + "_pos" in pose:
+                Mn[:3, 3] = pose[n + "_pos"]
             M[n] = Mn
             basis = np.linalg.inv(base) @ Mn
-            loc = Vector(basis[:3, 3]) if n == "Hips" else Vector((0, 0, 0))
+            loc = Vector(basis[:3, 3]) if (n + "_pos") in pose else Vector((0, 0, 0))
             q = Matrix(basis[:3, :3].tolist()).to_quaternion()
             out[n] = (loc, q)
         self.last_M = M
@@ -175,7 +175,7 @@ class Rig:
     def pelvis(self, P, pos=(0, 0, 0), fwd=0.0, side=0.0, yaw=0.0):
         """Hips position offset (world) from rest + rotation (deg): forward tilt, side roll, yaw."""
         R0 = self.S.rest_rot("Hips")
-        Rw = axis_angle((0, 0, 1), yaw) @ axis_angle((0, -1, 0), side) @ axis_angle((1, 0, 0), -fwd)
+        Rw = axis_angle((0, 0, 1), yaw) @ axis_angle((0, -1, 0), side) @ axis_angle((1, 0, 0), fwd)
         P["Hips"] = Rw @ R0
         P["Hips_pos"] = self.hips0 + np.asarray(pos, float)
         return Rw
@@ -219,9 +219,7 @@ class Rig:
         """Wrist at `wrist` (world), elbow pointing to elbow_dir, hand frame from palm normal and
         finger direction (both world); clav = (raise deg, forward deg) of the clavicle."""
         s = 1.0 if S_ == "Left" else -1.0
-        self.fk(P, f"{S_}Shoulder", x=clav[1], z=-s * clav[0] * 0 + 0.0, y=0.0)
-        if clav[0]:
-            P[f"{S_}Shoulder"] = ("local", rot_xyz(clav[1], 0.0, s * clav[0]))
+        P[f"{S_}Shoulder"] = ("local", rot_xyz(clav[1], 0.0, s * clav[0]))
         M = self.S.world(P)
         sh = M[f"{S_}UpperArm"][:3, 3]
         Lg = self.L[S_]
@@ -273,65 +271,51 @@ class Gait:
         self.step_w = step_w
         self.toe_out = toe_out
 
-    def foot(self, S_, t, ground=0.0):
-        """World ankle position, foot forward, foot up, toe bend for side S_ at time t."""
-        s = 1.0 if S_ == "Left" else -1.0
-        ph = (t / self.T + (0.0 if S_ == "Left" else 0.5)) % 1.0
+    def _stance(self, S_, u):
+        """Ankle position (body frame), foot pitch for stance fraction u in [0,1]."""
         r = self.rig
+        s = 1.0 if S_ == "Left" else -1.0
         a0 = r.ankle0[S_]
-        ball0 = r.ball0[S_]
-        heel_back = 0.065 * r.leg_len / 0.86          # heel contact behind the ankle
-        ankle_h = a0[2]
-        fl = np.linalg.norm((ball0 - a0)[:2])           # ankle -> ball horizontal
-        x_lat = a0[0] + s * self.step_w
         fwd = np.array([s * math.sin(rad(self.toe_out)), -math.cos(rad(self.toe_out)), 0.0])
-        D = self.duty
-        S = self.stride
-        if ph < D:
-            u = ph / D
-            # contact point slides backward with the ground: y(u) = y_hs + S*u (forward is -y)
-            ground_y = -S * 0.5 + S * u              # displacement along -fwd (world +y)
-            # foot pitch: heel strike (+heel_ang toes up) -> flat by 0.18 -> heel rise from 0.62
-            if u < 0.18:
-                pitch = self.heel_ang * (1 - ss(u / 0.18))
-                pivot = "heel"
-            elif u < 0.60:
-                pitch = 0.0
-                pivot = "flat"
-            else:
-                pitch = -self.toe_ang * ss((u - 0.60) / 0.40)
-                pivot = "ball"
-            toe_bend = max(0.0, -pitch) * 0.9
-        else:
-            u = (ph - D) / (1 - D)
-            e = sm(u)
-            ground_y = S * 0.5 - S * e
-            pitch = lerp(-self.toe_ang, self.heel_ang, ss(u * 1.15))
-            pivot = "air"
-            toe_bend = max(0.0, -pitch) * 0.9 * (1 - ss(u * 2))
-        # foot frame
-        R = axis_angle(np.cross(fwd, (0, 0, 1)), pitch)          # +pitch lifts toes
-        f = R @ fwd
-        up = R @ np.array([0, 0, 1.0])
-        base = np.array([x_lat, a0[1], 0.0]) + np.array([0, ground_y, 0]) * 1.0
-        base = base - fwd * 0.0
-        heel = np.array([0, 0, 0.0]) - fwd * heel_back
-        ballp = fwd * fl
-        ank_local = np.array([0, 0, ankle_h])
-        if pivot in ("heel",):
-            # rotate the foot about the heel contact
-            p_c = base + heel
-            ank = p_c + R @ (ank_local - heel)
-        elif pivot == "ball":
-            p_c = base + ballp
-            ank = p_c + R @ (ank_local - ballp)
-        elif pivot == "flat":
+        heel = -fwd * 0.062 * r.leg_len / 0.86 + np.array([0, 0, 0.0])
+        ballp = fwd * np.linalg.norm((r.ball0[S_] - a0)[:2])
+        g = self.duty * self.stride * (u - 0.5)          # contact moves backward (+y) with the ground
+        base = np.array([a0[0] + s * self.step_w, a0[1] + g, 0.0])
+        ank_local = np.array([0, 0, a0[2]])
+        if u < 0.16:
+            pitch = self.heel_ang * (1 - ss(u / 0.16))
+            R = axis_angle(np.cross(fwd, (0, 0, 1)), pitch)
+            pc = base + heel
+            ank = pc + R @ (ank_local - heel)
+        elif u < 0.58:
+            pitch = 0.0
             ank = base + ank_local
         else:
-            clear = self.lift * math.sin(math.pi * u) ** 0.85
-            ank = base + ank_local + np.array([0, 0, clear]) + R @ ank_local - ank_local
-            ank = ank + np.array([0, 0, max(0.0, -pitch) * 0.0])
-        return ank, f, up, toe_bend, ph
+            pitch = -self.toe_ang * ss((u - 0.58) / 0.42)
+            R = axis_angle(np.cross(fwd, (0, 0, 1)), pitch)
+            pc = base + ballp
+            ank = pc + R @ (ank_local - ballp)
+        return ank, pitch, fwd
+
+    def foot(self, S_, t):
+        """World ankle, foot forward, foot up, toe bend, phase for side S_ at time t."""
+        ph = (t / self.T + (0.0 if S_ == "Left" else 0.5)) % 1.0
+        D = self.duty
+        if ph < D:
+            u = ph / D
+            ank, pitch, fwd = self._stance(S_, u)
+            toe = max(0.0, -pitch) * 0.95
+        else:
+            u = (ph - D) / (1 - D)
+            p0, a0_, fwd = self._stance(S_, 1.0)
+            p1, a1_, _ = self._stance(S_, 0.0)
+            e = sm(u)
+            ank = p0 * (1 - e) + p1 * e
+            ank = ank + np.array([0, 0, self.lift * math.sin(math.pi * min(1.0, u * 1.08)) ** 0.8])
+            pitch = lerp(-self.toe_ang, self.heel_ang * 0.8, ss(u * 1.2))
+            toe = self.toe_ang * 0.95 * (1 - ss(u * 2.5))
+        R = axis_angle(np.cross(fwd, (0, 0, 1)), pitch)
+        return ank, R @ fwd, R @ np.array([0, 0, 1.0]), toe, ph
 
 
 # --------------------------------------------------------------------------- secondary motion

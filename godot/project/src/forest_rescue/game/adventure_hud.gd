@@ -448,8 +448,8 @@ func build_locked_card() -> void:
 
 func show_locked(reason: String) -> void:
 	locked_reason = reason
-	if reason == "unavailable":
-		locked_body.text = text("hud.unavailable")
+	if reason in ["unavailable", "error"]:
+		locked_body.text = text("hud.unavailable") if reason == "unavailable" else game.client.load_error()
 		locked_progress.hide()
 		locked_cta.hide()
 	else:

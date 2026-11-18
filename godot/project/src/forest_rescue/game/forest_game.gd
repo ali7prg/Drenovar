@@ -48,6 +48,7 @@ var acting := false
 var anchors_cache: Dictionary = {}
 var site_post_steps: Dictionary = {}
 var boss_arena_state := ""
+var entered_session := false
 
 func setup(host: Node) -> void:
 	main = host
@@ -87,6 +88,7 @@ func on_state(state: Dictionary) -> void:
 	last_state_ref = state
 	var previous := client.adv
 	client.ingest(state)
+	enter_session_once()
 	sync_world()
 	actors.on_state(client.adv, previous)
 	mech.on_state()
@@ -122,6 +124,18 @@ func add_menu_entries(parent: Container) -> void:
 	entry.custom_minimum_size = Vector2(48, 42)
 	entry.pressed.connect(open_journal)
 	parent.add_child(entry)
+
+## CONTRACT v1.1 «Session entry»: once per app launch, POST /api/session/new with the existing
+## settlement counts as a new foreground entry (an interrupted intro becomes an invitation).
+func enter_session_once() -> void:
+	if entered_session or not client.known or not main.connected() or main.player_id.is_empty():
+		return
+	entered_session = true
+	var response: Dictionary = await main.request("session/new", {})
+	if response.has("city") and response.has("world"):
+		main.accept(response)
+	elif not response.has("error"):
+		main.poll_account_state()
 
 # ------------------------------------------------------------------ world access (WORLD_API.md)
 func city_active() -> bool:
@@ -336,6 +350,8 @@ func existing_marker_near(screen_position: Vector2) -> bool:
 	return false
 
 func locked_reason() -> String:
+	if client.known and not client.available():
+		return "error"
 	return "unavailable" if not client.available() else "locked"
 
 # ------------------------------------------------------------------ frame loop
@@ -754,7 +770,9 @@ func on_events(events: Array) -> void:
 			"reward_escrowed":
 				hud.toast(content.text("reward.reserve"), "reward", 3.5)
 			"transfer_rewards":
-				panels.on_transfer(event.get("resources", {}))
+				var moved: Dictionary = (event.get("resources", {}) as Dictionary).duplicate()
+				moved["storageFull"] = bool(event.get("storageFull", false))
+				panels.on_transfer(moved)
 			"horse_joined":
 				hud.toast(String(content.campaign.get("prologue", {}).get("completionText", "")), "reward", 6.0)
 				audio.play_cue("fr_large_reward")

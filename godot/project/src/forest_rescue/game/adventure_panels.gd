@@ -366,7 +366,7 @@ func on_transfer(resources: Dictionary) -> void:
 		game.hud.toast(t("reward.claimed", {"amount":" · ".join(parts)}), "reward", 5.0)
 		game.fx.fly_to_wallet(resources)
 		game.audio.play_cue("fr_large_reward")
-	if remaining > 0:
+	if remaining > 0 or bool(resources.get("storageFull", false)):
 		game.hud.toast(t("reward.capacity") if moved > 0 else t("reward.noRoom"), "info", 6.0)
 
 func offer_retry() -> void:

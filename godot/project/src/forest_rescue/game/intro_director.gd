@@ -99,7 +99,8 @@ func invite_pressed() -> void:
 func start_offered() -> void:
 	requested = true
 	mode = "waiting"
-	var result: Dictionary = await game.request_action("start_intro", {}, "adventure_intro")
+	var fields := {"reducedMotion":true} if game.reduced_motion else {}
+	var result: Dictionary = await game.request_action("start_intro", fields, "adventure_intro")
 	requested = false
 	if not bool(result.get("ok", false)):
 		mode = ""
@@ -361,7 +362,8 @@ func on_follow() -> void:
 	finish_presentation()
 	if was_replay:
 		return
-	var result: Dictionary = await game.request_action("finish_intro", {}, "adventure_intro")
+	var attempt := int(intro_state().get("attempt", 0))
+	var result: Dictionary = await game.request_action("finish_intro", {"attempt":attempt} if attempt > 0 else {}, "adventure_intro")
 	if not bool(result.get("ok", false)) and String(intro_state().get("status", "")) == "playing":
 		return
 	# The player now chooses the squad and the route; nothing marches automatically.

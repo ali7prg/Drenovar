@@ -6,7 +6,7 @@ extends SceneTree
 
 const FIXTURES := "res://data/forest_rescue/game/fixtures/"
 const ALLOWED := {
-	"adventure_intro":["kind", "campaignId", "action"],
+	"adventure_intro":["kind", "campaignId", "action", "requestId", "attempt", "reducedMotion"],
 	"form_squad":["kind", "campaignId", "action", "units"], "move":["kind", "campaignId", "action", "targetId"],
 	"stop":["kind", "campaignId", "action"], "discover_horse":["kind", "campaignId", "action"],
 	"attempt_task":["kind", "campaignId", "action", "siteId", "taskId"], "mechanism_input":["kind", "campaignId", "action", "siteId", "symbol"],
@@ -144,7 +144,7 @@ func run() -> void:
 	check(stub.requests.size() == 1, "start_intro sent once when safe")
 	if stub.requests.size() >= 1:
 		var body: Dictionary = stub.requests[0].body
-		check(body == {"kind":"adventure_intro", "campaignId":"forest_rescue_v1", "action":"start_intro"}, "start_intro exact body " + str(body))
+		check(body == {"kind":"adventure_intro", "campaignId":"forest_rescue_v1", "action":"start_intro", "requestId":stub.requests[0].key}, "start_intro exact body " + str(body))
 		check(not String(stub.requests[0].key).is_empty(), "Idempotency-Key present")
 	await frames(2)
 	check(forest.intro.presenting() and forest.intro.mode == "animated", "presentation started")
@@ -314,8 +314,9 @@ func run() -> void:
 	for entry in forest.client.sent_log:
 		var body: Dictionary = entry.body
 		var key: String = body.kind if body.kind == "adventure_intro" else String(body.action)
+		check(String(body.get("requestId", "")) == String(entry.key), "body requestId equals Idempotency-Key")
 		for field in body:
-			check(ALLOWED.get(key, []).has(field), "allowed field %s in %s" % [field, key])
+			check(field == "requestId" or ALLOWED.get(key, []).has(field), "allowed field %s in %s" % [field, key])
 	print("QA_FOREST_FLOW checks=", checks, " failures=", failures.size())
 	for failure in failures:
 		print("  FAIL ", failure)

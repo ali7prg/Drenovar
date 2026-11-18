@@ -93,9 +93,9 @@ def skeleton():
     for s, sx in (("L", 1), ("R", -1)):
         bone(f"scapula_{s}", S(255, 100, 0.16 * sx), S(215, 175, 0.31 * sx), "spine_03", fwd)
         bone(f"upperarm_{s}", S(215, 175, 0.31 * sx), S(262, 240, 0.33 * sx), f"scapula_{s}", fwd)
-        bone(f"forearm_{s}", S(262, 240, 0.33 * sx), S(258, 322, 0.335 * sx), f"upperarm_{s}", fwd)
-        bone(f"hand_{s}", S(258, 322, 0.335 * sx), S(243, 352, 0.34 * sx), f"forearm_{s}", fwd)
-        bone(f"fingers_{s}", S(243, 352, 0.34 * sx), S(190, 360, 0.345 * sx), f"hand_{s}", up)
+        bone(f"forearm_{s}", S(262, 240, 0.34 * sx), S(258, 322, 0.35 * sx), f"upperarm_{s}", fwd)
+        bone(f"hand_{s}", S(258, 322, 0.35 * sx), S(243, 352, 0.355 * sx), f"forearm_{s}", fwd)
+        bone(f"fingers_{s}", S(243, 352, 0.355 * sx), S(190, 360, 0.36 * sx), f"hand_{s}", up)
         bone(f"thigh_{s}", S(575, 125, 0.26 * sx), S(548, 218, 0.35 * sx), "hips", fwd)
         bone(f"shin_{s}", S(548, 218, 0.35 * sx), S(630, 268, 0.37 * sx), f"thigh_{s}", fwd)
         bone(f"foot_{s}", S(630, 268, 0.375 * sx), S(612, 350, 0.40 * sx), f"shin_{s}", fwd)
@@ -155,13 +155,13 @@ def body_parts(sk):
                       k=0.035, tag="ear"))
     # light cheek / throat ruff volume (lynx facial ruff)
     for sx in (1, -1):
-        P.append(Part(sdf.ellipsoid(S(108, 152, 0.19 * sx), (0.14, 0.15, 0.14)), head, k=0.06, tag="ruffvol"))
+        P.append(Part(sdf.ellipsoid(S(108, 150, 0.22 * sx), (0.16, 0.15, 0.15)), head, k=0.06, tag="ruffvol"))
         P.append(Part(sdf.ellipsoid(S(140, 166, 0.15 * sx), (0.14, 0.13, 0.11)), "neck_02", k=0.06, tag="ruffvol"))
     P.append(Part(sdf.ellipsoid(S(172, 194, 0.0), (0.18, 0.13, 0.11)), "neck_01", k=0.07, tag="ruffvol"))
     # dark mane ridge along the dorsal neck (spikes grow from it)
     ridge = [(98, 86, 0.065, "neck_02"), (140, 78, 0.095, "neck_02"), (190, 72, 0.115, "neck_01"),
-             (250, 74, 0.12, "spine_03"), (320, 80, 0.105, "spine_03"), (400, 80, 0.075, "spine_02"),
-             (470, 74, 0.05, "spine_01")]
+             (250, 74, 0.12, "spine_03"), (320, 82, 0.10, "spine_03"), (400, 88, 0.065, "spine_02"),
+             (470, 86, 0.04, "spine_01")]
     for (x0, y0, r0, b0), (x1, y1, r1, b1) in zip(ridge[:-1], ridge[1:]):
         P.append(Part(sdf.round_cone(S(x0, y0), S(x1, y1), r0, r1), b0, k=0.05, tag="maneridge"))
 
@@ -175,11 +175,11 @@ def body_parts(sk):
         P.append(Part(stretch(sdf.round_cone(Sj, E, 0.125, 0.115), 1.2, center=Sj), ua, k=0.05, tag="upperarm"))
         Mid = E + (Wr - E) * 0.45
         P.append(Part(stretch(sdf.round_cone(E, Mid, 0.145, 0.135), 1.08, center=E), fa, k=0.05, tag="forearm"))
-        P.append(Part(stretch(sdf.round_cone(Mid, Wr, 0.135, 0.125), 1.32, center=Wr), fa, k=0.05, tag="forearm"))
+        P.append(Part(stretch(sdf.round_cone(Mid, Wr, 0.135, 0.125), 1.12, center=Wr), fa, k=0.05, tag="forearm"))
         P.append(Part(sdf.ellipsoid(E + (Wr - E) * 0.22 + np.array([0, 0.01, 0]), (0.15, 0.15, 0.17)), fa, k=0.06,
                       tag="forearm_m"))
-        P.append(Part(stretch(sdf.round_cone(Wr, M, 0.12, 0.115), 1.32, center=Wr), ha, k=0.04, tag="hand"))
-        _paw(P, M, T, fi, sx, scale=1.0, latf=1.2)
+        P.append(Part(stretch(sdf.round_cone(Wr, M, 0.12, 0.115), 1.15, center=Wr), ha, k=0.04, tag="hand"))
+        _paw(P, M, T, fi, sx, scale=1.0, latf=1.12)
         th, sh, ft, to = LEGS[f"hind_{s}"][1:]
         H, K, Hk, Mt = sk.head(th), sk.head(sh), sk.head(ft), sk.head(to)
         Tt = sk.tail(to)
@@ -189,7 +189,7 @@ def body_parts(sk):
         P.append(Part(sdf.round_cone(H, K, 0.15, 0.13), th, k=0.06, tag="thigh"))
         P.append(Part(stretch(sdf.round_cone(K, Hk, 0.15, 0.12), 0.85, center=K), sh, k=0.05, tag="shin"))
         P.append(Part(sdf.ellipsoid(K + (Hk - K) * 0.28, (0.12, 0.15, 0.13)), sh, k=0.06, tag="gaskin"))
-        P.append(Part(stretch(sdf.round_cone(Hk, Mt, 0.125, 0.12), 0.95, center=Hk), ft, k=0.04, tag="metatarsus"))
+        P.append(Part(stretch(sdf.round_cone(Hk, Mt, 0.125, 0.12), 0.92, center=Hk), ft, k=0.04, tag="metatarsus"))
         _paw(P, Mt, Tt, to, sx, scale=0.92, latf=1.15)
     # ---- tail core
     tb = ["hips"] + [f"tail_{i:02d}" for i in range(1, 7)]
@@ -231,7 +231,7 @@ def toe_tips(sk, side, hind=False, scale=1.0, latf=None):
     lat = np.array([1.0, 0, 0])
     c = np.array([M[0], M[1], 0.0]) + fwd * 0.05 * scale
     out = []
-    latf = (1.15 if hind else 1.2) if latf is None else latf
+    latf = (1.15 if hind else 1.12) if latf is None else latf
     for j, (ox, of) in TOES:
         p = c + (lat * ox * sx * latf + fwd * (of + 0.06)) * scale + np.array([0, 0, 0.06 * scale])
         out.append((p, fwd, lat * sx))
@@ -248,8 +248,8 @@ def side_stance(sk, pose=None):
     legs = {
         "fore_L": ((124, 352), (-0.45, 1.0)),    # reaching forward
         "fore_R": ((284, 352), (-0.20, 1.0)),    # planted under the shoulder
-        "hind_L": ((688, 352), (-0.06, 1.0)),    # extended back
-        "hind_R": ((472, 352), (-0.62, 1.0)),    # stepping forward under the belly
+        "hind_L": ((678, 352), (-0.14, 1.0)),    # extended back
+        "hind_R": ((462, 352), (-0.70, 1.0)),    # stepping forward under the belly
     }
     girdle = {"fore_L": 2.0, "fore_R": 22.0}
     for leg, ((x, y), (dx, dy)) in legs.items():
@@ -328,10 +328,23 @@ def fur(sk, hv, hf, pans, rng):
         return np.array([0.0, 0.28, -0.10]) + rng.normal(0, 0.05, 3)
 
     import gref
-    mane_views = [gref.morph_view(side, -3), gref.morph_view(front, 6), gref.morph_view(rear, 6)]
+    mane_views = [gref.morph_view(side, -1), gref.morph_view(front, 5), gref.morph_view(rear, 5)]
     C += gfur.make_clumps("mane", r, nr, d_mane, rng, mane_views, 0.66, min_len=0.05,
                           width=(0.04, 0.072), flat=0.45, bend_fn=b_mane,
-                          up_fn=lambda p, n, d: np.array([0.0, 1.0, 0.0]), jag=(0.82, 1.0))
+                          up_fn=lambda p, n, d: np.array([0.0, 1.0, 0.0]), jag=(0.86, 1.0))
+    # midline crest (tall spikes between the ears and over the withers, seen in front/rear)
+    def w_crest(c, n):
+        x, y = sheet_xy(c)
+        return _ss(100, 125, x) * (1 - _ss(250, 290, x)) * (np.abs(c[:, 0]) < 0.07) * _ss(0.3, 0.6, n[:, 2])
+    r2, nr2 = _roots(hv, hf, rng, 40, w_crest, 0.03)
+
+    def d_crest(p, n, rng):
+        x, _ = sheet_xy(p)
+        th = math.radians(np.interp(x[0], [100, 180, 260], [66, 58, 48]))
+        return np.array([rng.normal(0, 0.12), math.cos(th), math.sin(th)])
+    C += gfur.make_clumps("mane", r2, nr2, d_crest, rng, [side, front, rear], 0.72, min_len=0.10,
+                          width=(0.045, 0.07), flat=0.5, bend_fn=b_mane,
+                          up_fn=lambda p, n, d: np.array([0.0, 1.0, 0.0]), jag=(0.9, 1.0))
     # ---- tail bush (side view only: the rear sheet draws the tail hanging, inconsistent)
     tail_bones = [f"tail_{i:02d}" for i in range(1, 7)]
     seg = [(sk.head(b), sk.tail(b)) for b in tail_bones]

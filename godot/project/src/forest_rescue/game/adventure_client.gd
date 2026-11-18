@@ -60,7 +60,7 @@ func ingest(state: Dictionary) -> void:
 	if value is Dictionary and String(value.get("campaignId", "")) == CAMPAIGN_ID:
 		known = true
 		supported = int(value.get("schemaVersion", 0)) == SCHEMA_VERSION
-		adv = value if supported else {}
+		adv = value if supported else {"error":{"error":"SCHEMA_UNSUPPORTED"}}
 	else:
 		known = false
 		supported = true
@@ -84,7 +84,14 @@ func ingest(state: Dictionary) -> void:
 		events_arrived.emit(fresh)
 
 func available() -> bool:
-	return known and supported
+	# A corrupt/future-schema save is projected with an «error» object: show it, send nothing.
+	return known and supported and not adv.has("error")
+
+func load_error() -> String:
+	var problem: Variant = adv.get("error") if known else null
+	if problem is Dictionary:
+		return String(problem.get("message", content.text("error.version")))
+	return content.text("error.version") if known and not supported else ""
 
 func unlocked() -> bool:
 	return available() and bool(adv.get("access", {}).get("unlocked", false))
@@ -154,10 +161,13 @@ func send(action: String, fields: Dictionary = {}, kind := "adventure") -> Dicti
 		return _fail("FOREST_LOCKED_HALL_LEVEL", content.text("error.forestLocked"))
 	if in_flight:
 		return _fail("LOCAL_BUSY", content.text("network.pending"))
-	var body := {"kind":kind, "campaignId":CAMPAIGN_ID, "action":action}
+	var key := uuid4()
+	# CONTRACT v1.1: optional body requestId equal to the Idempotency-Key header; both are
+	# reused unchanged when an uncertain request is retried.
+	var body := {"kind":kind, "campaignId":CAMPAIGN_ID, "action":action, "requestId":key}
 	for name in fields:
 		body[name] = fields[name]
-	pending = {"body":body, "key":uuid4(), "attempts":0}
+	pending = {"body":body, "key":key, "attempts":0}
 	return await _deliver()
 
 ## Re-sends the last uncertain request with the same key and body.

@@ -56,9 +56,9 @@ LODS_TREE = {
 }
 
 # grove oaks (art/01 look): broad, flat, lifted crown of yellow lobes, trunk + limbs visible below
-GROVE_CFG = dict(placement="anchors", mass_r=0.27, mass_zscale=0.62, ao_under=0.66, ao_side=0.84, side_mode="shade", p_hires=0.85,
-                 limbs_connected_only=True, limb_keep_r=2.6, anchor_min_r=2.6, anchor_min_z=5.0, mass_min_dist=2.6,
-                 trunk_r_k=0.82)
+GROVE_CFG = dict(placement="anchors", mass_r=0.26, mass_zscale=0.6, ao_under=0.66, ao_side=0.82, side_mode="shade", p_hires=0.5,
+                 limbs_connected_only=True, limb_keep_r=2.6, anchor_min_r=2.6, anchor_min_z=7.2, mass_min_dist=2.5,
+                 trunk_r_k=0.8, lobe_zf_min=-0.3)
 GROVE_LODS = {0: dict(n_masses=9, clumps_per=58, core_cards=0, max_cards=1250, copy_min_r_px=2.6),
               1: dict(n_masses=8, clumps_per=26, core_cards=0, max_cards=470),
               2: dict(n_masses=7, clumps_per=11, core_cards=0, max_cards=110)}
@@ -75,16 +75,16 @@ TREES = {
         paintedLightMixByMaterial={"lf_foliage_vol": 0.5},
         hires=dict(region="oak_top", sheet="07_fog_exploration_interface.png", box=(518, 100, 800, 530), rosette_px=800,
                    m_per_px=1 / 50.0, l_shift=5.0, n_composite=16, keep_original=True),
-        palettes=[dict(name="grove", region="oak_grove", lab=dict(dh=12.0, dl=1.0, kc=0.8))],
+        palettes=[dict(name="grove", region="oak_grove", lab=dict(dh=12.0, dl=-3.0, kc=0.72))],
         single_refs="oak",
         tint_note="art/02 palette (orange-gold); for art/07 / art/01 look tint foliage toward warm yellow: "
                   "hue +0.02..+0.035, saturation x1.10, value x1.08 (INSTANCE_CUSTOM r,g,b)",
         variants={1: dict(seed=5, copies=[(125, 0.92), (-125, 0.9)]),
-                  2: dict(seed=6, mirror=True, copies=[(90, 0.95), (180, 0.9), (-90, 0.95)], scale=(1.08, 1.06), palette="grove",
+                  2: dict(seed=6, mirror=True, copies=[(90, 0.95), (180, 0.9), (-90, 0.95)], scale=(1.08, 1.14), palette="grove",
                           no_front=True, cfg=GROVE_CFG, lods=GROVE_LODS),
-                  3: dict(seed=8, copies=[(100, 0.95), (200, 0.9), (-80, 0.95)], scale=(1.02, 1.1), palette="grove",
+                  3: dict(seed=8, copies=[(100, 0.95), (200, 0.9), (-80, 0.95)], scale=(1.02, 1.18), palette="grove",
                           no_front=True, cfg=GROVE_CFG, lods=GROVE_LODS),
-                  4: dict(seed=9, mirror=True, copies=[(120, 0.9), (-120, 0.9)], scale=(1.14, 1.0), palette="grove",
+                  4: dict(seed=9, mirror=True, copies=[(120, 0.9), (-120, 0.9)], scale=(1.14, 1.1), palette="grove",
                           no_front=True, cfg=GROVE_CFG, lods=GROVE_LODS)},
         patch=dict(refs=[("07_fog_exploration_interface.png", (518, 110, 1020, 720), "art/07 panel 2"),
                          ("01_world_masterplan.png", (0, 0, 560, 330), "art/01 NW golden-oak grove")],
@@ -120,7 +120,7 @@ LODS_WHORL = {
 LODS_BIRCH = {
     0: dict(trunk_step_m=0.35, trunk_sides=10, limb_step_m=0.25, limb_sides=5, limb_min_r_px=1.2, limb_budget=900,
             copies=True, copy_min_r_px=1.8, front_frac=1.0, front_scale=1.0, n_masses=34, clumps_per=20,
-            fill_size=1.1, front_extra=0.5, max_cards=1180, core_cards=8),
+            fill_size=1.1, front_extra=0.5, max_cards=1100, core_cards=8),
     1: dict(trunk_step_m=0.7, trunk_sides=6, limb_step_m=0.5, limb_sides=4, limb_min_r_px=2.6, limb_budget=260,
             copies=True, copy_min_r_px=3.5, front_frac=0.55, front_scale=1.15, n_masses=18, clumps_per=10,
             fill_size=1.5, front_extra=0.25, max_cards=450, core_cards=3),
@@ -157,7 +157,7 @@ TREES["birch"] = dict(
              lum_pref=3.0, front_tilt_max=30, top_part=0.65, obl_part=0.8, vol_material=True, mass_zscale=0.7,
              ao_under=0.82, front_extra_eta=0.6, core_eta_max=0.5, top_by_chroma=True),
     n_patches=140, min_px=35, region="birch", bark="birch", swatch=(650, 798, 844, 984), paintedLightMix=0.3,
-    swatch_m=0.45,
+    swatch_m=0.45, tile_grade=dict(dh=-4.0, dl=0.0, kc=1.18),
     paintedLightMixByMaterial={"lf_foliage_vol": 0.5},
     height_hint=13.0, crown_hint=4.4, lods=LODS_BIRCH, crown_mode="mass", placement="anchors", mass_r=0.15,
     anchor_min_r=1.3, anchor_step_m=0.9, anchor_min_z=3.5,

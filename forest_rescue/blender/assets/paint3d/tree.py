@@ -270,6 +270,15 @@ class Patches:
                                   w_m=(rect[2] - rect[0]) / ref.ppm, h_m=(rect[3] - rect[1]) / ref.ppm))
         self.extra = []
 
+    def grade(self, dh=0.0, dl=0.0, kc=1.0):
+        from skimage import color as skc
+        for i, t_ in enumerate(self.tiles):
+            lab_ = seg.lab(t_[..., :3])
+            C = np.hypot(lab_[..., 1], lab_[..., 2]) * kc
+            h = np.arctan2(lab_[..., 2], lab_[..., 1]) + np.radians(dh)
+            lab_ = np.stack([np.clip(lab_[..., 0] + dl, 0, 100), C * np.cos(h), C * np.sin(h)], -1)
+            self.tiles[i] = np.concatenate([np.clip(skc.lab2rgb(lab_), 0, 1).astype(np.float32), t_[..., 3:4]], 2)
+
     def pack(self, key):
         region = atl.REGIONS[key]
         sizes = [(t.shape[1], t.shape[0]) for t in self.tiles]
@@ -400,7 +409,12 @@ class Patches:
         tiles = hires.composite(tiles, n=n_composite) + tiles
         pal_tiles = []
         if keep_original:
-            # the same rosettes/composites in their original art/07 colours (grove palette)
+            # the same rosettes/composites in their original art/07 colours (grove palette), chroma x0.85
+            from skimage import color as skc
+            for o in orig:
+                lab_ = seg.lab(o["rgba"][..., :3])
+                lab_[..., 1:] *= 0.85
+                o["rgba"] = np.concatenate([np.clip(skc.lab2rgb(lab_), 0, 1).astype(np.float32), o["rgba"][..., 3:4]], 2)
             pal_tiles = hires.composite(orig, n=n_composite) + orig
         allt = tiles + pal_tiles
         img, uvs, s = hires.pack(allt, key)
@@ -1135,7 +1149,7 @@ class TreeBuilder:
             n_c = clumps_per
             gold = np.pi * (3 - np.sqrt(5))
             for j in range(n_c):
-                zf = 1 - (j + 0.5) / n_c * 1.55            # 1 (top) .. -0.55 (underside)
+                zf = 1 - (j + 0.5) / n_c * (1.0 - cfg.get("lobe_zf_min", -0.55))   # 1 (top) .. zf_min (underside)
                 rr = np.sqrt(max(0.0, 1 - zf * zf))
                 a = j * gold + rng.uniform(-0.25, 0.25)
                 dvec = np.array([rr * np.cos(a), rr * np.sin(a), zf])

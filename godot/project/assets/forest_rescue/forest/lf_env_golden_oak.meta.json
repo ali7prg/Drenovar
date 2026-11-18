@@ -9,8 +9,8 @@
         "lf_env_golden_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3306,
-        "LOD1": 1234,
+        "LOD0": 3312,
+        "LOD1": 1256,
         "LOD2": 170
       },
       "materials": {
@@ -30,18 +30,18 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 13.59,
-      "crown_radius_m": 8.5,
+      "height_m": 13.69,
+      "crown_radius_m": 8.79,
       "bounds_m_blender": [
         [
-          -6.13,
+          -6.31,
           -5.81,
           -0.3
         ],
         [
           8.5,
-          7.43,
-          13.59
+          8.79,
+          13.69
         ]
       ],
       "display_offset_gltf": [
@@ -69,9 +69,9 @@
         "lf_env_golden_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3728,
-        "LOD1": 1278,
-        "LOD2": 194
+        "LOD0": 3216,
+        "LOD1": 1230,
+        "LOD2": 138
       },
       "materials": {
         "LOD0": [
@@ -90,22 +90,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 11.7,
-      "crown_radius_m": 8.47,
+      "height_m": 12.54,
+      "crown_radius_m": 7.6,
       "bounds_m_blender": [
         [
-          -8.47,
-          -6.3,
-          -0.32
+          -7.6,
+          -5.32,
+          -0.34
         ],
         [
-          4.78,
-          7.02,
-          11.7
+          4.49,
+          5.39,
+          12.54
         ]
       ],
       "display_offset_gltf": [
-        17.401,
+        16.814,
         0.0,
         0.0
       ],
@@ -127,24 +127,25 @@
         ],
         "scale": [
           1.08,
-          1.06
+          1.14
         ],
         "palette": "grove",
         "no_front": true,
         "cfg": {
           "placement": "anchors",
-          "mass_r": 0.27,
-          "mass_zscale": 0.62,
+          "mass_r": 0.26,
+          "mass_zscale": 0.6,
           "ao_under": 0.66,
-          "ao_side": 0.84,
+          "ao_side": 0.82,
           "side_mode": "shade",
-          "p_hires": 0.85,
+          "p_hires": 0.5,
           "limbs_connected_only": true,
           "limb_keep_r": 2.6,
           "anchor_min_r": 2.6,
-          "anchor_min_z": 5.0,
-          "mass_min_dist": 2.6,
-          "trunk_r_k": 0.82
+          "anchor_min_z": 7.2,
+          "mass_min_dist": 2.5,
+          "trunk_r_k": 0.8,
+          "lobe_zf_min": -0.3
         },
         "lods": {
           "0": {
@@ -176,9 +177,9 @@
         "lf_env_golden_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3656,
-        "LOD1": 1346,
-        "LOD2": 198
+        "LOD0": 3090,
+        "LOD1": 1180,
+        "LOD2": 138
       },
       "materials": {
         "LOD0": [
@@ -197,22 +198,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 11.92,
-      "crown_radius_m": 8.16,
+      "height_m": 13.23,
+      "crown_radius_m": 6.83,
       "bounds_m_blender": [
         [
-          -5.46,
-          -6.86,
-          -0.33
+          -3.67,
+          -6.09,
+          -0.35
         ],
         [
-          8.16,
-          6.69,
-          11.92
+          6.83,
+          3.87,
+          13.23
         ]
       ],
       "display_offset_gltf": [
-        34.802,
+        33.628,
         0.0,
         0.0
       ],
@@ -233,24 +234,25 @@
         ],
         "scale": [
           1.02,
-          1.1
+          1.18
         ],
         "palette": "grove",
         "no_front": true,
         "cfg": {
           "placement": "anchors",
-          "mass_r": 0.27,
-          "mass_zscale": 0.62,
+          "mass_r": 0.26,
+          "mass_zscale": 0.6,
           "ao_under": 0.66,
-          "ao_side": 0.84,
+          "ao_side": 0.82,
           "side_mode": "shade",
-          "p_hires": 0.85,
+          "p_hires": 0.5,
           "limbs_connected_only": true,
           "limb_keep_r": 2.6,
           "anchor_min_r": 2.6,
-          "anchor_min_z": 5.0,
-          "mass_min_dist": 2.6,
-          "trunk_r_k": 0.82
+          "anchor_min_z": 7.2,
+          "mass_min_dist": 2.5,
+          "trunk_r_k": 0.8,
+          "lobe_zf_min": -0.3
         },
         "lods": {
           "0": {
@@ -282,9 +284,9 @@
         "lf_env_golden_oak_v4_LOD2"
       ],
       "tris": {
-        "LOD0": 3090,
-        "LOD1": 1114,
-        "LOD2": 190
+        "LOD0": 2558,
+        "LOD1": 1016,
+        "LOD2": 158
       },
       "materials": {
         "LOD0": [
@@ -303,22 +305,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 10.71,
-      "crown_radius_m": 9.09,
+      "height_m": 12.47,
+      "crown_radius_m": 7.96,
       "bounds_m_blender": [
         [
-          -9.09,
-          -7.3,
-          -0.3
+          -7.96,
+          -6.19,
+          -0.33
         ],
         [
-          5.31,
-          8.1,
-          10.71
+          2.53,
+          5.56,
+          12.47
         ]
       ],
       "display_offset_gltf": [
-        52.203,
+        50.442,
         0.0,
         0.0
       ],
@@ -336,24 +338,25 @@
         ],
         "scale": [
           1.14,
-          1.0
+          1.1
         ],
         "palette": "grove",
         "no_front": true,
         "cfg": {
           "placement": "anchors",
-          "mass_r": 0.27,
-          "mass_zscale": 0.62,
+          "mass_r": 0.26,
+          "mass_zscale": 0.6,
           "ao_under": 0.66,
-          "ao_side": 0.84,
+          "ao_side": 0.82,
           "side_mode": "shade",
-          "p_hires": 0.85,
+          "p_hires": 0.5,
           "limbs_connected_only": true,
           "limb_keep_r": 2.6,
           "anchor_min_r": 2.6,
-          "anchor_min_z": 5.0,
-          "mass_min_dist": 2.6,
-          "trunk_r_k": 0.82
+          "anchor_min_z": 7.2,
+          "mass_min_dist": 2.5,
+          "trunk_r_k": 0.8,
+          "lobe_zf_min": -0.3
         },
         "lods": {
           "0": {
@@ -380,9 +383,9 @@
     }
   },
   "tris": {
-    "LOD0": 3728,
-    "LOD1": 1346,
-    "LOD2": 198
+    "LOD0": 3312,
+    "LOD1": 1256,
+    "LOD2": 170
   },
   "bones": 0,
   "materials": [

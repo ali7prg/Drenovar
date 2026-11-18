@@ -225,6 +225,8 @@ def main():
                      scale=sp.get("tile_scale", 2))
     if sp.get("crown_mode") == "whorls":
         print(f"[{asset}] fronds: {P.add_fronds()}", flush=True)
+    if sp.get("tile_grade"):
+        P.grade(**sp["tile_grade"])
     P.preview(qa_path(asset, a.iter, "patches.png"))
     reg_img, s = P.pack(sp["region"])
     atl.save_region(sp["region"], reg_img, {"asset": asset, "scale": s, "tiles": P.n})

@@ -54,8 +54,8 @@ def trunk_sdf_mesh(profile, depth_k=0.72, arch=ARCH, cavity=CAVITY, voxel=0.1, s
         q = np.sqrt(((x - cx) / hw) ** 2 + (y / ry) ** 2)
         d = (q - 1.0) * np.minimum(hw, ry)
         # vertical ridges, slowly twisting, + gnarls
-        ridge = np.abs(np.sin(th * 7 + z * 0.35 + 1.5 * texproj.fbm(Pt * 0.35, 1.0, 3, seed=seed)))
-        d += 0.26 * (ridge ** 0.55) - 0.13
+        ridge = np.abs(np.sin(th * 9 + z * 0.9 + 1.8 * texproj.fbm(Pt * 0.35, 1.0, 3, seed=seed)))
+        d += 0.34 * (ridge ** 0.5) - 0.17
         d += 0.30 * (texproj.fbm(Pt, 0.45, 3, seed=seed + 1) - 0.5)
         # cap the top smoothly
         d = np.maximum(d, z - zmax)
@@ -79,32 +79,40 @@ def trunk_sdf_mesh(profile, depth_k=0.72, arch=ARCH, cavity=CAVITY, voxel=0.1, s
                 p[0] = -p[0]
         for i in range(len(pts) - 1):
             prims.append(sdf.round_cone(pts[i], pts[i + 1], rads[i], rads[i + 1], k=0.45 if i == 0 else 0.25))
-    for k in range(9):                       # burls / gnarls on the trunk surface
+    for k in range(15):                      # burls / gnarls on the trunk surface
         z = rng.uniform(1.0, 6.2)
         cxz = np.interp(z, prof[:, 0], prof[:, 1])
         hwz = np.interp(z, prof[:, 0], prof[:, 2])
         a = rng.uniform(0, 2 * np.pi)
         cpt = np.array([cxz + math.cos(a) * hwz * 0.92, math.sin(a) * hwz * depth_k * 0.92, z])
-        prims.append(sdf.sphere(cpt, rng.uniform(0.3, 0.6), k=0.35))
+        prims.append(sdf.sphere(cpt, rng.uniform(0.3, 0.7), k=0.35))
     for p in prims:
         F.apply(p)
     # arch tunnel (2D arch in XZ extruded along Y) and inner cavity
     ax, aw, ah = arch["x"], arch["w"], arch["h"]
 
     def tunnel(Pt):
+        """Pointed (two-centred) arch, slightly irregular, extruded along Y."""
         x, z = Pt[..., 0] - ax, Pt[..., 2]
         r = aw / 2
-        zc = ah - r
-        # rectangle below the spring line, half-disc above (round arch)
+        zc = ah - 1.25 * r                       # spring line
+        R2 = 1.35 * r                           # arc radius > half-width -> pointed crown
         dx = np.abs(x) - r
         rect = np.maximum(dx, np.maximum(z - zc, -0.8 - z))
-        circ = np.sqrt(x ** 2 + (z - zc) ** 2) - r
-        d = np.where(z > zc, circ, rect)
-        d += 0.12 * (texproj.fbm(Pt, 0.8, 2, seed=seed + 5) - 0.5)
+        cxo = r - R2                            # arc centres at x = -+(R2 - r)
+        arcL = np.sqrt((x - (-cxo)) ** 2 + (z - zc) ** 2) - R2
+        arcR = np.sqrt((x - cxo) ** 2 + (z - zc) ** 2) - R2
+        pointed = np.maximum(arcL, arcR)
+        d = np.where(z > zc, pointed, rect)
+        d += 0.14 * (texproj.fbm(Pt, 0.8, 2, seed=seed + 5) - 0.5)
         return d.astype(np.float32)
 
     T = F.evaluate_full(tunnel)
-    F.d = sdf.smax(F.d, -T, 0.18).astype(np.float32)
+    # thick rolled lips around the opening (callus wood), then cut the opening
+    P_all = np.stack(np.meshgrid(*F.axes, indexing="ij"), -1)
+    lip = 0.32 * np.exp(-((T - 0.18) / 0.22) ** 2) * (P_all[..., 2] < ah + 0.6)
+    F.d = (F.d - lip).astype(np.float32)
+    F.d = sdf.smax(F.d, -T, 0.12).astype(np.float32)
     cav = sdf.ellipsoid(cavity["c"], cavity["r"], k=0.35, op="subtract")
     F.apply(cav)
     if broken_top is not None:
@@ -119,7 +127,7 @@ def trunk_sdf_mesh(profile, depth_k=0.72, arch=ARCH, cavity=CAVITY, voxel=0.1, s
         if False else F.d
     F.smooth(0.7)
     import groundcover2 as gc2
-    bare = gc2.moss_dilate(F, 0.07, seed=seed + 31, up_lo=0.15, cover=0.45, freq=0.55)
+    bare = gc2.moss_dilate(F, 0.09, seed=seed + 31, up_lo=0.05, cover=0.5, freq=0.55, streak=True)
     V, Fc = F.mesh()
     V, Fc = largest_components(V, Fc)
     return V, Fc, dict(arch=arch, cavity=cavity, prof=prof, bare=bare, field=F)
@@ -172,7 +180,7 @@ def trunk_meshdata(md, V, T, N, mode, tile, info, mat=0, ao_c=None, moss_mat=Non
     c = np.asarray(info["cavity"]["c"])
     r = np.asarray(info["cavity"]["r"])
     incav = np.clip(1.25 - np.linalg.norm((V - c) / (r * 1.25), axis=1), 0, 1)
-    ao = np.clip(1.0 - 0.55 * inward - 0.35 * incav, 0.38, 1.0)
+    ao = np.clip(1.0 - 0.6 * inward - 0.55 * incav, 0.22, 1.0)
     ao *= 0.85 + 0.15 * np.clip(V[:, 2] / 6.0, 0, 1)
     col = np.zeros((len(V), 4))
     col[:, 3] = ao
@@ -240,6 +248,34 @@ HOLLOW_MOODS = [(4, ["oak_orange_a", "oak_orange_b", "oak_rust_a"]), (3, ["oak_r
                 (1, ["oak_amber_b", "oak_orange_a"])]
 
 
+def antlerize(leaders, rng, kink=0.35):
+    """Kink every chain (gnarled) and add 1-2 forks from its last segments (antler-like branching)."""
+    out = []
+    for pts, rads in leaders:
+        pts = [np.array(p, float) for p in pts]
+        dense, rd = [pts[0]], [rads[0]]
+        for i in range(len(pts) - 1):
+            for s in (0.5, 1.0):
+                q = pts[i] + (pts[i + 1] - pts[i]) * s
+                if s < 1.0:
+                    d = normalize(pts[i + 1] - pts[i])
+                    side = trees.perp(d)
+                    q = q + side * rng.normal(0, kink) + np.cross(d, side) * rng.normal(0, kink * 0.6)
+                dense.append(q)
+                rd.append(rads[i] + (rads[i + 1] - rads[i]) * s)
+        out.append((dense, rd))
+        if rads[-1] < 0.45 and len(dense) >= 4:
+            for f in range(2):
+                j = len(dense) - 3 - f
+                base = dense[j]
+                d = normalize(dense[j + 1] - dense[j])
+                side = trees.perp(d) * (1 if f == 0 else -1)
+                tip = base + normalize(d * 0.6 + side * 0.8 + np.array([0, 0, 0.35])) * rng.uniform(1.4, 2.2)
+                mid = (base + tip) / 2 + rng.normal(0, 0.25, 3)
+                out.append(([base, mid, tip], [rd[j] * 0.7, rd[j] * 0.45, max(0.12, rd[j] * 0.22)]))
+    return out
+
+
 def build_hollow_oak(variant, view=None, budget=(6800, 2700, 300)):
     seed = {1: 141, 2: 252, 3: 363}[variant]
     rng = np.random.default_rng(seed)
@@ -261,6 +297,7 @@ def build_hollow_oak(variant, view=None, budget=(6800, 2700, 300)):
                    ([(0.4, -0.3, 6.6), (-1.8, -0.4, 7.4), (-3.4, -0.2, 8.4)], [0.75, 0.42, 0.22])]
         broken = 7.3
         prof = [(z, cx, hw * 0.92) for z, cx, hw in PROFILE_V1]
+    leaders = antlerize(leaders, rng)
     V, T, tinfo = trunk_sdf_mesh(prof, seed=seed, leaders=leaders, mirror=mirror, broken_top=broken)
     # twig skeleton: seeds at the SDF limb tips; short gnarled branches grow into sparse foliage puffs
     sk = tg.Skeleton()
@@ -286,8 +323,10 @@ def build_hollow_oak(variant, view=None, budget=(6800, 2700, 300)):
                 dense_frac=0.35, dense_scale=1.2, puff_max_gap=1.3,
                 leaf_tip_dist=1.2, leaf_r_max=0.08, site_spacing=0.5, side_frac=0.5, sph=0.6, up_bias=0.2,
                 seed=seed, bark_tile=(1.6, 1.6), leaf_z_min=5.0, puffs=puffs, puff_r=(1.0, 1.6), puff_frac=0.75,
-                skip_order0=True, bark_frac=(0.45, 0.35, 0.2), n_clumps=16 if variant != 3 else 9,
-                clump_r=(0.8, 1.3), clump_kind="hollow", accent_frac=0.2, clump_depth=(0.3, 1.4), clump_flat=0.75)
+                skip_order0=True, bark_frac=(0.45, 0.35, 0.2), n_clumps=0, n_pads=18 if variant != 3 else 10,
+                pad_r=(0.65, 1.05), pad_flat=(0.45, 0.6), pad_tip=0.6, pad_depth=0.5, fringe_frac=0.3,
+                fringe_tiles=["oak_clump_ochre_b", "oak_clump_red_a", "oak_clump_ochre_a"], lod2_cards=3,
+                lod2_max_clumps=14, clump_kind="hollow", accent_frac=0.25)
     trunk_targets = {0: 3900, 1: 1350, 2: 170}
     if variant == 3:
         trunk_targets = {0: 3300, 1: 1150, 2: 170}

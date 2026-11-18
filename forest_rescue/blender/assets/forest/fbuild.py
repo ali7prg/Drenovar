@@ -93,6 +93,9 @@ def image(path, colorspace="sRGB"):
     img = bpy.data.images.load(path, check_existing=False)
     img.name = os.path.splitext(os.path.basename(path))[0]
     img.colorspace_settings.name = colorspace
+    img.pack()                                    # read pixels NOW (no lazy load at render time -> no magenta)
+    if not img.has_data or img.size[0] == 0:
+        raise RuntimeError(f"texture failed to load: {path}")
     _IMG_CACHE[key] = img
     return img
 

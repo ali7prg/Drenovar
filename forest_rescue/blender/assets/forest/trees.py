@@ -1483,7 +1483,8 @@ def pad_cards(C, radii, yaw, nodes, n_target, lod, spec, rng, sway, ph_chain, no
             bump = 1.0 + 0.18 * math.sin(3 * math.atan2(d[1], d[0]) + k) * (d[2] > 0)
             p = C[k] + Rk @ (d * rad * (rng.uniform(0.45, 0.75) if lod < 2 else 0.1) * bump)
             nrm_local = normalize(d / rad)
-            nrm = normalize(Rk @ nrm_local + rng.normal(0, 0.15, 3)) if lod < 2 else normalize(Rk @ d)
+            tilt = normalize(np.array([rng.normal(), rng.normal(), 0.0]))
+            nrm = normalize(Rk @ nrm_local + 0.45 * tilt + rng.normal(0, 0.15, 3)) if lod < 2 else normalize(Rk @ d)
             sz = rad[0] * rng.uniform(0.85, 1.15) * [1.0, 1.35, 2.1][lod] * spec.get("pad_card_k", 1.0)
             upv = normalize(np.cross(nrm, rng.normal(0, 1, 3)))
             cards.append(dict(c=p, n=nrm, up=upv, w=sz, h=sz * rng.uniform(0.8, 1.0), tile=tl[rng.integers(len(tl))],
@@ -1559,14 +1560,14 @@ def build_golden_oak2(variant, view=None):
         limb_defs = [((-1.8, 0.3, 5.0), (-5.2, 0.5, 7.0), 0.52), ((-0.6, -1.4, 5.6), (-2.4, -3.8, 9.6), 0.46),
                      ((0.4, 0.5, 6.0), (0.6, 1.0, 11.2), 0.5), ((1.6, -0.6, 5.4), (4.2, -1.2, 9.4), 0.48),
                      ((1.9, 1.0, 4.8), (5.6, 2.2, 6.8), 0.44)]
-        n_pads, pad_r = 40, (1.2, 1.9)
+        n_pads, pad_r = 50, (1.3, 2.1)
     elif variant == 2:
         env = tg.envelope_ellipsoid((0, 0, 9.0), (5.0, 4.6, 5.0), voxel=0.25,
                                     noise=lambda X, Y, Z: 0.12 * np.sin(1.2 * X + 0.6 * Z) * np.cos(1.1 * Y))
         top_z, rb = 4.2, 0.72
         limb_defs = [((-1.0, 0.3, 6.4), (-3.4, 0.6, 10.2), 0.4), ((1.0, -0.4, 6.6), (3.2, -0.9, 10.6), 0.4),
                      ((0.2, 0.2, 7.0), (0.3, 0.4, 13.2), 0.42), ((0.4, 1.3, 6.2), (1.2, 3.6, 9.4), 0.34)]
-        n_pads, pad_r = 26, (1.05, 1.7)
+        n_pads, pad_r = 34, (1.15, 1.85)
     elif variant == 3:
         env1 = tg.envelope_ellipsoid((2.0, 0.3, 7.4), (5.8, 4.2, 3.4), voxel=0.25,
                                      noise=lambda X, Y, Z: 0.15 * np.sin(0.9 * X + 1.7 * Y) * np.cos(0.8 * Z))
@@ -1575,14 +1576,14 @@ def build_golden_oak2(variant, view=None):
         top_z, rb = 3.0, 0.82
         limb_defs = [((1.8, 0.2, 4.4), (5.6, 0.4, 6.4), 0.46), ((1.0, -0.3, 5.6), (3.0, -0.8, 9.4), 0.42),
                      ((-0.8, 0.0, 5.8), (-2.8, -0.4, 10.2), 0.44), ((0.6, 1.6, 4.8), (1.6, 3.8, 6.8), 0.34)]
-        n_pads, pad_r = 28, (1.1, 1.75)
+        n_pads, pad_r = 36, (1.2, 1.9)
     else:
         env = tg.envelope_ellipsoid((0, 0, 5.2), (3.6, 3.4, 2.7), voxel=0.2,
                                     noise=lambda X, Y, Z: 0.12 * np.sin(1.7 * X) * np.cos(1.9 * Y + Z))
         top_z, rb = 2.3, 0.4
         limb_defs = [((-0.9, 0.2, 3.4), (-2.6, 0.5, 4.8), 0.22), ((0.9, -0.4, 3.6), (2.5, -0.8, 5.2), 0.22),
                      ((0.1, 0.9, 3.8), (0.3, 2.0, 6.6), 0.22)]
-        n_pads, pad_r = 16, (0.85, 1.35)
+        n_pads, pad_r = 20, (0.9, 1.45)
     trunk = _subdiv([(0, 0, -0.3), (0.05, 0, top_z * 0.5), (0.12, 0.04, top_z)], 0.6)
     tid = sk.add_polyline(trunk, can_grow_from_z=top_z + 0.4)
     top = np.array(trunk[-1])
@@ -1597,7 +1598,7 @@ def build_golden_oak2(variant, view=None):
     spec = oak_spec(seed, r_base=rb, trunk_r=lambda p: rb * (1.0 - 0.25 * min(max(p[2], 0), top_z) / top_z),
                     trunk_ids=tid, limbs=limbs, n_pads=n_pads, pad_r=pad_r, n_clumps=0, clump_kind="oak",
                     accent_frac=0.05, bark_frac=(0.46, 0.32, 0.16), pad_tip=0.8, pad_depth=0.9, leaf_z_min=top_z - 0.3,
-                    fringe_frac=0.25, lod2_cards=3, lod2_max_clumps=22,
+                    fringe_frac=0.25, lod2_cards=3, lod2_max_clumps=22, pad_flat=(0.5, 0.66),
                     roots=(6, 2.6 if variant != 4 else 1.2, rb * 0.55), flare=(1.2, 1.1, 5, 1.0),
                     budget=(2950, 1150, 290) if variant != 4 else (2400, 950, 240))
     res = finish_broadleaf(sk, env, spec, rng)

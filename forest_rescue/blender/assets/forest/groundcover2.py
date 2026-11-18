@@ -25,14 +25,19 @@ def _grid(F):
     return np.stack(np.meshgrid(*F.axes, indexing="ij"), -1)
 
 
-def moss_dilate(F, thick, seed, up_lo=0.3, cover=0.55, freq=0.7):
-    """Dilate F.d on up-facing regions (noise-patchy); returns the bare field copy."""
+def moss_dilate(F, thick, seed, up_lo=0.3, cover=0.55, freq=0.7, streak=False):
+    """Dilate F.d on up-facing regions (noise-patchy); returns the bare field copy.
+    streak=True adds vertical moss streaks running down the sides (bark furrows)."""
     bare = F.d.copy()
     gx, gy, gz = np.gradient(F.d, F.voxel)
     gn = np.sqrt(gx ** 2 + gy ** 2 + gz ** 2) + 1e-6
     up = np.clip((gz / gn - up_lo) / (1 - up_lo), 0, 1)
     P = _grid(F)
     n = texproj.fbm(P, freq, 4, seed=seed)
+    if streak:
+        st = texproj.fbm(P * np.array([3.0, 3.0, 0.25]), 1.0, 3, seed=seed + 7)
+        side = np.clip(1 - np.abs(gz / gn), 0, 1)
+        up = np.maximum(up, side * (st > 0.62) * 0.8)
     patch = np.clip((n - (1 - cover) * 0.8 - 0.1) * 5, 0, 1)
     fuzz = 0.6 + 0.8 * texproj.fbm(P, 6.0, 2, seed=seed + 1)
     t = thick * up * patch * fuzz

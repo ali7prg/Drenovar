@@ -67,7 +67,8 @@ _reg("bramble_dense", 1152, 1536, 256, 256, attach="center")
 _reg("grass_dense", 1408, 1536, 256, 256, attach="center")
 _reg("shrub_dense", 1664, 1536, 256, 256, attach="center")
 _reg("reed_dense", 1920, 1536, 128, 512, attach="bottom")
-_reg("oak_green_a", 640, 1792, 256, 256, attach="center")
+_reg("moss_fringe", 640, 1792, 256, 256, attach="top")
+LAYOUT["oak_green_a"] = LAYOUT["moss_fringe"]
 _reg("pine_spray_e", 896, 1792, 256, 256)
 _reg("birch_spare", 1152, 1792, 256, 256, attach="center")
 _reg("pine_top", 1408, 1792, 256, 256, attach="center")
@@ -675,6 +676,24 @@ def paint_fern_frond(w, h, r, cols, golden=0.3):
     return cv.result()
 
 
+def paint_moss_fringe(w, h, r):
+    """Moss cushion edge: dense fuzzy band at the top, ragged tufts and strands hanging down (attach top)."""
+    cv = Canvas(w, h)
+    cols = [(0.20, 0.24, 0.07), (0.30, 0.34, 0.09), (0.40, 0.42, 0.13), (0.50, 0.50, 0.17)]
+    for k in range(900):
+        x = r.uniform(4, w - 4)
+        depth = h * (0.18 + 0.55 * r.random() ** 2.2)
+        y = r.uniform(2, depth)
+        c = np.asarray(cols[r.integers(len(cols))]) * (0.75 + 0.45 * (1 - y / h))
+        ln = r.uniform(4, 11)
+        a0 = np.pi / 2 + r.normal(0, 0.5)
+        cv.line([(x, y), (x + math.cos(a0) * ln * 0.4, y + math.sin(a0) * ln)], r.uniform(1.0, 2.0), np.clip(c, 0, 1))
+    for k in range(60):
+        cx, cy = r.uniform(8, w - 8), r.uniform(4, h * 0.3)
+        cv.circle((cx, cy), r.uniform(4, 9), np.clip(np.asarray(cols[r.integers(4)]) * 1.05, 0, 1))
+    return cv.result()
+
+
 def normalize2(v):
     return v / (np.linalg.norm(v) + 1e-9)
 
@@ -741,7 +760,7 @@ def build_atlas(barks=None, seed=7):
         put(name, paint_clump(256, 256, rng(seed + 10 + i), OAK_CLUMP_PAL[pal_of[key]], "oak", n_leaves=200,
                               leaf_len=(0.13, 0.19), radius=0.27))
     for i, (name, key) in enumerate([("oak_dense_gold", "gold"), ("oak_dense_amber", "ochre"),
-                                     ("oak_dense_orange", "dark"), ("oak_dense_rust", "red"), ("oak_green_a", "light")]):
+                                     ("oak_dense_orange", "dark"), ("oak_dense_rust", "red")]):
         put(name, paint_clump(256, 256, rng(seed + 30 + i), OAK_CLUMP_PAL[key], "oak", n_leaves=360,
                               leaf_len=(0.09, 0.13), radius=0.45))
     for i, name in enumerate(["pine_spray_a", "pine_spray_b", "pine_spray_c", "pine_spray_d", "pine_spray_e"]):
@@ -786,6 +805,7 @@ def build_atlas(barks=None, seed=7):
                                     radius=0.40, gap=0.12))
     put("shrub_dense", paint_clump(256, 256, rng(seed + 131), shrub, "shrub", n_leaves=260, leaf_len=(0.08, 0.13)))
     put("moss_clump", paint_moss(256, 256, rng(seed + 140)))
+    put("moss_fringe", paint_moss_fringe(256, 256, rng(seed + 145)))
     put("mushroom", paint_mushroom(256, 256, rng(seed + 141)))
     put("fungus_bracket", paint_bracket(256, 256, rng(seed + 142)))
     put("leaf_litter", paint_litter(256, 256, rng(seed + 143)))

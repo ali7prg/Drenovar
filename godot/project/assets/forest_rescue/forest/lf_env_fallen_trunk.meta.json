@@ -1,5 +1,6 @@
 {
   "id": "lf_env_fallen_trunk",
+  "generation": "v2 image-based reconstruction from art/02 (inflated painted slabs/logs)",
   "variants": {
     "v1": {
       "nodes": [
@@ -8,57 +9,43 @@
         "lf_env_fallen_trunk_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2536,
-        "LOD1": 950,
-        "LOD2": 446
+        "LOD0": 2300,
+        "LOD1": 874,
+        "LOD2": 252
       },
+      "materials": {
+        "LOD0": [
+          "lf_bark_fallen",
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_bark_fallen",
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_bark_fallen",
+          "lf_foliage"
+        ]
+      },
+      "height_m": 4.04,
+      "footprint_radius_m": 5.34,
+      "bounds_m_blender": [
+        [
+          -4.77,
+          -0.67,
+          0.8
+        ],
+        [
+          5.34,
+          1.2,
+          4.04
+        ]
+      ],
       "display_offset_gltf": [
         0.0,
         0.0,
         0.0
-      ],
-      "materials": {
-        "LOD0": [
-          "lf_bark_hollow",
-          "lf_foliage"
-        ],
-        "LOD1": [
-          "lf_foliage"
-        ],
-        "LOD2": [
-          "lf_foliage"
-        ]
-      },
-      "height_m": 3.35,
-      "footprint_radius_m": 6.75,
-      "bounds_m_blender": [
-        [
-          -6.75,
-          -2.0,
-          -0.25
-        ],
-        [
-          5.62,
-          2.54,
-          3.35
-        ]
-      ],
-      "wind": false,
-      "info": {
-        "LOD0": {
-          "tris": 2536,
-          "moss_faces": 1494
-        },
-        "LOD1": {
-          "tris": 950,
-          "moss_faces": 548
-        },
-        "LOD2": {
-          "tris": 446,
-          "moss_faces": 234
-        },
-        "arch_clearance_m": 1.34
-      }
+      ]
     },
     "v2": {
       "nodes": [
@@ -67,56 +54,43 @@
         "lf_env_fallen_trunk_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 2536,
-        "LOD1": 950,
-        "LOD2": 250
+        "LOD0": 1536,
+        "LOD1": 591,
+        "LOD2": 180
       },
-      "display_offset_gltf": [
-        13.37,
-        0.0,
-        0.0
-      ],
       "materials": {
         "LOD0": [
-          "lf_bark_hollow",
+          "lf_bark_fallen",
           "lf_foliage"
         ],
         "LOD1": [
+          "lf_bark_fallen",
           "lf_foliage"
         ],
         "LOD2": [
+          "lf_bark_fallen",
           "lf_foliage"
         ]
       },
-      "height_m": 2.04,
-      "footprint_radius_m": 4.88,
+      "height_m": 4.04,
+      "footprint_radius_m": 6.63,
       "bounds_m_blender": [
         [
-          -4.88,
-          -1.06,
-          -0.22
+          -6.63,
+          -0.94,
+          0.8
         ],
         [
-          4.7,
-          1.09,
-          2.04
+          3.48,
+          0.93,
+          4.04
         ]
       ],
-      "wind": false,
-      "info": {
-        "LOD0": {
-          "tris": 2536,
-          "moss_faces": 1648
-        },
-        "LOD1": {
-          "tris": 950,
-          "moss_faces": 571
-        },
-        "LOD2": {
-          "tris": 250,
-          "moss_faces": 142
-        }
-      }
+      "display_offset_gltf": [
+        13.031,
+        0.0,
+        0.0
+      ]
     },
     "v3_stream": {
       "nodes": [
@@ -125,83 +99,118 @@
         "lf_env_fallen_trunk_v3_stream_LOD2"
       ],
       "tris": {
-        "LOD0": 2858,
-        "LOD1": 950,
-        "LOD2": 432
+        "LOD0": 2758,
+        "LOD1": 1130,
+        "LOD2": 452
       },
-      "display_offset_gltf": [
-        26.741,
-        0.0,
-        0.0
-      ],
       "materials": {
         "LOD0": [
-          "lf_bark_hollow",
-          "lf_foliage",
-          "lf_rock_limestone"
+          "lf_bark_fallen",
+          "lf_foliage"
         ],
         "LOD1": [
+          "lf_bark_fallen",
           "lf_foliage"
         ],
         "LOD2": [
+          "lf_bark_fallen",
           "lf_foliage"
         ]
       },
-      "height_m": 3.42,
-      "footprint_radius_m": 6.14,
+      "height_m": 4.04,
+      "footprint_radius_m": 5.69,
       "bounds_m_blender": [
         [
-          -6.14,
-          -3.0,
-          -0.23
+          -5.34,
+          -0.67,
+          -0.87
         ],
         [
-          5.94,
-          3.0,
-          3.42
+          5.69,
+          1.2,
+          4.04
         ]
       ],
-      "wind": false,
-      "info": {
-        "LOD0": {
-          "tris": 2858,
-          "moss_faces": 1214
-        },
-        "LOD1": {
-          "tris": 950,
-          "moss_faces": 441
-        },
-        "LOD2": {
-          "tris": 432,
-          "moss_faces": 195
-        },
-        "arch_clearance_m": 1.34
-      }
+      "display_offset_gltf": [
+        26.062,
+        0.0,
+        0.0
+      ]
     }
   },
   "tris": {
-    "LOD0": 2858,
-    "LOD1": 950,
-    "LOD2": 446
+    "LOD0": 2758,
+    "LOD1": 1130,
+    "LOD2": 452
   },
   "bones": 0,
   "materials": [
-    "lf_bark_hollow",
-    "lf_foliage",
-    "lf_rock_limestone"
+    "lf_bark_fallen"
   ],
   "glb_images": [
-    "lf_bark_hollow_n.png",
-    "lf_bark_hollow_c.jpg",
-    "lf_bark_hollow_r.png",
-    "lf_foliage_atlas.png",
-    "lf_rock_limestone_n.png",
-    "lf_rock_limestone_c.jpg",
-    "lf_rock_limestone_r.png"
+    "lf_bark_fallen_n.png",
+    "lf_bark_fallen_c.jpg",
+    "lf_bark_fallen_r.png"
   ],
-  "texture_mode": "external shared files next to the GLB (relative URIs)",
-  "wind": "static (no COLOR_0)",
-  "layout_note": "Variants along +X (display_offset_gltf); LOD0/1/2 of a variant share its origin (show one per distance). Mesh origin = ground contact centre.",
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_groundcover.py fallen_trunk",
-  "collision": "use a convex hull / capsule of LOD2 (see footprint_radius_m, height_m)"
+  "textures": {
+    "lf_bark_fallen_c.jpg": 1024,
+    "lf_bark_fallen_n.png": 1024,
+    "lf_bark_fallen_r.png": 1024,
+    "lf_foliage_atlas.png": 2048
+  },
+  "paintedLightMix": 0.35,
+  "paintedLightNote": "Texture = the painting (front/back), painted swatches on sides/tops. Shade as albedo * mix(1, lambert, paintedLightMix).",
+  "wind": {
+    "attribute": "COLOR_0",
+    "R": "0 (static); plant cards 0.1-0.6",
+    "G": "plant flutter",
+    "B": "phase",
+    "A": "AO"
+  },
+  "layout_note": "Variants laid out along +X (display_offset_gltf); the LODs of a variant share its origin.",
+  "collision": [
+    {
+      "type": "box",
+      "centre": [
+        0.0,
+        2.02,
+        0.0
+      ],
+      "size": [
+        10.11,
+        4.04,
+        1.87
+      ],
+      "variant": "v1"
+    },
+    {
+      "type": "box",
+      "centre": [
+        0.0,
+        2.02,
+        0.0
+      ],
+      "size": [
+        10.11,
+        4.04,
+        1.87
+      ],
+      "variant": "v2"
+    },
+    {
+      "type": "box",
+      "centre": [
+        0.0,
+        2.02,
+        0.0
+      ],
+      "size": [
+        11.03,
+        4.04,
+        1.87
+      ],
+      "variant": "v3_stream"
+    }
+  ],
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_props.py fallen_trunk"
 }

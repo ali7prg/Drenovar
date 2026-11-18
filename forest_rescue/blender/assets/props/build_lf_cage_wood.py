@@ -64,7 +64,7 @@ def build(lod):
     fl = pk.beam((-pc + 0.12, 0, p["floor_z"] / 2), (pc - 0.12, 0, p["floor_z"] / 2), 2 * pc - 0.24, p["floor_z"],
                  chamfer=0.0, up=(0, 0, 1))
     B.add("root", "floor", "limestone", fl, meta={"flag_size": 0.45, "moss": 0.15})
-    thr = pk.beam((hx + 0.1, front - 0.12, 0.06), (pc - 0.1, front - 0.12, 0.06), 0.42, 0.12, chamfer=0.015)
+    thr = pk.beam((hx + 0.1, front - 0.12, 0.05), (pc - 0.1, front - 0.12, 0.05), 0.42, 0.10, chamfer=0.015)
     B.add("root", "threshold", "limestone", thr, meta={"block_len": 0.4, "course_h": 0.2, "moss": 0.3})
     # ---------------- timber posts, caps, finials
     tops = []
@@ -241,7 +241,7 @@ def build(lod):
         strap_cv.circle((x + 0.03, 0.0), 0.012)
     strap_motif = [{"mask": strap_cv.mask(0.001), "bbox": (0.0, -0.06, 0.5, 0.06), "isl": (2,), "depth": 0.002,
                     "mode": "cut", "colour": sh.C(52, 108, 80), "tint": 0.95, "rough": 0.35, "metal": 0.0}]
-    ck.hinge_set(B, (hinge[0], hinge[1]), [dz0 + 0.42, dz0 + 1.92], 0.50, 0.11, dfy - 0.009, -pc - post / 2,
+    ck.hinge_set(B, (hinge[0], hinge[1]), [dz0 + 0.42, dz0 + 1.92], 0.50, 0.11, dfy, -pc - post / 2,
                  cls="bronze", knuckle_r=0.03, strap_motif=strap_motif)
     # latch: lock box under the socket + sliding bolt into a keeper on the right corner post
     sz = 1.25

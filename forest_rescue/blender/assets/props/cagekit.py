@@ -75,7 +75,7 @@ def hinge_set(B, axis_xy, z_list, strap_len, strap_w, door_face_y, jamb_face_y, 
             B.add(static, f"hinge{i}_caps", cls, cap.transformed(M4(None, (ax, ay, zz))))
         # jamb leaf (static plate on the jamb face, toward -X)
         plate = pk.extrude(pk.rect(0.11, knuckle_h * 3.0, 0.012), 0.008, chamfer=0.002)
-        Mj = M4(Rx(math.pi / 2), (ax - 0.075 * (-jamb_dir) * -1 - 0.055, jamb_face_y, zc))
+        Mj = M4(Rx(math.pi / 2), (ax - 0.065, jamb_face_y, zc))
         B.add(static, f"hinge{i}_jambleaf", cls, plate.transformed(Mj))
         # door strap: tapered scroll strap along +X on the door face
         L = strap_len

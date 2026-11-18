@@ -84,8 +84,7 @@ def run(asset_id, build_fn, hinge, latch, sock, kind, door, front_y, interior, c
     R = REF[ref_key]
     cams_path = os.path.join(paths.ensure(paths.QA_COMPARE, "props_cams"), "cage_cams.json")
     cams = qa.load_cams(cams_path)
-    A.pivots["keyhole"].scale = (0, 0, 0)
-    bpy.context.view_layer.update()
+    A.pivots["keyhole"]["rest_scale"] = (0.0, 0.0, 0.0)   # applied by rest_pose() at export
     # ---------------- camera fits (closed: all; open: static frame only, drawn door excluded)
     fits = {}
     for state in ("closed", "open"):
@@ -118,7 +117,7 @@ def run(asset_id, build_fn, hinge, latch, sock, kind, door, front_y, interior, c
              pp.ViewSpec("open", fits["open"][0], fits["open"][1], static, "persp", cam=fits["open"][2],
                          pose=lambda: open_pose(A), unpose=lambda: closed_pose(A), weight=0.8, erode=0, delight=0.3,
                          min_facing=0.15, depth_eps=0.03)]
-    files, info = pp.paint_relief_textures(A, shaders(), specs, size=4096, height_gain=0.03,
+    files, info = pp.paint_relief_textures(A, shaders(), specs, size=2048, height_gain=0.03,
                                            sizes={"base": 2048, "orm": 1024, "normal": 2048}, relief_levels=2,
                                            ao_distance=0.35, ao_strength=0.6, edge_fade_m=0.01, samples=8,
                                            paint_alpha_w=0.3)
@@ -150,6 +149,8 @@ def run(asset_id, build_fn, hinge, latch, sock, kind, door, front_y, interior, c
         o.hide_render = True
     for o in A.lod0_objects():
         o.hide_render = False
+    for nm in ("keyhole", "keyhole_core"):
+        A.meshes[0][nm].hide_render = True
     if art is not None:
         art.hide_render = False
     res = {}

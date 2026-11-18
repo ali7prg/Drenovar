@@ -1357,7 +1357,7 @@ def rest_pose(asset):
         if "rest_loc" in obj:
             obj.location = tuple(obj["rest_loc"])
         obj.rotation_euler = (0, 0, 0)
-        obj.scale = (1, 1, 1)
+        obj.scale = tuple(obj.get("rest_scale", (1, 1, 1)))
     bpy.context.scene.frame_set(0)
 
 

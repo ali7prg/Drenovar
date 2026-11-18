@@ -9,9 +9,9 @@
         "lf_env_birch_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3898,
-        "LOD1": 1028,
-        "LOD2": 168
+        "LOD0": 3754,
+        "LOD1": 1048,
+        "LOD2": 142
       },
       "materials": {
         "LOD0": [
@@ -34,13 +34,13 @@
       "crown_radius_m": 5.49,
       "bounds_m_blender": [
         [
-          -2.78,
-          -2.79,
+          -2.74,
+          -2.77,
           -0.3
         ],
         [
           5.49,
-          3.06,
+          2.39,
           13.08
         ]
       ],
@@ -69,9 +69,9 @@
         "lf_env_birch_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3684,
-        "LOD1": 1042,
-        "LOD2": 170
+        "LOD0": 3006,
+        "LOD1": 1096,
+        "LOD2": 162
       },
       "materials": {
         "LOD0": [
@@ -90,22 +90,22 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 13.09,
-      "crown_radius_m": 5.12,
+      "height_m": 10.32,
+      "crown_radius_m": 3.92,
       "bounds_m_blender": [
         [
-          -5.12,
+          -3.92,
           -2.6,
           -0.3
         ],
         [
-          2.7,
-          2.29,
-          13.09
+          1.1,
+          2.28,
+          10.32
         ]
       ],
       "display_offset_gltf": [
-        10.266,
+        10.223,
         0.0,
         0.0
       ],
@@ -113,25 +113,45 @@
         "mirror": true,
         "copies": [
           [
-            100,
+            72,
+            0.95
+          ],
+          [
+            144,
             0.9
           ],
           [
-            -140,
+            -72,
             0.95
+          ],
+          [
+            -144,
+            0.9
           ]
         ],
-        "front_eta_max": 0.5,
+        "no_front": true,
         "cfg": {
-          "anchor_min_z": 6.0
+          "anchor_min_z": 4.5,
+          "mass_min_dist": 1.25,
+          "ao_under": 0.86
         },
         "lods": {
           "0": {
-            "n_masses": 26,
-            "clumps_per": 16
+            "n_masses": 40,
+            "clumps_per": 18,
+            "max_cards": 1000,
+            "core_cards": 0,
+            "copy_min_r_px": 2.6,
+            "limb_budget": 700
           },
           "1": {
-            "n_masses": 16
+            "n_masses": 24,
+            "clumps_per": 10,
+            "core_cards": 0
+          },
+          "2": {
+            "n_masses": 12,
+            "clumps_per": 6
           }
         }
       }
@@ -143,9 +163,9 @@
         "lf_env_birch_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3638,
-        "LOD1": 978,
-        "LOD2": 150
+        "LOD0": 2970,
+        "LOD1": 1064,
+        "LOD2": 166
       },
       "materials": {
         "LOD0": [
@@ -164,60 +184,80 @@
           "lf_foliage_vol"
         ]
       },
-      "height_m": 14.0,
-      "crown_radius_m": 4.61,
+      "height_m": 10.7,
+      "crown_radius_m": 3.62,
       "bounds_m_blender": [
         [
-          -2.54,
-          -2.43,
-          -0.32
+          -0.97,
+          -2.18,
+          -0.31
         ],
         [
-          4.61,
-          2.07,
-          14.0
+          3.62,
+          2.12,
+          10.7
         ]
       ],
       "display_offset_gltf": [
-        20.532,
+        20.447,
         0.0,
         0.0
       ],
       "recipe": {
         "copies": [
           [
-            150,
-            0.92
+            60,
+            0.9
           ],
           [
-            -100,
+            130,
             0.95
+          ],
+          [
+            -60,
+            0.95
+          ],
+          [
+            -130,
+            0.9
           ]
         ],
         "scale": [
-          0.9,
-          1.07
+          0.92,
+          1.05
         ],
-        "front_eta_max": 0.45,
+        "no_front": true,
         "cfg": {
-          "anchor_min_z": 6.5
+          "anchor_min_z": 5.0,
+          "mass_min_dist": 1.3,
+          "ao_under": 0.86
         },
         "lods": {
           "0": {
-            "n_masses": 24,
-            "clumps_per": 16
+            "n_masses": 36,
+            "clumps_per": 18,
+            "max_cards": 1000,
+            "core_cards": 0,
+            "copy_min_r_px": 2.6,
+            "limb_budget": 700
           },
           "1": {
-            "n_masses": 14
+            "n_masses": 22,
+            "clumps_per": 10,
+            "core_cards": 0
+          },
+          "2": {
+            "n_masses": 12,
+            "clumps_per": 6
           }
         }
       }
     }
   },
   "tris": {
-    "LOD0": 3898,
-    "LOD1": 1042,
-    "LOD2": 170
+    "LOD0": 3754,
+    "LOD1": 1096,
+    "LOD2": 166
   },
   "bones": 0,
   "materials": [

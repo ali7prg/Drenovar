@@ -9,9 +9,9 @@
         "lf_env_dark_pine_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 1778,
-        "LOD1": 704,
-        "LOD2": 278
+        "LOD0": 1780,
+        "LOD1": 734,
+        "LOD2": 274
       },
       "materials": {
         "LOD0": [
@@ -61,8 +61,8 @@
       ],
       "tris": {
         "LOD0": 1816,
-        "LOD1": 722,
-        "LOD2": 290
+        "LOD1": 700,
+        "LOD2": 286
       },
       "materials": {
         "LOD0": [
@@ -113,8 +113,8 @@
         "lf_env_dark_pine_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 1814,
-        "LOD1": 674,
+        "LOD0": 1816,
+        "LOD1": 668,
         "LOD2": 286
       },
       "materials": {
@@ -169,8 +169,8 @@
         "lf_env_dark_pine_v4_LOD2"
       ],
       "tris": {
-        "LOD0": 1806,
-        "LOD1": 730,
+        "LOD0": 1772,
+        "LOD1": 682,
         "LOD2": 282
       },
       "materials": {
@@ -222,8 +222,8 @@
   },
   "tris": {
     "LOD0": 1816,
-    "LOD1": 730,
-    "LOD2": 290
+    "LOD1": 734,
+    "LOD2": 286
   },
   "bones": 0,
   "materials": [

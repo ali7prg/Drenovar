@@ -144,6 +144,12 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
                         continue
                     Ps_, s_ = geom.resample_polyline(p_["P"], sp["anchor_step_m"])
                     tips += [q for q in Ps_[1:] if q[2] > B.cfg.get("anchor_min_z", sp.get("anchor_min_z", 3.0))]
+            if B.cfg.get("anchor_source") == "patches":
+                # painted clump centres (crown envelope of the painting) at the painted plane, + rotated copies
+                cu = np.array([P.info[i]["c"][0] for i in range(P.n)])
+                cv_ = np.array([P.info[i]["c"][1] for i in range(P.n)])
+                pts = geom.world_at_y(ref.view, cu, cv_, np.zeros(P.n))
+                tips = [q for q in pts if q[2] > B.cfg.get("anchor_min_z", 0.0)]
             anchors = list(tips)
             for (Rm, tv, mir, sc) in copies:
                 anchors += [((tp - tv) * sc) @ Rm.T + tv for tp in tips]

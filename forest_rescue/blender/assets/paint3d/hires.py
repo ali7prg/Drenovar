@@ -81,3 +81,53 @@ def pack(tiles, key):
         ax0, ay0 = region[0] + p[0], region[1] + p[1]
         uvs.append(atl.uv_rect((ax0 + 0.5, ay0 + 0.5, ax0 + w - 0.5, ay0 + h - 0.5)))
     return img, uvs, s
+
+
+def composite(tiles, n=12, size=(168, 132), per=(5, 9), seed=3):
+    """Rosette-cluster tiles: several painted rosettes composited (over) inside an ellipse, random flips and
+    small rotations -> large crisp top tiles built only from painting pixels (patch synthesis)."""
+    rng = np.random.default_rng(seed)
+    W, H = size
+    out = []
+    good = [t for t in tiles if t["rgba"].shape[0] >= 18 and t["rgba"].shape[1] >= 18]
+    for k in range(n):
+        canvas = np.zeros((H, W, 4), np.float32)
+        m = rng.integers(per[0], per[1] + 1)
+        cx, cy = W / 2, H / 2
+        order = []
+        for j in range(m):
+            t = good[rng.integers(len(good))]["rgba"].copy()
+            if rng.random() < 0.5:
+                t = t[:, ::-1]
+            ang = rng.normal(0, 18)
+            sc = rng.uniform(0.9, 1.25)
+            h, w = t.shape[:2]
+            M = cv2.getRotationMatrix2D((w / 2, h / 2), ang, sc)
+            bw, bh = int(w * sc * 1.3) + 2, int(h * sc * 1.3) + 2
+            M[0, 2] += (bw - w) / 2
+            M[1, 2] += (bh - h) / 2
+            t = cv2.warpAffine(t, M, (bw, bh), flags=cv2.INTER_LINEAR, borderValue=(0, 0, 0, 0))
+            a = rng.uniform(0, 2 * np.pi)
+            r = np.sqrt(rng.random()) * 0.32
+            px = int(cx + np.cos(a) * r * W - bw / 2)
+            py = int(cy + np.sin(a) * r * H * 0.85 - bh / 2)
+            order.append((py + bh, px, py, t))
+        for _, px, py, t in sorted(order, key=lambda q: q[0]):     # lower rosettes in front
+            bh, bw = t.shape[:2]
+            x0, y0 = max(0, px), max(0, py)
+            x1, y1 = min(W, px + bw), min(H, py + bh)
+            if x1 <= x0 or y1 <= y0:
+                continue
+            src = t[y0 - py:y1 - py, x0 - px:x1 - px]
+            al = src[..., 3:4]
+            dst = canvas[y0:y1, x0:x1]
+            dst[..., :3] = src[..., :3] * al + dst[..., :3] * (1 - al)
+            dst[..., 3:4] = al + dst[..., 3:4] * (1 - al)
+        ys, xs = np.nonzero(canvas[..., 3] > 0.05)
+        if not len(ys):
+            continue
+        canvas = canvas[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+        known = canvas[..., 3] > 0.5
+        canvas[..., :3] = seg.bleed(canvas[..., :3], known)
+        out.append(dict(rgba=canvas, area=int(known.sum()), lum=float(np.mean([g["lum"] for g in good]))))
+    return out

@@ -182,7 +182,8 @@ def main():
     if sp.get("hires"):
         hr = sp["hires"]
         nh = P.add_hires(hr["region"], hr["sheet"], hr["box"], rosette_px=hr.get("rosette_px", 800),
-                         m_per_px=hr.get("m_per_px"), l_shift=hr.get("l_shift", 4.0), hue=hr.get("hue", (70, 100)))
+                         m_per_px=hr.get("m_per_px"), l_shift=hr.get("l_shift", 4.0), hue=hr.get("hue", (70, 100)),
+                         n_composite=hr.get("n_composite", 14))
         print(f"[{asset}] hi-res top tiles: {nh}", flush=True)
     atlas_path = atl.assemble()
     print(f"[{asset}] patches={P.n} atlas_scale={s:.3f} limbs={len(ref.limbs)} ({time.time() - t0:.1f}s)", flush=True)

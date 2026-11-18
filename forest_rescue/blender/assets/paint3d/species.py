@@ -12,14 +12,14 @@ RT = os.path.join(paths.RUNTIME, "forest")
 
 LODS_MASS_OAK = {
     0: dict(trunk_step_m=0.35, trunk_sides=12, limb_step_m=0.3, limb_sides=5, limb_min_r_px=1.5, limb_budget=600,
-            copies=True, copy_min_r_px=2.5, front_frac=1.0, front_scale=1.0, n_masses=12, clumps_per=15,
-            fill_size=1.6, front_extra=0.6, max_cards=1050, core_cards=22),
+            copies=True, copy_min_r_px=2.5, front_frac=1.0, front_scale=1.0, n_masses=12, clumps_per=34,
+            fill_size=1.5, front_extra=0.6, max_cards=1100, core_cards=14),
     1: dict(trunk_step_m=0.7, trunk_sides=8, limb_step_m=0.6, limb_sides=4, limb_min_r_px=3.0, limb_budget=220,
-            copies=True, copy_min_r_px=4.0, front_frac=0.55, front_scale=1.15, n_masses=9, clumps_per=7,
-            fill_size=2.0, front_extra=0.3, max_cards=420, core_cards=8),
+            copies=True, copy_min_r_px=4.0, front_frac=0.55, front_scale=1.15, n_masses=10, clumps_per=16,
+            fill_size=1.9, front_extra=0.3, max_cards=430, core_cards=6),
     2: dict(trunk_step_m=1.6, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
-            copies=False, front_frac=0.16, front_scale=1.5, n_masses=8, clumps_per=3, fill_size=2.4,
-            front_extra=0.0, max_cards=100, core_cards=3),
+            copies=False, front_frac=0.16, front_scale=1.5, n_masses=8, clumps_per=7, fill_size=2.4,
+            front_extra=0.0, max_cards=100, core_cards=2),
 }
 
 LODS_MASS = {
@@ -60,13 +60,13 @@ TREES = {
         cfg=dict(name="golden_oak", box=(0, 0, 430, 445), exclude=[(284, 360, 320, 432)], clip_row=410, ground_row=421,
                  fork_row=245, wood=dict(ratio=0.85, Lmax=64, hue_rng=(61, 95)), float_min_r=2.2, keep_x=(0, 428),
                  crown_kd=0.9, front_bias=0.45, trunk_kd=0.9, seed=7, root_zone=34, root_k=0.8, n_lobes=13, top_weight=1.6, lum_pref=2.6, mass_up=0.55, front_tilt_max=30, top_part=0.6, obl_part=0.75, vol_material=True,
-                 mass_eta_min=0.05, mass_eta_max=0.4, core_eta_max=0.42, front_extra_eta=0.5, ao_under=0.72,
+                 mass_eta_min=0.05, mass_eta_max=0.4, core_eta_max=0.42, front_extra_eta=0.5, ao_under=0.8,
                  mass_zscale=0.55, p_hires=0.75, top_scale=1.0),
         n_patches=110, min_px=50, region="golden_oak", bark="oak", swatch=(20, 798, 318, 984), paintedLightMix=0.3,
         height_hint=13.3, crown_hint=7.2, lods=LODS_MASS_OAK, crown_mode="mass", mass_r=0.4,
         paintedLightMixByMaterial={"lf_foliage_vol": 0.5},
         hires=dict(region="oak_top", sheet="07_fog_exploration_interface.png", box=(518, 100, 800, 530), rosette_px=800,
-                   m_per_px=1 / 38.0, l_shift=5.0),
+                   m_per_px=1 / 50.0, l_shift=5.0, n_composite=16),
         single_refs="oak",
         tint_note="art/02 palette (orange-gold); for art/07 / art/01 look tint foliage toward warm yellow: "
                   "hue +0.02..+0.035, saturation x1.10, value x1.08 (INSTANCE_CUSTOM r,g,b)",

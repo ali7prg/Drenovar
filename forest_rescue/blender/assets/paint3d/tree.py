@@ -288,7 +288,8 @@ class Patches:
     def preview(self, path):
         seg.save(path, seg.label_preview(self.lbl, self.ref.img, 0.45))
 
-    def add_hires(self, key, sheet, box, target_mask=None, rosette_px=800, m_per_px=None, l_shift=4.0, hue=(70, 100)):
+    def add_hires(self, key, sheet, box, target_mask=None, rosette_px=800, m_per_px=None, l_shift=4.0, hue=(70, 100),
+                  n_composite=14):
         """Append colour-matched hi-res clump tiles from another painting (top/oblique card sources)."""
         import hires
         import p3atlas
@@ -297,6 +298,7 @@ class Patches:
         C = np.hypot(Lab[..., 1], Lab[..., 2])
         sel = (C > 35) & (Lab[..., 0] > 52) & self.ref.fg if target_mask is None else target_mask
         tiles = hires.match_palette(tiles, Lab[sel], l_shift=l_shift)
+        tiles = hires.composite(tiles, n=n_composite) + tiles
         img, uvs, s = hires.pack(tiles, key)
         p3atlas.save_region(key, img, {"source": sheet, "box": box, "tiles": len(tiles)})
         mpp = m_per_px or (1.0 / self.ref.ppm)
@@ -887,7 +889,7 @@ class TreeBuilder:
 
         def pick(eta, mode):
             if mode in ("top", "obl") and hires_m.any() and rng.random() < p_hi:
-                w = np.where(hires_m, np.sqrt(areas), 0.0)
+                w = np.where(hires_m, areas, 0.0)          # prefer the big rosette clusters
                 w = w * np.exp(np.clip((lums - np.median(lums[hires_m])) / 6.0, -3, 3))
                 w /= w.sum()
                 return int(rng.choice(len(info), p=w))
@@ -981,37 +983,35 @@ class TreeBuilder:
             r = mass_r * Rmax / ref.ppm * rng.uniform(0.85, 1.2)
             masses.append((C, r, eta))
         typ = np.median([q["w_m"] for q in info if q["area"] > np.median(areas)]) * size_k
+        edges_m = np.array([q["edge"] for q in info])
         for (C, r, eta) in masses:
-            got = 0
-            tries = 0
-            pts = []
-            while got < clumps_per and tries < clumps_per * 30:
-                tries += 1
-                dvec = nrm(rng.normal(0, 1, 3))
-                rad = rng.random() ** 0.35                      # denser near the mass surface
-                P3 = C + dvec * np.array([r, r, r * zsq]) * rad
-                if any(np.sum((P3 - q) ** 2) < (0.55 * typ) ** 2 for q in pts):
-                    continue
-                rel = (P3 - C) / np.array([r, r, r * zsq])
-                nshade = nrm(rel / np.array([r, r, r * zsq]))
-                zrel = rel[2]
-                au = cfg.get("ao_under", 0.85)
-                ao = float(np.clip(1.0 + (1.0 - au) * min(zrel, 0.0) / 0.7, au, 1.0)) if rad > 0.55 else 0.5 * (1 + au)
-                horiz = nrm(rel * np.array([1, 1, 0])) if np.linalg.norm(rel[:2]) > 1e-3 else nrm(rng.normal(0, 1, 3) * [1, 1, 0])
-                size = typ * rng.uniform(0.95, 1.2)
-                placed = 0
-                for n, mode, roll, hf in ((nrm(Z + rng.normal(0, 0.15, 3)), "top" if zrel > -0.2 else "under",
-                                           rng.uniform(-np.pi, np.pi), cfg.get("top_part", 0.6) if zrel > -0.2 else 1.0),
-                                          (nrm(horiz + Z * 0.9 + rng.normal(0, 0.12, 3)), "top" if zrel > 0.1 else "obl",
-                                           rng.normal(0, 0.2), cfg.get("obl_part", 0.75) if zrel > -0.2 else 1.0),
-                                          (nrm(horiz + rng.normal(0, 0.15, 3)), "side" if zrel > -0.3 else "under",
-                                           rng.normal(0, 0.15), 1.0)):
-                    ti = pick(eta, mode)
-                    sz = size / max(info[ti]["w_m"], 1e-3) * (cfg.get("top_scale", 1.25) if mode == "top" else 1.0)
-                    placed += add(P3 + rng.normal(0, 0.1 * typ, 3), n, ti, sz, roll, ao, nshade, hfrac=hf)
-                if placed:
-                    pts.append(P3)
-                    got += 1
+            rz = r * zsq
+            # cumulus cap: Fibonacci points on the lobe ellipsoid, ordered top -> rim -> underside
+            n_c = clumps_per
+            gold = np.pi * (3 - np.sqrt(5))
+            for j in range(n_c):
+                zf = 1 - (j + 0.5) / n_c * 1.55            # 1 (top) .. -0.55 (underside)
+                rr = np.sqrt(max(0.0, 1 - zf * zf))
+                a = j * gold + rng.uniform(-0.25, 0.25)
+                dvec = np.array([rr * np.cos(a), rr * np.sin(a), zf])
+                P3 = C + dvec * np.array([r, r, rz]) * rng.uniform(0.85, 1.0)
+                nshade = nrm(dvec / np.array([r, r, rz]))
+                if zf > 0.35:
+                    mode, hf, ao = "top", cfg.get("top_part", 0.6), 1.0
+                    n = nrm(nshade + Z * 0.6)
+                elif zf > -0.15:
+                    mode, hf, ao = "side", 1.0, 0.95
+                    n = nrm(nshade + Z * 0.35)
+                else:
+                    mode, hf, ao = "under", 1.0, cfg.get("ao_under", 0.8)
+                    n = nrm(nshade * np.array([1, 1, 0.3]) + rng.normal(0, 0.1, 3))
+                ti = pick(eta, mode)
+                if mode == "side" and not info[ti].get("hires"):
+                    pass
+                size = typ * rng.uniform(0.95, 1.2) * (cfg.get("top_scale", 1.0) if mode == "top" else 0.95)
+                sz = size / max(info[ti]["w_m"], 1e-3)
+                roll = rng.uniform(-np.pi, np.pi) if mode == "top" else rng.normal(0, 0.15)
+                add(P3, n, ti, sz, roll, ao, nshade, hfrac=hf if not info[ti].get("hires") else 1.0)
                 if max_cards and len(cards) >= max_cards:
                     break
             if max_cards and len(cards) >= max_cards:
@@ -1045,9 +1045,9 @@ class TreeBuilder:
             u = ref.xc[vi] + ref.R[vi] * k * np.cos(a)
             tq = ref.kd * ref.R[vi] * k * np.sin(a)
             P3 = ref.cam_to_world(np.array([u]), np.array([vq]), np.array([tq]))[0]
-            ti = pick((vq - v0) / max(v1 - v0, 1), "under")
-            add(P3, nrm(Z * 0.8 + rng.normal(0, 0.4, 3)), ti, rng.uniform(1.0, 1.3) * size_k, rng.uniform(-np.pi, np.pi),
-                0.78, None)
+            ti = pick((vq - v0) / max(v1 - v0, 1), "side")
+            add(P3, nrm(Z * 0.6 + rng.normal(0, 0.45, 3)), ti, rng.uniform(0.8, 1.0) * size_k, rng.uniform(-np.pi, np.pi),
+                0.85, None)
         return cards
 
     def _fill_quad(self, P3, n, ti, size, roll, hfrac=1.0):

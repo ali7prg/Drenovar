@@ -4,7 +4,7 @@
   "heightM": 5.46,
   "footprintM": [
     9.28,
-    2.9
+    2.92
   ],
   "scaleNote": "real metres from the 1.8 m figure on art/02 (understory without a figure: realistic height, see build script); world layer should respect heightM instead of normalising",
   "variants": {
@@ -38,7 +38,7 @@
       "bounds_m_blender": [
         [
           -4.46,
-          -0.28,
+          -0.3,
           0.15
         ],
         [
@@ -55,7 +55,7 @@
       "heightM": 5.46,
       "footprintM": [
         9.28,
-        2.9
+        2.92
       ]
     },
     "v2": {
@@ -84,16 +84,16 @@
         ]
       },
       "height_m": 5.06,
-      "footprint_radius_m": 3.18,
+      "footprint_radius_m": 3.14,
       "bounds_m_blender": [
         [
-          -2.8,
-          -1.12,
-          0.15
+          -2.84,
+          -1.11,
+          0.13
         ],
         [
-          3.18,
-          1.53,
+          3.14,
+          1.45,
           5.06
         ]
       ],
@@ -105,7 +105,7 @@
       "heightM": 5.06,
       "footprintM": [
         5.97,
-        2.65
+        2.56
       ]
     },
     "v3": {
@@ -134,15 +134,15 @@
         ]
       },
       "height_m": 5.44,
-      "footprint_radius_m": 2.95,
+      "footprint_radius_m": 2.97,
       "bounds_m_blender": [
         [
-          -2.6,
+          -2.58,
           -0.91,
           0.31
         ],
         [
-          2.95,
+          2.97,
           1.17,
           5.44
         ]
@@ -202,7 +202,7 @@
       "size": [
         9.28,
         5.46,
-        2.9
+        2.92
       ],
       "variant": "v1"
     },
@@ -216,7 +216,7 @@
       "size": [
         5.98,
         5.06,
-        2.65
+        2.56
       ],
       "variant": "v2"
     },
@@ -240,20 +240,20 @@
     "v1": {
       "side_top_max": 1.067,
       "side_top_median": 1.067,
-      "front_faces": 144,
-      "other_faces": 480
+      "front_faces": 158,
+      "other_faces": 466
     },
     "v2": {
       "side_top_max": 1.067,
       "side_top_median": 1.067,
-      "front_faces": 80,
-      "other_faces": 260
+      "front_faces": 79,
+      "other_faces": 261
     },
     "v3": {
       "side_top_max": 1.067,
       "side_top_median": 1.067,
-      "front_faces": 67,
-      "other_faces": 229
+      "front_faces": 68,
+      "other_faces": 228
     }
   }
 }

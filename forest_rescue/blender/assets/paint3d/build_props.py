@@ -23,7 +23,7 @@ import cv2  # noqa: E402
 import numpy as np  # noqa: E402
 from scipy import ndimage as ndi  # noqa: E402
 from skimage import feature, morphology, segmentation  # noqa: E402
-from frlib import core, paths, refs, render as frr  # noqa: E402
+from frlib import core, paths, refs, texproj, render as frr  # noqa: E402
 
 import geom  # noqa: E402
 import prism  # noqa: E402
@@ -203,6 +203,7 @@ def build(name, it):
     tex_clip = ref.clip if name == "moss_rock" else ref.H
     pm = paint_mask if name == "moss_rock" else (paint_mask | (ref.fg_full & (st_lbl > 0)))
     tex = slab.assemble(1024, ref.img, pm, tex_clip, side_sw, top_sw, side_scale=1.6, top_scale=1.6)
+    log_parts = straight_log_parts(ref, tex, tex_clip) if name == "fallen_trunk" else None
     cpath = os.path.join(RT, f"{c['tex']}_c.jpg")
     cv2.imwrite(cpath, cv2.cvtColor((tex * 255).astype(np.uint8), cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, 90])
     nmap, rmap = tree.bark_maps(tex)
@@ -305,6 +306,17 @@ def build(name, it):
     for vn, vd in variants.items():
         objs = []
         info[vn] = {}
+        if log_parts is not None and vd.get("flatten"):
+            for lod in range(3):
+                md = straight_log(log_parts, lod, seed=7 + len(vn), short=bool(vd.get("cut_x")))
+                if vd.get("mirror"):
+                    md = md.transformed(mirror_x=True)
+                o = pblend.obj_from_mesh(f"{asset}_{vn}_LOD{lod}", md, mats)
+                objs.append(o)
+                info[vn][f"LOD{lod}"] = dict(tris=md.tris())
+            built[vn] = objs
+            print(f"[{asset}] {vn}: " + ", ".join(f"LOD{l}={info[vn][f'LOD{l}']['tris']}" for l in range(3)), flush=True)
+            continue
         for lod, frac in ((0, 1.0), (1, 0.38), (2, 0.11)):
           for attempt in range(6):
               md = geom.Mesh()
@@ -442,6 +454,71 @@ def build(name, it):
     pblend.use_painted(allobjs, K, on=False)
     export(asset, built, info, c["tex"])
     print(f"[{asset}] exported ({time.time() - t0:.1f}s)", flush=True)
+
+
+def straight_log_parts(ref, tex, tex_clip):
+    """Painted log strip (EXTRA band of the texture) + root plate measurements from the art/02 fallen trunk."""
+    import logbuild
+    m = ref.fg.copy()
+    cols = np.nonzero(m.any(0))[0]
+    x0, x1 = cols.min(), cols.max()
+    # root plate = the tall left mass; log body = columns whose painted height is close to the median log height
+    hgt = np.array([np.ptp(np.nonzero(m[:, x])[0]) + 1 if m[:, x].any() else 0 for x in range(ref.W)])
+    med = np.median(hgt[x0:x1])
+    tall = np.nonzero(hgt > 1.6 * med)[0]
+    x_root = int(tall[tall < (x0 + x1) / 2].max()) + 4 if len(tall[tall < (x0 + x1) / 2]) else x0 + 10
+    x_end = x1 - 4
+    xs, cs, rs = logbuild.painted_log(ref.img, m, x_root, x_end)
+    TEX = tex.shape[0]
+    ex0, ey0, ex1, ey1 = int(slab.EXTRA[0] * TEX), int((1 - slab.EXTRA[3]) * TEX), int(slab.EXTRA[2] * TEX), int((1 - slab.EXTRA[1]) * TEX)
+    strip = logbuild.unwrap_strip(ref.img, xs, cs, rs, ex1 - ex0, int((ey1 - ey0) * 0.72))
+    tex[ey0:ey0 + strip.shape[0], ex0:ex1] = strip
+    # root-plate face texture: painted root mass pixels quilted into the rest of the EXTRA band
+    root = ref.img[:, max(0, x0):x_root]
+    rmask = m[:, max(0, x0):x_root]
+    rf = texproj.fill(root.astype(np.float64), rmask).astype(np.float32) if rmask.any() else root
+    rh = (ey1 - ey0) - strip.shape[0]
+    rface = cv2.resize(rf[np.nonzero(rmask.any(1))[0].min():np.nonzero(rmask.any(1))[0].max() + 1], (rh, rh))
+    tex[ey0 + strip.shape[0]:ey1, ex0:ex0 + rh] = rface
+    tex[ey0 + strip.shape[0]:ey1, ex0 + rh:ex0 + 2 * rh] = rface[:, ::-1]
+    S_ = TEX
+    uv_strip = (ex0 / S_, 1 - (ey0 + strip.shape[0]) / S_, ex1 / S_, 1 - ey0 / S_)
+    uv_root_face = (ex0 / S_, 1 - ey1 / S_, (ex0 + rh) / S_, 1 - (ey0 + strip.shape[0]) / S_)
+    uv_root_rim = ((ex0 + rh) / S_, 1 - ey1 / S_, (ex0 + 2 * rh) / S_, 1 - (ey0 + strip.shape[0]) / S_)
+    radius = float(np.median(rs)) / ref.ppm
+    length = float(xs[-1] - xs[0]) / ref.ppm
+    root_r = 0.5 * float(med * 1.9) / ref.ppm
+    return dict(uv_strip=uv_strip, uv_root_face=uv_root_face, uv_root_rim=uv_root_rim, radius=max(0.42, radius),
+                length=length, root_r=float(np.clip(root_r, 1.25, 1.5)))
+
+
+def straight_log(parts, lod, seed=0, short=False):
+    import logbuild
+    segs_len, segs_rad, n_root = ((26, 12, 18), (12, 8, 12), (5, 5, 8))[lod]
+    L = parts["length"] * (0.62 if short else 1.0)
+    V, T, UV, N, r = logbuild.log_mesh(L, parts["radius"], parts["uv_strip"], segs_len, segs_rad, seed=seed)
+    md = geom.Mesh()
+    C = np.zeros((len(V), 4))
+    C[:, 3] = 0.95
+    md.add(V, T, UV, C, N, 0)
+    if not short:
+        Vr, Tr, UVr, Nr = logbuild.root_plate(np.array([-0.15, 0.0, parts["root_r"] * 0.85]), parts["root_r"],
+                                             0.7, parts["uv_root_rim"], parts["uv_root_face"], n=n_root, seed=seed)
+        Cr = np.zeros((len(Vr), 4))
+        Cr[:, 3] = 0.9
+        md.add(Vr, Tr, UVr, Cr, Nr, 0)
+    if lod < 2:
+        end = np.array([L, 0.0, r[-1] - 0.06])
+        Vs, Ts, UVs, Ns = logbuild.splinters(end, r[-1], parts["uv_strip"], n=7 if lod == 0 else 4, seed=seed)
+        Cs = np.zeros((len(Vs), 4))
+        Cs[:, 3] = 0.85
+        md.add(Vs, Ts, UVs, Cs, Ns, 0)
+    Vv, Tt, UVv, Cc, Nn, Mm = md.arrays()
+    off = np.array([0.5 * L, 0.0, 0.0])
+    out = geom.Mesh()
+    out.add(Vv - off, Tt, UVv, Cc, Nn, 0)
+    out.M = [Mm]
+    return out
 
 
 def export(asset, built, info, texname):

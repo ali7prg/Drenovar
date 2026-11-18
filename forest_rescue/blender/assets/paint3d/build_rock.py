@@ -71,6 +71,9 @@ def build_mound_mesh(ref, body, lbl, depth_frac, voxel=2.5, rng=None):
     top_like = (((ref.Hu > 75) & (ref.Hu < 118) & (ref.C > 14)) | (ref.L > 64))
     ys, xs = np.nonzero(body)
     xc, half = 0.5 * (xs.min() + xs.max()), 0.5 * (xs.max() - xs.min() + 1)
+    vtop = ys.min()
+    apex_w = geom.world_at_y(ref.view, np.array([xc]), np.array([vtop + 0.45 * (ys.max() - vtop)]), np.array([0.0]))[0]
+    apex = (float(apex_w[0]), float(apex_w[2]))
     Vs, Fs, base = [], [], 0
     for b in range(1, int(lbl.max()) + 1):
         m = (lbl == b) & body
@@ -81,7 +84,7 @@ def build_mound_mesh(ref, body, lbl, depth_frac, voxel=2.5, rng=None):
         mm = math.sqrt(max(0.0, 1.0 - ((cx - xc) / half) ** 2))
         res = prism.block_solid(ref.view, mg, top_like, ref.ppm, ref.cfg["elev"], y0=rng.uniform(-0.12, 0.12),
                                 rng=rng, min_depth_k=0.5, max_depth_k=1.0, depth_mul=0.65 + 0.45 * mm, eps_px=4.5,
-                                taper=0.8)
+                                taper=0.55, apex=apex)
         if res is None:
             continue
         V, F, _ = res

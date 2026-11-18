@@ -36,7 +36,7 @@ def top_band(region, top_like, min_cols_frac=0.3, lo_frac=0.08, hi_frac=0.45):
 
 
 def block_solid(view, region, top_like, ppm, elev_deg, y0=0.0, eps_px=1.6, taper=0.86, min_depth_k=0.7,
-                max_depth_k=1.5, rng=None, depth_mul=1.0):
+                max_depth_k=1.5, rng=None, depth_mul=1.0, apex=None):
     """Returns (verts (N,3), faces list) of the solid block in Blender world space, or None."""
     rng = rng or np.random.default_rng(0)
     ys, xs = np.nonzero(region)
@@ -82,13 +82,15 @@ def block_solid(view, region, top_like, ppm, elev_deg, y0=0.0, eps_px=1.6, taper
     ret = bmesh.ops.extrude_face_region(bm, geom=[f])
     ext = [e for e in ret["geom"] if isinstance(e, bmesh.types.BMVert)]
     bmesh.ops.translate(bm, vec=(0.0, D, 0.0), verts=ext)
-    # tapered, slightly irregular back face (natural fracture), bottom kept on its plane
-    cen = np.mean([v.co for v in ext], axis=0)
+    # tapered, slightly irregular back face (natural fracture), bottom kept on its plane; with an apex the back
+    # converges toward the outcrop's centre (mound: inclined sides instead of extruded ledges)
+    cen = np.mean([v.co for v in ext], axis=0) if apex is None else np.array([apex[0], 0.0, apex[1]])
     zmin = min(v.co.z for v in ext)
     for v in ext:
         k = taper * rng.uniform(0.95, 1.03)
         v.co.x = cen[0] + (v.co.x - cen[0]) * k
-        v.co.z = max(zmin, cen[2] + (v.co.z - cen[2]) * k)
+        if v.co.z > zmin + 0.25:
+            v.co.z = max(zmin, cen[2] + (v.co.z - cen[2]) * k)
     bmesh.ops.triangulate(bm, faces=bm.faces[:])
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
     V = np.array([v.co[:] for v in bm.verts])

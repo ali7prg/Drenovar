@@ -56,12 +56,13 @@ LODS_TREE = {
 }
 
 # grove oaks (art/01 look): broad, flat, lifted crown of yellow lobes, trunk + limbs visible below
-GROVE_CFG = dict(placement="anchors", mass_r=0.25, mass_zscale=0.58, ao_under=0.68, ao_side=0.84, side_mode="shade", p_hires=0.6,
+GROVE_CFG = dict(placement="umbrella", umb_n=8, umb_rk=1.0, umb_base=0.5, umb_lobe_r=0.3, mass_r=0.25, mass_zscale=0.58, ao_under=0.68, ao_side=0.84, side_mode="shade", p_hires=0.6,
                  limbs_connected_only=True, limb_keep_r=2.2, anchor_min_r=2.2, anchor_min_z=7.6, mass_min_dist=2.7,
-                 trunk_r_k=0.78, lobe_zf_min=-0.25, anchor_radial_k=1.12, anchor_step_m=1.2)
-GROVE_LODS = {0: dict(n_masses=9, clumps_per=58, core_cards=0, max_cards=1250, copy_min_r_px=2.6),
-              1: dict(n_masses=8, clumps_per=26, core_cards=0, max_cards=470),
-              2: dict(n_masses=7, clumps_per=11, core_cards=0, max_cards=110)}
+                 trunk_r_k=0.78, lobe_zf_min=-0.25, anchor_radial_k=1.25, anchor_step_m=1.2, lobe_limbs=True,
+                 lobe_limb_r0=0.5)
+GROVE_LODS = {0: dict(n_masses=9, clumps_per=62, core_cards=0, max_cards=1250, copy_min_r_px=2.6),
+              1: dict(n_masses=8, clumps_per=28, core_cards=0, max_cards=470, lobe_limb_pts=4),
+              2: dict(n_masses=7, clumps_per=11, core_cards=0, max_cards=110, lobe_limb_pts=2)}
 
 TREES = {
     "golden_oak": dict(

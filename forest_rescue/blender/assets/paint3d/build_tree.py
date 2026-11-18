@@ -184,6 +184,7 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
             if rk != 1.0 and copies:
                 tv0 = copies[0][1]
                 anchors = [np.array([tv0[0] + (q[0] - tv0[0]) * rk, tv0[1] + (q[1] - tv0[1]) * rk, q[2]]) for q in anchors]
+        B.cfg["umb_n"] = L.get("umb_n", B.cfg.get("umb_n", 8)) if lod == 0 else max(5, B.cfg.get("umb_n", 8) - lod)
         fills = B.mass_cards(fronts, dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod, n_masses=L["n_masses"],
                              mass_r=B.cfg.get("mass_r", sp.get("mass_r", 0.34)), clumps_per=L["clumps_per"],
                              front_extra_frac=L.get("front_extra", 0.6), max_cards=L.get("max_cards"),
@@ -201,6 +202,25 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
     else:
         fills = B.fill_cards(L["n_fill"], dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod, n_inner=L["n_inner"],
                              min_dist_k=L.get("min_dist_k", 0.55))
+    if B.cfg.get("lobe_limbs") and getattr(B, "last_masses", None):
+        # main limbs: from the trunk top (fork) arching up/out into every lobe (3-5+ thick limbs under the crown)
+        trunk = [q for q in ps if q["kind"] == "trunk"][0]
+        F = trunk["P"][int(np.argmax(trunk["P"][:, 2]))]
+        r_top = float(trunk["r"][int(np.argmax(trunk["P"][:, 2]))])
+        thick = sorted([q for q in base_paths if q["kind"] == "limb"], key=lambda q: -q.get("r_px", 0))
+        uv_id = thick[0]["id"] if thick else 0
+        rng_l = np.random.default_rng(vs["seed"] * 13 + lod)
+        nid = 10000
+        for (C, r_m, eta) in B.last_masses:
+            Cl = F + (C - F) * 0.88
+            d_ = Cl - F
+            M = F + d_ * 0.45 + np.array([0, 0, 1.0]) * 0.25 * np.linalg.norm(d_) + rng_l.normal(0, 0.15, 3)
+            s_ = np.linspace(0, 1, L.get("lobe_limb_pts", 6))[:, None]
+            Pq = (1 - s_) ** 2 * F + 2 * (1 - s_) * s_ * M + s_ ** 2 * Cl
+            rr = np.linspace(r_top * B.cfg.get("lobe_limb_r0", 0.45), 0.07, len(s_))
+            bark_uv[nid] = bark_uv[uv_id]
+            ps.append(dict(P=Pq, r=rr, kind="limb", id=nid, parent=-1, r_px=float(rr[0] * ref.ppm), level=1))
+            nid += 1
     if vs.get("palette"):
         mp = P.pal[vs["palette"]]
         for c in fronts + fills:

@@ -1098,6 +1098,26 @@ class TreeBuilder:
                     C = ref.cam_to_world(np.array([u]), np.array([v]), np.array([tq]))[0]
                     masses.append((C, max(0.35 * Rv / ref.ppm, 0.45), eta))
             n_masses = 0
+        elif placement == "umbrella":
+            # art/01 grove oak: 7-9 distinct domed lobes on a broad, lifted crown (top lobe + ring at varied heights)
+            axis_top = geom.world_at_y(ref.view, np.array([ref.axis_x[0]]), np.array([float(ref.trunk_rows[0])]),
+                                       np.array([0.0]))[0]
+            Rc = float(ref.R[v0:v1 + 1].max()) / ref.ppm * cfg.get("umb_rk", 1.0)
+            Htot = (ref.ground - v0) / ref.ppm
+            zb, zt = cfg.get("umb_base", 0.55) * Htot, 0.97 * Htot
+            n_l = cfg.get("umb_n", 8)
+            r_l = cfg.get("umb_lobe_r", 0.3) * Rc
+            rz_ = r_l * zsq
+            a0 = rng.uniform(0, 2 * np.pi)
+            masses.append((np.array([axis_top[0], axis_top[1], zt - rz_ * 0.9]), r_l * 0.95, 0.05))
+            for i in range(n_l - 1):
+                ang = a0 + 2 * np.pi * i / (n_l - 1) + rng.normal(0, 0.18)
+                rho = Rc * rng.uniform(0.5, 0.82)
+                hi = (i % 2 == 0)
+                z = zb + rz_ + (zt - zb - 2.2 * rz_) * (rng.uniform(0.55, 0.95) if hi else rng.uniform(0.05, 0.45))
+                C = np.array([axis_top[0] + rho * np.cos(ang), axis_top[1] + rho * np.sin(ang), z])
+                masses.append((C, r_l * rng.uniform(0.85, 1.1), float(np.clip(1 - (z - zb) / max(zt - zb, 1e-3), 0, 1))))
+            n_masses = 0
         elif placement == "anchors" and anchors is not None and len(anchors):
             A = np.asarray(anchors)
             md = cfg.get("mass_min_dist", 0.0)
@@ -1143,6 +1163,7 @@ class TreeBuilder:
             masses.append((C, r, eta))
         typ = np.median([q["w_m"] for q in info if q["area"] > np.median(areas)]) * size_k
         edges_m = np.array([q["edge"] for q in info])
+        self.last_masses = list(masses)
         for (C, r, eta) in masses:
             rz = r * zsq
             # cumulus cap: Fibonacci points on the lobe ellipsoid, ordered top -> rim -> underside

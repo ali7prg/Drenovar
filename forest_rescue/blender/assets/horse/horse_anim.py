@@ -526,11 +526,17 @@ class ClipBuilder:
                 need[k] = max([0.0] + o)
             if need.max() <= 0.003:
                 break
-            # widen + smooth the requirement (circular for loops)
+            # widen + smooth the requirement (circular for loops: the last sample duplicates
+            # the first, so filter one period and copy frame 0 to the end -> exact loop)
             from scipy import ndimage as ndi
-            mode = "wrap" if loop else "nearest"
-            need = ndi.maximum_filter1d(need, 5, mode=mode)
-            need = ndi.gaussian_filter1d(need, 1.5, mode=mode)
+            if loop and n > 2:
+                per = need[:-1]
+                per = ndi.maximum_filter1d(per, 5, mode="wrap")
+                per = ndi.gaussian_filter1d(per, 1.5, mode="wrap")
+                need = np.concatenate([per, per[:1]])
+            else:
+                need = ndi.maximum_filter1d(need, 5, mode="nearest")
+                need = ndi.gaussian_filter1d(need, 1.5, mode="nearest")
             for k, pose in enumerate(frames):
                 l = pose.loc.get("spine_02", np.zeros(3)).copy()
                 l[2] -= gain * need[k]

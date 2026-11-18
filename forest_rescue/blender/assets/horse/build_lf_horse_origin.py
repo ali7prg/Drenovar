@@ -475,6 +475,11 @@ def main():
         write_clip(arm, clip, fb)
         m = dict(clip["meta"])
         m["hoofSlip_m"] = hoof_slip(clip, cb, fb)
+        if clip["loop"]:
+            a0, a1 = fb[0], fb[-1]
+            m["loopSeamMaxQuatDiff"] = float(max(min(np.abs(a0[n][1] - a1[n][1]).max(),
+                                                     np.abs(a0[n][1] + a1[n][1]).max()) for n in a0))
+            log(f"  {clip['name']} loop seam max quat diff {m['loopSeamMaxQuatDiff']:.1e}")
         m["ikOverreach_m"] = round(max(HA.OVERREACH[0], 0.0), 4)
         meta_clips[clip["name"]] = m
     arm.animation_data.action = None

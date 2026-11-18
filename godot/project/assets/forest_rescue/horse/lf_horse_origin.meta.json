@@ -83,6 +83,7 @@
         "H_L": 0.0,
         "H_R": 0.0
       },
+      "loopSeamMaxQuatDiff": 6.938893903907228e-18,
       "ikOverreach_m": 0.0
     },
     "lf_horse_walk": {
@@ -106,6 +107,7 @@
         "H_L": 0.0005,
         "H_R": 0.0007
       },
+      "loopSeamMaxQuatDiff": 3.469446951953614e-16,
       "ikOverreach_m": 0.0
     },
     "lf_horse_trot": {
@@ -129,6 +131,7 @@
         "H_L": 0.007,
         "H_R": 0.0
       },
+      "loopSeamMaxQuatDiff": 4.524158825347513e-15,
       "ikOverreach_m": 0.0
     },
     "lf_horse_start": {

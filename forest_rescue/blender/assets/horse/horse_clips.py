@@ -132,8 +132,13 @@ def secondary(cb, frames, times, loop, root=None, tail_amp=1.0, ribbon_amp=1.0, 
         pel.append(M["pelvis"][:3, 3] + rp)
     ring_p, neck_p, pel = map(np.array, (ring_p, neck_p, pel))
     from scipy import ndimage as ndi
-    mode = "wrap" if loop else "nearest"
-    ring_p, neck_p, pel = (ndi.gaussian_filter1d(a, 2.0, axis=0, mode=mode) for a in (ring_p, neck_p, pel))
+    if loop:   # one period (last sample duplicates the first), wrap, then close the loop
+        ring_p, neck_p, pel = (np.concatenate([ndi.gaussian_filter1d(a[:-1], 2.0, axis=0, mode="wrap")] * 1 +
+                                              [ndi.gaussian_filter1d(a[:-1], 2.0, axis=0, mode="wrap")[:1]])
+                               for a in (ring_p, neck_p, pel))
+    else:
+        ring_p, neck_p, pel = (ndi.gaussian_filter1d(a, 2.0, axis=0, mode="nearest")
+                               for a in (ring_p, neck_p, pel))
     g = 9.81
     a_ring = np.stack([HA.accel(ring_p[:, i], dt) for i in range(3)], 1)
     a_neck = HA.accel(neck_p[:, 2], dt)

@@ -8,6 +8,15 @@ const PARCHMENT_INK := Color("#3a2716")
 const MUTED := Color("#d5c7a8")
 const BRASS := Color("#b48a4e")
 static var cache: Dictionary = {}
+static var italic_font: FontVariation
+
+## Faux-italic NotoSerif (only the Regular face ships with the game); used where art/18 is italic.
+static func italic() -> Font:
+	if italic_font == null:
+		italic_font = FontVariation.new()
+		italic_font.base_font = TITLE_FONT
+		italic_font.variation_transform = Transform2D(Vector2(1, 0), Vector2(0.22, 1), Vector2.ZERO)
+	return italic_font
 
 ## Vertical gradient fill, outer border, optional inner highlight line, rounded corners.
 static func frame(top: Color, bottom: Color, border: Color, radius := 9, border_width := 2,

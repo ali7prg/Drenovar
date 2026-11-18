@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_bone_key v1 socket (fitted perspective)",
+  "iou_filled": 0.9324,
+  "iou_raw": 0.9324,
+  "mean_abs_colour_error": 0.172,
+  "mean_rgb_ref": [
+    0.545,
+    0.459,
+    0.366
+  ],
+  "mean_rgb_render": [
+    0.703,
+    0.595,
+    0.482
+  ]
+}

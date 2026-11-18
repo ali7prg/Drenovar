@@ -229,6 +229,7 @@ func build_card() -> void:
 	card.add_child(column)
 	card_text = Style.label("", 24, Style.IVORY, true, 5)
 	card_text.name = "IntroLine"
+	card_text.add_theme_font_override("font", Style.italic())
 	card_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	card_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(card_text)

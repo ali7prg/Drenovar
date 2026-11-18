@@ -1,0 +1,405 @@
+{
+  "id": "lf_mechanism_winch_sequence",
+  "tris": {
+    "LOD0": 2792,
+    "LOD1": 2478,
+    "LOD2": 1674
+  },
+  "tris_by_node": {
+    "LOD0": {
+      "root": 1132,
+      "drum": 1120,
+      "crank": 124,
+      "pawl": 64,
+      "brake": 96,
+      "rope": 56,
+      "chest": 168,
+      "chest_lid": 32
+    },
+    "LOD1": {
+      "root": 1030,
+      "drum": 988,
+      "crank": 94,
+      "pawl": 56,
+      "brake": 76,
+      "rope": 46,
+      "chest": 168,
+      "chest_lid": 20
+    },
+    "LOD2": {
+      "root": 804,
+      "drum": 512,
+      "crank": 74,
+      "pawl": 48,
+      "brake": 60,
+      "rope": 36,
+      "chest": 132,
+      "chest_lid": 8
+    }
+  },
+  "budget": "mechanism LOD0 <= 6000 tris",
+  "bones": 0,
+  "materials": [
+    "lf_mechanism_winch_sequence_mat"
+  ],
+  "textures": {
+    "baseColor": "2048 JPEG",
+    "metallicRoughness": "1024 JPEG (G rough, B metal)",
+    "normal": "2048 PNG"
+  },
+  "coordinate_space": "glTF (Y up, metres); operator/front side faces +Z",
+  "bounds_m": {
+    "min": [
+      -1.45,
+      -1.0,
+      1.655
+    ],
+    "max": [
+      1.45,
+      2.1292,
+      -1.245
+    ]
+  },
+  "clips": {
+    "lf_winch_brake": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "brake_set": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_winch_pawl": {
+      "seconds": 0.5,
+      "frames": 15,
+      "loop": false,
+      "markers": {
+        "pawl_engaged": 0.37
+      },
+      "glb_seconds": 0.5
+    },
+    "lf_rope_release": {
+      "seconds": 1.3,
+      "frames": 39,
+      "loop": false,
+      "markers": {
+        "chest_clear_of_pit": 1.0
+      },
+      "glb_seconds": 1.3
+    },
+    "lf_lock_mechanism": {
+      "seconds": 1.8,
+      "frames": 54,
+      "loop": false,
+      "markers": {
+        "lid_unlocked": 0.4666666666666667,
+        "lid_open": 1.5333333333333334
+      },
+      "glb_seconds": 1.8
+    }
+  },
+  "glb_nodes": [
+    "lf_mechanism_winch_sequence_brake_lever_LOD0",
+    "lf_mechanism_winch_sequence_brake_lever_LOD1",
+    "lf_mechanism_winch_sequence_brake_lever_LOD2",
+    "brake_lever",
+    "artifact_spot",
+    "lf_mechanism_winch_sequence_chest_lid_LOD0",
+    "lf_mechanism_winch_sequence_chest_lid_LOD1",
+    "lf_mechanism_winch_sequence_chest_lid_LOD2",
+    "chest_lid",
+    "lf_mechanism_winch_sequence_chest_LOD0",
+    "lf_mechanism_winch_sequence_chest_LOD1",
+    "lf_mechanism_winch_sequence_chest_LOD2",
+    "chest",
+    "lf_mechanism_winch_sequence_crank_LOD0",
+    "lf_mechanism_winch_sequence_crank_LOD1",
+    "lf_mechanism_winch_sequence_crank_LOD2",
+    "crank",
+    "lf_mechanism_winch_sequence_drum_LOD0",
+    "lf_mechanism_winch_sequence_drum_LOD1",
+    "lf_mechanism_winch_sequence_drum_LOD2",
+    "drum",
+    "lf_mechanism_winch_sequence_LOD0",
+    "lf_mechanism_winch_sequence_LOD1",
+    "lf_mechanism_winch_sequence_LOD2",
+    "lf_mechanism_winch_sequence_pawl_LOD0",
+    "lf_mechanism_winch_sequence_pawl_LOD1",
+    "lf_mechanism_winch_sequence_pawl_LOD2",
+    "pawl",
+    "lf_mechanism_winch_sequence_rope_LOD0",
+    "lf_mechanism_winch_sequence_rope_LOD1",
+    "lf_mechanism_winch_sequence_rope_LOD2",
+    "rope"
+  ],
+  "glb_animations": {
+    "lf_winch_brake": [
+      [
+        "brake_lever",
+        "translation"
+      ],
+      [
+        "brake_lever",
+        "rotation"
+      ],
+      [
+        "brake_lever",
+        "scale"
+      ]
+    ],
+    "lf_winch_pawl": [
+      [
+        "brake_lever",
+        "translation"
+      ],
+      [
+        "brake_lever",
+        "rotation"
+      ],
+      [
+        "brake_lever",
+        "scale"
+      ],
+      [
+        "pawl",
+        "translation"
+      ],
+      [
+        "pawl",
+        "rotation"
+      ],
+      [
+        "pawl",
+        "scale"
+      ]
+    ],
+    "lf_rope_release": [
+      [
+        "brake_lever",
+        "translation"
+      ],
+      [
+        "brake_lever",
+        "rotation"
+      ],
+      [
+        "brake_lever",
+        "scale"
+      ],
+      [
+        "chest",
+        "translation"
+      ],
+      [
+        "chest",
+        "rotation"
+      ],
+      [
+        "chest",
+        "scale"
+      ],
+      [
+        "crank",
+        "translation"
+      ],
+      [
+        "crank",
+        "rotation"
+      ],
+      [
+        "crank",
+        "scale"
+      ],
+      [
+        "drum",
+        "translation"
+      ],
+      [
+        "drum",
+        "rotation"
+      ],
+      [
+        "drum",
+        "scale"
+      ],
+      [
+        "pawl",
+        "translation"
+      ],
+      [
+        "pawl",
+        "rotation"
+      ],
+      [
+        "pawl",
+        "scale"
+      ],
+      [
+        "rope",
+        "translation"
+      ],
+      [
+        "rope",
+        "rotation"
+      ],
+      [
+        "rope",
+        "scale"
+      ]
+    ],
+    "lf_lock_mechanism": [
+      [
+        "chest",
+        "translation"
+      ],
+      [
+        "chest",
+        "rotation"
+      ],
+      [
+        "chest",
+        "scale"
+      ],
+      [
+        "chest_lid",
+        "translation"
+      ],
+      [
+        "chest_lid",
+        "rotation"
+      ],
+      [
+        "chest_lid",
+        "scale"
+      ],
+      [
+        "crank",
+        "translation"
+      ],
+      [
+        "crank",
+        "rotation"
+      ],
+      [
+        "crank",
+        "scale"
+      ],
+      [
+        "drum",
+        "translation"
+      ],
+      [
+        "drum",
+        "rotation"
+      ],
+      [
+        "drum",
+        "scale"
+      ],
+      [
+        "pawl",
+        "translation"
+      ],
+      [
+        "pawl",
+        "rotation"
+      ],
+      [
+        "pawl",
+        "scale"
+      ],
+      [
+        "rope",
+        "translation"
+      ],
+      [
+        "rope",
+        "rotation"
+      ],
+      [
+        "rope",
+        "scale"
+      ]
+    ]
+  },
+  "markers": {
+    "artifact_spot": {
+      "position": [
+        0.0,
+        -0.82,
+        0.205
+      ],
+      "parent": "chest"
+    }
+  },
+  "projection": {
+    "painted_fraction": 0.127,
+    "texel_mm": 3.806
+  },
+  "camera_fit_iou": {
+    "main": 0.8384
+  },
+  "notes": "Crank and drum share the axle (1:1); pawl clicks over the 22-tooth ratchet while raising.",
+  "symbol_targets": {
+    "brake": {
+      "node": "brake_lever",
+      "rotation_x_deg": -48.0,
+      "clip": "lf_winch_brake"
+    },
+    "pawl": {
+      "node": "pawl",
+      "rotation_x_deg": -24.0,
+      "clip": "lf_winch_pawl"
+    },
+    "raise": {
+      "clip": "lf_rope_release",
+      "nodes": {
+        "drum": {
+          "rotation_x_deg": -357.75
+        },
+        "crank": {
+          "rotation_x_deg": -357.75
+        },
+        "rope": {
+          "scale_y": 0.3333,
+          "note": "rope node scales along its own length (glTF Y)"
+        },
+        "chest": {
+          "translation_offset": [
+            0,
+            1.28,
+            0
+          ]
+        },
+        "brake_lever": {
+          "rotation_x_deg": 0.0
+        }
+      }
+    },
+    "solved": {
+      "clip": "lf_lock_mechanism",
+      "chest_lid": {
+        "rotation_x_deg": -105.0
+      }
+    },
+    "wrong_input": "server resets: tween nodes back to rest (all 0, rope scale 1)",
+    "sites": [
+      "lf_site_03",
+      "lf_site_07",
+      "lf_site_11"
+    ],
+    "order": [
+      "brake",
+      "pawl",
+      "raise"
+    ]
+  },
+  "sockets": {
+    "artifact_spot_raised": [
+      0.0,
+      0.46,
+      0.205
+    ]
+  }
+}

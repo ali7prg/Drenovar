@@ -51,6 +51,33 @@ def _planar_uvs(V, T, tile, mode="tile", rect=None, axis_uv=None):
     return uvs, fn
 
 
+def moss_caps(md, V, T, fn, mat, rng, up_min=0.55, patch=0.55, seed=0):
+    """Up-facing faces -> moss carpet: duplicate faces lifted 1.5 cm, UV into the opaque moss tile centre
+    (per-face local planar mapping; noisy texture hides the per-face seams). Patchy via 3-D noise."""
+    u0, v0, u1, v1 = atlas.uv_rect("moss_clump")
+    cu, cv = (u0 + u1) / 2, (v0 + v1) / 2
+    hw = (u1 - u0) * 0.22
+    cen = V[T].mean(1)
+    noise = texproj.fbm(cen, 0.35, 3, seed=seed)
+    sel = (fn[:, 2] > up_min) & (noise > (1 - patch) * 0.75 + 0.15)
+    if not sel.any():
+        return 0
+    faces, uvs, verts = [], [], []
+    for f, n in zip(T[sel], fn[sel]):
+        b = len(verts)
+        for i in f:
+            verts.append(V[i] + n * 0.015)
+        faces.append((b, b + 1, b + 2))
+        ou, ov = rng.uniform(-0.5, 0.5, 2) * hw
+        uvs.append([(cu + ou + ((V[i, 0] * 0.35) % 1.0 - 0.5) * hw * 0.5, cv + ov + ((V[i, 1] * 0.35) % 1.0 - 0.5) * hw * 0.5)
+                    for i in f])
+    col = np.zeros((len(verts), 4))
+    col[:, 3] = 0.9
+    nrm = np.repeat(fn[sel], 3, axis=0)
+    md.add(np.array(verts), faces, uvs, mat, col, normals=nrm)
+    return int(sel.sum())
+
+
 def _cards_on_surface(md, V, T, fn, rng, n, tiles, size, mat, zmin=-1.0, up_min=0.6, lift=0.03, wind=False,
                       flat=True):
     """Moss/shrub cards on upward-facing triangles (area weighted)."""
@@ -99,8 +126,10 @@ def build_fallen_trunk(variant):
     prims = []
     for i in range(len(xs) - 1):
         prims.append(sdf.round_cone((xs[i], ys[i], zc[i]), (xs[i + 1], ys[i + 1], zc[i + 1]), rr[i], rr[i + 1], k=0.25))
-    # splintered root end: spikes
+    # splintered root end: broken root plate + spikes pointing up/out (art/02 left end)
     x0, z0 = xs[0], zc[0]
+    if variant == 1:
+        prims.append(sdf.ellipsoid((x0 - 0.2, ys[0], z0 + 0.35), (0.55, 1.15, 1.35), k=0.35))
     for k in range(10 if variant == 1 else 6):
         a = rng.uniform(0, 2 * np.pi)
         d = normalize(np.array([-0.35 - 0.4 * rng.random(), math.cos(a) * 0.6, math.sin(a) * 0.5 + 1.1]))
@@ -154,8 +183,7 @@ def build_fallen_trunk(variant):
         md.add(v, faces, uvs, 0, col)
         fn = normalize(np.cross(v[t[:, 1]] - v[t[:, 0]], v[t[:, 2]] - v[t[:, 0]]))
         fmat = 1 if lod == 0 else 0
-        _cards_on_surface(md, v, t, fn, rng, [90, 30, 10][lod], ["moss_clump"], (0.9, 1.5) if lod == 0 else (1.4, 2.2),
-                          fmat, up_min=0.6, lift=0.02)
+        moss_caps(md, v, t, fn, fmat, rng, up_min=0.5, patch=0.6, seed=variant)
         if lod == 0:
             anchors = []
             for j in range(5):
@@ -180,7 +208,7 @@ def build_moss_rock(variant):
     res = _res(["rock", "foliage"], wind=False)
     prims = []
     if variant == 1:
-        blocks = [((-0.7, 0.2, 2.6), (2.9, 1.9, 1.55), (0.05, -0.34, 0.08)),  # big slab, top rising to the right
+        blocks = [((-0.9, 0.2, 2.75), (2.9, 1.9, 1.85), (0.03, -0.12, 0.06)),  # big block, top rising slightly right
                   ((3.0, 0.3, 1.0), (2.0, 2.0, 1.05), (0.0, 0.08, 0.1)),        # lower right terrace
                   ((-3.7, 0.5, 0.8), (1.2, 1.4, 0.85), (0.0, 0.0, -0.1)),
                   ((0.4, -1.7, 0.5), (2.8, 0.9, 0.55), (0.0, 0.0, 0.05)),
@@ -227,7 +255,8 @@ def build_moss_rock(variant):
         moss_n = {1: [170, 60, 16], 2: [70, 26, 8], 3: [26, 9, 3]}[variant][lod]
         msz = {1: [(1.6, 2.6), (2.4, 3.4), (3.2, 4.2)], 2: [(1.0, 1.6), (1.5, 2.2), (2.0, 2.8)],
                3: [(0.6, 1.0), (0.9, 1.4), (1.2, 1.8)]}[variant][lod]
-        _cards_on_surface(md, v, t, fn, rng, moss_n, ["moss_clump"], msz, fmat, up_min=0.5, lift=0.02)
+        moss_caps(md, v, t, fn, fmat, rng, up_min=0.45, patch=0.7, seed=variant)
+        _cards_on_surface(md, v, t, fn, rng, moss_n // 4, ["moss_clump"], msz, fmat, up_min=0.5, lift=0.01)
         if lod < 2:
             shrub = {1: [44, 14], 2: [16, 6], 3: [6, 2]}[variant][lod]
             ssz = {1: (0.9, 1.6), 2: (0.7, 1.2), 3: (0.5, 0.8)}[variant]
@@ -249,11 +278,11 @@ def build_bramble(variant):
     for k in range({1: 36, 2: 26, 3: 28}[variant]):
         a = rng.uniform(0, 2 * np.pi)
         d = np.array([math.cos(a), math.sin(a) * 0.8, 0])
-        base = d * rng.uniform(0, 0.35) * W * 0.3
-        reach = rng.uniform(0.35, 0.62) * W
-        top = rng.uniform(0.75, 1.15) * H
-        pts = trees._bezier(base, base + d * reach * 0.3 + np.array([0, 0, top * 1.35]), base + d * reach +
-                            np.array([0, 0, top * rng.uniform(0.25, 0.7)]), 7)
+        base = d * rng.uniform(0, 0.8) * W * 0.32
+        reach = rng.uniform(0.25, 0.5) * W
+        top = rng.uniform(0.7, 1.1) * H
+        pts = trees._bezier(base, base + d * reach * 0.35 + np.array([0, 0, top * 1.4]), base + d * reach +
+                            np.array([0, 0, top * rng.uniform(0.0, 0.35)]), 7)
         canes.append((pts, rng.random()))
     rect = atlas.uv_rect("bramble_cane")
     for lod in range(3):
@@ -268,9 +297,16 @@ def build_bramble(variant):
         centre = np.array([0, 0, H * 0.45])
         for j in range(n_cards):
             pts, ph = canes[rng.integers(len(canes))]
-            t = rng.uniform(0.1, 0.8) if lod == 0 else rng.uniform(0.15, 0.85)
-            i = min(int(t * (len(pts) - 1)), len(pts) - 2)
-            p = pts[i] + (pts[i + 1] - pts[i]) * rng.random()
+            if rng.random() < 0.65:
+                # fill a ground-hugging dome (art/02 mound)
+                q = rng.normal(0, 1, 3)
+                q[2] = abs(q[2])
+                q = normalize(q) * rng.uniform(0.35, 1.0) ** 0.5
+                p = np.array([q[0] * W * 0.5, q[1] * W * 0.42, q[2] * H * 0.92])
+            else:
+                t = rng.uniform(0.15, 0.8)
+                i = min(int(t * (len(pts) - 1)), len(pts) - 2)
+                p = pts[i] + (pts[i + 1] - pts[i]) * rng.random()
             out = normalize(p - centre + rng.normal(0, 0.3, 3))
             n = normalize(out + np.array([0, 0, 0.5]))
             tile = ["bramble_a", "bramble_b"][rng.integers(2)] if lod < 2 else "bramble_dense"

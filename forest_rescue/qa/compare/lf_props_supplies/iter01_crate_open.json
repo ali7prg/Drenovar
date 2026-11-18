@@ -1,0 +1,16 @@
+{
+  "title": "lf_props_supplies crate_open (fitted camera)",
+  "iou_filled": 0.8376,
+  "iou_raw": 0.8298,
+  "mean_abs_colour_error": 0.1383,
+  "mean_rgb_ref": [
+    0.454,
+    0.321,
+    0.213
+  ],
+  "mean_rgb_render": [
+    0.571,
+    0.423,
+    0.313
+  ]
+}

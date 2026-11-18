@@ -1,0 +1,16 @@
+{
+  "title": "lf_mechanism_winch_sequence main (camera fitted to the drawing)",
+  "iou_filled": 0.8355,
+  "iou_raw": 0.7633,
+  "mean_abs_colour_error": 0.1057,
+  "mean_rgb_ref": [
+    0.429,
+    0.344,
+    0.263
+  ],
+  "mean_rgb_render": [
+    0.423,
+    0.343,
+    0.273
+  ]
+}

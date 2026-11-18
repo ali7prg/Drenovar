@@ -1,0 +1,387 @@
+{
+  "id": "lf_guardian_tenerys",
+  "species": "tenerys",
+  "group": "guardians",
+  "source": "forest_rescue/blender/sources/guardians/lf_guardian_tenerys.blend",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/guardians/build_lf_guardian_tenerys.py",
+  "tris": {
+    "LOD0": 16790,
+    "LOD1": 8742,
+    "LOD2": 3202
+  },
+  "bones": 38,
+  "bones_used_by_lod": {
+    "LOD0": 37,
+    "LOD1": 25,
+    "LOD2": 16
+  },
+  "max_influences": 4,
+  "materials": [
+    "lf_guardian_tenerys_mat"
+  ],
+  "textures": {
+    "basecolor": "2048 JPEG (sRGB)",
+    "normal": "1024 PNG (tangent, OpenGL)",
+    "orm": "1024 PNG (G=roughness, B=metal=0)"
+  },
+  "albedo_gain_vs_sheet": [
+    1.041,
+    1.041,
+    1.041
+  ],
+  "bounds_m": {
+    "min": [
+      -0.618,
+      -0.01,
+      -2.99
+    ],
+    "max": [
+      0.617,
+      2.018,
+      2.038
+    ],
+    "length_m": 5.028,
+    "height_m": 2.028,
+    "width_m": 1.235
+  },
+  "coordinate_space": "glTF: +Y up, +Z forward (head), metres; root bone at the origin on the ground",
+  "clips": {
+    "Idle": {
+      "seconds": 4.0,
+      "loop": true,
+      "frames": 121,
+      "footSlip_cm_max": {
+        "fore_L": 0.0,
+        "fore_R": 0.0,
+        "hind_L": 0.0,
+        "hind_R": 0.0
+      },
+      "ikReachError_cm_max": 0.0,
+      "ground": {
+        "min_z_m": -0.011,
+        "end_min_z_m": -0.01,
+        "bind_min_z_m": -0.01
+      }
+    },
+    "Walk": {
+      "seconds": 1.1,
+      "loop": true,
+      "frames": 34,
+      "groundSpeed_mps": 1.6,
+      "strideLength_m": 1.76,
+      "duty": 0.62,
+      "footfalls": {
+        "hind_L": {
+          "touchdown": 0.0,
+          "liftoff": 0.682
+        },
+        "fore_L": {
+          "touchdown": 0.275,
+          "liftoff": 0.957
+        },
+        "hind_R": {
+          "touchdown": 0.55,
+          "liftoff": 0.132
+        },
+        "fore_R": {
+          "touchdown": 0.825,
+          "liftoff": 0.407
+        }
+      },
+      "footSlip_cm_max": {
+        "fore_L": 1.07,
+        "fore_R": 1.4,
+        "hind_L": 0.0,
+        "hind_R": 0.0
+      },
+      "ikReachError_cm_max": 6.45,
+      "ground": {
+        "min_z_m": -0.113,
+        "end_min_z_m": -0.105,
+        "bind_min_z_m": -0.01
+      }
+    },
+    "Run": {
+      "seconds": 0.6667,
+      "loop": true,
+      "frames": 21,
+      "groundSpeed_mps": 5.2,
+      "strideLength_m": 3.467,
+      "duty": 0.29,
+      "footfalls": {
+        "hind_L": {
+          "touchdown": 0.0,
+          "liftoff": 0.193
+        },
+        "hind_R": {
+          "touchdown": 0.06,
+          "liftoff": 0.253
+        },
+        "fore_R": {
+          "touchdown": 0.28,
+          "liftoff": 0.473
+        },
+        "fore_L": {
+          "touchdown": 0.34,
+          "liftoff": 0.533
+        }
+      },
+      "footSlip_cm_max": {
+        "fore_L": 7.0,
+        "fore_R": 6.73,
+        "hind_L": 0.0,
+        "hind_R": 0.0
+      },
+      "ikReachError_cm_max": 38.36,
+      "ground": {
+        "min_z_m": -0.015,
+        "end_min_z_m": -0.006,
+        "bind_min_z_m": -0.01
+      }
+    },
+    "Alert": {
+      "seconds": 1.2,
+      "loop": false,
+      "frames": 37,
+      "footSlip_cm_max": {
+        "fore_L": 0.0,
+        "fore_R": 0.0,
+        "hind_L": 0.0,
+        "hind_R": 0.0
+      },
+      "ikReachError_cm_max": 0.0,
+      "ground": {
+        "min_z_m": -0.01,
+        "end_min_z_m": -0.009,
+        "bind_min_z_m": -0.01
+      }
+    },
+    "Attack": {
+      "seconds": 1.3,
+      "loop": false,
+      "frames": 40,
+      "markers": {
+        "contact": 0.7
+      },
+      "footSlip_cm_max": {
+        "fore_L": 0.0,
+        "fore_R": 0.24,
+        "hind_L": 0.64,
+        "hind_R": 0.16
+      },
+      "ikReachError_cm_max": 60.04,
+      "ground": {
+        "min_z_m": -0.014,
+        "end_min_z_m": -0.009,
+        "bind_min_z_m": -0.01
+      }
+    },
+    "Hit": {
+      "seconds": 0.4667,
+      "loop": false,
+      "frames": 15,
+      "footSlip_cm_max": {
+        "fore_L": 0.0,
+        "fore_R": 0.17,
+        "hind_L": 0.0,
+        "hind_R": 0.0
+      },
+      "ikReachError_cm_max": 9.59,
+      "ground": {
+        "min_z_m": -0.01,
+        "end_min_z_m": -0.01,
+        "bind_min_z_m": -0.01
+      }
+    },
+    "Roar": {
+      "seconds": 2.0,
+      "loop": false,
+      "frames": 61,
+      "footSlip_cm_max": {
+        "fore_L": 0.0,
+        "fore_R": 0.0,
+        "hind_L": 0.0,
+        "hind_R": 0.0
+      },
+      "ikReachError_cm_max": 12.07,
+      "ground": {
+        "min_z_m": -0.011,
+        "end_min_z_m": -0.01,
+        "bind_min_z_m": -0.01
+      }
+    },
+    "Death": {
+      "seconds": 2.8,
+      "loop": false,
+      "frames": 85,
+      "footSlip_cm_max": {
+        "fore_L": 1.45,
+        "fore_R": 1.45,
+        "hind_L": 0.72,
+        "hind_R": 0.72
+      },
+      "ikReachError_cm_max": 0.0,
+      "ground": {
+        "min_z_m": -0.16,
+        "end_min_z_m": -0.136,
+        "bind_min_z_m": -0.01
+      }
+    }
+  },
+  "sockets": {
+    "mouth": [
+      0.0,
+      1.143,
+      1.997
+    ],
+    "head_top": [
+      0.0,
+      1.878,
+      1.612
+    ],
+    "chest": [
+      0.0,
+      0.945,
+      1.103
+    ],
+    "hit_center": [
+      0.0,
+      1.199,
+      -0.028
+    ],
+    "tail_tip": [
+      -0.0,
+      0.69,
+      -2.941
+    ],
+    "paw_fore_L": [
+      0.355,
+      0.113,
+      0.803
+    ]
+  },
+  "levels": {
+    "L1": {
+      "game_scale": 1.18,
+      "sites": [
+        "lf_site_01",
+        "lf_site_02",
+        "lf_site_03"
+      ],
+      "baseColorFactor": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "show_nodes": [],
+      "look": "base striped dark-brown coat, small horn nubs"
+    },
+    "L2": {
+      "game_scale": 1.34,
+      "sites": [
+        "lf_site_04"
+      ],
+      "baseColorFactor": [
+        0.84,
+        0.82,
+        0.83,
+        1.0
+      ],
+      "show_nodes": [
+        "lf_guardian_tenerys_L2"
+      ],
+      "look": "darker coat (material tint), longer back-swept horns"
+    },
+    "L3": {
+      "game_scale": 1.5,
+      "sites": [
+        "lf_site_07"
+      ],
+      "baseColorFactor": [
+        0.7,
+        0.68,
+        0.71,
+        1.0
+      ],
+      "show_nodes": [
+        "lf_guardian_tenerys_L3"
+      ],
+      "look": "near-black coat (material tint), large curved horns + bony dorsal spurs"
+    }
+  },
+  "lod_nodes": [
+    "lf_guardian_tenerys_LOD0",
+    "lf_guardian_tenerys_LOD1",
+    "lf_guardian_tenerys_LOD2"
+  ],
+  "level_nodes_hidden_by_default": [
+    "lf_guardian_tenerys_L2",
+    "lf_guardian_tenerys_L3"
+  ],
+  "glb_stats": {
+    "meshes": {
+      "lf_guardian_tenerys_L2": {
+        "tris": 132,
+        "joints_used": 1,
+        "max_influences": 1,
+        "hidden": true
+      },
+      "lf_guardian_tenerys_L3": {
+        "tris": 462,
+        "joints_used": 4,
+        "max_influences": 1,
+        "hidden": true
+      },
+      "lf_guardian_tenerys_LOD0": {
+        "tris": 16790,
+        "joints_used": 37,
+        "max_influences": 4,
+        "hidden": false
+      },
+      "lf_guardian_tenerys_LOD1": {
+        "tris": 8742,
+        "joints_used": 25,
+        "max_influences": 4,
+        "hidden": false
+      },
+      "lf_guardian_tenerys_LOD2": {
+        "tris": 3202,
+        "joints_used": 16,
+        "max_influences": 4,
+        "hidden": false
+      }
+    },
+    "animations": {
+      "Alert": 1.2,
+      "Attack": 1.3,
+      "Death": 2.8,
+      "Hit": 0.4667,
+      "Idle": 4.0,
+      "Roar": 2.0,
+      "Run": 0.6667,
+      "Walk": 1.1
+    },
+    "skins": [
+      38
+    ],
+    "images": [
+      [
+        "lf_guardian_tenerys_normal",
+        "image/png"
+      ],
+      [
+        "lf_guardian_tenerys_basecolor",
+        "image/jpeg"
+      ],
+      [
+        "lf_guardian_tenerys_orm",
+        "image/png"
+      ]
+    ],
+    "extensionsUsed": [
+      "KHR_node_visibility"
+    ]
+  },
+  "notes": "Level scale is applied by the game (landscape.gd: actor.scale = 1.02 + 0.16*level); the GLB keeps the ~5 m footprint of the original TENERYS prototype.  Level looks: multiply the material albedo by levels.Lx.baseColorFactor and set visible=true on levels.Lx.show_nodes (hidden by default with KHR_node_visibility).  LOD0/1/2 are sibling nodes: enable one per distance band (visibility ranges). Clips are in place; Walk/Run strides and footfalls are in clips.*; Attack contact marker 0.70 s.  Hit is 14 frames (0.467 s): 0.45 s is not a whole number of 30 fps frames."
+}

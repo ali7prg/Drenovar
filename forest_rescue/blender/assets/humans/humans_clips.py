@@ -739,7 +739,7 @@ def soldier_clip_specs(R, role, name, dur):
         k4["sp"] = np.array([4.0, 0, 0])
         k4["nk"] = np.array([-18.0, 0.0, 65.0])
         for S_, s in (("Left", 1.0), ("Right", -1.0)):
-            k4["feet"][S_] = dict(ank=np.array([s * 0.13, 1.05, 0.13]), fwd=unit(np.array([s * 0.1, 0.75, -0.66])),
+            k4["feet"][S_] = dict(ank=np.array([s * 0.13, 1.05, 0.18]), fwd=unit(np.array([s * 0.1, 0.8, -0.6])),
                                   up=unit(np.array([0, 0.66, 0.75])), toe=35.0, knee=np.array([s * 0.1, 0.0, -1.0]))
             k4["arm"][S_] = dict(wrist=np.array([s * 0.30, -0.66, 0.05]), elbow=np.array([s * 0.9, 0.1, -0.3]),
                                  palm=np.array([0, 0, -1.0]), hfwd=np.array([s * 0.2, -1.0, 0.0]), w_ik=1.0,

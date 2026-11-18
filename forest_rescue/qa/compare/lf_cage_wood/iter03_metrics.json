@@ -1,0 +1,32 @@
+{
+  "closed": {
+    "iou_filled": 0.9372,
+    "iou_raw": 0.8352,
+    "mean_abs_colour_error": 0.1741,
+    "mean_rgb_ref": [
+      0.461,
+      0.392,
+      0.324
+    ],
+    "mean_rgb_render": [
+      0.471,
+      0.39,
+      0.319
+    ]
+  },
+  "open": {
+    "iou_filled": 0.8758,
+    "iou_raw": 0.7711,
+    "mean_abs_colour_error": 0.2105,
+    "mean_rgb_ref": [
+      0.491,
+      0.423,
+      0.353
+    ],
+    "mean_rgb_render": [
+      0.462,
+      0.382,
+      0.312
+    ]
+  }
+}

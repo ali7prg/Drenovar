@@ -1,0 +1,16 @@
+{
+  "title": "lf_props_supplies arrows (fitted camera)",
+  "iou_filled": 0.0482,
+  "iou_raw": 0.0456,
+  "mean_abs_colour_error": 0.1647,
+  "mean_rgb_ref": [
+    0.564,
+    0.424,
+    0.286
+  ],
+  "mean_rgb_render": [
+    0.634,
+    0.506,
+    0.391
+  ]
+}

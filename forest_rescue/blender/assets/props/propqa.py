@@ -27,7 +27,8 @@ def out(asset_id, name):
     return paths.compare(asset_id, name)
 
 
-def flood_mask(img, tol=3, step=4, blur=0.8, exclude=None, clip_below=None, keep="largest", fill=True, min_area=60):
+def flood_mask(img, tol=3, step=4, blur=0.8, exclude=None, clip_below=None, keep="largest", fill=True, min_area=60,
+               bg=None, seed_tol=0.07):
     """Foreground = everything not reachable from the crop border through smooth background
     (floating-range flood fill follows soft painted shadows but stops at object edges)."""
     import cv2
@@ -37,7 +38,14 @@ def flood_mask(img, tol=3, step=4, blur=0.8, exclude=None, clip_below=None, keep
     flags = 4 | cv2.FLOODFILL_MASK_ONLY | (255 << 8)
     pts = [(x, 0) for x in range(0, W, step)] + [(x, H - 1) for x in range(0, W, step)] + \
           [(0, y) for y in range(0, H, step)] + [(W - 1, y) for y in range(0, H, step)]
+    imf = ndi.gaussian_filter(img, (blur, blur, 0))
+    if bg is None:
+        border = np.concatenate([imf[0], imf[-1], imf[:, 0], imf[:, -1]])
+        bg = np.median(border, axis=0)
+    bg = np.asarray(bg, float)
     for x, y in pts:
+        if np.linalg.norm(imf[y, x] - bg) > seed_tol:     # never seed on an object touching the crop edge
+            continue
         if mask[y + 1, x + 1] == 0:
             cv2.floodFill(im, mask, (x, y), (0, 0, 0), (tol,) * 3, (tol,) * 3, flags)
     fg = mask[1:-1, 1:-1] == 0
@@ -57,11 +65,14 @@ def flood_mask(img, tol=3, step=4, blur=0.8, exclude=None, clip_below=None, keep
     return ndi.binary_fill_holes(fg) if fill else fg
 
 
+BG = {"10_artifact_mechanisms.png": (148 / 255, 131 / 255, 120 / 255)}
+
+
 def crop_and_mask(image, box, method="flood", tol=3, exclude=None, clip_below=None, keep="largest", fill=True,
                   **kw):
     img = pk.ref_crop(image, box)
     if method == "flood":
-        m = flood_mask(img, tol=tol, exclude=exclude, clip_below=clip_below, keep=keep, fill=fill)
+        m = flood_mask(img, tol=tol, exclude=exclude, clip_below=clip_below, keep=keep, fill=fill, bg=BG.get(image))
     else:
         m = refs.silhouette(img, exclude=exclude, clip_below=clip_below, keep=keep, **kw)
     return img, m

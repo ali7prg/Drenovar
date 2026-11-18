@@ -1,0 +1,16 @@
+{
+  "title": "lf_props_supplies coins (fitted camera)",
+  "iou_filled": 0.3568,
+  "iou_raw": 0.3568,
+  "mean_abs_colour_error": 0.1324,
+  "mean_rgb_ref": [
+    0.52,
+    0.389,
+    0.251
+  ],
+  "mean_rgb_render": [
+    0.591,
+    0.448,
+    0.308
+  ]
+}

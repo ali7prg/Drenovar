@@ -1,0 +1,22 @@
+{
+  "id": "lf_arena_bones",
+  "tris": {
+    "LOD0": 1400
+  },
+  "bounds_m": {
+    "min": [
+      -1.7,
+      -1.63,
+      -0.0
+    ],
+    "max": [
+      2.35,
+      1.31,
+      0.37
+    ]
+  },
+  "materials": [
+    "M_lf_arena_bones"
+  ],
+  "notes": "pivot at the base centre"
+}

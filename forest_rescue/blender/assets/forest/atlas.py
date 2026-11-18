@@ -158,7 +158,7 @@ def leaf_outline(kind, r, n=40):
         w = 0.34 * np.sin(np.pi * t) ** 0.8
         w += 0.04 * (np.mod(t * 9, 1.0) - 0.5)
     elif kind == "pinna":
-        w = 0.085 * np.sin(np.pi * t) ** 0.6 * (0.7 + 0.45 * np.abs(np.sin(np.pi * 9 * t)))
+        w = 0.06 * np.sin(np.pi * t) ** 0.6 * (0.6 + 0.5 * np.abs(np.sin(np.pi * 9 * t)))
     elif kind == "blade":
         w = 0.5 * (1 - t) ** 0.9
     else:
@@ -395,8 +395,8 @@ def paint_fern(w, h, r, cols, golden=0.0):
     ys = base[1] - tt * (h - 10)
     axis = np.stack([xs, ys], -1)
     cv.line(axis, 2.0, (0.35, 0.28, 0.12))
-    for k in range(34):
-        t = 0.12 + 0.86 * k / 34
+    for k in range(24):
+        t = 0.12 + 0.86 * k / 24
         j = int(t * 39)
         p = axis[j]
         d = axis[min(j + 1, 39)] - axis[max(j - 1, 0)]
@@ -404,7 +404,7 @@ def paint_fern(w, h, r, cols, golden=0.0):
         ln = (0.44 * math.sin(np.pi * (0.12 + 0.88 * (1 - t))) ** 0.9 + 0.04) * w
         for side in (-1, 1):
             n = np.array([-d[1], d[0]]) * side
-            dirv = n * 0.92 + d * 0.30
+            dirv = n * 0.8 + d * 0.55
             ang = math.atan2(dirv[1], dirv[0]) + np.pi / 2
             mix = np.clip(golden + 0.3 * (1 - t) * r.random(), 0, 1)
             c = np.asarray(cols[0]) * (1 - mix) + np.asarray(cols[1]) * mix
@@ -467,11 +467,13 @@ def paint_bramble(w, h, r, dense=False):
 
 def paint_moss(w, h, r):
     yy, xx = np.mgrid[0:h, 0:w]
-    d = np.sqrt(((xx - w / 2) / (w * 0.45)) ** 2 + ((yy - h / 2) / (h * 0.4)) ** 2)
-    n = fbm(h, w, 8, 8, int(r.integers(1e6)), 4)
-    a = smoothstep(0.55, 0.45, d + (n - 0.5) * 0.5)
-    g = fbm(h, w, 64, 64, int(r.integers(1e6)), 2)
-    col = ramp(g, [(0, (0.30, 0.34, 0.10)), (0.6, (0.50, 0.52, 0.16)), (1, (0.66, 0.66, 0.24))])
+    d = np.sqrt(((xx - w / 2) / (w * 0.5)) ** 2 + ((yy - h / 2) / (h * 0.5)) ** 2)
+    n = fbm(h, w, 8, 8, int(r.integers(1e6)), 5)
+    a = smoothstep(0.98, 0.86, d + (n - 0.5) * 0.45)
+    g = fbm(h, w, 64, 64, int(r.integers(1e6)), 3)
+    g2 = fbm(h, w, 6, 6, int(r.integers(1e6)), 3)
+    col = ramp(g * 0.7 + g2 * 0.3, [(0, (0.20, 0.25, 0.07)), (0.5, (0.36, 0.40, 0.11)), (0.8, (0.50, 0.52, 0.16)),
+                                    (1, (0.62, 0.62, 0.22))])
     return np.concatenate([col, a[..., None]], -1)
 
 

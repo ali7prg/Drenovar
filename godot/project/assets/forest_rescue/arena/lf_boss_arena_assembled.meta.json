@@ -1,0 +1,191 @@
+{
+  "id": "lf_boss_arena_assembled",
+  "tris": {
+    "LOD0_total": 56284
+  },
+  "budget_tris": 60000,
+  "modules": {
+    "lf_arena_cliff_a": {
+      "LOD0": 2877,
+      "LOD1": 1126
+    },
+    "lf_arena_cliff_b": {
+      "LOD0": 2888,
+      "LOD1": 1137
+    },
+    "lf_arena_cliff_c": {
+      "LOD0": 2887,
+      "LOD1": 1136
+    },
+    "lf_arena_fossil_wall": {
+      "LOD0": 5587,
+      "LOD1": 2186
+    },
+    "lf_arena_pillar_a": {
+      "LOD0": 1500,
+      "LOD1": 600
+    },
+    "lf_arena_pillar_b": {
+      "LOD0": 1300,
+      "LOD1": 600
+    },
+    "lf_arena_floor": {
+      "LOD0": 4164
+    },
+    "lf_arena_bones": {
+      "LOD0": 1400
+    },
+    "lf_arena_stream": {
+      "LOD0": 1514
+    },
+    "lf_arena_banner": {
+      "LOD0": 210
+    }
+  },
+  "layout": {
+    "cliffs": [
+      [
+        "c",
+        -66
+      ],
+      [
+        "b",
+        -40
+      ],
+      [
+        "b",
+        2
+      ],
+      [
+        "a",
+        22
+      ],
+      [
+        "a",
+        42
+      ],
+      [
+        "a",
+        96
+      ],
+      [
+        "a",
+        119
+      ],
+      [
+        "b",
+        141
+      ],
+      [
+        "b",
+        178
+      ],
+      [
+        "a",
+        201
+      ],
+      [
+        "b",
+        224
+      ],
+      [
+        "c",
+        247
+      ]
+    ],
+    "fossil": 68.0,
+    "pillars": [
+      [
+        "a",
+        [
+          -10.2,
+          6.0
+        ],
+        20.0
+      ],
+      [
+        "a",
+        [
+          -13.0,
+          -0.6
+        ],
+        75.0
+      ],
+      [
+        "a",
+        [
+          13.0,
+          0.6
+        ],
+        -30.0
+      ],
+      [
+        "b",
+        [
+          5.6,
+          -5.2
+        ],
+        10.0
+      ]
+    ],
+    "banners": [
+      [
+        -112.0,
+        16.6
+      ],
+      [
+        -68.0,
+        16.6
+      ]
+    ],
+    "bones": [
+      [
+        [
+          -4.5,
+          3.8
+        ],
+        30.0
+      ],
+      [
+        [
+          6.5,
+          7.5
+        ],
+        -60.0
+      ],
+      [
+        [
+          -8.5,
+          -6.0
+        ],
+        120.0
+      ]
+    ],
+    "stream": [
+      [
+        -21.0,
+        -16.5,
+        0.0
+      ],
+      -40.0
+    ]
+  },
+  "ring_inner_radius_m": 17.5,
+  "floor_radius_m": 17.8,
+  "entrance": "main gap centred on Blender -Y (= glTF/Godot +Z), width ~7 m between the banners; side paths at 160 deg (back-left) and -18 deg (right) as in art/08",
+  "world_placement": {
+    "centre_xyz": [
+      75.0,
+      6.545627597111355,
+      -86.0
+    ],
+    "yaw_deg_about_up": 5.4,
+    "note": "route lf_route_boss enters from z=-65 (south); +5.4 deg aligns the gap with the last route segment (77,-65)->(75,-86)"
+  },
+  "clips": {
+    "lf_banner_wind": {
+      "seconds": 4.5,
+      "loop": true
+    }
+  }
+}

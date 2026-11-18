@@ -1,0 +1,16 @@
+{
+  "title": "lf_props_supplies sacks (fitted camera)",
+  "iou_filled": 0.8094,
+  "iou_raw": 0.8094,
+  "mean_abs_colour_error": 0.1456,
+  "mean_rgb_ref": [
+    0.573,
+    0.436,
+    0.288
+  ],
+  "mean_rgb_render": [
+    0.664,
+    0.511,
+    0.36
+  ]
+}

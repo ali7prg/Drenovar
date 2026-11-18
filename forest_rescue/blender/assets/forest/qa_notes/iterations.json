@@ -86,6 +86,13 @@
    "iou": 0.722,
    "diff": "left leader cut flat by the SDF field top; foliage still dense and big; limbs thin",
    "change": "field top above leaders, limb r_base 1.1, cards 0.75-1.05 m, bark share 62%"
+  },
+  {
+   "iter": 3,
+   "iou": 0.712,
+   "iou_closed": 0.743,
+   "diff": "leaders look like cut posts, limbs are thin tubes hidden by scattered foliage; LOD2 917 tris (budget 300) because marching-cubes islands block decimation",
+   "change": "leaders + 5 main limbs as smooth round-cone chains inside the SDF trunk (to 13.4 m); tubes only for twig ends from the SDF limb tips; drop small mesh islands; moss caps"
   }
  ],
  "lf_env_fallen_trunk": [
@@ -95,6 +102,13 @@
    "iou_closed": 0.384,
    "diff": "log far too low/thin (art: ~1.3 m thick, arching ~2 m above the stream mid-span); root splinters short; moss reads as spots",
    "change": "radius 0.78->0.42 m, arch centre 0.75->1.95 m, splinters 1.2-2.8 m pointing up, moss carpets 0.9-1.5 m"
+  },
+  {
+   "iter": 2,
+   "iou": 0.606,
+   "iou_closed": 0.617,
+   "diff": "body proportions now right; root end lacks the tall splintered root plate; moss cards read as bright floating 'lily pads'",
+   "change": "root-plate ellipsoid + taller splinters; moss as 'caps' (up-facing faces duplicated +1.5 cm and mapped into the opaque centre of the moss tile, noise-patchy) instead of cards; darker, larger moss tile"
   }
  ],
  "lf_env_moss_rock": [
@@ -105,6 +119,13 @@
    "colour_err": 0.309,
    "diff": "main slab not tilted (yaw instead of tilt), regular crazy-paving crack net, rock too pale, moss/shrubs tiny and sparse",
    "change": "slab tilted -0.34 rad (top rising right) + lower right terrace, softer sparse cracks + warmer limestone, moss carpets 1.6-2.6 m (170), 44 shrubs 0.9-1.6 m"
+  },
+  {
+   "iter": 2,
+   "iou": 0.783,
+   "iou_closed": 0.799,
+   "diff": "slab tilt overdone (art: near-level block with vertical cleft face); moss cards float like lily pads; shrubs ok",
+   "change": "slab tilt -0.12 rad, block taller; moss caps on up-facing faces + a few edge cards"
   }
  ],
  "lf_env_bramble": [
@@ -114,6 +135,13 @@
    "iou_closed": 0.761,
    "diff": "dense saturated leaf blob, overshoots top; arching thorny canes hidden",
    "change": "36 thicker canes arching past the foliage, 230 smaller leaf cards concentrated low, darker olive/maroon palette"
+  },
+  {
+   "iter": 2,
+   "iou": 0.51,
+   "iou_closed": 0.567,
+   "diff": "vase-shaped (canes rise from a narrow base); art is a broad ground-hugging mound",
+   "change": "canes start across the footprint and arch down to the edges; 65% of leaf cards fill a half-ellipsoid dome"
   }
  ],
  "lf_env_reed_fern": [
@@ -123,6 +151,13 @@
    "iou_closed": 0.552,
    "diff": "fern fronds droop below ground (right half empty); reed clump too narrow",
    "change": "frond profile rises to ~1.25 m and arches (L 1.8 m, width 0.55-0.72), reed clump radius 0.5 m with 34 blade cards"
+  },
+  {
+   "iter": 2,
+   "iou": 0.626,
+   "iou_closed": 0.671,
+   "diff": "ferns now visible but each frond reads as a solid paddle (atlas pinnae merge)",
+   "change": "atlas fern: 24 narrower pinnae angled towards the tip (gaps between pinnae)"
   }
  ]
 }

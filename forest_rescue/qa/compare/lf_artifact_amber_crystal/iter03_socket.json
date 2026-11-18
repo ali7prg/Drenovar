@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_amber_crystal v1 socket (fitted perspective)",
+  "iou_filled": 0.7222,
+  "iou_raw": 0.7222,
+  "mean_abs_colour_error": 0.1196,
+  "mean_rgb_ref": [
+    0.552,
+    0.464,
+    0.364
+  ],
+  "mean_rgb_render": [
+    0.628,
+    0.528,
+    0.424
+  ]
+}

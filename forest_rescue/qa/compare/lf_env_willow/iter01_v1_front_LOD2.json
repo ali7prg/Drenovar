@@ -1,0 +1,8 @@
+{
+  "view": "willow",
+  "iou": 0.7367,
+  "mean_abs_colour_error": 0.1898,
+  "ref_pixels": 71454,
+  "render_pixels": 60685,
+  "iou_closed_r4": 0.7878
+}

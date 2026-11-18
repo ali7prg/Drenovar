@@ -3,7 +3,7 @@
   "tris": {
     "LOD0": 14918,
     "LOD1": 7083,
-    "LOD2": 2595
+    "LOD2": 2596
   },
   "bones": {
     "deform": 52,
@@ -22,42 +22,42 @@
   ],
   "textures": {
     "lf_horse_origin_body_color.jpg": [
-      1024,
-      1024
+      2048,
+      2048
     ],
     "lf_horse_origin_body_normal.png": [
+      2048,
+      2048
+    ],
+    "lf_horse_origin_body_orm.png": [
       1024,
       1024
     ],
-    "lf_horse_origin_body_orm.png": [
-      512,
-      512
-    ],
     "lf_horse_origin_hair.png": [
-      512,
-      512
+      1024,
+      1024
     ],
     "lf_horse_origin_tack_color.jpg": [
-      512,
-      512
+      1024,
+      1024
     ],
     "lf_horse_origin_tack_normal.png": [
-      512,
-      512
+      1024,
+      1024
     ],
     "lf_horse_origin_tack_orm.png": [
-      512,
-      512
+      1024,
+      1024
     ]
   },
   "bounds_m": {
     "min": [
-      -0.372,
-      -1.516,
+      -0.371,
+      -2.515,
       -0.007
     ],
     "max": [
-      0.371,
+      0.37,
       0.97,
       2.01
     ]
@@ -88,8 +88,8 @@
     "lf_horse_walk": {
       "seconds": 1.2,
       "loop": true,
-      "groundSpeed_mps": 1.35,
-      "strideLength_m": 1.62,
+      "groundSpeed_mps": 1.3,
+      "strideLength_m": 1.56,
       "markers": {
         "footfall_LH": 0.0,
         "liftoff_LH": 0.72,
@@ -103,38 +103,38 @@
       "hoofSlip_m": {
         "F_L": 0.0,
         "F_R": 0.0,
-        "H_L": 0.0,
-        "H_R": 0.0
+        "H_L": 0.0005,
+        "H_R": 0.0007
       },
-      "ikOverreach_m": 0.106
+      "ikOverreach_m": 0.0
     },
     "lf_horse_trot": {
       "seconds": 0.72,
       "loop": true,
-      "groundSpeed_mps": 3.3,
-      "strideLength_m": 2.376,
+      "groundSpeed_mps": 3.2,
+      "strideLength_m": 2.304,
       "markers": {
         "footfall_LF": 0.0,
-        "liftoff_LF": 0.288,
+        "liftoff_LF": 0.2736,
         "footfall_RH": 0.0,
-        "liftoff_RH": 0.288,
+        "liftoff_RH": 0.2736,
         "footfall_RF": 0.36,
-        "liftoff_RF": 0.648,
+        "liftoff_RF": 0.6336,
         "footfall_LH": 0.36,
-        "liftoff_LH": 0.648
+        "liftoff_LH": 0.6336
       },
       "hoofSlip_m": {
         "F_L": 0.0,
-        "F_R": 0.0,
-        "H_L": 0.0,
+        "F_R": 0.0033,
+        "H_L": 0.007,
         "H_R": 0.0
       },
-      "ikOverreach_m": 0.1467
+      "ikOverreach_m": 0.0
     },
     "lf_horse_start": {
       "seconds": 0.65,
       "loop": false,
-      "groundSpeed_mps": 0.628,
+      "groundSpeed_mps": 0.605,
       "strideLength_m": 0.0,
       "markers": {
         "lift_LH": 0.02,
@@ -143,19 +143,19 @@
         "lift_RH": 0.42,
         "land_LF": 0.56
       },
-      "speedProfile": "v(t)=1.35 m/s*(t/0.65)^1.15; distance 0.408 m",
+      "speedProfile": "v(t)=1.3 m/s*(t/0.65)^1.15; distance 0.393 m",
       "hoofSlip_m": {
         "F_L": 0.0,
-        "F_R": 0.0,
+        "F_R": 0.0007,
         "H_L": 0.0,
         "H_R": 0.0
       },
-      "ikOverreach_m": 0.2068
+      "ikOverreach_m": 0.0
     },
     "lf_horse_stop": {
       "seconds": 0.8,
       "loop": false,
-      "groundSpeed_mps": 0.519,
+      "groundSpeed_mps": 0.5,
       "strideLength_m": 0.0,
       "markers": {
         "land_RH": 0.3,
@@ -163,14 +163,14 @@
         "land_RF": 0.6,
         "square_LH": 0.72
       },
-      "speedProfile": "v(t)=1.35 m/s*(1-t/0.8)^1.6; distance 0.415 m",
+      "speedProfile": "v(t)=1.3 m/s*(1-t/0.8)^1.6; distance 0.400 m",
       "hoofSlip_m": {
         "F_L": 0.0,
         "F_R": 0.0,
         "H_L": 0.0,
         "H_R": 0.0
       },
-      "ikOverreach_m": 0.0943
+      "ikOverreach_m": 0.0
     },
     "lf_horse_turn_left": {
       "seconds": 1.1,
@@ -178,12 +178,14 @@
       "groundSpeed_mps": 0.0,
       "strideLength_m": 0.0,
       "rootYawDeg": 90.0,
-      "yawCurve": "yaw(t) = rootYawDeg * smootherstep(t/1.1) about the root origin (apply to the node while the clip plays; hooves are planted in that frame)",
+      "yawCurve": "yaw(t) = rootYawDeg * smoothstep(t/1.1) about the root origin (apply to the node while the clip plays; hooves are planted in that frame)",
       "markers": {
-        "step_1": 0.34,
-        "step_2": 0.6,
-        "step_3": 0.86,
-        "step_4": 1.08
+        "land_1": 0.19,
+        "land_2": 0.355,
+        "land_3": 0.52,
+        "land_4": 0.685,
+        "land_5": 0.85,
+        "land_6": 1.015
       },
       "hoofSlip_m": {
         "F_L": 0.0,
@@ -191,7 +193,7 @@
         "H_L": 0.0,
         "H_R": 0.0
       },
-      "ikOverreach_m": 0.0575
+      "ikOverreach_m": 0.0
     },
     "lf_horse_turn_right": {
       "seconds": 1.1,
@@ -199,12 +201,14 @@
       "groundSpeed_mps": 0.0,
       "strideLength_m": 0.0,
       "rootYawDeg": -90.0,
-      "yawCurve": "yaw(t) = rootYawDeg * smootherstep(t/1.1) about the root origin (apply to the node while the clip plays; hooves are planted in that frame)",
+      "yawCurve": "yaw(t) = rootYawDeg * smoothstep(t/1.1) about the root origin (apply to the node while the clip plays; hooves are planted in that frame)",
       "markers": {
-        "step_1": 0.34,
-        "step_2": 0.6,
-        "step_3": 0.86,
-        "step_4": 1.08
+        "land_1": 0.19,
+        "land_2": 0.355,
+        "land_3": 0.52,
+        "land_4": 0.685,
+        "land_5": 0.85,
+        "land_6": 1.015
       },
       "hoofSlip_m": {
         "F_L": 0.0,
@@ -212,7 +216,7 @@
         "H_L": 0.0,
         "H_R": 0.0
       },
-      "ikOverreach_m": 0.0643
+      "ikOverreach_m": 0.0
     },
     "lf_horse_alert": {
       "seconds": 1.4,

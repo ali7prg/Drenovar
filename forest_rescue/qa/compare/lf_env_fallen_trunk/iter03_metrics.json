@@ -1,0 +1,37 @@
+{
+  "metrics": {
+    "v1_front_LOD0": {
+      "view": "fallen_trunk",
+      "iou": 0.5889,
+      "mean_abs_colour_error": 0.1626,
+      "ref_pixels": 29424,
+      "render_pixels": 20781,
+      "iou_closed_r4": 0.5886
+    }
+  },
+  "tris": {
+    "v1": {
+      "LOD0": {
+        "tris": 2619
+      },
+      "LOD1": {
+        "tris": 1012
+      },
+      "LOD2": {
+        "tris": 342
+      },
+      "arch_clearance_m": 1.34
+    },
+    "v2": {
+      "LOD0": {
+        "tris": 3062
+      },
+      "LOD1": {
+        "tris": 1198
+      },
+      "LOD2": {
+        "tris": 319
+      }
+    }
+  }
+}

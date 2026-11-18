@@ -1,0 +1,16 @@
+{
+  "title": "lf_props_supplies chest (fitted camera)",
+  "iou_filled": 0.8278,
+  "iou_raw": 0.8267,
+  "mean_abs_colour_error": 0.1301,
+  "mean_rgb_ref": [
+    0.404,
+    0.294,
+    0.208
+  ],
+  "mean_rgb_render": [
+    0.493,
+    0.377,
+    0.295
+  ]
+}

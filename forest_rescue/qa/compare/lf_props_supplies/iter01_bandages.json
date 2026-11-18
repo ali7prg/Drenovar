@@ -1,0 +1,16 @@
+{
+  "title": "lf_props_supplies bandages (fitted camera)",
+  "iou_filled": 0.6839,
+  "iou_raw": 0.6839,
+  "mean_abs_colour_error": 0.1259,
+  "mean_rgb_ref": [
+    0.68,
+    0.568,
+    0.452
+  ],
+  "mean_rgb_render": [
+    0.621,
+    0.492,
+    0.372
+  ]
+}

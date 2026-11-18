@@ -1,0 +1,16 @@
+{
+  "title": "lf_mechanism_rune_lock closed (camera fitted to the drawing)",
+  "iou_filled": 0.9103,
+  "iou_raw": 0.9103,
+  "mean_abs_colour_error": 0.1352,
+  "mean_rgb_ref": [
+    0.436,
+    0.346,
+    0.251
+  ],
+  "mean_rgb_render": [
+    0.47,
+    0.372,
+    0.277
+  ]
+}

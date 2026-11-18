@@ -1,0 +1,47 @@
+{
+  "crate_closed": {
+    "iou_filled": 0.904,
+    "iou_raw": 0.904,
+    "mean_abs_colour_error": 0.1516
+  },
+  "crate_open": {
+    "iou_filled": 0.8376,
+    "iou_raw": 0.8298,
+    "mean_abs_colour_error": 0.1383
+  },
+  "blankets": {
+    "iou_filled": 0.8452,
+    "iou_raw": 0.8452,
+    "mean_abs_colour_error": 0.1488
+  },
+  "sacks": {
+    "iou_filled": 0.8094,
+    "iou_raw": 0.8094,
+    "mean_abs_colour_error": 0.1456
+  },
+  "coins": {
+    "iou_filled": 0.3568,
+    "iou_raw": 0.3568,
+    "mean_abs_colour_error": 0.1324
+  },
+  "bread": {
+    "iou_filled": 0.7457,
+    "iou_raw": 0.7456,
+    "mean_abs_colour_error": 0.1486
+  },
+  "bandages": {
+    "iou_filled": 0.6839,
+    "iou_raw": 0.6839,
+    "mean_abs_colour_error": 0.1259
+  },
+  "arrows": {
+    "iou_filled": 0.0482,
+    "iou_raw": 0.0456,
+    "mean_abs_colour_error": 0.1647
+  },
+  "chest": {
+    "iou_filled": 0.8278,
+    "iou_raw": 0.8267,
+    "mean_abs_colour_error": 0.1301
+  }
+}

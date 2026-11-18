@@ -1,0 +1,23 @@
+{
+  "id": "lf_arena_pillar_a",
+  "tris": {
+    "LOD0": 1500,
+    "LOD1": 600
+  },
+  "bounds_m": {
+    "min": [
+      -1.66,
+      -1.31,
+      -0.17
+    ],
+    "max": [
+      1.64,
+      1.45,
+      4.74
+    ]
+  },
+  "materials": [
+    "M_lf_arena_pillar_a"
+  ],
+  "notes": "pivot at the base centre"
+}

@@ -1,0 +1,23 @@
+{
+  "side": {
+    "view": "side",
+    "iou": 0.8473,
+    "mean_abs_colour_error": 0.0524,
+    "ref_pixels": 151914,
+    "render_pixels": 143867
+  },
+  "front": {
+    "view": "front",
+    "iou": 0.8708,
+    "mean_abs_colour_error": 0.0813,
+    "ref_pixels": 52637,
+    "render_pixels": 50526
+  },
+  "rear": {
+    "view": "rear",
+    "iou": 0.8469,
+    "mean_abs_colour_error": 0.0927,
+    "ref_pixels": 52216,
+    "render_pixels": 50502
+  }
+}

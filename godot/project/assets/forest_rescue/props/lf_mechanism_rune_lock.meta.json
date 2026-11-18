@@ -1,0 +1,653 @@
+{
+  "id": "lf_mechanism_rune_lock",
+  "tris": {
+    "LOD0": 3572,
+    "LOD1": 2480,
+    "LOD2": 1672
+  },
+  "tris_by_node": {
+    "LOD0": {
+      "root": 1852,
+      "door": 64,
+      "ring_3": 480,
+      "ring_2": 480,
+      "ring_1": 480,
+      "key_lever": 216
+    },
+    "LOD1": {
+      "root": 1412,
+      "door": 40,
+      "ring_3": 288,
+      "ring_2": 288,
+      "ring_1": 288,
+      "key_lever": 164
+    },
+    "LOD2": {
+      "root": 1056,
+      "door": 24,
+      "ring_3": 160,
+      "ring_2": 160,
+      "ring_1": 160,
+      "key_lever": 112
+    }
+  },
+  "budget": "mechanism LOD0 <= 6000 tris",
+  "bones": 0,
+  "materials": [
+    "lf_mechanism_rune_lock_mat"
+  ],
+  "textures": {
+    "baseColor": "2048 JPEG",
+    "metallicRoughness": "1024 JPEG (G rough, B metal)",
+    "normal": "2048 PNG"
+  },
+  "coordinate_space": "glTF (Y up, metres); operator/front side faces +Z",
+  "bounds_m": {
+    "min": [
+      -0.85,
+      0.0,
+      1.15
+    ],
+    "max": [
+      0.8,
+      1.0,
+      -0.8
+    ]
+  },
+  "clips": {
+    "lf_rune_ring1_mountain": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring1_river": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring1_leaf": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring1_coal": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring1_seed": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring1_tree": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring1_sun": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring1_stone": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring1_root": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring2_mountain": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring2_river": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring2_leaf": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring2_coal": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring2_seed": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring2_tree": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring2_sun": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring2_stone": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring2_root": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring3_mountain": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring3_river": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring3_leaf": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring3_coal": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring3_seed": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring3_tree": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring3_sun": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring3_stone": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_rune_ring3_root": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "click": 0.5
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_lock_mechanism": {
+      "seconds": 1.8,
+      "frames": 54,
+      "loop": false,
+      "markers": {
+        "key_turned": 0.8666666666666667,
+        "door_open": 1.6666666666666667
+      },
+      "glb_seconds": 1.8
+    }
+  },
+  "glb_nodes": [
+    "artifact_spot",
+    "lf_mechanism_rune_lock_door_pivot_LOD0",
+    "lf_mechanism_rune_lock_door_pivot_LOD1",
+    "lf_mechanism_rune_lock_door_pivot_LOD2",
+    "door_pivot",
+    "lf_mechanism_rune_lock_key_lever_LOD0",
+    "lf_mechanism_rune_lock_key_lever_LOD1",
+    "lf_mechanism_rune_lock_key_lever_LOD2",
+    "key_lever",
+    "lf_mechanism_rune_lock_LOD0",
+    "lf_mechanism_rune_lock_LOD1",
+    "lf_mechanism_rune_lock_LOD2",
+    "lf_mechanism_rune_lock_ring_1_LOD0",
+    "lf_mechanism_rune_lock_ring_1_LOD1",
+    "lf_mechanism_rune_lock_ring_1_LOD2",
+    "ring_1",
+    "lf_mechanism_rune_lock_ring_2_LOD0",
+    "lf_mechanism_rune_lock_ring_2_LOD1",
+    "lf_mechanism_rune_lock_ring_2_LOD2",
+    "ring_2",
+    "lf_mechanism_rune_lock_ring_3_LOD0",
+    "lf_mechanism_rune_lock_ring_3_LOD1",
+    "lf_mechanism_rune_lock_ring_3_LOD2",
+    "ring_3"
+  ],
+  "glb_animations": {
+    "lf_lock_mechanism": [
+      [
+        "door_pivot",
+        "translation"
+      ],
+      [
+        "key_lever",
+        "translation"
+      ],
+      [
+        "key_lever",
+        "rotation"
+      ],
+      [
+        "ring_1",
+        "rotation"
+      ],
+      [
+        "ring_2",
+        "rotation"
+      ],
+      [
+        "ring_3",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring1_mountain": [
+      [
+        "ring_1",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring1_river": [
+      [
+        "ring_1",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring1_leaf": [
+      [
+        "ring_1",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring1_coal": [
+      [
+        "ring_1",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring1_seed": [
+      [
+        "ring_1",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring1_tree": [
+      [
+        "ring_1",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring1_sun": [
+      [
+        "ring_1",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring1_stone": [
+      [
+        "ring_1",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring1_root": [
+      [
+        "ring_1",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring2_mountain": [
+      [
+        "ring_2",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring2_river": [
+      [
+        "ring_2",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring2_leaf": [
+      [
+        "ring_2",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring2_coal": [
+      [
+        "ring_2",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring2_seed": [
+      [
+        "ring_2",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring2_tree": [
+      [
+        "ring_2",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring2_sun": [
+      [
+        "ring_2",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring2_stone": [
+      [
+        "ring_2",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring2_root": [
+      [
+        "ring_2",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring3_mountain": [
+      [
+        "ring_3",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring3_river": [
+      [
+        "ring_3",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring3_leaf": [
+      [
+        "ring_3",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring3_coal": [
+      [
+        "ring_3",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring3_seed": [
+      [
+        "ring_3",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring3_tree": [
+      [
+        "ring_3",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring3_sun": [
+      [
+        "ring_3",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring3_stone": [
+      [
+        "ring_3",
+        "rotation"
+      ]
+    ],
+    "lf_rune_ring3_root": [
+      [
+        "ring_3",
+        "rotation"
+      ]
+    ]
+  },
+  "markers": {
+    "artifact_spot": {
+      "position": [
+        0.0,
+        0.34,
+        0.42
+      ],
+      "parent": "root"
+    }
+  },
+  "projection": {
+    "painted_fraction": 0.154,
+    "texel_mm": 2.406
+  },
+  "camera_fit_iou": {
+    "closed": 0.9099,
+    "open": 0.9301
+  },
+  "notes": "Rings share 10 engraved positions (blank + 9 symbols of sites 02/06/10). Drawing shows site 02 (mountain/river/leaf); comparisons use that solved pose. Door panel slides down into the plinth.",
+  "symbol_targets": {
+    "axis": "rings rotate about glTF +Y through the drum centre (node origin)",
+    "ring_for_progress_step": {
+      "1": "ring_1",
+      "2": "ring_2",
+      "3": "ring_3"
+    },
+    "rotation_y_deg": {
+      "blank": -0.0,
+      "mountain": -36.0,
+      "river": -72.0,
+      "leaf": -108.0,
+      "coal": -144.0,
+      "seed": -180.0,
+      "tree": -216.0,
+      "sun": -252.0,
+      "stone": -288.0,
+      "root": -324.0
+    },
+    "rest_deg": 0.0,
+    "positions_deg_apart": 36.0,
+    "sites": {
+      "lf_site_02": {
+        "step1": {
+          "symbol": "mountain",
+          "node": "ring_1",
+          "rotation_y_deg": -36.0,
+          "clip": "lf_rune_ring1_mountain"
+        },
+        "step2": {
+          "symbol": "river",
+          "node": "ring_2",
+          "rotation_y_deg": -72.0,
+          "clip": "lf_rune_ring2_river"
+        },
+        "step3": {
+          "symbol": "leaf",
+          "node": "ring_3",
+          "rotation_y_deg": -108.0,
+          "clip": "lf_rune_ring3_leaf"
+        }
+      },
+      "lf_site_06": {
+        "step1": {
+          "symbol": "coal",
+          "node": "ring_1",
+          "rotation_y_deg": -144.0,
+          "clip": "lf_rune_ring1_coal"
+        },
+        "step2": {
+          "symbol": "seed",
+          "node": "ring_2",
+          "rotation_y_deg": -180.0,
+          "clip": "lf_rune_ring2_seed"
+        },
+        "step3": {
+          "symbol": "tree",
+          "node": "ring_3",
+          "rotation_y_deg": -216.0,
+          "clip": "lf_rune_ring3_tree"
+        }
+      },
+      "lf_site_10": {
+        "step1": {
+          "symbol": "sun",
+          "node": "ring_1",
+          "rotation_y_deg": -252.0,
+          "clip": "lf_rune_ring1_sun"
+        },
+        "step2": {
+          "symbol": "stone",
+          "node": "ring_2",
+          "rotation_y_deg": -288.0,
+          "clip": "lf_rune_ring2_stone"
+        },
+        "step3": {
+          "symbol": "root",
+          "node": "ring_3",
+          "rotation_y_deg": -324.0,
+          "clip": "lf_rune_ring3_root"
+        }
+      }
+    },
+    "wrong_input": "tween the active ring to the chosen symbol (clip lf_rune_ring<k>_<symbol>), then tween all rings back to rest_deg (server resets progress)",
+    "solved": {
+      "clip": "lf_lock_mechanism",
+      "door_pivot_open_offset_m": [
+        0,
+        -0.44,
+        0
+      ],
+      "key_lever_open": "end pose of lf_lock_mechanism"
+    }
+  },
+  "sockets": {
+    "artifact_spot": [
+      0.0,
+      0.34,
+      0.42
+    ],
+    "front_index_mark": [
+      0.0,
+      0.7,
+      0.57
+    ]
+  }
+}

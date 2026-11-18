@@ -1,0 +1,183 @@
+{
+  "id": "lf_env_willow",
+  "variants": {
+    "v1": {
+      "nodes": [
+        "lf_env_willow_v1_LOD0",
+        "lf_env_willow_v1_LOD1",
+        "lf_env_willow_v1_LOD2"
+      ],
+      "tris": {
+        "LOD0": 2878,
+        "LOD1": 1300,
+        "LOD2": 294
+      },
+      "materials": {
+        "LOD0": [
+          "lf_bark_willow",
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_foliage"
+        ]
+      },
+      "height_m": 11.32,
+      "crown_radius_m": 8.56,
+      "bounds_m_blender": [
+        [
+          -5.3,
+          -5.11,
+          -0.34
+        ],
+        [
+          8.56,
+          4.83,
+          11.32
+        ]
+      ],
+      "display_offset_gltf": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "v2": {
+      "nodes": [
+        "lf_env_willow_v2_LOD0",
+        "lf_env_willow_v2_LOD1",
+        "lf_env_willow_v2_LOD2"
+      ],
+      "tris": {
+        "LOD0": 2907,
+        "LOD1": 1300,
+        "LOD2": 294
+      },
+      "materials": {
+        "LOD0": [
+          "lf_bark_willow",
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_foliage"
+        ]
+      },
+      "height_m": 9.65,
+      "crown_radius_m": 7.39,
+      "bounds_m_blender": [
+        [
+          -7.39,
+          -5.18,
+          -0.34
+        ],
+        [
+          5.54,
+          5.21,
+          9.65
+        ]
+      ],
+      "display_offset_gltf": [
+        15.856,
+        0.0,
+        0.0
+      ]
+    },
+    "v3": {
+      "nodes": [
+        "lf_env_willow_v3_LOD0",
+        "lf_env_willow_v3_LOD1",
+        "lf_env_willow_v3_LOD2"
+      ],
+      "tris": {
+        "LOD0": 2620,
+        "LOD1": 1200,
+        "LOD2": 294
+      },
+      "materials": {
+        "LOD0": [
+          "lf_bark_willow",
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_foliage"
+        ]
+      },
+      "height_m": 9.63,
+      "crown_radius_m": 3.91,
+      "bounds_m_blender": [
+        [
+          -3.57,
+          -3.79,
+          -0.31
+        ],
+        [
+          3.91,
+          3.82,
+          9.63
+        ]
+      ],
+      "display_offset_gltf": [
+        31.712,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "tris": {
+    "LOD0": 2907,
+    "LOD1": 1300,
+    "LOD2": 294
+  },
+  "bones": 0,
+  "materials": [
+    "lf_bark_willow",
+    "lf_foliage"
+  ],
+  "textures": {
+    "lf_foliage_atlas.png": 2048,
+    "lf_bark_willow_c.jpg": 1024,
+    "lf_bark_willow_n.png": 1024,
+    "lf_bark_willow_r.png": 1024
+  },
+  "texture_mode": "external shared files next to the GLB (relative URIs); one foliage atlas for the whole kit",
+  "alpha": {
+    "lf_foliage": {
+      "mode": "MASK",
+      "cutoff": 0.5,
+      "double_sided": true
+    }
+  },
+  "wind": {
+    "attribute": "COLOR_0 (RGBA float, linear)",
+    "R": "branch sway weight: 0 at trunk base -> 1 at branch tips (path length along the skeleton, ^1.35)",
+    "G": "leaf flutter weight: 0 on bark, 0.25-0.3 at a card's attachment edge -> 0.8-1.0 at its free edge",
+    "B": "per-branch phase 0..1 (first-order branch random, sub-branches inherit +-0.06); trunk 0",
+    "A": "crown ambient occlusion 0.45..1 (1 = outer/top of crown); multiply albedo in the shader",
+    "clip": "lf_forest_wind, 8 s seamless loop: use TIME*2pi/8 with integer harmonics (see lf_forest_wind.gdshader)",
+    "godot_note": "Godot's glTF importer enables vertex_color_use_as_albedo when COLOR_0 exists: use the provided ShaderMaterial (or disable that flag) or the wind mask tints the albedo."
+  },
+  "clips": {
+    "lf_forest_wind": {
+      "seconds": 8.0,
+      "loop": true,
+      "type": "shader (vertex colour driven)"
+    }
+  },
+  "layout_note": "Node translations are preview offsets only (variants along +X, LOD1/LOD2 rows behind). Instance the Mesh resources with your own transforms; mesh origin = trunk base on the ground.",
+  "lod_note": "LOD0: bark+foliage (2 surfaces); LOD1/LOD2: single foliage-atlas surface (bark strip in atlas).",
+  "glb_images": [
+    "lf_bark_willow_n.png",
+    "lf_bark_willow_c.jpg",
+    "lf_bark_willow_r.png",
+    "lf_foliage_atlas.png"
+  ],
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_trees.py willow"
+}

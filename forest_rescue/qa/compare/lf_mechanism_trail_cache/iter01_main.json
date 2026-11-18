@@ -1,0 +1,16 @@
+{
+  "title": "lf_mechanism_trail_cache main (camera fitted to the drawing)",
+  "iou_filled": 0.9364,
+  "iou_raw": 0.9364,
+  "mean_abs_colour_error": 0.3088,
+  "mean_rgb_ref": [
+    0.42,
+    0.336,
+    0.245
+  ],
+  "mean_rgb_render": [
+    0.033,
+    0.031,
+    0.019
+  ]
+}

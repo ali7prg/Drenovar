@@ -8,9 +8,9 @@
         "lf_env_fallen_trunk_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2508,
-        "LOD1": 958,
-        "LOD2": 304
+        "LOD0": 2617,
+        "LOD1": 1010,
+        "LOD2": 340
       },
       "materials": {
         "LOD0": [
@@ -24,30 +24,30 @@
           "lf_foliage"
         ]
       },
-      "height_m": 3.56,
+      "height_m": 2.63,
       "footprint_radius_m": 6.33,
       "bounds_m_blender": [
         [
           -6.33,
-          -1.93,
-          -0.01
+          -1.39,
+          -0.24
         ],
         [
-          5.75,
-          1.8,
-          3.56
+          5.36,
+          1.09,
+          2.63
         ]
       ],
       "wind": false,
       "info": {
         "LOD0": {
-          "tris": 2510
+          "tris": 2619
         },
         "LOD1": {
-          "tris": 960
+          "tris": 1012
         },
         "LOD2": {
-          "tris": 306
+          "tris": 342
         },
         "arch_clearance_m": 1.34
       }
@@ -59,9 +59,9 @@
         "lf_env_fallen_trunk_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 2544,
-        "LOD1": 958,
-        "LOD2": 258
+        "LOD0": 3060,
+        "LOD1": 1196,
+        "LOD2": 317
       },
       "materials": {
         "LOD0": [
@@ -75,38 +75,38 @@
           "lf_foliage"
         ]
       },
-      "height_m": 1.88,
-      "footprint_radius_m": 5.24,
+      "height_m": 1.59,
+      "footprint_radius_m": 4.31,
       "bounds_m_blender": [
         [
-          -4.83,
-          -1.64,
-          -0.53
+          -4.31,
+          -0.73,
+          -0.16
         ],
         [
-          5.24,
-          1.63,
-          1.88
+          4.03,
+          0.74,
+          1.59
         ]
       ],
       "wind": false,
       "info": {
         "LOD0": {
-          "tris": 2546
+          "tris": 3062
         },
         "LOD1": {
-          "tris": 960
+          "tris": 1198
         },
         "LOD2": {
-          "tris": 260
+          "tris": 319
         }
       }
     }
   },
   "tris": {
-    "LOD0": 2544,
-    "LOD1": 958,
-    "LOD2": 304
+    "LOD0": 3060,
+    "LOD1": 1196,
+    "LOD2": 340
   },
   "bones": 0,
   "materials": [

@@ -1,0 +1,23 @@
+{
+  "id": "lf_arena_stream",
+  "tris": {
+    "LOD0": 1514
+  },
+  "bounds_m": {
+    "min": [
+      -10.24,
+      -5.0,
+      -2.2
+    ],
+    "max": [
+      11.69,
+      4.95,
+      1.17
+    ]
+  },
+  "materials": [
+    "M_lf_arena_stream_rocks",
+    "M_lf_arena_stream_water"
+  ],
+  "notes": "pivot at the base centre"
+}

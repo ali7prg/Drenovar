@@ -1,0 +1,23 @@
+{
+  "id": "lf_arena_cliff_b",
+  "tris": {
+    "LOD0": 2888,
+    "LOD1": 1137
+  },
+  "bounds_m": {
+    "min": [
+      -5.08,
+      -2.2,
+      -0.26
+    ],
+    "max": [
+      5.1,
+      3.03,
+      5.44
+    ]
+  },
+  "materials": [
+    "M_lf_arena_cliff_b"
+  ],
+  "notes": "pivot: inner-face base centre, local +Y away from the arena centre (ring radius 17.5 m)"
+}

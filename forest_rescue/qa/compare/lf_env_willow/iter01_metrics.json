@@ -1,0 +1,108 @@
+{
+  "metrics": {
+    "v1_front_LOD0": {
+      "view": "willow",
+      "iou": 0.7786,
+      "mean_abs_colour_error": 0.196,
+      "ref_pixels": 71454,
+      "render_pixels": 65316,
+      "iou_closed_r4": 0.8423
+    },
+    "v1_front_LOD1": {
+      "view": "willow",
+      "iou": 0.7691,
+      "mean_abs_colour_error": 0.1978,
+      "ref_pixels": 71454,
+      "render_pixels": 65664,
+      "iou_closed_r4": 0.8239
+    },
+    "v1_front_LOD2": {
+      "view": "willow",
+      "iou": 0.7367,
+      "mean_abs_colour_error": 0.1898,
+      "ref_pixels": 71454,
+      "render_pixels": 60685,
+      "iou_closed_r4": 0.7878
+    }
+  },
+  "tris": {
+    "v1": {
+      "radius_alpha": 1.574,
+      "nodes": 454,
+      "leaf_sites": 137,
+      "cull_k0": 2.7,
+      "LOD0": {
+        "tris": 2878,
+        "bark_tris": 768,
+        "cards": 716,
+        "curtain_strips": 113
+      },
+      "cull_k1": 16.18,
+      "LOD1": {
+        "tris": 1300,
+        "bark_tris": 328,
+        "cards": 296,
+        "curtain_strips": 95
+      },
+      "cull_k2": 16.18,
+      "LOD2": {
+        "tris": 294,
+        "bark_tris": 42,
+        "cards": 86,
+        "curtain_strips": 40
+      }
+    },
+    "v2": {
+      "radius_alpha": 1.682,
+      "nodes": 543,
+      "leaf_sites": 162,
+      "cull_k0": 4.02,
+      "LOD0": {
+        "tris": 2907,
+        "bark_tris": 779,
+        "cards": 710,
+        "curtain_strips": 118
+      },
+      "cull_k1": 16.18,
+      "LOD1": {
+        "tris": 1300,
+        "bark_tris": 312,
+        "cards": 304,
+        "curtain_strips": 95
+      },
+      "cull_k2": 16.18,
+      "LOD2": {
+        "tris": 294,
+        "bark_tris": 42,
+        "cards": 86,
+        "curtain_strips": 40
+      }
+    },
+    "v3": {
+      "radius_alpha": 1.572,
+      "nodes": 281,
+      "leaf_sites": 83,
+      "cull_k0": 1.0,
+      "LOD0": {
+        "tris": 2620,
+        "bark_tris": 676,
+        "cards": 762,
+        "curtain_strips": 70
+      },
+      "cull_k1": 1.0,
+      "LOD1": {
+        "tris": 1200,
+        "bark_tris": 230,
+        "cards": 345,
+        "curtain_strips": 70
+      },
+      "cull_k2": 16.18,
+      "LOD2": {
+        "tris": 294,
+        "bark_tris": 42,
+        "cards": 86,
+        "curtain_strips": 40
+      }
+    }
+  }
+}

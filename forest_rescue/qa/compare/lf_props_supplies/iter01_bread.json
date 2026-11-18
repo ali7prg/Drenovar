@@ -1,0 +1,16 @@
+{
+  "title": "lf_props_supplies bread (fitted camera)",
+  "iou_filled": 0.7457,
+  "iou_raw": 0.7456,
+  "mean_abs_colour_error": 0.1486,
+  "mean_rgb_ref": [
+    0.632,
+    0.456,
+    0.296
+  ],
+  "mean_rgb_render": [
+    0.65,
+    0.481,
+    0.343
+  ]
+}

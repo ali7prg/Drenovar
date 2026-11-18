@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_bone_key v1 hero34 (fitted perspective)",
+  "iou_filled": 0.692,
+  "iou_raw": 0.692,
+  "mean_abs_colour_error": 0.157,
+  "mean_rgb_ref": [
+    0.632,
+    0.518,
+    0.392
+  ],
+  "mean_rgb_render": [
+    0.718,
+    0.583,
+    0.446
+  ]
+}

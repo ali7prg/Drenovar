@@ -427,6 +427,7 @@ func build_locked_card() -> void:
 	column.add_child(locked_title)
 	locked_body = Style.label(text("forest.locked.body"), 19, Color("#e2d6bd"), true, 0)
 	locked_body.name = "LockedBody"
+	locked_body.add_theme_font_override("font", Style.italic())
 	locked_body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	locked_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	locked_body.custom_minimum_size.x = 400

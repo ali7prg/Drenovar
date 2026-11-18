@@ -1,0 +1,243 @@
+{
+  "id": "lf_mechanism_trail_cache",
+  "tris": {
+    "LOD0": 2516,
+    "LOD1": 1544,
+    "LOD2": 957
+  },
+  "tris_by_node": {
+    "LOD0": {
+      "root": 2056,
+      "lid": 152,
+      "handle": 140,
+      "mark_1": 140,
+      "mark_2": 28
+    },
+    "LOD1": {
+      "root": 1182,
+      "lid": 152,
+      "handle": 90,
+      "mark_1": 92,
+      "mark_2": 28
+    },
+    "LOD2": {
+      "root": 657,
+      "lid": 152,
+      "handle": 60,
+      "mark_1": 60,
+      "mark_2": 28
+    }
+  },
+  "budget": "mechanism LOD0 <= 6000 tris",
+  "bones": 0,
+  "materials": [
+    "lf_mechanism_trail_cache_mat"
+  ],
+  "textures": {
+    "baseColor": "2048 JPEG",
+    "metallicRoughness": "1024 JPEG (G rough, B metal)",
+    "normal": "2048 PNG"
+  },
+  "coordinate_space": "glTF (Y up, metres); operator/front side faces +Z",
+  "bounds_m": {
+    "min": [
+      -1.5902,
+      0.0,
+      0.816
+    ],
+    "max": [
+      2.45,
+      0.98,
+      -1.597
+    ]
+  },
+  "clips": {
+    "lf_trail_mark_1": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "mark_visible": 0.1
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_trail_mark_2": {
+      "seconds": 0.6,
+      "frames": 18,
+      "loop": false,
+      "markers": {
+        "mark_visible": 0.1
+      },
+      "glb_seconds": 0.6
+    },
+    "lf_lock_mechanism": {
+      "seconds": 1.8,
+      "frames": 54,
+      "loop": false,
+      "markers": {
+        "lid_open": 1.5333333333333334
+      },
+      "glb_seconds": 1.8
+    }
+  },
+  "glb_nodes": [
+    "artifact_spot",
+    "lf_mechanism_trail_cache_cache_lid_ring_LOD0",
+    "lf_mechanism_trail_cache_cache_lid_ring_LOD1",
+    "lf_mechanism_trail_cache_cache_lid_ring_LOD2",
+    "cache_lid_ring",
+    "lf_mechanism_trail_cache_cache_lid_LOD0",
+    "lf_mechanism_trail_cache_cache_lid_LOD1",
+    "lf_mechanism_trail_cache_cache_lid_LOD2",
+    "cache_lid",
+    "lf_mechanism_trail_cache_LOD0",
+    "lf_mechanism_trail_cache_LOD1",
+    "lf_mechanism_trail_cache_LOD2",
+    "lf_mechanism_trail_cache_mark_landmark_a_LOD0",
+    "lf_mechanism_trail_cache_mark_landmark_a_LOD1",
+    "lf_mechanism_trail_cache_mark_landmark_a_LOD2",
+    "mark_landmark_a",
+    "lf_mechanism_trail_cache_mark_landmark_b_LOD0",
+    "lf_mechanism_trail_cache_mark_landmark_b_LOD1",
+    "lf_mechanism_trail_cache_mark_landmark_b_LOD2",
+    "mark_landmark_b"
+  ],
+  "glb_animations": {
+    "lf_lock_mechanism": [
+      [
+        "cache_lid",
+        "translation"
+      ],
+      [
+        "cache_lid",
+        "rotation"
+      ],
+      [
+        "cache_lid",
+        "scale"
+      ],
+      [
+        "cache_lid_ring",
+        "translation"
+      ],
+      [
+        "cache_lid_ring",
+        "rotation"
+      ],
+      [
+        "cache_lid_ring",
+        "scale"
+      ]
+    ],
+    "lf_trail_mark_1": [
+      [
+        "mark_landmark_a",
+        "translation"
+      ],
+      [
+        "mark_landmark_a",
+        "rotation"
+      ],
+      [
+        "mark_landmark_a",
+        "scale"
+      ]
+    ],
+    "lf_trail_mark_2": [
+      [
+        "mark_landmark_b",
+        "translation"
+      ],
+      [
+        "mark_landmark_b",
+        "rotation"
+      ],
+      [
+        "mark_landmark_b",
+        "scale"
+      ]
+    ]
+  },
+  "markers": {
+    "artifact_spot": {
+      "position": [
+        1.0,
+        0.41,
+        -0.0
+      ],
+      "parent": "root"
+    }
+  },
+  "projection": {
+    "painted_fraction": 0.001,
+    "texel_mm": 3.241
+  },
+  "camera_fit_iou": {
+    "main": 0.9364
+  },
+  "notes": "Landmarks A/B and the log cache are one GLB; client may offset A/B per the site layout.",
+  "symbol_targets": {
+    "landmarks": {
+      "A": {
+        "node": "mark_landmark_a",
+        "where": "split birch stump",
+        "clip": "lf_trail_mark_1",
+        "visible_scale": 1
+      },
+      "B": {
+        "node": "mark_landmark_b",
+        "where": "white-moss boulder",
+        "clip": "lf_trail_mark_2",
+        "visible_scale": 1
+      },
+      "C": {
+        "node": "cache_lid",
+        "where": "hollow log cache",
+        "clip": "lf_lock_mechanism",
+        "open_translation_offset": [
+          0.55,
+          0,
+          0
+        ]
+      }
+    },
+    "sites": {
+      "lf_site_01": {
+        "split_birch": "A",
+        "white_moss": "B",
+        "fallen_trunk": "C"
+      },
+      "lf_site_05": {
+        "resin_pine": "A",
+        "double_stump": "B",
+        "resin_bowl": "C"
+      },
+      "lf_site_09": {
+        "bent_fern": "A",
+        "flat_slab": "B",
+        "three_notches": "C"
+      }
+    },
+    "progress_rule": "progress k shows marks of steps <= k (scale 1); solved plays lf_lock_mechanism; wrong input -> marks scale 0",
+    "note": "Sites 05/09 reuse the same three landmark nodes; their biome-specific look (resin pine, double stump, resin bowl, bent fern, flat slab, three-notch stone) is NOT modelled here - deviation documented."
+  },
+  "sockets": {
+    "artifact_spot": [
+      1.0,
+      0.41,
+      -0.0
+    ],
+    "landmark_offsets_from_log": {
+      "A": [
+        -1.15,
+        0.0,
+        -0.5
+      ],
+      "B": [
+        0.25,
+        0.0,
+        -1.05
+      ]
+    }
+  }
+}

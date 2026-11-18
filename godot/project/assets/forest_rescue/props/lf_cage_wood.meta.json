@@ -1,35 +1,35 @@
 {
   "id": "lf_cage_wood",
   "tris": {
-    "LOD0": 7454,
-    "LOD1": 4426,
-    "LOD2": 2694
+    "LOD0": 5567,
+    "LOD1": 3814,
+    "LOD2": 2534
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 5622,
-      "door": 820,
+      "root": 4143,
+      "door": 700,
       "latch": 52,
-      "socket": 592,
-      "socket_core": 188,
-      "keyhole": 124,
-      "keyhole_core": 56
-    },
-    "LOD1": {
-      "root": 3060,
-      "door": 680,
-      "latch": 46,
-      "socket": 384,
+      "socket": 416,
       "socket_core": 108,
       "keyhole": 108,
       "keyhole_core": 40
     },
+    "LOD1": {
+      "root": 2624,
+      "door": 600,
+      "latch": 46,
+      "socket": 320,
+      "socket_core": 76,
+      "keyhole": 108,
+      "keyhole_core": 40
+    },
     "LOD2": {
-      "root": 1786,
-      "door": 404,
+      "root": 1722,
+      "door": 372,
       "latch": 24,
-      "socket": 272,
-      "socket_core": 60,
+      "socket": 224,
+      "socket_core": 44,
       "keyhole": 108,
       "keyhole_core": 40
     }
@@ -49,7 +49,7 @@
     "min": [
       -1.75,
       0.0,
-      2.8575
+      3.2161
     ],
     "max": [
       1.75,
@@ -88,7 +88,7 @@
     "hinge_axis": {
       "node": "door_pivot",
       "point": [
-        0.146,
+        -0.214,
         0.0,
         1.64
       ],
@@ -100,7 +100,7 @@
       "side": "left jamb seen from outside (glTF -X side of the opening)"
     },
     "door_open_deg": 95.0,
-    "door_rotation": "door_pivot rotates about glTF +Y; open = -95 deg about Blender Z = rotation_y(-95deg) in glTF? see poses",
+    "door_rotation": "door_pivot rotates about its local +Y (glTF up) axis, which passes exactly through the hinge pins; closed = 0 deg, open = -95 deg (outward, free edge swings toward +Z)",
     "key_slot": {
       "node": "key_slot",
       "parent": "socket_core",
@@ -147,27 +147,27 @@
     },
     "door": {
       "node": "door_pivot",
-      "width_m": 1.199,
+      "width_m": 1.559,
       "clear_height_m": 2.44
     },
     "exit_corridor": [
       [
-        0.7575,
+        0.5775,
         0.1,
         0.5
       ],
       [
-        0.7575,
+        0.5775,
         0.1,
         1.5
       ],
       [
-        0.7575,
+        0.5775,
         0.0,
         2.8
       ],
       [
-        0.7575,
+        0.5775,
         0.0,
         4.0
       ]
@@ -246,13 +246,53 @@
     "lf_cage_gate_open": [
       [
         "door_pivot",
+        "translation"
+      ],
+      [
+        "door_pivot",
         "rotation"
+      ],
+      [
+        "door_pivot",
+        "scale"
+      ],
+      [
+        "latch_pivot",
+        "translation"
+      ],
+      [
+        "latch_pivot",
+        "rotation"
+      ],
+      [
+        "latch_pivot",
+        "scale"
       ]
     ],
     "lf_cage_gate_settle": [
       [
         "door_pivot",
+        "translation"
+      ],
+      [
+        "door_pivot",
         "rotation"
+      ],
+      [
+        "door_pivot",
+        "scale"
+      ],
+      [
+        "latch_pivot",
+        "translation"
+      ],
+      [
+        "latch_pivot",
+        "rotation"
+      ],
+      [
+        "latch_pivot",
+        "scale"
       ]
     ],
     "lf_cage_unlock": [
@@ -261,22 +301,46 @@
         "translation"
       ],
       [
+        "latch_pivot",
+        "rotation"
+      ],
+      [
+        "latch_pivot",
+        "scale"
+      ],
+      [
         "keyhole_core",
         "translation"
       ],
       [
+        "keyhole_core",
+        "rotation"
+      ],
+      [
+        "keyhole_core",
+        "scale"
+      ],
+      [
         "socket_core",
         "translation"
+      ],
+      [
+        "socket_core",
+        "rotation"
+      ],
+      [
+        "socket_core",
+        "scale"
       ]
     ]
   },
   "notes": "Production rule: hinge on the LEFT jamb seen from outside (drawing's open view shows it on the right - not followed), single door pivot, outward opening 95 deg. socket_keyhole_pivot is scale 0 by default; for bone-key sites show it and hide socket_pivot.",
   "projection": {
-    "painted_fraction": 0.163,
-    "texel_mm": 6.782
+    "painted_fraction": 0.1,
+    "texel_mm": 6.791
   },
   "camera_fit_iou": {
-    "closed": 0.9289,
-    "open": 0.89
+    "closed": 0.9413,
+    "open": 0.8794
   }
 }

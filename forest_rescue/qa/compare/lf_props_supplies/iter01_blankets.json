@@ -1,0 +1,16 @@
+{
+  "title": "lf_props_supplies blankets (fitted camera)",
+  "iou_filled": 0.8452,
+  "iou_raw": 0.8452,
+  "mean_abs_colour_error": 0.1488,
+  "mean_rgb_ref": [
+    0.462,
+    0.293,
+    0.202
+  ],
+  "mean_rgb_render": [
+    0.611,
+    0.418,
+    0.323
+  ]
+}

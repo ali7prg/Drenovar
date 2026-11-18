@@ -1,0 +1,21 @@
+{
+  "iou": 0.4424,
+  "colour_err": 0.1366,
+  "ssim": 0.3958,
+  "ref_px": 77283,
+  "render_px": 43774,
+  "camera": {
+    "location": [
+      -7.0,
+      -12.0,
+      6.0
+    ],
+    "look_at": [
+      0.6,
+      0.0,
+      2.2
+    ],
+    "lens_mm": 40,
+    "note": "hand-matched to the art/06 main view (reference mask includes the painted ground base)"
+  }
+}

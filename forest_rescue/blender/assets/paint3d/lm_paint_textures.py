@@ -222,7 +222,7 @@ def main():
             # jointless stone quilt to the measured painted block faces (L p50 ~ 63, chroma ~ 10)
             from skimage import color as skc
             lab_ = seg.lab(alb)
-            lab_[..., 0] = (lab_[..., 0] - lab_[..., 0].mean()) * 0.9 + 61.0
+            lab_[..., 0] = (lab_[..., 0] - lab_[..., 0].mean()) * 0.9 + 53.0
             lab_[..., 1:] = (lab_[..., 1:] - lab_[..., 1:].mean((0, 1))) * 0.6 + np.array([2.2, 8.8])
             alb = np.clip(skc.lab2rgb(lab_), 0, 1).astype(np.float32)
         h, r = height_of(alb)

@@ -49,7 +49,7 @@ def main(asset, box, out_png, nodes=None):
         if z in shots:
             g = shots[z]
             h, w = g.shape[:2]
-            cw, ch = min(w, int(crop.size[0] * 1.6)), min(h, int(crop.size[1] * 1.6))
+            cw, ch = min(w, int(crop.size[0])), min(h, int(crop.size[1]))
             g = g[(h - ch) // 2:(h + ch) // 2, (w - cw) // 2:(w + cw) // 2]
             panels.append(g)
             labels.append(f"Godot city camera zoom {z}: {asset}")

@@ -257,8 +257,11 @@ class Patches:
             edge = bool((~ndi.binary_dilation(ref.fg, iterations=2))[max(0, rect[1]):rect[3], max(0, rect[0]):rect[2]].any())
             self.tiles.append(tile)
             self.rects.append(rect)
+            ytop = ys.min() + (ys.max() - ys.min()) / 3.0
+            top_px = m & (np.arange(ref.H)[:, None] <= ytop)
+            top_lum = float(Lab[..., 0][top_px].mean()) if top_px.any() else float(Lab[..., 0][m].mean())
             self.info.append(dict(c=(cu, cv), area=int(m.sum()), rho=float(rho), eta=float(eta),
-                                  lum=float(Lab[..., 0][m].mean()), edge=edge,
+                                  lum=float(Lab[..., 0][m].mean()), top_lum=top_lum, edge=edge,
                                   w_m=(rect[2] - rect[0]) / ref.ppm, h_m=(rect[3] - rect[1]) / ref.ppm))
         self.extra = []
 
@@ -699,6 +702,137 @@ class TreeBuilder:
                 got += 1
         return cards
 
+    def volume_cards(self, n_clumps, front_cards, front_dm, size_k=1.0, seed=5, min_dist_k=0.7, foot=0.86,
+                     front_extra_frac=0.65, extra_size=1.0, shell_pow=1.4, top_boost=1.2, max_cards=None):
+        """Crown as a filled volume: every clump = crossed cards (top-facing + oblique + outward side).
+
+        * front clumps (projectively fitted cards) get a top and an oblique card behind them (same painted patch);
+        * clump centres fill the revolved crown volume at several depths (shell / mid / core);
+        * top cards use the brightest-topped painted clumps, interior clumps darker patches + AO.
+        All cards stay behind the painted front layer and inside the silhouette in the art/02 view."""
+        ref, p = self.ref, self.p
+        rng = np.random.default_rng(seed)
+        info = p.info
+        areas = np.array([q["area"] for q in info], float)
+        etas = np.array([q["eta"] for q in info])
+        lums = np.array([q["lum"] for q in info])
+        tlums = np.array([q["top_lum"] for q in info])
+        edges = np.array([q["edge"] for q in info])
+        lum_med = np.median(lums)
+        lp = self.cfg.get("lum_pref", 4.0)
+        v0, v1 = ref.crown_rows
+        Z = np.array([0, 0, 1.0])
+        cards = []
+
+        def add(P3, n, ti, size, roll, ao, kind="fill", flip=None):
+            ok = False
+            for attempt in range(3):
+                Vc = self._fill_quad(P3, n, ti, size, roll)
+                if self.card_footprint_ok(Vc, ref.fg, foot, front_dm) >= foot:
+                    ok = True
+                    break
+                size *= 0.8
+            if not ok:
+                return False
+            cards.append(dict(kind=kind, P=P3, n=n, tile=ti, flip=bool(rng.random() < 0.5) if flip is None else flip,
+                              size=size, roll=roll, ao=ao))
+            return True
+
+        def pick(eta, mode, depth_k):
+            w = np.sqrt(areas) * np.exp(-((etas - eta) / 0.3) ** 2)
+            if mode == "top":
+                w *= np.exp(np.clip((tlums - np.median(tlums)) / (lp * 0.8), -5, 5))
+            elif mode == "side":
+                w *= np.where(edges, 1.8, 1.0) * np.exp(np.clip((lums - lum_med) / (lp * 1.5), -4, 4))
+            else:
+                w *= np.exp(np.clip((lums - lum_med) / (lp * 1.2), -4, 4))
+            if depth_k < 0.55:    # interior: darker leaves
+                w *= np.exp(np.clip(-(lums - lum_med) / 6.0, -4, 4))
+            w /= w.sum()
+            return int(rng.choice(len(info), p=w))
+
+        # 1) crossed cards behind the painted front clumps
+        if front_extra_frac > 0:
+            order = np.argsort([-info[c["tile"]]["area"] for c in front_cards])
+            for j in order[: int(len(order) * front_extra_frac)]:
+                c = front_cards[j]
+                ti = c["tile"]
+                cu, cv = c["c"]
+                C = ref.cam_to_world(np.array([cu]), np.array([cv]), np.array([c["t_px"]]))[0]
+                hs = max(info[ti]["w_m"], info[ti]["h_m"]) * extra_size
+                eta = (cv - v0) / max(v1 - v0, 1)
+                # top-facing card, pushed behind the front card
+                Pt = C + ref.view.d * (0.5 * hs + 0.2) + Z * 0.15 * hs
+                add(Pt, nrm(Z + rng.normal(0, 0.12, 3)), pick(eta, "top", 1.0), hs / max(info[ti]["w_m"], 1e-3) * 0.95,
+                    rng.uniform(-np.pi, np.pi), 1.0)
+                # oblique card (45 deg, outward + up)
+                out = c["n"] - np.dot(c["n"], Z) * Z
+                out = nrm(out) if np.linalg.norm(out) > 1e-3 else -ref.view.d
+                Po = C + ref.view.d * (0.4 * hs + 0.2)
+                add(Po, nrm(out + Z * 1.0 + rng.normal(0, 0.1, 3)), ti, 1.0 * extra_size, rng.normal(0, 0.2), 1.0)
+        # 2) clump centres through the crown volume
+        typ = np.median([q["w_m"] for q in info if q["area"] > np.median(areas)]) * size_k
+        rmin = typ * min_dist_k
+        vs = np.arange(v0, v1 + 1)
+        w_row = ref.R[vs] ** 2
+        eta_r = (vs - v0) / max(v1 - v0, 1)
+        w_row = w_row * (1.0 + top_boost * np.clip(1 - eta_r / 0.55, 0, 1))
+        w_row /= w_row.sum()
+        M = n_clumps * 30
+        vv = rng.choice(vs, size=M, p=w_row) + rng.uniform(-0.5, 0.5, M)
+        ph = rng.uniform(-np.pi, np.pi, M)
+        kk = rng.random(M) ** (1.0 / (1.0 + shell_pow))          # radial fraction, denser near the shell
+        kk = np.clip(kk, 0.12, 0.98)
+        vi = np.clip(np.round(vv).astype(int), 0, ref.H - 1)
+        uu = ref.xc[vi] + ref.R[vi] * kk * np.cos(ph)
+        tt = ref.kd * ref.R[vi] * kk * np.sin(ph)
+        ui = np.clip(np.round(uu).astype(int), 0, ref.W - 1)
+        ok = ref.fg[vi, ui] & (tt > front_dm[vi, ui] + 0.25 * ref.ppm)
+        cand = np.nonzero(ok)[0]
+        centres = []
+        grid = {}
+        n_ok = 0
+        for c in cand:
+            P3 = ref.cam_to_world(np.array([uu[c]]), np.array([vv[c]]), np.array([tt[c]]))[0]
+            key = tuple((P3 // rmin).astype(int))
+            bad = False
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    for dz in (-1, 0, 1):
+                        for o in grid.get((key[0] + dx, key[1] + dy, key[2] + dz), []):
+                            if np.sum((o - P3) ** 2) < rmin * rmin:
+                                bad = True
+                                break
+                        if bad:
+                            break
+                    if bad:
+                        break
+                if bad:
+                    break
+            if bad:
+                continue
+            grid.setdefault(key, []).append(P3)
+            eta = (vv[c] - v0) / max(v1 - v0, 1)
+            k = kk[c]
+            n_out = ref.world_dir(ref.normal_cam(uu[c], vv[c], tt[c]))
+            horiz = n_out - np.dot(n_out, Z) * Z
+            horiz = nrm(horiz) if np.linalg.norm(horiz) > 1e-3 else nrm(rng.normal(0, 1, 3) * [1, 1, 0])
+            ao = 1.0 if k > 0.8 else (0.86 if k > 0.55 else 0.7)
+            size = typ * rng.uniform(0.95, 1.2) * (1.0 if k > 0.55 else 0.9)
+            # three crossed cards
+            n_top = nrm(Z + rng.normal(0, 0.15, 3))
+            n_obl = nrm(horiz + Z + rng.normal(0, 0.12, 3))
+            n_side = nrm(horiz + rng.normal(0, 0.15, 3) + Z * 0.15)
+            for n, mode, roll in ((n_top, "top", rng.uniform(-np.pi, np.pi)), (n_obl, "obl", rng.normal(0, 0.2)),
+                                  (n_side, "side", rng.normal(0, 0.15))):
+                ti = pick(eta, mode, k)
+                sz = size / max(info[ti]["w_m"], 1e-3)
+                add(P3 + rng.normal(0, 0.12 * typ, 3), n, ti, sz, roll, ao)
+            n_ok += 1
+            if n_ok >= n_clumps or (max_cards and len(cards) >= max_cards):
+                break
+        return cards
+
     def _fill_quad(self, P3, n, ti, size, roll):
         w = self.p.info[ti]["w_m"] * size
         h = self.p.info[ti]["h_m"] * size
@@ -711,7 +845,7 @@ class TreeBuilder:
 
     # -------------------------------------------------------------- mesh assembly
     def assemble(self, paths, cards, bark_uv, sides_trunk=14, sides_limb=6, min_limb_r_px=0.0, copies=None,
-                 tree_h=None, crown_r=None, seed=3):
+                 tree_h=None, crown_r=None, seed=3, copy_min_r_px=0.0):
         ref, p = self.ref, self.p
         rng = np.random.default_rng(seed)
         bark = Mesh()
@@ -734,7 +868,7 @@ class TreeBuilder:
             bark.add(V, T, UV, C, N, MAT_BARK)
         for (Rm, tvec, mirror, sc) in (copies or []):
             for path in paths:
-                if path["kind"] != "limb" or path.get("r_px", 0) < min_limb_r_px:
+                if path["kind"] != "limb" or path.get("r_px", 0) < max(min_limb_r_px, copy_min_r_px):
                     continue
                 if path.get("parent", -1) == -2 and path.get("r_px", 0) < 3.0:
                     continue
@@ -766,7 +900,7 @@ class TreeBuilder:
                 upv = nrm(np.cross(n, rt))
                 upv = upv * np.cos(c["roll"]) + rt * np.sin(c["roll"])
                 V, T, UV, _, N = geom.free_card(c["P"], n, upv, w, h, uvr, np.zeros(4), flip=c["flip"])
-                ao = 0.9 if c["kind"] == "fill" else 0.78
+                ao = c.get("ao", 0.9 if c["kind"] == "fill" else 0.78)
             # smoothed crown normals (ellipsoid around the crown centre), blended with the card normal
             sn = nrm((V - crown_c) / crown_ax ** 2)
             Nn = nrm(sn * 0.75 + N * 0.25)

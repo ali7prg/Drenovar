@@ -112,7 +112,12 @@ def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
         keep = set(range(n)) - drop
     fronts = B.front_cards(scale=L["front_scale"], keep=keep, seed=vs["seed"])
     dm = B.front_depth_map(front_all)
-    if sp.get("crown_mode", "lobes") == "lobes":
+    if sp.get("crown_mode", "volume") == "volume":
+        fills = B.volume_cards(L["n_clumps"], fronts, dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod,
+                               min_dist_k=L.get("min_dist_k", 0.7), front_extra_frac=L.get("front_extra", 0.65),
+                               shell_pow=sp.get("shell_pow", 1.4), top_boost=sp.get("top_boost", 1.2),
+                               max_cards=L.get("max_cards"))
+    elif sp.get("crown_mode") == "lobes":
         fills = B.lobe_cards(L["n_fill"], dm, size_k=L["fill_size"], seed=vs["seed"] * 7 + lod,
                              n_lobes=L.get("n_lobes", sp["cfg"].get("n_lobes", 12)), lobe_r=sp.get("lobe_r", 0.32),
                              min_dist_k=L.get("min_dist_k", 0.45), inset=sp.get("lobe_inset", 0.74))
@@ -123,7 +128,7 @@ def build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all):
     Rc = sp.get("crown_hint", 6.0)
     bark, leaf = B.assemble(ps, fronts + fills, bark_uv, sides_trunk=L["trunk_sides"], sides_limb=L["limb_sides"],
                             min_limb_r_px=mr if L["limb_budget"] > 0 else 999, copies=copies if L.get("copies") else None,
-                            tree_h=H, crown_r=Rc, seed=vs["seed"])
+                            tree_h=H, crown_r=Rc, seed=vs["seed"], copy_min_r_px=L.get("copy_min_r_px", 0.0))
     if L["limb_budget"] <= 0:
         # trunk only
         pass
@@ -256,8 +261,11 @@ def main():
     for o in v1:
         o.location.x = 0
     bpy.context.view_layer.update()
-    if a.qa == "full" and sp.get("patch"):
-        SP.forest_patch(asset, built, qa_path(asset, a.iter, "patch55.png"), sp)
+    acc = pblend.crown_checks(v1[0], qa_path(asset, a.iter, "accept"))
+    metrics["acceptance"] = acc
+    print(f"[{asset}] acceptance: {acc}", flush=True)
+    if sp.get("single_refs"):
+        SP.matched_scale(asset, v1[0], qa_path(asset, a.iter, "matched_scale.png"), kind=sp["single_refs"])
     core.write_json(qa_path(asset, a.iter, "metrics.json"), {"metrics": metrics, "lods": info,
                                                             "atlas_scale": s, "patches": P.n})
     print(f"[{asset}] QA done ({time.time() - t0:.1f}s)", flush=True)
@@ -267,6 +275,10 @@ def main():
     pblend.use_painted(allobjs, k, on=False)
     SP.export_kit(asset, built, sp, info, kind, k, a)
     print(f"[{asset}] exported ({time.time() - t0:.1f}s)", flush=True)
+    if a.qa == "full" and sp.get("patch"):
+        files = ["lf_foliage_atlas.png", f"lf_bark_{kind}_c.jpg", f"lf_bark_{kind}_n.png", f"lf_bark_{kind}_r.png"]
+        pth = SP.godot_patch(asset, built, sp, qa_path(asset, a.iter, "patch"), k, files)
+        print(f"[{asset}] godot patch {pth} ({time.time() - t0:.1f}s)", flush=True)
 
 
 if __name__ == "__main__":

@@ -117,7 +117,7 @@ func _apply_painted(n: Node, k: float, sun: DirectionalLight3D) -> void:
 		var m: Mesh = mi.mesh
 		for i in m.get_surface_count():
 			var sm := m.surface_get_material(i) as BaseMaterial3D
-			if sm == null:
+			if sm == null or sm.albedo_texture == null:
 				continue
 			var mat := ShaderMaterial.new()
 			mat.shader = sh

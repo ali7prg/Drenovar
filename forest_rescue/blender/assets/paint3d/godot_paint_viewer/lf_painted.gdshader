@@ -10,7 +10,8 @@ uniform bool alpha_test = true;
 uniform float alpha_cutoff : hint_range(0.0, 1.0) = 0.5;
 uniform float painted_light_mix : hint_range(0.0, 1.0) = 0.4;
 uniform vec3 light_dir_world = vec3(-0.45, 0.70, 0.55);   // direction TO the light (Godot Y up)
-uniform float ao_strength = 0.35;
+uniform bool use_ao = true;
+uniform vec2 edge_fade = vec2(0.08, 0.26);
 uniform float wind_strength = 1.0;
 uniform float loop_seconds = 8.0;
 uniform vec3 wind_dir = vec3(1.0, 0.0, 0.35);
@@ -30,14 +31,17 @@ void vertex() {
 	float leaf = flutter * 0.04 * sin(11.0 * t + phase * 3.1 + dot(VERTEX, vec3(3.1, 2.3, 2.9)));
 	VERTEX += ldir * (trunk + branch) * wind_strength;
 	VERTEX += NORMAL * leaf * wind_strength;
-	v_ao = mix(1.0, COLOR.a, ao_strength);
+	v_ao = use_ao ? mix(0.42, 1.0, COLOR.a * COLOR.a) : 1.0;
 	v_wn = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 
 void fragment() {
 	vec4 c = texture(albedo_tex, UV);
 	if (alpha_test) {
-		ALPHA = c.a;
+		// cards seen edge-on fade out (face normal from screen derivatives)
+		vec3 fn = normalize(cross(dFdx(VERTEX), dFdy(VERTEX)));
+		float ndv = abs(dot(fn, normalize(-VERTEX)));
+		ALPHA = c.a * smoothstep(edge_fade.x, edge_fade.y, ndv);
 		ALPHA_SCISSOR_THRESHOLD = alpha_cutoff;
 	}
 	float lambert = max(dot(normalize(v_wn), normalize(light_dir_world)), 0.0);

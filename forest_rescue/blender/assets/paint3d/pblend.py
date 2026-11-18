@@ -68,8 +68,12 @@ def export_material(name, base_path, alpha_clip=None, normal_path=None, rough_pa
                          rough=0.9, double_sided=double_sided)
 
 
+EDGE_FADE = (0.08, 0.26)   # |dot(face normal, view)| range faded out on alpha-tested cards
+
+
 def painted_material(src, k=0.4, light=PAINT_LIGHT, name=None):
-    """QA material: emission = albedo * mix(1, max(N.L, 0), k), alpha-clipped like the game."""
+    """QA material = the game look: emission = albedo * mix(1, max(N.L,0), k) * mix(0.42, 1, AO^2);
+    alpha-tested cards also fade out when seen edge-on (|dot(true normal, view)| < EDGE_FADE)."""
     name = name or f"{src.name}_paint{k:.2f}"
     m = bpy.data.materials.get(name)
     if m:
@@ -79,6 +83,7 @@ def painted_material(src, k=0.4, light=PAINT_LIGHT, name=None):
         if n.type == "TEX_IMAGE" and n.image is not None and n.image.colorspace_settings.name != "Non-Color":
             img = n.image
             break
+    foliage = src.get("gltf_alpha_mode") == "MASK"
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -104,19 +109,53 @@ def painted_material(src, k=0.4, light=PAINT_LIGHT, name=None):
     lerp.inputs[1].default_value = k
     lerp.inputs[2].default_value = 1.0 - k
     nt.links.new(mx.outputs["Value"], lerp.inputs[0])
+    # AO from COLOR_0 alpha, world-layer formula mix(0.42, 1, ao^2)
+    va = nt.nodes.new("ShaderNodeVertexColor")
+    va.layer_name = "Col"
+    sq = nt.nodes.new("ShaderNodeMath")
+    sq.operation = "POWER"
+    sq.inputs[1].default_value = 2.0
+    nt.links.new(va.outputs["Alpha"], sq.inputs[0])
+    aom = nt.nodes.new("ShaderNodeMath")
+    aom.operation = "MULTIPLY_ADD"
+    aom.inputs[1].default_value = 0.58
+    aom.inputs[2].default_value = 0.42
+    nt.links.new(sq.outputs["Value"], aom.inputs[0])
+    shade = nt.nodes.new("ShaderNodeMath")
+    shade.operation = "MULTIPLY"
+    nt.links.new(lerp.outputs["Value"], shade.inputs[0])
+    nt.links.new(aom.outputs["Value"], shade.inputs[1])
     sc = nt.nodes.new("ShaderNodeVectorMath")
     sc.operation = "SCALE"
     nt.links.new(tex.outputs["Color"], sc.inputs[0])
-    nt.links.new(lerp.outputs["Value"], sc.inputs["Scale"])
+    nt.links.new(shade.outputs["Value"], sc.inputs["Scale"])
     em = nt.nodes.new("ShaderNodeEmission")
     nt.links.new(sc.outputs["Vector"], em.inputs["Color"])
     em.inputs["Strength"].default_value = 1.0
-    # vertex AO (COLOR_0 alpha) like the game shader: mix(0.42, 1, ao^2) -> we apply the softer kit value
     tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    alpha_src = tex.outputs["Alpha"]
+    if foliage:
+        d2 = nt.nodes.new("ShaderNodeVectorMath")
+        d2.operation = "DOT_PRODUCT"
+        nt.links.new(geo.outputs["True Normal"], d2.inputs[0])
+        nt.links.new(geo.outputs["Incoming"], d2.inputs[1])
+        ab = nt.nodes.new("ShaderNodeMath")
+        ab.operation = "ABSOLUTE"
+        nt.links.new(d2.outputs["Value"], ab.inputs[0])
+        mr = nt.nodes.new("ShaderNodeMapRange")
+        mr.interpolation_type = "SMOOTHSTEP"
+        mr.inputs["From Min"].default_value = EDGE_FADE[0]
+        mr.inputs["From Max"].default_value = EDGE_FADE[1]
+        nt.links.new(ab.outputs["Value"], mr.inputs["Value"])
+        am = nt.nodes.new("ShaderNodeMath")
+        am.operation = "MULTIPLY"
+        nt.links.new(tex.outputs["Alpha"], am.inputs[0])
+        nt.links.new(mr.outputs["Result"], am.inputs[1])
+        alpha_src = am.outputs["Value"]
     gt = nt.nodes.new("ShaderNodeMath")
     gt.operation = "GREATER_THAN"
     gt.inputs[1].default_value = 0.5
-    nt.links.new(tex.outputs["Alpha"], gt.inputs[0])
+    nt.links.new(alpha_src, gt.inputs[0])
     mix = nt.nodes.new("ShaderNodeMixShader")
     nt.links.new(gt.outputs["Value"], mix.inputs[0])
     nt.links.new(tr.outputs["BSDF"], mix.inputs[1])
@@ -271,3 +310,47 @@ def save_shot(rgba, path, bg=(0.86, 0.82, 0.76), text=None):
         u8 = label(u8, text)
     core.save_rgba(path, u8 / 255.0)
     return u8
+
+
+# ------------------------------------------------------------------ acceptance checks (55 deg / top)
+
+def crown_checks(obj, out_prefix, res=700):
+    """Top coverage of the crown disc and see-through holes at 55 deg from 4 yaws (alpha renders)."""
+    import cv2
+    from scipy import ndimage as ndi
+    from frlib import render as frr
+    res_d = {}
+    only([obj])
+    ortho_frame([obj], 90, 0, res=(res, res), margin=1.04)
+    rgba = frr.render_rgba()
+    a = rgba[..., 3] > 0.5
+    pts = np.argwhere(a)
+    hull = cv2.convexHull(pts[:, ::-1].astype(np.int32))
+    disc = np.zeros(a.shape, np.uint8)
+    cv2.fillConvexPoly(disc, hull, 1)
+    disc = disc.astype(bool)
+    diam = np.sqrt(disc.sum() / np.pi) * 2
+    inner = ndi.binary_erosion(disc, iterations=max(1, int(0.04 * diam)))
+    cov = float(a[inner].mean())
+    img = save_shot(rgba, out_prefix + "_top.png", bg=(0.9, 0.2, 0.9), text=f"top: crown-disc coverage {cov:.3f}")
+    res_d["top_coverage"] = round(cov, 4)
+    holes = {}
+    shots = []
+    for yaw in (0, 90, 180, 270):
+        only([obj])
+        ortho_frame([obj], 55, yaw, res=(res, res), margin=1.04)
+        rgba = frr.render_rgba()
+        a = rgba[..., 3] > 0.5
+        filled = ndi.binary_fill_holes(ndi.binary_closing(a, iterations=2))
+        rows = np.nonzero(filled.any(1))[0]
+        r0, r1 = rows.min(), rows.max()
+        crown = filled.copy()
+        crown[int(r0 + 0.72 * (r1 - r0)):] = False          # crown part (exclude the trunk zone at the bottom)
+        size = np.sqrt(crown.sum())
+        crown = ndi.binary_erosion(crown, iterations=max(1, int(0.035 * size)))
+        hf = float((~a[crown]).mean()) if crown.any() else 0.0
+        holes[str(yaw)] = round(hf, 4)
+        shots.append(save_shot(rgba, "/tmp/_h.png", bg=(0.9, 0.2, 0.9), text=f"55deg yaw {yaw}: holes {hf:.3f}"))
+    core.save_rgba(out_prefix + "_55holes.png", np.concatenate(shots, 1) / 255.0)
+    res_d["holes_55"] = holes
+    return res_d

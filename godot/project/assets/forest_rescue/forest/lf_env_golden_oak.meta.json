@@ -9,9 +9,9 @@
         "lf_env_golden_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3438,
-        "LOD1": 1150,
-        "LOD2": 180
+        "LOD0": 3200,
+        "LOD1": 1116,
+        "LOD2": 170
       },
       "materials": {
         "LOD0": [
@@ -28,16 +28,16 @@
         ]
       },
       "height_m": 13.59,
-      "crown_radius_m": 8.84,
+      "crown_radius_m": 8.89,
       "bounds_m_blender": [
         [
-          -6.17,
+          -5.93,
           -5.81,
           -0.3
         ],
         [
-          8.84,
-          8.67,
+          8.89,
+          7.38,
           13.59
         ]
       ],
@@ -66,9 +66,9 @@
         "lf_env_golden_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3430,
-        "LOD1": 1162,
-        "LOD2": 180
+        "LOD0": 3192,
+        "LOD1": 1156,
+        "LOD2": 178
       },
       "materials": {
         "LOD0": [
@@ -85,21 +85,21 @@
         ]
       },
       "height_m": 13.6,
-      "crown_radius_m": 8.5,
+      "crown_radius_m": 8.86,
       "bounds_m_blender": [
         [
-          -8.5,
-          -5.88,
+          -8.86,
+          -5.83,
           -0.3
         ],
         [
-          6.07,
-          8.03,
+          6.51,
+          7.58,
           13.6
         ]
       ],
       "display_offset_gltf": [
-        17.005,
+        17.37,
         0.0,
         0.0
       ],
@@ -124,9 +124,9 @@
         "lf_env_golden_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3406,
-        "LOD1": 1142,
-        "LOD2": 182
+        "LOD0": 3228,
+        "LOD1": 1104,
+        "LOD2": 176
       },
       "materials": {
         "LOD0": [
@@ -146,18 +146,18 @@
       "crown_radius_m": 7.65,
       "bounds_m_blender": [
         [
-          -5.33,
-          -5.31,
+          -5.56,
+          -5.19,
           -0.32
         ],
         [
           7.65,
-          7.49,
+          7.46,
           14.41
         ]
       ],
       "display_offset_gltf": [
-        34.009,
+        34.74,
         0.0,
         0.0
       ],
@@ -180,9 +180,9 @@
     }
   },
   "tris": {
-    "LOD0": 3438,
-    "LOD1": 1162,
-    "LOD2": 182
+    "LOD0": 3228,
+    "LOD1": 1156,
+    "LOD2": 178
   },
   "bones": 0,
   "materials": [
@@ -205,6 +205,15 @@
   },
   "paintedLightMix": 0.4,
   "paintedLightNote": "Textures carry the painted light. Shade as albedo * mix(1, lambert, paintedLightMix) (lambert = max(dot(N, L), 0)); foliage normals are smoothed crown normals.",
+  "edgeFade": {
+    "what": "alpha *= smoothstep(0.08, 0.26, |dot(face_normal, view_dir)|) on foliage (alpha-tested) surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so cards seen edge-on vanish instead of streaking",
+    "range": [
+      0.08,
+      0.26
+    ]
+  },
+  "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
+  "recommendedTint": "art/02 palette (orange-gold); for art/07 / art/01 look tint foliage toward warm yellow: hue +0.02..+0.035, saturation x1.10, value x1.08 (INSTANCE_CUSTOM r,g,b)",
   "wind": {
     "attribute": "COLOR_0 (RGBA float, linear)",
     "R": "sway weight 0 at the trunk base -> 1 at crown tips",

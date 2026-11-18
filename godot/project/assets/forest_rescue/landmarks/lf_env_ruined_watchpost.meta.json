@@ -1,18 +1,22 @@
 {
   "id": "lf_env_ruined_watchpost",
   "tris": {
-    "LOD0": 2256,
-    "LOD1": 120,
+    "LOD0": 7586,
+    "LOD1": 132,
     "LOD2": 60
   },
   "bones": 0,
   "materials": [
+    "lm_misc",
     "lm_stone"
   ],
   "glb_images": [
     "lm_stone_n.png",
     "lm_stone_c.jpg",
-    "lm_stone_r.png"
+    "lm_stone_r.png",
+    "lm_misc_n.png",
+    "lm_misc_c.png",
+    "lm_misc_r.png"
   ],
   "textures": {
     "lm_stone_c.jpg": 1024,
@@ -47,14 +51,14 @@
   },
   "bounds_m_gltf": [
     [
-      -5.112,
-      -0.137,
-      -3.991
+      -4.358,
+      -0.14,
+      -3.099
     ],
     [
-      5.48,
-      5.488,
-      3.317
+      5.523,
+      5.513,
+      3.876
     ]
   ],
   "collision": [

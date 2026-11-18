@@ -2,21 +2,21 @@
   "insets": {
     "front": {
       "view": "front",
-      "iou": 0.7564,
-      "mean_abs_colour_error": 0.1421,
+      "iou": 0.7334,
+      "mean_abs_colour_error": 0.1556,
       "ref_pixels": 45990,
-      "render_pixels": 50751
+      "render_pixels": 47349
     },
     "side": {
       "view": "side",
-      "iou": 0.6611,
-      "mean_abs_colour_error": 0.1392,
+      "iou": 0.6431,
+      "mean_abs_colour_error": 0.1302,
       "ref_pixels": 30969,
-      "render_pixels": 33075
+      "render_pixels": 30564
     }
   },
   "tris": {
-    "LOD0": 1718,
+    "LOD0": 2140,
     "LOD1": 452,
     "LOD2": 204
   }

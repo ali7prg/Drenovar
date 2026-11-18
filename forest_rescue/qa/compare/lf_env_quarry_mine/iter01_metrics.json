@@ -2,22 +2,22 @@
   "insets": {
     "mine_front": {
       "view": "mine_front",
-      "iou": 0.7363,
-      "mean_abs_colour_error": 0.2215,
+      "iou": 0.7122,
+      "mean_abs_colour_error": 0.1688,
       "ref_pixels": 74439,
-      "render_pixels": 60750
+      "render_pixels": 58536
     },
     "crane_side": {
       "view": "crane_side",
-      "iou": 0.2483,
-      "mean_abs_colour_error": 0.2158,
+      "iou": 0.2527,
+      "mean_abs_colour_error": 0.1628,
       "ref_pixels": 22185,
-      "render_pixels": 35730
+      "render_pixels": 35325
     }
   },
   "tris": {
-    "LOD0": 1128,
-    "LOD1": 464,
-    "LOD2": 488
+    "LOD0": 2036,
+    "LOD1": 504,
+    "LOD2": 528
   }
 }

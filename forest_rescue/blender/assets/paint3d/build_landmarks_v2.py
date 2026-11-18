@@ -81,9 +81,11 @@ def three_quarter_fitted(asset, it, objs, box, cam, m_ref):
     return m
 
 
-def run(name, it):
+def run(name, it, fit=True):
     asset = f"lf_env_{name}"
     BL.build(name, it, export=True, qa=True)
+    if not fit:
+        return None
     # fitted camera comparison (painted-light QA material on the exported LOD0)
     if name not in BL.REFS:
         return None
@@ -109,4 +111,4 @@ if __name__ == "__main__":
         if n in small:
             BL.build(n, it, export=True, qa=False)
         else:
-            run(n, it)
+            run(n, it, fit="--fit" in args)

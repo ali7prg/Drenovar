@@ -1,0 +1,132 @@
+{
+  "id": "lf_env_quarry_mine",
+  "tris": {
+    "LOD0": 1128,
+    "LOD1": 464,
+    "LOD2": 488
+  },
+  "bones": 0,
+  "materials": [
+    "lm_misc",
+    "lm_stone",
+    "lm_wood"
+  ],
+  "glb_images": [
+    "lm_stone_n.png",
+    "lm_stone_c.jpg",
+    "lm_stone_r.png",
+    "lm_wood_n.png",
+    "lm_wood_c.jpg",
+    "lm_wood_r.png",
+    "lm_misc_n.png",
+    "lm_misc_c.png",
+    "lm_misc_r.png"
+  ],
+  "textures": {
+    "lm_stone_c.jpg": 1024,
+    "lm_stone_n.png": 1024,
+    "lm_stone_r.png": 1024,
+    "lm_wood_c.jpg": 1024,
+    "lm_wood_n.png": 1024,
+    "lm_wood_r.png": 1024,
+    "lm_roof_c.jpg": 1024,
+    "lm_roof_n.png": 1024,
+    "lm_roof_r.png": 1024,
+    "lm_misc_c.png": 1024,
+    "lm_misc_n.png": 1024,
+    "lm_misc_r.png": 1024
+  },
+  "texture_mode": "external shared lm_* files next to the GLB (relative URIs)",
+  "nodes": {
+    "LOD0": [
+      "lf_env_quarry_mine_LOD0"
+    ],
+    "LOD1": [
+      "lf_env_quarry_mine_LOD1"
+    ],
+    "LOD2": [
+      "lf_env_quarry_mine_LOD2"
+    ]
+  },
+  "lod_files": {
+    "LOD0": "lf_env_quarry_mine.glb",
+    "LOD1": "lf_env_quarry_mine_LOD1.glb",
+    "LOD2": "lf_env_quarry_mine_LOD2.glb"
+  },
+  "bounds_m_gltf": [
+    [
+      -4.518,
+      -0.15,
+      -3.1
+    ],
+    [
+      6.15,
+      5.161,
+      5.69
+    ]
+  ],
+  "collision": [
+    {
+      "type": "box",
+      "centre": [
+        0.0,
+        2.2,
+        -0.8
+      ],
+      "size": [
+        9.0,
+        4.4,
+        3.6
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        4.4,
+        2.3,
+        1.9
+      ],
+      "size": [
+        0.4,
+        4.6,
+        0.4
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        5.7,
+        0.6,
+        1.9
+      ],
+      "size": [
+        1.0,
+        1.2,
+        1.3
+      ],
+      "yaw_deg": 0.0
+    }
+  ],
+  "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; 'ramp' = oriented box along the slope; yaw about +Y.",
+  "layout_note": "Main GLB = LOD0 at the asset origin; LOD1/LOD2 in <id>_LOD1.glb / <id>_LOD2.glb (same origin).",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/build_landmarks.py quarry_mine",
+  "sockets": {
+    "winch_axle": [
+      5.7,
+      0.75,
+      1.9
+    ],
+    "jib_tip": [
+      1.3,
+      4.85,
+      1.9
+    ],
+    "mine_entrance_centre": [
+      0.0,
+      0.0,
+      0.95
+    ]
+  }
+}

@@ -152,7 +152,7 @@ def limestone2(S=1024, seed=61):
         for ox in (-S, 0, S):
             for oy in (-S, 0, S):
                 cv2.polylines(crack, [(pts + [ox, oy]).astype(np.int32)], False, 1.0, int(r.integers(3, 6)), cv2.LINE_AA)
-    crack = np.maximum(cv2.GaussianBlur(crack, (0, 0), 0.9), pcrack.astype(np.float32))
+    crack = np.maximum(cv2.GaussianBlur(crack, (0, 0), 0.9), 0.35 * pcrack.astype(np.float32))
     pits = ftex.smoothstep(0.80, 0.85, ftex.fbm(S, S, 96, 96, seed + 5, 2))
     h = h - 0.45 * crack - 0.08 * pits
     alb = ftex.ramp(tone * 0.6 + plate_tone * 0.25 + streak * 0.15, [(0, (0.50, 0.46, 0.39)), (0.5, (0.66, 0.61, 0.52)),

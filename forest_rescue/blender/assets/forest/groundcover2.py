@@ -147,7 +147,7 @@ def build_moss_rock(variant):
     F.d = (F.d + np.clip(0.04 - (f2 - f1), 0, None) * 1.2).astype(np.float32)
     F.d = np.maximum(F.d, -P[..., 2] - 0.2).astype(np.float32)
     F.smooth(0.55)
-    bare = moss_dilate(F, {1: 0.11, 2: 0.07, 3: 0.05}[variant], seed=variant + 10, up_lo=0.35, cover=0.6)
+    bare = moss_dilate(F, {1: 0.2, 2: 0.12, 3: 0.08}[variant], seed=variant + 10, up_lo=0.25, cover=0.7)
     V, T = F.mesh()
     V, T = th.largest_components(V, T, min_frac=0.002)
     targets = {1: (2700, 1050, 300), 2: (1500, 600, 200), 3: (700, 280, 90)}[variant]
@@ -202,8 +202,8 @@ def build_fallen_trunk(variant):
     L = 10.0 if arch else 7.5
     xs = np.linspace(-L / 2, L / 2, 13)
     if arch:
-        zc = 0.75 + 1.15 * np.sin(np.pi * (xs + L / 2) / L) ** 1.1
-        rr = np.interp(xs, [-L / 2, -L / 2 + 1.5, L / 2 - 1.5, L / 2], [0.78, 0.66, 0.56, 0.5])
+        zc = 0.95 + 1.15 * np.sin(np.pi * (xs + L / 2) / L) ** 1.1
+        rr = np.interp(xs, [-L / 2, -L / 2 + 1.5, L / 2 - 1.5, L / 2], [0.95, 0.82, 0.70, 0.62])
     else:
         zc = 0.45 + 0.02 * xs
         rr = np.interp(xs, [-L / 2, L / 2], [0.5, 0.36])
@@ -213,7 +213,7 @@ def build_fallen_trunk(variant):
         prims.append(sdf.round_cone((xs[i], ys[i], zc[i]), (xs[i + 1], ys[i + 1], zc[i + 1]), rr[i], rr[i + 1], k=0.25))
     x0, z0 = xs[0], zc[0]
     # torn root plate (left)
-    prims.append(sdf.ellipsoid((x0 - 0.25, ys[0], z0 + 0.3), (0.55, 1.2 if arch else 0.8, 1.35 if arch else 0.9), k=0.35))
+    prims.append(sdf.ellipsoid((x0 - 0.3, ys[0], z0 + 0.55), (0.6, 1.4 if arch else 0.9, 1.75 if arch else 1.0), k=0.35))
     for k in range(12 if arch else 7):
         a = rng.uniform(0, 2 * np.pi)
         d = normalize(np.array([-0.5 - 0.5 * rng.random(), math.cos(a) * 0.9, math.sin(a) * 0.9 + 0.2]))
@@ -243,7 +243,7 @@ def build_fallen_trunk(variant):
     F.d = (F.d + 0.05 * ridge ** 0.6 + 0.08 * (texproj.fbm(P, 0.7, 3, seed=variant) - 0.5)).astype(np.float32)
     F.d = np.maximum(F.d, -P[..., 2] - 0.25).astype(np.float32)
     F.smooth(0.6)
-    bare = moss_dilate(F, 0.10, seed=variant + 20, up_lo=0.25, cover=0.7, freq=0.6)
+    bare = moss_dilate(F, 0.16, seed=variant + 20, up_lo=0.2, cover=0.75, freq=0.6)
     V, T = F.mesh()
     V, T = th.largest_components(V, T, min_frac=0.002)
     targets = {0: 2500, 1: 950, 2: 250}
@@ -307,8 +307,8 @@ def build_bramble(variant):
     for k in range({1: 30, 2: 22, 3: 24}[variant]):
         a = rng.uniform(0, 2 * np.pi)
         d = np.array([math.cos(a), math.sin(a) * 0.85, 0])
-        base = d * rng.uniform(0, 0.3) * W * 0.25
-        reach = rng.uniform(0.32, 0.55) * W
+        base = d * rng.uniform(0.1, 0.8) * W * 0.32
+        reach = rng.uniform(0.22, 0.42) * W
         top = rng.uniform(0.75, 1.15) * H
         pts = trees._bezier(base, base + d * reach * 0.3 + np.array([0, 0, top * 1.45]),
                             base + d * reach + np.array([0, 0, top * rng.uniform(0.0, 0.3)]), 9)
@@ -318,17 +318,23 @@ def build_bramble(variant):
         md = MeshData()
         for pts, ph in canes[: [len(canes), len(canes) // 2, 8][lod]]:
             p = pts[:: [1, 2, 4][lod]]
-            r = np.linspace(0.04, 0.016, len(p))
+            r = np.linspace(0.026, 0.012, len(p))
             sw = np.clip(p[:, 2] / H, 0, 1) * 0.8
             wind = np.stack([sw, np.zeros(len(p)), np.full(len(p), ph), np.full(len(p), 0.8)], -1)
             tg.tube(md, p, r, [4, 3, 3][lod], 0, wind, "atlas", atlas_rect=rect, cap_tip=False)
-        n_cards = {0: 170, 1: 80, 2: 34}[lod]
+        n_cards = {0: 300, 1: 110, 2: 40}[lod]
         centre = np.array([0, 0, H * 0.4])
         for j in range(n_cards):
             pts, ph = canes[rng.integers(len(canes))]
-            t = rng.uniform(0.25, 0.95)
-            i = min(int(t * (len(pts) - 1)), len(pts) - 2)
-            p = pts[i] + (pts[i + 1] - pts[i]) * rng.random()
+            if rng.random() < 0.4:      # fill the mound
+                q = rng.normal(0, 1, 3)
+                q[2] = abs(q[2])
+                q = normalize(q) * rng.uniform(0.3, 1.0) ** 0.5
+                p = np.array([q[0] * W * 0.48, q[1] * W * 0.4, q[2] * H * 0.85])
+            else:
+                t = rng.uniform(0.25, 0.95)
+                i = min(int(t * (len(pts) - 1)), len(pts) - 2)
+                p = pts[i] + (pts[i + 1] - pts[i]) * rng.random()
             out = normalize(p - centre + rng.normal(0, 0.3, 3))
             n = normalize(out + np.array([0, 0, 0.5]))
             tile = ["bramble_a", "bramble_b"][rng.integers(2)] if lod < 2 else "bramble_dense"
@@ -352,7 +358,7 @@ def _frond(md, base, az, length, tile, rng, segs, elev, width, mat=0, ph=0.0, ce
     ang = elev
     seg = length / max(segs, 1)
     for k in range(segs):
-        ang -= (elev + 0.55) / max(segs, 1) * 1.05             # tangent rotates down along the frond
+        ang -= (elev * 0.75 + 0.35) / max(segs, 1)             # tangent rotates down along the frond
         pts.append(pts[-1] + (d * math.cos(ang) + np.array([0, 0, math.sin(ang)])) * seg)
     pts = np.array(pts)
     centre = base + np.array([0, 0, 0.2]) if centre is None else centre
@@ -386,13 +392,13 @@ def build_reed_fern(kind, variant):
             md.merge(base_res.lods[lod])
         nf = [13, 9, 6][lod] if kind == "fern" else [10, 7, 5][lod]
         cx = 0.75 if kind == "mixed" else 0.0
-        L = (1.0 if variant == 1 else 0.75) * (1.3 if kind == "mixed" else 1.0)
+        L = (1.0 if variant == 1 else 0.75) * (1.45 if kind == "mixed" else 1.0)
         centre = np.array([cx, 0, 0.25])
         for j in range(nf):
             az = 2 * np.pi * j / nf + rng.normal(0, 0.2)
             tile = ["fern_frond_a", "fern_frond_b"][int(rng.random() < (0.35 if variant == 1 else 0.7))]
             _frond(md, np.array([cx, 0, 0.03]) + rng.normal(0, 0.05, 3) * np.array([1, 1, 0]), az,
-                   L * rng.uniform(0.8, 1.15), tile, rng, [4, 2, 1][lod], rng.uniform(0.8, 1.15),
+                   L * rng.uniform(0.8, 1.15), tile, rng, [4, 2, 1][lod], rng.uniform(1.0, 1.3),
                    L * rng.uniform(0.26, 0.34) * [1, 1.15, 1.3][lod], ph=rng.random(), centre=centre)
         res.lods[lod] = md
         res.info[f"LOD{lod}"] = dict(tris=md.tris())

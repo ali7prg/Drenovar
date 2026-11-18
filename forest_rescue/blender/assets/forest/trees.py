@@ -1050,7 +1050,7 @@ def build_willow(variant, view=None):
     # arc start nodes: outer upper skeleton nodes (FPS)
     rad_xy = np.linalg.norm(P[:, :2] - trunk_top[:2], axis=1)
     cand = np.nonzero((P[:, 2] > hem + 2.0) & (rad_xy > 0.6) & (R < 0.08))[0]
-    n_arcs = {1: 46, 2: 46, 3: 30}[variant]
+    n_arcs = {1: 52, 2: 52, 3: 34}[variant]
     sel = [cand[int(np.argmax(P[cand, 2]))]]
     dmin = np.linalg.norm(P[cand] - P[sel[0]], axis=1)
     for _ in range(min(n_arcs, len(cand)) - 1):
@@ -1097,7 +1097,7 @@ def build_willow(variant, view=None):
     for lod in range(3):
         md = res.lods[lod]
         mat = 1 if lod == 0 else 0
-        step = [0.26, 0.5, 1.3][lod]
+        step = [0.34, 0.6, 1.9][lod]
         nseg = [3, 2, 1][lod]
         wk = [1.0, 1.5, 2.6][lod]
         cards = []
@@ -1111,10 +1111,10 @@ def build_willow(variant, view=None):
                 p = arc[j] + (arc[j + 1] - arc[j]) * (s - cum[j]) / max(seg[j], 1e-6)
                 out = p - dome_c
                 out[2] = 0
-                strand(md, p, normalize(out), rng2.uniform(0.24, 0.34) * wk, nseg, node, ph, mat)
+                strand(md, p, normalize(out), rng2.uniform(0.40, 0.55) * wk, nseg, node, ph, mat)
                 s += step * rng2.uniform(0.8, 1.2)
             # drape cards over the arch (read from the top camera)
-            nd = [3, 2, 1][lod]
+            nd = [5, 3, 1][lod]
             for q in range(nd):
                 tt = (q + 0.5) / nd * 0.75
                 j = int(tt * (len(arc) - 1))

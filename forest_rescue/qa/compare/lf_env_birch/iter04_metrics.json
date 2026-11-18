@@ -1,0 +1,200 @@
+{
+  "metrics": {
+    "v1_front_LOD0": {
+      "view": "birch",
+      "iou": 0.7127,
+      "mean_abs_colour_error": 0.2066,
+      "ref_pixels": 56077,
+      "render_pixels": 43845,
+      "iou_closed_r4": 0.7479
+    },
+    "v1_front_LOD1": {
+      "view": "birch",
+      "iou": 0.7604,
+      "mean_abs_colour_error": 0.2191,
+      "ref_pixels": 56077,
+      "render_pixels": 49107,
+      "iou_closed_r4": 0.8048
+    },
+    "v1_front_LOD2": {
+      "view": "birch",
+      "iou": 0.7016,
+      "mean_abs_colour_error": 0.2291,
+      "ref_pixels": 56077,
+      "render_pixels": 64600,
+      "iou_closed_r4": 0.7335
+    },
+    "strategic_colour": {
+      "art/07 p2 trees": {
+        "mean": [
+          47.45,
+          2.4,
+          30.56
+        ],
+        "std": [
+          12.06,
+          5.22,
+          14.96
+        ],
+        "n": 6736,
+        "dE_vs_first_ref": 0.0
+      },
+      "art/01 grove": {
+        "mean": [
+          49.44,
+          5.05,
+          39.96
+        ],
+        "std": [
+          17.35,
+          6.94,
+          19.29
+        ],
+        "n": 12020,
+        "dE_vs_first_ref": 9.97
+      },
+      "LOD0": {
+        "mean": [
+          52.11,
+          -1.29,
+          34.8
+        ],
+        "std": [
+          22.0,
+          5.11,
+          12.88
+        ],
+        "n": 184431,
+        "dE_vs_first_ref": 7.3
+      },
+      "LOD1": {
+        "mean": [
+          54.39,
+          -1.38,
+          35.67
+        ],
+        "std": [
+          22.35,
+          5.42,
+          13.23
+        ],
+        "n": 187252,
+        "dE_vs_first_ref": 9.41
+      },
+      "LOD2": {
+        "mean": [
+          58.95,
+          -2.89,
+          35.5
+        ],
+        "std": [
+          19.63,
+          5.75,
+          11.22
+        ],
+        "n": 172371,
+        "dE_vs_first_ref": 13.59
+      }
+    },
+    "front_crown_colour": {
+      "ref": {
+        "mean": [
+          48.56,
+          0.41,
+          33.6
+        ],
+        "std": [
+          14.12,
+          3.58,
+          9.33
+        ],
+        "n": 33500
+      },
+      "render": {
+        "mean": [
+          47.17,
+          -1.05,
+          32.17
+        ],
+        "std": [
+          20.1,
+          4.15,
+          11.75
+        ],
+        "n": 37662
+      },
+      "dE_mean": 2.47
+    }
+  },
+  "tris": {
+    "v1": {
+      "radius_alpha": 1.316,
+      "nodes": 701,
+      "leaf_sites": 217,
+      "cull_k0": 1.0,
+      "LOD0": {
+        "tris": 3185,
+        "bark_tris": 753,
+        "cards": 1202
+      },
+      "cull_k1": 1.0,
+      "LOD1": {
+        "tris": 1240,
+        "bark_tris": 282,
+        "cards": 473
+      },
+      "cull_k2": 1.49,
+      "LOD2": {
+        "tris": 202,
+        "bark_tris": 42,
+        "cards": 78
+      }
+    },
+    "v2": {
+      "radius_alpha": 1.183,
+      "nodes": 372,
+      "leaf_sites": 121,
+      "cull_k0": 1.0,
+      "LOD0": {
+        "tris": 3139,
+        "bark_tris": 537,
+        "cards": 1301
+      },
+      "cull_k1": 1.0,
+      "LOD1": {
+        "tris": 1219,
+        "bark_tris": 125,
+        "cards": 547
+      },
+      "cull_k2": 1.0,
+      "LOD2": {
+        "tris": 184,
+        "bark_tris": 28,
+        "cards": 78
+      }
+    },
+    "v3": {
+      "radius_alpha": 1.121,
+      "nodes": 428,
+      "leaf_sites": 146,
+      "cull_k0": 1.0,
+      "LOD0": {
+        "tris": 3146,
+        "bark_tris": 436,
+        "cards": 1355
+      },
+      "cull_k1": 1.0,
+      "LOD1": {
+        "tris": 1226,
+        "bark_tris": 160,
+        "cards": 533
+      },
+      "cull_k2": 1.0,
+      "LOD2": {
+        "tris": 204,
+        "bark_tris": 48,
+        "cards": 78
+      }
+    }
+  }
+}

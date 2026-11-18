@@ -8,8 +8,8 @@
         "lf_env_birch_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3167,
-        "LOD1": 1244,
+        "LOD0": 3185,
+        "LOD1": 1240,
         "LOD2": 202
       },
       "materials": {
@@ -24,18 +24,18 @@
           "lf_foliage"
         ]
       },
-      "height_m": 12.52,
-      "crown_radius_m": 4.42,
+      "height_m": 12.82,
+      "crown_radius_m": 4.43,
       "bounds_m_blender": [
         [
-          -3.99,
-          -3.65,
+          -4.15,
+          -3.8,
           -0.39
         ],
         [
-          4.42,
-          3.58,
-          12.52
+          4.43,
+          3.78,
+          12.82
         ]
       ],
       "display_offset_gltf": [
@@ -51,8 +51,8 @@
         "lf_env_birch_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3125,
-        "LOD1": 1231,
+        "LOD0": 3139,
+        "LOD1": 1219,
         "LOD2": 184
       },
       "materials": {
@@ -67,22 +67,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 13.13,
-      "crown_radius_m": 3.21,
+      "height_m": 13.2,
+      "crown_radius_m": 3.43,
       "bounds_m_blender": [
         [
+          -3.26,
           -3.19,
-          -3.21,
           -0.31
         ],
         [
-          3.1,
-          2.97,
-          13.13
+          3.25,
+          3.43,
+          13.2
         ]
       ],
       "display_offset_gltf": [
-        11.544,
+        11.789,
         0.0,
         0.0
       ]
@@ -94,8 +94,8 @@
         "lf_env_birch_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3126,
-        "LOD1": 1222,
+        "LOD0": 3146,
+        "LOD1": 1226,
         "LOD2": 204
       },
       "materials": {
@@ -110,30 +110,30 @@
           "lf_foliage"
         ]
       },
-      "height_m": 11.51,
-      "crown_radius_m": 4.79,
+      "height_m": 12.04,
+      "crown_radius_m": 4.98,
       "bounds_m_blender": [
         [
-          -4.79,
-          -2.87,
+          -4.98,
+          -3.04,
           -0.42
         ],
         [
-          4.76,
-          2.98,
-          11.51
+          4.81,
+          2.74,
+          12.04
         ]
       ],
       "display_offset_gltf": [
-        23.088,
+        23.578,
         0.0,
         0.0
       ]
     }
   },
   "tris": {
-    "LOD0": 3167,
-    "LOD1": 1244,
+    "LOD0": 3185,
+    "LOD1": 1240,
     "LOD2": 204
   },
   "bones": 0,

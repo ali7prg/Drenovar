@@ -1,0 +1,23 @@
+{
+  "insets": {
+    "front": {
+      "view": "front",
+      "iou": 0.7564,
+      "mean_abs_colour_error": 0.1421,
+      "ref_pixels": 45990,
+      "render_pixels": 50751
+    },
+    "side": {
+      "view": "side",
+      "iou": 0.6611,
+      "mean_abs_colour_error": 0.1392,
+      "ref_pixels": 30969,
+      "render_pixels": 33075
+    }
+  },
+  "tris": {
+    "LOD0": 1718,
+    "LOD1": 452,
+    "LOD2": 204
+  }
+}

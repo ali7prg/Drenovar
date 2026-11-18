@@ -1,0 +1,105 @@
+{
+  "id": "lf_env_hunter_shelter",
+  "tris": {
+    "LOD0": 1718,
+    "LOD1": 452,
+    "LOD2": 204
+  },
+  "bones": 0,
+  "materials": [
+    "lm_misc",
+    "lm_roof",
+    "lm_stone",
+    "lm_wood"
+  ],
+  "glb_images": [
+    "lm_stone_n.png",
+    "lm_stone_c.jpg",
+    "lm_stone_r.png",
+    "lm_wood_n.png",
+    "lm_wood_c.jpg",
+    "lm_wood_r.png",
+    "lm_misc_n.png",
+    "lm_misc_c.png",
+    "lm_misc_r.png",
+    "lm_roof_n.png",
+    "lm_roof_c.jpg",
+    "lm_roof_r.png"
+  ],
+  "textures": {
+    "lm_stone_c.jpg": 1024,
+    "lm_stone_n.png": 1024,
+    "lm_stone_r.png": 1024,
+    "lm_wood_c.jpg": 1024,
+    "lm_wood_n.png": 1024,
+    "lm_wood_r.png": 1024,
+    "lm_roof_c.jpg": 1024,
+    "lm_roof_n.png": 1024,
+    "lm_roof_r.png": 1024,
+    "lm_misc_c.png": 1024,
+    "lm_misc_n.png": 1024,
+    "lm_misc_r.png": 1024
+  },
+  "texture_mode": "external shared lm_* files next to the GLB (relative URIs)",
+  "nodes": {
+    "LOD0": [
+      "lf_env_hunter_shelter_LOD0"
+    ],
+    "LOD1": [
+      "lf_env_hunter_shelter_LOD1"
+    ],
+    "LOD2": [
+      "lf_env_hunter_shelter_LOD2"
+    ]
+  },
+  "lod_files": {
+    "LOD0": "lf_env_hunter_shelter.glb",
+    "LOD1": "lf_env_hunter_shelter_LOD1.glb",
+    "LOD2": "lf_env_hunter_shelter_LOD2.glb"
+  },
+  "bounds_m_gltf": [
+    [
+      -3.684,
+      -0.017,
+      -2.861
+    ],
+    [
+      3.1,
+      4.42,
+      2.883
+    ]
+  ],
+  "collision": [
+    {
+      "type": "box",
+      "centre": [
+        2.1,
+        2.2,
+        -2.15
+      ],
+      "size": [
+        0.8,
+        4.4,
+        0.8
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        0.0,
+        1.4,
+        -0.0
+      ],
+      "size": [
+        5.6,
+        2.8,
+        4.0
+      ],
+      "yaw_deg": 0.0
+    }
+  ],
+  "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; 'ramp' = oriented box along the slope; yaw about +Y.",
+  "layout_note": "Main GLB = LOD0 at the asset origin; LOD1/LOD2 in <id>_LOD1.glb / <id>_LOD2.glb (same origin).",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/build_landmarks.py hunter_shelter"
+}

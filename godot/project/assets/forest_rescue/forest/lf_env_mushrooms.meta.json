@@ -12,6 +12,11 @@
         "LOD1": 96,
         "LOD2": 32
       },
+      "display_offset_gltf": [
+        0.0,
+        0.0,
+        0.0
+      ],
       "materials": {
         "LOD0": [
           "lf_foliage"
@@ -61,6 +66,11 @@
         "LOD1": 72,
         "LOD2": 16
       },
+      "display_offset_gltf": [
+        1.757,
+        0.0,
+        0.0
+      ],
       "materials": {
         "LOD0": [
           "lf_foliage"
@@ -114,6 +124,6 @@
   ],
   "texture_mode": "external shared files next to the GLB (relative URIs)",
   "wind": "static (no COLOR_0)",
-  "layout_note": "Node translations are preview offsets only; mesh origin = ground contact centre.",
+  "layout_note": "Variants along +X (display_offset_gltf); LOD0/1/2 of a variant share its origin (show one per distance). Mesh origin = ground contact centre.",
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_groundcover.py mushrooms"
 }

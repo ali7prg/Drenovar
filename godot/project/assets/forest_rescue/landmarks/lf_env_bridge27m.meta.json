@@ -1,0 +1,203 @@
+{
+  "id": "lf_env_bridge27m",
+  "tris": {
+    "LOD0": 3796,
+    "LOD1": 680,
+    "LOD2": 224
+  },
+  "bones": 0,
+  "materials": [
+    "lm_stone",
+    "lm_wood"
+  ],
+  "glb_images": [
+    "lm_stone_n.png",
+    "lm_stone_c.jpg",
+    "lm_stone_r.png",
+    "lm_wood_n.png",
+    "lm_wood_c.jpg",
+    "lm_wood_r.png"
+  ],
+  "textures": {
+    "lm_stone_c.jpg": 1024,
+    "lm_stone_n.png": 1024,
+    "lm_stone_r.png": 1024,
+    "lm_wood_c.jpg": 1024,
+    "lm_wood_n.png": 1024,
+    "lm_wood_r.png": 1024,
+    "lm_roof_c.jpg": 1024,
+    "lm_roof_n.png": 1024,
+    "lm_roof_r.png": 1024,
+    "lm_misc_c.png": 1024,
+    "lm_misc_n.png": 1024,
+    "lm_misc_r.png": 1024
+  },
+  "texture_mode": "external shared lm_* files next to the GLB (relative URIs)",
+  "nodes": {
+    "LOD0": [
+      "lf_env_bridge27m_LOD0"
+    ],
+    "LOD1": [
+      "lf_env_bridge27m_LOD1"
+    ],
+    "LOD2": [
+      "lf_env_bridge27m_LOD2"
+    ]
+  },
+  "lod_files": {
+    "LOD0": "lf_env_bridge27m.glb",
+    "LOD1": "lf_env_bridge27m_LOD1.glb",
+    "LOD2": "lf_env_bridge27m_LOD2.glb"
+  },
+  "bounds_m_gltf": [
+    [
+      -16.715,
+      -1.671,
+      -2.679
+    ],
+    [
+      16.717,
+      2.155,
+      2.7
+    ]
+  ],
+  "collision": [
+    {
+      "type": "box",
+      "centre": [
+        -7.25,
+        -0.503,
+        -0.0
+      ],
+      "size": [
+        1.3,
+        2.365,
+        4.7
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        7.25,
+        -0.472,
+        -0.0
+      ],
+      "size": [
+        1.3,
+        2.304,
+        4.7
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        0.0,
+        1.65,
+        2.2
+      ],
+      "size": [
+        27.2,
+        1.1,
+        0.22
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        0.0,
+        1.65,
+        -2.2
+      ],
+      "size": [
+        27.2,
+        1.1,
+        0.22
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "ramp",
+      "centre": [
+        -15.1,
+        0.79,
+        -0.0
+      ],
+      "size": [
+        3.2,
+        0.1,
+        4.0
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "ramp",
+      "centre": [
+        15.1,
+        0.76,
+        -0.0
+      ],
+      "size": [
+        3.2,
+        0.1,
+        4.0
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        0.0,
+        1.05,
+        -0.0
+      ],
+      "size": [
+        27.0,
+        0.1,
+        4.0
+      ],
+      "yaw_deg": 0.0
+    }
+  ],
+  "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; 'ramp' = oriented box along the slope; yaw about +Y.",
+  "layout_note": "Main GLB = LOD0 at the asset origin; LOD1/LOD2 in <id>_LOD1.glb / <id>_LOD2.glb (same origin).",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/build_landmarks.py bridge27m",
+  "placement": {
+    "world_position_xz": [
+      90.48200135039062,
+      20.0
+    ],
+    "world_y": 0.0,
+    "note": "origin = bridge centre on the world datum; deck top local +1.1 = atlas structuralHeight; long axis = +X (west->east 77..104); atlas waterLevel -1.35 lies at local -1.35"
+  },
+  "dimensions": {
+    "deck_length_m": 27.0,
+    "deck_width_m": 4.0,
+    "deck_top_z": 1.1,
+    "deck_x_range": [
+      -13.5,
+      13.5
+    ],
+    "deck_y_range_gltf_z": [
+      -2.0,
+      2.0
+    ],
+    "piers_x": [
+      -7.25,
+      7.25
+    ],
+    "pier_inner_faces_x": [
+      -6.6,
+      6.6
+    ],
+    "wet_banks_x": [
+      -6.317,
+      6.287
+    ],
+    "main_channel_clear": "no support between x=-6.6 and +6.6 (timber arch ribs span the channel)",
+    "ramps": "x ±13.5 -> ±16.7, deck 1.1 down to bank ≈0.45 (≈11.5°)",
+    "railing_top_above_deck_m": 1.04
+  }
+}

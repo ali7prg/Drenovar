@@ -607,8 +607,8 @@ BIRCH_PALETTES = {   # art/02 birch: warm yellow-green (R >= G), lighter than th
     "yellow": [(3, (0.76, 0.64, 0.28)), (2, (0.84, 0.72, 0.34)), (1, (0.60, 0.50, 0.20))],
     "green": [(3, (0.50, 0.48, 0.19)), (2, (0.58, 0.54, 0.23)), (1, (0.42, 0.40, 0.15))],
 }
-PINE_COLS = [(0.08, 0.12, 0.09), (0.18, 0.25, 0.16), (0.44, 0.48, 0.28)]     # dark blue-green, light tips
-PINE_COLS_B = [(0.10, 0.13, 0.09), (0.21, 0.27, 0.17), (0.50, 0.52, 0.30)]
+PINE_COLS = [(0.10, 0.12, 0.06), (0.24, 0.28, 0.13), (0.50, 0.52, 0.26)]     # olive-dark green (art/02 a*-3 b*17), light tips
+PINE_COLS_B = [(0.11, 0.13, 0.07), (0.27, 0.30, 0.15), (0.54, 0.55, 0.28)]
 WILLOW_COLS = [(0.52, 0.48, 0.20), (0.62, 0.56, 0.26), (0.72, 0.64, 0.32), (0.44, 0.42, 0.16), (0.78, 0.68, 0.36)]
 
 
@@ -712,18 +712,18 @@ def paint_bramble_open(w, h, r):
 
 # art/02 oak crown k-means (painted, lit): (0.83,0.56,0.20) light, (0.62,0.39,0.15) ochre, (0.47,0.28,0.11)
 # brown-orange, (0.29,0.19,0.10) shadow.  Albedo = lit tone without the painted shading.
-OAK_CLUMP_PAL = {   # chroma raised ~10% after iter08 (render C* 37 vs art/02 41, a* 11.6 vs 15.9)
-    "light": [(3, (0.94, 0.64, 0.18)), (2, (0.97, 0.72, 0.26)), (1, (0.84, 0.52, 0.13))],
-    "gold": [(3, (0.88, 0.55, 0.14)), (2, (0.93, 0.62, 0.20)), (1, (0.74, 0.42, 0.11))],
-    "ochre": [(3, (0.78, 0.43, 0.12)), (2, (0.85, 0.50, 0.15)), (1, (0.64, 0.33, 0.10))],
-    "dark": [(3, (0.60, 0.31, 0.10)), (2, (0.68, 0.37, 0.12)), (1, (0.48, 0.23, 0.08))],
-    "red": [(3, (0.76, 0.30, 0.10)), (2, (0.84, 0.38, 0.12)), (1, (0.60, 0.22, 0.08))],
+OAK_CLUMP_PAL = {   # iter10: golden (art/02 + art/07/01 compromise): less red than iter09, bright lit tops
+    "light": [(3, (0.96, 0.72, 0.22)), (2, (0.98, 0.79, 0.30)), (1, (0.88, 0.60, 0.15))],
+    "gold": [(3, (0.91, 0.63, 0.16)), (2, (0.95, 0.70, 0.22)), (1, (0.80, 0.50, 0.12))],
+    "ochre": [(3, (0.83, 0.51, 0.13)), (2, (0.88, 0.58, 0.17)), (1, (0.70, 0.40, 0.11))],
+    "dark": [(3, (0.66, 0.38, 0.11)), (2, (0.72, 0.44, 0.13)), (1, (0.54, 0.29, 0.09))],
+    "red": [(3, (0.80, 0.36, 0.11)), (2, (0.86, 0.44, 0.13)), (1, (0.66, 0.27, 0.09))],
 }
-BIRCH_CLUMP_PAL = {
-    "light": [(3, (0.78, 0.70, 0.32)), (2, (0.84, 0.76, 0.38)), (1, (0.66, 0.60, 0.26))],
-    "mid": [(3, (0.62, 0.56, 0.24)), (2, (0.70, 0.62, 0.28)), (1, (0.52, 0.48, 0.20))],
-    "dark": [(3, (0.46, 0.43, 0.18)), (2, (0.54, 0.50, 0.21)), (1, (0.38, 0.36, 0.14))],
-    "gold": [(3, (0.84, 0.66, 0.26)), (2, (0.90, 0.74, 0.32)), (1, (0.70, 0.54, 0.20))],
+BIRCH_CLUMP_PAL = {   # iter04: +20% lighter, more yellow (iter03 front L 39 vs 48.6, b* 28 vs 34)
+    "light": [(3, (0.88, 0.82, 0.42)), (2, (0.93, 0.87, 0.50)), (1, (0.78, 0.72, 0.34))],
+    "mid": [(3, (0.76, 0.70, 0.33)), (2, (0.83, 0.76, 0.38)), (1, (0.66, 0.61, 0.27))],
+    "dark": [(3, (0.60, 0.57, 0.25)), (2, (0.68, 0.64, 0.30)), (1, (0.50, 0.48, 0.20))],
+    "gold": [(3, (0.93, 0.77, 0.34)), (2, (0.96, 0.83, 0.42)), (1, (0.82, 0.64, 0.26))],
 }
 
 
@@ -746,14 +746,14 @@ def build_atlas(barks=None, seed=7):
                               leaf_len=(0.09, 0.13), radius=0.45))
     for i, name in enumerate(["pine_spray_a", "pine_spray_b", "pine_spray_c", "pine_spray_d", "pine_spray_e"]):
         put(name, paint_pine_spray(256, 256, rng(seed + 50 + i), PINE_COLS if i % 2 == 0 else PINE_COLS_B,
-                                   n_side=10 + i % 3, dense=True))
+                                   n_side=8 + i % 3, dense=False))
     put("pine_dense_a", paint_pine_dense(256, 256, rng(seed + 60), PINE_COLS))
     put("pine_dense_b", paint_pine_dense(256, 256, rng(seed + 61), PINE_COLS_B))
     put("pine_top", paint_pine_dense(256, 256, rng(seed + 62), PINE_COLS))
     for i, name in enumerate(BIRCH_CLUMPS):
         key = name.split("_")[2]
-        put(name, paint_clump(256, 256, rng(seed + 70 + i), BIRCH_CLUMP_PAL[key], "birch", n_leaves=230,
-                              leaf_len=(0.075, 0.11), radius=0.42, gap=0.1))
+        put(name, paint_clump(256, 256, rng(seed + 70 + i), BIRCH_CLUMP_PAL[key], "birch", n_leaves=150,
+                              leaf_len=(0.09, 0.13), radius=0.30, gap=0.16))
     put("birch_dense", paint_clump(256, 256, rng(seed + 79), BIRCH_CLUMP_PAL["mid"], "birch", n_leaves=300,
                                    leaf_len=(0.07, 0.1), radius=0.45))
     put("birch_spare", paint_clump(256, 256, rng(seed + 78), BIRCH_CLUMP_PAL["gold"], "birch", n_leaves=230,

@@ -8,9 +8,9 @@
         "lf_env_dark_pine_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2899,
-        "LOD1": 1150,
-        "LOD2": 289
+        "LOD0": 2887,
+        "LOD1": 1006,
+        "LOD2": 171
       },
       "materials": {
         "LOD0": [
@@ -24,18 +24,18 @@
           "lf_foliage"
         ]
       },
-      "height_m": 14.03,
-      "crown_radius_m": 3.74,
+      "height_m": 14.09,
+      "crown_radius_m": 3.89,
       "bounds_m_blender": [
         [
-          -3.39,
-          -3.5,
+          -3.3,
+          -3.83,
           -0.3
         ],
         [
-          3.74,
-          3.47,
-          14.03
+          3.89,
+          3.71,
+          14.09
         ]
       ],
       "display_offset_gltf": [
@@ -51,9 +51,9 @@
         "lf_env_dark_pine_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 2899,
-        "LOD1": 1150,
-        "LOD2": 289
+        "LOD0": 2407,
+        "LOD1": 956,
+        "LOD2": 181
       },
       "materials": {
         "LOD0": [
@@ -67,22 +67,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 16.85,
-      "crown_radius_m": 4.36,
+      "height_m": 16.59,
+      "crown_radius_m": 3.74,
       "bounds_m_blender": [
         [
-          -3.56,
-          -3.53,
+          -3.54,
+          -3.73,
           -0.3
         ],
         [
-          3.72,
-          4.36,
-          16.85
+          3.74,
+          3.6,
+          16.59
         ]
       ],
       "display_offset_gltf": [
-        9.89,
+        10.707,
         0.0,
         0.0
       ]
@@ -94,9 +94,9 @@
         "lf_env_dark_pine_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 2599,
-        "LOD1": 1050,
-        "LOD2": 279
+        "LOD0": 2143,
+        "LOD1": 798,
+        "LOD2": 151
       },
       "materials": {
         "LOD0": [
@@ -110,22 +110,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 8.53,
-      "crown_radius_m": 3.84,
+      "height_m": 8.59,
+      "crown_radius_m": 3.79,
       "bounds_m_blender": [
         [
-          -3.39,
-          -3.84,
-          -1.16
+          -3.59,
+          -3.79,
+          -2.31
         ],
         [
-          3.44,
-          3.32,
-          8.53
+          3.77,
+          3.53,
+          8.59
         ]
       ],
       "display_offset_gltf": [
-        19.78,
+        21.415,
         0.0,
         0.0
       ]
@@ -137,9 +137,9 @@
         "lf_env_dark_pine_v4_LOD2"
       ],
       "tris": {
-        "LOD0": 2899,
-        "LOD1": 1150,
-        "LOD2": 289
+        "LOD0": 2177,
+        "LOD1": 886,
+        "LOD2": 171
       },
       "materials": {
         "LOD0": [
@@ -153,31 +153,31 @@
           "lf_foliage"
         ]
       },
-      "height_m": 13.03,
-      "crown_radius_m": 3.62,
+      "height_m": 13.09,
+      "crown_radius_m": 4.55,
       "bounds_m_blender": [
         [
-          -2.25,
-          -2.24,
-          -0.3
+          -3.96,
+          -4.15,
+          -0.57
         ],
         [
-          3.62,
-          3.43,
-          13.03
+          4.44,
+          4.55,
+          13.09
         ]
       ],
       "display_offset_gltf": [
-        29.67,
+        32.122,
         0.0,
         0.0
       ]
     }
   },
   "tris": {
-    "LOD0": 2899,
-    "LOD1": 1150,
-    "LOD2": 289
+    "LOD0": 2887,
+    "LOD1": 1006,
+    "LOD2": 181
   },
   "bones": 0,
   "materials": [
@@ -214,8 +214,9 @@
       "type": "shader (vertex colour driven)"
     }
   },
-  "layout_note": "Node translations are preview offsets only (variants along +X, LOD1/LOD2 rows behind). Instance the Mesh resources with your own transforms; mesh origin = trunk base on the ground.",
+  "layout_note": "Variants are laid out along +X (display_offset_gltf); the three LOD meshes of a variant share the variant origin (overlapping, show one per distance). Mesh origin = trunk base on the ground.",
   "lod_note": "LOD0: bark+foliage (2 surfaces); LOD1/LOD2: single foliage-atlas surface (bark strip in atlas).",
+  "export_scale_vs_art02": 1.0,
   "glb_images": [
     "lf_bark_pine_n.png",
     "lf_bark_pine_c.jpg",

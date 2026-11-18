@@ -8,6 +8,8 @@ import numpy as np
 
 import atlas
 import treegen as tg
+from scipy.spatial import cKDTree
+from scipy.cluster.vq import kmeans2
 from treegen import MeshData, normalize
 
 
@@ -307,6 +309,10 @@ def finish_broadleaf(sk, env, spec, rng):
             k *= 1.22
         res.info[f"cull_k{lod}"] = round(k, 2)
         n_cards = max(8, (budgets[lod] - bt) // 2)
+        if spec.get("foliage") == "none":
+            out[lod] = md
+            res.info[f"LOD{lod}"] = dict(tris=md.tris(), bark_tris=bt, cards=0)
+            continue
         if spec.get("n_clumps"):
             if lod == 0:
                 CL, RL, NL = pick_clumps(P, R, tipd, env, spec, rng)
@@ -315,7 +321,24 @@ def finish_broadleaf(sk, env, spec, rng):
                 hull_c = (env.pmin + env.pmax) / 2
                 hull_r = np.maximum((env.pmax - env.pmin) / 2, 0.5)
                 res.clumps = dict(C=CL, R=RL)
-            cards = clump_cards(CL, RL, NL, n_cards, lod, spec, rng, sway, ph_chain, node_chain, zr, acc_fl)
+            if lod == 2 and len(CL) > spec.get("lod2_max_clumps", 24):
+                kk = spec.get("lod2_max_clumps", 24)
+                cent, lab = kmeans2(CL, kk, minit="++", seed=int(rng.integers(1 << 30)))
+                C2, R2, N2, A2 = [], [], [], []
+                for q in range(kk):
+                    idq = np.nonzero(lab == q)[0]
+                    if len(idq) == 0:
+                        continue
+                    c = CL[idq].mean(0)
+                    r = max(np.max(np.linalg.norm(CL[idq] - c, axis=1) + RL[idq] * 0.8), RL[idq].max())
+                    C2.append(c)
+                    R2.append(r)
+                    N2.append(NL[idq[0]])
+                    A2.append(bool(acc_fl[idq].any()) and len(idq) == 1)
+                cards = clump_cards(np.array(C2), np.array(R2), np.array(N2), n_cards, lod, spec, rng, sway, ph_chain,
+                                    node_chain, zr, np.array(A2))
+            else:
+                cards = clump_cards(CL, RL, NL, n_cards, lod, spec, rng, sway, ph_chain, node_chain, zr, acc_fl)
             emit_clump_cards(md, cards, hull_c, hull_r, 1 if lod == 0 else 0, zr, spec.get("k_clump", 0.7))
         else:
             if lod == 0:
@@ -352,6 +375,24 @@ def pick_clumps(P, R, tipd, env, spec, rng):
     """Clump centres at branch ends (FPS), radius per clump; returns (centres, radii, node ids)."""
     n = spec["n_clumps"]
     rlo, rhi = spec["clump_r"]
+    if spec.get("clump_fill", True):
+        # fill the crown shell evenly (overlapping cumulus), attach each clump to its nearest twig node
+        dlo, dhi = spec.get("clump_depth", (0.45, 1.7))
+        idx = np.argwhere(env.occ & (env.depth >= dlo) & (env.depth <= dhi))
+        pts = env.lo + idx * env.voxel
+        pts = pts[pts[:, 2] > spec.get("leaf_z_min", 1.0) + 0.3]
+        if len(pts) > 8000:
+            pts = pts[rng.choice(len(pts), 8000, replace=False)]
+        sel = [int(np.argmax(pts[:, 2]))]
+        dmin = np.linalg.norm(pts - pts[sel[0]], axis=1)
+        for _ in range(n - 1):
+            k = int(np.argmax(dmin))
+            sel.append(k)
+            dmin = np.minimum(dmin, np.linalg.norm(pts - pts[k], axis=1))
+        C = pts[sel] + rng.uniform(-0.5, 0.5, (len(sel), 3)) * env.voxel
+        twig = np.nonzero(R <= spec.get("leaf_r_max", 0.09) * 1.6)[0]
+        _, nn = cKDTree(P[twig]).query(C)
+        return C, rng.uniform(rlo, rhi, len(C)), twig[nn]
     depth = env.inside_depth(P)
     ok = (tipd <= spec.get("clump_tip", 1.8)) & (R <= spec.get("leaf_r_max", 0.09) * 1.6) & (depth > 0.3)
     ok &= P[:, 2] > spec.get("leaf_z_min", 1.0)
@@ -423,7 +464,7 @@ def clump_cards(C, rad, nodes, n_target, lod, spec, rng, sway, ph_chain, node_ch
                 cat = "red" if d[2] > -0.2 else "dark"
             else:
                 s = 0.6 * d[2] + 0.5 * (hk - 0.5) + 0.25 * float(np.dot(d, SUN)) + rng.normal(0, 0.12)
-                cat = "light" if s > 0.42 else "gold" if s > 0.02 else "ochre" if s > -0.32 else "dark"
+                cat = "light" if s > 0.30 else "gold" if s > -0.12 else "ochre" if s > -0.45 else "dark"
             tl = tiles[cat]
             tile = tl[rng.integers(len(tl))]
             sz = rad[k] * rng.uniform(1.0, 1.3) * size_k * spec.get("clump_card_k", 1.0)
@@ -463,7 +504,7 @@ def emit_clump_cards(md, cards, hull_c, hull_r, mat, zr, k_clump=0.7):
         col[:, 1] = np.clip(0.25 + 0.6 * dist, 0.25, 1.0)
         col[:, 2] = cc["wind"][2]
         hz = np.clip((corners[:, 2] - zr[0]) / max(zr[1] - zr[0], 1e-3), 0, 1)
-        col[:, 3] = np.clip(0.45 + 0.30 * (0.5 + 0.5 * nn[:, 2]) + 0.25 * hz, 0.45, 1.0)
+        col[:, 3] = np.clip(0.58 + 0.27 * (0.5 + 0.5 * nn[:, 2]) + 0.15 * hz, 0.58, 1.0)
         md.add(corners, [(0, 1, 2, 3)], [uv], mat, col, normals=nn)
 
 # ============================================================================ golden oak
@@ -481,7 +522,7 @@ def oak_spec(seed, budget=(2950, 1150, 290), r_base=0.85, **kw):
     s = dict(bark="oak", r_base=r_base, alpha=1.0, gamma=2.25, cull=(0.045, 0.16, 0.35), max_order=[9, 2, 1],
              flare=(1.3, 1.1, 5, 1.0), roots=(6, 2.6, 0.55), card_size=(1.1, 1.5), moods=OAK_MOODS_GOLD,
              dense_frac=0.55, dense_scale=1.1, bark_frac=(0.42, 0.3, 0.16),
-             n_clumps=28, clump_r=(1.4, 2.3), clump_kind="oak", accent_frac=0.12, clump_tip=1.8,
+             n_clumps=46, clump_r=(1.35, 2.1), clump_kind="oak", accent_frac=0.08, clump_tip=1.8,
              dense_map=OAK_DENSE, budget=budget, leaf_tip_dist=1.6, leaf_r_max=0.09, site_spacing=0.42,
              side_frac=0.45, sph=0.62, up_bias=0.22, seed=seed, bark_tile=(1.5, 1.5), leaf_z_min=2.0)
     s.update(kw)
@@ -525,7 +566,7 @@ def build_golden_oak(variant, view=None):
         puffs = env.sample_even(30, rng, dmin=0.7, dmax=1.8)
         att = env.sample(1500, rng, shell=2.0, inner_weight=0.12, clumps=puffs, clump_r=1.7)
         spec = oak_spec(seed, puffs=puffs, r_base=0.62, trunk_r=lambda p: 0.62 * (1.0 - 0.2 * min(p[2], 6) / 6), roots=(5, 1.8, 0.3), trunk_ids=tid,
-                        n_clumps=22, clump_r=(1.3, 2.1),
+                        n_clumps=36, clump_r=(1.25, 1.95),
                         flare=(0.45, 0.8, 5, 0.5), crown_c_h=0.5)
         tg.space_colonize(sk, att, D=0.38, di=3.0, dk=0.85, iters=160, tropism=(0, 0, 1), trop_w=0.18, rng=rng)
     elif variant == 3:
@@ -545,7 +586,7 @@ def build_golden_oak(variant, view=None):
         puffs = env.sample_even(32, rng, dmin=0.7, dmax=1.8)
         att = env.sample(1600, rng, shell=2.2, inner_weight=0.12, clumps=puffs, clump_r=1.8)
         spec = oak_spec(seed, puffs=puffs, r_base=0.78, trunk_r=lambda p: 0.78 * (1 - 0.15 * min(p[2], 3) / 3), crown_c_h=0.4, trunk_ids=tid,
-                        n_clumps=24, clump_r=(1.4, 2.2))
+                        n_clumps=40, clump_r=(1.3, 2.0))
         tg.space_colonize(sk, att, D=0.38, di=3.2, dk=0.85, iters=160, tropism=(0.25, 0, 1), trop_w=0.12, rng=rng)
     else:
         # young compact oak, 8 m, round crown
@@ -563,7 +604,7 @@ def build_golden_oak(variant, view=None):
         spec = oak_spec(seed, puffs=puffs, r_base=0.36, trunk_r=lambda p: 0.36 * (1 - 0.2 * min(p[2], 2.6) / 2.6), trunk_ids=tid,
                         roots=(5, 1.0, 0.14), flare=(0.4, 0.6, 5, 0.4), card_size=(1.0, 1.4),
                         cull=(0.03, 0.10, 0.2), budget=(2400, 950, 240), crown_c_h=0.45, leaf_z_min=1.6,
-                        n_clumps=14, clump_r=(1.0, 1.5))
+                        n_clumps=22, clump_r=(0.95, 1.4))
         tg.space_colonize(sk, att, D=0.3, di=2.4, dk=0.65, iters=150, tropism=(0, 0, 1), trop_w=0.12, rng=rng)
     res = finish_broadleaf(sk, env, spec, rng)
     res.env = env
@@ -909,9 +950,11 @@ def build_birch(variant, view=None):
     puffs = env.sample_even(26, rng, dmin=0.7, dmax=1.8)
     att = env.sample(1300, rng, shell=1.6, inner_weight=0.18, clumps=puffs, clump_r=1.4)
     tg.space_colonize(sk, att, D=0.32, di=2.6, dk=0.7, iters=150, tropism=(0, 0, -1), trop_w=0.05, rng=rng)
-    spec = dict(puffs=puffs, puff_r=(1.0, 1.5), puff_frac=0.7, bark="birch", n_clumps=30 if variant == 1 else 22,
-                clump_r=(0.7, 1.15), clump_kind="birch", accent_frac=0.15, clump_tip=1.4, lod2_cards=3,
-                base_dark=(1.1, 0.38), clump_flat=0.8, r_base=spec_r * (1.6 if variant == 1 else 1.0), alpha=1.0, gamma=2.3,
+    spec = dict(puffs=puffs, puff_r=(1.0, 1.5), puff_frac=0.7, bark="birch", n_clumps=60 if variant == 1 else 44,
+                clump_r=(0.7, 1.1), clump_kind="birch", accent_frac=0.15, clump_tip=1.4, lod2_cards=3, k_clump=0.55,
+                clump_flat=0.62, clump_card_k=1.15,
+                lod2_max_clumps=26,
+                base_dark=(1.1, 0.38), r_base=spec_r * (1.6 if variant == 1 else 1.0), alpha=1.0, gamma=2.3,
                 cull=(0.03, 0.08, 0.15), max_order=[9, 2, 1], flare=(0.25, 0.4, 4, 0.3), roots=None,
                 card_size=(0.85, 1.15), moods=BIRCH_MOODS, dense_map=BIRCH_DENSE, budget=(3200, 1250, 290),
                 leaf_tip_dist=1.4, leaf_r_max=0.05, site_spacing=0.38, side_frac=0.55, sph=0.6, up_bias=0.2,
@@ -991,54 +1034,103 @@ def build_willow(variant, view=None):
                 leaf_tip_dist=1.2, leaf_r_max=0.06, site_spacing=0.55, side_frac=0.3, sph=0.6, up_bias=0.2,
                 seed=seed, bark_tile=(1.3, 1.3), hang=0.6, leaf_z_min=3.0,
                 trunk_r=lambda p: rb * (1 - 0.25 * min(max(p[2], 0), 5) / 5), trunk_ids=tid)
-    # reserve budget for curtains: strips are added after finish_broadleaf
-    curt_budget = {0: 1100, 1: 380, 2: 80}
-    spec["budget"] = (spec["budget"][0] - curt_budget[0], spec["budget"][1] - curt_budget[1],
-                      spec["budget"][2] - curt_budget[2])
+    # bark only from finish_broadleaf; foliage = weeping curtains along arching branch curves (below)
+    spec["foliage"] = "none"
+    spec["bark_frac"] = (0.24, 0.2, 0.12)
     res = finish_broadleaf(sk, env, spec, rng)
     res.env = env
     P, parent, R = res.skel["P"], res.skel["parent"], res.skel["R"]
     ch = tg.children_lists(parent)
-    tips = [i for i in range(len(P)) if not ch[i] and P[i, 2] > hem + 1.5]
-    rng2 = np.random.default_rng(seed + 7)
     L = tg.path_lengths(P, parent)
     sway = np.clip((L - 0.4) / max(L.max() - 0.4, 1e-3), 0, 1) ** 1.35
-    crown_c = res.crown_c
+    rng2 = np.random.default_rng(seed + 7)
+    trunk_top = np.array(trunk[-1], float)
+    zr = (env.pmin[2], env.pmax[2])
+    dome_c = np.array([(env.pmin[0] + env.pmax[0]) / 2, (env.pmin[1] + env.pmax[1]) / 2, hem + 0.45 * (env.pmax[2] - hem)])
+    # arc start nodes: outer upper skeleton nodes (FPS)
+    rad_xy = np.linalg.norm(P[:, :2] - trunk_top[:2], axis=1)
+    cand = np.nonzero((P[:, 2] > hem + 2.0) & (rad_xy > 0.6) & (R < 0.08))[0]
+    n_arcs = {1: 46, 2: 46, 3: 30}[variant]
+    sel = [cand[int(np.argmax(P[cand, 2]))]]
+    dmin = np.linalg.norm(P[cand] - P[sel[0]], axis=1)
+    for _ in range(min(n_arcs, len(cand)) - 1):
+        k = int(np.argmax(dmin))
+        sel.append(cand[k])
+        dmin = np.minimum(dmin, np.linalg.norm(P[cand] - P[cand[k]], axis=1))
+    arcs = []
+    for i in sel:
+        S = P[i]
+        o = S - dome_c
+        o[2] = 0
+        o = normalize(o + rng2.normal(0, 0.25, 3) * np.array([1, 1, 0]))
+        ln = rng2.uniform(1.6, 2.6)
+        A = S + o * ln * 0.35 + np.array([0, 0, 0.45])
+        E = S + o * ln + np.array([0, 0, -0.5])
+        arcs.append((_bezier(S, A, E, 9), i, rng2.random()))
+    W_STR = [f"willow_strand_{k}" for k in range(6)]
+
+    def strand(md, top, out, width, nseg, node, ph, mat):
+        hz = hem * rng2.uniform(0.35, 0.75)
+        length = max(0.8, top[2] - hz)
+        u0, v0, u1, v1 = atlas.uv_rect(W_STR[rng2.integers(6)])
+        side = normalize(np.cross(out, np.array([0, 0, 1.0])))
+        verts, uvs, cols, nrms = [], [], [], []
+        for k in range(nseg + 1):
+            tt = k / nseg
+            c = top + out * 0.18 * math.sin(np.pi * tt * 0.7) + np.array([0, 0, -length * tt])
+            for sgn in (-1, 1):
+                v = c + side * sgn * width * 0.5
+                verts.append(v)
+                uvs.append((u0 if sgn < 0 else u1, v1 - (v1 - v0) * tt))
+                nrm = normalize(0.7 * normalize(v - dome_c) + 0.3 * normalize(out + np.array([0, 0, 0.2])))
+                nrms.append(nrm)
+                hzf = np.clip((v[2] - hz) / max(zr[1] - hz, 1e-3), 0, 1)
+                cols.append([min(1, sway[node] + 0.15 + 0.35 * tt), 0.25 + 0.75 * tt, ph,
+                             float(np.clip(0.45 + 0.35 * hzf + 0.2 * (0.5 + 0.5 * np.dot(nrm, SUN)), 0.45, 1))])
+        faces, fuv = [], []
+        for k in range(nseg):
+            a = 2 * k
+            faces.append((a, a + 1, a + 3, a + 2))
+            fuv.append([uvs[a], uvs[a + 1], uvs[a + 3], uvs[a + 2]])
+        md.add(np.array(verts), faces, fuv, mat, np.array(cols), normals=np.array(nrms))
+
     for lod in range(3):
         md = res.lods[lod]
+        mat = 1 if lod == 0 else 0
+        step = [0.26, 0.5, 1.3][lod]
         nseg = [3, 2, 1][lod]
-        n_strips = curt_budget[lod] // (2 * nseg)
-        sel = rng2.choice(tips, size=min(len(tips), n_strips), replace=len(tips) < n_strips)
-        for i in sel:
-            p = P[i] + rng2.normal(0, 0.15, 3)
-            out = normalize(np.array([p[0] - crown_c[0], p[1] - crown_c[1], 0]) + rng2.normal(0, 0.2, 3))
-            out[2] = 0
-            out = normalize(out)
-            length = max(1.2, (p[2] - hem) * rng2.uniform(0.88, 1.04))
-            w = rng2.uniform(0.55, 0.8) * (1.0 if lod == 0 else 1.5 if lod == 1 else 2.2)
-            tile = f"willow_strand_{rng2.integers(6)}"
-            u0, v0, u1, v1 = atlas.uv_rect(tile)
-            side = normalize(np.cross(out, np.array([0, 0, 1.0])))
-            # strip hangs: slight outward bow, then straight down
-            verts, uvs, cols, nrms = [], [], [], []
-            for k in range(nseg + 1):
-                t = k / nseg
-                c = p + out * 0.35 * math.sin(np.pi * t * 0.6) * length * 0.25 + np.array([0, 0, -length * t])
-                for sgn in (-1, 1):
-                    verts.append(c + side * sgn * w * 0.5)
-                    uvs.append((u0 if sgn < 0 else u1, v1 - (v1 - v0) * t))
-                    g = 0.3 + 0.7 * t
-                    cols.append([min(1, sway[i] + 0.1 * t), g, rng2.random() * 0 + (i % 97) / 97.0,
-                                 float(np.clip(0.6 + 0.4 * (1 - t) * 0.5 + 0.2, 0.5, 1))])
-                    nrms.append(normalize(out * 0.8 + np.array([0, 0, 0.25])))
-            faces, fuv = [], []
-            for k in range(nseg):
-                a = 2 * k
-                faces.append((a, a + 1, a + 3, a + 2))
-                fuv.append([uvs[a], uvs[a + 1], uvs[a + 3], uvs[a + 2]])
-            md.add(np.array(verts), faces, fuv, 1 if lod == 0 else 0, np.array(cols), normals=np.array(nrms))
+        wk = [1.0, 1.5, 2.6][lod]
+        cards = []
+        for arc, node, ph in arcs:
+            seg = np.linalg.norm(np.diff(arc, axis=0), axis=1)
+            cum = np.concatenate([[0], np.cumsum(seg)])
+            s = rng2.uniform(0, step)
+            while s < cum[-1]:
+                j = min(np.searchsorted(cum, s) - 1, len(seg) - 1)
+                j = max(j, 0)
+                p = arc[j] + (arc[j + 1] - arc[j]) * (s - cum[j]) / max(seg[j], 1e-6)
+                out = p - dome_c
+                out[2] = 0
+                strand(md, p, normalize(out), rng2.uniform(0.24, 0.34) * wk, nseg, node, ph, mat)
+                s += step * rng2.uniform(0.8, 1.2)
+            # drape cards over the arch (read from the top camera)
+            nd = [3, 2, 1][lod]
+            for q in range(nd):
+                tt = (q + 0.5) / nd * 0.75
+                j = int(tt * (len(arc) - 1))
+                p = arc[j]
+                tang = normalize(arc[min(j + 1, len(arc) - 1)] - arc[max(j - 1, 0)])
+                out = p - dome_c
+                nrm = normalize(np.cross(tang, normalize(np.cross(np.array([0, 0, 1.0]), tang))) + normalize(out) * 0.3)
+                if nrm[2] < 0:
+                    nrm = -nrm
+                sz = rng2.uniform(0.9, 1.25) * [1.0, 1.35, 2.0][lod]
+                cards.append(dict(c=p - tang * sz * 0.1, n=nrm, up=tang, w=sz * 0.8, h=sz, tile="willow_top_a", C=dome_c,
+                                  rad=float(np.linalg.norm(p - dome_c)), flat=1.0,
+                                  wind=np.array([min(1, sway[node] + 0.1), 0, ph]), attach="center"))
+        emit_clump_cards(md, cards, dome_c, np.maximum((env.pmax - env.pmin) / 2, 0.5), mat, zr, 0.5)
         res.info[f"LOD{lod}"]["tris"] = md.tris()
-        res.info[f"LOD{lod}"]["curtain_strips"] = len(sel)
+        res.info[f"LOD{lod}"]["arcs"] = len(arcs)
     return res
 
 
@@ -1158,7 +1250,7 @@ def build_conifer2(spec, rng):
         for j in range(4 if lod == 0 else 2):
             az = j * np.pi / (4 if lod == 0 else 2) + 0.3
             n = np.array([math.cos(az), math.sin(az), 0.1])
-            cards.append(dict(c=top - np.array([0, 0, hz]), n=normalize(n), up=np.array([0, 0, 1.0]), w=hz * 0.62, h=hz + 0.1,
+            cards.append(dict(c=top - np.array([0, 0, hz]), n=normalize(n), up=np.array([0, 0, 1.0]), w=hz * 0.42, h=hz + 0.25,
                               tile=tiles[j % len(tiles)], fc=top - np.array([0, 0, hz * 1.2]), sw0=0.5, sw1=0.6, phase=0.0,
                               t0=0.8, t1=1.0))
         return cards
@@ -1254,8 +1346,9 @@ def build_dark_pine2(variant, view=None):
         H = 14.0
         prof_ref = pine_profile_from_view(view, H)
         # silhouette widths are measured at the drooped tip height -> look the profile up ~0.6 m lower
-        prof = lambda z, az: 0.75 * prof_ref(max(z - 0.6, 0.0), az) + 0.25 * cone(H, 2.6, 3.3, 0.95)(z, az)
-        spec = dict(base, H=H, crown_base=2.9, r_base=0.32, profile=prof, Lmax=3.5,
+        prof = lambda z, az: (0.75 * prof_ref(max(z - 0.6, 0.0), az) + 0.25 * cone(H, 2.6, 3.3, 0.95)(z, az)) * \
+            (0.8 if z < 4.0 else 1.0)
+        spec = dict(base, H=H, crown_base=3.3, r_base=0.32, profile=prof, Lmax=3.5, fan_w=0.85, leader_h=2.2,
                     whorl_dz=lambda f: 0.55 - 0.25 * f, pitch=lambda f: -0.02 + 0.5 * f ** 1.5,
                     droop=lambda f: 0.30 * (1 - f) + 0.10, flare=(0.55, 0.6, 6, 0.5))
     elif variant == 2:

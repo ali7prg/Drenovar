@@ -1,0 +1,8 @@
+{
+  "view": "birch",
+  "iou": 0.7314,
+  "mean_abs_colour_error": 0.2506,
+  "ref_pixels": 56077,
+  "render_pixels": 63166,
+  "iou_closed_r4": 0.7741
+}

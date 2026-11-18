@@ -1,0 +1,223 @@
+{
+  "metrics": {
+    "v1_front_LOD0": {
+      "view": "golden_oak",
+      "iou": 0.7077,
+      "mean_abs_colour_error": 0.1809,
+      "ref_pixels": 103722,
+      "render_pixels": 80913,
+      "iou_closed_r4": 0.73
+    },
+    "v1_front_LOD1": {
+      "view": "golden_oak",
+      "iou": 0.7627,
+      "mean_abs_colour_error": 0.1899,
+      "ref_pixels": 103722,
+      "render_pixels": 94536,
+      "iou_closed_r4": 0.7898
+    },
+    "v1_front_LOD2": {
+      "view": "golden_oak",
+      "iou": 0.7893,
+      "mean_abs_colour_error": 0.2111,
+      "ref_pixels": 103722,
+      "render_pixels": 108425,
+      "iou_closed_r4": 0.8208
+    },
+    "strategic_colour": {
+      "art/07 p2 oak": {
+        "mean": [
+          46.69,
+          2.55,
+          34.33
+        ],
+        "std": [
+          17.13,
+          6.65,
+          16.14
+        ],
+        "n": 26448,
+        "dE_vs_first_ref": 0.0
+      },
+      "art/01 oak grove": {
+        "mean": [
+          47.26,
+          6.7,
+          38.82
+        ],
+        "std": [
+          17.02,
+          7.53,
+          18.46
+        ],
+        "n": 15074,
+        "dE_vs_first_ref": 6.14
+      },
+      "LOD0": {
+        "mean": [
+          44.73,
+          14.71,
+          35.44
+        ],
+        "std": [
+          19.28,
+          7.54,
+          16.12
+        ],
+        "n": 218273,
+        "dE_vs_first_ref": 12.37
+      },
+      "LOD1": {
+        "mean": [
+          46.2,
+          15.38,
+          37.15
+        ],
+        "std": [
+          19.46,
+          7.68,
+          15.63
+        ],
+        "n": 205090,
+        "dE_vs_first_ref": 13.15
+      },
+      "LOD2": {
+        "mean": [
+          47.91,
+          14.13,
+          38.49
+        ],
+        "std": [
+          19.2,
+          7.85,
+          15.8
+        ],
+        "n": 205778,
+        "dE_vs_first_ref": 12.36
+      }
+    },
+    "front_crown_colour": {
+      "ref": {
+        "mean": [
+          44.35,
+          15.92,
+          37.92
+        ],
+        "std": [
+          17.02,
+          5.9,
+          13.97
+        ],
+        "n": 61369
+      },
+      "render": {
+        "mean": [
+          41.31,
+          16.32,
+          34.79
+        ],
+        "std": [
+          19.02,
+          7.23,
+          14.28
+        ],
+        "n": 48960
+      },
+      "dE_mean": 4.38
+    }
+  },
+  "tris": {
+    "v1": {
+      "radius_alpha": 1.561,
+      "nodes": 1134,
+      "leaf_sites": 373,
+      "cull_k0": 2.22,
+      "LOD0": {
+        "tris": 2924,
+        "bark_tris": 1176,
+        "cards": 874
+      },
+      "cull_k1": 1.49,
+      "LOD1": {
+        "tris": 1136,
+        "bark_tris": 344,
+        "cards": 396
+      },
+      "cull_k2": 1.0,
+      "LOD2": {
+        "tris": 266,
+        "bark_tris": 42,
+        "cards": 112
+      }
+    },
+    "v2": {
+      "radius_alpha": 1.552,
+      "nodes": 660,
+      "leaf_sites": 213,
+      "cull_k0": 1.0,
+      "LOD0": {
+        "tris": 2906,
+        "bark_tris": 1136,
+        "cards": 885
+      },
+      "cull_k1": 1.0,
+      "LOD1": {
+        "tris": 1132,
+        "bark_tris": 296,
+        "cards": 418
+      },
+      "cull_k2": 1.0,
+      "LOD2": {
+        "tris": 218,
+        "bark_tris": 42,
+        "cards": 88
+      }
+    },
+    "v3": {
+      "radius_alpha": 1.629,
+      "nodes": 626,
+      "leaf_sites": 205,
+      "cull_k0": 1.22,
+      "LOD0": {
+        "tris": 2913,
+        "bark_tris": 1211,
+        "cards": 851
+      },
+      "cull_k1": 1.22,
+      "LOD1": {
+        "tris": 1136,
+        "bark_tris": 342,
+        "cards": 397
+      },
+      "cull_k2": 1.0,
+      "LOD2": {
+        "tris": 234,
+        "bark_tris": 42,
+        "cards": 96
+      }
+    },
+    "v4": {
+      "radius_alpha": 1.452,
+      "nodes": 431,
+      "leaf_sites": 135,
+      "cull_k0": 1.22,
+      "LOD0": {
+        "tris": 2370,
+        "bark_tris": 914,
+        "cards": 728
+      },
+      "cull_k1": 1.22,
+      "LOD1": {
+        "tris": 937,
+        "bark_tris": 243,
+        "cards": 347
+      },
+      "cull_k2": 16.18,
+      "LOD2": {
+        "tris": 154,
+        "bark_tris": 42,
+        "cards": 56
+      }
+    }
+  }
+}

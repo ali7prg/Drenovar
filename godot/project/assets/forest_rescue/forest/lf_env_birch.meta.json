@@ -8,9 +8,9 @@
         "lf_env_birch_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3199,
-        "LOD1": 1250,
-        "LOD2": 290
+        "LOD0": 3167,
+        "LOD1": 1244,
+        "LOD2": 202
       },
       "materials": {
         "LOD0": [
@@ -24,18 +24,18 @@
           "lf_foliage"
         ]
       },
-      "height_m": 12.81,
-      "crown_radius_m": 4.82,
+      "height_m": 12.52,
+      "crown_radius_m": 4.42,
       "bounds_m_blender": [
         [
-          -4.31,
-          -4.52,
+          -3.99,
+          -3.65,
           -0.39
         ],
         [
-          4.82,
-          4.26,
-          12.81
+          4.42,
+          3.58,
+          12.52
         ]
       ],
       "display_offset_gltf": [
@@ -51,9 +51,9 @@
         "lf_env_birch_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3199,
-        "LOD1": 1249,
-        "LOD2": 290
+        "LOD0": 3125,
+        "LOD1": 1231,
+        "LOD2": 184
       },
       "materials": {
         "LOD0": [
@@ -67,22 +67,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 13.5,
-      "crown_radius_m": 3.52,
+      "height_m": 13.13,
+      "crown_radius_m": 3.21,
       "bounds_m_blender": [
         [
-          -3.16,
-          -3.39,
+          -3.19,
+          -3.21,
           -0.31
         ],
         [
-          3.52,
-          3.44,
-          13.5
+          3.1,
+          2.97,
+          13.13
         ]
       ],
       "display_offset_gltf": [
-        12.029,
+        11.544,
         0.0,
         0.0
       ]
@@ -94,9 +94,9 @@
         "lf_env_birch_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 3200,
-        "LOD1": 1250,
-        "LOD2": 290
+        "LOD0": 3126,
+        "LOD1": 1222,
+        "LOD2": 204
       },
       "materials": {
         "LOD0": [
@@ -110,31 +110,31 @@
           "lf_foliage"
         ]
       },
-      "height_m": 11.92,
-      "crown_radius_m": 5.19,
+      "height_m": 11.51,
+      "crown_radius_m": 4.79,
       "bounds_m_blender": [
         [
-          -5.19,
-          -3.04,
+          -4.79,
+          -2.87,
           -0.42
         ],
         [
-          4.84,
-          3.12,
-          11.92
+          4.76,
+          2.98,
+          11.51
         ]
       ],
       "display_offset_gltf": [
-        24.058,
+        23.088,
         0.0,
         0.0
       ]
     }
   },
   "tris": {
-    "LOD0": 3200,
-    "LOD1": 1250,
-    "LOD2": 290
+    "LOD0": 3167,
+    "LOD1": 1244,
+    "LOD2": 204
   },
   "bones": 0,
   "materials": [
@@ -171,8 +171,9 @@
       "type": "shader (vertex colour driven)"
     }
   },
-  "layout_note": "Node translations are preview offsets only (variants along +X, LOD1/LOD2 rows behind). Instance the Mesh resources with your own transforms; mesh origin = trunk base on the ground.",
+  "layout_note": "Variants are laid out along +X (display_offset_gltf); the three LOD meshes of a variant share the variant origin (overlapping, show one per distance). Mesh origin = trunk base on the ground.",
   "lod_note": "LOD0: bark+foliage (2 surfaces); LOD1/LOD2: single foliage-atlas surface (bark strip in atlas).",
+  "export_scale_vs_art02": 1.0,
   "glb_images": [
     "lf_bark_birch_n.png",
     "lf_bark_birch_c.jpg",

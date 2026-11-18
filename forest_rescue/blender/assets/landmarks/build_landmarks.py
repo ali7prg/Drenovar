@@ -268,36 +268,36 @@ def build(name, it, export=True, qa=True):
         print(json.dumps({k: v["iou"] for k, v in mets.items()}), flush=True)
     if not export:
         return
-    root = fbuild.empty(asset)
-    exp = [root]
-    lo, hi = core.bounds([objs_lod[0]] + ([extra_objs[0]] if 0 in extra_objs else []))
-    spacing = max(hi[1] - lo[1], 4.0) + 2.0
-    for l in range(3):
-        objs_lod[l].parent = root
-        objs_lod[l].location = (0, l * spacing, 0)
-        exp.append(objs_lod[l])
-        if l in extra_objs:
-            extra_objs[l].parent = root
-            extra_objs[l].location = (0, l * spacing, 0)
-            exp.append(extra_objs[l])
-    bpy.context.view_layer.update()
+    # LOD0 = main GLB instanced by the game; LOD1/LOD2 = separate GLBs (same origin) so the scene never shows
+    # overlapping LOD copies.
     out = os.path.join(RT, f"{asset}.glb")
-    extra = dict(export_vertex_color="NONE", export_image_format="AUTO")
-    has_anim = bool(extra_objs)
-    core.export_glb(out, exp, animations=has_anim, extra=dict(extra, export_morph=True, export_morph_normal=False,
-                                                               export_animation_mode="ACTIONS"))
     import glbx
-    glbx.externalize(out, EXT)
+    files = {}
+    for l in range(3):
+        objs = [objs_lod[l]] + ([extra_objs[l]] if l in extra_objs else [])
+        root = fbuild.empty(asset if l == 0 else f"{asset}_lod{l}")
+        for o in objs:
+            o.parent = root
+            o.location = (0, 0, 0)
+        bpy.context.view_layer.update()
+        path = out if l == 0 else os.path.join(RT, f"{asset}_LOD{l}.glb")
+        anim = l in extra_objs
+        core.export_glb(path, [root] + objs, animations=anim,
+                        extra=dict(export_vertex_color="NONE", export_image_format="AUTO", export_morph=anim,
+                                   export_morph_normal=False, export_animation_mode="ACTIONS"))
+        glbx.externalize(path, EXT)
+        files[f"LOD{l}"] = os.path.basename(path)
     gi = glbx.info(out)
     meta = {"id": asset, "tris": tris, "bones": 0, "materials": sorted(set(gi["materials"])), "glb_images": gi["images"],
             "textures": {n: 1024 for n in EXT.values()},
             "texture_mode": "external shared lm_* files next to the GLB (relative URIs)",
             "nodes": {f"LOD{l}": [objs_lod[l].name] + ([extra_objs[l].name] if l in extra_objs else []) for l in range(3)},
+            "lod_files": files,
             "bounds_m_gltf": fbuild.gltf_bounds([objs_lod[0]] + ([extra_objs[0]] if 0 in extra_objs else [])),
             "collision": [to_gl_collider(c) for c in kits[0].colliders],
             "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; "
                               "'ramp' = oriented box along the slope; yaw about +Y.",
-            "layout_note": "LOD1/LOD2 nodes are displayed behind LOD0 (+Z offset) for preview only.",
+            "layout_note": "Main GLB = LOD0 at the asset origin; LOD1/LOD2 in <id>_LOD1.glb / <id>_LOD2.glb (same origin).",
             "build": f"python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/build_landmarks.py {name}"}
     if name == "camp_props":
         meta["clips"] = {"lf_banner_wind": {"seconds": 4.5, "loop": True, "type": "morph-target animation on the tarp"}}

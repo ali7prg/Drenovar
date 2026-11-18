@@ -28,6 +28,8 @@ ASSET = "lf_horse_origin"
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
 ITER = int(ARGS[ARGS.index("--iter") + 1]) if "--iter" in ARGS else None
 SAMPLES = int(ARGS[ARGS.index("--samples") + 1]) if "--samples" in ARGS else 40
+ENGINE = ARGS[ARGS.index("--engine") + 1] if "--engine" in ARGS else "eevee"
+ONLY = ARGS[ARGS.index("--only") + 1].split(",") if "--only" in ARGS else None
 ALL = not any(a in ARGS for a in ("--compare", "--poses", "--clips", "--lods"))
 
 
@@ -111,9 +113,9 @@ def do_poses(arm):
         arm.animation_data_create()
     # (action, time, camera location, look-at, lens, key light dir) chosen to match the drawings
     setups = {
-        "walk": ("lf_horse_walk", 0.42, (-4.6, -1.1, 1.35), (0.0, -0.20, 1.0), 50, (-0.5, -0.7, 0.6)),
-        "trot": ("lf_horse_trot", 0.20, (-4.6, -1.1, 1.40), (0.0, -0.20, 1.0), 50, (-0.5, -0.7, 0.6)),
-        "look_back": ("lf_horse_look_back", 0.95, (-3.4, 2.9, 1.55), (0.0, -0.15, 1.05), 45,
+        "walk": ("lf_horse_walk", 0.12, (-8.0, -1.6, 1.30), (0.0, -0.22, 0.98), 85, (-0.5, -0.7, 0.6)),
+        "trot": ("lf_horse_trot", 0.13, (-8.0, -1.6, 1.35), (0.0, -0.22, 1.0), 85, (-0.5, -0.7, 0.6)),
+        "look_back": ("lf_horse_look_back", 0.95, (-7.4, 2.9, 1.45), (0.0, 0.0, 0.98), 95,
                       (-0.6, 0.5, 0.7)),
     }
     from PIL import Image
@@ -133,14 +135,20 @@ def do_poses(arm):
 
 
 def do_clips(arm):
-    scene = bpy.context.scene
-    scene.render.engine = "BLENDER_WORKBENCH"
-    sh = scene.display.shading
-    sh.light = "STUDIO"
-    sh.color_type = "TEXTURE"
-    sh.show_shadows = True
-    sh.show_cavity = False
-    scene.display.shading.show_backface_culling = False
+    if ENGINE == "eevee":
+        scene = render.studio(engine="BLENDER_EEVEE", samples=8, transparent=False,
+                              key_dir=(-0.55, -0.75, 0.75), key_energy=3.2, fill_energy=1.0,
+                              rim_energy=1.2, ambient=0.6)
+        eng = "BLENDER_EEVEE"
+    else:
+        scene = bpy.context.scene
+        scene.render.engine = "BLENDER_WORKBENCH"
+        sh = scene.display.shading
+        sh.light = "STUDIO"
+        sh.color_type = "TEXTURE"
+        sh.show_shadows = True
+        sh.show_cavity = False
+        eng = "BLENDER_WORKBENCH"
     # ground plane
     me = bpy.data.meshes.new("qa_ground")
     me.from_pydata([(-8, -8, 0), (8, -8, 0), (8, 8, 0), (-8, 8, 0)], [], [(0, 1, 2, 3)])
@@ -151,6 +159,8 @@ def do_clips(arm):
     cam = render.perspective_camera((-4.2, -2.6, 1.7), (0, -0.15, 0.95), lens=40, res=(960, 540))
     meta = json.load(open(paths.runtime("horse", f"{ASSET}.meta.json")))
     for act in sorted(a.name for a in bpy.data.actions if a.name.startswith("lf_horse_")):
+        if ONLY and act not in ONLY:
+            continue
         out = paths.video(ASSET, f"{act}.mp4")
         a = bpy.data.actions[act]
         cm = meta["clips"].get(act, {})
@@ -178,8 +188,8 @@ def do_clips(arm):
             arm.rotation_euler = (0, 0, 0)
         else:
             loops = 2 if a.get("loop") else 1
-            render.render_clip(arm, a, out, camera_obj=cam, engine="BLENDER_WORKBENCH", res=(960, 540),
-                               loops=loops)
+            render.render_clip(arm, a, out, camera_obj=cam, engine=eng, res=(960, 540),
+                               loops=loops, samples=8)
         sheet = paths.video(ASSET, f"{act}_contact.png")
         render.contact_sheet_from_video(out, sheet, frames=8, width=1600)
         save_iter(sheet)

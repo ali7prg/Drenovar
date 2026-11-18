@@ -63,6 +63,8 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 			if score > best_score:
 				best_score = score
 				best_angle = angle
+		if best_score < -50.0:
+			continue   # no valid camp spot next to this glade (routes on every side)
 		var spot := center + Vector2(cos(best_angle), sin(best_angle)) * float(CAMP.distance)
 		placements.append({"id": CAMP.id, "position": Vector3(spot.x, 0.0, spot.y), "yaw": atan2(center.x - spot.x, center.y - spot.y),
 			"footprint": CAMP.footprint, "kind": "camp", "site": site.id, "pad": true})
@@ -127,7 +129,11 @@ func populate() -> void:
 		if path.is_empty():
 			missing[placement.id] = "not delivered (expected %s%s.glb)" % [LANDMARK_DIR, placement.id]
 			continue
-		var node: Node3D = load(path).instantiate()
+		var scene: Variant = load(path)
+		if not scene is PackedScene:
+			missing[placement.id] = "found but not imported yet: " + path
+			continue
+		var node: Node3D = scene.instantiate()
 		node.name = "%s_%s" % [placement.id, placement.get("site", str(placements.find(placement)))]
 		node.position = placement.position
 		node.rotation.y = placement.yaw
@@ -155,7 +161,7 @@ func _populate_arena() -> void:
 	arena_root.position = Vector3(center.x, center.y - 0.3, center.z)
 	add_child(arena_root)
 	var whole := _find(ARENA_DIR, "lf_boss_arena")
-	if not whole.is_empty():
+	if not whole.is_empty() and load(whole) is PackedScene:
 		var node: Node3D = load(whole).instantiate()
 		node.rotation.y = _arena_entrance_yaw()
 		arena_root.add_child(node)

@@ -1,0 +1,16 @@
+{
+  "title": "lf_cage_iron closed 3/4 (camera fitted)",
+  "iou_filled": 0.8879,
+  "iou_raw": 0.6802,
+  "mean_abs_colour_error": 0.1824,
+  "mean_rgb_ref": [
+    0.414,
+    0.363,
+    0.313
+  ],
+  "mean_rgb_render": [
+    0.394,
+    0.338,
+    0.285
+  ]
+}

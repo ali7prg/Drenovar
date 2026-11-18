@@ -132,7 +132,7 @@ def build_lod0(ctx, budget):
             elif p.name == "head":
                 Q = (V - lm["origin"]) / lm["scale"]
                 face = np.sqrt((Q[:, 0] / 0.06) ** 2 + ((Q[:, 2] + 0.03) / 0.08) ** 2) * (Q[:, 1] < 0.03)
-                prot = np.clip(1.25 - face, 0, 1) * 0.6 * (Q[:, 1] < 0.03)
+                prot = np.clip(1.25 - face, 0, 1) * 0.32 * (Q[:, 1] < 0.03)
                 decimate(obj, budget.get("head", 2600), protect=prot, protect_factor=1.0)
             else:
                 decimate(obj, budget.get(p.name, 400))
@@ -169,6 +169,7 @@ def build_lod0(ctx, budget):
             smooth_uv(obj, angle=60 if p.name == "head" else 64)
             if p.name == "head":
                 set_face_attr(obj, "uvboost", [1] * len(obj.data.polygons))
+                face_planar_uv(obj, ctx.lm)
         final.append(obj)
     lod0 = core.join(final, ctx.asset + "_LOD0")
     core.select_only([lod0])
@@ -183,6 +184,39 @@ def build_lod0(ctx, budget):
     lod0["pieces"] = ",".join(piece_names)
     log(ctx.asset, "LOD0 %d tris, %d classes, %.1fs" % (core.tri_count(lod0), len(classes), time.time() - t0))
     return lod0, classes
+
+
+def face_planar_uv(obj, lm):
+    """Front-planar UV island for the face (matches the portrait/front projection 1:1)."""
+    me = obj.data
+    nf = len(me.polygons)
+    cent = np.empty(nf * 3)
+    me.polygons.foreach_get("center", cent)
+    cent = cent.reshape(-1, 3)
+    nrm = np.empty(nf * 3)
+    me.polygons.foreach_get("normal", nrm)
+    nrm = nrm.reshape(-1, 3)
+    Q = (cent - lm["origin"]) / lm["scale"]
+    sel = (np.abs(Q[:, 0]) < 0.068) & (Q[:, 2] > -0.125) & (Q[:, 2] < 0.075) & (Q[:, 1] < 0.045) & (nrm[:, 1] < -0.25)
+    if sel.sum() < 20:
+        return
+    co = np.empty(len(me.vertices) * 3)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(-1, 3)
+    uv = np.empty(len(me.loops) * 2)
+    me.uv_layers.active.data.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2)
+    ls = np.empty(nf, np.int64)
+    me.polygons.foreach_get("loop_start", ls)
+    lt = np.empty(nf, np.int64)
+    me.polygons.foreach_get("loop_total", lt)
+    lv = np.empty(len(me.loops), np.int64)
+    me.loops.foreach_get("vertex_index", lv)
+    for f in np.nonzero(sel)[0]:
+        for li in range(ls[f], ls[f] + lt[f]):
+            v = co[lv[li]]
+            uv[li] = (5.0 + (v[0] - lm["origin"][0]) * 4.0, 5.0 + (v[2] - lm["origin"][2]) * 4.0)
+    me.uv_layers.active.data.foreach_set("uv", uv.ravel())
 
 
 def smooth_uv(obj, angle=64.0, iters=40):
@@ -350,7 +384,10 @@ def texture_lod0(ctx, lod0, classes, size=2048, hi_objs=None):
         pimg[yy, xx] = fpc[poly[Tx.tri[yy, xx]]]
         keep = np.isin(pimg, sdf_ids)
         nrm_bake = np.where(keep[..., None], nrm_bake, np.array([0.5, 0.5, 1.0]))
-        nrm = blend_normals(nrm_bake, nrm_detail)
+        nb = nrm_bake * 2 - 1
+        nb[..., :2] *= 0.75
+        nb /= np.maximum(np.linalg.norm(nb, axis=-1, keepdims=True), 1e-9)
+        nrm = blend_normals(nb * 0.5 + 0.5, nrm_detail)
     else:
         nrm = nrm_detail
     orm = np.stack([np.ones_like(rough), rough, metal], -1)

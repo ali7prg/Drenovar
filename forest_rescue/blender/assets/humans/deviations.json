@@ -1,0 +1,18 @@
+{
+ "_all": [
+  "The sheets are free-hand painted A-poses, not orthographic drawings: the separately painted front and back figures of the same character disagree (registered IoU(front, back) 0.86-0.93 measured from the masks), so a single 3-D model cannot match both views better than roughly that level.",
+  "Silhouettes are matched by hand-measured landmark/loft tables plus a soft silhouette-hull blend (2.2 cm); head, hands and boots are not hull-carved (avoids flat slices), which costs a little IoU at hair/hands/feet.",
+  "Colour comes from projecting the front/back panels (and the expression portrait onto the face) with grazing texels replaced by the class colour + procedural cloth/leather/metal detail; painted fold shading is compressed, not removed.",
+  "No facial blend shapes (manifest: only where close shots need them); Jaw bone only. Fingers simplified: thumb 2, index 2, middle 2 (ring+little follow the middle bones).",
+  "Secondary motion is bone-based (skirt/apron/tabard front-back-sides, cape 2, hood, bag) driven by damped springs from leg/torso motion; no cloth simulation, so deep lunges can make long skirts intersect the legs slightly.",
+  "Seated clips (cage_sit, stand_up start) assume a 0.45 m seat 0.40 m behind the root (cage bench/log); in place without the seat the hips float.",
+  "LOD1/LOD2 are collapse-decimated per piece with bones folded to 29/18 weighted bones; the skeleton node set in the GLB stays the full 48-bone human_shared (Godot evaluates the full skeleton; mesh skins use the subset)."
+ ],
+ "_humans_civilians": [
+  "36 captives use the 6 bases via captive_variants.json (material tint factors + optional hood/cap parts); 16 men on 3 male bases, 20 women on 3 female bases (5-7 per base).",
+  "The paired 'supported walk with forearm contact' (12_motion row 3) is not a manifest clip; the pose-match uses lf_civilian_follow_tired of a single character."
+ ],
+ "_humans_squad": [
+  "Weapons are separate rigid meshes on LeftProp/RightProp: captain sword_sheathed (default) + sword_drawn (hidden; game toggles for guard/attack/hit/death); scout bow_drawn and bow_slung hidden by default (the sheet shows no bow on the body); shield guard shield+spear always on."
+ ]
+}

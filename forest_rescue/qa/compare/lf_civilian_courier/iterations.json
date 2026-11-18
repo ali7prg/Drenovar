@@ -1,0 +1,24 @@
+[
+ {
+  "tag": "iter01",
+  "metrics": {
+   "front": {
+    "iou": 0.8004,
+    "colour_error": 0.0838
+   },
+   "back": {
+    "iou": 0.8073,
+    "colour_error": 0.0747
+   }
+  },
+  "differences": [
+   "head sliced flat by the silhouette hull -> boxy, faceted face; texture smeared",
+   "hands sliced by the hull",
+   "IoU low (0.80): cape/satchel/arm gaps"
+  ],
+  "changes_for_next": [
+   "head mesh built without hull carving; hands/boots added after the hull; softer hull",
+   "same texture fixes as miller iter05->06"
+  ]
+ }
+]

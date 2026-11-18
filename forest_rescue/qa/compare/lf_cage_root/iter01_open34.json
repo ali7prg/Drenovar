@@ -1,0 +1,16 @@
+{
+  "title": "lf_cage_root open 3/4 (camera fitted) - drawn door hinge side ignored",
+  "iou_filled": 0.8248,
+  "iou_raw": 0.6076,
+  "mean_abs_colour_error": 0.2038,
+  "mean_rgb_ref": [
+    0.521,
+    0.448,
+    0.346
+  ],
+  "mean_rgb_render": [
+    0.524,
+    0.438,
+    0.332
+  ]
+}

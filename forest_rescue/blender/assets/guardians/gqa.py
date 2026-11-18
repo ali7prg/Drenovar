@@ -36,6 +36,19 @@ def ground_plane(size=80.0, squares=160):
         bs = nt.nodes["Principled BSDF"]
         ck = nt.nodes.new("ShaderNodeTexChecker")
         ck.inputs["Scale"].default_value = squares
+        img = bpy.data.images.new("qa_checker", 64, 64)
+        px = np.zeros((64, 64, 4), np.float32)
+        yy, xx = np.mgrid[0:64, 0:64]
+        chk = ((yy // 32 + xx // 32) % 2).astype(np.float32)
+        px[..., :3] = (0.30 + 0.12 * chk)[..., None] * np.array([1.0, 0.95, 0.80])
+        px[..., 3] = 1
+        img.pixels.foreach_set(px.ravel())
+        tex = nt.nodes.new("ShaderNodeTexImage")
+        tex.image = img
+        tex.interpolation = "Closest"
+        nt.links.new(tex.outputs["Color"], bs.inputs["Base Color"])
+        uvs = np.array([(0, 0), (squares / 2, 0), (squares / 2, squares / 2), (0, squares / 2)], np.float32)
+        me.uv_layers.active.data.foreach_set("uv", uvs.ravel())
         ck.inputs["Color1"].default_value = (0.42, 0.40, 0.33, 1)
         ck.inputs["Color2"].default_value = (0.30, 0.28, 0.23, 1)
         nt.links.new(ck.outputs["Color"], bs.inputs["Base Color"])
@@ -45,13 +58,17 @@ def ground_plane(size=80.0, squares=160):
 
 
 def _engine(scene, samples=12):
-    try:
-        scene.render.engine = "BLENDER_EEVEE"
-        scene.eevee.taa_render_samples = samples
-        return "BLENDER_EEVEE"
-    except Exception:
-        scene.render.engine = "BLENDER_WORKBENCH"
-        return "BLENDER_WORKBENCH"
+    """Workbench: EEVEE runs ~30 s/frame on this headless software-GL machine."""
+    scene.render.engine = "BLENDER_WORKBENCH"
+    sh = scene.display.shading
+    sh.light = "STUDIO"
+    sh.color_type = "TEXTURE"
+    sh.show_shadows = True
+    sh.shadow_intensity = 0.55
+    sh.show_cavity = True
+    sh.cavity_type = "WORLD"
+    scene.display.render_aa = "8"
+    return "BLENDER_WORKBENCH"
 
 
 def clip_videos(B, cams=("q34",), res=(960, 540)):
@@ -60,6 +77,12 @@ def clip_videos(B, cams=("q34",), res=(960, 540)):
     scene = bpy.context.scene
     render.studio(engine="CYCLES", samples=8, transparent=False)
     eng = _engine(scene)
+    for mat in bpy.data.materials:                     # Workbench shows the active image node
+        if mat.use_nodes:
+            for nd in mat.node_tree.nodes:
+                if nd.type == "TEX_IMAGE" and nd.image and (nd.image.name.endswith("_basecolor")
+                                                            or nd.image.name == "qa_checker"):
+                    mat.node_tree.nodes.active = nd
     scene.render.film_transparent = False
     scene.render.resolution_x, scene.render.resolution_y = res
     _hide_extras(B, True)
@@ -74,7 +97,7 @@ def clip_videos(B, cams=("q34",), res=(960, 540)):
         act = bpy.data.actions[clip]
         B.arm.animation_data.action = act
         n = int(act.frame_range[1])
-        loops = 3 if info["loop"] else 1
+        loops = 3 if clip in ("Walk", "Run") else 1
         speed = info.get("groundSpeed_mps", 0.0)
         for cam in (cams + (("side",) if clip in ("Walk", "Run") else ())):
             loc, look, lens = camdefs[cam]
@@ -236,5 +259,42 @@ def old_vs_new(B):
                 sheet.paste(im, (i * W, 30 + j * H))
         dr.text((i * W + 6, 34), lab, fill=(255, 255, 0))
     p = os.path.join(d, "old_vs_new.png")
+    sheet.save(p)
+    return p
+
+
+def godot_vs_sheet(B):
+    """In-engine (Godot 4.6 viewer) shots next to the matching reference views."""
+    from PIL import Image, ImageDraw
+    spec = B.spec
+    d = paths.ensure(paths.QA_COMPARE, spec.ID)
+    gd = os.path.join(d, "godot")
+    # new GLB faces +Z: yaw 0 = front, 90 = left side, 180 = rear, 270 = right side
+    want = {"side": 270 if B.pans["side"].view.d[0] > 0 else 90, "front": 0, "rear": 180}
+    tiles = []
+    for name, pan in B.pans.items():
+        p = os.path.join(gd, f"shot_yaw{want[name]:03d}.png")
+        if not os.path.exists(p):
+            continue
+        ref = Image.fromarray((pan.view.image * 255).astype(np.uint8)).convert("RGB")
+        g = Image.open(p).convert("RGB")
+        h = 300
+        ref = ref.resize((int(ref.width * h / ref.height), h))
+        g = g.resize((int(g.width * h / g.height), h))
+        t = Image.new("RGB", (ref.width + g.width, h + 22), (25, 25, 25))
+        t.paste(ref, (0, 22))
+        t.paste(g, (ref.width, 22))
+        ImageDraw.Draw(t).text((6, 5), f"{name}: sheet | Godot 4.6 viewer (exported GLB, yaw {want[name]})",
+                               fill=(255, 230, 160))
+        tiles.append(t)
+    if not tiles:
+        return None
+    W = max(t.width for t in tiles)
+    sheet = Image.new("RGB", (W, sum(t.height for t in tiles)), (25, 25, 25))
+    y = 0
+    for t in tiles:
+        sheet.paste(t, (0, y))
+        y += t.height
+    p = os.path.join(d, "godot_vs_sheet.png")
     sheet.save(p)
     return p

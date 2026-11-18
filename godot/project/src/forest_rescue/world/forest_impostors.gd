@@ -34,13 +34,18 @@ func can_render() -> bool:
 
 
 ## meshes: Array of [key: String, mesh: Mesh]. sun_rotation: the city sun's rotation (radians).
-func bake(meshes: Array, sun_rotation: Vector3, environment: Environment) -> void:
+func bake(meshes: Array, sun_rotation: Vector3, environment: Environment, signature := "") -> void:
+	var cache := "user://forest_rescue_v1_impostors_%s" % str(hash(signature + str(CELL_PIXELS) + str(YAWS) + str(sun_rotation)))
+	if _atlas == null and not signature.is_empty():
+		_load_cache(cache)
 	var pending: Array = []
 	for entry in meshes:
 		if not _cells.has(entry[0]):
 			pending.append(entry)
 	if not pending.is_empty() and can_render():
 		await _render(pending, sun_rotation, environment)
+		if not signature.is_empty():
+			_save_cache(cache)
 	available = _atlas != null and not _cells.is_empty()
 	if available:
 		material = ShaderMaterial.new()
@@ -157,31 +162,38 @@ func _render(pending: Array, sun_rotation: Vector3, environment: Environment) ->
 			atlas_image.blit_rect(image, Rect2i(0, 0, CELL_PIXELS, CELL_PIXELS),
 				Vector2i((index % _grid) * CELL_PIXELS, (index / _grid) * CELL_PIXELS))
 		viewport.queue_free()
-	_dilate_transparent_rgb(atlas_image)
+	atlas_image.fix_alpha_edges()   # bleed colour into transparent texels (no dark mip halos)
 	atlas_image.generate_mipmaps()
 	_atlas = ImageTexture.create_from_image(atlas_image)
 
 
-## Bleed colour into transparent texels so mipmaps do not darken the silhouettes.
-static func _dilate_transparent_rgb(image: Image) -> void:
-	var w := image.get_width()
-	var h := image.get_height()
-	for pass_index in 2:
-		var copy := image.duplicate()
-		for y in range(1, h - 1):
-			for x in range(1, w - 1):
-				var c := copy.get_pixel(x, y)
-				if c.a > 0.02:
-					continue
-				var sum := Color(0, 0, 0, 0)
-				var n := 0
-				for o in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-					var q := copy.get_pixel(x + o.x, y + o.y)
-					if q.a > 0.02:
-						sum += q
-						n += 1
-				if n > 0:
-					image.set_pixel(x, y, Color(sum.r / n, sum.g / n, sum.b / n, 0.0))
+func _load_cache(base: String) -> void:
+	if not FileAccess.file_exists(base + ".json") or not FileAccess.file_exists(base + ".png"):
+		return
+	var info: Variant = JSON.parse_string(FileAccess.get_file_as_string(base + ".json"))
+	var image := Image.load_from_file(base + ".png")
+	if not info is Dictionary or image == null or image.is_empty():
+		return
+	image.generate_mipmaps()
+	_atlas = ImageTexture.create_from_image(image)
+	_grid = int(info.grid)
+	for key in info.cells:
+		var c: Dictionary = info.cells[key]
+		_cells[key] = {"first_cell": int(c.first), "size": Vector2(float(c.w), float(c.h)),
+			"center": Vector3(float(c.cx), float(c.cy), float(c.cz))}
+
+
+func _save_cache(base: String) -> void:
+	var image := _atlas.get_image()
+	if image.has_mipmaps():
+		image.clear_mipmaps()
+	image.save_png(base + ".png")
+	var cells := {}
+	for key in _cells:
+		var c: Dictionary = _cells[key]
+		cells[key] = {"first": c.first_cell, "w": c.size.x, "h": c.size.y, "cx": c.center.x, "cy": c.center.y, "cz": c.center.z}
+	var file := FileAccess.open(base + ".json", FileAccess.WRITE)
+	file.store_string(JSON.stringify({"grid": _grid, "cells": cells}))
 
 
 static func atlas_texture() -> ImageTexture:

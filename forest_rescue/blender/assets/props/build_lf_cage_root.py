@@ -84,31 +84,31 @@ def build(lod):
         base = np.array([sx * pc, sy * pc, -0.05])
         tp = [np.array([sx * pc * 0.98, sy * pc * 0.98, 1.2]), np.array([sx * pc * 1.02, sy * pc * 1.02, top - 0.2]),
               np.array([sx * pc * 0.95, sy * pc * 0.95, top + 0.12])]
-        bundle(B, base, tp, ci + 1, strands=3 if lod < 2 else 2, R=0.1, nseg=nseg, sides=sides, rr=0.075)
+        bundle(B, base, tp, ci + 1, strands=3 if lod < 2 else 2, R=0.14, nseg=nseg, sides=sides, rr=0.115)
         nfeet = 3 if lod < 2 else 2
         for k in range(nfeet):
             ang = math.atan2(sy, sx) + (k - (nfeet - 1) / 2) * 0.55
             d = np.array([math.cos(ang), math.sin(ang), 0])
-            ctrl = [base + np.array([0, 0, 0.55]), base + d * 0.28 + np.array([0, 0, 0.22]), base + d * 0.6 + np.array([0, 0, 0.04]),
-                    base + d * 0.85 + np.array([0, 0, -0.02])]
-            root(B, f"feet_{ci}", ctrl, 0.065, 0.02, B.seg(6, 4, 3), max(3, sides - 1), 100 + ci * 10 + k, wobble=0.03)
+            ctrl = [base + np.array([0, 0, 0.7]), base + d * 0.32 + np.array([0, 0, 0.26]), base + d * 0.75 + np.array([0, 0, 0.05]),
+                    base + d * 1.1 + np.array([0, 0, -0.02])]
+            root(B, f"feet_{ci}", ctrl, 0.10, 0.03, B.seg(6, 4, 3), max(3, sides - 1), 100 + ci * 10 + k, wobble=0.04)
         # emerald leaf inlay (diamond plate) on the outward diagonal face near the top
         if True:
             d = pk.unit(np.array([sx, sy, 0.0]))
-            dia = np.array([[0, 0.17], [-0.065, 0], [0, -0.17], [0.065, 0]])
+            dia = np.array([[0, 0.21], [-0.08, 0], [0, -0.21], [0.08, 0]])
             pl = pk.extrude(dia, 0.03, chamfer=(0.008 if lod < 2 else 0.0))
             ang = math.atan2(d[1], d[0])
             M = M4(Rz(ang - math.pi / 2) @ Rx(math.pi / 2) @ Rz(0), base + d * 0.16 + np.array([0, 0, top - 0.35]))
             Mrot = M4(Rz(ang + math.pi / 2)) @ M4(Rx(math.pi / 2))
-            Mrot[:3, 3] = base[:3] + d * 0.17 + np.array([0, 0, top - 0.3])
-            cv = mo.Canvas((-0.07, -0.18, 0.07, 0.18), ppm=2500)
+            Mrot[:3, 3] = base[:3] + d * 0.24 + np.array([0, 0, top - 0.35])
+            cv = mo.Canvas((-0.085, -0.22, 0.085, 0.22), ppm=2500)
             cv.poly(dia * 0.82)
-            inner = mo.Canvas((-0.07, -0.18, 0.07, 0.18), ppm=2500)
-            mo.fleur_sprig(inner, (0, -0.01), 0.2, 0.008)
+            inner = mo.Canvas((-0.085, -0.22, 0.085, 0.22), ppm=2500)
+            mo.fleur_sprig(inner, (0, -0.01), 0.25, 0.009)
             B.add("root", "inlays", "bronze", pl.transformed(Mrot),
-                  meta={"enamel": {"mask": cv.mask(0.002) * (1 - inner.mask(0.001)), "bbox": (-0.07, -0.18, 0.07, 0.18),
+                  meta={"enamel": {"mask": cv.mask(0.002) * (1 - inner.mask(0.001)), "bbox": (-0.085, -0.22, 0.085, 0.22),
                                    "isl": [2], "colour": sh.C(48, 104, 76)},
-                        "motif": [{"mask": inner.mask(0.001), "bbox": (-0.07, -0.18, 0.07, 0.18), "isl": (2,),
+                        "motif": [{"mask": inner.mask(0.001), "bbox": (-0.085, -0.22, 0.085, 0.22), "isl": (2,),
                                    "depth": 0.003, "mode": "raise"}]})
     # ---------------- top edge arches (two roots per edge) + dome diagonals
     for ci in range(4):
@@ -120,19 +120,19 @@ def build(lod):
             ctrl = [a + np.array([0, 0, -0.15]), a + (b - a) * 0.25 + np.array([0, 0, lift * 0.8]) + out * (1 - k),
                     mid + np.array([0, 0, lift]) + out, b + (a - b) * 0.25 + np.array([0, 0, lift * 0.8]) + out * (1 - k),
                     b + np.array([0, 0, -0.15])]
-            root(B, f"edge_{ci}", ctrl, 0.07 - 0.015 * k, 0.05, B.seg(10, 7, 5), sides, 200 + ci * 10 + k, wobble=0.025)
+            root(B, f"edge_{ci}", ctrl, 0.10 - 0.02 * k, 0.075, B.seg(10, 7, 5), sides, 200 + ci * 10 + k, wobble=0.03)
     for ci in range(2):
         a = np.array([corners[ci][0] * pc, corners[ci][1] * pc, top + 0.05])
         b = np.array([corners[ci + 2][0] * pc, corners[ci + 2][1] * pc, top + 0.05])
         ctrl = [a, a * 0.55 + np.array([0, 0, dome - top - 0.05 + top * 0.45]), np.array([0, 0, dome]),
                 b * 0.55 + np.array([0, 0, dome - top - 0.05 + top * 0.45]), b]
-        root(B, "dome", ctrl, 0.06, 0.05, B.seg(14, 9, 6), sides, 300 + ci, wobble=0.04)
+        root(B, "dome", ctrl, 0.085, 0.07, B.seg(12, 8, 6), sides, 300 + ci, wobble=0.04)
     if lod < 2:
         for ci in range(4):
             a = np.array([corners[ci][0] * pc, corners[ci][1] * pc, top + 0.1]) * np.array([1, 1, 1])
             mid = np.array([corners[ci][0] * pc * 0.2, corners[(ci + 1) % 4][1] * pc * 0.5, dome - 0.1])
             ctrl = [a, (a + mid) / 2 + np.array([0, 0, 0.35]), mid]
-            root(B, "dome2", ctrl, 0.045, 0.03, B.seg(8, 6, 4), 3, 320 + ci, wobble=0.03)
+            root(B, "dome2", ctrl, 0.065, 0.045, B.seg(8, 6, 4), 4, 320 + ci, wobble=0.03)
     # ---------------- wall lattices (back, left, right, front-left bay): mullion + lancet arches + crossing roots
     walls = [("x", pc, -pc, pc), ("y", -pc, -pc, pc), ("y", pc, -pc, pc), ("x", -pc, -pc, 0.0)]
     for wi, (axis, fixed, a, b) in enumerate(walls):
@@ -140,26 +140,26 @@ def build(lod):
             return np.array([s, fixed, z]) if axis == "x" else np.array([fixed, s, z])
         L = b - a
         m = (a + b) / 2
-        r = 0.045
-        sg = B.seg(9, 6, 4)
+        r = 0.07
+        sg = B.seg(8, 6, 4)
         sd = max(3, sides - 1)
         if wi < 3:
             root(B, f"wall_{wi}", [W(m, 0.0), W(m + 0.03, 1.2), W(m, top - 0.1)], r, 0.035, sg, sd, 400 + wi * 10, 0.02)
             for k, (s0, s1) in enumerate(((a + 0.1, m), (m, b - 0.1))):
                 c = (s0 + s1) / 2
                 root(B, f"wall_{wi}", [W(s0, 0.25), W(s0 + 0.05, 1.5), W(c, top - 0.18), W(s1 - 0.05, 1.5), W(s1, 0.25)],
-                     0.04, 0.03, B.seg(12, 8, 5), sd, 410 + wi * 10 + k, 0.02)
+                     0.06, 0.045, B.seg(10, 7, 5), sd, 410 + wi * 10 + k, 0.02)
             if lod < 2:
-                root(B, f"wall_{wi}x", [W(a + 0.15, 0.4), W(m, 1.6), W(b - 0.15, top - 0.2)], 0.035, 0.025, sg, 3,
+                root(B, f"wall_{wi}x", [W(a + 0.15, 0.4), W(m, 1.6), W(b - 0.15, top - 0.2)], 0.05, 0.035, sg, 4,
                      430 + wi * 10, 0.03)
-                root(B, f"wall_{wi}x", [W(b - 0.15, 0.4), W(m, 1.6), W(a + 0.15, top - 0.2)], 0.035, 0.025, sg, 3,
+                root(B, f"wall_{wi}x", [W(b - 0.15, 0.4), W(m, 1.6), W(a + 0.15, top - 0.2)], 0.05, 0.035, sg, 4,
                      440 + wi * 10, 0.03)
         else:   # front-left bay (left of the door frame)
             s1 = p["door_x0"] - 0.09
             c = (a + s1) / 2
             root(B, "wall_front", [W(a + 0.15, 0.3), W(a + 0.2, 1.5), W(c, top - 0.15), W(s1 - 0.05, 1.5), W(s1, 0.3)],
-                 0.042, 0.032, B.seg(12, 8, 5), sd, 470, 0.02)
-            root(B, "wall_front", [W(c, 0.0), W(c + 0.02, 1.2), W(c, top - 0.25)], 0.04, 0.03, sg, sd, 471, 0.02)
+                 0.06, 0.045, B.seg(10, 7, 5), sd, 470, 0.02)
+            root(B, "wall_front", [W(c, 0.0), W(c + 0.02, 1.2), W(c, top - 0.25)], 0.065, 0.045, sg, sd, 471, 0.02)
             if lod < 2:
                 root(B, "wall_frontx", [W(a + 0.2, 0.4), W(c, 1.4), W(s1, top - 0.3)], 0.032, 0.024, sg, 3, 472, 0.03)
     # ---------------- stone floor + kerb

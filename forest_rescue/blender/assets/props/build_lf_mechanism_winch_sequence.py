@@ -21,8 +21,8 @@ import propshaders as sh
 from propkit import M4, Rx, Ry, Rz
 
 ASSET = "lf_mechanism_winch_sequence"
-AX_Z, AX_Y = 1.42, 0.0          # drum axle
-FX = 0.78                       # frame (trestle) x
+AX_Z, AX_Y = 1.12, 0.0          # drum axle (drawing: low, wide A-frames)
+FX = 0.66                       # trestle apex x
 PIT = np.array([0.0, -0.205, 0.0])
 PIT_R, PIT_D = 0.62, 1.0
 DRUM_R, ROPE_R = 0.17, 0.205
@@ -75,52 +75,53 @@ def build(lod):
         t = np.array([-math.sin(a), math.cos(a), 0]) * w / 2
         st = pk.beam(c - t + np.array([0, 0, h / 2 - 0.07]), c + t + np.array([0, 0, h / 2 - 0.07]), d, h, chamfer=0.04)
         B.add("root", "rim_stones", "limestone", st, meta={"moss": 0.6})
-    # ---------------- A-frame trestles
+    # ---------------- A-frame trestles: legs splayed along the axle (front and back A), cross beams, sills
     for sx in (-1, 1):
         x = sx * FX
-        top = np.array([x, AX_Y, AX_Z + 0.12])
+        top = np.array([x, AX_Y, AX_Z + 0.10])
         for sy in (-1, 1):
-            foot = np.array([x, sy * 0.78, 0.10])
-            B.add("root", "frame_legs", "oak", pk.beam(foot, top + np.array([0, sy * 0.08, 0]), 0.13, 0.15, chamfer=0.018))
-        B.add("root", "frame_sills", "oak", pk.beam((x, -0.95, 0.07), (x, 0.95, 0.07), 0.16, 0.14, chamfer=0.018))
-        B.add("root", "frame_cross", "oak", pk.beam((x, -0.47, 0.62), (x, 0.47, 0.62), 0.12, 0.12, chamfer=0.015))
+            y = sy * 0.30
+            for side in (-1, 1):
+                foot = np.array([x + side * 0.46, y * 1.25, 0.10])
+                B.add("root", "frame_legs", "oak", pk.beam(foot, top + np.array([side * 0.06, y * 0.35, 0.0]), 0.12, 0.14, chamfer=0.016))
+            B.add("root", "frame_cross", "oak", pk.beam((x - 0.33, y * 0.95, 0.42), (x + 0.33, y * 0.95, 0.42), 0.1, 0.1, chamfer=0.012))
+            B.add("root", "frame_sills", "oak", pk.beam((x - 0.6, y * 1.25, 0.07), (x + 0.6, y * 1.25, 0.07), 0.16, 0.14, chamfer=0.016))
         B.add("root", "frame_tops", "oak", pk.beam((x, -0.2, AX_Z + 0.1), (x, 0.2, AX_Z + 0.1), 0.2, 0.2, chamfer=0.02))
-        # iron bearing + brackets
         bear = pk.lathe(np.array([[0.0, -0.06], [0.075, -0.06], [0.08, 0.06], [0.0, 0.06]]), B.seg(12, 8, 6), smooth=False)
         B.add("root", "bearings", "iron", bear.transformed(M4(Ry(math.pi / 2), (x + sx * 0.12, AX_Y, AX_Z))))
-        for zz in (0.62, AX_Z + 0.1):
+        for zz in (0.42, AX_Z + 0.1):
             br = pk.beam((x - 0.11, -0.12, zz), (x + 0.11, -0.12, zz), 0.03, 0.08, chamfer=0.006)
             B.add("root", "brackets", "iron", br, meta={"rivets": {"du": 0.08, "v": [pk.rect_face_v(0.03, 0.08, 0.006, "-N")], "r": 0.01}})
     # cross beams between the trestles + diagonal brace
-    B.add("root", "frame_tie", "oak", pk.beam((-FX, 0.45, 0.62), (FX, 0.45, 0.62), 0.11, 0.11, chamfer=0.015))
-    B.add("root", "frame_tie", "oak", pk.beam((-FX, 0.5, 0.2), (0.0, 0.5, 0.62), 0.1, 0.1, chamfer=0.015))
+    B.add("root", "frame_tie", "oak", pk.beam((-FX, 0.36, 0.55), (FX, 0.36, 0.55), 0.11, 0.11, chamfer=0.015))
+    B.add("root", "frame_tie", "oak", pk.beam((-FX + 0.1, 0.36, 0.2), (-0.1, 0.36, 0.55), 0.1, 0.1, chamfer=0.015))
     # ---------------- drum node: core, flanges, rope coil, ratchet gear, axle
     d = []
     core_ = pk.rod((-0.52, AX_Y, AX_Z), (0.52, AX_Y, AX_Z), DRUM_R, B.seg(20, 14, 8))
     B.add("drum", "drum_core", "oak", core_)
     coil = pk.rod((-0.45, AX_Y, AX_Z), (0.45, AX_Y, AX_Z), ROPE_R, B.seg(24, 16, 10), caps=False)
     B.add("drum", "drum_rope", "rope", coil, meta={"rope_pitch": 0.9 / 11, "rope_circ": 2 * math.pi * ROPE_R})
-    for xx in (-0.5, 0.5):
+    for xx in (0.5,):
         fl_ = pk.rod((xx - 0.025, AX_Y, AX_Z), (xx + 0.025, AX_Y, AX_Z), 0.255, B.seg(20, 14, 8))
         B.add("drum", "drum_flanges", "oak", fl_, meta={"pith_x": 0.0, "pith_y": 0.0})
-    for xx in (-0.5, 0.5):
+    for xx in (0.5,):
         band = pk.rod((xx - 0.03, AX_Y, AX_Z), (xx + 0.03, AX_Y, AX_Z), 0.262, B.seg(20, 14, 8), caps=False)
         B.add("drum", "drum_bands", "iron", band)
     gear = pk.extrude(gear_outline(0.27, 0.32, 22, lod), 0.06, chamfer=0.008)
-    B.add("drum", "ratchet", "iron", gear.transformed(M4(Ry(-math.pi / 2), (-0.58, AX_Y, AX_Z))))
-    hub = pk.rod((-0.66, AX_Y, AX_Z), (-0.52, AX_Y, AX_Z), 0.09, B.seg(10, 7, 5))
+    B.add("drum", "ratchet", "iron", gear.transformed(M4(Ry(-math.pi / 2), (-0.47, AX_Y, AX_Z))))
+    hub = pk.rod((-0.56, AX_Y, AX_Z), (-0.46, AX_Y, AX_Z), 0.09, B.seg(10, 7, 5))
     B.add("drum", "ratchet", "iron", hub)
-    axle = pk.rod((-0.98, AX_Y, AX_Z), (0.98, AX_Y, AX_Z), 0.04, B.seg(8, 6, 4))
+    axle = pk.rod((-0.86, AX_Y, AX_Z), (0.92, AX_Y, AX_Z), 0.04, B.seg(8, 6, 4))
     B.add("drum", "axle", "iron", axle)
     # ---------------- crank node (outside the right trestle, same axle)
-    arm = pk.beam((1.0, AX_Y, AX_Z), (1.0, AX_Y, AX_Z - 0.36), 0.05, 0.035, chamfer=0.008)
+    arm = pk.beam((0.98, AX_Y, AX_Z), (0.98, AX_Y, AX_Z - 0.34), 0.05, 0.035, chamfer=0.008)
     B.add("crank", "crank_arm", "iron", arm)
-    hb = pk.rod((0.97, AX_Y, AX_Z), (1.06, AX_Y, AX_Z), 0.07, B.seg(10, 7, 5))
+    hb = pk.rod((0.92, AX_Y, AX_Z), (1.0, AX_Y, AX_Z), 0.07, B.seg(10, 7, 5))
     B.add("crank", "crank_arm", "iron", hb)
     grip = pk.lathe(np.array([[0.0, 0.0], [0.035, 0.01], [0.042, 0.12], [0.036, 0.22], [0.0, 0.23]]), B.seg(10, 7, 5))
-    B.add("crank", "crank_grip", "dark_oak", grip.transformed(M4(Ry(math.pi / 2), (1.03, AX_Y, AX_Z - 0.36))))
+    B.add("crank", "crank_grip", "dark_oak", grip.transformed(M4(Ry(math.pi / 2), (1.0, AX_Y, AX_Z - 0.34))))
     # ---------------- pawl node (pivot on the left trestle, above-front of the gear)
-    pv = np.array([-0.58, -0.30, AX_Z + 0.27])
+    pv = np.array([-0.50, -0.30, AX_Z + 0.27])
     ol = np.array([[0.0, -0.022], [0.10, -0.034], [0.128, -0.062], [0.098, -0.046], [0.0, 0.022]])
     ang = math.radians(-18)
     ol = ol @ np.array([[math.cos(ang), math.sin(ang)], [-math.sin(ang), math.cos(ang)]])
@@ -163,8 +164,8 @@ def build(lod):
 def spec():
     return {"root": {},
             "drum": {"pivot": (0.0, AX_Y, AX_Z), "export_name": "drum"},
-            "crank": {"pivot": (1.0, AX_Y, AX_Z), "export_name": "crank"},
-            "pawl": {"pivot": (-0.58, -0.30, AX_Z + 0.27), "export_name": "pawl"},
+            "crank": {"pivot": (0.98, AX_Y, AX_Z), "export_name": "crank"},
+            "pawl": {"pivot": (-0.50, -0.30, AX_Z + 0.27), "export_name": "pawl"},
             "brake": {"pivot": (-FX, 0.12, AX_Z + 0.22), "export_name": "brake_lever"},
             "rope": {"pivot": tuple(ROPE_TOP), "export_name": "rope"},
             "chest": {"pivot": (PIT[0], PIT[1], Z_BOTTOM), "export_name": "chest"},

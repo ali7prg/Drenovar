@@ -33,6 +33,42 @@ def main():
         meshes[pn] = (v, f)
         print(pn, "mesh", len(v), len(f), f"{time.time() - t0:.1f}s")
     extra = getattr(spec, "shape_test_extra", None)
+    if "--full" in sys.argv:
+        import gfur
+        rng = np.random.default_rng(spec.SEED)
+        hv, hf = meshes["bind"]
+        clumps = spec.fur(sk, hv, hf, pans, rng)
+        if spec.details.__code__.co_argcount >= 4:
+            dets = spec.details(sk, hv, hf, pans)
+        else:
+            dets = spec.details(sk)
+        segs = [(b, sk.head(b), sk.tail(b)) for b in sk.deform if b != "root"]
+
+        def nearest(c):
+            best, bb = 9.0, None
+            for b, a, t in segs:
+                ab = t - a
+                u = np.clip(((c - a) @ ab) / (ab @ ab), 0, 1)
+                d = np.linalg.norm(c - (a + u * ab))
+                if d < best:
+                    best, bb = d, b
+            return bb
+        pieces = [(gfur.clump_mesh(c), nearest(c.root)) for c in clumps]
+        pieces += [(d["mesh"], d["bone"]) for d in dets]
+        print("clumps", len(clumps), "details", len(dets))
+
+        def extra(sk_, pose_key, name):
+            pose = poses.get(pose_key)
+            V, F = [], []
+            off = 0
+            for (v, f, _uv), b in pieces:
+                if pose is not None and b is not None:
+                    T = pose[b] @ np.linalg.inv(sk.rest[b])
+                    v = v @ T[:3, :3].T + T[:3, 3]
+                V.append(v)
+                F.append(f + off)
+                off += len(v)
+            return np.vstack(V), np.vstack(F)
     rows = []
     for name, pan in pans.items():
         pose_key = "side" if (name == "side" and "side" in meshes) else "bind"

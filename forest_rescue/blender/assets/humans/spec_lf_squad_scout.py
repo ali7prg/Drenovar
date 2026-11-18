@@ -150,21 +150,11 @@ def garments(ctx):
     # bow slung across the back (default)
     bc = np.array([0.0, 0.17, 1.30])
     Mb = PR.frame(bc, (0.0, -1.0, 0.0), (0.55, 0.0, 0.84))
-    bow = PR.place(PR.bow({"type": "rigid", "bone": "UpperChest"}, length=1.20), Mb)
-    bow.name = "bow_slung"
-    bow.meta["optional"] = "bow_slung"
-    bow.meta["default_on"] = False      # the sheet shows no bow on the body; game enables it
-    bow.meta["no_compare"] = True
+    bow = PR.place(PR.bow({"type": "rigid", "bone": "LeftProp"}, length=1.20), Mb)
+    bow.name = "bow"
+    bow.meta["no_compare"] = True        # the sheet shows the bow only as a separate inset
+    bow.meta["prop"] = {"bone": "LeftProp", "carry_bone": "UpperChest", "carry_place": Mb,
+                        "hand_place": PR.bone_frame(ctx.B, "LeftProp", roll_up=(0, 0, 1.0)),
+                        "held": ["lf_soldier_guard", "lf_soldier_attack", "lf_soldier_hit", "lf_soldier_death"]}
     out.append(bow)
     return out
-
-
-def optional_parts(ctx):
-    B = ctx.B
-    M = PR.bone_frame(B, "LeftProp", roll_up=(0, 0, 1.0))
-    bow = PR.place(PR.bow({"type": "rigid", "bone": "LeftProp"}, length=1.20), M)
-    bow.name = "bow_drawn"
-    bow.meta["optional"] = "bow_drawn"
-    bow.meta["default_on"] = False
-    bow.meta["no_compare"] = True
-    return [bow]

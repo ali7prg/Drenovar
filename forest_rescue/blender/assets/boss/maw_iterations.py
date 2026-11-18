@@ -26,4 +26,21 @@ ITERATIONS = [
          "-> 61 % texel use",
          "teeth x1.3 length / x1.22 radius; fuller jaw cross-sections (super-ellipse 2.5-3.2)",
          "tibialis volume on the shin front; projection blur 0.45 px; scale relief +40 %, darker head grooves"]},
+    {"iter": "03", "build": "region-seam UVs (61 % texel use); renders lost in a container restart, all its changes "
+                            "are part of iter04",
+     "diffs": ["(no compare images: the QA job was killed by a container restart; front iter02 reviewed instead)",
+               "front: premaxillary teeth read as 2 fangs per side instead of a small row across the snout",
+               "front: hands hang too low; claws look like straight spikes; burnt-umber chest too dark",
+               "review (coordinator): head/skin must follow the close-up — large rough olive-iron/charcoal scales, "
+               "burnt-umber throat, bigger irregular ivory teeth, taller shorter snout with visible nostril, "
+               "pronounced brow osteoderms, clearly visible pale scar over the LEFT eye"],
+     "fixes": ["6 small premaxillary teeth per side across the snout front; all other teeth x1.5 longer with random "
+               "length (0.8-1.25) and tilt, brighter ivory",
+               "snout 5.6 cm shorter and up to 5 cm taller; large nostril pits (17x12 cm) with raised rims",
+               "brow knobs x1.4, skull-roof osteoderm rows x1.3",
+               "scar: raised ridge 2.2-2.8 cm radius from the skull roof over the LEFT eye to the cheek, pale pink "
+               "(0.90,0.76,0.74), 7.5 cm wide mask with fibrous streaks",
+               "per-scale olive-iron/charcoal alternation + bronze scale centres on head/neck/back; darker head "
+               "grooves; burnt-umber (0.50,0.27,0.13) throat/chest band; hands raised for the front stance; "
+               "projection mask erosion 3 px (no background bleed)"]},
 ]

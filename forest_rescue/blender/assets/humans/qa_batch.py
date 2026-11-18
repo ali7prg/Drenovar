@@ -11,9 +11,10 @@ import humans_make
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
 tag = argv[0]
 res = {}
-for asset in argv[1:]:
+for item in argv[1:]:
+    asset, _, t = item.partition(":")
     try:
-        r = humans_make.make(asset, tag=tag, clips=False, export=False)
+        r = humans_make.make(asset, tag=t or tag, clips=False, export=False)
         res[asset] = {k: r.get(k) for k in ("iou", "colour_error")}
     except Exception:
         traceback.print_exc()

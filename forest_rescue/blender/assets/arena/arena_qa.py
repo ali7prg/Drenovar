@@ -81,7 +81,7 @@ def run(iter_tag, placed, banners, mods, floor):
     try_boss(col)
     sc = bpy.context.scene
     # camera reproducing the 08 framing: from the south, ~32 deg elevation, centre slightly behind middle
-    for name, (loc, look, lens) in {"iter{}_assembled_q34": ((0.0, -50.0, 31.0), (0.0, 2.0, 0.0), 30.0)}.items():
+    for name, (loc, look, lens) in {"iter{}_assembled_q34": ((0.0, -50.0, 31.0), (0.0, 1.0, 0.0), 44.0)}.items():
         render.perspective_camera(loc, look, lens=lens, res=(1536, 716))
         rgba = render.render_rgba()
         ref = refs.crop(refs.load(REF), TOP_BOX)

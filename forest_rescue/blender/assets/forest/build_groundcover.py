@@ -146,10 +146,11 @@ def build(name, it, export=True, qa=True, samples=20):
         lo, hi = core.bounds([objs[0]])
         for lod, o in enumerate(objs):
             o.parent = ve
-            o.location = (0, lod * spacing, 0)
+            o.location = (0, 0, 0)
             exp.append(o)
         allm |= set(res.mats)
         meta_vars[vn] = {"nodes": [o.name for o in objs], "tris": {f"LOD{l}": core.tri_count(objs[l]) for l in range(3)},
+                         "display_offset_gltf": fbuild.to_gltf((i * spacing, 0, 0)),
                          "materials": {f"LOD{l}": [m.name for m in objs[l].data.materials] for l in range(3)},
                          "height_m": round(float(hi[2]), 2),
                          "footprint_radius_m": round(float(max(-lo[0], hi[0], -lo[1], hi[1])), 2),
@@ -166,7 +167,8 @@ def build(name, it, export=True, qa=True, samples=20):
             "bones": 0, "materials": sorted(set(gi["materials"])), "glb_images": gi["images"],
             "texture_mode": "external shared files next to the GLB (relative URIs)",
             "wind": WIND_DOC if anywind else "static (no COLOR_0)",
-            "layout_note": "Node translations are preview offsets only; mesh origin = ground contact centre.",
+            "layout_note": "Variants along +X (display_offset_gltf); LOD0/1/2 of a variant share its origin (show one per "
+                           "distance). Mesh origin = ground contact centre.",
             "build": f"python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_groundcover.py {name}"}
     if name in ("fallen_trunk", "moss_rock"):
         meta["collision"] = "use a convex hull / capsule of LOD2 (see footprint_radius_m, height_m)"

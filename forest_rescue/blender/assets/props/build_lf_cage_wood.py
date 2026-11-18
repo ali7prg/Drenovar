@@ -80,6 +80,24 @@ def build(lod):
                            a1=math.pi / 4 + 2 * math.pi, smooth=False)
             B.add("root", "finials", "oak", fin.transformed(M4(None, (x, y, p["post_top"] + p["cap_h"]))))
             tops.append((x, y))
+    # emerald leaf inlays on the corner posts (drawing: green leaf emblems at mid height)
+    leaf = mo.leaf_shape((0.0, -0.085), (0.0, 0.085), 0.03, n=10)
+    cvl = mo.Canvas((-0.05, -0.1, 0.05, 0.1), ppm=4000)
+    cvl.line(np.array([[0, -0.08], [0, 0.07]]), 0.004)
+    for k in range(3):
+        y = -0.04 + k * 0.035
+        cvl.line(np.array([[0, y], [0.022, y + 0.025]]), 0.003)
+        cvl.line(np.array([[0, y], [-0.022, y + 0.025]]), 0.003)
+    for (sx, sy, face) in ((-1, -1, "front"), (1, -1, "front"), (-1, -1, "side"), (-1, 1, "side")):
+        x, y = sx * pc, sy * pc
+        pl = pk.extrude(leaf, 0.01, chamfer=0.003)
+        if face == "front":
+            M = M4(Rx(math.pi / 2), (x, y - post / 2 - 0.0, 1.72))
+        else:
+            M = M4(Rz(-math.pi / 2) @ Rx(math.pi / 2), (x - post / 2, y, 1.72))
+        B.add("root", "post_inlays", "enamel", pl.transformed(M), max_lod=1,
+              meta={"motif": [{"mask": cvl.mask(0.0008), "bbox": (-0.05, -0.1, 0.05, 0.1), "isl": (2,), "depth": 0.002, "mode": "raise"}],
+                    "no_paint": 1})
     # hinge post (left jamb of the door, seen from outside)
     hp = pk.beam((hx, front, 0.0), (hx, front, p["beam_z0"]), 0.24, 0.26, chamfer=(0.025 if lod < 2 else 0.0), up=(0, 1, 0))
     B.add("root", "hinge_post", "oak", hp)

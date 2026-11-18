@@ -67,13 +67,18 @@ def build_model(spec, opt):
     gb.log("body LOD0", core.tri_count(body))
     B.body_hi = body_hi
     # fur clumps (roots on the hi-res surface)
+    gfur.TAPER = getattr(spec, "CLUMP_TAPER", 0.9)
+    B.field = F
     B.clumps = spec.fur(sk, hv, hf, B.pans, rng)
     cV, cF, cU, cI = gfur.clumps_to_mesh(B.clumps)
     B.clump_faces = 6 * (len(B.clumps[0].pts) - 2) + 3 if B.clumps else 0
     clump_obj = gb.obj_from("clumps", cV, cF, cU)
     gb.log("clumps", len(B.clumps), "tris", len(cF))
     # details
-    B.details = spec.details(sk)
+    if spec.details.__code__.co_argcount >= 4:
+        B.details = spec.details(sk, hv, hf, B.pans)
+    else:
+        B.details = spec.details(sk)
     dV, dF, dU, dI = gbody.merge([d["mesh"] for d in B.details])
     B.detail_face_ids = dI
     det_obj = gb.obj_from("details", dV, dF, dU)
@@ -127,7 +132,7 @@ def clump_lod_mesh(B, li):
             L = np.array([B.clumps[i].length for i in gi]) * rng.uniform(0.75, 1.25, len(gi))
             idx += [gi[j] for j in np.argsort(-L)[:n]]
         idx = sorted(idx)
-    meshes = [gfur.clump_mesh(B.clumps[i], width_scale=spec.CLUMP_WIDTH[li]) for i in idx]
+    meshes = [gfur.clump_mesh(B.clumps[i], width_scale=spec.CLUMP_WIDTH[li], taper=gfur.TAPER) for i in idx]
     V, F, U, ids = gbody.merge(meshes)
     fpc = B.clump_faces
     uv = np.concatenate([B.clump_uv[i * fpc * 3:(i + 1) * fpc * 3] for i in idx])
@@ -240,6 +245,15 @@ def texture(B, opt):
     lab[T.valid] = tri_lab[T.tri[T.valid]]
     B.tex_labels = lab
     gb.log("projection done; known fraction", float((w > 0.02)[T.valid].mean()))
+    if hasattr(spec, "TIP_LIGHTEN"):
+        # hair gets lighter away from the skin (distance sampled from the body SDF)
+        stren, dist, lc = spec.TIP_LIGHTEN
+        fur_lbl = [k for k, v in B.label_names.items() if v.startswith("fur_") and v not in ("fur_moss",)]
+        fm = np.isin(lab, fur_lbl)
+        if fm.any():
+            dsk = np.clip(B.field.sample(T.pos[fm]), 0, None)
+            k = (stren * np.clip(dsk / dist, 0, 1))[:, None]
+            col[fm] = col[fm] * (1 - k) + np.asarray(lc) * k
     col = spec.texture_overrides(B, col, T, lab) if hasattr(spec, "texture_overrides") else col
     # normal map: fur strands on body+fur, smooth on hard details
     flow = spec.fur_flow(B, T) if hasattr(spec, "fur_flow") else None
@@ -248,7 +262,11 @@ def texture(B, opt):
     P = T.pos[yy, xx]
     furry = np.isin(lab[yy, xx], [0] + [100 + i for i in range(len(B.groups))])
     H = np.zeros(valid.shape)
-    if flow is not None:
+    if hasattr(spec, "height_fn"):
+        hgt = spec.height_fn(P, T.nrm[yy, xx])
+        plate = np.isin(lab[yy, xx], [k for k, v in B.label_names.items() if v in ("plate", "spike")])
+        H[yy, xx] = np.where(furry | plate, hgt, 0.5)
+    elif flow is not None:
         D = flow(P, T.nrm[yy, xx])
         h = gtex.strand_height(P, D, scale=getattr(spec, "STRAND_SCALE", 1.0))
         H[yy, xx] = np.where(furry, h, 0.5)
@@ -332,7 +350,7 @@ def calibrate(B, samples=24):
     rgba = gb.render_view(view, samples=samples)
     both = view.mask & (rgba[..., 3] > 0.5)
     lum = np.array([0.299, 0.587, 0.114])
-    g = float((view.image[both] @ lum).mean() / max((rgba[..., :3][both] @ lum).mean(), 1e-3))
+    g = float(np.median(view.image[both] @ lum) / max(np.median(rgba[..., :3][both] @ lum), 1e-3))
     gain = np.clip(np.array([g, g, g]), 0.85, 1.45)    # luminance only (keeps the painted hue)
     gb.apply_pose(B.arm, B.sk, None)
     col = np.clip(B.base_col * gain, 0, 1)
@@ -367,6 +385,7 @@ def main(spec):
         if opt["godot"]:
             gqa.godot(B)
             gqa.old_vs_new(B)
+            gqa.godot_vs_sheet(B)
         summary = {"compare": getattr(B, "compare_res", None), "strip": getattr(B, "strip", None),
                    "videos": getattr(B, "videos", None), "godot": getattr(B, "godot_log", None),
                    "albedo_gain": getattr(B, "albedo_gain", None), "clips": B.clip_meta,
@@ -472,6 +491,24 @@ def animate(B):
     B.clip_desc = clips
     for name, (frames, loop) in clips.items():
         poses = [C.compose(f) for f in frames]
+        if name not in ("Walk", "Run", "Death"):
+            # planted feet must reach the ground: lower the body where a leg is overstretched
+            from scipy import ndimage as ndi
+            for it in range(3):
+                err = np.zeros(len(frames))
+                for i, (f, p) in enumerate(zip(frames, poses)):
+                    for leg, ch in spec.LEGS.items():
+                        tgt = np.asarray(f["feet"][leg]["pos"], float)
+                        if abs(tgt[2] - C.neutral[leg][2]) < 1e-4:
+                            err[i] = max(err[i], float(np.linalg.norm(p[ch[4]][:3, 3] - tgt)))
+                if err.max() < 0.008:
+                    break
+                corr = np.maximum(ndi.gaussian_filter1d(ndi.maximum_filter1d(err, 5), 1.2), err) * 1.1
+                for f, c in zip(frames, corr):
+                    b = list(f.get("body", (0, 0, 0, 0, 0, 0)))
+                    b[2] -= float(c)
+                    f["body"] = tuple(b)
+                poses = [C.compose(f) for f in frames]
         reach = 0.0
         for f, p in zip(frames, poses):
             for leg, ch in spec.LEGS.items():
@@ -586,7 +623,9 @@ def export(B):
         o.hide_set(False)
         o.hide_render = False
     core.export_glb(path, objs, extra={"export_animation_mode": "ACTIONS"})
-    hidden = [o.name for o in getattr(B, "level_objs", [])]
+    # LOD1/LOD2 and level nodes hidden by default (KHR_node_visibility, honoured by Godot 4.6): the current
+    # game instantiates the scene without LOD logic, so only LOD0 must render unless visibility ranges are set.
+    hidden = [o.name for o in getattr(B, "level_objs", [])] + [o.name for o in B.lods[1:]]
     extras = {n: {"loop": m["loop"], "markers": m.get("markers", {}), "seconds": m["seconds"]}
               for n, m in B.clip_meta.items()}
     gglb.postprocess(path, hidden_nodes=hidden, anim_extras=extras,
@@ -617,6 +656,9 @@ def export(B):
         "sockets": {k: glb_coords(v) for k, v in spec.sockets(B.sk).items()} if hasattr(spec, "sockets") else {},
         "levels": spec.LEVELS,
         "lod_nodes": [f"{spec.ID}_LOD{i}" for i in range(3)],
+        "lod_usage": "LOD0 visible by default; LOD1/LOD2 are hidden (KHR_node_visibility). Integration: set "
+                     "visible=true and GeometryInstance3D.visibility_range_begin/end per LOD (suggested 0-35 m, "
+                     "35-80 m, >80 m at strategic zoom).",
         "level_nodes_hidden_by_default": hidden,
         "glb_stats": st,
         "notes": spec.NOTES,
@@ -664,11 +706,15 @@ def fix_ground_all(B, tol=0.012):
             need = np.maximum(0.0, floor - zs)
             if need.max() < 0.004 or loop:
                 break
-            need = ndi.gaussian_filter1d(ndi.maximum_filter1d(need, 5), 1.5) * 1.15
+            need = np.maximum(ndi.gaussian_filter1d(ndi.maximum_filter1d(need, 5), 1.5), need) * 1.05
             for f, c in zip(frames, need):
                 b = list(f.get("body", (0, 0, 0, 0, 0, 0)))
                 b[2] += float(c)
                 f["body"] = tuple(b)
+                for leg, ft in f.get("feet", {}).items():      # body-carried feet move with the body
+                    w = float(ft.get("body_w", 0.0))
+                    if w > 0:
+                        ft["pos"] = np.asarray(ft["pos"], float) + np.array([0, 0, c * w])
             poses = [B.composer.compose(f) for f in frames]
             B.clip_frames[name] = poses
             write_action(B.arm, B.sk, name, poses, loop)
@@ -677,13 +723,18 @@ def fix_ground_all(B, tol=0.012):
             # settled pose must rest on the ground (not float): lower the tail end if it hovers
             zs = min_z_per_frame(B, name)
             hover = zs[-1] - bind_min
-            if hover > 0.02:
+            if hover > 0.03:
                 k = len(frames)
                 for i, f in enumerate(frames):
-                    u = gclips.ss((i / (k - 1) - 0.62) / 0.12)
+                    u = gclips.ss((i / (k - 1) - 0.80) / 0.12)
+                    c = -float(hover - 0.01) * u
                     b = list(f["body"])
-                    b[2] -= float(hover - 0.005) * u
+                    b[2] += c
                     f["body"] = tuple(b)
+                    for leg, ft in f.get("feet", {}).items():
+                        w = float(ft.get("body_w", 0.0))
+                        if w > 0:
+                            ft["pos"] = np.asarray(ft["pos"], float) + np.array([0, 0, c * w])
                 poses = [B.composer.compose(f) for f in frames]
                 B.clip_frames[name] = poses
                 write_action(B.arm, B.sk, name, poses, loop)

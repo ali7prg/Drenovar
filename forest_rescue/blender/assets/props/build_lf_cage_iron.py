@@ -20,8 +20,8 @@ import propshaders as sh
 from propkit import M4, Rx, Ry, Rz
 
 ASSET = "lf_cage_iron"
-P = dict(pc=1.48, post=0.17, base_top=0.30, base_h=0.20, base_over=0.20, runner_h=0.12,
-         top_z0=2.80, top_h=0.17, fin_h=0.38, hinge_x=-0.42, door_h=2.22, door_arch=0.16, door_t=0.06,
+P = dict(pc=1.48, post=0.22, base_top=0.34, base_h=0.24, base_over=0.20, runner_h=0.12,
+         top_z0=2.78, top_h=0.21, fin_h=0.46, hinge_x=-0.42, door_h=2.22, door_arch=0.16, door_t=0.06,
          rail_z=(1.02,), knot_z=(0.92, 1.12))
 
 
@@ -76,7 +76,7 @@ def build(lod):
             po = pk.beam((x, y, bt), (x, y, p["top_z0"] + p["top_h"]), post, post, chamfer=(0.012 if lod < 2 else 0.0), up=(0, 1, 0))
             B.add("root", f"post_{sx}{sy}", "iron", po, meta=riv(0.16, [pk.rect_face_v(post, post, 0.012, f) for f in ("+N", "+B", "-N", "-B")], 0.012))
             z = p["top_z0"] + p["top_h"]
-            fin = pk.lathe(np.array([[0.1, 0], [0.1, 0.03], [0.06, 0.05], [0.07, 0.09], [0.045, 0.12], [0.06, 0.15],
+            fin = pk.lathe(np.array([[0.13, 0], [0.13, 0.04], [0.07, 0.06], [0.085, 0.11], [0.05, 0.15], [0.075, 0.19],
                                      [0.0, p["fin_h"]]]), B.seg(8, 6, 4), smooth=False)
             B.add("root", "finials", "iron", fin.transformed(M4(None, (x, y, z))))
     hx = p["hinge_x"]
@@ -85,8 +85,8 @@ def build(lod):
     # ---------------- top frame beams
     z0, th = p["top_z0"], p["top_h"]
     for i, (a, b) in enumerate([((-pc, -pc), (pc, -pc)), ((-pc, pc), (pc, pc)), ((-pc, -pc), (-pc, pc)), ((pc, -pc), (pc, pc))]):
-        be = pk.beam((a[0], a[1], z0 + th / 2), (b[0], b[1], z0 + th / 2), 0.13, th, chamfer=(0.01 if lod < 2 else 0.0), up=(0, 0, 1))
-        B.add("root", f"topbeam_{i}", "iron", be, meta=riv(0.16, [pk.rect_face_v(0.13, th, 0.01, "+N"), pk.rect_face_v(0.13, th, 0.01, "-N")], 0.012))
+        be = pk.beam((a[0], a[1], z0 + th / 2), (b[0], b[1], z0 + th / 2), 0.16, th, chamfer=(0.01 if lod < 2 else 0.0), up=(0, 0, 1))
+        B.add("root", f"topbeam_{i}", "iron", be, meta=riv(0.15, [pk.rect_face_v(0.16, th, 0.01, "+N"), pk.rect_face_v(0.16, th, 0.01, "-N")], 0.015))
     # roof ridge strap (arched) across the top + boss
     nr = B.seg(9, 5, 3)
     xs = np.linspace(-pc, pc, nr)
@@ -114,11 +114,11 @@ def build(lod):
             ca = a + aw * (k + 0.5)
             u = (xx - ca) / (aw / 2)
             top = spring + (apex - spring) * max(0.0, 1 - abs(u) ** 1.7)
-            bar = pk.rod(W2(xx, bt + 0.04), W2(xx, top), 0.016, B.seg(5, 4, 3), caps=False)
+            bar = pk.rod(W2(xx, bt + 0.04), W2(xx, top), 0.021, B.seg(5, 4, 3), caps=False)
             B.add("root", f"bars_{bi}", "iron", bar)
             if lod < 2:
                 for kz in p["knot_z"]:
-                    kn = pk.lathe(np.array([[0.016, -0.04], [0.031, -0.012], [0.031, 0.012], [0.016, 0.04]]), 5)
+                    kn = pk.lathe(np.array([[0.021, -0.045], [0.04, -0.014], [0.04, 0.014], [0.021, 0.045]]), 5)
                     B.add("root", f"knots_{bi}", "iron", kn.transformed(M4(None, W2(xx, kz))), max_lod=0)
                 fl = pk.lathe(np.array([[0.016, 0.0], [0.036, 0.03], [0.02, 0.06], [0.0, 0.13]]), 4)
                 B.add("root", f"fleurs_{bi}", "iron", fl.transformed(M4(None, W2(xx, spring - 0.18))), max_lod=0)
@@ -146,12 +146,12 @@ def build(lod):
                                                                up=(0, 1, 0) if axis == "x" else (1, 0, 0)), max_lod=0)
     # plaque above the door
     pq = np.array([[0.30 * math.cos(q), 0.24 * math.sin(q)] for q in np.linspace(0, math.pi, B.seg(14, 9, 6))])
-    plaque = pk.extrude(np.vstack([pq, [[-0.30, -0.02], [0.30, -0.02]]]), 0.035, chamfer=(0.008 if lod < 2 else 0.0))
+    plaque = pk.extrude(np.vstack([pq, [[-0.30, -0.02], [0.30, -0.02]]]), 0.04, chamfer=(0.008 if lod < 2 else 0.0))
     cv = mo.Canvas((-0.31, -0.03, 0.31, 0.25), ppm=1500)
     mo.tree_emblem(cv, (0.0, 0.11), 0.2, 0.014)
     cv.ring((0, 0.0), 0.27, 0.03)
     en = cv.mask(0.002)
-    B.add("root", "plaque", "bronze", plaque.transformed(M4(Rx(math.pi / 2), (0.62, -pc - 0.07, z0 - 0.05))),
+    B.add("root", "plaque", "bronze", plaque.transformed(M4(Rx(math.pi / 2), (0.5, -pc - 0.12, z0 - 0.30))),
           meta={"enamel": {"mask": 1 - en, "bbox": (-0.31, -0.03, 0.31, 0.25), "isl": [2], "colour": sh.C(52, 108, 80)},
                 "motif": [{"mask": en, "bbox": (-0.31, -0.03, 0.31, 0.25), "isl": (2,), "depth": 0.004, "mode": "raise"}]})
     # ---------------- door

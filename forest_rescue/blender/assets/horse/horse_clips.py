@@ -19,7 +19,7 @@ WALK = dict(T=1.2, v=1.30, duty=0.60, offsets={"H_L": 0.0, "F_L": 0.25, "H_R": 0
             lift={"F": 0.115, "H": 0.095}, knee=62 * DEG, fet_swing=0.75, fet_load=0.18,
             swing_pitch=0.85)
 TROT = dict(T=0.72, v=3.2, duty=0.38, offsets={"F_L": 0.0, "H_R": 0.0, "F_R": 0.5, "H_L": 0.5},
-            lift={"F": 0.24, "H": 0.19}, knee=98 * DEG, fet_swing=1.0, fet_load=0.30,
+            lift={"F": 0.19, "H": 0.17}, knee=80 * DEG, fet_swing=0.9, fet_load=0.30,
             swing_pitch=1.05)
 
 
@@ -76,10 +76,12 @@ def ears(pose, skel, l_back=0.0, r_back=0.0, l_out=0.0, r_out=0.0):
 
 
 def tail_pose(pose, skel, lift=0.0, swish=0.0, lag_swish=None, lift_chain=None):
-    """lift: rotate dock back/up; swish: lateral (+ = toward +X) distributed along the chain."""
+    """lift: raise the dock (bones 1-2); the hair (bones 3-6) hangs back down under gravity
+    so a carried tail arcs like a plume instead of rotating as a rigid stick."""
     names = [f"tail_{i:02d}" for i in range(1, 7)]
     for i, n in enumerate(names):
-        li = (lift_chain[i] if lift_chain is not None else (lift if i < 2 else lift * 0.25))
+        li = (lift_chain[i] if lift_chain is not None else
+              (lift * (0.65 if i == 0 else 0.45) if i < 2 else -lift * (0.18 + 0.05 * i)))
         if li:
             pose.toward(skel, n, (0, 1, 0.3), li)
         sw = lag_swish[i] if lag_swish is not None else swish * (0.35 + 0.15 * i)
@@ -180,11 +182,11 @@ def gait_loop(cb, G, name):
             dz = -0.030 * math.cos(4 * math.pi * (ph - duty / 2)) - 0.012
             body(pose, dx=0.004 * math.sin(2 * math.pi * ph), dz=dz,
                  pitch=0.9 * DEG * math.sin(4 * math.pi * ph), roll=1.2 * DEG * math.sin(2 * math.pi * ph))
-            neck(pose, pitch=-6 * DEG + 2.5 * DEG * math.cos(4 * math.pi * (ph - 0.1)),
-                 yaw=1.0 * DEG * math.sin(2 * math.pi * ph))
+            neck(pose, pitch=13 * DEG + 2.5 * DEG * math.cos(4 * math.pi * (ph - 0.1)),
+                 yaw=1.0 * DEG * math.sin(2 * math.pi * ph), head_pitch=-7 * DEG)
             pose.add_rot("pelvis", (0, 1, 0), 2.5 * DEG * math.sin(2 * math.pi * (ph + 0.25)))
             pose.add_rot("spine_03", (0, 1, 0), -1.5 * DEG * math.sin(2 * math.pi * (ph + 0.25)))
-            tail_base = 8 * DEG
+            tail_base = 24 * DEG
             ears(pose, cb.skel, l_back=-4 * DEG, r_back=-4 * DEG)
         else:
             # walk: two dips per stride, lateral sway, head nod synced with fore stance
@@ -193,7 +195,8 @@ def gait_loop(cb, G, name):
                  pitch=0.6 * DEG * math.sin(4 * math.pi * ph), roll=1.0 * DEG * math.sin(2 * math.pi * ph),
                  yaw=0.8 * DEG * math.sin(2 * math.pi * (ph + 0.1)))
             nod = 3.2 * DEG * math.cos(4 * math.pi * (ph - 0.30))
-            neck(pose, pitch=2 * DEG + nod, yaw=1.2 * DEG * math.sin(2 * math.pi * (ph - 0.1)))
+            neck(pose, pitch=16 * DEG + nod, yaw=1.2 * DEG * math.sin(2 * math.pi * (ph - 0.1)),
+                 head_pitch=-8 * DEG)
             pose.add_rot("pelvis", (0, 1, 0), 3.0 * DEG * math.sin(2 * math.pi * (ph + 0.05)))
             pose.add_rot("pelvis", (0, 0, 1), 2.0 * DEG * math.sin(2 * math.pi * (ph + 0.2)))
             pose.add_rot("spine_03", (0, 1, 0), -1.5 * DEG * math.sin(2 * math.pi * ph))
@@ -475,9 +478,9 @@ def look_back(cb):
         pose.ik = standing_ik(cb)
         e = env(t, 0.05, 0.62, 1.22, 1.78)
         # turn to the horse's right (-X): negative yaw about world Z
-        neck(pose, yaw=-118 * DEG * e, pitch=4 * DEG * e, w=(0.20, 0.30, 0.30, 0.20),
-             head_roll=14 * DEG * e, head_pitch=-6 * DEG * e)
-        pose.add_rot("spine_03", (0, 0, 1), -8 * DEG * e)
+        neck(pose, yaw=-172 * DEG * e, pitch=12 * DEG * e, w=(0.28, 0.30, 0.27, 0.15),
+             head_roll=24 * DEG * e, head_pitch=-8 * DEG * e)
+        pose.add_rot("spine_03", (0, 0, 1), -10 * DEG * e)
         pose.add_rot("spine_01", (0, 0, 1), 4 * DEG * e)
         body(pose, dx=0.012 * e, dy=0.02 * e, roll=1.0 * DEG * e)
         flick = bump(t, 0.85, 1.15)

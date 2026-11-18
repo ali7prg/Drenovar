@@ -71,6 +71,12 @@ func understory_asset(kind: String, asset_id: String) -> Dictionary:
 		_note(asset_id + "#" + kind, _cache[key])
 		return _cache[key]
 	var entry := _load_kit(asset_id)
+	if not entry.is_empty():
+		# Named variants (reed_v1, fern_v2 …): keep the ones matching the requested kind.
+		var matching: Array = entry.variants.filter(func(v): return String(v.get("name", "")).begins_with(kind))
+		if not matching.is_empty():
+			entry = entry.duplicate()
+			entry.variants = matching
 	if entry.is_empty():
 		entry = _legacy_detail(kind)
 	_cache[key] = entry
@@ -176,6 +182,15 @@ func _load_kit(asset_id: String) -> Dictionary:
 				var number := int(String(key).trim_prefix("v"))
 				var offset: Array = info.get("display_offset_gltf", [0, 0, 0])
 				offsets[number] = Vector3(float(offset[0]), float(offset[1]), float(offset[2]))
+	var named := {}
+	if FileAccess.file_exists(meta_path):
+		var meta: Variant = JSON.parse_string(FileAccess.get_file_as_string(meta_path))
+		if meta is Dictionary and meta.get("variants") is Dictionary:
+			named = meta.variants
+	if not named.is_empty():
+		var result_named := _load_named(files, named)
+		if not result_named.is_empty():
+			return result_named
 	for file in files:
 		var scene: Variant = load(file)
 		if not scene is PackedScene:
@@ -214,6 +229,49 @@ func _load_kit(asset_id: String) -> Dictionary:
 				lods[i] = lods[i - 1] if i > 0 and lods[i - 1] != null else lods.filter(func(m): return m != null)[0]
 		result.variants.append(_variant_entry(lods, file_label(files)))
 	return result
+
+
+## Variants described by <asset>.meta.json: {name: {nodes: [LOD0, LOD1, LOD2], display_offset_gltf}}.
+func _load_named(files: PackedStringArray, named: Dictionary) -> Dictionary:
+	var parts := {}
+	var roots: Array = []
+	for file in files:
+		var scene: Variant = load(file)
+		if not scene is PackedScene:
+			continue
+		var root: Node = scene.instantiate()
+		roots.append(root)
+		for part: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+			var transform := Transform3D.IDENTITY
+			var node: Node = part
+			while node != null and node != root:
+				if node is Node3D:
+					transform = (node as Node3D).transform * transform
+				node = node.get_parent()
+			parts[String(part.name)] = [part.mesh, transform]
+	var result := {"kit": true, "source": file_label(files), "variants": []}
+	var keys := named.keys()
+	keys.sort()
+	for key in keys:
+		var info: Dictionary = named[key]
+		var offset_list: Array = info.get("display_offset_gltf", [0, 0, 0])
+		var offset := Vector3(float(offset_list[0]), float(offset_list[1]), float(offset_list[2]))
+		var lods: Array = []
+		for node_name in info.get("nodes", []):
+			if parts.has(node_name) and parts[node_name][0] != null:
+				var transform: Transform3D = parts[node_name][1]
+				transform.origin -= offset
+				lods.append(_wind_mesh(parts[node_name][0], transform))
+		if lods.is_empty():
+			continue
+		while lods.size() < 3:
+			lods.append(lods[-1])
+		var entry := _variant_entry(lods.slice(0, 3), result.source)
+		entry.name = String(key)
+		result.variants.append(entry)
+	for root in roots:
+		root.free()
+	return result if not result.variants.is_empty() else {}
 
 
 func file_label(files: PackedStringArray) -> String:

@@ -19,7 +19,6 @@ ROLE = "captain"
 CLASS_GROUP = {"tabard": "garment"}
 BUDGET = {"head": 2500}
 FACE_PAINT = {"lip_tint": (1.03, 0.9, 0.88), "brow_thick": 0.003, "iris": (0.25, 0.18, 0.12)}
-HULL_K = 0.010
 
 L = dict(
     crown=1.745, top=1.79, eye=1.640, mouth=1.570, chin=1.533, neck=1.478,
@@ -125,22 +124,11 @@ def garments(ctx):
     # sheathed: blade inside the scabbard (flip so the blade points down along -Y)
     Mflip = M @ np.diag([1.0, -1.0, -1.0, 1.0])
     Mflip[:3, 3] = hilt + yv * 0.07
+    sw = PR.sword({"type": "rigid", "bone": "RightProp"}, blade_len=0.74)
     sw = PR.place(sw, Mflip)
-    sw.name = "sword_sheathed"
-    sw.meta["optional"] = "sword_sheathed"
-    sw.meta["default_on"] = True
+    sw.name = "sword"
+    sw.meta["prop"] = {"bone": "RightProp", "carry_bone": "Hips", "carry_place": Mflip,
+                       "hand_place": PR.bone_frame(ctx.B, "RightProp", roll_up=(0, 0, 1.0)),
+                       "held": ["lf_soldier_guard", "lf_soldier_attack", "lf_soldier_hit", "lf_soldier_death"]}
     out.append(sw)
     return out
-
-
-def optional_parts(ctx):
-    """Drawn sword in the right hand (RightProp); game toggles it with sword_sheathed."""
-    B = ctx.B
-    h, t = B["RightProp"]
-    M = PR.bone_frame(B, "RightProp", roll_up=(0, 0, 1.0))
-    sw = PR.place(PR.sword({"type": "rigid", "bone": "RightProp"}, blade_len=0.74), M)
-    sw.name = "sword_drawn"
-    sw.meta["optional"] = "sword_drawn"
-    sw.meta["default_on"] = False
-    sw.meta["no_compare"] = True
-    return [sw]

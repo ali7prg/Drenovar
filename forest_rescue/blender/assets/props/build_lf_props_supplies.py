@@ -31,11 +31,11 @@ LAYOUT = {"crate_closed": (-3.6, 0), "crate_open": (-2.75, 0), "blankets": (-1.9
           "bread": (0.35, 0), "bandages": (0.95, 0), "arrows": (1.6, 0), "chest": (2.75, 0)}
 REF = {"crate_closed": (20, 742, 212, 900), "crate_open": (212, 698, 392, 902), "blankets": (398, 748, 632, 892),
        "sacks": (622, 726, 846, 930), "coins": (842, 776, 1022, 892), "bread": (88, 906, 322, 1008),
-       "bandages": (392, 918, 632, 1010), "arrows": (966, 752, 1172, 978), "chest": (1132, 700, 1512, 992)}
+       "bandages": (392, 918, 632, 998), "arrows": (976, 752, 1136, 978), "chest": (1132, 700, 1512, 992)}
 X0 = {"crate_closed": [-0.7, 0.45, 0, 3.0, 2.4, 0, 0], "crate_open": [-0.6, 0.45, 0, 3.0, 2.4, 0, 0],
       "blankets": [-0.45, 0.5, 0, 3.0, 2.4, 0, 0], "sacks": [-0.3, 0.35, 0, 3.0, 2.4, 0, 0],
       "coins": [-0.3, 0.6, 0, 1.5, 2.4, 0, 0], "bread": [-0.3, 0.45, 0, 2.0, 2.4, 0, 0],
-      "bandages": [-0.4, 0.5, 0, 2.0, 2.4, 0, 0], "arrows": [-0.2, 0.55, 0, 3.0, 2.4, 0, 0], "chest": [-0.55, 0.42, 0, 3.5, 2.4, 0, 0]}
+      "bandages": [-0.4, 0.5, 0, 2.0, 2.4, 0, 0], "arrows": [-0.55, 0.75, 0, 3.0, 2.4, 0, 0], "chest": [-0.55, 0.42, 0, 3.5, 2.4, 0, 0]}
 TRIQ = None
 
 
@@ -65,10 +65,10 @@ def crate(B, node, o, open_=False):
         h = H / nrow - 0.008
         for sy in (-1, 1):
             B.add(node, f"{node}_planks", "plank", pk.beam(o + (-W / 2 + 0.06, sy * (D / 2 - 0.012), z), o + (W / 2 - 0.06, sy * (D / 2 - 0.012), z),
-                                                        0.024, h, chamfer=c))
+                                                        0.024, h, chamfer=0.0))
         for sx in (-1, 1):
             B.add(node, f"{node}_planks", "plank", pk.beam(o + (sx * (W / 2 - 0.012), -D / 2 + 0.06, z), o + (sx * (W / 2 - 0.012), D / 2 - 0.06, z),
-                                                        0.024, h, chamfer=c))
+                                                        0.024, h, chamfer=0.0))
     B.add(node, f"{node}_bottom", "plank", pk.beam(o + (-W / 2 + 0.02, 0, 0.012), o + (W / 2 - 0.02, 0, 0.012), D - 0.04, 0.024))
     if not open_:
         for sx in (-1, 1):   # diagonal X braces on the front
@@ -76,7 +76,7 @@ def crate(B, node, o, open_=False):
                                                         0.012, 0.05, chamfer=0.004))
         for k in range(4):
             y = -D / 2 + (k + 0.5) * D / 4
-            B.add(node, f"{node}_lid", "plank", pk.beam(o + (-W / 2, y, H + 0.012), o + (W / 2, y, H + 0.012), D / 4 - 0.006, 0.024, chamfer=c))
+            B.add(node, f"{node}_lid", "plank", pk.beam(o + (-W / 2, y, H + 0.012), o + (W / 2, y, H + 0.012), D / 4 - 0.006, 0.024, chamfer=0.0))
         for x in (-W / 2 + 0.07, W / 2 - 0.07):
             B.add(node, f"{node}_straps", "iron", pk.beam(o + (x, -D / 2 - 0.004, H + 0.026), o + (x, D / 2 + 0.004, H + 0.026), 0.04, 0.006),
                   meta={"rivets": {"du": 0.09, "v": [pk.rect_face_v(0.04, 0.006, 0.0, "+B")], "r": 0.007}})
@@ -89,7 +89,7 @@ def crate(B, node, o, open_=False):
         for sy in (-1, 1):
             for zz in (0.03, H - 0.03):
                 B.add(node, f"{node}_brackets", "iron", pk.beam(o + (sx * (W / 2 - 0.0), sy * (D / 2 - 0.0), zz - 0.03), o + (sx * (W / 2), sy * (D / 2), zz + 0.03),
-                                                             0.075, 0.075, chamfer=0.004), max_lod=1)
+                                                             0.075, 0.075, chamfer=0.0), max_lod=0)
 
 
 def crate_lid(B, node, o):
@@ -97,7 +97,7 @@ def crate_lid(B, node, o):
     o = np.asarray(o, float)
     for k in range(4):
         y = -D / 2 + (k + 0.5) * D / 4
-        B.add(node, f"{node}_planks", "plank", pk.beam(o + (-W / 2, y, H + 0.012), o + (W / 2, y, H + 0.012), D / 4 - 0.006, 0.024, chamfer=0.006))
+        B.add(node, f"{node}_planks", "plank", pk.beam(o + (-W / 2, y, H + 0.012), o + (W / 2, y, H + 0.012), D / 4 - 0.006, 0.024, chamfer=0.0))
     for x in (-W / 2 + 0.07, W / 2 - 0.07):
         B.add(node, f"{node}_straps", "iron", pk.beam(o + (x, -D / 2, H + 0.026), o + (x, D / 2, H + 0.026), 0.04, 0.006))
 
@@ -132,7 +132,7 @@ def sack(B, node, o, open_=False, seed=0):
         r = r * (1 + 0.05 * np.sin(th * 3 + seed) + 0.03 * np.sin(th * 7 + v * 6))
         z = z - 0.02 * np.cos(th) * (v > 0.95)
         return np.stack([o[0] + r * np.cos(th), o[1] + r * np.sin(th), o[2] + z], -1)
-    body = pk.grid(fn, 20, 10, Lu=2 * math.pi * R, Lv=H, wrap_u=True)
+    body = pk.grid(fn, 16, 8, Lu=2 * math.pi * R, Lv=H, wrap_u=True)
     bottom = pk.orient_toward(pk.lathe(np.array([[0.0, 0.0], [R * 0.8, 0.0]]), 20).transformed(M4(None, o)), (0, 0, -1))
     m = triq_motif(0.06, 0.001, "cut", isl=(0,), colour=sh.C(70, 50, 32))
     m["bbox"] = (2 * math.pi * R * 0.75 - 0.06, H * 0.35 - 0.06, 2 * math.pi * R * 0.75 + 0.06, H * 0.35 + 0.06)
@@ -156,34 +156,33 @@ def build(lod):
         blanket(B, "blankets", L["blankets"], k)
     sack(B, "sacks", L["sacks"] + (-0.12, 0.1, 0), False, 1)
     sack(B, "sacks", L["sacks"] + (0.15, -0.08, 0), True, 2)
-    # coins: three stacks + loose coins (stack = one cylinder with groove texture)
+    # coins: tight cluster as drawn - three stacks, loose coins, one upright coin in front
     cs = B.seg(14, 10, 7)
-    for k, (dx, dy, n) in enumerate(((0.0, 0.05, 6), (-0.09, -0.04, 3), (0.08, -0.05, 4))):
-        h = n * 0.0062
-        st = pk.extrude(pk.circle(0.032, cs), h, chamfer=0.0012)
+    for k, (dx, dy, n) in enumerate(((0.0, 0.06, 5), (-0.075, 0.0, 2), (0.075, 0.005, 3))):
+        st = pk.extrude(pk.circle(0.036, cs), n * 0.0068, chamfer=0.0)
         B.add("coins", "coin_stacks", "bronze", st.transformed(M4(None, L["coins"] + (dx, dy, 0))),
-              meta={"motif": [triq_motif(0.032, 0.0008, "raise")]})
-    for k, (dx, dy, a) in enumerate(((-0.16, 0.06, 0.1), (0.15, 0.07, 0.3), (-0.02, -0.12, 0.0), (0.16, -0.12, 0.2))):
-        c = pk.extrude(pk.circle(0.032, cs), 0.0062, chamfer=0.0012)
-        B.add("coins", "coin_loose", "bronze", c.transformed(M4(Rx(a), L["coins"] + (dx, dy, 0.004 + 0.03 * math.sin(a)))),
-              meta={"motif": [triq_motif(0.032, 0.0008, "raise")]})
+              meta={"motif": [triq_motif(0.036, 0.0008, "raise")]})
+    for k, (dx, dy, a, z) in enumerate(((-0.12, -0.05, 0.12, 0.004), (0.13, -0.06, 0.08, 0.004), (0.02, -0.035, 1.25, 0.034))):
+        c = pk.extrude(pk.circle(0.036, cs), 0.0068, chamfer=0.0)
+        B.add("coins", "coin_loose", "bronze", c.transformed(M4(Rx(a), L["coins"] + (dx, dy, z))),
+              meta={"motif": [triq_motif(0.036, 0.0008, "raise")]})
     # bread loaves
     for k, (dx, dy, s) in enumerate(((-0.12, 0.0, 1.0), (0.13, 0.04, 0.92))):
         def deform(P, u, v, s=s):
             P = P.copy()
             P[..., 2] = np.where(P[..., 2] < 0, P[..., 2] * 0.25, P[..., 2])
             return P
-        e = pk.ellipsoid((dx, dy, 0.025), (0.13 * s, 0.1 * s, 0.085 * s), nu=B.seg(16, 10, 8), nv=B.seg(8, 6, 4), deform=deform)
+        e = pk.ellipsoid((dx, dy, 0.025), (0.13 * s, 0.1 * s, 0.085 * s), nu=B.seg(12, 9, 7), nv=B.seg(6, 5, 4), deform=deform)
         cv = mo.Canvas((0, 0, 2 * math.pi * 0.115, math.pi * 0.105), ppm=1500)
         for j in range(3):
             cv.line(np.array([[0.25 + j * 0.06, 0.24], [0.32 + j * 0.06, 0.29]]), 0.008)
         B.add("bread", "loaves", "bread", e.transformed(M4(Rz(0.4 * k), L["bread"])),
               meta={"motif": [{"mask": cv.mask(0.002), "bbox": (0, 0, 2 * math.pi * 0.115, math.pi * 0.105), "isl": (0,), "depth": 0.006, "mode": "cut"}]})
     # bandages: two rolls + loose tail
-    for k, (dx, dy, a) in enumerate(((-0.1, 0.02, 0.25), (0.11, -0.03, -0.15))):
+    for k, (dx, dy, a) in enumerate(((-0.09, 0.03, 0.05), (0.09, -0.02, -0.05))):
         roll = pk.rod((-0.075, 0, 0.045), (0.075, 0, 0.045), 0.045, B.seg(14, 9, 6))
         B.add("bandages", "rolls", "linen", roll.transformed(M4(Rz(a), L["bandages"] + (dx, dy, 0))))
-    tail = pk.beam(L["bandages"] + (0.16, -0.05, 0.003), L["bandages"] + (0.32, -0.12, 0.003), 0.13, 0.004)
+    tail = pk.beam(L["bandages"] + (0.17, -0.05, 0.003), L["bandages"] + (0.33, -0.11, 0.003), 0.13, 0.004)
     B.add("bandages", "tail", "linen", tail)
     # arrows: bundle of 8 tied with cord
     rng = np.random.RandomState(4)
@@ -191,21 +190,22 @@ def build(lod):
         a = 2 * math.pi * k / 8
         off = np.array([0.0, 0.022 * math.cos(a), 0.022 * math.sin(a) + 0.06])
         tilt = rng.uniform(-0.05, 0.05)
-        p0 = L["arrows"] + off + np.array([-0.38, 0, 0.0]) + np.array([0, tilt * 2, 0])
-        p1 = L["arrows"] + off + np.array([0.38, 0, 0.0]) + np.array([0, -tilt * 2, 0])
+        offy = np.array([0.022 * math.cos(a), 0.0, 0.022 * math.sin(a) + 0.06])
+        p0 = L["arrows"] + offy + np.array([tilt * 2, 0.38, 0.0])
+        p1 = L["arrows"] + offy + np.array([-tilt * 2, -0.38, 0.0])
         B.add("arrows", "shafts", "plank", pk.rod(p0, p1, 0.006, 5))
         head = pk.lathe(np.array([[0.0, 0.0], [0.014, 0.012], [0.0, 0.07]]), 4)
-        B.add("arrows", "heads", "iron", head.transformed(M4(Ry(math.pi / 2), p1)))
+        B.add("arrows", "heads", "iron", head.transformed(M4(Rx(math.pi / 2), p1)))
         for f in range(3 if lod < 2 else 0):
             fa = a + f * 2 * math.pi / 3
-            nrm = np.array([0, math.cos(fa), math.sin(fa)])
-            fl = pk.Piece(np.array([p0 + (0.02, 0, 0), p0 + (0.14, 0, 0), p0 + (0.12, 0, 0) + nrm * 0.022, p0 + (0.03, 0, 0) + nrm * 0.03]))
+            nrm = np.array([math.cos(fa), 0, math.sin(fa)])
+            fl = pk.Piece(np.array([p0 + (0, -0.02, 0), p0 + (0, -0.14, 0), p0 + (0, -0.12, 0) + nrm * 0.022, p0 + (0, -0.03, 0) + nrm * 0.03]))
             fl.add_face((0, 1, 2, 3), [(0, 0), (0.12, 0), (0.1, 0.022), (0.01, 0.03)], 0, False, 0)
             fl.add_face((3, 2, 1, 0), [(0.01, 0.03), (0.1, 0.022), (0.12, 0), (0, 0)], 1, False, 0)
             B.add("arrows", "fletching", "feather", fl, max_lod=1)
     for x in (-0.12, 0.08):
-        cord = pk.tube(np.array([L["arrows"] + (x, 0.032 * math.cos(t), 0.06 + 0.032 * math.sin(t)) for t in np.linspace(0, 2 * math.pi, 10, endpoint=False)]),
-                       0.006, 4, closed_path=True, up=(1, 0, 0))
+        cord = pk.tube(np.array([L["arrows"] + (0.032 * math.cos(t), x, 0.06 + 0.032 * math.sin(t)) for t in np.linspace(0, 2 * math.pi, 10, endpoint=False)]),
+                       0.006, 4, closed_path=True, up=(0, 1, 0))
         B.add("arrows", "cords", "rope", cord, meta={"rope_pitch": 0.01, "rope_circ": 0.04})
     # travel chest: body + iron bands + plaque + contents ; lid node (barrel vault)
     o = L["chest"]

@@ -194,7 +194,7 @@ func focus_camera() -> void:
 	var spot: Vector3 = game.site_anchor(site_id).get("artifact", game.target_position(site_id))
 	if spot == Vector3.INF:
 		return
-	var zoom := 30.0
+	var zoom := 24.0 if kind == "trail_cache" else 28.0
 	var view := get_viewport_rect().size
 	var right := Vector3(1, 0, -1).normalized()
 	var shift := (view.x * 0.18) * zoom / maxf(view.y, 1.0)
@@ -386,119 +386,185 @@ func draw_widget() -> void:
 	if flash > 0.0:
 		widget.draw_rect(rect, Color(flash_color, flash_color.a * flash))
 
+const BRONZE := Color("#b8894a")
+const BRONZE_LIGHT := Color("#e2b673")
+const BRONZE_DARK := Color("#6d4b22")
+const STONE := Color("#7d786e")
+const STONE_DARK := Color("#4a463f")
+const WOOD := Color("#7a4f2a")
+const WOOD_DARK := Color("#4a2e17")
+const ENGRAVE := Color("#3a2614")
+
+func stone_block(rect: Rect2) -> void:
+	widget.draw_rect(rect, STONE)
+	var rows := maxi(1, int(rect.size.y / 14.0))
+	for r in rows:
+		var y := rect.position.y + rect.size.y * float(r) / rows
+		widget.draw_line(Vector2(rect.position.x, y), Vector2(rect.end.x, y), STONE_DARK, 1.0)
+		var offset := 9.0 if r % 2 == 0 else 0.0
+		var x := rect.position.x + offset
+		while x < rect.end.x:
+			widget.draw_line(Vector2(x, y), Vector2(x, y + rect.size.y / rows), STONE_DARK, 1.0)
+			x += 22.0
+	widget.draw_rect(rect, STONE_DARK, false, 1.5)
+
+func bronze_disc(c: Vector2, r: float, lit: bool) -> void:
+	widget.draw_circle(c, r, BRONZE_DARK)
+	widget.draw_circle(c, r - 2.0, BRONZE_LIGHT if lit else BRONZE)
+	widget.draw_circle(c + Vector2(-r * 0.25, -r * 0.3), r * 0.45, Color(1, 0.92, 0.7, 0.18))
+	widget.draw_arc(c, r - 1.0, 0, TAU, 48, BRONZE_DARK, 2.0, true)
+
 func draw_rune_lock(progress: int, solved: bool) -> void:
 	var c := widget_center()
 	var spin := reset_spin * TAU * 0.5
+	widget.draw_circle(c, ring_radius(0) + 10.0, STONE_DARK)
+	widget.draw_circle(c, ring_radius(0) + 7.0, STONE)
+	for i in 24:
+		var a := TAU * float(i) / 24.0
+		widget.draw_line(c + Vector2(cos(a), sin(a)) * (ring_radius(0) + 1.0), c + Vector2(cos(a), sin(a)) * (ring_radius(0) + 9.0), STONE_DARK, 1.0)
 	for ring in 3:
 		var r := ring_radius(ring)
 		var active := ring == progress and not solved
-		widget.draw_circle(c, r, Color("#3a2c1a") if ring % 2 == 0 else Color("#2c2216"))
-		widget.draw_arc(c, r, 0, TAU, 64, Color("#d6ad62") if active else Color("#8a6a3c"), 3.0 if active else 1.6, true)
+		bronze_disc(c, r, ring < progress or solved)
 		if active:
 			var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 220.0)
-			widget.draw_arc(c, r + 3.0, 0, TAU, 64, Color(1.0, 0.8, 0.35, 0.35 * pulse), 4.0, true)
+			widget.draw_arc(c, r + 1.5, 0, TAU, 64, Color(1.0, 0.85, 0.4, 0.55 + 0.35 * pulse), 3.0, true)
 		var count := symbols.size()
 		for slot in count:
 			var symbol := String(symbols[slot])
 			var p := ring_symbol_position(ring, slot, count, spin * (1 if ring % 2 == 0 else -1))
 			var chosen := ring < progress and solution.size() > ring and String(solution[ring]) == symbol
 			if ring < progress:
-				if chosen:
-					p = c + Vector2(0, -(ring_radius(ring) - minf(widget.size.x, widget.size.y) * 0.075))
-				else:
+				if not chosen:
 					continue
-			var color := Color("#ffe39a") if chosen else (Color("#f0d9a8") if active else Color("#9c8a6a"))
-			draw_symbol(widget, symbol, p, 22.0 if ring == 0 else 18.0, color)
-	widget.draw_circle(c, ring_radius(2) * 0.42, Color("#5a4024"))
-	Art.draw_tree(widget, c, ring_radius(2) * 0.7, Color("#e9c77f") if solved else Color("#a88a52"))
-	var pointer := PackedVector2Array([c + Vector2(-9, -ring_radius(0) - 12), c + Vector2(9, -ring_radius(0) - 12), c + Vector2(0, -ring_radius(0) + 2)])
+				p = c + Vector2(0, -(ring_radius(ring) - minf(widget.size.x, widget.size.y) * 0.075))
+			draw_symbol(widget, symbol, p, 22.0 if ring == 0 else 18.0, ENGRAVE if not active else Color("#2a1608"))
+	widget.draw_circle(c, ring_radius(2) * 0.42, BRONZE_DARK)
+	Art.draw_tree(widget, c, ring_radius(2) * 0.7, Color("#f4d48e") if solved else Color("#d8b070"))
+	var pointer := PackedVector2Array([c + Vector2(-9, -ring_radius(0) - 14), c + Vector2(9, -ring_radius(0) - 14), c + Vector2(0, -ring_radius(0) + 2)])
 	widget.draw_colored_polygon(pointer, Color("#e9c77f"))
+	if solved:
+		var gem := c + Vector2(ring_radius(0) + 2.0, ring_radius(0) * 0.35)
+		widget.draw_circle(gem, 9.0, Color("#9fdc3c"))
+		widget.draw_circle(gem + Vector2(-3, -3), 3.0, Color("#eaffb0"))
 
 func draw_winch(progress: int, solved: bool) -> void:
 	var w := widget.size
-	var frame_left := Vector2(w.x * 0.18, w.y * 0.88)
-	var frame_right := Vector2(w.x * 0.62, w.y * 0.88)
-	var top := w.y * 0.22
-	var wood := Color("#8a5a32")
-	widget.draw_line(frame_left, Vector2(w.x * 0.26, top), wood, 7.0)
-	widget.draw_line(frame_right, Vector2(w.x * 0.54, top), wood, 7.0)
-	widget.draw_line(Vector2(w.x * 0.22, top), Vector2(w.x * 0.58, top), wood, 6.0)
-	var drum := Vector2(w.x * 0.40, top + 6.0)
-	widget.draw_circle(drum, 16.0, Color("#b08a5a"))
-	for i in 5:
-		widget.draw_line(drum + Vector2(-14 + i * 7, -14), drum + Vector2(-14 + i * 7, 14), Color("#6d4a26"), 1.5)
-	var drop := 0.0 if solved else (1.0 - float(progress) / 3.0) * (1.0 - reset_spin) + reset_spin * 1.0
-	var chest_y := lerpf(w.y * 0.42, w.y * 0.8, clampf(drop, 0.0, 1.0))
-	widget.draw_line(drum + Vector2(0, 14), Vector2(drum.x, chest_y - 14), Color("#d9c08a"), 2.0)
-	widget.draw_rect(Rect2(w.x * 0.26, w.y * 0.84, w.x * 0.28, 8), Color("#3a3a3a"))
-	Art.draw_chest(widget, Rect2(drum.x - 22, chest_y - 16, 44, 36))
+	var ground := w.y * 0.86
+	widget.draw_rect(Rect2(0, ground, w.x, w.y - ground), Color("#3b4a2a"))
+	var well := Rect2(w.x * 0.22, ground - 6.0, w.x * 0.36, 18.0)
+	stone_block(well)
+	widget.draw_rect(Rect2(well.position + Vector2(10, 4), Vector2(well.size.x - 20, 10)), Color("#120f0b"))
+	var top := w.y * 0.16
+	for x in [w.x * 0.2, w.x * 0.6]:
+		widget.draw_line(Vector2(x - 12, ground), Vector2(x + (8.0 if x < w.x * 0.4 else -8.0), top), WOOD_DARK, 9.0)
+		widget.draw_line(Vector2(x - 12, ground), Vector2(x + (8.0 if x < w.x * 0.4 else -8.0), top), WOOD, 6.0)
+		widget.draw_rect(Rect2(Vector2(x - 20, ground - 8), Vector2(26, 10)), Color("#5a5a5a"))
+	widget.draw_line(Vector2(w.x * 0.18, top + 8), Vector2(w.x * 0.62, top + 8), WOOD, 7.0)
+	var drum := Vector2(w.x * 0.40, top + 14.0)
+	widget.draw_rect(Rect2(drum - Vector2(34, 14), Vector2(68, 28)), Color("#a3814f"))
+	for i in 9:
+		var x := drum.x - 32 + i * 8
+		widget.draw_line(Vector2(x, drum.y - 14), Vector2(x + 4, drum.y + 14), Color("#d9c08a"), 2.0)
+	var gear := drum + Vector2(-46, 2)
+	for i in 10:
+		var a := TAU * float(i) / 10.0 + (0.0 if progress < 2 else 0.3)
+		widget.draw_line(gear + Vector2(cos(a), sin(a)) * 10.0, gear + Vector2(cos(a), sin(a)) * 16.0, Color("#3d3a36"), 4.0)
+	widget.draw_circle(gear, 11.0, Color("#56524b"))
+	var crank := drum + Vector2(46, 2)
+	var turn := float(progress) * 1.2
+	widget.draw_line(crank, crank + Vector2(cos(turn), sin(turn)) * 20.0, Color("#56524b"), 5.0)
+	widget.draw_circle(crank + Vector2(cos(turn), sin(turn)) * 20.0, 5.0, WOOD)
+	var drop := 0.0 if solved else (1.0 - float(progress) / 3.0) * (1.0 - reset_spin) + reset_spin
+	var chest_y := lerpf(w.y * 0.36, ground - 4.0, clampf(drop, 0.0, 1.0))
+	widget.draw_line(drum + Vector2(0, 14), Vector2(drum.x, chest_y - 14), Color("#e0c58e"), 2.5)
+	Art.draw_chest(widget, Rect2(drum.x - 24, chest_y - 18, 48, 38))
 	var steps := ["brake", "pawl", "raise"]
 	for i in 3:
-		var p := Vector2(w.x * 0.80, w.y * (0.24 + 0.27 * i))
-		var done := i < progress
-		widget.draw_circle(p, 22.0, Color("#3b2d1c") if not done else Color("#5c4a20"))
-		widget.draw_arc(p, 22.0, 0, TAU, 32, Color("#e9c77f") if done else Color("#8a6a3c"), 2.0, true)
-		draw_symbol(widget, steps[i], p, 26.0, Color("#ffe39a") if done else Color("#d8c39a"))
+		var p := Vector2(w.x * 0.83, w.y * (0.2 + 0.28 * i))
+		var done := i < progress or solved
+		bronze_disc(p, 22.0, done)
+		draw_symbol(widget, steps[i], p, 26.0, ENGRAVE)
+		widget.draw_string(get_theme_default_font(), p + Vector2(-28, 34), "%d" % (i + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#d8c39a"))
 
 func draw_paired(progress: int, solved: bool) -> void:
 	var w := widget.size
-	var y := w.y * 0.62
-	var plate_size := Vector2(w.x * 0.22, w.y * 0.22)
-	var left := Rect2(Vector2(w.x * 0.06, y - plate_size.y * 0.5), plate_size)
-	var right := Rect2(Vector2(w.x * 0.72, y - plate_size.y * 0.5), plate_size)
+	var base := Rect2(Vector2(w.x * 0.03, w.y * 0.42), Vector2(w.x * 0.94, w.y * 0.5))
+	stone_block(base)
+	var plate_size := Vector2(w.x * 0.24, w.y * 0.2)
+	var left := Rect2(Vector2(w.x * 0.06, w.y * 0.3), plate_size)
+	var right := Rect2(Vector2(w.x * 0.70, w.y * 0.3), plate_size)
+	var latch := Rect2(Vector2(w.x * 0.43, w.y * 0.12), Vector2(w.x * 0.14, w.y * 0.62))
 	for i in 2:
 		var plate: Rect2 = left if i == 0 else right
-		var pressed := plates_occupied
-		var held := progress > i
-		widget.draw_rect(plate.grow(4), Color("#4a4a46"))
-		widget.draw_rect(plate.grow(-2 if pressed else 0), Color("#8d8a80") if not held else Color("#c7a65a"))
-		widget.draw_rect(plate, Color("#2b2b28"), false, 2.0)
+		var pressed := plates_occupied or plates_state() == "walking"
+		var sink := 6.0 if pressed else 0.0
+		var spring := Rect2(plate.position + Vector2(plate.size.x * 0.35, plate.size.y + sink), Vector2(plate.size.x * 0.3, base.end.y - plate.end.y - sink - 8.0))
+		for k in 5:
+			var y := spring.position.y + spring.size.y * float(k) / 5.0
+			widget.draw_line(Vector2(spring.position.x, y), Vector2(spring.end.x, y + spring.size.y / 10.0), Color("#c8a46a"), 2.0)
+		var top := Rect2(plate.position + Vector2(0, sink), plate.size)
+		widget.draw_rect(top.grow(3), BRONZE_DARK)
+		widget.draw_rect(top, Color("#8d877c") if progress <= i else Color("#c9a65e"))
+		widget.draw_rect(top.grow(-5), STONE_DARK, false, 1.0)
+		var lever_from := Vector2(top.get_center().x, base.end.y - 14.0)
+		var lever_to := Vector2(latch.position.x if i == 0 else latch.end.x, latch.end.y - 18.0)
+		widget.draw_line(lever_from, lever_to, WOOD_DARK, 9.0)
+		widget.draw_line(lever_from, lever_to, Color("#e0b86a") if progress > i or solved else WOOD, 6.0)
 		if pressed:
-			var person := plate.get_center() + Vector2(0, -plate_size.y * 0.35)
-			widget.draw_circle(person, 8.0, Color("#e8dcc0"))
-			widget.draw_rect(Rect2(person + Vector2(-8, 8), Vector2(16, 22)), Color("#3f5a7a"))
-	var latch_rect := Rect2(Vector2(w.x * 0.42, w.y * 0.2), Vector2(w.x * 0.16, w.y * 0.62))
-	widget.draw_rect(latch_rect, Color("#7a6a52"))
-	widget.draw_rect(latch_rect, Color("#2b2b28"), false, 2.0)
-	var bolt_drop := 0.0 if not solved else 1.0
-	var bolt := Rect2(latch_rect.position + Vector2(latch_rect.size.x * 0.3, latch_rect.size.y * (0.18 + 0.4 * bolt_drop)), Vector2(latch_rect.size.x * 0.4, latch_rect.size.y * 0.32))
-	widget.draw_rect(bolt, Color("#d6ad62"))
-	Art.draw_tree(widget, latch_rect.get_center() + Vector2(0, -latch_rect.size.y * 0.32), 26.0, Color("#e9c77f"))
-	for i in 2:
-		var from := Vector2(left.end.x, y) if i == 0 else Vector2(right.position.x, y)
-		var to := Vector2(latch_rect.position.x, y + 12) if i == 0 else Vector2(latch_rect.end.x, y + 12)
-		widget.draw_line(from, to, Color("#8a5a32") if progress <= i else Color("#e9c77f"), 5.0)
+			var person := top.get_center() + Vector2(0, -plate_size.y * 0.55)
+			widget.draw_circle(person + Vector2(0, -16), 7.0, Color("#e6d2b0"))
+			widget.draw_rect(Rect2(person + Vector2(-8, -9), Vector2(16, 24)), Color("#5a6b3a") if i == 0 else Color("#6b4a2e"))
+			widget.draw_line(top.get_center() + Vector2(0, -plate_size.y * 1.4), top.get_center() + Vector2(0, -plate_size.y * 1.05), Color("#ffe9b0"), 2.0)
+	stone_block(latch)
+	var arch := latch.grow(-6)
+	widget.draw_rect(arch, BRONZE_DARK)
+	widget.draw_rect(arch.grow(-3), BRONZE)
+	var bolt_drop := 1.0 if solved else 0.0
+	var bolt := Rect2(arch.position + Vector2(arch.size.x * 0.28, arch.size.y * (0.35 + 0.4 * bolt_drop)), Vector2(arch.size.x * 0.44, arch.size.y * 0.24))
+	widget.draw_rect(bolt, BRONZE_LIGHT)
+	widget.draw_rect(bolt, BRONZE_DARK, false, 1.5)
+	Art.draw_tree(widget, arch.get_center() + Vector2(0, -arch.size.y * 0.3), 24.0, Color("#3a2614"))
 
 func trail_points() -> Array:
 	var w := widget.size
-	return [Vector2(w.x * 0.18, w.y * 0.72), Vector2(w.x * 0.5, w.y * 0.32), Vector2(w.x * 0.82, w.y * 0.62)]
+	return [Vector2(w.x * 0.16, w.y * 0.7), Vector2(w.x * 0.46, w.y * 0.3), Vector2(w.x * 0.76, w.y * 0.62)]
 
 func draw_trail(progress: int, solved: bool) -> void:
+	var w := widget.size
+	widget.draw_rect(Rect2(Vector2.ZERO, w), Color("#2f3a24"))
+	for i in 18:
+		var p := Vector2(fmod(i * 73.0, w.x), fmod(i * 41.0 + 13.0, w.y))
+		widget.draw_circle(p, 9.0 + float(i % 3) * 3.0, Color("#3a4a2c"))
 	var points := trail_points()
 	var order := solution if solution.size() == 3 else symbols
-	for i in range(1, 3):
-		var a: Vector2 = points[i - 1]
-		var b: Vector2 = points[i]
-		var lit := i < progress or solved
-		var steps := 9
-		for k in steps:
-			var p := a.lerp(b, (float(k) + 0.5) / steps)
-			widget.draw_circle(p, 3.0, Color("#f6b73c") if lit else Color("#5e5547"))
+	var cache := Vector2(w.x * 0.9, w.y * 0.3)
+	var stops := points + [cache]
+	for i in range(1, stops.size()):
+		var a: Vector2 = stops[i - 1]
+		var b: Vector2 = stops[i]
+		var lit := i <= progress or solved
+		for k in 10:
+			var p := a.lerp(b, (float(k) + 0.5) / 10.0)
+			widget.draw_circle(p, 3.2, Color("#ffcf5c") if lit else Color("#6f6450"))
 	for i in min(3, order.size()):
 		var p: Vector2 = points[i]
 		var found: bool = i < progress or solved
-		var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 260.0 + i)
+		var symbol := String(order[i])
 		if not found and i == progress:
-			widget.draw_circle(p, 30.0, Color(1.0, 0.8, 0.35, 0.12 + 0.12 * pulse))
-		widget.draw_circle(p, 24.0, Color("#2e271d"))
-		widget.draw_arc(p, 24.0, 0, TAU, 32, Color("#e9c77f") if found else Color("#7a6646"), 2.0, true)
-		if found:
-			draw_symbol(widget, String(order[i]), p, 28.0, Color("#ffe39a"))
+			var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 260.0 + i)
+			widget.draw_circle(p, 31.0, Color(1.0, 0.8, 0.35, 0.12 + 0.14 * pulse))
+		bronze_disc(p, 24.0, found)
+		if found or observed(symbol):
+			draw_symbol(widget, symbol, p, 28.0, ENGRAVE)
 		else:
-			var font := get_theme_default_font()
-			widget.draw_string(font, p + Vector2(-5, 7), "?", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("#a99474"))
+			widget.draw_string(get_theme_default_font(), p + Vector2(-5, 7), "?", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, ENGRAVE)
+	var log := Rect2(cache - Vector2(34, 10), Vector2(68, 20))
+	widget.draw_rect(log, WOOD)
+	widget.draw_rect(log, WOOD_DARK, false, 2.0)
+	widget.draw_circle(log.end - Vector2(0, 10), 9.0, Color("#a3814f"))
 	if solved:
-		Art.draw_chest(widget, Rect2(widget.size.x * 0.43, widget.size.y * 0.66, 56, 46))
+		Art.draw_chest(widget, Rect2(cache.x - 22, cache.y - 40, 44, 34))
 
 func widget_input(event: InputEvent) -> void:
 	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):

@@ -20,7 +20,7 @@ const HOLLOW_OAK := 4
 const UNDERSTORY := ["fern", "reed", "bramble", "rock", "trunk", "stump"]
 const UNDERSTORY_ASSET := {
 	"fern": "lf_env_reed_fern", "reed": "lf_env_reed_fern", "bramble": "lf_env_bramble",
-	"rock": "lf_env_moss_rock", "trunk": "lf_env_fallen_trunk", "stump": "lf_env_fallen_trunk"}
+	"rock": "lf_env_moss_rock", "trunk": "lf_env_fallen_trunk", "stump": "lf_env_fallen_branches"}
 
 ## Resource-tree species by the tree's in-game name (data.woods[].name).
 const RESOURCE_SPECIES := {"Дуб": OAK, "Сосна": PINE}

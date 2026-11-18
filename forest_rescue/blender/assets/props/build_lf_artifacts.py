@@ -74,8 +74,8 @@ SHADERS.update({
 
 
 HEIGHT_GAIN = {"stone_rune": 0.022, "bronze_seal": 0.016, "amber_crystal": 0.010, "bone_key": 0.005}
-HERO_X0 = {"stone_rune": [-0.25, 0.75, 0, 0.5, 2.2, 0, 0], "bronze_seal": [-0.3, 0.7, 0, 0.45, 2.2, 0, 0],
-           "amber_crystal": [-0.35, 0.95, 0, 0.5, 2.2, 0, 0], "bone_key": [-0.8, 0.8, 0, 0.7, 2.2, 0, 0]}
+HERO_X0 = {"stone_rune": [-0.25, 0.75, 0, 0.66, 2.2, 0, 0], "bronze_seal": [-0.3, 0.7, 0, 0.58, 2.2, 0, 0],
+           "amber_crystal": [-0.35, 0.95, 0, 0.65, 2.2, 0, 0], "bone_key": [-0.9, 0.8, 0, 0.69, 2.2, 0, 0]}
 VIEWS = {}   # family -> computed views/cameras (shared by projection and QA)
 
 
@@ -135,14 +135,25 @@ def make_views(A, fam, cams):
     else:
         V["front"] = (fimg, fm, pp.ortho_view_for("front", fimg, fm, "front", v1, real_width=size[0]))
         V["side"] = (simg, sm, pp.ortho_view_for("side", simg, sm, "left", v1, real_height=size[2]))
-    for key, objs, node, x0 in (("hero", v1, "v1", HERO_X0[fam]), ("socket", so, "socket", [0.0, 0.85, 0, 0.8, 2.2, 0, 0])):
+    for key, objs, node, x0 in (("hero", v1, "v1", HERO_X0[fam]), ("socket", so, "socket", [0.0, 0.85, 0, 1.05, 2.2, 0, 0])):
         img, m = qa.crop_and_mask(IMG, box[key], **MASK)
         lay_flat(A, node, fam)
         tris = pk.world_triangles(objs)
         c = tris.reshape(-1, 3).mean(0)
         ck = f"{A.id}:{key}"
-        start = np.array(cams[ck]) if ck in cams and not qa.flag("--refit") else np.array(list(x0) + list(c))
-        x, sc = pk.fit_camera(tris, m, start, fixed=(2,), iters=(1 if ck in cams else 2))
+        if ck in cams and not qa.flag("--refit"):
+            x, sc = pk.fit_camera(tris, m, np.array(cams[ck]), fixed=(2,), iters=1)
+        else:   # multi-start (yaw/pitch/distance) -> best silhouette IoU, then refine
+            best = None
+            for dy, dp, ds in ((0, 0, 1), (-0.35, 0, 1), (0.35, 0, 1), (0, -0.2, 1), (0, 0.15, 1), (0, 0, 0.8), (0, 0, 1.25)):
+                st = np.array(list(x0) + list(c))
+                st[0] += dy
+                st[1] += dp
+                st[3] *= ds
+                xx, ss = pk.fit_camera(tris, m, st, fixed=(2,), iters=1)
+                if best is None or ss > best[1]:
+                    best = (xx, ss)
+            x, sc = pk.fit_camera(tris, m, best[0], fixed=(2,), iters=1)
         cams[ck] = [float(a) for a in x]
         lay_flat(A, node, fam, False)
         H, W = m.shape
@@ -162,10 +173,6 @@ def swatch_for(fam, V):
     dx, dy = max(2, int(w * 0.18)), max(2, int(h * 0.12))
     sw = img[y0 + dy:y1 - dy, x0 + dx:x1 - dx]
     out = {c: (sw, 0.03 if fam != "bone_key" else 0.02) for c in SWATCH_CLS[fam]}
-    # socket stone: use the stone rune side view if available (limestone), else the socket plate itself
-    simg, sm, _ = V["socket"]
-    a0, b0, a1, b1, ww, hh = pp.mask_extent(sm)
-    out["limestone_fine"] = (simg[b0 + int(hh * 0.15):b0 + int(hh * 0.32), a0 + int(ww * 0.06):a0 + int(ww * 0.2)], 0.03)
     return out
 
 

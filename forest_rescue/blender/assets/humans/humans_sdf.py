@@ -345,6 +345,7 @@ def hand_parts(J, S_, side, fingers, scale, female=False, cls="skin", k=0.006):
              "ring": (f"{S_}MiddleProximal", f"{S_}MiddleIntermediate"),
              "little": (f"{S_}MiddleProximal", f"{S_}MiddleIntermediate"),
              "thumb": (f"{S_}ThumbMetacarpal", f"{S_}ThumbProximal")}
+    palm.nohull = True
     for name, (pts, rad) in fingers.items():
         rad = rad * fs
         b0, b1 = bones[name]
@@ -356,10 +357,12 @@ def hand_parts(J, S_, side, fingers, scale, female=False, cls="skin", k=0.006):
             bone = b0 if i == 0 else b1
             P.append(tag(fsdf.round_cone(pts[i], pts[i + 1], r0, r1), cls=cls, bone=bone, k=0.003,
                          name=f"{name}{i}_{S_}"))
+            P[-1].nohull = True
     # thenar / hypothenar padding
     P.append(tag(fsdf.ellipsoid(w + d * 0.035 * scale + t * 0.016 * scale + n * 0.010 * scale,
                                 (0.020 * scale, 0.020 * scale, 0.020 * scale)), cls=cls, bone=f"{S_}ThumbMetacarpal",
                  k=0.010))
+    P[-1].nohull = True
     return P
 
 
@@ -392,14 +395,17 @@ def boot_parts(J, S_, side, L, top_z, cls="leather", shaft_r=(0.058, 0.050), toe
     def boot_fn(Pp, f=foot.fn):
         return np.maximum(f(Pp), -Pp[..., 2] - 0.0)
     P.append(tag(Prim(boot_fn, foot.lo, foot.hi, bone=f"{S_}Foot", name=f"boot_{S_}", k=k), cls=cls))
+    P[-1].nohull = True
     # toes region assigned to the toe bone (front part)
     toe_c = np.array([tip[0], tip[1], 0.026 * s]) - fwd * 0.045 * s
     P.append(tag(fsdf.ellipsoid(toe_c, (0.040 * s * width, 0.050 * s, 0.024 * s * round_toe),
                                 rot=np.arctan2(fwd[0], -fwd[1]) * np.array([0, 0, 1.0]) * -1),
                  cls=cls, bone=f"{S_}Toes", k=0.015))
+    P[-1].nohull = True
     # heel block
     hc = np.array([heel[0], heel[1], 0.030 * s]) + fwd * 0.03 * s
     P.append(tag(fsdf.ellipsoid(hc, (0.034 * s * width, 0.038 * s, 0.030 * s)), cls=cls, bone=f"{S_}Foot", k=0.015))
+    P[-1].nohull = True
     # sole slab (slightly wider, dark)
     sa = np.array([heel[0], heel[1], sole * 0.5]) - fwd * 0.010 * s
     sb = np.array([tip[0], tip[1], sole * 0.5]) + fwd * 0.016 * s
@@ -408,6 +414,7 @@ def boot_parts(J, S_, side, L, top_z, cls="leather", shaft_r=(0.058, 0.050), toe
         d = f(Pp) - 0.0035
         return np.maximum(np.maximum(d, Pp[..., 2] - sole), -Pp[..., 2])
     P.append(tag(Prim(sole_fn, foot.lo, foot.hi, bone=f"{S_}Foot", name=f"sole_{S_}", k=0.004), cls="sole"))
+    P[-1].nohull = True
     # shaft around the lower leg: from ankle to top_z following the shin line
     kn = J[f"{S_}LowerLeg"]
     ax = an + np.array([0, -0.004 * s, 0.0])

@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_bronze_seal v1 hero34 (fitted perspective)",
+  "iou_filled": 0.9389,
+  "iou_raw": 0.9389,
+  "mean_abs_colour_error": 0.0901,
+  "mean_rgb_ref": [
+    0.464,
+    0.345,
+    0.215
+  ],
+  "mean_rgb_render": [
+    0.446,
+    0.329,
+    0.208
+  ]
+}

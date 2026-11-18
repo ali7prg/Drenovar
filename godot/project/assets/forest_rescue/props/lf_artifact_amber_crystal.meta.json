@@ -1,25 +1,25 @@
 {
   "id": "lf_artifact_amber_crystal",
   "tris": {
-    "LOD0": 2562,
-    "LOD1": 1842,
-    "LOD2": 1194
+    "LOD0": 2178,
+    "LOD1": 1698,
+    "LOD2": 1146
   },
   "tris_per_variant": {
     "v1": {
-      "LOD0": 798,
-      "LOD1": 558,
-      "LOD2": 342
+      "LOD0": 670,
+      "LOD1": 510,
+      "LOD2": 326
     },
     "v2": {
-      "LOD0": 870,
-      "LOD1": 630,
-      "LOD2": 414
+      "LOD0": 742,
+      "LOD1": 582,
+      "LOD2": 398
     },
     "v3": {
-      "LOD0": 834,
-      "LOD1": 594,
-      "LOD2": 378
+      "LOD0": 706,
+      "LOD1": 546,
+      "LOD2": 362
     }
   },
   "tris_socket": {

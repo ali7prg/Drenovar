@@ -128,3 +128,13 @@ def stance(sk, legs, sheet, targets, girdle=None, toe_down=0.08):
             rr = Rb.T @ Rw @ Rb
         grig.solve_leg(sk, pose, ch, tgt, ed, toe / np.linalg.norm(toe), pole, root_rot=rr)
     return pose
+
+
+def fit_height(c, n, views, hmax, step=0.01):
+    """Largest height along n (<= hmax) whose point stays inside every view mask."""
+    h = 0.0
+    while h + step <= hmax:
+        if not gbody.inside_masks((np.asarray(c) + np.asarray(n) * (h + step))[None], views)[0]:
+            break
+        h += step
+    return h

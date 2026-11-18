@@ -67,6 +67,16 @@
     "bronze palette (158,100,36)/(222,160,72)",
     "all artifacts scaled x1.3 to the cage-sheet sockets"
    ]
+  },
+  "iter03": {
+   "approach": "x1.3 scale (cage hex socket), warmer bronze, side view masked with tighter flood tolerance",
+   "diffs": [
+    "side IoU 0.844 -> 0.910 (mask fix)",
+    "hero 0.938 -> 0.830: camera re-optimised from the pre-scale camera did not converge"
+   ],
+   "fixes_next": [
+    "fresh hero/socket camera fits with scaled start distances"
+   ]
   }
  },
  "lf_artifact_amber_crystal": {
@@ -94,6 +104,18 @@
     "crystal texels get flat normals and no baked AO",
     "x1.3 scale to the cage-sheet diamond socket"
    ]
+  },
+  "iter03": {
+   "approach": "x1.3 scale, crystal flat normals + no baked AO",
+   "diffs": [
+    "black wedges gone",
+    "v2/v3 LOD0 834-870 tris > 800",
+    "hero 0.870 / socket 0.722 - stale cameras after scaling"
+   ],
+   "fixes_next": [
+    "frame outline 48 -> 32 points",
+    "fresh camera fits"
+   ]
   }
  },
  "lf_artifact_bone_key": {
@@ -120,6 +142,16 @@
    "fixes_next": [
     "hero camera re-initialised at yaw -0.8 (iter01 orientation was right)",
     "x1.25 scale to the cage keyhole plate"
+   ]
+  },
+  "iter03": {
+   "approach": "x1.25 scale",
+   "diffs": [
+    "hero still 0.69: the iter02 mirrored camera was reused as start",
+    "socket 0.932"
+   ],
+   "fixes_next": [
+    "stored hero camera cleared, start yaw -0.9 / dist 0.69 (iter01 orientation)"
    ]
   }
  },
@@ -154,6 +186,122 @@
     "thin iron (bars/rails/arches/tips/tracery) no longer projected (procedural iron); per-material colour gate (2.2 MAD) rejects outlier paint",
     "3-sided spear tips, lighter tracery/arches, unchamfered boards",
     "export at a frame outside all NLA strips (export_current_frame) + keep constant channels"
+   ]
+  },
+  "iter03": {
+   "approach": "landmark-solved camera + silhouette refinement, door 1.6 m (hinge post x=-0.33), thin iron procedural, colour gate, export at rest",
+   "diffs": [
+    "translucent look gone; view angle now matches the drawing (IoU filled 0.937, raw 0.835)",
+    "drawing has green leaf inlays on the posts - missing",
+    "gothic iron arches read as round arches; drawing shows pointed double arches per side",
+    "plaque emblem faint"
+   ],
+   "fixes_next": [
+    "emerald leaf inlay plates on posts",
+    "steeper pointed arches",
+    "final pass with clips + Godot check"
+   ]
+  }
+ },
+ "lf_mechanism_rune_lock": {
+  "iter01": {
+   "approach": "limestone drum, 3 sloped bronze bands with 10 glyph positions each, lever key, sliding stone door",
+   "diffs": [
+    "drawing tiers are flat discs stacked toward the back with glyphs on the top faces; sloped bands made the glyphs unreadable and the projection ghosted",
+    "rim clamps stuck out as spikes"
+   ],
+   "fixes_next": [
+    "three stacked glyph discs (each rotates about its own axis, glyph at the front crescent reads upright)",
+    "short flat clamps",
+    "fresh camera fit"
+   ]
+  }
+ },
+ "lf_mechanism_winch_sequence": {
+  "iter01": {
+   "approach": "oak A-frames (legs splayed front/back), drum with rope + 22-tooth ratchet, crank, pawl, brake lever, stone pit, hanging chest",
+   "diffs": [
+    "frames too tall/steep (axle 1.42 m), drawing shows low wide A-frames splayed along the axle",
+    "crank not protruding enough",
+    "IoU 0.836/0.763"
+   ],
+   "fixes_next": [
+    "axle 1.12 m, 4 legs per trestle splayed along X, gear moved inside, crank at x=0.98"
+   ]
+  }
+ },
+ "lf_mechanism_paired_latch": {
+  "iter01": {
+   "approach": "stone pavement, two spring plates, oak levers pinned to a bronze T-latch on a stone post with bronze arch",
+   "diffs": [
+    "reference mask covered the whole crop (flood fill seeded on the pavement touching the crop edge) -> camera zoomed into the model"
+   ],
+   "fixes_next": [
+    "flood fill seeds only on background-coloured border pixels",
+    "fresh camera fit"
+   ]
+  }
+ },
+ "lf_mechanism_trail_cache": {
+  "iter01": {
+   "approach": "split birch stump, SDF boulder, hollow log trough with sliding lid, coin box, ribbons",
+   "diffs": [
+    "same mask failure as the latch (scene touches crop edge) -> camera inside the model, black render"
+   ],
+   "fixes_next": [
+    "background-seeded flood mask",
+    "stump enlarged to the drawn proportion (R 0.35, H 0.98)"
+   ]
+  }
+ },
+ "lf_props_supplies": {
+  "iter01": {
+   "approach": "9 item groups in one GLB, per-item fitted cameras, projection + painted relief",
+   "diffs": [
+    "LOD0 5,636 tris > 5,000 (crates fully chamfered)",
+    "coins IoU 0.36: our coins spread out, drawing is a tight cluster with one upright coin",
+    "arrows IoU 0.05: bundle orientation/camera wrong",
+    "bandages 0.68: layout differs, label inside crop"
+   ],
+   "fixes_next": [
+    "unchamfered crate planks, lighter coins/sacks/bread",
+    "coins re-clustered and enlarged",
+    "arrow bundle along Y (diagonal in the drawing)",
+    "crops trimmed of labels/neighbouring items"
+   ]
+  }
+ },
+ "lf_cage_iron": {
+  "iter01": {
+   "approach": "riveted iron frame (posts, top beams, ridge strap), gothic tracery arches, collared bars with fleur tips, oak skid platform on runners, door 1.75 m on the left-hinged pivot, hex bronze socket, landmark camera",
+   "diffs": [
+    "members too light: drawn posts are ~0.2 m riveted straps, top beams heavier, bars thicker (raw IoU 0.680)",
+    "finials smaller than drawn",
+    "emerald plaque hidden behind the arches",
+    "skid platform thinner than drawn"
+   ],
+   "fixes_next": [
+    "post 0.22, top beam 0.16x0.21, bars r 0.021 + bigger collars",
+    "finials 0.46 m",
+    "platform 0.24 thick (top 0.34)",
+    "plaque moved in front of the arches above the door",
+    "hex plate R 0.128"
+   ]
+  }
+ },
+ "lf_cage_root": {
+  "iter01": {
+   "approach": "twisted 3-strand corner bundles, flared feet, arching edge roots and dome, lancet lattice walls, timber door frame + plank door (1.54 m) on the left hinge, diamond bronze socket, leaf inlays",
+   "diffs": [
+    "roots far too thin and sparse (drawn trunks ~0.35 m bundles, dense lattice): raw IoU 0.642",
+    "feet do not flare as wide as drawn",
+    "leaf inlays too small"
+   ],
+   "fixes_next": [
+    "strand radius 0.075 -> 0.115, bundle radius 0.14",
+    "feet r 0.10, reach 1.1 m",
+    "edge/dome/lattice roots thickened (0.06-0.10)",
+    "inlays 0.42 m tall"
    ]
   }
  }

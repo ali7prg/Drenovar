@@ -48,7 +48,7 @@ void fragment() {
 		float d = q.x - min(q.w, q.y);
 		vec3 hsv = vec3(abs(q.z + (q.w - q.y) / (6.0 * d + 1e-10)), d / (q.x + 1e-10), q.x);
 		// Only shift foliage-like texels (keep bark and deep shade).
-		float leafy = smoothstep(0.18, 0.4, hsv.y) * smoothstep(0.08, 0.25, hsv.z);
+		float leafy = smoothstep(0.10, 0.22, hsv.y);
 		hsv.x = fract(hsv.x + tone.r * leafy);
 		hsv.y = clamp(hsv.y * mix(1.0, tone.g, leafy), 0.0, 1.0);
 		hsv.z = clamp(hsv.z * mix(1.0, tone.b, leafy), 0.0, 1.0);

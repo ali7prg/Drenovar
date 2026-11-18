@@ -55,7 +55,16 @@ func fresh(state_name: String, live := false) -> void:
 		forest.actors.first_state = true
 		forest.client.adv = {}
 		forest.client.primed = false
-	game.accept(fixture(state_name))
+	var state := fixture(state_name)
+	# Freeze presentation time at the recorded server time: llvmpipe needs seconds per frame,
+	# and a still must show the recorded moment (mid-battle, mid-walk), not a later one.
+	forest.client.manual_clock_ms = float(state.get("adventure", {}).get("serverTime", -1.0))
+	game.accept(state)
+	# Recorded fixtures carry earlier battle reports: keep DRENOVAR's own result popup for the
+	# battle shots only (it is the separate ordinary-loot line), not over unrelated scenes.
+	game.battle_results.pending.clear()
+	game.result_notice.hide()
+	game.close_modal()
 	await process_frame
 
 func look(target: Vector3, zoom: float) -> void:
@@ -160,6 +169,7 @@ func run() -> void:
 		await preload_actors()
 		look(Vector3(-20, 6, -66), 24.0)
 		await create_timer(0.4).timeout
+		forest.client.manual_clock_ms = -1.0
 		game.accept(fixture("site01_cage_open"))
 		await shoot("cage_unlock_key", 1.5)
 		await shoot("cage_open_exit", 2.6)

@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_stone_rune v1 side (ortho)",
+  "iou_filled": 0.9466,
+  "iou_raw": 0.9468,
+  "mean_abs_colour_error": 0.1139,
+  "mean_rgb_ref": [
+    0.547,
+    0.472,
+    0.394
+  ],
+  "mean_rgb_render": [
+    0.589,
+    0.503,
+    0.415
+  ]
+}

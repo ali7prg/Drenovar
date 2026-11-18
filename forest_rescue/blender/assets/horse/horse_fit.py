@@ -127,6 +127,10 @@ def hull_views(views, mode="consensus"):
         return [views["left"], views["front"]]
     if mode == "all":
         return [views[k] for k in ("left", "right", "front", "rear")]
+    if mode == "mixed":
+        v = copy.copy(views["front"])
+        v.mask = views["front"].mask | mirrored_partner(views, "front")
+        return [views["left"], views["right"], v]
     out = []
     for k in ("left", "front"):
         v = copy.copy(views[k])

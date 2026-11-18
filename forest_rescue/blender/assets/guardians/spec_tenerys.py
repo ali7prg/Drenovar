@@ -186,8 +186,11 @@ def body_parts(sk):
         # haunch (gluteal mass) stays with the pelvis; lower thigh follows the femur
         P.append(Part(sdf.ellipsoid(S(572, 140, 0.26 * sx), (0.20, 0.27, 0.22), rot=(math.radians(12), 0, 0)), "hips",
                       k=0.09, tag="haunch"))
-        P.append(Part(sdf.ellipsoid(H + (K - H) * 0.55 + np.array([0, 0.03, 0]), (0.17, 0.19, 0.21)), th, k=0.08,
+        P.append(Part(sdf.ellipsoid(H + (K - H) * 0.55 + np.array([0, 0.0, 0]), (0.17, 0.155, 0.21)), th, k=0.08,
                       tag="thigh_m"))
+        # stifle / flank skin fold (drawn forward of the knee on both hind legs)
+        P.append(Part(sdf.ellipsoid(H + (K - H) * 0.78 + np.array([-0.06 * sx, -0.13, 0.03]), (0.11, 0.17, 0.12)),
+                      th, k=0.09, tag="flank"))
         P.append(Part(sdf.ellipsoid(S(594, 196, 0.27 * sx), (0.14, 0.12, 0.19)), th, k=0.07, tag="hamstring"))
         P.append(Part(sdf.round_cone(H, K, 0.15, 0.13), th, k=0.06, tag="thigh"))
         P.append(Part(stretch(sdf.round_cone(K, Hk, 0.15, 0.12), 0.85, center=K), sh, k=0.05, tag="shin"))
@@ -251,7 +254,7 @@ def side_stance(sk, pose=None):
     legs = {
         "fore_L": ((124, 352), (-0.45, 1.0)),    # reaching forward
         "fore_R": ((284, 352), (-0.20, 1.0)),    # planted under the shoulder
-        "hind_L": ((672, 352), (0.0, 1.0)),      # extended back
+        "hind_L": ((680, 352), (0.06, 1.0)),     # extended back
         "hind_R": ((462, 352), (-0.70, 1.0)),    # stepping forward under the belly
     }
     girdle = {"fore_L": 2.0, "fore_R": 22.0}
@@ -297,6 +300,10 @@ def _roots(hv, hf, rng, n, weight_fn, min_dist):
     return pts[keep], nrm[keep]
 
 
+def gspec_ss(a, b, x):
+    return _ss(a, b, x)
+
+
 def _ss(a, b, x):
     t = np.clip((x - a) / (b - a), 0, 1)
     return t * t * (3 - 2 * t)
@@ -334,7 +341,7 @@ def fur(sk, hv, hf, pans, rng):
     mane_views = [gref.morph_view(side, -1), gref.morph_view(front, 5), gref.morph_view(rear, 5)]
     C += gfur.make_clumps("mane", r, nr, d_mane, rng, mane_views, 0.66, min_len=0.05,
                           width=(0.03, 0.056), flat=0.5, bend_fn=b_mane,
-                          up_fn=lambda p, n, d: np.array([0.0, 1.0, 0.0]), jag=(0.86, 1.0))
+                          up_fn=lambda p, n, d: np.array([0.0, 1.0, 0.0]), jag=(0.9, 1.0))
     # midline crest (tall spikes between the ears and over the withers, seen in front/rear)
     def w_crest(c, n):
         x, y = sheet_xy(c)
@@ -379,6 +386,15 @@ def fur(sk, hv, hf, pans, rng):
     C += gfur.make_clumps("tail", r, nr, d_tail, rng, [side], 0.50, min_len=0.08, width=(0.045, 0.072),
                           flat=0.6, bend_fn=lambda p, n, d, rng: n * 0.12,
                           up_fn=lambda p, n, d: np.cross(d, n), jag=(0.88, 1.0))
+    # tail underside brush (the sheet's tail hangs a full brush below the core)
+    def w_tail_u(c, n):
+        d, _ = tail_t(c)
+        x, _y = sheet_xy(c)
+        return (d < 0.14) * gspec_ss(735, 760, x) * (1 - gspec_ss(880, 900, x)) * (n[:, 2] < -0.15)
+    r, nr = _roots(hv, hf, rng, 30, w_tail_u, 0.05)
+    C += gfur.make_clumps("tail", r, nr, lambda p, n, rng: np.array([0, 0.45, -1.0]) + rng.normal(0, 0.08, 3), rng,
+                          [side], 0.36, min_len=0.06, width=(0.045, 0.07), flat=0.6,
+                          up_fn=lambda p, n, d: np.cross(d, n), jag=(0.9, 1.0))
     # tail-tip brush
     tip = sk.tail("tail_06")
     tdir = (sk.tail("tail_06") - sk.head("tail_06"))
@@ -621,16 +637,16 @@ ANIM = dict(
     mane=["mane_01", "mane_02", "mane_03"],
     bones={"jaw", "ear_L", "ear_R"},
     tail_base=[0.0] * 6, tail_lag=0.07, idle_tail_sway=7.0, idle_tail_curl=5.0,
-    walk=dict(T=33 / 30, speed=1.6, duty=0.62,
+    walk=dict(T=33 / 30, speed=1.6, duty=0.62, height=-0.04,
               touchdown={"hind_L": 0.0, "fore_L": 0.25, "hind_R": 0.5, "fore_R": 0.75},
-              lift_f=0.15, lift_h=0.13, bob=0.016, sway=0.018, pitch=1.0, roll=1.6, yaw=2.0, spine_yaw=2.2,
+              lift_f=0.21, lift_h=0.19, bob=0.016, sway=0.018, pitch=1.0, roll=1.6, yaw=2.0, spine_yaw=2.2,
               tail_sway=7.0, tail_lift=6.0, tail_bounce=2.0, ears=4.0, mane_bounce=3.0),
-    run=dict(T=20 / 30, speed=5.2, duty=0.29,
+    run=dict(T=20 / 30, speed=4.2, duty=0.32,
              touchdown={"hind_L": 0.0, "hind_R": 0.09, "fore_R": 0.42, "fore_L": 0.51},
              lift_f=0.30, lift_h=0.26, fold_f=85.0, fold_h=60.0, bob=0.05, bob_phase=-0.9, sway=0.0,
-             pitch=4.0, pitch_phase=0.6, roll=1.0, yaw=1.0, spine_yaw=1.0, flex=9.0, flex_mult=1,
+             pitch=3.0, pitch_phase=0.6, roll=1.0, yaw=1.0, spine_yaw=1.0, flex=6.0, flex_mult=1,
              flex_phase=0.3, tail_sway=3.0, tail_lift=10.0, tail_bounce=6.0, ears=-18.0, mane_bounce=7.0,
-             head_pitch=2.0, sweep_f=1.0, sweep_h=1.0, height=-0.07, girdle=1.4),
+             head_pitch=2.0, sweep_f=1.0, sweep_h=1.0, height=-0.13, girdle=1.4),
     alert_pose=dict(body=(0.0, 0.06, -0.12, -3.0, 0.0, 0.0),
                     rot={"neck_01": (7.0, 0, 0), "neck_02": (4.0, 0, 0), "head": (-9.0, 0, 0),
                          "spine_01": (-2.0, 0, 0), "spine_03": (2.0, 0, 0)}, tail_lift=12.0),

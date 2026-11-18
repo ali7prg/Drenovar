@@ -88,6 +88,7 @@ func setup(host: Node) -> void:
 # ------------------------------------------------------------------ hooks from main.gd
 func on_state(state: Dictionary) -> void:
 	last_state_ref = state
+	track_stage()
 	var previous := client.adv
 	client.ingest(state)
 	enter_session_once()
@@ -525,6 +526,10 @@ func guide() -> Dictionary:
 	elif current_phase in ["boss_unlocked", "boss_active"]:
 		result.title = String(content.campaign.get("boss", {}).get("displayName", ""))
 		result.reward = content.final_reward()
+		# Three dots = the three authored boss phases (hunt, fury, last stand).
+		var phase_ids := ["hunt", "fury", "last_stand"]
+		var reached := phase_ids.find(String(adv.get("boss", {}).get("phase", "hunt"))) + 1 if current_phase == "boss_active" else 0
+		result.progress = Vector2i(clampi(reached, 0, 3), 3)
 	elif current_phase == "completed":
 		result.title = content.text("ending.title")
 		result.reward = content.final_reward()

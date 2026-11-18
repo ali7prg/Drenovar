@@ -25,9 +25,10 @@ uniform float dim_strength = 0.0;        // explored but not in current sight
 uniform vec4 sights[8];
 uniform int sight_count = 0;
 uniform vec3 light_dir = vec3(0.45, 0.74, 0.5);
-uniform vec3 lit_color : source_color = vec3(0.788, 0.824, 0.839);    // #c9d2d6 highlights
-uniform vec3 shade_color : source_color = vec3(0.373, 0.435, 0.478);  // #5f6f7a valleys
-uniform vec3 haze_color : source_color = vec3(0.561, 0.627, 0.671);   // #8fa0ab body
+// Target on screen (after the city's filmic tonemap): #c9d2d6 tops, #8fa0ab body, #5f6f7a valleys.
+uniform vec3 lit_color : source_color = vec3(0.64, 0.69, 0.72);
+uniform vec3 shade_color : source_color = vec3(0.24, 0.29, 0.33);
+uniform vec3 haze_color : source_color = vec3(0.39, 0.45, 0.50);
 uniform vec3 warm_rim : source_color = vec3(0.90, 0.87, 0.80);
 uniform float edge_softness = 0.16;
 uniform bool soft_depth = true;
@@ -90,8 +91,18 @@ void vertex() {
 	float clear = mix(s.r, s.g, reveal_t) * inside;
 	vertex_fog = 1.0 - clear;
 	vertex_depth = mix(mix(s.b, s.a, reveal_t), 1.0, 1.0 - inside);
-	// Banks hug the ground at the clear edge and rise above the canopy deeper in the fog.
-	float swell = smoothstep(0.0, 0.85, vertex_fog) * (0.22 + 0.78 * smoothstep(0.0, 1.0, vertex_depth));
+	// Banks stand above the canopy right at the feathered edge (far side), but rise gently on the
+	// camera-near side so they never hide the protected town by parallax.
+	vec2 e = vec2(4.0, 0.0);
+	vec2 uv = (world.xz - domain.xy) / domain.zw;
+	float dx = mix(state_bicubic(uv + e.xy / domain.zw).b, state_bicubic(uv + e.xy / domain.zw).a, reveal_t)
+		- mix(state_bicubic(uv - e.xy / domain.zw).b, state_bicubic(uv - e.xy / domain.zw).a, reveal_t);
+	float dz = mix(state_bicubic(uv + e.yx / domain.zw).b, state_bicubic(uv + e.yx / domain.zw).a, reveal_t)
+		- mix(state_bicubic(uv - e.yx / domain.zw).b, state_bicubic(uv - e.yx / domain.zw).a, reveal_t);
+	vec2 to_clear = -vec2(dx, dz);
+	float near_side = smoothstep(-0.05, 0.25, dot(to_clear, normalize(vec2(-1.0, -1.0))));
+	float ramp = mix(0.75 + 0.25 * vertex_depth, smoothstep(0.0, 0.75, vertex_depth), near_side);
+	float swell = smoothstep(0.0, 0.5, vertex_fog) * ramp;
 	float billow = texture(noise_tex, world.xz / 47.0 + vec2(0.37 * layer, 0.11)).r;
 	world.y += layer_height * swell * (0.85 + 0.3 * billow) + reveal_curl * (1.0 - swell) * 2.0;
 	VERTEX = (inverse(MODEL_MATRIX) * vec4(world, 1.0)).xyz;
@@ -101,32 +112,38 @@ void fragment() {
 	vec2 p = world.xz;
 	float t = TIME + time_offset;
 	vec2 drift = wind * t * drift_speed;
-	// Domain-warped drifting billows (large) + detail; wisps curl at the edge.
-	vec4 w = texture(noise_tex, (p + drift * 0.6) / 61.0);
-	vec2 warp = (w.rg - 0.5) * (9.0 + reveal_curl * 14.0);
-	float big = texture(noise_tex, (p + warp + drift) / 47.0 + vec2(0.37 * layer, 0.11)).r;
-	float mid = texture(noise_tex, (p - warp * 0.7 + drift * 1.6) / 19.0 + vec2(0.5, 0.23 * layer)).g;
-	float fine = texture(noise_tex, (p + warp * 0.4 + drift * 2.3) / 7.5).b;
+	vec2 offset = vec2(0.37 * layer, 0.11 + 0.23 * layer);
+	// Cloud-scale noise: ~55 m lobes, ~40 m billows, ~17 m puffs, ~6 m wisps (no marbling).
+	vec4 lobe = texture(noise_tex, (p + drift * 0.3) / 220.0 + vec2(0.21, 0.67));
+	vec2 warp = (lobe.rg - 0.5) * (10.0 + reveal_curl * 16.0);
+	float big = texture(noise_tex, (p + warp + drift) / 170.0 + offset).r;
+	float mid = texture(noise_tex, (p - warp * 0.5 + drift * 1.5) / 70.0 + offset.yx).g;
+	float fine = texture(noise_tex, (p + warp * 0.3 + drift * 2.2) / 26.0 + offset).r;
 	float delay = texture(noise_tex, p / 33.0).a;
-	vec2 edge_warp = (vec2(mid, big) - 0.5) * (7.0 + layer * 2.5 + reveal_curl * 6.0) + (w.ba - 0.5) * 4.0;
-	float clear = clear_at(p + edge_warp, delay);
+	vec2 edge_warp = (lobe.ba - 0.5) * 30.0 + (vec2(mid, big) - 0.5) * (7.0 + reveal_curl * 6.0);
+	// Irregular bank edge: fog may curl up to ~10 m into explored ground, but the clear area may
+	// grow at most ~3 m past the server cells (fog never reveals), and the town core stays clear.
+	float true_clear = clear_at(p, delay);
+	float clear = min(clear_at(p + edge_warp, delay), smoothstep(0.02, 0.22, true_clear));
+	clear = max(clear, 1.0 - smoothstep(53.0, 55.5, max(abs(p.x), abs(p.y))));
 	float fog = 1.0 - clear;
-	float billow = big * 0.66 + mid * 0.27 + fine * 0.07;
+	float billow = big * 0.62 + mid * 0.28 + fine * 0.10;
 	float body = fog * (0.62 + 0.62 * billow) * (0.55 + 0.45 * smoothstep(0.0, 0.5, vertex_depth)) - layer_threshold;
-	float alpha = smoothstep(0.0, edge_softness, body) * layer_alpha;
-	// Lighting from the noise height field (cheap normal) + bank slope.
-	float hx = texture(noise_tex, (p + vec2(1.2, 0.0) + warp + drift) / 47.0 + vec2(0.37 * layer, 0.11)).r - big;
-	float hz = texture(noise_tex, (p + vec2(0.0, 1.2) + warp + drift) / 47.0 + vec2(0.37 * layer, 0.11)).r - big;
-	vec3 n = normalize(vec3(-hx * 7.0, 1.0, -hz * 7.0));
+	float alpha = smoothstep(0.0, edge_softness, body) * layer_alpha * smoothstep(0.0, 0.55, fog);
+	// Lighting from the billow height field (sun side bright, lee side blue-grey).
+	float bx = texture(noise_tex, (p + vec2(3.0, 0.0) + warp + drift) / 170.0 + offset).r * 0.62
+		+ texture(noise_tex, (p + vec2(3.0, 0.0) - warp * 0.5 + drift * 1.5) / 70.0 + offset.yx).g * 0.28;
+	float bz = texture(noise_tex, (p + vec2(0.0, 3.0) + warp + drift) / 170.0 + offset).r * 0.62
+		+ texture(noise_tex, (p + vec2(0.0, 3.0) - warp * 0.5 + drift * 1.5) / 70.0 + offset.yx).g * 0.28;
+	float b0 = big * 0.62 + mid * 0.28;
+	vec3 n = normalize(vec3(-(bx - b0) * 9.0, 1.0, -(bz - b0) * 9.0));
 	float ndl = clamp(dot(n, normalize(light_dir)) * 0.5 + 0.5, 0.0, 1.0);
-	// Cauliflower shading: billow tops catch the sun, valleys stay blue-grey.
-	float tops = pow(clamp(billow, 0.0, 1.0), 0.8);
-	float light = clamp(tops * (0.55 + 0.18 * layer) + (ndl - 0.5) * 0.55 + 0.12 * layer, 0.0, 1.0);
-	vec3 color = mix(shade_color, lit_color, light);
+	float tops = smoothstep(0.3, 0.8, billow);
+	float light = clamp(0.16 + tops * 0.46 + (ndl - 0.5) * 1.0 + 0.04 * layer, 0.0, 1.0);
+	vec3 color = light < 0.5 ? mix(shade_color, haze_color, light * 2.0) : mix(haze_color, lit_color, light * 2.0 - 1.0);
 	// Thin edges glow softly from the sun side (backlit wisps).
 	float thin = 1.0 - smoothstep(0.0, edge_softness * 2.5, body);
-	color = mix(color, warm_rim, thin * 0.35 * ndl);
-	color = mix(haze_color, color, 0.35 + 0.65 * smoothstep(0.0, 1.0, layer * 0.5 + billow * 0.5));
+	color = mix(color, warm_rim, thin * 0.18 * ndl);
 	// Explored but not currently watched: a light veil (haze layer only), never over the town.
 	if (dim_strength > 0.0 && layer < 0.5) {
 		vec4 s = state_bicubic((p - domain.xy) / domain.zw);

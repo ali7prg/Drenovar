@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_stone_rune v1 hero34 (fitted perspective)",
+  "iou_filled": 0.7848,
+  "iou_raw": 0.7848,
+  "mean_abs_colour_error": 0.1093,
+  "mean_rgb_ref": [
+    0.516,
+    0.447,
+    0.369
+  ],
+  "mean_rgb_render": [
+    0.535,
+    0.468,
+    0.396
+  ]
+}

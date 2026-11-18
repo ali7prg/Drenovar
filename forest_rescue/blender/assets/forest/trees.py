@@ -231,9 +231,13 @@ def finish_broadleaf(sk, env, spec, rng):
                 if att == "top":
                     upv = normalize(upv * 0.3 + np.array([0, 0, -1.0]))
                 s = rng.uniform(*spec["card_size"]) * (spec.get("dense_scale", 1.25) if dense else 1.0)
-                c = p - upv * s * 0.5
+                cw, chh = s * spec.get("card_w", 1.0), s * spec.get("card_h", 1.0)
+                if att == "top":
+                    c = p + np.array([0, 0, chh * 0.35])
+                else:
+                    c = p - upv * chh * 0.5
                 ph = ph_chain[node_chain[node]]
-                cards.append(dict(c=c, n=n, up=upv, w=s, h=s, tile=tile,
+                cards.append(dict(c=c, n=n, up=upv, w=cw, h=chh, tile=tile,
                                   wind=np.array([min(1.0, sway[node] + 0.08), 0, ph]),
                                   ao=float(np.clip(tg.crown_ao(p[None], env=env, floor=0.38)[0] * (0.72 + 0.28 * (d[2] + 1) / 2), 0.36, 1)),
                                   attach=att, flutter=(0.3, 1.0)))
@@ -280,7 +284,8 @@ def finish_broadleaf(sk, env, spec, rng):
             s = rng.uniform(*spec["card_size"])
             c = p - up * s * spec.get("card_back", 0.12)
             ph = ph_chain[node_chain[i]]
-            cards.append(dict(c=c, n=n, up=up, w=s, h=s, tile=tile, wind=np.array([min(1.0, sway[i] + 0.05), 0, ph]),
+            cards.append(dict(c=c, n=n, up=up, w=s * spec.get("card_w", 1.0), h=s * spec.get("card_h", 1.0), tile=tile,
+                              wind=np.array([min(1.0, sway[i] + 0.05), 0, ph]),
                               ao=float(ao[i]), attach=att, flutter=(0.3, 1.0)))
         return cards[:max(1, n_target + len(cards) - len(cards))] if False else cards
 
@@ -437,10 +442,12 @@ def build_conifer(spec, rng):
     trunk_pts = [np.array([0, 0, -0.3])]
     lean = np.asarray(spec.get("lean", (0, 0)), float)
     zs = np.linspace(0, H, int(H / 0.9) + 2)
+    wob = spec.get("wobble", 0.05)
+    ph1, ph2 = rng.uniform(0, 6.28, 2)
     for z in zs:
-        wob = spec.get("wobble", 0.05)
-        trunk_pts.append(np.array([lean[0] * z / H + rng.normal(0, wob) * (z > 0.5),
-                                   lean[1] * z / H + rng.normal(0, wob) * (z > 0.5), z]))
+        f = min(1.0, z / 2.0)          # smooth low-frequency bends (no zig-zag)
+        trunk_pts.append(np.array([lean[0] * z / H + wob * 2.2 * f * math.sin(z * 0.45 + ph1),
+                                   lean[1] * z / H + wob * 2.2 * f * math.sin(z * 0.38 + ph2), z]))
     trunk_pts = np.array(trunk_pts)
     trunk_pts[-1, :2] = trunk_pts[-2, :2]
     rb = spec["r_base"]
@@ -573,9 +580,9 @@ def build_conifer(spec, rng):
                                   wind=np.array([min(1, sw), 0, b["phase"]]), ao=float(aof(p)[0]), attach="bottom",
                                   flutter=(0.25, 0.8)))
                 # vertical side spray for volume when seen from the side
-                if rng.random() < spec.get("side_spray", 0.35):
+                if rng.random() < spec.get("side_spray", 0.45):
                     n2 = normalize(side * (1 if rng.random() < 0.5 else -1) + np.array([0, 0, 0.2]))
-                    cards.append(dict(c=c, n=n2, up=normalize(bd + np.array([0, 0, -0.25])), w=w * 0.85, h=h * 0.9,
+                    cards.append(dict(c=c, n=n2, up=normalize(bd + np.array([0, 0, -0.55])), w=w * 0.85, h=h * 0.95,
                                       tile=tiles[rng.integers(len(tiles))], wind=np.array([min(1, sw), 0, b["phase"]]),
                                       ao=float(aof(p)[0]) * 0.95, attach="bottom", flutter=(0.25, 0.8)))
         # leader: crossed vertical sprays around the top
@@ -611,9 +618,15 @@ def build_conifer(spec, rng):
             cards = tg.merge_cards(cards0, n_cards, spec["dense_map"], rng, size_gain=0.95,
                                    min_size=spec["spray_w"][1] * (1.2 if lod == 1 else 1.8),
                                    max_size=spec["spray_w"][1] * (2.4 if lod == 1 else 3.6))
-            # merged conifer cards lie flatter (tiers read from above)
-            for c in cards:
-                c["n"] = normalize(c["n"] * 0.5 + np.array([0, 0, 1.0]) * 0.5)
+            # merged conifer cards: alternate flat tiers (top camera) and outward-facing vertical cards (side)
+            for j, c in enumerate(cards):
+                if j % 2 == 0:
+                    c["n"] = normalize(c["n"] * 0.5 + np.array([0, 0, 1.0]) * 0.5)
+                else:
+                    radial = c["c"] - np.array([trunk_pts[-1, 0], trunk_pts[-1, 1], c["c"][2]])
+                    radial[2] = 0
+                    c["n"] = normalize(normalize(radial) + np.array([0, 0, 0.25]))
+                    c["up"] = np.array([0, 0, 1.0])
         tg.emit_cards(md, cards, crown_c, mat=1 if lod == 0 else 0, sph=spec.get("sph", 0.45), up_bias=0.3)
         out[lod] = md
         res.info[f"LOD{lod}"] = dict(tris=md.tris(), bark_tris=bt, cards=len(cards))
@@ -669,7 +682,7 @@ def build_dark_pine(variant, view=None):
         spec = dict(base, H=H, crown_base=2.9, r_base=0.30, profile=prof, Lmax=3.6,
                     whorl_dz=lambda f: 0.62 - 0.30 * f, per_whorl=5,
                     pitch=lambda f: -0.22 + 0.85 * f ** 1.5, droop=lambda f: 0.20 * (1 - f) + 0.05,
-                    tip_up=0.10, missing=0.05, flare=(0.9, 0.8, 6, 0.6))
+                    tip_up=0.10, missing=0.05, flare=(0.55, 0.6, 6, 0.5), side_spray=0.6)
     elif variant == 2:
         H = 16.5
         def prof(z, az, H=H):
@@ -700,7 +713,7 @@ def build_dark_pine(variant, view=None):
         spec = dict(base, H=H, crown_base=3.5, r_base=0.36, profile=prof, Lmax=3.8,
                     whorl_dz=lambda f: 0.7 - 0.2 * f, per_whorl=5, lean=(0.9, 0.3),
                     pitch=lambda f: -0.25 + 0.75 * f, droop=lambda f: 0.25 * (1 - f) + 0.05, tip_up=0.1,
-                    missing=0.32, wobble=0.1, spray_w=(0.9, 1.2), flare=(0.7, 0.8, 5, 0.7))
+                    missing=0.32, wobble=0.1, spray_w=(0.9, 1.2), flare=(0.45, 0.6, 5, 0.5))
     res = build_conifer(spec, rng)
     res.spec = spec
     return res
@@ -721,7 +734,7 @@ def build_birch(variant, view=None):
     sk = tg.Skeleton()
     root = sk.add(np.array([0, 0, -0.3]), -1, fixed=True, can_grow=False)
     if variant == 1:
-        env = tg.envelope_from_mask(view.mask, view.ppm, view.ay, view.ax, z_min=3.2, depth_scale=0.9, voxel=0.22)
+        env = tg.envelope_from_mask(view.mask, view.ppm, view.ay, view.ax, z_min=3.3, depth_scale=0.9, voxel=0.22)
         trunks = [[(0, 0, 0.0), (0.05, 0.0, 3.0), (0.15, 0.1, 6.0), (0.2, 0.1, 9.0), (0.25, 0.1, 11.5)],
                   [(-0.4, 0.15, 0.0), (-1.0, 0.25, 3.0), (-1.7, 0.35, 6.0), (-2.2, 0.4, 8.5)],
                   [(0.45, -0.15, 0.0), (1.2, -0.25, 3.0), (1.9, -0.3, 6.0), (2.4, -0.4, 8.6)]]
@@ -747,9 +760,9 @@ def build_birch(variant, view=None):
     tg.space_colonize(sk, att, D=0.32, di=2.6, dk=0.7, iters=150, tropism=(0, 0, -1), trop_w=0.05, rng=rng)
     spec = dict(puffs=puffs, puff_r=(1.0, 1.5), puff_frac=0.7, bark="birch", r_base=spec_r * (1.6 if variant == 1 else 1.0), alpha=1.0, gamma=2.3,
                 cull=(0.03, 0.08, 0.15), max_order=[9, 2, 1], flare=(0.25, 0.4, 4, 0.3), roots=None,
-                card_size=(1.0, 1.35), moods=BIRCH_MOODS, dense_map=BIRCH_DENSE, budget=(3200, 1250, 290),
+                card_size=(0.85, 1.15), moods=BIRCH_MOODS, dense_map=BIRCH_DENSE, budget=(3200, 1250, 290),
                 leaf_tip_dist=1.4, leaf_r_max=0.05, site_spacing=0.38, side_frac=0.55, sph=0.6, up_bias=0.2,
-                seed=seed, bark_tile=(0.9, 0.9), hang=1.0, leaf_z_min=2.5,
+                seed=seed, bark_tile=(0.9, 0.9), hang=1.0, leaf_z_min=3.5, bark_frac=(0.42, 0.32, 0.18),
                 trunk_r=lambda p: spec_r * (1.0 - 0.55 * min(max(p[2], 0), 12) / 12), trunk_ids=trunk_ids)
     res = finish_broadleaf(sk, env, spec, rng)
     res.env = env
@@ -800,10 +813,12 @@ def build_willow(variant, view=None):
     puffs = env.sample_even(26, rng, dmin=0.7, dmax=1.8)
     att = env.sample(1300, rng, shell=1.6, inner_weight=0.1, clumps=puffs, clump_r=1.5)
     tg.space_colonize(sk, att, D=0.36, di=3.6, dk=0.8, iters=150, tropism=(0, 0, 1), trop_w=0.1, rng=rng)
-    W_TILES = ["willow_top_a"]
+    W_TILES = [f"willow_strand_{k}" for k in range(6)]
     spec = dict(puffs=puffs, puff_r=(1.2, 1.8), puff_frac=0.75, bark="willow", r_base=rb, alpha=1.0, gamma=2.3, cull=(0.04, 0.12, 0.28), max_order=[9, 2, 1],
                 flare=(0.45, 0.7, 4, 0.6), roots=(5, 1.6, rb * 0.35), card_size=(1.2, 1.6),
-                moods=[(1, W_TILES)], dense_map={"willow_top_a": "willow_dense"}, budget=(3300, 1300, 295),
+                moods=[(1, W_TILES)], dense_map={**{f"willow_strand_{k}": "willow_dense" for k in range(6)},
+                                                 "willow_top_a": "willow_dense"}, budget=(3300, 1300, 295),
+                card_w=0.42, card_h=1.9,
                 leaf_tip_dist=1.2, leaf_r_max=0.06, site_spacing=0.55, side_frac=0.3, sph=0.6, up_bias=0.2,
                 seed=seed, bark_tile=(1.3, 1.3), hang=0.6, leaf_z_min=3.0,
                 trunk_r=lambda p: rb * (1 - 0.25 * min(max(p[2], 0), 5) / 5), trunk_ids=tid)

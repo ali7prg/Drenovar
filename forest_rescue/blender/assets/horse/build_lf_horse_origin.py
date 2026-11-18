@@ -237,6 +237,8 @@ def body_textures(lo, hi, views, J, tack_objs):
     col, w = HX.project_body(T, verts, tris, list_views(views), excl)
     log("projection coverage", float((w > 0).sum() / max(T.valid.sum(), 1)))
     col = texproj.fill(col, w > 1e-6)
+    col, gain, ref_med, tex_med = HX.match_coat(T, col, views, excl)
+    log("coat gain", np.round(gain, 3), "sheet coat", np.round(ref_med, 3), "texture", np.round(tex_med, 3))
     col, rough, height = HX.details(T, col, J)
     col = texproj.dilate_margin(col, T.valid, 8)
     core.save_rgba(tex_path("body_color_master.png"), col)
@@ -430,7 +432,7 @@ def main():
                            normal_tex=core.load_image(body_nrm, "Non-Color"),
                            rough_tex=(orm := core.load_image(body_orm, "Non-Color")), metal_tex=orm)
     bsdf = next(n for n in m_body.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
-    bsdf.inputs["Specular IOR Level"].default_value = 0.30
+    bsdf.inputs["Specular IOR Level"].default_value = 0.20
     m_hair = alpha_clip_material(f"{ASSET}_hair", core.load_image(hair_png))
     m_tack = core.material(f"{ASSET}_tack", base_tex=core.load_image(tack_col),
                            normal_tex=core.load_image(tack_nrm, "Non-Color"),

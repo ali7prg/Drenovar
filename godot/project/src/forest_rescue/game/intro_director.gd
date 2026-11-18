@@ -127,8 +127,8 @@ func begin(local_replay: bool) -> void:
 	shown_lines.clear()
 	game.main.close_modal()
 	game.hud.hide_locked()
-	var stage: Node3D = game.stage
-	camera_home = {"target":stage.target, "zoom":stage.zoom} if is_instance_valid(stage) else {}
+	var stage: Node3D = game.main.stage
+	camera_home = {"target":stage.target, "zoom":stage.zoom} if is_instance_valid(stage) and game.main.map_name == "city" else {}
 	if game.reduced_motion:
 		mode = "static"
 		game.world_call("set_reduced_motion", [true])
@@ -148,7 +148,7 @@ func tick(delta: float) -> void:
 	if mode != "animated":
 		return
 	elapsed += delta
-	var stage: Node3D = game.stage
+	var stage: Node3D = game.main.stage
 	var main: Node = game.main
 	if not main.fingers.is_empty() or main.dragging:
 		camera_user_took = true
@@ -365,7 +365,7 @@ func finish_presentation() -> void:
 	game.hud.hide_banner()
 	show_hall_glow(false)
 	game.actors.stop_intro_horse()
-	var stage: Node3D = game.stage
+	var stage: Node3D = game.main.stage
 	if is_instance_valid(stage) and not camera_home.is_empty() and not camera_user_took:
 		stage.target = camera_home.target
 		stage.zoom = camera_home.zoom

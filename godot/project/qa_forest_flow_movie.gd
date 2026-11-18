@@ -22,9 +22,13 @@ func look(target: Vector3, zoom: float) -> void:
 	game.stage.zoom = zoom
 	game.stage.update_camera(0, true)
 
+const FPS := 12.0
+
+## Movie time, not wall time: --fixed-fps renders each frame as 1/FPS s whatever it costs.
 func seconds(value: float) -> void:
-	var until := Time.get_ticks_msec() + int(value * 1000.0)
-	while Time.get_ticks_msec() < until:
+	for i in int(value * FPS):
+		if forest.client.manual_clock_ms >= 0.0:
+			forest.client.manual_clock_ms += 1000.0 / FPS
 		await process_frame
 
 func fresh(name: String) -> void:
@@ -32,7 +36,12 @@ func fresh(name: String) -> void:
 	forest.actors.first_state = true
 	forest.client.adv = {}
 	forest.client.primed = false
-	game.accept(fixture(name))
+	var state := fixture(name)
+	forest.client.manual_clock_ms = float(state.adventure.serverTime)
+	game.accept(state)
+	game.battle_results.pending.clear()
+	game.result_notice.hide()
+	game.close_modal()
 	await process_frame
 
 func run() -> void:
@@ -63,7 +72,12 @@ func run() -> void:
 			await fresh("site01_battle_victory")
 			look(Vector3(-20, 6, -66), 22.0)
 			await seconds(1.0)
-			game.accept(fixture("site01_cage_open"))
+			var opened := fixture("site01_cage_open")
+			forest.client.manual_clock_ms = float(opened.adventure.serverTime)
+			game.accept(opened)
+			game.battle_results.pending.clear()
+			game.result_notice.hide()
+			game.close_modal()
 			await seconds(9.0)
 			await fresh("site01_escort_walking")
 			look(Vector3(-14, 6, -59), 28.0)

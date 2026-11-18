@@ -102,8 +102,13 @@ func hall_level() -> int:
 func required_hall() -> int:
 	return int(adv.get("access", {}).get("requiredHall", 3))
 
+## QA movie rendering only (fixed-fps --write-movie): drive presentation time per frame.
+var manual_clock_ms := -1.0
+
 ## CONTRACT §5: t = serverTime + (localNow - receivedAt). Monotonic, never jumps backwards.
 func server_now() -> float:
+	if manual_clock_ms >= 0.0:
+		return manual_clock_ms
 	var target := received_server_ms + float(Time.get_ticks_msec() - received_ticks)
 	var ticks := Time.get_ticks_msec()
 	if clock_ticks == 0 or absf(target - clock_ms) > 1500.0:

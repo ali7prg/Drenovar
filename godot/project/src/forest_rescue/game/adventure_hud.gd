@@ -56,6 +56,8 @@ var progress_value := 0
 var progress_total := 3
 var sparkle_rect := Rect2()
 var compact := false
+var strip_head: BoxContainer
+var strip_chest: Control
 var last_nav_edge := -1.0
 
 func setup(owner_game: Node) -> void:
@@ -76,6 +78,7 @@ func setup(owner_game: Node) -> void:
 	arrow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	arrow.draw.connect(draw_arrow)
 	add_child(arrow)
+	move_child(arrow, 0)  # name plates and the target arrow stay under cards and toasts
 	get_viewport().size_changed.connect(layout)
 	layout()
 
@@ -145,11 +148,20 @@ func build_bar() -> void:
 	strip.alignment = BoxContainer.ALIGNMENT_CENTER
 	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	reward_strip.add_child(strip)
-	strip.add_child(Art.new("chest", Vector2(36, 40)))
+	strip_head = BoxContainer.new()
+	strip_head.name = "RewardHead"
+	strip_head.alignment = BoxContainer.ALIGNMENT_CENTER
+	strip_head.add_theme_constant_override("separation", 2)
+	strip_head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	strip.add_child(strip_head)
+	strip_chest = Art.new("chest", Vector2(36, 40))
+	strip_chest.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	strip_head.add_child(strip_chest)
 	reward_caption = Style.label(text("hud.rewardFor"), 13, Style.IVORY, true)
 	reward_caption.name = "RewardCaption"
 	reward_caption.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	strip.add_child(reward_caption)
+	reward_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	strip_head.add_child(reward_caption)
 	for index in STRIP_ORDER.size():
 		var key: String = STRIP_ORDER[index]
 		if index > 0:
@@ -237,7 +249,7 @@ func set_task(title: String, value: int, total: int) -> void:
 
 func set_reward(caption: String, resources: Dictionary) -> void:
 	reward_caption.text = caption
-	reward_caption.visible = not caption.is_empty() and not compact
+	reward_caption.visible = not caption.is_empty()
 	for key in STRIP_ORDER:
 		var amount := int(resources.get(key, 0))
 		reward_amounts[key].text = "+" + game.content.format_amount(amount) if amount > 0 else "—"
@@ -544,6 +556,7 @@ func draw_tags(camera: Camera3D) -> void:
 	# Name plates over revealed places (site, Iskra, landmarks, boss) — readable from the top camera.
 	var font: Font = Style.TITLE_FONT
 	var view := get_viewport_rect().size
+	var placed: Array[Rect2] = []
 	for tag in game.actors.tags:
 		var p: Vector3 = tag.position
 		if camera.is_position_behind(p):
@@ -558,6 +571,21 @@ func draw_tags(camera: Camera3D) -> void:
 			caption += "  %d/5" % int(tag.step)
 		var width := font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 		var box := Rect2(at - Vector2(width * 0.5 + 9, 13), Vector2(width + 18, 24))
+		var origin_y := box.position.y
+		for attempt in 6:
+			var clash := false
+			for other in placed:
+				if other.intersects(box.grow(1.0)):
+					clash = true
+			if not clash:
+				break
+			var step := 27.0 * float(attempt / 2 + 1)
+			box.position.y = origin_y + (step if attempt % 2 == 0 else -step)
+		var blocked: bool = box.position.y > view.y - 118.0 or (game.mech.is_open() and box.position.x < 490.0)
+		if blocked:
+			continue
+		placed.append(box)
+		at = box.position + Vector2(width * 0.5 + 9, 13)
 		var fill := Color("#f1e3c1e6") if kind == "site" else (Color("#2a2219e0") if kind != "landmark" else Color("#3d2f14e8"))
 		var ink := Color("#3a2716") if kind == "site" else Color("#f6ead0")
 		arrow.draw_style_box(Style.frame(fill, fill.darkened(0.08), Color("#8b6a3c"), 6, 1, Vector4(0, 0, 0, 0)), box)
@@ -620,16 +648,21 @@ func layout() -> void:
 	var available := right_edge - 52.0
 	# One row like art/07: task card, reward strip (fills the rest), three buttons; the existing
 	# DRENOVAR navigation keeps the bottom-right corner, so the row ends where it begins.
-	var buttons_width := 76.0 + 76.0 + 100.0 + 16.0
+	var buttons_width := 76.0 + 72.0 + 108.0 + 16.0
 	var strip_min := 36.0 + 6.0 + 46.0 * 5.0 + 4.0 * 13.0 + 24.0
 	compact = available < 200.0 + 16.0 + strip_min + 84.0 + buttons_width
-	reward_caption.visible = not compact and not reward_caption.text.is_empty()
+	# «За спасение:» stays visible: inline beside the chest when there is room (art/07),
+	# otherwise stacked under a smaller chest.
+	reward_caption.visible = not reward_caption.text.is_empty()
+	strip_head.vertical = compact
+	reward_caption.add_theme_font_size_override("font_size", 11 if compact else 13)
+	strip_chest.custom_minimum_size = Vector2(30, 30) if compact else Vector2(36, 40)
 	task_card.custom_minimum_size.x = 200.0
 	for key in reward_cells:
 		reward_cells[key].custom_minimum_size.x = 46.0
 	route_button.custom_minimum_size.x = 76.0
-	squad_button.custom_minimum_size.x = 76.0
-	continue_button.custom_minimum_size.x = 100.0
+	squad_button.custom_minimum_size.x = 72.0
+	continue_button.custom_minimum_size.x = 108.0
 	reward_strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	reward_strip.visible = available >= 200.0 + 16.0 + strip_min + buttons_width
 	bar.position = Vector2(52, view.y - 84 - 8)

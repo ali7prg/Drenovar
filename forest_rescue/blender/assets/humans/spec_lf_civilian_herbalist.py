@@ -17,7 +17,7 @@ import humans_sdf as H
 ASSET = "lf_civilian_herbalist"
 GROUP = "civilian"
 CLASS_GROUP = {"cloak": "garment", "hood": "garment"}
-BUDGET = {"head": 2300, "hood": 1500, "hood_down": 500}
+BUDGET = {"head": 2300, "hood": 1500}
 FACE_PAINT = {"lip_tint": (1.06, 0.88, 0.86)}
 OPTIONAL_COLORS = {"hair": (0.30, 0.20, 0.13), "cloak": (0.22, 0.30, 0.20)}
 DRAPE_EXTRA = ("dress",)
@@ -105,32 +105,34 @@ def garments(ctx):
     def axis_center(c):
         return np.array([cxy[0], cxy[1], c[2]])
 
-    # ---- hood (raised): shell around the head with a face opening, merges into the capelet
+    # ---- hood (raised): thick wool shell over the hair with a smooth oval face opening; it
+    # continues down around the neck onto the shoulders where the capelet starts
     O = lm["origin"]
 
     def hood_outer(P):
         Q = (np.asarray(P, float) - O) / s
-        head = ctx.head_fn(P) - (0.040 + 0.020 * np.clip((Q[..., 1] - 0.05) / 0.12, 0, 1)
-                                 + 0.010 * np.clip((Q[..., 2] - 0.05) / 0.07, 0, 1)) * s
-        # neck drape: the hood falls onto the shoulders around the neck
-        neck = fsdf.round_cone(O + np.array([0, 0.10, -0.08]) * s, O + np.array([0, 0.10, -0.205]) * s,
-                               0.085 * s, 0.13 * s).fn(P)
-        return np.minimum(head, neck) if False else fsdf.smin(head, neck, 0.04)
+        back = np.clip((Q[..., 1] - 0.03) / 0.12, 0, 1)
+        top = np.clip((Q[..., 2] - 0.02) / 0.10, 0, 1)
+        head = ctx.head_fn(P) - (0.034 + 0.026 * back + 0.008 * top) * s
+        neck = fsdf.round_cone(O + np.array([0, 0.085, -0.06]) * s, O + np.array([0, 0.075, -0.215]) * s,
+                               0.090 * s, 0.150 * s).fn(P)
+        return fsdf.smin(head, neck, 0.05 * s)
 
     def hood_inner(P):
         Q = (np.asarray(P, float) - O) / s
-        inner = ctx.head_fn(P) - 0.028 * s
-        inner = fsdf.smin(inner, fsdf.round_cone(O + np.array([0, 0.10, -0.08]) * s,
-                                                 O + np.array([0, 0.10, -0.215]) * s, 0.070 * s, 0.115 * s).fn(P), 0.03)
-        # face opening (front) and the bottom (open toward the shoulders)
-        opening = np.maximum(np.maximum(np.abs(Q[..., 0]) - 0.078 + 0.12 * np.maximum(-0.02 - Q[..., 2], 0),
-                                        Q[..., 1] - 0.010), np.maximum(Q[..., 2] - 0.082, -0.125 - Q[..., 2])) * s
-        bottom = (-0.20 - Q[..., 2]) * s
-        return fsdf.smin(np.minimum(inner, opening), bottom, 0.01)
-    lo = O + np.array([-0.17, -0.10, -0.25]) * s
-    hi = O + np.array([0.17, 0.26, 0.17]) * s
+        inner = fsdf.smin(ctx.head_fn(P) - 0.020 * s,
+                          fsdf.round_cone(O + np.array([0, 0.085, -0.06]) * s, O + np.array([0, 0.075, -0.235]) * s,
+                                          0.074 * s, 0.135 * s).fn(P), 0.04 * s)
+        # oval face opening, open to the front only (y < 0.02 head units)
+        ov = (np.sqrt((Q[..., 0] / 0.080) ** 2 + ((Q[..., 2] + 0.020) / 0.125) ** 2) - 1.0) * 0.08
+        front = Q[..., 1] - 0.020
+        opening = fsdf.smax(ov, front, 0.015) * s
+        bottom = (-0.205 - Q[..., 2]) * s
+        return np.minimum(np.minimum(inner, opening), bottom)
+    lo = O + np.array([-0.18, -0.10, -0.26]) * s
+    hi = O + np.array([0.18, 0.28, 0.18]) * s
     hood = K.headwear_piece("hood", ctx, hood_outer, hood_inner, lo, hi, "cloak",
-                            {"type": "hood", "pivot_z": J["Head"][2], "lag": 0.25}, voxel=0.0028)
+                            {"type": "hood", "pivot_z": J["Head"][2], "lag": 0.25}, voxel=0.0026)
     hood.meta["optional"] = "hood_up"
     hood.meta["default_on"] = True
     out.append(hood)
@@ -195,22 +197,3 @@ def garments(ctx):
                                   {"type": "rigid", "bone": "Bag"}, bevel=0.9))
     out.append(G.merge_pieces("herbs", sprigs, cls="herbs", rule={"type": "rigid", "bone": "Bag"}))
     return out
-
-
-def optional_parts(ctx):
-    """Captive variants: hood lowered onto the shoulders (hair then visible)."""
-    lm = ctx.lm
-    s = lm["scale"]
-    O = lm["origin"]
-    c = O + np.array([0, 0.15, -0.22]) * s
-
-    def outer(P):
-        return fsdf.round_cone(c, c + np.array([0, 0.05, -0.10]), 0.11 * s, 0.09 * s).fn(P)
-
-    def inner(P):
-        return fsdf.round_cone(c + np.array([0, -0.01, 0.01]), c + np.array([0, 0.04, -0.09]), 0.098 * s, 0.078 * s).fn(P)
-    p = K.headwear_piece("hood_down", ctx, outer, inner, c - 0.2, c + 0.2, "cloak",
-                         {"type": "blend", "bones": {"UpperChest": 0.6, "Hood": 0.4}})
-    p.meta["optional"] = "hood_down"
-    p.meta["default_on"] = False
-    return [p]

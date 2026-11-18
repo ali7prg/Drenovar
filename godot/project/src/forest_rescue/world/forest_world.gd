@@ -15,6 +15,8 @@ const ForestKit = preload("res://src/forest_rescue/world/forest_kit.gd")
 const ForestCanopy = preload("res://src/forest_rescue/world/forest_canopy.gd")
 const ForestFog = preload("res://src/forest_rescue/world/forest_fog.gd")
 const ForestLandmarks = preload("res://src/forest_rescue/world/forest_landmarks.gd")
+const ForestImpostors = preload("res://src/forest_rescue/world/forest_impostors.gd")
+const SUN_ROTATION := Vector3(-0.837758, -0.558505, 0.0)   # landscape.gd city sun (-48°, -32°, 0)
 const Rules = preload("res://src/forest_rescue/world/forest_layout_rules.gd")
 const PATH_SHADER = preload("res://src/forest_rescue/world/forest_path.gdshader")
 const SURFACES := "res://assets/city/premium/surfaces07/"
@@ -25,7 +27,8 @@ const SIGHT_RADIUS := 10.0
 ## Visual target heights (m) so kit trees keep the town's proportions (legacy trees ≈ 8.5 m).
 const TREE_HEIGHT := [9.5, 10.5, 9.0, 8.0, 10.0]
 const TREE_CROWN := [4.3, 3.2, 3.4, 4.5, 5.0]
-const UNDER_HEIGHT := {"fern": 0.95, "reed": 1.6, "bramble": 1.15, "rock": 1.25, "trunk": 0.75, "stump": 0.7}
+const UNDER_HEIGHT := {"fern": 0.95, "reed": 1.6, "bramble": 1.15, "rock": 1.25, "trunk": 0.75, "stump": 0.2}
+const ROCK_VARIANT_SCALE := [2.6, 1.7, 1.0]
 
 static var _cache: Dictionary = {}        # shared across city-scene rebuilds (versioned keys)
 
@@ -64,6 +67,9 @@ var mesh_keys: Dictionary = {}
 var city_state: Dictionary = {}
 var arena_state := "locked"
 var site_steps: Dictionary = {}
+var impostors: Node
+var _fade_key := ""
+var _fade_timer := 0.0
 var _cull_timer := 0.0
 var _sight_timer := 0.0
 
@@ -140,6 +146,23 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	canopy.name = "Canopy"
 	add_child(canopy)
 	_build_paths()
+	impostors = ForestImpostors.new()
+	impostors.name = "Impostors"
+	add_child(impostors)
+	var bake_list: Array = []
+	for species in Rules.SPECIES.size():
+		for variant in [1, 2, 3]:
+			var mesh := _tree_mesh(species, variant)
+			bake_list.append([mesh[2], canopy.meshes[mesh[0]].lods[0]])
+	var signature := ""
+	for file in DirAccess.get_files_at(ForestKit.KIT_DIR):
+		if file.ends_with(".glb"):
+			signature += "%s:%d;" % [file, FileAccess.get_modified_time(ForestKit.KIT_DIR + file)]
+	for entry in bake_list:
+		signature += String(entry[0]) + ";"
+	await impostors.bake(bake_list, SUN_ROTATION, stage.camera.environment, signature)
+	canopy.impostors = impostors
+	setup_ms.impostors = (Time.get_ticks_usec() - t) / 1000.0
 	fog = ForestFog.new()
 	fog.name = "Fog"
 	add_child(fog)
@@ -268,7 +291,7 @@ func _mesh_for(asset: Dictionary, key: String, kind: int, variant: int, target_h
 	var norm := target_height / maxf(0.2, float(entry.height))
 	if target_crown > 0.0:
 		norm = minf(norm, target_crown / maxf(0.2, float(entry.radius)))
-	mesh_keys[key] = [index, norm]
+	mesh_keys[key] = [index, norm, key]
 	return mesh_keys[key]
 
 
@@ -289,16 +312,21 @@ func _tone(species: int, x: float, z: float) -> Color:
 			golden = clampf(w[0] * 0.9 + w[1] * 0.9 + w[7] * 0.7 + w[3] * 0.35, 0.0, 1.0)
 		if species == Rules.HOLLOW_OAK or h < golden * 0.85 + 0.08:
 			if h2 < 0.24:
-				return Color(-0.04, 0.95, 0.80, 0.0)     # copper-orange
-			return Color(h2 * 0.025 - 0.02, 0.82, 0.84, 0.0)  # golden ochre
-		return Color(0.15 + 0.04 * h2, 0.72 + 0.12 * h, 0.60 + 0.12 * h2, 0.0)  # summer green oak
-	return Color((h - 0.5) * 0.03, 0.92 + 0.14 * h2, 0.9 + 0.12 * h, 0.0)
+				return Color(-0.04, 1.0, 0.74, 0.0)      # copper-orange
+			return Color(h2 * 0.025 - 0.015, 1.0, 0.80, 0.0)  # golden ochre
+		return Color(0.19 + 0.04 * h2, 0.82 + 0.1 * h, 0.44 + 0.08 * h2, 0.0)  # summer green oak
+	if species == Rules.PINE:
+		return Color(0.06 + 0.03 * h, 1.0 + 0.1 * h2, 0.56 + 0.1 * h, 0.0)   # deep blue-green conifers
+	if species == Rules.WILLOW:
+		return Color(0.05 + 0.02 * h, 0.85 + 0.1 * h2, 0.58 + 0.08 * h, 0.0)
+	return Color(0.07 + 0.03 * h, 0.85 + 0.12 * h2, 0.56 + 0.08 * h, 0.0)    # birch: deeper green
 
 
 func _under_mesh(kind_index: int, variant: int) -> Array:
 	var kind: String = Rules.UNDERSTORY[kind_index]
 	var canopy_kind := ForestCanopy.KIND_ROCK if kind in ["rock", "trunk"] else (ForestCanopy.KIND_STUMP if kind == "stump" else ForestCanopy.KIND_UNDER)
-	return _mesh_for(kit.understory_asset(kind, Rules.UNDERSTORY_ASSET[kind]), "under:%s:v%d" % [kind, variant], canopy_kind, variant, UNDER_HEIGHT[kind])
+	var height: float = UNDER_HEIGHT[kind] * (ROCK_VARIANT_SCALE[(variant - 1) % 3] if kind == "rock" else 1.0)
+	return _mesh_for(kit.understory_asset(kind, Rules.UNDERSTORY_ASSET[kind]), "under:%s:v%d" % [kind, variant], canopy_kind, variant, height)
 
 
 ## Visual position of a resource tree (remapped outer slot, or original inside the core).
@@ -355,8 +383,9 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 		var variant := Rules.kit_variant_for_legacy(int(tree.variant))
 		var mesh := _tree_mesh(species, variant)
 		var scale := float(tree.scale) * float(mesh[1]) * (0.92 + 0.16 * fposmod(float(tree.angle) * 1.37, 1.0))
-		canopy.add_instance(mesh[0], Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * scale), Vector3(xz.x, y - 0.05, xz.y)),
-			_tone(species, xz.x, xz.y))
+		var tone := _tone(species, xz.x, xz.y)
+		canopy.add_instance(mesh[0], Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * scale), Vector3(xz.x, y - 0.05, xz.y)), tone)
+		_add_impostor(mesh, Vector3(xz.x, y - 0.05, xz.y), float(tree.angle), scale, tone)
 		occupied.append(xz)
 	for item in layout.get("trees", []):
 		var xz := Vector2(float(item[0]), float(item[1]))
@@ -365,7 +394,9 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 		var mesh := _tree_mesh(int(item[2]), int(item[3]))
 		var transform := Transform3D(Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(Vector3.ONE * float(item[5]) * float(mesh[1])),
 			Vector3(xz.x, height_at(xz.x, xz.y) - 0.05, xz.y))
-		canopy.add_instance(mesh[0], transform, _tone(int(item[2]), xz.x, xz.y))
+		var tone := _tone(int(item[2]), xz.x, xz.y)
+		canopy.add_instance(mesh[0], transform, tone)
+		_add_impostor(mesh, transform.origin, deg_to_rad(float(item[4])), float(item[5]) * float(mesh[1]), tone)
 	for list_name in ["understory", "innerUnderstory"]:
 		var inner: bool = list_name == "innerUnderstory"
 		for item in layout.get(list_name, []):
@@ -381,6 +412,12 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 	if stage.camera != null and stage.camera.is_inside_tree():
 		on_camera_changed()
 	call_deferred("_emit_ready_once")
+
+
+func _add_impostor(mesh: Array, origin: Vector3, yaw: float, scale: float, tone: Color) -> void:
+	if impostors != null and impostors.has_impostor(mesh[2]):
+		var entry: Array = impostors.instance_for(mesh[2], origin, yaw, scale, tone)
+		canopy.add_impostor(entry[0], entry[1])
 
 
 var _ready_emitted := false
@@ -416,6 +453,13 @@ func on_camera_changed() -> void:
 	for cls in ["full", "proxy", "fogOnly", "unloaded"]:
 		for id in selected.get(cls, []):
 			classes[id] = cls
+	# Budget overflow inside the view (zoomed-out ortho camera sees all 16 chunks): instead of
+	# bare ground these chunks draw tree impostors only (2 triangles per tree, no understory).
+	for chunk in ForestMasks.all_chunks():
+		if classes.get(chunk.id, "") == "unloaded":
+			var nearest := Vector2(clampf(target.x, chunk.minX, chunk.maxX), clampf(target.z, chunk.minZ, chunk.maxZ))
+			if nearest.distance_to(Vector2(target.x, target.z)) <= view_radius + 20.0:
+				classes[chunk.id] = "far"
 	var edge_distance := maxf(0.0, 112.0 - maxf(absf(target.x), absf(target.z)))
 	classes["edge"] = "fogOnly" if edge_distance <= view_radius + 20.0 else "unloaded"
 	canopy.chunk_class = classes
@@ -443,6 +487,10 @@ func chunk_explored(id: String) -> bool:
 
 
 func _process(delta: float) -> void:
+	_fade_timer -= delta
+	if _fade_timer <= 0.0:
+		_fade_timer = 0.15
+		_update_fade_circles()
 	_cull_timer -= delta
 	if _cull_timer <= 0.0:
 		_cull_timer = 0.25
@@ -452,6 +500,24 @@ func _process(delta: float) -> void:
 	if _sight_timer <= 0.0 and not locked:
 		_sight_timer = 0.5
 		_update_sights()
+
+
+## Canopy fade around adventure actors and pinned areas (crowns dither away above 1.2 m).
+func _update_fade_circles() -> void:
+	var circles: Array = []
+	for child in _actors.get_children():
+		if child is Node3D and (child as Node3D).visible and not child.get_meta("no_canopy_fade", false):
+			var p: Vector3 = (child as Node3D).global_position
+			circles.append(Vector4(p.x, p.y, p.z, float(child.get_meta("canopy_fade_radius", 6.5))))
+	for id in pinned:
+		var area: Dictionary = pinned[id]
+		var c: Vector3 = area.center
+		circles.append(Vector4(c.x, height_at(c.x, c.z), c.z, maxf(4.0, float(area.radius))))
+	var key := str(circles)
+	if key == _fade_key:
+		return
+	_fade_key = key
+	ForestKit.set_fade_circles(circles, [impostors.material] if impostors != null and impostors.material != null else [])
 
 
 func _cull_fogged_children(root: Node3D) -> void:

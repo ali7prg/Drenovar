@@ -139,9 +139,9 @@ def optional_parts(ctx):
     Ml = PR.bone_frame(B, "LeftProp", roll_up=(0, 0, 1.0))
     sh = PR.place(PR.round_shield({"type": "rigid", "bone": "LeftProp"}, radius=0.39), Ml)
     sh.name = "shield"
-    sh.meta.update(optional="shield", default_on=True, no_compare=True)
+    sh.meta.update(no_compare=True)
     Mr = PR.bone_frame(B, "RightProp", roll_up=(0, 0, 1.0))
     sp = PR.place(PR.spear({"type": "rigid", "bone": "RightProp"}, below=0.95, above=1.05), Mr)
     sp.name = "spear"
-    sp.meta.update(optional="spear", default_on=True, no_compare=True)
+    sp.meta.update(no_compare=True)
     return [sh, sp]

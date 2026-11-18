@@ -119,7 +119,7 @@ def hoof(coffin, toe, heel, side, bone, scale=1.0):
     parts = []
     gc = (toe + heel) * 0.5                     # ground centre
     top = coffin + V(0, 0.01, 0.025)
-    r_bot = 0.090 * scale
+    r_bot = 0.095 * scale
     r_top = 0.068 * scale
     parts.append(flat_cone(gc + V(0, -0.008, 0.024), top, r_bot, r_top, 0.9, axis=(0, 1, 0),
                            bone=bone, name=f"hoof_{side}"))
@@ -155,7 +155,7 @@ def body_parts(J=None):
     add(round_cone(V(0, -0.10, 1.33), V(0, 0.25, 1.38), 0.15, 0.175, bone="spine_01",
                    name="loin"), 0.08)
     # croup and hindquarters (draft "double" rump: two gluteal masses with a groove)
-    add(ell((0, 0.40, 1.40), (0.235, 0.31, 0.17), bone="pelvis", name="croup"), 0.16)
+    add(ell((0, 0.40, 1.40), (0.262, 0.31, 0.17), bone="pelvis", name="croup"), 0.16)
     for sx in (1, -1):
         add(ell((0.197 * sx, 0.49, 1.19), (0.186, 0.30, 0.305), bone="pelvis", name="haunch"), 0.16)
         add(ell((0.24 * sx, 0.18, 1.36), (0.06, 0.09, 0.06), bone="pelvis", name="hip_point"), 0.15)
@@ -168,13 +168,13 @@ def body_parts(J=None):
     neck = [V(0, -0.64, 1.38), V(0, -0.79, 1.56), V(0, -0.91, 1.71), V(0, -1.02, 1.82),
             V(0, -1.09, 1.87)]
     nr = [0.26, 0.20, 0.16, 0.13, 0.11]
-    nf = [0.74, 0.72, 0.74, 0.78, 0.82]
+    nf = [0.70, 0.66, 0.68, 0.74, 0.80]
     nb = ["neck_01", "neck_02", "neck_03", "neck_03"]
     for i in range(4):
         add(flat_cone(neck[i], neck[i + 1], nr[i], nr[i + 1], 0.5 * (nf[i] + nf[i + 1]),
                       bone=nb[i], name=f"neck_{i}"), 0.10)
-    crest = [V(0, -0.40, 1.50), V(0, -0.58, 1.62), V(0, -0.76, 1.75), V(0, -0.93, 1.85),
-             V(0, -1.06, 1.895)]
+    crest = [V(0, -0.40, 1.48), V(0, -0.58, 1.59), V(0, -0.76, 1.715), V(0, -0.93, 1.815),
+             V(0, -1.06, 1.87)]
     cr = [0.10, 0.10, 0.085, 0.07, 0.06]
     cb = ["spine_03", "neck_01", "neck_02", "neck_03"]
     for i in range(4):
@@ -233,7 +233,7 @@ def body_parts(J=None):
         # cannon (deep front-back because of the tendons) + feathered fetlock
         add(flat_cone(kn + V(0, 0.005, -0.03), fe + V(0, 0.01, 0.03), 0.063, 0.063, 0.95,
                       bone=f"cannon_F_{s}", name="cannon"), 0.04)
-        add(flat_cone(kn + V(0, 0.045, -0.07), fe + V(0, 0.05, 0.04), 0.040, 0.046, 0.95,
+        add(flat_cone(kn + V(0, 0.052, -0.07), fe + V(0, 0.058, 0.04), 0.044, 0.05, 0.95,
                       bone=f"cannon_F_{s}", name="tendon"), 0.04)
         add(ell(fe + V(0, 0.014, 0.0), (0.078, 0.086, 0.075), bone=f"pastern_F_{s}",
                 name="fetlock"), 0.04)

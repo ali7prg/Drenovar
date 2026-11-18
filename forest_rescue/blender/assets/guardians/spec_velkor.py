@@ -90,9 +90,9 @@ def _hoof(P, sk, digit_bone, sx):
 
 def body_parts(sk):
     P = []
-    prof = [(206, 136, 160, 0.10), (222, 124, 196, 0.36), (245, 117, 214, 0.47), (280, 112, 226, 0.53),
-            (330, 110, 234, 0.56), (380, 105, 238, 0.57), (430, 97, 238, 0.58), (470, 92, 232, 0.56),
-            (505, 97, 222, 0.50), (530, 104, 206, 0.40), (555, 108, 184, 0.31), (574, 106, 162, 0.24),
+    prof = [(206, 132, 160, 0.10), (222, 118, 196, 0.36), (245, 110, 214, 0.47), (280, 104, 226, 0.53),
+            (330, 100, 234, 0.56), (380, 94, 238, 0.57), (430, 86, 238, 0.58), (470, 82, 232, 0.56),
+            (505, 88, 222, 0.50), (530, 98, 206, 0.40), (555, 106, 184, 0.31), (574, 106, 162, 0.24),
             (582, 108, 150, 0.12)]
     prof = sorted(prof, key=lambda r: -r[0])          # ascending world Y (right-facing sheet)
     Y = [S(x, 0)[1] for x, *_ in prof]
@@ -100,7 +100,7 @@ def body_parts(sk):
     zb = [S(0, b)[2] for _, t, b, w in prof]
     w = [w for *_, w in prof]
     P.append(Part(loft(Y, zt, zb, w, bone="spine_02"), "spine_02", k=0.0, tag="torso"))
-    P.append(Part(sdf.ellipsoid(S(480, 104), (0.34, 0.45, 0.20)), "spine_03", k=0.12, tag="hump"))
+    P.append(Part(sdf.ellipsoid(S(482, 100), (0.30, 0.45, 0.20)), "spine_03", k=0.12, tag="hump"))
     hd = "head"
     P.append(Part(sdf.ellipsoid(S(588, 114), (0.21, 0.22, 0.19)), hd, k=0.07, tag="cranium"))
     P.append(Part(sdf.round_cone(S(600, 122), S(634, 134), 0.165, 0.11), hd, k=0.06, tag="muzzle"))
@@ -159,25 +159,33 @@ def fur(sk, hv, hf, pans, rng):
     def w_shag(c, n):
         x, y = xy(c)
         return (np.abs(n[:, 2]) < 0.75) * (y < 300) * gspec.ss(200, 215, x) * (1 - gspec.ss(585, 600, x))
-    r, nr = gspec.roots(hv, hf, rng, 300, w_shag, 0.07)
+    r, nr = gspec.roots(hv, hf, rng, 250, w_shag, 0.075)
     C += gfur.make_clumps("shag", r, nr, lambda p, n, rng: n * 0.35 + np.array([0, 0.18, -1.0]) +
-                          rng.normal(0, 0.1, 3), rng, hull, 0.62, min_len=0.10, width=(0.07, 0.12), flat=0.35,
+                          rng.normal(0, 0.1, 3), rng, hull, 0.85, min_len=0.10, width=(0.07, 0.12), flat=0.35,
                           bend_fn=lambda p, n, d, rng: n * 0.05 + np.array([0, 0.05, -0.05]),
-                          up_fn=lambda p, n, d: np.cross(d, n), jag=(0.82, 1.0))
+                          up_fn=lambda p, n, d: np.cross(d, n), jag=(0.9, 1.0))
+    # belly / chest underside fringe (long hanging hair)
+    def w_belly(c, n):
+        x, y = xy(c)
+        return (n[:, 2] < -0.45) * gspec.ss(220, 245, x) * (1 - gspec.ss(560, 580, x))
+    r, nr = gspec.roots(hv, hf, rng, 70, w_belly, 0.09)
+    C += gfur.make_clumps("shag", r, nr, lambda p, n, rng: np.array([0, 0.15, -1.0]) + rng.normal(0, 0.08, 3), rng,
+                          hull, 0.7, min_len=0.10, width=(0.09, 0.13), flat=0.75,
+                          up_fn=lambda p, n, d: np.array([0, 1.0, 0]), jag=(0.9, 1.0))
     # throat / chest beard (long, hanging)
     def w_beard(c, n):
         x, y = xy(c)
         return gspec.ss(520, 540, x) * (1 - gspec.ss(632, 640, x)) * (n[:, 2] < -0.2) * (np.abs(c[:, 0]) < 0.3)
     r, nr = gspec.roots(hv, hf, rng, 55, w_beard, 0.06)
     C += gfur.make_clumps("beard", r, nr, lambda p, n, rng: np.array([0, 0.05, -1.0]) + rng.normal(0, 0.1, 3), rng,
-                          hull, 0.55, min_len=0.12, width=(0.07, 0.11), flat=0.4,
+                          hull, 0.55, min_len=0.12, width=(0.08, 0.12), flat=0.7,
                           up_fn=lambda p, n, d: np.array([1.0, 0, 0]), jag=(0.85, 1.0))
     # moss + leaves on the back / neck top (short, flat blades lying on the surface)
     def w_moss(c, n):
         x, y = xy(c)
         return (n[:, 2] > 0.35) * gspec.ss(215, 240, x) * (1 - gspec.ss(565, 580, x))
     r, nr = gspec.roots(hv, hf, rng, 120, w_moss, 0.075)
-    C += gfur.make_clumps("moss", r, nr, lambda p, n, rng: n * 0.7 + rng.normal(0, 0.35, 3), rng, [side, front], 0.16,
+    C += gfur.make_clumps("moss", r, nr, lambda p, n, rng: n * 0.9 + rng.normal(0, 0.3, 3), rng, [side, front], 0.24,
                           min_len=0.05, width=(0.07, 0.11), flat=0.25,
                           bend_fn=lambda p, n, d, rng: -n * 0.4, up_fn=lambda p, n, d: np.cross(d, n),
                           jag=(0.6, 1.0))
@@ -190,10 +198,11 @@ def fur(sk, hv, hf, pans, rng):
             ab = b - a
             t = np.clip(((c - a) @ ab) / (ab @ ab), 0, 1)
             d = np.minimum(d, np.linalg.norm(c - (a + t[:, None] * ab), axis=1))
-        return d < 0.14
-    r, nr = gspec.roots(hv, hf, rng, 40, w_tail, 0.05)
-    C += gfur.make_clumps("tail", r, nr, lambda p, n, rng: np.array([0, 0.45, -1.0]) + n * 0.4 + rng.normal(0, 0.1, 3),
-                          rng, [side], 0.75, min_len=0.12, width=(0.06, 0.1), flat=0.45,
+        x, y = xy(c)
+        return (d < 0.16) | ((x < 230) & (y < 200) & (np.abs(c[:, 0]) < 0.3))
+    r, nr = gspec.roots(hv, hf, rng, 60, w_tail, 0.045)
+    C += gfur.make_clumps("tail", r, nr, lambda p, n, rng: np.array([0, 0.55, -1.0]) + n * 0.5 + rng.normal(0, 0.12, 3),
+                          rng, [side], 1.15, min_len=0.15, width=(0.07, 0.11), flat=0.45,
                           up_fn=lambda p, n, d: np.cross(d, n), jag=(0.85, 1.0))
     # fetlock feathering
     for leg in LEGS.values():
@@ -212,23 +221,29 @@ def fur(sk, hv, hf, pans, rng):
 
 
 def _antler(base, sx, rng):
-    """Main beam + tines (side view: sweeps up/back; front view: spreads to ~±1.3 m)."""
+    """Bowed beam sweeping out/back/up (sheet: ~±1.25 m, 1.7 m behind the head) with 8 curved tines
+    rising and hooking slightly forward; brow tine reaches over the face."""
     import gfur
     import gbody as gb
-    beam_pts = np.array([base, base + np.array([0.28 * sx, 0.10, 0.22]), base + np.array([0.62 * sx, 0.28, 0.40]),
-                         base + np.array([0.95 * sx, 0.48, 0.52]), base + np.array([1.16 * sx, 0.70, 0.62]),
-                         base + np.array([1.28 * sx, 0.92, 0.78])])
-    beam = gb.catmull(beam_pts, 9)
-    r = np.linspace(0.075, 0.032, 9)
+    beam_pts = np.array([base, base + np.array([0.40 * sx, 0.15, 0.06]), base + np.array([0.80 * sx, 0.45, 0.10]),
+                         base + np.array([1.08 * sx, 0.85, 0.13]), base + np.array([1.25 * sx, 1.30, 0.15]),
+                         base + np.array([1.32 * sx, 1.70, 0.18])])
+    beam = gb.catmull(beam_pts, 11)
+    r = np.linspace(0.13, 0.05, 11)
     meshes = [gb.tube(beam, r, sides=6, up=(0, 0, 1), tip=True)]
-    tines = [(0.12, (0.15 * sx, -0.85, 0.55), 0.40), (0.30, (0.10 * sx, -0.55, 0.85), 0.52),
-             (0.48, (0.05 * sx, -0.35, 0.95), 0.50), (0.64, (0.12 * sx, -0.15, 1.0), 0.46),
-             (0.80, (0.25 * sx, 0.05, 1.0), 0.38), (0.92, (0.35 * sx, 0.25, 0.95), 0.30)]
-    for f, d, L in tines:
+    tines = [(0.03, (0.05 * sx, -1.0, 0.25), (0.0, -0.1, 0.55), 0.70),
+             (0.16, (0.06 * sx, -0.55, 0.85), (0.0, -0.2, 0.25), 0.52),
+             (0.30, (0.06 * sx, -0.30, 0.95), (0.0, -0.30, 0.05), 0.60),
+             (0.42, (0.08 * sx, -0.20, 1.0), (0.04 * sx, -0.30, 0.0), 0.62),
+             (0.55, (0.10 * sx, -0.10, 1.0), (0.04 * sx, -0.28, 0.0), 0.60),
+             (0.68, (0.12 * sx, 0.0, 1.0), (0.05 * sx, -0.25, 0.0), 0.58),
+             (0.81, (0.16 * sx, 0.10, 1.0), (0.06 * sx, -0.22, 0.0), 0.52),
+             (0.93, (0.22 * sx, 0.25, 0.95), (0.06 * sx, -0.18, 0.0), 0.42)]
+    for f, d, cv, L in tines:
         i = f * (len(beam) - 1)
         p = beam[int(i)] * (1 - (i % 1)) + beam[min(int(i) + 1, len(beam) - 1)] * (i % 1)
-        rr = float(np.interp(f, np.linspace(0, 1, 9), r)) * 0.8
-        meshes.append(gfur.horn(p, np.array(d), np.array([0.0, 0.10, -0.12]), L, rr, sides=5, n=6))
+        rr = float(np.interp(f, np.linspace(0, 1, 11), r)) * 0.85
+        meshes.append(gfur.horn(p, np.array(d), np.array(cv), L, rr, sides=5, n=6))
     return meshes
 
 
@@ -245,7 +260,7 @@ def details(sk):
                       kind="eye", lods=(0, 1, 2)))
         # hanging moss vines from the beam (green strands)
         for k, f in enumerate((0.25, 0.45, 0.62, 0.8)):
-            top = base + np.array([(0.28 + 0.95 * f) * sx * 0.95, 0.15 + 0.55 * f, 0.30 + 0.32 * f])
+            top = base + np.array([(0.40 + 0.9 * f) * sx, 0.15 + 1.5 * f, 0.05 + 0.12 * f])
             L = 0.28 + 0.12 * ((k * 7) % 3)
             pts = gb.catmull([top, top + np.array([0.02 * sx, 0.02, -L * 0.5]), top + np.array([0.0, 0.05, -L])], 5)
             D.append(dict(mesh=gb.tube(pts, np.linspace(0.022, 0.006, 5), sides=4, up=(0, 1, 0), tip=True),
@@ -316,8 +331,9 @@ def texture_overrides(B, col, T, lab):
     if m.any():
         bases = np.array([S(566, 90, 0.15), S(566, 90, -0.15)])
         d = np.min(np.linalg.norm(P[m][:, None, :] - bases[None], axis=2), axis=1)
-        t = np.clip(d / 0.9, 0, 1)[:, None]
-        out[m] = np.array([0.45, 0.38, 0.30]) * (1 - t) + np.array([0.90, 0.86, 0.76]) * t
+        t = np.clip(d / 1.1, 0, 1)[:, None] ** 0.7
+        streak = 0.08 * np.sin(P[m][:, 0] * 90 + P[m][:, 2] * 140)[:, None]
+        out[m] = (np.array([0.42, 0.34, 0.25]) * (1 - t) + np.array([0.86, 0.81, 0.70]) * t) * (1 + streak)
     m = lab == inv.get("vine", -9)
     if m.any():
         out[m] = np.array([0.36, 0.42, 0.14]) * (0.85 + 0.3 * np.random.default_rng(1).random((m.sum(), 1)))
@@ -345,15 +361,15 @@ ANIM = dict(
     spine=["spine_01", "spine_02", "spine_03"], neck=["neck_01", "neck_02"], tail=TAIL,
     mane=["mane_01", "mane_02"], bones={"jaw", "ear_L", "ear_R"},
     tail_base=[0.0] * 3, tail_lag=0.09, idle_tail_sway=5.0, idle_tail_curl=2.0,
-    walk=dict(T=33 / 30, speed=1.5, duty=0.64,
+    walk=dict(T=33 / 30, speed=1.3, duty=0.64, height=-0.10,
               touchdown={"hind_L": 0.0, "fore_L": 0.25, "hind_R": 0.5, "fore_R": 0.75},
               lift_f=0.16, lift_h=0.14, fold_f=60.0, fold_h=45.0, bob=0.03, sway=0.03, pitch=1.2, roll=2.2,
               yaw=1.5, spine_yaw=1.5, tail_sway=6.0, tail_lift=0.0, tail_bounce=2.0, ears=0.0,
               mane_bounce=5.0, head_nod=3.0),
-    run=dict(T=22 / 30, speed=3.6, duty=0.42, touchdown={"fore_L": 0.0, "hind_R": 0.0, "fore_R": 0.5, "hind_L": 0.5},
+    run=dict(T=22 / 30, speed=3.2, duty=0.42, touchdown={"fore_L": 0.0, "hind_R": 0.0, "fore_R": 0.5, "hind_L": 0.5},
              lift_f=0.24, lift_h=0.2, fold_f=75.0, fold_h=55.0, bob=0.05, bob_phase=0.0, sway=0.0, pitch=1.5,
              roll=1.5, yaw=1.0, spine_yaw=1.0, flex=2.0, tail_sway=4.0, tail_lift=8.0, tail_bounce=5.0,
-             ears=-10.0, mane_bounce=8.0, head_nod=4.0, height=-0.03),
+             ears=-10.0, mane_bounce=8.0, head_nod=4.0, height=-0.07),
     alert_pose=dict(body=(0.0, 0.05, -0.05, -2.0, 0.0, 0.0),
                     rot={"neck_01": (10.0, 0, 0), "neck_02": (6.0, 0, 0), "head": (6.0, 0, 0)}, tail_lift=8.0),
     death_lie=(-0.9, 84.0), roar_neck=16.0, roar_head=18.0, roar_jaw=26.0, mane_bristle=6.0,
@@ -453,3 +469,7 @@ HEAD_VIEWS = {
     "side": {"sheet": "11", "box": (1110, 0, 1536, 345), "kind": "persp",
              "cam": S(600, 120) + np.array([-2.6, -1.1, 0.25]), "look": S(585, 100), "lens": 50.0},
 }
+
+
+CLUMP_TAPER = 0.55            # long hair locks end blunt (not spikes)
+TIP_LIGHTEN = (0.55, 0.45, (0.78, 0.66, 0.50))   # strength, distance from skin (m), light hair colour

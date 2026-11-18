@@ -27,11 +27,12 @@ STEP = 36.0
 SITES = {"lf_site_02": ["mountain", "river", "leaf"], "lf_site_06": ["coal", "seed", "tree"],
          "lf_site_10": ["sun", "stone", "root"]}
 R_OUT, WALL_TOP = 0.70, 0.58
-RINGS = {  # name: (r_bottom, z_bottom, r_top, z_top)
-    "ring_3": (0.565, 0.665, 0.445, 0.765),
-    "ring_2": (0.445, 0.765, 0.315, 0.865),
-    "ring_1": (0.315, 0.865, 0.180, 0.955),
+RINGS = {  # stacked discs rising toward the back (drawing): name: (radius, centre_y, z_bottom, z_top)
+    "ring_3": (0.555, 0.00, 0.640, 0.705),
+    "ring_2": (0.470, 0.150, 0.705, 0.770),
+    "ring_1": (0.375, 0.265, 0.770, 0.835),
 }
+GLYPH_R = {"ring_3": 0.43, "ring_2": 0.35, "ring_1": 0.25}   # glyph circle radius on each disc (front crescent)
 DOOR_A0, DOOR_A1 = math.radians(247), math.radians(293)
 DOOR_DROP = 0.44
 KEY_STAND = np.array([-0.62, -1.05, 0.0])
@@ -43,26 +44,37 @@ def ring_angle(symbol):
     return -math.radians(STEP * GLYPHS.index(symbol))
 
 
-def glyph_motif(name, rb, zb, rt, zt):
-    """Engrave the 10 glyph positions on the sloped band (lathe param: u = angle*R_ref, v = arc)."""
-    R = max(rb, rt)
-    arc = math.hypot(rb - rt, zt - zb)
-    U = 2 * math.pi * R
-    bb = (0.0, 0.0, U, arc)
-    cv = mo.Canvas(bb, ppm=900)
-    s = min(arc * 0.78, U / 10 * 0.62)
+def glyph_motif(name, R):
+    """10 glyph positions engraved on the disc's top face (planar cap UV = local x, y in metres).
+    Position k sits at angle 270 + 36k deg (k=0 at the front); glyph 'up' points to the disc centre so the
+    glyph at the front index reads upright for the viewer."""
+    from scipy import ndimage as ndi
+    bb = (-R, -R, R, R)
+    cv = mo.Canvas(bb, ppm=1100)
+    big = np.zeros((cv.H, cv.W), np.float32)
+    s_ = 0.16 if name != "ring_1" else 0.15
+    rg = GLYPH_R[name]
     for k, g in enumerate(GLYPHS):
-        ang = math.radians(270 + k * STEP) % (2 * math.pi)
-        u = ang / (2 * math.pi) * U
+        sub = mo.Canvas((-s_ * 0.6, -s_ * 0.6, s_ * 0.6, s_ * 0.6), ppm=1100)
         if g == "blank":
-            cv.circle((u, arc * 0.5), s * 0.12)
+            sub.ring((0, 0), s_ * 0.18, s_ * 0.06)
         else:
-            mo.glyph(cv, g, (u, arc * 0.5), s, s * 0.11)
-        # index notch lines between positions
-        ua = (ang + math.radians(STEP / 2)) / (2 * math.pi) * U % U
-        cv.line(np.array([[ua, arc * 0.12], [ua, arc * 0.88]]), 0.006)
-    return [{"mask": cv.mask(0.002), "bbox": bb, "isl": (0,), "depth": 0.004, "mode": "cut",
-             "colour": sh.C(64, 46, 26), "tint": 0.8}]
+            mo.glyph(sub, g, (0, 0), s_, s_ * 0.1)
+        m = sub.mask(0.0)
+        ang = 270 + k * STEP
+        m = ndi.rotate(m, -(ang - 270), reshape=False, order=1)
+        cx = rg * math.cos(math.radians(ang))
+        cy = rg * math.sin(math.radians(ang))
+        px = int(round((cx - bb[0]) * cv.ppm - m.shape[1] / 2))
+        py = int(round((bb[3] - cy) * cv.ppm - m.shape[0] / 2))
+        h, w = m.shape
+        y0, x0 = max(py, 0), max(px, 0)
+        y1, x1 = min(py + h, big.shape[0]), min(px + w, big.shape[1])
+        big[y0:y1, x0:x1] = np.maximum(big[y0:y1, x0:x1], m[y0 - py:y1 - py, x0 - px:x1 - px])
+    cv.ring((0, 0), R - 0.03, 0.012)
+    big = np.maximum(big, cv.mask(0.0))
+    big = ndi.gaussian_filter(big, 1.2)
+    return [{"mask": big, "bbox": bb, "isl": (2,), "depth": 0.004, "mode": "cut", "colour": sh.C(58, 40, 22), "tint": 0.85}]
 
 
 def build(lod):
@@ -102,10 +114,10 @@ def build(lod):
     for k in range(8):
         a = math.radians(22.5 + 45 * k)
         c, s_ = math.cos(a), math.sin(a)
-        cl = pk.beam((c * 0.54, s_ * 0.54, 0.69), (c * (R_OUT + 0.05), s_ * (R_OUT + 0.05), 0.64), 0.075, 0.03, chamfer=0.006)
+        cl = pk.beam((c * 0.60, s_ * 0.60, 0.648), (c * (R_OUT + 0.04), s_ * (R_OUT + 0.04), 0.648), 0.07, 0.025, chamfer=0.005)
         B.add("root", "clamps", "bronze", cl)
-        dn = pk.beam((c * (R_OUT + 0.05), s_ * (R_OUT + 0.05), 0.66), (c * (R_OUT + 0.05), s_ * (R_OUT + 0.05), 0.52), 0.075, 0.03,
-                     chamfer=0.006)
+        dn = pk.beam((c * (R_OUT + 0.04), s_ * (R_OUT + 0.04), 0.66), (c * (R_OUT + 0.04), s_ * (R_OUT + 0.04), 0.56), 0.07, 0.025,
+                     chamfer=0.005)
         B.add("root", "clamps", "bronze", dn)
     # front index mark (bronze pointer at the front of the rim)
     mark = pk.extrude(np.array([[-0.03, 0], [0.03, 0], [0.0, 0.07]]), 0.02, chamfer=0.004)
@@ -126,18 +138,11 @@ def build(lod):
     dp = pk.lathe(np.array([[R_OUT - 0.10, 0.09], [R_OUT + 0.005, 0.09], [R_OUT + 0.012, 0.30], [R_OUT + 0.005, 0.505],
                             [R_OUT - 0.10, 0.505]]), B.seg(8, 5, 3), a0=DOOR_A0 + 0.01, a1=DOOR_A1 - 0.01, smooth=False)
     B.add("door", "door_panel", "limestone", dp, meta={"block_len": 0.3, "course_h": 0.21, "moss": 0.3})
-    # ---------------- rings
-    for name, (rb, zb, rt, zt) in RINGS.items():
-        band = pk.lathe(np.array([[rb, zb], [rt, zt]]), B.seg(60, 36, 20), smooth=True, ref_R=max(rb, rt))
-        band.isl = [0] * len(band.F)
-        top = pk.lathe(np.array([[rt, zt], [rt - 0.035, zt]]), B.seg(60, 36, 20), smooth=False)
-        top.isl = [1] * len(top.F)
-        top_flag = pk.Piece.merge([top])
-        lip = pk.lathe(np.array([[rb + 0.012, zb - 0.02], [rb + 0.012, zb + 0.008], [rb, zb]]), B.seg(60, 36, 20), smooth=False)
-        lip.isl = [2] * len(lip.F)
-        B.add(name, f"{name}_band", "bronze", pk.Piece.merge([band, top_flag, lip]), meta={"motif": glyph_motif(name, rb, zb, rt, zt)})
-    boss = pk.lathe(np.array([[0.18, 0.955], [0.15, 0.985], [0.05, 1.0], [0.0, 1.0]]), B.seg(32, 20, 12), smooth=False)
-    B.add("root", "top_boss", "bronze", boss)
+    # ---------------- rings: stacked bronze discs (each rotates about its own vertical axis)
+    for name, (R, cy, zb, zt) in RINGS.items():
+        disc = pk.extrude_round(pk.circle(R, B.seg(48, 32, 20)), zt - zb, r_front=0.012, r_back=0.004, seg=1,
+                                cap_spacing=(0.09 if lod == 0 else None))
+        B.add(name, f"{name}_disc", "bronze", disc.transformed(M4(None, (0, cy, zb))), meta={"motif": glyph_motif(name, R)})
     # ---------------- lever key (rests on the stand; green crystal in a bronze claw)
     k0 = KEY_STAND + np.array([0.0, 0.0, 0.18 + 0.022])
     rod = pk.rod(k0 + np.array([-0.21, 0, 0]), k0 + np.array([0.14, 0, 0]), 0.018, B.seg(8, 6, 4))
@@ -155,9 +160,9 @@ def build(lod):
 
 
 SPEC = {"root": {},
-        "ring_1": {"pivot": (0, 0, 0), "export_name": "ring_1"},
-        "ring_2": {"pivot": (0, 0, 0), "export_name": "ring_2"},
-        "ring_3": {"pivot": (0, 0, 0), "export_name": "ring_3"},
+        "ring_1": {"pivot": (0, RINGS["ring_1"][1], RINGS["ring_1"][2]), "export_name": "ring_1"},
+        "ring_2": {"pivot": (0, RINGS["ring_2"][1], RINGS["ring_2"][2]), "export_name": "ring_2"},
+        "ring_3": {"pivot": (0, RINGS["ring_3"][1], RINGS["ring_3"][2]), "export_name": "ring_3"},
         "door": {"pivot": (0, -R_OUT, 0.09), "export_name": "door_pivot"},
         "key_lever": {"pivot": tuple(KEY_STAND + np.array([0.0, 0.0, 0.202])), "export_name": "key_lever"}}
 SOLVED_POSE_02 = {"ring_1": {"rot": (0, 0, ring_angle("mountain"))}, "ring_2": {"rot": (0, 0, ring_angle("river"))},
@@ -206,7 +211,7 @@ def clips(A):
 def meta(A):
     return {
         "symbol_targets": {
-            "axis": "rings rotate about glTF +Y through the drum centre (node origin)",
+            "axis": "each ring disc rotates about glTF +Y through its own node origin (disc centre); discs are stacked rising toward the back",
             "ring_for_progress_step": {"1": "ring_1", "2": "ring_2", "3": "ring_3"},
             "rotation_y_deg": {g: round(math.degrees(ring_angle(g)), 2) for g in GLYPHS},
             "rest_deg": 0.0, "positions_deg_apart": STEP,
@@ -219,7 +224,8 @@ def meta(A):
             "solved": {"clip": "lf_lock_mechanism", "door_pivot_open_offset_m": [0, -DOOR_DROP, 0],
                        "key_lever_open": "end pose of lf_lock_mechanism"},
         },
-        "sockets": {"artifact_spot": pk.b2g((0.0, -0.42, 0.34)), "front_index_mark": pk.b2g((0, -0.57, 0.70))},
+        "sockets": {"artifact_spot": pk.b2g((0.0, -0.42, 0.34)), "front_index_mark": pk.b2g((0, -0.57, 0.70)),
+                    "glyph_front_positions": {n: pk.b2g((0.0, RINGS[n][1] - GLYPH_R[n], RINGS[n][3])) for n in RINGS}},
     }
 
 

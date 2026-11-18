@@ -132,7 +132,18 @@ func on_state(value: Dictionary, previous: Dictionary) -> void:
 		if finished:
 			var shown: Dictionary = fight if not fight.is_empty() and String(fight.get("reportId", "")) == String(last_battle.get("reportId", "")) else last_battle
 			if String(shown.get("outcome", "pending")) != "pending":
-				game.panels.open_battle_result(shown)
+				# DRENOVAR's own battle popup already presents reports listed in state.reports
+				# (outcome, losses, ordinary loot): do not stack a second window over it.
+				var listed := false
+				for report in game.main.state.get("reports", []):
+					if String(report.get("id", "")) == String(shown.get("reportId", "")):
+						listed = true
+				if listed:
+					var site_id := String(shown.get("siteId", ""))
+					if String(shown.get("outcome", "")) == "victory" and game.content.site(site_id).size() > 0:
+						game.hud.toast(String(game.content.task(site_id, "defeat_guardian").get("title", "")), "reward", 5.0)
+				else:
+					game.panels.open_battle_result(shown)
 	last_battle = fight
 
 func poi_from(state: Dictionary, id: String) -> Dictionary:
@@ -279,7 +290,8 @@ func update_horse(now: float, delta: float) -> void:
 	var moving := false
 	var move: Variant = horse.get("move")
 	if not intro_horse.is_empty():
-		var elapsed := (Time.get_ticks_msec() - float(intro_horse.started)) / 1000.0
+		intro_horse.elapsed = float(intro_horse.get("elapsed", 0.0)) + delta
+		var elapsed := float(intro_horse.elapsed)
 		var walk_seconds := float(intro_horse.get("walk", 2.4))
 		var from: Vector3 = intro_horse.from
 		var to: Vector3 = intro_horse.to
@@ -479,13 +491,14 @@ func update_sites(now: float, delta: float) -> void:
 		update_guardian(site_id, poi, anchor, now, delta, near)
 		var step := int(game.client.site_state(site_id).get("step", 0))
 		markers.append({"position":center + Vector3.UP * 2.0, "kind":"site", "id":site_id, "site":site_id})
-		if game.fog_clear(center):
+		var trail_open: bool = game.mech.is_open() and game.mech.site_id == site_id and game.mech.kind == "trail_cache"
+		if game.fog_clear(center) and not trail_open:
 			tags.append({"position":center + Vector3.UP * 4.2, "text":game.site_name(site_id), "kind":"site", "step":step})
 		if String(poi.get("variation", "")) == "trail_cache" and game.mech.is_open() and game.mech.site_id == site_id:
 			for symbol in anchor.get("landmarks", {}):
 				var mark: Vector3 = anchor.landmarks[symbol]
 				markers.append({"position":mark + Vector3.UP * 1.0, "kind":"landmark", "symbol":String(symbol), "site":site_id})
-				tags.append({"position":mark + Vector3.UP * 2.2, "text":game.content.symbol_label(String(symbol)), "kind":"landmark"})
+				tags.append({"position":mark + Vector3.UP * 0.6, "text":game.content.symbol_label(String(symbol)), "kind":"landmark"})
 	for site_id in site_props.keys():
 		if not present.has(site_id):
 			for id in site_props[site_id].values():

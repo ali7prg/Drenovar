@@ -159,7 +159,7 @@ def main():
         export_objs.append(ve)
         for lod, o in enumerate(objs):
             o.parent = ve
-            o.location = (0, lod * spacing, 0)
+            o.location = (0, 0, 0)          # all LODs at the variant origin (engine picks one per distance)
             export_objs.append(o)
         lo, hi = core.bounds([objs[0]])
         lo = lo - np.array([i * spacing, 0, 0])
@@ -193,8 +193,8 @@ def main():
         "alpha": {"lf_foliage": {"mode": "MASK", "cutoff": 0.5, "double_sided": True}},
         "wind": WIND_DOC,
         "clips": {"lf_forest_wind": {"seconds": 8.0, "loop": True, "type": "shader (vertex colour driven)"}},
-        "layout_note": "Node translations are preview offsets only (variants along +X, LOD1/LOD2 rows behind). "
-                       "Instance the Mesh resources with your own transforms; mesh origin = trunk base on the ground.",
+        "layout_note": "Variants are laid out along +X (display_offset_gltf); the three LOD meshes of a variant share "
+                       "the variant origin (overlapping, show one per distance). Mesh origin = trunk base on the ground.",
         "lod_note": "LOD0: bark+foliage (2 surfaces); LOD1/LOD2: single foliage-atlas surface (bark strip in atlas).",
         "export_scale_vs_art02": scale,
         "glb_images": gi["images"],

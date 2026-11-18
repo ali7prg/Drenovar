@@ -58,12 +58,12 @@ def assemble(asset, voxel=0.0035, with_garments=True):
     head_parts = [p for p in parts_all if is_head(p)]
     body_parts = [p for p in parts_all if not is_head(p)]
     lo, hi = HB.field_bounds(L)
-    F = HB.build_field(body_parts, subs, lo, hi, voxel, views=views, hull_k=getattr(spec, "HULL_K", 0.010))
+    F = HB.build_field(body_parts, subs, lo, hi, voxel, views=views, hull_k=getattr(spec, "HULL_K", 0.022),
+                       hull_dilate=getattr(spec, "HULL_DILATE", 1.0))
     s_ = L["crown"] / 1.75
     hlo = np.array([-0.17 * s_, O[1] - 0.10, J["Neck"][2] - 0.07])
     hhi = np.array([0.17 * s_, O[1] + 0.30, L.get("top", L["crown"] + 0.05)])
-    Fhd = HB.build_field(head_parts, [], hlo, hhi, getattr(spec, "HEAD_VOXEL", 0.0021), views=views,
-                         hull_k=getattr(spec, "HULL_K", 0.010))
+    Fhd = HB.build_field(head_parts, [], hlo, hhi, getattr(spec, "HEAD_VOXEL", 0.0021), views=None)
     # body_fn = union of both (for garment fitting)
     ctx.body_field = F
     fb, fh = G.FieldFn(F), G.FieldFn(Fhd)

@@ -1,0 +1,118 @@
+[
+ {
+  "tag": "iter01",
+  "metrics": {
+   "front": {
+    "iou": 0.8711,
+    "colour_error": 0.2038
+   },
+   "back": {
+    "iou": 0.8719,
+    "colour_error": 0.269
+   }
+  },
+  "differences": [
+   "geometry-only pass; shoulders narrow/low vs sheet",
+   "sleeves and forearms too thin",
+   "trouser legs below the apron too narrow, boots small",
+   "fingers curled backwards",
+   "apron bib edge stair-stepped (face mask)"
+  ],
+  "changes_for_next": [
+   "deltoids enlarged, sleeve radius 0.088, rolled cuffs bigger",
+   "forearm radii +10%, shin/trouser radii +10%",
+   "boots 18% wider / 30% taller with turned cuff",
+   "finger flexion axis fixed",
+   "bib built with per-row taper"
+  ]
+ },
+ {
+  "tag": "iter02",
+  "metrics": {
+   "front": {
+    "iou": 0.8872,
+    "colour_error": 0.2052
+   },
+   "back": {
+    "iou": 0.8885,
+    "colour_error": 0.2709
+   }
+  },
+  "differences": [
+   "shoulder tops notched by the hull (torso top too flat/high)",
+   "hands edge-on (sheet: palms toward the thighs)"
+  ],
+  "changes_for_next": [
+   "trapezius slope in torso stations 1.35-1.465",
+   "palm orientation: thumb forward-medial; hand scale 1.12"
+  ]
+ },
+ {
+  "tag": "iter03",
+  "metrics": {
+   "front": {
+    "iou": 0.8902,
+    "colour_error": 0.2049
+   },
+   "back": {
+    "iou": 0.8915,
+    "colour_error": 0.2711
+   }
+  },
+  "differences": [
+   "neck strap path crossed the face",
+   "untextured"
+  ],
+  "changes_for_next": [
+   "strap re-routed around the neck",
+   "first textured build: projection + procedural PBR, AO"
+  ]
+ },
+ {
+  "tag": "iter04",
+  "metrics": {
+   "front": {
+    "iou": 0.8906,
+    "colour_error": 0.1047
+   },
+   "back": {
+    "iou": 0.8908,
+    "colour_error": 0.0898
+   }
+  },
+  "differences": [
+   "grazing-angle streaks on sleeves/trousers/boots",
+   "parchment background bled into edges",
+   "face garbled, low-poly"
+  ],
+  "changes_for_next": [
+   "facing threshold 0.32 + mask erosion 2px + per-class outlier rejection",
+   "portrait inset projected on the face (affine eye/mouth registration)"
+  ]
+ },
+ {
+  "tag": "iter05",
+  "metrics": {
+   "front": {
+    "iou": 0.8888,
+    "colour_error": 0.1122
+   },
+   "back": {
+    "iou": 0.8909,
+    "colour_error": 0.0929
+   }
+  },
+  "differences": [
+   "orchestrator review: faceted head/boots/hands",
+   "side streaks remain",
+   "beard is a separate plate with a hard rim",
+   "hands do not read as hands"
+  ],
+  "changes_for_next": [
+   "separate head mesh (2.1 mm voxels, own 2.5k budget), beard merged into it with tapered thickness",
+   "silhouette hull no longer slices head/hands/boots; softer hull blend (2.2 cm)",
+   "UVs from a smoothed twin (large islands); cloth shading compression; AO 32 spp; normal bake only from SDF pieces",
+   "rounder boot toe box with turned cuff; projection power 5, grazing texels take class colour"
+  ]
+ }
+]

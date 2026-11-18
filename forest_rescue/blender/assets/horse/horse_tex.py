@@ -131,6 +131,25 @@ def _star_mask(P, N, J):
     return m
 
 
+def match_coat(T, col, views, excl):
+    """Per-channel gain so the projected coat (body above the knees) matches the sheet's coat."""
+    yy, xx = np.nonzero(T.valid)
+    P = T.pos[yy, xx]
+    sel = (P[:, 2] > 0.85) & (P[:, 1] > -0.85) & (P[:, 1] < 0.70) & (P[:, 2] < 1.45)
+    tex_med = np.median(col[yy[sel], xx[sel]], 0)
+    refs = []
+    for name in ("left", "right"):
+        v = views[name]
+        rr, uu = _px_world(v)
+        RR, UU = np.meshgrid(rr, uu)
+        Y = RR if name == "left" else -RR
+        m = v.mask & ~excl[name] & (UU > 0.85) & (UU < 1.45) & (Y > -0.85) & (Y < 0.70)
+        refs.append(v.image[m])
+    ref_med = np.median(np.concatenate(refs), 0)
+    gain = np.clip(ref_med / np.maximum(tex_med, 1e-4), 0.8, 1.35)
+    return np.clip(col * gain[None, None, :], 0, 1), gain, ref_med, tex_med
+
+
 def details(T, col, J=None, seed=41):
     """Procedural coat detail + painted features.  Returns colour, roughness, height maps."""
     J = J or HB.skeleton()
@@ -139,7 +158,7 @@ def details(T, col, J=None, seed=41):
     P = T.pos[yy, xx]
     N = T.nrm[yy, xx]
     c = col[yy, xx].copy()
-    rough = np.full(len(P), 0.64)
+    rough = np.full(len(P), 0.72)
     height = np.zeros(len(P))
     # fine hair strokes: noise stretched along the (down/back) hair flow
     flow_scale = np.array([1.0, 0.35, 0.18])
@@ -207,7 +226,7 @@ def details(T, col, J=None, seed=41):
     c = c * (1 - sm[:, None]) + white * sm[:, None]
     out = col.copy()
     out[yy, xx] = np.clip(c, 0, 1)
-    R = np.full((Ht, Wt), 0.64)
+    R = np.full((Ht, Wt), 0.72)
     R[yy, xx] = rough
     Hh = np.zeros((Ht, Wt))
     Hh[yy, xx] = height

@@ -130,7 +130,35 @@ def bake_clip(rig, name, dur, loop, specs, role, props_fn=None, cloth=True):
     frames = [rig.S.solve(P) for P in poses]
     if loop:
         frames[-1] = frames[0]
+    bake_clip.last_slide = foot_slide(rig, poses, getattr(bake_clip, "speed", 0.0))
     return frames
+
+
+def foot_slide(rig, poses, speed):
+    """Max drift (cm) of the stance-foot contact point vs the ground (which moves backward at
+    `speed` in in-place clips), over every stance interval; heel/ball/toe pivots tracked."""
+    worst = 0.0
+    for S_ in ("Left", "Right"):
+        prev = None
+        for i, P in enumerate(poses):
+            M = rig.S.world(P)
+            Mf, Mt = M[f"{S_}Foot"], M[f"{S_}Toes"]
+            heel = (Mf @ np.array([0.0, -0.07, -0.075, 1.0]))[:3]
+            ball = Mt[:3, 3]
+            tip = (Mt @ np.array([0.0, rig.S.length[f"{S_}Toes"], 0.0, 1.0]))[:3]
+            pts = {"heel": heel, "ball": ball, "tip": tip}
+            k = min(pts, key=lambda q: pts[q][2])
+            p = pts[k]
+            if p[2] > 0.035:
+                prev = None
+                continue
+            t = i / A.FPS
+            if prev is None or prev[0] != k:
+                prev = (k, p.copy(), t)
+                continue
+            exp = prev[1] + np.array([0.0, speed * (t - prev[2]), 0.0])
+            worst = max(worst, float(np.linalg.norm((p - exp)[:2])))
+    return round(worst * 100.0, 2)
 
 
 def clip_specs(rig, role, name, dur):
@@ -185,12 +213,14 @@ def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032)
     budget = dict(getattr(spec, "BUDGET", {"head": 2500}))
     budget["total"] = budgets[0]
     lod0, classes = PL.build_lod0(ctx, budget)
-    hi = [PL.obj_from_piece(p, "hi_" + p.name) for p in ctx.pieces if p.meta.get("optional") is None
-          or p.meta.get("default_on")]
+    hi = [PL.obj_from_piece(p, "hi_" + p.name) for p in ctx.pieces if p.meta.get("sdf") and p.name in ("body", "head")]
     tex = PL.texture_lod0(ctx, lod0, classes, size=2048, hi_objs=hi)
     tp = PL.save_textures(asset, tex)
     mats, imgs = PL.make_materials(asset, lod0, classes, spec, tp, tex["factors"])
     main, optional = split_optional(ctx, lod0)
+    aux = split_optional.aux
+    for o in aux:
+        o.hide_render = True
     res = {"asset": asset, "tag": tag}
     if compare:
         for o in optional:
@@ -203,7 +233,13 @@ def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032)
     if not export:
         return res
     # ---------------- rig
+    if aux:
+        for o in aux:
+            o.hide_render = False
+        main = core.join([main] + aux, asset + "_LOD0")
+    prop_to_hand(ctx, main)
     arm = SK.create_armature(asset + "_rig", ctx.B, ctx.J)
+    rest_old = {b.name: np.array(b.matrix_local) for b in arm.data.bones}
     W = RG.compute_weights(ctx, main, main["pieces"].split(","))
     RG.bind(main, arm, W)
     body_ref = RG.compute_weights.last_body
@@ -241,9 +277,14 @@ def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032)
             tc = time.time()
             specs, extra = clip_specs(rig, role, name, dur)
             pf = (lambda P, t, nm=name: props_fn(rig, P, t, nm)) if props_fn else None
+            bake_clip.speed = float(extra.get("groundSpeed_mps", 0.0)) if loop else 0.0
+            pf = carry_override(ctx, rig, rest_old, name) or pf
             frames = bake_clip(rig, name, dur, loop, specs, role, props_fn=pf)
             act = write_action(arm, name, frames, loop)
             clip_meta[name] = dict(seconds=dur, loop=loop, frames=len(frames), **extra)
+            if loop or name.startswith("lf_soldier_") or name in ("lf_civilian_react", "lf_civilian_thank",
+                                                                   "lf_civilian_look_back"):
+                clip_meta[name]["footSlide_cm"] = bake_clip.last_slide
             log(asset, "clip", name, len(frames), "%.1fs" % (time.time() - tc))
         arm.animation_data.action = None
         RG_rest(arm)
@@ -255,43 +296,70 @@ def make(asset, tag="iter", clips=True, export=True, compare=True, voxel=0.0032)
     return res
 
 
+def carry_override(ctx, rig, rest_old, clip):
+    """Per-frame override that keeps a carried prop on its carry bone (scabbard on the hips,
+    bow on the back) in clips where it is not held."""
+    props = [p.meta["prop"] for p in ctx.pieces if p.meta.get("prop")]
+    props = [pr for pr in props if clip not in pr["held"]]
+    if not props:
+        return None
+
+    def fn(P, t):
+        M = rig.S.world(P)
+        for pr in props:
+            b, cb = pr["bone"], pr["carry_bone"]
+            S_local = np.linalg.inv(rest_old[b]) @ pr["hand_place"]
+            Mc = M[cb] @ np.linalg.inv(rig.S.rest[cb]) @ pr["carry_place"]
+            Mb = Mc @ np.linalg.inv(S_local)
+            P[b] = Mb[:3, :3] / np.linalg.norm(Mb[:3, :3], axis=0, keepdims=True)
+            P[b + "_pos"] = Mb[:3, 3]
+    return fn
+
+
 def RG_rest(arm):
     for pb in arm.pose.bones:
         pb.matrix_basis.identity()
 
 
-def split_optional(ctx, lod0):
-    """Separate optional pieces (beards, headwear variants) into their own objects."""
-    names = lod0["pieces"].split(",")
-    opt = [p for p in ctx.pieces if p.meta.get("optional")]
-    objs = []
-    if not opt:
-        return lod0, objs
-    fpiece = PL.get_face_attr(lod0, "piece")
+def _extract(lod0, sel, name):
     import bmesh
+    o = lod0.copy()
+    o.data = lod0.data.copy()
+    core.link(o)
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f, k in zip(bm.faces, sel) if not k], context="FACES")
+    bm.to_mesh(o.data)
+    bm.free()
+    o.name = name
+    o["pieces"] = lod0["pieces"]
+    o["classes"] = lod0["classes"]
+    return o
+
+
+def split_optional(ctx, lod0):
+    """Separate variant parts (optional) and compare-hidden parts (weapons) into own objects."""
+    import bmesh
+    names = lod0["pieces"].split(",")
+    fpiece = PL.get_face_attr(lod0, "piece")
     keep_main = np.ones(len(fpiece), bool)
-    for p in opt:
-        if p.name not in names:
+    opt, aux = [], []
+    for p in ctx.pieces:
+        if not (p.meta.get("optional") or p.meta.get("no_compare")) or p.name not in names:
             continue
-        pi = names.index(p.name)
-        sel = fpiece == pi
+        sel = fpiece == names.index(p.name)
         if not sel.any():
             continue
-        o = lod0.copy()
-        o.data = lod0.data.copy()
-        core.link(o)
-        bm = bmesh.new()
-        bm.from_mesh(o.data)
-        bm.faces.ensure_lookup_table()
-        bmesh.ops.delete(bm, geom=[f for f, k in zip(bm.faces, sel) if not k], context="FACES")
-        bm.to_mesh(o.data)
-        bm.free()
-        o.name = f"{ctx.asset}_opt_{p.meta['optional']}"
-        o["default_on"] = bool(p.meta.get("default_on", False))
-        o["no_compare"] = bool(p.meta.get("no_compare", False))
-        o["pieces"] = lod0["pieces"]
-        o["classes"] = lod0["classes"]
-        objs.append(o)
+        if p.meta.get("optional"):
+            o = _extract(lod0, sel, f"{ctx.asset}_opt_{p.meta['optional']}")
+            o["default_on"] = bool(p.meta.get("default_on", True))
+            o["no_compare"] = bool(p.meta.get("no_compare", False))
+            opt.append(o)
+        else:
+            o = _extract(lod0, sel, f"aux_{p.name}")
+            o["prop"] = p.name
+            aux.append(o)
         keep_main &= ~sel
     bm = bmesh.new()
     bm.from_mesh(lod0.data)
@@ -299,7 +367,35 @@ def split_optional(ctx, lod0):
     bmesh.ops.delete(bm, geom=[f for f, k in zip(bm.faces, keep_main) if not k], context="FACES")
     bm.to_mesh(lod0.data)
     bm.free()
-    return lod0, objs
+    split_optional.aux = aux
+    return lod0, opt
+
+
+def prop_to_hand(ctx, obj):
+    """Move carried props (sword in scabbard, slung bow) from their carry placement (as on the
+    sheet) to their hand placement before rigid binding to the Prop bone."""
+    for p in ctx.pieces:
+        pr = p.meta.get("prop")
+        if not pr:
+            continue
+        names = obj["pieces"].split(",")
+        if p.name not in names:
+            continue
+        fpiece = PL.get_face_attr(obj, "piece")
+        me = obj.data
+        vs = set()
+        for f, pi in zip(me.polygons, fpiece):
+            if pi == names.index(p.name):
+                vs.update(f.vertices)
+        idx = np.array(sorted(vs))
+        X = np.linalg.inv(pr["carry_place"])
+        Mv = pr["hand_place"] @ X
+        co = np.empty(len(me.vertices) * 3)
+        me.vertices.foreach_get("co", co)
+        co = co.reshape(-1, 3)
+        co[idx] = co[idx] @ Mv[:3, :3].T + Mv[:3, 3]
+        me.vertices.foreach_set("co", co.ravel())
+        me.update()
 
 
 def write_action(arm, name, frames, loop):

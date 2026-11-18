@@ -82,8 +82,11 @@ def clump_mesh(c, sides=3, width_scale=1.0, taper=0.9):
     return gbody.tube(c.pts, rx, ry, sides=sides, up=c.up, tip=True)
 
 
+TAPER = 0.9
+
+
 def clumps_to_mesh(clumps, sides=3, width_scale=1.0):
-    meshes = [clump_mesh(c, sides=sides, width_scale=width_scale) for c in clumps]
+    meshes = [clump_mesh(c, sides=sides, width_scale=width_scale, taper=TAPER) for c in clumps]
     if not meshes:
         return np.zeros((0, 3)), np.zeros((0, 3), int), np.zeros((0, 3, 2)), np.zeros(0, int)
     return gbody.merge(meshes)

@@ -597,6 +597,12 @@ def clip_arrive_specs(R, dur):
 
 def sol_neutral(R, role, w=0.0, ready=0.0):
     sp = neutral(R, w)
+    if role in ("captain", "scout") and ready <= 0.0:
+        # weapon carried (sword sheathed / bow slung): relaxed arms, captain's left hand near the hilt
+        if role == "captain":
+            sp["arm"]["Left"] = dict(fk=np.array([14.0, -2.0, 0.0, 38.0, 8.0, 0.0]))
+            sp["fing"]["Left"] = np.array([0.45, 0.35, 0.4])
+        return sp
     if role == "captain":
         # sword in the right hand, blade low and forward
         sp["arm"]["Right"] = dict(fk=np.array([14.0 + 30 * ready, -6.0, 0.0, 28.0 + 50 * ready, -10.0, 0.0]))
@@ -646,7 +652,7 @@ def soldier_clip_specs(R, role, name, dur):
         specs = []
         for t in ts:
             sp = gait_spec(R, G, t, style)
-            base = sol_neutral(R, role, 0.0, ready=0.3 if jog else 0.0)
+            base = sol_neutral(R, role, 0.0, ready=0.0)
             hold = role_hold_arm(role)
             if hold:
                 sp["arm"][hold] = base["arm"][hold]
@@ -717,8 +723,10 @@ def soldier_clip_specs(R, role, name, dur):
         k2["nk"] = np.array([18.0, 0, 0])
         for S_, s in (("Left", 1.0), ("Right", -1.0)):
             a = R.ankle0[S_].copy()
-            a[1] += 0.12
-            k2["feet"][S_] = dict(ank=a, fwd=foot_fwd(S_, 10.0), up=np.array([0, 0, 1.0]), toe=10.0,
+            a[1] += 0.16
+            a[2] = 0.17
+            k2["feet"][S_] = dict(ank=a, fwd=unit(np.array([s * 0.05, -0.64, -0.77])),
+                                  up=unit(np.array([0, 0.77, -0.64]) * -1.0), toe=50.0,
                                   knee=unit(np.array([s * 0.2, -1.0, -0.3])))
         k3 = copy(k2)                                     # falling forward, hands reach for the ground
         h0 = R.hips0
@@ -727,7 +735,7 @@ def soldier_clip_specs(R, role, name, dur):
         k3["sp"] = np.array([16.0, 0, 0])
         k3["nk"] = np.array([-10.0, 0, 0])
         for S_, s in (("Left", 1.0), ("Right", -1.0)):
-            k3["feet"][S_] = dict(ank=np.array([s * 0.12, 0.70, 0.15]), fwd=unit(np.array([0, 0.55, -0.8])),
+            k3["feet"][S_] = dict(ank=np.array([s * 0.12, 0.70, 0.18]), fwd=unit(np.array([0, 0.55, -0.8])),
                                   up=unit(np.array([0, 0.8, 0.55])), toe=30.0, knee=unit(np.array([s * 0.1, -0.2, -1.0])))
             k3["arm"][S_] = dict(wrist=np.array([s * 0.26, -0.62, 0.10]), elbow=np.array([s * 0.8, 0.2, -0.4]),
                                  palm=np.array([0, 0, -1.0]), hfwd=np.array([0, -1.0, 0.0]), w_ik=1.0,
@@ -755,13 +763,13 @@ def soldier_clip_specs(R, role, name, dur):
 
 
 def role_hold_arm(role):
-    return {"captain": "Right", "scout": "Left", "shield_guard": "Right"}.get(role)
+    return {"shield_guard": "Right"}.get(role)
 
 
 def support_clip(R, role, name, dur, ts):
     free = {"captain": "Left", "scout": "Right", "shield_guard": "Right"}.get(role, "Right")
     s = 1.0 if free == "Left" else -1.0
-    g = sol_neutral(R, role, 0.0)
+    g = sol_neutral(R, role, 0.0, ready=0.0)
     if name == "lf_soldier_unlock":
         reach = copy(g)
         reach["hip"] = g["hip"] + np.array([0, -0.06, -0.01])

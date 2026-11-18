@@ -1,0 +1,346 @@
+{
+  "id": "lf_cage_iron",
+  "tris": {
+    "LOD0": 11126,
+    "LOD1": 4220,
+    "LOD2": 2400
+  },
+  "tris_by_node": {
+    "LOD0": {
+      "root": 9884,
+      "door": 710,
+      "latch": 52,
+      "socket": 312,
+      "socket_core": 20,
+      "keyhole": 108,
+      "keyhole_core": 40
+    },
+    "LOD1": {
+      "root": 3146,
+      "door": 608,
+      "latch": 46,
+      "socket": 252,
+      "socket_core": 20,
+      "keyhole": 108,
+      "keyhole_core": 40
+    },
+    "LOD2": {
+      "root": 1758,
+      "door": 378,
+      "latch": 24,
+      "socket": 72,
+      "socket_core": 20,
+      "keyhole": 108,
+      "keyhole_core": 40
+    }
+  },
+  "budget": "cage LOD0 <= 6000 tris (all nodes incl. door, latch and both socket variants)",
+  "bones": 0,
+  "materials": [
+    "lf_cage_iron_mat"
+  ],
+  "textures": {
+    "baseColor": "2048 JPEG",
+    "metallicRoughness": "1024 JPEG (G rough, B metal)",
+    "normal": "2048 PNG"
+  },
+  "coordinate_space": "glTF (Y up, metres) relative to the GLB root; door side faces +Z (atlas escapeApproachOffset)",
+  "bounds_m": {
+    "min": [
+      -1.69,
+      -0.0,
+      3.3098
+    ],
+    "max": [
+      1.69,
+      3.35,
+      -1.69
+    ]
+  },
+  "clips": {
+    "lf_cage_unlock": {
+      "seconds": 1.0,
+      "loop": false,
+      "frames": 30,
+      "markers": {
+        "latch_clear": 0.7
+      },
+      "glb_seconds": 1.0
+    },
+    "lf_cage_gate_open": {
+      "seconds": 1.6,
+      "loop": false,
+      "frames": 48,
+      "markers": {
+        "passage_clear": 1.2
+      },
+      "glb_seconds": 1.6
+    },
+    "lf_cage_gate_settle": {
+      "seconds": 0.4,
+      "loop": false,
+      "frames": 12,
+      "markers": {},
+      "glb_seconds": 0.4
+    }
+  },
+  "sockets": {
+    "hinge_axis": {
+      "node": "door_pivot",
+      "point": [
+        -0.347,
+        0.0,
+        1.573
+      ],
+      "direction": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "side": "left jamb seen from outside (glTF -X side of the opening)"
+    },
+    "door_open_deg": 95.0,
+    "door_rotation": "door_pivot rotates about its local +Y (glTF up) axis, which passes exactly through the hinge pins; closed = 0 deg, open = -95 deg (outward, free edge swings toward +Z)",
+    "key_slot": {
+      "node": "key_slot",
+      "parent": "socket_core",
+      "position_closed": [
+        1.187,
+        1.3,
+        1.547
+      ],
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "height_above_ground_m": 1.3,
+      "shape": "hex",
+      "fits_family": "bronze_seal",
+      "insert": "parent the artifact variant node to key_slot with identity transform"
+    },
+    "key_slot_keyhole": {
+      "node": "key_slot_keyhole",
+      "parent": "keyhole_core",
+      "position_closed": [
+        1.187,
+        1.3,
+        1.547
+      ],
+      "normal": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "shape": "keyhole",
+      "fits_family": "bone_key",
+      "activate": "set socket_keyhole_pivot.scale=1 and socket_pivot.scale=0 (default is native)"
+    },
+    "latch": {
+      "node": "latch_pivot",
+      "travel_m": 0.12,
+      "axis": [
+        -1.0,
+        0.0,
+        0.0
+      ]
+    },
+    "door": {
+      "node": "door_pivot",
+      "width_m": 1.724,
+      "clear_height_m": 2.38
+    },
+    "exit_corridor": [
+      [
+        0.525,
+        0.3,
+        0.48
+      ],
+      [
+        0.525,
+        0.3,
+        1.48
+      ],
+      [
+        0.525,
+        0.0,
+        2.78
+      ],
+      [
+        0.525,
+        0.0,
+        3.98
+      ]
+    ],
+    "interior_footprint_m": [
+      2.79,
+      2.79
+    ],
+    "interior_clear_height_m": 2.5
+  },
+  "poses": {
+    "closed": {
+      "door_pivot": {
+        "rotation_y_deg": 0.0
+      },
+      "latch_pivot": {
+        "translation_offset": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "open": {
+      "door_pivot": {
+        "rotation_y_deg": -95.0,
+        "note": "glTF rotation about +Y by -95 deg (Blender -95 deg about +Z)"
+      },
+      "latch_pivot": {
+        "translation_offset": [
+          -0.12,
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "glb_nodes": [
+    "lf_cage_iron_latch_pivot_LOD0",
+    "lf_cage_iron_latch_pivot_LOD1",
+    "lf_cage_iron_latch_pivot_LOD2",
+    "latch_pivot",
+    "lf_cage_iron_door_pivot_LOD0",
+    "lf_cage_iron_door_pivot_LOD1",
+    "lf_cage_iron_door_pivot_LOD2",
+    "key_slot_keyhole",
+    "lf_cage_iron_keyhole_core_LOD0",
+    "lf_cage_iron_keyhole_core_LOD1",
+    "lf_cage_iron_keyhole_core_LOD2",
+    "keyhole_core",
+    "lf_cage_iron_socket_keyhole_pivot_LOD0",
+    "lf_cage_iron_socket_keyhole_pivot_LOD1",
+    "lf_cage_iron_socket_keyhole_pivot_LOD2",
+    "socket_keyhole_pivot",
+    "lf_cage_iron_socket_pivot_LOD0",
+    "lf_cage_iron_socket_pivot_LOD1",
+    "lf_cage_iron_socket_pivot_LOD2",
+    "key_slot",
+    "lf_cage_iron_socket_core_LOD0",
+    "lf_cage_iron_socket_core_LOD1",
+    "lf_cage_iron_socket_core_LOD2",
+    "socket_core",
+    "socket_pivot",
+    "door_pivot",
+    "exit_corridor_0",
+    "exit_corridor_1",
+    "exit_corridor_2",
+    "exit_corridor_3",
+    "hinge_axis_bottom",
+    "hinge_axis_top",
+    "lf_cage_iron_LOD0",
+    "lf_cage_iron_LOD1",
+    "lf_cage_iron_LOD2"
+  ],
+  "glb_animations": {
+    "lf_cage_gate_open": [
+      [
+        "door_pivot",
+        "translation"
+      ],
+      [
+        "door_pivot",
+        "rotation"
+      ],
+      [
+        "door_pivot",
+        "scale"
+      ],
+      [
+        "latch_pivot",
+        "translation"
+      ],
+      [
+        "latch_pivot",
+        "rotation"
+      ],
+      [
+        "latch_pivot",
+        "scale"
+      ]
+    ],
+    "lf_cage_gate_settle": [
+      [
+        "door_pivot",
+        "translation"
+      ],
+      [
+        "door_pivot",
+        "rotation"
+      ],
+      [
+        "door_pivot",
+        "scale"
+      ],
+      [
+        "latch_pivot",
+        "translation"
+      ],
+      [
+        "latch_pivot",
+        "rotation"
+      ],
+      [
+        "latch_pivot",
+        "scale"
+      ]
+    ],
+    "lf_cage_unlock": [
+      [
+        "latch_pivot",
+        "translation"
+      ],
+      [
+        "latch_pivot",
+        "rotation"
+      ],
+      [
+        "latch_pivot",
+        "scale"
+      ],
+      [
+        "keyhole_core",
+        "translation"
+      ],
+      [
+        "keyhole_core",
+        "rotation"
+      ],
+      [
+        "keyhole_core",
+        "scale"
+      ],
+      [
+        "socket_core",
+        "translation"
+      ],
+      [
+        "socket_core",
+        "rotation"
+      ],
+      [
+        "socket_core",
+        "scale"
+      ]
+    ]
+  },
+  "notes": "Production rule: hinge on the LEFT jamb seen from outside (drawing's open view shows it on the right - not followed), single door pivot, outward opening 95 deg. socket_keyhole_pivot is scale 0 by default; for bone-key sites show it and hide socket_pivot.",
+  "projection": {
+    "painted_fraction": 0.085,
+    "texel_mm": 5.509
+  },
+  "camera_fit_iou": {
+    "closed": 0.8949,
+    "open": 0.9257
+  }
+}

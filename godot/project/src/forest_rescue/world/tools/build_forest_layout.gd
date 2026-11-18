@@ -225,10 +225,28 @@ func run() -> void:
 				break
 		var reason := 1 if in_mask else 2
 		if found == Vector2.INF:
-			# Keep near the old spot but always off the old spiral point.
-			var angle := rng.randf() * TAU
-			found = Vector2(tx + cos(angle) * 0.9, tz + sin(angle) * 0.9)
+			# Relaxed fallback: nearest spot outside every hard mask (wider search, smaller gap).
 			reason = 3
+			radius = 1.0
+			while radius <= 30.0 and found == Vector2.INF:
+				for k in 24:
+					var angle := angle0 + TAU * k / 24.0
+					var x := tx + cos(angle) * radius
+					var z := tz + sin(angle) * radius
+					if blocked_exact(x, z, true) or terrain.ground_height(x, z) < -0.35:
+						continue
+					var free := true
+					for other in near_points(x, z, 2.6, placed_grid, placed):
+						if Vector2(x - other[0], z - other[1]).length() < 1.6:
+							free = false
+							break
+					if free:
+						found = Vector2(x, z)
+						break
+				radius += 0.75
+			if found == Vector2.INF:
+				var angle := rng.randf() * TAU
+				found = Vector2(tx + cos(angle) * 0.9, tz + sin(angle) * 0.9)
 		insert(placed_grid, placed, [found.x, found.y, Rules.MIN_TREE_GAP])
 		remap[tree.id] = [snappedf(found.x, 0.01), snappedf(found.y, 0.01), reason]
 		reasons[["slot", "mask_push", "jitter", "kept"][reason]] += 1

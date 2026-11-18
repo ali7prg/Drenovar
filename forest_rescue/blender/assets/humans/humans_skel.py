@@ -57,18 +57,15 @@ HUMANOID = [b for b in BONES if not (b.startswith("Skirt") or b.startswith("Cape
 SECONDARY = [b for b in BONES if b not in HUMANOID]
 
 # Animation-LOD bone sets (mesh influences are folded into the nearest kept ancestor)
-LOD1_KEEP = ["Root", "Hips", "Spine", "Chest", "UpperChest", "Neck", "Head", "Jaw",
-             "LeftShoulder", "LeftUpperArm", "LeftLowerArm", "LeftHand", "LeftThumbMetacarpal",
-             "LeftMiddleProximal",
-             "RightShoulder", "RightUpperArm", "RightLowerArm", "RightHand", "RightThumbMetacarpal",
-             "RightMiddleProximal",
+LOD1_KEEP = ["Root", "Hips", "Spine", "Chest", "UpperChest", "Neck", "Head",
+             "LeftShoulder", "LeftUpperArm", "LeftLowerArm", "LeftHand", "LeftMiddleProximal",
+             "RightShoulder", "RightUpperArm", "RightLowerArm", "RightHand", "RightMiddleProximal",
              "LeftUpperLeg", "LeftLowerLeg", "LeftFoot", "LeftToes",
              "RightUpperLeg", "RightLowerLeg", "RightFoot", "RightToes",
-             "SkirtFront1", "SkirtBack1", "Cape1", "LeftProp", "RightProp"]
+             "SkirtFront1", "SkirtBack1", "Cape1", "LeftProp", "RightProp"]      # 29 weighted (<=30)
 LOD2_KEEP = ["Root", "Hips", "Spine", "Chest", "UpperChest", "Neck", "Head",
              "LeftUpperArm", "LeftLowerArm", "LeftHand", "RightUpperArm", "RightLowerArm", "RightHand",
-             "LeftUpperLeg", "LeftLowerLeg", "LeftFoot", "RightUpperLeg", "RightLowerLeg", "RightFoot",
-             "LeftProp", "RightProp"]
+             "LeftUpperLeg", "LeftLowerLeg", "LeftFoot", "RightUpperLeg", "RightLowerLeg", "RightFoot"]  # 18 weighted
 
 
 def v3(*a):

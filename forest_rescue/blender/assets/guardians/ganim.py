@@ -166,15 +166,15 @@ def foot_gait(phase, duty, sweep, lift, front=True, fold=None):
     fmax = fold if fold is not None else (72.0 if front else 48.0)
     if s < 0.32:
         meta = lerp(28.0, fmax, ss(s / 0.32))
-        toe = lerp(0.0, 38.0, ss(s / 0.32))
+        toe = lerp(0.0, 12.0, ss(s / 0.32))
     elif s < 0.78:
         u = ss((s - 0.32) / 0.46)
         meta = lerp(fmax, -14.0, u)
-        toe = lerp(38.0, -12.0, u)
+        toe = lerp(12.0, -10.0, u)
     else:
         u = ss((s - 0.78) / 0.22)
         meta = lerp(-14.0, -6.0, u)
-        toe = lerp(-12.0, 0.0, u)
+        toe = lerp(-10.0, 0.0, u)
     girdle = (10.0 - 20.0 * e) if front else 0.0
     return fwd, h, float(meta), float(toe), girdle, False
 

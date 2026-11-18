@@ -19,13 +19,13 @@ const GRID_MIN := -135.625
 const GRID_STEP := 45.20833206176758 / 31.0
 const CORE := 56.0
 const CORE_BLEND := 2.0
-const ROAD_HALF_WIDTH := 1.4
+const ROAD_HALF_WIDTH := 2.9    # full-weight band ≥ grid diagonal so triangles under the path follow the profile
 const ROAD_BLEND := 3.0
 const RAMP_LENGTH := 10.0
 const PAD_TIE := 6.0
 const ARENA_BLEND_OUTER := 19.0
 const ARENA_DISH := 0.3
-const TERRAIN_VERSION := 3
+const TERRAIN_VERSION := 9
 
 const BIOME_TINTS := [
 	Color(1.05, 1.04, 0.86),   # lf_biome_1 Берёзовый дозор — warm birch light
@@ -51,6 +51,7 @@ var road_on_deck: Array = []             # per route: PackedByteArray
 var grid_ready := false
 var stats := {}
 var extra_pads: Array = []               # [[Vector2 centre, radius, height]] landmark/camp pads
+var pad_heights: Dictionary = {}         # site id -> reconciled pad height (centre + route ends)
 
 
 func _init(forest_atlas: RefCounted = null) -> void:
@@ -149,10 +150,52 @@ func _prepare_profiles() -> void:
 	road_profiles.clear()
 	road_on_deck.clear()
 	var deck: Rect2 = atlas.bridge_deck_rect()
-	var pads: Array = []
+	# Pads: start from the sampled site centres (+ arena), then relax heights so that every road
+	# between two pads needs ≤ ~8° of extra grade on top of the authored 12° profile.
+	pad_heights.clear()
+	var centers := {}
+	var radii := {}
 	for site in atlas.sites:
-		pads.append([Vector2(site.center.x, site.center.z), float(site.radius), float(site.center.y)])
-	pads.append([Vector2(atlas.arena_center.x, atlas.arena_center.z), atlas.ARENA_RADIUS, atlas.arena_center.y])
+		pad_heights[site.id] = float(site.center.y)
+		centers[site.id] = Vector2(site.center.x, site.center.z)
+		radii[site.id] = float(site.radius)
+	pad_heights["lf_boss_arena"] = float(atlas.arena_center.y)
+	centers["lf_boss_arena"] = Vector2(atlas.arena_center.x, atlas.arena_center.z)
+	radii["lf_boss_arena"] = atlas.ARENA_RADIUS
+	var links: Array = []      # [route index, from pad, to pad, i0, i1, length]
+	for r in atlas.routes.size():
+		var route: Dictionary = atlas.routes[r]
+		var pts: PackedVector3Array = route.points
+		var from_id: String = route.from if centers.has(route.from) else ""
+		var to_id: String = route.to if centers.has(route.to) else ""
+		var along := PackedFloat32Array([0.0])
+		for i in range(1, pts.size()):
+			along.append(along[i - 1] + Vector2(pts[i].x - pts[i - 1].x, pts[i].z - pts[i - 1].z).length())
+		var i0 := 0
+		var i1 := pts.size() - 1
+		if not from_id.is_empty():
+			while i0 < pts.size() - 1 and Vector2(pts[i0].x, pts[i0].z).distance_to(centers[from_id]) < radii[from_id]:
+				i0 += 1
+		if not to_id.is_empty():
+			while i1 > i0 and Vector2(pts[i1].x, pts[i1].z).distance_to(centers[to_id]) < radii[to_id]:
+				i1 -= 1
+		links.append([r, from_id, to_id, i0, i1, maxf(1.0, along[i1] - along[i0]), along])
+	for _iteration in 12:
+		for link in links:
+			if link[1].is_empty() or link[2].is_empty():
+				continue
+			var pts: PackedVector3Array = atlas.routes[link[0]].points
+			var c0: float = pad_heights[link[1]] - pts[link[3]].y
+			var c1: float = pad_heights[link[2]] - pts[link[4]].y
+			var limit: float = tan(deg_to_rad(8.0)) * link[5]
+			var excess := absf(c1 - c0) - limit
+			if excess > 0.0:
+				var shift := excess * 0.5 * signf(c1 - c0)
+				pad_heights[link[2]] -= shift
+				pad_heights[link[1]] += shift
+	var pads: Array = []
+	for id in pad_heights:
+		pads.append([centers[id], radii[id], pad_heights[id]])
 	for route in atlas.routes:
 		var points: PackedVector3Array = route.points
 		var n := points.size()
@@ -170,6 +213,20 @@ func _prepare_profiles() -> void:
 			on_deck[i] = 1 if on else 0
 			if on:
 				profile[i] = atlas.BRIDGE_DECK_Y
+		# Tie into the pads: flat inside each glade, linear arc-length correction between edges.
+		var link: Array = links[road_profiles.size()]
+		var c_from: float = (pad_heights[link[1]] - profile[link[3]]) if not link[1].is_empty() else 0.0
+		var c_to: float = (pad_heights[link[2]] - profile[link[4]]) if not link[2].is_empty() else 0.0
+		for i in n:
+			if on_deck[i] == 1:
+				continue
+			if i < link[3] and not link[1].is_empty():
+				profile[i] = pad_heights[link[1]]
+			elif i > link[4] and not link[2].is_empty():
+				profile[i] = pad_heights[link[2]]
+			elif link[4] > link[3]:
+				var t := clampf((along[i] - along[link[3]]) / (along[link[4]] - along[link[3]]), 0.0, 1.0)
+				profile[i] += lerpf(c_from, c_to, t)
 		# Ramps: along-route distance to the nearest deck sample.
 		if route.bridge:
 			var deck_along: Array = []
@@ -184,16 +241,6 @@ func _prepare_profiles() -> void:
 					s = minf(s, absf(along[i] - value))
 				if s < RAMP_LENGTH:
 					profile[i] = lerpf(profile[i], atlas.BRIDGE_DECK_Y, 1.0 - smoothstep(0.0, RAMP_LENGTH, s))
-		# Tie into glade/arena pads.
-		for i in n:
-			if on_deck[i] == 1:
-				continue
-			var p := Vector2(points[i].x, points[i].z)
-			for pad in pads:
-				var d: float = p.distance_to(pad[0])
-				var r: float = pad[1]
-				if d < r + PAD_TIE:
-					profile[i] = lerpf(profile[i], pad[2], 1.0 - smoothstep(r - 1.0, r + PAD_TIE, d))
 		# Two light smoothing passes (deck samples stay fixed).
 		for _pass in 2:
 			var copy := profile.duplicate()
@@ -230,29 +277,32 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 	var dirt := 0.0
 	var stone := 0.0
 	var road_distance := INF
-	var hit: Dictionary = atlas.nearest_route(x, z)
-	if not hit.is_empty():
-		road_distance = hit.distance
-		if not road_hit_on_deck(hit) and hit.distance < ROAD_HALF_WIDTH + ROAD_BLEND:
-			var w := 1.0 - smoothstep(ROAD_HALF_WIDTH, ROAD_HALF_WIDTH + ROAD_BLEND, hit.distance)
-			h = lerpf(h, road_height(hit) - 0.03, w)
-		dirt = maxf(dirt, 0.92 * (1.0 - smoothstep(0.6, 2.4, hit.distance)))
-	for site in atlas.sites:
-		var d := Vector2(x - site.center.x, z - site.center.z).length()
-		var r: float = site.radius
-		if d < r + site.blend:
-			h = lerpf(h, site.center.y, 1.0 - smoothstep(r, r + site.blend, d))
-		if d < r + 1.0:
-			dirt = maxf(dirt, 0.55 * (1.0 - smoothstep(2.5, r + 0.5, d)))
+	# Landmark/camp pads first; roads and glades then take precedence.
 	for pad in extra_pads:
 		var pd: float = Vector2(x, z).distance_to(pad[0])
 		var pr: float = pad[1]
 		if pd < pr + 3.0:
 			h = lerpf(h, pad[2], 1.0 - smoothstep(pr * 0.75, pr + 3.0, pd))
 			dirt = maxf(dirt, 0.35 * (1.0 - smoothstep(pr * 0.5, pr + 1.0, pd)))
+	var hit: Dictionary = atlas.nearest_route(x, z)
+	if not hit.is_empty():
+		road_distance = hit.distance
+		# Deck segments also shape the banks under the deck ends (abutments); the river
+		# protection below keeps the wet channel itself untouched.
+		if hit.distance < ROAD_HALF_WIDTH + ROAD_BLEND:
+			var w := 1.0 - smoothstep(ROAD_HALF_WIDTH, ROAD_HALF_WIDTH + ROAD_BLEND, hit.distance)
+			h = lerpf(h, road_height(hit) - 0.03, w)
+		dirt = maxf(dirt, 0.92 * (1.0 - smoothstep(0.6, 2.4, hit.distance)))
+	for site in atlas.sites:   # glade pads last: always flat inside the clearing radius
+		var d := Vector2(x - site.center.x, z - site.center.z).length()
+		var r: float = site.radius
+		if d < r + site.blend:
+			h = lerpf(h, float(pad_heights.get(site.id, site.center.y)), 1.0 - smoothstep(r, r + site.blend, d))
+		if d < r + 1.0:
+			dirt = maxf(dirt, 0.55 * (1.0 - smoothstep(2.5, r + 0.5, d)))
 	var ad := Vector2(x - atlas.arena_center.x, z - atlas.arena_center.z).length()
 	if ad < ARENA_BLEND_OUTER:
-		var floor_y: float = atlas.arena_center.y - ARENA_DISH * (1.0 - pow(minf(ad, 15.0) / 15.0, 2.0))
+		var floor_y: float = float(pad_heights.get("lf_boss_arena", atlas.arena_center.y)) - ARENA_DISH * (1.0 - pow(minf(ad, 15.0) / 15.0, 2.0))
 		h = lerpf(h, floor_y, 1.0 - smoothstep(atlas.ARENA_RADIUS, ARENA_BLEND_OUTER, ad))
 		dirt = maxf(dirt, 0.95 * (1.0 - smoothstep(12.5, 16.0, ad)))
 		stone = maxf(stone, 0.45 * smoothstep(12.0, 15.0, ad) * (1.0 - smoothstep(16.5, 19.5, ad)))
@@ -308,6 +358,9 @@ func bake() -> void:
 			var limestone := weights[1] if weights.size() > 1 else 0.0
 			rock[k] = maxf(rock[k], smoothstep(16.0, 30.0, slope) * (0.45 + 0.5 * limestone) * core)
 			earth[k] = maxf(earth[k], limestone * 0.18 * core)
+			# Shaded forest floor (darker under the canopy, light on paths/glades), as in art/01.
+			var floor_shade := lerpf(0.80, 1.0, clampf(earth[k] * 1.4, 0.0, 1.0))
+			color = Color(color.r * floor_shade, color.g * floor_shade, color.b * floor_shade)
 			tint[k] = Color(1, 1, 1).lerp(color, core)
 	stats.changed_vertices = changed
 	grid_ready = true
@@ -364,8 +417,13 @@ func on_bridge_deck(x: float, z: float) -> bool:
 ## Walkable height: bridge deck where it spans, otherwise the rendered ground.
 func height_at(x: float, z: float) -> float:
 	var h := ground_height(x, z)
-	if on_bridge_deck(x, z):
+	var deck: Rect2 = atlas.bridge_deck_rect()
+	var outside := Vector2(maxf(maxf(deck.position.x - x, x - deck.end.x), 0.0), maxf(maxf(deck.position.y - z, z - deck.end.y), 0.0)).length()
+	if outside <= 0.0:
 		return maxf(h, atlas.BRIDGE_DECK_Y)
+	if outside < 1.5 and h < atlas.BRIDGE_DECK_Y and h > atlas.BRIDGE_DECK_Y - 0.8:
+		# Abutment apron: walkable height eases off the deck edge (bridge mesh covers the seam).
+		return lerpf(atlas.BRIDGE_DECK_Y, h, smoothstep(0.0, 1.5, outside))
 	return h
 
 

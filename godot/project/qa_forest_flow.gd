@@ -189,6 +189,10 @@ func run() -> void:
 	check(forest.hud.continue_caption.text == "Продолжить", "continue caption")
 	check(forest.hud.hint_label.text.contains(content.site("lf_site_01").artifact.puzzle.clue), "hint shows the authored clue")
 	check(not forest.hud.bar.get_global_rect().intersects(game.nav_buttons.world.get_parent().get_global_rect()), "bar does not overlap navigation")
+	check(forest.hud.reward_caption.is_visible_in_tree() and forest.hud.reward_caption.text == "За спасение:", "reward strip caption visible")
+	var view_rect := Rect2(Vector2.ZERO, root.get_visible_rect().size)
+	for control in [forest.hud.task_card, forest.hud.reward_strip, forest.hud.route_button, forest.hud.squad_button, forest.hud.continue_button]:
+		check(view_rect.encloses(control.get_global_rect()), "HUD element inside the screen: " + control.name)
 
 	# 5. Event dedup by seq/revision; first state after load replays nothing.
 	var replay_events: Array = []

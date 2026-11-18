@@ -32,10 +32,14 @@ var uploads := 0
 var uploaded_bytes := 0
 var shadow_trees := true
 var lod_bias := 1.0
+var impostors: Node = null              # ForestImpostors (null/unavailable → 3D LOD2 meshes)
+var cell_impostor: Dictionary = {}      # cell -> PackedFloat32Array (STRIDE floats per tree)
+const IMPOSTOR_KEY := Vector2i(-1, 2)
 
 
 func clear_instances() -> void:
 	cell_buffers.clear()
+	cell_impostor.clear()
 	cell_low.clear()
 	cell_high.clear()
 	for key in selection.keys():
@@ -86,6 +90,18 @@ func add_instance(mesh_index: int, transform: Transform3D, custom := Color(0, 1,
 	cell_high[cell] = cell_high[cell].max(o + Vector3(r, spec.height * s + 1.0, r))
 
 
+func add_impostor(transform: Transform3D, custom: Color) -> void:
+	var cell := cell_of(transform.origin.x, transform.origin.z)
+	var b := transform.basis
+	var o := transform.origin
+	if not cell_impostor.has(cell):
+		cell_impostor[cell] = PackedFloat32Array()
+	var buffer: PackedFloat32Array = cell_impostor[cell]
+	buffer.append_array(PackedFloat32Array([b.x.x, b.y.x, b.z.x, o.x, b.x.y, b.y.y, b.z.y, o.y, b.x.z, b.y.z, b.z.z, o.z,
+		custom.r, custom.g, custom.b, custom.a]))
+	cell_impostor[cell] = buffer
+
+
 func instance_count() -> int:
 	var total := 0
 	for cell in cell_buffers:
@@ -112,7 +128,7 @@ func lod_for(kind: int, cls: String, zoom: float, distance: float) -> int:
 			if kind == KIND_ROCK:
 				return 1 if z <= 70.0 else -1
 			return -1
-		"fogOnly":
+		"fogOnly", "far":
 			return 2 if kind == KIND_TREE else -1
 	return -1
 
@@ -140,10 +156,19 @@ func update_view(camera: Camera3D, target: Vector3, zoom: float) -> void:
 		var center := cell_center(cell)
 		var distance := Vector2(target.x, target.z).distance_to(center) - CELL * 0.7
 		var buffers: Dictionary = cell_buffers[cell]
+		var tree_lod := lod_for(KIND_TREE, cls, zoom, maxf(distance, 0.0))
+		var use_impostor: bool = tree_lod == 2 and impostors != null and impostors.available and cell_impostor.has(cell)
+		if use_impostor:
+			if not wanted.has(IMPOSTOR_KEY):
+				wanted[IMPOSTOR_KEY] = PackedInt32Array()
+			wanted[IMPOSTOR_KEY].append(cell)
+			var count_i: int = cell_impostor[cell].size() / STRIDE
+			instances[2] += count_i
+			tris += count_i * 2
 		for mesh_index in buffers:
 			var spec: Dictionary = meshes[mesh_index]
 			var lod := lod_for(spec.kind, cls, zoom, maxf(distance, 0.0))
-			if lod < 0:
+			if lod < 0 or (use_impostor and spec.kind == KIND_TREE):
 				continue
 			var key := Vector2i(mesh_index, lod)
 			if not wanted.has(key):
@@ -187,7 +212,7 @@ func _apply(key: Vector2i, cells: PackedInt32Array) -> void:
 	var low := Vector3(INF, INF, INF)
 	var high := Vector3(-INF, -INF, -INF)
 	for cell in cells:
-		transforms.append_array(cell_buffers[cell][key.x])
+		transforms.append_array(cell_impostor[cell] if key == IMPOSTOR_KEY else cell_buffers[cell][key.x])
 		low = low.min(cell_low[cell])
 		high = high.max(cell_high[cell])
 	var count := transforms.size() / STRIDE
@@ -209,11 +234,12 @@ func _apply(key: Vector2i, cells: PackedInt32Array) -> void:
 
 
 func _make_node(key: Vector2i) -> MultiMeshInstance3D:
-	var spec: Dictionary = meshes[key.x]
+	var impostor := key == IMPOSTOR_KEY
+	var spec: Dictionary = {"key": "impostors", "kind": -1} if impostor else meshes[key.x]
 	var multi := MultiMesh.new()
 	multi.transform_format = MultiMesh.TRANSFORM_3D
 	multi.use_custom_data = true
-	multi.mesh = spec.lods[key.y]
+	multi.mesh = impostors.quad if impostor else spec.lods[key.y]
 	multi.instance_count = 0
 	var node := MultiMeshInstance3D.new()
 	node.name = "%s_LOD%d" % [String(spec.key).replace(":", "_"), key.y]

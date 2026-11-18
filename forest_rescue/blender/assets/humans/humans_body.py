@@ -42,17 +42,24 @@ def field_bounds(L, pad=0.03):
     return lo, hi
 
 
-def build_field(parts, subs, lo, hi, voxel, hull=None, hull_k=0.012, views=None, smooth=0.0):
+def build_field(parts, subs, lo, hi, voxel, hull=None, hull_k=0.012, views=None, smooth=0.0, hull_dilate=1.0):
+    """Ordered CSG of the parts; parts flagged nohull (hands, boots) are added after the smooth
+    intersection with the silhouette hull so the hull never slices them flat."""
     F = fsdf.Field(lo, hi, voxel)
-    # ordered CSG: parts are applied in list order with their own op (face sockets need order)
+    late = []
     for p in parts:
         if not getattr(p, "geom", True):
+            continue
+        if views is not None and getattr(p, "nohull", False):
+            late.append(p)
             continue
         F.apply(p, op=getattr(p, "op", "union"), k=p.k)
     for p in subs:
         F.apply(p, op="subtract", k=p.k)
     if views is not None:
-        hv = H.hull2d(F, views)
+        hv = H.hull2d(F, views, dilate_px=hull_dilate)
         F.intersect(hv, k=hull_k)
+    for p in late:
+        F.apply(p, op=getattr(p, "op", "union"), k=p.k)
     F.smooth(smooth or 0.65)
     return F

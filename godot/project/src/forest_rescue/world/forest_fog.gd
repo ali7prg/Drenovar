@@ -15,9 +15,9 @@ const REVEAL_SECONDS := 2.0
 const LAYERS := [
 	# lift (m), alpha, threshold, drift, edge softness
 	# height = shell top above ground in deep fog (canopy ≈ 9–10.5 m); banks rise with depth.
-	{"name": "FogHaze", "height": 9.0, "lift": 0.0, "alpha": 0.80, "threshold": 0.00, "drift": 0.45, "soft": 0.26},
-	{"name": "FogBank", "height": 13.0, "lift": 0.0, "alpha": 0.84, "threshold": 0.10, "drift": 0.65, "soft": 0.26},
-	{"name": "FogCrest", "height": 16.5, "lift": 0.0, "alpha": 0.90, "threshold": 0.22, "drift": 0.95, "soft": 0.30},
+	{"name": "FogHaze", "height": 10.0, "lift": 0.0, "alpha": 0.80, "threshold": 0.00, "drift": 0.45, "soft": 0.26},
+	{"name": "FogBank", "height": 13.0, "lift": 0.0, "alpha": 0.86, "threshold": 0.10, "drift": 0.65, "soft": 0.26},
+	{"name": "FogCrest", "height": 16.0, "lift": 0.0, "alpha": 0.90, "threshold": 0.20, "drift": 0.95, "soft": 0.30},
 ]
 
 static var _noise_texture: ImageTexture

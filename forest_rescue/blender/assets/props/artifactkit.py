@@ -307,7 +307,7 @@ def build_amber(B, node, v, M=np.eye(4)):
     inner = pk.offset_poly(outer, -fw)
     traced = tr.get("outline")
     if traced is not None:
-        fo = pk.resample_closed(traced, {0: 48, 1: 28, 2: 16}[B.lod])
+        fo = pk.resample_closed(traced, {0: 32, 1: 22, 2: 14}[B.lod])
         frame = pk.extrude(fo, t, chamfer=0.0022, hole=inner)
     else:
         frame = pk.extrude(outer, t, chamfer=0.0022, hole=inner)
@@ -474,7 +474,7 @@ def socket_plate_outline(kind, style=None):
         if kind == "circle":
             return pk.circle(0.122, 40)
         if kind == "hex":
-            return pk.ngon(0.104, 6, 0.0)
+            return pk.ngon(0.128, 6, 0.0)
         if kind == "diamond":
             return pk.ccw(diamond(0.250, 0.162))
         return pk.rect(0.165, 0.205, 0.028)

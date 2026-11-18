@@ -12,7 +12,7 @@ import horse_fit as HF  # noqa: E402
 from frlib import sdf  # noqa: E402
 
 
-def body_field(voxel=0.007, hull_mode="all", hull_k=0.025, smooth=0.010, views=None, J=None):
+def body_field(voxel=0.007, hull_mode="mixed", hull_k=0.025, smooth=0.010, views=None, J=None):
     """Anatomical parts, smoothly intersected with the 4-view visual hull, ears + carves after."""
     views = views or HR.load_views()
     J = J or HB.skeleton()

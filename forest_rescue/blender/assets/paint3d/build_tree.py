@@ -121,6 +121,8 @@ def _build_lod(B, base_paths, bark_uv, sp, lod, variant, front_all, L, vs):
         ps = [q for q in ps if keep(q)]
         if B.cfg.get("limb_min_top_z"):
             ps = [q for q in ps if q["kind"] == "trunk" or q["P"][:, 2].max() >= B.cfg["limb_min_top_z"]]
+        if B.cfg.get("limb_max_z"):
+            ps = [q for q in ps if q["kind"] == "trunk" or q["P"][:, 2].max() <= B.cfg["limb_max_z"]]
     if B.cfg.get("trunk_r_k"):
         kk_ = B.cfg["trunk_r_k"]
         for q in ps:

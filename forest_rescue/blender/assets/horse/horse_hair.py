@@ -228,7 +228,7 @@ def _mane_bone_at(y, s):
 
 # --------------------------------------------------------------------------- mane
 
-MANE_BOTTOM = ([-1.10, -0.95, -0.80, -0.62, -0.45, -0.30], [1.82, 1.63, 1.545, 1.495, 1.50, 1.53])
+MANE_BOTTOM = ([-1.10, -0.95, -0.80, -0.62, -0.45, -0.30], [1.86, 1.67, 1.555, 1.495, 1.50, 1.53])
 
 
 def _crest_point(guide, y, sx=0.0, lift=0.0):
@@ -406,7 +406,7 @@ def tail_cards(lod=0, seed=7, drop=None):
             rad = (0.045 + 0.065 * np.sin(np.pi * np.clip(ts * 0.8, 0, 1)) ** 0.7 + 0.05 * ts ** 2) * \
                 rscale * rng.uniform(0.85, 1.1)
             ox = np.cos(ang) * rad * 0.95
-            oy = np.sin(ang) * rad * 1.0
+            oy = np.sin(ang) * rad * 0.72 - 0.015
             wav = rng.uniform(0.015, 0.04)
             ph = rng.uniform(0, 6.28)
             path = c + np.stack([ox + wav * np.sin(ph + ts * 11), oy + 0.7 * wav * np.cos(ph + ts * 8),

@@ -79,11 +79,15 @@ def tail_pose(pose, skel, lift=0.0, swish=0.0, lag_swish=None, lift_chain=None):
     """lift: raise the dock (bones 1-2); the hair (bones 3-6) hangs back down under gravity
     so a carried tail arcs like a plume instead of rotating as a rigid stick."""
     names = [f"tail_{i:02d}" for i in range(1, 7)]
+    d0 = skel.R["tail_02"][:3, 1]
+    axis = np.cross(d0, np.array([0.0, 1.0, 0.3]))          # one lift axis for the chain
     for i, n in enumerate(names):
-        li = (lift_chain[i] if lift_chain is not None else
-              (lift * (0.65 if i == 0 else 0.45) if i < 2 else -lift * (0.18 + 0.05 * i)))
+        if lift_chain is not None:
+            li = lift_chain[i]
+        else:   # dock carries the lift, the hair hangs back toward vertical (gravity)
+            li = lift * (0.65 if i == 0 else 0.45) if i < 2 else -lift * (0.30 if i == 2 else 0.22)
         if li:
-            pose.toward(skel, n, (0, 1, 0.3), li)
+            pose.add_rot(n, axis, li)
         sw = lag_swish[i] if lag_swish is not None else swish * (0.35 + 0.15 * i)
         if sw:
             pose.toward(skel, n, (1, 0, 0), sw)
@@ -146,7 +150,7 @@ def secondary(cb, frames, times, loop, root=None, tail_amp=1.0, ribbon_amp=1.0, 
     for k, pose in enumerate(frames):
         ribbon(pose, cb.skel, np.clip(rib_fwd[k], -0.6, 0.6) * ribbon_amp,
                np.clip(rib_side[k], -0.5, 0.5) * ribbon_amp)
-        m = np.clip(mane_l[k], -0.35, 0.35) * mane_amp
+        m = np.clip(0.35 * mane_l[k], -0.10, 0.10) * mane_amp
         mane(pose, cb.skel, m, m)
         # tail: cascade lag along the chain
         lag = [np.clip(tail_sw[max(0, k - 2 * i) if not loop else (k - 2 * i) % len(frames)], -0.4, 0.4)

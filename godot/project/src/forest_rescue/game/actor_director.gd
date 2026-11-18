@@ -665,13 +665,15 @@ func update_captives(site_id: String, poi: Dictionary, anchor: Dictionary, now: 
 			markers.append({"position":actor.position + Vector3.UP * 1.3, "kind":"cage" if state == "caged" else "site", "site":site_id, "id":id})
 
 func guardian_paths(spec: Dictionary) -> Array:
+	# Product decision (2026-11-18): campaign guardians use the game's EXISTING creature
+	# models (data.creatureModels, species × level 1–3) — no new guardian art.
 	var species := String(spec.get("species", "tenerys"))
 	var level := clampi(int(spec.get("level", 1)), 1, 3)
-	var fallback := ""
+	var original := ""
 	var models: Dictionary = game.main.data.get("creatureModels", {})
 	if models.has(species):
-		fallback = String(models[species][level - 1])
-	return [ASSETS + "guardians/lf_guardian_%s.glb" % species, fallback]
+		original = String(models[species][level - 1])
+	return [original, original]
 
 func update_guardian(site_id: String, poi: Dictionary, anchor: Dictionary, now: float, delta: float, near: bool) -> void:
 	var spec: Dictionary = poi.get("guardian", {})
@@ -684,10 +686,8 @@ func update_guardian(site_id: String, poi: Dictionary, anchor: Dictionary, now: 
 		return
 	var level := clampi(int(spec.get("level", 1)), 1, 3)
 	var paths := guardian_paths(spec)
-	var existing: Rig = rigs.get(id)
-	var actor := rig(id, paths[0], paths[1], [1.0, 1.12, 1.25][level - 1])
-	if existing == null:
-		actor.tint = [Color.WHITE, Color(1.0, 0.94, 0.88), Color(0.92, 0.86, 0.95)][level - 1]
+	# Same scale rule as ordinary hunts in landscape.gd (1.02 + 0.16 × level), original materials.
+	var actor := rig(id, paths[0], paths[1], 1.02 + 0.16 * level)
 	var home: Vector3 = anchor.get("guardian", anchor.get("center", Vector3.ZERO))
 	var approach: Vector3 = anchor.get("approach", home + Vector3(0, 0, 4))
 	var squad_pos := squad_focus()

@@ -161,7 +161,7 @@ def body_parts(J=None):
         add(ell((0.24 * sx, 0.18, 1.36), (0.06, 0.09, 0.06), bone="pelvis", name="hip_point"), 0.15)
         add(ell((0.22 * sx, 0.16, 1.09), (0.11, 0.19, 0.155), bone="spine_01", name="flank"), 0.15)
     # tail head (dock root)
-    add(round_cone(V(0, 0.60, 1.42), J["tail_head"] + V(0, 0.01, -0.01), 0.08, 0.06,
+    add(round_cone(V(0, 0.60, 1.42), J["tail_head"] + V(0, -0.02, -0.01), 0.075, 0.05,
                    bone="tail_01", name="tail_root"), 0.08)
 
     # ---------------- neck ----------------
@@ -261,7 +261,7 @@ def body_parts(J=None):
         add(sphere(hk + V(0, 0.07, 0.05), 0.042, bone=f"cannon_H_{s}", name="point_of_hock"), 0.04)
         add(flat_cone(hk + V(0, 0.005, -0.04), fe + V(0, 0.01, 0.03), 0.066, 0.064, 0.95,
                       bone=f"cannon_H_{s}", name="cannon_h"), 0.04)
-        add(flat_cone(hk + V(0, 0.05, -0.07), fe + V(0, 0.05, 0.04), 0.042, 0.046, 0.95,
+        add(flat_cone(hk + V(0, 0.055, -0.07), fe + V(0, 0.058, 0.04), 0.046, 0.05, 0.95,
                       bone=f"cannon_H_{s}", name="tendon_h"), 0.04)
         add(ell(fe + V(0, 0.014, 0.0), (0.078, 0.086, 0.075), bone=f"pastern_H_{s}",
                 name="fetlock_h"), 0.04)

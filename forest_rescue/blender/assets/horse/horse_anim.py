@@ -424,10 +424,10 @@ class LegPlan:
                 xy = p0 + (p1 - p0) * e
                 h = self.lift * math.sin(math.pi * min(1.0, s ** 0.85)) ** 1.2
                 yaw = yaw + (c[k + 1][3] - yaw) * e
-                pitch = self.swing_pitch * (0.55 + 0.9 * math.sin(math.pi * min(1, s / 0.75))) * \
-                    (1 - smooth((s - 0.55) / 0.4)) + (-0.06) * bump(s, 0.7, 1.0, 0.92)
-                knee = self.knee * math.sin(math.pi * min(1.0, s / 0.8)) ** 1.1
-                fet = -self.fet_swing * math.sin(math.pi * min(1.0, s / 0.85))
+                pitch = self.swing_pitch * (0.55 + 0.9 * math.sin(math.pi * min(1, s / 0.6))) * \
+                    (1 - smooth((s - 0.35) / 0.4)) + (-0.06) * bump(s, 0.65, 1.0, 0.88)
+                knee = self.knee * math.sin(math.pi * min(1.0, s / 0.68)) ** 1.1
+                fet = -self.fet_swing * math.sin(math.pi * min(1.0, s / 0.72))
                 return dict(toe=np.array([xy[0], xy[1], h]), yaw=yaw, pitch=pitch, knee=knee,
                             fet=fet, swing=s, stance=-1.0)
         # before the first / after the last contact

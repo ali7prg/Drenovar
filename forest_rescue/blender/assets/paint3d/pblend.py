@@ -68,7 +68,7 @@ def export_material(name, base_path, alpha_clip=None, normal_path=None, rough_pa
                          rough=0.9, double_sided=double_sided)
 
 
-EDGE_FADE = (0.08, 0.26)   # |dot(face normal, view)| range faded out on alpha-tested cards
+EDGE_FADE = (0.10, 0.30)   # |dot(face normal, view)| range faded out on alpha-tested cards
 
 
 def painted_material(src, k=0.4, light=PAINT_LIGHT, name=None):

@@ -125,9 +125,9 @@ def export_kit(asset, built, sp, info, kind, k, args):
         "paintedLightMix": k,
         "paintedLightNote": "Textures carry the painted light. Shade as albedo * mix(1, lambert, paintedLightMix) "
                             "(lambert = max(dot(N, L), 0)); foliage normals are smoothed crown normals.",
-        "edgeFade": {"what": "alpha *= smoothstep(0.08, 0.26, |dot(face_normal, view_dir)|) on foliage (alpha-tested) "
+        "edgeFade": {"what": "alpha *= smoothstep(0.10, 0.30, |dot(face_normal, view_dir)|) on foliage (alpha-tested) "
                              "surfaces; face normal from screen derivatives (cross(dFdx(VERTEX), dFdy(VERTEX))) so "
-                             "cards seen edge-on vanish instead of streaking", "range": [0.08, 0.26]},
+                             "cards seen edge-on vanish instead of streaking", "range": [0.10, 0.30]},
         "aoFormula": "albedo *= mix(0.42, 1.0, COLOR_0.a^2) (same as forest_wind.gdshader)",
         "recommendedTint": sp.get("tint_note"),
         "wind": {"attribute": "COLOR_0 (RGBA float, linear)",

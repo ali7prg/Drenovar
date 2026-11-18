@@ -85,16 +85,16 @@ def mane_clumps(guide, seed=13):
             length = max(0.10, (root[2] - bottom) * 1.25) * rng.uniform(0.9, 1.12)
             segs = max(3, int(length / 0.045))
             path = _march(guide, root, V(sx * out, rng.uniform(0.0, 0.12), 0.05), length, segs,
-                          0.012, 0.016, rng)
-            r0 = rng.uniform(0.022, 0.030)
+                          0.004, 0.010 if side == "R" else 0.006, rng)
+            r0 = rng.uniform(0.017, 0.023) if side == "R" else rng.uniform(0.014, 0.019)
             radii = np.linspace(r0, r0 * 0.55, len(path))
             # waviness: offset the inner points sideways a little along the neck
             C.chain(path, radii, f"mane_{side}", k=0.03)
     # crest ridge: the mane's mass on top of the neck (fuller crest silhouette, both views)
     ys = np.linspace(y0 + 0.005, y1 + 0.02, 14)
-    pts = [_crest_top(guide, y) + V(-0.010, 0.0, 0.010 + 0.012 * math.sin(math.pi * (i / 13)))
+    pts = [_crest_top(guide, y) + V(-0.008, 0.0, -0.012 + 0.006 * math.sin(math.pi * (i / 13)))
            for i, y in enumerate(ys)]
-    radii = [0.030 + 0.012 * math.sin(math.pi * i / 13) for i in range(len(pts))]
+    radii = [0.026 + 0.008 * math.sin(math.pi * i / 13) for i in range(len(pts))]
     C.chain(pts, radii, "mane_crest", k=0.035)
     return C
 
@@ -127,7 +127,7 @@ def tail_center(t):
 def _tail_section(t):
     """Half-width (X, rear view) and half-depth (Y, side view) of the tail mass along t."""
     ax = np.interp(t, [0.0, 0.12, 0.25, 0.50, 0.72, 0.88, 1.0], [0.040, 0.075, 0.110, 0.130, 0.118, 0.085, 0.040])
-    ay = np.interp(t, [0.0, 0.12, 0.25, 0.50, 0.72, 0.88, 1.0], [0.040, 0.065, 0.085, 0.098, 0.090, 0.068, 0.035])
+    ay = np.interp(t, [0.0, 0.12, 0.25, 0.50, 0.72, 0.88, 1.0], [0.035, 0.052, 0.070, 0.082, 0.078, 0.062, 0.032])
     return ax, ay
 
 

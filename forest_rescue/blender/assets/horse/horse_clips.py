@@ -75,7 +75,10 @@ def ears(pose, skel, l_back=0.0, r_back=0.0, l_out=0.0, r_out=0.0):
             pose.toward(skel, b, (sx, 0, 0), out)
 
 
-def tail_pose(pose, skel, lift=0.0, swish=0.0, lag_swish=None, lift_chain=None):
+TAIL_STREAM_W = (0.30, 0.25, 0.17, 0.12, 0.09, 0.07)
+
+
+def tail_pose(pose, skel, lift=0.0, swish=0.0, lag_swish=None, lift_chain=None, stream=0.0):
     """lift: raise the dock (bones 1-2); the hair (bones 3-6) hangs back down under gravity
     so a carried tail arcs like a plume instead of rotating as a rigid stick."""
     names = [f"tail_{i:02d}" for i in range(1, 7)]
@@ -86,6 +89,8 @@ def tail_pose(pose, skel, lift=0.0, swish=0.0, lag_swish=None, lift_chain=None):
             li = lift_chain[i]
         else:   # dock carries the lift, the hair hangs back toward vertical (gravity)
             li = lift * (0.65 if i == 0 else 0.45) if i < 2 else -lift * (0.30 if i == 2 else 0.22)
+        if stream:   # locomotion: the whole tail flows out behind (walk/trot drawings)
+            li += stream * TAIL_STREAM_W[i]
         if li:
             pose.add_rot(n, axis, li)
         sw = lag_swish[i] if lag_swish is not None else swish * (0.35 + 0.15 * i)
@@ -207,7 +212,7 @@ def gait_loop(cb, G, name):
                  yaw=1.0 * DEG * math.sin(2 * math.pi * ph), head_pitch=-7 * DEG)
             pose.add_rot("pelvis", (0, 1, 0), 2.5 * DEG * math.sin(2 * math.pi * (ph + 0.25)))
             pose.add_rot("spine_03", (0, 1, 0), -1.5 * DEG * math.sin(2 * math.pi * (ph + 0.25)))
-            tail_base = 24 * DEG
+            tail_base, tail_stream = 12 * DEG, 40 * DEG
             ears(pose, cb.skel, l_back=-4 * DEG, r_back=-4 * DEG)
         else:
             # walk: two dips per stride, lateral sway, head nod synced with fore stance
@@ -221,10 +226,10 @@ def gait_loop(cb, G, name):
             pose.add_rot("pelvis", (0, 1, 0), 3.0 * DEG * math.sin(2 * math.pi * (ph + 0.05)))
             pose.add_rot("pelvis", (0, 0, 1), 2.0 * DEG * math.sin(2 * math.pi * (ph + 0.2)))
             pose.add_rot("spine_03", (0, 1, 0), -1.5 * DEG * math.sin(2 * math.pi * ph))
-            tail_base = 4 * DEG
+            tail_base, tail_stream = 5 * DEG, 26 * DEG
             ears(pose, cb.skel, l_back=4 * DEG * math.sin(2 * math.pi * ph),
                  r_back=-4 * DEG * math.sin(2 * math.pi * ph))
-        tail_pose(pose, cb.skel, lift=tail_base)
+        tail_pose(pose, cb.skel, lift=tail_base, stream=tail_stream)
         frames.append(pose)
         root.append((rp, 0.0))
     cb.compensate(frames, True)
@@ -335,7 +340,7 @@ def start(cb):
         body(pose, dy=-0.03 * lean * (1 - 0.6 * smooth((u - 0.6) / 0.4)), dz=-0.012 * bump(u, 0.0, 1.0, 0.4),
              pitch=1.2 * DEG * bump(u, 0, 1.0, 0.35))
         neck(pose, pitch=2 * DEG * smooth(u) + 4 * DEG * bump(u, 0.0, 0.8, 0.3))
-        tail_pose(pose, cb.skel, lift=4 * DEG * smooth(u))
+        tail_pose(pose, cb.skel, lift=5 * DEG * smooth(u), stream=26 * DEG * smooth(u))
         frames.append(pose)
         root.append((rp, 0.0))
     cb.compensate(frames, False)
@@ -383,7 +388,7 @@ def stop(cb):
         settle = bump(u, 0.2, 1.0, 0.6)
         body(pose, dy=0.025 * settle, dz=-0.01 * settle, pitch=-1.2 * DEG * settle)
         neck(pose, pitch=2 * DEG * (1 - smooth(u)) - 5 * DEG * bump(u, 0.25, 1.0, 0.55))
-        tail_pose(pose, cb.skel, lift=4 * DEG * (1 - smooth(u)))
+        tail_pose(pose, cb.skel, lift=5 * DEG * (1 - smooth(u)), stream=26 * DEG * (1 - smooth(u)))
         frames.append(pose)
         root.append((rp, 0.0))
     cb.compensate(frames, False)

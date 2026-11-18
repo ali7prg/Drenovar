@@ -32,13 +32,15 @@ import horse_tack as HT  # noqa: E402
 import horse_tex as HX  # noqa: E402
 import horse_anim as HA  # noqa: E402
 import horse_clips as HC  # noqa: E402
+import horse_hairvol as HV  # noqa: E402
 
 ASSET = "lf_horse_origin"
 GROUP = "horse"
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
 FAST = "--fast" in ARGS
 TEX = int(ARGS[ARGS.index("--tex-size") + 1]) if "--tex-size" in ARGS else (1024 if FAST else 2048)
-BODY_TRIS = {0: 10000, 1: 5100, 2: 2100}
+BODY_TRIS = {0: 9000, 1: 6000, 2: 2750}   # LOD1/2: body + opaque hair volumes
+HAIR_VOL_TRIS = 3300
 T0 = time.time()
 
 
@@ -66,10 +68,38 @@ def build_body(views, J):
         m.wrap_method = "NEAREST_SURFACEPOINT"
         bpy.ops.object.modifier_apply(modifier="sw")
     lo.data.shade_smooth()
-    core.smart_uv(lo, angle=62.0, margin=0.004)
-    core.pack_uv(lo, margin=0.004)
     log("body LOD0", core.tri_count(lo), "tris")
     return F, hi, lo
+
+
+def build_hair_volumes(guide):
+    """Opaque mane + forelock + tail masses (HQ for baking, decimated for the game mesh)."""
+    vox = 0.006 if FAST else 0.004
+    mane, fore, tail = HV.mane_clumps(guide), HV.forelock_clumps(guide), HV.tail_clumps()
+    allc = HV.Clumps()
+    for c in (mane, fore, tail):
+        allc.prims += c.prims
+        allc.segs += c.segs
+    head = HV.Clumps()
+    head.prims = mane.prims + fore.prims
+    head.segs = mane.segs + fore.segs
+    vs, fs, off = [], [], 0
+    for C, lo, hi in ((head, (-0.27, -1.30, 1.30), (0.27, -0.25, 2.06)),
+                      (tail, (-0.22, 0.52, 0.08), (0.22, 1.06, 1.52))):
+        Fh = HV.volume_field(C, lo, hi, vox, body_guide=guide)
+        v, f = Fh.mesh()
+        v, f = HV.drop_hidden(v, f, guide)
+        vs.append(v)
+        fs.append(f + off)
+        off += len(v)
+    v = np.concatenate(vs)
+    f = np.concatenate(fs)
+    hq = core.mesh_object(f"{ASSET}_hair_HQ", v, f)
+    log("hair volume HQ", len(f), "tris")
+    lo = core.decimate_to(hq, HAIR_VOL_TRIS, name=f"{ASSET}_hairvol0")
+    lo.data.shade_smooth()
+    log("hair volume LOD0", core.tri_count(lo), "tris")
+    return hq, lo, allc
 
 
 def mesh_from_cards(name, cs, col=None):
@@ -220,10 +250,28 @@ def alpha_clip_material(name, img, rough=0.55):
 
 # --------------------------------------------------------------------------- textures
 
-def body_textures(lo, hi, views, J, tack_objs):
+def body_textures(lo, hi, views, J, tack_objs, clumps):
     from PIL import Image
     verts, tris, uv, vn = core.mesh_arrays(lo, evaluated=False)
     T = texproj.rasterize_uv(verts, tris, uv, TEX, vn)
+    # opaque hair-volume texels (face attribute) + strand flow from the clump segments
+    me = lo.data
+    me.calc_loop_triangles()
+    poly = np.empty(len(me.loop_triangles), np.int64)
+    me.loop_triangles.foreach_get("polygon_index", poly)
+    fflag = np.empty(len(me.polygons), np.int32)
+    me.attributes["hair_volume"].data.foreach_get("value", fflag)
+    tri_hair = fflag[poly].astype(bool)
+    hair_mask = T.valid & tri_hair[np.clip(T.tri, 0, None)]
+    hair_flow = np.zeros(T.pos.shape)
+    hy, hx = np.nonzero(hair_mask)
+    hair_flow[hy, hx] = HV.flow_dirs(clumps, T.pos[hy, hx])
+    pal = HX.sheet_palette(views)
+    # sheet hair is painted with light baked in: albedo slightly darker than the painted median
+    hair_pal = (pal["mane"][0] * 0.62, pal["mane"][1] * 0.86, pal["tail"][2] * 1.0)
+    hoof_col = 0.5 * (pal["hoof"][0] + pal["hoof"][1]) * 0.92
+    log("sheet palette mane", np.round(pal["mane"][1], 3), "tail", np.round(pal["tail"][1], 3),
+        "hoof", np.round(hoof_col, 3), "hair texels", int(hair_mask.sum()))
     tv, tt = [], []
     off = 0
     for o in tack_objs:
@@ -239,7 +287,8 @@ def body_textures(lo, hi, views, J, tack_objs):
     col = texproj.fill(col, w > 1e-6)
     col, gain, ref_med, tex_med = HX.match_coat(T, col, views, excl)
     log("coat gain", np.round(gain, 3), "sheet coat", np.round(ref_med, 3), "texture", np.round(tex_med, 3))
-    col, rough, height = HX.details(T, col, J)
+    col, rough, height = HX.details(T, col, J, hair_mask=hair_mask, hair_flow=hair_flow,
+                                    hair_pal=hair_pal, hoof_col=hoof_col)
     col = texproj.dilate_margin(col, T.valid, 8)
     core.save_rgba(tex_path("body_color_master.png"), col)
     Image.fromarray((np.clip(col, 0, 1) * 255 + 0.5).astype(np.uint8)).save(
@@ -391,24 +440,35 @@ def main():
     views = HR.load_views()
     J = HB.skeleton()
     hq_col = core.collection("HQ_sculpt")
-    F, hi, lo0 = build_body(views, J)
+    F, hi, lo_body = build_body(views, J)
+    guide = HH.SurfaceGuide(F)
+    hair_hq, hair_lo, clumps = build_hair_volumes(guide)
+
+    # ---- rig + weights (body from part SDFs, hair volumes from their clumps)
+    arm = build_armature(J)
+    names, W = body_weights(lo_body, J)
+    bind_weights(lo_body, arm, names, W)
+    hv = np.array([v.co[:] for v in hair_lo.data.vertices])
+    assign_groups(hair_lo, HV.volume_weights(clumps, hv, HH._neck_bone_at, HH._mane_bone_at,
+                                             HH._tail_weights, HH._blend))
+    log("body weights", len(names), "bones")
+    n_body_faces = len(lo_body.data.polygons)
+    lo0 = core.join([lo_body, hair_lo], name=f"{ASSET}_body0")
+    flag = lo0.data.attributes.new("hair_volume", "INT", "FACE")
+    flag.data.foreach_set("value", (np.arange(len(lo0.data.polygons)) >= n_body_faces).astype(np.int32))
+    core.smart_uv(lo0, angle=62.0, margin=0.004)
+    core.pack_uv(lo0, margin=0.004)
+    hi = core.join([hi, hair_hq], name=f"{ASSET}_HQ")
     for c in list(hi.users_collection):
         c.objects.unlink(hi)
     hq_col.objects.link(hi)
-    guide = HH.SurfaceGuide(F)
-
-    # ---- rig + body weights
-    arm = build_armature(J)
-    names, W = body_weights(lo0, J)
-    bind_weights(lo0, arm, names, W)
-    log("body weights", len(names), "bones")
 
     # ---- hair / tack per LOD
     parts = {}
     for lod in (0, 1, 2):
         drop = {0: None, 1: HRig.LOD1_DROP, 2: HRig.LOD2_DROP}[lod]
-        sets = [("mane", HH.mane_cards(guide, lod)), ("forelock", HH.forelock_cards(guide, lod)),
-                ("tail", HH.tail_cards(lod)), ("feather", HH.feather_cards(J, lod))]
+        sets = [("mane", HH.mane_fringe_cards(guide, lod)), ("forelock", HH.forelock_fringe_cards(guide, lod)),
+                ("tail", HH.tail_fringe_cards(lod)), ("feather", HH.feather_cards(J, lod))]
         hair_objs = []
         for nm, cs in sets:
             if cs.tris == 0:
@@ -427,7 +487,7 @@ def main():
 
     # ---- textures
     hair_png, tack_col, tack_nrm, tack_orm = hair_tack_textures()
-    body_col, body_nrm, body_orm = body_textures(lo0, hi, views, J, parts[0][1])
+    body_col, body_nrm, body_orm = body_textures(lo0, hi, views, J, parts[0][1], clumps)
     m_body = core.material(f"{ASSET}_body", base_tex=core.load_image(body_col),
                            normal_tex=core.load_image(body_nrm, "Non-Color"),
                            rough_tex=(orm := core.load_image(body_orm, "Non-Color")), metal_tex=orm)
@@ -511,6 +571,11 @@ def main():
                   "weightedByLOD": {f"LOD{k}": len(lod_used(o)) for k, o in lods.items()},
                   "maxInfluences": 4},
         "materials": [m_body.name, m_hair.name, m_tack.name],
+        "hairMaterial": {"name": m_hair.name, "alphaMode": "MASK", "alphaCutoff": 0.5,
+                         "doubleSided": True,
+                         "note": "fringe cards only (mane/tail wisps, forelock, feathering); the "
+                                 "mane/tail/forelock MASS is opaque geometry in " + m_body.name +
+                                 ". Atlas colour is dilated into transparent texels."},
         "textures": {os.path.basename(p): list(bpy.data.images.load(p, check_existing=True).size)
                      for p in (body_col, body_nrm, body_orm, hair_png, tack_col, tack_nrm, tack_orm)},
         "bounds_m": {"min": [round(float(x), 3) for x in mins], "max": [round(float(x), 3) for x in maxs]},

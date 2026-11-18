@@ -42,8 +42,10 @@ def mane_roots():
 
 
 def tail_points():
-    return [V(0, 0.60, 1.425), V(0, 0.755, 1.395), V(0, 0.835, 1.22), V(0, 0.865, 1.00),
-            V(0, 0.875, 0.74), V(0, 0.865, 0.46), V(0, 0.85, 0.13)]
+    """Tail chain along the solid tail mass (horse_hairvol.TAIL_SPLINE): dock arches back
+    from the croup, hair falls to just above the fetlock line."""
+    return [V(0, 0.60, 1.425), V(0, 0.73, 1.425), V(0, 0.82, 1.27), V(0, 0.865, 1.02),
+            V(0, 0.882, 0.76), V(0, 0.876, 0.50), V(0, 0.85, 0.20)]
 
 
 def ribbon_points():

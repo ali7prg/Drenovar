@@ -35,9 +35,10 @@ def hair_atlas(size=1024, seed=11):
     sw = W // N_STRIPS
     col = np.zeros((H, W, 3), np.float32)
     cov = np.zeros((H, W), np.float32)
-    dark = np.array([0.125, 0.085, 0.060])
-    mid = np.array([0.235, 0.155, 0.100])
-    warm = np.array([0.47, 0.31, 0.19])
+    # palette sampled from the sheet's mane/tail pixels (horse_tex.sheet_palette)
+    dark = np.array([0.17, 0.12, 0.09])
+    mid = np.array([0.27, 0.19, 0.14])
+    warm = np.array([0.45, 0.32, 0.22])
     #        strands, length range, waviness, width px@2x, root spread, tip spread, highlights
     params = {
         0: dict(n=230, len=(0.55, 1.00), wave=0.08, width=(3, 5), root=0.80, tip=1.00, high=0.30),
@@ -241,69 +242,6 @@ def _crest_point(guide, y, sx=0.0, lift=0.0):
     return P[i]
 
 
-def mane_cards(guide, lod=0, seed=3):
-    """Layered clump cards: under/mid/top layers falling to both sides + crest volume."""
-    rng = np.random.default_rng(seed + lod)
-    cs = CardSet()
-    y_poll, y_with = -1.115, -0.36
-    segs = {0: 6, 1: 4, 2: 3}[lod]
-    layers = {0: [(40, 0.006, 1.0, "mane_dense"), (30, 0.013, 1.06, "mane_wavy"),
-                  (16, 0.020, 1.10, "mane_wisp")],
-              1: [(22, 0.010, 1.0, "mane_dense"), (16, 0.022, 1.1, "mane_wavy")],
-              2: [(11, 0.014, 1.05, "mane_dense")]}[lod]
-    for s, sx in (("L", 1.0), ("R", -1.0)):
-        for li, (n_roots, off, lmul, strip_name) in enumerate(layers):
-            for k in range(n_roots):
-                t = (k + rng.uniform(0.1, 0.9)) / n_roots
-                y = y_poll + (y_with - y_poll) * t
-                root = _crest_point(guide, y, sx)
-                # length: reach the sheet's mane-bottom line (curving over the crest), irregular
-                bottom = float(np.interp(y, *MANE_BOTTOM))
-                length = max(0.12, (root[2] - bottom) * 1.32) * lmul * rng.uniform(0.75, 1.18)
-                # the mane falls mainly to the horse's right (front/rear views of the sheet)
-                length *= 1.10 if s == "R" else 0.88
-                width = rng.uniform(0.050, 0.072) * (1.25 if lod == 2 else 1.0)
-                d0 = V(sx * (0.85 if s == "R" else 0.6), rng.uniform(0.0, 0.15), 0.02)
-                path = _strand_on_surface(guide, root, d0, length, segs,
-                                          off if s == "R" else off * 0.7, rng, sx, stiff=0.50,
-                                          off_gain=(0.008 + 0.004 * li) * (1.0 if s == "R" else 0.6))
-                keep = path[:, 2] > bottom - 0.07
-                keep[:2] = True
-                path = path[:max(2, int(np.argmin(keep)) if not keep.all() else len(path))]
-                if len(path) < 2:
-                    continue
-                nrm = guide.grad(path)
-                weights = []
-                for i in range(len(path)):
-                    f = i / (len(path) - 1)
-                    w = _blend(_neck_bone_at(y), _mane_bone_at(y, s) if lod < 1 else
-                               _neck_bone_at(y), min(1.0, f * 1.5))
-                    weights.append(w)
-                cs.add_card(path, np.linspace(width, width * 0.85, len(path)), nrm,
-                            STRIP[strip_name], weights, twist=rng.normal(0, 0.35),
-                            flip=bool(rng.integers(2)))
-    # crest volume: arching cards from the midline over to each side (mass above the crest)
-    n_crest = {0: 9, 1: 5, 2: 0}[lod]
-    for k in range(n_crest):
-        t = (k + rng.uniform(0.2, 0.8)) / max(n_crest, 1)
-        y = y_poll + (y_with + 0.05 - y_poll) * t
-        root = _crest_point(guide, y, 0.0)
-        for sx in (1.0, -1.0):
-            s = "L" if sx > 0 else "R"
-            up = 0.012 + 0.012 * math.sin(math.pi * t)
-            L = rng.uniform(0.06, 0.09)
-            f = np.linspace(0, 1, 4)
-            path = np.array([root + V(sx * L * 0.75 * ff, rng.uniform(-0.01, 0.02) * ff,
-                                      up * math.sin(math.pi * ff * 0.8) - 0.05 * ff * ff) for ff in f])
-            path = np.array([guide.project(p[None], max(0.004, guide.d(p[None])[0]))[0] for p in path])
-            nrm = np.tile(V(0, -0.2, 1.0), (4, 1)) + rng.normal(0, 0.15, (4, 3))
-            w = [_blend(_neck_bone_at(y), _mane_bone_at(y, s) if lod < 1 else _neck_bone_at(y), ff)
-                 for ff in f]
-            cs.add_card(path, np.array([0.065, 0.06, 0.055, 0.045]), nrm, STRIP["mane_wisp"], w,
-                        flip=bool(rng.integers(2)))
-    return cs
-
-
 def _strand_on_surface(guide, root, d0, length, segs, offset, rng, sx, stiff=0.55, off_gain=0.0):
     """March a strand from `root` along the skin; gravity bends it down, the offset from the
     skin grows along the strand (hair volume), slight waves."""
@@ -330,38 +268,8 @@ def _strand_on_surface(guide, root, d0, length, segs, offset, rng, sx, stiff=0.5
     return np.array(pts)
 
 
-# --------------------------------------------------------------------------- forelock
-
-def forelock_cards(guide, lod=0, seed=5):
-    rng = np.random.default_rng(seed)
-    cs = CardSet()
-    n = {0: 9, 1: 5, 2: 3}[lod]
-    segs = {0: 5, 1: 3, 2: 2}[lod]
-    for k in range(n):
-        f = k / max(n - 1, 1) - 0.5
-        x = f * 0.10
-        root = guide.project(V(x, -1.215 - 0.02 * rng.random(), 1.975), 0.004)[0]
-        d0 = V(x * 1.5, -0.80, -0.60)
-        length = rng.uniform(0.16, 0.21) * (1.0 - 0.30 * abs(f))
-        path = _strand_on_surface(guide, root, d0, length, segs, 0.005, rng, 1.0, stiff=0.45,
-                                  off_gain=0.008)
-        nrm = guide.grad(path)
-        w = [_blend({"head": 1.0}, {"forelock": 1.0} if lod < 1 else {"head": 1.0},
-                    i / (len(path) - 1)) for i in range(len(path))]
-        cs.add_card(path, np.linspace(0.06, 0.045, len(path)), nrm, STRIP["forelock"], w,
-                    twist=rng.normal(0, 0.3), flip=bool(rng.integers(2)))
-    return cs
-
-
 # --------------------------------------------------------------------------- tail
 
-def _tail_center(t):
-    """Tail centre line (root t=0 at the dock, t=1 tip) as a smooth curve."""
-    pts = HRig.tail_points()[1:]
-    pts = np.array(pts)
-    s = np.concatenate([[0], np.cumsum(np.linalg.norm(np.diff(pts, axis=0), axis=1))])
-    s /= s[-1]
-    return np.stack([np.interp(t, s, pts[:, i]) for i in range(3)], -1)
 
 
 def _tail_weights(p):
@@ -384,95 +292,132 @@ def _tail_weights(p):
     return {names[i]: 1.0}
 
 
-def tail_cards(lod=0, seed=7, drop=None):
-    """Full flowing tail: dock cover + outer/inner clump shells + cross cards, wavy ends."""
-    rng = np.random.default_rng(seed)
+# --------------------------------------------------------------------------- fringe cards
+# The hair MASS is opaque geometry (horse_hairvol); cards only add the wispy fringe.
+
+def mane_fringe_cards(guide, lod=0, seed=3):
+    """Wisps hanging below the mane volume's lower edge + a few flyaways above the crest."""
+    import horse_hairvol as HV
+    if lod >= 2:
+        return CardSet()
+    rng = np.random.default_rng(seed + lod)
     cs = CardSet()
-    cfg = {0: dict(shells=[(24, 1.0, 12), (12, 0.6, 10)], cross=6, dock=14, dseg=5),
-           1: dict(shells=[(12, 1.0, 8), (7, 0.6, 6)], cross=3, dock=5, dseg=3),
-           2: dict(shells=[(7, 1.0, 4)], cross=2, dock=0, dseg=2)}[lod]
-
-    def wts(path):
-        w = [_tail_weights(p) for p in path]
-        if drop:
-            w = [{HRig.resolve(b, drop): v for b, v in ww.items()} for ww in w]
-        return w
-
-    for si, (n_ang, rscale, segs) in enumerate(cfg["shells"]):
-        for k in range(n_ang):
-            ang = 2 * math.pi * (k + 0.5 * si + rng.uniform(-0.25, 0.25)) / n_ang
-            t0 = 0.05 + rng.uniform(0.0, 0.10) + 0.06 * si
-            t1 = rng.uniform(0.88, 1.0) if si == 0 else rng.uniform(0.80, 0.97)
-            ts = np.linspace(t0, t1, segs + 1)
-            c = _tail_center(ts)
-            # cross-section: hugs the dock, full in the middle, spreading loose toward the tip
-            rad = (0.045 + 0.065 * np.sin(np.pi * np.clip(ts * 0.8, 0, 1)) ** 0.7 + 0.05 * ts ** 2) * \
-                rscale * rng.uniform(0.85, 1.1)
-            ox = np.cos(ang) * rad * 1.12
-            oy = np.sin(ang) * rad * 0.72 - 0.015
-            wav = rng.uniform(0.015, 0.04)
-            ph = rng.uniform(0, 6.28)
-            path = c + np.stack([ox + wav * np.sin(ph + ts * 11), oy + 0.7 * wav * np.cos(ph + ts * 8),
-                                 np.zeros_like(ts)], -1)
-            nrm = np.stack([np.cos(ang) * np.ones_like(ts), np.sin(ang) * np.ones_like(ts),
-                            0.15 * np.ones_like(ts)], -1)
-            width = rng.uniform(0.060, 0.085) * np.linspace(1.0, 1.3, len(ts))
-            strip = [STRIP["tail_a"], STRIP["tail_b"], STRIP["tail_wisp"]][(k + si) % 3]
-            cs.add_card(path, width, nrm, strip, wts(path), twist=rng.normal(0, 0.4),
+    y0, y1 = -1.10, -0.40
+    for s, sx, n, line, lr in (("R", -1.0, {0: 26, 1: 13}[lod], HV.MANE_BOTTOM_R, (0.10, 0.17)),
+                               ("L", 1.0, {0: 18, 1: 9}[lod], HV.MANE_BOTTOM_L, (0.07, 0.12))):
+        for k in range(n):
+            t = (k + rng.uniform(0.15, 0.85)) / n
+            y = y0 + (y1 - y0) * t
+            bottom = float(np.interp(y, *line))
+            root = guide.project(V(0.10 * sx, y, bottom + 0.055)[None], 0.010)[0]
+            length = rng.uniform(*lr)
+            path = _strand_on_surface(guide, root, V(sx * 0.3, rng.uniform(0.0, 0.1), -1.0), length,
+                                      {0: 4, 1: 3}[lod], 0.012, rng, sx, stiff=0.6, off_gain=0.008)
+            nrm = guide.grad(path)
+            w = [_blend(_neck_bone_at(y), _mane_bone_at(y, s) if lod < 1 else _neck_bone_at(y),
+                        min(1.0, 0.5 + 0.5 * i / (len(path) - 1))) for i in range(len(path))]
+            cs.add_card(path, np.linspace(0.06, 0.045, len(path)), nrm,
+                        STRIP["mane_wavy"] if k % 2 else STRIP["mane_wisp"], w,
+                        twist=rng.normal(0, 0.3), flip=bool(rng.integers(2)))
+    # flyaway strands arching over the crest (read above the crest line in the profiles)
+    for k in range({0: 10, 1: 5}[lod]):
+        t = (k + rng.uniform(0.2, 0.8)) / {0: 10, 1: 5}[lod]
+        y = y0 + 0.02 + (y1 - y0 - 0.06) * t
+        top = HV._crest_top(guide, y)
+        for sx in (1.0, -1.0):
+            s = "L" if sx > 0 else "R"
+            f = np.linspace(0, 1, 4)
+            L = rng.uniform(0.07, 0.10)
+            path = np.array([top + V(sx * L * 0.8 * ff, 0.01 * ff, 0.012 + 0.02 * math.sin(math.pi * ff * 0.8)
+                                     - 0.05 * ff * ff) for ff in f])
+            nrm = np.tile(V(0, -0.2, 1.0), (4, 1)) + rng.normal(0, 0.15, (4, 3))
+            w = [_blend(_neck_bone_at(y), _mane_bone_at(y, s) if lod < 1 else _neck_bone_at(y), ff)
+                 for ff in f]
+            cs.add_card(path, np.array([0.05, 0.05, 0.045, 0.035]), nrm, STRIP["mane_wisp"], w,
                         flip=bool(rng.integers(2)))
-    # cross cards through the core: density from the side and from behind
-    for k in range(cfg["cross"]):
-        ts = np.linspace(0.10, rng.uniform(0.66, 0.90), cfg["shells"][0][2] - 1)
-        c = _tail_center(ts)
-        a = math.pi * k / max(cfg["cross"], 1)
-        nrm = np.tile(V(math.cos(a), math.sin(a), 0.0), (len(ts), 1))
-        ph = rng.uniform(0, 6.28)
-        path = c + np.stack([0.015 * np.sin(ph + ts * 9), 0.01 * np.cos(ph + ts * 7),
-                             np.zeros_like(ts)], -1)
-        cs.add_card(path, np.linspace(0.10, 0.14, len(ts)), nrm, STRIP["tail_a"], wts(path),
-                    twist=rng.normal(0, 0.3))
-    # dock cover: short hair lying along the dock, falling over the buttocks
-    tp = HRig.tail_points()
-    for k in range(cfg["dock"]):
-        a = math.pi * (0.10 + 0.8 * k / max(cfg["dock"] - 1, 1))       # top half around the dock
-        f0 = rng.uniform(-0.35, 0.30)                                   # from the tail head on
-        base = tp[1] + (tp[2] - tp[1]) * f0 if f0 >= 0 else tp[1] + (tp[1] - tp[0]) * f0
-        root = base + V(math.cos(a) * 0.05, -math.sin(a) * 0.01, math.sin(a) * 0.045)
-        L = rng.uniform(0.32, 0.48)
-        f = np.linspace(0, 1, cfg["dseg"] + 1)
-        side = math.cos(a)
-        path = np.array([root + V(side * 0.05 * ff, 0.07 * ff - 0.02 * ff * ff, -L * ff) for ff in f])
-        nrm = np.tile(V(side, 0.6, 0.2), (len(f), 1))
-        cs.add_card(path, np.linspace(0.055, 0.07, len(f)), nrm, STRIP["tail_b"], wts(path),
-                    flip=bool(rng.integers(2)))
     return cs
 
 
-# --------------------------------------------------------------------------- feathering
-
-def feather_cards(J, lod=0, seed=9):
-    """Slight draft feathering: soft fringes behind each fetlock/lower cannon over the heels.
-
-    Cards hang behind the leg with their plane facing sideways, so they read as a fringe in
-    the profiles and stay thin (edge-on) in the front/rear views.
-    """
+def forelock_fringe_cards(guide, lod=0, seed=5):
+    """Forelock wisps falling between the eyes, parted around the white star."""
     if lod >= 2:
         return CardSet()
     rng = np.random.default_rng(seed)
     cs = CardSet()
-    n = {0: 4, 1: 2}[lod]
+    xs = {0: (-0.055, -0.030, 0.0, 0.030, 0.058), 1: (-0.04, 0.0, 0.045)}[lod]
+    for x in xs:
+        root = guide.project(V(x * 0.5, -1.20, 1.975)[None], 0.006)[0]
+        # centre strand stops above the star (top tip ~1.865 m); side strands reach eye level
+        zend = 1.875 if abs(x) < 0.01 else rng.uniform(1.765, 1.80)
+        length = max(0.08, (root[2] - zend) * 1.35)
+        path = _strand_on_surface(guide, root, V(x * 1.4, -0.8, -0.6), length, 4, 0.006, rng, 1.0,
+                                  stiff=0.45, off_gain=0.004)
+        nrm = guide.grad(path)
+        w = [_blend({"head": 1.0}, {"forelock": 1.0} if lod < 1 else {"head": 1.0}, i / (len(path) - 1))
+             for i in range(len(path))]
+        cs.add_card(path, np.linspace(0.045, 0.03, len(path)), nrm, STRIP["forelock"], w,
+                    twist=rng.normal(0, 0.25), flip=bool(rng.integers(2)))
+    return cs
+
+
+def tail_fringe_cards(lod=0, seed=7, drop=None):
+    """Wisps on the lower outer surface and past the tip of the solid tail mass."""
+    import horse_hairvol as HV
+    if lod >= 2:
+        return CardSet()
+    rng = np.random.default_rng(seed)
+    cs = CardSet()
+    n = {0: 18, 1: 8}[lod]
+    segs = {0: 5, 1: 3}[lod]
+    for k in range(n):
+        ang = 2 * math.pi * (k + rng.uniform(-0.3, 0.3)) / n
+        t0 = rng.uniform(0.45, 0.70)
+        t1 = rng.uniform(0.98, 1.06)
+        ts = np.linspace(t0, t1, segs + 1)
+        c = HV.tail_center(np.clip(ts, 0, 1))
+        c[:, 2] -= np.clip(ts - 1.0, 0, None) * 1.2          # extend past the tip
+        ax, ay = HV._tail_section(np.clip(ts, 0, 1))
+        rho = 0.92 + 0.15 * np.clip((ts - t0) / (t1 - t0), 0, 1)
+        wav = rng.uniform(0.008, 0.02)
+        ph = rng.uniform(0, 6.28)
+        x = c[:, 0] + rho * math.cos(ang) * ax + wav * np.sin(ph + ts * 12)
+        y = c[:, 1] + rho * math.sin(ang) * ay + 0.6 * wav * np.cos(ph + ts * 9)
+        path = np.stack([x, y, c[:, 2]], 1)
+        nrm = np.tile(V(math.cos(ang), math.sin(ang), 0.1), (len(ts), 1))
+        w = [_tail_weights(p) for p in path]
+        if drop:
+            w = [{HRig.resolve(b, drop): v for b, v in ww.items()} for ww in w]
+        cs.add_card(path, rng.uniform(0.06, 0.085) * np.ones(len(ts)), nrm,
+                    [STRIP["tail_a"], STRIP["tail_b"], STRIP["tail_wisp"]][k % 3], w,
+                    twist=rng.normal(0, 0.3), flip=bool(rng.integers(2)))
+    return cs
+
+
+def feather_cards(J, lod=0, seed=9):
+    """Draft feathering: tufts from the fetlock falling over the coronet onto the hoof wall,
+    around the back and sides of every leg, longer on the hind legs."""
+    if lod >= 2:
+        return CardSet()
+    rng = np.random.default_rng(seed)
+    cs = CardSet()
+    n = {0: 6, 1: 3}[lod]
     for fh in ("F", "H"):
         for s in ("L", "R"):
             sx = 1.0 if s == "L" else -1.0
             fet = J[f"fetlock_{fh}_{s}"]
+            top = 0.07 if fh == "F" else 0.12             # hind tufts start higher (longer)
             bone = f"pastern_{fh}_{s}"
             for k in range(n):
-                f = k / max(n - 1, 1) - 0.5
-                root = fet + V(sx * (0.032 * f * 2), 0.06, 0.13 + 0.03 * rng.random())
-                tip = fet + V(sx * (0.045 * f * 2), 0.10 + 0.02 * rng.random(), -0.14)
-                path = np.array([root + (tip - root) * t + V(0, 0.02 * math.sin(math.pi * t), 0)
-                                 for t in np.linspace(0, 1, 4)])
-                nrm = np.tile(V(1.0, 0.25 * f, 0.0), (4, 1))
-                cs.add_card(path, np.array([0.045, 0.055, 0.055, 0.045]), nrm, STRIP["feather"],
-                            [{bone: 1.0}] * 4, twist=rng.normal(0, 0.15), flip=bool(rng.integers(2)))
+                ang = math.radians(35 + 290 * k / max(n - 1, 1))   # skip the front of the pastern
+                c, sn = math.cos(ang + math.pi / 2), math.sin(ang + math.pi / 2)
+                # angle 0 = front (-Y): direction (sin, -cos)
+                dx, dy = math.sin(ang) * sx, -math.cos(ang)
+                r0, r1 = 0.064, 0.098
+                root = fet + V(dx * r0, dy * r0 + 0.012, top)
+                tip = V(fet[0] + dx * r1, fet[1] + dy * r1 + 0.01, 0.035 + rng.uniform(-0.008, 0.01))
+                path = np.array([root + (tip - root) * f + V(dx, dy, 0) * 0.015 * math.sin(math.pi * f)
+                                 for f in np.linspace(0, 1, 4)])
+                nrm = np.tile(V(dx, dy, 0.0), (4, 1))
+                cs.add_card(path, np.array([0.05, 0.055, 0.055, 0.05]), nrm, STRIP["feather"],
+                            [{bone: 1.0}] * 4, twist=rng.normal(0, 0.2), flip=bool(rng.integers(2)))
     return cs

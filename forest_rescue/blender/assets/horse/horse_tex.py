@@ -150,7 +150,34 @@ def match_coat(T, col, views, excl):
     return np.clip(col * gain[None, None, :], 0, 1), gain, ref_med, tex_med
 
 
-def details(T, col, J=None, seed=41):
+def hair_strands(P, N, flow, pal, seed=61):
+    """Opaque hair-volume shading: anisotropic strand noise streaked along `flow`.
+
+    Returns colour (n,3), roughness (n,), height (n,) for texels on the mane/tail/forelock.
+    """
+    d = flow / np.maximum(np.linalg.norm(flow, axis=1, keepdims=True), 1e-9)
+    e1 = np.cross(d, N)
+    e1 /= np.maximum(np.linalg.norm(e1, axis=1, keepdims=True), 1e-9)
+    e2 = np.cross(d, e1)
+    a = (P * e1).sum(1)
+    b = (P * d).sum(1)
+    c = (P * e2).sum(1)
+    Q = np.stack([a * 230.0, b * 7.0, c * 230.0], 1)
+    fine = texproj.fbm(Q, 1.0, 3, seed=seed)
+    Q2 = np.stack([a * 38.0, b * 2.5, c * 38.0], 1)
+    clump = texproj.fbm(Q2, 1.0, 3, seed=seed + 7)
+    dark, mid, high = (np.asarray(x, float) for x in pal)
+    v = np.clip(0.55 * fine + 0.45 * clump, 0, 1)
+    col = dark[None] + (mid - dark)[None] * (v ** 1.2)[:, None] * 1.25
+    hl = np.clip((fine - 0.62) * 4.0, 0, 1) * np.clip((clump - 0.45) * 3, 0, 1)
+    col = col * (1 - 0.6 * hl[:, None]) + high[None] * 0.6 * hl[:, None]
+    rough = 0.50 + 0.12 * (1 - fine)
+    height = 0.9 * fine + 0.5 * clump
+    return np.clip(col, 0, 1), rough, height
+
+
+def details(T, col, J=None, seed=41, hair_mask=None, hair_flow=None, hair_pal=None,
+            hoof_col=None):
     """Procedural coat detail + painted features.  Returns colour, roughness, height maps."""
     J = J or HB.skeleton()
     Wt, Ht = T.size
@@ -181,9 +208,10 @@ def details(T, col, J=None, seed=41):
     hz = P[:, 2]
     hoofm = hz < 0.072
     growth = texproj.fbm(P * np.array([1.0, 1.0, 0.08]), 140.0, 3, seed=seed + 9)
-    horn = np.array([0.47, 0.40, 0.32]) * (0.8 + 0.4 * growth)[:, None]
+    horn_base = np.array([0.42, 0.32, 0.24]) if hoof_col is None else np.asarray(hoof_col, float)
+    horn = horn_base * (0.78 + 0.4 * growth)[:, None]
     c[hoofm] = horn[hoofm] * np.clip((hz[hoofm] / 0.072) * 0.4 + 0.75, 0, 1)[:, None]
-    rough[hoofm] = 0.45
+    rough[hoofm] = 0.58
     height[hoofm] += 0.5 * growth[hoofm]
     cor = (hz >= 0.072) & (hz < 0.095)
     c[cor] *= 0.6
@@ -232,6 +260,12 @@ def details(T, col, J=None, seed=41):
     sm = _star_mask(P, N, J)
     white = np.array([0.93, 0.90, 0.84]) * (0.92 + 0.1 * hair)[:, None]
     c = c * (1 - sm[:, None]) + white * sm[:, None]
+    if hair_mask is not None and hair_mask.any():
+        hm = hair_mask[yy, xx]
+        hc, hr, hh = hair_strands(P[hm], N[hm], hair_flow[yy[hm], xx[hm]], hair_pal)
+        c[hm] = hc
+        rough[hm] = hr
+        height[hm] = hh
     out = col.copy()
     out[yy, xx] = np.clip(c, 0, 1)
     R = np.full((Ht, Wt), 0.72)

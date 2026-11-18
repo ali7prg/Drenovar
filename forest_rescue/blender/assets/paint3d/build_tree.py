@@ -257,6 +257,7 @@ def main():
                                                             "atlas_scale": s, "patches": P.n})
     print(f"[{asset}] QA done ({time.time() - t0:.1f}s)", flush=True)
     if a.no_export:
+        core.save_blend(os.path.join(TEXM, f"_inspect_{asset}.blend"))
         return
     pblend.use_painted(allobjs, k, on=False)
     SP.export_kit(asset, built, sp, info, kind, k, a)

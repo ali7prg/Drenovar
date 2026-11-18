@@ -536,8 +536,8 @@ class TreeBuilder:
             sd = np.cos(ph[c])
             if abs(sd) > 0.55:
                 wgt *= np.where(edges & (np.abs(rhos) > 0.45), 3.0, 0.6)
-            if n_w[2] > 0.2:
-                wgt *= np.exp(np.clip((lums - lum_med) / 6.0 * min(1.0, n_w[2] * 1.6), -4, 4))
+            if n_w[2] > -0.3:
+                wgt *= np.exp(np.clip((lums - lum_med) / self.cfg.get("lum_pref", 5.0), -4, 4))
             if choose is not None:
                 wgt *= choose
             wgt = wgt / wgt.sum()
@@ -546,6 +546,9 @@ class TreeBuilder:
             P3 = ref.cam_to_world(np.array([u]), np.array([v]), np.array([tt]))[0]
             size = rng.uniform(0.95, 1.18) * size_k
             roll = rng.normal(0, 0.22)
+            if n_w[2] > self.cfg.get("flip_top_nz", 0.4):
+                # upper slopes are seen from above: tuck the painted clump shadow under the card above
+                roll += np.pi
             placed = None
             for attempt in range(3):
                 Vc = self._fill_quad(P3, n_w, ti, size, roll)

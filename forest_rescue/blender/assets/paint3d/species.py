@@ -12,9 +12,9 @@ RT = os.path.join(paths.RUNTIME, "forest")
 
 LODS_TREE = {
     0: dict(trunk_step_m=0.3, trunk_sides=12, limb_step_m=0.25, limb_sides=6, limb_min_r_px=1.3, limb_budget=950,
-            copies=True, front_frac=1.0, front_scale=1.0, n_fill=440, fill_size=1.3, n_inner=40, min_dist_k=0.5),
+            copies=True, front_frac=1.0, front_scale=1.0, n_fill=400, fill_size=1.45, n_inner=40, min_dist_k=0.5),
     1: dict(trunk_step_m=0.6, trunk_sides=8, limb_step_m=0.5, limb_sides=4, limb_min_r_px=3.0, limb_budget=260,
-            copies=True, front_frac=0.6, front_scale=1.12, n_fill=180, fill_size=1.6, n_inner=12, min_dist_k=0.6),
+            copies=True, front_frac=0.6, front_scale=1.12, n_fill=170, fill_size=1.75, n_inner=12, min_dist_k=0.6),
     2: dict(trunk_step_m=1.6, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
             copies=False, front_frac=0.22, front_scale=1.5, n_fill=62, fill_size=2.0, n_inner=0, min_dist_k=0.7),
 }
@@ -31,7 +31,7 @@ TREES = {
                   3: dict(seed=8, copies=[(140, 0.9), (-110, 0.95)], scale=(0.9, 1.06))},
         patch=dict(refs=[("07_fog_exploration_interface.png", (518, 110, 1020, 720), "art/07 panel 2"),
                          ("01_world_masterplan.png", (0, 0, 560, 330), "art/01 NW golden-oak grove")],
-                   ground=(0.40, 0.42, 0.20), n=30, area=46.0),
+                   ground=(0.42, 0.44, 0.24), n=30, area=78.0, spacing=12.0),
     ),
 }
 
@@ -127,7 +127,7 @@ def forest_patch(asset, built, out_png, sp):
     while len(pts) < cfg["n"] and tries < 5000:
         tries += 1
         p = rng.uniform(-area / 2, area / 2, 2)
-        if all(np.linalg.norm(p - q) > sp.get("patch_spacing", 7.0) for q in pts):
+        if all(np.linalg.norm(p - q) > cfg.get("spacing", 7.0) for q in pts):
             pts.append(p)
     vs = sorted(built)
     for i, p in enumerate(pts):
@@ -154,7 +154,10 @@ def forest_patch(asset, built, out_png, sp):
     g.data.materials.append(m)
     bpy.context.view_layer.update()
     pblend.only(insts + [g])
-    cam = pblend.ortho_frame(insts, 55, 25, res=(1100, 900), margin=1.0)
+    # perspective camera at 55 deg pitch (game-like), framing the patch centre
+    d = area * 0.95
+    loc = (0.0, -d * math.cos(math.radians(55)), d * math.sin(math.radians(55)))
+    cam = frr.perspective_camera(loc, (0, 0, 2.0), lens=35, res=(1100, 900))
     rgba = frr.render_rgba()
     img = rgba[..., :3] * rgba[..., 3:4] + np.array(cfg["ground"]) * (1 - rgba[..., 3:4])
     ims, labs = [], []

@@ -467,7 +467,7 @@ def main():
     parts = {}
     for lod in (0, 1, 2):
         drop = {0: None, 1: HRig.LOD1_DROP, 2: HRig.LOD2_DROP}[lod]
-        sets = [("mane", HH.mane_fringe_cards(guide, lod)), ("forelock", HH.forelock_fringe_cards(guide, lod)),
+        sets = [("mane", HH.mane_lock_cards(guide, lod) if lod < 2 else HH.CardSet()), ("forelock", HH.forelock_fringe_cards(guide, lod)),
                 ("tail", HH.tail_fringe_cards(lod)), ("feather", HH.feather_cards(J, lod))]
         hair_objs = []
         for nm, cs in sets:

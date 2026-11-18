@@ -87,15 +87,15 @@ def mane_clumps(guide, seed=13):
             t = (k + rng.uniform(0.2, 0.8)) / n
             y = y0 + (y1 - y0) * t
             root = _crest_top(guide, y, 0.008 * sx) + V(0, 0, -0.016)
-            bottom = float(np.interp(y, *line))
-            length = max(0.10, (root[2] - bottom) * 1.25) * rng.uniform(0.9, 1.12)
+            bottom = float(np.interp(y, *MANE_BOTTOM_L)) + 0.035
+            length = max(0.08, (root[2] - bottom) * 1.2) * rng.uniform(0.9, 1.08)
             segs = max(3, int(length / 0.045))
             path = _march(guide, root, V(sx * out, rng.uniform(0.0, 0.12), 0.05), length, segs,
-                          0.004, 0.010 if side == "R" else 0.006, rng)
-            r0 = rng.uniform(0.030, 0.038) if side == "R" else rng.uniform(0.026, 0.032)
+                          0.0, 0.004, rng)
+            r0 = rng.uniform(0.022, 0.028) if side == "R" else rng.uniform(0.020, 0.025)
             radii = np.linspace(r0, r0 * 0.6, len(path))
-            # flat locks lying on the neck, merged into one wavy sheet by the smooth union
-            C.chain(path, radii, f"mane_{side}", k=0.04, normals=guide.grad(path), flatten=0.42)
+            # thin flat underlayer lying on the neck (opaque mass; strand cards sit on top)
+            C.chain(path, radii, f"mane_{side}", k=0.03, normals=guide.grad(path), flatten=0.40)
     # crest ridge: the mane's mass on top of the neck (fuller crest silhouette, both views)
     ys = np.linspace(y0 + 0.005, y1 + 0.02, 14)
     pts = [_crest_top(guide, y) + V(-0.008, 0.0, -0.024 + 0.004 * math.sin(math.pi * (i / 13)))

@@ -10,3 +10,4 @@
 **/.env
 **/.env.*
 **/node_modules/
+**/*.blend1

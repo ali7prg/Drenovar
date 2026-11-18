@@ -282,7 +282,20 @@ def material(name, base=(0.8, 0.8, 0.8, 1.0), rough=0.8, metal=0.0, base_tex=Non
     if base_tex is not None:
         n = tex(base_tex, 300)
         nt.links.new(n.outputs["Color"], bsdf.inputs["Base Color"])
-        if alpha_clip is not None or alpha_blend:
+        if alpha_clip is not None:
+            # glTF exporter recognises alpha = 1 - (A < cutoff) as alphaMode MASK + alphaCutoff
+            lt = nt.nodes.new("ShaderNodeMath")
+            lt.operation = "LESS_THAN"
+            lt.location = (-60, 420)
+            lt.inputs[1].default_value = float(alpha_clip)
+            inv = nt.nodes.new("ShaderNodeMath")
+            inv.operation = "SUBTRACT"
+            inv.location = (90, 420)
+            inv.inputs[0].default_value = 1.0
+            nt.links.new(n.outputs["Alpha"], lt.inputs[0])
+            nt.links.new(lt.outputs["Value"], inv.inputs[1])
+            nt.links.new(inv.outputs["Value"], bsdf.inputs["Alpha"])
+        elif alpha_blend:
             nt.links.new(n.outputs["Alpha"], bsdf.inputs["Alpha"])
     else:
         bsdf.inputs["Base Color"].default_value = base
@@ -314,11 +327,6 @@ def material(name, base=(0.8, 0.8, 0.8, 1.0), rough=0.8, metal=0.0, base_tex=Non
         bsdf.inputs["Emission Color"].default_value = emission
         bsdf.inputs["Emission Strength"].default_value = emission_strength
     if alpha_clip is not None:
-        mat.blend_method = "CLIP" if hasattr(mat, "blend_method") else None
-        try:
-            mat.alpha_threshold = alpha_clip
-        except AttributeError:
-            pass
         mat["gltf_alpha_mode"] = "MASK"
         mat["gltf_alpha_cutoff"] = alpha_clip
         mat.surface_render_method = "DITHERED"

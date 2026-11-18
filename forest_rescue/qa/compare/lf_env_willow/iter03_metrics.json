@@ -1,0 +1,209 @@
+{
+  "metrics": {
+    "v1_front_LOD0": {
+      "view": "willow",
+      "iou": 0.677,
+      "mean_abs_colour_error": 0.1534,
+      "ref_pixels": 71454,
+      "render_pixels": 60277,
+      "iou_closed_r4": 0.7636
+    },
+    "v1_front_LOD1": {
+      "view": "willow",
+      "iou": 0.6141,
+      "mean_abs_colour_error": 0.1602,
+      "ref_pixels": 71454,
+      "render_pixels": 53401,
+      "iou_closed_r4": 0.7621
+    },
+    "v1_front_LOD2": {
+      "view": "willow",
+      "iou": 0.5564,
+      "mean_abs_colour_error": 0.1693,
+      "ref_pixels": 71454,
+      "render_pixels": 46038,
+      "iou_closed_r4": 0.7237
+    },
+    "strategic_colour": {
+      "art/07 p2 oak": {
+        "mean": [
+          45.51,
+          0.72,
+          34.98
+        ],
+        "std": [
+          16.29,
+          5.79,
+          16.96
+        ],
+        "n": 22595,
+        "dE_vs_first_ref": 0.0
+      },
+      "art/01 oak grove": {
+        "mean": [
+          49.44,
+          5.05,
+          39.96
+        ],
+        "std": [
+          17.35,
+          6.94,
+          19.29
+        ],
+        "n": 12020,
+        "dE_vs_first_ref": 7.68
+      },
+      "LOD0": {
+        "mean": [
+          43.79,
+          -1.31,
+          26.31
+        ],
+        "std": [
+          10.08,
+          2.68,
+          6.49
+        ],
+        "n": 127693,
+        "dE_vs_first_ref": 9.07
+      },
+      "LOD1": {
+        "mean": [
+          46.5,
+          -1.57,
+          27.58
+        ],
+        "std": [
+          10.5,
+          3.28,
+          7.07
+        ],
+        "n": 109596,
+        "dE_vs_first_ref": 7.81
+      },
+      "LOD2": {
+        "mean": [
+          49.19,
+          -2.05,
+          28.65
+        ],
+        "std": [
+          11.16,
+          3.98,
+          7.94
+        ],
+        "n": 100189,
+        "dE_vs_first_ref": 7.83
+      }
+    },
+    "front_crown_colour": {
+      "ref": {
+        "mean": [
+          46.32,
+          0.25,
+          32.08
+        ],
+        "std": [
+          13.72,
+          3.06,
+          8.23
+        ],
+        "n": 47878
+      },
+      "render": {
+        "mean": [
+          42.94,
+          -1.21,
+          27.32
+        ],
+        "std": [
+          10.06,
+          2.34,
+          5.86
+        ],
+        "n": 44379
+      },
+      "dE_mean": 6.02
+    }
+  },
+  "tris": {
+    "v1": {
+      "radius_alpha": 1.574,
+      "nodes": 454,
+      "leaf_sites": 137,
+      "cull_k0": 2.7,
+      "LOD0": {
+        "tris": 3552,
+        "bark_tris": 768,
+        "cards": 0,
+        "arcs": 46
+      },
+      "cull_k1": 16.18,
+      "LOD1": {
+        "tris": 1352,
+        "bark_tris": 328,
+        "cards": 0,
+        "arcs": 46
+      },
+      "cull_k2": 16.18,
+      "LOD2": {
+        "tris": 300,
+        "bark_tris": 42,
+        "cards": 0,
+        "arcs": 46
+      }
+    },
+    "v2": {
+      "radius_alpha": 1.682,
+      "nodes": 543,
+      "leaf_sites": 162,
+      "cull_k0": 4.02,
+      "LOD0": {
+        "tris": 3461,
+        "bark_tris": 779,
+        "cards": 0,
+        "arcs": 46
+      },
+      "cull_k1": 16.18,
+      "LOD1": {
+        "tris": 1352,
+        "bark_tris": 312,
+        "cards": 0,
+        "arcs": 46
+      },
+      "cull_k2": 16.18,
+      "LOD2": {
+        "tris": 298,
+        "bark_tris": 42,
+        "cards": 0,
+        "arcs": 46
+      }
+    },
+    "v3": {
+      "radius_alpha": 1.572,
+      "nodes": 281,
+      "leaf_sites": 83,
+      "cull_k0": 1.0,
+      "LOD0": {
+        "tris": 2374,
+        "bark_tris": 676,
+        "cards": 0,
+        "arcs": 30
+      },
+      "cull_k1": 1.0,
+      "LOD1": {
+        "tris": 866,
+        "bark_tris": 230,
+        "cards": 0,
+        "arcs": 30
+      },
+      "cull_k2": 16.18,
+      "LOD2": {
+        "tris": 198,
+        "bark_tris": 42,
+        "cards": 0,
+        "arcs": 30
+      }
+    }
+  }
+}

@@ -1,8 +1,8 @@
 {
   "view": "bramble",
-  "iou": 0.6964,
-  "mean_abs_colour_error": 0.1844,
+  "iou": 0.5695,
+  "mean_abs_colour_error": 0.1891,
   "ref_pixels": 40104,
-  "render_pixels": 52237,
-  "iou_closed_r4": 0.7286
+  "render_pixels": 34722,
+  "iou_closed_r4": 0.6866
 }

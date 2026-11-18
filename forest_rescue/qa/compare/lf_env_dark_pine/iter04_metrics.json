@@ -1,0 +1,203 @@
+{
+  "metrics": {
+    "v1_front_LOD0": {
+      "view": "dark_pine",
+      "iou": 0.7118,
+      "mean_abs_colour_error": 0.1773,
+      "ref_pixels": 46412,
+      "render_pixels": 40783,
+      "iou_closed_r4": 0.8115
+    },
+    "v1_front_LOD1": {
+      "view": "dark_pine",
+      "iou": 0.6686,
+      "mean_abs_colour_error": 0.1698,
+      "ref_pixels": 46412,
+      "render_pixels": 39675,
+      "iou_closed_r4": 0.786
+    },
+    "v1_front_LOD2": {
+      "view": "dark_pine",
+      "iou": 0.3652,
+      "mean_abs_colour_error": 0.141,
+      "ref_pixels": 46412,
+      "render_pixels": 18069,
+      "iou_closed_r4": 0.4057
+    },
+    "strategic_colour": {
+      "art/01 conifers": {
+        "mean": [
+          30.69,
+          -5.15,
+          9.45
+        ],
+        "std": [
+          8.68,
+          2.17,
+          11.33
+        ],
+        "n": 871,
+        "dE_vs_first_ref": 0.0
+      },
+      "art/07 p2 conifers": {
+        "mean": [
+          40.78,
+          -8.19,
+          13.89
+        ],
+        "std": [
+          11.19,
+          1.9,
+          14.7
+        ],
+        "n": 608,
+        "dE_vs_first_ref": 11.44
+      },
+      "LOD0": {
+        "mean": [
+          40.0,
+          -7.58,
+          20.75
+        ],
+        "std": [
+          10.07,
+          1.8,
+          5.62
+        ],
+        "n": 141254,
+        "dE_vs_first_ref": 14.84
+      },
+      "LOD1": {
+        "mean": [
+          39.52,
+          -7.49,
+          20.62
+        ],
+        "std": [
+          10.38,
+          1.88,
+          5.74
+        ],
+        "n": 136501,
+        "dE_vs_first_ref": 14.43
+      },
+      "LOD2": {
+        "mean": [
+          37.45,
+          -8.1,
+          17.8
+        ],
+        "std": [
+          6.78,
+          1.81,
+          4.13
+        ],
+        "n": 49003,
+        "dE_vs_first_ref": 11.14
+      }
+    },
+    "front_crown_colour": {
+      "ref": {
+        "mean": [
+          29.74,
+          -3.25,
+          17.27
+        ],
+        "std": [
+          10.18,
+          1.24,
+          6.22
+        ],
+        "n": 9081
+      },
+      "render": {
+        "mean": [
+          30.41,
+          -5.98,
+          16.29
+        ],
+        "std": [
+          12.21,
+          1.99,
+          5.28
+        ],
+        "n": 24512
+      },
+      "dE_mean": 2.98
+    }
+  },
+  "tris": {
+    "v1": {
+      "branches": 148,
+      "LOD0": {
+        "tris": 2711,
+        "bark_tris": 453,
+        "cards": 1129
+      },
+      "LOD1": {
+        "tris": 968,
+        "bark_tris": 126,
+        "cards": 421
+      },
+      "LOD2": {
+        "tris": 171,
+        "bark_tris": 75,
+        "cards": 48
+      }
+    },
+    "v2": {
+      "branches": 149,
+      "LOD0": {
+        "tris": 2407,
+        "bark_tris": 507,
+        "cards": 950
+      },
+      "LOD1": {
+        "tris": 956,
+        "bark_tris": 150,
+        "cards": 403
+      },
+      "LOD2": {
+        "tris": 181,
+        "bark_tris": 85,
+        "cards": 48
+      }
+    },
+    "v3": {
+      "branches": 129,
+      "LOD0": {
+        "tris": 2143,
+        "bark_tris": 387,
+        "cards": 878
+      },
+      "LOD1": {
+        "tris": 798,
+        "bark_tris": 90,
+        "cards": 354
+      },
+      "LOD2": {
+        "tris": 151,
+        "bark_tris": 55,
+        "cards": 48
+      }
+    },
+    "v4": {
+      "branches": 100,
+      "LOD0": {
+        "tris": 2177,
+        "bark_tris": 591,
+        "cards": 793
+      },
+      "LOD1": {
+        "tris": 886,
+        "bark_tris": 126,
+        "cards": 380
+      },
+      "LOD2": {
+        "tris": 171,
+        "bark_tris": 75,
+        "cards": 48
+      }
+    }
+  }
+}

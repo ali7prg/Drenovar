@@ -8,10 +8,15 @@
         "lf_env_fallen_trunk_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2617,
-        "LOD1": 1010,
-        "LOD2": 340
+        "LOD0": 2536,
+        "LOD1": 950,
+        "LOD2": 332
       },
+      "display_offset_gltf": [
+        0.0,
+        0.0,
+        0.0
+      ],
       "materials": {
         "LOD0": [
           "lf_bark_hollow",
@@ -24,32 +29,35 @@
           "lf_foliage"
         ]
       },
-      "height_m": 2.63,
-      "footprint_radius_m": 6.33,
+      "height_m": 2.62,
+      "footprint_radius_m": 6.56,
       "bounds_m_blender": [
         [
-          -6.33,
-          -1.39,
-          -0.24
+          -6.56,
+          -1.79,
+          -0.25
         ],
         [
-          5.36,
-          1.09,
-          2.63
+          5.55,
+          1.97,
+          2.62
         ]
       ],
       "wind": false,
       "info": {
         "LOD0": {
-          "tris": 2619
+          "tris": 2536,
+          "moss_faces": 1073
         },
         "LOD1": {
-          "tris": 1012
+          "tris": 950,
+          "moss_faces": 357
         },
         "LOD2": {
-          "tris": 342
+          "tris": 332,
+          "moss_faces": 113
         },
-        "arch_clearance_m": 1.34
+        "arch_clearance_m": 1.29
       }
     },
     "v2": {
@@ -59,10 +67,15 @@
         "lf_env_fallen_trunk_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 3060,
-        "LOD1": 1196,
-        "LOD2": 317
+        "LOD0": 2536,
+        "LOD1": 950,
+        "LOD2": 250
       },
+      "display_offset_gltf": [
+        13.109,
+        0.0,
+        0.0
+      ],
       "materials": {
         "LOD0": [
           "lf_bark_hollow",
@@ -75,53 +88,120 @@
           "lf_foliage"
         ]
       },
-      "height_m": 1.59,
-      "footprint_radius_m": 4.31,
+      "height_m": 1.61,
+      "footprint_radius_m": 4.62,
       "bounds_m_blender": [
         [
-          -4.31,
-          -0.73,
-          -0.16
+          -4.62,
+          -0.89,
+          -0.24
         ],
         [
-          4.03,
-          0.74,
-          1.59
+          4.5,
+          1.06,
+          1.61
         ]
       ],
       "wind": false,
       "info": {
         "LOD0": {
-          "tris": 3062
+          "tris": 2536,
+          "moss_faces": 1275
         },
         "LOD1": {
-          "tris": 1198
+          "tris": 950,
+          "moss_faces": 450
         },
         "LOD2": {
-          "tris": 319
+          "tris": 250,
+          "moss_faces": 111
         }
+      }
+    },
+    "v3_stream": {
+      "nodes": [
+        "lf_env_fallen_trunk_v3_stream_LOD0",
+        "lf_env_fallen_trunk_v3_stream_LOD1",
+        "lf_env_fallen_trunk_v3_stream_LOD2"
+      ],
+      "tris": {
+        "LOD0": 2858,
+        "LOD1": 952,
+        "LOD2": 328
+      },
+      "display_offset_gltf": [
+        26.218,
+        0.0,
+        0.0
+      ],
+      "materials": {
+        "LOD0": [
+          "lf_bark_hollow",
+          "lf_foliage",
+          "lf_rock_limestone"
+        ],
+        "LOD1": [
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_foliage"
+        ]
+      },
+      "height_m": 2.73,
+      "footprint_radius_m": 5.95,
+      "bounds_m_blender": [
+        [
+          -5.95,
+          -3.0,
+          -0.25
+        ],
+        [
+          5.56,
+          3.0,
+          2.73
+        ]
+      ],
+      "wind": false,
+      "info": {
+        "LOD0": {
+          "tris": 2858,
+          "moss_faces": 838
+        },
+        "LOD1": {
+          "tris": 952,
+          "moss_faces": 308
+        },
+        "LOD2": {
+          "tris": 328,
+          "moss_faces": 104
+        },
+        "arch_clearance_m": 1.29
       }
     }
   },
   "tris": {
-    "LOD0": 3060,
-    "LOD1": 1196,
-    "LOD2": 340
+    "LOD0": 2858,
+    "LOD1": 952,
+    "LOD2": 332
   },
   "bones": 0,
   "materials": [
     "lf_bark_hollow",
-    "lf_foliage"
+    "lf_foliage",
+    "lf_rock_limestone"
   ],
   "glb_images": [
     "lf_bark_hollow_n.png",
     "lf_bark_hollow_c.jpg",
     "lf_bark_hollow_r.png",
-    "lf_foliage_atlas.png"
+    "lf_foliage_atlas.png",
+    "lf_rock_limestone_n.png",
+    "lf_rock_limestone_c.jpg",
+    "lf_rock_limestone_r.png"
   ],
   "texture_mode": "external shared files next to the GLB (relative URIs)",
   "wind": "static (no COLOR_0)",
-  "layout_note": "Node translations are preview offsets only; mesh origin = ground contact centre.",
+  "layout_note": "Variants along +X (display_offset_gltf); LOD0/1/2 of a variant share its origin (show one per distance). Mesh origin = ground contact centre.",
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_groundcover.py fallen_trunk",
   "collision": "use a convex hull / capsule of LOD2 (see footprint_radius_m, height_m)"
 }

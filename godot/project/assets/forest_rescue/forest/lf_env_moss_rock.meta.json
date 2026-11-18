@@ -8,10 +8,15 @@
         "lf_env_moss_rock_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 3466,
-        "LOD1": 1308,
-        "LOD2": 917
+        "LOD0": 3040,
+        "LOD1": 1070,
+        "LOD2": 574
       },
+      "display_offset_gltf": [
+        0.0,
+        0.0,
+        0.0
+      ],
       "materials": {
         "LOD0": [
           "lf_rock_limestone",
@@ -26,30 +31,33 @@
           "lf_foliage"
         ]
       },
-      "height_m": 6.05,
-      "footprint_radius_m": 6.45,
+      "height_m": 5.69,
+      "footprint_radius_m": 5.66,
       "bounds_m_blender": [
         [
-          -6.45,
-          -4.2,
-          -0.86
+          -5.21,
+          -2.86,
+          -0.06
         ],
         [
-          6.0,
-          3.96,
-          6.05
+          5.66,
+          2.86,
+          5.69
         ]
       ],
       "wind": false,
       "info": {
         "LOD0": {
-          "tris": 3466
+          "tris": 3040,
+          "moss_faces": 1062
         },
         "LOD1": {
-          "tris": 1308
+          "tris": 1070,
+          "moss_faces": 402
         },
         "LOD2": {
-          "tris": 917
+          "tris": 574,
+          "moss_faces": 215
         }
       }
     },
@@ -60,10 +68,15 @@
         "lf_env_moss_rock_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 2040,
-        "LOD1": 805,
-        "LOD2": 534
+        "LOD0": 1644,
+        "LOD1": 610,
+        "LOD2": 326
       },
+      "display_offset_gltf": [
+        11.866,
+        0.0,
+        0.0
+      ],
       "materials": {
         "LOD0": [
           "lf_rock_limestone",
@@ -78,30 +91,33 @@
           "lf_foliage"
         ]
       },
-      "height_m": 3.13,
-      "footprint_radius_m": 3.54,
+      "height_m": 2.71,
+      "footprint_radius_m": 2.68,
       "bounds_m_blender": [
         [
-          -3.11,
-          -1.75,
+          -2.04,
+          -2.1,
           -0.11
         ],
         [
-          3.54,
-          2.27,
-          3.13
+          2.68,
+          1.7,
+          2.71
         ]
       ],
       "wind": false,
       "info": {
         "LOD0": {
-          "tris": 2043
+          "tris": 1644,
+          "moss_faces": 382
         },
         "LOD1": {
-          "tris": 808
+          "tris": 610,
+          "moss_faces": 150
         },
         "LOD2": {
-          "tris": 537
+          "tris": 326,
+          "moss_faces": 72
         }
       }
     },
@@ -112,10 +128,15 @@
         "lf_env_moss_rock_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 743,
-        "LOD1": 293,
-        "LOD2": 93
+        "LOD0": 770,
+        "LOD1": 284,
+        "LOD2": 132
       },
+      "display_offset_gltf": [
+        23.732,
+        0.0,
+        0.0
+      ],
       "materials": {
         "LOD0": [
           "lf_rock_limestone",
@@ -130,38 +151,41 @@
           "lf_foliage"
         ]
       },
-      "height_m": 1.59,
-      "footprint_radius_m": 1.28,
+      "height_m": 1.62,
+      "footprint_radius_m": 1.57,
       "bounds_m_blender": [
         [
-          -1.28,
-          -1.21,
+          -1.57,
+          -0.74,
           -0.12
         ],
         [
-          1.1,
-          0.91,
-          1.59
+          1.37,
+          0.89,
+          1.62
         ]
       ],
       "wind": false,
       "info": {
         "LOD0": {
-          "tris": 744
+          "tris": 770,
+          "moss_faces": 232
         },
         "LOD1": {
-          "tris": 294
+          "tris": 284,
+          "moss_faces": 89
         },
         "LOD2": {
-          "tris": 94
+          "tris": 132,
+          "moss_faces": 42
         }
       }
     }
   },
   "tris": {
-    "LOD0": 3466,
-    "LOD1": 1308,
-    "LOD2": 917
+    "LOD0": 3040,
+    "LOD1": 1070,
+    "LOD2": 574
   },
   "bones": 0,
   "materials": [
@@ -176,7 +200,7 @@
   ],
   "texture_mode": "external shared files next to the GLB (relative URIs)",
   "wind": "static (no COLOR_0)",
-  "layout_note": "Node translations are preview offsets only; mesh origin = ground contact centre.",
+  "layout_note": "Variants along +X (display_offset_gltf); LOD0/1/2 of a variant share its origin (show one per distance). Mesh origin = ground contact centre.",
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_groundcover.py moss_rock",
   "collision": "use a convex hull / capsule of LOD2 (see footprint_radius_m, height_m)"
 }

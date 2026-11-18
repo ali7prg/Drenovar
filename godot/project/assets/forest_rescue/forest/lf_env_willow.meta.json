@@ -8,9 +8,9 @@
         "lf_env_willow_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 2878,
-        "LOD1": 1300,
-        "LOD2": 294
+        "LOD0": 3552,
+        "LOD1": 1352,
+        "LOD2": 300
       },
       "materials": {
         "LOD0": [
@@ -24,18 +24,18 @@
           "lf_foliage"
         ]
       },
-      "height_m": 11.32,
-      "crown_radius_m": 8.56,
+      "height_m": 10.74,
+      "crown_radius_m": 9.6,
       "bounds_m_blender": [
         [
-          -5.3,
-          -5.11,
+          -6.24,
+          -6.11,
           -0.34
         ],
         [
-          8.56,
-          4.83,
-          11.32
+          9.6,
+          6.55,
+          10.74
         ]
       ],
       "display_offset_gltf": [
@@ -51,9 +51,9 @@
         "lf_env_willow_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 2907,
-        "LOD1": 1300,
-        "LOD2": 294
+        "LOD0": 3461,
+        "LOD1": 1352,
+        "LOD2": 298
       },
       "materials": {
         "LOD0": [
@@ -67,22 +67,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 9.65,
-      "crown_radius_m": 7.39,
+      "height_m": 8.85,
+      "crown_radius_m": 8.59,
       "bounds_m_blender": [
         [
-          -7.39,
-          -5.18,
+          -8.59,
+          -5.97,
           -0.34
         ],
         [
-          5.54,
-          5.21,
-          9.65
+          5.85,
+          5.67,
+          8.85
         ]
       ],
       "display_offset_gltf": [
-        15.856,
+        17.833,
         0.0,
         0.0
       ]
@@ -94,9 +94,9 @@
         "lf_env_willow_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 2620,
-        "LOD1": 1200,
-        "LOD2": 294
+        "LOD0": 2374,
+        "LOD1": 866,
+        "LOD2": 198
       },
       "materials": {
         "LOD0": [
@@ -110,31 +110,31 @@
           "lf_foliage"
         ]
       },
-      "height_m": 9.63,
-      "crown_radius_m": 3.91,
+      "height_m": 8.83,
+      "crown_radius_m": 4.89,
       "bounds_m_blender": [
         [
-          -3.57,
-          -3.79,
+          -4.46,
+          -4.22,
           -0.31
         ],
         [
-          3.91,
-          3.82,
-          9.63
+          4.64,
+          4.89,
+          8.83
         ]
       ],
       "display_offset_gltf": [
-        31.712,
+        35.667,
         0.0,
         0.0
       ]
     }
   },
   "tris": {
-    "LOD0": 2907,
-    "LOD1": 1300,
-    "LOD2": 294
+    "LOD0": 3552,
+    "LOD1": 1352,
+    "LOD2": 300
   },
   "bones": 0,
   "materials": [
@@ -171,8 +171,9 @@
       "type": "shader (vertex colour driven)"
     }
   },
-  "layout_note": "Node translations are preview offsets only (variants along +X, LOD1/LOD2 rows behind). Instance the Mesh resources with your own transforms; mesh origin = trunk base on the ground.",
+  "layout_note": "Variants are laid out along +X (display_offset_gltf); the three LOD meshes of a variant share the variant origin (overlapping, show one per distance). Mesh origin = trunk base on the ground.",
   "lod_note": "LOD0: bark+foliage (2 surfaces); LOD1/LOD2: single foliage-atlas surface (bark strip in atlas).",
+  "export_scale_vs_art02": 1.0,
   "glb_images": [
     "lf_bark_willow_n.png",
     "lf_bark_willow_c.jpg",

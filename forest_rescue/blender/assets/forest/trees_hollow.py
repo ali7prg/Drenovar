@@ -297,7 +297,12 @@ def build_hollow_oak(variant, view=None, budget=(6800, 2700, 300)):
     res.env = att_env
     # trunk per LOD
     for lod in range(3):
-        v, t, n = decimate_bpy(V, T, trunk_targets[lod])
+        if lod == 2:      # coarse re-mesh first (collapse decimation stalls on the dense open mesh)
+            Vc, Tc = tinfo["field"].mesh(step=5)
+            Vc, Tc = largest_components(Vc, Tc)
+            v, t, n = decimate_bpy(Vc, Tc, 140)
+        else:
+            v, t, n = decimate_bpy(V, T, trunk_targets[lod])
         md = MeshData()
         trunk_meshdata(md, v, t, n, "tile" if lod == 0 else "atlas", (2.4, 2.4), tinfo, mat=0,
                        moss_mat=1 if lod == 0 else 0)

@@ -47,7 +47,8 @@ def voronoi_crack(G, seeds):
 
 
 def fractured_mound(prof_x, prof_h, W, seeds, depth_frac=0.7, voxel=0.07, gap=0.11, round_m=0.035, rough=0.02,
-                    seed=3, back_fall=1.0, facet_cut=0.12):
+                    seed=3, back_fall=1.0, facet_cut=0.12, plane_pct=70, side_cut=0.04, step_amp=0.0, protect=None,
+                    angular=False):
     """Voronoi-fractured mound whose cells are ANGULAR blocks: inside each cell the smooth mound top / front / back
     surfaces are replaced by planes fitted to the mound over that cell (flat-ish top facets, flat sides)."""
     pad = 0.4
@@ -61,6 +62,8 @@ def fractured_mound(prof_x, prof_h, W, seeds, depth_frac=0.7, voxel=0.07, gap=0.
     xe = (prof_x - prof_x.min()) / max(np.ptp(prof_x), 1e-6)
     prof_h = prof_h * np.clip(np.minimum(xe, 1 - xe) / 0.08, 0, 1) ** 0.5
     c, own = voronoi_crack(G, seeds)
+    seeds_a = np.asarray(seeds, float)
+    rng_s = np.random.default_rng(seed + 99)
     # smooth mound top h(x, y) on the (x, y) grid
     X2, Y2 = np.meshgrid(xs, ys, indexing="ij")
     hx = np.interp(X2, prof_x, prof_h, left=0.0, right=0.0)
@@ -83,6 +86,11 @@ def fractured_mound(prof_x, prof_h, W, seeds, depth_frac=0.7, voxel=0.07, gap=0.
             continue
         A = np.stack([X2[m], Y2[m], np.ones(m.sum())], 1)
         planes[i] = np.linalg.lstsq(A, H2[m], rcond=None)[0]
+        # lift the plane so it passes through the upper part of the dome over the cell (cuts only the bulge)
+        resid = H2[m] - A @ planes[i]
+        planes[i][2] += float(np.percentile(resid, plane_pct))
+        if step_amp > 0 and not (protect is not None and protect[i]):
+            planes[i][2] -= step_amp * float(np.max(prof_h)) * rng_s.uniform(0.0, 1.0)
         mx = np.unique(X2[m])
         Ylin = np.polyfit(mx, 0.5 * depth_frac * W * np.sqrt(np.clip(1 - (2 * mx / W) ** 2, 0, None)), 1) \
             if len(mx) > 2 else (0, float(np.mean(Yb[m])))
@@ -92,11 +100,17 @@ def fractured_mound(prof_x, prof_h, W, seeds, depth_frac=0.7, voxel=0.07, gap=0.
     ftop = (z - (a * x + b * y + c0)) / np.sqrt(1 + a * a + b * b)
     Ylin_own = np.maximum(yb_lin[own, 0] * x + yb_lin[own, 1], 0.05)
     fside = np.abs(y) - Ylin_own
-    fmound = np.maximum(np.maximum(ftop, fside), -(z + 0.25))
-    # outer surface = the smooth mound, flattened into facets where it bulges more than `facet_cut` above the
-    # per-cell planes (flat-ish block tops / faces, silhouette kept)
+    # outer surface = the smooth mound, flattened into facets: block tops cut by their (per-cell lowered) planes,
+    # block sides by their straight plan segments -> angular blocks at different heights (a pile, not a loaf)
     fsmooth = mound_sdf(G, prof_x, prof_h, W, depth_frac, back_fall=back_fall, seed=seed)
-    f = np.maximum(fsmooth, fmound - facet_cut)
+    if angular:
+        # pile of blocks: flat tilted tops and straight sides only (no smooth envelope)
+        tilt = rng_s.normal(0, 0.12, (n, 2))
+        ftop_t = (z - (a * x + b * y + c0 + tilt[own, 0] * (x - seeds_a[own, 0]) + tilt[own, 1] * (y - seeds_a[own, 1])))
+        f = np.maximum(np.maximum(ftop_t, fside), -(z + 0.25))
+        f = np.maximum(f, np.abs(x) - 0.5 * W - 0.1)
+    else:
+        f = np.maximum(np.maximum(fsmooth, ftop - facet_cut), np.maximum(fside - side_cut, -(z + 0.25)))
     F = np.maximum(f, c + gap / 2)
     F = F + rough * noise3(G, 2.2, seed + 7, octaves=2)
     F = ndi.gaussian_filter(F, max(0.4, round_m / voxel))
@@ -110,7 +124,7 @@ def fractured_mound(prof_x, prof_h, W, seeds, depth_frac=0.7, voxel=0.07, gap=0.
         faces = faces[:, ::-1]
     vi = np.clip(np.round((verts - np.array([xs[0], ys[0], zs[0]])) / voxel).astype(int), 0,
                  np.array(G.shape[:3]) - 1)
-    crack = c[vi[:, 0], vi[:, 1], vi[:, 2]]
+    crack = -c[vi[:, 0], vi[:, 1], vi[:, 2]] - gap / 2          # >= 0: distance from the crack wall
     cell = own[vi[:, 0], vi[:, 1], vi[:, 2]]
     return verts, faces, crack, cell
 

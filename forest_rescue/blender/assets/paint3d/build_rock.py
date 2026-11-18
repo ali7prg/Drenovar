@@ -209,8 +209,10 @@ def main():
         sx, sz = cents[rng.integers(len(cents))]
         seeds.append((sx + rng.normal(0, 0.12 * Wm), rng.uniform(-0.05, 0.3) * D, max(0.2, sz * rng.uniform(0.6, 1.1))))
     seeds = np.array(seeds)
+    protect = np.array([True] * len(cents) + [False] * (len(seeds) - len(cents)))
     specs = {
-        "v1": dict(prof=(px - xc_w, ph), W=Wm, seeds=seeds, depth=0.7, tex="lf_rock_limestone", painted=True),
+        "v1": dict(prof=(px - xc_w, ph), W=Wm, seeds=seeds, depth=0.7, tex="lf_rock_limestone", painted=True,
+                   protect=protect),
     }
     # v2: compact boulder pile (4 cells) ; v3: long low ledge (7 cells)
     Wb = 4.2
@@ -229,25 +231,28 @@ def main():
             for nm in paths_}
     built, info, report = {}, {}, {}
     for vn, spc in specs.items():
-        Vg, Fg, crack, cell = rockfield.fractured_mound(spc["prof"][0], spc["prof"][1], spc["W"], spc["seeds"],
-                                                        depth_frac=spc["depth"], seed=11 + len(vn))
-        Fg, rep = rockfield.drop_thin(Vg, Fg, 0.2)
-        if spc["painted"]:
-            Vg = Vg + np.array([xc_w, 0.0, 0.0])
-        o = BPR.to_obj(f"tmp_{vn}", Vg, Fg)
-        # crack AO as a vertex attribute carried through decimation: store in a float colour layer
-        ca = o.data.color_attributes.new("ao", "FLOAT_COLOR", "POINT")
-        aov = np.clip(1.0 + crack / 0.12, 0.45, 1.0)
-        cols = np.zeros((len(Vg), 4), np.float32)
-        cols[:, 0] = aov
-        cols[:, 3] = 1.0
-        ca.data.foreach_set("color", cols.ravel())
         objs = []
         info[vn] = {}
-        for lod, target in ((0, 3600), (1, 1400), (2, 280)):
-            oc = o.copy()
-            oc.data = o.data.copy()
-            core.link(oc)
+        for lod, target, vox in ((0, 3600, 0.07), (1, 1400, 0.11), (2, 280, 0.24)):
+            Vg, Fg, crack, cell = rockfield.fractured_mound(spc["prof"][0], spc["prof"][1], spc["W"], spc["seeds"],
+                                                            depth_frac=spc["depth"], seed=11 + len(vn), voxel=vox,
+                                                            gap=max(0.11, 1.4 * vox) if lod < 2 else 0.0,
+                                                            facet_cut=0.22 if spc["painted"] else 0.05,
+                                                            plane_pct=80 if spc["painted"] else 60,
+                                                            side_cut=0.06 if spc["painted"] else 0.02,
+                                                            step_amp=0.3, protect=spc.get("protect"),
+                                                            angular=not spc["painted"])
+            Fg, rep = rockfield.drop_thin(Vg, Fg, 0.2)
+            if spc["painted"]:
+                Vg = Vg + np.array([xc_w, 0.0, 0.0])
+            o = BPR.to_obj(f"tmp_{vn}_{lod}", Vg, Fg)
+            ca = o.data.color_attributes.new("ao", "FLOAT_COLOR", "POINT")
+            aov = np.clip(0.5 + 0.5 * crack / 0.3, 0.5, 1.0)
+            cols = np.zeros((len(Vg), 4), np.float32)
+            cols[:, 0] = aov
+            cols[:, 3] = 1.0
+            ca.data.foreach_set("color", cols.ravel())
+            oc = o
             BPR.decimate(oc, target)
             for _ in range(4):
                 if core.tri_count(oc) <= target * 1.08:
@@ -263,6 +268,8 @@ def main():
             Mw = np.array(oc.matrix_world)
             V = V @ Mw[:3, :3].T + Mw[:3, 3]
             bpy.data.objects.remove(oc, do_unlink=True)
+            if lod == 0:
+                rep0 = rep
             Vc = V[T]
             fn = geom.nrm(np.cross(Vc[:, 1] - Vc[:, 0], Vc[:, 2] - Vc[:, 0]))
             cen = Vc.mean(1)
@@ -274,11 +281,12 @@ def main():
                 ui = np.clip(np.round(uu).astype(int), 0, ref.W - 1)
                 vi = np.clip(np.round(vv).astype(int), 0, ref.H - 1)
                 vis = np.isfinite(zb[vi, ui]) & (dd <= zb[vi, ui] + 0.25) & paint_mask[vi, ui]
-                front = (facing >= FRONT_T) & vis
+                front = (facing >= 0.5) & vis
             else:
                 front = np.zeros(len(T), bool)
             nz_thr = 0.55 + 0.12 * rockfield.noise3(cen, 0.9, 5, octaves=2)
-            kind = np.where(front, 0, np.where(fn[:, 2] >= nz_thr, 2, 1))
+            edge = aov2[T].mean(1) < 0.7
+            kind = np.where(front, 0, np.where((fn[:, 2] >= nz_thr) & ~edge, 2, 1))
             uu, vv, _ = ref.view.project(Vc.reshape(-1, 3))
             vv = np.clip(vv, 0, ref.clip - 2)
             uu = np.clip(uu, 0, ref.W - 1)
@@ -289,7 +297,8 @@ def main():
             UVc = np.where((kind == 0)[:, None, None], uv_f, np.where((kind == 2)[:, None, None], uv_t, uv_s))
             if lod == 0:
                 rs_, rm_ = mound.stretch_ratio(Vc[kind != 0], UVc[kind != 0], (0.3 * 1024, 0.32 * 1024))
-                report[vn] = dict(uv_stretch_max=round(rs_, 3), uv_stretch_median=round(rm_, 3), **rep,
+                report[vn] = dict(uv_stretch_max=round(rs_, 3), uv_stretch_median=round(rm_, 3), **rep0,
+                                  painted_face_stretch_max=round(1 / 0.5, 2),
                                   painted_front_faces=int((kind == 0).sum()), moss_faces=int((kind == 2).sum()))
             md = geom.Mesh()
             Cw = np.zeros((len(Vc) * 3, 4))
@@ -305,7 +314,6 @@ def main():
             ob = pblend.obj_from_mesh(f"{ASSET}_{vn}_LOD{lod}", md, [mats[spc["tex"]], fol])
             objs.append(ob)
             info[vn][f"LOD{lod}"] = dict(tris=md.tris())
-        bpy.data.objects.remove(o, do_unlink=True)
         built[vn] = objs
         print(f"[{ASSET}] {vn}: " + ", ".join(f"LOD{l}={info[vn][f'LOD{l}']['tris']}" for l in range(3)) +
               f" {report[vn]}", flush=True)

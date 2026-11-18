@@ -1,0 +1,23 @@
+{
+  "insets": {
+    "mine_front": {
+      "view": "mine_front",
+      "iou": 0.7363,
+      "mean_abs_colour_error": 0.1829,
+      "ref_pixels": 74439,
+      "render_pixels": 60750
+    },
+    "crane_side": {
+      "view": "crane_side",
+      "iou": 0.2483,
+      "mean_abs_colour_error": 0.1886,
+      "ref_pixels": 22185,
+      "render_pixels": 35730
+    }
+  },
+  "tris": {
+    "LOD0": 1128,
+    "LOD1": 464,
+    "LOD2": 488
+  }
+}

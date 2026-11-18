@@ -1,0 +1,7 @@
+{
+  "view": "crane_side",
+  "iou": 0.2483,
+  "mean_abs_colour_error": 0.1886,
+  "ref_pixels": 22185,
+  "render_pixels": 35730
+}

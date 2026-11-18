@@ -10,7 +10,7 @@
       "tris": {
         "LOD0": 2711,
         "LOD1": 968,
-        "LOD2": 171
+        "LOD2": 235
       },
       "materials": {
         "LOD0": [
@@ -53,7 +53,7 @@
       "tris": {
         "LOD0": 2407,
         "LOD1": 956,
-        "LOD2": 181
+        "LOD2": 245
       },
       "materials": {
         "LOD0": [
@@ -96,7 +96,7 @@
       "tris": {
         "LOD0": 2143,
         "LOD1": 798,
-        "LOD2": 151
+        "LOD2": 215
       },
       "materials": {
         "LOD0": [
@@ -139,7 +139,7 @@
       "tris": {
         "LOD0": 2177,
         "LOD1": 886,
-        "LOD2": 171
+        "LOD2": 235
       },
       "materials": {
         "LOD0": [
@@ -177,7 +177,7 @@
   "tris": {
     "LOD0": 2711,
     "LOD1": 968,
-    "LOD2": 181
+    "LOD2": 245
   },
   "bones": 0,
   "materials": [

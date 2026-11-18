@@ -178,7 +178,7 @@ def build_shelter(lod):
     # roof slab (tiles) following the rafters
     ang = math.atan2(zf - zb, D)
     L = math.hypot(D + 1.1, zf - zb + 0.2)
-    k.box((0, (-0.6 + 0.5) / 2, (zf + zb) / 2 + 0.42), (W + 1.0, L, 0.14), rotm(-ang, 0, 0), ROOF, tile=2.2)
+    k.box((0, (-0.6 + 0.5) / 2, (zf + zb) / 2 + 0.48), (W + 1.1, L, 0.3), rotm(-ang, 0, 0), ROOF, tile=2.2)
     # ridge/edge beams
     k.beam((-W / 2 - 0.5, -D / 2 - 0.62, zf + 0.42), (W / 2 + 0.5, -D / 2 - 0.62, zf + 0.42), 0.12, 0.14)
     # back + side plank walls
@@ -397,7 +397,7 @@ def stone_slab(k, c, w, h, t, yaw, knot, lod):
         u0, v0, u1, v1 = lmt.uv(knot)
         pw, ph = w * 0.62, h * 0.55
         z0 = h * 0.22
-        quad = [R @ np.array([x, -t / 2 - 0.012, z]) + c + np.array([0, 0, -0.25]) for x, z in
+        quad = [R @ np.array([x, -t / 2 - 0.006, z]) + c + np.array([0, 0, -0.25]) for x, z in
                 ((-pw / 2, z0), (pw / 2, z0), (pw / 2, z0 + ph), (-pw / 2, z0 + ph))]
         k.quad(quad, [(u0, v0), (u1, v0), (u1, v1), (u0, v1)], MISC)
 
@@ -408,7 +408,7 @@ def build_stones(lod):
             (3.0, 1.6, 0.95, 2.1, "knot_b"), (2.6, -1.6, 1.05, 2.3, "knot_a")]
     for x, y, w, h, knot in spec:
         yaw = math.atan2(-y, -x) - math.pi / 2         # carved face toward the circle centre
-        stone_slab(k, (x, y, 0), w, h, 0.5, yaw + math.pi, knot, lod)
+        stone_slab(k, (x, y, 0), w, h, 0.78, yaw + math.pi, knot, lod)
         k.collider("box", (x, y, h / 2), (w, 0.55, h), yaw=yaw)
     if lod == 0:
         for i in range(10):
@@ -424,13 +424,13 @@ def tarp_mesh(nx=9, ny=7, lod=0):
     """Canvas tarp between 4 poles (sagging) as a grid; returns verts (grid), faces, uvs, pins mask."""
     if lod > 0:
         nx, ny = 4, 3
-    corners = np.array([[-2.2, -1.6, 2.55], [2.0, -1.8, 2.75], [2.2, 1.7, 2.35], [-2.0, 1.6, 2.15]])
+    corners = np.array([[-2.2, -1.6, 2.15], [2.0, -1.8, 2.35], [2.2, 1.7, 2.75], [-2.0, 1.6, 2.6]])
     V, uv, pin = [], [], []
     for j in range(ny + 1):
         for i in range(nx + 1):
             u, v = i / nx, j / ny
             p = (1 - u) * (1 - v) * corners[0] + u * (1 - v) * corners[1] + u * v * corners[2] + (1 - u) * v * corners[3]
-            sag = 0.45 * math.sin(math.pi * u) * math.sin(math.pi * v)
+            sag = 0.75 * math.sin(math.pi * u) * math.sin(math.pi * v) ** 0.8
             p = p - np.array([0, 0, sag])
             V.append(p)
             uv.append((u, v))

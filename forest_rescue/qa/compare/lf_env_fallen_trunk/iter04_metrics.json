@@ -1,0 +1,58 @@
+{
+  "metrics": {
+    "v1_front_LOD0": {
+      "view": "fallen_trunk",
+      "iou": 0.6797,
+      "mean_abs_colour_error": 0.1505,
+      "ref_pixels": 29424,
+      "render_pixels": 29808,
+      "iou_closed_r4": 0.6878
+    }
+  },
+  "tris": {
+    "v1": {
+      "LOD0": {
+        "tris": 2536,
+        "moss_faces": 1494
+      },
+      "LOD1": {
+        "tris": 950,
+        "moss_faces": 548
+      },
+      "LOD2": {
+        "tris": 446,
+        "moss_faces": 234
+      },
+      "arch_clearance_m": 1.34
+    },
+    "v2": {
+      "LOD0": {
+        "tris": 2536,
+        "moss_faces": 1648
+      },
+      "LOD1": {
+        "tris": 950,
+        "moss_faces": 571
+      },
+      "LOD2": {
+        "tris": 250,
+        "moss_faces": 142
+      }
+    },
+    "v3_stream": {
+      "LOD0": {
+        "tris": 2858,
+        "moss_faces": 1214
+      },
+      "LOD1": {
+        "tris": 950,
+        "moss_faces": 441
+      },
+      "LOD2": {
+        "tris": 432,
+        "moss_faces": 195
+      },
+      "arch_clearance_m": 1.34
+    }
+  }
+}

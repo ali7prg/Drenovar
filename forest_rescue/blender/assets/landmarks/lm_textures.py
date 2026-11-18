@@ -50,9 +50,10 @@ def wood(seed=3):
 
 
 def stone(seed=5):
-    d = ftex.limestone(S, seed)
-    alb = d["albedo"] * 1.04
-    return np.clip(alb, 0, 1), d["height"], d["rough"]
+    """Weathered limestone (shared with the forest rocks: long cracks + lichen, colour of the art/02 rock)."""
+    import swatch
+    alb, nrm, rough, h = swatch.limestone2(S, seed + 61)
+    return np.clip(alb * 1.03, 0, 1), ftex.normalize01(h), rough[..., 1]
 
 
 def roof(seed=7):
@@ -91,8 +92,7 @@ def knot_pattern(w, h, seed, strands=2):
         edge = smoothstep(0.09, 0.075, d) - band
         over = (np.sin(yy * 2 * np.pi * 3 + ph) > 0).astype(float)
         out = np.maximum(out, band * (0.7 + 0.3 * over) - edge * 0.2)
-    frame = smoothstep(0.06, 0.03, np.minimum(np.minimum(xx, 1 - xx), np.minimum(yy, 1 - yy)))
-    return np.clip(out + frame * 0.5, 0, 1)
+    return np.clip(out, 0, 1)
 
 
 def misc(seed=9):
@@ -147,8 +147,10 @@ def misc(seed=9):
     for nm, sd in (("knot_a", 1), ("knot_b", 2)):
         x, y, w, h = MISC[nm]
         k = knot_pattern(w, h, sd)
-        base = ramp(noise(w, h, 16, seed + sd), [(0, (0.55, 0.53, 0.48)), (1, (0.72, 0.70, 0.64))])
-        put(nm, base * (0.75 + 0.25 * k[..., None]), h=k, r=0.88)
+        edge = np.clip(cv2.dilate((k > 0.3).astype(np.float32), np.ones((5, 5))) - (k > 0.3), 0, 1)
+        base = ramp(noise(w, h, 16, seed + sd), [(0, (0.40, 0.37, 0.32)), (1, (0.52, 0.49, 0.43))])
+        groove = np.clip(edge + 0.6 * (k > 0.3), 0, 1)        # dark carved outline + slightly darker strands
+        put(nm, base * (1 - 0.45 * edge[..., None]), h=1 - groove, a=np.clip(groove * 1.2, 0, 1), r=0.9)
     for nm, cols in (("moss", [(0, (0.28, 0.32, 0.09)), (1, (0.56, 0.58, 0.20))]),
                      ("grass", [(0, (0.40, 0.40, 0.16)), (1, (0.62, 0.58, 0.26))]),
                      ("charcoal", [(0, (0.06, 0.05, 0.05)), (1, (0.30, 0.18, 0.10))]),

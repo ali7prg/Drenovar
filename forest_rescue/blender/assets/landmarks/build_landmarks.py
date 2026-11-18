@@ -40,7 +40,7 @@ REFS = {
 }
 # camera for the 3/4 side-by-side (location, look-at, lens) roughly matching the painting
 CAMS = {
-    "bridge27m": ((-21.0, -27.0, 13.0), (1.5, 0.0, -0.2), 38),
+    "bridge27m": ((-13.0, -15.0, 7.5), (-3.0, 0.0, 0.2), 38),
     "hunter_shelter": ((-6.5, -9.5, 5.2), (0.2, 0.0, 1.6), 40),
     "quarry_mine": ((-3.5, -14.0, 6.0), (1.0, 0.0, 2.0), 40),
     "ruined_watchpost": ((-7.0, -12.0, 6.0), (0.6, 0.0, 2.2), 40),

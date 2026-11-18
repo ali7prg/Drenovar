@@ -1,0 +1,56 @@
+{
+  "metrics": {
+    "v1_front_LOD0": {
+      "view": "moss_rock",
+      "iou": 0.7769,
+      "mean_abs_colour_error": 0.1794,
+      "ref_pixels": 59936,
+      "render_pixels": 50064,
+      "iou_closed_r4": 0.8036
+    }
+  },
+  "tris": {
+    "v1": {
+      "LOD0": {
+        "tris": 3040,
+        "moss_faces": 1575
+      },
+      "LOD1": {
+        "tris": 1070,
+        "moss_faces": 631
+      },
+      "LOD2": {
+        "tris": 642,
+        "moss_faces": 383
+      }
+    },
+    "v2": {
+      "LOD0": {
+        "tris": 1644,
+        "moss_faces": 684
+      },
+      "LOD1": {
+        "tris": 610,
+        "moss_faces": 279
+      },
+      "LOD2": {
+        "tris": 344,
+        "moss_faces": 160
+      }
+    },
+    "v3": {
+      "LOD0": {
+        "tris": 770,
+        "moss_faces": 305
+      },
+      "LOD1": {
+        "tris": 284,
+        "moss_faces": 128
+      },
+      "LOD2": {
+        "tris": 138,
+        "moss_faces": 61
+      }
+    }
+  }
+}

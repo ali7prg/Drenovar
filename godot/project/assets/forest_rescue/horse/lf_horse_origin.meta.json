@@ -1,9 +1,9 @@
 {
   "id": "lf_horse_origin",
   "tris": {
-    "LOD0": 15841,
-    "LOD1": 7651,
-    "LOD2": 3050
+    "LOD0": 15865,
+    "LOD1": 7666,
+    "LOD2": 3058
   },
   "bones": {
     "deform": 52,

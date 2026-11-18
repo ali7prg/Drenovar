@@ -214,7 +214,7 @@ def halter(guide, lod=0):
             n = guide.grad(c2[None])[0]
             R = 0.025 if name == "ring_T" else (0.018 if name.startswith("ring_A") else 0.020)
             ring(geo, c2, n, R=R, seg=seg, sides=sides, weight=head)
-    if lod == 0:
+    if False:   # no buckle: the sheet's profiles show a plain crownpiece above the cheek ring
         # buckle on the left cheek piece of the crownpiece
         c = _push_out(guide, V(0.092, -1.107, 1.885)[None], OFFSET + 0.004)[0]
         n = guide.grad(c[None])[0]

@@ -155,14 +155,32 @@ class Quad:
         return rot, off
 
 
-def bake(quad, frames, pose_fn):
-    """Evaluates pose_fn(frame) -> pose for frames 0..N (inclusive). Returns per-bone arrays."""
+import os as _os
+SWING_SMOOTH = int(_os.environ.get("CV2_SWING_SMOOTH", "0"))   # passes of a (1/4, 1/2, 1/4) filter over the
+                                                            # IK legs while the foot is in the air (0: off)
+PUSH = float(_os.environ.get("CV2_PUSH", "0.95"))   # toe flex at push-off (rad): the heel rises, the knee bends
+
+
+def bake(quad, frames, pose_fn, loop=False):
+    """Evaluates pose_fn(frame) -> pose for frames 0..N (inclusive). Returns per-bone arrays.
+    The IK leg rotations are then smoothed in time over the frames where that foot is off the ground: a leg that
+    comes off a stretched stance bends tens of degrees between two frames (two-bone IK near full reach), which
+    the eye reads as a snap (smooth_check.py). Planted frames are left exactly as solved, so contacts do not
+    slide."""
     sk = quad.sk
     names = [b.name for b in sk.bones]
     R = {n: [] for n in names}
     T = {n: [] for n in names}
+    free = {key: [] for key in quad.legs}
     for fr in range(frames + 1):
-        rot, off = quad.solve(pose_fn(fr))
+        pose = pose_fn(fr)
+        rot, off = quad.solve(pose)
+        legs = pose.get("legs", {}) or {}
+        for key in quad.legs:
+            spec = legs.get(key)
+            up = spec is not None and spec.get("ik", True) and spec.get("tip") is not None and \
+                float(np.asarray(spec["tip"])[1]) > 0.004
+            free[key].append(bool(up))
         for n in names:
             R[n].append(rot.get(n, q_identity()))
             T[n].append(sk.rest_offset(n) + off.get(n, np.zeros(3)))
@@ -174,7 +192,40 @@ def bake(quad, frames, pose_fn):
             if np.dot(r[i], r[i - 1]) < 0:
                 r[i] = -r[i]
         out[n] = (r, np.array(T[n], float))
+    if SWING_SMOOTH and frames >= 4:
+        for key, L in quad.legs.items():
+            mask = np.array(free[key], bool)
+            if not mask.any():
+                continue
+            for bone in L["chain"][1:]:
+                r, t = out[bone]
+                out[bone] = (_smooth_free(r, mask, loop, SWING_SMOOTH), t)
     return out
+
+
+def _smooth_free(r, mask, loop, passes):
+    """(1/4, 1/2, 1/4) smoothing of quaternion rows where mask is True (others stay fixed)."""
+    r = r.copy()
+    n = len(r)
+    m = n - 1 if loop else n          # loops: frame N repeats frame 0
+    for _ in range(passes):
+        src = r.copy()
+        for i in range(m):
+            if not mask[i] or (not loop and (i == 0 or i == n - 1)):
+                continue
+            a = src[(i - 1) % m]
+            b = src[(i + 1) % m] if (loop or i + 1 < n) else src[i]
+            c = src[i]
+            a = a if np.dot(a, c) >= 0 else -a
+            b = b if np.dot(b, c) >= 0 else -b
+            q = 0.25 * a + 0.5 * c + 0.25 * b
+            r[i] = q / np.linalg.norm(q)
+        if loop:
+            r[n - 1] = r[0]
+    for i in range(1, n):
+        if np.dot(r[i], r[i - 1]) < 0:
+            r[i] = -r[i]
+    return r
 
 
 def channels(baked, frames, translate=("MotionRoot", "Pelvis"), eps=1e-5):
@@ -196,7 +247,7 @@ def gait_tip(quad, kind, side, phase, stride, duty, lift, reach=0.0, lateral=0.0
     with it (Hermite), the foot rises from rest, the push-off toe angle carries into the swing and the landing toe
     angle into the stance."""
     rest = quad.rest_tip(kind, side)
-    f_push = -0.15 if kind == "Front" else 0.10
+    f_push = (-0.15 if kind == "Front" else 0.10) * PUSH / 0.55
     f_flex = -0.9 if kind == "Front" else 0.75
     if phase < duty:
         s = phase / duty
@@ -204,7 +255,7 @@ def gait_tip(quad, kind, side, phase, stride, duty, lift, reach=0.0, lateral=0.0
         y = 0.0
         land = 1.0 - ease(s / 0.15)                 # landing toe angle eases out after touch-down
         push = ease((s - 0.7) / 0.3)                # heel lift / push-off at the end of stance
-        toe = 0.25 * land - 0.55 * push
+        toe = 0.25 * land - PUSH * push
         foot = f_push * push
     else:
         s = (phase - duty) / (1 - duty)
@@ -212,11 +263,11 @@ def gait_tip(quad, kind, side, phase, stride, duty, lift, reach=0.0, lateral=0.0
         m = -stride * (1 - duty) / duty
         h00, h10, h01, h11 = 2 * s ** 3 - 3 * s ** 2 + 1, s ** 3 - 2 * s ** 2 + s, -2 * s ** 3 + 3 * s ** 2, s ** 3 - s ** 2
         x = h00 * (-0.5 * stride) + h10 * m + h01 * (0.5 * stride) + h11 * m + reach * np.sin(np.pi * s) ** 2
-        y = lift * np.sin(np.pi * s) ** 1.6
+        y = lift * np.sin(np.pi * s)
         flex = np.sin(np.pi * min(1.0, s * 1.15)) ** 2
         lift0 = 1.0 - ease(s / 0.25)                # the push-off pose carries into the swing
         land = ease((s - 0.75) / 0.25)
-        toe = -0.55 * lift0 - 1.2 * flex + 0.25 * land
+        toe = -PUSH * lift0 - 1.2 * flex + 0.25 * land
         foot = f_push * lift0 + f_flex * flex
     return rest + np.array([x, y, lateral]), toe, foot
 
@@ -309,7 +360,7 @@ def plan_feet(rig, frames, motion, swings, lift=0.18, stance_mid=True):
                     # push-off before a swing
                     if i < len(sw):
                         push = ease((fr - (b - 4)) / 4.0)
-                        toe = -0.5 * push
+                        toe = -PUSH * 0.9 * push
                     break
             if tip is None:
                 for i, (a, b) in enumerate(sw):
@@ -319,10 +370,10 @@ def plan_feet(rig, frames, motion, swings, lift=0.18, stance_mid=True):
                         p1 = local_of(world[i + 1], b)
                         e = ease(s)
                         tip = p0 + (p1 - p0) * e
-                        tip = tip + np.array([0, lift * np.sin(np.pi * s) ** 1.6, 0])
+                        tip = tip + np.array([0, lift * np.sin(np.pi * s), 0])
                         # continuous with the push-off before (toe -0.5) and the flat landing after: no snap
                         flex = np.sin(np.pi * s) ** 2
-                        toe = -0.5 * (1.0 - ease(s / 0.3)) - 1.1 * flex
+                        toe = -PUSH * 0.9 * (1.0 - ease(s / 0.3)) - 1.1 * flex
                         foot = (-0.8 if key[0] == "Front" else 0.7) * flex
                         break
             out[key] = {"tip": tip, "toe": toe, "foot": foot}

@@ -120,11 +120,11 @@ def body_core():
          # head: long wolf muzzle, heavy brow, flat crown; mouth a little open (snarl, sabres show)
          Prim("ellipsoid", "Head", k=0.06, c=(1.20, 1.73, 0), r=(0.22, 0.150, 0.145), name="cranium"),
          Prim("ellipsoid", "Head", k=0.05, c=(1.15, 1.81, 0), r=(0.15, 0.075, 0.12), name="crown"),
-         Prim("cone", "Nose", k=0.05, a=(1.30, 1.665, 0), b=(1.52, 1.57, 0), ra=0.085, rb=0.040, name="muzzle"),
+         Prim("cone", "Nose", k=0.05, a=(1.30, 1.665, 0), b=(1.52, 1.57, 0), ra=0.085, rb=0.034, name="muzzle"),
          Prim("ellipsoid", "Head", k=0.035, c=(1.40, 1.67, 0), r=(0.13, 0.04, 0.06), R=rot_z(-0.30), name="nasal"),
-         Prim("sphere", "Nose", k=0.012, mat="nose", c=(1.548, 1.572, 0), r=0.042, name="nosepad"),
-         Prim("sphere", "Nose", k=0.005, neg=True, mat="nose", c=(1.584, 1.579, 0.017), r=0.011, name="nostrilL"),
-         Prim("sphere", "Nose", k=0.005, neg=True, mat="nose", c=(1.584, 1.579, -0.017), r=0.011, name="nostrilR"),
+         Prim("ellipsoid", "Nose", k=0.012, mat="nose", c=(1.552, 1.575, 0), r=(0.036, 0.032, 0.046), name="nosepad"),
+         Prim("sphere", "Nose", k=0.005, neg=True, mat="nose", c=(1.585, 1.576, 0.019), r=0.011, name="nostrilL"),
+         Prim("sphere", "Nose", k=0.005, neg=True, mat="nose", c=(1.585, 1.576, -0.019), r=0.011, name="nostrilR"),
          Prim("cone", "Jaw", k=0.035, a=(1.22, 1.56, 0), b=(1.49, 1.49, 0), ra=0.060, rb=0.027, name="jaw"),
          Prim("box", "Head", k=0.006, neg=True, mat="mouth", c=(1.41, 1.53, 0), h=(0.16, 0.012, 0.05), round=0.004,
               R=rot_z(-0.22), name="mouthslit")]
@@ -138,7 +138,7 @@ def body_core():
               Prim("sphere", "Head", k=0.01, neg=True, c=(1.31, 1.715, 0.128 * s), r=0.031, name=f"socket{nm}")]
         # eyelids over the eyeball: an almond opening, not a marble (creature-references: narrow, slanted wolf eyes)
         P += lid_prims((1.307, 1.715, 0.120 * s), 0.029, (0.62, 0.0, 0.78 * s), "Head", f"eye{nm}", mat="skin",
-                       upper=0.70, lower=0.84)
+                       upper=0.56, lower=0.72, tilt=0.35 * s)
         # tall pointed ears, the opening turned forward and a little outward (front view: the cupped inner ear)
         ec = np.array([1.12, 1.98, 0.115 * s])
         Re = rot_x(-0.20 * s) @ rot_y(-0.30 * s) @ rot_z(-0.08)
@@ -237,11 +237,7 @@ def teeth_part():
                      root + np.array([-0.045, -0.30, 0.006 * s]), 14)
         P += chain(list(pts), list(np.linspace(0.021, 0.004, len(pts))), "Head", k=0.0, mat="fang",
                    name=f"sabre{nm}")
-        for i, (x, ln) in enumerate(((1.48, 0.035), (1.38, 0.03), (1.33, 0.025))):
-            a = np.array([x, 1.545, (0.035 + 0.01 * i) * s])
-            P.append(Prim("cone", "Head", k=0.005, mat="fang", name=f"up{nm}{i}", a=a, b=a + np.array([0, -ln, 0]),
-                          ra=0.009, rb=0.002))
-        for i, (x, ln) in enumerate(((1.46, 0.045), (1.40, 0.03), (1.34, 0.025))):
+        for i, (x, ln) in enumerate(((1.45, 0.05),)):
             a = np.array([x, 1.49, (0.030 + 0.008 * i) * s])
             P.append(Prim("cone", "Jaw", k=0.005, mat="fang", name=f"lo{nm}{i}", a=a, b=a + np.array([0, ln, 0]),
                           ra=0.010, rb=0.002))
@@ -256,10 +252,10 @@ def claw_parts():
             P = []
             for i, dz in enumerate((-0.062, -0.022, 0.022, 0.062)):
                 base = j[5] + np.array([-0.01 + (0.03 if abs(dz) < 0.03 else 0.0), 0.034, dz * 1.45])
-                L = 0.165 if kind == "Front" else 0.13
+                L = 0.12 if kind == "Front" else 0.10
                 pts = bezier(base, base + np.array([0.05, 0.01, 0]), base + np.array([L * 0.8, -0.005, 0]),
                              base + np.array([L, -0.035, 0]), 10)
-                P += chain(list(pts), list(np.linspace(0.021, 0.0035, len(pts))), f"Toe_{kind}_{nm}", k=0.0,
+                P += chain(list(pts), list(np.linspace(0.017, 0.003, len(pts))), f"Toe_{kind}_{nm}", k=0.0,
                            mat="claw", name=f"claw{i}")
             parts.append((f"claws_{kind}_{nm}", Part(f"claws_{kind}_{nm}", P, band=0.02), f"Toe_{kind}_{nm}"))
     return parts
@@ -286,11 +282,11 @@ def _face_keep(p, muzzle=False):
     return (x < 1.50) if muzzle else True
 FUR_CARDS = [  # creature-references: swept-back mane behind the head (ears and face stay clear), glowing strands,
     # silver cheek ruff, dark furred legs to the paws, huge silver brush tail with white tips
-    {"centre": (1.22, 1.70, 0), "radii": (0.20, 0.13, 0.17), "count": 420, "length": 0.07, "width": 0.035,
-     "flow": lambda p, n: np.array([-1.0, 0.12, 0]), "lift": 0.10, "droop": 0.02, "tip": "#a3a5b2",
+    {"centre": (1.22, 1.70, 0), "radii": (0.20, 0.13, 0.17), "count": 460, "length": 0.09, "width": 0.035,
+     "flow": lambda p, n: np.array([-1.0, 0.12, 0]), "lift": 0.22, "droop": 0.02, "tip": "#a3a5b2",
      "root_k": 0.9, "segments": _FACE, "keep": _face_keep},                                       # face fur
     {"centre": (1.42, 1.62, 0), "radii": (0.11, 0.06, 0.08), "count": 220, "length": 0.04, "width": 0.025,
-     "flow": lambda p, n: np.array([-1.0, 0.25, 0]), "lift": 0.06, "droop": 0.0, "tip": "#c9cbd4",
+     "flow": lambda p, n: np.array([-1.0, 0.25, 0]), "lift": 0.12, "droop": 0.0, "tip": "#c9cbd4",
      "root_k": 0.9, "segments": _FACE, "keep": lambda p: _face_keep(p, True)},                    # muzzle fur
     {"centre": (0.55, 1.70, 0), "radii": (0.42, 0.26, 0.32), "count": 460, "length": 0.35, "width": 0.12,
      "flow": lambda p, n: np.array([-1.0, 0.22, 0]), "lift": 0.24, "droop": 0.05, "crossed": True,

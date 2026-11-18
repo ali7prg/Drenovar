@@ -94,7 +94,7 @@ def smoothstep(e0, e1, x):
 
 
 def finish(rig, name, frames, loop, pose_fn, events=None, windows=None, motion=None, speed=None, extras=None):
-    b = bake(rig, frames, pose_fn)
+    b = bake(rig, frames, pose_fn, loop=loop)
     clip = {"name": name, "frames": frames, "fps": FPS, "length": frames / FPS, "loop": bool(loop),
             "events": events or [], "channels": channels(b, frames)}
     if windows:
@@ -247,6 +247,7 @@ def death(rig, sp, sampler, name, N, keys, fk_angles, buckle_end=20, fk_start=18
     lay = Layered().add(lambda fr: dict(_g(sp, "POSTURE"))).keys(keys)
     tails = spring_chain(tail_drive(lay), len(rig.tail), N, 40.0, 6.0)
     lift_log = []
+    ik_hold = {}
 
     def pose(fr):
         prm = lay(fr)
@@ -259,8 +260,11 @@ def death(rig, sp, sampler, name, N, keys, fk_angles, buckle_end=20, fk_start=18
             for kind, side, s in LEGS:
                 for seg in ("UpperLeg", "LowerLeg", "Foot", "Toe"):
                     bn = f"{seg}_{kind}_{side}"
+                    # blend from the leg pose held at fk_start: re-solving the planted-foot IK while the body
+                    # drops and rolls over the feet flips the knee (a 160-degree snap in one frame)
+                    src = ik_hold.setdefault(bn, rot[bn])
                     a = fk_angles[f"{seg}_{kind}"] * (1.0 + (0.25 if side == "R" else 0.0))
-                    rot[bn] = q_slerp(rot[bn], q_euler(a, 0, 0.12 * s), w)
+                    rot[bn] = q_slerp(src, q_euler(a, 0, 0.12 * s), w)
         off = dict(off)
         off["MotionRoot"] = np.zeros(3)
         best = None

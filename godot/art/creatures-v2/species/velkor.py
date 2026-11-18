@@ -149,19 +149,19 @@ def body_core():
               Prim("ellipsoid", "Head", k=0.04, c=(1.60, 2.20, 0.155 * s), r=(0.12, 0.05, 0.05), name=f"zygoma{nm}"),
               Prim("ellipsoid", "Head", k=0.035, c=(1.68, 2.32, 0.095 * s), r=(0.12, 0.052, 0.07), R=rot_z(-0.10),
                    name=f"brow{nm}"),
-              Prim("cone", "Nose", k=0.03, mat="skin", a=(1.76, 2.035, 0.10 * s), b=(1.93, 2.025, 0.048 * s),
-                   ra=0.036, rb=0.025, name=f"lip{nm}"),
+              Prim("cone", "Nose", k=0.03, mat="skin", a=(1.77, 2.04, 0.078 * s), b=(1.93, 2.03, 0.040 * s),
+                   ra=0.022, rb=0.015, name=f"lip{nm}"),
               Prim("sphere", "Head", k=0.015, neg=True, c=(1.718, 2.252, 0.124 * s), r=0.038, name=f"socket{nm}")]
         # eyelids: the deer-like eye of the sheet, dark-rimmed, not a bead
         P += lid_prims((1.712, 2.252, 0.118 * s), 0.034, (0.55, 0.06, 0.83 * s), "Head", f"eye{nm}", mat="skin",
                        upper=0.74, lower=0.88)
         ec = np.array([1.38, 2.37, 0.21 * s])
         Re = rot_x(0.95 * s) @ rot_z(0.10)     # upright, a little outward: the sheets show both ears
-        P += [Prim("ellipsoid", f"Ear_{nm}", k=0.03, c=ec, r=(0.055, 0.16, 0.085), R=Re, name=f"ear{nm}"),
-              Prim("cone", f"Ear_{nm}", k=0.03, a=ec, b=ec + Re @ np.array([0.0, 0.19, 0.0]), ra=0.058, rb=0.012,
+        P += [Prim("ellipsoid", f"Ear_{nm}", k=0.03, c=ec, r=(0.040, 0.11, 0.060), R=Re, name=f"ear{nm}"),
+              Prim("cone", f"Ear_{nm}", k=0.03, a=ec, b=ec + Re @ np.array([0.0, 0.15, 0.0]), ra=0.044, rb=0.008,
                    name=f"eartip{nm}"),
-              Prim("ellipsoid", f"Ear_{nm}", k=0.01, neg=True, mat="skin", c=ec + Re @ np.array([0.042, 0.0, 0.0]),
-                   r=(0.032, 0.12, 0.058), R=Re, name=f"earcav{nm}")]
+              Prim("ellipsoid", f"Ear_{nm}", k=0.01, neg=True, mat="skin", c=ec + Re @ np.array([0.034, 0.01, 0.0]),
+                   r=(0.026, 0.085, 0.040), R=Re, name=f"earcav{nm}")]
         P += [Prim("ellipsoid", f"Shoulder_{nm}", k=0.14, c=side((0.78, 1.50, 0.34), s), r=(0.36, 0.48, 0.22),
                    R=rot_z(-0.42), name=f"scapula{nm}"),
               Prim("ellipsoid", f"UpperLeg_Front_{nm}", k=0.12, c=side((0.95, 1.30, 0.37), s), r=(0.23, 0.23, 0.18),
@@ -276,7 +276,7 @@ def antler_prims(s):
         P += chain(list(curve), list(np.linspace(r0, 0.009, len(curve))), bone, k=0.0, mat="antler", name=f"tine{i}")
     rng = np.random.default_rng(11 if s < 0 else 12)
     from common import _frame
-    for i in range(48):
+    for i in range(96):
         f = 0.10 + 0.88 * rng.random()
         k = f * (len(beam) - 1)
         # hang from the underside of the beam, overlapping it (a strand off the beam would be a loose piece)
@@ -286,7 +286,7 @@ def antler_prims(s):
         d /= np.linalg.norm(d)
         R = _frame(d, np.array([1.0, 0, 0]))
         P.append(Prim("ellipsoid", bone, k=0.0, mat="moss", name=f"mossh{i}", c=root + d * L * 0.42,
-                      r=(L * 0.5, 0.009, 0.012 + 0.005 * rng.random()), R=R))
+                      r=(L * 0.5, 0.0045, 0.006 + 0.003 * rng.random()), R=R))
     return Part(f"antler_{nm}", P, band=0.04)
 
 
@@ -524,6 +524,8 @@ def shade_body(ctx):
     col = col * np.array([1.12, 1.06, 0.98], np.float32)[None, :]   # creature-references coat: warm grey-brown
     skin = mix(lin("#4c3a33"), lin("#6a4c42"), sstep(0.5, -0.5, N[:, 1]))
     col = mix(col, skin, w["skin"])
+    ear_cup = sstep(2.30, 2.36, y) * sstep(1.52, 1.44, P[:, 0])          # pale fur inside the ears (sheet)
+    col = mix(col, lin("#cdbca6"), w["skin"] * ear_cup)
     col = mix(col, lin("#1c1916"), w["nose"])
     hoof = mix(lin("#1f1915"), lin("#3e3129"), sstep(0.035, 0.0, y) + 0.35 * sstep(0.0, 1.0, noise.perlin(P * 40, 9)))
     col = mix(col, hoof, w["hoof"])

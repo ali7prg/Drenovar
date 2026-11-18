@@ -1,0 +1,13 @@
+{
+  "godot": "4.6.3.stable.official.7d41c59c4",
+  "node": "v24.22.1",
+  "python": "3.12.14",
+  "pillow": "13.0.0",
+  "meshoptimizer": "1.3.0",
+  "gltf_validator": "2.0.0-dev.3.10",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "native_only": false,
+  "reproducibility_checked": true,
+  "scratch_dependencies": [],
+  "source_commit": "4f7dcc228bc06d0ddc35e8292ca6e41cf8b4c95a"
+}

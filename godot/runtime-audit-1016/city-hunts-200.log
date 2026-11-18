@@ -1,0 +1,44 @@
+PLAYABLE_CHECK synthetic loopback only true
+PLAYABLE_CHECK normal game ready true
+PLAYABLE_CHECK interactive V6 account loaded true
+PLAYABLE_CHECK server supplies a reachable target true
+PLAYABLE_CHECK touch target within viewport: @Button@299 true
+PLAYABLE_CHECK Attack opens formation true
+PLAYABLE_CHECK touch target within viewport: @Button@332 true
+PLAYABLE_CHECK selected formation has server route true
+PLAYABLE_CHECK touch target within viewport: MarchSend true
+PLAYABLE_CHECK one touch starts a real army true
+PLAYABLE_CHECK server army equals selected formation true
+PLAYABLE_CHECK one army from one touch true
+PLAYABLE_CHECK real server battle produces a report true
+PLAYABLE_CHECK normal gameplay creates visual actors true
+PLAYABLE_CHECK actual game renders scheduled attacks true
+PLAYABLE_CHECK result becomes available after visual contact true
+PLAYABLE_CHECK touch target within viewport: @Button@557 true
+PLAYABLE_CHECK Continue restores game control true
+PLAYABLE_CHECK survivors return through real server clock true
+PLAYABLE_CHECK returned garrison matches report: ENG-01 true
+PLAYABLE_CHECK returned garrison matches report: ENG-02 true
+PLAYABLE_CHECK server supplies a reachable target true
+PLAYABLE_CHECK touch target within viewport: @Button@576 true
+PLAYABLE_CHECK Attack opens formation true
+PLAYABLE_CHECK touch target within viewport: @Button@600 true
+PLAYABLE_CHECK selected formation has server route true
+PLAYABLE_CHECK touch target within viewport: MarchSend true
+PLAYABLE_CHECK one touch starts a real army true
+PLAYABLE_CHECK server army equals selected formation true
+PLAYABLE_CHECK one army from one touch true
+PLAYABLE_CHECK real server battle produces a report true
+PLAYABLE_CHECK normal gameplay creates visual actors true
+PLAYABLE_CHECK actual game renders scheduled attacks true
+PLAYABLE_CHECK result becomes available after visual contact true
+PLAYABLE_CHECK touch target within viewport: @Button@798 true
+PLAYABLE_CHECK Continue restores game control true
+PLAYABLE_CHECK survivors return through real server clock true
+PLAYABLE_CHECK returned garrison matches report: ENG-01 true
+PLAYABLE_CHECK returned garrison matches report: ENG-02 true
+PLAYABLE_CHECK no false offline notice after a server error true
+PLAYABLE_CHECK second hunt leaves commands unlocked true
+PLAYABLE_CHECK restart restores same settlement true
+PLAYABLE_CHECK restored account requests finish true
+{"checks":43,"clip_samples":4916,"clock":"wall clock","device":"Linux Godot; no physical iPhone acceptance","entry":"main.tscn, interactive UI and HTTP","failures":[],"observed_actions":["idle","run","walk","hit","attack","death"],"phases":{"fighting":1794843992042.0,"outbound":1794843975867.35,"returning":1794843994657.53},"rounds":[{"actions":["idle","run","walk","hit","attack"],"level":2,"memory_static_mb":221.78076839447,"nodes":1005.0,"orphans":0.0,"phases":{"fighting":1794843956176.94,"outbound":1794843936706.6,"returning":1794843956971.3},"round":1,"samples":5606,"trace":[{"at":1794843961011.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/0","phase":"contact","received":1794843962554.0,"shown":1794843961015.5},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/1","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/2","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/3","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/4","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/5","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/6","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/7","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/8","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/9","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/10","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/11","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/12","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/13","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/14","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/15","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/16","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/17","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/18","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/19","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/20","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-cbf2-40f5-ba83-fc088e882862/1794843956136/21","phase":"contact","received":1794843964170.0,"shown":1794843962637.06},{"at":1794843962636.0,"id":"2c7cfbe9-

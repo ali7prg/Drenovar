@@ -1,0 +1,65 @@
+source,event_time,note
+visual/baseline/horse05.mp4,0.040–2.700s,"same-speed captured frames, original timestamp spacing; no interpolated motion"
+visual/baseline/horse06.mp4,0.017–2.683s,"same-speed captured frames, original timestamp spacing; no interpolated motion"
+visual/after/horse05.mp4,0.033–2.683s,"same-speed captured frames, original timestamp spacing; no interpolated motion"
+visual/after/horse06.mp4,0.081–2.746s,"same-speed captured frames, original timestamp spacing; no interpolated motion"
+visual/matrix/M-city-L1-ENG-01.png,1794800014507.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L1-ENG-02.png,1794800014507.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L1-ENG-03.png,1794800013707.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L1-ENG-04.png,1794800017743.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L1-ENG-05.png,1794800008254.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L1-ENG-06.png,1794800009119.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L1-ENG-07.png,1794800018543.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L1-ENG-08.png,1794800014507.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L1-ENG-09.png,1794800014507.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L1-ENG-10.png,1794800011286.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L2-ENG-01.png,1794800020507.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L2-ENG-02.png,1794800020507.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L2-ENG-03.png,1794800019707.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L2-ENG-04.png,1794800025743.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L2-ENG-05.png,1794800011254.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L2-ENG-06.png,1794800012547.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L2-ENG-07.png,1794800026543.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L2-ENG-08.png,1794800020507.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L2-ENG-09.png,1794800020507.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L2-ENG-10.png,1794800016086.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L3-ENG-01.png,1794800016350.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L3-ENG-02.png,1794800016350.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L3-ENG-03.png,1794800015550.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L3-ENG-04.png,1794800020200.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L3-ENG-05.png,1794800009175.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L3-ENG-06.png,1794800010172.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L3-ENG-07.png,1794800021000.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L3-ENG-08.png,1794800016350.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L3-ENG-09.png,1794800016350.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-city-L3-ENG-10.png,1794800012760.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L1-ENG-01.png,1794800015876.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L1-ENG-02.png,1794800015876.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L1-ENG-03.png,1794800015076.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L1-ENG-04.png,1794800019568.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L1-ENG-05.png,1794800008938.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L1-ENG-06.png,1794800009901.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L1-ENG-07.png,1794800020568.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L1-ENG-08.png,1794800015876.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L1-ENG-09.png,1794800015876.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L1-ENG-10.png,1794800012381.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L2-ENG-01.png,1794800019481.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L2-ENG-02.png,1794800019481.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L2-ENG-03.png,1794800018681.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L2-ENG-04.png,1794800024375.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L2-ENG-05.png,1794800010741.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L2-ENG-06.png,1794800011961.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L2-ENG-07.png,1794800025375.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L2-ENG-08.png,1794800019481.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L2-ENG-09.png,1794800019481.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L2-ENG-10.png,1794800015265.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L3-ENG-01.png,1794800018170.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L3-ENG-02.png,1794800018170.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L3-ENG-03.png,1794800017370.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L3-ENG-04.png,1794800022627.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L3-ENG-05.png,1794800010085.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L3-ENG-06.png,1794800011212.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L3-ENG-07.png,1794800023627.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L3-ENG-08.png,1794800018170.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L3-ENG-09.png,1794800018170.0,battle first soldier contact +200ms; stopped replay
+visual/matrix/M-world-L3-ENG-10.png,1794800014216.0,battle first soldier contact +200ms; stopped replay

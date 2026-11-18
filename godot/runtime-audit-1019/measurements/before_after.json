@@ -1,0 +1,296 @@
+{
+ "Город, 3 охоты (Тенерис I–III)": {
+  "before": {
+   "shown": 102,
+   "server": 249,
+   "cav_shown": 8,
+   "cav_server": 64,
+   "hidden": 2571,
+   "vanish": 70,
+   "jumps": 72,
+   "jump_max": 7.33,
+   "fast": 14484,
+   "fast_max": 62.6,
+   "snaps": 188,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 15865,
+   "frame_p95": 8.25,
+   "frame_max": 74.77
+  },
+  "after": {
+   "shown": 137,
+   "server": 247,
+   "cav_shown": 34,
+   "cav_server": 64,
+   "hidden": 0,
+   "vanish": 0,
+   "jumps": 0,
+   "jump_max": 0,
+   "fast": 2015,
+   "fast_max": 26.0,
+   "snaps": 0,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 15429,
+   "frame_p95": 9.91,
+   "frame_max": 77.4
+  },
+  "records": [
+   "h3",
+   "P_h3"
+  ]
+ },
+ "Мир, 2 охоты (Велькор I–II)": {
+  "before": {
+   "shown": 66,
+   "server": 127,
+   "cav_shown": 19,
+   "cav_server": 36,
+   "hidden": 1786,
+   "vanish": 54,
+   "jumps": 8,
+   "jump_max": 2.09,
+   "fast": 10893,
+   "fast_max": 52.6,
+   "snaps": 126,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 9941,
+   "frame_p95": 7.23,
+   "frame_max": 39.54
+  },
+  "after": {
+   "shown": 81,
+   "server": 127,
+   "cav_shown": 22,
+   "cav_server": 36,
+   "hidden": 0,
+   "vanish": 0,
+   "jumps": 0,
+   "jump_max": 0,
+   "fast": 327,
+   "fast_max": 19.3,
+   "snaps": 2,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 9526,
+   "frame_p95": 10.72,
+   "frame_max": 47.89
+  },
+  "records": [
+   "w1",
+   "P_w2"
+  ]
+ },
+ "Город, мобильная сеть (джиттер)": {
+  "before": {
+   "shown": 113,
+   "server": 249,
+   "cav_shown": 28,
+   "cav_server": 64,
+   "hidden": 2424,
+   "vanish": 71,
+   "jumps": 68,
+   "jump_max": 8.52,
+   "fast": 11355,
+   "fast_max": 50.0,
+   "snaps": 166,
+   "frozen": 2739,
+   "frozen_max": 1532,
+   "frames": 15854,
+   "frame_p95": 8.51,
+   "frame_max": 67.81
+  },
+  "after": {
+   "shown": 140,
+   "server": 249,
+   "cav_shown": 34,
+   "cav_server": 64,
+   "hidden": 0,
+   "vanish": 0,
+   "jumps": 0,
+   "jump_max": 0,
+   "fast": 2533,
+   "fast_max": 27.6,
+   "snaps": 0,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 15777,
+   "frame_p95": 8.79,
+   "frame_max": 79.67
+  },
+  "records": [
+   "j1",
+   "P_j3"
+  ]
+ },
+ "Город, камера сдвигается в бою": {
+  "before": {
+   "shown": 7,
+   "server": 20,
+   "cav_shown": 1,
+   "cav_server": 8,
+   "hidden": 469,
+   "vanish": 42,
+   "jumps": 17,
+   "jump_max": 6.47,
+   "fast": 2919,
+   "fast_max": 43.3,
+   "snaps": 67,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 4001,
+   "frame_p95": 7.16,
+   "frame_max": 59.01
+  },
+  "after": {
+   "shown": 15,
+   "server": 20,
+   "cav_shown": 6,
+   "cav_server": 8,
+   "hidden": 0,
+   "vanish": 0,
+   "jumps": 0,
+   "jump_max": 0,
+   "fast": 200,
+   "fast_max": 19.6,
+   "snaps": 0,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 3987,
+   "frame_p95": 7.56,
+   "frame_max": 50.82
+  },
+  "records": [
+   "p1",
+   "P_p1"
+  ]
+ },
+ "Город, заминки кадров 3%×250 мс": {
+  "before": {
+   "shown": 100,
+   "server": 248,
+   "cav_shown": 12,
+   "cav_server": 64,
+   "hidden": 1329,
+   "vanish": 70,
+   "jumps": 230,
+   "jump_max": 8.63,
+   "fast": 5418,
+   "fast_max": 54.0,
+   "snaps": 203,
+   "frozen": 15,
+   "frozen_max": 15,
+   "frames": 7697,
+   "frame_p95": 10.01,
+   "frame_max": 268.25
+  },
+  "after": {
+   "shown": 138,
+   "server": 248,
+   "cav_shown": 34,
+   "cav_server": 64,
+   "hidden": 0,
+   "vanish": 0,
+   "jumps": 2,
+   "jump_max": 4.76,
+   "fast": 869,
+   "fast_max": 28.4,
+   "snaps": 141,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 7625,
+   "frame_p95": 10.23,
+   "frame_max": 270.36
+  },
+  "records": [
+   "G_s3",
+   "P_s3"
+  ]
+ },
+ "Город+мир, сворачивание на 4 с в бою": {
+  "before": {
+   "shown": 26,
+   "server": 51,
+   "cav_shown": 8,
+   "cav_server": 20,
+   "hidden": 2496,
+   "vanish": 53,
+   "jumps": 29,
+   "jump_max": 6.47,
+   "fast": 4953,
+   "fast_max": 49.1,
+   "snaps": 133,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 7470,
+   "frame_p95": 7.1,
+   "frame_max": 4011.43
+  },
+  "after": {
+   "shown": 41,
+   "server": 52,
+   "cav_shown": 18,
+   "cav_server": 20,
+   "hidden": 0,
+   "vanish": 0,
+   "jumps": 0,
+   "jump_max": 0,
+   "fast": 415,
+   "fast_max": 20.0,
+   "snaps": 9,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 7345,
+   "frame_p95": 7.99,
+   "frame_max": 4012.08
+  },
+  "records": [
+   "G_bg",
+   "P_bg"
+  ]
+ },
+ "Город, отзыв отряда на марше": {
+  "before": {
+   "shown": 0,
+   "server": 0,
+   "cav_shown": 0,
+   "cav_server": 0,
+   "hidden": 1,
+   "vanish": 24,
+   "jumps": 24,
+   "jump_max": 35.09,
+   "fast": 3907,
+   "fast_max": 122.0,
+   "snaps": 25,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 2164,
+   "frame_p95": 7.11,
+   "frame_max": 49.76
+  },
+  "after": {
+   "shown": 0,
+   "server": 0,
+   "cav_shown": 0,
+   "cav_server": 0,
+   "hidden": 0,
+   "vanish": 0,
+   "jumps": 0,
+   "jump_max": 0,
+   "fast": 0,
+   "fast_max": 0,
+   "snaps": 3,
+   "frozen": 0,
+   "frozen_max": 0,
+   "frames": 2131,
+   "frame_p95": 7.59,
+   "frame_max": 48.45
+  },
+  "records": [
+   "G_rc",
+   "P_rc"
+  ]
+ }
+}

@@ -1,0 +1,15 @@
+ok  Connected to the patched local server
+ok  Server reports cityFeatures moveBuilding
+ok  Plot v1-4 clearing ordered
+ok  Plot v1-4 cleared
+ok  Ring of the lumber camp offers Переместить
+ok  Move placement started
+ok  Only cleared plots are offered
+ok  Plot v1-4 is offered
+ok  Confirm enabled on a free plot
+ok  Server moved the lumber camp to v1-4
+ok  Same id and level after the move
+ok  Nothing charged for the move
+ok  Lumber camp drawn on the new plot
+ok  Without the feature: confirm off with an explanation
+checks=14 failures=0

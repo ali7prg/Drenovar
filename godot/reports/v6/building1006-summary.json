@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "build": 1006,
+  "native": {
+    "states": 297,
+    "transitions": 270,
+    "checks": 4512,
+    "milestone_boundaries": 81
+  },
+  "web": {
+    "states": 297,
+    "transitions": 270,
+    "milestone_boundaries": 81
+  },
+  "native_services": {
+    "checks": 46,
+    "services": 6,
+    "market_trade": "passed"
+  },
+  "primary_login_screen": {
+    "checks": 18,
+    "status": "passed"
+  },
+  "server_suite": {
+    "tests": 52,
+    "fail": 0,
+    "node": "24.22.1"
+  },
+  "published_read_only": {
+    "checks": 16,
+    "run": "https://github.com/ali7prg/drenovar-server/actions/runs/43805447452",
+    "status": "passed"
+  },
+  "production_game_data_writes": 0,
+  "physical_iPhone12": "not tested",
+  "scope": "Actual UI buttons backed by actual HTTP/SQLite game server, synthetic isolated states. Browser component run excludes 3D rendering; models/quality unchanged. Source tests verify acceptance, cancellation and completion, not a claim of full physical device acceptance."
+}

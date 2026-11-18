@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "release": "https://github.com/ali7prg/Drenovar/releases/tag/ios-test-v0.6.0-b1011",
+  "source_commit": "aa514fdc30ac17e9157dd81385900788f01b9cb1",
+  "ipa_sha256": "a6344f99dd42222a5a659fe941ee3742e2f0c25b31ff5909840000aa00ac20df",
+  "ipa_bytes": 248422899,
+  "unpacked_bytes": 429281848,
+  "bundle": "com.drenovar.game.v6test",
+  "build": "1011",
+  "pck_sha256": "6bb1408432323d89e09b11956871c5a69ba924d6e936312d2f31632a9a253f04",
+  "engine_unchanged": true,
+  "crc": "passed",
+  "device_acceptance": false
+}

@@ -1,0 +1,430 @@
+{
+ "species": "velkor",
+ "clip_count": 12,
+ "naming": "<species>__<name>",
+ "fps": 30,
+ "semantic_states": {
+  "Idle": "idle",
+  "Walk": "walk",
+  "Run": "run",
+  "Alert": "alert",
+  "Attack": "attack_antler_sweep",
+  "Hit": "hit",
+  "Death": "death",
+  "Roar": "roar"
+ },
+ "server_events": {
+  "creature_attack": "attack_antler_sweep",
+  "antler_charge": "attack_charge"
+ },
+ "clips": {
+  "idle": {
+   "name": "velkor__idle",
+   "frames": 90,
+   "fps": 30.0,
+   "length_s": 3.0,
+   "loop": true,
+   "events": []
+  },
+  "walk": {
+   "name": "velkor__walk",
+   "frames": 36,
+   "fps": 30.0,
+   "length_s": 1.2,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 9,
+     "time": 0.3,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 18,
+     "time": 0.6,
+     "foot": "hind_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 27,
+     "time": 0.9,
+     "foot": "front_l"
+    }
+   ],
+   "speed_mps": 1.6
+  },
+  "alert": {
+   "name": "velkor__alert",
+   "frames": 30,
+   "fps": 30.0,
+   "length_s": 1.0,
+   "loop": false,
+   "events": []
+  },
+  "run": {
+   "name": "velkor__run",
+   "frames": 21,
+   "fps": 30.0,
+   "length_s": 0.7,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 9,
+     "time": 0.3,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 11,
+     "time": 0.36666666666666664,
+     "foot": "front_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 19,
+     "time": 0.6333333333333333,
+     "foot": "hind_r"
+    }
+   ],
+   "speed_mps": 6.0
+  },
+  "turn_left": {
+   "name": "velkor__turn_left",
+   "frames": 24,
+   "fps": 30.0,
+   "length_s": 0.8,
+   "loop": false,
+   "events": [],
+   "motion": {
+    "yaw_deg": 45.0,
+    "yaw": [
+     0.0,
+     0.005694136684631501,
+     0.021991148575128554,
+     0.047712938426394985,
+     0.08168140899333463,
+     0.1227184630308513,
+     0.16964600329384882,
+     0.221285932537231,
+     0.27646015351590186,
+     0.3339905689847649,
+     0.39269908169872414,
+     0.45140759441268347,
+     0.5089380098815465,
+     0.5641122308602172,
+     0.6157521601035993,
+     0.662679700366597,
+     0.7037167544041137,
+     0.7376852249710533,
+     0.7634070148223198,
+     0.7797040267128168,
+     0.7853981633974483,
+     0.7853981633974483,
+     0.7853981633974483,
+     0.7853981633974483,
+     0.7853981633974483
+    ]
+   }
+  },
+  "turn_right": {
+   "name": "velkor__turn_right",
+   "frames": 24,
+   "fps": 30.0,
+   "length_s": 0.8,
+   "loop": false,
+   "events": [],
+   "motion": {
+    "yaw_deg": -45.0,
+    "yaw": [
+     -0.0,
+     -0.005694136684631501,
+     -0.021991148575128554,
+     -0.047712938426394985,
+     -0.08168140899333463,
+     -0.1227184630308513,
+     -0.16964600329384882,
+     -0.221285932537231,
+     -0.27646015351590186,
+     -0.3339905689847649,
+     -0.39269908169872414,
+     -0.45140759441268347,
+     -0.5089380098815465,
+     -0.5641122308602172,
+     -0.6157521601035993,
+     -0.662679700366597,
+     -0.7037167544041137,
+     -0.7376852249710533,
+     -0.7634070148223198,
+     -0.7797040267128168,
+     -0.7853981633974483,
+     -0.7853981633974483,
+     -0.7853981633974483,
+     -0.7853981633974483,
+     -0.7853981633974483
+    ]
+   }
+  },
+  "roar": {
+   "name": "velkor__roar",
+   "frames": 72,
+   "fps": 30.0,
+   "length_s": 2.4,
+   "loop": false,
+   "events": [
+    {
+     "event": "sound",
+     "frame": 16,
+     "time": 0.5333333333333333
+    },
+    {
+     "event": "rune_pulse",
+     "frame": 24,
+     "time": 0.8
+    }
+   ]
+  },
+  "attack_antler_sweep": {
+   "name": "velkor__attack_antler_sweep",
+   "frames": 45,
+   "fps": 30.0,
+   "length_s": 1.5,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "whoosh",
+     "frame": 19
+    },
+    {
+     "event": "contact",
+     "frame": 22
+    },
+    {
+     "event": "recovery",
+     "frame": 27
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     18
+    ],
+    "active": [
+     18,
+     27
+    ],
+    "recovery": [
+     27,
+     45
+    ],
+    "impact": 22
+   },
+   "contact_s": 0.7333,
+   "normalized": {
+    "windup": [
+     0,
+     0.4
+    ],
+    "active": [
+     0.4,
+     0.6
+    ],
+    "recovery": [
+     0.6,
+     1.0
+    ],
+    "impact": 0.489
+   }
+  },
+  "attack_charge": {
+   "name": "velkor__attack_charge",
+   "frames": 66,
+   "fps": 30.0,
+   "length_s": 2.2,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "launch",
+     "frame": 21
+    },
+    {
+     "event": "contact",
+     "frame": 34
+    },
+    {
+     "event": "brake",
+     "frame": 42
+    },
+    {
+     "event": "recovery",
+     "frame": 46
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     21
+    ],
+    "active": [
+     21,
+     42
+    ],
+    "recovery": [
+     42,
+     66
+    ],
+    "impact": 34
+   },
+   "motion": {
+    "forward_m": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.007330498440213695,
+     0.03700848537991139,
+     0.09351332536469688,
+     0.1777778106427919,
+     0.2888974564658487,
+     0.4247332841467904,
+     0.5822315308206979,
+     0.7576260085072636,
+     0.946581101156093,
+     1.1443011836324473,
+     1.3456198216703545,
+     1.5450765338660395,
+     1.7369861533609947,
+     1.9155044329635262,
+     2.074692882314555,
+     2.2085856550595797,
+     2.3112615412219806,
+     2.376924812390013,
+     2.4,
+     2.438822856765378,
+     2.475,
+     2.506066017177982,
+     2.529903810567666,
+     2.54488887394336,
+     2.55,
+     2.5315125,
+     2.4785999999999997,
+     2.3950875,
+     2.2847999999999997,
+     2.1515625,
+     1.9991999999999999,
+     1.8315375,
+     1.6523999999999996,
+     1.4656124999999995,
+     1.275,
+     1.0843874999999996,
+     0.8975999999999998,
+     0.7184624999999998,
+     0.5508000000000002,
+     0.3984375,
+     0.26519999999999966,
+     0.1549125000000002,
+     0.07140000000000006,
+     0.018487499999999945,
+     0.0
+    ]
+   },
+   "contact_s": 1.1333,
+   "normalized": {
+    "windup": [
+     0,
+     0.318
+    ],
+    "active": [
+     0.318,
+     0.636
+    ],
+    "recovery": [
+     0.636,
+     1.0
+    ],
+    "impact": 0.515
+   }
+  },
+  "hit": {
+   "name": "velkor__hit",
+   "frames": 18,
+   "fps": 30.0,
+   "length_s": 0.6,
+   "loop": false,
+   "events": [
+    {
+     "event": "hit",
+     "frame": 2
+    }
+   ]
+  },
+  "death": {
+   "name": "velkor__death",
+   "frames": 84,
+   "fps": 30.0,
+   "length_s": 2.8,
+   "loop": false,
+   "events": [
+    {
+     "event": "collapse",
+     "frame": 10
+    },
+    {
+     "event": "ground_contact",
+     "frame": 40
+    },
+    {
+     "event": "dead",
+     "frame": 84
+    }
+   ]
+  },
+  "rest": {
+   "name": "velkor__rest",
+   "frames": 120,
+   "fps": 30.0,
+   "length_s": 4.0,
+   "loop": true,
+   "events": []
+  }
+ }
+}

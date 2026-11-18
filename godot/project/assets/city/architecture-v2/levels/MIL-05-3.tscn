@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-05-3.res" id="1_7phvd"]
+
+[node name="MIL_05_3" type="Node3D" unique_id=319087965]
+metadata/series = "B15_MilitaryAcademy"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-0.6, 0, 5.4)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1369249632]
+mesh = ExtResource("1_7phvd")

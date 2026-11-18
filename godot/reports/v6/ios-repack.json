@@ -1,0 +1,12 @@
+{
+  "output": "/tmp/drenovar-v6-ios/DRENOVAR-iOS-v0.6.0-test.ipa",
+  "bytes": 246506292,
+  "sha256": "96c612eff3cde48db5ef84e67839a5005cd54bca48273544ed55cacd80ae3e01",
+  "engine_sha256": "d9816f67f540bbebccfdb2a5ecf9460feda71c05247e4e80601caf44973bfaae",
+  "pck_sha256": "fa2da130476ac062b9e042e4c60c52182af87bbc20a1b3be0315454428d53921",
+  "version": "0.6.0",
+  "build": "1001",
+  "bundle_identifier": "com.drenovar.game.v6test",
+  "signed": false,
+  "device_tested": false
+}

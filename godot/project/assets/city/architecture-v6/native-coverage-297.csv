@@ -1,0 +1,298 @@
+building_id,runtime_type,level,source,native_scene,sha256,origin,verification
+B21,ALT-02,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-02-1.tscn,4c72fefe5a9c8a4b7c04453b5a8acd5c82eb0aa20a367d66ec1d6f6f76ebb839,Claude preserved,passed
+B21,ALT-02,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-02-2.tscn,1e8a1b33136a499cfbb42f111fc4b2d248f401c88f2c660295ca6570a03f12fe,Claude preserved,passed
+B21,ALT-02,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-02-3.tscn,14cb079918897b8fa683cd6d48f44c8b4f6875f6a9f76008754a19b2397f89a8,Claude preserved,passed
+B21,ALT-02,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-02-4.tscn,6702fc0ba8ff749fee23f5cc89346e76f015264a1e237b5f4ab61250b2211191,Claude preserved,passed
+B21,ALT-02,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-02-5.tscn,ba0fb06a17ea7c6163fcb861397775d394926207f529fd298f4e7388bf720c07,Claude preserved,passed
+B21,ALT-02,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-02-6.tscn,3b7ba3abedc959451be63691d712cea5c195010f14cab3795407752fb43bded8,V6 ART1 authored,passed
+B21,ALT-02,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-02-7.tscn,4e60d8881cf02ff582faeb8a2af564025de56b8628f752c32e6e51ad3218fa27,V6 ART1 authored,passed
+B21,ALT-02,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-02-8.tscn,3eceadd9ec082448df91be780acc33b01a7225987e6c9bc3b6607db0832d6346,V6 ART1 authored,passed
+B21,ALT-02,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-02-9.tscn,67b068122fe5df5d887468f4005729c9e24a4e4a82e24b9d0f6aaf650dd33e3a,V6 ART1 authored,passed
+B21,ALT-02,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-02-10.tscn,42976dadb0a5caba3bcaffb5a4b2b96271b290cc815e641d5a1ea14815e15994,V6 ART1 authored,passed
+B21,ALT-02,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-02-11.tscn,07a4063961fa1a13f22473ae0130f7e6e194f681ed3c52970d11110822e73419,V6 ART1 authored,passed
+B22,ALT-05,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-05-1.tscn,5a1c9d9c3687c3b482c04415c866e8eb60240e4f3866121e5298f66cbb64bf80,Claude preserved,passed
+B22,ALT-05,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-05-2.tscn,cf5985ffcdf94f5d3d317f5f526ab8d3b95a9c2e2116841b3612976b367e1f0e,Claude preserved,passed
+B22,ALT-05,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-05-3.tscn,406abc9687872fdf3744e76d42c02f85d762994f743ab4a6c6e8f15a76b47da0,Claude preserved,passed
+B22,ALT-05,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-05-4.tscn,1f0fe8a171163428f3fccc35b302365a86a6050e0d8b5476d49a4635d363ff39,Claude preserved,passed
+B22,ALT-05,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-05-5.tscn,d59623ae4557a45f7ef694af9c0b0bb29ff5529ca6f9882356acfb653e5eb37c,Claude preserved,passed
+B22,ALT-05,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-05-6.tscn,b2339096d41771f6e5c30c4b1bfb8399fecfc71f609b21da0acad91773ba8df5,V6 ART1 authored,passed
+B22,ALT-05,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-05-7.tscn,13ef4f9b85539bf7c7151239340dd33e5c710ce737a3fc9594eec3a2074cedd2,V6 ART1 authored,passed
+B22,ALT-05,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-05-8.tscn,98e298231defcab0056f2c7e27305064080b46530ca9489129854143322b1a45,V6 ART1 authored,passed
+B22,ALT-05,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-05-9.tscn,de7372ed26ae544298f54b8748df9896d9a22d2cd738e37c7d8396e7fadfae5e,V6 ART1 authored,passed
+B22,ALT-05,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-05-10.tscn,7ced9110c9c9aa5587c9e5e45a185bc37c49c556cf28b76c77878cce4ea204e5,V6 ART1 authored,passed
+B22,ALT-05,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-05-11.tscn,8cba309e188595064f970a20011e2d2609fb2462b5d37f657b70cd25cce3ceb8,V6 ART1 authored,passed
+B23,ALT-06,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-06-1.tscn,a3949c21c2133e82c861616aba0453e5604ec263618fd50d8ae06a1add45a59a,Claude preserved,passed
+B23,ALT-06,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-06-2.tscn,a29adcf0e40a4f3096c2a2cbf9d31207ea4993c2be16cf6fb3c416ed14ec59b6,Claude preserved,passed
+B23,ALT-06,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-06-3.tscn,0ddb413a3062ef70852727684e9a4724c0075b2adaaada681b1fda1b2fba893f,Claude preserved,passed
+B23,ALT-06,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-06-4.tscn,a6088382d785ae19c722ddcfea618b7ed78eb866afa6cdf243a0d9c9027acfbe,Claude preserved,passed
+B23,ALT-06,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-06-5.tscn,7ec904aa030270bb414c8087b825bcb6d95ce5712782c2853b77f43fb0126e5f,Claude preserved,passed
+B23,ALT-06,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-06-6.tscn,f50b365f36ea0c73b798617f61359e246c695cff98b01fb2add289cca247ba65,V6 ART1 authored,passed
+B23,ALT-06,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-06-7.tscn,eb49046a4ea29f65d80a68444607b1cc183beae7c9a5fc0cf1a88068a2a69a6a,V6 ART1 authored,passed
+B23,ALT-06,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-06-8.tscn,f15aacf3eee28a7828e4a1b54de56f0bcbe86a6afd26699592ee05000a8e29aa,V6 ART1 authored,passed
+B23,ALT-06,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-06-9.tscn,5ae7ad0e3d3acf9f71aa81174e033919a7db39412ddee403e49a7a287ea2a2a1,V6 ART1 authored,passed
+B23,ALT-06,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-06-10.tscn,0896701db43fe1bed73d52c46a074e59f7823d446f38562171b1b31ce4e36548,V6 ART1 authored,passed
+B23,ALT-06,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-06-11.tscn,d2b5619bdce359d98628ec94ead637751fdc6a344a4438c22b8f215e296a8547,V6 ART1 authored,passed
+B24,ALT-07,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-07-1.tscn,b7da782e71d3da6b26cfca8e5c167fbc421b8449e767a0153dd5a6ca4ffdf4d7,Claude preserved,passed
+B24,ALT-07,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-07-2.tscn,98314a12917ea75c83c4d2f31eaa92ac44f8f5b213322d2f1e6d899168e929ac,Claude preserved,passed
+B24,ALT-07,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-07-3.tscn,0729fd8d5c8623856c9e1f3f5b1780cb2ce12b8d5fe38c4f70c9449931b0bf07,Claude preserved,passed
+B24,ALT-07,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-07-4.tscn,31b3225497c42841ceead878453c7855ab1c67a50033e6a14c224a4856f536e9,Claude preserved,passed
+B24,ALT-07,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-07-5.tscn,b0aefbb57c927c0cd1b43abbb1aec3e41028fd4fef40326efe048f0c4cd5ba08,Claude preserved,passed
+B24,ALT-07,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-07-6.tscn,39f82652f119575a37d35982217b95654e0269f68db732a39af2bb1e64f1f3b0,V6 ART1 authored,passed
+B24,ALT-07,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-07-7.tscn,c7285e5eb897930ca6010f8ee7f7cb78fb4e094cfc5e6d7758c92a1b6177d2ab,V6 ART1 authored,passed
+B24,ALT-07,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-07-8.tscn,ad8a24d6fb500bed9ff83efa0cd076ed5c0783ffefb9697d4b782a4ddab35bfc,V6 ART1 authored,passed
+B24,ALT-07,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-07-9.tscn,17b6beda1fe2c905481d0ebc969a1a114eb710cebe358fae7569afcd5bd7ed56,V6 ART1 authored,passed
+B24,ALT-07,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-07-10.tscn,8d8e4cb2732babeb1e9c7464f6fa7ce7e4e1df0ad69d041cbb6869345cde07c0,V6 ART1 authored,passed
+B24,ALT-07,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-07-11.tscn,5d000bf2509d413e9604780c9a02a835fe670d3814bf8f6da90f28d2902d5067,V6 ART1 authored,passed
+B25,ALT-08,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-08-1.tscn,ce5f8c9b0c18df6c4d5c41495867e09fe581cf290250583dd672cef486bb04c6,Claude preserved,passed
+B25,ALT-08,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-08-2.tscn,aa8f3ff83af492aea1a616f55229105bf8bfd927276f981b6d7f9357ebff9ee7,Claude preserved,passed
+B25,ALT-08,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-08-3.tscn,cd659d9fe6c808b58107ae2d18961a91121369985741dd45892d5f8338d318b2,Claude preserved,passed
+B25,ALT-08,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-08-4.tscn,47723d2bb3df312bc3be7a94f1acebf46e56e095fd64ecbbb7350422fcb7819a,Claude preserved,passed
+B25,ALT-08,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-08-5.tscn,6a676d00b2ab8f20bf242e5940fc6a0eb5edb4dfa1211f2a56cb6dfe09ef3e28,Claude preserved,passed
+B25,ALT-08,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-08-6.tscn,dd990942e912329a11148c4f70bd75faea16e1cb36a6c42426be9d5c20a4a809,V6 ART1 authored,passed
+B25,ALT-08,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-08-7.tscn,22acdd126cbdfadc79c01d9b46605450a3a9c4de82bc6088acd783f18238d3a0,V6 ART1 authored,passed
+B25,ALT-08,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-08-8.tscn,02e0eacb48f78787182ddff6b261b21d0dea13e2cd29593d9ad5a5061460d5e1,V6 ART1 authored,passed
+B25,ALT-08,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-08-9.tscn,9755f077ec3e09f46811abb1fd5b8e1fddf888f6a70ae567d4a25f9061b45a45,V6 ART1 authored,passed
+B25,ALT-08,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-08-10.tscn,b0f36838c9151290f1105259e2c7dae59b0dff01c60c1187aa2cd09abbe42fe9,V6 ART1 authored,passed
+B25,ALT-08,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-08-11.tscn,fdd90b8b26fefed0ad165ffe8dc9c75307a889d245a411435b8b9e0417bb0a4e,V6 ART1 authored,passed
+B26,ALT-09,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-09-1.tscn,c5495069de71b85f56348851506175d846cee7eb0b7c082d4b53999c2d8caf3d,Claude preserved,passed
+B26,ALT-09,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-09-2.tscn,5a66590c12ad87693242e2b36a4459d100748eacffd59c6b79e86067a29e9464,Claude preserved,passed
+B26,ALT-09,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-09-3.tscn,f1d878f299d88a9c6ba98192b02355c7c83820dd81e02a42894ebf0bba890f71,Claude preserved,passed
+B26,ALT-09,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-09-4.tscn,83b0b321c68688783ad97354317a212a2666e3528748d3efc060a99fdef0716b,Claude preserved,passed
+B26,ALT-09,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-09-5.tscn,447cdd1b3f73d476d51eefae642f5dd8a9ddc70fced5b17dfedd953a7e3e7094,Claude preserved,passed
+B26,ALT-09,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-09-6.tscn,09a052f27c3d7aa21cc14178f778d3be15b0c919d85a0acffc065dcda945b446,V6 ART1 authored,passed
+B26,ALT-09,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-09-7.tscn,619f92f57363ff841f0cfbc9afcdaadd1d8c3eaa09dc3fdbeac256ed2581096e,V6 ART1 authored,passed
+B26,ALT-09,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-09-8.tscn,18fcbbb85ce9d53d046abee4bec490af2f3710ce00747a5c4d48207bef4ceb94,V6 ART1 authored,passed
+B26,ALT-09,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-09-9.tscn,6550468e9f12ac940cadb6c85591d3f5af4a7a165ff3a631fb2335bd06cef7e2,V6 ART1 authored,passed
+B26,ALT-09,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-09-10.tscn,58df446b3aadcedb05547413cc578e409585ced4568a925a9456d77833c7f96e,V6 ART1 authored,passed
+B26,ALT-09,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-09-11.tscn,4526aabf886167dfe8bcfebfd04ce586ce84d3bca7dafcbc957909361837aae4,V6 ART1 authored,passed
+B27,ALT-10,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-10-1.tscn,17b23cca36dfec8bb4440eacff97f298d0bb258fca84b44b41bff5d02808b183,Claude preserved,passed
+B27,ALT-10,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-10-2.tscn,25af8b5e5d8360aef4c457751a465ae29521f40a1fc3b3f442aef75553fb6fb1,Claude preserved,passed
+B27,ALT-10,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-10-3.tscn,8ac692e0314e4b9d5208b172f8c84c5f853c1591b68baaa3d2cbd3f25e2cf49a,Claude preserved,passed
+B27,ALT-10,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-10-4.tscn,9bf5a1d0398ef7337ccb1b156cbc187e4370db93d942a0d2e763e132b4922b0b,Claude preserved,passed
+B27,ALT-10,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ALT-10-5.tscn,d9ea8816235f4372b2e5d42db1ba88331ae1f5cc35645e523ff9a610fa448f76,Claude preserved,passed
+B27,ALT-10,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-10-6.tscn,c2ffeef95defbbc7c04e79ef23385ac2680469d7709ce405f2c0a8a678c75cae,V6 ART1 authored,passed
+B27,ALT-10,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-10-7.tscn,a523564a486f6b845c9eb08f7c92d1bc0443882575ca856fa3007d43e2f7416b,V6 ART1 authored,passed
+B27,ALT-10,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-10-8.tscn,57023a07e4252ac4d951516962657d2efe796a679c8f060a681ff51a3718afbf,V6 ART1 authored,passed
+B27,ALT-10,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-10-9.tscn,2a4d3eb91bef56dfce198254a1931dd9881ffa3852a60335d3ce3a986d381189,V6 ART1 authored,passed
+B27,ALT-10,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-10-10.tscn,a6bb5c017eaf80fd71f2bc72d1856a240de197f5106fe7b507b6f3c6f662a8bb,V6 ART1 authored,passed
+B27,ALT-10,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ALT-10-11.tscn,54dfa67dc086f53e479cb8d555fce5ed6452a72c2379fb7e5b4ca9944bf9c92b,V6 ART1 authored,passed
+B03,ECO-01,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-01-1.tscn,5aa340afeb31c0e060517e22c3fa8d04dfa5854c78cefc52a05582e715de28b7,Claude preserved,passed
+B03,ECO-01,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-01-2.tscn,515573dfd9b1487dbbd11bbb88d421f31b9595d21b6ca2962da2ed87fe22260f,Claude preserved,passed
+B03,ECO-01,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-01-3.tscn,35b6049d35b07fa102dc933fd5f4e7afc5a325eb759869b6c8b16489aae30b61,Claude preserved,passed
+B03,ECO-01,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-01-4.tscn,d7bdae16d519b2e64baf2e13e1c396b45424fe22347f16b04481c576a7e0d315,Claude preserved,passed
+B03,ECO-01,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-01-5.tscn,8509fd15e46fac47b356e36f92ebb6839d20705b8d58e07792dd1446a4612ca3,Claude preserved,passed
+B03,ECO-01,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-01-6.tscn,7f514050bcd4dbe564f39feb4e3678de0c09e97fdfbe971f8fd5f6cb6ec113fb,V6 ART1 authored,passed
+B03,ECO-01,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-01-7.tscn,2c71a2d7e2d9ec93283c49e306349934ab66c5dc61facfc4fa842492becf6c49,V6 ART1 authored,passed
+B03,ECO-01,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-01-8.tscn,1dc6356bd8915834acc23ee56eb901b3ae3d930b854520f8873b04b89520c900,V6 ART1 authored,passed
+B03,ECO-01,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-01-9.tscn,74d3c66d009b66a965816860dffd0883c24736db87d265dd8903acc8eeb5a0e7,V6 ART1 authored,passed
+B03,ECO-01,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-01-10.tscn,0c70ee72ab175108cc1b4521d5927564d3411b453bd7bc26847b68a1d8b5bf94,V6 ART1 authored,passed
+B03,ECO-01,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-01-11.tscn,c12c2088c696e8b050972cbedee274791d6b90550f0e2a2f92eabeba0a45c06a,V6 ART1 authored,passed
+B04,ECO-02,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-02-1.tscn,caa97220eeb77770b9a2f3603f4542a6cb7550b036122b82030bb179adb53278,Claude preserved,passed
+B04,ECO-02,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-02-2.tscn,acc4992ff6613878a64f742ac17edf6e38bc03b8101ae84225556034fcd8b423,Claude preserved,passed
+B04,ECO-02,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-02-3.tscn,6f1175a4ab9203cc5ac08d008b7ae333bc357fc0154e8925dea0344c18e6b0b7,Claude preserved,passed
+B04,ECO-02,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-02-4.tscn,846915a9a42156412847de7ed68d56f4eab658ababc3d1107f0d3f34e4171922,Claude preserved,passed
+B04,ECO-02,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-02-5.tscn,979c89bf7f132b1b73865d11d3865bbce22ff786eb3b210b51b928a5d2f3659c,Claude preserved,passed
+B04,ECO-02,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-02-6.tscn,fcbb134b842c3193164560f86234a30652c443d0ef2c31b2b017c54c0349061b,V6 ART1 authored,passed
+B04,ECO-02,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-02-7.tscn,86b16d70c2161f7857938191a31d5423a1f4abdbbe8b994049fa51f4e7ea8450,V6 ART1 authored,passed
+B04,ECO-02,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-02-8.tscn,9e791d4d52ef76856e505083615ca1e426c02103c8d10844b3d7624593dd6c96,V6 ART1 authored,passed
+B04,ECO-02,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-02-9.tscn,c52dab8e23cb5ed601a03e2be0a88a4d88acb92c634f6601c4644ab248aee894,V6 ART1 authored,passed
+B04,ECO-02,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-02-10.tscn,52d51aa1114efcec7925b3109c3c5ebb3c4d505ab5a1c9d3ec512d922aa3b1e7,V6 ART1 authored,passed
+B04,ECO-02,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-02-11.tscn,9a07e6867f11823af8da0daf21db6feaec6a9cb9f2e258a5232837efdce4c017,V6 ART1 authored,passed
+B05,ECO-03,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-03-1.tscn,4584f48854eae4a12540dc138a84d0de9b7f7f0849814fbce3cb51362bcda43e,Claude preserved,passed
+B05,ECO-03,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-03-2.tscn,9216f80a504634ce88b50cb9f1b9ba14dbd5471f3884875ad5ebaae0eb798cc6,Claude preserved,passed
+B05,ECO-03,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-03-3.tscn,844133cd0b4773415c7404acfc2dc37b5a197ff5c0cb6d240f7f8af939e90ae4,Claude preserved,passed
+B05,ECO-03,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-03-4.tscn,e3cd64f245b65ae642e1d62605690ab96046384fa8cb21349f5601074295bb50,Claude preserved,passed
+B05,ECO-03,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-03-5.tscn,c0776b5615fd370b3ca6a420ee21968b79302f359e6030ad9d20a1c25bf3ca0a,Claude preserved,passed
+B05,ECO-03,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-03-6.tscn,759840b503a9fbaad4f577fcc070bbb71de314c92d8650c8471ccfec4d4dc293,V6 ART1 authored,passed
+B05,ECO-03,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-03-7.tscn,9ba981ef5d42f2ebadd36b4a6afcd02b43c14b50482551e66d78cb0c27f40786,V6 ART1 authored,passed
+B05,ECO-03,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-03-8.tscn,bfefbc2b93f199a11709b574417ec0a098b3fc8915e97dd8e765dc37073e084b,V6 ART1 authored,passed
+B05,ECO-03,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-03-9.tscn,5001448524079011a25047f670a049c1f6a7969dcf492bb285e43cbc05f67301,V6 ART1 authored,passed
+B05,ECO-03,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-03-10.tscn,bf5a5e3624a2cbd17840d636d3abd808e7add98a01c859d0dae42a3bbd974639,V6 ART1 authored,passed
+B05,ECO-03,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-03-11.tscn,cf42f37da38afd3e762c8d240253f1966dd18a2d969bcf8e0c10ab744e2a29ae,V6 ART1 authored,passed
+B02,ECO-04,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-04-1.tscn,60ada93501d7ba49f9e8649ec63d066dc2c25b6f1af159bdc769e2b8d0163751,Claude preserved,passed
+B02,ECO-04,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-04-2.tscn,18689aea69a297f5486de90791ca29cdd7dd80712a1a8de18bc4c359b409f342,Claude preserved,passed
+B02,ECO-04,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-04-3.tscn,fe49de367416f8bb8458204814653177766255f7ccef0e95b04d4b7494293392,Claude preserved,passed
+B02,ECO-04,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-04-4.tscn,8613b2c5f09ad0933ab431ef81f5acc29cdcf6f13160c2d33fe553c38c2bc1b3,Claude preserved,passed
+B02,ECO-04,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-04-5.tscn,65a0b57a02105296520b1a4016db5052a9351146f3811367f48be3e65cf347ff,Claude preserved,passed
+B02,ECO-04,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-04-6.tscn,038cdf6fdcd473fdd89fa869440b15b5dbb347500a91505ec12ae5a4ac9e7c76,V6 ART1 authored,passed
+B02,ECO-04,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-04-7.tscn,89026d57ca59b785ae73d1fb39ed69f689c47968d686e7b6a079981770bcfa6a,V6 ART1 authored,passed
+B02,ECO-04,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-04-8.tscn,c8105072d8c7bf6f4b3b2f267e6456e86c43a7f666088c3c9db834e23e2bb6ec,V6 ART1 authored,passed
+B02,ECO-04,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-04-9.tscn,16d76c0eb9d4f42f1d2400fae973ac882ae370fc518caacfbc3751e00c794bb0,V6 ART1 authored,passed
+B02,ECO-04,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-04-10.tscn,23e5007b0a4b394da8e5e2ad56ede1662f0775023de1d3e805f66b5ed0339dfd,V6 ART1 authored,passed
+B02,ECO-04,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-04-11.tscn,81fde7cb71df9eda9d44f3c533696bca1af25065ba8aa4ea2102488ccb7d0e88,V6 ART1 authored,passed
+B01,ECO-05,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-05-1.tscn,8e4b6f34bb38a9561d5deaaa9e7e0a8b1efce3f7a8e8083a0c12dabddcb40991,Claude preserved,passed
+B01,ECO-05,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-05-2.tscn,d003b465fef9056bfd7a12e63a32dbf97d01bc105585549fdadb42f9cf8e6f73,Claude preserved,passed
+B01,ECO-05,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-05-3.tscn,d371b8705eece633eceab68e24b40d2e6ef20fc71c76b96d7daf7d93f70b98bd,Claude preserved,passed
+B01,ECO-05,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-05-4.tscn,78a114217882b54dc2231a7edc8f7cabff8547652854aa64ea59c5bbb943c862,Claude preserved,passed
+B01,ECO-05,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/ECO-05-5.tscn,c3b19297f15365d8429985d14e3cb052884fe98c59da701ddc5754a87428bcdf,Claude preserved,passed
+B01,ECO-05,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-05-6.tscn,beccc019814c56d74893ce9872b45a0c2f44016a3003d3cb6987a649a834cb6b,V6 ART1 authored,passed
+B01,ECO-05,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-05-7.tscn,209c5c558732cd1d6ed88bc38b78d8c25c0f93a30ce89e7fa3acef10fe24befa,V6 ART1 authored,passed
+B01,ECO-05,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-05-8.tscn,ec13908565412e15412ee881b121ff7274976b0cc47c9b8bfd3c1c1c71d320d3,V6 ART1 authored,passed
+B01,ECO-05,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-05-9.tscn,0551cf2ab2057df89b7ed6e1ecac9255d103f18841e762c735e82bb167c0252d,V6 ART1 authored,passed
+B01,ECO-05,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-05-10.tscn,db33123d3da54fe7e9ab2783956f67b822a5903966c55dfc66e2eebb72c20878,V6 ART1 authored,passed
+B01,ECO-05,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/ECO-05-11.tscn,d7075dcb2086099c43d63550f1c1bd41b919ee17b7ce038c2716bbdb270dac09,V6 ART1 authored,passed
+B11,MIL-01,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-01-1.tscn,0e20f28bec2e17760b7138b8174cfa0f0a418194ee9b58c10e25fee3006f47a2,Claude preserved,passed
+B11,MIL-01,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-01-2.tscn,62a0d784897ddc32df7432e605f2597f3724d00e472d75d0adfde3d64620ff6c,Claude preserved,passed
+B11,MIL-01,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-01-3.tscn,262e3114a70bdd63efb25bc2095d5e7e9cbd3fca0d4cbe7030b4bde3834f436f,Claude preserved,passed
+B11,MIL-01,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-01-4.tscn,b83200682c87f51d9b8037d1484dc188d0c53d40cdd91b4e2c3d7edd2940631f,Claude preserved,passed
+B11,MIL-01,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-01-5.tscn,7f9940d1347c1c111636fbd4780da3caf3640ab9831c7686b654269bba01334e,Claude preserved,passed
+B11,MIL-01,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-01-6.tscn,52b6bc56309b8ef3cd92c979633e28d13692798fe4e999b6d88ba5d13ed9b9ef,V6 ART1 authored,passed
+B11,MIL-01,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-01-7.tscn,f18ec778bebff02dce5319090172165e42e60c24a3e2e20a02dc2527f8cbfc0c,V6 ART1 authored,passed
+B11,MIL-01,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-01-8.tscn,20a26cd60730bd7c5341834044336e45ed11e1031b31cf52c0e789c76eb25a76,V6 ART1 authored,passed
+B11,MIL-01,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-01-9.tscn,f048039b982cefef450aa83fb00965b871d8533c59eb625fac8d4df953ab89a7,V6 ART1 authored,passed
+B11,MIL-01,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-01-10.tscn,249b1f70325bbca80d9c968f0de0735b0b73aa16244e2eb3a73e745cea40b6dd,V6 ART1 authored,passed
+B11,MIL-01,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-01-11.tscn,f9e5967a64b6c39bd33c138e37f39e89a790421a92bdcb1c60d9f7296d774af6,V6 ART1 authored,passed
+B12,MIL-02,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-02-1.tscn,5a2633f51da478dd62a6a4a384ea8257a41ec334bec3bf2c8dca06cfd1538a10,Claude preserved,passed
+B12,MIL-02,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-02-2.tscn,d78e54994a6ff1778c849611d2bde4afb8f9322a5f1836d7a04b62e5e033d942,Claude preserved,passed
+B12,MIL-02,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-02-3.tscn,980f8f66f27c8d808a6a9b1c4950c9541f009c73b8e638b2db55a0935ef6ce50,Claude preserved,passed
+B12,MIL-02,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-02-4.tscn,411dd4a01d493191a21305c93d44ce2f1059f390f63937ef699cfa815213dae1,Claude preserved,passed
+B12,MIL-02,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-02-5.tscn,00945e62f5c56df22f3cbe9e24deccc3f56e9b3f76d6b4ff5cc453c8f4d09133,Claude preserved,passed
+B12,MIL-02,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-02-6.tscn,4140f1086e6e3b4b4a7efe8806af790d99f7b33bba5cf6ae23af527dbb401245,V6 ART1 authored,passed
+B12,MIL-02,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-02-7.tscn,64c856962dd2190908f41321a80b15aa93d7bae198559ef6d00c8f9699371ef0,V6 ART1 authored,passed
+B12,MIL-02,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-02-8.tscn,1ce1e3f453673419cd689c85067d41d93a69c6e29e9313058ac692fd6dc93cc3,V6 ART1 authored,passed
+B12,MIL-02,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-02-9.tscn,ce258f13513de5afd3b3d180b7326e89fe24b549e463d2bf0ef261cc086c3461,V6 ART1 authored,passed
+B12,MIL-02,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-02-10.tscn,9ef0c495f34db3998f552dac7f3f51f6d829f45b96bea58d5e1003aa9195aa51,V6 ART1 authored,passed
+B12,MIL-02,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-02-11.tscn,6db8f3281d3ebe363e8ee1e98e5f13c150f28b1ce305731755dcb52cadc03dbf,V6 ART1 authored,passed
+B13,MIL-03,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-03-1.tscn,0b1ca336f92baa8046b2bf6d3b0eaef6895cc1f1cdceaf4bebfa5c797647196c,Claude preserved,passed
+B13,MIL-03,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-03-2.tscn,1657f0c53794ba1a8668d7a6b1524558cc41a82e6b1d75fc795490ba9c30a8c6,Claude preserved,passed
+B13,MIL-03,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-03-3.tscn,adfcf41bffa239c4703da5e427cf7c96ca58e2bd033c18a9e6db119a64135b0c,Claude preserved,passed
+B13,MIL-03,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-03-4.tscn,b170a43e8b927c844011d84f9ba358016b9f3fbeab26b38f350caa9fb00377d2,Claude preserved,passed
+B13,MIL-03,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-03-5.tscn,8a469528f1897bbbf333ba299e08a48a8d870cc1cfb30e1b9e297f21d9a0dc1b,Claude preserved,passed
+B13,MIL-03,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-03-6.tscn,3f08ab9ac35cdf7eaeccdfa2b53389cabcd82de9eae7105aa433205eaef6abd7,V6 ART1 authored,passed
+B13,MIL-03,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-03-7.tscn,434eb2f082183a32cd88f7f7107c9218ac2cb97a57a32a92a7dcac2a02c9a8fc,V6 ART1 authored,passed
+B13,MIL-03,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-03-8.tscn,6531a3b53d0aa4edcc201c53f86adc9c7448356afd8a420f294982ca87c4dbf1,V6 ART1 authored,passed
+B13,MIL-03,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-03-9.tscn,7dbe6eaf91eb05ab299f3a02af1ea3c7c340815de891d95b74e155d2eb225ada,V6 ART1 authored,passed
+B13,MIL-03,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-03-10.tscn,91e11bba72401028a9907dce7ad2e4ff21578cbd8f5d3cd6312c8aef32a1886e,V6 ART1 authored,passed
+B13,MIL-03,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-03-11.tscn,181eaf5c2285f971988c92d493d1d7f3f0fb166b5029572012f90256c58d922d,V6 ART1 authored,passed
+B14,MIL-04,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-04-1.tscn,313f5ad0fabf631fa53ef744227337b2fffd46377e8280dddd64d6848d067bca,Claude preserved,passed
+B14,MIL-04,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-04-2.tscn,6b46f664df337c726fb77cd3015b91b74f044802ef8514a688e620b8604ccbf7,Claude preserved,passed
+B14,MIL-04,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-04-3.tscn,dca99c5829b97e0244df57a06e52ef5d8c905d7467bda6d2ce52606b1a9bbee2,Claude preserved,passed
+B14,MIL-04,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-04-4.tscn,cefdb730d5394cba72d061c064873bce3e89e223c3efedb3684758d85cd23d73,Claude preserved,passed
+B14,MIL-04,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-04-5.tscn,e6e11626638a96ad6f14afdfffe19664131731f2f6881466d40b4d3d6c08c35f,Claude preserved,passed
+B14,MIL-04,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-04-6.tscn,939fe13a51da21ea2ed19b061702ad2a2007018256e0d6a42191a1912ba8e920,V6 ART1 authored,passed
+B14,MIL-04,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-04-7.tscn,883fd6df9d69ae71b3e3dcee112df55dc612548b4b63b050781da6f95b7d1cc5,V6 ART1 authored,passed
+B14,MIL-04,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-04-8.tscn,00c29ebe46a441486a7d643d1e683dd680fd9da2148ac2522359ea3959db0a76,V6 ART1 authored,passed
+B14,MIL-04,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-04-9.tscn,b72f6e2c19f3d8c7f3e4659c273df3094efbd25c86d7548501238adb2087b2a0,V6 ART1 authored,passed
+B14,MIL-04,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-04-10.tscn,0a57d796732df11c58cccc5125da5db0527e439d608766fd3265cd9f36557aa1,V6 ART1 authored,passed
+B14,MIL-04,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-04-11.tscn,4a12f5e2984b4efa0dabb819d1ca1935536d8bed3122182cdc46d5ea7ec967bd,V6 ART1 authored,passed
+B15,MIL-05,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-05-1.tscn,026850aa10880e010b3a924ed7a246d3af905189f3b29740f5d26ee802a869f0,Claude preserved,passed
+B15,MIL-05,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-05-2.tscn,5cce97df2f85baaad33241771ebbd1536e4dc979d5523cd4300eaf247cd830b6,Claude preserved,passed
+B15,MIL-05,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-05-3.tscn,8cc539409c0dc6e16face20004b79befd8441e1ed6764e1205fd14d37069bec5,Claude preserved,passed
+B15,MIL-05,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-05-4.tscn,22260bfdc66d8c9dae2146be19518b8ed95e4cb2442c2828517fb5ef9bd810ba,Claude preserved,passed
+B15,MIL-05,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/MIL-05-5.tscn,c7e5e7795d616fc271bdc06497b3274ab90973405f156e5f01ed3450d2dee039,Claude preserved,passed
+B15,MIL-05,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-05-6.tscn,4b1f39429cadaf1487cd3746e8da415f7af2661f26f4a5afdaa1873a6ee5bd84,V6 ART1 authored,passed
+B15,MIL-05,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-05-7.tscn,ae7d64dd4ce0171c93f92eed70cdcbb37670a936ff12a0a5a66d2d69f1c2184e,V6 ART1 authored,passed
+B15,MIL-05,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-05-8.tscn,42a754e1706df32a7c88daf65185b30a2ddfe1eebd6e1feaacd9784288683af1,V6 ART1 authored,passed
+B15,MIL-05,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-05-9.tscn,abf877057895213add4e985419421e75f9992e89fe32e75640419aef300dea9e,V6 ART1 authored,passed
+B15,MIL-05,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-05-10.tscn,e8b55df488d4d62bd7e3ee7077a5089a90e6b4474311edb3992284c8faee2741,V6 ART1 authored,passed
+B15,MIL-05,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/MIL-05-11.tscn,7e9ff75ac5f9ba95698c9fceb802d9862b4a80164b1b5fbc2bc382cd12c0fe17,V6 ART1 authored,passed
+B06,RES-01,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-01-1.tscn,d56307aa7f558567f1873ffe5bbdb0b5bb82efda58bea3a0aad79b28d89e6a1b,Claude preserved,passed
+B06,RES-01,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-01-2.tscn,7b82b2ba5fdb42707866965cbbc5842b019141c4ccc496c21acc8d02d8aada17,Claude preserved,passed
+B06,RES-01,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-01-3.tscn,4ab3987c14c27031a2a42ab6f8cbb126f9a7503b9e993340a2fcc4ca7ffd0428,Claude preserved,passed
+B06,RES-01,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-01-4.tscn,67397281a7206c009de519f798008805bb4d266ae508be8bbd304e6ef2c34651,Claude preserved,passed
+B06,RES-01,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-01-5.tscn,2afcc0cdfd5c7dfbbef97ada8400095c3163110552c83e2e935019d6009e358e,Claude preserved,passed
+B06,RES-01,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-01-6.tscn,eb80f5a3b45889293bb6fb811747fc7363d84bc64d28fac0db210d195c73d431,V6 ART1 authored,passed
+B06,RES-01,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-01-7.tscn,da3de6d042917ca89ce8d7d119943ba23110c0a16f10a28c26cb6cfba4652317,V6 ART1 authored,passed
+B06,RES-01,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-01-8.tscn,80cb2bdee424c5d1563a511e385ab8446c73ea035d752d20909633190610a703,V6 ART1 authored,passed
+B06,RES-01,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-01-9.tscn,9fe5245b4ee0dfb9ff78ef0179f4d7d189fef84597c7e74cd861a49d8a59184c,V6 ART1 authored,passed
+B06,RES-01,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-01-10.tscn,29cf8b693efe80d6db182a1144fbed4cb75dc828f6e8b0edee65ad6925e14609,V6 ART1 authored,passed
+B06,RES-01,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-01-11.tscn,01d916c6b039fa5f46a20580608f32ad24bb7a2a29a7cd934c80724b081eea5d,V6 ART1 authored,passed
+B07,RES-02,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-02-1.tscn,7256b460e895a775a787106fc4ce5c18b55c336fbb7f68b3d93d03f2f5cd5134,Claude preserved,passed
+B07,RES-02,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-02-2.tscn,0ca8d136d02a9934217da2f8bf5021e880c0c90c20320baa0c1af0c40efaf164,Claude preserved,passed
+B07,RES-02,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-02-3.tscn,17ca35d2c374da6e7a166728d71c78662668de838a853020af3603b3a7e94f6a,Claude preserved,passed
+B07,RES-02,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-02-4.tscn,77ace9496d19107790fb60ff65b2d871f1f2f7c650ccd1ce50b28ba0713c719c,Claude preserved,passed
+B07,RES-02,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-02-5.tscn,79443faa0f6dad43e626d220f912164ad1cdf7e488d93fd4e70363053f32beff,Claude preserved,passed
+B07,RES-02,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-02-6.tscn,3bea9ad1a33f107747d19f5905c2392aea2d88690c7eb2782797799b7c747f19,V6 ART1 authored,passed
+B07,RES-02,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-02-7.tscn,bdb3b22e52ef81a0a3a29cf41702d7f06567116ae740ea132f33fce5bce47c26,V6 ART1 authored,passed
+B07,RES-02,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-02-8.tscn,5323ad27267bc348ac24fc1527f94047f09373acc651f0d4ce9e942a4530c314,V6 ART1 authored,passed
+B07,RES-02,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-02-9.tscn,04cbba64fb6043bb22fab03f470f0989523d714dee47c62149d13ba13fc0d3fc,V6 ART1 authored,passed
+B07,RES-02,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-02-10.tscn,19d317940f2250e977bc106b223ac08bd13b86262d8f1194bfadfedd867fb525,V6 ART1 authored,passed
+B07,RES-02,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-02-11.tscn,26c3786f1c96eec9540c3760335477fe81bf375c930505321b7c7cf8f797daef,V6 ART1 authored,passed
+B08,RES-03,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-03-1.tscn,ca3889c463ef3b9bdc77f37d3c187cbfc44ae171022fdd56f47875132b6c9f59,Claude preserved,passed
+B08,RES-03,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-03-2.tscn,ee37125745449254823b42e7a73e32a45d3cd4f1c1992f44369911062208727c,Claude preserved,passed
+B08,RES-03,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-03-3.tscn,f1767d0c008156b2ff593e188f01aeb951035c646ed9e83f3a2be827a67ebabc,Claude preserved,passed
+B08,RES-03,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-03-4.tscn,15e86c67c54c9f3b0ebcdd8a2ffaa4227e349b752ff5cfee91519a98750cb4cd,Claude preserved,passed
+B08,RES-03,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-03-5.tscn,e4bbcde08c5fe552f6a67e0e74add3fe47c437e4775243ac8be6776532a70c5d,Claude preserved,passed
+B08,RES-03,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-03-6.tscn,04864d7769920df296847bea52fa25106440eb76552bef5016461111efcd7359,V6 ART1 authored,passed
+B08,RES-03,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-03-7.tscn,c14814bf4be9f0db8c167be40dc5857f5d061f4467abb820f073374c63c88094,V6 ART1 authored,passed
+B08,RES-03,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-03-8.tscn,4bd2d864e05ac55663b649e31d750a5b9f967e0ed126687ef2c3e6af46295980,V6 ART1 authored,passed
+B08,RES-03,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-03-9.tscn,350c0f8c9abf91b6908ec59a23b9614b4691fe64232bb311824872500ddcfec3,V6 ART1 authored,passed
+B08,RES-03,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-03-10.tscn,3c77dceaabc72e771287d5ecdf698c1c36ad7c1f84af5d3789b1e71b13c59a02,V6 ART1 authored,passed
+B08,RES-03,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-03-11.tscn,b5bf27c19ddf6a3a4567c9d45cb5af76869c8b143ed9baa2fe465d1359862ecd,V6 ART1 authored,passed
+B09,RES-04,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-04-1.tscn,0d3e56b7b8836984e8f36fc87f77745232197626d7506fa4f7eda6e42a367e6d,Claude preserved,passed
+B09,RES-04,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-04-2.tscn,c7635284562f6a7914239ef89208be5f8b2be60813f1fab5d5df3fda0658ce70,Claude preserved,passed
+B09,RES-04,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-04-3.tscn,9e258f760e236666c3f4a8bc8beb20e35642f273d24d4d9a1411f0e0dd91c444,Claude preserved,passed
+B09,RES-04,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-04-4.tscn,574468de0ceab5583ea4319a842d2b46ac846038fd5af142093434780ac362f2,Claude preserved,passed
+B09,RES-04,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-04-5.tscn,d592e9c673dc07175c581b22570d864b68b0c8613f30f1961362ee05572e5787,Claude preserved,passed
+B09,RES-04,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-04-6.tscn,c8b411ec5f5f205d9bd32354f786825bffb9d2d0825792ae30e379630dadf899,V6 ART1 authored,passed
+B09,RES-04,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-04-7.tscn,115b4c9baf407485971e34826e8111ef9838fe3ceecf54b6002d3788b108f7f9,V6 ART1 authored,passed
+B09,RES-04,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-04-8.tscn,cbe916f3d2237fa42904de302078abb1560c1918f0dce97ac709252d624b5e62,V6 ART1 authored,passed
+B09,RES-04,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-04-9.tscn,990637e808fa422b0bb9395df7cfc435f85e26cd619d5fbb361090937b96fd0e,V6 ART1 authored,passed
+B09,RES-04,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-04-10.tscn,20882cce9900ab2b05ccf546e83bad6a29af5ced9584b3396f54cdf430decdf7,V6 ART1 authored,passed
+B09,RES-04,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-04-11.tscn,188964acd2406dc3c708be1ff896dbc6cd87ace04bf1c34f8d00d15b63f908d5,V6 ART1 authored,passed
+B10,RES-05,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-05-1.tscn,c034ad8e1e8cf172d64ec1fbd94e70e009f791b41f6cf96e07507fecd443ced4,Claude preserved,passed
+B10,RES-05,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-05-2.tscn,b1ee381e2c07e3fa765bb92afe5884fdc0bb92b2d3d506c24ad4ecaf656a1f17,Claude preserved,passed
+B10,RES-05,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-05-3.tscn,de731c49a42e45df3d0ef696bd01e1a8baea3f11afb5b503bd90fa6a6b86b19c,Claude preserved,passed
+B10,RES-05,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-05-4.tscn,47c2938810fb8d72ebfcce4792658ae0d911d5cde066044b38f5e52856191f12,Claude preserved,passed
+B10,RES-05,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/RES-05-5.tscn,88f8fdf91d30a6b4b835eee4a4194bd72146c7cb974985b9dc4d0ce6ca932e29,Claude preserved,passed
+B10,RES-05,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-05-6.tscn,38f8ff8fd9826e0ecc6d98456d99641773fce4487ad54813b3d3f7188ae5f81c,V6 ART1 authored,passed
+B10,RES-05,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-05-7.tscn,2c5b488bf0d23bffd62b439e779fba2475fcd0b5e5b029c7191a44bc6401fd6b,V6 ART1 authored,passed
+B10,RES-05,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-05-8.tscn,1a485078ebd8936432a51f341d73121c0d5c8be2a44c954a179e1b9dfb3d42b4,V6 ART1 authored,passed
+B10,RES-05,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-05-9.tscn,f894ccd1c3473dac88ec1369c5cb3f5069ce44624e6880d4e1a15f988911d4ee,V6 ART1 authored,passed
+B10,RES-05,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-05-10.tscn,e505c839f38dfb7bc8b2fa9ec500412cb8759546555ea80d752f907472459a18,V6 ART1 authored,passed
+B10,RES-05,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/RES-05-11.tscn,6c28ea43008396d9924af0b006c2b72bb71fe920cc110f6e5242450de3433609,V6 ART1 authored,passed
+B16,SUP-01,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-01-1.tscn,5825ef39838aca1fc0be8891ee28c8d56f92585c58bec6defbb53cca23f7fd45,Claude preserved,passed
+B16,SUP-01,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-01-2.tscn,55318fb497ed09e32601da974f2da284a8ea6e625883dc07f162de160ae72cf8,Claude preserved,passed
+B16,SUP-01,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-01-3.tscn,983a67b220760840e40538ec40170e8bda25b143b49c71d76fb3705d5c3b95f3,Claude preserved,passed
+B16,SUP-01,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-01-4.tscn,452607dae0f52f03696489b2ba326d364f7bd77c6029f2b93fffe7e425dfdb8a,Claude preserved,passed
+B16,SUP-01,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-01-5.tscn,073e64f1065ad722a5d0fe5e778521575c5ad83764c60dd4cc07d0e3525e64fb,Claude preserved,passed
+B16,SUP-01,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-01-6.tscn,3f52fe55d92f9c9b64e66ca469f8b9576f39957c64100a1ed8116de13da08e8f,V6 ART1 authored,passed
+B16,SUP-01,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-01-7.tscn,d716ba1bf431980be00c292fd016e97f537a4d401195be7bf694d9ac881b9871,V6 ART1 authored,passed
+B16,SUP-01,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-01-8.tscn,aeca487f7fe9cc530b637133bfc31e09e0d0b1de65cb5cbb99f41a5ffdef2bbf,V6 ART1 authored,passed
+B16,SUP-01,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-01-9.tscn,4b7f78b0c5a1cf69c54a5bfc4942f84afd6757f2bf8c12ec3a5f1940334755cf,V6 ART1 authored,passed
+B16,SUP-01,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-01-10.tscn,5310e52197014dc09559aa9fb276857e2a6121d36321970b4d8ff2ef90c60405,V6 ART1 authored,passed
+B16,SUP-01,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-01-11.tscn,d56ae4af6c9d8b8ea1a5f3d6c9bedba31addc37ccd53de3af6f2d0e01ba04527,V6 ART1 authored,passed
+B17,SUP-02,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-02-1.tscn,e0360cde0c361f57b4c0edea15f7a99a746507952aab2c80c156d19ae3dd51a5,Claude preserved,passed
+B17,SUP-02,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-02-2.tscn,e2bb0f144b9a735edc5464dc95fed9ba9964f5f4f1834ca0d5b14dbf1c557b88,Claude preserved,passed
+B17,SUP-02,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-02-3.tscn,97cb6d2bf978940df53a267b73de8b1169025a2171976b01817aac589ed1dab6,Claude preserved,passed
+B17,SUP-02,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-02-4.tscn,ba71e4e588c543a020a6e910dd54aeb8876c5029c5d98529d23dedae420d7137,Claude preserved,passed
+B17,SUP-02,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-02-5.tscn,be7b6cf59b8a105e6d9b6ee0f1340d314c3fedc03f48e7b90b839d9dacc4bb25,Claude preserved,passed
+B17,SUP-02,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-02-6.tscn,504db9d75014023b0f06b62558c229c388beeb8cf10daaeb28fca674388e320e,V6 ART1 authored,passed
+B17,SUP-02,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-02-7.tscn,a6d4c482535f88e15674274e3bd54a7181d39c4f4b1073725b00d939a87602a4,V6 ART1 authored,passed
+B17,SUP-02,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-02-8.tscn,199030ee6aa7e37736214753a7d140490ced8c7ca03377017fb7f3f0d4f6614c,V6 ART1 authored,passed
+B17,SUP-02,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-02-9.tscn,949fe27b0ed8382b152434d26a008bc30eb1652da1aa4c5172e2f3876a6aac57,V6 ART1 authored,passed
+B17,SUP-02,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-02-10.tscn,ca0c9af8d5e95ea78ca8239269a75709922880ce169b8b7acd2455981b05916c,V6 ART1 authored,passed
+B17,SUP-02,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-02-11.tscn,b2aa32b9a0870f712d576ebbedeab14b691d86dae18a863e53fc32f6a1931d41,V6 ART1 authored,passed
+B18,SUP-03,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-03-1.tscn,3cee6f2fdec8f299ceaf16a106f6887d1443162edf85410f46a9027e5057184d,Claude preserved,passed
+B18,SUP-03,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-03-2.tscn,85383bfdf900b828df37b622d1b2bd914bd548c3c5e279984e33573d1f9634e7,Claude preserved,passed
+B18,SUP-03,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-03-3.tscn,af72d44936dc088aabc0ee8b66f0c8b3907d36c77b5086f1b7187a0844b2a05a,Claude preserved,passed
+B18,SUP-03,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-03-4.tscn,eae90e46af575993912e50cac28bc3c0b07494e2989a9c55e929235865230531,Claude preserved,passed
+B18,SUP-03,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-03-5.tscn,9d9a847002ebface9302f8cd315b7bdc4d50a9fa3e6babf8fd762f7ec3852681,Claude preserved,passed
+B18,SUP-03,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-03-6.tscn,86c34efed033ab310e77dc0850ff9df10a13db7649615adda91bfdd432653c3b,V6 ART1 authored,passed
+B18,SUP-03,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-03-7.tscn,b8e6d542ee1ebd74b7d7dddac69629289aea2d20a8e4a0a07cecc16183412a2c,V6 ART1 authored,passed
+B18,SUP-03,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-03-8.tscn,1f86e7aa4f61e2f87bb5a0517437419c1564fb7e5bcb2a33ddbc1523c43c3e68,V6 ART1 authored,passed
+B18,SUP-03,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-03-9.tscn,18ac84201ef5dcd7ae87aefb06e54f89b13b95ec24738764f061f605008aa6d0,V6 ART1 authored,passed
+B18,SUP-03,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-03-10.tscn,d5e64604bb1d7bffdafb081096db8718af92d96d2de1dd024128a24a49e38968,V6 ART1 authored,passed
+B18,SUP-03,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-03-11.tscn,b29dc483b5cfe5e741d4276aa4e523682c262286f36a24dc2c544eb89d2a701b,V6 ART1 authored,passed
+B19,SUP-04,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-04-1.tscn,defde80a8108829e01992ff5cdab5d4fb55f3f5f4fb5a7919add06d4dc6b8b8b,Claude preserved,passed
+B19,SUP-04,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-04-2.tscn,0c5699328f5f050c51eaa1da85fb2d265cc62a53ca31d881a4b2fbc03e01dacd,Claude preserved,passed
+B19,SUP-04,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-04-3.tscn,c993e7ff453a46972c2431009f88f5ae64fc52a23a7a25d58b58c92d8788762a,Claude preserved,passed
+B19,SUP-04,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-04-4.tscn,dafc1bbebeb1df0c7c38fed30b2c2a2234ba46fd7241d0fa0ef5620e9f5337db,Claude preserved,passed
+B19,SUP-04,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-04-5.tscn,e1b5d7bf8c1a976a284922c80e55fc055afee40c0bbc8841ca2661a3a77c8eb8,Claude preserved,passed
+B19,SUP-04,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-04-6.tscn,ee24ff4a01fa90c8fb7fde3f3124c14ca701faa44ba8ee2bdb37fe021bcecddc,V6 ART1 authored,passed
+B19,SUP-04,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-04-7.tscn,35655d83ea813d2e0fa21a9933117bc86e968bb0fb114512badeaddfa6caada6,V6 ART1 authored,passed
+B19,SUP-04,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-04-8.tscn,ffb3cd5193f964296e4182d148609bb8ff45525a1056c4fc2f3b9a212f445c90,V6 ART1 authored,passed
+B19,SUP-04,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-04-9.tscn,94c82a3661a086d558210b7b3a7f05adc4946967db2dac2b48409446cc9f383f,V6 ART1 authored,passed
+B19,SUP-04,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-04-10.tscn,541f5acb2452254b2f315b95c98d18f1af186bdec3dcd98c53cf66694613ff77,V6 ART1 authored,passed
+B19,SUP-04,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-04-11.tscn,fdc544b2f1832e38297303fd6619117856450eeafbbffd9c451550e3cb2c9bcd,V6 ART1 authored,passed
+B20,SUP-05,1,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-05-1.tscn,665172e1383f6437a0e9c979b1fdeed1f0037f47ea7a05283981d348ffa20321,Claude preserved,passed
+B20,SUP-05,2,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-05-2.tscn,af4f4e86d0aece5f609c5675b1dd12c60bc962e3162c284eed8ea699f0cdfd80,Claude preserved,passed
+B20,SUP-05,3,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-05-3.tscn,62432ba23e950be59a23beebd905ab9bf5acbfc9fa400cbe78c7c63ce7c6fd09,Claude preserved,passed
+B20,SUP-05,4,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-05-4.tscn,7e20cfabe5038a53abb5634e25e89df142006401a1976c6d48c54df2c284e3d5,Claude preserved,passed
+B20,SUP-05,5,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v2/levels/SUP-05-5.tscn,bf7cfc84184b7d2cbf433919ef79e26d8a9b10e00cc27cac20cf31b596ce5a8a,Claude preserved,passed
+B20,SUP-05,6,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-05-6.tscn,2ae158ef1931df9ae2d50e0ebe4611ae778a2eed34bfc3c2b41896cd701e2626,V6 ART1 authored,passed
+B20,SUP-05,7,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-05-7.tscn,483417191e7a9fcd604634454331c4bfe0954e28cba4c91d2e7c2f7056b7ac1e,V6 ART1 authored,passed
+B20,SUP-05,8,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-05-8.tscn,f525f837b55b910ccbe62c542c9bacb133536525f916fa4b87ccbe1d4f1a02d5,V6 ART1 authored,passed
+B20,SUP-05,9,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-05-9.tscn,8af958c2b3813a9133e40a3af341c49cade1d88ac6e4a361b3b2db0690b3a3fe,V6 ART1 authored,passed
+B20,SUP-05,10,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-05-10.tscn,439d2a692c5c96adc1eeeb789e2b2375173b0e310265b929ced3301894f5fb34,V6 ART1 authored,passed
+B20,SUP-05,11,13_BUILDING_PASSPORTS_RU.md,godot/project/assets/city/architecture-v6/levels/SUP-05-11.tscn,ad4f56369d0312adff1bbea4fc14afed058a7945feeabdca0aad61dd9231b04d,V6 ART1 authored,passed

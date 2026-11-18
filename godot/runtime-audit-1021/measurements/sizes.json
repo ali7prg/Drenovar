@@ -1,0 +1,122 @@
+{
+ "tool": "godot/tools/measure_field_scale.gd",
+ "method": "heights of the GLB models (AABB of their meshes) at the game's scales; Godot 4.6.3 headless Linux",
+ "units": "metres",
+ "city": {
+  "barracks26_m": 5.18,
+  "farm_m": 7.29,
+  "hall_m": 11.53,
+  "house_m": 7.35,
+  "well_m": 4.62
+ },
+ "creatures": {
+  "dragor": {
+   "L1_city_m": 4.39,
+   "L1_world_1020_m": 4.39,
+   "L1_world_1021_m": 2.63,
+   "L3_city_m": 5.58,
+   "L3_world_1020_m": 5.58,
+   "L3_world_1021_m": 3.35
+  },
+  "kamneklyk": {
+   "L1_city_m": 4.18,
+   "L1_world_1020_m": 4.18,
+   "L1_world_1021_m": 2.51,
+   "L3_city_m": 5.32,
+   "L3_world_1020_m": 5.32,
+   "L3_world_1021_m": 3.19
+  },
+  "tenerys": {
+   "L1_city_m": 3.94,
+   "L1_world_1020_m": 3.94,
+   "L1_world_1021_m": 2.36,
+   "L3_city_m": 5.01,
+   "L3_world_1020_m": 5.01,
+   "L3_world_1021_m": 3.01
+  },
+  "velkor": {
+   "L1_city_m": 6.7,
+   "L1_world_1020_m": 6.7,
+   "L1_world_1021_m": 4.02,
+   "L3_city_m": 8.51,
+   "L3_world_1020_m": 8.51,
+   "L3_world_1021_m": 5.11
+  }
+ },
+ "soldiers": {
+  "ENG-01": {
+   "1020_both_maps_m": 2.09,
+   "1021_city_m": 1.82,
+   "1021_world_m": 0.91,
+   "parade_m": 1.82
+  },
+  "ENG-02": {
+   "1020_both_maps_m": 2.15,
+   "1021_city_m": 1.87,
+   "1021_world_m": 0.93,
+   "parade_m": 1.87
+  },
+  "ENG-03": {
+   "1020_both_maps_m": 2.2,
+   "1021_city_m": 1.91,
+   "1021_world_m": 0.96,
+   "parade_m": 1.91
+  },
+  "ENG-04": {
+   "1020_both_maps_m": 2.07,
+   "1021_city_m": 1.8,
+   "1021_world_m": 0.9,
+   "parade_m": 1.8
+  },
+  "ENG-05": {
+   "1020_both_maps_m": 3.14,
+   "1021_city_m": 2.73,
+   "1021_world_m": 1.36,
+   "parade_m": 2.73
+  },
+  "ENG-06": {
+   "1020_both_maps_m": 3.26,
+   "1021_city_m": 2.83,
+   "1021_world_m": 1.42,
+   "parade_m": 2.83
+  },
+  "ENG-07": {
+   "1020_both_maps_m": 2.22,
+   "1021_city_m": 1.93,
+   "1021_world_m": 0.96,
+   "parade_m": 1.93
+  },
+  "ENG-08": {
+   "1020_both_maps_m": 2.07,
+   "1021_city_m": 1.8,
+   "1021_world_m": 0.9,
+   "parade_m": 1.8
+  },
+  "ENG-09": {
+   "1020_both_maps_m": 2.02,
+   "1021_city_m": 1.75,
+   "1021_world_m": 0.88,
+   "parade_m": 1.75
+  },
+  "ENG-10": {
+   "1020_both_maps_m": 2.09,
+   "1021_city_m": 1.82,
+   "1021_world_m": 0.91,
+   "parade_m": 1.82
+  }
+ },
+ "world": {
+  "common_trees_m": [
+   2.04,
+   3.88
+  ],
+  "hall_m": [
+   3.23,
+   4.3
+  ],
+  "house_m": [
+   0.99,
+   1.65
+  ]
+ }
+}

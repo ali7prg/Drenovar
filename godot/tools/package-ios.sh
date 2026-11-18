@@ -5,6 +5,7 @@ output_dir="${1:-"$project_root/build/ios"}"
 mkdir -p "$output_dir"
 output_dir="$(cd "$output_dir" && pwd)"
 godot_bin="${GODOT_BIN:-godot}"
+test -s "$project_root/project/assets/city/architecture-v6/units/SIEGE-RAM-01.tscn"
 "$godot_bin" --headless --path "$project_root/project" --editor --import
 "$godot_bin" --headless --path "$project_root/project" --export-release iOS "$output_dir/DRENOVAR.ipa"
 test -s "$output_dir/DRENOVAR.xcodeproj/project.pbxproj"

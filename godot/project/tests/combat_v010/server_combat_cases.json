@@ -1,0 +1,3112 @@
+{
+  "packageVersion": "0.1.0",
+  "kind": "offline_real_server_simulator_output",
+  "sourceSnapshot": "365276cc169943adc48847c0e9d86ae23e77fb3e",
+  "moduleSHA256": {
+    "gameplay37/server/combat.mjs": "918540ade91ed2878f4fbc2b4553fef85026fecf6475c26c1ecab650e8916715",
+    "gameplay37/server/catalog.mjs": "0c9a9971f8cc176c8885bfc2a5e6690ea0c1ce23d83667b20c796a9ba8e56a9f",
+    "dist/army/roster.js": "a8d34b8810fd8a2050885748715cd03cddc60c9698fdbf409c11cd46ac2ffaa4",
+    "gameplay37/server/world62.mjs": "d2b1f27897d59afd003dd1966c1b8f70c170af0769bd3f5f3b20dc53ffafc7c2",
+    "dist/creatures37/formation60.js": "c8a9121c4fafba52d62069afbb53f7e7868d92bf39fbd34ac937fe060a5f8e3e"
+  },
+  "note": "Synthetic armies, actual supplied deterministic simulator; not player data or graphics validation.",
+  "cases": [
+    {
+      "name": "single_spearman_tenerys_defeat",
+      "party": {
+        "ENG-01": 1
+      },
+      "species": "tenerys",
+      "level": 1,
+      "seed": 42,
+      "source": "city",
+      "result": {
+        "outcome": "defeat",
+        "duration": 4400,
+        "surviving": {},
+        "wounded": {
+          "ENG-01": 1
+        },
+        "dead": {},
+        "creatureHP": 1311,
+        "events": [
+          {
+            "at": 600,
+            "kind": "creature_attack",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 42,
+            "hp": 93
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 44,
+            "creatureHP": 1356
+          },
+          {
+            "at": 2400,
+            "kind": "creature_attack",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 43,
+            "hp": 50
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 45,
+            "creatureHP": 1311
+          },
+          {
+            "at": 4200,
+            "kind": "pounce",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 73,
+            "hp": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "spear_sword_tenerys",
+      "party": {
+        "ENG-01": 10,
+        "ENG-02": 10
+      },
+      "species": "tenerys",
+      "level": 1,
+      "seed": 43,
+      "source": "city",
+      "result": {
+        "outcome": "victory",
+        "duration": 2600,
+        "surviving": {
+          "ENG-01": 10,
+          "ENG-02": 10
+        },
+        "wounded": {},
+        "dead": {},
+        "creatureHP": 0,
+        "events": [
+          {
+            "at": 600,
+            "kind": "creature_attack",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 42,
+            "hp": 93
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 44,
+            "creatureHP": 1356
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 1,
+            "damage": 42,
+            "creatureHP": 1314
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 5,
+            "damage": 45,
+            "creatureHP": 1269
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 6,
+            "damage": 42,
+            "creatureHP": 1227
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 0,
+            "damage": 61,
+            "creatureHP": 1166
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 1,
+            "damage": 67,
+            "creatureHP": 1099
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 5,
+            "damage": 62,
+            "creatureHP": 1037
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 6,
+            "damage": 65,
+            "creatureHP": 972
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 2,
+            "damage": 43,
+            "creatureHP": 929
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 7,
+            "damage": 40,
+            "creatureHP": 889
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 2,
+            "damage": 62,
+            "creatureHP": 827
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 7,
+            "damage": 56,
+            "creatureHP": 771
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 3,
+            "damage": 41,
+            "creatureHP": 730
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 8,
+            "damage": 42,
+            "creatureHP": 688
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 3,
+            "damage": 62,
+            "creatureHP": 626
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 8,
+            "damage": 56,
+            "creatureHP": 570
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 4,
+            "damage": 45,
+            "creatureHP": 525
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 9,
+            "damage": 45,
+            "creatureHP": 480
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 4,
+            "damage": 60,
+            "creatureHP": 420
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 9,
+            "damage": 59,
+            "creatureHP": 361
+          },
+          {
+            "at": 2400,
+            "kind": "creature_attack",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 47,
+            "hp": 46
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 46,
+            "creatureHP": 315
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 1,
+            "damage": 41,
+            "creatureHP": 274
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 5,
+            "damage": 42,
+            "creatureHP": 232
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 6,
+            "damage": 41,
+            "creatureHP": 191
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 0,
+            "damage": 59,
+            "creatureHP": 132
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 1,
+            "damage": 62,
+            "creatureHP": 70
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 5,
+            "damage": 64,
+            "creatureHP": 6
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 6,
+            "damage": 66,
+            "creatureHP": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "ranged_tenerys",
+      "party": {
+        "ENG-03": 10,
+        "ENG-04": 5,
+        "ENG-10": 5
+      },
+      "species": "tenerys",
+      "level": 1,
+      "seed": 44,
+      "source": "city",
+      "result": {
+        "outcome": "victory",
+        "duration": 200,
+        "surviving": {
+          "ENG-03": 10,
+          "ENG-04": 5,
+          "ENG-10": 5
+        },
+        "wounded": {},
+        "dead": {},
+        "creatureHP": 0,
+        "events": [
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 0,
+            "damage": 71,
+            "creatureHP": 1329
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 1,
+            "damage": 81,
+            "creatureHP": 1248
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 2,
+            "damage": 77,
+            "creatureHP": 1171
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 3,
+            "damage": 78,
+            "creatureHP": 1093
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 4,
+            "damage": 83,
+            "creatureHP": 1010
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 5,
+            "damage": 71,
+            "creatureHP": 939
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 6,
+            "damage": 86,
+            "creatureHP": 853
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 7,
+            "damage": 81,
+            "creatureHP": 772
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 8,
+            "damage": 79,
+            "creatureHP": 693
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 9,
+            "damage": 79,
+            "creatureHP": 614
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 0,
+            "damage": 103,
+            "creatureHP": 511
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 1,
+            "damage": 102,
+            "creatureHP": 409
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 2,
+            "damage": 96,
+            "creatureHP": 313
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 3,
+            "damage": 104,
+            "creatureHP": 209
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 4,
+            "damage": 89,
+            "creatureHP": 120
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-10",
+            "index": 0,
+            "damage": 53,
+            "creatureHP": 67
+          },
+          {
+            "at": 200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-10",
+            "index": 1,
+            "damage": 56,
+            "creatureHP": 11
+          },
+          {
+            "at": 200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-10",
+            "index": 2,
+            "damage": 50,
+            "creatureHP": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "mixed_all_types_velkor",
+      "party": {
+        "ENG-01": 3,
+        "ENG-02": 3,
+        "ENG-03": 3,
+        "ENG-04": 3,
+        "ENG-05": 3,
+        "ENG-06": 3,
+        "ENG-07": 3,
+        "ENG-08": 3,
+        "ENG-09": 3,
+        "ENG-10": 3
+      },
+      "species": "velkor",
+      "level": 1,
+      "seed": 45,
+      "source": "world",
+      "result": {
+        "outcome": "victory",
+        "duration": 2000,
+        "surviving": {
+          "ENG-01": 3,
+          "ENG-02": 3,
+          "ENG-03": 3,
+          "ENG-04": 3,
+          "ENG-05": 3,
+          "ENG-06": 3,
+          "ENG-07": 3,
+          "ENG-08": 3,
+          "ENG-09": 3,
+          "ENG-10": 3
+        },
+        "wounded": {},
+        "dead": {},
+        "creatureHP": 0,
+        "events": [
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 0,
+            "damage": 65,
+            "creatureHP": 1835
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 1,
+            "damage": 76,
+            "creatureHP": 1759
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 2,
+            "damage": 80,
+            "creatureHP": 1679
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 0,
+            "damage": 91,
+            "creatureHP": 1588
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 1,
+            "damage": 88,
+            "creatureHP": 1500
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 2,
+            "damage": 86,
+            "creatureHP": 1414
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-10",
+            "index": 0,
+            "damage": 54,
+            "creatureHP": 1360
+          },
+          {
+            "at": 200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-10",
+            "index": 1,
+            "damage": 53,
+            "creatureHP": 1307
+          },
+          {
+            "at": 200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-10",
+            "index": 2,
+            "damage": 54,
+            "creatureHP": 1253
+          },
+          {
+            "at": 400,
+            "kind": "creature_attack",
+            "unitId": "ENG-05",
+            "index": 1,
+            "damage": 61,
+            "hp": 89
+          },
+          {
+            "at": 600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 1,
+            "damage": 56,
+            "creatureHP": 1197
+          },
+          {
+            "at": 600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 0,
+            "damage": 120,
+            "creatureHP": 1077
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 0,
+            "damage": 62,
+            "creatureHP": 1015
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 1,
+            "damage": 117,
+            "creatureHP": 898
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 2,
+            "damage": 102,
+            "creatureHP": 796
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 40,
+            "creatureHP": 756
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 0,
+            "damage": 58,
+            "creatureHP": 698
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 2,
+            "damage": 62,
+            "creatureHP": 636
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-08",
+            "index": 0,
+            "damage": 37,
+            "creatureHP": 599
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-09",
+            "index": 0,
+            "damage": 33,
+            "creatureHP": 566
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 1,
+            "damage": 42,
+            "creatureHP": 524
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 1,
+            "damage": 52,
+            "creatureHP": 472
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-08",
+            "index": 1,
+            "damage": 35,
+            "creatureHP": 437
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-09",
+            "index": 1,
+            "damage": 30,
+            "creatureHP": 407
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 2,
+            "damage": 38,
+            "creatureHP": 369
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 2,
+            "damage": 58,
+            "creatureHP": 311
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-08",
+            "index": 2,
+            "damage": 36,
+            "creatureHP": 275
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-09",
+            "index": 2,
+            "damage": 29,
+            "creatureHP": 246
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-07",
+            "index": 0,
+            "damage": 77,
+            "creatureHP": 169
+          },
+          {
+            "at": 1800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-07",
+            "index": 1,
+            "damage": 68,
+            "creatureHP": 101
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 0,
+            "damage": 67,
+            "creatureHP": 34
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 1,
+            "damage": 77,
+            "creatureHP": 0
+          }
+        ]
+      },
+      "worldTimeline": [
+        [
+          0,
+          "soldier_attack",
+          "ENG-03",
+          0,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-03",
+          1,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-03",
+          2,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-04",
+          0,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-04",
+          1,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-04",
+          2,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-10",
+          0,
+          null
+        ],
+        [
+          200,
+          "soldier_attack",
+          "ENG-10",
+          1,
+          null
+        ],
+        [
+          400,
+          "creature_attack",
+          "ENG-05",
+          1,
+          89
+        ],
+        [
+          600,
+          "soldier_attack",
+          "ENG-05",
+          1,
+          null
+        ],
+        [
+          600,
+          "soldier_attack",
+          "ENG-06",
+          0,
+          null
+        ],
+        [
+          800,
+          "soldier_attack",
+          "ENG-05",
+          0,
+          null
+        ],
+        [
+          800,
+          "soldier_attack",
+          "ENG-06",
+          1,
+          null
+        ],
+        [
+          1000,
+          "soldier_attack",
+          "ENG-01",
+          0,
+          null
+        ],
+        [
+          1000,
+          "soldier_attack",
+          "ENG-02",
+          0,
+          null
+        ],
+        [
+          1000,
+          "soldier_attack",
+          "ENG-08",
+          0,
+          null
+        ],
+        [
+          1000,
+          "soldier_attack",
+          "ENG-09",
+          0,
+          null
+        ],
+        [
+          1200,
+          "soldier_attack",
+          "ENG-01",
+          1,
+          null
+        ],
+        [
+          1200,
+          "soldier_attack",
+          "ENG-02",
+          1,
+          null
+        ],
+        [
+          1200,
+          "soldier_attack",
+          "ENG-08",
+          1,
+          null
+        ],
+        [
+          1200,
+          "soldier_attack",
+          "ENG-09",
+          1,
+          null
+        ],
+        [
+          1400,
+          "soldier_attack",
+          "ENG-01",
+          2,
+          null
+        ],
+        [
+          1400,
+          "soldier_attack",
+          "ENG-02",
+          2,
+          null
+        ],
+        [
+          1600,
+          "soldier_attack",
+          "ENG-07",
+          0,
+          null
+        ],
+        [
+          1800,
+          "soldier_attack",
+          "ENG-07",
+          1,
+          null
+        ],
+        [
+          2000,
+          "soldier_attack",
+          "ENG-03",
+          0,
+          null
+        ],
+        [
+          2000,
+          "soldier_attack",
+          "ENG-03",
+          1,
+          null
+        ]
+      ]
+    },
+    {
+      "name": "large_velkor_l3",
+      "party": {
+        "ENG-01": 20,
+        "ENG-02": 20,
+        "ENG-03": 20,
+        "ENG-04": 20,
+        "ENG-05": 10,
+        "ENG-06": 10
+      },
+      "species": "velkor",
+      "level": 3,
+      "seed": 46,
+      "source": "world",
+      "result": {
+        "outcome": "victory",
+        "duration": 4000,
+        "surviving": {
+          "ENG-01": 19,
+          "ENG-02": 20,
+          "ENG-03": 20,
+          "ENG-04": 20,
+          "ENG-05": 9,
+          "ENG-06": 10
+        },
+        "wounded": {
+          "ENG-01": 1,
+          "ENG-05": 1
+        },
+        "dead": {},
+        "creatureHP": 0,
+        "events": [
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 0,
+            "damage": 50,
+            "creatureHP": 11350
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 1,
+            "damage": 58,
+            "creatureHP": 11292
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 2,
+            "damage": 53,
+            "creatureHP": 11239
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 3,
+            "damage": 51,
+            "creatureHP": 11188
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 4,
+            "damage": 52,
+            "creatureHP": 11136
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 5,
+            "damage": 52,
+            "creatureHP": 11084
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 6,
+            "damage": 51,
+            "creatureHP": 11033
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 7,
+            "damage": 60,
+            "creatureHP": 10973
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 8,
+            "damage": 59,
+            "creatureHP": 10914
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 9,
+            "damage": 59,
+            "creatureHP": 10855
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 10,
+            "damage": 55,
+            "creatureHP": 10800
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 11,
+            "damage": 53,
+            "creatureHP": 10747
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 12,
+            "damage": 55,
+            "creatureHP": 10692
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 13,
+            "damage": 55,
+            "creatureHP": 10637
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 14,
+            "damage": 51,
+            "creatureHP": 10586
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 15,
+            "damage": 59,
+            "creatureHP": 10527
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 16,
+            "damage": 53,
+            "creatureHP": 10474
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 17,
+            "damage": 55,
+            "creatureHP": 10419
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 18,
+            "damage": 58,
+            "creatureHP": 10361
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 19,
+            "damage": 50,
+            "creatureHP": 10311
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 0,
+            "damage": 75,
+            "creatureHP": 10236
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 1,
+            "damage": 73,
+            "creatureHP": 10163
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 2,
+            "damage": 76,
+            "creatureHP": 10087
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 3,
+            "damage": 72,
+            "creatureHP": 10015
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 4,
+            "damage": 67,
+            "creatureHP": 9948
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 5,
+            "damage": 74,
+            "creatureHP": 9874
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 6,
+            "damage": 67,
+            "creatureHP": 9807
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 7,
+            "damage": 75,
+            "creatureHP": 9732
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 8,
+            "damage": 77,
+            "creatureHP": 9655
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 9,
+            "damage": 72,
+            "creatureHP": 9583
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 10,
+            "damage": 81,
+            "creatureHP": 9502
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 11,
+            "damage": 75,
+            "creatureHP": 9427
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 12,
+            "damage": 68,
+            "creatureHP": 9359
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 13,
+            "damage": 76,
+            "creatureHP": 9283
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 14,
+            "damage": 80,
+            "creatureHP": 9203
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 15,
+            "damage": 73,
+            "creatureHP": 9130
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 16,
+            "damage": 73,
+            "creatureHP": 9057
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 17,
+            "damage": 75,
+            "creatureHP": 8982
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 18,
+            "damage": 66,
+            "creatureHP": 8916
+          },
+          {
+            "at": 0,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 19,
+            "damage": 76,
+            "creatureHP": 8840
+          },
+          {
+            "at": 400,
+            "kind": "creature_attack",
+            "unitId": "ENG-05",
+            "index": 1,
+            "damage": 198,
+            "hp": 0
+          },
+          {
+            "at": 600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 6,
+            "damage": 42,
+            "creatureHP": 8798
+          },
+          {
+            "at": 600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 0,
+            "damage": 84,
+            "creatureHP": 8714
+          },
+          {
+            "at": 600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 5,
+            "damage": 88,
+            "creatureHP": 8626
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 0,
+            "damage": 45,
+            "creatureHP": 8581
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 3,
+            "damage": 48,
+            "creatureHP": 8533
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 4,
+            "damage": 45,
+            "creatureHP": 8488
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 5,
+            "damage": 43,
+            "creatureHP": 8445
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 8,
+            "damage": 47,
+            "creatureHP": 8398
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 9,
+            "damage": 48,
+            "creatureHP": 8350
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 1,
+            "damage": 85,
+            "creatureHP": 8265
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 2,
+            "damage": 87,
+            "creatureHP": 8178
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 6,
+            "damage": 86,
+            "creatureHP": 8092
+          },
+          {
+            "at": 800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 7,
+            "damage": 77,
+            "creatureHP": 8015
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 32,
+            "creatureHP": 7983
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 5,
+            "damage": 28,
+            "creatureHP": 7955
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 10,
+            "damage": 28,
+            "creatureHP": 7927
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 15,
+            "damage": 32,
+            "creatureHP": 7895
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 0,
+            "damage": 45,
+            "creatureHP": 7850
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 5,
+            "damage": 41,
+            "creatureHP": 7809
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 10,
+            "damage": 39,
+            "creatureHP": 7770
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 15,
+            "damage": 43,
+            "creatureHP": 7727
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 2,
+            "damage": 41,
+            "creatureHP": 7686
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 7,
+            "damage": 43,
+            "creatureHP": 7643
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 3,
+            "damage": 93,
+            "creatureHP": 7550
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 4,
+            "damage": 86,
+            "creatureHP": 7464
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 8,
+            "damage": 80,
+            "creatureHP": 7384
+          },
+          {
+            "at": 1000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 9,
+            "damage": 87,
+            "creatureHP": 7297
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 1,
+            "damage": 32,
+            "creatureHP": 7265
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 6,
+            "damage": 28,
+            "creatureHP": 7237
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 11,
+            "damage": 28,
+            "creatureHP": 7209
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 16,
+            "damage": 28,
+            "creatureHP": 7181
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 1,
+            "damage": 41,
+            "creatureHP": 7140
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 6,
+            "damage": 42,
+            "creatureHP": 7098
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 11,
+            "damage": 47,
+            "creatureHP": 7051
+          },
+          {
+            "at": 1200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 16,
+            "damage": 43,
+            "creatureHP": 7008
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 2,
+            "damage": 33,
+            "creatureHP": 6975
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 7,
+            "damage": 31,
+            "creatureHP": 6944
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 12,
+            "damage": 32,
+            "creatureHP": 6912
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 17,
+            "damage": 28,
+            "creatureHP": 6884
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 2,
+            "damage": 43,
+            "creatureHP": 6841
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 7,
+            "damage": 46,
+            "creatureHP": 6795
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 12,
+            "damage": 45,
+            "creatureHP": 6750
+          },
+          {
+            "at": 1400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 17,
+            "damage": 40,
+            "creatureHP": 6710
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 3,
+            "damage": 30,
+            "creatureHP": 6680
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 4,
+            "damage": 33,
+            "creatureHP": 6647
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 8,
+            "damage": 30,
+            "creatureHP": 6617
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 9,
+            "damage": 31,
+            "creatureHP": 6586
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 13,
+            "damage": 27,
+            "creatureHP": 6559
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 14,
+            "damage": 30,
+            "creatureHP": 6529
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 18,
+            "damage": 30,
+            "creatureHP": 6499
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 19,
+            "damage": 28,
+            "creatureHP": 6471
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 3,
+            "damage": 40,
+            "creatureHP": 6431
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 4,
+            "damage": 46,
+            "creatureHP": 6385
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 8,
+            "damage": 48,
+            "creatureHP": 6337
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 9,
+            "damage": 47,
+            "creatureHP": 6290
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 13,
+            "damage": 41,
+            "creatureHP": 6249
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 14,
+            "damage": 43,
+            "creatureHP": 6206
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 18,
+            "damage": 47,
+            "creatureHP": 6159
+          },
+          {
+            "at": 1600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 19,
+            "damage": 42,
+            "creatureHP": 6117
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 0,
+            "damage": 54,
+            "creatureHP": 6063
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 1,
+            "damage": 59,
+            "creatureHP": 6004
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 2,
+            "damage": 59,
+            "creatureHP": 5945
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 3,
+            "damage": 54,
+            "creatureHP": 5891
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 4,
+            "damage": 53,
+            "creatureHP": 5838
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 5,
+            "damage": 50,
+            "creatureHP": 5788
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 6,
+            "damage": 58,
+            "creatureHP": 5730
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 7,
+            "damage": 54,
+            "creatureHP": 5676
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 8,
+            "damage": 55,
+            "creatureHP": 5621
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 9,
+            "damage": 55,
+            "creatureHP": 5566
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 10,
+            "damage": 50,
+            "creatureHP": 5516
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 11,
+            "damage": 53,
+            "creatureHP": 5463
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 12,
+            "damage": 51,
+            "creatureHP": 5412
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 13,
+            "damage": 54,
+            "creatureHP": 5358
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 14,
+            "damage": 57,
+            "creatureHP": 5301
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 15,
+            "damage": 54,
+            "creatureHP": 5247
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 16,
+            "damage": 57,
+            "creatureHP": 5190
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 17,
+            "damage": 52,
+            "creatureHP": 5138
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 18,
+            "damage": 54,
+            "creatureHP": 5084
+          },
+          {
+            "at": 2000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 19,
+            "damage": 58,
+            "creatureHP": 5026
+          },
+          {
+            "at": 2400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 6,
+            "damage": 44,
+            "creatureHP": 4982
+          },
+          {
+            "at": 2400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 0,
+            "damage": 92,
+            "creatureHP": 4890
+          },
+          {
+            "at": 2400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 5,
+            "damage": 86,
+            "creatureHP": 4804
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 0,
+            "damage": 42,
+            "creatureHP": 4762
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 3,
+            "damage": 40,
+            "creatureHP": 4722
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 4,
+            "damage": 48,
+            "creatureHP": 4674
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 5,
+            "damage": 47,
+            "creatureHP": 4627
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 8,
+            "damage": 46,
+            "creatureHP": 4581
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 9,
+            "damage": 46,
+            "creatureHP": 4535
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 1,
+            "damage": 85,
+            "creatureHP": 4450
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 2,
+            "damage": 93,
+            "creatureHP": 4357
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 6,
+            "damage": 86,
+            "creatureHP": 4271
+          },
+          {
+            "at": 2600,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 7,
+            "damage": 91,
+            "creatureHP": 4180
+          },
+          {
+            "at": 2600,
+            "kind": "creature_attack",
+            "unitId": "ENG-01",
+            "index": 0,
+            "damage": 178,
+            "hp": 0
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 5,
+            "damage": 33,
+            "creatureHP": 4147
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 10,
+            "damage": 32,
+            "creatureHP": 4115
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 15,
+            "damage": 29,
+            "creatureHP": 4086
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 0,
+            "damage": 44,
+            "creatureHP": 4042
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 5,
+            "damage": 44,
+            "creatureHP": 3998
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 10,
+            "damage": 44,
+            "creatureHP": 3954
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 15,
+            "damage": 46,
+            "creatureHP": 3908
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 2,
+            "damage": 40,
+            "creatureHP": 3868
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-05",
+            "index": 7,
+            "damage": 41,
+            "creatureHP": 3827
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 3,
+            "damage": 87,
+            "creatureHP": 3740
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 4,
+            "damage": 83,
+            "creatureHP": 3657
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 8,
+            "damage": 89,
+            "creatureHP": 3568
+          },
+          {
+            "at": 2800,
+            "kind": "soldier_attack",
+            "unitId": "ENG-06",
+            "index": 9,
+            "damage": 76,
+            "creatureHP": 3492
+          },
+          {
+            "at": 3000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 1,
+            "damage": 31,
+            "creatureHP": 3461
+          },
+          {
+            "at": 3000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 6,
+            "damage": 31,
+            "creatureHP": 3430
+          },
+          {
+            "at": 3000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 11,
+            "damage": 31,
+            "creatureHP": 3399
+          },
+          {
+            "at": 3000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 16,
+            "damage": 31,
+            "creatureHP": 3368
+          },
+          {
+            "at": 3000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 1,
+            "damage": 45,
+            "creatureHP": 3323
+          },
+          {
+            "at": 3000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 6,
+            "damage": 42,
+            "creatureHP": 3281
+          },
+          {
+            "at": 3000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 11,
+            "damage": 45,
+            "creatureHP": 3236
+          },
+          {
+            "at": 3000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 16,
+            "damage": 44,
+            "creatureHP": 3192
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 2,
+            "damage": 27,
+            "creatureHP": 3165
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 7,
+            "damage": 28,
+            "creatureHP": 3137
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 12,
+            "damage": 32,
+            "creatureHP": 3105
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 17,
+            "damage": 30,
+            "creatureHP": 3075
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 2,
+            "damage": 47,
+            "creatureHP": 3028
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 7,
+            "damage": 39,
+            "creatureHP": 2989
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 12,
+            "damage": 40,
+            "creatureHP": 2949
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 17,
+            "damage": 40,
+            "creatureHP": 2909
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 0,
+            "damage": 71,
+            "creatureHP": 2838
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 1,
+            "damage": 76,
+            "creatureHP": 2762
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 2,
+            "damage": 69,
+            "creatureHP": 2693
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 3,
+            "damage": 73,
+            "creatureHP": 2620
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 4,
+            "damage": 78,
+            "creatureHP": 2542
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 5,
+            "damage": 74,
+            "creatureHP": 2468
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 6,
+            "damage": 67,
+            "creatureHP": 2401
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 7,
+            "damage": 67,
+            "creatureHP": 2334
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 8,
+            "damage": 71,
+            "creatureHP": 2263
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 9,
+            "damage": 72,
+            "creatureHP": 2191
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 10,
+            "damage": 72,
+            "creatureHP": 2119
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 11,
+            "damage": 70,
+            "creatureHP": 2049
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 12,
+            "damage": 78,
+            "creatureHP": 1971
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 13,
+            "damage": 79,
+            "creatureHP": 1892
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 14,
+            "damage": 76,
+            "creatureHP": 1816
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 15,
+            "damage": 67,
+            "creatureHP": 1749
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 16,
+            "damage": 73,
+            "creatureHP": 1676
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 17,
+            "damage": 70,
+            "creatureHP": 1606
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 18,
+            "damage": 66,
+            "creatureHP": 1540
+          },
+          {
+            "at": 3200,
+            "kind": "soldier_attack",
+            "unitId": "ENG-04",
+            "index": 19,
+            "damage": 70,
+            "creatureHP": 1470
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 3,
+            "damage": 29,
+            "creatureHP": 1441
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 4,
+            "damage": 28,
+            "creatureHP": 1413
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 8,
+            "damage": 32,
+            "creatureHP": 1381
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 9,
+            "damage": 29,
+            "creatureHP": 1352
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 13,
+            "damage": 33,
+            "creatureHP": 1319
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 14,
+            "damage": 32,
+            "creatureHP": 1287
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 18,
+            "damage": 28,
+            "creatureHP": 1259
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-01",
+            "index": 19,
+            "damage": 28,
+            "creatureHP": 1231
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 3,
+            "damage": 47,
+            "creatureHP": 1184
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 4,
+            "damage": 43,
+            "creatureHP": 1141
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 8,
+            "damage": 48,
+            "creatureHP": 1093
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 9,
+            "damage": 41,
+            "creatureHP": 1052
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 13,
+            "damage": 45,
+            "creatureHP": 1007
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 14,
+            "damage": 40,
+            "creatureHP": 967
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 18,
+            "damage": 46,
+            "creatureHP": 921
+          },
+          {
+            "at": 3400,
+            "kind": "soldier_attack",
+            "unitId": "ENG-02",
+            "index": 19,
+            "damage": 45,
+            "creatureHP": 876
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 0,
+            "damage": 59,
+            "creatureHP": 817
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 1,
+            "damage": 54,
+            "creatureHP": 763
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 2,
+            "damage": 60,
+            "creatureHP": 703
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 3,
+            "damage": 55,
+            "creatureHP": 648
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 4,
+            "damage": 53,
+            "creatureHP": 595
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 5,
+            "damage": 56,
+            "creatureHP": 539
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 6,
+            "damage": 53,
+            "creatureHP": 486
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 7,
+            "damage": 55,
+            "creatureHP": 431
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 8,
+            "damage": 59,
+            "creatureHP": 372
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 9,
+            "damage": 53,
+            "creatureHP": 319
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 10,
+            "damage": 60,
+            "creatureHP": 259
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 11,
+            "damage": 55,
+            "creatureHP": 204
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 12,
+            "damage": 53,
+            "creatureHP": 151
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 13,
+            "damage": 57,
+            "creatureHP": 94
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 14,
+            "damage": 51,
+            "creatureHP": 43
+          },
+          {
+            "at": 4000,
+            "kind": "soldier_attack",
+            "unitId": "ENG-03",
+            "index": 15,
+            "damage": 55,
+            "creatureHP": 0
+          }
+        ]
+      },
+      "worldTimeline": [
+        [
+          0,
+          "soldier_attack",
+          "ENG-03",
+          0,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-03",
+          1,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-03",
+          2,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-03",
+          3,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-04",
+          0,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-04",
+          1,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-04",
+          2,
+          null
+        ],
+        [
+          0,
+          "soldier_attack",
+          "ENG-04",
+          3,
+          null
+        ],
+        [
+          400,
+          "creature_attack",
+          "ENG-05",
+          1,
+          0
+        ],
+        [
+          600,
+          "soldier_attack",
+          "ENG-06",
+          0,
+          null
+        ],
+        [
+          800,
+          "soldier_attack",
+          "ENG-05",
+          0,
+          null
+        ],
+        [
+          800,
+          "soldier_attack",
+          "ENG-06",
+          1,
+          null
+        ],
+        [
+          800,
+          "soldier_attack",
+          "ENG-06",
+          2,
+          null
+        ],
+        [
+          1000,
+          "soldier_attack",
+          "ENG-01",
+          0,
+          null
+        ],
+        [
+          1000,
+          "soldier_attack",
+          "ENG-02",
+          0,
+          null
+        ],
+        [
+          1000,
+          "soldier_attack",
+          "ENG-05",
+          2,
+          null
+        ],
+        [
+          1200,
+          "soldier_attack",
+          "ENG-01",
+          1,
+          null
+        ],
+        [
+          1200,
+          "soldier_attack",
+          "ENG-02",
+          1,
+          null
+        ],
+        [
+          1400,
+          "soldier_attack",
+          "ENG-01",
+          2,
+          null
+        ],
+        [
+          1400,
+          "soldier_attack",
+          "ENG-02",
+          2,
+          null
+        ],
+        [
+          1600,
+          "soldier_attack",
+          "ENG-01",
+          3,
+          null
+        ],
+        [
+          1600,
+          "soldier_attack",
+          "ENG-01",
+          4,
+          null
+        ],
+        [
+          1600,
+          "soldier_attack",
+          "ENG-02",
+          3,
+          null
+        ],
+        [
+          1600,
+          "soldier_attack",
+          "ENG-02",
+          4,
+          null
+        ],
+        [
+          2000,
+          "soldier_attack",
+          "ENG-03",
+          0,
+          null
+        ],
+        [
+          2000,
+          "soldier_attack",
+          "ENG-03",
+          1,
+          null
+        ],
+        [
+          2000,
+          "soldier_attack",
+          "ENG-03",
+          2,
+          null
+        ],
+        [
+          2000,
+          "soldier_attack",
+          "ENG-03",
+          3,
+          null
+        ],
+        [
+          2400,
+          "soldier_attack",
+          "ENG-06",
+          0,
+          null
+        ],
+        [
+          2600,
+          "soldier_attack",
+          "ENG-05",
+          0,
+          null
+        ],
+        [
+          2600,
+          "soldier_attack",
+          "ENG-06",
+          1,
+          null
+        ],
+        [
+          2600,
+          "soldier_attack",
+          "ENG-06",
+          2,
+          null
+        ],
+        [
+          2600,
+          "creature_attack",
+          "ENG-01",
+          0,
+          0
+        ],
+        [
+          2800,
+          "soldier_attack",
+          "ENG-02",
+          0,
+          null
+        ],
+        [
+          2800,
+          "soldier_attack",
+          "ENG-05",
+          2,
+          null
+        ],
+        [
+          3000,
+          "soldier_attack",
+          "ENG-01",
+          1,
+          null
+        ],
+        [
+          3000,
+          "soldier_attack",
+          "ENG-02",
+          1,
+          null
+        ],
+        [
+          3200,
+          "soldier_attack",
+          "ENG-01",
+          2,
+          null
+        ],
+        [
+          3200,
+          "soldier_attack",
+          "ENG-02",
+          2,
+          null
+        ],
+        [
+          3200,
+          "soldier_attack",
+          "ENG-04",
+          0,
+          null
+        ],
+        [
+          3200,
+          "soldier_attack",
+          "ENG-04",
+          1,
+          null
+        ],
+        [
+          3200,
+          "soldier_attack",
+          "ENG-04",
+          2,
+          null
+        ],
+        [
+          3200,
+          "soldier_attack",
+          "ENG-04",
+          3,
+          null
+        ],
+        [
+          3400,
+          "soldier_attack",
+          "ENG-01",
+          3,
+          null
+        ],
+        [
+          3400,
+          "soldier_attack",
+          "ENG-01",
+          4,
+          null
+        ],
+        [
+          3400,
+          "soldier_attack",
+          "ENG-02",
+          3,
+          null
+        ],
+        [
+          3400,
+          "soldier_attack",
+          "ENG-02",
+          4,
+          null
+        ],
+        [
+          4000,
+          "soldier_attack",
+          "ENG-03",
+          0,
+          null
+        ],
+        [
+          4000,
+          "soldier_attack",
+          "ENG-03",
+          1,
+          null
+        ],
+        [
+          4000,
+          "soldier_attack",
+          "ENG-03",
+          2,
+          null
+        ],
+        [
+          4000,
+          "soldier_attack",
+          "ENG-03",
+          3,
+          null
+        ]
+      ]
+    }
+  ]
+}

@@ -36,11 +36,14 @@ func run() -> void:
 	var creature = stage.creatures.get_node_or_null(NodePath(encounter.id))
 	check(creature != null,"Creature not created")
 	var identity: int = creature.get_instance_id()
-	stage.camera_target = Vector3(1000,0,1000)
+	# The camera itself leaves (target and pose), as a pan does in the game.
+	stage.target = Vector3(1000,0,1000)
+	stage.update_camera(0,true)
 	stage.present_creatures(local_state,float(local_state.serverTime)+16,.016)
 	check(is_instance_valid(creature) and not creature.visible and not creature.is_queued_for_deletion(),"Camera exit destroyed creature")
 	check(creature.process_mode == Node.PROCESS_MODE_DISABLED,"Hidden creature still animates")
-	stage.camera_target = stage.target
+	stage.target = stage.point(encounter.position)
+	stage.update_camera(0,true)
 	stage.present_creatures(local_state,float(local_state.serverTime)+32,.016)
 	check(creature.visible and creature.get_instance_id() == identity,"Re-entry rebuilt creature")
 	encounter.status = "defeated"
@@ -52,7 +55,13 @@ func run() -> void:
 	stage.target = Vector3.ZERO
 	stage.zoom = 40
 	stage.update_camera(0,true)
-	stage.present_armies(local_state,5000)
+	# Troop models load in the background; the column appears once they are in.
+	for frame in 240:
+		stage.present_armies(local_state,5000)
+		var shown = stage.actors.get_node_or_null("qa_runtime_march")
+		if shown != null and shown.get_child_count() == 4:
+			break
+		await process_frame
 	var group = stage.actors.get_node_or_null("qa_runtime_march")
 	check(group != null and group.get_child_count() == 4,"March composition changed")
 	var unit_id: int = group.get_child(0).get_instance_id()

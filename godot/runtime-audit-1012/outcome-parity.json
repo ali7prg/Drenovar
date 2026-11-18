@@ -1,0 +1,8 @@
+{
+  "baseline": "e5062aa292da895653c07dab50ce9b85a2a4ee11",
+  "candidate": "codex/combat-live-repair-20261116 working tree",
+  "scenarios": 67,
+  "identical": 67,
+  "differences": [],
+  "method": "fixed seed 123456; original authoritative paths, travelMs, events, outcomes, return and rewards; SQLite memory, no device claim"
+}

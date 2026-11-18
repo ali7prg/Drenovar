@@ -1,0 +1,29 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+PANEL {"call_ms":18.24,"next_frame_ms":4.73,"panel":"recruitment_first"}
+PANEL {"call_ms":11.04,"next_frame_ms":1.71,"panel":"recruitment_again"}
+PANEL {"call_ms":5.99,"next_frame_ms":4.99,"panel":"environment_catalog"}
+PANEL {"call_ms":3.87,"next_frame_ms":2.98,"panel":"construction"}
+PANEL {"call_ms":3.62,"next_frame_ms":3.27,"panel":"performance"}
+PANEL {"call_ms":2.18,"next_frame_ms":3.5,"panel":"encounter"}
+PANEL {"call_ms":1.85,"next_frame_ms":5.06,"panel":"starter_goals"}
+PANEL {"call_ms":1.76,"next_frame_ms":5.12,"panel":"economy"}
+PANEL {"call_ms":1.48,"next_frame_ms":5.41,"panel":"building_RES-04"}
+PANEL {"call_ms":1.41,"next_frame_ms":5.49,"panel":"city_actions"}
+PANEL {"call_ms":1.39,"next_frame_ms":5.49,"panel":"building_ECO-05"}
+PANEL {"call_ms":1.38,"next_frame_ms":5.53,"panel":"armies"}
+PANEL {"call_ms":1.3,"next_frame_ms":5.61,"panel":"building_RES-01"}
+PANEL {"call_ms":1.29,"next_frame_ms":5.63,"panel":"building_MIL-01"}
+PANEL {"call_ms":1.19,"next_frame_ms":5.72,"panel":"world_directory"}
+PANEL {"call_ms":1.16,"next_frame_ms":5.74,"panel":"city_hunt"}
+PANEL {"call_ms":1.13,"next_frame_ms":5.76,"panel":"map_options"}
+PANEL {"call_ms":1.13,"next_frame_ms":5.79,"panel":"world_hunt"}
+PANEL {"call_ms":1.1,"next_frame_ms":5.8,"panel":"account"}
+PANEL {"call_ms":1.06,"next_frame_ms":5.83,"panel":"training_buildings"}
+PANEL {"call_ms":0.85,"next_frame_ms":6.05,"panel":"controls_menu"}
+PANEL {"call_ms":0.84,"next_frame_ms":6.03,"panel":"world_marches"}
+PANEL {"call_ms":0.64,"next_frame_ms":6.24,"panel":"world_cities"}
+PANEL {"call_ms":0.58,"next_frame_ms":6.27,"panel":"clearings"}
+PANEL {"call_ms":0.44,"next_frame_ms":6.45,"panel":"hospital"}
+PANEL {"call_ms":0.42,"next_frame_ms":6.48,"panel":"reports"}
+QA_PANEL_LATENCY panels=26 checks=26 failures=0

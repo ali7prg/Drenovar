@@ -1,0 +1,82 @@
+{
+ "tool": "CombatPresentation (combat_presentation.gd) of build 1020 and 1021, the same scenario",
+ "scenario": "case mixed_all_types_velkor; polls every 800 ms; the clock is given the server time as in main.gd (server_time()); the battle's answer comes answer_late_ms after the arrival",
+ "fields": {
+  "fight_shown_from_ms": "shown clock, from the arrival: the fight status begins",
+  "first_blow_shown_ms": "the first server blow drawn",
+  "blows_shown": "server events drawn (contact)",
+  "blows_skipped": "server events dropped as late-completion",
+  "blows_total": "soldier_attack events of the battle"
+ },
+ "note": "1021 also fights before the answer (ambient swings, shield feints, health bar) in the scene; checked in qa_combat_1021.gd, not by this clock-only run",
+ "results": {
+  "1020": [
+   {
+    "answer_late_ms": 0.0,
+    "blows_shown": 32,
+    "blows_skipped": 0,
+    "blows_total": 31,
+    "fight_shown_from_ms": -750.0,
+    "first_blow_shown_ms": 0.0
+   },
+   {
+    "answer_late_ms": 2000.0,
+    "blows_shown": 29,
+    "blows_skipped": 3,
+    "blows_total": 31,
+    "fight_shown_from_ms": 350.0,
+    "first_blow_shown_ms": 450.0
+   },
+   {
+    "answer_late_ms": 4000.0,
+    "blows_shown": 22,
+    "blows_skipped": 10,
+    "blows_total": 31,
+    "fight_shown_from_ms": 2750.0,
+    "first_blow_shown_ms": 2850.0
+   },
+   {
+    "answer_late_ms": 6000.0,
+    "blows_shown": 18,
+    "blows_skipped": 14,
+    "blows_total": 31,
+    "fight_shown_from_ms": 4350.0,
+    "first_blow_shown_ms": 4450.0
+   }
+  ],
+  "1021": [
+   {
+    "answer_late_ms": 0.0,
+    "blows_shown": 32,
+    "blows_skipped": 0,
+    "blows_total": 31,
+    "fight_shown_from_ms": -750.0,
+    "first_blow_shown_ms": 0.0
+   },
+   {
+    "answer_late_ms": 2000.0,
+    "blows_shown": 32,
+    "blows_skipped": 0,
+    "blows_total": 31,
+    "fight_shown_from_ms": 350.0,
+    "first_blow_shown_ms": 1150.0
+   },
+   {
+    "answer_late_ms": 4000.0,
+    "blows_shown": 32,
+    "blows_skipped": 0,
+    "blows_total": 31,
+    "fight_shown_from_ms": 2750.0,
+    "first_blow_shown_ms": 3550.0
+   },
+   {
+    "answer_late_ms": 6000.0,
+    "blows_shown": 32,
+    "blows_skipped": 0,
+    "blows_total": 31,
+    "fight_shown_from_ms": 4350.0,
+    "first_blow_shown_ms": 5150.0
+   }
+  ]
+ }
+}

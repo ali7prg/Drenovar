@@ -1,0 +1,651 @@
+extends RefCounted
+
+const VERSION := "DRENOVAR-V6-C1.0"
+const ROMAN := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"]
+var ui: Node
+var catalogue: Dictionary = {}
+var catalogue_loading := false
+var quote_request := 0
+var navigation_request := 0
+var submitting := false
+
+func begin_view() -> int:
+	navigation_request += 1
+	return navigation_request
+signal catalogue_loaded(success: bool)
+
+func _init(owner_node: Node) -> void:
+	ui = owner_node
+
+func enabled() -> bool:
+	return ui.state.get("economy_version", "") == VERSION and ui.state.get("v6") is Dictionary
+
+func load_catalogue() -> bool:
+	if not await ui.ensure_v6_ready():
+		return false
+	if catalogue.get("economy_version", "") == VERSION:
+		return true
+	if catalogue_loading:
+		return await catalogue_loaded
+	catalogue_loading = true
+	var response: Dictionary = await ui.request("command", {"kind":"v6catalog"})
+	var success: bool = not response.has("error") and response.get("economy_version", "") == VERSION and response.get("buildings", []).size() == 297
+	if success:
+		catalogue = response
+	elif response.has("error"):
+		ui.show_error(response)
+	else:
+		ui.show_error({"error":"Получен каталог другой версии. Повторите подключение к общему серверу.", "code":"CATALOGUE_VERSION_MISMATCH"})
+	catalogue_loading = false
+	catalogue_loaded.emit(success and enabled())
+	return success and enabled()
+
+func instance(id: String) -> Dictionary:
+	if not enabled():
+		return {}
+	for b: Dictionary in ui.state.v6.buildings:
+		if b.id == id:
+			return b
+	return {}
+
+func inspect_instance(id: String) -> void:
+	var navigation := begin_view()
+	var generation: int = ui.modal_generation
+	if not await ui.ensure_v6_ready():
+		return
+	if navigation != navigation_request or generation != ui.modal_generation:
+		return
+	var b := instance(id)
+	if b.is_empty():
+		ui.show_error({"error":"Здание изменилось. Обновите город и выберите его снова."})
+		return
+	await inspect(str(b.type))
+
+func open_ring(marker: Dictionary) -> void:
+	var navigation := begin_view()
+	var generation: int = ui.modal_generation
+	if not await load_catalogue():
+		return
+	if navigation != navigation_request or generation != ui.modal_generation:
+		return
+	var instance_id := str(marker.item.get("id", ""))
+	if instance_id.is_empty() and marker.item.get("wall", false):
+		await inspect("B18")
+		return
+	var b := instance(instance_id)
+	if b.is_empty():
+		ui.show_error({"error":"Здание изменилось. Выберите его снова после обновления города."})
+		return
+	var type: String = b.type
+	var actions: Array = [["Улучшить" if int(b.level) < 11 else "Сведения", "upgrade" if int(b.level) < 11 else "info", inspect_instance.bind(str(b.id))]]
+	for order: Dictionary in ui.state.v6.orders:
+		if order.status == "pending" and order.get("instance_id", "") == b.id:
+			actions.append(["Очереди", "speed", queues])
+			break
+	if type in ["B11", "B12", "B13", "B15", "B16", "B17"]:
+		actions.append(["Работы здания", "heal" if type == "B16" else "train", services.bind(type)])
+	if type == "B05":
+		actions.append(["Рынок", "trade", trade])
+	if type in ["B18", "B19"]:
+		actions.append(["Оборона", "defence", inspect_instance.bind(str(b.id))])
+	if type in ["B06", "B07", "B08", "B09", "B10", "B22", "B24"]:
+		actions.append(["Производство", "collect", economy])
+	actions.append(["Переместить", "move", move_building.bind(b, str(row_for(type,int(b.level)).environment))])
+	ui.action_ring.open(str(b.id), "%s · %s" % [row_for(type,1).name_ru, ROMAN[int(b.level)-1]], marker.position, ui.stage.camera, actions)
+
+func building(type: String) -> Dictionary:
+	for b: Dictionary in ui.state.v6.buildings:
+		if b.type == type:
+			return b
+	return {}
+
+func row_for(type: String, level: int) -> Dictionary:
+	for row: Dictionary in catalogue.get("buildings", []):
+		if row.building_id == type and int(row.level) == level:
+			return row
+	return {}
+
+func warnings() -> void:
+	for warning: Dictionary in ui.state.v6.get("warnings", []):
+		ui.row(ui.modal_body, "Башня обнаружила нападение · до прибытия %d с" % int(warning.eta_seconds))
+
+func stock_line() -> void:
+	warnings()
+	var s: Dictionary = ui.state.v6
+	for r: String in ["wood", "food", "stone", "iron", "coins"]:
+		ui.row(ui.modal_body, "%s: %d / %d · резерв %d · %.2f/ч%s" % [ui.RESOURCE_NAMES[r], int(s.stock[r]), int(s.capacities[r]), int(s.escrow[r]), float(s.production_per_hour[r]), " · производство приостановлено" if s.production_stopped[r] else ""])
+	ui.row(ui.modal_body, "Работники: %d / %d · армия: %d / %d" % [int(s.workforce.used), int(s.workforce.capacity), int(s.army_used), int(s.army_capacity)])
+
+func economy() -> void:
+	var navigation := begin_view()
+	var generation: int = ui.modal_generation
+	if not await ui.ensure_v6_ready():
+		return
+	if navigation != navigation_request or generation != ui.modal_generation:
+		return
+	ui.open_modal("Экономика поселения", "right", "V6 · В ЧАС")
+	stock_line()
+	ui.button(ui.modal_body, "Очереди и отмена", queues)
+	ui.button(ui.modal_body, "Цели поселения", objectives)
+
+func move_building(b: Dictionary, environment: String) -> void:
+	begin_view()
+	ui.open_modal("Переместить здание", "right", "ПОДХОДЯЩИЕ УЧАСТКИ")
+	for plot: String in ui.state.get("v6_plots", {}):
+		if environment not in ui.state.v6_plots[plot]:
+			continue
+		var occupied := false
+		for other: Dictionary in ui.state.v6.buildings:
+			occupied = occupied or other.plot == plot
+		if not occupied:
+			ui.button(ui.modal_body, "Участок " + plot, send.bind({"kind":"move", "building_id":b.id, "plot":plot}))
+
+func catalog() -> void:
+	var navigation := begin_view()
+	var generation: int = ui.modal_generation
+	if not await load_catalogue():
+		return
+	if navigation != navigation_request or generation != ui.modal_generation:
+		return
+	ui.open_modal("Строительство", "right", "27 ТИПОВ · I–XI")
+	ui.row(ui.modal_body, "Пшеница и рыбалка занимают один общий пищевой участок.")
+	for row: Dictionary in catalogue.buildings:
+		if int(row.level) != 1:
+			continue
+		var b: Dictionary = building(row.building_id)
+		ui.button(ui.modal_body, "%s · %s" % [row.name_ru, ROMAN[int(b.level)-1] if not b.is_empty() else "построить"], inspect.bind(str(row.building_id)))
+	ui.button(ui.modal_body, "Все очереди", queues)
+	ui.button(ui.modal_body, "Армия и осада", army)
+	ui.button(ui.modal_body, "Подключить другое устройство", account)
+
+func inspect(type: String) -> void:
+	var navigation := begin_view()
+	var generation: int = ui.modal_generation
+	if not await load_catalogue():
+		return
+	if navigation != navigation_request or generation != ui.modal_generation:
+		return
+	if row_for(type,1).is_empty():
+		ui.show_error({"error":"Неизвестный тип здания в текущем каталоге."})
+		return
+	var b: Dictionary = building(type)
+	var level: int = int(b.get("level", 0))
+	var row: Dictionary = row_for(type, maxi(1, level))
+	ui.open_modal(str(row.name_ru), "right", "УРОВЕНЬ " + (ROMAN[level-1] if level > 0 else "НЕ ПОСТРОЕНО"))
+	if level > 0:
+		for metric: String in row.effects:
+			ui.row(ui.modal_body, "%s: %s" % [str(catalogue.get("metrics", {}).get(metric, {}).get("name_ru", metric)), metric_value(metric, row.effects[metric])])
+	if level < 11:
+		var next: Dictionary = row_for(type, level + 1)
+		section_title("Следующий уровень · " + ROMAN[level])
+		cost_cards(next.cost)
+		muted("Базовое время: " + duration(int(next.duration_seconds)))
+		for d: Dictionary in next.requirements:
+			var current: Dictionary = building(d.building_id)
+			var ok: bool = int(current.get("level", 0)) >= int(d.level)
+			ui.row(ui.modal_body, "%s %s ≥ %s" % ["✓" if ok else "•", row_for(d.building_id, 1).name_ru, ROMAN[int(d.level)-1]])
+		var action := {"kind":"construction", "building":type, "target":level+1}
+		if level > 0:
+			ui.panel_action(ui.modal_body, "Проверить улучшение", confirm.bind(action))
+		else:
+			ui.row(ui.modal_body, "Выберите участок подходящей местности: " + str(next.environment))
+			for plot: String in ui.state.get("v6_plots", {}):
+				if next.environment in ui.state.v6_plots[plot]:
+					var placement: Dictionary = action.duplicate()
+					placement.plot = plot
+					ui.button(ui.modal_body, "Участок " + plot, confirm.bind(placement))
+	else:
+		ui.row(ui.modal_body, "XI — окончательный уровень.")
+	if type in ["B11", "B12", "B13", "B17", "B15", "B16"] and level > 0:
+		ui.button(ui.modal_body, "Работы здания", services.bind(type))
+	if type == "B06" and level > 0:
+		ui.button(ui.modal_body, "Посетить лагерь", func(): await ui.command({"kind":"v6collect"}); objectives())
+	if type == "B18" and level > 0:
+		ui.row(ui.modal_body, "Прочность стены: %d / %d" % [int(ui.state.v6.wall_hp), int(ui.state.v6.wall_max_hp)])
+		ui.button(ui.modal_body, "Ремонт стены", confirm.bind({"kind":"repair_wall"}))
+	if type == "B05" and level > 0:
+		ui.button(ui.modal_body, "Рынок", trade)
+	if type in ["B22", "B24"] and level > 0:
+		ui.button(ui.modal_body, "Сменить пищевую специализацию", send.bind({"kind":"switch_food", "variant":"B24" if type == "B22" else "B22"}))
+	if level > 0:
+		ui.button(ui.modal_body, "Переместить здание", move_building.bind(b, str(row.environment)))
+	ui.button(ui.modal_body, "Очереди и отмена", queues)
+
+func confirm(action: Dictionary) -> void:
+	var navigation := begin_view()
+	quote_request += 1
+	var request_id := quote_request
+	ui.open_modal("Подтвердить работу", "right", "УЛУЧШЕНИЕ ПОСЕЛЕНИЯ")
+	var panel_generation: int = ui.modal_generation
+	ui.row(ui.modal_body, "Рассчитываем стоимость и время…")
+	var intent: Dictionary = action.duplicate(true)
+	intent.economy_version = VERSION
+	var response: Dictionary = await ui.request("command", {"kind":"v6quote", "intent":intent})
+	if request_id != quote_request or panel_generation != ui.modal_generation or navigation != navigation_request:
+		return
+	ui.empty(ui.modal_body)
+	if not response.get("ok", false):
+		ui.row(ui.modal_body, str(response.get("reason", {}).get("message", response.get("error", "Нет ответа сервера"))))
+		var reason: Dictionary = response.get("reason", {})
+		if reason.has("resource") and reason.has("required") and reason.has("available"):
+			ui.row(ui.modal_body, "%s: нужно %s, доступно %s" % [ui.RESOURCE_NAMES.get(reason.resource, reason.resource), str(reason.get("required", "")), str(reason.get("available", ""))])
+		elif reason.has("building"):
+			ui.row(ui.modal_body, "Требуется: " + str(row_for(str(reason.building),1).get("name_ru",reason.building)))
+		if response.has("error"):
+			ui.button(ui.modal_body, "Повторить расчёт", confirm.bind(action))
+		return
+	var q: Dictionary = response.quote
+	section_title("Стоимость работы")
+	cost_cards(q.cost)
+	time_card("До завершения", int(q.duration_seconds))
+	if int(q.speed_bp) > 0:
+		muted("Бонус скорости +%.2f%%" % (float(q.speed_bp)/100.0))
+	muted("Отмена вернёт резерв невыполненной части ремонта." if action.kind == "repair_wall" else "Ресурсы резервируются при начале работы. При отмене до завершения резерв возвращается.")
+	intent.expected_duration_seconds = int(q.duration_seconds)
+	ui.modal_footer.show()
+	work_button(ui.modal_footer, "Начать", send.bind(intent), true)
+
+func duration(seconds: int) -> String:
+	seconds = maxi(0, seconds)
+	if seconds >= 3600:
+		return "%d ч %d мин" % [seconds / 3600, (seconds % 3600) / 60]
+	if seconds >= 60:
+		return "%d мин%s" % [seconds / 60, " %d с" % (seconds % 60) if seconds % 60 else ""]
+	return "%d с" % seconds
+
+func section_title(text: String) -> void:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_override("font", ui.TITLE_FONT)
+	label.add_theme_font_size_override("font_size", 22)
+	label.add_theme_color_override("font_color", Color("#ead4a8"))
+	ui.modal_body.add_child(label)
+
+func muted(text: String) -> void:
+	var label := Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_color_override("font_color", Color("#bcb6a6"))
+	ui.modal_body.add_child(label)
+
+func cost_cards(cost: Dictionary) -> void:
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	ui.modal_body.add_child(grid)
+	for resource: String in cost:
+		if int(cost[resource]) <= 0:
+			continue
+		var card: PanelContainer = ui.panel(10)
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.add_theme_stylebox_override("panel", ui.Interface.style(Color("#1b2026"), Color("#a4814d66"), 10, 12, 10))
+		grid.add_child(card)
+		var content := VBoxContainer.new()
+		card.add_child(content)
+		var line := HBoxContainer.new()
+		content.add_child(line)
+		ui.add_resource_icon(line, resource, 22)
+		var label := Label.new()
+		label.text = ui.RESOURCE_NAMES.get(resource, resource)
+		label.add_theme_font_size_override("font_size", 15)
+		label.add_theme_color_override("font_color", Color("#c3bba8"))
+		line.add_child(label)
+		var amount := Label.new()
+		amount.text = ui.format_balance(int(cost[resource]))
+		amount.add_theme_font_size_override("font_size", 22)
+		amount.add_theme_color_override("font_color", Color("#f3dfb5"))
+		content.add_child(amount)
+		card.tooltip_text = "%s: %d" % [ui.RESOURCE_NAMES.get(resource,resource), int(cost[resource])]
+
+func time_card(title: String, seconds: int, ends_at := 0.0) -> void:
+	var card: PanelContainer = ui.panel(12)
+	card.add_theme_stylebox_override("panel", ui.Interface.style(Color("#39362d"), Color("#a4814d66"), 10, 12, 10))
+	ui.modal_body.add_child(card)
+	var line := HBoxContainer.new()
+	card.add_child(line)
+	var label := Label.new()
+	label.text = title
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.add_theme_font_size_override("font_size", 17)
+	line.add_child(label)
+	var clock := Label.new()
+	clock.text = duration(seconds)
+	clock.add_theme_font_override("font", ui.TITLE_FONT)
+	clock.add_theme_font_size_override("font_size", 26)
+	clock.add_theme_color_override("font_color", Color("#f0d290"))
+	line.add_child(clock)
+	if ends_at > 0:
+		ui.bind_countdown(clock, "", ends_at)
+
+func work_button(parent: Container, title: String, action: Callable, primary := false) -> Button:
+	var control: Button = ui.button(parent, title, Callable())
+	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	control.custom_minimum_size.y = 52
+	if primary:
+		ui.WebPanels.primary(control)
+	control.pressed.connect(func():
+		if submitting or control.disabled:
+			return
+		submitting = true
+		var previous: Array = []
+		for root: Node in [ui.modal_body, ui.modal_footer]:
+			for item: Node in root.find_children("*", "Button", true, false):
+				previous.append([item, item.disabled])
+				item.disabled = true
+		control.text = "Выполняем…"
+		await action.call()
+		submitting = false
+		for entry: Array in previous:
+			if is_instance_valid(entry[0]):
+				entry[0].disabled = entry[1]
+		if is_instance_valid(control):
+			control.text = title
+	)
+	return control
+
+func send(action: Dictionary) -> void:
+	var navigation := navigation_request
+	var intent: Dictionary = action.duplicate(true)
+	intent.economy_version = VERSION
+	var success: bool = await ui.command({"kind":"v6", "intent":intent})
+	if success and navigation == navigation_request:
+		await queues()
+
+func queues() -> void:
+	var navigation := begin_view()
+	var generation: int = ui.modal_generation
+	if not await ui.ensure_v6_ready():
+		return
+	if navigation != navigation_request or generation != ui.modal_generation:
+		return
+	ui.open_modal("Очереди поселения", "right", "ЗАКАЗЫ СЕРВЕРА")
+	stock_line()
+	var count := 0
+	for order: Dictionary in ui.state.v6.orders:
+		if order.status != "pending":
+			continue
+		count += 1
+		var names := {"construction":"Строительство", "train":"Обучение", "heal":"Лечение", "research":"Исследование", "siege":"Сборка таранов", "repair_ram":"Ремонт тарана", "repair_wall":"Ремонт стены"}
+		if float(order.starts_at)*1000.0 > ui.timer_now():
+			ui.countdown("Ожидание начала", float(order.starts_at)*1000.0)
+		ui.countdown("%s · %s" % [str(row_for(str(order.building), 1).get("name_ru", order.building)), str(names.get(order.kind, order.kind))], float(order.ends_at)*1000.0)
+		var reserved: Array[String] = []
+		for resource: String in order.get("escrow", {}):
+			if int(order.escrow[resource]) > 0:
+				reserved.append(ui.RESOURCE_NAMES.get(resource,resource) + " " + str(int(order.escrow[resource])))
+		if not reserved.is_empty():
+			ui.row(ui.modal_body, "Резерв заказа: " + ", ".join(reserved))
+		ui.button(ui.modal_body, "Отменить работу", send.bind({"kind":"cancel", "order_id":order.id}))
+		if order.kind in ["construction", "train", "siege"]:
+			ui.button(ui.modal_body, "Использовать ускоритель", speedups.bind(order))
+	if count == 0:
+		ui.row(ui.modal_body, "Активных заказов нет.")
+	for receipt: String in ui.state.v6.rewards:
+		if ui.state.v6.rewards[receipt].status == "pending":
+			ui.button(ui.modal_body, "Получить награду " + receipt, send.bind({"kind":"claim", "receipt_id":receipt}))
+
+func services(type: String) -> void:
+	var navigation := begin_view()
+	var generation: int = ui.modal_generation
+	if not await load_catalogue():
+		return
+	if navigation != navigation_request or generation != ui.modal_generation:
+		return
+	ui.open_modal(str(row_for(type, 1).name_ru), "right", "РАБОТЫ ЗДАНИЯ")
+	var amount := SpinBox.new()
+	amount.min_value = 1
+	amount.max_value = 4000
+	amount.value = 1
+	amount.custom_minimum_size = Vector2(180, 48)
+	ui.modal_body.add_child(amount)
+	if type == "B17":
+		for machine: Dictionary in ui.state.v6.get("machines", []):
+			if machine.location == "home" and int(machine.hp) < int(machine.max_hp):
+				ui.button(ui.modal_body, "Ремонт тарана · %d / %d" % [int(machine.hp), int(machine.max_hp)], confirm.bind({"kind":"repair_ram", "machine_id":machine.id}))
+	if type == "B15":
+		for family: String in ["R_BUILD", "R_ECON", "R_ATTACK", "R_DEFENCE"]:
+			var rank: int = int(ui.state.v6.research.get(family, 0))
+			if rank < 11:
+				var title: String = {"R_BUILD":"Организация строительства", "R_ECON":"Экономика", "R_ATTACK":"Атака войск", "R_DEFENCE":"Защита войск"}[family]
+				ui.button(ui.modal_body, "%s → %s" % [title, ROMAN[rank]], confirm.bind({"kind":"research", "research":family + "-" + str(rank+1)}))
+	elif type == "B16":
+		for unit: String in ui.state.v6.wounded:
+			var unit_id := unit
+			ui.button(ui.modal_body, "%s · раненых %d" % [unit_id, int(ui.state.v6.wounded[unit_id])], func(): confirm({"kind":"heal", "units":{unit_id:int(amount.value)}}))
+	else:
+		for unit: Dictionary in catalogue.units:
+			if unit.building_id == type:
+				var unit_id: String = unit.unit_id
+				ui.button(ui.modal_body, str(unit.name_ru), func(): confirm({"kind":"siege" if type == "B17" else "train", "unit":unit_id, "quantity":int(amount.value)}))
+
+func trade() -> void:
+	var navigation := begin_view()
+	var generation: int = ui.modal_generation
+	if not await ui.ensure_v6_ready():
+		return
+	if navigation != navigation_request or generation != ui.modal_generation:
+		return
+	ui.open_modal("Рынок", "right", "ОБЩИЙ ДНЕВНОЙ ОБОРОТ")
+	stock_line()
+	var amount := SpinBox.new()
+	amount.min_value = 1
+	amount.max_value = 10000000
+	amount.custom_minimum_size = Vector2(180, 48)
+	ui.modal_body.add_child(amount)
+	for resource: String in ["wood", "food", "stone", "iron"]:
+		var r := resource
+		ui.button(ui.modal_body, "Купить " + str(ui.RESOURCE_NAMES[r]), func(): send({"kind":"trade", "direction":"buy", "resource":r, "quantity":int(amount.value)}))
+		ui.button(ui.modal_body, "Продать " + str(ui.RESOURCE_NAMES[r]), func(): send({"kind":"trade", "direction":"sell", "resource":r, "quantity":int(amount.value)}))
+
+func metric_value(metric: String, value: Variant) -> String:
+	if metric.ends_with("_bp"):
+		return String.num(float(value) / 100.0, 2) + "%"
+	if metric.ends_with("_rate_h") or metric.ends_with("_hp_h"):
+		return "%s/ч" % str(value)
+	return str(value)
+
+func account() -> void:
+	begin_view()
+	var primary: bool = ui.endpoint == "https://drenovar-game.ali069587.workers.dev"
+	ui.open_modal("Аккаунт", "profile", "DRENOVAR · ОБЩИЙ ГОРОД" if primary else "DRENOVAR · ТЕСТОВАЯ ВЕРСИЯ")
+	ui.message.text = ""
+	ui.row(ui.modal_body, "Версия %s · сборка %s" % [ProjectSettings.get_setting("application/config/version"), ProjectSettings.get_setting("application/config/build_number", "")])
+	if not ui.login_proof.is_empty():
+		var challenge: String = ui.login_proof.sha256_text()
+		var code: String = challenge.left(8).to_upper()
+		ui.row(ui.modal_body, "Код подтверждения: " + code)
+		if ui.pending_login_save_error:
+			ui.row(ui.modal_body, "Не удалось сохранить незавершённый вход. Если приложение перезапустится, начните вход заново.")
+		ui.row(ui.modal_body, "В Safari войдите в тот же аккаунт ChatGPT, которому принадлежит ваш город. Введите этот код и нажмите «Разрешить вход». Затем вернитесь в DRENOVAR — откроется существующий город.")
+		ui.button(ui.modal_body, "Открыть вход через ChatGPT", ui.open_login_page.bind(challenge))
+		ui.button(ui.modal_body, "Скопировать код", func(): DisplayServer.clipboard_set(code))
+		ui.button(ui.modal_body, "Проверить вход", ui.finish_login.bind(true))
+		ui.button(ui.modal_body, "Начать вход заново", ui.restart_login)
+		ui.button(ui.modal_body, "Отмена входа", ui.cancel_transfer)
+		return
+	if ui.client_update_required:
+		ui.row(ui.modal_body, "Сервер запросил обновление приложения. Здесь указан номер установленной сборки.")
+		ui.button(ui.modal_body, "Открыть сборки DRENOVAR", func(): OS.shell_open("https://github.com/ali7prg/Drenovar/releases"))
+	if primary and not enabled():
+		ui.button(ui.modal_body, "Войти через ChatGPT", ui.begin_main_login)
+	ui.row(ui.modal_body, "Войдите через ChatGPT, чтобы открыть свой существующий город. Здания, ресурсы и армия останутся на общем сервере. Подключение по коду — дополнительный способ входа." if primary else "Это отдельный тестовый мир V6. Поселения действующей игры здесь пока недоступны; их прогресс сохранён в действующей версии.")
+	ui.button(ui.modal_body, "Открыть основной город в браузере" if primary else "Открыть действующую веб-версию", func(): OS.shell_open(ui.OLD_SERVER_URL))
+	if ui.restoring_session:
+		ui.row(ui.modal_body, "Восстанавливаем подключение к вашему городу…")
+		ui.button(ui.modal_body, "Повторить подключение", ui.restore_account)
+		return
+	if not ui.connected():
+		ui.button(ui.modal_body, "Подключить устройство" if primary else "Подключиться к тестовому миру", func():
+			await ui.device_login()
+			account()
+		)
+		return
+	if ui.saved_session_error:
+		ui.row(ui.modal_body, "Не удалось сохранить вход на устройстве. Не закрывайте приложение до подключения второго устройства.")
+	if enabled():
+		ui.row(ui.modal_body, str(ui.state.city.name))
+		if not ui.state.v6.get("legacy_building_archive", []).is_empty():
+			ui.button(ui.modal_body, "Архив прежних зданий", archive)
+		ui.row(ui.modal_body, "Чтобы открыть этот же город на другом устройстве, получите код и введите его там. Код действует 10 минут.")
+		ui.button(ui.modal_body, "Получить код подключения", pairing_code)
+	else:
+		ui.row(ui.modal_body, "Введите код из своего города в веб-версии. Новое поселение для этого создавать не нужно." if primary else "Введите код из аккаунта веб-версии V6 или создайте отдельное тестовое поселение.")
+		if not primary:
+			ui.button(ui.modal_body, "Создать тестовое поселение", ui.create_settlement)
+	var input := LineEdit.new()
+	input.placeholder_text = "16 знаков из веб-версии V6"
+	input.max_length = 20
+	input.custom_minimum_size = Vector2(260, 48)
+	ui.modal_body.add_child(input)
+	ui.button(ui.modal_body, "Открыть мой город" if primary else "Подключить тестовое поселение", func():
+		var response: Dictionary = await ui.send_request("pair/accept", {"code":input.text})
+		if response.has("error"):
+			ui.show_error(response)
+		else:
+			ui.player_id = ""
+			await ui.sync_account()
+			account()
+	)
+	ui.button(ui.modal_body, "Выйти из аккаунта на устройстве", ui.confirm_profile_action.bind(ui.sign_out_question(), ui.sign_out))
+
+func archive() -> void:
+	begin_view()
+	await load_catalogue()
+	ui.open_modal("Архив прежних зданий", "right", "ТЕСТОВЫЙ ВАРИАНТ COMPAT-P2")
+	ui.row(ui.modal_body, "Исходные здания сохранены в архиве; они не дают второй игровой эффект. Компенсация за преобразование выдаётся один раз.")
+	for entry: Dictionary in ui.state.v6.get("legacy_building_archive", []):
+		var previous: Dictionary = entry.instance
+		var row: Dictionary = row_for(str(previous.to_type), int(previous.level))
+		ui.row(ui.modal_body, "%s · %s · прежний участок %s" % [str(row.get("name_ru", "Прежнее здание")), ROMAN[int(previous.level)-1], str(previous.plot)])
+		for resource: String in entry.proposed_compensation:
+			ui.row(ui.modal_body, "%s: %d" % [ui.RESOURCE_NAMES[resource], int(entry.proposed_compensation[resource])])
+
+func pairing_code() -> void:
+	var response: Dictionary = await ui.send_request("pair/create", {})
+	if response.has("error"):
+		ui.show_error(response)
+		return
+	ui.open_modal("Код подключения", "right", "ДЕЙСТВУЕТ 10 МИНУТ")
+	ui.row(ui.modal_body, str(response.code))
+	ui.row(ui.modal_body, "В веб-версии откройте «Аккаунт» и введите код. Показывайте код только своему устройству.")
+
+func objectives() -> void:
+	var navigation := begin_view()
+	var generation: int = ui.modal_generation
+	if not await ui.ensure_v6_ready():
+		return
+	if navigation != navigation_request or generation != ui.modal_generation:
+		return
+	ui.open_modal("Цели поселения", "right", "НАГРАДЫ")
+	for step: Dictionary in ui.state.v6.get("starter", []):
+		ui.row(ui.modal_body, str(step.title) + (" · получено" if step.claimed else " · выполнено" if step.ready else " · в процессе"))
+		if step.ready and not step.claimed:
+			var objective: String = step.id
+			ui.button(ui.modal_body, "Получить награду", func(): await ui.command({"kind":"starter71", "objectiveId":objective}); objectives())
+
+func speedups(order: Dictionary) -> void:
+	begin_view()
+	ui.open_modal("Ускорить работу", "right", "ПРЕДМЕТЫ УСКОРЕНИЯ")
+	var queue: String = "construction" if order.kind == "construction" else "training"
+	time_card("До завершения", ceili((float(order.ends_at)*1000.0-ui.timer_now())/1000.0), float(order.ends_at)*1000.0)
+	muted("Выберите ускоритель для текущей работы.")
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	ui.modal_body.add_child(grid)
+	var tiers := [60, 300, 900, 1800, 3600, 7200, 18000, 36000]
+	var confirmation := {"item":""}
+	var note := Label.new()
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.add_theme_color_override("font_color", Color("#efd297"))
+	note.add_theme_font_size_override("font_size", 16)
+	for index: int in tiers.size():
+		var item: String = queue + "-" + str(index+1)
+		var count: int = int(ui.state.items.get(item, 0))
+		if count > 0:
+			var seconds: int = tiers[index]
+			var body := {"kind":"speedup", "queue":queue, "item":item, "orderId":order.id, "expectedEndsAt":float(order.ends_at)*1000.0, "confirmUnused":false}
+			var use := work_button(grid, "%s\nВ наличии: %d\nИспользовать →" % [duration(seconds), count], func():
+				var remaining: float = (float(order.ends_at)*1000.0-ui.timer_now())/1000.0
+				if remaining <= 0:
+					note.text = "Работа завершена. Обновляем состояние…"
+					await ui.ensure_v6_ready(true)
+					queues()
+					return
+				if seconds > remaining and confirmation.item != item:
+					confirmation.item = item
+					note.text = "Остаток %s пропадёт. Нажмите ускоритель ещё раз, чтобы подтвердить." % duration(ceili(seconds-remaining))
+					return
+				body.confirmUnused = seconds > remaining
+				if await ui.command(body):
+					queues()
+			)
+			use.custom_minimum_size.y = 106
+			use.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			use.add_theme_font_size_override("font_size", 18)
+			use.add_theme_stylebox_override("normal", ui.Interface.style(Color("#343b3c"), Color("#b99a6088"), 10, 14, 12))
+	muted("Неиспользованный остаток ускорения пропадёт." if grid.get_child_count() else "Ускорителей пока нет. Таймер продолжает идти.")
+	ui.modal_body.add_child(note)
+
+func army() -> void:
+	var navigation := begin_view()
+	var generation: int = ui.modal_generation
+	if not await load_catalogue():
+		return
+	if navigation != navigation_request or generation != ui.modal_generation:
+		return
+	ui.open_modal("Армия и осада", "right", "ПОХОДЫ")
+	warnings()
+	ui.row(ui.modal_body, "Армия %d / %d · поход до %d мест · отрядов %d" % [int(ui.state.v6.army_used), int(ui.state.v6.army_capacity), int(ui.state.v6.march_capacity), int(ui.state.v6.march_parallel)])
+	ui.row(ui.modal_body, "Таран занимает 5 мест. Новые раненые сверх коек станут погибшими; доступно коек %d." % int(ui.state.v6.hospital_capacity))
+	ui.button(ui.modal_body, "Показать плац в городе", ui.open_parade)
+	ui.button(ui.modal_body, "Раненые и лечение", services.bind("B16"))
+	for march: Dictionary in ui.state.get("armies", []) + ui.state.get("world", {}).get("armies", []):
+		if march.get("owner", ui.state.playerId) != ui.state.playerId or march.status == "returned":
+			continue
+		ui.row(ui.modal_body, "%s · %s" % [str(march.name), {"outbound":"В пути к цели", "fighting":"В бою", "returning":"Возвращается"}.get(str(march.status), str(march.status))])
+		if march.has("cargo") and not march.cargo.get("issued", false):
+			ui.row(ui.modal_body, "Груз поступит по прибытии отряда:")
+			for resource: String in march.cargo.resources:
+				if int(march.cargo.resources[resource]) > 0:
+					ui.row(ui.modal_body, "%s: %d" % [ui.RESOURCE_NAMES[resource], int(march.cargo.resources[resource])])
+		ui.button(ui.modal_body, "Показать отряд", ui.focus_army.bind(march))
+		if march.status in ["outbound", "fighting"]:
+			var action := {"kind":"recall" if march.status == "outbound" else "retreat", "armyId":march.id}
+			ui.button(ui.modal_body, "Отозвать" if march.status == "outbound" else "Отступить", func(): await ui.command(action); army())
+	for target: Dictionary in ui.state.get("world", {}).get("cities", []):
+		if target.id != ui.state.playerId and target.get("pvp", false):
+			ui.button(ui.modal_body, "Поход: " + str(target.name), formation.bind(str(target.id), str(target.name)))
+
+func formation(target: String, name: String) -> void:
+	begin_view()
+	ui.open_modal("Поход: " + name, "right", "СОСТАВ")
+	var inputs: Dictionary = {}
+	for unit: Dictionary in catalogue.units:
+		var available: int = int(ui.state.v6.healthy.get(unit.unit_id, 0))
+		if available <= 0:
+			continue
+		ui.row(ui.modal_body, "%s · доступно %d · мест %d" % [str(unit.name_ru), available, int(unit.army_slots)])
+		var input := SpinBox.new()
+		input.min_value = 0
+		input.max_value = mini(available, int(ui.state.v6.march_capacity)/int(unit.army_slots))
+		input.custom_minimum_size = Vector2(180, 48)
+		ui.modal_body.add_child(input)
+		inputs[unit.unit_id] = input
+	ui.button(ui.modal_body, "Рассчитать поход", func():
+		var units: Dictionary = {}
+		for id: String in inputs:
+			if int(inputs[id].value) > 0:
+				units[id] = int(inputs[id].value)
+		var body := {"kind":"worldMarch", "worldKind":"pvp", "encounterId":target, "units":units}
+		var result: Dictionary = await ui.request("march-preview", body)
+		if result.has("error"):
+			ui.show_error(result)
+			return
+		ui.open_modal("Отправить отряд", "right", "ПОДТВЕРЖДЕНИЕ")
+		ui.row(ui.modal_body, "Дорога: %d с · %d мест. Потери зависят от гарнизона и сопровождения." % [int(ceil(float(result.travelMs)/1000.0)), int(result.total)])
+		ui.button(ui.modal_body, "Отправить", func(): await ui.command(body); army())
+	)

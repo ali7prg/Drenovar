@@ -1,0 +1,18 @@
+RESPONSIVENESS Attack opens formation true
+RESPONSIVENESS preview slider changes do not flood workers true
+RESPONSIVENESS Send feedback within100ms of actual tap true
+RESPONSIVENESS submitted roster locked true
+RESPONSIVENESS late failed preview cannot replace Sending quote true
+RESPONSIVENESS cancelled preview is not offline true
+RESPONSIVENESS obsolete active preview actually cancelled true
+RESPONSIVENESS close works while command pending true
+RESPONSIVENESS command settles after close and retries true
+RESPONSIVENESS late command does not close new panel true
+RESPONSIVENESS double touch and retries create one army true
+RESPONSIVENESS 200-unit screenshot composition preserved true
+RESPONSIVENESS network badge clears after confirmed response true
+RESPONSIVENESS preview503 does not forbid authoritative command true
+RESPONSIVENESS second march finishes true
+RESPONSIVENESS second target receives one army true
+RESPONSIVENESS active HTTP workers bounded true
+{"cancelled_requests":2,"checks":17,"failures":[],"method":"Linux Godot main scene, real touch, delayed loopback HTTP, 200-unit first army; no iPhone acceptance","peak_http_workers":2}

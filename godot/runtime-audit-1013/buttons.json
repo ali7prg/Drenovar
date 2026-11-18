@@ -1,0 +1,31 @@
+{
+  "checks": 50,
+  "failures": [],
+  "method": "Linux Godot 4.6.3 headless; real Input.parse_input_event touch; synthetic V6 fixture; busy flag held; no device latency claim",
+  "timings": [
+    {
+      "button": "Меню",
+      "pressed_signal": true,
+      "title": "Меню",
+      "touch_roundtrip_ms": 65.186
+    },
+    {
+      "button": "Армия",
+      "pressed_signal": true,
+      "title": "Армия и осада",
+      "touch_roundtrip_ms": 34.483
+    },
+    {
+      "button": "Строить",
+      "pressed_signal": true,
+      "title": "Строительство",
+      "touch_roundtrip_ms": 36.149
+    },
+    {
+      "button": "Отчёты",
+      "pressed_signal": true,
+      "title": "Летопись сражений",
+      "touch_roundtrip_ms": 34.345
+    }
+  ]
+}

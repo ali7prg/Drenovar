@@ -1,0 +1,26 @@
+[
+  {
+    "test": "qa_diagnostics",
+    "exit": 0
+  },
+  {
+    "test": "qa_network",
+    "exit": 0
+  },
+  {
+    "test": "qa_touch_buttons",
+    "exit": 0
+  },
+  {
+    "test": "qa_session_store",
+    "exit": 0
+  },
+  {
+    "test": "qa_combat_presentation",
+    "exit": 0
+  },
+  {
+    "test": "qa_combat_audio",
+    "exit": 0
+  }
+]

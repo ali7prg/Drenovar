@@ -1,0 +1,48 @@
+{
+  "method": "Rendered deterministic comparison of identical recorded server events at exact far-bank position; 40ms simulation steps, not real-time gameplay capture",
+  "device": "Linux x86_64; Godot4.6.3 official7d41c59c4; Mesa25.0.7 OpenGL4.5 Compatibility; llvmpipe LLVM19.1.7 256bits; Xorg dummy",
+  "viewport": [
+    1366,
+    630
+  ],
+  "before_build": 1012,
+  "before_pck_sha256": "502e2503f5f5b8a9fd2f4bf1354028ca32ba0351639f59804b39f8ef666a0216",
+  "after_build": 1013,
+  "after_pck_sha256": "ba9fe43f212ed25e130c9c1c34440e687d4e89f67041d379f430c6e5557c1fbc",
+  "fixture": "godot/tools/fixtures/city-bank-200.json",
+  "fixture_sha256": "e9911237a29a25e5beb9e0c603606f79d2c47fefb1b858dba1df7ab077ad3e69",
+  "camera_position": "(61.57101, 29.03216, -10.73486)",
+  "orthographic_size": 33.0,
+  "capture_timestamps_ms": [
+    0,
+    240,
+    480,
+    720
+  ],
+  "before_attack_members": [],
+  "after_attack_members": [
+    "ENG-02_0",
+    "ENG-02_5"
+  ],
+  "limitations": [
+    "Not physical iPhone12/Metal/Safari acceptance",
+    "Deterministic stepped rendering, not FPS, touch latency or continuous gameplay evidence",
+    "Normal game HUD hidden; diagnostic actor IDs and current clip added by external script only",
+    "GPU converts unsupported ETC2 textures to RGBA8 on software OpenGL; shipping assets and render settings unchanged",
+    "No audio device; dummy audio fallback, sound not verified"
+  ],
+  "network_scope": "Local synthetic in-memory fixture on127.0.0.1:8826 for setup only; zero staging/production/QA-clock requests",
+  "files": {
+    "capture-bank.gd": "166403094e455bb435cc328e4e720d53be9b10016a3d26e89fb6ea0f2a63620f",
+    "before/frame-0000.png": "424a8ddbe23a88ea39649877a85eedbb65acfb240662a0ac742c59d421da21f3",
+    "before/frame-0240.png": "a07547c1375e11b4c8cb1b537a53b3e7ae6f2b8893d5308549e5f29302c49266",
+    "before/frame-0480.png": "a7792a07bb7f535b659787091b6177b18ef08f5b3855f3d37b5aa56a3bd32b93",
+    "before/frame-0720.png": "b76146aeb0d7102da85e1bbd2d7bab725625389d2e747ac16c6670d16af9b971",
+    "after/frame-0000.png": "16b67f3653f57105d0ebc65330fbce0d8ee8e6c67678ab404e9aadd60fa7b259",
+    "after/frame-0240.png": "b6cbcaef4c8a34ed62a6e92c6c35a2d6fcfd39899c20f2aa00c2d03c8808e1b3",
+    "after/frame-0480.png": "4dd0ee36eaee20f81056adbb302dd87c8bb885d273ffc556bbf246ee2d69e7d4",
+    "after/frame-0720.png": "b4f3e695efa725f82941515ff60446effc627c9aca151cd0ce0607c2ea42ce83",
+    "before/frames.json": "8e007459732da63210a70c51df28e021bf5696cfc814c918063c4a43b27d0d0d",
+    "after/frames.json": "41cf79be39710aa4efe901ad25810f1bb706f541bcfcf212ff0b198ceb5a038a"
+  }
+}

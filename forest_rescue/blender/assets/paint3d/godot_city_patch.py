@@ -32,6 +32,7 @@ ART01_SETS = {
     "hollow": ["grove"],
     "willow": ["east_river"],
     "rocks": ["sw_quarry"],
+    "understory": ["sw_quarry", "east_river"],
 }
 ART01.update({"east_river": (1000, 280, 1536, 700), "sw_quarry": (0, 620, 520, 1024)})
 ART01_SPECIES = {   # single-species crops for colour stats

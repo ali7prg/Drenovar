@@ -284,8 +284,8 @@ def build(name, it):
         variants = {
             "v1": dict(blocks=list(range(len(body_blocks))), plants=True),
             # compact boulders: a painted block group + a copy of it rotated behind (outcrop depth ~ width)
-            "v2": dict(blocks=left, plants=True, center=True, rot_copy=(95, 0.85)),
-            "v3": dict(blocks=right, plants=True, center=True, rot_copy=(-100, 0.8), mirror=True),
+            "v2": dict(blocks=left, plants=True, center=True, rot_copy=(165, 0.85)),
+            "v3": dict(blocks=right, plants=True, center=True, rot_copy=(-160, 0.8), mirror=True),
         }
     else:
         variants = {

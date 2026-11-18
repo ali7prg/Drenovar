@@ -2474,7 +2474,7 @@
      "tris": {
       "LOD0": 3672,
       "LOD1": 1444,
-      "LOD2": 296
+      "LOD2": 280
      },
      "height_m": 5.5,
      "canopyRadius_m": 3.02,
@@ -2503,7 +2503,7 @@
      "tris": {
       "LOD0": 3348,
       "LOD1": 1316,
-      "LOD2": 344
+      "LOD2": 272
      },
      "height_m": 5.5,
      "canopyRadius_m": 3.24,

@@ -24,8 +24,42 @@ def load(p):
         return None
 
 
+NOTES = """
+## Scale decision (sheet is not self-consistent)
+
+The sheet annotates head height 3.6 m, hip height 2.8 m and body length 8.0 m, but its own drawing measures
+870 px snout->tail tip against a 320 px head height (ratio 2.72; 8.0/3.6 = 2.22). Proportions were kept from the
+drawing (needed for the silhouette match) and the vertical annotations were taken as authority: top of the skull
+3.6 m, back line over the hip 2.76 m, hip joint 2.41 m. The resulting length is 9.8 m snout->tail tip, 8.4 m
+along the sheet's own "body length" dimension line (which starts at the brow). Keeping 8.0 m instead would shrink
+the creature to 2.9 m head height. The human scale figure on the sheet (113 px) is not consistent with either.
+
+## Known deviations (honest)
+
+* Sheet left view shows three legs; the corrected mask removes the forward far leg (raw IoU also reported).
+  The front view shows a tail "spike" hanging between the legs; a horizontal tail cannot produce it, so it stays
+  red in the front diff (~2.5 % of the mask).
+* Painted micro-detail is projected from the 88 px/m sheet; finer scales come from the procedural normal map, so
+  very close shots are softer than the head close-up illustration.
+* The head close-up is a separate, chunkier illustration; the 3-D head follows the orthographic side silhouette.
+* Turn clips are in place: the client must yaw the root by 90 deg (smoothstep over 1.3 s) for planted feet to
+  stay fixed; lane_charge needs the documented translation profile (meta clientRootTranslation).
+* LOD1/LOD2 keep the 59-bone skeleton (one skin) but weight only 44 / 25 bones.
+* QA renders use Blender Cycles/Workbench and the Godot viewer; no device (iPhone) timing was measured here.
+
+## Rebuild
+
+```
+python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/boss/build_lf_boss_ancient_maw.py --iter NN
+forest_rescue/tools/godot_view.sh <cache>/lf_boss_ancient_maw_LOD0_qa.glb shots forest_rescue/qa/compare/lf_boss_ancient_maw/godot_iterNN
+forest_rescue/tools/godot_view.sh <cache>/lf_boss_ancient_maw_LOD0_qa.glb clip forest_rescue/qa/video/lf_boss_ancient_maw/godot_all_clips.mp4 all 95
+python3 forest_rescue/blender/assets/boss/maw_report.py
+```
+"""
+
+
 def main():
-    extra = open(sys.argv[1]).read() if len(sys.argv) > 1 else ""
+    extra = (open(sys.argv[1]).read() if len(sys.argv) > 1 else "") + NOTES
     L = ["# lf_boss_ancient_maw «Пращур» — production report", ""]
     meta = load(META) or {}
     L += ["## Deliverables", "",

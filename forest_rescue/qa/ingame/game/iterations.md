@@ -16,3 +16,10 @@ this log covers the gameplay layer (HUD, cards, intro, actors, mechanisms, teleg
 | intro_prompt / intro_horse | Visible horizontal banding in the bottom shade (24 stacked rects) | Smooth `GradientTexture2D` shade |
 | intro_banner (art/18 centre) | Network toast drawn over the banner; ribbon tails detached from the plate; no visible hall glow | Toasts move below the banner while it is shown; ribbon tails drawn in the plate's own space; additive halo over the town hall (0–2 s) |
 | locked_card (art/18 left) | Close to the reference (medallion, title, body, red «К ратуше»); body not italic (only NotoSerif Regular ships with the game); fog is the world layer's | kept |
+
+## iter02
+
+| Shot | Differs from reference | Change for iter03 |
+|---|---|---|
+| intro_horse (art/18 right) | Bottom shade now smooth (fixed). Iskra is placed on the corridor and visible to the renderer, but the world layer's canopy covers the whole entrance corridor and the site glade from the top camera, so she cannot be seen | Reported to the world layer (routes ≥ 3.8 m and glades ≥ 7 m free of crowns / canopy fade around actors); gameplay side adds 2D name plates («Искра», «Отряд», site names with n/5) drawn above everything, and faint golden route-preview dots to the next target |
+| intro_banner | Toast no longer overlaps; ribbons attached to the plate | kept |

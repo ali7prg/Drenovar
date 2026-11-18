@@ -104,3 +104,27 @@ def hoof(fetlock, tip_dir, length, width, lat=(1, 0, 0), cloven=True):
         r = np.linspace(width * (0.42 if cloven else 0.6), width * (0.36 if cloven else 0.5), 5)
         out.append(gbody.tube(pts, r, r * 0.8, sides=6, up=(0, 0, 1), tip=False, cap_base=False))
     return out
+
+
+def stance(sk, legs, sheet, targets, girdle=None, toe_down=0.08):
+    """Leg IK to a drawn side-view stance.  targets: leg -> ((x, y) paw-ball/fetlock sheet px,
+    (dx, dy) sheet direction from wrist/hock to that joint)."""
+    import grig
+    pose = sk.fk()
+    girdle = girdle or {}
+    for leg, ((x, y), (dx, dy)) in targets.items():
+        ch = legs[leg]
+        side = leg[-1]
+        lat = sk.head(ch[4])[0]
+        tgt = sheet.S(x, y, lat)
+        ed = sheet.S(x + dx * 10, y + dy * 10, lat) - tgt
+        front = leg.startswith("fore")
+        pole = np.array([0, 1.0, 0]) if front else np.array([0, -1.0, 0])
+        toe = sk.tail(ch[4]) - sk.head(ch[4])
+        rr = None
+        if ch[0] is not None and leg in girdle:
+            Rw = grig.rot_axis([1, 0, 0], math.radians(girdle[leg]))
+            Rb = sk.rest[ch[0]][:3, :3]
+            rr = Rb.T @ Rw @ Rb
+        grig.solve_leg(sk, pose, ch, tgt, ed, toe / np.linalg.norm(toe), pole, root_rot=rr)
+    return pose

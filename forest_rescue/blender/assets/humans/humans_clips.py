@@ -722,13 +722,13 @@ def soldier_clip_specs(R, role, name, dur):
                                   knee=unit(np.array([s * 0.2, -1.0, -0.3])))
         k3 = copy(k2)                                     # falling forward, hands reach for the ground
         h0 = R.hips0
-        k3["hip"] = np.array([0.0, 0.10, 0.30 - h0[2]])
+        k3["hip"] = np.array([0.0, 0.12, 0.40 - h0[2]])
         k3["pel"] = np.array([62.0, 4.0, 0.0])
         k3["sp"] = np.array([16.0, 0, 0])
         k3["nk"] = np.array([-10.0, 0, 0])
         for S_, s in (("Left", 1.0), ("Right", -1.0)):
-            k3["feet"][S_] = dict(ank=np.array([s * 0.12, 0.62, 0.10]), fwd=unit(np.array([0, 0.35, -1.0])),
-                                  up=np.array([0, 1.0, 0.3]), toe=25.0, knee=unit(np.array([s * 0.1, -0.4, -1.0])))
+            k3["feet"][S_] = dict(ank=np.array([s * 0.12, 0.70, 0.15]), fwd=unit(np.array([0, 0.55, -0.8])),
+                                  up=unit(np.array([0, 0.8, 0.55])), toe=30.0, knee=unit(np.array([s * 0.1, -0.2, -1.0])))
             k3["arm"][S_] = dict(wrist=np.array([s * 0.26, -0.62, 0.10]), elbow=np.array([s * 0.8, 0.2, -0.4]),
                                  palm=np.array([0, 0, -1.0]), hfwd=np.array([0, -1.0, 0.0]), w_ik=1.0,
                                  fk=k2["arm"][S_].get("fk", np.zeros(6)))
@@ -739,8 +739,8 @@ def soldier_clip_specs(R, role, name, dur):
         k4["sp"] = np.array([4.0, 0, 0])
         k4["nk"] = np.array([-18.0, 0.0, 65.0])
         for S_, s in (("Left", 1.0), ("Right", -1.0)):
-            k4["feet"][S_] = dict(ank=np.array([s * 0.13, 1.02, 0.075]), fwd=np.array([s * 0.15, 0.05, -1.0]),
-                                  up=np.array([0, 1.0, 0.1]), toe=0.0, knee=np.array([s * 0.1, 0.0, -1.0]))
+            k4["feet"][S_] = dict(ank=np.array([s * 0.13, 1.05, 0.13]), fwd=unit(np.array([s * 0.1, 0.75, -0.66])),
+                                  up=unit(np.array([0, 0.66, 0.75])), toe=35.0, knee=np.array([s * 0.1, 0.0, -1.0]))
             k4["arm"][S_] = dict(wrist=np.array([s * 0.30, -0.66, 0.05]), elbow=np.array([s * 0.9, 0.1, -0.3]),
                                  palm=np.array([0, 0, -1.0]), hfwd=np.array([s * 0.2, -1.0, 0.0]), w_ik=1.0,
                                  fk=k2["arm"][S_].get("fk", np.zeros(6)))

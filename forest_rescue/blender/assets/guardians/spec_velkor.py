@@ -100,7 +100,7 @@ def body_parts(sk):
     zb = [S(0, b)[2] for _, t, b, w in prof]
     w = [w for *_, w in prof]
     P.append(Part(loft(Y, zt, zb, w, bone="spine_02"), "spine_02", k=0.0, tag="torso"))
-    P.append(Part(sdf.ellipsoid(S(480, 96), (0.36, 0.45, 0.22)), "spine_03", k=0.12, tag="hump"))
+    P.append(Part(sdf.ellipsoid(S(480, 104), (0.34, 0.45, 0.20)), "spine_03", k=0.12, tag="hump"))
     hd = "head"
     P.append(Part(sdf.ellipsoid(S(588, 114), (0.21, 0.22, 0.19)), hd, k=0.07, tag="cranium"))
     P.append(Part(sdf.round_cone(S(600, 122), S(634, 134), 0.165, 0.11), hd, k=0.06, tag="muzzle"))
@@ -271,8 +271,16 @@ LOD_REMAP = {
         "hhoof_R": "hcannon_R", "jaw": "head", "spine_01": "hips", "neck_01": "spine_03", "scapula_L": "spine_03",
         "scapula_R": "spine_03", "cannon_L": "forearm_L", "cannon_R": "forearm_R"},
 }
-PROJECTION = [("side", "bind"), ("front", "bind")]
-COMPARE = [("side", "bind"), ("front", "bind")]
+PROJECTION = [("side", "side"), ("front", "bind")]
+COMPARE = [("side", "side"), ("front", "bind")]
+
+
+def side_stance(sk):
+    """Drawn walking stance: near hind leg extended back, far hind under the belly."""
+    return gspec.stance(sk, LEGS, SH, {
+        "fore_L": ((452, 309), (0.05, 1.0)), "fore_R": ((412, 306), (-0.12, 1.0)),
+        "hind_L": ((142, 309), (-0.45, 1.0)), "hind_R": ((262, 309), (0.10, 1.0))},
+        girdle={"fore_R": 8.0})
 WEIGHT_FALLOFF = 0.06
 NORMAL_STRENGTH = 4.5
 ROUGHNESS = {"body": 0.88, "fur_shag": 0.92, "fur_beard": 0.92, "fur_moss": 0.95, "fur_tail": 0.92,

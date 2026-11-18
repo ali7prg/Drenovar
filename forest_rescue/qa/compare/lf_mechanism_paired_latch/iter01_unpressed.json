@@ -1,0 +1,16 @@
+{
+  "title": "lf_mechanism_paired_latch unpressed (camera fitted to the drawing)",
+  "iou_filled": 0.7519,
+  "iou_raw": 0.7519,
+  "mean_abs_colour_error": 0.1353,
+  "mean_rgb_ref": [
+    0.453,
+    0.368,
+    0.28
+  ],
+  "mean_rgb_render": [
+    0.398,
+    0.32,
+    0.249
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "unpressed": {
+    "iou_filled": 0.7519,
+    "iou_raw": 0.7519,
+    "mean_abs_colour_error": 0.1353,
+    "mean_rgb_ref": [
+      0.453,
+      0.368,
+      0.28
+    ],
+    "mean_rgb_render": [
+      0.398,
+      0.32,
+      0.249
+    ]
+  },
+  "held": {
+    "iou_filled": 0.6394,
+    "iou_raw": 0.6152,
+    "mean_abs_colour_error": 0.1491,
+    "mean_rgb_ref": [
+      0.428,
+      0.342,
+      0.26
+    ],
+    "mean_rgb_render": [
+      0.411,
+      0.328,
+      0.264
+    ]
+  }
+}

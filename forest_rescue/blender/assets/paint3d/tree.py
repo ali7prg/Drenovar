@@ -109,6 +109,21 @@ class TreeRef:
             x = 0.7 * x + 0.3 * j
         ax = np.array(ax[::-1])
         rad = np.array(rad[::-1])
+        rz = cfg.get("root_zone", 0)
+        if rz:
+            fgc = ndi.binary_closing(self.fg, structure=morphology.disk(2))
+            for i, v in enumerate(rows):
+                if v < clip - rz:
+                    continue
+                lab_, n = ndi.label(fgc[v])
+                xi = int(np.clip(round(ax[i]), 0, self.W - 1))
+                k = lab_[xi]
+                if k:
+                    run = np.nonzero(lab_ == k)[0]
+                    hw = 0.5 * (run.max() - run.min()) * cfg.get("root_k", 0.85)
+                    f = (v - (clip - rz)) / rz
+                    rad[i] = max(rad[i], (1 - f) * rad[i] + f * hw)
+                    ax[i] = (1 - 0.5 * f) * ax[i] + 0.5 * f * 0.5 * (run.max() + run.min())
         self.trunk_rows = rows
         self.axis_x = _smooth1d(ax, cfg.get("trunk_smooth", 4))
         r = _smooth1d(rad, 2)
@@ -134,6 +149,17 @@ class TreeRef:
         segs, jc, sk, dist = skel.segments(wl)
         limbs = skel.limb_tree(segs, jc, self.trunk_band, self.axis_at, min_r=cfg.get("limb_min_r", 1.3),
                                float_min_r=cfg.get("float_min_r", 1.8), float_min_len=cfg.get("float_min_len", 10))
+        rz = cfg.get("root_zone", 0)
+        if rz:
+            keep = [i for i, l in enumerate(limbs) if np.mean(l["P"][:, 1]) < self.clip - rz * 0.8]
+            remap = {o: n for n, o in enumerate(keep)}
+            new = []
+            for o in keep:
+                l = dict(limbs[o])
+                if l["parent"] >= 0:
+                    l["parent"] = remap.get(l["parent"], -2)
+                new.append(l)
+            limbs = new
         self.limbs = limbs
         self.skel = sk
         # 2-D coverage of the modelled wood (trunk band + limb disks)
@@ -222,7 +248,7 @@ class Patches:
         v0, v1 = ref.crown_rows
         for i in range(1, self.n + 1):
             m = lbl == i
-            tile, rect = seg.make_tile(ref.img, ref.fg, m, margin=margin, scale=scale)
+            tile, rect = seg.make_tile(ref.img, ref.fg, m, margin=margin, scale=scale, bg=ref.bg)
             ys, xs = np.nonzero(m)
             cu, cv = float(xs.mean()), float(ys.mean())
             vi = int(np.clip(round(cv), 0, ref.H - 1))
@@ -306,12 +332,13 @@ class TreeBuilder:
         rb = r_px[-1]
         ext = []
         if bottom[2] > -0.25:
-            for zz in (max(bottom[2] - 0.5 * (bottom[2] + 0.3), -0.3), -0.35):
+            for zz in (0.5 * bottom[2] - 0.05, -0.4):
                 q = bottom.copy()
                 q[2] = zz
                 ext.append(q)
         Pw = np.vstack([Pw, ext]) if ext else Pw
-        r_px = np.r_[r_px, [rb * cfg.get("flare", 1.08)] * len(ext)]
+        fl = cfg.get("flare", 1.12)
+        r_px = np.r_[r_px, [rb * fl, rb * fl * 1.08][:len(ext)]]
         Pw = Pw[::-1]
         r_m = r_px[::-1] / ref.ppm
         paths.append(dict(P=Pw, r=r_m, kind="trunk", id=0, parent=-1, depth_scale=cfg.get("trunk_kd", 0.9)))
@@ -368,6 +395,8 @@ class TreeBuilder:
             t = -D * rng.uniform(0.82, 1.0)
             n_cam = ref.normal_cam(cu, cv, t)
             n_cam = nrm(n_cam + np.array([0, 0, -1.0]) * self.cfg.get("front_bias", 0.8))
+            if n_cam[2] > -0.42:            # keep <= ~65 deg from the reference axis
+                n_cam = nrm(n_cam + np.array([0, 0, -1.0]) * (0.42 + n_cam[2] + 0.05))
             n_w = ref.world_dir(n_cam)
             cards.append(dict(kind="front", rect=(x0, y0, x1, y1), c=(cu, cv), t_px=t, n=n_w, tile=i,
                               flip=False))
@@ -390,42 +419,93 @@ class TreeBuilder:
         dm[wl] = np.minimum(dm[wl], -0.2 * ref.depth_px(np.nonzero(wl)[1], np.nonzero(wl)[0]))
         return dm
 
-    def fill_cards(self, n_fill, front_dm, size_k=1.0, seed=5, n_inner=0, min_dist_k=0.55, choose=None):
+    def lobes(self, seed, n=None):
+        """Big clump lobes on the crown dome: (phi, eta, amplitude, sigma_phi, sigma_eta)."""
+        rng = np.random.default_rng(seed)
+        n = n or self.cfg.get("n_lobes", 14)
+        L = []
+        for i in range(n):
+            L.append((rng.uniform(-np.pi, np.pi), rng.uniform(0.05, 0.8), rng.uniform(0.10, 0.2),
+                      rng.uniform(0.35, 0.55), rng.uniform(0.10, 0.16)))
+        return L
+
+    @staticmethod
+    def lobe_field(lobes, ph, eta):
+        b = np.zeros(np.shape(ph))
+        g = np.zeros(np.shape(ph) + (2,))
+        for (p0, e0, A, sp, se) in lobes:
+            dp = (np.asarray(ph) - p0 + np.pi) % (2 * np.pi) - np.pi
+            de = np.asarray(eta) - e0
+            w = A * np.exp(-(dp / sp) ** 2 - (de / se) ** 2)
+            b += w
+            g[..., 0] += w * dp / sp
+            g[..., 1] += w * de / se
+        return b, g
+
+    def card_footprint_ok(self, V, fg, thresh):
+        u, v, _ = self.ref.view.project(V)
+        pts = np.stack([u, v], 1)
+        x0, y0 = np.floor(pts.min(0)).astype(int) - 1
+        x1, y1 = np.ceil(pts.max(0)).astype(int) + 2
+        H, W = fg.shape
+        if x1 <= 0 or y1 <= 0 or x0 >= W or y0 >= H:
+            return 0.0
+        m = np.zeros((y1 - y0, x1 - x0), np.uint8)
+        cv2.fillConvexPoly(m, np.round(pts - [x0, y0]).astype(np.int32), 1)
+        cx0, cy0 = max(0, x0), max(0, y0)
+        cx1, cy1 = min(W, x1), min(H, y1)
+        inside = m[cy0 - y0:cy1 - y0, cx0 - x0:cx1 - x0].astype(bool) & fg[cy0:cy1, cx0:cx1]
+        tot = m.sum()
+        return float(inside.sum()) / max(1, tot)
+
+    def fill_cards(self, n_fill, front_dm, size_k=1.0, seed=5, n_inner=0, min_dist_k=0.55, choose=None,
+                   up_bias=0.35, foot=0.86):
         ref, p = self.ref, self.p
+        cfg = self.cfg
         rng = np.random.default_rng(seed)
         v0, v1 = ref.crown_rows
-        fgd = ndi.binary_dilation(ref.fg, iterations=2)
-        # candidate points on the revolved surface, area weighted
+        fg_e = ref.fg
+        lobes = self.lobes(seed + 101)
         vs = np.arange(v0, v1 + 1)
         R = ref.R[vs]
         dR = np.gradient(ref.R)[vs]
         w_row = R * np.sqrt(1 + dR ** 2)
+        eta_r = (vs - v0) / max(v1 - v0, 1)
+        w_row = w_row * (1.0 + self.cfg.get("top_weight", 1.6) * np.clip(1 - eta_r / 0.6, 0, 1))
         w_row = w_row / w_row.sum()
-        M = n_fill * 12
+        M = n_fill * 14
         vv = rng.choice(vs, size=M, p=w_row) + rng.uniform(-0.5, 0.5, M)
         ph = rng.uniform(-np.pi, np.pi, M)
         vi = np.clip(np.round(vv).astype(int), 0, ref.H - 1)
-        x = ref.xc[vi] + ref.R[vi] * np.cos(ph)
-        t = ref.kd * ref.R[vi] * np.sin(ph)
-        # radial jitter inward a little
-        k = rng.uniform(0.82, 1.0, M)
-        x = ref.xc[vi] + (x - ref.xc[vi]) * k
-        t = t * k
-        ok = np.ones(M, bool)
+        eta = (vv - v0) / max(v1 - v0, 1)
+        bump, grad = self.lobe_field(lobes, ph, eta)
+        kr = 0.86 + bump * 0.9 + rng.uniform(-0.04, 0.04, M)
+        side = np.abs(np.cos(ph)) > 0.75
+        kr = np.where(side, np.minimum(kr, 0.98), kr)
+        x = ref.xc[vi] + ref.R[vi] * kr * np.cos(ph)
+        t = ref.kd * ref.R[vi] * kr * np.sin(ph)
+        # clumpier: keep candidates with probability rising on lobes
+        keep_p = np.clip(0.3 + bump / 0.2, 0, 1)
+        ok = rng.random(M) < keep_p
         xi = np.clip(np.round(x).astype(int), 0, ref.W - 1)
-        ok &= fgd[vi, xi]
+        ok &= fg_e[vi, xi]
         ok &= t > front_dm[vi, xi] + 0.3 * ref.ppm
         cand = np.nonzero(ok)[0]
         rng.shuffle(cand)
-        # Poisson-disk thinning in 3D (camera px units)
-        typ = np.median([q["w_m"] for q in p.info]) * ref.ppm * size_k
+        info = p.info
+        areas = np.array([q["area"] for q in info], float)
+        typ = np.median([q["w_m"] for q in info if q["area"] > np.median(areas)]) * ref.ppm * size_k
         rmin = typ * min_dist_k
-        pts = []
+        etas = np.array([q["eta"] for q in info])
+        rhos = np.array([q["rho"] for q in info])
+        lums = np.array([q["lum"] for q in info])
+        edges = np.array([q["edge"] for q in info])
+        lum_med = np.median(lums)
         grid = {}
-        cell = rmin
+        cards = []
         for c in cand:
             q = np.array([x[c], vv[c], t[c]])
-            key = tuple((q // cell).astype(int))
+            key = tuple((q // rmin).astype(int))
             bad = False
             for dx in (-1, 0, 1):
                 for dy in (-1, 0, 1):
@@ -442,55 +522,87 @@ class TreeBuilder:
                     break
             if bad:
                 continue
-            grid.setdefault(key, []).append(q)
-            pts.append((c, q))
-            if len(pts) >= n_fill:
-                break
-        cards = []
-        info = p.info
-        etas = np.array([q["eta"] for q in info])
-        rhos = np.array([q["rho"] for q in info])
-        lums = np.array([q["lum"] for q in info])
-        edges = np.array([q["edge"] for q in info])
-        for c, q in pts:
             u, v, tt = q
-            eta = (v - v0) / max(v1 - v0, 1)
-            side = np.cos(ph[c])
-            wgt = np.exp(-((etas - eta) / 0.18) ** 2)
-            if abs(side) > 0.55:
-                wgt *= np.where(edges & (np.abs(rhos) > 0.45), 3.0, 0.5)
+            n_cam = ref.normal_cam(u, v, tt)
+            n_w = ref.world_dir(n_cam)
+            # lobe shading: tilt away from the lobe centre (tops of clumps face up/out)
+            tang_up = ref.world_dir(np.array([0.0, 1.0, 0.0]))
+            tang_ph = ref.world_dir(np.array([-np.sin(ph[c]), 0.0, np.cos(ph[c]) * ref.kd]))
+            n_w = nrm(n_w + 2.2 * (grad[c, 1] * -tang_up + grad[c, 0] * tang_ph))
+            if n_w[2] > -0.25:
+                n_w = nrm(n_w + up_bias * np.array([0, 0, 1.0]))
+            n_w = nrm(n_w + rng.normal(0, 0.12, 3))
+            wgt = np.exp(-((etas - eta[c]) / 0.2) ** 2) * np.sqrt(areas)
+            sd = np.cos(ph[c])
+            if abs(sd) > 0.55:
+                wgt *= np.where(edges & (np.abs(rhos) > 0.45), 3.0, 0.6)
+            if n_w[2] > 0.2:
+                wgt *= np.exp(np.clip((lums - lum_med) / 6.0 * min(1.0, n_w[2] * 1.6), -4, 4))
             if choose is not None:
                 wgt *= choose
             wgt = wgt / wgt.sum()
             ti = int(rng.choice(len(info), p=wgt))
-            flip = bool(np.sign(rhos[ti]) != np.sign(side)) if abs(side) > 0.4 else bool(rng.random() < 0.5)
-            n_cam = ref.normal_cam(u, v, tt)
-            n_w = ref.world_dir(n_cam)
-            # random tilt
-            n_w = nrm(n_w + rng.normal(0, 0.18, 3))
-            cards.append(dict(kind="fill", P=ref.cam_to_world(np.array([u]), np.array([v]), np.array([tt]))[0],
-                              n=n_w, tile=ti, flip=flip, size=rng.uniform(0.95, 1.18) * size_k,
-                              roll=rng.normal(0, 0.25), c=(u, v), t_px=tt))
-        # inner cards
-        for _ in range(n_inner):
-            vq = rng.uniform(v0 + 0.15 * (v1 - v0), v1 - 0.1 * (v1 - v0))
+            flip = bool(np.sign(rhos[ti]) != np.sign(sd)) if abs(sd) > 0.4 else bool(rng.random() < 0.5)
+            P3 = ref.cam_to_world(np.array([u]), np.array([v]), np.array([tt]))[0]
+            size = rng.uniform(0.95, 1.18) * size_k
+            roll = rng.normal(0, 0.22)
+            placed = None
+            for attempt in range(3):
+                Vc = self._fill_quad(P3, n_w, ti, size, roll)
+                if self.card_footprint_ok(Vc, fg_e, foot) >= foot:
+                    placed = (P3, size)
+                    break
+                # shrink and pull toward the crown axis
+                ax_w = ref.cam_to_world(np.array([ref.xc[int(v)]]), np.array([v]), np.array([0.0]))[0]
+                P3 = ax_w + (P3 - ax_w) * 0.85
+                size *= 0.78
+            if placed is None:
+                continue
+            grid.setdefault(key, []).append(q)
+            cards.append(dict(kind="fill", P=placed[0], n=n_w, tile=ti, flip=flip, size=placed[1], roll=roll,
+                              c=(u, v), t_px=tt))
+            if len(cards) >= n_fill:
+                break
+        # inner cards (block see-through from above; darker patches)
+        tries = 0
+        n_in = 0
+        while n_in < n_inner and tries < n_inner * 20:
+            tries += 1
+            vq = rng.uniform(v0 + 0.08 * (v1 - v0), v1 - 0.15 * (v1 - v0))
             vi_ = int(vq)
             a = rng.uniform(-np.pi, np.pi)
-            kk = rng.uniform(0.35, 0.7)
+            kk = rng.uniform(0.35, 0.72)
             u = ref.xc[vi_] + ref.R[vi_] * kk * np.cos(a)
             tt = ref.kd * ref.R[vi_] * kk * np.sin(a)
-            if not fgd[vi_, int(np.clip(u, 0, ref.W - 1))]:
+            ui = int(np.clip(u, 0, ref.W - 1))
+            if not fg_e[vi_, ui] or tt < front_dm[vi_, ui] + 0.3 * ref.ppm:
                 continue
-            if tt < front_dm[vi_, int(np.clip(u, 0, ref.W - 1))] + 0.3 * ref.ppm:
-                continue
-            wgt = np.exp(-((etas - (vq - v0) / max(v1 - v0, 1)) / 0.25) ** 2) * np.exp(-(lums - lums.min()) / 12)
+            wgt = np.exp(-((etas - (vq - v0) / max(v1 - v0, 1)) / 0.25) ** 2) * np.sqrt(areas)
+            wgt *= np.exp(-((lums - lum_med) / 10.0) ** 2)
             wgt /= wgt.sum()
             ti = int(rng.choice(len(info), p=wgt))
             n_w = ref.world_dir(ref.normal_cam(u, vq, tt))
-            cards.append(dict(kind="inner", P=ref.cam_to_world(np.array([u]), np.array([vq]), np.array([tt]))[0],
-                              n=nrm(n_w + rng.normal(0, 0.3, 3)), tile=ti, flip=bool(rng.random() < 0.5),
-                              size=rng.uniform(1.0, 1.25) * size_k, roll=rng.normal(0, 0.4), c=(u, vq), t_px=tt))
+            n_w = nrm(n_w + rng.normal(0, 0.3, 3) + np.array([0, 0, 0.4]))
+            P3 = ref.cam_to_world(np.array([u]), np.array([vq]), np.array([tt]))[0]
+            size = rng.uniform(1.0, 1.25) * size_k
+            roll = rng.normal(0, 0.4)
+            Vc = self._fill_quad(P3, n_w, ti, size, roll)
+            if self.card_footprint_ok(Vc, fg_e, foot) < foot:
+                continue
+            cards.append(dict(kind="inner", P=P3, n=n_w, tile=ti, flip=bool(rng.random() < 0.5), size=size,
+                              roll=roll, c=(u, vq), t_px=tt))
+            n_in += 1
         return cards
+
+    def _fill_quad(self, P3, n, ti, size, roll):
+        w = self.p.info[ti]["w_m"] * size
+        h = self.p.info[ti]["h_m"] * size
+        up = np.array([0, 0, 1.0])
+        rt = nrm(np.cross(up, n)) if abs(np.dot(up, n)) < 0.97 else nrm(np.cross([1.0, 0, 0], n))
+        upv = nrm(np.cross(n, rt))
+        upv = upv * np.cos(roll) + rt * np.sin(roll)
+        V, _, _, _, _ = geom.free_card(P3, n, upv, w, h, (0, 0, 1, 1), np.zeros(4))
+        return V
 
     # -------------------------------------------------------------- mesh assembly
     def assemble(self, paths, cards, bark_uv, sides_trunk=14, sides_limb=6, min_limb_r_px=0.0, copies=None,
@@ -545,7 +657,6 @@ class TreeBuilder:
                 h = p.info[ti]["h_m"] * c["size"]
                 up = np.array([0, 0, 1.0])
                 n = c["n"]
-                # roll around the normal
                 rt = nrm(np.cross(up, n)) if abs(np.dot(up, n)) < 0.97 else nrm(np.cross([1.0, 0, 0], n))
                 upv = nrm(np.cross(n, rt))
                 upv = upv * np.cos(c["roll"]) + rt * np.sin(c["roll"])

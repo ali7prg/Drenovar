@@ -245,7 +245,7 @@ def bleed(rgb, known, iters=None):
     return texproj.fill(rgb.astype(np.float64), known).astype(np.float32)
 
 
-def make_tile(img, fg, patch, margin=3, scale=2, sharpen=0.6, alpha_erode=0.0, grow_fg=False):
+def make_tile(img, fg, patch, margin=3, scale=2, sharpen=0.6, alpha_erode=0.0, grow_fg=False, bg=None, bg_thresh=11.0):
     """RGBA tile of one patch: alpha = (patch dilated by `margin` px) & fg (true outer edge kept).
 
     RGB = painted pixels, bled outward from fg so edges carry foliage colour, Lanczos x`scale`
@@ -255,10 +255,16 @@ def make_tile(img, fg, patch, margin=3, scale=2, sharpen=0.6, alpha_erode=0.0, g
     x0, x1 = max(0, xs.min() - pad), min(img.shape[1], xs.max() + 1 + pad)
     y0, y1 = max(0, ys.min() - pad), min(img.shape[0], ys.max() + 1 + pad)
     p = patch[y0:y1, x0:x1]
-    f = fg[y0:y1, x0:x1]
-    grown = ndi.binary_dilation(p, structure=morphology.disk(margin)) if margin else p
-    a = (grown & f) | p
+    f = fg[y0:y1, x0:x1].copy()
     rgb = img[y0:y1, x0:x1].astype(np.float32)
+    if bg is not None:
+        # painted see-through gaps (background colour inside the fg mask) stay transparent
+        Lb = lab(np.asarray(bg, np.float32)[None, None])[0, 0]
+        d = lab(rgb) - Lb
+        bglike = np.sqrt(d[..., 0] ** 2 + 1.4 * (d[..., 1] ** 2 + d[..., 2] ** 2)) < bg_thresh
+        f &= ~bglike
+    grown = ndi.binary_dilation(p, structure=morphology.disk(margin)) if margin else p
+    a = grown & f
     rgb = bleed(rgb, f)
     a_f = a.astype(np.float32)
     if scale != 1:

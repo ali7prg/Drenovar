@@ -485,4 +485,14 @@ def feather_cards(J, lod=0, seed=9):
                 wk = 1.45 if abs(math.degrees(ang) - 180.0) < 70.0 else 1.0   # fuller at the back
                 cs.add_card(path, np.array([0.032, 0.036, 0.034, 0.028]) * wk, nrm, STRIP["tail_wisp"],
                             [{bone: 1.0}] * 4, twist=rng.normal(0, 0.2), flip=bool(rng.integers(2)))
+            # fringe hanging behind the fetlock (reads as the feathering mass in the profiles)
+            for k in range({0: 3, 1: 1}[lod]):
+                f = (k / 2.0 - 0.5) if lod == 0 else 0.0
+                root = fet + V(sx * 0.03 * f * 2, 0.06, 0.13 + 0.02 * rng.random())
+                tip = fet + V(sx * 0.04 * f * 2, 0.10 + 0.02 * rng.random(), -0.14)
+                path = np.array([root + (tip - root) * t + V(0, 0.02 * math.sin(math.pi * t), 0)
+                                 for t in np.linspace(0, 1, 4)])
+                nrm = np.tile(V(1.0, 0.25 * f, 0.0), (4, 1))
+                cs.add_card(path, np.array([0.045, 0.055, 0.055, 0.045]), nrm, STRIP["feather"],
+                            [{bone: 1.0}] * 4, twist=rng.normal(0, 0.15), flip=bool(rng.integers(2)))
     return cs

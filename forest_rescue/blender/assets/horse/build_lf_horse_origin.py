@@ -40,7 +40,7 @@ ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
 FAST = "--fast" in ARGS
 TEX = int(ARGS[ARGS.index("--tex-size") + 1]) if "--tex-size" in ARGS else (1024 if FAST else 2048)
 BODY_TRIS = {0: 9000, 1: 6000, 2: 2750}   # LOD1/2: body + opaque hair volumes
-HAIR_VOL_TRIS = 3300
+HAIR_VOL_TRIS = 2700
 T0 = time.time()
 
 

@@ -98,10 +98,10 @@ def mane_clumps(guide, seed=13):
             C.chain(path, radii, f"mane_{side}", k=0.03, normals=guide.grad(path), flatten=0.40)
     # crest ridge: the mane's mass on top of the neck (fuller crest silhouette, both views)
     ys = np.linspace(y0 + 0.005, y1 + 0.02, 14)
-    pts = [_crest_top(guide, y) + V(-0.008, 0.0, -0.024 + 0.004 * math.sin(math.pi * (i / 13)))
+    pts = [_crest_top(guide, y) + V(-0.008, 0.0, -0.034 + 0.004 * math.sin(math.pi * (i / 13)))
            for i, y in enumerate(ys)]
     radii = [0.026 + 0.006 * math.sin(math.pi * i / 13) for i in range(len(pts))]
-    C.chain(pts, radii, "mane_crest", k=0.035)
+    C.chain(pts, radii, "mane_crest", k=0.02)
     return C
 
 
@@ -119,8 +119,8 @@ def forelock_clumps(guide, seed=17):
 
 # --------------------------------------------------------------------------- tail
 
-TAIL_SPLINE = [V(0, 0.60, 1.425), V(0, 0.73, 1.425), V(0, 0.82, 1.27), V(0, 0.865, 1.02),
-               V(0, 0.882, 0.76), V(0, 0.876, 0.50), V(0, 0.862, 0.30), V(0, 0.850, 0.20)]
+TAIL_SPLINE = [V(0, 0.60, 1.425), V(0, 0.73, 1.425), V(0, 0.815, 1.27), V(0, 0.855, 1.02),
+               V(0, 0.870, 0.76), V(0, 0.866, 0.50), V(0, 0.855, 0.30), V(0, 0.845, 0.20)]
 
 
 def tail_center(t):
@@ -134,7 +134,7 @@ def tail_center(t):
 def _tail_section(t):
     """Half-width (X, rear view) and half-depth (Y, side view) of the tail mass along t."""
     ax = np.interp(t, [0.0, 0.12, 0.25, 0.50, 0.72, 0.88, 1.0], [0.040, 0.075, 0.110, 0.130, 0.118, 0.085, 0.040])
-    ay = np.interp(t, [0.0, 0.12, 0.25, 0.50, 0.72, 0.88, 1.0], [0.035, 0.050, 0.064, 0.074, 0.071, 0.058, 0.030])
+    ay = np.interp(t, [0.0, 0.12, 0.25, 0.50, 0.72, 0.88, 1.0], [0.035, 0.048, 0.060, 0.068, 0.066, 0.055, 0.030])
     return ax, ay
 
 

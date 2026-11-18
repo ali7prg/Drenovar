@@ -1,0 +1,16 @@
+{
+  "insets": {
+    "row": {
+      "view": "row",
+      "iou": 0.4034,
+      "mean_abs_colour_error": 0.2429,
+      "ref_pixels": 76086,
+      "render_pixels": 88515
+    }
+  },
+  "tris": {
+    "LOD0": 380,
+    "LOD1": 120,
+    "LOD2": 110
+  }
+}

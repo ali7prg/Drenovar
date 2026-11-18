@@ -1257,12 +1257,12 @@ def build_conifer2(spec, rng):
 
     def tier_cards():
         cards = []
-        zt = np.linspace(cb, H - 0.6, spec.get("lod2_tiers", 8))
+        zt = np.linspace(cb, H - 0.6, spec.get("lod2_tiers", 10))
         for i, z in enumerate(zt):
             L = spec["profile"](z, 0.0) * 1.02
             f = (z - cb) / max(H - cb, 1e-3)
-            for j in range(6):
-                az = j * np.pi / 3 + i * 0.5
+            for j in range(8):
+                az = j * np.pi / 4 + i * 0.4
                 d = np.array([math.cos(az), math.sin(az), 0])
                 tang = normalize(d + np.array([0, 0, -0.35 - 0.3 * (1 - f)]))
                 side = normalize(np.cross(d, np.array([0, 0, 1.0])))

@@ -8,9 +8,9 @@
         "lf_env_hollow_oak_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 6782,
-        "LOD1": 2699,
-        "LOD2": 917
+        "LOD0": 6750,
+        "LOD1": 2669,
+        "LOD2": 295
       },
       "materials": {
         "LOD0": [
@@ -24,18 +24,18 @@
           "lf_foliage"
         ]
       },
-      "height_m": 14.13,
-      "crown_radius_m": 9.2,
+      "height_m": 14.33,
+      "crown_radius_m": 8.18,
       "bounds_m_blender": [
         [
-          -6.0,
-          -4.91,
-          -0.61
+          -6.02,
+          -4.87,
+          -0.63
         ],
         [
-          9.2,
-          4.89,
-          14.13
+          8.18,
+          4.49,
+          14.33
         ]
       ],
       "display_offset_gltf": [
@@ -51,9 +51,9 @@
         "lf_env_hollow_oak_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 6782,
-        "LOD1": 2700,
-        "LOD2": 926
+        "LOD0": 6741,
+        "LOD1": 2677,
+        "LOD2": 296
       },
       "materials": {
         "LOD0": [
@@ -67,22 +67,22 @@
           "lf_foliage"
         ]
       },
-      "height_m": 13.64,
-      "crown_radius_m": 8.6,
+      "height_m": 14.35,
+      "crown_radius_m": 8.86,
       "bounds_m_blender": [
         [
-          -8.6,
-          -4.62,
-          -0.61
+          -8.86,
+          -4.8,
+          -0.64
         ],
         [
           5.51,
-          5.5,
-          13.64
+          5.23,
+          14.35
         ]
       ],
       "display_offset_gltf": [
-        17.197,
+        16.369,
         0.0,
         0.0
       ]
@@ -94,9 +94,9 @@
         "lf_env_hollow_oak_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 6782,
-        "LOD1": 2699,
-        "LOD2": 748
+        "LOD0": 6721,
+        "LOD1": 2660,
+        "LOD2": 254
       },
       "materials": {
         "LOD0": [
@@ -110,31 +110,31 @@
           "lf_foliage"
         ]
       },
-      "height_m": 11.14,
-      "crown_radius_m": 6.89,
+      "height_m": 11.67,
+      "crown_radius_m": 6.97,
       "bounds_m_blender": [
         [
           -5.2,
-          -3.97,
-          -0.61
+          -4.27,
+          -0.62
         ],
         [
-          6.89,
-          4.73,
-          11.14
+          6.97,
+          4.74,
+          11.67
         ]
       ],
       "display_offset_gltf": [
-        34.395,
+        32.737,
         0.0,
         0.0
       ]
     }
   },
   "tris": {
-    "LOD0": 6782,
-    "LOD1": 2700,
-    "LOD2": 926
+    "LOD0": 6750,
+    "LOD1": 2677,
+    "LOD2": 296
   },
   "bones": 0,
   "materials": [
@@ -171,8 +171,9 @@
       "type": "shader (vertex colour driven)"
     }
   },
-  "layout_note": "Node translations are preview offsets only (variants along +X, LOD1/LOD2 rows behind). Instance the Mesh resources with your own transforms; mesh origin = trunk base on the ground.",
+  "layout_note": "Variants are laid out along +X (display_offset_gltf); the three LOD meshes of a variant share the variant origin (overlapping, show one per distance). Mesh origin = trunk base on the ground.",
   "lod_note": "LOD0: bark+foliage (2 surfaces); LOD1/LOD2: single foliage-atlas surface (bark strip in atlas).",
+  "export_scale_vs_art02": 1.0,
   "glb_images": [
     "lf_bark_hollow_n.png",
     "lf_bark_hollow_c.jpg",

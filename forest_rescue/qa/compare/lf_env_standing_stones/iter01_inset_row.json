@@ -1,0 +1,7 @@
+{
+  "view": "row",
+  "iou": 0.4034,
+  "mean_abs_colour_error": 0.2429,
+  "ref_pixels": 76086,
+  "render_pixels": 88515
+}

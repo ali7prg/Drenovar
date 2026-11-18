@@ -1,0 +1,79 @@
+{
+  "id": "lf_env_rope_coil",
+  "tris": {
+    "LOD0": 800,
+    "LOD1": 144,
+    "LOD2": 144
+  },
+  "bones": 0,
+  "materials": [
+    "lm_misc"
+  ],
+  "glb_images": [
+    "lm_misc_n.png",
+    "lm_misc_c.png",
+    "lm_misc_r.png"
+  ],
+  "textures": {
+    "lm_stone_c.jpg": 1024,
+    "lm_stone_n.png": 1024,
+    "lm_stone_r.png": 1024,
+    "lm_wood_c.jpg": 1024,
+    "lm_wood_n.png": 1024,
+    "lm_wood_r.png": 1024,
+    "lm_roof_c.jpg": 1024,
+    "lm_roof_n.png": 1024,
+    "lm_roof_r.png": 1024,
+    "lm_misc_c.png": 1024,
+    "lm_misc_n.png": 1024,
+    "lm_misc_r.png": 1024
+  },
+  "texture_mode": "external shared lm_* files next to the GLB (relative URIs)",
+  "nodes": {
+    "LOD0": [
+      "lf_env_rope_coil_LOD0"
+    ],
+    "LOD1": [
+      "lf_env_rope_coil_LOD1"
+    ],
+    "LOD2": [
+      "lf_env_rope_coil_LOD2"
+    ]
+  },
+  "lod_files": {
+    "LOD0": "lf_env_rope_coil.glb",
+    "LOD1": "lf_env_rope_coil_LOD1.glb",
+    "LOD2": "lf_env_rope_coil_LOD2.glb"
+  },
+  "bounds_m_gltf": [
+    [
+      -0.454,
+      0.007,
+      -0.454
+    ],
+    [
+      0.454,
+      0.333,
+      0.454
+    ]
+  ],
+  "collision": [
+    {
+      "type": "cylinder",
+      "centre": [
+        0.0,
+        0.15,
+        -0.0
+      ],
+      "size": [
+        0.9,
+        0.3,
+        0.9
+      ],
+      "yaw_deg": 0.0
+    }
+  ],
+  "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; 'ramp' = oriented box along the slope; yaw about +Y.",
+  "layout_note": "Main GLB = LOD0 at the asset origin; LOD1/LOD2 in <id>_LOD1.glb / <id>_LOD2.glb (same origin).",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/build_landmarks.py rope_coil"
+}

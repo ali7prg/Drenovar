@@ -1089,12 +1089,12 @@
       "lf_env_hollow_oak_v1_LOD2"
      ],
      "tris": {
-      "LOD0": 6782,
-      "LOD1": 2699,
-      "LOD2": 917
+      "LOD0": 6750,
+      "LOD1": 2669,
+      "LOD2": 295
      },
-     "height_m": 14.13,
-     "canopyRadius_m": 9.2,
+     "height_m": 14.33,
+     "canopyRadius_m": 8.18,
      "footprintRadius_m": 4.6,
      "materials": {
       "LOD0": [
@@ -1116,12 +1116,12 @@
       "lf_env_hollow_oak_v2_LOD2"
      ],
      "tris": {
-      "LOD0": 6782,
-      "LOD1": 2700,
-      "LOD2": 926
+      "LOD0": 6741,
+      "LOD1": 2677,
+      "LOD2": 296
      },
-     "height_m": 13.64,
-     "canopyRadius_m": 8.6,
+     "height_m": 14.35,
+     "canopyRadius_m": 8.86,
      "footprintRadius_m": 4.6,
      "materials": {
       "LOD0": [
@@ -1143,12 +1143,12 @@
       "lf_env_hollow_oak_v3_LOD2"
      ],
      "tris": {
-      "LOD0": 6782,
-      "LOD1": 2699,
-      "LOD2": 748
+      "LOD0": 6721,
+      "LOD1": 2660,
+      "LOD2": 254
      },
-     "height_m": 11.14,
-     "canopyRadius_m": 6.89,
+     "height_m": 11.67,
+     "canopyRadius_m": 6.97,
      "footprintRadius_m": 4.6,
      "materials": {
       "LOD0": [

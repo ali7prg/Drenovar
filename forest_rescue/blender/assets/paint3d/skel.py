@@ -60,58 +60,84 @@ def segments(mask, smooth=0):
     return out, jcent, sk, dist
 
 
-def limb_tree(segs, jcent, root_xy, root_radius=6.0, min_len=6, min_r=1.2, spur_k=1.6):
-    """Orient segments away from root_xy (BFS through junctions), prune spurs/thin bits.
+def limb_tree(segs, jcent, root_mask, axis_fn, min_len=6, min_r=1.2, spur_k=1.6, touch_px=4,
+              keep_floating=True, float_min_r=1.6, float_min_len=10):
+    """Orient segments away from the trunk (root_mask), BFS through junctions, prune spurs/thin bits.
 
-    Returns list of limbs: dict(P (k,2) pixel x,y from base to tip, r (k,), parent index or -1, depth level)."""
-    root_xy = np.asarray(root_xy, float)
-    # adjacency: junction -> segments
+    axis_fn(y_pixel) -> x_pixel of the trunk axis at that row (start points get extended to it).
+    Floating segments (not connected to the trunk) are kept as independent limbs (parent -2).
+    Returns list of dict(P (k,2) x,y from base to tip, r (k,), parent idx (-1 trunk, -2 floating), level)."""
+    H, W = root_mask.shape
+    near_root = ndi.binary_dilation(root_mask, iterations=touch_px)
     adj = {}
     for si, s in enumerate(segs):
         for j in s["j"]:
             if j is not None:
                 adj.setdefault(j, []).append(si)
-    # pick start segments: those with an end within root_radius*3 of root or touching junction near root
-    def d_end(s):
-        return min(np.linalg.norm(s["P"][0] - root_xy), np.linalg.norm(s["P"][-1] - root_xy))
-    order = sorted(range(len(segs)), key=lambda i: d_end(segs[i]))
-    visited = set()
-    limbs = []
-    queue = []
-    for si in order:
-        if d_end(segs[si]) <= root_radius * 2.5 + 4:
-            queue.append((si, None, -1, 0))
-    if not queue and order:
-        queue.append((order[0], None, -1, 0))
-    jvisited = set()
-    while queue:
-        si, from_j, parent, lvl = queue.pop(0)
-        if si in visited:
-            continue
-        visited.add(si)
-        s = segs[si]
-        P, r, j0, j1 = s["P"], s["r"], s["j"][0], s["j"][1]
-        if from_j is not None:
-            if j1 == from_j and j0 != from_j:
+
+    def touches(p):
+        x, y = int(round(p[0])), int(round(p[1]))
+        return 0 <= y < H and 0 <= x < W and near_root[y, x]
+
+    visited, limbs, queue, jvisited = set(), [], [], set()
+    for si, s in enumerate(segs):
+        a, b = touches(s["P"][0]), touches(s["P"][-1])
+        if a or b:
+            queue.append((si, None, -1, 0, a))
+    # junctions inside the root region count as visited roots
+    for j, c in enumerate(jcent):
+        y, x = int(round(c[0])), int(round(c[1]))
+        if 0 <= y < H and 0 <= x < W and near_root[y, x]:
+            jvisited.add(j)
+
+    def run(queue):
+        while queue:
+            si, from_j, parent, lvl, start_first = queue.pop(0)
+            if si in visited:
+                continue
+            visited.add(si)
+            s = segs[si]
+            P, r, j0, j1 = s["P"], s["r"], s["j"][0], s["j"][1]
+            if from_j is not None:
+                if j1 == from_j and j0 != from_j:
+                    P, r, j0, j1 = P[::-1], r[::-1], j1, j0
+            elif not start_first:
                 P, r, j0, j1 = P[::-1], r[::-1], j1, j0
-        else:
-            if np.linalg.norm(P[-1] - root_xy) < np.linalg.norm(P[0] - root_xy):
-                P, r, j0, j1 = P[::-1], r[::-1], j1, j0
-        if from_j is not None and from_j < len(jcent):
-            jc = jcent[from_j][::-1]
-            P = np.vstack([jc[None], P])
-            r = np.r_[r[0], r]
-        elif parent == -1:
-            P = np.vstack([root_xy[None], P])
-            r = np.r_[r[0], r]
-        idx = len(limbs)
-        limbs.append(dict(P=P, r=r, parent=parent, level=lvl, end_j=j1, seg=si))
-        if j1 is not None and j1 not in jvisited:
-            jvisited.add(j1)
-            for sj in adj.get(j1, []):
-                if sj not in visited:
-                    queue.append((sj, j1, idx, lvl + 1))
-    # prune: thin limbs and short terminal spurs
+            if from_j is not None and from_j < len(jcent):
+                jc = jcent[from_j][::-1]
+                P = np.vstack([jc[None], P])
+                r = np.r_[r[0], r]
+            elif parent == -1:
+                ax = axis_fn(P[0][1])
+                if ax is not None:
+                    P = np.vstack([[ax, P[0][1]], P])
+                    r = np.r_[r[0], r]
+            # drop pixels inside the trunk (keep the first one as anchor)
+            idx = len(limbs)
+            limbs.append(dict(P=P, r=r, parent=parent, level=lvl, end_j=j1, seg=si))
+            if j1 is not None and j1 not in jvisited:
+                jvisited.add(j1)
+                for sj in adj.get(j1, []):
+                    if sj not in visited:
+                        queue.append((sj, j1, idx, lvl + 1, True))
+
+    run(queue)
+    if keep_floating:
+        # remaining components: start from their lowest end (closest to the trunk axis)
+        rest = [si for si in range(len(segs)) if si not in visited]
+        rest.sort(key=lambda si: -np.median(segs[si]["r"]) * segs[si]["n"])
+        for si in rest:
+            if si in visited:
+                continue
+            s = segs[si]
+            if np.median(s["r"]) < float_min_r or s["n"] < float_min_len:
+                continue
+            p0, p1 = s["P"][0], s["P"][-1]
+            ax0 = axis_fn(p0[1])
+            ax1 = axis_fn(p1[1])
+            d0 = abs(p0[0] - (ax0 if ax0 is not None else p0[0])) + 0.3 * (H - p0[1])
+            d1 = abs(p1[0] - (ax1 if ax1 is not None else p1[0])) + 0.3 * (H - p1[1])
+            run([(si, None, -2, 1, d0 <= d1)])
     children = {i: [] for i in range(len(limbs))}
     for i, l in enumerate(limbs):
         if l["parent"] >= 0:
@@ -124,7 +150,6 @@ def limb_tree(segs, jcent, root_xy, root_radius=6.0, min_len=6, min_r=1.2, spur_
             keep[i] = False
         if not children[i] and L < max(min_len, spur_k * rm * 2):
             keep[i] = False
-    # drop descendants of dropped limbs
     for i, l in enumerate(limbs):
         p = l["parent"]
         while p >= 0:
@@ -132,12 +157,12 @@ def limb_tree(segs, jcent, root_xy, root_radius=6.0, min_len=6, min_r=1.2, spur_
                 keep[i] = False
                 break
             p = limbs[p]["parent"]
-    remap = {}
-    out = []
+    remap, out = {}, []
     for i, l in enumerate(limbs):
         if keep[i]:
             remap[i] = len(out)
             l = dict(l)
-            l["parent"] = remap.get(l["parent"], -1)
+            if l["parent"] >= 0:
+                l["parent"] = remap.get(l["parent"], -2)
             out.append(l)
     return out

@@ -300,3 +300,24 @@ def pack_tiles(tiles, region, pad=2, scale_down_until_fit=True):
             raise RuntimeError("atlas region full")
         s *= 0.92
     raise RuntimeError("cannot pack tiles")
+
+
+def pack_rects(sizes, region, pad=2, max_tries=14):
+    """sizes: list of (w,h). Returns positions [(x,y)] (absolute) and the uniform scale used."""
+    order = sorted(range(len(sizes)), key=lambda i: -sizes[i][1])
+    s = 1.0
+    for _ in range(max_tries):
+        pk = ShelfPacker(region, pad)
+        pos = [None] * len(sizes)
+        ok = True
+        for i in order:
+            w, h = sizes[i]
+            p = pk.place(max(1, int(np.ceil(w * s))), max(1, int(np.ceil(h * s))))
+            if p is None:
+                ok = False
+                break
+            pos[i] = p
+        if ok:
+            return pos, s
+        s *= 0.92
+    raise RuntimeError("cannot pack rects")

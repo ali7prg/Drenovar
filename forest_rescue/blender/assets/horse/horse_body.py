@@ -47,7 +47,9 @@ def skeleton():
         ey = -1.195 if s == "L" else -1.245
         J[f"ear_{s}"] = V(0.062 * sx, ey, 1.925)
         J[f"ear_tip_{s}"] = V(0.13 * sx, ey - 0.04, 2.058)
-        J[f"eye_{s}"] = V(0.118 * sx, -1.255, 1.75)
+        # painted iris centre measured on the sheet (left Y -1.250 Z 1.749; right view after
+        # head registration -1.250 / 1.745; front half-separation 0.1225) on the head surface
+        J[f"eye_{s}"] = V(0.1085 * sx, -1.250, 1.747)
         # ---- fore limb: one neutral leg (equal bone lengths both sides), posed per side
         J[f"scap_top_{s}"] = V(0.115 * sx, -0.38, 1.47)
         J[f"shoulder_{s}"] = V(0.19 * sx, -0.78, 1.08)
@@ -194,9 +196,6 @@ def body_parts(J=None):
         # cheeks / jowls (masseter over the mandible ramus)
         add(ell((0.068 * sx, -1.16, 1.65), (0.06, 0.115, 0.12), (-30, 0, 0), bone="jaw",
                 name="jowl"), 0.06)
-        add(ell((0.11 * sx, -1.255, 1.75), (0.032, 0.035, 0.028), bone=H, name="eye_bulge"), 0.025)
-        add(ell((0.10 * sx, -1.245, 1.78), (0.03, 0.05, 0.02), (20, 0, 0), bone=H,
-                name="brow"), 0.03)
         add(flat_cone(V(0.088 * sx, -1.24, 1.71), V(0.075 * sx, -1.33, 1.62), 0.03, 0.022, 0.8,
                       bone=H, name="face_crest"), 0.04)
     # lower jaw
@@ -287,6 +286,41 @@ def ear_parts(J=None):
                       bone=f"ear_{s}", name="ear")
         p.k = 0.035
         P.append(p)
+    return P
+
+
+EYE_R = 0.024
+
+
+def eye_geometry(J=None):
+    """{side: (eyeball centre, radius, outward axis)} — one eye per side at the painted iris."""
+    J = J or skeleton()
+    out = {}
+    for s, sx in (("L", 1.0), ("R", -1.0)):
+        n = V(0.95 * sx, -0.25, 0.10)
+        n /= np.linalg.norm(n)
+        S = J[f"eye_{s}"]
+        out[s] = (S - n * (EYE_R - 0.013), EYE_R, n)
+    return out
+
+
+def eye_parts(J=None):
+    """Eyeball, upper/lower lids and brow (supraorbital) bulge — added after the hull and the
+    smoothing pass so the eye stays crisp."""
+    J = J or skeleton()
+    P = []
+    for s, (C, r, n) in eye_geometry(J).items():
+        sx = 1.0 if s == "L" else -1.0
+        parts = [(sphere(C, r, bone="head", name="eyeball"), 0.006),
+                 (ell(C + n * 0.016 + V(0, 0, 0.016), (0.008, 0.030, 0.009), bone="head",
+                      name="upper_lid"), 0.008),
+                 (ell(C + n * 0.015 + V(0, 0.002, -0.015), (0.007, 0.026, 0.008), bone="head",
+                      name="lower_lid"), 0.008),
+                 (ell(J[f"eye_{s}"] + V(-0.002 * sx, 0.010, 0.032), (0.016, 0.040, 0.014), bone="head",
+                      name="brow"), 0.02)]
+        for p, k in parts:
+            p.k = k
+            P.append(p)
     return P
 
 

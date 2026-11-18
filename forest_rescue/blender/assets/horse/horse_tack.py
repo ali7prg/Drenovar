@@ -101,9 +101,9 @@ def halter_paths():
     T = HRig.throat_ring()               # throat ring with the ribbon
     m = lambda p: V(-p[0], p[1], p[2])   # noqa: E731
     paths = {
-        "crown": ([A + V(0, 0, 0.025), V(0.100, -1.104, 1.84), V(0.074, -1.110, 1.925),
+        "crown": ([A + V(0, 0, -0.006), A + V(0, 0, 0.025), V(0.100, -1.104, 1.84), V(0.074, -1.110, 1.925),
                    V(0.0, -1.112, 1.962), m(V(0.074, -1.110, 1.925)), m(V(0.100, -1.104, 1.84)),
-                   m(A + V(0, 0, 0.025))], False, STRAP_W),
+                   m(A + V(0, 0, 0.025)), m(A + V(0, 0, -0.006))], False, STRAP_W),
         "cheek_L": ([A + V(0, -0.012, -0.012), V(0.102, -1.19, 1.648), B + V(0, 0.012, 0.012)],
                     False, STRAP_W * 0.95),
         "cheek_R": ([m(A) + V(0, -0.012, -0.012), m(V(0.102, -1.19, 1.648)),
@@ -212,11 +212,11 @@ def halter(guide, lod=0):
         for name, c in rings.items():
             c2 = _push_out(guide, c[None], OFFSET + 0.004)[0]
             n = guide.grad(c2[None])[0]
-            R = 0.025 if name == "ring_T" else 0.020
+            R = 0.025 if name == "ring_T" else (0.018 if name.startswith("ring_A") else 0.020)
             ring(geo, c2, n, R=R, seg=seg, sides=sides, weight=head)
     if lod == 0:
         # buckle on the left cheek piece of the crownpiece
-        c = _push_out(guide, V(0.103, -1.103, 1.815)[None], OFFSET + 0.004)[0]
+        c = _push_out(guide, V(0.092, -1.107, 1.885)[None], OFFSET + 0.004)[0]
         n = guide.grad(c[None])[0]
         up = V(0, 0, 1) - n * n[2]
         up /= np.linalg.norm(up)

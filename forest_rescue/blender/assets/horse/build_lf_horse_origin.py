@@ -171,7 +171,7 @@ def skel_from_armature(arm_obj):
 
 def body_weights(lo, J):
     verts, tris, _, _ = core.mesh_arrays(lo, evaluated=False)
-    parts = HB.body_parts(J) + HB.ear_parts(J)
+    parts = HB.body_parts(J) + HB.ear_parts(J) + HB.eye_parts(J)
     names = sorted({p.bone for p in parts if p.bone})
     A = sdf.adjacency_matrix(len(verts), tris)
     W = sdf.part_weights(verts, parts, names, falloff=0.028, power=1.0, top=6, adjacency=A,

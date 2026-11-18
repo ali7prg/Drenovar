@@ -25,6 +25,8 @@ def body_field(voxel=0.007, hull_mode="mixed", hull_k=0.025, smooth=0.010, views
         F.apply(c, op="subtract")
     if smooth:
         F.smooth(smooth / voxel)      # smooth given in metres
+    for p in HB.eye_parts(J):         # crisp eyes/lids after smoothing
+        F.apply(p)
     return F
 
 

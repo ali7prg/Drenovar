@@ -21,6 +21,34 @@ def _px_world(view):
     return (u - view.ax) / view.ppm, (view.ay - v) / view.ppm
 
 
+# The painted views disagree on where the head sits: the right profile draws the whole head
+# 0.068 m further forward than the left profile (eye, cheek ring and noseband ring all shift
+# by 0.063-0.072 m) and the front view draws it 0.026 m toward the horse's right.  Texture
+# projection samples those views with the head region re-registered to the (left-profile)
+# geometry, so painted eyes/rings land on the modelled eye/rings instead of beside them.
+HEAD_SHIFT_M = {"right": 0.068, "front": -0.0257}
+
+
+def head_offset_m(view_name, P):
+    """Offset (metres along view.right) added when sampling `view_name` at world points P."""
+    sh = HEAD_SHIFT_M.get(view_name, 0.0)
+    if not sh:
+        return np.zeros(len(P))
+    w = np.clip((-0.92 - P[:, 1]) / 0.14, 0.0, 1.0)
+    return sh * w
+
+
+def eye_region_weight(P, view_name, radius=0.075):
+    """0 near an eye for every view except the profile on that eye's side (no ghost eyes)."""
+    out = np.ones(len(P))
+    for s, (C, r, n) in HB.eye_geometry().items():
+        near = np.linalg.norm(P - C, axis=1) < radius
+        own = "left" if s == "L" else "right"
+        if view_name != own:
+            out[near] = 0.0
+    return out
+
+
 def exclusion_masks(views, tack_verts=None, tack_tris=None, dilate_px=3):
     """Per view: pixels showing mane/tail/forelock hair, halter or ribbon (not coat)."""
     out = {}
@@ -49,8 +77,14 @@ def exclusion_masks(views, tack_verts=None, tack_tris=None, dilate_px=3):
             ex |= dark & (UU > 1.47) & ((np.abs(X) > 0.085) | (UU > 1.86))
             if name == "rear":
                 ex |= (luma < 0.30) & (np.abs(X) < 0.12) & (UU > 0.18) & (UU < 1.46)
+        if name in ("left", "right"):
+            # the white star seen edge-on in the profiles: painted procedurally, never projected
+            sat = img.max(2) - img.min(2)
+            Yh = RR if name == "left" else -RR
+            ex |= (luma > 0.58) & (sat < 0.20) & (Yh < -1.05) & (UU > 1.55) & v.mask
         if tack_verts is not None:
             u, vv, _ = v.project(tack_verts)
+            u = u + head_offset_m(name, tack_verts) * v.ppm
             poly = np.stack([u, vv], -1)[tack_tris]
             tm = np.zeros((H, W), np.uint8)
             for t in poly:
@@ -81,6 +115,7 @@ def project_body(T, verts, tris, views, excl, power=3.0, min_facing=0.12, deligh
         zb = texproj.zbuffer(verts, tris, view)
         vw, vh = view.size
         u, v, dep = view.project(P)
+        u = u + head_offset_m(name, P) * view.ppm
         ui = np.round(u).astype(int)
         vi = np.round(v).astype(int)
         ok = (ui >= 0) & (ui < vw) & (vi >= 0) & (vi < vh)
@@ -92,6 +127,7 @@ def project_body(T, verts, tris, views, excl, power=3.0, min_facing=0.12, deligh
         inm[ok] = good[vi[ok], ui[ok]]
         facing = np.clip(N @ (-view.d), 0.0, 1.0)
         w = np.where(vis & inm & (facing > min_facing), facing ** power * view.weight, 0.0)
+        w = w * eye_region_weight(P, name)
         col = texproj._bilinear(view.image, u, v)[:, :3]
         L = light_dir_for(view)
         shade = ambient + (1 - ambient) * np.clip(N @ L, 0, 1)
@@ -227,18 +263,20 @@ def details(T, col, J=None, seed=41, hair_mask=None, hair_flow=None, hair_pal=No
         nm = np.clip(1.4 - dn, 0, 1)
         c *= (1 - 0.8 * nm)[:, None]
         rough = np.where(nm > 0.3, 0.7, rough)
-    # eyes: dark glossy eyeball with a lighter lid rim
-    for s, sx in (("L", 1), ("R", -1)):
-        e = J[f"eye_{s}"] + np.array([0.014 * sx, 0.0, 0.0])
-        de = np.linalg.norm((P - e) / np.array([0.02, 0.026, 0.017]), axis=1)
-        eye = np.clip((1.0 - de) * 6, 0, 1)
-        lid = np.clip((1.35 - de) * 6, 0, 1) * (1 - eye)
-        eyec = np.array([0.045, 0.032, 0.026])
+    # eyes: exactly one per side — the modelled eyeball is painted dark and glossy, the lid rims
+    # around it darkened (lashes); the surround comes from that side's profile only
+    for s, (C, r, n) in HB.eye_geometry(J).items():
+        dist = np.linalg.norm(P - C, axis=1)
+        eye = np.clip((r + 0.0035 - dist) / 0.002, 0, 1)
+        rim = np.clip((r + 0.011 - dist) / 0.004, 0, 1) * (1 - eye) * ((P - C) @ n > 0)
+        iris = np.array([0.05, 0.035, 0.028])
+        # warm brown iris toward the front of the eye, near-black pupil band in the middle
+        front = np.clip(((P - C) @ np.array([0.0, -1.0, 0.0])) / r, -1, 1)
+        eyec = iris[None] * (1.0 + 0.6 * np.clip(front, 0, 1))[:, None]
         c = c * (1 - eye[:, None]) + eyec * eye[:, None]
-        c *= (1 - 0.35 * lid)[:, None]
-        rough = np.where(eye > 0.5, 0.06, rough)
-        height -= 0.4 * lid
-        # small catch-light area is left to the glossy roughness
+        c *= (1 - 0.45 * rim)[:, None]
+        rough = np.where(eye > 0.5, 0.05, rough)
+        height -= 0.4 * rim
     # inner ears darker
     for s, sx in (("L", 1), ("R", -1)):
         b, tip = J[f"ear_{s}"], J[f"ear_tip_{s}"]

@@ -471,7 +471,7 @@ def straight_log_parts(ref, tex, tex_clip):
     xs, cs, rs = logbuild.painted_log(ref.img, m, x_root, x_end)
     TEX = tex.shape[0]
     ex0, ey0, ex1, ey1 = int(slab.EXTRA[0] * TEX), int((1 - slab.EXTRA[3]) * TEX), int(slab.EXTRA[2] * TEX), int((1 - slab.EXTRA[1]) * TEX)
-    strip = logbuild.unwrap_strip(ref.img, xs, cs, rs, ex1 - ex0, int((ey1 - ey0) * 0.72))
+    strip = logbuild.unwrap_strip(ref.img, xs, cs, rs, ex1 - ex0, int((ey1 - ey0) * 0.72), mask=m)
     tex[ey0:ey0 + strip.shape[0], ex0:ex1] = strip
     # root-plate face texture: painted root mass pixels quilted into the rest of the EXTRA band
     root = ref.img[:, max(0, x0):x_root]
@@ -496,7 +496,8 @@ def straight_log(parts, lod, seed=0, short=False):
     import logbuild
     segs_len, segs_rad, n_root = ((26, 12, 18), (12, 8, 12), (5, 5, 8))[lod]
     L = parts["length"] * (0.62 if short else 1.0)
-    V, T, UV, N, r = logbuild.log_mesh(L, parts["radius"], parts["uv_strip"], segs_len, segs_rad, seed=seed)
+    V, T, UV, N, r = logbuild.log_mesh(L, parts["radius"], parts["uv_strip"], segs_len, segs_rad, seed=seed,
+                                       cap_uv=parts["uv_root_face"])
     md = geom.Mesh()
     C = np.zeros((len(V), 4))
     C[:, 3] = 0.95

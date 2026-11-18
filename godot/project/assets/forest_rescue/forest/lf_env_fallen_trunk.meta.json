@@ -15,9 +15,9 @@
         "lf_env_fallen_trunk_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 710,
-        "LOD1": 248,
-        "LOD2": 82
+        "LOD0": 734,
+        "LOD1": 264,
+        "LOD2": 92
       },
       "materials": {
         "LOD0": [
@@ -65,9 +65,9 @@
         "lf_env_fallen_trunk_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 638,
-        "LOD1": 200,
-        "LOD2": 50
+        "LOD0": 662,
+        "LOD1": 216,
+        "LOD2": 60
       },
       "materials": {
         "LOD0": [
@@ -115,8 +115,8 @@
         "lf_env_fallen_trunk_v3_stream_LOD2"
       ],
       "tris": {
-        "LOD0": 2758,
-        "LOD1": 1130,
+        "LOD0": 2756,
+        "LOD1": 1128,
         "LOD2": 286
       },
       "materials": {
@@ -160,8 +160,8 @@
     }
   },
   "tris": {
-    "LOD0": 2758,
-    "LOD1": 1130,
+    "LOD0": 2756,
+    "LOD1": 1128,
     "LOD2": 286
   },
   "bones": 0,

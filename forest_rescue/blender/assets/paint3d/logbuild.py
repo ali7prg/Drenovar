@@ -30,7 +30,7 @@ def painted_log(img, mask, x_root, x_end):
     return xs, cs, rs
 
 
-def unwrap_strip(img, xs, cs, rs, out_w, out_h):
+def unwrap_strip(img, xs, cs, rs, out_w, out_h, mask=None):
     """Strip texture: u = along the log (xs), v = around (top at v = 0.5): row = c - r * cos(theta)."""
     u = np.linspace(xs[0], xs[-1], out_w)
     c = np.interp(u, xs, cs)
@@ -38,11 +38,19 @@ def unwrap_strip(img, xs, cs, rs, out_w, out_h):
     th = np.linspace(0.0, 2 * math.pi, out_h)            # row 0 = top of the log (moss), around the ring
     row = c[None, :] - (r[None, :] * 0.84) * np.cos(th)[:, None]
     col = np.repeat(u[None, :], out_h, 0)
-    smp = texproj._bilinear(img.astype(np.float32), col.ravel(), row.ravel())[:, :3]
-    return smp.reshape(out_h, out_w, 3)
+    smp = texproj._bilinear(img.astype(np.float32), col.ravel(), row.ravel())[:, :3].reshape(out_h, out_w, 3)
+    if mask is not None:
+        # only painted log pixels: texels sampling background (log tips / under the arch) are filled from the bark
+        H, W = mask.shape
+        inside = mask[np.clip(np.round(row).astype(int), 0, H - 1), np.clip(np.round(col).astype(int), 0, W - 1)]
+        inside = ndi.binary_erosion(inside, iterations=2)
+        if inside.any() and not inside.all():
+            smp = texproj.fill(smp.astype(np.float64), inside).astype(np.float32)
+    return smp
 
 
-def log_mesh(length, radius, uv_rect, segs_len=24, segs_rad=12, taper=0.85, curve=0.25, sink=0.06, seed=0):
+def log_mesh(length, radius, uv_rect, segs_len=24, segs_rad=12, taper=0.85, curve=0.25, sink=0.06, seed=0,
+             cap_uv=None):
     """Tube along +x from 0 to length, lying on the ground (z = r - sink), gentle plan curve (y)."""
     rng = np.random.default_rng(seed)
     s = np.linspace(0, 1, segs_len + 1)
@@ -52,11 +60,36 @@ def log_mesh(length, radius, uv_rect, segs_len=24, segs_rad=12, taper=0.85, curv
     z = r - sink
     P = np.stack([x, y, z], 1)
     V, T, UV, C, N = geom.tube(P, r, segs_rad, uv_rect, np.zeros(4), ref_side=np.array([0, 0, 1.0]))
+    # end caps (fans) so the open tube ends never show the inside
+    k = segs_rad + 1
+    nV = len(V)
+    capV, capT, capUV, capN = [], [], [], []
+    for ring, sgn in ((0, -1.0), (len(P) - 1, 1.0)):
+        ids = np.arange(ring * k, ring * k + segs_rad)
+        cen = V[ids].mean(0)
+        base = nV + len(capV)
+        capV.append(cen)
+        capN.append(np.array([sgn, 0, 0.0]))
+        cu0, cv0, cu1, cv1 = cap_uv if cap_uv is not None else uv_rect
+        capUV.append(((cu0 + cu1) / 2, (cv0 + cv1) / 2))
+        for j, vid in enumerate(ids):
+            capV.append(V[vid])
+            capN.append(np.array([sgn, 0, 0.0]))
+            a_ = 2 * math.pi * j / segs_rad
+            capUV.append(((cu0 + cu1) / 2 + 0.35 * (cu1 - cu0) * math.cos(a_),
+                          (cv0 + cv1) / 2 + 0.35 * (cv1 - cv0) * math.sin(a_)))
+        for j in range(segs_rad):
+            a_, b_ = base + 1 + j, base + 1 + (j + 1) % segs_rad
+            capT.append([base, a_, b_] if sgn > 0 else [base, b_, a_])
     # geom.tube: u around, v along -> strip texture: u along the log, v around (top of the log at the strip top)
     u0, v0, u1, v1 = uv_rect
     fa = (UV[:, 0] - u0) / max(u1 - u0, 1e-9)
     fl = (UV[:, 1] - v0) / max(v1 - v0, 1e-9)
     UV = np.stack([u0 + fl * (u1 - u0), v1 - fa * (v1 - v0)], 1)
+    V = np.vstack([V, np.array(capV)])
+    T = np.vstack([T, np.array(capT)])
+    UV = np.vstack([UV, np.array(capUV)])
+    N = np.vstack([N, np.array(capN)])
     return V, T, UV, N, r
 
 

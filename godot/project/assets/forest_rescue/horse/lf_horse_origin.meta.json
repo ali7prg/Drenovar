@@ -1,0 +1,288 @@
+{
+  "id": "lf_horse_origin",
+  "tris": {
+    "LOD0": 14546,
+    "LOD1": 7186,
+    "LOD2": 2602
+  },
+  "bones": {
+    "deform": 52,
+    "total": 53,
+    "weightedByLOD": {
+      "LOD0": 52,
+      "LOD1": 38,
+      "LOD2": 24
+    },
+    "maxInfluences": 4
+  },
+  "materials": [
+    "lf_horse_origin_body",
+    "lf_horse_origin_hair",
+    "lf_horse_origin_tack"
+  ],
+  "textures": {
+    "lf_horse_origin_body_color.jpg": [
+      1024,
+      1024
+    ],
+    "lf_horse_origin_body_normal.png": [
+      1024,
+      1024
+    ],
+    "lf_horse_origin_body_orm.png": [
+      512,
+      512
+    ],
+    "lf_horse_origin_hair.png": [
+      512,
+      512
+    ],
+    "lf_horse_origin_tack_color.jpg": [
+      512,
+      512
+    ],
+    "lf_horse_origin_tack_normal.png": [
+      512,
+      512
+    ],
+    "lf_horse_origin_tack_orm.png": [
+      512,
+      512
+    ]
+  },
+  "bounds_m": {
+    "min": [
+      -0.362,
+      -1.516,
+      -0.008
+    ],
+    "max": [
+      0.362,
+      0.992,
+      2.013
+    ]
+  },
+  "clips": {
+    "lf_horse_idle": {
+      "seconds": 5.0,
+      "loop": true,
+      "groundSpeed_mps": 0.0,
+      "strideLength_m": 0.0,
+      "markers": {
+        "ear_flick_L": 1.15,
+        "ear_flick_R": 3.25,
+        "tail_swish": 2.4,
+        "breath_in": [
+          1.25,
+          3.75
+        ]
+      },
+      "hoofSlip_m": {
+        "F_L": 0.0,
+        "F_R": 0.0,
+        "H_L": 0.0,
+        "H_R": 0.0
+      }
+    },
+    "lf_horse_walk": {
+      "seconds": 1.2,
+      "loop": true,
+      "groundSpeed_mps": 1.45,
+      "strideLength_m": 1.74,
+      "markers": {
+        "footfall_LH": 0.0,
+        "liftoff_LH": 0.744,
+        "footfall_LF": 0.3,
+        "liftoff_LF": 1.044,
+        "footfall_RH": 0.6,
+        "liftoff_RH": 0.144,
+        "footfall_RF": 0.9,
+        "liftoff_RF": 0.444
+      },
+      "hoofSlip_m": {
+        "F_L": 0.0,
+        "F_R": 0.0,
+        "H_L": 0.0,
+        "H_R": 0.0
+      }
+    },
+    "lf_horse_trot": {
+      "seconds": 0.72,
+      "loop": true,
+      "groundSpeed_mps": 3.3,
+      "strideLength_m": 2.376,
+      "markers": {
+        "footfall_LF": 0.0,
+        "liftoff_LF": 0.288,
+        "footfall_RH": 0.0,
+        "liftoff_RH": 0.288,
+        "footfall_RF": 0.36,
+        "liftoff_RF": 0.648,
+        "footfall_LH": 0.36,
+        "liftoff_LH": 0.648
+      },
+      "hoofSlip_m": {
+        "F_L": 0.0,
+        "F_R": 0.0,
+        "H_L": 0.0,
+        "H_R": 0.0
+      }
+    },
+    "lf_horse_start": {
+      "seconds": 0.65,
+      "loop": false,
+      "groundSpeed_mps": 0.674,
+      "strideLength_m": 0.0,
+      "markers": {
+        "lift_LH": 0.02,
+        "lift_LF": 0.12,
+        "land_LH": 0.3,
+        "lift_RH": 0.42,
+        "land_LF": 0.56
+      },
+      "speedProfile": "v(t)=1.45 m/s*(t/0.65)^1.15; distance 0.438 m",
+      "hoofSlip_m": {
+        "F_L": 0.0,
+        "F_R": 0.0,
+        "H_L": 0.0,
+        "H_R": 0.0
+      }
+    },
+    "lf_horse_stop": {
+      "seconds": 0.8,
+      "loop": false,
+      "groundSpeed_mps": 0.558,
+      "strideLength_m": 0.0,
+      "markers": {
+        "land_RH": 0.3,
+        "land_LF": 0.42,
+        "land_RF": 0.6,
+        "square_LH": 0.72
+      },
+      "speedProfile": "v(t)=1.45 m/s*(1-t/0.8)^1.6; distance 0.446 m",
+      "hoofSlip_m": {
+        "F_L": 0.0,
+        "F_R": 0.0,
+        "H_L": 0.0,
+        "H_R": 0.0
+      }
+    },
+    "lf_horse_turn_left": {
+      "seconds": 1.1,
+      "loop": false,
+      "groundSpeed_mps": 0.0,
+      "strideLength_m": 0.0,
+      "rootYawDeg": 90.0,
+      "yawCurve": "yaw(t) = rootYawDeg * smootherstep(t/1.1) about the root origin (apply to the node while the clip plays; hooves are planted in that frame)",
+      "markers": {
+        "step_1": 0.34,
+        "step_2": 0.6,
+        "step_3": 0.86,
+        "step_4": 1.08
+      },
+      "hoofSlip_m": {
+        "F_L": 0.0,
+        "F_R": 0.0,
+        "H_L": 0.0,
+        "H_R": 0.0
+      }
+    },
+    "lf_horse_turn_right": {
+      "seconds": 1.1,
+      "loop": false,
+      "groundSpeed_mps": 0.0,
+      "strideLength_m": 0.0,
+      "rootYawDeg": -90.0,
+      "yawCurve": "yaw(t) = rootYawDeg * smootherstep(t/1.1) about the root origin (apply to the node while the clip plays; hooves are planted in that frame)",
+      "markers": {
+        "step_1": 0.34,
+        "step_2": 0.6,
+        "step_3": 0.86,
+        "step_4": 1.08
+      },
+      "hoofSlip_m": {
+        "F_L": 0.0,
+        "F_R": 0.0,
+        "H_L": 0.0,
+        "H_R": 0.0
+      }
+    },
+    "lf_horse_alert": {
+      "seconds": 1.4,
+      "loop": false,
+      "groundSpeed_mps": 0.0,
+      "strideLength_m": 0.0,
+      "markers": {
+        "head_up": 0.28,
+        "hold": 0.9
+      },
+      "hoofSlip_m": {
+        "F_L": 0.0,
+        "F_R": 0.0,
+        "H_L": 0.0,
+        "H_R": 0.0
+      }
+    },
+    "lf_horse_look_back": {
+      "seconds": 1.8,
+      "loop": false,
+      "groundSpeed_mps": 0.0,
+      "strideLength_m": 0.0,
+      "markers": {
+        "look_back_peak": 0.95,
+        "return_start": 1.22
+      },
+      "hoofSlip_m": {
+        "F_L": 0.0,
+        "F_R": 0.0,
+        "H_L": 0.0,
+        "H_R": 0.0
+      }
+    },
+    "lf_horse_call": {
+      "seconds": 2.0,
+      "loop": false,
+      "groundSpeed_mps": 0.0,
+      "strideLength_m": 0.0,
+      "markers": {
+        "neigh_start": 0.55,
+        "neigh_end": 1.15,
+        "head_toss": 1.4
+      },
+      "hoofSlip_m": {
+        "F_L": 0.0,
+        "F_R": 0.0,
+        "H_L": 0.0,
+        "H_R": 0.0
+      }
+    }
+  },
+  "sockets": {
+    "ribbon_ring": [
+      0.018,
+      -1.085,
+      1.488
+    ],
+    "lead_ring_chin": [
+      0.0,
+      -1.3,
+      1.452
+    ],
+    "head_look": [
+      0.0,
+      -1.3,
+      1.75
+    ],
+    "withers": [
+      0.0,
+      -0.4,
+      1.58
+    ]
+  },
+  "notes": "Bay cob mare, dark points/mane/tail, white star, worn leather halter with brass rings and knotted green ribbon; no saddle/rider. Locomotion clips are in place: drive the root at groundSpeed_mps. Turn clips assume the game yaws the root by rootYawDeg with the documented curve. Forward = -Y (Blender) = +Z (glTF).",
+  "coordinateConvention": {
+    "up": "+Y",
+    "forward": "+Z",
+    "unit": "metre"
+  }
+}

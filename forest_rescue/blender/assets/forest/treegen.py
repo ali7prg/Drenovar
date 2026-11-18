@@ -141,6 +141,22 @@ class Envelope:
     def contains(self, P):
         return self.inside_depth(P) > 0
 
+    def sample_even(self, n, rng, dmin=0.6, dmax=1.6):
+        """Farthest-point sampling of n points whose inside-depth is in [dmin, dmax]."""
+        idx = np.argwhere(self.occ & (self.depth >= dmin) & (self.depth <= dmax))
+        if len(idx) < n:
+            idx = np.argwhere(self.occ)
+        pts = self.lo + idx * self.voxel
+        if len(pts) > 6000:
+            pts = pts[rng.choice(len(pts), 6000, replace=False)]
+        sel = [int(rng.integers(len(pts)))]
+        d = np.linalg.norm(pts - pts[sel[0]], axis=1)
+        for _ in range(n - 1):
+            k = int(np.argmax(d))
+            sel.append(k)
+            d = np.minimum(d, np.linalg.norm(pts - pts[k], axis=1))
+        return pts[sel] + rng.uniform(-0.5, 0.5, (n, 3)) * self.voxel
+
     def sample(self, n, rng, shell=None, inner_weight=0.15, clumps=None, clump_r=1.6):
         """Attractor sampling: uniform in volume, biased to an outer shell and/or clumps."""
         idx = np.argwhere(self.occ)
@@ -402,7 +418,7 @@ def seg_count(r, table):
     return table[-1][1]
 
 
-SEG_LOD0 = [(0.45, 14), (0.25, 10), (0.12, 8), (0.06, 6), (0.03, 5), (0.0, 4)]
+SEG_LOD0 = [(0.45, 12), (0.25, 9), (0.12, 7), (0.06, 5), (0.0, 4)]
 SEG_LOD1 = [(0.45, 8), (0.20, 6), (0.08, 5), (0.0, 4)]
 SEG_LOD2 = [(0.30, 6), (0.0, 4)]
 

@@ -34,6 +34,7 @@ var last_progress := 0
 var symbols: Array = []
 var solution: Array = []
 var previous_camera := {}
+var pending_landmark := ""
 
 func setup(owner_game: Node) -> void:
 	game = owner_game
@@ -134,6 +135,13 @@ func is_open() -> bool:
 func mechanism() -> Dictionary:
 	return game.client.poi(site_id).get("mechanism", {})
 
+func plates_state() -> String:
+	var plates: Variant = mechanism().get("plates")
+	return String(plates.get("state", "free")) if plates is Dictionary else "free"
+
+func observed(symbol: String) -> bool:
+	return (mechanism().get("observed", []) as Array).has(symbol)
+
 func open(target_site: String) -> void:
 	if target_site.is_empty():
 		return
@@ -163,7 +171,8 @@ func open(target_site: String) -> void:
 	clue.text = String(site.get("artifact", {}).get("puzzle", {}).get("clue", game.content.text("artifact.missing")))
 	feedback.text = game.content.text("mechanism.paired") if kind == "paired_latch" else ""
 	last_progress = int(mechanism().get("progress", 0))
-	plates_occupied = String(game.client.squad().get("busy", "")) == "mechanism"
+	plates_occupied = plates_state() == "held"
+	pending_landmark = ""
 	build_inputs()
 	open_flag = true
 	show()
@@ -221,7 +230,7 @@ func refresh() -> void:
 	count_label.text = "%d / %d" % [length if solved else progress, length]
 	dots.queue_redraw()
 	widget.queue_redraw()
-	occupy_button.visible = kind == "paired_latch" and not solved and not plates_occupied
+	occupy_button.visible = kind == "paired_latch" and not solved and plates_state() == "free"
 	recover_button.visible = solved and not found
 	inputs.visible = not solved
 	for child in inputs.get_children():
@@ -236,8 +245,9 @@ func on_state() -> void:
 	if game.client.poi(site_id).is_empty():
 		close()
 		return
-	if String(game.client.squad().get("busy", "")) == "mechanism":
-		plates_occupied = true
+	plates_occupied = plates_state() == "held"
+	if kind == "paired_latch" and plates_state() == "walking":
+		feedback.text = game.content.text("mechanism.paired")
 	var found := String(game.client.poi(site_id).get("artifact", {}).get("state", "hidden")) != "hidden"
 	if found:
 		close()
@@ -267,6 +277,15 @@ func on_progress(target_site: String, ok: bool) -> void:
 func send_symbol(symbol: String) -> void:
 	if sending:
 		return
+	if kind == "trail_cache" and not observed(symbol):
+		# The squad must really reach the landmark first (server records it as observed).
+		pending_landmark = symbol
+		sending = true
+		refresh()
+		await game.request_action("move", {"targetId":site_id + ":landmark:" + symbol})
+		sending = false
+		refresh()
+		return
 	sending = true
 	refresh()
 	var before := int(mechanism().get("progress", 0))
@@ -295,7 +314,7 @@ func occupy() -> void:
 	var result: Dictionary = await game.request_action("occupy_plates", {"siteId":site_id})
 	sending = false
 	if bool(result.get("ok", false)):
-		plates_occupied = true
+		plates_occupied = plates_state() == "held"
 		feedback.text = game.content.text("mechanism.paired")
 	refresh()
 
@@ -307,6 +326,10 @@ func recover() -> void:
 func tick(delta: float) -> void:
 	if not open_flag:
 		return
+	if not pending_landmark.is_empty() and not sending and observed(pending_landmark) and not (game.client.squad().get("move") is Dictionary):
+		var symbol := pending_landmark
+		pending_landmark = ""
+		send_symbol(symbol)
 	if shake > 0.0 or flash > 0.0 or reset_spin > 0.0:
 		shake = maxf(0.0, shake - delta * 2.2)
 		flash = maxf(0.0, flash - delta * 1.6)

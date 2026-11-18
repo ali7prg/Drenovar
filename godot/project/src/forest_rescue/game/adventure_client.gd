@@ -42,6 +42,7 @@ var clock_ms := 0.0
 var clock_ticks := 0
 var seen: Dictionary = {}
 var seen_queue: Array[String] = []
+var primed := false
 var in_flight := false
 var pending: Dictionary = {}
 var last_result: Dictionary = {}
@@ -66,7 +67,21 @@ func ingest(state: Dictionary) -> void:
 		adv = {}
 	received_ticks = Time.get_ticks_msec()
 	received_server_ms = float(adv.get("serverTime", state.get("serverTime", 0)))
+	# Lazily settled server events (arrivals, fog reveals, escort home) come through
+	# recentEvents. On the first state after (re)load they are only marked as seen: poses
+	# are restored from state, nothing is replayed.
+	var recent: Array = adv.get("recentEvents", [])
+	var fresh := []
+	if previous.is_empty() or not primed:
+		primed = not adv.is_empty()
+		for event in recent:
+			if event is Dictionary:
+				remember(event_key(event, ""))
+	else:
+		fresh = dedupe(recent)
 	state_changed.emit(adv, previous)
+	if not fresh.is_empty():
+		events_arrived.emit(fresh)
 
 func available() -> bool:
 	return known and supported
@@ -174,7 +189,7 @@ func _deliver() -> Dictionary:
 			host.accept(response)
 			var fresh := dedupe(response.get("events", []), String(body.get("action", "")))
 			network_status.emit("idle", "")
-			last_result = {"ok":true, "events":fresh, "action":body.action}
+			last_result = {"ok":true, "events":response.get("events", []), "fresh":fresh, "action":body.action}
 			if not fresh.is_empty():
 				events_arrived.emit(fresh)
 			return last_result
@@ -218,11 +233,13 @@ func classify(response: Dictionary) -> String:
 
 func error_message(response: Dictionary) -> String:
 	var code := String(response.get("error", ""))
+	# CONTRACT §1: errors carry a Russian «message» written for this exact case; the
+	# authored ui.ru.json strings are the fallback when the server sends none.
+	var server_text := String(response.get("message", ""))
+	if not server_text.is_empty() and server_text != code:
+		return server_text
 	if ERROR_STRINGS.has(code):
 		return content.text(ERROR_STRINGS[code])
-	var server_text := String(response.get("message", ""))
-	if not server_text.is_empty():
-		return server_text
 	if code.length() > 0 and not code.to_upper() == code:
 		return code
 	return content.text("error.invalidAction")
@@ -230,8 +247,16 @@ func error_message(response: Dictionary) -> String:
 func _fail(code: String, message: String) -> Dictionary:
 	return {"ok":false, "error":code, "message":message}
 
+func remember(key: String) -> void:
+	if seen.has(key):
+		return
+	seen[key] = true
+	seen_queue.append(key)
+
 func event_key(event: Dictionary, action: String) -> String:
 	var kind := String(event.get("type", ""))
+	if event.has("seq"):
+		return "seq:%s|%s" % [str(event.seq), kind]
 	var rev: Variant = event.get("revision")
 	if rev == null:
 		if kind == "fog_revealed":
@@ -255,8 +280,7 @@ func dedupe(events: Array, action := "") -> Array:
 		var key := event_key(event, action)
 		if seen.has(key):
 			continue
-		seen[key] = true
-		seen_queue.append(key)
+		remember(key)
 		fresh.append(event)
 	while seen_queue.size() > 256:
 		seen.erase(seen_queue.pop_front())
@@ -271,4 +295,8 @@ func next_settle_ms() -> float:
 	var fight := battle()
 	if not fight.is_empty() and String(fight.get("outcome", "pending")) == "pending" and fight.has("endsAt"):
 		best = minf(best, float(fight.endsAt))
+	for entry in adv.get("pois", []):
+		var plates: Variant = entry.get("mechanism", {}).get("plates")
+		if plates is Dictionary and plates.get("readyAt") != null and String(plates.get("state", "")) != "held":
+			best = minf(best, float(plates.readyAt))
 	return best

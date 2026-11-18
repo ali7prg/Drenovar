@@ -108,12 +108,8 @@ static func draw_pin(ci: CanvasItem, r: Rect2, tint: Color) -> void:
 	var color := IVORY * tint
 	var head := c + Vector2(0, -s * 0.12)
 	var radius := s * 0.22
-	var points := PackedVector2Array()
-	for i in 25:
-		var a := PI * 0.82 + (PI * 2.0 - PI * 0.64) * float(i) / 24.0 - PI * 0.5
-		points.append(head + Vector2(cos(a), sin(a)) * radius)
-	points.append(c + Vector2(0, s * 0.3))
-	ci.draw_colored_polygon(points, color)
+	ci.draw_colored_polygon(PackedVector2Array([head + Vector2(-radius * 0.86, radius * 0.5), head + Vector2(radius * 0.86, radius * 0.5), c + Vector2(0, s * 0.3)]), color)
+	ci.draw_circle(head, radius, color)
 	ci.draw_circle(head, radius * 0.42, Color("#5b3c22"))
 	ci.draw_arc(c + Vector2(0, s * 0.32), s * 0.22, PI * 0.15, PI * 0.85, 12, Color(color, 0.7), maxf(1.0, s * 0.05), true)
 

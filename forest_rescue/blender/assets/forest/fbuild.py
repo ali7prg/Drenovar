@@ -29,6 +29,18 @@ def bark_files(kind):
 
 def object_from_md(name, md, materials, col=None, smooth=True):
     V, F, UV, MAT, C, N = md.arrays()
+    # drop degenerate (repeated index) and duplicate faces so validate() keeps loop/UV order
+    keep, seen = [], set()
+    for i, f in enumerate(F):
+        key = tuple(sorted(f))
+        if len(set(f)) < len(f) or key in seen:
+            continue
+        seen.add(key)
+        keep.append(i)
+    if len(keep) != len(F):
+        F = [F[i] for i in keep]
+        UV = [UV[i] for i in keep]
+        MAT = MAT[keep]
     me = bpy.data.meshes.new(name)
     me.from_pydata(V.tolist(), [], [list(f) for f in F])
     me.validate(clean_customdata=False)

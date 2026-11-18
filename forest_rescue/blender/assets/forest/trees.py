@@ -48,9 +48,14 @@ def finish_broadleaf(sk, env, spec, rng):
     root = order[0]
     # remap radii: trunk base radius fixed, power curve keeps limbs chunky
     Rb = R[root]
-    R = spec["r_base"] * (R / Rb) ** spec.get("alpha", 1.0)
-    # authored trunk/limb nodes: enforce the specified taper
-    for i in np.nonzero(fixed)[0]:
+    # automatic exponent: branch tips -> r_tip, trunk base -> r_base (limbs stay chunky)
+    r_tip = spec.get("r_tip", 0.014)
+    alpha = math.log(r_tip / spec["r_base"]) / math.log(0.01 / Rb) if Rb > 0.011 else 1.0
+    alpha = float(np.clip(alpha * spec.get("alpha_k", 1.0), 0.7, 3.5))
+    R = spec["r_base"] * (R / Rb) ** alpha
+    res_alpha = alpha
+    # authored trunk nodes only: enforce the specified taper
+    for i in spec.get("trunk_ids", []):
         if "trunk_r" in spec:
             R[i] = max(R[i], spec["trunk_r"](P[i]))
     chains, cpar, corder = tg.build_chains(P, parent, R)
@@ -77,9 +82,11 @@ def finish_broadleaf(sk, env, spec, rng):
     crown_c[2] = env.pmin[2] + (env.pmax[2] - env.pmin[2]) * spec.get("crown_c_h", 0.45)
     res = Result()
     res.skel = dict(P=P, parent=parent, R=R)
+    res.info["radius_alpha"] = round(res_alpha, 3)
+    res.info["nodes"] = int(len(P))
 
-    def bark(md, lod):
-        cull = spec["cull"][lod]
+    def bark(md, lod, cull_k=1.0):
+        cull = spec["cull"][lod] * cull_k
         segtab = [tg.SEG_LOD0, tg.SEG_LOD1, tg.SEG_LOD2][lod]
         mat = 0
         uvmode = "tile" if lod == 0 else "atlas"
@@ -89,15 +96,19 @@ def finish_broadleaf(sk, env, spec, rng):
             if corder[ci] > maxorder:
                 continue
             nodes = list(ch)
+            if corder[ci] == 0 and spec.get("skip_order0"):
+                nodes = nodes[1:]
+                if len(nodes) < 2:
+                    continue
             if cpar[ci] >= 0 and len(nodes) > 1:
                 r0 = R[nodes[1]]
             else:
                 r0 = R[nodes[0]]
-            if r0 < cull:
+            if r0 < cull and corder[ci] > 0:
                 continue
             keep = [nodes[0]]
             for n in nodes[1:]:
-                if R[n] < cull * 0.55:
+                if R[n] < cull * 0.55 and corder[ci] > 0:
                     break
                 keep.append(n)
             if len(keep) < 2:
@@ -108,8 +119,8 @@ def finish_broadleaf(sk, env, spec, rng):
                 rad[0] = rad[1] * 1.05
                 # start slightly inside the parent so the joint is hidden
                 pts[0] = pts[0] + normalize(pts[1] - pts[0]) * min(0.15, rad[0])
-            step = (lambda r: np.clip(r * [7, 12, 20][lod], [0.25, 0.6, 1.2][lod], [1.4, 2.5, 4.0][lod]))
-            pts2, rad2, kidx = tg.resample_chain(pts, rad, step, min_angle_deg=[7, 14, 25][lod])
+            step = (lambda r: np.clip(r * [10, 14, 20][lod], [0.35, 0.7, 1.2][lod], [1.6, 2.6, 4.0][lod]))
+            pts2, rad2, kidx = tg.resample_chain(pts, rad, step, min_angle_deg=[9, 15, 25][lod])
             if lod == 2:
                 pts2, rad2 = pts2[: max(2, min(len(pts2), 3 if corder[ci] else 4))], rad2[: max(2, min(len(rad2), 3 if corder[ci] else 4))]
                 kidx = kidx[:len(pts2)]
@@ -117,7 +128,7 @@ def finish_broadleaf(sk, env, spec, rng):
             wind = np.stack([sway[ids], np.zeros(len(ids)), np.full(len(ids), ph_chain[ci]), ao[ids]], -1)
             segs = tg.seg_count(rad2[0], segtab)
             flare = None
-            if corder[ci] == 0 and spec.get("flare"):
+            if corder[ci] == 0 and spec.get("flare") and not spec.get("skip_order0"):
                 fa, fh, lobes, la = spec["flare"]
                 th0 = rng.uniform(0, 6.28)
                 zs = pts2[:, 2]
@@ -153,10 +164,10 @@ def finish_broadleaf(sk, env, spec, rng):
                 th = 2 * np.pi * k / nroot + rng2.normal(0, 0.25)
                 d = np.array([math.cos(th), math.sin(th), 0])
                 ln = rlen * rng2.uniform(0.6, 1.2)
-                p0 = np.array([0, 0, 0.55]) + d * spec["r_base"] * 0.55
-                pts = _bezier(p0, p0 + d * ln * 0.45 + np.array([0, 0, -0.35]), p0 + d * ln + np.array([0, 0, -0.75]),
+                p0 = np.array([0, 0, 1.0]) + d * spec["r_base"] * 0.7
+                pts = _bezier(p0, p0 + d * ln * 0.45 + np.array([0, 0, -0.85]), p0 + d * ln + np.array([0, 0, -1.25]),
                               5 if lod == 0 else 3)
-                rad = np.linspace(rr, rr * 0.25, len(pts))
+                rad = rr * np.linspace(1.0, 0.3, len(pts)) ** 0.8
                 wind = np.zeros((len(pts), 4))
                 wind[:, 3] = 0.8
                 tg.tube(md, pts, rad, 6 if lod == 0 else 4, 0, wind, uvmode, tile=spec.get("bark_tile", (1.4, 1.4)),
@@ -180,8 +191,61 @@ def finish_broadleaf(sk, env, spec, rng):
     acc = np.array(acc, int)
     res.info["leaf_sites"] = int(len(acc))
 
+    puffs = spec.get("puffs")
+    if puffs is not None and len(puffs):
+        from scipy.spatial import cKDTree as _KD
+        leafn = np.nonzero(R <= spec.get("leaf_r_max", 0.07) * 1.5)[0]
+        kd = _KD(P[leafn])
+
+    def make_puff_cards(n_target):
+        cards = []
+        pr = np.asarray(spec.get("puff_r", (1.3, 2.0)))
+        radii = rng.uniform(pr[0], pr[1], len(puffs))
+        share = radii ** 2 / (radii ** 2).sum()
+        moods = spec["moods"]
+        for pi, (pc, rc) in enumerate(zip(puffs, radii)):
+            k = max(3, int(round(n_target * share[pi])))
+            dd0, _ = kd.query(pc)
+            if dd0 > spec.get("puff_max_gap", 1.7):
+                continue
+            tiles = _pick(rng, moods)
+            for j in range(k):
+                d = rng.normal(0, 1, 3)
+                d[2] = abs(d[2]) * 0.9 + 0.15 if rng.random() < 0.8 else d[2]
+                d = normalize(d)
+                p = pc + d * rc * rng.uniform(0.45, 1.0)
+                for _k in range(4):
+                    if env.inside_depth(p[None])[0] > 0:
+                        break
+                    p = pc + (p - pc) * 0.6
+                dd, ni = kd.query(p)
+                node = leafn[ni]
+                n = normalize(d * 0.85 + np.array([0, 0, 0.3]) + rng.normal(0, 0.18, 3))
+                tile = tiles[rng.integers(len(tiles))]
+                dense = rng.random() < spec.get("dense_frac", 0.0)
+                if dense:
+                    tile = spec["dense_map"].get(tile, tile)
+                att = atlas.LAYOUT[tile]["attach"]
+                upv = normalize(np.cross(n, rng.normal(0, 1, 3)))
+                if att == "top":
+                    upv = normalize(upv * 0.3 + np.array([0, 0, -1.0]))
+                s = rng.uniform(*spec["card_size"]) * (spec.get("dense_scale", 1.25) if dense else 1.0)
+                c = p - upv * s * 0.5
+                ph = ph_chain[node_chain[node]]
+                cards.append(dict(c=c, n=n, up=upv, w=s, h=s, tile=tile,
+                                  wind=np.array([min(1.0, sway[node] + 0.08), 0, ph]),
+                                  ao=float(np.clip(tg.crown_ao(p[None], env=env, floor=0.5)[0] * (0.8 + 0.2 * (d[2] + 1) / 2), 0.45, 1)),
+                                  attach=att, flutter=(0.3, 1.0)))
+        return cards
+
     def make_cards(n_target):
         cards = []
+        if puffs is not None and len(puffs):
+            nf = int(n_target * spec.get("puff_frac", 0.8))
+            cards = make_puff_cards(nf)
+            n_target = n_target - len(cards)
+            if n_target <= 0:
+                return cards[: max(1, nf)]
         if len(acc) == 0:
             return cards
         reps = int(math.ceil(n_target / len(acc)))
@@ -204,9 +268,9 @@ def finish_broadleaf(sk, env, spec, rng):
             out = normalize(p - crown_c)
             side = rng.random() < spec.get("side_frac", 0.45)
             if side:
-                n = normalize(out * 0.85 + np.array([0, 0, 0.15]) + rng.normal(0, 0.25, 3))
+                n = normalize(out * 0.85 + np.array([0, 0, 0.35]) + rng.normal(0, 0.2, 3))
             else:
-                n = normalize(out * 0.45 + np.array([0, 0, 0.75]) + rng.normal(0, 0.25, 3))
+                n = normalize(out * 0.6 + np.array([0, 0, 0.65]) + rng.normal(0, 0.2, 3))
             att = atlas.LAYOUT[tile]["attach"]
             if att == "top":
                 up = normalize(out * 0.5 + np.array([0, 0, -1.0]) * spec.get("hang", 0.8) + bdir * 0.2)
@@ -217,14 +281,21 @@ def finish_broadleaf(sk, env, spec, rng):
             ph = ph_chain[node_chain[i]]
             cards.append(dict(c=c, n=n, up=up, w=s, h=s, tile=tile, wind=np.array([min(1.0, sway[i] + 0.05), 0, ph]),
                               ao=float(ao[i]), attach=att, flutter=(0.3, 1.0)))
-        return cards
+        return cards[:max(1, n_target + len(cards) - len(cards))] if False else cards
 
     budgets = spec["budget"]
     out = {}
+    bark_frac = spec.get("bark_frac", (0.36, 0.3, 0.16))
     for lod in range(3):
-        md = MeshData()
-        bark(md, lod)
-        bt = md.tris()
+        k = 1.0
+        for _ in range(14):
+            md = MeshData()
+            bark(md, lod, k)
+            bt = md.tris()
+            if bt <= budgets[lod] * bark_frac[lod]:
+                break
+            k *= 1.22
+        res.info[f"cull_k{lod}"] = round(k, 2)
         n_cards = max(8, (budgets[lod] - bt) // 2)
         if lod == 0:
             cards0 = make_cards(n_cards)
@@ -244,10 +315,10 @@ def finish_broadleaf(sk, env, spec, rng):
 
 # ============================================================================ golden oak
 
-OAK_MOODS_GOLD = [(5, ["oak_gold_a", "oak_gold_b", "oak_gold_a", "oak_amber_a"]),
+OAK_MOODS_GOLD = [(6, ["oak_gold_a", "oak_gold_b", "oak_gold_a", "oak_amber_a"]),
                   (3, ["oak_amber_a", "oak_amber_b", "oak_gold_b"]),
                   (1.5, ["oak_orange_a", "oak_amber_b", "oak_orange_b"]),
-                  (1, ["oak_green_a", "oak_gold_a"])]
+                  (0.4, ["oak_green_a", "oak_gold_a", "oak_gold_b"])]
 OAK_DENSE = {"oak_gold_a": "oak_dense_gold", "oak_gold_b": "oak_dense_gold", "oak_amber_a": "oak_dense_amber",
              "oak_amber_b": "oak_dense_amber", "oak_orange_a": "oak_dense_orange", "oak_orange_b": "oak_dense_orange",
              "oak_rust_a": "oak_dense_rust", "oak_rust_b": "oak_dense_rust", "oak_green_a": "oak_dense_gold"}
@@ -255,7 +326,8 @@ OAK_DENSE = {"oak_gold_a": "oak_dense_gold", "oak_gold_b": "oak_dense_gold", "oa
 
 def oak_spec(seed, budget=(2950, 1150, 290), r_base=0.85, **kw):
     s = dict(bark="oak", r_base=r_base, alpha=1.0, gamma=2.25, cull=(0.045, 0.16, 0.35), max_order=[9, 2, 1],
-             flare=(0.55, 0.9, 5, 0.6), roots=(6, 2.4, 0.32), card_size=(1.25, 1.75), moods=OAK_MOODS_GOLD,
+             flare=(1.3, 1.1, 5, 1.0), roots=(8, 2.6, 0.5), card_size=(1.1, 1.5), moods=OAK_MOODS_GOLD,
+             dense_frac=0.6, dense_scale=1.3,
              dense_map=OAK_DENSE, budget=budget, leaf_tip_dist=1.6, leaf_r_max=0.09, site_spacing=0.42,
              side_frac=0.45, sph=0.62, up_bias=0.22, seed=seed, bark_tile=(1.5, 1.5), leaf_z_min=2.0)
     s.update(kw)
@@ -280,9 +352,9 @@ def build_golden_oak(variant, view=None):
         for mid, end in limbs:
             pts = _bezier(top, mid, end, 7)
             sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=4.0)
-        att = env.sample(1700, rng, shell=2.3, inner_weight=0.12,
-                         clumps=env.sample(34, rng, shell=1.2), clump_r=1.9)
-        spec = oak_spec(seed, trunk_r=lambda p: 0.85 * (1.0 - 0.18 * min(p[2], 4.4) / 4.4))
+        puffs = env.sample_even(46, rng, dmin=0.6, dmax=1.6)
+        att = env.sample(1700, rng, shell=2.3, inner_weight=0.12, clumps=puffs, clump_r=1.9)
+        spec = oak_spec(seed, puffs=puffs, trunk_r=lambda p: 0.85 * (1.0 - 0.18 * min(p[2], 4.4) / 4.4), trunk_ids=tid)
         tg.space_colonize(sk, att, D=0.38, di=3.2, dk=0.85, iters=160, tropism=(0, 0, 1), trop_w=0.12, rng=rng)
     elif variant == 2:
         # tall ovoid crown, straight bole, crown base 3.5 m, 15 m tall
@@ -296,8 +368,9 @@ def build_golden_oak(variant, view=None):
                          ((-0.4, -1.4, 7.4), (-0.6, -3.0, 9.4))]:
             pts = _bezier(top, mid, end, 7)
             sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=4.0)
-        att = env.sample(1500, rng, shell=2.0, inner_weight=0.12, clumps=env.sample(30, rng, shell=1.0), clump_r=1.7)
-        spec = oak_spec(seed, r_base=0.62, trunk_r=lambda p: 0.62 * (1.0 - 0.2 * min(p[2], 6) / 6), roots=(5, 1.8, 0.24),
+        puffs = env.sample_even(30, rng, dmin=0.7, dmax=1.8)
+        att = env.sample(1500, rng, shell=2.0, inner_weight=0.12, clumps=puffs, clump_r=1.7)
+        spec = oak_spec(seed, puffs=puffs, r_base=0.62, trunk_r=lambda p: 0.62 * (1.0 - 0.2 * min(p[2], 6) / 6), roots=(5, 1.8, 0.24), trunk_ids=tid,
                         flare=(0.45, 0.8, 5, 0.5), crown_c_h=0.5)
         tg.space_colonize(sk, att, D=0.38, di=3.0, dk=0.85, iters=160, tropism=(0, 0, 1), trop_w=0.18, rng=rng)
     elif variant == 3:
@@ -314,8 +387,9 @@ def build_golden_oak(variant, view=None):
                          ((3.0, -0.8, 5.4), (6.8, -1.0, 6.4))]:
             pts = _bezier(top, mid, end, 8)
             sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=3.0)
-        att = env.sample(1600, rng, shell=2.2, inner_weight=0.12, clumps=env.sample(32, rng, shell=1.2), clump_r=1.8)
-        spec = oak_spec(seed, r_base=0.78, trunk_r=lambda p: 0.78 * (1 - 0.15 * min(p[2], 3) / 3), crown_c_h=0.4)
+        puffs = env.sample_even(32, rng, dmin=0.7, dmax=1.8)
+        att = env.sample(1600, rng, shell=2.2, inner_weight=0.12, clumps=puffs, clump_r=1.8)
+        spec = oak_spec(seed, puffs=puffs, r_base=0.78, trunk_r=lambda p: 0.78 * (1 - 0.15 * min(p[2], 3) / 3), crown_c_h=0.4, trunk_ids=tid)
         tg.space_colonize(sk, att, D=0.38, di=3.2, dk=0.85, iters=160, tropism=(0.25, 0, 1), trop_w=0.12, rng=rng)
     else:
         # young compact oak, 8 m, round crown
@@ -328,8 +402,9 @@ def build_golden_oak(variant, view=None):
                          ((0.1, 0.1, 4.4), (0.2, 0.2, 7.2)), ((0.2, 1.1, 3.6), (0.4, 2.3, 5.0))]:
             pts = _bezier(top, mid, end, 6)
             sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=2.4)
-        att = env.sample(1000, rng, shell=1.6, inner_weight=0.15, clumps=env.sample(20, rng, shell=0.9), clump_r=1.3)
-        spec = oak_spec(seed, r_base=0.36, trunk_r=lambda p: 0.36 * (1 - 0.2 * min(p[2], 2.6) / 2.6),
+        puffs = env.sample_even(20, rng, dmin=0.7, dmax=1.8)
+        att = env.sample(1000, rng, shell=1.6, inner_weight=0.15, clumps=puffs, clump_r=1.3)
+        spec = oak_spec(seed, puffs=puffs, r_base=0.36, trunk_r=lambda p: 0.36 * (1 - 0.2 * min(p[2], 2.6) / 2.6), trunk_ids=tid,
                         roots=(5, 1.0, 0.14), flare=(0.4, 0.6, 5, 0.4), card_size=(1.0, 1.4),
                         cull=(0.03, 0.10, 0.2), budget=(2400, 950, 240), crown_c_h=0.45, leaf_z_min=1.6)
         tg.space_colonize(sk, att, D=0.3, di=2.4, dk=0.65, iters=150, tropism=(0, 0, 1), trop_w=0.12, rng=rng)
@@ -419,10 +494,10 @@ def build_conifer(spec, rng):
         return tg.crown_ao(np.atleast_2d(p), centre=crown_c, radii=crown_r,
                            zrange=(spec["crown_base"], H), floor=0.5)
 
-    def bark(md, lod):
+    def bark(md, lod, stem_k=1.0):
         rect = atlas.uv_rect("bark_" + spec["bark"]) if lod > 0 else None
         mode = "tile" if lod == 0 else "atlas"
-        segs = [10, 6, 5][lod]
+        segs = [9, 6, 5][lod]
         stride = [1, 2, 3][lod]
         tp = trunk_pts[::stride]
         if not np.allclose(tp[-1], trunk_pts[-1]):
@@ -452,11 +527,11 @@ def build_conifer(spec, rng):
             zz = tp[:, 2]
         tg.tube(md, tp, tr, segs, 0, wind, mode, tile=spec.get("bark_tile", (1.0, 1.0)), flare=flare, atlas_rect=rect)
         # branch stems: only longer, lower branches get geometry
-        lmin = spec.get("stem_min_L", [1.2, 2.4, 99][lod])
+        lmin = spec.get("stem_min_L", [1.4, 2.4, 99][lod]) * stem_k
         for b in branches:
-            if b["L"] < lmin or b["frac"] > [0.85, 0.6, 0][lod]:
+            if b["L"] < lmin or b["frac"] > [0.8, 0.6, 0][lod]:
                 continue
-            pts = b["pts"][:: (1 if lod == 0 else 2)]
+            pts = b["pts"][::2]
             r = np.linspace(b["r"], b["r"] * 0.3, len(pts))
             sw = np.interp(pts[:, 2], trunk_pts[:, 2], trunk_sway) + np.linspace(0.15, 0.85, len(pts)) * 0.7
             w = np.stack([np.clip(sw, 0, 1), np.zeros(len(pts)), np.full(len(pts), b["phase"]), aof(pts)], -1)
@@ -516,9 +591,14 @@ def build_conifer(spec, rng):
     out = {}
     budgets = spec["budget"]
     for lod in range(3):
-        md = MeshData()
-        bark(md, lod)
-        bt = md.tris()
+        k = 1.0
+        for _ in range(12):
+            md = MeshData()
+            bark(md, lod, k)
+            bt = md.tris()
+            if bt <= budgets[lod] * spec.get("bark_frac", (0.3, 0.25, 0.2))[lod]:
+                break
+            k *= 1.18
         n_cards = max(8, (budgets[lod] - bt) // 2)
         if lod == 0:
             cards0 = spray_cards(n_cards)
@@ -649,17 +729,19 @@ def build_birch(variant, view=None):
         trunks = [[(-0.2, 0, 0.0), (-0.8, 0.05, 3.0), (-1.7, 0.1, 6.0), (-2.4, 0.2, 9.5)],
                   [(0.2, 0, 0.0), (0.9, -0.05, 3.0), (1.7, -0.1, 6.0), (2.3, -0.2, 9.0)]]
         spec_r = 0.18
+    trunk_ids = [root]
     for tpts in trunks:
         pts = _subdiv(tpts, 0.6)
-        sk.add_polyline(pts, parent=root, can_grow_from_z=3.2 if variant != 2 else 4.0)
-    att = env.sample(1300, rng, shell=1.6, inner_weight=0.18, clumps=env.sample(26, rng, shell=1.0), clump_r=1.4)
+        trunk_ids += sk.add_polyline(pts, parent=root, can_grow_from_z=3.2 if variant != 2 else 4.0)
+    puffs = env.sample_even(26, rng, dmin=0.7, dmax=1.8)
+    att = env.sample(1300, rng, shell=1.6, inner_weight=0.18, clumps=puffs, clump_r=1.4)
     tg.space_colonize(sk, att, D=0.32, di=2.6, dk=0.7, iters=150, tropism=(0, 0, -1), trop_w=0.05, rng=rng)
-    spec = dict(bark="birch", r_base=spec_r * (1.6 if variant == 1 else 1.0), alpha=1.0, gamma=2.3,
+    spec = dict(puffs=puffs, puff_r=(1.0, 1.5), puff_frac=0.7, bark="birch", r_base=spec_r * (1.6 if variant == 1 else 1.0), alpha=1.0, gamma=2.3,
                 cull=(0.03, 0.08, 0.15), max_order=[9, 2, 1], flare=(0.25, 0.4, 4, 0.3), roots=None,
                 card_size=(1.0, 1.35), moods=BIRCH_MOODS, dense_map=BIRCH_DENSE, budget=(3200, 1250, 290),
                 leaf_tip_dist=1.4, leaf_r_max=0.05, site_spacing=0.38, side_frac=0.55, sph=0.6, up_bias=0.2,
                 seed=seed, bark_tile=(0.9, 0.9), hang=1.0, leaf_z_min=2.5,
-                trunk_r=lambda p: spec_r * (1.0 - 0.55 * min(max(p[2], 0), 12) / 12))
+                trunk_r=lambda p: spec_r * (1.0 - 0.55 * min(max(p[2], 0), 12) / 12), trunk_ids=trunk_ids)
     res = finish_broadleaf(sk, env, spec, rng)
     res.env = env
     return res
@@ -705,15 +787,16 @@ def build_willow(variant, view=None):
     for mid, end in limbs:
         pts = _bezier(top, mid, end, 7)
         sk.add_polyline(list(pts[1:]), parent=tid[-1], can_grow_from_z=3.5)
-    att = env.sample(1300, rng, shell=1.6, inner_weight=0.1, clumps=env.sample(26, rng, shell=0.8), clump_r=1.5)
+    puffs = env.sample_even(26, rng, dmin=0.7, dmax=1.8)
+    att = env.sample(1300, rng, shell=1.6, inner_weight=0.1, clumps=puffs, clump_r=1.5)
     tg.space_colonize(sk, att, D=0.36, di=2.8, dk=0.8, iters=150, tropism=(0, 0, 1), trop_w=0.1, rng=rng)
     W_TILES = ["willow_top_a"]
-    spec = dict(bark="willow", r_base=rb, alpha=1.0, gamma=2.3, cull=(0.04, 0.12, 0.28), max_order=[9, 2, 1],
+    spec = dict(puffs=puffs, puff_r=(1.2, 1.8), puff_frac=0.75, bark="willow", r_base=rb, alpha=1.0, gamma=2.3, cull=(0.04, 0.12, 0.28), max_order=[9, 2, 1],
                 flare=(0.45, 0.7, 4, 0.6), roots=(5, 1.6, rb * 0.35), card_size=(1.2, 1.6),
                 moods=[(1, W_TILES)], dense_map={"willow_top_a": "willow_dense"}, budget=(3300, 1300, 295),
                 leaf_tip_dist=1.2, leaf_r_max=0.06, site_spacing=0.55, side_frac=0.3, sph=0.6, up_bias=0.2,
                 seed=seed, bark_tile=(1.3, 1.3), hang=0.6, leaf_z_min=3.0,
-                trunk_r=lambda p: rb * (1 - 0.25 * min(max(p[2], 0), 5) / 5))
+                trunk_r=lambda p: rb * (1 - 0.25 * min(max(p[2], 0), 5) / 5), trunk_ids=tid)
     # reserve budget for curtains: strips are added after finish_broadleaf
     curt_budget = {0: 1100, 1: 380, 2: 80}
     spec["budget"] = (spec["budget"][0] - curt_budget[0], spec["budget"][1] - curt_budget[1],

@@ -221,7 +221,6 @@ func tick(delta: float) -> void:
 	update_boss(now, delta)
 	update_beacon(delta)
 	update_ribbon()
-	telegraphs.tick(now, delta)
 	update_battle_hud(now)
 	run_choreography(delta)
 
@@ -419,8 +418,10 @@ func squad_pose(index: int, now: float) -> Dictionary:
 		forward = Vector3(sin(forest_heading()), 0, cos(forest_heading()))
 	forward = forward.normalized()
 	var right := Vector3(forward.z, 0, -forward.x)
-	if busy != null and String(busy) == "mechanism":
-		var site_id := node.get_slice(":", 0).replace("lf_key_", "lf_site_")
+	var site_here := node.get_slice(":", 0).replace("lf_key_", "lf_site_")
+	var plates: Variant = game.client.poi(site_here).get("mechanism", {}).get("plates")
+	if plates is Dictionary and String(plates.get("state", "free")) in ["walking", "held"]:
+		var site_id := site_here
 		var anchor: Dictionary = game.site_anchor(site_id)
 		if anchor.has("plate_left") and index < 2:
 			var plate: Vector3 = anchor.plate_left if index == 0 else anchor.plate_right
@@ -760,7 +761,7 @@ func update_battle_hud(now: float) -> void:
 		if float(event.get("t", 0.0)) <= elapsed and event.has("hp"):
 			hp = float(event.hp)
 	var left := maxi(0, ceili((float(fight.get("endsAt", now)) - now) / 1000.0))
-	var title: String = game.content.text("site.guardian", {"name":game.content.species_name(species), "level":int(fight.get("level", 1))})
+	var title: String = game.content.text("site.guardian", {"name":game.content.species_name(species), "level":int(fight.get("level")) if fight.get("level") != null else 1})
 	var sub := "%d:%02d" % [left / 60, left % 60]
 	if boss_fight:
 		title = "%s · %s" % [game.content.species_name(species), game.content.text("boss.phase." + String(adv.get("boss", {}).get("phase", "hunt")))]

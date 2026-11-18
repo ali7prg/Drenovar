@@ -18,7 +18,7 @@ L = dict(
     hip_l=(0.098, 0.905), hip_r=(-0.098, 0.905),
     knee_l=(0.128, 0.480), knee_r=(-0.128, 0.480),
     ankle_l=(0.168, 0.085), ankle_r=(-0.162, 0.085),
-    hand_len=0.090, hand_scale=1.06, foot_len=0.27, toe_out_deg=9.0,
+    hand_len=0.092, hand_scale=1.12, foot_len=0.27, toe_out_deg=9.0,
     female=False,
 )
 
@@ -39,31 +39,32 @@ def body_parts(J, L):
         (1.04, (0.185, 0.185), (0.135, 0.110), 2.3),
         (1.16, (0.192, 0.192), (0.135, 0.110), 2.4),
         (1.28, (0.200, 0.200), (0.125, 0.115), 2.5),
-        (1.36, (0.200, 0.200), (0.112, 0.112), 2.5),
-        (1.42, (0.170, 0.170), (0.090, 0.090), 2.4),
-        (1.465, (0.090, 0.090), (0.065, 0.060), 2.0),
+        (1.35, (0.198, 0.198), (0.112, 0.112), 2.5),
+        (1.40, (0.165, 0.165), (0.095, 0.095), 2.4),
+        (1.435, (0.115, 0.115), (0.075, 0.075), 2.2),
+        (1.465, (0.075, 0.075), (0.060, 0.058), 2.0),
     ]
     P.append(H.vloft(0.60, 1.465, [(z, w, d, n) for z, w, d, n in torso], cls="shirt", bone=None, k=0.0,
                      name="torso", y=0.012))
     # shoulders / deltoids under the sleeves
     for S_, sx in (("Left", 1), ("Right", -1)):
         sh = J[f"{S_}UpperArm"]
-        P.append(H.ellipsoid(sh + np.array([sx * 0.012, 0.0, 0.0]), (0.080, 0.075, 0.082), cls="shirt",
+        P.append(H.ellipsoid(sh + np.array([sx * 0.020, 0.0, -0.010]), (0.092, 0.085, 0.092), cls="shirt",
                              bone=f"{S_}UpperArm", k=0.05))
         P.append(H.capsule(J[f"{S_}Shoulder"] + np.array([0, 0.02, 0.01]), sh + np.array([0, 0.02, 0.03]), 0.055,
                            0.060, cls="shirt", bone=f"{S_}Shoulder", k=0.05))
         el = J[f"{S_}LowerArm"]
         wr = J[f"{S_}Hand"]
         # loose sleeve (upper arm)
-        P.append(H.limb(sh, el, [(0.0, 0.072), (0.5, 0.068), (0.85, 0.064), (1.0, 0.060)], cls="shirt",
+        P.append(H.limb(sh, el, [(0.0, 0.088), (0.45, 0.084), (0.80, 0.076), (1.0, 0.066)], cls="shirt",
                         bone=f"{S_}UpperArm", k=0.03, name=f"sleeve_{S_}"))
         # rolled cuff just above the elbow
         ax = (el - sh) / np.linalg.norm(el - sh)
-        P.append(H.torus(sh + (el - sh) * 0.86, 0.052, 0.024, axis=ax, cls="shirt", bone=f"{S_}UpperArm", k=0.01))
-        P.append(H.torus(sh + (el - sh) * 0.95, 0.050, 0.022, axis=ax, cls="shirt", bone=f"{S_}LowerArm", k=0.01))
+        P.append(H.torus(sh + (el - sh) * 0.84, 0.060, 0.030, axis=ax, cls="shirt", bone=f"{S_}UpperArm", k=0.012))
+        P.append(H.torus(sh + (el - sh) * 0.97, 0.056, 0.027, axis=ax, cls="shirt", bone=f"{S_}LowerArm", k=0.012))
         # forearm (skin, muscular)
-        P.append(H.limb(el, wr, [(0.0, 0.050, 0.046), (0.25, 0.052, 0.047), (0.70, 0.040, 0.034),
-                                 (1.0, 0.032, 0.026)], cls="skin", bone=f"{S_}LowerArm", k=0.02,
+        P.append(H.limb(el, wr, [(0.0, 0.056, 0.050), (0.25, 0.058, 0.052), (0.70, 0.045, 0.038),
+                                 (1.0, 0.036, 0.029)], cls="skin", bone=f"{S_}LowerArm", k=0.02,
                         name=f"forearm_{S_}"))
         # legs: baggy trousers bloused above the boots
         hp = J[f"{S_}UpperLeg"]
@@ -72,11 +73,11 @@ def body_parts(J, L):
         P.append(H.limb(hp + np.array([0, 0, 0.04]), kn, [(0.0, 0.112, 0.118), (0.4, 0.100, 0.105),
                                                          (1.0, 0.082, 0.085)], cls="trousers",
                         bone=f"{S_}UpperLeg", k=0.04, name=f"thigh_{S_}"))
-        P.append(H.limb(kn, an, [(0.0, 0.080, 0.084), (0.35, 0.084, 0.088), (0.62, 0.086, 0.090),
-                                 (0.76, 0.072, 0.076), (1.0, 0.050, 0.055)], cls="trousers",
+        P.append(H.limb(kn, an, [(0.0, 0.088, 0.090), (0.35, 0.096, 0.098), (0.60, 0.100, 0.102),
+                                 (0.74, 0.084, 0.088), (1.0, 0.058, 0.062)], cls="trousers",
                         bone=f"{S_}LowerLeg", k=0.03, name=f"shin_{S_}"))
-        P += H.boot_parts(J, S_, sx, L, top_z=0.225, cls="boot", shaft_r=(0.062, 0.060), width=1.05,
-                          shaft_flare=1.08, cuff=0.010)
+        P += H.boot_parts(J, S_, sx, L, top_z=0.225, cls="boot", shaft_r=(0.068, 0.066), width=1.18,
+                          shaft_flare=1.10, cuff=0.012, height=1.30)
     return P
 
 
@@ -104,15 +105,17 @@ def garments(ctx):
     out.append(G.piece_from_drape("apron_skirt", D, "apron", 0.0045,
                                   {"type": "skirt", "top_z": 1.11, "hem_z": 0.35, "follow": 0.55}, axis_center))
     # --- bib (front, chest to waist), narrowing toward the top
-    def bib_region(th, z):
-        w = np.interp(z, [1.08, 1.20, 1.40], [0.150, 0.118, 0.084])
-        return np.abs(np.sin(th)) * 0.150 < w
-    Db = C.drape(ctx.torso_fn, cxy, (-0.95, 0.95), lambda th: np.full_like(th, 1.405), lambda th: np.full_like(th, 1.085),
-                 nu=16, nv=12, clearance=0.009, slack=0.25, folds=[(7, 0.002, 0.0)], region=bib_region, part="bib")
+    def bib_taper(z):
+        w = np.interp(z, [1.08, 1.20, 1.40], [0.98, 0.80, 0.56])
+        return (-w, w)
+    Db = C.drape(ctx.torso_fn, cxy, (-1.0, 1.0), lambda th: np.full_like(th, 1.405), lambda th: np.full_like(th, 1.085),
+                 nu=14, nv=12, clearance=0.009, slack=0.25, folds=[(7, 0.002, 0.0)], taper=bib_taper, part="bib")
     out.append(G.piece_from_drape("apron_bib", Db, "apron", 0.004, {"type": "body"}, axis_center))
     # --- neck strap: bib corners -> over the trapezius -> around the back of the neck
-    th = np.concatenate([np.linspace(-0.55, -2.2, 10), np.linspace(-2.4, 2.4, 9), np.linspace(2.2, 0.55, 10)])
-    zz = np.concatenate([np.linspace(1.40, 1.468, 10), np.full(9, 1.478), np.linspace(1.468, 1.40, 10)])
+    half_t = np.array([0.55, 0.68, 0.85, 1.05, 1.30, 1.60, 1.95, 2.35, 2.75, 3.14159])
+    half_z = np.array([1.400, 1.425, 1.448, 1.462, 1.472, 1.478, 1.481, 1.483, 1.484, 1.485])
+    th = np.concatenate([-half_t, half_t[::-1][1:]])
+    zz = np.concatenate([half_z, half_z[::-1][1:]])
     P, N = G.curve_on_body(ctx.body_fn, cxy, th, zz, clearance=0.006)
     out.append(G.band_piece("apron_strap", P, N, 0.024, 0.003, "apron", {"type": "body"}))
     # --- waist tie (closed ring) + bow and tails at the back
@@ -162,7 +165,9 @@ def head_extras(ctx):
         return np.maximum(ctx.head_fn(P) - 0.017 * s, reg(P))
     hair = H.tag(fsdf.Prim(hair_fn, lm["origin"] - 0.16, lm["origin"] + 0.20), cls="hair", bone="Head", k=0.004,
                  name="hair_shell")
-    cl = G.curls(lm, ctx.head_fn, reg, 70, 0.009 * s, 0.015 * s, 0.012 * s, seed=11)
+    cl = G.curls(lm, ctx.head_fn, reg, 150, 0.007 * s, 0.012 * s, 0.013 * s, seed=11)
+    for c in cl:
+        c.k = 0.008
     return [hair] + cl
 
 
@@ -184,14 +189,17 @@ def beard(ctx):
         return np.maximum(np.maximum(r1, r2), -mouth) * s
 
     def fn(P):
-        return np.maximum(ctx.head_fn(P) - 0.016 * s, region(P))
+        return np.maximum(ctx.head_fn(P) - 0.020 * s, region(P))
     prims = [H.tag(fsdf.Prim(fn, O - 0.14, O + 0.14), cls="beard", bone="Jaw", k=0.004)]
-    prims += G.curls(lm, ctx.head_fn, region, 46, 0.007 * s, 0.012 * s, 0.010 * s, seed=21, bone="Jaw", cls="beard")
-    # moustache
+    cl = G.curls(lm, ctx.head_fn, region, 90, 0.006 * s, 0.010 * s, 0.016 * s, seed=21, bone="Jaw", cls="beard")
+    for c in cl:
+        c.k = 0.008
+    prims += cl
+    # moustache (merges into the beard at the mouth corners)
     m = lm["mouth"]
     for sx in (1, -1):
-        prims.append(H.capsule(m + np.array([0, -0.004, 0.011]) * s, m + np.array([sx * 0.030, 0.003, 0.0]) * s,
-                               0.0075 * s, 0.0055 * s, cls="beard", bone="Head", k=0.006))
+        prims.append(H.capsule(m + np.array([0, -0.006, 0.012]), m + np.array([sx * 0.028, 0.004, -0.004]),
+                               0.0095, 0.0080, cls="beard", bone="Head", k=0.008))
     lo = O + np.array([-0.10, -0.06, -0.16]) * s
     hi = O + np.array([0.10, 0.12, 0.0]) * s
     return G.sdf_piece("beard", prims, lo, hi, 0.0022, "beard", {"type": "body"}, smooth=0.7)

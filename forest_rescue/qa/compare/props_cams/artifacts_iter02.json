@@ -1,0 +1,41 @@
+{
+  "stone_rune": {
+    "front": {
+      "iou_filled": 0.9683,
+      "iou_raw": 0.9683,
+      "mean_abs_colour_error": 0.1464
+    },
+    "side": {
+      "iou_filled": 0.928,
+      "iou_raw": 0.9282,
+      "mean_abs_colour_error": 0.0934
+    },
+    "hero34": {
+      "iou_filled": 0.9472,
+      "iou_raw": 0.9472,
+      "mean_abs_colour_error": 0.1263
+    },
+    "socket": {
+      "iou_filled": 0.9047,
+      "iou_raw": 0.9047,
+      "mean_abs_colour_error": 0.1027
+    },
+    "trace": {
+      "front_px": [
+        138,
+        129
+      ],
+      "side_px": [
+        37,
+        110
+      ],
+      "diameter_m": 0.12,
+      "height_m": 0.11217391304347826,
+      "thickness_m": 0.03773122529644269
+    },
+    "paint": {
+      "painted_fraction": 0.205,
+      "texel_mm": 0.32
+    }
+  }
+}

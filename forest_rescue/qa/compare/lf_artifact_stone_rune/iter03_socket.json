@@ -1,0 +1,16 @@
+{
+  "title": "lf_artifact_stone_rune v1 socket (fitted perspective)",
+  "iou_filled": 0.9044,
+  "iou_raw": 0.9044,
+  "mean_abs_colour_error": 0.1112,
+  "mean_rgb_ref": [
+    0.529,
+    0.445,
+    0.35
+  ],
+  "mean_rgb_render": [
+    0.578,
+    0.49,
+    0.398
+  ]
+}

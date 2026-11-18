@@ -1,0 +1,102 @@
+{
+  "metrics": {
+    "v1_front_LOD0": {
+      "view": "golden_oak",
+      "iou": 0.4633,
+      "mean_abs_colour_error": 0.1801,
+      "ref_pixels": 103722,
+      "render_pixels": 51855,
+      "iou_closed_r4": 0.5069
+    },
+    "v1_front_LOD1": {
+      "view": "golden_oak",
+      "iou": 0.386,
+      "mean_abs_colour_error": 0.192,
+      "ref_pixels": 103722,
+      "render_pixels": 43073,
+      "iou_closed_r4": 0.3905
+    },
+    "v1_front_LOD2": {
+      "view": "golden_oak",
+      "iou": 0.3613,
+      "mean_abs_colour_error": 0.1937,
+      "ref_pixels": 103722,
+      "render_pixels": 39930,
+      "iou_closed_r4": 0.3688
+    }
+  },
+  "tris": {
+    "v1": {
+      "leaf_sites": 317,
+      "LOD0": {
+        "tris": 12598,
+        "bark_tris": 12582,
+        "cards": 8
+      },
+      "LOD1": {
+        "tris": 769,
+        "bark_tris": 753,
+        "cards": 8
+      },
+      "LOD2": {
+        "tris": 238,
+        "bark_tris": 222,
+        "cards": 8
+      }
+    },
+    "v2": {
+      "leaf_sites": 193,
+      "LOD0": {
+        "tris": 6978,
+        "bark_tris": 6962,
+        "cards": 8
+      },
+      "LOD1": {
+        "tris": 536,
+        "bark_tris": 520,
+        "cards": 8
+      },
+      "LOD2": {
+        "tris": 154,
+        "bark_tris": 138,
+        "cards": 8
+      }
+    },
+    "v3": {
+      "leaf_sites": 177,
+      "LOD0": {
+        "tris": 7642,
+        "bark_tris": 7626,
+        "cards": 8
+      },
+      "LOD1": {
+        "tris": 770,
+        "bark_tris": 754,
+        "cards": 8
+      },
+      "LOD2": {
+        "tris": 178,
+        "bark_tris": 162,
+        "cards": 8
+      }
+    },
+    "v4": {
+      "leaf_sites": 127,
+      "LOD0": {
+        "tris": 4261,
+        "bark_tris": 4245,
+        "cards": 8
+      },
+      "LOD1": {
+        "tris": 420,
+        "bark_tris": 404,
+        "cards": 8
+      },
+      "LOD2": {
+        "tris": 112,
+        "bark_tris": 96,
+        "cards": 8
+      }
+    }
+  }
+}

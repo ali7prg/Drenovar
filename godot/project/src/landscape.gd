@@ -17,6 +17,10 @@ const WATER_SHADER = preload("res://src/water.gdshader")
 const BIOME_SHADER = preload("res://src/biome.gdshader")
 const MEADOW_SHADER = preload("res://src/meadow.gdshader")
 const Formations = preload("res://src/formations.gd")
+# [forest_rescue_v1 hook] versioned world layer flag; OFF = legacy forest (rollback).
+const ForestFlags = preload("res://src/forest_rescue/world/forest_flags.gd")
+var forest_world: Node3D = null
+var city_ground_meshes: Array = []
 var data: Dictionary
 var map_name := "city"
 var world_heights := PackedFloat32Array()
@@ -134,6 +138,8 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 		add_child(ground)
 		for mesh in ground.find_children("*", "MeshInstance3D", true, false):
 			mesh.material_override = ground_material
+			if is_city:
+				city_ground_meshes.append(mesh)  # [forest_rescue_v1 hook]
 			var bounds: AABB = mesh.transform * mesh.get_aabb()
 			terrain_bounds = bounds if not terrain_bounds.has_volume() else terrain_bounds.merge(bounds)
 		if Time.get_ticks_usec() - terrain_slice >= 3500:
@@ -158,6 +164,7 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 		zoom = 70.0
 		target = Vector3(5, 0, -4)
 		build_water()
+		await _setup_forest_world()  # [forest_rescue_v1 hook]
 	else:
 		fit_world()
 		await build_world_scenery()
@@ -462,6 +469,8 @@ func batch_mesh(parent: Node3D, mesh: Mesh, offset: Transform3D, cells: Dictiona
 		"total":count, "visible":0, "capacity":0, "layer":layer})
 
 func build_forest(city: Dictionary, exclusions: Array) -> void:
+	if forest_world != null:
+		forest_world.detach_canopy()  # [forest_rescue_v1 hook] survives the group rebuild
 	if is_instance_valid(trees.get("node")):
 		trees.node.free()
 	for child in city_ground_detail.get_children():
@@ -473,6 +482,12 @@ func build_forest(city: Dictionary, exclusions: Array) -> void:
 	trees["node"] = group
 	selectable_trees.clear()
 	standing_tree_cells.clear()
+	# [forest_rescue_v1 hook] the world layer owns every tree (kit species, remapped outer ids).
+	if forest_world != null:
+		forest_world.attach_canopy(group)
+		forest_world.build_city_forest(city, exclusions)
+		build_meadow(exclusions)
+		return
 	var felled := {}
 	for id in city.get("progress", {}).get("felled", []):
 		felled[id] = true
@@ -696,6 +711,8 @@ func update_visible_batches() -> void:
 			uploaded_transform_bytes += visible_transforms.size() * 4
 		node.multimesh.visible_instance_count = batch.visible
 	last_cull_ms = (Time.get_ticks_usec() - started) / 1000.0
+	if forest_world != null:
+		forest_world.on_camera_changed()  # [forest_rescue_v1 hook]
 
 func batch_counts() -> Vector2i:
 	var counts := Vector2i.ZERO
@@ -793,6 +810,8 @@ func play_animation(model: Node3D, preferred: String, fallback := "", phase := -
 func present(state: Dictionary) -> void:
 	if map_name == "city":
 		var city: Dictionary = state.city
+		if forest_world != null:
+			forest_world.apply_state_hint(state)  # [forest_rescue_v1 hook]
 		var progress: Dictionary = city.get("progress", {})
 		var kingdom: Variant = city.get("kingdom")
 		var construction: Variant = kingdom if kingdom is Dictionary else city.get("legacyUpgrades")
@@ -1180,6 +1199,8 @@ func along_route(route: Dictionary, fraction: float) -> Vector3:
 
 func ground_point(p: Vector3) -> Vector3:
 	p.y = terrain_y(p) if map_name == "world" else sample_city(p.x, p.z)
+	if forest_world != null and maxf(absf(p.x), absf(p.z)) > 56.0:
+		p.y = forest_world.height_at(p.x, p.z)  # [forest_rescue_v1 hook] earthworks/bridge
 	return p
 
 func battle_events(army: Dictionary) -> Dictionary:
@@ -1510,3 +1531,16 @@ func zoom_at(amount: float, position: Vector2) -> void:
 func shift_camera_target(offset: Vector3) -> void:
 	target.x = clampf(target.x + offset.x, -147, 147)
 	target.z = clampf(target.z + offset.z, -118, 118)
+
+# [forest_rescue_v1 hook] World layer for «Лес потерянных» (src/forest_rescue/world/*).
+# Loaded only when the flag is ON, so a broken/missing layer can never affect the rollback path.
+func _setup_forest_world() -> void:
+	if map_name != "city" or not ForestFlags.enabled():
+		return
+	var script: Variant = load("res://src/forest_rescue/world/forest_world.gd")
+	if not script is GDScript:
+		push_error("forest_rescue_v1: world layer script missing; legacy forest kept")
+		return
+	forest_world = script.new()
+	add_child(forest_world)
+	await forest_world.setup(self, city_ground_meshes)

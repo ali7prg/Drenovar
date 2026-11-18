@@ -224,7 +224,10 @@ def texture(B, opt):
     gb.apply_pose(B.arm, B.sk, None)
     v0, t0, uv0, n0 = gb.posed_arrays(lod0)
     gb.log("projecting", size)
-    col, w, T = gtex.project_posed(vp, t0, uv0, size, bind_verts=v0, bind_normals=n0)
+    filt = None
+    if hasattr(spec, "projection_filter"):
+        filt = lambda vn, Tb: spec.projection_filter(B, vn, Tb)
+    col, w, T = gtex.project_posed(vp, t0, uv0, size, bind_verts=v0, bind_normals=n0, filt=filt)
     # labels per texel
     me = lod0.data
     me.calc_loop_triangles()
@@ -262,6 +265,7 @@ def texture(B, opt):
     ao = np.ones(valid.shape)
     orm = np.stack([ao, rough, np.zeros_like(rough)], -1)
     col = gtex.dilate_islands(col, valid, 8)
+    B.base_col = col
     nrm_map = gtex.dilate_islands(nrm_map, valid, 8)
     orm = gtex.dilate_islands(orm, valid, 8)
     # masters + game textures
@@ -285,6 +289,7 @@ def texture(B, opt):
     for o in B.lods:
         core.assign(o, mat)
     B.material = mat
+    B.base_path, B.base_img, B.base_master = base_p, img_b, base_m
     B.textures = {"basecolor": [2048 if size == 2048 else size] * 2, "normal": [gsize_n] * 2, "orm": [gsize_n] * 2}
     for o in B.lods[1:]:
         o.hide_set(False)
@@ -315,10 +320,35 @@ def compare(B, tag, samples=32):
     return res
 
 
+def calibrate(B, samples=24):
+    """Albedo gain so the studio render matches the painted sheet brightness (side view)."""
+    spec = B.spec
+    for o in B.lods[1:]:
+        o.hide_render = True
+    B.body_hi.hide_render = True
+    vname, pk = spec.COMPARE[0]
+    gb.apply_pose(B.arm, B.sk, B.poses.get(pk))
+    view = B.pans[vname].view
+    rgba = gb.render_view(view, samples=samples)
+    both = view.mask & (rgba[..., 3] > 0.5)
+    gain = view.image[both].mean(0) / np.maximum(rgba[..., :3][both].mean(0), 1e-3)
+    gain = np.clip(gain, 0.85, 1.45)
+    gb.apply_pose(B.arm, B.sk, None)
+    col = np.clip(B.base_col * gain, 0, 1)
+    B.base_col = col
+    core.save_rgba(B.base_master, col)
+    gb.save_jpg(B.base_path, col, 90)
+    B.base_img.reload()
+    B.albedo_gain = gain.round(3).tolist()
+    gb.log("albedo gain", B.albedo_gain)
+    return gain
+
+
 def main(spec):
     opt = args()
     B = build_model(spec, opt)
     texture(B, opt)
+    calibrate(B)
     if opt["iter"]:
         compare(B, f"iter{opt['iter']}")
     return B

@@ -44,22 +44,37 @@ def _M(M, R=None, t=(0, 0, 0)):
 
 # =============================================================================== stone rune
 
+TRACE = {}   # filled by the build script from the reference masks: {family: dict(outline=(k,2) m, t=m, ...)}
+
+
+def polar_resample(outline, n):
+    """Resample a star-shaped outline by angle -> radii r(theta) (n samples)."""
+    o = np.asarray(outline, float)
+    ang = np.arctan2(o[:, 1], o[:, 0])
+    rad = np.linalg.norm(o, axis=1)
+    order = np.argsort(ang)
+    ang, rad = ang[order], rad[order]
+    ang = np.concatenate([ang - 2 * math.pi, ang, ang + 2 * math.pi])
+    rad = np.concatenate([rad, rad, rad])
+    th = np.linspace(-math.pi, math.pi, n, endpoint=False)
+    return th, np.interp(th, ang, rad)
+
+
 def rune_outline(v, n):
     R = DIMS["stone_rune"]["R"]
-    th = np.linspace(0, 2 * math.pi, n, endpoint=False)
-    rng = np.random.RandomState(10 + v)
-    ph = rng.uniform(0, 6.28, 4)
-    r = R * (1 + 0.010 * np.sin(3 * th + ph[0]) + 0.006 * np.sin(5 * th + ph[1]) + 0.004 * np.sin(9 * th + ph[2]))
-    if v == 1:
-        for a, d, w in ((2.4, 0.0035, 0.28), (5.3, 0.0025, 0.22), (0.9, 0.0015, 0.18)):
-            dd = np.angle(np.exp(1j * (th - a)))
-            r -= d * np.clip(1 - np.abs(dd) / w, 0, 1) ** 0.7
-    elif v == 2:
+    tr = TRACE.get("stone_rune")
+    if tr is not None:
+        th, r = polar_resample(tr["outline"], n)
+    else:
+        th = np.linspace(-math.pi, math.pi, n, endpoint=False)
+        r = np.full(n, R)
+    if v == 2:
+        r = r * 0.985
         for a in (math.pi / 2, math.pi / 2 + 2.094, math.pi / 2 + 4.189):
             dd = np.angle(np.exp(1j * (th - a)))
-            r -= 0.0075 * np.clip(1 - np.abs(dd) / 0.16, 0, 1)
+            r -= 0.0085 * np.clip(1 - np.abs(dd) / 0.17, 0, 1)
     elif v == 3:
-        r = R * (0.985 - 0.035 * (0.5 + 0.5 * np.cos(8 * th))) + (r - R) * 0.4
+        r = r * (0.99 - 0.035 * (0.5 + 0.5 * np.cos(8 * th)))
     return np.stack([r * np.cos(th), r * np.sin(th)], 1)
 
 
@@ -115,17 +130,25 @@ def rune_motifs(v):
 
 def build_rune(B, node, v, M=np.eye(4), cls="rune_stone"):
     d = DIMS["stone_rune"]
-    n = B.seg(64, 36, 20)
+    t = TRACE.get("stone_rune", {}).get("t", d["t"])
+    n = B.seg(40, 28, 16)
     outline = rune_outline(v, n)
-    body = pk.extrude(outline, d["t"], chamfer=0.0045 if B.lod < 2 else 0.003)
-    B.add(node, f"{node}_body", cls, body.transformed(_M(M, FRONT)), meta={"motif": rune_motifs(v)})
+    R = float(np.linalg.norm(outline, axis=1).max())
+    dome = (lambda P: 0.0025 * np.clip(1 - (np.linalg.norm(P, axis=1) / R) ** 2, 0, 1)) if B.lod < 2 else None
+    body = pk.extrude_round(outline, t - 0.0025, r_front=0.0075, r_back=0.005, seg=(2 if B.lod == 0 else 1),
+                            cap_spacing=(0.013 if B.lod == 0 else (0.022 if B.lod == 1 else None)), dome=dome)
+    meta = {"motif": rune_motifs(v)} if v != 1 else {"painted": 1}
+    B.add(node, f"{node}_body", cls, body.transformed(_M(M, FRONT)), meta=meta)
 
 
 # =============================================================================== bronze seal
 
 def seal_outline(v, lod):
     R = DIMS["bronze_seal"]["R"]
+    tr = TRACE.get("bronze_seal")
     hexo = pk.ngon(R, 6, 0.0)
+    if tr is not None and v != 2:
+        return pk.resample_closed(tr["outline"], {0: 42, 1: 24, 2: 12}[lod])
     if v == 2 and lod < 2:
         pts = []
         for i in range(6):
@@ -174,16 +197,23 @@ def seal_motif(v):
 
 def build_seal(B, node, v, M=np.eye(4), cls="bronze"):
     d = DIMS["bronze_seal"]
+    t = TRACE.get("bronze_seal", {}).get("t", d["t"])
     outline = seal_outline(v, B.lod)
+    sp = 0.011 if B.lod == 0 else (0.02 if B.lod == 1 else None)
+    meta = {"motif": seal_motif(v)} if v != 1 else {"painted": 1}
     if v == 3:
-        body = pk.extrude(outline, d["t"] - 0.004, chamfer=0.0025)
-        boss = pk.extrude(pk.ngon(d["R"] * 0.72, 6, 0.0), 0.0042, chamfer=0.0016)
-        boss = boss.transformed(M4(None, (0, 0, d["t"] - 0.0042)))
-        B.add(node, f"{node}_boss", cls, boss.transformed(_M(M, FRONT)), meta={"motif": seal_motif(v)})
-        B.add(node, f"{node}_body", cls, body.transformed(_M(M, FRONT)), meta={"motif": seal_motif(v)})
+        body = pk.extrude_round(outline, t - 0.0045, r_front=0.002, r_back=0.002, seg=1, cap_spacing=sp)
+        boss = pk.extrude_round(pk.ngon(d["R"] * 0.72, 6, 0.0), 0.0045, r_front=0.0015, r_back=0.0005, seg=1,
+                                cap_spacing=sp)
+        boss = boss.transformed(M4(None, (0, 0, t - 0.0047)))
+        B.add(node, f"{node}_body", cls, Piece_merge(body, boss).transformed(_M(M, FRONT)), meta=meta)
     else:
-        body = pk.extrude(outline, d["t"], chamfer=0.0028)
-        B.add(node, f"{node}_body", cls, body.transformed(_M(M, FRONT)), meta={"motif": seal_motif(v)})
+        body = pk.extrude_round(outline, t, r_front=0.0028, r_back=0.002, seg=(2 if B.lod == 0 else 1), cap_spacing=sp)
+        B.add(node, f"{node}_body", cls, body.transformed(_M(M, FRONT)), meta=meta)
+
+
+def Piece_merge(*ps):
+    return pk.Piece.merge(list(ps))
 
 
 # =============================================================================== amber crystal
@@ -262,12 +292,14 @@ def crystal_piece(outline, z0, z1, apex_z, kind, lod):
 
 def build_amber(B, node, v, M=np.eye(4)):
     d = DIMS["amber_crystal"]
-    H, W, t = d["H"], d["W"], d["t"]
+    tr = TRACE.get("amber_crystal", {})
+    H, W, t = tr.get("H", d["H"]), tr.get("W", d["W"]), tr.get("t", d["t"])
     outer = pk.ccw(diamond(H, W))
     fw = 0.0165
     inner = pk.offset_poly(outer, -fw)
     frame = pk.extrude(outer, t, chamfer=0.0022, hole=inner)
-    B.add(node, f"{node}_frame", "oak_fine", frame.transformed(_M(M, FRONT)), meta={"motif": amber_frame_motif()})
+    B.add(node, f"{node}_frame", "oak_fine", frame.transformed(_M(M, FRONT)),
+          meta=({"motif": amber_frame_motif()} if v != 1 else {"painted": 1}))
     gem_out = pk.offset_poly(outer, -fw + 0.0025)
     if v == 1:
         B.add(node, f"{node}_crystal", "amber", crystal_piece(gem_out, 0.003, t - 0.001, t + 0.012, "peak", B.lod)
@@ -309,18 +341,23 @@ def build_amber(B, node, v, M=np.eye(4)):
 
 # =============================================================================== bone key
 
+KEY_L = 0.152          # traced: bow outer dia = 0.353 L, shaft dia 0.12 L, bit 0.75..0.97 L (front view)
+
+
 def key_profile(lod):
-    """Lathe profile (r, x) of the shaft from bow neck to tip, x local (insertion point = 0)."""
-    P = [(0.0, -0.0805), (0.0058, -0.0800), (0.0062, -0.0775), (0.0088, -0.0765), (0.0088, -0.0728), (0.0066, -0.0722),
-         (0.0088, -0.0712), (0.0088, -0.0676), (0.0074, -0.0668), (0.0076, -0.0645), (0.0076, -0.0285), (0.0074, -0.0262),
-         (0.0088, -0.0255), (0.0088, -0.0218), (0.0066, -0.0212), (0.0086, -0.0204), (0.0086, -0.0170), (0.0058, -0.0162),
-         (0.0056, 0.0480), (0.0050, 0.0505), (0.0030, 0.0522), (0.0, 0.0528)]
+    """Lathe profile (r, x) of the shaft from the bow neck to the tip; x local (insertion point = 0 at 0.73 L)."""
+    L = KEY_L
+    X = lambda f: (f - 0.73) * L
+    P = [(0.0, X(0.315)), (0.0080, X(0.318)), (0.0118, X(0.330)), (0.0128, X(0.338)), (0.0128, X(0.356)),
+         (0.0098, X(0.362)), (0.0116, X(0.370)), (0.0116, X(0.402)), (0.0094, X(0.410)), (0.0093, X(0.418)),
+         (0.0093, X(0.662)), (0.0096, X(0.670)), (0.0106, X(0.676)), (0.0106, X(0.722)), (0.0094, X(0.730)),
+         (0.0091, X(0.740)), (0.0091, X(0.975)), (0.0080, X(0.990)), (0.0048, X(0.999)), (0.0, X(1.0))]
     P = np.array(P)
     pc = np.concatenate([[0], np.cumsum(np.linalg.norm(np.diff(P, axis=0), axis=1))])
     if lod == 2:
-        idx = [0, 1, 3, 7, 9, 10, 13, 16, 17, 18, 20, 21]
+        idx = [0, 1, 3, 4, 7, 9, 10, 13, 15, 16, 18, 19]
     elif lod == 1:
-        idx = [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 21]
+        idx = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19]
     else:
         idx = list(range(len(P)))
     return P[idx], pc[idx]
@@ -331,7 +368,8 @@ def key_motif():
     prof, pc = key_profile(0)
     # profile point indices 9..10 = knot section
     v0, v1 = pc[9], pc[10]
-    R = prof[:, 0].max()
+    prof = prof
+    R = 0.0128
     U = 2 * math.pi * R
     bb = (0, v0 - 0.002, U, v1 + 0.002)
     cv = mo.Canvas(bb, ppm=12000)
@@ -347,19 +385,19 @@ def build_key(B, node, v, M=np.eye(4)):
     Mk = np.asarray(M, float) @ M4(Rz(math.pi / 2))
     seg = B.seg(10, 7, 5)
     kp, kv = key_profile(B.lod)
-    shaft = pk.lathe(kp, seg, smooth=True, v_values=kv, ref_R=0.0088)
+    shaft = pk.lathe(kp, seg, smooth=True, v_values=kv, ref_R=0.0128)
     shaft = shaft.transformed(M4(Ry(math.pi / 2)))   # lathe axis Z -> X ; r=0 rows at x=-0.0805 and 0.0528
     shaft = _fix_lathe_x(shaft)
     B.add(node, f"{node}_shaft", "bone", shaft.transformed(Mk), meta={"motif": key_motif()})
     # bow
-    bc = np.array([-0.1015, 0.0, 0.0])
+    bc = np.array([(0.172 - 0.73) * KEY_L, 0.0, 0.0])
     nseg = B.seg(28, 18, 12)
     sides = B.seg(8, 6, 5)
     if v == 1:
         th = np.linspace(0, 2 * math.pi, nseg, endpoint=False)
-        R = 0.0210
+        R = 0.0206
         path = np.stack([bc[0] + R * np.cos(th), np.zeros(nseg), R * np.sin(th)], 1)
-        bow = pk.tube(path, 0.0058, sides, closed_path=True, up=(0, 1, 0))
+        bow = pk.tube(path, 0.0064, sides, closed_path=True, up=(0, 1, 0))
     elif v == 2:
         th = np.linspace(0, 2 * math.pi, int(nseg * 1.3), endpoint=False)
         R = 0.0185 * (1 + 0.30 * np.cos(3 * th))
@@ -376,18 +414,19 @@ def build_key(B, node, v, M=np.eye(4)):
     B.add(node, f"{node}_bow", "bone", bow.transformed(Mk))
     # bit (XZ outline, thickness along Y)
     if v == 1:
-        bit = [(0.0225, 0.004), (0.0225, -0.031), (0.031, -0.031), (0.031, -0.018), (0.0395, -0.018), (0.0395, -0.031),
-               (0.0495, -0.031), (0.0495, 0.004)]
+        bit = [(0.003, 0.004), (0.003, -0.0292), (0.0175, -0.0292), (0.0175, -0.0165), (0.0223, -0.0165),
+               (0.0223, -0.0292), (0.0365, -0.0292), (0.0365, 0.004)]
     elif v == 2:
-        bit = [(0.0225, 0.004), (0.0225, -0.031), (0.0285, -0.031), (0.0285, -0.019), (0.0335, -0.019), (0.0335, -0.031),
-               (0.0385, -0.031), (0.0385, -0.019), (0.0435, -0.019), (0.0435, -0.031), (0.0495, -0.031), (0.0495, 0.004)]
+        bit = [(0.003, 0.004), (0.003, -0.0292), (0.0106, -0.0292), (0.0106, -0.017), (0.016, -0.017),
+               (0.016, -0.0292), (0.0236, -0.0292), (0.0236, -0.017), (0.0289, -0.017), (0.0289, -0.0292),
+               (0.0365, -0.0292), (0.0365, 0.004)]
     else:
-        bit = [(0.0205, 0.004), (0.0205, -0.034), (0.0300, -0.034), (0.0300, -0.0255), (0.0410, -0.0255),
-               (0.0410, -0.017), (0.0495, -0.017), (0.0495, 0.004)]
+        bit = [(0.0023, 0.004), (0.0023, -0.032), (0.0137, -0.032), (0.0137, -0.024), (0.0251, -0.024),
+               (0.0251, -0.016), (0.0365, -0.016), (0.0365, 0.004)]
     bit = np.array(bit)
-    bp = pk.extrude(bit, 0.0082, chamfer=0.0011)
-    # extrude: outline XY (x, z), depth along local z -> map (x, y, z) -> (x, z_depth - 0.0041, y)
-    Mb = np.array([[1, 0, 0, 0], [0, 0, 1, -0.0041], [0, 1, 0, 0], [0, 0, 0, 1]], float)
+    bp = pk.extrude(bit, 0.0105, chamfer=0.0013)
+    # extrude: outline XY (x, z), depth along local z -> map (x, y, z) -> (x, z_depth - t/2, y)
+    Mb = np.array([[1, 0, 0, 0], [0, 0, 1, -0.00525], [0, 1, 0, 0], [0, 0, 0, 1]], float)
     bp = bp.transformed(Mb)
     B.add(node, f"{node}_bit", "bone", bp.transformed(Mk))
 

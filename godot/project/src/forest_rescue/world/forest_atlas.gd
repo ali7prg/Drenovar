@@ -165,8 +165,8 @@ func nearest_route(x: float, z: float) -> Dictionary:
 	var best_distance := INF
 	var p := Vector2(x, z)
 	for code in _segment_grid.get(key, PackedInt32Array()):
-		var route_index := code >> 16
-		var i := code & 0xffff
+		var route_index: int = code >> 16
+		var i: int = code & 0xffff
 		var points: PackedVector3Array = routes[route_index].points
 		var a := Vector2(points[i].x, points[i].z)
 		var d := Vector2(points[i + 1].x, points[i + 1].z) - a

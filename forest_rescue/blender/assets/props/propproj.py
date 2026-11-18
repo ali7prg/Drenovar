@@ -279,7 +279,7 @@ def relief_bake(asset, height_img, texel_m, objs=None, levels=3, samples=12, ao_
     tex.image = himg
     tex.extension = "EXTEND"
     tex.use_interpolation = True
-    tex.filter_type = "BOX"
+
     nimg = bpy.data.images.new("__relief_n", size, size, alpha=False, float_buffer=True)
     nimg.colorspace_settings.name = "Non-Color"
     aimg = bpy.data.images.new("__relief_ao", size, size, alpha=False, float_buffer=True)
@@ -361,3 +361,102 @@ def relief_bake(asset, height_img, texel_m, objs=None, levels=3, samples=12, ao_
     log(f"[relief] baked normal+AO {size}px from displaced x{4 ** levels} subdivided copies in {time.time() - t0:.1f}s "
         f"(height range {hmin * 1000:.1f}..{hmax * 1000:.1f} mm)")
     return nrm, ao
+
+
+# =============================================================================== full texture stage
+
+def paint_relief_textures(asset, shaders, specs, size=2048, height_gain=0.02, sizes=None, relief_levels=3,
+                          ao_distance=0.02, ao_strength=0.6, delight_match=True, edge_fade_m=0.0015,
+                          paint_alpha_w=0.25, height_owner_only=True, normal_extra=0.0, samples=12, log=print,
+                          swatches=None):
+    """Procedural PBR + projected reference colour + painted relief -> displaced high-res copy ->
+    baked normal/AO. Returns bpy images {base, orm, normal} (also writes masters/runtime files)."""
+    from PIL import Image
+    from frlib import paths
+    tex, tx = pk.synthesize(asset, shaders, size=size)
+    ts = TexelSet(asset, size)
+    assert ts.n == len(tx.yy), "texel order mismatch"
+    proc = tex["albedo"][ts.yy, ts.xx]
+    hproc = tex["height"][ts.yy, ts.xx]
+    if specs:
+        col, w, hpaint, hw = project_views(ts, specs, log=log)
+    else:
+        col, w, hpaint, hw = np.zeros((ts.n, 3)), np.zeros(ts.n), np.zeros(ts.n), np.zeros(ts.n)
+    alpha = pk.smoothstep(w / paint_alpha_w)
+    # colour match the procedural layer to the painting per material class (for unpainted sides/variants)
+    out = proc.copy()
+    if delight_match and (alpha > 0.5).any():
+        for cid in np.unique(tx.cls):
+            sel = tx.cls == cid
+            good = sel & (alpha > 0.6)
+            if good.sum() > 200:
+                ratio = col[good].mean(0) / np.maximum(proc[good].mean(0), 1e-4)
+                ratio = np.clip(ratio, 0.5, 2.0)
+                out[sel] = np.clip(proc[sel] * ratio, 0, 1)
+    # painted swatches: tileable crops of plain material from the drawing for unpainted texels of a class
+    inv_cls = {v: k for k, v in asset.cls_ids.items()}
+    for cid in np.unique(tx.cls):
+        name = inv_cls[int(cid)]
+        if not swatches or name not in swatches:
+            continue
+        simg, tile_m = swatches[name]
+        sel = (tx.cls == cid) & (alpha < 0.999)
+        if not sel.any():
+            continue
+        sh_, sw_ = simg.shape[:2]
+        uu = ts.UV[sel, 0] / tile_m * sw_
+        vv = ts.UV[sel, 1] / tile_m * sh_
+        uu = np.abs(((uu / sw_) % 2.0) - 1.0) * (sw_ - 1)      # mirrored repeat
+        vv = np.abs(((vv / sh_) % 2.0) - 1.0) * (sh_ - 1)
+        sc = _bilinear(simg, uu, vv)[:, :3]
+        lum = sc.mean(1)
+        detail = (lum - lum.mean()) / max(lum.mean(), 1e-6)       # painted high-frequency detail only
+        out[sel] = np.clip(out[sel] * (1 + 0.55 * detail)[:, None], 0, 1)
+    out = out * (1 - alpha[:, None]) + col * alpha[:, None]
+    # relief: painted band-pass height where painted (front/hero), procedural elsewhere
+    hpa = pk.smoothstep(hw / paint_alpha_w)
+    height = hproc * (1 - hpa) + (hpaint * height_gain) * hpa
+    H_img = ts.to_img(height)
+    W, H = ts.size
+    fade = edge_fade(ts.valid, tex["texel_m"], edge_fade_m)
+    H_img = texproj.fill(H_img[..., None], ts.valid)[..., 0] * fade
+    nrm, ao = relief_bake(asset, H_img, tex["texel_m"], levels=relief_levels, ao_distance=ao_distance,
+                          samples=samples, log=log)
+    if normal_extra > 0:   # add sub-texel micro detail on top of the baked macro relief
+        micro = texproj.height_to_normal(tex["height"] * 0.35, ts.valid, strength=normal_extra, texel_m=tex["texel_m"])
+        n = nrm * 2 - 1
+        m = micro * 2 - 1
+        n = pk.unit(np.concatenate([n[..., :2] + m[..., :2], n[..., 2:3] * m[..., 2:3]], -1))
+        nrm = n * 0.5 + 0.5
+    alb = ts.to_img(out)
+    alb = texproj.fill(alb, ts.valid)
+    alb = alb * (1 - ao_strength + ao_strength * ao[..., None])
+    rough = texproj.fill(tex["rough"][..., None], ts.valid)[..., 0]
+    metal = texproj.fill(tex["metal"][..., None], ts.valid)[..., 0]
+    orm = np.stack([np.ones_like(rough), rough, metal], -1)
+    sizes = sizes or {"base": 2048, "orm": 1024, "normal": 2048}
+    tdir = paths.ensure(paths.TEXTURE_SOURCES, pk.GROUP)
+    core.save_rgba(os.path.join(tdir, f"{asset.id}_base_master.png"), np.clip(alb, 0, 1))
+    core.save_rgba(os.path.join(tdir, f"{asset.id}_orm_master.png"), np.clip(orm, 0, 1))
+    core.save_rgba(os.path.join(tdir, f"{asset.id}_normal_master.png"), np.clip(nrm, 0, 1))
+    core.save_rgba(os.path.join(tdir, f"{asset.id}_height_master.png"),
+                   np.repeat(np.clip((H_img - H_img.min()) / max(np.ptp(H_img), 1e-9), 0, 1)[..., None], 3, 2))
+    core.save_rgba(os.path.join(tdir, f"{asset.id}_paintweight_master.png"),
+                   np.repeat(np.clip(ts.to_img(alpha), 0, 1)[..., None], 3, 2))
+    rt = paths.ensure(paths.SOURCES, pk.GROUP, "tex")
+    files = {}
+    for key, arr, fmt, cs in (("base", alb, "JPEG", "sRGB"), ("orm", orm, "JPEG", "Non-Color"),
+                              ("normal", nrm, "PNG", "Non-Color")):
+        s = sizes[key]
+        a = pk._resize(arr, s, s) if arr.shape[0] != s else arr
+        u8 = (np.clip(a, 0, 1) * 255 + 0.5).astype(np.uint8)
+        fp = os.path.join(rt, f"{asset.id}_{key}.{'jpg' if fmt == 'JPEG' else 'png'}")
+        im = Image.fromarray(u8, "RGB")
+        im.save(fp, quality=90, optimize=True) if fmt == "JPEG" else im.save(fp, optimize=True)
+        img = bpy.data.images.load(fp, check_existing=False)
+        img.name = f"{asset.id}_{key}"
+        img.colorspace_settings.name = cs
+        files[key] = img
+    painted = float((alpha > 0.5).mean())
+    log(f"[paint] painted fraction {painted:.2f}; textures {sizes}")
+    return files, {"painted_fraction": round(painted, 3), "texel_mm": round(tex["texel_m"] * 1000, 3)}

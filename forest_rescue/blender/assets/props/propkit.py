@@ -1695,3 +1695,96 @@ def godot_clip(glb, out_mp4, anim="all", seconds=6, extra=()):
     cmd = ["bash", tool, glb, "clip", out_mp4, anim, str(seconds)] + list(extra)
     r = subprocess.run(cmd, capture_output=True, text=True)
     return r.stdout + r.stderr
+
+
+# =============================================================================== rounded extrusion with grid cap
+
+def _point_in_poly(pts, poly):
+    import cv2
+    c = poly.astype(np.float32).reshape(-1, 1, 2)
+    return np.array([cv2.pointPolygonTest(c, (float(x), float(y)), False) > 0 for x, y in pts])
+
+
+def grid_cap(poly, spacing, z=0.0, up=True, dome=None, isl=2):
+    """Planar cap of a CCW polygon with interior grid points (Delaunay) for displacement/doming."""
+    from scipy.spatial import Delaunay
+    poly = ccw(np.asarray(poly, float))
+    lo, hi = poly.min(0), poly.max(0)
+    gx = np.arange(lo[0] + spacing * 0.5, hi[0], spacing)
+    gy = np.arange(lo[1] + spacing * 0.5, hi[1], spacing)
+    G = np.array([(x, y + (0.5 * spacing if (i % 2) else 0)) for i, x in enumerate(gx) for y in gy]) if len(gx) and len(gy) else np.zeros((0, 2))
+    if len(G):
+        inside = _point_in_poly(G, offset_poly(poly, -spacing * 0.45))
+        G = G[inside]
+    pts = np.vstack([poly, G]) if len(G) else poly
+    tri = Delaunay(pts).simplices
+    cen = pts[tri].mean(1)
+    keep = _point_in_poly(cen, poly)
+    tri = tri[keep]
+    zz = np.full(len(pts), z, float)
+    if dome is not None:
+        zz = zz + dome(pts)
+    p = Piece()
+    b = p.append_verts(np.c_[pts, zz])
+    for t in tri:
+        a, bb, c = pts[t[0]], pts[t[1]], pts[t[2]]
+        cr = (bb[0] - a[0]) * (c[1] - a[1]) - (bb[1] - a[1]) * (c[0] - a[0])
+        tt = list(t) if (cr > 0) == up else [t[0], t[2], t[1]]
+        p.add_face(tuple(b + i for i in tt), [tuple(pts[i]) for i in tt], isl, False, 0)
+    return p
+
+
+def extrude_round(outline, depth, r_front=0.004, r_back=0.003, seg=3, cap_spacing=None, dome=None,
+                  smooth=True):
+    """Prism with quarter-round front/back rims (pillow tokens). Front cap at z=depth (+dome), back at z=0.
+
+    Sides: u = perimeter, v = z (metres). Caps: planar (x, y), island 2 = front, 1 = back.
+    """
+    outline = ccw(np.asarray(outline, float))
+    k = len(outline)
+    pe = np.linalg.norm(np.roll(outline, -1, axis=0) - outline, axis=1)
+    pc = np.concatenate([[0], np.cumsum(pe)])
+    layers = []
+    for j in range(seg + 1):                       # back rounding: inset r(1-sin)
+        th = (math.pi / 2) * j / seg
+        layers.append((r_back * (1 - math.sin(th)), r_back * (1 - math.cos(th))))
+    for j in range(seg + 1):                       # front rounding
+        th = (math.pi / 2) * j / seg
+        layers.append((r_front * (1 - math.cos(th)), depth - r_front + r_front * math.sin(th)))
+    rings = []
+    piece = Piece()
+    for inset, z in layers:
+        pts = offset_poly(outline, -inset) if inset > 1e-7 else outline
+        rings.append((piece.append_verts(np.c_[pts, np.full(k, z)]), z, pts))
+    vacc = 0.0
+    vs = [0.0]
+    for i in range(1, len(layers)):
+        d = math.hypot(layers[i][0] - layers[i - 1][0], layers[i][1] - layers[i - 1][1])
+        vacc += d
+        vs.append(vacc)
+    for li in range(len(layers) - 1):
+        r0, z0, _ = rings[li]
+        r1, z1, _ = rings[li + 1]
+        if abs(vs[li + 1] - vs[li]) < 1e-9:
+            continue
+        flag = 0 if (li == seg) else 1
+        for j in range(k):
+            j1 = (j + 1) % k
+            piece.add_face((r0 + j, r0 + j1, r1 + j1, r1 + j),
+                           [(pc[j], vs[li]), (pc[j + 1], vs[li]), (pc[j + 1], vs[li + 1]), (pc[j], vs[li + 1])],
+                           0, smooth, flag)
+    back = rings[0][2]
+    front = rings[-1][2]
+    if cap_spacing:
+        fc = grid_cap(front, cap_spacing, z=depth, up=True, dome=dome, isl=2)
+        bc = grid_cap(back, cap_spacing * 1.6, z=0.0, up=False, isl=1)
+    else:
+        fc = Piece()
+        b = fc.append_verts(np.c_[front, np.full(k, depth)])
+        for t in ear_clip(front):
+            fc.add_face(tuple(b + i for i in t), [tuple(front[i]) for i in t], 2, False, 0)
+        bc = Piece()
+        b = bc.append_verts(np.c_[back, np.zeros(k)])
+        for t in ear_clip(back):
+            bc.add_face((b + t[0], b + t[2], b + t[1]), [tuple(back[t[0]]), tuple(back[t[2]]), tuple(back[t[1]])], 1, False, 0)
+    return Piece.merge([piece, fc, bc])

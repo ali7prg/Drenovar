@@ -65,15 +65,22 @@ def hair_atlas(size=1024, seed=11):
             c = base_dark * (1 - r) + base_mid * r
             if rng.random() < p["high"]:
                 c = c * 0.4 + high * rng.uniform(0.5, 1.0)
-            img_c = np.zeros_like(layer_c)
-            img_a = np.zeros_like(layer_a)
-            cv2.polylines(img_a, [pts], False, 1.0, thickness=max(1, w), lineType=cv2.LINE_AA)
+            pad = w + 2
+            x0b = max(0, int(pts[:, 0].min()) - pad)
+            x1b = min(sw, int(pts[:, 0].max()) + pad + 1)
+            y1b = min(H, int(pts[:, 1].max()) + pad + 1)
+            if x1b <= x0b:
+                continue
+            img_a = np.zeros((y1b, x1b - x0b), np.float32)
+            cv2.polylines(img_a, [pts - np.array([x0b, 0])], False, 1.0, thickness=max(1, w),
+                          lineType=cv2.LINE_AA)
             # taper: fade the last 25 % of each strand
-            fade = np.clip((L - np.arange(H)) / (0.25 * L + 1e-6), 0, 1)[:, None]
+            fade = np.clip((L - np.arange(y1b)) / (0.25 * L + 1e-6), 0, 1)[:, None]
             img_a *= fade
-            m = img_a > layer_a
-            layer_c[m] = c
-            layer_a = np.maximum(layer_a, img_a)
+            sub_a = layer_a[:y1b, x0b:x1b]
+            m = img_a > sub_a
+            layer_c[:y1b, x0b:x1b][m] = c
+            layer_a[:y1b, x0b:x1b] = np.maximum(sub_a, img_a)
         # root darkening + slight ambient occlusion toward the root
         grad = np.linspace(0.75, 1.05, H)[:, None, None]
         layer_c *= grad
@@ -159,7 +166,6 @@ class CardSet:
         for i in range(N):
             self.verts += [L[i], R[i]]
             self.weights += [weights[i], weights[i]]
-            self.uvs_v = None
         for i in range(N - 1):
             a, b, c, d = base + 2 * i, base + 2 * i + 1, base + 2 * i + 3, base + 2 * i + 2
             self.faces += [(a, b, c), (a, c, d)]

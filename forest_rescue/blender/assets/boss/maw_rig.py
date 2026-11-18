@@ -167,7 +167,14 @@ def compute_weights(verts, faces, bone_names, merge=None, smooth_iters=8):
     # normalise -> smooth -> limit
     s = W.sum(1, keepdims=True)
     W = np.where(s > 1e-6, W / np.maximum(s, 1e-9), 0)
-    A = sdf.adjacency_matrix(N, faces)
+    from scipy import sparse
+    e = np.asarray(faces)  # edges (E,2)
+    e = np.concatenate([e, e[:, ::-1]])
+    A = sparse.coo_matrix((np.ones(len(e)), (e[:, 0], e[:, 1])), shape=(N, N)).tocsr()
+    A.data[:] = 1.0
+    deg = np.asarray(A.sum(axis=1)).ravel()
+    deg[deg == 0] = 1
+    A = sparse.diags(1.0 / deg) @ A
     lock = np.zeros(N, bool)
     lock[pal | flo] = True
     Wl = W[lock].copy()
@@ -178,41 +185,33 @@ def compute_weights(verts, faces, bone_names, merge=None, smooth_iters=8):
     return W
 
 
-def bind_body(obj, arm, bone_names, merge=None, extra_rigid=None):
-    """Weights for a mesh made of body faces (+ rigid detail verts listed in obj['bones'])."""
-    verts, tris, _uv, _n = core.mesh_arrays(obj, evaluated=False, world=True)
+def bind_body(obj, arm, bone_names, rigid_table, merge=None):
+    """Weights for a joined mesh: body verts (rigid_id<0) part-based, detail verts rigid to their bone."""
     nv = len(obj.data.vertices)
-    V = np.array([v.co[:] for v in obj.data.vertices])
-    faces = [list(p.vertices) for p in obj.data.polygons]
-    rigid = np.zeros(nv, bool)
-    rigid_bone = [None] * nv
-    if "rigid_bone" in obj.keys():
-        rb = list(obj["rigid_bone"])
-        for i, b in enumerate(rb):
-            if b:
-                rigid[i] = True
-                rigid_bone[i] = b
+    V = np.empty(nv * 3)
+    obj.data.vertices.foreach_get("co", V)
+    V = V.reshape(nv, 3)
+    ne = len(obj.data.edges)
+    faces = np.empty(ne * 2, np.int64)
+    obj.data.edges.foreach_get("vertices", faces)
+    faces = faces.reshape(ne, 2)
+    rid = np.empty(nv, np.int32)
+    obj.data.attributes["rigid_id"].data.foreach_get("value", rid)
     W = compute_weights(V, faces, bone_names, merge)
     idx = {b: i for i, b in enumerate(bone_names)}
     merge = merge or {}
-    for i in np.nonzero(rigid)[0]:
+    sp = B.spine_points()
+    j1, j2 = sp["tongue_02"][0][1], sp["tongue_03"][0][1]
+    for i in np.nonzero(rid >= 0)[0]:
         W[i] = 0
-        b = rigid_bone[i]
+        b = rigid_table[rid[i]]
         if b == "tongue":
-            # tongue: by Y along tongue_01..03
             y = V[i, 1]
-            sp = B.spine_points()
-            j1, j2 = sp["tongue_02"][0][1], sp["tongue_03"][0][1]
-            if y > j1 + 0.05:
-                W[i, idx[resolve("tongue_01", merge)]] = 1
-            elif y > j2 + 0.05:
-                t = np.clip((j1 + 0.05 - y) / 0.1, 0, 1)
-                W[i, idx[resolve("tongue_01", merge)]] += 1 - t
-                W[i, idx[resolve("tongue_02", merge)]] += t
-            else:
-                t = np.clip((j2 + 0.05 - y) / 0.1, 0, 1)
-                W[i, idx[resolve("tongue_02", merge)]] += 1 - t
-                W[i, idx[resolve("tongue_03", merge)]] += t
+            t1 = np.clip((j1 + 0.05 - y) / 0.1, 0, 1)
+            t2 = np.clip((j2 + 0.05 - y) / 0.1, 0, 1)
+            w = {"tongue_01": 1 - t1, "tongue_02": t1 * (1 - t2), "tongue_03": t2}
+            for k, v in w.items():
+                W[i, idx[resolve(k, merge)]] += v
         else:
             W[i, idx[resolve(b, merge)]] = 1.0
     W = sdf.limit_weights(W, top=4, min_w=0.02)

@@ -52,11 +52,12 @@ def main():
             nrm = ftex.height_to_normal_wrap(d["height"], 4.0)
             rough = np.stack([np.ones_like(d["rough"]), d["rough"], np.zeros_like(d["rough"])], -1)
         barks[kind] = alb
+        pre = "lf_rock_" if kind == "limestone" else "lf_bark_"
         for base, folder in ((RUNTIME, "rt"), (MASTER, "m")):
-            ftex.save_rgb(os.path.join(base, f"lf_bark_{kind}_c.jpg"), alb, quality=90)
-            ftex.save_rgb(os.path.join(base, f"lf_bark_{kind}_n.png"), nrm)
-            ftex.save_rgb(os.path.join(base, f"lf_bark_{kind}_r.png"), rough)
-        cv2.imwrite(os.path.join(MASTER, f"lf_bark_{kind}_height16.png"),
+            ftex.save_rgb(os.path.join(base, f"{pre}{kind}_c.jpg"), alb, quality=90)
+            ftex.save_rgb(os.path.join(base, f"{pre}{kind}_n.png"), nrm)
+            ftex.save_rgb(os.path.join(base, f"{pre}{kind}_r.png"), rough)
+        cv2.imwrite(os.path.join(MASTER, f"{pre}{kind}_height16.png"),
                     (np.clip(d["height"], 0, 1) * 65535).astype(np.uint16))
         print(f"[tex] {kind} {time.time() - t0:.1f}s", flush=True)
     if not a.skip_atlas:

@@ -1,0 +1,144 @@
+shader_type spatial;
+render_mode unshaded, blend_mix, depth_draw_never, cull_back, shadows_disabled, fog_disabled;
+
+// «Лес потерянных» exploration fog (lf_vfx_fog). Terrain-following shells, no particles,
+// no raymarch. State texture (56×56, 4 m cells over [-112,112)²):
+//   R = previous clear mask, G = target clear mask (server projection), B = anchor (town /
+//   property, never dimmed). The reveal (lf_fog_reveal, ~2 s) blends R→G per pixel with a
+//   noise delay so cleared fog rolls away in billows; the edge is warped by drifting noise
+//   (wisps). Outside the atlas the forest is always fogged.
+
+uniform sampler2D state_tex : filter_linear, repeat_disable;
+uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
+uniform sampler2D depth_tex : hint_depth_texture, filter_linear_mipmap;
+uniform vec4 domain = vec4(-112.0, -112.0, 224.0, 224.0);
+uniform float layer = 0.0;               // 0 haze, 1 bank, 2 crest
+uniform float layer_alpha = 0.9;
+uniform float layer_threshold = 0.0;     // higher layers need deeper fog
+uniform float layer_lift = 4.0;          // metres the shell rises above the ground in deep fog
+uniform float drift_speed = 0.6;
+uniform vec2 wind = vec2(0.83, 0.56);
+uniform float reveal_t = 1.0;
+uniform float reveal_curl = 0.0;
+uniform float dim_strength = 0.0;        // explored but not in current sight
+uniform vec4 sights[8];
+uniform int sight_count = 0;
+uniform vec3 light_dir = vec3(0.45, 0.74, 0.5);
+uniform vec3 lit_color : source_color = vec3(0.90, 0.92, 0.95);
+uniform vec3 shade_color : source_color = vec3(0.47, 0.54, 0.64);
+uniform vec3 haze_color : source_color = vec3(0.64, 0.70, 0.78);
+uniform vec3 warm_rim : source_color = vec3(1.0, 0.93, 0.80);
+uniform float edge_softness = 0.16;
+uniform bool soft_depth = true;
+uniform float soft_distance = 2.5;
+uniform float time_offset = 0.0;
+
+varying vec3 world;
+varying float vertex_fog;
+
+vec4 cubic_weights(float v) {
+	vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
+	vec4 s = n * n * n;
+	float x = s.x;
+	float y = s.y - 4.0 * s.x;
+	float z = s.z - 4.0 * s.y + 6.0 * s.x;
+	float w = 6.0 - x - y - z;
+	return vec4(x, y, z, w) * (1.0 / 6.0);
+}
+
+// Cubic B-spline filtered state (4 bilinear taps): rounded, blob-like cell shapes.
+vec4 state_bicubic(vec2 uv) {
+	vec2 size = vec2(56.0);
+	vec2 px = uv * size - 0.5;
+	vec2 f = fract(px);
+	px -= f;
+	vec4 xc = cubic_weights(f.x);
+	vec4 yc = cubic_weights(f.y);
+	vec4 c = px.xxyy + vec2(-0.5, 1.5).xyxy;
+	vec4 s = vec4(xc.xz + xc.yw, yc.xz + yc.yw);
+	vec4 offset = c + vec4(xc.yw, yc.yw) / s;
+	offset /= size.xxyy;
+	vec4 s0 = texture(state_tex, offset.xz);
+	vec4 s1 = texture(state_tex, offset.yz);
+	vec4 s2 = texture(state_tex, offset.xw);
+	vec4 s3 = texture(state_tex, offset.yw);
+	float sx = s.x / (s.x + s.y);
+	float sy = s.z / (s.z + s.w);
+	return mix(mix(s3, s2, sx), mix(s1, s0, sx), sy);
+}
+
+float inside_domain(vec2 p) {
+	vec2 q = (p - domain.xy) / domain.zw;
+	vec2 edge = smoothstep(vec2(0.0), vec2(0.012), q) * (1.0 - smoothstep(vec2(0.988), vec2(1.0), q));
+	return edge.x * edge.y;
+}
+
+// Clear amount (0 = fog, 1 = open) incl. the reveal blend at time reveal_t.
+float clear_at(vec2 p, float delay_noise) {
+	vec4 s = state_bicubic((p - domain.xy) / domain.zw);
+	float local_t = smoothstep(delay_noise * 0.55, delay_noise * 0.55 + 0.45, reveal_t);
+	return mix(s.r, s.g, local_t) * inside_domain(p);
+}
+
+void vertex() {
+	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	vec4 s = state_bicubic((world.xz - domain.xy) / domain.zw);
+	float clear = mix(s.r, s.g, reveal_t) * inside_domain(world.xz);
+	vertex_fog = 1.0 - clear;
+	// Shells dip to the ground at the bank edge and swell in deep fog → rolling bank profile.
+	float swell = smoothstep(0.05, 0.85, vertex_fog);
+	world.y += layer_lift * (swell - 1.0) + reveal_curl * (1.0 - swell) * 1.5;
+	VERTEX = (inverse(MODEL_MATRIX) * vec4(world, 1.0)).xyz;
+}
+
+void fragment() {
+	vec2 p = world.xz;
+	float t = TIME + time_offset;
+	vec2 drift = wind * t * drift_speed;
+	// Domain-warped drifting billows (large) + detail; wisps curl at the edge.
+	vec4 w = texture(noise_tex, (p + drift * 0.6) / 61.0);
+	vec2 warp = (w.rg - 0.5) * (9.0 + reveal_curl * 14.0);
+	float big = texture(noise_tex, (p + warp + drift) / 47.0 + vec2(0.37 * layer, 0.11)).r;
+	float mid = texture(noise_tex, (p - warp * 0.7 + drift * 1.6) / 19.0 + vec2(0.5, 0.23 * layer)).g;
+	float fine = texture(noise_tex, (p + warp * 0.4 + drift * 2.3) / 7.5).b;
+	float delay = texture(noise_tex, p / 33.0).a;
+	vec2 edge_warp = (vec2(mid, big) - 0.5) * (3.2 + layer * 1.6 + reveal_curl * 6.0);
+	float clear = clear_at(p + edge_warp, delay);
+	float fog = 1.0 - clear;
+	float billow = big * 0.62 + mid * 0.28 + fine * 0.10;
+	float body = fog * (0.66 + 0.62 * billow) - layer_threshold;
+	float alpha = smoothstep(0.0, edge_softness, body) * layer_alpha;
+	// Lighting from the noise height field (cheap normal) + bank slope.
+	float hx = texture(noise_tex, (p + vec2(1.2, 0.0) + warp + drift) / 47.0 + vec2(0.37 * layer, 0.11)).r - big;
+	float hz = texture(noise_tex, (p + vec2(0.0, 1.2) + warp + drift) / 47.0 + vec2(0.37 * layer, 0.11)).r - big;
+	vec3 n = normalize(vec3(-hx * 7.0, 1.0, -hz * 7.0));
+	float ndl = clamp(dot(n, normalize(light_dir)) * 0.5 + 0.5, 0.0, 1.0);
+	float height_light = 0.55 + 0.22 * layer + 0.25 * billow;
+	vec3 color = mix(shade_color, lit_color, clamp(ndl * height_light * 1.25, 0.0, 1.0));
+	// Thin edges glow softly from the sun side (backlit wisps).
+	float thin = 1.0 - smoothstep(0.0, edge_softness * 2.5, body);
+	color = mix(color, warm_rim, thin * 0.35 * ndl);
+	color = mix(haze_color, color, 0.35 + 0.65 * smoothstep(0.0, 1.0, layer * 0.5 + billow * 0.5));
+	// Explored but not currently watched: a light veil (haze layer only), never over the town.
+	if (dim_strength > 0.0 && layer < 0.5) {
+		vec4 s = state_bicubic((p - domain.xy) / domain.zw);
+		float sight = 0.0;
+		for (int i = 0; i < 8; i++) {
+			if (i >= sight_count) break;
+			vec4 q = sights[i];
+			sight = max(sight, (1.0 - smoothstep(q.z * 0.75, q.z, distance(p, q.xy))) * q.w);
+		}
+		float veil = dim_strength * clear * (1.0 - s.b) * (1.0 - sight) * (0.75 + 0.5 * billow);
+		alpha = max(alpha, veil);
+		color = mix(color, haze_color, veil);
+	}
+	if (soft_depth) {
+		float depth = texture(depth_tex, SCREEN_UV).r;
+		vec4 view = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, depth, 1.0);
+		view.xyz /= view.w;
+		float gap = (-view.z) - (-VERTEX.z);
+		alpha *= clamp(gap / soft_distance, 0.0, 1.0);
+	}
+	ALBEDO = color;
+	ALPHA = clamp(alpha, 0.0, 1.0);
+}

@@ -97,7 +97,8 @@ def ray_radius(sdf_fn, center_xy, theta, z, rmax=0.65, step=0.004, clearance=0.0
 
 def drape(sdf_fn, center_xy, theta_range, z_top, z_hem, nu=48, nv=40, clearance=0.012, slack=0.10,
           flare=0.0, flare_pow=1.5, folds=None, ragged=0.0, seed=0, region=None, closed=False,
-          fit=None, rmin=0.03, top_r=None, part="cloth", u_scale=None, extra_r=None, z_samples=None):
+          fit=None, rmin=0.03, top_r=None, part="cloth", u_scale=None, extra_r=None, z_samples=None,
+          taper=None):
     """Cloth sheet hanging around a vertical axis.
 
     theta_range: (t0, t1) radians (t0<t1; closed=True for a full tube).
@@ -172,6 +173,13 @@ def drape(sdf_fn, center_xy, theta_range, z_top, z_hem, nu=48, nv=40, clearance=
         Zr[:, i] = zz
     if fit is not None:
         V = fit_outline(V, *fit)
+    if taper is not None:
+        # per-row theta window: resample each row curve at evenly spaced theta in taper(z)
+        for j in range(nv):
+            lo_t, hi_t = taper(float(Zr[j].mean()))
+            tt = np.linspace(lo_t, hi_t, nu)
+            for k in range(3):
+                V[j, :, k] = np.interp(tt, th, V[j, :, k])
     valid = np.ones((nv, nu), bool)
     if region is not None:
         valid = region(np.broadcast_to(th[None, :], (nv, nu)), Zr)

@@ -92,7 +92,14 @@ def rotate(v, axis, deg):
 
 # --------------------------------------------------------------------------- hand layout
 
-def hand_frame(wrist, knuckle, side, thumb_fwd=(0.0, -1.0, 0.0)):
+def palm_thumb(side, medial=0.55):
+    """Default thumb direction of a relaxed hanging hand: forward and toward the midline."""
+    return unit(np.array([-side * medial, -0.83, 0.0]))
+
+
+def hand_frame(wrist, knuckle, side, thumb_fwd=None):
+    if thumb_fwd is None:
+        thumb_fwd = palm_thumb(side)
     """(d, t, n): d = wrist->middle knuckle, t = thumb side, n = palm normal (out of palm)."""
     d = unit(np.asarray(knuckle) - np.asarray(wrist))
     t = np.asarray(thumb_fwd, float)
@@ -102,8 +109,10 @@ def hand_frame(wrist, knuckle, side, thumb_fwd=(0.0, -1.0, 0.0)):
 
 
 def finger_points(wrist, knuckle, side, scale=1.0, curl=(18.0, 22.0, 16.0), spread=4.0,
-                  thumb_curl=12.0, thumb_fwd=(0.0, -1.0, 0.0)):
+                  thumb_curl=12.0, thumb_fwd=None):
     """Joint chains for 5 fingers in the relaxed drawing pose: {name: [p0..p3]} + radii."""
+    if thumb_fwd is None:
+        thumb_fwd = palm_thumb(side)
     d, t, n = hand_frame(wrist, knuckle, side, thumb_fwd)
     w = np.asarray(wrist, float)
     s = scale
@@ -118,7 +127,7 @@ def finger_points(wrist, knuckle, side, scale=1.0, curl=(18.0, 22.0, 16.0), spre
         p = w + (od * d + ot * t) * s
         dirv = rotate(d, n, spr * side)
         pts = [p]
-        axis = unit(np.cross(n, dirv))  # flexion axis: rotates dir toward +n (palm side)
+        axis = unit(np.cross(dirv, n))  # flexion axis: rotates dir toward +n (palm side)
         for k, L in enumerate(segs):
             dirv = rotate(dirv, axis, curl[k])
             p = p + dirv * L * s
@@ -126,12 +135,12 @@ def finger_points(wrist, knuckle, side, scale=1.0, curl=(18.0, 22.0, 16.0), spre
         out[name] = (pts, rad * s)
     # thumb: CMC on the palmar/radial side, pointing toward t and forward
     cmc = w + (0.022 * d + 0.020 * t + 0.010 * n) * s
-    tdir = unit(0.55 * d + 0.78 * t + 0.30 * n)
+    tdir = unit(0.78 * d + 0.50 * t + 0.38 * n)
     pts = [cmc]
     p = cmc
     for k, L in enumerate((0.044, 0.031, 0.026)):
         if k:
-            tdir = rotate(tdir, unit(np.cross(n, tdir)), thumb_curl)
+            tdir = rotate(tdir, unit(np.cross(tdir, n)), thumb_curl)
         p = p + tdir * L * s
         pts.append(p)
     out["thumb"] = (pts, 0.0105 * s)

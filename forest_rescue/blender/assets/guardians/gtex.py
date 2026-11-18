@@ -10,7 +10,7 @@ from frlib import texproj
 
 
 def project_posed(views_posed, tris, uv, size, mirror_x=True, min_w=0.02, k_fill=8,
-                  facing_power=2.5, bind_verts=None, bind_normals=None):
+                  facing_power=2.5, bind_verts=None, bind_normals=None, filt=None):
     """views_posed: list of (view, verts_posed (N,3), normals_posed (N,3)) for the same mesh.
 
     Returns colour (H,W,3), weight (H,W), Texels in bind pose (positions for fill/mirroring).
@@ -23,6 +23,8 @@ def project_posed(views_posed, tris, uv, size, mirror_x=True, min_w=0.02, k_fill
         zb = texproj.zbuffer(vp, tris, view)
         col, w = texproj.project(T, [view], {view.name: zb}, power=facing_power, depth_eps=0.035,
                                  min_facing=0.12, mask_erode=2)
+        if filt is not None:
+            w = w * filt(view.name, T_bind)
         if acc is None:
             acc = col * w[..., None]
             wsum = w.copy()

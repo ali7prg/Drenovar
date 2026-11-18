@@ -50,6 +50,7 @@ var road_profiles: Array = []            # per route: PackedFloat32Array final r
 var road_on_deck: Array = []             # per route: PackedByteArray
 var grid_ready := false
 var stats := {}
+var extra_pads: Array = []               # [[Vector2 centre, radius, height]] landmark/camp pads
 
 
 func _init(forest_atlas: RefCounted = null) -> void:
@@ -164,7 +165,7 @@ func _prepare_profiles() -> void:
 		for i in n:
 			profile[i] = points[i].y
 			along[i] = 0.0 if i == 0 else along[i - 1] + Vector2(points[i].x - points[i - 1].x, points[i].z - points[i - 1].z).length()
-			var on := route.bridge and absf(points[i].z - atlas.BRIDGE_CENTER.z) < 0.6 \
+			var on: bool = route.bridge and absf(points[i].z - atlas.BRIDGE_CENTER.z) < 0.6 \
 				and points[i].x >= deck.position.x - 0.05 and points[i].x <= deck.end.x + 0.05
 			on_deck[i] = 1 if on else 0
 			if on:
@@ -243,6 +244,12 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 			h = lerpf(h, site.center.y, 1.0 - smoothstep(r, r + site.blend, d))
 		if d < r + 1.0:
 			dirt = maxf(dirt, 0.55 * (1.0 - smoothstep(2.5, r + 0.5, d)))
+	for pad in extra_pads:
+		var pd: float = Vector2(x, z).distance_to(pad[0])
+		var pr: float = pad[1]
+		if pd < pr + 3.0:
+			h = lerpf(h, pad[2], 1.0 - smoothstep(pr * 0.75, pr + 3.0, pd))
+			dirt = maxf(dirt, 0.35 * (1.0 - smoothstep(pr * 0.5, pr + 1.0, pd)))
 	var ad := Vector2(x - atlas.arena_center.x, z - atlas.arena_center.z).length()
 	if ad < ARENA_BLEND_OUTER:
 		var floor_y: float = atlas.arena_center.y - ARENA_DISH * (1.0 - pow(minf(ad, 15.0) / 15.0, 2.0))

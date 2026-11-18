@@ -328,8 +328,19 @@ def curve_on_body(fn, center_xy, thetas, zs, clearance=0.004, smooth=1):
     if smooth:
         r = ndi.gaussian_filter1d(r, smooth, mode="nearest")
     P = np.stack([center_xy[0] + r * np.sin(th), center_xy[1] - r * np.cos(th), zz], -1)
-    N = np.stack([np.sin(th), -np.cos(th), np.zeros_like(th)], -1)
+    N = sdf_normals(fn, P)
     return P, N
+
+
+def sdf_normals(fn, P, h=0.004):
+    P = np.asarray(P, float)
+    g = np.zeros_like(P)
+    for k in range(3):
+        d = np.zeros(3)
+        d[k] = h
+        g[:, k] = fn(P + d) - fn(P - d)
+    n = np.linalg.norm(g, axis=1, keepdims=True)
+    return g / np.maximum(n, 1e-9)
 
 
 def hair_region(lm, front=0.064, temple_drop=0.30, side=0.018, back=-0.070, side_y=(0.03, 0.13), noise=0.0,

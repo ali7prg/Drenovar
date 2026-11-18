@@ -56,6 +56,7 @@ var progress_value := 0
 var progress_total := 3
 var sparkle_rect := Rect2()
 var compact := false
+var last_nav_edge := -1.0
 
 func setup(owner_game: Node) -> void:
 	game = owner_game
@@ -91,7 +92,7 @@ func build_bar() -> void:
 	task_card = PanelContainer.new()
 	task_card.name = "TaskCard"
 	task_card.add_theme_stylebox_override("panel", Style.parchment())
-	task_card.custom_minimum_size = Vector2(262, 78)
+	task_card.custom_minimum_size = Vector2(214, 78)
 	task_card.mouse_filter = Control.MOUSE_FILTER_STOP
 	task_card.gui_input.connect(_on_card_input.bind("journal"))
 	bar.add_child(task_card)
@@ -99,7 +100,7 @@ func build_bar() -> void:
 	row.add_theme_constant_override("separation", 10)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	task_card.add_child(row)
-	task_icon = Art.new("banner", Vector2(50, 60))
+	task_icon = Art.new("banner", Vector2(40, 56))
 	row.add_child(task_icon)
 	var column := VBoxContainer.new()
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -107,7 +108,7 @@ func build_bar() -> void:
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(column)
-	task_title = Style.label("", 19, Style.PARCHMENT_INK, true)
+	task_title = Style.label("", 17, Style.PARCHMENT_INK, true)
 	task_title.name = "TaskTitle"
 	task_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	task_title.max_lines_visible = 2
@@ -140,11 +141,12 @@ func build_bar() -> void:
 	reward_strip.gui_input.connect(_on_card_input.bind("rewards"))
 	bar.add_child(reward_strip)
 	var strip := HBoxContainer.new()
-	strip.add_theme_constant_override("separation", 7)
+	strip.add_theme_constant_override("separation", 6)
+	strip.alignment = BoxContainer.ALIGNMENT_CENTER
 	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	reward_strip.add_child(strip)
-	strip.add_child(Art.new("chest", Vector2(46, 46)))
-	reward_caption = Style.label(text("hud.rewardFor"), 15, Style.IVORY, true)
+	strip.add_child(Art.new("chest", Vector2(36, 40)))
+	reward_caption = Style.label(text("hud.rewardFor"), 14, Style.IVORY, true)
 	reward_caption.name = "RewardCaption"
 	reward_caption.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	strip.add_child(reward_caption)
@@ -166,12 +168,12 @@ func build_bar() -> void:
 		strip.add_child(cell)
 		var icon := TextureRect.new()
 		icon.texture = game.main.resource_icons.get(key)
-		icon.custom_minimum_size = Vector2(34, 32)
+		icon.custom_minimum_size = Vector2(30, 28)
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		cell.add_child(icon)
-		var amount := Style.label("", 16, Style.IVORY, false, 3)
+		var amount := Style.label("", 14, Style.IVORY, false, 3)
 		amount.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		cell.add_child(amount)
 		reward_amounts[key] = amount
@@ -585,18 +587,24 @@ func layout() -> void:
 	if bar == null:
 		return
 	var view := get_viewport_rect().size
-	var available := nav_left_edge() - 12.0 - 52.0
-	var wide_width := 262.0 + 10.0 + 470.0 + 10.0 + 88.0 * 2 + 118.0 + 20.0
-	compact = available < wide_width
+	var right_edge := nav_left_edge() - 12.0
+	var available := right_edge - 52.0
+	# One row like art/07: task card, reward strip (fills the rest), three buttons; the existing
+	# DRENOVAR navigation keeps the bottom-right corner, so the row ends where it begins.
+	var buttons_width := 80.0 + 80.0 + 104.0 + 12.0
+	var strip_min := 34.0 + 6.0 + 48.0 * 5.0 + 4.0 * 13.0 + 20.0
+	compact = available < 214.0 + 12.0 + strip_min + 82.0 + buttons_width
 	reward_caption.visible = not compact and not reward_caption.text.is_empty()
+	task_card.custom_minimum_size.x = 214.0
 	for key in reward_cells:
-		reward_cells[key].custom_minimum_size.x = 52.0 if compact else 64.0
+		reward_cells[key].custom_minimum_size.x = 48.0
+	route_button.custom_minimum_size.x = 80.0
+	squad_button.custom_minimum_size.x = 80.0
+	continue_button.custom_minimum_size.x = 104.0
+	reward_strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	reward_strip.visible = available >= 214.0 + 12.0 + strip_min + buttons_width
 	bar.position = Vector2(52, view.y - 84 - 8)
-	bar.size = Vector2(minf(available, wide_width), 84)
-	if compact and available < 760.0:
-		reward_strip.visible = false
-	elif bar.visible:
-		reward_strip.visible = true
+	bar.size = Vector2(maxf(available, 300.0), 84)
 	layout_hint()
 	if locked_card.visible:
 		locked_card.reset_size()
@@ -608,6 +616,7 @@ func layout() -> void:
 		battle_header.reset_size()
 		var size_now := battle_header.get_combined_minimum_size()
 		battle_header.position = Vector2((view.x - size_now.x) * 0.5, 64)
+	last_nav_edge = right_edge
 
 func layout_hint() -> void:
 	if hint == null:
@@ -620,6 +629,8 @@ func layout_hint() -> void:
 
 func tick(_delta: float) -> void:
 	var now := Time.get_ticks_msec()
+	if bar.visible and absf(nav_left_edge() - 12.0 - last_nav_edge) > 0.5:
+		layout()
 	for pill in toasts.get_children():
 		var until := float(pill.get_meta("until", 0))
 		if now > until:

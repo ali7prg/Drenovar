@@ -92,3 +92,14 @@ def save_panels_preview(panels, out_png):
     from frlib import render
     render.side_by_side([np.dstack([p.view.image * (0.4 + 0.6 * p.mask[..., None])]) for p in panels],
                         [p.name for p in panels], out_png, height=380)
+
+
+def morph_view(view, px):
+    """Copy of a refs.View with the mask dilated (px>0) or eroded (px<0)."""
+    import copy
+    v = copy.copy(view)
+    if px > 0:
+        v.mask = ndi.binary_dilation(view.mask, iterations=int(px))
+    elif px < 0:
+        v.mask = ndi.binary_erosion(view.mask, iterations=int(-px))
+    return v

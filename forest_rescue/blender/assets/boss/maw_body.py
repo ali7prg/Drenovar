@@ -329,7 +329,7 @@ def head_widths(y):
     """Upper-jaw (W_u) and mandible (W_l) half widths at the lip line, per Y."""
     y = np.asarray(y, float)
     wu = np.interp(y, [-4.52, -4.47, -4.38, -4.20, -3.95, -3.70, -3.50, -3.30, -3.10],
-                   [0.12, 0.21, 0.26, 0.29, 0.32, 0.36, 0.40, 0.42, 0.40])
+                   [0.13, 0.23, 0.29, 0.33, 0.36, 0.40, 0.43, 0.44, 0.41])
     wl = np.maximum(wu - np.interp(y, [-4.5, -4.3, -3.5, -3.3], [0.035, 0.045, 0.05, 0.03]), 0.06)
     return wu, wl
 
@@ -450,8 +450,8 @@ def mouth_cavity():
         # inner width shrinks toward the back/front
         win = np.interp(y, [-4.6, -4.45, -4.2, -3.8, -3.45, -3.30], [0.05, 0.12, 0.19, 0.25, 0.25, 0.10])
         s = np.clip(np.abs(x) / np.maximum(win, 1e-3), 0, 1)
-        dome = 0.11 * (1 - s ** 2) * np.interp(y, [-4.6, -4.3, -3.6, -3.35], [0.2, 0.8, 1.0, 0.5])
-        trough = 0.07 * (1 - s ** 2) * np.interp(y, [-4.6, -4.3, -3.6, -3.35], [0.2, 0.8, 1.0, 0.6])
+        dome = 0.11 * (1 - s ** 2) * np.interp(y, [-4.6, -4.4, -4.2, -3.6, -3.35], [0.0, 0.0, 0.7, 1.0, 0.5])
+        trough = 0.07 * (1 - s ** 2) * np.interp(y, [-4.6, -4.4, -4.2, -3.6, -3.35], [0.0, 0.1, 0.7, 1.0, 0.6])
         upper = zmid + half_gap + dome
         lower = zmid - half_gap - trough
         dz = np.maximum(z - upper, lower - z)          # <0 inside the vertical band
@@ -471,12 +471,19 @@ def brow_knobs():
     for sx in (1, -1):
         for i, t in enumerate(np.linspace(0, 1, 5)):
             p = np.array([sx * (0.25 + 0.03 * t), -3.88 + 0.40 * t, 3.36 + 0.11 * t])
-            h = 0.035 + 0.02 * math.sin(math.pi * t) + 0.01 * rng.random()
+            h = 0.045 + 0.025 * math.sin(math.pi * t) + 0.012 * rng.random()
             out.append(oriented_ellipsoid(p + [sx * 0.015, 0, 0.03], [0, 0.3, 1], h, 0.035, 0.03, k=0.03,
                                           name="brow_knob", bone="head"))
         # horn-like tip at the rear-top of the ridge (front view)
         out.append(oriented_ellipsoid([sx * 0.30, -3.52, 3.47], [sx * 0.5, 0.3, 1], 0.07, 0.038, 0.038, k=0.04,
                                       name="brow_horn", bone="head"))
+    # skull-roof rows of large knobby osteoderms (close-up: big knobs behind the brow toward the neck)
+    for sx in (1, -1):
+        for j, y in enumerate(np.linspace(-3.55, -3.05, 5)):
+            z = np.interp(y, [-3.6, -3.3, -3.0], [3.53, 3.57, 3.52])
+            sz = 0.055 + 0.012 * rng.random()
+            out.append(oriented_ellipsoid([sx * (0.17 + 0.03 * j / 4), y, z], [0, 1, 0.2], sz * 1.3, sz, sz * 0.9,
+                                          k=0.03, name="roof_knob", bone="head"))
     for i, y in enumerate(np.linspace(-4.30, -3.30, 9)):
         z = np.interp(y, [-4.4, -4.0, -3.6, -3.3], [3.16, 3.30, 3.48, 3.56])
         out.append(sdf.sphere([0, y, z + 0.005], 0.028 + 0.006 * (i % 2), k=0.025, name="snout_crest",
@@ -550,7 +557,7 @@ def osteoderms():
             xs = [abs(loft_surface(prof, yy, ph, sx)[0][0]) for ph in phis]
             ph = phis[int(np.argmin(np.abs(np.array(xs) - min(off, 0.8 * w))))]
             P, n = loft_surface(prof, yy, ph, sx)
-            size = np.interp(y, [-3.0, -1.5, 0.5, 1.6], [0.055, 0.075, 0.07, 0.06]) * (0.85 + 0.3 * rng.random())
+            size = np.interp(y, [-3.0, -1.5, 0.5, 1.6], [0.07, 0.085, 0.08, 0.065]) * (0.85 + 0.3 * rng.random())
             out.append(oriented_ellipsoid(P + n * size * 0.15, [0, 1, 0.05], size * 1.5,
                                           size * 0.9, size * 0.85, up=n, k=0.03, name="osteoderm"))
         y += spacing

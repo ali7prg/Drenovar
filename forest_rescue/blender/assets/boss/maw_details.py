@@ -146,7 +146,7 @@ def claws():
                                bend_dir=[0, -0.3, -1], bend=0.35, sides=7, rings=4, flat=0.72, region="claws",
                                bone=f"dewclaw_{side}", embed=0.04))
         ap = B.arm_points(side)
-        for f, (L, r0) in {"finger1": (0.18, 0.042), "finger2": (0.20, 0.046)}.items():
+        for f, (L, r0) in {"finger1": (0.22, 0.045), "finger2": (0.24, 0.05)}.items():
             b0, b1 = ap[f"{f}b_{side}"]
             dvec = (b1 - b0) / np.linalg.norm(b1 - b0)
             out.append(curved_cone(b1 - (b1 - b0) * 0.25, dvec + np.array([0, -0.25, 0]), L, r0,

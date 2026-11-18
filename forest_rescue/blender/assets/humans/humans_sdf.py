@@ -366,7 +366,7 @@ def hand_parts(J, S_, side, fingers, scale, female=False, cls="skin", k=0.006):
 # --------------------------------------------------------------------------- boots / feet
 
 def boot_parts(J, S_, side, L, top_z, cls="leather", shaft_r=(0.058, 0.050), toe_r=0.042, sole=0.024,
-               bone_foot=None, k=0.012, shaft_flare=1.0, width=1.0, cuff=0.0, round_toe=1.0):
+               bone_foot=None, k=0.012, shaft_flare=1.0, width=1.0, cuff=0.0, round_toe=1.0, height=1.0):
     """Leather boot: rounded toe box + heel + sole + shaft up to top_z around the shin."""
     s = L["crown"] / 1.75
     an = J[f"{S_}Foot"]
@@ -380,23 +380,15 @@ def boot_parts(J, S_, side, L, top_z, cls="leather", shaft_r=(0.058, 0.050), toe
     back = heel + np.array([0, 0, 0.0])
     a = np.array([back[0], back[1], 0.0]) - fwd * 0.012 * s
     b = np.array([tip[0], tip[1], 0.0]) + fwd * 0.018 * s
-    st = [dict(t=0.0, w=0.036 * s * width, d=(0.050 * s, 0.050 * s), n=2.2, o=(0.0, 0.0)),
-          dict(t=0.18, w=0.042 * s * width, d=0.070 * s, n=2.4, o=(0.0, 0.0)),
-          dict(t=0.45, w=0.046 * s * width, d=0.060 * s, n=2.6, o=(0.0, 0.0)),
-          dict(t=0.72, w=0.050 * s * width, d=0.044 * s, n=2.6, o=(0.0, 0.0)),
-          dict(t=0.92, w=0.044 * s * width, d=0.034 * s * round_toe, n=2.2, o=(0.0, 0.0)),
-          dict(t=1.0, w=0.030 * s * width, d=0.024 * s * round_toe, n=2.0, o=(0.0, 0.0))]
+    hh = height
+    st = [dict(t=0.0, w=0.036 * s * width, d=0.052 * s * hh, n=2.2),
+          dict(t=0.18, w=0.042 * s * width, d=0.074 * s * hh, n=2.4),
+          dict(t=0.45, w=0.046 * s * width, d=0.064 * s * hh, n=2.6),
+          dict(t=0.72, w=0.050 * s * width, d=0.048 * s * hh, n=2.6),
+          dict(t=0.92, w=0.044 * s * width, d=0.037 * s * round_toe * hh, n=2.2),
+          dict(t=1.0, w=0.030 * s * width, d=0.026 * s * round_toe * hh, n=2.0)]
     # depth axis = up (so 'd' is height), section centre raised so the sole sits on z=0
     foot = loft(a, b, st, depth_axis=(0, 0, 1.0), cls=cls, bone=bone_foot or f"{S_}Foot", k=0.0, name=f"boot_{S_}")
-    zlift = 0.0
-
-    def raised(P, f=foot.fn):
-        Q = P.copy()
-        Q[..., 2] = Q[..., 2] - zlift
-        return f(Q)
-    # cut everything below the ground (sole plane) but keep a rim
-    base = foot
-
     def boot_fn(Pp, f=foot.fn):
         return np.maximum(f(Pp), -Pp[..., 2] - 0.0)
     P.append(tag(Prim(boot_fn, foot.lo, foot.hi, bone=f"{S_}Foot", name=f"boot_{S_}", k=k), cls=cls))

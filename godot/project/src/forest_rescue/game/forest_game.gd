@@ -223,28 +223,51 @@ func inside_base(p: Vector3) -> bool:
 		return value
 	return maxf(absf(p.x), absf(p.z)) <= BASE_HALF
 
-## World position of a CONTRACT targetId (POI, sub-targets, horse origin, home reception).
+## Server-side XZ of a targetId from the projection (POIs, POI targets, landmarks), or INF.
+func server_xz(target_id: String) -> Vector3:
+	var adv := client.adv
+	for poi in adv.get("pois", []):
+		if String(poi.get("id", "")) == target_id:
+			return Vector3(float(poi.get("x", 0)), float(poi.get("y", 0)), float(poi.get("z", 0)))
+		var targets: Dictionary = poi.get("targets", {})
+		for key in targets:
+			var entry: Variant = targets[key]
+			if entry is Dictionary and String(entry.get("id", "")) == target_id:
+				return Vector3(float(entry.get("x", 0)), float(entry.get("y", 0)), float(entry.get("z", 0)))
+			if entry is Array:
+				for item in entry:
+					if item is Dictionary and String(item.get("id", "")) == target_id:
+						return Vector3(float(item.get("x", 0)), float(item.get("y", 0)), float(item.get("z", 0)))
+	return Vector3.INF
+
+## World position of a CONTRACT targetId: server XZ first, world layer next, authored fallback.
 func target_position(target_id: String) -> Vector3:
+	if target_id.is_empty():
+		return Vector3.INF
+	var xz := server_xz(target_id)
+	if xz != Vector3.INF:
+		return ground(xz.x, xz.z)
 	var value: Variant = world_call("poi_position", [target_id])
-	if value is Vector3 and value != Vector3.ZERO:
+	if value is Vector3 and value != Vector3.ZERO and value != Vector3.INF:
 		return value
 	var base_id := target_id.get_slice(":", 0)
 	if target_id.contains(":"):
 		var anchor := site_anchor(base_id)
 		var part := target_id.get_slice(":", 1)
+		if part == "landmark":
+			var marks: Dictionary = anchor.get("landmarks", {})
+			if marks.get(target_id.get_slice(":", 2)) is Vector3:
+				return marks[target_id.get_slice(":", 2)]
 		if anchor.get(part) is Vector3:
 			return anchor[part]
 	if base_id.begins_with("lf_key_"):
 		var site_id := "lf_site_" + base_id.trim_prefix("lf_key_")
-		return site_anchor(site_id).get("artifact", Vector3.ZERO)
-	var poi := client.poi(base_id)
-	if not poi.is_empty():
-		return Vector3(float(poi.get("x", 0)), float(poi.get("y", 0)), float(poi.get("z", 0)))
+		return site_anchor(site_id).get("artifact", Vector3.INF)
 	var known := {HORSE_TARGET:Vector2(-8, -55), HOME_TARGET:Vector2(-8, -52), "lf_bridge_crossing":Vector2(90.5, 20),
 		BOSS_TARGET:Vector2(75, -86)}
 	if known.has(base_id):
-		var xz: Vector2 = known[base_id]
-		return ground(xz.x, xz.y)
+		var flat: Vector2 = known[base_id]
+		return ground(flat.x, flat.y)
 	var site := content.site(base_id)
 	if not site.is_empty():
 		var center: Array = site.get("layoutCenterXZReference", [0, 0])
@@ -253,14 +276,17 @@ func target_position(target_id: String) -> Vector3:
 
 ## Site anchors from the world layer; authored atlas offsets as a fallback.
 func site_anchor(site_id: String) -> Dictionary:
-	if anchors_cache.has(site_id):
-		return anchors_cache[site_id]
+	var poi := client.poi(site_id)
+	var targets: Dictionary = poi.get("targets", {})
+	var cache_key := site_id + ":" + str(targets.size()) + ":" + str((targets.get("landmarks", []) as Array).size() if targets.get("landmarks") is Array else 0)
+	if anchors_cache.has(cache_key):
+		return anchors_cache[cache_key]
 	var value: Variant = world_call("site_anchor", [site_id])
-	var anchor: Dictionary = value if value is Dictionary and not value.is_empty() else {}
+	var anchor: Dictionary = (value as Dictionary).duplicate() if value is Dictionary and not value.is_empty() else {}
 	if anchor.is_empty():
 		var site := content.site(site_id)
 		var center_xz: Array = site.get("layoutCenterXZReference", [0, 0])
-		var poi := client.poi(site_id)
+		pass
 		var cx := float(poi.get("x", center_xz[0]))
 		var cz := float(poi.get("z", center_xz[1]))
 		var side := -1.0 if int(site.get("number", 1)) % 2 == 1 else 1.0
@@ -273,7 +299,20 @@ func site_anchor(site_id: String) -> Dictionary:
 			var angle := -2.2 + 1.1 * i
 			marks[String(solution[i])] = ground(cx + cos(angle) * 5.2, cz + sin(angle) * 5.2)
 		anchor.landmarks = marks
-	anchors_cache[site_id] = anchor
+	# Authoritative server node positions win over authored offsets (same XZ the squad walks to).
+	for part in ["center", "cage", "guardian", "plate_left", "plate_right"]:
+		if targets.get(part) is Dictionary:
+			anchor[part] = ground(float(targets[part].get("x", 0)), float(targets[part].get("z", 0)))
+	if targets.get("key") is Dictionary:
+		anchor["artifact"] = ground(float(targets.key.get("x", 0)), float(targets.key.get("z", 0)))
+	if targets.get("landmarks") is Array:
+		var marks_now := {}
+		for mark in targets.landmarks:
+			marks_now[String(mark.get("symbol", ""))] = ground(float(mark.get("x", 0)), float(mark.get("z", 0)))
+		anchor["landmarks"] = marks_now
+	if not anchor.has("approach") and anchor.get("center") is Vector3 and anchor.get("guardian") is Vector3:
+		anchor["approach"] = anchor.center + (anchor.guardian - anchor.center).normalized() * 7.5
+	anchors_cache[cache_key] = anchor
 	return anchor
 
 func pin(id: String, center: Vector3, radius: float) -> void:
@@ -443,8 +482,11 @@ func guide() -> Dictionary:
 	var current_phase := client.phase()
 	var fight := client.battle()
 	var next: Variant = adv.get("nextTask")
-	var next_site := String(next.get("siteId", "")) if next is Dictionary else ""
-	var next_task := String(next.get("taskId", "")) if next is Dictionary else ""
+	var next_site := ""
+	var next_task := ""
+	if next is Dictionary:
+		next_site = String(next.siteId) if next.get("siteId") != null else ""
+		next_task = String(next.taskId) if next.get("taskId") != null else ""
 	if next_site != "":
 		result.reward = content.task_reward(next_site, "escort_home")
 		result.title = String(content.task(next_site, next_task).get("title", site_name(next_site)))
@@ -534,14 +576,20 @@ func rescue_step(result: Dictionary, site_id: String, task_id: String, node: Str
 			return finish_with(result, "button.inspect", "attempt_task", {"siteId":site_id, "taskId":"discover"}, String(content.task(site_id, "discover").get("objective", "")))
 		"recover_artifact":
 			var mechanism: Dictionary = poi.get("mechanism", {})
+			var key_entry: Variant = poi.get("targets", {}).get("key")
+			if key_entry is Dictionary:
+				key_target = String(key_entry.get("id", key_target))
 			result.target = key_target
 			result.progress = Vector2i(int(mechanism.get("progress", 0)), int(mechanism.get("length", 3)))
 			var clue := String(site.get("artifact", {}).get("puzzle", {}).get("clue", content.text("artifact.missing")))
 			if bool(mechanism.get("solved", false)):
 				result.progress.x = result.progress.y
+				if node != key_target:
+					return finish_with(result, "button.recover", "move", {"targetId":key_target}, content.text("artifact.bound"))
 				return finish_with(result, "button.recover", "attempt_task", {"siteId":site_id, "taskId":"recover_artifact"}, content.text("artifact.bound"))
-			if node != key_target and node != site_id:
-				return finish_with(result, "button.recover", "move", {"targetId":key_target}, content.text("artifact.missing"))
+			if not node.begins_with(site_id) and node != key_target:
+				result.target = site_id
+				return finish_with(result, "button.recover", "move", {"targetId":site_id}, content.text("artifact.missing"))
 			result = finish_with(result, "button.recover", "", {}, clue)
 			result.panel = "mechanism"
 			return result

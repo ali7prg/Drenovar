@@ -9,8 +9,8 @@
         "lf_env_bramble_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 812,
-        "LOD1": 260,
+        "LOD0": 1128,
+        "LOD1": 268,
         "LOD2": 54
       },
       "materials": {
@@ -31,7 +31,7 @@
         ]
       },
       "height_m": 2.06,
-      "crown_radius_m": 1.51,
+      "crown_radius_m": 1.52,
       "bounds_m_blender": [
         [
           -1.51,
@@ -40,7 +40,7 @@
         ],
         [
           1.48,
-          1.39,
+          1.52,
           2.06
         ]
       ],
@@ -69,8 +69,8 @@
         "lf_env_bramble_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 820,
-        "LOD1": 234,
+        "LOD0": 1168,
+        "LOD1": 274,
         "LOD2": 68
       },
       "materials": {
@@ -91,7 +91,7 @@
         ]
       },
       "height_m": 2.06,
-      "crown_radius_m": 1.53,
+      "crown_radius_m": 1.52,
       "bounds_m_blender": [
         [
           -1.51,
@@ -100,7 +100,7 @@
         ],
         [
           1.51,
-          1.53,
+          1.52,
           2.06
         ]
       ],
@@ -130,8 +130,8 @@
         "lf_env_bramble_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 866,
-        "LOD1": 268,
+        "LOD0": 950,
+        "LOD1": 276,
         "LOD2": 80
       },
       "materials": {
@@ -161,7 +161,7 @@
         ],
         [
           1.19,
-          1.18,
+          1.08,
           2.27
         ]
       ],
@@ -189,8 +189,8 @@
     }
   },
   "tris": {
-    "LOD0": 866,
-    "LOD1": 268,
+    "LOD0": 1168,
+    "LOD1": 276,
     "LOD2": 80
   },
   "bones": 0,

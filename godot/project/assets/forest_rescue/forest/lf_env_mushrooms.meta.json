@@ -1,5 +1,6 @@
 {
   "id": "lf_env_mushrooms",
+  "generation": "v2: painted tiles from art/02 (grass bases / bracket fungi) and painted golden-oak limbs",
   "variants": {
     "v1": {
       "nodes": [
@@ -8,52 +9,43 @@
         "lf_env_mushrooms_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 224,
-        "LOD1": 96,
-        "LOD2": 32
+        "LOD0": 360,
+        "LOD1": 172,
+        "LOD2": 99
       },
+      "materials": {
+        "LOD0": [
+          "lf_foliage",
+          "lf_foliage"
+        ],
+        "LOD1": [
+          "lf_foliage",
+          "lf_foliage"
+        ],
+        "LOD2": [
+          "lf_foliage",
+          "lf_foliage"
+        ]
+      },
+      "height_m": 0.21,
+      "footprint_radius_m": 0.24,
+      "bounds_m_blender": [
+        [
+          -0.24,
+          -0.2,
+          -0.01
+        ],
+        [
+          0.1,
+          0.23,
+          0.21
+        ]
+      ],
       "display_offset_gltf": [
         0.0,
         0.0,
         0.0
-      ],
-      "materials": {
-        "LOD0": [
-          "lf_foliage"
-        ],
-        "LOD1": [
-          "lf_foliage"
-        ],
-        "LOD2": [
-          "lf_foliage"
-        ]
-      },
-      "height_m": 0.22,
-      "footprint_radius_m": 0.44,
-      "bounds_m_blender": [
-        [
-          -0.44,
-          -0.15,
-          0.0
-        ],
-        [
-          0.32,
-          0.37,
-          0.22
-        ]
-      ],
-      "wind": false,
-      "info": {
-        "LOD0": {
-          "tris": 224
-        },
-        "LOD1": {
-          "tris": 96
-        },
-        "LOD2": {
-          "tris": 32
-        }
-      }
+      ]
     },
     "v2": {
       "nodes": [
@@ -62,58 +54,49 @@
         "lf_env_mushrooms_v2_LOD2"
       ],
       "tris": {
-        "LOD0": 160,
-        "LOD1": 72,
-        "LOD2": 16
+        "LOD0": 600,
+        "LOD1": 301,
+        "LOD2": 165
       },
-      "display_offset_gltf": [
-        1.757,
-        0.0,
-        0.0
-      ],
       "materials": {
         "LOD0": [
+          "lf_foliage",
           "lf_foliage"
         ],
         "LOD1": [
+          "lf_foliage",
           "lf_foliage"
         ],
         "LOD2": [
+          "lf_foliage",
           "lf_foliage"
         ]
       },
-      "height_m": 0.38,
-      "footprint_radius_m": 0.5,
+      "height_m": 0.15,
+      "footprint_radius_m": 0.33,
       "bounds_m_blender": [
         [
-          -0.26,
-          -0.19,
-          0.0
+          -0.33,
+          -0.25,
+          -0.01
         ],
         [
-          0.43,
-          0.5,
-          0.38
+          0.26,
+          0.3,
+          0.15
         ]
       ],
-      "wind": false,
-      "info": {
-        "LOD0": {
-          "tris": 160
-        },
-        "LOD1": {
-          "tris": 72
-        },
-        "LOD2": {
-          "tris": 16
-        }
-      }
+      "display_offset_gltf": [
+        2.584,
+        0.0,
+        0.0
+      ]
     }
   },
   "tris": {
-    "LOD0": 224,
-    "LOD1": 96,
-    "LOD2": 32
+    "LOD0": 600,
+    "LOD1": 301,
+    "LOD2": 165
   },
   "bones": 0,
   "materials": [
@@ -122,8 +105,18 @@
   "glb_images": [
     "lf_foliage_atlas.png"
   ],
-  "texture_mode": "external shared files next to the GLB (relative URIs)",
-  "wind": "static (no COLOR_0)",
-  "layout_note": "Variants along +X (display_offset_gltf); LOD0/1/2 of a variant share its origin (show one per distance). Mesh origin = ground contact centre.",
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/forest/build_groundcover.py mushrooms"
+  "textures": {
+    "lf_foliage_atlas.png": 2048
+  },
+  "paintedLightMix": 0.35,
+  "paintedLightNote": "Texture = the painting (front/back), painted swatches on sides/tops. Shade as albedo * mix(1, lambert, paintedLightMix).",
+  "wind": {
+    "attribute": "COLOR_0",
+    "R": "0 (static); plant cards 0.1-0.6",
+    "G": "plant flutter",
+    "B": "phase",
+    "A": "AO"
+  },
+  "layout_note": "Variants laid out along +X (display_offset_gltf); the LODs of a variant share its origin.",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/paint3d/build_groundcover.py"
 }

@@ -54,8 +54,8 @@ def main():
     Hu = np.degrees(np.arctan2(Lab[..., 2], Lab[..., 1])) % 360
     xx = np.arange(W)[None, :]
     # fern: bright yellow-green fronds right of the split; reeds: everything else (blades + cattails)
-    fern = fg & (xx >= SPLIT_X - 30) & (Hu > 84) & (Lab[..., 0] > 40)
-    fern = ndi.binary_closing(fern, iterations=2) & fg
+    fern = fg & (xx >= SPLIT_X - 30) & (Hu > 78) & (Lab[..., 0] > 30)
+    fern = ndi.binary_closing(fern, iterations=3) & fg
     fern &= (xx >= SPLIT_X - 30)
     lab_, n = ndi.label(fern)
     if n:
@@ -79,7 +79,7 @@ def main():
     P.tiles, P.rects, P.info = [], [], []
     for i in range(1, P.n + 1):
         m = P.lbl == i
-        tile, rect = seg.make_tile(img, fg, m, margin=2, scale=2, bg=bg)
+        tile, rect = seg.make_tile(img, fg, m, margin=4 if i <= n_reed else 3, scale=2 if i > n_reed else 1, bg=bg)
         ys, xs = np.nonzero(m)
         P.tiles.append(tile)
         P.rects.append(rect)
@@ -119,20 +119,26 @@ def main():
             md.add(V, T, UV, wind(V, phase=(i * 0.137) % 1), geom.nrm(N + np.array([0, 0, 0.3])), 1)
         return md
 
-    def reed_clump(ids, angles, center_px, md=None, scale=1.0, seed=0):
-        """Painted strips in crossed vertical planes through the clump axis (each strip keeps its painted x offset)."""
+    def reed_clump(ids, angles, center_px, md=None, scale=1.0, seed=0, radius=0.7):
+        """Vertical painted strip cards scattered in a tuft: each strip keeps its painted height/bottom, gets a
+        random yaw and a random position inside the clump radius (len(angles) copies of the strip set)."""
         rng = np.random.default_rng(seed)
         md = md or geom.Mesh()
         c_w = geom.world_at_y(view, np.array([center_px]), np.array([float(GROUND)]), np.array([0.0]))[0]
         c_w[2] = 0.0
         for ang in angles:
-            R = geom.rot_z(math.radians(ang))
             for i in ids:
-                rect = P.rects[i]
-                cu, cv_ = P.info[i]["c"]
-                V, T, UV, _, N = geom.front_card(view, rect, (cu, cv_), 0.0, -view.d, P.uv[i], np.zeros(4))
-                V = ((V - c_w) * scale) @ R.T + c_w + rng.normal(0, 0.05, 3) * np.array([1, 1, 0])
-                N = N @ R.T
+                inf = P.info[i]
+                w = inf["w_m"] * scale
+                h = inf["h_m"] * scale
+                bottom_z = (GROUND - P.rects[i][3]) / PPM * scale
+                rho = radius * scale * math.sqrt(rng.random())
+                phi = rng.uniform(0, 2 * math.pi)
+                pos = c_w + np.array([rho * math.cos(phi), rho * math.sin(phi), max(bottom_z, -0.05)])
+                yaw = math.radians(ang) + rng.normal(0, 0.6)
+                n = np.array([math.sin(yaw), -math.cos(yaw), 0.0])
+                V, T, UV, _, N = geom.free_card(pos, n, np.array([0, 0, 1.0]), w, h, P.uv[i], np.zeros(4),
+                                                flip=bool(rng.random() < 0.5), pivot_v=0.0)
                 md.add(V, T, UV, wind(V, phase=rng.random()), geom.nrm(N + np.array([0, 0, 0.3])), 1)
         return md
 
@@ -167,13 +173,16 @@ def main():
     variants = {}
     # mixed_v1 = art/02: front strips/fronds + crossed reed planes + fern rosette behind
     mixed = front(reed_ids + fern_ids)
-    reed_clump(reed_ids, (60, 120), rcx, md=mixed, scale=0.92, seed=1)
+    # behind the painted front: tuft of scattered strips pushed back so the front layer stays exact
+    back = reed_clump(reed_ids, (60, 120), rcx, scale=0.92, seed=1, radius=0.55)
+    Vb, Tb, UVb, Cb, Nb, Mb = back.arrays()
+    mixed.add(Vb + view.d * 0.6, Tb, UVb, Cb, Nb, 1)
     fern_rosette(fern_ids, 7, fcx, md=mixed, scale=0.9, seed=2, reach=0.85)
     variants["mixed_v1"] = mixed
-    variants["reed_v1"] = reed_clump(reed_ids, (0, 60, 120), rcx, scale=1.0, seed=3)
-    variants["reed_v2"] = reed_clump(reed_ids[::2], (20, 80, 140), rcx, scale=0.85, seed=4)
-    variants["fern_v1"] = fern_rosette(fern_ids, 9, fcx, scale=1.0, seed=5)
-    variants["fern_v2"] = fern_rosette(fern_ids, 7, fcx, scale=0.8, seed=6, reach=1.1)
+    variants["reed_v1"] = reed_clump(reed_ids, (0, 60, 120), rcx, scale=1.0, seed=3, radius=0.8)
+    variants["reed_v2"] = reed_clump(reed_ids[::2], (20, 80, 140, 170), rcx, scale=0.85, seed=4, radius=0.6)
+    variants["fern_v1"] = fern_rosette(fern_ids, 11, fcx, scale=1.0, seed=5)
+    variants["fern_v2"] = fern_rosette(fern_ids, 8, fcx, scale=0.8, seed=6, reach=1.1)
     built = {}
     info = {}
     for vn, md in variants.items():

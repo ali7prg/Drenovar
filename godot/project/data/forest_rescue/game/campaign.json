@@ -1,0 +1,1994 @@
+{
+  "schemaVersion": 1,
+  "id": "forest_rescue_v1",
+  "title": "Лес потерянных",
+  "subtitle": "Конь без всадника. Двенадцать клеток. Тридцать шесть дорог домой.",
+  "contentVersion": "1.1.0",
+  "status": "authored content with tested reference logic; requires actual engine integration and full new character asset production",
+  "mainTaskCount": 60,
+  "additionalPrologue": true,
+  "additionalBossArc": true,
+  "resources": [
+    "food",
+    "wood",
+    "stone",
+    "iron",
+    "coins"
+  ],
+  "phases": [
+    "prologue",
+    "rescue",
+    "boss_unlocked",
+    "boss_active",
+    "completed"
+  ],
+  "siteStepNames": [
+    "undiscovered",
+    "discovered",
+    "artifact_recovered",
+    "guardian_defeated",
+    "cage_opened",
+    "rescued"
+  ],
+  "taskOrder": [
+    "discover",
+    "recover_artifact",
+    "defeat_guardian",
+    "unlock_cage",
+    "escort_home"
+  ],
+  "actUnlockPolicy": "act1 after horse; act2 after all sites1..3 rescued; act3 after4..6; act4 after7..9; free site order within each act",
+  "firstGuardian": {
+    "species": "tenerys",
+    "level": 1
+  },
+  "prologue": {
+    "horseId": "lf_horse_origin",
+    "title": "Конь без всадника",
+    "intro": [
+      "К воротам выходит гнедая кобыла с тёмной гривой и белой звёздочкой на лбу. На потёртом недоуздке завязана зелёная лента; рядом нет ни всадника, ни хозяина.",
+      "Она отступает к лесу, останавливается и ждёт. Между деревьями виден обрывок такой же зелёной ткани.",
+      "Соберите отряд и следуйте за ней. Поселение останется вашим домом; за его границей начинается неизвестный лес."
+    ],
+    "completionText": "След привёл к первой берёзовой просеке. Впереди железо — и человеческий голос.",
+    "reward": {
+      "food": 5000,
+      "wood": 5000,
+      "stone": 0,
+      "iron": 0,
+      "coins": 0
+    },
+    "awardId": "forest_rescue_v1:prologue",
+    "minimumHallLevel": 3,
+    "availability": "Only after authoritative completed town hall level >=3; intro presentation gives no reward."
+  },
+  "sites": [
+    {
+      "id": "lf_site_01",
+      "number": 1,
+      "name": "Берёзовая просека",
+      "act": 1,
+      "rewardMultiplier": 1,
+      "layoutCenterXZReference": [
+        -20,
+        -65
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "trail_cache",
+      "guardian": {
+        "species": "tenerys",
+        "level": 1,
+        "modifier": null,
+        "requiredHall": 1,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_01",
+        "name": "Берестяная печать",
+        "quantity": 1,
+        "boundSiteId": "lf_site_01",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "От расколотой берёзы — к камню с белым мхом, затем к поваленному стволу.",
+          "solution": [
+            "split_birch",
+            "white_moss",
+            "fallen_trunk"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_01_a",
+          "name": "Лада",
+          "role": "возница"
+        },
+        {
+          "id": "lf_captive_01_b",
+          "name": "Тим",
+          "role": "помощник конюха"
+        },
+        {
+          "id": "lf_captive_01_c",
+          "name": "Сава",
+          "role": "пекарь"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Берёзовая просека",
+          "objective": "У белых стволов висит разорванная упряжь. За кустами кто-то трижды ударяет по железу — и сразу замолкает.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 2000,
+            "wood": 2000,
+            "stone": 1000,
+            "iron": 500,
+            "coins": 100
+          },
+          "awardId": "forest_rescue_v1:lf_site_01:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Берестяная печать",
+          "objective": "От расколотой берёзы — к камню с белым мхом, затем к поваленному стволу.",
+          "resultText": "Получен артефакт «Берестяная печать». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 4000,
+            "wood": 6000,
+            "stone": 4000,
+            "iron": 3000,
+            "coins": 300
+          },
+          "awardId": "forest_rescue_v1:lf_site_01:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Берёзовая просека",
+          "objective": "Тенерис держится перед клеткой. Широкая поляна даёт место отойти от прыжка; не загоняйте отряд между клеткой и стволом.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 10000,
+            "wood": 8000,
+            "stone": 5000,
+            "iron": 2000,
+            "coins": 500
+          },
+          "awardId": "forest_rescue_v1:lf_site_01:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Берёзовая просека",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Гнедая кобыла принадлежит Ладе. Услышав знакомый свист, она впервые перестаёт пятиться.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 8000,
+            "wood": 10000,
+            "stone": 6000,
+            "iron": 4000,
+            "coins": 700
+          },
+          "awardId": "forest_rescue_v1:lf_site_01:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Берёзовая просека",
+          "objective": "Проводите людей по берёзовым лентам к северному подходу поселения.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 20000,
+            "wood": 20000,
+            "stone": 12000,
+            "iron": 8000,
+            "coins": 1400
+          },
+          "awardId": "forest_rescue_v1:lf_site_01:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "Мы оставляли белые ленты на ветках. Сначала для тех, кто придёт за нами. Потом — чтобы самим не забыть дорогу.",
+      "postState": "У просеки остаются снятые ленты, открытая клетка и маленький знак безопасной дороги.",
+      "guardianTactics": "Тенерис держится перед клеткой. Широкая поляна даёт место отойти от прыжка; не загоняйте отряд между клеткой и стволом."
+    },
+    {
+      "id": "lf_site_02",
+      "number": 2,
+      "name": "Каменный карман",
+      "act": 1,
+      "rewardMultiplier": 1,
+      "layoutCenterXZReference": [
+        -43,
+        -67
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "rune_lock",
+      "guardian": {
+        "species": "tenerys",
+        "level": 1,
+        "modifier": null,
+        "requiredHall": 1,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_02",
+        "name": "Печать трёх граней",
+        "quantity": 1,
+        "boundSiteId": "lf_site_02",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "На плите: «Сперва гора хранит дождь, затем река несёт его листу».",
+          "solution": [
+            "mountain",
+            "river",
+            "leaf"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_02_a",
+          "name": "Орина",
+          "role": "резчица"
+        },
+        {
+          "id": "lf_captive_02_b",
+          "name": "Бран",
+          "role": "каменщик"
+        },
+        {
+          "id": "lf_captive_02_c",
+          "name": "Мила",
+          "role": "собирательница трав"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Каменный карман",
+          "objective": "Между двумя плитами стоит клетка. Ветер шевелит связку деревянных игрушек; звук похож на просьбу о помощи.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 2000,
+            "wood": 2000,
+            "stone": 1000,
+            "iron": 500,
+            "coins": 100
+          },
+          "awardId": "forest_rescue_v1:lf_site_02:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Печать трёх граней",
+          "objective": "На плите: «Сперва гора хранит дождь, затем река несёт его листу».",
+          "resultText": "Получен артефакт «Печать трёх граней». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 4000,
+            "wood": 6000,
+            "stone": 4000,
+            "iron": 3000,
+            "coins": 300
+          },
+          "awardId": "forest_rescue_v1:lf_site_02:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Каменный карман",
+          "objective": "Страж обходит обе плиты. Встречайте его у широкого выхода, а не в узкой щели; остальные бойцы сохраняют путь отступления.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 10000,
+            "wood": 8000,
+            "stone": 5000,
+            "iron": 2000,
+            "coins": 500
+          },
+          "awardId": "forest_rescue_v1:lf_site_02:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Каменный карман",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Орина прятала игрушки под одеждой, чтобы успокаивать соседей по клетке. Одну она оставляет на открытой двери.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 8000,
+            "wood": 10000,
+            "stone": 6000,
+            "iron": 4000,
+            "coins": 700
+          },
+          "awardId": "forest_rescue_v1:lf_site_02:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Каменный карман",
+          "objective": "Выведите людей из кармана через широкий западный выход, затем по проверенной северной тропе.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 20000,
+            "wood": 20000,
+            "stone": 12000,
+            "iron": 8000,
+            "coins": 1400
+          },
+          "awardId": "forest_rescue_v1:lf_site_02:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "Три знака — не заклинание. Это отметки старой дороги. Кто запер нас, просто повернул их против людей.",
+      "postState": "В открытой клетке висит деревянная птица; новая метка предупреждает о каменном сужении.",
+      "guardianTactics": "Страж обходит обе плиты. Встречайте его у широкого выхода, а не в узкой щели; остальные бойцы сохраняют путь отступления."
+    },
+    {
+      "id": "lf_site_03",
+      "number": 3,
+      "name": "Пепельная часовня",
+      "act": 1,
+      "rewardMultiplier": 1,
+      "layoutCenterXZReference": [
+        -67,
+        -63
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "winch_sequence",
+      "guardian": {
+        "species": "tenerys",
+        "level": 1,
+        "modifier": null,
+        "requiredHall": 1,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_03",
+        "name": "Печать тихого колокола",
+        "quantity": 1,
+        "boundSiteId": "lf_site_03",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "На рукояти зарубки: тормоз, собачка, подъём. Нагрузку нельзя снимать до фиксации.",
+          "solution": [
+            "brake",
+            "pawl",
+            "raise"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_03_a",
+          "name": "Энна",
+          "role": "ткачиха"
+        },
+        {
+          "id": "lf_captive_03_b",
+          "name": "Радек",
+          "role": "кровельщик"
+        },
+        {
+          "id": "lf_captive_03_c",
+          "name": "Ивар",
+          "role": "ученик писаря"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Пепельная часовня",
+          "objective": "От часовни остались ступени и холодный очаг. Рядом скрипит подъёмник; на нём закреплён ларец с частью замка.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 2000,
+            "wood": 2000,
+            "stone": 1000,
+            "iron": 500,
+            "coins": 100
+          },
+          "awardId": "forest_rescue_v1:lf_site_03:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Печать тихого колокола",
+          "objective": "На рукояти зарубки: тормоз, собачка, подъём. Нагрузку нельзя снимать до фиксации.",
+          "resultText": "Получен артефакт «Печать тихого колокола». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 4000,
+            "wood": 6000,
+            "stone": 4000,
+            "iron": 3000,
+            "coins": 300
+          },
+          "awardId": "forest_rescue_v1:lf_site_03:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Пепельная часовня",
+          "objective": "Тенерис бросается через центральные ступени. Короткий обход слева сохраняет видимость и не превращает бой в давку.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 10000,
+            "wood": 8000,
+            "stone": 5000,
+            "iron": 2000,
+            "coins": 500
+          },
+          "awardId": "forest_rescue_v1:lf_site_03:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Пепельная часовня",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Ивар запоминал имена пленников и повторял их каждое утро. Теперь он просит записать девять спасённых.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 8000,
+            "wood": 10000,
+            "stone": 6000,
+            "iron": 4000,
+            "coins": 700
+          },
+          "awardId": "forest_rescue_v1:lf_site_03:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Пепельная часовня",
+          "objective": "Сведите людей со ступеней по боковому склону; проверьте, что все трое вошли в безопасный коридор.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 20000,
+            "wood": 20000,
+            "stone": 12000,
+            "iron": 8000,
+            "coins": 1400
+          },
+          "awardId": "forest_rescue_v1:lf_site_03:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "Когда людей превращают в счёт, легко кого-то забыть. Назовите нас по именам, когда вернёмся.",
+      "postState": "У ступеней появляется памятная запись первых девяти имён; это текстовая запись кампании, не население экономики.",
+      "guardianTactics": "Тенерис бросается через центральные ступени. Короткий обход слева сохраняет видимость и не превращает бой в давку."
+    },
+    {
+      "id": "lf_site_04",
+      "number": 4,
+      "name": "Шёпот елей",
+      "act": 2,
+      "rewardMultiplier": 2,
+      "layoutCenterXZReference": [
+        -84,
+        -32
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "paired_latch",
+      "guardian": {
+        "species": "tenerys",
+        "level": 2,
+        "modifier": null,
+        "requiredHall": 3,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_04",
+        "name": "Печать елового круга",
+        "quantity": 1,
+        "boundSiteId": "lf_site_04",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "Два упора удерживают тягу одновременно; лишь затем можно освободить центральный язычок.",
+          "solution": [
+            "left_plate",
+            "right_plate",
+            "center_latch"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_04_a",
+          "name": "Верна",
+          "role": "следопыт"
+        },
+        {
+          "id": "lf_captive_04_b",
+          "name": "Олек",
+          "role": "носильщик"
+        },
+        {
+          "id": "lf_captive_04_c",
+          "name": "Нела",
+          "role": "гончар"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Шёпот елей",
+          "objective": "В плотной хвое почти не видно неба. Две старые площадки вокруг клетки соединены корнями и бронзовой тягой.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 4000,
+            "wood": 4000,
+            "stone": 2000,
+            "iron": 1000,
+            "coins": 200
+          },
+          "awardId": "forest_rescue_v1:lf_site_04:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Печать елового круга",
+          "objective": "Два упора удерживают тягу одновременно; лишь затем можно освободить центральный язычок.",
+          "resultText": "Получен артефакт «Печать елового круга». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 8000,
+            "wood": 12000,
+            "stone": 8000,
+            "iron": 6000,
+            "coins": 600
+          },
+          "awardId": "forest_rescue_v1:lf_site_04:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Шёпот елей",
+          "objective": "Сильный Тенерис атакует из тени. Расчистите обзор движением камеры и держите отряд у отмеченного кармана, не преследуя его между деревьями.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 20000,
+            "wood": 16000,
+            "stone": 10000,
+            "iron": 4000,
+            "coins": 1000
+          },
+          "awardId": "forest_rescue_v1:lf_site_04:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Шёпот елей",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Верна показывает, как отличать след человека от примятой ветром хвои. После спасения эти отметки помогают видеть обратную тропу.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 16000,
+            "wood": 20000,
+            "stone": 12000,
+            "iron": 8000,
+            "coins": 1400
+          },
+          "awardId": "forest_rescue_v1:lf_site_04:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Шёпот елей",
+          "objective": "Разведите людей и боевой отряд по соседним проходам, чтобы никто не застрял у корневого узла.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 40000,
+            "wood": 40000,
+            "stone": 24000,
+            "iron": 16000,
+            "coins": 2800
+          },
+          "awardId": "forest_rescue_v1:lf_site_04:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "Лес не пустой. Он просто прячет то, что стоит на месте. Идите медленно — увидите больше.",
+      "postState": "Возле тропы остаются заметные зарубки; мрачная чаща впервые получает читаемый человеческий маршрут.",
+      "guardianTactics": "Сильный Тенерис атакует из тени. Расчистите обзор движением камеры и держите отряд у отмеченного кармана, не преследуя его между деревьями."
+    },
+    {
+      "id": "lf_site_05",
+      "number": 5,
+      "name": "Смоляная низина",
+      "act": 2,
+      "rewardMultiplier": 2,
+      "layoutCenterXZReference": [
+        -86,
+        0
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "trail_cache",
+      "guardian": {
+        "species": "velkor",
+        "level": 2,
+        "modifier": null,
+        "requiredHall": 3,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_05",
+        "name": "Янтарная печать",
+        "quantity": 1,
+        "boundSiteId": "lf_site_05",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "Тёплая сосна, двойной пень, смоляная чаша: след обходит холодную воду.",
+          "solution": [
+            "resin_pine",
+            "double_stump",
+            "resin_bowl"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_05_a",
+          "name": "Дарна",
+          "role": "смолокур"
+        },
+        {
+          "id": "lf_captive_05_b",
+          "name": "Егор",
+          "role": "лодочник"
+        },
+        {
+          "id": "lf_captive_05_c",
+          "name": "Рута",
+          "role": "портниха"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Смоляная низина",
+          "objective": "Смола блестит на чашках старых сосен. Трое пленников подвязали к клетке полоску ткани, чтобы её заметили над туманом.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 4000,
+            "wood": 4000,
+            "stone": 2000,
+            "iron": 1000,
+            "coins": 200
+          },
+          "awardId": "forest_rescue_v1:lf_site_05:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Янтарная печать",
+          "objective": "Тёплая сосна, двойной пень, смоляная чаша: след обходит холодную воду.",
+          "resultText": "Получен артефакт «Янтарная печать». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 8000,
+            "wood": 12000,
+            "stone": 8000,
+            "iron": 6000,
+            "coins": 600
+          },
+          "awardId": "forest_rescue_v1:lf_site_05:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Смоляная низина",
+          "objective": "Велькор перекрывает сухую перемычку. Обойдите боковой карман и не стройте бойцов в одну тесную линию перед рогами.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 20000,
+            "wood": 16000,
+            "stone": 10000,
+            "iron": 4000,
+            "coins": 1000
+          },
+          "awardId": "forest_rescue_v1:lf_site_05:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Смоляная низина",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Дарна зажигает безопасный низкий дымок у выхода, когда опасность миновала. Он отмечает сухую землю, а не скрывает бой.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 16000,
+            "wood": 20000,
+            "stone": 12000,
+            "iron": 8000,
+            "coins": 1400
+          },
+          "awardId": "forest_rescue_v1:lf_site_05:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Смоляная низина",
+          "objective": "Ведите людей только по сухим корням и каменной перемычке; вода не становится проходимой от нажатия.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 40000,
+            "wood": 40000,
+            "stone": 24000,
+            "iron": 16000,
+            "coins": 2800
+          },
+          "awardId": "forest_rescue_v1:lf_site_05:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "Мы думали, ткань сгниёт раньше, чем её кто-нибудь увидит. Вы всё-таки увидели.",
+      "postState": "На сухом краю низины горит спокойный хозяйственный дымок; интерактивная клетка пуста.",
+      "guardianTactics": "Велькор перекрывает сухую перемычку. Обойдите боковой карман и не стройте бойцов в одну тесную линию перед рогами."
+    },
+    {
+      "id": "lf_site_06",
+      "number": 6,
+      "name": "Угольный круг",
+      "act": 2,
+      "rewardMultiplier": 2,
+      "layoutCenterXZReference": [
+        -81,
+        35
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "rune_lock",
+      "guardian": {
+        "species": "kamneklyk",
+        "level": 2,
+        "modifier": null,
+        "requiredHall": 3,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_06",
+        "name": "Печать возвращённого огня",
+        "quantity": 1,
+        "boundSiteId": "lf_site_06",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "Уголь греет очаг; очаг хранит семя; из семени поднимается дерево.",
+          "solution": [
+            "coal",
+            "seed",
+            "tree"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_06_a",
+          "name": "Федор",
+          "role": "углежог"
+        },
+        {
+          "id": "lf_captive_06_b",
+          "name": "Ася",
+          "role": "сборщица ягод"
+        },
+        {
+          "id": "lf_captive_06_c",
+          "name": "Марен",
+          "role": "ремесленник"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Угольный круг",
+          "objective": "Посреди молодой поросли лежит круг обугленного дерева. На замке клетки сохранились три чётких отпечатка.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 4000,
+            "wood": 4000,
+            "stone": 2000,
+            "iron": 1000,
+            "coins": 200
+          },
+          "awardId": "forest_rescue_v1:lf_site_06:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Печать возвращённого огня",
+          "objective": "Уголь греет очаг; очаг хранит семя; из семени поднимается дерево.",
+          "resultText": "Получен артефакт «Печать возвращённого огня». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 8000,
+            "wood": 12000,
+            "stone": 8000,
+            "iron": 6000,
+            "coins": 600
+          },
+          "awardId": "forest_rescue_v1:lf_site_06:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Угольный круг",
+          "objective": "Камнеклык силён в узком коридоре. Используйте открытый край угольного круга, чтобы распознавать разгон и не прижиматься к ограде.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 20000,
+            "wood": 16000,
+            "stone": 10000,
+            "iron": 4000,
+            "coins": 1000
+          },
+          "awardId": "forest_rescue_v1:lf_site_06:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Угольный круг",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Федор просит оставить обгоревший круг нетронутым: из золы уже растут молодые деревья.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 16000,
+            "wood": 20000,
+            "stone": 12000,
+            "iron": 8000,
+            "coins": 1400
+          },
+          "awardId": "forest_rescue_v1:lf_site_06:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Угольный круг",
+          "objective": "Выведите людей вдоль молодого леса, минуя место разгона стража.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 40000,
+            "wood": 40000,
+            "stone": 24000,
+            "iron": 16000,
+            "coins": 2800
+          },
+          "awardId": "forest_rescue_v1:lf_site_06:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "Не всё, что стало чёрным, погибло. Только нас здесь держать больше не надо.",
+      "postState": "Уголёк в новом очаге обозначает привал; молодая поросль остаётся, клетка не восстанавливается.",
+      "guardianTactics": "Камнеклык силён в узком коридоре. Используйте открытый край угольного круга, чтобы распознавать разгон и не прижиматься к ограде."
+    },
+    {
+      "id": "lf_site_07",
+      "number": 7,
+      "name": "Ольховый брод",
+      "act": 3,
+      "rewardMultiplier": 3,
+      "layoutCenterXZReference": [
+        -62,
+        70
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "winch_sequence",
+      "guardian": {
+        "species": "tenerys",
+        "level": 3,
+        "modifier": null,
+        "requiredHall": 5,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_07",
+        "name": "Печать мелкой воды",
+        "quantity": 1,
+        "boundSiteId": "lf_site_07",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "Зафиксируйте тормоз, защёлкните собачку, поднимите ларец к настилу.",
+          "solution": [
+            "brake",
+            "pawl",
+            "raise"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_07_a",
+          "name": "Лина",
+          "role": "рыбачка"
+        },
+        {
+          "id": "lf_captive_07_b",
+          "name": "Торен",
+          "role": "плотник"
+        },
+        {
+          "id": "lf_captive_07_c",
+          "name": "Сима",
+          "role": "лекарка"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Ольховый брод",
+          "objective": "Вода скрывает звук шагов. Над берегом стоит клетка; ларец с печатью подвешен отдельно на старой грузовой балке.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 6000,
+            "wood": 6000,
+            "stone": 3000,
+            "iron": 1500,
+            "coins": 300
+          },
+          "awardId": "forest_rescue_v1:lf_site_07:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Печать мелкой воды",
+          "objective": "Зафиксируйте тормоз, защёлкните собачку, поднимите ларец к настилу.",
+          "resultText": "Получен артефакт «Печать мелкой воды». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 12000,
+            "wood": 18000,
+            "stone": 12000,
+            "iron": 9000,
+            "coins": 900
+          },
+          "awardId": "forest_rescue_v1:lf_site_07:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Ольховый брод",
+          "objective": "Тенерис третьего уровня охраняет сухой плац у брода. Бой идёт на берегу; в воду нельзя вытеснять ни бойцов, ни людей.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 30000,
+            "wood": 24000,
+            "stone": 15000,
+            "iron": 6000,
+            "coins": 1500
+          },
+          "awardId": "forest_rescue_v1:lf_site_07:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Ольховый брод",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Торен закрепляет поручень, прежде чем по настилу пойдёт Сима. Это визуальный итог спасения, не новая строительная очередь.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 24000,
+            "wood": 30000,
+            "stone": 18000,
+            "iron": 12000,
+            "coins": 2100
+          },
+          "awardId": "forest_rescue_v1:lf_site_07:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Ольховый брод",
+          "objective": "Проведите троих по проверенному настилу и дождитесь серверного прибытия каждого на безопасный берег.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 60000,
+            "wood": 60000,
+            "stone": 36000,
+            "iron": 24000,
+            "coins": 4200
+          },
+          "awardId": "forest_rescue_v1:lf_site_07:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "Страшнее всего было видеть близкий берег и не иметь возможности сделать к нему шаг.",
+      "postState": "У брода остаётся поручень и исправный проход; опасная территория больше не выглядит забытым тупиком.",
+      "guardianTactics": "Тенерис третьего уровня охраняет сухой плац у брода. Бой идёт на берегу; в воду нельзя вытеснять ни бойцов, ни людей."
+    },
+    {
+      "id": "lf_site_08",
+      "number": 8,
+      "name": "Травяной лабиринт",
+      "act": 3,
+      "rewardMultiplier": 3,
+      "layoutCenterXZReference": [
+        -25,
+        86
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "paired_latch",
+      "guardian": {
+        "species": "velkor",
+        "level": 3,
+        "modifier": null,
+        "requiredHall": 5,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_08",
+        "name": "Печать двух троп",
+        "quantity": 1,
+        "boundSiteId": "lf_site_08",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "Две площадки находятся у разных выходов. Удержите обе и откройте средний затвор.",
+          "solution": [
+            "left_plate",
+            "right_plate",
+            "center_latch"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_08_a",
+          "name": "Ярина",
+          "role": "певчая"
+        },
+        {
+          "id": "lf_captive_08_b",
+          "name": "Век",
+          "role": "пастух"
+        },
+        {
+          "id": "lf_captive_08_c",
+          "name": "Дина",
+          "role": "садовница"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Травяной лабиринт",
+          "objective": "Высокая трава разделяет поляну на тесные проходы. Из клетки слышна песня, которую поют по одной строке.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 6000,
+            "wood": 6000,
+            "stone": 3000,
+            "iron": 1500,
+            "coins": 300
+          },
+          "awardId": "forest_rescue_v1:lf_site_08:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Печать двух троп",
+          "objective": "Две площадки находятся у разных выходов. Удержите обе и откройте средний затвор.",
+          "resultText": "Получен артефакт «Печать двух троп». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 12000,
+            "wood": 18000,
+            "stone": 12000,
+            "iron": 9000,
+            "coins": 900
+          },
+          "awardId": "forest_rescue_v1:lf_site_08:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Травяной лабиринт",
+          "objective": "Велькор разворачивается широким роговым ударом. Выберите одну ясную зону боя, не гоняйтесь за силуэтом сквозь траву.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 30000,
+            "wood": 24000,
+            "stone": 15000,
+            "iron": 6000,
+            "coins": 1500
+          },
+          "awardId": "forest_rescue_v1:lf_site_08:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Травяной лабиринт",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Ярина допевает песню только за пределами клетки. Дина завязывает траву в пучки, обозначая обратный проход.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 24000,
+            "wood": 30000,
+            "stone": 18000,
+            "iron": 12000,
+            "coins": 2100
+          },
+          "awardId": "forest_rescue_v1:lf_site_08:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Травяной лабиринт",
+          "objective": "Используйте отмеченные пучками коридоры; разведанный лабиринт не теряет карту после возвращения.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 60000,
+            "wood": 60000,
+            "stone": 36000,
+            "iron": 24000,
+            "coins": 4200
+          },
+          "awardId": "forest_rescue_v1:lf_site_08:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "Мы пели по очереди, чтобы знать: все ещё здесь. Сегодня можно спеть вместе.",
+      "postState": "Связанные пучки превращают хаос травы в человеческую дорожку; песня остаётся записью в журнале.",
+      "guardianTactics": "Велькор разворачивается широким роговым ударом. Выберите одну ясную зону боя, не гоняйтесь за силуэтом сквозь траву."
+    },
+    {
+      "id": "lf_site_09",
+      "number": 9,
+      "name": "Папоротниковый уступ",
+      "act": 3,
+      "rewardMultiplier": 3,
+      "layoutCenterXZReference": [
+        20,
+        87
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "trail_cache",
+      "guardian": {
+        "species": "kamneklyk",
+        "level": 3,
+        "modifier": null,
+        "requiredHall": 5,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_09",
+        "name": "Печать трёх уступов",
+        "quantity": 1,
+        "boundSiteId": "lf_site_09",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "Кривой папоротник указывает на плоскую плиту; за ней — камень с тремя насечками.",
+          "solution": [
+            "bent_fern",
+            "flat_slab",
+            "three_notches"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_09_a",
+          "name": "Мирен",
+          "role": "картограф"
+        },
+        {
+          "id": "lf_captive_09_b",
+          "name": "Бела",
+          "role": "сборщица коры"
+        },
+        {
+          "id": "lf_captive_09_c",
+          "name": "Стас",
+          "role": "ученик кузнеца"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Папоротниковый уступ",
+          "objective": "Папоротники скрывают нижний край каменной полки. На решётке клетки закреплена грубо нарисованная карта.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 6000,
+            "wood": 6000,
+            "stone": 3000,
+            "iron": 1500,
+            "coins": 300
+          },
+          "awardId": "forest_rescue_v1:lf_site_09:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Печать трёх уступов",
+          "objective": "Кривой папоротник указывает на плоскую плиту; за ней — камень с тремя насечками.",
+          "resultText": "Получен артефакт «Печать трёх уступов». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 12000,
+            "wood": 18000,
+            "stone": 12000,
+            "iron": 9000,
+            "coins": 900
+          },
+          "awardId": "forest_rescue_v1:lf_site_09:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Папоротниковый уступ",
+          "objective": "Камнеклык давит к обрыву. Не считать край декоративным: серверные маршруты держат бой на широкой полке с отмеченными границами.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 30000,
+            "wood": 24000,
+            "stone": 15000,
+            "iron": 6000,
+            "coins": 1500
+          },
+          "awardId": "forest_rescue_v1:lf_site_09:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Папоротниковый уступ",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Мирен просит не исправлять детскую карту: именно она помогла другим понять, где их держали.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 24000,
+            "wood": 30000,
+            "stone": 18000,
+            "iron": 12000,
+            "coins": 2100
+          },
+          "awardId": "forest_rescue_v1:lf_site_09:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Папоротниковый уступ",
+          "objective": "Сведите группу с уступа по широкому северному спуску, а не по короткой прямой через склон.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 60000,
+            "wood": 60000,
+            "stone": 36000,
+            "iron": 24000,
+            "coins": 4200
+          },
+          "awardId": "forest_rescue_v1:lf_site_09:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "Пока я рисовал дорогу, она существовала хотя бы на бумаге. Теперь проведём по ней людей.",
+      "postState": "На карте лагеря появляется точный безопасный спуск; заросли сохраняют просвет к клетке.",
+      "guardianTactics": "Камнеклык давит к обрыву. Не считать край декоративным: серверные маршруты держат бой на широкой полке с отмеченными границами."
+    },
+    {
+      "id": "lf_site_10",
+      "number": 10,
+      "name": "Изломанная терраса",
+      "act": 4,
+      "rewardMultiplier": 4,
+      "layoutCenterXZReference": [
+        64,
+        72
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "rune_lock",
+      "guardian": {
+        "species": "dragor",
+        "level": 2,
+        "modifier": null,
+        "requiredHall": 3,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_10",
+        "name": "Печать каменного дыхания",
+        "quantity": 1,
+        "boundSiteId": "lf_site_10",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "Солнце нагревает камень; камень держит корень; корень хранит землю.",
+          "solution": [
+            "sun",
+            "stone",
+            "root"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_10_a",
+          "name": "Грета",
+          "role": "каменотёс"
+        },
+        {
+          "id": "lf_captive_10_b",
+          "name": "Леван",
+          "role": "обозный мастер"
+        },
+        {
+          "id": "lf_captive_10_c",
+          "name": "Ника",
+          "role": "пекарь"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Изломанная терраса",
+          "objective": "Лес расступается перед расколотыми плитами. Между ними тянется клетка, а за ней слышно тяжёлое дыхание.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 8000,
+            "wood": 8000,
+            "stone": 4000,
+            "iron": 2000,
+            "coins": 400
+          },
+          "awardId": "forest_rescue_v1:lf_site_10:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Печать каменного дыхания",
+          "objective": "Солнце нагревает камень; камень держит корень; корень хранит землю.",
+          "resultText": "Получен артефакт «Печать каменного дыхания». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 16000,
+            "wood": 24000,
+            "stone": 16000,
+            "iron": 12000,
+            "coins": 1200
+          },
+          "awardId": "forest_rescue_v1:lf_site_10:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Изломанная терраса",
+          "objective": "Драгор перекрывает центральную площадку. Его ударную волну нужно пережидать в обозначенных безопасных карманах, не заходя на непройденный склон.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 40000,
+            "wood": 32000,
+            "stone": 20000,
+            "iron": 8000,
+            "coins": 2000
+          },
+          "awardId": "forest_rescue_v1:lf_site_10:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Изломанная терраса",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Грета касается плит и сразу находит спокойный путь. Она не убирает опасность чудом — просто читает камень лучше остальных.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 32000,
+            "wood": 40000,
+            "stone": 24000,
+            "iron": 16000,
+            "coins": 2800
+          },
+          "awardId": "forest_rescue_v1:lf_site_10:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Изломанная терраса",
+          "objective": "Уведите людей с террасы до перехода к речной переправе; бойцы прикрывают широкую часть маршрута.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 80000,
+            "wood": 80000,
+            "stone": 48000,
+            "iron": 32000,
+            "coins": 5600
+          },
+          "awardId": "forest_rescue_v1:lf_site_10:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "Камень всегда предупреждает. Плохо, когда никто не может отойти после предупреждения.",
+      "postState": "На плитах остаются новые дорожные метки; пространство становится читаемым перед самой трудной частью леса.",
+      "guardianTactics": "Драгор перекрывает центральную площадку. Его ударную волну нужно пережидать в обозначенных безопасных карманах, не заходя на непройденный склон."
+    },
+    {
+      "id": "lf_site_11",
+      "number": 11,
+      "name": "Речные ступени",
+      "act": 4,
+      "rewardMultiplier": 4,
+      "layoutCenterXZReference": [
+        101,
+        -3
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "winch_sequence",
+      "guardian": {
+        "species": "dragor",
+        "level": 3,
+        "modifier": null,
+        "requiredHall": 5,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_11",
+        "name": "Печать дальнего берега",
+        "quantity": 1,
+        "boundSiteId": "lf_site_11",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "Сначала тормоз, затем собачка, затем подъём. Ларец должен дойти до сухой площадки.",
+          "solution": [
+            "brake",
+            "pawl",
+            "raise"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_11_a",
+          "name": "Марта",
+          "role": "перевозчица"
+        },
+        {
+          "id": "lf_captive_11_b",
+          "name": "Рен",
+          "role": "травник"
+        },
+        {
+          "id": "lf_captive_11_c",
+          "name": "Алва",
+          "role": "швея"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Речные ступени",
+          "objective": "За водой видны железные прутья. Клетка стоит на сухой ступени берега; низкая грузовая рама удерживает ключевой ларец.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 8000,
+            "wood": 8000,
+            "stone": 4000,
+            "iron": 2000,
+            "coins": 400
+          },
+          "awardId": "forest_rescue_v1:lf_site_11:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Печать дальнего берега",
+          "objective": "Сначала тормоз, затем собачка, затем подъём. Ларец должен дойти до сухой площадки.",
+          "resultText": "Получен артефакт «Печать дальнего берега». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 16000,
+            "wood": 24000,
+            "stone": 16000,
+            "iron": 12000,
+            "coins": 1200
+          },
+          "awardId": "forest_rescue_v1:lf_site_11:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Речные ступени",
+          "objective": "Драгор третьего уровня опасен у края воды. Переправа завершается до начала боя; противника не атакуют с невалидного противоположного берега.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 40000,
+            "wood": 32000,
+            "stone": 20000,
+            "iron": 8000,
+            "coins": 2000
+          },
+          "awardId": "forest_rescue_v1:lf_site_11:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Речные ступени",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Марта считает шаги до воды и обратно, пока не убедится: путь действительно свободен.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 32000,
+            "wood": 40000,
+            "stone": 24000,
+            "iron": 16000,
+            "coins": 2800
+          },
+          "awardId": "forest_rescue_v1:lf_site_11:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Речные ступени",
+          "objective": "Используйте подтверждённый сервером мостовой маршрут к домашнему пункту приёма. Кратчайшая линия через реку недопустима.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 80000,
+            "wood": 80000,
+            "stone": 48000,
+            "iron": 32000,
+            "coins": 5600
+          },
+          "awardId": "forest_rescue_v1:lf_site_11:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "Берег был совсем рядом. Но расстояние до дома измеряют не водой.",
+      "postState": "На ступенях появляется верёвочный ориентир и знак проверенной переправы; лодка не заменяет отсутствующий маршрут.",
+      "guardianTactics": "Драгор третьего уровня опасен у края воды. Переправа завершается до начала боя; противника не атакуют с невалидного противоположного берега."
+    },
+    {
+      "id": "lf_site_12",
+      "number": 12,
+      "name": "Роща старых костей",
+      "act": 4,
+      "rewardMultiplier": 4,
+      "layoutCenterXZReference": [
+        78,
+        -49
+      ],
+      "layoutAuthority": "data/world-atlas.json; these are authored reference coordinates, not existing placed scene",
+      "variation": "paired_latch",
+      "guardian": {
+        "species": "dragor",
+        "level": 3,
+        "modifier": "ancient_watch",
+        "requiredHall": 5,
+        "respawnRewards": false,
+        "ordinaryFirstVictoryLoot": "retain existing genuine combat reward separately; no campaign guardian respawn farming"
+      },
+      "artifact": {
+        "id": "lf_key_12",
+        "name": "Печать последней двери",
+        "quantity": 1,
+        "boundSiteId": "lf_site_12",
+        "tradeable": false,
+        "consumedOn": "unlock_cage",
+        "puzzle": {
+          "clue": "Удержите два боковых упора и высвободите центральный затвор. Обе стороны должны быть заняты одновременно.",
+          "solution": [
+            "left_plate",
+            "right_plate",
+            "center_latch"
+          ],
+          "wrongInput": "reset mechanism attempt only; no damage or resource/key loss",
+          "recoveryAfterReload": "persist verified mechanism progress separately in adapter state or reset only mechanism, never paid quest task"
+        }
+      },
+      "captives": [
+        {
+          "id": "lf_captive_12_a",
+          "name": "Тала",
+          "role": "хранительница записей"
+        },
+        {
+          "id": "lf_captive_12_b",
+          "name": "Мирко",
+          "role": "охотник"
+        },
+        {
+          "id": "lf_captive_12_c",
+          "name": "Эда",
+          "role": "мельничная работница"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "discover",
+          "order": 1,
+          "title": "Найти: Роща старых костей",
+          "objective": "Между корнями лежат древние кости. Последняя клетка прячется в их тени; дальше деревья образуют огромную тёмную чашу.",
+          "resultText": "Клетка обнаружена и отмечена на карте. Награда добавлена в резерв.",
+          "requiresStep": 0,
+          "nextStep": 1,
+          "reward": {
+            "food": 8000,
+            "wood": 8000,
+            "stone": 4000,
+            "iron": 2000,
+            "coins": 400
+          },
+          "awardId": "forest_rescue_v1:lf_site_12:discover",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "recover_artifact",
+          "order": 2,
+          "title": "Добыть: Печать последней двери",
+          "objective": "Удержите два боковых упора и высвободите центральный затвор. Обе стороны должны быть заняты одновременно.",
+          "resultText": "Получен артефакт «Печать последней двери». Он подходит только к этой клетке; сначала победите её стража.",
+          "requiresStep": 1,
+          "nextStep": 2,
+          "reward": {
+            "food": 16000,
+            "wood": 24000,
+            "stone": 16000,
+            "iron": 12000,
+            "coins": 1200
+          },
+          "awardId": "forest_rescue_v1:lf_site_12:recover_artifact",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "defeat_guardian",
+          "order": 3,
+          "title": "Победить стража: Роща старых костей",
+          "objective": "Драгор охраняет тесную арену с корнями. Модификатор ancient_watch означает более сложные проходы и читаемые опасные зоны, а не невидимую прибавку здоровья.",
+          "resultText": "Страж побеждён. Теперь печать может открыть клетку; награда добавлена в резерв.",
+          "requiresStep": 2,
+          "nextStep": 3,
+          "reward": {
+            "food": 40000,
+            "wood": 32000,
+            "stone": 20000,
+            "iron": 8000,
+            "coins": 2000
+          },
+          "awardId": "forest_rescue_v1:lf_site_12:defeat_guardian",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "unlock_cage",
+          "order": 4,
+          "title": "Открыть клетку: Роща старых костей",
+          "objective": "Примените печать только к этой клетке. Она расходуется один раз; сначала убедитесь, что страж побеждён.",
+          "resultText": "Тала знает, что скрывается в Костяной чаше. Она рассказывает об этом только после того, как все трое достигают поселения.",
+          "requiresStep": 3,
+          "nextStep": 4,
+          "reward": {
+            "food": 32000,
+            "wood": 40000,
+            "stone": 24000,
+            "iron": 16000,
+            "coins": 2800
+          },
+          "awardId": "forest_rescue_v1:lf_site_12:unlock_cage",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        },
+        {
+          "id": "escort_home",
+          "order": 5,
+          "title": "Вернуть людей: Роща старых костей",
+          "objective": "Сначала проводите последнюю тройку домой. Арена Пращура откроется после спасения всех тридцати шести людей.",
+          "resultText": "Трое спасённых прибыли домой. Их имена сохранены; награда добавлена в резерв.",
+          "requiresStep": 4,
+          "nextStep": 5,
+          "reward": {
+            "food": 80000,
+            "wood": 80000,
+            "stone": 48000,
+            "iron": 32000,
+            "coins": 5600
+          },
+          "awardId": "forest_rescue_v1:lf_site_12:escort_home",
+          "proof": "server-authoritative; see code/forest-rescue.mjs and code/reference-transaction.mjs; never client-declared success"
+        }
+      ],
+      "testimony": "За этими деревьями больше нет клеток. Там тот, из-за кого лес замолкает. Не ведите туда спасённых.",
+      "postState": "Все клетки открыты. У последней остаётся предупреждение о Пращуре; спасённые не появляются на финальной арене.",
+      "guardianTactics": "Драгор охраняет тесную арену с корнями. Модификатор ancient_watch означает более сложные проходы и читаемые опасные зоны, а не невидимую прибавку здоровья."
+    }
+  ],
+  "boss": {
+    "encounterId": "lf_boss_ancient_maw",
+    "speciesId": "ancient_maw",
+    "displayName": "Пращур",
+    "arenaId": "lf_boss_arena",
+    "status": "new species and encounter controller required; no final 3D rig delivered by narrative package",
+    "visualDirection": "Огромный страшный хищник с динозавровым силуэтом: тяжёлые задние лапы, длинный хвост, низкая голова, костяные гребни; без клетки и пленников на арене.",
+    "requiredHall": 5,
+    "unlock": "all 12 sites step5 and 36 unique rescuedIds confirmed home",
+    "candidateStats": {
+      "hp": 78000,
+      "attack": 620,
+      "defense": 300,
+      "displayStrength": 450000,
+      "acceptedBalance": false
+    },
+    "phases": [
+      {
+        "id": "hunt",
+        "hpAboveFraction": 0.7,
+        "attacks": [
+          "jaw_arc",
+          "lane_charge"
+        ]
+      },
+      {
+        "id": "fury",
+        "hpAboveFraction": 0.35,
+        "attacks": [
+          "jaw_arc",
+          "tail_sweep",
+          "lane_charge"
+        ]
+      },
+      {
+        "id": "last_stand",
+        "hpAboveFraction": 0,
+        "attacks": [
+          "tail_sweep",
+          "stomp_waves",
+          "jaw_arc"
+        ]
+      }
+    ],
+    "attacks": {
+      "jaw_arc": {
+        "telegraphSeconds": 2.4,
+        "activeSeconds": 0.45,
+        "recoverySeconds": 1.4,
+        "shape": "frontal sector",
+        "playerRead": "Голова отведена назад; сектор перед пастью отмечен формой и цветом."
+      },
+      "tail_sweep": {
+        "telegraphSeconds": 3.0,
+        "activeSeconds": 0.65,
+        "recoverySeconds": 1.8,
+        "shape": "rear_and_side sector",
+        "playerRead": "Хвост поднимается, опасная дуга появляется сбоку и сзади."
+      },
+      "lane_charge": {
+        "telegraphSeconds": 2.8,
+        "activeSeconds": 1.1,
+        "recoverySeconds": 2.0,
+        "shape": "fixed lane committed at end of telegraph",
+        "playerRead": "След движения показан до рывка; после фиксации не доворачивать на отряд."
+      },
+      "stomp_waves": {
+        "telegraphSeconds": 3.2,
+        "waveActiveSeconds": 0.4,
+        "waveCount": 2,
+        "waveStartIntervalSeconds": 0.9,
+        "recoverySeconds": 2.4,
+        "shape": "two expanding rings with explicit gaps",
+        "playerRead": "Поднятая лапа, затем две раздельные волны; безопасные разрывы читаются сверху."
+      }
+    },
+    "timingStatus": "authored starting values; server authority; simulate, tune and playtest before acceptance",
+    "failurePolicy": "existing troop casualties/retreat rules preserved; no reward; rescued people never revoked; retreat available; boss reset through verified encounter policy",
+    "reward": {
+      "food": 1000000,
+      "wood": 1000000,
+      "stone": 750000,
+      "iron": 500000,
+      "coins": 100000
+    },
+    "awardId": "forest_rescue_v1:final",
+    "prisoners": 0,
+    "endingText": "В Костяной чаше больше никто не отвечает на рёв. Все тридцать шесть спасённых остаются дома. Ваша награда ждёт в резерве; её можно забирать по мере освобождения склада."
+  },
+  "economyTotals": {
+    "food": 2325000,
+    "wood": 2385000,
+    "stone": 1590000,
+    "iron": 1025000,
+    "coins": 190000
+  },
+  "rewardPolicy": "all awards enter durable server escrow; claim only free per-resource capacity; opt-in automatic refill after successful spend, default false; no expiry, no overwrite, no conversion; no XP",
+  "fogPolicy": {
+    "states": [
+      "unexplored",
+      "explored_unseen",
+      "currently_visible"
+    ],
+    "permanentExploration": true,
+    "revealAuthority": "server squad/horse-authorized sight only",
+    "rewardForMapVisibilityAlone": false,
+    "protectedBaseAlwaysVisible": true,
+    "savedAcrossReload": true,
+    "oldUnrelatedFogPreserved": true,
+    "minimumHallLevel": 3,
+    "beforeUnlock": "Protected city visible; outside animated locked cloak; no POIs or new exploration."
+  },
+  "newAssetResponsibilities": "Claude Code creates/imports actual optimized 3D, rigs and animations under final user division. Supplied images are visual references, never meshes.",
+  "minimumHallLevel": 3,
+  "unlockIntroReference": "data/unlock-intro.json"
+}

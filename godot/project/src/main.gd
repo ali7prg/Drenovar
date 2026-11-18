@@ -12,6 +12,8 @@ const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
 const HudAction = preload("res://src/hud_action.gd")
 const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
+# FOREST_RESCUE hook: gameplay layer of «Лес потерянных» (src/forest_rescue/game/).
+const ForestGame = preload("res://src/forest_rescue/game/forest_game.gd")
 const RECRUIT_ORDER := ["ENG-09", "ENG-08", "ENG-01", "ENG-02", "ENG-07", "ENG-10", "ENG-03", "ENG-04", "ENG-05", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
 const RESOURCE_NAMES := {"food":"Еда","wood":"Дерево","stone":"Камень","iron":"Железо","coins":"Монеты"}
@@ -94,6 +96,7 @@ var action_list_key := ""
 var next_training_update := 0.0
 var followed_army := ""
 var next_minimap_draw := 0
+var forest_game: Node # FOREST_RESCUE hook
 
 func _ready() -> void:
 	Input.use_accumulated_input = false
@@ -116,6 +119,10 @@ func _ready() -> void:
 	state = data.demo
 	add_child(hud)
 	build_ui()
+	# FOREST_RESCUE hook: adventure overlay, actors, intro and network client.
+	forest_game = ForestGame.new()
+	add_child(forest_game)
+	forest_game.setup(self)
 	if loopback:
 		await sync_account(true)
 	else:
@@ -318,6 +325,8 @@ func show_controls_menu() -> void:
 	button(modal_body, "Приблизить", func(): close_modal(); zoom_scene(1.2))
 	button(modal_body, "Отдалить", func(): close_modal(); zoom_scene(0.83))
 	button(modal_body, "Плавность на устройстве", show_performance)
+	if forest_game != null: # FOREST_RESCUE hook: journal entry
+		forest_game.add_menu_entries(modal_body)
 	button(modal_body, "О приложении", show_application)
 
 func setup_resource_icons() -> void:
@@ -2267,6 +2276,8 @@ func reset_session() -> void:
 	state = data.demo
 	if is_instance_valid(stage):
 		stage.present(state)
+	if forest_game != null: # FOREST_RESCUE hook
+		forest_game.on_state(state)
 	refresh_hud()
 
 func show_reports() -> void:
@@ -2386,6 +2397,8 @@ func accept(response: Dictionary) -> void:
 	refresh_hud()
 	if is_instance_valid(stage):
 		stage.present(state)
+	if forest_game != null: # FOREST_RESCUE hook: ingest state.adventure
+		forest_game.on_state(state)
 	refresh_economy()
 	if starter_panel_open and not command_in_progress and state.get("starterEligible71", false):
 		show_starter_goals()
@@ -2423,15 +2436,16 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	message.text = "Действие выполнено"
 	return true
 
-func request(path: String, payload: Variant = null) -> Dictionary:
+func request(path: String, payload: Variant = null, idempotency_key := "") -> Dictionary:
 	if not connected():
 		return {"error":"Сначала войди в аккаунт."}
-	var response := await send_request(path if loopback else "native/game/" + path, payload)
+	# FOREST_RESCUE hook: optional explicit Idempotency-Key (same key on retry of an uncertain request).
+	var response := await send_request(path if loopback else "native/game/" + path, payload, true, 12.0, idempotency_key)
 	if not loopback and response.get("httpStatus", 0) == 401:
 		reset_session()
 	return response
 
-func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0) -> Dictionary:
+func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0, idempotency_key := "") -> Dictionary:
 	if foreground and busy:
 		return {"error":"Подожди завершения предыдущего запроса."}
 	if foreground:
@@ -2452,8 +2466,8 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	if payload != null:
 		headers.append("Content-Type: application/json")
 		headers.append("Origin: "+endpoint)
-		var request_key := ""
-		if path.get_file() == "command" and payload is Dictionary:
+		var request_key := idempotency_key # FOREST_RESCUE hook
+		if request_key.is_empty() and path.get_file() == "command" and payload is Dictionary:
 			request_key = str(payload.get("requestId", ""))
 		if request_key.is_empty():
 			request_key = Crypto.new().generate_random_bytes(16).hex_encode()
@@ -2654,6 +2668,8 @@ func pick_marker(screen_position: Vector2) -> void:
 				distance = gap
 		if not best.is_empty():
 			inspect_world_plot(best.item)
+		return
+	if forest_game != null and forest_game.pick(screen_position): # FOREST_RESCUE hook: forest POIs / locked card
 		return
 	for marker in stage.place_markers + stage.army_markers + stage.creature_markers:
 		if stage.camera.is_position_behind(marker.position):

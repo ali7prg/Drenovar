@@ -1,0 +1,421 @@
+{
+  "schemaVersion": 1,
+  "campaignId": "forest_rescue_v1",
+  "locale": "ru-RU",
+  "plainTextOnly": true,
+  "voiceActingDelivered": false,
+  "entries": [
+    {
+      "id": "lf_captive_01_a_released",
+      "speakerId": "lf_captive_01_a",
+      "speaker": "Лада",
+      "role": "возница",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Не хватайте её за повод. Она вернулась сама — значит, привела вас."
+    },
+    {
+      "id": "lf_captive_01_b_released",
+      "speakerId": "lf_captive_01_b",
+      "speaker": "Тим",
+      "role": "помощник конюха",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Я слышал, как она звала за деревьями. Теперь можно ответить."
+    },
+    {
+      "id": "lf_captive_01_c_released",
+      "speakerId": "lf_captive_01_c",
+      "speaker": "Сава",
+      "role": "пекарь",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Дома у меня осталась закваска. Глупо думать о хлебе сейчас? Нет? Тогда пойдём."
+    },
+    {
+      "id": "lf_site_01_testimony",
+      "speakerId": "lf_captive_01_a",
+      "speaker": "Лада",
+      "when": "site step5",
+      "text": "Мы оставляли белые ленты на ветках. Сначала для тех, кто придёт за нами. Потом — чтобы самим не забыть дорогу."
+    },
+    {
+      "id": "lf_captive_02_a_released",
+      "speakerId": "lf_captive_02_a",
+      "speaker": "Орина",
+      "role": "резчица",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Птицу оставлю здесь. Пусть следующему путнику будет видно, что дверь открыта."
+    },
+    {
+      "id": "lf_captive_02_b_released",
+      "speakerId": "lf_captive_02_b",
+      "speaker": "Бран",
+      "role": "каменщик",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Через щель не идите. Камень сдвинулся; я покажу широкий проход."
+    },
+    {
+      "id": "lf_captive_02_c_released",
+      "speakerId": "lf_captive_02_c",
+      "speaker": "Мила",
+      "role": "собирательница трав",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Подождите миг. Я должна привыкнуть, что могу выбрать, куда поставить ногу."
+    },
+    {
+      "id": "lf_site_02_testimony",
+      "speakerId": "lf_captive_02_a",
+      "speaker": "Орина",
+      "when": "site step5",
+      "text": "Три знака — не заклинание. Это отметки старой дороги. Кто запер нас, просто повернул их против людей."
+    },
+    {
+      "id": "lf_captive_03_a_released",
+      "speakerId": "lf_captive_03_a",
+      "speaker": "Энна",
+      "role": "ткачиха",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Я считала дни по нитям на рукаве. Последнюю распущу уже дома."
+    },
+    {
+      "id": "lf_captive_03_b_released",
+      "speakerId": "lf_captive_03_b",
+      "speaker": "Радек",
+      "role": "кровельщик",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Ступень слева шатается. Держитесь за меня, пока спускаемся."
+    },
+    {
+      "id": "lf_captive_03_c_released",
+      "speakerId": "lf_captive_03_c",
+      "speaker": "Ивар",
+      "role": "ученик писаря",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Лада, Тим, Сава… Я помню всех. Запишем, чтобы больше не терялись."
+    },
+    {
+      "id": "lf_site_03_testimony",
+      "speakerId": "lf_captive_03_a",
+      "speaker": "Энна",
+      "when": "site step5",
+      "text": "Когда людей превращают в счёт, легко кого-то забыть. Назовите нас по именам, когда вернёмся."
+    },
+    {
+      "id": "lf_captive_04_a_released",
+      "speakerId": "lf_captive_04_a",
+      "speaker": "Верна",
+      "role": "следопыт",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Не смотрите только вперёд. Зарубка с обратной стороны ствола тоже ведёт домой."
+    },
+    {
+      "id": "lf_captive_04_b_released",
+      "speakerId": "lf_captive_04_b",
+      "speaker": "Олек",
+      "role": "носильщик",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Я донесу сумку. Только разрешите не держаться больше за решётку."
+    },
+    {
+      "id": "lf_captive_04_c_released",
+      "speakerId": "lf_captive_04_c",
+      "speaker": "Нела",
+      "role": "гончар",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "В глине остались наши следы. Давайте сегодня оставим их за пределами клетки."
+    },
+    {
+      "id": "lf_site_04_testimony",
+      "speakerId": "lf_captive_04_a",
+      "speaker": "Верна",
+      "when": "site step5",
+      "text": "Лес не пустой. Он просто прячет то, что стоит на месте. Идите медленно — увидите больше."
+    },
+    {
+      "id": "lf_captive_05_a_released",
+      "speakerId": "lf_captive_05_a",
+      "speaker": "Дарна",
+      "role": "смолокур",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Ткань держалась на последнем узле. Хорошо, что не отпустила."
+    },
+    {
+      "id": "lf_captive_05_b_released",
+      "speakerId": "lf_captive_05_b",
+      "speaker": "Егор",
+      "role": "лодочник",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "На воду не ступайте. Тёмная полоса глубже, чем кажется."
+    },
+    {
+      "id": "lf_captive_05_c_released",
+      "speakerId": "lf_captive_05_c",
+      "speaker": "Рута",
+      "role": "портниха",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Я сошью новую ленту. Эту выбрасывать не стану."
+    },
+    {
+      "id": "lf_site_05_testimony",
+      "speakerId": "lf_captive_05_a",
+      "speaker": "Дарна",
+      "when": "site step5",
+      "text": "Мы думали, ткань сгниёт раньше, чем её кто-нибудь увидит. Вы всё-таки увидели."
+    },
+    {
+      "id": "lf_captive_06_a_released",
+      "speakerId": "lf_captive_06_a",
+      "speaker": "Федор",
+      "role": "углежог",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Молодые деревья не трогайте. Круг обгорел давно; лес уже возвращается."
+    },
+    {
+      "id": "lf_captive_06_b_released",
+      "speakerId": "lf_captive_06_b",
+      "speaker": "Ася",
+      "role": "сборщица ягод",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Я помню, где растут ягоды. Сейчас мне нужна только дорога к воротам."
+    },
+    {
+      "id": "lf_captive_06_c_released",
+      "speakerId": "lf_captive_06_c",
+      "speaker": "Марен",
+      "role": "ремесленник",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Замок сделан умело. Жаль, что умение пошло на такую работу."
+    },
+    {
+      "id": "lf_site_06_testimony",
+      "speakerId": "lf_captive_06_a",
+      "speaker": "Федор",
+      "when": "site step5",
+      "text": "Не всё, что стало чёрным, погибло. Только нас здесь держать больше не надо."
+    },
+    {
+      "id": "lf_captive_07_a_released",
+      "speakerId": "lf_captive_07_a",
+      "speaker": "Лина",
+      "role": "рыбачка",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Сначала проверим настил. Вода никуда не торопится; и нам не надо."
+    },
+    {
+      "id": "lf_captive_07_b_released",
+      "speakerId": "lf_captive_07_b",
+      "speaker": "Торен",
+      "role": "плотник",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Я подтянул поручень. Держитесь здесь, когда пойдём вниз."
+    },
+    {
+      "id": "lf_captive_07_c_released",
+      "speakerId": "lf_captive_07_c",
+      "speaker": "Сима",
+      "role": "лекарка",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "У меня дрожат руки. Я помогу другим, когда мы окажемся на сухом берегу."
+    },
+    {
+      "id": "lf_site_07_testimony",
+      "speakerId": "lf_captive_07_a",
+      "speaker": "Лина",
+      "when": "site step5",
+      "text": "Страшнее всего было видеть близкий берег и не иметь возможности сделать к нему шаг."
+    },
+    {
+      "id": "lf_captive_08_a_released",
+      "speakerId": "lf_captive_08_a",
+      "speaker": "Ярина",
+      "role": "певчая",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Можно больше не делить песню на строки? Я хочу допеть её целиком."
+    },
+    {
+      "id": "lf_captive_08_b_released",
+      "speakerId": "lf_captive_08_b",
+      "speaker": "Век",
+      "role": "пастух",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Я пометил выходы травой. По одному из них мы уже не вернёмся."
+    },
+    {
+      "id": "lf_captive_08_c_released",
+      "speakerId": "lf_captive_08_c",
+      "speaker": "Дина",
+      "role": "садовница",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Эти пучки оставим. Другому человеку тоже понадобится увидеть путь."
+    },
+    {
+      "id": "lf_site_08_testimony",
+      "speakerId": "lf_captive_08_a",
+      "speaker": "Ярина",
+      "when": "site step5",
+      "text": "Мы пели по очереди, чтобы знать: все ещё здесь. Сегодня можно спеть вместе."
+    },
+    {
+      "id": "lf_captive_09_a_released",
+      "speakerId": "lf_captive_09_a",
+      "speaker": "Мирен",
+      "role": "картограф",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Не смейтесь над картой. Рисовал её углём на колене."
+    },
+    {
+      "id": "lf_captive_09_b_released",
+      "speakerId": "lf_captive_09_b",
+      "speaker": "Бела",
+      "role": "сборщица коры",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "За плитой хороший спуск. Я запомнила его ещё до того, как нас привели."
+    },
+    {
+      "id": "lf_captive_09_c_released",
+      "speakerId": "lf_captive_09_c",
+      "speaker": "Стас",
+      "role": "ученик кузнеца",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Когда вернусь к кузнице, первым делом сделаю петлю для двери, которая никого не держит."
+    },
+    {
+      "id": "lf_site_09_testimony",
+      "speakerId": "lf_captive_09_a",
+      "speaker": "Мирен",
+      "when": "site step5",
+      "text": "Пока я рисовал дорогу, она существовала хотя бы на бумаге. Теперь проведём по ней людей."
+    },
+    {
+      "id": "lf_captive_10_a_released",
+      "speakerId": "lf_captive_10_a",
+      "speaker": "Грета",
+      "role": "каменотёс",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Плита звенит под ногой. Здесь не стоим; идём вдоль тёмного шва."
+    },
+    {
+      "id": "lf_captive_10_b_released",
+      "speakerId": "lf_captive_10_b",
+      "speaker": "Леван",
+      "role": "обозный мастер",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Я всё время составлял список потерянного груза. Сегодня вычеркну из него нас."
+    },
+    {
+      "id": "lf_captive_10_c_released",
+      "speakerId": "lf_captive_10_c",
+      "speaker": "Ника",
+      "role": "пекарь",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Если дома осталось хоть немного муки, я испеку хлеб всем, кто вернулся."
+    },
+    {
+      "id": "lf_site_10_testimony",
+      "speakerId": "lf_captive_10_a",
+      "speaker": "Грета",
+      "when": "site step5",
+      "text": "Камень всегда предупреждает. Плохо, когда никто не может отойти после предупреждения."
+    },
+    {
+      "id": "lf_captive_11_a_released",
+      "speakerId": "lf_captive_11_a",
+      "speaker": "Марта",
+      "role": "перевозчица",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Я знаю этот берег. Раньше люди платили мне за переправу. Сегодня достаточно идти рядом."
+    },
+    {
+      "id": "lf_captive_11_b_released",
+      "speakerId": "lf_captive_11_b",
+      "speaker": "Рен",
+      "role": "травник",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Не срывайте белые цветы у воды. Они покажут, где кончается сухая ступень."
+    },
+    {
+      "id": "lf_captive_11_c_released",
+      "speakerId": "lf_captive_11_c",
+      "speaker": "Алва",
+      "role": "швея",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Мне казалось, дома обо мне уже говорят в прошедшем времени. Пойдём скорее."
+    },
+    {
+      "id": "lf_site_11_testimony",
+      "speakerId": "lf_captive_11_a",
+      "speaker": "Марта",
+      "when": "site step5",
+      "text": "Берег был совсем рядом. Но расстояние до дома измеряют не водой."
+    },
+    {
+      "id": "lf_captive_12_a_released",
+      "speakerId": "lf_captive_12_a",
+      "speaker": "Тала",
+      "role": "хранительница записей",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Я расскажу о Костяной чаше дома. Сначала пусть все трое дойдут до ворот."
+    },
+    {
+      "id": "lf_captive_12_b_released",
+      "speakerId": "lf_captive_12_b",
+      "speaker": "Мирко",
+      "role": "охотник",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Эти кости слишком велики для здешних стражей. Не преследуйте звук за деревьями."
+    },
+    {
+      "id": "lf_captive_12_c_released",
+      "speakerId": "lf_captive_12_c",
+      "speaker": "Эда",
+      "role": "мельничная работница",
+      "when": "site step >=4; play once visually, always rereadable",
+      "text": "Последняя клетка… Скажите это ещё раз. Я хочу запомнить, как звучат эти слова."
+    },
+    {
+      "id": "lf_site_12_testimony",
+      "speakerId": "lf_captive_12_a",
+      "speaker": "Тала",
+      "when": "site step5",
+      "text": "За этими деревьями больше нет клеток. Там тот, из-за кого лес замолкает. Не ведите туда спасённых."
+    },
+    {
+      "id": "horse_intro",
+      "speakerId": "narrator",
+      "speaker": "Наблюдение",
+      "when": "prologue",
+      "paragraphs": [
+        "К воротам выходит гнедая кобыла с тёмной гривой и белой звёздочкой на лбу. На потёртом недоуздке завязана зелёная лента; рядом нет ни всадника, ни хозяина.",
+        "Она отступает к лесу, останавливается и ждёт. Между деревьями виден обрывок такой же зелёной ткани.",
+        "Соберите отряд и следуйте за ней. Поселение останется вашим домом; за его границей начинается неизвестный лес."
+      ]
+    },
+    {
+      "id": "horse_return",
+      "speakerId": "lf_captive_01_a",
+      "speaker": "Лада",
+      "when": "lf_site_01 step5",
+      "text": "Её зовут Искра. Она боится сильного ветра, но нашла вас через весь лес. Берегите её, пока идёте за остальными."
+    },
+    {
+      "id": "boss_warning",
+      "speakerId": "lf_captive_12_a",
+      "speaker": "Тала",
+      "when": "all 12 sites step5",
+      "text": "Все люди вернулись. За рощей старых костей больше нет клеток. Там живёт Пращур. Мы слышали, как после его шагов осыпается камень. Если решите идти, оставьте нас здесь — дома."
+    },
+    {
+      "id": "boss_enter",
+      "speakerId": "narrator",
+      "speaker": "Костяная чаша",
+      "when": "boss_active",
+      "text": "Деревья замолкают. Над старой костью поднимается голова, слишком большая для привычного леса. Пращур медленно разворачивается к отряду."
+    },
+    {
+      "id": "boss_end",
+      "speakerId": "narrator",
+      "speaker": "Тридцать шесть дорог домой",
+      "when": "completed",
+      "text": "В Костяной чаше больше никто не отвечает на рёв. Все тридцать шесть спасённых остаются дома. Ваша награда ждёт в резерве; её можно забирать по мере освобождения склада."
+    }
+  ],
+  "playbackPolicy": "Dialogue never blocks combat orders or server mutations; repeat reading has no rewards; no fabricated portraits or spoken audio."
+}

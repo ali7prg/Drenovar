@@ -123,8 +123,8 @@ static func draw_squad(ci: CanvasItem, r: Rect2, tint: Color) -> void:
 	var color := IVORY * tint
 	for offset in [Vector2(-s * 0.26, s * 0.03), Vector2(s * 0.26, s * 0.03), Vector2(0, 0)]:
 		var big: bool = offset == Vector2.ZERO
-		var k := 1.0 if big else 0.8
-		var head := c + offset + Vector2(0, -s * 0.16 * k)
+		var k: float = 1.0 if big else 0.8
+		var head: Vector2 = c + offset + Vector2(0, -s * 0.16 * k)
 		var shoulders := PackedVector2Array()
 		for i in 13:
 			var a := PI + PI * float(i) / 12.0

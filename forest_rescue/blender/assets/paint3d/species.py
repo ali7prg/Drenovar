@@ -100,14 +100,14 @@ LODS_WHORL = {
             copies=False, front_frac=0.5, front_scale=1.15, density=0.6, width_k=1.35, keep_every=1, max_cards=None,
             inner=True),
     2: dict(trunk_step_m=2.5, trunk_sides=5, limb_step_m=1.0, limb_sides=3, limb_min_r_px=99, limb_budget=0,
-            copies=False, front_frac=0.15, front_scale=1.5, density=0.32, width_k=1.7, keep_every=2, max_cards=40,
+            copies=False, front_frac=0.3, front_scale=1.55, density=0.42, width_k=1.6, keep_every=1, max_cards=48,
             inner=False),
 }
 
 LODS_BIRCH = {
     0: dict(trunk_step_m=0.35, trunk_sides=10, limb_step_m=0.25, limb_sides=5, limb_min_r_px=1.2, limb_budget=900,
-            copies=True, copy_min_r_px=1.8, front_frac=1.0, front_scale=1.0, n_masses=26, clumps_per=20,
-            fill_size=1.1, front_extra=0.5, max_cards=1150, core_cards=8),
+            copies=True, copy_min_r_px=1.8, front_frac=1.0, front_scale=1.0, n_masses=34, clumps_per=20,
+            fill_size=1.1, front_extra=0.5, max_cards=1250, core_cards=8),
     1: dict(trunk_step_m=0.7, trunk_sides=6, limb_step_m=0.5, limb_sides=4, limb_min_r_px=2.6, limb_budget=260,
             copies=True, copy_min_r_px=3.5, front_frac=0.55, front_scale=1.15, n_masses=18, clumps_per=10,
             fill_size=1.5, front_extra=0.25, max_cards=450, core_cards=3),

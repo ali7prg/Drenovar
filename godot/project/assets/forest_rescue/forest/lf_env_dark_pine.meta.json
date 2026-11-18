@@ -9,9 +9,60 @@
         "lf_env_dark_pine_v1_LOD2"
       ],
       "tris": {
-        "LOD0": 1636,
-        "LOD1": 574,
-        "LOD2": 142
+        "LOD0": 1680,
+        "LOD1": 552,
+        "LOD2": 260
+      },
+      "materials": {
+        "LOD0": [
+          "lf_bark_pine",
+          "lf_foliage",
+          "lf_foliage_vol"
+        ],
+        "LOD1": [
+          "lf_bark_pine",
+          "lf_foliage",
+          "lf_foliage_vol"
+        ],
+        "LOD2": [
+          "lf_bark_pine",
+          "lf_foliage",
+          "lf_foliage_vol"
+        ]
+      },
+      "height_m": 14.17,
+      "crown_radius_m": 3.76,
+      "bounds_m_blender": [
+        [
+          -3.76,
+          -3.1,
+          -0.3
+        ],
+        [
+          3.44,
+          3.56,
+          14.17
+        ]
+      ],
+      "display_offset_gltf": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "recipe": {
+        "copies": []
+      }
+    },
+    "v2": {
+      "nodes": [
+        "lf_env_dark_pine_v2_LOD0",
+        "lf_env_dark_pine_v2_LOD1",
+        "lf_env_dark_pine_v2_LOD2"
+      ],
+      "tris": {
+        "LOD0": 1680,
+        "LOD1": 580,
+        "LOD2": 278
       },
       "materials": {
         "LOD0": [
@@ -34,64 +85,13 @@
       "crown_radius_m": 3.78,
       "bounds_m_blender": [
         [
-          -3.78,
-          -3.1,
-          -0.3
-        ],
-        [
-          3.44,
-          3.6,
-          14.17
-        ]
-      ],
-      "display_offset_gltf": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "recipe": {
-        "copies": []
-      }
-    },
-    "v2": {
-      "nodes": [
-        "lf_env_dark_pine_v2_LOD0",
-        "lf_env_dark_pine_v2_LOD1",
-        "lf_env_dark_pine_v2_LOD2"
-      ],
-      "tris": {
-        "LOD0": 1642,
-        "LOD1": 598,
-        "LOD2": 142
-      },
-      "materials": {
-        "LOD0": [
-          "lf_bark_pine",
-          "lf_foliage",
-          "lf_foliage_vol"
-        ],
-        "LOD1": [
-          "lf_bark_pine",
-          "lf_foliage",
-          "lf_foliage_vol"
-        ],
-        "LOD2": [
-          "lf_bark_pine",
-          "lf_foliage",
-          "lf_foliage_vol"
-        ]
-      },
-      "height_m": 14.17,
-      "crown_radius_m": 3.68,
-      "bounds_m_blender": [
-        [
           -3.44,
           -3.02,
           -0.3
         ],
         [
-          3.68,
-          3.67,
+          3.78,
+          3.59,
           14.17
         ]
       ],
@@ -112,9 +112,9 @@
         "lf_env_dark_pine_v3_LOD2"
       ],
       "tris": {
-        "LOD0": 1648,
-        "LOD1": 604,
-        "LOD2": 148
+        "LOD0": 1690,
+        "LOD1": 544,
+        "LOD2": 290
       },
       "materials": {
         "LOD0": [
@@ -134,16 +134,16 @@
         ]
       },
       "height_m": 15.3,
-      "crown_radius_m": 3.24,
+      "crown_radius_m": 3.32,
       "bounds_m_blender": [
         [
-          -3.24,
+          -3.32,
           -2.62,
           -0.32
         ],
         [
           3.02,
-          3.21,
+          3.15,
           15.3
         ]
       ],
@@ -167,9 +167,9 @@
         "lf_env_dark_pine_v4_LOD2"
       ],
       "tris": {
-        "LOD0": 1678,
-        "LOD1": 588,
-        "LOD2": 142
+        "LOD0": 1630,
+        "LOD1": 544,
+        "LOD2": 266
       },
       "materials": {
         "LOD0": [
@@ -198,7 +198,7 @@
         ],
         [
           3.9,
-          3.79,
+          3.87,
           12.75
         ]
       ],
@@ -218,9 +218,9 @@
     }
   },
   "tris": {
-    "LOD0": 1678,
-    "LOD1": 604,
-    "LOD2": 148
+    "LOD0": 1690,
+    "LOD1": 580,
+    "LOD2": 290
   },
   "bones": 0,
   "materials": [

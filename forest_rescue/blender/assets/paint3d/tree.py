@@ -331,7 +331,8 @@ class Patches:
         self.fronds = []
         fr = [f for f in fr if (f["v_tip"] - v0) / max(v1 - v0, 1) < self.ref.cfg.get("frond_eta_max", 0.93)]
         for f in fr:
-            tile, rect = seg.make_tile(ref.img, ref.fg, f["mask"], margin=1, scale=scale, bg=ref.bg)
+            tile, rect = seg.make_tile(ref.img, ref.fg, f["mask"], margin=1, scale=scale, bg=ref.bg,
+                                       bg_thresh=self.ref.cfg.get("frond_bg_thresh", 22.0))
             x0, y0, x1, y1 = rect
             eta = (f["v_tip"] - v0) / max(v1 - v0, 1)
             self.tiles.append(tile)
@@ -1021,10 +1022,17 @@ class TreeBuilder:
             A = np.asarray(anchors)
             sel = rng.choice(len(A), size=min(n_masses, len(A)), replace=False)
             for i in sel:
-                C = A[i]
-                u, v, _ = ref.view.project(C[None])
+                C = A[i].copy()
+                r_m = mass_r * Rmax / ref.ppm * rng.uniform(0.8, 1.2)
+                u, v, tq = ref.view.project(C[None])
+                ui = int(np.clip(round(u[0]), 0, ref.W - 1))
+                vi = int(np.clip(round(v[0]), 0, ref.H - 1))
+                # masses in front of the painted front layer are pushed back behind it (front stays exact)
+                need = front_dm[vi, ui] / ref.ppm + 0.15 + 0.6 * r_m if np.isfinite(front_dm[vi, ui]) else -1e9
+                if tq[0] < need:
+                    C = C + ref.view.d * (need - tq[0])
                 eta = float(np.clip((v[0] - v0) / max(v1 - v0, 1), 0, 1))
-                masses.append((C, mass_r * Rmax / ref.ppm * rng.uniform(0.8, 1.2), eta))
+                masses.append((C, r_m, eta))
             n_masses = 0
         n_top = max(1, n_masses // 5)
         for i in range(n_masses):
@@ -1111,7 +1119,7 @@ class TreeBuilder:
                 0.85, None)
         return cards
 
-    def whorl_cards(self, front_dm, seed=5, density=1.0, droop=(14, 30), keep_every=1, max_cards=None, inner=True,
+    def whorl_cards(self, front_dm, seed=5, density=1.0, droop=(4, 14), keep_every=1, max_cards=None, inner=True,
                     foot=0.86, width_k=1.0, len_k=1.0):
         """Conifer: drooping radial frond cards per whorl (tier), textured with painted side-view tier fronds.
         Frond cards facing the reference camera are shortened so the painted front layer stays in front."""

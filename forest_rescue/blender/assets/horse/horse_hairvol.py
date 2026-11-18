@@ -13,7 +13,7 @@ import math
 import numpy as np
 
 from frlib import sdf
-from frlib.sdf import round_cone
+from frlib.sdf import round_cone, flat_capsule
 
 import horse_rig as HRig
 
@@ -30,9 +30,15 @@ class Clumps:
         self.prims = []
         self.segs = []          # (a, b, part)
 
-    def chain(self, pts, radii, part, k=0.02):
+    def chain(self, pts, radii, part, k=0.02, normals=None, flatten=1.0):
+        """Round-cone chain; with `normals` the clump is squashed along the skin normal
+        (flat hair locks lying on the neck instead of round 'dreadlock' tubes)."""
         for i in range(len(pts) - 1):
-            p = round_cone(pts[i], pts[i + 1], radii[i], radii[i + 1], name=part)
+            if normals is not None and flatten < 1.0:
+                nrm = normals[i] + normals[i + 1]
+                p = flat_capsule(pts[i], pts[i + 1], radii[i], radii[i + 1], flatten, up=nrm, name=part)
+            else:
+                p = round_cone(pts[i], pts[i + 1], radii[i], radii[i + 1], name=part)
             p.k = k
             self.prims.append(p)
             self.segs.append((np.asarray(pts[i], float), np.asarray(pts[i + 1], float), part))
@@ -80,21 +86,21 @@ def mane_clumps(guide, seed=13):
         for k in range(n):
             t = (k + rng.uniform(0.2, 0.8)) / n
             y = y0 + (y1 - y0) * t
-            root = _crest_top(guide, y, 0.008 * sx) + V(0, 0, -0.004)
+            root = _crest_top(guide, y, 0.008 * sx) + V(0, 0, -0.016)
             bottom = float(np.interp(y, *line))
             length = max(0.10, (root[2] - bottom) * 1.25) * rng.uniform(0.9, 1.12)
             segs = max(3, int(length / 0.045))
             path = _march(guide, root, V(sx * out, rng.uniform(0.0, 0.12), 0.05), length, segs,
                           0.004, 0.010 if side == "R" else 0.006, rng)
-            r0 = rng.uniform(0.017, 0.023) if side == "R" else rng.uniform(0.014, 0.019)
-            radii = np.linspace(r0, r0 * 0.55, len(path))
-            # waviness: offset the inner points sideways a little along the neck
-            C.chain(path, radii, f"mane_{side}", k=0.03)
+            r0 = rng.uniform(0.030, 0.038) if side == "R" else rng.uniform(0.026, 0.032)
+            radii = np.linspace(r0, r0 * 0.6, len(path))
+            # flat locks lying on the neck, merged into one wavy sheet by the smooth union
+            C.chain(path, radii, f"mane_{side}", k=0.04, normals=guide.grad(path), flatten=0.42)
     # crest ridge: the mane's mass on top of the neck (fuller crest silhouette, both views)
     ys = np.linspace(y0 + 0.005, y1 + 0.02, 14)
-    pts = [_crest_top(guide, y) + V(-0.008, 0.0, -0.012 + 0.006 * math.sin(math.pi * (i / 13)))
+    pts = [_crest_top(guide, y) + V(-0.008, 0.0, -0.024 + 0.004 * math.sin(math.pi * (i / 13)))
            for i, y in enumerate(ys)]
-    radii = [0.026 + 0.008 * math.sin(math.pi * i / 13) for i in range(len(pts))]
+    radii = [0.026 + 0.006 * math.sin(math.pi * i / 13) for i in range(len(pts))]
     C.chain(pts, radii, "mane_crest", k=0.035)
     return C
 
@@ -106,7 +112,8 @@ def forelock_clumps(guide, seed=17):
         root = guide.project(V(x, -1.205, 1.975)[None], 0.004)[0]
         length = (0.13, 0.15, 0.12)[k]
         path = _march(guide, root, V(x * 1.2, -0.80, -0.55), length, 4, 0.006, 0.006, rng, stiff=0.45)
-        C.chain(path, np.linspace(0.020, 0.011, len(path)), "forelock", k=0.02)
+        C.chain(path, np.linspace(0.016, 0.009, len(path)), "forelock", k=0.02,
+                normals=guide.grad(path), flatten=0.5)
     return C
 
 
@@ -127,7 +134,7 @@ def tail_center(t):
 def _tail_section(t):
     """Half-width (X, rear view) and half-depth (Y, side view) of the tail mass along t."""
     ax = np.interp(t, [0.0, 0.12, 0.25, 0.50, 0.72, 0.88, 1.0], [0.040, 0.075, 0.110, 0.130, 0.118, 0.085, 0.040])
-    ay = np.interp(t, [0.0, 0.12, 0.25, 0.50, 0.72, 0.88, 1.0], [0.035, 0.052, 0.070, 0.082, 0.078, 0.062, 0.032])
+    ay = np.interp(t, [0.0, 0.12, 0.25, 0.50, 0.72, 0.88, 1.0], [0.035, 0.050, 0.064, 0.074, 0.071, 0.058, 0.030])
     return ax, ay
 
 

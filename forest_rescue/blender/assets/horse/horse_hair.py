@@ -344,7 +344,7 @@ def forelock_fringe_cards(guide, lod=0, seed=5):
         return CardSet()
     rng = np.random.default_rng(seed)
     cs = CardSet()
-    xs = {0: (-0.055, -0.030, 0.0, 0.030, 0.058), 1: (-0.04, 0.0, 0.045)}[lod]
+    xs = {0: (-0.045, 0.0, 0.040), 1: (-0.04, 0.0, 0.045)}[lod]
     for x in xs:
         root = guide.project(V(x * 0.5, -1.20, 1.975)[None], 0.006)[0]
         # centre strand stops above the star (top tip ~1.865 m); side strands reach eye level
@@ -355,7 +355,7 @@ def forelock_fringe_cards(guide, lod=0, seed=5):
         nrm = guide.grad(path)
         w = [_blend({"head": 1.0}, {"forelock": 1.0} if lod < 1 else {"head": 1.0}, i / (len(path) - 1))
              for i in range(len(path))]
-        cs.add_card(path, np.linspace(0.045, 0.03, len(path)), nrm, STRIP["forelock"], w,
+        cs.add_card(path, np.linspace(0.034, 0.022, len(path)), nrm, STRIP["forelock"], w,
                     twist=rng.normal(0, 0.25), flip=bool(rng.integers(2)))
     return cs
 
@@ -400,7 +400,7 @@ def feather_cards(J, lod=0, seed=9):
         return CardSet()
     rng = np.random.default_rng(seed)
     cs = CardSet()
-    n = {0: 6, 1: 3}[lod]
+    n = {0: 7, 1: 3}[lod]
     for fh in ("F", "H"):
         for s in ("L", "R"):
             sx = 1.0 if s == "L" else -1.0
@@ -412,12 +412,12 @@ def feather_cards(J, lod=0, seed=9):
                 c, sn = math.cos(ang + math.pi / 2), math.sin(ang + math.pi / 2)
                 # angle 0 = front (-Y): direction (sin, -cos)
                 dx, dy = math.sin(ang) * sx, -math.cos(ang)
-                r0, r1 = 0.064, 0.098
+                r0, r1 = 0.058, 0.080
                 root = fet + V(dx * r0, dy * r0 + 0.012, top)
                 tip = V(fet[0] + dx * r1, fet[1] + dy * r1 + 0.01, 0.035 + rng.uniform(-0.008, 0.01))
                 path = np.array([root + (tip - root) * f + V(dx, dy, 0) * 0.015 * math.sin(math.pi * f)
                                  for f in np.linspace(0, 1, 4)])
                 nrm = np.tile(V(dx, dy, 0.0), (4, 1))
-                cs.add_card(path, np.array([0.05, 0.055, 0.055, 0.05]), nrm, STRIP["feather"],
+                cs.add_card(path, np.array([0.032, 0.036, 0.034, 0.028]), nrm, STRIP["tail_wisp"],
                             [{bone: 1.0}] * 4, twist=rng.normal(0, 0.2), flip=bool(rng.integers(2)))
     return cs

@@ -268,7 +268,7 @@ def body_textures(lo, hi, views, J, tack_objs, clumps):
     hair_flow[hy, hx] = HV.flow_dirs(clumps, T.pos[hy, hx])
     pal = HX.sheet_palette(views)
     # sheet hair is painted with light baked in: albedo slightly darker than the painted median
-    hair_pal = (pal["mane"][0] * 0.62, pal["mane"][1] * 0.86, pal["tail"][2] * 1.0)
+    hair_pal = (pal["mane"][0] * 0.80, pal["mane"][1] * 1.0, pal["tail"][2] * 1.05)
     hoof_col = 0.5 * (pal["hoof"][0] + pal["hoof"][1]) * 0.92
     log("sheet palette mane", np.round(pal["mane"][1], 3), "tail", np.round(pal["tail"][1], 3),
         "hoof", np.round(hoof_col, 3), "hair texels", int(hair_mask.sum()))

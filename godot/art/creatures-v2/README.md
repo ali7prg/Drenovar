@@ -87,6 +87,7 @@ $PY -I tools/proof.py glb <id> <work>/<id>/out/<id>_lod0.glb /tmp/rc /tmp/glb id
 $PY -I tools/proof.py glbposes <id> <work>/<id>/out/<id>_lod0.glb /tmp/rc /tmp/glb     # the 4 attack poses
 $PY -I tools/proof.py cycle <id> /tmp/rc /tmp/cycles idle,walk,run                     # filmstrips
 $PY -I tools/slide_check.py <id> [clip,...]                     # foot sliding before export
+python3 -I tools/detail.py /tmp/rc /tmp/glb model_idle_0 <id> /tmp/glb side,front,rear,top,pose   # close-ups
 python3 -I tools/refsheet.py /tmp/rc /tmp/glb <audit images> <audit measurements> <id> ...
 ```
 
@@ -105,6 +106,15 @@ python3 -I tools/refsheet.py /tmp/rc /tmp/glb <audit images> <audit measurements
   bones, e.g. the Teneris tail warp leaves the hind feet that stand under it). Species set `WARP`; the
   shading functions receive unwarped texel positions. Parts marked `"warp": False` are authored directly in
   the new proportions (the Velkor antler crown).
+* **Close-ups.** `tools/detail.py` cuts the same regions from the reference and from the render aligned to it
+  (`proof.py` writes `<id>_<tag>_<view>_aligned.png` and `<id>_glbpose_<phase>_aligned.png`): head, back, legs and
+  tail from the side, head / chest / feet from the front, rear, top halves, and head / body on the attack poses
+  (the 16 pose images double as 3/4 close-ups). `refsheet.py` collects them into `closeup_<id>.jpg`.
+* **Eyes.** An eye sphere has to break the head surface and its socket cut has to open through it: Teneris and
+  Kamneklyk had their eyes closed in under 1-2.5 cm of skull until the close-up pass (check the body SDF along the
+  eye axis, as in that pass).
+* **Leg fur.** Card seeds are random points in a region projected onto the nearest surface, so a region centred on
+  the midline roots the leg cards on the inner faces of the legs only. Leg regions are per leg, centred outside it.
 * **Plates.** `sdf.Prim(grp=...)`: the cut-outs of a plate / shard / scute carve only that plate, never the
   neighbours it overlaps. Baked normals on rigid parts tilted more than ~70 degrees from the low poly are bake
   errors (a ray hit a neighbouring plate) and are replaced by the surface normal (`texturing.run`).

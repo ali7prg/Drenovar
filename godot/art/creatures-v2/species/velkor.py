@@ -367,15 +367,19 @@ FUR_CARDS = [  # sheet: shaggy grey-brown coat everywhere, long pale chest mane,
      "crossed": True, "tip": "#a39079"},                                                            # belly fringe
     {"centre": (-1.00, 1.25, 0), "radii": (0.42, 0.44, 0.50), "count": 240, "length": 0.26, "width": 0.09,
      "flow": lambda p, n: np.array([-0.6, -1.0, 0]), "lift": 0.15, "droop": 0.2, "tip": "#9d8770"},  # haunches
-    {"centre": (0.96, 0.66, 0), "radii": (0.26, 0.60, 0.54), "count": 420, "length": 0.24, "width": 0.10,
+] + [  # leg fur per leg, seeded outside each leg (a midline region roots almost every card on the inner faces)
+    {"centre": (0.96, 0.66, 0.46 * s), "radii": (0.26, 0.60, 0.17), "count": 220, "length": 0.24, "width": 0.10,
      "flow": lambda p, n: np.array([-0.3, -1.0, 0]), "lift": 0.15, "gravity": 0.2, "droop": 0.1,
-     "crossed": True, "tip": "#a8957f", "root": "#5e4e40", "root_k": 1.0},                          # forelegs
-    {"centre": (-0.95, 0.66, 0), "radii": (0.34, 0.58, 0.54), "count": 400, "length": 0.22, "width": 0.10,
+     "crossed": True, "tip": "#a8957f", "root": "#5e4e40", "root_k": 1.0} for s in (1, -1)          # forelegs
+] + [
+    {"centre": (-0.95, 0.66, 0.46 * s), "radii": (0.34, 0.58, 0.17), "count": 210, "length": 0.22, "width": 0.10,
      "flow": lambda p, n: np.array([-0.4, -1.0, 0]), "lift": 0.15, "droop": 0.1, "crossed": True,
-     "tip": "#a08b74", "root": "#5e4e40", "root_k": 1.0},                                           # hind legs
-    {"centre": (0.05, 0.24, 0), "radii": (1.30, 0.14, 0.55), "count": 230, "length": 0.17, "width": 0.08,
+     "tip": "#a08b74", "root": "#5e4e40", "root_k": 1.0} for s in (1, -1)                           # hind legs
+] + [
+    {"centre": (cx, 0.24, 0.42 * s), "radii": (0.18, 0.14, 0.14), "count": 60, "length": 0.17, "width": 0.08,
      "flow": lambda p, n: np.array([0.0, -1.0, 0]), "lift": 0.3, "droop": 0.05, "crossed": True,
-     "tip": "#b5a38d"},                                                                             # fetlock tufts
+     "tip": "#b5a38d"} for s in (1, -1) for cx in (1.02, -1.02)                                     # fetlock tufts
+] + [
     {"centre": (-1.52, 1.24, 0), "radii": (0.24, 0.44, 0.20), "count": 340, "length": 0.50, "width": 0.14,
      "flow": lambda p, n: np.array([-0.3, -1.0, 0]), "lift": 0.25, "droop": 0.2, "crossed": True,
      "tip": "#e2d4be", "root": "#7a6652", "root_k": 1.0},                                                                             # tail brush

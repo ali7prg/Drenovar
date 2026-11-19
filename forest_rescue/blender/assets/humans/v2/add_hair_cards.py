@@ -31,7 +31,7 @@ ITER = int(ARGS[1]) if len(ARGS) > 1 else 25
 T0 = time.time()
 # short tousled crop: outward tufts all over; tied-back hair: flat tufts along the flow + loose strands
 STYLE = {
-    "lf_squad_captain": dict(kind="crop", n=(64, 28), L=(0.020, 0.034), W=0.030, loose=0),
+    "lf_squad_captain": dict(kind="crop", n=(64, 28), L=(0.018, 0.028), W=0.030, loose=0),
     "lf_civilian_courier": dict(kind="tied", n=(52, 24), L=(0.016, 0.028), W=0.026, loose=12, loose_L=(0.055, 0.095)),
     "lf_civilian_quarry_worker": dict(kind="tied", n=(52, 24), L=(0.016, 0.028), W=0.026, loose=12,
                                       loose_L=(0.055, 0.095)),
@@ -69,8 +69,13 @@ def atlas_from_portrait(C):
     e = float(np.linalg.norm(el - er))
     cs, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     cont = max(cs, key=len)[:, 0, :].astype(float)
-    keep = (cont[:, 1] < eye_y - 0.15 * e) & (cont[:, 1] > 2) & (cont[:, 0] > 2) & (cont[:, 0] < W - 3)
+    keep = (cont[:, 1] < eye_y - 0.45 * e) & (cont[:, 1] > 2) & (cont[:, 0] > 2) & (cont[:, 0] < W - 3)
     pts = cont[keep]
+    # distinct clumps: evenly spaced in angle around the head centre
+    hcx, hcy = 0.5 * (er[0] + el[0]), eye_y + 0.2 * e
+    ang = np.arctan2(pts[:, 1] - hcy, pts[:, 0] - hcx)
+    order = np.argsort(ang)
+    pts = pts[order]
     sm = cv2.GaussianBlur(mask.astype(np.float32), (0, 0), max(2.0, 0.08 * e))
     gy, gx = np.gradient(sm)
     s = 0.75 * e
@@ -78,11 +83,12 @@ def atlas_from_portrait(C):
     # evenly spaced along the kept outline
     if len(pts) < 20:
         raise RuntimeError("hair outline too short")
-    seg = np.r_[0, np.cumsum(np.linalg.norm(np.diff(pts, axis=0), axis=1))]
-    picks = np.interp(np.linspace(0.04, 0.96, GRID * GRID) * seg[-1], seg, np.arange(len(pts))).astype(int)
+    angs = np.sort(ang)
+    targets = np.linspace(angs[int(0.03 * len(angs))], angs[int(0.97 * len(angs)) - 1], GRID * GRID)
+    picks = np.clip(np.searchsorted(angs, targets), 0, len(pts) - 1)
     atlas = np.zeros((GRID * P, GRID * P, 4), np.float32)
     xs = (np.arange(P) + 0.5) / P
-    win = np.clip(np.minimum(xs, 1 - xs) / 0.22, 0, 1)
+    win = np.clip(np.minimum(xs, 1 - xs) / 0.12, 0, 1)
     win = win * win * (3 - 2 * win)
     for k, pi in enumerate(picks):
         cx, cy = pts[pi]
@@ -131,18 +137,30 @@ def rot_about(v, axis, ang):
     return v * math.cos(ang) + np.cross(axis, v) * math.sin(ang) + axis * np.dot(axis, v) * (1 - math.cos(ang))
 
 
-def cards_for(lod, n_cards, st, seed):
+def hair_faces(lod, C, tex):
+    """Hair polygons of a finished LOD (material slots are merged by then): head polygons above the eye
+    line - 3 cm whose painted texel (at the UV centroid) is hair-dark."""
+    me = lod.data
+    cen = np.array([p.center[:] for p in me.polygons])
+    uvl = me.uv_layers.active.data
+    th, tw = tex.shape[:2]
+    lum = np.zeros(len(cen))
+    for i, p in enumerate(me.polygons):
+        uv = np.mean([uvl[li].uv[:] for li in p.loop_indices], axis=0)
+        c = tex[min(th - 1, max(0, int(uv[1] * th))), min(tw - 1, max(0, int(uv[0] * tw))), :3]
+        lum[i] = 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
+    return (cen[:, 2] > C["L"]["eye"] - 0.03) & (np.abs(cen[:, 0]) < 0.2) & (lum < 0.30)
+
+
+def cards_for(lod, n_cards, st, seed, C, tex):
     """Card quads (verts, faces, uvs, per-vertex weight dicts) on the hair shell of one LOD mesh."""
     from scipy.spatial import cKDTree
     me = lod.data
-    hair_slots = [i for i, m in enumerate(me.materials) if m is not None and m.name.endswith("_hair")]
-    if not hair_slots:
-        return None
-    hs = hair_slots[0]
     cen = np.array([p.center[:] for p in me.polygons])
     nrm = np.array([p.normal[:] for p in me.polygons])
-    mi = np.array([p.material_index for p in me.polygons])
-    hair = (mi == hs) & (cen[:, 2] > 1.2)
+    hair = hair_faces(lod, C, tex)
+    mi = np.where(hair, 1, 0)
+    hs = 1
     if hair.sum() < 30:
         return None
     hc_ = cen[hair]
@@ -151,8 +169,8 @@ def cards_for(lod, n_cards, st, seed):
     radial = cen - hc
     radial /= np.maximum(np.linalg.norm(radial, axis=1, keepdims=True), 1e-9)
     out = np.einsum("ij,ij->i", nrm, radial)
-    cand = hair & (out > 0.35) & (nrm[:, 2] > -0.35) & (cen[:, 2] > hc[2] - 0.03) \
-        & ~((nrm[:, 1] < -0.6) & (cen[:, 2] < top - 0.045))
+    cand = hair & (out > 0.35) & (nrm[:, 2] > -0.35) & (cen[:, 2] > hc[2] - 0.03) & (nrm[:, 1] > -0.35) \
+        & ~((cen[:, 1] < hc[1] - 0.02) & (cen[:, 2] < top - 0.03))
     idx = np.nonzero(cand)[0]
     if len(idx) < 10:
         return None
@@ -181,13 +199,17 @@ def cards_for(lod, n_cards, st, seed):
 
     for k, f in enumerate(sel):
         n = nrm[f]
-        p = cen[f] - n * 0.005
+        p = cen[f] - n * 0.008
         tang = np.cross(n, up)
         tang = tang / np.linalg.norm(tang) if np.linalg.norm(tang) > 1e-3 else np.array([1.0, 0, 0])
+        # hair flow on the surface: down and back from the crown (tied styles: more toward the back)
+        flow = np.array([0.0, 0.6 if st["kind"] == "crop" else 1.0, -1.0])
+        flow = flow - n * np.dot(flow, n)
+        flow = flow / max(np.linalg.norm(flow), 1e-6)
         if st["kind"] == "crop":
-            d = n + 0.30 * rng.uniform(-1, 1) * tang + 0.12 * up
+            d = 0.60 * n + 0.40 * flow + 0.25 * rng.uniform(-1, 1) * tang
         else:
-            d = n * 0.55 + 0.45 * back + 0.15 * rng.uniform(-1, 1) * tang
+            d = 0.40 * n + 0.60 * flow + 0.15 * rng.uniform(-1, 1) * tang
         d /= np.linalg.norm(d)
         w = np.cross(d, up) if abs(d[2]) < 0.85 else np.array([1.0, 0.0, 0.0])
         w /= np.linalg.norm(w)
@@ -231,9 +253,15 @@ def main():
     mat = core.material(f"{AID}_hair_cards", base_tex=img, alpha_clip=0.5, double_sided=True, rough=1.0)
     bsdf = next(n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
     bsdf.inputs["Specular IOR Level"].default_value = 0.0
+    tex = None
+    for m in lods[0].data.materials:
+        for nd in (m.node_tree.nodes if m and m.node_tree else []):
+            if nd.type == "TEX_IMAGE" and nd.image is not None and tex is None:
+                im = nd.image
+                tex = np.array(im.pixels[:], dtype=np.float32).reshape(im.size[1], im.size[0], im.channels)
     added = {}
     for k, o in enumerate(lods[:2]):
-        res = cards_for(o, st["n"][k], st, seed=7 + k)
+        res = cards_for(o, st["n"][k], st, seed=7 + k, C=C, tex=tex)
         if res is None:
             log("no hair shell on", o.name)
             continue

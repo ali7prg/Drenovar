@@ -562,15 +562,12 @@ def clear_face_occluders(lo0, J):
             front = (cen[occ][:, 1] < cen[skin][i, 1] - 0.002) & (d < 0.012)
             kill[np.nonzero(occ)[0][front]] = True
     hooded = any(g.get("kind") == "hood" for g in C.get("garments", []) + C.get("acc", []))
-    if hooded:
-        kill |= head & (mat == MAT_IDS["hair"]) & (cen[:, 2] > L["eye"] + 0.05)
     if kill.any():
         bmesh.ops.delete(bm, geom=[bm.faces[int(k)] for k in np.nonzero(kill)[0]], context="FACES")
         bm.to_mesh(lo0.data)
         lo0.data.update()
     bm.free()
-    log("face occluders removed (hair/shell faces over the upper face%s):" % (", hood dome" if hooded else ""),
-        int(kill.sum()))
+    log("face occluders removed (hair/shell faces over the upper face):", int(kill.sum()))
 
 
 FRONT_FACES = True   # every face from the front painting (no portrait projection); portrait only lays out UVs
@@ -729,7 +726,7 @@ def texture(lo0, R, J, pinfo0=None):
             if True:
                 # hair (hairline, sideburns, beard edges, hair under a hood) never takes the painted face's
                 # skin: the light bands where the hair volume overlaps the painted forehead / cheeks
-                hr_ = is_head(data[2]) & (tex_mat == MAT_IDS["hair"]) & (~in_inner_f)
+                hr_ = is_head(data[2]) & (tex_mat == MAT_IDS["hair"]) & (~in_inner_f) & (data[2][:, 2] > C["L"]["eye"])
                 sk_on_hair = hr_ & (np.linalg.norm(colf - skin_med, axis=1) < 0.15) & ((colf @ lw) > 0.7 * med_l)
                 wf = np.where(sk_on_hair, 0.0, wf)
                 log("painted skin dropped from the hair outside the inner face", int(sk_on_hair.sum()))

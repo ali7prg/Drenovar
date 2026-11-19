@@ -1,0 +1,51 @@
+{
+ "id": "lf_foliage_atlas_green",
+ "source": "lf_foliage_atlas.png (kit v2)",
+ "tool": "godot/project/src/forest_rescue/world/tools/bake_green_oak_atlas.py",
+ "purpose": "baked green-broadleaf palette copy for golden-oak instances outside the art/01 golden grove (world layer palette zoning; no runtime tint)",
+ "method": "golden foliage texels (hue 25..100, chroma > 8) get the measured art/01 golden->green shift: lightness z-score transfer, chroma ratio, hue rotation; browns/greys/other hues untouched",
+ "art01_green_broadleaf": {
+  "L_mean": 40.88246154785156,
+  "L_std": 13.164867401123047,
+  "C_med": 22.868934631347656,
+  "H_med": 110.33731079101562,
+  "n": 73729,
+  "L_p10_p50_p90": [
+   24.5,
+   39.7,
+   59.8
+  ]
+ },
+ "art01_golden_grove": {
+  "L_mean": 46.225135803222656,
+  "L_std": 14.39096736907959,
+  "C_med": 36.13178634643555,
+  "H_med": 78.0687255859375,
+  "n": 69745,
+  "L_p10_p50_p90": [
+   27.5,
+   45.5,
+   66.7
+  ]
+ },
+ "atlas_golden_before": {
+  "L_mean": 44.71904373168945,
+  "L_std": 16.5589542388916,
+  "C_med": 32.16564178466797,
+  "H_med": 75.8797607421875
+ },
+ "atlas_after": {
+  "lab": {
+   "L_mean": 40.07040786743164,
+   "C_med": 21.62370491027832,
+   "H_med": 104.53948211669922
+  }
+ },
+ "transfer": {
+  "dL": -5.342674255371094,
+  "kL": 0.9148007262811991,
+  "kC": 0.6329311928305397,
+  "dH_deg": 32.268585205078125
+ },
+ "selected_texels": 1000891
+}

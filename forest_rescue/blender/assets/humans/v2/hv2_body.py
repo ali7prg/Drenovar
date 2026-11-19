@@ -107,7 +107,7 @@ def torso_part(R, C, J):
             t = tmpl[i]
             v = t if meas is None else meas
             v = min(v, lim)
-            v = float(np.clip(v, 0.80 * t, 1.25 * t))
+            v = float(np.clip(v, 0.80 * t, B.get("torso_max", 1.25) * t))
             if sgn > 0:
                 al[i] = v
             else:
@@ -218,8 +218,8 @@ def arm_parts(R, C, J, prof):
         parts.append(F.tube(el, wr + (wr - el) / np.linalg.norm(wr - el) * 0.012, s2, a2, b2, c2,
                             bone=f"{S}LowerArm", label="body", k=0.014, name=f"forearm_{s}"))
         # deltoid cap + elbow
-        dr = float(ARM_T[1][0] * k1)
-        parts.append(F.ellipsoid(sh + np.array([sx * 0.010, 0.004, 0.004]), (dr * 1.02, dr * 1.0, dr * 1.05),
+        dr = float(ARM_T[1][0] * k1) * C["build"].get("deltoid", 1.0)
+        parts.append(F.ellipsoid(sh + np.array([sx * 0.016, 0.004, 0.002]), (dr * 1.06, dr * 1.0, dr * 1.08),
                                  bone=f"{S}UpperArm", label="body", k=0.03, name=f"deltoid_{s}"))
         er = 0.5 * (a1[-1] + a2[0])
         parts.append(F.sphere(el, er * 0.92, bone=f"{S}LowerArm", label="body", k=0.02, name=f"elbow_{s}"))
@@ -393,7 +393,7 @@ def hair_sdf(C, J, P, d_body):
     hl = np.interp(aphi, hp, hv)
     above = z - hl                                   # >0 above the hairline
     # thickness: fuller on top/back, curly noise
-    vol = 1.0 + 0.35 * np.clip((z + 0.02) / 0.10, 0, 1) + 0.25 * np.clip((aphi - 1.2) / 1.5, 0, 1)
+    vol = 1.0 + 0.20 * np.clip((z + 0.02) / 0.10, 0, 1) - 0.25 * np.clip((aphi - 1.9) / 1.2, 0, 1)
     if style in ("curly", "wavy", "tousled"):
         vol = vol * (0.80 + 0.45 * _noise3(P, 70.0, 3))
     # thin at the hairline (no visor), full volume 3-4 cm above it; thinner over the forehead
@@ -410,16 +410,18 @@ def hair_sdf(C, J, P, d_body):
         d_scalp = np.maximum(d_scalp, (z - (-0.02)) * S[2])      # only the nape below the helmet
     out = d_scalp
     if beard and beard != "stubble":
-        base = {"full": 0.010, "full_grey": 0.009, "full_red": 0.011}.get(beard, 0.008)
-        chin_bulk = {"full": 0.016, "full_grey": 0.014, "full_red": 0.016}.get(beard, 0.01)
-        tb = base + chin_bulk * np.exp(-((z + 0.120) / 0.045) ** 2) * np.exp(-(x / 0.050) ** 2)
+        base = {"full": 0.0045, "full_grey": 0.004, "full_red": 0.005}.get(beard, 0.004)
+        chin_bulk = {"full": 0.020, "full_grey": 0.017, "full_red": 0.020}.get(beard, 0.012)
+        tb = base + chin_bulk * np.exp(-((z + 0.125) / 0.040) ** 2) * np.exp(-(x / 0.045) ** 2)
+        # thinner around the lips (no slot), short moustache
+        lipz = np.sqrt((x / 0.030) ** 2 + ((z + 0.075) / 0.016) ** 2)
+        tb = tb * np.clip(lipz - 0.6, 0.0, 1.0) * (1 - 0.0) + 0.0
         tb = tb * (0.85 + 0.3 * _noise3(P, 90.0, 7))
         top = np.interp(aphi, [0, 0.30, 0.55, 1.0, 1.45, 1.75], [-0.050, -0.052, -0.040, -0.024, -0.016, -0.02])
         below = top - z
         tb = tb * (0.08 + 0.92 * np.clip(below / 0.025, 0, 1))
         front = 1.70 - aphi
-        lips = np.sqrt((x / 0.021) ** 2 + ((z + 0.075) / 0.0105) ** 2) - 1.0
-        allow = np.minimum(np.minimum(below, front * 0.05), np.where(aphi < 0.8, lips * 0.012, 1.0))
+        allow = np.minimum(below, front * 0.05)
         d_beard = smax_np(d_body - tb, -allow * S[2], 0.004)
         out = smin_np(out, d_beard, 0.004)
     return out

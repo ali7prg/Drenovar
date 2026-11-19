@@ -86,7 +86,7 @@ def hair_geometry(R, J, body_field):
     P = fld.points(np.zeros(3, int), fld.n)
     db = body_field.sample(P.reshape(-1, 3)).reshape(P.shape[:3])
     fld.d = HB.hair_sdf(C, J, P, db).astype(np.float32)
-    fld.intersect_xz(R, k=0.010, dilate=0.003)
+    fld.intersect_xz(R, k=0.018, dilate=0.004)
     v, f = fld.mesh()
     log("hair MC", len(v), "verts", len(f), "tris")
     return v, f
@@ -360,7 +360,15 @@ def texture(lo0, R, J):
         ws = tot
         per.update(per2)
         pinfo = dict(cam=cam, params=params.tolist(), err=err)
-    col, seen = HT.synthesize(T, data, col, ws, per, views)
+    mi = np.array([p.material_index for p in lo0.data.polygons])
+    lt = np.empty(len(lo0.data.loop_triangles), np.int64) if False else None
+    me = lo0.data
+    me.calc_loop_triangles()
+    tri_poly = np.empty(len(me.loop_triangles), np.int64)
+    me.loop_triangles.foreach_get("polygon_index", tri_poly)
+    yy, xx = data[0], data[1]
+    group = mi[tri_poly[T.tri[yy, xx]]]
+    col, seen = HT.synthesize(T, data, col, ws, per, views, group=group)
     log("texture: seen fraction", round(float(seen.mean()), 3))
     img = HT.to_image(T, data, col)
     p_png = paths.texture_master(GROUP, f"{AID}_color_master.png")

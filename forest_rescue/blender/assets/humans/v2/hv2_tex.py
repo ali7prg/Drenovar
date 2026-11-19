@@ -131,8 +131,21 @@ def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None)
     return (yy, xx, P, N), col, ws, per
 
 
-def synthesize(T, data, col, ws, per, views, seen_thr=0.25, k=14, detail=0.9, axis_x=0.0):
-    """Fill weakly seen texels from the same character's painted cloth (see module doc)."""
+def synthesize(T, data, col, ws, per, views, seen_thr=0.25, k=14, detail=0.9, axis_x=0.0, group=None):
+    """Fill weakly seen texels from the same character's painted cloth (see module doc).
+    group: per-texel material id; unseen texels only borrow from seen texels of their group."""
+    if group is not None:
+        out = col.copy()
+        seen_all = ws >= seen_thr
+        for g in np.unique(group):
+            sel = group == g
+            if not (sel & seen_all).any():
+                continue
+            sub_data = (data[0][sel], data[1][sel], data[2][sel], data[3][sel])
+            sub_per = {kk: (vv[0][sel], vv[1][sel], vv[2][sel]) for kk, vv in per.items()}
+            o, _ = synthesize(T, sub_data, col[sel], ws[sel], sub_per, views, seen_thr, k, detail, axis_x, None)
+            out[sel] = o
+        return out, seen_all
     yy, xx, P, N = data
     seen = ws >= seen_thr
     out = col.copy()

@@ -24,7 +24,7 @@ CHARS = {
                    hair_thick=0.020, boot_top=0.225, sleeve="rolled"),
         garments=[
             dict(kind="skirt", name="apron", z_top=1.115, wrap=(-138, 138), offset=0.012,
-                 fit="run", hem="mask", flare=0.03, material="cloth", thickness=0.005,
+                 fit="run", hem=(0.355, 0.385, 0.405), flare=0.03, material="cloth", thickness=0.005,
                  back_open=True),
             dict(kind="bib", name="apron_bib", z_top=1.425, z_bot=1.10, half_angle=(34, 58),
                  offset=0.006, material="cloth", thickness=0.004),

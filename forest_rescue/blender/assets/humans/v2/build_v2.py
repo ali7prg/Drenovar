@@ -536,6 +536,9 @@ def portrait_cam(J):
     return dict(cam=cam, params=params.tolist(), err=err)
 
 
+FRONT_FACES = True   # every face from the front painting (no portrait projection); portrait only lays out UVs
+
+
 def texture(lo0, R, J, pinfo0=None):
     """Single source per feature.  Face (forehead..chin, cheek..jaw, feathered mask): the expression
     portrait projected from ITS OWN solved camera (yaw/pitch/roll/scale, |n.v| >= 0.5, skin + hair
@@ -543,6 +546,8 @@ def texture(lo0, R, J, pinfo0=None):
     with |n.v| >= 0.35 (head: >= 0.5); the rest synthesised per material and head/body (head skin
     from the character's own cheek colour, hair with strand detail from the painted hair)."""
     import cv2 as _cv
+    if FRONT_FACES:
+        pinfo0 = None
     verts, tris, uv, vn = core.mesh_arrays(lo0, evaluated=False)
     T = texproj.rasterize_uv(verts, tris, uv, TEX, vn)
     o, S = HB.head_frame(C, J)
@@ -560,9 +565,36 @@ def texture(lo0, R, J, pinfo0=None):
     def is_head(P):
         return (P[:, 2] > chin - 0.07) & (np.abs(P[:, 0]) < 0.20)
 
+    # head skin: the painted face region is bounded by natural edges - hairline (hair is its own material),
+    # the jaw / neck and the ears - not by per-triangle normals (decimated facets made a patchwork across
+    # the cheeks): facing is measured with a smooth proxy normal (tall head ellipsoid above the chin,
+    # neck cylinder below), so the front paints the whole face and the fade sits between cheek and ear
+    head_skin_t = is_head(P0) & (tex_mat == MAT_IDS["body"])
+    hc = np.array([0.0, o[1] + 0.012, C["L"]["eye"] - 0.012])
+    rad = np.array([0.080 * S[0], 0.100 * S[1], 0.200 * S[2]])
+    neck_y = float(J["Neck"][1])
+
+    def proxy_n(P):
+        q = (P - hc) / rad ** 2
+        ne = q / np.maximum(np.linalg.norm(q, axis=1, keepdims=True), 1e-9)
+        qc = np.stack([P[:, 0], P[:, 1] - neck_y, np.zeros(len(P))], 1)
+        nc = qc / np.maximum(np.linalg.norm(qc, axis=1, keepdims=True), 1e-9)
+        t = np.clip((P[:, 2] - (chin - 0.03)) / 0.04, 0.0, 1.0)[:, None]
+        n = ne * t + nc * (1.0 - t)
+        return n / np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-9)
+
+    def nfn(P, N):
+        return np.where(head_skin_t[:, None], proxy_n(P), N) if FRONT_FACES else N
+
     def lohi(P):
         h = is_head(P)
-        return np.where(h, 0.50, 0.35), np.where(h, 0.68, 0.55)
+        lo_ = np.where(h, 0.50, 0.35)
+        hi_ = np.where(h, 0.68, 0.55)
+        if FRONT_FACES:
+            lo_ = np.where(head_skin_t, 0.22, lo_)
+            hi_ = np.where(head_skin_t, 0.42, hi_)
+        return lo_, hi_
+    vis_eps_t = np.where(is_head(P0), 0.012, 0.006)
     views = [R.front, R.back]
     pinfo = pinfo0
     cheek_ref = None
@@ -614,7 +646,8 @@ def texture(lo0, R, J, pinfo0=None):
             # and skin-coloured portrait pixels never land on hair geometry beside the face (hood openings)
             log("portrait: dark (hair) pixels dropped from head skin", int(dark.sum()))
     # painted front/back views; the front never paints where the portrait paints (complementary)
-    data, col, ws, per = HT.project_views(T, verts, tris, views, erode=2, lo_hi_fn=lohi)
+    data, col, ws, per = HT.project_views(T, verts, tris, views, erode=2, lo_hi_fn=lohi, vis_eps=vis_eps_t,
+                                          normal_fn=nfn)
     wf, uf, vf = per["front"]
     wb, ub, vb = per["back"]
     # hoods / caps / helmets never take the painted face pixels (herbalist hood rim)
@@ -633,6 +666,29 @@ def texture(lo0, R, J, pinfo0=None):
     wf = wf * (1.0 - wport)
     colf = texproj._bilinear(R.front.image, uf, vf)[:, :3]
     colb = texproj._bilinear(R.back.image, ub, vb)[:, :3]
+    if FRONT_FACES:
+        # inner face (eyes + brows .. mouth .. chin) in the front painting: everything there is kept;
+        # outside it, dark painted pixels (hair locks, hat shadow, collar) never land on head skin
+        er_, el_, no_, mo_, ch_ = [np.array(p_, float) for p_ in fp]
+        up_ = (er_ + el_) / 2 - mo_
+        inner = np.array([er_ + up_ * 0.60 + (er_ - el_) * 0.15, el_ + up_ * 0.60 + (el_ - er_) * 0.15,
+                          el_ + (el_ - er_) * 0.25, mo_ + (el_ - er_) * 0.45, ch_ + (ch_ - mo_) * 0.3,
+                          mo_ + (er_ - el_) * 0.45, er_ + (er_ - el_) * 0.25])
+        im_in = np.zeros(R.front.image.shape[:2], np.uint8)
+        _cv.fillPoly(im_in, [np.round(_cv.convexHull(inner.astype(np.float32))[:, 0, :]).astype(np.int32)], 1)
+        in_inner_f = texproj._bilinear(im_in.astype(np.float32)[..., None], uf, vf)[:, 0] > 0.5
+        lw = np.array([0.299, 0.587, 0.114])
+        hs_ = is_head(data[2]) & (tex_mat == MAT_IDS["body"])
+        ref_f = hs_ & in_inner_f & (wf > 0.5)
+        if ref_f.sum() > 50:
+            med_l = float(np.median(colf[ref_f] @ lw))
+            skin_med = np.median(colf[ref_f], 0)
+            dk_f = hs_ & (~in_inner_f) & ((colf @ lw) < 0.55 * med_l)
+            dk_b = hs_ & ((colb @ lw) < 0.55 * med_l)
+            wf = np.where(dk_f, 0.0, wf)
+            wb = np.where(dk_b, 0.0, wb)
+            log("front face: skin", np.round(skin_med, 3), "dark pixels dropped outside the inner face",
+                int((dk_f & (per["front"][0] > 0)).sum()), "back", int((dk_b & (per["back"][0] > 0)).sum()))
     if any(g.get("kind") == "hood" for g in C.get("garments", []) + C.get("acc", [])):
         # hood: painted pixels unlike the hood's own cloth (face / hair seen through the wider painted
         # opening) never texture the hood shell - it is synthesised from its own cloth instead

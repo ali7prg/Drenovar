@@ -97,7 +97,8 @@ def zbuf(verts, tris, cam):
     return texproj.zbuffer(verts, tris, cam, pad=0)
 
 
-def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None, lo_hi_fn=None, vis_eps=0.006):
+def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None, lo_hi_fn=None, vis_eps=0.006,
+                  normal_fn=None):
     """Angle-limited, z-buffered projection.  Returns colour, weight sum, per-view weights.
     lo_hi_fn(P) -> (lo, hi) per texel (stricter limits on the head)."""
     W, H = T.size
@@ -120,7 +121,7 @@ def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None,
         m = ndi.binary_erosion(v.mask, iterations=erode) if erode else v.mask
         inm = np.zeros(len(P), bool)
         inm[ok] = m[vi[ok], ui[ok]]
-        facing = N @ (-v.d)
+        facing = (normal_fn(P, N) if normal_fn is not None else N) @ (-v.d)
         if lo_hi_fn is not None:
             lo_t, hi_t = lo_hi_fn(P)
             w = np.clip((facing - lo_t) / np.maximum(hi_t - lo_t, 1e-6), 0, 1)

@@ -123,7 +123,8 @@ class Cam:
 
 
 def solve(P3, p2, size, f_range=(300, 20000), free_pp=False, free_k1=False, free_k2=False, weights=None,
-          pp_prior=0.02, k_prior=0.5, f0=None, fix_f=False, f_prior=None, init_centre=None, init_target=None):
+          pp_prior=0.02, k_prior=0.5, f0=None, fix_f=False, f_prior=None, init_centre=None, init_target=None,
+          min_height=None):
     """P3 (N,3) world points, p2 (N,2) painting pixels (crop coordinates). Returns (Cam, report)."""
     P3 = np.asarray(P3, float)
     p2 = np.asarray(p2, float)
@@ -184,6 +185,8 @@ def solve(P3, p2, size, f_range=(300, 20000), free_pp=False, free_k1=False, free
         u, v, z = c.project(P3)
         r = np.concatenate([(u - p2[:, 0]) * np.sqrt(w), (v - p2[:, 1]) * np.sqrt(w)])
         extra = []
+        if min_height is not None:
+            extra += [40.0 * min(0.0, c.centre[2] - min_height)]
         if fix_f:
             extra += [(math.log(c.f) - math.log(f0)) * 400.0]
         elif f_prior:
@@ -197,7 +200,8 @@ def solve(P3, p2, size, f_range=(300, 20000), free_pp=False, free_k1=False, free
         return np.concatenate([r, np.array(extra)])
 
     x0 = pack(cam)
-    sol = least_squares(resid, x0, method="lm" if len(P3) * 2 >= len(x0) + 2 else "trf", max_nfev=4000)
+    sol = least_squares(resid, x0, method="trf" if min_height is not None else ("lm" if len(P3) * 2 >= len(x0) + 2 else "trf"),
+                        max_nfev=4000)
     cam = unpack(sol.x)
     u, v, z = cam.project(P3)
     e = np.hypot(u - p2[:, 0], v - p2[:, 1])

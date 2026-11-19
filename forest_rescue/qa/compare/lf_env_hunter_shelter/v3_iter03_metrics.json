@@ -1,0 +1,54 @@
+{
+  "main_view": {
+    "iou": 0.7488,
+    "colour_err": 0.1095,
+    "ssim": 0.4248,
+    "ref_px": 81731,
+    "render_px": 68626,
+    "iou_structure_only": 0.7048785033664935
+  },
+  "camera": {
+    "rms_px": 18.45,
+    "max_px": 26.63,
+    "n_points": 9
+  },
+  "insets": {
+    "front": {
+      "iou": 0.1894,
+      "colour_err": 0.204,
+      "ssim": 0.4209,
+      "ref_px": 82240,
+      "render_px": 18504
+    },
+    "side": {
+      "iou": 0.0892,
+      "colour_err": 0.1356,
+      "ssim": 0.517,
+      "ref_px": 54688,
+      "render_px": 4932
+    }
+  },
+  "texture": {
+    "texels": 2290167,
+    "projected_frac": 0.05706134094151213,
+    "seconds": 10.3
+  },
+  "sheets": "forest_rescue/qa/compare/lf_env_hunter_shelter/v3_iter03_*",
+  "tris": {
+    "LOD0": {
+      "structure": 3098,
+      "base": 1372,
+      "total": 4470
+    },
+    "LOD1": {
+      "structure": 936,
+      "base": 314,
+      "total": 1250
+    },
+    "LOD2": {
+      "structure": 340,
+      "base": 74,
+      "total": 414
+    }
+  }
+}

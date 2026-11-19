@@ -20,11 +20,13 @@ ATLAS = 2048
 MASK_THRESH = 0.09
 MASK_EXCLUDE = [(442, 0, 450, 268)]
 F_PAINT = 1921.0
-L, D, EAVE, RIDGE, OH = 5.6, 3.6, 2.0, 3.6, 0.3
-CORR = [((950, 222), (-L / 2, 0.0, 0.0)), ((950, 27), (-L / 2, 0.0, RIDGE)), ((870, 95), (-L / 2 - 0.05, D / 2 + OH, EAVE - 0.27)),
-        ((1030, 93), (-L / 2 - OH, -D / 2 - OH, EAVE - 0.27)), ((1250, 130), (L / 2 + OH, -D / 2 - OH, EAVE - 0.27)),
-        ((1222, 212), (L / 2, -D / 2, 0.0)), ((1222, 135), (L / 2, -D / 2, EAVE)), ((1130, 222), (0.9, -D / 2, 0.0)),
-        ((1130, 128), (0.9, -D / 2, EAVE))]
+L, D, EAVE, RIDGE, OH = 5.43, 4.85, 2.0, 3.40, 0.27      # blueprint solved jointly with the camera (11 points)
+CORR = [((950, 215), (-L / 2, 0.0, 0.0)), ((951, 26), (-L / 2 - OH, 0.0, RIDGE)),
+        ((1040, 100), (-L / 2 - OH, -D / 2 - OH, EAVE - 0.1)), ((870, 95), (-L / 2 - OH, D / 2 + OH, EAVE - 0.1)),
+        ((1255, 130), (L / 2 + OH, -D / 2 - OH, EAVE - 0.1)), ((1150, 60), (L / 2 + OH, 0.0, RIDGE)),
+        ((1131, 134), (-0.06, -D / 2, EAVE)), ((1131, 222), (-0.06, -D / 2, 0.0)), ((1222, 136), (L / 2, -D / 2, EAVE)),
+        ((1223, 207), (L / 2, -D / 2, 0.0)), ((880, 205), (-L / 2, D / 2, 0.0)), ((1146, 16), None)]
+CORR = [c for c in CORR if c[1] is not None]
 INSETS = {
     "front": dict(box=(1272, 12, 1392, 88), dir=(0, 1, 0), fit="width"),
     "side": dict(box=(1418, 12, 1512, 88), dir=(1, 0, 0), fit="width"),
@@ -73,13 +75,13 @@ def camera_points():
     P = [w for _, w in CORR]
     p = [S(*q) for q, _ in CORR]
     return np.array(P, float), np.array(p, float), dict(f0=F_PAINT, fix_f=True, free_pp=True, pp_prior=0.06,
-                                                        init_centre=(-14.0, -24.0, 9.0), init_target=(0.0, 0.0, 1.6))
+                                                        init_centre=(-27.8, -29.5, 7.4), init_target=(0.0, 0.0, 1.6), min_height=5.0)
 
 
 def build(lod, cam=None, crop=None, mask=None, cards=None):
     g = Geo(seed=71 + lod)
     rng = np.random.default_rng(3 + lod)
-    xs_posts = [-L / 2, -0.9, 0.9, L / 2]
+    xs_posts = [-L / 2, -0.06, L / 2]
     # posts (front/back rows) + gable king posts
     for y in (-D / 2, D / 2):
         for x in xs_posts if lod < 2 else (-L / 2, L / 2):

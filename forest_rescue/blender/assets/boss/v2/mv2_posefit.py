@@ -89,13 +89,17 @@ class Fitter:
         self.T = np.array([t.vertices[:] for t in me.loop_triangles])
         names = self.rig.sk.names
         self.names = names
+        # weights: nearest full-resolution LOD0 vertex (decimation can leave vertices without groups)
+        from scipy.spatial import cKDTree
+        wz = np.load(C.cache("maw2_weights_lod0.npz"))
+        wn = [str(n) for n in wz["names"]]
+        Wf = wz["W"].astype(np.float64)
+        Vf = np.array([v.co[:] for v in body.data.vertices])
+        _d, nn = cKDTree(Vf).query(self.V)
         W = np.zeros((len(self.V), len(names)))
-        gidx = {g.index: g.name for g in lo.vertex_groups}
-        for v in me.vertices:
-            for g in v.groups:
-                n = gidx[g.group]
-                if n in names:
-                    W[v.index, names.index(n)] = g.weight
+        for j, n in enumerate(wn):
+            if n in names:
+                W[:, names.index(n)] = Wf[nn, j]
         W /= np.maximum(W.sum(1, keepdims=True), 1e-9)
         self.W = W
         self.used = [j for j in range(len(names)) if W[:, j].max() > 0]
@@ -147,7 +151,7 @@ def landmarks_ref(mask):
     return snout, tail, float(ys.max())
 
 
-def fit_panel(fitter, panel, ch0, iters=900):
+def fit_panel(fitter, panel, ch0, iters=700):
     img = R.keypose_panel(panel)
     mask = R.keypose_mask(img)
     H, W = mask.shape
@@ -188,12 +192,12 @@ def fit_panel(fitter, panel, ch0, iters=900):
     def lc(c):
         return loss(np.concatenate([x0, c]))
     best = None
-    for az0 in (-70.0, -40.0, -15.0, 0.0, 15.0, 40.0, 70.0):
+    for az0 in (-60.0, -25.0, 0.0, 25.0, 60.0):
         Rz = PO.qmat((0, 0, 1), az0)
         Q = Vp @ Rz.T
         s_ = (xs.max() - xs.min()) / max(Q[:, 1].max() - Q[:, 1].min(), 1e-3)
         c0 = np.array([math.log(s_), xs.min() - s_ * Q[:, 1].min(), ground + s_ * Q[:, 2].min(), az0, 6.0])
-        r = minimize(lc, c0, method="Powell", options={"maxfev": 90, "xtol": 1e-3, "ftol": 1e-4})
+        r = minimize(lc, c0, method="Powell", options={"maxfev": 70, "xtol": 1e-3, "ftol": 1e-4})
         if best is None or r.fun < best.fun:
             best = r
     r1 = best

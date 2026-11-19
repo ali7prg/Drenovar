@@ -10,6 +10,7 @@ from scipy.spatial import cKDTree
 
 from frlib import texproj
 
+DEBUG = True
 PAINT_K = 0.35          # paintedLightMix used for de-lighting (same value the game/QA shader uses)
 
 
@@ -171,7 +172,7 @@ def lambert_shade(N, light, k=PAINT_K):
     return (1 - k) + k * np.clip(N @ L, 0, 1)
 
 
-def project_painting(P, N, cam, img, zb, W, H, accept=None, power=2.0, depth_eps=0.06, min_facing=0.12):
+def project_painting(P, N, cam, img, zb, W, H, accept=None, power=1.0, depth_eps=0.06, min_facing=0.05):
     """Colour + weight for texel positions P/normals N from the painting seen by cam.
     accept: optional bool (H,W) image of painting pixels allowed for these texels."""
     u, v, dep = cam.project(P)
@@ -189,7 +190,9 @@ def project_painting(P, N, cam, img, zb, W, H, accept=None, power=2.0, depth_eps
         acc = np.zeros(len(P), bool)
         acc[ok] = accept[vi[ok], ui[ok]]
         vis &= acc
-    w = np.where(vis & (facing > min_facing), facing ** power, 0.0)
+    w = np.where(vis & (facing > min_facing), facing, 0.0)
+    if DEBUG:
+        print(f"   project: n={len(P)} inframe={ok.mean():.3f} vis={vis.mean():.3f} facing>0.4={(facing > 0.4).mean():.3f} w>0.17={(w > 0.17).mean():.3f}", flush=True)
     col = bilinear(img, u, v)[:, :3]
     return col, w, facing
 

@@ -76,6 +76,23 @@ def atlas_uv(objs, fixed_masks, margin=0.004, angle=60.0):
     bpy.ops.object.mode_set(mode="OBJECT")
 
 
+def restore_fixed_uv(obj, geo):
+    """Re-apply the fixed UVs (alpha cards) after the atlas unwrap/pack touched them."""
+    V, F, M, Tg, UVf = geo.arrays()
+    me = obj.data
+    uvl = me.uv_layers["UVMap"]
+    cur = np.empty(len(me.loops) * 2)
+    uvl.data.foreach_get("uv", cur)
+    cur = cur.reshape(-1, 2)
+    li = 0
+    for f, uv in zip(F, UVf):
+        if uv is not None:
+            cur[li:li + len(f)] = np.asarray(uv, float)
+        li += len(f)
+    uvl.data.foreach_set("uv", cur.astype(np.float32).ravel())
+    me.update()
+
+
 def mesh_tris(obj):
     """World verts, tris, per-corner uv (M,3,2), face normals, material slot per tri, polygon index per tri."""
     me = obj.data

@@ -93,8 +93,13 @@ def camera_overlay(L, asset, it, cam, crop, P3, p2, geo=None):
 
 # ----------------------------------------------------------------------------- cards atlas
 def card_atlas(L, size=1024):
-    """Painted vegetation sprites cut from the art (alpha = vegetation mask) packed in a grid atlas.
-    Returns (rgba (size,size,4), rects {name: (u0,v0,u1,v1)})."""
+    """Vegetation sprites for alpha cards. CARD_KINDS (procedural fern/grass/weed/ivy in the painting palette)
+    or CARD_SPRITES (cut from the art). Returns (rgba (size,size,4), rects {name: (u0,v0,u1,v1,aw,ah)})."""
+    if getattr(L, "CARD_KINDS", None):
+        import sprites
+        x0, y0, x1, y1 = L.MAIN_BOX
+        pal = sprites.palette_from(sheet()[y0:y1, x0:x1])
+        return sprites.atlas(list(L.CARD_KINDS.items()), pal, size)
     sprites = getattr(L, "CARD_SPRITES", {})
     if not sprites:
         return None, {}
@@ -130,6 +135,18 @@ def card_atlas(L, size=1024):
 
 
 # ----------------------------------------------------------------------------- texturing
+def rectify(cam, crop, origin, ex, ey, size_m, res=256):
+    """Orthophoto of a painted planar patch: origin + u*ex + v*ey (u,v in [0,size_m]) -> painting pixels."""
+    o = np.asarray(origin, float)
+    ex = np.asarray(ex, float)
+    ey = np.asarray(ey, float)
+    t = (np.arange(res) + 0.5) / res * size_m
+    U, Vv = np.meshgrid(t, t[::-1])
+    P = o + U[..., None] * ex + Vv[..., None] * ey
+    u, v, _ = cam.project(P.reshape(-1, 3))
+    return np.clip(tex.bilinear(crop, u, v)[:, :3].reshape(res, res, 3), 0, 1)
+
+
 def gather(objs):
     Vs, Ts, UVs, FNs, MIs, OB, PIs = [], [], [], [], [], [], []
     off = 0
@@ -139,7 +156,7 @@ def gather(objs):
         Ts.append(T + off)
         UVs.append(UV)
         FNs.append(FN)
-        MIs.append(np.array([o.data.materials[i].name.rsplit("_", 1)[-1] for i in mi], dtype=object))
+        MIs.append(np.array([o.data.materials[i].name.rsplit("_", 1)[-1].split(".")[0] for i in mi], dtype=object))
         OB.append(np.full(len(T), oi))
         PIs.append(pi)
         off += len(V)
@@ -174,8 +191,9 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
     pcls, _ = clf.classify(crop)
     col = np.zeros((len(P), 3))
     wgt = np.zeros(len(P))
+    nop = np.array([any(str(t).startswith(pre) for pre in getattr(L, "NO_PROJECT_TAGS", ())) for t in tags])
     for mc, accepted in L.ACCEPT.items():
-        k = mcls == mc
+        k = (mcls == mc) & ~nop
         if not k.any():
             continue
         acc = np.isin(pcls, list(accepted)) & ref_mask
@@ -187,12 +205,17 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
     # swatch fill, colour matched per tag (fallback: per class, then swatch statistics)
     sw = {}
     for mc, spec in L.SWATCHES.items():
+        if "plane" in spec:      # rectified from the painting through the solved camera
+            sw[mc] = tex.Swatch(rectify(cam, crop, **spec["plane"]), spec["metres"], mc)
+            core.save_rgba(qa_path(asset, it, f"swatch_{mc}"), sw[mc].img)
+            continue
         b = spec["box"]
         src = sheet(spec.get("sheet", SHEET06))
         sw[mc] = tex.Swatch(src[b[1]:b[3], b[0]:b[2]], spec["metres"], mc)
+    tag_sw = getattr(L, "TAG_SWATCH", {})
     fill = np.zeros((len(P), 3))
     lab_proj = tex.to_lab(proj_alb)
-    good = wgt > 0.25
+    good = wgt > 0.12
     for mc in np.unique(mcls):
         k = mcls == mc
         s = sw.get(mc) or sw.get(L.SWATCH_FALLBACK.get(mc, "stone"))
@@ -203,7 +226,11 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
             kk = tags[idx] == tg
             ii = idx[kk]
             off = rng.uniform(0, 7, 3)
-            raw = s.sample(P[ii], N[ii], off)
+            s_t = s
+            for pre, swn in tag_sw.items():
+                if str(tg).startswith(pre) and swn in sw:
+                    s_t = sw[swn]
+            raw = s_t.sample(P[ii], N[ii], off)
             gk = good[ii]
             if gk.sum() > 150:
                 mu, sd = lab_proj[ii][gk].mean(0), lab_proj[ii][gk].std(0)
@@ -213,12 +240,12 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
                     mu, sd = lab_proj[gc].mean(0), lab_proj[gc].std(0)
                 else:
                     mu, sd = L.CLASS_LAB.get(mc, (s.mu, s.sd)) if hasattr(L, "CLASS_LAB") else (s.mu, s.sd)
-            sd = np.maximum(sd, s.sd * 0.6)
-            f[kk] = tex.colour_match(raw, np.asarray(mu), np.asarray(sd), s.mu, s.sd, 1.0)
+            sd = np.maximum(sd, s_t.sd * 0.6)
+            f[kk] = tex.colour_match(raw, np.asarray(mu), np.asarray(sd), s_t.mu, s_t.sd, 1.0)
         fill[k] = f
     # blend (feathered in texture space)
     a_img = np.zeros(valid.shape)
-    a_img[yy, xx] = np.clip((wgt - 0.04) / 0.25, 0, 1)
+    a_img[yy, xx] = np.clip((wgt - 0.05) / 0.10, 0, 1)
     a_img = ndi.gaussian_filter(a_img, 1.2) * valid
     a = a_img[yy, xx]
     alb = proj_alb * a[:, None] + fill * (1 - a[:, None])
@@ -307,6 +334,9 @@ def build(name, it):
     for lod in range(3):
         group = [objs[(lod, p)] for p in ("struct", "base") if (lod, p) in objs]
         bl.atlas_uv(group, [fixed[(lod, p)] for p in ("struct", "base") if (lod, p) in objs])
+        for p in ("struct", "base"):
+            if (lod, p) in objs:
+                bl.restore_fixed_uv(objs[(lod, p)], geos[lod][p])
     # ---- LOD0 texture by projection + fill
     keys0 = [(0, p) for p in ("struct", "base") if (0, p) in objs]
     o0 = [objs[k] for k in keys0]
@@ -344,7 +374,7 @@ def build(name, it):
         lod_mats[lod] = bl.export_materials(f"{asset}_lod{lod}", ic, None, card_img)
     for (lod, part), o in objs.items():
         for i, s in enumerate(o.material_slots):
-            cls = o.data.materials[i].name.rsplit("_", 1)[-1]
+            cls = o.data.materials[i].name.rsplit("_", 1)[-1].split(".")[0]
             o.data.materials[i] = lod_mats[lod][cls]
     # ---- QA main view
     bl.setup_render(16)

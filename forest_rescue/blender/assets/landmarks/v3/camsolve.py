@@ -123,7 +123,7 @@ class Cam:
 
 
 def solve(P3, p2, size, f_range=(300, 20000), free_pp=False, free_k1=False, free_k2=False, weights=None,
-          pp_prior=0.02, k_prior=0.5, f0=None):
+          pp_prior=0.02, k_prior=0.5, f0=None, fix_f=False, f_prior=None):
     """P3 (N,3) world points, p2 (N,2) painting pixels (crop coordinates). Returns (Cam, report)."""
     P3 = np.asarray(P3, float)
     p2 = np.asarray(p2, float)
@@ -172,6 +172,10 @@ def solve(P3, p2, size, f_range=(300, 20000), free_pp=False, free_k1=False, free
         u, v, z = c.project(P3)
         r = np.concatenate([(u - p2[:, 0]) * np.sqrt(w), (v - p2[:, 1]) * np.sqrt(w)])
         extra = []
+        if fix_f:
+            extra += [(math.log(c.f) - math.log(f0)) * 400.0]
+        elif f_prior:
+            extra += [(math.log(c.f) - math.log(f_prior[0])) / f_prior[1]]
         if free_pp:
             extra += [(c.cx / W - 0.5) / pp_prior, (c.cy / H - 0.5) / pp_prior]
         if free_k1:

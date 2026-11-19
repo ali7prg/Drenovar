@@ -37,13 +37,18 @@ MASK_THRESH = 0.09
 # painted correspondences (art/06 sheet px): main railing post tops, near (south, y=-2.1) and far (north)
 NEAR = [(94, 121), (166, 93), (270, 65), (353, 50), (413, 37), (471, 27), (540, 17)]
 FAR = [(37, 77), (104, 58), (193, 42), (267, 31), (331, 22), (382, 16), (458, 8)]
+# far post feet on the deck (z = deck top, y = +2.0)
+FAR_FOOT = {1: (104, 100), 2: (193, 77), 4: (331, 48), 5: (383, 38), 6: (458, 27)}
 
 INSETS = {
     "side": dict(box=(592, 30, 822, 74), dir=(0, 1, 0), fit="width"),
     "top": dict(box=(592, 98, 822, 144), dir=(0, 0, -1), fit="width"),
 }
 
+NO_PROJECT_TAGS = ("tower", "cornice", "cap", "gatepier", "finial", "banner", "niche")
+TAG_SWATCH = {"deck": "deck", "ramp": "deck", "subdeck": "deck"}
 SWATCHES = {
+    "deck": dict(plane=dict(origin=(-4.6, -1.75, DECK), ex=(1, 0, 0), ey=(0, 1, 0), size_m=3.4), metres=3.4),
     "wood": dict(box=(600, 166, 703, 252), metres=1.0),
     "stone": dict(box=(716, 166, 808, 252), metres=1.35),
     "ground": dict(box=(372, 168, 470, 232), metres=5.0),
@@ -52,12 +57,13 @@ SWATCHES = {
 }
 SWATCH_FALLBACK = {"water": "ground", "rope": "wood", "roof": "stone", "glow": "metal"}
 CLASS_TRAIN = {
-    "wood": [(160, 96, 176, 140), (262, 70, 278, 140), (200, 110, 250, 125), (610, 175, 640, 250)],
+    "wood": [(160, 96, 176, 140), (262, 70, 278, 140), (200, 110, 250, 125), (610, 175, 640, 250),
+             (112, 104, 150, 118), (300, 58, 330, 66), (395, 40, 420, 46), (200, 82, 240, 92)],
     "stone": [(240, 150, 300, 195), (420, 108, 460, 140), (722, 172, 800, 245), (110, 150, 160, 200)],
     "water": [(430, 175, 520, 235), (370, 205, 430, 245), (300, 200, 340, 225)],
     "veg": [(55, 195, 100, 225), (20, 230, 60, 250), (550, 150, 580, 200)],
 }
-ACCEPT = {"wood": {"wood"}, "stone": {"stone"}, "ground": {"water", "veg", "stone"},
+ACCEPT = {"wood": {"wood", "stone"}, "stone": {"stone"}, "ground": {"water", "veg", "stone"},
           "metal": set(), "cloth": set(), "rope": {"wood"}}
 NORMAL_STRENGTH = {"stone": 3.0, "wood": 2.5, "ground": 1.5, "cloth": 1.0, "metal": 1.0}
 # banner red from art/01 (Lab of the painted banners)
@@ -69,7 +75,8 @@ def veg_mask(c):
     return (g > b + 0.06) & (g > 0.25) & ((g >= r - 0.04))
 
 
-CARD_SPRITES = {
+CARD_KINDS = {"fern_a": "fern", "grass_a": "grass", "weed_a": "weed", "grass_b": "grass"}
+CARD_SPRITES_UNUSED = {
     "fern_a": dict(box=(40, 186, 112, 236), mask=veg_mask),
     "grass_a": dict(box=(538, 146, 584, 202), mask=veg_mask),
     "weed_a": dict(box=(262, 212, 300, 262), mask=veg_mask),
@@ -86,7 +93,13 @@ def camera_points():
         p.append(NEAR[k])
         P.append((MAIN_POST_X[k], POST_Y, POST_TOP))
         p.append(FAR[k])
-    return np.array(P, float), np.array(p, float), dict(free_pp=True, free_k1=True)
+    for k, q in FAR_FOOT.items():
+        P.append((MAIN_POST_X[k], 2.0, DECK))
+        p.append(q)
+    opts = dict(free_pp=True)
+    if os.environ.get("LM3_K1"):
+        opts.update(free_k1=True, k_prior=float(os.environ["LM3_K1"]))
+    return np.array(P, float), np.array(p, float), opts
 
 
 def attach(cam, crop, mask):

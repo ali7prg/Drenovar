@@ -566,6 +566,7 @@ def texture(lo0, R, J, pinfo0=None):
     views = [R.front, R.back]
     pinfo = pinfo0
     cheek_ref = None
+    med_l = None
     wport = np.zeros(len(P0))
     col2 = np.zeros((len(P0), 3))
     if pinfo0:
@@ -606,9 +607,15 @@ def texture(lo0, R, J, pinfo0=None):
         ref_sk = skin_t & in_inner & (wport > 0.5)
         if ref_sk.sum() > 100:
             med_l = float(np.median(lum2[ref_sk]))
+            skin_med = np.median(col2[ref_sk], 0)
             dark = skin_t & (~in_inner) & (lum2 < 0.75 * med_l) & (wport > 0)
             wport = np.where(dark, 0.0, wport)
-            log("portrait: dark (hair) pixels dropped from head skin", int(dark.sum()))
+            # and skin-coloured portrait pixels never land on hair geometry beside the face (hood openings)
+            hair_tx = (tex_mat == MAT_IDS["hair"]) & is_head(d2[2])
+            skinlike = hair_tx & (~in_inner) & (np.linalg.norm(col2 - skin_med, axis=1) < 0.16) & (lum2 > 0.72 * med_l)
+            wport = np.where(skinlike, 0.0, wport)
+            log("portrait: dark (hair) pixels dropped from head skin", int(dark.sum()), "skin pixels dropped from hair",
+                int(skinlike.sum()))
     # painted front/back views; the front never paints where the portrait paints (complementary)
     data, col, ws, per = HT.project_views(T, verts, tris, views, erode=2, lo_hi_fn=lohi)
     wf, uf, vf = per["front"]
@@ -629,6 +636,16 @@ def texture(lo0, R, J, pinfo0=None):
     wf = wf * (1.0 - wport)
     colf = texproj._bilinear(R.front.image, uf, vf)[:, :3]
     colb = texproj._bilinear(R.back.image, ub, vb)[:, :3]
+    if pinfo0 and med_l is not None:
+        # painted hair / collar shadow over the temples and neck never lands on head skin either
+        hs_ = is_head(data[2]) & (tex_mat == MAT_IDS["body"])
+        lw = np.array([0.299, 0.587, 0.114])
+        dk_f = hs_ & ((colf @ lw) < 0.60 * med_l)
+        dk_b = hs_ & ((colb @ lw) < 0.60 * med_l)
+        wf = np.where(dk_f, 0.0, wf)
+        wb = np.where(dk_b, 0.0, wb)
+        log("front/back: dark pixels dropped from head skin", int((dk_f & (per["front"][0] > 0)).sum()),
+            int((dk_b & (per["back"][0] > 0)).sum()))
     if pinfo0:
         both = (wf > 0.2) & (wport > 0.2)
         gain = np.ones(3)
@@ -645,6 +662,7 @@ def texture(lo0, R, J, pinfo0=None):
     ws = wf + wb + wport * 4.0
     col = (colf * wf[:, None] + colb * wb[:, None] + col2 * (wport * 4.0)[:, None]) / np.maximum(ws, 1e-9)[:, None]
     per["front"] = (wf, uf, vf)
+    per["back"] = (wb, ub, vb)
     if pinfo0:
         per["portrait"] = (wport, *per2["portrait"][1:])
     # head skin that no view sees well: the character's own cheek colour (no pink patches)

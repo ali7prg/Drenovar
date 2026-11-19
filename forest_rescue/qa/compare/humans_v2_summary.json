@@ -22,24 +22,24 @@
    }
   },
   "latest": {
-   "iter": 16,
+   "iter": 17,
    "front": {
     "iou": 0.9178,
-    "colour_error": 0.0453,
-    "colour_error_core": 0.0413,
+    "colour_error": 0.0451,
+    "colour_error_core": 0.0411,
     "ref_px": 46985,
     "render_px": 46516
    },
    "back": {
     "iou": 0.9161,
-    "colour_error": 0.0413,
+    "colour_error": 0.0412,
     "colour_error_core": 0.0379,
     "ref_px": 45287,
     "render_px": 45417
    },
    "portrait": {
-    "ssim": 0.159,
-    "ssim_face": 0.0998,
+    "ssim": 0.1709,
+    "ssim_face": 0.1197,
     "solve_err_px": 2.37
    }
   },
@@ -201,24 +201,24 @@
    }
   },
   "latest": {
-   "iter": 5,
+   "iter": 6,
    "front": {
     "iou": 0.9052,
-    "colour_error": 0.0376,
-    "colour_error_core": 0.0343,
+    "colour_error": 0.0374,
+    "colour_error_core": 0.0342,
     "ref_px": 46366,
     "render_px": 44216
    },
    "back": {
     "iou": 0.899,
-    "colour_error": 0.0294,
+    "colour_error": 0.0293,
     "colour_error_core": 0.0263,
     "ref_px": 43810,
     "render_px": 44175
    },
    "portrait": {
-    "ssim": 0.0889,
-    "ssim_face": 0.0651,
+    "ssim": 0.1025,
+    "ssim_face": 0.0644,
     "solve_err_px": 2.47
    }
   },
@@ -380,24 +380,24 @@
    }
   },
   "latest": {
-   "iter": 3,
+   "iter": 4,
    "front": {
     "iou": 0.8942,
-    "colour_error": 0.0447,
-    "colour_error_core": 0.0405,
+    "colour_error": 0.0445,
+    "colour_error_core": 0.0403,
     "ref_px": 41919,
     "render_px": 41385
    },
    "back": {
     "iou": 0.902,
-    "colour_error": 0.0373,
+    "colour_error": 0.0372,
     "colour_error_core": 0.0328,
     "ref_px": 40557,
     "render_px": 40197
    },
    "portrait": {
-    "ssim": 0.1166,
-    "ssim_face": 0.0973,
+    "ssim": 0.1237,
+    "ssim_face": 0.1037,
     "solve_err_px": 1.82
    }
   },
@@ -559,23 +559,23 @@
    }
   },
   "latest": {
-   "iter": 3,
+   "iter": 4,
    "front": {
     "iou": 0.8868,
-    "colour_error": 0.0392,
-    "colour_error_core": 0.0347,
+    "colour_error": 0.0391,
+    "colour_error_core": 0.0346,
     "ref_px": 40111,
     "render_px": 39169
    },
    "back": {
     "iou": 0.8873,
-    "colour_error": 0.0361,
+    "colour_error": 0.036,
     "colour_error_core": 0.0313,
     "ref_px": 39280,
     "render_px": 38016
    },
    "portrait": {
-    "ssim": 0.1184,
+    "ssim": 0.1342,
     "ssim_face": 0.0647,
     "solve_err_px": 3.48
    }
@@ -738,24 +738,24 @@
    }
   },
   "latest": {
-   "iter": 3,
+   "iter": 4,
    "front": {
     "iou": 0.9211,
-    "colour_error": 0.0376,
-    "colour_error_core": 0.0337,
+    "colour_error": 0.0373,
+    "colour_error_core": 0.0335,
     "ref_px": 50400,
     "render_px": 48548
    },
    "back": {
     "iou": 0.9097,
-    "colour_error": 0.0357,
-    "colour_error_core": 0.0324,
+    "colour_error": 0.0356,
+    "colour_error_core": 0.0323,
     "ref_px": 50799,
     "render_px": 48332
    },
    "portrait": {
-    "ssim": 0.1285,
-    "ssim_face": 0.2765,
+    "ssim": 0.1435,
+    "ssim_face": 0.3022,
     "solve_err_px": 1.38
    }
   },
@@ -917,24 +917,24 @@
    }
   },
   "latest": {
-   "iter": 3,
+   "iter": 4,
    "front": {
     "iou": 0.8951,
-    "colour_error": 0.0383,
-    "colour_error_core": 0.0338,
+    "colour_error": 0.0381,
+    "colour_error_core": 0.0337,
     "ref_px": 48938,
     "render_px": 48758
    },
    "back": {
     "iou": 0.9032,
     "colour_error": 0.0358,
-    "colour_error_core": 0.0315,
+    "colour_error_core": 0.0314,
     "ref_px": 46594,
     "render_px": 46064
    },
    "portrait": {
-    "ssim": 0.1586,
-    "ssim_face": 0.1933,
+    "ssim": 0.1751,
+    "ssim_face": 0.198,
     "solve_err_px": 4.34
    }
   },
@@ -1096,11 +1096,11 @@
    }
   },
   "latest": {
-   "iter": 5,
+   "iter": 6,
    "front": {
     "iou": 0.8991,
-    "colour_error": 0.033,
-    "colour_error_core": 0.031,
+    "colour_error": 0.0329,
+    "colour_error_core": 0.0309,
     "ref_px": 70877,
     "render_px": 69057
    },
@@ -1112,8 +1112,8 @@
     "render_px": 67891
    },
    "portrait": {
-    "ssim": 0.2309,
-    "ssim_face": 0.1241,
+    "ssim": 0.2501,
+    "ssim_face": 0.1303,
     "solve_err_px": 5.96
    }
   },
@@ -1255,18 +1255,18 @@
    "portrait": null
   },
   "latest": {
-   "iter": 3,
+   "iter": 4,
    "front": {
     "iou": 0.9028,
-    "colour_error": 0.0311,
-    "colour_error_core": 0.0287,
+    "colour_error": 0.031,
+    "colour_error_core": 0.0286,
     "ref_px": 66131,
     "render_px": 63283
    },
    "back": {
     "iou": 0.9018,
-    "colour_error": 0.026,
-    "colour_error_core": 0.023,
+    "colour_error": 0.0259,
+    "colour_error_core": 0.0229,
     "ref_px": 63799,
     "render_px": 61313
    },
@@ -1410,17 +1410,17 @@
    "portrait": null
   },
   "latest": {
-   "iter": 3,
+   "iter": 4,
    "front": {
     "iou": 0.9037,
-    "colour_error": 0.0298,
-    "colour_error_core": 0.0275,
+    "colour_error": 0.0297,
+    "colour_error_core": 0.0274,
     "ref_px": 81063,
     "render_px": 77791
    },
    "back": {
     "iou": 0.8971,
-    "colour_error": 0.0248,
+    "colour_error": 0.0247,
     "colour_error_core": 0.0221,
     "ref_px": 79411,
     "render_px": 76487

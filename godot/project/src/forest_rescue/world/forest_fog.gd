@@ -1,7 +1,14 @@
 extends Node3D
-## Fog layer manager: three terrain-following shells sharing one mesh, one 56×56 state texture
-## (updated only when the projection changes) and a tiling noise texture. All animation is
-## uniforms only (drift, reveal progress) — no per-frame texture uploads, no particles.
+## Fog layer manager (v2): ONE terrain-following shell whose shader raymarches a height-limited
+## fog volume (forest_fog.gdshader), a 70×70 state texture (the 56×56 server grid + an always
+## fogged 7-cell ring, updated only when the projection changes), a ground heightmap and a
+## tiling noise texture. All animation is uniforms only (drift, reveal progress): no per-frame
+## texture uploads, no particles, alpha overdraw = 1 layer.
+##
+## Per cell the CPU bakes the fog-top height: it rises from the floor at the explored edge to
+## canopy height FOG_TOP over TOP_RAMP metres, and on the camera-near side of explored ground it
+## is capped so a bank never hides ground behind it (the city camera is fixed: a bank H metres
+## high hides H·cot(38°) of ground in the view direction, which is the (-1,-1) cell diagonal).
 
 signal reveal_finished
 
@@ -12,19 +19,23 @@ const CELL := 4.0
 const ORIGIN := -112.0
 const BYTES := 392
 const REVEAL_SECONDS := 2.0
-const LAYERS := [
-	# lift (m), alpha, threshold, drift, edge softness
-	# height = shell top above ground in deep fog (canopy ≈ 9–10.5 m); banks rise with depth.
-	{"name": "FogHaze", "height": 10.0, "lift": 0.0, "alpha": 0.80, "threshold": 0.00, "drift": 0.45, "soft": 0.26},
-	{"name": "FogBank", "height": 13.0, "lift": 0.0, "alpha": 0.86, "threshold": 0.10, "drift": 0.65, "soft": 0.26},
-	{"name": "FogCrest", "height": 16.0, "lift": 0.0, "alpha": 0.90, "threshold": 0.20, "drift": 0.95, "soft": 0.30},
-]
+const GRID := 70                  # state grid incl. the ring outside the atlas
+const GRID_OFFSET := 7
+const GRID_ORIGIN := -140.0
+const FOG_TOP := 17.5             # deep fog top above the ground (m); billows ±28 %
+const TOP_RAMP := 16.0            # top rises over this distance from the explored edge
+const HEIGHT_RANGE := 30.0        # B/A channel scale (m)
+const VIEW_SLOPE := 1.28          # cot(38°)
+const HEIGHT_LO := -4.0
+const HEIGHT_SPAN := 40.0
+const LAYERS := [{"name": "FogVolume", "drift": 0.6}]
 
 static var _noise_texture: ImageTexture
 static var _shell_mesh: ArrayMesh
 static var _shell_key := ""
+static var _height_texture: ImageTexture
 
-var state_image := Image.create(COLUMNS, ROWS, false, Image.FORMAT_RGBA8)
+var state_image := Image.create(GRID, GRID, false, Image.FORMAT_RGBA8)
 var state_texture: ImageTexture
 var target_bits := PackedByteArray()
 var anchor_bits := PackedByteArray()
@@ -43,49 +54,69 @@ func _ready() -> void:
 
 
 func build(height_fn: Callable, light_dir: Vector3) -> void:
-	state_image.fill(Color(0, 0, 0, 0))
+	state_image.fill(Color(0, 0, 0, FOG_TOP / HEIGHT_RANGE))
+	for row in GRID:
+		for column in GRID:
+			state_image.set_pixel(column, row, Color(0, 0, FOG_TOP / HEIGHT_RANGE, FOG_TOP / HEIGHT_RANGE))
 	state_texture = ImageTexture.create_from_image(state_image)
 	if _noise_texture == null:
 		_noise_texture = ImageTexture.create_from_image(make_noise_image(256))
-	var key := "shell_v2"
+	var key := "shell_v3"
 	if _shell_mesh == null or _shell_key != key:
 		_shell_mesh = make_shell_mesh(height_fn)
+		_height_texture = make_height_texture(height_fn)
 		_shell_key = key
-	for i in LAYERS.size():
-		var spec: Dictionary = LAYERS[i]
-		var material := ShaderMaterial.new()
-		material.shader = SHADER
-		material.render_priority = 10 + i
-		material.set_shader_parameter("state_tex", state_texture)
-		material.set_shader_parameter("noise_tex", _noise_texture)
-		material.set_shader_parameter("layer", float(i))
-		material.set_shader_parameter("layer_alpha", spec.alpha)
-		material.set_shader_parameter("layer_threshold", spec.threshold)
-		material.set_shader_parameter("layer_height", spec.height)
-		material.set_shader_parameter("drift_speed", spec.drift)
-		material.set_shader_parameter("edge_softness", spec.soft)
-		material.set_shader_parameter("light_dir", light_dir.normalized())
-		material.set_shader_parameter("time_offset", 37.0 * i)
-		material.set_shader_parameter("soft_depth", soft_depth)
-		var shell := MeshInstance3D.new()
-		shell.name = spec.name
-		shell.mesh = _shell_mesh
-		shell.position.y = 0.0
-		shell.material_override = material
-		shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		shell.extra_cull_margin = 16.0
-		add_child(shell)
-		shells.append(shell)
-		materials.append(material)
+	var material := ShaderMaterial.new()
+	material.shader = SHADER
+	material.render_priority = 10
+	material.set_shader_parameter("state_tex", state_texture)
+	material.set_shader_parameter("height_tex", _height_texture)
+	material.set_shader_parameter("noise_tex", _noise_texture)
+	material.set_shader_parameter("domain", Vector4(GRID_ORIGIN, GRID_ORIGIN, GRID * CELL, GRID * CELL))
+	material.set_shader_parameter("height_range", HEIGHT_RANGE)
+	material.set_shader_parameter("height_lo", HEIGHT_LO)
+	material.set_shader_parameter("height_span", HEIGHT_SPAN)
+	material.set_shader_parameter("drift_speed", LAYERS[0].drift)
+	material.set_shader_parameter("light_dir", light_dir.normalized())
+	var shell := MeshInstance3D.new()
+	shell.name = LAYERS[0].name
+	shell.mesh = _shell_mesh
+	shell.material_override = material
+	shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	shell.extra_cull_margin = 40.0
+	add_child(shell)
+	shells.append(shell)
+	materials.append(material)
 
 
-## Terrain-following grid: 4 m inside ±124, 8 m out to ±220, hole over the always-clear town.
+## Smoothed ground (max of 5 taps, so the volume floor never cuts ridges) on a 2 m grid.
+static func smoothed_ground(height_fn: Callable, x: float, z: float) -> float:
+	var h := -1.35
+	for o in [Vector2.ZERO, Vector2(2.5, 0), Vector2(-2.5, 0), Vector2(0, 2.5), Vector2(0, -2.5)]:
+		h = maxf(h, float(height_fn.call(x + o.x, z + o.y)))
+	return h
+
+
+static func make_height_texture(height_fn: Callable) -> ImageTexture:
+	var n := 141
+	var image := Image.create(n, n, false, Image.FORMAT_L8)
+	for j in n:
+		for i in n:
+			var x := GRID_ORIGIN + i * 2.0
+			var z := GRID_ORIGIN + j * 2.0
+			var h := smoothed_ground(height_fn, x, z)
+			var v := clampf((h - HEIGHT_LO) / HEIGHT_SPAN, 0.0, 1.0)
+			image.set_pixel(i, j, Color(v, v, v, 1.0))
+	return ImageTexture.create_from_image(image)
+
+
+## Terrain-following grid: 4 m inside ±144, 8 m out to ±224, hole over the always-clear town.
 static func make_shell_mesh(height_fn: Callable) -> ArrayMesh:
 	var coords := PackedFloat32Array()
-	var c := -220.0
-	while c <= 220.0001:
+	var c := -224.0
+	while c <= 224.0001:
 		coords.append(c)
-		c += 4.0 if absf(c) < 124.0 else 8.0
+		c += 4.0 if absf(c) < 144.0 else 8.0
 	var n := coords.size()
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
@@ -95,11 +126,7 @@ static func make_shell_mesh(height_fn: Callable) -> ArrayMesh:
 		for i in n:
 			var x := coords[i]
 			var z := coords[j]
-			var h := -1.35
-			# Smooth the ground under the shell (max of 5 taps) so banks do not clip ridges.
-			for o in [Vector2.ZERO, Vector2(2.5, 0), Vector2(-2.5, 0), Vector2(0, 2.5), Vector2(0, -2.5)]:
-				h = maxf(h, float(height_fn.call(x + o.x, z + o.y)))
-			vertices[j * n + i] = Vector3(x, h, z)
+			vertices[j * n + i] = Vector3(x, smoothed_ground(height_fn, x, z), z)
 			normals[j * n + i] = Vector3.UP
 	var indices := PackedInt32Array()
 	for j in n - 1:
@@ -122,7 +149,7 @@ static func make_shell_mesh(height_fn: Callable) -> ArrayMesh:
 	return mesh
 
 
-## RGBA tiling noise: R large billows, G mid, B fine, A reveal delay.
+## RGBA tiling noise: R large billows, G mid, B fine (cellular wisps), A reveal delay.
 static func make_noise_image(size: int) -> Image:
 	var image := Image.create(size, size, false, Image.FORMAT_RGBA8)
 	var layers: Array[Image] = []
@@ -226,57 +253,87 @@ static func count_bits(bytes: PackedByteArray) -> int:
 	return total
 
 
-## Depth into the fog per cell: chamfer distance (cells) to the nearest clear cell, /6 → 0..1.
-static func fog_depth(bits: PackedByteArray) -> PackedFloat32Array:
-	var d := PackedFloat32Array()
-	d.resize(COLUMNS * ROWS)
+## Fog-top heights (m) for the 70×70 state grid from a 56×56 clear mask: ramp from the explored
+## edge (chamfer distance) and the camera-near cap (distance to clear ground along the view).
+static func fog_tops(bits: PackedByteArray) -> PackedFloat32Array:
+	var n := GRID
+	var clear := PackedByteArray()
+	clear.resize(n * n)
 	for row in ROWS:
 		for column in COLUMNS:
-			d[row * COLUMNS + column] = 0.0 if bit(bits, column, row) else 99.0
+			if bit(bits, column, row):
+				clear[(row + GRID_OFFSET) * n + column + GRID_OFFSET] = 1
+	var d := PackedFloat32Array()
+	d.resize(n * n)
+	for k in n * n:
+		d[k] = 0.0 if clear[k] == 1 else 999.0
 	for pass_index in 2:
-		var rows := range(ROWS) if pass_index == 0 else range(ROWS - 1, -1, -1)
-		var columns := range(COLUMNS) if pass_index == 0 else range(COLUMNS - 1, -1, -1)
+		var rows := range(n) if pass_index == 0 else range(n - 1, -1, -1)
+		var columns := range(n) if pass_index == 0 else range(n - 1, -1, -1)
 		var step := -1 if pass_index == 0 else 1
 		for row in rows:
 			for column in columns:
-				var k: int = row * COLUMNS + column
+				var k: int = row * n + column
 				var best := d[k]
 				for o in [Vector2i(step, 0), Vector2i(0, step), Vector2i(step, step), Vector2i(-step, step)]:
 					var c: int = column + o.x
 					var r: int = row + o.y
-					if c >= 0 and r >= 0 and c < COLUMNS and r < ROWS:
-						best = minf(best, d[r * COLUMNS + c] + (1.4142 if o.x != 0 and o.y != 0 else 1.0))
+					if c >= 0 and r >= 0 and c < n and r < n:
+						best = minf(best, d[r * n + c] + (1.4142 if o.x != 0 and o.y != 0 else 1.0))
 				d[k] = best
-	for k in d.size():
-		d[k] = clampf(d[k] / 6.0, 0.0, 1.0)
-	return d
+	var tops := PackedFloat32Array()
+	tops.resize(n * n)
+	for row in n:
+		for column in n:
+			var k := row * n + column
+			if clear[k] == 1:
+				tops[k] = 0.0
+				continue
+			var edge := maxf(0.0, d[k] * CELL - CELL * 0.5)
+			var top := FOG_TOP * smoothstep(0.0, TOP_RAMP, edge + 2.0)
+			# Camera-near cap: the view crosses the ground toward (-X, -Z) = cell diagonal (-1, -1).
+			for s in range(1, 14):
+				var c := column - s
+				var r := row - s
+				if c < 0 or r < 0:
+					break
+				if clear[r * n + c] == 1:
+					var behind := s * CELL * 1.41421 - CELL * 0.7
+					top = minf(top, maxf(0.0, (behind + 2.5) / (VIEW_SLOPE * 1.28)))
+					break
+			tops[k] = top
+	return tops
 
 
 ## Sets the displayed target. animate=false snaps (reduced motion / first frame).
-## State texel: R previous clear, G target clear, B previous depth, A target depth.
+## State texel: R target clear, G previous clear, B target fog top, A previous fog top.
 func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, seconds := REVEAL_SECONDS) -> void:
 	if bits.size() != BYTES:
 		return
 	var previous := target_bits
 	target_bits = bits
 	anchor_bits = anchors if anchors.size() == BYTES else PackedByteArray()
-	var depth := fog_depth(bits)
+	var tops := fog_tops(bits)
 	var grows := false
-	for row in ROWS:
-		for column in COLUMNS:
-			var before := bit(previous, column, row) if previous.size() == BYTES else false
-			var after := bit(bits, column, row)
+	var first := previous.size() != BYTES
+	var shown_t := smoothstep(0.0, 1.0, reveal_t)
+	for row in GRID:
+		for column in GRID:
+			var inner_c := column - GRID_OFFSET
+			var inner_r := row - GRID_OFFSET
+			var before := bit(previous, inner_c, inner_r) if not first else false
+			var after := bit(bits, inner_c, inner_r)
 			if after and not before:
 				grows = true
+			var px := state_image.get_pixel(column, row)
 			# During an unfinished reveal, continue from what is shown now.
-			var shown := state_image.get_pixel(column, row)
-			var start := lerpf(shown.r, shown.g, smoothstep(0.0, 1.0, reveal_t)) if revealing else (1.0 if before else 0.0)
-			var start_depth := lerpf(shown.b, shown.a, smoothstep(0.0, 1.0, reveal_t)) if revealing else shown.a
-			var target_depth := depth[row * COLUMNS + column]
-			if previous.size() != BYTES:
-				start_depth = target_depth
-			state_image.set_pixel(column, row, Color(start if animate else (1.0 if after else 0.0), 1.0 if after else 0.0,
-				start_depth if animate else target_depth, target_depth))
+			var start := lerpf(px.g, px.r, shown_t) if revealing else px.r
+			var start_top := lerpf(px.a, px.b, shown_t) if revealing else px.b
+			var target_top := tops[row * GRID + column] / HEIGHT_RANGE
+			if first or not animate:
+				start = 1.0 if after else 0.0
+				start_top = target_top
+			state_image.set_pixel(column, row, Color(1.0 if after else 0.0, start, target_top, start_top))
 	state_texture.update(state_image)
 	if animate and grows and not reduced_motion:
 		reveal_seconds = maxf(0.05, seconds)
@@ -291,10 +348,10 @@ func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, 
 
 
 func _settle() -> void:
-	for row in ROWS:
-		for column in COLUMNS:
+	for row in GRID:
+		for column in GRID:
 			var p := state_image.get_pixel(column, row)
-			state_image.set_pixel(column, row, Color(p.g, p.g, p.a, p.a))
+			state_image.set_pixel(column, row, Color(p.r, p.r, p.b, p.b))
 	state_texture.update(state_image)
 
 
@@ -329,7 +386,7 @@ func set_reduced_motion(on: bool) -> void:
 	if on:
 		finish_now()
 	for material in materials:
-		material.set_shader_parameter("drift_speed", 0.0 if on else LAYERS[materials.find(material)].drift)
+		material.set_shader_parameter("drift_speed", 0.0 if on else LAYERS[0].drift)
 
 
 func set_dim(strength: float) -> void:
@@ -351,14 +408,12 @@ func set_sights(points: Array) -> void:
 
 func set_soft_depth(on: bool) -> void:
 	soft_depth = on
-	for material in materials:
-		material.set_shader_parameter("soft_depth", on)
 
 
-## Displayed clear amount (0..1) at a point, CPU mirror of the shader's bilinear target.
+## Displayed clear amount (0..1) at a point, CPU mirror of the shader's state blend.
 func displayed_clear(x: float, z: float) -> float:
 	var cell := cell_of(x, z)
 	if cell.x < 0:
 		return 0.0
-	var p := state_image.get_pixel(cell.x, cell.y)
-	return lerpf(p.r, p.g, reveal_t)
+	var p := state_image.get_pixel(cell.x + GRID_OFFSET, cell.y + GRID_OFFSET)
+	return lerpf(p.g, p.r, reveal_t)

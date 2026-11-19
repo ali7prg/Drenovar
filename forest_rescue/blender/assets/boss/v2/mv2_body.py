@@ -52,7 +52,7 @@ J = {
     "eye_L": V(0.385, -3.63, 3.285),
     # left leg (near leg in the side view)
     "hip_L": V(0.58, -0.22, 2.42),
-    "knee_L": V(0.73, -0.70, 1.55),
+    "knee_L": V(0.73, -0.52, 1.45),
     "ankle_L": V(0.68, 0.10, 0.74),
     "ball_L": V(0.68, -0.15, 0.17),
     # left arm
@@ -394,9 +394,9 @@ def leg_parts(side):
     ft = f"foot_{side}"
     # thigh: big muscular mass (side: Y -1.0..+0.45, Z 1.2..2.9; front: outer surface x=1.04)
     # thigh: widest LOW (front view: x 1.02-1.05 at z 1.45-1.8, only 0.76 at z 2.5); side: Y -1.0..+0.45
-    P.append(oell(m([0.66, -0.42, 1.80]), knee - hip, 0.82, 0.36, 0.60, k=0.16, name="thigh", bone=th))
+    P.append(oell(m([0.65, -0.36, 1.86]), knee - hip, 0.80, 0.33, 0.60, k=0.16, name="thigh", bone=th))
     P.append(oell(m([0.55, -0.18, 2.32]), [0, -0.3, -1.0], 0.40, 0.22, 0.45, k=0.16, name="thigh_top", bone=th))
-    P.append(oell(m([0.70, -0.72, 1.72]), [0, -0.6, -1.0], 0.42, 0.30, 0.34, k=0.14, name="quad", bone=th))
+    P.append(oell(m([0.70, -0.62, 1.70]), [0, -0.5, -1.0], 0.42, 0.30, 0.34, k=0.14, name="quad", bone=th))
     P.append(oell(m([0.56, 0.18, 2.05]), [0, 1.0, -0.35], 0.50, 0.31, 0.40, k=0.16, name="caudofem", bone=th))
     # knee (broad in the front view: outer edge x = 1.04 at z 1.3-1.5)
     P.append(oell(knee + m([0.02, -0.02, 0.0]), [1, 0, 0], 0.30, 0.25, 0.24, k=0.10, name="knee", bone=sh))

@@ -535,14 +535,25 @@ def portrait_cam(J):
 
 
 def texture(lo0, R, J, pinfo0=None):
-    """One registered face source: the portrait is piecewise-affine warped onto OUR face in a
-    hi-res virtual FRONT camera and projected inside a feathered face mask only; the painted
-    front view is suppressed there (never two sources on one feature).  Body: front/back views
-    with |n.v| >= 0.35 (head: >= 0.5); everything else synthesised per material and head/body."""
+    """Single source per feature.  Face (forehead..chin, cheek..jaw, feathered mask): the expression
+    portrait projected from ITS OWN solved camera (yaw/pitch/roll/scale, |n.v| >= 0.5, skin + hair
+    only); the painted front view never paints that region.  Everything else: front/back paintings
+    with |n.v| >= 0.35 (head: >= 0.5); the rest synthesised per material and head/body (head skin
+    from the character's own cheek colour, hair with strand detail from the painted hair)."""
+    import cv2 as _cv
     verts, tris, uv, vn = core.mesh_arrays(lo0, evaluated=False)
     T = texproj.rasterize_uv(verts, tris, uv, TEX, vn)
     o, S = HB.head_frame(C, J)
     chin = C["L"]["chin"]
+    yy0, xx0 = np.nonzero(T.valid)
+    P0 = T.pos[yy0, xx0]
+    me_ = lo0.data
+    me_.calc_loop_triangles()
+    tp_ = np.empty(len(me_.loop_triangles), np.int64)
+    me_.loop_triangles.foreach_get("polygon_index", tp_)
+    mi_ = np.array([p.material_index for p in me_.polygons])
+    tex_mat = mi_[tp_[T.tri[yy0, xx0]]]
+    skin_hair = (tex_mat == MAT_IDS["body"]) | (tex_mat == MAT_IDS["hair"])
 
     def is_head(P):
         return (P[:, 2] > chin - 0.07) & (np.abs(P[:, 0]) < 0.20)
@@ -551,69 +562,72 @@ def texture(lo0, R, J, pinfo0=None):
         h = is_head(P)
         return np.where(h, 0.50, 0.35), np.where(h, 0.68, 0.55)
     views = [R.front, R.back]
-    face = None
     pinfo = pinfo0
+    wport = np.zeros(len(P0))
+    col2 = np.zeros((len(P0), 3))
     if pinfo0:
         cam = pinfo0["cam"]
-        lm3 = HB.head_landmarks(C, J)
-        face = HT.FaceView(R.front, centre=o + np.array([0.0, 0.0, -0.035]) * S, size_m=0.34, scale=4.0)
-        dst5 = [np.array(face.project(lm3[k])[:2]) for k in ("eye_r", "eye_l", "nose", "mouth", "chin")]
-        src5 = [np.array(p) for p in cam.lm2[:5]] if len(cam.lm2) >= 5 else None
-        # Duplicate-feature rule: the painted FRONT view is the single registered face source (the
-        # warped up-tilted portrait inset distorts the frontal face); the portrait is used for the
-        # face UV island layout and the SSIM check only.
-        if not C["build"].get("portrait_texture", False):
-            log("face texture: single source = painted front view (portrait not projected)")
-            src5 = None
-        if src5 is not None:
-            HT.warp_portrait(face, cam.image, src5, dst5, feather_px=8.0)
-            core.save_rgba(qa("face_source.png"), np.concatenate([face.image, np.repeat(face.feather[..., None], 3, -1)], 1))
-        else:
-            face = None
+        # feathered face mask in the portrait image: forehead..chin, temples/cheeks..jaw angles
+        ctrl = HT.face_controls(*[np.array(p) for p in cam.lm2[:5]])
+        hull = _cv.convexHull(ctrl[[5, 6, 8, 10, 12, 4, 13, 11, 9, 7]].astype(np.float32))[:, 0, :]
+        m = np.zeros(cam.image.shape[:2], np.uint8)
+        _cv.fillPoly(m, [np.round(hull).astype(np.int32)], 1)
+        feat = _cv.GaussianBlur(m.astype(np.float32), (0, 0), 4.0)
+        img_ = cam.image
+        border = np.concatenate([img_[:4].reshape(-1, 3), img_[:, :4].reshape(-1, 3), img_[:, -4:].reshape(-1, 3)])
+        from scipy import ndimage as _ndi
+        fg = _ndi.binary_erosion(_ndi.binary_opening(np.linalg.norm(img_[..., :3] - np.median(border, 0), axis=-1) > 0.10,
+                                                     iterations=1), iterations=2)
+        cam.mask = cam.mask & (feat > 0.02) & fg
 
-    def feather_at(P):
-        u, v, _ = face.project(P)
-        return texproj._bilinear(face.feather[..., None].astype(np.float32), u, v)[:, 0]
-    region = {"front": (lambda P: 1.0 - feather_at(P))} if face is not None else None
-    data, col, ws, per = HT.project_views(T, verts, tris, views, erode=2, region=region, lo_hi_fn=lohi)
-    if face is not None:
-        d2, col2, ws2, per2 = HT.project_views(T, verts, tris, [face], lo=0.30, hi=0.55, erode=0,
-                                               region={"face": feather_at})
-        # the portrait only paints skin + hair/beard, never hoods / caps / helmets / clothes
-        me_ = lo0.data
-        me_.calc_loop_triangles()
-        tp_ = np.empty(len(me_.loop_triangles), np.int64)
-        me_.loop_triangles.foreach_get("polygon_index", tp_)
-        mi_ = np.array([p.material_index for p in me_.polygons])
-        tex_mat = mi_[tp_[T.tri[data[0], data[1]]]]
-        okm = (tex_mat == MAT_IDS["body"]) | (tex_mat == MAT_IDS["hair"])
-        ws2 = ws2 * okm
-        # restore the painted front view where the portrait does not paint
-        if region is not None:
-            data, col, ws, per = HT.project_views(T, verts, tris, views, erode=2, lo_hi_fn=lohi,
-                                                  region={"front": (lambda P: 1.0 - feather_at(P) * 0.0)})
-            wf = per["front"][0]
-            sup = feather_at(data[2]) * okm
-            col_f = col.copy()
-            # recombine: front weight suppressed only where the portrait paints
-            wb = per["back"][0]
-            ws_front = wf * (1 - sup)
-            colf = texproj._bilinear(R.front.image, per["front"][1], per["front"][2])[:, :3]
-            colb = texproj._bilinear(R.back.image, per["back"][1], per["back"][2])[:, :3]
-            ws = ws_front + wb
-            col = (colf * ws_front[:, None] + colb * wb[:, None]) / np.maximum(ws, 1e-9)[:, None]
-            per["front"] = (ws_front, per["front"][1], per["front"][2])
-        both = (ws > 0.2) & (ws2 > 0.2)
+        def pfeather(P):
+            u, v, _ = cam.project(P)
+            return texproj._bilinear(feat[..., None], u, v)[:, 0]
+        d2, c2, ws2, per2 = HT.project_views(T, verts, tris, [cam], lo=0.50, hi=0.65, erode=0,
+                                             region={"portrait": (lambda P: pfeather(P) * is_head(P))})
+        wport = np.clip(ws2, 0, 1) * skin_hair
+        col2 = c2
+    # painted front/back views; the front never paints where the portrait paints (complementary)
+    data, col, ws, per = HT.project_views(T, verts, tris, views, erode=2, lo_hi_fn=lohi)
+    wf, uf, vf = per["front"]
+    wb, ub, vb = per["back"]
+    # hoods / caps / helmets never take the painted face pixels (herbalist hood rim)
+    lm3 = HB.head_landmarks(C, J)
+    fp = np.array([R.front.project(lm3[k])[:2] for k in ("eye_r", "eye_l", "nose", "mouth", "chin")])
+    fctrl = HT.face_controls(*fp)
+    fhull = _cv.convexHull(fctrl[[5, 6, 8, 10, 12, 4, 13, 11, 9, 7]].astype(np.float32))[:, 0, :]
+    fm = np.zeros(R.front.image.shape[:2], np.uint8)
+    _cv.fillPoly(fm, [np.round(fhull).astype(np.int32)], 1)
+    in_face_px = texproj._bilinear(fm.astype(np.float32)[..., None], uf, vf)[:, 0] > 0.5
+    wf = np.where((~skin_hair) & is_head(data[2]) & in_face_px, 0.0, wf)
+    wf = wf * (1.0 - wport)
+    colf = texproj._bilinear(R.front.image, uf, vf)[:, :3]
+    colb = texproj._bilinear(R.back.image, ub, vb)[:, :3]
+    if pinfo0:
+        both = (wf > 0.2) & (wport > 0.2)
         gain = np.ones(3)
-        if both.sum() > 100:
-            gain = np.clip(np.median(col[both], 0) / np.maximum(np.median(col2[both], 0), 1e-3), 0.8, 1.2)
+        sel_tone = is_head(data[2]) & skin_hair & (wport > 0.3)
+        ref = per["front"][0] > 0.3
+        if (sel_tone & ref).sum() > 100:
+            gain = np.clip(np.median(colf[sel_tone & ref], 0) / np.maximum(np.median(col2[sel_tone & ref], 0), 1e-3),
+                           0.8, 1.2)
         gain = np.sqrt(gain)
-        log("face source gain", np.round(gain, 3), "face texels", int((ws2 > 0.5).sum()))
         col2 = np.clip(col2 * gain, 0, 1)
-        tot = ws + ws2
-        col = (col * ws[:, None] + col2 * ws2[:, None]) / np.maximum(tot, 1e-9)[:, None]
-        ws = tot
-        per.update(per2)
+        log("portrait (own camera) gain", np.round(gain, 3), "face texels", int((wport > 0.5).sum()))
+    ws = wf + wb + wport * 4.0
+    col = (colf * wf[:, None] + colb * wb[:, None] + col2 * (wport * 4.0)[:, None]) / np.maximum(ws, 1e-9)[:, None]
+    per["front"] = (wf, uf, vf)
+    if pinfo0:
+        per["portrait"] = (wport, *per2["portrait"][1:])
+    # head skin that no view sees well: the character's own cheek colour (no pink patches)
+    head_skin = is_head(data[2]) & (tex_mat == MAT_IDS["body"])
+    seen_face = head_skin & (ws > 0.5)
+    cheek = np.median(col[seen_face], 0) if seen_face.sum() > 50 else None
+    if cheek is not None:
+        weak = head_skin & (ws < 0.25)
+        col[weak] = cheek
+        ws = np.where(weak, 0.30, ws)
+        log("head skin fill colour", np.round(cheek, 3), "texels", int(weak.sum()))
     mi = np.array([p.material_index for p in lo0.data.polygons])
     lt = np.empty(len(lo0.data.loop_triangles), np.int64) if False else None
     me = lo0.data

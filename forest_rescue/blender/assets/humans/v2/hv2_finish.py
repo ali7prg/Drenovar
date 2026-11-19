@@ -20,10 +20,10 @@ PAINTED_LIGHT_MIX = 0.40
 def export_materials(aid, img_path):
     img = core.load_image(img_path)
     mats = []
-    for nm, rough in (("body", 0.86), ("hair", 0.80), ("cloth", 0.90), ("gear", 0.72)):
+    for nm, rough in (("body", 0.90), ("hair", 1.0), ("cloth", 0.92), ("gear", 0.75)):
         m = core.material(f"{aid}_{nm}", base_tex=img, rough=rough)
         bsdf = next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
-        bsdf.inputs["Specular IOR Level"].default_value = 0.15
+        bsdf.inputs["Specular IOR Level"].default_value = 0.0 if nm == "hair" else 0.12
         mats.append(m)
     return mats
 

@@ -559,6 +559,9 @@ def texture(lo0, R, J, pinfo0=None):
         face = HT.FaceView(R.front, centre=o + np.array([0.0, 0.0, -0.035]) * S, size_m=0.34, scale=4.0)
         dst5 = [np.array(face.project(lm3[k])[:2]) for k in ("eye_r", "eye_l", "nose", "mouth", "chin")]
         src5 = [np.array(p) for p in cam.lm2[:5]] if len(cam.lm2) >= 5 else None
+        if abs(pinfo0["params"][0]) > 0.30:
+            log("portrait is a 3/4 view (yaw", round(pinfo0["params"][0], 2), "): face from the front view only")
+            src5 = None
         if src5 is not None:
             HT.warp_portrait(face, cam.image, src5, dst5, feather_px=8.0)
             core.save_rgba(qa("face_source.png"), np.concatenate([face.image, np.repeat(face.feather[..., None], 3, -1)], 1))
@@ -573,6 +576,30 @@ def texture(lo0, R, J, pinfo0=None):
     if face is not None:
         d2, col2, ws2, per2 = HT.project_views(T, verts, tris, [face], lo=0.30, hi=0.55, erode=0,
                                                region={"face": feather_at})
+        # the portrait only paints skin + hair/beard, never hoods / caps / helmets / clothes
+        me_ = lo0.data
+        me_.calc_loop_triangles()
+        tp_ = np.empty(len(me_.loop_triangles), np.int64)
+        me_.loop_triangles.foreach_get("polygon_index", tp_)
+        mi_ = np.array([p.material_index for p in me_.polygons])
+        tex_mat = mi_[tp_[T.tri[data[0], data[1]]]]
+        okm = (tex_mat == MAT_IDS["body"]) | (tex_mat == MAT_IDS["hair"])
+        ws2 = ws2 * okm
+        # restore the painted front view where the portrait does not paint
+        if region is not None:
+            data, col, ws, per = HT.project_views(T, verts, tris, views, erode=2, lo_hi_fn=lohi,
+                                                  region={"front": (lambda P: 1.0 - feather_at(P) * 0.0)})
+            wf = per["front"][0]
+            sup = feather_at(data[2]) * okm
+            col_f = col.copy()
+            # recombine: front weight suppressed only where the portrait paints
+            wb = per["back"][0]
+            ws_front = wf * (1 - sup)
+            colf = texproj._bilinear(R.front.image, per["front"][1], per["front"][2])[:, :3]
+            colb = texproj._bilinear(R.back.image, per["back"][1], per["back"][2])[:, :3]
+            ws = ws_front + wb
+            col = (colf * ws_front[:, None] + colb * wb[:, None]) / np.maximum(ws, 1e-9)[:, None]
+            per["front"] = (ws_front, per["front"][1], per["front"][2])
         both = (ws > 0.2) & (ws2 > 0.2)
         gain = np.ones(3)
         if both.sum() > 100:

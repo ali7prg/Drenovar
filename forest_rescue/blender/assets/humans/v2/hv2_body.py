@@ -620,8 +620,12 @@ def head_shell(C, J, R, body_field, fld, kind, spec=None):
     if kind == "hood":
         t = spec.get("thick", 0.045)
         d = db - t
-        opening = (aphi < spec.get("open_phi", 1.12)) & (z < spec.get("open_top", 0.075)) & (z > spec.get("open_bot", -0.16))
-        d = np.where(opening & (y < 0.03), np.maximum(d, (0.004 + 0.0 * z)), d)
+        top_, bot_ = spec.get("open_top", 0.075), spec.get("open_bot", -0.16)
+        zc_, zr_ = 0.5 * (top_ + bot_), 0.5 * (top_ - bot_)
+        ell = np.sqrt((aphi / spec.get("open_phi", 1.12)) ** 2 + ((z - zc_) / zr_) ** 2)
+        open_sdf = (1.0 - ell) * 0.06                 # >0 inside the elliptic face opening
+        open_sdf = np.where(y < 0.03, open_sdf, -1.0)
+        d = smax_np(d, open_sdf, 0.012)
         d = np.maximum(d, (spec.get("bottom", -0.24) - z) * S[2])
     elif kind == "cap":
         t = spec.get("thick", 0.030)

@@ -255,6 +255,11 @@ WALK_SPEED = 1.6                     # m/s -> stride 2.56 m per cycle
 WALK_DUTY = 0.62
 
 
+WALK_LIFT = 0.30
+WALK_PZ = 0.0
+WALK_PITCH = 0.0
+
+
 def walk_foot(t, side):
     phase = (t / WALK_D + (0.0 if side == "L" else 0.5)) % 1.0
     # body-relative foot excursion during stance = ground speed * stance time (no slip in the world)
@@ -270,9 +275,9 @@ def walk_foot(t, side):
         s = (phase - WALK_DUTY) / (1 - WALK_DUTY)
         e = ss(s)
         y = stride / 2 - stride * e
-        z = 0.30 * math.sin(math.pi * s) ** 0.9
+        z = WALK_LIFT * math.sin(math.pi * s) ** 0.9
         heel = 22.0 * (1 - ss(s / 0.5)) + 6.0 * math.sin(math.pi * s)
-        curl = 26.0 * math.sin(math.pi * min(1.0, s * 1.1))
+        curl = 34.0 * math.sin(math.pi * min(1.0, s * 1.1))
         contact = False
     return np.array([0.0, y, z]), heel, curl, contact
 
@@ -282,11 +287,11 @@ def clip_walk(t):
     ch = idle_channels(t, D, amp=0.3)
     ph = 2 * math.pi * t / D
     ch.update({
-        "pz": -0.06 * (0.5 + 0.5 * math.cos(2 * ph)) + 0.02,      # dips at each contact
+        "pz": WALK_PZ - 0.06 * (0.5 + 0.5 * math.cos(2 * ph)) + 0.02,      # dips at each contact
         "px": 0.05 * math.sin(ph - 0.4),                          # sway over the stance foot
         "pyaw": 3.0 * math.sin(ph),
         "proll": 2.5 * math.sin(ph - 0.3),
-        "ppitch": -1.0 + 1.0 * math.cos(2 * ph),
+        "ppitch": WALK_PITCH - 1.0 + 1.0 * math.cos(2 * ph),
         "syaw": -2.0 * math.sin(ph),
         "nyaw": -2.5 * math.sin(ph - 0.3),                        # head stabilised against the pelvis yaw
         "npitch": -2.0 * math.cos(2 * ph + 0.5),
@@ -477,11 +482,11 @@ def clip_death(t):
     D = 5.2
     ch = idle_channels(t, 5.0, amp=0.15 * float(1 - ss((t - 1.0) / 1.0)))
     fall = C((0, 0), (1.4, 0.06), (2.3, 0.25), (3.3, 0.82), (3.7, 1.0), (3.95, 0.97), (4.3, 1.0), (5.2, 1.0))(t)
-    roll = C((0, 0), (1.2, 4), (2.2, -6), (3.0, -40), (3.7, -78), (3.95, -74), (4.4, -79), (5.2, -79))(t)
+    roll = C((0, 0), (1.2, 4), (2.2, -6), (3.0, -10), (3.7, -14), (3.95, -12), (4.4, -13), (5.2, -13))(t)
     ch.update({
-        "pz": -1.55 * fall,
-        "px": -0.25 * fall,
-        "py": 0.25 * fall,
+        "pz": -1.36 * fall,
+        "px": -0.10 * fall,
+        "py": 0.20 * fall,
         "proll": roll,
         "ppitch": C((0, 0), (1.2, 3), (2.4, -6), (3.7, -10), (5.2, -9))(t),
         "pyaw": C((0, 0), (2.0, 4), (3.7, 10), (5.2, 10))(t),
@@ -503,11 +508,11 @@ def clip_death(t):
     ch["contact_L"] = ch["contact_R"] = t < 2.2
     for s, sx in (("L", 1), ("R", -1)):
         b = planted(s)
-        ch[f"ball_{s}"] = b + np.array([sx * 0.35 * fold, 0.55 * fold, (0.45 if s == "L" else 0.30) * fold])
-        ch[f"heel_{s}"] = 40.0 * fold
+        ch[f"ball_{s}"] = b + np.array([sx * 0.30 * fold, 0.75 * fold, 0.40 * fold])
+        ch[f"heel_{s}"] = 62.0 * fold
         ch[f"curl_{s}"] = 25.0 * fold
-    by = C((0, 0), (1.0, -8), (2.0, 10), (3.0, -6), (3.7, -22), (4.3, -30), (5.2, -30))
-    bp = C((0, 0), (2.0, -4), (3.2, -14), (3.7, -20), (4.2, -16), (5.2, -18))
+    by = C((0, 0), (1.0, -8), (2.0, 10), (3.0, -6), (3.7, -16), (4.3, -22), (5.2, -22))
+    bp = C((0, 0), (2.0, -4), (3.2, -18), (3.7, -26), (4.2, -22), (5.2, -24))
     ch["tail"] = tail_wave(t, by, bp, delay=0.07)
     return ch
 
@@ -699,9 +704,105 @@ CLIPS = {
 }
 
 
+# ------------------------------------------------------------------------------------ art/05 key-pose fit
+OVERRIDES = {}
+WINDOWS = {"turn_anticipation": (0.0, 0.55), "turn_planted": (0.55, 1.3), "bite_windup": (0.7, 2.42),
+           "bite_strike": (2.42, 3.25), "roar": (0.55, 2.3), "tail_coil": (1.2, 3.06), "tail_release": (3.06, 4.5),
+           "death_rest": (3.3, 5.2)}
+SCALARS = ["pz", "ppitch", "pyaw", "proll", "spitch", "syaw", "npitch", "nyaw", "hpitch", "jaw", "heel_L", "heel_R",
+           "arm_pitch"]
+
+
+def load_keypose_fit(path):
+    import json
+    import os
+    global WALK_SPEED, WALK_LIFT, WALK_PZ, WALK_PITCH
+    if not os.path.exists(path):
+        return False
+    data = json.load(open(path))
+    OVERRIDES.clear()
+    walk = [r for k, r in data.items() if k.startswith("walk")]
+    if walk:
+        con = [r["params"] for r in walk if "contact" in r["panel"]]
+        pas = [r["params"] for r in walk if "passing" in r["panel"]]
+        if con:
+            step = float(np.mean([abs(p["bLy"] - p["bRy"]) for p in con]))
+            step = float(np.clip(step, 1.2, 2.6))
+            WALK_SPEED = round(step / (WALK_D * WALK_DUTY), 3)
+            WALK_PZ = float(np.clip(np.mean([p["pz"] for p in con]), -0.4, 0.05))
+            WALK_PITCH = float(np.clip(np.mean([p["ppitch"] for p in con + pas]), -8, 8))
+        if pas:
+            WALK_LIFT = float(np.clip(max(max(p["bLz"], p["bRz"]) for p in pas) - 0.17, 0.25, 0.75))
+    for panel, r in data.items():
+        if panel in WINDOWS:
+            a, b = WINDOWS[panel]
+            OVERRIDES.setdefault(r["clip"], []).append((float(r["time"]), a, b, r["params"]))
+    return True
+
+
+def _window(t, a, tk, b):
+    if t < a or t > b:
+        return 0.0
+    if t <= tk:
+        return float(ss((t - a) / max(tk - a, 1e-6)))
+    return 1.0 - float(ss((t - tk) / max(b - tk, 1e-6)))
+
+
+def with_overrides(cid, fn):
+    """Wrap a clip function: blend the fitted art/05 pose in around its key time (additive deltas vs the base
+    pose at that time); feet move with a lifted step in the first/last 40 % of the window."""
+    if cid not in OVERRIDES:
+        return fn
+    base_cache = {}
+
+    def g(t):
+        ch = fn(t)
+        for (tk, a, b, prm) in OVERRIDES[cid]:
+            w = _window(t, a, tk, b)
+            if w <= 0:
+                continue
+            if tk not in base_cache:
+                base_cache[tk] = fn(tk)
+            b0 = base_cache[tk]
+            for k in SCALARS:
+                if k in prm:
+                    ch[k] = ch.get(k, 0.0) + (prm[k] - b0.get(k, 0.0)) * w
+            tail = ch.get("tail", [(0.0, 0.0)] * 12)
+            tb = b0.get("tail", [(0.0, 0.0)] * 12)
+            ch["tail"] = [(tail[i][0] + (prm["ty0"] + prm["ty1"] * i / 11.0 - tb[i][0]) * w,
+                           tail[i][1] + (prm["tp0"] + prm["tp1"] * i / 11.0 - tb[i][1]) * w) for i in range(12)]
+            # feet: step to the painted placement (y), lifted, then hold; step back in the out window
+            for s_, key in (("L", "bLy"), ("R", "bRy")):
+                dy = prm[key] - float(np.asarray(b0[f"ball_{s_}"])[1])
+                dz_t = max(prm["b" + s_ + "z"] - 0.17, 0.0)
+                if abs(dy) < 0.05 and dz_t < 0.05:
+                    continue
+                if t <= tk:
+                    x = (t - a) / max(tk - a, 1e-6)
+                    m = float(ss(x / 0.4)) if x < 0.4 else 1.0
+                    lift = 0.22 * math.sin(math.pi * min(1.0, x / 0.4)) if x < 0.4 else 0.0
+                    swing = x < 0.4
+                else:
+                    x = (t - tk) / max(b - tk, 1e-6)
+                    m = 1.0 - (float(ss((x - 0.6) / 0.4)) if x > 0.6 else 0.0)
+                    lift = 0.22 * math.sin(math.pi * (x - 0.6) / 0.4) if x > 0.6 else 0.0
+                    swing = x > 0.6
+                # a painted raised foot (dz) is reached at the key time and released after it
+                hold_lift = dz_t * w if dz_t >= 0.05 else 0.0
+                p = np.asarray(ch[f"ball_{s_}"], float).copy()
+                p[1] += dy * m
+                p[2] += lift + hold_lift
+                ch[f"ball_{s_}"] = p
+                if swing or hold_lift > 0.01:
+                    ch[f"contact_{s_}"] = False
+        return ch
+    return g
+
+
 def frames(rig, clip_id):
     """Sample a clip at 60 fps: returns (keys per frame, foot world points per frame, node yaw, overreach)."""
     D, loop, fn, _m = CLIPS[clip_id]
+    fn = with_overrides(clip_id, fn)
     n = int(round(D * FPS))
     out, feet, yaws = [], [], []
     over = 0.0

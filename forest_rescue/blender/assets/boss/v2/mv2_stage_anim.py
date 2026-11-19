@@ -111,11 +111,15 @@ def main():
     sc.render.fps = CL.FPS
     sc.render.fps_base = 1.0
     arm = bpy.data.objects[ARM]
+    fitted = CL.load_keypose_fit(C.cache("keypose_fit.json"))
+    C.log(f"art/05 key-pose fit applied: {fitted}; walk speed {CL.WALK_SPEED} lift {CL.WALK_LIFT:.2f} pz {CL.WALK_PZ:.2f}")
     rig = CL.Rig(arm)
     report = {}
     for cid, (D, loop, _fn, markers) in CL.CLIPS.items():
         keys, feet, yaws, over = CL.frames(rig, cid)
         gs = CL.WALK_SPEED if cid == "lf_boss_walk" else 0.0
+        if cid == "lf_boss_walk":
+            CL.CLIPS[cid] = (CL.WALK_D, True, CL.clip_walk, {})
         slip = CL.foot_slip(cid, feet, yaws, ground_speed=gs)
         try:
             write_action_slotted(arm, cid, keys, loop)

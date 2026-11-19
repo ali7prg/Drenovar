@@ -59,7 +59,8 @@ def Z(v=0.0):
 
 
 def rot_xyz(yaw=0.0, pitch=0.0, roll=0.0):
-    """World rotation: yaw about +Z (left turn +), pitch about +X (nose up +), roll about -Y (left side up +)."""
+    """World rotation: yaw about +Z (left turn +), pitch about +X (+ lifts a backward-pointing bone such as the
+    tail, lowers a forward-pointing one; Rig.build negates it for the forward chain), roll about -Y (left up +)."""
     return PO.qmat((0, 0, 1), yaw) @ PO.qmat((1, 0, 0), pitch) @ PO.qmat((0, -1, 0), roll)
 
 
@@ -109,12 +110,14 @@ class Rig:
         ps.reset()
         g = lambda k, d=0.0: p.get(k, d)  # noqa: E731
         # pelvis
+        # forward-pointing chain (pelvis, spine, neck, head): channel pitch > 0 = nose UP, i.e. a negative
+        # rotation about +X (a +X rotation turns -Y forward downwards)
         ps.translate_world("pelvis", [g("px"), g("py"), g("pz")])
-        ps.rot_world("pelvis", rot_xyz(g("pyaw"), g("ppitch"), g("proll")))
+        ps.rot_world("pelvis", rot_xyz(g("pyaw"), -g("ppitch"), g("proll")))
         # spine (chest) distribution
         for i, b in enumerate(SPINE):
             w = (0.25, 0.35, 0.40)[i]
-            ps.rot_world(b, rot_xyz(g("syaw") * w, g("spitch") * w, g("sroll") * w))
+            ps.rot_world(b, rot_xyz(g("syaw") * w, -g("spitch") * w, g("sroll") * w))
         if "breath" in self.sk.names:
             sc = 1.0 + g("breath")
             ps.basis["breath"][:3, :3] = ps.basis["breath"][:3, :3] @ np.diag([sc, 1.0 + 0.6 * g("breath"), sc])
@@ -122,8 +125,8 @@ class Rig:
         # neck + head
         for i, b in enumerate(NECK):
             w = (0.40, 0.33, 0.27)[i]
-            ps.rot_world(b, rot_xyz(g("nyaw") * w, g("npitch") * w, g("nroll") * w))
-        ps.rot_world("head", rot_xyz(g("hyaw"), g("hpitch"), g("hroll")))
+            ps.rot_world(b, rot_xyz(g("nyaw") * w, -g("npitch") * w, g("nroll") * w))
+        ps.rot_world("head", rot_xyz(g("hyaw"), -g("hpitch"), g("hroll")))
         ps.rot_world_axis("jaw", (1, 0, 0), g("jaw"))
         for i, b in enumerate(("tongue_01", "tongue_02", "tongue_03")):
             ps.rot_world_axis(b, (1, 0, 0), g("tongue") * (0.5 + 0.25 * i))

@@ -171,9 +171,9 @@ void fragment() {
 	float pfx = puffs(entry + vec3(e, 0.0, 0.0), drift, time);
 	float pfz = puffs(entry + vec3(0.0, 0.0, e), drift, time);
 	// combined cloud-top height field: banks (state top × billow) + world-space puffs
-	float h0 = top_e * (0.6 + 0.8 * b0) + 6.0 * pf;
-	float hx = mix(s_x.a, s_x.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(e, 0.0), drift)) + 6.0 * pfx;
-	float hz = mix(s_z.a, s_z.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(0.0, e), drift)) + 6.0 * pfz;
+	float h0 = top_e * (0.6 + 0.8 * b0) + 3.5 * pf;
+	float hx = mix(s_x.a, s_x.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(e, 0.0), drift)) + 3.5 * pfx;
+	float hz = mix(s_z.a, s_z.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(0.0, e), drift)) + 3.5 * pfz;
 	vec3 n = normalize(vec3((h0 - hx) / e * 1.7, 1.0, (h0 - hz) / e * 1.7));
 	float lambert = clamp(dot(n, normalize(light_dir)), 0.0, 1.0);
 	// 0 = valley between billows .. 1 = domed billow top
@@ -182,7 +182,7 @@ void fragment() {
 	vec3 shade = mix(valley_color, body_color, smoothstep(0.0, 0.5, cum));
 	shade = mix(shade, lit_color, smoothstep(0.42, 0.95, cum) * (0.4 + 0.6 * lambert));
 	shade = mix(shade, sun_color, smoothstep(0.72, 1.0, cum) * smoothstep(0.55, 0.95, lambert) * 0.9);
-	shade *= mix(0.9, 1.06, lambert);
+	shade *= mix(0.92, 1.05, lambert);
 
 	// ---- volume march: density (3D puffs), thin fog reads as light haze --------------------
 	float trans = 1.0;

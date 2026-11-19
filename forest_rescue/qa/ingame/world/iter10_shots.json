@@ -27,12 +27,12 @@
   },
   "entrance_reveal_2": {
     "perf": {
-      "draws": 202,
+      "draws": 198,
       "fogOnly": 7,
       "full": 4,
       "inst": 498,
       "landmark_tris": 0,
-      "prims": 280195,
+      "prims": 280153,
       "proxy": 1,
       "through_fog": {
         "deep_px_sampled": 6524,
@@ -94,6 +94,32 @@
       "tree_px_through_deep_fog": 0
     },
     "zoom": 130.0
+  },
+  "locked_town_z40": {
+    "perf": {
+      "draws": 255,
+      "fogOnly": 8,
+      "full": 4,
+      "inst": 542,
+      "landmark_tris": 0,
+      "prims": 295842,
+      "proxy": 0,
+      "through_fog": {
+        "deep_px_sampled": 0,
+        "tree_px_through_deep_fog": 0
+      },
+      "tris_est": 51892
+    },
+    "px_per_m": 15.75,
+    "target": [
+      0.0,
+      -30.0
+    ],
+    "through_fog": {
+      "deep_px_sampled": 0,
+      "tree_px_through_deep_fog": 0
+    },
+    "zoom": 40.0
   },
   "locked_town_z68": {
     "perf": {
@@ -158,7 +184,7 @@
       "proxy": 3,
       "through_fog": {
         "deep_px_sampled": 48807,
-        "tree_px_through_deep_fog": 1
+        "tree_px_through_deep_fog": 0
       },
       "tris_est": 1778
     },
@@ -169,7 +195,7 @@
     ],
     "through_fog": {
       "deep_px_sampled": 48807,
-      "tree_px_through_deep_fog": 1
+      "tree_px_through_deep_fog": 0
     },
     "zoom": 130.0
   },

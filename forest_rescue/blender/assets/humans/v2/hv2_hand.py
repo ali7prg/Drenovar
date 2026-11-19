@@ -81,10 +81,10 @@ def tube(acc, pts, radii, weights, sides=8, ref=None, tip=True, flat=1.0, base_c
 
 
 FINGERS = {  # name: (knuckle offset along d, along t), segments, radius, spread deg, bones
-    "Index": (1.00, 0.36, (0.044, 0.026, 0.021), 0.0104, 1.0),
-    "Middle": (1.03, 0.12, (0.048, 0.029, 0.022), 0.0107, 0.0),
-    "Ring": (0.99, -0.12, (0.045, 0.027, 0.021), 0.0102, -0.8),
-    "Pinky": (0.91, -0.35, (0.036, 0.021, 0.019), 0.0091, -2.0),
+    "Index": (1.00, 0.37, (0.046, 0.027, 0.022), 0.0118, 1.0),
+    "Middle": (1.03, 0.12, (0.050, 0.030, 0.023), 0.0122, 0.0),
+    "Ring": (0.99, -0.13, (0.047, 0.028, 0.022), 0.0116, -0.8),
+    "Pinky": (0.91, -0.37, (0.038, 0.022, 0.020), 0.0104, -2.0),
 }
 
 
@@ -100,8 +100,8 @@ def build_hand(side, wrist, d, palm_n, thumb_t, scale=1.0, palm_len=0.090, curl=
         n = -n
     acc = MeshAcc()
     s = scale
-    w_half = (0.044 if not female else 0.039) * s
-    th = (0.017 if not female else 0.015) * s
+    w_half = (0.050 if not female else 0.044) * s
+    th = (0.021 if not female else 0.018) * s
     pl = palm_len * s
     wr = np.asarray(wrist, float)
     hand_w = {f"{S}Hand": 1.0}
@@ -174,7 +174,7 @@ def build_hand(side, wrist, d, palm_n, thumb_t, scale=1.0, palm_len=0.090, curl=
         p = p + dv * Lk * s
         tpts.append(p.copy())
     tpts = np.array(tpts)
-    tr = 0.0115 * s * (0.92 if female else 1.0)
+    tr = 0.0132 * s * (0.92 if female else 1.0)
     tw = [{f"{S}Hand": 0.6, f"{S}Thumb1": 0.4}, {f"{S}Thumb1": 1.0}, {f"{S}Thumb1": 0.4, f"{S}Thumb2": 0.6},
           {f"{S}Thumb2": 1.0}]
     tube(acc, tpts, [tr * 1.25, tr * 1.05, tr * 0.95, tr * 0.82], tw, sides=8, ref=n)

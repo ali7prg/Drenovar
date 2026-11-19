@@ -104,7 +104,7 @@ def hands_geometry(J):
         palm_n = medial * 0.96 + np.array([0, 0.22, 0])          # palm toward the thigh, a bit back
         thumb_t = np.array([0, -1.0, 0.0])                       # thumb forward
         acc, bones = HH.build_hand(S, wr - fa * 0.010, d, palm_n, thumb_t, scale=L["hand_scale"],
-                                   palm_len=C["build"].get("palm_len", 0.095 if not C["female"] else 0.085),
+                                   palm_len=1.06 * C["build"].get("palm_len", 0.095 if not C["female"] else 0.085),
                                    female=C["female"])
         out[S] = (acc, bones)
     return out
@@ -535,56 +535,55 @@ def portrait_cam(J):
 
 
 def texture(lo0, R, J, pinfo0=None):
+    """One registered face source: the portrait is piecewise-affine warped onto OUR face in a
+    hi-res virtual FRONT camera and projected inside a feathered face mask only; the painted
+    front view is suppressed there (never two sources on one feature).  Body: front/back views
+    with |n.v| >= 0.35 (head: >= 0.5); everything else synthesised per material and head/body."""
     verts, tris, uv, vn = core.mesh_arrays(lo0, evaluated=False)
     T = texproj.rasterize_uv(verts, tris, uv, TEX, vn)
+    o, S = HB.head_frame(C, J)
+    chin = C["L"]["chin"]
+
+    def is_head(P):
+        return (P[:, 2] > chin - 0.07) & (np.abs(P[:, 0]) < 0.20)
+
+    def lohi(P):
+        h = is_head(P)
+        return np.where(h, 0.50, 0.35), np.where(h, 0.68, 0.55)
     views = [R.front, R.back]
-    data, col, ws, per = HT.project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2)
-    # portrait (civilians + captain): scaled orthographic camera solved from landmarks
-    pinfo = None
+    face = None
+    pinfo = pinfo0
     if pinfo0:
-        cam, err = pinfo0["cam"], pinfo0["err"]
-        o, S = HB.head_frame(C, J)
-        chin = C["L"]["chin"]
-
-        def head_region(P):
-            q = P - o
-            near = np.exp(-np.maximum(0, (q[:, 1] + 0.0)) / 0.06)
-            return (P[:, 2] > chin - 0.035) * near
-        # portrait pixels: the face/beard (landmark hull x1.7) fully, the hair only where it faces
-        # the portrait camera head-on; the clothes at the bottom of the inset are never used
-        # the clothes at the bottom of the inset are never used
-        fm = np.ones(cam.image.shape[:2], bool)
-        chin_y = cam.lm2[-1][1] if len(cam.lm2) >= 5 else cam.lm2[2][1] + 25
-        fm[int(chin_y + 0.35 * (chin_y - cam.lm2[0][1])):] = False
-        fm[:3] = fm[-3:] = False
-        fm[:, :3] = fm[:, -3:] = False
-        # never project the inset's parchment / studio background onto hair or face
-        img_ = cam.image
-        border = np.concatenate([img_[:4].reshape(-1, 3), img_[:, :4].reshape(-1, 3), img_[:, -4:].reshape(-1, 3)])
-        bgc = np.median(border, 0)
-        dist = np.linalg.norm(img_[..., :3] - bgc, axis=-1)
-        from scipy import ndimage as _ndi
-        fg = _ndi.binary_opening(dist > 0.10, iterations=1)
-        fm &= _ndi.binary_erosion(fg, iterations=2)
-        cam.mask = fm
-
-        d2, col2, ws2, per2 = HT.project_views(T, verts, tris, [cam], lo=0.40, hi=0.65, erode=0,
-                                               region={"portrait": head_region})
-        # tone-match the portrait to the full-body painting on texels both see
-        both = (ws > 0.3) & (ws2 > 0.3)
-        if both.sum() > 200:
-            gain = np.clip(np.median(col[both], 0) / np.maximum(np.median(col2[both], 0), 1e-3), 0.8, 1.2)
+        cam = pinfo0["cam"]
+        lm3 = HB.head_landmarks(C, J)
+        face = HT.FaceView(R.front, centre=o + np.array([0.0, 0.0, -0.035]) * S, size_m=0.34, scale=4.0)
+        dst5 = [np.array(face.project(lm3[k])[:2]) for k in ("eye_r", "eye_l", "nose", "mouth", "chin")]
+        src5 = [np.array(p) for p in cam.lm2[:5]] if len(cam.lm2) >= 5 else None
+        if src5 is not None:
+            HT.warp_portrait(face, cam.image, src5, dst5, feather_px=8.0)
+            core.save_rgba(qa("face_source.png"), np.concatenate([face.image, np.repeat(face.feather[..., None], 3, -1)], 1))
         else:
-            gain = np.ones(3)
-        log("portrait gain", np.round(gain, 3))
-        gain = np.sqrt(gain)          # half-way: keeps the portrait's own values, close to the body tone
+            face = None
+
+    def feather_at(P):
+        u, v, _ = face.project(P)
+        return texproj._bilinear(face.feather[..., None].astype(np.float32), u, v)[:, 0]
+    region = {"front": (lambda P: 1.0 - feather_at(P))} if face is not None else None
+    data, col, ws, per = HT.project_views(T, verts, tris, views, erode=2, region=region, lo_hi_fn=lohi)
+    if face is not None:
+        d2, col2, ws2, per2 = HT.project_views(T, verts, tris, [face], lo=0.30, hi=0.55, erode=0,
+                                               region={"face": feather_at})
+        both = (ws > 0.2) & (ws2 > 0.2)
+        gain = np.ones(3)
+        if both.sum() > 100:
+            gain = np.clip(np.median(col[both], 0) / np.maximum(np.median(col2[both], 0), 1e-3), 0.8, 1.2)
+        gain = np.sqrt(gain)
+        log("face source gain", np.round(gain, 3), "face texels", int((ws2 > 0.5).sum()))
         col2 = np.clip(col2 * gain, 0, 1)
-        wp = ws2 * 10.0
-        tot = ws + wp
-        col = (col * ws[:, None] + col2 * wp[:, None]) / np.maximum(tot, 1e-9)[:, None]
+        tot = ws + ws2
+        col = (col * ws[:, None] + col2 * ws2[:, None]) / np.maximum(tot, 1e-9)[:, None]
         ws = tot
         per.update(per2)
-        pinfo = pinfo0
     mi = np.array([p.material_index for p in lo0.data.polygons])
     lt = np.empty(len(lo0.data.loop_triangles), np.int64) if False else None
     me = lo0.data
@@ -592,7 +591,7 @@ def texture(lo0, R, J, pinfo0=None):
     tri_poly = np.empty(len(me.loop_triangles), np.int64)
     me.loop_triangles.foreach_get("polygon_index", tri_poly)
     yy, xx = data[0], data[1]
-    group = mi[tri_poly[T.tri[yy, xx]]]
+    group = mi[tri_poly[T.tri[yy, xx]]] * 2 + is_head(data[2]).astype(np.int64)
     col, seen = HT.synthesize(T, data, col, ws, per, views, group=group)
     log("texture: seen fraction", round(float(seen.mean()), 3))
     img = HT.to_image(T, data, col)
@@ -664,6 +663,15 @@ def qa_renders(lo0, R, J, mats, pinfo):
         bg = np.array([0.80, 0.78, 0.74])
         tiles.append(np.clip(rgba[..., :3] * rgba[..., 3:4] + bg * (1 - rgba[..., 3:4]), 0, 1))
     core.save_rgba(qa("face.png"), np.concatenate(tiles, 1))
+    # duplicate-feature check: head at 5 angles (front, 3/4 L/R, profile L/R), large
+    tiles = []
+    for yaw in (0, -45, 45, -90, 90):
+        a = math.radians(yaw)
+        HBL.look_at_cam((math.sin(a) * 3, -math.cos(a) * 3, o[2] + 0.02), (0, 0.005, o[2] - 0.02), ortho_scale=0.36,
+                        res=(460, 520))
+        rgba = HBL.render_rgba()
+        tiles.append(np.clip(rgba[..., :3] * rgba[..., 3:4] + np.array([0.80, 0.78, 0.74]) * (1 - rgba[..., 3:4]), 0, 1))
+    core.save_rgba(qa("heads5_blender.png"), np.concatenate(tiles, 1))
     # clay (geometry only) views
     clay_img = bpy.data.images.new("clay", 8, 8)
     clay_img.generated_color = (0.72, 0.70, 0.66, 1.0)

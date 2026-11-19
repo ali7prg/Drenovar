@@ -97,8 +97,9 @@ def zbuf(verts, tris, cam):
     return texproj.zbuffer(verts, tris, cam, pad=1)
 
 
-def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None):
-    """Angle-limited, z-buffered projection.  Returns colour, weight sum, per-view weights."""
+def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None, lo_hi_fn=None):
+    """Angle-limited, z-buffered projection.  Returns colour, weight sum, per-view weights.
+    lo_hi_fn(P) -> (lo, hi) per texel (stricter limits on the head)."""
     W, H = T.size
     yy, xx = np.nonzero(T.valid)
     P = T.pos[yy, xx]
@@ -120,7 +121,12 @@ def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None)
         inm = np.zeros(len(P), bool)
         inm[ok] = m[vi[ok], ui[ok]]
         facing = N @ (-v.d)
-        w = smoothstep(lo, hi, facing) * vis * inm * v.weight
+        if lo_hi_fn is not None:
+            lo_t, hi_t = lo_hi_fn(P)
+            w = np.clip((facing - lo_t) / np.maximum(hi_t - lo_t, 1e-6), 0, 1)
+            w = w * w * (3 - 2 * w) * vis * inm * v.weight
+        else:
+            w = smoothstep(lo, hi, facing) * vis * inm * v.weight
         if region is not None and v.name in region:
             w = w * region[v.name](P)
         col = texproj._bilinear(v.image, u, vv)[:, :3]
@@ -211,3 +217,74 @@ def to_image(T, data, colors, fill_bg=True):
     if fill_bg:
         img = texproj.dilate_margin(img, T.valid, 6)
     return img
+
+
+class FaceView:
+    """High-resolution virtual FRONT camera over the head (same direction and registration as the
+    painted front view, 4x its pixel density) carrying the portrait warped onto our face."""
+
+    def __init__(self, front, centre, size_m=0.34, scale=4.0):
+        self.name = "face"
+        self.d = np.array([0.0, 1.0, 0.0])
+        self.right = np.array([1.0, 0.0, 0.0])
+        self.up = np.array([0.0, 0.0, 1.0])
+        self.ppm = front.ppm * scale
+        self.anchor = np.asarray(centre, float)
+        n = int(round(size_m * self.ppm))
+        self.W = self.H = n
+        self.ax = n / 2.0
+        self.ay = n / 2.0
+        self.weight = 1.0
+        self.image = np.zeros((n, n, 3))
+        self.mask = np.zeros((n, n), bool)
+        self.feather = np.zeros((n, n))
+
+    @property
+    def size(self):
+        return self.W, self.H
+
+    def project(self, P):
+        P = np.asarray(P, float) - self.anchor
+        return self.ax + (P @ self.right) * self.ppm, self.ay - (P @ self.up) * self.ppm, P @ self.d
+
+
+def face_controls(e_r, e_l, nose, mouth, chin):
+    """5 landmarks -> 14 control points spanning forehead, temples, cheeks, jaw and chin."""
+    e_r, e_l, nose, mouth, chin = (np.asarray(v, float) for v in (e_r, e_l, nose, mouth, chin))
+    em = 0.5 * (e_r + e_l)
+    lat = e_l - e_r
+    down = mouth - em
+    pts = [e_r, e_l, nose, mouth, chin,
+           em - down * 0.95,                         # forehead / hairline centre
+           e_r - lat * 0.55 - down * 0.35, e_l + lat * 0.55 - down * 0.35,   # temples
+           e_r - lat * 0.62 + down * 0.55, e_l + lat * 0.62 + down * 0.55,   # cheeks
+           mouth - lat * 0.85 + down * 0.25, mouth + lat * 0.85 + down * 0.25,  # jaw angles
+           chin - lat * 0.45 - down * 0.10, chin + lat * 0.45 - down * 0.10]   # chin sides
+    return np.array(pts)
+
+
+def warp_portrait(face, portrait_img, src5, dst5, feather_px=8.0):
+    """Piecewise-affine warp of the portrait so its 14 control points land on our face's points
+    in the virtual front view; face mask = control-point hull (forehead..chin, cheek..jaw)."""
+    import cv2
+    from skimage.transform import PiecewiseAffineTransform, SimilarityTransform, warp
+    src = face_controls(*src5)
+    dst = face_controls(*dst5)
+    sim = SimilarityTransform()
+    sim.estimate(dst[:5], src[:5])
+    H, W = face.H, face.W
+    border = np.array([[0, 0], [W - 1, 0], [W - 1, H - 1], [0, H - 1], [W / 2, 0], [W / 2, H - 1], [0, H / 2],
+                       [W - 1, H / 2]], float)
+    dst_all = np.concatenate([dst, border])
+    src_all = np.concatenate([src, sim(border)])
+    pw = PiecewiseAffineTransform()
+    pw.estimate(dst_all, src_all)
+    out = warp(portrait_img.astype(np.float64), pw, output_shape=(H, W), order=1, mode="edge")
+    face.image = out[..., :3]
+    hull = cv2.convexHull(dst[[5, 6, 8, 10, 12, 4, 13, 11, 9, 7]].astype(np.float32))[:, 0, :]
+    m = np.zeros((H, W), np.uint8)
+    cv2.fillPoly(m, [np.round(hull).astype(np.int32)], 1)
+    feat = cv2.GaussianBlur(m.astype(np.float32), (0, 0), feather_px / 2.0)
+    face.mask = feat > 0.02
+    face.feather = feat
+    return face

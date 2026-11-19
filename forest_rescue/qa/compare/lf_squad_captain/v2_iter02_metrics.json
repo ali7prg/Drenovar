@@ -1,0 +1,21 @@
+{
+ "front": {
+  "iou": 0.8778,
+  "colour_error": 0.0351,
+  "colour_error_core": 0.033,
+  "ref_px": 70877,
+  "render_px": 65916
+ },
+ "back": {
+  "iou": 0.8864,
+  "colour_error": 0.0287,
+  "colour_error_core": 0.026,
+  "ref_px": 69915,
+  "render_px": 64803
+ },
+ "portrait": {
+  "ssim": 0.5813,
+  "ssim_face": 0.6661,
+  "solve_err_px": 5.96
+ }
+}

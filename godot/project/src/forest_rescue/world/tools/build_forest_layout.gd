@@ -57,7 +57,7 @@ const ZONE_MIX := [
 	{Rules.BIRCH: 0.45, Rules.PINE: 0.30, Rules.OAK: 0.25},                 # town belt
 ]
 ## Ambient spacing (m) per zone: target trunk spacing incl. resource trees.
-const ZONE_SPACING := [7.4, 5.6, 4.6, 5.2, 6.0, 4.1, 11.0, 6.4]
+const ZONE_SPACING := [6.6, 4.8, 3.7, 4.2, 4.6, 3.3, 9.0, 5.0]
 ## Absolute scale ranges per [zone][species] for AMBIENT trees (inside kit recommendedScale).
 const AMBIENT_SCALE := {
 	Rules.OAK: [[0.86, 1.08], [0.70, 0.90], [0.66, 0.80], [0.66, 0.82], [0.66, 0.80], [0.66, 0.78], [0.66, 0.78], [0.66, 0.82]],
@@ -67,14 +67,14 @@ const AMBIENT_SCALE := {
 }
 ## Resource-tree absolute scale ranges per zone [oak, pine] (zone decides which one dominates).
 const RESOURCE_SCALE_OUTER := [
-	[[0.70, 0.90], [0.66, 0.80]],   # grove: oaks lead, pines low
-	[[0.62, 0.80], [0.74, 0.92]],
-	[[0.52, 0.64], [0.92, 1.12]],   # arena pines
-	[[0.56, 0.70], [0.80, 1.00]],
-	[[0.56, 0.70], [0.78, 0.96]],
-	[[0.46, 0.56], [0.94, 1.18]],   # spruce: young oaks under tall spruces
-	[[0.52, 0.64], [0.76, 0.92]],
-	[[0.56, 0.70], [0.74, 0.90]],
+	[[0.72, 0.92], [0.62, 0.74]],   # grove: oaks lead, pines low
+	[[0.58, 0.74], [0.74, 0.92]],
+	[[0.44, 0.54], [0.92, 1.12]],   # arena pines
+	[[0.46, 0.58], [0.82, 1.02]],
+	[[0.46, 0.58], [0.78, 0.96]],
+	[[0.40, 0.48], [0.96, 1.20]],   # spruce: young oaks under tall spruces
+	[[0.46, 0.56], [0.76, 0.92]],
+	[[0.48, 0.60], [0.74, 0.90]],
 ]
 ## Inner base (±56): the town stays readable (legacy-like 8–10 m crowns).
 const RESOURCE_SCALE_INNER := [[0.46, 0.58], [0.60, 0.74]]
@@ -172,7 +172,7 @@ func zone_weights(x: float, z: float) -> PackedFloat32Array:
 	# Quarry: around the SW quarry centre (glade 08 / mine), ragged edge.
 	if quarry_center != Vector2.INF:
 		var dq := Vector2(x, z).distance_to(quarry_center) + warp.get_noise_2d(x * 1.7, z * 1.7) * 6.0
-		var q := 1.0 - smoothstep(16.0, 28.0, dq)
+		var q := 1.0 - smoothstep(18.0, 32.0, dq)
 		for i in w.size():
 			w[i] *= (1.0 - q)
 		w[Z_QUARRY] = maxf(w[Z_QUARRY], q * 1.2)
@@ -465,9 +465,15 @@ func run() -> void:
 		var bank: float = atlas.river_bank_distance(x, z)
 		var kind := Rules.pick_index(ZONE_UNDERSTORY[zone], rng.randf())
 		var kind_name: String = Rules.UNDERSTORY[kind]
-		var reed_zone := bank > -0.6 and bank < 1.8 and h > -1.3 and slope < 38.0
+		# The river runs in a gorge: reeds on the wet margin, boulders on the steep walls.
+		var reed_zone := bank > -0.4 and bank < 1.2 and h > -1.3 and h < 0.8
+		var wall_zone := bank >= 1.2 and bank < 4.5 and slope > 30.0
 		if reed_zone:
 			kind_name = "reed" if rng.randf() < 0.8 else "rock"
+		elif wall_zone:
+			if rng.randf() > 0.35:
+				continue
+			kind_name = "rock"
 		elif h < -0.3 or slope > 34.0:
 			continue
 		elif kind_name == "reed":
@@ -481,6 +487,8 @@ func run() -> void:
 				kind = Rules.UNDERSTORY.find(kind_name)
 		if kind_name == "quarry_rock":
 			r = 4.2
+		elif kind_name == "reed":
+			r = 2.2
 		if blocked_exact(x, z, false):
 			continue
 		var ok := true

@@ -105,12 +105,19 @@ def atlas_from_portrait(C):
                       [sc * ty, -sc * ny, c[1] - (P / 2) * sc * ty + (P / 2) * sc * ny]], np.float32)
         rgb = cv2.warpAffine(img, M, (P, P), flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP,
                              borderMode=cv2.BORDER_REFLECT)
-        d = np.linalg.norm(rgb - bg, axis=-1)
-        a = np.clip((d - 0.05) / 0.12, 0, 1)
-        a[int(P * 0.62):] = np.maximum(a[int(P * 0.62):], 1.0)      # root: the hair mass, opaque
+        # hair-ness: darker than the plain background (drops the light panel lines and skin highlights)
+        lum = rgb @ np.array([0.299, 0.587, 0.114], np.float32)
+        hairy = np.clip((float(bg @ np.array([0.299, 0.587, 0.114])) - lum - 0.10) / 0.12, 0, 1)
+        hairy = np.where(lum > 0.42, 0.0, hairy)                      # skin / background never hair
+        a = hairy.copy()
+        # colour bleed from hair texels into everything else (no halo, no skin at the root)
+        far = hairy < 0.5
+        if far.any() and (~far).any():
+            _, (iy, ix) = ndi.distance_transform_edt(far, return_indices=True)
+            rgb = rgb[iy, ix]
+        a[int(P * 0.66):] = 1.0                                         # root: the hair mass, opaque
         a = a * win[None, :]
         a[:4] = 0
-        # colour bleed into the transparent texels (no halo when mip-mapped / alpha-tested)
         far = a < 0.5
         if far.any() and (~far).any():
             _, (iy, ix) = ndi.distance_transform_edt(far, return_indices=True)

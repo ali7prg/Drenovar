@@ -54,14 +54,14 @@
   "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -1.754,
+      -1.836,
       0.0,
-      -1.288
+      -1.378
     ],
     "max": [
-      1.754,
-      3.921,
-      3.39
+      1.836,
+      3.927,
+      3.201
     ]
   },
   "lod_nodes": {
@@ -200,138 +200,138 @@
   ],
   "blueprint": {
     "c": 1.55,
-    "cy": 1.1544,
-    "s": 0.2,
-    "zd": 0.4922,
-    "zt": 3.0961,
+    "cy": 1.1614,
+    "s": 0.27,
+    "zd": 0.4967,
+    "zt": 3.1014,
     "zs": 3.5,
-    "zc": 3.4913,
-    "pe": 0.1339,
-    "pf": 0.5378,
-    "hx": -0.9009,
-    "dx1": 1.3424,
-    "sz": 1.2591,
-    "sx": 0.6979,
-    "zda": 2.4694,
-    "dz0": 0.3632
+    "zc": 3.4972,
+    "pe": 0.2162,
+    "pf": 0.2704,
+    "hx": -0.7844,
+    "dx1": 1.2612,
+    "sz": 1.2581,
+    "sx": 0.6858,
+    "zda": 2.4607,
+    "dz0": 0.3584
   },
   "qa": {
     "views": {
       "closed34": {
-        "iou_raw": 0.6946,
-        "iou_filled": 0.9226,
-        "colour_err": 0.1043,
-        "colour_err_core": 0.0855,
-        "ref_px": 80509,
-        "render_px": 72015,
+        "iou_raw": 0.764,
+        "iou_filled": 0.9327,
+        "colour_err": 0.1025,
+        "colour_err_core": 0.0851,
+        "ref_px": 80445,
+        "render_px": 79253,
         "ignored_px": 0,
-        "camera_rms_px": 8.23,
-        "camera_max_px": 13.03,
+        "camera_rms_px": 4.46,
+        "camera_max_px": 8.84,
         "camera_points": 11
       },
       "open34": {
-        "iou_raw": 0.6851,
-        "iou_filled": 0.9346,
-        "colour_err": 0.1369,
-        "colour_err_core": 0.1181,
-        "ref_px": 73449,
-        "render_px": 64426,
-        "ignored_px": 37584,
-        "camera_rms_px": 5.87,
-        "camera_max_px": 10.18,
+        "iou_raw": 0.7414,
+        "iou_filled": 0.9382,
+        "colour_err": 0.131,
+        "colour_err_core": 0.1157,
+        "ref_px": 72978,
+        "render_px": 68932,
+        "ignored_px": 35100,
+        "camera_rms_px": 5.07,
+        "camera_max_px": 9.78,
         "camera_points": 7
       }
     },
     "cameras": {
       "closed34": {
-        "rms_px": 8.23,
-        "max_px": 13.03,
+        "rms_px": 4.46,
+        "max_px": 8.84,
         "n": 11,
-        "fov_deg": 20.74,
+        "fov_deg": 19.69,
         "per_point_px": {
-          "top_n": 13.03,
-          "top_l": 8.05,
-          "top_r": 8.57,
-          "crown": 11.91,
-          "plat_bl": 6.82,
-          "plat_n": 11.06,
-          "plat_r": 10.88,
-          "door_bl": 1.73,
-          "door_br": 2.1,
-          "door_ap": 1.13,
+          "top_n": 1.69,
+          "top_l": 6.49,
+          "top_r": 6.78,
+          "crown": 8.84,
+          "plat_bl": 2.95,
+          "plat_r": 5.97,
+          "postn_foot": 2.24,
+          "door_bl": 0.43,
+          "door_br": 0.43,
+          "door_ap": 0.57,
           "sock": 0.03
         }
       },
       "open34": {
-        "rms_px": 5.87,
-        "max_px": 10.18,
+        "rms_px": 5.07,
+        "max_px": 9.78,
         "n": 7,
-        "fov_deg": 25.77,
+        "fov_deg": 27.06,
         "per_point_px": {
-          "top_n": 2.2,
-          "top_l": 6.76,
-          "top_r": 7.49,
-          "crown": 10.18,
-          "plat_bl": 4.71,
-          "plat_n": 2.31,
-          "postb_foot": 1.71
+          "top_n": 4.23,
+          "top_l": 3.5,
+          "top_r": 4.18,
+          "crown": 9.78,
+          "plat_bl": 5.03,
+          "plat_n": 3.05,
+          "postb_foot": 1.5
         }
       }
     },
     "texture": {
-      "texels": 2354659,
-      "projected_frac": 0.1842,
+      "texels": 2269608,
+      "projected_frac": 0.1759,
       "per_view_frac": {
-        "closed34": 0.1457,
-        "open34": 0.129
+        "closed34": 0.1487,
+        "open34": 0.1272
       },
-      "seconds": 12.7
+      "seconds": 11.7
     },
-    "sheets": "forest_rescue/qa/compare/lf_cage_iron/v2_iter03_*"
+    "sheets": "forest_rescue/qa/compare/lf_cage_iron/v2_iter04_*"
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_iron --iter 3",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_iron --iter 4",
   "door_open_deg": -95.0,
   "door_open_deg_note": "signed Godot rotation.y of door_pivot for the open pose (actor_director.swing_door fallback adds door_open_deg * amount: negative = outward)",
   "sockets": {
     "floor": [
       0.0,
-      0.4922,
+      0.4967,
       -0.0
     ],
     "hinge": [
-      -0.8109,
-      0.3632,
-      1.2194
+      -0.6944,
+      0.3584,
+      1.2264
     ],
     "captive_slot_0": [
       -0.72,
-      0.492,
+      0.497,
       0.1
     ],
     "captive_slot_1": [
       0.05,
-      0.492,
+      0.497,
       -0.45
     ],
     "captive_slot_2": [
       0.74,
-      0.492,
+      0.497,
       0.18
     ]
   },
   "socketInfo": {
     "floor": {
       "node": "floor",
-      "height_m": 0.492,
+      "height_m": 0.497,
       "note": "top of the cage floor (glTF y). Seat captives at cage.global_transform * sockets.floor (or add sockets.floor[1] to their ground height); captive_slot_0..2 are seat spots on the floor that match actor_director CAGE_SLOTS."
     },
     "key_slot": {
       "node": "key_slot",
       "parent": "door_pivot",
       "position_closed": [
-        0.6979,
-        1.2591,
-        1.2344
+        0.6858,
+        1.2581,
+        1.2414
       ],
       "normal": [
         0,
@@ -354,9 +354,9 @@
         "hinge_axis_top"
       ],
       "point": [
-        -0.8109,
+        -0.6944,
         0.0,
-        1.2194
+        1.2264
       ],
       "direction": [
         0,
@@ -369,8 +369,8 @@
       "node": "door_pivot",
       "open_rotation_y_deg": -95.0,
       "rule": "door_pivot rotates about its local +Y (through the hinge pins); closed 0, open -95 deg (outward: the free edge moves toward +Z)",
-      "clear_width_m": 2.133,
-      "clear_height_m": 1.886
+      "clear_width_m": 1.936,
+      "clear_height_m": 1.882
     },
     "latch": {
       "node": "latch_pivot",
@@ -383,24 +383,24 @@
     },
     "exit_corridor": [
       [
-        -0.3009,
-        0.4922,
-        0.6544
+        -0.1844,
+        0.4967,
+        0.6614
       ],
       [
-        -0.3009,
-        0.4922,
-        1.4544
+        -0.1844,
+        0.4967,
+        1.4614
       ],
       [
-        -0.3009,
+        -0.1844,
         0.0,
-        2.5544
+        2.5614
       ],
       [
-        -0.3009,
+        -0.1844,
         0.0,
-        3.7544
+        3.7614
       ]
     ]
   },

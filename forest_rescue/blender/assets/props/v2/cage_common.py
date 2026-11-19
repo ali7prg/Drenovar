@@ -88,12 +88,20 @@ def add_door_and_sockets(A, cfg, lod, native):
     bx = np.linspace(x0 + sw, x1 - sw, nb + 2)[1:-1]
     if cfg.get("bar_x") is not None:
         bx = np.array(cfg["bar_x"]) if lod < 2 else np.array(cfg["bar_x"])[::2]
+    slats = cfg.get("slats", False)
     for x in bx:
         ztop = zs + (za - zs) * math.sqrt(max(0.0, 1 - ((x - xc) / half) ** 2)) - 0.1
-        g.cyl((x, ym, z0 + cfg["rail_h"] - 0.01), (x, ym, ztop), cfg["bar_r"], n=6 if lod == 0 else 4, mat="iron",
-              tag="door_bar", caps=(False, False))
+        if slats:
+            g.box((x, ym, (z0 + cfg["rail_h"] + ztop) / 2), (0.075, t * 0.6, ztop - z0 - cfg["rail_h"] + 0.02),
+                  mat=wm, tag="door_slat")
+        else:
+            g.cyl((x, ym, z0 + cfg["rail_h"] - 0.01), (x, ym, ztop), cfg["bar_r"], n=6 if lod == 0 else 4, mat="iron",
+                  tag="door_bar", caps=(False, False))
     for zr in cfg["rails_z"]:
-        g.box((xc, ym - 0.004, zr), (x1 - x0 - 2 * sw + 0.02, 0.03, 0.045), mat="iron", tag="door_ironrail")
+        if slats:
+            g.box((xc, ym - 0.02, zr), (x1 - x0 - 2 * sw + 0.02, 0.035, 0.09), mat=wm, tag="door_rail")
+        else:
+            g.box((xc, ym - 0.004, zr), (x1 - x0 - 2 * sw + 0.02, 0.03, 0.045), mat="iron", tag="door_ironrail")
     if lod == 0:
         for zr in cfg["rails_z"]:
             for x in bx:

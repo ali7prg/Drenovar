@@ -1,29 +1,36 @@
 extends Node3D
-## Landmarks + boss arena dressing. Assets are picked up automatically when the asset agents
-## deliver them (re-checked on every city build); nothing is invented here.
+## Landmarks + boss arena dressing (landmarks v3 / arena modules). Nothing is invented here:
+## every visual is a delivered GLB, picked up automatically (re-checked on every city build).
 ##
-## Authored spots (atlas coordinates, documented in WORLD_API.md changelog):
+## Landmark GLBs: <id>.glb = LOD0 (+ <id>_cloth_LOD0 morph clip lf_banner_wind, + <id>_base
+## painted ground patch), <id>_LOD1.glb / <id>_LOD2.glb (same origin). In the world the `_base`
+## nodes are OFF (the terrain/paths provide the ground), cloth clips loop, every surface uses the
+## painted kit material with k = 0.35 (meta paintedLightMix), LODs switch by the city zoom.
+##
+## Spots follow the art/01 masterplan as seen from the city camera (screen angle φ around the
+## town, CCW from screen-right) and are validated against route clearances, glades, arena,
+## bridge, core and the wet river channel (spiral search ≤ 24 m if blocked):
 ##   lf_env_bridge27m        (90.482, 0, 20) exactly, yaw 0 (long axis X, deck top local 1.1)
-##   lf_env_quarry_mine      Ломаный известняк, NW of site 03 — preferred (-93, -88)
-##   lf_env_ruined_watchpost Пепельная часовня edge — preferred (-80, -73)
-##   lf_env_hunter_shelter   Тёмная хвоя, west of route 04→05 — preferred (-101, -15)
-##   lf_env_standing_stones  Древняя роща, east of site 12 — preferred (96, -62)
-##   lf_env_camp_props       one per glade, just outside the pad at the freest angle
-##   arena modules           centred on the arena (75, -86), entrance toward the boss route
-## Preferred spots are validated against route clearances, glades, arena, bridge, core and the
-## wet river channel; if blocked, a spiral search (≤ 24 m) finds the nearest valid spot.
+##   lf_env_quarry_mine      art/01 SW quarry (φ≈209°): outside glade 08, portal facing it
+##   lf_env_ruined_watchpost art/01 arch ruin at the grove edge (φ≈164°), near glade 06
+##   lf_env_hunter_shelter   art/01 east bank shelter (φ≈331°), between glades 11 and 12
+##   lf_env_standing_stones  art/01 stone row above the town (φ≈85°), between glades 02 and 03
+##   lf_env_camp_props       one per glade (tent + fire next to the cage), freest angle
+##   arena (assembled)       centred on (75, -86), yaw 5.4° (gap toward the boss route)
 
+const ForestKit = preload("res://src/forest_rescue/world/forest_kit.gd")
 const LANDMARK_DIR := "res://assets/forest_rescue/landmarks/"
 const ARENA_DIR := "res://assets/forest_rescue/arena/"
-const PROPS_JSON := "res://assets/forest_rescue/props/site_props.json"
+const LIGHT_MIX := 0.35
+const ARENA_YAW_DEG := 5.4
 
 const SPECS := [
-	{"id": "lf_env_quarry_mine", "pos": Vector2(-93, -88), "footprint": 8.0, "face": Vector2(-70, -66)},
-	{"id": "lf_env_ruined_watchpost", "pos": Vector2(-80, -73), "footprint": 5.5, "face": Vector2(-67, -63)},
-	{"id": "lf_env_hunter_shelter", "pos": Vector2(-101, -15), "footprint": 5.0, "face": Vector2(-85, -15)},
-	{"id": "lf_env_standing_stones", "pos": Vector2(96, -62), "footprint": 5.5, "face": Vector2(78, -49)},
+	{"id": "lf_env_quarry_mine", "site": "lf_site_08", "out": 15.5, "side": 4.0, "footprint": 6.0, "face_site": true},
+	{"id": "lf_env_ruined_watchpost", "pos": Vector2(-74, 47), "footprint": 5.0, "face": Vector2(0, 0)},
+	{"id": "lf_env_hunter_shelter", "pos": Vector2(97, -27), "footprint": 4.6, "face": Vector2(90, -20)},
+	{"id": "lf_env_standing_stones", "pos": Vector2(-56, -82), "footprint": 4.4, "face": Vector2(-40, -60)},
 ]
-const CAMP := {"id": "lf_env_camp_props", "footprint": 3.2, "distance": 9.6}
+const CAMP := {"id": "lf_env_camp_props", "footprint": 3.4, "distance": 10.2}
 
 var atlas: RefCounted
 var placements: Array = []        # [{id, position: Vector3, yaw, footprint, kind}]
@@ -32,6 +39,10 @@ var loaded: Dictionary = {}
 var arena_state := "locked"
 var arena_root: Node3D
 var site_states: Dictionary = {}
+var items: Array = []             # [{node, lods: [Node3D×3], players: [[AnimationPlayer]×3], center: Vector2, radius, lod}]
+var arena_parts: Array = []       # [MeshInstance3D, Mesh LOD0, Mesh LOD1]
+var arena_lod := -1
+var tris_by_lod := {}             # placement id -> [tris LOD0, LOD1, LOD2]
 
 
 ## Computes all placements (static, deterministic). height_fn: Callable(x, z) -> float.
@@ -41,9 +52,20 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 	placements.append({"id": "lf_env_bridge27m", "position": Vector3(atlas.BRIDGE_CENTER.x, 0.0, atlas.BRIDGE_CENTER.z),
 		"yaw": 0.0, "footprint": 0.0, "kind": "bridge", "pad": false})
 	for spec in SPECS:
-		var spot := find_spot(spec.pos, float(spec.footprint), masks)
-		var face: Vector2 = spec.face - spot
-		placements.append({"id": spec.id, "position": Vector3(spot.x, 0.0, spot.y), "yaw": atan2(face.x, face.y),
+		var preferred: Vector2
+		var face: Vector2
+		if spec.has("site"):
+			var site: Dictionary = atlas.site_by_id[spec.site]
+			var c := Vector2(site.center.x, site.center.z)
+			var out := c.normalized()
+			preferred = c + out * float(spec.out) + Vector2(-out.y, out.x) * float(spec.get("side", 0.0))
+			face = c
+		else:
+			preferred = spec.pos
+			face = spec.face
+		var spot := find_spot(preferred, float(spec.footprint), masks)
+		var dir: Vector2 = face - spot
+		placements.append({"id": spec.id, "position": Vector3(spot.x, 0.0, spot.y), "yaw": atan2(dir.x, dir.y),
 			"footprint": spec.footprint, "kind": "landmark", "pad": true})
 	for site in atlas.sites:
 		var center := Vector2(site.center.x, site.center.z)
@@ -58,6 +80,8 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 			# keep away from the approach side (+offset) used by the escort
 			var approach: Vector2 = site.approach
 			score -= 6.0 * maxf(0.0, Vector2(cos(angle), sin(angle)).dot(approach.normalized()))
+			# art/01: the tent stands on the camera-far side of the cage (screen-up = world -X-Z)
+			score += 2.0 * Vector2(cos(angle), sin(angle)).dot(Vector2(-0.7071, -0.7071))
 			if not valid_spot(p, float(CAMP.footprint), masks, true):
 				score -= 100.0
 			if score > best_score:
@@ -90,6 +114,9 @@ func valid_spot(p: Vector2, footprint: float, masks: RefCounted, camp := false) 
 		return false
 	if atlas.bridge_deck_rect().grow(footprint + 4.0).has_point(p):
 		return false
+	for placement in placements:
+		if placement.kind != "bridge" and Vector2(placement.position.x, placement.position.z).distance_to(p) < float(placement.footprint) + footprint + 1.0:
+			return false
 	return true
 
 
@@ -116,42 +143,136 @@ func pads() -> Array:
 	return result
 
 
+## Spots the forest layout keeps free of trunks: [[Vector2 center, radius]].
+func clearances() -> Array:
+	var result: Array = []
+	for placement in placements:
+		if placement.kind != "bridge":
+			result.append([Vector2(placement.position.x, placement.position.z), float(placement.footprint) + 1.5])
+	return result
+
+
 ## Instantiates every delivered asset; logs missing ones. Safe to call again (picks up new files).
 func populate() -> void:
 	for child in get_children():
 		child.free()
+	items.clear()
+	arena_parts.clear()
+	arena_lod = -1
 	missing.clear()
 	loaded.clear()
 	for placement in placements:
-		var path := _find(LANDMARK_DIR, placement.id)
-		if path.is_empty():
-			path = _find("res://assets/forest_rescue/props/", placement.id)
-		if path.is_empty():
+		var paths := lod_paths(placement.id)
+		if paths[0].is_empty():
 			missing[placement.id] = "not delivered (expected %s%s.glb)" % [LANDMARK_DIR, placement.id]
 			continue
-		var scene: Variant = load(path)
-		if not scene is PackedScene:
-			missing[placement.id] = "found but not imported yet: " + path
-			continue
-		var node: Node3D = scene.instantiate()
-		node.name = "%s_%s" % [placement.id, placement.get("site", str(placements.find(placement)))]
-		node.position = placement.position
-		node.rotation.y = placement.yaw
-		add_child(node)
-		loaded[placement.id] = path
+		var holder := Node3D.new()
+		holder.name = "%s_%s" % [placement.id, placement.get("site", str(placements.find(placement)))]
+		holder.position = placement.position
+		holder.rotation.y = placement.yaw
+		add_child(holder)
+		var lods: Array = []
+		var players: Array = []
+		var tris: Array = []
+		for lod in 3:
+			var path: String = paths[lod] if not paths[lod].is_empty() else paths[maxi(0, lod - 1)]
+			var scene: Variant = load(path)
+			if not scene is PackedScene:
+				missing[placement.id] = "found but not imported yet: " + path
+				lods.append(null)
+				players.append([])
+				tris.append(0)
+				continue
+			var node: Node3D = scene.instantiate()
+			node.name = "LOD%d" % lod
+			_prepare(node)
+			holder.add_child(node)
+			lods.append(node)
+			players.append(node.find_children("*", "AnimationPlayer", true, false))
+			tris.append(_count_tris(node))
+		tris_by_lod[placement.id] = tris
+		items.append({"node": holder, "lods": lods, "players": players, "center": Vector2(placement.position.x, placement.position.z),
+			"radius": maxf(4.0, float(placement.footprint)) if placement.kind != "bridge" else 17.0, "lod": -1, "id": placement.id,
+			"site": placement.get("site", ""), "tris": tris})
+		loaded[placement.id] = paths[0]
+		_set_lod(items[-1], 1)
 	_populate_arena()
 
 
-func _find(directory: String, id: String) -> String:
-	for candidate in [directory + id + ".glb", directory + id + ".tscn", directory + id + ".scn"]:
-		if ResourceLoader.exists(candidate):
-			return candidate
-	var dir := DirAccess.open(directory)
-	if dir != null:
-		for file in dir.get_files():
-			if file.begins_with(id) and file.ends_with(".glb"):
-				return directory + file
-	return ""
+## [LOD0, LOD1, LOD2] files of a landmark id ("" when missing).
+func lod_paths(id: String) -> Array:
+	var result := []
+	for suffix in ["", "_LOD1", "_LOD2"]:
+		var path: String = LANDMARK_DIR + id + suffix + ".glb"
+		result.append(path if ResourceLoader.exists(path) else "")
+	return result
+
+
+func _prepare(node: Node3D) -> void:
+	for part in node.find_children("*", "Node3D", true, false):
+		if String(part.name).contains("_base"):
+			(part as Node3D).visible = false
+	ForestKit.paint_scene(node, LIGHT_MIX)
+	for part: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
+		part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if String(part.name).contains("_base") else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+
+
+static func _count_tris(node: Node) -> int:
+	var total := 0
+	for part: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
+		if part.mesh == null or not part.visible:
+			continue
+		total += ForestKit.mesh_triangles(part.mesh)
+	return total
+
+
+func _set_lod(item: Dictionary, lod: int) -> void:
+	if item.lod == lod:
+		return
+	item.lod = lod
+	for i in 3:
+		var node: Node3D = item.lods[i]
+		if node == null:
+			continue
+		var on := i == lod
+		node.visible = on
+		for player: AnimationPlayer in item.players[i]:
+			if on and not player.get_animation_list().is_empty():
+				var clip: String = player.get_animation_list()[0]
+				player.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+				if not player.is_playing():
+					player.play(clip)
+					player.seek(fposmod(item.center.x * 0.37 + item.center.y * 0.11, 4.5), true)
+			elif not on and player.is_playing():
+				player.stop()
+
+
+## LOD by the city zoom and the distance to the camera focus; hidden while under opaque fog.
+## visible_fn: Callable(x, z, radius) -> bool (fog-aware). Returns visible triangle estimate.
+func update_view(target: Vector3, zoom: float, visible_fn: Callable) -> int:
+	var tris := 0
+	for item in items:
+		var shown: bool = visible_fn.call(item.center.x, item.center.y, item.radius) if visible_fn.is_valid() else true
+		item.node.visible = shown
+		if not shown:
+			continue
+		var d: float = item.center.distance_to(Vector2(target.x, target.z))
+		var lod := 2
+		if zoom <= 50.0 and d <= 36.0:
+			lod = 0
+		elif zoom <= 96.0:
+			lod = 1
+		_set_lod(item, lod)
+		tris += int(item.tris[lod])
+	if arena_root != null:
+		var center := Vector2(arena_root.position.x, arena_root.position.z)
+		var shown: bool = visible_fn.call(center.x, center.y, 20.0) if visible_fn.is_valid() else true
+		arena_root.visible = shown
+		if shown:
+			var lod := 0 if zoom <= 52.0 and center.distance_to(Vector2(target.x, target.z)) <= 48.0 else 1
+			_set_arena_lod(lod)
+			tris += _count_tris(arena_root)
+	return tris
 
 
 func _populate_arena() -> void:
@@ -159,57 +280,51 @@ func _populate_arena() -> void:
 	arena_root.name = "BossArena"
 	var center: Vector3 = atlas.arena_center
 	arena_root.position = Vector3(center.x, center.y - 0.3, center.z)
+	arena_root.rotation.y = deg_to_rad(ARENA_YAW_DEG)
 	add_child(arena_root)
-	var whole := _find(ARENA_DIR, "lf_boss_arena")
-	if not whole.is_empty() and load(whole) is PackedScene:
-		var node: Node3D = load(whole).instantiate()
-		node.rotation.y = _arena_entrance_yaw()
-		arena_root.add_child(node)
-		loaded["lf_boss_arena"] = whole
-		apply_arena_state(arena_state)
+	var whole := ARENA_DIR + "lf_boss_arena_assembled.glb"
+	if not ResourceLoader.exists(whole) or not load(whole) is PackedScene:
+		missing["lf_boss_arena"] = "arena not delivered (expected %s)" % whole
 		return
-	var dir := DirAccess.open(ARENA_DIR)
-	var modules: Array = []
-	if dir != null:
-		for file in dir.get_files():
-			if file.ends_with(".glb"):
-				modules.append(ARENA_DIR + file)
-	modules.sort()
-	if modules.is_empty():
-		missing["lf_boss_arena"] = "arena modules not delivered (expected %s*.glb)" % ARENA_DIR
-		return
-	# Ring layout: cliffs around r≈17 leaving a 50° entrance toward the boss route,
-	# fossil cliff opposite the entrance, pillars inside the bowl.
-	var entrance := _arena_entrance_yaw()
-	var cliffs := modules.filter(func(p): return String(p).get_file().contains("cliff") and not String(p).get_file().contains("fossil"))
-	var fossils := modules.filter(func(p): return String(p).get_file().contains("fossil") or String(p).get_file().contains("bone"))
-	var pillars := modules.filter(func(p): return String(p).get_file().contains("pillar") or String(p).get_file().contains("rock"))
-	var others := modules.filter(func(p): return not (cliffs.has(p) or fossils.has(p) or pillars.has(p)))
-	var ring := 10
-	for k in ring:
-		var angle := entrance + PI / 7.0 + (TAU - 2.0 * PI / 7.0) * k / float(ring - 1)
-		var path: String = (fossils[0] if k == ring / 2 and not fossils.is_empty() else (cliffs[k % cliffs.size()] if not cliffs.is_empty() else ""))
-		if path.is_empty():
+	var node: Node3D = load(whole).instantiate()
+	arena_root.add_child(node)
+	loaded["lf_boss_arena"] = whole
+	for player: AnimationPlayer in node.find_children("*", "AnimationPlayer", true, false):
+		if not player.get_animation_list().is_empty():
+			var clip: String = player.get_animation_list()[0]
+			player.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+			player.play(clip)
+	# LOD1 from the module GLBs (cliffs, fossil wall, pillars); bones/floor/stream/banners keep LOD0.
+	var lod1 := {}
+	for module in ["cliff_a", "cliff_b", "cliff_c", "fossil_wall", "pillar_a", "pillar_b"]:
+		var path := ARENA_DIR + "lf_arena_%s.glb" % module
+		if not ResourceLoader.exists(path):
 			continue
-		var node: Node3D = load(path).instantiate()
-		node.position = Vector3(sin(angle), 0.0, cos(angle)) * 17.5
-		node.rotation.y = angle + PI
-		arena_root.add_child(node)
-	for k in pillars.size() * 0 + mini(3, pillars.size()):
-		var angle := entrance + PI * (0.55 + 0.45 * k)
-		var node: Node3D = load(pillars[k % pillars.size()]).instantiate()
-		node.position = Vector3(sin(angle), 0.0, cos(angle)) * 10.5
-		arena_root.add_child(node)
-	for path in others:
-		loaded[String(path).get_file()] = path
-	loaded["arena_modules"] = modules
+		var root: Node = (load(path) as PackedScene).instantiate()
+		for part: MeshInstance3D in root.find_children("*LOD1", "MeshInstance3D", true, false):
+			lod1[module] = part.mesh
+		root.free()
+	for part: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
+		var name := String(part.name)
+		var module := ""
+		if name.begins_with("cliff_"):
+			module = "cliff_" + name.right(1)
+		elif name.begins_with("pillar_"):
+			module = "pillar_" + name.right(1)
+		elif name == "fossil_wall":
+			module = "fossil_wall"
+		if lod1.has(module):
+			arena_parts.append([part, part.mesh, lod1[module]])
+	_set_arena_lod(1)
 	apply_arena_state(arena_state)
 
 
-func _arena_entrance_yaw() -> float:
-	# Direction from the arena centre toward the boss route's approach (77, -65).
-	var c: Vector3 = atlas.arena_center
-	return atan2(77.0 - c.x, -65.0 - c.z)
+func _set_arena_lod(lod: int) -> void:
+	if lod == arena_lod:
+		return
+	arena_lod = lod
+	for entry in arena_parts:
+		(entry[0] as MeshInstance3D).mesh = entry[1] if lod == 0 else entry[2]
 
 
 ## Visual dressing only. Nodes named state_<locked|available|active|defeated> (any depth) are

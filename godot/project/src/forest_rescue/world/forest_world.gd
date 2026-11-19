@@ -464,8 +464,26 @@ func on_camera_changed() -> void:
 	canopy.chunk_class = classes
 	canopy.update_view(stage.camera, target, zoom)
 	last_cull = canopy.last_stats.duplicate()
+	if landmarks != null:
+		last_cull.landmark_tris = landmarks.update_view(target, zoom, Callable(self, "area_displayed"))
 	last_cull.select = selected
 	last_cull.cull_ms = (Time.get_ticks_usec() - started) / 1000.0
+
+
+## True when any displayed-clear fog cell lies within `radius` (+ the 3 m blend band) of (x, z).
+func area_displayed(x: float, z: float, radius: float) -> bool:
+	if displayed_bits.size() != ForestFog.BYTES:
+		return true
+	var r := radius + 3.0
+	var c0 := ForestFog.cell_of(clampf(x - r, -111.9, 111.9), clampf(z - r, -111.9, 111.9))
+	var c1 := ForestFog.cell_of(clampf(x + r, -111.9, 111.9), clampf(z + r, -111.9, 111.9))
+	if c0.x < 0 or c1.x < 0:
+		return false
+	for row in range(c0.y, c1.y + 1):
+		for column in range(c0.x, c1.x + 1):
+			if ForestFog.bit(displayed_bits, column, row):
+				return true
+	return false
 
 
 func chunk_explored(id: String) -> bool:
@@ -768,6 +786,8 @@ func play_entrance_reveal(duration_ms: int) -> void:
 	last_fog_key = key
 	displayed_bits = shown
 	fog.set_target(shown, anchor_bits, not reduced_motion, duration_ms / 1000.0)
+	if canopy != null and stage != null and stage.camera != null:
+		on_camera_changed()
 
 
 func set_reduced_motion(on: bool) -> void:
@@ -811,6 +831,7 @@ func perf_snapshot() -> Dictionary:
 		"instances": last_cull.get("instances", 0), "tris_est": last_cull.get("tris_est", 0),
 		"lod0": last_cull.get("lod0", 0), "lod1": last_cull.get("lod1", 0), "lod2": last_cull.get("lod2", 0),
 		"batches": last_cull.get("batches", 0), "uploads": canopy.uploads if canopy != null else 0,
+		"landmark_tris": last_cull.get("landmark_tris", 0),
 		"cull_ms": last_cull.get("cull_ms", 0.0), "build_ms": last_cull.get("build_ms", 0.0),
 		"fog_shells": fog.shells.size() if fog != null else 0, "setup_ms": setup_ms.duplicate()}
 

@@ -352,11 +352,11 @@ static var _painted: Dictionary = {}     # (material id, flags) -> shared Shader
 
 ## Painted-light override for a GLB material (kit trees/understory and landmarks share it).
 ## k: meta paintedLightMix; lf_foliage_vol surfaces use 0.5. Cached per source material.
-static func painted_material(original: Material, has_colors: bool, k: float, wind := true) -> Material:
+static func painted_material(original: Material, has_colors: bool, k: float, wind := true, fade := true) -> Material:
 	if not original is BaseMaterial3D:
 		return original
 	var base := original as BaseMaterial3D
-	var key := "%d:%s:%s:%.3f:%s" % [base.get_instance_id(), has_colors, base.resource_name, k, wind]
+	var key := "%d:%s:%s:%.3f:%s:%s" % [base.get_instance_id(), has_colors, base.resource_name, k, wind, fade]
 	if _painted.has(key) and is_instance_valid(_painted[key]):
 		return _painted[key]
 	var name := String(base.resource_name).to_lower()
@@ -372,7 +372,8 @@ static func painted_material(original: Material, has_colors: bool, k: float, win
 	material.set_shader_parameter("light_dir_world", light_dir.normalized())
 	material.set_shader_parameter("use_ao", has_colors)
 	material.set_shader_parameter("vertex_wind", has_colors and wind)
-	materials.append(material)
+	if fade:
+		materials.append(material)
 	_painted[key] = material
 	return material
 
@@ -387,7 +388,7 @@ static func paint_scene(root: Node, k: float) -> void:
 			var has_colors := false
 			if part.mesh is ArrayMesh:
 				has_colors = (part.mesh.surface_get_format(s) & Mesh.ARRAY_FORMAT_COLOR) != 0
-			part.set_surface_override_material(s, painted_material(original, has_colors, k, false))
+			part.set_surface_override_material(s, painted_material(original, has_colors, k, false, false))
 
 
 ## Pushes fade circles (Vector4 x, ground y, z, radius) to every kit/impostor material.

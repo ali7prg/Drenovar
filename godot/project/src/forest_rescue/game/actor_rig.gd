@@ -245,16 +245,8 @@ func apply_look() -> void:
 				if uv2_set.has(material_name) and material is ShaderMaterial:
 					material = material.duplicate()
 					material.set_shader_parameter("albedo_uv2", true)
-			for key in tints:
-				if material_name.ends_with("_" + String(key)):
-					var c: Array = tints[key]
-					var factor := Color(float(c[0]), float(c[1]), float(c[2]), 1.0)
-					material = material.duplicate()
-					if material is ShaderMaterial:
-						var base: Color = material.get_shader_parameter("albedo_color")
-						material.set_shader_parameter("albedo_color", base * factor)
-					elif material is BaseMaterial3D:
-						material.albedo_color = material.albedo_color * factor
+			if not tints.is_empty():
+				material = apply_variant_tints(material, material_name, tints)
 			mesh.set_surface_override_material(s, material)
 	var hidden: Array = variant.get("hide", [])
 	if not hidden.is_empty():
@@ -263,6 +255,44 @@ func apply_look() -> void:
 				var index := skeleton.find_bone(String(bone_name))
 				if index >= 0:
 					skeleton.set_bone_pose_scale(index, Vector3.ONE * 0.001)
+
+## Look variation on one surface. The v2 civilians carry ONE merged body material, so the
+## cloth / hair tints go through <asset>_variant_mask.png (R cloth, G hair, B keep) baked by
+## forest_rescue/tools/bake_variant_masks.py; the hair cards take the hair tint as a whole;
+## materials named *_<group> (older split assets) take that group's tint.
+func apply_variant_tints(material: Material, material_name: String, tints: Dictionary) -> Material:
+	var cloth := tint_color(tints.get("cloth"))
+	var hair := tint_color(tints.get("hair"))
+	if material_name.ends_with("_hair_cards") or material_name.ends_with("_hair"):
+		return multiplied(material, hair)
+	if material_name.ends_with("_cloth"):
+		return multiplied(material, cloth)
+	if material_name.ends_with("_body") and material is ShaderMaterial:
+		var mask_path := asset_path.get_basename() + "_variant_mask.png"
+		if ResourceLoader.exists(mask_path):
+			var copy := material.duplicate() as ShaderMaterial
+			copy.set_shader_parameter("variant_mask", load(mask_path))
+			copy.set_shader_parameter("use_variant_mask", true)
+			copy.set_shader_parameter("tint_cloth", Vector3(cloth.r, cloth.g, cloth.b))
+			copy.set_shader_parameter("tint_hair", Vector3(hair.r, hair.g, hair.b))
+			return copy
+	return material
+
+static func tint_color(value: Variant) -> Color:
+	if value is Array and value.size() >= 3:
+		return Color(float(value[0]), float(value[1]), float(value[2]), 1.0)
+	return Color.WHITE
+
+static func multiplied(material: Material, factor: Color) -> Material:
+	if factor == Color.WHITE:
+		return material
+	var copy := material.duplicate()
+	if copy is ShaderMaterial:
+		var base: Color = copy.get_shader_parameter("albedo_color")
+		copy.set_shader_parameter("albedo_color", base * factor)
+	elif copy is BaseMaterial3D:
+		copy.albedo_color = copy.albedo_color * factor
+	return copy
 
 ## Emission of the *_glow materials (0 = off, ~3 seated in a socket).
 func set_glow(energy: float) -> void:

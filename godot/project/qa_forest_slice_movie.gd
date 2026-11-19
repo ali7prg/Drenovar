@@ -142,6 +142,10 @@ func run() -> void:
 	forest.client.manual_clock_ms = clock
 	if part == "boss":
 		await run_boss()
+	elif part == "site2":
+		await refresh()
+		close_popups()
+		await run_site2()
 	else:
 		await run_early()
 	mark("end")
@@ -281,7 +285,16 @@ func run_early() -> void:
 	game.close_modal()
 	await hold(1.0)
 	mark("d_end")
-	# (e) Site 2: rune lock (one wrong input), iron cage, Kamneklyk-free Tenerys, unlock.
+
+# ---------------------------------------------------------------- (e) site 2 (separate take)
+func run_site2() -> void:
+	# (e) Site 2: rune lock (one wrong input), iron cage, Tenerys, unlock, exit, escort start.
+	var home: Vector3 = forest.actors.squad_focus()
+	if home != Vector3.INF:
+		game.stage.target = home
+	game.stage.zoom = 40.0
+	game.stage.update_camera(0, true)
+	await hold(0.5)
 	mark("e_start")
 	follow = true
 	follow_zoom = 40.0

@@ -17,6 +17,12 @@ uniform bool use_albedo_texture = true;
 // glTF baseColorTexture.texCoord == 1 (props whose painting projection lives in TEXCOORD_1:
 // rune lock, winch, artifacts); set by actor_rig from the GLB header. Default: UV (TEXCOORD_0).
 uniform bool albedo_uv2 = false;
+// Captive look variation (humans/captive_variants.json) through <id>_variant_mask.png
+// (R = cloth, G = hair, B = keep): albedo *= mix(1, tint_cloth, R) * mix(1, tint_hair, G).
+uniform bool use_variant_mask = false;
+uniform sampler2D variant_mask : hint_default_black, filter_linear_mipmap, repeat_enable;
+uniform vec3 tint_cloth = vec3(1.0);
+uniform vec3 tint_hair = vec3(1.0);
 uniform float alpha_cut = 0.5;
 uniform float painted_light_mix : hint_range(0.0, 1.0) = 0.3;
 uniform vec3 light_dir_world = vec3(0.45, 0.74, 0.5);   // direction TO the sun
@@ -73,6 +79,10 @@ void fragment() {
 	vec4 c = albedo_color;
 	if (use_albedo_texture) {
 		c *= texture(albedo_texture, albedo_uv2 ? UV2 : UV);
+	}
+	if (use_variant_mask) {
+		vec3 m = texture(variant_mask, UV).rgb;
+		c.rgb *= mix(vec3(1.0), tint_cloth, m.r) * mix(vec3(1.0), tint_hair, m.g);
 	}
 	for (int i = 0; i < 8; i++) {
 		if (i >= fade_count) break;

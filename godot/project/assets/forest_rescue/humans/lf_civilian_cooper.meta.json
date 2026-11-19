@@ -272,5 +272,17 @@
     "unit": "metre",
     "note": "Blender -Y forward exported to glTF +Z; feet on y=0, root at the origin"
   },
-  "notes": ""
+  "notes": "",
+  "morphs": {
+    "sit_drape": {
+      "kind": "corrective cloth drape baked from a Blender cloth simulation (pinned at the waist / shoulders, body + cage-floor collision), stored relative to the posed rest shape",
+      "clips": {
+        "lf_civilian_cage_sit": "1.0",
+        "lf_civilian_stand_up": "1 -> 0 over 0-1.50 s as the thighs come down",
+        "other civilian clips": "0"
+      },
+      "cloth_bones": "neutral while the morph is on (cage_sit; stand_up until the morph is off, then blended back)",
+      "mean_delta_m": 0.285
+    }
+  }
 }

@@ -111,13 +111,12 @@ class Refs:
         return float(self.g.zs[rows.max()])
 
     # ------------------------------------------------------------------ limb width profiles
-    def profile(self, A, B, n=48, max_half=0.10, which="c", medial_limit=None):
+    def profile(self, A, B, n=48, max_half=0.10, which="c", medial_limit=None, snap=0.045):
         """Perpendicular extents of the silhouette along the 2-D segment A->B (x,z).
 
-        Returns s (n), centre offset c (along n1), half-width a, valid flags (both sides found).
-        n1 = in-plane normal (rotated +90 deg from the axis).  medial_limit: optional callable
-        (x, z) -> bool marking points that belong to another part (rays stop there, invalid).
-        """
+        For each sample the painted run nearest to the axis (within `snap`) is taken, so a
+        slightly off-centre landmark still measures its own limb.  Returns s, centre offset c,
+        half-width a, ok (both ends found), and one-sided ends (lo/hi with flags)."""
         M = {"c": self.M, "f": self.Mf, "b": self.Mb}[which]
         A = np.asarray(A, float)
         B = np.asarray(B, float)
@@ -126,43 +125,41 @@ class Refs:
         t = d / L
         n1 = np.array([-t[1], t[0]])
         s = np.linspace(0, 1, n)
-        K = int(max_half / RES) + 2
-        ks = np.arange(K) * RES
+        ts = np.arange(-max_half, max_half + 1e-9, RES)
+        K = len(ts)
         cs, as_, ok = np.zeros(n), np.zeros(n), np.zeros(n, bool)
-        hp = np.zeros(n)
-        hm = np.zeros(n)
+        lo_v, hi_v = np.zeros(n), np.zeros(n)
+        lo_ok, hi_ok = np.zeros(n, bool), np.zeros(n, bool)
         for i, si in enumerate(s):
             Q = A + si * d
-            ext = []
-            good = True
-            for sgn in (1, -1):
-                pts = Q[None, :] + sgn * ks[:, None] * n1[None, :]
-                r, c = self.g.ij(pts[:, 0], pts[:, 1])
-                r = np.clip(np.round(r).astype(int), 0, self.g.H - 1)
-                c = np.clip(np.round(c).astype(int), 0, self.g.W - 1)
-                inside = M[r, c]
-                if medial_limit is not None:
-                    blocked = medial_limit(pts[:, 0], pts[:, 1])
-                else:
-                    blocked = np.zeros(K, bool)
-                if not inside[0]:
-                    good = False
-                    ext.append(0.0)
-                    continue
-                stop = np.nonzero(~inside | blocked)[0]
-                if len(stop) == 0:
-                    good = False
-                    ext.append(max_half)
-                    continue
-                k = stop[0]
-                if blocked[k] and inside[k]:
-                    good = False
-                ext.append(ks[k])
-            hp[i], hm[i] = ext
-            cs[i] = 0.5 * (ext[0] - ext[1])
-            as_[i] = 0.5 * (ext[0] + ext[1])
-            ok[i] = good
-        return dict(s=s, c=cs, a=as_, ok=ok, hp=hp, hm=hm, n1=n1, t=t, L=L)
+            pts = Q[None, :] + ts[:, None] * n1[None, :]
+            r, c = self.g.ij(pts[:, 0], pts[:, 1])
+            r = np.clip(np.round(r).astype(int), 0, self.g.H - 1)
+            c = np.clip(np.round(c).astype(int), 0, self.g.W - 1)
+            inside = M[r, c].copy()
+            blocked = medial_limit(pts[:, 0], pts[:, 1]) if medial_limit is not None else np.zeros(K, bool)
+            free = inside & ~blocked
+            dd = np.diff(np.concatenate([[0], free.astype(np.int8), [0]]))
+            st = np.nonzero(dd == 1)[0]
+            en = np.nonzero(dd == -1)[0] - 1
+            if len(st) == 0:
+                continue
+            mid = K // 2
+            dist = np.where((st <= mid) & (en >= mid), 0, np.minimum(np.abs(st - mid), np.abs(en - mid)))
+            j = int(np.argmin(dist))
+            if dist[j] * RES > snap:
+                continue
+            a0, a1 = st[j], en[j]
+            # an end is genuine if the next sample outward is background (not blocked, not window edge)
+            lo_good = a0 > 0 and not blocked[a0 - 1] and not inside[a0 - 1]
+            hi_good = a1 < K - 1 and not blocked[a1 + 1] and not inside[a1 + 1]
+            lo_v[i], hi_v[i] = ts[a0], ts[a1]
+            lo_ok[i], hi_ok[i] = lo_good, hi_good
+            if lo_good and hi_good:
+                cs[i] = 0.5 * (ts[a0] + ts[a1])
+                as_[i] = 0.5 * (ts[a1] - ts[a0])
+                ok[i] = True
+        return dict(s=s, c=cs, a=as_, ok=ok, lo=lo_v, hi=hi_v, lo_ok=lo_ok, hi_ok=hi_ok, n1=n1, t=t, L=L)
 
 
 def fill_profile(s, vals, ok, template, smooth=2.0, scale_clip=(0.6, 1.8)):

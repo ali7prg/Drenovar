@@ -181,9 +181,15 @@ def limb_profile(R, A, B, tmpl, max_half, n=40, blocked=None, smooth=2.0):
     ok = pr["ok"] & (pr["a"] > 0.012)
     a, k = F.fill_profile(pr["s"], pr["a"], ok, tmpl, smooth=smooth)
     c = np.where(ok, pr["c"], 0.0)
+    # one-sided samples: keep the genuine painted edge, template width on the other side
+    one_lo = ~ok & pr["lo_ok"] & ~pr["hi_ok"]
+    one_hi = ~ok & pr["hi_ok"] & ~pr["lo_ok"]
+    c = np.where(one_lo, pr["lo"] + a, c)
+    c = np.where(one_hi, pr["hi"] - a, c)
+    c = np.clip(c, -0.6 * a, 0.6 * a)
     from scipy.ndimage import gaussian_filter1d
     c = gaussian_filter1d(c, smooth, mode="nearest")
-    return pr["s"], a, c, ok, k
+    return pr["s"], a, c, ok | one_lo | one_hi, k
 
 
 def arm_parts(R, C, J, prof):

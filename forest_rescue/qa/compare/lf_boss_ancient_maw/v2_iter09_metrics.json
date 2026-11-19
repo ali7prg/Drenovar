@@ -1,0 +1,99 @@
+{
+  "left": {
+    "view": "left",
+    "iou": 0.9262,
+    "mean_abs_colour_error": 0.0485,
+    "ref_pixels": 102033,
+    "render_pixels": 99375
+  },
+  "left_raw": {
+    "view": "left_raw",
+    "iou": 0.8678,
+    "mean_abs_colour_error": 0.0486,
+    "ref_pixels": 109329,
+    "render_pixels": 99375
+  },
+  "front": {
+    "view": "front",
+    "iou": 0.8931,
+    "mean_abs_colour_error": 0.0723,
+    "ref_pixels": 46631,
+    "render_pixels": 46005
+  },
+  "front_raw": {
+    "view": "front_raw",
+    "iou": 0.9063,
+    "mean_abs_colour_error": 0.0709,
+    "ref_pixels": 48471,
+    "render_pixels": 46005
+  },
+  "rear34": {
+    "view": "rear34",
+    "iou": 0.8282,
+    "mean_abs_colour_error": 0.0791,
+    "ref_pixels": 57577,
+    "render_pixels": 55115,
+    "camera": {
+      "pnp_rms_px": 17.167159496448484,
+      "pnp_focal_px": 6403.400654967001,
+      "pnp_errors": {
+        "tail_tip": 8.21,
+        "snout_tip": 7.21,
+        "upper_teeth_front": 5.34,
+        "chin": 6.27,
+        "brow_knob_L": 8.15,
+        "heel_L": 25.65,
+        "heel_R": 20.62,
+        "hallux_claw_L": 6.82,
+        "sole_back_L": 7.89,
+        "claw_toe4_L": 17.78,
+        "claw_toe2_R": 26.36,
+        "hand_claw_L": 25.59,
+        "groin": 24.82,
+        "thigh_back_R": 19.96
+      },
+      "refined_iou": 0.8369809777050522,
+      "refined_rms_px": 19.327121168781638,
+      "refined_errors": {
+        "tail_tip": 20.01,
+        "snout_tip": 17.96,
+        "upper_teeth_front": 7.24,
+        "chin": 14.32,
+        "brow_knob_L": 5.01,
+        "heel_L": 27.34,
+        "heel_R": 22.25,
+        "hallux_claw_L": 11.22,
+        "sole_back_L": 9.32,
+        "claw_toe4_L": 11.24,
+        "claw_toe2_R": 17.17,
+        "hand_claw_L": 29.69,
+        "groin": 29.1,
+        "thigh_back_R": 24.89
+      },
+      "refined_focal_px": 6529.995092260255
+    }
+  },
+  "head_closeup": {
+    "view": "head_closeup",
+    "iou": 0.838,
+    "mean_abs_colour_error": 0.1395,
+    "ref_pixels": 164923,
+    "render_pixels": 170505,
+    "camera": {
+      "pnp_rms_px": 25.994086201901542,
+      "focal_px": 400.0,
+      "jaw_open_deg": 20.0,
+      "errors_px": {
+        "snout_tip": 27.74,
+        "nostril_L": 17.21,
+        "eye_L": 22.14,
+        "scar_top": 24.31,
+        "mouth_corner_L": 28.61,
+        "upper_tooth_front_L": 8.17,
+        "upper_tooth_mid_L": 43.1,
+        "jaw_tip": 23.14,
+        "lower_tooth_front_L": 25.6
+      }
+    }
+  }
+}

@@ -285,7 +285,8 @@ def main():
     hv_t[vy, vx] = B.head_part().fn(T.pos[vy, vx] - T.nrm[vy, vx] * 0.004)
     # geometric band only (the soft hull trims the lips by different amounts left/right): every texel within
     # 7.5 cm of the closed lip line on the outer half of the jaws is sourced from the closed-mouth side/front views
-    lipband = (np.abs(T.pos[..., 2] - zl_t) < 0.075) & (np.abs(X) > 0.45 * wu_t) & (Y < -3.25) & (hv_t > -0.09)
+    dzl = T.pos[..., 2] - zl_t
+    lipband = (dzl < 0.075) & (dzl > -0.16) & (np.abs(X) > 0.45 * wu_t) & (Y < -3.25) & (hv_t > -0.09)
     lipband = ndi.gaussian_filter(lipband.astype(np.float64), 1.5)
     g_cu = g_head * (1 - lipband)
     gates = {"head_closeup": g_cu * (X > -0.02), "head_mirror": g_cu * (X < 0.02),

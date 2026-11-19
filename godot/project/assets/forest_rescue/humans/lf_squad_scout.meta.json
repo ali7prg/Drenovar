@@ -1,0 +1,255 @@
+{
+  "id": "lf_squad_scout",
+  "generation": "v2 image-based (painted turnaround silhouettes + template depth, painting projection)",
+  "rig": "human_shared",
+  "tris": {
+    "LOD0": 13962,
+    "LOD1": 6790,
+    "LOD2": 2418
+  },
+  "budget": {
+    "LOD0": 14000,
+    "LOD1": 7000,
+    "LOD2": 2500
+  },
+  "bones": {
+    "deform": 50,
+    "total": 59,
+    "weightedByLOD": {
+      "LOD0": 45,
+      "LOD1": 23,
+      "LOD2": 17
+    },
+    "maxInfluences": 4,
+    "names": [
+      "Hips",
+      "Spine",
+      "Chest",
+      "UpperChest",
+      "Neck",
+      "Head",
+      "LeftShoulder",
+      "LeftUpperArm",
+      "LeftLowerArm",
+      "LeftHand",
+      "LeftThumb1",
+      "LeftThumb2",
+      "LeftIndex1",
+      "LeftIndex2",
+      "LeftMiddle1",
+      "LeftMiddle2",
+      "LeftRing1",
+      "LeftPinky1",
+      "LeftUpperLeg",
+      "LeftLowerLeg",
+      "LeftFoot",
+      "LeftToes",
+      "RightShoulder",
+      "RightUpperArm",
+      "RightLowerArm",
+      "RightHand",
+      "RightThumb1",
+      "RightThumb2",
+      "RightIndex1",
+      "RightIndex2",
+      "RightMiddle1",
+      "RightMiddle2",
+      "RightRing1",
+      "RightPinky1",
+      "RightUpperLeg",
+      "RightLowerLeg",
+      "RightFoot",
+      "RightToes",
+      "SkirtFront1",
+      "SkirtFront2",
+      "SkirtBack1",
+      "SkirtBack2",
+      "SkirtLeft",
+      "SkirtRight",
+      "Cloak1",
+      "Cloak2",
+      "Hood",
+      "Bag",
+      "PropR",
+      "PropL"
+    ]
+  },
+  "nodes": {
+    "LOD0": "lf_squad_scout_LOD0",
+    "LOD1": "lf_squad_scout_LOD1",
+    "LOD2": "lf_squad_scout_LOD2"
+  },
+  "materials": [
+    "lf_squad_scout_body",
+    "lf_squad_scout_hair",
+    "lf_squad_scout_cloth",
+    "lf_squad_scout_gear",
+    "lf_squad_scout_prop"
+  ],
+  "paintedLightMix": 0.4,
+  "shading": "albedo * mix(1, lambert(sun), paintedLightMix): the atlas carries the painted light",
+  "textures": {
+    "lf_squad_scout_color.jpg": 2048
+  },
+  "bounds_m": {
+    "min": [
+      -0.361,
+      -0.203,
+      0.002
+    ],
+    "max": [
+      0.39,
+      0.175,
+      1.823
+    ]
+  },
+  "clips": {
+    "lf_soldier_idle": {
+      "seconds": 4.0,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.05,
+        "Right": 0.05
+      },
+      "ikOverreach_m": 0.0011,
+      "loopSeamMaxQuatDiff": 0.0
+    },
+    "lf_soldier_walk": {
+      "seconds": 1.0,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 1.4,
+      "strideLength_m": 1.4,
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0
+    },
+    "lf_soldier_jog": {
+      "seconds": 0.7,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 3.0,
+      "strideLength_m": 2.1,
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.11,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0006,
+      "loopSeamMaxQuatDiff": 0.0
+    },
+    "lf_soldier_guard": {
+      "seconds": 3.2,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0
+    },
+    "lf_soldier_attack": {
+      "seconds": 1.2,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {
+        "weapon_contact": 0.65
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_soldier_hit": {
+      "seconds": 0.5,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_soldier_death": {
+      "seconds": 2.0,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 1.62,
+        "Right": 1.07
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_soldier_unlock": {
+      "seconds": 2.4,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {
+        "latch_release": 1.6
+      },
+      "footSlip_mm": {
+        "Left": 0.1,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0364
+    },
+    "lf_soldier_help": {
+      "seconds": 2.8,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.13,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0001
+    },
+    "lf_soldier_salute": {
+      "seconds": 1.8,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0
+    }
+  },
+  "sockets": {
+    "hand_r": [
+      -0.377,
+      0.899,
+      0.023
+    ],
+    "hand_l": [
+      0.377,
+      0.899,
+      0.023
+    ],
+    "head_top": [
+      0.0,
+      1.814,
+      0.0
+    ]
+  },
+  "variants": {},
+  "coordinateConvention": {
+    "up": "+Y",
+    "forward": "+Z",
+    "unit": "metre",
+    "note": "Blender -Y forward exported to glTF +Z; feet on y=0, root at the origin"
+  },
+  "notes": ""
+}

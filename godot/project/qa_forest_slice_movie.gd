@@ -55,11 +55,24 @@ func refresh() -> void:
 	if response.has("city"):
 		game.accept(response)
 
+var result_frames := 0
+
 ## One movie frame: advance presentation time and keep the camera on the squad (smoothly).
+## DRENOVAR's own battle-result card («Победа», ordinary loot) is read for 2 s of movie time,
+## then dismissed the way a player taps «Продолжить».
 func frame() -> void:
 	clock += 1000.0 / FPS
 	frame_count += 1
 	forest.client.manual_clock_ms = clock
+	if game.result_open and game.modal.visible:
+		result_frames += 1
+		if result_frames > int(FPS * 2.0):
+			result_frames = 0
+			game.close_modal()
+			game.battle_results.pending.clear()
+			game.result_notice.hide()
+	else:
+		result_frames = 0
 	if follow:
 		var focus: Vector3 = forest.actors.squad_focus()
 		if focus != Vector3.INF:
@@ -269,9 +282,9 @@ func run_early() -> void:
 	mark("g_end")
 	# (d) Arrival at the settlement, thanks, the reward claim.
 	mark("d_start")
+	follow_zoom = 22.0
 	await until_settled(90.0)
-	await hold(1.0)
-	await continue_step()
+	await finish_escort()
 	mark("d_arrived")
 	await hold(6.0)
 	follow = false
@@ -297,6 +310,9 @@ func run_site2() -> void:
 	await hold(0.5)
 	follow = true
 	follow_zoom = 40.0
+	if String(forest.guide().get("fields", {}).get("taskId", "")) == "escort_home":
+		await finish_escort()
+		await hold(1.0)
 	await travel()               # home → site 2 (the walk itself is segment b's subject)
 	mark("e_start")
 	await hold(1.0)
@@ -350,6 +366,20 @@ func travel(show := 1.5) -> void:
 			game.stage.target = focus
 			game.stage.update_camera(0, true)
 		mark("travel_cut")
+
+## Escort arrival: settle until the server reports the escort home, then «Продолжить»
+## (attempt_task escort_home: the rescue is verified and rewarded by the server).
+func finish_escort() -> void:
+	var guard := 0
+	while guard < 60:
+		var step: Dictionary = forest.guide()
+		if String(step.get("action", "")) == "attempt_task" and String(step.get("fields", {}).get("taskId", "")) == "escort_home":
+			await hold(2.2)                      # the three arrive and thank (choreography)
+			await act("attempt_task", step.fields)
+			return
+		guard += 1
+		await refresh()
+		await hold(0.5)
 
 func rune_input(symbol: String) -> void:
 	await sync_clock()

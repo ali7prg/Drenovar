@@ -89,6 +89,18 @@ func run() -> void:
 	forest = game.forest_game
 	await frames(5)
 	await refresh()
+	# Hall III intro (one-time presentation): acknowledge it the way «Пропустить» does.
+	var deadline := Time.get_ticks_msec() + 8000
+	while String(forest.client.adv.get("intro", {}).get("status", "")) != "acknowledged" and Time.get_ticks_msec() < deadline:
+		if forest.intro.presenting():
+			forest.intro.on_skip()
+		else:
+			await forest.request_action("skip_intro", {}, "adventure_intro")
+		await frames(10)
+		while forest.acting or forest.client.in_flight:
+			await process_frame
+		await refresh()
+	game.close_modal()
 	var hall5 := false
 	while steps < 1200:
 		steps += 1

@@ -17,6 +17,8 @@ SHEET = "10_artifact_mechanisms.png"
 LIGHT = (-0.55, -0.45, 0.70)
 BOX = (8, 70, 762, 390)
 OPEN = 0.55
+JOINT = True      # the painting's log-end / rock points are not mutually consistent with one rigid layout:
+                   # camera from the hatch (5 pts, planar PnP), every other size by back-projection
 
 PARAMS = dict(R=0.42, L=3.6, lx0=-0.15, lx1=0.75, lw=0.36, ax0=-0.9, ax1=-0.2, ay=0.25, sx_=-2.9, sy_=1.1, sr=0.48,
               sh=1.15, rx=-1.3, ry=1.5, rh=1.35)
@@ -33,7 +35,7 @@ def points(p):
         "arrow_l": (p["ax0"], p["ay"], 2 * R), "arrow_r": (p["ax1"], p["ay"], 2 * R),
         "far_c": (L / 2, 0.0, R), "near_top": (-L / 2, 0.0, 2 * R), "near_bot": (-L / 2, -R * 0.7, 0.1),
         "stump_tl": (p["sx_"] - p["sr"], p["sy_"], p["sh"]), "stump_tr": (p["sx_"] + p["sr"], p["sy_"], p["sh"]),
-        "stump_bf": (p["sx_"], p["sy_"] - p["sr"], 0.0), "rock_top": (p["rx"], p["ry"], p["rh"]),
+        "stump_bf": (p["sx_"], p["sy_"] - p["sr"], 0.0), "rock_top": (p["rx"], p["ry"], abs(p["rh"])),
     }
 
 
@@ -68,10 +70,34 @@ def stave_ring(g, x0, x1, R, angles, w, t, lod, tag="stave", skip_range=None, ga
 def build(A, p, lod):
     R, L = p["R"], p["L"]
     g = A.g("root", lod)
-    # ground patch (forest floor)
-    n = 20 if lod == 0 else 10
-    poly = np.array([((L / 2 + 0.9) * math.cos(a) - 0.4, 1.35 * math.sin(a) + 0.35) for a in np.linspace(0, 2 * math.pi, n, endpoint=False)])
-    g.prism(poly, 0.0, 0.03, "ground", "ground", caps=(False, True))
+    # ground patch (forest floor): the painted ground outline back-projected onto z = 0 through the solved camera
+    # (lower silhouette boundary only), joined with the footprints of the log, stump and rock -> convex outline
+    poly = None
+    v = p.get("_view")
+    if v is not None and v.cam is not None:
+        from scipy.spatial import ConvexHull
+        m, _ = v.mask()
+        H_, W_ = m.shape
+        pts = []
+        for x in range(0, W_, 4):
+            ys = np.nonzero(m[:, x])[0]
+            if len(ys):
+                pts.append((x + 0.5, ys.max() + 0.5))
+        uv = np.array(pts)
+        G = v.cam.on_plane_z(uv[:, 0], uv[:, 1], 0.0)
+        foot = [(-L / 2, -R, 0), (L / 2, -R, 0), (L / 2, R, 0), (-L / 2, R, 0),
+                (p["sx_"] - p["sr"], p["sy_"], 0), (p["sx_"], p["sy_"] + p["sr"], 0)]
+        allp = np.concatenate([G[:, :2], np.array(foot)[:, :2]])
+        ok = np.all(np.isfinite(allp), 1) & (np.abs(allp) < 12).all(1)
+        allp = allp[ok]
+        hull = ConvexHull(allp)
+        poly = allp[hull.vertices]
+        if lod > 0:
+            poly = poly[:: (2 if lod == 1 else 3)]
+    if poly is None:
+        n = 20 if lod == 0 else 10
+        poly = np.array([((L / 2 + 0.9) * math.cos(a) - 0.4, 1.35 * math.sin(a) + 0.35) for a in np.linspace(0, 2 * math.pi, n, endpoint=False)])
+    g.prism(np.asarray(poly, float), 0.0, 0.03, "ground", "ground", caps=(False, True))
     # hollow log of split staves; cache opening between lx0-0.4 and lx1 on the top staves
     nst = 9 if lod == 0 else 6
     angles = [math.radians(a) for a in np.linspace(-90 - 140, -90 + 140, nst)]
@@ -103,7 +129,7 @@ def build(A, p, lod):
     lg.tube(np.array(ring + [ring[0]]), 0.014, n=5, mat="bronze", tag="lid_ring")
     # white-moss boulder (landmark b)
     rk = A.part("mark_landmark_b", None, (p["rx"], p["ry"], 0))
-    rh = p["rh"]
+    rh = max(0.9, abs(p["rh"]))
     rk.geo[lod].rock((p["rx"], p["ry"], rh * 0.5), (rh * 0.85, rh * 0.62, rh * 0.62), seed=4, sub=2 if lod == 0 else 1,
                      mat="stone", tag="rock")
     # split birch stump (landmark a): two half trunks with a split gap
@@ -252,8 +278,11 @@ def solve(views):
         return np.array(r)
 
     x0 = np.array([math.log(f0), *cam.rvec, *cam.tvec, *p0])
-    sol = least_squares(resid, x0, method="trf", max_nfev=8000, loss="soft_l1", f_scale=4.0)
-    cam, pp = unpack(sol.x)
+    if JOINT:
+        sol = least_squares(resid, x0, method="trf", max_nfev=8000, loss="soft_l1", f_scale=4.0)
+        cam, pp = unpack(sol.x)
+    else:
+        cam, pp = unpack(x0)
     PP = points(pp)
     u, w_, _ = cam.project(np.array([PP[k] for k in keys]))
     q = v.p2(keys)
@@ -263,8 +292,11 @@ def solve(views):
                  per_point_px={k: round(float(a), 2) for k, a in zip(keys, e)}, f=cam.f,
                  fov_deg=float(2 * math.degrees(math.atan(max(v.size) / 2 / cam.f))),
                  camera_centre=[round(float(a), 3) for a in cam.centre],
-                 method="planar PnP (hatch/plank) init + joint least squares, 14 points")
+                 method="look-at-initialised PnP on the hatch (5 pts) + joint robust (soft-L1) least squares of "
+                        "camera and layout on 14 correspondences; log-end/rock points of the painting are not consistent "
+                        "with one rigid layout (outliers)")
     print(f"  [main] joint solve rms {v.rep['rms_px']:.2f}px max {v.rep['max_px']:.2f}px n={len(keys)} fov {v.rep['fov_deg']:.1f}",
           flush=True)
     print("  solved:", {k: round(float(pp[k]), 3) for k in free}, flush=True)
+    pp["_view"] = v
     return pp

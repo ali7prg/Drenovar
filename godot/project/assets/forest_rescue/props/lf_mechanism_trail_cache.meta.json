@@ -2,25 +2,25 @@
   "id": "lf_mechanism_trail_cache",
   "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 1218,
-    "LOD1": 584,
-    "LOD2": 460
+    "LOD0": 1197,
+    "LOD1": 575,
+    "LOD2": 445
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 678,
+      "root": 657,
       "cache_lid": 148,
       "mark_landmark_b": 320,
       "mark_landmark_a": 72
     },
     "LOD1": {
-      "root": 316,
+      "root": 307,
       "cache_lid": 148,
       "mark_landmark_b": 80,
       "mark_landmark_a": 40
     },
     "LOD2": {
-      "root": 192,
+      "root": 177,
       "cache_lid": 148,
       "mark_landmark_b": 80,
       "mark_landmark_a": 40
@@ -45,14 +45,14 @@
   "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -3.088,
-      -0.111,
-      -2.204
+      -3.249,
+      -0.08,
+      -2.347
     ],
     "max": [
-      2.242,
-      2.127,
-      1.0
+      1.773,
+      2.129,
+      1.089
     ]
   },
   "lod_nodes": {
@@ -147,71 +147,75 @@
   ],
   "blueprint": {
     "R": 0.42,
-    "L": 3.484,
-    "lx0": -0.9813,
-    "lx1": -0.0247,
-    "lw": 0.2081,
-    "ax0": -0.5166,
-    "ax1": 0.0979,
-    "ay": 0.3449,
-    "sx_": -2.6977,
-    "sy_": 0.8028,
-    "sr": 0.3904,
-    "sh": 2.0668,
-    "rx": -0.6593,
-    "ry": 1.9666,
-    "rh": -0.3927
+    "L": 3.4864,
+    "lx0": -0.9807,
+    "lx1": -0.0236,
+    "lw": 0.2083,
+    "ax0": -0.5162,
+    "ax1": 0.0988,
+    "ay": 0.3453,
+    "sx_": -2.6992,
+    "sy_": 0.8036,
+    "sr": 0.3909,
+    "sh": 2.0688,
+    "rx": -0.8085,
+    "ry": 1.7723,
+    "rh": 0.0
   },
   "qa": {
     "views": {
       "main": {
-        "iou_raw": 0.8263,
-        "iou_filled": 0.8263,
-        "colour_err": 0.0829,
-        "colour_err_core": 0.083,
+        "iou_raw": 0.7313,
+        "iou_filled": 0.7313,
+        "colour_err": 0.0889,
+        "colour_err_core": 0.0889,
         "ref_px": 189803,
-        "render_px": 210518,
+        "render_px": 180238,
         "ignored_px": 0,
-        "camera_rms_px": 17.91,
-        "camera_max_px": 61.11,
+        "camera_rms_px": 17.9,
+        "camera_max_px": 61.06,
         "camera_points": 14
       }
     },
     "cameras": {
       "main": {
-        "rms_px": 17.91,
-        "max_px": 61.11,
+        "rms_px": 17.9,
+        "max_px": 61.06,
         "n": 14,
-        "fov_deg": 19.98,
+        "fov_deg": 19.94,
         "per_point_px": {
-          "lid_bl": 4.83,
-          "lid_br": 3.68,
+          "lid_bl": 4.81,
+          "lid_br": 3.67,
           "lid_fr": 10.67,
-          "lid_fl": 11.26,
+          "lid_fl": 11.25,
           "ring": 12.81,
           "arrow_l": 0.61,
-          "arrow_r": 0.63,
-          "far_c": 4.22,
-          "near_top": 61.11,
-          "near_bot": 7.55,
-          "stump_tl": 7.73,
-          "stump_tr": 13.29,
-          "stump_bf": 1.01,
-          "rock_top": 0.05
+          "arrow_r": 0.64,
+          "far_c": 4.21,
+          "near_top": 61.06,
+          "near_bot": 7.62,
+          "stump_tl": 7.72,
+          "stump_tr": 13.32,
+          "stump_bf": 1.02,
+          "rock_top": 0.06
         }
       }
     },
     "texture": {
-      "texels": 3042659,
-      "projected_frac": 0.1278,
+      "texels": 2873459,
+      "projected_frac": 0.1028,
       "per_view_frac": {
-        "main": 0.1281
+        "main": 0.1031
       },
-      "seconds": 11.7
+      "seconds": 10.6
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_trail_cache/v2_iter10_*"
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_trail_cache/v2_iter14_*",
+    "godot_import": {
+      "errors_warnings": 0,
+      "lines": []
+    }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_trail_cache --iter 10",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_trail_cache --iter 14",
   "mechanism": "trail_cache",
   "steps": {
     "split_birch": "lf_trail_mark_1 (node mark_landmark_a)",
@@ -221,7 +225,7 @@
   "solved_clip": "lf_lock_mechanism (hold last frame)",
   "sockets": {
     "artifact": [
-      -0.703,
+      -0.7022,
       0.79,
       -0.0
     ]

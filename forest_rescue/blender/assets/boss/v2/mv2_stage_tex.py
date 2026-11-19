@@ -53,13 +53,42 @@ def mirror_cam(cam, name, image=None):
     return CM.PerspCam(name, img, cam.mask[:, ::-1].copy(), K, rv, tv)
 
 
+def scar_mask_closeup(crop):
+    """Pixels of the healed scar in the head close-up: pale lilac-pink streak over/behind the left eye,
+    found by colour (pinkness + local brightness) in the brow/cheek window, its centre line extended to the
+    brow top, then dilated (crop coordinates)."""
+    r, g, b = crop[..., 0], crop[..., 1], crop[..., 2]
+    lum = crop @ np.array([0.3, 0.59, 0.11])
+    loc = cv2.GaussianBlur(lum.astype(np.float32), (0, 0), 5)
+    pink = ((r - g) + (b - g) > 0.07) & (lum > 0.38) & (lum - loc > 0.04)
+    win = np.zeros_like(pink)
+    win[0:185, 230:400] = True                    # brow / eye / cheek; the mouth lining below is excluded
+    pink &= win
+    lab, n = ndi.label(ndi.binary_closing(pink, iterations=2))
+    if n:
+        sizes = ndi.sum(pink, lab, range(1, n + 1))
+        pink = np.isin(lab, np.nonzero(sizes >= 40)[0] + 1)
+    ys, xs = np.nonzero(pink)
+    m = pink.copy()
+    if len(ys):
+        cen = []
+        for yq in range(int(ys.min()), int(ys.max()) + 1, 6):
+            sel = (ys >= yq) & (ys < yq + 6)
+            if sel.any():
+                cen.append((float(np.median(xs[sel])), yq + 3.0))
+        cen = np.array(cen)
+        if len(cen) >= 2:
+            d = cen[0] - cen[min(3, len(cen) - 1)]
+            d = d / max(np.linalg.norm(d), 1e-6)
+            top = cen[0] + d * 18.0                     # the thin top of the scar on the brow knobs
+            line = np.zeros(m.shape, np.uint8)
+            cv2.polylines(line, [np.vstack([top, cen]).astype(np.int32)], False, 255, 7)
+            m |= line > 0
+    return ndi.binary_dilation(m, iterations=2)
+
+
 def head_scar_free(crop):
-    x0, y0 = R.HEAD_BOX[:2]
-    mk = np.zeros(crop.shape[:2], np.uint8)
-    pts = np.array([(306, 563), (296, 586), (283, 612), (288, 634), (300, 660), (322, 688), (346, 712)], float)
-    pts -= (x0, y0)
-    cv2.polylines(mk, [pts.astype(np.int32)], False, 255, 24)
-    return R.inpaint(crop, mk > 0, 9)
+    return R.inpaint(crop, scar_mask_closeup(crop), 5)
 
 
 def side_scar_free():
@@ -337,26 +366,25 @@ def main():
     base = np.clip(base * mod[:, None], 0, 1)
     albedo = np.zeros((size, size, 3))
     albedo[yy, xx] = base
-    # the healed scar exists on the LEFT only: inpaint any pale residue along the mirrored scar path (right side)
-    sp = np.array([[-p_[0], p_[1], p_[2]] for p_ in B.SCAR_PTS])
-    dmin = np.full(len(P), 9.0)
-    for i in range(len(sp) - 1):
-        a_, b_ = sp[i], sp[i + 1]
-        ab = b_ - a_
-        tt = np.clip(((P - a_) @ ab) / (ab @ ab), 0, 1)
-        dmin = np.minimum(dmin, np.linalg.norm(P - (a_ + tt[:, None] * ab), axis=1))
-    # replace with the colour of 3-D neighbours just outside the band (never UV neighbours: the atlas gaps are empty)
-    sel = (P[:, 0] < -0.12) & (dmin < 0.050)
-    ring = (P[:, 0] < -0.12) & (dmin >= 0.060) & (dmin < 0.11)
-    if sel.any() and ring.sum() > 50:
+    # the healed scar exists on the LEFT only: any lilac-pale residue near the RIGHT eye (sources are cleaned,
+    # this is a safety net) is replaced by the colour of its 3-D neighbours (never UV neighbours)
+    eye_r = np.array([-0.36, -3.63, 3.285])
+    near = (np.linalg.norm(P - eye_r, axis=1) < 0.32) & (P[:, 0] < -0.1)
+    if near.sum() > 100:
         from scipy.spatial import cKDTree
-        tree = cKDTree(P[ring])
-        _d, nn = tree.query(P[sel], k=16)
-        cols = base[ring][nn].mean(1)
-        hn = h[ring][nn].mean(1)
-        cols = cols * (1.0 + 0.14 * 1.4 * (h[sel] - hn))[:, None]
-        albedo[yy[sel], xx[sel]] = np.clip(cols, 0, 1)
-        C.log(f"right-eye scar residue replaced from 3-D neighbours: {int(sel.sum())} texels")
+        lum = base @ np.array([0.3, 0.59, 0.11])
+        tree_n = cKDTree(P[near])
+        _d, nn = tree_n.query(P[near], k=24)
+        loc_l = lum[near][nn].mean(1)
+        pinkish = ((base[near, 0] - base[near, 1]) + (base[near, 2] - base[near, 1]) > 0.05) & \
+            (lum[near] - loc_l > 0.035)
+        idx = np.nonzero(near)[0][pinkish]
+        if len(idx):
+            good = np.nonzero(near)[0][~pinkish]
+            tg = cKDTree(P[good])
+            _d, nn2 = tg.query(P[idx], k=12)
+            albedo[yy[idx], xx[idx]] = base[good][nn2].mean(1)
+        C.log(f"right-eye residue texels replaced: {len(idx)}")
     albedo = texproj.fill(albedo, T.valid)            # whole atlas filled: no dark mip bleeding at seams
     # --- normal map from the scale height (+ small osteoderm/ridge relief), tangent space
     hmap = np.zeros((size, size))

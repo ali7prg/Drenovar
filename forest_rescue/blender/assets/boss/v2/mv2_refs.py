@@ -132,7 +132,15 @@ def side_colour(img=None, remove_scar=False):
     m = mk > 0
     if remove_scar:
         m |= ndi.binary_dilation(_poly_mask(m.shape, SIDE_SCAR_POLY, x0, y0), iterations=3)
-    return inpaint(crop, ndi.binary_dilation(m, iterations=1), 6)
+        # plus every pale lilac pixel of the scar streak around the eye (colour detection)
+        r, g, b = crop[..., 0], crop[..., 1], crop[..., 2]
+        lum = crop @ np.array([0.3, 0.59, 0.11])
+        loc = cv2.GaussianBlur(lum.astype(np.float32), (0, 0), 3)
+        pink = ((r - g) + (b - g) > 0.06) & (lum - loc > 0.03)
+        win = np.zeros_like(pink)
+        win[140 - y0:215 - y0, 100 - x0:165 - x0] = True
+        m |= ndi.binary_dilation(pink & win, iterations=1)
+    return inpaint(crop, ndi.binary_dilation(m, iterations=1), 5)
 
 
 def side_view(corrected=True, img=None, colour=True):

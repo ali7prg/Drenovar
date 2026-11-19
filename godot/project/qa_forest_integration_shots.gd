@@ -318,6 +318,47 @@ func run() -> void:
 			forest.world.canopy.visible = true
 
 
+	# -------------------------------------------------- cage floors (texture check): oak / iron / root,
+	# empty, roof faded as with captives inside; z12 close (canopy hidden) and z30 game view.
+	if wanted("cagefloor"):
+		await fresh("completed")
+		await preload_actors()
+		var Rig = load("res://src/forest_rescue/game/actor_rig.gd")
+		var built: Array = []
+		for item in [["oak", "lf_site_07"], ["iron", "lf_site_08"], ["root", "lf_site_12"]]:
+			var a: Dictionary = forest.site_anchor(item[1])
+			var center: Vector3 = a.get("center", Vector3.ZERO)
+			var approach: Vector3 = a.get("approach", center + Vector3(0, 0, 7))
+			var out_dir := Vector3(approach.x - center.x, 0, approach.z - center.z).normalized()
+			var p3: Vector3 = center + out_dir * 3.2
+			var cage = Rig.new()
+			cage.setup("floor_cage_" + item[0], forest.actors.cage_file(item[0]))
+			forest.actors.props_parent.add_child(cage)
+			cage.position = forest.ground(p3.x, p3.z)
+			cage.rotation.y = atan2(out_dir.x, out_dir.z) + deg_to_rad(25.0)
+			cage.poll_load(true)
+			built.append([cage, item[0]])
+		await frames(2)
+		for entry in built:
+			var cage = entry[0]
+			cage.set_active(true)
+			var roof: Node3D = cage.part("roof")
+			if roof != null:
+				roof.visible = false
+			cage.hold_end(["lf_cage_gate_settle"])
+		await frames(10)
+		for entry in built:
+			forest.world.canopy.visible = false
+			look(entry[0].global_position + Vector3(0, 0.6, 0.3), 12.0)
+			await frames(3)
+			await shoot("cagefloor_%s_z12" % entry[1])
+			forest.world.canopy.visible = true
+			look(entry[0].global_position, 30.0)
+			await frames(3)
+			await shoot("cagefloor_%s_z30" % entry[1])
+		for entry in built:
+			entry[0].queue_free()
+
 	# -------------------------------------------------- artifact seated in the door socket (glow)
 	if wanted("socket"):
 		await fresh("site01_cage_open")

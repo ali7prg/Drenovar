@@ -382,6 +382,9 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 		var look: Array = resource_look.get(tree.id, [])
 		var variant: int = int(look[0]) if look.size() == 2 else Rules.kit_variant_for_legacy(int(tree.variant), Rules.id_hash(tree.id), species)
 		var scale: float = float(look[1]) if look.size() == 2 else Rules.resource_scale(species, float(tree.scale))
+		if variant >= Rules.GREEN_VARIANT_BASE:
+			species = Rules.OAK_GREEN
+			variant -= Rules.GREEN_VARIANT_BASE
 		var mesh := _tree_mesh(species, variant)
 		var transform := Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * scale), Vector3(xz.x, y - 0.05, xz.y))
 		canopy.add_instance(mesh[0], transform)

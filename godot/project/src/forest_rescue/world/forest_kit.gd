@@ -74,8 +74,56 @@ func kit_status() -> Dictionary:
 	return {"loaded": loaded.duplicate(), "missing": missing.duplicate(), "kitJson": FileAccess.file_exists(KIT_JSON)}
 
 
+## Golden-oak meshes re-textured with the baked green-broadleaf atlas copy (palette zoning,
+## tools/bake_green_oak_atlas.py; no runtime tint).
+const GREEN_OAK_ID := "lf_env_golden_oak_green"
+const GREEN_ATLAS := KIT_DIR + "lf_foliage_atlas_green.png"
+static var _green_materials: Dictionary = {}
+
+
+func _green_oak() -> Dictionary:
+	var key := "tree:" + GREEN_OAK_ID
+	if _cache.has(key):
+		_note(GREEN_OAK_ID, _cache[key])
+		return _cache[key]
+	var base := tree_asset("lf_env_golden_oak")
+	if not base.get("kit", false) or not ResourceLoader.exists(GREEN_ATLAS):
+		return base
+	var atlas: Texture2D = load(GREEN_ATLAS)
+	var result: Dictionary = base.duplicate()
+	result.variants = []
+	result.source = String(base.source) + " + lf_foliage_atlas_green.png"
+	for entry: Dictionary in base.variants:
+		var copy := entry.duplicate()
+		var lods: Array = []
+		for mesh: Mesh in entry.lods:
+			lods.append(_retextured(mesh, atlas))
+		copy.lods = lods
+		result.variants.append(copy)
+	_cache[key] = result
+	_note(GREEN_OAK_ID, result)
+	return result
+
+
+static func _retextured(mesh: Mesh, atlas: Texture2D) -> Mesh:
+	var copy: ArrayMesh = mesh.duplicate()
+	for s in copy.get_surface_count():
+		var material := copy.surface_get_material(s)
+		if material is ShaderMaterial and String(material.resource_name).to_lower().contains("foliage"):
+			var id := material.get_instance_id()
+			if not _green_materials.has(id):
+				var green: ShaderMaterial = material.duplicate()
+				green.set_shader_parameter("albedo_texture", atlas)
+				_green_materials[id] = green
+				materials.append(green)
+			copy.surface_set_material(s, _green_materials[id])
+	return copy
+
+
 ## Returns {variants: [{lods: [Mesh, Mesh, Mesh], tris: [int,int,int], height: float, source}], kit: bool}
 func tree_asset(asset_id: String) -> Dictionary:
+	if asset_id == GREEN_OAK_ID:
+		return _green_oak()
 	var key := "tree:" + asset_id
 	if _cache.has(key) and (_cache[key].kit or not _kit_available(asset_id)):
 		_note(asset_id, _cache[key])

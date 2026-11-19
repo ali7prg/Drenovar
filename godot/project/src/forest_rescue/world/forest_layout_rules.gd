@@ -16,21 +16,26 @@ const PREVIOUS_LAYOUT_ID := "lf_forest_layout_v1"
 const SEED := 2207
 
 ## Tree species (index used in the layout file).
-const SPECIES := ["lf_env_golden_oak", "lf_env_dark_pine", "lf_env_birch", "lf_env_willow", "lf_env_hollow_oak"]
+## OAK_GREEN = the golden-oak meshes with the baked green-broadleaf atlas (art/01: deep-green
+## round broadleaf everywhere outside the golden grove); a resource «Дуб» may use either.
+const SPECIES := ["lf_env_golden_oak", "lf_env_dark_pine", "lf_env_birch", "lf_env_willow", "lf_env_hollow_oak", "lf_env_golden_oak_green"]
 const OAK := 0
 const PINE := 1
 const BIRCH := 2
 const WILLOW := 3
 const HOLLOW_OAK := 4
+const OAK_GREEN := 5
+## Resource look variant >= GREEN_VARIANT_BASE means "green copy of oak variant (v - base)".
+const GREEN_VARIANT_BASE := 10
 ## Kit variants per species (1-based, forest_kit.json biomeTreeMix): v1 = art/02 hero palette,
 ## v2+ = art/01 palettes (grove oak golden-ochre, dark blue-green spruce, east-river willow).
-const SPECIES_VARIANTS := [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3], [1, 2, 3], [1, 2, 3]]
+const SPECIES_VARIANTS := [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3], [1, 2, 3], [1, 2, 3], [2, 3, 4]]
 ## Kit recommendedScale per species (meta), and the hero cave oak heroScale.
-const SPECIES_SCALE := [[0.65, 1.1], [0.75, 1.3], [0.8, 1.35], [0.8, 1.2], [1.7, 2.0]]
+const SPECIES_SCALE := [[0.65, 1.1], [0.75, 1.3], [0.8, 1.35], [0.8, 1.2], [1.7, 2.0], [0.65, 1.1]]
 const HERO_SCALE := 1.8
 ## Nominal crown radius (m, at scale 1) for clearance rules; real value comes from meta footprintM.
-const CROWN_RADIUS := [7.0, 3.0, 3.8, 5.4, 6.4]
-const TRUNK_RADIUS := [1.0, 0.5, 0.5, 0.8, 2.6]
+const CROWN_RADIUS := [7.0, 3.0, 3.8, 5.4, 6.4, 7.0]
+const TRUNK_RADIUS := [1.0, 0.5, 0.5, 0.8, 2.6, 1.0]
 
 ## Understory kinds (index used in the layout file) → [kit asset id, kit variant names].
 const UNDERSTORY := ["fern", "reed", "bramble", "rock", "trunk", "branches", "quarry_rock", "grass", "mushrooms"]

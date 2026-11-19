@@ -153,7 +153,7 @@ def claws():
 
 
 def eye_centre(sx):
-    return np.array([sx * 0.372, -3.63, 3.285])
+    return np.array([sx * 0.360, -3.63, 3.285])
 
 
 def eye_axis(sx):
@@ -161,7 +161,7 @@ def eye_axis(sx):
     return a / np.linalg.norm(a)
 
 
-EYE_R = 0.052
+EYE_R = 0.045
 
 
 def eyes(n_lat=10, n_lon=16):
@@ -230,5 +230,53 @@ def tongue():
     return [{"verts": np.array(verts), "faces": faces, "uv": np.array(uvs), "bone": "tongue", "region": "tongue"}]
 
 
+def mouth_curtain():
+    """Inward-facing mouth lining (gum line -> gum line, + throat wall). One-sided: from outside you see the
+    far side's lining through the open gape (never the background); skinned head (top) / jaw (bottom)."""
+    x0, y0, x1, y1 = (0.25, 0.0, 0.5, 0.25)
+    verts, faces, uvs, wjaw = [], [], [], []
+    ys = np.linspace(-4.40, -3.36, 14)
+    rows = 4
+    for sx in (1, -1):
+        base = len(verts)
+        for i, y in enumerate(ys):
+            wu, wl = B.head_widths(y)
+            zl = float(B.lip_z(y))
+            for r in range(rows):
+                t = r / (rows - 1)                       # 0 upper gum -> 1 lower gum
+                x = sx * ((1 - t) * (float(wu) - 0.085) + t * (float(wl) - 0.085) - 0.012 * math.sin(math.pi * t))
+                z = zl + 0.006 - 0.012 * t
+                verts.append([x, y, z])
+                wjaw.append(t)
+        for i in range(len(ys) - 1):
+            for r in range(rows - 1):
+                a = base + i * rows + r
+                b = a + rows
+                q = [a, b, b + 1, a + 1] if sx > 0 else [a, a + 1, b + 1, b]
+                faces.append(q)
+    # throat wall at the back of the gape
+    base = len(verts)
+    yb = -3.37
+    zl = float(B.lip_z(yb))
+    wu, wl = B.head_widths(yb)
+    cols = 6
+    for r in range(rows):
+        t = r / (rows - 1)
+        for c in range(cols):
+            x = (c / (cols - 1) * 2 - 1) * (float(wu) - 0.09)
+            verts.append([x, yb, zl + 0.006 - 0.012 * t])
+            wjaw.append(t)
+    for r in range(rows - 1):
+        for c in range(cols - 1):
+            a = base + r * cols + c
+            faces.append([a, a + cols, a + cols + 1, a + 1])
+    V = np.array(verts)
+    for f in faces:
+        for k in f:
+            uvs.append((x0 + (x1 - x0) * (0.2 + 0.6 * ((V[k, 1] + 4.4) / 1.05)), y0 + (y1 - y0) * (0.2 + 0.6 * wjaw[k])))
+    return [{"verts": V, "faces": faces, "uv": np.array(uvs), "bone": "head", "region": "mouth",
+             "wjaw": np.array(wjaw)}]
+
+
 def all_parts():
-    return {"teeth": teeth(), "claws": claws(), "eyes": eyes(), "tongue": tongue()}
+    return {"teeth": teeth(), "claws": claws(), "eyes": eyes(), "tongue": tongue(), "mouth": mouth_curtain()}

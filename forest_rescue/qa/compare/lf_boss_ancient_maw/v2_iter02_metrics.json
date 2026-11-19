@@ -1,0 +1,87 @@
+{
+  "left": {
+    "view": "left",
+    "iou": 0.9086,
+    "mean_abs_colour_error": 0.0493,
+    "ref_pixels": 102033,
+    "render_pixels": 97904
+  },
+  "left_raw": {
+    "view": "left_raw",
+    "iou": 0.8513,
+    "mean_abs_colour_error": 0.0494,
+    "ref_pixels": 109329,
+    "render_pixels": 97904
+  },
+  "front": {
+    "view": "front",
+    "iou": 0.8933,
+    "mean_abs_colour_error": 0.0724,
+    "ref_pixels": 46631,
+    "render_pixels": 44501
+  },
+  "front_raw": {
+    "view": "front_raw",
+    "iou": 0.8604,
+    "mean_abs_colour_error": 0.0724,
+    "ref_pixels": 48471,
+    "render_pixels": 44501
+  },
+  "rear34": {
+    "view": "rear34",
+    "iou": 0.8404,
+    "mean_abs_colour_error": 0.0801,
+    "ref_pixels": 57577,
+    "render_pixels": 53509,
+    "camera": {
+      "pnp_rms_px": 16.975678640489523,
+      "pnp_focal_px": 20000.0,
+      "pnp_errors": {
+        "tail_tip": 16.28,
+        "snout_tip": 14.01,
+        "heel_L": 3.89,
+        "heel_R": 4.81,
+        "claw_toe4_L": 23.74,
+        "hand_claw_L": 16.18,
+        "knee_back_L": 29.62,
+        "tail_mid_top": 10.14
+      },
+      "refined_iou": 0.8557128119156618,
+      "refined_rms_px": 25.00219177326647,
+      "refined_errors": {
+        "tail_tip": 24.18,
+        "snout_tip": 18.49,
+        "heel_L": 20.66,
+        "heel_R": 24.03,
+        "claw_toe4_L": 3.24,
+        "hand_claw_L": 34.86,
+        "knee_back_L": 41.35,
+        "tail_mid_top": 11.59
+      },
+      "refined_focal_px": 20054.732816702555
+    }
+  },
+  "head_closeup": {
+    "view": "head_closeup",
+    "iou": 0.8397,
+    "mean_abs_colour_error": 0.1315,
+    "ref_pixels": 164923,
+    "render_pixels": 172774,
+    "camera": {
+      "pnp_rms_px": 25.994086201901542,
+      "focal_px": 400.0,
+      "jaw_open_deg": 20.0,
+      "errors_px": {
+        "snout_tip": 27.74,
+        "nostril_L": 17.21,
+        "eye_L": 22.14,
+        "scar_top": 24.31,
+        "mouth_corner_L": 28.61,
+        "upper_tooth_front_L": 8.17,
+        "upper_tooth_mid_L": 43.1,
+        "jaw_tip": 23.14,
+        "lower_tooth_front_L": 25.6
+      }
+    }
+  }
+}

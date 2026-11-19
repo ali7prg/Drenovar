@@ -239,6 +239,29 @@ def main():
     nposed /= np.maximum(np.linalg.norm(nposed, axis=-1, keepdims=True), 1e-9)
     head.normals_posed = nposed
     head_m.normals_posed = nposed
+    # colour transfer: close-up tonality -> side view tonality on the head (mean/std per channel, LAB)
+    hv = [left, head]
+    zb0 = {"left": TP.zbuffer_fast(V, tris, left), "head_closeup": TP.zbuffer_fast(Vp, tris, head)}
+    _c, _w, per0 = TP.project_views(T, hv, zb0, texel_pos={"head_closeup": texel_pos["head_closeup"]},
+                                    warps={"head_closeup": warp}, per_view_out=True)
+    col_s, ws_s = TP.project_views(T, [left], zb0)
+    col_h, ws_h = TP.project_views(T, [head], zb0, texel_pos={"head_closeup": texel_pos["head_closeup"]},
+                                   warps={"head_closeup": warp})
+    both = (ws_s > 0.05) & (ws_h > 0.05) & (T.pos[..., 1] < -2.95)
+    if both.sum() > 500:
+        a = cv2.cvtColor(col_s[both][None].astype(np.float32), cv2.COLOR_RGB2LAB)[0]
+        b = cv2.cvtColor(col_h[both][None].astype(np.float32), cv2.COLOR_RGB2LAB)[0]
+        ms, ss, mh, sh = a.mean(0), a.std(0), b.mean(0), b.std(0)
+        gain = np.clip(ss / np.maximum(sh, 1e-3), 0.6, 1.3)
+        gain[0] = np.clip(0.5 + 0.5 * gain[0], 0.7, 1.2)            # keep most of the close-up contrast
+
+        def transfer(img):
+            lab = cv2.cvtColor(img.astype(np.float32), cv2.COLOR_RGB2LAB)
+            lab = (lab - mh) * gain + mh + (ms - mh) * 0.85
+            return np.clip(cv2.cvtColor(lab, cv2.COLOR_LAB2RGB), 0, 1).astype(np.float64)
+        head.image = transfer(head.image)
+        head_m.image = transfer(head_m.image)
+        C.log(f"close-up colour transfer: mean {mh.round(2)} -> {ms.round(2)} gain {gain.round(2)}")
     views = [left, right, front, rear, rear_m, head, head_m]
     zb = {}
     for v in views:
@@ -249,8 +272,15 @@ def main():
     Y = T.pos[..., 1]
     X = T.pos[..., 0]
     g_head = np.clip((-2.92 - Y) / 0.12, 0, 1)
-    gates = {"head_closeup": g_head * (X > -0.02), "head_mirror": g_head * (X < 0.02),
-             "left": 1 - 0.97 * g_head, "right_mirror": 1 - 0.97 * g_head, "front": 1 - 0.9 * g_head,
+    # lip band (outer surface within +-6 cm of the closed lip line): the side view (closed mouth, teeth
+    # over the lower lip) is the source there, the open-mouth close-up only for the head above/below it
+    zl_t = np.interp(Y, B.head_profile()["Y"], B.head_profile()["zlip"])
+    wu_t, _ = B.head_widths(Y)
+    lipband = (np.abs(T.pos[..., 2] - zl_t) < 0.065) & (np.abs(X) > wu_t - 0.06) & (Y < -3.25)
+    lipband = ndi.gaussian_filter(lipband.astype(np.float64), 1.5)
+    g_cu = g_head * (1 - lipband)
+    gates = {"head_closeup": g_cu * (X > -0.02), "head_mirror": g_cu * (X < 0.02),
+             "left": 1 - 0.97 * g_cu, "right_mirror": 1 - 0.97 * g_cu, "front": 1 - 0.9 * g_cu,
              "rear34": 1 - g_head, "rear34_mirror": 1 - g_head}
     prio = {"left": 1.0, "right_mirror": 1.0, "front": 0.9, "rear34": 0.55, "rear34_mirror": 0.55,
             "head_closeup": 6.0, "head_mirror": 6.0}
@@ -275,7 +305,7 @@ def main():
     # mouth interior (inside the closed head volume): gums/palate flesh where the close-up does not see
     zl = np.interp(P[:, 1], B.head_profile()["Y"], B.head_profile()["zlip"])
     wu, _ = B.head_widths(P[:, 1])
-    inner_mouth = (P[:, 1] < -3.30) & (P[:, 1] > -4.55) & (np.abs(P[:, 2] - zl) < 0.16) & (np.abs(P[:, 0]) < wu - 0.05)
+    inner_mouth = (P[:, 1] < -3.30) & (P[:, 1] > -4.42) & (np.abs(P[:, 2] - zl) < 0.16) & (np.abs(P[:, 0]) < wu - 0.05)
     flesh = np.array([0.45, 0.22, 0.20])
     base[inner_mouth & unseen] = flesh * (0.8 + 0.2 * cvar[inner_mouth & unseen])[:, None]
     # scale detail on the albedo: crevices darker, scale crowns lighter, per-scale value jitter
@@ -327,7 +357,7 @@ def main():
                            normal_strength=1.0)
     m_ker = core.material(f"{C.ASSET_ID}_keratin", base_tex=img_k, rough=0.45)
     core.assign(body, m_body)
-    for n in ("maw_teeth", "maw_claws", "maw_eyes", "maw_tongue"):
+    for n in ("maw_teeth", "maw_claws", "maw_eyes", "maw_tongue", "maw_mouth"):
         core.assign(bpy.data.objects[n], m_ker)
     info = {"coverage_by_view": cov, "coverage_total": float(known.sum() / T.valid.sum()), "rear_cam": rinfo,
             "head_cam": hinfo, "jaw_open_deg_closeup": jaw_deg, "texture_size": size}

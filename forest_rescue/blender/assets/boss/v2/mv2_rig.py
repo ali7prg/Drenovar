@@ -50,7 +50,7 @@ def bone_table():
         add(f"tongue_{i + 1:02d}", (0, ty[i], tz[i]), (0, ty[i + 1], tz[i + 1]),
             "jaw" if i == 0 else f"tongue_{i:02d}", connect=i > 0)
     for sx, side in ((1, "L"), (-1, "R")):
-        c = np.array([sx * 0.372, -3.63, 3.285])
+        c = np.array([sx * 0.360, -3.63, 3.285])
         ax = np.array([sx * 0.80, -0.55, 0.22])
         ax /= np.linalg.norm(ax)
         add(f"eye_{side}", c, c + ax * 0.08, "head")
@@ -223,7 +223,7 @@ def compute_weights(V, names, parts, adjacency=None, smooth_iters=3):
     addw("neck_03", hd * (1 - jaw_w) * head_chain)
     # eyelids
     for sx, side in ((1, "L"), (-1, "R")):
-        c = np.array([sx * 0.372, -3.63, 3.285])
+        c = np.array([sx * 0.360, -3.63, 3.285])
         r = np.linalg.norm(V - c, axis=1)
         ring = np.clip((0.115 - r) / 0.045, 0, 1) * (r > 0.045)
         up = V[:, 2] >= c[2] + 0.004

@@ -334,7 +334,10 @@ def head_detail_parts():
         sub.append(oell([sx * 0.235, -4.37, 3.115], [0.3 * sx, -1, 0.2], 0.045, 0.022, 0.028, k=0.02,
                         name="nostril", bone="head"))
         # eye socket (eyeball is a separate mesh of radius 0.052)
-        sub.append(sdf.sphere([sx * 0.372, -3.63, 3.285], 0.052, k=0.015, name="eyesocket", bone="head"))
+        sub.append(sdf.sphere([sx * 0.360, -3.63, 3.285], 0.046, k=0.012, name="eyesocket", bone="head"))
+        # eyelid rim (torus around the opening, axis = eye axis)
+        ax = np.array([sx * 0.80, -0.55, 0.22])
+        add.append(sdf.torus([sx * 0.372, -3.638, 3.288], 0.047, 0.014, axis=ax, k=0.012, name="eyelid", bone="head"))
     return add, sub
 
 

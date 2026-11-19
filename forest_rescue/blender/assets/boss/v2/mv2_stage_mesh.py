@@ -79,16 +79,21 @@ def face_labels(body):
     lab = np.zeros(nf, np.int64)
     side = (P[:, 0] >= 0).astype(np.int64)
     ybands = np.digitize(P[:, 1], [-3.0, -1.2, 0.6, 2.4])
+    zl = np.interp(P[:, 1], B.head_profile()["Y"], B.head_profile()["zlip"])
+    wu, _wl = B.head_widths(P[:, 1])
+    mouth = (P[:, 1] < -3.28) & (P[:, 1] > -4.6) & (np.abs(P[:, 2] - zl) < 0.17) & (np.abs(P[:, 0]) < wu - 0.045)
+    lower_head = (P[:, 2] < zl) & (P[:, 1] < -3.0)
     for i, k in enumerate(keys):
         sel = owner == i
         if k == "body":
-            lab[sel] = 100 + side[sel] * 10 + ybands[sel]
+            lab[sel] = 100 + side[sel] * 10 + ybands[sel] + 5 * lower_head[sel]
         elif k == "leg":
             # outer / inner half of each leg, toes with the leg
             xin = np.abs(P[sel, 0]) - 0.66
             lab[sel] = 200 + side[sel] * 10 + (xin > 0)
         else:
             lab[sel] = 300 + side[sel] * 10 + (P[sel, 1] < -1.95)
+    lab[mouth] = 400 + side[mouth]
     return lab
 
 
@@ -145,7 +150,8 @@ def main():
     region_uv(body)
     C.log(f"uv coverage {uv_coverage(body):.3f}")
     parts = D.all_parts()
-    for key, name in (("teeth", "maw_teeth"), ("claws", "maw_claws"), ("eyes", "maw_eyes"), ("tongue", "maw_tongue")):
+    for key, name in (("teeth", "maw_teeth"), ("claws", "maw_claws"), ("eyes", "maw_eyes"), ("tongue", "maw_tongue"),
+                      ("mouth", "maw_mouth")):
         part_object(name, parts[key])
     for o in list(bpy.data.objects):
         if o.type == "MESH":

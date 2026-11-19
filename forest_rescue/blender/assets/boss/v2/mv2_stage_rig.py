@@ -88,6 +88,23 @@ def bind_tongue(obj, arm):
     obj.matrix_parent_inverse = arm.matrix_world.inverted()
 
 
+def bind_mouth(obj, arm):
+    import mv2_details as D
+    wj = D.mouth_curtain()[0]["wjaw"]
+    obj.vertex_groups.clear()
+    vh = obj.vertex_groups.new(name="head")
+    vj = obj.vertex_groups.new(name="jaw")
+    for i, w in enumerate(wj):
+        if w < 0.999:
+            vh.add([i], float(1 - w), "REPLACE")
+        if w > 0.001:
+            vj.add([i], float(w), "REPLACE")
+    mod = obj.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    obj.parent = arm
+    obj.matrix_parent_inverse = arm.matrix_world.inverted()
+
+
 def ik_controls(arm):
     """Editable IK control rig on the master: foot/hand targets + knee/elbow poles (constraints muted,
     clips are baked FK; enable them to author new motion)."""
@@ -116,6 +133,7 @@ def main():
     for name, bl in db.items():
         bind_parts(bpy.data.objects[name], arm, bl)
     bind_tongue(bpy.data.objects["maw_tongue"], arm)
+    bind_mouth(bpy.data.objects["maw_mouth"], arm)
     ik_controls(arm)
     bpy.ops.wm.save_as_mainfile(filepath=C.cache("maw2_rig.blend"), compress=True)
     C.log(f"stage rig done {time.time() - t0:.1f}s")

@@ -40,6 +40,7 @@ def setup_flat():
     sc.render.film_transparent = True
     sc.view_settings.view_transform = "Standard"
     sc.render.image_settings.color_mode = "RGBA"
+    sh.show_backface_culling = True
     for m in bpy.data.materials:
         if m.node_tree is None:
             continue
@@ -82,8 +83,8 @@ def sheet_pose(arm, which):
     ps = PO.Pose(sk)
     if which == "left":
         # right (far) leg stepped back as drawn: ankle (Y 1.25, Z 0.70), ball (Y 1.02, Z 0.17)
-        ps.two_bone("thigh_R", "shin_R", np.array([-0.68, 1.25, 0.70]), pole_dir=(0, -1, 0))
-        ps.aim("foot_R", np.array([-0.68, 1.02, 0.17]) - ps.head("foot_R"))
+        ps.two_bone("thigh_R", "shin_R", np.array([-0.68, 1.38, 0.68]), pole_dir=(0, -1, 0))
+        ps.aim("foot_R", np.array([-0.68, 1.12, 0.17]) - ps.head("foot_R"))
         for t in ("toe2a_R", "toe3a_R", "toe4a_R", "toe2b_R", "toe3b_R", "toe4b_R", "hallux_R"):
             ps.set_world_rot(t, sk.rest[t][:3, :3])
         ps.rot_world_axis("upperarm_R", (1, 0, 0), -28)

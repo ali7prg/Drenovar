@@ -156,8 +156,8 @@
       "rootTranslation": "in_place",
       "markers": {},
       "footSlip_mm": {
-        "Left": 34.35,
-        "Right": 33.48
+        "Left": 0.49,
+        "Right": 0.47
       },
       "ikOverreach_m": 0.1162
     },

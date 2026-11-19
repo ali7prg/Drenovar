@@ -223,8 +223,8 @@
       "closed34": {
         "iou_raw": 0.8251,
         "iou_filled": 0.9489,
-        "colour_err": 0.0918,
-        "colour_err_core": 0.0816,
+        "colour_err": 0.0865,
+        "colour_err_core": 0.0769,
         "ref_px": 88026,
         "render_px": 80981,
         "ignored_px": 0,
@@ -235,8 +235,8 @@
       "open34": {
         "iou_raw": 0.7985,
         "iou_filled": 0.9569,
-        "colour_err": 0.124,
-        "colour_err_core": 0.1155,
+        "colour_err": 0.1187,
+        "colour_err_core": 0.1099,
         "ref_px": 82099,
         "render_px": 71639,
         "ignored_px": 37698,
@@ -299,15 +299,15 @@
         "mirror_x_closed": 0.1329,
         "back_from_left": 0.1235
       },
-      "seconds": 33.0
+      "seconds": 28.9
     },
-    "sheets": "forest_rescue/qa/compare/lf_cage_wood/v2_iter07_*",
+    "sheets": "forest_rescue/qa/compare/lf_cage_wood/v2_iter08_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_oak --iter 7",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_oak --iter 8",
   "door_open_deg": -95.0,
   "door_open_deg_note": "signed Godot rotation.y of door_pivot for the open pose (actor_director.swing_door fallback adds door_open_deg * amount: negative = outward)",
   "sockets": {

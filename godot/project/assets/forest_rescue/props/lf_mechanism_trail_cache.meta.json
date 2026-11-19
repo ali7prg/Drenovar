@@ -162,8 +162,8 @@
       "main": {
         "iou_raw": 0.6297,
         "iou_filled": 0.6297,
-        "colour_err": 0.101,
-        "colour_err_core": 0.1008,
+        "colour_err": 0.0916,
+        "colour_err_core": 0.0914,
         "ref_px": 189803,
         "render_px": 134841,
         "ignored_px": 0,
@@ -197,15 +197,15 @@
       "per_view_frac": {
         "main": 0.1299
       },
-      "seconds": 17.3
+      "seconds": 15.8
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_trail_cache/v2_iter05_*",
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_trail_cache/v2_iter06_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_trail_cache --iter 5",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_trail_cache --iter 6",
   "mechanism": "trail_cache",
   "steps": {
     "split_birch": "lf_trail_mark_1 (node mark_landmark_a)",

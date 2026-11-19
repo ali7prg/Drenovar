@@ -153,8 +153,8 @@
       "crate_closed": {
         "iou_raw": 0.9026,
         "iou_filled": 0.9026,
-        "colour_err": 0.0902,
-        "colour_err_core": 0.0869,
+        "colour_err": 0.0896,
+        "colour_err_core": 0.0863,
         "ref_px": 23973,
         "render_px": 23789,
         "ignored_px": 0,
@@ -165,8 +165,8 @@
       "crate_open": {
         "iou_raw": 0.7722,
         "iou_filled": 0.7722,
-        "colour_err": 0.0897,
-        "colour_err_core": 0.0862,
+        "colour_err": 0.084,
+        "colour_err_core": 0.08,
         "ref_px": 24878,
         "render_px": 25432,
         "ignored_px": 0,
@@ -177,8 +177,8 @@
       "blankets": {
         "iou_raw": 0.7909,
         "iou_filled": 0.7909,
-        "colour_err": 0.0804,
-        "colour_err_core": 0.0767,
+        "colour_err": 0.0777,
+        "colour_err_core": 0.073,
         "ref_px": 22581,
         "render_px": 26746,
         "ignored_px": 0,
@@ -189,8 +189,8 @@
       "sacks": {
         "iou_raw": 0.8445,
         "iou_filled": 0.8445,
-        "colour_err": 0.0812,
-        "colour_err_core": 0.0782,
+        "colour_err": 0.0778,
+        "colour_err_core": 0.0733,
         "ref_px": 25236,
         "render_px": 26149,
         "ignored_px": 0,
@@ -201,8 +201,8 @@
       "coins": {
         "iou_raw": 0.6368,
         "iou_filled": 0.6368,
-        "colour_err": 0.0955,
-        "colour_err_core": 0.085,
+        "colour_err": 0.0925,
+        "colour_err_core": 0.0838,
         "ref_px": 10437,
         "render_px": 7173,
         "ignored_px": 0,
@@ -213,8 +213,8 @@
       "arrows": {
         "iou_raw": 0.2548,
         "iou_filled": 0.2653,
-        "colour_err": 0.164,
-        "colour_err_core": 0.1542,
+        "colour_err": 0.1653,
+        "colour_err_core": 0.1594,
         "ref_px": 22379,
         "render_px": 5980,
         "ignored_px": 0,
@@ -225,8 +225,8 @@
       "bread": {
         "iou_raw": 0.5848,
         "iou_filled": 0.5848,
-        "colour_err": 0.0724,
-        "colour_err_core": 0.0669,
+        "colour_err": 0.0741,
+        "colour_err_core": 0.0687,
         "ref_px": 15507,
         "render_px": 13277,
         "ignored_px": 0,
@@ -237,8 +237,8 @@
       "bandages": {
         "iou_raw": 0.592,
         "iou_filled": 0.592,
-        "colour_err": 0.107,
-        "colour_err_core": 0.1002,
+        "colour_err": 0.1017,
+        "colour_err_core": 0.0927,
         "ref_px": 9795,
         "render_px": 9888,
         "ignored_px": 0,
@@ -249,8 +249,8 @@
       "chest": {
         "iou_raw": 0.8042,
         "iou_filled": 0.8042,
-        "colour_err": 0.1027,
-        "colour_err_core": 0.1008,
+        "colour_err": 0.1003,
+        "colour_err_core": 0.0986,
         "ref_px": 91271,
         "render_px": 83758,
         "ignored_px": 0,
@@ -383,15 +383,15 @@
         "bandages": 0.0034,
         "chest": 0.0388
       },
-      "seconds": 29.5
+      "seconds": 32.3
     },
-    "sheets": "forest_rescue/qa/compare/lf_props_supplies/v2_iter03_*",
+    "sheets": "forest_rescue/qa/compare/lf_props_supplies/v2_iter04_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py supplies --iter 3",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py supplies --iter 4",
   "items": {
     "supply_crate_closed": {
       "painted_box": [

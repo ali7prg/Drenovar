@@ -48,6 +48,9 @@ RT = paths.ensure(paths.RUNTIME, "props")
 SRC = paths.ensure(paths.SOURCES, "props")
 TEXM = paths.ensure(paths.TEXTURE_SOURCES, "props", "v2")
 PAINT_K = 0.38
+# de-lighting exponent: 0 = albedo is the painted colour (measured in the game camera: full de-lighting made the
+# props 8-18 L* brighter than the painting under the game's painted-light path + FILMIC), 1 = full lambert de-light
+DELIGHT = 0.0
 _SH = {}
 
 
@@ -590,10 +593,10 @@ def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.
             c[k], w[k] = ck, wk
             c2, w2, _ = tex.project_painting(Pp[k], Np[k], v.cam, crop, zb, W_, H_, accept=accm, min_facing=0.12,
                                              max_mag=1e9)
-            shade2 = tex.lambert_shade(Np[k], v.light, PAINT_K)
+            shade2 = tex.lambert_shade(Np[k], v.light, PAINT_K) ** DELIGHT
             lenient[k] += (c2 / shade2[:, None]) * (w2 > 0)[:, None]
             lw[k] += (w2 > 0)
-        shade = tex.lambert_shade(Np, v.light, PAINT_K)
+        shade = tex.lambert_shade(Np, v.light, PAINT_K) ** DELIGHT
         wp = (w * v.tex_weight) ** 10
         acc += (c / shade[:, None]) * wp[:, None]
         wsum += wp

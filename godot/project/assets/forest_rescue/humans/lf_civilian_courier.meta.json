@@ -3,8 +3,8 @@
   "generation": "v2 image-based (painted turnaround silhouettes + template depth, painting projection)",
   "rig": "human_shared",
   "tris": {
-    "LOD0": 11775,
-    "LOD1": 5819,
+    "LOD0": 11903,
+    "LOD1": 5877,
     "LOD2": 2134
   },
   "budget": {
@@ -272,5 +272,27 @@
     "unit": "metre",
     "note": "Blender -Y forward exported to glTF +Z; feet on y=0, root at the origin"
   },
-  "notes": ""
+  "notes": "",
+  "morphs": {
+    "sit_drape": {
+      "kind": "corrective cloth drape baked from a Blender cloth simulation (pinned at the waist / shoulders, body + cage-floor collision), stored relative to the posed rest shape",
+      "clips": {
+        "lf_civilian_cage_sit": "1.0",
+        "lf_civilian_stand_up": "1 -> 0 over 0-1.50 s as the thighs come down",
+        "other civilian clips": "0"
+      },
+      "cloth_bones": "neutral while the morph is on (cage_sit; stand_up until the morph is off, then blended back)",
+      "mean_delta_m": 0.084
+    }
+  },
+  "hairCards": {
+    "style": "tied",
+    "cardsByLOD": {
+      "lf_civilian_courier_LOD0": 64,
+      "lf_civilian_courier_LOD1": 29
+    },
+    "material": "lf_civilian_courier_hair_cards (alphaMode MASK 0.5, double sided)",
+    "atlas": "forest_rescue/blender/textures/humans/lf_civilian_courier_hair_cards.png",
+    "source": "strand clumps cut from the painted hair outline of the portrait inset"
+  }
 }

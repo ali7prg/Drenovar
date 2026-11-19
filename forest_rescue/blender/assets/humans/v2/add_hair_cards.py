@@ -225,14 +225,14 @@ def cards_for(lod, n_cards, st, seed, C, tex):
     # loose strands hanging beside the face (tied-back styles)
     if st.get("loose", 0):
         side = hair & (np.abs(nrm[:, 0]) > 0.45) & (cen[:, 2] > hc[2] - 0.05) & (cen[:, 2] < hc[2] + 0.03) \
-            & (cen[:, 1] < hc[1] + 0.01)
+            & (cen[:, 1] > hc[1] + 0.005)
         sidx = np.nonzero(side)[0]
         if len(sidx):
             nl = max(2, int(st["loose"] * n_cards / st["n"][0]))
             for f in sidx[fps(cen[sidx], nl, seed + 1)]:
                 n = nrm[f]
                 p = cen[f] - n * 0.004
-                d = 0.30 * n + np.array([0.0, 0.05, -1.0])
+                d = 0.35 * n + np.array([0.0, 0.25, -1.0])
                 d /= np.linalg.norm(d)
                 w = np.cross(d, n)
                 w /= max(np.linalg.norm(w), 1e-6)

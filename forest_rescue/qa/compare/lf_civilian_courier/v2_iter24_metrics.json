@@ -1,16 +1,16 @@
 {
- "front": {
-  "iou": 0.8868,
-  "colour_error": 0.038,
-  "colour_error_core": 0.0339,
-  "ref_px": 40111,
-  "render_px": 39169
- },
- "back": {
-  "iou": 0.8873,
-  "colour_error": 0.0363,
-  "colour_error_core": 0.0318,
-  "ref_px": 39280,
-  "render_px": 38016
- }
+  "front": {
+    "iou": 0.887,
+    "colour_error": 0.0386,
+    "colour_error_core": 0.0344,
+    "ref_px": 40111,
+    "render_px": 39207
+  },
+  "back": {
+    "iou": 0.8878,
+    "colour_error": 0.0365,
+    "colour_error_core": 0.032,
+    "ref_px": 39280,
+    "render_px": 38053
+  }
 }

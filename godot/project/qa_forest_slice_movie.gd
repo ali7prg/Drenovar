@@ -25,7 +25,7 @@ var part := "early"
 var endpoint := ""
 var marks: PackedStringArray = []
 var frame_count := 0
-var boss_units := 1100
+var boss_units := 1500
 
 func _initialize() -> void:
 	call_deferred("run")
@@ -295,14 +295,15 @@ func run_site2() -> void:
 	game.stage.zoom = 40.0
 	game.stage.update_camera(0, true)
 	await hold(0.5)
-	mark("e_start")
 	follow = true
 	follow_zoom = 40.0
-	await continue_step()
-	await continue_step()
+	await travel()               # home → site 2 (the walk itself is segment b's subject)
+	mark("e_start")
 	await hold(1.0)
+	await continue_step()        # discover
+	await hold(0.6)
 	follow_zoom = 22.0
-	await continue_step()
+	await continue_step()        # to the rune lock
 	mark("e_rune")
 	forest.mech.open("lf_site_02")
 	await hold(1.0)
@@ -331,6 +332,24 @@ func run_site2() -> void:
 	await continue_step()
 	await hold(4.0)
 	mark("e_end")
+
+## Long walk: commit the move, show 1.5 s of it, then jump the presentation clock to the arrival.
+func travel(show := 1.5) -> void:
+	var step: Dictionary = forest.guide()
+	if String(step.get("action", "")) != "move":
+		return
+	await act("move", step.get("fields", {}))
+	await hold(show)
+	var settle: float = forest.client.last_settle_ms()
+	if settle != INF and clock < settle + 300.0:
+		clock = settle + 300.0
+		forest.client.manual_clock_ms = clock
+		await refresh()
+		var focus: Vector3 = forest.actors.squad_focus()
+		if focus != Vector3.INF:
+			game.stage.target = focus
+			game.stage.update_camera(0, true)
+		mark("travel_cut")
 
 func rune_input(symbol: String) -> void:
 	await sync_clock()
@@ -361,12 +380,14 @@ func run_boss() -> void:
 	await act("form_squad", {"units":{"ENG-02":boss_units, "ENG-03":boss_units, "ENG-07":boss_units}})
 	await hold(0.5)
 	mark("f_prep")
-	await continue_step()       # move to the arena
-	await hold(1.0)
-	mark("f_start")
+	await travel(1.0)           # home → arena (cut)
 	follow = false
 	var arena: Vector3 = forest.target_position("lf_boss_ancient_maw")
-	await glide(arena + Vector3(1.5, 0, 6.0), 40.0, 1.2)
+	game.stage.target = arena + Vector3(1.5, 0, 6.0)
+	game.stage.zoom = 40.0
+	game.stage.update_camera(0, true)
+	await hold(0.6)
+	mark("f_start")
 	await continue_step()       # begin_boss → awaken
 	await hold(4.6)
 	mark("f_engage")

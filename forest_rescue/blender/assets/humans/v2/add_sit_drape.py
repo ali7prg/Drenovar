@@ -38,7 +38,7 @@ AID = ARGS[0]
 SRC = ARGS[ARGS.index("--src") + 1] if "--src" in ARGS else None
 DRY = ARGS[ARGS.index("--dry") + 1] if "--dry" in ARGS else None
 CLOTH = ("SkirtFront1", "SkirtFront2", "SkirtBack1", "SkirtBack2", "SkirtLeft", "SkirtRight", "Cloak1", "Cloak2")
-SLOW = 2                  # simulated sit-down runs at half the clip speed (collision robustness)
+SLOW = 3                  # simulated sit-down runs at half the clip speed (collision robustness)
 HOLD = 50                 # frames held in the seated pose to settle
 OFF_ANGLE = 38.0          # stand_up: morph reaches 0 when the thighs are this many degrees from vertical
 T0 = time.time()
@@ -134,6 +134,55 @@ def snapshots(objs, out_dir, label, colors):
     return p
 
 
+LEG = {"LeftUpperLeg", "RightUpperLeg", "LeftLowerLeg", "RightLowerLeg", "LeftFoot", "RightFoot", "LeftToes", "RightToes"}
+FORE = ("LowerArm", "Hand", "Thumb", "Index", "Middle", "Ring", "Pinky", "Prop")
+
+
+def islands(o):
+    from scipy.sparse import coo_matrix
+    from scipy.sparse.csgraph import connected_components
+    nv = len(o.data.vertices)
+    e = np.zeros(len(o.data.edges) * 2, np.int32)
+    o.data.edges.foreach_get("vertices", e)
+    e = e.reshape(-1, 2)
+    A = coo_matrix((np.ones(len(e)), (e[:, 0], e[:, 1])), shape=(nv, nv))
+    return connected_components(A, directed=False)[1]
+
+
+def vweights(o):
+    gi = {g.index: g.name for g in o.vertex_groups}
+    return [{gi[ge.group]: ge.weight for ge in v.groups if ge.weight > 0} for v in o.data.vertices]
+
+
+def reweight_garments(o):
+    """Skirt / apron / cloak islands: weights on leg bones move to the vertex's dominant cloth bone (or Hips),
+    so a seated pose with neutral cloth bones leaves the garment hanging rigidly from the hips (no boards /
+    wings from blending with 140-degree thigh rotations) and the inverse skinning of the morph is well posed."""
+    W = vweights(o)
+    lab = islands(o)
+    cw = np.array([sum(w for n, w in d.items() if n in CLOTH) for d in W])
+    garment = set()
+    for li in np.unique(lab[cw > 0.03]):
+        m = lab == li
+        if (cw[m] > 0.03).mean() >= 0.15:
+            garment.add(int(li))
+    moved = 0
+    for i, d in enumerate(W):
+        if int(lab[i]) not in garment:
+            continue
+        wl = sum(w for n, w in d.items() if n in LEG)
+        if wl <= 0:
+            continue
+        cl = {n: w for n, w in d.items() if n in CLOTH}
+        tgt = max(cl, key=cl.get) if cl else "Hips"
+        for n in [n for n in d if n in LEG]:
+            o.vertex_groups[n].remove([i])
+        g = o.vertex_groups.get(tgt) or o.vertex_groups.new(name=tgt)
+        g.add([i], wl, "ADD")
+        moved += 1
+    return moved, len(garment)
+
+
 def skin_matrices(arm):
     return {pb.name: np.array(pb.matrix) @ np.linalg.inv(np.array(arm.data.bones[pb.name].matrix_local))
             for pb in arm.pose.bones}
@@ -162,6 +211,10 @@ def main():
     if arm.animation_data is None:
         arm.animation_data_create()
     qa_dir = DRY or os.path.join(paths.QA_VIDEO, AID)
+    # ---- garments hang from the hips / chest only: leg weights on garment islands -> their cloth bone
+    for o in lods:
+        moved, isl = reweight_garments(o)
+        log(o.name, "garment islands", isl, "vertices re-weighted from the legs", moved)
     # ---- cloth vertices of LOD0
     gi = {g.index: g.name for g in lo0.vertex_groups}
     nv = len(lo0.data.vertices)
@@ -209,6 +262,16 @@ def main():
         bmesh.ops.delete(bm, geom=kill, context="FACES")
         bm.to_mesh(o.data)
         bm.free()
+    # forearms / hands leave the collider (they sweep through the lap while sitting down and snag the cloth)
+    gic = {g.index: g.name for g in col.vertex_groups}
+    fore = np.array([sum(ge.weight for ge in v.groups if any(k in gic[ge.group] for k in FORE)) > 0.5
+                     for v in col.data.vertices])
+    bm = bmesh.new()
+    bm.from_mesh(col.data)
+    bm.verts.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if all(fore[v.index] for v in f.verts)], context="FACES")
+    bm.to_mesh(col.data)
+    bm.free()
     oi = np.zeros(len(sim.data.vertices), np.int32)
     sim.data.attributes["orig_idx"].data.foreach_get("value", oi)
     pin = sim.vertex_groups.new(name="_pin")
@@ -217,22 +280,22 @@ def main():
     cm = sim.modifiers.new("Cloth", "CLOTH")
     st = cm.settings
     st.vertex_group_mass = "_pin"
-    st.quality = 10
+    st.quality = 12
     st.mass = 0.3
-    st.tension_stiffness = 15
-    st.compression_stiffness = 15
-    st.shear_stiffness = 8
-    st.bending_stiffness = 1.0
-    st.air_damping = 1.5
+    st.tension_stiffness = 20
+    st.compression_stiffness = 20
+    st.shear_stiffness = 10
+    st.bending_stiffness = 2.5
+    st.air_damping = 2.0
     cs = cm.collision_settings
     cs.use_collision = True
-    cs.collision_quality = 4
-    cs.distance_min = 0.008
+    cs.collision_quality = 5
+    cs.distance_min = 0.010
     cs.impulse_clamp = 0.0
     cs.use_self_collision = False
     col.modifiers.new("Collision", "COLLISION")
-    col.collision.thickness_outer = 0.010
-    col.collision.cloth_friction = 6.0
+    col.collision.thickness_outer = 0.012
+    col.collision.cloth_friction = 5.0
     col.collision.damping = 0.5
     me = bpy.data.meshes.new("_floor")
     me.from_pydata([(-3, -3, 0), (3, -3, 0), (3, 3, 0), (-3, 3, 0)], [], [(0, 1, 2, 3)])

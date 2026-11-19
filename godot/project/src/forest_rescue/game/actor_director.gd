@@ -474,7 +474,8 @@ func update_horse(now: float, delta: float) -> void:
 			actor.play(["lf_horse_idle", "Idle"], 0.35)
 	if show_actor(actor, actor.position):
 		markers.append({"position":actor.position + Vector3.UP * 1.6, "kind":"horse", "id":"horse"})
-		tags.append({"position":actor.position + Vector3.UP * 2.6, "text":game.content.text("hud.horse"), "kind":"horse"})
+		if plates_for_actors():
+			tags.append({"position":actor.position + Vector3.UP * 3.0, "text":game.content.text("hud.horse"), "kind":"horse"})
 	game.pin("lf_horse", actor.position, 14.0)
 
 ## Yaw towards the guide's next destination (INF when unknown or too close to matter).
@@ -560,8 +561,13 @@ func update_squad(now: float, delta: float) -> void:
 		var leader: Dictionary = motion.get("squad_0", {})
 		if not leader.is_empty():
 			game.pin("lf_squad", leader.position, 16.0)
-			if game.fog_clear(leader.position):
-				tags.append({"position":leader.position + Vector3.UP * 2.6, "text":game.content.text("hud.squad"), "kind":"squad"})
+			if game.fog_clear(leader.position) and plates_for_actors():
+				tags.append({"position":leader.position + Vector3.UP * 3.0, "text":game.content.text("hud.squad"), "kind":"squad"})
+
+## Name plates for the horse / squad only while they are small on screen (wide zoom); up
+## close the 3D actors read by themselves and the plates would cover them.
+func plates_for_actors() -> bool:
+	return float(game.stage.camera_zoom) >= 44.0
 
 ## A live one-shot (salute, help, attack beat) finishes before locomotion takes over.
 func soldier_one_shot(actor: Rig) -> bool:
@@ -633,6 +639,10 @@ func squad_pose(index: int, now: float) -> Dictionary:
 	var right := Vector3(forward.z, 0, -forward.x)
 	if target_kind(node) == "guardian":
 		center = center - forward * float(STAND_OFF.guardian)
+	elif node.begins_with("lf_site_") and not node.contains(":"):
+		# Glade centre: the three stand abreast on the cage side, clear of the guardian's spot.
+		center = center + forward * 0.6
+		lateral = [Vector3(0, 0, 0), Vector3(-1.15, 0, -0.35), Vector3(1.15, 0, -0.35)][index]
 	var p: Vector3 = center + right * lateral.x + forward * lateral.z
 	return {"position":p, "yaw":PathMotion.yaw_of(forward), "guard":node.ends_with(":guardian")}
 
@@ -1235,7 +1245,10 @@ func update_guardian(site_id: String, poi: Dictionary, anchor: Dictionary, now: 
 		return
 	var fight: Dictionary = game.client.battle()
 	var in_battle: bool = not fight.is_empty() and String(fight.get("siteId", "")) == site_id and String(fight.get("species", "")) != "ancient_maw"
-	var speed := place(id, actor, home, PathMotion.yaw_of(face - home), delta)
+	var center: Vector3 = anchor.get("center", home)
+	var out := Vector3(home.x - center.x, 0, home.z - center.z)
+	var stand := home if in_battle or out.length_squared() < 0.01 else home + out.normalized() * 1.2
+	var speed := place(id, actor, stand, PathMotion.yaw_of(face - stand), delta)
 	if in_battle:
 		guardian_battle_pose(actor, fight, now)
 	elif squad_pos != Vector3.INF and squad_pos.distance_to(home) < 12.0 and not guardian_alerted.get(site_id, false):

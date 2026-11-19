@@ -295,8 +295,9 @@ def locomotion(cx, name, T, v, **kw):
     raw = [gait(cx, t, T, v, **kw) for t in times]
     # pelvis reach correction made periodic (max over the loop, smoothed)
     need = np.array([reach_fix(cx, p) for p, _ in raw])
-    from scipy.ndimage import gaussian_filter1d
-    need = gaussian_filter1d(np.concatenate([need, need, need]), 3)[len(need):2 * len(need)]
+    from scipy.ndimage import gaussian_filter1d, maximum_filter1d
+    rep = maximum_filter1d(np.concatenate([need, need, need]), 9)
+    need = gaussian_filter1d(rep, 2.5)[len(need):2 * len(need)]
     need = np.maximum(need, 0) + 0.004
     params = []
     for (p, c), nd in zip(raw, need):

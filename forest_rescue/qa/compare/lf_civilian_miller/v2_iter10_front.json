@@ -1,0 +1,7 @@
+{
+ "iou": 0.8963,
+ "colour_error": 0.0495,
+ "colour_error_core": 0.0457,
+ "ref_px": 46985,
+ "render_px": 44889
+}

@@ -150,10 +150,11 @@ def secondary(sk, params, Ms, loop, kind_info):
     bag = lag(np.clip(acc * 0.004, -0.4, 0.4), 0.2)
     for i in range(n):
         R = out[i]
-        R["SkirtFront1"] = HA.rot(HA.X, f1[i])
-        R["SkirtFront2"] = HA.rot(HA.X, f2[i])
-        R["SkirtBack1"] = HA.rot(HA.X, -b1[i])
-        R["SkirtBack2"] = HA.rot(HA.X, -b2[i])
+        # +X rotation swings a hanging bone backward (+Y): front panels use -angle
+        R["SkirtFront1"] = HA.rot(HA.X, -f1[i])
+        R["SkirtFront2"] = HA.rot(HA.X, -f2[i])
+        R["SkirtBack1"] = HA.rot(HA.X, b1[i])
+        R["SkirtBack2"] = HA.rot(HA.X, b2[i])
         R["SkirtLeft"] = HA.rot(HA.Y, -sl[i])
         R["SkirtRight"] = HA.rot(HA.Y, sr[i])
         R["Cloak1"] = HA.rot(HA.X, -0.6 * tl[i] - 0.4 * b1[i] * 0.3)
@@ -244,6 +245,22 @@ def finish(AID, C, R, J, B, lo0, p_png, ITER, log):
             for bn, Rr in extra_r.items():
                 P.rot[bn] = Rr
             bb, MM = HA.solve(sk, P)
+            # cloth never goes through the floor: swing skirt/cloak chains outward until the tail
+            # clears z = 0.03 (seated / kneeling / fallen poses)
+            fixed = False
+            for bn, axis, sgn in (("SkirtFront1", HA.X, -1), ("SkirtBack1", HA.X, 1), ("SkirtLeft", HA.Y, -1),
+                                  ("SkirtRight", HA.Y, 1), ("Cloak1", HA.X, 1)):
+                head = MM[bn][:3, 3]
+                tail = head + MM[bn][:3, 1] * sk.length[bn]
+                if tail[2] < 0.03:
+                    L = sk.length[bn]
+                    need = math.acos(np.clip((head[2] - 0.03) / max(L, 1e-6), -1, 1))
+                    cur = math.acos(np.clip(-(MM[bn][:3, 1])[2], -1, 1))
+                    extra = max(0.0, need - cur) + 0.05
+                    P.rot[bn] = HA.rot(axis, sgn * extra) @ P.rot.get(bn, np.eye(3))
+                    fixed = True
+            if fixed:
+                bb, MM = HA.solve(sk, P)
             frames_basis.append(bb)
             final_M.append(MM)
             ikk.append({f"IK_Foot_{s}": MM[f"{S}Foot"][:3, 3] - sk.head(f"{S}Foot") for S, s in (("Left", "L"), ("Right", "R"))} |

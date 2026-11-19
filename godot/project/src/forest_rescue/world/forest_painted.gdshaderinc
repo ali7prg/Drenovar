@@ -32,6 +32,8 @@ uniform float leaf_amp = 0.04;
 uniform vec4 fade_circles[8];
 uniform int fade_count = 0;
 
+#include "res://src/forest_rescue/world/forest_fog_receiver.gdshaderinc"
+
 varying float v_ao;
 varying vec3 v_wn;
 varying vec3 world_pos;
@@ -79,14 +81,20 @@ void fragment() {
 			discard;
 		}
 	}
+	// Under the fog: buried parts erode away, parts above the cloud top darken into silhouettes.
+	vec2 fog = fog_receive(world_pos, TIME);
 #ifdef CUTOUT
 	// Face normal from screen derivatives; orthographic views look along -Z in view space.
 	vec3 fn = normalize(cross(dFdx(VERTEX), dFdy(VERTEX)));
 	vec3 view_dir = PROJECTION_MATRIX[3][3] != 0.0 ? vec3(0.0, 0.0, 1.0) : normalize(-VERTEX);
 	float ndv = abs(dot(fn, view_dir));
-	ALPHA = c.a * smoothstep(edge_fade.x, edge_fade.y, ndv);
+	ALPHA = c.a * smoothstep(edge_fade.x, edge_fade.y, ndv) * (1.0 - fog.x);
 	ALPHA_SCISSOR_THRESHOLD = alpha_cut;
+#else
+	if (fog.x > 0.001 && fog.x * 1.05 > bayer4(FRAGCOORD.xy)) {
+		discard;
+	}
 #endif
 	float lambert = max(dot(normalize(v_wn), normalize(light_dir_world)), 0.0);
-	ALBEDO = c.rgb * mix(1.0, lambert, painted_light_mix) * v_ao;
+	ALBEDO = mix(c.rgb * mix(1.0, lambert, painted_light_mix) * v_ao, fog_silhouette, fog.y);
 }

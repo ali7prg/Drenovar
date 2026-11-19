@@ -174,6 +174,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	fog.build(func(x: float, z: float) -> float: return terrain.ground_height(x, z), light)
 	fog.reveal_finished.connect(func() -> void: fog_reveal_finished.emit(fog_revision))
 	landmarks.populate()
+	_register_fog_receivers()
 	setup_ms.visuals = (Time.get_ticks_usec() - t) / 1000.0
 	apply_adventure({})
 	setup_ms.total = (Time.get_ticks_usec() - started) / 1000.0
@@ -410,10 +411,20 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 			var basis := Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(Vector3.ONE * float(item[5]))
 			canopy.add_instance(mesh[0], Transform3D(basis, Vector3(xz.x, y - 0.03, xz.y)))
 	_refresh_local_anchors()
+	_register_fog_receivers()
 	last_cull.build_ms = (Time.get_ticks_usec() - started) / 1000.0
 	if stage.camera != null and stage.camera.is_inside_tree():
 		on_camera_changed()
 	call_deferred("_emit_ready_once")
+
+
+func _register_fog_receivers() -> void:
+	if fog == null:
+		return
+	var list: Array = ForestKit.fog_receivers.duplicate()
+	if impostors != null and impostors.material != null:
+		list.append(impostors.material)
+	fog.set_receivers(list)
 
 
 func _add_impostor(mesh: Array, origin: Vector3, yaw: float, scale: float) -> void:

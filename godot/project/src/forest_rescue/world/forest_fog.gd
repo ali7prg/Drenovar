@@ -23,7 +23,7 @@ const GRID := 70                  # state grid incl. the ring outside the atlas
 const GRID_OFFSET := 7
 const GRID_ORIGIN := -140.0
 const FOG_TOP := 13.0             # deep fog top above the ground (m); billows −48…+42 %
-const TOP_RAMP := 14.0            # top rises over this distance from the explored edge
+const TOP_RAMP := 22.0            # top rises over this distance from the explored edge (gentle bank)
 const SDF_RANGE := 64.0           # R/G channel: 0.5 + signed distance (m) / SDF_RANGE
 const HEIGHT_RANGE := 30.0        # B/A channel scale (m)
 const VIEW_SLOPE := 1.28          # cot(38°)
@@ -48,6 +48,7 @@ var reduced_motion := false
 var revealing := false
 var dim_strength := 0.0
 var soft_depth := true
+var receivers: Array = []         # painted kit/landmark/impostor materials (forest_fog_receiver)
 
 
 func _ready() -> void:
@@ -87,6 +88,23 @@ func build(height_fn: Callable, light_dir: Vector3) -> void:
 	add_child(shell)
 	shells.append(shell)
 	materials.append(material)
+
+
+## Materials that read the fog volume (trees erode/darken under it). Safe to call again.
+func set_receivers(list: Array) -> void:
+	receivers = list.filter(func(m): return m is ShaderMaterial)
+	for material: ShaderMaterial in receivers:
+		material.set_shader_parameter("fog_enabled", true)
+		material.set_shader_parameter("fog_state_tex", state_texture)
+		material.set_shader_parameter("fog_height_tex", _height_texture)
+		material.set_shader_parameter("fog_noise_tex", _noise_texture)
+		material.set_shader_parameter("fog_domain", Vector4(GRID_ORIGIN, GRID_ORIGIN, GRID * CELL, GRID * CELL))
+		material.set_shader_parameter("fog_height_range", HEIGHT_RANGE)
+		material.set_shader_parameter("fog_height_lo", HEIGHT_LO)
+		material.set_shader_parameter("fog_height_span", HEIGHT_SPAN)
+		material.set_shader_parameter("fog_sdf_range", SDF_RANGE)
+		material.set_shader_parameter("fog_reveal_t", reveal_t)
+		material.set_shader_parameter("fog_drift_speed", 0.0 if reduced_motion else LAYERS[0].drift)
 
 
 ## Smoothed ground (max of 5 taps, so the volume floor never cuts ridges) on a 2 m grid.
@@ -417,6 +435,8 @@ func _push_reveal() -> void:
 	for material in materials:
 		material.set_shader_parameter("reveal_t", reveal_t)
 		material.set_shader_parameter("reveal_curl", curl)
+	for material: ShaderMaterial in receivers:
+		material.set_shader_parameter("fog_reveal_t", reveal_t)
 
 
 func finish_now() -> void:
@@ -431,6 +451,8 @@ func set_reduced_motion(on: bool) -> void:
 		finish_now()
 	for material in materials:
 		material.set_shader_parameter("drift_speed", 0.0 if on else LAYERS[0].drift)
+	for material: ShaderMaterial in receivers:
+		material.set_shader_parameter("fog_drift_speed", 0.0 if on else LAYERS[0].drift)
 
 
 func set_dim(strength: float) -> void:

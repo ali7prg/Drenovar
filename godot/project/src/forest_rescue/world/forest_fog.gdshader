@@ -49,6 +49,8 @@ uniform vec3 deep_color : source_color = vec3(0.22, 0.29, 0.34);
 uniform vec3 haze_color : source_color = vec3(0.45, 0.53, 0.59);
 uniform vec3 rim_color : source_color = vec3(0.74, 0.71, 0.63);
 uniform float time_offset = 0.0;
+uniform float tendril_reach = 14.0;      // m over the explored edge (art/07 panel 3)
+uniform float tendril_density = 0.07;
 uniform int debug_mode = 0;
 const int STEPS = 8;
 
@@ -82,7 +84,10 @@ void vertex() {
 	float explored = step(0.0, max(s.r, s.g) - 0.5);
 	float town = step(max(abs(world.x), abs(world.z)), 56.0);
 	float veil = dim_strength > 0.0 ? explored * (1.0 - town) * veil_height : 0.0;
-	shell_top = max(cloud, veil);
+	// Tendrils drift over the revealed forest edge at canopy height.
+	float sdf_v = (mix(s.g, s.r, reveal_t) - 0.5) * sdf_range;
+	float tendril = sdf_v > -2.0 ? 16.0 * (1.0 - smoothstep(0.0, tendril_reach, sdf_v)) : 0.0;
+	shell_top = max(max(cloud, veil), tendril);
 	world.y += max(shell_top, 0.25);
 	VERTEX = (inverse(MODEL_MATRIX) * vec4(world, 1.0)).xyz;
 }
@@ -107,7 +112,7 @@ void fragment() {
 	vec4 s_in = texture(state_tex, state_uv(entry.xz));
 	vec4 s_out = texture(state_tex, state_uv(surface.xz));
 	float sdf_min = (min(min(s_in.r, s_in.g), min(s_out.r, s_out.g)) - 0.5) * sdf_range;
-	if (dim_strength <= 0.0 && sdf_min > 4.5) {
+	if (dim_strength <= 0.0 && sdf_min > tendril_reach + 1.0) {
 		discard;
 	}
 	float trans = 1.0;
@@ -124,15 +129,21 @@ void fragment() {
 		float b = billow(p.xz, drift);
 		float offset = -3.0 + 4.0 * (b * 0.6 + w.r * 0.4) - reveal_curl * 2.5 * w.b;
 		float fogness = 1.0 - smoothstep(-2.2, 1.8, sdf + offset);
-		if (fogness < 0.004) {
+		float y = max(0.0, p.y - ground(p.xz));
+		// Tendrils: thin elongated wisps (along the wind) in the canopy layer over explored edges.
+		vec2 along = vec2(dot(p.xz, normalize(wind)), dot(p.xz, vec2(-wind.y, wind.x) / length(wind)));
+		vec4 tn = texture(noise_tex, vec2(along.x / 46.0, along.y / 13.0) - drift.xy * vec2(0.024, 0.0) + vec2(0.13, 0.57));
+		float reach = 1.0 - smoothstep(0.0, tendril_reach, sdf);
+		float layer = smoothstep(4.0, 8.0, y) * (1.0 - smoothstep(12.0, 17.0, y));
+		float td = tendril_density * reach * layer * smoothstep(0.52, 0.78, tn.r * 0.7 + w.g * 0.3) * step(-2.0, sdf);
+		if (fogness < 0.004 && td < 0.0005) {
 			continue;
 		}
 		float top = mix(s.a, s.b, local_t) * height_range;
 		float cloud_top = top * (0.45 + 1.0 * b);
-		float y = max(0.0, p.y - ground(p.xz));
 		float body = 1.0 - smoothstep(cloud_top - 3.2, cloud_top + 0.6, y);
 		float wisps = 0.62 + 0.38 * smoothstep(0.2, 0.8, w.g);
-		float d = density * fogness * body * wisps;
+		float d = density * fogness * body * wisps + td;
 		if (d <= 0.0005) {
 			continue;
 		}
@@ -143,7 +154,7 @@ void fragment() {
 		float facing = clamp(0.5 + (b - billow(p.xz + normalize(light_dir.xz) * 6.0, drift)) * 6.0, 0.0, 1.0);
 		col = mix(col, lit_color, smoothstep(0.5, 1.2, hy) * (0.3 + 0.7 * facing));
 		// Thin fog (edges, wisps) reads as light haze, not as a dark film.
-		col = mix(col, haze_color, (1.0 - smoothstep(0.1, 0.65, fogness * body)) * 0.75);
+		col = mix(col, haze_color, (1.0 - smoothstep(0.1, 0.65, fogness * body)) * 0.85);
 		col = mix(col, rim_color, (1.0 - fogness) * 0.12 * facing);
 		acc += trans * a * col;
 		trans *= 1.0 - a;

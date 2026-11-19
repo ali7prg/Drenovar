@@ -14,6 +14,8 @@ uniform int fade_count = 0;
 uniform float sway = 0.06;
 uniform float alpha_cut = 0.5;
 
+#include "res://src/forest_rescue/world/forest_fog_receiver.gdshaderinc"
+
 varying flat float cell;
 varying vec3 world;
 
@@ -51,9 +53,13 @@ void vertex() {
 void fragment() {
 	vec2 cell_xy = vec2(mod(cell, grid), floor(cell / grid));
 	vec4 c = texture(atlas, (cell_xy + clamp(UV, vec2(0.004), vec2(0.996))) / grid);
-	if (c.a < alpha_cut) {
+	// The quad stands at the crown centre: sample the fog where this texel's ray meets the tree
+	// (approximation: the quad point itself) — buried parts erode, tops darken into silhouettes.
+	vec2 fog = fog_receive(world, TIME);
+	if (c.a * (1.0 - fog.x) < alpha_cut) {
 		discard;
 	}
+	c.rgb = mix(c.rgb, fog_silhouette, fog.y);
 	for (int i = 0; i < 8; i++) {
 		if (i >= fade_count) break;
 		vec4 f = fade_circles[i];

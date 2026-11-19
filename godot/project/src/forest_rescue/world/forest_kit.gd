@@ -40,6 +40,7 @@ var missing: Dictionary = {}            # asset id -> reason
 var loaded: Dictionary = {}             # asset id -> source path
 var wind_enabled := true
 static var materials: Array = []         # every painted ShaderMaterial (canopy fade uniforms)
+static var fog_receivers: Array = []     # every painted ShaderMaterial (fog-aware erosion/silhouettes)
 static var light_dir := Vector3(0.45, 0.74, 0.5)   # direction TO the sun (set by ForestWorld)
 static var _metas: Dictionary = {}
 
@@ -116,6 +117,7 @@ static func _retextured(mesh: Mesh, atlas: Texture2D) -> Mesh:
 				green.set_shader_parameter("albedo_texture", atlas)
 				_green_materials[id] = green
 				materials.append(green)
+				fog_receivers.append(green)
 			copy.surface_set_material(s, _green_materials[id])
 	return copy
 
@@ -422,6 +424,7 @@ static func painted_material(original: Material, has_colors: bool, k: float, win
 	material.set_shader_parameter("vertex_wind", has_colors and wind)
 	if fade:
 		materials.append(material)
+	fog_receivers.append(material)
 	_painted[key] = material
 	return material
 

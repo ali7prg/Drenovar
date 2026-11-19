@@ -137,8 +137,8 @@ def first_run_bottom(u0, u1):
 
 # belly/throat line (full-image side coords): measured where visible, interpolated behind limbs
 BELLY_CTRL = [(150, 262.0), (176, 264.0), (200, 272.0), (218, 280.0), (232, 296.0), (250, 316.0),
-              (275, 323.0), (300, 325.0), (330, 329.0), (360, 331.0), (390, 332.0), (420, 330.0),
-              (450, 325.0), (480, 314.0), (505, 302.0), (525, 292.0), (545, 285.0)]
+              (275, 323.0), (300, 325.0), (330, 329.0), (360, 331.0), (390, 330.0), (420, 324.0),
+              (450, 315.0), (480, 305.0), (505, 297.0), (525, 290.0), (545, 285.0)]
 TRUNK_U0, TRUNK_U1 = 150, 914
 
 
@@ -234,7 +234,7 @@ def oell(c, axis, ra, rs, ru, up=(0, 0, 1), **kw):
 
 
 # ------------------------------------------------------------------------------------ head
-HEAD_U0, HEAD_U1 = 44, 196
+HEAD_U0, HEAD_U1 = 44, 206
 
 
 def head_profile():
@@ -277,6 +277,11 @@ def head_part():
     t = np.clip((y0 + cap - Yu) / cap, 0, 1)
     f = np.sqrt(np.clip(1 - t * t, 0, 1))
     wu, wl = wu * np.maximum(f, 0.05), wl * np.maximum(f, 0.05)
+    # back taper inside the neck (no step where the skull meets the neck loft)
+    tb = np.clip((Yu - (y1 - 0.30)) / 0.30, 0, 1)
+    fb = 1.0 - 0.45 * tb ** 1.5
+    wu, wl = wu * fb, wl * fb
+    zt = zm + (zt - zm) * (1.0 - 0.35 * tb ** 1.5)
     pu = np.interp(Yu, [-4.55, -4.2, -3.9, -3.1], [3.0, 3.0, 2.7, 2.4])
     pl = np.interp(Yu, [-4.55, -3.8, -3.1], [2.7, 2.8, 2.4])
     T = [zt, zm, zb, wu, wl, pu, pl]
@@ -300,7 +305,7 @@ def head_part():
 
     lo = np.array([-0.6, y0, zb.min() - 0.05])
     hi = np.array([0.6, y1, zt.max() + 0.05])
-    return sdf.Prim(fn, lo, hi, bone="head", name="head")
+    return sdf.Prim(fn, lo, hi, bone="head", name="head", k=0.09)
 
 
 def lip_z(y):
@@ -321,7 +326,7 @@ def head_detail_parts():
         add.append(sdf.round_cone([sx * 0.36, -3.86, 3.20], [sx * 0.43, -3.48, 3.22], 0.05, 0.06, k=0.05,
                                   name="cheekbone", bone="head"))
         # brow ridge: keratin ridge over the eye running back to the skull roof (jagged knobs added below)
-        add.append(sdf.round_cone([sx * 0.30, -3.84, 3.38], [sx * 0.33, -3.45, 3.50], 0.055, 0.065, k=0.06,
+        add.append(sdf.round_cone([sx * 0.31, -3.80, 3.36], [sx * 0.31, -3.45, 3.46], 0.045, 0.055, k=0.07,
                                   name="brow", bone="head"))
         # nostril boss + nostril pit
         add.append(oell([sx * 0.20, -4.36, 3.12], [0, -1, 0.3], 0.09, 0.06, 0.05, k=0.05, name="nasal",
@@ -329,7 +334,7 @@ def head_detail_parts():
         sub.append(oell([sx * 0.235, -4.37, 3.115], [0.3 * sx, -1, 0.2], 0.045, 0.022, 0.028, k=0.02,
                         name="nostril", bone="head"))
         # eye socket (eyeball is a separate mesh of radius 0.052)
-        sub.append(sdf.sphere([sx * 0.392, -3.63, 3.285], 0.050, k=0.012, name="eyesocket", bone="head"))
+        sub.append(sdf.sphere([sx * 0.372, -3.63, 3.285], 0.052, k=0.015, name="eyesocket", bone="head"))
     return add, sub
 
 
@@ -533,14 +538,43 @@ def build_parts():
     return add, sub
 
 
-def build_field(voxel=0.03, lo=(-1.35, -4.66, -0.02), hi=(1.35, 5.42, 3.75), hull_views=None, hull_k=0.02,
+def view_sdf2d(view, up=4, blur=1.2):
+    """Signed distance (metres, + outside) of an orthographic view's mask, sub-pixel smooth."""
+    import cv2
+    m = view.mask.astype(np.float32)
+    H, W = m.shape
+    big = cv2.resize(m, (W * up, H * up), interpolation=cv2.INTER_LINEAR)
+    big = ndi.gaussian_filter(big, blur * up) > 0.5
+    out = ndi.distance_transform_edt(~big)
+    ins = ndi.distance_transform_edt(big)
+    d = (out - ins) / (up * view.ppm)
+    return d.astype(np.float32), up
+
+
+def hull_sdf_smooth(F, views, slab=24):
+    """Intersection of the views' extruded silhouettes as a smooth SDF (max of per-view 2-D distances)."""
+    vol = np.full(tuple(F.n), -10.0, np.float32)
+    for v in views:
+        d2, up = view_sdf2d(v)
+        for x0 in range(0, F.n[0], slab):
+            x1 = min(F.n[0], x0 + slab)
+            P = F._points(np.array([x0, 0, 0]), np.array([x1, F.n[1], F.n[2]]))
+            u, vv, _ = v.project(P.reshape(-1, 3))
+            uu = (u + 0.5) * up - 0.5
+            vy = (vv + 0.5) * up - 0.5
+            s = ndi.map_coordinates(d2, [vy, uu], order=1, mode="constant", cval=1.0)
+            vol[x0:x1] = np.maximum(vol[x0:x1], s.reshape(P.shape[:3]))
+    return vol
+
+
+def build_field(voxel=0.03, lo=(-1.35, -4.66, -0.02), hi=(1.35, 5.42, 3.75), hull_views=None, hull_k=0.03,
                 parts=None):
     add, sub = parts if parts is not None else build_parts()
     F = sdf.Field(lo, hi, voxel)
     for p in add:
         F.apply(p)
     if hull_views:
-        hs = sdf.hull_sdf(F, hull_views, dilate_px=1.0)
+        hs = hull_sdf_smooth(F, hull_views) - 0.004
         F.intersect(hs, k=hull_k)
     for p in sub:
         F.apply(p, op="subtract")

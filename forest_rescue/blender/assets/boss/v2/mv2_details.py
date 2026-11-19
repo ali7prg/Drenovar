@@ -103,7 +103,7 @@ def teeth():
                 x = sx * 0.07
             base = np.array([x, y, zl + 0.012])
             dirv = np.array([sx * 0.05, -0.12 + 0.18 * t, -1.0])
-            out.append(curved_cone(base, dirv, ln, r0, bend_dir=(0, 1, 0), bend=0.18, sides=7, rings=5, flat=0.62,
+            out.append(curved_cone(base, dirv, ln, r0, bend_dir=(0, 1, 0), bend=0.18, sides=6, rings=4, flat=0.62,
                                    region="teeth", bone="head", u_slot=(0.0, 0.5), embed=0.035))
         ys_l = np.linspace(-4.44, -3.60, n_lo)
         for i, y in enumerate(ys_l):
@@ -117,7 +117,7 @@ def teeth():
                 x = sx * 0.06
             base = np.array([x, y + 0.03, zl - 0.012])
             dirv = np.array([-sx * 0.04, -0.10 + 0.15 * t, 1.0])
-            out.append(curved_cone(base, dirv, ln, r0, bend_dir=(0, 1, 0), bend=0.16, sides=7, rings=5, flat=0.62,
+            out.append(curved_cone(base, dirv, ln, r0, bend_dir=(0, 1, 0), bend=0.16, sides=6, rings=4, flat=0.62,
                                    region="teeth", bone="jaw", u_slot=(0.5, 1.0), embed=0.035))
     return out
 
@@ -153,7 +153,7 @@ def claws():
 
 
 def eye_centre(sx):
-    return np.array([sx * 0.392, -3.63, 3.285])
+    return np.array([sx * 0.372, -3.63, 3.285])
 
 
 def eye_axis(sx):

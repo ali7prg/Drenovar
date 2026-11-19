@@ -11,11 +11,13 @@ render_mode unshaded, blend_mix, depth_draw_never, depth_test_default, cull_back
 // One alpha-blended layer (overdraw 1), no particles, uniforms-only animation.
 //
 // State texture (70×70, 4 m cells over [-140,140)², the atlas ±112 plus an always-fogged ring):
-//   R = target clear (server projection), G = previous clear, B/A = target/previous fog-top
-//   height (/HEIGHT_RANGE), already capped on the camera-near side so a bank never hides
-//   explored ground behind it (fixed city camera). Reveal (~2 s) blends previous→target per
-//   pixel with a noise delay so the cleared fog sinks and rolls away in billows.
-// Heightmap texture: smoothed ground height (m) on a 2 m grid over [-140,140].
+//   R/G = target/previous signed distance to the explored edge (+ inside explored ground,
+//   0.5 + d/64), B/A = target/previous fog-top height (/height_range), already capped on the
+//   camera-near side so a bank never hides explored ground behind it (fixed city camera).
+//   The edge is the SDF zero line + bounded noise (−3…+1 m: fog may curl a little into explored
+//   ground, it never reveals more than ~3 m past the server cells). The reveal (~2 s) blends the
+//   SDF and the top previous→target with a per-pixel noise delay: the bank sinks and rolls back.
+// Heightmap texture: smoothed ground height on a 2 m grid over [-140,140].
 
 uniform sampler2D state_tex : filter_linear, repeat_disable;
 uniform sampler2D height_tex : filter_linear, repeat_disable;
@@ -29,16 +31,19 @@ uniform float reveal_t = 1.0;
 uniform float reveal_curl = 0.0;
 uniform float drift_speed = 0.6;
 uniform vec2 wind = vec2(0.83, 0.56);
-uniform float density = 0.30;            // extinction per metre inside deep fog
+uniform float density = 0.34;            // extinction per metre inside deep fog
+uniform float fog_top_abs = 13.0;         // deep fog top (m) for the colour gradient
+uniform float sdf_range = 64.0;
 uniform float dim_strength = 0.0;        // explored but not in current sight
 uniform float veil_height = 19.0;
 uniform vec4 sights[8];
 uniform int sight_count = 0;
 uniform vec3 light_dir = vec3(0.45, 0.74, 0.5);
-// On-screen targets after the city's FILMIC tonemap: lit tops #c6d0d8, body #8a99a6, deep #59676f.
-uniform vec3 lit_color : source_color = vec3(0.70, 0.75, 0.80);
+// Blue-grey palette (art/07, art/18), sRGB before the city's FILMIC tonemap.
+uniform vec3 lit_color : source_color = vec3(0.66, 0.71, 0.76);
 uniform vec3 body_color : source_color = vec3(0.47, 0.53, 0.59);
-uniform vec3 deep_color : source_color = vec3(0.27, 0.32, 0.37);
+uniform vec3 deep_color : source_color = vec3(0.31, 0.36, 0.42);
+uniform vec3 haze_color : source_color = vec3(0.60, 0.65, 0.70);
 uniform vec3 rim_color : source_color = vec3(0.86, 0.84, 0.78);
 uniform float time_offset = 0.0;
 const int STEPS = 8;
@@ -57,10 +62,10 @@ void vertex() {
 	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec4 s = texture(state_tex, state_uv(world.xz));
 	float h = max(s.a, s.b) * height_range;
-	float clear = mix(s.g, s.r, reveal_t);
+	float explored = step(0.0, max(s.r, s.g) - 0.5);
 	float town = step(max(abs(world.x), abs(world.z)), 56.0);
-	float veil = dim_strength > 0.0 ? clear * (1.0 - town) * veil_height : 0.0;
-	world.y += max(h * 1.32 + 1.2, veil);
+	float veil = dim_strength > 0.0 ? explored * (1.0 - town) * veil_height : 0.0;
+	world.y += max(h * 1.42 + 1.2, veil);
 	VERTEX = (inverse(MODEL_MATRIX) * vec4(world, 1.0)).xyz;
 }
 
@@ -73,11 +78,11 @@ void fragment() {
 	view.xyz /= view.w;
 	vec3 surface = (INV_VIEW_MATRIX * vec4(view.xyz, 1.0)).xyz;
 	vec3 entry = world;
-	// Cheap reject: entry and surface columns both fully clear and no veil.
+	// Cheap reject: entry and surface columns both well inside explored ground and no veil.
 	vec4 s_in = texture(state_tex, state_uv(entry.xz));
 	vec4 s_out = texture(state_tex, state_uv(surface.xz));
-	if (dim_strength <= 0.0 && min(min(s_in.r, s_in.g), min(s_out.r, s_out.g)) > 0.999
-			&& max(max(s_in.a, s_in.b), max(s_out.a, s_out.b)) < 0.002) {
+	float sdf_min = (min(min(s_in.r, s_in.g), min(s_out.r, s_out.g)) - 0.5) * sdf_range;
+	if (dim_strength <= 0.0 && sdf_min > 4.5) {
 		discard;
 	}
 	vec3 ray = surface - entry;
@@ -86,43 +91,44 @@ void fragment() {
 		ray *= 60.0 / len;
 		len = 60.0;
 	}
-	// Large-scale warp of the clear mask: the edge wanders in lobes and curls during a reveal.
-	vec4 lobe = texture(noise_tex, (entry.xz + drift * 0.35) / 210.0 + vec2(0.21, 0.67));
-	vec2 warp = (lobe.rg - 0.5) * (9.0 + reveal_curl * 12.0);
 	float trans = 1.0;
 	vec3 acc = vec3(0.0);
 	float step_len = len / float(STEPS);
-	float jitter = fract(sin(dot(FRAGCOORD.xy, vec2(12.9898, 78.233))) * 43758.5453);
+	float lit = 0.0;
 	for (int i = 0; i < STEPS; i++) {
-		vec3 p = entry + ray * ((float(i) + jitter) / float(STEPS));
-		vec2 q = p.xz + warp;
-		vec4 s = texture(state_tex, state_uv(q));
-		float delay = texture(noise_tex, q / 37.0).a;
+		vec3 p = entry + ray * ((float(i) + 0.5) / float(STEPS));
+		vec4 s = texture(state_tex, state_uv(p.xz));
+		vec4 n = texture(noise_tex, (p.xz + drift) / 66.0);
+		vec4 m = texture(noise_tex, (p.xz - drift * 1.7) / 21.0 + vec2(0.37, 0.11));
+		float delay = n.a;
 		float local_t = smoothstep(delay * 0.5, delay * 0.5 + 0.5, reveal_t);
-		float fogness = 1.0 - mix(s.g, s.r, local_t);
+		float sdf = (mix(s.g, s.r, local_t) - 0.5) * sdf_range;
+		// Organic edge: −3…+1 m of drifting noise, plus a curl while the bank rolls back.
+		float offset = -3.0 + 4.0 * (n.g * 0.6 + m.r * 0.4) - reveal_curl * 2.0 * m.b;
+		float fogness = 1.0 - smoothstep(-2.0, 1.6, sdf + offset);
 		if (fogness < 0.004) {
 			continue;
 		}
 		float top = mix(s.a, s.b, local_t) * height_range;
-		vec4 n = texture(noise_tex, (p.xz + drift) / 64.0);
-		vec4 m = texture(noise_tex, (p.xz - drift * 1.6) / 23.0 + vec2(0.37, 0.11));
-		float billow = n.r * 0.65 + m.g * 0.35;
-		float cloud_top = top * (0.72 + 0.56 * billow);
-		float y = p.y - ground(p.xz);
-		float body = 1.0 - smoothstep(cloud_top - 3.5, cloud_top + 0.8, y);
-		float wisps = 0.55 + 0.45 * smoothstep(0.25, 0.75, m.b);
-		float d = density * fogness * body * wisps * smoothstep(-1.0, 0.8, top);
+		float billow = n.r * 0.62 + m.g * 0.38;
+		float cloud_top = top * (0.52 + 0.9 * billow);
+		float y = max(0.0, p.y - ground(p.xz));
+		float body = 1.0 - smoothstep(cloud_top - 3.0, cloud_top + 0.6, y);
+		float wisps = 0.6 + 0.4 * smoothstep(0.2, 0.8, m.b);
+		float d = density * fogness * body * wisps;
 		if (d <= 0.0005) {
 			continue;
 		}
 		float a = 1.0 - exp(-d * step_len);
-		float h_frac = clamp(y / max(cloud_top, 1.0), 0.0, 1.0);
-		vec3 col = mix(deep_color, body_color, smoothstep(0.0, 0.55, h_frac));
-		// Lit cloud tops: brighter where the billow surface faces the sun.
-		vec4 n2 = texture(noise_tex, (p.xz + drift + normalize(light_dir.xz) * 4.0) / 64.0);
-		float facing = clamp(0.5 + (billow - (n2.r * 0.65 + m.g * 0.35)) * 6.0, 0.0, 1.0);
-		col = mix(col, lit_color, smoothstep(0.5, 1.0, h_frac) * (0.45 + 0.55 * facing));
-		col = mix(col, rim_color, (1.0 - fogness) * 0.12 * facing);
+		// Colour by absolute height: valleys between banks darker, billow tops lit by the sun.
+		float hy = clamp(y / fog_top_abs, 0.0, 1.3);
+		vec3 col = mix(deep_color, body_color, smoothstep(0.05, 0.6, hy));
+		vec4 n2 = texture(noise_tex, (p.xz + drift + normalize(light_dir.xz) * 5.0) / 66.0);
+		float facing = clamp(0.5 + (n.r - n2.r) * 7.0, 0.0, 1.0);
+		col = mix(col, lit_color, smoothstep(0.55, 1.15, hy) * (0.35 + 0.65 * facing));
+		// Thin fog (edges, wisps) reads as light haze, not as a dark film.
+		col = mix(col, haze_color, (1.0 - smoothstep(0.15, 0.7, fogness * body)) * 0.7);
+		col = mix(col, rim_color, (1.0 - fogness) * 0.10 * facing);
 		acc += trans * a * col;
 		trans *= 1.0 - a;
 		if (trans < 0.02) {
@@ -141,7 +147,8 @@ void fragment() {
 			sight = max(sight, (1.0 - smoothstep(c.z * 0.7, c.z, distance(surface.xz, c.xy))) * c.w);
 		}
 		float town = 1.0 - step(56.0, max(abs(surface.x), abs(surface.z)));
-		float veil = dim_strength * mix(s.g, s.r, reveal_t) * (1.0 - town) * (1.0 - sight);
+		float explored = smoothstep(0.0, 3.0, (mix(s.g, s.r, reveal_t) - 0.5) * sdf_range);
+		float veil = dim_strength * explored * (1.0 - town) * (1.0 - sight);
 		// surface -> veil -> fog (back to front)
 		float total = 1.0 - (1.0 - alpha) * (1.0 - veil);
 		color = (color * alpha + (1.0 - alpha) * veil * body_color) / max(total, 1e-4);

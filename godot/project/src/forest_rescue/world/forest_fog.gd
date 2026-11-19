@@ -22,8 +22,9 @@ const REVEAL_SECONDS := 2.0
 const GRID := 70                  # state grid incl. the ring outside the atlas
 const GRID_OFFSET := 7
 const GRID_ORIGIN := -140.0
-const FOG_TOP := 17.5             # deep fog top above the ground (m); billows ±28 %
-const TOP_RAMP := 16.0            # top rises over this distance from the explored edge
+const FOG_TOP := 13.0             # deep fog top above the ground (m); billows −48…+42 %
+const TOP_RAMP := 14.0            # top rises over this distance from the explored edge
+const SDF_RANGE := 64.0           # R/G channel: 0.5 + signed distance (m) / SDF_RANGE
 const HEIGHT_RANGE := 30.0        # B/A channel scale (m)
 const VIEW_SLOPE := 1.28          # cot(38°)
 const HEIGHT_LO := -4.0
@@ -54,10 +55,7 @@ func _ready() -> void:
 
 
 func build(height_fn: Callable, light_dir: Vector3) -> void:
-	state_image.fill(Color(0, 0, 0, FOG_TOP / HEIGHT_RANGE))
-	for row in GRID:
-		for column in GRID:
-			state_image.set_pixel(column, row, Color(0, 0, FOG_TOP / HEIGHT_RANGE, FOG_TOP / HEIGHT_RANGE))
+	state_image.fill(Color(0, 0, FOG_TOP / HEIGHT_RANGE, FOG_TOP / HEIGHT_RANGE))
 	state_texture = ImageTexture.create_from_image(state_image)
 	if _noise_texture == null:
 		_noise_texture = ImageTexture.create_from_image(make_noise_image(256))
@@ -78,6 +76,8 @@ func build(height_fn: Callable, light_dir: Vector3) -> void:
 	material.set_shader_parameter("height_span", HEIGHT_SPAN)
 	material.set_shader_parameter("drift_speed", LAYERS[0].drift)
 	material.set_shader_parameter("light_dir", light_dir.normalized())
+	material.set_shader_parameter("sdf_range", SDF_RANGE)
+	material.set_shader_parameter("fog_top_abs", FOG_TOP)
 	var shell := MeshInstance3D.new()
 	shell.name = LAYERS[0].name
 	shell.mesh = _shell_mesh
@@ -253,6 +253,48 @@ static func count_bits(bytes: PackedByteArray) -> int:
 	return total
 
 
+## Chamfer distance (cells) to the nearest cell with mask == value, over the GRID×GRID grid.
+static func _chamfer(mask: PackedByteArray, value: int) -> PackedFloat32Array:
+	var n := GRID
+	var d := PackedFloat32Array()
+	d.resize(n * n)
+	for k in n * n:
+		d[k] = 0.0 if mask[k] == value else 999.0
+	for pass_index in 2:
+		var rows := range(n) if pass_index == 0 else range(n - 1, -1, -1)
+		var columns := range(n) if pass_index == 0 else range(n - 1, -1, -1)
+		var step := -1 if pass_index == 0 else 1
+		for row in rows:
+			for column in columns:
+				var k: int = row * n + column
+				var best := d[k]
+				for o in [Vector2i(step, 0), Vector2i(0, step), Vector2i(step, step), Vector2i(-step, step)]:
+					var c: int = column + o.x
+					var r: int = row + o.y
+					if c >= 0 and r >= 0 and c < n and r < n:
+						best = minf(best, d[r * n + c] + (1.4142 if o.x != 0 and o.y != 0 else 1.0))
+				d[k] = best
+	return d
+
+
+## Signed distance (m) to the explored edge per state cell: + inside explored ground.
+static func signed_distance(bits: PackedByteArray) -> PackedFloat32Array:
+	var n := GRID
+	var clear := PackedByteArray()
+	clear.resize(n * n)
+	for row in ROWS:
+		for column in COLUMNS:
+			if bit(bits, column, row):
+				clear[(row + GRID_OFFSET) * n + column + GRID_OFFSET] = 1
+	var to_clear := _chamfer(clear, 1)
+	var to_fog := _chamfer(clear, 0)
+	var sdf := PackedFloat32Array()
+	sdf.resize(n * n)
+	for k in n * n:
+		sdf[k] = (to_fog[k] * CELL - CELL * 0.5) if clear[k] == 1 else -(to_clear[k] * CELL - CELL * 0.5)
+	return sdf
+
+
 ## Fog-top heights (m) for the 70×70 state grid from a 56×56 clear mask: ramp from the explored
 ## edge (chamfer distance) and the camera-near cap (distance to clear ground along the view).
 static func fog_tops(bits: PackedByteArray) -> PackedFloat32Array:
@@ -314,6 +356,7 @@ func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, 
 	target_bits = bits
 	anchor_bits = anchors if anchors.size() == BYTES else PackedByteArray()
 	var tops := fog_tops(bits)
+	var sdf := signed_distance(bits)
 	var grows := false
 	var first := previous.size() != BYTES
 	var shown_t := smoothstep(0.0, 1.0, reveal_t)
@@ -329,11 +372,12 @@ func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, 
 			# During an unfinished reveal, continue from what is shown now.
 			var start := lerpf(px.g, px.r, shown_t) if revealing else px.r
 			var start_top := lerpf(px.a, px.b, shown_t) if revealing else px.b
+			var target := clampf(0.5 + sdf[row * GRID + column] / SDF_RANGE, 0.0, 1.0)
 			var target_top := tops[row * GRID + column] / HEIGHT_RANGE
 			if first or not animate:
-				start = 1.0 if after else 0.0
+				start = target
 				start_top = target_top
-			state_image.set_pixel(column, row, Color(1.0 if after else 0.0, start, target_top, start_top))
+			state_image.set_pixel(column, row, Color(target, start, target_top, start_top))
 	state_texture.update(state_image)
 	if animate and grows and not reduced_motion:
 		reveal_seconds = maxf(0.05, seconds)
@@ -416,4 +460,4 @@ func displayed_clear(x: float, z: float) -> float:
 	if cell.x < 0:
 		return 0.0
 	var p := state_image.get_pixel(cell.x + GRID_OFFSET, cell.y + GRID_OFFSET)
-	return lerpf(p.g, p.r, reveal_t)
+	return smoothstep(-2.0, 2.0, (lerpf(p.g, p.r, reveal_t) - 0.5) * SDF_RANGE)

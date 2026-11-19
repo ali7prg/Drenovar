@@ -21,14 +21,12 @@ const Rules = preload("res://src/forest_rescue/world/forest_layout_rules.gd")
 const PATH_SHADER = preload("res://src/forest_rescue/world/forest_path.gdshader")
 const SURFACES := "res://assets/city/premium/surfaces07/"
 
-const API_VERSION := 2
+const API_VERSION := 3
 const DIM_EXPLORED := 0.24
 const SIGHT_RADIUS := 10.0
-## Visual target heights (m) so kit trees keep the town's proportions (legacy trees ≈ 8.5 m).
-const TREE_HEIGHT := [9.5, 10.5, 9.0, 8.0, 10.0]
-const TREE_CROWN := [4.3, 3.2, 3.4, 4.5, 5.0]
-const UNDER_HEIGHT := {"fern": 0.95, "reed": 1.6, "bramble": 1.15, "rock": 1.25, "trunk": 0.75, "stump": 0.2}
-const ROCK_VARIANT_SCALE := [2.6, 1.7, 1.0]
+## Kit v2 meshes keep their authored real-metre size (meta heightM/footprintM); the layout
+## carries absolute instance scales. TREE_CROWN = nominal crown radius (m) for clearance QA.
+const TREE_CROWN := Rules.CROWN_RADIUS
 
 static var _cache: Dictionary = {}        # shared across city-scene rebuilds (versioned keys)
 
@@ -62,7 +60,9 @@ var received_at_ms := 0
 var server_time_ms := 0.0
 var last_cull := {}
 var setup_ms := {}
-var remap: Dictionary = {}               # resource id -> Vector2 (visual position)
+var remap: Dictionary = {}               # resource id -> Vector2 (visual position, layout)
+var resource_look: Dictionary = {}       # resource id -> [kit variant, absolute scale]
+var visual_pos: Dictionary = {}          # resource id -> Vector2 actually rendered (last build)
 var mesh_keys: Dictionary = {}
 var city_state: Dictionary = {}
 var arena_state := "locked"
@@ -94,9 +94,12 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	if layout.is_empty():
 		layout = _load_layout()
 		_cache.layout = layout
-	for id in layout.get("resourceRemap", {}):
-		var entry: Array = layout.resourceRemap[id]
-		remap[id] = Vector2(float(entry[0]), float(entry[1]))
+	for section in ["resourceRemap", "innerRemap"]:
+		for id in layout.get(section, {}):
+			var entry: Array = layout[section][id]
+			remap[id] = Vector2(float(entry[0]), float(entry[1]))
+			if entry.size() >= 5:
+				resource_look[id] = [int(entry[3]), float(entry[4])]
 	masks = _cache.get("masks")
 	if masks == null:
 		masks = ForestMasks.MaskSet.new(8.0)
@@ -141,6 +144,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	_cache.tiles = tiles
 	setup_ms.tiles = (Time.get_ticks_usec() - t) / 1000.0
 	t = Time.get_ticks_usec()
+	ForestKit.light_dir = Basis.from_euler(SUN_ROTATION).z.normalized()
 	kit = ForestKit.new(data, stage.scenery_material)
 	canopy = ForestCanopy.new()
 	canopy.name = "Canopy"
@@ -151,7 +155,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	add_child(impostors)
 	var bake_list: Array = []
 	for species in Rules.SPECIES.size():
-		for variant in [1, 2, 3]:
+		for variant in Rules.SPECIES_VARIANTS[species]:
 			var mesh := _tree_mesh(species, variant)
 			bake_list.append([mesh[2], canopy.meshes[mesh[0]].lods[0]])
 	var signature := ""
@@ -282,55 +286,44 @@ func apply_state_hint(state: Dictionary) -> void:
 var _last_hint := ""
 
 
-func _mesh_for(asset: Dictionary, key: String, kind: int, variant: int, target_height: float, target_crown := 0.0) -> Array:
+## Registers one kit variant (real-metre mesh, no normalisation). Returns [mesh index, 1.0, key].
+func _mesh_for(asset: Dictionary, key: String, kind: int, variant: int, variant_name := "") -> Array:
 	if mesh_keys.has(key):
 		return mesh_keys[key]
 	var variants: Array = asset.variants
 	var entry: Dictionary = variants[(maxi(variant, 1) - 1) % variants.size()]
+	if not variant_name.is_empty():
+		for candidate: Dictionary in variants:
+			if String(candidate.get("name", "")) == variant_name:
+				entry = candidate
+				break
 	var index: int = canopy.register_mesh(key, entry.lods, entry.tris, kind, entry.radius, entry.height)
-	var norm := target_height / maxf(0.2, float(entry.height))
-	if target_crown > 0.0:
-		norm = minf(norm, target_crown / maxf(0.2, float(entry.radius)))
-	mesh_keys[key] = [index, norm, key]
+	mesh_keys[key] = [index, 1.0, key]
 	return mesh_keys[key]
 
 
 func _tree_mesh(species: int, variant: int) -> Array:
 	var id: String = Rules.SPECIES[species]
-	return _mesh_for(kit.tree_asset(id), "tree:%s:v%d" % [id, variant], ForestCanopy.KIND_TREE, variant, TREE_HEIGHT[species], TREE_CROWN[species])
-
-
-## Per-instance foliage tone (INSTANCE_CUSTOM): golden oaks stay golden in the north-west
-## (birch watch / limestone / ancient grove, as in art/01) and turn summer-green elsewhere.
-func _tone(species: int, x: float, z: float) -> Color:
-	var h := fposmod(sin(x * 12.9898 + z * 78.233) * 43758.5453, 1.0)
-	var h2 := fposmod(sin(x * 39.346 + z * 11.135) * 24634.6345, 1.0)
-	if species == Rules.OAK or species == Rules.HOLLOW_OAK:
-		var golden := 0.5
-		if maxf(absf(x), absf(z)) > 56.0:
-			var w: PackedFloat32Array = atlas.biome_weights(x, z)
-			golden = clampf(w[0] * 0.9 + w[1] * 0.9 + w[7] * 0.7 + w[3] * 0.35, 0.0, 1.0)
-		if species == Rules.HOLLOW_OAK or h < golden * 0.85 + 0.08:
-			if h2 < 0.24:
-				return Color(-0.04, 1.0, 0.74, 0.0)      # copper-orange
-			return Color(h2 * 0.025 - 0.015, 1.0, 0.80, 0.0)  # golden ochre
-		return Color(0.19 + 0.04 * h2, 0.82 + 0.1 * h, 0.44 + 0.08 * h2, 0.0)  # summer green oak
-	if species == Rules.PINE:
-		return Color(0.06 + 0.03 * h, 1.0 + 0.1 * h2, 0.56 + 0.1 * h, 0.0)   # deep blue-green conifers
-	if species == Rules.WILLOW:
-		return Color(0.05 + 0.02 * h, 0.85 + 0.1 * h2, 0.58 + 0.08 * h, 0.0)
-	return Color(0.07 + 0.03 * h, 0.85 + 0.12 * h2, 0.56 + 0.08 * h, 0.0)    # birch: deeper green
+	var variants: Array = Rules.SPECIES_VARIANTS[species]
+	var v: int = variant if variants.has(variant) else int(variants[(maxi(variant, 1) - 1) % variants.size()])
+	return _mesh_for(kit.tree_asset(id), "tree:%s:v%d" % [id, v], ForestCanopy.KIND_TREE, v, "v%d" % v)
 
 
 func _under_mesh(kind_index: int, variant: int) -> Array:
-	var kind: String = Rules.UNDERSTORY[kind_index]
-	var canopy_kind := ForestCanopy.KIND_ROCK if kind in ["rock", "trunk"] else (ForestCanopy.KIND_STUMP if kind == "stump" else ForestCanopy.KIND_UNDER)
-	var height: float = UNDER_HEIGHT[kind] * (ROCK_VARIANT_SCALE[(variant - 1) % 3] if kind == "rock" else 1.0)
-	return _mesh_for(kit.understory_asset(kind, Rules.UNDERSTORY_ASSET[kind]), "under:%s:v%d" % [kind, variant], canopy_kind, variant, height)
+	var kind: String = Rules.UNDERSTORY[clampi(kind_index, 0, Rules.UNDERSTORY.size() - 1)]
+	var spec: Array = Rules.UNDERSTORY_KIT[kind]
+	var names: Array = spec[1]
+	var variant_name: String = names[(maxi(variant, 1) - 1) % names.size()]
+	var canopy_kind := ForestCanopy.KIND_ROCK if kind in Rules.LARGE_UNDERSTORY else ForestCanopy.KIND_UNDER
+	return _mesh_for(kit.understory_asset(kind, spec[0]), "under:%s:%s" % [kind, variant_name], canopy_kind, 1, variant_name)
 
 
-## Visual position of a resource tree (remapped outer slot, or original inside the core).
+## Visual position of a resource tree (natural slot from the layout; the original spot when the
+## slot is blocked by the player's property). Same point the pick list uses.
 func resource_tree_position(id: String) -> Vector3:
+	if visual_pos.has(id):
+		var v: Vector2 = visual_pos[id]
+		return Vector3(v.x, height_at(v.x, v.y), v.y)
 	for tree in data.woods:
 		if tree.id == id:
 			var p := _tree_xz(tree)
@@ -355,48 +348,54 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 	canopy.clear_instances()
 	stage.selectable_trees.clear()
 	stage.standing_tree_cells.clear()
+	visual_pos.clear()
 	var felled := {}
 	for id in city.get("progress", {}).get("felled", []):
 		felled[id] = true
 	var kingdom: bool = city.get("kingdom") is Dictionary
 	var stump: Dictionary = kit.stump_asset()
-	var stump_mesh: Array = _mesh_for(stump, "stump:resource", ForestCanopy.KIND_STUMP, 1, 0.7)
-	var occupied: Array = []
+	var stump_mesh: Array = _mesh_for(stump, "stump:resource", ForestCanopy.KIND_STUMP, 1)
 	for tree in data.woods:
 		if tree.village and not kingdom:
 			continue
-		var xz := _tree_xz(tree)
-		if _excluded(xz, exclusions) or stage.on_street(xz, 1.5):
+		# Pickable set exactly as the legacy forest (decided on the original spot); the visual
+		# slot falls back to the original spot when the player's property covers it.
+		var original := Vector2(float(tree.p[0]), float(tree.p[2]))
+		if _excluded(original, exclusions) or stage.on_street(original, 1.5):
 			continue
+		var xz := _tree_xz(tree)
+		if xz != original and (_excluded(xz, exclusions) or stage.on_street(xz, 1.5)):
+			xz = original
+		visual_pos[tree.id] = xz
 		var y := height_at(xz.x, xz.y)
 		var entry: Dictionary = tree.duplicate()
 		entry.p = [xz.x, y, xz.y]
 		stage.selectable_trees.append(entry)
 		if felled.has(tree.id):
-			canopy.add_instance(stump_mesh[0], Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * stump_mesh[1]), Vector3(xz.x, y, xz.y)))
+			canopy.add_instance(stump_mesh[0], Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * 0.7), Vector3(xz.x, y, xz.y)))
 			continue
 		var cell := Vector2i(floori(xz.x / 4.0), floori(xz.y / 4.0))
 		if not stage.standing_tree_cells.has(cell):
 			stage.standing_tree_cells[cell] = []
 		stage.standing_tree_cells[cell].append(xz)
 		var species: int = Rules.RESOURCE_SPECIES.get(String(tree.name), Rules.PINE)
-		var variant := Rules.kit_variant_for_legacy(int(tree.variant))
+		var look: Array = resource_look.get(tree.id, [])
+		var variant: int = int(look[0]) if look.size() == 2 else Rules.kit_variant_for_legacy(int(tree.variant), Rules.id_hash(tree.id), species)
+		var scale: float = float(look[1]) if look.size() == 2 else Rules.resource_scale(species, float(tree.scale))
 		var mesh := _tree_mesh(species, variant)
-		var scale := float(tree.scale) * float(mesh[1]) * (0.92 + 0.16 * fposmod(float(tree.angle) * 1.37, 1.0))
-		var tone := _tone(species, xz.x, xz.y)
-		canopy.add_instance(mesh[0], Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * scale), Vector3(xz.x, y - 0.05, xz.y)), tone)
-		_add_impostor(mesh, Vector3(xz.x, y - 0.05, xz.y), float(tree.angle), scale, tone)
-		occupied.append(xz)
+		var transform := Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * scale), Vector3(xz.x, y - 0.05, xz.y))
+		canopy.add_instance(mesh[0], transform)
+		_add_impostor(mesh, transform.origin, float(tree.angle), scale)
 	for item in layout.get("trees", []):
 		var xz := Vector2(float(item[0]), float(item[1]))
 		if _excluded(xz, exclusions):
 			continue
 		var mesh := _tree_mesh(int(item[2]), int(item[3]))
-		var transform := Transform3D(Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(Vector3.ONE * float(item[5]) * float(mesh[1])),
+		var scale := float(item[5])
+		var transform := Transform3D(Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(Vector3.ONE * scale),
 			Vector3(xz.x, height_at(xz.x, xz.y) - 0.05, xz.y))
-		var tone := _tone(int(item[2]), xz.x, xz.y)
-		canopy.add_instance(mesh[0], transform, tone)
-		_add_impostor(mesh, transform.origin, deg_to_rad(float(item[4])), float(item[5]) * float(mesh[1]), tone)
+		canopy.add_instance(mesh[0], transform)
+		_add_impostor(mesh, transform.origin, deg_to_rad(float(item[4])), scale)
 	for list_name in ["understory", "innerUnderstory"]:
 		var inner: bool = list_name == "innerUnderstory"
 		for item in layout.get(list_name, []):
@@ -405,7 +404,7 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 				continue
 			var mesh := _under_mesh(int(item[2]), int(item[3]))
 			var y := height_at(xz.x, xz.y)
-			var basis := Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(Vector3.ONE * float(item[5]) * float(mesh[1]))
+			var basis := Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(Vector3.ONE * float(item[5]))
 			canopy.add_instance(mesh[0], Transform3D(basis, Vector3(xz.x, y - 0.03, xz.y)))
 	_refresh_local_anchors()
 	last_cull.build_ms = (Time.get_ticks_usec() - started) / 1000.0
@@ -414,9 +413,9 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 	call_deferred("_emit_ready_once")
 
 
-func _add_impostor(mesh: Array, origin: Vector3, yaw: float, scale: float, tone: Color) -> void:
+func _add_impostor(mesh: Array, origin: Vector3, yaw: float, scale: float) -> void:
 	if impostors != null and impostors.has_impostor(mesh[2]):
-		var entry: Array = impostors.instance_for(mesh[2], origin, yaw, scale, tone)
+		var entry: Array = impostors.instance_for(mesh[2], origin, yaw, scale)
 		canopy.add_impostor(entry[0], entry[1])
 
 

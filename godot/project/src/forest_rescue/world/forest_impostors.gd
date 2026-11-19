@@ -4,14 +4,17 @@ extends Node
 ## The city camera never rotates (orthographic, constant offset (75, 83, 75)), so each tree
 ## variant is rendered once from exactly that direction under the scene's sun (4 yaw steps per
 ## variant) into one atlas. Distant trees then become camera-plane quads (2 triangles each) in a
-## single MultiMesh; INSTANCE_CUSTOM.a selects the atlas cell, .rgb carries the foliage tone.
+## single MultiMesh; INSTANCE_CUSTOM.a selects the atlas cell. The bake uses a LINEAR tonemap
+## (the impostor shader is unshaded, the city FILMIC tonemap then applies once, like the 3D
+## painted trees) and the quads also cast shadows (they face the sun in the shadow pass).
 ## Requires a rendering device; in headless runs `available` stays false and the 3D LOD2
 ## meshes are used instead.
 
 const SHADER := preload("res://src/forest_rescue/world/forest_impostor.gdshader")
 const CAMERA_OFFSET := Vector3(75, 83, 75)
 const YAWS := 4
-const CELL_PIXELS := 160
+const CELL_PIXELS := 224
+const BAKE_VERSION := "painted_v2"
 
 static var _atlas: ImageTexture
 static var _cells: Dictionary = {}        # mesh key -> {first_cell, size: Vector2 (world w,h), center: Vector3}
@@ -35,7 +38,7 @@ func can_render() -> bool:
 
 ## meshes: Array of [key: String, mesh: Mesh]. sun_rotation: the city sun's rotation (radians).
 func bake(meshes: Array, sun_rotation: Vector3, environment: Environment, signature := "") -> void:
-	var cache := "user://forest_rescue_v1_impostors_%s" % str(hash(signature + str(CELL_PIXELS) + str(YAWS) + str(sun_rotation)))
+	var cache := "user://forest_rescue_v1_impostors_%s" % str(hash(signature + BAKE_VERSION + str(CELL_PIXELS) + str(YAWS) + str(sun_rotation)))
 	if _atlas == null and not signature.is_empty():
 		_load_cache(cache)
 	var pending: Array = []
@@ -59,15 +62,15 @@ func has_impostor(key: String) -> bool:
 	return available and _cells.has(key)
 
 
-## Instance transform + custom for a tree drawn as an impostor.
-func instance_for(key: String, origin: Vector3, yaw: float, scale: float, tone: Color) -> Array:
+## Instance transform + custom (a = atlas cell) for a tree drawn as an impostor.
+func instance_for(key: String, origin: Vector3, yaw: float, scale: float) -> Array:
 	var info: Dictionary = _cells[key]
 	var step := int(roundi(fposmod(yaw, TAU) / TAU * YAWS)) % YAWS
 	var basis := camera_basis()
 	var size: Vector2 = info.size * scale
 	var center: Vector3 = Basis(Vector3.UP, step * TAU / YAWS) * (info.center * scale)
 	var transform := Transform3D(Basis(basis.x * size.x, basis.y * size.y, basis.z), origin + center)
-	return [transform, Color(tone.r, tone.g, tone.b, float(info.first_cell + step))]
+	return [transform, Color(0.0, 1.0, 1.0, float(info.first_cell + step))]
 
 
 func _make_quad() -> ArrayMesh:
@@ -143,6 +146,9 @@ func _render(pending: Array, sun_rotation: Vector3, environment: Environment) ->
 			var env := environment.duplicate() if environment != null else Environment.new()
 			env.background_mode = Environment.BG_CLEAR_COLOR
 			env.fog_enabled = false
+			env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+			env.tonemap_exposure = 1.0
+			env.glow_enabled = false
 			camera.environment = env
 			holder.add_child(camera)
 			camera.current = true

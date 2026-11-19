@@ -244,7 +244,7 @@ func _make_node(key: Vector2i) -> MultiMeshInstance3D:
 	var node := MultiMeshInstance3D.new()
 	node.name = "%s_LOD%d" % [String(spec.key).replace(":", "_"), key.y]
 	node.multimesh = multi
-	var casts: bool = shadow_trees and (spec.kind == KIND_TREE or spec.kind == KIND_STUMP)
+	var casts: bool = shadow_trees and (impostor or spec.kind == KIND_TREE or spec.kind == KIND_STUMP or spec.kind == KIND_ROCK)
 	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if casts else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(node)
 	nodes[key] = node

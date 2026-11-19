@@ -22,7 +22,7 @@
    }
   },
   "latest": {
-   "iter": 23,
+   "iter": 24,
    "front": {
     "iou": 0.9178,
     "colour_error": 0.0423,
@@ -32,7 +32,7 @@
    },
    "back": {
     "iou": 0.9161,
-    "colour_error": 0.0388,
+    "colour_error": 0.0387,
     "colour_error_core": 0.0356,
     "ref_px": 45287,
     "render_px": 45417
@@ -40,9 +40,9 @@
    "portrait": null
   },
   "tris": {
-   "LOD0": 11820,
-   "LOD1": 5820,
-   "LOD2": 2133
+   "LOD0": 11797,
+   "LOD1": 5819,
+   "LOD2": 2132
   },
   "bones": {
    "LOD0": 45,
@@ -197,7 +197,7 @@
    }
   },
   "latest": {
-   "iter": 23,
+   "iter": 24,
    "front": {
     "iou": 0.9052,
     "colour_error": 0.036,
@@ -207,7 +207,7 @@
    },
    "back": {
     "iou": 0.899,
-    "colour_error": 0.028,
+    "colour_error": 0.0279,
     "colour_error_core": 0.0254,
     "ref_px": 43810,
     "render_px": 44175
@@ -215,9 +215,9 @@
    "portrait": null
   },
   "tris": {
-   "LOD0": 11820,
+   "LOD0": 11781,
    "LOD1": 5819,
-   "LOD2": 2133
+   "LOD2": 2132
   },
   "bones": {
    "LOD0": 48,
@@ -372,26 +372,26 @@
    }
   },
   "latest": {
-   "iter": 23,
+   "iter": 24,
    "front": {
     "iou": 0.8942,
     "colour_error": 0.0423,
-    "colour_error_core": 0.0381,
+    "colour_error_core": 0.0382,
     "ref_px": 41919,
     "render_px": 41385
    },
    "back": {
     "iou": 0.902,
-    "colour_error": 0.0359,
-    "colour_error_core": 0.0318,
+    "colour_error": 0.0361,
+    "colour_error_core": 0.032,
     "ref_px": 40557,
     "render_px": 40197
    },
    "portrait": null
   },
   "tris": {
-   "LOD0": 11816,
-   "LOD1": 5820,
+   "LOD0": 11799,
+   "LOD1": 5819,
    "LOD2": 2134
   },
   "bones": {
@@ -547,26 +547,26 @@
    }
   },
   "latest": {
-   "iter": 23,
+   "iter": 24,
    "front": {
     "iou": 0.8868,
-    "colour_error": 0.038,
-    "colour_error_core": 0.0338,
+    "colour_error": 0.0382,
+    "colour_error_core": 0.034,
     "ref_px": 40111,
-    "render_px": 39169
+    "render_px": 39199
    },
    "back": {
-    "iou": 0.8873,
-    "colour_error": 0.0363,
-    "colour_error_core": 0.0318,
+    "iou": 0.8877,
+    "colour_error": 0.0366,
+    "colour_error_core": 0.032,
     "ref_px": 39280,
-    "render_px": 38016
+    "render_px": 38050
    },
    "portrait": null
   },
   "tris": {
-   "LOD0": 11820,
-   "LOD1": 5820,
+   "LOD0": 11903,
+   "LOD1": 5877,
    "LOD2": 2134
   },
   "bones": {
@@ -722,10 +722,10 @@
    }
   },
   "latest": {
-   "iter": 23,
+   "iter": 24,
    "front": {
     "iou": 0.9211,
-    "colour_error": 0.0372,
+    "colour_error": 0.0373,
     "colour_error_core": 0.0334,
     "ref_px": 50400,
     "render_px": 48548
@@ -740,9 +740,9 @@
    "portrait": null
   },
   "tris": {
-   "LOD0": 11820,
-   "LOD1": 5820,
-   "LOD2": 2134
+   "LOD0": 11754,
+   "LOD1": 5819,
+   "LOD2": 2133
   },
   "bones": {
    "LOD0": 44,
@@ -897,26 +897,26 @@
    }
   },
   "latest": {
-   "iter": 23,
+   "iter": 24,
    "front": {
-    "iou": 0.8951,
-    "colour_error": 0.0361,
-    "colour_error_core": 0.0321,
+    "iou": 0.8954,
+    "colour_error": 0.0364,
+    "colour_error_core": 0.0322,
     "ref_px": 48938,
-    "render_px": 48758
+    "render_px": 48802
    },
    "back": {
-    "iou": 0.9032,
-    "colour_error": 0.035,
-    "colour_error_core": 0.0308,
+    "iou": 0.9039,
+    "colour_error": 0.0353,
+    "colour_error_core": 0.0311,
     "ref_px": 46594,
-    "render_px": 46064
+    "render_px": 46105
    },
    "portrait": null
   },
   "tris": {
-   "LOD0": 11820,
-   "LOD1": 5820,
+   "LOD0": 11905,
+   "LOD1": 5877,
    "LOD2": 2134
   },
   "bones": {
@@ -1072,26 +1072,26 @@
    }
   },
   "latest": {
-   "iter": 23,
+   "iter": 90,
    "front": {
-    "iou": 0.8991,
-    "colour_error": 0.0326,
-    "colour_error_core": 0.0305,
+    "iou": 0.8937,
+    "colour_error": 0.0333,
+    "colour_error_core": 0.0312,
     "ref_px": 70877,
-    "render_px": 69057
+    "render_px": 69601
    },
    "back": {
-    "iou": 0.9051,
-    "colour_error": 0.0288,
-    "colour_error_core": 0.0263,
+    "iou": 0.8998,
+    "colour_error": 0.0292,
+    "colour_error_core": 0.0267,
     "ref_px": 69915,
-    "render_px": 67891
+    "render_px": 68379
    },
    "portrait": null
   },
   "tris": {
-   "LOD0": 13718,
-   "LOD1": 6790,
+   "LOD0": 13814,
+   "LOD1": 6845,
    "LOD2": 2424
   },
   "bones": {

@@ -1582,6 +1582,8 @@ func update_beacon(delta: float) -> void:
 		return
 	beacon.show()
 	beacon.position = beacon.position.lerp(game.ground(p.x, p.z), 1.0 - exp(-8.0 * delta)) if beacon.position.distance_to(p) < 30.0 else game.ground(p.x, p.z)
+	# Sized for the overview; up close it shrinks so it does not hide the glade.
+	beacon.scale = Vector3.ONE * clampf(float(game.stage.camera_zoom) / 40.0, 0.45, 1.3)
 	var gem: Node3D = beacon.get_node("Gem")
 	var t := Time.get_ticks_msec() / 1000.0
 	gem.position.y = 3.4 + 0.25 * sin(t * 2.2)

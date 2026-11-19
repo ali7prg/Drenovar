@@ -166,6 +166,8 @@ func track_stage() -> void:
 					world.set_reduced_motion(reduced_motion)
 				if world.has_signal("fog_reveal_finished") and not world.fog_reveal_finished.is_connected(on_fog_revealed):
 					world.fog_reveal_finished.connect(on_fog_revealed)
+				if "clock_source" in world:
+					world.clock_source = Callable(client, "server_now")
 			actors.on_stage_changed()
 			sync_world()
 

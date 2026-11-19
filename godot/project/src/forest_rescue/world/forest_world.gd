@@ -703,12 +703,19 @@ func _stamp_property(p: Vector2, half: float) -> void:
 		x += 2.0
 
 
+## Optional presentation clock (gameplay layer: client.server_now) so the sight circles stay
+## on the actors when the clock is driven per frame (fixed-fps movies); real time otherwise.
+var clock_source := Callable()
+
+
 func _update_sights() -> void:
 	if fog == null:
 		return
 	var points: Array = []
 	if not locked:
 		var now := server_time_ms + float(Time.get_ticks_msec() - received_at_ms)
+		if clock_source.is_valid():
+			now = float(clock_source.call())
 		for actor in ["squad", "horse"]:
 			var block: Variant = adventure.get(actor)
 			if block is Dictionary and (actor != "horse" or block.get("visible", false)):

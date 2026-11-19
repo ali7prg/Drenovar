@@ -37,7 +37,7 @@ func setup(owner_game: Node) -> void:
 	shader = Shader.new()
 	shader.code = """
 shader_type spatial;
-render_mode unshaded, cull_disabled, depth_draw_never, blend_add, shadows_disabled, fog_disabled;
+render_mode unshaded, cull_disabled, depth_draw_never, blend_mix, shadows_disabled, fog_disabled;
 uniform vec4 tint : source_color = vec4(1.0, 0.48, 0.1, 1.0);
 uniform float fill = 0.0;      // telegraph progress 0..1
 uniform float active = 0.0;    // 1 inside the hit window
@@ -83,11 +83,14 @@ void fragment() {
 		light *= ends;
 		wash *= ends;
 	}
-	vec3 hot = vec3(1.0, 0.78, 0.4);
-	vec3 col = mix(tint.rgb, hot, clamp(light * 0.15 + active * 0.35, 0.0, 1.0));
-	float strength = (light * (1.0 + 0.8 * active) + wash * (0.9 + 1.2 * active)) * (0.6 + 0.4 * fill);
-	ALBEDO = col * clamp(strength, 0.0, 1.35) * fade;
-	ALPHA = 1.0;
+	// Painted glow (art/08): saturated orange lines with a lighter core, a soft warm halo;
+	// HDR brightness lifts them above the floor, the active window turns them hot.
+	vec3 hot = vec3(1.0, 0.82, 0.45);
+	float core = clamp(light - 0.55, 0.0, 1.0);
+	vec3 col = mix(tint.rgb, hot, clamp(core * 0.8 + active * 0.3, 0.0, 1.0)) * (1.25 + 0.55 * active + 0.35 * core);
+	float alpha = clamp(light * 0.85 + wash * (1.0 + active), 0.0, 0.92) * (0.55 + 0.45 * fill);
+	ALBEDO = col;
+	ALPHA = alpha * fade;
 }
 """
 
@@ -237,7 +240,7 @@ func draw_decal(id: String, attack: String, boss_pos: Vector3, direction: float,
 	material.set_shader_parameter("fade", fade)
 	node.position = boss_pos
 
-## Mesh in boss-local XZ, draped on the terrain (height_at) and lifted 0.12 m.
+## Mesh in boss-local XZ, draped on the terrain (height_at) and lifted 0.3 m (above the arena floor).
 func build_mesh(attack: String, shape: Dictionary, boss_pos: Vector3, direction: float, event: Dictionary) -> ArrayMesh:
 	var k := scale_factor
 	var surface := SurfaceTool.new()
@@ -313,7 +316,7 @@ func add_quad(surface: SurfaceTool, basis: Basis, origin: Vector3, quad: Array, 
 	for corner in quad:
 		var world := origin + basis * (corner as Vector3)
 		var ground: Vector3 = game.ground(world.x, world.z)
-		lifted.append(basis * (corner as Vector3) + Vector3(0, ground.y - origin.y + 0.12, 0))
+		lifted.append(basis * (corner as Vector3) + Vector3(0, ground.y - origin.y + 0.3, 0))
 	for i in [0, 1, 2, 0, 2, 3]:
 		surface.set_uv(uvs[i])
 		surface.add_vertex(lifted[i])

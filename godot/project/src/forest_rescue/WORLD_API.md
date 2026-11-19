@@ -42,7 +42,9 @@ func layout_info() -> Dictionary                      # {layoutId, layoutVersion
 
 Coordinates: game XZ = atlas XZ (`delivery/data/world-atlas.json`), +Y up, north = -Z.
 
-`perf_snapshot()` (v3) also reports `landmark_tris` (visible landmark/arena triangles at the chosen LOD).
+`perf_snapshot()` (v3) also reports `landmark_tris` (visible landmark/arena triangles at the chosen
+LOD), `fog_culled` (instances removed because they stand deeper than 3 m inside fog) and
+`fog_cull_ms` (CPU time of the last cull, run only when the fog projection changes).
 
 ## Changelog
 * v1 (2026-11-18) initial.
@@ -52,7 +54,7 @@ Coordinates: game XZ = atlas XZ (`delivery/data/world-atlas.json`), +Y up, north
   - Layout `lf_forest_layout_v2` (`data/forest_rescue/world/forest_layout_v2.json`, builder
     `world/tools/build_forest_layout.gd`): every resource id kept; outer trees moved off the old
     spiral to natural spots (≤ 4 m, clearance pushes ≤ 6.5 m keep the stump inside its ±6.7 m
-    prepared-site plot); inner (±56) trees jittered ≤ 3.5 m off the spiral rows (same side of every
+    prepared-site plot); inner (±56) trees jittered ≤ 3.5 m (≤ 4 m on the entrance) off the spiral rows (same side of every
     plot square, ≥ 1.8 m off town roads; if the player's property covers the jittered spot the tree
     is drawn at its original spot). `selectable_trees[].p` and `resource_tree_position()` are the
     rendered positions; the pickable set is decided on the original spot exactly as the legacy forest.
@@ -60,3 +62,11 @@ Coordinates: game XZ = atlas XZ (`delivery/data/world-atlas.json`), +Y up, north
     reveals, hall I–II = whole outer forest fogged, entrance corridor 1200 ms). Visual changes only.
   - Actors under `actors_root()` keep the canopy fade; trees/landmarks under fog now erode/darken
     by fog density (no gameplay effect).
+  - Under fog nothing renders but the fog: every canopy instance (trees, impostors, understory)
+    standing more than 3 m inside unexplored ground is removed from the GPU buffers when the
+    projection changes; landmarks/arena hide unless displayed ground is within their radius + 3 m;
+    props/actors keep the `fog_cleared_at()` rule. The pickable resource list is unaffected.
+  - Inner (±56) trees on the hall-III entrance (horse spot r 3.9 m, entry trail ±3 m) may move up
+    to 4.0 m (other inner trees ≤ 3.5 m). The entry trail ribbon starts at the horse origin.
+  - The city river strip gets the world-layer river material (flag ON only; found by its shader,
+    landscape.gd unchanged).

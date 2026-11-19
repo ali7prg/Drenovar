@@ -18,7 +18,7 @@ uniform float fog_sdf_range = 64.0;
 uniform float fog_reveal_t = 1.0;
 uniform float fog_drift_speed = 0.6;
 uniform vec2 fog_wind = vec2(0.83, 0.56);
-uniform vec3 fog_silhouette : source_color = vec3(0.27, 0.34, 0.40);
+uniform vec3 fog_silhouette : source_color = vec3(0.17, 0.22, 0.27);
 
 vec2 fog_uv(vec2 p) {
 	return (p - fog_domain.xy) / fog_domain.zw;
@@ -35,7 +35,7 @@ uniform float fog_reveal_curl = 0.0;
 uniform float fog_dim_strength = 0.0;
 uniform vec4 fog_sights[8];
 uniform int fog_sight_count = 0;
-uniform vec3 fog_veil_color : source_color = vec3(0.26, 0.33, 0.39);
+uniform vec3 fog_veil_color : source_color = vec3(0.17, 0.22, 0.27);
 
 // Same edge field as forest_fog.gdshader (edge_offset): lobes + wind-elongated tendrils.
 float fog_edge_offset(vec2 p, vec2 drift, float b) {

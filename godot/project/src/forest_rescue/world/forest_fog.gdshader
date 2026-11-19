@@ -40,13 +40,13 @@ uniform vec4 sights[8];
 uniform int sight_count = 0;
 uniform vec3 light_dir = vec3(0.45, 0.74, 0.5);
 uniform vec3 view_dir = vec3(-0.5414, -0.5991, -0.5414);   // city camera: normalize(-(75, 83, 75))
-// Blue-grey palette sampled from art/18 panel 1 / art/07 panel 1 (median #53697a, tops #738ca0,
-// valleys #374956), sRGB before the city's FILMIC tonemap (near identity in this range).
-uniform vec3 lit_color : source_color = vec3(0.50, 0.59, 0.66);
-uniform vec3 body_color : source_color = vec3(0.35, 0.43, 0.50);
-uniform vec3 deep_color : source_color = vec3(0.22, 0.29, 0.34);
-uniform vec3 haze_color : source_color = vec3(0.45, 0.53, 0.59);
-uniform vec3 rim_color : source_color = vec3(0.74, 0.71, 0.63);
+// Blue-grey palette matched to art/18 panel 1 / art/07 panel 1 ON SCREEN (after the city's FILMIC
+// tonemap): valleys #31434f, body #53697b, lit billow tops #7d95aa (sRGB inputs below).
+uniform vec3 lit_color : source_color = vec3(0.36, 0.43, 0.50);
+uniform vec3 body_color : source_color = vec3(0.235, 0.29, 0.345);
+uniform vec3 deep_color : source_color = vec3(0.125, 0.17, 0.205);
+uniform vec3 haze_color : source_color = vec3(0.30, 0.355, 0.41);
+uniform vec3 rim_color : source_color = vec3(0.55, 0.53, 0.47);
 uniform float time_offset = 0.0;
 uniform int debug_mode = 0;
 const int STEPS = 8;
@@ -150,11 +150,14 @@ void fragment() {
 		}
 		float a = 1.0 - exp(-d * step_len);
 		// Colour by absolute height: valleys between banks darker, billow tops lit by the sun.
-		float hy = clamp(y / fog_top_abs + (w.r - 0.5) * 0.25, 0.0, 1.4);
-		vec3 col = mix(deep_color, body_color, smoothstep(0.0, 0.6, hy));
+		float hy = clamp(y / fog_top_abs + (w.r - 0.5) * 0.1, 0.0, 1.4);
 		float bs = billow(sheared * 0.35 + p.xz * 0.65, drift);
 		float facing = clamp(0.5 + (bs - billow(sheared * 0.35 + p.xz * 0.65 + normalize(light_dir.xz) * 6.0, drift)) * 6.0, 0.0, 1.0);
-		col = mix(col, lit_color, smoothstep(0.5, 1.2, hy) * (0.3 + 0.7 * facing));
+		// billow ridges lit, valleys between the banks in shadow (art/18 cloud sea contrast)
+		float ridge = smoothstep(0.32, 0.76, b * 0.92 + w.g * 0.08);
+		vec3 col = mix(deep_color, body_color, smoothstep(0.0, 0.55, hy));
+		col = mix(col, lit_color * 1.12, smoothstep(0.45, 1.05, hy) * (0.1 + 0.9 * ridge) * (0.3 + 0.7 * facing));
+		col *= 0.6 + 0.62 * ridge;
 		// Thin fog (edges, wisps) reads as light haze, not as a dark film.
 		col = mix(col, haze_color, (1.0 - smoothstep(0.1, 0.65, fogness * body)) * 0.85);
 		col = mix(col, rim_color, (1.0 - fogness) * 0.12 * facing);

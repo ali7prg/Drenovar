@@ -78,17 +78,62 @@ def persp_camera_from(cam, name="qa_pcam"):
     return ob
 
 
+def left_pose(ps, sk, prm):
+    """Turnaround (left-view) pose: the far right leg stepped back and the far arm forward, as painted."""
+    ay, az, by, arm = prm
+    ps.two_bone("thigh_R", "shin_R", np.array([-0.68, ay, az]), pole_dir=(0, -1, 0))
+    ps.aim("foot_R", np.array([-0.68, by, 0.17]) - ps.head("foot_R"))
+    for t in ("toe2a_R", "toe3a_R", "toe4a_R", "toe2b_R", "toe3b_R", "toe4b_R", "hallux_R"):
+        ps.set_world_rot(t, sk.rest[t][:3, :3])
+    ps.rot_world_axis("upperarm_R", (1, 0, 0), -arm)
+    ps.rot_world_axis("forearm_R", (1, 0, 0), -10)
+
+
+def fit_left_pose(arm):
+    """Grid-search the far leg/arm so the posed silhouette matches the painted left view (numpy LBS)."""
+    body = bpy.data.objects["maw_body"]
+    V, tris, _uv, _n = core.mesh_arrays(body, evaluated=False)
+    wz = np.load(C.cache("maw2_weights_lod0.npz"))
+    names = [str(n) for n in wz["names"]]
+    W = wz["W"].astype(np.float64)
+    sk = PO.Skeleton(arm)
+    view = R.side_view(corrected=True, colour=False)
+    H, Wd = view.mask.shape
+    Vh = np.concatenate([V, np.ones((len(V), 1))], 1)
+    inv = {n: np.linalg.inv(sk.rest[n]) for n in names}
+    best = None
+    for ay in (1.20, 1.30, 1.40, 1.50):
+        for az in (0.62, 0.72, 0.82):
+            for by in (0.95, 1.07, 1.19):
+                for armd in (20.0, 32.0):
+                    ps = PO.Pose(sk)
+                    left_pose(ps, sk, (ay, az, by, armd))
+                    M = ps.fk()
+                    Vp = np.zeros((len(V), 3))
+                    for j, n in enumerate(names):
+                        w = W[:, j]
+                        nz = w > 0
+                        if nz.any():
+                            Vp[nz] += w[nz, None] * (Vh[nz] @ (M[n] @ inv[n]).T)[:, :3]
+                    u, v, _ = view.project(Vp)
+                    pts = np.stack([u, v], 1)[tris]
+                    m = np.zeros((H, Wd), np.uint8)
+                    cv2.fillPoly(m, np.round(pts * 8).astype(np.int32), 1, shift=3)
+                    mm = m > 0
+                    iou = (mm & view.mask).sum() / max((mm | view.mask).sum(), 1)
+                    if best is None or iou > best[0]:
+                        best = (float(iou), (ay, az, by, armd))
+    core.write_json(C.cache("left_pose.json"), {"iou_body_only": best[0], "params": best[1]})
+    return best
+
+
 def sheet_pose(arm, which):
     sk = PO.Skeleton(arm)
     ps = PO.Pose(sk)
     if which == "left":
-        # right (far) leg stepped back as drawn: ankle (Y 1.25, Z 0.70), ball (Y 1.02, Z 0.17)
-        ps.two_bone("thigh_R", "shin_R", np.array([-0.68, 1.38, 0.68]), pole_dir=(0, -1, 0))
-        ps.aim("foot_R", np.array([-0.68, 1.12, 0.17]) - ps.head("foot_R"))
-        for t in ("toe2a_R", "toe3a_R", "toe4a_R", "toe2b_R", "toe3b_R", "toe4b_R", "hallux_R"):
-            ps.set_world_rot(t, sk.rest[t][:3, :3])
-        ps.rot_world_axis("upperarm_R", (1, 0, 0), -28)
-        ps.rot_world_axis("forearm_R", (1, 0, 0), -10)
+        prm = json.load(open(C.cache("left_pose.json")))["params"] if os.path.exists(C.cache("left_pose.json")) \
+            else (1.38, 0.68, 1.12, 28.0)
+        left_pose(ps, sk, prm)
     elif which == "head":
         info = json.load(open(C.cache("head_cam.json")))
         ps.rot_world_axis("jaw", (1, 0, 0), float(info["jaw_open_deg"]))
@@ -137,6 +182,7 @@ def compare_sheet(name, ref, refmask, rgba, out_png, title):
 
 def compare_all(tag):
     arm = bpy.data.objects[ARM]
+    print("LEFTPOSE", fit_left_pose(arm))
     setup_flat()
     res = {}
     for key, view in (("left", R.side_view(corrected=True, colour=True)), ("left_raw", R.side_view(corrected=False)),
@@ -179,16 +225,22 @@ def heads5(tag, lod_suffix=""):
     setup_flat()
     sc = bpy.context.scene
     imgs = []
-    centre = np.array([0.0, -3.85, 3.05])
+    centre = np.array([0.0, -3.82, 3.02])
     for ang in (0, -45, 45, -90, 90):
         a = math.radians(ang)
         # creature faces -Y; angle 0 = camera in front; negative = camera on the creature's left (+X)
         d = np.array([-math.sin(a), -math.cos(a), 0.18])
         loc = centre + d / np.linalg.norm(d) * 9.0
-        render.perspective_camera(tuple(loc), tuple(centre), name="h5cam", res=(420, 380), ortho_scale=1.9)
+        render.perspective_camera(tuple(loc), tuple(centre), name="h5cam", res=(440, 400), ortho_scale=2.5)
         imgs.append(render.render_rgba())
-    labels = ["front 0", "3/4 left", "3/4 right", "profile left", "profile right"]
-    render.side_by_side(imgs, labels, C.qa(f"heads5_blender{lod_suffix}.png"), height=380)
+    labels = ["front 0", "3/4 left (scar)", "3/4 right", "profile left (scar)", "profile right"]
+    panels = []
+    for img, lab in zip(imgs, labels):
+        rgb = img[..., :3] * img[..., 3:4] + 0.93 * (1 - img[..., 3:4])
+        u8 = (np.clip(rgb, 0, 1) * 255).astype(np.uint8)
+        u8 = np.pad(u8, ((6, 6), (6, 6), (0, 0)), constant_values=40)
+        panels.append(render._label(u8, lab, (12, 10)))
+    core.save_rgba(C.qa(f"heads5_blender{lod_suffix}.png"), np.concatenate(panels, axis=1) / 255.0)
 
 
 if __name__ == "__main__":

@@ -133,8 +133,8 @@ def main():
     t0 = time.time()
     core.reset()
     side = R.side_view(corrected=True, colour=False)
-    front = R.front_view()
-    F, add, sub = B.build_field(voxel=C.VOXEL, hull_views=[side, front], hull_k=0.02)
+    front = R.front_view(corrected=False)     # raw: keeps the pale ventral keel between the legs
+    F, add, sub = B.build_field(voxel=C.VOXEL, hull_views=[side, front], hull_k=0.06)
     C.log(f"field {F.n} built {time.time() - t0:.1f}s")
     F.d = sdf.ndi.gaussian_filter(F.d, 0.6).astype(np.float32)
     V, Fc = F.mesh()

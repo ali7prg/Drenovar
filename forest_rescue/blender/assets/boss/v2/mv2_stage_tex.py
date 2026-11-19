@@ -215,6 +215,7 @@ def main():
     left = R.side_view(corrected=True, colour=True)
     right = mirror_view_ortho(left, "right_mirror", side_scar_free())
     front = R.front_view(corrected=False)
+    front.name = "front"
     # rear camera (silhouette-refined), solved against the current body occupancy
     surf = V[::2]
     rear, rinfo = CM.rear_cam(occ_points=surf, refine=True, log=C.cache("rear_cam.json"))

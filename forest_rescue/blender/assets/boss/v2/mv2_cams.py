@@ -94,13 +94,19 @@ def rear_landmarks():
     x0, y0 = R.REAR_BOX[:2]
     pts = [
         ("tail_tip", (0.0, 5.30, 2.19), (1526, 361)),
-        ("snout_tip", (0.0, -4.55, 2.93), (1164, 182)),
-        ("heel_L", (0.70, 0.31, 0.76), (1291, 391)),
-        ("heel_R", (-0.70, 0.31, 0.76), (1388, 387)),
-        ("claw_toe4_L", (1.20, -0.67, 0.02), (1213, 463)),
-        ("hand_claw_L", (0.45, -2.12, 1.13), (1208, 323)),
-        ("knee_back_L", (0.80, -0.20, 1.40), (1288, 318)),
-        ("tail_mid_top", (0.0, 2.60, 2.84), (1440, 255)),
+        ("snout_tip", (0.0, -4.55, 2.93), (1165.5, 177.5)),
+        ("upper_teeth_front", (0.10, -4.48, 2.80), (1171, 187.5)),
+        ("chin", (0.0, -4.45, 2.62), (1172.5, 204)),
+        ("brow_knob_L", (0.37, -3.52, 3.56), (1184, 134)),
+        ("heel_L", (0.68, 0.33, 0.74), (1303, 390)),
+        ("heel_R", (-0.68, 0.33, 0.74), (1405, 385)),
+        ("hallux_claw_L", (0.52, 0.24, 0.22), (1297, 445)),
+        ("sole_back_L", (0.68, 0.12, 0.04), (1290, 470)),
+        ("claw_toe4_L", (1.02, -0.86, 0.02), (1212.7, 470)),
+        ("claw_toe2_R", (-0.42, -0.90, 0.02), (1350, 460)),
+        ("hand_claw_L", (0.42, -2.12, 1.13), (1211.7, 323.3)),
+        ("groin", (0.0, 0.10, 1.40), (1306.7, 340)),
+        ("thigh_back_R", (-0.95, 0.20, 1.70), (1396.7, 336.7)),
     ]
     names = [p[0] for p in pts]
     P3 = np.array([p[1] for p in pts], float)
@@ -117,7 +123,7 @@ def rear_cam(occ_points=None, refine=True, log=None):
     info = {"pnp_rms_px": rms, "pnp_focal_px": f, "pnp_errors": dict(zip(names, np.round(e, 2).tolist()))}
     cam = PerspCam("rear34", crop, mask, K_of(f, W, H), rv, tv)
     if refine and occ_points is not None:
-        cam, iou = refine_silhouette(cam, occ_points, mask)
+        cam, iou = refine_silhouette(cam, occ_points, mask, P3=P3, p2=p2)
         proj = np.stack(cam.project(P3)[:2], 1)
         e2 = np.linalg.norm(proj - p2, axis=1)
         info.update({"refined_iou": iou, "refined_rms_px": float(np.sqrt((e2 ** 2).mean())),
@@ -141,8 +147,9 @@ def splat_mask(cam, pts, shape, radius_m=0.03):
     return ndi.binary_fill_holes(m)
 
 
-def refine_silhouette(cam, pts, mask, iters=400):
-    """Powell over (rvec, tvec, log f) maximising silhouette IoU with the painted mask."""
+def refine_silhouette(cam, pts, mask, iters=400, P3=None, p2=None, lam=0.0008):
+    """Powell over (rvec, tvec, log f) maximising silhouette IoU with the painted mask, with a landmark
+    reprojection penalty (lam per px rms) so the camera stays consistent with the hand-picked points."""
     H, W = mask.shape
     sub = pts[:: max(1, len(pts) // 60000)]
     x0 = np.concatenate([cam.rvec, cam.tvec, [math.log(cam.K[0, 0])]])
@@ -155,11 +162,16 @@ def refine_silhouette(cam, pts, mask, iters=400):
         m = splat_mask(c, sub, (H, W), 0.035)
         inter = (m & mask).sum()
         uni = (m | mask).sum()
-        return 1.0 - inter / max(uni, 1)
+        pen = 0.0
+        if P3 is not None:
+            u, v, _ = c.project(P3)
+            pen = lam * float(np.sqrt(((np.stack([u, v], 1) - p2) ** 2).sum(1).mean()))
+        return 1.0 - inter / max(uni, 1) + pen
 
     res = minimize(loss, x0, method="Powell", options={"maxiter": iters, "xtol": 1e-3, "ftol": 1e-4})
     c = make(res.x)
-    return c, float(1.0 - res.fun)
+    m = splat_mask(c, sub, (H, W), 0.035)
+    return c, float((m & mask).sum() / max((m | mask).sum(), 1))
 
 
 # ---------------------------------------------------------------- head close-up landmarks

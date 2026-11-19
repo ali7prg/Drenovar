@@ -1,0 +1,54 @@
+{
+  "main_view": {
+    "iou": 0.8552,
+    "colour_err": 0.1182,
+    "ssim": 0.457,
+    "ref_px": 81683,
+    "render_px": 82536,
+    "iou_structure_only": 0.6155119551405356
+  },
+  "camera": {
+    "rms_px": 1.57,
+    "max_px": 2.75,
+    "n_points": 8
+  },
+  "insets": {
+    "front": {
+      "iou": 0.1847,
+      "colour_err": 0.1508,
+      "ssim": 0.4289,
+      "ref_px": 58656,
+      "render_px": 53631
+    },
+    "side": {
+      "iou": 0.1723,
+      "colour_err": 0.1595,
+      "ssim": 0.5233,
+      "ref_px": 37408,
+      "render_px": 18043
+    }
+  },
+  "texture": {
+    "texels": 2340284,
+    "projected_frac": 0.07146782185409976,
+    "seconds": 11.2
+  },
+  "sheets": "forest_rescue/qa/compare/lf_env_camp_props/v3_iter12_*",
+  "tris": {
+    "LOD0": {
+      "structure": 4400,
+      "base": 756,
+      "total": 5156
+    },
+    "LOD1": {
+      "structure": 1450,
+      "base": 150,
+      "total": 1600
+    },
+    "LOD2": {
+      "structure": 370,
+      "base": 22,
+      "total": 392
+    }
+  }
+}

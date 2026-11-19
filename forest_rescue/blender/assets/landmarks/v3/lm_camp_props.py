@@ -277,7 +277,7 @@ def image_space_cloth(cloth, cam, region, supports, lod):
     T = np.concatenate([_tris_of(G) for G in supports])
     from scipy import ndimage as ndi
     ys, xs = np.nonzero(region)
-    step = 5 if lod == 0 else (10 if lod == 1 else 22)
+    step = 5 if lod == 0 else (10 if lod == 1 else 28)
     gx = np.arange(xs.min() - step, xs.max() + step * 2, step)
     gy = np.arange(ys.min() - step, ys.max() + step * 2, step)
     GX, GY = np.meshgrid(gx, gy, indexing="ij")

@@ -45,7 +45,6 @@ def zbuffer_fast(verts, tris, view):
     bw = np.clip((d00 * d21 - d01 * d20) / den, 0, 1)
     bu = np.clip(1 - bv - bw, 0, 1)
     zb[yy, xx] = bu * D[t, 0] + bv * D[t, 1] + bw * D[t, 2]
-    zb = ndi.minimum_filter(zb, size=3)
     return zb
 
 
@@ -85,7 +84,7 @@ class TPSWarp:
 
 
 def project_views(T, views, zbufs, texel_pos=None, warps=None, priority=None, facing_lo=0.45, facing_hi=0.62,
-                  depth_eps=0.035, mask_erode=2, region_gate=None, per_view_out=False):
+                  depth_eps=0.06, mask_erode=2, region_gate=None, per_view_out=False):
     """Blend reference colours onto texels.
 
     texel_pos: {view_name: (H,W,3) posed texel positions} (default T.pos)

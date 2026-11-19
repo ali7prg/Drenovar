@@ -50,6 +50,80 @@ def part_object(name, parts, smooth=True):
     return obj
 
 
+def face_labels(body):
+    """Region label per face: body halves (x sign) cut into Y bands, legs/arms split outer/inner."""
+    V, tris, _uv, _n = core.mesh_arrays(body, evaluated=False)
+    me = body.data
+    nf = len(me.polygons)
+    cen = np.zeros(nf * 3)
+    me.polygons.foreach_get("center", cen)
+    P = cen.reshape(nf, 3)
+    add, _sub = B.build_parts()
+    groups = {"body": [], "leg": [], "arm": []}
+    for p in add:
+        b = p.bone or ""
+        if b.startswith(("thigh", "shin", "foot", "toe", "hallux")):
+            groups["leg"].append(p)
+        elif b.startswith(("upperarm", "forearm", "hand", "finger")):
+            groups["arm"].append(p)
+        else:
+            groups["body"].append(p)
+    dist = {}
+    for g, ps in groups.items():
+        d = np.full(nf, 10.0)
+        for p in ps:
+            d = np.minimum(d, p.fn(P))
+        dist[g] = d
+    keys = list(dist)
+    owner = np.argmin(np.stack([dist[k] for k in keys], 1), 1)
+    lab = np.zeros(nf, np.int64)
+    side = (P[:, 0] >= 0).astype(np.int64)
+    ybands = np.digitize(P[:, 1], [-3.0, -1.2, 0.6, 2.4])
+    for i, k in enumerate(keys):
+        sel = owner == i
+        if k == "body":
+            lab[sel] = 100 + side[sel] * 10 + ybands[sel]
+        elif k == "leg":
+            # outer / inner half of each leg, toes with the leg
+            xin = np.abs(P[sel, 0]) - 0.66
+            lab[sel] = 200 + side[sel] * 10 + (xin > 0)
+        else:
+            lab[sel] = 300 + side[sel] * 10 + (P[sel, 1] < -1.95)
+    return lab
+
+
+def region_uv(body, margin=0.0025):
+    import bmesh
+    lab = face_labels(body)
+    me = body.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bm.faces.ensure_lookup_table()
+    for e in bm.edges:
+        fs = e.link_faces
+        e.seam = bool(len(fs) == 2 and lab[fs[0].index] != lab[fs[1].index])
+    bm.to_mesh(me)
+    bm.free()
+    core.select_only([body])
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.unwrap(method="CONFORMAL", margin=margin, correct_aspect=True)
+    bpy.ops.uv.select_all(action="SELECT")
+    bpy.ops.uv.average_islands_scale()
+    bpy.ops.uv.pack_islands(rotate=True, scale=True, margin=margin, shape_method="CONCAVE", margin_method="SCALED")
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def uv_coverage(o, res=1024):
+    V, tris, uv, _ = core.mesh_arrays(o, evaluated=False)
+    img = np.zeros((res, res), np.uint8)
+    pts = np.round(np.stack([uv[..., 0] * res, (1 - uv[..., 1]) * res], -1) * 16).astype(np.int32)
+    import cv2
+    for t in range(len(tris)):
+        cv2.fillConvexPoly(img, pts[t], 1, shift=4)
+    return float(img.mean())
+
+
 def main():
     t0 = time.time()
     core.reset()
@@ -68,8 +142,8 @@ def main():
     bpy.data.objects.remove(high, do_unlink=True)
     C.log(f"decimated: bake_src {core.tri_count(src)} body {core.tri_count(body)} {time.time() - t0:.1f}s")
     # UVs: smart projection (3-D continuous texture content hides the seams), pack with margin
-    core.smart_uv(body, angle=62.0, margin=0.0035, area_weight=0.0)
-    core.pack_uv(body, margin=0.003)
+    region_uv(body)
+    C.log(f"uv coverage {uv_coverage(body):.3f}")
     parts = D.all_parts()
     for key, name in (("teeth", "maw_teeth"), ("claws", "maw_claws"), ("eyes", "maw_eyes"), ("tongue", "maw_tongue")):
         part_object(name, parts[key])

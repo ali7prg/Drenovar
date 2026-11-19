@@ -625,7 +625,7 @@ def texture(lo0, R, J, pinfo0=None):
     head_skin = is_head(data[2]) & (tex_mat == MAT_IDS["body"])
     seen_face = head_skin & (ws > 0.5)
     cheek = np.median(col[seen_face], 0) if seen_face.sum() > 50 else None
-    if cheek is not None:
+    if cheek is not None and False:
         weak = head_skin & (ws < 0.06)
         col[weak] = cheek
         ws = np.where(weak, 0.30, ws)

@@ -272,5 +272,16 @@
     "unit": "metre",
     "note": "Blender -Y forward exported to glTF +Z; feet on y=0, root at the origin"
   },
-  "notes": ""
+  "notes": "",
+  "morphs": {
+    "sit_drape": {
+      "kind": "corrective cloth drape (Blender cloth sim: pinned waist/shoulders, body + floor collision)",
+      "clips": {
+        "lf_civilian_cage_sit": "1.0",
+        "lf_civilian_stand_up": "1 -> 0 over 0-1.0 s",
+        "other civilian clips": "0"
+      },
+      "note": "cloth bones are neutral while seated so bones and morph do not fight"
+    }
+  }
 }

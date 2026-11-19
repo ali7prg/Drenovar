@@ -94,7 +94,7 @@ def solve_portrait(X3, x2, img, weight=6.0):
 
 
 def zbuf(verts, tris, cam):
-    return texproj.zbuffer(verts, tris, cam, pad=1)
+    return texproj.zbuffer(verts, tris, cam, pad=0)
 
 
 def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None, lo_hi_fn=None):
@@ -116,7 +116,7 @@ def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None,
         ok = (ui >= 0) & (ui < vw) & (vi >= 0) & (vi < vh)
         zval = np.full(len(P), -np.inf)
         zval[ok] = zb[vi[ok], ui[ok]]
-        vis = ok & (dep <= zval + 0.005)
+        vis = ok & (dep <= zval + 0.006)
         m = ndi.binary_erosion(v.mask, iterations=erode) if erode else v.mask
         inm = np.zeros(len(P), bool)
         inm[ok] = m[vi[ok], ui[ok]]

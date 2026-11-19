@@ -30,12 +30,14 @@ INSETS = {
     "side": dict(box=(1418, 12, 1512, 88), dir=(1, 0, 0), fit="width"),
 }
 NO_PROJECT_TAGS = ()
-TAG_SWATCH = {"tile": "roof", "plank": "wood", "beam": "wood_h", "chimney": "stone"}
+TAG_SWATCH = {"tile": "roof", "plank": "plank", "beam": "wood_h", "chimney": "stone", "footing": "stone", "log": "logend"}
 SWATCHES = {
-    "roof": dict(box=(1376, 104, 1505, 178), metres=1.2),
+    "roof": dict(box=(1378, 106, 1503, 176), metres=1.0),
     "wood": dict(box=(1441, 222, 1461, 256), metres=0.6),
     "wood_h": dict(box=(1441, 222, 1461, 256), metres=0.6, rotate=True),
-    "stone": dict(box=(1140, 30, 1160, 60), metres=0.6),
+    "stone": dict(box=(1218, 212, 1250, 232), metres=0.7),
+    "plank": dict(box=(1092, 140, 1118, 190), metres=0.8),
+    "logend": dict(box=(1170, 168, 1200, 198), metres=0.6),
     "ground": dict(plane=dict(origin=(-1.0, -4.2, 0.0), ex=(1, 0, 0), ey=(0, 1, 0), size_m=2.0), metres=2.0),
     "gravel": dict(plane=dict(origin=(-1.0, -4.2, 0.0), ex=(1, 0, 0), ey=(0, 1, 0), size_m=2.0), metres=2.0),
     "grass": dict(box=(830, 220, 870, 240), metres=1.2),
@@ -47,15 +49,20 @@ CLASS_TRAIN = {
     "stone": [(1140, 30, 1160, 60), (1220, 215, 1250, 235), (900, 200, 940, 215)],
     "veg": [(840, 140, 870, 180), (1240, 150, 1260, 190)],
     "dirt": [(1000, 230, 1100, 250)],
+    "dark": [(1040, 120, 1100, 160)],
+    "logs": [(1160, 165, 1210, 210)],
 }
-ACCEPT = {"roof": {"roof", "veg"}, "wood": {"wood", "roof"}, "stone": {"stone"}, "ground": {"dirt", "veg", "stone"},
-          "rope": {"wood"}}
+ACCEPT = {"roof": {"roof", "veg"}, "wood": {"wood", "roof", "dark", "logs"}, "stone": {"stone"},
+          "ground": {"dirt", "veg", "stone"}, "rope": {"wood"}}
 CLASS_SWATCH = {"ground": {"veg": "grass", "dirt": "ground", "stone": "gravel"}}
 NORMAL_STRENGTH = {"roof": 3.0, "wood": 2.5, "stone": 3.0, "ground": 1.5}
 EDGE_WIDTH_M = 0.03
 EDGE_STRENGTH = {"roof": 0.45, "wood": 0.35, "stone": 0.5}
 POLY_JITTER = 0.03
 CARD_KINDS = {"ivy_a": "ivy", "ivy_b": "ivy", "net": "net", "grass_a": "grass", "fern_a": "fern"}
+
+
+CH = {}
 
 
 def S(x, y):
@@ -132,16 +139,44 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
     for i in range(ng if lod == 0 else (ng // 3 if lod == 1 else 1)):
         w = D / (ng if lod == 0 else (ng // 3 if lod == 1 else 1))
         y = -D / 2 + (i + 0.5) * w
+        if y < 0.0:          # front gable: only the back half is planked (the front half is open, net hangs there)
+            continue
         top = EAVE + (RIDGE - EAVE) * (1 - abs(y) / (D / 2))
         g.box((-L / 2 - 0.06, y, top / 2), (0.05, w - 0.015, top), None, "wood", "plank", skip=("-z",))
-    # stone chimney at the back-right
-    cx, cy = 1.7, D / 2 + 0.55
-    if lod == 0:
-        g.masonry_box((cx - 0.38, cy - 0.38, 0.0), (cx + 0.38, cy + 0.38, 4.35), course=0.32, block=(0.3, 0.45), cheap=True,
-                      top=True, tag="chimney", seed=4)
+    # closed right gable wall (planks with the gable triangle) and low stone footings
+    for i in range(ng if lod == 0 else (ng // 3 if lod == 1 else 1)):
+        w = D / (ng if lod == 0 else (ng // 3 if lod == 1 else 1))
+        y = -D / 2 + (i + 0.5) * w
+        top = EAVE + (RIDGE - EAVE) * (1 - abs(y) / (D / 2))
+        g.box((L / 2 + 0.06, y, 0.3 + (top - 0.3) / 2), (0.05, w - 0.015, top - 0.3), None, "wood", "plank", skip=("-z",))
+    for (c, sz) in (((0, D / 2 + 0.06, 0.15), (L + 0.2, 0.24, 0.3)), ((L / 2 + 0.06, 0, 0.15), (0.24, D + 0.2, 0.3)),
+                    ((-L / 2 - 0.06, D / 4, 0.15), (0.24, D / 2 + 0.1, 0.3))):
+        g.box(c, sz, None, "stone", "footing", skip=("-z",))
+    # stone chimney
+    if cam is not None:
+        # painted chimney axis: base where it meets the ridge silhouette (1146, 63) on the back slope plane,
+        # top (1146, 16) on its vertical line
+        apex0 = np.array([0.0, 0.0, RIDGE + 0.05])
+        nb = np.array([0.0, (RIDGE - EAVE) / (D / 2), 1.0])
+        nb /= np.linalg.norm(nb)
+        u, v = S(1146, 63)
+        Cb = cam.on_plane(np.array([u + .5]), np.array([v + .5]), apex0 + np.array([0, 0.0, 0]), nb)[0]
+        o, dd = cam.ray(np.array([S(1146, 16)[0] + .5]), np.array([S(1146, 16)[1] + .5]))
+        dd = dd[0]
+        tt = ((Cb[:2] - o[:2]) @ dd[:2]) / max(dd[:2] @ dd[:2], 1e-9)
+        CH["top"] = float(np.clip(o[2] + tt * dd[2], RIDGE + 0.3, RIDGE + 1.6))
+        cx, cy = float(np.clip(Cb[0], -L / 2 + 0.5, L / 2 - 0.5)), float(np.clip(Cb[1], 0.35, D / 2 - 0.4))
     else:
-        g.box((cx, cy, 2.17), (0.76, 0.76, 4.35), None, "stone", "chimney", skip=("-z",))
-    g.box((cx, cy, 4.42), (0.86, 0.86, 0.14), None, "stone", "chimney")
+        cx, cy = 1.2, 0.8
+    CH["c"] = (cx, cy)
+    ztop = CH.get("top", 4.4)
+    zb = EAVE + (RIDGE - EAVE) * (1 - cy / (D / 2)) - 0.2
+    if lod == 0:
+        g.masonry_box((cx - 0.34, cy - 0.34, zb), (cx + 0.34, cy + 0.34, ztop - 0.14), course=0.3, block=(0.28, 0.42), cheap=True,
+                      top=False, tag="chimney", seed=4)
+    else:
+        g.box((cx, cy, (zb + ztop - 0.14) / 2), (0.68, 0.68, ztop - 0.14 - zb), None, "stone", "chimney", skip=("-z",))
+    g.box((cx, cy, ztop - 0.07), (0.8, 0.8, 0.14), None, "stone", "chimney")
     # workbench, stump, woodpile
     g.box((-0.6, D / 2 - 0.55, 0.86), (2.6, 0.7, 0.08), None, "wood", "bench")
     for sx in (-1.2, 1.2):
@@ -153,12 +188,27 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
     else:
         Ps = np.array([-1.0, -0.8, 0])
     g.cyl(Ps, Ps + np.array([0, 0, 0.5]), 0.28, 0.25, n=10 if lod == 0 else 6, mat="wood", tag="stump", jitter=0.06)
-    nlog = (5, 4, 3) if lod == 0 else ((3, 2) if lod == 1 else (2,))
-    for r, n in enumerate(nlog):
-        for i in range(n):
-            x = L / 2 - 1.0 + (i - (n - 1) / 2) * 0.27 + (0.135 if r % 2 else 0)
-            z = 0.14 + r * 0.24
-            g.cyl((x, -0.9, z), (x, 0.2, z), 0.13, n=7 if lod == 0 else 5, mat="wood", tag="log")
+    if cam is not None:
+        u, v = S(1186, 214)
+        WP = cam.on_plane_z(np.array([u + .5]), np.array([v + .5]), 0.0)[0]
+        o, dd = cam.ray(np.array([S(1186, 160)[0] + .5]), np.array([S(1186, 160)[1] + .5]))
+        dd = dd[0]
+        tt = ((WP[:2] - o[:2]) @ dd[:2]) / max(dd[:2] @ dd[:2], 1e-9)
+        wh = float(np.clip(o[2] + tt * dd[2], 0.7, 1.5))
+        ww = float(np.clip(ibm.metres(cam, WP, 72), 1.0, 2.2))
+    else:
+        WP, wh, ww = np.array([2.0, -1.2, 0.0]), 1.1, 1.4
+    CH["wood"] = (WP, wh, ww)
+    rows = max(3, int(round(wh / 0.23)))
+    nl = max(4, int(ww / 0.25))
+    for r in range(rows if lod < 2 else 1):
+        n = nl - (r % 2)
+        for i in range(n if lod == 0 else max(1, n // 2)):
+            x = WP[0] + (i - (n - 1) / 2) * (ww / nl)
+            z = 0.12 + r * 0.22
+            g.cyl((x, WP[1] - 0.05, z), (x, WP[1] + 1.05, z), 0.12, n=7 if lod == 0 else 4, mat="wood", tag="log", jitter=0.1)
+    if lod > 0:
+        g.box((WP[0], WP[1] + 0.5, wh / 2), (ww, 1.1, wh), None, "wood", "log", skip=("-z",))
     # hanging net + ivy cards
     if lod < 2 and cards:
         if "net" in cards:
@@ -173,7 +223,7 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
                   "card_ivy", "ivy", uv=[[(u0, v0), (u1, v0), (u1, v1), (u0, v1)]])
     base = Geo(seed=9 + lod)
     if cam is not None and mask is not None:
-        poly = ibm.footprint(cam, mask, lambda x, y: np.zeros_like(x), ylim=(-7.0, D / 2 + 0.8), xlim=(-L / 2 - 2.5, L / 2 + 2.0))
+        poly = ibm.footprint(cam, mask, lambda x, y: np.zeros_like(x), ylim=(-25.0, D / 2 + 0.9), xlim=(-L / 2 - 6.0, L / 2 + 6.0))
         ibm.ground_patch(poly, lambda x, y: np.zeros_like(x) - 0.01, 0.6 if lod == 0 else (1.2 if lod == 1 else 2.6), g=base, undulate=0.02)
         rocks = [(905, 215, 12), (1090, 225, 9), (1215, 225, 14), (1065, 245, 9), (880, 200, 10), (1250, 230, 6), (1100, 238, 6)]
         ibm.place_rocks(base, cam, [(S(u, v)[0], S(u, v)[1], r) for u, v, r in rocks][: (7 if lod == 0 else 3 if lod == 1 else 0)],
@@ -189,7 +239,7 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
 def colliders():
     C = [dict(type="box", centre=(0.0, D / 2 + 0.06, EAVE / 2), size=(L, 0.2, EAVE)),
          dict(type="box", centre=(-L / 2 - 0.06, 0.0, EAVE / 2), size=(0.2, D, EAVE)),
-         dict(type="box", centre=(1.7, D / 2 + 0.55, 2.2), size=(0.8, 0.8, 4.4))]
+         dict(type="box", centre=(CH.get("c", (1.2, 0.8))[0], CH.get("c", (1.2, 0.8))[1], 2.2), size=(0.8, 0.8, 4.4))]
     for x in (-L / 2, -0.9, 0.9, L / 2):
         C.append(dict(type="box", centre=(x, -D / 2, EAVE / 2), size=(0.26, 0.26, EAVE)))
     return C
@@ -197,4 +247,5 @@ def colliders():
 
 def meta_extra():
     return dict(dimensions={"frame_m": [L, D], "eave_m": EAVE, "ridge_m": RIDGE, "overhang_m": OH},
-                sockets={"chimney_top": [1.7, 4.5, -(D / 2 + 0.55)], "workbench": [-0.6, 0.9, -(D / 2 - 0.55)]})
+                sockets={"chimney_top": [round(CH.get("c", (1.2, 0.8))[0], 3), round(CH.get("top", 4.4), 3), round(-CH.get("c", (1.2, 0.8))[1], 3)],
+                         "workbench": [-0.6, 0.9, -(D / 2 - 0.55)]})

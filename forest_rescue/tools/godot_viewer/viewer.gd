@@ -107,6 +107,8 @@ func _place_camera(extra_yaw: float) -> void:
 	var radius := aabb.size.length() * 0.5
 	var dist := radius / tan(deg_to_rad(cam.fov * 0.5)) * float(args.get("dist", "1.15"))
 	var center := aabb.get_center()
+	if args.has("cy"):
+		center.y = float(args.get("cy"))      # --cy=<m>: look-at height override (seated clips)
 	var dir := Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch))
 	cam.global_position = center + dir * dist
 	cam.look_at(center, Vector3.UP)

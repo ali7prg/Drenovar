@@ -567,6 +567,7 @@ def texture(lo0, R, J, pinfo0=None):
     pinfo = pinfo0
     cheek_ref = None
     med_l = None
+    skin_med = None
     wport = np.zeros(len(P0))
     col2 = np.zeros((len(P0), 3))
     if pinfo0:
@@ -632,6 +633,18 @@ def texture(lo0, R, J, pinfo0=None):
     wf = wf * (1.0 - wport)
     colf = texproj._bilinear(R.front.image, uf, vf)[:, :3]
     colb = texproj._bilinear(R.back.image, ub, vb)[:, :3]
+    if any(g.get("kind") == "hood" for g in C.get("garments", []) + C.get("acc", [])):
+        # hood: painted pixels unlike the hood's own cloth (face / hair seen through the wider painted
+        # opening) never texture the hood shell - it is synthesised from its own cloth instead
+        # (skin-coloured painted pixels only: the painted hair framing the face stays on the hood rim)
+        shell_t = is_head(data[2]) & (~skin_hair)
+        if skin_med is not None:
+            lw_ = np.array([0.299, 0.587, 0.114])
+            far_f = shell_t & (np.linalg.norm(colf - skin_med, axis=1) < 0.17) & ((colf @ lw_) > 0.6 * med_l)
+            far_b = shell_t & (np.linalg.norm(colb - skin_med, axis=1) < 0.17) & ((colb @ lw_) > 0.6 * med_l)
+            wf = np.where(far_f, 0.0, wf)
+            wb = np.where(far_b, 0.0, wb)
+            log("hood: painted skin pixels dropped from the hood", int((far_f & (per["front"][0] > 0)).sum()))
     if pinfo0 and med_l is not None:
         # painted hair / collar shadow over the temples and neck never lands on head skin either
         hs_ = is_head(data[2]) & (tex_mat == MAT_IDS["body"])

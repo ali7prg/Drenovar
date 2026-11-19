@@ -20,6 +20,7 @@ BUDGET0 = 6000
 ATLAS = 2048
 MASK_THRESH = 0.09
 MASK_EXCLUDE = [(515, 20, 605, 135)]
+MASK_FILL = 4000
 F_PAINT = 1921.0     # focal length (px) solved on the bridge view of the same sheet
 
 
@@ -203,7 +204,7 @@ def outcrop(g, lod, cam, mask):
         c = (P[0], y_front + d / 2 - 0.05 + rng.normal(0, 0.03), max(P[2], h / 2 - 0.05))
         if lod == 0:
             g.rounded_block(c, (w * 0.97, d, h * 0.97), 0.11, rot_z(rng.normal(0, 0.03)), mat="stone", tag="block",
-                            skip=("+y",), seed=k, jitter=0.03)
+                            skip=("+y", "-z"), seed=k, jitter=0.03)
         else:
             g.box(c, (w, d, h), rot_z(rng.normal(0, 0.03)), "stone", "block", skip=("-z", "+y"))
     OUT["n_blocks"] = len(blocks)
@@ -218,7 +219,7 @@ def outcrop(g, lod, cam, mask):
         prof_x.append(Pq[0])
         prof_z.append(Pq[2])
     prof_x, prof_z = np.array(prof_x), np.array(prof_z)
-    for li, (yb, drop) in enumerate([(0.95, 0.85), (1.75, 1.7), (2.55, 2.6)] if lod == 0 else ([(1.2, 1.2)] if lod == 1 else [])):
+    for li, (yb, drop) in enumerate([(0.95, 1.05), (1.75, 2.0), (2.55, 3.0)] if lod == 0 else ([(1.2, 1.4)] if lod == 1 else [])):
         x = prof_x.min()
         while x < prof_x.max() - 0.3:
             L = rng.uniform(0.9, 1.4) if lod == 0 else 1.8
@@ -228,11 +229,8 @@ def outcrop(g, lod, cam, mask):
             while z < top - 0.3:
                 hh = min(0.65, top - z)
                 c = (xm, yb + 0.4, z + hh / 2)
-                if lod == 0:
-                    g.rounded_block(c, (L - 0.05, 0.8, hh - 0.03), 0.1, rot_z(rng.normal(0, 0.03)), mat="stone",
-                                    tag="outcrop", skip=("-z", "+y"), seed=100 + li * 50 + int(x * 10))
-                else:
-                    g.box(c, (L - 0.05, 0.8, hh - 0.03), None, "stone", "outcrop", skip=("-z", "+y"))
+                g.box(c, (L - 0.05, 0.8, hh - 0.03), rot_z(rng.normal(0, 0.03)), "stone", "outcrop", skip=("-z", "+y"),
+                      chamfer=0.0)
                 z += 0.65
             x += L
     # ivy cards hanging on the front face where the painting shows ivy

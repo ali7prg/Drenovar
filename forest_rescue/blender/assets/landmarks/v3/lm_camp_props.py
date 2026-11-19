@@ -135,6 +135,8 @@ def mpx(cam, P, px):
 
 # ============================================================================ geometry
 def build(lod, cam=None, crop=None, mask=None, cards=None):
+    if crop is not None:
+        TARP_FIT["crop"] = crop
     g = Geo(seed=31 + lod)
     cloth = Geo(seed=41 + lod)
     a, b, hs = LAYOUT["a"], LAYOUT["b"], LAYOUT["hs"]
@@ -167,38 +169,12 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
           tag="pole", jitter=0.08)
     bm = bp(995, 748, 0.0)
     g.cyl(bm, bm + np.array([0, 0, 2.05]), 0.075, 0.065, n=8 if lod == 0 else 5, mat="wood", tag="pole")
-    # front-edge sag: painted lowest point of the front edge on the FL-FR vertical plane
-    nrm = np.cross(T_FR - T_FL, [0, 0, 1.0])
-    nrm /= np.linalg.norm(nrm)
-    u_, v_ = S(1000, 688)
-    sagP = cam.on_plane(np.array([u_ + 0.5]), np.array([v_ + 0.5]), T_FL, nrm)[0]
-    front_sag = float(np.clip((T_FL[2] + T_FR[2]) / 2 - sagP[2], 0.2, 1.4))
-    nu, nv = (14, 10) if lod == 0 else ((7, 5) if lod == 1 else (3, 3))
-    P = np.zeros((nu, nv, 3))
-    for i in range(nu):
-        for j in range(nv):
-            u, v = i / (nu - 1), j / (nv - 1)
-            q = (1 - u) * (1 - v) * T_FL + u * (1 - v) * T_FR + u * v * T_BR + (1 - u) * v * T_BL
-            sag = front_sag * math.sin(math.pi * u) * (1 - v) ** 1.5 + 0.35 * math.sin(math.pi * u) * math.sin(math.pi * v) \
-                + 0.15 * math.sin(math.pi * v) * (1 - u)
-            fold = 0.04 * math.sin(u * 11.0 + v * 3.0) * math.sin(math.pi * u)
-            P[i, j] = q + np.array([0, 0, -sag + fold])
-    cloth.grid_surface(P, "cloth", "tarp")
-    # left flap: from the T_FL..T_BL edge down over the bag to the left pole top and the ground
+    # tarp: parametric canopy (corners on the pole tops, back-left corner on the back plane) + left flap; the
+    # parameters are fitted so the projected cloth silhouette matches the painted tarp mask (IoU in the painting)
     L_top = pos["BL"] + np.array([0, 0, hs["BL"]])
-    G_back = bp(796, 748, 0.25)
-    G_front = bp(884, 730, 0.6)
-    nf = 6 if lod == 0 else 3
-    Fp = np.zeros((nf, nv, 3))
-    for i in range(nf):
-        t = i / (nf - 1)
-        for j in range(nv):
-            v = j / (nv - 1)
-            top = P[0, j]
-            low = (1 - v) * G_front + v * G_back
-            mid = (1 - v) * (0.5 * (top + G_front)) + v * L_top
-            q = (1 - t) ** 2 * top + 2 * t * (1 - t) * mid + t * t * low
-            Fp[i, j] = q + np.array([0.03 * math.sin(j * 1.9) * t, 0, 0])
+    prm = fit_tarp(cam, T_FL, T_FR, T_BR, T_BL, L_top) if cam is not None else TARP_DEFAULT
+    P, Fp = tarp_surfaces(prm, T_FL, T_FR, T_BR, T_BL, L_top, lod)
+    cloth.grid_surface(P, "cloth", "tarp")
     cloth.grid_surface(Fp, "cloth", "flap")
     # rope lashings at the tarp corners + guy ropes to pegs
     if lod < 2:
@@ -223,6 +199,108 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
             spots = [(S(u, v)[0], S(u, v)[1], n, h) for u, v, n, h in spots][:: (1 if lod == 0 else 2)]
             ibm.place_cards(base, cam, spots, cards)
     return dict(struct=g, cloth=cloth, base=base)
+
+
+TARP_DEFAULT = np.array([0.6, 0.35, 0.15, 0.0, 0.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0])
+TARP_FIT = {}
+
+
+def tarp_surfaces(prm, T_FL, T_FR, T_BR, T_BL, L_top, lod):
+    front_sag, mid_sag, back_sag, dBLz, dBLx, dFRz, flap_drop, flap_out, flap_fwd, dBRz, dBLy, taper = prm
+    T_BLp = T_BL + np.array([dBLx, dBLy, dBLz])
+    T_FRp = T_FR + np.array([0, 0, dFRz])
+    T_BRp = T_BR + np.array([0, 0, dBRz])
+    nu, nv = (14, 10) if lod == 0 else ((7, 5) if lod == 1 else (3, 3))
+    P = np.zeros((nu, nv, 3))
+    for i in range(nu):
+        for j in range(nv):
+            u, v = i / (nu - 1), j / (nv - 1)
+            q = (1 - u) * (1 - v) * T_FL + u * (1 - v) * T_FRp + u * v * T_BRp + (1 - u) * v * T_BLp
+            sag = front_sag * math.sin(math.pi * u) * (1 - v) ** 1.5 + mid_sag * math.sin(math.pi * u) * math.sin(math.pi * v) \
+                + back_sag * math.sin(math.pi * v) * (1 - u)
+            fold = 0.04 * math.sin(u * 11.0 + v * 3.0) * math.sin(math.pi * u)
+            P[i, j] = q + np.array([0, 0, -sag + fold])
+    nf = 6 if lod == 0 else 3
+    Fp = np.zeros((nf, nv, 3))
+    for i in range(nf):
+        t = i / (nf - 1)
+        for j in range(nv):
+            top = P[0, j]
+            low = top + np.array([-flap_out, -flap_fwd, -flap_drop * (1 + taper * (j / (nv - 1) - 0.5))])
+            q = top * (1 - t) + low * t + np.array([0, 0, 0.12 * math.sin(math.pi * t)]) * 0
+            Fp[i, j] = q + np.array([0.03 * math.sin(j * 1.9) * t, 0, 0])
+    return P, Fp
+
+
+def painted_tarp_mask(crop):
+    import cv2 as _cv2
+    from scipy import ndimage as ndi
+    lab = _cv2.cvtColor(crop.astype(np.float32), _cv2.COLOR_RGB2LAB)
+    L_, a_, b_ = lab[..., 0], lab[..., 1], lab[..., 2]
+    m = (a_ > 9.5) & (L_ > 25) & (L_ < 80) & (b_ > 8)
+    H, W = m.shape
+    y1 = S(0, 765)[1]
+    m[y1:] = False
+    m[:, :S(770, 0)[0]] = False
+    m[:, S(1185, 0)[0]:] = False
+    m[S(0, 700)[1]:, S(1095, 0)[0]:] = False          # cloth on the crates is not the tarp
+    m = ndi.binary_closing(m, iterations=2)
+    m = ndi.binary_opening(m, structure=np.ones((3, 9), bool), iterations=1)   # drop thin poles
+    lbl, n = ndi.label(m)
+    if n:
+        sizes = ndi.sum(m, lbl, range(1, n + 1))
+        keep = np.nonzero(sizes > 400)[0] + 1
+        m = np.isin(lbl, keep)
+    return ndi.binary_fill_holes(m)
+
+
+def fit_tarp(cam, T_FL, T_FR, T_BR, T_BL, L_top):
+    import cv2 as _cv2
+    from scipy.optimize import minimize
+    if "prm" in TARP_FIT:
+        return TARP_FIT["prm"]
+    crop = TARP_FIT["crop"]
+    tm = painted_tarp_mask(crop)
+    H, W = tm.shape
+
+    def sil(prm):
+        P, Fp = tarp_surfaces(prm, T_FL, T_FR, T_BR, T_BL, L_top, 0)
+        m = np.zeros((H, W), np.uint8)
+        for G in (P, Fp):
+            u, v, z = cam.project(G.reshape(-1, 3))
+            uv = np.stack([u, v], 1).reshape(G.shape[0], G.shape[1], 2)
+            for i in range(G.shape[0] - 1):
+                for j in range(G.shape[1] - 1):
+                    q = np.array([uv[i, j], uv[i + 1, j], uv[i + 1, j + 1], uv[i, j + 1]])
+                    _cv2.fillConvexPoly(m, np.round(q * 4).astype(np.int32), 1, shift=2)
+        return m.astype(bool)
+
+    def loss(prm):
+        r = sil(prm)
+        inter = (r & tm).sum()
+        uni = (r | tm).sum()
+        reg = 0.02 * np.sum(np.minimum(prm[[0, 1, 2, 6]], 0) ** 2)
+        return 1 - inter / max(uni, 1) + reg
+
+    best = None
+    for x0 in (TARP_DEFAULT, TARP_DEFAULT + np.array([0.3, 0.1, 0.2, 0.3, 0, 0, 0.3, 0.2, 0, 0, 0.3, 0.0]),
+               np.array([0.5, 0.32, 0.59, -0.41, 0.0, 0.0, 1.11, 1.19, 0.0, 0.0, 0.0, 0.0])):
+        r = minimize(loss, x0, method="Nelder-Mead", options=dict(maxfev=2500, xatol=0.005, fatol=1e-5))
+        if best is None or r.fun < best.fun:
+            best = r
+    TARP_FIT["prm"] = best.x
+    TARP_FIT["iou"] = float(1 - best.fun)
+    rm = sil(best.x)
+    TARP_FIT["mask_iou"] = float((rm & tm).sum() / max((rm | tm).sum(), 1))
+    import os
+    from PIL import Image
+    vis = np.zeros((H, W, 3), np.uint8)
+    vis[tm & rm] = (60, 160, 60)
+    vis[tm & ~rm] = (210, 40, 40)
+    vis[~tm & rm] = (40, 70, 220)
+    TARP_FIT["vis"] = vis
+    print(f"[lf_env_camp_props] tarp fit: IoU in the painted tarp mask {TARP_FIT['mask_iou']:.3f} params {np.round(best.x, 2)}", flush=True)
+    return best.x
 
 
 def props(g, lod, cam, pos, hs):
@@ -342,4 +420,6 @@ def meta_extra():
     return dict(sockets={"lantern_light": gl(LAYOUT.get("lantern", (2, 0, 2))), "fire_light": gl(np.add(LAYOUT.get("fire", (0, 0, 0)), (0, 0, 0.4)))},
                 dimensions={"pole_rectangle_m": [round(LAYOUT["a"], 2), round(LAYOUT["b"], 2)],
                             "pole_heights_m": {k: round(v, 2) for k, v in LAYOUT["hs"].items()}},
+                tarp_fit={"iou_in_painted_tarp_mask": round(TARP_FIT.get("mask_iou", 0.0), 3),
+                          "params": [round(float(v), 3) for v in TARP_FIT.get("prm", TARP_DEFAULT)]},
                 notes="origin = centre of the pole rectangle on the ground; pole layout and heights solved jointly with the art/06 camera")

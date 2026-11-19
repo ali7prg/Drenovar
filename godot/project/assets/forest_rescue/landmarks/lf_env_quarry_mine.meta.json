@@ -2,20 +2,20 @@
   "id": "lf_env_quarry_mine",
   "generation": "v3 (blueprint + solved art/06 camera + painting projection)",
   "tris": {
-    "LOD0": 7144,
-    "LOD1": 1056,
+    "LOD0": 6726,
+    "LOD1": 1136,
     "LOD2": 254
   },
   "tris_detail": {
     "LOD0": {
-      "structure": 7144,
+      "structure": 6726,
       "base": 904,
-      "total": 8048
+      "total": 7630
     },
     "LOD1": {
-      "structure": 1056,
+      "structure": 1136,
       "base": 138,
-      "total": 1194
+      "total": 1274
     },
     "LOD2": {
       "structure": 254,
@@ -78,13 +78,13 @@
   },
   "bounds_m_gltf": [
     [
-      -4.361,
-      -0.045,
-      -3.341
+      -4.363,
+      -0.015,
+      -3.37
     ],
     [
       5.178,
-      4.15,
+      4.149,
       3.723
     ]
   ],
@@ -153,12 +153,12 @@
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py quarry_mine",
   "qa": {
     "main_view": {
-      "iou": 0.8274,
-      "colour_err": 0.1103,
-      "ssim": 0.4832,
-      "ref_px": 114434,
-      "render_px": 132497,
-      "iou_structure_only": 0.7300003819272046
+      "iou": 0.8863,
+      "colour_err": 0.1111,
+      "ssim": 0.5043,
+      "ref_px": 123500,
+      "render_px": 131631,
+      "iou_structure_only": 0.7733175201504771
     },
     "camera": {
       "rms_px": 3.56,
@@ -167,19 +167,19 @@
     },
     "insets": {
       "mine_front": {
-        "iou": 0.5766,
-        "colour_err": 0.1619,
-        "ssim": 0.2503,
+        "iou": 0.5702,
+        "colour_err": 0.1689,
+        "ssim": 0.2508,
         "ref_px": 132832,
-        "render_px": 83475
+        "render_px": 82932
       }
     },
     "texture": {
-      "texels": 2989766,
-      "projected_frac": 0.04923228105477151,
-      "seconds": 13.9
+      "texels": 3002998,
+      "projected_frac": 0.05233070418295317,
+      "seconds": 12.2
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter07_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter08_*"
   },
   "sockets": {
     "mine_entrance_centre": [

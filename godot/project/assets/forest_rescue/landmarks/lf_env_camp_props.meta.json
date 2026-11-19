@@ -172,12 +172,12 @@
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py camp_props",
   "qa": {
     "main_view": {
-      "iou": 0.8086,
-      "colour_err": 0.1303,
-      "ssim": 0.3997,
+      "iou": 0.8117,
+      "colour_err": 0.1312,
+      "ssim": 0.4031,
       "ref_px": 81683,
-      "render_px": 83505,
-      "iou_structure_only": 0.5756033139941756
+      "render_px": 82812,
+      "iou_structure_only": 0.5789270464250023
     },
     "camera": {
       "rms_px": 1.57,
@@ -186,26 +186,26 @@
     },
     "insets": {
       "front": {
-        "iou": 0.158,
-        "colour_err": 0.1491,
-        "ssim": 0.4602,
+        "iou": 0.2242,
+        "colour_err": 0.1473,
+        "ssim": 0.4352,
         "ref_px": 58656,
-        "render_px": 47053
+        "render_px": 63193
       },
       "side": {
-        "iou": 0.2,
-        "colour_err": 0.1568,
-        "ssim": 0.5277,
+        "iou": 0.171,
+        "colour_err": 0.2019,
+        "ssim": 0.51,
         "ref_px": 37408,
-        "render_px": 17424
+        "render_px": 19320
       }
     },
     "texture": {
-      "texels": 2611102,
-      "projected_frac": 0.048723872142873006,
-      "seconds": 12.2
+      "texels": 2700511,
+      "projected_frac": 0.05362540645085319,
+      "seconds": 12.4
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_camp_props/v3_iter07_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_camp_props/v3_iter08_*"
   },
   "clips": {
     "lf_banner_wind": {
@@ -238,6 +238,21 @@
       "BR": 1.96,
       "BL": 1.45
     }
+  },
+  "tarp_fit": {
+    "iou_in_painted_tarp_mask": 0.591,
+    "params": [
+      0.503,
+      0.32,
+      0.59,
+      -0.407,
+      -0.005,
+      0.002,
+      1.11,
+      1.189,
+      -0.011,
+      0.01
+    ]
   },
   "notes": "origin = centre of the pole rectangle on the ground; pole layout and heights solved jointly with the art/06 camera"
 }

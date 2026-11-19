@@ -717,7 +717,9 @@ def texture(lo0, R, J, pinfo0=None):
         if ref_f.sum() > 50:
             med_l = float(np.median(colf[ref_f] @ lw))
             skin_med = np.median(colf[ref_f], 0)
-            dk_f = hs_ & (~in_inner_f) & ((colf @ lw) < 0.55 * med_l)
+            # (below the eye line only: painted hair on the forehead / temples stays - it is the painted
+            # hairline, and dropping it left light bands under the hair shell)
+            dk_f = hs_ & (~in_inner_f) & ((colf @ lw) < 0.55 * med_l) & (data[2][:, 2] < C["L"]["eye"] - 0.01)
             dk_b = hs_ & ((colb @ lw) < 0.55 * med_l)
             wf = np.where(dk_f, 0.0, wf)
             wb = np.where(dk_b, 0.0, wb)

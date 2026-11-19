@@ -88,7 +88,9 @@ func _ready() -> void:
 							var t: Array = tint[key]
 							col = Color(float(t[0]), float(t[1]), float(t[2]))
 					mat.set_shader_parameter("albedo_color", col)
-					mat.set_shader_parameter("alpha_test", false)
+					# hair-strand cards (alphaMode MASK) keep their alpha test; everything else is opaque
+					mat.set_shader_parameter("alpha_test", sm.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED)
+					mat.set_shader_parameter("alpha_cutoff", sm.alpha_scissor_threshold if sm.alpha_scissor_threshold > 0.0 else 0.5)
 					mat.set_shader_parameter("painted_light_mix", float(inst.get("k", 0.4)))
 					mat.set_shader_parameter("light_dir_world", to_light)
 					mat.set_shader_parameter("wind_strength", 0.0)

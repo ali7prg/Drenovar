@@ -3,8 +3,8 @@
   "generation": "v2 image-based (painted turnaround silhouettes + template depth, painting projection)",
   "rig": "human_shared",
   "tris": {
-    "LOD0": 13814,
-    "LOD1": 6845,
+    "LOD0": 13686,
+    "LOD1": 6789,
     "LOD2": 2424
   },
   "budget": {
@@ -251,15 +251,5 @@
     "unit": "metre",
     "note": "Blender -Y forward exported to glTF +Z; feet on y=0, root at the origin"
   },
-  "notes": "",
-  "hairCards": {
-    "style": "crop",
-    "cardsByLOD": {
-      "lf_squad_captain_LOD0": 64,
-      "lf_squad_captain_LOD1": 28
-    },
-    "material": "lf_squad_captain_hair_cards (alphaMode MASK 0.5, double sided)",
-    "atlas": "forest_rescue/blender/textures/humans/lf_squad_captain_hair_cards.png",
-    "source": "strand clumps cut from the painted hair outline of the portrait inset"
-  }
+  "notes": ""
 }

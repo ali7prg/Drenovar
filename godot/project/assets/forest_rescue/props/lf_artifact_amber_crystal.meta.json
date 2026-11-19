@@ -83,7 +83,23 @@
     ],
     "note": "socket origin = recess floor centre; artifact origin goes exactly here with identity rotation"
   },
-  "clips": {},
+  "clips": {
+    "lf_artifact_insert": {
+      "seconds": 1.2,
+      "loop": false,
+      "frames": 36,
+      "markers": {
+        "seated": 0.75,
+        "glow_peak": 0.95
+      }
+    },
+    "lf_artifact_glow": {
+      "seconds": 2.0,
+      "loop": true,
+      "frames": 60,
+      "markers": {}
+    }
+  },
   "bounds_m": {
     "min": [
       -0.1157,
@@ -101,18 +117,59 @@
     "lf_artifact_amber_crystal_socket_LOD1",
     "lf_artifact_amber_crystal_socket_LOD2",
     "lf_artifact_amber_crystal_socket",
+    "lf_artifact_amber_crystal_v1_glow",
+    "lf_artifact_amber_crystal_v1_glow_pivot",
     "lf_artifact_amber_crystal_v1_LOD0",
     "lf_artifact_amber_crystal_v1_LOD1",
     "lf_artifact_amber_crystal_v1_LOD2",
     "lf_artifact_amber_crystal_v1",
+    "lf_artifact_amber_crystal_v2_glow",
+    "lf_artifact_amber_crystal_v2_glow_pivot",
     "lf_artifact_amber_crystal_v2_LOD0",
     "lf_artifact_amber_crystal_v2_LOD1",
     "lf_artifact_amber_crystal_v2_LOD2",
     "lf_artifact_amber_crystal_v2",
+    "lf_artifact_amber_crystal_v3_glow",
+    "lf_artifact_amber_crystal_v3_glow_pivot",
     "lf_artifact_amber_crystal_v3_LOD0",
     "lf_artifact_amber_crystal_v3_LOD1",
     "lf_artifact_amber_crystal_v3_LOD2",
     "lf_artifact_amber_crystal_v3"
   ],
-  "notes": "All three variants sit at the origin; show exactly one variant node per key (meta.variants). bone_key: shaft along -Z of glTF (into the lock), turn = rotation about the glTF Z axis. LOD1/LOD2 are lower-tessellation rebuilds sharing the LOD0 atlas (parametric UV transfer)."
+  "notes": "All three variants sit at the origin; show exactly one variant node per key (meta.variants). bone_key: shaft along -Z of glTF (into the lock), turn = rotation about the glTF Z axis. LOD1/LOD2 are lower-tessellation rebuilds sharing the LOD0 atlas (parametric UV transfer).",
+  "glow": {
+    "nodes": [
+      "lf_artifact_amber_crystal_v1_glow",
+      "lf_artifact_amber_crystal_v2_glow",
+      "lf_artifact_amber_crystal_v3_glow"
+    ],
+    "pivots": [
+      "lf_artifact_amber_crystal_v1_glow_pivot",
+      "lf_artifact_amber_crystal_v2_glow_pivot",
+      "lf_artifact_amber_crystal_v3_glow_pivot"
+    ],
+    "material": "lf_artifact_amber_crystal_glow",
+    "emissive_rgb": [
+      1.0,
+      0.62,
+      0.15
+    ],
+    "emissive_strength": 3.0,
+    "parameter": "StandardMaterial3D.emission_energy_multiplier (glTF KHR_materials_emissive_strength); set 0 to switch the glow off, ~3 when seated, pulse via lf_artifact_glow",
+    "note": "the painted-light override (paintedLightMix) must skip materials ending in _glow"
+  },
+  "insert": {
+    "clip": "lf_artifact_insert",
+    "axis_gltf": [
+      0,
+      0,
+      1
+    ],
+    "travel_m": 0.22,
+    "parent_to": "cage key_slot node (identity transform), variant node per site"
+  },
+  "glb_animations": [
+    "lf_artifact_insert",
+    "lf_artifact_glow"
+  ]
 }

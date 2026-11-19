@@ -383,15 +383,15 @@
         "bandages": 0.0034,
         "chest": 0.0388
       },
-      "seconds": 24.9
+      "seconds": 29.5
     },
-    "sheets": "forest_rescue/qa/compare/lf_props_supplies/v2_iter02_*",
+    "sheets": "forest_rescue/qa/compare/lf_props_supplies/v2_iter03_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py supplies --iter 2",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py supplies --iter 3",
   "items": {
     "supply_crate_closed": {
       "painted_box": [

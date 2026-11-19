@@ -1,47 +1,65 @@
 {
   "id": "lf_env_ruined_watchpost",
+  "generation": "v3 (blueprint + solved art/06 camera + painting projection)",
   "tris": {
-    "LOD0": 2288,
-    "LOD1": 132,
-    "LOD2": 60
+    "LOD0": 2360,
+    "LOD1": 896,
+    "LOD2": 228
+  },
+  "tris_detail": {
+    "LOD0": {
+      "structure": 2360,
+      "base": 1068,
+      "total": 3428
+    },
+    "LOD1": {
+      "structure": 896,
+      "base": 190,
+      "total": 1086
+    },
+    "LOD2": {
+      "structure": 228,
+      "base": 24,
+      "total": 252
+    }
+  },
+  "budget": {
+    "LOD0": 6000,
+    "LOD1": 1500,
+    "LOD2": 400,
+    "note": "structure meshes; the toggleable ground base is counted separately in tris_detail"
   },
   "bones": 0,
   "materials": [
-    "lm_misc",
-    "lm_stone"
+    "lf_env_ruined_watchpost_card.001",
+    "lf_env_ruined_watchpost_ground.001",
+    "lf_env_ruined_watchpost_stone.001"
   ],
   "glb_images": [
-    "lm_stone_n.png",
-    "lm_stone_c.jpg",
-    "lm_stone_r.png",
-    "lm_misc_n.png",
-    "lm_misc_c.png",
-    "lm_misc_r.png"
+    "lf_env_ruined_watchpost_cards.png",
+    "lf_env_ruined_watchpost_n.png",
+    "lf_env_ruined_watchpost_c.jpg"
   ],
   "textures": {
-    "lm_stone_c.jpg": 1024,
-    "lm_stone_n.png": 1024,
-    "lm_stone_r.png": 1024,
-    "lm_wood_c.jpg": 1024,
-    "lm_wood_n.png": 1024,
-    "lm_wood_r.png": 1024,
-    "lm_roof_c.jpg": 1024,
-    "lm_roof_n.png": 1024,
-    "lm_roof_r.png": 1024,
-    "lm_misc_c.png": 1024,
-    "lm_misc_n.png": 1024,
-    "lm_misc_r.png": 1024
+    "lf_env_ruined_watchpost_c.jpg": 2048,
+    "lf_env_ruined_watchpost_n.png": 1024,
+    "lf_env_ruined_watchpost_lod1_c.jpg": 1024,
+    "lf_env_ruined_watchpost_lod2_c.jpg": 512,
+    "lf_env_ruined_watchpost_cards.png": 1024
   },
-  "texture_mode": "external shared lm_* files next to the GLB (relative URIs)",
+  "texture_mode": "external per-asset files next to the GLB (relative URIs); LOD1/LOD2 have their own atlases",
   "nodes": {
     "LOD0": [
-      "lf_env_ruined_watchpost_LOD0"
+      "lf_env_ruined_watchpost_LOD0",
+      "lf_env_ruined_watchpost_base"
     ],
     "LOD1": [
-      "lf_env_ruined_watchpost_LOD1"
+      "lf_env_ruined_watchpost_LOD1",
+      "lf_env_ruined_watchpost_base_LOD1"
     ],
     "LOD2": [
-      "lf_env_ruined_watchpost_LOD2"
+      "lf_env_ruined_watchpost_LOD2",
+      "lf_env_ruined_watchpost_base_LOD2"
     ]
   },
   "lod_files": {
@@ -49,30 +67,36 @@
     "LOD1": "lf_env_ruined_watchpost_LOD1.glb",
     "LOD2": "lf_env_ruined_watchpost_LOD2.glb"
   },
+  "base_node": {
+    "LOD0": "lf_env_ruined_watchpost_base",
+    "LOD1": "lf_env_ruined_watchpost_base_LOD1",
+    "LOD2": "lf_env_ruined_watchpost_base_LOD2",
+    "note": "painted ground patch (dirt/gravel/grass/stones/water) as a separate node; the world may hide it"
+  },
   "bounds_m_gltf": [
     [
-      -5.112,
-      -0.137,
-      -3.991
+      -4.09,
+      0.0,
+      -0.97
     ],
     [
-      5.48,
-      5.488,
-      3.317
+      5.989,
+      5.981,
+      2.09
     ]
   ],
   "collision": [
     {
       "type": "box",
       "centre": [
-        0.0,
-        0.65,
-        -0.0
+        0.3,
+        0.9,
+        1.0
       ],
       "size": [
-        5.6,
-        1.3,
-        4.4
+        4.6,
+        1.8,
+        2.0
       ],
       "yaw_deg": 0.0
     },
@@ -80,32 +104,105 @@
       "type": "box",
       "centre": [
         0.0,
-        3.3,
-        -1.75
+        3.6,
+        -0.425
       ],
       "size": [
-        5.6,
+        3.9,
+        3.6,
+        0.85
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        -3.0,
+        2.0,
+        0.5
+      ],
+      "size": [
+        2.2,
         4.0,
-        0.8
+        1.0
       ],
       "yaw_deg": 0.0
     },
     {
       "type": "ramp",
       "centre": [
-        4.2,
-        0.65,
-        0.6
+        3.9,
+        0.9,
+        1.0
       ],
       "size": [
-        2.5,
-        1.3,
-        1.7
+        2.6,
+        1.8,
+        2.0
       ],
       "yaw_deg": 0.0
     }
   ],
-  "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; 'ramp' = oriented box along the slope; yaw about +Y.",
+  "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; 'ramp' = oriented box along the slope; 'cylinder' size = (diameter, height, diameter); yaw about +Y.",
   "layout_note": "Main GLB = LOD0 at the asset origin; LOD1/LOD2 in <id>_LOD1.glb / <id>_LOD2.glb (same origin).",
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/build_landmarks.py ruined_watchpost"
+  "paintedLightMix": 0.35,
+  "paintedLightNote": "Textures carry the painted light. Shade as albedo * mix(1, lambert, paintedLightMix) (lambert = max(dot(N, L), 0)), as the nature kit (forest_kit.json 'shading').",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py ruined_watchpost",
+  "qa": {
+    "main_view": {
+      "iou": 0.7536,
+      "colour_err": 0.0914,
+      "ssim": 0.5186,
+      "ref_px": 86455,
+      "render_px": 95640,
+      "iou_structure_only": 0.6108075406892783
+    },
+    "camera": {
+      "rms_px": 11.77,
+      "max_px": 20.12,
+      "n_points": 8
+    },
+    "insets": {
+      "front": {
+        "iou": 0.5457,
+        "colour_err": 0.1512,
+        "ssim": 0.3732,
+        "ref_px": 95280,
+        "render_px": 98445
+      },
+      "side": {
+        "iou": 0.5087,
+        "colour_err": 0.1412,
+        "ssim": 0.3239,
+        "ref_px": 70784,
+        "render_px": 125366
+      }
+    },
+    "texture": {
+      "texels": 3156565,
+      "projected_frac": 0.05499490743894075,
+      "seconds": 13.2
+    },
+    "sheets": "forest_rescue/qa/compare/lf_env_ruined_watchpost/v3_iter02_*"
+  },
+  "dimensions": {
+    "terrace_height_m": 1.8,
+    "arch_opening_m": [
+      1.0,
+      2.5
+    ],
+    "stair": "7 steps, riser 0.26 m, tread 0.36 m"
+  },
+  "sockets": {
+    "arch_centre": [
+      0.0,
+      1.8,
+      0.0
+    ],
+    "stair_foot": [
+      5.3,
+      0.0,
+      1.0
+    ]
+  }
 }

@@ -97,7 +97,24 @@ def ivy(size, palette, rng):
     return img, a
 
 
-KINDS = {"fern": fern, "grass": grass, "weed": weed, "ivy": ivy}
+def net(size, palette, rng):
+    """Knotted rope net (diamond mesh) hanging in a pouch shape."""
+    img = np.zeros((size, size, 3), np.float32)
+    a = np.zeros((size, size), np.float32)
+    col = (0.62, 0.50, 0.32)
+    step = size // 12
+    for k in range(-size, 2 * size, step):
+        cv2.line(img, (k, 0), (k + size, size), col, 2, cv2.LINE_AA)
+        cv2.line(a, (k, 0), (k + size, size), 1.0, 2, cv2.LINE_AA)
+        cv2.line(img, (k, 0), (k - size, size), col, 2, cv2.LINE_AA)
+        cv2.line(a, (k, 0), (k - size, size), 1.0, 2, cv2.LINE_AA)
+    yy, xx = np.mgrid[0:size, 0:size] / size
+    pouch = (np.abs(xx - 0.5) < 0.5 - 0.25 * yy ** 2)
+    a *= pouch
+    return img, a
+
+
+KINDS = {"fern": fern, "grass": grass, "weed": weed, "ivy": ivy, "net": net}
 
 
 def atlas(specs, palette, size=1024, seed=3):

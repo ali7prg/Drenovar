@@ -20,11 +20,11 @@ OX, OY = MAIN_BOX[0], MAIN_BOX[1]
 BUDGET0 = 6000
 ATLAS = 2048
 MASK_THRESH = 0.09
-MASK_EXCLUDE = [(0, 0, 60, 40), (420, 0, 480, 40)]
+MASK_EXCLUDE = [(0, 0, 60, 40), (420, 0, 480, 40), (462, 0, 480, 165), (0, 0, 70, 30)]
 F_PAINT = 1921.0
 TER_H = 1.8
 TER_Y = -2.0          # terrace front face
-ARCH = dict(x0=-0.65, x1=0.65, spring=TER_H + 1.75, y=0.0, t=0.85)
+ARCH = dict(x0=-0.5, x1=0.5, spring=TER_H + 1.85, y=0.0, t=0.85)
 
 CORR = [((905, 535), (-2.0, TER_Y, 0.0)), ((905, 446), (-2.0, TER_Y, TER_H)), ((1088, 446), (2.0, TER_Y, TER_H)),
         ((975, 437), (ARCH["x0"], ARCH["y"], TER_H)), ((1008, 437), (ARCH["x1"], ARCH["y"], TER_H)),
@@ -173,7 +173,7 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
         if zb > 0.01:
             g.box((x0 + 0.18, TER_Y + 1.0, zb / 2), (0.36, 2.0, zb), None, "stone", "stair", skip=("-z", "+z", "-x"))
     # broken wall stubs / pillars on the right (painted silhouette profiles)
-    for (xa, xb, sx0, sx1, y0) in ((2.6, 4.2, 1075, 1168, -0.3), (4.4, 5.1, 1170, 1206, -1.2), (5.4, 6.0, 1209, 1238, -1.8)):
+    for (xa, xb, sx0, sx1, y0) in ((2.6, 4.2, 1086, 1166, -0.3), (4.4, 5.1, 1171, 1205, -1.2), (5.4, 6.0, 1211, 1232, -1.8)):
         sp = profile(cam, mask, sx0, sx1, y0, 0.5, 5.0)
         if len(sp[0]) < 2:
             continue

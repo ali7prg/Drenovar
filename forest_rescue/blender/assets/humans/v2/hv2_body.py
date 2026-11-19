@@ -120,7 +120,7 @@ def torso_part(R, C, J):
     f = np.clip((zs - z_bot) / (nz - z_bot), 0, 1.06)
     td = B.get("torso_depth", 1.0)
     ratio = np.interp(f, [0.0, 0.18, 0.40, 0.62, 0.80, 0.92, 1.0, 1.06],
-                      [0.66, 0.70, 0.74 + 0.06 * stocky, 0.70, 0.64, 0.56, 0.62, 0.85]) * td
+                      [0.64, 0.66, 0.68 + 0.04 * stocky, 0.66, 0.62, 0.55, 0.62, 0.85]) * td
     a = 0.5 * (al + ar)
     depth = ratio * a
     belly = B.get("belly", 0.0)
@@ -322,11 +322,11 @@ def head_parts(C, J):
                      bone=bone, label="skin", k=0.014, name="brow"))
     # eye sockets (subtract) + eyeballs (add back slightly recessed)
     for sx in (1, -1):
-        P.append(F.Part(F.ellipsoid(W((sx * 0.032, -0.091, 0.0)), R_((0.018, 0.016, 0.012))).fn,
+        P.append(F.Part(F.ellipsoid(W((sx * 0.032, -0.094, 0.002)), R_((0.017, 0.013, 0.010))).fn,
                         W((sx * 0.032, -0.091, 0.0)) - 0.03, W((sx * 0.032, -0.091, 0.0)) + 0.03,
                         bone=bone, label="skin", k=0.010, op="subtract", name="socket"))
     for sx in (1, -1):
-        P.append(F.sphere(W((sx * 0.032, -0.077, 0.0)), 0.0122 * S[0], bone=bone, label="skin", k=0.003, name="eyeball"))
+        P.append(F.sphere(W((sx * 0.032, -0.0705, 0.0)), 0.0122 * S[0], bone=bone, label="skin", k=0.006, name="eyeball"))
     P.append(F.rcone(W((0, -0.083, -0.002)), W((0, -0.104 * nose - 0.0, -0.043)), 0.008 * S[0] * nose, 0.0105 * S[0] * nose,
                      bone=bone, label="skin", k=0.008, name="nose"))
     for sx in (1, -1):
@@ -394,8 +394,8 @@ def hair_sdf(C, J, P, d_body):
     taper = np.clip(above / 0.035, 0.0, 1.0)
     taper = taper * taper * (3 - 2 * taper)
     front = np.clip(1.0 - (aphi / 1.3), 0.0, 1.0)
-    t = t_h * vol * (0.25 + 0.75 * taper) * (1.0 - 0.45 * front)
-    d_scalp = np.maximum(d_body - t, -above * 0.9 * S[2])
+    t = t_h * vol * (0.06 + 0.94 * taper) * (1.0 - 0.45 * front)
+    d_scalp = smax_np(d_body - t, -above * 0.9 * S[2], 0.006)
     if style == "bun":
         c = o + np.array([0.0, 0.088, 0.035]) * S
         d_bun = np.linalg.norm(P - c, axis=-1) - 0.034 * S[0]
@@ -410,13 +410,17 @@ def hair_sdf(C, J, P, d_body):
         tb = tb * (0.85 + 0.3 * _noise3(P, 90.0, 7))
         top = np.interp(aphi, [0, 0.30, 0.55, 1.0, 1.45, 1.75], [-0.050, -0.052, -0.040, -0.024, -0.016, -0.02])
         below = top - z
-        tb = tb * (0.35 + 0.65 * np.clip(below / 0.02, 0, 1))
+        tb = tb * (0.08 + 0.92 * np.clip(below / 0.025, 0, 1))
         front = 1.70 - aphi
         lips = np.sqrt((x / 0.021) ** 2 + ((z + 0.075) / 0.0105) ** 2) - 1.0
         allow = np.minimum(np.minimum(below, front * 0.05), np.where(aphi < 0.8, lips * 0.012, 1.0))
-        d_beard = np.maximum(d_body - tb, -allow * S[2])
+        d_beard = smax_np(d_body - tb, -allow * S[2], 0.004)
         out = smin_np(out, d_beard, 0.004)
     return out
+
+
+def smax_np(a, b, k):
+    return -smin_np(-a, -b, k)
 
 
 def smin_np(a, b, k):

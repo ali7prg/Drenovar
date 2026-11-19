@@ -30,30 +30,39 @@ def add_group(obj, name, weights):
     return g
 
 
-def decimate(obj, target, protect=None, factor=8.0):
-    cur = core.tri_count(obj)
-    if cur <= target:
-        return obj
+def _collapse(obj, ratio, group=None, factor=1.0):
     mod = obj.modifiers.new("dec", "DECIMATE")
     mod.decimate_type = "COLLAPSE"
-    mod.ratio = max(0.002, target / cur)
+    mod.ratio = max(0.002, min(1.0, ratio))
     mod.use_collapse_triangulate = True
-    if protect is not None:
-        # Blender's collapse cost grows where the group weight is LOW: store 1 - protect
-        add_group(obj, "_protect", 1.0 - np.clip(np.asarray(protect, float), 0, 1) + 1e-4)
-        mod.vertex_group = "_protect"
+    if group:
+        mod.vertex_group = group
         mod.vertex_group_factor = factor
     core.select_only([obj])
     bpy.ops.object.modifier_apply(modifier="dec")
-    if obj.vertex_groups.get("_protect"):
-        obj.vertex_groups.remove(obj.vertex_groups["_protect"])
-    # second pass without protection if still above target
+
+
+def decimate(obj, target, protect=None, factor=1.0, stage=40000):
+    """Two-stage collapse: uniform pre-reduction to `stage` tris (thin limbs survive), then to the
+    target with optional protection weights (1 = keep detail: face, ears)."""
+    cur = core.tri_count(obj)
+    if cur > stage * 1.2:
+        _collapse(obj, stage / cur)
+        cur = core.tri_count(obj)
+    if cur <= target:
+        return obj
+    grp = None
+    if protect is not None:
+        vv = np.array([v.co[:] for v in obj.data.vertices])
+        w = protect(vv) if callable(protect) else np.asarray(protect, float)
+        # Blender's collapse cost grows where the group weight is LOW: store 1 - protect
+        add_group(obj, "_protect", 1.0 - np.clip(w, 0, 1))
+        grp = "_protect"
+    _collapse(obj, target / cur, grp, factor)
+    if grp and obj.vertex_groups.get(grp):
+        obj.vertex_groups.remove(obj.vertex_groups[grp])
     if core.tri_count(obj) > target * 1.06:
-        mod = obj.modifiers.new("dec2", "DECIMATE")
-        mod.decimate_type = "COLLAPSE"
-        mod.ratio = target / core.tri_count(obj)
-        mod.use_collapse_triangulate = True
-        bpy.ops.object.modifier_apply(modifier="dec2")
+        _collapse(obj, target / core.tri_count(obj))
     return obj
 
 

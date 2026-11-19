@@ -248,20 +248,24 @@ MAT_IDS = {"body": 0, "hair": 1, "cloth": 2, "gear": 3}
 def build_objects(R, J):
     fld, parts, wparts, prof, bv, bf, sup = body_geometry(R, J)
     body = HBL.obj_from(f"{AID}_bodyHQ", bv, bf)
-    # protect the face/ears from decimation, keep the boots' toe shapes
+    # protect the face (front of the head) and ears from decimation
     o, S = HB.head_frame(C, J)
-    vv = np.array([v.co[:] for v in body.data.vertices])
-    prot = np.where(vv[:, 2] > C["L"]["chin"] - 0.03, 1.0, 0.0)
-    prot = np.maximum(prot, np.where(vv[:, 2] < 0.10, 0.4, 0.0))
-    t_body = {"civilian": 5400, "soldier": 5600}[C["kind"]]
-    HBL.decimate(body, t_body, protect=prot, factor=6.0)
+
+    def prot(vv):
+        q = (vv - o) / S
+        face = (q[:, 2] > -0.15) & (q[:, 2] < 0.08) & (q[:, 1] < 0.0)
+        ears = (np.abs(q[:, 0]) > 0.06) & (q[:, 2] > -0.06) & (q[:, 2] < 0.03) & (np.abs(q[:, 1]) < 0.04)
+        hands = vv[:, 2] < -10
+        return np.where(face | ears, 1.0, 0.0) + hands
+    t_body = {"civilian": 6400, "soldier": 6600}[C["kind"]]
+    HBL.decimate(body, t_body, protect=prot, factor=1.0)
     HBL.smooth_shade(body)
     log("body tris", core.tri_count(body))
     objs = [(body, "body", "body")]
     hv, hf = hair_geometry(R, J, fld)
     if hv is not None and len(hf):
         hair = HBL.obj_from(f"{AID}_hairHQ", hv, hf)
-        HBL.decimate(hair, 1100)
+        HBL.decimate(hair, 1100, stage=20000)
         HBL.smooth_shade(hair)
         objs.append((hair, "hair", "hair"))
         log("hair tris", core.tri_count(hair))

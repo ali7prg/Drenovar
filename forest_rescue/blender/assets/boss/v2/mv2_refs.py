@@ -46,7 +46,7 @@ SIDE_EXCLUDE = [             # full-image boxes forced to background
     (0, 250, 62, 330),       # head-height text
     (30, 330, 175, 482),     # human scale figure + label
     (588, 300, 665, 380),    # hip-height text
-    (580, 300, 590, 482),    # hip-height line below the tail
+    (578, 294, 593, 482),    # hip-height line + tick below the tail
     (888, 378, 940, 482),    # front-view foot entering the crop
 ]
 # annotation strokes painted over the creature (inpainted before colour projection)

@@ -1,91 +1,128 @@
 {
   "id": "lf_mechanism_trail_cache",
+  "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 2516,
-    "LOD1": 1544,
-    "LOD2": 957
+    "LOD0": 1218,
+    "LOD1": 584,
+    "LOD2": 460
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 2056,
-      "lid": 152,
-      "handle": 140,
-      "mark_1": 140,
-      "mark_2": 28
+      "root": 678,
+      "cache_lid": 148,
+      "mark_landmark_b": 320,
+      "mark_landmark_a": 72
     },
     "LOD1": {
-      "root": 1182,
-      "lid": 152,
-      "handle": 90,
-      "mark_1": 92,
-      "mark_2": 28
+      "root": 316,
+      "cache_lid": 148,
+      "mark_landmark_b": 80,
+      "mark_landmark_a": 40
     },
     "LOD2": {
-      "root": 657,
-      "lid": 152,
-      "handle": 60,
-      "mark_1": 60,
-      "mark_2": 28
+      "root": 192,
+      "cache_lid": 148,
+      "mark_landmark_b": 80,
+      "mark_landmark_a": 40
     }
   },
-  "budget": "mechanism LOD0 <= 6000 tris",
+  "budget": {},
   "bones": 0,
   "materials": [
+    "lf_mechanism_trail_cache_lod1_mat",
+    "lf_mechanism_trail_cache_lod2_mat",
     "lf_mechanism_trail_cache_mat"
   ],
   "textures": {
-    "baseColor": "2048 JPEG",
-    "metallicRoughness": "1024 JPEG (G rough, B metal)",
-    "normal": "2048 PNG"
+    "lf_mechanism_trail_cache_c.jpg": 2048,
+    "lf_mechanism_trail_cache_n.png": 1024,
+    "lf_mechanism_trail_cache_lod1_c.jpg": 1024,
+    "lf_mechanism_trail_cache_lod2_c.jpg": 512
   },
-  "coordinate_space": "glTF (Y up, metres); operator/front side faces +Z",
+  "texture_mode": "external JPEG/PNG next to the GLB (relative URIs); LOD1/LOD2 have their own atlases",
+  "paintedLightMix": 0.38,
+  "paintedLightNote": "albedo carries the painted light: shade = albedo * mix(1, lambert, paintedLightMix) (actor_rig.apply_look -> ForestKit.painted_material)",
+  "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -1.5902,
-      0.0,
-      0.816
+      -2.95,
+      -0.08,
+      -2.492
     ],
     "max": [
-      2.45,
-      0.98,
-      -1.597
+      2.15,
+      1.48,
+      1.0
     ]
   },
+  "lod_nodes": {
+    "LOD0": [
+      "lf_mechanism_trail_cache_LOD0",
+      "lf_mechanism_trail_cache_cache_lid_LOD0",
+      "lf_mechanism_trail_cache_mark_landmark_a_LOD0",
+      "lf_mechanism_trail_cache_mark_landmark_b_LOD0"
+    ],
+    "LOD1": [
+      "lf_mechanism_trail_cache_LOD1",
+      "lf_mechanism_trail_cache_cache_lid_LOD1",
+      "lf_mechanism_trail_cache_mark_landmark_a_LOD1",
+      "lf_mechanism_trail_cache_mark_landmark_b_LOD1"
+    ],
+    "LOD2": [
+      "lf_mechanism_trail_cache_LOD2",
+      "lf_mechanism_trail_cache_cache_lid_LOD2",
+      "lf_mechanism_trail_cache_mark_landmark_a_LOD2",
+      "lf_mechanism_trail_cache_mark_landmark_b_LOD2"
+    ]
+  },
+  "lod_note": "LOD meshes are siblings named *_LOD0/1/2 (actor_rig.set_lod); LOD1/LOD2 are hidden by default (KHR_node_visibility) so a plain instance shows LOD0 only.",
+  "hidden_by_default": [],
   "clips": {
     "lf_trail_mark_1": {
-      "seconds": 0.6,
-      "frames": 18,
+      "seconds": 1.0,
       "loop": false,
-      "markers": {
-        "mark_visible": 0.1
-      },
-      "glb_seconds": 0.6
+      "frames": 30,
+      "markers": {},
+      "note": "landmark 1 (split birch) acknowledged: small settle bump",
+      "nodes": [
+        "mark_landmark_a"
+      ]
     },
     "lf_trail_mark_2": {
-      "seconds": 0.6,
-      "frames": 18,
+      "seconds": 1.0,
       "loop": false,
-      "markers": {
-        "mark_visible": 0.1
-      },
-      "glb_seconds": 0.6
+      "frames": 30,
+      "markers": {},
+      "note": "landmark 2 (white-moss rock) acknowledged",
+      "nodes": [
+        "mark_landmark_b"
+      ]
     },
     "lf_lock_mechanism": {
-      "seconds": 1.8,
-      "frames": 54,
+      "seconds": 1.4,
       "loop": false,
+      "frames": 42,
       "markers": {
-        "lid_open": 1.5333333333333334
+        "cache_open": 1.25
       },
-      "glb_seconds": 1.8
+      "note": "log hatch slides open along the log (solved pose = last frame)",
+      "nodes": [
+        "cache_lid"
+      ]
+    },
+    "lf_trail_cache_close": {
+      "seconds": 1.0,
+      "loop": false,
+      "frames": 30,
+      "markers": {},
+      "note": "hatch slides closed",
+      "nodes": [
+        "cache_lid"
+      ]
     }
   },
   "glb_nodes": [
     "artifact_spot",
-    "lf_mechanism_trail_cache_cache_lid_ring_LOD0",
-    "lf_mechanism_trail_cache_cache_lid_ring_LOD1",
-    "lf_mechanism_trail_cache_cache_lid_ring_LOD2",
-    "cache_lid_ring",
     "lf_mechanism_trail_cache_cache_lid_LOD0",
     "lf_mechanism_trail_cache_cache_lid_LOD1",
     "lf_mechanism_trail_cache_cache_lid_LOD2",
@@ -102,142 +139,83 @@
     "lf_mechanism_trail_cache_mark_landmark_b_LOD2",
     "mark_landmark_b"
   ],
-  "glb_animations": {
-    "lf_lock_mechanism": [
-      [
-        "cache_lid",
-        "translation"
-      ],
-      [
-        "cache_lid",
-        "rotation"
-      ],
-      [
-        "cache_lid",
-        "scale"
-      ],
-      [
-        "cache_lid_ring",
-        "translation"
-      ],
-      [
-        "cache_lid_ring",
-        "rotation"
-      ],
-      [
-        "cache_lid_ring",
-        "scale"
-      ]
-    ],
-    "lf_trail_mark_1": [
-      [
-        "mark_landmark_a",
-        "translation"
-      ],
-      [
-        "mark_landmark_a",
-        "rotation"
-      ],
-      [
-        "mark_landmark_a",
-        "scale"
-      ]
-    ],
-    "lf_trail_mark_2": [
-      [
-        "mark_landmark_b",
-        "translation"
-      ],
-      [
-        "mark_landmark_b",
-        "rotation"
-      ],
-      [
-        "mark_landmark_b",
-        "scale"
-      ]
-    ]
+  "glb_animations": [
+    "lf_lock_mechanism",
+    "lf_trail_cache_close",
+    "lf_trail_mark_1",
+    "lf_trail_mark_2"
+  ],
+  "blueprint": {
+    "R": 0.45,
+    "L": 3.3,
+    "lx0": -0.1656,
+    "lx1": 0.8829,
+    "lw": 0.51,
+    "rx": -0.6235,
+    "ry": 1.3468,
+    "sx_": -2.0544,
+    "sy_": 2.1077
   },
-  "markers": {
-    "artifact_spot": {
-      "position": [
-        1.0,
-        0.41,
-        -0.0
-      ],
-      "parent": "root"
+  "qa": {
+    "views": {
+      "main": {
+        "iou_raw": 0.0,
+        "iou_filled": 0.0,
+        "colour_err": 1.0,
+        "colour_err_core": 1.0,
+        "ref_px": 189803,
+        "render_px": 0,
+        "ignored_px": 0,
+        "camera_rms_px": 10.99,
+        "camera_max_px": 15.48,
+        "camera_points": 8
+      }
+    },
+    "cameras": {
+      "main": {
+        "rms_px": 10.99,
+        "max_px": 15.48,
+        "n": 8,
+        "fov_deg": 0.01,
+        "per_point_px": {
+          "latch": 13.62,
+          "ring": 11.46,
+          "lid_a": 15.48,
+          "lid_b": 13.41,
+          "lid_c": 12.71,
+          "lid_d": 8.29,
+          "rock_top": 0.02,
+          "stump_top": 0.39
+        }
+      }
+    },
+    "texture": {
+      "texels": 2710424,
+      "projected_frac": 0.2473,
+      "per_view_frac": {
+        "main": 0.2464
+      },
+      "seconds": 8.8
+    },
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_trail_cache/v2_iter02_*",
+    "godot_import": {
+      "errors_warnings": 0,
+      "lines": []
     }
   },
-  "projection": {
-    "painted_fraction": 0.001,
-    "texel_mm": 3.241
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_trail_cache --iter 2",
+  "mechanism": "trail_cache",
+  "steps": {
+    "split_birch": "lf_trail_mark_1 (node mark_landmark_a)",
+    "white_moss": "lf_trail_mark_2 (node mark_landmark_b)",
+    "fallen_trunk": "lf_lock_mechanism (node cache_lid slides +X 0.55 m)"
   },
-  "camera_fit_iou": {
-    "main": 0.9364
-  },
-  "notes": "Landmarks A/B and the log cache are one GLB; client may offset A/B per the site layout.",
-  "symbol_targets": {
-    "landmarks": {
-      "A": {
-        "node": "mark_landmark_a",
-        "where": "split birch stump",
-        "clip": "lf_trail_mark_1",
-        "visible_scale": 1
-      },
-      "B": {
-        "node": "mark_landmark_b",
-        "where": "white-moss boulder",
-        "clip": "lf_trail_mark_2",
-        "visible_scale": 1
-      },
-      "C": {
-        "node": "cache_lid",
-        "where": "hollow log cache",
-        "clip": "lf_lock_mechanism",
-        "open_translation_offset": [
-          0.55,
-          0,
-          0
-        ]
-      }
-    },
-    "sites": {
-      "lf_site_01": {
-        "split_birch": "A",
-        "white_moss": "B",
-        "fallen_trunk": "C"
-      },
-      "lf_site_05": {
-        "resin_pine": "A",
-        "double_stump": "B",
-        "resin_bowl": "C"
-      },
-      "lf_site_09": {
-        "bent_fern": "A",
-        "flat_slab": "B",
-        "three_notches": "C"
-      }
-    },
-    "progress_rule": "progress k shows marks of steps <= k (scale 1); solved plays lf_lock_mechanism; wrong input -> marks scale 0",
-    "note": "Sites 05/09 reuse the same three landmark nodes; their biome-specific look (resin pine, double stump, resin bowl, bent fern, flat slab, three-notch stone) is NOT modelled here - deviation documented."
-  },
+  "solved_clip": "lf_lock_mechanism (hold last frame)",
   "sockets": {
-    "artifact_spot": [
-      1.0,
-      0.41,
+    "artifact": [
+      0.1587,
+      0.85,
       -0.0
-    ],
-    "landmark_offsets_from_log": {
-      "A": [
-        -1.15,
-        0.0,
-        -0.5
-      ],
-      "B": [
-        0.25,
-        0.0,
-        -1.05
-      ]
-    }
+    ]
   }
 }

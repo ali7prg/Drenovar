@@ -1,0 +1,40 @@
+{
+  "qa": {
+    "main": {
+      "iou_raw": 0.7376,
+      "iou_filled": 0.7376,
+      "colour_err": 0.0884,
+      "colour_err_core": 0.0883,
+      "ref_px": 189803,
+      "render_px": 166319,
+      "ignored_px": 0,
+      "camera_rms_px": 17.57,
+      "camera_max_px": 36.28,
+      "camera_points": 10
+    }
+  },
+  "tris": {
+    "LOD0": 1218,
+    "LOD1": 584,
+    "LOD2": 460
+  },
+  "texture": {
+    "texels": 2736209,
+    "projected_frac": 0.3921,
+    "per_view_frac": {
+      "main": 0.3912
+    },
+    "seconds": 11.6
+  },
+  "blueprint": {
+    "R": 0.45,
+    "L": 3.6662,
+    "lx0": -0.8607,
+    "lx1": 0.2476,
+    "lw": 0.365,
+    "rx": -1.1895,
+    "ry": 1.2651,
+    "sx_": -2.5904,
+    "sy_": 2.0431
+  }
+}

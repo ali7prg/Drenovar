@@ -2,13 +2,13 @@
   "id": "lf_mechanism_paired_latch",
   "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 2914,
+    "LOD0": 2874,
     "LOD1": 1214,
     "LOD2": 1104
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 746,
+      "root": 706,
       "plate_left": 140,
       "spring_left": 864,
       "plate_right": 140,
@@ -57,12 +57,12 @@
   "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -3.902,
+      -4.414,
       0.0,
-      -1.515
+      -1.523
     ],
     "max": [
-      3.902,
+      4.414,
       2.21,
       1.617
     ]
@@ -217,12 +217,12 @@
   "qa": {
     "views": {
       "unpressed": {
-        "iou_raw": 0.6737,
-        "iou_filled": 0.8262,
-        "colour_err": 0.0526,
-        "colour_err_core": 0.0502,
-        "ref_px": 80786,
-        "render_px": 85742,
+        "iou_raw": 0.8348,
+        "iou_filled": 0.879,
+        "colour_err": 0.0527,
+        "colour_err_core": 0.0515,
+        "ref_px": 96210,
+        "render_px": 94316,
         "ignored_px": 0,
         "camera_rms_px": 3.7,
         "camera_max_px": 8.12,
@@ -253,20 +253,20 @@
       }
     },
     "texture": {
-      "texels": 2959412,
-      "projected_frac": 0.2109,
+      "texels": 2996009,
+      "projected_frac": 0.2642,
       "per_view_frac": {
-        "unpressed": 0.2113
+        "unpressed": 0.2645
       },
-      "seconds": 10.6
+      "seconds": 11.7
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_paired_latch/v2_iter01_*",
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_paired_latch/v2_iter02_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_paired_latch --iter 1",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_paired_latch --iter 2",
   "mechanism": "paired_latch",
   "sockets": {
     "plate_left": [

@@ -33,8 +33,8 @@ NO_PROJECT_TAGS = ()
 TAG_SWATCH = {"tile": "roof", "plank": "wood", "beam": "wood_h", "chimney": "stone"}
 SWATCHES = {
     "roof": dict(box=(1376, 104, 1505, 178), metres=1.2),
-    "wood": dict(box=(1395, 195, 1420, 250), metres=0.8),
-    "wood_h": dict(box=(1395, 195, 1420, 250), metres=0.8, rotate=True),
+    "wood": dict(box=(1441, 222, 1461, 256), metres=0.6),
+    "wood_h": dict(box=(1441, 222, 1461, 256), metres=0.6, rotate=True),
     "stone": dict(box=(1140, 30, 1160, 60), metres=0.6),
     "ground": dict(plane=dict(origin=(-1.0, -4.2, 0.0), ex=(1, 0, 0), ey=(0, 1, 0), size_m=2.0), metres=2.0),
     "gravel": dict(plane=dict(origin=(-1.0, -4.2, 0.0), ex=(1, 0, 0), ey=(0, 1, 0), size_m=2.0), metres=2.0),
@@ -43,7 +43,7 @@ SWATCHES = {
 SWATCH_FALLBACK = {"metal": "wood", "rope": "wood", "cloth": "wood", "glow": "wood", "water": "ground"}
 CLASS_TRAIN = {
     "roof": [(1060, 70, 1120, 100), (1150, 100, 1200, 120), (1376, 104, 1505, 178)],
-    "wood": [(940, 60, 960, 200), (1120, 140, 1140, 210), (1180, 160, 1215, 200), (1395, 195, 1420, 250)],
+    "wood": [(940, 60, 960, 200), (1120, 140, 1140, 210), (1180, 160, 1215, 200), (1441, 222, 1461, 256)],
     "stone": [(1140, 30, 1160, 60), (1220, 215, 1250, 235), (900, 200, 940, 215)],
     "veg": [(840, 140, 870, 180), (1240, 150, 1260, 190)],
     "dirt": [(1000, 230, 1100, 250)],
@@ -135,7 +135,7 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
         top = EAVE + (RIDGE - EAVE) * (1 - abs(y) / (D / 2))
         g.box((-L / 2 - 0.06, y, top / 2), (0.05, w - 0.015, top), None, "wood", "plank", skip=("-z",))
     # stone chimney at the back-right
-    cx, cy = 1.7, D / 2 - 0.2
+    cx, cy = 1.7, D / 2 + 0.55
     if lod == 0:
         g.masonry_box((cx - 0.38, cy - 0.38, 0.0), (cx + 0.38, cy + 0.38, 4.35), course=0.32, block=(0.3, 0.45), cheap=True,
                       top=True, tag="chimney", seed=4)
@@ -189,7 +189,7 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
 def colliders():
     C = [dict(type="box", centre=(0.0, D / 2 + 0.06, EAVE / 2), size=(L, 0.2, EAVE)),
          dict(type="box", centre=(-L / 2 - 0.06, 0.0, EAVE / 2), size=(0.2, D, EAVE)),
-         dict(type="box", centre=(1.7, D / 2 - 0.2, 2.2), size=(0.8, 0.8, 4.4))]
+         dict(type="box", centre=(1.7, D / 2 + 0.55, 2.2), size=(0.8, 0.8, 4.4))]
     for x in (-L / 2, -0.9, 0.9, L / 2):
         C.append(dict(type="box", centre=(x, -D / 2, EAVE / 2), size=(0.26, 0.26, EAVE)))
     return C
@@ -197,4 +197,4 @@ def colliders():
 
 def meta_extra():
     return dict(dimensions={"frame_m": [L, D], "eave_m": EAVE, "ridge_m": RIDGE, "overhang_m": OH},
-                sockets={"chimney_top": [1.7, 4.5, -(D / 2 - 0.2)], "workbench": [-0.6, 0.9, -(D / 2 - 0.55)]})
+                sockets={"chimney_top": [1.7, 4.5, -(D / 2 + 0.55)], "workbench": [-0.6, 0.9, -(D / 2 - 0.55)]})

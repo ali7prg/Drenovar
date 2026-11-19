@@ -69,7 +69,8 @@ EDGE_WIDTH_M = 0.03
 EDGE_STRENGTH = {"stone": 0.6, "wood": 0.3}
 TAG_RGB = {"deck": (0.58, 0.44, 0.31), "ramp": (0.58, 0.44, 0.31), "tower": (0.60, 0.56, 0.49),
            "cornice": (0.56, 0.52, 0.45), "cap": (0.50, 0.46, 0.40), "gatepier": (0.60, 0.56, 0.49),
-           "post": (0.36, 0.25, 0.16), "rail": (0.45, 0.32, 0.21)}
+           "post": (0.27, 0.18, 0.11), "rail": (0.38, 0.26, 0.16), "baluster": (0.30, 0.20, 0.12),
+           "knee": (0.27, 0.18, 0.11), "brace": (0.27, 0.18, 0.11), "arch": (0.33, 0.22, 0.14), "trestle": (0.27, 0.18, 0.11)}
 POLY_JITTER = 0.09
 WIND = {"dir": (0, 1, 0), "amp": 0.22, "drop": 2.2}
 SWATCH_FALLBACK = {"water": "ground", "rope": "wood", "roof": "stone", "glow": "metal"}
@@ -204,7 +205,7 @@ def railings(g, lod):
                 continue
             if main:
                 zb = DECK - 0.55 if lod == 0 else DECK - 0.4
-                w = 0.26
+                w = 0.3
                 g.box((x, y, (zb + POST_TOP) / 2), (w, w, POST_TOP - zb), rot_z(g.rng.normal(0, 0.015)), "wood",
                       "post", skip=("-z",))
                 if lod == 0:   # bolt plates / cap
@@ -249,7 +250,7 @@ def substructure(g, lod):
             g.box((x, y, (hi[2] + zt) / 2), (0.24, 0.24, zt - hi[2]), None, "wood", "trestle", skip=("-z",))
             if lod == 0:
                 for d in (-1, 1):
-                    g.beam((x + d * 0.1, y, hi[2] + 0.12), (x + d * 1.0, y, DECK - 0.7), 0.16, 0.16, mat="wood",
+                    g.beam((x + d * 0.1, y, hi[2] + 0.12), (x + d * 1.0, y, DECK - 0.7), 0.22, 0.22, mat="wood",
                            tag="knee")
     # pier walls between the tower pairs (under the deck)
     for x in (-TOWER_X, TOWER_X):
@@ -292,7 +293,7 @@ def substructure(g, lod):
                     if DECK - 0.38 - zr > 0.15:
                         g.box((xv, y, (zr + DECK - 0.38) / 2), (0.16, 0.16, DECK - 0.38 - zr), None, "wood", "strut")
                 for e in (-1, 1):
-                    g.beam((e * (TOWER_X - TOWER_W / 2), y, -0.1), (e * (TOWER_X - 2.4), y, DECK - 0.4), 0.18, 0.18,
+                    g.beam((e * (TOWER_X - TOWER_W / 2), y, -0.1), (e * (TOWER_X - 2.4), y, DECK - 0.4), 0.24, 0.24,
                            mat="wood", tag="brace")
         # cross ties between the ribs
         if lod == 0:

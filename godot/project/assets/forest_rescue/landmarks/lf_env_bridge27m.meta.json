@@ -282,12 +282,12 @@
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py bridge27m",
   "qa": {
     "main_view": {
-      "iou": 0.8837,
-      "colour_err": 0.1549,
-      "ssim": 0.263,
+      "iou": 0.8841,
+      "colour_err": 0.1557,
+      "ssim": 0.2651,
       "ref_px": 121528,
-      "render_px": 126670,
-      "iou_structure_only": 0.4167381579753661
+      "render_px": 126783,
+      "iou_structure_only": 0.41751862828435987
     },
     "camera": {
       "rms_px": 10.53,
@@ -296,26 +296,26 @@
     },
     "insets": {
       "side": {
-        "iou": 0.3206,
-        "colour_err": 0.1662,
-        "ssim": 0.3882,
+        "iou": 0.3222,
+        "colour_err": 0.1669,
+        "ssim": 0.3868,
         "ref_px": 69184,
-        "render_px": 43127
+        "render_px": 43607
       },
       "top": {
-        "iou": 0.7786,
-        "colour_err": 0.0803,
-        "ssim": 0.2967,
+        "iou": 0.7787,
+        "colour_err": 0.0809,
+        "ssim": 0.3037,
         "ref_px": 121504,
-        "render_px": 114349
+        "render_px": 114407
       }
     },
     "texture": {
-      "texels": 2256878,
-      "projected_frac": 0.027248260650332007,
-      "seconds": 17.7
+      "texels": 2322673,
+      "projected_frac": 0.027783075792416755,
+      "seconds": 14.0
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_bridge27m/v3_iter08_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_bridge27m/v3_iter09_*"
   },
   "clips": {
     "lf_banner_wind": {

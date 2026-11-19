@@ -66,7 +66,7 @@ EDGE_WIDTH_M = 0.035
 EDGE_STRENGTH = {"stone": 0.6, "wood": 0.4}
 TAG_RGB = {"tunnel": (0.07, 0.06, 0.05)}
 MORTAR_RGB = (0.25, 0.23, 0.19)
-POLY_JITTER = 0.10
+POLY_JITTER = 0.03
 CARD_KINDS = {"ivy_a": "ivy", "ivy_b": "ivy", "grass_a": "grass", "weed_a": "weed"}
 _CAM = {}
 
@@ -186,7 +186,7 @@ def outcrop(g, lod, cam, mask):
                     c = (xm + rng.normal(0, 0.03), yfront + d / 2 + rng.normal(0, 0.04), z + hh / 2)
                     R = rot_z(rng.normal(0, 0.03))
                     g.box(c, (xb - xa - 0.05, d, hh - 0.04), R, "stone", "block" if li == 0 else "outcrop",
-                          chamfer=0.0, skip=("-z", "+y") if li < len(layers) - 1 else ("-z",))
+                          chamfer=0.12 if lod == 0 else 0.0, skip=("-z", "+y") if li < len(layers) - 1 else ("-z",))
                 x = xb
             z += ch
             ci += 1
@@ -314,7 +314,7 @@ def blocks(g, lod, cam):
         w = mpx(cam, P, (x1 - x0)) * 0.8
         h = mpx(cam, P, (yb - yt)) * 0.75
         g.box((P[0], P[1] + w * 0.35, h / 2), (w, w * 0.8, h), rot_z(rng.uniform(-0.4, 0.4)), "stone", f"cut{k}",
-              chamfer=0.0, skip=("-z",))
+              chamfer=0.1 if lod == 0 else 0.0, skip=("-z",))
     # crate next to the crane
     if cam is not None:
         P = gp(cam, 404, 556)

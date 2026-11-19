@@ -2,15 +2,15 @@
   "id": "lf_env_quarry_mine",
   "generation": "v3 (blueprint + solved art/06 camera + painting projection)",
   "tris": {
-    "LOD0": 1456,
+    "LOD0": 2558,
     "LOD1": 790,
     "LOD2": 246
   },
   "tris_detail": {
     "LOD0": {
-      "structure": 1456,
+      "structure": 2558,
       "base": 904,
-      "total": 2360
+      "total": 3462
     },
     "LOD1": {
       "structure": 790,
@@ -153,12 +153,12 @@
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py quarry_mine",
   "qa": {
     "main_view": {
-      "iou": 0.8138,
-      "colour_err": 0.1153,
-      "ssim": 0.4647,
+      "iou": 0.8127,
+      "colour_err": 0.1137,
+      "ssim": 0.4634,
       "ref_px": 114434,
-      "render_px": 122056,
-      "iou_structure_only": 0.7223003174703457
+      "render_px": 121013,
+      "iou_structure_only": 0.7142279003332804
     },
     "camera": {
       "rms_px": 3.56,
@@ -167,19 +167,19 @@
     },
     "insets": {
       "mine_front": {
-        "iou": 0.4812,
-        "colour_err": 0.1591,
-        "ssim": 0.2625,
+        "iou": 0.4811,
+        "colour_err": 0.1587,
+        "ssim": 0.2618,
         "ref_px": 132832,
-        "render_px": 72330
+        "render_px": 72307
       }
     },
     "texture": {
-      "texels": 3070611,
-      "projected_frac": 0.05417358304259315,
-      "seconds": 12.0
+      "texels": 3027830,
+      "projected_frac": 0.05478742201510653,
+      "seconds": 12.4
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter05_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter06_*"
   },
   "sockets": {
     "mine_entrance_centre": [

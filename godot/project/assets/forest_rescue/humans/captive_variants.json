@@ -1,6 +1,6 @@
 {
  "schemaVersion": 2,
- "note": "captive id -> civilian visual (lf_civilian_<visual>.glb) + look variation. tint.<group> multiplies the albedo of materials named *_<group> (cloth = tintable garments, hair = hair and beard; the emerald rescue band is *_gear and never tinted); hide = bones scaled to 0 (Bag carries the toggleable accessory); scale = uniform model scale. Applied by actor_rig.apply_look via actor_director.captive_variant.",
+ "note": "captive id -> civilian visual (lf_civilian_<visual>.glb) + look variation. tint.<group> multiplies the albedo of materials named *_<group> (cloth = tintable garments, hair = hair and beard; the emerald rescue band is *_gear and never tinted); hide = bones scaled to 0 (Bag carries the toggleable accessory); scale = uniform model scale. Applied by actor_rig.apply_look via actor_director.captive_variant. Site 12 (two quarry_worker captives) uses the strongest cloth/hair contrast and +-4% height so the pair reads apart (tints applied through <visual>_variant_mask.png).",
  "visuals": [
   "cooper",
   "courier",
@@ -831,22 +831,22 @@
    "variant": 6,
    "tint": {
     "cloth": [
-     0.84,
+     0.72,
      1.0,
-     0.88
+     0.78
     ],
     "hair": [
-     1.18,
-     0.96,
-     0.82
+     0.62,
+     0.6,
+     0.6
     ]
    },
    "tintNames": {
-    "cloth": "muted_emerald",
-    "hair": "chestnut"
+    "cloth": "deep_emerald",
+    "hair": "black"
    },
    "hide": [],
-   "scale": 1.03
+   "scale": 1.04
   },
   "lf_captive_12_b": {
    "visual": "ferryman",
@@ -881,22 +881,24 @@
    "variant": 7,
    "tint": {
     "cloth": [
-     0.78,
-     0.78,
-     0.78
+     1.34,
+     0.9,
+     0.68
     ],
     "hair": [
+     1.55,
      1.32,
-     0.88,
-     0.7
+     1.02
     ]
    },
    "tintNames": {
-    "cloth": "smoke",
-    "hair": "auburn"
+    "cloth": "deep_russet",
+    "hair": "dark_blond"
    },
-   "hide": [],
-   "scale": 0.98
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.96
   }
  }
 }

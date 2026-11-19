@@ -48,6 +48,37 @@ class Distribution:
 var tag := "probe"
 var out_dir := "res://../../forest_rescue/qa/ingame/world"
 var frames_per_scenario := 90
+var segments_mode := false
+
+## --segments: actor-aware probe. One scenario per evidence video segment at its busiest moment,
+## played from recorded realm fixtures through a stub transport (live choreography included):
+## environment triangles (forest instances + landmarks/arena at the chosen LOD), actor/prop
+## triangles (visible meshes of every adventure rig at its current LOD), draw calls, primitives.
+## Targets: environment <= 110k, environment + actors <= 180k triangles.
+const FIXTURES := "res://data/forest_rescue/game/fixtures/"
+const ForestKit = preload("res://src/forest_rescue/world/forest_kit.gd")
+const SEGMENTS := [
+	{"name": "a_intro_horse_z40", "fixture": "intro_playing", "intro": true, "target": "lf_horse_origin", "zoom": 40.0, "seconds": 6.3},
+	{"name": "b_route_follow_z38", "fixture": "prologue_moving", "target": "squad", "zoom": 38.0, "seconds": 1.0},
+	{"name": "c_site1_unlock_exit_z26", "fixture": "site01_battle_victory", "live": "site01_cage_open", "target": "lf_site_01:cage", "zoom": 26.0, "seconds": 7.0},
+	{"name": "c_site1_battle_z30", "fixture": "site01_battle_active", "target": "lf_site_01:guardian", "zoom": 30.0, "seconds": 1.0},
+	{"name": "d_escort_home_z26", "fixture": "site01_escort_walking", "live": "site01_escort_home", "target": "lf_home_reception", "zoom": 26.0, "seconds": 3.0},
+	{"name": "e_site2_rune_z26", "fixture": "site02_rune_1of3", "target": "lf_site_02", "zoom": 26.0, "seconds": 1.0},
+	{"name": "f_boss_fight_z40", "fixture": "boss_battle_35", "target": "lf_boss_ancient_maw", "zoom": 40.0, "seconds": 1.0},
+	{"name": "f_boss_fight_z68", "fixture": "boss_battle_60", "target": "lf_boss_ancient_maw", "zoom": 68.0, "seconds": 1.0},
+	{"name": "g_escort_walking_z30", "fixture": "site01_escort_walking", "target": "squad", "zoom": 30.0, "seconds": 1.0},
+]
+
+class StubHost extends Node:
+	var main: Node
+	var busy := false
+	var replies: Array = []
+	func request(_path: String, _payload: Variant = null, _key := "") -> Dictionary:
+		return replies.pop_front() if not replies.is_empty() else {"error":"Сервер недоступен"}
+	func accept(response: Dictionary) -> void:
+		main.accept(response)
+	func poll_account_state() -> void:
+		pass
 
 
 func _initialize() -> void:
@@ -58,7 +89,126 @@ func _initialize() -> void:
 			out_dir = arg.trim_prefix("--out=")
 		elif arg.begins_with("--frames="):
 			frames_per_scenario = int(arg.trim_prefix("--frames="))
-	call_deferred("run")
+		elif arg == "--segments":
+			segments_mode = true
+	call_deferred("run_segments" if segments_mode else "run")
+
+
+func fixture(name: String) -> Dictionary:
+	return JSON.parse_string(FileAccess.get_file_as_string(FIXTURES + name + ".json"))
+
+
+## Visible triangles of every adventure rig (actors + props) at its current LOD.
+func actor_tris(forest: Node) -> Vector2i:
+	var tris := 0
+	var shown := 0
+	for id in forest.actors.rigs:
+		var rig = forest.actors.rigs[id]
+		if not is_instance_valid(rig) or not rig.is_visible_in_tree() or rig.model == null:
+			continue
+		shown += 1
+		for mesh: MeshInstance3D in rig.model.find_children("*", "MeshInstance3D", true, false):
+			if mesh.mesh != null and mesh.is_visible_in_tree():
+				tris += ForestKit.mesh_triangles(mesh.mesh)
+	return Vector2i(tris, shown)
+
+
+func run_segments() -> void:
+	root.size = Vector2i(1366, 630)
+	var game = load("res://main.tscn").instantiate()
+	root.add_child(game)
+	while game.get("scene_loading") or not is_instance_valid(game.get("stage")):
+		await process_frame
+	var forest: Node = game.forest_game
+	var stub := StubHost.new()
+	stub.main = game
+	root.add_child(stub)
+	forest.client.host = stub
+	for warm in 10:
+		await process_frame
+	var stage: Node3D = game.stage
+	var world: Node3D = stage.get("forest_world")
+	var results: Array = []
+	for spec in SEGMENTS:
+		game.close_modal()
+		forest.actors.on_stage_changed()
+		forest.actors.first_state = true
+		forest.client.adv = {}
+		forest.client.primed = false
+		var state := fixture(spec.fixture)
+		var clock := float(state.get("adventure", {}).get("serverTime", 0.0))
+		forest.client.manual_clock_ms = clock
+		game.accept(state)
+		game.battle_results.pending.clear()
+		game.result_notice.hide()
+		game.close_modal()
+		await process_frame
+		if spec.get("intro", false):
+			forest.intro.begin(true)
+		var target := Vector3.INF
+		for warm in 40:
+			await process_frame
+		for id in forest.actors.rigs:
+			var rig = forest.actors.rigs[id]
+			if is_instance_valid(rig) and rig.load_state == "loading":
+				rig.poll_load(true)
+		if spec.has("live"):
+			game.accept(fixture(spec.live))
+			game.battle_results.pending.clear()
+			game.result_notice.hide()
+			game.close_modal()
+		for step in int(float(spec.seconds) * 30.0):
+			clock += 1000.0 / 30.0
+			forest.client.manual_clock_ms = clock
+			target = forest.actors.squad_focus() if String(spec.target) == "squad" else forest.target_position(String(spec.target))
+			if target != Vector3.INF:
+				stage.target = target
+			stage.zoom = float(spec.zoom)
+			stage.update_camera(0.0, true)
+			await process_frame
+		if world != null and world.get("landmarks") != null and world.landmarks.has_method("finish_arena_load"):
+			world.landmarks.finish_arena_load()
+		var draws := PackedInt32Array()
+		var prims := PackedInt32Array()
+		var env := PackedInt32Array()
+		var actors := PackedInt32Array()
+		var totals := PackedInt32Array()
+		var inst := PackedInt32Array()
+		var shown_max := 0
+		for i in 45:
+			clock += 1000.0 / 30.0
+			forest.client.manual_clock_ms = clock
+			await process_frame
+			draws.append(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME))
+			prims.append(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME))
+			var snap: Dictionary = world.perf_snapshot() if world != null else {}
+			var e := int(snap.get("tris_est", 0)) + int(snap.get("landmark_tris", 0))
+			var a := actor_tris(forest)
+			env.append(e)
+			actors.append(a.x)
+			totals.append(e + a.x)
+			inst.append(int(snap.get("instances", 0)) + a.y)
+			shown_max = maxi(shown_max, a.y)
+		for arr in [draws, prims, env, actors, totals, inst]:
+			arr.sort()
+		var row := {"segment": spec.name, "zoom": spec.zoom,
+			"envTrisMax": env[-1], "actorTrisMax": actors[-1], "totalTrisMax": totals[-1], "totalTrisMedian": totals[totals.size() / 2],
+			"envBudgetOk": env[-1] <= 110000, "totalBudgetOk": totals[-1] <= 180000,
+			"drawCallsMedian": draws[draws.size() / 2], "drawCallsMax": draws[-1],
+			"primitivesMedian": prims[prims.size() / 2], "primitivesMax": prims[-1],
+			"instancesMax": inst[-1], "actorRigsVisibleMax": shown_max}
+		results.append(row)
+		print("PERF_SEGMENT ", JSON.stringify(row))
+	var report := {"format": "drenovar-forest-segment-probe-v1", "tag": tag,
+		"renderer": RenderingServer.get_current_rendering_method(), "adapter": RenderingServer.get_video_adapter_name(),
+		"viewport": str(root.size), "targets": {"envTris": 110000, "totalTris": 180000},
+		"limits": "SOFTWARE-RENDERED desktop (llvmpipe/Xvfb) counts and timings; NOT iPhone 12 measurements. Triangles: environment = forest instances (tris_est) + landmarks/arena at the chosen LOD; actors = visible meshes of adventure rigs at their LOD (upper bound, before Godot's automatic mesh LOD). draw calls / primitives are renderer totals incl. shadow passes.",
+		"segments": results}
+	var path := out_dir.path_join("perf_segments_" + tag + ".json")
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_string(JSON.stringify(report, "  "))
+	print("PERF_DONE ", path)
+	quit()
 
 
 func run() -> void:

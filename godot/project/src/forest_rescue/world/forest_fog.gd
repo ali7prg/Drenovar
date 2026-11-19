@@ -23,7 +23,7 @@ const GRID := 70                  # state grid incl. the ring outside the atlas
 const GRID_OFFSET := 7
 const GRID_ORIGIN := -140.0
 const FOG_TOP := 17.0             # deep fog top (m): with billows 0.75–1.35× it stays above the canopy
-const TOP_RAMP := 22.0            # top rises over this distance from the explored edge (gentle bank)
+const TOP_RAMP := 14.0            # top rises over this distance from the explored edge
 const SDF_RANGE := 64.0           # R/G channel: 0.5 + signed distance (m) / SDF_RANGE
 const HEIGHT_RANGE := 30.0        # B/A channel scale (m)
 const VIEW_SLOPE := 1.28          # cot(38°)
@@ -106,6 +106,9 @@ func set_receivers(list: Array) -> void:
 		material.set_shader_parameter("fog_sdf_range", SDF_RANGE)
 		material.set_shader_parameter("fog_reveal_t", reveal_t)
 		material.set_shader_parameter("fog_drift_speed", 0.0 if reduced_motion else LAYERS[0].drift)
+		material.set_shader_parameter("fog_deep_top", FOG_TOP)
+		material.set_shader_parameter("fog_dim_strength", dim_strength)
+	_push_sights_to(receivers, "fog_sights", "fog_sight_count")
 
 
 ## Smoothed ground (max of 5 taps, so the volume floor never cuts ridges) on a 2 m grid.
@@ -439,6 +442,7 @@ func _push_reveal() -> void:
 		material.set_shader_parameter("reveal_curl", curl)
 	for material: ShaderMaterial in receivers:
 		material.set_shader_parameter("fog_reveal_t", reveal_t)
+		material.set_shader_parameter("fog_reveal_curl", curl)
 
 
 func finish_now() -> void:
@@ -461,17 +465,32 @@ func set_dim(strength: float) -> void:
 	dim_strength = strength
 	for material in materials:
 		material.set_shader_parameter("dim_strength", strength)
+	for material: ShaderMaterial in receivers:
+		material.set_shader_parameter("fog_dim_strength", strength)
+
+
+var _sights: Array[Vector4] = []
+var _sight_count := 0
 
 
 func set_sights(points: Array) -> void:
 	var packed: Array[Vector4] = []
 	for p in points.slice(0, 8):
 		packed.append(p)
+	_sight_count = packed.size()
 	while packed.size() < 8:
 		packed.append(Vector4.ZERO)
-	for material in materials:
-		material.set_shader_parameter("sights", packed)
-		material.set_shader_parameter("sight_count", mini(points.size(), 8))
+	_sights = packed
+	_push_sights_to(materials, "sights", "sight_count")
+	_push_sights_to(receivers, "fog_sights", "fog_sight_count")
+
+
+func _push_sights_to(list: Array, array_name: String, count_name: String) -> void:
+	if _sights.is_empty():
+		return
+	for material: ShaderMaterial in list:
+		material.set_shader_parameter(array_name, _sights)
+		material.set_shader_parameter(count_name, _sight_count)
 
 
 func set_soft_depth(on: bool) -> void:

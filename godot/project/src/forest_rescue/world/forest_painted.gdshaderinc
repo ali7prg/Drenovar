@@ -82,7 +82,7 @@ void fragment() {
 		}
 	}
 	// Under the fog: buried parts erode away, parts above the cloud top darken into silhouettes.
-	vec2 fog = fog_receive(world_pos, TIME);
+	vec3 fog = fog_receive(world_pos, TIME);
 #ifdef CUTOUT
 	// Face normal from screen derivatives; orthographic views look along -Z in view space.
 	vec3 fn = normalize(cross(dFdx(VERTEX), dFdy(VERTEX)));
@@ -96,5 +96,6 @@ void fragment() {
 	}
 #endif
 	float lambert = max(dot(normalize(v_wn), normalize(light_dir_world)), 0.0);
-	ALBEDO = mix(c.rgb * mix(1.0, lambert, painted_light_mix) * v_ao, fog_silhouette, fog.y);
+	vec3 lit = c.rgb * mix(1.0, lambert, painted_light_mix) * v_ao;
+	ALBEDO = mix(mix(lit, fog_veil_color, fog.z), fog_silhouette, fog.y);
 }

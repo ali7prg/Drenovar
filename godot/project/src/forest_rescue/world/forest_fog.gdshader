@@ -33,10 +33,9 @@ uniform float reveal_t = 1.0;
 uniform float reveal_curl = 0.0;
 uniform float drift_speed = 0.6;
 uniform vec2 wind = vec2(0.83, 0.56);
-uniform float density = 0.30;            // extinction per metre inside deep fog
+uniform float density = 0.42;            // extinction per metre inside deep fog (opaque)
 uniform float fog_top_abs = 13.0;        // deep fog top (m) for the colour gradient
 uniform float dim_strength = 0.0;        // explored but not in current sight
-uniform float veil_height = 19.0;
 uniform vec4 sights[8];
 uniform int sight_count = 0;
 uniform vec3 light_dir = vec3(0.45, 0.74, 0.5);
@@ -49,8 +48,6 @@ uniform vec3 deep_color : source_color = vec3(0.22, 0.29, 0.34);
 uniform vec3 haze_color : source_color = vec3(0.45, 0.53, 0.59);
 uniform vec3 rim_color : source_color = vec3(0.74, 0.71, 0.63);
 uniform float time_offset = 0.0;
-uniform float tendril_reach = 14.0;      // m over the explored edge (art/07 panel 3)
-uniform float tendril_density = 0.07;
 uniform int debug_mode = 0;
 const int STEPS = 8;
 
@@ -80,16 +77,21 @@ void vertex() {
 	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec4 s = texture(state_tex, state_uv(world.xz));
 	float top = mix(s.a, s.b, reveal_t) * height_range;
-	float cloud = top * (0.6 + 0.8 * billow(world.xz, drift_of(TIME)));
-	float explored = step(0.0, max(s.r, s.g) - 0.5);
-	float town = step(max(abs(world.x), abs(world.z)), 56.0);
-	float veil = dim_strength > 0.0 ? explored * (1.0 - town) * veil_height : 0.0;
-	// Tendrils drift over the revealed forest edge at canopy height.
-	float sdf_v = (mix(s.g, s.r, reveal_t) - 0.5) * sdf_range;
-	float tendril = sdf_v > -2.0 ? 16.0 * (1.0 - smoothstep(0.0, tendril_reach, sdf_v)) : 0.0;
-	shell_top = max(max(cloud, veil), tendril);
-	world.y += max(shell_top, 0.25);
+	// The shell is the cloud top; over explored ground it lies on the ground (veil only), so
+	// there are no lifted walls over the revealed forest.
+	shell_top = top * (0.6 + 0.8 * billow(world.xz, drift_of(TIME)));
+	world.y += max(shell_top, 0.3);
 	VERTEX = (inverse(MODEL_MATRIX) * vec4(world, 1.0)).xyz;
+}
+
+// Edge offset (m) added to the signed distance: drifting lobes + wind-elongated tendrils
+// (art/07 panel 3). Range −2.6…+0.4: fog may curl ≤ 2.6 m into explored ground, never reveals.
+float edge_offset(vec2 p, vec2 drift, float b) {
+	vec2 wn = normalize(wind);
+	vec2 along = vec2(dot(p, wn), dot(p, vec2(-wn.y, wn.x)));
+	float t1 = texture(noise_tex, vec2(along.x / 38.0, along.y / 9.0) - vec2(drift.x * 0.03, 0.0) + vec2(0.13, 0.57)).r;
+	float t2 = texture(noise_tex, vec2(along.x / 17.0, along.y / 5.0) - vec2(drift.x * 0.05, 0.0) + vec2(0.61, 0.21)).g;
+	return -2.6 + 3.0 * (b * 0.35 + t1 * 0.45 + t2 * 0.2) - reveal_curl * 2.0 * t2;
 }
 
 void fragment() {
@@ -112,15 +114,14 @@ void fragment() {
 	vec4 s_in = texture(state_tex, state_uv(entry.xz));
 	vec4 s_out = texture(state_tex, state_uv(surface.xz));
 	float sdf_min = (min(min(s_in.r, s_in.g), min(s_out.r, s_out.g)) - 0.5) * sdf_range;
-	if (dim_strength <= 0.0 && sdf_min > tendril_reach + 1.0) {
+	if (dim_strength <= 0.0 && sdf_min > 2.5) {
 		discard;
 	}
 	float trans = 1.0;
 	vec3 acc = vec3(0.0);
 	float step_len = t_hit / float(STEPS);
-	// Over explored ground the shell is only lifted for tendrils / the veil: without a depth
-	// buffer a march from there would paint far banks over the crowns in front, so the volume is
-	// integrated only from entries on (or right at) the fog bank itself.
+	// Over explored ground the shell lies on the ground (veil only): the volume is integrated only
+	// from entries on (or right at) the fog bank itself.
 	float sdf_entry = (mix(s_in.g, s_in.r, reveal_t) - 0.5) * sdf_range;
 	int steps = sdf_entry > 2.0 ? 0 : STEPS;
 	for (int i = 0; i < steps; i++) {
@@ -130,10 +131,9 @@ void fragment() {
 		float delay = texture(noise_tex, p.xz / 41.0).a;
 		float local_t = smoothstep(delay * 0.5, delay * 0.5 + 0.5, reveal_t);
 		float sdf = (mix(s.g, s.r, local_t) - 0.5) * sdf_range;
-		// Organic edge: −3…+1 m of drifting noise, plus a curl while the bank rolls back.
+		// Organic edge: 2–3 m blend band, drifting lobes and wind-elongated tendrils.
 		float b = billow(p.xz, drift);
-		float offset = -3.0 + 4.0 * (b * 0.6 + w.r * 0.4) - reveal_curl * 2.5 * w.b;
-		float fogness = 1.0 - smoothstep(-2.2, 1.8, sdf + offset);
+		float fogness = 1.0 - smoothstep(-1.5, 1.5, sdf + edge_offset(p.xz, drift, b));
 		float y = max(0.0, p.y - ground(p.xz));
 		if (fogness < 0.004) {
 			continue;
@@ -163,24 +163,8 @@ void fragment() {
 	}
 	float alpha = 1.0 - trans;
 	vec3 color = alpha > 0.0001 ? acc / alpha : body_color;
-	// Tendrils: thin wisps drifting (along the wind) over the revealed forest edge at canopy
-	// height, evaluated on the lifted shell itself (art/07 panel 3) — light haze, bounded alpha.
-	{
-		float sdf_e = (mix(s_in.g, s_in.r, reveal_t) - 0.5) * sdf_range;
-		float reach = (1.0 - smoothstep(0.0, tendril_reach, sdf_e)) * step(-1.0, sdf_e);
-		if (reach > 0.001) {
-			vec2 wn = normalize(wind);
-			vec2 along = vec2(dot(entry.xz, wn), dot(entry.xz, vec2(-wn.y, wn.x)));
-			float n1 = texture(noise_tex, vec2(along.x / 34.0, along.y / 22.0) - vec2(drift.x * 0.02, 0.0) + vec2(0.13, 0.57)).r;
-			float n2 = texture(noise_tex, vec2(along.x / 15.0, along.y / 11.0) - vec2(drift.x * 0.035, 0.0) + vec2(0.61, 0.21)).g;
-			float wisp = smoothstep(0.48, 0.80, n1 * 0.7 + n2 * 0.3);
-			float a_t = tendril_density * 4.5 * reach * wisp;
-			color = (color * alpha + (1.0 - alpha) * a_t * haze_color) / max(1.0 - (1.0 - alpha) * (1.0 - a_t), 1e-4);
-			alpha = 1.0 - (1.0 - alpha) * (1.0 - a_t);
-		}
-	}
-	// Explored but not currently watched: a light veil over the known forest (never the town).
-	// A sight circle counts if the view ray passes over it anywhere between 0 and 14 m height.
+	// Explored but not currently watched: a light ground-level veil over the known forest (never
+	// the town); trees there are dimmed by forest_fog_receiver with the same rule.
 	if (dim_strength > 0.0) {
 		vec4 s = texture(state_tex, state_uv(surface.xz));
 		// Round sight circle on the ground (where this pixel's view ray meets the ground).

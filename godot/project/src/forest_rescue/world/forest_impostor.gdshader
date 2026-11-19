@@ -55,11 +55,11 @@ void fragment() {
 	vec4 c = texture(atlas, (cell_xy + clamp(UV, vec2(0.004), vec2(0.996))) / grid);
 	// The quad stands at the crown centre: sample the fog where this texel's ray meets the tree
 	// (approximation: the quad point itself) — buried parts erode, tops darken into silhouettes.
-	vec2 fog = fog_receive(world, TIME);
+	vec3 fog = fog_receive(world, TIME);
 	if (c.a * (1.0 - fog.x) < alpha_cut) {
 		discard;
 	}
-	c.rgb = mix(c.rgb, fog_silhouette, fog.y);
+	c.rgb = mix(mix(c.rgb, fog_veil_color, fog.z), fog_silhouette, fog.y);
 	for (int i = 0; i < 8; i++) {
 		if (i >= fade_count) break;
 		vec4 f = fade_circles[i];

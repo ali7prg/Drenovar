@@ -116,9 +116,12 @@ func continue_step() -> Dictionary:
 func boot() -> void:
 	game = load("res://main.tscn").instantiate()
 	root.add_child(game)
-	while game.scene_loading or not is_instance_valid(game.stage) or game.player_id.is_empty():
+	var deadline := Time.get_ticks_msec() + 90000
+	while (game.scene_loading or not is_instance_valid(game.stage) or game.player_id.is_empty()) and Time.get_ticks_msec() < deadline:
 		await process_frame
 		frame_count += 1
+		if frame_count % 600 == 0:
+			print("BOOT wait loading=", game.scene_loading, " stage=", is_instance_valid(game.stage), " player=", game.player_id, " busy=", game.busy)
 	forest = game.forest_game
 	endpoint = game.endpoint
 

@@ -303,6 +303,24 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
         kk = np.array([str(t).startswith(pre) for t in tags])
         if kk.any():
             fill[kk] = fill[kk] * 0.35 + np.asarray(rgb) * 0.65
+    # painted low-frequency tone on the swatch detail: in 3-D cells (0.5 m) seen by the painting, shift the fill's
+    # mean colour toward the painting's (lenient-visibility, de-lit) mean; detail stays from the swatch (no smearing)
+    cell = getattr(L, "TONE_CELL_M", 0.5)
+    vis_idx = np.nonzero(vis_s)[0]
+    if len(vis_idx) > 100:
+        key = np.floor(P / cell).astype(np.int64)
+        kh = (key[:, 0] * 73856093) ^ (key[:, 1] * 19349663) ^ (key[:, 2] * 83492791)
+        _, inv = np.unique(kh, return_inverse=True)
+        nb = inv.max() + 1
+        cnt_v = np.bincount(inv[vis_idx], minlength=nb).astype(np.float64)
+        paint_lin = np.clip(col_s / shade[:, None], 0, 1)
+        sum_p = np.stack([np.bincount(inv[vis_idx], weights=paint_lin[vis_idx, c], minlength=nb) for c in range(3)], 1)
+        sum_f = np.stack([np.bincount(inv[vis_idx], weights=fill[vis_idx, c], minlength=nb) for c in range(3)], 1)
+        okc = cnt_v > 20
+        shift = np.zeros((nb, 3))
+        shift[okc] = (sum_p[okc] - sum_f[okc]) / cnt_v[okc, None]
+        shift = np.clip(shift, -0.14, 0.14)
+        fill = np.clip(fill + shift[inv] * getattr(L, "TONE_STRENGTH", 0.85), 0, 1)
     # blend (feathered in texture space)
     a_img = np.zeros(valid.shape)
     a_img[yy, xx] = np.clip((wgt - 0.05) / 0.10, 0, 1)

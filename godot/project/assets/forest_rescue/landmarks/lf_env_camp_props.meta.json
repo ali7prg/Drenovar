@@ -173,8 +173,8 @@
   "qa": {
     "main_view": {
       "iou": 0.852,
-      "colour_err": 0.1362,
-      "ssim": 0.4086,
+      "colour_err": 0.1306,
+      "ssim": 0.4147,
       "ref_px": 81683,
       "render_px": 82880,
       "iou_structure_only": 0.6131613172929536
@@ -187,15 +187,15 @@
     "insets": {
       "front": {
         "iou": 0.1835,
-        "colour_err": 0.1487,
-        "ssim": 0.4246,
+        "colour_err": 0.1506,
+        "ssim": 0.4271,
         "ref_px": 58656,
         "render_px": 54005
       },
       "side": {
         "iou": 0.1745,
-        "colour_err": 0.162,
-        "ssim": 0.518,
+        "colour_err": 0.1668,
+        "ssim": 0.5211,
         "ref_px": 37408,
         "render_px": 18265
       }
@@ -203,9 +203,9 @@
     "texture": {
       "texels": 2370466,
       "projected_frac": 0.04789395840311567,
-      "seconds": 11.1
+      "seconds": 10.2
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_camp_props/v3_iter09_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_camp_props/v3_iter10_*"
   },
   "clips": {
     "lf_banner_wind": {

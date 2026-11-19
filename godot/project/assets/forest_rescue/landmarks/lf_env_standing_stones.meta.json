@@ -82,7 +82,7 @@
     [
       3.625,
       2.796,
-      2.822
+      2.913
     ]
   ],
   "collision": [
@@ -150,9 +150,9 @@
         2.18
       ],
       "size": [
-        1.467,
+        1.687,
         2.54,
-        0.807
+        0.928
       ],
       "yaw_deg": 225.2
     }
@@ -164,12 +164,12 @@
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py standing_stones",
   "qa": {
     "main_view": {
-      "iou": 0.9209,
-      "colour_err": 0.1099,
-      "ssim": 0.5482,
+      "iou": 0.9193,
+      "colour_err": 0.1037,
+      "ssim": 0.5647,
       "ref_px": 72006,
-      "render_px": 72723,
-      "iou_structure_only": 0.46254031596785655
+      "render_px": 72850,
+      "iou_structure_only": 0.47279889859734736
     },
     "camera": {
       "rms_px": 16.13,
@@ -178,19 +178,19 @@
     },
     "insets": {
       "row": {
-        "iou": 0.4638,
-        "colour_err": 0.154,
-        "ssim": 0.3636,
+        "iou": 0.4729,
+        "colour_err": 0.1525,
+        "ssim": 0.3609,
         "ref_px": 139296,
-        "render_px": 215836
+        "render_px": 219499
       }
     },
     "texture": {
-      "texels": 3082250,
-      "projected_frac": 0.11004493470678887,
-      "seconds": 11.2
+      "texels": 3119759,
+      "projected_frac": 0.1269021100668353,
+      "seconds": 13.3
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_standing_stones/v3_iter02_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_standing_stones/v3_iter03_*"
   },
   "dimensions": {
     "S1": {
@@ -235,8 +235,8 @@
     },
     "S5": {
       "height_m": 2.54,
-      "width_m": 1.47,
-      "thickness_m": 0.81,
+      "width_m": 1.69,
+      "thickness_m": 0.93,
       "position_gltf": [
         2.19,
         0.0,

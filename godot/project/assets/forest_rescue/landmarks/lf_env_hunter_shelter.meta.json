@@ -195,8 +195,8 @@
   "qa": {
     "main_view": {
       "iou": 0.8888,
-      "colour_err": 0.1282,
-      "ssim": 0.3753,
+      "colour_err": 0.1151,
+      "ssim": 0.3986,
       "ref_px": 81731,
       "render_px": 80130,
       "iou_structure_only": 0.6489504988259414
@@ -209,15 +209,15 @@
     "insets": {
       "front": {
         "iou": 0.7606,
-        "colour_err": 0.1835,
-        "ssim": 0.2221,
+        "colour_err": 0.1893,
+        "ssim": 0.2161,
         "ref_px": 82240,
         "render_px": 92184
       },
       "side": {
         "iou": 0.6749,
-        "colour_err": 0.1485,
-        "ssim": 0.323,
+        "colour_err": 0.1547,
+        "ssim": 0.3094,
         "ref_px": 54688,
         "render_px": 59355
       }
@@ -225,9 +225,9 @@
     "texture": {
       "texels": 2558104,
       "projected_frac": 0.06463537057132938,
-      "seconds": 9.8
+      "seconds": 10.6
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_hunter_shelter/v3_iter06_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_hunter_shelter/v3_iter07_*"
   },
   "dimensions": {
     "frame_m": [

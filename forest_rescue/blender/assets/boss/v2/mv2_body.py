@@ -400,19 +400,19 @@ def leg_parts(side):
     # thigh: big muscular mass (side: Y -1.0..+0.45, Z 1.2..2.9; front: outer surface x=1.04)
     # thigh: widest LOW (front view: x 1.02-1.05 at z 1.45-1.8, only 0.76 at z 2.5); side: Y -1.0..+0.45
     P.append(oell(m([0.65, -0.36, 1.86]), knee - hip, 0.80, 0.33, 0.60, k=0.16, name="thigh", bone=th))
-    P.append(oell(m([0.55, -0.18, 2.32]), [0, -0.3, -1.0], 0.40, 0.22, 0.45, k=0.16, name="thigh_top", bone=th))
+    P.append(oell(m([0.53, -0.18, 2.32]), [0, -0.3, -1.0], 0.40, 0.20, 0.45, k=0.16, name="thigh_top", bone=th))
     P.append(oell(m([0.70, -0.62, 1.70]), [0, -0.5, -1.0], 0.42, 0.30, 0.34, k=0.14, name="quad", bone=th))
-    P.append(oell(m([0.56, 0.18, 2.05]), [0, 1.0, -0.35], 0.50, 0.31, 0.40, k=0.16, name="caudofem", bone=th))
+    P.append(oell(m([0.54, 0.18, 2.05]), [0, 1.0, -0.35], 0.50, 0.30, 0.40, k=0.16, name="caudofem", bone=th))
     # knee (broad in the front view: outer edge x = 1.04 at z 1.3-1.5)
     P.append(oell(knee + m([0.02, -0.02, 0.0]), [1, 0, 0], 0.30, 0.25, 0.24, k=0.10, name="knee", bone=sh))
     # shin + calf (gastrocnemius at the back of the upper shin); side width 0.57 m at z = 1.05
     P.append(sdf.round_cone(knee, ankle, 0.24, 0.17, k=0.10, name="shin", bone=sh))
     P.append(oell(knee + (ankle - knee) * 0.40 + m([0.0, 0.12, 0.04]), ankle - knee, 0.48, 0.19, 0.20, k=0.10,
                   name="calf", bone=sh))
-    P.append(oell(knee + (ankle - knee) * 0.5, [1, 0, 0], 0.21, 0.20, 0.30, k=0.08, name="shin_w", bone=sh))
+    P.append(oell(knee + (ankle - knee) * 0.5, [1, 0, 0], 0.235, 0.20, 0.32, k=0.08, name="shin_w", bone=sh))
     # ankle + metatarsus (broad: three metatarsals side by side; front half-width 0.23)
-    P.append(oell(ankle + m([0, 0.05, 0]), [1, 0, 0], 0.22, 0.20, 0.17, k=0.06, name="ankle", bone=ft))
-    P.append(oell((ankle + ball) * 0.5, ball - ankle, 0.40, 0.23, 0.16, up=(0, 1, 0), k=0.07, name="metatarsus",
+    P.append(oell(ankle + m([0, 0.05, 0]), [1, 0, 0], 0.245, 0.20, 0.17, k=0.06, name="ankle", bone=ft))
+    P.append(oell((ankle + ball) * 0.5, ball - ankle, 0.40, 0.255, 0.16, up=(0, 1, 0), k=0.07, name="metatarsus",
                   bone=ft))
     P.append(sdf.round_cone(ankle, ball, 0.17, 0.14, k=0.06, name="metatarsus_core", bone=ft))
     # toes (II, III, IV): two phalanx segments + pads, claws are separate meshes
@@ -538,7 +538,7 @@ def build_parts():
     return add, sub
 
 
-def view_sdf2d(view, up=4, blur=1.2):
+def view_sdf2d(view, up=4, blur=2.0):
     """Signed distance (metres, + outside) of an orthographic view's mask, sub-pixel smooth."""
     import cv2
     m = view.mask.astype(np.float32)
@@ -560,21 +560,22 @@ def hull_sdf_smooth(F, views, slab=24):
             x1 = min(F.n[0], x0 + slab)
             P = F._points(np.array([x0, 0, 0]), np.array([x1, F.n[1], F.n[2]]))
             u, vv, _ = v.project(P.reshape(-1, 3))
-            uu = (u + 0.5) * up - 0.5
-            vy = (vv + 0.5) * up - 0.5
+            uu = u * up - 0.5
+            vy = vv * up - 0.5
             s = ndi.map_coordinates(d2, [vy, uu], order=1, mode="constant", cval=1.0)
             vol[x0:x1] = np.maximum(vol[x0:x1], s.reshape(P.shape[:3]))
     return vol
 
 
-def build_field(voxel=0.03, lo=(-1.35, -4.66, -0.02), hi=(1.35, 5.42, 3.75), hull_views=None, hull_k=0.03,
+def build_field(voxel=0.03, lo=(-1.35, -4.66, -0.02), hi=(1.35, 5.42, 3.75), hull_views=None, hull_k=0.06,
                 parts=None):
     add, sub = parts if parts is not None else build_parts()
     F = sdf.Field(lo, hi, voxel)
     for p in add:
         F.apply(p)
     if hull_views:
-        hs = hull_sdf_smooth(F, hull_views) - 0.004
+        # soft hull: only trims parts that exceed the drawn silhouettes by > ~2.5 cm (no flat cut faces)
+        hs = hull_sdf_smooth(F, hull_views) - 0.025
         F.intersect(hs, k=hull_k)
     for p in sub:
         F.apply(p, op="subtract")

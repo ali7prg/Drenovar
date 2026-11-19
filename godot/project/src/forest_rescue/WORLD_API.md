@@ -70,5 +70,7 @@ LOD), `fog_culled` (instances removed because they stand deeper than 3 m inside 
     to 4.0 m (other inner trees ≤ 3.5 m). The entry trail ribbon starts at the horse origin.
   - The city river strip gets the world-layer river material (flag ON only; found by its shader,
     landscape.gd unchanged).
-  - Fog look v3 (iter10, visual only): luminous blue-grey cumulus (art/07, art/18 colour targets),
-    world-space 3D-noise puffs, light wisps over the revealed edge, drift 0.45 m/s.
+  - Fog look v3 (iter10–11, visual only): painted mist texture quilted from art/07 + art/18
+    (`assets/forest_rescue/world/lf_fog_painted.png`, tools/build_fog_texture.py), soft cauliflower
+    domes, wrap lighting / silver lining / haze at grazing angles, light wisps and a translucent haze
+    bank over the revealed edge, drift 0.45 m/s (frozen with reduced motion).

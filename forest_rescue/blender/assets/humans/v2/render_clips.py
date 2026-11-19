@@ -27,6 +27,9 @@ AIDS = ARGS[1].split(",")
 CLIPS = ARGS[2:]
 
 
+MESHES = {}
+
+
 def load_char(aid, offset_x):
     path = paths.source("humans", f"{aid}.blend")
     with bpy.data.libraries.load(path, link=False) as (src, dst):
@@ -43,7 +46,7 @@ def load_char(aid, offset_x):
         if o is not None and o.type == "MESH" and not o.name.endswith("_LOD0"):
             o.hide_render = True
     arm.location.x = offset_x
-    arm["_meshes"] = [o.name for o in dst.objects if o is not None and o.type == "MESH"]
+    MESHES[arm.name] = [o.name for o in dst.objects if o is not None and o.type == "MESH"]
     import re as _re
     return arm, {_re.sub(r"\.\d{3}$", "", a.name): a for a in dst.actions if a is not None}
 
@@ -57,7 +60,7 @@ def set_clip(arm, act):
         if s.target_id_type == "OBJECT":
             arm.animation_data.action_slot = s
     key_slot = next((s for s in act.slots if s.target_id_type == "KEY"), None)
-    for name in arm.get("_meshes", []):
+    for name in MESHES.get(arm.name, []):
         o = bpy.data.objects.get(name)
         key = o.data.shape_keys if o is not None else None
         if key is None:

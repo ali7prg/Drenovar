@@ -18,7 +18,7 @@ SHEET = "cage_variants_gate_sockets.png"
 LIGHT = (-0.55, -0.55, 0.62)
 BOXES = {"closed34": (592, 108, 958, 444), "open34": (592, 440, 985, 732)}
 
-PARAMS = dict(c=1.55, cy=1.40, s=0.27, zd=0.42, zt=3.05, zs=3.50, zc=3.45, kx=0.0, ky=0.0, pe=0.14, pf=0.55, hx=-1.10, dx1=1.30, sz=1.30,
+PARAMS = dict(c=1.80, cy=1.60, s=0.30, zd=0.42, zt=3.05, zs=3.50, zc=3.45, kx=0.0, ky=0.0, pe=0.14, pf=0.55, hx=-1.10, dx1=1.30, sz=1.30,
               sx=1.06, zda=2.45, dz0=0.44)
 FREE = ["cy", "zd", "zt", "zc", "kx", "ky", "pe", "pf", "hx", "dx1", "sz", "sx", "zda", "dz0"]
 

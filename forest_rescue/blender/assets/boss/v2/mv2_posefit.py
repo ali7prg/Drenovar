@@ -147,7 +147,7 @@ def landmarks_ref(mask):
     return snout, tail, float(ys.max())
 
 
-def fit_panel(fitter, panel, ch0, iters=650):
+def fit_panel(fitter, panel, ch0, iters=900):
     img = R.keypose_panel(panel)
     mask = R.keypose_mask(img)
     H, W = mask.shape
@@ -183,10 +183,20 @@ def fit_panel(fitter, panel, ch0, iters=650):
         return (f, iou, lm, m) if detail else f
 
     z0 = np.concatenate([x0, cam0])
-    # stage 1: camera only, stage 2: everything
+    # stage 1: camera only from an azimuth grid (3/4 and near-frontal panels), stage 2: everything
+
     def lc(c):
         return loss(np.concatenate([x0, c]))
-    r1 = minimize(lc, cam0, method="Powell", options={"maxfev": 160, "xtol": 1e-3, "ftol": 1e-4})
+    best = None
+    for az0 in (-70.0, -40.0, -15.0, 0.0, 15.0, 40.0, 70.0):
+        Rz = PO.qmat((0, 0, 1), az0)
+        Q = Vp @ Rz.T
+        s_ = (xs.max() - xs.min()) / max(Q[:, 1].max() - Q[:, 1].min(), 1e-3)
+        c0 = np.array([math.log(s_), xs.min() - s_ * Q[:, 1].min(), ground + s_ * Q[:, 2].min(), az0, 6.0])
+        r = minimize(lc, c0, method="Powell", options={"maxfev": 90, "xtol": 1e-3, "ftol": 1e-4})
+        if best is None or r.fun < best.fun:
+            best = r
+    r1 = best
     z1 = np.concatenate([x0, r1.x])
     r2 = minimize(loss, z1, method="Powell", options={"maxfev": iters, "xtol": 1e-3, "ftol": 1e-5})
     f, iou, lm, m = loss(r2.x, detail=True)

@@ -1,488 +1,488 @@
 {
- "id": "lf_cage_iron",
- "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
- "tris": {
-  "LOD0": 8210,
-  "LOD1": 2880,
-  "LOD2": 1359
- },
- "tris_by_node": {
-  "LOD0": {
-   "root": 6880,
-   "roof": 306,
-   "door_pivot": 564,
-   "socket_stone_rune": 248,
-   "socket_bronze_seal": 68,
-   "socket_amber_crystal": 44,
-   "socket_bone_key": 76,
-   "latch_pivot": 24
+  "id": "lf_cage_iron",
+  "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
+  "tris": {
+    "LOD0": 8210,
+    "LOD1": 2880,
+    "LOD2": 1359
   },
-  "LOD1": {
-   "root": 2111,
-   "roof": 177,
-   "door_pivot": 240,
-   "socket_stone_rune": 140,
-   "socket_bronze_seal": 68,
-   "socket_amber_crystal": 44,
-   "socket_bone_key": 76,
-   "latch_pivot": 24
+  "tris_by_node": {
+    "LOD0": {
+      "root": 6880,
+      "roof": 306,
+      "door_pivot": 564,
+      "socket_stone_rune": 248,
+      "socket_bronze_seal": 68,
+      "socket_amber_crystal": 44,
+      "socket_bone_key": 76,
+      "latch_pivot": 24
+    },
+    "LOD1": {
+      "root": 2111,
+      "roof": 177,
+      "door_pivot": 240,
+      "socket_stone_rune": 140,
+      "socket_bronze_seal": 68,
+      "socket_amber_crystal": 44,
+      "socket_bone_key": 76,
+      "latch_pivot": 24
+    },
+    "LOD2": {
+      "root": 734,
+      "roof": 113,
+      "door_pivot": 208,
+      "socket_stone_rune": 92,
+      "socket_bronze_seal": 68,
+      "socket_amber_crystal": 44,
+      "socket_bone_key": 76,
+      "latch_pivot": 24
+    }
   },
-  "LOD2": {
-   "root": 734,
-   "roof": 113,
-   "door_pivot": 208,
-   "socket_stone_rune": 92,
-   "socket_bronze_seal": 68,
-   "socket_amber_crystal": 44,
-   "socket_bone_key": 76,
-   "latch_pivot": 24
-  }
- },
- "budget": {},
- "bones": 0,
- "materials": [
-  "lf_cage_iron_lod1_mat",
-  "lf_cage_iron_lod2_mat",
-  "lf_cage_iron_mat"
- ],
- "textures": {
-  "lf_cage_iron_c.jpg": 2048,
-  "lf_cage_iron_n.png": 1024,
-  "lf_cage_iron_lod1_c.jpg": 1024,
-  "lf_cage_iron_lod2_c.jpg": 512
- },
- "texture_mode": "external JPEG/PNG next to the GLB (relative URIs); LOD1/LOD2 have their own atlases",
- "paintedLightMix": 0.38,
- "paintedLightNote": "albedo carries the painted light: shade = albedo * mix(1, lambert, paintedLightMix) (actor_rig.apply_look -> ForestKit.painted_material)",
- "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
- "bounds_m": {
-  "min": [
-   -2.119,
-   0.0,
-   -1.723
+  "budget": {},
+  "bones": 0,
+  "materials": [
+    "lf_cage_iron_lod1_mat",
+    "lf_cage_iron_lod2_mat",
+    "lf_cage_iron_mat"
   ],
-  "max": [
-   2.119,
-   4.519,
-   3.849
-  ]
- },
- "lod_nodes": {
-  "LOD0": [
-   "lf_cage_iron_LOD0",
-   "lf_cage_iron_door_pivot_LOD0",
-   "lf_cage_iron_latch_pivot_LOD0",
-   "lf_cage_iron_roof_LOD0",
-   "lf_cage_iron_socket_amber_crystal_LOD0",
-   "lf_cage_iron_socket_bone_key_LOD0",
-   "lf_cage_iron_socket_bronze_seal_LOD0",
-   "lf_cage_iron_socket_stone_rune_LOD0"
-  ],
-  "LOD1": [
-   "lf_cage_iron_LOD1",
-   "lf_cage_iron_door_pivot_LOD1",
-   "lf_cage_iron_latch_pivot_LOD1",
-   "lf_cage_iron_roof_LOD1",
-   "lf_cage_iron_socket_amber_crystal_LOD1",
-   "lf_cage_iron_socket_bone_key_LOD1",
-   "lf_cage_iron_socket_bronze_seal_LOD1",
-   "lf_cage_iron_socket_stone_rune_LOD1"
-  ],
-  "LOD2": [
-   "lf_cage_iron_LOD2",
-   "lf_cage_iron_door_pivot_LOD2",
-   "lf_cage_iron_latch_pivot_LOD2",
-   "lf_cage_iron_roof_LOD2",
-   "lf_cage_iron_socket_amber_crystal_LOD2",
-   "lf_cage_iron_socket_bone_key_LOD2",
-   "lf_cage_iron_socket_bronze_seal_LOD2",
-   "lf_cage_iron_socket_stone_rune_LOD2"
-  ]
- },
- "lod_note": "LOD meshes are siblings named *_LOD0/1/2 (actor_rig.set_lod); LOD1/LOD2 are hidden by default (KHR_node_visibility) so a plain instance shows LOD0 only.",
- "hidden_by_default": [
-  "socket_amber_crystal",
-  "socket_bone_key",
-  "socket_stone_rune"
- ],
- "clips": {
-  "lf_cage_unlock": {
-   "seconds": 1.0,
-   "loop": false,
-   "frames": 30,
-   "markers": {
-    "latch_clear": 0.7
-   },
-   "note": "socket plate settles (artifact pressed home), latch bolt slides 0.12 m toward the hinge",
-   "nodes": [
-    "latch_pivot",
+  "textures": {
+    "lf_cage_iron_c.jpg": 2048,
+    "lf_cage_iron_n.png": 1024,
+    "lf_cage_iron_lod1_c.jpg": 1024,
+    "lf_cage_iron_lod2_c.jpg": 512
+  },
+  "texture_mode": "external JPEG/PNG next to the GLB (relative URIs); LOD1/LOD2 have their own atlases",
+  "paintedLightMix": 0.38,
+  "paintedLightNote": "albedo carries the painted light: shade = albedo * mix(1, lambert, paintedLightMix) (actor_rig.apply_look -> ForestKit.painted_material)",
+  "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
+  "bounds_m": {
+    "min": [
+      -2.119,
+      0.0,
+      -1.723
+    ],
+    "max": [
+      2.119,
+      4.519,
+      3.849
+    ]
+  },
+  "lod_nodes": {
+    "LOD0": [
+      "lf_cage_iron_LOD0",
+      "lf_cage_iron_door_pivot_LOD0",
+      "lf_cage_iron_latch_pivot_LOD0",
+      "lf_cage_iron_roof_LOD0",
+      "lf_cage_iron_socket_amber_crystal_LOD0",
+      "lf_cage_iron_socket_bone_key_LOD0",
+      "lf_cage_iron_socket_bronze_seal_LOD0",
+      "lf_cage_iron_socket_stone_rune_LOD0"
+    ],
+    "LOD1": [
+      "lf_cage_iron_LOD1",
+      "lf_cage_iron_door_pivot_LOD1",
+      "lf_cage_iron_latch_pivot_LOD1",
+      "lf_cage_iron_roof_LOD1",
+      "lf_cage_iron_socket_amber_crystal_LOD1",
+      "lf_cage_iron_socket_bone_key_LOD1",
+      "lf_cage_iron_socket_bronze_seal_LOD1",
+      "lf_cage_iron_socket_stone_rune_LOD1"
+    ],
+    "LOD2": [
+      "lf_cage_iron_LOD2",
+      "lf_cage_iron_door_pivot_LOD2",
+      "lf_cage_iron_latch_pivot_LOD2",
+      "lf_cage_iron_roof_LOD2",
+      "lf_cage_iron_socket_amber_crystal_LOD2",
+      "lf_cage_iron_socket_bone_key_LOD2",
+      "lf_cage_iron_socket_bronze_seal_LOD2",
+      "lf_cage_iron_socket_stone_rune_LOD2"
+    ]
+  },
+  "lod_note": "LOD meshes are siblings named *_LOD0/1/2 (actor_rig.set_lod); LOD1/LOD2 are hidden by default (KHR_node_visibility) so a plain instance shows LOD0 only.",
+  "hidden_by_default": [
     "socket_amber_crystal",
     "socket_bone_key",
-    "socket_bronze_seal",
     "socket_stone_rune"
-   ]
-  },
-  "lf_cage_gate_open": {
-   "seconds": 1.6,
-   "loop": false,
-   "frames": 48,
-   "markers": {
-    "passage_clear": 1.2
-   },
-   "note": "door swings OUTWARD 95 deg about the left-jamb hinge axis",
-   "nodes": [
-    "door_pivot",
-    "latch_pivot"
-   ]
-  },
-  "lf_cage_gate_settle": {
-   "seconds": 0.4,
-   "loop": false,
-   "frames": 12,
-   "markers": {},
-   "note": "small damped settle at the open stop (95 deg)",
-   "nodes": [
-    "door_pivot",
-    "latch_pivot"
-   ]
-  },
-  "lf_cage_gate_close": {
-   "seconds": 1.2,
-   "loop": false,
-   "frames": 36,
-   "markers": {},
-   "note": "door returns to the frame, latch re-engages at the end",
-   "nodes": [
-    "door_pivot",
-    "latch_pivot"
-   ]
-  }
- },
- "glb_nodes": [
-  "captive_slot_0",
-  "captive_slot_1",
-  "captive_slot_2",
-  "key_slot",
-  "lf_cage_iron_latch_pivot_LOD0",
-  "lf_cage_iron_latch_pivot_LOD1",
-  "lf_cage_iron_latch_pivot_LOD2",
-  "latch_pivot",
-  "lf_cage_iron_door_pivot_LOD0",
-  "lf_cage_iron_door_pivot_LOD1",
-  "lf_cage_iron_door_pivot_LOD2",
-  "lf_cage_iron_socket_amber_crystal_LOD0",
-  "lf_cage_iron_socket_amber_crystal_LOD1",
-  "lf_cage_iron_socket_amber_crystal_LOD2",
-  "socket_amber_crystal",
-  "lf_cage_iron_socket_bone_key_LOD0",
-  "lf_cage_iron_socket_bone_key_LOD1",
-  "lf_cage_iron_socket_bone_key_LOD2",
-  "socket_bone_key",
-  "lf_cage_iron_socket_bronze_seal_LOD0",
-  "lf_cage_iron_socket_bronze_seal_LOD1",
-  "lf_cage_iron_socket_bronze_seal_LOD2",
-  "socket_bronze_seal",
-  "lf_cage_iron_socket_stone_rune_LOD0",
-  "lf_cage_iron_socket_stone_rune_LOD1",
-  "lf_cage_iron_socket_stone_rune_LOD2",
-  "socket_stone_rune",
-  "door_pivot",
-  "exit_corridor_0",
-  "exit_corridor_1",
-  "exit_corridor_2",
-  "exit_corridor_3",
-  "floor",
-  "hinge_axis_bottom",
-  "hinge_axis_top",
-  "lf_cage_iron_LOD0",
-  "lf_cage_iron_LOD1",
-  "lf_cage_iron_LOD2",
-  "lf_cage_iron_roof_LOD0",
-  "lf_cage_iron_roof_LOD1",
-  "lf_cage_iron_roof_LOD2",
-  "roof"
- ],
- "glb_animations": [
-  "lf_cage_gate_open",
-  "lf_cage_gate_settle",
-  "lf_cage_gate_close",
-  "lf_cage_unlock"
- ],
- "blueprint": {
-  "c": 1.8,
-  "cy": 1.4739,
-  "s": 0.34,
-  "zd": 0.4855,
-  "zt": 3.6324,
-  "zs": 3.5,
-  "zc": 4.0888,
-  "kx": 0.1234,
-  "ky": -0.0957,
-  "pe": 0.2495,
-  "pf": 0.3735,
-  "hx": -0.8607,
-  "dx1": 1.5229,
-  "sz": 1.3984,
-  "sx": 0.8587,
-  "zda": 2.8385,
-  "dz0": 0.3218
- },
- "qa": {
-  "views": {
-   "closed34": {
-    "iou_raw": 0.7274,
-    "iou_filled": 0.927,
-    "colour_err": 0.1043,
-    "colour_err_core": 0.0855,
-    "ref_px": 78256,
-    "render_px": 72258,
-    "ignored_px": 0,
-    "camera_rms_px": 2.81,
-    "camera_max_px": 5.35,
-    "camera_points": 11
-   },
-   "open34": {
-    "iou_raw": 0.7057,
-    "iou_filled": 0.9259,
-    "colour_err": 0.1291,
-    "colour_err_core": 0.1124,
-    "ref_px": 72260,
-    "render_px": 64336,
-    "ignored_px": 35492,
-    "camera_rms_px": 3.13,
-    "camera_max_px": 5.24,
-    "camera_points": 7
-   }
-  },
-  "cameras": {
-   "closed34": {
-    "rms_px": 2.81,
-    "max_px": 5.35,
-    "n": 11,
-    "fov_deg": 19.71,
-    "per_point_px": {
-     "top_n": 0.97,
-     "top_l": 4.34,
-     "top_r": 4.67,
-     "crown": 2.53,
-     "plat_bl": 2.37,
-     "plat_r": 5.35,
-     "postn_foot": 2.04,
-     "door_bl": 0.45,
-     "door_br": 0.43,
-     "door_ap": 0.39,
-     "sock": 0.02
+  ],
+  "clips": {
+    "lf_cage_unlock": {
+      "seconds": 1.0,
+      "loop": false,
+      "frames": 30,
+      "markers": {
+        "latch_clear": 0.7
+      },
+      "note": "socket plate settles (artifact pressed home), latch bolt slides 0.12 m toward the hinge",
+      "nodes": [
+        "latch_pivot",
+        "socket_amber_crystal",
+        "socket_bone_key",
+        "socket_bronze_seal",
+        "socket_stone_rune"
+      ]
+    },
+    "lf_cage_gate_open": {
+      "seconds": 1.6,
+      "loop": false,
+      "frames": 48,
+      "markers": {
+        "passage_clear": 1.2
+      },
+      "note": "door swings OUTWARD 95 deg about the left-jamb hinge axis",
+      "nodes": [
+        "door_pivot",
+        "latch_pivot"
+      ]
+    },
+    "lf_cage_gate_settle": {
+      "seconds": 0.4,
+      "loop": false,
+      "frames": 12,
+      "markers": {},
+      "note": "small damped settle at the open stop (95 deg)",
+      "nodes": [
+        "door_pivot",
+        "latch_pivot"
+      ]
+    },
+    "lf_cage_gate_close": {
+      "seconds": 1.2,
+      "loop": false,
+      "frames": 36,
+      "markers": {},
+      "note": "door returns to the frame, latch re-engages at the end",
+      "nodes": [
+        "door_pivot",
+        "latch_pivot"
+      ]
     }
-   },
-   "open34": {
-    "rms_px": 3.13,
-    "max_px": 5.24,
-    "n": 7,
-    "fov_deg": 26.23,
-    "per_point_px": {
-     "top_n": 2.01,
-     "top_l": 1.34,
-     "top_r": 2.65,
-     "crown": 3.36,
-     "plat_bl": 5.24,
-     "plat_n": 2.83,
-     "postb_foot": 3.02
-    }
-   }
   },
-  "texture": {
-   "texels": 2229441,
-   "projected_frac": 0.2645,
-   "per_view_frac": {
-    "closed34": 0.1444,
-    "open34": 0.1285,
-    "mirror_x_closed": 0.1388,
-    "back_from_left": 0.1135
-   },
-   "seconds": 31.9
-  },
-  "sheets": "forest_rescue/qa/compare/lf_cage_iron/v2_iter10_*",
-  "godot_import": {
-   "errors_warnings": 0,
-   "lines": []
-  }
- },
- "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_iron --iter 10",
- "door_open_deg": -95.0,
- "door_open_deg_note": "signed Godot rotation.y of door_pivot for the open pose (actor_director.swing_door fallback adds door_open_deg * amount: negative = outward)",
- "sockets": {
-  "floor": [
-   0.0,
-   0.4855,
-   -0.0
-  ],
-  "hinge": [
-   -0.7707,
-   0.3218,
-   1.5389
-  ],
-  "captive_slot_0": [
-   -0.72,
-   0.486,
-   0.1
-  ],
-  "captive_slot_1": [
-   0.05,
-   0.486,
-   -0.45
-  ],
-  "captive_slot_2": [
-   0.74,
-   0.486,
-   0.18
-  ]
- },
- "socketInfo": {
-  "floor": {
-   "node": "floor",
-   "height_m": 0.486,
-   "note": "top of the cage floor (glTF y). Seat captives at cage.global_transform * sockets.floor (or add sockets.floor[1] to their ground height); captive_slot_0..2 are seat spots on the floor that match actor_director CAGE_SLOTS."
-  },
-  "key_slot": {
-   "node": "key_slot",
-   "parent": "door_pivot",
-   "position_closed": [
-    0.8587,
-    1.3984,
-    1.5539
-   ],
-   "normal": [
-    0,
-    0,
-    1
-   ],
-   "note": "live node on the door (moves with it). Use find_part('key_slot').global_transform; parent the artifact there with identity transform. Not listed in 'sockets' on purpose (a static array would leave the artifact floating when the door is open)."
-  },
-  "socket_plates": {
-   "stone_rune": "socket_stone_rune",
-   "bronze_seal": "socket_bronze_seal",
-   "amber_crystal": "socket_amber_crystal",
-   "bone_key": "socket_bone_key"
-  },
-  "socket_native": "socket_bronze_seal",
-  "socket_switch": "all four plates are children of door_pivot at the same spot; only the native one is visible by default (KHR_node_visibility). For a site whose artifact family differs, set socket_<family>.visible = true and socket_<native>.visible = false.",
-  "hinge_axis": {
-   "nodes": [
+  "glb_nodes": [
+    "captive_slot_0",
+    "captive_slot_1",
+    "captive_slot_2",
+    "key_slot",
+    "lf_cage_iron_latch_pivot_LOD0",
+    "lf_cage_iron_latch_pivot_LOD1",
+    "lf_cage_iron_latch_pivot_LOD2",
+    "latch_pivot",
+    "lf_cage_iron_door_pivot_LOD0",
+    "lf_cage_iron_door_pivot_LOD1",
+    "lf_cage_iron_door_pivot_LOD2",
+    "lf_cage_iron_socket_amber_crystal_LOD0",
+    "lf_cage_iron_socket_amber_crystal_LOD1",
+    "lf_cage_iron_socket_amber_crystal_LOD2",
+    "socket_amber_crystal",
+    "lf_cage_iron_socket_bone_key_LOD0",
+    "lf_cage_iron_socket_bone_key_LOD1",
+    "lf_cage_iron_socket_bone_key_LOD2",
+    "socket_bone_key",
+    "lf_cage_iron_socket_bronze_seal_LOD0",
+    "lf_cage_iron_socket_bronze_seal_LOD1",
+    "lf_cage_iron_socket_bronze_seal_LOD2",
+    "socket_bronze_seal",
+    "lf_cage_iron_socket_stone_rune_LOD0",
+    "lf_cage_iron_socket_stone_rune_LOD1",
+    "lf_cage_iron_socket_stone_rune_LOD2",
+    "socket_stone_rune",
+    "door_pivot",
+    "exit_corridor_0",
+    "exit_corridor_1",
+    "exit_corridor_2",
+    "exit_corridor_3",
+    "floor",
     "hinge_axis_bottom",
-    "hinge_axis_top"
-   ],
-   "point": [
-    -0.7707,
-    0.0,
-    1.5389
-   ],
-   "direction": [
-    0,
-    1,
-    0
-   ],
-   "side": "LEFT jamb seen from outside (glTF -X side of the opening)"
+    "hinge_axis_top",
+    "lf_cage_iron_LOD0",
+    "lf_cage_iron_LOD1",
+    "lf_cage_iron_LOD2",
+    "lf_cage_iron_roof_LOD0",
+    "lf_cage_iron_roof_LOD1",
+    "lf_cage_iron_roof_LOD2",
+    "roof"
+  ],
+  "glb_animations": [
+    "lf_cage_gate_open",
+    "lf_cage_gate_settle",
+    "lf_cage_gate_close",
+    "lf_cage_unlock"
+  ],
+  "blueprint": {
+    "c": 1.8,
+    "cy": 1.4739,
+    "s": 0.34,
+    "zd": 0.4855,
+    "zt": 3.6324,
+    "zs": 3.5,
+    "zc": 4.0888,
+    "kx": 0.1234,
+    "ky": -0.0957,
+    "pe": 0.2495,
+    "pf": 0.3735,
+    "hx": -0.8607,
+    "dx1": 1.5229,
+    "sz": 1.3984,
+    "sx": 0.8587,
+    "zda": 2.8385,
+    "dz0": 0.3218
   },
-  "door": {
-   "node": "door_pivot",
-   "open_rotation_y_deg": -95.0,
-   "rule": "door_pivot rotates about its local +Y (through the hinge pins); closed 0, open -95 deg (outward: the free edge moves toward +Z)",
-   "clear_width_m": 2.274,
-   "clear_height_m": 2.297
+  "qa": {
+    "views": {
+      "closed34": {
+        "iou_raw": 0.7274,
+        "iou_filled": 0.927,
+        "colour_err": 0.1043,
+        "colour_err_core": 0.0855,
+        "ref_px": 78256,
+        "render_px": 72258,
+        "ignored_px": 0,
+        "camera_rms_px": 2.81,
+        "camera_max_px": 5.35,
+        "camera_points": 11
+      },
+      "open34": {
+        "iou_raw": 0.7057,
+        "iou_filled": 0.9259,
+        "colour_err": 0.1291,
+        "colour_err_core": 0.1124,
+        "ref_px": 72260,
+        "render_px": 64336,
+        "ignored_px": 35492,
+        "camera_rms_px": 3.13,
+        "camera_max_px": 5.24,
+        "camera_points": 7
+      }
+    },
+    "cameras": {
+      "closed34": {
+        "rms_px": 2.81,
+        "max_px": 5.35,
+        "n": 11,
+        "fov_deg": 19.71,
+        "per_point_px": {
+          "top_n": 0.97,
+          "top_l": 4.34,
+          "top_r": 4.67,
+          "crown": 2.53,
+          "plat_bl": 2.37,
+          "plat_r": 5.35,
+          "postn_foot": 2.04,
+          "door_bl": 0.45,
+          "door_br": 0.43,
+          "door_ap": 0.39,
+          "sock": 0.02
+        }
+      },
+      "open34": {
+        "rms_px": 3.13,
+        "max_px": 5.24,
+        "n": 7,
+        "fov_deg": 26.23,
+        "per_point_px": {
+          "top_n": 2.01,
+          "top_l": 1.34,
+          "top_r": 2.65,
+          "crown": 3.36,
+          "plat_bl": 5.24,
+          "plat_n": 2.83,
+          "postb_foot": 3.02
+        }
+      }
+    },
+    "texture": {
+      "texels": 2229441,
+      "projected_frac": 0.2645,
+      "per_view_frac": {
+        "closed34": 0.1444,
+        "open34": 0.1285,
+        "mirror_x_closed": 0.1388,
+        "back_from_left": 0.1135
+      },
+      "seconds": 31.9
+    },
+    "sheets": "forest_rescue/qa/compare/lf_cage_iron/v2_iter10_*",
+    "godot_import": {
+      "errors_warnings": 0,
+      "lines": []
+    }
   },
-  "latch": {
-   "node": "latch_pivot",
-   "travel_m": 0.12,
-   "axis_gltf": [
-    -1,
-    0,
-    0
-   ]
-  },
-  "exit_corridor": [
-   [
-    -0.2607,
-    0.4855,
-    0.9739
-   ],
-   [
-    -0.2607,
-    0.4855,
-    1.7739
-   ],
-   [
-    -0.2607,
-    0.0,
-    2.8739
-   ],
-   [
-    -0.2607,
-    0.0,
-    4.0739
-   ]
-  ]
- },
- "poses": {
-  "closed": {
-   "door_pivot": {
-    "rotation_y_deg": 0.0
-   },
-   "latch_pivot": {
-    "translation_offset": [
-     0,
-     0,
-     0
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_iron --iter 10",
+  "door_open_deg": -95.0,
+  "door_open_deg_note": "signed Godot rotation.y of door_pivot for the open pose (actor_director.swing_door fallback adds door_open_deg * amount: negative = outward)",
+  "sockets": {
+    "floor": [
+      0.0,
+      0.4855,
+      -0.0
+    ],
+    "hinge": [
+      -0.7707,
+      0.3218,
+      1.5389
+    ],
+    "captive_slot_0": [
+      -0.72,
+      0.486,
+      0.1
+    ],
+    "captive_slot_1": [
+      0.05,
+      0.486,
+      -0.45
+    ],
+    "captive_slot_2": [
+      0.74,
+      0.486,
+      0.18
     ]
-   }
   },
-  "open": {
-   "door_pivot": {
-    "rotation_y_deg": -95.0
-   },
-   "latch_pivot": {
-    "translation_offset": [
-     -0.12,
-     0,
-     0
+  "socketInfo": {
+    "floor": {
+      "node": "floor",
+      "height_m": 0.486,
+      "note": "top of the cage floor (glTF y). Seat captives at cage.global_transform * sockets.floor (or add sockets.floor[1] to their ground height); captive_slot_0..2 are seat spots on the floor that match actor_director CAGE_SLOTS."
+    },
+    "key_slot": {
+      "node": "key_slot",
+      "parent": "door_pivot",
+      "position_closed": [
+        0.8587,
+        1.3984,
+        1.5539
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "note": "live node on the door (moves with it). Use find_part('key_slot').global_transform; parent the artifact there with identity transform. Not listed in 'sockets' on purpose (a static array would leave the artifact floating when the door is open)."
+    },
+    "socket_plates": {
+      "stone_rune": "socket_stone_rune",
+      "bronze_seal": "socket_bronze_seal",
+      "amber_crystal": "socket_amber_crystal",
+      "bone_key": "socket_bone_key"
+    },
+    "socket_native": "socket_bronze_seal",
+    "socket_switch": "all four plates are children of door_pivot at the same spot; only the native one is visible by default (KHR_node_visibility). For a site whose artifact family differs, set socket_<family>.visible = true and socket_<native>.visible = false.",
+    "hinge_axis": {
+      "nodes": [
+        "hinge_axis_bottom",
+        "hinge_axis_top"
+      ],
+      "point": [
+        -0.7707,
+        0.0,
+        1.5389
+      ],
+      "direction": [
+        0,
+        1,
+        0
+      ],
+      "side": "LEFT jamb seen from outside (glTF -X side of the opening)"
+    },
+    "door": {
+      "node": "door_pivot",
+      "open_rotation_y_deg": -95.0,
+      "rule": "door_pivot rotates about its local +Y (through the hinge pins); closed 0, open -95 deg (outward: the free edge moves toward +Z)",
+      "clear_width_m": 2.274,
+      "clear_height_m": 2.297
+    },
+    "latch": {
+      "node": "latch_pivot",
+      "travel_m": 0.12,
+      "axis_gltf": [
+        -1,
+        0,
+        0
+      ]
+    },
+    "exit_corridor": [
+      [
+        -0.2607,
+        0.4855,
+        0.9739
+      ],
+      [
+        -0.2607,
+        0.4855,
+        1.7739
+      ],
+      [
+        -0.2607,
+        0.0,
+        2.8739
+      ],
+      [
+        -0.2607,
+        0.0,
+        4.0739
+      ]
     ]
-   }
+  },
+  "poses": {
+    "closed": {
+      "door_pivot": {
+        "rotation_y_deg": 0.0
+      },
+      "latch_pivot": {
+        "translation_offset": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    "open": {
+      "door_pivot": {
+        "rotation_y_deg": -95.0
+      },
+      "latch_pivot": {
+        "translation_offset": [
+          -0.12,
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "cage_type": "iron",
+  "native_family": "bronze_seal",
+  "roofNode": "roof",
+  "roofNote": "crown straps + central boss + spire as one node (meshes lf_cage_iron_roof_LOD0/1/2); fade or hide it when captives are inside and the camera is above",
+  "texture_fix": {
+    "tool": "forest_rescue/tools/fix_cage_top_textures.py (+ blender/assets/props/v2/cage_seen_mask.py, qa_recompare.py)",
+    "what": "top-facing faces (floor deck, pallet tops; glTF n.y > 0.7, y < 0.62 m): plank deck synthesised from the painted deck of the OPEN view (art/cage_variants_gate_sockets.png), planks parallel to the front, one texel density, colour matched to the painted plank tone; replaces the diagonal bar stripes",
+    "rule": "texture-only: GLB, nodes, sockets, UVs and clips unchanged; LOD0 texels the painting shows (seen mask from the solved painting cameras) keep their projected colour; LOD1/LOD2 rewritten on the same faces",
+    "backup": "forest_rescue/blender/textures/props/v2/pre_top_fix/",
+    "compare": {
+      "closed34": {
+        "old": {
+          "iou_raw": 0.7274,
+          "iou_filled": 0.927,
+          "colour_err": 0.1043
+        },
+        "new": {
+          "iou_raw": 0.7274,
+          "iou_filled": 0.927,
+          "colour_err": 0.1059
+        }
+      },
+      "open34": {
+        "old": {
+          "iou_raw": 0.7057,
+          "iou_filled": 0.9259,
+          "colour_err": 0.1291
+        },
+        "new": {
+          "iou_raw": 0.7057,
+          "iou_filled": 0.9259,
+          "colour_err": 0.1297
+        }
+      }
+    },
+    "compare_sheets": "forest_rescue/qa/compare/lf_cage_iron/v2_iter91_*  (iron: v2_iter92_*)"
   }
- },
- "cage_type": "iron",
- "native_family": "bronze_seal",
- "roofNode": "roof",
- "roofNote": "crown straps + central boss + spire as one node (meshes lf_cage_iron_roof_LOD0/1/2); fade or hide it when captives are inside and the camera is above",
- "texture_fix": {
-  "tool": "forest_rescue/tools/fix_cage_top_textures.py (+ blender/assets/props/v2/cage_seen_mask.py, qa_recompare.py)",
-  "what": "top-facing faces (floor deck, pallet tops; glTF n.y > 0.7, y < 0.62 m): plank deck synthesised from the painted deck of the OPEN view (art/cage_variants_gate_sockets.png), planks parallel to the front, one texel density, colour matched to the painted plank tone; replaces the diagonal bar stripes",
-  "rule": "texture-only: GLB, nodes, sockets, UVs and clips unchanged; LOD0 texels the painting shows (seen mask from the solved painting cameras) keep their projected colour; LOD1/LOD2 rewritten on the same faces",
-  "backup": "forest_rescue/blender/textures/props/v2/pre_top_fix/",
-  "compare": {
-   "closed34": {
-    "old": {
-     "iou_raw": 0.7274,
-     "iou_filled": 0.927,
-     "colour_err": 0.1043
-    },
-    "new": {
-     "iou_raw": 0.7274,
-     "iou_filled": 0.927,
-     "colour_err": 0.1059
-    }
-   },
-   "open34": {
-    "old": {
-     "iou_raw": 0.7057,
-     "iou_filled": 0.9259,
-     "colour_err": 0.1291
-    },
-    "new": {
-     "iou_raw": 0.7057,
-     "iou_filled": 0.9259,
-     "colour_err": 0.1297
-    }
-   }
-  },
-  "compare_sheets": "forest_rescue/qa/compare/lf_cage_iron/v2_iter91_*  (iron: v2_iter92_*)"
- }
 }

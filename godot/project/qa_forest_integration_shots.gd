@@ -147,6 +147,35 @@ func run() -> void:
 	forest.client.host = stub
 	await frames(10, false)
 
+	# -------------------------------------------------- hall III intro: the mare walks out of the mist
+	if wanted("intro"):
+		await fresh("intro_offer")
+		look(Vector3(5, 0, -4), 70.0)
+		stub.replies = [fixture("intro_playing").merged({"events":[{"type":"intro_present", "seq":9001, "revision":1}]})]
+		var started := Time.get_ticks_msec()
+		while not forest.intro.presenting() and Time.get_ticks_msec() - started < 4000:
+			await frames(1)
+		while forest.intro.elapsed < 6.4:
+			await frames(1)
+		var horse = forest.actors.rigs.get("horse")
+		if horse != null and is_instance_valid(horse):
+			horse.poll_load(true)
+		await frames(2)
+		await shoot("intro_horse_z40")
+		var at: Vector3 = horse.global_position if horse != null and is_instance_valid(horse) else forest.target_position("lf_horse_origin")
+		var keep := forest.intro.camera_user_took
+		forest.intro.camera_user_took = true
+		look(at + Vector3(0, 0.8, 0), 12.0)
+		await frames(3)
+		await shoot("intro_horse_z12")
+		forest.intro.camera_user_took = keep
+		while forest.intro.elapsed < 12.4:
+			await frames(1)
+		await shoot("intro_prompt")
+		stub.replies = [fixture("prologue")]
+		forest.intro.on_skip()
+		await frames(2)
+
 	# -------------------------------------------------- horse + squad at the horse origin
 	if wanted("horse"):
 		await fresh("horse_joined")

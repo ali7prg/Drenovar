@@ -67,21 +67,21 @@ const AMBIENT_SCALE := {
 }
 ## Resource-tree absolute scale ranges per zone [oak, pine] (zone decides which one dominates).
 const RESOURCE_SCALE_OUTER := [
-	[[0.46, 0.58], [0.56, 0.68]],   # grove: young oaks/pines under sparse big oaks
-	[[0.44, 0.56], [0.68, 0.84]],
-	[[0.40, 0.48], [0.92, 1.12]],   # arena pines
-	[[0.42, 0.52], [0.82, 1.02]],
-	[[0.42, 0.52], [0.76, 0.94]],
-	[[0.38, 0.46], [0.96, 1.20]],   # spruce: young oaks under tall spruces
-	[[0.42, 0.52], [0.74, 0.88]],
-	[[0.44, 0.56], [0.72, 0.88]],
+	[[0.34, 0.46], [0.44, 0.56]],   # grove: young oaks/pines between sparse old oaks
+	[[0.38, 0.50], [0.62, 0.80]],
+	[[0.34, 0.42], [0.92, 1.12]],   # arena pines
+	[[0.36, 0.46], [0.82, 1.02]],
+	[[0.36, 0.46], [0.76, 0.94]],
+	[[0.32, 0.40], [0.96, 1.20]],   # spruce: young oaks under tall spruces
+	[[0.36, 0.46], [0.70, 0.86]],
+	[[0.42, 0.54], [0.70, 0.86]],
 ]
 ## Inner base (±56): the town stays readable (legacy-like 8–10 m crowns).
 const RESOURCE_SCALE_INNER := [[0.46, 0.58], [0.60, 0.74]]
 ## Kit variant palettes per zone & species (art/01: v2+; v1 = art/02 hero accents).
 const ZONE_VARIANTS := {
 	Rules.OAK: [[2, 3, 4], [2, 3, 4, 1], [1, 2, 3], [2, 3, 4, 1], [2, 3, 4], [1, 2, 3], [2, 3, 4], [2, 3, 4, 1]],
-	Rules.PINE: [[2, 3, 4], [2, 3, 4], [2, 3, 4], [2, 3, 4], [2, 3], [2, 3, 4], [2, 3, 4], [2, 3, 4]],
+	Rules.PINE: [[1, 1, 2], [2, 3, 4], [2, 3, 4], [2, 3, 4], [2, 3], [2, 3, 4], [1, 2, 3], [2, 3, 4]],
 	Rules.BIRCH: [[2, 3], [2, 3, 1], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3, 1], [2, 3]],
 	Rules.WILLOW: [[2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3]],
 }
@@ -414,7 +414,8 @@ func run() -> void:
 	var trees: Array = []
 	var species_count := {}
 	if hero != Vector2.INF:
-		trees.append([snappedf(hero.x, 0.01), snappedf(hero.y, 0.01), Rules.HOLLOW_OAK, 2, 225.0, Rules.HERO_SCALE, Z_GROVE])
+		# yaw 45°: the walk-through hollow (model +Z) faces the city camera (+X+Z), as in art/01.
+		trees.append([snappedf(hero.x, 0.01), snappedf(hero.y, 0.01), Rules.HOLLOW_OAK, 2, 45.0, Rules.HERO_SCALE, Z_GROVE])
 		species_count[Rules.SPECIES[Rules.HOLLOW_OAK]] = 1
 	var cells: Array = []
 	var span := int(EXTENT * 2.0)

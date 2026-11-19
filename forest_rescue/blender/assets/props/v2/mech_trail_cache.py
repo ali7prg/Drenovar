@@ -18,15 +18,15 @@ LIGHT = (-0.55, -0.45, 0.70)
 BOX = (8, 70, 762, 390)
 OPEN = 0.55
 
-PARAMS = dict(R=0.45, L=3.3, lx0=-0.15, lx1=0.75, lw=0.36, rx=-1.0, ry=1.3, sx_=-2.6, sy_=0.6)
-FREE = ["lx0", "lx1", "lw", "rx", "ry", "sx_", "sy_"]
+PARAMS = dict(R=0.45, L=3.3, ltx=-0.9, lx0=-0.15, lx1=0.75, lw=0.36, rx=-1.0, ry=1.3, sx_=-2.6, sy_=0.6)
+FREE = ["L", "ltx", "lx0", "lx1", "lw", "rx", "ry", "sx_", "sy_"]
 
 
 def points(p):
     R, L = p["R"], p["L"]
     zt = 2 * R
     return {
-        "latch": (p["lx0"] - 0.57, -0.05, zt + 0.1), "ring": (p["lx1"] - 0.18 + OPEN, -0.2, zt + 0.1),
+        "latch": (p["ltx"], -0.05, zt + 0.1), "near_end": (-L / 2, -R * 0.2, zt * 0.55), "ring": (p["lx1"] - 0.18 + OPEN, -0.2, zt + 0.1),
         "lid_a": (p["lx0"] + OPEN, -p["lw"], zt + 0.06), "lid_b": (p["lx1"] + OPEN, -p["lw"], zt + 0.06),
         "lid_c": (p["lx0"] + OPEN, p["lw"], zt + 0.06), "lid_d": (p["lx1"] + OPEN, p["lw"], zt + 0.06),
         "rock_top": (p["rx"], p["ry"], 1.55), "stump_top": (p["sx_"], p["sy_"], 1.15),
@@ -36,11 +36,12 @@ def points(p):
 def views():
     v = pv2.ViewSpec(
         "main", SHEET, BOX,
-        {"latch": (340, 215), "ring": (582.5, 220),
+        {"latch": (340, 215), "ring": (582.5, 220), "near_end": (262, 290),
          "lid_a": (495, 262.5), "lid_b": (630, 222.5), "lid_c": (460, 200), "lid_d": (595, 167.5),
          "rock_top": (310, 82.5), "stump_top": (105, 100)},
         pose={"cache_lid": {"loc": (OPEN, 0, 0)}},
-        light=LIGHT, thresh=0.085, fill_holes=True, shadow=None, title="TRAIL CACHE main view (lid slid open)")
+        light=LIGHT, thresh=0.085, fill_holes=True, shadow=None, solve_opts={"fov_prior": 20.0},
+        title="TRAIL CACHE main view (lid slid open)")
     return [v]
 
 
@@ -69,7 +70,7 @@ def build(A, p, lod):
     # hollow log of split staves; cache opening between lx0-0.4 and lx1 on the top staves
     nst = 9 if lod == 0 else 6
     angles = [math.radians(a) for a in np.linspace(-90 - 140, -90 + 140, nst)]
-    gap = (p["lx0"] - 0.45, p["lx1"] + 0.02)
+    gap = (min(p["lx0"] - 0.1, p["ltx"] + 0.12), p["lx1"] + 0.02)
     stave_ring(g, -L / 2, L / 2, R * 0.93, angles, 2 * math.pi * R / nst * 1.05, 0.16, lod, skip_range=(math.radians(20), math.radians(160)), gap=gap)
     # end caps (cut ends, rings come from the painting)
     for xe in (-L / 2 + 0.03, L / 2 - 0.03):
@@ -84,7 +85,7 @@ def build(A, p, lod):
             g.cyl(c - Rm[:, 2] * 0.025, c + Rm[:, 2] * 0.025, 0.12, n=14 if lod == 0 else 8, mat="bronze", tag="token",
                   up=(1, 0, 0))
     # iron latch block at the near end of the opening
-    g.box((gap[0] - 0.12, -0.05, 2 * R + 0.03), (0.22, 0.26, 0.14), mat="iron", tag="latch_block")
+    g.box((p["ltx"], -0.05, 2 * R + 0.03), (0.22, 0.26, 0.14), mat="iron", tag="latch_block")
     # sliding lid (node): planks + iron strap + bronze ring; rest = closed over the opening
     lid = A.part("cache_lid", None, ((p["lx0"] + p["lx1"]) / 2, 0, 2 * R))
     lg = lid.geo[lod]

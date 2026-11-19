@@ -268,7 +268,10 @@ def solve_views(views, points_fn, params, free, prior_sigma=0.25, log_fn=log):
     for v in views:
         keys = [k for k in v.points if k in P]
         W, H = v.size
-        cam, rep = camsolve.solve(np.array([P[k] for k in keys]), v.p2(keys), (W, H), **v.solve_opts)
+        so = {k: x for k, x in v.solve_opts.items() if k != "fov_prior"}
+        if v.solve_opts.get("fov_prior"):
+            so.setdefault("f0", max(W, H) / (2 * math.tan(math.radians(v.solve_opts["fov_prior"]) / 2)))
+        cam, rep = camsolve.solve(np.array([P[k] for k in keys]), v.p2(keys), (W, H), **so)
         v.cam, v.rep = cam, rep
         log_fn(f"  [{v.name}] init solvePnP rms {rep['rms_px']:.2f}px (n={len(keys)}) f={cam.f:.0f}")
     free = [k for k in free if k in params]
@@ -294,6 +297,11 @@ def solve_views(views, points_fn, params, free, prior_sigma=0.25, log_fn=log):
             u, vv, z = c.project(np.array([PP[k] for k in keys]))
             q = v.p2(keys)
             r += list((u - q[:, 0]) * v.weight) + list((vv - q[:, 1]) * v.weight)
+        for c, v in zip(cams, views):
+            fov0 = v.solve_opts.get("fov_prior")
+            if fov0:
+                f0 = max(v.size) / (2 * math.tan(math.radians(fov0) / 2))
+                r.append((math.log(c.f) - math.log(f0)) * 40.0)
         for j, k in enumerate(free):
             r.append((pp[k] - p0[j]) / (prior_sigma * scale0[j]) * 0.6)
         return np.array(r)

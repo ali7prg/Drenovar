@@ -170,7 +170,7 @@ class ViewSpec:
 
     def __init__(self, name, sheet_name, box, points, pose=None, project=True, light=(-0.45, -0.55, 0.70),
                  thresh=0.10, fill_holes=40, exclude=(), clip_below=None, iou_ignore=None, weight=1.0,
-                 shadow=None, solve_opts=None, hide_parts=(), title=""):
+                 shadow=None, solve_opts=None, hide_parts=(), title="", ignore_boxes=()):
         self.name, self.sheet_name, self.box = name, sheet_name, tuple(box)
         self.points = dict(points)
         self.pose = dict(pose or {})
@@ -181,6 +181,8 @@ class ViewSpec:
         self.shadow = shadow
         self.solve_opts = solve_opts or {}
         self.title = title
+        self.ignore_boxes = list(ignore_boxes)
+        self.ground = None          # 3-D footprint polygon at z=0 (set after the solve): ground-shadow cut
         self.cam = None
         self.rep = None
 
@@ -206,7 +208,25 @@ class ViewSpec:
                             fill_holes=self.fill_holes, keep="all", min_area=25, exclude=ex,
                             clip_below=(self.clip_below - self.box[1]) if self.clip_below else None,
                             shadow_luma_drop=self.shadow)
+        if self.ground is not None and self.cam is not None:
+            u, v, _ = self.cam.project(np.asarray(self.ground, float))
+            poly = np.stack([u, v], 1).astype(np.int32)
+            fp = np.zeros(m.shape, np.uint8)
+            cv2.fillPoly(fp, [poly], 1)
+            cols = np.nonzero(fp.any(0))[0]
+            for x in cols:
+                ylow = np.nonzero(fp[:, x])[0].max()
+                m[ylow + 2:, x] = False
         return m, bg
+
+    def ignore(self):
+        if not self.ignore_boxes:
+            return None
+        W, H = self.size
+        ig = np.zeros((H, W), bool)
+        for (a, b, c, d) in self.ignore_boxes:
+            ig[max(0, b - self.box[1]):max(0, d - self.box[1]), max(0, a - self.box[0]):max(0, c - self.box[0])] = True
+        return ig
 
 
 def solve_views(views, points_fn, params, free, prior_sigma=0.25, log_fn=log):

@@ -200,20 +200,31 @@ def masonry_run(g, p0, p1, z0, z1, thick, courses, block_len, rng, mat="stone", 
     return g
 
 
-def hip_roof(g, z0, half, apex, rows, lod, mat="roof", tag="roof", step=0.035):
-    """Square hip roof from eave half-size `half` at z0 to the apex point, shingle rows as stepped slabs."""
-    for q in range(4):
-        Rz = G.rot_z(q * math.pi / 2)
+def hip_roof(g, z0, half, apex, rows, lod, mat="roof", tag="roof", step=0.035, apex_xy=(0.0, 0.0)):
+    """Hip (pyramid) roof from the eave rectangle (+-hx, +-hy) at z0 to the apex point, shingle rows as stepped
+    slabs. half = scalar or (hx, hy)."""
+    hx, hy = (half, half) if np.isscalar(half) else half
+    sides = [((-hx, -hy), (hx, -hy)), ((hx, -hy), (hx, hy)), ((hx, hy), (-hx, hy)), ((-hx, hy), (-hx, -hy))]
+    for (a, b) in sides:
+        a = np.array([a[0], a[1], z0])
+        b = np.array([b[0], b[1], z0])
+        top = np.array([apex_xy[0], apex_xy[1], apex])
         for r in range(rows):
             f0, f1 = r / rows, (r + 1) / rows
-            za, zb = z0 + (apex - z0) * f0, z0 + (apex - z0) * f1
-            ya, yb = -half * (1 - f0), -half * (1 - f1)
-            xa, xb = half * (1 - f0), half * (1 - f1)
+            A0, B0 = a + (top - a) * f0, b + (top - b) * f0
+            A1, B1 = a + (top - a) * f1, b + (top - b) * f1
             drop = step if lod < 2 else 0.0
-            V = np.array([[-xa, ya - 0.0, za - drop], [xa, ya, za - drop], [xb, yb, zb], [-xb, yb, zb],
-                          [-xa, ya, za], [xa, ya, za]]) @ Rz.T
-            F = [[0, 1, 2, 3]] if drop == 0 else [[4, 5, 2, 3], [0, 1, 5, 4]]
-            g.add(V, F, mat, tag)
+            if drop == 0:
+                if r == rows - 1:
+                    g.add(np.array([A0, B0, top]), [[0, 1, 2]], mat, tag)
+                else:
+                    g.add(np.array([A0, B0, B1, A1]), [[0, 1, 2, 3]], mat, tag)
+                continue
+            V = np.array([A0 - (0, 0, drop), B0 - (0, 0, drop), B1, A1, A0, B0])
+            if r == rows - 1:
+                V[2] = top
+                V[3] = top + (A1 - B1) * 0.001
+            g.add(V, [[4, 5, 2, 3], [0, 1, 5, 4]], mat, tag)
     return g
 
 

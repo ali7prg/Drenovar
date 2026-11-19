@@ -2,13 +2,13 @@
   "id": "lf_cage_wood",
   "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 7296,
-    "LOD1": 2948,
-    "LOD2": 1732
+    "LOD0": 7128,
+    "LOD1": 2936,
+    "LOD2": 1740
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 6236,
+      "root": 6068,
       "door_pivot": 600,
       "socket_stone_rune": 248,
       "socket_bronze_seal": 68,
@@ -17,7 +17,7 @@
       "latch_pivot": 24
     },
     "LOD1": {
-      "root": 2348,
+      "root": 2336,
       "door_pivot": 248,
       "socket_stone_rune": 140,
       "socket_bronze_seal": 68,
@@ -26,7 +26,7 @@
       "latch_pivot": 24
     },
     "LOD2": {
-      "root": 1220,
+      "root": 1228,
       "door_pivot": 208,
       "socket_stone_rune": 92,
       "socket_bronze_seal": 68,
@@ -54,14 +54,14 @@
   "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -1.659,
+      -1.857,
       0.0,
-      -1.659
+      -1.549
     ],
     "max": [
-      1.659,
-      3.667,
-      2.986
+      1.857,
+      3.819,
+      2.965
     ]
   },
   "lod_nodes": {
@@ -199,78 +199,75 @@
     "lf_cage_unlock"
   ],
   "blueprint": {
-    "c": 1.45,
-    "s": 0.27,
-    "e": 0.0364,
-    "hb": 0.5931,
-    "zf": 3.2968,
-    "zr": 3.6671,
-    "bt": 2.9505,
-    "bh": 0.2727,
-    "ov": 0.0138,
-    "hx": -0.3789,
-    "dx1": 1.1385,
-    "dz0": 0.123,
-    "sz": 1.1647,
-    "sx": 0.839,
-    "zda": 2.272
+    "c": 1.6,
+    "cy": 1.2917,
+    "s": 0.29,
+    "e": 0.0408,
+    "hb": 0.6256,
+    "zf": 3.4274,
+    "zr": 3.8186,
+    "bt": 3.0774,
+    "bh": 0.2855,
+    "ov": 0.0522,
+    "hx": -0.4112,
+    "dx1": 1.245,
+    "dz0": 0.1034,
+    "sz": 1.1965,
+    "sx": 0.9153,
+    "zda": 2.3681
   },
   "qa": {
     "views": {
       "closed34": {
-        "iou_raw": 0.7903,
-        "iou_filled": 0.9134,
-        "colour_err": 0.0866,
-        "colour_err_core": 0.0754,
+        "iou_raw": 0.7835,
+        "iou_filled": 0.9166,
+        "colour_err": 0.0855,
+        "colour_err_core": 0.0737,
         "ref_px": 89290,
-        "render_px": 82328,
+        "render_px": 81821,
         "ignored_px": 0,
-        "camera_rms_px": 5.81,
-        "camera_max_px": 20.15,
+        "camera_rms_px": 5.42,
+        "camera_max_px": 17.62,
         "camera_points": 16
       }
     },
     "cameras": {
       "closed34": {
-        "rms_px": 5.81,
-        "max_px": 20.15,
+        "rms_px": 5.42,
+        "max_px": 17.62,
         "n": 16,
-        "fov_deg": 16.94,
+        "fov_deg": 19.14,
         "per_point_px": {
-          "fin_n": 2.06,
-          "fin_l": 1.51,
-          "fin_r": 2.03,
-          "apex": 20.15,
-          "base_n0": 3.7,
-          "base_n1": 0.62,
-          "base_l0": 0.73,
-          "base_r0": 3.42,
-          "door_bl": 3.71,
-          "door_br": 2.07,
-          "door_ap": 3.81,
+          "fin_n": 2.08,
+          "fin_l": 3.18,
+          "fin_r": 2.08,
+          "apex": 17.62,
+          "base_n0": 2.16,
+          "base_n1": 0.67,
+          "base_l0": 3.22,
+          "base_r0": 1.16,
+          "door_bl": 4.83,
+          "door_br": 1.9,
+          "door_ap": 3.45,
           "sock": 0.02,
-          "beam_r_t": 3.11,
-          "beam_r_b": 2.3,
-          "beam_l_t": 5.33,
-          "beam_l_b": 4.62
+          "beam_r_t": 4.67,
+          "beam_r_b": 3.17,
+          "beam_l_t": 5.81,
+          "beam_l_b": 4.41
         }
       }
     },
     "texture": {
-      "texels": 2288881,
-      "projected_frac": 0.1467,
+      "texels": 2348165,
+      "projected_frac": 0.15,
       "per_view_frac": {
-        "closed34": 0.1505
+        "closed34": 0.1531
       },
-      "seconds": 10.0
+      "seconds": 8.9
     },
-    "sheets": "forest_rescue/qa/compare/lf_cage_wood/v2_iter01_*",
-    "godot_import": {
-      "errors_warnings": 0,
-      "lines": []
-    }
+    "sheets": "forest_rescue/qa/compare/lf_cage_wood/v2_iter02_*"
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_oak --iter 1",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_oak --iter 2",
   "door_open_deg": -95.0,
   "door_open_deg_note": "signed Godot rotation.y of door_pivot for the open pose (actor_director.swing_door fallback adds door_open_deg * amount: negative = outward)",
   "sockets": {
@@ -280,9 +277,9 @@
       -0.0
     ],
     "hinge": [
-      -0.2689,
-      0.123,
-      1.545
+      -0.3012,
+      0.1034,
+      1.3867
     ],
     "captive_slot_0": [
       -0.72,
@@ -310,9 +307,9 @@
       "node": "key_slot",
       "parent": "door_pivot",
       "position_closed": [
-        0.839,
-        1.1647,
-        1.56
+        0.9153,
+        1.1965,
+        1.4017
       ],
       "normal": [
         0,
@@ -335,9 +332,9 @@
         "hinge_axis_top"
       ],
       "point": [
-        -0.2689,
+        -0.3012,
         0.0,
-        1.545
+        1.3867
       ],
       "direction": [
         0,
@@ -350,8 +347,8 @@
       "node": "door_pivot",
       "open_rotation_y_deg": -95.0,
       "rule": "door_pivot rotates about its local +Y (through the hinge pins); closed 0, open -95 deg (outward: the free edge moves toward +Z)",
-      "clear_width_m": 1.387,
-      "clear_height_m": 1.909
+      "clear_width_m": 1.526,
+      "clear_height_m": 2.025
     },
     "latch": {
       "node": "latch_pivot",
@@ -364,24 +361,24 @@
     },
     "exit_corridor": [
       [
-        0.2211,
+        0.1888,
         0.12,
-        0.95
+        0.7917
       ],
       [
-        0.2211,
+        0.1888,
         0.12,
-        1.75
+        1.5917
       ],
       [
-        0.2211,
+        0.1888,
         0.0,
-        2.85
+        2.6917
       ],
       [
-        0.2211,
+        0.1888,
         0.0,
-        4.05
+        3.8917
       ]
     ]
   },

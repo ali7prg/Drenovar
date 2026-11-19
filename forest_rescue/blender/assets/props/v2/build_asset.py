@@ -49,6 +49,9 @@ def run(modname, it, do_export=True, do_godot=True):
     pv2.log(f"[{aid}] iter {it}")
     views = M.views()
     params, reps = pv2.solve_views(views, M.points, M.PARAMS, M.FREE, prior_sigma=getattr(M, "PRIOR", 0.25))
+    if hasattr(M, "ground_poly"):
+        for v in views:
+            v.ground = M.ground_poly(params)
     A = pv2.Asset(aid, M.ATLAS)
     for lod in range(3):
         M.build(A, params, lod)
@@ -111,9 +114,11 @@ def run(modname, it, do_export=True, do_godot=True):
     qa = {}
     for v in views:
         rgba = pv2.render_view(A, B, v, ss=2)
-        ign = None
+        ign = v.ignore()
         if getattr(v, "iou_ignore", None):
-            ign = pv2.ignore_mask_from_parts(A, B, v, v.iou_ignore)
+            pm = pv2.ignore_mask_from_parts(A, B, v, v.iou_ignore)
+            if pm is not None:
+                ign = pm if ign is None else (ign | pm)
         m = pv2.compare(v, rgba, pv2.qa_path(aid, it, v.name),
                         f"{aid} v2 iter {it}: {v.title or v.name} | solved camera rms {v.rep['rms_px']:.2f}px "
                         f"(n={v.rep['n']}) | LOD0 painted light k={pv2.PAINT_K}", ignore=ign)

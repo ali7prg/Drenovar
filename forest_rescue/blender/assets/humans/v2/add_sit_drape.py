@@ -384,7 +384,8 @@ def main():
     st.quality = 10
     st.mass = 0.3
     st.tension_stiffness = 15
-    st.compression_stiffness = 15
+    st.compression_stiffness = 3                # long skirts buckle and pile on the floor instead of
+                                                # being pushed through it by the descending waist
     st.shear_stiffness = 5
     st.bending_stiffness = 0.8
     st.air_damping = 2.0
@@ -402,8 +403,10 @@ def main():
     floor = bpy.data.objects.new("_floor", me)
     sc.collection.objects.link(floor)
     floor.modifiers.new("Collision", "COLLISION")
-    floor.collision.thickness_outer = 0.008
+    floor.collision.thickness_outer = 0.015
     floor.collision.cloth_friction = 12.0
+    floor.collision.use_culling = True          # single sided: cloth pushed through comes back up
+    floor.collision.use_normal = True
     # ---- armature: standing -> seated (reverse stand_up, slowed, cloth bones neutral), then hold
     bases = [pose_at(arm, up, n_up - f) for f in range(n_up + 1)]
     seat = pose_at(arm, sit, 0)
@@ -441,6 +444,10 @@ def main():
     ev = sim.evaluated_get(deps)
     P_drape = np.array([v.co[:] for v in ev.data.vertices])
     N_drape = np.array([v.normal[:] for v in ev.data.vertices])
+    below = P_drape[:, 2] < 0.004
+    if below.any():
+        log("proxy vertices below the cage floor clamped onto it:", int(below.sum()))
+        P_drape[below, 2] = 0.004
     log("simulated proxy over", last, "frames; z range", round(float(P_drape[:, 2].min()), 3),
         round(float(P_drape[:, 2].max()), 3), "mean move", round(float(np.linalg.norm(P_drape - P_hang, axis=1).mean()), 3))
     # ---- seated skinning (cloth bones neutral) -> rest-space morph deltas for every LOD
@@ -469,6 +476,7 @@ def main():
                 for kk in range(4):
                     n = nn[t, kk]
                     vd += w[t, kk] * (P_drape[n] + Rk[n] @ (vh - P_hang[n]))
+                vd[2] = max(vd[2], 0.002)
                 d[i] = np.linalg.solve(M[:3, :3], (vd - vh) * fade[t])
         deltas[o.name] = d
     dn = np.linalg.norm(deltas[lo0.name], axis=1)

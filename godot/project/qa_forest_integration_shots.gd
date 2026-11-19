@@ -214,6 +214,93 @@ func run() -> void:
 			await shoot("unlock_%04.1fs" % at)
 		forest.remove_meta("unlock_frame")
 
+	# -------------------------------------------------- captive variety: three cages, real captives
+	# (captive_variants.json + variant masks), seated, then leaving through the door. Rigs are
+	# built with the game's own Rig/look code on open town ground (presentation check only).
+	if wanted("variety"):
+		await fresh("site01_discovered")
+		var Rig = load("res://src/forest_rescue/game/actor_rig.gd")
+		var cases := [["lf_site_12", "root"], ["lf_site_08", "iron"], ["lf_site_07", "oak"]]
+		var base := Vector3(-24, 0, -36)
+		var built: Array = []
+		for i in cases.size():
+			var site_id: String = cases[i][0]
+			var spot: Vector3 = forest.ground(base.x + 6.4 * i, base.z + 0.0)
+			var cage = Rig.new()
+			cage.setup("variety_cage_%d" % i, forest.actors.cage_file(cases[i][1]))
+			forest.actors.props_parent.add_child(cage)
+			cage.position = spot
+			cage.rotation.y = deg_to_rad(20.0)
+			var people: Array = []
+			var letters := ["a", "b", "c"]
+			for k in 3:
+				var id := "lf_captive_%s_%s" % [site_id.trim_prefix("lf_site_"), letters[k]]
+				var look: Dictionary = forest.actors.captive_variant({"id":id})
+				var person = Rig.new()
+				person.model_scale = float(look.get("scale", 1.0))
+				person.variant = look
+				person.setup("variety_%s" % id, "res://assets/forest_rescue/humans/lf_civilian_%s.glb" % forest.actors.captive_visual({"id":id}))
+				forest.actors.root.add_child(person)
+				people.append(person)
+			built.append([cage, people, site_id])
+		for entry in built:
+			entry[0].poll_load(true)
+			for person in entry[1]:
+				person.poll_load(true)
+		await frames(2)
+		for entry in built:
+			var cage = entry[0]
+			cage.set_active(true)
+			var roof: Node3D = cage.part("roof")
+			if roof != null:
+				roof.visible = false
+			cage.hold_end(["lf_cage_gate_close"])
+			for k in 3:
+				var person = entry[1][k]
+				person.set_active(true)
+				var slot: Node3D = cage.part("captive_slot_%d" % k)
+				person.global_position = slot.global_position if slot != null else cage.global_position
+				person.rotation.y = cage.rotation.y + 0.35 * (k - 1)
+				person.play(["lf_civilian_cage_sit"] if k == 0 else (["lf_civilian_cage_stand"] if k == 1 else ["lf_civilian_cage_wait"]), 0.0)
+		var center: Vector3 = forest.ground(base.x + 6.4, base.z) + Vector3(0, 0.8, 0.8)
+		look(center, 11.0)
+		await frames(40)
+		await shoot("variety_seated_z11")
+		look(center, 30.0)
+		await frames(4)
+		await shoot("variety_seated_z30")
+		# Gates open, the three leave through the door one after another (exit clip on the path).
+		for entry in built:
+			entry[0].play(["lf_cage_gate_open"], 0.0, true)
+		await frames(40)
+		var t0 := 0.0
+		for step in int(FPS * 4.2):
+			t0 += 1.0 / FPS
+			for entry in built:
+				var cage = entry[0]
+				for k in 3:
+					var person = entry[1][k]
+					var start := 0.6 * k
+					if t0 < start:
+						continue
+					var a: Node3D = cage.part("exit_corridor_0")
+					var b: Node3D = cage.part("exit_corridor_3")
+					var slot: Node3D = cage.part("captive_slot_%d" % k)
+					var path := [slot.global_position, a.global_position, b.global_position + cage.global_basis * Vector3(-1.2 + 1.2 * k, 0, 0.8)]
+					var route: Dictionary = PathMotion.build(path)
+					var sample: Dictionary = PathMotion.sample(route, (t0 - start) * 1.0)
+					person.global_position = sample.position
+					person.rotation.y = PathMotion.yaw_of(sample.tangent)
+					person.play(["lf_civilian_exit"], 0.15)
+			await frames(1)
+		look(center, 11.0)
+		await frames(2)
+		await shoot("variety_exiting_z11")
+		for entry in built:
+			entry[0].queue_free()
+			for person in entry[1]:
+				person.queue_free()
+
 	# -------------------------------------------------- artifact seated in the door socket (glow)
 	if wanted("socket"):
 		await fresh("site01_cage_open")

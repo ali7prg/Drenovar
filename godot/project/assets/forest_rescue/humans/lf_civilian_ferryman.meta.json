@@ -97,7 +97,7 @@
       0.006
     ],
     "max": [
-      0.365,
+      0.364,
       0.197,
       1.825
     ]
@@ -124,7 +124,7 @@
         "Left": 0.03,
         "Right": 0.04
       },
-      "ikOverreach_m": 0.0518,
+      "ikOverreach_m": 0.0596,
       "loopSeamMaxQuatDiff": 0.0
     },
     "lf_civilian_cage_wait": {
@@ -156,8 +156,8 @@
       "rootTranslation": "in_place",
       "markers": {},
       "footSlip_mm": {
-        "Left": 33.22,
-        "Right": 32.98
+        "Left": 0.47,
+        "Right": 0.47
       },
       "ikOverreach_m": 0.1089
     },
@@ -250,14 +250,14 @@
   },
   "sockets": {
     "hand_r": [
-      -0.359,
-      0.862,
-      0.025
+      -0.369,
+      0.858,
+      0.027
     ],
     "hand_l": [
-      0.359,
-      0.862,
-      0.025
+      0.369,
+      0.858,
+      0.027
     ],
     "head_top": [
       0.0,

@@ -209,6 +209,16 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
     # swatch fill, colour matched per tag (fallback: per class, then swatch statistics)
     sw = {}
     for mc, spec in L.SWATCHES.items():
+        if "ground_px" in spec:  # rectified painted ground patch around a painted pixel (correct scale, coherent)
+            gx, gy = spec["ground_px"]
+            u0 = gx - L.MAIN_BOX[0]
+            v0 = gy - L.MAIN_BOX[1]
+            Pc = cam.on_plane_z(np.array([u0 + 0.5]), np.array([v0 + 0.5]), spec.get("z", 0.0))[0]
+            m_ = spec["metres"]
+            plane = dict(origin=(Pc[0] - m_ / 2, Pc[1] - m_ / 2, spec.get("z", 0.0)), ex=(1, 0, 0), ey=(0, 1, 0), size_m=m_)
+            sw[mc] = tex.Swatch(rectify(cam, crop, **plane), m_, mc)
+            core.save_rgba(qa_path(asset, it, f"swatch_{mc}"), sw[mc].img)
+            continue
         if "plane" in spec:      # rectified from the painting through the solved camera
             sw[mc] = tex.Swatch(rectify(cam, crop, **spec["plane"]), spec["metres"], mc)
             core.save_rgba(qa_path(asset, it, f"swatch_{mc}"), sw[mc].img)

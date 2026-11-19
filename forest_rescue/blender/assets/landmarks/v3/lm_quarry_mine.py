@@ -44,8 +44,8 @@ SWATCHES = {
     "wood_h": dict(box=(650, 470, 668, 560), metres=0.8, rotate=True),
     "stone": dict(box=(150, 300, 240, 360), metres=1.6),
     "stone_face": dict(box=(300, 300, 380, 330), metres=1.2),
-    "ground": dict(box=(440, 560, 520, 585), metres=2.0),
-    "gravel": dict(box=(440, 560, 520, 585), metres=2.0),
+    "ground": dict(ground_px=(480, 572), metres=1.4),
+    "gravel": dict(ground_px=(480, 572), metres=1.4),
     "grass": dict(box=(30, 520, 90, 560), metres=1.5),
     "rope": dict(box=(660, 520, 735, 560), metres=0.5),
     "metal": dict(box=(1430, 740, 1470, 800), metres=0.4),
@@ -61,7 +61,7 @@ CLASS_TRAIN = {
 }
 ACCEPT = {"wood": {"wood", "dark"}, "stone": {"stone", "veg", "dark"}, "ground": {"dirt", "veg", "stone"},
           "metal": {"dark", "wood"}, "rope": {"wood"}, "cloth": set()}
-CLASS_SWATCH = {"ground": {"veg": "grass", "dirt": "gravel", "stone": "gravel"}}
+CLASS_SWATCH = {"ground": {"veg": "ground", "dirt": "gravel", "stone": "gravel"}}
 NORMAL_STRENGTH = {"stone": 3.0, "wood": 2.5, "ground": 1.5, "rope": 2.0}
 EDGE_WIDTH_M = 0.035
 EDGE_STRENGTH = {"stone": 0.6, "wood": 0.4}

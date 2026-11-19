@@ -57,9 +57,9 @@ SWATCHES = {
     "stone": dict(box=(716, 166, 808, 252), metres=1.35),
     "stone_face": dict(box=(722, 214, 790, 248), metres=0.9),
     "ground": dict(box=(0, 140, 40, 180), metres=2.5),
-    "water": dict(box=(400, 180, 470, 235), metres=5.0),
+    "water": dict(ground_px=(440, 205), z=-1.33, metres=4.0),
     "grass": dict(box=(55, 195, 100, 225), metres=1.6),
-    "gravel": dict(box=(330, 222, 372, 250), metres=1.8),
+    "gravel": dict(ground_px=(350, 238), z=-1.33, metres=2.0),
     "cloth": dict(box=(1280, 718, 1386, 828), metres=1.2),
     "metal": dict(box=(1430, 740, 1470, 800), metres=0.4),
 }

@@ -1,0 +1,47 @@
+{
+  "main_view": {
+    "iou": 0.8862,
+    "colour_err": 0.1121,
+    "ssim": 0.5056,
+    "ref_px": 123500,
+    "render_px": 131650,
+    "iou_structure_only": 0.7734850029835414
+  },
+  "camera": {
+    "rms_px": 3.56,
+    "max_px": 5.91,
+    "n_points": 8
+  },
+  "insets": {
+    "mine_front": {
+      "iou": 0.5702,
+      "colour_err": 0.1683,
+      "ssim": 0.2572,
+      "ref_px": 132832,
+      "render_px": 82933
+    }
+  },
+  "texture": {
+    "texels": 3006382,
+    "projected_frac": 0.055304016588710286,
+    "seconds": 13.1
+  },
+  "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter09_*",
+  "tris": {
+    "LOD0": {
+      "structure": 5880,
+      "base": 904,
+      "total": 6784
+    },
+    "LOD1": {
+      "structure": 1136,
+      "base": 138,
+      "total": 1274
+    },
+    "LOD2": {
+      "structure": 254,
+      "base": 16,
+      "total": 270
+    }
+  }
+}

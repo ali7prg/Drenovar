@@ -41,8 +41,8 @@ SWATCHES = {
     "stone": dict(box=(1365, 418, 1495, 485), metres=1.6),
     "stone_face": dict(box=(1420, 430, 1470, 470), metres=0.8),
     "stair": dict(box=(1370, 500, 1495, 552), metres=1.5),
-    "ground": dict(box=(880, 550, 960, 570), metres=2.0),
-    "gravel": dict(box=(880, 550, 960, 570), metres=2.0),
+    "ground": dict(ground_px=(1000, 556), metres=1.6),
+    "gravel": dict(ground_px=(1000, 556), metres=1.6),
     "grass": dict(box=(800, 530, 850, 560), metres=1.2),
 }
 SWATCH_FALLBACK = {"wood": "stone", "metal": "stone", "rope": "stone", "cloth": "stone", "glow": "stone", "water": "ground"}
@@ -52,7 +52,7 @@ CLASS_TRAIN = {
     "dirt": [(880, 550, 960, 570)],
 }
 ACCEPT = {"stone": {"stone", "veg"}, "ground": {"dirt", "veg", "stone"}}
-CLASS_SWATCH = {"ground": {"veg": "grass", "dirt": "ground", "stone": "gravel"}}
+CLASS_SWATCH = {"ground": {"veg": "ground", "dirt": "ground", "stone": "gravel"}}
 NORMAL_STRENGTH = {"stone": 3.0, "ground": 1.5}
 EDGE_WIDTH_M = 0.03
 EDGE_STRENGTH = {"stone": 0.55}

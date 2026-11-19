@@ -26,7 +26,7 @@ STONES = {
     "S2": ((-2.0, 1.9), 2.0, (130, 730), (127, 619), 58, 0.55),
     "S3": ((0.4, 2.9), 2.75, (247, 715), (245, 578), 86, 0.6),
     "S4": ((3.0, 1.6), 2.1, (393, 740), (395, 624), 62, 0.55),
-    "S5": ((2.6, -1.6), 2.3, (361, 817), (380, 689), 80, 0.55),
+    "S5": ((2.6, -1.6), 2.3, (361, 817), (380, 689), 92, 0.55),
 }
 INSETS = {"row": dict(box=(478, 598, 706, 694), dir=(0, 1, 0), fit="width")}
 NO_PROJECT_TAGS = ()
@@ -34,8 +34,8 @@ TAG_SWATCH = {"stone": "stone_carved"}
 SWATCHES = {
     "stone": dict(box=(630, 722, 705, 828), metres=0.9),
     "stone_carved": dict(box=(503, 720, 600, 828), metres=0.9),
-    "ground": dict(box=(170, 700, 230, 735), metres=1.8),
-    "gravel": dict(box=(170, 700, 230, 735), metres=1.8),
+    "ground": dict(ground_px=(230, 760), metres=1.8),
+    "gravel": dict(ground_px=(230, 760), metres=1.8),
     "grass": dict(box=(20, 790, 60, 815), metres=1.2),
 }
 SWATCH_FALLBACK = {"wood": "stone", "metal": "stone", "rope": "stone", "cloth": "stone", "glow": "stone", "water": "ground"}
@@ -45,8 +45,8 @@ CLASS_TRAIN = {
     "dirt": [(170, 700, 230, 735), (150, 760, 220, 790)],
 }
 ACCEPT = {"stone": {"stone", "veg"}, "ground": {"dirt", "veg", "stone"}}
-CLASS_SWATCH = {"ground": {"veg": "grass", "dirt": "ground", "stone": "gravel"}}
-NORMAL_STRENGTH = {"stone": 4.0, "ground": 1.5}
+CLASS_SWATCH = {"ground": {"veg": "ground", "dirt": "ground", "stone": "gravel"}}
+NORMAL_STRENGTH = {"stone": 7.0, "ground": 1.5}
 EDGE_STRENGTH = {"stone": 0.0}
 POLY_JITTER = 0.03
 CARD_KINDS = {"grass_a": "grass", "fern_a": "fern", "weed_a": "weed", "grass_b": "grass"}

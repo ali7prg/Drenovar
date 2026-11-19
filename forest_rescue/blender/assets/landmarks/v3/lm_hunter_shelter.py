@@ -40,8 +40,8 @@ SWATCHES = {
     "stone": dict(box=(1218, 212, 1250, 232), metres=0.7),
     "plank": dict(box=(1092, 140, 1118, 190), metres=0.8),
     "logend": dict(box=(1170, 168, 1200, 198), metres=0.6),
-    "ground": dict(plane=dict(origin=(-1.0, -4.2, 0.0), ex=(1, 0, 0), ey=(0, 1, 0), size_m=2.0), metres=2.0),
-    "gravel": dict(plane=dict(origin=(-1.0, -4.2, 0.0), ex=(1, 0, 0), ey=(0, 1, 0), size_m=2.0), metres=2.0),
+    "ground": dict(ground_px=(1040, 246), metres=1.6),
+    "gravel": dict(ground_px=(1040, 246), metres=1.6),
     "grass": dict(box=(830, 220, 870, 240), metres=1.2),
 }
 SWATCH_FALLBACK = {"metal": "wood", "rope": "wood", "cloth": "wood", "glow": "wood", "water": "ground"}
@@ -56,7 +56,7 @@ CLASS_TRAIN = {
 }
 ACCEPT = {"roof": {"roof", "veg"}, "wood": {"wood", "roof", "dark", "logs"}, "stone": {"stone"},
           "ground": {"dirt", "veg", "stone"}, "rope": {"wood"}}
-CLASS_SWATCH = {"ground": {"veg": "grass", "dirt": "ground", "stone": "gravel"}}
+CLASS_SWATCH = {"ground": {"veg": "ground", "dirt": "ground", "stone": "gravel"}}
 NORMAL_STRENGTH = {"roof": 3.0, "wood": 2.5, "stone": 3.0, "ground": 1.5}
 EDGE_WIDTH_M = 0.03
 EDGE_STRENGTH = {"roof": 0.45, "wood": 0.35, "stone": 0.5}

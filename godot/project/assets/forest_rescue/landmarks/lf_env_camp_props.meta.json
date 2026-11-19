@@ -2,25 +2,25 @@
   "id": "lf_env_camp_props",
   "generation": "v3 (blueprint + solved art/06 camera + painting projection)",
   "tris": {
-    "LOD0": 2674,
-    "LOD1": 1014,
-    "LOD2": 334
+    "LOD0": 4316,
+    "LOD1": 1404,
+    "LOD2": 388
   },
   "tris_detail": {
     "LOD0": {
-      "structure": 2674,
+      "structure": 4316,
       "base": 756,
-      "total": 3430
+      "total": 5072
     },
     "LOD1": {
-      "structure": 1014,
+      "structure": 1404,
       "base": 150,
-      "total": 1164
+      "total": 1554
     },
     "LOD2": {
-      "structure": 334,
+      "structure": 388,
       "base": 22,
-      "total": 356
+      "total": 410
     }
   },
   "budget": {
@@ -85,7 +85,7 @@
     [
       -3.455,
       -0.01,
-      -2.455
+      -3.037
     ],
     [
       3.055,
@@ -172,12 +172,12 @@
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py camp_props",
   "qa": {
     "main_view": {
-      "iou": 0.8117,
-      "colour_err": 0.1312,
-      "ssim": 0.4031,
+      "iou": 0.852,
+      "colour_err": 0.1362,
+      "ssim": 0.4086,
       "ref_px": 81683,
-      "render_px": 82812,
-      "iou_structure_only": 0.5789270464250023
+      "render_px": 82880,
+      "iou_structure_only": 0.6131613172929536
     },
     "camera": {
       "rms_px": 1.57,
@@ -186,26 +186,26 @@
     },
     "insets": {
       "front": {
-        "iou": 0.2242,
-        "colour_err": 0.1473,
-        "ssim": 0.4352,
+        "iou": 0.1835,
+        "colour_err": 0.1487,
+        "ssim": 0.4246,
         "ref_px": 58656,
-        "render_px": 63193
+        "render_px": 54005
       },
       "side": {
-        "iou": 0.171,
-        "colour_err": 0.2019,
-        "ssim": 0.51,
+        "iou": 0.1745,
+        "colour_err": 0.162,
+        "ssim": 0.518,
         "ref_px": 37408,
-        "render_px": 19320
+        "render_px": 18265
       }
     },
     "texture": {
-      "texels": 2700511,
-      "projected_frac": 0.05362540645085319,
-      "seconds": 12.4
+      "texels": 2370466,
+      "projected_frac": 0.04789395840311567,
+      "seconds": 11.1
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_camp_props/v3_iter08_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_camp_props/v3_iter09_*"
   },
   "clips": {
     "lf_banner_wind": {
@@ -240,18 +240,20 @@
     }
   },
   "tarp_fit": {
-    "iou_in_painted_tarp_mask": 0.591,
+    "iou_in_painted_tarp_mask": 0.747,
     "params": [
-      0.503,
-      0.32,
-      0.59,
-      -0.407,
-      -0.005,
+      0.724,
+      0.115,
+      1.135,
+      -0.266,
+      -0.015,
+      -0.003,
+      0.748,
+      0.344,
       0.002,
-      1.11,
-      1.189,
       -0.011,
-      0.01
+      1.793,
+      0.004
     ]
   },
   "notes": "origin = centre of the pole rectangle on the ground; pole layout and heights solved jointly with the art/06 camera"

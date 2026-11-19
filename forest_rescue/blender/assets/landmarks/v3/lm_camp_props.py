@@ -137,6 +137,8 @@ def mpx(cam, P, px):
 def build(lod, cam=None, crop=None, mask=None, cards=None):
     if crop is not None:
         TARP_FIT["crop"] = crop
+    if mask is not None:
+        TARP_FIT["refmask"] = mask
     g = Geo(seed=31 + lod)
     cloth = Geo(seed=41 + lod)
     a, b, hs = LAYOUT["a"], LAYOUT["b"], LAYOUT["hs"]
@@ -173,9 +175,13 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
     # parameters are fitted so the projected cloth silhouette matches the painted tarp mask (IoU in the painting)
     L_top = pos["BL"] + np.array([0, 0, hs["BL"]])
     prm = fit_tarp(cam, T_FL, T_FR, T_BR, T_BL, L_top) if cam is not None else TARP_DEFAULT
-    P, Fp = tarp_surfaces(prm, T_FL, T_FR, T_BR, T_BL, L_top, lod)
-    cloth.grid_surface(P, "cloth", "tarp")
-    cloth.grid_surface(Fp, "cloth", "flap")
+    P, Fp = tarp_surfaces(prm, T_FL, T_FR, T_BR, T_BL, L_top, 0)
+    if cam is not None and "region" in TARP_FIT:
+        image_space_cloth(cloth, cam, TARP_FIT["region"], [P, Fp], lod)
+    else:
+        P, Fp = tarp_surfaces(prm, T_FL, T_FR, T_BR, T_BL, L_top, lod)
+        cloth.grid_surface(P, "cloth", "tarp")
+        cloth.grid_surface(Fp, "cloth", "flap")
     # rope lashings at the tarp corners + guy ropes to pegs
     if lod < 2:
         for T in (T_FL, T_FR, T_BR, T_BL, L_top):
@@ -232,6 +238,76 @@ def tarp_surfaces(prm, T_FL, T_FR, T_BR, T_BL, L_top, lod):
     return P, Fp
 
 
+def _tris_of(G):
+    T = []
+    for i in range(G.shape[0] - 1):
+        for j in range(G.shape[1] - 1):
+            a, b, c, d = G[i, j], G[i + 1, j], G[i + 1, j + 1], G[i, j + 1]
+            T.append((a, b, c))
+            T.append((a, c, d))
+    return np.array(T)
+
+
+def _raycast(o, D, T):
+    """Nearest hit of rays (o, D[k]) with triangles T (n,3,3); returns points (k,3) and hit mask."""
+    v0, v1, v2 = T[:, 0], T[:, 1], T[:, 2]
+    e1, e2 = v1 - v0, v2 - v0
+    best = np.full(len(D), np.inf)
+    for k0 in range(0, len(D), 256):
+        d = D[k0:k0 + 256][:, None, :]
+        pv = np.cross(d, e2[None])
+        det = (e1[None] * pv).sum(-1)
+        ok = np.abs(det) > 1e-9
+        inv = np.where(ok, 1.0 / np.where(ok, det, 1), 0)
+        tv = (o - v0)[None]
+        u = (tv * pv).sum(-1) * inv
+        qv = np.cross(tv, e1[None])
+        v = (d * qv).sum(-1) * inv
+        t = (e2[None] * qv).sum(-1) * inv
+        hit = ok & (u >= -1e-4) & (v >= -1e-4) & (u + v <= 1 + 1e-4) & (t > 0)
+        t = np.where(hit, t, np.inf)
+        best[k0:k0 + 256] = t.min(1)
+    hitm = np.isfinite(best)
+    return o + D * np.where(hitm, best, 0)[:, None], hitm
+
+
+def image_space_cloth(cloth, cam, region, supports, lod):
+    """Cloth mesh = image-space grid over the painted tarp region, back-projected onto the fitted drape surface
+    (canopy + flap). Matches the painted outline from the solved camera; lies on the plausible 3-D drape."""
+    T = np.concatenate([_tris_of(G) for G in supports])
+    ys, xs = np.nonzero(region)
+    step = 5 if lod == 0 else (10 if lod == 1 else 22)
+    gx = np.arange(xs.min() - step, xs.max() + step * 2, step)
+    gy = np.arange(ys.min() - step, ys.max() + step * 2, step)
+    GX, GY = np.meshgrid(gx, gy, indexing="ij")
+    o, D = cam.ray(GX.ravel() + 0.5, GY.ravel() + 0.5)
+    Pts, hit = _raycast(o, D, T)
+    Pts = Pts.reshape(GX.shape + (3,))
+    hit = hit.reshape(GX.shape)
+    H, W = region.shape
+    inside = np.zeros(GX.shape, bool)
+    vx = np.clip(GX, 0, W - 1).astype(int)
+    vy = np.clip(GY, 0, H - 1).astype(int)
+    inside = region[vy, vx] & (GX >= 0) & (GX < W) & (GY >= 0) & (GY < H)
+    from scipy import ndimage as ndi
+    idx = -np.ones(GX.shape, int)
+    V, F = [], []
+    for i in range(GX.shape[0] - 1):
+        for j in range(GX.shape[1] - 1):
+            cs = [(i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1)]
+            if sum(inside[a, b] for a, b in cs) < 2 or not all(hit[a, b] for a, b in cs):
+                continue
+            f = []
+            for a, b in cs:
+                if idx[a, b] < 0:
+                    idx[a, b] = len(V)
+                    V.append(Pts[a, b])
+                f.append(idx[a, b])
+            F.append(f)
+    if F:
+        cloth.add(np.array(V), F, "cloth", "tarp")
+
+
 def painted_tarp_mask(crop):
     import cv2 as _cv2
     from scipy import ndimage as ndi
@@ -261,6 +337,22 @@ def fit_tarp(cam, T_FL, T_FR, T_BR, T_BL, L_top):
         return TARP_FIT["prm"]
     crop = TARP_FIT["crop"]
     tm = painted_tarp_mask(crop)
+    if "refmask" in TARP_FIT:
+        from scipy import ndimage as ndi
+        rm0 = TARP_FIT["refmask"].copy()
+        Hh, Ww = rm0.shape
+        yy, xx = np.mgrid[0:Hh, 0:Ww]
+        sx, sy = xx + OX, yy + OY
+        rm0 &= ((sx <= 900) & (sy < 752)) | ((sx > 900) & (sy < 702))
+        rm0 &= (sx > 770) & (sx < 1182)
+        rm0 &= ~((sx > 1148) & (sx < 1190) & (sy > 600) & (sy < 710))      # lantern
+        rm0 = ndi.binary_opening(rm0, structure=np.ones((3, 11), bool))     # drop thin poles / ropes
+        lbl, n = ndi.label(rm0)
+        if n:
+            sizes = ndi.sum(rm0, lbl, range(1, n + 1))
+            rm0 = lbl == (int(np.argmax(sizes)) + 1)
+        tm = ndi.binary_fill_holes(rm0)
+        TARP_FIT["region"] = tm
     H, W = tm.shape
 
     def sil(prm):

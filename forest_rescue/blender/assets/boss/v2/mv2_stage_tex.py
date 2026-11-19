@@ -58,8 +58,8 @@ def head_scar_free(crop):
     mk = np.zeros(crop.shape[:2], np.uint8)
     pts = np.array([(306, 563), (296, 586), (283, 612), (288, 634), (300, 660), (322, 688), (346, 712)], float)
     pts -= (x0, y0)
-    cv2.polylines(mk, [pts.astype(np.int32)], False, 255, 13)
-    return R.inpaint(crop, mk > 0, 6)
+    cv2.polylines(mk, [pts.astype(np.int32)], False, 255, 24)
+    return R.inpaint(crop, mk > 0, 9)
 
 
 def side_scar_free():
@@ -317,7 +317,10 @@ def main():
     headvol = B.head_part().fn(P - N * 0.004)
     # interior = clearly inside the un-cut head volume AND inside the cavity footprint (outer surfaces trimmed by
     # the soft hull are at most ~2.5 cm inside, so they stay scaly skin)
-    inner_mouth = (P[:, 1] < -3.30) & (np.abs(P[:, 2] - zl) < 0.17) & (headvol < -0.035) & (np.abs(P[:, 0]) < wu - 0.05)
+    # ... and not facing outwards (the outer lips/chin keep the painted scaly skin even where the hull trimmed them)
+    outward = N[:, 0] * np.sign(P[:, 0] + 1e-9)
+    inner_mouth = ((P[:, 1] < -3.30) & (np.abs(P[:, 2] - zl) < 0.17) & (headvol < -0.035) & (np.abs(P[:, 0]) < wu - 0.05)
+                   & (outward < 0.25) & (N[:, 1] > -0.6))
     flesh = np.array([0.40, 0.19, 0.17])
     dark = np.array([0.09, 0.055, 0.045])
     # interior near the lips/front (what the closed mouth's slit shows) is a dark shadowed gap; deeper = flesh

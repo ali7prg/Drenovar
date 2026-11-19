@@ -131,8 +131,8 @@ def side_colour(img=None, remove_scar=False):
         cv2.line(mk, (a - x0, b - y0), (c - x0, d - y0), 255, w)
     m = mk > 0
     if remove_scar:
-        m |= _poly_mask(m.shape, SIDE_SCAR_POLY, x0, y0)
-    return inpaint(crop, ndi.binary_dilation(m, iterations=1), 5)
+        m |= ndi.binary_dilation(_poly_mask(m.shape, SIDE_SCAR_POLY, x0, y0), iterations=3)
+    return inpaint(crop, ndi.binary_dilation(m, iterations=1), 6)
 
 
 def side_view(corrected=True, img=None, colour=True):

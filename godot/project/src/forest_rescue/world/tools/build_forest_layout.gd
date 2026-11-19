@@ -102,6 +102,7 @@ const ZONE_UNDER_SPACING := [3.4, 3.2, 3.6, 3.3, 3.0, 3.1, 3.6, 3.5]
 const HERO_PREFERRED := Vector2(-104.0, 24.0)
 const HERO_CLEAR := 9.5
 const QUARRY_PIT := 9.0           # art/01: open grey pit in front of the mine (no trunks)
+var quarry_axis := 0.0            # direction (rad) from the pit centre to the cliff arc
 
 var atlas
 var terrain
@@ -259,8 +260,15 @@ func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown :=
 			return true
 	if hero != Vector2.INF and Vector2(x, z).distance_to(hero) < (HERO_CLEAR if tree else 5.5):
 		return true
-	if tree and quarry_center != Vector2.INF and Vector2(x, z).distance_to(quarry_center) < QUARRY_PIT + crown * 0.4:
-		return true
+	if tree and quarry_center != Vector2.INF:
+		var dq := Vector2(x, z).distance_to(quarry_center)
+		if dq < QUARRY_PIT + crown * 0.4:
+			return true
+		# the cliff/ledge arc behind the mine stays free of trunks (art/01: bare grey cliffs)
+		if dq < 21.0 + crown * 0.3:
+			var a := atan2(z - quarry_center.y, x - quarry_center.x)
+			if absf(angle_difference(a, quarry_axis)) < deg_to_rad(80.0):
+				return true
 	return false
 
 
@@ -322,8 +330,11 @@ func run() -> void:
 		landmark_discs.append(disc)
 	for placement in landmarks.placements:
 		if placement.id == "lf_env_quarry_mine":
-			quarry_center = Vector2(placement.position.x, placement.position.z).lerp(
-				Vector2(atlas.site_by_id.lf_site_08.center.x, atlas.site_by_id.lf_site_08.center.z), 0.45)
+			var mine_p := Vector2(placement.position.x, placement.position.z)
+			var glade_p := Vector2(atlas.site_by_id.lf_site_08.center.x, atlas.site_by_id.lf_site_08.center.z)
+			quarry_center = mine_p.lerp(glade_p, 0.45)
+			var axis := ((mine_p - glade_p).normalized() * 0.6 + Vector2(-0.7071, -0.7071) * 0.4).normalized()
+			quarry_axis = atan2(axis.y, axis.x)
 	landmarks.free()
 	print("LAYOUT terrain+masks ready ms=", Time.get_ticks_msec() - started, " quarry=", quarry_center)
 
@@ -732,10 +743,7 @@ func _quarry_cliffs(under: Array, under_grid: Dictionary, logs: Array, log_grid:
 			mine = disc[0]
 	var site: Dictionary = atlas.site_by_id.lf_site_08
 	var glade_c := Vector2(site.center.x, site.center.z)
-	var back := (mine - glade_c).normalized() if mine != Vector2.INF else Vector2(-0.7, 0.7)
-	var far := Vector2(-0.7071, -0.7071)          # camera-far side (screen up)
-	var axis := (back * 0.6 + far * 0.4).normalized()
-	var base_angle := atan2(axis.y, axis.x)
+	var base_angle := quarry_axis
 	var kind := Rules.UNDERSTORY.find("quarry_rock")
 	var tiers := [[12.5, 0.0, 1.05], [15.5, 1.6, 1.2], [18.5, 3.2, 1.3]]
 	for tier in tiers.size():
@@ -743,7 +751,7 @@ func _quarry_cliffs(under: Array, under_grid: Dictionary, logs: Array, log_grid:
 		var lift: float = tiers[tier][1]
 		var scale: float = tiers[tier][2]
 		var arc := deg_to_rad(150.0 - tier * 20.0)
-		var steps := int(arc * radius / 7.2)
+		var steps := int(arc * radius / 5.6)
 		for k in steps + 1:
 			var a := base_angle - arc * 0.5 + arc * k / maxf(1.0, steps) + rng.randf_range(-0.05, 0.05)
 			var c := quarry_center + Vector2(cos(a), sin(a)) * (radius + rng.randf_range(-0.8, 0.8))

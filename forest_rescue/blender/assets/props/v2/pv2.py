@@ -51,6 +51,7 @@ PAINT_K = 0.38
 # de-lighting exponent: 0 = albedo is the painted colour (measured in the game camera: full de-lighting made the
 # props 8-18 L* brighter than the painting under the game's painted-light path + FILMIC), 1 = full lambert de-light
 DELIGHT = 0.0
+STRICT_FACING_CLASSES = set()      # material classes that use |n.v| >= 0.5 on steep faces too (set per module)
 _SH = {}
 
 
@@ -590,6 +591,8 @@ def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.
                 accm = ref_m & gfn(crop)
             ck, wk, fk = tex.project_painting(Pp[k], Np[k], v.cam, crop, zb, W_, H_, accept=accm, min_facing=0.5,
                                               max_mag=2.0)
+            if mc in STRICT_FACING_CLASSES:
+                wk = np.where(fk >= 0.5, wk, 0.0)          # |n.v| >= 0.5 also on steep faces (no stretched smear)
             c[k], w[k] = ck, wk
             c2, w2, _ = tex.project_painting(Pp[k], Np[k], v.cam, crop, zb, W_, H_, accept=accm, min_facing=0.12,
                                              max_mag=1e9)

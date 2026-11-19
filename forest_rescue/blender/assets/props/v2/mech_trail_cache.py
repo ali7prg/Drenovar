@@ -162,8 +162,9 @@ def build(A, p, lod):
     return A
 
 
+STRICT_FACING = ("wood",)
 SWATCHES = {
-    "wood": dict(sheet=SHEET, box=(380, 205, 420, 225), metres=0.5),
+    "wood": dict(sheet=SHEET, box=(560, 250, 622, 268), metres=0.6),
     "stone": dict(sheet=SHEET, box=(240, 95, 290, 135), metres=0.8),
     "birch": dict(sheet=SHEET, box=(60, 140, 90, 200), metres=0.6),
     "bronze": dict(sheet=SHEET, box=(408, 252, 430, 268), metres=0.15),

@@ -106,6 +106,7 @@ def run(modname, it, do_export=True, do_godot=True):
         bl.atlas_uv(objs, fixed)
     # texture LOD0 by projection, LOD1/2 by transfer
     tviews = views + (pv2.sym_views(views, M.sym_specs(params)) if hasattr(M, "sym_specs") else [])
+    pv2.STRICT_FACING_CLASSES = set(getattr(M, "STRICT_FACING", ()))
     alb0, nrm0, info, tstats = pv2.texture_lod0(A, B, tviews, M.SWATCHES, M.ATLAS, it, gate=getattr(M, "GATE", None),
                                                 edge=getattr(M, "EDGE", None))
     files = {"c0": f"{aid}_c.jpg", "n0": f"{aid}_n.png", "c1": f"{aid}_lod1_c.jpg", "c2": f"{aid}_lod2_c.jpg"}

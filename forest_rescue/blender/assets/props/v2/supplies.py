@@ -143,7 +143,7 @@ def arrow_bundle(g, o, lod):
         Hh = T - d * ARROW["lh"] + offH
         Nn = T + d * ARROW["ln"] + offN
         Tt = T + offT
-        g.tube(np.array([Hh + (Tt - Hh) * 0.08, Tt, Nn]), 0.0058, n=5 if lod == 0 else 4, mat="wood", tag="shaft")
+        g.tube(np.array([Hh + (Tt - Hh) * 0.08, Tt, Nn]), 0.0058, n=5 if lod == 0 else 4, mat="shaftwood", tag="shaft")
         dh = (Hh - Tt) / np.linalg.norm(Hh - Tt)
         # bodkin head: long 4-sided pyramid with a short socket
         CG.lathe(g, [(0.009, -0.012), (0.013, 0.0), (0.0, 0.075)], Hh, n=4, mat="steel", tag="arrowhead",
@@ -158,10 +158,12 @@ def arrow_bundle(g, o, lod):
                 c0 = Nn - dn * 0.03
                 q = [c0 - dn * 0.17, c0 - dn * 0.01, c0 - dn * 0.03 + sd * 0.042, c0 - dn * 0.15 + sd * 0.04]
                 g.add(np.array(q), [[0, 1, 2, 3], [3, 2, 1, 0]], "feather", "fletching")
+                if lod == 0:
+                    g.tube(np.array([c0 - dn * 0.165, c0 - dn * 0.012]), 0.0018, n=3, mat="quill", tag="quill")
     for k in range(3 if lod < 2 else 1):
-        c = T + d * (0.012 * (k - 1))
-        ring = [c + (u * 0.05 * math.cos(t) + w * 0.042 * math.sin(t)) for t in np.linspace(0, 2 * math.pi, 11)[:-1]]
-        g.tube(np.array(ring + [ring[0]]), 0.0085, n=5 if lod == 0 else 4, mat="rope", tag="arrow_tie")
+        c = T + d * (0.016 * (k - 1))
+        ring = [c + (u * 0.031 * math.cos(t) + w * 0.026 * math.sin(t)) for t in np.linspace(0, 2 * math.pi, 13)[:-1]]
+        g.tube(np.array(ring + [ring[0]]), 0.0075, n=5 if lod == 0 else 4, mat="rope", tag="arrow_tie")
 
 
 def build(A, p, lod):
@@ -384,17 +386,29 @@ def make_cameras_old(views, A):
                      method="silhouette-box fit of a 40 m pinhole along the painted view direction (no PnP)")
 
 
+def _lum(c):
+    return c @ np.array([0.299, 0.587, 0.114])
+
+
+GATE = {"shaftwood": lambda c: _lum(c) < 0.72,
+        "feather": lambda c: np.zeros(c.shape[:2], bool),      # vanes: synthesised from painted feather pixels only
+        "quill": lambda c: np.zeros(c.shape[:2], bool),
+        "steel": lambda c: _lum(c) < 0.6,
+        "rope": lambda c: _lum(c) < 0.75}
+
 SWATCHES = {
     "wood": dict(sheet=SHEET, box=(60, 790, 100, 830), metres=0.3),
+    "shaftwood": dict(sheet=SHEET, box=(1057, 888, 1065, 904), metres=0.05),
     "iron": dict(sheet=SHEET, box=(1150, 860, 1165, 900), metres=0.1),
     "cloth": dict(sheet=SHEET, box=(430, 800, 470, 830), metres=0.25),
     "sack": dict(sheet=SHEET, box=(650, 790, 690, 830), metres=0.25),
     "grain": dict(sheet=SHEET, box=(740, 800, 770, 812), metres=0.1),
-    "rope": dict(sheet=SHEET, box=(1050, 850, 1070, 870), metres=0.05),
+    "rope": dict(sheet=SHEET, box=(1058, 860, 1072, 870), metres=0.04),
     "bronze": dict(sheet=SHEET, box=(915, 830, 945, 860), metres=0.06),
     "bread": dict(sheet=SHEET, box=(120, 930, 170, 960), metres=0.15),
-    "feather": dict(sheet=SHEET, box=(1130, 790, 1150, 810), metres=0.05),
+    "feather": dict(sheet=SHEET, box=(1127, 778, 1141, 792), metres=0.05),
     "steel": dict(sheet=SHEET, box=(985, 935, 1000, 950), metres=0.04),
+    "quill": dict(sheet=SHEET, box=(1098, 796, 1102, 800), metres=0.01),
 }
 
 

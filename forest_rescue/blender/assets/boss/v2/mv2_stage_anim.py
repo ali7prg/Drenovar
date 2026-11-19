@@ -104,6 +104,35 @@ def write_action_slotted(arm, name, keys, loop):
     return act
 
 
+CLAW_TIPS = None
+
+
+def claw_min_z(rig, cid):
+    """Lowest foot-claw tip (world z) over the clip's planted frames (rest-pose tips carried by the toe bones)."""
+    global CLAW_TIPS
+    import mv2_details as D
+    if CLAW_TIPS is None:
+        CLAW_TIPS = []
+        for p in D.claws():
+            if p["bone"].startswith(("toe", "hallux")):
+                CLAW_TIPS.append((p["bone"], p["verts"][-2]))
+    D_, loop, fn, _m = CL.CLIPS[cid]
+    fn = CL.with_overrides(cid, fn)
+    best = 9.0
+    for f in range(0, int(round(D_ * CL.FPS)) + 1, 3):
+        ch = fn(f / CL.FPS)
+        rig.build(ch)
+        M = rig.ps.fk()
+        for bone, tip in CLAW_TIPS:
+            side = bone[-1]
+            if not ch.get(f"contact_{side}", True):
+                continue
+            Mi = M[bone] @ np.linalg.inv(rig.sk.rest[bone])
+            z = (Mi @ np.append(tip, 1.0))[2]
+            best = min(best, z)
+    return best
+
+
 def main():
     t0 = time.time()
     bpy.ops.wm.open_mainfile(filepath=C.cache("maw2_tex.blend"))
@@ -142,6 +171,7 @@ def main():
             entry["rootYawDeg"] = CL.TURN_YAW * (1 if cid.endswith("left") else -1)
             entry["yawCurve"] = (f"yaw(t) = rootYawDeg * smoothstep(t/{CL.TURN_D}) about the root origin (apply to the "
                                  "node while the clip plays; feet are planted in that frame)")
+        entry["clawTipMinZ_planted_m"] = round(float(claw_min_z(rig, cid)), 4)
         report[cid] = entry
         C.log(f"{cid}: {D}s frames {len(keys) - 1} slip {slip} over {over:.3f} {time.time() - t0:.1f}s")
     arm.animation_data.action = bpy.data.actions["lf_boss_idle"]

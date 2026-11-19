@@ -337,6 +337,24 @@ def main():
     base = np.clip(base * mod[:, None], 0, 1)
     albedo = np.zeros((size, size, 3))
     albedo[yy, xx] = base
+    # the healed scar exists on the LEFT only: inpaint any pale residue along the mirrored scar path (right side)
+    sp = np.array([[-p_[0], p_[1], p_[2]] for p_ in B.SCAR_PTS])
+    dmin = np.full(len(P), 9.0)
+    for i in range(len(sp) - 1):
+        a_, b_ = sp[i], sp[i + 1]
+        ab = b_ - a_
+        tt = np.clip(((P - a_) @ ab) / (ab @ ab), 0, 1)
+        dmin = np.minimum(dmin, np.linalg.norm(P - (a_ + tt[:, None] * ab), axis=1))
+    rmask = np.zeros((size, size), np.uint8)
+    sel = (P[:, 0] < -0.12) & (dmin < 0.055)
+    rmask[yy[sel], xx[sel]] = 255
+    if sel.any():
+        u8 = (np.clip(albedo, 0, 1) * 255).astype(np.uint8)
+        known = np.zeros((size, size), np.uint8)
+        known[yy, xx] = 1
+        u8 = cv2.inpaint(u8, rmask, 7, cv2.INPAINT_TELEA)
+        albedo[yy[sel], xx[sel]] = u8[yy[sel], xx[sel]] / 255.0
+        C.log(f"right-eye scar residue inpainted: {int(sel.sum())} texels")
     albedo = texproj.fill(albedo, T.valid)            # whole atlas filled: no dark mip bleeding at seams
     # --- normal map from the scale height (+ small osteoderm/ridge relief), tangent space
     hmap = np.zeros((size, size))

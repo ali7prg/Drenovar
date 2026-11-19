@@ -131,10 +131,17 @@ def claws():
         for toe, chain in B.TOES_L.items():
             pts = [m(p) for p in chain]
             dirv = pts[2] - pts[1]
-            dirv = dirv / np.linalg.norm(dirv) + np.array([0, 0, -0.35])
+            dirv = dirv / np.linalg.norm(dirv)
+            dirv[2] = max(dirv[2], -0.05)          # point forward; the hook comes from the bend, tip stays on the ground
+            dirv /= np.linalg.norm(dirv)
             ln = {"toe2": 0.24, "toe3": 0.27, "toe4": 0.23}[toe]
-            out.append(curved_cone(pts[2] + dirv * 0.01, dirv, ln, 0.068, bend_dir=(0, 0, -1), bend=0.45, sides=8,
-                                   rings=7, flat=0.62, region="claws", bone=f"{toe}b_{side}", embed=0.05, keel=0.25))
+            embed = 0.05
+            base = pts[2] + dirv * 0.01
+            L = ln + embed
+            z0 = base[2] - dirv[2] * embed
+            bend = float(np.clip((z0 + dirv[2] * L - 0.014) / L, 0.15, 0.45))   # tip z >= ~1.4 cm
+            out.append(curved_cone(base, dirv, ln, 0.068, bend_dir=(0, 0, -1), bend=bend, sides=8,
+                                   rings=7, flat=0.62, region="claws", bone=f"{toe}b_{side}", embed=embed, keel=0.25))
         hx = [m(p) for p in B.HALLUX_L]
         d = hx[1] - hx[0]
         out.append(curved_cone(hx[1], d / np.linalg.norm(d) + np.array([0, 0.2, -0.5]), 0.10, 0.032,

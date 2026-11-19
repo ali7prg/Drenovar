@@ -1,0 +1,578 @@
+{
+  "entrance_reveal_0": {
+    "perf": {
+      "draws": 196,
+      "fogOnly": 8,
+      "full": 4,
+      "inst": 799,
+      "landmark_tris": 0,
+      "prims": 568642,
+      "proxy": 0,
+      "tris_est": 201384
+    },
+    "px_per_m": 13.695652173913,
+    "target": [
+      -8.0,
+      -50.0
+    ],
+    "zoom": 46.0
+  },
+  "entrance_reveal_1": {
+    "perf": {
+      "draws": 205,
+      "fogOnly": 7,
+      "full": 4,
+      "inst": 851,
+      "landmark_tris": 0,
+      "prims": 713666,
+      "proxy": 1,
+      "tris_est": 280548
+    },
+    "px_per_m": 13.695652173913,
+    "target": [
+      -8.0,
+      -50.0
+    ],
+    "zoom": 46.0
+  },
+  "entrance_reveal_2": {
+    "perf": {
+      "draws": 204,
+      "fogOnly": 7,
+      "full": 4,
+      "inst": 851,
+      "landmark_tris": 0,
+      "prims": 713656,
+      "proxy": 1,
+      "tris_est": 280548
+    },
+    "px_per_m": 13.695652173913,
+    "target": [
+      -8.0,
+      -50.0
+    ],
+    "zoom": 46.0
+  },
+  "entrance_reveal_3": {
+    "perf": {
+      "draws": 203,
+      "fogOnly": 7,
+      "full": 4,
+      "inst": 851,
+      "landmark_tris": 0,
+      "prims": 713646,
+      "proxy": 1,
+      "tris_est": 280548
+    },
+    "px_per_m": 13.695652173913,
+    "target": [
+      -8.0,
+      -50.0
+    ],
+    "zoom": 46.0
+  },
+  "entrance_reveal_4": {
+    "perf": {
+      "draws": 200,
+      "fogOnly": 7,
+      "full": 4,
+      "inst": 851,
+      "landmark_tris": 0,
+      "prims": 713616,
+      "proxy": 1,
+      "tris_est": 280548
+    },
+    "px_per_m": 13.695652173913,
+    "target": [
+      -8.0,
+      -50.0
+    ],
+    "zoom": 46.0
+  },
+  "full_arena_z40": {
+    "perf": {
+      "draws": 264,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 739,
+      "landmark_tris": 60378,
+      "prims": 1115103,
+      "proxy": 3,
+      "tris_est": 499788
+    },
+    "px_per_m": 15.75,
+    "target": [
+      75.0,
+      -84.0
+    ],
+    "zoom": 40.0
+  },
+  "full_arena_z68": {
+    "perf": {
+      "draws": 242,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 1173,
+      "landmark_tris": 32565,
+      "prims": 255891,
+      "proxy": 4,
+      "tris_est": 61483
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      75.0,
+      -84.0
+    ],
+    "zoom": 68.0
+  },
+  "full_east_z40": {
+    "perf": {
+      "draws": 249,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 581,
+      "landmark_tris": 34987,
+      "prims": 879957,
+      "proxy": 2,
+      "tris_est": 396465
+    },
+    "px_per_m": 15.75,
+    "target": [
+      98.0,
+      -30.0
+    ],
+    "zoom": 40.0
+  },
+  "full_east_z68": {
+    "perf": {
+      "draws": 242,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 1111,
+      "landmark_tris": 32565,
+      "prims": 241069,
+      "proxy": 7,
+      "tris_est": 53279
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      98.0,
+      -30.0
+    ],
+    "zoom": 68.0
+  },
+  "full_grove_z40": {
+    "perf": {
+      "draws": 98,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 723,
+      "landmark_tris": 32565,
+      "prims": 1047504,
+      "proxy": 4,
+      "tris_est": 523856
+    },
+    "px_per_m": 15.75,
+    "target": [
+      -88.0,
+      8.0
+    ],
+    "zoom": 40.0
+  },
+  "full_grove_z68": {
+    "perf": {
+      "draws": 224,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 1200,
+      "landmark_tris": 32565,
+      "prims": 276848,
+      "proxy": 8,
+      "tris_est": 62898
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      -88.0,
+      8.0
+    ],
+    "zoom": 68.0
+  },
+  "full_overview_z120": {
+    "perf": {
+      "draws": 355,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 2764,
+      "landmark_tris": 29674,
+      "prims": 303045,
+      "proxy": 8,
+      "tris_est": 5790
+    },
+    "px_per_m": 5.25,
+    "target": [
+      0.0,
+      0.0
+    ],
+    "zoom": 120.0
+  },
+  "full_overview_z140": {
+    "perf": {
+      "draws": 361,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 3055,
+      "landmark_tris": 29674,
+      "prims": 306312,
+      "proxy": 8,
+      "tris_est": 6596
+    },
+    "px_per_m": 4.5,
+    "target": [
+      0.0,
+      0.0
+    ],
+    "zoom": 140.0
+  },
+  "full_quarry_z40": {
+    "perf": {
+      "draws": 102,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 702,
+      "landmark_tris": 37309,
+      "prims": 992886,
+      "proxy": 3,
+      "tris_est": 490393
+    },
+    "px_per_m": 15.75,
+    "target": [
+      -28.0,
+      88.0
+    ],
+    "zoom": 40.0
+  },
+  "full_quarry_z68": {
+    "perf": {
+      "draws": 174,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 1219,
+      "landmark_tris": 32565,
+      "prims": 244392,
+      "proxy": 7,
+      "tris_est": 71390
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      -28.0,
+      88.0
+    ],
+    "zoom": 68.0
+  },
+  "full_river_bridge_z40": {
+    "perf": {
+      "draws": 225,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 693,
+      "landmark_tris": 38351,
+      "prims": 905722,
+      "proxy": 4,
+      "tris_est": 415661
+    },
+    "px_per_m": 15.75,
+    "target": [
+      88.0,
+      16.0
+    ],
+    "zoom": 40.0
+  },
+  "full_river_bridge_z68": {
+    "perf": {
+      "draws": 229,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 1332,
+      "landmark_tris": 32565,
+      "prims": 237698,
+      "proxy": 7,
+      "tris_est": 55969
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      88.0,
+      16.0
+    ],
+    "zoom": 68.0
+  },
+  "full_spruce_z40": {
+    "perf": {
+      "draws": 205,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 931,
+      "landmark_tris": 32565,
+      "prims": 1253594,
+      "proxy": 3,
+      "tris_est": 599999
+    },
+    "px_per_m": 15.75,
+    "target": [
+      38.0,
+      84.0
+    ],
+    "zoom": 40.0
+  },
+  "full_spruce_z68": {
+    "perf": {
+      "draws": 200,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 1438,
+      "landmark_tris": 32565,
+      "prims": 248739,
+      "proxy": 7,
+      "tris_est": 71793
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      38.0,
+      84.0
+    ],
+    "zoom": 68.0
+  },
+  "full_top_birch_z40": {
+    "perf": {
+      "draws": 104,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 724,
+      "landmark_tris": 33265,
+      "prims": 1097950,
+      "proxy": 5,
+      "tris_est": 549585
+    },
+    "px_per_m": 15.75,
+    "target": [
+      -30.0,
+      -72.0
+    ],
+    "zoom": 40.0
+  },
+  "full_top_birch_z68": {
+    "perf": {
+      "draws": 150,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 1399,
+      "landmark_tris": 32565,
+      "prims": 247621,
+      "proxy": 7,
+      "tris_est": 76208
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      -30.0,
+      -72.0
+    ],
+    "zoom": 68.0
+  },
+  "full_town_z40": {
+    "perf": {
+      "draws": 282,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 737,
+      "landmark_tris": 32565,
+      "prims": 1296498,
+      "proxy": 8,
+      "tris_est": 562154
+    },
+    "px_per_m": 15.75,
+    "target": [
+      5.0,
+      -4.0
+    ],
+    "zoom": 40.0
+  },
+  "full_town_z68": {
+    "perf": {
+      "draws": 280,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 1561,
+      "landmark_tris": 32565,
+      "prims": 323454,
+      "proxy": 8,
+      "tris_est": 59854
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      5.0,
+      -4.0
+    ],
+    "zoom": 68.0
+  },
+  "locked_overview_z130": {
+    "perf": {
+      "draws": 298,
+      "fogOnly": 12,
+      "full": 4,
+      "inst": 2912,
+      "landmark_tris": 0,
+      "prims": 272288,
+      "proxy": 0,
+      "tris_est": 6206
+    },
+    "px_per_m": 4.84615384615385,
+    "target": [
+      0.0,
+      0.0
+    ],
+    "zoom": 130.0
+  },
+  "locked_town_z40": {
+    "perf": {
+      "draws": 264,
+      "fogOnly": 8,
+      "full": 4,
+      "inst": 685,
+      "landmark_tris": 0,
+      "prims": 1153826,
+      "proxy": 0,
+      "tris_est": 492046
+    },
+    "px_per_m": 15.75,
+    "target": [
+      0.0,
+      -30.0
+    ],
+    "zoom": 40.0
+  },
+  "locked_town_z68": {
+    "perf": {
+      "draws": 265,
+      "fogOnly": 12,
+      "full": 4,
+      "inst": 1531,
+      "landmark_tris": 0,
+      "prims": 238184,
+      "proxy": 0,
+      "tris_est": 19086
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      5.0,
+      -4.0
+    ],
+    "zoom": 68.0
+  },
+  "partial_edge_z68": {
+    "perf": {
+      "draws": 90,
+      "fogOnly": 4,
+      "full": 4,
+      "inst": 1412,
+      "landmark_tris": 430,
+      "prims": 198642,
+      "proxy": 3,
+      "tris_est": 68880
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      -55.0,
+      -58.0
+    ],
+    "zoom": 68.0
+  },
+  "partial_overview_z130": {
+    "perf": {
+      "draws": 297,
+      "fogOnly": 9,
+      "full": 4,
+      "inst": 2875,
+      "landmark_tris": 165,
+      "prims": 266562,
+      "proxy": 3,
+      "tris_est": 6132
+    },
+    "px_per_m": 4.84615384615385,
+    "target": [
+      -10.0,
+      -10.0
+    ],
+    "zoom": 130.0
+  },
+  "partial_path_z40": {
+    "perf": {
+      "draws": 96,
+      "fogOnly": 2,
+      "full": 4,
+      "inst": 681,
+      "landmark_tris": 1130,
+      "prims": 1145548,
+      "proxy": 3,
+      "tris_est": 572920
+    },
+    "px_per_m": 15.75,
+    "target": [
+      -38.0,
+      -66.0
+    ],
+    "zoom": 40.0
+  },
+  "partial_squad_z40": {
+    "perf": {
+      "draws": 92,
+      "fogOnly": 2,
+      "full": 4,
+      "inst": 779,
+      "landmark_tris": 1130,
+      "prims": 1116350,
+      "proxy": 2,
+      "tris_est": 569628
+    },
+    "px_per_m": 15.75,
+    "target": [
+      -72.0,
+      -52.0
+    ],
+    "zoom": 40.0
+  },
+  "unlocked_entrance_z68": {
+    "perf": {
+      "draws": 270,
+      "fogOnly": 9,
+      "full": 4,
+      "inst": 1463,
+      "landmark_tris": 0,
+      "prims": 260956,
+      "proxy": 1,
+      "tris_est": 36250
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      -4.0,
+      -44.0
+    ],
+    "zoom": 68.0
+  },
+  "unlocked_horse_z30": {
+    "perf": {
+      "draws": 96,
+      "fogOnly": 6,
+      "full": 4,
+      "inst": 494,
+      "landmark_tris": 0,
+      "prims": 955882,
+      "proxy": 1,
+      "tris_est": 460060
+    },
+    "px_per_m": 21.0,
+    "target": [
+      -9.0,
+      -56.0
+    ],
+    "zoom": 30.0
+  }
+}

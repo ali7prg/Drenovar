@@ -75,12 +75,25 @@ func run() -> void:
 	game.set_process(false)
 	var stage: Node3D = game.stage
 	var world: Node3D = stage.get("forest_world")
+	for warm in 8:
+		await process_frame
+	if game.get("forest_game") != null:
+		game.forest_game.process_mode = Node.PROCESS_MODE_DISABLED   # synthetic fixtures below
+	# Environment budget (PERFORMANCE_AUDIT_RU / WORLD_LAYOUT_AND_FOG_RU): visible new environment
+	# geometry ≤ 110k triangles, ≤ 4 full + ≤ 8 light (proxy) chunks, fog alpha overdraw ≤ 3.
 	var scenarios := [
-		{"name": "town_default_pan", "zoom": 70.0, "center": Vector3(5, 0, -4), "radius": Vector2(16, 12)},
-		{"name": "forest_edge_pan_locked", "zoom": 70.0, "center": Vector3(-30, 0, -70), "radius": Vector2(30, 18)},
-		{"name": "overview_zoom120", "zoom": 120.0, "center": Vector3(0, 0, 0), "radius": Vector2(20, 14)},
-		{"name": "close_zoom32_glade", "zoom": 32.0, "center": Vector3(-20, 0, -62), "radius": Vector2(10, 8)},
-		{"name": "explored_forest_pan", "zoom": 60.0, "center": Vector3(-60, 0, -40), "radius": Vector2(28, 22), "explored": true},
+		{"name": "town_default_z68_locked", "zoom": 68.0, "center": Vector3(5, 0, -4), "radius": Vector2(16, 12)},
+		{"name": "forest_edge_z68_locked", "zoom": 68.0, "center": Vector3(-30, 0, -70), "radius": Vector2(30, 18)},
+		{"name": "overview_z120_locked", "zoom": 120.0, "center": Vector3(0, 0, 0), "radius": Vector2(20, 14)},
+		{"name": "town_z40_explored", "zoom": 40.0, "center": Vector3(0, 0, -30), "radius": Vector2(10, 8), "explored": true},
+		{"name": "grove_z40_explored", "zoom": 40.0, "center": Vector3(-88, 0, 8), "radius": Vector2(10, 8), "explored": true},
+		{"name": "spruce_z40_explored", "zoom": 40.0, "center": Vector3(38, 0, 84), "radius": Vector2(10, 8), "explored": true},
+		{"name": "bridge_z40_explored", "zoom": 40.0, "center": Vector3(88, 0, 16), "radius": Vector2(8, 6), "explored": true},
+		{"name": "arena_z40_explored", "zoom": 40.0, "center": Vector3(75, 0, -84), "radius": Vector2(8, 6), "explored": true},
+		{"name": "grove_z68_explored", "zoom": 68.0, "center": Vector3(-70, 0, 0), "radius": Vector2(24, 16), "explored": true},
+		{"name": "east_z68_explored", "zoom": 68.0, "center": Vector3(80, 0, -20), "radius": Vector2(24, 16), "explored": true},
+		{"name": "overview_z120_explored", "zoom": 120.0, "center": Vector3(0, 0, 0), "radius": Vector2(20, 14), "explored": true},
+		{"name": "close_z32_glade_explored", "zoom": 32.0, "center": Vector3(-20, 0, -62), "radius": Vector2(8, 6), "explored": true},
 	]
 	var results: Array = []
 	for spec in scenarios:
@@ -105,6 +118,10 @@ func run() -> void:
 		var prims := PackedInt32Array()
 		var instances := PackedInt32Array()
 		var tris_est := PackedInt32Array()
+		var landmark_tris := PackedInt32Array()
+		var env_tris := PackedInt32Array()
+		var full_max := 0
+		var proxy_max := 0
 		var last := Time.get_ticks_usec()
 		for i in frames_per_scenario:
 			var a := TAU * i / float(frames_per_scenario)
@@ -122,15 +139,26 @@ func run() -> void:
 				var snap: Dictionary = world.perf_snapshot()
 				instances.append(int(snap.instances))
 				tris_est.append(int(snap.tris_est))
+				landmark_tris.append(int(snap.get("landmark_tris", 0)))
+				env_tris.append(int(snap.tris_est) + int(snap.get("landmark_tris", 0)))
+				full_max = maxi(full_max, int(snap.full_chunks))
+				proxy_max = maxi(proxy_max, int(snap.proxy_chunks))
 		draws.sort()
 		prims.sort()
 		instances.sort()
 		tris_est.sort()
+		landmark_tris.sort()
+		env_tris.sort()
 		var row := {"scenario": spec.name, "zoom": spec.zoom, "frame": frame.report(), "cameraUpdateCpu": cull.report(),
 			"drawCallsMedian": draws[draws.size() / 2], "drawCallsMax": draws[-1],
 			"primitivesMedian": prims[prims.size() / 2], "primitivesMax": prims[-1],
 			"forestInstancesMedian": instances[instances.size() / 2] if not instances.is_empty() else 0,
 			"forestTrisEstMedian": tris_est[tris_est.size() / 2] if not tris_est.is_empty() else 0,
+			"landmarkTrisMedian": landmark_tris[landmark_tris.size() / 2] if not landmark_tris.is_empty() else 0,
+			"envTrisMedian": env_tris[env_tris.size() / 2] if not env_tris.is_empty() else 0,
+			"envTrisMax": env_tris[-1] if not env_tris.is_empty() else 0,
+			"envBudgetOk": (env_tris[-1] if not env_tris.is_empty() else 0) <= 110000 and full_max <= 4 and proxy_max <= 8,
+			"fullChunksMax": full_max, "proxyChunksMax": proxy_max,
 			"objects": Performance.get_monitor(Performance.OBJECT_COUNT),
 			"nodes": Performance.get_monitor(Performance.OBJECT_NODE_COUNT),
 			"videoMemMiB": Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,

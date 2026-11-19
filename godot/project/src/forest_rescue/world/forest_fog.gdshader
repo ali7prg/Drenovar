@@ -41,12 +41,13 @@ uniform vec4 sights[8];
 uniform int sight_count = 0;
 uniform vec3 light_dir = vec3(0.45, 0.74, 0.5);
 uniform vec3 view_dir = vec3(-0.5414, -0.5991, -0.5414);   // city camera: normalize(-(75, 83, 75))
-// Blue-grey palette (art/07, art/18), sRGB before the city's FILMIC tonemap.
-uniform vec3 lit_color : source_color = vec3(0.70, 0.75, 0.80);
-uniform vec3 body_color : source_color = vec3(0.48, 0.55, 0.61);
-uniform vec3 deep_color : source_color = vec3(0.30, 0.36, 0.42);
-uniform vec3 haze_color : source_color = vec3(0.62, 0.67, 0.72);
-uniform vec3 rim_color : source_color = vec3(0.88, 0.85, 0.78);
+// Blue-grey palette sampled from art/18 panel 1 / art/07 panel 1 (median #53697a, tops #738ca0,
+// valleys #374956), sRGB before the city's FILMIC tonemap (near identity in this range).
+uniform vec3 lit_color : source_color = vec3(0.50, 0.59, 0.66);
+uniform vec3 body_color : source_color = vec3(0.35, 0.43, 0.50);
+uniform vec3 deep_color : source_color = vec3(0.22, 0.29, 0.34);
+uniform vec3 haze_color : source_color = vec3(0.45, 0.53, 0.59);
+uniform vec3 rim_color : source_color = vec3(0.74, 0.71, 0.63);
 uniform float time_offset = 0.0;
 uniform int debug_mode = 0;
 const int STEPS = 8;

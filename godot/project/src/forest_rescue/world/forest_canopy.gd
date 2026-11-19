@@ -110,23 +110,30 @@ func instance_count() -> int:
 	return total
 
 
-## Chooses LOD per cell (-1 = hidden) for a mesh kind.
+## Chooses LOD per cell (-1 = hidden) for a mesh kind. Trees: LOD 2 means "impostor when baked"
+## (identical silhouette from the fixed city camera, 2 triangles), 3D LOD1/LOD0 only near the
+## camera focus at close zoom. Budget target: ≤ 110k visible environment triangles at zoom 40/68/120.
 func lod_for(kind: int, cls: String, zoom: float, distance: float) -> int:
 	var z := zoom * lod_bias
 	match cls:
 		"full":
+			# distance = focus to the 14 m cell centre minus 9.8 m (≈ nearest cell edge).
 			if kind == KIND_TREE or kind == KIND_STUMP:
-				if z <= 40.0 and distance <= 22.0:
+				if z <= 30.0 and distance <= 2.0:
 					return 0
-				return 1 if z <= 62.0 and distance <= 40.0 else 2
+				return 1 if z <= 48.0 and distance <= 6.0 else 2
 			if kind == KIND_ROCK:
-				return 0 if z <= 46.0 else (1 if z <= 100.0 else -1)
-			return (0 if z <= 40.0 else 1) if z <= 78.0 else -1
+				if z <= 34.0 and distance <= 16.0:
+					return 1
+				return 2 if z <= 100.0 else -1
+			if z > 78.0 or (z > 50.0 and distance > 36.0) or distance > 52.0:
+				return -1
+			return 0 if z <= 30.0 and distance <= 12.0 else (1 if z <= 46.0 and distance <= 24.0 else 2)
 		"proxy":
 			if kind == KIND_TREE or kind == KIND_STUMP:
 				return 2
 			if kind == KIND_ROCK:
-				return 1 if z <= 70.0 else -1
+				return 2 if z <= 70.0 else -1
 			return -1
 		"fogOnly", "far":
 			return 2 if kind == KIND_TREE else -1

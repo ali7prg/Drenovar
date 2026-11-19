@@ -145,6 +145,9 @@ func run() -> void:
 	# The gameplay layer syncs the world from its own (offline) state when it first sees the
 	# stage; let it do that, then freeze it so the synthetic fixtures below are not overridden.
 	await settle(6)
+	# Warm-up: let pipelines/shaders compile before the first capture (first frames can be unlit).
+	view(Vector3(5, 0, -4), 68.0)
+	await settle(30)
 	var forest_game: Node = game.get("forest_game")
 	if forest_game != null:
 		forest_game.process_mode = Node.PROCESS_MODE_DISABLED

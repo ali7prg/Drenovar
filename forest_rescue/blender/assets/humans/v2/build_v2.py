@@ -530,7 +530,9 @@ def portrait_cam(J):
             x2.append((pc[key][0] - box[0], pc[key][1] - box[1]))
     cam, params, err = HT.solve_portrait(X3, x2, img, weight=5.0)
     log("portrait solve", np.round(params, 3), "max px err", round(err, 2))
-    cam.lm2 = np.array(x2)
+    # canonical landmark order for masks / SSIM: eye_r, eye_l, nose, mouth, chin
+    pt = {k: (pc[k][0] - box[0], pc[k][1] - box[1]) for k in ("eye_r", "eye_l", "nose", "mouth", "chin") if k in pc}
+    cam.lm2 = np.array([pt[k] for k in ("eye_r", "eye_l", "nose", "mouth", "chin") if k in pt])
     return dict(cam=cam, params=params.tolist(), err=err)
 
 
@@ -624,7 +626,7 @@ def texture(lo0, R, J, pinfo0=None):
     seen_face = head_skin & (ws > 0.5)
     cheek = np.median(col[seen_face], 0) if seen_face.sum() > 50 else None
     if cheek is not None:
-        weak = head_skin & (ws < 0.25)
+        weak = head_skin & (ws < 0.06)
         col[weak] = cheek
         ws = np.where(weak, 0.30, ws)
         log("head skin fill colour", np.round(cheek, 3), "texels", int(weak.sum()))

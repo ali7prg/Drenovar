@@ -75,14 +75,14 @@
   },
   "bounds_m_gltf": [
     [
-      -3.377,
+      -3.378,
       -0.15,
       -3.05
     ],
     [
       3.625,
-      2.6,
-      2.819
+      2.796,
+      2.822
     ]
   ],
   "collision": [
@@ -90,12 +90,12 @@
       "type": "box",
       "centre": [
         -2.788,
-        1.1,
+        1.447,
         2.041
       ],
       "size": [
         1.461,
-        2.2,
+        2.895,
         0.804
       ],
       "yaw_deg": 126.2
@@ -104,12 +104,12 @@
       "type": "box",
       "centre": [
         -2.033,
-        1.0,
+        1.179,
         -1.64
       ],
       "size": [
         1.16,
-        2.0,
+        2.358,
         0.638
       ],
       "yaw_deg": 51.1
@@ -118,12 +118,12 @@
       "type": "box",
       "centre": [
         0.355,
-        1.375,
+        1.473,
         -2.499
       ],
       "size": [
         1.759,
-        2.75,
+        2.946,
         1.055
       ],
       "yaw_deg": -8.1
@@ -132,12 +132,12 @@
       "type": "box",
       "centre": [
         3.213,
-        1.05,
+        1.228,
         -1.339
       ],
       "size": [
         1.243,
-        2.1,
+        2.455,
         0.684
       ],
       "yaw_deg": -67.4
@@ -146,12 +146,12 @@
       "type": "box",
       "centre": [
         2.194,
-        1.15,
+        1.27,
         2.18
       ],
       "size": [
         1.467,
-        2.3,
+        2.54,
         0.807
       ],
       "yaw_deg": 225.2
@@ -164,12 +164,12 @@
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py standing_stones",
   "qa": {
     "main_view": {
-      "iou": 0.8566,
+      "iou": 0.9209,
       "colour_err": 0.1099,
-      "ssim": 0.5229,
-      "ref_px": 68834,
-      "render_px": 70735,
-      "iou_structure_only": 0.4310211338284633
+      "ssim": 0.5482,
+      "ref_px": 72006,
+      "render_px": 72723,
+      "iou_structure_only": 0.46254031596785655
     },
     "camera": {
       "rms_px": 16.13,
@@ -178,23 +178,23 @@
     },
     "insets": {
       "row": {
-        "iou": 0.5196,
-        "colour_err": 0.1515,
-        "ssim": 0.3957,
+        "iou": 0.4638,
+        "colour_err": 0.154,
+        "ssim": 0.3636,
         "ref_px": 139296,
-        "render_px": 188819
+        "render_px": 215836
       }
     },
     "texture": {
-      "texels": 3121473,
-      "projected_frac": 0.10463649693590174,
-      "seconds": 13.4
+      "texels": 3082250,
+      "projected_frac": 0.11004493470678887,
+      "seconds": 11.2
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_standing_stones/v3_iter01_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_standing_stones/v3_iter02_*"
   },
   "dimensions": {
     "S1": {
-      "height_m": 2.2,
+      "height_m": 2.89,
       "width_m": 1.46,
       "thickness_m": 0.8,
       "position_gltf": [
@@ -204,7 +204,7 @@
       ]
     },
     "S2": {
-      "height_m": 2.0,
+      "height_m": 2.36,
       "width_m": 1.16,
       "thickness_m": 0.64,
       "position_gltf": [
@@ -214,7 +214,7 @@
       ]
     },
     "S3": {
-      "height_m": 2.75,
+      "height_m": 2.95,
       "width_m": 1.76,
       "thickness_m": 1.06,
       "position_gltf": [
@@ -224,7 +224,7 @@
       ]
     },
     "S4": {
-      "height_m": 2.1,
+      "height_m": 2.46,
       "width_m": 1.24,
       "thickness_m": 0.68,
       "position_gltf": [
@@ -234,7 +234,7 @@
       ]
     },
     "S5": {
-      "height_m": 2.3,
+      "height_m": 2.54,
       "width_m": 1.47,
       "thickness_m": 0.81,
       "position_gltf": [

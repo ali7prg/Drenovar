@@ -1,51 +1,68 @@
 {
   "id": "lf_env_quarry_mine",
+  "generation": "v3 (blueprint + solved art/06 camera + painting projection)",
   "tris": {
-    "LOD0": 2036,
-    "LOD1": 504,
-    "LOD2": 392
+    "LOD0": 1612,
+    "LOD1": 930,
+    "LOD2": 646
+  },
+  "tris_detail": {
+    "LOD0": {
+      "structure": 1612,
+      "base": 1058,
+      "total": 2670
+    },
+    "LOD1": {
+      "structure": 930,
+      "base": 180,
+      "total": 1110
+    },
+    "LOD2": {
+      "structure": 646,
+      "base": 22,
+      "total": 668
+    }
+  },
+  "budget": {
+    "LOD0": 6000,
+    "LOD1": 1500,
+    "LOD2": 400,
+    "note": "structure meshes; the toggleable ground base is counted separately in tris_detail"
   },
   "bones": 0,
   "materials": [
-    "lm_misc",
-    "lm_stone",
-    "lm_wood"
+    "lf_env_quarry_mine_card.001",
+    "lf_env_quarry_mine_ground.001",
+    "lf_env_quarry_mine_metal.001",
+    "lf_env_quarry_mine_rope.001",
+    "lf_env_quarry_mine_stone.001",
+    "lf_env_quarry_mine_wood.001"
   ],
   "glb_images": [
-    "lm_stone_n.png",
-    "lm_stone_c.jpg",
-    "lm_stone_r.png",
-    "lm_wood_n.png",
-    "lm_wood_c.jpg",
-    "lm_wood_r.png",
-    "lm_misc_n.png",
-    "lm_misc_c.png",
-    "lm_misc_r.png"
+    "lf_env_quarry_mine_cards.png",
+    "lf_env_quarry_mine_n.png",
+    "lf_env_quarry_mine_c.jpg"
   ],
   "textures": {
-    "lm_stone_c.jpg": 1024,
-    "lm_stone_n.png": 1024,
-    "lm_stone_r.png": 1024,
-    "lm_wood_c.jpg": 1024,
-    "lm_wood_n.png": 1024,
-    "lm_wood_r.png": 1024,
-    "lm_roof_c.jpg": 1024,
-    "lm_roof_n.png": 1024,
-    "lm_roof_r.png": 1024,
-    "lm_misc_c.png": 1024,
-    "lm_misc_n.png": 1024,
-    "lm_misc_r.png": 1024
+    "lf_env_quarry_mine_c.jpg": 2048,
+    "lf_env_quarry_mine_n.png": 1024,
+    "lf_env_quarry_mine_lod1_c.jpg": 1024,
+    "lf_env_quarry_mine_lod2_c.jpg": 512,
+    "lf_env_quarry_mine_cards.png": 1024
   },
-  "texture_mode": "external shared lm_* files next to the GLB (relative URIs)",
+  "texture_mode": "external per-asset files next to the GLB (relative URIs); LOD1/LOD2 have their own atlases",
   "nodes": {
     "LOD0": [
-      "lf_env_quarry_mine_LOD0"
+      "lf_env_quarry_mine_LOD0",
+      "lf_env_quarry_mine_base"
     ],
     "LOD1": [
-      "lf_env_quarry_mine_LOD1"
+      "lf_env_quarry_mine_LOD1",
+      "lf_env_quarry_mine_base_LOD1"
     ],
     "LOD2": [
-      "lf_env_quarry_mine_LOD2"
+      "lf_env_quarry_mine_LOD2",
+      "lf_env_quarry_mine_base_LOD2"
     ]
   },
   "lod_files": {
@@ -53,80 +70,140 @@
     "LOD1": "lf_env_quarry_mine_LOD1.glb",
     "LOD2": "lf_env_quarry_mine_LOD2.glb"
   },
+  "base_node": {
+    "LOD0": "lf_env_quarry_mine_base",
+    "LOD1": "lf_env_quarry_mine_base_LOD1",
+    "LOD2": "lf_env_quarry_mine_base_LOD2",
+    "note": "painted ground patch (dirt/gravel/grass/stones/water) as a separate node; the world may hide it"
+  },
   "bounds_m_gltf": [
     [
-      -4.5,
-      -0.134,
-      -3.1
+      -4.097,
+      0.0,
+      -3.534
     ],
     [
-      6.4,
-      5.295,
-      5.69
+      5.178,
+      4.071,
+      3.735
     ]
   ],
   "collision": [
     {
       "type": "box",
       "centre": [
-        0.0,
-        2.2,
-        -0.8
+        -1.2,
+        2.0,
+        -1.6
       ],
       "size": [
-        9.0,
-        4.4,
-        3.6
+        7.6,
+        4.0,
+        3.4
       ],
       "yaw_deg": 0.0
     },
     {
       "type": "box",
       "centre": [
-        4.4,
-        2.3,
-        1.9
-      ],
-      "size": [
-        0.4,
-        4.6,
-        0.4
-      ],
-      "yaw_deg": 0.0
-    },
-    {
-      "type": "box",
-      "centre": [
-        5.65,
-        0.6,
-        1.9
-      ],
-      "size": [
-        1.0,
+        -1.25,
         1.2,
-        1.3
+        0.0
+      ],
+      "size": [
+        0.32,
+        2.4,
+        0.32
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        1.25,
+        1.2,
+        0.0
+      ],
+      "size": [
+        0.32,
+        2.4,
+        0.32
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "box",
+      "centre": [
+        4.2,
+        1.6,
+        0.5
+      ],
+      "size": [
+        2.6,
+        3.2,
+        1.6
       ],
       "yaw_deg": 0.0
     }
   ],
-  "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; 'ramp' = oriented box along the slope; yaw about +Y.",
+  "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; 'ramp' = oriented box along the slope; 'cylinder' size = (diameter, height, diameter); yaw about +Y.",
   "layout_note": "Main GLB = LOD0 at the asset origin; LOD1/LOD2 in <id>_LOD1.glb / <id>_LOD2.glb (same origin).",
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/build_landmarks.py quarry_mine",
+  "paintedLightMix": 0.35,
+  "paintedLightNote": "Textures carry the painted light. Shade as albedo * mix(1, lambert, paintedLightMix) (lambert = max(dot(N, L), 0)), as the nature kit (forest_kit.json 'shading').",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py quarry_mine",
+  "qa": {
+    "main_view": {
+      "iou": 0.7893,
+      "colour_err": 0.1159,
+      "ssim": 0.4305,
+      "ref_px": 119032,
+      "render_px": 134675,
+      "iou_structure_only": 0.7043357350524586
+    },
+    "camera": {
+      "rms_px": 3.56,
+      "max_px": 5.91,
+      "n_points": 8
+    },
+    "insets": {
+      "mine_front": {
+        "iou": 0.5086,
+        "colour_err": 0.1596,
+        "ssim": 0.254,
+        "ref_px": 132832,
+        "render_px": 77937
+      }
+    },
+    "texture": {
+      "texels": 3057143,
+      "projected_frac": 0.04425275494146005,
+      "seconds": 17.9
+    },
+    "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter02_*"
+  },
   "sockets": {
-    "winch_axle": [
-      5.7,
-      0.75,
-      1.9
-    ],
-    "jib_tip": [
-      1.3,
-      4.85,
-      1.9
-    ],
     "mine_entrance_centre": [
       0.0,
       0.0,
-      0.95
+      0.15
+    ],
+    "winch_axle": [
+      4.489,
+      1.05,
+      1.988
+    ],
+    "jib_tip": [
+      1.473,
+      3.826,
+      1.901
     ]
-  }
+  },
+  "dimensions": {
+    "portal_clear_m": [
+      2.2,
+      2.0
+    ],
+    "rail_gauge_m": 0.6
+  },
+  "notes": "crane, blocks, crate and rails are placed by back-projecting their painted ground contacts (v3 camera json)"
 }

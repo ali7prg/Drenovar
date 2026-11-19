@@ -123,7 +123,7 @@ class Cam:
 
 
 def solve(P3, p2, size, f_range=(300, 20000), free_pp=False, free_k1=False, free_k2=False, weights=None,
-          pp_prior=0.02, k_prior=0.5, f0=None, fix_f=False, f_prior=None):
+          pp_prior=0.02, k_prior=0.5, f0=None, fix_f=False, f_prior=None, init_centre=None, init_target=None):
     """P3 (N,3) world points, p2 (N,2) painting pixels (crop coordinates). Returns (Cam, report)."""
     P3 = np.asarray(P3, float)
     p2 = np.asarray(p2, float)
@@ -133,7 +133,19 @@ def solve(P3, p2, size, f_range=(300, 20000), free_pp=False, free_k1=False, free
     fs = [f0] if f0 else np.geomspace(f_range[0], f_range[1], 60)
     for f in fs:
         K = np.array([[f, 0, W / 2], [0, f, H / 2], [0, 0, 1.0]])
-        ok, rv, tv = cv2.solvePnP(P3, p2, K, None, flags=cv2.SOLVEPNP_SQPNP)
+        if init_centre is not None:
+            C = np.asarray(init_centre, float)
+            fwd = np.asarray(init_target, float) - C
+            fwd /= np.linalg.norm(fwd)
+            right = np.cross(fwd, [0, 0, 1.0])
+            right /= np.linalg.norm(right)
+            down = np.cross(fwd, right)
+            Rg = np.stack([right, down, fwd])
+            rv0 = cv2.Rodrigues(Rg)[0]
+            tv0 = (-Rg @ C).reshape(3, 1)
+            ok, rv, tv = cv2.solvePnP(P3, p2, K, None, rv0, tv0, useExtrinsicGuess=True, flags=cv2.SOLVEPNP_ITERATIVE)
+        else:
+            ok, rv, tv = cv2.solvePnP(P3, p2, K, None, flags=cv2.SOLVEPNP_SQPNP)
         if not ok:
             continue
         rv, tv = cv2.solvePnPRefineLM(P3, p2, K, None, rv, tv)

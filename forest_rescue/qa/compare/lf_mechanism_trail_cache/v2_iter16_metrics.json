@@ -3,7 +3,7 @@
     "main": {
       "iou_raw": 0.8236,
       "iou_filled": 0.8236,
-      "colour_err": 0.0824,
+      "colour_err": 0.0823,
       "colour_err_core": 0.0824,
       "ref_px": 189803,
       "render_px": 212802,
@@ -24,7 +24,7 @@
     "per_view_frac": {
       "main": 0.1171
     },
-    "seconds": 12.4
+    "seconds": 10.7
   },
   "blueprint": {
     "R": 0.42,

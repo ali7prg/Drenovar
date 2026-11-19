@@ -2,9 +2,9 @@
   "id": "lf_props_supplies",
   "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 4340,
-    "LOD1": 2703,
-    "LOD2": 2027
+    "LOD0": 4616,
+    "LOD1": 2751,
+    "LOD2": 2043
   },
   "tris_by_node": {
     "LOD0": {
@@ -13,7 +13,7 @@
       "supply_blankets": 168,
       "supply_sacks": 498,
       "supply_coins": 788,
-      "supply_arrows": 900,
+      "supply_arrows": 1176,
       "supply_bread": 640,
       "supply_bandages": 128,
       "supply_chest": 778
@@ -24,7 +24,7 @@
       "supply_blankets": 84,
       "supply_sacks": 333,
       "supply_coins": 364,
-      "supply_arrows": 792,
+      "supply_arrows": 840,
       "supply_bread": 160,
       "supply_bandages": 80,
       "supply_chest": 618
@@ -35,7 +35,7 @@
       "supply_blankets": 84,
       "supply_sacks": 333,
       "supply_coins": 220,
-      "supply_arrows": 284,
+      "supply_arrows": 300,
       "supply_bread": 160,
       "supply_bandages": 80,
       "supply_chest": 618
@@ -153,8 +153,8 @@
       "crate_closed": {
         "iou_raw": 0.9488,
         "iou_filled": 0.9488,
-        "colour_err": 0.0866,
-        "colour_err_core": 0.0835,
+        "colour_err": 0.0863,
+        "colour_err_core": 0.0831,
         "ref_px": 23973,
         "render_px": 24274,
         "ignored_px": 0,
@@ -165,8 +165,8 @@
       "crate_open": {
         "iou_raw": 0.818,
         "iou_filled": 0.818,
-        "colour_err": 0.0672,
-        "colour_err_core": 0.0623,
+        "colour_err": 0.0673,
+        "colour_err_core": 0.0625,
         "ref_px": 24878,
         "render_px": 26452,
         "ignored_px": 0,
@@ -177,8 +177,8 @@
       "blankets": {
         "iou_raw": 0.8625,
         "iou_filled": 0.8625,
-        "colour_err": 0.0782,
-        "colour_err_core": 0.074,
+        "colour_err": 0.0786,
+        "colour_err_core": 0.0746,
         "ref_px": 22581,
         "render_px": 24300,
         "ignored_px": 0,
@@ -189,8 +189,8 @@
       "sacks": {
         "iou_raw": 0.8545,
         "iou_filled": 0.8545,
-        "colour_err": 0.0818,
-        "colour_err_core": 0.0776,
+        "colour_err": 0.0822,
+        "colour_err_core": 0.0778,
         "ref_px": 25236,
         "render_px": 26237,
         "ignored_px": 0,
@@ -201,8 +201,8 @@
       "coins": {
         "iou_raw": 0.7515,
         "iou_filled": 0.7515,
-        "colour_err": 0.0913,
-        "colour_err_core": 0.0857,
+        "colour_err": 0.0916,
+        "colour_err_core": 0.0862,
         "ref_px": 10437,
         "render_px": 9453,
         "ignored_px": 0,
@@ -211,12 +211,12 @@
         "camera_points": 4
       },
       "arrows": {
-        "iou_raw": 0.6096,
-        "iou_filled": 0.6194,
-        "colour_err": 0.1602,
-        "colour_err_core": 0.1559,
+        "iou_raw": 0.5843,
+        "iou_filled": 0.5985,
+        "colour_err": 0.1763,
+        "colour_err_core": 0.1721,
         "ref_px": 18679,
-        "render_px": 13979,
+        "render_px": 12746,
         "ignored_px": 0,
         "camera_rms_px": 3.53,
         "camera_max_px": 7.03,
@@ -225,7 +225,7 @@
       "bread": {
         "iou_raw": 0.7604,
         "iou_filled": 0.7604,
-        "colour_err": 0.0721,
+        "colour_err": 0.072,
         "colour_err_core": 0.0677,
         "ref_px": 15507,
         "render_px": 14246,
@@ -238,7 +238,7 @@
         "iou_raw": 0.6218,
         "iou_filled": 0.6218,
         "colour_err": 0.1055,
-        "colour_err_core": 0.0973,
+        "colour_err_core": 0.0972,
         "ref_px": 9197,
         "render_px": 10840,
         "ignored_px": 0,
@@ -249,8 +249,8 @@
       "chest": {
         "iou_raw": 0.874,
         "iou_filled": 0.874,
-        "colour_err": 0.0943,
-        "colour_err_core": 0.0927,
+        "colour_err": 0.0951,
+        "colour_err_core": 0.0935,
         "ref_px": 91271,
         "render_px": 92825,
         "ignored_px": 0,
@@ -375,28 +375,28 @@
       }
     },
     "texture": {
-      "texels": 2879677,
-      "projected_frac": 0.1615,
+      "texels": 2810223,
+      "projected_frac": 0.1597,
       "per_view_frac": {
-        "crate_closed": 0.0357,
-        "crate_open": 0.0383,
+        "crate_closed": 0.0358,
+        "crate_open": 0.0386,
         "blankets": 0.0202,
-        "sacks": 0.0154,
-        "coins": 0.004,
-        "arrows": 0.0065,
-        "bread": 0.0045,
-        "bandages": 0.0033,
-        "chest": 0.0335
+        "sacks": 0.0155,
+        "coins": 0.0041,
+        "arrows": 0.004,
+        "bread": 0.0046,
+        "bandages": 0.0034,
+        "chest": 0.0336
       },
-      "seconds": 23.9
+      "seconds": 22.1
     },
-    "sheets": "forest_rescue/qa/compare/lf_props_supplies/v2_iter06_*",
+    "sheets": "forest_rescue/qa/compare/lf_props_supplies/v2_iter07_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py supplies --iter 6",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py supplies --iter 7",
   "items": {
     "supply_crate_closed": {
       "painted_box": [

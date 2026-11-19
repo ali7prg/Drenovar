@@ -156,10 +156,10 @@ def arrow_bundle(g, o, lod):
                 ang = 2 * math.pi * k / 3 + a
                 sd = side0 * math.cos(ang) + np.cross(dn, side0) * math.sin(ang)
                 c0 = Nn - dn * 0.03
-                q = [c0 - dn * 0.17, c0 - dn * 0.01, c0 - dn * 0.03 + sd * 0.042, c0 - dn * 0.15 + sd * 0.04]
+                q = [c0 - dn * 0.135, c0 - dn * 0.01, c0 - dn * 0.03 + sd * 0.033, c0 - dn * 0.12 + sd * 0.031]
                 g.add(np.array(q), [[0, 1, 2, 3], [3, 2, 1, 0]], "feather", "fletching")
                 if lod == 0:
-                    g.tube(np.array([c0 - dn * 0.165, c0 - dn * 0.012]), 0.0018, n=3, mat="quill", tag="quill")
+                    g.tube(np.array([c0 - dn * 0.13, c0 - dn * 0.012]), 0.0018, n=3, mat="quill", tag="quill")
     for k in range(3 if lod < 2 else 1):
         c = T + d * (0.016 * (k - 1))
         ring = [c + (u * 0.031 * math.cos(t) + w * 0.026 * math.sin(t)) for t in np.linspace(0, 2 * math.pi, 13)[:-1]]
@@ -398,7 +398,7 @@ GATE = {"shaftwood": lambda c: _lum(c) < 0.72,
 
 SWATCHES = {
     "wood": dict(sheet=SHEET, box=(60, 790, 100, 830), metres=0.3),
-    "shaftwood": dict(sheet=SHEET, box=(1057, 888, 1065, 904), metres=0.05),
+    "shaftwood": dict(sheet=SHEET, box=(1046, 892, 1050, 900), metres=0.03),
     "iron": dict(sheet=SHEET, box=(1150, 860, 1165, 900), metres=0.1),
     "cloth": dict(sheet=SHEET, box=(430, 800, 470, 830), metres=0.25),
     "sack": dict(sheet=SHEET, box=(650, 790, 690, 830), metres=0.25),

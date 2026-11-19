@@ -524,7 +524,13 @@ class Swatches:
         for cls, s in spec.items():
             img = sheet(s["sheet"])
             x0, y0, x1, y1 = s["box"]
-            self.sw[cls] = tex.Swatch(img[y0:y1, x0:x1], s["metres"], cls, rotate=s.get("rotate", False))
+            patch = img[y0:y1, x0:x1]
+            if s.get("tile_v") and patch.shape[1] > patch.shape[0]:
+                # a strip with the grain along its length: mirror-tile it across the grain into a square tile
+                reps = int(np.ceil(patch.shape[1] / patch.shape[0]))
+                rows = [patch if k % 2 == 0 else patch[::-1] for k in range(reps)]
+                patch = np.concatenate(rows, 0)[:patch.shape[1]]
+            self.sw[cls] = tex.Swatch(patch, s["metres"], cls, rotate=s.get("rotate", False))
 
     def get(self, cls):
         return self.sw.get(cls) or next(iter(self.sw.values()))
@@ -594,8 +600,10 @@ def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.
             if mc in STRICT_FACING_CLASSES:
                 wk = np.where(fk >= 0.5, wk, 0.0)          # |n.v| >= 0.5 also on steep faces (no stretched smear)
             c[k], w[k] = ck, wk
-            c2, w2, _ = tex.project_painting(Pp[k], Np[k], v.cam, crop, zb, W_, H_, accept=accm, min_facing=0.12,
-                                             max_mag=1e9)
+            c2, w2, f2 = tex.project_painting(Pp[k], Np[k], v.cam, crop, zb, W_, H_, accept=accm, min_facing=0.12,
+                                              max_mag=1e9)
+            if mc in STRICT_FACING_CLASSES:
+                w2 = np.where(f2 >= 0.5, w2, 0.0)          # no stretched colours in the tone statistics either
             shade2 = tex.lambert_shade(Np[k], v.light, PAINT_K) ** DELIGHT
             lenient[k] += (c2 / shade2[:, None]) * (w2 > 0)[:, None]
             lw[k] += (w2 > 0)

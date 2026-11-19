@@ -132,8 +132,8 @@ def claws():
             pts = [m(p) for p in chain]
             dirv = pts[2] - pts[1]
             dirv = dirv / np.linalg.norm(dirv) + np.array([0, 0, -0.35])
-            ln = {"toe2": 0.20, "toe3": 0.23, "toe4": 0.19}[toe]
-            out.append(curved_cone(pts[2] + dirv * 0.01, dirv, ln, 0.060, bend_dir=(0, 0, -1), bend=0.42, sides=8,
+            ln = {"toe2": 0.24, "toe3": 0.27, "toe4": 0.23}[toe]
+            out.append(curved_cone(pts[2] + dirv * 0.01, dirv, ln, 0.068, bend_dir=(0, 0, -1), bend=0.45, sides=8,
                                    rings=7, flat=0.62, region="claws", bone=f"{toe}b_{side}", embed=0.05, keel=0.25))
         hx = [m(p) for p in B.HALLUX_L]
         d = hx[1] - hx[0]
@@ -235,7 +235,7 @@ def mouth_curtain():
     far side's lining through the open gape (never the background); skinned head (top) / jaw (bottom)."""
     x0, y0, x1, y1 = (0.25, 0.0, 0.5, 0.25)
     verts, faces, uvs, wjaw = [], [], [], []
-    ys = np.linspace(-4.40, -3.36, 14)
+    ys = np.linspace(-4.30, -3.36, 13)
     rows = 4
     for sx in (1, -1):
         base = len(verts)
@@ -244,7 +244,7 @@ def mouth_curtain():
             zl = float(B.lip_z(y))
             for r in range(rows):
                 t = r / (rows - 1)                       # 0 upper gum -> 1 lower gum
-                x = sx * ((1 - t) * (float(wu) - 0.085) + t * (float(wl) - 0.085) - 0.012 * math.sin(math.pi * t))
+                x = sx * ((1 - t) * (float(wu) - 0.10) + t * (float(wl) - 0.10) - 0.012 * math.sin(math.pi * t))
                 z = zl + 0.006 - 0.012 * t
                 verts.append([x, y, z])
                 wjaw.append(t)

@@ -63,9 +63,9 @@ J = {
 }
 # toe chains (left): [knuckle0 (MTP), knuckle1, claw base], claw direction
 TOES_L = {
-    "toe2": [V(0.57, -0.20, 0.15), V(0.43, -0.45, 0.11), V(0.33, -0.63, 0.085)],
-    "toe3": [V(0.69, -0.22, 0.16), V(0.71, -0.48, 0.12), V(0.72, -0.71, 0.09)],
-    "toe4": [V(0.81, -0.18, 0.15), V(0.98, -0.39, 0.11), V(1.10, -0.54, 0.085)],
+    "toe2": [V(0.58, -0.22, 0.15), V(0.50, -0.47, 0.115), V(0.44, -0.66, 0.09)],
+    "toe3": [V(0.69, -0.24, 0.16), V(0.70, -0.51, 0.12), V(0.71, -0.74, 0.095)],
+    "toe4": [V(0.80, -0.20, 0.15), V(0.89, -0.44, 0.115), V(0.96, -0.62, 0.09)],
 }
 HALLUX_L = [V(0.55, 0.12, 0.42), V(0.52, 0.17, 0.28)]
 FINGERS_L = {   # [base (knuckle), mid, claw base]
@@ -137,7 +137,7 @@ def first_run_bottom(u0, u1):
 
 # belly/throat line (full-image side coords): measured where visible, interpolated behind limbs
 BELLY_CTRL = [(150, 262.0), (176, 264.0), (200, 272.0), (218, 280.0), (232, 296.0), (250, 316.0),
-              (275, 323.0), (300, 325.0), (330, 329.0), (360, 331.0), (390, 330.0), (420, 324.0),
+              (275, 323.0), (300, 326.0), (330, 331.0), (360, 334.0), (390, 334.0), (420, 327.0),
               (450, 315.0), (480, 305.0), (505, 297.0), (525, 290.0), (545, 285.0)]
 TRUNK_U0, TRUNK_U1 = 150, 914
 
@@ -415,13 +415,16 @@ def leg_parts(side):
     P.append(oell(knee + (ankle - knee) * 0.5, [1, 0, 0], 0.235, 0.20, 0.32, k=0.08, name="shin_w", bone=sh))
     # ankle + metatarsus (broad: three metatarsals side by side; front half-width 0.23)
     P.append(oell(ankle + m([0, 0.05, 0]), [1, 0, 0], 0.245, 0.20, 0.17, k=0.06, name="ankle", bone=ft))
-    P.append(oell((ankle + ball) * 0.5, ball - ankle, 0.40, 0.255, 0.16, up=(0, 1, 0), k=0.07, name="metatarsus",
+    P.append(oell((ankle + ball) * 0.5, ball - ankle, 0.40, 0.255, 0.19, up=(0, 1, 0), k=0.07, name="metatarsus",
                   bone=ft))
-    P.append(sdf.round_cone(ankle, ball, 0.17, 0.14, k=0.06, name="metatarsus_core", bone=ft))
+    P.append(sdf.round_cone(ankle, ball, 0.18, 0.16, k=0.06, name="metatarsus_core", bone=ft))
+    # scaled ankle bulge at the back (heel) and the ball pad under the toes' root
+    P.append(oell(ankle + m([0, 0.10, -0.02]), [0, 1, 0], 0.14, 0.20, 0.15, k=0.05, name="heel", bone=ft))
+    P.append(oell(ball + m([0, -0.06, -0.08]), [0, 1, 0], 0.18, 0.26, 0.08, k=0.05, name="ballpad", bone=ft))
     # toes (II, III, IV): two phalanx segments + pads, claws are separate meshes
     for toe, chain in TOES_L.items():
         pts = [m(p) for p in chain]
-        rr = {"toe2": (0.10, 0.085, 0.07), "toe3": (0.11, 0.09, 0.075), "toe4": (0.10, 0.08, 0.065)}[toe]
+        rr = {"toe2": (0.105, 0.09, 0.075), "toe3": (0.115, 0.095, 0.08), "toe4": (0.105, 0.088, 0.072)}[toe]
         bones = [f"{toe}a_{side}", f"{toe}b_{side}"]
         P.append(sdf.round_cone(ball + (pts[0] - ball) * 0.2, pts[0], 0.12, rr[0], k=0.05, name=toe, bone=ft))
         P.append(sdf.round_cone(pts[0], pts[1], rr[0], rr[1], k=0.035, name=toe, bone=bones[0]))
@@ -537,6 +540,9 @@ def build_parts():
         add += arm_parts(side)
     add += dorsal_knobs()
     add += scar_ridge()
+    # ventral pubic keel between the thighs (front view: pale triangle to z~0.6; side view: behind the near leg)
+    add.append(sdf.round_cone([0, -0.12, 1.50], [0, -0.04, 0.78], 0.24, 0.05, k=0.14, name="keel", bone="pelvis"))
+    add.append(oell([0, -0.10, 1.32], [0, 0, 1], 0.32, 0.14, 0.20, k=0.10, name="keel_web", bone="pelvis"))
     sub = hs + [mouth_cut()]
     return add, sub
 

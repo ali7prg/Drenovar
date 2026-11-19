@@ -214,7 +214,7 @@ def main():
     # --- views
     left = R.side_view(corrected=True, colour=True)
     right = mirror_view_ortho(left, "right_mirror", side_scar_free())
-    front = R.front_view(corrected=True)
+    front = R.front_view(corrected=False)
     # rear camera (silhouette-refined), solved against the current body occupancy
     surf = V[::2]
     rear, rinfo = CM.rear_cam(occ_points=surf, refine=True, log=C.cache("rear_cam.json"))
@@ -305,7 +305,8 @@ def main():
     # mouth interior (inside the closed head volume): gums/palate flesh where the close-up does not see
     zl = np.interp(P[:, 1], B.head_profile()["Y"], B.head_profile()["zlip"])
     wu, _ = B.head_widths(P[:, 1])
-    inner_mouth = (P[:, 1] < -3.30) & (P[:, 1] > -4.42) & (np.abs(P[:, 2] - zl) < 0.16) & (np.abs(P[:, 0]) < wu - 0.05)
+    headvol = B.head_part().fn(P - N * 0.004)
+    inner_mouth = (P[:, 1] < -3.30) & (np.abs(P[:, 2] - zl) < 0.17) & (headvol < -0.012)
     flesh = np.array([0.45, 0.22, 0.20])
     base[inner_mouth & unseen] = flesh * (0.8 + 0.2 * cvar[inner_mouth & unseen])[:, None]
     # scale detail on the albedo: crevices darker, scale crowns lighter, per-scale value jitter

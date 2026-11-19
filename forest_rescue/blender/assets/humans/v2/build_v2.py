@@ -144,6 +144,24 @@ def skirt_weights_fn(z_top, cx, cy, hem_lo, thigh=0.5):
     return fn
 
 
+def cloak_weights_fn(z_top, hem_lo):
+    def fn(V):
+        W = []
+        for p in V.reshape(-1, 3):
+            v = np.clip((z_top - p[2]) / max(z_top - hem_lo, 1e-3), 0, 1)
+            side = "Left" if p[0] > 0 else "Right"
+            d = {"UpperChest": 1 - HT.smoothstep(0.0, 0.25, v)}
+            if p[1] > 0.0:
+                d["Cloak1"] = HT.smoothstep(0.0, 0.25, v) * (1 - HT.smoothstep(0.4, 0.8, v))
+                d["Cloak2"] = HT.smoothstep(0.4, 0.8, v)
+            else:
+                d[f"{side}Shoulder"] = HT.smoothstep(0.0, 0.25, v) * 0.5
+                d["Chest"] = HT.smoothstep(0.0, 0.25, v) * 0.5
+            W.append({k: float(x) for k, x in d.items() if x > 1e-3})
+        return W
+    return fn
+
+
 def arm_cap_fn(J):
     """Max half-extent of a garment row so the fit never grabs the painted arms/hands."""
     L = C["L"]
@@ -165,23 +183,46 @@ def garments(R, J, fld, prof, sup):
     cy = 0.012
     T = HD.BodyTable(sup, 0.0, cy, 0.05, C["L"]["neck"] + 0.02, dz=0.01)
     sheets = []
+    T_full = None
     for g in C.get("garments", []):
-        if g["kind"] == "skirt":
+        if g["kind"] in ("skirt", "cloak"):
+            if g["kind"] == "cloak":
+                if T_full is None:
+                    T_full = HD.BodyTable(fld, 0.0, cy, 0.05, C["L"]["neck"] + 0.04, dz=0.01)
+                TT = T_full
+            else:
+                TT = T
             hem = g.get("hem")
             if hem is None:
                 hz_ = g.get("hem_z", 0.4)
                 hem = (hz_, hz_, hz_)
+            hp = g.get("hem_pts")
 
-            def hem_fn(p, hem=hem):
-                ap = abs(p)
+            def hem_fn(p, hem=hem, hp=hp):
+                ap = abs(math.atan2(math.sin(p), math.cos(p)))
+                if hp:
+                    return float(np.interp(math.degrees(ap), [x for x, _ in hp], [z for _, z in hp]))
                 return float(np.interp(ap, [0, math.pi / 2, math.pi], hem))
-            ph0, ph1 = (math.radians(a) for a in g["wrap"])
-            sh = HD.drape_skirt(g["name"], T, R, g["z_top"], hem_fn, ph0, ph1, offset=g.get("offset", 0.012),
+            if g.get("closed"):
+                ph0, ph1 = -math.pi, math.pi
+            else:
+                ph0, ph1 = (math.radians(a_) for a_ in g["wrap"])
+            fit_max = g.get("fit_max")
+            capf = arm_cap_fn(J)
+            if fit_max is not None:
+                capf = (lambda z, sg, fm=fit_max, cf=capf: min(fm, cf(z, sg)))
+            if g["kind"] == "cloak":
+                capf = (lambda z, sg: 9.0)
+            hem_lo = min(hem_fn(pp) for pp in np.linspace(ph0, ph1, 30))
+            wfn = skirt_weights_fn(g["z_top"], TT.cx, TT.cy, hem_lo, thigh=g.get("thigh", 0.5))
+            if g["kind"] == "cloak":
+                wfn = cloak_weights_fn(g["z_top"], hem_lo)
+            sh = HD.drape_skirt(g["name"], TT, R, g["z_top"], hem_fn, ph0, ph1, offset=g.get("offset", 0.012),
                                 flare=g.get("flare", 0.03), fit=g.get("fit"), nu=g.get("nu", 34), nv=g.get("nv", 18),
                                 material=g.get("material", "cloth"), thickness=g.get("thickness", 0.005),
-                                weights_fn=skirt_weights_fn(g["z_top"], T.cx, T.cy, min(hem)),
-                                ragged=g.get("ragged", 0.004), seed=len(sheets), fit_rows=g.get("fit_rows"),
-                                closed=g.get("closed", False), cap_fn=arm_cap_fn(J))
+                                weights_fn=wfn, ragged=g.get("ragged", 0.004), seed=len(sheets),
+                                fit_rows=g.get("fit_rows"), closed=bool(g.get("closed")), cap_fn=capf,
+                                slope=g.get("slope", 0.12))
             sheets.append(sh)
         elif g["kind"] == "bib":
             ht, hb = g["half_angle"]
@@ -241,6 +282,90 @@ def garments(R, J, fld, prof, sup):
             path = np.concatenate([pts[0], pts[1][::-1][1:]], 0)
             V, Fc = HD.tube_mesh(path, 0.007, sides=6, cap=False)
             meshes.append((a["name"], V, Fc, [{"UpperChest": 0.6, "Neck": 0.4}] * len(V), a.get("material", "cloth")))
+        elif k == "forearm_band":
+            S = "Left" if a["side"] == "l" else "Right"
+            A_, B_ = J[f"{S}LowerArm"], J[f"{S}Hand"]
+            c = A_ + (B_ - A_) * a.get("t", 0.6)
+            sh = HD.band_ring(a["name"], fld, c, B_ - A_, (0, -1, 0), rad_guess=0.06, width=a["width"], offset=0.004,
+                              thickness=0.005, material=a.get("material", "gear"), weights={f"{S}LowerArm": 1.0})
+            sheets.append(sh)
+        elif k == "lump":
+            V, Fc = HD.box_mesh(np.array(a["at"], float), np.array(a["size"]) * 0.5, bevel=0.9, nseg=2)
+            meshes.append((a["name"], V, Fc, [{a.get("bone", "UpperChest"): 1.0}] * len(V), a.get("material", "cloth")))
+        elif k == "coil":
+            at = np.array(a["at"], float)
+            pts = []
+            loops = a.get("loops", 4)
+            for i in range(loops):
+                th_ = np.linspace(0, 2 * math.pi, 14)
+                rx, rz = a.get("rx", 0.05) * (1 + 0.08 * i), a.get("rz", 0.17) * (1 - 0.05 * i)
+                loop = np.stack([at[0] + rx * np.sin(th_) + 0.006 * i, at[1] - 0.006 * i + 0.01 * np.cos(th_) * 0,
+                                 at[2] - rz * (1 - np.cos(th_))], 1)
+                V, Fc = HD.tube_mesh(loop, a.get("r", 0.011), sides=6, cap=False)
+                meshes.append((f"{a['name']}{i}", V, Fc, [{"Bag": 1.0}] * len(V), a.get("material", "gear")))
+        elif k == "hammer":
+            at = np.array(a["at"], float)
+            handle = np.array([at, at + np.array([0.0, 0.0, -a.get("len", 0.26)])])
+            V, Fc = HD.tube_mesh(handle, 0.011, sides=6)
+            meshes.append((a["name"] + "_handle", V, Fc, [{"Bag": 1.0}] * len(V), "gear"))
+            V, Fc = HD.box_mesh(handle[1] + np.array([0, 0, -0.015]), (0.045, 0.02, 0.02), bevel=0.5, nseg=1)
+            meshes.append((a["name"] + "_head", V, Fc, [{"Bag": 1.0}] * len(V), "gear"))
+        elif k == "satchel":
+            at = np.array(a["at"], float)
+            V, Fc = HD.box_mesh(at, np.array(a["size"]) * 0.5, bevel=0.45, nseg=1)
+            meshes.append((a["name"], V, Fc, [{"Bag": 1.0}] * len(V), a.get("material", "gear")))
+            # strap from the opposite shoulder across the chest/back to the bag
+            sh_side = -np.sign(at[0])
+            top_z = C["L"]["shoulder_l"][1] + 0.05
+            path = []
+            for f in np.linspace(0, 1, 16):
+                for face_sgn in (-1,):
+                    pass
+                z = top_z + (at[2] + a["size"][2] * 0.4 - top_z) * f
+                x = sh_side * 0.10 + (at[0] - sh_side * 0.10) * f
+                rr = float(T.hull(np.array([min(max(z, T.zs[0]), T.zs[-1])]), np.array([math.atan2(x, -0.3)]))[0])
+                phi = math.atan2(x, -math.sqrt(max(rr * rr - x * x, 1e-6)))
+                rr = float(T.hull(np.array([min(max(z, T.zs[0]), T.zs[-1])]), np.array([phi]))[0]) + 0.008
+                path.append([T.cx + rr * math.sin(phi), T.cy - rr * math.cos(phi), z])
+            path = np.array(path)
+            nrm = path - np.array([T.cx, T.cy, 0]) * np.array([1, 1, 0])
+            nrm[:, 2] = 0
+            nrm /= np.maximum(np.linalg.norm(nrm, axis=1, keepdims=True), 1e-6)
+            sheets.append(HD.strip(a["name"] + "_strap", path, nrm, 0.035, material=a.get("material", "gear"),
+                                   weights=[{"Chest": 0.6, "UpperChest": 0.4}] * (2 * len(path))))
+        elif k == "tails":
+            at = np.array(a["at"], float)
+            for i, dx in enumerate(a.get("dx", (0.0, 0.03))):
+                zs = np.linspace(at[2], at[2] - a["len"], 9)
+                pts = []
+                for zz in zs:
+                    rr = float(T.hull(np.array([max(zz, T.zs[0])]), np.array([math.atan2(at[0] + dx, -0.2)]))[0]) + 0.02
+                    phi = math.atan2(at[0] + dx, -0.2)
+                    pts.append([T.cx + rr * math.sin(phi), T.cy - rr * math.cos(phi), zz])
+                pts = np.array(pts)
+                nrm = np.tile(np.array([0, -1.0, 0]), (len(pts), 1))
+                wts = [{"Hips": 1 - min(1, j / 6) * 0.6, "SkirtFront1": min(1, j / 6) * 0.6} for j in range(len(pts)) for _ in range(2)]
+                sheets.append(HD.strip(f"{a['name']}{i}", pts, nrm, a.get("width", 0.05), material=a.get("material", "cloth"),
+                                       weights=wts))
+        elif k in ("scabbard", "quiver"):
+            top, bot = np.array(a["top"], float), np.array(a["bottom"], float)
+            r = 0.022 if k == "scabbard" else 0.042
+            if a["name"] == "knife":
+                r = 0.014
+            V, Fc = HD.tube_mesh(np.array([top, 0.5 * (top + bot), bot]), [r * 1.05, r, r * 0.8], sides=8)
+            meshes.append((a["name"], V, Fc, [{"Hips": 1.0}] * len(V), a.get("material", "gear")))
+            if k == "scabbard" and a["name"] != "knife":
+                ax = (top - bot) / np.linalg.norm(top - bot)
+                hilt = np.array([top, top + ax * 0.16])
+                V, Fc = HD.tube_mesh(hilt, 0.012, sides=6)
+                meshes.append((a["name"] + "_hilt", V, Fc, [{"Hips": 1.0}] * len(V), "gear"))
+                V, Fc = HD.box_mesh(top + ax * 0.01, (0.06, 0.012, 0.012), bevel=0.5, nseg=1)
+                meshes.append((a["name"] + "_guard", V, Fc, [{"Hips": 1.0}] * len(V), "gear"))
+            if k == "quiver":
+                for i in range(5):
+                    off = np.array([0.012 * math.cos(i * 1.3), 0.012 * math.sin(i * 1.3), 0.0])
+                    V, Fc = HD.tube_mesh(np.array([top + off, top + off + np.array([0.01, -0.01, 0.12])]), 0.006, sides=5)
+                    meshes.append((f"arrow{i}", V, Fc, [{"Hips": 1.0}] * len(V), "gear"))
         elif k == "pouch":
             at = np.array(a["at"], float)
             V, Fc = HD.box_mesh(at, np.array(a["size"]) * 0.5, bevel=0.55, nseg=1)
@@ -290,6 +415,27 @@ def build_objects(R, J):
         HRG.groups_from_dicts(hair, [{"Head": 1 - w, "Neck": w} if w > 0.01 else {"Head": 1.0} for w in wn])
         objs.append((hair, "hair", "hair"))
         log("hair tris", core.tri_count(hair))
+    for g in C.get("garments", []):
+        if g["kind"] in ("hood", "cap", "helmet"):
+            o_, S_ = HB.head_frame(C, J)
+            lo = o_ + np.array([-0.18, -0.19, -0.30])
+            hi = o_ + np.array([0.18, 0.21, 0.26])
+            sf = F.Field(lo, hi, 0.0028)
+            sf.d = HB.head_shell(C, J, R, fld, sf, g["kind"], g)
+            if g.get("hull", True):
+                sf.intersect_xz(R, k=0.012, dilate=0.003)
+            v_, f_ = sf.mesh()
+            ob = HBL.obj_from(f"{AID}_{g['name']}", v_, f_)
+            HBL.decimate(ob, g.get("tris", 900), stage=20000)
+            HBL.smooth_shade(ob)
+            vv_ = np.array([v.co[:] for v in ob.data.vertices])
+            if g["kind"] == "hood":
+                wz = np.clip((J["Head"][2] - vv_[:, 2]) / 0.12, 0, 1)
+                HRG.groups_from_dicts(ob, [{"Head": 1 - w * 0.7, "Hood": w * 0.3, "Neck": w * 0.4} for w in wz])
+            else:
+                HRG.groups_from_dicts(ob, [{"Head": 1.0}] * len(vv_))
+            objs.append((ob, g.get("material", "cloth"), "garment"))
+            log(g["name"], core.tri_count(ob), "tris")
     hands = hands_geometry(J)
     hand_bones = {}
     for S_, (acc, bones) in hands.items():
@@ -334,7 +480,7 @@ def build_objects(R, J):
         if g["kind"] == "cloak":
             ginfo["cloak_hem"] = g.get("hem_back", 0.9)
     for a in C.get("acc", []):
-        if a["kind"] in ("pouch", "satchel"):
+        if a["kind"] == "satchel" or (a["kind"] in ("pouch", "coil", "hammer") and "bag" not in ginfo):
             ginfo["bag"] = a["at"]
     return dict(field=fld, parts=parts, wparts=wparts, prof=prof, objs=objs, hand_bones=hand_bones, T=T, ginfo=ginfo)
 

@@ -605,3 +605,40 @@ def sleeve_cuff_parts(C, J, R):
         tor = fsdf.torus(c, a * 0.95, 0.020, axis=ax)
         out.append(F.Part(tor.fn, tor.lo, tor.hi, bone=f"{S}UpperArm", label="body", k=0.02, name=f"cuff_{s}"))
     return out
+
+
+def head_shell(C, J, R, body_field, fld, kind, spec=None):
+    """Hood / cap / helmet as real shells around the head (body field offset, painted outline via
+    the soft visual hull, face opening cut)."""
+    spec = spec or {}
+    o, S = head_frame(C, J)
+    P = fld.points(np.zeros(3, int), fld.n)
+    db = body_field.sample(P.reshape(-1, 3)).reshape(P.shape[:3])
+    q = (P - o) / S
+    x, y, z = q[..., 0], q[..., 1], q[..., 2]
+    aphi = np.abs(np.arctan2(x, -y))
+    if kind == "hood":
+        t = spec.get("thick", 0.045)
+        d = db - t
+        opening = (aphi < spec.get("open_phi", 1.12)) & (z < spec.get("open_top", 0.075)) & (z > spec.get("open_bot", -0.16))
+        d = np.where(opening & (y < 0.03), np.maximum(d, (0.004 + 0.0 * z)), d)
+        d = np.maximum(d, (spec.get("bottom", -0.24) - z) * S[2])
+    elif kind == "cap":
+        t = spec.get("thick", 0.030)
+        tilt = z - 0.035 + 0.02 * (-y / 0.1)            # lower at the front (peak), higher at the back
+        d = db - t * np.clip((tilt + 0.02) / 0.04, 0.25, 1.0)
+        d = np.maximum(d, -tilt * S[2])
+    elif kind == "helmet":
+        t = spec.get("thick", 0.014)
+        d = db - t
+        d = np.maximum(d, (0.028 - z) * S[2])
+        apex = o + np.array([0.0, 0.02, 0.21]) * S
+        base = o + np.array([0.0, 0.012, 0.09]) * S
+        from frlib import sdf as fsdf
+        cone = fsdf.round_cone(base, apex, 0.072 * S[0], 0.008).fn(P)
+        d = smin_np(d, np.maximum(cone, (0.05 - z) * S[2]), 0.02)
+        nasal = fsdf.box(o + np.array([0.0, -0.100, -0.010]) * S, np.array([0.008, 0.006, 0.040]) * S).fn(P)
+        d = np.minimum(d, nasal)
+    else:
+        raise ValueError(kind)
+    return d.astype(np.float32)

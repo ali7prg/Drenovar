@@ -434,3 +434,169 @@ def smax_np(a, b, k):
 def smin_np(a, b, k):
     h = np.maximum(k - np.abs(a - b), 0.0) / k
     return np.minimum(a, b) - h * h * k * 0.25
+
+
+# --------------------------------------------------------------------------- v2 hair: clump volume
+
+def _fib_sphere(n):
+    i = np.arange(n) + 0.5
+    phi = np.arccos(1 - 2 * i / n)
+    th = math.pi * (1 + 5 ** 0.5) * i
+    return np.stack([np.cos(th) * np.sin(phi), np.sin(th) * np.sin(phi), np.cos(phi)], 1)
+
+
+def _surface_samples(C, J, body_field, n=1400):
+    """Head surface points + normals by ray casting from the head centre."""
+    o, S = head_frame(C, J)
+    hc = o + np.array([0.0, 0.02, -0.01]) * S
+    dirs = _fib_sphere(n)
+    rs = np.arange(0.01, 0.20, 0.0015)
+    P = hc[None, None, :] + rs[None, :, None] * dirs[:, None, :]
+    d = body_field.sample(P.reshape(-1, 3)).reshape(len(dirs), len(rs))
+    pts, nrm = [], []
+    eps = 0.002
+    for i in range(len(dirs)):
+        out = np.nonzero(d[i] > 0)[0]
+        if len(out) == 0:
+            continue
+        k = out[0]
+        if k == 0:
+            continue
+        p = P[i, k]
+        g = np.array([body_field.sample((p + np.eye(3)[a] * eps)[None])[0] - body_field.sample((p - np.eye(3)[a] * eps)[None])[0]
+                      for a in range(3)])
+        nn = g / max(np.linalg.norm(g), 1e-9)
+        pts.append(p)
+        nrm.append(nn)
+    return np.array(pts), np.array(nrm)
+
+
+HAIR_STYLE = {   # base thickness (front/back faces), max thickness, clump radius, elongation
+    "curly": (0.016, 0.050, 0.016, 1.15),
+    "wavy": (0.012, 0.040, 0.015, 1.5),
+    "tousled": (0.014, 0.045, 0.015, 1.3),
+    "short_grey": (0.008, 0.030, 0.012, 1.2),
+    "short_dark": (0.012, 0.040, 0.014, 1.3),
+    "bun": (0.007, 0.026, 0.011, 1.4),
+    "long_under_hood": (0.006, 0.030, 0.012, 1.8),
+    "helmet": (0.004, 0.012, 0.010, 1.6),
+}
+
+
+def hair_clump_field(C, J, R, body_field, fld, seed=5):
+    """Hair = union of wavy clumps rooted on the scalp, sized so the union fills the painted head
+    outline (front + back consensus) where the silhouette shows hair, template volume elsewhere;
+    beard = clumps on the jaw/chin below the beard line.  Returns the signed distance on fld."""
+    from frlib import sdf as fsdf
+    rng = np.random.default_rng(seed)
+    o, S = head_frame(C, J)
+    B = C["build"]
+    style = B.get("hair", "short_dark")
+    beard = B.get("beard")
+    base_t, max_t, rc, elong = HAIR_STYLE.get(style, HAIR_STYLE["short_dark"])
+    scale_t = B.get("hair_scale", 1.0)
+    pts, nrm = _surface_samples(C, J, body_field)
+    q = (pts - o) / S
+    phi = np.arctan2(q[:, 0], -q[:, 1])
+    aphi = np.abs(phi)
+    key = "bun" if style == "bun" else ("helmet" if style == "helmet" else "default")
+    hp, hv = HAIRLINES[key]
+    hl = np.interp(aphi, hp, hv)
+    if beard and beard != "stubble":
+        # side-burns run down to the jaw for bearded men
+        hl = np.where((aphi > 1.2) & (aphi < 1.75), np.minimum(hl, -0.035), hl)
+    scalp = q[:, 2] > hl
+    # silhouette thickness: distance from the surface to the painted outline along the in-plane normal
+    sd = R.sdf2(pts[:, 0], pts[:, 2])
+    f_in = np.linalg.norm(nrm[:, [0, 2]], axis=1)
+    t_sil = np.clip(-sd / np.maximum(f_in, 0.35), 0.0, max_t * scale_t)
+    t = (base_t * scale_t) * (1 - f_in ** 2) + t_sil * f_in ** 2
+    # thin toward the hairline (no visor), fuller above
+    above = q[:, 2] - hl
+    t = t * (0.25 + 0.75 * np.clip(above / 0.04, 0, 1))
+    prims = []
+    for p, n, tt, sc in zip(pts, nrm, t, scalp):
+        if not sc or tt < 0.002:
+            continue
+        r = rc * (0.75 + 0.5 * rng.random()) + 0.35 * tt
+        c = p + n * (tt - r * 0.85) + rng.normal(0, 0.002, 3)
+        # flow: down and back along the surface
+        flow = np.array([0.0, 0.45, -1.0])
+        flow = flow - (flow @ n) * n
+        fl = flow / max(np.linalg.norm(flow), 1e-9)
+        a = c - fl * r * (elong - 1.0) * 0.8
+        b = c + fl * r * (elong - 1.0) * 0.8
+        prims.append(fsdf.round_cone(a, b, r, r * 0.8))
+    # beard clumps
+    if beard and beard != "stubble":
+        base = {"full": 0.008, "full_grey": 0.007, "full_red": 0.009}.get(beard, 0.006)
+        chin = {"full": 0.026, "full_grey": 0.022, "full_red": 0.024}.get(beard, 0.015)
+        top = np.interp(aphi, [0, 0.30, 0.55, 1.0, 1.45, 1.75], [-0.050, -0.052, -0.038, -0.024, -0.016, -0.02])
+        bz = (q[:, 2] < top) & (aphi < 1.72) & (q[:, 2] > -0.17)
+        lips = np.sqrt((q[:, 0] / 0.026) ** 2 + ((q[:, 2] + 0.076) / 0.012) ** 2) < 1.0
+        bz &= ~(lips & (aphi < 0.8))
+        tb = base + chin * np.exp(-((q[:, 2] + 0.125) / 0.045) ** 2) * np.exp(-(q[:, 0] / 0.05) ** 2)
+        tb = np.maximum(tb, np.clip(-sd / np.maximum(f_in, 0.35), 0, chin) * (q[:, 2] < -0.09))
+        tb *= (0.3 + 0.7 * np.clip((top - q[:, 2]) / 0.02, 0, 1))
+        for p, n, tt, ok in zip(pts, nrm, tb, bz):
+            if not ok:
+                continue
+            r = 0.009 + 0.4 * tt
+            c = p + n * (tt - r * 0.8) + rng.normal(0, 0.0015, 3)
+            fl = np.array([0.0, -0.2, -1.0])
+            fl = fl - (fl @ n) * n
+            fl /= max(np.linalg.norm(fl), 1e-9)
+            prims.append(fsdf.round_cone(c - fl * r * 0.3, c + fl * r * 0.5, r, r * 0.85))
+    d = np.full(tuple(fld.n), 1.0, np.float32)
+    for pr in prims:
+        i0, i1 = fld.block(pr.lo - 0.01, pr.hi + 0.01)
+        if np.any(i1 <= i0):
+            continue
+        Pp = fld.points(i0, i1)
+        dp = pr.fn(Pp).astype(np.float32)
+        sl = tuple(slice(i0[j], i1[j]) for j in range(3))
+        d[sl] = smin_np(d[sl], dp, 0.008)
+    # never cover the face below the hairline (forehead, eyes, cheeks above the beard)
+    Pall = fld.points(np.zeros(3, int), fld.n)
+    qa = (Pall - o) / S
+    ph = np.abs(np.arctan2(qa[..., 0], -qa[..., 1]))
+    hlg = np.interp(ph, hp, hv)
+    face = (ph < 1.15) & (qa[..., 2] < hlg - 0.004) & (qa[..., 2] > -0.06)
+    if beard and beard != "stubble":
+        topb = np.interp(ph, [0, 0.30, 0.55, 1.0, 1.45, 1.75], [-0.050, -0.052, -0.038, -0.024, -0.016, -0.02])
+        face &= qa[..., 2] > topb
+    d = np.where(face & (qa[..., 1] < 0.02), np.maximum(d, 0.004), d)
+    return d.astype(np.float32), len(prims)
+
+
+def neck_trap_parts(C, J):
+    """Sloping trapezius from the neck to the shoulders + a fuller neck (painted outline)."""
+    L = C["L"]
+    fem = C["female"]
+    P = []
+    nz = L["neck"]
+    for S, s, sx in SIDES:
+        sh = J[f"{S}UpperArm"]
+        a = np.array([sx * 0.03, 0.03, nz + 0.035])
+        b = np.array([sh[0] * 0.80, 0.025, sh[2] + 0.025])
+        r = 0.040 if not fem else 0.033
+        P.append(F.rcone(a, b, r * (1.15 if not fem else 1.0), r, bone="UpperChest", label="body", k=0.035,
+                         name=f"trap_{s}"))
+    return P
+
+
+def sleeve_cuff_parts(C, J, R):
+    """Rolled sleeves: a soft torus above the elbow (painted cuff), owned by the upper arm."""
+    out = []
+    if C["build"].get("sleeve") != "rolled":
+        return out
+    for S, s, sx in SIDES:
+        sh, el = J[f"{S}UpperArm"], J[f"{S}LowerArm"]
+        ax = el - sh
+        c = sh + ax * 0.86
+        prof = R.profile((sh[0], sh[2]), (el[0], el[2]), n=12, max_half=0.09)
+        a = float(np.median(prof["a"][prof["ok"]])) if prof["ok"].any() else 0.05
+        from frlib import sdf as fsdf
+        tor = fsdf.torus(c, a * 0.95, 0.020, axis=ax)
+        out.append(F.Part(tor.fn, tor.lo, tor.hi, bone=f"{S}UpperArm", label="body", k=0.02, name=f"cuff_{s}"))
+    return out

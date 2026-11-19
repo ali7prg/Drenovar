@@ -56,7 +56,7 @@ def qa(name):
 def body_geometry(R, J):
     torso, prof = HB.torso_part(R, C, J)
     parts = [torso] + HB.arm_parts(R, C, J, prof) + HB.leg_parts(R, C, J) + HB.boot_parts(R, C, J) \
-        + HB.head_parts(C, J)
+        + HB.head_parts(C, J) + HB.neck_trap_parts(C, J) + HB.sleeve_cuff_parts(C, J, R)
     top = C["L"]["top"] + 0.03
     fld = F.Field((-0.62, -0.36, -0.01), (0.62, 0.30, top), VOX)
     for p in parts:
@@ -77,19 +77,18 @@ def body_geometry(R, J):
 
 
 def hair_geometry(R, J, body_field):
-    """Hair/beard = body field offset by a regional thickness, cut at the hairline/beard line,
-    clipped by the painted outline (visual hull)."""
+    """Hair + beard as a volume of wavy clumps fitted to the painted head outline (front/back
+    consensus), rounded by a soft hull intersection; textured later from portrait + views."""
     o, S = HB.head_frame(C, J)
-    lo = o + np.array([-0.15, -0.16, -0.19])
-    hi = o + np.array([0.15, 0.18, 0.22])
+    lo = o + np.array([-0.16, -0.17, -0.22])
+    hi = o + np.array([0.16, 0.19, 0.22])
     hi[2] = max(hi[2], C["L"]["top"] + 0.05)
-    fld = F.Field(lo, hi, VOX * 0.8)
-    P = fld.points(np.zeros(3, int), fld.n)
-    db = body_field.sample(P.reshape(-1, 3)).reshape(P.shape[:3])
-    fld.d = HB.hair_sdf(C, J, P, db).astype(np.float32)
-    fld.intersect_xz(R, k=0.018, dilate=0.004)
+    fld = F.Field(lo, hi, 0.0025)
+    d, n = HB.hair_clump_field(C, J, R, body_field, fld)
+    fld.d = d
+    fld.intersect_xz(R, k=0.012, dilate=0.003)
     v, f = fld.mesh()
-    log("hair MC", len(v), "verts", len(f), "tris")
+    log("hair clumps", n, "MC", len(v), "verts", len(f), "tris")
     return v, f
 
 
@@ -100,17 +99,20 @@ def hands_geometry(J):
         el, wr = J[f"{S}LowerArm"], J[f"{S}Hand"]
         fa = (wr - el) / np.linalg.norm(wr - el)
         medial = np.array([-sx, 0.0, 0.0])
-        d = fa + 0.10 * medial + np.array([0, -0.10, 0])
+        d = fa + 0.06 * medial + np.array([0, -0.04, 0])
         d /= np.linalg.norm(d)
-        palm_n = medial * 0.92 + np.array([0, -0.38, 0])
-        thumb_t = np.array([0, -1.0, 0.0])
-        acc, bones = HH.build_hand(S, wr - fa * 0.008, d, palm_n, thumb_t, scale=L["hand_scale"],
-                                   palm_len=0.088, female=C["female"])
+        palm_n = medial * 0.96 + np.array([0, 0.22, 0])          # palm toward the thigh, a bit back
+        thumb_t = np.array([0, -1.0, 0.0])                       # thumb forward
+        acc, bones = HH.build_hand(S, wr - fa * 0.010, d, palm_n, thumb_t, scale=L["hand_scale"],
+                                   palm_len=C["build"].get("palm_len", 0.095 if not C["female"] else 0.085),
+                                   female=C["female"])
         out[S] = (acc, bones)
     return out
 
 
-def skirt_weights_fn(z_top, cx, cy, hem_lo):
+def skirt_weights_fn(z_top, cx, cy, hem_lo, thigh=0.5):
+    """Skirt/apron/tabard weights: hips at the waist, skirt bones lower down, and a share of the
+    thigh under each panel so seated / walking legs carry the cloth instead of cutting through it."""
     def fn(V):
         W = []
         for p in V.reshape(-1, 3):
@@ -120,15 +122,23 @@ def skirt_weights_fn(z_top, cx, cy, hem_lo):
             wh = 1 - HT.smoothstep(0.0, 0.32, v)
             rest = 1 - wh
             lvl2 = HT.smoothstep(0.45, 0.8, v)
-            d = {"Hips": wh}
+            # thigh share: strongest on the panels in front of / behind the legs, toward the hem
+            facing = max(math.cos(phi), 0.0) if ap < math.pi / 2 else 0.6 * max(-math.cos(phi), 0.0)
+            wt = thigh * HT.smoothstep(0.1, 0.55, v) * facing ** 0.5
+            wl = wt * float(np.clip(0.5 + (p[0] - cx) / 0.10, 0, 1))
+            wr = wt - wl
+            rest2 = rest * (1 - wt)
+            d = {"Hips": wh * (1 - wt)}
             if ap < math.radians(55):
-                d["SkirtFront1"] = rest * (1 - lvl2)
-                d["SkirtFront2"] = rest * lvl2
+                d["SkirtFront1"] = rest2 * (1 - lvl2)
+                d["SkirtFront2"] = rest2 * lvl2
             elif ap > math.radians(125):
-                d["SkirtBack1"] = rest * (1 - lvl2)
-                d["SkirtBack2"] = rest * lvl2
+                d["SkirtBack1"] = rest2 * (1 - lvl2)
+                d["SkirtBack2"] = rest2 * lvl2
             else:
-                d["SkirtLeft" if phi > 0 else "SkirtRight"] = rest
+                d["SkirtLeft" if phi > 0 else "SkirtRight"] = rest2
+            d["LeftUpperLeg"] = wl
+            d["RightUpperLeg"] = wr
             W.append({k: float(x) for k, x in d.items() if x > 1e-3})
         return W
     return fn
@@ -272,7 +282,7 @@ def build_objects(R, J):
     hv, hf = hair_geometry(R, J, fld)
     if hv is not None and len(hf):
         hair = HBL.obj_from(f"{AID}_hairHQ", hv, hf)
-        HBL.decimate(hair, 1100, stage=20000)
+        HBL.decimate(hair, C["build"].get("hair_tris", 1500), stage=30000)
         HBL.smooth_shade(hair)
         hvv = np.array([v.co[:] for v in hair.data.vertices])
         hzj = J["Head"][2]
@@ -357,28 +367,36 @@ def make_materials(img):
     return mats
 
 
-def texture(lo0, R, J):
+def portrait_cam(J):
+    pc = C.get("portrait")
+    if not pc:
+        return None
+    import humans_refs as HR_
+    box = HR_.PANELS[AID]["inset"]
+    img = HR_.refs.crop(HR_.sheet(HR_.PANELS[AID]["sheet"]), box)
+    lm3 = HB.head_landmarks(C, J)
+    X3 = [lm3["eye_r"], lm3["eye_l"], lm3["mouth"]]
+    x2 = [(pc["eye_r"][0] - box[0], pc["eye_r"][1] - box[1]), (pc["eye_l"][0] - box[0], pc["eye_l"][1] - box[1]),
+          (pc["mouth"][0] - box[0], pc["mouth"][1] - box[1])]
+    for key in ("nose", "chin"):
+        if key in pc:
+            X3.append(lm3[key])
+            x2.append((pc[key][0] - box[0], pc[key][1] - box[1]))
+    cam, params, err = HT.solve_portrait(X3, x2, img, weight=5.0)
+    log("portrait solve", np.round(params, 3), "max px err", round(err, 2))
+    cam.lm2 = np.array(x2)
+    return dict(cam=cam, params=params.tolist(), err=err)
+
+
+def texture(lo0, R, J, pinfo0=None):
     verts, tris, uv, vn = core.mesh_arrays(lo0, evaluated=False)
     T = texproj.rasterize_uv(verts, tris, uv, TEX, vn)
     views = [R.front, R.back]
     data, col, ws, per = HT.project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2)
-    # portrait (civilians): scaled orthographic camera solved from landmarks
+    # portrait (civilians + captain): scaled orthographic camera solved from landmarks
     pinfo = None
-    pc = C.get("portrait")
-    if pc:
-        import humans_refs as HR
-        box = HR.PANELS[AID]["inset"]
-        img = HR.refs.crop(HR.sheet(HR.PANELS[AID]["sheet"]), box)
-        lm3 = HB.head_landmarks(C, J)
-        X3 = [lm3["eye_r"], lm3["eye_l"], lm3["mouth"]]
-        x2 = [(pc["eye_r"][0] - box[0], pc["eye_r"][1] - box[1]), (pc["eye_l"][0] - box[0], pc["eye_l"][1] - box[1]),
-              (pc["mouth"][0] - box[0], pc["mouth"][1] - box[1])]
-        for key in ("nose", "chin"):
-            if key in pc:
-                X3.append(lm3[key])
-                x2.append((pc[key][0] - box[0], pc[key][1] - box[1]))
-        cam, params, err = HT.solve_portrait(X3, x2, img, weight=5.0)
-        log("portrait solve", np.round(params, 3), "max px err", round(err, 2))
+    if pinfo0:
+        cam, err = pinfo0["cam"], pinfo0["err"]
         o, S = HB.head_frame(C, J)
         chin = C["L"]["chin"]
 
@@ -387,7 +405,7 @@ def texture(lo0, R, J):
             near = np.exp(-np.maximum(0, (q[:, 1] + 0.0)) / 0.06)
             return (P[:, 2] > chin - 0.035) * near
 
-        d2, col2, ws2, per2 = HT.project_views(T, verts, tris, [cam], lo=0.30, hi=0.6, erode=0,
+        d2, col2, ws2, per2 = HT.project_views(T, verts, tris, [cam], lo=0.40, hi=0.65, erode=0,
                                                region={"portrait": head_region})
         # tone-match the portrait to the full-body painting on texels both see
         both = (ws > 0.3) & (ws2 > 0.3)
@@ -396,13 +414,14 @@ def texture(lo0, R, J):
         else:
             gain = np.ones(3)
         log("portrait gain", np.round(gain, 3))
+        gain = np.sqrt(gain)          # half-way: keeps the portrait's own values, close to the body tone
         col2 = np.clip(col2 * gain, 0, 1)
-        wp = ws2 * 4.0
+        wp = ws2 * 10.0
         tot = ws + wp
         col = (col * ws[:, None] + col2 * wp[:, None]) / np.maximum(tot, 1e-9)[:, None]
         ws = tot
         per.update(per2)
-        pinfo = dict(cam=cam, params=params.tolist(), err=err)
+        pinfo = pinfo0
     mi = np.array([p.material_index for p in lo0.data.polygons])
     lt = np.empty(len(lo0.data.loop_triangles), np.int64) if False else None
     me = lo0.data
@@ -445,12 +464,20 @@ def qa_renders(lo0, R, J, mats, pinfo):
         comp = small[..., :3] * small[..., 3:4] + bgc * (1 - small[..., 3:4])
         mask = small[..., 3] > 0.5
         s = HBL.ssim_gray(comp, ref, mask)
+        import cv2 as _cv
+        lm2 = cam.lm2
+        hull = _cv.convexHull(lm2.astype(np.float32))[:, 0, :]
+        ctr = hull.mean(0)
+        hull = ctr + (hull - ctr) * 1.45
+        fm = np.zeros(ref.shape[:2], np.uint8)
+        _cv.fillPoly(fm, [np.round(hull).astype(np.int32)], 1)
+        s_face = HBL.ssim_gray(comp, ref, fm.astype(bool) & mask)
         big = cv2.resize(ref, (W * 2, H * 2), interpolation=cv2.INTER_CUBIC)
         compb = rgba[..., :3] * rgba[..., 3:4] + bgc * (1 - rgba[..., 3:4])
         sheet = np.concatenate([HBL._label((np.clip(big, 0, 1) * 255).astype(np.uint8), "portrait (sheet)"),
-                                HBL._label((np.clip(compb, 0, 1) * 255).astype(np.uint8), f"model, same framing  SSIM {s:.3f}")], 1)
+                                HBL._label((np.clip(compb, 0, 1) * 255).astype(np.uint8), f"model, same framing SSIM {s:.3f} face {s_face:.3f}")], 1)
         core.save_rgba(qa("portrait.png"), sheet / 255.0)
-        res["portrait"] = {"ssim": round(s, 4), "solve_err_px": round(pinfo["err"], 2)}
+        res["portrait"] = {"ssim": round(s, 4), "ssim_face": round(s_face, 4), "solve_err_px": round(pinfo["err"], 2)}
         log("portrait", res["portrait"])
     # 3/4 views and side
     zc = C["L"]["top"] * 0.5
@@ -514,9 +541,26 @@ def main():
     B = build_objects(R, J)
     lo0 = join_lod0(B["objs"])
     reg = HBL.face_attr_get(lo0, "region")
-    HBL.uv_layout(lo0, boost_faces=reg == 1, boost=2.6)
-    log("LOD0 tris", core.tri_count(lo0))
-    p_png, pinfo = texture(lo0, R, J)
+    HBL.uv_layout(lo0, boost_faces=reg == 1, boost=2.0)
+    pinfo0 = portrait_cam(J)
+    # dedicated face island: front-facing head polygons projected with the portrait camera (or the
+    # front view when the sheet has no portrait)
+    me = lo0.data
+    cen = np.array([p.center[:] for p in me.polygons])
+    nrm = np.array([p.normal[:] for p in me.polygons])
+    o, S = HB.head_frame(C, J)
+    if pinfo0:
+        cam = pinfo0["cam"]
+        facing = nrm @ (-cam.d)
+        proj = lambda P: cam.project(P)[:2]  # noqa: E731
+    else:
+        facing = -nrm[:, 1]
+        proj = lambda P: (P[:, 0], -P[:, 2])  # noqa: E731
+    face_sel = (reg == 1) & (facing > 0.15) & (cen[:, 1] < o[1] + 0.02) & (cen[:, 2] > C["L"]["chin"] - 0.05) \
+        & (np.abs(cen[:, 0]) < 0.085 * S[0])
+    HBL.uv_face_island(lo0, face_sel, proj, island=0.40)
+    log("LOD0 tris", core.tri_count(lo0), "face island polys", int(face_sel.sum()))
+    p_png, pinfo = texture(lo0, R, J, pinfo0)
     img = core.load_image(p_png)
     mats = make_materials(img)
     lo0.data.materials.clear()

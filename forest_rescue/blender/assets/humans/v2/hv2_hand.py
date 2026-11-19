@@ -81,15 +81,15 @@ def tube(acc, pts, radii, weights, sides=8, ref=None, tip=True, flat=1.0, base_c
 
 
 FINGERS = {  # name: (knuckle offset along d, along t), segments, radius, spread deg, bones
-    "Index": (1.00, 0.37, (0.042, 0.025, 0.020), 0.0098, 2.5),
-    "Middle": (1.03, 0.12, (0.046, 0.028, 0.021), 0.0101, 0.5),
-    "Ring": (0.99, -0.13, (0.043, 0.026, 0.020), 0.0096, -1.5),
-    "Pinky": (0.90, -0.37, (0.034, 0.020, 0.018), 0.0085, -4.0),
+    "Index": (1.00, 0.36, (0.044, 0.026, 0.021), 0.0104, 1.0),
+    "Middle": (1.03, 0.12, (0.048, 0.029, 0.022), 0.0107, 0.0),
+    "Ring": (0.99, -0.12, (0.045, 0.027, 0.021), 0.0102, -0.8),
+    "Pinky": (0.91, -0.35, (0.036, 0.021, 0.019), 0.0091, -2.0),
 }
 
 
-def build_hand(side, wrist, d, palm_n, thumb_t, scale=1.0, palm_len=0.090, curl=(22, 30, 18),
-               thumb_curl=14.0, female=False):
+def build_hand(side, wrist, d, palm_n, thumb_t, scale=1.0, palm_len=0.090, curl=(12, 22, 12),
+               thumb_curl=10.0, female=False):
     """side: 'Left'/'Right'.  d = wrist->middle knuckle direction, palm_n = palm normal (out of
     the palm), thumb_t = thumb-side direction.  Returns (acc, bones) with bones = joint table."""
     S = side
@@ -100,8 +100,8 @@ def build_hand(side, wrist, d, palm_n, thumb_t, scale=1.0, palm_len=0.090, curl=
         n = -n
     acc = MeshAcc()
     s = scale
-    w_half = (0.041 if not female else 0.037) * s
-    th = (0.019 if not female else 0.016) * s
+    w_half = (0.044 if not female else 0.039) * s
+    th = (0.017 if not female else 0.015) * s
     pl = palm_len * s
     wr = np.asarray(wrist, float)
     hand_w = {f"{S}Hand": 1.0}
@@ -136,7 +136,8 @@ def build_hand(side, wrist, d, palm_n, thumb_t, scale=1.0, palm_len=0.090, curl=
     bones = {}
     # ---- fingers
     for name, (od, ot, segs, rad, spread) in FINGERS.items():
-        rad = rad * s * (0.92 if female else 1.0)
+        rad = rad * s * (0.90 if female else 1.0)
+        curl_f = {"Index": 0.85, "Middle": 1.0, "Ring": 1.1, "Pinky": 1.2}[name]
         base = wr + d * (od * pl * 0.93) + t * (ot * w_half * 1.02)
         # spread: rotate within the palm plane away from the middle finger (sign by t side)
         fdir = _rot(d, n, spread)
@@ -147,7 +148,7 @@ def build_hand(side, wrist, d, palm_n, thumb_t, scale=1.0, palm_len=0.090, curl=
         p = base.copy()
         dirv = fdir.copy()
         for k, Lk in enumerate(segs):
-            dirv = _rot(dirv, _unit(np.cross(dirv, n)), curl[k])
+            dirv = _rot(dirv, _unit(np.cross(dirv, n)), curl[k] * curl_f)
             p = p + dirv * Lk * s
             pts.append(p.copy())
         pts = np.array(pts)
@@ -163,7 +164,7 @@ def build_hand(side, wrist, d, palm_n, thumb_t, scale=1.0, palm_len=0.090, curl=
         bones[f"_{name}tip"] = pts[-1]
     # ---- thumb: from the palm's thumb side near the wrist, toward t and forward along d
     cmc = wr + d * (0.16 * pl) + t * (w_half * 0.60) + n * (th * 0.30)
-    tdir = _unit(0.72 * d + 0.56 * t + 0.36 * n)
+    tdir = _unit(0.80 * d + 0.50 * t + 0.25 * n)
     tpts = [cmc]
     p = cmc.copy()
     dv = tdir.copy()

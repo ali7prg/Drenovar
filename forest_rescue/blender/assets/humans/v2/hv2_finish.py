@@ -155,8 +155,8 @@ def secondary(sk, params, Ms, loop, kind_info):
         R["SkirtFront2"] = HA.rot(HA.X, -f2[i])
         R["SkirtBack1"] = HA.rot(HA.X, b1[i])
         R["SkirtBack2"] = HA.rot(HA.X, b2[i])
-        R["SkirtLeft"] = HA.rot(HA.Y, -sl[i])
-        R["SkirtRight"] = HA.rot(HA.Y, sr[i])
+        R["SkirtLeft"] = HA.rot(HA.X, -0.6 * max(th["Left"][i], 0.0)) @ HA.rot(HA.Y, -sl[i])
+        R["SkirtRight"] = HA.rot(HA.X, -0.6 * max(th["Right"][i], 0.0)) @ HA.rot(HA.Y, sr[i])
         R["Cloak1"] = HA.rot(HA.X, -0.6 * tl[i] - 0.4 * b1[i] * 0.3)
         R["Cloak2"] = HA.rot(HA.X, -0.8 * tl[i] - 0.5 * b1[i] * 0.3)
         R["Hood"] = HA.rot(HA.X, -0.5 * tl[i])
@@ -248,8 +248,8 @@ def finish(AID, C, R, J, B, lo0, p_png, ITER, log):
             # cloth never goes through the floor: swing skirt/cloak chains outward until the tail
             # clears z = 0.03 (seated / kneeling / fallen poses)
             fixed = False
-            for bn, axis, sgn in (("SkirtFront1", HA.X, -1), ("SkirtBack1", HA.X, 1), ("SkirtLeft", HA.Y, -1),
-                                  ("SkirtRight", HA.Y, 1), ("Cloak1", HA.X, 1)):
+            for bn, axis, sgn in (("SkirtFront1", HA.X, -1), ("SkirtBack1", HA.X, 1), ("SkirtLeft", HA.X, 1),
+                                  ("SkirtRight", HA.X, 1), ("Cloak1", HA.X, 1)):
                 head = MM[bn][:3, 3]
                 tail = head + MM[bn][:3, 1] * sk.length[bn]
                 if tail[2] < 0.03:

@@ -327,3 +327,32 @@ def look_at_cam(loc, target, ortho_scale=None, lens=60, res=(700, 1000), name="h
     sc.render.resolution_x, sc.render.resolution_y = res
     sc.render.resolution_percentage = 100
     return obj
+
+
+def uv_face_island(obj, face_sel, project_fn, island=0.42, margin=0.003):
+    """Give the face its own planar island (projected with the portrait camera) at high texel
+    density, then re-pack all islands (relative scales kept)."""
+    me = obj.data
+    nl = len(me.loops)
+    uvl = me.uv_layers.active.data
+    uv = np.empty(nl * 2)
+    uvl.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2)
+    co = np.empty(len(me.vertices) * 3)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(-1, 3)
+    lv = np.empty(nl, np.int64)
+    me.loops.foreach_get("vertex_index", lv)
+    loop_face = np.empty(nl, np.int64)
+    for p in me.polygons:
+        loop_face[p.loop_start:p.loop_start + p.loop_total] = p.index
+    sel = np.asarray(face_sel)[loop_face]
+    if not sel.any():
+        return
+    u, v = project_fn(co[lv[sel]])
+    u0, u1, v0, v1 = u.min(), u.max(), v.min(), v.max()
+    sc = island / max(u1 - u0, v1 - v0)
+    uv[sel, 0] = (u - u0) * sc
+    uv[sel, 1] = 1.0 - (v - v0) * sc
+    uvl.foreach_set("uv", uv.ravel())
+    core.pack_uv(obj, margin=margin, rotate=False)

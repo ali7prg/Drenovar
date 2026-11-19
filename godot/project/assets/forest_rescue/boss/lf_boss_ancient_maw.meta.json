@@ -399,7 +399,7 @@
     "note": "Blender -Y forward exported to glTF +Z; feet on y=0, root at the origin"
   },
   "notes": "Clips in place (root bone fixed). Turn clips: apply rootYawDeg with the documented curve to the node. lane_charge lunges the body ~2.6 m forward inside the clip and steps back during recovery (root stays on the mark). Markers are presentation-only (manifest). Keys sampled at 60 fps so 4.25/5.45/0.55 s are exact.",
-  "recommendedScale": 2.06,
+  "recommendedScale": 1.52,
   "recommendedScaleInfo": {
     "source": "art/08_final_boss_arena.png, measured in image pixels (no perspective correction: the boss stands farther from the camera than the squad, so these ratios are lower bounds)",
     "boss_hip_line_px": 116,
@@ -418,6 +418,14 @@
     "recommendedScale": 2.06,
     "recommendedScale_captain_only": 1.52,
     "arena_relative_ratio": 1.28,
-    "note": "recommendedScale = art08 ratio (mean of the 4 squad figures) / 1.53. Relative to the arena floor the painted boss is only ~1.28x the model (floor ~2.7 boss lengths vs 3.5 in game); the boss_telegraphs shapes (jaw 9.5 m, tail 11.5 m) are authored for scale 1.0. The model itself stays at the key-stats scale (rig scale 1.0 in actor_director)."
+    "note": "recommendedScale = art08 ratio (mean of the 4 squad figures) / 1.53. Relative to the arena floor the painted boss is only ~1.28x the model (floor ~2.7 boss lengths vs 3.5 in game); the boss_telegraphs shapes (jaw 9.5 m, tail 11.5 m) are authored for scale 1.0. The model itself stays at the key-stats scale (rig scale 1.0 in actor_director).",
+    "chosen": 1.52,
+    "candidates": {
+      "arena_relative": 1.28,
+      "captain": 1.52,
+      "squad_mean": 2.06
+    },
+    "choice_reason": "Godot city camera (zoom 40) with the boss at 1.0/1.28/1.52/2.06 next to art/08 (qa v2_iter13_scale_candidates.png): at 1.52 the boss spans ~0.36 of the arena floor width as in art/08 (1.28 -> 0.31, 2.06 -> 0.49) and its hip line is ~2.3x a squad member (art/08 captain ratio 2.32).",
+    "telegraphNote": "boss_telegraphs.gd shapes (jaw 9.5 m, tail 11.5 m, rings 6/11 m) are authored for scale 1.0; scale them with the boss if adopted (actor_director rig(..., scale))."
   }
 }

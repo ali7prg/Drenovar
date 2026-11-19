@@ -182,11 +182,10 @@ def masonry_run(g, p0, p1, z0, z1, thick, courses, block_len, rng, mat="stone", 
     for ci in range(courses):
         zc = z0 + ch * (ci + 0.5)
         n = max(1, int(round(L / block_len)))
-        cuts = np.linspace(0, L, n + 1)
         if ci % 2 == 1 and n > 1:
-            off = (L / n) * 0.5
-            cuts = np.concatenate([[0], cuts[1:-1] - off + (L / n) * 0.0, [L]])
-            cuts = np.sort(np.concatenate([[0, L], (np.linspace(0, L, n + 1)[1:-1] + L / n * 0.5)[:-1] if n > 2 else [L / 2]]))
+            cuts = np.concatenate([[0.0], (np.arange(n) + 0.5) * L / n, [L]])
+        else:
+            cuts = np.linspace(0, L, n + 1)
         for a, b in zip(cuts[:-1], cuts[1:]):
             if b - a < 0.05:
                 continue
@@ -230,10 +229,8 @@ def door_hinge_strap(g, hinge_xy, y_face, z, length, w, lod, mat="bronze", tag="
         tipx = hx + length * 0.82
         poly = np.array([[0, -w * 0.62], [length * 0.13, -w * 0.45], [length * 0.18, 0.0], [length * 0.13, w * 0.45],
                          [0, w * 0.62]])
-        R = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]], float).T   # local x->X, y->Z, z->-Y
-        R = np.stack([[1, 0, 0], [0, 0, -1], [0, 1, 0]], 1).astype(float)
-        g.prism(poly, -t / 2, t / 2, mat, tag, R=frame((1, 0, 0), (0, -1, 0)) @ np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
-                t=(tipx, y0, z))
+        Rl = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]], float)   # local x->X, y->Z, z->-Y
+        g.prism(poly, -t / 2, t / 2, mat, tag, R=Rl, t=(tipx, y0, z))
     if lod == 0:
         for k in range(3):
             rx = hx + length * (0.22 + 0.24 * k)

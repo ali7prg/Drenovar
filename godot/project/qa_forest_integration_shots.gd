@@ -223,6 +223,10 @@ func run() -> void:
 		# real cage there is open and empty), 3 m towards the approach.
 		await fresh("completed")
 		await preload_actors()
+		# The glade edges are narrow for three test cages: the canopy is hidden for this lineup so
+		# nothing but the captives is judged (same lighting, camera and materials as the game).
+		if forest.world != null and forest.world.get("canopy") != null:
+			forest.world.canopy.visible = false
 		var Rig = load("res://src/forest_rescue/game/actor_rig.gd")
 		var cases := [["lf_site_12", "root"], ["lf_site_08", "iron"], ["lf_site_07", "oak"]]
 		var built: Array = []
@@ -272,7 +276,7 @@ func run() -> void:
 				person.play(["lf_civilian_cage_sit"] if k == 0 else (["lf_civilian_cage_stand"] if k == 1 else ["lf_civilian_cage_wait"]), 0.0)
 		await frames(40)
 		for i in built.size():
-			look(built[i][0].global_position + Vector3(0, 1.0, 0.6), 7.0)
+			look(built[i][0].global_position + Vector3(0, 1.0, 0.6), 6.0)
 			await frames(3)
 			await shoot("variety_seated_%s" % built[i][2])
 		look(built[0][0].global_position, 30.0)
@@ -303,13 +307,15 @@ func run() -> void:
 					person.play(["lf_civilian_exit"], 0.15)
 			await frames(1)
 		for i in built.size():
-			look(built[i][0].global_position + Vector3(0.4, 1.0, 1.8), 7.0)
+			look(built[i][0].global_position + Vector3(0.4, 1.0, 2.2), 6.5)
 			await frames(3)
 			await shoot("variety_exiting_%s" % built[i][2])
 		for entry in built:
 			entry[0].queue_free()
 			for person in entry[1]:
 				person.queue_free()
+		if forest.world != null and forest.world.get("canopy") != null:
+			forest.world.canopy.visible = true
 
 
 	# -------------------------------------------------- artifact seated in the door socket (glow)

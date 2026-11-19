@@ -199,6 +199,7 @@ def build(A, p, lod):
         band(g, a, b, 0.09, 0.24, nrm, lod, tag="topband")
     # crown: four riveted straps rising from the post caps to a central boss + spire
     zc = p["zc"]
+    rg = A.part("roof", None, (0.0, 0.0, zt)).geo[lod]          # crown = separate node (fade / cut away)
     nseg = 7 if lod == 0 else (4 if lod == 1 else 2)
     for sx_ in (-1, 1):
         for sy_ in (-1, 1):
@@ -209,9 +210,9 @@ def build(A, p, lod):
                 q = a * (1 - t) + kc * t
                 q[2] = zt + 0.06 + (zc - zt - 0.06) * math.sin(t * math.pi / 2)
                 P.append(q)
-            CG.sweep_rect(g, np.array(P), 0.085, 0.09, up=(0, 0, 1), mat="iron", tag="crown_strap")
-    g.box((p["kx"], p["ky"], zc), (0.14, 0.14, 0.1), mat="iron", tag="crown_boss")
-    CG.lathe(g, [(0.06, 0.0), (0.06, 0.03), (0.035, 0.06), (0.055, 0.11), (0.03, 0.17), (0.0, 0.38)], (p["kx"], p["ky"], zc + 0.05),
+            CG.sweep_rect(rg, np.array(P), 0.085, 0.09, up=(0, 0, 1), mat="iron", tag="crown_strap")
+    rg.box((p["kx"], p["ky"], zc), (0.14, 0.14, 0.1), mat="iron", tag="crown_boss")
+    CG.lathe(rg, [(0.06, 0.0), (0.06, 0.03), (0.035, 0.06), (0.055, 0.11), (0.03, 0.17), (0.0, 0.38)], (p["kx"], p["ky"], zc + 0.05),
              n=8 if lod == 0 else 5, mat="iron", tag="spire")
     # middle / bottom bands are per face (iron_face rails); front: riveted segmental arch band over the door
     z_mid = zd + 0.52 * (zt - zd)
@@ -295,4 +296,7 @@ def clips(A, B):
 def meta(A, p):
     cfg = door_cfg(p)
     piv = np.array([cfg["hinge_x"], cfg["y_face"] - 0.035, 0.0])
-    return CC.cage_meta(A, cfg, piv, NATIVE, {"cage_type": "iron", "native_family": NATIVE})
+    return CC.cage_meta(A, cfg, piv, NATIVE, {"cage_type": "iron", "native_family": NATIVE, "roofNode": "roof",
+                                              "roofNote": "crown straps + central boss + spire as one node (meshes "
+                                                          "lf_cage_iron_roof_LOD0/1/2); fade or hide it when captives are "
+                                                          "inside and the camera is above"})

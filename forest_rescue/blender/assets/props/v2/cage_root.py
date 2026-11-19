@@ -221,16 +221,17 @@ def build(A, p, lod):
             leaf_emblem(g, np.array([x, y, p["ze"]]) + oc * (RT + 0.02), oc, lod)
     # ---------------- canopy: twisted arches over every face + diagonals to the crown
     n_arc = 9 if lod == 0 else (6 if lod == 1 else 4)
+    rg = A.part("roof", None, (0.0, 0.0, zt)).geo[lod]          # canopy = separate node (fade / cut away)
     crown = np.array([p["kx"], p["ky"], zc])
     for i in range(4):
         a = np.array([*corners[i], zt])
         b = np.array([*corners[(i + 1) % 4], zt])
         mid_out = np.array([outs[i][0] + outs[(i + 1) % 4][0], outs[i][1] + outs[(i + 1) % 4][1], 0.0]) * -0.03
         P = arch_curve(a, b, zt, 0.38, n_arc, bulge=mid_out)
-        twisted_pair(g, P, 0.095, 1.5, 0.08, lod, "canopy_edge", seed=i)
+        twisted_pair(rg, P, 0.095, 1.5, 0.08, lod, "canopy_edge", seed=i)
         if lod < 2:
             P2 = arch_curve(a + (0, 0, -0.35), b + (0, 0, -0.35), zt - 0.35, 0.5, n_arc, bulge=mid_out * 0.5)
-            g.tube(wobble(P2, 0.03, 40 + i), np.linspace(0.085, 0.07, n_arc), n=sides(lod), mat="root", tag="canopy_edge2")
+            rg.tube(wobble(P2, 0.03, 40 + i), np.linspace(0.085, 0.07, n_arc), n=sides(lod), mat="root", tag="canopy_edge2")
     for i in range(4):
         a = np.array([*corners[i], zt])
         P = []
@@ -238,7 +239,7 @@ def build(A, p, lod):
             q = a + (crown - a) * t
             q[2] = zt + (zc - zt) * math.sin(t * math.pi / 2)
             P.append(q)
-        twisted_pair(g, np.array(P), 0.09, 1.0, 0.07, lod, "canopy_diag", seed=10 + i)
+        twisted_pair(rg, np.array(P), 0.09, 1.0, 0.07, lod, "canopy_diag", seed=10 + i)
     if lod < 2:
         # cross roots linking edge apexes over the top (dome lattice)
         apexes = []
@@ -251,7 +252,7 @@ def build(A, p, lod):
         for i in range(4):
             a, b = apexes[i], apexes[(i + 1) % 4]
             P = arch_curve(a, b, zt + 0.36, (zc - zt - 0.36) * 0.8, n_arc)
-            g.tube(wobble(P, 0.04, 70 + i), np.linspace(0.085, 0.075, n_arc), n=sides(lod), mat="root", tag="canopy_cross")
+            rg.tube(wobble(P, 0.04, 70 + i), np.linspace(0.085, 0.075, n_arc), n=sides(lod), mat="root", tag="canopy_cross")
     # ---------------- walls: lancet lattices
     zl0, zl1 = 0.12, zt - 0.05
     span_x, span_y = 2 * c - 2 * RT, 2 * cy - 2 * RT
@@ -316,4 +317,7 @@ def clips(A, B):
 def meta(A, p):
     cfg = door_cfg(p)
     piv = np.array([cfg["hinge_x"], cfg["y_face"] - 0.035, 0.0])
-    return CC.cage_meta(A, cfg, piv, NATIVE, {"cage_type": "root", "native_family": NATIVE})
+    return CC.cage_meta(A, cfg, piv, NATIVE, {"cage_type": "root", "native_family": NATIVE, "roofNode": "roof",
+                                              "roofNote": "root canopy (edge arches, diagonals, dome lattice) as one node "
+                                                          "(meshes lf_cage_root_roof_LOD0/1/2); fade or hide it when "
+                                                          "captives are inside and the camera is above"})

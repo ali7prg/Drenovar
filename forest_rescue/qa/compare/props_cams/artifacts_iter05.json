@@ -1,0 +1,40 @@
+{
+  "bone_key": {
+    "front": {
+      "iou_filled": 0.7956,
+      "iou_raw": 0.6543,
+      "mean_abs_colour_error": 0.1541
+    },
+    "side": {
+      "iou_filled": 0.6085,
+      "iou_raw": 0.6085,
+      "mean_abs_colour_error": 0.1571
+    },
+    "hero34": {
+      "iou_filled": 0.8068,
+      "iou_raw": 0.8068,
+      "mean_abs_colour_error": 0.1729
+    },
+    "socket": {
+      "iou_filled": 0.9019,
+      "iou_raw": 0.9019,
+      "mean_abs_colour_error": 0.1714
+    },
+    "trace": {
+      "front_px": [
+        167,
+        62
+      ],
+      "side_px": [
+        24,
+        120
+      ],
+      "length_m": 0.153,
+      "aspect": 0.3712574850299401
+    },
+    "paint": {
+      "painted_fraction": 0.238,
+      "texel_mm": 0.317
+    }
+  }
+}

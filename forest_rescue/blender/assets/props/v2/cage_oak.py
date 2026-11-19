@@ -245,10 +245,11 @@ def build(A, p, lod):
     # ---------------- hip roof + apex finial
     apex_z = p["zr"] - 0.26
     ax, ay = p["ax"], p["ay"]
-    CG.hip_roof(g, bt, (c + s / 2 + ov + 0.06, cy + s / 2 + ov + 0.06), apex_z, 6 if lod == 0 else (4 if lod == 1 else 1),
+    rg = A.part("roof", None, (0.0, 0.0, bt)).geo[lod]          # separate node: the integrator may fade / cut it
+    CG.hip_roof(rg, bt, (c + s / 2 + ov + 0.06, cy + s / 2 + ov + 0.06), apex_z, 6 if lod == 0 else (4 if lod == 1 else 1),
                 lod, mat="roof", tag="roof", apex_xy=(ax, ay))
-    g.box((ax, ay, apex_z + 0.02), (0.24, 0.24, 0.12), mat="wood", tag="apex_block")
-    CG.pyramid(g, (ax, ay, apex_z + 0.08), 0.24, p["zr"] - apex_z - 0.08, mat="wood", tag="apex_finial")
+    rg.box((ax, ay, apex_z + 0.02), (0.24, 0.24, 0.12), mat="wood", tag="apex_block")
+    CG.pyramid(rg, (ax, ay, apex_z + 0.08), 0.24, p["zr"] - apex_z - 0.08, mat="wood", tag="apex_finial")
     # ---------------- enamel leaf inlays on post faces (front / left)
     if lod < 2:
         Rf = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]], float)          # facing -Y
@@ -284,6 +285,9 @@ def door_cfg(p):
                 bar_x=painted_ts(p, "closed34", 340, [327, 338, 354, 368, 383, 398], (0.0, -cy - 0.02), (1, 0)))
 
 
+ROOF_META = {"roofNode": "roof", "roofNote": "hip roof + apex finial as one node (meshes lf_cage_wood_roof_LOD0/1/2): "
+                                            "fade or hide it when captives are inside and the camera is above"}
+
 SWATCHES = {
     "wood": dict(sheet=SHEET, box=(209, 250, 241, 282), metres=0.27),
     "iron": dict(sheet=SHEET, box=(140, 330, 170, 345), metres=0.2),
@@ -307,4 +311,4 @@ def clips(A, B):
 def meta(A, p):
     cfg = door_cfg(p)
     piv = np.array([cfg["hinge_x"], cfg["y_face"] - 0.035, 0.0])
-    return CC.cage_meta(A, cfg, piv, NATIVE, {"cage_type": "oak", "native_family": NATIVE})
+    return CC.cage_meta(A, cfg, piv, NATIVE, {"cage_type": "oak", "native_family": NATIVE, **ROOF_META})

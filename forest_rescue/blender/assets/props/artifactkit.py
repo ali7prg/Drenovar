@@ -403,23 +403,24 @@ def build_key(B, node, v, M=np.eye(4)):
     shaft = _fix_lathe_x(shaft)
     B.add(node, f"{node}_shaft", "bone", shaft.transformed(Mk), meta={"motif": key_motif()})
     # bow
-    bc = np.array([(0.172 - 0.73) * KEY_L, 0.0, 0.0])
+    BOW_K = 1.40          # props v2 pass: the painted ring bow is ~40 % larger (hero IoU 0.69 -> fix)
+    bc = np.array([(0.172 - 0.73) * KEY_L - 0.0206 * (BOW_K - 1.0), 0.0, 0.0])
     nseg = B.seg(22, 14, 10)
     sides = B.seg(6, 5, 4)
-    bow_prof = lambda r: np.array([[r * math.cos(a), 1.45 * r * math.sin(a)] for a in
+    bow_prof = lambda r: np.array([[r * BOW_K * math.cos(a), 1.15 * r * BOW_K * math.sin(a)] for a in
                                    np.linspace(0, 2 * math.pi, sides, endpoint=False) + math.pi / sides])
     if v == 1:
         th = np.linspace(0, 2 * math.pi, nseg, endpoint=False)
-        R = 0.0206
+        R = 0.0206 * BOW_K
         path = np.stack([bc[0] + R * np.cos(th), np.zeros(nseg), R * np.sin(th)], 1)
         bow = pk.sweep(path, bow_prof(0.0064), closed_path=True, up=(0, 1, 0), smooth=True, ref_perim=0.05)
     elif v == 2:
         th = np.linspace(0, 2 * math.pi, int(nseg * 1.2), endpoint=False)
-        R = 0.0185 * (1 + 0.30 * np.cos(3 * th))
+        R = 0.0185 * BOW_K * (1 + 0.30 * np.cos(3 * th))
         path = np.stack([bc[0] - 0.002 + R * np.cos(th), np.zeros(len(th)), R * np.sin(th)], 1)
         bow = pk.sweep(path, bow_prof(0.0052), closed_path=True, up=(0, 1, 0), smooth=True, ref_perim=0.045)
     else:
-        s = 0.0205
+        s = 0.0205 * BOW_K
         sq = pk.rounded_rect(2 * s, 2 * s, 0.008, seg=max(2, nseg // 8))
         sq = pk.resample_closed(sq, nseg)
         path = np.stack([bc[0] + sq[:, 0], np.zeros(len(sq)), sq[:, 1]], 1)
@@ -438,7 +439,7 @@ def build_key(B, node, v, M=np.eye(4)):
     else:
         bit = [(0.0023, 0.004), (0.0023, -0.032), (0.0137, -0.032), (0.0137, -0.024), (0.0251, -0.024),
                (0.0251, -0.016), (0.0365, -0.016), (0.0365, 0.004)]
-    bit = np.array(bit)
+    bit = np.array(bit) * np.array([1.0, 1.22])          # deeper bit (painted)
     bp = pk.extrude(bit, 0.0105, chamfer=0.0013)
     # extrude: outline XY (x, z), depth along local z -> map (x, y, z) -> (x, z_depth - t/2, y)
     Mb = np.array([[1, 0, 0, 0], [0, 0, 1, -0.00525], [0, 1, 0, 0], [0, 0, 0, 1]], float)

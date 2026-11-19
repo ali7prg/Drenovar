@@ -61,9 +61,9 @@ func run() -> void:
 	stage = game.stage
 	world = stage.forest_world
 	game.set_process(false)
+	game.hud.visible = false
 	await frames(0.3)
 	game.forest_game.process_mode = Node.PROCESS_MODE_DISABLED
-	game.hud.visible = false
 	world.set_reduced_motion(false)
 	var town := ForestFog.default_town_bits()
 	var corridor: Dictionary = world.atlas.entrance_corridor

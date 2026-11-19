@@ -171,10 +171,10 @@ void fragment() {
 		if (reach > 0.001) {
 			vec2 wn = normalize(wind);
 			vec2 along = vec2(dot(entry.xz, wn), dot(entry.xz, vec2(-wn.y, wn.x)));
-			float n1 = texture(noise_tex, vec2(along.x / 52.0, along.y / 15.0) - vec2(drift.x * 0.02, 0.0) + vec2(0.13, 0.57)).r;
-			float n2 = texture(noise_tex, vec2(along.x / 23.0, along.y / 7.0) - vec2(drift.x * 0.035, 0.0) + vec2(0.61, 0.21)).b;
-			float wisp = smoothstep(0.50, 0.78, n1 * 0.72 + n2 * 0.28);
-			float a_t = tendril_density * 6.0 * reach * wisp;
+			float n1 = texture(noise_tex, vec2(along.x / 34.0, along.y / 22.0) - vec2(drift.x * 0.02, 0.0) + vec2(0.13, 0.57)).r;
+			float n2 = texture(noise_tex, vec2(along.x / 15.0, along.y / 11.0) - vec2(drift.x * 0.035, 0.0) + vec2(0.61, 0.21)).g;
+			float wisp = smoothstep(0.48, 0.80, n1 * 0.7 + n2 * 0.3);
+			float a_t = tendril_density * 4.5 * reach * wisp;
 			color = (color * alpha + (1.0 - alpha) * a_t * haze_color) / max(1.0 - (1.0 - alpha) * (1.0 - a_t), 1e-4);
 			alpha = 1.0 - (1.0 - alpha) * (1.0 - a_t);
 		}

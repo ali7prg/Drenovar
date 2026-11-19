@@ -31,6 +31,7 @@ PANELS = {
     'unlocked_entrance_z68': ('18_hall3_unlock_intro.png', (520, 8, 1018, 1010), 'art/18 panel 2 (hall III: entrance opens)'),
     'entrance_reveal_2': ('18_hall3_unlock_intro.png', (520, 200, 1018, 760), 'art/18 panel 2 (corridor reveal)'),
     'unlocked_horse_z30': ('18_hall3_unlock_intro.png', (1030, 8, 1528, 1010), 'art/18 panel 3 (the horse)'),
+    'entrance_corridor_z46': ('18_hall3_unlock_intro.png', (520, 8, 1018, 1010), 'art/18 panel 2 (entrance corridor)'),
     'partial_squad_z40': ('07_fog_exploration_interface.png', (8, 8, 508, 875), 'art/07 panel 1 (squad enters the fog)'),
     'partial_path_z40': ('07_fog_exploration_interface.png', (520, 8, 1020, 875), 'art/07 panel 2 (revealed path)'),
     'partial_edge_z68': ('07_fog_exploration_interface.png', (1032, 8, 1530, 875), 'art/07 panel 3 (fog edge)'),

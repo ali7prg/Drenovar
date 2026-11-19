@@ -59,7 +59,7 @@ const RESOURCE_SPECIES := {"Дуб": OAK, "Сосна": PINE}
 ## Remap limits (resource trees keep their ids; visual slot within this distance of the old
 ## spiral point, except trees pushed out of a route/glade/arena/bridge clearance).
 const MAX_SLOT_DISPLACEMENT := 4.0
-const MAX_INNER_JITTER := 3.5
+const MAX_INNER_JITTER := 4.0          # ≤ 3.5 m typical; ≤ 4.0 m to clear the hall-III entrance
 const MIN_TREE_GAP := 2.3
 ## Trunk clearance from a route centre line (route.clear + this); crowns may overhang.
 const ROUTE_TRUNK_MARGIN := 1.4

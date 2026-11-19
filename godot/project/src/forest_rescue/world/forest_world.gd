@@ -19,6 +19,7 @@ const ForestImpostors = preload("res://src/forest_rescue/world/forest_impostors.
 const SUN_ROTATION := Vector3(-0.837758, -0.558505, 0.0)   # landscape.gd city sun (-48°, -32°, 0)
 const Rules = preload("res://src/forest_rescue/world/forest_layout_rules.gd")
 const PATH_SHADER = preload("res://src/forest_rescue/world/forest_path.gdshader")
+const RIVER_SHADER = preload("res://src/forest_rescue/world/forest_river.gdshader")
 const SURFACES := "res://assets/city/premium/surfaces07/"
 
 const API_VERSION := 3
@@ -150,6 +151,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	canopy.name = "Canopy"
 	add_child(canopy)
 	_build_paths()
+	_restyle_river()
 	impostors = ForestImpostors.new()
 	impostors.name = "Impostors"
 	add_child(impostors)
@@ -253,6 +255,22 @@ func _build_paths() -> void:
 	paths.material_override = material
 	paths.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(paths)
+
+
+## The city water strip gets the art/01 river material (world layer only; flag OFF keeps the
+## original material). The strip is found by its shader, nothing else in landscape.gd changes.
+func _restyle_river() -> void:
+	var material := ShaderMaterial.new()
+	material.shader = RIVER_SHADER
+	material.set_shader_parameter("noise_tex", ForestFog._noise_texture if ForestFog._noise_texture != null else ImageTexture.create_from_image(ForestFog.make_noise_image(128)))
+	var deck: Rect2 = atlas.bridge_deck_rect()
+	material.set_shader_parameter("bridge_rect", Vector4(deck.position.x, deck.position.y, deck.size.x, deck.size.y))
+	for child in stage.get_children():
+		if child is MeshInstance3D and child.material_override is ShaderMaterial:
+			var shader: Shader = (child.material_override as ShaderMaterial).shader
+			if shader != null and shader.resource_path == "res://src/water.gdshader":
+				child.material_override = material
+				child.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 # ============================================================================================

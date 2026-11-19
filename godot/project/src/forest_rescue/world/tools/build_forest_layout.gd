@@ -403,7 +403,7 @@ func run() -> void:
 	var placed_inner: Array = []
 	var placed_inner_grid := {}
 	var horse := Vector2(atlas.horse_origin.x, atlas.horse_origin.z)
-	var entry: PackedVector3Array = atlas.route_by_id["lf_route_entry"].points
+	var entry_route: PackedVector3Array = atlas.route_by_id["lf_route_entry"].points
 	for t in inner_order:
 		var tree: Dictionary = inner[t]
 		var o := Vector2(float(tree.p[0]), float(tree.p[2]))
@@ -412,8 +412,8 @@ func run() -> void:
 		var best := o
 		var best_score := -INF
 		# The hall-III entrance (art/18): the horse spot and the entry trail stay trunk-free.
-		var on_entrance := o.distance_to(horse) < HORSE_CLEAR or _entry_distance(o, entry) < ENTRY_CLEAR
-		var reach := 4.0 if on_entrance else Rules.MAX_INNER_JITTER
+		var on_entrance := o.distance_to(horse) < HORSE_CLEAR or _entry_distance(o, entry_route) < ENTRY_CLEAR
+		var reach := Rules.MAX_INNER_JITTER if on_entrance else 3.5
 		for k in (60 if on_entrance else 28):
 			var angle := rng.randf() * TAU
 			var dist := lerpf(1.0, reach, sqrt(rng.randf()))
@@ -422,7 +422,7 @@ func run() -> void:
 				continue
 			if _near_road(q, 1.8) or terrain.ground_height(q.x, q.y) < -0.3:
 				continue
-			if q.distance_to(horse) < HORSE_CLEAR or _entry_distance(q, entry) < ENTRY_CLEAR:
+			if q.distance_to(horse) < HORSE_CLEAR or _entry_distance(q, entry_route) < ENTRY_CLEAR:
 				continue
 			var ok := true
 			for other in near_points(q.x, q.y, 3.0, placed_inner_grid, placed_inner):

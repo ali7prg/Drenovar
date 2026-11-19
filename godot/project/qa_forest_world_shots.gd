@@ -115,6 +115,23 @@ func _short_perf() -> Dictionary:
 		"prims": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)}
 
 
+func _horse_stand_in() -> Node3D:
+	var path := "res://assets/forest_rescue/horse/lf_horse_origin.glb"
+	if not ResourceLoader.exists(path):
+		return null
+	var node: Node3D = (load(path) as PackedScene).instantiate()
+	var origin: Vector3 = world.poi_position("lf_horse_origin")
+	node.position = origin
+	node.rotation.y = atan2(-12.0 - origin.x, -60.0 - origin.z)
+	world.actors_root().add_child(node)
+	for player: AnimationPlayer in node.find_children("*", "AnimationPlayer", true, false):
+		for clip in player.get_animation_list():
+			if String(clip).to_lower().contains("idle"):
+				player.play(clip)
+				break
+	return node
+
+
 func apply(adv: Dictionary, finish := true) -> void:
 	world.apply_adventure(adv)
 	if finish:
@@ -177,8 +194,14 @@ func run() -> void:
 	else:
 		world.play_entrance_reveal(0)
 		world.fog.finish_now()
+	# art/18 panels 2–3: the corridor (-8,-55)→(-12,-60) framed at zoom 46 and 30, a stand-in
+	# horse (the delivered horse GLB, QA only) under actors_root so the canopy fade is exercised.
+	var horse := _horse_stand_in()
 	await shot("unlocked_entrance_z68", Vector3(-4, 0, -44), 68.0)
-	await shot("unlocked_horse_z30", Vector3(-9, 0, -56), 30.0)
+	await shot("entrance_corridor_z46", Vector3(-12, 0, -58), 46.0)
+	await shot("unlocked_horse_z30", Vector3(-11, 0, -58), 30.0)
+	if horse != null:
+		horse.queue_free()
 	# 3. Partly explored: act 1 done, the squad halfway along route 03→04 (art/07 panels).
 	await apply(adventure(true, explored_bits(["lf_route_entry", "lf_route_01_02", "lf_route_02_03", "lf_route_03_04"], 0.5), 2, "acknowledged", "lf_site_03"))
 	await shot("partial_squad_z40", Vector3(-72, 0, -52), 40.0)

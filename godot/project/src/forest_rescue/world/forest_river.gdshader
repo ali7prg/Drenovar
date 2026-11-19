@@ -19,7 +19,8 @@ uniform float flow_speed = 1.1;
 varying vec3 world;
 
 float river_center(float z) {
-	return z + 66.0 + 8.0 * sin(z * 0.068) + 3.5 * cos(z * 0.127 + 0.3) + 9.0 * exp(-pow((z + 25.0) / 15.0, 2.0));
+	float k = (z + 25.0) / 15.0;          // (GLSL pow() is undefined for a negative base)
+	return z + 66.0 + 8.0 * sin(z * 0.068) + 3.5 * cos(z * 0.127 + 0.3) + 9.0 * exp(-k * k);
 }
 
 float half_width(float z) {

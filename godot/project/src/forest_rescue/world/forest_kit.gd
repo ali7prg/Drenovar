@@ -4,12 +4,18 @@ extends RefCounted
 ##   res://assets/forest_rescue/forest/<asset_id>*.glb   (fallback discovery by file name)
 ## Inside a GLB, meshes named *_LOD0/_LOD1/_LOD2 (optionally *_v1.._v3_*) give variants/LODs.
 ## Wind vertex colours (COLOR_0): R branch sway, G leaf flutter, B phase, A ambient occlusion.
+## Kit v2: every surface gets the painted-light material (forest_painted.gdshaderinc) with k from
+## <asset>.meta.json paintedLightMix (lf_foliage_vol 0.5); meshes keep their authored real-metre
+## size (meta heightM/footprintM) — the world layer scales instances, it never normalises.
 ## A species that is missing falls back to a clearly logged legacy stand-in so the layout is
 ## still visible; kit_status() reports exactly what is missing.
 
 const KIT_DIR := "res://assets/forest_rescue/forest/"
 const KIT_JSON := KIT_DIR + "forest_kit.json"
 const WIND_SHADER := preload("res://src/forest_rescue/world/forest_wind.gdshader")
+const CUTOUT_SHADER := preload("res://src/forest_rescue/world/forest_wind_cutout.gdshader")
+const VOLUME_LIGHT_MIX := 0.5            # lf_foliage_vol (forest_kit.json "shading")
+const DEFAULT_LIGHT_MIX := 0.3
 
 ## Legacy stand-ins (game.json model keys / cityDetails keys), used only when a kit asset is absent.
 const LEGACY_TREES := {
@@ -33,7 +39,9 @@ var scenery_material: Material          # landscape material for legacy city det
 var missing: Dictionary = {}            # asset id -> reason
 var loaded: Dictionary = {}             # asset id -> source path
 var wind_enabled := true
-static var materials: Array = []         # every wind ShaderMaterial (canopy fade uniforms)
+static var materials: Array = []         # every painted ShaderMaterial (canopy fade uniforms)
+static var light_dir := Vector3(0.45, 0.74, 0.5)   # direction TO the sun (set by ForestWorld)
+static var _metas: Dictionary = {}
 
 
 func _init(game_data: Dictionary, legacy_detail_material: Material) -> void:
@@ -45,6 +53,21 @@ static func clear_cache() -> void:
 	_cache.clear()
 	_kit_json.clear()
 	_kit_json_mtime = -1
+	_metas.clear()
+
+
+## <asset_id>.meta.json (cached): paintedLightMix, heroScale, recommendedScale, variants{heightM, footprintM}.
+static func meta(asset_id: String) -> Dictionary:
+	if _metas.has(asset_id):
+		return _metas[asset_id]
+	var path := KIT_DIR + asset_id + ".meta.json"
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+	_metas[asset_id] = parsed if parsed is Dictionary else {}
+	return _metas[asset_id]
+
+
+static func light_mix(asset_id: String) -> float:
+	return float(meta(asset_id).get("paintedLightMix", DEFAULT_LIGHT_MIX))
 
 
 func kit_status() -> Dictionary:
@@ -188,7 +211,7 @@ func _load_kit(asset_id: String) -> Dictionary:
 		if meta is Dictionary and meta.get("variants") is Dictionary:
 			named = meta.variants
 	if not named.is_empty():
-		var result_named := _load_named(files, named)
+		var result_named := _load_named(files, named, light_mix(asset_id))
 		if not result_named.is_empty():
 			return result_named
 	for file in files:
@@ -215,7 +238,7 @@ func _load_kit(asset_id: String) -> Dictionary:
 						transform = (node as Node3D).transform * transform
 					node = node.get_parent()
 				transform.origin -= offsets.get(variant, Vector3.ZERO)
-				variants[variant][lod] = _wind_mesh(part.mesh, transform)
+				variants[variant][lod] = _wind_mesh(part.mesh, transform, light_mix(asset_id))
 		root.free()
 	if variants.is_empty():
 		return {}
@@ -232,7 +255,7 @@ func _load_kit(asset_id: String) -> Dictionary:
 
 
 ## Variants described by <asset>.meta.json: {name: {nodes: [LOD0, LOD1, LOD2], display_offset_gltf}}.
-func _load_named(files: PackedStringArray, named: Dictionary) -> Dictionary:
+func _load_named(files: PackedStringArray, named: Dictionary, k := DEFAULT_LIGHT_MIX) -> Dictionary:
 	var parts := {}
 	var roots: Array = []
 	for file in files:
@@ -261,13 +284,19 @@ func _load_named(files: PackedStringArray, named: Dictionary) -> Dictionary:
 			if parts.has(node_name) and parts[node_name][0] != null:
 				var transform: Transform3D = parts[node_name][1]
 				transform.origin -= offset
-				lods.append(_wind_mesh(parts[node_name][0], transform))
+				lods.append(_wind_mesh(parts[node_name][0], transform, k))
 		if lods.is_empty():
 			continue
 		while lods.size() < 3:
 			lods.append(lods[-1])
 		var entry := _variant_entry(lods.slice(0, 3), result.source)
 		entry.name = String(key)
+		# Authored real-metre size (meta heightM / footprintM) when present.
+		if info.has("heightM"):
+			entry.height = float(info.heightM)
+		var footprint: Variant = info.get("footprintM")
+		if footprint is Array and footprint.size() >= 2:
+			entry.radius = maxf(float(footprint[0]), float(footprint[1])) * 0.5
 		result.variants.append(entry)
 	for root in roots:
 		root.free()
@@ -296,8 +325,8 @@ static func mesh_triangles(mesh: Mesh) -> int:
 	return total
 
 
-## Copies a kit mesh with wind ShaderMaterials (texture maps carried over from the GLB).
-func _wind_mesh(mesh: Mesh, transform: Transform3D) -> Mesh:
+## Copies a kit mesh with painted ShaderMaterials (texture maps carried over from the GLB).
+func _wind_mesh(mesh: Mesh, transform: Transform3D, k := DEFAULT_LIGHT_MIX) -> Mesh:
 	var source: Mesh = mesh
 	var copy := ArrayMesh.new()
 	for s in source.get_surface_count():
@@ -314,32 +343,51 @@ func _wind_mesh(mesh: Mesh, transform: Transform3D) -> Mesh:
 				arrays[Mesh.ARRAY_NORMAL] = normals
 		copy.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		var original := source.surface_get_material(s)
-		copy.surface_set_material(s, wind_material(original, arrays[Mesh.ARRAY_COLOR] != null))
+		copy.surface_set_material(s, painted_material(original, arrays[Mesh.ARRAY_COLOR] != null, k, wind_enabled))
 	return copy
 
 
-func wind_material(original: Material, has_colors: bool) -> Material:
+static var _painted: Dictionary = {}     # (material id, flags) -> shared ShaderMaterial
+
+
+## Painted-light override for a GLB material (kit trees/understory and landmarks share it).
+## k: meta paintedLightMix; lf_foliage_vol surfaces use 0.5. Cached per source material.
+static func painted_material(original: Material, has_colors: bool, k: float, wind := true) -> Material:
 	if not original is BaseMaterial3D:
 		return original
 	var base := original as BaseMaterial3D
+	var key := "%d:%s:%s:%.3f:%s" % [base.get_instance_id(), has_colors, base.resource_name, k, wind]
+	if _painted.has(key) and is_instance_valid(_painted[key]):
+		return _painted[key]
+	var name := String(base.resource_name).to_lower()
+	var cutout := base.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED
 	var material := ShaderMaterial.new()
-	material.shader = WIND_SHADER
-	var foliage := base.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED or String(base.resource_name).to_lower().contains("foli") \
-		or String(base.resource_name).to_lower().contains("leaf")
+	material.shader = CUTOUT_SHADER if cutout else WIND_SHADER
+	material.resource_name = base.resource_name
 	material.set_shader_parameter("albedo_texture", base.albedo_texture)
 	material.set_shader_parameter("albedo_color", base.albedo_color)
 	material.set_shader_parameter("use_albedo_texture", base.albedo_texture != null)
-	material.set_shader_parameter("normal_texture", base.normal_texture if base.normal_enabled else null)
-	material.set_shader_parameter("use_normal", base.normal_enabled and base.normal_texture != null)
-	material.set_shader_parameter("roughness_texture", base.roughness_texture)
-	material.set_shader_parameter("use_roughness_texture", base.roughness_texture != null)
-	material.set_shader_parameter("roughness_value", base.roughness)
-	material.set_shader_parameter("foliage", foliage)
-	material.set_shader_parameter("alpha_cut", base.alpha_scissor_threshold if foliage else 0.0)
-	material.set_shader_parameter("vertex_wind", has_colors)
-	material.set_shader_parameter("wind_strength", 1.0 if wind_enabled else 0.0)
+	material.set_shader_parameter("alpha_cut", base.alpha_scissor_threshold if base.alpha_scissor_threshold > 0.0 else 0.5)
+	material.set_shader_parameter("painted_light_mix", VOLUME_LIGHT_MIX if name.contains("_vol") else k)
+	material.set_shader_parameter("light_dir_world", light_dir.normalized())
+	material.set_shader_parameter("use_ao", has_colors)
+	material.set_shader_parameter("vertex_wind", has_colors and wind)
 	materials.append(material)
+	_painted[key] = material
 	return material
+
+
+## Replaces every surface material under `root` by its painted override (landmarks, arena).
+static func paint_scene(root: Node, k: float) -> void:
+	for part: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+		if part.mesh == null:
+			continue
+		for s in part.mesh.get_surface_count():
+			var original: Material = part.get_active_material(s)
+			var has_colors := false
+			if part.mesh is ArrayMesh:
+				has_colors = (part.mesh.surface_get_format(s) & Mesh.ARRAY_FORMAT_COLOR) != 0
+			part.set_surface_override_material(s, painted_material(original, has_colors, k, false))
 
 
 ## Pushes fade circles (Vector4 x, ground y, z, radius) to every kit/impostor material.

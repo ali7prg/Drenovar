@@ -8,7 +8,9 @@ uniform sampler2D path_albedo : source_color, filter_linear_mipmap_anisotropic, 
 uniform sampler2D path_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D path_roughness : filter_linear_mipmap, repeat_enable;
 uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
-uniform vec3 tint : source_color = vec3(1.04, 0.97, 0.86);
+// art/01 trails: light-tan dirt (#caa270 mean, #b89261..#dcb37f) with soft grassy edges.
+uniform vec3 tint : source_color = vec3(1.17, 1.05, 0.90);
+uniform vec3 grass_edge : source_color = vec3(0.55, 0.58, 0.33);
 uniform float uv_scale = 0.35;
 
 varying vec3 world;
@@ -23,8 +25,11 @@ void fragment() {
 	vec4 n = texture(noise_tex, world.xz / 5.5);
 	float edge = COLOR.a + (n.g - 0.5) * 0.55 + (n.b - 0.5) * 0.25;
 	float worn = texture(noise_tex, world.xz / 2.3).r;
-	ALBEDO = base * (0.9 + 0.2 * worn) * COLOR.rgb;
+	// Centre worn lighter, edges grow over with grass tufts (noise-broken), then fade out.
+	float grassy = 1.0 - smoothstep(0.35, 0.85, edge + (n.r - 0.5) * 0.35);
+	vec3 dirt = base * (0.92 + 0.22 * worn) * COLOR.rgb;
+	ALBEDO = mix(dirt, grass_edge * (0.85 + 0.3 * n.b), grassy * 0.75);
 	NORMAL_MAP = texture(path_normal, uv).rgb;
 	ROUGHNESS = texture(path_roughness, uv).r;
-	ALPHA = smoothstep(0.18, 0.62, edge) * 0.97;
+	ALPHA = smoothstep(0.12, 0.5, edge) * 0.97;
 }

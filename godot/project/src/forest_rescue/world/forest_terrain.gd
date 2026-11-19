@@ -25,7 +25,7 @@ const RAMP_LENGTH := 10.0
 const PAD_TIE := 6.0
 const ARENA_BLEND_OUTER := 19.0
 const ARENA_DISH := 0.3
-const TERRAIN_VERSION := 9
+const TERRAIN_VERSION := 10
 
 const BIOME_TINTS := [
 	Color(1.05, 1.04, 0.86),   # lf_biome_1 Берёзовый дозор — warm birch light
@@ -292,7 +292,7 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 		if hit.distance < ROAD_HALF_WIDTH + ROAD_BLEND:
 			var w := 1.0 - smoothstep(ROAD_HALF_WIDTH, ROAD_HALF_WIDTH + ROAD_BLEND, hit.distance)
 			h = lerpf(h, road_height(hit) - 0.03, w)
-		dirt = maxf(dirt, 0.92 * (1.0 - smoothstep(0.6, 2.4, hit.distance)))
+		dirt = maxf(dirt, 0.85 * (1.0 - smoothstep(0.5, 1.7, hit.distance)))
 	for site in atlas.sites:   # glade pads last: always flat inside the clearing radius
 		var d := Vector2(x - site.center.x, z - site.center.z).length()
 		var r: float = site.radius

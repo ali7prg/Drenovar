@@ -207,9 +207,10 @@ func _build_paths() -> void:
 		var on_deck: PackedByteArray = terrain.road_on_deck[r]
 		var profile: PackedFloat32Array = terrain.road_profiles[r]
 		var run_start := -1
+		var entry: bool = atlas.routes[r].id == "lf_route_entry"
 		for i in points.size():
 			var p := points[i]
-			var skip := on_deck[i] == 1 or maxf(absf(p.x), absf(p.z)) < 56.0
+			var skip := on_deck[i] == 1 or (maxf(absf(p.x), absf(p.z)) < 56.0 and not entry)
 			if skip:
 				run_start = -1
 				continue
@@ -407,7 +408,7 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 			if _excluded(xz, exclusions) or (inner and stage.on_street(xz, 1.7)):
 				continue
 			var mesh := _under_mesh(int(item[2]), int(item[3]))
-			var y := height_at(xz.x, xz.y)
+			var y := height_at(xz.x, xz.y) + (float(item[6]) if item.size() > 6 else 0.0)
 			var basis := Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(Vector3.ONE * float(item[5]))
 			canopy.add_instance(mesh[0], Transform3D(basis, Vector3(xz.x, y - 0.03, xz.y)))
 	_refresh_local_anchors()

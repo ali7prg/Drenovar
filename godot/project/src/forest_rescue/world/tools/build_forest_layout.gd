@@ -402,6 +402,8 @@ func run() -> void:
 	_shuffle(inner_order)
 	var placed_inner: Array = []
 	var placed_inner_grid := {}
+	var horse := Vector2(atlas.horse_origin.x, atlas.horse_origin.z)
+	var entry: PackedVector3Array = atlas.route_by_id["lf_route_entry"].points
 	for t in inner_order:
 		var tree: Dictionary = inner[t]
 		var o := Vector2(float(tree.p[0]), float(tree.p[2]))
@@ -409,13 +411,18 @@ func run() -> void:
 		var species: int = Rules.RESOURCE_SPECIES.get(String(tree.name), Rules.PINE)
 		var best := o
 		var best_score := -INF
-		for k in 28:
+		# The hall-III entrance (art/18): the horse spot and the entry trail stay trunk-free.
+		var on_entrance := o.distance_to(horse) < HORSE_CLEAR or _entry_distance(o, entry) < ENTRY_CLEAR
+		var reach := 4.0 if on_entrance else Rules.MAX_INNER_JITTER
+		for k in (60 if on_entrance else 28):
 			var angle := rng.randf() * TAU
-			var dist := lerpf(1.0, Rules.MAX_INNER_JITTER, sqrt(rng.randf()))
+			var dist := lerpf(1.0, reach, sqrt(rng.randf()))
 			var q := o + Vector2(cos(angle), sin(angle)) * dist
 			if maxf(absf(q.x), absf(q.y)) > CORE - 0.4 or _rect_membership(q, plot_rects) != membership:
 				continue
 			if _near_road(q, 1.8) or terrain.ground_height(q.x, q.y) < -0.3:
+				continue
+			if q.distance_to(horse) < HORSE_CLEAR or _entry_distance(q, entry) < ENTRY_CLEAR:
 				continue
 			var ok := true
 			for other in near_points(q.x, q.y, 3.0, placed_inner_grid, placed_inner):
@@ -491,8 +498,10 @@ func run() -> void:
 	var under_grid := {}
 	var logs: Array = []
 	var log_grid := {}
-	_shuffle(cells)
 	var kinds_count := {}
+	_bank_dressing(trees, under, under_grid, logs, log_grid, kinds_count, species_count)
+	_quarry_cliffs(under, under_grid, logs, log_grid, kinds_count)
+	_shuffle(cells)
 	for cell: Vector2i in cells:
 		var x := -EXTENT + cell.x + rng.randf()
 		var z := -EXTENT + cell.y + rng.randf()
@@ -565,7 +574,10 @@ func run() -> void:
 		kinds_count[kind_name] = kinds_count.get(kind_name, 0) + 1
 	var understory: Array = []
 	for item in under:
-		understory.append([item[0], item[1], item[3], item[4], item[5], item[6]])
+		var row := [item[0], item[1], item[3], item[4], item[5], item[6]]
+		if item.size() > 7 and float(item[7]) != 0.0:
+			row.append(item[7])          # height offset (stacked quarry ledges)
+		understory.append(row)
 	print("LAYOUT understory=", understory.size(), " ", kinds_count)
 
 	# 6. Inner understory near inner trees (runtime filters plots/roads/buildings again) --------
@@ -628,7 +640,7 @@ func run() -> void:
 		"format": {"trees": "[x, z, speciesIndex, kitVariant(1..4), yawDeg, absoluteScale, zoneIndex]",
 			"resourceRemap": "{id: [x, z, reasonCode, kitVariant, absoluteScale]} for every outer resource tree",
 			"innerRemap": "{id: [x, z, reasonCode(0 jittered / 3 kept), kitVariant, absoluteScale]} for every inner (±56) resource tree",
-			"understory": "[x, z, kindIndex, variant(1-based in Rules.UNDERSTORY_KIT), yawDeg, absoluteScale]"},
+			"understory": "[x, z, kindIndex, variant(1-based in Rules.UNDERSTORY_KIT), yawDeg, absoluteScale, (heightOffset)]"},
 		"trees": trees, "resourceRemap": remap, "innerRemap": inner_remap, "understory": understory, "innerUnderstory": inner_under}
 	var file := FileAccess.open(Rules.LAYOUT_PATH, FileAccess.WRITE)
 	file.store_string(JSON.stringify(result, "", false))
@@ -636,6 +648,124 @@ func run() -> void:
 	print("LAYOUT_DONE trees=", trees.size(), " remap=", remap.size(), " inner=", inner_remap.size(), " understory=", understory.size(),
 		" innerUnder=", inner_under.size(), " ms=", Time.get_ticks_msec() - started)
 	quit()
+
+
+## River banks (art/01 east river): boulders half in the water along both wet edges, reed beds
+## in patches on the wet margin, willows leaning over the water where the bank allows.
+func _bank_dressing(trees: Array, under: Array, under_grid: Dictionary, logs: Array, log_grid: Dictionary,
+		kinds_count: Dictionary, species_count: Dictionary) -> void:
+	var z := -EXTENT
+	var willow_next := [-EXTENT, -EXTENT + 6.0]
+	while z <= EXTENT:
+		var r: Vector3 = atlas.river_at(z)
+		for side in 2:
+			var edge: float = r.y if side == 0 else r.z
+			var out := -1.0 if side == 0 else 1.0
+			var patch := (clump.get_noise_2d(edge * 0.7, z * 0.7) + 1.0) * 0.5
+			# boulders right at the wet edge (partly submerged)
+			if rng.randf() < 0.55:
+				var x := edge + out * lerpf(-0.6, 0.8, rng.randf())
+				var zz := z + rng.randf() * 1.5
+				if _bank_ok(x, zz, 1.4):
+					var big := rng.randf() < 0.3
+					var kind := "quarry_rock" if not big else "rock"
+					var variant := 1 if (big or rng.randf() < 0.6) else 2
+					var scale := lerpf(0.26, 0.5, rng.randf()) if not big else lerpf(0.22, 0.36, rng.randf())
+					insert(under_grid, under, [snappedf(x, 0.01), snappedf(zz, 0.01), 1.6, Rules.UNDERSTORY.find(kind), variant,
+						snappedf(rng.randf() * 360.0, 0.1), snappedf(scale, 0.001)])
+					insert(log_grid, logs, [x, zz, 0.0])
+					kinds_count["bank_" + kind] = kinds_count.get("bank_" + kind, 0) + 1
+			# reed beds in patches on the wet margin
+			if patch > 0.45:
+				for k in 2:
+					var x := edge + out * lerpf(-1.2, 0.6, rng.randf())
+					var zz := z + rng.randf() * 2.4
+					if _bank_ok(x, zz, 1.0):
+						insert(under_grid, under, [snappedf(x, 0.01), snappedf(zz, 0.01), 1.2, Rules.UNDERSTORY.find("reed"), 1 + rng.randi() % 3,
+							snappedf(rng.randf() * 360.0, 0.1), snappedf(lerpf(0.75, 1.15, rng.randf()), 0.001)])
+						kinds_count["bank_reed"] = kinds_count.get("bank_reed", 0) + 1
+			# willows on the bank top, leaning over the water
+			if z >= willow_next[side]:
+				var x := edge + out * lerpf(1.4, 3.2, rng.randf())
+				if maxf(absf(x), absf(z)) > CORE + 1.0 and not blocked_exact(x, z, true, 1.0, 4.0) \
+						and terrain.ground_height(x, z) > -0.4 and terrain.slope_degrees(x, z) < 38.0 and free_of_trunks(x, z, 3.2):
+					insert(trunk_grid, trunks, [x, z, 3.2])
+					var scale := lerpf(0.82, 1.02, rng.randf())
+					trees.append([snappedf(x, 0.01), snappedf(z, 0.01), Rules.WILLOW, 2 + rng.randi() % 2,
+						snappedf(rad_to_deg(atan2(-out, 0.0)) + lerpf(-40.0, 40.0, rng.randf()), 0.1), snappedf(scale, 0.001), Z_RIVER])
+					species_count[Rules.SPECIES[Rules.WILLOW]] = species_count.get(Rules.SPECIES[Rules.WILLOW], 0) + 1
+					willow_next[side] = z + lerpf(9.0, 17.0, rng.randf())
+				else:
+					willow_next[side] = z + 2.0
+		z += 2.4
+
+
+func _bank_ok(x: float, z: float, spacing: float) -> bool:
+	if maxf(absf(x), absf(z)) < CORE + 0.5 or maxf(absf(x), absf(z)) > EXTENT - 1.0:
+		return false
+	if blocked_exact(x, z, false) or atlas.bridge_deck_rect().grow(3.0).has_point(Vector2(x, z)):
+		return false
+	for other in near_points(x, z, spacing + 1.0, _bank_grid, _bank_points):
+		if Vector2(x - other[0], z - other[1]).length() < spacing:
+			return false
+	insert(_bank_grid, _bank_points, [x, z, 0.0])
+	return true
+
+
+var _bank_points: Array = []
+var _bank_grid := {}
+
+
+## SW quarry (art/01): light-grey cliffs and ledges wrap the back of the mine and the far side of
+## the quarry pit (moss rock v3 ledge slabs stacked in 2–3 terraces, quarry palette), v2 boulder
+## piles in the pit. Kept off the mine, the route clearances and glade 08.
+func _quarry_cliffs(under: Array, under_grid: Dictionary, logs: Array, log_grid: Dictionary, kinds_count: Dictionary) -> void:
+	if quarry_center == Vector2.INF:
+		return
+	var mine := Vector2.INF
+	for disc in landmark_discs:
+		if Vector2(disc[0]).distance_to(quarry_center) < 14.0:
+			mine = disc[0]
+	var site: Dictionary = atlas.site_by_id.lf_site_08
+	var glade_c := Vector2(site.center.x, site.center.z)
+	var back := (mine - glade_c).normalized() if mine != Vector2.INF else Vector2(-0.7, 0.7)
+	var far := Vector2(-0.7071, -0.7071)          # camera-far side (screen up)
+	var axis := (back * 0.6 + far * 0.4).normalized()
+	var base_angle := atan2(axis.y, axis.x)
+	var kind := Rules.UNDERSTORY.find("quarry_rock")
+	var tiers := [[12.5, 0.0, 1.05], [15.5, 1.6, 1.2], [18.5, 3.2, 1.3]]
+	for tier in tiers.size():
+		var radius: float = tiers[tier][0]
+		var lift: float = tiers[tier][1]
+		var scale: float = tiers[tier][2]
+		var arc := deg_to_rad(150.0 - tier * 20.0)
+		var steps := int(arc * radius / 7.2)
+		for k in steps + 1:
+			var a := base_angle - arc * 0.5 + arc * k / maxf(1.0, steps) + rng.randf_range(-0.05, 0.05)
+			var c := quarry_center + Vector2(cos(a), sin(a)) * (radius + rng.randf_range(-0.8, 0.8))
+			if mine != Vector2.INF and c.distance_to(mine) < 7.5:
+				continue
+			if c.distance_to(glade_c) < float(site.radius) + 2.5 or blocked_exact(c.x, c.y, false):
+				continue
+			if not ground_ok(c.x, c.y, false):
+				continue
+			# slab long axis tangent to the arc, face toward the pit
+			var yaw := rad_to_deg(atan2(cos(a), -sin(a))) + rng.randf_range(-12.0, 12.0)
+			insert(under_grid, under, [snappedf(c.x, 0.01), snappedf(c.y, 0.01), 4.0, kind, 2, snappedf(yaw, 0.1),
+				snappedf(scale * rng.randf_range(0.92, 1.08), 0.001), snappedf(lift, 0.01)])
+			insert(log_grid, logs, [c.x, c.y, 0.0])
+			kinds_count["quarry_ledge"] = kinds_count.get("quarry_ledge", 0) + 1
+	# boulder piles in the pit, between the glade and the cliffs
+	for k in 16:
+		var a := base_angle + rng.randf_range(-1.6, 1.6)
+		var c := quarry_center + Vector2(cos(a), sin(a)) * rng.randf_range(4.0, 11.0)
+		if mine != Vector2.INF and c.distance_to(mine) < 6.5:
+			continue
+		if c.distance_to(glade_c) < float(site.radius) + 0.5 or blocked_exact(c.x, c.y, false):
+			continue
+		insert(under_grid, under, [snappedf(c.x, 0.01), snappedf(c.y, 0.01), 2.0, kind, 1, snappedf(rng.randf() * 360.0, 0.1),
+			snappedf(rng.randf_range(0.3, 0.6), 0.001)])
+		kinds_count["quarry_boulder"] = kinds_count.get("quarry_boulder", 0) + 1
 
 
 ## Best clump-biased spot within [min_d, max_d] of (tx, tz) (outside art glades).
@@ -762,6 +892,17 @@ func _find_hero_spot() -> Vector2:
 				return p
 		radius += 1.0
 	return HERO_PREFERRED
+
+
+const HORSE_CLEAR := 3.9
+const ENTRY_CLEAR := 3.0
+
+
+func _entry_distance(p: Vector2, points: PackedVector3Array) -> float:
+	var best := INF
+	for i in range(points.size() - 1):
+		best = minf(best, ForestMasks.segment_distance(p, Vector2(points[i].x, points[i].z), Vector2(points[i + 1].x, points[i + 1].z)))
+	return best
 
 
 func _rect_membership(p: Vector2, rects: Array) -> int:

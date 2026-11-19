@@ -419,6 +419,18 @@ func run() -> void:
 		await frames(2)
 		await shoot("boss_85_z68")
 
+	# -------------------------------------------------- art/01 overview: the whole revealed forest
+	if wanted("overview"):
+		await fresh("completed")
+		await preload_actors()
+		look(Vector3(2, 0, -6), 130.0)
+		settle_world()
+		await frames(20)
+		await shoot("overview_z130")
+		look(Vector3(-20, 0, -40), 68.0)
+		await frames(10)
+		await shoot("overview_z68")
+
 	# -------------------------------------------------- each boss attack: telegraph + active window
 	if wanted("tele"):
 		var seen := {}

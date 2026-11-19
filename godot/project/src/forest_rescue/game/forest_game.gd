@@ -454,6 +454,15 @@ func schedule_settle_poll() -> void:
 	main.poll_account_state()
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		# Static GLB / meta caches of the actor rigs are process-wide: release them with the layer
+		# (no PackedScene or material left alive at exit).
+		var Rig = load("res://src/forest_rescue/game/actor_rig.gd")
+		Rig.scenes.clear()
+		Rig.requested.clear()
+		Rig.metas.clear()
+		Rig.uv2_materials.clear()
+		return
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
 		foreground = false
 		if intro != null:

@@ -74,3 +74,19 @@ LOD), `fog_culled` (instances removed because they stand deeper than 3 m inside 
     (`assets/forest_rescue/world/lf_fog_painted.png`, tools/build_fog_texture.py), soft cauliflower
     domes, wrap lighting / silver lining / haze at grazing angles, light wisps and a translucent haze
     bank over the revealed edge, drift 0.45 m/s (frozen with reduced motion).
+* v3.1 (2026-11-19, integration pass — additive, API_VERSION unchanged):
+  - Boss arena v2 LODs: `lf_boss_arena_assembled{,_lod1,_lod2}.glb` are switched as whole files by the
+    city zoom (LOD0 ≤ 34, LOD1 ≤ 85, LOD2 beyond; LOD2 also when the arena is far from the camera
+    target). The wanted file is loaded on a worker thread and swapped in; the previous instance is
+    freed, so only one arena file is resident. Painted kit material (k 0.35) like the landmarks.
+    `landmarks.finish_arena_load()` completes a pending swap synchronously (QA stills only).
+  - Zero-through-fog for the arena: every arena part (rim pines, rocks, banners inside the arena
+    GLB) follows the kit-instance rule (`area_displayed(part centre, part radius)`), and the arena's
+    painted materials are registered as fog receivers. `perf_snapshot().landmark_tris` counts only
+    the visible arena parts.
+  - `clock_source: Callable` (optional property): the gameplay layer sets `client.server_now`, so
+    the sight circles follow the presentation clock (fixed-fps movies); real time when unset.
+  - Painted shader include (`forest_painted.gdshaderinc`, shared with actors/props): optional
+    uniforms `albedo_uv2` (glTF baseColorTexture.texCoord 1), `use_variant_mask` / `variant_mask` /
+    `tint_cloth` / `tint_hair` (captive look variation through `<civilian>_variant_mask.png`). Defaults
+    leave the kit unchanged.

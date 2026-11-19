@@ -40,7 +40,7 @@ CHARS = {
             dict(kind="pouch", name="pouch", at=(-0.115, -0.15, 0.86), size=(0.085, 0.045, 0.15),
                  material="gear", toggle=True),
         ],
-        portrait=dict(eye_r=(417, 147), eye_l=(456, 147), mouth=(441, 171)),
+        portrait=dict(eye_r=(437, 146), eye_l=(468, 146), nose=(452, 157), mouth=(452.5, 171), chin=(452, 197)),
     ),
     "lf_civilian_herbalist": dict(
         kind="civilian", female=True, height=1.70,
@@ -56,7 +56,7 @@ CHARS = {
                    hair_thick=0.012, boot_top=0.12),
         garments=[],
         acc=[],
-        portrait=dict(eye_r=(912, 152), eye_l=(952, 151), mouth=(936, 178)),
+        portrait=dict(eye_r=(930, 150), eye_l=(958, 148), nose=(950, 162), mouth=(949, 176), chin=(949, 199)),
     ),
     "lf_civilian_ferryman": dict(
         kind="civilian", female=False, height=1.82,
@@ -71,7 +71,7 @@ CHARS = {
         build=dict(stocky=0.4, belly=0.0, torso_depth=1.0, head_w=0.98, beard="full", hair="wavy",
                    hair_thick=0.014, boot_top=0.36),
         garments=[], acc=[],
-        portrait=dict(eye_r=(1418, 145), eye_l=(1462, 143), mouth=(1447, 172)),
+        portrait=dict(eye_r=(1435, 145), eye_l=(1466, 143.5), nose=(1455, 154.5), mouth=(1454, 169), chin=(1452, 191)),
     ),
     "lf_civilian_courier": dict(
         kind="civilian", female=True, height=1.69,
@@ -86,7 +86,7 @@ CHARS = {
         build=dict(stocky=0.0, belly=0.0, torso_depth=0.95, head_w=0.96, beard=None, hair="bun",
                    hair_thick=0.012, boot_top=0.40),
         garments=[], acc=[],
-        portrait=dict(eye_r=(414, 601), eye_l=(452, 600), mouth=(436, 626)),
+        portrait=dict(eye_r=(438.5, 599), eye_l=(469.5, 598), nose=(460, 612), mouth=(457.5, 630), chin=(455, 652)),
     ),
     "lf_civilian_cooper": dict(
         kind="civilian", female=False, height=1.71,
@@ -101,7 +101,7 @@ CHARS = {
         build=dict(stocky=0.2, belly=0.01, torso_depth=1.0, head_w=0.98, beard="full_grey", hair="short_grey",
                    hair_thick=0.012, boot_top=0.16),
         garments=[], acc=[],
-        portrait=dict(eye_r=(911, 603), eye_l=(951, 601), mouth=(936, 628)),
+        portrait=dict(eye_r=(928, 598), eye_l=(963, 595.5), nose=(951.5, 609.5), mouth=(954, 626), chin=(955.5, 649)),
     ),
     "lf_civilian_quarry_worker": dict(
         kind="civilian", female=True, height=1.71,
@@ -116,7 +116,7 @@ CHARS = {
         build=dict(stocky=0.5, belly=0.0, torso_depth=1.0, head_w=1.0, beard=None, hair="bun",
                    hair_thick=0.012, boot_top=0.20),
         garments=[], acc=[],
-        portrait=dict(eye_r=(1421, 601), eye_l=(1459, 598), mouth=(1446, 626)),
+        portrait=dict(eye_r=(1444, 598), eye_l=(1475.5, 596), nose=(1466.5, 608), mouth=(1465.5, 626), chin=(1467, 649.5)),
     ),
     "lf_squad_captain": dict(
         kind="soldier", female=True, height=1.74,
@@ -131,7 +131,7 @@ CHARS = {
         build=dict(stocky=0.1, belly=0.0, torso_depth=1.0, head_w=0.98, beard=None, hair="short_dark",
                    hair_thick=0.016, boot_top=0.36),
         garments=[], acc=[],
-        portrait=None,
+        portrait=dict(eye_r=(134.5, 864), eye_l=(178, 865), nose=(167.5, 892), mouth=(161.5, 913.5), chin=(158.5, 943.5)),
     ),
     "lf_squad_scout": dict(
         kind="soldier", female=False, height=1.83,

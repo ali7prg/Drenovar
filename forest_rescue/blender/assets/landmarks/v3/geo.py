@@ -301,7 +301,7 @@ class Geo:
 
     def masonry_box(self, lo, hi, course=0.42, block=(0.5, 0.9), gap=0.035, relief=0.045, bevel=0.04,
                     faces=("+x", "-x", "+y", "-y"), top=True, mat="stone", tag="masonry", cheap=False, seed=0,
-                    ragged=None, top_blocks=True):
+                    ragged=None, top_blocks=True, cheap_faces=()):
         """Masonry block (pier/abutment/tower shaft) between lo and hi corners (axis aligned)."""
         rng = np.random.default_rng(seed)
         lo = np.asarray(lo, float)
@@ -319,7 +319,7 @@ class Geo:
                 continue
             ofs = [(v + 0.37 * ("+x-y+y-x".index(k))) % block[0] for v in offs]
             self.masonry_face(o, ex, np.array([0, 0, 1.0]), w, H, courses, rng=rng, block=block, gap=gap,
-                              relief=relief, bevel=bevel, mat=mat, tag=tag, offsets=ofs, cheap=cheap,
+                              relief=relief, bevel=bevel, mat=mat, tag=tag, offsets=ofs, cheap=cheap or k in cheap_faces,
                               ragged_top=None if ragged is None else ragged.get(k))
         if top:
             if top_blocks:

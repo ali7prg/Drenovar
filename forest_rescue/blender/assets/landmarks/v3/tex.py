@@ -70,7 +70,10 @@ def make_tileable(img, blend=0.25):
 class Swatch:
     """Tileable texture covering `metres` x `metres`, sampled tri-planarly by world position."""
 
-    def __init__(self, img, metres, name=""):
+    def __init__(self, img, metres, name="", rotate=False):
+        img = np.asarray(img, np.float64)
+        if rotate:
+            img = np.ascontiguousarray(np.rot90(img))
         self.img = make_tileable(img).astype(np.float32)
         self.m = float(metres)
         self.name = name
@@ -172,7 +175,8 @@ def lambert_shade(N, light, k=PAINT_K):
     return (1 - k) + k * np.clip(N @ L, 0, 1)
 
 
-def project_painting(P, N, cam, img, zb, W, H, accept=None, power=1.0, depth_eps=0.06, min_facing=0.05):
+def project_painting(P, N, cam, img, zb, W, H, accept=None, power=1.0, depth_eps=0.06, min_facing=0.5,
+                     max_mag=2.0):
     """Colour + weight for texel positions P/normals N from the painting seen by cam.
     accept: optional bool (H,W) image of painting pixels allowed for these texels."""
     u, v, dep = cam.project(P)
@@ -190,7 +194,13 @@ def project_painting(P, N, cam, img, zb, W, H, accept=None, power=1.0, depth_eps
         acc = np.zeros(len(P), bool)
         acc[ok] = accept[vi[ok], ui[ok]]
         vis &= acc
-    w = np.where(vis & (facing > min_facing), facing, 0.0)
+    # footprint rule: project only where the painting sees the face well (|n.v| >= min_facing, stretch
+    # 1/|n.v| <= 2) and a painting pixel is not magnified more than max_mag x the asset's typical footprint
+    dist = np.linalg.norm(P - C, axis=1)
+    foot = dist / cam.f / np.maximum(facing, 1e-3)
+    good_f = vis & (facing >= min_facing)
+    ref = np.median(foot[good_f]) if good_f.any() else 1.0
+    w = np.where(good_f & (foot <= max_mag * ref), facing, 0.0)
     if DEBUG:
         print(f"   project: n={len(P)} inframe={ok.mean():.3f} vis={vis.mean():.3f} facing>0.4={(facing > 0.4).mean():.3f} w>0.17={(w > 0.17).mean():.3f}", flush=True)
     col = bilinear(img, u, v)[:, :3]

@@ -211,8 +211,14 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
             continue
         b = spec["box"]
         src = sheet(spec.get("sheet", SHEET06))
-        sw[mc] = tex.Swatch(src[b[1]:b[3], b[0]:b[2]], spec["metres"], mc)
+        sw[mc] = tex.Swatch(src[b[1]:b[3], b[0]:b[2]], spec["metres"], mc, rotate=spec.get("rotate", False))
     tag_sw = getattr(L, "TAG_SWATCH", {})
+    # painting class at each texel's projection (even where the colour is not projected) -> swatch choice
+    u_all, v_all, _ = cam.project(P)
+    ui = np.clip(np.floor(u_all).astype(int), 0, W - 1)
+    vi = np.clip(np.floor(v_all).astype(int), 0, H - 1)
+    texcls = pcls[vi, ui]
+    class_sw = getattr(L, "CLASS_SWATCH", {})
     fill = np.zeros((len(P), 3))
     lab_proj = tex.to_lab(proj_alb)
     good = wgt > 0.12
@@ -231,6 +237,13 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
                 if str(tg).startswith(pre) and swn in sw:
                     s_t = sw[swn]
             raw = s_t.sample(P[ii], N[ii], off)
+            if mc in class_sw:      # class-guided synthesis (e.g. ground base: water / grass / gravel)
+                for pc, swn in class_sw[mc].items():
+                    sel_c = texcls[ii] == pc if pc != "*" else np.zeros(len(ii), bool)
+                    if pc.startswith("z<"):
+                        sel_c = P[ii, 2] < float(pc[2:])
+                    if sel_c.any() and swn in sw:
+                        raw[sel_c] = sw[swn].sample(P[ii][sel_c], N[ii][sel_c], off)
             gk = good[ii]
             if gk.sum() > 150:
                 mu, sd = lab_proj[ii][gk].mean(0), lab_proj[ii][gk].std(0)
@@ -243,6 +256,19 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
             sd = np.maximum(sd, s_t.sd * 0.6)
             f[kk] = tex.colour_match(raw, np.asarray(mu), np.asarray(sd), s_t.mu, s_t.sd, 1.0)
         fill[k] = f
+    # distinct blocks/planks: per-polygon brightness/warmth jitter; dark mortar backing
+    pid = OB[tri] * 1000003 + PI[tri]
+    h1 = ((pid * 2654435761) % 1000) / 1000.0
+    h2 = ((pid * 40503 + 17) % 997) / 997.0
+    jit = 1.0 + getattr(L, "POLY_JITTER", 0.08) * (h1 - 0.5) * 2
+    fill = np.clip(fill * jit[:, None] * np.stack([1 + 0.03 * (h2 - 0.5), np.ones_like(h2), 1 - 0.03 * (h2 - 0.5)], 1), 0, 1)
+    mort = np.array([str(t).endswith("_mortar") for t in tags])
+    if mort.any():
+        fill[mort] = np.asarray(getattr(L, "MORTAR_RGB", (0.24, 0.22, 0.19)))
+    for pre, rgb in getattr(L, "TAG_RGB", {}).items():
+        kk = np.array([str(t).startswith(pre) for t in tags])
+        if kk.any():
+            fill[kk] = fill[kk] * 0.35 + np.asarray(rgb) * 0.65
     # blend (feathered in texture space)
     a_img = np.zeros(valid.shape)
     a_img[yy, xx] = np.clip((wgt - 0.05) / 0.10, 0, 1)

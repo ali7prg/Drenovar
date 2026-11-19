@@ -45,16 +45,28 @@ INSETS = {
     "top": dict(box=(592, 98, 822, 144), dir=(0, 0, -1), fit="width"),
 }
 
-NO_PROJECT_TAGS = ("tower", "cornice", "cap", "gatepier", "finial", "banner", "niche")
-TAG_SWATCH = {"deck": "deck", "ramp": "deck", "subdeck": "deck"}
+NO_PROJECT_TAGS = ("tower", "cornice", "cap", "gatepier", "finial", "banner", "niche", "post_cap")
+TAG_SWATCH = {"deck": "plank", "ramp": "plank", "subdeck": "plank", "rail": "wood_h", "stringer": "wood_h",
+              "fascia": "wood_h", "capbeam": "wood_h", "arch": "wood_h", "tie": "wood_h", "brace": "wood_h",
+              "knee": "wood_h", "tower": "stone_face", "cornice": "stone_face", "gatepier": "stone_face",
+              "pier": "stone_face", "abut": "stone_face", "wing": "stone_face", "cap": "stone_face"}
 SWATCHES = {
-    "deck": dict(plane=dict(origin=(-4.6, -1.75, DECK), ex=(1, 0, 0), ey=(0, 1, 0), size_m=3.4), metres=3.4),
-    "wood": dict(box=(600, 166, 703, 252), metres=1.0),
+    "plank": dict(box=(632, 176, 648, 250), metres=0.9),
+    "wood": dict(box=(632, 176, 648, 250), metres=0.9),
+    "wood_h": dict(box=(632, 176, 648, 250), metres=0.9, rotate=True),
     "stone": dict(box=(716, 166, 808, 252), metres=1.35),
-    "ground": dict(box=(372, 168, 470, 232), metres=5.0),
+    "stone_face": dict(box=(740, 214, 772, 244), metres=0.55),
+    "ground": dict(box=(0, 140, 40, 180), metres=2.5),
+    "water": dict(box=(400, 180, 470, 235), metres=5.0),
+    "grass": dict(box=(55, 195, 100, 225), metres=1.6),
+    "gravel": dict(box=(330, 222, 372, 250), metres=1.8),
     "cloth": dict(box=(1280, 718, 1386, 828), metres=1.2),
     "metal": dict(box=(1430, 740, 1470, 800), metres=0.4),
 }
+CLASS_SWATCH = {"ground": {"water": "water", "veg": "grass", "stone": "gravel", "wood": "gravel", "z<-1.0": "water"}}
+MORTAR_RGB = (0.30, 0.27, 0.22)
+POLY_JITTER = 0.09
+WIND = {"dir": (0, 1, 0), "amp": 0.22, "drop": 2.2}
 SWATCH_FALLBACK = {"water": "ground", "rope": "wood", "roof": "stone", "glow": "metal"}
 CLASS_TRAIN = {
     "wood": [(160, 96, 176, 140), (262, 70, 278, 140), (200, 110, 250, 125), (610, 175, 640, 250),
@@ -130,9 +142,10 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
     railings(g, lod)
     substructure(g, lod)
     towers(g, lod)
-    banners(g, lod)
+    cloth = Geo(seed=21 + lod)
+    banners(g, lod, cloth)
     base = ground_base(lod, cam, mask, cards or {})
-    return dict(struct=g, base=base)
+    return dict(struct=g, cloth=cloth, base=base)
 
 
 def deck(g, lod):
@@ -318,29 +331,33 @@ def towers(g, lod):
                                (cx + ww / 2, cy + ny, dz + 0.55), "metal", "niche")
 
 
-def banners(g, lod):
-    """Red banners on the two north towers (art/01): iron pole on the cap apex, cross bar, waving cloth."""
+def banners(g, lod, cloth):
+    """Red banners on the two north towers (art/01): iron pole on the cap apex, arm toward +x, a large cloth
+    (0.8 x 2.2 m) hanging beside the tower top with a sway-ready curve (wind clip lf_banner_wind)."""
     for sx in (-1, 1):
         cx, cy = sx * TOWER_X, TOWER_Y
-        g.cyl((cx, cy, 5.6), (cx, cy, 7.55), 0.055, 0.045, n=6 if lod == 0 else 4, mat="metal", tag="banner_pole")
-        bar0 = np.array([cx - 0.5 * sx, cy, 7.35])
-        bar1 = np.array([cx + 0.05 * sx, cy, 7.35])
-        g.cyl(bar0, bar1, 0.03, n=4, mat="metal", tag="banner_bar", caps=(False, False))
-        nu, nv = (7, 9) if lod == 0 else ((4, 5) if lod == 1 else (2, 3))
-        W, Hh = 0.85, 1.75
+        top = 7.25
+        g.cyl((cx, cy, 5.6), (cx, cy, top + 0.15), 0.06, 0.05, n=6 if lod == 0 else 4, mat="metal", tag="banner_pole")
+        g.cyl((cx - 0.05, cy, top), (cx + 1.55, cy, top), 0.04, n=4, mat="metal", tag="banner_arm", caps=(False, True))
+        if lod == 0:
+            g.beam((cx + 0.05, cy, top - 0.55), (cx + 0.9, cy, top - 0.02), 0.05, 0.05, mat="metal", tag="banner_arm")
+        nu, nv = (6, 10) if lod == 0 else ((3, 5) if lod == 1 else (2, 2))
+        Wb, Hb = 0.8, 2.2
+        x0 = cx + 0.62
         P = np.zeros((nu, nv, 3))
         for i in range(nu):
             for j in range(nv):
                 u = i / (nu - 1)
                 v = j / (nv - 1)
-                x = cx - 0.48 * sx + sx * W * u * 0.98
-                z = 7.32 - Hh * (1 - v) + 0.0
-                z = 7.32 - Hh * v
-                y = cy + 0.09 * math.sin(2.6 * u * math.pi + 1.3 * v) * (0.3 + v)
-                if v > 0.9 and lod == 0:   # swallow-tail notch
-                    z += 0.25 * (1 - abs(2 * u - 1)) * (v - 0.9) / 0.1
+                x = x0 + Wb * u
+                z = top - 0.04 - Hb * v
+                y = cy + (0.06 * math.sin(math.pi * u * 1.6 + 0.4) + 0.12 * v * v) * (0.4 + v)
+                if v > 0.88 and lod == 0:          # swallow-tail notch at the bottom
+                    z += 0.32 * (1 - abs(2 * u - 1)) * (v - 0.88) / 0.12
                 P[i, j] = (x, y, z)
-        g.grid_surface(P, "cloth", "banner")
+        cloth.grid_surface(P, "cloth", "banner")
+        if lod < 2:   # top hem / rod
+            g.cyl((x0 - 0.02, cy, top - 0.04), (x0 + Wb + 0.02, cy, top - 0.04), 0.025, n=4, mat="wood", tag="banner_rod")
 
 
 # ---------------------------------------------------------------------------- ground base (painted patch)
@@ -449,9 +466,9 @@ def meta_extra():
                     "abutments_x": [-ABUT_X, ABUT_X], "wet_banks_x": [-6.317, 6.287],
                     "main_channel_clear": "no support between x=-6.6 and +6.6 (timber arch ribs span the channel)",
                     "towers": "4 stone tower piers 1.3 x 1.3 m at x=+-7.25, gltf z=+-2.95 (beside the deck), top 6.15 m",
-                    "banners": "red banners on the two north towers (gltf z=-2.95), pole top 7.55 m",
+                    "banners": "red cloth banners 0.8 x 2.2 m on arms of the two north towers (gltf z=-2.95), arm at 7.25 m; node <id>_cloth_LOD0 carries the lf_banner_wind morph clip",
                     "ramps": "x +-13.5 -> +-16.7, deck 1.1 down to bank 0.45 (11.5 deg)",
                     "railing_top_above_deck_m": round(2.04 + 0.065 - DECK, 3)},
-        sockets={"banner_west": [-TOWER_X, 7.35, -TOWER_Y], "banner_east": [TOWER_X, 7.35, -TOWER_Y],
+        sockets={"banner_west": [-TOWER_X + 1.02, 7.21, -TOWER_Y], "banner_east": [TOWER_X + 1.02, 7.21, -TOWER_Y],
                  "deck_west": [-13.5, DECK, 0.0], "deck_east": [13.5, DECK, 0.0]},
     )

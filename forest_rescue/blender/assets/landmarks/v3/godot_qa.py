@@ -29,7 +29,43 @@ def copy_assets(asset, dst):
     return meta
 
 
-def city(asset, box, out_png, yaw=0.0):
+MOCK = """
+	if spec.has("mock_river"):
+		ground.position.y = -50.0
+		var wm := StandardMaterial3D.new()
+		wm.albedo_color = Color(0.17, 0.36, 0.37)
+		wm.roughness = 0.15
+		var water := MeshInstance3D.new()
+		var wpm := PlaneMesh.new()
+		wpm.size = Vector2(14.0, 140.0)
+		water.mesh = wpm
+		water.material_override = wm
+		water.position = Vector3(0, -1.35, 0)
+		add_child(water)
+		for sgn in [-1.0, 1.0]:
+			var bank := MeshInstance3D.new()
+			var bm := BoxMesh.new()
+			bm.size = Vector3(60.0, 4.0, 140.0)
+			bank.mesh = bm
+			var bmat := StandardMaterial3D.new()
+			bmat.albedo_color = Color(0.43, 0.46, 0.25)
+			bank.material_override = bmat
+			bank.position = Vector3(sgn * (6.4 + 30.0), 0.45 - 2.0, 0)
+			add_child(bank)
+			var slope := MeshInstance3D.new()
+			var sm := BoxMesh.new()
+			sm.size = Vector3(2.6, 0.3, 140.0)
+			slope.mesh = sm
+			var smat := StandardMaterial3D.new()
+			smat.albedo_color = Color(0.45, 0.38, 0.28)
+			slope.material_override = smat
+			slope.position = Vector3(sgn * 6.0, -0.45, 0)
+			slope.rotation.z = sgn * 0.62
+			add_child(slope)
+"""
+
+
+def city(asset, box, out_png, yaw=0.0, base=True, mock_river=False):
     work = tempfile.mkdtemp(prefix="frcity3.")
     shutil.copytree(os.path.join(P3D, "godot_city_viewer"), work, dirs_exist_ok=True)
     meta = copy_assets(asset, os.path.join(work, "models"))
@@ -38,9 +74,14 @@ def city(asset, box, out_png, yaw=0.0):
         src = open(os.path.join(work, "city.gd")).read()
         src = src.replace("\tadd_child(ground)", "\tground.position.y = %f\n\tadd_child(ground)" % gy)
         open(os.path.join(work, "city.gd"), "w").write(src)
-    nodes = list(meta["nodes"]["LOD0"])
+    nodes = [n for n in meta["nodes"]["LOD0"] if base or not n.endswith("_base")]
     spec = dict(instances=[dict(glb=f"{asset}.glb", node=n, x=0.0, z=0.0, yaw=yaw, s=1.0, tag="lm") for n in nodes],
                 ground=[0.40, 0.42, 0.24], target=[0, 1.0, 0])
+    if mock_river:
+        spec["mock_river"] = True
+        src = open(os.path.join(work, "city.gd")).read()
+        src = src.replace("\tadd_child(ground)\n", "\tadd_child(ground)\n" + MOCK, 1)
+        open(os.path.join(work, "city.gd"), "w").write(src)
     json.dump(spec, open(os.path.join(work, "spec.json"), "w"))
     subprocess.run(["timeout", "600", "godot", "--headless", "--path", work, "--import"], stdout=subprocess.DEVNULL,
                    stderr=subprocess.DEVNULL)
@@ -67,7 +108,7 @@ def city(asset, box, out_png, yaw=0.0):
             h, w = g.shape[:2]
             cw, ch = min(w, crop.size[0]), min(h, crop.size[1])
             panels.append(g[(h - ch) // 2:(h + ch) // 2, (w - cw) // 2:(w + cw) // 2])
-            labels.append(f"Godot game camera zoom {z} (LOD0 + base)")
+            labels.append(f"Godot game camera zoom {z} (LOD0, base {'on' if base else 'OFF'}{', mock river' if mock_river else ''})")
     H = 420
     row = []
     for im, lab in zip(panels, labels):
@@ -102,5 +143,8 @@ def viewer(asset, out_png):
 if __name__ == "__main__":
     a = sys.argv[1:]
     yaw = float(a[3]) if len(a) > 3 else 0.0
-    city(a[0], tuple(int(v) for v in a[1].split(",")), a[2] + "_city.png", np.radians(yaw))
+    box = tuple(int(v) for v in a[1].split(","))
+    mock = os.environ.get("LM3_MOCK_RIVER") == "1"
+    city(a[0], box, a[2] + "_city_baseoff.png", np.radians(yaw), base=False, mock_river=mock)
+    city(a[0], box, a[2] + "_city_baseon.png", np.radians(yaw), base=True, mock_river=False)
     viewer(a[0], a[2] + "_viewer.png")

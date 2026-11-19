@@ -351,14 +351,51 @@ def ortho_render(objs, direction, up=(0, 0, 1), res=900, margin=1.02):
     return rgba[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
 
 
-def export_glb(path, objs, root_name):
+def cloth_wind(obj, spec):
+    """Two seamless shape-key loops (billow + ripple) weighted by distance from the hanging edge (top)."""
+    import math as _m
+    me = obj.data
+    n = len(me.vertices)
+    co = np.empty(n * 3)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(n, 3)
+    ztop = spec.get("ztop")
+    if ztop is None:
+        ztop = co[:, 2].max()
+    span = max(spec.get("drop", float(np.ptp(co[:, 2]))), 1e-3)
+    w = np.clip((ztop - co[:, 2]) / span, 0, 1) ** 1.3
+    d = np.asarray(spec.get("dir", (0, 1, 0)), float)
+    obj.shape_key_add(name="Basis")
+    for name, amp, k in (("billow", spec.get("amp", 0.22), 0.0), ("ripple", spec.get("amp", 0.22) * 0.35, 1.0)):
+        sk = obj.shape_key_add(name=name)
+        if k == 0:
+            off = np.outer(w, d) * amp
+        else:
+            off = np.outer(w * np.sin(co[:, 0] * 4.0 + co[:, 2] * 3.0), d) * amp
+        sk.data.foreach_set("co", (co + off).astype(np.float32).ravel())
+    act = bpy.data.actions.new("lf_banner_wind")
+    me.shape_keys.animation_data_create()
+    me.shape_keys.animation_data.action = act
+    fps = 30
+    nfr = int(4.5 * fps)
+    kb = me.shape_keys.key_blocks
+    for f in range(0, nfr + 1, 3):
+        t = f / nfr * 2 * _m.pi
+        kb["billow"].value = 0.5 + 0.5 * _m.sin(t)
+        kb["ripple"].value = 0.5 + 0.5 * _m.sin(2 * t + 0.7)
+        kb["billow"].keyframe_insert("value", frame=f + 1)
+        kb["ripple"].keyframe_insert("value", frame=f + 1)
+
+
+def export_glb(path, objs, root_name, anim=False):
     root = bpy.data.objects.new(root_name, None)
     core.link(root)
     for o in objs:
         o.parent = root
     bpy.context.view_layer.update()
-    core.export_glb(path, [root] + list(objs), animations=False,
-                    extra=dict(export_vertex_color="NONE", export_image_format="AUTO", export_morph=False))
+    core.export_glb(path, [root] + list(objs), animations=anim,
+                    extra=dict(export_vertex_color="NONE", export_image_format="AUTO", export_morph=anim,
+                               export_morph_normal=False, export_animation_mode="ACTIONS"))
     for o in objs:
         o.parent = None
     bpy.data.objects.remove(root, do_unlink=True)

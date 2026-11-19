@@ -191,6 +191,8 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
     pcls, _ = clf.classify(crop)
     col = np.zeros((len(P), 3))
     wgt = np.zeros(len(P))
+    col_s = np.zeros((len(P), 3))      # lenient visibility: palette statistics only (no detail transfer)
+    vis_s = np.zeros(len(P), bool)
     nop = np.array([any(str(t).startswith(pre) for pre in getattr(L, "NO_PROJECT_TAGS", ())) for t in tags])
     for mc, accepted in L.ACCEPT.items():
         k = (mcls == mc) & ~nop
@@ -199,6 +201,8 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
         acc = np.isin(pcls, list(accepted)) & ref_mask
         c, w, facing = tex.project_painting(P[k], N[k], cam, crop, zb, W, H, accept=acc)
         col[k], wgt[k] = c, w
+        c2, w2, _ = tex.project_painting(P[k], N[k], cam, crop, zb, W, H, accept=acc, min_facing=0.08, max_mag=1e9)
+        col_s[k], vis_s[k] = c2, w2 > 0
     # de-light (painting key light) so the painted-light shader reproduces the painting
     shade = tex.lambert_shade(N, bl.PAINT_LIGHT_06)
     proj_alb = np.clip(col / shade[:, None], 0, 1)
@@ -220,8 +224,8 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
     texcls = pcls[vi, ui]
     class_sw = getattr(L, "CLASS_SWATCH", {})
     fill = np.zeros((len(P), 3))
-    lab_proj = tex.to_lab(proj_alb)
-    good = wgt > 0.12
+    lab_proj = tex.to_lab(np.clip(col_s / shade[:, None], 0, 1))
+    good = vis_s
     for mc in np.unique(mcls):
         k = mcls == mc
         s = sw.get(mc) or sw.get(L.SWATCH_FALLBACK.get(mc, "stone"))
@@ -245,6 +249,26 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
                     if sel_c.any() and swn in sw:
                         raw[sel_c] = sw[swn].sample(P[ii][sel_c], N[ii][sel_c], off)
             gk = good[ii]
+            if mc in class_sw:
+                # per painting-class palette inside the tag (water / grass / gravel keep their own colours)
+                f_t = np.zeros((len(ii), 3))
+                done = np.zeros(len(ii), bool)
+                for pc in np.unique(texcls[ii]):
+                    sel_c = (texcls[ii] == pc) & gk
+                    msk = texcls[ii] == pc
+                    if sel_c.sum() > 80:
+                        mu_c, sd_c = lab_proj[ii][sel_c].mean(0), lab_proj[ii][sel_c].std(0)
+                        sd_c = np.maximum(sd_c, s_t.sd * 0.5)
+                        f_t[msk] = tex.colour_match(raw[msk], mu_c, sd_c, raw[msk].mean(0) * 0 + tex.to_lab(raw[msk]).mean(0),
+                                                    tex.to_lab(raw[msk]).std(0) + 1e-3, 1.0)
+                        done |= msk
+                if done.any() and gk.sum() > 150:
+                    mu, sd = lab_proj[ii][gk].mean(0), lab_proj[ii][gk].std(0)
+                    rest = ~done
+                    if rest.any():
+                        f_t[rest] = tex.colour_match(raw[rest], mu, np.maximum(sd, s_t.sd * 0.6), s_t.mu, s_t.sd, 1.0)
+                    f[kk] = f_t
+                    continue
             if gk.sum() > 150:
                 mu, sd = lab_proj[ii][gk].mean(0), lab_proj[ii][gk].std(0)
             else:
@@ -341,30 +365,31 @@ def build(name, it):
     tags = {}
     fixed = {}
     for lod in range(3):
-        for part in ("struct", "base"):
-            g = geos[lod][part]
+        for part in PARTS:
+            g = geos[lod].get(part)
             if g is None or not g.F:
                 continue
-            nm = (f"{asset}_LOD{lod}" if part == "struct" else (f"{asset}_base" if lod == 0 else f"{asset}_base_LOD{lod}"))
+            nm = {"struct": f"{asset}_LOD{lod}", "cloth": f"{asset}_cloth_LOD{lod}",
+                  "base": f"{asset}_base" if lod == 0 else f"{asset}_base_LOD{lod}"}[part]
             o, fx, M, Tg = bl.object_from_geo(nm, g, mats0)
             objs[(lod, part)] = o
             tags[(lod, part)] = Tg
             fixed[(lod, part)] = fx
     tris = {}
     for lod in range(3):
-        s = core.tri_count(objs[(lod, "struct")])
+        s = core.tri_count(objs[(lod, "struct")]) + (core.tri_count(objs[(lod, "cloth")]) if (lod, "cloth") in objs else 0)
         b = core.tri_count(objs[(lod, "base")]) if (lod, "base") in objs else 0
         tris[f"LOD{lod}"] = dict(structure=s, base=b, total=s + b)
     print(f"[{asset}] tris {tris}", flush=True)
     # ---- UV atlases per LOD (struct + base share one atlas)
     for lod in range(3):
-        group = [objs[(lod, p)] for p in ("struct", "base") if (lod, p) in objs]
-        bl.atlas_uv(group, [fixed[(lod, p)] for p in ("struct", "base") if (lod, p) in objs])
-        for p in ("struct", "base"):
+        group = [objs[(lod, p)] for p in PARTS if (lod, p) in objs]
+        bl.atlas_uv(group, [fixed[(lod, p)] for p in PARTS if (lod, p) in objs])
+        for p in PARTS:
             if (lod, p) in objs:
                 bl.restore_fixed_uv(objs[(lod, p)], geos[lod][p])
     # ---- LOD0 texture by projection + fill
-    keys0 = [(0, p) for p in ("struct", "base") if (0, p) in objs]
+    keys0 = [(0, p) for p in PARTS if (0, p) in objs]
     o0 = [objs[k] for k in keys0]
     ftags = [tags[k] for k in keys0]
     alb0, nrm0, tstats, texinfo = texture_atlas(L, asset, it, o0, ftags, cam, crop, ref_mask, W, H,
@@ -380,7 +405,7 @@ def build(name, it):
     save_png(os.path.join(RT, files["n0"]), n_small)
     lod_tex = {}
     for lod, size in ((1, 1024), (2, 512)):
-        keys = [(lod, p) for p in ("struct", "base") if (lod, p) in objs]
+        keys = [(lod, p) for p in PARTS if (lod, p) in objs]
         a = transfer_atlas(texinfo, [objs[k] for k in keys], size)
         fn = f"{asset}_lod{lod}_c.jpg"
         save_jpg(os.path.join(RT, fn), a)
@@ -411,24 +436,32 @@ def build(name, it):
     met = pblend.compare_sheet(crop, ref_mask, rgba, bg, qa_path(asset, it, "main"),
                                f"{asset} v3 iter {it}: art/06 main view, solved camera (rms {cam_rep['rms_px']:.1f}px), "
                                f"LOD0 + base, painted-light k=0.35", scale=2)
-    rgba_s = bl.render_painting_cam(cam, W, H, [objs[(0, "struct")]], ss=2)
+    rgba_s = bl.render_painting_cam(cam, W, H, [o for k, o in objs.items() if k[0] == 0 and k[1] != "base"], ss=2)
     met_s = dict(iou_structure_only=float(((rgba_s[..., 3] > 0.5) & ref_mask).sum() / max(1, ((rgba_s[..., 3] > 0.5) | ref_mask).sum())))
     met.update(met_s)
     print(f"[{asset}] MAIN VIEW: IoU {met['iou']:.3f} colour {met['colour_err']:.3f} SSIM {met['ssim']:.3f}", flush=True)
     # ---- insets
     insets = {}
     for key, spec in getattr(L, "INSETS", {}).items():
-        sel_objs = [objs[(0, "struct")]] + ([objs[(0, "base")]] if spec.get("base") and (0, "base") in objs else [])
+        sel_objs = [o for k, o in objs.items() if k[0] == 0 and k[1] != "base"] + ([objs[(0, "base")]] if spec.get("base") and (0, "base") in objs else [])
         insets[key] = inset_compare(asset, it, key, spec, sel_objs)
         print(f"[{asset}] inset {key}: IoU {insets[key]['iou']:.3f}", flush=True)
     bl.use_qa(view_objs, 0.35, on=False)
+    # ---- wind clip on cloth (morph targets, seamless loop)
+    clips = {}
+    for lod in range(2):
+        if (lod, "cloth") in objs:
+            bl.cloth_wind(objs[(lod, "cloth")], getattr(L, "WIND", {}))
+            clips["lf_banner_wind"] = {"seconds": 4.5, "loop": True, "type": "morph-target animation (shape keys billow/ripple) on the cloth node",
+                                       "node": f"{asset}_cloth_LOD0"}
     # ---- export
     lod_files = {}
     nodes = {}
     for lod in range(3):
-        keys = [(lod, p) for p in ("struct", "base") if (lod, p) in objs]
+        keys = [(lod, p) for p in PARTS if (lod, p) in objs]
         path = os.path.join(RT, f"{asset}.glb" if lod == 0 else f"{asset}_LOD{lod}.glb")
-        bl.export_glb(path, [objs[k] for k in keys], asset if lod == 0 else f"{asset}_lod{lod}")
+        bl.export_glb(path, [objs[k] for k in keys], asset if lod == 0 else f"{asset}_lod{lod}",
+                      anim=(lod, "cloth") in objs and lod < 2)
         ext = {f"{asset}_c": files["c0"], f"{asset}_n": files["n0"], f"{asset}_lod1_c": files["c1"],
                f"{asset}_lod2_c": files["c2"]}
         if "cards" in files:
@@ -439,7 +472,7 @@ def build(name, it):
         nodes[f"LOD{lod}"] = [objs[k].name for k in keys]
     import glbx
     gi = glbx.info(os.path.join(RT, f"{asset}.glb"))
-    lo, hi = core.bounds([objs[(0, "struct")]])
+    lo, hi = core.bounds([o for k, o in objs.items() if k[0] == 0 and k[1] != "base"])
     meta = dict(
         id=asset, generation="v3 (blueprint + solved art/06 camera + painting projection)",
         tris={k: v["structure"] for k, v in tris.items()}, tris_detail=tris,
@@ -465,6 +498,8 @@ def build(name, it):
                                            n_points=cam_rep["n"]), insets=insets, texture=tstats,
                 sheets=f"forest_rescue/qa/compare/{asset}/v3_iter{it:02d}_*"),
     )
+    if clips:
+        meta["clips"] = clips
     meta.update(L.meta_extra())
     core.write_json(os.path.join(RT, f"{asset}.meta.json"), meta)
     core.write_json(qa_path(asset, it, "metrics", "json"), meta["qa"] | dict(tris=tris))
@@ -475,6 +510,9 @@ def build(name, it):
     core.save_blend(os.path.join(SRC, f"{asset}.blend"))
     print(f"[{asset}] done in {time.time() - t0:.0f}s", flush=True)
     return meta
+
+
+PARTS = ("struct", "cloth", "base")
 
 
 def to_gl_collider(c):
@@ -521,7 +559,7 @@ def lod_sheet(asset, it, objs):
     import pblend
     shots = []
     for lod in range(3):
-        sel = [objs[(lod, p)] for p in ("struct", "base") if (lod, p) in objs]
+        sel = [objs[(lod, p)] for p in PARTS if (lod, p) in objs]
         bl.use_qa(sel, 0.35)
         d = (math.sin(math.radians(225)) * math.cos(math.radians(38)), math.cos(math.radians(225)) * math.cos(math.radians(38)),
              -math.sin(math.radians(38)))

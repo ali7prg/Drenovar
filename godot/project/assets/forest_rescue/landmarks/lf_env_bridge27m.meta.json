@@ -2,20 +2,20 @@
   "id": "lf_env_bridge27m",
   "generation": "v3 (blueprint + solved art/06 camera + painting projection)",
   "tris": {
-    "LOD0": 6764,
-    "LOD1": 1006,
+    "LOD0": 6804,
+    "LOD1": 1018,
     "LOD2": 322
   },
   "tris_detail": {
     "LOD0": {
-      "structure": 6764,
+      "structure": 6804,
       "base": 2752,
-      "total": 9516
+      "total": 9556
     },
     "LOD1": {
-      "structure": 1006,
+      "structure": 1018,
       "base": 546,
-      "total": 1552
+      "total": 1564
     },
     "LOD2": {
       "structure": 322,
@@ -54,14 +54,17 @@
   "nodes": {
     "LOD0": [
       "lf_env_bridge27m_LOD0",
+      "lf_env_bridge27m_cloth_LOD0",
       "lf_env_bridge27m_base"
     ],
     "LOD1": [
       "lf_env_bridge27m_LOD1",
+      "lf_env_bridge27m_cloth_LOD1",
       "lf_env_bridge27m_base_LOD1"
     ],
     "LOD2": [
       "lf_env_bridge27m_LOD2",
+      "lf_env_bridge27m_cloth_LOD2",
       "lf_env_bridge27m_base_LOD2"
     ]
   },
@@ -84,7 +87,7 @@
     ],
     [
       16.698,
-      7.55,
+      7.4,
       3.71
     ]
   ],
@@ -280,8 +283,8 @@
   "qa": {
     "main_view": {
       "iou": 0.8837,
-      "colour_err": 0.1076,
-      "ssim": 0.4946,
+      "colour_err": 0.1666,
+      "ssim": 0.2484,
       "ref_px": 121528,
       "render_px": 126670,
       "iou_structure_only": 0.4167381579753661
@@ -293,26 +296,34 @@
     },
     "insets": {
       "side": {
-        "iou": 0.3192,
-        "colour_err": 0.1871,
-        "ssim": 0.3893,
+        "iou": 0.3206,
+        "colour_err": 0.1737,
+        "ssim": 0.3845,
         "ref_px": 69184,
-        "render_px": 43049
+        "render_px": 43127
       },
       "top": {
-        "iou": 0.778,
-        "colour_err": 0.1546,
-        "ssim": 0.2294,
+        "iou": 0.7786,
+        "colour_err": 0.1343,
+        "ssim": 0.197,
         "ref_px": 121504,
-        "render_px": 114009
+        "render_px": 114349
       }
     },
     "texture": {
-      "texels": 684129,
-      "projected_frac": 0.18734186096481803,
-      "seconds": 7.2
+      "texels": 682147,
+      "projected_frac": 0.026171778223755292,
+      "seconds": 7.1
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_bridge27m/v3_iter04_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_bridge27m/v3_iter06_*"
+  },
+  "clips": {
+    "lf_banner_wind": {
+      "seconds": 4.5,
+      "loop": true,
+      "type": "morph-target animation (shape keys billow/ripple) on the cloth node",
+      "node": "lf_env_bridge27m_cloth_LOD0"
+    }
   },
   "placement": {
     "world_position_xz": [
@@ -356,19 +367,19 @@
     ],
     "main_channel_clear": "no support between x=-6.6 and +6.6 (timber arch ribs span the channel)",
     "towers": "4 stone tower piers 1.3 x 1.3 m at x=+-7.25, gltf z=+-2.95 (beside the deck), top 6.15 m",
-    "banners": "red banners on the two north towers (gltf z=-2.95), pole top 7.55 m",
+    "banners": "red cloth banners 0.8 x 2.2 m on arms of the two north towers (gltf z=-2.95), arm at 7.25 m; node <id>_cloth_LOD0 carries the lf_banner_wind morph clip",
     "ramps": "x +-13.5 -> +-16.7, deck 1.1 down to bank 0.45 (11.5 deg)",
     "railing_top_above_deck_m": 1.005
   },
   "sockets": {
     "banner_west": [
-      -7.25,
-      7.35,
+      -6.23,
+      7.21,
       -2.95
     ],
     "banner_east": [
-      7.25,
-      7.35,
+      8.27,
+      7.21,
       -2.95
     ],
     "deck_west": [

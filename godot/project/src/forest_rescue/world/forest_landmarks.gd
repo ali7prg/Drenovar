@@ -251,6 +251,16 @@ func _prepare(node: Node3D) -> void:
 		part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if String(part.name).contains("_base") else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 
 
+static func _visible_tris(node: Node) -> int:
+	if node == null or not is_instance_valid(node):
+		return 0
+	var total := 0
+	for part: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
+		if part.mesh != null and part.is_visible_in_tree():
+			total += ForestKit.mesh_triangles(part.mesh)
+	return total
+
+
 static func _count_tris(node: Node) -> int:
 	var total := 0
 	for part: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
@@ -309,8 +319,10 @@ func update_view(target: Vector3, zoom: float, visible_fn: Callable) -> int:
 			if d > zoom * 1.25 + 40.0:
 				lod = 2
 			_set_arena_lod(lod)
+			arena_visible_fn = visible_fn
+			_cull_arena()
 			if d <= zoom * 1.25 + 24.0:
-				tris += arena_tris
+				tris += _visible_tris(arena_node)
 	return tris
 
 
@@ -322,6 +334,8 @@ func update_view(target: Vector3, zoom: float, visible_fn: Callable) -> int:
 const ARENA_FILES := ["lf_boss_arena_assembled.glb", "lf_boss_arena_assembled_lod1.glb", "lf_boss_arena_assembled_lod2.glb"]
 const ARENA_LOD_ZOOM := [34.0, 85.0]
 var arena_node: Node3D
+var arena_cull: Array = []        # [[MeshInstance3D, Vector2 xz centre, radius]] of the shown file
+var arena_visible_fn := Callable()
 var arena_shown_lod := -1
 var arena_wanted_lod := -1
 var arena_loading := ""
@@ -415,7 +429,31 @@ func _swap_arena(scene: Variant, lod: int) -> void:
 	arena_shown_lod = lod
 	arena_lod = lod
 	arena_tris = _count_tris(node)
+	# Zero-through-fog: the arena file carries kit trees / rocks on its rim; each part follows
+	# the same rule as the kit instances (nothing renders deeper inside unexplored ground than
+	# the 3 m blend band, here + the part's own radius), and its painted materials join the fog
+	# receivers so the band erodes like the forest around it.
+	arena_cull.clear()
+	for part: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
+		if part.mesh == null:
+			continue
+		var box: AABB = part.global_transform * part.get_aabb()
+		var c := box.get_center()
+		arena_cull.append([part, Vector2(c.x, c.z), maxf(box.size.x, box.size.z) * 0.5])
+	var world := get_parent()
+	if world != null and world.has_method("_register_fog_receivers"):
+		world.call("_register_fog_receivers")
+	_cull_arena()
 	apply_arena_state(arena_state)
+
+
+func _cull_arena() -> void:
+	if not arena_visible_fn.is_valid():
+		return
+	for entry in arena_cull:
+		var part: MeshInstance3D = entry[0]
+		if is_instance_valid(part):
+			part.visible = bool(arena_visible_fn.call(entry[1].x, entry[1].y, float(entry[2])))
 
 
 func _set_arena_lod(lod: int) -> void:

@@ -259,6 +259,11 @@ func run() -> void:
 	await shot("partial_path_z40", Vector3(-38, 0, -66), 40.0)
 	await shot("partial_edge_z68", Vector3(-55, 0, -58), 68.0)
 	await shot("partial_overview_z130", Vector3(-10, 0, -10), 130.0)
+	# 3b. Only the boss route explored (the live finale): the arena is partly revealed and its
+	#     rim (kit trees/rocks inside the arena GLB) must not show through the deep fog.
+	await apply(adventure(true, explored_bits(["lf_route_entry", "lf_route_boss"]), 4, "acknowledged", "lf_boss_ancient_maw"))
+	await shot("partial_arena_z40", Vector3(75, 0, -84), 40.0)
+	await shot("partial_arena_z68", Vector3(75, 0, -84), 68.0)
 	# 4. Fully explored: composition vs. the masterplan, biomes, bridge, arena.
 	await apply(adventure(true, all_bits(), 3, "acknowledged", "lf_site_12"))
 	world.fog.set_dim(0.0)

@@ -517,7 +517,8 @@ func horse_rest_point(node: String, fallback: Vector3) -> Vector3:
 	var right := Vector3(back.z, 0, -back.x)
 	var art: Vector3 = anchor.get("artifact", center)
 	var side := -1.0 if (art - center).dot(right) > 0.0 else 1.0
-	var p := center + back * 2.0 + right * side * 3.0
+	# Clear of the cage door / gathering spot (cage + 4–5 m towards the approach) and of the device.
+	var p := center + back * 5.6 + right * side * 3.8
 	return game.ground(p.x, p.z)
 
 ## Point on the arena's entrance axis `distance` m from the centre (side offset in m).

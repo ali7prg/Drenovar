@@ -165,3 +165,106 @@ def meta(A, p):
                       "fallen_trunk": "lf_lock_mechanism (node cache_lid slides +X 0.55 m)"},
             "solved_clip": "lf_lock_mechanism (hold last frame)",
             "sockets": {"artifact": g(((p["lx0"] + p["lx1"]) / 2 - 0.2, 0, 2 * p["R"] - 0.05))}}
+
+
+def solve(views):
+    """Two-stage solve: (1) camera from the hatch rectangle + ring + arrow plank (all on the log top) with an
+    assumed hatch size and a 20 deg fov prior (planar PnP); (2) log ends, stump and rock back-projected through that
+    camera for initial sizes; (3) joint least squares of camera + every blueprint size on all 14 points."""
+    import cv2
+    from scipy.optimize import least_squares
+    import camsolve
+    v = views[0]
+    W, H = v.size
+    p = dict(PARAMS)
+    f0 = max(W, H) / (2 * math.tan(math.radians(10.0)))
+    K = np.array([[f0, 0, W / 2], [0, f0, H / 2], [0, 0, 1.0]])
+    k1 = ["lid_bl", "lid_br", "lid_fr", "lid_fl", "ring"]
+    p["ax0"] = p["lx0"] + OPEN - 0.2
+    p["ax1"] = p["ax0"] + 0.62
+    p["ay"] = p["lw"] + 0.14
+    P = points(p)
+    # look-at initialisation (camera in front-left, above): avoids the planar-PnP two-fold ambiguity
+    best = None
+    for el in (25, 32, 38, 45, 52):
+        for az in (-40, -30, -20, -10, 0, 10):
+            tgt = np.array([0.3, 0.0, 0.9])
+            d = f0 * 0.9 / 138.0
+            e_, a_ = math.radians(el), math.radians(az)
+            C = tgt + d * np.array([math.sin(a_) * math.cos(e_), -math.cos(a_) * math.cos(e_), math.sin(e_)])
+            fwd = (tgt - C) / np.linalg.norm(tgt - C)
+            right = np.cross(fwd, (0, 0, 1.0))
+            right /= np.linalg.norm(right)
+            down = np.cross(fwd, right)
+            Rm = np.stack([right, down, fwd])
+            rv0 = cv2.Rodrigues(Rm)[0]
+            tv0 = (-Rm @ C).reshape(3, 1)
+            ok, rv, tv = cv2.solvePnP(np.array([P[k] for k in k1], float), v.p2(k1), K, None, rv0, tv0,
+                                      useExtrinsicGuess=True, flags=cv2.SOLVEPNP_ITERATIVE)
+            pr, _ = cv2.projectPoints(np.array([P[k] for k in k1], float), rv, tv, K, None)
+            err = float(np.sqrt(((pr[:, 0] - v.p2(k1)) ** 2).sum(1).mean()))
+            Rc = cv2.Rodrigues(rv)[0]
+            Cc = -Rc.T @ tv.ravel()
+            if Cc[2] < 1.0:          # camera must be above the ground
+                continue
+            if best is None or err < best[0]:
+                best = (err, rv, tv, el, az)
+    err, rv, tv, el, az = best
+    print(f"  [main] stage-1 hatch PnP (5 pts) rms {err:.2f}px from look-at init el {el} az {az}", flush=True)
+    cam = camsolve.Cam(f0, W / 2, H / 2, rv.ravel(), tv.ravel(), size=v.size)
+    # back-projections for initial sizes
+    def ray_plane(key, p0, n):
+        q = v.p2([key])[0]
+        return cam.on_plane(np.array([q[0]]), np.array([q[1]]), p0, n)[0]
+    zt = 2 * p["R"]
+    nt = ray_plane("near_top", (0, 0, 0), (0, 1, 0))
+    fc = ray_plane("far_c", (0, 0, 0), (0, 1, 0))
+    p["L"] = float(max(2.0, min(6.0, fc[0] - nt[0])))
+    sb = ray_plane("stump_bf", (0, 0, 0), (0, 0, 1))
+    p["sx_"], p["sy_"] = float(sb[0]), float(sb[1] + p["sr"])
+    tl = ray_plane("stump_tl", (0, p["sy_"], 0), (0, 1, 0))
+    tr = ray_plane("stump_tr", (0, p["sy_"], 0), (0, 1, 0))
+    p["sr"] = float(max(0.25, min(0.8, abs(tr[0] - tl[0]) / 2)))
+    p["sh"] = float(max(0.6, min(2.2, (tl[2] + tr[2]) / 2)))
+    rt = ray_plane("rock_top", (0, p["ry"], 0), (0, 1, 0))
+    p["rx"], p["rh"] = float(rt[0]), float(max(0.6, min(2.5, rt[2])))
+    print("  [main] stage-1 planar PnP init:", {k: round(p[k], 3) for k in ("L", "sx_", "sy_", "sr", "sh", "rx", "rh")}, flush=True)
+    free = FREE
+    keys = list(v.points)
+    p0 = np.array([p[k] for k in free])
+
+    def unpack(x):
+        c = camsolve.Cam(math.exp(x[0]), W / 2, H / 2, x[1:4], x[4:7], size=v.size)
+        pp = dict(p)
+        for j, k in enumerate(free):
+            pp[k] = x[7 + j]
+        return c, pp
+
+    def resid(x):
+        c, pp = unpack(x)
+        PP = points(pp)
+        u, w_, _ = c.project(np.array([PP[k] for k in keys]))
+        q = v.p2(keys)
+        r = list(u - q[:, 0]) + list(w_ - q[:, 1])
+        r.append((x[0] - math.log(f0)) * 40.0)
+        for j, k in enumerate(free):
+            r.append((pp[k] - p0[j]) / (0.35 * max(abs(p0[j]), 0.2)) * 0.6)
+        return np.array(r)
+
+    x0 = np.array([math.log(f0), *cam.rvec, *cam.tvec, *p0])
+    sol = least_squares(resid, x0, method="trf", max_nfev=8000, loss="soft_l1", f_scale=4.0)
+    cam, pp = unpack(sol.x)
+    PP = points(pp)
+    u, w_, _ = cam.project(np.array([PP[k] for k in keys]))
+    q = v.p2(keys)
+    e = np.hypot(u - q[:, 0], w_ - q[:, 1])
+    v.cam = cam
+    v.rep = dict(rms_px=float(np.sqrt((e ** 2).mean())), max_px=float(e.max()), n=len(keys),
+                 per_point_px={k: round(float(a), 2) for k, a in zip(keys, e)}, f=cam.f,
+                 fov_deg=float(2 * math.degrees(math.atan(max(v.size) / 2 / cam.f))),
+                 camera_centre=[round(float(a), 3) for a in cam.centre],
+                 method="planar PnP (hatch/plank) init + joint least squares, 14 points")
+    print(f"  [main] joint solve rms {v.rep['rms_px']:.2f}px max {v.rep['max_px']:.2f}px n={len(keys)} fov {v.rep['fov_deg']:.1f}",
+          flush=True)
+    print("  solved:", {k: round(float(pp[k]), 3) for k in free}, flush=True)
+    return pp

@@ -48,7 +48,12 @@ def run(modname, it, do_export=True, do_godot=True):
     core.reset()
     pv2.log(f"[{aid}] iter {it}")
     views = M.views()
-    if hasattr(M, "make_cameras"):
+    if hasattr(M, "solve"):
+        params = M.solve(views)
+        A = pv2.Asset(aid, M.ATLAS)
+        for lod in range(3):
+            M.build(A, params, lod)
+    elif hasattr(M, "make_cameras"):
         params = dict(M.PARAMS)
         A = pv2.Asset(aid, M.ATLAS)
         for lod in range(3):

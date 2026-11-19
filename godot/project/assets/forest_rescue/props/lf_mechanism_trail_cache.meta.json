@@ -45,14 +45,14 @@
   "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -51.495,
-      -0.08,
-      -25.868
+      -3.088,
+      -0.111,
+      -2.204
     ],
     "max": [
-      29.316,
-      24.446,
-      3.667
+      2.242,
+      2.127,
+      1.0
     ]
   },
   "lod_nodes": {
@@ -147,71 +147,71 @@
   ],
   "blueprint": {
     "R": 0.42,
-    "L": 57.6312,
-    "lx0": -1.1124,
-    "lx1": 11.68,
-    "lw": 3.6715,
-    "ax0": -4.2557,
-    "ax1": 1.7638,
-    "ay": 3.5873,
-    "sx_": -44.6539,
-    "sy_": 9.9302,
-    "sr": 6.8408,
-    "sh": 24.3855,
-    "rx": -15.141,
-    "ry": 21.1538,
-    "rh": 7.3828
+    "L": 3.484,
+    "lx0": -0.9813,
+    "lx1": -0.0247,
+    "lw": 0.2081,
+    "ax0": -0.5166,
+    "ax1": 0.0979,
+    "ay": 0.3449,
+    "sx_": -2.6977,
+    "sy_": 0.8028,
+    "sr": 0.3904,
+    "sh": 2.0668,
+    "rx": -0.6593,
+    "ry": 1.9666,
+    "rh": -0.3927
   },
   "qa": {
     "views": {
       "main": {
-        "iou_raw": 0.0,
-        "iou_filled": 0.0,
-        "colour_err": 1.0,
-        "colour_err_core": 1.0,
+        "iou_raw": 0.8263,
+        "iou_filled": 0.8263,
+        "colour_err": 0.0829,
+        "colour_err_core": 0.083,
         "ref_px": 189803,
-        "render_px": 0,
+        "render_px": 210518,
         "ignored_px": 0,
-        "camera_rms_px": 31.65,
-        "camera_max_px": 82.67,
+        "camera_rms_px": 17.91,
+        "camera_max_px": 61.11,
         "camera_points": 14
       }
     },
     "cameras": {
       "main": {
-        "rms_px": 31.65,
-        "max_px": 82.67,
+        "rms_px": 17.91,
+        "max_px": 61.11,
         "n": 14,
-        "fov_deg": 0.01,
+        "fov_deg": 19.98,
         "per_point_px": {
-          "lid_bl": 19.12,
-          "lid_br": 11.04,
-          "lid_fr": 20.77,
-          "lid_fl": 13.7,
-          "ring": 22.63,
-          "arrow_l": 25.24,
-          "arrow_r": 41.03,
-          "far_c": 11.15,
-          "near_top": 46.17,
-          "near_bot": 82.67,
-          "stump_tl": 18.67,
-          "stump_tr": 14.93,
-          "stump_bf": 18.95,
-          "rock_top": 8.0
+          "lid_bl": 4.83,
+          "lid_br": 3.68,
+          "lid_fr": 10.67,
+          "lid_fl": 11.26,
+          "ring": 12.81,
+          "arrow_l": 0.61,
+          "arrow_r": 0.63,
+          "far_c": 4.22,
+          "near_top": 61.11,
+          "near_bot": 7.55,
+          "stump_tl": 7.73,
+          "stump_tr": 13.29,
+          "stump_bf": 1.01,
+          "rock_top": 0.05
         }
       }
     },
     "texture": {
-      "texels": 2737147,
-      "projected_frac": 0.4141,
+      "texels": 3042659,
+      "projected_frac": 0.1278,
       "per_view_frac": {
-        "main": 0.4154
+        "main": 0.1281
       },
-      "seconds": 10.1
+      "seconds": 11.7
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_trail_cache/v2_iter07_*"
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_trail_cache/v2_iter10_*"
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_trail_cache --iter 7",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_trail_cache --iter 10",
   "mechanism": "trail_cache",
   "steps": {
     "split_birch": "lf_trail_mark_1 (node mark_landmark_a)",
@@ -221,7 +221,7 @@
   "solved_clip": "lf_lock_mechanism (hold last frame)",
   "sockets": {
     "artifact": [
-      5.0838,
+      -0.703,
       0.79,
       -0.0
     ]

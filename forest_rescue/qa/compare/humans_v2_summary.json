@@ -1,0 +1,1401 @@
+{
+ "lf_civilian_miller": {
+  "first": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8688,
+    "colour_error": 0.0452,
+    "colour_error_core": 0.041,
+    "ref_px": 46985,
+    "render_px": 46011
+   },
+   "back": {
+    "iou": 0.8746,
+    "colour_error": 0.0382,
+    "colour_error_core": 0.035,
+    "ref_px": 45287,
+    "render_px": 44894
+   },
+   "portrait": {
+    "ssim": 0.4861,
+    "solve_err_px": 0.22
+   }
+  },
+  "latest": {
+   "iter": 13,
+   "front": {
+    "iou": 0.9154,
+    "colour_error": 0.0471,
+    "colour_error_core": 0.0434,
+    "ref_px": 46985,
+    "render_px": 46047
+   },
+   "back": {
+    "iou": 0.9156,
+    "colour_error": 0.0404,
+    "colour_error_core": 0.0373,
+    "ref_px": 45287,
+    "render_px": 44924
+   },
+   "portrait": {
+    "ssim": 0.5439,
+    "ssim_face": 0.7495,
+    "solve_err_px": 2.37
+   }
+  },
+  "tris": {
+   "LOD0": 11820,
+   "LOD1": 5820,
+   "LOD2": 2133
+  },
+  "bones": {
+   "LOD0": 45,
+   "LOD1": 23,
+   "LOD2": 17
+  },
+  "deform": 50,
+  "clips": {
+   "lf_civilian_cage_sit": {
+    "seconds": 5.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_stand": {
+    "seconds": 4.8,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.01,
+     "Right": 0.03
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_wait": {
+    "seconds": 6.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_react": {
+    "seconds": 1.4,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_stand_up": {
+    "seconds": 2.2,
+    "loop": false,
+    "slip_mm": {
+     "Left": 34.35,
+     "Right": 33.48
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_exit": {
+    "seconds": 2.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 20.0
+    },
+    "speed": 1.0,
+    "markers": {}
+   },
+   "lf_civilian_follow": {
+    "seconds": 1.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": 1.2,
+    "markers": {}
+   },
+   "lf_civilian_follow_tired": {
+    "seconds": 1.25,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 15.83
+    },
+    "speed": 0.95,
+    "markers": {}
+   },
+   "lf_civilian_wait": {
+    "seconds": 4.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_look_back": {
+    "seconds": 1.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_arrive": {
+    "seconds": 2.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_thank": {
+    "seconds": 2.3,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   }
+  }
+ },
+ "lf_civilian_herbalist": {
+  "first": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8895,
+    "colour_error": 0.0407,
+    "colour_error_core": 0.0373,
+    "ref_px": 46366,
+    "render_px": 46768
+   },
+   "back": {
+    "iou": 0.8427,
+    "colour_error": 0.0301,
+    "colour_error_core": 0.0273,
+    "ref_px": 43810,
+    "render_px": 46746
+   },
+   "portrait": {
+    "ssim": 0.5168,
+    "ssim_face": 0.8318,
+    "solve_err_px": 2.47
+   }
+  },
+  "latest": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8895,
+    "colour_error": 0.0407,
+    "colour_error_core": 0.0373,
+    "ref_px": 46366,
+    "render_px": 46768
+   },
+   "back": {
+    "iou": 0.8427,
+    "colour_error": 0.0301,
+    "colour_error_core": 0.0273,
+    "ref_px": 43810,
+    "render_px": 46746
+   },
+   "portrait": {
+    "ssim": 0.5168,
+    "ssim_face": 0.8318,
+    "solve_err_px": 2.47
+   }
+  },
+  "tris": {
+   "LOD0": 11820,
+   "LOD1": 5820,
+   "LOD2": 2133
+  },
+  "bones": {
+   "LOD0": 48,
+   "LOD1": 24,
+   "LOD2": 17
+  },
+  "deform": 50,
+  "clips": {
+   "lf_civilian_cage_sit": {
+    "seconds": 5.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_stand": {
+    "seconds": 4.8,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.11,
+     "Right": 0.1
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_wait": {
+    "seconds": 6.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.07,
+     "Right": 0.04
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_react": {
+    "seconds": 1.4,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_stand_up": {
+    "seconds": 2.2,
+    "loop": false,
+    "slip_mm": {
+     "Left": 32.56,
+     "Right": 32.56
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_exit": {
+    "seconds": 2.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 20.0
+    },
+    "speed": 1.0,
+    "markers": {}
+   },
+   "lf_civilian_follow": {
+    "seconds": 1.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": 1.2,
+    "markers": {}
+   },
+   "lf_civilian_follow_tired": {
+    "seconds": 1.25,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 15.83
+    },
+    "speed": 0.95,
+    "markers": {}
+   },
+   "lf_civilian_wait": {
+    "seconds": 4.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.07,
+     "Right": 0.07
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_look_back": {
+    "seconds": 1.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_arrive": {
+    "seconds": 2.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_thank": {
+    "seconds": 2.3,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   }
+  }
+ },
+ "lf_civilian_ferryman": {
+  "first": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8786,
+    "colour_error": 0.0479,
+    "colour_error_core": 0.0436,
+    "ref_px": 41919,
+    "render_px": 40109
+   },
+   "back": {
+    "iou": 0.8889,
+    "colour_error": 0.0374,
+    "colour_error_core": 0.033,
+    "ref_px": 40557,
+    "render_px": 38981
+   },
+   "portrait": {
+    "ssim": 0.4953,
+    "ssim_face": 0.7214,
+    "solve_err_px": 1.82
+   }
+  },
+  "latest": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8786,
+    "colour_error": 0.0479,
+    "colour_error_core": 0.0436,
+    "ref_px": 41919,
+    "render_px": 40109
+   },
+   "back": {
+    "iou": 0.8889,
+    "colour_error": 0.0374,
+    "colour_error_core": 0.033,
+    "ref_px": 40557,
+    "render_px": 38981
+   },
+   "portrait": {
+    "ssim": 0.4953,
+    "ssim_face": 0.7214,
+    "solve_err_px": 1.82
+   }
+  },
+  "tris": {
+   "LOD0": 11816,
+   "LOD1": 5820,
+   "LOD2": 2134
+  },
+  "bones": {
+   "LOD0": 45,
+   "LOD1": 23,
+   "LOD2": 17
+  },
+  "deform": 50,
+  "clips": {
+   "lf_civilian_cage_sit": {
+    "seconds": 5.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_stand": {
+    "seconds": 4.8,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.03,
+     "Right": 0.04
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_wait": {
+    "seconds": 6.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.01
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_react": {
+    "seconds": 1.4,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_stand_up": {
+    "seconds": 2.2,
+    "loop": false,
+    "slip_mm": {
+     "Left": 33.22,
+     "Right": 32.98
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_exit": {
+    "seconds": 2.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 20.0
+    },
+    "speed": 1.0,
+    "markers": {}
+   },
+   "lf_civilian_follow": {
+    "seconds": 1.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": 1.2,
+    "markers": {}
+   },
+   "lf_civilian_follow_tired": {
+    "seconds": 1.25,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 15.83
+    },
+    "speed": 0.95,
+    "markers": {}
+   },
+   "lf_civilian_wait": {
+    "seconds": 4.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_look_back": {
+    "seconds": 1.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_arrive": {
+    "seconds": 2.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_thank": {
+    "seconds": 2.3,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   }
+  }
+ },
+ "lf_civilian_courier": {
+  "first": {
+   "iter": 1,
+   "front": {
+    "iou": 0.848,
+    "colour_error": 0.0423,
+    "colour_error_core": 0.0379,
+    "ref_px": 40111,
+    "render_px": 39567
+   },
+   "back": {
+    "iou": 0.8574,
+    "colour_error": 0.0363,
+    "colour_error_core": 0.0311,
+    "ref_px": 39280,
+    "render_px": 38307
+   },
+   "portrait": {
+    "ssim": 0.5801,
+    "ssim_face": 0.8502,
+    "solve_err_px": 3.48
+   }
+  },
+  "latest": {
+   "iter": 1,
+   "front": {
+    "iou": 0.848,
+    "colour_error": 0.0423,
+    "colour_error_core": 0.0379,
+    "ref_px": 40111,
+    "render_px": 39567
+   },
+   "back": {
+    "iou": 0.8574,
+    "colour_error": 0.0363,
+    "colour_error_core": 0.0311,
+    "ref_px": 39280,
+    "render_px": 38307
+   },
+   "portrait": {
+    "ssim": 0.5801,
+    "ssim_face": 0.8502,
+    "solve_err_px": 3.48
+   }
+  },
+  "tris": {
+   "LOD0": 11820,
+   "LOD1": 5820,
+   "LOD2": 2134
+  },
+  "bones": {
+   "LOD0": 47,
+   "LOD1": 24,
+   "LOD2": 17
+  },
+  "deform": 50,
+  "clips": {
+   "lf_civilian_cage_sit": {
+    "seconds": 5.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_stand": {
+    "seconds": 4.8,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.1,
+     "Right": 0.1
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_wait": {
+    "seconds": 6.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.07,
+     "Right": 0.04
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_react": {
+    "seconds": 1.4,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_stand_up": {
+    "seconds": 2.2,
+    "loop": false,
+    "slip_mm": {
+     "Left": 32.05,
+     "Right": 32.05
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_exit": {
+    "seconds": 2.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 20.0
+    },
+    "speed": 1.0,
+    "markers": {}
+   },
+   "lf_civilian_follow": {
+    "seconds": 1.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": 1.2,
+    "markers": {}
+   },
+   "lf_civilian_follow_tired": {
+    "seconds": 1.25,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 15.83
+    },
+    "speed": 0.95,
+    "markers": {}
+   },
+   "lf_civilian_wait": {
+    "seconds": 4.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.07,
+     "Right": 0.07
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_look_back": {
+    "seconds": 1.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_arrive": {
+    "seconds": 2.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_thank": {
+    "seconds": 2.3,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   }
+  }
+ },
+ "lf_civilian_cooper": {
+  "first": {
+   "iter": 1,
+   "front": {
+    "iou": 0.9047,
+    "colour_error": 0.0399,
+    "colour_error_core": 0.0356,
+    "ref_px": 50400,
+    "render_px": 47424
+   },
+   "back": {
+    "iou": 0.8918,
+    "colour_error": 0.0355,
+    "colour_error_core": 0.0318,
+    "ref_px": 50799,
+    "render_px": 47131
+   },
+   "portrait": {
+    "ssim": 0.554,
+    "ssim_face": 0.7925,
+    "solve_err_px": 1.38
+   }
+  },
+  "latest": {
+   "iter": 1,
+   "front": {
+    "iou": 0.9047,
+    "colour_error": 0.0399,
+    "colour_error_core": 0.0356,
+    "ref_px": 50400,
+    "render_px": 47424
+   },
+   "back": {
+    "iou": 0.8918,
+    "colour_error": 0.0355,
+    "colour_error_core": 0.0318,
+    "ref_px": 50799,
+    "render_px": 47131
+   },
+   "portrait": {
+    "ssim": 0.554,
+    "ssim_face": 0.7925,
+    "solve_err_px": 1.38
+   }
+  },
+  "tris": {
+   "LOD0": 11820,
+   "LOD1": 5820,
+   "LOD2": 2134
+  },
+  "bones": {
+   "LOD0": 43,
+   "LOD1": 22,
+   "LOD2": 17
+  },
+  "deform": 50,
+  "clips": {
+   "lf_civilian_cage_sit": {
+    "seconds": 5.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_stand": {
+    "seconds": 4.8,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.09,
+     "Right": 0.1
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_wait": {
+    "seconds": 6.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.06,
+     "Right": 0.04
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_react": {
+    "seconds": 1.4,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_stand_up": {
+    "seconds": 2.2,
+    "loop": false,
+    "slip_mm": {
+     "Left": 32.12,
+     "Right": 32.12
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_exit": {
+    "seconds": 2.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 20.0
+    },
+    "speed": 1.0,
+    "markers": {}
+   },
+   "lf_civilian_follow": {
+    "seconds": 1.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": 1.2,
+    "markers": {}
+   },
+   "lf_civilian_follow_tired": {
+    "seconds": 1.25,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 15.83
+    },
+    "speed": 0.95,
+    "markers": {}
+   },
+   "lf_civilian_wait": {
+    "seconds": 4.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.06,
+     "Right": 0.06
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_look_back": {
+    "seconds": 1.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_arrive": {
+    "seconds": 2.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_thank": {
+    "seconds": 2.3,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   }
+  }
+ },
+ "lf_civilian_quarry_worker": {
+  "first": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8575,
+    "colour_error": 0.0404,
+    "colour_error_core": 0.0356,
+    "ref_px": 48938,
+    "render_px": 46603
+   },
+   "back": {
+    "iou": 0.866,
+    "colour_error": 0.0348,
+    "colour_error_core": 0.0305,
+    "ref_px": 46594,
+    "render_px": 44053
+   },
+   "portrait": {
+    "ssim": 0.6325,
+    "ssim_face": 0.8657,
+    "solve_err_px": 4.34
+   }
+  },
+  "latest": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8575,
+    "colour_error": 0.0404,
+    "colour_error_core": 0.0356,
+    "ref_px": 48938,
+    "render_px": 46603
+   },
+   "back": {
+    "iou": 0.866,
+    "colour_error": 0.0348,
+    "colour_error_core": 0.0305,
+    "ref_px": 46594,
+    "render_px": 44053
+   },
+   "portrait": {
+    "ssim": 0.6325,
+    "ssim_face": 0.8657,
+    "solve_err_px": 4.34
+   }
+  },
+  "tris": {
+   "LOD0": 11820,
+   "LOD1": 5820,
+   "LOD2": 2134
+  },
+  "bones": {
+   "LOD0": 44,
+   "LOD1": 22,
+   "LOD2": 17
+  },
+  "deform": 50,
+  "clips": {
+   "lf_civilian_cage_sit": {
+    "seconds": 5.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_stand": {
+    "seconds": 4.8,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.08,
+     "Right": 0.09
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_cage_wait": {
+    "seconds": 6.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.04,
+     "Right": 0.04
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_react": {
+    "seconds": 1.4,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_stand_up": {
+    "seconds": 2.2,
+    "loop": false,
+    "slip_mm": {
+     "Left": 32.14,
+     "Right": 32.06
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_exit": {
+    "seconds": 2.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 20.0
+    },
+    "speed": 1.0,
+    "markers": {}
+   },
+   "lf_civilian_follow": {
+    "seconds": 1.1,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": 1.2,
+    "markers": {}
+   },
+   "lf_civilian_follow_tired": {
+    "seconds": 1.25,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 15.83
+    },
+    "speed": 0.95,
+    "markers": {}
+   },
+   "lf_civilian_wait": {
+    "seconds": 4.4,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.04,
+     "Right": 0.05
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_look_back": {
+    "seconds": 1.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_arrive": {
+    "seconds": 2.6,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_civilian_thank": {
+    "seconds": 2.3,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   }
+  }
+ },
+ "lf_squad_captain": {
+  "first": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8477,
+    "colour_error": 0.0367,
+    "colour_error_core": 0.0347,
+    "ref_px": 70877,
+    "render_px": 63593
+   },
+   "back": {
+    "iou": 0.8579,
+    "colour_error": 0.0288,
+    "colour_error_core": 0.026,
+    "ref_px": 69915,
+    "render_px": 62472
+   },
+   "portrait": {
+    "ssim": 0.6925,
+    "ssim_face": 0.8867,
+    "solve_err_px": 5.96
+   }
+  },
+  "latest": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8477,
+    "colour_error": 0.0367,
+    "colour_error_core": 0.0347,
+    "ref_px": 70877,
+    "render_px": 63593
+   },
+   "back": {
+    "iou": 0.8579,
+    "colour_error": 0.0288,
+    "colour_error_core": 0.026,
+    "ref_px": 69915,
+    "render_px": 62472
+   },
+   "portrait": {
+    "ssim": 0.6925,
+    "ssim_face": 0.8867,
+    "solve_err_px": 5.96
+   }
+  },
+  "tris": {
+   "LOD0": 14138,
+   "LOD1": 6790,
+   "LOD2": 2424
+  },
+  "bones": {
+   "LOD0": 45,
+   "LOD1": 23,
+   "LOD2": 18
+  },
+  "deform": 50,
+  "clips": {
+   "lf_soldier_idle": {
+    "seconds": 4.0,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.05,
+     "Right": 0.05
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_walk": {
+    "seconds": 1.0,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": 1.4,
+    "markers": {}
+   },
+   "lf_soldier_jog": {
+    "seconds": 0.7,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.11,
+     "Right": 0.0
+    },
+    "speed": 3.0,
+    "markers": {}
+   },
+   "lf_soldier_guard": {
+    "seconds": 3.2,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_attack": {
+    "seconds": 1.2,
+    "loop": false,
+    "slip_mm": {
+     "Left": 80.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {
+     "weapon_contact": 0.65
+    }
+   },
+   "lf_soldier_hit": {
+    "seconds": 0.5,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_death": {
+    "seconds": 2.0,
+    "loop": false,
+    "slip_mm": {
+     "Left": 107.42,
+     "Right": 20.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_unlock": {
+    "seconds": 2.4,
+    "loop": false,
+    "slip_mm": {
+     "Left": 100.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {
+     "latch_release": 1.6
+    }
+   },
+   "lf_soldier_help": {
+    "seconds": 2.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 79.99,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_salute": {
+    "seconds": 1.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   }
+  }
+ },
+ "lf_squad_scout": {
+  "first": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8805,
+    "colour_error": 0.031,
+    "colour_error_core": 0.0286,
+    "ref_px": 66131,
+    "render_px": 61398
+   },
+   "back": {
+    "iou": 0.8816,
+    "colour_error": 0.0252,
+    "colour_error_core": 0.0223,
+    "ref_px": 63799,
+    "render_px": 59538
+   },
+   "portrait": null
+  },
+  "latest": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8805,
+    "colour_error": 0.031,
+    "colour_error_core": 0.0286,
+    "ref_px": 66131,
+    "render_px": 61398
+   },
+   "back": {
+    "iou": 0.8816,
+    "colour_error": 0.0252,
+    "colour_error_core": 0.0223,
+    "ref_px": 63799,
+    "render_px": 59538
+   },
+   "portrait": null
+  },
+  "tris": {
+   "LOD0": 13962,
+   "LOD1": 6790,
+   "LOD2": 2418
+  },
+  "bones": {
+   "LOD0": 45,
+   "LOD1": 23,
+   "LOD2": 17
+  },
+  "deform": 50,
+  "clips": {
+   "lf_soldier_idle": {
+    "seconds": 4.0,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.05,
+     "Right": 0.05
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_walk": {
+    "seconds": 1.0,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": 1.4,
+    "markers": {}
+   },
+   "lf_soldier_jog": {
+    "seconds": 0.7,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.11,
+     "Right": 0.0
+    },
+    "speed": 3.0,
+    "markers": {}
+   },
+   "lf_soldier_guard": {
+    "seconds": 3.2,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_attack": {
+    "seconds": 1.2,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {
+     "weapon_contact": 0.65
+    }
+   },
+   "lf_soldier_hit": {
+    "seconds": 0.5,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_death": {
+    "seconds": 2.0,
+    "loop": false,
+    "slip_mm": {
+     "Left": 1.62,
+     "Right": 1.07
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_unlock": {
+    "seconds": 2.4,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.1,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {
+     "latch_release": 1.6
+    }
+   },
+   "lf_soldier_help": {
+    "seconds": 2.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.13,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_salute": {
+    "seconds": 1.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   }
+  }
+ },
+ "lf_squad_shield_guard": {
+  "first": null,
+  "latest": null,
+  "tris": null,
+  "bones": null,
+  "deform": null,
+  "clips": {}
+ }
+}

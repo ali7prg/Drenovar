@@ -186,7 +186,7 @@ def limb_profile(R, A, B, tmpl, max_half, n=40, blocked=None, smooth=2.0):
     one_hi = ~ok & pr["hi_ok"] & ~pr["lo_ok"]
     c = np.where(one_lo, pr["lo"] + a, c)
     c = np.where(one_hi, pr["hi"] - a, c)
-    c = np.clip(c, -0.6 * a, 0.6 * a)
+    c = np.clip(c, -1.0 * a, 1.0 * a)
     from scipy.ndimage import gaussian_filter1d
     c = gaussian_filter1d(c, smooth, mode="nearest")
     return pr["s"], a, c, ok | one_lo | one_hi, k
@@ -234,8 +234,8 @@ def leg_parts(R, C, J, skirt_top=None):
 
         def blocked(x, z, sx=sx):
             return (sx * x) < 0.004          # the other leg / crotch gap
-        s1, a1, c1, ok1, k1 = limb_profile(R, top, kn, THIGH_T, 0.13, blocked=blocked)
-        s2, a2, c2, ok2, k2 = limb_profile(R, kn, an, SHIN_T, 0.11, blocked=blocked)
+        s1, a1, c1, ok1, k1 = limb_profile(R, top, kn, THIGH_T, 0.17, blocked=blocked)
+        s2, a2, c2, ok2, k2 = limb_profile(R, kn, an, SHIN_T, 0.15, blocked=blocked)
         fem = C["female"]
         b1 = a1 * np.interp(s1, [0, 0.5, 1.0], [1.15 if fem else 1.08, 1.04, 0.98])
         b2 = a2 * np.interp(s2, [0, 0.4, 1.0], [1.0, 1.04, 1.0])

@@ -92,13 +92,13 @@
   },
   "bounds_m": {
     "min": [
-      -0.318,
-      -0.201,
+      -0.296,
+      -0.225,
       0.002
     ],
     "max": [
-      0.337,
-      0.179,
+      0.315,
+      0.188,
       1.683
     ]
   },
@@ -156,8 +156,8 @@
       "rootTranslation": "in_place",
       "markers": {},
       "footSlip_mm": {
-        "Left": 32.56,
-        "Right": 32.56
+        "Left": 0.46,
+        "Right": 0.46
       },
       "ikOverreach_m": 0.1455
     },

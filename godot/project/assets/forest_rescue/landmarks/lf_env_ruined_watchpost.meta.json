@@ -2,25 +2,25 @@
   "id": "lf_env_ruined_watchpost",
   "generation": "v3 (blueprint + solved art/06 camera + painting projection)",
   "tris": {
-    "LOD0": 2360,
-    "LOD1": 896,
-    "LOD2": 228
+    "LOD0": 1590,
+    "LOD1": 526,
+    "LOD2": 110
   },
   "tris_detail": {
     "LOD0": {
-      "structure": 2360,
-      "base": 1068,
-      "total": 3428
+      "structure": 1590,
+      "base": 2444,
+      "total": 4034
     },
     "LOD1": {
-      "structure": 896,
-      "base": 190,
-      "total": 1086
+      "structure": 526,
+      "base": 546,
+      "total": 1072
     },
     "LOD2": {
-      "structure": 228,
-      "base": 24,
-      "total": 252
+      "structure": 110,
+      "base": 124,
+      "total": 234
     }
   },
   "budget": {
@@ -75,28 +75,28 @@
   },
   "bounds_m_gltf": [
     [
-      -4.09,
+      -3.914,
       0.0,
-      -0.97
+      -31.155
     ],
     [
-      5.989,
-      5.981,
-      2.09
+      5.965,
+      6.107,
+      6.311
     ]
   ],
   "collision": [
     {
       "type": "box",
       "centre": [
-        0.3,
-        0.9,
-        1.0
+        0.0,
+        0.972,
+        -0.0
       ],
       "size": [
-        4.6,
-        1.8,
-        2.0
+        4.4,
+        1.945,
+        2.4
       ],
       "yaw_deg": 0.0
     },
@@ -104,26 +104,12 @@
       "type": "box",
       "centre": [
         0.0,
-        3.6,
-        -0.425
+        3.745,
+        -0.6
       ],
       "size": [
-        3.9,
-        3.6,
-        0.85
-      ],
-      "yaw_deg": 0.0
-    },
-    {
-      "type": "box",
-      "centre": [
-        -3.0,
-        2.0,
-        0.5
-      ],
-      "size": [
-        2.2,
         4.0,
+        3.6,
         1.0
       ],
       "yaw_deg": 0.0
@@ -131,16 +117,16 @@
     {
       "type": "ramp",
       "centre": [
-        3.9,
-        0.9,
-        1.0
+        3.414,
+        0.972,
+        2.705
       ],
       "size": [
-        2.6,
-        1.8,
-        2.0
+        3.497,
+        1.945,
+        1.9
       ],
-      "yaw_deg": 0.0
+      "yaw_deg": -38.0
     }
   ],
   "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; 'ramp' = oriented box along the slope; 'cylinder' size = (diameter, height, diameter); yaw about +Y.",
@@ -150,12 +136,12 @@
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py ruined_watchpost",
   "qa": {
     "main_view": {
-      "iou": 0.7536,
-      "colour_err": 0.0914,
-      "ssim": 0.5186,
+      "iou": 0.8843,
+      "colour_err": 0.0931,
+      "ssim": 0.6008,
       "ref_px": 86455,
-      "render_px": 95640,
-      "iou_structure_only": 0.6108075406892783
+      "render_px": 93074,
+      "iou_structure_only": 0.7097030090303511
     },
     "camera": {
       "rms_px": 11.77,
@@ -164,45 +150,42 @@
     },
     "insets": {
       "front": {
-        "iou": 0.5457,
-        "colour_err": 0.1512,
-        "ssim": 0.3732,
+        "iou": 0.4752,
+        "colour_err": 0.1417,
+        "ssim": 0.3923,
         "ref_px": 95280,
-        "render_px": 98445
+        "render_px": 100271
       },
       "side": {
-        "iou": 0.5087,
-        "colour_err": 0.1412,
-        "ssim": 0.3239,
+        "iou": 0.4858,
+        "colour_err": 0.1447,
+        "ssim": 0.3973,
         "ref_px": 70784,
-        "render_px": 125366
+        "render_px": 106390
       }
     },
     "texture": {
-      "texels": 3156565,
-      "projected_frac": 0.05499490743894075,
-      "seconds": 13.2
+      "texels": 2375742,
+      "projected_frac": 0.042830408352422106,
+      "seconds": 10.1
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_ruined_watchpost/v3_iter02_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_ruined_watchpost/v3_iter03_*"
   },
   "dimensions": {
-    "terrace_height_m": 1.8,
-    "arch_opening_m": [
-      1.0,
-      2.5
-    ],
-    "stair": "7 steps, riser 0.26 m, tread 0.36 m"
+    "terrace_height_m": 1.94,
+    "stair": "9 steps, riser 0.22 m",
+    "construction": "walls follow the painted foot lines (back-projected); per image column the painted solid runs give the wall heights and the arch opening"
   },
   "sockets": {
-    "arch_centre": [
-      0.0,
-      1.8,
-      0.0
+    "stair_top": [
+      2.036,
+      1.945,
+      1.63
     ],
     "stair_foot": [
-      5.3,
+      4.793,
       0.0,
-      1.0
+      3.781
     ]
   }
 }

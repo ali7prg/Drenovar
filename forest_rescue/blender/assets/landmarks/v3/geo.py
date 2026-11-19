@@ -334,6 +334,50 @@ class Geo:
                           mat, tag + "_top")
         return self
 
+    def rounded_block(self, c, size, r, R=None, mat="stone", tag="block", skip=(), seed=0, jitter=0.0):
+        """Block with rounded edges: 3x3 vertex grid per face pushed onto a rounded box (edge radius r)."""
+        hs = np.asarray(size, float) / 2.0
+        r = float(min(r, hs.min() * 0.9))
+        inner = hs - r
+        rng = np.random.default_rng(seed)
+        faces = {"+x": (0, 1, 2, 1), "-x": (0, 2, 1, -1), "+y": (1, 2, 0, 1), "-y": (1, 0, 2, -1), "+z": (2, 0, 1, 1),
+                 "-z": (2, 1, 0, -1)}
+        V, F = [], []
+        g = np.array([-1.0, 0.0, 1.0])
+        for k, (ax, a1, a2, sg) in faces.items():
+            if k in skip:
+                continue
+            base = len(V)
+            for i in range(3):
+                for j in range(3):
+                    p = np.zeros(3)
+                    p[ax] = sg * hs[ax]
+                    p[a1] = g[i] * hs[a1]
+                    p[a2] = g[j] * hs[a2]
+                    q = np.clip(p, -inner, inner)
+                    d = p - q
+                    n = np.linalg.norm(d)
+                    p2 = q + (d / n * r if n > 1e-9 else 0)
+                    if jitter:
+                        p2 = p2 * (1 + jitter * (rng.random(3) - 0.5))
+                    V.append(p2)
+            for i in range(2):
+                for j in range(2):
+                    a = base + i * 3 + j
+                    F.append([a, a + 3, a + 4, a + 1])
+        V = np.array(V)
+        R = np.eye(3) if R is None else np.asarray(R, float)
+        V = V @ R.T + np.asarray(c, float)
+        # orient faces outward (winding by face normal vs centre)
+        F2 = []
+        for f in F:
+            P = V[f]
+            nrm = np.cross(P[1] - P[0], P[2] - P[0])
+            if nrm @ (P.mean(0) - c) < 0:
+                f = f[::-1]
+            F2.append(f)
+        return self.add(V, F2, mat, tag)
+
     def card(self, base, w, h, yaw, mat, tag, uv_rect, tilt=0.0, bend=0.0):
         """Vertical alpha card (grass/ivy sprite) standing at base; uv_rect=(u0,v0,u1,v1) in the card atlas."""
         u0, v0, u1, v1 = uv_rect

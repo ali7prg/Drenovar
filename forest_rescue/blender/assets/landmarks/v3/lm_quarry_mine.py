@@ -42,7 +42,7 @@ SWATCHES = {
     "wood": dict(box=(650, 470, 668, 560), metres=0.8),
     "wood_h": dict(box=(650, 470, 668, 560), metres=0.8, rotate=True),
     "stone": dict(box=(150, 300, 240, 360), metres=1.6),
-    "stone_face": dict(box=(205, 410, 232, 440), metres=0.8),
+    "stone_face": dict(box=(300, 300, 380, 330), metres=1.2),
     "ground": dict(box=(440, 560, 520, 585), metres=2.0),
     "gravel": dict(box=(440, 560, 520, 585), metres=2.0),
     "grass": dict(box=(30, 520, 90, 560), metres=1.5),
@@ -96,6 +96,7 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
     g = Geo(seed=3 + lod)
     _CARDS.clear()
     _CARDS.update(cards or {})
+    _CARDS["__crop__"] = crop
     portal(g, lod)
     outcrop(g, lod, cam, mask)
     crane(g, lod, cam)
@@ -149,58 +150,107 @@ def portal(g, lod):
 
 
 def outcrop(g, lod, cam, mask):
-    """Big cut limestone blocks stacked into a mound around the portal; front profile from the painting."""
+    """Rounded limestone blocks at their painted positions: watershed segmentation of the painted outcrop on its
+    dark joints; each segment becomes a rounded block (edge radius 0.1 m) on the outcrop front surface, sized from
+    its painted extent; deeper rounded blocks behind give the mound its volume."""
     if cam is None:
-        prof_x = np.linspace(-4.6, 2.4, 30)
-        prof_z = 3.8 * np.ones_like(prof_x)
-    else:
-        cols = np.arange(S(14, 0)[0], S(372, 0)[0], 4)
-        prof_x, prof_z = [], []
-        for c in cols:
-            rows = np.nonzero(mask[:, c])[0]
-            if len(rows) == 0:
-                continue
-            P = cam.on_plane(np.array([c + 0.5]), np.array([rows.min() + 0.5]), (0, 0.15, 0), (0, 1, 0))[0]
-            prof_x.append(P[0])
-            prof_z.append(P[2] * 0.96)
-        prof_x, prof_z = np.array(prof_x), np.clip(np.array(prof_z), 0.5, 6.0)
+        return
+    from scipy import ndimage as ndi
+    from skimage.feature import peak_local_max
+    from skimage.segmentation import watershed
+    import cv2 as _cv2
+    crop = _CARDS.get("__crop__")
+    H, W = mask.shape
+    lab = _cv2.cvtColor(crop.astype(np.float32), _cv2.COLOR_RGB2LAB)[..., 0]
+    region = mask.copy()
+    region[:, S(376, 0)[0]:] = False
+    region[S(0, 362)[1]:S(0, 520)[1], S(150, 0)[0]:S(346, 0)[0]] = False      # portal timbers + tunnel
+    for (x0, x1, yt, yb) in BLOCKS:
+        region[S(0, yt)[1]:S(0, yb)[1] + 1, S(x0, 0)[0]:S(x1, 0)[0] + 1] = False
+    region[S(0, 512)[1]:, :] = False                                           # ground / rails
+    blur = ndi.gaussian_filter(lab, 3.0)
+    joints = (lab < blur - 6.0)
+    solid = region & ~joints
+    solid = ndi.binary_opening(solid, iterations=1)
+    dist = ndi.distance_transform_edt(solid)
+    peaks = peak_local_max(dist, min_distance=7, threshold_abs=2.5, labels=ndi.label(solid)[0])
+    markers = np.zeros(mask.shape, np.int32)
+    for i, (y, x) in enumerate(peaks):
+        markers[y, x] = i + 1
+    seg = watershed(-dist, markers, mask=region)
     rng = np.random.default_rng(17 + lod)
-    ch = 0.62 if lod == 0 else (1.0 if lod == 1 else 1.4)
-    x0, x1 = prof_x.min(), prof_x.max()
-    layers = [(0.15, 0.0), (0.95, 0.75), (1.75, 1.6), (2.55, 2.5)] if lod == 0 else ([(0.15, 0.0), (1.4, 1.2)] if lod == 1 else [(0.15, 0.0)])
-    for li, (yfront, drop) in enumerate(layers):
-        z = 0.0
-        ci = 0
-        while z < prof_z.max() - drop - 0.1:
-            x = x0 + (rng.uniform(0, 0.5) if ci % 2 else 0.0)
-            while x < x1 - 0.05:
-                bl = rng.uniform(0.8, 1.3) if lod == 0 else (1.6 if lod == 1 else 2.4)
-                xa, xb = x, min(x + bl, x1)
-                xm = (xa + xb) / 2
-                top = np.interp(xm, prof_x, prof_z) - drop
-                inside_portal = abs(xm) < 1.75 and z < 2.6 and li == 0
-                if z + ch * 0.5 < top and not inside_portal and not (abs(xm) < 1.3 and z < 2.6):
-                    hh = min(ch, top - z) if top - z < ch * 1.4 else ch
-                    hh = max(hh, 0.3)
-                    d = 0.78 + rng.uniform(-0.08, 0.08)
-                    c = (xm + rng.normal(0, 0.03), yfront + d / 2 + rng.normal(0, 0.04), z + hh / 2)
-                    R = rot_z(rng.normal(0, 0.03))
-                    g.box(c, (xb - xa - 0.05, d, hh - 0.04), R, "stone", "block" if li == 0 else "outcrop",
-                          chamfer=0.12 if lod == 0 else 0.0, skip=("-z", "+y") if li < len(layers) - 1 else ("-z",))
-                x = xb
-            z += ch
-            ci += 1
+    y_front = 0.15
+    blocks = []
+    for lbl in range(1, seg.max() + 1):
+        ys, xs = np.nonzero(seg == lbl)
+        if len(xs) < 40:
+            continue
+        x0, x1, y0, y1 = xs.min(), xs.max(), ys.min(), ys.max()
+        cxp, cyp = (x0 + x1) / 2, (y0 + y1) / 2
+        P = cam.on_plane(np.array([cxp + 0.5]), np.array([cyp + 0.5]), (0, y_front, 0), (0, 1, 0))[0]
+        w = ibm.metres(cam, P, x1 - x0 + 3)
+        h = ibm.metres(cam, P, y1 - y0 + 3)
+        if P[2] - h / 2 < -0.2:
+            continue
+        blocks.append((P, w, h, len(xs)))
+    blocks.sort(key=lambda b: -b[3])
+    if lod == 1:
+        blocks = blocks[: max(8, len(blocks) // 3)]
+    if lod == 2:
+        blocks = blocks[: 6]
+    for k, (P, w, h, n) in enumerate(blocks):
+        d = rng.uniform(0.7, 0.95)
+        c = (P[0], y_front + d / 2 - 0.05 + rng.normal(0, 0.03), max(P[2], h / 2 - 0.05))
+        if lod == 0:
+            g.rounded_block(c, (w * 0.97, d, h * 0.97), 0.11, rot_z(rng.normal(0, 0.03)), mat="stone", tag="block",
+                            skip=("+y",), seed=k, jitter=0.03)
+        else:
+            g.box(c, (w, d, h), rot_z(rng.normal(0, 0.03)), "stone", "block", skip=("-z", "+y"))
+    OUT["n_blocks"] = len(blocks)
+    # mound volume behind: rounded blocks stepping back and down (stay inside the painted silhouette)
+    cols = np.arange(S(14, 0)[0], S(372, 0)[0], 4)
+    prof_x, prof_z = [], []
+    for c in cols:
+        rows = np.nonzero(mask[:, c])[0]
+        if len(rows) == 0:
+            continue
+        Pq = cam.on_plane(np.array([c + 0.5]), np.array([rows.min() + 0.5]), (0, y_front, 0), (0, 1, 0))[0]
+        prof_x.append(Pq[0])
+        prof_z.append(Pq[2])
+    prof_x, prof_z = np.array(prof_x), np.array(prof_z)
+    for li, (yb, drop) in enumerate([(0.95, 0.85), (1.75, 1.7), (2.55, 2.6)] if lod == 0 else ([(1.2, 1.2)] if lod == 1 else [])):
+        x = prof_x.min()
+        while x < prof_x.max() - 0.3:
+            L = rng.uniform(0.9, 1.4) if lod == 0 else 1.8
+            xm = x + L / 2
+            top = np.interp(xm, prof_x, prof_z) - drop
+            z = 0.0
+            while z < top - 0.3:
+                hh = min(0.65, top - z)
+                c = (xm, yb + 0.4, z + hh / 2)
+                if lod == 0:
+                    g.rounded_block(c, (L - 0.05, 0.8, hh - 0.03), 0.1, rot_z(rng.normal(0, 0.03)), mat="stone",
+                                    tag="outcrop", skip=("-z", "+y"), seed=100 + li * 50 + int(x * 10))
+                else:
+                    g.box(c, (L - 0.05, 0.8, hh - 0.03), None, "stone", "outcrop", skip=("-z", "+y"))
+                z += 0.65
+            x += L
     # ivy cards hanging on the front face where the painting shows ivy
-    if cam is not None and lod < 2 and "ivy_a" in _CARDS:
+    if lod < 2 and "ivy_a" in _CARDS:
         for k, (u, v, hpx) in enumerate([(120, 330, 90), (170, 320, 80), (90, 360, 70), (215, 300, 50), (60, 330, 50),
                                           (365, 310, 40), (140, 380, 60)][:: (1 if lod == 0 else 2)]):
             uu, vv = S(u, v)
-            P = cam.on_plane(np.array([uu + 0.5]), np.array([vv + 0.5]), (0, -0.05, 0), (0, 1, 0))[0]
+            P = cam.on_plane(np.array([uu + 0.5]), np.array([vv + 0.5]), (0, -0.12, 0), (0, 1, 0))[0]
             h = mpx(cam, P, hpx)
             u0, v0, u1, v1, aw, ah = _CARDS["ivy_a" if k % 2 else "ivy_b"]
             top = P + np.array([0, -0.02, h * 0.15])
             g.add(np.array([top + (-h * 0.35, 0, -h), top + (h * 0.35, 0, -h), top + (h * 0.35, 0, 0), top + (-h * 0.35, 0, 0)]),
                   [[0, 1, 2, 3]], "card_ivy", "ivy", uv=[[(u0, v0), (u1, v0), (u1, v1), (u0, v1)]])
+
+
+OUT = {}
+BLOCKS = [(112, 236, 397, 490), (193, 318, 475, 560), (318, 403, 520, 582), (232, 302, 437, 482), (345, 380, 470, 505),
+          (16, 110, 455, 528), (130, 190, 520, 560), (372, 430, 450, 492), (300, 345, 448, 498)]
 
 
 _CARDS = {}
@@ -300,8 +350,7 @@ def crane(g, lod, cam):
 
 
 def blocks(g, lod, cam):
-    spec = [(112, 236, 397, 490), (193, 318, 475, 560), (318, 403, 520, 582), (232, 302, 437, 482), (345, 380, 470, 505),
-            (16, 110, 455, 528), (130, 190, 520, 560), (372, 430, 450, 492), (300, 345, 448, 498)]
+    spec = list(BLOCKS)
     if lod == 1:
         spec = spec[:6]
     if lod == 2:
@@ -313,8 +362,11 @@ def blocks(g, lod, cam):
         P = gp(cam, (x0 + x1) / 2, yb)
         w = mpx(cam, P, (x1 - x0)) * 0.8
         h = mpx(cam, P, (yb - yt)) * 0.75
-        g.box((P[0], P[1] + w * 0.35, h / 2), (w, w * 0.8, h), rot_z(rng.uniform(-0.4, 0.4)), "stone", f"cut{k}",
-              chamfer=0.1 if lod == 0 else 0.0, skip=("-z",))
+        if lod == 0:
+            g.rounded_block((P[0], P[1] + w * 0.35, h / 2), (w, w * 0.8, h), 0.1, rot_z(rng.uniform(-0.4, 0.4)), mat="stone",
+                            tag=f"cut{k}", skip=("-z",), seed=200 + k, jitter=0.03)
+        else:
+            g.box((P[0], P[1] + w * 0.35, h / 2), (w, w * 0.8, h), rot_z(rng.uniform(-0.4, 0.4)), "stone", f"cut{k}", skip=("-z",))
     # crate next to the crane
     if cam is not None:
         P = gp(cam, 404, 556)

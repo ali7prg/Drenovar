@@ -2,25 +2,25 @@
   "id": "lf_env_quarry_mine",
   "generation": "v3 (blueprint + solved art/06 camera + painting projection)",
   "tris": {
-    "LOD0": 2558,
-    "LOD1": 790,
-    "LOD2": 246
+    "LOD0": 7144,
+    "LOD1": 1056,
+    "LOD2": 254
   },
   "tris_detail": {
     "LOD0": {
-      "structure": 2558,
+      "structure": 7144,
       "base": 904,
-      "total": 3462
+      "total": 8048
     },
     "LOD1": {
-      "structure": 790,
+      "structure": 1056,
       "base": 138,
-      "total": 928
+      "total": 1194
     },
     "LOD2": {
-      "structure": 246,
+      "structure": 254,
       "base": 16,
-      "total": 262
+      "total": 270
     }
   },
   "budget": {
@@ -78,14 +78,14 @@
   },
   "bounds_m_gltf": [
     [
-      -4.1,
-      0.0,
-      -3.457
+      -4.361,
+      -0.045,
+      -3.341
     ],
     [
       5.178,
-      3.854,
-      3.735
+      4.15,
+      3.723
     ]
   ],
   "collision": [
@@ -153,12 +153,12 @@
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py quarry_mine",
   "qa": {
     "main_view": {
-      "iou": 0.8127,
-      "colour_err": 0.1137,
-      "ssim": 0.4634,
+      "iou": 0.8274,
+      "colour_err": 0.1103,
+      "ssim": 0.4832,
       "ref_px": 114434,
-      "render_px": 121013,
-      "iou_structure_only": 0.7142279003332804
+      "render_px": 132497,
+      "iou_structure_only": 0.7300003819272046
     },
     "camera": {
       "rms_px": 3.56,
@@ -167,19 +167,19 @@
     },
     "insets": {
       "mine_front": {
-        "iou": 0.4811,
-        "colour_err": 0.1587,
-        "ssim": 0.2618,
+        "iou": 0.5766,
+        "colour_err": 0.1619,
+        "ssim": 0.2503,
         "ref_px": 132832,
-        "render_px": 72307
+        "render_px": 83475
       }
     },
     "texture": {
-      "texels": 3027830,
-      "projected_frac": 0.05478742201510653,
-      "seconds": 12.4
+      "texels": 2989766,
+      "projected_frac": 0.04923228105477151,
+      "seconds": 13.9
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter06_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter07_*"
   },
   "sockets": {
     "mine_entrance_centre": [

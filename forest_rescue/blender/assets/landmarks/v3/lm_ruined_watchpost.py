@@ -119,78 +119,153 @@ def wall(g, x0, x1, y0, t, z0, prof, lod, tag, rng, opening=None, course=0.36, b
         ci += 1
 
 
+def _vline_height(cam, foot, px):
+    o, d = cam.ray(np.array([px[0] + 0.5]), np.array([px[1] + 0.5]))
+    d = d[0]
+    t = ((foot[:2] - o[:2]) @ d[:2]) / max(d[:2] @ d[:2], 1e-9)
+    return float(o[2] + t * d[2])
+
+
+def column_wall(g, cam, mask, foot_line, foot_z, x0s, x1s, lod, tag, rng, thickness=0.9, course=0.38, block=(0.4, 0.75),
+                z_cap=None, step=3):
+    """Masonry wall following the painted foot line (sheet px polyline on plane z=foot_z); per image column the
+    solid runs of the painted mask above the foot give the wall's height intervals (gaps = arch openings)."""
+    fx = np.array([q[0] for q in foot_line], float)
+    fy = np.array([q[1] for q in foot_line], float)
+    cols = np.arange(x0s, x1s, step)
+    F, runs = [], []
+    for c in cols:
+        yf = float(np.interp(c, fx, fy))
+        u, v = S(c, yf)
+        if not (0 <= int(u) < mask.shape[1]):
+            continue
+        Pf = cam.on_plane_z(np.array([u + 0.5]), np.array([v + 0.5]), foot_z)[0]
+        col = mask[: max(1, int(v)), int(u)]
+        rr = []
+        y = 0
+        n = len(col)
+        while y < n:
+            if col[y]:
+                y2 = y
+                while y2 < n and col[y2]:
+                    y2 += 1
+                ztop = _vline_height(cam, Pf, (u, y))
+                zbot = _vline_height(cam, Pf, (u, y2)) if y2 < n - 2 else foot_z
+                rr.append((max(zbot, foot_z), ztop))
+                y = y2
+            else:
+                y += 1
+        F.append(Pf)
+        runs.append(rr)
+    if len(F) < 2:
+        return
+    F = np.array(F)
+    seg = np.r_[0, np.cumsum(np.linalg.norm(np.diff(F[:, :2], axis=0), axis=1))]
+    total = seg[-1]
+    ch = course if lod == 0 else (0.75 if lod == 1 else 1.5)
+    zmax = max((r[1] for rr in runs for r in rr), default=foot_z)
+    if z_cap is not None:
+        zmax = min(zmax, z_cap)
+    z = foot_z
+    ci = 0
+    cam_c = cam.centre
+    while z < zmax - 0.05:
+        sdist = -(rng.uniform(0, block[0]) if ci % 2 else 0.0)
+        while sdist < total - 0.02:
+            L = rng.uniform(*block) if lod == 0 else (1.2 if lod == 1 else 2.4)
+            a, b = max(sdist, 0.0), min(sdist + L, total)
+            sdist += L
+            if b - a < 0.12:
+                continue
+            sm = (a + b) / 2
+            k = int(np.clip(np.searchsorted(seg, sm), 1, len(seg) - 1))
+            zc = z + ch / 2
+            ok = any(lo - 0.05 <= zc <= hi + 0.02 for (lo, hi) in runs[k]) if runs[k] else False
+            if not ok:
+                continue
+            top_here = max((hi for (lo, hi) in runs[k] if lo - 0.05 <= zc), default=z)
+            hh = ch if top_here - z >= ch * 0.7 else max(0.18, top_here - z)
+            if z_cap is not None:
+                hh = min(hh, z_cap - z)
+            if hh < 0.1:
+                continue
+            pa = F[k - 1] + (F[k] - F[k - 1]) * 0.5
+            dirv = F[min(k + 1, len(F) - 1)] - F[max(k - 2, 0)]
+            dirv[2] = 0
+            dirv /= max(np.linalg.norm(dirv), 1e-6)
+            nrm = np.array([-dirv[1], dirv[0], 0.0])
+            if (cam_c - pa) @ nrm < 0:
+                nrm = -nrm
+            # position along the foot polyline at arc length sm
+            j = int(np.clip(np.searchsorted(seg, sm) - 1, 0, len(seg) - 2))
+            tt = (sm - seg[j]) / max(seg[j + 1] - seg[j], 1e-6)
+            base = F[j] + (F[j + 1] - F[j]) * tt
+            c = base - nrm * thickness / 2 + np.array([0, 0, z - foot_z + hh / 2])
+            c[2] = z + hh / 2
+            yaw = math.atan2(dirv[1], dirv[0])
+            g.box(c, (b - a - 0.035, thickness - rng.uniform(0, 0.05), hh - 0.035), rot_z(yaw + rng.normal(0, 0.01)),
+                  "stone", tag, skip=("-z",))
+        z += ch
+        ci += 1
+
+
 def build(lod, cam=None, crop=None, mask=None, cards=None):
     g = Geo(seed=61 + lod)
     rng = np.random.default_rng(13 + lod)
     if cam is None:
         return dict(struct=g, base=Geo())
-    # gate wall with the arch (on the terrace)
-    gp_ = profile(cam, mask, 922, 1078, ARCH["y"], TER_H + 0.4, 7.0)
-    wall(g, -1.9, 1.95, ARCH["y"], ARCH["t"], TER_H, gp_, lod, "wall", rng,
-         opening=(ARCH["x0"], ARCH["x1"], ARCH["spring"]))
-    # voussoirs
-    nv = 11 if lod == 0 else (7 if lod == 1 else 0)
-    r0 = (ARCH["x1"] - ARCH["x0"]) / 2
-    xc = (ARCH["x0"] + ARCH["x1"]) / 2
-    for i in range(nv):
-        a0 = math.pi * i / nv
-        a1 = math.pi * (i + 1) / nv
-        P = []
-        for a, r in ((a0, r0), (a1, r0), (a1, r0 + 0.42), (a0, r0 + 0.42)):
-            P.append((xc + math.cos(a) * r, ARCH["spring"] + math.sin(a) * r))
-        poly = np.array(P)
-        mid = poly.mean(0)
-        poly = mid + (poly - mid) * 0.93
-        g.prism(poly, 0, 1, "stone", "arch", R=np.array([[1, 0, 0], [0, 0, 1], [0, 1, 0]]).T @ np.eye(3) * 0 +
-                np.array([[1, 0, 0], [0, 0, 1.0], [0, 1.0, 0]]) @ np.diag([1, ARCH["t"] + 0.06, 1]) @ np.eye(3),
-                t=(0, ARCH["y"] - 0.03, 0))
-    # ivy-covered side wall (left, in front of the gate wall)
-    lp = profile(cam, mask, 828, 925, -1.0, 1.0, 5.0)
-    wall(g, -4.1, -1.9, -1.0, 1.0, 0.0, lp, lod, "wall", rng)
-    # terrace (raised masonry platform) + paving top
-    tp = (np.array([-2.0, 2.6]), np.array([TER_H, TER_H]))
-    wall(g, -2.0, 2.6, TER_Y, 2.0, 0.0, tp, lod, "terrace", rng, course=0.45)
-    if lod < 2:
-        nx = 6 if lod == 0 else 3
-        for i in range(nx):
-            for j in range(3 if lod == 0 else 2):
-                x0 = -2.0 + 4.6 * i / nx
-                y0 = TER_Y + 2.0 * j / (3 if lod == 0 else 2)
-                g.box((x0 + 2.3 / nx, y0 + 1.0 / (3 if lod == 0 else 2), TER_H + 0.04), (4.6 / nx - 0.04, 2.0 / (3 if lod == 0 else 2) - 0.04, 0.08),
-                      rot_z(rng.normal(0, 0.02)), "stone", "pave", skip=("-z",))
-    # broken stair descending to the right-front
-    nst = 7
-    for k in range(nst if lod < 2 else 3):
-        kk = k if lod < 2 else k * 2
-        z_top = TER_H - (kk + 1) * TER_H / nst
-        x0 = 2.6 + kk * 0.36
-        g.box((x0 + 0.36 * (nst - kk) / 2, TER_Y + 1.0, (z_top + TER_H - kk * TER_H / nst) / 2 - (TER_H - kk * TER_H / nst - z_top) / 2 + (TER_H - kk * TER_H / nst) / 2 * 0 + 0.0),
-              (0.36 * (nst - kk), 2.0 - 0.1 * (kk % 2), TER_H / nst), rot_z(rng.normal(0, 0.01)), "stone", "stair", skip=("-z",)) if False else None
-        zb = TER_H - (kk + 1) * TER_H / nst
-        zt = TER_H - kk * TER_H / nst
-        g.box((x0 + 0.18, TER_Y + 1.0 + rng.normal(0, 0.03), (zb + zt) / 2), (0.38, 2.0 - 0.12 * (kk % 3), zt - zb), rot_z(rng.normal(0, 0.015)),
+    # terrace height from its painted front face (foot 535, top 446 on the same vertical line)
+    u, v = S(960, 535)
+    Tf = cam.on_plane_z(np.array([u + 0.5]), np.array([v + 0.5]), 0.0)[0]
+    th = float(np.clip(_vline_height(cam, Tf, S(960, 446)), 1.0, 2.6))
+    TER["h"] = th
+    # terrace front wall (flat top at th), then the gate wall with the arch standing on the terrace top
+    column_wall(g, cam, mask, [(905, 535), (1092, 533)], 0.0, 905, 1092, lod, "terrace", rng, thickness=2.2, course=0.45,
+                z_cap=th)
+    if lod < 2:   # paving slabs on the terrace top
+        top_c = cam.on_plane_z(np.array([S(1000, 452)[0] + .5]), np.array([S(1000, 452)[1] + .5]), th)[0]
+        g.box((top_c[0], top_c[1] + 0.4, th + 0.04), (4.2, 2.0, 0.08), rot_z(0.0), "stone", "pave", skip=("-z",))
+    column_wall(g, cam, mask, [(922, 444), (1080, 440)], th, 922, 1080, lod, "wall", rng, thickness=0.95)
+    # left wall section receding diagonally (foot on the ground)
+    column_wall(g, cam, mask, [(826, 524), (925, 532)], 0.0, 826, 924, lod, "wall", rng, thickness=1.0)
+    # low broken wall on the terrace (right)
+    column_wall(g, cam, mask, [(1082, 446), (1166, 450)], th, 1082, 1166, lod, "stub", rng, thickness=0.7, z_cap=th + 1.6)
+    # stair: 9 stone steps from the terrace edge down to the ground at the front right
+    top = cam.on_plane_z(np.array([S(1092, 447)[0] + .5]), np.array([S(1092, 447)[1] + .5]), th)[0]
+    bot = cam.on_plane_z(np.array([S(1232, 560)[0] + .5]), np.array([S(1232, 560)[1] + .5]), 0.0)[0]
+    run = bot - top
+    run[2] = 0
+    Lr = np.linalg.norm(run)
+    rd = run / max(Lr, 1e-6)
+    side = np.array([-rd[1], rd[0], 0.0])
+    if (cam.centre - top) @ side > 0:
+        side = -side            # steps extend away from the camera (visible end faces the viewer)
+    nst = 9 if lod < 2 else 3
+    width = 1.9
+    for k in range(nst):
+        zt = th * (1 - k / nst)
+        zb = th * (1 - (k + 1) / nst)
+        c = top + rd * (Lr * (k + 0.5) / nst) + side * (width / 2)
+        hgt = zt if lod < 2 else zt
+        g.box((c[0], c[1], hgt / 2), (Lr / nst + 0.03, width - 0.08 * (k % 2), hgt), rot_z(math.atan2(rd[1], rd[0]) + rng.normal(0, 0.01)),
               "stone", "stair", skip=("-z",))
-        if zb > 0.01:
-            g.box((x0 + 0.18, TER_Y + 1.0, zb / 2), (0.36, 2.0, zb), None, "stone", "stair", skip=("-z", "+z", "-x"))
-    # broken wall stubs / pillars on the right (painted silhouette profiles)
-    for (xa, xb, sx0, sx1, y0) in ((2.6, 4.2, 1086, 1166, -0.3), (4.4, 5.1, 1171, 1205, -1.2), (5.4, 6.0, 1211, 1232, -1.8)):
-        sp = profile(cam, mask, sx0, sx1, y0, 0.5, 5.0)
-        if len(sp[0]) < 2:
-            continue
-        wall(g, xa, xb, y0, 0.8, 0.0 if y0 < -1 else TER_H * 0.0, sp, lod, "stub", rng)
-    # ivy cards on the side wall / gate wall
+    TER["stair"] = (top, bot)
+    # ivy cards on the walls where the painting shows ivy
     if lod < 2 and cards and "ivy_a" in cards:
-        for k, (u, v, hpx, yv) in enumerate([(845, 395, 90, -1.05), (880, 380, 70, -1.05), (945, 345, 80, -0.05),
-                                               (1050, 300, 50, -0.05), (905, 420, 60, -1.05), (1000, 455, 40, TER_Y - 0.05)][:: (1 if lod == 0 else 2)]):
-            uu, vv = S(u, v)
-            P = cam.on_plane(np.array([uu + 0.5]), np.array([vv + 0.5]), (0, yv, 0), (0, 1, 0))[0]
+        for k, (u0p, v0p, hpx) in enumerate([(845, 395, 90), (880, 380, 70), (945, 345, 80), (1050, 300, 50), (905, 420, 60)][:: (1 if lod == 0 else 2)]):
+            uu, vv = S(u0p, v0p)
+            P = cam.on_plane_z(np.array([uu + 0.5]), np.array([vv + 0.5]), th + 1.0)[0]
             h = ibm.metres(cam, P, hpx)
             u0, v0, u1, v1, aw, ah = cards["ivy_a" if k % 2 else "ivy_b"]
-            top = P + np.array([0, -0.03, h * 0.2])
-            g.add(np.array([top + (-h * 0.3, 0, -h), top + (h * 0.3, 0, -h), top + (h * 0.3, 0, 0), top + (-h * 0.3, 0, 0)]),
+            d = cam.centre - P
+            d[2] = 0
+            d /= np.linalg.norm(d)
+            r = np.array([-d[1], d[0], 0.0])
+            topp = P + d * 0.55
+            g.add(np.array([topp - r * h * 0.3 - [0, 0, h], topp + r * h * 0.3 - [0, 0, h], topp + r * h * 0.3, topp - r * h * 0.3]),
                   [[0, 1, 2, 3]], "card_ivy", "ivy", uv=[[(u0, v0), (u1, v0), (u1, v1), (u0, v1)]])
     base = Geo(seed=9 + lod)
-    poly = ibm.footprint(cam, mask, lambda x, y: np.zeros_like(x), ylim=(-8.0, 1.5), xlim=(-7.0, 8.0))
+    poly = ibm.footprint(cam, mask, lambda x, y: np.zeros_like(x), ylim=(-30.0, 30.0), xlim=(-30.0, 30.0))
     ibm.ground_patch(poly, lambda x, y: np.zeros_like(x) - 0.01, 0.7 if lod == 0 else (1.4 if lod == 1 else 2.8), g=base,
                      undulate=0.03)
     rubble = [(840, 515, 12), (900, 545, 9), (940, 560, 10), (955, 540, 11), (1080, 555, 9), (1125, 560, 7), (800, 545, 7),
@@ -205,14 +280,25 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
     return dict(struct=g, base=base)
 
 
+TER = {}
+
+
 def colliders():
-    return [dict(type="box", centre=(0.3, TER_Y + 1.0, TER_H / 2), size=(4.6, 2.0, TER_H)),
-            dict(type="box", centre=(0.0, ARCH["y"] + ARCH["t"] / 2, TER_H + 1.8), size=(3.9, ARCH["t"], 3.6)),
-            dict(type="box", centre=(-3.0, -0.5, 2.0), size=(2.2, 1.0, 4.0)),
-            dict(type="ramp", centre=(3.9, TER_Y + 1.0, TER_H / 2), size=(2.6, 2.0, TER_H))]
+    th = TER.get("h", TER_H)
+    C = [dict(type="box", centre=(0.0, 0.0, th / 2), size=(4.4, 2.4, th)),
+         dict(type="box", centre=(0.0, 0.6, th + 1.8), size=(4.0, 1.0, 3.6))]
+    if "stair" in TER:
+        t, b = TER["stair"]
+        c = (t + b) / 2
+        C.append(dict(type="ramp", centre=(c[0], c[1], th / 2), size=(float(np.linalg.norm((b - t)[:2])), 1.9, th),
+                      yaw=math.atan2(b[1] - t[1], b[0] - t[0])))
+    return C
 
 
 def meta_extra():
-    return dict(dimensions={"terrace_height_m": TER_H, "arch_opening_m": [round(ARCH["x1"] - ARCH["x0"], 2), round(ARCH["spring"] + 0.65 - TER_H, 2)],
-                            "stair": "7 steps, riser 0.26 m, tread 0.36 m"},
-                sockets={"arch_centre": [0.0, TER_H, 0.0], "stair_foot": [5.3, 0.0, -TER_Y - 1.0]})
+    th = TER.get("h", TER_H)
+    t, b = TER.get("stair", (np.zeros(3), np.zeros(3)))
+    gl = lambda p: [round(float(p[0]), 3), round(float(p[2]), 3), round(float(-p[1]), 3)]
+    return dict(dimensions={"terrace_height_m": round(th, 2), "stair": f"9 steps, riser {th / 9:.2f} m",
+                            "construction": "walls follow the painted foot lines (back-projected); per image column the painted solid runs give the wall heights and the arch opening"},
+                sockets={"stair_top": gl(t), "stair_foot": gl(b)})

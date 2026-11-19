@@ -1,0 +1,16 @@
+{
+ "front": {
+  "iou": 0.904,
+  "colour_error": 0.0359,
+  "colour_error_core": 0.0328,
+  "ref_px": 46366,
+  "render_px": 44158
+ },
+ "back": {
+  "iou": 0.8977,
+  "colour_error": 0.0278,
+  "colour_error_core": 0.0253,
+  "ref_px": 43810,
+  "render_px": 44117
+ }
+}

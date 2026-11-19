@@ -536,6 +536,43 @@ def portrait_cam(J):
     return dict(cam=cam, params=params.tolist(), err=err)
 
 
+def clear_face_occluders(lo0, J):
+    """Hair / hood / cap faces lying in front of the upper face skin (eyes, forehead, temples, upper
+    cheeks) are removed, so no second layer crosses the painted face (hairline bands, the herbalist's
+    hood rim and cheek fragment).  Hooded heads also lose the hair dome that pokes through the hood."""
+    import bmesh
+    from scipy.spatial import cKDTree
+    o, S = HB.head_frame(C, J)
+    L = C["L"]
+    bm = bmesh.new()
+    bm.from_mesh(lo0.data)
+    bm.faces.ensure_lookup_table()
+    cen = np.array([f.calc_center_median()[:] for f in bm.faces])
+    nrm = np.array([f.normal[:] for f in bm.faces])
+    mat = np.array([f.material_index for f in bm.faces])
+    head = (cen[:, 2] > L["chin"] - 0.01) & (np.abs(cen[:, 0]) < 0.2)
+    box = (np.abs(cen[:, 0]) < 0.052 * S[0]) & (cen[:, 2] > 0.5 * (L["eye"] + L["mouth"])) & (cen[:, 2] < L["eye"] + 0.055)
+    skin = head & box & (mat == MAT_IDS["body"]) & (nrm[:, 1] < -0.3)
+    kill = np.zeros(len(cen), bool)
+    if skin.sum() >= 20:
+        t = cKDTree(cen[skin][:, [0, 2]])
+        occ = head & box & (mat != MAT_IDS["body"])
+        if occ.any():
+            d, i = t.query(cen[occ][:, [0, 2]])
+            front = (cen[occ][:, 1] < cen[skin][i, 1] - 0.002) & (d < 0.012)
+            kill[np.nonzero(occ)[0][front]] = True
+    hooded = any(g.get("kind") == "hood" for g in C.get("garments", []) + C.get("acc", []))
+    if hooded:
+        kill |= head & (mat == MAT_IDS["hair"]) & (cen[:, 2] > L["eye"] + 0.05)
+    if kill.any():
+        bmesh.ops.delete(bm, geom=[bm.faces[int(k)] for k in np.nonzero(kill)[0]], context="FACES")
+        bm.to_mesh(lo0.data)
+        lo0.data.update()
+    bm.free()
+    log("face occluders removed (hair/shell faces over the upper face%s):" % (", hood dome" if hooded else ""),
+        int(kill.sum()))
+
+
 FRONT_FACES = True   # every face from the front painting (no portrait projection); portrait only lays out UVs
 
 
@@ -689,12 +726,18 @@ def texture(lo0, R, J, pinfo0=None):
             wb = np.where(dk_b, 0.0, wb)
             log("front face: skin", np.round(skin_med, 3), "dark pixels dropped outside the inner face",
                 int((dk_f & (per["front"][0] > 0)).sum()), "back", int((dk_b & (per["back"][0] > 0)).sum()))
-            if any(g.get("kind") == "hood" for g in C.get("garments", []) + C.get("acc", [])):
-                # under a hood the hair beside the face never takes the painted face's skin
+            if True:
+                # hair (hairline, sideburns, beard edges, hair under a hood) never takes the painted face's
+                # skin: the light bands where the hair volume overlaps the painted forehead / cheeks
                 hr_ = is_head(data[2]) & (tex_mat == MAT_IDS["hair"]) & (~in_inner_f)
                 sk_on_hair = hr_ & (np.linalg.norm(colf - skin_med, axis=1) < 0.15) & ((colf @ lw) > 0.7 * med_l)
                 wf = np.where(sk_on_hair, 0.0, wf)
-                log("hooded: painted skin dropped from the hair beside the face", int(sk_on_hair.sum()))
+                log("painted skin dropped from the hair outside the inner face", int(sk_on_hair.sum()))
+                # caps / hoods / helmets: no painted skin on the shell either (cap brim edge, hood rim)
+                sh_ = is_head(data[2]) & (~skin_hair)
+                sk_on_shell = sh_ & (np.linalg.norm(colf - skin_med, axis=1) < 0.17) & ((colf @ lw) > 0.6 * med_l)
+                wf = np.where(sk_on_shell, 0.0, wf)
+                log("painted skin dropped from head shells", int(sk_on_shell.sum()))
     if any(g.get("kind") == "hood" for g in C.get("garments", []) + C.get("acc", [])):
         # hood: painted pixels unlike the hood's own cloth (face / hair seen through the wider painted
         # opening) never texture the hood shell - it is synthesised from its own cloth instead
@@ -909,6 +952,7 @@ def main():
     J = HB.joints(C)
     B = build_objects(R, J)
     lo0 = join_lod0(B["objs"])
+    clear_face_occluders(lo0, J)
     reg = HBL.face_attr_get(lo0, "region")
     HBL.uv_layout(lo0, boost_faces=reg == 1, boost=2.0)
     pinfo0 = portrait_cam(J)

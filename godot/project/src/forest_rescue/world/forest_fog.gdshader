@@ -118,7 +118,12 @@ void fragment() {
 	float trans = 1.0;
 	vec3 acc = vec3(0.0);
 	float step_len = t_hit / float(STEPS);
-	for (int i = 0; i < STEPS; i++) {
+	// Over explored ground the shell is only lifted for tendrils / the veil: without a depth
+	// buffer a march from there would paint far banks over the crowns in front, so the volume is
+	// integrated only from entries on (or right at) the fog bank itself.
+	float sdf_entry = (mix(s_in.g, s_in.r, reveal_t) - 0.5) * sdf_range;
+	int steps = sdf_entry > 2.0 ? 0 : STEPS;
+	for (int i = 0; i < steps; i++) {
 		vec3 p = entry + view_dir * (t_hit * (float(i) + 0.5) / float(STEPS));
 		vec4 s = texture(state_tex, state_uv(p.xz));
 		vec4 w = texture(noise_tex, (p.xz - drift * 2.3) / 15.0 + vec2(0.71, 0.29));
@@ -130,20 +135,14 @@ void fragment() {
 		float offset = -3.0 + 4.0 * (b * 0.6 + w.r * 0.4) - reveal_curl * 2.5 * w.b;
 		float fogness = 1.0 - smoothstep(-2.2, 1.8, sdf + offset);
 		float y = max(0.0, p.y - ground(p.xz));
-		// Tendrils: thin elongated wisps (along the wind) in the canopy layer over explored edges.
-		vec2 along = vec2(dot(p.xz, normalize(wind)), dot(p.xz, vec2(-wind.y, wind.x) / length(wind)));
-		vec4 tn = texture(noise_tex, vec2(along.x / 46.0, along.y / 13.0) - drift.xy * vec2(0.024, 0.0) + vec2(0.13, 0.57));
-		float reach = 1.0 - smoothstep(0.0, tendril_reach, sdf);
-		float layer = smoothstep(4.0, 8.0, y) * (1.0 - smoothstep(12.0, 17.0, y));
-		float td = tendril_density * reach * layer * smoothstep(0.52, 0.78, tn.r * 0.7 + w.g * 0.3) * step(-2.0, sdf);
-		if (fogness < 0.004 && td < 0.0005) {
+		if (fogness < 0.004) {
 			continue;
 		}
 		float top = mix(s.a, s.b, local_t) * height_range;
 		float cloud_top = top * (0.45 + 1.0 * b);
 		float body = 1.0 - smoothstep(cloud_top - 3.2, cloud_top + 0.6, y);
 		float wisps = 0.62 + 0.38 * smoothstep(0.2, 0.8, w.g);
-		float d = density * fogness * body * wisps + td;
+		float d = density * fogness * body * wisps;
 		if (d <= 0.0005) {
 			continue;
 		}
@@ -164,6 +163,22 @@ void fragment() {
 	}
 	float alpha = 1.0 - trans;
 	vec3 color = alpha > 0.0001 ? acc / alpha : body_color;
+	// Tendrils: thin wisps drifting (along the wind) over the revealed forest edge at canopy
+	// height, evaluated on the lifted shell itself (art/07 panel 3) — light haze, bounded alpha.
+	{
+		float sdf_e = (mix(s_in.g, s_in.r, reveal_t) - 0.5) * sdf_range;
+		float reach = (1.0 - smoothstep(0.0, tendril_reach, sdf_e)) * step(-1.0, sdf_e);
+		if (reach > 0.001) {
+			vec2 wn = normalize(wind);
+			vec2 along = vec2(dot(entry.xz, wn), dot(entry.xz, vec2(-wn.y, wn.x)));
+			float n1 = texture(noise_tex, vec2(along.x / 52.0, along.y / 15.0) - vec2(drift.x * 0.02, 0.0) + vec2(0.13, 0.57)).r;
+			float n2 = texture(noise_tex, vec2(along.x / 23.0, along.y / 7.0) - vec2(drift.x * 0.035, 0.0) + vec2(0.61, 0.21)).b;
+			float wisp = smoothstep(0.50, 0.78, n1 * 0.72 + n2 * 0.28);
+			float a_t = tendril_density * 6.0 * reach * wisp;
+			color = (color * alpha + (1.0 - alpha) * a_t * haze_color) / max(1.0 - (1.0 - alpha) * (1.0 - a_t), 1e-4);
+			alpha = 1.0 - (1.0 - alpha) * (1.0 - a_t);
+		}
+	}
 	// Explored but not currently watched: a light veil over the known forest (never the town).
 	// A sight circle counts if the view ray passes over it anywhere between 0 and 14 m height.
 	if (dim_strength > 0.0) {
@@ -179,12 +194,13 @@ void fragment() {
 			float dist = distance(c.xy, a2 + seg * h);
 			sight = max(sight, (1.0 - smoothstep(c.z * 0.7, c.z, dist)) * c.w);
 		}
-		float town = 1.0 - step(56.0, max(abs(surface.x), abs(surface.z)));
+		// soft 10 m transition at the protected town (no hard line along the ±56 square)
+		float outside = smoothstep(56.0, 66.0, max(abs(surface.x), abs(surface.z)));
 		float explored = smoothstep(0.0, 3.0, (mix(s.g, s.r, reveal_t) - 0.5) * sdf_range);
-		float veil = dim_strength * explored * (1.0 - town) * (1.0 - sight);
-		// ground -> veil -> fog (back to front)
+		float veil = dim_strength * explored * outside * (1.0 - sight);
+		// ground -> veil -> fog (back to front); the veil dims toward the deep fog colour
 		float total = 1.0 - (1.0 - alpha) * (1.0 - veil);
-		color = (color * alpha + (1.0 - alpha) * veil * body_color) / max(total, 1e-4);
+		color = (color * alpha + (1.0 - alpha) * veil * mix(deep_color, body_color, 0.5)) / max(total, 1e-4);
 		alpha = total;
 	}
 	if (alpha < 0.003) {

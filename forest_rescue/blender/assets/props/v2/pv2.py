@@ -170,7 +170,8 @@ class ViewSpec:
 
     def __init__(self, name, sheet_name, box, points, pose=None, project=True, light=(-0.45, -0.55, 0.70),
                  thresh=0.10, fill_holes=40, exclude=(), clip_below=None, iou_ignore=None, weight=1.0,
-                 shadow=None, solve_opts=None, hide_parts=(), title="", ignore_boxes=()):
+                 shadow=None, solve_opts=None, hide_parts=(), title="", ignore_boxes=(), render_pose=None,
+                 tex_weight=1.0):
         self.name, self.sheet_name, self.box = name, sheet_name, tuple(box)
         self.points = dict(points)
         self.pose = dict(pose or {})
@@ -182,6 +183,8 @@ class ViewSpec:
         self.solve_opts = solve_opts or {}
         self.title = title
         self.ignore_boxes = list(ignore_boxes)
+        self.render_pose = render_pose
+        self.tex_weight = tex_weight
         self.ground = None          # 3-D footprint polygon at z=0 (set after the solve): ground-shadow cut
         self.cam = None
         self.rep = None
@@ -458,6 +461,18 @@ def zbuf_tris(cam, W, H, Vt):
     return tex.zbuffer(cam, W, H, V, T)
 
 
+def _lum(c):
+    return c @ np.array([0.299, 0.587, 0.114])
+
+
+DEFAULT_GATES = {
+    "iron": lambda c: _lum(c) < 0.42,
+    "wood": lambda c: _lum(c) < 0.66,
+    "roof": lambda c: _lum(c) < 0.6,
+    "bronze": lambda c: (c[..., 0] - c[..., 2] > 0.06) & (_lum(c) < 0.8),
+}
+
+
 class Swatches:
     """Material swatches from the painting (crops of the same object's painted pixels)."""
 
@@ -523,8 +538,9 @@ def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.
             if not k.any():
                 continue
             accm = ref_m
-            if gate and mc in gate:
-                accm = ref_m & gate[mc](crop)
+            gfn = (gate or {}).get(mc, DEFAULT_GATES.get(mc))
+            if gfn is not None:
+                accm = ref_m & gfn(crop)
             ck, wk, fk = tex.project_painting(Pp[k], Np[k], v.cam, crop, zb, W_, H_, accept=accm, min_facing=0.5,
                                               max_mag=2.0)
             c[k], w[k] = ck, wk
@@ -534,12 +550,12 @@ def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.
             lenient[k] += (c2 / shade2[:, None]) * (w2 > 0)[:, None]
             lw[k] += (w2 > 0)
         shade = tex.lambert_shade(Np, v.light, PAINT_K)
-        wp = w ** 4
+        wp = (w * v.tex_weight) ** 10
         acc += (c / shade[:, None]) * wp[:, None]
         wsum += wp
         per_view[v.name] = float((w > 0).mean())
     proj = np.clip(acc / np.maximum(wsum, 1e-12)[:, None], 0, 1)
-    wmax = wsum ** 0.25
+    wmax = np.clip(wsum ** 0.1, 0, 1)
     has_l = lw > 0
     len_col = np.clip(lenient / np.maximum(lw, 1)[:, None], 0, 1)
     # ---- swatch fill, colour matched (per tag -> per class -> swatch)
@@ -650,9 +666,13 @@ def use_qa(objs, light, on=True):
                 s.link = "DATA"
 
 
+def rpose(v):
+    return v.render_pose if v.render_pose is not None else v.pose
+
+
 def render_view(asset, B, v, ss=2, lod=0):
-    set_pose(asset, B, v.pose)
-    hid = hidden_parts(asset, v.pose)
+    set_pose(asset, B, rpose(v))
+    hid = hidden_parts(asset, rpose(v))
     objs = [o for (l_, nm), o in B.objs.items() if l_ == lod and nm not in hid]
     use_qa(objs, v.light, True)
     rgba = bl.render_painting_cam(v.cam, v.size[0], v.size[1], objs, ss=ss)
@@ -721,7 +741,7 @@ def compare(v, rgba, out_png, title, ignore=None, scale=2):
 
 def ignore_mask_from_parts(asset, B, v, parts, dilate=3):
     """Pixels covered by the given parts in this view (rendered silhouette) -> excluded from IoU."""
-    set_pose(asset, B, v.pose)
+    set_pose(asset, B, rpose(v))
     objs = [o for (l_, nm), o in B.objs.items() if l_ == 0 and nm in parts]
     if not objs:
         rest(asset, B)

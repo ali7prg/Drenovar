@@ -2,13 +2,13 @@
   "id": "lf_cage_wood",
   "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 7128,
-    "LOD1": 2936,
-    "LOD2": 1740
+    "LOD0": 7890,
+    "LOD1": 3080,
+    "LOD2": 1772
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 6068,
+      "root": 6830,
       "door_pivot": 600,
       "socket_stone_rune": 248,
       "socket_bronze_seal": 68,
@@ -17,7 +17,7 @@
       "latch_pivot": 24
     },
     "LOD1": {
-      "root": 2336,
+      "root": 2480,
       "door_pivot": 248,
       "socket_stone_rune": 140,
       "socket_bronze_seal": 68,
@@ -26,7 +26,7 @@
       "latch_pivot": 24
     },
     "LOD2": {
-      "root": 1228,
+      "root": 1260,
       "door_pivot": 208,
       "socket_stone_rune": 92,
       "socket_bronze_seal": 68,
@@ -54,14 +54,14 @@
   "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -1.857,
+      -1.9,
       0.0,
-      -1.549
+      -1.757
     ],
     "max": [
-      1.857,
-      3.819,
-      2.965
+      1.9,
+      4.022,
+      3.26
     ]
   },
   "lod_nodes": {
@@ -200,74 +200,108 @@
   ],
   "blueprint": {
     "c": 1.6,
-    "cy": 1.2917,
+    "cy": 1.4568,
     "s": 0.29,
-    "e": 0.0408,
-    "hb": 0.6256,
-    "zf": 3.4274,
-    "zr": 3.8186,
-    "bt": 3.0774,
-    "bh": 0.2855,
-    "ov": 0.0522,
-    "hx": -0.4112,
-    "dx1": 1.245,
-    "dz0": 0.1034,
-    "sz": 1.1965,
-    "sx": 0.9153,
-    "zda": 2.3681
+    "e": 0.0702,
+    "hb": 0.6692,
+    "zf": 3.5522,
+    "zr": 4.0224,
+    "bt": 3.1773,
+    "bh": 0.2805,
+    "ov": 0.0949,
+    "hx": -0.4901,
+    "dx1": 1.2978,
+    "dz0": 0.1051,
+    "sz": 1.2274,
+    "sx": 0.9465,
+    "zda": 2.4373,
+    "ax": 0.4465,
+    "ay": 0.1045
   },
   "qa": {
     "views": {
       "closed34": {
-        "iou_raw": 0.7835,
-        "iou_filled": 0.9166,
-        "colour_err": 0.0855,
-        "colour_err_core": 0.0737,
-        "ref_px": 89290,
-        "render_px": 81821,
+        "iou_raw": 0.8251,
+        "iou_filled": 0.9489,
+        "colour_err": 0.0898,
+        "colour_err_core": 0.0795,
+        "ref_px": 88026,
+        "render_px": 80981,
         "ignored_px": 0,
-        "camera_rms_px": 5.42,
-        "camera_max_px": 17.62,
+        "camera_rms_px": 1.76,
+        "camera_max_px": 3.42,
         "camera_points": 16
+      },
+      "open34": {
+        "iou_raw": 0.7985,
+        "iou_filled": 0.9569,
+        "colour_err": 0.1218,
+        "colour_err_core": 0.1128,
+        "ref_px": 82099,
+        "render_px": 71639,
+        "ignored_px": 37698,
+        "camera_rms_px": 1.52,
+        "camera_max_px": 3.57,
+        "camera_points": 11
       }
     },
     "cameras": {
       "closed34": {
-        "rms_px": 5.42,
-        "max_px": 17.62,
+        "rms_px": 1.76,
+        "max_px": 3.42,
         "n": 16,
-        "fov_deg": 19.14,
+        "fov_deg": 20.37,
         "per_point_px": {
-          "fin_n": 2.08,
-          "fin_l": 3.18,
-          "fin_r": 2.08,
-          "apex": 17.62,
-          "base_n0": 2.16,
-          "base_n1": 0.67,
-          "base_l0": 3.22,
-          "base_r0": 1.16,
-          "door_bl": 4.83,
-          "door_br": 1.9,
-          "door_ap": 3.45,
-          "sock": 0.02,
-          "beam_r_t": 4.67,
-          "beam_r_b": 3.17,
-          "beam_l_t": 5.81,
-          "beam_l_b": 4.41
+          "fin_n": 0.98,
+          "fin_l": 2.54,
+          "fin_r": 3.42,
+          "apex": 0.62,
+          "base_n0": 0.22,
+          "base_n1": 0.38,
+          "base_l0": 1.75,
+          "base_r0": 2.01,
+          "door_bl": 1.19,
+          "door_br": 1.4,
+          "door_ap": 1.01,
+          "sock": 0.0,
+          "beam_r_t": 3.07,
+          "beam_r_b": 1.47,
+          "beam_l_t": 1.95,
+          "beam_l_b": 1.78
+        }
+      },
+      "open34": {
+        "rms_px": 1.52,
+        "max_px": 3.57,
+        "n": 11,
+        "fov_deg": 24.09,
+        "per_point_px": {
+          "fin_n": 3.57,
+          "fin_l": 1.17,
+          "fin_r": 0.38,
+          "apex": 1.0,
+          "beam_r_t": 1.63,
+          "beam_r_b": 0.53,
+          "beam_l_t": 0.98,
+          "beam_l_b": 1.27,
+          "base_l0": 0.56,
+          "plinth_fr0": 1.56,
+          "plinth_fr1": 1.41
         }
       }
     },
     "texture": {
-      "texels": 2348165,
-      "projected_frac": 0.15,
+      "texels": 2434209,
+      "projected_frac": 0.1592,
       "per_view_frac": {
-        "closed34": 0.1531
+        "closed34": 0.1402,
+        "open34": 0.1304
       },
-      "seconds": 8.9
+      "seconds": 14.2
     },
-    "sheets": "forest_rescue/qa/compare/lf_cage_wood/v2_iter02_*"
+    "sheets": "forest_rescue/qa/compare/lf_cage_wood/v2_iter04_*"
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_oak --iter 2",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_oak --iter 4",
   "door_open_deg": -95.0,
   "door_open_deg_note": "signed Godot rotation.y of door_pivot for the open pose (actor_director.swing_door fallback adds door_open_deg * amount: negative = outward)",
   "sockets": {
@@ -277,9 +311,9 @@
       -0.0
     ],
     "hinge": [
-      -0.3012,
-      0.1034,
-      1.3867
+      -0.3801,
+      0.1051,
+      1.5518
     ],
     "captive_slot_0": [
       -0.72,
@@ -307,9 +341,9 @@
       "node": "key_slot",
       "parent": "door_pivot",
       "position_closed": [
-        0.9153,
-        1.1965,
-        1.4017
+        0.9465,
+        1.2274,
+        1.5668
       ],
       "normal": [
         0,
@@ -332,9 +366,9 @@
         "hinge_axis_top"
       ],
       "point": [
-        -0.3012,
+        -0.3801,
         0.0,
-        1.3867
+        1.5518
       ],
       "direction": [
         0,
@@ -347,8 +381,8 @@
       "node": "door_pivot",
       "open_rotation_y_deg": -95.0,
       "rule": "door_pivot rotates about its local +Y (through the hinge pins); closed 0, open -95 deg (outward: the free edge moves toward +Z)",
-      "clear_width_m": 1.526,
-      "clear_height_m": 2.025
+      "clear_width_m": 1.658,
+      "clear_height_m": 2.092
     },
     "latch": {
       "node": "latch_pivot",
@@ -361,24 +395,24 @@
     },
     "exit_corridor": [
       [
-        0.1888,
+        0.1099,
         0.12,
-        0.7917
+        0.9568
       ],
       [
-        0.1888,
+        0.1099,
         0.12,
-        1.5917
+        1.7568
       ],
       [
-        0.1888,
+        0.1099,
         0.0,
-        2.6917
+        2.8568
       ],
       [
-        0.1888,
+        0.1099,
         0.0,
-        3.8917
+        4.0568
       ]
     ]
   },

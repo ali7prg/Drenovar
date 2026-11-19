@@ -170,7 +170,7 @@ def outline_ring(g, c, R, outer, inner, z0, z1, mat, tag):
 
 
 def masonry_run(g, p0, p1, z0, z1, thick, courses, block_len, rng, mat="stone", tag="base", out_dir=None,
-                chamfer=0.025, skip=("-z",), lod=0, end_pad=0.0):
+                chamfer=0.012, skip=("-z",), lod=0, end_pad=0.0):
     """Wall of stone blocks along the segment p0->p1 (XY), from z0 to z1, `courses` rows, running bond."""
     p0 = np.asarray(p0, float)[:2]
     p1 = np.asarray(p1, float)[:2]
@@ -189,7 +189,7 @@ def masonry_run(g, p0, p1, z0, z1, thick, courses, block_len, rng, mat="stone", 
         for a, b in zip(cuts[:-1], cuts[1:]):
             if b - a < 0.05:
                 continue
-            gap = 0.012 if lod == 0 else 0.0
+            gap = 0.0
             jl = rng.uniform(-0.01, 0.01) if lod == 0 else 0.0
             cen = np.array([p0[0], p0[1], 0.0]) + ex * ((a + b) / 2) + np.array([0, 0, zc])
             sz = (b - a - gap, thick + jl, ch - gap)

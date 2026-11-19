@@ -49,6 +49,7 @@ def run(modname, it, do_export=True, do_godot=True):
     pv2.log(f"[{aid}] iter {it}")
     views = M.views()
     params, reps = pv2.solve_views(views, M.points, M.PARAMS, M.FREE, prior_sigma=getattr(M, "PRIOR", 0.25))
+    params["_cams"] = {v.name: v.cam for v in views}
     if hasattr(M, "ground_poly"):
         for v in views:
             v.ground = M.ground_poly(params)
@@ -167,7 +168,7 @@ def run(modname, it, do_export=True, do_godot=True):
             hidden_by_default=sorted(A.hidden),
             clips={k: {kk: vv for kk, vv in v.items() if kk != "nodes"} | {"nodes": v["nodes"]} for k, v in A.clips.items()},
             glb_nodes=nodes, glb_animations=anims,
-            blueprint={k: round(float(v), 4) for k, v in params.items()},
+            blueprint={k: round(float(v), 4) for k, v in params.items() if not k.startswith("_")},
             qa=dict(views=qa, cameras={v.name: dict(rms_px=round(v.rep["rms_px"], 2), max_px=round(v.rep["max_px"], 2),
                                                     n=v.rep["n"], fov_deg=round(v.rep["fov_deg"], 2),
                                                     per_point_px=v.rep["per_point_px"]) for v in views},
@@ -185,7 +186,7 @@ def run(modname, it, do_export=True, do_godot=True):
             meta["qa"]["godot_import"] = {"errors_warnings": len(bad), "lines": bad[:20]}
             core.write_json(os.path.join(pv2.RT, f"{aid}.meta.json"), meta)
     core.write_json(pv2.qa_path(aid, it, "metrics", "json"), dict(qa=qa, tris=tris, texture=tstats,
-                                                                  blueprint={k: round(float(v), 4) for k, v in params.items()}))
+                                                                  blueprint={k: round(float(v), 4) for k, v in params.items() if not k.startswith("_")}))
     for o in bpy.data.objects:
         o.hide_render = False
     core.save_blend(os.path.join(pv2.SRC, f"{aid}.blend"))

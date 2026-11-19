@@ -86,6 +86,8 @@ def add_door_and_sockets(A, cfg, lod, native):
     # iron bars and cross rails
     nb = cfg["bars"] if lod < 2 else max(3, cfg["bars"] // 2)
     bx = np.linspace(x0 + sw, x1 - sw, nb + 2)[1:-1]
+    if cfg.get("bar_x") is not None:
+        bx = np.array(cfg["bar_x"]) if lod < 2 else np.array(cfg["bar_x"])[::2]
     for x in bx:
         ztop = zs + (za - zs) * math.sqrt(max(0.0, 1 - ((x - xc) / half) ** 2)) - 0.1
         g.cyl((x, ym, z0 + cfg["rail_h"] - 0.01), (x, ym, ztop), cfg["bar_r"], n=6 if lod == 0 else 4, mat="iron",

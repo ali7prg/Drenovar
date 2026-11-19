@@ -42,6 +42,9 @@ def points(p):
     }
 
 
+BOXES = {"closed34": (100, 108, 466, 432), "open34": (98, 436, 490, 734)}
+
+
 def views():
     closed = pv2.ViewSpec(
         "closed34", SHEET, (100, 108, 466, 432),
@@ -55,7 +58,8 @@ def views():
         {"fin_n": (213.3, 442.3), "fin_l": (120, 472.3), "fin_r": (410, 464.3), "apex": (283.3, 441),
          "beam_r_t": (428.3, 491.7), "beam_r_b": (428.3, 510), "beam_l_t": (105, 500), "beam_l_b": (105, 516.7),
          "base_l0": (101, 710), "plinth_fr0": (245, 730), "plinth_fr1": (244.3, 675)},
-        light=LIGHT, thresh=0.11, fill_holes=30, shadow=0.10, hide_parts=("door_pivot",),
+        light=LIGHT, thresh=0.11, fill_holes=30, shadow=0.10, hide_parts=("door_pivot",), tex_weight=0.75,
+        render_pose={"door_pivot": {"rot": (0, 0, -math.radians(95))}},
         ignore_boxes=[(383, 520, 490, 734)], iou_ignore=("door_pivot",),
         title="OAK open 3/4 (painted door hangs on the RIGHT jamb = drawing inconsistency; production rule: "
               "LEFT jamb -> door region ignored)")
@@ -71,13 +75,29 @@ def ground_poly(p):
 
 
 # ---------------------------------------------------------------- geometry
-def bar_face(g, origin, ex, L, z_bot, z_r1, z_r2, z_spring, z_apex, n_arch, nbars, lod, tag, r_bar=0.022):
+def painted_ts(p, view, row, xs, origin, ex):
+    """Bar positions along a face from painted bar centres (sheet x at sheet row) via the solved camera."""
+    cam = p.get("_cams", {}).get(view)
+    if cam is None:
+        return None
+    x0, y0 = BOXES[view][:2]
+    o = np.array([origin[0], origin[1], 0.0])
+    e3 = np.array([ex[0], ex[1], 0.0])
+    n = np.cross(e3, (0, 0, 1))
+    P = cam.on_plane(np.array(xs, float) - x0, np.full(len(xs), row - y0, float), o, n)
+    return sorted(float((q - o) @ e3) for q in P)
+
+
+def bar_face(g, origin, ex, L, z_bot, z_r1, z_r2, z_spring, z_apex, n_arch, nbars, lod, tag, r_bar=0.024, ts=None):
     """Iron bars + rails + gothic pointed arches in a vertical face. origin = start point (x, y) on the face
-    line, ex = unit direction along the face."""
+    line, ex = unit direction along the face. ts: bar positions along the face (painted), else even spacing."""
     o = np.array([origin[0], origin[1], 0.0])
     ex = np.array([ex[0], ex[1], 0.0])
     nb = nbars if lod < 2 else max(2, (nbars + 1) // 2)
-    ts = np.linspace(0, L, nb + 2)[1:-1]
+    if ts is None:
+        ts = np.linspace(0, L, nb + 2)[1:-1]
+    elif lod == 2:
+        ts = ts[::2]
     w = L / n_arch
     rise = z_apex - z_spring
     for t in ts:
@@ -215,10 +235,13 @@ def build(A, p, lod):
     zs_ = z_r2 + 0.06
     zap = bb - 0.05
     spx, spy = 2 * c - s, 2 * cy - s
-    bar_face(g, (-c, -cy + s / 2), (0, 1), spy, hb, z_r1, z_r2, zs_, zap, 3, 6, lod, "left")
+    tl = painted_ts(p, "closed34", 335, [137, 148, 158, 168.5, 180.5, 190, 200.5], (-c, -cy + s / 2), (0, 1))
+    tf = painted_ts(p, "closed34", 335, [250, 270, 284], (-c + s / 2, -cy), (1, 0))
+    bar_face(g, (-c, -cy + s / 2), (0, 1), spy, hb, z_r1, z_r2, zs_, zap, 3, 7, lod, "left", ts=tl)
     bar_face(g, (-c + s / 2, cy), (1, 0), spx, hb, z_r1, z_r2, zs_, zap, 4, 9, lod, "back")
     bar_face(g, (c, -cy + s / 2), (0, 1), spy, hb, z_r1, z_r2, zs_, zap, 3, 8, lod, "right")
-    bar_face(g, (-c + s / 2, -cy), (1, 0), (hx - 0.11) - (-c + s / 2), hb, z_r1, z_r2, zs_, zap, 1, 3, lod, "frontbay")
+    bar_face(g, (-c + s / 2, -cy), (1, 0), (hx - 0.11) - (-c + s / 2), hb, z_r1, z_r2, zs_, zap, 1, 3, lod, "frontbay",
+             ts=tf)
     # ---------------- hip roof + apex finial
     apex_z = p["zr"] - 0.26
     ax, ay = p["ax"], p["ay"]
@@ -257,7 +280,8 @@ def door_cfg(p):
                 floor_z=0.12, captive_slots_xz=[(-0.72, 0.1), (0.05, -0.45), (0.74, 0.18)],
                 exit=[(hx + 0.6, -cy + 0.5, 0.12), (hx + 0.6, -cy - 0.3, 0.12), (hx + 0.6, -cy - 1.4, 0.0),
                       (hx + 0.6, -cy - 2.6, 0.0)],
-                wood_mat="wood", socket_mat="stone")
+                wood_mat="wood", socket_mat="stone",
+                bar_x=painted_ts(p, "closed34", 340, [327, 338, 354, 368, 383, 398], (0.0, -cy - 0.02), (1, 0)))
 
 
 SWATCHES = {

@@ -702,9 +702,7 @@ def texture(lo0, R, J, pinfo0=None):
         hair_seen = (tex_mat == MAT_IDS["hair"]) & is_head(data[2]) & (ws > 0.5)
         if hair_seen.sum() > 100:
             hair_med = np.median(col[hair_seen], 0)
-            wpt = per["portrait"][0] if "portrait" in per else np.zeros(len(ws))
-            side = (np.abs(data[3][:, 0]) > 0.5) | (data[2][:, 1] > o[1] + 0.015)
-            sk = is_head(data[2]) & (tex_mat == MAT_IDS["body"]) & (wpt < 0.5) & side \
+            sk = is_head(data[2]) & (tex_mat == MAT_IDS["body"]) & (ws < 0.3) & (data[2][:, 1] > o[1] + 0.015) \
                 & (data[2][:, 2] > C["L"]["mouth"] - 0.01)
             col[sk] = hair_med
             tex_mat = np.where(sk, MAT_IDS["hair"], tex_mat)

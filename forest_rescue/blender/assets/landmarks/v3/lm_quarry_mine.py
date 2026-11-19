@@ -103,7 +103,7 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
     rails(g, lod, cam)
     base = Geo(seed=9 + lod)
     if cam is not None and mask is not None:
-        poly = ibm.footprint(cam, mask, lambda x, y: np.zeros_like(x), ylim=(-9.0, 5.5), xlim=(-7.5, 9.5))
+        poly = ibm.footprint(cam, mask, lambda x, y: np.zeros_like(x), ylim=(-9.0, 1.2), xlim=(-7.5, 9.5))
         ibm.ground_patch(poly, lambda x, y: np.zeros_like(x) - 0.02, 0.8 if lod == 0 else (1.6 if lod == 1 else 3.2), g=base,
                          undulate=0.03)
         rocks = [(60, 560, 8), (125, 555, 7), (260, 560, 6), (430, 575, 7), (590, 545, 6), (515, 575, 6), (300, 575, 5),
@@ -162,7 +162,7 @@ def outcrop(g, lod, cam, mask):
                 continue
             P = cam.on_plane(np.array([c + 0.5]), np.array([rows.min() + 0.5]), (0, 0.15, 0), (0, 1, 0))[0]
             prof_x.append(P[0])
-            prof_z.append(P[2])
+            prof_z.append(P[2] * 0.96)
         prof_x, prof_z = np.array(prof_x), np.clip(np.array(prof_z), 0.5, 6.0)
     rng = np.random.default_rng(17 + lod)
     ch = 0.62 if lod == 0 else 1.0

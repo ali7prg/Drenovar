@@ -2,25 +2,25 @@
   "id": "lf_env_quarry_mine",
   "generation": "v3 (blueprint + solved art/06 camera + painting projection)",
   "tris": {
-    "LOD0": 1612,
-    "LOD1": 930,
-    "LOD2": 646
+    "LOD0": 1456,
+    "LOD1": 870,
+    "LOD2": 608
   },
   "tris_detail": {
     "LOD0": {
-      "structure": 1612,
-      "base": 1058,
-      "total": 2670
+      "structure": 1456,
+      "base": 904,
+      "total": 2360
     },
     "LOD1": {
-      "structure": 930,
-      "base": 180,
-      "total": 1110
+      "structure": 870,
+      "base": 138,
+      "total": 1008
     },
     "LOD2": {
-      "structure": 646,
-      "base": 22,
-      "total": 668
+      "structure": 608,
+      "base": 16,
+      "total": 624
     }
   },
   "budget": {
@@ -78,13 +78,13 @@
   },
   "bounds_m_gltf": [
     [
-      -4.097,
+      -4.1,
       0.0,
-      -3.534
+      -3.457
     ],
     [
       5.178,
-      4.071,
+      3.854,
       3.735
     ]
   ],
@@ -153,12 +153,12 @@
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py quarry_mine",
   "qa": {
     "main_view": {
-      "iou": 0.7893,
-      "colour_err": 0.1159,
-      "ssim": 0.4305,
-      "ref_px": 119032,
-      "render_px": 134675,
-      "iou_structure_only": 0.7043357350524586
+      "iou": 0.8138,
+      "colour_err": 0.1147,
+      "ssim": 0.4692,
+      "ref_px": 114434,
+      "render_px": 122056,
+      "iou_structure_only": 0.7223003174703457
     },
     "camera": {
       "rms_px": 3.56,
@@ -167,19 +167,19 @@
     },
     "insets": {
       "mine_front": {
-        "iou": 0.5086,
-        "colour_err": 0.1596,
-        "ssim": 0.254,
+        "iou": 0.4812,
+        "colour_err": 0.1581,
+        "ssim": 0.2634,
         "ref_px": 132832,
-        "render_px": 77937
+        "render_px": 72330
       }
     },
     "texture": {
-      "texels": 3057143,
-      "projected_frac": 0.04425275494146005,
-      "seconds": 17.9
+      "texels": 3070611,
+      "projected_frac": 0.05417358304259315,
+      "seconds": 11.8
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter02_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter04_*"
   },
   "sockets": {
     "mine_entrance_centre": [
@@ -193,9 +193,9 @@
       1.988
     ],
     "jib_tip": [
-      1.473,
-      3.826,
-      1.901
+      2.076,
+      3.449,
+      1.934
     ]
   },
   "dimensions": {

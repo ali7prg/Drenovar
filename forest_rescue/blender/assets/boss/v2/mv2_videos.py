@@ -26,16 +26,21 @@ def scene_setup():
     sc = bpy.context.scene
     sc.render.engine = "BLENDER_WORKBENCH"
     sh = sc.display.shading
-    sh.light = "STUDIO"
+    # readable light like the sheet: flat albedo (the texture carries the painted light) on a light background,
+    # cavity on for form, a soft ground shadow
+    sh.light = "FLAT"
     sh.color_type = "TEXTURE"
-    sh.show_shadows = True
-    sh.shadow_intensity = 0.45
-    sh.show_cavity = False
+    sh.show_shadows = False
+    sh.show_cavity = True
+    sh.cavity_type = "SCREEN"
+    sh.curvature_ridge_factor = 0.6
+    sh.curvature_valley_factor = 0.9
     sh.show_backface_culling = True
     sc.display.light_direction = (-0.45, -0.35, 0.82)
     sc.render.film_transparent = False
     sc.view_settings.view_transform = "Standard"
     w = bpy.data.worlds.get("qa_world") or bpy.data.worlds.new("qa_world")
+    w.color = (0.80, 0.79, 0.78)
     sc.world = w
     for m in bpy.data.materials:
         if m.node_tree is None:
@@ -53,7 +58,7 @@ def scene_setup():
         g = bpy.context.active_object
         g.name = "ground_qa"
         mat = bpy.data.materials.new("ground_qa_mat")
-        mat.diffuse_color = (0.55, 0.52, 0.45, 1.0)
+        mat.diffuse_color = (0.72, 0.70, 0.66, 1.0)
         g.data.materials.append(mat)
     # grid lines on the ground for slip reading: thin strips every 0.5 m
     if "ground_grid" not in bpy.data.objects:
@@ -65,7 +70,7 @@ def scene_setup():
             faces.append((b, b + 1, b + 2, b + 3))
         o = core.mesh_object("ground_grid", np.array(verts), faces, smooth=False)
         mat = bpy.data.materials.new("grid_mat")
-        mat.diffuse_color = (0.35, 0.33, 0.28, 1.0)
+        mat.diffuse_color = (0.55, 0.53, 0.49, 1.0)
         o.data.materials.append(mat)
     return sc
 

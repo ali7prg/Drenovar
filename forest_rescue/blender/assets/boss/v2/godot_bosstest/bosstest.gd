@@ -146,8 +146,14 @@ func _run() -> void:
 	for z in [40.0, 68.0]:
 		_set_lod(0 if z < 42.0 else 1)
 		await _shot("game_zoom%d_idle" % int(z), z, target)
-	# attack key frames at the game zoom 40 (telegraph and active)
+	# recommendedScale candidates (arena-relative 1.28, captain 1.52, squad mean 2.06) at the city camera
 	_set_lod(0)
+	for sc in [1.0, 1.28, 1.52, 2.06]:
+		boss.model.scale = Vector3.ONE * sc
+		await _shot("game_zoom40_scale_%.2f" % sc, 40.0, target)
+		await _shot("game_zoom68_scale_%.2f" % sc, 68.0, target)
+	boss.model.scale = Vector3.ONE
+	# attack key frames at the game zoom 40 (telegraph and active)
 	for pair in [["lf_boss_jaw_arc", 2.0], ["lf_boss_jaw_arc", 2.55], ["lf_boss_tail_sweep", 2.8], ["lf_boss_tail_sweep", 3.45],
 			["lf_boss_lane_charge", 2.2], ["lf_boss_lane_charge", 3.5], ["lf_boss_stomp_waves", 2.9], ["lf_boss_stomp_waves", 3.25],
 			["lf_boss_phase_roar", 1.2], ["lf_boss_death", 5.19]]:

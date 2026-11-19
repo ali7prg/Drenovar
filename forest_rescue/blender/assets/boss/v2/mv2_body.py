@@ -63,9 +63,9 @@ J = {
 }
 # toe chains (left): [knuckle0 (MTP), knuckle1, claw base], claw direction
 TOES_L = {
-    "toe2": [V(0.58, -0.22, 0.15), V(0.50, -0.47, 0.115), V(0.44, -0.66, 0.09)],
+    "toe2": [V(0.58, -0.22, 0.15), V(0.47, -0.46, 0.115), V(0.39, -0.65, 0.09)],
     "toe3": [V(0.69, -0.24, 0.16), V(0.70, -0.51, 0.12), V(0.71, -0.74, 0.095)],
-    "toe4": [V(0.80, -0.20, 0.15), V(0.89, -0.44, 0.115), V(0.96, -0.62, 0.09)],
+    "toe4": [V(0.80, -0.20, 0.15), V(0.92, -0.43, 0.115), V(1.01, -0.60, 0.09)],
 }
 HALLUX_L = [V(0.55, 0.12, 0.42), V(0.52, 0.17, 0.28)]
 FINGERS_L = {   # [base (knuckle), mid, claw base]
@@ -541,8 +541,8 @@ def build_parts():
     add += dorsal_knobs()
     add += scar_ridge()
     # ventral pubic keel between the thighs (front view: pale triangle to z~0.6; side view: behind the near leg)
-    add.append(sdf.round_cone([0, -0.12, 1.50], [0, -0.04, 0.78], 0.24, 0.05, k=0.14, name="keel", bone="pelvis"))
-    add.append(oell([0, -0.10, 1.32], [0, 0, 1], 0.32, 0.14, 0.20, k=0.10, name="keel_web", bone="pelvis"))
+    add.append(sdf.round_cone([0, -0.16, 1.50], [0, -0.12, 1.02], 0.26, 0.07, k=0.14, name="keel", bone="pelvis"))
+    add.append(oell([0, -0.14, 1.36], [0, 0, 1], 0.26, 0.16, 0.22, k=0.10, name="keel_web", bone="pelvis"))
     sub = hs + [mouth_cut()]
     return add, sub
 

@@ -277,7 +277,10 @@ def main():
     # over the lower lip) is the source there, the open-mouth close-up only for the head above/below it
     zl_t = np.interp(Y, B.head_profile()["Y"], B.head_profile()["zlip"])
     wu_t, _ = B.head_widths(Y)
-    lipband = (np.abs(T.pos[..., 2] - zl_t) < 0.065) & (np.abs(X) > wu_t - 0.06) & (Y < -3.25)
+    hv_t = np.full(Y.shape, 1.0)
+    vy, vx = np.nonzero(T.valid)
+    hv_t[vy, vx] = B.head_part().fn(T.pos[vy, vx] - T.nrm[vy, vx] * 0.004)
+    lipband = (np.abs(T.pos[..., 2] - zl_t) < 0.075) & (hv_t > -0.012) & (Y < -3.25)
     lipband = ndi.gaussian_filter(lipband.astype(np.float64), 1.5)
     g_cu = g_head * (1 - lipband)
     gates = {"head_closeup": g_cu * (X > -0.02), "head_mirror": g_cu * (X < 0.02),

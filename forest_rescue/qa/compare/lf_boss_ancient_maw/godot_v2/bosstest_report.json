@@ -1,0 +1,48 @@
+{
+  "boss": {
+    "clip_lengths": {
+      "lf_boss_awaken": 4.19999980926514,
+      "lf_boss_death": 5.19999980926514,
+      "lf_boss_hit": 0.550000011920929,
+      "lf_boss_idle": 5.0,
+      "lf_boss_jaw_arc": 4.25,
+      "lf_boss_lane_charge": 5.90000009536743,
+      "lf_boss_phase_roar": 2.79999995231628,
+      "lf_boss_stagger": 1.79999995231628,
+      "lf_boss_stomp_waves": 6.90000009536743,
+      "lf_boss_tail_sweep": 5.44999980926514,
+      "lf_boss_turn_left": 1.29999995231628,
+      "lf_boss_turn_right": 1.29999995231628,
+      "lf_boss_walk": 1.60000002384186
+    },
+    "clips_missing": [],
+    "clips_ok": 13,
+    "length_mismatch": [],
+    "lods": [
+      1,
+      1,
+      1
+    ],
+    "painted": true,
+    "ready": true,
+    "skeleton_bones": 70,
+    "tris_by_lod": [
+      45700,
+      23784,
+      8826
+    ]
+  },
+  "markers": {
+    "lf_boss_death:ground_contact": 1,
+    "lf_boss_jaw_arc:active_begin": 1,
+    "lf_boss_jaw_arc:active_end": 1,
+    "lf_boss_lane_charge:active_begin": 1,
+    "lf_boss_lane_charge:active_end": 1,
+    "lf_boss_stomp_waves:wave_1_begin": 1,
+    "lf_boss_stomp_waves:wave_1_end": 1,
+    "lf_boss_stomp_waves:wave_2_begin": 1,
+    "lf_boss_stomp_waves:wave_2_end": 1,
+    "lf_boss_tail_sweep:active_begin": 1,
+    "lf_boss_tail_sweep:active_end": 1
+  }
+}

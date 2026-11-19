@@ -283,7 +283,7 @@ def main():
     hv_t = np.full(Y.shape, 1.0)
     vy, vx = np.nonzero(T.valid)
     hv_t[vy, vx] = B.head_part().fn(T.pos[vy, vx] - T.nrm[vy, vx] * 0.004)
-    lipband = (np.abs(T.pos[..., 2] - zl_t) < 0.075) & (hv_t > -0.012) & (Y < -3.25)
+    lipband = (np.abs(T.pos[..., 2] - zl_t) < 0.075) & (hv_t > -0.035) & (Y < -3.25)
     lipband = ndi.gaussian_filter(lipband.astype(np.float64), 1.5)
     g_cu = g_head * (1 - lipband)
     gates = {"head_closeup": g_cu * (X > -0.02), "head_mirror": g_cu * (X < 0.02),
@@ -313,11 +313,13 @@ def main():
     zl = np.interp(P[:, 1], B.head_profile()["Y"], B.head_profile()["zlip"])
     wu, _ = B.head_widths(P[:, 1])
     headvol = B.head_part().fn(P - N * 0.004)
-    inner_mouth = (P[:, 1] < -3.30) & (np.abs(P[:, 2] - zl) < 0.17) & (headvol < -0.012)
+    # interior = clearly inside the un-cut head volume AND inside the cavity footprint (outer surfaces trimmed by
+    # the soft hull are at most ~2.5 cm inside, so they stay scaly skin)
+    inner_mouth = (P[:, 1] < -3.30) & (np.abs(P[:, 2] - zl) < 0.17) & (headvol < -0.035) & (np.abs(P[:, 0]) < wu - 0.05)
     flesh = np.array([0.40, 0.19, 0.17])
     dark = np.array([0.09, 0.055, 0.045])
     # interior near the lips/front (what the closed mouth's slit shows) is a dark shadowed gap; deeper = flesh
-    depth_in = np.clip((-headvol - 0.012) / 0.06, 0, 1)
+    depth_in = np.clip((-headvol - 0.035) / 0.06, 0, 1)
     fl = flesh[None, :] * depth_in[:, None] + dark[None, :] * (1 - depth_in[:, None])
     sel = inner_mouth
     base[sel] = fl[sel] * (0.85 + 0.15 * cvar[sel])[:, None]

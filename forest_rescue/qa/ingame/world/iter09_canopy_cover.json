@@ -1,8 +1,8 @@
 {
  "NW golden grove": {
   "art01": 0.794,
-  "game": 0.668,
-  "game_fog_fraction_excluded": 0.159,
+  "game": 0.676,
+  "game_fog_fraction_excluded": 0.151,
   "view": "full_grove_z68",
   "art_box": [
    60,
@@ -13,8 +13,8 @@
  },
  "south spruce": {
   "art01": 0.486,
-  "game": 0.527,
-  "game_fog_fraction_excluded": 0.381,
+  "game": 0.53,
+  "game_fog_fraction_excluded": 0.353,
   "view": "full_spruce_z68",
   "art_box": [
    420,
@@ -25,8 +25,8 @@
  },
  "east river": {
   "art01": 0.536,
-  "game": 0.527,
-  "game_fog_fraction_excluded": 0.476,
+  "game": 0.538,
+  "game_fog_fraction_excluded": 0.46,
   "view": "full_east_z68",
   "art_box": [
    960,
@@ -37,8 +37,8 @@
  },
  "SW quarry": {
   "art01": 0.467,
-  "game": 0.558,
-  "game_fog_fraction_excluded": 0.398,
+  "game": 0.574,
+  "game_fog_fraction_excluded": 0.379,
   "view": "full_quarry_z68",
   "art_box": [
    20,

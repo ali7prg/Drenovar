@@ -263,9 +263,9 @@
       "markers": {},
       "footSlip_m": {
         "L": 0.0,
-        "R": 0.0
+        "R": 0.0004
       },
-      "ikOverreach_m": 0.1627,
+      "ikOverreach_m": 0.0128,
       "clawTipMinZ_planted_m": 0.013
     },
     "lf_boss_hit": {

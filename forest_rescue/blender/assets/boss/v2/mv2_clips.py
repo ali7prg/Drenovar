@@ -847,7 +847,13 @@ def frames(rig, clip_id):
         if loop and f == n:
             t = 0.0
         ch = fn(t)
-        over = max(over, rig.build(ch))
+        o = rig.build(ch)
+        if o > 0.002:
+            # a planted foot out of leg reach: drop the pelvis by the overreach (keeps the foot on the ground)
+            ch = dict(ch)
+            ch["pz"] = ch.get("pz", 0.0) - o * 1.15
+            o = rig.build(ch)
+        over = max(over, o)
         out.append(rig.keyframe())
         fp = rig.foot_points()
         yaws.append(ch.get("_node_yaw", 0.0))

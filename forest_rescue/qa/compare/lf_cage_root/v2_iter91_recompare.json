@@ -1,0 +1,30 @@
+{
+  "closed34": {
+    "old": {
+      "iou_raw": 0.7176,
+      "iou_filled": 0.8797,
+      "colour_err": 0.0974,
+      "colour_err_core": 0.0894
+    },
+    "new": {
+      "iou_raw": 0.7176,
+      "iou_filled": 0.8797,
+      "colour_err": 0.0978,
+      "colour_err_core": 0.0898
+    }
+  },
+  "open34": {
+    "old": {
+      "iou_raw": 0.7169,
+      "iou_filled": 0.8719,
+      "colour_err": 0.1251,
+      "colour_err_core": 0.1172
+    },
+    "new": {
+      "iou_raw": 0.7169,
+      "iou_filled": 0.8719,
+      "colour_err": 0.1258,
+      "colour_err_core": 0.118
+    }
+  }
+}

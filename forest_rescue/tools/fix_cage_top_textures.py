@@ -319,6 +319,37 @@ def tube_axes(cent, normals, radius=0.14):
     return axes
 
 
+def floor_colour_stats(js, binary, worlds, aid, lod, atlas, spec, floor_tex):
+    """(mean_new, std_ratio, mean_old) mapping the quilted floor onto the plank tone of the old
+    floor texels brighter than their median (= the painted floor between the bar stripes)."""
+    size = atlas.shape[0]
+    samples = []
+    for ni, node in enumerate(js["nodes"]):
+        name = node.get("name", "")
+        if "mesh" not in node or name != f"{aid}_LOD{lod}":
+            continue
+        m = worlds[ni]
+        for prim in js["meshes"][node["mesh"]]["primitives"]:
+            pos = accessor(js, binary, prim["attributes"]["POSITION"]).astype(np.float64)
+            uv = accessor(js, binary, prim["attributes"]["TEXCOORD_0"]).astype(np.float64)
+            faces = accessor(js, binary, prim["indices"]).reshape(-1, 3).astype(np.int64)
+            wp = pos @ m[:3, :3].T + m[:3, 3]
+            a, b, c = wp[faces[:, 0]], wp[faces[:, 1]], wp[faces[:, 2]]
+            nrm = np.cross(b - a, c - a)
+            nrm /= np.maximum(np.linalg.norm(nrm, axis=1, keepdims=True), 1e-9)
+            cent = (a + b + c) / 3.0
+            sel = (nrm[:, 1] > 0.7) & (cent[:, 1] < spec["floor_max"])
+            for f, ys, xs, bary in raster_triangles(uv, faces[sel], size):
+                samples.append(atlas[ys, xs])
+    if not samples:
+        return None
+    old = np.concatenate(samples).astype(np.float32)
+    lum = old @ np.array([0.299, 0.587, 0.114], np.float32)
+    light = old[lum >= np.median(lum)]
+    new = floor_tex.reshape(-1, 3).astype(np.float32)
+    return (new.mean(0), light.std(0) / np.maximum(new.std(0), 1.0), light.mean(0))
+
+
 def fix(kind, art, rng):
     spec = CAGES[kind]
     aid = spec["id"]
@@ -343,6 +374,14 @@ def fix(kind, art, rng):
         low = cv2.GaussianBlur(atlas.astype(np.float32), (0, 0), max(1.5, size / 340.0))
         out = atlas.copy()
         written = np.zeros(atlas.shape[:2], bool)
+        # LOD0: texels the painting shows (blender/assets/props/v2/cage_seen_mask.py) keep their
+        # projected colour, so the painting comparison cannot get worse; only occluded / unseen fill
+        # (bar stripes under the bars, blotchy synthesis) is replaced. LOD1/2 are transfers: all.
+        keep = np.zeros(atlas.shape[:2], bool)
+        floor_stats = floor_colour_stats(js, binary, worlds, aid, lod, atlas, spec, floor_tex)
+        seen_path = os.path.join(BACKUP, f"{aid}_seen_lod0.png")
+        if lod == 0 and os.path.exists(seen_path):
+            keep = cv2.resize(cv2.imread(seen_path, cv2.IMREAD_GRAYSCALE), (size, size), interpolation=cv2.INTER_NEAREST) > 127
         counts = {"floor": 0, "bark": 0}
         for ni, node in enumerate(js["nodes"]):
             name = node.get("name", "")
@@ -371,6 +410,10 @@ def fix(kind, art, rng):
                 for f, ys, xs, bary in raster_triangles(uv, faces, size):
                     if not (is_floor[f] or is_bark[f]):
                         continue
+                    free = ~keep[ys, xs]
+                    if not free.any():
+                        continue
+                    ys, xs, bary = ys[free], xs[free], bary[free]
                     p = bary @ wp[faces[f]]
                     if is_floor[f]:
                         u = np.mod((p[:, 0] + 2.5) * floor_ppm, floor_tex.shape[1] - 1).astype(int)
@@ -388,6 +431,10 @@ def fix(kind, art, rng):
                         col = bark_tex[v, u]
                         bark_mean_px = bark_mean[v, u]
                         counts["bark"] += len(ys)
+                    if is_floor[f] and floor_stats is not None:
+                        # Colour transfer onto the painted floor's plank tone (the light bands the
+                        # painting shows between the bars), per channel mean / std.
+                        col = (col.astype(np.float32) - floor_stats[0]) * floor_stats[1] + floor_stats[2]
                     if is_floor[f]:
                         # Keep the painted low-frequency light (contact shadow under bars / roots).
                         shade = np.clip(0.72 + 0.28 * lum[ys, xs] / max(float(np.mean(lum[ys, xs])), 1.0), 0.6, 1.2)

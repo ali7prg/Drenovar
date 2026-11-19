@@ -18,17 +18,17 @@ SHEET = "cage_variants_gate_sockets.png"
 LIGHT = (-0.55, -0.55, 0.62)
 BOXES = {"closed34": (592, 108, 958, 444), "open34": (592, 440, 985, 732)}
 
-PARAMS = dict(c=1.55, cy=1.40, s=0.20, zd=0.42, zt=3.05, zs=3.50, pe=0.14, pf=0.55, hx=-1.10, dx1=1.30, sz=1.30,
+PARAMS = dict(c=1.55, cy=1.40, s=0.20, zd=0.42, zt=3.05, zs=3.50, zc=3.45, pe=0.14, pf=0.55, hx=-1.10, dx1=1.30, sz=1.30,
               sx=1.06, zda=2.45, dz0=0.44)
-FREE = ["cy", "zd", "zt", "zs", "pe", "pf", "hx", "dx1", "sz", "sx", "zda", "dz0"]
+FREE = ["cy", "zd", "zt", "zc", "pe", "pf", "hx", "dx1", "sz", "sx", "zda", "dz0"]
 
 
 def points(p):
     c, cy, s = p["c"], p["cy"], p["s"]
     yf = -cy - 0.03
     return {
-        "spire_n": (-c, -cy, p["zs"]), "spire_l": (-c, cy, p["zs"]), "spire_r": (c, -cy, p["zs"]),
-        "spire_b": (c, cy, p["zs"]),
+        "top_n": (-c, -cy, p["zt"] + 0.08), "top_l": (-c, cy, p["zt"] + 0.08), "top_r": (c, -cy, p["zt"] + 0.08),
+        "crown": (0.0, 0.0, p["zc"]),
         "plat_bl": (-c - p["pe"], cy + p["pe"], p["zd"]), "plat_n": (-c - p["pe"], -cy - p["pf"], p["zd"]),
         "plat_r": (c + p["pe"], -cy - p["pf"], p["zd"]),
         "post_n_top": (-c - s / 2, -cy - s / 2, p["zt"]),
@@ -41,14 +41,14 @@ def points(p):
 def views():
     closed = pv2.ViewSpec(
         "closed34", SHEET, BOXES["closed34"],
-        {"spire_n": (722.3, 118.3), "spire_l": (614.3, 151.7), "spire_r": (918.3, 133.3), "spire_b": (778.3, 126.7),
-         "plat_bl": (593.3, 376.7), "plat_n": (773.3, 395), "plat_r": (948.3, 381.7), "post_n_top": (723.3, 143.3),
+        {"top_n": (722.3, 141.7), "top_l": (614.3, 173.3), "top_r": (918.3, 160.0), "crown": (778.3, 141.7),
+         "plat_bl": (593.3, 376.7), "plat_n": (773.3, 395), "plat_r": (948.3, 381.7),
          "door_bl": (790, 396.7), "door_br": (910, 388.3), "door_ap": (850, 216.7), "sock": (878.3, 316.7)},
         light=LIGHT, thresh=0.11, fill_holes=30, shadow=0.10, title="IRON closed 3/4")
     opened = pv2.ViewSpec(
         "open34", SHEET, BOXES["open34"],
-        {"spire_n": (714.3, 445), "spire_l": (615, 471.7), "spire_r": (895, 456.7), "spire_b": (768.3, 451.7),
-         "plat_bl": (595, 683.3), "plat_n": (726.7, 705), "post_n_top": (714.3, 468.3), "postb_foot": (780, 670)},
+        {"top_n": (714.5, 465.0), "top_l": (614.5, 491.0), "top_r": (895, 481.0), "crown": (768.3, 463.0),
+         "plat_bl": (595, 683.3), "plat_n": (726.7, 705), "postb_foot": (780, 670)},
         light=LIGHT, thresh=0.11, fill_holes=30, shadow=0.10, hide_parts=("door_pivot",), tex_weight=0.75,
         render_pose={"door_pivot": {"rot": (0, 0, -math.radians(95))}}, ignore_boxes=[(872, 530, 985, 732)],
         iou_ignore=("door_pivot",),
@@ -182,7 +182,7 @@ def build(A, p, lod):
             g.box((x, y, (zd + zt) / 2), (s, s, zt - zd), mat="iron", tag="post")
             g.box((x, y, zd + 0.07), (s + 0.05, s + 0.05, 0.14), mat="iron", tag="post_shoe", skip=("-z",))
             g.box((x, y, zt + 0.04), (s + 0.06, s + 0.06, 0.08), mat="iron", tag="post_cap")
-            CG.lathe(g, [(0.075, 0.0), (0.075, 0.04), (0.045, 0.07), (0.07, 0.13), (0.05, 0.19), (0.03, 0.22), (0.0, p["zs"] - zt - 0.08)],
+            CG.lathe(g, [(0.075, 0.0), (0.075, 0.04), (0.045, 0.07), (0.07, 0.13), (0.05, 0.19), (0.03, 0.22), (0.0, 0.46)],
                      (x, y, zt + 0.08), n=8 if lod == 0 else (6 if lod == 1 else 4), mat="iron", tag="spire")
             for fn in ((0, -1, 0), (-1, 0, 0), (1, 0, 0), (0, 1, 0)):
                 if (fn[0] and fn[0] == sx_) or (fn[1] and fn[1] == sy_):
@@ -196,6 +196,21 @@ def build(A, p, lod):
     for (a, b, nrm) in (((-c, -cy, zb), (c, -cy, zb), (0, -1, 0)), ((-c, cy, zb), (c, cy, zb), (0, 1, 0)),
                         ((-c, -cy, zb), (-c, cy, zb), (-1, 0, 0)), ((c, -cy, zb), (c, cy, zb), (1, 0, 0))):
         band(g, a, b, 0.07, 0.18, nrm, lod, tag="topband")
+    # crown: four riveted straps rising from the post caps to a central boss + spire
+    zc = p["zc"]
+    nseg = 7 if lod == 0 else (4 if lod == 1 else 2)
+    for sx_ in (-1, 1):
+        for sy_ in (-1, 1):
+            a = np.array([sx_ * c, sy_ * cy, zt + 0.06])
+            P = []
+            for t in np.linspace(0, 1, nseg):
+                q = a * (1 - t)
+                q[2] = zt + 0.06 + (zc - zt - 0.06) * math.sin(t * math.pi / 2)
+                P.append(q)
+            CG.sweep_rect(g, np.array(P), 0.05, 0.06, up=(0, 0, 1), mat="iron", tag="crown_strap")
+    g.box((0, 0, zc), (0.14, 0.14, 0.1), mat="iron", tag="crown_boss")
+    CG.lathe(g, [(0.06, 0.0), (0.06, 0.03), (0.035, 0.06), (0.055, 0.11), (0.03, 0.17), (0.0, 0.38)], (0, 0, zc + 0.05),
+             n=8 if lod == 0 else 5, mat="iron", tag="spire")
     # middle / bottom bands are per face (iron_face rails); front: riveted segmental arch band over the door
     z_mid = zd + 0.52 * (zt - zd)
     xs_ = np.linspace(-c + s / 2, c - s / 2, 11 if lod == 0 else 7)

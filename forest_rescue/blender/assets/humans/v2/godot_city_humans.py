@@ -106,7 +106,7 @@ def heads_spec():
             x = i * 3.0
             z = lod * 3.0
             inst.append(dict(glb=f"{a}.glb", x=x, z=z, yaw=0.0, painted=True, k=k_of(a), anim=idle, t=0.0, lod=lod))
-            heads.append(dict(tag=f"{a}_LOD{lod}", x=x, y=head_y, z=z))
+            heads.append(dict(tag=f"{a}_LOD{lod}", x=x, y=head_y, z=z, inst=len(inst) - 1))
     return dict(instances=inst, heads=heads, target=[0, 1, 0], ground=[0.40, 0.42, 0.24])
 
 

@@ -11,6 +11,7 @@ extends Node3D
 var args := {}
 var cam: Camera3D
 var sun: DirectionalLight3D
+var roots: Array = []
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
@@ -63,6 +64,7 @@ func _ready() -> void:
 		var s := float(inst.get("s", 1.0))
 		root.scale = Vector3(s, s, s)
 		add_child(root)
+		roots.append(root)
 		var lod := int(inst.get("lod", 0))
 		for mi: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
 			var lower := String(mi.name).to_lower()
@@ -116,6 +118,8 @@ func _shots(spec: Dictionary) -> void:
 		var vp := get_viewport()
 		vp.size = Vector2i(520, 560)
 		for h in spec.heads:
+			for k in roots.size():
+				roots[k].visible = (k == int(h.inst))
 			var c := Vector3(float(h.x), float(h.y), float(h.z))
 			for ang in [0, -45, 45, -90, 90]:
 				var a := deg_to_rad(float(ang))

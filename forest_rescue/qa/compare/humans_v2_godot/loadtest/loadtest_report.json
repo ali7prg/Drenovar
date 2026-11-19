@@ -1,0 +1,157 @@
+{
+  "_markers": {
+    "lf_squad_captain:lf_soldier_attack:weapon_contact": 1,
+    "lf_squad_captain:lf_soldier_unlock:latch_release": 1,
+    "lf_squad_scout:lf_soldier_attack:weapon_contact": 1,
+    "lf_squad_scout:lf_soldier_unlock:latch_release": 1,
+    "lf_squad_shield_guard:lf_soldier_attack:weapon_contact": 1,
+    "lf_squad_shield_guard:lf_soldier_unlock:latch_release": 1
+  },
+  "lf_civilian_cooper": {
+    "clips_missing": [],
+    "clips_ok": 12,
+    "length_mismatch": [],
+    "lods": [
+      1,
+      1,
+      1
+    ],
+    "painted": true,
+    "ready": true,
+    "variant": {
+      "cloth": "weathered_oak",
+      "hair": "ash"
+    },
+    "walk_speed_scale_at_1.2": 1.0
+  },
+  "lf_civilian_courier": {
+    "clips_missing": [],
+    "clips_ok": 12,
+    "length_mismatch": [],
+    "lods": [
+      1,
+      1,
+      1
+    ],
+    "painted": true,
+    "ready": true,
+    "variant": {
+      "cloth": "muted_emerald",
+      "hair": "dark_blond"
+    },
+    "walk_speed_scale_at_1.2": 1.0
+  },
+  "lf_civilian_ferryman": {
+    "clips_missing": [],
+    "clips_ok": 12,
+    "length_mismatch": [],
+    "lods": [
+      1,
+      1,
+      1
+    ],
+    "painted": true,
+    "ready": true,
+    "variant": {
+      "cloth": "weathered_oak",
+      "hair": "chestnut"
+    },
+    "walk_speed_scale_at_1.2": 1.0
+  },
+  "lf_civilian_herbalist": {
+    "clips_missing": [],
+    "clips_ok": 12,
+    "length_mismatch": [],
+    "lods": [
+      1,
+      1,
+      1
+    ],
+    "painted": true,
+    "ready": true,
+    "variant": {
+      "cloth": "russet",
+      "hair": "auburn"
+    },
+    "walk_speed_scale_at_1.2": 1.0
+  },
+  "lf_civilian_miller": {
+    "clips_missing": [],
+    "clips_ok": 12,
+    "length_mismatch": [],
+    "lods": [
+      1,
+      1,
+      1
+    ],
+    "painted": true,
+    "ready": true,
+    "variant": {
+      "cloth": "smoke",
+      "hair": "black"
+    },
+    "walk_speed_scale_at_1.2": 1.0
+  },
+  "lf_civilian_quarry_worker": {
+    "clips_missing": [],
+    "clips_ok": 12,
+    "length_mismatch": [],
+    "lods": [
+      1,
+      1,
+      1
+    ],
+    "painted": true,
+    "ready": true,
+    "variant": {
+      "cloth": "limestone",
+      "hair": "chestnut"
+    },
+    "walk_speed_scale_at_1.2": 1.0
+  },
+  "lf_squad_captain": {
+    "clips_missing": [],
+    "clips_ok": 10,
+    "length_mismatch": [],
+    "lods": [
+      1,
+      1,
+      1
+    ],
+    "painted": true,
+    "ready": true,
+    "variant": {
+
+    }
+  },
+  "lf_squad_scout": {
+    "clips_missing": [],
+    "clips_ok": 10,
+    "length_mismatch": [],
+    "lods": [
+      1,
+      1,
+      1
+    ],
+    "painted": true,
+    "ready": true,
+    "variant": {
+
+    }
+  },
+  "lf_squad_shield_guard": {
+    "clips_missing": [],
+    "clips_ok": 10,
+    "length_mismatch": [],
+    "lods": [
+      1,
+      1,
+      1
+    ],
+    "painted": true,
+    "ready": true,
+    "variant": {
+
+    }
+  }
+}

@@ -1,0 +1,254 @@
+{
+  "entrance_corridor_z46": {
+    "perf": {
+      "draws": 140,
+      "fogOnly": 6,
+      "full": 4,
+      "inst": 470,
+      "landmark_tris": 0,
+      "prims": 194906,
+      "proxy": 1,
+      "through_fog": {
+        "deep_px_sampled": 12043,
+        "tree_px_through_deep_fog": 0
+      },
+      "tris_est": 35753
+    },
+    "px_per_m": 13.695652173913,
+    "target": [
+      -12.0,
+      -58.0
+    ],
+    "through_fog": {
+      "deep_px_sampled": 12043,
+      "tree_px_through_deep_fog": 0
+    },
+    "zoom": 46.0
+  },
+  "full_overview_z140": {
+    "perf": {
+      "draws": 405,
+      "fogOnly": 0,
+      "full": 4,
+      "inst": 2343,
+      "landmark_tris": 34114,
+      "prims": 307854,
+      "proxy": 8,
+      "tris_est": 4936
+    },
+    "px_per_m": 4.5,
+    "target": [
+      0.0,
+      0.0
+    ],
+    "zoom": 140.0
+  },
+  "locked_overview_z130": {
+    "perf": {
+      "draws": 295,
+      "fogOnly": 12,
+      "full": 4,
+      "inst": 753,
+      "landmark_tris": 0,
+      "prims": 262474,
+      "proxy": 0,
+      "through_fog": {
+        "deep_px_sampled": 53020,
+        "tree_px_through_deep_fog": 0
+      },
+      "tris_est": 1626
+    },
+    "px_per_m": 4.84615384615385,
+    "target": [
+      0.0,
+      0.0
+    ],
+    "through_fog": {
+      "deep_px_sampled": 53020,
+      "tree_px_through_deep_fog": 0
+    },
+    "zoom": 130.0
+  },
+  "locked_town_z68": {
+    "perf": {
+      "draws": 261,
+      "fogOnly": 12,
+      "full": 4,
+      "inst": 742,
+      "landmark_tris": 0,
+      "prims": 219464,
+      "proxy": 0,
+      "through_fog": {
+        "deep_px_sampled": 2242,
+        "tree_px_through_deep_fog": 0
+      },
+      "tris_est": 2418
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      5.0,
+      -4.0
+    ],
+    "through_fog": {
+      "deep_px_sampled": 2242,
+      "tree_px_through_deep_fog": 0
+    },
+    "zoom": 68.0
+  },
+  "partial_edge_z68": {
+    "perf": {
+      "draws": 96,
+      "fogOnly": 4,
+      "full": 4,
+      "inst": 611,
+      "landmark_tris": 4780,
+      "prims": 117258,
+      "proxy": 3,
+      "through_fog": {
+        "deep_px_sampled": 20550,
+        "tree_px_through_deep_fog": 0
+      },
+      "tris_est": 5218
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      -55.0,
+      -58.0
+    ],
+    "through_fog": {
+      "deep_px_sampled": 20550,
+      "tree_px_through_deep_fog": 0
+    },
+    "zoom": 68.0
+  },
+  "partial_overview_z130": {
+    "perf": {
+      "draws": 306,
+      "fogOnly": 9,
+      "full": 4,
+      "inst": 829,
+      "landmark_tris": 1275,
+      "prims": 258622,
+      "proxy": 3,
+      "through_fog": {
+        "deep_px_sampled": 48807,
+        "tree_px_through_deep_fog": 0
+      },
+      "tris_est": 1778
+    },
+    "px_per_m": 4.84615384615385,
+    "target": [
+      -10.0,
+      -10.0
+    ],
+    "through_fog": {
+      "deep_px_sampled": 48807,
+      "tree_px_through_deep_fog": 0
+    },
+    "zoom": 130.0
+  },
+  "partial_path_z40": {
+    "perf": {
+      "draws": 100,
+      "fogOnly": 2,
+      "full": 4,
+      "inst": 451,
+      "landmark_tris": 11380,
+      "prims": 141181,
+      "proxy": 3,
+      "through_fog": {
+        "deep_px_sampled": 3829,
+        "tree_px_through_deep_fog": 0
+      },
+      "tris_est": 35885
+    },
+    "px_per_m": 15.75,
+    "target": [
+      -38.0,
+      -66.0
+    ],
+    "through_fog": {
+      "deep_px_sampled": 3829,
+      "tree_px_through_deep_fog": 0
+    },
+    "zoom": 40.0
+  },
+  "partial_squad_z40": {
+    "perf": {
+      "draws": 90,
+      "fogOnly": 2,
+      "full": 4,
+      "inst": 379,
+      "landmark_tris": 6280,
+      "prims": 116834,
+      "proxy": 2,
+      "through_fog": {
+        "deep_px_sampled": 4425,
+        "tree_px_through_deep_fog": 0
+      },
+      "tris_est": 28638
+    },
+    "px_per_m": 15.75,
+    "target": [
+      -72.0,
+      -52.0
+    ],
+    "through_fog": {
+      "deep_px_sampled": 4425,
+      "tree_px_through_deep_fog": 0
+    },
+    "zoom": 40.0
+  },
+  "unlocked_entrance_z68": {
+    "perf": {
+      "draws": 267,
+      "fogOnly": 9,
+      "full": 4,
+      "inst": 719,
+      "landmark_tris": 0,
+      "prims": 230633,
+      "proxy": 1,
+      "through_fog": {
+        "deep_px_sampled": 14079,
+        "tree_px_through_deep_fog": 0
+      },
+      "tris_est": 3105
+    },
+    "px_per_m": 9.26470588235294,
+    "target": [
+      -4.0,
+      -44.0
+    ],
+    "through_fog": {
+      "deep_px_sampled": 14079,
+      "tree_px_through_deep_fog": 0
+    },
+    "zoom": 68.0
+  },
+  "unlocked_horse_z30": {
+    "perf": {
+      "draws": 101,
+      "fogOnly": 6,
+      "full": 4,
+      "inst": 311,
+      "landmark_tris": 0,
+      "prims": 222193,
+      "proxy": 1,
+      "through_fog": {
+        "deep_px_sampled": 1789,
+        "tree_px_through_deep_fog": 0
+      },
+      "tris_est": 69292
+    },
+    "px_per_m": 21.0,
+    "target": [
+      -11.0,
+      -58.0
+    ],
+    "through_fog": {
+      "deep_px_sampled": 1789,
+      "tree_px_through_deep_fog": 0
+    },
+    "zoom": 30.0
+  }
+}

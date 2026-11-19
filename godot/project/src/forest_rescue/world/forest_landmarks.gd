@@ -16,7 +16,8 @@ extends Node3D
 ##   lf_env_hunter_shelter   art/01 east bank shelter (φ≈331°), between glades 11 and 12
 ##   lf_env_standing_stones  art/01 stone row above the town (φ≈85°), between glades 02 and 03
 ##   lf_env_camp_props       one per glade (tent + fire next to the cage), freest angle
-##   arena (assembled)       centred on (75, -86), yaw 5.4° (gap toward the boss route)
+##   arena (assembled)       centred on (75, -86), yaw 5.4° (gap toward the boss route); whole
+##                           LOD files by zoom (<=34 / <=85 / beyond), one resident at a time
 
 const ForestKit = preload("res://src/forest_rescue/world/forest_kit.gd")
 const LANDMARK_DIR := "res://assets/forest_rescue/landmarks/"
@@ -304,11 +305,27 @@ func update_view(target: Vector3, zoom: float, visible_fn: Callable) -> int:
 		arena_root.visible = shown
 		if shown:
 			var d := center.distance_to(Vector2(target.x, target.z))
-			var lod := 0 if zoom <= 34.0 and d <= 40.0 else 1
+			var lod := 0 if zoom <= ARENA_LOD_ZOOM[0] else (1 if zoom <= ARENA_LOD_ZOOM[1] else 2)
+			if d > zoom * 1.25 + 40.0:
+				lod = 2
 			_set_arena_lod(lod)
 			if d <= zoom * 1.25 + 24.0:
-				tris += _count_tris(arena_root)
+				tris += arena_tris
 	return tris
+
+
+## Arena v2 (art/08 rebuild): three whole files with the same node names,
+## lf_boss_arena_assembled{,_lod1,_lod2}.glb (54.8k / 21.2k / 10.1k tris, ~13-14 MB each with
+## embedded kit textures). The file for the zoom (LOD0 <= 34, LOD1 <= 85, LOD2 beyond) is
+## loaded on a worker thread and swapped in; the previous instance is freed, so only one
+## arena file stays resident. Painted kit material like the landmarks.
+const ARENA_FILES := ["lf_boss_arena_assembled.glb", "lf_boss_arena_assembled_lod1.glb", "lf_boss_arena_assembled_lod2.glb"]
+const ARENA_LOD_ZOOM := [34.0, 85.0]
+var arena_node: Node3D
+var arena_shown_lod := -1
+var arena_wanted_lod := -1
+var arena_loading := ""
+var arena_tris := 0
 
 
 func _populate_arena() -> void:
@@ -318,49 +335,91 @@ func _populate_arena() -> void:
 	arena_root.position = Vector3(center.x, center.y - 0.3, center.z)
 	arena_root.rotation.y = deg_to_rad(ARENA_YAW_DEG)
 	add_child(arena_root)
-	var whole := ARENA_DIR + "lf_boss_arena_assembled.glb"
-	if not ResourceLoader.exists(whole) or not load(whole) is PackedScene:
-		missing["lf_boss_arena"] = "arena not delivered (expected %s)" % whole
+	if not arena_loading.is_empty():
+		ResourceLoader.load_threaded_get(arena_loading)   # drain a request of the previous build
+	arena_node = null
+	arena_shown_lod = -1
+	arena_wanted_lod = -1
+	arena_loading = ""
+	if _arena_path(0).is_empty():
+		missing["lf_boss_arena"] = "arena not delivered (expected %s%s)" % [ARENA_DIR, ARENA_FILES[0]]
 		return
-	var node: Node3D = load(whole).instantiate()
+	loaded["lf_boss_arena"] = _arena_path(0)
+	_request_arena_lod(1)
+
+
+func _arena_path(lod: int) -> String:
+	for level in range(lod, -1, -1):
+		var path: String = ARENA_DIR + ARENA_FILES[level]
+		if ResourceLoader.exists(path):
+			return path
+	return ""
+
+
+func _request_arena_lod(lod: int) -> void:
+	arena_wanted_lod = lod
+	var path := _arena_path(lod)
+	if path.is_empty() or (lod == arena_shown_lod and arena_node != null):
+		return
+	if arena_loading == path:
+		return
+	if not arena_loading.is_empty():
+		# A different file is still on its way: let it land, the poll re-requests the wanted one.
+		return
+	if ResourceLoader.load_threaded_request(path, "PackedScene") != OK:
+		_swap_arena(load(path), lod)
+		return
+	arena_loading = path
+
+
+func _process(_delta: float) -> void:
+	_poll_arena()
+
+
+func _poll_arena(blocking := false) -> void:
+	if arena_loading.is_empty():
+		return
+	var status := ResourceLoader.load_threaded_get_status(arena_loading)
+	if blocking or status == ResourceLoader.THREAD_LOAD_LOADED:
+		var scene: Variant = ResourceLoader.load_threaded_get(arena_loading)
+		var lod := ARENA_FILES.find(arena_loading.get_file())
+		arena_loading = ""
+		_swap_arena(scene, lod)
+	elif status == ResourceLoader.THREAD_LOAD_FAILED or status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+		push_warning("ForestLandmarks: arena LOD failed to load: " + arena_loading)
+		arena_loading = ""
+	if arena_loading.is_empty() and arena_wanted_lod >= 0 and arena_wanted_lod != arena_shown_lod:
+		_request_arena_lod(arena_wanted_lod)
+
+
+## QA/capture: finish a pending arena load now (a still never shows the previous LOD).
+func finish_arena_load() -> void:
+	_poll_arena(true)
+
+
+func _swap_arena(scene: Variant, lod: int) -> void:
+	if not scene is PackedScene or arena_root == null:
+		return
+	var node: Node3D = (scene as PackedScene).instantiate()
+	node.name = "LOD%d" % lod
+	ForestKit.paint_scene(node, LIGHT_MIX)
 	arena_root.add_child(node)
-	loaded["lf_boss_arena"] = whole
 	for player: AnimationPlayer in node.find_children("*", "AnimationPlayer", true, false):
 		if not player.get_animation_list().is_empty():
 			var clip: String = player.get_animation_list()[0]
 			player.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
 			player.play(clip)
-	# LOD1 from the module GLBs (cliffs, fossil wall, pillars); bones/floor/stream/banners keep LOD0.
-	var lod1 := {}
-	for module in ["cliff_a", "cliff_b", "cliff_c", "fossil_wall", "pillar_a", "pillar_b"]:
-		var path := ARENA_DIR + "lf_arena_%s.glb" % module
-		if not ResourceLoader.exists(path):
-			continue
-		var root: Node = (load(path) as PackedScene).instantiate()
-		for part: MeshInstance3D in root.find_children("*LOD1", "MeshInstance3D", true, false):
-			lod1[module] = part.mesh
-		root.free()
-	for part: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
-		var name := String(part.name)
-		var module := ""
-		if name.begins_with("cliff_"):
-			module = "cliff_" + name.right(1)
-		elif name.begins_with("pillar_"):
-			module = "pillar_" + name.right(1)
-		elif name == "fossil_wall":
-			module = "fossil_wall"
-		if lod1.has(module):
-			arena_parts.append([part, part.mesh, lod1[module]])
-	_set_arena_lod(1)
+	if arena_node != null and is_instance_valid(arena_node):
+		arena_node.free()
+	arena_node = node
+	arena_shown_lod = lod
+	arena_lod = lod
+	arena_tris = _count_tris(node)
 	apply_arena_state(arena_state)
 
 
 func _set_arena_lod(lod: int) -> void:
-	if lod == arena_lod:
-		return
-	arena_lod = lod
-	for entry in arena_parts:
-		(entry[0] as MeshInstance3D).mesh = entry[1] if lod == 0 else entry[2]
+	_request_arena_lod(lod)
 
 
 ## Visual dressing only. Nodes named state_<locked|available|active|defeated> (any depth) are

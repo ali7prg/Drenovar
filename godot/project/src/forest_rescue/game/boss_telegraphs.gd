@@ -2,14 +2,18 @@ extends Node3D
 ## Ground telegraphs for «Пращур» (campaign.json boss.attacks), synced to the server battle
 ## timeline: frontal sector (jaw_arc), rear/side arc (tail_sweep), fixed lane (lane_charge,
 ## committed at the end of its telegraph) and two rings with explicit gaps (stomp_waves).
-## Presentation only: the server decides hits; the decal shows where and when.
+## Shapes are authored for the boss at scale 1.0 and scaled with it (scale_factor = meta
+## recommendedScale 1.52). Look (art/08): thin glowing orange arcs over a faint warm fill;
+## the arcs sweep outward while the telegraph fills, flare white-hot in the active window and
+## fade during recovery. Presentation only: the server decides hits; the decal shows where/when.
 
 const SHAPES := {
-	"jaw_arc":{"kind":"sector", "inner":1.6, "outer":9.5, "from":-42.0, "to":42.0, "color":Color("#ff6237")},
-	"tail_sweep":{"kind":"sector", "inner":2.6, "outer":11.5, "from":70.0, "to":290.0, "color":Color("#ffad32")},
-	"lane_charge":{"kind":"lane", "width":4.4, "start":2.0, "length":22.0, "color":Color("#ff3e4e")},
-	"stomp_waves":{"kind":"rings", "radii":[6.0, 11.0], "band":1.5, "color":Color("#ffd65c")}
+	"jaw_arc":{"kind":"sector", "inner":1.6, "outer":9.5, "from":-42.0, "to":42.0, "color":Color("#ff7a26")},
+	"tail_sweep":{"kind":"sector", "inner":2.6, "outer":11.5, "from":70.0, "to":290.0, "color":Color("#ff9a2e")},
+	"lane_charge":{"kind":"lane", "width":4.4, "start":2.0, "length":22.0, "color":Color("#ff6a2a")},
+	"stomp_waves":{"kind":"rings", "radii":[6.0, 11.0], "band":1.5, "color":Color("#ffa034")}
 }
+const KIND_ID := {"sector":0, "lane":1, "rings":2}
 const FALLBACK_TIMING := {
 	"jaw_arc":{"telegraphSeconds":2.4, "activeSeconds":0.45, "recoverySeconds":1.4},
 	"tail_sweep":{"telegraphSeconds":3.0, "activeSeconds":0.65, "recoverySeconds":1.8},
@@ -24,6 +28,8 @@ var schedule: Array = []
 var schedule_key := ""
 var warning := ""
 var locked_dirs: Dictionary = {}
+## Boss model scale (actor_director sets it from the boss meta recommendedScale).
+var scale_factor := 1.0
 
 func setup(owner_game: Node) -> void:
 	game = owner_game
@@ -31,23 +37,55 @@ func setup(owner_game: Node) -> void:
 	shader = Shader.new()
 	shader.code = """
 shader_type spatial;
-render_mode unshaded, cull_disabled, depth_draw_never, blend_mix, shadows_disabled;
-uniform vec4 tint : source_color = vec4(1.0, 0.4, 0.2, 1.0);
-uniform float fill = 0.0;
-uniform float active = 0.0;
-uniform float fade = 1.0;
-varying vec2 local_uv;
+render_mode unshaded, cull_disabled, depth_draw_never, blend_add, shadows_disabled, fog_disabled;
+uniform vec4 tint : source_color = vec4(1.0, 0.55, 0.16, 1.0);
+uniform float fill = 0.0;      // telegraph progress 0..1
+uniform float active = 0.0;    // 1 inside the hit window
+uniform float fade = 1.0;      // recovery fade-out
+uniform int kind = 0;          // 0 sector, 1 lane, 2 rings
+float glow_line(float x, float at, float core, float halo) {
+	float d = abs(x - at);
+	return smoothstep(core, 0.0, d) + 0.45 * smoothstep(halo, 0.0, d);
+}
 void fragment() {
 	vec2 uv = UV;
-	float border = 1.0 - smoothstep(0.0, 0.035, min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y)));
-	float hatch = step(0.5, fract((uv.x * 7.0 + uv.y * 5.0) - TIME * 0.6));
-	float filled = step(uv.y, fill);
-	float base = 0.16 + 0.12 * hatch;
-	float a = max(border * 0.95, base + filled * 0.32);
-	a = mix(a, 0.85 + 0.15 * hatch, active);
-	vec3 color = mix(tint.rgb, vec3(1.0, 0.96, 0.85), border * 0.35 + active * 0.4);
-	ALBEDO = color;
-	ALPHA = clamp(a * fade, 0.0, 1.0);
+	float ends = smoothstep(0.0, 0.12, uv.x) * smoothstep(1.0, 0.88, uv.x);
+	float light = 0.0;
+	float wash = 0.0;
+	if (kind == 0) {
+		// Sector: three concentric arcs + bright rim; a wavefront sweeps outwards with the fill.
+		for (int i = 0; i < 3; i++) {
+			float at = 0.34 + 0.25 * float(i);
+			light += glow_line(uv.y, at, 0.025, 0.09) * (0.55 + 0.45 * step(at, fill + 0.02));
+		}
+		light += glow_line(uv.y, 0.985, 0.02, 0.07) * 0.8;
+		light += glow_line(uv.y, fill, 0.03, 0.12) * (1.0 - active) * 0.9;
+		wash = (0.12 + 0.18 * step(uv.y, fill)) * smoothstep(0.0, 0.25, uv.y);
+		light *= ends;
+		wash *= ends;
+	} else if (kind == 1) {
+		// Lane: glowing side edges, chevrons running forward, warm fill growing along it.
+		float side = min(uv.x, 1.0 - uv.x);
+		light = glow_line(side, 0.02, 0.025, 0.1);
+		float chevron = fract(uv.y * 7.0 - abs(uv.x - 0.5) * 1.6 - TIME * 1.5);
+		light += smoothstep(0.1, 0.0, abs(chevron - 0.5)) * 0.55 * step(0.12, side);
+		wash = 0.1 + 0.2 * step(uv.y, fill);
+		float tip = smoothstep(1.0, 0.9, uv.y);
+		light *= tip;
+		wash *= tip;
+	} else {
+		// Ring band: a thin hot line at the centre; in the active window the wave runs outward.
+		float wave = mix(0.5, fract(TIME * 2.4), active);
+		light = glow_line(uv.y, 0.5, 0.06, 0.24) + glow_line(uv.y, wave, 0.05, 0.2) * active;
+		wash = 0.08 + 0.12 * fill;
+		light *= ends;
+		wash *= ends;
+	}
+	vec3 hot = vec3(1.0, 0.93, 0.72);
+	vec3 col = mix(tint.rgb, hot, clamp(light * 0.35 + active * 0.45, 0.0, 1.0));
+	float strength = (light * (0.85 + 0.9 * active) + wash * (1.0 + 1.6 * active)) * (0.55 + 0.45 * fill);
+	ALBEDO = col * clamp(strength, 0.0, 2.2) * fade;
+	ALPHA = 1.0;
 }
 """
 
@@ -99,6 +137,9 @@ func build_schedule(fight: Dictionary) -> void:
 		for entry in schedule:
 			if entry.attack == attack and absf(float(entry.start) - start) < 0.3:
 				duplicate = true
+			# Later waves of one stomp share the telegraph of the first wave.
+			if entry.attack == attack and start > float(entry.start) and start < float(entry.start) + total_seconds(attack):
+				duplicate = true
 		if not duplicate:
 			schedule.append({"attack":attack, "start":maxf(0.0, start), "event":event})
 	schedule.sort_custom(func(a, b): return float(a.start) < float(b.start))
@@ -109,10 +150,14 @@ func update_from_battle(fight: Dictionary, elapsed: float, boss_pos: Vector3, bo
 	var current := {}
 	var live := {}
 	warning = ""
+	var death_at := INF
+	for event in fight.get("timeline", []):
+		if String(event.get("type", "")) == "death":
+			death_at = minf(death_at, float(event.get("t", 0.0)))
 	for index in schedule.size():
 		var entry: Dictionary = schedule[index]
 		var local := elapsed - float(entry.start)
-		if local < 0.0 or local > total_seconds(String(entry.attack)):
+		if local < 0.0 or local > total_seconds(String(entry.attack)) or elapsed >= death_at:
 			continue
 		var attack := String(entry.attack)
 		var id := "%s_%d" % [attack, index]
@@ -147,7 +192,7 @@ func update_from_battle(fight: Dictionary, elapsed: float, boss_pos: Vector3, bo
 func draw_decal(id: String, attack: String, boss_pos: Vector3, direction: float, local: float, spec: Dictionary, event: Dictionary) -> void:
 	var shape: Dictionary = SHAPES[attack]
 	var node: MeshInstance3D = decals.get(id)
-	var key := "%s|%.2f|%.1f|%.1f" % [attack, direction, boss_pos.x, boss_pos.z]
+	var key := "%s|%.2f|%.1f|%.1f|%.2f" % [attack, direction, boss_pos.x, boss_pos.z, scale_factor]
 	if node == null or not is_instance_valid(node):
 		node = MeshInstance3D.new()
 		node.name = id
@@ -155,6 +200,7 @@ func draw_decal(id: String, attack: String, boss_pos: Vector3, direction: float,
 		var material := ShaderMaterial.new()
 		material.shader = shader
 		material.set_shader_parameter("tint", shape.color)
+		material.set_shader_parameter("kind", KIND_ID.get(String(shape.kind), 0))
 		node.material_override = material
 		add_child(node)
 		decals[id] = node
@@ -182,6 +228,8 @@ func draw_decal(id: String, attack: String, boss_pos: Vector3, direction: float,
 			active = 1.0
 		elif local > telegraph + span:
 			fade = clampf(1.0 - (local - telegraph - span) / float(spec.get("recoverySeconds", 1.4)), 0.0, 1.0) * 0.6
+	# Soft fade-in over the first 0.3 s of the telegraph.
+	fade *= clampf(local / 0.3, 0.0, 1.0)
 	material.set_shader_parameter("fill", fill)
 	material.set_shader_parameter("active", active)
 	material.set_shader_parameter("fade", fade)
@@ -189,17 +237,18 @@ func draw_decal(id: String, attack: String, boss_pos: Vector3, direction: float,
 
 ## Mesh in boss-local XZ, draped on the terrain (height_at) and lifted 0.12 m.
 func build_mesh(attack: String, shape: Dictionary, boss_pos: Vector3, direction: float, event: Dictionary) -> ArrayMesh:
+	var k := scale_factor
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var basis := Basis(Vector3.UP, direction)
 	match String(shape.kind):
 		"sector":
-			add_arc(surface, basis, boss_pos, float(shape.inner), float(shape.outer), deg_to_rad(float(shape.from)), deg_to_rad(float(shape.to)), 28)
+			add_arc(surface, basis, boss_pos, float(shape.inner) * k, float(shape.outer) * k, deg_to_rad(float(shape.from)), deg_to_rad(float(shape.to)), 40)
 		"lane":
-			var w := float(shape.width) * 0.5
-			var start := float(shape.start)
-			var length := float(shape.length)
-			var steps := 12
+			var w := float(shape.width) * 0.5 * k
+			var start := float(shape.start) * k
+			var length := float(shape.length) * k
+			var steps := 16
 			for i in steps:
 				var a := start + length * float(i) / steps
 				var b := start + length * float(i + 1) / steps
@@ -215,12 +264,12 @@ func build_mesh(attack: String, shape: Dictionary, boss_pos: Vector3, direction:
 					for value in gaps[ring]:
 						center_angles.append(deg_to_rad(float(value)))
 				else:
-					for k in 3:
-						center_angles.append(deg_to_rad(40.0 + 120.0 * k + 60.0 * ring))
+					for g in 3:
+						center_angles.append(deg_to_rad(40.0 + 120.0 * g + 60.0 * ring))
 				var gap_half := deg_to_rad(15.0)
-				var r := float(radii[ring])
-				var band := float(shape.band) * 0.5
-				var segments := 72
+				var r := float(radii[ring]) * k
+				var band := float(shape.band) * 0.5 * k
+				var segments := 96
 				var open := []
 				for s in segments:
 					var mid := TAU * (float(s) + 0.5) / segments

@@ -833,16 +833,17 @@ func seat_artifact(prop: Rig, cage: Rig, animate: bool) -> void:
 	prop.position = Vector3.ZERO
 	prop.rotation = KEY_SLOT_FIX
 	prop.scale = Vector3.ONE
+	prop.set_meta("seated", true)
 	if animate:
 		prop.play(["lf_artifact_insert"], 0.0, true)
 		prop.set_glow(0.3)
-	elif prop.get_meta("seated", false) == false or prop.playing_id() != "lf_artifact_glow":
-		if prop.playing_id() != "lf_artifact_insert":
-			prop.play(["lf_artifact_glow"], 0.0)
-			prop.set_glow(3.0)
-	prop.set_meta("seated", true)
-	if prop.get_meta("seated", false) and prop.playing_id() == "lf_artifact_glow":
-		prop.set_glow(3.0 + 0.6 * sin(prop.clip_time() * PI))
+		return
+	var playing := prop.playing_id()
+	if playing == "lf_artifact_insert":
+		return
+	if playing != "lf_artifact_glow":
+		prop.play(["lf_artifact_glow"], 0.0)
+	prop.set_glow(3.0 + 0.6 * sin(prop.clip_time() * PI))
 
 func release_artifact(prop: Rig) -> void:
 	if prop.get_parent() != props_parent and props_parent != null and is_instance_valid(props_parent):
@@ -1767,6 +1768,9 @@ func on_cage_opened(site_id: String) -> void:
 		people.append(String(person.get("id", "")))
 	choreo["cage:" + site_id] = {"kind":"cage", "site":site_id, "t":0.0, "stage":"start", "stage_t":0.0, "actors":people + ["squad_0"],
 		"people":people, "exit_start":{}, "flags":{}}
+	# The seal's insertion (lf_artifact_insert on the key_slot) is owned by the cage beat;
+	# this beat only keeps the stable-pose code away from the artifact meanwhile.
+	choreo["key:" + site_id] = {"kind":"key_insert", "site":site_id, "t":0.0, "actors":[]}
 
 func start_guardian_death(site_id: String) -> void:
 	if choreo.has("death:" + site_id):
@@ -1800,6 +1804,9 @@ func run_choreography(delta: float) -> void:
 				done = run_cage(beat, delta)
 			"key_pickup":
 				done = run_key_pickup(beat)
+			"key_insert":
+				var key_prop: Rig = rigs.get("artifact_" + String(beat.site))
+				done = float(beat.t) > 3.0 or (float(beat.t) > 0.6 and (key_prop == null or not is_instance_valid(key_prop) or key_prop.playing_id() != "lf_artifact_insert"))
 			"death":
 				done = run_death(beat)
 			"arrive":
@@ -2021,6 +2028,10 @@ func run_arrival(beat: Dictionary, delta: float) -> bool:
 
 func on_marker(actor: Node3D, clip_id: String, marker_name: String) -> void:
 	var lower := marker_name.to_lower()
+	if clip_id.begins_with("lf_rune_ring"):
+		if lower == "click":
+			game.audio.play_cue("fr_cage_latch", 0.1, 1.3)
+		return
 	if actor == rigs.get("horse"):
 		if lower.begins_with("footfall") or lower.begins_with("land"):
 			var state: Dictionary = motion.get("horse", {})
@@ -2061,9 +2072,6 @@ func on_marker(actor: Node3D, clip_id: String, marker_name: String) -> void:
 			if lower == "ground_contact":
 				game.fx.burst_world(actor.global_position, "hit")
 				game.audio.play_cue("fr_distant_rumble", 0.0, 0.8)
-		"lf_rune_ring1_" + clip_id.get_slice("_", 3), "lf_rune_ring2_" + clip_id.get_slice("_", 3), "lf_rune_ring3_" + clip_id.get_slice("_", 3):
-			if lower == "click":
-				game.audio.play_cue("fr_cage_latch", 0.1, 1.3)
 		"lf_winch_brake", "lf_winch_pawl":
 			game.audio.play_cue("fr_cage_latch", 0.1, 1.15)
 		"lf_rope_release", "lf_lock_mechanism":

@@ -289,6 +289,9 @@ func send_symbol(symbol: String) -> void:
 	sending = true
 	refresh()
 	var before := int(mechanism().get("progress", 0))
+	# The 3D device animates from the authoritative state change; it needs the chosen symbol
+	# (a wrong rune turns the active ring to it before the rings spin back).
+	game.actors.mechanism_feedback(site_id, symbol, true)
 	var result: Dictionary = await game.request_action("mechanism_input", {"siteId":site_id, "symbol":symbol})
 	sending = false
 	if bool(result.get("ok", false)):

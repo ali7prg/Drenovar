@@ -80,7 +80,7 @@ class Fitter:
             if m.type == "ARMATURE":
                 lo.modifiers.remove(m)
         mod = lo.modifiers.new("dec", "DECIMATE")
-        mod.ratio = 7000 / max(len(lo.data.polygons), 1)
+        mod.ratio = 3200 / max(len(lo.data.polygons), 1)
         core.select_only([lo])
         bpy.ops.object.modifier_apply(modifier="dec")
         me = lo.data
@@ -101,16 +101,18 @@ class Fitter:
         self.used = [j for j in range(len(names)) if W[:, j].max() > 0]
         self.inv = {n: np.linalg.inv(self.rig.sk.rest[n]) for n in names}
         self.Vh = np.concatenate([self.V, np.ones((len(self.V), 1))], 1)
+        self.sub = {}
+        for j in self.used:
+            nz = np.nonzero(self.W[:, j] > 0)[0]
+            self.sub[j] = (nz, self.Vh[nz], self.W[nz, j][:, None])
 
     def skin(self, ch):
         self.rig.build(ch)
         M = self.rig.ps.fk()
         out = np.zeros((len(self.V), 3))
         for j in self.used:
-            n = self.names[j]
-            w = self.W[:, j]
-            nz = w > 0
-            out[nz] += w[nz, None] * (self.Vh[nz] @ (M[n] @ self.inv[n]).T)[:, :3]
+            nz, vh, w = self.sub[j]
+            out[nz] += w * (vh @ (M[self.names[j]] @ self.inv[self.names[j]])[:3].T)
         snout = self.rig.ps.tail("head")
         tail = self.rig.ps.tail("tail_12")
         return out, snout, tail
@@ -145,7 +147,7 @@ def landmarks_ref(mask):
     return snout, tail, float(ys.max())
 
 
-def fit_panel(fitter, panel, ch0, iters=1800):
+def fit_panel(fitter, panel, ch0, iters=650):
     img = R.keypose_panel(panel)
     mask = R.keypose_mask(img)
     H, W = mask.shape
@@ -184,7 +186,7 @@ def fit_panel(fitter, panel, ch0, iters=1800):
     # stage 1: camera only, stage 2: everything
     def lc(c):
         return loss(np.concatenate([x0, c]))
-    r1 = minimize(lc, cam0, method="Powell", options={"maxfev": 300, "xtol": 1e-3, "ftol": 1e-4})
+    r1 = minimize(lc, cam0, method="Powell", options={"maxfev": 160, "xtol": 1e-3, "ftol": 1e-4})
     z1 = np.concatenate([x0, r1.x])
     r2 = minimize(loss, z1, method="Powell", options={"maxfev": iters, "xtol": 1e-3, "ftol": 1e-5})
     f, iou, lm, m = loss(r2.x, detail=True)
@@ -196,19 +198,28 @@ def fit_panel(fitter, panel, ch0, iters=1800):
 
 def main():
     t0 = time.time()
-    bpy.ops.wm.open_mainfile(filepath=sys.argv[-1])
+    args = sys.argv[1:]
+    blend = [a for a in args if a.endswith(".blend")][0]
+    only = None
+    if "--panels" in args:
+        only = [int(i) for i in args[args.index("--panels") + 1].split(",")]
+    bpy.ops.wm.open_mainfile(filepath=blend)
     arm = bpy.data.objects[ARM]
     if arm.animation_data:
         arm.animation_data.action = None
     fitter = Fitter(arm, bpy.data.objects["maw_body"])
     out = {}
     tiles = []
-    for panel, cid, t in PANELS:
+    for pi, (panel, cid, t) in enumerate(PANELS):
+        if only is not None and pi not in only:
+            continue
         ch0 = CL.CLIPS[cid][2](t)
         res, mask, m, img = fit_panel(fitter, panel, ch0)
         res["clip"] = cid
         res["time"] = t
         out[panel] = res
+        core.write_json(C.cache(f"keypose_fit_{panel}.json"), res)
+        np.save(C.cache(f"keypose_fit_{panel}_mask.npy"), m)
         C.log(f"{panel}: IoU {res['iou_before']:.3f} -> {res['iou']:.3f} lm {res['landmark_err_frac']:.3f} "
               f"{time.time() - t0:.0f}s")
         ov = img.copy()
@@ -221,6 +232,9 @@ def main():
         tile = (np.clip(np.concatenate([a, np.full((h, 4, 3), 0.1), b], 1), 0, 1) * 255).astype(np.uint8)
         from frlib import render
         tiles.append(render._label(tile, f"{panel}: pose IoU {res['iou']:.3f}"))
+    if only is not None:
+        print("POSEFIT_PART", json.dumps({k: round(v["iou"], 3) for k, v in out.items()}))
+        return
     core.write_json(C.cache("keypose_fit.json"), out)
     w = max(t.shape[1] for t in tiles)
     tiles = [np.pad(t, ((0, 6), (0, w - t.shape[1]), (0, 0)), constant_values=25) for t in tiles]

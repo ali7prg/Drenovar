@@ -348,6 +348,9 @@ def camera_overlay(v, P3named, out_png, geo_tris=None):
             cv2.polylines(ov, [pts], True, (90, 200, 255), 1, cv2.LINE_AA)
         big = cv2.addWeighted(big, 0.45, ov, 0.55, 0)
     keys = [k for k in v.points if k in P3named]
+    if not keys:
+        Image.fromarray(big).save(out_png)
+        return
     u, vv, _ = v.cam.project(np.array([P3named[k] for k in keys]))
     q = v.p2(keys)
     for k, a, b, (c, d) in zip(keys, u, vv, q):
@@ -886,6 +889,16 @@ def export(asset, B, path, texfiles):
     glbx.externalize(path, texfiles)
     # default-hidden nodes (LOD1/LOD2 meshes, alternative socket plates) via KHR_node_visibility
     js, bin_ = glbx.read_glb(path)
+    # rest TRS of every part node (the exporter samples NLA-animated empties outside their strips at the property
+    # default, i.e. translation 0): write the authored rest transform explicitly (identity rotation / scale)
+    rest_t = {name: np.asarray(e["rest_loc"], float) for name, e in B.empties.items()}
+    for node in js.get("nodes", []):
+        nm = node.get("name")
+        if nm in rest_t:
+            x, y, z = rest_t[nm]
+            node["translation"] = [float(x), float(z), float(-y)]
+            node.pop("rotation", None)
+            node.pop("scale", None)
     hid = set(asset.hidden)
     for lod in (1, 2):
         for (l_, nm), o in B.objs.items():

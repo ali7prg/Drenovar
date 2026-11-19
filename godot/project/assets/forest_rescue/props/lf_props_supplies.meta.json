@@ -1,160 +1,113 @@
 {
   "id": "lf_props_supplies",
+  "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 5636,
-    "LOD1": 4980,
-    "LOD2": 3844
+    "LOD0": 3776,
+    "LOD1": 2283,
+    "LOD2": 1907
   },
   "tris_by_node": {
     "LOD0": {
-      "crate_closed": 876,
-      "crate_open": 744,
-      "crate_open_lid": 136,
-      "blankets": 180,
-      "sacks": 936,
-      "coins": 756,
-      "bread": 512,
-      "bandages": 116,
-      "arrows": 400,
-      "chest": 600,
-      "chest_lid": 380
+      "supply_crate_closed": 226,
+      "supply_crate_open": 214,
+      "supply_blankets": 168,
+      "supply_sacks": 498,
+      "supply_coins": 864,
+      "supply_arrows": 288,
+      "supply_bread": 640,
+      "supply_bandages": 100,
+      "supply_chest": 778
     },
     "LOD1": {
-      "crate_closed": 876,
-      "crate_open": 744,
-      "crate_open_lid": 136,
-      "blankets": 180,
-      "sacks": 936,
-      "coins": 532,
-      "bread": 240,
-      "bandages": 76,
-      "arrows": 400,
-      "chest": 600,
-      "chest_lid": 260
+      "supply_crate_closed": 142,
+      "supply_crate_open": 130,
+      "supply_blankets": 84,
+      "supply_sacks": 333,
+      "supply_coins": 468,
+      "supply_arrows": 288,
+      "supply_bread": 160,
+      "supply_bandages": 60,
+      "supply_chest": 618
     },
     "LOD2": {
-      "crate_closed": 652,
-      "crate_open": 520,
-      "crate_open_lid": 136,
-      "blankets": 180,
-      "sacks": 936,
-      "coins": 364,
-      "bread": 128,
-      "bandages": 52,
-      "arrows": 352,
-      "chest": 496,
-      "chest_lid": 28
+      "supply_crate_closed": 118,
+      "supply_crate_open": 130,
+      "supply_blankets": 84,
+      "supply_sacks": 333,
+      "supply_coins": 252,
+      "supply_arrows": 152,
+      "supply_bread": 160,
+      "supply_bandages": 60,
+      "supply_chest": 618
     }
   },
-  "budget": "supplies set <= 5000 tris (LOD0, whole set)",
+  "budget": {},
   "bones": 0,
   "materials": [
+    "lf_props_supplies_lod1_mat",
+    "lf_props_supplies_lod2_mat",
     "lf_props_supplies_mat"
   ],
   "textures": {
-    "baseColor": "2048 JPEG",
-    "metallicRoughness": "1024 JPEG",
-    "normal": "2048 PNG"
+    "lf_props_supplies_c.jpg": 2048,
+    "lf_props_supplies_n.png": 1024,
+    "lf_props_supplies_lod1_c.jpg": 1024,
+    "lf_props_supplies_lod2_c.jpg": 512
   },
-  "coordinate_space": "glTF (Y up, metres); item fronts face +Z",
-  "items": {
-    "crate_closed": {
-      "node": "supply_crate_closed",
-      "layout_offset": [
-        -3.6,
-        0.0,
-        -0.0
-      ]
-    },
-    "crate_open": {
-      "node": "supply_crate_open",
-      "layout_offset": [
-        -2.75,
-        0.0,
-        -0.0
-      ]
-    },
-    "blankets": {
-      "node": "supply_blankets",
-      "layout_offset": [
-        -1.9,
-        0.0,
-        -0.0
-      ]
-    },
-    "sacks": {
-      "node": "supply_sacks",
-      "layout_offset": [
-        -1.0,
-        0.0,
-        -0.0
-      ]
-    },
-    "coins": {
-      "node": "supply_coins",
-      "layout_offset": [
-        -0.2,
-        0.0,
-        -0.0
-      ]
-    },
-    "bread": {
-      "node": "supply_bread",
-      "layout_offset": [
-        0.35,
-        0.0,
-        -0.0
-      ]
-    },
-    "bandages": {
-      "node": "supply_bandages",
-      "layout_offset": [
-        0.95,
-        0.0,
-        -0.0
-      ]
-    },
-    "arrows": {
-      "node": "supply_arrows",
-      "layout_offset": [
-        1.6,
-        0.0,
-        -0.0
-      ]
-    },
-    "chest": {
-      "node": "supply_chest",
-      "layout_offset": [
-        2.75,
-        0.0,
-        -0.0
-      ]
-    }
+  "texture_mode": "external JPEG/PNG next to the GLB (relative URIs); LOD1/LOD2 have their own atlases",
+  "paintedLightMix": 0.38,
+  "paintedLightNote": "albedo carries the painted light: shade = albedo * mix(1, lambert, paintedLightMix) (actor_rig.apply_look -> ForestKit.painted_material)",
+  "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
+  "bounds_m": {
+    "min": [
+      -2.102,
+      -0.395,
+      -1.04
+    ],
+    "max": [
+      1.741,
+      0.716,
+      0.762
+    ]
   },
-  "lid_nodes": {
-    "supply_crate_open_lid": {
-      "open_rotation_x_deg": -112.0
-    },
-    "supply_chest_lid": {
-      "open_rotation_x_deg": -100.0
-    }
+  "lod_nodes": {
+    "LOD0": [
+      "lf_props_supplies_supply_arrows_LOD0",
+      "lf_props_supplies_supply_bandages_LOD0",
+      "lf_props_supplies_supply_blankets_LOD0",
+      "lf_props_supplies_supply_bread_LOD0",
+      "lf_props_supplies_supply_chest_LOD0",
+      "lf_props_supplies_supply_coins_LOD0",
+      "lf_props_supplies_supply_crate_closed_LOD0",
+      "lf_props_supplies_supply_crate_open_LOD0",
+      "lf_props_supplies_supply_sacks_LOD0"
+    ],
+    "LOD1": [
+      "lf_props_supplies_supply_arrows_LOD1",
+      "lf_props_supplies_supply_bandages_LOD1",
+      "lf_props_supplies_supply_blankets_LOD1",
+      "lf_props_supplies_supply_bread_LOD1",
+      "lf_props_supplies_supply_chest_LOD1",
+      "lf_props_supplies_supply_coins_LOD1",
+      "lf_props_supplies_supply_crate_closed_LOD1",
+      "lf_props_supplies_supply_crate_open_LOD1",
+      "lf_props_supplies_supply_sacks_LOD1"
+    ],
+    "LOD2": [
+      "lf_props_supplies_supply_arrows_LOD2",
+      "lf_props_supplies_supply_bandages_LOD2",
+      "lf_props_supplies_supply_blankets_LOD2",
+      "lf_props_supplies_supply_bread_LOD2",
+      "lf_props_supplies_supply_chest_LOD2",
+      "lf_props_supplies_supply_coins_LOD2",
+      "lf_props_supplies_supply_crate_closed_LOD2",
+      "lf_props_supplies_supply_crate_open_LOD2",
+      "lf_props_supplies_supply_sacks_LOD2"
+    ]
   },
-  "clips": {
-    "lf_supply_chest_open": {
-      "seconds": 1.2,
-      "loop": false,
-      "markers": {
-        "lid_open": 1.0
-      }
-    },
-    "lf_supply_crate_open": {
-      "seconds": 1.0,
-      "loop": false,
-      "markers": {
-        "lid_open": 0.8
-      }
-    }
-  },
+  "lod_note": "LOD meshes are siblings named *_LOD0/1/2 (actor_rig.set_lod); LOD1/LOD2 are hidden by default (KHR_node_visibility) so a plain instance shows LOD0 only.",
+  "hidden_by_default": [],
+  "clips": {},
   "glb_nodes": [
     "lf_props_supplies_supply_arrows_LOD0",
     "lf_props_supplies_supply_arrows_LOD1",
@@ -175,10 +128,6 @@
     "lf_props_supplies_supply_chest_LOD0",
     "lf_props_supplies_supply_chest_LOD1",
     "lf_props_supplies_supply_chest_LOD2",
-    "lf_props_supplies_supply_chest_lid_LOD0",
-    "lf_props_supplies_supply_chest_lid_LOD1",
-    "lf_props_supplies_supply_chest_lid_LOD2",
-    "supply_chest_lid",
     "supply_chest",
     "lf_props_supplies_supply_coins_LOD0",
     "lf_props_supplies_supply_coins_LOD1",
@@ -191,30 +140,368 @@
     "lf_props_supplies_supply_crate_open_LOD0",
     "lf_props_supplies_supply_crate_open_LOD1",
     "lf_props_supplies_supply_crate_open_LOD2",
-    "lf_props_supplies_supply_crate_open_lid_LOD0",
-    "lf_props_supplies_supply_crate_open_lid_LOD1",
-    "lf_props_supplies_supply_crate_open_lid_LOD2",
-    "supply_crate_open_lid",
     "supply_crate_open",
     "lf_props_supplies_supply_sacks_LOD0",
     "lf_props_supplies_supply_sacks_LOD1",
     "lf_props_supplies_supply_sacks_LOD2",
     "supply_sacks"
   ],
-  "projection": {
-    "painted_fraction": 0.116,
-    "texel_mm": 2.513
+  "glb_animations": [],
+  "blueprint": {},
+  "qa": {
+    "views": {
+      "crate_closed": {
+        "iou_raw": 0.9026,
+        "iou_filled": 0.9026,
+        "colour_err": 0.0902,
+        "colour_err_core": 0.0869,
+        "ref_px": 23973,
+        "render_px": 23789,
+        "ignored_px": 0,
+        "camera_rms_px": 5.21,
+        "camera_max_px": 5.43,
+        "camera_points": 4
+      },
+      "crate_open": {
+        "iou_raw": 0.7722,
+        "iou_filled": 0.7722,
+        "colour_err": 0.0897,
+        "colour_err_core": 0.0862,
+        "ref_px": 24878,
+        "render_px": 25432,
+        "ignored_px": 0,
+        "camera_rms_px": 11.67,
+        "camera_max_px": 12.55,
+        "camera_points": 4
+      },
+      "blankets": {
+        "iou_raw": 0.7909,
+        "iou_filled": 0.7909,
+        "colour_err": 0.0804,
+        "colour_err_core": 0.0767,
+        "ref_px": 22581,
+        "render_px": 26746,
+        "ignored_px": 0,
+        "camera_rms_px": 6.17,
+        "camera_max_px": 7.15,
+        "camera_points": 4
+      },
+      "sacks": {
+        "iou_raw": 0.8445,
+        "iou_filled": 0.8445,
+        "colour_err": 0.0812,
+        "colour_err_core": 0.0782,
+        "ref_px": 25236,
+        "render_px": 26149,
+        "ignored_px": 0,
+        "camera_rms_px": 7.72,
+        "camera_max_px": 7.72,
+        "camera_points": 4
+      },
+      "coins": {
+        "iou_raw": 0.6368,
+        "iou_filled": 0.6368,
+        "colour_err": 0.0955,
+        "colour_err_core": 0.085,
+        "ref_px": 10437,
+        "render_px": 7173,
+        "ignored_px": 0,
+        "camera_rms_px": 8.54,
+        "camera_max_px": 11.01,
+        "camera_points": 4
+      },
+      "arrows": {
+        "iou_raw": 0.2548,
+        "iou_filled": 0.2653,
+        "colour_err": 0.164,
+        "colour_err_core": 0.1542,
+        "ref_px": 22379,
+        "render_px": 5980,
+        "ignored_px": 0,
+        "camera_rms_px": 1.57,
+        "camera_max_px": 1.7,
+        "camera_points": 4
+      },
+      "bread": {
+        "iou_raw": 0.5848,
+        "iou_filled": 0.5848,
+        "colour_err": 0.0724,
+        "colour_err_core": 0.0669,
+        "ref_px": 15507,
+        "render_px": 13277,
+        "ignored_px": 0,
+        "camera_rms_px": 16.24,
+        "camera_max_px": 21.98,
+        "camera_points": 4
+      },
+      "bandages": {
+        "iou_raw": 0.592,
+        "iou_filled": 0.592,
+        "colour_err": 0.107,
+        "colour_err_core": 0.1002,
+        "ref_px": 9795,
+        "render_px": 9888,
+        "ignored_px": 0,
+        "camera_rms_px": 1.01,
+        "camera_max_px": 1.35,
+        "camera_points": 4
+      },
+      "chest": {
+        "iou_raw": 0.8042,
+        "iou_filled": 0.8042,
+        "colour_err": 0.1027,
+        "colour_err_core": 0.1008,
+        "ref_px": 91271,
+        "render_px": 83758,
+        "ignored_px": 0,
+        "camera_rms_px": 1.3,
+        "camera_max_px": 1.45,
+        "camera_points": 4
+      }
+    },
+    "cameras": {
+      "crate_closed": {
+        "rms_px": 5.21,
+        "max_px": 5.43,
+        "n": 4,
+        "fov_deg": 1.28,
+        "per_point_px": {
+          "x0": 5.43,
+          "x1": -5.43,
+          "y0": -4.99,
+          "y1": 4.99
+        }
+      },
+      "crate_open": {
+        "rms_px": 11.67,
+        "max_px": 12.55,
+        "n": 4,
+        "fov_deg": 1.11,
+        "per_point_px": {
+          "x0": -12.55,
+          "x1": 12.55,
+          "y0": 10.72,
+          "y1": -10.72
+        }
+      },
+      "blankets": {
+        "rms_px": 6.17,
+        "max_px": 7.15,
+        "n": 4,
+        "fov_deg": 1.05,
+        "per_point_px": {
+          "x0": 7.15,
+          "x1": -7.15,
+          "y0": -5.0,
+          "y1": 5.0
+        }
+      },
+      "sacks": {
+        "rms_px": 7.72,
+        "max_px": 7.72,
+        "n": 4,
+        "fov_deg": 1.19,
+        "per_point_px": {
+          "x0": 7.72,
+          "x1": -7.72,
+          "y0": -7.72,
+          "y1": 7.72
+        }
+      },
+      "coins": {
+        "rms_px": 8.54,
+        "max_px": 11.01,
+        "n": 4,
+        "fov_deg": 0.53,
+        "per_point_px": {
+          "x0": -11.01,
+          "x1": 11.01,
+          "y0": 4.96,
+          "y1": -4.96
+        }
+      },
+      "arrows": {
+        "rms_px": 1.57,
+        "max_px": 1.7,
+        "n": 4,
+        "fov_deg": 0.98,
+        "per_point_px": {
+          "x0": 1.43,
+          "x1": -1.43,
+          "y0": -1.7,
+          "y1": 1.7
+        }
+      },
+      "bread": {
+        "rms_px": 16.24,
+        "max_px": 21.98,
+        "n": 4,
+        "fov_deg": 0.79,
+        "per_point_px": {
+          "x0": -21.98,
+          "x1": 21.98,
+          "y0": 6.62,
+          "y1": -6.62
+        }
+      },
+      "bandages": {
+        "rms_px": 1.01,
+        "max_px": 1.35,
+        "n": 4,
+        "fov_deg": 1.06,
+        "per_point_px": {
+          "x0": -1.35,
+          "x1": 1.35,
+          "y0": 0.47,
+          "y1": -0.47
+        }
+      },
+      "chest": {
+        "rms_px": 1.3,
+        "max_px": 1.45,
+        "n": 4,
+        "fov_deg": 1.73,
+        "per_point_px": {
+          "x0": 1.45,
+          "x1": -1.45,
+          "y0": -1.13,
+          "y1": 1.13
+        }
+      }
+    },
+    "texture": {
+      "texels": 3181902,
+      "projected_frac": 0.1368,
+      "per_view_frac": {
+        "crate_closed": 0.0368,
+        "crate_open": 0.014,
+        "blankets": 0.0146,
+        "sacks": 0.0169,
+        "coins": 0.0041,
+        "arrows": 0.0052,
+        "bread": 0.0028,
+        "bandages": 0.0034,
+        "chest": 0.0388
+      },
+      "seconds": 24.9
+    },
+    "sheets": "forest_rescue/qa/compare/lf_props_supplies/v2_iter02_*",
+    "godot_import": {
+      "errors_warnings": 0,
+      "lines": []
+    }
   },
-  "camera_fit_iou": {
-    "crate_closed": 0.916,
-    "crate_open": 0.8745,
-    "blankets": 0.8441,
-    "sacks": 0.812,
-    "coins": 0.3783,
-    "bread": 0.7947,
-    "bandages": 0.66,
-    "arrows": 0.0668,
-    "chest": 0.8813
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py supplies --iter 2",
+  "items": {
+    "supply_crate_closed": {
+      "painted_box": [
+        20,
+        742,
+        208,
+        895
+      ],
+      "pile_xy_gltf": [
+        -1.75,
+        -0.55
+      ]
+    },
+    "supply_crate_open": {
+      "painted_box": [
+        214,
+        700,
+        388,
+        895
+      ],
+      "pile_xy_gltf": [
+        -1.0,
+        -0.65
+      ]
+    },
+    "supply_blankets": {
+      "painted_box": [
+        402,
+        754,
+        628,
+        895
+      ],
+      "pile_xy_gltf": [
+        -0.2,
+        -0.7
+      ]
+    },
+    "supply_sacks": {
+      "painted_box": [
+        626,
+        728,
+        845,
+        918
+      ],
+      "pile_xy_gltf": [
+        0.65,
+        -0.7
+      ]
+    },
+    "supply_coins": {
+      "painted_box": [
+        846,
+        780,
+        1018,
+        880
+      ],
+      "pile_xy_gltf": [
+        1.35,
+        -0.35
+      ]
+    },
+    "supply_arrows": {
+      "painted_box": [
+        970,
+        748,
+        1172,
+        982
+      ],
+      "pile_xy_gltf": [
+        1.45,
+        -0.95
+      ]
+    },
+    "supply_bread": {
+      "painted_box": [
+        92,
+        902,
+        318,
+        998
+      ],
+      "pile_xy_gltf": [
+        -1.55,
+        0.35
+      ]
+    },
+    "supply_bandages": {
+      "painted_box": [
+        394,
+        912,
+        630,
+        1002
+      ],
+      "pile_xy_gltf": [
+        -0.7,
+        0.35
+      ]
+    },
+    "supply_chest": {
+      "painted_box": [
+        1138,
+        702,
+        1510,
+        993
+      ],
+      "pile_xy_gltf": [
+        0.45,
+        0.45
+      ]
+    }
   },
-  "notes": "Lids rest closed; drawing shows them open (comparison renders use the open pose). Counts are visual only (economy from data)."
+  "budget_note": "supplies <= 1k tris per item at LOD0",
+  "usage": "each supply_* node can be shown/hidden or instanced separately (reward piles, chest contents)"
 }

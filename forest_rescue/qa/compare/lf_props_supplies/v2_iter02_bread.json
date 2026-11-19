@@ -1,0 +1,9 @@
+{
+  "iou_raw": 0.5848,
+  "iou_filled": 0.5848,
+  "colour_err": 0.0724,
+  "colour_err_core": 0.0669,
+  "ref_px": 15507,
+  "render_px": 13277,
+  "ignored_px": 0
+}

@@ -18,7 +18,7 @@ SHEET = "cage_variants_gate_sockets.png"
 LIGHT = (-0.55, -0.55, 0.62)
 BOXES = {"closed34": (592, 108, 958, 444), "open34": (592, 440, 985, 732)}
 
-PARAMS = dict(c=1.80, cy=1.60, s=0.30, zd=0.42, zt=3.05, zs=3.50, zc=3.45, kx=0.0, ky=0.0, pe=0.14, pf=0.55, hx=-1.10, dx1=1.30, sz=1.30,
+PARAMS = dict(c=1.80, cy=1.60, s=0.34, zd=0.42, zt=3.05, zs=3.50, zc=3.45, kx=0.0, ky=0.0, pe=0.14, pf=0.55, hx=-1.10, dx1=1.30, sz=1.30,
               sx=1.06, zda=2.45, dz0=0.44)
 FREE = ["cy", "zd", "zt", "zc", "kx", "ky", "pe", "pf", "hx", "dx1", "sz", "sx", "zda", "dz0"]
 
@@ -142,7 +142,7 @@ def iron_face(g, origin, ex, L, z_bot, z_mid, z_top, n_arch, ts, lod, tag, fleur
         for k in range(n_arch):
             Lp, Rp = CG.pointed_arch(k * w, (k + 1) * w, zsp, rise, n)
             for pts in (Lp, Rp):
-                CG.sweep_rect(g, np.array([o + ex * s_ + (0, 0, z_) for s_, z_ in pts]), 0.05, 0.075, up=(0, 0, 1),
+                CG.sweep_rect(g, np.array([o + ex * s_ + (0, 0, z_) for s_, z_ in pts]), 0.065, 0.09, up=(0, 0, 1),
                               mat="iron", tag=tag + "_arch")
             if lod == 0:
                 # two lancets + an oculus inside each arch
@@ -209,7 +209,7 @@ def build(A, p, lod):
                 q = a * (1 - t) + kc * t
                 q[2] = zt + 0.06 + (zc - zt - 0.06) * math.sin(t * math.pi / 2)
                 P.append(q)
-            CG.sweep_rect(g, np.array(P), 0.05, 0.06, up=(0, 0, 1), mat="iron", tag="crown_strap")
+            CG.sweep_rect(g, np.array(P), 0.085, 0.09, up=(0, 0, 1), mat="iron", tag="crown_strap")
     g.box((p["kx"], p["ky"], zc), (0.14, 0.14, 0.1), mat="iron", tag="crown_boss")
     CG.lathe(g, [(0.06, 0.0), (0.06, 0.03), (0.035, 0.06), (0.055, 0.11), (0.03, 0.17), (0.0, 0.38)], (p["kx"], p["ky"], zc + 0.05),
              n=8 if lod == 0 else 5, mat="iron", tag="spire")

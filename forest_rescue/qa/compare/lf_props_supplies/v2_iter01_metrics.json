@@ -1,0 +1,134 @@
+{
+  "qa": {
+    "crate_closed": {
+      "iou_raw": 0.9026,
+      "iou_filled": 0.9026,
+      "colour_err": 0.0906,
+      "colour_err_core": 0.0873,
+      "ref_px": 23973,
+      "render_px": 23789,
+      "ignored_px": 0,
+      "camera_rms_px": 5.21,
+      "camera_max_px": 5.43,
+      "camera_points": 4
+    },
+    "crate_open": {
+      "iou_raw": 0.7722,
+      "iou_filled": 0.7722,
+      "colour_err": 0.0894,
+      "colour_err_core": 0.0859,
+      "ref_px": 24878,
+      "render_px": 25432,
+      "ignored_px": 0,
+      "camera_rms_px": 11.67,
+      "camera_max_px": 12.55,
+      "camera_points": 4
+    },
+    "blankets": {
+      "iou_raw": 0.7909,
+      "iou_filled": 0.7909,
+      "colour_err": 0.0807,
+      "colour_err_core": 0.0769,
+      "ref_px": 22581,
+      "render_px": 26746,
+      "ignored_px": 0,
+      "camera_rms_px": 6.17,
+      "camera_max_px": 7.15,
+      "camera_points": 4
+    },
+    "sacks": {
+      "iou_raw": 0.8445,
+      "iou_filled": 0.8445,
+      "colour_err": 0.0811,
+      "colour_err_core": 0.0781,
+      "ref_px": 25236,
+      "render_px": 26149,
+      "ignored_px": 0,
+      "camera_rms_px": 7.72,
+      "camera_max_px": 7.72,
+      "camera_points": 4
+    },
+    "coins": {
+      "iou_raw": 0.4639,
+      "iou_filled": 0.4641,
+      "colour_err": 0.1007,
+      "colour_err_core": 0.087,
+      "ref_px": 10437,
+      "render_px": 7472,
+      "ignored_px": 0,
+      "camera_rms_px": 6.38,
+      "camera_max_px": 8.14,
+      "camera_points": 4
+    },
+    "arrows": {
+      "iou_raw": 0.2548,
+      "iou_filled": 0.2653,
+      "colour_err": 0.1651,
+      "colour_err_core": 0.1546,
+      "ref_px": 22379,
+      "render_px": 5980,
+      "ignored_px": 0,
+      "camera_rms_px": 1.57,
+      "camera_max_px": 1.7,
+      "camera_points": 4
+    },
+    "bread": {
+      "iou_raw": 0.5848,
+      "iou_filled": 0.5848,
+      "colour_err": 0.0725,
+      "colour_err_core": 0.0673,
+      "ref_px": 15507,
+      "render_px": 13277,
+      "ignored_px": 0,
+      "camera_rms_px": 16.24,
+      "camera_max_px": 21.98,
+      "camera_points": 4
+    },
+    "bandages": {
+      "iou_raw": 0.4763,
+      "iou_filled": 0.4763,
+      "colour_err": 0.0975,
+      "colour_err_core": 0.0878,
+      "ref_px": 9795,
+      "render_px": 9360,
+      "ignored_px": 0,
+      "camera_rms_px": 2.89,
+      "camera_max_px": 3.88,
+      "camera_points": 4
+    },
+    "chest": {
+      "iou_raw": 0.8042,
+      "iou_filled": 0.8042,
+      "colour_err": 0.1027,
+      "colour_err_core": 0.1008,
+      "ref_px": 91271,
+      "render_px": 83758,
+      "ignored_px": 0,
+      "camera_rms_px": 1.3,
+      "camera_max_px": 1.45,
+      "camera_points": 4
+    }
+  },
+  "tris": {
+    "LOD0": 3600,
+    "LOD1": 2187,
+    "LOD2": 1883
+  },
+  "texture": {
+    "texels": 3219549,
+    "projected_frac": 0.1346,
+    "per_view_frac": {
+      "crate_closed": 0.0368,
+      "crate_open": 0.0142,
+      "blankets": 0.0149,
+      "sacks": 0.017,
+      "coins": 0.0025,
+      "arrows": 0.0052,
+      "bread": 0.0028,
+      "bandages": 0.0022,
+      "chest": 0.0389
+    },
+    "seconds": 26.0
+  },
+  "blueprint": {}
+}

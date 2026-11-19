@@ -258,15 +258,15 @@
       "per_view_frac": {
         "unpressed": 0.2645
       },
-      "seconds": 11.7
+      "seconds": 16.4
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_paired_latch/v2_iter02_*",
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_paired_latch/v2_iter03_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_paired_latch --iter 2",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_paired_latch --iter 3",
   "mechanism": "paired_latch",
   "sockets": {
     "plate_left": [

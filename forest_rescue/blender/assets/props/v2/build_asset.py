@@ -48,14 +48,21 @@ def run(modname, it, do_export=True, do_godot=True):
     core.reset()
     pv2.log(f"[{aid}] iter {it}")
     views = M.views()
-    params, reps = pv2.solve_views(views, M.points, M.PARAMS, M.FREE, prior_sigma=getattr(M, "PRIOR", 0.25))
-    params["_cams"] = {v.name: v.cam for v in views}
-    if hasattr(M, "ground_poly"):
-        for v in views:
-            v.ground = M.ground_poly(params)
-    A = pv2.Asset(aid, M.ATLAS)
-    for lod in range(3):
-        M.build(A, params, lod)
+    if hasattr(M, "make_cameras"):
+        params = dict(M.PARAMS)
+        A = pv2.Asset(aid, M.ATLAS)
+        for lod in range(3):
+            M.build(A, params, lod)
+        M.make_cameras(views, A)
+    else:
+        params, reps = pv2.solve_views(views, M.points, M.PARAMS, M.FREE, prior_sigma=getattr(M, "PRIOR", 0.25))
+        params["_cams"] = {v.name: v.cam for v in views}
+        if hasattr(M, "ground_poly"):
+            for v in views:
+                v.ground = M.ground_poly(params)
+        A = pv2.Asset(aid, M.ATLAS)
+        for lod in range(3):
+            M.build(A, params, lod)
     # camera overlays (LOD0 wireframe at each view's pose)
     P3 = M.points(params)
     for v in views:

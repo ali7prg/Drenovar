@@ -214,7 +214,7 @@ func run() -> void:
 	await shot("full_overview_z120", Vector3(0, 0, 0), 120.0)
 	await shot("full_overview_z140", Vector3(0, 0, 0), 140.0)
 	for spec in [["grove", Vector3(-88, 0, 8)], ["spruce", Vector3(38, 0, 84)], ["river_bridge", Vector3(88, 0, 16)],
-			["quarry", Vector3(-28, 0, 88)], ["arena", Vector3(75, 0, -84)], ["town", Vector3(5, 0, -4)],
+			["quarry", Vector3(-31, 0, 92)], ["arena", Vector3(75, 0, -84)], ["town", Vector3(5, 0, -4)],
 			["top_birch", Vector3(-30, 0, -72)], ["east", Vector3(98, 0, -30)]]:
 		await shot("full_%s_z68" % spec[0], spec[1], 68.0)
 		await shot("full_%s_z40" % spec[0], spec[1], 40.0)

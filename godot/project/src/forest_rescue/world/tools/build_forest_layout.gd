@@ -101,6 +101,7 @@ const ZONE_UNDER_SPACING := [3.4, 3.2, 3.6, 3.3, 3.0, 3.1, 3.6, 3.5]
 ## Hero cave oak (art/01 top-left corner of the grove): screen φ≈149°, near the overview edge.
 const HERO_PREFERRED := Vector2(-104.0, 24.0)
 const HERO_CLEAR := 9.5
+const QUARRY_PIT := 9.0           # art/01: open grey pit in front of the mine (no trunks)
 
 var atlas
 var terrain
@@ -258,6 +259,8 @@ func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown :=
 			return true
 	if hero != Vector2.INF and Vector2(x, z).distance_to(hero) < (HERO_CLEAR if tree else 5.5):
 		return true
+	if tree and quarry_center != Vector2.INF and Vector2(x, z).distance_to(quarry_center) < QUARRY_PIT + crown * 0.4:
+		return true
 	return false
 
 
@@ -313,6 +316,7 @@ func run() -> void:
 	var landmarks = ForestLandmarks.new()
 	landmarks.plan(atlas, masks, func(x: float, z: float) -> float: return ForestTerrain.base_height(x, z))
 	terrain.extra_pads = landmarks.pads()
+	terrain.quarry_center = landmarks.quarry_center()
 	terrain.bake()
 	for disc in landmarks.clearances():
 		landmark_discs.append(disc)

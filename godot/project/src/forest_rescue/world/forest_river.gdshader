@@ -57,7 +57,8 @@ void fragment() {
 	// shade under the bridge deck (soft)
 	vec2 b0 = bridge_rect.xy;
 	vec2 b1 = bridge_rect.xy + bridge_rect.zw;
-	vec2 inside = smoothstep(b0 - vec2(0.0, 1.5), b0 + vec2(0.0, 0.5), p) * (1.0 - smoothstep(b1 - vec2(0.0, 0.5), b1 + vec2(0.0, 1.5), p));
+	// (smoothstep needs edge0 < edge1 in GLSL: equal edges are undefined)
+	vec2 inside = smoothstep(b0 - vec2(0.5, 1.5), b0 + vec2(0.5, 0.5), p) * (1.0 - smoothstep(b1 - vec2(0.5, 0.5), b1 + vec2(0.5, 1.5), p));
 	col *= 1.0 - 0.35 * inside.x * inside.y;
 	ALBEDO = col;
 }

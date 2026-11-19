@@ -119,6 +119,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	if terrain == null:
 		terrain = ForestTerrain.new(atlas)
 		terrain.extra_pads = landmarks.pads()
+		terrain.quarry_center = landmarks.quarry_center()
 		var source_meshes: Array = []
 		for part: MeshInstance3D in ground_meshes:
 			source_meshes.append(part.mesh)

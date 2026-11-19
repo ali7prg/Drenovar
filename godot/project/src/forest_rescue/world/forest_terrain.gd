@@ -51,6 +51,7 @@ var road_on_deck: Array = []             # per route: PackedByteArray
 var grid_ready := false
 var stats := {}
 var extra_pads: Array = []               # [[Vector2 centre, radius, height]] landmark/camp pads
+var quarry_center := Vector2.INF         # SW quarry pit: grey stone/gravel ground (art/01)
 var pad_heights: Dictionary = {}         # site id -> reconciled pad height (centre + route ends)
 
 
@@ -306,6 +307,12 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 		h = lerpf(h, floor_y, 1.0 - smoothstep(atlas.ARENA_RADIUS, ARENA_BLEND_OUTER, ad))
 		dirt = maxf(dirt, 0.95 * (1.0 - smoothstep(12.5, 16.0, ad)))
 		stone = maxf(stone, 0.45 * smoothstep(12.0, 15.0, ad) * (1.0 - smoothstep(16.5, 19.5, ad)))
+	if quarry_center != Vector2.INF:
+		var dq := Vector2(x, z).distance_to(quarry_center)
+		if dq < 24.0:
+			var n := 0.5 + 0.5 * sin(x * 0.61 + z * 0.37) * cos(x * 0.29 - z * 0.53)
+			stone = maxf(stone, 0.85 * (1.0 - smoothstep(10.0 + 4.0 * n, 21.0, dq)))
+			dirt = maxf(dirt, 0.45 * (1.0 - smoothstep(14.0, 23.0, dq)))
 	# Never touch the wet river channel; blend back over 2 m outside the wet edge.
 	var bank: float = atlas.river_bank_distance(x, z)
 	var keep := smoothstep(0.0, 2.0, bank) * core

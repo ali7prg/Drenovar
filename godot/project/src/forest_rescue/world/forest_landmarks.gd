@@ -157,6 +157,16 @@ func find_spot(preferred: Vector2, footprint: float, masks: RefCounted) -> Vecto
 	return preferred
 
 
+## Centre of the SW quarry pit (art/01): between the mine portal and glade 08 (shared with the
+## layout builder). Vector2.INF when the mine has no placement.
+func quarry_center() -> Vector2:
+	for placement in placements:
+		if placement.id == "lf_env_quarry_mine":
+			var site: Dictionary = atlas.site_by_id.lf_site_08
+			return Vector2(placement.position.x, placement.position.z).lerp(Vector2(site.center.x, site.center.z), 0.45)
+	return Vector2.INF
+
+
 ## Flatten pads for terrain baking: [[Vector2 center, radius, height]].
 func pads() -> Array:
 	var result: Array = []

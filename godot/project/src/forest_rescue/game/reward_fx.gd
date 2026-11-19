@@ -152,7 +152,9 @@ func glow_world(id: String, p: Vector3) -> void:
 	glow.show()
 	glow.position = p
 	var pulse := 0.85 + 0.25 * sin(Time.get_ticks_msec() / 230.0)
-	glow.scale = Vector3.ONE * pulse
+	# Sized for the overview zoom; shrinks up close so the artifact itself stays readable.
+	var zoom := float(game.stage.camera_zoom) if is_instance_valid(game.stage) else 40.0
+	glow.scale = Vector3.ONE * pulse * clampf(zoom / 42.0, 0.3, 1.2)
 
 ## Task reward entered the reserve: sparkles at the squad and on the reward strip.
 func award(_resources: Dictionary, world_position: Vector3) -> void:

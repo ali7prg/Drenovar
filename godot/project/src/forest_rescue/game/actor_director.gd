@@ -437,6 +437,8 @@ func update_horse(now: float, delta: float) -> void:
 	if String(horse.get("node", "")) == "lf_boss_ancient_maw":
 		target = boss_gap_point(HORSE_BOSS_STAND_OFF, -2.5)
 		yaw = PathMotion.yaw_of(game.target_position("lf_boss_ancient_maw") - target)
+	else:
+		target = horse_rest_point(String(horse.get("node", "")), target)
 	if move is Dictionary and not (move.get("path", []) as Array).is_empty():
 		var boss_move := String(move.get("targetId", "")) == "lf_boss_ancient_maw"
 		var sample := move_sample(move, now, 0.0, HORSE_BOSS_STAND_OFF if boss_move else -1.0)
@@ -444,6 +446,17 @@ func update_horse(now: float, delta: float) -> void:
 		yaw = PathMotion.yaw_of(sample.tangent)
 		moving = not sample.arrived
 		speed_now = float(sample.speed)
+		if not boss_move:
+			# Final 4 m: she steers off the path end to her own spot beside the squad.
+			var rest := horse_rest_point(String(move.get("targetId", "")), Vector3.INF)
+			if rest != Vector3.INF:
+				var left := float(sample.route.total) - float(sample.distance)
+				var w := smoothstep(4.0, 0.0, left)
+				if w > 0.0:
+					var blended: Vector3 = (sample.position as Vector3).lerp(rest, w)
+					if blended.distance_to(target) > 0.01:
+						yaw = PathMotion.yaw_of(blended - target) if moving else yaw
+					target = blended
 	var measured := place("horse", actor, target, yaw, delta)
 	var speed := speed_now if moving else measured
 	var mood := String(horse.get("mood", "calm"))
@@ -487,6 +500,25 @@ func update_horse(now: float, delta: float) -> void:
 		if plates_for_actors():
 			tags.append({"position":actor.position + Vector3.UP * 3.0, "text":game.content.text("hud.horse"), "kind":"horse"})
 	game.pin("lf_horse", actor.position, 14.0)
+
+## Where the mare waits at a glade (site centre / key / sub-targets): beside the squad, back
+## towards the approach, on the side away from the mechanism; `fallback` elsewhere.
+func horse_rest_point(node: String, fallback: Vector3) -> Vector3:
+	var site_id := node.get_slice(":", 0).replace("lf_key_", "lf_site_")
+	if not site_id.begins_with("lf_site_"):
+		return fallback
+	var anchor: Dictionary = game.site_anchor(site_id)
+	if anchor.is_empty() or not anchor.get("center") is Vector3:
+		return fallback
+	var center: Vector3 = anchor.center
+	var approach: Vector3 = anchor.get("approach", center + Vector3(0, 0, 7))
+	var back := Vector3(approach.x - center.x, 0, approach.z - center.z)
+	back = back.normalized() if back.length_squared() > 0.01 else Vector3.BACK
+	var right := Vector3(back.z, 0, -back.x)
+	var art: Vector3 = anchor.get("artifact", center)
+	var side := -1.0 if (art - center).dot(right) > 0.0 else 1.0
+	var p := center + back * 2.0 + right * side * 3.0
+	return game.ground(p.x, p.z)
 
 ## Point on the arena's entrance axis `distance` m from the centre (side offset in m).
 func boss_gap_point(distance: float, side := 0.0) -> Vector3:
@@ -666,8 +698,8 @@ func squad_pose(index: int, now: float) -> Dictionary:
 		center = center - forward * float(STAND_OFF.guardian)
 	elif node.begins_with("lf_site_") and not node.contains(":"):
 		# Glade centre: the three stand abreast on the cage side, clear of the guardian's spot.
-		center = center + forward * 0.6
-		lateral = [Vector3(0, 0, 0), Vector3(-1.15, 0, -0.35), Vector3(1.15, 0, -0.35)][index]
+		center = center - forward * 0.4
+		lateral = [Vector3(0, 0, 0), Vector3(-1.2, 0, -0.3), Vector3(1.2, 0, -0.3)][index]
 	var p: Vector3 = center + right * lateral.x + forward * lateral.z
 	return {"position":p, "yaw":PathMotion.yaw_of(forward), "guard":node.ends_with(":guardian")}
 
@@ -2097,7 +2129,7 @@ func on_marker(actor: Node3D, clip_id: String, marker_name: String) -> void:
 						choreo[key].flags.passage_clear = true
 		"lf_artifact_insert":
 			if lower == "seated":
-				game.fx.burst_world(actor.global_position - Vector3.UP * 0.8, "socket")
+				game.fx.burst_world(actor.global_position - Vector3.UP * 0.8, "hit")
 				game.audio.play_cue("fr_cage_latch")
 				(actor as Rig).set_glow(2.0)
 			elif lower == "glow_peak":

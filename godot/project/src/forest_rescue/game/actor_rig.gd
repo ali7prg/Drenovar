@@ -104,6 +104,29 @@ static func fetch_now(path: String) -> Variant:
 	requested[path] = true
 	return scenes[path]
 
+static var uv2_materials: Dictionary = {}
+
+## Names of the GLB's materials whose baseColorTexture uses texCoord 1 (read from the glTF
+## JSON chunk once per file; Godot's importer samples every texture with UV1).
+static func glb_uv2_materials(path: String) -> Dictionary:
+	if uv2_materials.has(path):
+		return uv2_materials[path]
+	var found := {}
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file != null and file.get_length() > 20 and file.get_32() == 0x46546C67:
+		file.get_32()
+		file.get_32()
+		var chunk := file.get_32()
+		if file.get_32() == 0x4E4F534A and chunk > 0 and chunk < 32 * 1024 * 1024:
+			var parsed: Variant = JSON.parse_string(file.get_buffer(chunk).get_string_from_utf8())
+			if parsed is Dictionary:
+				for material in parsed.get("materials", []):
+					var base: Variant = material.get("pbrMetallicRoughness", {}).get("baseColorTexture")
+					if base is Dictionary and int(base.get("texCoord", 0)) == 1:
+						found[String(material.get("name", ""))] = true
+	uv2_materials[path] = found
+	return found
+
 static func meta_for(path: String) -> Dictionary:
 	if metas.has(path):
 		return metas[path]
@@ -201,6 +224,7 @@ func apply_tint(mesh: MeshInstance3D) -> void:
 func apply_look() -> void:
 	var k := float(meta.get("paintedLightMix", DEFAULT_LIGHT_MIX)) if painted else -1.0
 	var tints: Dictionary = variant.get("tint", {})
+	var uv2_set := glb_uv2_materials(asset_path) if k >= 0.0 else {}
 	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 		if mesh.mesh == null:
 			continue
@@ -218,6 +242,9 @@ func apply_look() -> void:
 				continue
 			if k >= 0.0:
 				material = ForestKit.painted_material(material, false, k, false, false)
+				if uv2_set.has(material_name) and material is ShaderMaterial:
+					material = material.duplicate()
+					material.set_shader_parameter("albedo_uv2", true)
 			for key in tints:
 				if material_name.ends_with("_" + String(key)):
 					var c: Array = tints[key]

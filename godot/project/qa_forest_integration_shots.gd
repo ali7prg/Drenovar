@@ -214,6 +214,22 @@ func run() -> void:
 			await shoot("unlock_%04.1fs" % at)
 		forest.remove_meta("unlock_frame")
 
+	# -------------------------------------------------- artifact seated in the door socket (glow)
+	if wanted("socket"):
+		await fresh("site01_cage_open")
+		var c := anchor("lf_site_01", "cage")
+		look(c, 20.0)
+		await preload_actors()
+		await frames(30)
+		var prop = forest.actors.rigs.get("artifact_lf_site_01")
+		var at: Vector3 = prop.global_position if prop != null and is_instance_valid(prop) else c
+		look(at, 3.2)
+		await frames(10)
+		await shoot("socket_z3")
+		look(at, 7.0)
+		await frames(4)
+		await shoot("socket_z7")
+
 	# -------------------------------------------------- escort walking
 	if wanted("escort"):
 		await fresh("site01_escort_walking")
@@ -267,9 +283,13 @@ func run() -> void:
 			var arena: Vector3 = forest.target_position("lf_boss_ancient_maw")
 			look(arena + Vector3(0, 0, 4), 34.0)
 			await preload_actors()
+			var death_at := INF
+			for event in fight.get("timeline", []):
+				if String(event.get("type", "")) == "death":
+					death_at = float(event.t)
 			for event in fight.get("timeline", []):
 				var attack := String(event.get("attack", ""))
-				if String(event.get("type", "")) != "telegraph" or seen.has(attack):
+				if String(event.get("type", "")) != "telegraph" or seen.has(attack) or float(event.t) + 5.0 > death_at:
 					continue
 				seen[attack] = true
 				var telegraph := float(event.get("telegraphSeconds", 2.4))

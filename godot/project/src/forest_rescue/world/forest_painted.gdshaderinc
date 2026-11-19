@@ -14,6 +14,9 @@ render_mode unshaded, cull_disabled, depth_draw_opaque;
 uniform sampler2D albedo_texture : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform vec4 albedo_color : source_color = vec4(1.0);
 uniform bool use_albedo_texture = true;
+// glTF baseColorTexture.texCoord == 1 (props whose painting projection lives in TEXCOORD_1:
+// rune lock, winch, artifacts); set by actor_rig from the GLB header. Default: UV (TEXCOORD_0).
+uniform bool albedo_uv2 = false;
 uniform float alpha_cut = 0.5;
 uniform float painted_light_mix : hint_range(0.0, 1.0) = 0.3;
 uniform vec3 light_dir_world = vec3(0.45, 0.74, 0.5);   // direction TO the sun
@@ -69,7 +72,7 @@ void vertex() {
 void fragment() {
 	vec4 c = albedo_color;
 	if (use_albedo_texture) {
-		c *= texture(albedo_texture, UV);
+		c *= texture(albedo_texture, albedo_uv2 ? UV2 : UV);
 	}
 	for (int i = 0; i < 8; i++) {
 		if (i >= fade_count) break;

@@ -83,10 +83,10 @@ void fragment() {
 		light *= ends;
 		wash *= ends;
 	}
-	vec3 hot = vec3(1.0, 0.9, 0.62);
-	vec3 col = mix(tint.rgb, hot, clamp(light * 0.3 + active * 0.4, 0.0, 1.0));
-	float strength = (light * (1.5 + 1.3 * active) + wash * (1.0 + 1.5 * active)) * (0.6 + 0.4 * fill);
-	ALBEDO = col * clamp(strength, 0.0, 3.0) * fade;
+	vec3 hot = vec3(1.0, 0.78, 0.4);
+	vec3 col = mix(tint.rgb, hot, clamp(light * 0.15 + active * 0.35, 0.0, 1.0));
+	float strength = (light * (1.0 + 0.8 * active) + wash * (0.9 + 1.2 * active)) * (0.6 + 0.4 * fill);
+	ALBEDO = col * clamp(strength, 0.0, 1.35) * fade;
 	ALPHA = 1.0;
 }
 """

@@ -205,8 +205,9 @@ def band_ring(name, field, center, axis, ref, rad_guess=0.08, width=0.05, offset
             dvec = e1 * math.cos(a) + e2 * math.sin(a)
             P = c[None, :] + rs[:, None] * dvec[None, :]
             d = field.sample(P)
-            ins = np.nonzero(d < 0)[0]
-            r = rs[ins.max()] if len(ins) else rad_guess
+            # first inside->outside transition from the axis (the limb's own surface)
+            out_idx = np.nonzero(d >= 0)[0]
+            r = rs[out_idx[0]] if len(out_idx) else rad_guess
             V[i, j] = c + dvec * (r + offset)
     # smooth around
     for i in range(rows):

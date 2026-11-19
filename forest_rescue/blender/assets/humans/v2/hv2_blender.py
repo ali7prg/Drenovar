@@ -39,7 +39,8 @@ def decimate(obj, target, protect=None, factor=8.0):
     mod.ratio = max(0.002, target / cur)
     mod.use_collapse_triangulate = True
     if protect is not None:
-        add_group(obj, "_protect", protect)
+        # Blender's collapse cost grows where the group weight is LOW: store 1 - protect
+        add_group(obj, "_protect", 1.0 - np.clip(np.asarray(protect, float), 0, 1) + 1e-4)
         mod.vertex_group = "_protect"
         mod.vertex_group_factor = factor
     core.select_only([obj])

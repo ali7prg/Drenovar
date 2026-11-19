@@ -65,7 +65,14 @@ def body_geometry(R, J):
     v, f = fld.mesh()
     log("body MC", len(v), "verts", len(f), "tris")
     weight_parts = parts[1:] + HB.torso_bone_parts(prof, J)
-    return fld, parts, weight_parts, prof, v, f
+    # support field for garments: torso + legs + boots only (no arms/hands)
+    sup = F.Field((-0.62, -0.36, -0.01), (0.62, 0.30, top), 0.006)
+    for p in parts:
+        if p.name.startswith(("upperarm", "forearm", "deltoid", "elbow")):
+            continue
+        sup.apply(p)
+    log("arm profile k", [round(float(x), 2) for x in getattr(HB, "LAST_K", [])])
+    return fld, parts, weight_parts, prof, v, f, sup
 
 
 def hair_geometry(R, J, body_field):
@@ -141,11 +148,11 @@ def arm_cap_fn(J):
     return cap
 
 
-def garments(R, J, fld, prof):
+def garments(R, J, fld, prof, sup):
     """Garment sheets + accessories from the character spec."""
     hz = J["Hips"][2]
     cy = 0.012
-    T = HD.BodyTable(fld, 0.0, cy, 0.05, C["L"]["neck"] + 0.02, dz=0.01)
+    T = HD.BodyTable(sup, 0.0, cy, 0.05, C["L"]["neck"] + 0.02, dz=0.01)
     sheets = []
     for g in C.get("garments", []):
         if g["kind"] == "skirt":
@@ -239,7 +246,7 @@ MAT_IDS = {"body": 0, "hair": 1, "cloth": 2, "gear": 3}
 
 
 def build_objects(R, J):
-    fld, parts, wparts, prof, bv, bf = body_geometry(R, J)
+    fld, parts, wparts, prof, bv, bf, sup = body_geometry(R, J)
     body = HBL.obj_from(f"{AID}_bodyHQ", bv, bf)
     # protect the face/ears from decimation, keep the boots' toe shapes
     o, S = HB.head_frame(C, J)
@@ -266,7 +273,7 @@ def build_objects(R, J):
         ob["weights"] = json.dumps(Wts)
         objs.append((ob, "body", "hand"))
         hand_bones[S_] = bones
-    sheets, meshes, T = garments(R, J, fld, prof)
+    sheets, meshes, T = garments(R, J, fld, prof, sup)
     for sh in sheets:
         ob = HBL.obj_from(f"{AID}_{sh.name}", sh.V, sh.faces())
         ob["weights"] = json.dumps(sh.weights)

@@ -169,6 +169,7 @@ def torso_bone_parts(prof, J):
 
 # --------------------------------------------------------------------------- limbs
 
+LAST_K = []
 ARM_T = ([0.0, 0.25, 0.6, 1.0], [0.056, 0.050, 0.046, 0.042])        # upper arm half-widths
 FARM_T = ([0.0, 0.3, 0.7, 1.0], [0.044, 0.043, 0.034, 0.028])         # forearm
 THIGH_T = ([0.0, 0.3, 0.7, 1.0], [0.090, 0.082, 0.068, 0.060])
@@ -198,6 +199,7 @@ def arm_parts(R, C, J, prof):
             return (sx * x) < lat - 0.004
         s1, a1, c1, ok1, k1 = limb_profile(R, sh, el, ARM_T, 0.085, blocked=blocked)
         s2, a2, c2, ok2, k2 = limb_profile(R, el, wr, FARM_T, 0.07, blocked=blocked)
+        LAST_K.extend([k1, k2, float(ok1.mean()), float(ok2.mean()), float(a1.max()), float(a2.max())])
         # the upper part of the upper arm is merged with the torso in the painting: template
         # deltoid scaled by the measured mid-arm width
         top = np.interp(s1, [0, 0.35], [1.0, 0.0])

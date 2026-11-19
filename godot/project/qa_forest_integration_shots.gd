@@ -163,7 +163,7 @@ func run() -> void:
 		await frames(2)
 		await shoot("intro_horse_z40")
 		var at: Vector3 = horse.global_position if horse != null and is_instance_valid(horse) else forest.target_position("lf_horse_origin")
-		var keep := forest.intro.camera_user_took
+		var keep: bool = forest.intro.camera_user_took
 		forest.intro.camera_user_took = true
 		look(at + Vector3(0, 0.8, 0), 12.0)
 		await frames(3)

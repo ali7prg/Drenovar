@@ -77,7 +77,7 @@ void fragment() {
 	} else {
 		// Ring band: a hot line at the centre (two thin echoes); in the active window the wave runs out.
 		float wave = mix(0.5, fract(TIME * 2.4), active);
-		light = glow_line(uv.y, 0.5, 0.09, 0.3) + 0.6 * glow_line(uv.y, 0.22, 0.05, 0.12) + 0.6 * glow_line(uv.y, 0.78, 0.05, 0.12);
+		light = glow_line(uv.y, 0.5, 0.16, 0.42) + 0.7 * glow_line(uv.y, 0.2, 0.07, 0.16) + 0.7 * glow_line(uv.y, 0.8, 0.07, 0.16);
 		light += glow_line(uv.y, wave, 0.07, 0.22) * active;
 		wash = 0.05 + 0.08 * fill;
 		light *= ends;
@@ -85,10 +85,11 @@ void fragment() {
 	}
 	// Painted glow (art/08): saturated orange lines with a lighter core, a soft warm halo;
 	// HDR brightness lifts them above the floor, the active window turns them hot.
-	vec3 hot = vec3(1.0, 0.82, 0.45);
+	// Saturated orange (the FILMIC tonemap whitens strong HDR values): brightness stays near 1.
+	vec3 hot = vec3(1.0, 0.72, 0.28);
 	float core = clamp(light - 0.55, 0.0, 1.0);
-	vec3 col = mix(tint.rgb, hot, clamp(core * 0.8 + active * 0.3, 0.0, 1.0)) * (1.25 + 0.55 * active + 0.35 * core);
-	float alpha = clamp(light * 0.85 + wash * (1.0 + active), 0.0, 0.92) * (0.55 + 0.45 * fill);
+	vec3 col = mix(tint.rgb, hot, clamp(core * 0.7 + active * 0.35, 0.0, 1.0)) * (0.98 + 0.25 * active + 0.12 * core);
+	float alpha = clamp(light * 0.95 + wash * (1.1 + active), 0.0, 0.95) * (0.6 + 0.4 * fill);
 	ALBEDO = col;
 	ALPHA = alpha * fade;
 }
@@ -206,6 +207,8 @@ func draw_decal(id: String, attack: String, boss_pos: Vector3, direction: float,
 		material.shader = shader
 		material.set_shader_parameter("tint", shape.color)
 		material.set_shader_parameter("kind", KIND_ID.get(String(shape.kind), 0))
+		# Drawn before the fog shell: where the projection is still fog, the mist veils the decal.
+		material.render_priority = -10
 		node.material_override = material
 		add_child(node)
 		decals[id] = node

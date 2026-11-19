@@ -149,7 +149,10 @@ def synthesize(T, data, col, ws, per, views, seen_thr=0.25, k=14, detail=0.9, ax
                 continue
             sub_data = (data[0][sel], data[1][sel], data[2][sel], data[3][sel])
             sub_per = {kk: (vv[0][sel], vv[1][sel], vv[2][sel]) for kk, vv in per.items()}
-            o, _ = synthesize(T, sub_data, col[sel], ws[sel], sub_per, views, seen_thr, k, detail, axis_x, None)
+            # head groups (odd ids): low-frequency fill only - transferring painted detail across the
+            # face would copy eyes / mouths onto cheeks and temples (ghost features)
+            o, _ = synthesize(T, sub_data, col[sel], ws[sel], sub_per, views, seen_thr, k,
+                              0.0 if (int(g) % 2 == 1) else detail, axis_x, None)
             out[sel] = o
         return out, seen_all
     yy, xx, P, N = data

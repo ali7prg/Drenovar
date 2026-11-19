@@ -75,7 +75,7 @@ def main():
     me.materials.append(gm)
     width = max(1.6, len(AIDS) * 1.0 + 0.8)
     cam = render.perspective_camera((width * 0.9, -width * 2.0 - 2.0, 1.6), (0, 0, 0.85), lens=50,
-                                    res=(int(300 * max(1, len(AIDS) * 0.75)), 450), ortho_scale=max(2.3, width * 1.05))
+                                    res=(2 * int(150 * max(1, len(AIDS) * 0.75)), 450), ortho_scale=max(2.3, width * 1.05))
     for clip in clip_names:
         tmp = tempfile.mkdtemp()
         n_fr = None

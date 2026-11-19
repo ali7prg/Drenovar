@@ -77,32 +77,37 @@ def torso_part(R, C, J):
     shz = 0.5 * (L["shoulder_l"][1] + L["shoulder_r"][1])
     xsh = 0.5 * (L["shoulder_l"][0] - L["shoulder_r"][0])
     z_bot = hz - 0.115
-    zs = np.arange(z_bot, nz + 1e-6, 0.005)
+    z_top = nz + 0.032
+    zs = np.arange(z_bot, z_top + 1e-6, 0.005)
     # template half-widths (fractions of the shoulder-joint half span) by height
     stocky = B.get("stocky", 0.0)
     waist_f = (0.70 if fem else 0.76) + 0.10 * stocky
     hip_f = (0.98 if fem else 0.86) + 0.04 * stocky
-    tz = [z_bot, hz, hz + 0.17, shz - 0.11, shz + 0.01, nz]
-    tw = [0.86 * hip_f, hip_f, waist_f, 0.90, 0.93, 0.36 * (0.88 if fem else 1.0)]
+    tz = [z_bot, hz, hz + 0.17, shz - 0.11, shz + 0.01, nz - 0.012, z_top]
+    tw = [0.86 * hip_f, hip_f, waist_f, 0.90, 0.95, 0.62, 0.34 * (0.88 if fem else 1.0)]
     tmpl = np.interp(zs, tz, tw) * xsh
     al, ar = np.zeros_like(zs), np.zeros_like(zs)
     for i, z in enumerate(zs):
         run = R.central_run(z)
+        runs = R.row_runs(z)
         for side, sgn in (("l", 1.0), ("r", -1.0)):
             meas = None
             if run is not None:
                 meas = run[1] if sgn > 0 else -run[0]
-            lim = None
             if z < shz:
                 ax = abs(_arm_axis_x(L, side, z))
-                lim = ax - 0.55 * (0.050 if z > shz - 0.12 else 0.044)
+                # half-width of the painted arm at this row (its own run), template if merged
+                aw = 0.050 if z > shz - 0.12 else 0.044
+                for r0, r1 in runs:
+                    if r0 - 0.002 <= sgn * ax <= r1 + 0.002 and not (run is not None and r0 == run[0] and r1 == run[1]):
+                        aw = 0.5 * (r1 - r0)
+                lim = ax - 0.92 * aw
             else:
                 lim = xsh + 0.012
             t = tmpl[i]
             v = t if meas is None else meas
-            if lim is not None:
-                v = min(v, lim)
-            v = float(np.clip(v, 0.80 * t, 1.22 * t))
+            v = min(v, lim)
+            v = float(np.clip(v, 0.80 * t, 1.25 * t))
             if sgn > 0:
                 al[i] = v
             else:
@@ -112,10 +117,10 @@ def torso_part(R, C, J):
     ar = gaussian_filter1d(ar, 3, mode="nearest")
     cx = np.zeros_like(zs)
     # depth: ratio of the local half-width (template), front/back split, centre offsets
-    f = (zs - z_bot) / (nz - z_bot)
+    f = np.clip((zs - z_bot) / (nz - z_bot), 0, 1.06)
     td = B.get("torso_depth", 1.0)
-    ratio = np.interp(f, [0.0, 0.18, 0.40, 0.62, 0.80, 0.92, 1.0],
-                      [0.66, 0.70, 0.74 + 0.06 * stocky, 0.70, 0.64, 0.56, 0.78]) * td
+    ratio = np.interp(f, [0.0, 0.18, 0.40, 0.62, 0.80, 0.92, 1.0, 1.06],
+                      [0.66, 0.70, 0.74 + 0.06 * stocky, 0.70, 0.64, 0.56, 0.62, 0.85]) * td
     a = 0.5 * (al + ar)
     depth = ratio * a
     belly = B.get("belly", 0.0)
@@ -252,17 +257,21 @@ def boot_parts(R, C, J):
         hw = 0.5 * w
         fl = L["foot_len"]
         yaw = math.atan2(fwd[0], -fwd[1])
-        rot = np.array([[math.cos(yaw), math.sin(yaw), 0], [-math.sin(yaw), math.cos(yaw), 0], [0, 0, 1.0]])
-        rot = np.array([[math.cos(-yaw), -math.sin(-yaw), 0], [math.sin(-yaw), math.cos(-yaw), 0], [0, 0, 1.0]])
+        # local axes (columns): x = lateral, y = along the foot (+-fwd), z = up
+        rot = np.array([[math.cos(yaw), -math.sin(yaw), 0], [math.sin(yaw), math.cos(yaw), 0], [0, 0, 1.0]])
         ctr = lambda u: heel + fwd * (u * fl)  # noqa: E731
-        parts.append(F.ellipsoid(ctr(0.16) + np.array([0, 0, 0.050]), (hw * 0.86, 0.055 * fl / 0.27, 0.052),
+        k27 = fl / 0.27
+        parts.append(F.ellipsoid(ctr(0.17) + np.array([0, 0, 0.052]), (hw * 0.84, 0.060 * k27, 0.056),
                                  rot=rot, bone=f"{S}Foot", label="boot", k=0.02, name=f"heel_{s}"))
-        parts.append(F.ellipsoid(ctr(0.45) + np.array([0, 0, 0.055]), (hw * 0.95, 0.10 * fl / 0.27, 0.050),
+        parts.append(F.ellipsoid(ctr(0.47) + np.array([0, 0, 0.056]), (hw * 0.94, 0.11 * k27, 0.055),
                                  rot=rot, bone=f"{S}Foot", label="boot", k=0.025, name=f"arch_{s}"))
-        parts.append(F.ellipsoid(ctr(0.72) + np.array([0, 0, 0.036]), (hw * 1.0, 0.075 * fl / 0.27, 0.038),
+        parts.append(F.ellipsoid(ctr(0.74) + np.array([0, 0, 0.040]), (hw * 1.0, 0.085 * k27, 0.044),
                                  rot=rot, bone=f"{S}Toes", label="boot", k=0.025, name=f"ball_{s}"))
-        parts.append(F.ellipsoid(ctr(0.90) + np.array([0, 0, 0.026]), (hw * 0.86, 0.050 * fl / 0.27, 0.029),
+        parts.append(F.ellipsoid(ctr(0.89) + np.array([0, 0, 0.034]), (hw * 0.90, 0.058 * k27, 0.036),
                                  rot=rot, bone=f"{S}Toes", label="boot", k=0.02, name=f"toe_{s}"))
+        # sole slab (flat bottom, slight welt) + heel block
+        parts.append(F.rbox(ctr(0.52) + np.array([0, 0, 0.012]), (hw * 1.02, 0.50 * fl, 0.012), rot=rot,
+                            rounding=0.008, bone=f"{S}Foot", label="boot", k=0.012, name=f"sole_{s}"))
         # ankle / shaft bottom joins the shin
         parts.append(F.rcone(an + np.array([0, 0.004, -0.045]), an + np.array([0, 0.0, 0.06]), 0.052 * fl / 0.27,
                              0.048 * fl / 0.27, bone=f"{S}Foot", label="boot", k=0.02, name=f"ankle_{s}"))
@@ -346,56 +355,68 @@ def head_landmarks(C, J):
 
 # --------------------------------------------------------------------------- hair & beard
 
-def hair_parts(C, J, R):
-    """Scalp hair volume (painted outline via the hull) + beard; returns (parts, region_fn)."""
+def _noise3(P, freq, seed=0):
+    from frlib import texproj
+    return texproj.fbm(P, freq=freq, octaves=3, seed=seed)
+
+
+HAIRLINES = {
+    # |phi| (0 front .. pi back) -> hairline height in head units (eye level = 0)
+    "default": ([0, 0.9, 1.35, 1.75, 2.4, math.pi], [0.062, 0.050, 0.012, -0.028, -0.070, -0.084]),
+    "bun": ([0, 0.9, 1.35, 1.75, 2.4, math.pi], [0.066, 0.054, 0.020, -0.020, -0.066, -0.080]),
+    "helmet": ([0, 1.4, 1.9, 2.4, math.pi], [0.30, 0.30, -0.02, -0.075, -0.090]),
+}
+
+
+def hair_sdf(C, J, P, d_body):
+    """Signed distance of scalp hair + beard at world points P, from the body distance d_body
+    (hair = body offset by a regional thickness; cut at the painted hairline / beard line)."""
     o, S = head_frame(C, J)
     B = C["build"]
     style = B.get("hair", "short")
     beard = B.get("beard")
-    t = B.get("hair_thick", 0.015)
-    P = []
-
-    def W(p):
-        return o + np.asarray(p, float) * S
-
-    def R_(r):
-        return np.asarray(r, float) * S
-    if style not in ("helmet",):
-        P.append(F.ellipsoid(W((0, 0.016, 0.028)), R_((0.076, 0.098, 0.093)) + np.array([t, t * 1.1, t * 1.2]),
-                             bone="Head", label="hair", k=0.0, name="hair_cap"))
-        P.append(F.ellipsoid(W((0, 0.048, -0.020)), R_((0.064, 0.060, 0.074)) + np.array([t, t, t]),
-                             bone="Head", label="hair", k=0.02, name="hair_back"))
-        if style in ("bun",):
-            P.append(F.sphere(W((0, 0.085, 0.045)), 0.034 * S[0], bone="Head", label="hair", k=0.015, name="bun"))
-        if style in ("long_under_hood",):
-            P.append(F.ellipsoid(W((0, 0.05, -0.09)), R_((0.07, 0.05, 0.08)), bone="Neck", label="hair", k=0.02,
-                                 name="hair_long"))
+    t_h = B.get("hair_thick", 0.015)
+    q = (P - o) / S
+    x, y, z = q[..., 0], q[..., 1], q[..., 2]
+    phi = np.arctan2(x, -y)
+    aphi = np.abs(phi)
+    key = "bun" if style == "bun" else ("helmet" if style == "helmet" else "default")
+    hp, hv = HAIRLINES[key]
+    hl = np.interp(aphi, hp, hv)
+    above = z - hl                                   # >0 above the hairline
+    # thickness: fuller on top/back, curly noise
+    vol = 1.0 + 0.35 * np.clip((z + 0.02) / 0.10, 0, 1) + 0.25 * np.clip((aphi - 1.2) / 1.5, 0, 1)
+    if style in ("curly", "wavy", "tousled"):
+        vol = vol * (0.80 + 0.45 * _noise3(P, 70.0, 3))
+    # thin at the hairline (no visor), full volume 3-4 cm above it; thinner over the forehead
+    taper = np.clip(above / 0.035, 0.0, 1.0)
+    taper = taper * taper * (3 - 2 * taper)
+    front = np.clip(1.0 - (aphi / 1.3), 0.0, 1.0)
+    t = t_h * vol * (0.25 + 0.75 * taper) * (1.0 - 0.45 * front)
+    d_scalp = np.maximum(d_body - t, -above * 0.9 * S[2])
+    if style == "bun":
+        c = o + np.array([0.0, 0.088, 0.035]) * S
+        d_bun = np.linalg.norm(P - c, axis=-1) - 0.034 * S[0]
+        d_scalp = smin_np(d_scalp, d_bun, 0.012)
+    if style == "helmet":
+        d_scalp = np.maximum(d_scalp, (z - (-0.02)) * S[2])      # only the nape below the helmet
+    out = d_scalp
     if beard and beard != "stubble":
-        bt = {"full": 0.020, "full_grey": 0.017, "full_red": 0.020}.get(beard, 0.016)
-        P.append(F.ellipsoid(W((0, -0.040, -0.075)), R_((0.066, 0.060, 0.060)) + bt, bone="Head", label="beard",
-                             k=0.0, name="beard_jaw"))
-        P.append(F.ellipsoid(W((0, -0.066, -0.120)), R_((0.036, 0.032, 0.030)) + bt, bone="Head", label="beard",
-                             k=0.02, name="beard_chin"))
+        base = {"full": 0.010, "full_grey": 0.009, "full_red": 0.011}.get(beard, 0.008)
+        chin_bulk = {"full": 0.016, "full_grey": 0.014, "full_red": 0.016}.get(beard, 0.01)
+        tb = base + chin_bulk * np.exp(-((z + 0.120) / 0.045) ** 2) * np.exp(-(x / 0.050) ** 2)
+        tb = tb * (0.85 + 0.3 * _noise3(P, 90.0, 7))
+        top = np.interp(aphi, [0, 0.30, 0.55, 1.0, 1.45, 1.75], [-0.050, -0.052, -0.040, -0.024, -0.016, -0.02])
+        below = top - z
+        tb = tb * (0.35 + 0.65 * np.clip(below / 0.02, 0, 1))
+        front = 1.70 - aphi
+        lips = np.sqrt((x / 0.021) ** 2 + ((z + 0.075) / 0.0105) ** 2) - 1.0
+        allow = np.minimum(np.minimum(below, front * 0.05), np.where(aphi < 0.8, lips * 0.012, 1.0))
+        d_beard = np.maximum(d_body - tb, -allow * S[2])
+        out = smin_np(out, d_beard, 0.004)
+    return out
 
-    def region(Pw):
-        """>0 where hair is NOT allowed (face skin): signed field, metres."""
-        q = (Pw - o) / S
-        x, y, z = q[..., 0], q[..., 1], q[..., 2]
-        phi = np.arctan2(x, -y)                     # 0 = front, +-pi = back
-        aphi = np.abs(phi)
-        # hairline height as a function of the angle around the head
-        hl = np.interp(aphi, [0, 0.9, 1.35, 1.75, 2.4, math.pi], [0.062, 0.050, 0.010, -0.030, -0.070, -0.082])
-        scalp = z - hl                              # >0 above the hairline
-        return scalp
 
-    def beard_region(Pw):
-        q = (Pw - o) / S
-        x, y, z = q[..., 0], q[..., 1], q[..., 2]
-        phi = np.arctan2(x, -y)
-        aphi = np.abs(phi)
-        top = np.interp(aphi, [0, 0.35, 0.7, 1.2, 1.6, 2.0], [-0.052, -0.050, -0.030, -0.018, -0.010, -0.06])
-        below = top - z                              # >0 below the beard top line
-        back = 1.75 - aphi                           # >0 in front of the ears
-        mouth = np.sqrt((x / 0.020) ** 2 + ((z + 0.074) / 0.010) ** 2) - 1.0   # lips opening
-        return np.minimum(np.minimum(below, back * 0.05), np.maximum(mouth * 0.01, -1))
-    return P, region, beard_region
+def smin_np(a, b, k):
+    h = np.maximum(k - np.abs(a - b), 0.0) / k
+    return np.minimum(a, b) - h * h * k * 0.25

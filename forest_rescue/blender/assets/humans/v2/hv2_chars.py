@@ -21,7 +21,7 @@ CHARS = {
                ankle_l=(0.168, 0.085), ankle_r=(-0.162, 0.085),
                hand_len=0.092, hand_scale=1.10, foot_len=0.275, toe_out_deg=9.0),
         build=dict(stocky=1.0, belly=0.025, torso_depth=1.08, head_w=1.04, beard="full", hair="curly",
-                   hair_thick=0.020, boot_top=0.225, sleeve="rolled"),
+                   hair_thick=0.026, boot_top=0.225, sleeve="rolled"),
         garments=[
             dict(kind="skirt", name="apron", z_top=1.115, wrap=(-138, 138), offset=0.012,
                  fit="run", hem=(0.355, 0.385, 0.405), flare=0.03, material="cloth", thickness=0.005,

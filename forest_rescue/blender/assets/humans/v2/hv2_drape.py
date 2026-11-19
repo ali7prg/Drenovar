@@ -118,7 +118,7 @@ class BodyTable:
 
 def drape_skirt(name, T, R, z_top, hem_fn, phi0, phi1, offset=0.012, flare=0.03, fit="run",
                 nu=44, nv=26, slope=0.12, label="garment", material="cloth", thickness=0.005,
-                weights_fn=None, ragged=0.0, seed=0, fit_rows=None, fit_gain=1.0, closed=False):
+                weights_fn=None, ragged=0.0, seed=0, fit_rows=None, fit_gain=1.0, closed=False, cap_fn=None):
     """Skirt-like sheet from z_top to hem_fn(phi) over angles [phi0, phi1] (radians)."""
     rng = np.random.default_rng(seed)
     phis = np.linspace(phi0, phi1, nu, endpoint=not closed)
@@ -155,6 +155,8 @@ def drape_skirt(name, T, R, z_top, hem_fn, phi0, phi1, offset=0.012, flare=0.03,
                 continue
             xs = V[i, :, 0] - T.cx
             for sgn, target in ((1, run[1] - T.cx), (-1, T.cx - run[0])):
+                if cap_fn is not None:
+                    target = min(target, cap_fn(zrow, sgn))
                 cur = (xs * sgn).max()
                 if cur <= 1e-3 or target <= 0:
                     continue

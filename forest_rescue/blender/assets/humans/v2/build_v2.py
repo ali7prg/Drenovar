@@ -69,34 +69,17 @@ def body_geometry(R, J):
 
 
 def hair_geometry(R, J, body_field):
-    hp, region, beard_region = HB.hair_parts(C, J, R)
-    if not hp:
-        return None, None
+    """Hair/beard = body field offset by a regional thickness, cut at the hairline/beard line,
+    clipped by the painted outline (visual hull)."""
     o, S = HB.head_frame(C, J)
-    lo = o + np.array([-0.16, -0.17, -0.20]) * 1.0
-    hi = o + np.array([0.16, 0.17, 0.20])
-    hi[2] = min(hi[2], C["L"]["top"] + 0.03)
-    fld = F.Field(lo, hi, VOX * 0.85)
-    scalp = [p for p in hp if p.label == "hair"]
-    beard = [p for p in hp if p.label == "beard"]
-    if scalp:
-        f1 = F.Field(lo, hi, VOX * 0.85)
-        for p in scalp:
-            f1.apply(p)
-        P = f1.points(np.zeros(3, int), f1.n)
-        reg = region(P).astype(np.float32)          # >0 above the hairline
-        f1.d = F.smax(f1.d, -reg * 0.8, 0.004).astype(np.float32)
-        fld.d = np.minimum(fld.d, f1.d)
-    if beard:
-        f2 = F.Field(lo, hi, VOX * 0.85)
-        for p in beard:
-            f2.apply(p)
-        P = f2.points(np.zeros(3, int), f2.n)
-        reg = beard_region(P).astype(np.float32)
-        f2.d = F.smax(f2.d, -reg * 0.8, 0.003).astype(np.float32)
-        fld.d = F.smin(fld.d, f2.d, 0.006).astype(np.float32)
-    # keep only outside the skin a little (hair sits on the scalp) and inside the painted outline
-    fld.intersect_xz(R, k=0.004, dilate=0.001)
+    lo = o + np.array([-0.15, -0.16, -0.19])
+    hi = o + np.array([0.15, 0.18, 0.22])
+    hi[2] = max(hi[2], C["L"]["top"] + 0.05)
+    fld = F.Field(lo, hi, VOX * 0.8)
+    P = fld.points(np.zeros(3, int), fld.n)
+    db = body_field.sample(P.reshape(-1, 3)).reshape(P.shape[:3])
+    fld.d = HB.hair_sdf(C, J, P, db).astype(np.float32)
+    fld.intersect_xz(R, k=0.010, dilate=0.003)
     v, f = fld.mesh()
     log("hair MC", len(v), "verts", len(f), "tris")
     return v, f
@@ -143,6 +126,21 @@ def skirt_weights_fn(z_top, cx, cy, hem_lo):
     return fn
 
 
+def arm_cap_fn(J):
+    """Max half-extent of a garment row so the fit never grabs the painted arms/hands."""
+    L = C["L"]
+
+    def cap(z, sgn):
+        s = "l" if sgn > 0 else "r"
+        S_ = "Left" if sgn > 0 else "Right"
+        wr = J[f"{S_}Hand"]
+        if z < wr[2] + 0.05:
+            return abs(wr[0]) - 0.050 * L["hand_scale"]
+        ax = abs(HB._arm_axis_x(L, s, z))
+        return ax - 0.050
+    return cap
+
+
 def garments(R, J, fld, prof):
     """Garment sheets + accessories from the character spec."""
     hz = J["Hips"][2]
@@ -165,7 +163,7 @@ def garments(R, J, fld, prof):
                                 material=g.get("material", "cloth"), thickness=g.get("thickness", 0.005),
                                 weights_fn=skirt_weights_fn(g["z_top"], T.cx, T.cy, min(hem)),
                                 ragged=g.get("ragged", 0.004), seed=len(sheets), fit_rows=g.get("fit_rows"),
-                                closed=g.get("closed", False))
+                                closed=g.get("closed", False), cap_fn=arm_cap_fn(J))
             sheets.append(sh)
         elif g["kind"] == "bib":
             ht, hb = g["half_angle"]
@@ -411,6 +409,33 @@ def qa_renders(lo0, R, J, mats, pinfo):
         bg = np.array([0.80, 0.78, 0.74])
         tiles.append(np.clip(rgba[..., :3] * rgba[..., 3:4] + bg * (1 - rgba[..., 3:4]), 0, 1))
     core.save_rgba(qa("face.png"), np.concatenate(tiles, 1))
+    # clay (geometry only) views
+    clay_img = bpy.data.images.new("clay", 8, 8)
+    clay_img.generated_color = (0.72, 0.70, 0.66, 1.0)
+    clay = HBL.painted_material("clay_qa", clay_img, k=0.85, light=(-0.5, -0.7, 0.6))
+    saved = list(lo0.data.materials)
+    lo0.data.materials.clear()
+    for _ in saved:
+        lo0.data.materials.append(clay)
+    tiles = []
+    for yaw in (0, -35, 35, 90, 180):
+        a = math.radians(yaw)
+        HBL.look_at_cam((math.sin(a) * 6.0, -math.cos(a) * 6.0, zc + 0.6), (0, 0, zc), ortho_scale=C["L"]["top"] * 1.12,
+                        res=(440, 900))
+        rgba = HBL.render_rgba()
+        tiles.append(np.clip(rgba[..., :3] * rgba[..., 3:4] + 0.86 * (1 - rgba[..., 3:4]), 0, 1))
+    core.save_rgba(qa("clay.png"), np.concatenate(tiles, 1))
+    tiles = []
+    for yaw in (0, -40, 40, 90):
+        a = math.radians(yaw)
+        HBL.look_at_cam((math.sin(a) * 3, -math.cos(a) * 3, o[2] + 0.05), (0, 0, o[2] - 0.02), ortho_scale=0.34,
+                        res=(400, 400))
+        rgba = HBL.render_rgba()
+        tiles.append(np.clip(rgba[..., :3] * rgba[..., 3:4] + 0.86 * (1 - rgba[..., 3:4]), 0, 1))
+    core.save_rgba(qa("clay_head.png"), np.concatenate(tiles, 1))
+    lo0.data.materials.clear()
+    for m in saved:
+        lo0.data.materials.append(m)
     with open(qa("metrics.json"), "w") as f:
         json.dump(res, f, indent=1)
     return res

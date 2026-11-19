@@ -3,9 +3,9 @@
   "generation": "v2 image-based (painted turnaround silhouettes + template depth, painting projection)",
   "rig": "human_shared",
   "tris": {
-    "LOD0": 16124,
+    "LOD0": 11820,
     "LOD1": 5820,
-    "LOD2": 2133
+    "LOD2": 2132
   },
   "budget": {
     "LOD0": 12000,

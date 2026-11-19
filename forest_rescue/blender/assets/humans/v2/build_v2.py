@@ -302,19 +302,19 @@ def build_objects(R, J):
     total = sum(core.tri_count(o) for o, _, _ in objs)
     limit = int(BUDGET[0] * 0.985)
     if total > limit:
-        gar = [(o, k) for o, _, k in objs if k in ("garment", "acc")]
-        g_tris = sum(core.tri_count(o) for o, _ in gar)
+        gar = [(ob_, k_) for ob_, _, k_ in objs if k_ in ("garment", "acc")]
+        g_tris = sum(core.tri_count(ob_) for ob_, _ in gar)
         excess = total - limit
         ratio = max(0.35, 1.0 - excess / max(g_tris, 1))
-        for o, k in gar:
-            n = core.tri_count(o)
+        for ob_, k_ in gar:
+            n = core.tri_count(ob_)
             if n > 120:
-                HBL.decimate(o, int(n * ratio), stage=10 ** 9)
-        total = sum(core.tri_count(o) for o, _, _ in objs)
+                HBL.decimate(ob_, int(n * ratio), stage=10 ** 9)
+        total = sum(core.tri_count(ob_) for ob_, _, _ in objs)
         if total > limit:
             n = core.tri_count(body)
             HBL.decimate(body, n - (total - limit), protect=prot, factor=1.0, stage=10 ** 9)
-        log("budget pass: LOD0 tris", sum(core.tri_count(o) for o, _, _ in objs), "garment ratio", round(ratio, 2))
+        log("budget pass: LOD0 tris", sum(core.tri_count(ob_) for ob_, _, _ in objs), "garment ratio", round(ratio, 2))
     ginfo = {}
     for g in C.get("garments", []):
         if g["kind"] == "skirt" and g.get("bones", "skirt") == "skirt":

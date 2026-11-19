@@ -111,6 +111,23 @@ func _ready() -> void:
 func _shots(spec: Dictionary) -> void:
 	var out: String = args.get("out", "/tmp")
 	DirAccess.make_dir_recursive_absolute(out)
+	if spec.has("heads"):
+		# duplicate-feature check: every head at 5 angles (front, 3/4 L/R, profile L/R)
+		var vp := get_viewport()
+		vp.size = Vector2i(520, 560)
+		for h in spec.heads:
+			var c := Vector3(float(h.x), float(h.y), float(h.z))
+			for ang in [0, -45, 45, -90, 90]:
+				var a := deg_to_rad(float(ang))
+				cam.size = 0.42
+				cam.position = c + Vector3(sin(a), 0.03, cos(a)) * 4.0
+				cam.look_at(c, Vector3.UP)
+				for _f in 6:
+					await get_tree().process_frame
+				vp.get_texture().get_image().save_png(out.path_join("%s_%d.png" % [String(h.tag), int(ang)]))
+		print("VIEWER_SHOTS_DONE ", out)
+		get_tree().quit()
+		return
 	var t: Array = spec.get("target", [0, 0, 0])
 	var target := Vector3(float(t[0]), float(t[1]), float(t[2]))
 	var prefix := String(spec.get("out_prefix", "city"))

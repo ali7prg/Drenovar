@@ -559,8 +559,11 @@ def texture(lo0, R, J, pinfo0=None):
         face = HT.FaceView(R.front, centre=o + np.array([0.0, 0.0, -0.035]) * S, size_m=0.34, scale=4.0)
         dst5 = [np.array(face.project(lm3[k])[:2]) for k in ("eye_r", "eye_l", "nose", "mouth", "chin")]
         src5 = [np.array(p) for p in cam.lm2[:5]] if len(cam.lm2) >= 5 else None
-        if abs(pinfo0["params"][0]) > 0.30:
-            log("portrait is a 3/4 view (yaw", round(pinfo0["params"][0], 2), "): face from the front view only")
+        # Duplicate-feature rule: the painted FRONT view is the single registered face source (the
+        # warped up-tilted portrait inset distorts the frontal face); the portrait is used for the
+        # face UV island layout and the SSIM check only.
+        if not C["build"].get("portrait_texture", False):
+            log("face texture: single source = painted front view (portrait not projected)")
             src5 = None
         if src5 is not None:
             HT.warp_portrait(face, cam.image, src5, dst5, feather_px=8.0)

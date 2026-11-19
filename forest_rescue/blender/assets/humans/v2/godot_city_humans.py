@@ -94,6 +94,22 @@ def group_spec(t=0.3):
                 zooms="40,68", close=dict(size=8.0, target=[float(-2.5 * fwd[0]), 0.9, float(-2.5 * fwd[1])]))
 
 
+def heads_spec():
+    """All 9 characters, LOD0 and LOD1 copies 3 m apart, idle pose frame 0; camera visits each head."""
+    inst, heads = [], []
+    names = [a for a in SQUAD + CIV if os.path.exists(os.path.join(HUM, f"{a}.glb"))]
+    for i, a in enumerate(names):
+        meta = json.load(open(os.path.join(HUM, f"{a}.meta.json")))
+        head_y = float(meta["sockets"]["head_top"][1]) - 0.10
+        idle = "lf_soldier_idle" if a.startswith("lf_squad") else "lf_civilian_wait"
+        for lod in (0, 1):
+            x = i * 3.0
+            z = lod * 3.0
+            inst.append(dict(glb=f"{a}.glb", x=x, z=z, yaw=0.0, painted=True, k=k_of(a), anim=idle, t=0.0, lod=lod))
+            heads.append(dict(tag=f"{a}_LOD{lod}", x=x, y=head_y, z=z))
+    return dict(instances=inst, heads=heads, target=[0, 1, 0], ground=[0.40, 0.42, 0.24])
+
+
 def label(im, text):
     d = ImageDraw.Draw(im)
     d.rectangle([4, 4, 12 + 6 * len(text), 20], fill=(20, 20, 20))
@@ -135,6 +151,9 @@ if __name__ == "__main__":
     out = os.path.abspath(sys.argv[1])
     mode = sys.argv[2] if len(sys.argv) > 2 else "both"
     os.makedirs(out, exist_ok=True)
+    if mode == "heads":
+        run(heads_spec(), out, "heads")
+        sys.exit(0)
     if mode in ("row", "both"):
         run(row_spec(), out, "row")
         sheet(out, "row", [("07_fog_exploration_interface.png", (520, 330, 1010, 690))], os.path.join(out, "row_sheet.png"))

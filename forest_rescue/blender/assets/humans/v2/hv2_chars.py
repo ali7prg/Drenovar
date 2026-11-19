@@ -59,7 +59,8 @@ CHARS = {
                  thigh=0.35),
             dict(kind="cloak", name="cloak", z_top=1.37, wrap=(48, 312), offset=0.010, flare=0.015, material="cloth",
                  hem_pts=[(48, 0.36), (95, 0.36), (112, 1.12), (180, 1.10)], thickness=0.006, nu=36, nv=20),
-            dict(kind="hood", name="hood", material="cloth", thick=0.040, tris=1000),
+            dict(kind="hood", name="hood", material="cloth", thick=0.040, tris=1000, open_phi=1.40, open_top=0.095,
+                 open_bot=-0.17),
         ],
         acc=[
             dict(kind="belt", name="belt", z=1.03, height=0.03, offset=0.014, material="gear"),

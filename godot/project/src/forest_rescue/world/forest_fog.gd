@@ -341,7 +341,7 @@ static func fog_tops(bits: PackedByteArray) -> PackedFloat32Array:
 					break
 				if clear[r * n + c] == 1:
 					var behind := s * CELL * 1.41421 - CELL * 0.7
-					top = minf(top, maxf(0.0, (behind + 2.5) / (VIEW_SLOPE * 1.28)))
+					top = minf(top, maxf(0.0, (behind + 2.5) / (VIEW_SLOPE * 1.45)))
 					break
 			tops[k] = top
 	return tops

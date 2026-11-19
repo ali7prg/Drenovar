@@ -18,27 +18,32 @@ LIGHT = (-0.55, -0.45, 0.70)
 BOX = (8, 70, 762, 390)
 OPEN = 0.55
 
-PARAMS = dict(R=0.45, L=3.3, ltx=-0.9, lx0=-0.15, lx1=0.75, lw=0.36, rx=-1.0, ry=1.3, sx_=-2.6, sy_=0.6)
-FREE = ["L", "ltx", "lx0", "lx1", "lw", "rx", "ry", "sx_", "sy_"]
+PARAMS = dict(R=0.42, L=3.6, lx0=-0.15, lx1=0.75, lw=0.36, ax0=-0.9, ax1=-0.2, ay=0.25, sx_=-2.9, sy_=1.1, sr=0.48,
+              sh=1.15, rx=-1.3, ry=1.5, rh=1.35)
+FREE = ["L", "lx0", "lx1", "lw", "ax0", "ax1", "ay", "sx_", "sy_", "sr", "sh", "rx", "ry", "rh"]
 
 
 def points(p):
     R, L = p["R"], p["L"]
-    zt = 2 * R
+    zt = 2 * R + 0.07
     return {
-        "latch": (p["ltx"], -0.05, zt + 0.1), "near_end": (-L / 2, -R * 0.2, zt * 0.55), "ring": (p["lx1"] - 0.18 + OPEN, -0.2, zt + 0.1),
-        "lid_a": (p["lx0"] + OPEN, -p["lw"], zt + 0.06), "lid_b": (p["lx1"] + OPEN, -p["lw"], zt + 0.06),
-        "lid_c": (p["lx0"] + OPEN, p["lw"], zt + 0.06), "lid_d": (p["lx1"] + OPEN, p["lw"], zt + 0.06),
-        "rock_top": (p["rx"], p["ry"], 1.55), "stump_top": (p["sx_"], p["sy_"], 1.15),
+        "lid_bl": (p["lx0"] + OPEN, p["lw"], zt), "lid_br": (p["lx1"] + OPEN, p["lw"], zt),
+        "lid_fr": (p["lx1"] + OPEN, -p["lw"], zt), "lid_fl": (p["lx0"] + OPEN, -p["lw"], zt),
+        "ring": (p["lx1"] + OPEN - 0.18, -0.2, zt + 0.06),
+        "arrow_l": (p["ax0"], p["ay"], 2 * R), "arrow_r": (p["ax1"], p["ay"], 2 * R),
+        "far_c": (L / 2, 0.0, R), "near_top": (-L / 2, 0.0, 2 * R), "near_bot": (-L / 2, -R * 0.7, 0.1),
+        "stump_tl": (p["sx_"] - p["sr"], p["sy_"], p["sh"]), "stump_tr": (p["sx_"] + p["sr"], p["sy_"], p["sh"]),
+        "stump_bf": (p["sx_"], p["sy_"] - p["sr"], 0.0), "rock_top": (p["rx"], p["ry"], p["rh"]),
     }
 
 
 def views():
     v = pv2.ViewSpec(
         "main", SHEET, BOX,
-        {"latch": (340, 215), "ring": (582.5, 220), "near_end": (262, 290),
-         "lid_a": (495, 262.5), "lid_b": (630, 222.5), "lid_c": (460, 200), "lid_d": (595, 167.5),
-         "rock_top": (310, 82.5), "stump_top": (105, 100)},
+        {"lid_bl": (460, 201.7), "lid_br": (593.3, 168.3), "lid_fr": (628.3, 216.7), "lid_fl": (495, 261.7),
+         "ring": (583.3, 220), "arrow_l": (440, 186.7), "arrow_r": (525, 166.7), "far_c": (737, 180),
+         "near_top": (232, 245), "near_bot": (285, 368), "stump_tl": (50, 113.3), "stump_tr": (183.3, 105),
+         "stump_bf": (100, 313), "rock_top": (300, 75)},
         pose={"cache_lid": {"loc": (OPEN, 0, 0)}},
         light=LIGHT, thresh=0.085, fill_holes=True, shadow=None, solve_opts={"fov_prior": 20.0},
         title="TRAIL CACHE main view (lid slid open)")
@@ -70,7 +75,7 @@ def build(A, p, lod):
     # hollow log of split staves; cache opening between lx0-0.4 and lx1 on the top staves
     nst = 9 if lod == 0 else 6
     angles = [math.radians(a) for a in np.linspace(-90 - 140, -90 + 140, nst)]
-    gap = (min(p["lx0"] - 0.1, p["ltx"] + 0.12), p["lx1"] + 0.02)
+    gap = (p["lx0"] - 0.45, p["lx1"] + 0.02)
     stave_ring(g, -L / 2, L / 2, R * 0.93, angles, 2 * math.pi * R / nst * 1.05, 0.16, lod, skip_range=(math.radians(20), math.radians(160)), gap=gap)
     # end caps (cut ends, rings come from the painting)
     for xe in (-L / 2 + 0.03, L / 2 - 0.03):
@@ -85,7 +90,7 @@ def build(A, p, lod):
             g.cyl(c - Rm[:, 2] * 0.025, c + Rm[:, 2] * 0.025, 0.12, n=14 if lod == 0 else 8, mat="bronze", tag="token",
                   up=(1, 0, 0))
     # iron latch block at the near end of the opening
-    g.box((p["ltx"], -0.05, 2 * R + 0.03), (0.22, 0.26, 0.14), mat="iron", tag="latch_block")
+    g.box((gap[0] - 0.12, -0.05, 2 * R + 0.03), (0.22, 0.26, 0.14), mat="iron", tag="latch_block")
     # sliding lid (node): planks + iron strap + bronze ring; rest = closed over the opening
     lid = A.part("cache_lid", None, ((p["lx0"] + p["lx1"]) / 2, 0, 2 * R))
     lg = lid.geo[lod]
@@ -98,7 +103,9 @@ def build(A, p, lod):
     lg.tube(np.array(ring + [ring[0]]), 0.014, n=5, mat="bronze", tag="lid_ring")
     # white-moss boulder (landmark b)
     rk = A.part("mark_landmark_b", None, (p["rx"], p["ry"], 0))
-    rk.geo[lod].rock((p["rx"], p["ry"], 0.62), (1.0, 0.8, 0.9), seed=4, sub=2 if lod == 0 else 1, mat="stone", tag="rock")
+    rh = p["rh"]
+    rk.geo[lod].rock((p["rx"], p["ry"], rh * 0.5), (rh * 0.85, rh * 0.62, rh * 0.62), seed=4, sub=2 if lod == 0 else 1,
+                     mat="stone", tag="rock")
     # split birch stump (landmark a): two half trunks with a split gap
     st = A.part("mark_landmark_a", None, (p["sx_"], p["sy_"], 0))
     sg = st.geo[lod]
@@ -114,10 +121,10 @@ def build(A, p, lod):
         g2 = np.array([(px_, py_) for px_, py_ in pts])
         # D-shaped prism (flat face at the split)
         ang = np.linspace(-math.pi / 2, math.pi / 2, nh)
-        D = np.array([(0.36 * math.sin(a), side * (0.03 + 0.36 * math.cos(a))) for a in ang])
+        D = np.array([(p["sr"] * math.sin(a), side * (0.035 + p["sr"] * math.cos(a))) for a in ang])
         if side > 0:
             D = D[::-1]
-        sg.prism(D, 0.0, 1.05 + (0.08 if side > 0 else 0.0), "birch", "stump", t=(p["sx_"], p["sy_"], 0))
+        sg.prism(D, 0.0, p["sh"] + (0.06 if side > 0 else 0.0), "birch", "stump", t=(p["sx_"], p["sy_"], 0))
     # bracket fungi on the far end
     if lod < 2:
         for k, (dz, dx) in enumerate(((0.62, 0.0), (0.42, 0.1))):

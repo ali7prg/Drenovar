@@ -813,6 +813,18 @@ def texture(lo0, R, J, pinfo0=None):
             col[sel] = np.clip(base * (1.0 + 0.045 * nz[:, None] * kk), 0, 1)
             log("cheek skin synthesis texels", len(sel), "cheek colour", np.round(cheek_ref, 3))
     hooded = any(g.get("kind") == "hood" for g in C.get("garments", []) + C.get("acc", []))
+    if FRONT_FACES and not hooded:
+        # temples above the eyes that no view paints read as hair in every painting (no light skin band
+        # between the painted hairline and the hair shell): painted-hair colour, strands added below
+        hair_seen2 = (tex_mat == MAT_IDS["hair"]) & is_head(data[2]) & (ws > 0.5)
+        if hair_seen2.sum() > 100:
+            hm = np.median(col[hair_seen2], 0)
+            tmp = is_head(data[2]) & (tex_mat == MAT_IDS["body"]) & (ws < 0.3) & (data[2][:, 2] > C["L"]["eye"] + 0.005) \
+                & (np.abs(data[2][:, 0]) > 0.032 * S[0])
+            kk = np.clip(1.0 - ws[tmp] / 0.3, 0, 1)[:, None]
+            col[tmp] = col[tmp] * (1 - kk) + hm * kk
+            tex_mat = np.where(tmp, MAT_IDS["hair"], tex_mat)
+            log("temples above the eyes -> painted hair colour, texels", int(tmp.sum()))
     if hooded:
         # inside a hood the sides / back of the head read as hair in the painting (no skin beside the face
         # opening): synthesised head skin behind the face plane takes the painted hair colour + strands

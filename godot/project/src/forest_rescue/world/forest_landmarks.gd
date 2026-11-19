@@ -78,7 +78,7 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 		for ring in [6.2, 7.4, 8.8]:
 			for k in 36:
 				var angle := TAU * k / 36.0
-				var p := center + Vector2(cos(angle), sin(angle)) * ring
+				var p: Vector2 = center + Vector2(cos(angle), sin(angle)) * float(ring)
 				if not camp_spot_ok(p, float(CAMP.footprint), site):
 					continue
 				var clearance := INF
@@ -86,7 +86,7 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 					clearance = minf(clearance, p.distance_to(center + anchor))
 				var hit: Dictionary = atlas.nearest_route(p.x, p.y)
 				var trail: float = minf(hit.get("distance", 12.0), 12.0)
-				var score := minf(clearance, 6.0) * 1.6 + trail - ring * 0.4
+				var score: float = minf(clearance, 6.0) * 1.6 + trail - float(ring) * 0.4
 				score += 1.5 * Vector2(cos(angle), sin(angle)).dot(Vector2(-0.7071, -0.7071))
 				if clearance < 3.6:
 					score -= 50.0

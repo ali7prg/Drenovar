@@ -18,7 +18,7 @@ uniform float fog_sdf_range = 64.0;
 uniform float fog_reveal_t = 1.0;
 uniform float fog_drift_speed = 0.6;
 uniform vec2 fog_wind = vec2(0.83, 0.56);
-uniform vec3 fog_silhouette : source_color = vec3(0.17, 0.22, 0.27);
+uniform vec3 fog_silhouette : source_color = vec3(0.370, 0.418, 0.449);   // light mist (fog haze)
 
 vec2 fog_uv(vec2 p) {
 	return (p - fog_domain.xy) / fog_domain.zw;
@@ -35,7 +35,7 @@ uniform float fog_reveal_curl = 0.0;
 uniform float fog_dim_strength = 0.0;
 uniform vec4 fog_sights[8];
 uniform int fog_sight_count = 0;
-uniform vec3 fog_veil_color : source_color = vec3(0.17, 0.22, 0.27);
+uniform vec3 fog_veil_color : source_color = vec3(0.246, 0.300, 0.335);
 
 // Same edge field as forest_fog.gdshader (edge_offset): lobes + wind-elongated tendrils.
 float fog_edge_offset(vec2 p, vec2 drift, float b) {
@@ -78,6 +78,9 @@ vec3 fog_receive(vec3 p, float time) {
 	float buried = 1.0 - smoothstep(cloud - 1.5, cloud + 2.5, y);
 	// Deep fog hides whole trees (no tops poking through the cloud sea), e.g. while a reveal runs.
 	float deep = smoothstep(fog_deep_top * 0.45, fog_deep_top * 0.8, top);
-	float tint = 1.0 - smoothstep(cloud + 1.0, cloud + 8.0, y);
-	return vec3(fogness * max(buried, deep), fogness * mix(0.45, 0.8, tint), veil);
+	// Edge trees get a soft light-mist tint (stronger inside the fog band, subtle on revealed ground),
+	// never a dark band.
+	float tint = 1.0 - smoothstep(cloud + 1.0, cloud + 9.0, y);
+	float side = mix(0.25, 1.0, 1.0 - smoothstep(-1.0, 1.0, sdf));
+	return vec3(fogness * max(buried, deep), fogness * side * mix(0.3, 0.6, tint), veil);
 }

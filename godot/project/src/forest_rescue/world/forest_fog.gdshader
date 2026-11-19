@@ -87,12 +87,13 @@ float puffs(vec3 p, vec2 drift, float time) {
 	vec3 q = vec3((p.x + drift.x * 0.8) / 11.0, p.y / 5.5 + time * 0.012, (p.z + drift.y * 0.8) / 11.0);
 	float a = texture(noise3d, q).r;
 	float b = texture(noise3d, q * 2.03 + vec3(0.31, 0.17, 0.59)).r;
-	return a * 0.7 + b * 0.3;
+	return a * 0.82 + b * 0.18;
 }
 
 float wisp_band(float sdf) {
-	// plateau over the explored edge band, descends gently further inside explored ground
-	return smoothstep(-2.0, 0.5, sdf) * (1.0 - smoothstep(5.0, 16.0, sdf));
+	// only over explored ground (the bank itself stays the cloud top): rises right after the edge,
+	// plateau over the first ~5 m of revealed forest, descends gently further inside
+	return smoothstep(1.0, 3.0, sdf) * (1.0 - smoothstep(7.0, 17.0, sdf));
 }
 
 void vertex() {
@@ -129,30 +130,34 @@ void fragment() {
 
 	// ---- cumulus surface shading at the cloud top (entry) --------------------------------
 	float top_e = mix(s_in.a, s_in.b, reveal_t) * height_range;
-	float e = 2.5;
+	float e = 3.0;
 	vec4 s_x = texture(state_tex, state_uv(entry.xz + vec2(e, 0.0)));
 	vec4 s_z = texture(state_tex, state_uv(entry.xz + vec2(0.0, e)));
 	float b0 = billow(entry.xz, drift);
-	float h0 = top_e * (0.6 + 0.8 * b0);
-	float hx = mix(s_x.a, s_x.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(e, 0.0), drift));
-	float hz = mix(s_z.a, s_z.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(0.0, e), drift));
 	float pf = puffs(entry, drift, time);
-	float pfx = puffs(entry + vec3(1.2, 0.0, 0.0), drift, time);
-	float pfz = puffs(entry + vec3(0.0, 0.0, 1.2), drift, time);
-	vec3 n = normalize(vec3((h0 - hx) / e + (pf - pfx) * 2.4, 1.0, (h0 - hz) / e + (pf - pfz) * 2.4));
-	vec3 l = normalize(light_dir);
-	float lambert = clamp(dot(n, l), 0.0, 1.0);
-	float wrap = clamp(dot(n, l) * 0.5 + 0.5, 0.0, 1.0);
-	float occl = smoothstep(0.15, 0.85, b0 * 0.75 + pf * 0.25);           // valleys between billows
-	vec3 shade = mix(valley_color, body_color, smoothstep(0.1, 0.8, wrap) * (0.45 + 0.55 * occl));
-	shade = mix(shade, lit_color, smoothstep(0.35, 0.9, lambert) * (0.35 + 0.65 * occl));
-	shade = mix(shade, sun_color, smoothstep(0.8, 1.0, lambert) * smoothstep(0.55, 0.95, occl) * 0.8);
+	float pfx = puffs(entry + vec3(e, 0.0, 0.0), drift, time);
+	float pfz = puffs(entry + vec3(0.0, 0.0, e), drift, time);
+	// combined cloud-top height field: banks (state top × billow) + world-space puffs
+	float h0 = top_e * (0.6 + 0.8 * b0) + 4.0 * pf;
+	float hx = mix(s_x.a, s_x.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(e, 0.0), drift)) + 4.0 * pfx;
+	float hz = mix(s_z.a, s_z.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(0.0, e), drift)) + 4.0 * pfz;
+	vec3 n = normalize(vec3((h0 - hx) / e * 2.2, 1.0, (h0 - hz) / e * 2.2));
+	float lambert = clamp(dot(n, normalize(light_dir)), 0.0, 1.0);
+	// 0 = valley between billows .. 1 = domed billow top
+	float cum = smoothstep(0.37, 0.69, b0 * 0.55 + pf * 0.45);
+	cum = 1.0 - (1.0 - cum) * (1.0 - cum);
+	vec3 shade = mix(valley_color, body_color, smoothstep(0.0, 0.5, cum));
+	shade = mix(shade, lit_color, smoothstep(0.42, 0.95, cum) * (0.4 + 0.6 * lambert));
+	shade = mix(shade, sun_color, smoothstep(0.72, 1.0, cum) * smoothstep(0.55, 0.95, lambert) * 0.9);
+	shade *= mix(0.9, 1.06, lambert);
 
 	// ---- volume march: density (3D puffs), thin fog reads as light haze --------------------
 	float trans = 1.0;
 	vec3 acc = vec3(0.0);
 	float step_len = t_hit / float(STEPS);
-	int steps = sdf_entry > 2.0 && band < 0.98 ? 0 : STEPS;
+	// No march from lifted/explored entries: without a depth buffer it would paint far banks over
+	// the revealed trees in front (wisps only there).
+	int steps = (sdf_entry > 2.0 || band > 0.02) ? 0 : STEPS;
 	for (int i = 0; i < steps; i++) {
 		vec3 p = entry + view_dir * (t_hit * (float(i) + 0.5) / float(STEPS));
 		vec4 s = texture(state_tex, state_uv(p.xz));
@@ -181,8 +186,9 @@ void fragment() {
 			continue;
 		}
 		float a = 1.0 - exp(-d * step_len);
-		float near_top = smoothstep(cloud_top - 6.0, cloud_top - 0.5, y);
-		vec3 col = mix(body_color, shade, near_top);
+		// the visible colour is the cumulus surface shade, a touch darker deeper inside
+		float near_top = smoothstep(cloud_top - 7.0, cloud_top - 0.5, y);
+		vec3 col = shade * mix(0.86, 1.0, near_top);
 		float thin = 1.0 - smoothstep(0.15, 0.7, fogness * body);
 		col = mix(col, haze_color, thin * 0.8);
 		col = mix(col, sun_color, revealing * 0.55);

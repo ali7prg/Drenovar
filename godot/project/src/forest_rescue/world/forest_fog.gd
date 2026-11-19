@@ -29,9 +29,10 @@ const HEIGHT_RANGE := 30.0        # B/A channel scale (m)
 const VIEW_SLOPE := 1.28          # cot(38°)
 const HEIGHT_LO := -4.0
 const HEIGHT_SPAN := 40.0
-const LAYERS := [{"name": "FogVolume", "drift": 0.6}]
+const LAYERS := [{"name": "FogVolume", "drift": 0.45}]
 
 static var _noise_texture: ImageTexture
+static var _noise3d: ImageTexture3D
 static var _shell_mesh: ArrayMesh
 static var _shell_key := ""
 static var _height_texture: ImageTexture
@@ -61,6 +62,8 @@ func build(height_fn: Callable, light_dir: Vector3) -> void:
 	state_texture = ImageTexture.create_from_image(state_image)
 	if _noise_texture == null:
 		_noise_texture = ImageTexture.create_from_image(make_noise_image(256))
+	if _noise3d == null:
+		_noise3d = make_noise_3d(48, 48, 24)
 	var key := "shell_v4"
 	if _shell_mesh == null or _shell_key != key:
 		_shell_mesh = make_shell_mesh(height_fn)
@@ -72,6 +75,7 @@ func build(height_fn: Callable, light_dir: Vector3) -> void:
 	material.set_shader_parameter("state_tex", state_texture)
 	material.set_shader_parameter("height_tex", _height_texture)
 	material.set_shader_parameter("noise_tex", _noise_texture)
+	material.set_shader_parameter("noise3d", _noise3d)
 	material.set_shader_parameter("domain", Vector4(GRID_ORIGIN, GRID_ORIGIN, GRID * CELL, GRID * CELL))
 	material.set_shader_parameter("height_range", HEIGHT_RANGE)
 	material.set_shader_parameter("height_lo", HEIGHT_LO)
@@ -171,6 +175,23 @@ static func make_shell_mesh(height_fn: Callable) -> ArrayMesh:
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return mesh
+
+
+## Seamless 3D noise (L8, w×h×d) for world-space cloud puffs and wisps (sampled with repeat).
+static func make_noise_3d(w: int, h: int, d: int) -> ImageTexture3D:
+	var noise := FastNoiseLite.new()
+	noise.seed = 2207
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	noise.fractal_octaves = 3
+	noise.frequency = 4.0 / w
+	var images: Array[Image] = noise.get_seamless_image_3d(w, h, d, false, 0.1, true)
+	for image in images:
+		if image.get_format() != Image.FORMAT_L8:
+			image.convert(Image.FORMAT_L8)
+	var texture := ImageTexture3D.new()
+	texture.create(Image.FORMAT_L8, w, h, d, false, images)
+	return texture
 
 
 ## RGBA tiling noise: R large billows, G mid, B fine (cellular wisps), A reveal delay.

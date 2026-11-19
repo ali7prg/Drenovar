@@ -47,7 +47,9 @@ const SQUAD_FORMATION := [Vector3(0, 0, 0), Vector3(-0.85, 0, -1.25), Vector3(0.
 const LIVE_RANGE := 70.0
 ## Where the squad stops short of a glade sub-target (server node = the cage / guardian /
 ## device spot itself): door front, fighting distance, device front.
-const STAND_OFF := {"cage":2.0, "guardian":3.4, "key":1.9}
+const STAND_OFF := {"cage":2.0, "guardian":3.4, "key":1.9, "boss":12.5}
+## The mare keeps back from the boss: she waits at the arena gap, behind the squad.
+const HORSE_BOSS_STAND_OFF := 21.0
 ## Orthographic size thresholds for LOD0 / LOD1 (× rig.lod_scale); beyond = LOD2.
 const LOD_ZOOM := [34.0, 72.0]
 const BOSS_LOD_SCALE := 1.4
@@ -339,17 +341,21 @@ func route_for(key: String, path: Array) -> Dictionary:
 static func target_kind(target_id: String) -> String:
 	if target_id.begins_with("lf_key_"):
 		return "key"
+	if target_id == "lf_boss_ancient_maw":
+		return "boss"
 	if target_id.contains(":"):
 		return target_id.get_slice(":", 1)
 	return ""
 
-func move_sample(move: Dictionary, now: float, back := 0.0) -> Dictionary:
+func move_sample(move: Dictionary, now: float, back := 0.0, stand_off := -1.0) -> Dictionary:
 	var key := "%s|%s|%s" % [str(move.get("departAt", 0)), str(move.get("arriveAt", 0)), str(move.get("targetId", ""))]
 	var route := route_for(key, move.get("path", []))
 	var distance := PathMotion.travelled(move, route, now)
-	# Presentation: the squad stops short of a cage / guardian / device spot (the server node
-	# is the spot itself); the ribbon and arrival timing are unchanged.
-	var limit := float(route.total) - float(STAND_OFF.get(target_kind(String(move.get("targetId", ""))), 0.0))
+	# Presentation: the squad stops short of a cage / guardian / device / boss spot (the server
+	# node is the spot itself); the ribbon and arrival timing are unchanged.
+	if stand_off < 0.0:
+		stand_off = float(STAND_OFF.get(target_kind(String(move.get("targetId", ""))), 0.0))
+	var limit := float(route.total) - stand_off
 	var shown := minf(distance, maxf(limit, 0.0))
 	var sample := PathMotion.sample(route, maxf(0.0, shown - back))
 	sample.arrived = now >= float(move.get("arriveAt", 0)) or distance >= limit
@@ -428,8 +434,12 @@ func update_horse(now: float, delta: float) -> void:
 		markers.append({"position":actor.position + Vector3.UP * 1.6, "kind":"horse", "id":"horse"})
 		return
 	var speed_now := 0.0
+	if String(horse.get("node", "")) == "lf_boss_ancient_maw":
+		target = boss_gap_point(HORSE_BOSS_STAND_OFF, -2.5)
+		yaw = PathMotion.yaw_of(game.target_position("lf_boss_ancient_maw") - target)
 	if move is Dictionary and not (move.get("path", []) as Array).is_empty():
-		var sample := move_sample(move, now)
+		var boss_move := String(move.get("targetId", "")) == "lf_boss_ancient_maw"
+		var sample := move_sample(move, now, 0.0, HORSE_BOSS_STAND_OFF if boss_move else -1.0)
 		target = sample.position
 		yaw = PathMotion.yaw_of(sample.tangent)
 		moving = not sample.arrived
@@ -477,6 +487,13 @@ func update_horse(now: float, delta: float) -> void:
 		if plates_for_actors():
 			tags.append({"position":actor.position + Vector3.UP * 3.0, "text":game.content.text("hud.horse"), "kind":"horse"})
 	game.pin("lf_horse", actor.position, 14.0)
+
+## Point on the arena's entrance axis `distance` m from the centre (side offset in m).
+func boss_gap_point(distance: float, side := 0.0) -> Vector3:
+	var arena: Vector3 = game.target_position("lf_boss_ancient_maw")
+	var axis := Vector3(sin(deg_to_rad(ARENA_FACING_DEG)), 0, cos(deg_to_rad(ARENA_FACING_DEG)))
+	var p := arena + axis * distance + Vector3(axis.z, 0, -axis.x) * side
+	return game.ground(p.x, p.z)
 
 ## Yaw towards the guide's next destination (INF when unknown or too close to matter).
 func horse_facing(from: Vector3) -> float:
@@ -611,6 +628,14 @@ func squad_pose(index: int, now: float) -> Dictionary:
 		var plate: Vector3 = plate_stand_point(site_here, index)
 		return {"position":plate, "yaw":PathMotion.yaw_of(anchor.get("artifact", plate) - plate), "clip":["lf_soldier_guard", "lf_soldier_idle", "Shield_Block", "Idle"], "keep_y":plate.y > -INF}
 	match target_kind(node):
+		"boss":
+			var arena: Vector3 = game.target_position("lf_boss_ancient_maw")
+			var gap := boss_gap_point(BOSS_FIGHT_DISTANCE)
+			var fwd := (arena - gap)
+			fwd.y = 0
+			fwd = fwd.normalized()
+			var right := Vector3(fwd.z, 0, -fwd.x)
+			return {"position":gap + right * lateral.x * 1.2 + fwd * lateral.z * 0.8, "yaw":PathMotion.yaw_of(fwd), "guard":true}
 		"cage":
 			# The unlocking soldier stands at the socket on the door; the others behind him.
 			var cage: Rig = rigs.get("cage_" + site_here)

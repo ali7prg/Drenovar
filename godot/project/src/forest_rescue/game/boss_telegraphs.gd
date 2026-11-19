@@ -8,10 +8,10 @@ extends Node3D
 ## fade during recovery. Presentation only: the server decides hits; the decal shows where/when.
 
 const SHAPES := {
-	"jaw_arc":{"kind":"sector", "inner":1.6, "outer":9.5, "from":-42.0, "to":42.0, "color":Color("#ff7a26")},
-	"tail_sweep":{"kind":"sector", "inner":2.6, "outer":11.5, "from":70.0, "to":290.0, "color":Color("#ff9a2e")},
-	"lane_charge":{"kind":"lane", "width":4.4, "start":2.0, "length":22.0, "color":Color("#ff6a2a")},
-	"stomp_waves":{"kind":"rings", "radii":[6.0, 11.0], "band":1.5, "color":Color("#ffa034")}
+	"jaw_arc":{"kind":"sector", "inner":1.6, "outer":9.5, "from":-42.0, "to":42.0, "color":Color("#ff6a1a")},
+	"tail_sweep":{"kind":"sector", "inner":2.6, "outer":11.5, "from":70.0, "to":290.0, "color":Color("#ff8a1e")},
+	"lane_charge":{"kind":"lane", "width":4.4, "start":2.0, "length":22.0, "color":Color("#ff5a1a")},
+	"stomp_waves":{"kind":"rings", "radii":[6.0, 11.0], "band":1.5, "color":Color("#ff9424")}
 }
 const KIND_ID := {"sector":0, "lane":1, "rings":2}
 const FALLBACK_TIMING := {
@@ -38,53 +38,55 @@ func setup(owner_game: Node) -> void:
 	shader.code = """
 shader_type spatial;
 render_mode unshaded, cull_disabled, depth_draw_never, blend_add, shadows_disabled, fog_disabled;
-uniform vec4 tint : source_color = vec4(1.0, 0.55, 0.16, 1.0);
+uniform vec4 tint : source_color = vec4(1.0, 0.48, 0.1, 1.0);
 uniform float fill = 0.0;      // telegraph progress 0..1
 uniform float active = 0.0;    // 1 inside the hit window
 uniform float fade = 1.0;      // recovery fade-out
 uniform int kind = 0;          // 0 sector, 1 lane, 2 rings
 float glow_line(float x, float at, float core, float halo) {
 	float d = abs(x - at);
-	return smoothstep(core, 0.0, d) + 0.45 * smoothstep(halo, 0.0, d);
+	return smoothstep(core, core * 0.25, d) + 0.5 * smoothstep(halo, 0.0, d);
 }
 void fragment() {
 	vec2 uv = UV;
-	float ends = smoothstep(0.0, 0.12, uv.x) * smoothstep(1.0, 0.88, uv.x);
+	float ends = smoothstep(0.0, 0.1, uv.x) * smoothstep(1.0, 0.9, uv.x);
 	float light = 0.0;
 	float wash = 0.0;
 	if (kind == 0) {
-		// Sector: three concentric arcs + bright rim; a wavefront sweeps outwards with the fill.
+		// Sector (art/08): three close concentric arcs near the rim + the rim itself; a wavefront
+		// sweeps outwards with the fill, everything flares in the active window.
 		for (int i = 0; i < 3; i++) {
-			float at = 0.34 + 0.25 * float(i);
-			light += glow_line(uv.y, at, 0.025, 0.09) * (0.55 + 0.45 * step(at, fill + 0.02));
+			float at = 0.62 + 0.13 * float(i);
+			light += glow_line(uv.y, at, 0.035, 0.11) * (0.45 + 0.55 * step(at, fill + 0.04));
 		}
-		light += glow_line(uv.y, 0.985, 0.02, 0.07) * 0.8;
-		light += glow_line(uv.y, fill, 0.03, 0.12) * (1.0 - active) * 0.9;
-		wash = (0.12 + 0.18 * step(uv.y, fill)) * smoothstep(0.0, 0.25, uv.y);
+		light += glow_line(uv.y, 0.975, 0.03, 0.09);
+		light += glow_line(uv.y, fill, 0.04, 0.16) * (1.0 - active) * 0.7;
+		wash = (0.05 + 0.12 * step(uv.y, fill)) * smoothstep(0.0, 0.3, uv.y);
 		light *= ends;
 		wash *= ends;
 	} else if (kind == 1) {
 		// Lane: glowing side edges, chevrons running forward, warm fill growing along it.
 		float side = min(uv.x, 1.0 - uv.x);
-		light = glow_line(side, 0.02, 0.025, 0.1);
-		float chevron = fract(uv.y * 7.0 - abs(uv.x - 0.5) * 1.6 - TIME * 1.5);
-		light += smoothstep(0.1, 0.0, abs(chevron - 0.5)) * 0.55 * step(0.12, side);
-		wash = 0.1 + 0.2 * step(uv.y, fill);
-		float tip = smoothstep(1.0, 0.9, uv.y);
+		light = glow_line(side, 0.03, 0.04, 0.14);
+		float chevron = fract(uv.y * 6.0 - abs(uv.x - 0.5) * 1.4 - TIME * 1.3);
+		light += smoothstep(0.09, 0.0, abs(chevron - 0.5)) * 0.7 * step(0.1, side) * step(uv.y, fill + 0.05);
+		wash = 0.05 + 0.12 * step(uv.y, fill);
+		float tip = smoothstep(1.0, 0.88, uv.y) * smoothstep(0.0, 0.05, uv.y);
 		light *= tip;
 		wash *= tip;
 	} else {
-		// Ring band: a thin hot line at the centre; in the active window the wave runs outward.
+		// Ring band: a hot line at the centre (two thin echoes); in the active window the wave runs out.
 		float wave = mix(0.5, fract(TIME * 2.4), active);
-		light = glow_line(uv.y, 0.5, 0.06, 0.24) + glow_line(uv.y, wave, 0.05, 0.2) * active;
-		wash = 0.08 + 0.12 * fill;
+		light = glow_line(uv.y, 0.5, 0.09, 0.3) + 0.6 * glow_line(uv.y, 0.22, 0.05, 0.12) + 0.6 * glow_line(uv.y, 0.78, 0.05, 0.12);
+		light += glow_line(uv.y, wave, 0.07, 0.22) * active;
+		wash = 0.05 + 0.08 * fill;
 		light *= ends;
 		wash *= ends;
 	}
-	vec3 hot = vec3(1.0, 0.93, 0.72);
-	vec3 col = mix(tint.rgb, hot, clamp(light * 0.35 + active * 0.45, 0.0, 1.0));
-	float strength = (light * (0.85 + 0.9 * active) + wash * (1.0 + 1.6 * active)) * (0.55 + 0.45 * fill);
-	ALBEDO = col * clamp(strength, 0.0, 2.2) * fade;
+	vec3 hot = vec3(1.0, 0.9, 0.62);
+	vec3 col = mix(tint.rgb, hot, clamp(light * 0.3 + active * 0.4, 0.0, 1.0));
+	float strength = (light * (1.5 + 1.3 * active) + wash * (1.0 + 1.5 * active)) * (0.6 + 0.4 * fill);
+	ALBEDO = col * clamp(strength, 0.0, 3.0) * fade;
 	ALPHA = 1.0;
 }
 """

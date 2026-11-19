@@ -184,7 +184,7 @@ func run() -> void:
 		await preload_actors()
 		await frames(20)
 		await shoot(item[0] + "_z30")
-		look(spot, 16.0)
+		look(spot + Vector3(0, 0.5, 0), 9.0)
 		await frames(4)
 		await shoot(item[0] + "_close")
 
@@ -202,7 +202,7 @@ func run() -> void:
 	if wanted("unlock"):
 		await fresh("site01_battle_victory")
 		var c := anchor("lf_site_01", "cage")
-		look(c + Vector3(0.6, 0, 1.2), 22.0)
+		look(c + Vector3(0.8, 0.8, 2.2), 12.0)
 		await preload_actors()
 		await frames(10)
 		await live("site01_cage_open")
@@ -257,6 +257,27 @@ func run() -> void:
 		settle_world()
 		await frames(2)
 		await shoot("boss_85_z68")
+
+	# -------------------------------------------------- each boss attack: telegraph + active window
+	if wanted("tele"):
+		var seen := {}
+		for pct in [10, 35, 60, 85]:
+			await fresh("boss_battle_%d" % pct)
+			var fight: Dictionary = forest.client.battle()
+			var arena: Vector3 = forest.target_position("lf_boss_ancient_maw")
+			look(arena + Vector3(0, 0, 4), 34.0)
+			await preload_actors()
+			for event in fight.get("timeline", []):
+				var attack := String(event.get("attack", ""))
+				if String(event.get("type", "")) != "telegraph" or seen.has(attack):
+					continue
+				seen[attack] = true
+				var telegraph := float(event.get("telegraphSeconds", 2.4))
+				for local in [telegraph * 0.75, telegraph + 0.12]:
+					clock = float(fight.startedAt) + (float(event.t) + local) * 1000.0 - 400.0
+					forest.client.manual_clock_ms = clock
+					await frames(12)
+					await shoot("tele_%s_%s" % [attack, "active" if local > telegraph else "warn"])
 
 	print("FOREST_INTEGRATION_SHOTS saved=", saved.size())
 	var file := FileAccess.open(out.path_join(prefix + "shots.log"), FileAccess.WRITE)

@@ -502,18 +502,23 @@ def hair_clump_field(C, J, R, body_field, fld, seed=5):
     key = "bun" if style == "bun" else ("helmet" if style == "helmet" else "default")
     hp, hv = HAIRLINES[key]
     hl = np.interp(aphi, hp, hv)
+    side_burn = np.zeros(len(q), bool)
     if beard and beard != "stubble":
-        # side-burns run down to the jaw for bearded men
-        hl = np.where((aphi > 1.2) & (aphi < 1.75), np.minimum(hl, -0.035), hl)
-    scalp = q[:, 2] > hl
+        # thin side-burns run down to the jaw for bearded men (in front of the ears)
+        side_burn = (aphi > 1.25) & (aphi < 1.62) & (q[:, 2] <= hl) & (q[:, 2] > -0.045)
+    scalp = (q[:, 2] > hl) | side_burn
     # silhouette thickness: distance from the surface to the painted outline along the in-plane normal
     sd = R.sdf2(pts[:, 0], pts[:, 2])
     f_in = np.linalg.norm(nrm[:, [0, 2]], axis=1)
     t_sil = np.clip(-sd / np.maximum(f_in, 0.35), 0.0, max_t * scale_t)
     t = (base_t * scale_t) * (1 - f_in ** 2) + t_sil * f_in ** 2
-    # thin toward the hairline (no visor), fuller above
+    # thin toward the hairline (no visor), fuller above; the volume that fills the side outline
+    # grows from the side/back of the head, never as a frame around the face
     above = q[:, 2] - hl
     t = t * (0.25 + 0.75 * np.clip(above / 0.04, 0, 1))
+    front_lim = np.interp(aphi, [0.0, 1.0, 1.35, 1.7], [0.010, 0.010, 0.018, 1.0])
+    t = np.minimum(t, front_lim * np.where(q[:, 2] > hl + 0.045, 3.0, 1.0))
+    t = np.where(side_burn, 0.006, t)
     prims = []
     for p, n, tt, sc in zip(pts, nrm, t, scalp):
         if not sc or tt < 0.002:
@@ -529,14 +534,14 @@ def hair_clump_field(C, J, R, body_field, fld, seed=5):
         prims.append(fsdf.round_cone(a, b, r, r * 0.8))
     # beard clumps
     if beard and beard != "stubble":
-        base = {"full": 0.008, "full_grey": 0.007, "full_red": 0.009}.get(beard, 0.006)
-        chin = {"full": 0.026, "full_grey": 0.022, "full_red": 0.024}.get(beard, 0.015)
+        base = {"full": 0.0055, "full_grey": 0.005, "full_red": 0.006}.get(beard, 0.004)
+        chin = {"full": 0.019, "full_grey": 0.016, "full_red": 0.018}.get(beard, 0.012)
         top = np.interp(aphi, [0, 0.30, 0.55, 1.0, 1.45, 1.75], [-0.050, -0.052, -0.038, -0.024, -0.016, -0.02])
         bz = (q[:, 2] < top) & (aphi < 1.72) & (q[:, 2] > -0.17)
-        lips = np.sqrt((q[:, 0] / 0.026) ** 2 + ((q[:, 2] + 0.076) / 0.012) ** 2) < 1.0
+        lips = np.sqrt((q[:, 0] / 0.030) ** 2 + ((q[:, 2] + 0.077) / 0.015) ** 2) < 1.0
         bz &= ~(lips & (aphi < 0.8))
         tb = base + chin * np.exp(-((q[:, 2] + 0.125) / 0.045) ** 2) * np.exp(-(q[:, 0] / 0.05) ** 2)
-        tb = np.maximum(tb, np.clip(-sd / np.maximum(f_in, 0.35), 0, chin) * (q[:, 2] < -0.09))
+        tb = np.maximum(tb, np.clip(-sd / np.maximum(f_in, 0.35), 0, chin) * (q[:, 2] < -0.10) * (aphi > 0.5))
         tb *= (0.3 + 0.7 * np.clip((top - q[:, 2]) / 0.02, 0, 1))
         for p, n, tt, ok in zip(pts, nrm, tb, bz):
             if not ok:
@@ -561,7 +566,7 @@ def hair_clump_field(C, J, R, body_field, fld, seed=5):
     qa = (Pall - o) / S
     ph = np.abs(np.arctan2(qa[..., 0], -qa[..., 1]))
     hlg = np.interp(ph, hp, hv)
-    face = (ph < 1.15) & (qa[..., 2] < hlg - 0.004) & (qa[..., 2] > -0.06)
+    face = (ph < 1.32) & (qa[..., 2] < hlg - 0.004) & (qa[..., 2] > -0.06)
     if beard and beard != "stubble":
         topb = np.interp(ph, [0, 0.30, 0.55, 1.0, 1.45, 1.75], [-0.050, -0.052, -0.038, -0.024, -0.016, -0.02])
         face &= qa[..., 2] > topb

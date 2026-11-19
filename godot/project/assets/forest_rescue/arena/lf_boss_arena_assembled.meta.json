@@ -1,7 +1,7 @@
 {
   "id": "lf_boss_arena_assembled",
   "tris": {
-    "LOD0_total": 56284
+    "LOD0_total": 55505
   },
   "budget_tris": 60000,
   "modules": {
@@ -43,89 +43,57 @@
     }
   },
   "layout": {
-    "cliffs": [
-      [
-        "c",
-        -66
-      ],
-      [
-        "b",
-        -40
-      ],
-      [
-        "b",
-        2
-      ],
-      [
-        "a",
-        22
-      ],
-      [
-        "a",
-        42
-      ],
-      [
-        "a",
-        96
-      ],
-      [
-        "a",
-        119
-      ],
-      [
-        "b",
-        141
-      ],
-      [
-        "b",
-        178
-      ],
-      [
-        "a",
-        201
-      ],
-      [
-        "b",
-        224
-      ],
-      [
-        "c",
-        247
-      ]
+    "ring_slots_deg": [
+      -66,
+      -40,
+      2,
+      22,
+      42,
+      96,
+      119,
+      141,
+      178,
+      201,
+      224,
+      247
     ],
     "fossil": 68.0,
-    "pillars": [
+    "inner_outcrops": [
       [
-        "a",
         [
           -10.2,
           6.0
         ],
-        20.0
+        20.0,
+        "v1",
+        0.62
       ],
       [
-        "a",
         [
           -13.0,
           -0.6
         ],
-        75.0
+        75.0,
+        "v2",
+        1.05
       ],
       [
-        "a",
         [
           13.0,
           0.6
         ],
-        -30.0
+        -30.0,
+        "v1",
+        0.55
       ],
       [
-        "b",
         [
-          5.6,
-          -5.2
+          7.0,
+          -10.5
         ],
-        10.0
+        10.0,
+        "v2",
+        0.9
       ]
     ],
     "banners": [
@@ -138,37 +106,12 @@
         16.6
       ]
     ],
-    "bones": [
-      [
-        [
-          -4.5,
-          3.8
-        ],
-        30.0
-      ],
-      [
-        [
-          6.5,
-          7.5
-        ],
-        -60.0
-      ],
-      [
-        [
-          -8.5,
-          -6.0
-        ],
-        120.0
-      ]
+    "removed": [
+      "pillars (carved totems)",
+      "loose floor bones",
+      "stream piece"
     ],
-    "stream": [
-      [
-        -21.0,
-        -16.5,
-        0.0
-      ],
-      -40.0
-    ]
+    "kit": "lf_env_moss_rock v1-v3 (limestone material), lf_env_dark_pine v2-v4, lf_env_bramble v1-v3, lf_env_grass_tuft v1-v2 as linked duplicates (glTF mesh instancing)"
   },
   "ring_inner_radius_m": 17.5,
   "floor_radius_m": 17.8,
@@ -189,20 +132,30 @@
     }
   },
   "lods": {
+    "LOD0": {
+      "file": "lf_boss_arena_assembled.glb",
+      "tris": 55505,
+      "bytes": 13854988,
+      "nodes": 118
+    },
     "LOD1": {
       "file": "lf_boss_arena_assembled_lod1.glb",
-      "tris": 23817,
-      "bytes": 16128072
+      "tris": 21400,
+      "bytes": 13255320,
+      "nodes": 118
     },
     "LOD2": {
       "file": "lf_boss_arena_assembled_lod2.glb",
-      "tris": 11039,
-      "bytes": 5442388
+      "tris": 9966,
+      "bytes": 13081348,
+      "nodes": 32
     },
-    "LOD0": {
-      "file": "lf_boss_arena_assembled.glb",
-      "tris": 56284
-    },
-    "note": "same node names (cliff_NN_v, fossil_wall, pillar_N_v, bones_N, floor, stream, banner_N[_rig]) in every LOD file; suggested use: LOD0 zoom <= 34, LOD1 zoom <= 85, LOD2 beyond (actor LOD thresholds 42/85)"
+    "note": "v2 (art/08 rebuild): same node names in every LOD file; suggested use LOD0 zoom <= 34, LOD1 zoom <= 85, LOD2 beyond"
+  },
+  "generation": "v2 rebuild after art/08 (natural limestone enclosure, quilted painted floor)",
+  "floor": {
+    "texture": "art/08 floor pixels quilted (Efros-Freeman) at ~20 px/m over 50 m, rim blend under the rocks",
+    "radius_m": 23.5,
+    "height_local_m": 0.32
   }
 }

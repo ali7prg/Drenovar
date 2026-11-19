@@ -153,9 +153,10 @@ class Rig:
         # legs
         over = 0.0
         for s, sx in (("L", 1), ("R", -1)):
-            ball = np.asarray(p[f"ball_{s}"], float)
+            ball = np.asarray(p[f"ball_{s}"], float).copy()
             fyaw = g(f"fyaw_{s}")
             heel = g(f"heel_{s}")          # heel lift (deg) rolling over the toes
+            ball[2] += 0.0016 * max(heel, 0.0)   # rolling onto the toe tips lifts the ball (claws stay above ground)
             Ry = PO.qmat((0, 0, 1), fyaw)
             off = Ry @ (PO.qmat((1, 0, 0), heel) @ REST_ANKLE_OFF)
             ankle = ball + off

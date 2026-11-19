@@ -18,6 +18,7 @@ var squad: Array = []
 var arena0: Node3D
 var arena1: Node3D
 var clip_rigs := {}
+var formation: Array = []
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
@@ -55,7 +56,7 @@ func _ready() -> void:
 	add_child(boss)
 	boss.poll_load(true)
 	boss.marker.connect(_on_marker)
-	var formation := [Vector3(0, 0, 0), Vector3(-0.85, 0, -1.25), Vector3(0.85, 0, -1.25)]
+	formation = [Vector3(0, 0, 0), Vector3(-0.85, 0, -1.25), Vector3(0.85, 0, -1.25)]
 	for i in 3:
 		var r := Rig.new()
 		r.setup("squad%d" % i, SQUAD[i])
@@ -152,6 +153,16 @@ func _run() -> void:
 		boss.model.scale = Vector3.ONE * sc
 		await _shot("game_zoom40_scale_%.2f" % sc, 40.0, target)
 		await _shot("game_zoom68_scale_%.2f" % sc, 68.0, target)
+	# acceptance: boss at recommendedScale, the squad at the entrance (art/08 composition)
+	var rec := float(boss.meta.get("recommendedScale", 1.0))
+	boss.model.scale = Vector3.ONE * rec
+	for i in 3:
+		squad[i].position = Vector3(0, 0, 15.5) + Basis(Vector3.UP, PI) * formation[i]
+	for z in [40.0, 68.0]:
+		_set_lod(0 if z < 42.0 else 1)
+		await _shot("arena_accept_zoom%d" % int(z), z, Vector3(0, 1.0, 3.0))
+	for i in 3:
+		squad[i].position = Vector3(0, 0, 10.0) + Basis(Vector3.UP, PI) * formation[i]
 	boss.model.scale = Vector3.ONE
 	# attack key frames at the game zoom 40 (telegraph and active)
 	for pair in [["lf_boss_jaw_arc", 2.0], ["lf_boss_jaw_arc", 2.55], ["lf_boss_tail_sweep", 2.8], ["lf_boss_tail_sweep", 3.45],

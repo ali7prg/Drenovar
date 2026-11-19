@@ -1,0 +1,7 @@
+{
+  "view": "head_closeup",
+  "iou": 0.8387,
+  "mean_abs_colour_error": 0.1365,
+  "ref_pixels": 164923,
+  "render_pixels": 170669
+}

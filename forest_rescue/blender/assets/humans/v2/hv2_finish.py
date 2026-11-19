@@ -256,8 +256,8 @@ def finish(AID, C, R, J, B, lo0, p_png, ITER, log):
                     L = sk.length[bn]
                     need = math.acos(np.clip((head[2] - 0.03) / max(L, 1e-6), -1, 1))
                     cur = math.acos(np.clip(-(MM[bn][:3, 1])[2], -1, 1))
-                    extra = max(0.0, need - cur) + 0.05
-                    P.rot[bn] = HA.rot(axis, sgn * extra) @ P.rot.get(bn, np.eye(3))
+                    lift = max(0.0, need - cur) + 0.05
+                    P.rot[bn] = HA.rot(axis, sgn * lift) @ P.rot.get(bn, np.eye(3))
                     fixed = True
             if fixed:
                 bb, MM = HA.solve(sk, P)

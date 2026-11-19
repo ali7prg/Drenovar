@@ -66,6 +66,7 @@ func run() -> void:
 	var changed_fields := 0
 	var inner_moved := 0
 	var outer_displacements := PackedFloat32Array()
+	var inner_jitter := PackedFloat32Array()
 	var on_old_point := 0
 	for id in legacy_ids:
 		if not ids.has(id):
@@ -79,7 +80,9 @@ func run() -> void:
 		var old := Vector2(float(a.p[0]), float(a.p[2]))
 		var now := Vector2(float(b.p[0]), float(b.p[2]))
 		if maxf(absf(old.x), absf(old.y)) <= 56.0:
-			if old.distance_to(now) > 0.001:
+			# layout v2: inner (±56) trees are jittered off the spiral rows by ≤ 3.5 m, same id
+			inner_jitter.append(old.distance_to(now))
+			if old.distance_to(now) > Rules.MAX_INNER_JITTER + 0.01:
 				inner_moved += 1
 		else:
 			outer_displacements.append(old.distance_to(now))
@@ -89,7 +92,10 @@ func run() -> void:
 		check(Vector2(visual.x, visual.z).distance_to(now) < 0.01, "pick position != rendered position for " + id)
 	check(missing == 0, "resource ids missing after remap: %d" % missing)
 	check(changed_fields == 0, "resource tree fields changed: %d" % changed_fields)
-	check(inner_moved == 0, "inner (±56) resource trees moved: %d" % inner_moved)
+	check(inner_moved == 0, "inner (±56) resource trees moved more than %.1f m: %d" % [Rules.MAX_INNER_JITTER, inner_moved])
+	inner_jitter.sort()
+	notes.inner_jitter = {"count": inner_jitter.size(), "median_m": inner_jitter[inner_jitter.size() / 2] if not inner_jitter.is_empty() else 0.0,
+		"max_m": inner_jitter[-1] if not inner_jitter.is_empty() else 0.0}
 	outer_displacements.sort()
 	var n := outer_displacements.size()
 	check(n > 1000, "too few outer resource trees checked: %d" % n)
@@ -131,11 +137,12 @@ func run() -> void:
 			bad_trees += 1
 			continue
 		var hit: Dictionary = world.atlas.nearest_route(x, z)
-		var crown: float = world.TREE_CROWN[int(item[2])]
-		if not hit.is_empty() and hit.distance < 3.8 + crown * 0.9:
+		# v2 rule: trunk ≥ route clearance + 1.4 m + 45 % of the crown (crowns may overhang a bit)
+		var crown: float = world.TREE_CROWN[int(item[2])] * float(item[5])
+		if not hit.is_empty() and hit.distance < 3.8 + Rules.ROUTE_TRUNK_MARGIN + crown * 0.45 - 0.05:
 			bad_trees += 1
 		for site in world.atlas.sites:
-			if Vector2(x, z).distance_to(Vector2(site.center.x, site.center.z)) < site.radius + crown * 0.9:
+			if Vector2(x, z).distance_to(Vector2(site.center.x, site.center.z)) < site.radius + Rules.GLADE_TRUNK_MARGIN + crown * 0.4 - 0.05:
 				bad_trees += 1
 		if Vector2(x, z).distance_to(Vector2(world.atlas.arena_center.x, world.atlas.arena_center.z)) < 17.0:
 			bad_trees += 1

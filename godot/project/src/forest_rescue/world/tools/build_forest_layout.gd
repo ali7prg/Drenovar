@@ -364,8 +364,20 @@ func run() -> void:
 			reason = 3
 			found = _nearest_free(tx, tz, 14.0, 1.6)
 		if found == Vector2.INF:
-			var angle := rng.randf() * TAU
-			found = Vector2(tx + cos(angle) * 1.2, tz + sin(angle) * 1.2)
+			found = _nearest_free(tx, tz, 30.0, 1.2)
+		if found == Vector2.INF:
+			# last resort: nearest spot outside every clearance mask, ignoring slope/trunk gaps
+			var radius := 0.5
+			while radius <= 30.0 and found == Vector2.INF:
+				for k in 24:
+					var angle := TAU * k / 24.0
+					var q := Vector2(tx + cos(angle) * radius, tz + sin(angle) * radius)
+					if not blocked_exact(q.x, q.y, true) and atlas.river_bank_distance(q.x, q.y) > 0.5:
+						found = q
+						break
+				radius += 0.5
+		if found == Vector2.INF:
+			found = Vector2(tx, tz)
 		insert(trunk_grid, trunks, [found.x, found.y, gap])
 		var look := _resource_look(tree, species, found.x, found.y, false)
 		remap[tree.id] = [snappedf(found.x, 0.01), snappedf(found.y, 0.01), reason, look[0], look[1]]

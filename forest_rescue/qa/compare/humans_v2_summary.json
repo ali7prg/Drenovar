@@ -22,26 +22,22 @@
    }
   },
   "latest": {
-   "iter": 22,
+   "iter": 23,
    "front": {
     "iou": 0.9178,
-    "colour_error": 0.0442,
-    "colour_error_core": 0.041,
+    "colour_error": 0.0423,
+    "colour_error_core": 0.0389,
     "ref_px": 46985,
     "render_px": 46516
    },
    "back": {
     "iou": 0.9161,
-    "colour_error": 0.039,
-    "colour_error_core": 0.0358,
+    "colour_error": 0.0388,
+    "colour_error_core": 0.0356,
     "ref_px": 45287,
     "render_px": 45417
    },
-   "portrait": {
-    "ssim": 0.3552,
-    "ssim_face": 0.6788,
-    "solve_err_px": 2.37
-   }
+   "portrait": null
   },
   "tris": {
    "LOD0": 11820,
@@ -201,26 +197,22 @@
    }
   },
   "latest": {
-   "iter": 22,
+   "iter": 23,
    "front": {
     "iou": 0.9052,
-    "colour_error": 0.038,
-    "colour_error_core": 0.0351,
+    "colour_error": 0.036,
+    "colour_error_core": 0.0329,
     "ref_px": 46366,
     "render_px": 44216
    },
    "back": {
     "iou": 0.899,
-    "colour_error": 0.0278,
-    "colour_error_core": 0.0252,
+    "colour_error": 0.028,
+    "colour_error_core": 0.0254,
     "ref_px": 43810,
     "render_px": 44175
    },
-   "portrait": {
-    "ssim": 0.2589,
-    "ssim_face": 0.6626,
-    "solve_err_px": 2.47
-   }
+   "portrait": null
   },
   "tris": {
    "LOD0": 11820,
@@ -380,26 +372,22 @@
    }
   },
   "latest": {
-   "iter": 22,
+   "iter": 23,
    "front": {
     "iou": 0.8942,
-    "colour_error": 0.0453,
-    "colour_error_core": 0.0413,
+    "colour_error": 0.0423,
+    "colour_error_core": 0.0381,
     "ref_px": 41919,
     "render_px": 41385
    },
    "back": {
     "iou": 0.902,
-    "colour_error": 0.0362,
-    "colour_error_core": 0.032,
+    "colour_error": 0.0359,
+    "colour_error_core": 0.0318,
     "ref_px": 40557,
     "render_px": 40197
    },
-   "portrait": {
-    "ssim": 0.2684,
-    "ssim_face": 0.601,
-    "solve_err_px": 1.82
-   }
+   "portrait": null
   },
   "tris": {
    "LOD0": 11816,
@@ -559,26 +547,22 @@
    }
   },
   "latest": {
-   "iter": 22,
+   "iter": 23,
    "front": {
     "iou": 0.8868,
-    "colour_error": 0.0404,
-    "colour_error_core": 0.0364,
+    "colour_error": 0.038,
+    "colour_error_core": 0.0338,
     "ref_px": 40111,
     "render_px": 39169
    },
    "back": {
     "iou": 0.8873,
-    "colour_error": 0.0371,
-    "colour_error_core": 0.0326,
+    "colour_error": 0.0363,
+    "colour_error_core": 0.0318,
     "ref_px": 39280,
     "render_px": 38016
    },
-   "portrait": {
-    "ssim": 0.3292,
-    "ssim_face": 0.687,
-    "solve_err_px": 3.48
-   }
+   "portrait": null
   },
   "tris": {
    "LOD0": 11820,
@@ -738,26 +722,22 @@
    }
   },
   "latest": {
-   "iter": 22,
+   "iter": 23,
    "front": {
     "iou": 0.9211,
-    "colour_error": 0.0382,
-    "colour_error_core": 0.0344,
+    "colour_error": 0.0372,
+    "colour_error_core": 0.0334,
     "ref_px": 50400,
     "render_px": 48548
    },
    "back": {
     "iou": 0.9097,
-    "colour_error": 0.0354,
+    "colour_error": 0.0353,
     "colour_error_core": 0.0321,
     "ref_px": 50799,
     "render_px": 48332
    },
-   "portrait": {
-    "ssim": 0.2376,
-    "ssim_face": 0.6058,
-    "solve_err_px": 1.38
-   }
+   "portrait": null
   },
   "tris": {
    "LOD0": 11820,
@@ -917,26 +897,22 @@
    }
   },
   "latest": {
-   "iter": 22,
+   "iter": 23,
    "front": {
     "iou": 0.8951,
-    "colour_error": 0.0375,
-    "colour_error_core": 0.0335,
+    "colour_error": 0.0361,
+    "colour_error_core": 0.0321,
     "ref_px": 48938,
     "render_px": 48758
    },
    "back": {
     "iou": 0.9032,
-    "colour_error": 0.0352,
-    "colour_error_core": 0.031,
+    "colour_error": 0.035,
+    "colour_error_core": 0.0308,
     "ref_px": 46594,
     "render_px": 46064
    },
-   "portrait": {
-    "ssim": 0.3063,
-    "ssim_face": 0.7216,
-    "solve_err_px": 4.34
-   }
+   "portrait": null
   },
   "tris": {
    "LOD0": 11820,
@@ -1096,26 +1072,22 @@
    }
   },
   "latest": {
-   "iter": 22,
+   "iter": 23,
    "front": {
     "iou": 0.8991,
-    "colour_error": 0.0352,
-    "colour_error_core": 0.0332,
+    "colour_error": 0.0326,
+    "colour_error_core": 0.0305,
     "ref_px": 70877,
     "render_px": 69057
    },
    "back": {
     "iou": 0.9051,
-    "colour_error": 0.0301,
-    "colour_error_core": 0.0276,
+    "colour_error": 0.0288,
+    "colour_error_core": 0.0263,
     "ref_px": 69915,
     "render_px": 67891
    },
-   "portrait": {
-    "ssim": 0.3982,
-    "ssim_face": 0.74,
-    "solve_err_px": 5.96
-   }
+   "portrait": null
   },
   "tris": {
    "LOD0": 13718,

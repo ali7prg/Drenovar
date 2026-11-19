@@ -206,15 +206,23 @@ static func make_dome_texture(size: int) -> ImageTexture:
 		for x in size:
 			var c := Color(0, 0, 0, 1)
 			for k in 2:
-				var d := clampf(octaves[k].get_pixel(x, y).r * 1.15, 0.0, 1.0)   # 0 at a dome centre
-				var cap := sqrt(maxf(0.0, 1.0 - d * d))                          # round cap
+				var d := clampf(octaves[k].get_pixel(x, y).r * 1.1, 0.0, 1.0)    # 0 at a dome centre
+				var cap := (1.0 - d * d) * (1.0 - d * d)                         # soft cauliflower bump
 				if k == 0:
 					c.r = cap
 				else:
 					c.g = cap
 			out.set_pixel(x, y, c)
-	out.generate_mipmaps()
-	return ImageTexture.create_from_image(out)
+	# soften (wrap-around box blur) so neighbouring caps merge into billows, no crater rims
+	var soft := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	for y in size:
+		for x in size:
+			var acc := Color(0, 0, 0, 0)
+			for o in [Vector2i(0, 0), Vector2i(3, 0), Vector2i(-3, 0), Vector2i(0, 3), Vector2i(0, -3)]:
+				acc += out.get_pixel(posmod(x + o.x, size), posmod(y + o.y, size))
+			soft.set_pixel(x, y, Color(acc.r / 5.0, acc.g / 5.0, 0.0, 1.0))
+	soft.generate_mipmaps()
+	return ImageTexture.create_from_image(soft)
 
 
 ## Seamless 3D noise (L8, w×h×d) for world-space cloud puffs and wisps (sampled with repeat).

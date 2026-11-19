@@ -122,7 +122,7 @@ float billow(vec2 p, vec2 drift) {
 // World-space 3D puffs (vertically squashed), slowly evolving; 0..1. The 3D texture repeats every
 // 56 m horizontally / 14 m vertically with ~4 features per repeat: puffs ≈ 14 m wide, 7 m tall.
 float puffs(vec3 p, vec2 drift, float time) {
-	vec3 q = vec3((p.x + drift.x * 0.8) / 56.0, p.y / 14.0 + time * 0.004, (p.z + drift.y * 0.8) / 56.0);
+	vec3 q = vec3((p.x + drift.x * 0.8) / 56.0, p.y / 14.0 + time * drift_speed * 0.009, (p.z + drift.y * 0.8) / 56.0);
 	float a = texture(noise3d, q).r;
 	float b = texture(noise3d, q * 2.03 + vec3(0.31, 0.17, 0.59)).r;
 	return a * 0.8 + b * 0.2;
@@ -131,14 +131,14 @@ float puffs(vec3 p, vec2 drift, float time) {
 // Cloud-top relief 0..1: cauliflower domes (two Worley octaves) + low-frequency swell. Shared with
 // forest_fog_receiver.gdshaderinc (fog_domes) — keep both identical.
 float domes(vec2 p, vec2 drift) {
-	float a = texture(dome_tex, (p + drift * 0.5) / dome_tile).r;
-	float b = texture(dome_tex, (p - drift * 0.35) / (dome_tile / 2.3) + vec2(0.31, 0.67)).g;
+	float a = textureLod(dome_tex, (p + drift * 0.5) / dome_tile, 1.5).r;
+	float b = textureLod(dome_tex, (p - drift * 0.35) / (dome_tile / 2.3) + vec2(0.31, 0.67), 1.0).g;
 	float swell = texture(noise_tex, (p + drift * 0.2) / 170.0 + vec2(0.55, 0.15)).r;
-	return clamp(a * 0.62 + b * 0.23 + swell * 0.3 - 0.08, 0.0, 1.0);
+	return clamp(a * 0.55 + b * 0.2 + swell * 0.4 - 0.08, 0.0, 1.0);
 }
 
 float cloud_height(float top, vec2 p, vec2 drift) {
-	return top * (0.8 + 0.4 * domes(p, drift));
+	return top * (0.86 + 0.28 * domes(p, drift));
 }
 
 vec3 painted(vec2 p, float time) {
@@ -150,9 +150,9 @@ vec3 painted(vec2 p, float time) {
 	vec3 m = a * 0.6 + b * 0.4;
 	// restore the contrast lost by averaging two independent layers; slightly desaturate
 	vec3 mean = vec3(0.30, 0.355, 0.40);
-	m = max(mean + (m - mean) * 1.5, vec3(0.0));
+	m = max(mean + (m - mean) * 1.3, vec3(0.0));
 	float lum = dot(m, vec3(0.3, 0.55, 0.15));
-	return mix(vec3(lum), m, 0.8);
+	return mix(vec3(lum), m, 0.72);
 }
 
 float wisp_band(float sdf) {
@@ -204,14 +204,17 @@ void fragment() {
 	float hx = cloud_height(mix(s_x.a, s_x.b, reveal_t) * height_range, entry.xz + vec2(e, 0.0), drift);
 	float hz = cloud_height(mix(s_z.a, s_z.b, reveal_t) * height_range, entry.xz + vec2(0.0, e), drift);
 	vec2 slope = vec2(h0 - hx, h0 - hz) / e;
-	slope *= min(1.0, 0.75 / max(length(slope), 1e-4));        // ≤ ~37° tilt: no hard terminators
+	slope *= min(1.0, 0.45 / max(length(slope), 1e-4));        // ≤ ~24° tilt: no hard terminators
 	vec3 n = normalize(vec3(slope.x, 1.0, slope.y));
 	vec3 l = normalize(light_dir);
 	float half_lambert = dot(n, l) * 0.5 + 0.5;                   // wrap lighting
 	float ndv = abs(dot(n, -view_dir));
 	vec3 albedo = painted(entry.xz, time);
 	// gentle form from the domes: lit dome tops, soft shaded flanks (wrap lighting, never black)
-	vec3 shade = albedo * mix(0.74, 1.14, half_lambert * half_lambert);
+	vec3 shade = albedo * mix(0.82, 1.16, half_lambert * half_lambert);
+	// sunlit dome tops (cumulus highlights)
+	float dome_top = smoothstep(0.55, 0.95, domes(entry.xz, drift));
+	shade = mix(shade, sun_color, dome_top * smoothstep(0.55, 0.95, half_lambert) * 0.45);
 	// silver lining: thin / grazing parts of the billows catch the light
 	float rim = (1.0 - smoothstep(0.35, 0.85, ndv)) * smoothstep(0.45, 0.9, half_lambert);
 	shade = mix(shade, sun_color, rim * 0.35);
@@ -277,7 +280,7 @@ void fragment() {
 	if (band > 0.01) {
 		vec2 wn = normalize(wind);
 		vec2 along = vec2(dot(entry.xz, wn), dot(entry.xz, vec2(-wn.y, wn.x)));
-		vec3 wq = vec3((along.x - time * drift_speed * 1.2) / 120.0, entry.y / 30.0 + time * 0.003, along.y / 36.0);
+		vec3 wq = vec3((along.x - time * drift_speed * 1.2) / 120.0, entry.y / 30.0 + time * drift_speed * 0.007, along.y / 36.0);
 		float w1 = texture(noise3d, wq).r;
 		vec3 pw = painted(vec2(along.x * 0.6, along.y * 1.6), time);
 		float lum = dot(pw, vec3(0.3, 0.55, 0.15));

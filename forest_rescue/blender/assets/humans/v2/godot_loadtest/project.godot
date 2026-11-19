@@ -1,0 +1,17 @@
+; Load test of the v2 human GLBs through the GAME's actor loader (src/forest_rescue/game/actor_rig.gd),
+; run in a private copy so the game's own import cache is never touched.
+config_version=5
+
+[application]
+config/name="FR humans load test"
+run/main_scene="res://loadtest.tscn"
+config/features=PackedStringArray("4.6", "Mobile")
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+textures/vram_compression/import_etc2_astc=true

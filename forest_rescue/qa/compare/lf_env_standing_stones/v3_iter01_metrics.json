@@ -1,0 +1,47 @@
+{
+  "main_view": {
+    "iou": 0.8566,
+    "colour_err": 0.1099,
+    "ssim": 0.5229,
+    "ref_px": 68834,
+    "render_px": 70735,
+    "iou_structure_only": 0.4310211338284633
+  },
+  "camera": {
+    "rms_px": 16.13,
+    "max_px": 28.43,
+    "n_points": 10
+  },
+  "insets": {
+    "row": {
+      "iou": 0.5196,
+      "colour_err": 0.1515,
+      "ssim": 0.3957,
+      "ref_px": 139296,
+      "render_px": 188819
+    }
+  },
+  "texture": {
+    "texels": 3121473,
+    "projected_frac": 0.10463649693590174,
+    "seconds": 13.4
+  },
+  "sheets": "forest_rescue/qa/compare/lf_env_standing_stones/v3_iter01_*",
+  "tris": {
+    "LOD0": {
+      "structure": 1130,
+      "base": 1140,
+      "total": 2270
+    },
+    "LOD1": {
+      "structure": 430,
+      "base": 208,
+      "total": 638
+    },
+    "LOD2": {
+      "structure": 165,
+      "base": 32,
+      "total": 197
+    }
+  }
+}

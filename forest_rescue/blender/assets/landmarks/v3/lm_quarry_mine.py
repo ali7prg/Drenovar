@@ -165,16 +165,16 @@ def outcrop(g, lod, cam, mask):
             prof_z.append(P[2] * 0.96)
         prof_x, prof_z = np.array(prof_x), np.clip(np.array(prof_z), 0.5, 6.0)
     rng = np.random.default_rng(17 + lod)
-    ch = 0.62 if lod == 0 else 1.0
+    ch = 0.62 if lod == 0 else (1.0 if lod == 1 else 1.4)
     x0, x1 = prof_x.min(), prof_x.max()
-    layers = [(0.15, 0.0), (0.95, 0.75), (1.75, 1.6), (2.55, 2.5)] if lod < 2 else [(0.15, 0.0), (1.4, 1.2)]
+    layers = [(0.15, 0.0), (0.95, 0.75), (1.75, 1.6), (2.55, 2.5)] if lod == 0 else ([(0.15, 0.0), (1.4, 1.2)] if lod == 1 else [(0.15, 0.0)])
     for li, (yfront, drop) in enumerate(layers):
         z = 0.0
         ci = 0
         while z < prof_z.max() - drop - 0.1:
             x = x0 + (rng.uniform(0, 0.5) if ci % 2 else 0.0)
             while x < x1 - 0.05:
-                bl = rng.uniform(0.8, 1.3) if lod == 0 else 1.6
+                bl = rng.uniform(0.8, 1.3) if lod == 0 else (1.6 if lod == 1 else 2.4)
                 xa, xb = x, min(x + bl, x1)
                 xm = (xa + xb) / 2
                 top = np.interp(xm, prof_x, prof_z) - drop
@@ -224,10 +224,10 @@ def crane(g, lod, cam):
     back = 1.2
     o = fl
     # base frame (sills) + legs
-    for d in (0.0, back):
+    for d in ((0.0, back) if lod < 2 else (0.0,)):
         g.beam(o + ey * d + np.array([0, 0, 0.45]), o + ex * Lx + ey * d + np.array([0, 0, 0.45]), 0.22, 0.22, mat="wood",
                tag="sill")
-    for t in (0.0, 1.0):
+    for t in ((0.0, 1.0) if lod < 2 else ()):
         g.beam(o + ex * Lx * t + np.array([0, 0, 0.45]), o + ex * Lx * t + ey * back + np.array([0, 0, 0.45]), 0.2, 0.2,
                mat="wood", tag="sill")
         for d in (0.0, back):
@@ -258,6 +258,9 @@ def crane(g, lod, cam):
            mat="wood", tag="beam")
     # winch: two A-frame cheeks, drum with rope, crank
     wc = o + ex * (Lx * 0.72) + ey * 0.6 + np.array([0, 0, 0.45])
+    if lod == 2:
+        g.cyl(wc - ex * 0.46 + np.array([0, 0, 0.6]), wc + ex * 0.46 + np.array([0, 0, 0.6]), 0.36, n=5, mat="rope", tag="drum_rope")
+        return
     for s in (-0.5, 0.5):
         p = wc + ex * s
         g.beam(p - ey * 0.45, p + np.array([0, 0, 0.62]), 0.14, 0.14, mat="wood", tag="cheek")
@@ -302,7 +305,7 @@ def blocks(g, lod, cam):
     if lod == 1:
         spec = spec[:6]
     if lod == 2:
-        spec = spec[:3]
+        spec = spec[:2]
     rng = np.random.default_rng(5)
     for k, (x0, x1, yt, yb) in enumerate(spec):
         if cam is None:

@@ -1,55 +1,73 @@
 {
   "id": "lf_env_camp_props",
+  "generation": "v3 (blueprint + solved art/06 camera + painting projection)",
   "tris": {
-    "LOD0": 2112,
-    "LOD1": 624,
-    "LOD2": 238
+    "LOD0": 2386,
+    "LOD1": 778,
+    "LOD2": 282
+  },
+  "tris_detail": {
+    "LOD0": {
+      "structure": 2386,
+      "base": 756,
+      "total": 3142
+    },
+    "LOD1": {
+      "structure": 778,
+      "base": 150,
+      "total": 928
+    },
+    "LOD2": {
+      "structure": 282,
+      "base": 22,
+      "total": 304
+    }
+  },
+  "budget": {
+    "LOD0": 6000,
+    "LOD1": 1500,
+    "LOD2": 400,
+    "note": "structure meshes; the toggleable ground base is counted separately in tris_detail"
   },
   "bones": 0,
   "materials": [
-    "lm_glow",
-    "lm_misc",
-    "lm_stone",
-    "lm_wood"
+    "lf_env_camp_props_card.001",
+    "lf_env_camp_props_cloth.001",
+    "lf_env_camp_props_glow.001",
+    "lf_env_camp_props_ground.001",
+    "lf_env_camp_props_metal.001",
+    "lf_env_camp_props_rope.001",
+    "lf_env_camp_props_stone.001",
+    "lf_env_camp_props_wood.001"
   ],
   "glb_images": [
-    "lm_stone_n.png",
-    "lm_stone_c.jpg",
-    "lm_stone_r.png",
-    "lm_wood_n.png",
-    "lm_wood_c.jpg",
-    "lm_wood_r.png",
-    "lm_misc_n.png",
-    "lm_misc_c.png",
-    "lm_misc_r.png"
+    "lf_env_camp_props_cards.png",
+    "lf_env_camp_props_n.png",
+    "lf_env_camp_props_c.jpg"
   ],
   "textures": {
-    "lm_stone_c.jpg": 1024,
-    "lm_stone_n.png": 1024,
-    "lm_stone_r.png": 1024,
-    "lm_wood_c.jpg": 1024,
-    "lm_wood_n.png": 1024,
-    "lm_wood_r.png": 1024,
-    "lm_roof_c.jpg": 1024,
-    "lm_roof_n.png": 1024,
-    "lm_roof_r.png": 1024,
-    "lm_misc_c.png": 1024,
-    "lm_misc_n.png": 1024,
-    "lm_misc_r.png": 1024
+    "lf_env_camp_props_c.jpg": 2048,
+    "lf_env_camp_props_n.png": 1024,
+    "lf_env_camp_props_lod1_c.jpg": 1024,
+    "lf_env_camp_props_lod2_c.jpg": 512,
+    "lf_env_camp_props_cards.png": 1024
   },
-  "texture_mode": "external shared lm_* files next to the GLB (relative URIs)",
+  "texture_mode": "external per-asset files next to the GLB (relative URIs); LOD1/LOD2 have their own atlases",
   "nodes": {
     "LOD0": [
       "lf_env_camp_props_LOD0",
-      "lf_env_camp_props_tarp_LOD0"
+      "lf_env_camp_props_cloth_LOD0",
+      "lf_env_camp_props_base"
     ],
     "LOD1": [
       "lf_env_camp_props_LOD1",
-      "lf_env_camp_props_tarp_LOD1"
+      "lf_env_camp_props_cloth_LOD1",
+      "lf_env_camp_props_base_LOD1"
     ],
     "LOD2": [
       "lf_env_camp_props_LOD2",
-      "lf_env_camp_props_tarp_LOD2"
+      "lf_env_camp_props_cloth_LOD2",
+      "lf_env_camp_props_base_LOD2"
     ]
   },
   "lod_files": {
@@ -57,67 +75,31 @@
     "LOD1": "lf_env_camp_props_LOD1.glb",
     "LOD2": "lf_env_camp_props_LOD2.glb"
   },
+  "base_node": {
+    "LOD0": "lf_env_camp_props_base",
+    "LOD1": "lf_env_camp_props_base_LOD1",
+    "LOD2": "lf_env_camp_props_base_LOD2",
+    "note": "painted ground patch (dirt/gravel/grass/stones/water) as a separate node; the world may hide it"
+  },
   "bounds_m_gltf": [
     [
-      -3.407,
-      -0.014,
-      -1.815
+      -3.035,
+      -0.041,
+      -2.251
     ],
     [
-      3.519,
-      3.0,
-      2.61
+      2.755,
+      2.78,
+      3.49
     ]
   ],
   "collision": [
     {
       "type": "cylinder",
       "centre": [
-        -2.2,
-        1.075,
-        1.6
-      ],
-      "size": [
-        0.2,
-        2.15,
-        0.2
-      ],
-      "yaw_deg": 0.0
-    },
-    {
-      "type": "cylinder",
-      "centre": [
-        2.0,
-        1.175,
-        1.8
-      ],
-      "size": [
-        0.2,
-        2.35,
-        0.2
-      ],
-      "yaw_deg": 0.0
-    },
-    {
-      "type": "cylinder",
-      "centre": [
-        2.2,
-        1.375,
-        -1.7
-      ],
-      "size": [
-        0.2,
-        2.75,
-        0.2
-      ],
-      "yaw_deg": 0.0
-    },
-    {
-      "type": "cylinder",
-      "centre": [
-        -2.0,
+        -2.025,
         1.3,
-        -1.6
+        1.225
       ],
       "size": [
         0.2,
@@ -127,82 +109,135 @@
       "yaw_deg": 0.0
     },
     {
-      "type": "box",
+      "type": "cylinder",
       "centre": [
-        -1.4,
-        0.25,
-        1.5
+        2.025,
+        1.01,
+        1.225
       ],
       "size": [
-        1.8,
-        0.5,
-        0.4
-      ],
-      "yaw_deg": 11.5
-    },
-    {
-      "type": "box",
-      "centre": [
-        -0.5,
-        0.25,
-        -1.2
-      ],
-      "size": [
-        1.6,
-        0.5,
-        0.4
-      ],
-      "yaw_deg": -5.7
-    },
-    {
-      "type": "box",
-      "centre": [
-        2.0,
-        0.65,
-        -1.1
-      ],
-      "size": [
-        1.5,
-        1.3,
-        0.9
+        0.2,
+        2.019,
+        0.2
       ],
       "yaw_deg": 0.0
     },
     {
       "type": "cylinder",
       "centre": [
-        3.2,
-        0.45,
-        -1.0
+        2.025,
+        0.979,
+        -1.225
       ],
       "size": [
-        0.64,
-        0.9,
-        0.64
+        0.2,
+        1.958,
+        0.2
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "cylinder",
+      "centre": [
+        -2.025,
+        0.726,
+        -1.225
+      ],
+      "size": [
+        0.2,
+        1.452,
+        0.2
+      ],
+      "yaw_deg": 0.0
+    },
+    {
+      "type": "cylinder",
+      "centre": [
+        -0.501,
+        0.15,
+        1.053
+      ],
+      "size": [
+        1.2,
+        0.3,
+        1.2
       ],
       "yaw_deg": 0.0
     }
   ],
-  "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; 'ramp' = oriented box along the slope; yaw about +Y.",
+  "collision_note": "Godot axes (x, y=up, z), metres, relative to the asset origin; box size = full extents; 'ramp' = oriented box along the slope; 'cylinder' size = (diameter, height, diameter); yaw about +Y.",
   "layout_note": "Main GLB = LOD0 at the asset origin; LOD1/LOD2 in <id>_LOD1.glb / <id>_LOD2.glb (same origin).",
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/build_landmarks.py camp_props",
+  "paintedLightMix": 0.35,
+  "paintedLightNote": "Textures carry the painted light. Shade as albedo * mix(1, lambert, paintedLightMix) (lambert = max(dot(N, L), 0)), as the nature kit (forest_kit.json 'shading').",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py camp_props",
+  "qa": {
+    "main_view": {
+      "iou": 0.8268,
+      "colour_err": 0.1342,
+      "ssim": 0.4033,
+      "ref_px": 81683,
+      "render_px": 83702,
+      "iou_structure_only": 0.5759850547347557
+    },
+    "camera": {
+      "rms_px": 1.57,
+      "max_px": 2.75,
+      "n_points": 8
+    },
+    "insets": {
+      "front": {
+        "iou": 0.2447,
+        "colour_err": 0.1475,
+        "ssim": 0.4889,
+        "ref_px": 58656,
+        "render_px": 50379
+      },
+      "side": {
+        "iou": 0.1795,
+        "colour_err": 0.1622,
+        "ssim": 0.5347,
+        "ref_px": 37408,
+        "render_px": 19350
+      }
+    },
+    "texture": {
+      "texels": 2658458,
+      "projected_frac": 0.03635114792108809,
+      "seconds": 10.3
+    },
+    "sheets": "forest_rescue/qa/compare/lf_env_camp_props/v3_iter05_*"
+  },
   "clips": {
     "lf_banner_wind": {
       "seconds": 4.5,
       "loop": true,
-      "type": "morph-target animation on the tarp"
+      "type": "morph-target animation (shape keys billow/ripple) on the cloth node",
+      "node": "lf_env_camp_props_cloth_LOD0"
     }
   },
   "sockets": {
     "lantern_light": [
-      2.45,
-      1.95,
-      0.2
+      1.675,
+      1.449,
+      1.275
     ],
     "fire_light": [
-      0.0,
+      -0.501,
       0.4,
-      0.6
+      1.053
     ]
-  }
+  },
+  "dimensions": {
+    "pole_rectangle_m": [
+      4.05,
+      2.45
+    ],
+    "pole_heights_m": {
+      "FL": 2.6,
+      "FR": 2.02,
+      "BR": 1.96,
+      "BL": 1.45
+    }
+  },
+  "notes": "origin = centre of the pole rectangle on the ground; pole layout and heights solved jointly with the art/06 camera"
 }

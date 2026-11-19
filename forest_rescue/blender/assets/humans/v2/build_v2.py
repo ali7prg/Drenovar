@@ -298,6 +298,23 @@ def build_objects(R, J):
         ob = HBL.obj_from(f"{AID}_{name}", V, Fc)
         HRG.groups_from_dicts(ob, Wts)
         objs.append((ob, mat, "acc"))
+    # ---- LOD0 triangle budget: thin the garment sheets first (flat cloth keeps its outline), then the body
+    total = sum(core.tri_count(o) for o, _, _ in objs)
+    limit = int(BUDGET[0] * 0.985)
+    if total > limit:
+        gar = [(o, k) for o, _, k in objs if k in ("garment", "acc")]
+        g_tris = sum(core.tri_count(o) for o, _ in gar)
+        excess = total - limit
+        ratio = max(0.35, 1.0 - excess / max(g_tris, 1))
+        for o, k in gar:
+            n = core.tri_count(o)
+            if n > 120:
+                HBL.decimate(o, int(n * ratio), stage=10 ** 9)
+        total = sum(core.tri_count(o) for o, _, _ in objs)
+        if total > limit:
+            n = core.tri_count(body)
+            HBL.decimate(body, n - (total - limit), protect=prot, factor=1.0, stage=10 ** 9)
+        log("budget pass: LOD0 tris", sum(core.tri_count(o) for o, _, _ in objs), "garment ratio", round(ratio, 2))
     ginfo = {}
     for g in C.get("garments", []):
         if g["kind"] == "skirt" and g.get("bones", "skirt") == "skirt":

@@ -49,9 +49,9 @@ uniform vec3 light_dir = vec3(0.45, 0.74, 0.5);
 uniform vec3 view_dir = vec3(-0.5414, -0.5991, -0.5414);   // city camera: normalize(-(75, 83, 75))
 uniform float wisp_height = 13.0;        // wisp sheet over the explored edge band (m)
 uniform float wisp_alpha = 0.34;
-// sRGB inputs (see header): on screen #3f535e / #5f727e / #81939f / #98a5ac.
-uniform vec3 valley_color : source_color = vec3(0.204, 0.259, 0.292);
-uniform vec3 body_color : source_color = vec3(0.293, 0.350, 0.386);
+// sRGB inputs (see header): on screen ≈ #3a4d58 / #5a6d79 / #81939f / #98a5ac.
+uniform vec3 valley_color : source_color = vec3(0.180, 0.231, 0.262);
+uniform vec3 body_color : source_color = vec3(0.268, 0.322, 0.357);
 uniform vec3 lit_color : source_color = vec3(0.395, 0.452, 0.489);
 uniform vec3 sun_color : source_color = vec3(0.485, 0.515, 0.530);
 uniform vec3 haze_color : source_color = vec3(0.370, 0.418, 0.449);
@@ -68,6 +68,36 @@ vec2 state_uv(vec2 p) {
 
 float ground(vec2 p) {
 	return height_lo + texture(height_tex, state_uv(p)).r * height_span;
+}
+
+vec4 cubic_weights(float v) {
+	vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
+	vec4 s = n * n * n;
+	float x = s.x;
+	float y = s.y - 4.0 * s.x;
+	float z = s.z - 4.0 * s.y + 6.0 * s.x;
+	float w = 6.0 - x - y - z;
+	return vec4(x, y, z, w) * (1.0 / 6.0);
+}
+
+// Cubic B-spline filtered state (4 bilinear taps): rounded domes instead of planar facets.
+vec4 state_smooth(vec2 p) {
+	vec2 size = vec2(textureSize(state_tex, 0));
+	vec2 px = state_uv(p) * size - 0.5;
+	vec2 f = fract(px);
+	px -= f;
+	vec4 xc = cubic_weights(f.x);
+	vec4 yc = cubic_weights(f.y);
+	vec4 c = px.xxyy + vec2(-0.5, 1.5).xyxy;
+	vec4 sw = vec4(xc.xz + xc.yw, yc.xz + yc.yw);
+	vec4 offset = (c + vec4(xc.yw, yc.yw) / sw) / size.xxyy;
+	vec4 s0 = texture(state_tex, offset.xz);
+	vec4 s1 = texture(state_tex, offset.yz);
+	vec4 s2 = texture(state_tex, offset.xw);
+	vec4 s3 = texture(state_tex, offset.yw);
+	float sx = sw.x / (sw.x + sw.y);
+	float sy = sw.z / (sw.z + sw.w);
+	return mix(mix(s3, s2, sx), mix(s1, s0, sx), sy);
 }
 
 vec2 drift_of(float time) {
@@ -100,7 +130,8 @@ float wisp_band(float sdf) {
 void vertex() {
 	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec4 s = texture(state_tex, state_uv(world.xz));
-	float top = mix(s.a, s.b, reveal_t) * height_range;
+	vec4 sm = state_smooth(world.xz);
+	float top = mix(sm.a, sm.b, reveal_t) * height_range;
 	float cloud = top * (0.6 + 0.8 * billow(world.xz, drift_of(TIME)));
 	float sdf = (mix(s.g, s.r, reveal_t) - 0.5) * sdf_range;
 	wisp_lift = wisp_band(sdf);
@@ -130,10 +161,11 @@ void fragment() {
 	}
 
 	// ---- cumulus surface shading at the cloud top (entry) --------------------------------
-	float top_e = mix(s_in.a, s_in.b, reveal_t) * height_range;
+	vec4 sm_in = state_smooth(entry.xz);
+	float top_e = mix(sm_in.a, sm_in.b, reveal_t) * height_range;
 	float e = 4.5;
-	vec4 s_x = texture(state_tex, state_uv(entry.xz + vec2(e, 0.0)));
-	vec4 s_z = texture(state_tex, state_uv(entry.xz + vec2(0.0, e)));
+	vec4 s_x = state_smooth(entry.xz + vec2(e, 0.0));
+	vec4 s_z = state_smooth(entry.xz + vec2(0.0, e));
 	float b0 = billow(entry.xz, drift);
 	float pf = puffs(entry, drift, time);
 	float pfx = puffs(entry + vec3(e, 0.0, 0.0), drift, time);
@@ -145,7 +177,7 @@ void fragment() {
 	vec3 n = normalize(vec3((h0 - hx) / e * 1.7, 1.0, (h0 - hz) / e * 1.7));
 	float lambert = clamp(dot(n, normalize(light_dir)), 0.0, 1.0);
 	// 0 = valley between billows .. 1 = domed billow top
-	float cum = smoothstep(0.30, 0.74, b0 * 0.62 + pf * 0.38);
+	float cum = smoothstep(0.28, 0.76, b0 * 0.7 + pf * 0.3);
 	cum = 1.0 - (1.0 - cum) * (1.0 - cum);
 	vec3 shade = mix(valley_color, body_color, smoothstep(0.0, 0.5, cum));
 	shade = mix(shade, lit_color, smoothstep(0.42, 0.95, cum) * (0.4 + 0.6 * lambert));
@@ -175,7 +207,8 @@ void fragment() {
 		if (fogness < 0.004) {
 			continue;
 		}
-		float top = mix(s.a, s.b, local_t) * height_range;
+		vec4 smp = state_smooth(p.xz);
+		float top = mix(smp.a, smp.b, local_t) * height_range;
 		float g = ground(p.xz);
 		// the faceted shell may sit slightly above the analytic cloud top: count the first metres
 		// below the entry as inside the cloud (no facet creases in density/haze)

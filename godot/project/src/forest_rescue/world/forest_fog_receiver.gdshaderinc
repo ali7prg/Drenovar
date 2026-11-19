@@ -24,6 +24,36 @@ vec2 fog_uv(vec2 p) {
 	return (p - fog_domain.xy) / fog_domain.zw;
 }
 
+vec4 fog_cubic_weights(float v) {
+	vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
+	vec4 s = n * n * n;
+	float x = s.x;
+	float y = s.y - 4.0 * s.x;
+	float z = s.z - 4.0 * s.y + 6.0 * s.x;
+	float w = 6.0 - x - y - z;
+	return vec4(x, y, z, w) * (1.0 / 6.0);
+}
+
+// Same B-spline state filter as forest_fog.gdshader (state_smooth).
+vec4 fog_state_smooth(vec2 p) {
+	vec2 size = vec2(textureSize(fog_state_tex, 0));
+	vec2 px = fog_uv(p) * size - 0.5;
+	vec2 f = fract(px);
+	px -= f;
+	vec4 xc = fog_cubic_weights(f.x);
+	vec4 yc = fog_cubic_weights(f.y);
+	vec4 c = px.xxyy + vec2(-0.5, 1.5).xyxy;
+	vec4 sw = vec4(xc.xz + xc.yw, yc.xz + yc.yw);
+	vec4 offset = (c + vec4(xc.yw, yc.yw) / sw) / size.xxyy;
+	vec4 s0 = texture(fog_state_tex, offset.xz);
+	vec4 s1 = texture(fog_state_tex, offset.yz);
+	vec4 s2 = texture(fog_state_tex, offset.xw);
+	vec4 s3 = texture(fog_state_tex, offset.yw);
+	float sx = sw.x / (sw.x + sw.y);
+	float sy = sw.z / (sw.z + sw.w);
+	return mix(mix(s3, s2, sx), mix(s1, s0, sx), sy);
+}
+
 float fog_billow(vec2 p, vec2 drift) {
 	float big = texture(fog_noise_tex, (p + drift) / 92.0).r;
 	float mid = texture(fog_noise_tex, (p - drift * 1.6) / 33.0 + vec2(0.37, 0.11)).g;
@@ -73,7 +103,8 @@ vec3 fog_receive(vec3 p, float time) {
 	vec2 drift = fog_wind * time * fog_drift_speed;
 	float b = fog_billow(p.xz, drift);
 	float fogness = 1.0 - smoothstep(-1.5, 1.5, sdf + fog_edge_offset(p.xz, drift, b));
-	float top = mix(s.a, s.b, local_t) * fog_height_range;
+	vec4 sm = fog_state_smooth(p.xz);
+	float top = mix(sm.a, sm.b, local_t) * fog_height_range;
 	float cloud = top * (0.6 + 0.8 * b);
 	float buried = 1.0 - smoothstep(cloud - 1.5, cloud + 2.5, y);
 	// Deep fog hides whole trees (no tops poking through the cloud sea), e.g. while a reveal runs.

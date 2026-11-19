@@ -38,6 +38,7 @@ PANELS = {
     'partial_overview_z130': (ART01, None, 'art/01 masterplan (fog at the edges)'),
     'full_overview_z120': (ART01, None, 'art/01 masterplan'),
     'full_overview_z140': (ART01, None, 'art/01 masterplan'),
+    'partial_edge_z68_art07p1': ('07_fog_exploration_interface.png', (8, 8, 508, 875), 'art/07 panel 1'),
     'full_arena_z40': ('08_final_boss_arena.png', (0, 0, 1536, 715), 'art/08 arena'),
 }
 

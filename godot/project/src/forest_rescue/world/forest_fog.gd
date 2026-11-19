@@ -61,7 +61,7 @@ func build(height_fn: Callable, light_dir: Vector3) -> void:
 	state_texture = ImageTexture.create_from_image(state_image)
 	if _noise_texture == null:
 		_noise_texture = ImageTexture.create_from_image(make_noise_image(256))
-	var key := "shell_v3"
+	var key := "shell_v4"
 	if _shell_mesh == null or _shell_key != key:
 		_shell_mesh = make_shell_mesh(height_fn)
 		_height_texture = make_height_texture(height_fn)
@@ -111,10 +111,12 @@ func set_receivers(list: Array) -> void:
 	_push_sights_to(receivers, "fog_sights", "fog_sight_count")
 
 
-## Smoothed ground (max of 5 taps, so the volume floor never cuts ridges) on a 2 m grid.
+## Smoothed ground for the fog volume floor: max over a 6 m neighbourhood (13 taps), so the
+## volume never cuts ridges and bridges the narrow river gorge (no steep fog walls there).
 static func smoothed_ground(height_fn: Callable, x: float, z: float) -> float:
 	var h := -1.35
-	for o in [Vector2.ZERO, Vector2(2.5, 0), Vector2(-2.5, 0), Vector2(0, 2.5), Vector2(0, -2.5)]:
+	for o in [Vector2.ZERO, Vector2(3, 0), Vector2(-3, 0), Vector2(0, 3), Vector2(0, -3), Vector2(6, 0), Vector2(-6, 0),
+			Vector2(0, 6), Vector2(0, -6), Vector2(4.2, 4.2), Vector2(-4.2, 4.2), Vector2(4.2, -4.2), Vector2(-4.2, -4.2)]:
 		h = maxf(h, float(height_fn.call(x + o.x, z + o.y)))
 	return h
 

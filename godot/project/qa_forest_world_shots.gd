@@ -16,6 +16,7 @@ var game: Node
 var stage: Node3D
 var world: Node3D
 var report := {}
+var fogcheck := true              # count tree/landmark pixels showing through deep fog
 
 
 func _initialize() -> void:
@@ -104,7 +105,57 @@ func shot(name: String, target: Vector3, zoom: float) -> void:
 	image.save_png(path)
 	var perf := _short_perf()
 	report[name] = {"target": [target.x, target.z], "zoom": zoom, "px_per_m": float(root.size.y) / zoom, "perf": perf}
+	if fogcheck and world.displayed_bits.size() == 392 and ForestFog.count_bits(world.displayed_bits) < 56 * 56:
+		# freeze the fog drift for the A/B capture (otherwise drifting billows count as changes)
+		world.fog.set_reduced_motion(true)
+		await settle(2)
+		var frozen := root.get_texture().get_image()
+		report[name].through_fog = await _through_fog(frozen)
+		perf.through_fog = report[name].through_fog
+		world.fog.set_reduced_motion(false)
 	print("SHOT ", path, " ", JSON.stringify(perf))
+
+
+## Acceptance: pixels whose ground point lies deep in fog (> 26 m from explored ground, beyond any
+## edge tree's crown projection) must not change when trees/landmarks are hidden.
+func _through_fog(with_trees: Image) -> Dictionary:
+	var hidden: Array = []
+	for node in [world.canopy, world.landmarks]:
+		if node != null and node.visible:
+			node.visible = false
+			hidden.append(node)
+	await settle(3)
+	var without := root.get_texture().get_image()
+	for node in hidden:
+		node.visible = true
+	await settle(2)
+	var deep := 0
+	var changed := 0
+	var size := with_trees.get_size()
+	for y in range(0, size.y, 3):
+		for x in range(0, size.x, 3):
+			var ground := _ground_point(Vector2(x, y))
+			if ground == Vector3.INF or world.fog.sdf_at(ground.x, ground.z) > -26.0:
+				continue
+			deep += 1
+			var a := with_trees.get_pixel(x, y)
+			var b := without.get_pixel(x, y)
+			if maxf(absf(a.r - b.r), maxf(absf(a.g - b.g), absf(a.b - b.b))) > 0.05:
+				changed += 1
+	return {"deep_px_sampled": deep, "tree_px_through_deep_fog": changed}
+
+
+func _ground_point(screen: Vector2) -> Vector3:
+	var camera: Camera3D = stage.camera
+	var origin := camera.project_ray_origin(screen)
+	var ray := camera.project_ray_normal(screen)
+	if absf(ray.y) < 0.001:
+		return Vector3.INF
+	var p := origin + ray * ((0.0 - origin.y) / ray.y)
+	for i in 3:
+		var h: float = world.height_at(p.x, p.z)
+		p = origin + ray * ((h - origin.y) / ray.y)
+	return p
 
 
 func _short_perf() -> Dictionary:

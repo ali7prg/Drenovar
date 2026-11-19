@@ -51,9 +51,11 @@ void fragment() {
 	col += vec3(0.10, 0.12, 0.12) * smoothstep(0.74, 0.92, ripple * 0.6 + streak * 0.4) * depth;
 	// foam where the water meets the bank / bank rocks, broken and drifting
 	float foam_n = texture(noise_tex, vec2(q.x / 2.2, (q.y - t * 0.6) / 4.0)).b;
-	float foam = smoothstep(0.80, 0.98, u) * smoothstep(0.35, 0.75, foam_n);
-	foam = max(foam, smoothstep(0.88, 1.0, u) * 0.6);
-	col = mix(col, foam_color, clamp(foam, 0.0, 0.85));
+	float foam_patch = texture(noise_tex, vec2(p.x / 19.0, p.y / 23.0)).r;   // rocky stretches
+	float foam = smoothstep(0.82, 0.97, u) * smoothstep(0.55, 0.85, foam_n) * smoothstep(0.42, 0.62, foam_patch);
+	col = mix(col, foam_color, clamp(foam, 0.0, 0.7));
+	// wet dark rim where the water laps the bank
+	col *= 1.0 - 0.18 * smoothstep(0.9, 1.0, u);
 	// shade under the bridge deck (soft)
 	vec2 b0 = bridge_rect.xy;
 	vec2 b1 = bridge_rect.xy + bridge_rect.zw;

@@ -127,7 +127,9 @@ void fragment() {
 	for (int i = 0; i < steps; i++) {
 		vec3 p = entry + view_dir * (t_hit * (float(i) + 0.5) / float(STEPS));
 		vec4 s = texture(state_tex, state_uv(p.xz));
-		vec4 w = texture(noise_tex, (p.xz - drift * 2.3) / 15.0 + vec2(0.71, 0.29));
+		// height-sheared wisp noise: steep cloud faces get texture instead of vertical streaks
+		vec2 sheared = p.xz + vec2(0.9, -0.6) * p.y;
+		vec4 w = texture(noise_tex, (sheared - drift * 2.3) / 15.0 + vec2(0.71, 0.29));
 		float delay = texture(noise_tex, p.xz / 41.0).a;
 		float local_t = smoothstep(delay * 0.5, delay * 0.5 + 0.5, reveal_t);
 		float sdf = (mix(s.g, s.r, local_t) - 0.5) * sdf_range;
@@ -148,9 +150,10 @@ void fragment() {
 		}
 		float a = 1.0 - exp(-d * step_len);
 		// Colour by absolute height: valleys between banks darker, billow tops lit by the sun.
-		float hy = clamp(y / fog_top_abs, 0.0, 1.4);
+		float hy = clamp(y / fog_top_abs + (w.r - 0.5) * 0.25, 0.0, 1.4);
 		vec3 col = mix(deep_color, body_color, smoothstep(0.0, 0.6, hy));
-		float facing = clamp(0.5 + (b - billow(p.xz + normalize(light_dir.xz) * 6.0, drift)) * 6.0, 0.0, 1.0);
+		float bs = billow(sheared * 0.35 + p.xz * 0.65, drift);
+		float facing = clamp(0.5 + (bs - billow(sheared * 0.35 + p.xz * 0.65 + normalize(light_dir.xz) * 6.0, drift)) * 6.0, 0.0, 1.0);
 		col = mix(col, lit_color, smoothstep(0.5, 1.2, hy) * (0.3 + 0.7 * facing));
 		// Thin fog (edges, wisps) reads as light haze, not as a dark film.
 		col = mix(col, haze_color, (1.0 - smoothstep(0.1, 0.65, fogness * body)) * 0.85);

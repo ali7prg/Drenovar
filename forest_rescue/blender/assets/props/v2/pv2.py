@@ -278,11 +278,16 @@ def camera_overlay(v, P3named, out_png, geo_tris=None):
     if geo_tris is not None:
         V, T = geo_tris
         u, vv, z = v.cam.project(V)
-        for t in T[:: max(1, len(T) // 9000)]:
+        U = np.stack([u[T], vv[T]], 2)
+        area = 0.5 * np.abs((U[:, 1, 0] - U[:, 0, 0]) * (U[:, 2, 1] - U[:, 0, 1]) - (U[:, 2, 0] - U[:, 0, 0]) * (U[:, 1, 1] - U[:, 0, 1]))
+        sel = np.argsort(-area)[:2500]
+        ov = big.copy()
+        for t in T[sel]:
             if (z[t] <= 0).any():
                 continue
             pts = (np.stack([u[t], vv[t]], 1) * S).astype(np.int32)
-            cv2.polylines(big, [pts], True, (90, 200, 255), 1, cv2.LINE_AA)
+            cv2.polylines(ov, [pts], True, (90, 200, 255), 1, cv2.LINE_AA)
+        big = cv2.addWeighted(big, 0.45, ov, 0.55, 0)
     keys = [k for k in v.points if k in P3named]
     u, vv, _ = v.cam.project(np.array([P3named[k] for k in keys]))
     q = v.p2(keys)

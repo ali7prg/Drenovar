@@ -1,62 +1,104 @@
 {
   "id": "lf_cage_wood",
+  "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 5567,
-    "LOD1": 3814,
-    "LOD2": 2534
+    "LOD0": 7296,
+    "LOD1": 2948,
+    "LOD2": 1732
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 4143,
-      "door": 700,
-      "latch": 52,
-      "socket": 416,
-      "socket_core": 108,
-      "keyhole": 108,
-      "keyhole_core": 40
+      "root": 6236,
+      "door_pivot": 600,
+      "socket_stone_rune": 248,
+      "socket_bronze_seal": 68,
+      "socket_amber_crystal": 44,
+      "socket_bone_key": 76,
+      "latch_pivot": 24
     },
     "LOD1": {
-      "root": 2624,
-      "door": 600,
-      "latch": 46,
-      "socket": 320,
-      "socket_core": 76,
-      "keyhole": 108,
-      "keyhole_core": 40
+      "root": 2348,
+      "door_pivot": 248,
+      "socket_stone_rune": 140,
+      "socket_bronze_seal": 68,
+      "socket_amber_crystal": 44,
+      "socket_bone_key": 76,
+      "latch_pivot": 24
     },
     "LOD2": {
-      "root": 1722,
-      "door": 372,
-      "latch": 24,
-      "socket": 224,
-      "socket_core": 44,
-      "keyhole": 108,
-      "keyhole_core": 40
+      "root": 1220,
+      "door_pivot": 208,
+      "socket_stone_rune": 92,
+      "socket_bronze_seal": 68,
+      "socket_amber_crystal": 44,
+      "socket_bone_key": 76,
+      "latch_pivot": 24
     }
   },
-  "budget": "cage LOD0 <= 6000 tris (all nodes incl. door, latch and both socket variants)",
+  "budget": {},
   "bones": 0,
   "materials": [
+    "lf_cage_wood_lod1_mat",
+    "lf_cage_wood_lod2_mat",
     "lf_cage_wood_mat"
   ],
   "textures": {
-    "baseColor": "2048 JPEG",
-    "metallicRoughness": "1024 JPEG (G rough, B metal)",
-    "normal": "2048 PNG"
+    "lf_cage_wood_c.jpg": 2048,
+    "lf_cage_wood_n.png": 1024,
+    "lf_cage_wood_lod1_c.jpg": 1024,
+    "lf_cage_wood_lod2_c.jpg": 512
   },
-  "coordinate_space": "glTF (Y up, metres) relative to the GLB root; door side faces +Z (atlas escapeApproachOffset)",
+  "texture_mode": "external JPEG/PNG next to the GLB (relative URIs); LOD1/LOD2 have their own atlases",
+  "paintedLightMix": 0.38,
+  "paintedLightNote": "albedo carries the painted light: shade = albedo * mix(1, lambert, paintedLightMix) (actor_rig.apply_look -> ForestKit.painted_material)",
+  "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -1.75,
+      -1.659,
       0.0,
-      3.2161
+      -1.659
     ],
     "max": [
-      1.75,
-      4.32,
-      -1.75
+      1.659,
+      3.667,
+      2.986
     ]
   },
+  "lod_nodes": {
+    "LOD0": [
+      "lf_cage_wood_LOD0",
+      "lf_cage_wood_door_pivot_LOD0",
+      "lf_cage_wood_latch_pivot_LOD0",
+      "lf_cage_wood_socket_amber_crystal_LOD0",
+      "lf_cage_wood_socket_bone_key_LOD0",
+      "lf_cage_wood_socket_bronze_seal_LOD0",
+      "lf_cage_wood_socket_stone_rune_LOD0"
+    ],
+    "LOD1": [
+      "lf_cage_wood_LOD1",
+      "lf_cage_wood_door_pivot_LOD1",
+      "lf_cage_wood_latch_pivot_LOD1",
+      "lf_cage_wood_socket_amber_crystal_LOD1",
+      "lf_cage_wood_socket_bone_key_LOD1",
+      "lf_cage_wood_socket_bronze_seal_LOD1",
+      "lf_cage_wood_socket_stone_rune_LOD1"
+    ],
+    "LOD2": [
+      "lf_cage_wood_LOD2",
+      "lf_cage_wood_door_pivot_LOD2",
+      "lf_cage_wood_latch_pivot_LOD2",
+      "lf_cage_wood_socket_amber_crystal_LOD2",
+      "lf_cage_wood_socket_bone_key_LOD2",
+      "lf_cage_wood_socket_bronze_seal_LOD2",
+      "lf_cage_wood_socket_stone_rune_LOD2"
+    ]
+  },
+  "lod_note": "LOD meshes are siblings named *_LOD0/1/2 (actor_rig.set_lod); LOD1/LOD2 are hidden by default (KHR_node_visibility) so a plain instance shows LOD0 only.",
+  "hidden_by_default": [
+    "socket_amber_crystal",
+    "socket_bone_key",
+    "socket_bronze_seal"
+  ],
   "clips": {
     "lf_cage_unlock": {
       "seconds": 1.0,
@@ -65,7 +107,14 @@
       "markers": {
         "latch_clear": 0.7
       },
-      "glb_seconds": 1.0
+      "note": "socket plate settles (artifact pressed home), latch bolt slides 0.12 m toward the hinge",
+      "nodes": [
+        "latch_pivot",
+        "socket_amber_crystal",
+        "socket_bone_key",
+        "socket_bronze_seal",
+        "socket_stone_rune"
+      ]
     },
     "lf_cage_gate_open": {
       "seconds": 1.6,
@@ -74,109 +123,267 @@
       "markers": {
         "passage_clear": 1.2
       },
-      "glb_seconds": 1.6
+      "note": "door swings OUTWARD 95 deg about the left-jamb hinge axis",
+      "nodes": [
+        "door_pivot",
+        "latch_pivot"
+      ]
     },
     "lf_cage_gate_settle": {
       "seconds": 0.4,
       "loop": false,
       "frames": 12,
       "markers": {},
-      "glb_seconds": 0.4
+      "note": "small damped settle at the open stop (95 deg)",
+      "nodes": [
+        "door_pivot",
+        "latch_pivot"
+      ]
+    },
+    "lf_cage_gate_close": {
+      "seconds": 1.2,
+      "loop": false,
+      "frames": 36,
+      "markers": {},
+      "note": "door returns to the frame, latch re-engages at the end",
+      "nodes": [
+        "door_pivot",
+        "latch_pivot"
+      ]
     }
   },
-  "sockets": {
-    "hinge_axis": {
-      "node": "door_pivot",
-      "point": [
-        -0.214,
-        0.0,
-        1.64
-      ],
-      "direction": [
-        0.0,
-        1.0,
-        0.0
-      ],
-      "side": "left jamb seen from outside (glTF -X side of the opening)"
+  "glb_nodes": [
+    "captive_slot_0",
+    "captive_slot_1",
+    "captive_slot_2",
+    "key_slot",
+    "lf_cage_wood_latch_pivot_LOD0",
+    "lf_cage_wood_latch_pivot_LOD1",
+    "lf_cage_wood_latch_pivot_LOD2",
+    "latch_pivot",
+    "lf_cage_wood_door_pivot_LOD0",
+    "lf_cage_wood_door_pivot_LOD1",
+    "lf_cage_wood_door_pivot_LOD2",
+    "lf_cage_wood_socket_amber_crystal_LOD0",
+    "lf_cage_wood_socket_amber_crystal_LOD1",
+    "lf_cage_wood_socket_amber_crystal_LOD2",
+    "socket_amber_crystal",
+    "lf_cage_wood_socket_bone_key_LOD0",
+    "lf_cage_wood_socket_bone_key_LOD1",
+    "lf_cage_wood_socket_bone_key_LOD2",
+    "socket_bone_key",
+    "lf_cage_wood_socket_bronze_seal_LOD0",
+    "lf_cage_wood_socket_bronze_seal_LOD1",
+    "lf_cage_wood_socket_bronze_seal_LOD2",
+    "socket_bronze_seal",
+    "lf_cage_wood_socket_stone_rune_LOD0",
+    "lf_cage_wood_socket_stone_rune_LOD1",
+    "lf_cage_wood_socket_stone_rune_LOD2",
+    "socket_stone_rune",
+    "door_pivot",
+    "exit_corridor_0",
+    "exit_corridor_1",
+    "exit_corridor_2",
+    "exit_corridor_3",
+    "floor",
+    "hinge_axis_bottom",
+    "hinge_axis_top",
+    "lf_cage_wood_LOD0",
+    "lf_cage_wood_LOD1",
+    "lf_cage_wood_LOD2"
+  ],
+  "glb_animations": [
+    "lf_cage_gate_open",
+    "lf_cage_gate_settle",
+    "lf_cage_gate_close",
+    "lf_cage_unlock"
+  ],
+  "blueprint": {
+    "c": 1.45,
+    "s": 0.27,
+    "e": 0.0364,
+    "hb": 0.5931,
+    "zf": 3.2968,
+    "zr": 3.6671,
+    "bt": 2.9505,
+    "bh": 0.2727,
+    "ov": 0.0138,
+    "hx": -0.3789,
+    "dx1": 1.1385,
+    "dz0": 0.123,
+    "sz": 1.1647,
+    "sx": 0.839,
+    "zda": 2.272
+  },
+  "qa": {
+    "views": {
+      "closed34": {
+        "iou_raw": 0.7903,
+        "iou_filled": 0.9134,
+        "colour_err": 0.0866,
+        "colour_err_core": 0.0754,
+        "ref_px": 89290,
+        "render_px": 82328,
+        "ignored_px": 0,
+        "camera_rms_px": 5.81,
+        "camera_max_px": 20.15,
+        "camera_points": 16
+      }
     },
-    "door_open_deg": 95.0,
-    "door_rotation": "door_pivot rotates about its local +Y (glTF up) axis, which passes exactly through the hinge pins; closed = 0 deg, open = -95 deg (outward, free edge swings toward +Z)",
+    "cameras": {
+      "closed34": {
+        "rms_px": 5.81,
+        "max_px": 20.15,
+        "n": 16,
+        "fov_deg": 16.94,
+        "per_point_px": {
+          "fin_n": 2.06,
+          "fin_l": 1.51,
+          "fin_r": 2.03,
+          "apex": 20.15,
+          "base_n0": 3.7,
+          "base_n1": 0.62,
+          "base_l0": 0.73,
+          "base_r0": 3.42,
+          "door_bl": 3.71,
+          "door_br": 2.07,
+          "door_ap": 3.81,
+          "sock": 0.02,
+          "beam_r_t": 3.11,
+          "beam_r_b": 2.3,
+          "beam_l_t": 5.33,
+          "beam_l_b": 4.62
+        }
+      }
+    },
+    "texture": {
+      "texels": 2288881,
+      "projected_frac": 0.1467,
+      "per_view_frac": {
+        "closed34": 0.1505
+      },
+      "seconds": 10.0
+    },
+    "sheets": "forest_rescue/qa/compare/lf_cage_wood/v2_iter01_*",
+    "godot_import": {
+      "errors_warnings": 0,
+      "lines": []
+    }
+  },
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_oak --iter 1",
+  "door_open_deg": -95.0,
+  "door_open_deg_note": "signed Godot rotation.y of door_pivot for the open pose (actor_director.swing_door fallback adds door_open_deg * amount: negative = outward)",
+  "sockets": {
+    "floor": [
+      0.0,
+      0.12,
+      -0.0
+    ],
+    "hinge": [
+      -0.2689,
+      0.123,
+      1.545
+    ],
+    "captive_slot_0": [
+      -0.72,
+      0.12,
+      0.1
+    ],
+    "captive_slot_1": [
+      0.05,
+      0.12,
+      -0.45
+    ],
+    "captive_slot_2": [
+      0.74,
+      0.12,
+      0.18
+    ]
+  },
+  "socketInfo": {
+    "floor": {
+      "node": "floor",
+      "height_m": 0.12,
+      "note": "top of the cage floor (glTF y). Seat captives at cage.global_transform * sockets.floor (or add sockets.floor[1] to their ground height); captive_slot_0..2 are seat spots on the floor that match actor_director CAGE_SLOTS."
+    },
     "key_slot": {
       "node": "key_slot",
-      "parent": "socket_core",
+      "parent": "door_pivot",
       "position_closed": [
-        1.157,
-        1.25,
-        1.622
+        0.839,
+        1.1647,
+        1.56
       ],
       "normal": [
-        0.0,
-        0.0,
-        1.0
+        0,
+        0,
+        1
       ],
-      "height_above_ground_m": 1.25,
-      "shape": "circle",
-      "fits_family": "stone_rune",
-      "insert": "parent the artifact variant node to key_slot with identity transform"
+      "note": "live node on the door (moves with it). Use find_part('key_slot').global_transform; parent the artifact there with identity transform. Not listed in 'sockets' on purpose (a static array would leave the artifact floating when the door is open)."
     },
-    "key_slot_keyhole": {
-      "node": "key_slot_keyhole",
-      "parent": "keyhole_core",
-      "position_closed": [
-        1.157,
-        1.25,
-        1.622
+    "socket_plates": {
+      "stone_rune": "socket_stone_rune",
+      "bronze_seal": "socket_bronze_seal",
+      "amber_crystal": "socket_amber_crystal",
+      "bone_key": "socket_bone_key"
+    },
+    "socket_native": "socket_stone_rune",
+    "socket_switch": "all four plates are children of door_pivot at the same spot; only the native one is visible by default (KHR_node_visibility). For a site whose artifact family differs, set socket_<family>.visible = true and socket_<native>.visible = false.",
+    "hinge_axis": {
+      "nodes": [
+        "hinge_axis_bottom",
+        "hinge_axis_top"
       ],
-      "normal": [
+      "point": [
+        -0.2689,
         0.0,
-        0.0,
-        1.0
+        1.545
       ],
-      "shape": "keyhole",
-      "fits_family": "bone_key",
-      "activate": "set socket_keyhole_pivot.scale=1 and socket_pivot.scale=0 (default is native)"
+      "direction": [
+        0,
+        1,
+        0
+      ],
+      "side": "LEFT jamb seen from outside (glTF -X side of the opening)"
+    },
+    "door": {
+      "node": "door_pivot",
+      "open_rotation_y_deg": -95.0,
+      "rule": "door_pivot rotates about its local +Y (through the hinge pins); closed 0, open -95 deg (outward: the free edge moves toward +Z)",
+      "clear_width_m": 1.387,
+      "clear_height_m": 1.909
     },
     "latch": {
       "node": "latch_pivot",
       "travel_m": 0.12,
-      "axis": [
-        -1.0,
-        0.0,
-        0.0
+      "axis_gltf": [
+        -1,
+        0,
+        0
       ]
-    },
-    "door": {
-      "node": "door_pivot",
-      "width_m": 1.559,
-      "clear_height_m": 2.44
     },
     "exit_corridor": [
       [
-        0.5775,
-        0.1,
-        0.5
+        0.2211,
+        0.12,
+        0.95
       ],
       [
-        0.5775,
-        0.1,
-        1.5
+        0.2211,
+        0.12,
+        1.75
       ],
       [
-        0.5775,
+        0.2211,
         0.0,
-        2.8
+        2.85
       ],
       [
-        0.5775,
+        0.2211,
         0.0,
-        4.0
+        4.05
       ]
-    ],
-    "interior_footprint_m": [
-      2.7,
-      2.7
-    ],
-    "interior_clear_height_m": 2.56
+    ]
   },
   "poses": {
     "closed": {
@@ -193,8 +400,7 @@
     },
     "open": {
       "door_pivot": {
-        "rotation_y_deg": -95.0,
-        "note": "glTF rotation about +Y by -95 deg (Blender -95 deg about +Z)"
+        "rotation_y_deg": -95.0
       },
       "latch_pivot": {
         "translation_offset": [
@@ -205,142 +411,6 @@
       }
     }
   },
-  "glb_nodes": [
-    "lf_cage_wood_latch_pivot_LOD0",
-    "lf_cage_wood_latch_pivot_LOD1",
-    "lf_cage_wood_latch_pivot_LOD2",
-    "latch_pivot",
-    "lf_cage_wood_door_pivot_LOD0",
-    "lf_cage_wood_door_pivot_LOD1",
-    "lf_cage_wood_door_pivot_LOD2",
-    "key_slot_keyhole",
-    "lf_cage_wood_keyhole_core_LOD0",
-    "lf_cage_wood_keyhole_core_LOD1",
-    "lf_cage_wood_keyhole_core_LOD2",
-    "keyhole_core",
-    "lf_cage_wood_socket_keyhole_pivot_LOD0",
-    "lf_cage_wood_socket_keyhole_pivot_LOD1",
-    "lf_cage_wood_socket_keyhole_pivot_LOD2",
-    "socket_keyhole_pivot",
-    "lf_cage_wood_socket_pivot_LOD0",
-    "lf_cage_wood_socket_pivot_LOD1",
-    "lf_cage_wood_socket_pivot_LOD2",
-    "key_slot",
-    "lf_cage_wood_socket_core_LOD0",
-    "lf_cage_wood_socket_core_LOD1",
-    "lf_cage_wood_socket_core_LOD2",
-    "socket_core",
-    "socket_pivot",
-    "door_pivot",
-    "exit_corridor_0",
-    "exit_corridor_1",
-    "exit_corridor_2",
-    "exit_corridor_3",
-    "hinge_axis_bottom",
-    "hinge_axis_top",
-    "lf_cage_wood_LOD0",
-    "lf_cage_wood_LOD1",
-    "lf_cage_wood_LOD2"
-  ],
-  "glb_animations": {
-    "lf_cage_gate_open": [
-      [
-        "door_pivot",
-        "translation"
-      ],
-      [
-        "door_pivot",
-        "rotation"
-      ],
-      [
-        "door_pivot",
-        "scale"
-      ],
-      [
-        "latch_pivot",
-        "translation"
-      ],
-      [
-        "latch_pivot",
-        "rotation"
-      ],
-      [
-        "latch_pivot",
-        "scale"
-      ]
-    ],
-    "lf_cage_gate_settle": [
-      [
-        "door_pivot",
-        "translation"
-      ],
-      [
-        "door_pivot",
-        "rotation"
-      ],
-      [
-        "door_pivot",
-        "scale"
-      ],
-      [
-        "latch_pivot",
-        "translation"
-      ],
-      [
-        "latch_pivot",
-        "rotation"
-      ],
-      [
-        "latch_pivot",
-        "scale"
-      ]
-    ],
-    "lf_cage_unlock": [
-      [
-        "latch_pivot",
-        "translation"
-      ],
-      [
-        "latch_pivot",
-        "rotation"
-      ],
-      [
-        "latch_pivot",
-        "scale"
-      ],
-      [
-        "keyhole_core",
-        "translation"
-      ],
-      [
-        "keyhole_core",
-        "rotation"
-      ],
-      [
-        "keyhole_core",
-        "scale"
-      ],
-      [
-        "socket_core",
-        "translation"
-      ],
-      [
-        "socket_core",
-        "rotation"
-      ],
-      [
-        "socket_core",
-        "scale"
-      ]
-    ]
-  },
-  "notes": "Production rule: hinge on the LEFT jamb seen from outside (drawing's open view shows it on the right - not followed), single door pivot, outward opening 95 deg. socket_keyhole_pivot is scale 0 by default; for bone-key sites show it and hide socket_pivot.",
-  "projection": {
-    "painted_fraction": 0.1,
-    "texel_mm": 6.791
-  },
-  "camera_fit_iou": {
-    "closed": 0.9413,
-    "open": 0.8794
-  }
+  "cage_type": "oak",
+  "native_family": "stone_rune"
 }

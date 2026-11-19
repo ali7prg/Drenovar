@@ -223,11 +223,11 @@ func run() -> void:
 		await fresh("completed")
 		var Rig = load("res://src/forest_rescue/game/actor_rig.gd")
 		var cases := [["lf_site_12", "root"], ["lf_site_08", "iron"], ["lf_site_07", "oak"]]
-		var base := Vector3(68.6, 0, -72.0)
+		var base := Vector3(64.0, 0, -76.0)
 		var built: Array = []
 		for i in cases.size():
 			var site_id: String = cases[i][0]
-			var spot: Vector3 = forest.ground(base.x + 6.4 * i, base.z + 0.0)
+			var spot: Vector3 = forest.ground(base.x + 6.0 * i, base.z + 0.0)
 			var cage = Rig.new()
 			cage.setup("variety_cage_%d" % i, forest.actors.cage_file(cases[i][1]))
 			forest.actors.props_parent.add_child(cage)
@@ -264,7 +264,7 @@ func run() -> void:
 				person.global_position = slot.global_position if slot != null else cage.global_position
 				person.rotation.y = cage.rotation.y + 0.35 * (k - 1)
 				person.play(["lf_civilian_cage_sit"] if k == 0 else (["lf_civilian_cage_stand"] if k == 1 else ["lf_civilian_cage_wait"]), 0.0)
-		var center: Vector3 = forest.ground(base.x + 6.4, base.z) + Vector3(0, 0.8, 0.8)
+		var center: Vector3 = forest.ground(base.x + 6.0, base.z) + Vector3(0, 0.8, 1.6)
 		look(center, 11.0)
 		await frames(40)
 		await shoot("variety_seated_z11")

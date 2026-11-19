@@ -60,9 +60,10 @@ def bone_specs(J, hand_bones, T, garment_info):
     """List of dicts {name, head, tail, parent, roll_z (desired local Z axis), deform}."""
     B = []
 
-    def add(name, head, tail, zref, deform=True, parent=None):
+    def add(name, head, tail, zref, deform=True, parent="auto"):
         B.append(dict(name=name, head=np.asarray(head, float), tail=np.asarray(tail, float),
-                      parent=parent or parent_of(name), zref=np.asarray(zref, float), deform=deform))
+                      parent=parent_of(name) if parent == "auto" else parent, zref=np.asarray(zref, float),
+                      deform=deform))
     fwd = np.array([0, -1.0, 0])
     add("Root", (0, 0, 0), (0, 0.25, 0), (0, 0, 1.0), deform=False, parent=None)
     add("Hips", J["Hips"], J["Spine"], fwd)

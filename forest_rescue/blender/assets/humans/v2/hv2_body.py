@@ -77,7 +77,7 @@ def torso_part(R, C, J):
     shz = 0.5 * (L["shoulder_l"][1] + L["shoulder_r"][1])
     xsh = 0.5 * (L["shoulder_l"][0] - L["shoulder_r"][0])
     z_bot = hz - 0.115
-    z_top = nz + 0.032
+    z_top = nz + 0.015
     zs = np.arange(z_bot, z_top + 1e-6, 0.005)
     # template half-widths (fractions of the shoulder-joint half span) by height
     stocky = B.get("stocky", 0.0)

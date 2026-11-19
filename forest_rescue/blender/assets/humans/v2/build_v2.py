@@ -28,6 +28,7 @@ import hv2_hand as HH  # noqa: E402
 import hv2_drape as HD  # noqa: E402
 import hv2_tex as HT  # noqa: E402
 import hv2_blender as HBL  # noqa: E402
+import hv2_rig as HRG  # noqa: E402
 from hv2_chars import CHARS  # noqa: E402
 
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
@@ -261,12 +262,22 @@ def build_objects(R, J):
     HBL.decimate(body, t_body, protect=prot, factor=1.0)
     HBL.smooth_shade(body)
     log("body tris", core.tri_count(body))
+    bvv, btri, _, _ = core.mesh_arrays(body, evaluated=False)
+    Wd = HRG.body_weights(bvv, parts, J)
+    names, M = HRG.normalize_top4(Wd, len(bvv))
+    M = HRG.smooth_weights(names, M, btri, iters=2, factor=0.5)
+    names, M = HRG.normalize_top4({n: M[:, j] for j, n in enumerate(names)}, len(bvv))
+    HRG.assign_groups(body, names, M)
     objs = [(body, "body", "body")]
     hv, hf = hair_geometry(R, J, fld)
     if hv is not None and len(hf):
         hair = HBL.obj_from(f"{AID}_hairHQ", hv, hf)
         HBL.decimate(hair, 1100, stage=20000)
         HBL.smooth_shade(hair)
+        hvv = np.array([v.co[:] for v in hair.data.vertices])
+        hzj = J["Head"][2]
+        wn = np.clip((hzj - hvv[:, 2]) / 0.08, 0, 0.6)
+        HRG.groups_from_dicts(hair, [{"Head": 1 - w, "Neck": w} if w > 0.01 else {"Head": 1.0} for w in wn])
         objs.append((hair, "hair", "hair"))
         log("hair tris", core.tri_count(hair))
     hands = hands_geometry(J)
@@ -274,27 +285,42 @@ def build_objects(R, J):
     for S_, (acc, bones) in hands.items():
         V, Fc, Wts = acc.arrays()
         ob = HBL.obj_from(f"{AID}_hand_{S_}", V, Fc)
-        ob["weights"] = json.dumps(Wts)
+        HRG.groups_from_dicts(ob, Wts)
         objs.append((ob, "body", "hand"))
         hand_bones[S_] = bones
     sheets, meshes, T = garments(R, J, fld, prof, sup)
     for sh in sheets:
         ob = HBL.obj_from(f"{AID}_{sh.name}", sh.V, sh.faces())
-        ob["weights"] = json.dumps(sh.weights)
+        HRG.groups_from_dicts(ob, sh.weights)
         HBL.solidify(ob, sh.thickness, offset=-1.0 if not sh.closed_u else 1.0)
         objs.append((ob, sh.material, "garment"))
     for name, V, Fc, Wts, mat in meshes:
         ob = HBL.obj_from(f"{AID}_{name}", V, Fc)
-        ob["weights"] = json.dumps(Wts)
+        HRG.groups_from_dicts(ob, Wts)
         objs.append((ob, mat, "acc"))
-    return dict(field=fld, parts=parts, wparts=wparts, prof=prof, objs=objs, hand_bones=hand_bones, T=T)
+    ginfo = {}
+    for g in C.get("garments", []):
+        if g["kind"] == "skirt" and g.get("bones", "skirt") == "skirt":
+            ginfo.setdefault("skirt_top", g["z_top"])
+            hem = g.get("hem") or (g.get("hem_z", 0.4),) * 3
+            ginfo.setdefault("skirt_hem", float(min(hem)))
+        if g["kind"] == "cloak":
+            ginfo["cloak_hem"] = g.get("hem_back", 0.9)
+    for a in C.get("acc", []):
+        if a["kind"] in ("pouch", "satchel"):
+            ginfo["bag"] = a["at"]
+    return dict(field=fld, parts=parts, wparts=wparts, prof=prof, objs=objs, hand_bones=hand_bones, T=T, ginfo=ginfo)
 
 
 def join_lod0(objs):
     """Join into one mesh with material index per part; face attribute 'region' for UV boost."""
+    slots = [bpy.data.materials.get(f"_slot_{k}") or bpy.data.materials.new(f"_slot_{k}") for k in MAT_IDS]
     for ob, mat, kind in objs:
         mid = MAT_IDS[mat]
         me = ob.data
+        me.materials.clear()
+        for m in slots:
+            me.materials.append(m)
         me.polygons.foreach_set("material_index", np.full(len(me.polygons), mid, np.int32))
         reg = np.zeros(len(me.polygons), np.int32)
         if kind in ("body", "hair"):
@@ -373,6 +399,9 @@ def texture(lo0, R, J):
     img = HT.to_image(T, data, col)
     p_png = paths.texture_master(GROUP, f"{AID}_color_master.png")
     core.save_rgba(p_png, img)
+    from PIL import Image
+    Image.fromarray((np.clip(img, 0, 1) * 255 + 0.5).astype(np.uint8)).save(p_png.replace("_color_master.png", "_color.jpg"),
+                                                                           quality=90)
     return p_png, pinfo
 
 

@@ -113,6 +113,18 @@ def region_uv(body, margin=0.0025):
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.uv.unwrap(method="CONFORMAL", margin=margin, correct_aspect=True)
+    # mouth interior and the jaws (folded C-shaped regions) are re-projected with smart UV: a conformal
+    # unwrap of those can fold over itself, which put mouth-flesh texels on the outer right lower jaw
+    bpy.ops.object.mode_set(mode="OBJECT")
+    import math as _m
+    head_faces = np.isin(lab // 100, [4]) | ((lab >= 100) & (lab < 200) & (lab % 10 >= 5)) | \
+        ((lab >= 100) & (lab < 200) & (lab % 10 == 0))
+    for i, poly in enumerate(me.polygons):
+        poly.select = bool(head_faces[i])
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.uv.smart_project(angle_limit=_m.radians(60.0), island_margin=margin, area_weight=0.0,
+                             correct_aspect=True, scale_to_bounds=False)
+    bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.uv.select_all(action="SELECT")
     bpy.ops.uv.average_islands_scale()
     bpy.ops.uv.pack_islands(rotate=True, scale=True, margin=margin, shape_method="CONCAVE", margin_method="SCALED")

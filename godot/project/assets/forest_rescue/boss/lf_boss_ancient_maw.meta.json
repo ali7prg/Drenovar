@@ -371,21 +371,21 @@
       "ikOverreach_m": 0.0
     }
   },
-  "glbBytes": 13757828,
+  "glbBytes": 13411632,
   "textureProjection": {
     "coverageByView": {
-      "left": 0.2675437405947449,
-      "right_mirror": 0.2660928167370128,
-      "front": 0.08473886159368851,
-      "rear34": 0.16030849422586593,
-      "rear34_mirror": 0.15970090591640046,
-      "head_closeup": 0.02311959040962384,
-      "head_mirror": 0.024525149656734916
+      "left": 0.2688481399056916,
+      "right_mirror": 0.2652563236327278,
+      "front": 0.08506575376152317,
+      "rear34": 0.15991193032548537,
+      "rear34_mirror": 0.1588586998850698,
+      "head_closeup": 0.023718243461490866,
+      "head_mirror": 0.023028741251248833
     },
     "rearCamera": {
       "pnp_rms_px": 17.167159496448484,
-      "refined_iou": 0.8369809777050522,
-      "refined_rms_px": 19.327121168781638
+      "refined_iou": 0.8371816422975673,
+      "refined_rms_px": 19.377726474190897
     },
     "headCamera": {
       "pnp_rms_px": 25.994086201901542,

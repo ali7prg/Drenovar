@@ -219,27 +219,26 @@ func run() -> void:
 	# (captive_variants.json + variant masks), seated, then leaving through the door. Rigs are
 	# built with the game's own Rig/look code on open town ground (presentation check only).
 	if wanted("variety"):
-		# Open, revealed ground: site 1's glade and the trail home (the layer's own rigs hidden and
-		# frozen for this presentation check).
-		await fresh("site01_discovered")
+		# Each test cage stands in its own site's glade (all revealed in the completed state, the
+		# real cage there is open and empty), 3 m towards the approach.
+		await fresh("completed")
 		await preload_actors()
-		forest.set_process(false)
-		for id in forest.actors.rigs:
-			if is_instance_valid(forest.actors.rigs[id]):
-				forest.actors.rigs[id].visible = false
 		var Rig = load("res://src/forest_rescue/game/actor_rig.gd")
 		var cases := [["lf_site_12", "root"], ["lf_site_08", "iron"], ["lf_site_07", "oak"]]
-		var base := Vector3(64.0, 0, -76.0)
 		var built: Array = []
 		for i in cases.size():
 			var site_id: String = cases[i][0]
-			var spots := [Vector2(-21.0, -66.5), Vector2(-16.0, -61.0), Vector2(-11.5, -55.5)]
-			var spot: Vector3 = forest.ground(spots[i].x, spots[i].y)
+			var a: Dictionary = forest.site_anchor(site_id)
+			var center: Vector3 = a.get("center", Vector3.ZERO)
+			var approach: Vector3 = a.get("approach", center + Vector3(0, 0, 7))
+			var out_dir := Vector3(approach.x - center.x, 0, approach.z - center.z).normalized()
+			var p3: Vector3 = center + out_dir * 3.2
+			var spot: Vector3 = forest.ground(p3.x, p3.z)
 			var cage = Rig.new()
 			cage.setup("variety_cage_%d" % i, forest.actors.cage_file(cases[i][1]))
 			forest.actors.props_parent.add_child(cage)
 			cage.position = spot
-			cage.rotation.y = deg_to_rad(20.0)
+			cage.rotation.y = atan2(out_dir.x, out_dir.z) + deg_to_rad(25.0)
 			var people: Array = []
 			var letters := ["a", "b", "c"]
 			for k in 3:
@@ -276,8 +275,7 @@ func run() -> void:
 			look(built[i][0].global_position + Vector3(0, 1.0, 0.6), 7.0)
 			await frames(3)
 			await shoot("variety_seated_%s" % built[i][2])
-		var center: Vector3 = forest.ground(-16.0, -61.0)
-		look(center, 30.0)
+		look(built[0][0].global_position, 30.0)
 		await frames(4)
 		await shoot("variety_seated_z30")
 		# Gates open, the three leave through the door one after another (exit clip on the path).
@@ -312,7 +310,7 @@ func run() -> void:
 			entry[0].queue_free()
 			for person in entry[1]:
 				person.queue_free()
-		forest.set_process(true)
+
 
 	# -------------------------------------------------- artifact seated in the door socket (glow)
 	if wanted("socket"):

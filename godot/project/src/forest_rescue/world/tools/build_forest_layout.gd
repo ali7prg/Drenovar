@@ -162,7 +162,21 @@ func _sector_weight(phi: float, a: float, b: float, blend: float) -> float:
 	return best
 
 
+var _zone_cache := {}
+var _open_cache := {}
+
+
+## Memoised on a 1 m lattice (the builder queries these hundreds of thousands of times).
 func zone_weights(x: float, z: float) -> PackedFloat32Array:
+	var key := Vector2i(floori(x), floori(z))
+	if _zone_cache.has(key):
+		return _zone_cache[key]
+	var w := _zone_weights_raw(floori(x) + 0.5, floori(z) + 0.5)
+	_zone_cache[key] = w
+	return w
+
+
+func _zone_weights_raw(x: float, z: float) -> PackedFloat32Array:
 	var w := PackedFloat32Array()
 	w.resize(8)
 	var phi := screen_angle(x, z) + warp.get_noise_2d(x, z) * 16.0
@@ -658,6 +672,15 @@ func _resource_crown(tree: Dictionary, species: int, x: float, z: float) -> floa
 ## Openness 0..1 from art/01: 1 inside/at the edge of clearings, site camps, trails, art glades
 ## and landmark spots (young trees, saplings), 0 in forest cores (full-size trees).
 func openness(x: float, z: float) -> float:
+	var key := Vector2i(floori(x), floori(z))
+	if _open_cache.has(key):
+		return _open_cache[key]
+	var value := _openness_raw(floori(x) + 0.5, floori(z) + 0.5)
+	_open_cache[key] = value
+	return value
+
+
+func _openness_raw(x: float, z: float) -> float:
 	var d := 99.0
 	var hit: Dictionary = atlas.nearest_route(x, z)
 	if not hit.is_empty():

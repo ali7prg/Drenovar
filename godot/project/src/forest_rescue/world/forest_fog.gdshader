@@ -82,12 +82,13 @@ float billow(vec2 p, vec2 drift) {
 	return big * 0.66 + mid * 0.34;
 }
 
-// World-space 3D puffs (vertically squashed), slowly evolving; 0..1.
+// World-space 3D puffs (vertically squashed), slowly evolving; 0..1. The 3D texture repeats every
+// 56 m horizontally / 14 m vertically with ~4 features per repeat: puffs ≈ 14 m wide, 7 m tall.
 float puffs(vec3 p, vec2 drift, float time) {
-	vec3 q = vec3((p.x + drift.x * 0.8) / 11.0, p.y / 5.5 + time * 0.012, (p.z + drift.y * 0.8) / 11.0);
+	vec3 q = vec3((p.x + drift.x * 0.8) / 56.0, p.y / 14.0 + time * 0.004, (p.z + drift.y * 0.8) / 56.0);
 	float a = texture(noise3d, q).r;
 	float b = texture(noise3d, q * 2.03 + vec3(0.31, 0.17, 0.59)).r;
-	return a * 0.82 + b * 0.18;
+	return a * 0.8 + b * 0.2;
 }
 
 float wisp_band(float sdf) {
@@ -130,7 +131,7 @@ void fragment() {
 
 	// ---- cumulus surface shading at the cloud top (entry) --------------------------------
 	float top_e = mix(s_in.a, s_in.b, reveal_t) * height_range;
-	float e = 3.0;
+	float e = 4.5;
 	vec4 s_x = texture(state_tex, state_uv(entry.xz + vec2(e, 0.0)));
 	vec4 s_z = texture(state_tex, state_uv(entry.xz + vec2(0.0, e)));
 	float b0 = billow(entry.xz, drift);
@@ -138,13 +139,13 @@ void fragment() {
 	float pfx = puffs(entry + vec3(e, 0.0, 0.0), drift, time);
 	float pfz = puffs(entry + vec3(0.0, 0.0, e), drift, time);
 	// combined cloud-top height field: banks (state top × billow) + world-space puffs
-	float h0 = top_e * (0.6 + 0.8 * b0) + 4.0 * pf;
-	float hx = mix(s_x.a, s_x.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(e, 0.0), drift)) + 4.0 * pfx;
-	float hz = mix(s_z.a, s_z.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(0.0, e), drift)) + 4.0 * pfz;
-	vec3 n = normalize(vec3((h0 - hx) / e * 2.2, 1.0, (h0 - hz) / e * 2.2));
+	float h0 = top_e * (0.6 + 0.8 * b0) + 6.0 * pf;
+	float hx = mix(s_x.a, s_x.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(e, 0.0), drift)) + 6.0 * pfx;
+	float hz = mix(s_z.a, s_z.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(0.0, e), drift)) + 6.0 * pfz;
+	vec3 n = normalize(vec3((h0 - hx) / e * 1.7, 1.0, (h0 - hz) / e * 1.7));
 	float lambert = clamp(dot(n, normalize(light_dir)), 0.0, 1.0);
 	// 0 = valley between billows .. 1 = domed billow top
-	float cum = smoothstep(0.37, 0.69, b0 * 0.55 + pf * 0.45);
+	float cum = smoothstep(0.30, 0.74, b0 * 0.62 + pf * 0.38);
 	cum = 1.0 - (1.0 - cum) * (1.0 - cum);
 	vec3 shade = mix(valley_color, body_color, smoothstep(0.0, 0.5, cum));
 	shade = mix(shade, lit_color, smoothstep(0.42, 0.95, cum) * (0.4 + 0.6 * lambert));
@@ -175,8 +176,11 @@ void fragment() {
 			continue;
 		}
 		float top = mix(s.a, s.b, local_t) * height_range;
-		float cloud_top = top * (0.6 + 0.8 * b);
-		float y = max(0.0, p.y - ground(p.xz));
+		float g = ground(p.xz);
+		// the faceted shell may sit slightly above the analytic cloud top: count the first metres
+		// below the entry as inside the cloud (no facet creases in density/haze)
+		float cloud_top = max(top * (0.6 + 0.8 * b), (entry.y - g) * step(0.5, top) - 0.4);
+		float y = max(0.0, p.y - g);
 		float body = 1.0 - smoothstep(cloud_top - 3.0, cloud_top + 0.6, y);
 		float detail = 0.55 + 0.45 * smoothstep(0.25, 0.75, puffs(p, drift, time));
 		// revealing fog thins out and brightens (luminous dissolve)
@@ -188,7 +192,7 @@ void fragment() {
 		float a = 1.0 - exp(-d * step_len);
 		// the visible colour is the cumulus surface shade, a touch darker deeper inside
 		float near_top = smoothstep(cloud_top - 7.0, cloud_top - 0.5, y);
-		vec3 col = shade * mix(0.86, 1.0, near_top);
+		vec3 col = shade * mix(0.93, 1.0, near_top);
 		float thin = 1.0 - smoothstep(0.15, 0.7, fogness * body);
 		col = mix(col, haze_color, thin * 0.8);
 		col = mix(col, sun_color, revealing * 0.55);
@@ -205,7 +209,7 @@ void fragment() {
 	if (band > 0.01) {
 		vec2 wn = normalize(wind);
 		vec2 along = vec2(dot(entry.xz, wn), dot(entry.xz, vec2(-wn.y, wn.x)));
-		vec3 wq = vec3(along.x / 26.0 - time * drift_speed * 0.045, entry.y / 9.0 + time * 0.01, along.y / 8.0);
+		vec3 wq = vec3((along.x - time * drift_speed * 1.2) / 120.0, entry.y / 30.0 + time * 0.003, along.y / 36.0);
 		float w1 = texture(noise3d, wq).r;
 		float w2 = texture(noise3d, wq * 2.1 + vec3(0.43, 0.11, 0.27)).r;
 		float wisp = smoothstep(0.50, 0.78, w1 * 0.7 + w2 * 0.3) * smoothstep(0.6, 1.0, band);

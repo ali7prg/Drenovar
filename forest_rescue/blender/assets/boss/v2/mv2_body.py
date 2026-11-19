@@ -51,10 +51,10 @@ J = {
     "jaw_end": V(0, -4.48, 2.70),
     "eye_L": V(0.385, -3.63, 3.285),
     # left leg (near leg in the side view)
-    "hip_L": V(0.56, -0.20, 2.42),
-    "knee_L": V(0.70, -0.80, 1.66),
-    "ankle_L": V(0.68, 0.14, 0.80),
-    "ball_L": V(0.68, -0.18, 0.17),
+    "hip_L": V(0.58, -0.22, 2.42),
+    "knee_L": V(0.73, -0.70, 1.55),
+    "ankle_L": V(0.68, 0.10, 0.74),
+    "ball_L": V(0.68, -0.15, 0.17),
     # left arm
     "shoulder_L": V(0.56, -1.86, 2.18),
     "elbow_L": V(0.66, -1.70, 1.84),
@@ -63,11 +63,11 @@ J = {
 }
 # toe chains (left): [knuckle0 (MTP), knuckle1, claw base], claw direction
 TOES_L = {
-    "toe2": [V(0.58, -0.22, 0.15), V(0.44, -0.47, 0.11), V(0.36, -0.66, 0.085)],
-    "toe3": [V(0.69, -0.24, 0.16), V(0.71, -0.52, 0.12), V(0.72, -0.76, 0.09)],
-    "toe4": [V(0.80, -0.20, 0.15), V(0.94, -0.42, 0.11), V(1.04, -0.58, 0.085)],
+    "toe2": [V(0.57, -0.20, 0.15), V(0.43, -0.45, 0.11), V(0.33, -0.63, 0.085)],
+    "toe3": [V(0.69, -0.22, 0.16), V(0.71, -0.48, 0.12), V(0.72, -0.71, 0.09)],
+    "toe4": [V(0.81, -0.18, 0.15), V(0.98, -0.39, 0.11), V(1.10, -0.54, 0.085)],
 }
-HALLUX_L = [V(0.55, 0.06, 0.40), V(0.53, 0.12, 0.27)]
+HALLUX_L = [V(0.55, 0.12, 0.42), V(0.52, 0.17, 0.28)]
 FINGERS_L = {   # [base (knuckle), mid, claw base]
     "finger1": [V(0.40, -1.98, 1.40), V(0.385, -2.03, 1.32), V(0.38, -2.05, 1.25)],
     "finger2": [V(0.47, -2.00, 1.39), V(0.475, -2.05, 1.31), V(0.48, -2.07, 1.24)],
@@ -136,9 +136,9 @@ def first_run_bottom(u0, u1):
 
 
 # belly/throat line (full-image side coords): measured where visible, interpolated behind limbs
-BELLY_CTRL = [(150, 239.0), (172, 240.0), (195, 245.0), (215, 255.0), (232, 275.0), (250, 300.0),
-              (275, 320.0), (300, 328.0), (330, 333.0), (360, 335.0), (390, 334.0), (420, 330.0),
-              (450, 322.0), (480, 312.0), (505, 300.0), (525, 290.0), (545, 284.0)]
+BELLY_CTRL = [(150, 262.0), (176, 264.0), (200, 272.0), (218, 280.0), (232, 296.0), (250, 316.0),
+              (275, 323.0), (300, 325.0), (330, 329.0), (360, 331.0), (390, 332.0), (420, 330.0),
+              (450, 325.0), (480, 314.0), (505, 302.0), (525, 292.0), (545, 285.0)]
 TRUNK_U0, TRUNK_U1 = 150, 914
 
 
@@ -157,33 +157,35 @@ def trunk_profile():
     Y = SY(us)
     ztop, zbot = SZ(skin), SZ(bottom)
     # inside the head the loft is only the neck core: pull the top down under the skull
-    pull = np.clip((205 - us) / 55.0, 0, 1)
+    pull = np.clip((200 - us) / 45.0, 0, 1)
     ztop = ztop - pull * 0.30
     # lateral half widths (anatomical profile, fitted against the front + rear views)
     cy = [-3.30, -3.00, -2.70, -2.40, -2.10, -1.80, -1.50, -1.15, -0.80, -0.45, -0.10, 0.30, 0.70, 1.10,
           1.60, 2.20, 2.90, 3.60, 4.30, 4.90, 5.30]
-    cw = [0.42, 0.47, 0.52, 0.60, 0.70, 0.78, 0.83, 0.86, 0.86, 0.82, 0.74, 0.64, 0.55, 0.48,
+    cw = [0.40, 0.42, 0.45, 0.52, 0.60, 0.67, 0.72, 0.76, 0.78, 0.76, 0.70, 0.62, 0.55, 0.48,
           0.41, 0.34, 0.27, 0.20, 0.135, 0.075, 0.03]
     hx = PchipInterpolator(cy, cw)(np.clip(Y, cy[0], cy[-1]))
     # egg: >0 widest low (belly/ribcage), <0 widest high (neck top / tail base muscles)
-    egg = np.interp(Y, [-3.3, -2.6, -2.0, -1.4, -0.8, -0.2, 0.4, 1.2, 2.5, 5.3],
-                    [-0.05, 0.05, 0.18, 0.25, 0.25, 0.15, 0.0, -0.08, -0.05, 0.0])
-    pexp = np.interp(Y, [-3.3, -2.0, -0.5, 1.0, 3.0, 5.3], [2.2, 2.25, 2.35, 2.3, 2.2, 2.1])
+    egg = np.interp(Y, [-3.3, -2.9, -2.6, -2.0, -1.4, -0.8, -0.2, 0.4, 1.2, 2.5, 5.3],
+                    [0.05, 0.12, 0.18, 0.28, 0.36, 0.36, 0.26, 0.08, -0.08, -0.05, 0.0])
+    pexp = np.interp(Y, [-3.3, -2.0, -0.5, 1.0, 3.0, 5.3], [2.2, 2.35, 2.45, 2.35, 2.2, 2.1])
+    pup = np.interp(Y, [-3.3, -2.7, -2.2, -1.2, 0.0, 0.8, 2.0, 5.3], [2.0, 1.85, 1.65, 1.6, 1.7, 1.9, 2.0, 2.0])
     zc = 0.5 * (ztop + zbot)
     hz = 0.5 * (ztop - zbot)
     _CACHE["trunk"] = {"us": us, "Y": Y, "ztop": ztop, "zbot": zbot, "zc": zc, "hz": hz, "hx": hx,
-                       "egg": egg, "p": pexp, "top_raw": SZ(top_raw), "top_open": SZ(top_open)}
+                       "egg": egg, "p": pexp, "pup": pup, "top_raw": SZ(top_raw), "top_open": SZ(top_open)}
     return _CACHE["trunk"]
 
 
-def loft(Y, zc, hz, hx, egg, pexp, name="loft", bone=None, cap_front=0.10, cap_back=0.06, k=0.0):
+def loft(Y, zc, hz, hx, egg, pexp, name="loft", bone=None, cap_front=0.10, cap_back=0.06, k=0.0, pup=None):
     """Generalised cylinder along Y with super-elliptic slices (|x/w|^p + |t|^p = 1)."""
     Y = np.asarray(Y, float)
     n = len(Y)
     y0, y1 = Y[0], Y[-1]
     Yu = np.linspace(y0, y1, n)
     dy = (y1 - y0) / (n - 1)
-    zc, hz, hx, egg, pexp = [np.interp(Yu, Y, np.asarray(a, float)) for a in (zc, hz, hx, egg, pexp)]
+    pup = pexp if pup is None else pup
+    zc, hz, hx, egg, pexp, pup = [np.interp(Yu, Y, np.asarray(a, float)) for a in (zc, hz, hx, egg, pexp, pup)]
     hz, hx = hz.copy(), hx.copy()
     if cap_front > 0:
         t = np.clip((y0 + cap_front - Yu) / cap_front, 0, 1)
@@ -195,16 +197,17 @@ def loft(Y, zc, hz, hx, egg, pexp, name="loft", bone=None, cap_front=0.10, cap_b
         f = np.sqrt(np.clip(1 - t * t, 0.0, 1.0))
         hz *= np.maximum(f, 0.03)
         hx *= np.maximum(f, 0.03)
-    T = [zc, hz, hx, egg, pexp]
+    T = [zc, hz, hx, egg, pexp, pup]
 
     def fn(P):
         x, y, z = P[..., 0], P[..., 1], P[..., 2]
         fi = np.clip((y - y0) / dy, 0, n - 1.0001)
         i = np.floor(fi).astype(np.int64)
         f = fi - i
-        c, h, w, e, pp = [a[i] * (1 - f) + a[i + 1] * f for a in T]
+        c, h, w, e, pl, pu = [a[i] * (1 - f) + a[i + 1] * f for a in T]
         h = np.maximum(h, 1e-3)
         t = (z - c) / h
+        pp = np.where(t > 0, pu, pl)
         wt = np.maximum(w * (1.0 - e * np.clip(t, -1, 1)), 1e-3)
         s = np.abs(x) / wt
         r = (s ** pp + np.abs(t) ** pp) ** (1.0 / pp)
@@ -231,7 +234,7 @@ def oell(c, axis, ra, rs, ru, up=(0, 0, 1), **kw):
 
 
 # ------------------------------------------------------------------------------------ head
-HEAD_U0, HEAD_U1 = 44, 182
+HEAD_U0, HEAD_U1 = 44, 196
 
 
 def head_profile():
@@ -309,7 +312,7 @@ def head_detail_parts():
     add, sub = [], []
     for sx in (1, -1):
         # jaw adductor / cheek mass behind the eye, above the mouth corner
-        add.append(oell([sx * 0.33, -3.33, 3.14], [0, -1, 0.1], 0.30, 0.16, 0.24, k=0.10, name="cheek",
+        add.append(oell([sx * 0.31, -3.33, 3.14], [0, -1, 0.1], 0.30, 0.15, 0.24, k=0.10, name="cheek",
                         bone="head"))
         # mandible angle (lower jaw rear, under the corner)
         add.append(oell([sx * 0.32, -3.40, 2.70], [0, -1, 0.2], 0.30, 0.15, 0.18, k=0.08, name="jaw_angle",
@@ -333,8 +336,8 @@ def head_detail_parts():
 def brow_knobs():
     """Modest jagged keratin knobs along each brow ridge (front view: tips at x=+-0.37, z=3.51)."""
     parts = []
-    pts = [(-3.82, 3.43, 0.034), (-3.72, 3.47, 0.042), (-3.62, 3.51, 0.05), (-3.52, 3.54, 0.044),
-           (-3.42, 3.55, 0.036)]
+    pts = [(-3.82, 3.39, 0.032), (-3.72, 3.43, 0.040), (-3.62, 3.465, 0.046), (-3.52, 3.49, 0.042),
+           (-3.42, 3.50, 0.034)]
     for sx in (1, -1):
         for i, (y, z, r) in enumerate(pts):
             x = sx * (0.31 + 0.02 * i)
@@ -355,7 +358,7 @@ def mouth_cut():
         zlip = np.interp(yy, Ys, zl)
         w = np.interp(yy, Ys, wu)
         # slit: |z - zlip| < 0.012, inside the lips (|x| < w + margin), from the snout to the corner
-        d_slit = np.maximum(np.abs(z - zlip) - 0.013, np.maximum(np.abs(x) - (w + 0.08), np.maximum(
+        d_slit = np.maximum(np.abs(z - zlip) - 0.009, np.maximum(np.abs(x) - (w + 0.08), np.maximum(
             Ys[0] - 0.08 - y, y - Ys[-1])))
         # cavity: ellipsoid-ish volume inside, 0.09 m above and 0.14 m below the lip line, inset 0.07 m
         wi = np.maximum(w - 0.075, 0.03)
@@ -390,20 +393,23 @@ def leg_parts(side):
     sh = f"shin_{side}"
     ft = f"foot_{side}"
     # thigh: big muscular mass (side: Y -1.0..+0.45, Z 1.2..2.9; front: outer surface x=1.04)
-    P.append(oell(m([0.66, -0.30, 2.05]), knee - hip, 0.80, 0.38, 0.62, k=0.16, name="thigh", bone=th))
-    P.append(oell(m([0.62, -0.62, 1.85]), [0, -0.6, -1.0], 0.48, 0.33, 0.36, k=0.14, name="quad", bone=th))
-    P.append(oell(m([0.58, 0.18, 2.10]), [0, 1.0, -0.35], 0.50, 0.30, 0.42, k=0.16, name="caudofem", bone=th))
-    # knee
-    P.append(sdf.sphere(knee + m([0.0, -0.02, 0.0]), 0.23, k=0.10, name="knee", bone=sh))
-    # shin + calf (gastrocnemius at the back of the upper shin)
-    P.append(sdf.round_cone(knee, ankle, 0.22, 0.135, k=0.10, name="shin", bone=sh))
-    P.append(oell(knee + (ankle - knee) * 0.35 + m([0.0, 0.10, 0.02]), ankle - knee, 0.42, 0.17, 0.20, k=0.10,
+    # thigh: widest LOW (front view: x 1.02-1.05 at z 1.45-1.8, only 0.76 at z 2.5); side: Y -1.0..+0.45
+    P.append(oell(m([0.66, -0.42, 1.80]), knee - hip, 0.82, 0.36, 0.60, k=0.16, name="thigh", bone=th))
+    P.append(oell(m([0.55, -0.18, 2.32]), [0, -0.3, -1.0], 0.40, 0.22, 0.45, k=0.16, name="thigh_top", bone=th))
+    P.append(oell(m([0.70, -0.72, 1.72]), [0, -0.6, -1.0], 0.42, 0.30, 0.34, k=0.14, name="quad", bone=th))
+    P.append(oell(m([0.56, 0.18, 2.05]), [0, 1.0, -0.35], 0.50, 0.31, 0.40, k=0.16, name="caudofem", bone=th))
+    # knee (broad in the front view: outer edge x = 1.04 at z 1.3-1.5)
+    P.append(oell(knee + m([0.02, -0.02, 0.0]), [1, 0, 0], 0.30, 0.25, 0.24, k=0.10, name="knee", bone=sh))
+    # shin + calf (gastrocnemius at the back of the upper shin); side width 0.57 m at z = 1.05
+    P.append(sdf.round_cone(knee, ankle, 0.24, 0.17, k=0.10, name="shin", bone=sh))
+    P.append(oell(knee + (ankle - knee) * 0.40 + m([0.0, 0.12, 0.04]), ankle - knee, 0.48, 0.19, 0.20, k=0.10,
                   name="calf", bone=sh))
-    # ankle + metatarsus (broad: three metatarsals side by side)
-    P.append(sdf.sphere(ankle, 0.15, k=0.06, name="ankle", bone=ft))
-    P.append(oell((ankle + ball) * 0.5, ball - ankle, 0.40, 0.19, 0.14, up=(0, 1, 0), k=0.07, name="metatarsus",
+    P.append(oell(knee + (ankle - knee) * 0.5, [1, 0, 0], 0.21, 0.20, 0.30, k=0.08, name="shin_w", bone=sh))
+    # ankle + metatarsus (broad: three metatarsals side by side; front half-width 0.23)
+    P.append(oell(ankle + m([0, 0.05, 0]), [1, 0, 0], 0.22, 0.20, 0.17, k=0.06, name="ankle", bone=ft))
+    P.append(oell((ankle + ball) * 0.5, ball - ankle, 0.40, 0.23, 0.16, up=(0, 1, 0), k=0.07, name="metatarsus",
                   bone=ft))
-    P.append(sdf.round_cone(ankle, ball, 0.14, 0.13, k=0.06, name="metatarsus_core", bone=ft))
+    P.append(sdf.round_cone(ankle, ball, 0.17, 0.14, k=0.06, name="metatarsus_core", bone=ft))
     # toes (II, III, IV): two phalanx segments + pads, claws are separate meshes
     for toe, chain in TOES_L.items():
         pts = [m(p) for p in chain]
@@ -467,38 +473,57 @@ def dorsal_knobs():
                           bone=None))
     # paired lateral rows (smaller), following the loft surface at angle phi from the top
     rng = np.random.default_rng(7)
-    for row, (phi, ys, step, size) in enumerate([(0.42, (-2.9, 1.6), 0.20, 0.050), (0.80, (-2.6, 0.9), 0.24, 0.042),
+    for row, (phi, ys, step, size) in enumerate([(0.30, (-2.6, 1.6), 0.20, 0.048), (0.60, (-1.9, 0.9), 0.24, 0.040),
                                                  (0.38, (1.6, 4.6), 0.21, 0.040)]):
         y = ys[0] + rng.uniform(0, step)
         while y < ys[1]:
-            zc = float(np.interp(y, Yp, prof["zc"]))
-            hz = float(np.interp(y, Yp, prof["hz"]))
-            hx = float(np.interp(y, Yp, prof["hx"]))
             for sx in (1, -1):
                 ang = phi + rng.uniform(-0.05, 0.05)
-                x = sx * hx * math.sin(ang) * 0.98
-                z = zc + hz * math.cos(ang) * 0.98
-                s = size * rng.uniform(0.8, 1.15)
-                nrm = np.array([sx * math.sin(ang) / hx, 0, math.cos(ang) / hz])
-                nrm /= np.linalg.norm(nrm)
-                c = np.array([x, y, z]) + nrm * s * 0.25
-                parts.append(oell(c, [0, 1, 0], s * 1.3, s * 1.0, s * 0.75, up=nrm, k=0.025, name="osteoderm_lat",
+                p, nrm = trunk_surface(y, ang)
+                p[0] *= sx
+                nrm[0] *= sx
+                s_ = size * rng.uniform(0.8, 1.15)
+                c = p + nrm * s_ * 0.15
+                parts.append(oell(c, [0, 1, 0], s_ * 1.3, s_ * 1.0, s_ * 0.75, up=nrm, k=0.025, name="osteoderm_lat",
                                   bone=None))
             y += step * rng.uniform(0.85, 1.15)
     return parts
 
 
+def trunk_part():
+    if "trunk_prim" not in _CACHE:
+        prof = trunk_profile()
+        _CACHE["trunk_prim"] = loft(prof["Y"], prof["zc"], prof["hz"], prof["hx"], prof["egg"], prof["p"],
+                                    name="trunk", bone="spine_02", pup=prof["pup"])
+    return _CACHE["trunk_prim"]
+
+
+def trunk_surface(y, phi):
+    """Point + outward normal on the trunk loft surface at station y, angle phi from the top (+x side)."""
+    prof = trunk_profile()
+    tr = trunk_part()
+    zc = float(np.interp(y, prof["Y"], prof["zc"]))
+    dirv = np.array([math.sin(phi), 0.0, math.cos(phi)])
+    ts = np.linspace(0.0, 1.6, 321)
+    P = np.array([0.0, y, zc])[None, :] + ts[:, None] * dirv[None, :]
+    d = tr.fn(P)
+    k = int(np.argmax(d > 0)) if np.any(d > 0) else len(ts) - 1
+    p = P[max(k, 1)]
+    e = 0.004
+    g = np.array([(tr.fn((p + dv)[None])[0] - tr.fn((p - dv)[None])[0]) / (2 * e)
+                  for dv in (np.array([e, 0, 0]), np.array([0, e, 0]), np.array([0, 0, e]))])
+    return p, g / max(np.linalg.norm(g), 1e-9)
+
+
 # ------------------------------------------------------------------------------------ assembly
 def build_parts():
     prof = trunk_profile()
-    add = [loft(prof["Y"], prof["zc"], prof["hz"], prof["hx"], prof["egg"], prof["p"], name="trunk",
-                bone="spine_02")]
+    add = [trunk_part()]
     add.append(head_part())
     ha, hs = head_detail_parts()
     add += ha
     add += brow_knobs()
     # throat/dewlap fullness under the neck (burnt-umber throat)
-    add.append(oell([0, -2.75, 2.32], [0, -1, -0.45], 0.55, 0.42, 0.25, k=0.18, name="throat", bone="neck_02"))
     for side in "LR":
         add += leg_parts(side)
         add += arm_parts(side)

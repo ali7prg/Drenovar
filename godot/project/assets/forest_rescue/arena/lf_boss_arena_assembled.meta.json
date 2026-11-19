@@ -1,7 +1,7 @@
 {
   "id": "lf_boss_arena_assembled",
   "tris": {
-    "LOD0_total": 54508
+    "LOD0_total": 54768
   },
   "budget_tris": 60000,
   "modules": {
@@ -134,20 +134,20 @@
   "lods": {
     "LOD0": {
       "file": "lf_boss_arena_assembled.glb",
-      "tris": 54508,
-      "bytes": 13832120,
+      "tris": 54768,
+      "bytes": 13990452,
       "nodes": 118
     },
     "LOD1": {
       "file": "lf_boss_arena_assembled_lod1.glb",
-      "tris": 20930,
-      "bytes": 13244672,
+      "tris": 21190,
+      "bytes": 13403008,
       "nodes": 118
     },
     "LOD2": {
       "file": "lf_boss_arena_assembled_lod2.glb",
-      "tris": 9850,
-      "bytes": 13078908,
+      "tris": 10110,
+      "bytes": 13237220,
       "nodes": 32
     },
     "note": "v2 (art/08 rebuild): same node names in every LOD file; suggested use LOD0 zoom <= 34, LOD1 zoom <= 85, LOD2 beyond"

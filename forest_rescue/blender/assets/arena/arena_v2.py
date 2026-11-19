@@ -286,7 +286,8 @@ def main():
         objs.append(place(fsrc, "fossil_wall", (R_IN * math.cos(a), R_IN * math.sin(a), Z0 - 0.3), 68.0 - 90.0, 1.0, col))
         # banners: armature copies with the wind clip
         arm_src = [o for o in ban_objs if o.type == "ARMATURE"][0]
-        mesh_src = [o for o in ban_objs if o.type == "MESH"][0]
+        ban_meshes = [o for o in ban_objs if o.type == "MESH" and not o.name.lower().startswith("icosphere")]
+        mesh_src = max(ban_meshes, key=lambda o: len(o.data.polygons) + (10 ** 6 if "banner" in o.name.lower() else 0))
         for i, (ang, r) in enumerate(banners):
             a = math.radians(ang)
             arm_i = arm_src.copy()

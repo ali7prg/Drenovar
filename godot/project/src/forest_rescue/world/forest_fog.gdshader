@@ -80,7 +80,7 @@ void vertex() {
 	world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec4 s = texture(state_tex, state_uv(world.xz));
 	float top = mix(s.a, s.b, reveal_t) * height_range;
-	float cloud = top * (0.45 + 1.0 * billow(world.xz, drift_of(TIME)));
+	float cloud = top * (0.6 + 0.8 * billow(world.xz, drift_of(TIME)));
 	float explored = step(0.0, max(s.r, s.g) - 0.5);
 	float town = step(max(abs(world.x), abs(world.z)), 56.0);
 	float veil = dim_strength > 0.0 ? explored * (1.0 - town) * veil_height : 0.0;
@@ -139,7 +139,7 @@ void fragment() {
 			continue;
 		}
 		float top = mix(s.a, s.b, local_t) * height_range;
-		float cloud_top = top * (0.45 + 1.0 * b);
+		float cloud_top = top * (0.6 + 0.8 * b);
 		float body = 1.0 - smoothstep(cloud_top - 3.2, cloud_top + 0.6, y);
 		float wisps = 0.62 + 0.38 * smoothstep(0.2, 0.8, w.g);
 		float d = density * fogness * body * wisps;
@@ -183,16 +183,12 @@ void fragment() {
 	// A sight circle counts if the view ray passes over it anywhere between 0 and 14 m height.
 	if (dim_strength > 0.0) {
 		vec4 s = texture(state_tex, state_uv(surface.xz));
-		vec3 upper = surface - view_dir * (14.0 / -view_dir.y);
-		vec2 a2 = upper.xz;
-		vec2 seg = surface.xz - a2;
+		// Round sight circle on the ground (where this pixel's view ray meets the ground).
 		float sight = 0.0;
 		for (int i = 0; i < 8; i++) {
 			if (i >= sight_count) break;
 			vec4 c = sights[i];
-			float h = clamp(dot(c.xy - a2, seg) / max(dot(seg, seg), 1e-4), 0.0, 1.0);
-			float dist = distance(c.xy, a2 + seg * h);
-			sight = max(sight, (1.0 - smoothstep(c.z * 0.7, c.z, dist)) * c.w);
+			sight = max(sight, (1.0 - smoothstep(c.z * 0.75, c.z, distance(c.xy, surface.xz))) * c.w);
 		}
 		// soft 10 m transition at the protected town (no hard line along the ±56 square)
 		float outside = smoothstep(56.0, 66.0, max(abs(surface.x), abs(surface.z)));

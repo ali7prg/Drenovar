@@ -44,7 +44,7 @@ vec2 fog_receive(vec3 p, float time) {
 	float b = fog_billow(p.xz, drift);
 	float fogness = 1.0 - smoothstep(-2.2, 1.8, sdf - 3.0 + 4.0 * b);
 	float top = mix(s.a, s.b, fog_reveal_t) * fog_height_range;
-	float cloud = top * (0.45 + 1.0 * b);
+	float cloud = top * (0.6 + 0.8 * b);
 	float y = p.y - (fog_height_lo + texture(fog_height_tex, fog_uv(p.xz)).r * fog_height_span);
 	float buried = 1.0 - smoothstep(cloud - 1.5, cloud + 3.5, y);
 	float tint = 1.0 - smoothstep(cloud + 2.0, cloud + 12.0, y);

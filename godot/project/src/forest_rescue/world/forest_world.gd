@@ -412,6 +412,7 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 			canopy.add_instance(mesh[0], Transform3D(basis, Vector3(xz.x, y - 0.03, xz.y)))
 	_refresh_local_anchors()
 	_register_fog_receivers()
+	_apply_fog_cull()
 	last_cull.build_ms = (Time.get_ticks_usec() - started) / 1000.0
 	if stage.camera != null and stage.camera.is_inside_tree():
 		on_camera_changed()
@@ -498,6 +499,36 @@ func area_displayed(x: float, z: float, radius: float) -> bool:
 			if ForestFog.bit(displayed_bits, column, row):
 				return true
 	return false
+
+
+## Fog cull: keep an instance only if it stands on explored ground or inside the 3 m blend band.
+const FOG_BAND := 3.0
+var fog_cull_stats := {"ms": 0.0, "culled": 0}
+
+
+func _instance_kept(x: float, z: float) -> bool:
+	return fog == null or fog.sdf_at(x, z) >= -FOG_BAND
+
+
+## Whole 14 m canopy cell kept (1) / culled (-1) / mixed (0), from the SDF at its centre.
+func _cell_cull_state(cell: int) -> int:
+	if fog == null:
+		return 1
+	var c: Vector2 = ForestCanopy.cell_center(cell)
+	var d: float = fog.sdf_at(c.x, c.y)
+	if d >= ForestCanopy.CELL * 0.71 + 1.0:
+		return 1
+	if d <= -(FOG_BAND + ForestCanopy.CELL * 0.71 + 1.0):
+		return -1
+	return 0
+
+
+func _apply_fog_cull() -> void:
+	if canopy == null or fog == null:
+		return
+	var started := Time.get_ticks_usec()
+	canopy.set_cull(Callable(self, "_instance_kept"), Callable(self, "_cell_cull_state"))
+	fog_cull_stats = {"ms": (Time.get_ticks_usec() - started) / 1000.0, "culled": canopy.culled}
 
 
 func chunk_explored(id: String) -> bool:
@@ -602,6 +633,7 @@ func apply_adventure(adv: Dictionary) -> void:
 		displayed_bits = shown
 		fog.set_target(shown, anchor_bits, not first and not reduced_motion)
 		fog.set_dim(0.0 if locked else DIM_EXPLORED)
+		_apply_fog_cull()
 		if canopy != null and stage != null and stage.camera != null:
 			on_camera_changed()
 	var boss: Dictionary = adventure.get("boss", {}) if adventure.get("boss") is Dictionary else {}
@@ -800,6 +832,7 @@ func play_entrance_reveal(duration_ms: int) -> void:
 	last_fog_key = key
 	displayed_bits = shown
 	fog.set_target(shown, anchor_bits, not reduced_motion, duration_ms / 1000.0)
+	_apply_fog_cull()
 	if canopy != null and stage != null and stage.camera != null:
 		on_camera_changed()
 
@@ -845,7 +878,8 @@ func perf_snapshot() -> Dictionary:
 		"instances": last_cull.get("instances", 0), "tris_est": last_cull.get("tris_est", 0),
 		"lod0": last_cull.get("lod0", 0), "lod1": last_cull.get("lod1", 0), "lod2": last_cull.get("lod2", 0),
 		"batches": last_cull.get("batches", 0), "uploads": canopy.uploads if canopy != null else 0,
-		"landmark_tris": last_cull.get("landmark_tris", 0),
+		"landmark_tris": last_cull.get("landmark_tris", 0), "fog_culled": fog_cull_stats.culled,
+		"fog_cull_ms": fog_cull_stats.ms,
 		"cull_ms": last_cull.get("cull_ms", 0.0), "build_ms": last_cull.get("build_ms", 0.0),
 		"fog_shells": fog.shells.size() if fog != null else 0, "setup_ms": setup_ms.duplicate()}
 

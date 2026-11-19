@@ -35,11 +35,20 @@ var lod_bias := 1.0
 var impostors: Node = null              # ForestImpostors (null/unavailable → 3D LOD2 meshes)
 var cell_impostor: Dictionary = {}      # cell -> PackedFloat32Array (STRIDE floats per tree)
 const IMPOSTOR_KEY := Vector2i(-1, 2)
+## Fog cull (world layer): instances standing in unexplored ground deeper than the fog's blend
+## band are removed from the GPU buffers entirely (under fog nothing renders but the fog).
+## Recomputed only when the fog projection changes (set_cull), never per frame.
+var cull_fn: Callable                   # (x, z) -> bool keep; invalid = keep everything
+var shown_buffers: Dictionary = {}      # cell -> {mesh_index -> PackedFloat32Array} (kept subset)
+var shown_impostor: Dictionary = {}     # cell -> PackedFloat32Array
+var culled := 0
 
 
 func clear_instances() -> void:
 	cell_buffers.clear()
 	cell_impostor.clear()
+	shown_buffers.clear()
+	shown_impostor.clear()
 	cell_low.clear()
 	cell_high.clear()
 	for key in selection.keys():
@@ -102,6 +111,63 @@ func add_impostor(transform: Transform3D, custom: Color) -> void:
 	cell_impostor[cell] = buffer
 
 
+## Re-filters every cell with keep(x, z) (cell-level shortcut via cell_state(cell) when given:
+## 1 = whole cell kept, -1 = whole cell culled, 0 = test each instance). Forces re-upload.
+func set_cull(keep: Callable, cell_state: Callable = Callable()) -> void:
+	cull_fn = keep
+	shown_buffers.clear()
+	shown_impostor.clear()
+	culled = 0
+	for cell in cell_buffers:
+		var state := 1 if not keep.is_valid() else (int(cell_state.call(cell)) if cell_state.is_valid() else 0)
+		var buffers: Dictionary = cell_buffers[cell]
+		if state == 1:
+			shown_buffers[cell] = buffers
+			if cell_impostor.has(cell):
+				shown_impostor[cell] = cell_impostor[cell]
+			continue
+		if state == -1:
+			for buffer: PackedFloat32Array in buffers.values():
+				culled += buffer.size() / STRIDE
+			continue
+		var kept := {}
+		for mesh_index in buffers:
+			var filtered := _filter(buffers[mesh_index], keep)
+			if not filtered.is_empty():
+				kept[mesh_index] = filtered
+		if not kept.is_empty():
+			shown_buffers[cell] = kept
+		if cell_impostor.has(cell):
+			var filtered_i := _filter(cell_impostor[cell], keep, true)
+			if not filtered_i.is_empty():
+				shown_impostor[cell] = filtered_i
+	for key in selection.keys():
+		selection[key] = PackedInt32Array([-1])
+
+
+func _filter(buffer: PackedFloat32Array, keep: Callable, impostor := false) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	var count := buffer.size() / STRIDE
+	for i in count:
+		var o := i * STRIDE
+		# impostor quads stand at the crown centre; their custom r/g carry the tree base x/z
+		var x := buffer[o + 12] if impostor else buffer[o + 3]
+		var z := buffer[o + 13] if impostor else buffer[o + 11]
+		if keep.call(x, z):
+			out.append_array(buffer.slice(o, o + STRIDE))
+		elif not impostor:
+			culled += 1
+	return out
+
+
+func _buffers(cell: int) -> Dictionary:
+	return shown_buffers.get(cell, {}) if cull_fn.is_valid() else cell_buffers[cell]
+
+
+func _impostor_buffer(cell: int) -> PackedFloat32Array:
+	return shown_impostor.get(cell, PackedFloat32Array()) if cull_fn.is_valid() else cell_impostor.get(cell, PackedFloat32Array())
+
+
 func instance_count() -> int:
 	var total := 0
 	for cell in cell_buffers:
@@ -162,14 +228,14 @@ func update_view(camera: Camera3D, target: Vector3, zoom: float) -> void:
 			continue
 		var center := cell_center(cell)
 		var distance := Vector2(target.x, target.z).distance_to(center) - CELL * 0.7
-		var buffers: Dictionary = cell_buffers[cell]
+		var buffers: Dictionary = _buffers(cell)
 		var tree_lod := lod_for(KIND_TREE, cls, zoom, maxf(distance, 0.0))
 		var use_impostor: bool = tree_lod == 2 and impostors != null and impostors.available and cell_impostor.has(cell)
-		if use_impostor:
+		if use_impostor and not _impostor_buffer(cell).is_empty():
 			if not wanted.has(IMPOSTOR_KEY):
 				wanted[IMPOSTOR_KEY] = PackedInt32Array()
 			wanted[IMPOSTOR_KEY].append(cell)
-			var count_i: int = cell_impostor[cell].size() / STRIDE
+			var count_i: int = _impostor_buffer(cell).size() / STRIDE
 			instances[2] += count_i
 			tris += count_i * 2
 		for mesh_index in buffers:
@@ -219,7 +285,7 @@ func _apply(key: Vector2i, cells: PackedInt32Array) -> void:
 	var low := Vector3(INF, INF, INF)
 	var high := Vector3(-INF, -INF, -INF)
 	for cell in cells:
-		transforms.append_array(cell_impostor[cell] if key == IMPOSTOR_KEY else cell_buffers[cell][key.x])
+		transforms.append_array(_impostor_buffer(cell) if key == IMPOSTOR_KEY else _buffers(cell).get(key.x, PackedFloat32Array()))
 		low = low.min(cell_low[cell])
 		high = high.max(cell_high[cell])
 	var count := transforms.size() / STRIDE

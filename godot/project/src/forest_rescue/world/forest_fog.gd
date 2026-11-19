@@ -22,7 +22,7 @@ const REVEAL_SECONDS := 2.0
 const GRID := 70                  # state grid incl. the ring outside the atlas
 const GRID_OFFSET := 7
 const GRID_ORIGIN := -140.0
-const FOG_TOP := 13.0             # deep fog top above the ground (m); billows −48…+42 %
+const FOG_TOP := 17.0             # deep fog top (m): with billows 0.75–1.35× it stays above the canopy
 const TOP_RAMP := 22.0            # top rises over this distance from the explored edge (gentle bank)
 const SDF_RANGE := 64.0           # R/G channel: 0.5 + signed distance (m) / SDF_RANGE
 const HEIGHT_RANGE := 30.0        # B/A channel scale (m)
@@ -49,6 +49,7 @@ var revealing := false
 var dim_strength := 0.0
 var soft_depth := true
 var receivers: Array = []         # painted kit/landmark/impostor materials (forest_fog_receiver)
+var sdf_grid := PackedFloat32Array()   # target signed distance (m) per state cell (+ explored)
 
 
 func _ready() -> void:
@@ -375,6 +376,7 @@ func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, 
 	anchor_bits = anchors if anchors.size() == BYTES else PackedByteArray()
 	var tops := fog_tops(bits)
 	var sdf := signed_distance(bits)
+	sdf_grid = sdf
 	var grows := false
 	var first := previous.size() != BYTES
 	var shown_t := smoothstep(0.0, 1.0, reveal_t)
@@ -474,6 +476,22 @@ func set_sights(points: Array) -> void:
 
 func set_soft_depth(on: bool) -> void:
 	soft_depth = on
+
+
+## Target signed distance (m) to the explored edge at (x, z), bilinear over the state grid
+## (+ inside explored ground, − inside fog; the ring outside the atlas is always fog).
+func sdf_at(x: float, z: float) -> float:
+	if sdf_grid.size() != GRID * GRID:
+		return -99.0
+	var fx := clampf((x - GRID_ORIGIN) / CELL - 0.5, 0.0, GRID - 1.001)
+	var fz := clampf((z - GRID_ORIGIN) / CELL - 0.5, 0.0, GRID - 1.001)
+	var i := int(fx)
+	var j := int(fz)
+	var u := fx - i
+	var v := fz - j
+	var a := lerpf(sdf_grid[j * GRID + i], sdf_grid[j * GRID + i + 1], u)
+	var b := lerpf(sdf_grid[(j + 1) * GRID + i], sdf_grid[(j + 1) * GRID + i + 1], u)
+	return lerpf(a, b, v)
 
 
 ## Displayed clear amount (0..1) at a point, CPU mirror of the shader's state blend.

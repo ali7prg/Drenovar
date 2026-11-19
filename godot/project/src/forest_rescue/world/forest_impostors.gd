@@ -62,7 +62,7 @@ func has_impostor(key: String) -> bool:
 	return available and _cells.has(key)
 
 
-## Instance transform + custom (a = atlas cell) for a tree drawn as an impostor.
+## Instance transform + custom (r/g = tree base x/z for the fog cull, a = atlas cell).
 func instance_for(key: String, origin: Vector3, yaw: float, scale: float) -> Array:
 	var info: Dictionary = _cells[key]
 	var step := int(roundi(fposmod(yaw, TAU) / TAU * YAWS)) % YAWS
@@ -70,7 +70,7 @@ func instance_for(key: String, origin: Vector3, yaw: float, scale: float) -> Arr
 	var size: Vector2 = info.size * scale
 	var center: Vector3 = Basis(Vector3.UP, step * TAU / YAWS) * (info.center * scale)
 	var transform := Transform3D(Basis(basis.x * size.x, basis.y * size.y, basis.z), origin + center)
-	return [transform, Color(0.0, 1.0, 1.0, float(info.first_cell + step))]
+	return [transform, Color(origin.x, origin.z, 1.0, float(info.first_cell + step))]
 
 
 func _make_quad() -> ArrayMesh:

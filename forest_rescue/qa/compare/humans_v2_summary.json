@@ -22,24 +22,24 @@
    }
   },
   "latest": {
-   "iter": 13,
+   "iter": 16,
    "front": {
-    "iou": 0.9154,
-    "colour_error": 0.0471,
-    "colour_error_core": 0.0434,
+    "iou": 0.9178,
+    "colour_error": 0.0453,
+    "colour_error_core": 0.0413,
     "ref_px": 46985,
-    "render_px": 46047
+    "render_px": 46516
    },
    "back": {
-    "iou": 0.9156,
-    "colour_error": 0.0404,
-    "colour_error_core": 0.0373,
+    "iou": 0.9161,
+    "colour_error": 0.0413,
+    "colour_error_core": 0.0379,
     "ref_px": 45287,
-    "render_px": 44924
+    "render_px": 45417
    },
    "portrait": {
-    "ssim": 0.5439,
-    "ssim_face": 0.7495,
+    "ssim": 0.159,
+    "ssim_face": 0.0998,
     "solve_err_px": 2.37
    }
   },
@@ -99,8 +99,8 @@
     "seconds": 2.2,
     "loop": false,
     "slip_mm": {
-     "Left": 34.35,
-     "Right": 33.48
+     "Left": 0.49,
+     "Right": 0.47
     },
     "speed": null,
     "markers": {}
@@ -201,30 +201,30 @@
    }
   },
   "latest": {
-   "iter": 1,
+   "iter": 5,
    "front": {
-    "iou": 0.8895,
-    "colour_error": 0.0407,
-    "colour_error_core": 0.0373,
+    "iou": 0.9052,
+    "colour_error": 0.0376,
+    "colour_error_core": 0.0343,
     "ref_px": 46366,
-    "render_px": 46768
+    "render_px": 44216
    },
    "back": {
-    "iou": 0.8427,
-    "colour_error": 0.0301,
-    "colour_error_core": 0.0273,
+    "iou": 0.899,
+    "colour_error": 0.0294,
+    "colour_error_core": 0.0263,
     "ref_px": 43810,
-    "render_px": 46746
+    "render_px": 44175
    },
    "portrait": {
-    "ssim": 0.5168,
-    "ssim_face": 0.8318,
+    "ssim": 0.0889,
+    "ssim_face": 0.0651,
     "solve_err_px": 2.47
    }
   },
   "tris": {
    "LOD0": 11820,
-   "LOD1": 5820,
+   "LOD1": 5819,
    "LOD2": 2133
   },
   "bones": {
@@ -278,8 +278,8 @@
     "seconds": 2.2,
     "loop": false,
     "slip_mm": {
-     "Left": 32.56,
-     "Right": 32.56
+     "Left": 0.46,
+     "Right": 0.46
     },
     "speed": null,
     "markers": {}
@@ -380,24 +380,24 @@
    }
   },
   "latest": {
-   "iter": 1,
+   "iter": 3,
    "front": {
-    "iou": 0.8786,
-    "colour_error": 0.0479,
-    "colour_error_core": 0.0436,
+    "iou": 0.8942,
+    "colour_error": 0.0447,
+    "colour_error_core": 0.0405,
     "ref_px": 41919,
-    "render_px": 40109
+    "render_px": 41385
    },
    "back": {
-    "iou": 0.8889,
-    "colour_error": 0.0374,
-    "colour_error_core": 0.033,
+    "iou": 0.902,
+    "colour_error": 0.0373,
+    "colour_error_core": 0.0328,
     "ref_px": 40557,
-    "render_px": 38981
+    "render_px": 40197
    },
    "portrait": {
-    "ssim": 0.4953,
-    "ssim_face": 0.7214,
+    "ssim": 0.1166,
+    "ssim_face": 0.0973,
     "solve_err_px": 1.82
    }
   },
@@ -457,8 +457,8 @@
     "seconds": 2.2,
     "loop": false,
     "slip_mm": {
-     "Left": 33.22,
-     "Right": 32.98
+     "Left": 0.47,
+     "Right": 0.47
     },
     "speed": null,
     "markers": {}
@@ -559,24 +559,24 @@
    }
   },
   "latest": {
-   "iter": 1,
+   "iter": 3,
    "front": {
-    "iou": 0.848,
-    "colour_error": 0.0423,
-    "colour_error_core": 0.0379,
+    "iou": 0.8868,
+    "colour_error": 0.0392,
+    "colour_error_core": 0.0347,
     "ref_px": 40111,
-    "render_px": 39567
+    "render_px": 39169
    },
    "back": {
-    "iou": 0.8574,
-    "colour_error": 0.0363,
-    "colour_error_core": 0.0311,
+    "iou": 0.8873,
+    "colour_error": 0.0361,
+    "colour_error_core": 0.0313,
     "ref_px": 39280,
-    "render_px": 38307
+    "render_px": 38016
    },
    "portrait": {
-    "ssim": 0.5801,
-    "ssim_face": 0.8502,
+    "ssim": 0.1184,
+    "ssim_face": 0.0647,
     "solve_err_px": 3.48
    }
   },
@@ -636,8 +636,8 @@
     "seconds": 2.2,
     "loop": false,
     "slip_mm": {
-     "Left": 32.05,
-     "Right": 32.05
+     "Left": 0.45,
+     "Right": 0.45
     },
     "speed": null,
     "markers": {}
@@ -738,24 +738,24 @@
    }
   },
   "latest": {
-   "iter": 1,
+   "iter": 3,
    "front": {
-    "iou": 0.9047,
-    "colour_error": 0.0399,
-    "colour_error_core": 0.0356,
+    "iou": 0.9211,
+    "colour_error": 0.0376,
+    "colour_error_core": 0.0337,
     "ref_px": 50400,
-    "render_px": 47424
+    "render_px": 48548
    },
    "back": {
-    "iou": 0.8918,
-    "colour_error": 0.0355,
-    "colour_error_core": 0.0318,
+    "iou": 0.9097,
+    "colour_error": 0.0357,
+    "colour_error_core": 0.0324,
     "ref_px": 50799,
-    "render_px": 47131
+    "render_px": 48332
    },
    "portrait": {
-    "ssim": 0.554,
-    "ssim_face": 0.7925,
+    "ssim": 0.1285,
+    "ssim_face": 0.2765,
     "solve_err_px": 1.38
    }
   },
@@ -765,8 +765,8 @@
    "LOD2": 2134
   },
   "bones": {
-   "LOD0": 43,
-   "LOD1": 22,
+   "LOD0": 44,
+   "LOD1": 23,
    "LOD2": 17
   },
   "deform": 50,
@@ -815,8 +815,8 @@
     "seconds": 2.2,
     "loop": false,
     "slip_mm": {
-     "Left": 32.12,
-     "Right": 32.12
+     "Left": 0.45,
+     "Right": 0.45
     },
     "speed": null,
     "markers": {}
@@ -917,24 +917,24 @@
    }
   },
   "latest": {
-   "iter": 1,
+   "iter": 3,
    "front": {
-    "iou": 0.8575,
-    "colour_error": 0.0404,
-    "colour_error_core": 0.0356,
+    "iou": 0.8951,
+    "colour_error": 0.0383,
+    "colour_error_core": 0.0338,
     "ref_px": 48938,
-    "render_px": 46603
+    "render_px": 48758
    },
    "back": {
-    "iou": 0.866,
-    "colour_error": 0.0348,
-    "colour_error_core": 0.0305,
+    "iou": 0.9032,
+    "colour_error": 0.0358,
+    "colour_error_core": 0.0315,
     "ref_px": 46594,
-    "render_px": 44053
+    "render_px": 46064
    },
    "portrait": {
-    "ssim": 0.6325,
-    "ssim_face": 0.8657,
+    "ssim": 0.1586,
+    "ssim_face": 0.1933,
     "solve_err_px": 4.34
    }
   },
@@ -994,8 +994,8 @@
     "seconds": 2.2,
     "loop": false,
     "slip_mm": {
-     "Left": 32.14,
-     "Right": 32.06
+     "Left": 0.45,
+     "Right": 0.45
     },
     "speed": null,
     "markers": {}
@@ -1096,29 +1096,29 @@
    }
   },
   "latest": {
-   "iter": 1,
+   "iter": 5,
    "front": {
-    "iou": 0.8477,
-    "colour_error": 0.0367,
-    "colour_error_core": 0.0347,
+    "iou": 0.8991,
+    "colour_error": 0.033,
+    "colour_error_core": 0.031,
     "ref_px": 70877,
-    "render_px": 63593
+    "render_px": 69057
    },
    "back": {
-    "iou": 0.8579,
-    "colour_error": 0.0288,
-    "colour_error_core": 0.026,
+    "iou": 0.9051,
+    "colour_error": 0.0278,
+    "colour_error_core": 0.0254,
     "ref_px": 69915,
-    "render_px": 62472
+    "render_px": 67891
    },
    "portrait": {
-    "ssim": 0.6925,
-    "ssim_face": 0.8867,
+    "ssim": 0.2309,
+    "ssim_face": 0.1241,
     "solve_err_px": 5.96
    }
   },
   "tris": {
-   "LOD0": 14138,
+   "LOD0": 13718,
    "LOD1": 6790,
    "LOD2": 2424
   },
@@ -1173,7 +1173,7 @@
     "seconds": 1.2,
     "loop": false,
     "slip_mm": {
-     "Left": 80.0,
+     "Left": 0.08,
      "Right": 0.0
     },
     "speed": null,
@@ -1195,8 +1195,8 @@
     "seconds": 2.0,
     "loop": false,
     "slip_mm": {
-     "Left": 107.42,
-     "Right": 20.0
+     "Left": 1.55,
+     "Right": 1.07
     },
     "speed": null,
     "markers": {}
@@ -1205,7 +1205,7 @@
     "seconds": 2.4,
     "loop": false,
     "slip_mm": {
-     "Left": 100.0,
+     "Left": 0.1,
      "Right": 0.0
     },
     "speed": null,
@@ -1217,7 +1217,7 @@
     "seconds": 2.8,
     "loop": false,
     "slip_mm": {
-     "Left": 79.99,
+     "Left": 0.13,
      "Right": 0.0
     },
     "speed": null,
@@ -1255,25 +1255,25 @@
    "portrait": null
   },
   "latest": {
-   "iter": 1,
+   "iter": 3,
    "front": {
-    "iou": 0.8805,
-    "colour_error": 0.031,
-    "colour_error_core": 0.0286,
+    "iou": 0.9028,
+    "colour_error": 0.0311,
+    "colour_error_core": 0.0287,
     "ref_px": 66131,
-    "render_px": 61398
+    "render_px": 63283
    },
    "back": {
-    "iou": 0.8816,
-    "colour_error": 0.0252,
-    "colour_error_core": 0.0223,
+    "iou": 0.9018,
+    "colour_error": 0.026,
+    "colour_error_core": 0.023,
     "ref_px": 63799,
-    "render_px": 59538
+    "render_px": 61313
    },
    "portrait": null
   },
   "tris": {
-   "LOD0": 13962,
+   "LOD0": 13542,
    "LOD1": 6790,
    "LOD2": 2418
   },
@@ -1391,11 +1391,158 @@
   }
  },
  "lf_squad_shield_guard": {
-  "first": null,
-  "latest": null,
-  "tris": null,
-  "bones": null,
-  "deform": null,
-  "clips": {}
+  "first": {
+   "iter": 1,
+   "front": {
+    "iou": 0.8567,
+    "colour_error": 0.0292,
+    "colour_error_core": 0.0268,
+    "ref_px": 81063,
+    "render_px": 72803
+   },
+   "back": {
+    "iou": 0.8599,
+    "colour_error": 0.0242,
+    "colour_error_core": 0.0215,
+    "ref_px": 79411,
+    "render_px": 71546
+   },
+   "portrait": null
+  },
+  "latest": {
+   "iter": 3,
+   "front": {
+    "iou": 0.9037,
+    "colour_error": 0.0298,
+    "colour_error_core": 0.0275,
+    "ref_px": 81063,
+    "render_px": 77791
+   },
+   "back": {
+    "iou": 0.8971,
+    "colour_error": 0.0248,
+    "colour_error_core": 0.0221,
+    "ref_px": 79411,
+    "render_px": 76487
+   },
+   "portrait": null
+  },
+  "tris": {
+   "LOD0": 13624,
+   "LOD1": 6790,
+   "LOD2": 2423
+  },
+  "bones": {
+   "LOD0": 47,
+   "LOD1": 25,
+   "LOD2": 18
+  },
+  "deform": 50,
+  "clips": {
+   "lf_soldier_idle": {
+    "seconds": 4.0,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.04,
+     "Right": 0.04
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_walk": {
+    "seconds": 1.0,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": 1.4,
+    "markers": {}
+   },
+   "lf_soldier_jog": {
+    "seconds": 0.7,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.65,
+     "Right": 0.0
+    },
+    "speed": 3.0,
+    "markers": {}
+   },
+   "lf_soldier_guard": {
+    "seconds": 3.2,
+    "loop": true,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_attack": {
+    "seconds": 1.2,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.18
+    },
+    "speed": null,
+    "markers": {
+     "weapon_contact": 0.65
+    }
+   },
+   "lf_soldier_hit": {
+    "seconds": 0.5,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_death": {
+    "seconds": 2.0,
+    "loop": false,
+    "slip_mm": {
+     "Left": 1.62,
+     "Right": 1.07
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_unlock": {
+    "seconds": 2.4,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.1,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {
+     "latch_release": 1.6
+    }
+   },
+   "lf_soldier_help": {
+    "seconds": 2.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.13,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   },
+   "lf_soldier_salute": {
+    "seconds": 1.8,
+    "loop": false,
+    "slip_mm": {
+     "Left": 0.0,
+     "Right": 0.0
+    },
+    "speed": null,
+    "markers": {}
+   }
+  }
  }
 }

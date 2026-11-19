@@ -43,7 +43,8 @@ def load_char(aid, offset_x):
         if o is not None and o.type == "MESH" and not o.name.endswith("_LOD0"):
             o.hide_render = True
     arm.location.x = offset_x
-    return arm, {a.name: a for a in dst.actions if a is not None}
+    import re as _re
+    return arm, {_re.sub(r"\.\d{3}$", "", a.name): a for a in dst.actions if a is not None}
 
 
 def main():
@@ -74,7 +75,7 @@ def main():
     me.materials.append(gm)
     width = max(1.6, len(AIDS) * 1.0 + 0.8)
     cam = render.perspective_camera((width * 0.9, -width * 2.0 - 2.0, 1.6), (0, 0, 0.85), lens=50,
-                                    res=(int(360 * max(1, len(AIDS) * 0.75)), 540), ortho_scale=max(2.3, width * 1.05))
+                                    res=(int(300 * max(1, len(AIDS) * 0.75)), 450), ortho_scale=max(2.3, width * 1.05))
     for clip in clip_names:
         tmp = tempfile.mkdtemp()
         n_fr = None

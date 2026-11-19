@@ -8,6 +8,7 @@ extends SceneTree
 ##     --fixed-fps 30 -s qa_forest_integration_shots.gd -- --out=/abs/dir [--shots=a,b] [--prefix=p_]
 
 const FIXTURES := "res://data/forest_rescue/game/fixtures/"
+const PathMotion = preload("res://src/forest_rescue/game/path_motion.gd")
 const FPS := 30.0
 
 class StubHost extends Node:

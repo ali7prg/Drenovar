@@ -134,6 +134,13 @@ def main():
     core.reset()
     side = R.side_view(corrected=True, colour=False)
     front = R.front_view(corrected=False)     # raw: keeps the pale ventral keel between the legs
+    # the painted front view is not symmetric (head/legs drawn a few cm off the axis): hull with the union of
+    # the mask and its mirror about the axis so the soft hull never trims one side through to the mouth cavity
+    ax = front.ax
+    W = front.mask.shape[1]
+    cols = np.arange(W)
+    src = np.clip(np.round(2 * ax - 1 - cols).astype(int), 0, W - 1)
+    front.mask = front.mask | front.mask[:, src]
     F, add, sub = B.build_field(voxel=C.VOXEL, hull_views=[side, front], hull_k=0.06)
     C.log(f"field {F.n} built {time.time() - t0:.1f}s")
     F.d = sdf.ndi.gaussian_filter(F.d, 0.6).astype(np.float32)

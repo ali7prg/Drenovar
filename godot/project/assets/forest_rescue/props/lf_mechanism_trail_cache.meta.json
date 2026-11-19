@@ -2,25 +2,25 @@
   "id": "lf_mechanism_trail_cache",
   "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 1197,
-    "LOD1": 575,
-    "LOD2": 445
+    "LOD0": 1218,
+    "LOD1": 584,
+    "LOD2": 460
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 657,
+      "root": 678,
       "cache_lid": 148,
       "mark_landmark_b": 320,
       "mark_landmark_a": 72
     },
     "LOD1": {
-      "root": 307,
+      "root": 316,
       "cache_lid": 148,
       "mark_landmark_b": 80,
       "mark_landmark_a": 40
     },
     "LOD2": {
-      "root": 177,
+      "root": 192,
       "cache_lid": 148,
       "mark_landmark_b": 80,
       "mark_landmark_a": 40
@@ -45,14 +45,14 @@
   "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -3.249,
+      -3.09,
       -0.08,
       -2.347
     ],
     "max": [
-      1.773,
+      2.243,
       2.129,
-      1.089
+      1.0
     ]
   },
   "lod_nodes": {
@@ -165,12 +165,12 @@
   "qa": {
     "views": {
       "main": {
-        "iou_raw": 0.7313,
-        "iou_filled": 0.7313,
-        "colour_err": 0.0889,
-        "colour_err_core": 0.0889,
+        "iou_raw": 0.8236,
+        "iou_filled": 0.8236,
+        "colour_err": 0.0831,
+        "colour_err_core": 0.0832,
         "ref_px": 189803,
-        "render_px": 180238,
+        "render_px": 212802,
         "ignored_px": 0,
         "camera_rms_px": 17.9,
         "camera_max_px": 61.06,
@@ -202,20 +202,20 @@
       }
     },
     "texture": {
-      "texels": 2873459,
-      "projected_frac": 0.1028,
+      "texels": 2850923,
+      "projected_frac": 0.1211,
       "per_view_frac": {
-        "main": 0.1031
+        "main": 0.1213
       },
-      "seconds": 10.6
+      "seconds": 10.5
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_trail_cache/v2_iter14_*",
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_trail_cache/v2_iter15_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_trail_cache --iter 14",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_trail_cache --iter 15",
   "mechanism": "trail_cache",
   "steps": {
     "split_birch": "lf_trail_mark_1 (node mark_landmark_a)",

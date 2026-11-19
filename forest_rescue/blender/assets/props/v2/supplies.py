@@ -38,11 +38,16 @@ def points(p):
     return {}
 
 
+EXCLUDE = {"arrows": [(965, 790, 1004, 874), (1136, 832, 1176, 986)], "bread": [(276, 895, 322, 918)],
+           "bandages": [(425, 994, 565, 1006)]}
+
+
 def views():
     out = []
     for name, (box, xy, yaw, el) in ITEMS.items():
         hide = {f"supply_{o}": "hide" for o in ITEMS if o != name}
         v = pv2.ViewSpec(name, SHEET, box, {}, pose=hide, light=LIGHT, thresh=0.10, fill_holes=True, shadow=0.10,
+                         exclude=EXCLUDE.get(name, ()),
                          title=f"SUPPLIES {name} (camera fitted to the painted silhouette box)")
         v.yaw, v.el = yaw, el
         out.append(v)
@@ -102,6 +107,63 @@ def blob(g, c, radii, lod, mat, tag, flat=0.2, seed=0, sub=None, squash_top=0.0)
     g.add(V + np.asarray(c, float), F, mat, tag)
 
 
+ARROW = dict(theta=math.radians(34), tie_z=0.39, lh=0.47, ln=0.37, n=12)
+
+
+def arrow_frame(o):
+    th = ARROW["theta"]
+    d = np.array([math.sin(th), 0.0, math.cos(th)])
+    u = np.array([math.cos(th), 0.0, -math.sin(th)])
+    w = np.array([0.0, 1.0, 0.0])
+    T = np.asarray(o, float) + np.array([0.0, 0.0, ARROW["tie_z"]])
+    return T, d, u, w
+
+
+def arrow_keypoints(o):
+    T, d, u, w = arrow_frame(o)
+    H = T - d * ARROW["lh"]
+    N = T + d * ARROW["ln"]
+    return {"nock_c": N, "head_c": H, "tie_c": T, "tie_l": T - u * 0.05, "tie_r": T + u * 0.05,
+            "head_l": H - u * 0.085, "head_r": H + u * 0.085, "nock_l": N - u * 0.075, "nock_r": N + u * 0.075}
+
+
+def arrow_bundle(g, o, lod):
+    """About 12 arrows tied at the waist: shafts fanning out to both ends, steel bodkin heads, three grey vanes each,
+    a rope tie of three turns."""
+    T, d, u, w = arrow_frame(o)
+    n = ARROW["n"] if lod < 2 else 6
+    rng = np.random.default_rng(3)
+    for i in range(n):
+        a = 2 * math.pi * i / n + rng.uniform(-0.2, 0.2)
+        ra = 0.55 + 0.45 * (i % 3) / 2
+        ou, ow = math.cos(a) * ra, math.sin(a) * ra * 0.7
+        offH = (u * ou + w * ow) * 0.10
+        offN = (u * ou + w * ow) * 0.09
+        offT = (u * ou + w * ow) * 0.022
+        Hh = T - d * ARROW["lh"] + offH
+        Nn = T + d * ARROW["ln"] + offN
+        Tt = T + offT
+        g.tube(np.array([Hh + (Tt - Hh) * 0.08, Tt, Nn]), 0.0058, n=5 if lod == 0 else 4, mat="wood", tag="shaft")
+        dh = (Hh - Tt) / np.linalg.norm(Hh - Tt)
+        # bodkin head: long 4-sided pyramid with a short socket
+        CG.lathe(g, [(0.009, -0.012), (0.013, 0.0), (0.0, 0.075)], Hh, n=4, mat="steel", tag="arrowhead",
+                 R=CG.frame(np.cross(dh, (0, 1.0, 0)), dh))
+        if lod < 2:
+            dn = (Nn - Tt) / np.linalg.norm(Nn - Tt)
+            side0 = np.cross(dn, (0, 1.0, 0))
+            side0 /= np.linalg.norm(side0)
+            for k in range(3):
+                ang = 2 * math.pi * k / 3 + a
+                sd = side0 * math.cos(ang) + np.cross(dn, side0) * math.sin(ang)
+                c0 = Nn - dn * 0.03
+                q = [c0 - dn * 0.17, c0 - dn * 0.01, c0 - dn * 0.03 + sd * 0.042, c0 - dn * 0.15 + sd * 0.04]
+                g.add(np.array(q), [[0, 1, 2, 3], [3, 2, 1, 0]], "feather", "fletching")
+    for k in range(3 if lod < 2 else 1):
+        c = T + d * (0.012 * (k - 1))
+        ring = [c + (u * 0.05 * math.cos(t) + w * 0.042 * math.sin(t)) for t in np.linspace(0, 2 * math.pi, 11)[:-1]]
+        g.tube(np.array(ring + [ring[0]]), 0.0085, n=5 if lod == 0 else 4, mat="rope", tag="arrow_tie")
+
+
 def build(A, p, lod):
     for name, (box, (x, y), yaw, el) in ITEMS.items():
         part = A.part(f"supply_{name}", None, (x, y, 0.0))
@@ -133,48 +195,34 @@ def build(A, p, lod):
                      mat="grain", tag="grain")
             blob(g, o + (0.05, -0.32, 0), (0.12, 0.06, 0.02), lod, "grain", "grain_spill", flat=0.9, seed=3, sub=1)
         elif name == "coins":
-            for (dx, dy, n_, tilt) in ((-0.01, 0.07, 7, 0.0), (-0.1, 0.0, 3, 0.0), (0.1, 0.02, 4, 0.0), (0.03, -0.03, 2, 0.0)):
-                for k in range(n_ if lod < 2 else max(1, n_ // 2)):
-                    z = 0.009 * k * (1 if lod < 2 else 2) + 0.0045
-                    g.cyl(o + (dx + 0.002 * math.sin(k), dy, z - 0.0045), o + (dx + 0.002 * math.sin(k), dy, z + 0.0045),
-                          0.04, n=12 if lod == 0 else 7, mat="bronze", tag="coin")
-            for (dx, dy) in ((-0.17, -0.06), (0.16, -0.07), (-0.08, -0.1)):
-                g.cyl(o + (dx, dy, 0.0), o + (dx, dy, 0.009), 0.04, n=10 if lod == 0 else 6, mat="bronze", tag="coin_loose")
-            # one big coin standing upright at the front (painting)
-            g.cyl(o + (0.0, -0.12, 0.055), o + (0.0, -0.135, 0.055), 0.055, n=14 if lod == 0 else 7, mat="bronze",
-                  tag="coin_front", up=(0, 0, 1))
+            nc = 14 if lod == 0 else 7
+            for (dx, dy, n_) in ((0.0, 0.05, 6), (0.078, 0.015, 3), (-0.078, 0.025, 2), (0.13, -0.03, 2), (-0.135, -0.025, 1)):
+                for k in range(n_ if lod < 2 else max(1, (n_ + 1) // 2)):
+                    t0 = 0.0085 * k * (1 if lod < 2 else 2)
+                    c = o + (dx + 0.0015 * math.sin(3 * k), dy, t0)
+                    g.cyl(c, c + (0, 0, 0.0085), 0.047, n=nc, mat="bronze", tag="coin")
+            # big coin leaning toward the viewer in front of the stacks (painting)
+            nrm = np.array([0.0, -math.sin(math.radians(52)), math.cos(math.radians(52))])
+            c = o + (0.0, -0.04, 0.05)
+            g.cyl(c - nrm * 0.007, c + nrm * 0.007, 0.062, n=16 if lod == 0 else 8, mat="bronze", tag="coin_front",
+                  up=(0, 0, 1))
         elif name == "arrows":
-            n_ar = 8 if lod < 2 else 4
-            tie = o + (0, 0, 0.36)
-            for k in range(n_ar):
-                ang = (k - (n_ar - 1) / 2) * 0.06
-                d = np.array([-0.62 + ang, -0.08 + 0.03 * (k % 3), -0.78])
-                d /= np.linalg.norm(d)
-                base = tie - d * 0.40 + (0.012 * (k % 3) - 0.012, 0.014 * (k // 3), 0)
-                tip = base + d * 0.78
-                g.cyl(base, tip - d * 0.06, 0.006, n=4, mat="wood", tag="shaft", caps=(False, False))
-                CG.lathe(g, [(0.014, 0.0), (0.0, 0.07)], tip - d * 0.07, n=4, mat="iron", tag="arrowhead",
-                         R=CG.frame(np.cross(d, (1, 0, 0)), d) if abs(d[0]) < 0.9 else None)
-                if lod < 2:
-                    for f in range(2):
-                        side = np.cross(d, (0, 1, 0) if f == 0 else (1, 0, 0))
-                        side /= np.linalg.norm(side)
-                        c = base + d * 0.06
-                        g.add(np.array([c - d * 0.05, c + d * 0.07, c + d * 0.05 + side * 0.022, c - d * 0.05 + side * 0.022]),
-                              [[0, 1, 2, 3], [3, 2, 1, 0]], "feather", "fletching")
-            ring = [tie + np.array([0.035 * math.cos(a), 0.03 * math.sin(a), 0.0]) for a in np.linspace(0, 2 * math.pi, 9)[:-1]]
-            g.tube(np.array(ring + [ring[0]]), 0.012, n=5, mat="rope", tag="arrow_tie")
-            # the bundle leans: rotate later via the part (static lean baked here)
+            arrow_bundle(g, o, lod)
         elif name == "bread":
-            blob(g, o + (-0.17, 0.0, 0), (0.17, 0.12, 0.10), lod, "bread", "loaf", flat=0.75, seed=1)
-            blob(g, o + (0.17, 0.05, 0), (0.15, 0.11, 0.095), lod, "bread", "loaf", flat=0.75, seed=2)
+            blob(g, o + (-0.16, -0.02, 0), (0.17, 0.13, 0.135), lod, "bread", "loaf", flat=0.55, seed=1)
+            blob(g, o + (0.16, 0.06, 0), (0.16, 0.125, 0.14), lod, "bread", "loaf", flat=0.55, seed=2)
         elif name == "bandages":
-            ax = np.array([0.85, 0.55, 0.0]) / np.linalg.norm([0.85, 0.55])
-            for (dx, dy, L) in ((-0.16, 0.02, 0.26), (0.1, -0.05, 0.24)):
-                cc = o + (dx, dy, 0.075)
-                g.cyl(cc - ax * L / 2, cc + ax * L / 2, 0.075, n=12 if lod == 0 else 7, mat="cloth",
-                      tag="bandage_roll", up=(0, 0, 1))
-            g.box(o + (0.3, -0.12, 0.004), (0.26, 0.14, 0.008), mat="cloth", tag="bandage_strip")
+            ax = np.array([0.55, 0.83, 0.0])
+            ax /= np.linalg.norm(ax)
+            for (dx, dy, L, r) in ((-0.13, 0.02, 0.30, 0.088), (0.13, -0.04, 0.28, 0.084)):
+                cc = o + (dx, dy, r)
+                g.cyl(cc - ax * L / 2, cc + ax * L / 2, r, n=14 if lod == 0 else 8, mat="cloth", tag="bandage_roll",
+                      up=(0, 0, 1))
+            # loose tail unrolling from the right roll toward the front-right
+            tail = [o + (0.17, -0.12, 0.004), o + (0.3, -0.16, 0.004), o + (0.42, -0.15, 0.004)]
+            for k in range(2):
+                p0_, p1_ = np.array(tail[k]), np.array(tail[k + 1])
+                g.beam(p0_, p1_, 0.24, 0.008, up=(0, 0, 1), mat="cloth", tag="bandage_tail")
         elif name == "chest":
             w, d, h = 1.0, 0.58, 0.48
             plank_box(g, o + (0, 0, h / 2), (w, d, h), lod, tag="chest_body", n=4)
@@ -220,7 +268,84 @@ def build(A, p, lod):
     return A
 
 
+ARROW_PX = {"nock_c": (1131, 764), "head_c": (1010, 961), "tie_c": (1067, 865), "tie_l": (1045, 860),
+            "tie_r": (1090, 876.7), "head_l": (978.3, 950), "head_r": (1046.7, 965), "nock_l": (1090, 761.7),
+            "nock_r": (1163.3, 785)}
+
+
+def _sil_iou(cam, V, T, mask):
+    u, w_, z = cam.project(V)
+    H, W = mask.shape
+    m = np.zeros((H, W), np.uint8)
+    pts = np.stack([u, w_], 1)
+    for t in T:
+        cv2.fillConvexPoly(m, np.round(pts[t] * 4).astype(np.int32), 1, lineType=cv2.LINE_8, shift=2)
+    r = m > 0
+    return (r & mask).sum() / max(1, (r | mask).sum())
+
+
 def make_cameras(views, A):
+    """Arrows: cv2.solvePnP (9 painted points: nock/head fan ends, tie) via camsolve. Other items: pinhole 40 m
+    away; yaw / elevation searched by silhouette IoU, f + principal point fitted to the painted box."""
+    from geo import triangulate
+    for v in views:
+        if v.name == "arrows":
+            x, y = ITEMS["arrows"][1]
+            K3 = arrow_keypoints((x, y, 0.0))
+            keys = list(ARROW_PX)
+            v.points = dict(ARROW_PX)
+            cam, rep = camsolve.solve(np.array([K3[k] for k in keys]), v.p2(keys), v.size, f0=None)
+            v.cam = cam
+            rep["method"] = "cv2.solvePnP (focal scan) + LM refinement on 9 points (nock/head fan ends, tie)"
+            rep["per_point_px"] = {k: e for k, e in zip(keys, rep["per_point_px"])}
+            v.rep = rep
+            continue
+        part = A.parts[f"supply_{v.name}"]
+        V, F, _, _, _ = part.geo[0].arrays()
+        T = np.array(triangulate(F))
+        m, _ = v.mask()
+        best = None
+        y0, e0 = v.yaw, v.el
+        for dy in range(-30, 31, 6):
+            for de in range(-12, 19, 6):
+                cam = _box_cam(v, V, y0 + dy, max(2, e0 + de), m)
+                iou = _sil_iou(cam, V, T, m)
+                if best is None or iou > best[0]:
+                    best = (iou, cam, y0 + dy, max(2, e0 + de))
+        iou, cam, yy, ee = best
+        v.cam = cam
+        u, w_, z = cam.project(V)
+        ys, xs = np.nonzero(m)
+        res = np.array([u.min() - xs.min(), u.max() - xs.max() - 1, w_.min() - ys.min(), w_.max() - ys.max() - 1])
+        v.rep = dict(rms_px=float(np.sqrt((res ** 2).mean())), max_px=float(np.abs(res).max()), n=4,
+                     per_point_px={"x0": round(float(res[0]), 2), "x1": round(float(res[1]), 2),
+                                   "y0": round(float(res[2]), 2), "y1": round(float(res[3]), 2)},
+                     fov_deg=float(2 * math.degrees(math.atan(max(v.size) / 2 / cam.f))), f=cam.f,
+                     method=f"silhouette-IoU search of the painted view direction (yaw {yy}, el {ee}) + box fit")
+
+
+def _box_cam(v, V, yaw_deg, el_deg, m):
+    c = V.mean(0)
+    yaw, el = math.radians(yaw_deg), math.radians(el_deg)
+    dirc = np.array([math.sin(yaw) * math.cos(el), -math.cos(yaw) * math.cos(el), math.sin(el)])
+    C = c + dirc * 40.0
+    fwd = (c - C) / np.linalg.norm(c - C)
+    right = np.cross(fwd, (0, 0, 1.0))
+    right /= np.linalg.norm(right)
+    down = np.cross(fwd, right)
+    R = np.stack([right, down, fwd])
+    cam = camsolve.Cam(1.0, 0.0, 0.0, cv2.Rodrigues(R)[0].ravel(), -R @ C, size=v.size)
+    u, w_, z = cam.project(V)
+    ys, xs = np.nonzero(m)
+    X0, X1, Y0, Y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
+    f = 0.5 * ((X1 - X0) / (u.max() - u.min()) + (Y1 - Y0) / (w_.max() - w_.min()))
+    cam.f = f
+    cam.cx = (X0 + X1) / 2 - f * (u.max() + u.min()) / 2
+    cam.cy = (Y0 + Y1) / 2 - f * (w_.max() + w_.min()) / 2
+    return cam
+
+
+def make_cameras_old(views, A):
     """Per item: pinhole camera at 40 m along the painted view direction; f and principal point fitted so the
     item's projected bounding box equals its painted silhouette box. rep = box-corner residuals (px)."""
     W_ = A.world_mats({})
@@ -269,6 +394,7 @@ SWATCHES = {
     "bronze": dict(sheet=SHEET, box=(915, 830, 945, 860), metres=0.06),
     "bread": dict(sheet=SHEET, box=(120, 930, 170, 960), metres=0.15),
     "feather": dict(sheet=SHEET, box=(1130, 790, 1150, 810), metres=0.05),
+    "steel": dict(sheet=SHEET, box=(985, 935, 1000, 950), metres=0.04),
 }
 
 

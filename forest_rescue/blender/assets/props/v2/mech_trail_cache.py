@@ -17,6 +17,7 @@ SHEET = "10_artifact_mechanisms.png"
 LIGHT = (-0.55, -0.45, 0.70)
 BOX = (8, 70, 762, 390)
 OPEN = 0.55
+GROUND_FROM_PAINTING = False   # tried (iter 14): the convex back-projected outline over-covers -> IoU 0.73
 JOINT = True      # the painting's log-end / rock points are not mutually consistent with one rigid layout:
                    # camera from the hatch (5 pts, planar PnP), every other size by back-projection
 
@@ -73,7 +74,7 @@ def build(A, p, lod):
     # ground patch (forest floor): the painted ground outline back-projected onto z = 0 through the solved camera
     # (lower silhouette boundary only), joined with the footprints of the log, stump and rock -> convex outline
     poly = None
-    v = p.get("_view")
+    v = p.get("_view") if GROUND_FROM_PAINTING else None
     if v is not None and v.cam is not None:
         from scipy.spatial import ConvexHull
         m, _ = v.mask()

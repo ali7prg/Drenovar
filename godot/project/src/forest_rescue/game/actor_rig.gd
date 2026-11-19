@@ -11,6 +11,8 @@ extends Node3D
 signal marker(rig: Node3D, clip_id: String, marker_name: String)
 signal ready_to_show(rig: Node3D)
 
+const ForestKit = preload("res://src/forest_rescue/world/forest_kit.gd")
+
 static var scenes: Dictionary = {}
 static var requested: Dictionary = {}
 static var metas: Dictionary = {}
@@ -36,6 +38,10 @@ var model_scale := 1.0
 var model_yaw := 0.0
 var tint := Color.WHITE
 var hold_pending := ""
+## Per-actor look variation (humans/captive_variants.json entry): {"tint": {"cloth": [r,g,b],
+## "hair": [r,g,b]}, "hide": ["Bag"]} - tints multiply the albedo of materials named *_<key>,
+## hidden bones collapse their accessory (pouch / satchel / rope coil / hammer on the Bag bone).
+var variant: Dictionary = {}
 
 static func fetch(path: String) -> Variant:
 	if path.is_empty():
@@ -140,6 +146,8 @@ func poll_load(blocking := false) -> void:
 				lods[level].append(mesh)
 		if tint != Color.WHITE:
 			apply_tint(mesh)
+	if meta.has("paintedLightMix") or not variant.is_empty():
+		apply_look()
 	load_state = "ready"
 	if lods[1].size() + lods[2].size() > 0:
 		set_lod(0)
@@ -161,6 +169,40 @@ func apply_tint(mesh: MeshInstance3D) -> void:
 			var copy := material.duplicate() as BaseMaterial3D
 			copy.albedo_color = copy.albedo_color * tint
 			mesh.set_surface_override_material(surface, copy)
+
+## Humans (meta paintedLightMix): the atlas carries the painted light, so the engine light is mixed
+## in partially (forest kit painted material, k = paintedLightMix); then the per-actor variant.
+func apply_look() -> void:
+	var k := float(meta.get("paintedLightMix", -1.0))
+	var tints: Dictionary = variant.get("tint", {})
+	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if mesh.mesh == null:
+			continue
+		for s in mesh.mesh.get_surface_count():
+			var material: Material = mesh.get_active_material(s)
+			if material == null:
+				continue
+			var material_name := String(material.resource_name)
+			if k >= 0.0:
+				material = ForestKit.painted_material(material, false, k, false, false)
+			for key in tints:
+				if material_name.ends_with("_" + String(key)):
+					var c: Array = tints[key]
+					var factor := Color(float(c[0]), float(c[1]), float(c[2]), 1.0)
+					material = material.duplicate()
+					if material is ShaderMaterial:
+						var base: Color = material.get_shader_parameter("albedo_color")
+						material.set_shader_parameter("albedo_color", base * factor)
+					elif material is BaseMaterial3D:
+						material.albedo_color = material.albedo_color * factor
+			mesh.set_surface_override_material(s, material)
+	var hidden: Array = variant.get("hide", [])
+	if not hidden.is_empty():
+		for skeleton: Skeleton3D in model.find_children("*", "Skeleton3D", true, false):
+			for bone_name in hidden:
+				var index := skeleton.find_bone(String(bone_name))
+				if index >= 0:
+					skeleton.set_bone_pose_scale(index, Vector3.ONE * 0.001)
 
 func clip_meta(clip_name: String) -> Dictionary:
 	var clips: Dictionary = meta.get("clips", {})

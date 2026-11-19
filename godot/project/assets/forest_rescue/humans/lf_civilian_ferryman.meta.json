@@ -1,0 +1,276 @@
+{
+  "id": "lf_civilian_ferryman",
+  "generation": "v2 image-based (painted turnaround silhouettes + template depth, painting projection)",
+  "rig": "human_shared",
+  "tris": {
+    "LOD0": 11816,
+    "LOD1": 5820,
+    "LOD2": 2134
+  },
+  "budget": {
+    "LOD0": 12000,
+    "LOD1": 6000,
+    "LOD2": 2200
+  },
+  "bones": {
+    "deform": 50,
+    "total": 59,
+    "weightedByLOD": {
+      "LOD0": 45,
+      "LOD1": 23,
+      "LOD2": 17
+    },
+    "maxInfluences": 4,
+    "names": [
+      "Hips",
+      "Spine",
+      "Chest",
+      "UpperChest",
+      "Neck",
+      "Head",
+      "LeftShoulder",
+      "LeftUpperArm",
+      "LeftLowerArm",
+      "LeftHand",
+      "LeftThumb1",
+      "LeftThumb2",
+      "LeftIndex1",
+      "LeftIndex2",
+      "LeftMiddle1",
+      "LeftMiddle2",
+      "LeftRing1",
+      "LeftPinky1",
+      "LeftUpperLeg",
+      "LeftLowerLeg",
+      "LeftFoot",
+      "LeftToes",
+      "RightShoulder",
+      "RightUpperArm",
+      "RightLowerArm",
+      "RightHand",
+      "RightThumb1",
+      "RightThumb2",
+      "RightIndex1",
+      "RightIndex2",
+      "RightMiddle1",
+      "RightMiddle2",
+      "RightRing1",
+      "RightPinky1",
+      "RightUpperLeg",
+      "RightLowerLeg",
+      "RightFoot",
+      "RightToes",
+      "SkirtFront1",
+      "SkirtFront2",
+      "SkirtBack1",
+      "SkirtBack2",
+      "SkirtLeft",
+      "SkirtRight",
+      "Cloak1",
+      "Cloak2",
+      "Hood",
+      "Bag",
+      "PropR",
+      "PropL"
+    ]
+  },
+  "nodes": {
+    "LOD0": "lf_civilian_ferryman_LOD0",
+    "LOD1": "lf_civilian_ferryman_LOD1",
+    "LOD2": "lf_civilian_ferryman_LOD2"
+  },
+  "materials": [
+    "lf_civilian_ferryman_body",
+    "lf_civilian_ferryman_hair",
+    "lf_civilian_ferryman_cloth",
+    "lf_civilian_ferryman_gear"
+  ],
+  "paintedLightMix": 0.4,
+  "shading": "albedo * mix(1, lambert(sun), paintedLightMix): the atlas carries the painted light",
+  "textures": {
+    "lf_civilian_ferryman_color.jpg": 2048
+  },
+  "bounds_m": {
+    "min": [
+      -0.364,
+      -0.202,
+      0.006
+    ],
+    "max": [
+      0.365,
+      0.197,
+      1.825
+    ]
+  },
+  "clips": {
+    "lf_civilian_cage_sit": {
+      "seconds": 5.4,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0
+    },
+    "lf_civilian_cage_stand": {
+      "seconds": 4.8,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.03,
+        "Right": 0.04
+      },
+      "ikOverreach_m": 0.0518,
+      "loopSeamMaxQuatDiff": 0.0
+    },
+    "lf_civilian_cage_wait": {
+      "seconds": 6.1,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.01
+      },
+      "ikOverreach_m": 0.0002,
+      "loopSeamMaxQuatDiff": 0.0
+    },
+    "lf_civilian_react": {
+      "seconds": 1.4,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_civilian_stand_up": {
+      "seconds": 2.2,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 33.22,
+        "Right": 32.98
+      },
+      "ikOverreach_m": 0.1089
+    },
+    "lf_civilian_exit": {
+      "seconds": 2.8,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 1.0,
+      "strideLength_m": 1.12,
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 20.0
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_civilian_follow": {
+      "seconds": 1.1,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 1.2,
+      "strideLength_m": 1.32,
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0
+    },
+    "lf_civilian_follow_tired": {
+      "seconds": 1.25,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 0.95,
+      "strideLength_m": 1.1875,
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 15.83
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0
+    },
+    "lf_civilian_wait": {
+      "seconds": 4.4,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0001,
+      "loopSeamMaxQuatDiff": 0.0
+    },
+    "lf_civilian_look_back": {
+      "seconds": 1.6,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_civilian_arrive": {
+      "seconds": 2.6,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_civilian_thank": {
+      "seconds": 2.3,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0
+    }
+  },
+  "sockets": {
+    "hand_r": [
+      -0.359,
+      0.862,
+      0.025
+    ],
+    "hand_l": [
+      0.359,
+      0.862,
+      0.025
+    ],
+    "head_top": [
+      0.0,
+      1.824,
+      0.0
+    ]
+  },
+  "variants": {},
+  "coordinateConvention": {
+    "up": "+Y",
+    "forward": "+Z",
+    "unit": "metre",
+    "note": "Blender -Y forward exported to glTF +Z; feet on y=0, root at the origin"
+  },
+  "notes": ""
+}

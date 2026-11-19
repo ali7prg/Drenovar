@@ -215,6 +215,35 @@ def finish(AID, C, R, J, B, lo0, p_png, ITER, log):
     keep0 = set(deform)
     n0, M0 = HR.remap(names, M, keep0)
     HR.assign_groups(lo0, n0, M0)
+    # ---- hand-held weapons (squad): own small material, rigid on PropR / PropL
+    weapon = C.get("weapon")
+    if weapon:
+        import hv2_props as HP
+        atlas = paths.texture_master(GROUP, f"{AID}_props.jpg")
+        HP.build_atlas(atlas)
+        pm = core.material(f"{AID}_prop", base_tex=core.load_image(atlas), rough=0.6)
+        kinds = {"sword": ["sword"], "spear": ["spear", "shield"], "bow": ["bow"]}[weapon]
+        pobjs = []
+        for kd in kinds:
+            for nm, V, Fc, vuv, bone in HP.build(kd, B["hand_bones"], J):
+                luv = HP._loops_uv(Fc, vuv)
+                ob = core.mesh_object(f"{AID}_{nm}", V, Fc, uvs=luv)
+                ob.data.materials.append(mats[0])
+                ob.data.materials.append(mats[1])
+                ob.data.materials.append(mats[2])
+                ob.data.materials.append(mats[3])
+                ob.data.materials.append(pm)
+                ob.data.polygons.foreach_set("material_index", np.full(len(ob.data.polygons), 4, np.int32))
+                HR.groups_from_dicts(ob, [{bone: 1.0}] * len(V))
+                pobjs.append(ob)
+        if pobjs:
+            lo0.data.materials.append(pm)
+            # UV map names must match for join
+            for ob in pobjs:
+                ob.data.uv_layers[0].name = lo0.data.uv_layers.active.name
+            lo0 = core.join([lo0] + pobjs, name=f"{AID}_LOD0")
+            mats.append(pm)
+            log("props", kinds, core.tri_count(lo0), "tris with props")
     parent_to(lo0, arm)
     budget = {"civilian": (12000, 6000, 2200), "soldier": (14000, 7000, 2500)}[kind]
     lod1 = lod_copy(lo0, int(budget[1] * 0.97), HR.LOD1_KEEP, f"{AID}_LOD1")

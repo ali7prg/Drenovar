@@ -618,6 +618,12 @@ func captive_visual(captive: Dictionary) -> String:
 		return String(variant.visual)
 	return String(captive.get("visual", "miller"))
 
+## Look variation of one captive (tint / hidden accessory / height scale), {} when none.
+func captive_variant(captive: Dictionary) -> Dictionary:
+	var id := String(captive.get("id", ""))
+	var variant: Variant = variants.get("captives", {}).get(id, variants.get(id))
+	return variant if variant is Dictionary else {}
+
 func update_captives(site_id: String, poi: Dictionary, anchor: Dictionary, now: float, delta: float, near: bool) -> void:
 	var people: Array = poi.get("captives", [])
 	var cage_pos: Vector3 = anchor.get("cage", anchor.get("center", Vector3.ZERO))
@@ -634,7 +640,11 @@ func update_captives(site_id: String, poi: Dictionary, anchor: Dictionary, now: 
 				drop(id)
 			continue
 		var visual := captive_visual(person)
-		var actor := rig(id, ASSETS + "humans/lf_civilian_%s.glb" % visual)
+		var look := captive_variant(person)
+		var fresh := not rigs.has(id)
+		var actor := rig(id, ASSETS + "humans/lf_civilian_%s.glb" % visual, "", float(look.get("scale", 1.0)))
+		if fresh:
+			actor.variant = look
 		if choreo_owns(id):
 			show_actor(actor, actor.position, near or arriving)
 			continue

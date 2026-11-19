@@ -33,7 +33,7 @@ CHARS = {
         ],
         acc=[
             dict(kind="band", name="armband", side="l", seg="upper_arm", t=0.55, width=0.065,
-                 color=(0.24, 0.36, 0.22), material="cloth"),
+                 color=(0.24, 0.36, 0.22), material="gear"),
             dict(kind="belt", name="apron_tie", z=1.115, height=0.03, offset=0.016, material="cloth"),
             dict(kind="bow", name="apron_bow", z=1.10, tails=0.36, material="cloth"),
             dict(kind="neck_strap", name="apron_strap", z0=1.425, material="cloth"),
@@ -55,9 +55,9 @@ CHARS = {
         build=dict(stocky=0.0, belly=0.0, torso_depth=1.0, head_w=0.97, beard=None, hair="long_under_hood", hair_scale=0.6, torso_max=1.12, palm_len=0.084),
         garments=[
             dict(kind="skirt", name="dress", closed=True, z_top=1.03, hem=(0.075, 0.07, 0.065), offset=0.010, fit="run",
-                 fit_max=0.255, flare=0.05, material="body", thickness=0.005, nu=40, nv=20, ragged=0.004, slope=0.10,
+                 fit_max=0.30, flare=0.075, material="body", thickness=0.005, nu=40, nv=20, ragged=0.004, slope=0.10,
                  thigh=0.35),
-            dict(kind="cloak", name="cloak", z_top=1.37, wrap=(48, 312), offset=0.022, flare=0.05, material="cloth",
+            dict(kind="cloak", name="cloak", z_top=1.37, wrap=(48, 312), offset=0.010, flare=0.015, material="cloth",
                  hem_pts=[(48, 0.36), (95, 0.36), (112, 1.12), (180, 1.10)], thickness=0.006, nu=36, nv=20),
             dict(kind="hood", name="hood", material="cloth", thick=0.040, tris=1000),
         ],
@@ -89,7 +89,7 @@ CHARS = {
             dict(kind="belt", name="rope_belt", z=1.0, height=0.05, offset=0.022, material="gear"),
             dict(kind="coil", name="rope_coil", at=(-0.085, -0.17, 0.99), rx=0.05, rz=0.20, loops=4, r=0.011,
                  material="gear", toggle=True),
-            dict(kind="band", name="armband", side="l", seg="upper_arm", t=0.5, width=0.06, material="cloth"),
+            dict(kind="band", name="armband", side="l", seg="upper_arm", t=0.5, width=0.06, material="gear"),
         ],
         portrait=dict(eye_r=(1435, 145), eye_l=(1466, 143.5), nose=(1455, 154.5), mouth=(1454, 169), chin=(1452, 191)),
     ),
@@ -105,7 +105,7 @@ CHARS = {
                hand_len=0.084, hand_scale=0.92, foot_len=0.245, toe_out_deg=8.0),
         build=dict(stocky=0.0, belly=0.0, torso_depth=0.95, head_w=0.96, beard=None, hair="bun", torso_max=1.15, palm_len=0.084),
         garments=[
-            dict(kind="cloak", name="capelet", z_top=1.43, wrap=(22, 338), offset=0.024, flare=0.035, material="cloth",
+            dict(kind="cloak", name="capelet", z_top=1.43, wrap=(22, 338), offset=0.010, flare=0.0, material="cloth",
                  hem_pts=[(22, 1.17), (90, 1.15), (120, 1.12), (180, 1.11)], thickness=0.006, nu=36, nv=14),
             dict(kind="skirt", name="tunic_hem", closed=True, z_top=0.98, hem=(0.83, 0.82, 0.82), offset=0.010, fit="run",
                  fit_max=0.22, flare=0.02, material="body", thickness=0.004, thigh=0.45),
@@ -143,7 +143,7 @@ CHARS = {
         acc=[
             dict(kind="belt", name="apron_belt", z=1.05, height=0.035, offset=0.016, material="gear"),
             dict(kind="hammer", name="hammer", at=(-0.10, -0.17, 0.92), len=0.25, toggle=True),
-            dict(kind="band", name="armband", side="r", seg="upper_arm", t=0.80, width=0.05, material="cloth"),
+            dict(kind="band", name="armband", side="r", seg="upper_arm", t=0.80, width=0.05, material="gear"),
             dict(kind="neck_strap", name="apron_strap", z0=1.37, material="gear"),
         ],
         portrait=dict(eye_r=(928, 598), eye_l=(963, 595.5), nose=(951.5, 609.5), mouth=(954, 626), chin=(955.5, 649)),

@@ -1,0 +1,902 @@
+{
+ "schemaVersion": 2,
+ "note": "captive id -> civilian visual (lf_civilian_<visual>.glb) + look variation. tint.<group> multiplies the albedo of materials named *_<group> (cloth = tintable garments, hair = hair and beard; the emerald rescue band is *_gear and never tinted); hide = bones scaled to 0 (Bag carries the toggleable accessory); scale = uniform model scale. Applied by actor_rig.apply_look via actor_director.captive_variant.",
+ "visuals": [
+  "cooper",
+  "courier",
+  "ferryman",
+  "herbalist",
+  "miller",
+  "quarry_worker"
+ ],
+ "captives": {
+  "lf_captive_01_a": {
+   "visual": "courier",
+   "name": "Лада",
+   "role": "возница",
+   "variant": 0,
+   "tint": {
+    "cloth": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "hair": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "tintNames": {
+    "cloth": "as_painted",
+    "hair": "as_painted"
+   },
+   "hide": [],
+   "scale": 1.0
+  },
+  "lf_captive_01_b": {
+   "visual": "ferryman",
+   "name": "Тим",
+   "role": "помощник конюха",
+   "variant": 0,
+   "tint": {
+    "cloth": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "hair": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "tintNames": {
+    "cloth": "as_painted",
+    "hair": "as_painted"
+   },
+   "hide": [],
+   "scale": 1.0
+  },
+  "lf_captive_01_c": {
+   "visual": "miller",
+   "name": "Сава",
+   "role": "пекарь",
+   "variant": 0,
+   "tint": {
+    "cloth": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "hair": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "tintNames": {
+    "cloth": "as_painted",
+    "hair": "as_painted"
+   },
+   "hide": [],
+   "scale": 1.0
+  },
+  "lf_captive_02_a": {
+   "visual": "quarry_worker",
+   "name": "Орина",
+   "role": "резчица",
+   "variant": 0,
+   "tint": {
+    "cloth": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "hair": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "tintNames": {
+    "cloth": "as_painted",
+    "hair": "as_painted"
+   },
+   "hide": [],
+   "scale": 1.0
+  },
+  "lf_captive_02_b": {
+   "visual": "cooper",
+   "name": "Бран",
+   "role": "каменщик",
+   "variant": 0,
+   "tint": {
+    "cloth": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "hair": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "tintNames": {
+    "cloth": "as_painted",
+    "hair": "as_painted"
+   },
+   "hide": [],
+   "scale": 1.0
+  },
+  "lf_captive_02_c": {
+   "visual": "herbalist",
+   "name": "Мила",
+   "role": "собирательница трав",
+   "variant": 0,
+   "tint": {
+    "cloth": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "hair": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "tintNames": {
+    "cloth": "as_painted",
+    "hair": "as_painted"
+   },
+   "hide": [],
+   "scale": 1.0
+  },
+  "lf_captive_03_a": {
+   "visual": "herbalist",
+   "name": "Энна",
+   "role": "ткачиха",
+   "variant": 1,
+   "tint": {
+    "cloth": [
+     1.12,
+     0.9,
+     0.8
+    ],
+    "hair": [
+     1.32,
+     0.88,
+     0.7
+    ]
+   },
+   "tintNames": {
+    "cloth": "russet",
+    "hair": "auburn"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.98
+  },
+  "lf_captive_03_b": {
+   "visual": "ferryman",
+   "name": "Радек",
+   "role": "кровельщик",
+   "variant": 1,
+   "tint": {
+    "cloth": [
+     0.86,
+     0.8,
+     0.72
+    ],
+    "hair": [
+     1.18,
+     0.96,
+     0.82
+    ]
+   },
+   "tintNames": {
+    "cloth": "weathered_oak",
+    "hair": "chestnut"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.97
+  },
+  "lf_captive_03_c": {
+   "visual": "miller",
+   "name": "Ивар",
+   "role": "ученик писаря",
+   "variant": 1,
+   "tint": {
+    "cloth": [
+     0.78,
+     0.78,
+     0.78
+    ],
+    "hair": [
+     0.62,
+     0.6,
+     0.6
+    ]
+   },
+   "tintNames": {
+    "cloth": "smoke",
+    "hair": "black"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.98
+  },
+  "lf_captive_04_a": {
+   "visual": "courier",
+   "name": "Верна",
+   "role": "следопыт",
+   "variant": 1,
+   "tint": {
+    "cloth": [
+     0.84,
+     1.0,
+     0.88
+    ],
+    "hair": [
+     1.55,
+     1.32,
+     1.02
+    ]
+   },
+   "tintNames": {
+    "cloth": "muted_emerald",
+    "hair": "dark_blond"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.98
+  },
+  "lf_captive_04_b": {
+   "visual": "miller",
+   "name": "Олек",
+   "role": "носильщик",
+   "variant": 2,
+   "tint": {
+    "cloth": [
+     1.08,
+     0.98,
+     0.78
+    ],
+    "hair": [
+     1.18,
+     0.96,
+     0.82
+    ]
+   },
+   "tintNames": {
+    "cloth": "aged_bronze",
+    "hair": "chestnut"
+   },
+   "hide": [],
+   "scale": 1.03
+  },
+  "lf_captive_04_c": {
+   "visual": "quarry_worker",
+   "name": "Нела",
+   "role": "гончар",
+   "variant": 1,
+   "tint": {
+    "cloth": [
+     1.06,
+     1.06,
+     1.04
+    ],
+    "hair": [
+     1.18,
+     0.96,
+     0.82
+    ]
+   },
+   "tintNames": {
+    "cloth": "limestone",
+    "hair": "chestnut"
+   },
+   "hide": [],
+   "scale": 0.98
+  },
+  "lf_captive_05_a": {
+   "visual": "quarry_worker",
+   "name": "Дарна",
+   "role": "смолокур",
+   "variant": 2,
+   "tint": {
+    "cloth": [
+     1.12,
+     0.9,
+     0.8
+    ],
+    "hair": [
+     0.62,
+     0.6,
+     0.6
+    ]
+   },
+   "tintNames": {
+    "cloth": "russet",
+    "hair": "black"
+   },
+   "hide": [],
+   "scale": 1.02
+  },
+  "lf_captive_05_b": {
+   "visual": "ferryman",
+   "name": "Егор",
+   "role": "лодочник",
+   "variant": 2,
+   "tint": {
+    "cloth": [
+     0.9,
+     0.9,
+     0.98
+    ],
+    "hair": [
+     0.62,
+     0.6,
+     0.6
+    ]
+   },
+   "tintNames": {
+    "cloth": "dusk",
+    "hair": "black"
+   },
+   "hide": [],
+   "scale": 1.02
+  },
+  "lf_captive_05_c": {
+   "visual": "herbalist",
+   "name": "Рута",
+   "role": "портниха",
+   "variant": 2,
+   "tint": {
+    "cloth": [
+     0.9,
+     0.9,
+     0.98
+    ],
+    "hair": [
+     0.62,
+     0.6,
+     0.6
+    ]
+   },
+   "tintNames": {
+    "cloth": "dusk",
+    "hair": "black"
+   },
+   "hide": [],
+   "scale": 1.01
+  },
+  "lf_captive_06_a": {
+   "visual": "miller",
+   "name": "Федор",
+   "role": "углежог",
+   "variant": 3,
+   "tint": {
+    "cloth": [
+     0.86,
+     0.8,
+     0.72
+    ],
+    "hair": [
+     1.32,
+     0.88,
+     0.7
+    ]
+   },
+   "tintNames": {
+    "cloth": "weathered_oak",
+    "hair": "auburn"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.97
+  },
+  "lf_captive_06_b": {
+   "visual": "courier",
+   "name": "Ася",
+   "role": "сборщица ягод",
+   "variant": 2,
+   "tint": {
+    "cloth": [
+     1.08,
+     0.98,
+     0.78
+    ],
+    "hair": [
+     0.62,
+     0.6,
+     0.6
+    ]
+   },
+   "tintNames": {
+    "cloth": "aged_bronze",
+    "hair": "black"
+   },
+   "hide": [],
+   "scale": 1.02
+  },
+  "lf_captive_06_c": {
+   "visual": "cooper",
+   "name": "Марен",
+   "role": "ремесленник",
+   "variant": 1,
+   "tint": {
+    "cloth": [
+     0.86,
+     0.8,
+     0.72
+    ],
+    "hair": [
+     1.2,
+     1.18,
+     1.16
+    ]
+   },
+   "tintNames": {
+    "cloth": "weathered_oak",
+    "hair": "ash"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.98
+  },
+  "lf_captive_07_a": {
+   "visual": "quarry_worker",
+   "name": "Лина",
+   "role": "рыбачка",
+   "variant": 3,
+   "tint": {
+    "cloth": [
+     0.9,
+     0.9,
+     0.98
+    ],
+    "hair": [
+     1.32,
+     0.88,
+     0.7
+    ]
+   },
+   "tintNames": {
+    "cloth": "dusk",
+    "hair": "auburn"
+   },
+   "hide": [],
+   "scale": 0.97
+  },
+  "lf_captive_07_b": {
+   "visual": "cooper",
+   "name": "Торен",
+   "role": "плотник",
+   "variant": 2,
+   "tint": {
+    "cloth": [
+     1.12,
+     0.9,
+     0.8
+    ],
+    "hair": [
+     1.35,
+     1.33,
+     1.3
+    ]
+   },
+   "tintNames": {
+    "cloth": "russet",
+    "hair": "salt_pepper"
+   },
+   "hide": [],
+   "scale": 1.02
+  },
+  "lf_captive_07_c": {
+   "visual": "herbalist",
+   "name": "Сима",
+   "role": "лекарка",
+   "variant": 3,
+   "tint": {
+    "cloth": [
+     1.08,
+     0.98,
+     0.78
+    ],
+    "hair": [
+     1.18,
+     0.96,
+     0.82
+    ]
+   },
+   "tintNames": {
+    "cloth": "aged_bronze",
+    "hair": "chestnut"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.97
+  },
+  "lf_captive_08_a": {
+   "visual": "herbalist",
+   "name": "Ярина",
+   "role": "певчая",
+   "variant": 4,
+   "tint": {
+    "cloth": [
+     0.86,
+     0.8,
+     0.72
+    ],
+    "hair": [
+     1.55,
+     1.32,
+     1.02
+    ]
+   },
+   "tintNames": {
+    "cloth": "weathered_oak",
+    "hair": "dark_blond"
+   },
+   "hide": [],
+   "scale": 1.02
+  },
+  "lf_captive_08_b": {
+   "visual": "ferryman",
+   "name": "Век",
+   "role": "пастух",
+   "variant": 3,
+   "tint": {
+    "cloth": [
+     1.06,
+     1.06,
+     1.04
+    ],
+    "hair": [
+     1.55,
+     1.32,
+     1.02
+    ]
+   },
+   "tintNames": {
+    "cloth": "limestone",
+    "hair": "dark_blond"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.99
+  },
+  "lf_captive_08_c": {
+   "visual": "quarry_worker",
+   "name": "Дина",
+   "role": "садовница",
+   "variant": 4,
+   "tint": {
+    "cloth": [
+     0.86,
+     0.8,
+     0.72
+    ],
+    "hair": [
+     1.55,
+     1.32,
+     1.02
+    ]
+   },
+   "tintNames": {
+    "cloth": "weathered_oak",
+    "hair": "dark_blond"
+   },
+   "hide": [],
+   "scale": 1.01
+  },
+  "lf_captive_09_a": {
+   "visual": "ferryman",
+   "name": "Мирен",
+   "role": "картограф",
+   "variant": 4,
+   "tint": {
+    "cloth": [
+     1.12,
+     0.9,
+     0.8
+    ],
+    "hair": [
+     1.32,
+     0.88,
+     0.7
+    ]
+   },
+   "tintNames": {
+    "cloth": "russet",
+    "hair": "auburn"
+   },
+   "hide": [],
+   "scale": 0.98
+  },
+  "lf_captive_09_b": {
+   "visual": "courier",
+   "name": "Бела",
+   "role": "сборщица коры",
+   "variant": 3,
+   "tint": {
+    "cloth": [
+     0.9,
+     0.9,
+     0.98
+    ],
+    "hair": [
+     1.32,
+     0.88,
+     0.7
+    ]
+   },
+   "tintNames": {
+    "cloth": "dusk",
+    "hair": "auburn"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.97
+  },
+  "lf_captive_09_c": {
+   "visual": "cooper",
+   "name": "Стас",
+   "role": "ученик кузнеца",
+   "variant": 3,
+   "tint": {
+    "cloth": [
+     0.9,
+     0.9,
+     0.98
+    ],
+    "hair": [
+     1.0,
+     1.0,
+     1.0
+    ]
+   },
+   "tintNames": {
+    "cloth": "dusk",
+    "hair": "as_painted"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.97
+  },
+  "lf_captive_10_a": {
+   "visual": "quarry_worker",
+   "name": "Грета",
+   "role": "каменотёс",
+   "variant": 5,
+   "tint": {
+    "cloth": [
+     1.08,
+     0.98,
+     0.78
+    ],
+    "hair": [
+     0.62,
+     0.6,
+     0.6
+    ]
+   },
+   "tintNames": {
+    "cloth": "aged_bronze",
+    "hair": "black"
+   },
+   "hide": [],
+   "scale": 0.99
+  },
+  "lf_captive_10_b": {
+   "visual": "cooper",
+   "name": "Леван",
+   "role": "обозный мастер",
+   "variant": 4,
+   "tint": {
+    "cloth": [
+     0.84,
+     1.0,
+     0.88
+    ],
+    "hair": [
+     1.2,
+     1.18,
+     1.16
+    ]
+   },
+   "tintNames": {
+    "cloth": "muted_emerald",
+    "hair": "ash"
+   },
+   "hide": [],
+   "scale": 1.01
+  },
+  "lf_captive_10_c": {
+   "visual": "herbalist",
+   "name": "Ника",
+   "role": "пекарь",
+   "variant": 5,
+   "tint": {
+    "cloth": [
+     1.06,
+     1.06,
+     1.04
+    ],
+    "hair": [
+     0.62,
+     0.6,
+     0.6
+    ]
+   },
+   "tintNames": {
+    "cloth": "limestone",
+    "hair": "black"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 0.99
+  },
+  "lf_captive_11_a": {
+   "visual": "courier",
+   "name": "Марта",
+   "role": "перевозчица",
+   "variant": 4,
+   "tint": {
+    "cloth": [
+     0.86,
+     0.8,
+     0.72
+    ],
+    "hair": [
+     1.18,
+     0.96,
+     0.82
+    ]
+   },
+   "tintNames": {
+    "cloth": "weathered_oak",
+    "hair": "chestnut"
+   },
+   "hide": [],
+   "scale": 1.01
+  },
+  "lf_captive_11_b": {
+   "visual": "ferryman",
+   "name": "Рен",
+   "role": "травник",
+   "variant": 5,
+   "tint": {
+    "cloth": [
+     0.78,
+     0.78,
+     0.78
+    ],
+    "hair": [
+     1.35,
+     1.33,
+     1.3
+    ]
+   },
+   "tintNames": {
+    "cloth": "smoke",
+    "hair": "salt_pepper"
+   },
+   "hide": [],
+   "scale": 1.01
+  },
+  "lf_captive_11_c": {
+   "visual": "herbalist",
+   "name": "Алва",
+   "role": "швея",
+   "variant": 6,
+   "tint": {
+    "cloth": [
+     0.84,
+     1.0,
+     0.88
+    ],
+    "hair": [
+     1.18,
+     0.96,
+     0.82
+    ]
+   },
+   "tintNames": {
+    "cloth": "muted_emerald",
+    "hair": "chestnut"
+   },
+   "hide": [],
+   "scale": 1.0
+  },
+  "lf_captive_12_a": {
+   "visual": "quarry_worker",
+   "name": "Тала",
+   "role": "хранительница записей",
+   "variant": 6,
+   "tint": {
+    "cloth": [
+     0.84,
+     1.0,
+     0.88
+    ],
+    "hair": [
+     1.18,
+     0.96,
+     0.82
+    ]
+   },
+   "tintNames": {
+    "cloth": "muted_emerald",
+    "hair": "chestnut"
+   },
+   "hide": [],
+   "scale": 1.03
+  },
+  "lf_captive_12_b": {
+   "visual": "ferryman",
+   "name": "Мирко",
+   "role": "охотник",
+   "variant": 6,
+   "tint": {
+    "cloth": [
+     1.08,
+     0.98,
+     0.78
+    ],
+    "hair": [
+     0.62,
+     0.6,
+     0.6
+    ]
+   },
+   "tintNames": {
+    "cloth": "aged_bronze",
+    "hair": "black"
+   },
+   "hide": [
+    "Bag"
+   ],
+   "scale": 1.03
+  },
+  "lf_captive_12_c": {
+   "visual": "quarry_worker",
+   "name": "Эда",
+   "role": "мельничная работница",
+   "variant": 7,
+   "tint": {
+    "cloth": [
+     0.78,
+     0.78,
+     0.78
+    ],
+    "hair": [
+     1.32,
+     0.88,
+     0.7
+    ]
+   },
+   "tintNames": {
+    "cloth": "smoke",
+    "hair": "auburn"
+   },
+   "hide": [],
+   "scale": 0.98
+  }
+ }
+}

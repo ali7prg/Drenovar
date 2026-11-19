@@ -393,7 +393,7 @@ def build_objects(R, J):
         ears = (np.abs(q[:, 0]) > 0.06) & (q[:, 2] > -0.06) & (q[:, 2] < 0.03) & (np.abs(q[:, 1]) < 0.04)
         hands = vv[:, 2] < -10
         return np.where(face | ears, 1.0, 0.0) + hands
-    t_body = {"civilian": 6400, "soldier": 6600}[C["kind"]]
+    t_body = {"civilian": 6400, "soldier": 6400}[C["kind"]]
     HBL.decimate(body, t_body, protect=prot, factor=1.0)
     HBL.smooth_shade(body)
     log("body tris", core.tri_count(body))
@@ -456,7 +456,7 @@ def build_objects(R, J):
         objs.append((ob, mat, "acc"))
     # ---- LOD0 triangle budget: thin the garment sheets first (flat cloth keeps its outline), then the body
     total = sum(core.tri_count(o) for o, _, _ in objs)
-    limit = int(BUDGET[0] * 0.985)
+    limit = int(BUDGET[0] * 0.985) - (420 if C.get("weapon") else 0)   # hand-held props are added later
     if total > limit:
         gar = [(ob_, k_) for ob_, _, k_ in objs if k_ in ("garment", "acc")]
         g_tris = sum(core.tri_count(ob_) for ob_, _ in gar)
@@ -558,6 +558,14 @@ def texture(lo0, R, J, pinfo0=None):
         fm[int(chin_y + 0.35 * (chin_y - cam.lm2[0][1])):] = False
         fm[:3] = fm[-3:] = False
         fm[:, :3] = fm[:, -3:] = False
+        # never project the inset's parchment / studio background onto hair or face
+        img_ = cam.image
+        border = np.concatenate([img_[:4].reshape(-1, 3), img_[:, :4].reshape(-1, 3), img_[:, -4:].reshape(-1, 3)])
+        bgc = np.median(border, 0)
+        dist = np.linalg.norm(img_[..., :3] - bgc, axis=-1)
+        from scipy import ndimage as _ndi
+        fg = _ndi.binary_opening(dist > 0.10, iterations=1)
+        fm &= _ndi.binary_erosion(fg, iterations=2)
         cam.mask = fm
 
         d2, col2, ws2, per2 = HT.project_views(T, verts, tris, [cam], lo=0.40, hi=0.65, erode=0,

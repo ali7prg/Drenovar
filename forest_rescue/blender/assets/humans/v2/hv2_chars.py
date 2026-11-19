@@ -186,8 +186,8 @@ CHARS = {
                  fit=None, flare=0.02, material="cloth", thickness=0.005, nu=18, nv=22, slope=0.0, thigh=0.55),
             dict(kind="skirt", name="tabard_back", z_top=1.40, wrap=(140, 220), hem=(0.45, 0.45, 0.45), offset=0.016,
                  fit=None, flare=0.02, material="cloth", thickness=0.005, nu=18, nv=22, slope=0.0, thigh=0.4),
-            dict(kind="skirt", name="mail_skirt", closed=True, z_top=1.02, hem=(0.47, 0.46, 0.46), offset=0.010,
-                 fit="run", fit_max=0.24, flare=0.03, material="body", thickness=0.005, thigh=0.5),
+            dict(kind="skirt", name="mail_skirt", closed=True, z_top=1.02, hem=(0.395, 0.385, 0.38), offset=0.010,
+                 fit="run", fit_max=0.27, flare=0.05, material="body", thickness=0.005, thigh=0.5),
         ],
         acc=[
             dict(kind="belt", name="belt", z=1.02, height=0.04, offset=0.022, material="gear"),

@@ -308,6 +308,18 @@ def finish(AID, C, R, J, B, lo0, p_png, ITER, log):
             m["markers"] = extra["markers"]
         else:
             m["markers"] = {}
+        if speed <= 0:
+            # standing / acting clips: a foot counts as planted while its ankle target is still
+            # (deliberate steps - lunge, recoil, death fall - are excluded from the slip figure)
+            contacts = []
+            for i in range(len(params)):
+                c = {}
+                for s_, S_ in (("l", "Left"), ("r", "Right")):
+                    a0 = np.array([params[max(i - 1, 0)][f"{s_}_f{k}"] for k in "xyz"])
+                    a1 = np.array([params[min(i + 1, len(params) - 1)][f"{s_}_f{k}"] for k in "xyz"])
+                    still = np.linalg.norm(a1 - a0) * HA.FPS / 2 < 0.03 and params[i][f"{s_}_fz"] < 0.01
+                    c[S_] = (bool(still), None, "flat")
+                contacts.append(c)
         slip = foot_slip(sk, cx, final_M, contacts, times, speed)
         m["footSlip_mm"] = slip
         m["ikOverreach_m"] = round(max(HA.OVERREACH[0], 0.0), 4)

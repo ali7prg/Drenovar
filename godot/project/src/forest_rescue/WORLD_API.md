@@ -29,10 +29,34 @@ func unpin_area(id: String) -> void
 func focus_bounds() -> Rect2                        # camera-allowed XZ rect (city ±56 + forest ±112)
 func set_boss_arena_state(state: String) -> void    # locked|available|active|defeated (dressing)
 func set_site_post_state(site_id: String, step: int) -> void  # after-rescue dressing (open door, ribbons…)
-func perf_snapshot() -> Dictionary                  # {full_chunks, proxy_chunks, instances, tris_est}
+func perf_snapshot() -> Dictionary                  # {full_chunks, proxy_chunks, instances, tris_est, …}
+func focus_on(position: Vector3, zoom := -1.0) -> void      # v2: city-camera fly-to (no new camera mode)
+func focus_site(site_id: String, zoom := 42.0) -> void
+func focus_entrance(zoom := 46.0) -> void
+func set_sight_points(points: Array) -> void          # v2: extra sight circles Vector4(x, z, radius, strength)
+func resource_tree_position(id: String) -> Vector3    # rendered (= pick) position of a resource tree
+func area_displayed(x: float, z: float, radius: float) -> bool   # v3: any displayed-clear fog cell near (x, z)
+func kit_status() -> Dictionary
+func layout_info() -> Dictionary                      # {layoutId, layoutVersion, seed, remapStats, apiVersion, flag…}
 ```
 
 Coordinates: game XZ = atlas XZ (`delivery/data/world-atlas.json`), +Y up, north = -Z.
 
+`perf_snapshot()` (v3) also reports `landmark_tris` (visible landmark/arena triangles at the chosen LOD).
+
 ## Changelog
 * v1 (2026-11-18) initial.
+* v2 (2026-11-18) additive: focus_on/focus_site/focus_entrance, set_sight_points, kit_status, layout_info.
+* v3 (2026-11-19) world layer v2 (kit v2 + layout v2 + fog v2); API additive only:
+  - `area_displayed(x, z, radius)`; `perf_snapshot().landmark_tris`; `API_VERSION` 3.
+  - Layout `lf_forest_layout_v2` (`data/forest_rescue/world/forest_layout_v2.json`, builder
+    `world/tools/build_forest_layout.gd`): every resource id kept; outer trees moved off the old
+    spiral to natural spots (≤ 4 m, clearance pushes ≤ 6.5 m keep the stump inside its ±6.7 m
+    prepared-site plot); inner (±56) trees jittered ≤ 3.5 m off the spiral rows (same side of every
+    plot square, ≥ 1.8 m off town roads; if the player's property covers the jittered spot the tree
+    is drawn at its original spot). `selectable_trees[].p` and `resource_tree_position()` are the
+    rendered positions; the pickable set is decided on the original spot exactly as the legacy forest.
+  - Fog v2: `fog_cleared_at()` / projection rules unchanged (server cells only, the camera never
+    reveals, hall I–II = whole outer forest fogged, entrance corridor 1200 ms). Visual changes only.
+  - Actors under `actors_root()` keep the canopy fade; trees/landmarks under fog now erode/darken
+    by fog density (no gameplay effect).

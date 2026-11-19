@@ -766,14 +766,18 @@ def with_overrides(cid, fn):
             b0 = base_cache[tk]
             for k in SCALARS:
                 if k in prm:
-                    ch[k] = ch.get(k, 0.0) + (prm[k] - b0.get(k, 0.0)) * w
+                    tgt = prm[k]
+                    if k == "pz":
+                        tgt = min(tgt, -0.02)          # legs must keep reaching the planted feet (no overreach)
+                    ch[k] = ch.get(k, 0.0) + (tgt - b0.get(k, 0.0)) * w
             tail = ch.get("tail", [(0.0, 0.0)] * 12)
             tb = b0.get("tail", [(0.0, 0.0)] * 12)
             ch["tail"] = [(tail[i][0] + (prm["ty0"] + prm["ty1"] * i / 11.0 - tb[i][0]) * w,
                            tail[i][1] + (prm["tp0"] + prm["tp1"] * i / 11.0 - tb[i][1]) * w) for i in range(12)]
             # feet: step to the painted placement (y), lifted, then hold; step back in the out window
-            for s_, key in (("L", "bLy"), ("R", "bRy")):
-                dy = prm[key] - float(np.asarray(b0[f"ball_{s_}"])[1])
+            # (turn clips keep their own world-planted stepping: a held local offset would slide in the yawing frame)
+            for s_, key in ((() if cid.startswith("lf_boss_turn") else (("L", "bLy"), ("R", "bRy")))):
+                dy = float(np.clip(prm[key] - float(np.asarray(b0[f"ball_{s_}"])[1]), -0.75, 0.75))
                 dz_t = max(prm["b" + s_ + "z"] - 0.17, 0.0)
                 if abs(dy) < 0.05 and dz_t < 0.05:
                     continue

@@ -207,8 +207,8 @@
       },
       "ikOverreach_m": 0.0,
       "loopSeamMaxQuatDiff": 0.0,
-      "groundSpeed_mps": 1.6,
-      "strideLength_m": 2.56
+      "groundSpeed_mps": 1.423,
+      "strideLength_m": 2.277
     },
     "lf_boss_turn_left": {
       "seconds": 1.3,
@@ -258,9 +258,9 @@
       "markers": {},
       "footSlip_m": {
         "L": 0.0,
-        "R": 0.0
+        "R": 0.0102
       },
-      "ikOverreach_m": 0.0
+      "ikOverreach_m": 0.0604
     },
     "lf_boss_hit": {
       "seconds": 0.55,
@@ -371,7 +371,7 @@
       "ikOverreach_m": 0.0
     }
   },
-  "glbBytes": 14271868,
+  "glbBytes": 14280288,
   "textureProjection": {
     "coverageByView": {
       "left": 0.2754116039377006,

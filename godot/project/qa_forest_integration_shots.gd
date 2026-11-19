@@ -219,10 +219,11 @@ func run() -> void:
 	# (captive_variants.json + variant masks), seated, then leaving through the door. Rigs are
 	# built with the game's own Rig/look code on open town ground (presentation check only).
 	if wanted("variety"):
-		await fresh("site01_discovered")
+		# Open, revealed, flat ground: the south half of the arena floor in the completed state.
+		await fresh("completed")
 		var Rig = load("res://src/forest_rescue/game/actor_rig.gd")
 		var cases := [["lf_site_12", "root"], ["lf_site_08", "iron"], ["lf_site_07", "oak"]]
-		var base := Vector3(-24, 0, -36)
+		var base := Vector3(68.6, 0, -72.0)
 		var built: Array = []
 		for i in cases.size():
 			var site_id: String = cases[i][0]

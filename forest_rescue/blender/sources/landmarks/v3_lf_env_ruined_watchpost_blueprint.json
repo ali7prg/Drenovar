@@ -1,0 +1,305 @@
+{
+ "id": "lf_env_ruined_watchpost",
+ "source": "art/06_environment_landmarks.png",
+ "main_view_box_sheet_px": [
+  760,
+  255,
+  1240,
+  575
+ ],
+ "doc": "lf_env_ruined_watchpost v3 — crumbled limestone watchpost: arched gate wall with voussoirs, ivy-covered\nside wall, raised masonry terrace, broken stair descending to the right, broken wall stubs and pillars, rubble,\ngrass (art/06 main view + front/side insets; art/01 ruin arches).\n\nBlueprint (art/06 front inset): terrace 1.8 m high, arch opening 1.3 x 2.4 m on the terrace, gate wall top\n~5.5 m, stair risers 0.22 m / treads 0.36 m (7 steps). Camera: f fixed to the sheet focal length, pose from\n8 blueprint corners (terrace, arch springers/apex, stair nosings, wall stubs). Wall height profiles are\nback-projected from the painted silhouette onto the wall planes. Blender: front faces -Y, Z up.",
+ "camera_correspondences": [
+  {
+   "world_blender_m": [
+    -2.0,
+    -2.0,
+    0.0
+   ],
+   "painting_crop_px": [
+    145.0,
+    280.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -2.0,
+    -2.0,
+    1.8
+   ],
+   "painting_crop_px": [
+    145.0,
+    191.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    2.0,
+    -2.0,
+    1.8
+   ],
+   "painting_crop_px": [
+    328.0,
+    191.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -0.5,
+    0.0,
+    1.8
+   ],
+   "painting_crop_px": [
+    215.0,
+    182.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    0.5,
+    0.0,
+    1.8
+   ],
+   "painting_crop_px": [
+    248.0,
+    182.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    0.0,
+    0.0,
+    4.300000000000001
+   ],
+   "painting_crop_px": [
+    230.0,
+    73.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    5.0,
+    -1.6,
+    0.0
+   ],
+   "painting_crop_px": [
+    473.0,
+    305.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -4.1,
+    -1.2,
+    0.0
+   ],
+   "painting_crop_px": [
+    68.0,
+    270.0
+   ]
+  }
+ ],
+ "camera_options": {
+  "f0": 1921.0,
+  "fix_f": true,
+  "free_pp": true,
+  "pp_prior": 0.06,
+  "init_centre": [
+   -6.0,
+   -40.0,
+   14.0
+  ],
+  "init_target": [
+   0.5,
+   0.0,
+   2.0
+  ]
+ },
+ "insets": {
+  "front": {
+   "box": [
+    1242,
+    302,
+    1390,
+    394
+   ],
+   "dir": [
+    0,
+    1,
+    0
+   ],
+   "fit": "width"
+  },
+  "side": {
+   "box": [
+    1392,
+    302,
+    1514,
+    394
+   ],
+   "dir": [
+    1,
+    0,
+    0
+   ],
+   "fit": "width"
+  }
+ },
+ "swatches": {
+  "stone": {
+   "box": [
+    1365,
+    418,
+    1495,
+    485
+   ],
+   "metres": 1.6
+  },
+  "stone_face": {
+   "box": [
+    1420,
+    430,
+    1470,
+    470
+   ],
+   "metres": 0.8
+  },
+  "stair": {
+   "box": [
+    1370,
+    500,
+    1495,
+    552
+   ],
+   "metres": 1.5
+  },
+  "ground": {
+   "box": [
+    880,
+    550,
+    960,
+    570
+   ],
+   "metres": 2.0
+  },
+  "gravel": {
+   "box": [
+    880,
+    550,
+    960,
+    570
+   ],
+   "metres": 2.0
+  },
+  "grass": {
+   "box": [
+    800,
+    530,
+    850,
+    560
+   ],
+   "metres": 1.2
+  }
+ },
+ "dimensions_m": {
+  "TER_H": 1.8,
+  "TER_Y": -2.0,
+  "ARCH": {
+   "x0": -0.5,
+   "x1": 0.5,
+   "spring": 3.6500000000000004,
+   "y": 0.0,
+   "t": 0.85
+  },
+  "F_PAINT": 1921.0,
+  "CORR": [
+   [
+    [
+     905,
+     535
+    ],
+    [
+     -2.0,
+     -2.0,
+     0.0
+    ]
+   ],
+   [
+    [
+     905,
+     446
+    ],
+    [
+     -2.0,
+     -2.0,
+     1.8
+    ]
+   ],
+   [
+    [
+     1088,
+     446
+    ],
+    [
+     2.0,
+     -2.0,
+     1.8
+    ]
+   ],
+   [
+    [
+     975,
+     437
+    ],
+    [
+     -0.5,
+     0.0,
+     1.8
+    ]
+   ],
+   [
+    [
+     1008,
+     437
+    ],
+    [
+     0.5,
+     0.0,
+     1.8
+    ]
+   ],
+   [
+    [
+     990,
+     328
+    ],
+    [
+     0.0,
+     0.0,
+     4.300000000000001
+    ]
+   ],
+   [
+    [
+     1233,
+     560
+    ],
+    [
+     5.0,
+     -1.6,
+     0.0
+    ]
+   ],
+   [
+    [
+     828,
+     525
+    ],
+    [
+     -4.1,
+     -1.2,
+     0.0
+    ]
+   ]
+  ]
+ }
+}

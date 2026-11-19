@@ -1,0 +1,357 @@
+{
+ "id": "lf_env_hunter_shelter",
+ "source": "art/06_environment_landmarks.png",
+ "main_view_box_sheet_px": [
+  815,
+  0,
+  1265,
+  268
+ ],
+ "doc": "lf_env_hunter_shelter v3 — abandoned hunter shelter (art/06): oak post-and-beam frame with king posts and\nbraces, mossy tiled gable roof (overlapping tile rows split into tile runs), plank back/gable walls, stone\nchimney, workbench, stump seat, woodpile, hanging net, ivy; dirt patch with stones.\n\nBlueprint: 5.6 x 3.6 m frame, eaves 2.0 m, ridge 3.6 m, roof overhang 0.3 m. Camera: f fixed to the sheet focal\nlength, pose from 9 frame corners (king post foot/apex, eave ends, front posts). Long axis = X, open side -Y.",
+ "camera_correspondences": [
+  {
+   "world_blender_m": [
+    -2.8,
+    0.0,
+    0.0
+   ],
+   "painting_crop_px": [
+    135.0,
+    222.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -2.8,
+    0.0,
+    3.6
+   ],
+   "painting_crop_px": [
+    135.0,
+    27.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -2.8499999999999996,
+    2.1,
+    1.73
+   ],
+   "painting_crop_px": [
+    55.0,
+    95.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -3.0999999999999996,
+    -2.1,
+    1.73
+   ],
+   "painting_crop_px": [
+    215.0,
+    93.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    3.0999999999999996,
+    -2.1,
+    1.73
+   ],
+   "painting_crop_px": [
+    435.0,
+    130.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    2.8,
+    -1.8,
+    0.0
+   ],
+   "painting_crop_px": [
+    407.0,
+    212.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    2.8,
+    -1.8,
+    2.0
+   ],
+   "painting_crop_px": [
+    407.0,
+    135.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    0.9,
+    -1.8,
+    0.0
+   ],
+   "painting_crop_px": [
+    315.0,
+    222.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    0.9,
+    -1.8,
+    2.0
+   ],
+   "painting_crop_px": [
+    315.0,
+    128.0
+   ]
+  }
+ ],
+ "camera_options": {
+  "f0": 1921.0,
+  "fix_f": true,
+  "free_pp": true,
+  "pp_prior": 0.06,
+  "init_centre": [
+   -14.0,
+   -24.0,
+   9.0
+  ],
+  "init_target": [
+   0.0,
+   0.0,
+   1.6
+  ]
+ },
+ "insets": {
+  "front": {
+   "box": [
+    1272,
+    12,
+    1392,
+    88
+   ],
+   "dir": [
+    0,
+    1,
+    0
+   ],
+   "fit": "width"
+  },
+  "side": {
+   "box": [
+    1418,
+    12,
+    1512,
+    88
+   ],
+   "dir": [
+    1,
+    0,
+    0
+   ],
+   "fit": "width"
+  }
+ },
+ "swatches": {
+  "roof": {
+   "box": [
+    1376,
+    104,
+    1505,
+    178
+   ],
+   "metres": 1.2
+  },
+  "wood": {
+   "box": [
+    1441,
+    222,
+    1461,
+    256
+   ],
+   "metres": 0.6
+  },
+  "wood_h": {
+   "box": [
+    1441,
+    222,
+    1461,
+    256
+   ],
+   "metres": 0.6,
+   "rotate": true
+  },
+  "stone": {
+   "box": [
+    1140,
+    30,
+    1160,
+    60
+   ],
+   "metres": 0.6
+  },
+  "ground": {
+   "plane": {
+    "origin": [
+     -1.0,
+     -4.2,
+     0.0
+    ],
+    "ex": [
+     1,
+     0,
+     0
+    ],
+    "ey": [
+     0,
+     1,
+     0
+    ],
+    "size_m": 2.0
+   },
+   "metres": 2.0
+  },
+  "gravel": {
+   "plane": {
+    "origin": [
+     -1.0,
+     -4.2,
+     0.0
+    ],
+    "ex": [
+     1,
+     0,
+     0
+    ],
+    "ey": [
+     0,
+     1,
+     0
+    ],
+    "size_m": 2.0
+   },
+   "metres": 2.0
+  },
+  "grass": {
+   "box": [
+    830,
+    220,
+    870,
+    240
+   ],
+   "metres": 1.2
+  }
+ },
+ "dimensions_m": {
+  "L": 5.6,
+  "D": 3.6,
+  "EAVE": 2.0,
+  "RIDGE": 3.6,
+  "OH": 0.3,
+  "F_PAINT": 1921.0,
+  "CORR": [
+   [
+    [
+     950,
+     222
+    ],
+    [
+     -2.8,
+     0.0,
+     0.0
+    ]
+   ],
+   [
+    [
+     950,
+     27
+    ],
+    [
+     -2.8,
+     0.0,
+     3.6
+    ]
+   ],
+   [
+    [
+     870,
+     95
+    ],
+    [
+     -2.8499999999999996,
+     2.1,
+     1.73
+    ]
+   ],
+   [
+    [
+     1030,
+     93
+    ],
+    [
+     -3.0999999999999996,
+     -2.1,
+     1.73
+    ]
+   ],
+   [
+    [
+     1250,
+     130
+    ],
+    [
+     3.0999999999999996,
+     -2.1,
+     1.73
+    ]
+   ],
+   [
+    [
+     1222,
+     212
+    ],
+    [
+     2.8,
+     -1.8,
+     0.0
+    ]
+   ],
+   [
+    [
+     1222,
+     135
+    ],
+    [
+     2.8,
+     -1.8,
+     2.0
+    ]
+   ],
+   [
+    [
+     1130,
+     222
+    ],
+    [
+     0.9,
+     -1.8,
+     0.0
+    ]
+   ],
+   [
+    [
+     1130,
+     128
+    ],
+    [
+     0.9,
+     -1.8,
+     2.0
+    ]
+   ]
+  ]
+ }
+}

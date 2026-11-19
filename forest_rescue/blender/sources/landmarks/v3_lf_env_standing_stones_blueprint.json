@@ -1,0 +1,292 @@
+{
+ "id": "lf_env_standing_stones",
+ "source": "art/06_environment_landmarks.png",
+ "main_view_box_sheet_px": [
+  0,
+  578,
+  472,
+  845
+ ],
+ "doc": "lf_env_standing_stones v3 — five carved standing stones (knotwork) around a paved dirt circle with moss,\ngrass and pebbles (art/06 main view + row inset; art/01 south forest stones).\n\nBlueprint (art/06 row inset, previous collider layout): stone heights 2.2 / 2.0 / 2.75 / 2.1 / 2.3 m on a ring\nof radius ~3 m. Camera: solvePnP on the 10 stone foot/top points (f fixed to the sheet focal length), then each\nstone is re-placed by back-projecting its painted foot. Blender: front faces -Y, Z up, origin = circle centre.",
+ "camera_correspondences": [
+  {
+   "world_blender_m": [
+    -3.2,
+    -1.2,
+    0.0
+   ],
+   "painting_crop_px": [
+    88.0,
+    232.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -3.2,
+    -1.2,
+    2.2
+   ],
+   "painting_crop_px": [
+    76.0,
+    84.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -2.0,
+    1.9,
+    0.0
+   ],
+   "painting_crop_px": [
+    130.0,
+    152.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -2.0,
+    1.9,
+    2.0
+   ],
+   "painting_crop_px": [
+    127.0,
+    41.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    0.4,
+    2.9,
+    0.0
+   ],
+   "painting_crop_px": [
+    247.0,
+    137.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    0.4,
+    2.9,
+    2.75
+   ],
+   "painting_crop_px": [
+    245.0,
+    0.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    3.0,
+    1.6,
+    0.0
+   ],
+   "painting_crop_px": [
+    393.0,
+    162.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    3.0,
+    1.6,
+    2.1
+   ],
+   "painting_crop_px": [
+    395.0,
+    46.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    2.6,
+    -1.6,
+    0.0
+   ],
+   "painting_crop_px": [
+    361.0,
+    239.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    2.6,
+    -1.6,
+    2.3
+   ],
+   "painting_crop_px": [
+    380.0,
+    111.0
+   ]
+  }
+ ],
+ "camera_options": {
+  "f0": 1921.0,
+  "fix_f": true,
+  "free_pp": true,
+  "pp_prior": 0.05,
+  "init_centre": [
+   -2.0,
+   -18.0,
+   8.0
+  ],
+  "init_target": [
+   0.0,
+   0.5,
+   0.8
+  ]
+ },
+ "insets": {
+  "row": {
+   "box": [
+    478,
+    598,
+    706,
+    694
+   ],
+   "dir": [
+    0,
+    1,
+    0
+   ],
+   "fit": "width"
+  }
+ },
+ "swatches": {
+  "stone": {
+   "box": [
+    630,
+    722,
+    705,
+    828
+   ],
+   "metres": 0.9
+  },
+  "stone_carved": {
+   "box": [
+    503,
+    720,
+    600,
+    828
+   ],
+   "metres": 0.9
+  },
+  "ground": {
+   "box": [
+    170,
+    700,
+    230,
+    735
+   ],
+   "metres": 1.8
+  },
+  "gravel": {
+   "box": [
+    170,
+    700,
+    230,
+    735
+   ],
+   "metres": 1.8
+  },
+  "grass": {
+   "box": [
+    20,
+    790,
+    60,
+    815
+   ],
+   "metres": 1.2
+  }
+ },
+ "dimensions_m": {
+  "STONES": {
+   "S1": [
+    [
+     -3.2,
+     -1.2
+    ],
+    2.2,
+    [
+     88,
+     810
+    ],
+    [
+     76,
+     662
+    ],
+    80,
+    0.55
+   ],
+   "S2": [
+    [
+     -2.0,
+     1.9
+    ],
+    2.0,
+    [
+     130,
+     730
+    ],
+    [
+     127,
+     619
+    ],
+    58,
+    0.55
+   ],
+   "S3": [
+    [
+     0.4,
+     2.9
+    ],
+    2.75,
+    [
+     247,
+     715
+    ],
+    [
+     245,
+     578
+    ],
+    86,
+    0.6
+   ],
+   "S4": [
+    [
+     3.0,
+     1.6
+    ],
+    2.1,
+    [
+     393,
+     740
+    ],
+    [
+     395,
+     624
+    ],
+    62,
+    0.55
+   ],
+   "S5": [
+    [
+     2.6,
+     -1.6
+    ],
+    2.3,
+    [
+     361,
+     817
+    ],
+    [
+     380,
+     689
+    ],
+    80,
+    0.55
+   ]
+  },
+  "F_PAINT": 1921.0
+ }
+}

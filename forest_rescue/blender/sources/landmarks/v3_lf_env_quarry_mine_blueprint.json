@@ -1,0 +1,320 @@
+{
+ "id": "lf_env_quarry_mine",
+ "source": "art/06_environment_landmarks.png",
+ "main_view_box_sheet_px": [
+  0,
+  272,
+  605,
+  588
+ ],
+ "doc": "lf_env_quarry_mine v3 — limestone outcrop of big cut blocks with a timber mine portal, rails with sleepers,\na winch crane with a hanging block, cut blocks and a crate (art/06 main view + insets; art/01 SW quarry).\n\nBlueprint: portal clear opening 2.2 x 2.0 m (posts 0.3, lintel 0.38, cap joists 0.24), rail gauge 0.6 m.\nThe camera is solved from the portal frame; everything else is placed by back-projecting its painted ground\ncontact onto z = 0 and sized from its painted pixel extent at that depth.\nBlender axes: front (portal) faces -Y, Z up, origin = portal centre on the ground.",
+ "camera_correspondences": [
+  {
+   "world_blender_m": [
+    -1.4,
+    -0.15,
+    0.0
+   ],
+   "painting_crop_px": [
+    165.0,
+    234.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -1.1,
+    -0.15,
+    0.0
+   ],
+   "painting_crop_px": [
+    188.0,
+    235.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -1.1,
+    -0.15,
+    2.0
+   ],
+   "painting_crop_px": [
+    188.0,
+    126.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    1.1,
+    -0.15,
+    2.0
+   ],
+   "painting_crop_px": [
+    316.0,
+    126.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    1.4,
+    -0.15,
+    2.0
+   ],
+   "painting_crop_px": [
+    330.0,
+    126.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    1.1,
+    -0.15,
+    0.0
+   ],
+   "painting_crop_px": [
+    316.0,
+    228.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -1.62,
+    -0.2,
+    2.38
+   ],
+   "painting_crop_px": [
+    160.0,
+    105.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    1.62,
+    -0.2,
+    2.38
+   ],
+   "painting_crop_px": [
+    340.0,
+    105.0
+   ]
+  }
+ ],
+ "camera_options": {
+  "free_pp": true,
+  "pp_prior": 0.08,
+  "f0": 1921.0,
+  "fix_f": true,
+  "init_centre": [
+   -9.0,
+   -38.0,
+   14.0
+  ],
+  "init_target": [
+   0.5,
+   0.0,
+   1.5
+  ]
+ },
+ "insets": {
+  "mine_front": {
+   "box": [
+    528,
+    308,
+    664,
+    398
+   ],
+   "dir": [
+    0,
+    1,
+    0
+   ],
+   "fit": "width",
+   "parts": "outcrop"
+  }
+ },
+ "swatches": {
+  "wood": {
+   "box": [
+    650,
+    470,
+    668,
+    560
+   ],
+   "metres": 0.8
+  },
+  "wood_h": {
+   "box": [
+    650,
+    470,
+    668,
+    560
+   ],
+   "metres": 0.8,
+   "rotate": true
+  },
+  "stone": {
+   "box": [
+    150,
+    300,
+    240,
+    360
+   ],
+   "metres": 1.6
+  },
+  "stone_face": {
+   "box": [
+    205,
+    410,
+    232,
+    440
+   ],
+   "metres": 0.8
+  },
+  "ground": {
+   "box": [
+    440,
+    560,
+    520,
+    585
+   ],
+   "metres": 2.0
+  },
+  "gravel": {
+   "box": [
+    440,
+    560,
+    520,
+    585
+   ],
+   "metres": 2.0
+  },
+  "grass": {
+   "box": [
+    30,
+    520,
+    90,
+    560
+   ],
+   "metres": 1.5
+  },
+  "rope": {
+   "box": [
+    660,
+    520,
+    735,
+    560
+   ],
+   "metres": 0.5
+  },
+  "metal": {
+   "box": [
+    1430,
+    740,
+    1470,
+    800
+   ],
+   "metres": 0.4
+  },
+  "cloth": {
+   "box": [
+    1280,
+    718,
+    1386,
+    828
+   ],
+   "metres": 1.2
+  }
+ },
+ "dimensions_m": {
+  "F_PAINT": 1921.0,
+  "PORTAL": [
+   [
+    [
+     165,
+     506
+    ],
+    [
+     -1.4,
+     -0.15,
+     0.0
+    ]
+   ],
+   [
+    [
+     188,
+     507
+    ],
+    [
+     -1.1,
+     -0.15,
+     0.0
+    ]
+   ],
+   [
+    [
+     188,
+     398
+    ],
+    [
+     -1.1,
+     -0.15,
+     2.0
+    ]
+   ],
+   [
+    [
+     316,
+     398
+    ],
+    [
+     1.1,
+     -0.15,
+     2.0
+    ]
+   ],
+   [
+    [
+     330,
+     398
+    ],
+    [
+     1.4,
+     -0.15,
+     2.0
+    ]
+   ],
+   [
+    [
+     316,
+     500
+    ],
+    [
+     1.1,
+     -0.15,
+     0.0
+    ]
+   ],
+   [
+    [
+     160,
+     377
+    ],
+    [
+     -1.62,
+     -0.2,
+     2.38
+    ]
+   ],
+   [
+    [
+     340,
+     377
+    ],
+    [
+     1.62,
+     -0.2,
+     2.38
+    ]
+   ]
+  ]
+ }
+}

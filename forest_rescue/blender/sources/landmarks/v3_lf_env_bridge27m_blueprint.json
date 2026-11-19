@@ -1,0 +1,381 @@
+{
+ "id": "lf_env_bridge27m",
+ "source": "art/06_environment_landmarks.png",
+ "main_view_box_sheet_px": [
+  0,
+  0,
+  588,
+  266
+ ],
+ "doc": "lf_env_bridge27m v3 — timber trestle bridge (art/06) with the art/01 gate: 4 stone tower piers with red\nbanners and timber arch ribs over the clear water channel.\n\nEngineering (data/world-atlas.json, ART_PRODUCTION_RU §4): deck 27 x 4 m, deck top +1.1 (local), long axis +X\n(west -> east 77..104), wet banks x = -6.317 / +6.287 -> NO support for |x| < 6.6; supports on the banks:\nabutments at |x| = 13.5, bank piers at |x| = 10.4, tower piers at |x| = 7.25 (inner faces 6.6).\nBlender axes: +X east, +Y north (glTF -Z), Z up. Origin = bridge centre on the world datum (y=0).",
+ "camera_correspondences": [
+  {
+   "world_blender_m": [
+    -13.5,
+    -2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    94.0,
+    121.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -13.5,
+    2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    37.0,
+    77.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -9.0,
+    -2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    166.0,
+    93.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -9.0,
+    2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    104.0,
+    58.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -4.5,
+    -2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    270.0,
+    65.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -4.5,
+    2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    193.0,
+    42.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    0.0,
+    -2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    353.0,
+    50.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    0.0,
+    2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    267.0,
+    31.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    4.5,
+    -2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    413.0,
+    37.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    4.5,
+    2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    331.0,
+    22.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    9.0,
+    -2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    471.0,
+    27.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    9.0,
+    2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    382.0,
+    16.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    13.5,
+    -2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    540.0,
+    17.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    13.5,
+    2.1,
+    2.25
+   ],
+   "painting_crop_px": [
+    458.0,
+    8.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -9.0,
+    2.0,
+    1.1
+   ],
+   "painting_crop_px": [
+    104.0,
+    100.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -4.5,
+    2.0,
+    1.1
+   ],
+   "painting_crop_px": [
+    193.0,
+    77.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    4.5,
+    2.0,
+    1.1
+   ],
+   "painting_crop_px": [
+    331.0,
+    48.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    9.0,
+    2.0,
+    1.1
+   ],
+   "painting_crop_px": [
+    383.0,
+    38.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    13.5,
+    2.0,
+    1.1
+   ],
+   "painting_crop_px": [
+    458.0,
+    27.0
+   ]
+  }
+ ],
+ "camera_options": {
+  "free_pp": true
+ },
+ "insets": {
+  "side": {
+   "box": [
+    592,
+    30,
+    822,
+    74
+   ],
+   "dir": [
+    0,
+    1,
+    0
+   ],
+   "fit": "width"
+  },
+  "top": {
+   "box": [
+    592,
+    98,
+    822,
+    144
+   ],
+   "dir": [
+    0,
+    0,
+    -1
+   ],
+   "fit": "width"
+  }
+ },
+ "swatches": {
+  "plank": {
+   "box": [
+    632,
+    176,
+    648,
+    250
+   ],
+   "metres": 0.9
+  },
+  "wood": {
+   "box": [
+    632,
+    176,
+    648,
+    250
+   ],
+   "metres": 0.9
+  },
+  "wood_h": {
+   "box": [
+    632,
+    176,
+    648,
+    250
+   ],
+   "metres": 0.9,
+   "rotate": true
+  },
+  "stone": {
+   "box": [
+    716,
+    166,
+    808,
+    252
+   ],
+   "metres": 1.35
+  },
+  "stone_face": {
+   "box": [
+    722,
+    214,
+    790,
+    248
+   ],
+   "metres": 0.9
+  },
+  "ground": {
+   "box": [
+    0,
+    140,
+    40,
+    180
+   ],
+   "metres": 2.5
+  },
+  "water": {
+   "box": [
+    400,
+    180,
+    470,
+    235
+   ],
+   "metres": 5.0
+  },
+  "grass": {
+   "box": [
+    55,
+    195,
+    100,
+    225
+   ],
+   "metres": 1.6
+  },
+  "gravel": {
+   "box": [
+    330,
+    222,
+    372,
+    250
+   ],
+   "metres": 1.8
+  },
+  "cloth": {
+   "box": [
+    1280,
+    718,
+    1386,
+    828
+   ],
+   "metres": 1.2
+  },
+  "metal": {
+   "box": [
+    1430,
+    740,
+    1470,
+    800
+   ],
+   "metres": 0.4
+  }
+ },
+ "dimensions_m": {
+  "DECK": 1.1,
+  "HL": 13.5,
+  "HW": 2.0,
+  "WATER": -1.35,
+  "POST_Y": 2.1,
+  "POST_TOP": 2.25,
+  "TOWER_X": 7.25,
+  "TOWER_Y": 2.95,
+  "TOWER_W": 1.3,
+  "BANK_PIER_X": 10.4,
+  "ABUT_X": 13.5,
+  "RAMP_END": 16.7,
+  "BANK_Z": 0.45,
+  "MAIN_POST_X": [
+   -13.5,
+   -9.0,
+   -4.5,
+   0.0,
+   4.5,
+   9.0,
+   13.5
+  ]
+ }
+}

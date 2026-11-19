@@ -10,7 +10,7 @@ from scipy.spatial import cKDTree
 
 from frlib import texproj
 
-DEBUG = True
+DEBUG = False
 PAINT_K = 0.35          # paintedLightMix used for de-lighting (same value the game/QA shader uses)
 
 

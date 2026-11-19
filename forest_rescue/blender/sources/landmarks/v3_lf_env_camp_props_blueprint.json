@@ -1,0 +1,320 @@
+{
+ "id": "lf_env_camp_props",
+ "source": "art/06_environment_landmarks.png",
+ "main_view_box_sheet_px": [
+  735,
+  578,
+  1240,
+  845
+ ],
+ "doc": "lf_env_camp_props v3 — traveller camp (art/06): russet canvas tarp on four lashed poles (sagging, folds,\nhanging side flap, guy ropes), lantern on the right pole, two benches, stool, fire ring with tripod and pot,\ncrate stack with cloth, barrel, dirt patch with grass.\n\nCamera: joint solve of the pole rectangle (width a, depth b) and pole heights with the painting camera\n(f fixed to the sheet's solved focal length; front-left pole height 2.6 m sets the scale). Props are placed by\nback-projecting their painted ground contacts. Blender: front faces -Y, Z up; origin = fire ring centre.",
+ "camera_correspondences": [
+  {
+   "world_blender_m": [
+    -2.024671433945763,
+    -1.2245005522185575,
+    0.0
+   ],
+   "painting_crop_px": [
+    167.0,
+    237.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -2.024671433945763,
+    -1.2245005522185575,
+    2.6
+   ],
+   "painting_crop_px": [
+    167.0,
+    4.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    2.024671433945763,
+    -1.2245005522185575,
+    0.0
+   ],
+   "painting_crop_px": [
+    437.0,
+    203.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    2.024671433945763,
+    -1.2245005522185575,
+    2.019119929114074
+   ],
+   "painting_crop_px": [
+    437.0,
+    39.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    2.024671433945763,
+    1.2245005522185575,
+    0.0
+   ],
+   "painting_crop_px": [
+    315.0,
+    174.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    2.024671433945763,
+    1.2245005522185575,
+    1.957993263956257
+   ],
+   "painting_crop_px": [
+    315.0,
+    29.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -2.024671433945763,
+    1.2245005522185575,
+    0.0
+   ],
+   "painting_crop_px": [
+    51.0,
+    204.0
+   ]
+  },
+  {
+   "world_blender_m": [
+    -2.024671433945763,
+    1.2245005522185575,
+    1.4524393778446842
+   ],
+   "painting_crop_px": [
+    51.0,
+    86.0
+   ]
+  }
+ ],
+ "camera_options": {
+  "f0": 1921.0,
+  "fix_f": true,
+  "free_pp": true,
+  "pp_prior": 0.05,
+  "init_centre": [
+   -6.0,
+   -16.0,
+   8.0
+  ],
+  "init_target": [
+   0.0,
+   0.0,
+   0.8
+  ]
+ },
+ "insets": {
+  "front": {
+   "box": [
+    1236,
+    612,
+    1396,
+    694
+   ],
+   "dir": [
+    0,
+    1,
+    0
+   ],
+   "fit": "width"
+  },
+  "side": {
+   "box": [
+    1408,
+    612,
+    1516,
+    694
+   ],
+   "dir": [
+    1,
+    0,
+    0
+   ],
+   "fit": "width"
+  }
+ },
+ "swatches": {
+  "wood": {
+   "box": [
+    1504,
+    740,
+    1522,
+    830
+   ],
+   "metres": 0.8
+  },
+  "wood_h": {
+   "box": [
+    1504,
+    740,
+    1522,
+    830
+   ],
+   "metres": 0.8,
+   "rotate": true
+  },
+  "cloth": {
+   "box": [
+    1280,
+    718,
+    1386,
+    828
+   ],
+   "metres": 1.4
+  },
+  "stone": {
+   "box": [
+    1176,
+    820,
+    1206,
+    838
+   ],
+   "metres": 0.6
+  },
+  "ground": {
+   "plane": {
+    "origin": [
+     -1.2,
+     -3.2,
+     0.0
+    ],
+    "ex": [
+     1,
+     0,
+     0
+    ],
+    "ey": [
+     0,
+     1,
+     0
+    ],
+    "size_m": 1.8
+   },
+   "metres": 1.8
+  },
+  "gravel": {
+   "plane": {
+    "origin": [
+     -1.2,
+     -3.2,
+     0.0
+    ],
+    "ex": [
+     1,
+     0,
+     0
+    ],
+    "ey": [
+     0,
+     1,
+     0
+    ],
+    "size_m": 1.8
+   },
+   "metres": 1.8
+  },
+  "grass": {
+   "box": [
+    760,
+    805,
+    800,
+    830
+   ],
+   "metres": 1.2
+  },
+  "rope": {
+   "box": [
+    1278,
+    720,
+    1300,
+    740
+   ],
+   "metres": 0.3
+  },
+  "metal": {
+   "box": [
+    1430,
+    740,
+    1470,
+    800
+   ],
+   "metres": 0.4
+  },
+  "glow": {
+   "box": [
+    1440,
+    760,
+    1460,
+    790
+   ],
+   "metres": 0.2
+  }
+ },
+ "dimensions_m": {
+  "POLES": {
+   "FL": [
+    [
+     902,
+     815
+    ],
+    [
+     902,
+     582
+    ]
+   ],
+   "FR": [
+    [
+     1172,
+     781
+    ],
+    [
+     1172,
+     617
+    ]
+   ],
+   "BR": [
+    [
+     1050,
+     752
+    ],
+    [
+     1050,
+     607
+    ]
+   ],
+   "BL": [
+    [
+     786,
+     782
+    ],
+    [
+     786,
+     664
+    ]
+   ]
+  },
+  "H_FL": 2.6,
+  "F_PAINT": 1921.0
+ },
+ "solved_layout": {
+  "a": 4.049342867891526,
+  "b": 2.449001104437115,
+  "hs": {
+   "FL": 2.6,
+   "FR": 2.019119929114074,
+   "BR": 1.957993263956257,
+   "BL": 1.4524393778446842
+  }
+ }
+}

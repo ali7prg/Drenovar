@@ -406,12 +406,13 @@ def texture(lo0, R, J, pinfo0=None):
             return (P[:, 2] > chin - 0.035) * near
         # portrait pixels: the face/beard (landmark hull x1.7) fully, the hair only where it faces
         # the portrait camera head-on; the clothes at the bottom of the inset are never used
-        import cv2 as _cv
-        hull = _cv.convexHull(cam.lm2.astype(np.float32))[:, 0, :]
-        ctr = hull.mean(0)
-        fm = np.zeros(cam.image.shape[:2], np.uint8)
-        _cv.fillPoly(fm, [np.round(ctr + (hull - ctr) * 1.75).astype(np.int32)], 1)
-        cam.mask = fm.astype(bool)
+        # the clothes at the bottom of the inset are never used
+        fm = np.ones(cam.image.shape[:2], bool)
+        chin_y = cam.lm2[-1][1] if len(cam.lm2) >= 5 else cam.lm2[2][1] + 25
+        fm[int(chin_y + 0.35 * (chin_y - cam.lm2[0][1])):] = False
+        fm[:3] = fm[-3:] = False
+        fm[:, :3] = fm[:, -3:] = False
+        cam.mask = fm
 
         d2, col2, ws2, per2 = HT.project_views(T, verts, tris, [cam], lo=0.40, hi=0.65, erode=0,
                                                region={"portrait": head_region})

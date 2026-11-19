@@ -291,7 +291,7 @@ def boot_parts(R, C, J):
 def head_frame(C, J):
     L = C["L"]
     B = C["build"]
-    sz = (L["crown"] - L["chin"]) / 0.238
+    sz = (L["eye"] - L["chin"]) / 0.122          # face proportions from the painted eye/chin levels
     sx = sz * B.get("head_w", 1.0)
     o = np.array([0.0, 0.006, L["eye"]])
     return o, np.array([sx, sz, sz])

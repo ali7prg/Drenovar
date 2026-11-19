@@ -12,7 +12,7 @@ COMMON_F = dict(female=True)
 CHARS = {
     "lf_civilian_miller": dict(
         kind="civilian", female=False, height=1.78,
-        L=dict(crown=1.750, top=1.80, eye=1.630, mouth=1.552, chin=1.510, neck=1.452,
+        L=dict(crown=1.783, top=1.8, eye=1.684, mouth=1.615, chin=1.582, neck=1.505,
                shoulder_l=(0.205, 1.400), shoulder_r=(-0.205, 1.400),
                elbow_l=(0.345, 1.130), elbow_r=(-0.330, 1.130),
                wrist_l=(0.352, 0.925), wrist_r=(-0.342, 0.925),
@@ -44,7 +44,7 @@ CHARS = {
     ),
     "lf_civilian_herbalist": dict(
         kind="civilian", female=True, height=1.70,
-        L=dict(crown=1.660, top=1.72, eye=1.566, mouth=1.495, chin=1.455, neck=1.408,
+        L=dict(crown=1.658, top=1.72, eye=1.574, mouth=1.526, chin=1.487, neck=1.42,
                shoulder_l=(0.168, 1.360), shoulder_r=(-0.168, 1.360),
                elbow_l=(0.255, 1.105), elbow_r=(-0.255, 1.105),
                wrist_l=(0.268, 0.915), wrist_r=(-0.270, 0.915),
@@ -60,7 +60,7 @@ CHARS = {
     ),
     "lf_civilian_ferryman": dict(
         kind="civilian", female=False, height=1.82,
-        L=dict(crown=1.790, top=1.83, eye=1.676, mouth=1.596, chin=1.548, neck=1.490,
+        L=dict(crown=1.824, top=1.835, eye=1.72, mouth=1.649, chin=1.612, neck=1.533,
                shoulder_l=(0.205, 1.430), shoulder_r=(-0.205, 1.430),
                elbow_l=(0.300, 1.150), elbow_r=(-0.300, 1.150),
                wrist_l=(0.318, 0.930), wrist_r=(-0.318, 0.930),
@@ -75,7 +75,7 @@ CHARS = {
     ),
     "lf_civilian_courier": dict(
         kind="civilian", female=True, height=1.69,
-        L=dict(crown=1.690, top=1.73, eye=1.600, mouth=1.535, chin=1.500, neck=1.445,
+        L=dict(crown=1.705, top=1.71, eye=1.62, mouth=1.563, chin=1.532, neck=1.47,
                shoulder_l=(0.174, 1.395), shoulder_r=(-0.174, 1.395),
                elbow_l=(0.248, 1.125), elbow_r=(-0.248, 1.125),
                wrist_l=(0.284, 0.905), wrist_r=(-0.284, 0.905),
@@ -90,7 +90,7 @@ CHARS = {
     ),
     "lf_civilian_cooper": dict(
         kind="civilian", female=False, height=1.71,
-        L=dict(crown=1.700, top=1.75, eye=1.596, mouth=1.528, chin=1.488, neck=1.430,
+        L=dict(crown=1.704, top=1.735, eye=1.622, mouth=1.572, chin=1.537, neck=1.47,
                shoulder_l=(0.188, 1.385), shoulder_r=(-0.188, 1.385),
                elbow_l=(0.262, 1.115), elbow_r=(-0.262, 1.115),
                wrist_l=(0.275, 0.905), wrist_r=(-0.272, 0.905),
@@ -105,7 +105,7 @@ CHARS = {
     ),
     "lf_civilian_quarry_worker": dict(
         kind="civilian", female=True, height=1.71,
-        L=dict(crown=1.705, top=1.75, eye=1.616, mouth=1.550, chin=1.512, neck=1.455,
+        L=dict(crown=1.705, top=1.73, eye=1.623, mouth=1.568, chin=1.538, neck=1.48,
                shoulder_l=(0.185, 1.405), shoulder_r=(-0.185, 1.405),
                elbow_l=(0.262, 1.135), elbow_r=(-0.262, 1.135),
                wrist_l=(0.300, 0.925), wrist_r=(-0.300, 0.925),
@@ -120,7 +120,7 @@ CHARS = {
     ),
     "lf_squad_captain": dict(
         kind="soldier", female=True, height=1.74,
-        L=dict(crown=1.745, top=1.79, eye=1.640, mouth=1.570, chin=1.533, neck=1.478,
+        L=dict(crown=1.721, top=1.745, eye=1.635, mouth=1.588, chin=1.546, neck=1.49,
                shoulder_l=(0.175, 1.430), shoulder_r=(-0.175, 1.430),
                elbow_l=(0.262, 1.155), elbow_r=(-0.262, 1.155),
                wrist_l=(0.305, 0.920), wrist_r=(-0.305, 0.920),
@@ -135,7 +135,7 @@ CHARS = {
     ),
     "lf_squad_scout": dict(
         kind="soldier", female=False, height=1.83,
-        L=dict(crown=1.830, top=1.87, eye=1.720, mouth=1.646, chin=1.605, neck=1.548,
+        L=dict(crown=1.814, top=1.87, eye=1.72, mouth=1.661, chin=1.623, neck=1.555,
                shoulder_l=(0.188, 1.475), shoulder_r=(-0.188, 1.475),
                elbow_l=(0.280, 1.195), elbow_r=(-0.280, 1.195),
                wrist_l=(0.330, 0.955), wrist_r=(-0.330, 0.955),
@@ -150,7 +150,7 @@ CHARS = {
     ),
     "lf_squad_shield_guard": dict(
         kind="soldier", female=False, height=1.90,
-        L=dict(crown=1.840, top=1.92, eye=1.738, mouth=1.665, chin=1.625, neck=1.565,
+        L=dict(crown=1.873, top=1.91, eye=1.766, mouth=1.688, chin=1.655, neck=1.585,
                shoulder_l=(0.225, 1.500), shoulder_r=(-0.225, 1.500),
                elbow_l=(0.335, 1.230), elbow_r=(-0.335, 1.230),
                wrist_l=(0.405, 0.985), wrist_r=(-0.405, 0.985),

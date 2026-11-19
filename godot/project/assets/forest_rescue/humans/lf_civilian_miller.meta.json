@@ -93,13 +93,13 @@
   "bounds_m": {
     "min": [
       -0.366,
-      -0.21,
+      -0.217,
       0.003
     ],
     "max": [
       0.375,
-      0.232,
-      1.784
+      0.233,
+      1.785
     ]
   },
   "clips": {
@@ -124,7 +124,7 @@
         "Left": 0.01,
         "Right": 0.03
       },
-      "ikOverreach_m": 0.0552,
+      "ikOverreach_m": 0.054,
       "loopSeamMaxQuatDiff": 0.0
     },
     "lf_civilian_cage_wait": {
@@ -159,7 +159,7 @@
         "Left": 34.35,
         "Right": 33.48
       },
-      "ikOverreach_m": 0.1041
+      "ikOverreach_m": 0.1162
     },
     "lf_civilian_exit": {
       "seconds": 2.8,
@@ -261,7 +261,7 @@
     ],
     "head_top": [
       0.0,
-      1.75,
+      1.783,
       0.0
     ]
   },

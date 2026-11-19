@@ -166,19 +166,17 @@ def refine_silhouette(cam, pts, mask, iters=400):
 # crop-local (HEAD_BOX origin 0,528) <- world point in the rest pose; jaw landmarks are rotated by the
 # solved jaw-open angle before solving.
 HEAD_LANDMARKS_UPPER = [
-    ("snout_tip", (0.0, -4.56, 2.95), (18, 726)),
-    ("nostril_L", (0.235, -4.37, 3.115), (80, 676)),
-    ("eye_L", (0.43, -3.63, 3.285), (274, 631)),
-    ("scar_top", (0.335, -3.70, 3.52), (300, 568)),
-    ("mouth_corner_L", (0.44, -3.40, 3.02), (380, 716)),
-    ("upper_tooth_front_L", (0.17, -4.47, 2.84), (40, 760)),
-    ("upper_tooth_mid_L", (0.40, -3.95, 2.83), (180, 766)),
-    ("brow_front_L", (0.31, -3.86, 3.42), (215, 590)),
+    ("snout_tip", (0.0, -4.555, 2.93), (18, 722)),
+    ("nostril_L", (0.235, -4.37, 3.115), (79, 676)),
+    ("eye_L", (0.435, -3.63, 3.285), (274, 631)),
+    ("scar_top", (0.335, -3.70, 3.52), (306, 566)),
+    ("mouth_corner_L", (0.43, -3.36, 3.02), (400, 715)),
+    ("upper_tooth_front_L", (0.20, -4.45, 2.76), (37, 770)),
+    ("upper_tooth_mid_L", (0.31, -4.02, 2.75), (102, 771)),
 ]
 HEAD_LANDMARKS_JAW = [
-    ("jaw_tip", (0.0, -4.50, 2.66), (76, 885)),
-    ("lower_tooth_front_L", (0.16, -4.42, 2.80), (80, 845)),
-    ("lower_tooth_mid_L", (0.38, -3.92, 2.80), (210, 822)),
+    ("jaw_tip", (0.0, -4.48, 2.68), (75, 876)),
+    ("lower_tooth_front_L", (0.17, -4.40, 2.95), (80, 847)),
 ]
 
 
@@ -195,7 +193,7 @@ def head_points(jaw_deg, hinge=(0.0, -3.22, 2.96)):
     for n, p, q in HEAD_LANDMARKS_JAW:
         names.append(n)
         # opening the jaw rotates the mandible about +X (tip goes down): rotate by -a around X at the hinge
-        P3.append(h + (Rx.T @ (np.array(p) - h)))
+        P3.append(h + (Rx @ (np.array(p) - h)))
         p2.append((q[0] - x0, q[1] - y0))
     return names, np.array(P3, float), np.array(p2, float)
 

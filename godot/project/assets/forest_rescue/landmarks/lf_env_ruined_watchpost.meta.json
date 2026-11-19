@@ -9,18 +9,18 @@
   "tris_detail": {
     "LOD0": {
       "structure": 1590,
-      "base": 2444,
-      "total": 4034
+      "base": 1098,
+      "total": 2688
     },
     "LOD1": {
       "structure": 526,
-      "base": 546,
-      "total": 1072
+      "base": 190,
+      "total": 716
     },
     "LOD2": {
       "structure": 110,
-      "base": 124,
-      "total": 234
+      "base": 24,
+      "total": 134
     }
   },
   "budget": {
@@ -77,12 +77,12 @@
     [
       -3.914,
       0.0,
-      -31.155
+      -0.984
     ],
     [
       5.965,
       6.107,
-      6.311
+      5.057
     ]
   ],
   "collision": [
@@ -136,12 +136,12 @@
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/landmarks/v3/pipeline.py ruined_watchpost",
   "qa": {
     "main_view": {
-      "iou": 0.8843,
-      "colour_err": 0.0861,
-      "ssim": 0.6167,
+      "iou": 0.8573,
+      "colour_err": 0.0856,
+      "ssim": 0.6117,
       "ref_px": 86455,
-      "render_px": 93074,
-      "iou_structure_only": 0.7097030090303511
+      "render_px": 86917,
+      "iou_structure_only": 0.7097766425737732
     },
     "camera": {
       "rms_px": 11.77,
@@ -150,26 +150,26 @@
     },
     "insets": {
       "front": {
-        "iou": 0.4752,
-        "colour_err": 0.1405,
-        "ssim": 0.3994,
+        "iou": 0.4746,
+        "colour_err": 0.1533,
+        "ssim": 0.3677,
         "ref_px": 95280,
-        "render_px": 100271
+        "render_px": 98952
       },
       "side": {
-        "iou": 0.4858,
-        "colour_err": 0.1522,
-        "ssim": 0.382,
+        "iou": 0.51,
+        "colour_err": 0.1654,
+        "ssim": 0.3615,
         "ref_px": 70784,
-        "render_px": 106390
+        "render_px": 100805
       }
     },
     "texture": {
-      "texels": 2375742,
-      "projected_frac": 0.042830408352422106,
-      "seconds": 10.4
+      "texels": 3059878,
+      "projected_frac": 0.0734774392965994,
+      "seconds": 11.9
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_ruined_watchpost/v3_iter05_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_ruined_watchpost/v3_iter06_*"
   },
   "dimensions": {
     "terrace_height_m": 1.94,

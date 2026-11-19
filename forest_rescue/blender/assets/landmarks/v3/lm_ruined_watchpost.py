@@ -255,6 +255,9 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
         for k, (u0p, v0p, hpx) in enumerate([(845, 395, 90), (880, 380, 70), (945, 345, 80), (1050, 300, 50), (905, 420, 60)][:: (1 if lod == 0 else 2)]):
             uu, vv = S(u0p, v0p)
             P = cam.on_plane_z(np.array([uu + 0.5]), np.array([vv + 0.5]), th + 1.0)[0]
+            # grazing rays near the wall top can land far behind the ruin: keep ivy on the structure
+            P[0] = float(np.clip(P[0], -4.5, 6.5))
+            P[1] = float(np.clip(P[1], -4.5, 1.5))
             h = ibm.metres(cam, P, hpx)
             u0, v0, u1, v1, aw, ah = cards["ivy_a" if k % 2 else "ivy_b"]
             d = cam.centre - P
@@ -265,7 +268,8 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
             g.add(np.array([topp - r * h * 0.3 - [0, 0, h], topp + r * h * 0.3 - [0, 0, h], topp + r * h * 0.3, topp - r * h * 0.3]),
                   [[0, 1, 2, 3]], "card_ivy", "ivy", uv=[[(u0, v0), (u1, v0), (u1, v1), (u0, v1)]])
     base = Geo(seed=9 + lod)
-    poly = ibm.footprint(cam, mask, lambda x, y: np.zeros_like(x), ylim=(-30.0, 30.0), xlim=(-30.0, 30.0))
+    # the painted outline's top edge back-projects towards the horizon: bound the base to the ruin's surroundings
+    poly = ibm.footprint(cam, mask, lambda x, y: np.zeros_like(x), ylim=(-7.0, 2.5), xlim=(-6.5, 8.5))
     ibm.ground_patch(poly, lambda x, y: np.zeros_like(x) - 0.01, 0.7 if lod == 0 else (1.4 if lod == 1 else 2.8), g=base,
                      undulate=0.03)
     rubble = [(840, 515, 12), (900, 545, 9), (940, 560, 10), (955, 540, 11), (1080, 555, 9), (1125, 560, 7), (800, 545, 7),

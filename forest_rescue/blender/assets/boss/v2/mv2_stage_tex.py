@@ -345,16 +345,18 @@ def main():
         ab = b_ - a_
         tt = np.clip(((P - a_) @ ab) / (ab @ ab), 0, 1)
         dmin = np.minimum(dmin, np.linalg.norm(P - (a_ + tt[:, None] * ab), axis=1))
-    rmask = np.zeros((size, size), np.uint8)
-    sel = (P[:, 0] < -0.12) & (dmin < 0.055)
-    rmask[yy[sel], xx[sel]] = 255
-    if sel.any():
-        u8 = (np.clip(albedo, 0, 1) * 255).astype(np.uint8)
-        known = np.zeros((size, size), np.uint8)
-        known[yy, xx] = 1
-        u8 = cv2.inpaint(u8, rmask, 7, cv2.INPAINT_TELEA)
-        albedo[yy[sel], xx[sel]] = u8[yy[sel], xx[sel]] / 255.0
-        C.log(f"right-eye scar residue inpainted: {int(sel.sum())} texels")
+    # replace with the colour of 3-D neighbours just outside the band (never UV neighbours: the atlas gaps are empty)
+    sel = (P[:, 0] < -0.12) & (dmin < 0.050)
+    ring = (P[:, 0] < -0.12) & (dmin >= 0.060) & (dmin < 0.11)
+    if sel.any() and ring.sum() > 50:
+        from scipy.spatial import cKDTree
+        tree = cKDTree(P[ring])
+        _d, nn = tree.query(P[sel], k=16)
+        cols = base[ring][nn].mean(1)
+        hn = h[ring][nn].mean(1)
+        cols = cols * (1.0 + 0.14 * 1.4 * (h[sel] - hn))[:, None]
+        albedo[yy[sel], xx[sel]] = np.clip(cols, 0, 1)
+        C.log(f"right-eye scar residue replaced from 3-D neighbours: {int(sel.sum())} texels")
     albedo = texproj.fill(albedo, T.valid)            # whole atlas filled: no dark mip bleeding at seams
     # --- normal map from the scale height (+ small osteoderm/ridge relief), tangent space
     hmap = np.zeros((size, size))

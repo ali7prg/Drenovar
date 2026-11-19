@@ -288,10 +288,16 @@ SWATCHES = {
     "wood": dict(sheet=SHEET, box=(209, 250, 241, 282), metres=0.27),
     "iron": dict(sheet=SHEET, box=(140, 330, 170, 345), metres=0.2),
     "stone": dict(sheet=SHEET, box=(130, 372, 170, 412), metres=0.36),
-    "roof": dict(sheet=SHEET, box=(322, 136, 352, 158), metres=0.4),
+    "roof": dict(sheet=SHEET, box=(282, 128, 318, 146), metres=0.45),
     "bronze": dict(sheet=SHEET, box=(178, 838, 210, 868), metres=0.06),
     "enamel": dict(sheet=SHEET, box=(326, 190, 344, 202), metres=0.1),
 }
+
+
+def sym_specs(p):
+    """Right side (+X) mirrored from the painted left side; back (+Y) rotated from the left side."""
+    return [("mirror_x_closed", "closed34", pv2.mirror_x(), 0.55),
+            ("back_from_left", "closed34", pv2.rot_back_to_left(p["c"], p["cy"]), 0.45)]
 
 
 def clips(A, B):

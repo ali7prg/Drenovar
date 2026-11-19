@@ -93,7 +93,8 @@ def run(modname, it, do_export=True, do_godot=True):
         fixed = [B.finfo[(l_, nm)]["fixed"] for (l_, nm), o in B.objs.items() if l_ == lod]
         bl.atlas_uv(objs, fixed)
     # texture LOD0 by projection, LOD1/2 by transfer
-    alb0, nrm0, info, tstats = pv2.texture_lod0(A, B, views, M.SWATCHES, M.ATLAS, it, gate=getattr(M, "GATE", None),
+    tviews = views + (pv2.sym_views(views, M.sym_specs(params)) if hasattr(M, "sym_specs") else [])
+    alb0, nrm0, info, tstats = pv2.texture_lod0(A, B, tviews, M.SWATCHES, M.ATLAS, it, gate=getattr(M, "GATE", None),
                                                 edge=getattr(M, "EDGE", None))
     files = {"c0": f"{aid}_c.jpg", "n0": f"{aid}_n.png", "c1": f"{aid}_lod1_c.jpg", "c2": f"{aid}_lod2_c.jpg"}
     pv2.save_png(os.path.join(pv2.TEXM, f"{aid}_c.png"), alb0)

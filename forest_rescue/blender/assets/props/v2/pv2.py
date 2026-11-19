@@ -171,7 +171,7 @@ class ViewSpec:
     def __init__(self, name, sheet_name, box, points, pose=None, project=True, light=(-0.45, -0.55, 0.70),
                  thresh=0.10, fill_holes=40, exclude=(), clip_below=None, iou_ignore=None, weight=1.0,
                  shadow=None, solve_opts=None, hide_parts=(), title="", ignore_boxes=(), render_pose=None,
-                 tex_weight=1.0):
+                 tex_weight=1.0, sym=None, qa=True):
         self.name, self.sheet_name, self.box = name, sheet_name, tuple(box)
         self.points = dict(points)
         self.pose = dict(pose or {})
@@ -185,6 +185,8 @@ class ViewSpec:
         self.ignore_boxes = list(ignore_boxes)
         self.render_pose = render_pose
         self.tex_weight = tex_weight
+        self.sym = None if sym is None else np.asarray(sym, float)
+        self.qa = qa
         self.ground = None          # 3-D footprint polygon at z=0 (set after the solve): ground-shadow cut
         self.cam = None
         self.rep = None
@@ -230,6 +232,32 @@ class ViewSpec:
         for (a, b, c, d) in self.ignore_boxes:
             ig[max(0, b - self.box[1]):max(0, d - self.box[1]), max(0, a - self.box[0]):max(0, c - self.box[0])] = True
         return ig
+
+
+def sym_views(views, specs):
+    """Symmetry views: copies of solved views that paint texels the painting never sees (e.g. the +X side) from
+    their mirror / rotated counterpart (S maps the hidden texel onto a painted location)."""
+    out = []
+    for name, base, S, w in specs:
+        v = next(x for x in views if x.name == base)
+        c = ViewSpec(name, v.sheet_name, v.box, {}, pose=v.pose, light=v.light, thresh=v.thresh,
+                     fill_holes=v.fill_holes, exclude=v.exclude, shadow=v.shadow, tex_weight=w, sym=S, qa=False)
+        c.cam, c.rep, c.ground = v.cam, v.rep, v.ground
+        out.append(c)
+    return out
+
+
+def mirror_x():
+    S = np.eye(4)
+    S[0, 0] = -1
+    return S
+
+
+def rot_back_to_left(c, cy):
+    """Back face (+Y) -> left face (-X): (x, y) -> (-y * c / cy, x * cy / c)."""
+    S = np.eye(4)
+    S[:2, :2] = np.array([[0, -c / cy], [cy / c, 0]])
+    return S
 
 
 def solve_views(views, points_fn, params, free, prior_sigma=0.25, log_fn=log):
@@ -529,6 +557,11 @@ def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.
                 continue
             Pp[k] = P[k] @ M[:3, :3].T + M[:3, 3]
             Np[k] = N[k] @ M[:3, :3].T
+        if v.sym is not None:
+            S = v.sym
+            Pp = Pp @ S[:3, :3].T + S[:3, 3]
+            Np = Np @ S[:3, :3].T
+            Np /= np.maximum(np.linalg.norm(Np, axis=1, keepdims=True), 1e-9)
         ref_m, _ = v.mask()
         crop = v.crop
         c = np.zeros((len(P), 3))

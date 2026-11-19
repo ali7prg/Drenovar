@@ -286,7 +286,11 @@
       },
       "seconds": 14.2
     },
-    "sheets": "forest_rescue/qa/compare/lf_cage_root/v2_iter03_*"
+    "sheets": "forest_rescue/qa/compare/lf_cage_root/v2_iter03_*",
+    "godot_import": {
+      "errors_warnings": 0,
+      "lines": []
+    }
   },
   "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_root --iter 3",
   "door_open_deg": -95.0,

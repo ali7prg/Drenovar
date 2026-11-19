@@ -282,6 +282,12 @@ SWATCHES = {
 }
 
 
+def sym_specs(p):
+    """Right side (+X) mirrored from the painted left side; back (+Y) rotated from the left side."""
+    return [("mirror_x_closed", "closed34", pv2.mirror_x(), 0.55),
+            ("back_from_left", "closed34", pv2.rot_back_to_left(p["c"], p["cy"]), 0.45)]
+
+
 def clips(A, B):
     CC.add_clips(A, B)
 

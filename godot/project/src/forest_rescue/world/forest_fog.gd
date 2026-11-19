@@ -22,8 +22,8 @@ const REVEAL_SECONDS := 2.0
 const GRID := 70                  # state grid incl. the ring outside the atlas
 const GRID_OFFSET := 7
 const GRID_ORIGIN := -140.0
-const FOG_TOP := 17.0             # deep fog top (m): with billows 0.75–1.35× it stays above the canopy
-const TOP_RAMP := 14.0            # top rises over this distance from the explored edge
+const FOG_TOP := 14.0             # deep fog top (m); domes 0.8–1.2× (trees inside deep fog are culled)
+const TOP_RAMP := 24.0            # top rises over this distance from the explored edge (gentle bank)
 const SDF_RANGE := 64.0           # R/G channel: 0.5 + signed distance (m) / SDF_RANGE
 const HEIGHT_RANGE := 30.0        # B/A channel scale (m)
 const VIEW_SLOPE := 1.28          # cot(38°)
@@ -33,6 +33,8 @@ const LAYERS := [{"name": "FogVolume", "drift": 0.45}]
 
 static var _noise_texture: ImageTexture
 static var _noise3d: ImageTexture3D
+static var _dome_texture: ImageTexture
+const PAINT_TEX := "res://assets/forest_rescue/world/lf_fog_painted.png"
 static var _shell_mesh: ArrayMesh
 static var _shell_key := ""
 static var _height_texture: ImageTexture
@@ -64,6 +66,8 @@ func build(height_fn: Callable, light_dir: Vector3) -> void:
 		_noise_texture = ImageTexture.create_from_image(make_noise_image(256))
 	if _noise3d == null:
 		_noise3d = make_noise_3d(48, 48, 24)
+	if _dome_texture == null:
+		_dome_texture = make_dome_texture(256)
 	var key := "shell_v4"
 	if _shell_mesh == null or _shell_key != key:
 		_shell_mesh = make_shell_mesh(height_fn)
@@ -76,6 +80,9 @@ func build(height_fn: Callable, light_dir: Vector3) -> void:
 	material.set_shader_parameter("height_tex", _height_texture)
 	material.set_shader_parameter("noise_tex", _noise_texture)
 	material.set_shader_parameter("noise3d", _noise3d)
+	material.set_shader_parameter("dome_tex", _dome_texture)
+	if ResourceLoader.exists(PAINT_TEX):
+		material.set_shader_parameter("paint_tex", load(PAINT_TEX))
 	material.set_shader_parameter("domain", Vector4(GRID_ORIGIN, GRID_ORIGIN, GRID * CELL, GRID * CELL))
 	material.set_shader_parameter("height_range", HEIGHT_RANGE)
 	material.set_shader_parameter("height_lo", HEIGHT_LO)
@@ -103,6 +110,7 @@ func set_receivers(list: Array) -> void:
 		material.set_shader_parameter("fog_state_tex", state_texture)
 		material.set_shader_parameter("fog_height_tex", _height_texture)
 		material.set_shader_parameter("fog_noise_tex", _noise_texture)
+		material.set_shader_parameter("fog_dome_tex", _dome_texture)
 		material.set_shader_parameter("fog_domain", Vector4(GRID_ORIGIN, GRID_ORIGIN, GRID * CELL, GRID * CELL))
 		material.set_shader_parameter("fog_height_range", HEIGHT_RANGE)
 		material.set_shader_parameter("fog_height_lo", HEIGHT_LO)
@@ -175,6 +183,38 @@ static func make_shell_mesh(height_fn: Callable) -> ArrayMesh:
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return mesh
+
+
+## Cauliflower domes: inverted Worley F1 (distance to the nearest feature point) shaped into round
+## caps, two tileable octaves in R (~6 cells per tile) and G (~6 per tile, sampled 2.3× smaller).
+static func make_dome_texture(size: int) -> ImageTexture:
+	var octaves: Array[Image] = []
+	for k in 2:
+		var noise := FastNoiseLite.new()
+		noise.seed = 2207 + k * 31
+		noise.noise_type = FastNoiseLite.TYPE_CELLULAR
+		noise.cellular_distance_function = FastNoiseLite.DISTANCE_EUCLIDEAN
+		noise.cellular_return_type = FastNoiseLite.RETURN_DISTANCE
+		noise.cellular_jitter = 0.9
+		noise.fractal_type = FastNoiseLite.FRACTAL_NONE
+		noise.frequency = 6.0 / size
+		var image := noise.get_seamless_image(size, size, false, false, 0.1, true)
+		image.convert(Image.FORMAT_L8)
+		octaves.append(image)
+	var out := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	for y in size:
+		for x in size:
+			var c := Color(0, 0, 0, 1)
+			for k in 2:
+				var d := clampf(octaves[k].get_pixel(x, y).r * 1.15, 0.0, 1.0)   # 0 at a dome centre
+				var cap := sqrt(maxf(0.0, 1.0 - d * d))                          # round cap
+				if k == 0:
+					c.r = cap
+				else:
+					c.g = cap
+			out.set_pixel(x, y, c)
+	out.generate_mipmaps()
+	return ImageTexture.create_from_image(out)
 
 
 ## Seamless 3D noise (L8, w×h×d) for world-space cloud puffs and wisps (sampled with repeat).

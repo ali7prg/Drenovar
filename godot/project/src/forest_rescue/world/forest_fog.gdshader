@@ -31,6 +31,13 @@ uniform sampler2D state_tex : filter_linear, repeat_disable;
 uniform sampler2D height_tex : filter_linear, repeat_disable;
 uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
 uniform sampler3D noise3d : filter_linear, repeat_enable;
+// Painted mist (tools/build_fog_texture.py: quilted from art/07 + art/18 fog, pre-inverted through
+// the FILMIC tonemap) and cauliflower domes (inverted Worley F1, two octaves; ForestFog.make_dome).
+uniform sampler2D paint_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D dome_tex : filter_linear_mipmap, repeat_enable;
+uniform float paint_tile_a = 62.0;       // m per tile, layer A
+uniform float paint_tile_b = 41.0;       // m per tile, layer B (rotated, other drift)
+uniform float dome_tile = 84.0;          // m per dome tile (~13 m domes) + small domes at /2.3
 uniform vec4 domain = vec4(-140.0, -140.0, 280.0, 280.0);
 uniform float height_range = 30.0;
 uniform float height_lo = -4.0;
@@ -121,6 +128,33 @@ float puffs(vec3 p, vec2 drift, float time) {
 	return a * 0.8 + b * 0.2;
 }
 
+// Cloud-top relief 0..1: cauliflower domes (two Worley octaves) + low-frequency swell. Shared with
+// forest_fog_receiver.gdshaderinc (fog_domes) — keep both identical.
+float domes(vec2 p, vec2 drift) {
+	float a = texture(dome_tex, (p + drift * 0.5) / dome_tile).r;
+	float b = texture(dome_tex, (p - drift * 0.35) / (dome_tile / 2.3) + vec2(0.31, 0.67)).g;
+	float swell = texture(noise_tex, (p + drift * 0.2) / 170.0 + vec2(0.55, 0.15)).r;
+	return clamp(a * 0.62 + b * 0.23 + swell * 0.3 - 0.08, 0.0, 1.0);
+}
+
+float cloud_height(float top, vec2 p, vec2 drift) {
+	return top * (0.8 + 0.4 * domes(p, drift));
+}
+
+vec3 painted(vec2 p, float time) {
+	vec2 da = wind * time * drift_speed * 0.8;
+	vec2 db = vec2(-wind.y, wind.x) * time * drift_speed * 0.35 + wind * time * drift_speed * 0.5;
+	vec3 a = texture(paint_tex, (p - da) / paint_tile_a).rgb;
+	mat2 rot = mat2(vec2(0.8, 0.6), vec2(-0.6, 0.8));
+	vec3 b = texture(paint_tex, (rot * p - db) / paint_tile_b + vec2(0.37, 0.71)).rgb;
+	vec3 m = a * 0.6 + b * 0.4;
+	// restore the contrast lost by averaging two independent layers; slightly desaturate
+	vec3 mean = vec3(0.30, 0.355, 0.40);
+	m = max(mean + (m - mean) * 1.5, vec3(0.0));
+	float lum = dot(m, vec3(0.3, 0.55, 0.15));
+	return mix(vec3(lum), m, 0.8);
+}
+
 float wisp_band(float sdf) {
 	// only over explored ground (the bank itself stays the cloud top): rises right after the edge,
 	// plateau over the first ~5 m of revealed forest, descends gently further inside
@@ -132,7 +166,7 @@ void vertex() {
 	vec4 s = texture(state_tex, state_uv(world.xz));
 	vec4 sm = state_smooth(world.xz);
 	float top = mix(sm.a, sm.b, reveal_t) * height_range;
-	float cloud = top * (0.6 + 0.8 * billow(world.xz, drift_of(TIME)));
+	float cloud = cloud_height(top, world.xz, drift_of(TIME));
 	float sdf = (mix(s.g, s.r, reveal_t) - 0.5) * sdf_range;
 	wisp_lift = wisp_band(sdf);
 	world.y += max(max(cloud, wisp_height * wisp_lift), 0.3);
@@ -160,29 +194,29 @@ void fragment() {
 		discard;
 	}
 
-	// ---- cumulus surface shading at the cloud top (entry) --------------------------------
+	// ---- soft painted shading at the cloud top (entry) --------------------------------------
 	vec4 sm_in = state_smooth(entry.xz);
 	float top_e = mix(sm_in.a, sm_in.b, reveal_t) * height_range;
-	float e = 4.5;
+	float e = 3.0;
 	vec4 s_x = state_smooth(entry.xz + vec2(e, 0.0));
 	vec4 s_z = state_smooth(entry.xz + vec2(0.0, e));
-	float b0 = billow(entry.xz, drift);
-	float pf = puffs(entry, drift, time);
-	float pfx = puffs(entry + vec3(e, 0.0, 0.0), drift, time);
-	float pfz = puffs(entry + vec3(0.0, 0.0, e), drift, time);
-	// combined cloud-top height field: banks (state top × billow) + world-space puffs
-	float h0 = top_e * (0.6 + 0.8 * b0) + 3.5 * pf;
-	float hx = mix(s_x.a, s_x.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(e, 0.0), drift)) + 3.5 * pfx;
-	float hz = mix(s_z.a, s_z.b, reveal_t) * height_range * (0.6 + 0.8 * billow(entry.xz + vec2(0.0, e), drift)) + 3.5 * pfz;
-	vec3 n = normalize(vec3((h0 - hx) / e * 1.7, 1.0, (h0 - hz) / e * 1.7));
-	float lambert = clamp(dot(n, normalize(light_dir)), 0.0, 1.0);
-	// 0 = valley between billows .. 1 = domed billow top
-	float cum = smoothstep(0.28, 0.76, b0 * 0.7 + pf * 0.3);
-	cum = 1.0 - (1.0 - cum) * (1.0 - cum);
-	vec3 shade = mix(valley_color, body_color, smoothstep(0.0, 0.5, cum));
-	shade = mix(shade, lit_color, smoothstep(0.42, 0.95, cum) * (0.4 + 0.6 * lambert));
-	shade = mix(shade, sun_color, smoothstep(0.72, 1.0, cum) * smoothstep(0.55, 0.95, lambert) * 0.9);
-	shade *= mix(0.92, 1.05, lambert);
+	float h0 = cloud_height(top_e, entry.xz, drift);
+	float hx = cloud_height(mix(s_x.a, s_x.b, reveal_t) * height_range, entry.xz + vec2(e, 0.0), drift);
+	float hz = cloud_height(mix(s_z.a, s_z.b, reveal_t) * height_range, entry.xz + vec2(0.0, e), drift);
+	vec2 slope = vec2(h0 - hx, h0 - hz) / e;
+	slope *= min(1.0, 0.75 / max(length(slope), 1e-4));        // ≤ ~37° tilt: no hard terminators
+	vec3 n = normalize(vec3(slope.x, 1.0, slope.y));
+	vec3 l = normalize(light_dir);
+	float half_lambert = dot(n, l) * 0.5 + 0.5;                   // wrap lighting
+	float ndv = abs(dot(n, -view_dir));
+	vec3 albedo = painted(entry.xz, time);
+	// gentle form from the domes: lit dome tops, soft shaded flanks (wrap lighting, never black)
+	vec3 shade = albedo * mix(0.74, 1.14, half_lambert * half_lambert);
+	// silver lining: thin / grazing parts of the billows catch the light
+	float rim = (1.0 - smoothstep(0.35, 0.85, ndv)) * smoothstep(0.45, 0.9, half_lambert);
+	shade = mix(shade, sun_color, rim * 0.35);
+	// grazing angles and silhouettes melt into the haze (no outlines)
+	shade = mix(shade, haze_color, (1.0 - smoothstep(0.25, 0.7, ndv)) * 0.55);
 
 	// ---- volume march: density (3D puffs), thin fog reads as light haze --------------------
 	float trans = 1.0;
@@ -212,10 +246,10 @@ void fragment() {
 		float g = ground(p.xz);
 		// the faceted shell may sit slightly above the analytic cloud top: count the first metres
 		// below the entry as inside the cloud (no facet creases in density/haze)
-		float cloud_top = max(top * (0.6 + 0.8 * b), (entry.y - g) * step(0.5, top) - 0.4);
+		float cloud_top = max(cloud_height(top, p.xz, drift), (entry.y - g) * step(0.5, top) - 0.4);
 		float y = max(0.0, p.y - g);
 		float body = 1.0 - smoothstep(cloud_top - 3.0, cloud_top + 0.6, y);
-		float detail = 0.55 + 0.45 * smoothstep(0.25, 0.75, puffs(p, drift, time));
+		float detail = 0.75 + 0.25 * smoothstep(0.25, 0.75, puffs(p, drift, time));
 		// revealing fog thins out and brightens (luminous dissolve)
 		float revealing = clamp((s.r - s.g) * sdf_range / 10.0, 0.0, 1.0) * reveal_curl;
 		float d = density * fogness * body * detail * (1.0 - 0.6 * revealing);
@@ -225,9 +259,10 @@ void fragment() {
 		float a = 1.0 - exp(-d * step_len);
 		// the visible colour is the cumulus surface shade, a touch darker deeper inside
 		float near_top = smoothstep(cloud_top - 7.0, cloud_top - 0.5, y);
-		vec3 col = shade * mix(0.93, 1.0, near_top);
+		vec3 col = shade * mix(0.95, 1.0, near_top);
+		// the first metres of fog at the edge are translucent light mist
 		float thin = 1.0 - smoothstep(0.15, 0.7, fogness * body);
-		col = mix(col, haze_color, thin * 0.8);
+		col = mix(col, mix(haze_color, sun_color, 0.35), thin * 0.85);
 		col = mix(col, sun_color, revealing * 0.55);
 		acc += trans * a * col;
 		trans *= 1.0 - a;
@@ -244,10 +279,14 @@ void fragment() {
 		vec2 along = vec2(dot(entry.xz, wn), dot(entry.xz, vec2(-wn.y, wn.x)));
 		vec3 wq = vec3((along.x - time * drift_speed * 1.2) / 120.0, entry.y / 30.0 + time * 0.003, along.y / 36.0);
 		float w1 = texture(noise3d, wq).r;
-		float w2 = texture(noise3d, wq * 2.1 + vec3(0.43, 0.11, 0.27)).r;
-		float wisp = smoothstep(0.50, 0.78, w1 * 0.7 + w2 * 0.3) * smoothstep(0.6, 1.0, band);
-		float a_w = wisp_alpha * wisp * (1.0 - 0.5 * reveal_curl);
-		vec3 wc = mix(haze_color, sun_color, 0.35 + 0.4 * w2);
+		vec3 pw = painted(vec2(along.x * 0.6, along.y * 1.6), time);
+		float lum = dot(pw, vec3(0.3, 0.55, 0.15));
+		float wisp = smoothstep(0.46, 0.74, w1 * 0.6 + smoothstep(0.30, 0.42, lum) * 0.4) * smoothstep(0.6, 1.0, band);
+		// soft haze bank rising over the first metres of revealed forest (art/07 panel 3)
+		float sdf_e2 = (mix(s_in.g, s_in.r, reveal_t) - 0.5) * sdf_range;
+		float bank = 0.16 * (1.0 - smoothstep(1.5, 7.0, sdf_e2));
+		float a_w = (wisp_alpha * wisp + bank) * (1.0 - 0.5 * reveal_curl);
+		vec3 wc = mix(haze_color, sun_color, 0.3 + 0.5 * smoothstep(0.3, 0.45, lum));
 		color = (color * alpha + (1.0 - alpha) * a_w * wc) / max(1.0 - (1.0 - alpha) * (1.0 - a_w), 1e-4);
 		alpha = 1.0 - (1.0 - alpha) * (1.0 - a_w);
 	}

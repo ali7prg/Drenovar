@@ -109,6 +109,15 @@ def match_luminance(canvas, patches):
     return np.clip(skc.lab2rgb(lab), 0, 1)
 
 
+def despeckle(canvas):
+    """Remove leftover dark specks (tree tips): L below the local mean - 5 is lifted to it."""
+    lab = lab_of(canvas)
+    L = lab[..., 0]
+    local = ndimage.gaussian_filter(L, 6.0, mode='wrap')
+    lab[..., 0] = np.maximum(L, local - 5.0)
+    return np.clip(skc.lab2rgb(lab), 0, 1)
+
+
 def large_forms(canvas):
     """Gentle large-scale soft forms (tileable): low-frequency luminance swell from wrapped blur."""
     lab = lab_of(canvas)
@@ -147,6 +156,7 @@ def main():
     canvas, count = splat(patches)
     canvas = ndimage.gaussian_filter(canvas, (1.2, 1.2, 0), mode='wrap')
     canvas = match_luminance(canvas, patches)
+    canvas = despeckle(canvas)
     canvas = large_forms(canvas)
     screen = canvas
     albedo = inverse_filmic_srgb(screen)

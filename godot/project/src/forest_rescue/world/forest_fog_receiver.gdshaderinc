@@ -18,6 +18,8 @@ uniform float fog_sdf_range = 64.0;
 uniform float fog_reveal_t = 1.0;
 uniform float fog_drift_speed = 0.6;
 uniform vec2 fog_wind = vec2(0.83, 0.56);
+uniform sampler2D fog_dome_tex : filter_linear_mipmap, repeat_enable;
+uniform float fog_dome_tile = 84.0;
 uniform vec3 fog_silhouette : source_color = vec3(0.370, 0.418, 0.449);   // light mist (fog haze)
 
 vec2 fog_uv(vec2 p) {
@@ -76,6 +78,14 @@ float fog_edge_offset(vec2 p, vec2 drift, float b) {
 	return -2.6 + 3.0 * (b * 0.35 + t1 * 0.45 + t2 * 0.2) - fog_reveal_curl * 2.0 * t2;
 }
 
+// Same cloud-top relief as forest_fog.gdshader (domes / cloud_height).
+float fog_domes(vec2 p, vec2 drift) {
+	float a = texture(fog_dome_tex, (p + drift * 0.5) / fog_dome_tile).r;
+	float b = texture(fog_dome_tex, (p - drift * 0.35) / (fog_dome_tile / 2.3) + vec2(0.31, 0.67)).g;
+	float swell = texture(fog_noise_tex, (p + drift * 0.2) / 170.0 + vec2(0.55, 0.15)).r;
+	return clamp(a * 0.62 + b * 0.23 + swell * 0.3 - 0.08, 0.0, 1.0);
+}
+
 // x = cover (hide: dithered/eroded away), y = silhouette tint, z = explored-veil dim (0..1)
 vec3 fog_receive(vec3 p, float time) {
 	if (!fog_enabled) {
@@ -105,7 +115,7 @@ vec3 fog_receive(vec3 p, float time) {
 	float fogness = 1.0 - smoothstep(-1.5, 1.5, sdf + fog_edge_offset(p.xz, drift, b));
 	vec4 sm = fog_state_smooth(p.xz);
 	float top = mix(sm.a, sm.b, local_t) * fog_height_range;
-	float cloud = top * (0.6 + 0.8 * b);
+	float cloud = top * (0.8 + 0.4 * fog_domes(p.xz, drift));
 	float buried = 1.0 - smoothstep(cloud - 1.5, cloud + 2.5, y);
 	// Deep fog hides whole trees (no tops poking through the cloud sea), e.g. while a reveal runs.
 	float deep = smoothstep(fog_deep_top * 0.45, fog_deep_top * 0.8, top);

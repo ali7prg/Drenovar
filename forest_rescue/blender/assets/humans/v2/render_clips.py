@@ -43,8 +43,36 @@ def load_char(aid, offset_x):
         if o is not None and o.type == "MESH" and not o.name.endswith("_LOD0"):
             o.hide_render = True
     arm.location.x = offset_x
+    arm["_meshes"] = [o.name for o in dst.objects if o is not None and o.type == "MESH"]
     import re as _re
     return arm, {_re.sub(r"\.\d{3}$", "", a.name): a for a in dst.actions if a is not None}
+
+
+def set_clip(arm, act):
+    """Armature action (OBJECT slot) + the sit_drape morph weight curve (KEY slot) of the same action."""
+    arm.animation_data.action = act
+    if act is None:
+        return
+    for s in act.slots:
+        if s.target_id_type == "OBJECT":
+            arm.animation_data.action_slot = s
+    key_slot = next((s for s in act.slots if s.target_id_type == "KEY"), None)
+    for name in arm.get("_meshes", []):
+        o = bpy.data.objects.get(name)
+        key = o.data.shape_keys if o is not None else None
+        if key is None:
+            continue
+        if key.animation_data is None:
+            key.animation_data_create()
+        for tr in key.animation_data.nla_tracks:
+            tr.mute = True
+        if key_slot is not None:
+            key.animation_data.action = act
+            key.animation_data.action_slot = key_slot
+        else:
+            key.animation_data.action = None
+            for kb in key.key_blocks[1:]:
+                kb.value = 0.0
 
 
 def main():
@@ -83,7 +111,7 @@ def main():
             act = acts.get(clip)
             if arm.animation_data is None:
                 arm.animation_data_create()
-            arm.animation_data.action = act
+            set_clip(arm, act)
             if act is not None:
                 n_fr = int(act.frame_range[1])
         if n_fr is None:

@@ -110,6 +110,24 @@ def heads_spec():
     return dict(instances=inst, heads=heads, target=[0, 1, 0], ground=[0.40, 0.42, 0.24])
 
 
+def seated_spec(rows):
+    """6 civilians per row (columns across the view), rows stacked away from the camera; each row is one
+    (clip, time) - for the seated cloth check (sit_drape morph) in the game renderer."""
+    yaw = math.pi / 4
+    perp = np.array([1.0, -1.0]) / math.sqrt(2)
+    away = -np.array([1.0, 1.0]) / math.sqrt(2)
+    names = [a for a in CIV if os.path.exists(os.path.join(HUM, f"{a}.glb"))]
+    inst = []
+    for r, (anim, t) in enumerate(rows):
+        for i, a in enumerate(names):
+            x, z = perp * (i - (len(names) - 1) / 2) * 1.2 + away * r * 3.4
+            inst.append(dict(glb=f"{a}.glb", x=float(x), z=float(z), yaw=yaw, painted=True, k=k_of(a), anim=anim,
+                             t=t, lod=0))
+    ctr = away * (len(rows) - 1) * 3.4 / 2
+    return dict(instances=inst, target=[float(ctr[0]), 0.6, float(ctr[1])], ground=[0.40, 0.42, 0.24], zooms="68",
+                close=dict(size=2.6 * len(rows) + 1.2, target=[float(ctr[0]), 0.6, float(ctr[1])]))
+
+
 def label(im, text):
     d = ImageDraw.Draw(im)
     d.rectangle([4, 4, 12 + 6 * len(text), 20], fill=(20, 20, 20))
@@ -153,6 +171,17 @@ if __name__ == "__main__":
     os.makedirs(out, exist_ok=True)
     if mode == "heads":
         run(heads_spec(), out, "heads")
+        sys.exit(0)
+    if mode == "seated":
+        sets = {"seatedA": [("lf_civilian_stand_up", 0.0), ("lf_civilian_cage_wait", 1.0), ("lf_civilian_cage_sit", 1.0)],
+                "seatedB": [("lf_civilian_stand_up", 1.5), ("lf_civilian_stand_up", 1.0), ("lf_civilian_stand_up", 0.5)]}
+        for pre, rows in sets.items():
+            run(seated_spec(rows), out, pre)
+            p = os.path.join(out, f"{pre}_close.png")
+            if os.path.exists(p):
+                im = Image.open(p).convert("RGB")
+                txt = "Godot city camera, rows back->front: " + " | ".join(f"{a.replace('lf_civilian_', '')} t={t}" for a, t in reversed(rows))
+                label(im, txt).save(p)
         sys.exit(0)
     if mode in ("row", "both"):
         run(row_spec(), out, "row")

@@ -97,7 +97,7 @@ def zbuf(verts, tris, cam):
     return texproj.zbuffer(verts, tris, cam, pad=0)
 
 
-def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None, lo_hi_fn=None):
+def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None, lo_hi_fn=None, vis_eps=0.006):
     """Angle-limited, z-buffered projection.  Returns colour, weight sum, per-view weights.
     lo_hi_fn(P) -> (lo, hi) per texel (stricter limits on the head)."""
     W, H = T.size
@@ -116,7 +116,7 @@ def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None,
         ok = (ui >= 0) & (ui < vw) & (vi >= 0) & (vi < vh)
         zval = np.full(len(P), -np.inf)
         zval[ok] = zb[vi[ok], ui[ok]]
-        vis = ok & (dep <= zval + 0.006)
+        vis = ok & (dep <= zval + vis_eps)
         m = ndi.binary_erosion(v.mask, iterations=erode) if erode else v.mask
         inm = np.zeros(len(P), bool)
         inm[ok] = m[vi[ok], ui[ok]]
@@ -135,6 +135,34 @@ def project_views(T, verts, tris, views, lo=0.35, hi=0.55, erode=2, region=None,
         per[v.name] = (w, u, vv)
     col = acc / np.maximum(ws, 1e-9)[:, None]
     return (yy, xx, P, N), col, ws, per
+
+
+def _vnoise(x, seed):
+    i = np.floor(x)
+    f = x - i
+    h0 = np.modf(np.sin(i * 12.9898 + seed * 78.233) * 43758.5453)[0]
+    h1 = np.modf(np.sin((i + 1) * 12.9898 + seed * 78.233) * 43758.5453)[0]
+    t = f * f * (3 - 2 * f)
+    return (h0 + (h1 - h0) * t) * 2.0 - 1.0
+
+
+def hair_strands(P, crown, amp=0.28):
+    """Multiplicative strand-direction pattern for hair texels: strands radiate from the crown and run
+    down the head (across-strand coordinate = azimuth around the vertical axis through the crown), with
+    fine strands, wavy mid-size locks and big lumpy clumps."""
+    d = P - crown
+    th = np.arctan2(d[:, 0], -d[:, 1])
+    al = np.arctan2(np.hypot(d[:, 0], d[:, 1]), -d[:, 2] * 0.0 + d[:, 2] * -1.0 + 1e-9)
+    al = np.arccos(np.clip(d[:, 2] / np.maximum(np.linalg.norm(d, axis=1), 1e-9), -1, 1))
+    R0 = 0.09
+    u = th * R0
+    v = al * R0
+    f1 = _vnoise(u / 0.0032 + 0.8 * np.sin(v / 0.014 + 3.0 * _vnoise(u / 0.02, 5)), 1)
+    f2 = _vnoise(u / 0.011 + 0.5 * np.sin(v / 0.03 + 2.0 * _vnoise(u / 0.05, 7)), 2)
+    f3 = _vnoise(u / 0.032 + 0.2 * np.sin(v / 0.05), 3)
+    f4 = _vnoise(v / 0.018 + u * 41.0, 4)
+    val = 0.50 * f1 + 0.32 * f2 + 0.30 * f3 + 0.12 * f4
+    return 1.0 + amp * val
 
 
 def synthesize(T, data, col, ws, per, views, seen_thr=0.25, k=14, detail=0.9, axis_x=0.0, group=None):

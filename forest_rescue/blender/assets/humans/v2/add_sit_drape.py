@@ -154,22 +154,36 @@ def vweights(o):
     return [{gi[ge.group]: ge.weight for ge in v.groups if ge.weight > 0} for v in o.data.vertices]
 
 
-def reweight_garments(o):
+def reweight_garments(o, ref_pts=None, hip_z=None):
     """Skirt / apron / cloak islands: weights on leg bones move to the vertex's dominant cloth bone (or Hips),
     so a seated pose with neutral cloth bones leaves the garment hanging rigidly from the hips (no boards /
     wings from blending with 140-degree thigh rotations) and the inverse skinning of the morph is well posed.
     Returns (moved, n_islands, garment-vertex mask, island labels)."""
     W = vweights(o)
     lab = islands(o)
+    co = np.array([v.co[:] for v in o.data.vertices])
     cw = np.array([sum(w for n, w in d.items() if n in CLOTH) for d in W])
     garment = set()
     for li in np.unique(lab[cw > 0.03]):
         m = lab == li
         if (cw[m] > 0.03).mean() >= 0.15:
             garment.add(int(li))
+    if not garment and ref_pts is not None and len(ref_pts):
+        # LODs without cloth bones: garment islands = islands lying on LOD0's garment surface
+        from scipy.spatial import cKDTree
+        dd, _ = cKDTree(ref_pts).query(co)
+        for li in np.unique(lab):
+            m = lab == li
+            if m.sum() >= 8 and (dd[m] < 0.025).mean() >= 0.5:
+                garment.add(int(li))
+    # accessories hanging from the waist or above (belts, bands, ties, pouches, straps) also stop following
+    # the thighs; the body itself (largest island) keeps its leg weights
+    big = int(np.bincount(lab).argmax())
+    hz = hip_z if hip_z is not None else 0.0
+    acc = {int(li) for li in np.unique(lab) if int(li) != big and co[lab == li, 2].max() >= hz - 0.05}
     moved = 0
     for i, d in enumerate(W):
-        if int(lab[i]) not in garment:
+        if int(lab[i]) not in garment and int(lab[i]) not in acc:
             continue
         wl = sum(w for n, w in d.items() if n in LEG)
         if wl <= 0:
@@ -315,8 +329,12 @@ def main():
     qa_dir = DRY or os.path.join(paths.QA_VIDEO, AID)
     # ---- garments hang from the hips / chest only: leg weights on garment islands -> their cloth bone
     gmask = {}
+    hip_z = arm.data.bones["Hips"].head_local.z
+    ref_pts = None
     for o in lods:
-        moved, isl, mask, lab = reweight_garments(o)
+        moved, isl, mask, lab = reweight_garments(o, ref_pts, hip_z)
+        if o is lo0:
+            ref_pts = np.array([v.co[:] for v in lo0.data.vertices])[mask]
         gmask[o.name] = (mask, lab)
         log(o.name, "garment islands", isl, "garment verts", int(mask.sum()), "re-weighted from the legs", moved)
     mask0, lab0 = gmask[lo0.name]

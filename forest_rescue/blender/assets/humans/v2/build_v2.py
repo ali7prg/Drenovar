@@ -585,7 +585,7 @@ def texture(lo0, R, J, pinfo0=None):
         def pfeather(P):
             u, v, _ = cam.project(P)
             return texproj._bilinear(feat[..., None], u, v)[:, 0]
-        d2, c2, ws2, per2 = HT.project_views(T, verts, tris, [cam], lo=0.50, hi=0.65, erode=0,
+        d2, c2, ws2, per2 = HT.project_views(T, verts, tris, [cam], lo=0.50, hi=0.72, erode=0, vis_eps=0.02,
                                              region={"portrait": (lambda P: pfeather(P) * is_head(P))})
         wport = np.clip(ws2, 0, 1) * skin_hair
         col2 = c2
@@ -602,6 +602,10 @@ def texture(lo0, R, J, pinfo0=None):
     _cv.fillPoly(fm, [np.round(fhull).astype(np.int32)], 1)
     in_face_px = texproj._bilinear(fm.astype(np.float32)[..., None], uf, vf)[:, 0] > 0.5
     wf = np.where((~skin_hair) & is_head(data[2]) & in_face_px, 0.0, wf)
+    if pinfo0:
+        # single source: with a portrait, the painted front never textures the face region (the portrait
+        # fades out by |n.v| toward the profiles and the sides get synthesised cheek skin instead)
+        wf = np.where(is_head(data[2]) & in_face_px, 0.0, wf)
     wf = wf * (1.0 - wport)
     colf = texproj._bilinear(R.front.image, uf, vf)[:, :3]
     colb = texproj._bilinear(R.back.image, ub, vb)[:, :3]
@@ -640,6 +644,16 @@ def texture(lo0, R, J, pinfo0=None):
     group = mi[tri_poly[T.tri[yy, xx]]] * 2 + is_head(data[2]).astype(np.int64)
     col, seen = HT.synthesize(T, data, col, ws, per, views, group=group)
     log("texture: seen fraction", round(float(seen.mean()), 3))
+    # hair the paintings do not reach (sides, crown, under the beard): strand-direction texture on the
+    # synthesised base colour (no smooth "bowl" gradients); painted hair keeps its own strands
+    hair_t = (tex_mat == MAT_IDS["hair"]) & is_head(data[2])
+    if hair_t.any():
+        crown = np.array([0.0, o[1] + 0.012, C["L"]["top"] - 0.035])
+        k_syn = np.clip(1.0 - ws / 0.6, 0.0, 1.0)
+        fac = HT.hair_strands(data[2][hair_t], crown)
+        kk = k_syn[hair_t][:, None]
+        col[hair_t] = np.clip(col[hair_t] * (1.0 + (fac[:, None] - 1.0) * (0.35 + 0.65 * kk)), 0, 1)
+        log("hair strand synthesis texels", int(hair_t.sum()), "mostly synthesised", int((k_syn[hair_t] > 0.5).sum()))
     img = HT.to_image(T, data, col)
     p_png = paths.texture_master(GROUP, f"{AID}_color_master.png")
     core.save_rgba(p_png, img)

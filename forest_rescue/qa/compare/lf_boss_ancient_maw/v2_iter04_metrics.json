@@ -1,38 +1,38 @@
 {
   "left": {
     "view": "left",
-    "iou": 0.8598,
-    "mean_abs_colour_error": 0.0506,
+    "iou": 0.9262,
+    "mean_abs_colour_error": 0.0486,
     "ref_pixels": 102033,
-    "render_pixels": 90094
+    "render_pixels": 99375
   },
   "left_raw": {
     "view": "left_raw",
-    "iou": 0.8053,
-    "mean_abs_colour_error": 0.0507,
+    "iou": 0.8678,
+    "mean_abs_colour_error": 0.0487,
     "ref_pixels": 109329,
-    "render_pixels": 90094
+    "render_pixels": 99375
   },
   "front": {
     "view": "front",
-    "iou": 0.8954,
-    "mean_abs_colour_error": 0.0794,
+    "iou": 0.8931,
+    "mean_abs_colour_error": 0.0718,
     "ref_pixels": 46631,
-    "render_pixels": 45593
+    "render_pixels": 46005
   },
   "front_raw": {
     "view": "front_raw",
-    "iou": 0.9075,
-    "mean_abs_colour_error": 0.0779,
+    "iou": 0.9063,
+    "mean_abs_colour_error": 0.0704,
     "ref_pixels": 48471,
-    "render_pixels": 45593
+    "render_pixels": 46005
   },
   "rear34": {
     "view": "rear34",
-    "iou": 0.8309,
-    "mean_abs_colour_error": 0.0792,
+    "iou": 0.8282,
+    "mean_abs_colour_error": 0.079,
     "ref_pixels": 57577,
-    "render_pixels": 54876,
+    "render_pixels": 55115,
     "camera": {
       "pnp_rms_px": 17.167159496448484,
       "pnp_focal_px": 6403.400654967001,
@@ -75,10 +75,10 @@
   },
   "head_closeup": {
     "view": "head_closeup",
-    "iou": 0.7666,
-    "mean_abs_colour_error": 0.1366,
+    "iou": 0.838,
+    "mean_abs_colour_error": 0.1355,
     "ref_pixels": 164923,
-    "render_pixels": 154304,
+    "render_pixels": 170505,
     "camera": {
       "pnp_rms_px": 25.994086201901542,
       "focal_px": 400.0,

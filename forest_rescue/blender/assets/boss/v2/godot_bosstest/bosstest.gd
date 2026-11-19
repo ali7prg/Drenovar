@@ -155,6 +155,30 @@ func _run() -> void:
 		boss.player.seek(float(pair[1]), true)
 		boss.player.pause()
 		await _shot("game_zoom40_%s_%.2f" % [pair[0].trim_prefix("lf_boss_"), float(pair[1])], 40.0, target)
+	# heads5 in the game look (painted shader), LOD0 and LOD1: front, 3/4 L, 3/4 R, profile L, profile R
+	boss.play(["lf_boss_idle"], 0.0, true)
+	boss.player.seek(0.0, true)
+	boss.player.pause()
+	for s in squad:
+		s.visible = false
+	if arena0 != null:
+		arena0.visible = false
+	if arena1 != null:
+		arena1.visible = false
+	var head := Vector3(0, 3.02, 3.82)
+	var dirs := {"front": Vector3(0, 0.18, 1), "34L": Vector3(1, 0.18, 1), "34R": Vector3(-1, 0.18, 1), "profL": Vector3(1, 0.18, 0), "profR": Vector3(-1, 0.18, 0)}
+	cam.size = 2.6
+	for lvl in [0, 1]:
+		boss.set_lod(lvl)
+		for key in dirs:
+			cam.position = head + (dirs[key] as Vector3).normalized() * 12.0
+			cam.look_at(head, Vector3.UP)
+			for _f in 4:
+				await get_tree().process_frame
+			get_viewport().get_texture().get_image().save_png(out.path_join("heads5_lod%d_%s.png" % [lvl, key]))
+	boss.set_lod(0)
+	for s in squad:
+		s.visible = true
 	# size line-up: boss, horse, captain on a plain ground
 	if arena0 != null:
 		arena0.visible = false

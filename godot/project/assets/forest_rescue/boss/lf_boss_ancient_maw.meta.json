@@ -5,7 +5,7 @@
   "tris": {
     "LOD0": 45700,
     "LOD1": 23784,
-    "LOD2": 9324
+    "LOD2": 8826
   },
   "budget": {
     "LOD0": 48000,
@@ -202,10 +202,10 @@
       "loop": true,
       "markers": {},
       "footSlip_m": {
-        "L": 0.8844,
-        "R": 0.7845
+        "L": 0.0,
+        "R": 0.0
       },
-      "ikOverreach_m": 0.1439,
+      "ikOverreach_m": 0.0,
       "loopSeamMaxQuatDiff": 0.0,
       "groundSpeed_mps": 1.6,
       "strideLength_m": 2.56
@@ -218,7 +218,7 @@
       "markers": {},
       "footSlip_m": {
         "L": 0.0,
-        "R": 0.0018
+        "R": 0.0
       },
       "ikOverreach_m": 0.0,
       "rootYawDeg": 45.0,
@@ -231,7 +231,7 @@
       "loop": false,
       "markers": {},
       "footSlip_m": {
-        "L": 0.0018,
+        "L": 0.0,
         "R": 0.0
       },
       "ikOverreach_m": 0.0,
@@ -282,7 +282,7 @@
       "markers": {},
       "footSlip_m": {
         "L": 0.0,
-        "R": 0.0151
+        "R": 0.0
       },
       "ikOverreach_m": 0.0
     },
@@ -295,8 +295,8 @@
         "ground_contact": 3.7
       },
       "footSlip_m": {
-        "L": 0.042,
-        "R": 0.1901
+        "L": 0.0,
+        "R": 0.0
       },
       "ikOverreach_m": 0.0
     },
@@ -346,8 +346,8 @@
         "recovery_end": 5.9
       },
       "footSlip_m": {
-        "L": 0.0305,
-        "R": 0.4253
+        "L": 0.0,
+        "R": 0.0
       },
       "ikOverreach_m": 0.0
     },
@@ -365,13 +365,13 @@
         "recovery_end": 6.9
       },
       "footSlip_m": {
-        "L": 0.3198,
-        "R": 0.2059
+        "L": 0.0,
+        "R": 0.0003
       },
       "ikOverreach_m": 0.0
     }
   },
-  "glbBytes": 13739780,
+  "glbBytes": 13721932,
   "textureProjection": {
     "coverageByView": {
       "left": 0.26741433990215374,

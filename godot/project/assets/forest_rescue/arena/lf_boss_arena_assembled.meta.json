@@ -187,5 +187,22 @@
       "seconds": 4.5,
       "loop": true
     }
+  },
+  "lods": {
+    "LOD1": {
+      "file": "lf_boss_arena_assembled_lod1.glb",
+      "tris": 23817,
+      "bytes": 16128072
+    },
+    "LOD2": {
+      "file": "lf_boss_arena_assembled_lod2.glb",
+      "tris": 11039,
+      "bytes": 5442388
+    },
+    "LOD0": {
+      "file": "lf_boss_arena_assembled.glb",
+      "tris": 56284
+    },
+    "note": "same node names (cliff_NN_v, fossil_wall, pillar_N_v, bones_N, floor, stream, banner_N[_rig]) in every LOD file; suggested use: LOD0 zoom <= 34, LOD1 zoom <= 85, LOD2 beyond (actor LOD thresholds 42/85)"
   }
 }

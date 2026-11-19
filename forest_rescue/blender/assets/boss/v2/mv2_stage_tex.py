@@ -193,7 +193,10 @@ def keratin_atlas(size=512):
     # gap between teeth/claws strips (v 0.25-0.30): neutral
     reg = (v >= 0.25) & (v < 0.30)
     img[reg] = (0.5, 0.42, 0.33)
-    img[(xx >= 0.25) & (xx < 0.5) & (v < 0.25)] = (0.42, 0.24, 0.22)   # gum / mouth flesh swatch
+    lin = np.clip((v - 0.0) / 0.25, 0, 1)[..., None]
+    img_l = np.array([0.16, 0.075, 0.065]) * (0.8 + 0.4 * np.abs(lin - 0.5))
+    reg = (xx >= 0.25) & (xx < 0.5) & (v < 0.25)
+    img[reg] = np.broadcast_to(img_l, img.shape)[reg]                  # mouth lining: dark, shadowed
     return np.clip(img, 0, 1)
 
 
@@ -311,8 +314,13 @@ def main():
     wu, _ = B.head_widths(P[:, 1])
     headvol = B.head_part().fn(P - N * 0.004)
     inner_mouth = (P[:, 1] < -3.30) & (np.abs(P[:, 2] - zl) < 0.17) & (headvol < -0.012)
-    flesh = np.array([0.45, 0.22, 0.20])
-    base[inner_mouth & unseen] = flesh * (0.8 + 0.2 * cvar[inner_mouth & unseen])[:, None]
+    flesh = np.array([0.40, 0.19, 0.17])
+    dark = np.array([0.09, 0.055, 0.045])
+    # interior near the lips/front (what the closed mouth's slit shows) is a dark shadowed gap; deeper = flesh
+    depth_in = np.clip((-headvol - 0.012) / 0.06, 0, 1)
+    fl = flesh[None, :] * depth_in[:, None] + dark[None, :] * (1 - depth_in[:, None])
+    sel = inner_mouth
+    base[sel] = fl[sel] * (0.85 + 0.15 * cvar[sel])[:, None]
     # scale detail on the albedo: crevices darker, scale crowns lighter, per-scale value jitter
     seen_amp = np.where(P[:, 1] < -2.95, 0.06, 0.14)
     amp = np.where(unseen, 0.22, seen_amp)

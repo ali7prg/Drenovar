@@ -1,7 +1,7 @@
 {
   "view": "left_raw",
-  "iou": 0.8053,
-  "mean_abs_colour_error": 0.0507,
+  "iou": 0.8678,
+  "mean_abs_colour_error": 0.0487,
   "ref_pixels": 109329,
-  "render_pixels": 90094
+  "render_pixels": 99375
 }

@@ -59,7 +59,11 @@ def pick_patches():
                     # soft structure: some variation, but no hard edges (low gradient energy)
                     gy, gx = np.gradient(L)
                     edge = np.percentile(np.hypot(gx, gy), 98)
-                    if L.std() < 2.5 or edge > 6.0:
+                    if L.std() < 2.5 or edge > 4.5:
+                        continue
+                    # no tree tips / dark specks (sharp local minima) and no blown-out sun spots
+                    local = L - ndimage.gaussian_filter(L, 5.0)
+                    if (local < -4.5).mean() > 0.002 or (L > 72).mean() > 0.01:
                         continue
                     patches.append(img[y:y + PATCH, x:x + PATCH].copy())
                     stats.append((name, x, y, float(L.mean()), float(L.std()), float(edge)))
@@ -72,7 +76,7 @@ def splat(patches):
     canvas[:] = mean
     order = RNG.permutation(len(patches))
     count = 0
-    for k in range(900):
+    for k in range(520):
         p = patches[order[k % len(order)]]
         s = RNG.uniform(2.6, 4.2)
         size = int(PATCH * s)
@@ -94,12 +98,14 @@ def splat(patches):
 
 
 def match_luminance(canvas, patches):
-    src = np.concatenate([p.reshape(-1, 3) for p in patches])
-    src_L = lab_of(src[None])[0][:, 0]
+    src = np.concatenate([p.reshape(-1, 3) for p in patches[::3]])
+    src_L = np.sort(lab_of(src[None])[0][:, 0])
     lab = lab_of(canvas)
     L = lab[..., 0]
-    ranks = np.argsort(np.argsort(L.ravel())) / (L.size - 1)
-    lab[..., 0] = np.percentile(src_L, ranks * 100).reshape(L.shape)
+    order = np.argsort(L.ravel())
+    ranks = np.empty(L.size)
+    ranks[order] = np.arange(L.size) / (L.size - 1)
+    lab[..., 0] = np.interp(ranks, np.linspace(0, 1, src_L.size), src_L).reshape(L.shape)
     return np.clip(skc.lab2rgb(lab), 0, 1)
 
 

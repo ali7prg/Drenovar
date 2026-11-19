@@ -1,0 +1,53 @@
+{
+ "id": "lf_fog_painted",
+ "size": 1024,
+ "tool": "godot/project/src/forest_rescue/world/tools/build_fog_texture.py",
+ "sources": {
+  "07_fog_exploration_interface.png": [
+   [
+    8,
+    8,
+    508,
+    875
+   ],
+   [
+    520,
+    8,
+    1020,
+    875
+   ],
+   [
+    1032,
+    8,
+    1530,
+    875
+   ]
+  ],
+  "18_hall3_unlock_intro.png": [
+   [
+    8,
+    8,
+    508,
+    1010
+   ],
+   [
+    520,
+    8,
+    1018,
+    1010
+   ]
+  ]
+ },
+ "patches": 364,
+ "splats": 520,
+ "method": "auto-picked pure-mist patches (fog classifier >= 98.5 %, no dark/tree pixels, soft gradients), feathered toroidal splatting (seamless), luminance histogram matched to the source mist, gentle large-scale swell; stored pre-inverted through the city FILMIC tonemap (shader ALBEDO = texture)",
+ "screen_stats": {
+  "fog_frac": 1.0,
+  "L_p10_p50_p90": [
+   44.4,
+   52.8,
+   58.4
+  ],
+  "C_med": 12.22402572631836
+ }
+}

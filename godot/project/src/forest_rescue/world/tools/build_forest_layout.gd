@@ -157,7 +157,7 @@ func _sector_weight(phi: float, a: float, b: float, blend: float) -> float:
 	# Smooth bump over [a, b] (degrees, may wrap past 360).
 	var best := 0.0
 	for shift in [-360.0, 0.0, 360.0]:
-		var p := phi + shift
+		var p: float = phi + float(shift)
 		best = maxf(best, smoothstep(a - blend, a + blend, p) * (1.0 - smoothstep(b - blend, b + blend, p)))
 	return best
 
@@ -642,8 +642,8 @@ func _find_hero_spot() -> Vector2:
 	while radius <= 22.0:
 		for k in maxi(1, int(radius * 3.0)):
 			var angle := TAU * k / maxf(1.0, radius * 3.0)
-			var p := HERO_PREFERRED + Vector2(cos(angle), sin(angle)) * radius
-			var ok := ground_ok(p.x, p.y, true) and terrain.slope_degrees(p.x, p.y) < 14.0
+			var p: Vector2 = HERO_PREFERRED + Vector2(cos(angle), sin(angle)) * radius
+			var ok: bool = ground_ok(p.x, p.y, true) and float(terrain.slope_degrees(p.x, p.y)) < 14.0
 			var saved := hero
 			hero = Vector2.INF
 			ok = ok and not blocked_exact(p.x, p.y, true, 1.0)

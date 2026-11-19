@@ -181,8 +181,10 @@ def synthesize(T, data, col, ws, per, views, seen_thr=0.25, k=14, detail=0.9, ax
             # face would copy eyes / mouths onto cheeks and temples (ghost features)
             # head skin (group 1): low-frequency only (no copied eyes/mouths); hair keeps the painted
             # strand detail transfer
+            # every head group (odd id: skin, hair, hood/cap cloth) is low-frequency only - unfolded painted
+            # detail would carry the painted face (skin minus hood colour) onto hoods and temples
             o, _ = synthesize(T, sub_data, col[sel], ws[sel], sub_per, views, seen_thr, k,
-                              0.0 if int(g) == 1 else detail, axis_x, None)
+                              0.0 if int(g) % 2 == 1 else detail, axis_x, None)
             out[sel] = o
         return out, seen_all
     yy, xx, P, N = data

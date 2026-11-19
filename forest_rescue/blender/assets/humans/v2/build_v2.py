@@ -565,6 +565,7 @@ def texture(lo0, R, J, pinfo0=None):
         return np.where(h, 0.50, 0.35), np.where(h, 0.68, 0.55)
     views = [R.front, R.back]
     pinfo = pinfo0
+    cheek_ref = None
     wport = np.zeros(len(P0))
     col2 = np.zeros((len(P0), 3))
     if pinfo0:
@@ -593,9 +594,9 @@ def texture(lo0, R, J, pinfo0=None):
         # outside the inner face (eyes + brows .. chin) dark portrait pixels on skin texels are dropped
         er_, el_, no_, mo_, ch_ = [np.array(p_, float) for p_ in cam.lm2[:5]]
         up_ = (er_ + el_) / 2 - mo_
-        inner = np.array([er_ + up_ * 0.55 + (er_ - el_) * 0.25, el_ + up_ * 0.55 + (el_ - er_) * 0.25,
-                          el_ + (el_ - er_) * 0.3, mo_ + (el_ - er_) * 0.55, ch_, mo_ + (er_ - el_) * 0.55,
-                          er_ + (er_ - el_) * 0.3])
+        inner = np.array([er_ + up_ * 0.55 + (er_ - el_) * 0.10, el_ + up_ * 0.55 + (el_ - er_) * 0.10,
+                          el_ + (el_ - er_) * 0.12, mo_ + (el_ - er_) * 0.35, ch_, mo_ + (er_ - el_) * 0.35,
+                          er_ + (er_ - el_) * 0.12])
         im_in = np.zeros(cam.image.shape[:2], np.uint8)
         _cv.fillPoly(im_in, [np.round(_cv.convexHull(inner.astype(np.float32))[:, 0, :]).astype(np.int32)], 1)
         u2_, v2_ = per2["portrait"][1], per2["portrait"][2]
@@ -605,7 +606,7 @@ def texture(lo0, R, J, pinfo0=None):
         ref_sk = skin_t & in_inner & (wport > 0.5)
         if ref_sk.sum() > 100:
             med_l = float(np.median(lum2[ref_sk]))
-            dark = skin_t & (~in_inner) & (lum2 < 0.70 * med_l) & (wport > 0)
+            dark = skin_t & (~in_inner) & (lum2 < 0.75 * med_l) & (wport > 0)
             wport = np.where(dark, 0.0, wport)
             log("portrait: dark (hair) pixels dropped from head skin", int(dark.sum()))
     # painted front/back views; the front never paints where the portrait paints (complementary)
@@ -639,6 +640,8 @@ def texture(lo0, R, J, pinfo0=None):
         gain = np.sqrt(gain)
         col2 = np.clip(col2 * gain, 0, 1)
         log("portrait (own camera) gain", np.round(gain, 3), "face texels", int((wport > 0.5).sum()))
+        sk_in = is_head(data[2]) & (tex_mat == MAT_IDS["body"]) & in_inner & (wport > 0.7)
+        cheek_ref = np.median(col2[sk_in], 0) if sk_in.sum() > 200 else None
     ws = wf + wb + wport * 4.0
     col = (colf * wf[:, None] + colb * wb[:, None] + col2 * (wport * 4.0)[:, None]) / np.maximum(ws, 1e-9)[:, None]
     per["front"] = (wf, uf, vf)
@@ -663,46 +666,21 @@ def texture(lo0, R, J, pinfo0=None):
     group = mi[tri_poly[T.tri[yy, xx]]] * 2 + is_head(data[2]).astype(np.int64)
     col, seen = HT.synthesize(T, data, col, ws, per, views, group=group)
     log("texture: seen fraction", round(float(seen.mean()), 3))
-    if pinfo0:
+    if pinfo0 and cheek_ref is not None:
         # side cheeks / jaw / temples no view paints: skin synthesised from the character's own cheek
-        # (portrait cheek patch: its mean colour + its tiled, mirrored fine detail), not a flat fill
-        cam = pinfo0["cam"]
-        er_, el_, no_, mo_, ch_ = [np.array(p_, float) for p_ in cam.lm2[:5]]
-        eye_d = float(np.linalg.norm(el_ - er_))
-        best = None
-        for e_, e2_ in ((er_, el_), (el_, er_)):
-            cc = 0.5 * (e_ + mo_) + (e_ - e2_) * 0.15
-            hf = int(max(6, 0.20 * eye_d))
-            y0_, x0_ = int(cc[1]) - hf, int(cc[0]) - hf
-            if y0_ < 0 or x0_ < 0 or y0_ + 2 * hf > cam.image.shape[0] or x0_ + 2 * hf > cam.image.shape[1]:
-                continue
-            pt = cam.image[y0_:y0_ + 2 * hf, x0_:x0_ + 2 * hf, :3].astype(np.float32)
-            if cam.mask[y0_:y0_ + 2 * hf, x0_:x0_ + 2 * hf].mean() < 0.9:
-                continue
-            sd = float(pt.std())
-            if best is None or sd < best[1]:
-                best = (pt, sd)
+        # (median colour of the portrait-painted cheek skin) over the low-frequency fill, with a soft
+        # blotch noise so no area is a flat patch
         head_skin2 = is_head(data[2]) & (tex_mat == MAT_IDS["body"])
         k_s = np.clip(1.0 - ws / 0.5, 0.0, 1.0) * head_skin2
-        if best is not None and (k_s > 0).any():
-            pt = best[0]
-            det = pt - _cv.GaussianBlur(pt, (0, 0), max(1.5, pt.shape[0] / 6.0))
-            cm_ = np.median(pt.reshape(-1, 3), 0)
-            ppm = eye_d / 0.064
-            sel = np.nonzero(k_s > 0)[0]
-            Pw, Nw = data[2][sel], data[3][sel]
-            ax = np.argmax(np.abs(Nw), 1)
-            a_ = np.where(ax == 0, Pw[:, 1], Pw[:, 0]) * ppm
-            b_ = np.where(ax == 2, Pw[:, 1], Pw[:, 2]) * ppm
-            hh, ww = det.shape[:2]
-
-            def mirror(x, n):
-                x = np.mod(x, 2 * n)
-                return np.where(x >= n, 2 * n - 1 - x, x).astype(int)
-            dd = det[mirror(np.floor(b_), hh), mirror(np.floor(a_), ww)]
+        sel = np.nonzero(k_s > 0)[0]
+        if len(sel):
+            Pw = data[2][sel]
+            nz = (0.55 * HT._vnoise(Pw[:, 0] / 0.011 + 3.1 * HT._vnoise(Pw[:, 2] / 0.017, 3), 11)
+                  + 0.45 * HT._vnoise(Pw[:, 2] / 0.009 + 2.3 * HT._vnoise(Pw[:, 1] / 0.013, 5), 12))
             kk = k_s[sel][:, None]
-            col[sel] = np.clip(col[sel] * (1 - 0.6 * kk) + cm_[None, :] * 0.6 * kk + dd * kk, 0, 1)
-            log("cheek skin synthesis texels", len(sel), "cheek colour", np.round(cm_, 3))
+            base = col[sel] * (1 - 0.55 * kk) + cheek_ref[None, :] * 0.55 * kk
+            col[sel] = np.clip(base * (1.0 + 0.045 * nz[:, None] * kk), 0, 1)
+            log("cheek skin synthesis texels", len(sel), "cheek colour", np.round(cheek_ref, 3))
     # hair the paintings do not reach (sides, crown, under the beard): strand-direction texture on the
     # synthesised base colour (no smooth "bowl" gradients); painted hair keeps its own strands
     hair_t = (tex_mat == MAT_IDS["hair"]) & is_head(data[2])

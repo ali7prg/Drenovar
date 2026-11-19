@@ -52,6 +52,10 @@ func _ready() -> void:
 		return
 	model = scene.instantiate()
 	add_child(model)
+	if args.has("lod"):
+		# --lod=N: show only the meshes named *_LOD<N> (models that carry LOD0/1/2 as sibling meshes)
+		for c in model.find_children("*_LOD*", "MeshInstance3D", true, false):
+			c.visible = String(c.name).ends_with("_LOD" + str(args.get("lod")))
 	aabb = _scene_aabb(model)
 	print("VIEWER_AABB ", aabb.position, " ", aabb.size)
 	player = _find_player(model)

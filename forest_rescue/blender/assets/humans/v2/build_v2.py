@@ -591,8 +591,8 @@ def texture(lo0, R, J, pinfo0=None):
         lo_ = np.where(h, 0.50, 0.35)
         hi_ = np.where(h, 0.68, 0.55)
         if FRONT_FACES:
-            lo_ = np.where(head_skin_t, 0.22, lo_)
-            hi_ = np.where(head_skin_t, 0.42, hi_)
+            lo_ = np.where(head_skin_t, 0.30, lo_)
+            hi_ = np.where(head_skin_t, 0.50, hi_)
         return lo_, hi_
     vis_eps_t = np.where(is_head(P0), 0.012, 0.006)
     views = [R.front, R.back]
@@ -689,6 +689,12 @@ def texture(lo0, R, J, pinfo0=None):
             wb = np.where(dk_b, 0.0, wb)
             log("front face: skin", np.round(skin_med, 3), "dark pixels dropped outside the inner face",
                 int((dk_f & (per["front"][0] > 0)).sum()), "back", int((dk_b & (per["back"][0] > 0)).sum()))
+            if any(g.get("kind") == "hood" for g in C.get("garments", []) + C.get("acc", [])):
+                # under a hood the hair beside the face never takes the painted face's skin
+                hr_ = is_head(data[2]) & (tex_mat == MAT_IDS["hair"]) & (~in_inner_f)
+                sk_on_hair = hr_ & (np.linalg.norm(colf - skin_med, axis=1) < 0.15) & ((colf @ lw) > 0.7 * med_l)
+                wf = np.where(sk_on_hair, 0.0, wf)
+                log("hooded: painted skin dropped from the hair beside the face", int(sk_on_hair.sum()))
     if any(g.get("kind") == "hood" for g in C.get("garments", []) + C.get("acc", [])):
         # hood: painted pixels unlike the hood's own cloth (face / hair seen through the wider painted
         # opening) never texture the hood shell - it is synthesised from its own cloth instead

@@ -94,6 +94,9 @@ func run() -> void:
 		{"name": "east_z68_explored", "zoom": 68.0, "center": Vector3(80, 0, -20), "radius": Vector2(24, 16), "explored": true},
 		{"name": "overview_z120_explored", "zoom": 120.0, "center": Vector3(0, 0, 0), "radius": Vector2(20, 14), "explored": true},
 		{"name": "close_z32_glade_explored", "zoom": 32.0, "center": Vector3(-20, 0, -62), "radius": Vector2(8, 6), "explored": true},
+		{"name": "arena_z32_explored", "zoom": 32.0, "center": Vector3(75, 0, -84), "radius": Vector2(6, 5), "explored": true},
+		{"name": "bridge_z32_explored", "zoom": 32.0, "center": Vector3(88, 0, 16), "radius": Vector2(6, 5), "explored": true},
+		{"name": "entrance_z32_unlocked", "zoom": 32.0, "center": Vector3(-11, 0, -58), "radius": Vector2(5, 4)},
 	]
 	var results: Array = []
 	for spec in scenarios:

@@ -611,11 +611,7 @@ def texture(lo0, R, J, pinfo0=None):
             dark = skin_t & (~in_inner) & (lum2 < 0.75 * med_l) & (wport > 0)
             wport = np.where(dark, 0.0, wport)
             # and skin-coloured portrait pixels never land on hair geometry beside the face (hood openings)
-            hair_tx = (tex_mat == MAT_IDS["hair"]) & is_head(d2[2])
-            skinlike = hair_tx & (~in_inner) & (np.linalg.norm(col2 - skin_med, axis=1) < 0.16) & (lum2 > 0.72 * med_l)
-            wport = np.where(skinlike, 0.0, wport)
-            log("portrait: dark (hair) pixels dropped from head skin", int(dark.sum()), "skin pixels dropped from hair",
-                int(skinlike.sum()))
+            log("portrait: dark (hair) pixels dropped from head skin", int(dark.sum()))
     # painted front/back views; the front never paints where the portrait paints (complementary)
     data, col, ws, per = HT.project_views(T, verts, tris, views, erode=2, lo_hi_fn=lohi)
     wf, uf, vf = per["front"]
@@ -699,6 +695,18 @@ def texture(lo0, R, J, pinfo0=None):
             base = col[sel] * (1 - 0.55 * kk) + cheek_ref[None, :] * 0.55 * kk
             col[sel] = np.clip(base * (1.0 + 0.045 * nz[:, None] * kk), 0, 1)
             log("cheek skin synthesis texels", len(sel), "cheek colour", np.round(cheek_ref, 3))
+    hooded = any(g.get("kind") == "hood" for g in C.get("garments", []) + C.get("acc", []))
+    if hooded:
+        # inside a hood the sides / back of the head read as hair in the painting (no skin beside the face
+        # opening): synthesised head skin behind the face plane takes the painted hair colour + strands
+        hair_seen = (tex_mat == MAT_IDS["hair"]) & is_head(data[2]) & (ws > 0.5)
+        if hair_seen.sum() > 100:
+            hair_med = np.median(col[hair_seen], 0)
+            sk = is_head(data[2]) & (tex_mat == MAT_IDS["body"]) & (ws < 0.3) & (data[2][:, 1] > o[1] + 0.015) \
+                & (data[2][:, 2] > C["L"]["mouth"] - 0.01)
+            col[sk] = hair_med
+            tex_mat = np.where(sk, MAT_IDS["hair"], tex_mat)
+            log("hooded: head sides under the hood -> hair colour, texels", int(sk.sum()))
     # hair the paintings do not reach (sides, crown, under the beard): strand-direction texture on the
     # synthesised base colour (no smooth "bowl" gradients); painted hair keeps its own strands
     hair_t = (tex_mat == MAT_IDS["hair"]) & is_head(data[2])

@@ -497,7 +497,16 @@ def main():
         return
     # ---- clips: neutral cloth bones while seated / while the morph is on
     neutralize(sit, lambda f: 0.0)
-    neutralize(up, lambda f: float(np.clip((f - f_off) / 8.0, 0, 1)) ** 2 * (3 - 2 * float(np.clip((f - f_off) / 8.0, 0, 1))))
+    # cloth bones come back (thigh-follow secondary) while the morph fades out: from w <= 0.35 to just
+    # after the morph is off, so the skirt never hangs through the descending thighs
+    f_a = int(np.argmax(w_up <= 0.35)) if (w_up <= 0.35).any() else f_off
+    span_b = max(4.0, float(f_off + 4 - f_a))
+
+    def t_up(f):
+        x_ = float(np.clip((f - f_a) / span_b, 0.0, 1.0))
+        return x_ * x_ * (3 - 2 * x_)
+    neutralize(up, t_up)
+    log("stand_up cloth bones neutral until frame", f_a, "-> secondary by", f_a + span_b)
     # ---- morph weight curves in every civilian clip (KEY slot of the same action) + NLA strips for export
     for o in lods:
         key = o.data.shape_keys

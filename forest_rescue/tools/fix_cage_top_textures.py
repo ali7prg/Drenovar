@@ -39,7 +39,7 @@ FLOORS = {
     "root": {"quad": [(1252, 685), (1333, 683), (1346, 707), (1243, 707)], "metres": (2.6, 1.0), "ppm": 64},
     "oak": {"quad": [(208, 690), (372, 690), (392, 718), (190, 718)], "metres": (3.3, 1.3), "ppm": 70},
 }
-BARK_STRIPS = [(1223, 300, 1248, 385), (1091, 292, 1115, 360), (1409, 300, 1423, 350)]
+BARK_STRIPS = [(1210, 285, 1236, 345), (1207, 352, 1248, 398), (1095, 296, 1112, 356)]
 CAGES = {
     "iron": {"id": "lf_cage_iron", "floor_max": 0.62},
     "root": {"id": "lf_cage_root", "floor_max": 0.34, "bark": True},
@@ -170,23 +170,105 @@ def min_cut(err):
     return path
 
 
+def tile_from(sample, h, w, y0, x0):
+    """h x w block from `sample` starting at (y0, x0), mirrored-tiled so any size works."""
+    sh, sw = sample.shape[:2]
+    ys = np.abs(((np.arange(h) + y0) % (2 * sh)) - (np.arange(h) + y0) % (2 * sh) // sh * (2 * ((np.arange(h) + y0) % sh) + 1))
+    ys = np.where(((np.arange(h) + y0) // sh) % 2 == 0, (np.arange(h) + y0) % sh, sh - 1 - (np.arange(h) + y0) % sh)
+    xs = np.where(((np.arange(w) + x0) // sw) % 2 == 0, (np.arange(w) + x0) % sw, sw - 1 - (np.arange(w) + x0) % sw)
+    return sample[ys][:, xs]
+
+
+def plank_floor(sample, ppm, rng, metres=5.0, plank=0.3):
+    """Plank deck quilted from the painted deck: every plank is a run of grain-aligned strips
+    cut from the painting (grain along u = cage x), butt joints and seams darkened."""
+    n = int(metres * ppm)
+    w = max(6, int(plank * ppm))
+    out = np.zeros((n, n, 3), np.float32)
+    s = sample.astype(np.float32)
+    if s.shape[0] < w + 2:
+        s = cv2.resize(s, (s.shape[1], w + 2), interpolation=cv2.INTER_CUBIC)
+    y = 0
+    while y < n:
+        x = -int(rng.integers(0, int(1.2 * ppm)))
+        while x < n:
+            length = min(int(rng.uniform(1.1, 2.2) * ppm), s.shape[1])
+            sy = int(rng.integers(0, s.shape[0] - w + 1))
+            sx = int(rng.integers(0, s.shape[1] - length + 1))
+            block = s[sy:sy + w, sx:sx + length] * rng.uniform(0.9, 1.08)
+            x0, x1 = max(x, 0), min(x + length, n)
+            if x1 > x0:
+                out[y:y + w, x0:x1] = block[:min(w, n - y), x0 - x:x1 - x]
+                out[y:y + w, x0:min(x0 + 2, n)] *= 0.62           # butt joint
+            x += length
+        out[y:min(y + 2, n), :] *= 0.55                           # seam between planks
+        y += w
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def slab_floor(sample, ppm, rng, metres=5.0):
+    """Packed earth / flagstones quilted from the painted slab floor: irregular running-bond slabs,
+    each filled with a patch of the painting, darker joints."""
+    n = int(metres * ppm)
+    out = np.zeros((n, n, 3), np.float32)
+    s = sample.astype(np.float32)
+    y = 0
+    while y < n:
+        h = int(rng.uniform(0.42, 0.7) * ppm)
+        x = -int(rng.uniform(0.0, 0.5) * ppm)
+        h = min(h, s.shape[0])
+        while x < n:
+            w = min(int(rng.uniform(0.45, 0.95) * ppm), s.shape[1])
+            sy = int(rng.integers(0, s.shape[0] - h + 1))
+            sx = int(rng.integers(0, s.shape[1] - w + 1))
+            block = s[sy:sy + h, sx:sx + w] * rng.uniform(0.9, 1.08)
+            x0, x1 = max(x, 0), min(x + w, n)
+            y1 = min(y + h, n)
+            if x1 > x0:
+                out[y:y1, x0:x1] = block[:y1 - y, x0 - x:x1 - x]
+                out[y:y1, x0:min(x0 + 3, n)] *= 0.6
+            x += w
+        out[y:min(y + 3, n), :] *= 0.6
+        y += h
+    return np.clip(cv2.GaussianBlur(out, (0, 0), 0.7), 0, 255).astype(np.uint8)
+
+
 def floor_texture(art, kind, rng):
     spec = FLOORS[kind]
     top = rectified(art, spec["quad"], spec["metres"], spec["ppm"])
-    # 2 x 2 m of floor per tile side ... quilted to 5 m so a whole cage floor is one coherent piece.
-    size = int(5.0 * spec["ppm"])
-    block = max(24, int(0.55 * spec["ppm"]))
-    return quilt(top, size, size, block, block // 4, rng), spec["ppm"]
+    # Keep the clean middle of the painted floor (no rail / posts / door frame / front edge).
+    hh, ww = top.shape[:2]
+    top = top[int(hh * 0.14):int(hh * 0.9), int(ww * 0.04):int(ww * 0.9)]
+    if kind == "iron":
+        return plank_floor(top, spec["ppm"], rng), spec["ppm"]
+    return slab_floor(top, spec["ppm"], rng), spec["ppm"]
 
 
 def bark_texture(art, rng, ppm=110):
+    """Bark with the grain along v: vertical runs cut from the painted root trunks (closed view)."""
     strips = []
     for (x0, y0, x1, y1) in BARK_STRIPS:
-        s = art[y0:y1, x0:x1]
+        s = art[y0:y1, x0:x1].astype(np.float32)
         strips.append(cv2.resize(s, (int((x1 - x0) * 1.8), int((y1 - y0) * 1.8)), interpolation=cv2.INTER_CUBIC))
-    hgt = min(s.shape[0] for s in strips)
-    sample = np.concatenate([s[:hgt] for s in strips], axis=1)
-    return quilt(sample, 384, 192, 28, 8, rng), ppm
+    width, height = 192, 384
+    out = np.zeros((height, width, 3), np.float32)
+    x = 0
+    while x < width:
+        src = strips[int(rng.integers(0, len(strips)))]
+        w = min(src.shape[1] - 4, int(rng.integers(18, 34)))
+        y = -int(rng.integers(0, 60))
+        sx = int(rng.integers(2, max(3, src.shape[1] - w - 2)))
+        while y < height:
+            h = min(int(rng.integers(70, 150)), src.shape[0])
+            sy = int(rng.integers(0, src.shape[0] - h + 1))
+            block = src[sy:sy + h, sx:sx + w]
+            y0, y1 = max(y, 0), min(y + h, height)
+            if y1 > y0:
+                out[y0:y1, x:min(x + w, width)] = block[y0 - y:y1 - y, :min(w, width - x)]
+            y += h
+        x += w
+    out = cv2.GaussianBlur(out, (0, 0), 0.8)
+    return np.clip(out, 0, 255).astype(np.uint8), ppm
 
 
 def raster_triangles(uv, faces, size):
@@ -245,6 +327,7 @@ def fix(kind, art, rng):
     floor_tex, floor_ppm = floor_texture(art, kind, rng)
     cv2.imwrite(os.path.join(BACKUP, f"{aid}_floor_quilt.png"), cv2.cvtColor(floor_tex, cv2.COLOR_RGB2BGR))
     bark_tex, bark_ppm = (bark_texture(art, rng) if spec.get("bark") else (None, 0))
+    bark_mean = cv2.GaussianBlur(bark_tex.astype(np.float32), (0, 0), 6.0) if bark_tex is not None else None
     if bark_tex is not None:
         cv2.imwrite(os.path.join(BACKUP, f"{aid}_bark_quilt.png"), cv2.cvtColor(bark_tex, cv2.COLOR_RGB2BGR))
     files = [f"{aid}_c.jpg", f"{aid}_lod1_c.jpg", f"{aid}_lod2_c.jpg"]
@@ -257,6 +340,7 @@ def fix(kind, art, rng):
         atlas = cv2.cvtColor(cv2.imread(backup), cv2.COLOR_BGR2RGB)
         size = atlas.shape[0]
         lum = cv2.GaussianBlur(cv2.cvtColor(atlas, cv2.COLOR_RGB2GRAY).astype(np.float32), (0, 0), max(2.0, size / 256.0))
+        low = cv2.GaussianBlur(atlas.astype(np.float32), (0, 0), max(1.5, size / 340.0))
         out = atlas.copy()
         written = np.zeros(atlas.shape[:2], bool)
         counts = {"floor": 0, "bark": 0}
@@ -302,10 +386,18 @@ def fix(kind, art, rng):
                         u = np.mod(t * bark_ppm, bark_tex.shape[1] - 1).astype(int)
                         v = np.mod(s * bark_ppm, bark_tex.shape[0] - 1).astype(int)
                         col = bark_tex[v, u]
+                        bark_mean_px = bark_mean[v, u]
                         counts["bark"] += len(ys)
-                    # Keep the painted low-frequency light (contact shadow under bars / roots).
-                    shade = np.clip(0.72 + 0.28 * lum[ys, xs] / max(float(np.mean(lum[ys, xs])), 1.0), 0.6, 1.2)
-                    out[ys, xs] = np.clip(col.astype(np.float32) * shade[:, None], 0, 255).astype(np.uint8)
+                    if is_floor[f]:
+                        # Keep the painted low-frequency light (contact shadow under bars / roots).
+                        shade = np.clip(0.72 + 0.28 * lum[ys, xs] / max(float(np.mean(lum[ys, xs])), 1.0), 0.6, 1.2)
+                        out[ys, xs] = np.clip(col.astype(np.float32) * shade[:, None], 0, 255).astype(np.uint8)
+                    else:
+                        # Roots: keep the painted colour / light of the projection (low-pass of the
+                        # old texels) and replace only the fine detail by grain along the root axis.
+                        detail = col.astype(np.float32) / np.maximum(bark_mean_px, 1.0)
+                        detail = 1.0 + (detail - 1.0) * 0.75
+                        out[ys, xs] = np.clip(low[ys, xs] * detail, 0, 255).astype(np.uint8)
                     written[ys, xs] = True
         # Bleed the rewritten texels 2 px into the UV gutter (mip safety), only onto old fill.
         grown = out.copy()

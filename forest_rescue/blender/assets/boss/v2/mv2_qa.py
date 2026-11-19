@@ -128,6 +128,8 @@ def fit_left_pose(arm):
 
 
 def sheet_pose(arm, which):
+    if arm.animation_data:
+        arm.animation_data.action = None
     sk = PO.Skeleton(arm)
     ps = PO.Pose(sk)
     if which == "left":
@@ -222,6 +224,9 @@ def compare_all(tag):
 
 def heads5(tag, lod_suffix=""):
     """Head at 5 angles (front, 3/4 L, 3/4 R, profile L, profile R): 2 eyes, scar only on the LEFT."""
+    arm = bpy.data.objects.get(ARM)
+    if arm is not None:
+        sheet_pose(arm, "rest")
     setup_flat()
     sc = bpy.context.scene
     imgs = []

@@ -1,0 +1,17 @@
+; Ancient Maw v2 load test + game-camera check through the GAME's actor loader (src/forest_rescue/game/actor_rig.gd),
+; run in a private copy so the game's own import cache is never touched.
+config_version=5
+
+[application]
+config/name="FR boss load test"
+run/main_scene="res://bosstest.tscn"
+config/features=PackedStringArray("4.6", "Mobile")
+
+[display]
+window/size/viewport_width=1600
+window/size/viewport_height=900
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+textures/vram_compression/import_etc2_astc=true

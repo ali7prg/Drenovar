@@ -17,7 +17,7 @@ CACHE = os.environ.get("MAW2_CACHE", os.path.join(tempfile.gettempdir(), "maw2_c
 os.makedirs(CACHE, exist_ok=True)
 VOXEL = float(os.environ.get("MAW2_VOXEL", "0.016"))
 LOD_TRIS = (48000, 24000, 9000)
-BODY_TRIS = (41000, 21200, 8000)
+BODY_TRIS = (41000, 21200, 7500)
 TEX = 2048
 ITER = os.environ.get("MAW2_ITER", "01")
 

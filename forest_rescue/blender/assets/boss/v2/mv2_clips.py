@@ -254,7 +254,8 @@ WALK_DUTY = 0.62
 
 def walk_foot(t, side):
     phase = (t / WALK_D + (0.0 if side == "L" else 0.5)) % 1.0
-    stride = WALK_SPEED * WALK_D
+    # body-relative foot excursion during stance = ground speed * stance time (no slip in the world)
+    stride = WALK_SPEED * WALK_D * WALK_DUTY
     if phase < WALK_DUTY:
         s = phase / WALK_DUTY
         y = -stride / 2 + stride * s           # forward (-Y) at contact -> backward during stance
@@ -294,6 +295,7 @@ def clip_walk(t):
     })
     for s in "LR":
         off, heel, curl, _c = walk_foot(t, s)
+        ch[f"contact_{s}"] = _c
         ch[f"ball_{s}"] = planted(s) + off
         ch[f"heel_{s}"] = heel
         ch[f"curl_{s}"] = curl
@@ -345,6 +347,7 @@ def clip_turn(t, sign):
         return loc, fy, sw
     for side, (a, b) in ((inner, (0.18, 0.62)), (outer, (0.62, 1.10))):
         loc, fy, sw = foot(side, a, b)
+        ch[f"contact_{side}"] = not sw
         ch[f"ball_{side}"] = loc
         ch[f"fyaw_{side}"] = fy
         ch[f"heel_{side}"] = 14.0 * (1.0 if sw else 0.0) * math.sin(math.pi * np.clip((t - a) / (b - a), 0, 1))
@@ -456,6 +459,7 @@ def clip_stagger(t):
     st = Steps("R", start=(0, 0), plan=[(0.22, 0.62, (-0.32, 0.22), 0.30), (1.05, 1.55, (0.0, 0.0), 0.22)])
     off, lift, sw = st.at(t)
     ch["ball_R"] = planted("R", off[0], off[1]) + np.array([0, 0, lift])
+    ch["contact_R"] = not sw
     ch["curl_R"] = 20.0 if sw else 0.0
     ch["heel_R"] = 12.0 if sw else 0.0
     ch["ball_L"] = planted("L")
@@ -493,9 +497,10 @@ def clip_death(t):
     })
     # feet: planted until the buckle, then the legs fold (targets pulled in/up relative to the falling body)
     fold = float(ss((t - 2.2) / 1.4))
+    ch["contact_L"] = ch["contact_R"] = t < 2.2
     for s, sx in (("L", 1), ("R", -1)):
         b = planted(s)
-        ch[f"ball_{s}"] = b + np.array([sx * 0.35 * fold, 0.55 * fold, (0.45 if s == "L" else 0.1) * fold])
+        ch[f"ball_{s}"] = b + np.array([sx * 0.35 * fold, 0.55 * fold, (0.45 if s == "L" else 0.30) * fold])
         ch[f"heel_{s}"] = 40.0 * fold
         ch[f"curl_{s}"] = 25.0 * fold
     by = C((0, 0), (1.0, -8), (2.0, 10), (3.0, -6), (3.7, -22), (4.3, -30), (5.2, -30))
@@ -602,8 +607,11 @@ def clip_lane_charge(t):
     for s, st in (("L", stL), ("R", stR)):
         off, lift, sw = st.at(t)
         p = planted(s, off[0], off[1]) + np.array([0, 0, lift])
+        ch[f"contact_{s}"] = not sw
         if s == "R":
             p = p + np.array([0, -pawy * 0.0 + pawy - 0.15 * pawz, pawz])
+            if any(0 <= (t - t0) / 0.6 <= 1 for t0 in (0.55, 1.45)):
+                ch["contact_R"] = False          # pawing scrape: deliberate drag, not a planted foot
         ch[f"ball_{s}"] = p
         ch[f"heel_{s}"] = 18.0 if sw else (10.0 if (s == "R" and pawz > 0.01) else 0.0)
         ch[f"curl_{s}"] = 22.0 if sw else 0.0
@@ -638,7 +646,7 @@ def clip_stomp_waves(t):
     rz = C((0, 0), (0.6, 0), (1.6, 0.85), (2.9, 1.0), (3.05, 0.9), (3.2, 0.0), (6.9, 0))(t)
     ry = C((0, 0), (1.6, -0.35), (2.9, -0.40), (3.2, -0.25), (6.9, -0.25))(t)
     lz = C((0, 0), (3.3, 0), (3.75, 0.62), (3.95, 0.66), (4.1, 0.0), (6.9, 0))(t)
-    ly = C((0, 0), (3.3, 0), (3.75, -0.25), (4.1, -0.32), (5.6, -0.32), (6.3, 0.0), (6.9, 0))(t)
+    ly = C((0, 0), (3.3, 0), (3.75, -0.25), (4.1, -0.32), (5.7, -0.32), (6.25, 0.0), (6.9, 0))(t)
     ry2 = C((0, 0), (5.0, 0), (5.6, 1.0), (6.9, 1.0))(t)
     ch["ball_R"] = planted("R", 0.0, ry * (1 - ry2)) + np.array([0, 0, 1.0 * rz])
     ch["ball_L"] = planted("L", 0.0, ly) + np.array([0, 0, lz])
@@ -647,11 +655,19 @@ def clip_stomp_waves(t):
     ch["curl_R"] = 26.0 * min(1.0, lift_R * 1.5)
     ch["heel_L"] = 30.0 * min(1.0, lz * 1.5)
     ch["curl_L"] = 26.0 * min(1.0, lz * 1.5)
-    # recovery step for the right foot back to the mark (5.0-5.6)
+    # recovery steps back to the mark: right 5.0-5.6, left 5.7-6.25 (lifted, never dragged)
+    ch["contact_L"] = lz < 1e-3
+    ch["contact_R"] = rz < 1e-3
     if 5.0 < t < 5.6:
         s = (t - 5.0) / 0.6
         ch["ball_R"] = ch["ball_R"] + np.array([0, 0, 0.2 * math.sin(math.pi * s)])
         ch["heel_R"] = 14.0
+        ch["contact_R"] = False
+    if 5.7 < t < 6.25:
+        s = (t - 5.7) / 0.55
+        ch["ball_L"] = ch["ball_L"] + np.array([0, 0, 0.2 * math.sin(math.pi * s)])
+        ch["heel_L"] = 14.0
+        ch["contact_L"] = False
     by = C((0, 0), (2.9, 6), (3.3, -10), (3.8, 8), (4.25, -12), (5.0, 4), (6.9, 0))
     bp = C((0, 0), (1.4, -6), (2.9, -10), (3.25, 14), (3.6, -4), (4.15, 14), (4.6, -2), (5.5, 2), (6.9, 0))
     ch["tail"] = tail_wave(t, by, bp, delay=0.045)
@@ -695,6 +711,7 @@ def frames(rig, clip_id):
         out.append(rig.keyframe())
         fp = rig.foot_points()
         yaws.append(ch.get("_node_yaw", 0.0))
+        fp["contact"] = {s: bool(ch.get(f"contact_{s}", True)) for s in "LR"}
         feet.append(fp)
     return out, feet, yaws, over
 
@@ -709,7 +726,7 @@ def foot_slip(clip_id, feet, yaws, ground_speed=0.0):
         for f, (fp, yaw) in enumerate(zip(feet, yaws)):
             p = PO.qmat((0, 0, 1), yaw) @ fp[s]["ball"]
             p = p + np.array([0.0, -ground_speed * f / FPS, 0.0])
-            if p[2] < 0.03 + 0.17:      # ball joint sits 0.17 m above the ground when planted
+            if p[2] < 0.03 + 0.17 and fp.get("contact", {}).get(s, True):   # planted: ball joint 0.17 m up
                 if anchor is None:
                     anchor = p.copy()
                 best = max(best, float(np.linalg.norm((p - anchor)[:2])))

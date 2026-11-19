@@ -1,0 +1,423 @@
+{
+  "id": "lf_boss_ancient_maw",
+  "generation": "v2 image-based: anatomical SDF fitted to art/03 side/front silhouettes (soft visual hull), 7-view painting projection (ortho side/front, solved rear-3/4 and head close-up cameras)",
+  "rig": "new_dinosaur_boss",
+  "tris": {
+    "LOD0": 45700,
+    "LOD1": 23784,
+    "LOD2": 9324
+  },
+  "budget": {
+    "LOD0": 48000,
+    "LOD1": 24000,
+    "LOD2": 9000
+  },
+  "bones": {
+    "deform": 70,
+    "total": 70,
+    "weightedByLOD": {
+      "LOD0": 69,
+      "LOD1": 47,
+      "LOD2": 23
+    },
+    "budgetByLOD": [
+      80,
+      50,
+      28
+    ],
+    "maxInfluences": 4,
+    "names": [
+      "root",
+      "pelvis",
+      "spine_01",
+      "spine_02",
+      "spine_03",
+      "neck_01",
+      "neck_02",
+      "neck_03",
+      "head",
+      "jaw",
+      "tongue_01",
+      "tongue_02",
+      "tongue_03",
+      "eye_L",
+      "lid_up_L",
+      "lid_lo_L",
+      "eye_R",
+      "lid_up_R",
+      "lid_lo_R",
+      "upperarm_L",
+      "forearm_L",
+      "hand_L",
+      "finger1a_L",
+      "finger1b_L",
+      "finger2a_L",
+      "finger2b_L",
+      "finger3a_L",
+      "finger3b_L",
+      "upperarm_R",
+      "forearm_R",
+      "hand_R",
+      "finger1a_R",
+      "finger1b_R",
+      "finger2a_R",
+      "finger2b_R",
+      "finger3a_R",
+      "finger3b_R",
+      "breath",
+      "tail_01",
+      "tail_02",
+      "tail_03",
+      "tail_04",
+      "tail_05",
+      "tail_06",
+      "tail_07",
+      "tail_08",
+      "tail_09",
+      "tail_10",
+      "tail_11",
+      "tail_12",
+      "thigh_L",
+      "shin_L",
+      "foot_L",
+      "toe2a_L",
+      "toe2b_L",
+      "toe3a_L",
+      "toe3b_L",
+      "toe4a_L",
+      "toe4b_L",
+      "hallux_L",
+      "thigh_R",
+      "shin_R",
+      "foot_R",
+      "toe2a_R",
+      "toe2b_R",
+      "toe3a_R",
+      "toe3b_R",
+      "toe4a_R",
+      "toe4b_R",
+      "hallux_R"
+    ]
+  },
+  "nodes": {
+    "LOD0": "lf_boss_ancient_maw_LOD0",
+    "LOD1": "lf_boss_ancient_maw_LOD1",
+    "LOD2": "lf_boss_ancient_maw_LOD2"
+  },
+  "materials": [
+    "lf_boss_ancient_maw_body",
+    "lf_boss_ancient_maw_keratin"
+  ],
+  "paintedLightMix": 0.38,
+  "shading": "albedo * mix(1, lambert(sun), paintedLightMix): the atlas carries the painted light of art/03",
+  "textures": {
+    "lf_boss_ancient_maw_body_basecolor": 2048,
+    "lf_boss_ancient_maw_body_normal": 1024,
+    "lf_boss_ancient_maw_body_orm": 1024,
+    "lf_boss_ancient_maw_keratin": 512
+  },
+  "bounds_m": {
+    "min": [
+      -1.086,
+      -4.534,
+      -0.153
+    ],
+    "max": [
+      1.086,
+      5.297,
+      3.587
+    ]
+  },
+  "dimensions_m": {
+    "snoutToTailTip": 9.832,
+    "skullTop": 3.6,
+    "hipLine": 2.75,
+    "note": "built at the sheet's vertical key stats (head 3.6 m, hip line 2.75 m); the drawn length line then measures 8.46 m, snout->tail tip ~9.8 m (sheet not self-consistent)"
+  },
+  "sockets": {
+    "head_top": [
+      0.0,
+      3.6,
+      3.62
+    ],
+    "jaw_tip": [
+      0.0,
+      2.68,
+      4.48
+    ],
+    "mouth": [
+      0.0,
+      2.95,
+      4.1
+    ],
+    "eye_L": [
+      0.36,
+      3.285,
+      3.63
+    ],
+    "chest": [
+      0.0,
+      2.4,
+      1.6
+    ],
+    "hips": [
+      0.0,
+      2.5,
+      0.15
+    ],
+    "tail_tip": [
+      0.0,
+      2.19,
+      -5.3
+    ],
+    "foot_L": [
+      0.68,
+      0.1,
+      0.3
+    ],
+    "foot_R": [
+      -0.68,
+      0.1,
+      0.3
+    ]
+  },
+  "clips": {
+    "lf_boss_idle": {
+      "seconds": 5.0,
+      "frames": 300,
+      "fps": 60,
+      "loop": true,
+      "markers": {},
+      "footSlip_m": {
+        "L": 0.0,
+        "R": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0
+    },
+    "lf_boss_walk": {
+      "seconds": 1.6,
+      "frames": 96,
+      "fps": 60,
+      "loop": true,
+      "markers": {},
+      "footSlip_m": {
+        "L": 0.8844,
+        "R": 0.7845
+      },
+      "ikOverreach_m": 0.1439,
+      "loopSeamMaxQuatDiff": 0.0,
+      "groundSpeed_mps": 1.6,
+      "strideLength_m": 2.56
+    },
+    "lf_boss_turn_left": {
+      "seconds": 1.3,
+      "frames": 78,
+      "fps": 60,
+      "loop": false,
+      "markers": {},
+      "footSlip_m": {
+        "L": 0.0,
+        "R": 0.0018
+      },
+      "ikOverreach_m": 0.0,
+      "rootYawDeg": 45.0,
+      "yawCurve": "yaw(t) = rootYawDeg * smoothstep(t/1.3) about the root origin (apply to the node while the clip plays; feet are planted in that frame)"
+    },
+    "lf_boss_turn_right": {
+      "seconds": 1.3,
+      "frames": 78,
+      "fps": 60,
+      "loop": false,
+      "markers": {},
+      "footSlip_m": {
+        "L": 0.0018,
+        "R": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "rootYawDeg": -45.0,
+      "yawCurve": "yaw(t) = rootYawDeg * smoothstep(t/1.3) about the root origin (apply to the node while the clip plays; feet are planted in that frame)"
+    },
+    "lf_boss_awaken": {
+      "seconds": 4.2,
+      "frames": 252,
+      "fps": 60,
+      "loop": false,
+      "markers": {},
+      "footSlip_m": {
+        "L": 0.0,
+        "R": 0.0
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_boss_phase_roar": {
+      "seconds": 2.8,
+      "frames": 168,
+      "fps": 60,
+      "loop": false,
+      "markers": {},
+      "footSlip_m": {
+        "L": 0.0,
+        "R": 0.0
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_boss_hit": {
+      "seconds": 0.55,
+      "frames": 33,
+      "fps": 60,
+      "loop": false,
+      "markers": {},
+      "footSlip_m": {
+        "L": 0.0,
+        "R": 0.0
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_boss_stagger": {
+      "seconds": 1.8,
+      "frames": 108,
+      "fps": 60,
+      "loop": false,
+      "markers": {},
+      "footSlip_m": {
+        "L": 0.0,
+        "R": 0.0151
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_boss_death": {
+      "seconds": 5.2,
+      "frames": 312,
+      "fps": 60,
+      "loop": false,
+      "markers": {
+        "ground_contact": 3.7
+      },
+      "footSlip_m": {
+        "L": 0.042,
+        "R": 0.1901
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_boss_jaw_arc": {
+      "seconds": 4.25,
+      "frames": 255,
+      "fps": 60,
+      "loop": false,
+      "markers": {
+        "telegraph_begin": 0.0,
+        "active_begin": 2.4,
+        "active_end": 2.85,
+        "recovery_end": 4.25
+      },
+      "footSlip_m": {
+        "L": 0.0,
+        "R": 0.0
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_boss_tail_sweep": {
+      "seconds": 5.45,
+      "frames": 327,
+      "fps": 60,
+      "loop": false,
+      "markers": {
+        "telegraph_begin": 0.0,
+        "active_begin": 3.0,
+        "active_end": 3.65,
+        "recovery_end": 5.45
+      },
+      "footSlip_m": {
+        "L": 0.0,
+        "R": 0.0
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_boss_lane_charge": {
+      "seconds": 5.9,
+      "frames": 354,
+      "fps": 60,
+      "loop": false,
+      "markers": {
+        "telegraph_begin": 0.0,
+        "active_begin": 2.8,
+        "active_end": 3.9,
+        "recovery_end": 5.9
+      },
+      "footSlip_m": {
+        "L": 0.0305,
+        "R": 0.4253
+      },
+      "ikOverreach_m": 0.0
+    },
+    "lf_boss_stomp_waves": {
+      "seconds": 6.9,
+      "frames": 414,
+      "fps": 60,
+      "loop": false,
+      "markers": {
+        "telegraph_begin": 0.0,
+        "wave_1_begin": 3.2,
+        "wave_1_end": 3.6,
+        "wave_2_begin": 4.1,
+        "wave_2_end": 4.5,
+        "recovery_end": 6.9
+      },
+      "footSlip_m": {
+        "L": 0.3198,
+        "R": 0.2059
+      },
+      "ikOverreach_m": 0.0
+    }
+  },
+  "glbBytes": 13739780,
+  "textureProjection": {
+    "coverageByView": {
+      "left": 0.26741433990215374,
+      "right_mirror": 0.26599241964793346,
+      "front": 0.08450794828880598,
+      "rear34": 0.16030849422586593,
+      "rear34_mirror": 0.15970090591640046,
+      "head_closeup": 0.02627875214598778,
+      "head_mirror": 0.026271687165645156
+    },
+    "rearCamera": {
+      "pnp_rms_px": 17.167159496448484,
+      "refined_iou": 0.8369809777050522,
+      "refined_rms_px": 19.327121168781638
+    },
+    "headCamera": {
+      "pnp_rms_px": 25.994086201901542,
+      "jaw_open_deg": 20.0
+    }
+  },
+  "coordinateConvention": {
+    "up": "+Y",
+    "forward": "+Z",
+    "unit": "metre",
+    "note": "Blender -Y forward exported to glTF +Z; feet on y=0, root at the origin"
+  },
+  "notes": "Clips in place (root bone fixed). Turn clips: apply rootYawDeg with the documented curve to the node. lane_charge lunges the body ~2.6 m forward inside the clip and steps back during recovery (root stays on the mark). Markers are presentation-only (manifest). Keys sampled at 60 fps so 4.25/5.45/0.55 s are exact.",
+  "recommendedScale": 2.06,
+  "recommendedScaleInfo": {
+    "source": "art/08_final_boss_arena.png, measured in image pixels (no perspective correction: the boss stands farther from the camera than the squad, so these ratios are lower bounds)",
+    "boss_hip_line_px": 116,
+    "squad_heights_px": {
+      "captain_front": 50,
+      "member_2": 33,
+      "member_3": 33,
+      "member_4": 31,
+      "mean": 36.75
+    },
+    "art08_ratio_hip_to_squad": {
+      "mean_of_4": 3.16,
+      "captain_only": 2.32
+    },
+    "model_ratio_hip_to_squad": 1.53,
+    "recommendedScale": 2.06,
+    "recommendedScale_captain_only": 1.52,
+    "arena_relative_ratio": 1.28,
+    "note": "recommendedScale = art08 ratio (mean of the 4 squad figures) / 1.53. Relative to the arena floor the painted boss is only ~1.28x the model (floor ~2.7 boss lengths vs 3.5 in game); the boss_telegraphs shapes (jaw 9.5 m, tail 11.5 m) are authored for scale 1.0. The model itself stays at the key-stats scale (rig scale 1.0 in actor_director)."
+  }
+}

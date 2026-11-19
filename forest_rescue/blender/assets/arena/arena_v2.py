@@ -119,40 +119,43 @@ def floor_texture(path, size=1024, extent=50.0):
 
 
 def floor_mesh(name, spacing, extent=25.0):
-    """Disc r<=23.5 m + entrance tongue (-Y) + side paths (160 / -18 deg); planar UVs over a 50 m square."""
-    n = int(round(2 * extent / spacing))
-    xs = np.linspace(-extent, extent, n + 1)
-    verts, idx = [], {}
+    """Polar disc r <= 23.5 m (smooth round rim under the rocks) + path tongues (entrance -Y, side paths
+    160 / -18 deg) as overlapping strips 5 mm higher; planar UVs over a 50 m square."""
+    nseg = int(round(360 / (5.0 * spacing)))
+    rings = list(np.arange(spacing * 2.0, 23.5, spacing * 2.0)) + [23.5]
+    V, faces = [(0.0, 0.0, Z0 + 0.02)], []
 
-    def inside(x, y):
+    def zf(x, y, lift=0.0):
         r = math.hypot(x, y)
-        if r <= 23.5:
-            return True
-        a = math.degrees(math.atan2(y, x))
-        for ang, half_w, rmax in ((-90.0, 3.6, 25.0), (160.0, 2.4, 25.0), (-18.0, 2.4, 25.0)):
-            d = math.radians(ang)
-            t = x * math.cos(d) + y * math.sin(d)
-            s = -x * math.sin(d) + y * math.cos(d)
-            if 0 < t <= rmax and abs(s) <= half_w + 0.6 * (t - 20) * (t > 20):
-                return True
-        return False
-    faces = []
-    for i in range(n):
-        for j in range(n):
-            cx, cy = (xs[i] + xs[i + 1]) / 2, (xs[j] + xs[j + 1]) / 2
-            if not inside(cx, cy):
-                continue
-            q = []
-            for (a, b) in ((i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1)):
-                if (a, b) not in idx:
-                    x, y = xs[a], xs[b]
-                    r = math.hypot(x, y)
-                    z = Z0 + 0.02 + 0.30 * max(0.0, (r - 18.5) / 5.0) ** 2 + 0.03 * math.sin(0.7 * x) * math.cos(0.6 * y)
-                    idx[(a, b)] = len(verts)
-                    verts.append((x, y, z))
-                q.append(idx[(a, b)])
-            faces.append(q)
-    V = np.array(verts)
+        return Z0 + 0.02 + lift + 0.30 * max(0.0, (r - 18.5) / 5.0) ** 2 + 0.03 * math.sin(0.7 * x) * math.cos(0.6 * y)
+    for ri, r in enumerate(rings):
+        for k in range(nseg):
+            a = 2 * math.pi * k / nseg
+            x, y = r * math.cos(a), r * math.sin(a)
+            V.append((x, y, zf(x, y)))
+    for k in range(nseg):
+        faces.append([0, 1 + k, 1 + (k + 1) % nseg])
+    for ri in range(len(rings) - 1):
+        b0, b1 = 1 + ri * nseg, 1 + (ri + 1) * nseg
+        for k in range(nseg):
+            k2 = (k + 1) % nseg
+            faces.append([b0 + k, b1 + k, b1 + k2, b0 + k2])
+    for ang, half_w in ((-90.0, 3.6), (160.0, 2.4), (-18.0, 2.4)):
+        d = math.radians(ang)
+        ux, uy = math.cos(d), math.sin(d)
+        px, py = -uy, ux
+        steps = 6
+        base = len(V)
+        for i in range(steps + 1):
+            t = 22.5 + 9.5 * i / steps
+            w = half_w + 0.12 * (t - 22.5)
+            for sgn in (-1, 1):
+                x, y = ux * t + px * sgn * w, uy * t + py * sgn * w
+                V.append((x, y, zf(x, y, 0.005) if t < 24 else Z0 + 0.025 + 0.30 * 1.0))
+        for i in range(steps):
+            a0 = base + 2 * i
+            faces.append([a0, a0 + 2, a0 + 3, a0 + 1])
+    V = np.array(V)
     uvs = []
     for f in faces:
         for k in f:
@@ -214,7 +217,7 @@ def main():
     slots = [-66, -40, 2, 22, 42, 96, 119, 141, 178, 201, 224, 247]
     inner = [((-10.2, 6.0), 20.0, "v1", 0.62), ((-13.0, -0.6), 75.0, "v2", 1.05), ((13.0, 0.6), -30.0, "v1", 0.55),
              ((7.0, -10.5), 10.0, "v2", 0.9)]
-    banners = [(-112.0, 16.6), (-68.0, 16.6)]
+    banners = [(-101.0, 14.6), (-79.0, 14.6)]     # flank the entrance path in front of the outcrops
 
     def build(level):
         col = core.collection(f"arena_v2_lod{level}")

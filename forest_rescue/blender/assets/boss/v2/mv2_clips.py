@@ -362,16 +362,17 @@ def clip_turn(t, sign):
         ch[f"heel_{side}"] = 14.0 * (1.0 if sw else 0.0) * math.sin(math.pi * np.clip((t - a) / (b - a), 0, 1))
         ch[f"curl_{side}"] = 20.0 * (1.0 if sw else 0.0)
     # body: anticipation (head leads, hips lag), counter-rotation of the node frame for the hips
-    lead = C((0, 0), (0.15, 12), (0.6, 18), (1.0, 8), (1.3, 0))
-    lag = C((0, 0), (0.25, -8), (0.75, -6), (1.3, 0))
+    lead = C((0, 0), (0.22, 30), (0.6, 36), (1.0, 14), (1.3, 0))
+    lag = C((0, 0), (0.25, -10), (0.75, -6), (1.3, 0))
     ch["nyaw"] = sign * lead(t)
-    ch["hyaw"] = sign * lead(t) * 0.5
+    ch["hyaw"] = sign * lead(t) * 0.45
     ch["pyaw"] = sign * lag(t)
-    ch["syaw"] = sign * 0.5 * lead(t)
+    ch["syaw"] = sign * 0.75 * lead(t)
+    ch["sroll"] = sign * 0.2 * lead(t)
     ch["proll"] = sign * C((0, 0), (0.3, 3), (0.8, -2), (1.3, 0))(t)
     ch["pz"] = C((0, 0), (0.15, -0.05), (0.6, -0.03), (1.0, -0.05), (1.3, 0))(t)
-    by = C((0, 0), (0.3, -18), (0.8, -10), (1.3, 0))
-    ch["tail"] = tail_wave(t, lambda x: sign * by(x), lambda x: 0.0, delay=0.06)
+    by = C((0, 0), (0.3, -34), (0.8, -20), (1.3, 0))
+    ch["tail"] = tail_wave(t, lambda x: sign * by(x), lambda x: 6.0 * math.sin(math.pi * min(1.0, x / 1.3)), delay=0.06)
     ch["_node_yaw"] = yaw_node
     return ch
 
@@ -562,7 +563,7 @@ def clip_tail_sweep(t):
         "nyaw": -26.0 * coil(t),
         "hyaw": -10.0 * coil(t),
         "proll": 4.0 * coil(t),
-        "pz": C((0, 0), (2.2, -0.22), (2.95, -0.26), (3.3, -0.18), (3.65, -0.22), (4.5, -0.06), (5.45, 0))(t),
+        "pz": C((0, 0), (2.2, -0.32), (2.95, -0.36), (3.3, -0.22), (3.65, -0.24), (4.5, -0.06), (5.45, 0))(t),
         "ppitch": C((0, 0), (2.2, -3), (3.3, 2), (4.5, 0), (5.45, 0))(t),
         "npitch": C((0, 0), (2.2, -8), (3.3, 4), (4.5, 0), (5.45, 0))(t),
         "jaw": C((0, 1), (2.2, 6), (3.1, 14), (3.6, 4), (5.45, 1))(t),
@@ -573,10 +574,17 @@ def clip_tail_sweep(t):
         ch[f"heel_{s}"] = 0.0
     ch["heel_L"] = C((0, 0), (2.2, 10), (3.0, 12), (3.3, 0), (5.45, 0))(t)
     ch["heel_R"] = C((0, 0), (3.2, 0), (3.6, 10), (4.3, 6), (5.45, 0))(t)
-    by = C((0, 0), (2.2, 34), (2.95, 40), (3.15, 20), (3.42, -60), (3.65, -75), (3.95, -60), (4.6, -16),
+    by = C((0, 0), (2.2, 40), (2.95, 46), (3.15, 24), (3.42, -70), (3.65, -88), (3.95, -70), (4.6, -18),
            (5.1, 4), (5.45, 0))
-    bp = C((0, 0), (2.2, 22), (2.95, 26), (3.35, 4), (3.65, -2), (4.4, 2), (5.45, 0))
-    ch["tail"] = tail_wave(t, by, bp, delay=0.035)
+    bp = C((0, 0), (1.4, 30), (2.2, 52), (2.95, 58), (3.25, 20), (3.65, 0), (4.4, 2), (5.45, 0))
+    # coil: the distal tail curls up and over (pitch grows along the chain), release: flat wide sweep
+    curl = C((0, 0), (1.4, 0.6), (2.95, 1.0), (3.3, 0.2), (3.65, 0.0), (5.45, 0))
+
+    def tw(x, i):
+        return 0.0
+    tl = tail_wave(t, by, bp, delay=0.035)
+    k = curl(t)
+    ch["tail"] = [(y, pch + k * 9.0 * (i / 11.0) ** 1.5) for i, (y, pch) in enumerate(tl)]
     return ch
 
 
@@ -710,8 +718,21 @@ OVERRIDES = {}
 WINDOWS = {"turn_anticipation": (0.0, 0.55), "turn_planted": (0.55, 1.3), "bite_windup": (0.7, 2.42),
            "bite_strike": (2.42, 3.25), "roar": (0.55, 2.3), "tail_coil": (1.2, 3.06), "tail_release": (3.06, 4.5),
            "death_rest": (3.3, 5.2)}
-SCALARS = ["pz", "ppitch", "pyaw", "proll", "spitch", "syaw", "npitch", "nyaw", "hpitch", "jaw", "heel_L", "heel_R",
-           "arm_pitch"]
+SCALARS = ["pz", "ppitch", "pyaw", "proll", "spitch", "syaw", "sroll", "npitch", "nyaw", "nroll", "hpitch", "hyaw", "jaw",
+           "heel_L", "heel_R", "arm_pitch"]
+
+
+def _feet(prm):
+    """Fitted foot targets (x, y, z) per side from either fit format."""
+    if "fLy" in prm:
+        return {"L": (prm["fLx"], prm["fLy"], prm["fLz"]), "R": (prm["fRx"], prm["fRy"], prm["fRz"])}
+    return {"L": (0.68, prm["bLy"], prm["bLz"]), "R": (-0.68, prm["bRy"], prm["bRz"])}
+
+
+def _tail(prm, i):
+    t = i / 11.0
+    return (prm["ty0"] + prm["ty1"] * t + prm.get("ty2", 0.0) * t * t,
+            prm["tp0"] + prm["tp1"] * t + prm.get("tp2", 0.0) * t * t)
 
 
 def load_keypose_fit(path):
@@ -727,13 +748,16 @@ def load_keypose_fit(path):
         con = [r["params"] for r in walk if "contact" in r["panel"]]
         pas = [r["params"] for r in walk if "passing" in r["panel"]]
         if con:
-            step = float(np.mean([abs(p["bLy"] - p["bRy"]) for p in con]))
-            step = float(np.clip(step, 1.2, 2.6))
+            step = float(np.mean([abs(_feet(p)["L"][1] - _feet(p)["R"][1]) for p in con]))
+            step = float(np.clip(step, 1.2, 2.9))
             WALK_SPEED = round(step / (WALK_D * WALK_DUTY), 3)
-            WALK_PZ = float(np.clip(np.mean([p["pz"] for p in con]), -0.4, 0.05))
+            WALK_PZ = float(np.clip(np.mean([p["pz"] for p in con]), -0.55, 0.05))     # hip drop for the long stride
             WALK_PITCH = float(np.clip(np.mean([p["ppitch"] for p in con + pas]), -8, 8))
         if pas:
-            WALK_LIFT = float(np.clip(max(max(p["bLz"], p["bRz"]) for p in pas) - 0.17, 0.25, 0.75))
+            WALK_LIFT = float(np.clip(max(max(_feet(p)["L"][2], _feet(p)["R"][2]) for p in pas) - 0.17, 0.25, 0.85))
+    WALK_SPEED = max(WALK_SPEED, 2.25)          # art/05 contacts: feet ~2.2 m apart
+    WALK_PZ = min(WALK_PZ, -0.24)               # hip drop so the long stride stays within leg reach
+    WALK_LIFT = max(WALK_LIFT, 0.55)
     for panel, r in data.items():
         if panel in WINDOWS:
             a, b = WINDOWS[panel]
@@ -773,14 +797,17 @@ def with_overrides(cid, fn):
                     ch[k] = ch.get(k, 0.0) + (tgt - b0.get(k, 0.0)) * w
             tail = ch.get("tail", [(0.0, 0.0)] * 12)
             tb = b0.get("tail", [(0.0, 0.0)] * 12)
-            ch["tail"] = [(tail[i][0] + (prm["ty0"] + prm["ty1"] * i / 11.0 - tb[i][0]) * w,
-                           tail[i][1] + (prm["tp0"] + prm["tp1"] * i / 11.0 - tb[i][1]) * w) for i in range(12)]
+            ch["tail"] = [(tail[i][0] + (_tail(prm, i)[0] - tb[i][0]) * w,
+                           tail[i][1] + (_tail(prm, i)[1] - tb[i][1]) * w) for i in range(12)]
             # feet: step to the painted placement (y), lifted, then hold; step back in the out window
             # (turn clips keep their own world-planted stepping: a held local offset would slide in the yawing frame)
-            for s_, key in ((() if cid.startswith("lf_boss_turn") else (("L", "bLy"), ("R", "bRy")))):
-                dy = float(np.clip(prm[key] - float(np.asarray(b0[f"ball_{s_}"])[1]), -0.75, 0.75))
-                dz_t = max(prm["b" + s_ + "z"] - 0.17, 0.0)
-                if abs(dy) < 0.05 and dz_t < 0.05:
+            fe = _feet(prm)
+            for s_ in ((() if cid.startswith("lf_boss_turn") else ("L", "R"))):
+                b0p = np.asarray(b0[f"ball_{s_}"], float)
+                dy = float(np.clip(fe[s_][1] - b0p[1], -0.9, 0.9))
+                dx = float(np.clip(fe[s_][0] - b0p[0], -0.4, 0.4))
+                dz_t = max(fe[s_][2] - 0.17, 0.0)
+                if abs(dy) < 0.05 and abs(dx) < 0.05 and dz_t < 0.05:
                     continue
                 if t <= tk:
                     x = (t - a) / max(tk - a, 1e-6)
@@ -796,6 +823,7 @@ def with_overrides(cid, fn):
                 hold_lift = dz_t * w if dz_t >= 0.05 else 0.0
                 p = np.asarray(ch[f"ball_{s_}"], float).copy()
                 p[1] += dy * m
+                p[0] += dx * m
                 p[2] += lift + hold_lift
                 ch[f"ball_{s_}"] = p
                 if swing or hold_lift > 0.01:

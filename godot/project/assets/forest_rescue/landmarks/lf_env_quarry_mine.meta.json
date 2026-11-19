@@ -154,8 +154,8 @@
   "qa": {
     "main_view": {
       "iou": 0.8862,
-      "colour_err": 0.1121,
-      "ssim": 0.5056,
+      "colour_err": 0.1028,
+      "ssim": 0.5151,
       "ref_px": 123500,
       "render_px": 131650,
       "iou_structure_only": 0.7734850029835414
@@ -168,8 +168,8 @@
     "insets": {
       "mine_front": {
         "iou": 0.5702,
-        "colour_err": 0.1683,
-        "ssim": 0.2572,
+        "colour_err": 0.1727,
+        "ssim": 0.2545,
         "ref_px": 132832,
         "render_px": 82933
       }
@@ -177,9 +177,9 @@
     "texture": {
       "texels": 3006382,
       "projected_frac": 0.055304016588710286,
-      "seconds": 13.1
+      "seconds": 12.4
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter09_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_quarry_mine/v3_iter10_*"
   },
   "sockets": {
     "mine_entrance_centre": [

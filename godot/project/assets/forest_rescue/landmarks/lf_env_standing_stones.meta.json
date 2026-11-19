@@ -165,8 +165,8 @@
   "qa": {
     "main_view": {
       "iou": 0.9193,
-      "colour_err": 0.1037,
-      "ssim": 0.5647,
+      "colour_err": 0.0975,
+      "ssim": 0.569,
       "ref_px": 72006,
       "render_px": 72850,
       "iou_structure_only": 0.47279889859734736
@@ -179,8 +179,8 @@
     "insets": {
       "row": {
         "iou": 0.4729,
-        "colour_err": 0.1525,
-        "ssim": 0.3609,
+        "colour_err": 0.1514,
+        "ssim": 0.3672,
         "ref_px": 139296,
         "render_px": 219499
       }
@@ -188,9 +188,9 @@
     "texture": {
       "texels": 3119759,
       "projected_frac": 0.1269021100668353,
-      "seconds": 13.3
+      "seconds": 12.9
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_standing_stones/v3_iter03_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_standing_stones/v3_iter04_*"
   },
   "dimensions": {
     "S1": {

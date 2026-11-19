@@ -275,12 +275,21 @@ def image_space_cloth(cloth, cam, region, supports, lod):
     """Cloth mesh = image-space grid over the painted tarp region, back-projected onto the fitted drape surface
     (canopy + flap). Matches the painted outline from the solved camera; lies on the plausible 3-D drape."""
     T = np.concatenate([_tris_of(G) for G in supports])
+    from scipy import ndimage as ndi
     ys, xs = np.nonzero(region)
     step = 5 if lod == 0 else (10 if lod == 1 else 22)
     gx = np.arange(xs.min() - step, xs.max() + step * 2, step)
     gy = np.arange(ys.min() - step, ys.max() + step * 2, step)
     GX, GY = np.meshgrid(gx, gy, indexing="ij")
-    o, D = cam.ray(GX.ravel() + 0.5, GY.ravel() + 0.5)
+    H0, W0 = region.shape
+    # snap grid vertices outside the painted region onto its nearest inside pixel (smooth, exact outline)
+    _, (iy, ix) = ndi.distance_transform_edt(~region, return_indices=True)
+    cx_ = np.clip(GX, 0, W0 - 1).astype(int)
+    cy_ = np.clip(GY, 0, H0 - 1).astype(int)
+    out = ~region[cy_, cx_]
+    SX = np.where(out, ix[cy_, cx_], GX).astype(float)
+    SY = np.where(out, iy[cy_, cx_], GY).astype(float)
+    o, D = cam.ray(SX.ravel() + 0.5, SY.ravel() + 0.5)
     Pts, hit = _raycast(o, D, T)
     Pts = Pts.reshape(GX.shape + (3,))
     hit = hit.reshape(GX.shape)
@@ -295,7 +304,7 @@ def image_space_cloth(cloth, cam, region, supports, lod):
     for i in range(GX.shape[0] - 1):
         for j in range(GX.shape[1] - 1):
             cs = [(i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1)]
-            if sum(inside[a, b] for a, b in cs) < 2 or not all(hit[a, b] for a, b in cs):
+            if sum(inside[a, b] for a, b in cs) < 1 or not all(hit[a, b] for a, b in cs):
                 continue
             f = []
             for a, b in cs:
@@ -305,7 +314,13 @@ def image_space_cloth(cloth, cam, region, supports, lod):
                 f.append(idx[a, b])
             F.append(f)
     if F:
-        cloth.add(np.array(V), F, "cloth", "tarp")
+        V = np.array(V)
+        F2 = []
+        for f in F:
+            Pq = V[f]
+            nrm = np.cross(Pq[1] - Pq[0], Pq[2] - Pq[0])
+            F2.append(f if nrm @ (cam.centre - Pq.mean(0)) > 0 else f[::-1])
+        cloth.add(V, F2, "cloth", "tarp")
 
 
 def painted_tarp_mask(crop):

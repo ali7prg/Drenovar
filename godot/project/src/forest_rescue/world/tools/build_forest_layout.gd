@@ -47,7 +47,7 @@ const ZONE_NAMES := ["golden_grove", "top_birch_oak", "arena_pines", "east_mixed
 const SECTORS := {Z_ARENA: [12.0, 58.0], Z_TOP: [58.0, 104.0], Z_GROVE: [104.0, 212.0], Z_SPRUCE: [226.0, 306.0], Z_EAST: [306.0, 372.0]}
 ## Ambient species mix per zone (resource trees keep their species).
 const ZONE_MIX := [
-	{Rules.OAK: 0.80, Rules.PINE: 0.12, Rules.BIRCH: 0.08},                 # golden grove
+	{Rules.OAK: 0.92, Rules.PINE: 0.04, Rules.BIRCH: 0.04},                 # golden grove (big oaks)
 	{Rules.BIRCH: 0.45, Rules.OAK: 0.35, Rules.PINE: 0.20},                 # top: birch + oak
 	{Rules.PINE: 0.80, Rules.OAK: 0.12, Rules.BIRCH: 0.08},                 # arena pines
 	{Rules.BIRCH: 0.40, Rules.WILLOW: 0.22, Rules.PINE: 0.28, Rules.OAK: 0.10},  # east mixed
@@ -57,24 +57,24 @@ const ZONE_MIX := [
 	{Rules.BIRCH: 0.45, Rules.PINE: 0.30, Rules.OAK: 0.25},                 # town belt
 ]
 ## Ambient spacing (m) per zone: target trunk spacing incl. resource trees.
-const ZONE_SPACING := [6.6, 4.8, 3.7, 4.2, 4.6, 3.3, 9.0, 5.0]
+const ZONE_SPACING := [13.0, 5.2, 3.7, 4.3, 4.8, 3.3, 9.0, 5.2]
 ## Absolute scale ranges per [zone][species] for AMBIENT trees (inside kit recommendedScale).
 const AMBIENT_SCALE := {
-	Rules.OAK: [[0.86, 1.08], [0.70, 0.90], [0.66, 0.80], [0.66, 0.82], [0.66, 0.80], [0.66, 0.78], [0.66, 0.78], [0.66, 0.82]],
+	Rules.OAK: [[0.94, 1.10], [0.70, 0.88], [0.66, 0.80], [0.66, 0.82], [0.66, 0.80], [0.66, 0.78], [0.66, 0.78], [0.66, 0.82]],
 	Rules.PINE: [[0.78, 0.98], [0.80, 1.00], [0.90, 1.16], [0.84, 1.06], [0.80, 1.00], [0.92, 1.20], [0.80, 1.00], [0.78, 0.96]],
 	Rules.BIRCH: [[0.80, 0.95], [0.86, 1.08], [0.80, 0.96], [0.86, 1.10], [0.84, 1.04], [0.80, 0.95], [0.84, 1.00], [0.82, 1.00]],
 	Rules.WILLOW: [[0.82, 0.98], [0.82, 1.0], [0.82, 1.0], [0.86, 1.06], [0.88, 1.12], [0.82, 1.0], [0.82, 1.0], [0.84, 1.0]],
 }
 ## Resource-tree absolute scale ranges per zone [oak, pine] (zone decides which one dominates).
 const RESOURCE_SCALE_OUTER := [
-	[[0.72, 0.92], [0.62, 0.74]],   # grove: oaks lead, pines low
-	[[0.58, 0.74], [0.74, 0.92]],
-	[[0.44, 0.54], [0.92, 1.12]],   # arena pines
-	[[0.46, 0.58], [0.82, 1.02]],
-	[[0.46, 0.58], [0.78, 0.96]],
-	[[0.40, 0.48], [0.96, 1.20]],   # spruce: young oaks under tall spruces
-	[[0.46, 0.56], [0.76, 0.92]],
-	[[0.48, 0.60], [0.74, 0.90]],
+	[[0.46, 0.58], [0.56, 0.68]],   # grove: young oaks/pines under sparse big oaks
+	[[0.44, 0.56], [0.68, 0.84]],
+	[[0.40, 0.48], [0.92, 1.12]],   # arena pines
+	[[0.42, 0.52], [0.82, 1.02]],
+	[[0.42, 0.52], [0.76, 0.94]],
+	[[0.38, 0.46], [0.96, 1.20]],   # spruce: young oaks under tall spruces
+	[[0.42, 0.52], [0.74, 0.88]],
+	[[0.44, 0.56], [0.72, 0.88]],
 ]
 ## Inner base (±56): the town stays readable (legacy-like 8–10 m crowns).
 const RESOURCE_SCALE_INNER := [[0.46, 0.58], [0.60, 0.74]]
@@ -215,21 +215,24 @@ func pick_zone(x: float, z: float) -> int:
 # ---------------------------------------------------------------------------------------------
 # Clearances
 
-func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0) -> bool:
+## crown: crown radius (m) of the tree that would stand here; up to ~45 % of it may overhang a
+## path or glade (art/01: trails stay readable between the crowns).
+func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown := 0.0) -> bool:
 	if maxf(absf(x), absf(z)) < CORE + (0.8 if tree else 0.3):
 		return true
-	for gz in range(floori((z - 6.0) / masks.cell), floori((z + 6.0) / masks.cell) + 1):
-		for gx in range(floori((x - 6.0) / masks.cell), floori((x + 6.0) / masks.cell) + 1):
+	var reach := 6.0 + crown * 0.55
+	for gz in range(floori((z - reach) / masks.cell), floori((z + reach) / masks.cell) + 1):
+		for gx in range(floori((x - reach) / masks.cell), floori((x + reach) / masks.cell) + 1):
 			for index in masks.grid.get(Vector2i(gx, gz), PackedInt32Array()):
 				var mask: Dictionary = masks.masks[index]
 				var margin := 0.0
 				match String(mask.get("kind", "")):
 					"route":
-						margin = Rules.ROUTE_TRUNK_MARGIN * margin_scale if tree else 0.0
+						margin = (Rules.ROUTE_TRUNK_MARGIN + crown * 0.45) * margin_scale if tree else 0.0
 					"glade":
-						margin = Rules.GLADE_TRUNK_MARGIN * margin_scale if tree else 0.3
+						margin = (Rules.GLADE_TRUNK_MARGIN + crown * 0.4) * margin_scale if tree else 0.3
 					"arena":
-						margin = 2.0 * margin_scale if tree else 0.5
+						margin = (2.0 + crown * 0.4) * margin_scale if tree else 0.5
 					"bridge":
 						margin = 0.8
 					"core", "reserve":
@@ -264,7 +267,7 @@ func free_of_trunks(x: float, z: float, gap: float) -> bool:
 func is_glade(x: float, z: float) -> bool:
 	# Art glades: low-frequency noise holes (open grassy clearings between clumps, art/01 grove).
 	var zone := dominant_zone(x, z)
-	var threshold := 0.18 if zone == Z_GROVE else (0.12 if zone in [Z_TOP, Z_EAST, Z_BELT] else 0.06)
+	var threshold := 0.22 if zone == Z_GROVE else (0.15 if zone in [Z_TOP, Z_EAST, Z_BELT, Z_QUARRY] else 0.07)
 	return (glade.get_noise_2d(x, z) + 1.0) * 0.5 < threshold
 
 
@@ -332,14 +335,17 @@ func run() -> void:
 		var tz := float(tree.p[2])
 		var species: int = Rules.RESOURCE_SPECIES.get(String(tree.name), Rules.PINE)
 		var gap := Rules.MIN_TREE_GAP if species == Rules.PINE else 2.6
-		var in_mask := blocked_exact(tx, tz, true) or not ground_ok(tx, tz, true)
+		var crown := _resource_crown(tree, species, dominant_zone(tx, tz))
+		var in_mask := blocked_exact(tx, tz, true, 1.0, crown) or not ground_ok(tx, tz, true) or is_glade(tx, tz)
 		var found := Vector2.INF
 		var reason := 0
 		if not in_mask:
-			found = _best_spot(tx, tz, 1.0, Rules.MAX_SLOT_DISPLACEMENT, gap, 40)
+			found = _best_spot(tx, tz, 1.0, Rules.MAX_SLOT_DISPLACEMENT, gap, 40, crown)
 		if found == Vector2.INF:
 			reason = 1 if in_mask else 2
-			found = _nearest_free(tx, tz, 6.5, gap)
+			found = _nearest_free(tx, tz, 6.5, gap, crown, true)
+		if found == Vector2.INF:
+			found = _nearest_free(tx, tz, 6.5, gap, 0.0, false)
 		if found == Vector2.INF:
 			reason = 3
 			found = _nearest_free(tx, tz, 14.0, 1.6)
@@ -437,11 +443,13 @@ func run() -> void:
 			var gap := spacing if species != Rules.PINE else spacing * 0.86
 			if not free_of_trunks(x, z, gap):
 				continue
-			insert(trunk_grid, trunks, [x, z, minf(gap, 3.0)])
-			var variants: Array = ZONE_VARIANTS[species][zone]
-			var variant: int = variants[rng.randi() % variants.size()]
 			var scale_range: Array = AMBIENT_SCALE[species][zone]
 			var scale := lerpf(scale_range[0], scale_range[1], rng.randf())
+			if blocked_exact(x, z, true, 1.0, Rules.CROWN_RADIUS[species] * scale):
+				continue
+			insert(trunk_grid, trunks, [x, z, minf(gap, 3.0 if species != Rules.OAK or zone != Z_GROVE else 6.0)])
+			var variants: Array = ZONE_VARIANTS[species][zone]
+			var variant: int = variants[rng.randi() % variants.size()]
 			trees.append([snappedf(x, 0.01), snappedf(z, 0.01), species, variant,
 				snappedf(rng.randf() * 360.0, 0.1), snappedf(scale, 0.001), zone])
 			species_count[Rules.SPECIES[species]] = species_count.get(Rules.SPECIES[species], 0) + 1
@@ -599,8 +607,8 @@ func run() -> void:
 	quit()
 
 
-## Best clump-biased spot within [min_d, max_d] of (tx, tz).
-func _best_spot(tx: float, tz: float, min_d: float, max_d: float, gap: float, tries: int) -> Vector2:
+## Best clump-biased spot within [min_d, max_d] of (tx, tz) (outside art glades).
+func _best_spot(tx: float, tz: float, min_d: float, max_d: float, gap: float, tries: int, crown := 0.0) -> Vector2:
 	var best := Vector2.INF
 	var best_score := -INF
 	for k in tries:
@@ -608,11 +616,9 @@ func _best_spot(tx: float, tz: float, min_d: float, max_d: float, gap: float, tr
 		var dist := lerpf(min_d, max_d, sqrt(rng.randf()))
 		var x := tx + cos(angle) * dist
 		var z := tz + sin(angle) * dist
-		if blocked_exact(x, z, true) or not ground_ok(x, z, true) or not free_of_trunks(x, z, gap):
+		if blocked_exact(x, z, true, 1.0, crown) or not ground_ok(x, z, true) or not free_of_trunks(x, z, gap) or is_glade(x, z):
 			continue
 		var score := (clump.get_noise_2d(x, z) + 1.0) * 0.7 + rng.randf() * 0.45
-		if is_glade(x, z):
-			score -= 0.9
 		if score > best_score:
 			best_score = score
 			best = Vector2(x, z)
@@ -620,7 +626,7 @@ func _best_spot(tx: float, tz: float, min_d: float, max_d: float, gap: float, tr
 
 
 ## Nearest valid spot (rings of 0.5 m) up to max_r.
-func _nearest_free(tx: float, tz: float, max_r: float, gap: float) -> Vector2:
+func _nearest_free(tx: float, tz: float, max_r: float, gap: float, crown := 0.0, avoid_glades := false) -> Vector2:
 	var radius := 0.5
 	var angle0 := rng.randf() * TAU
 	while radius <= max_r:
@@ -629,11 +635,19 @@ func _nearest_free(tx: float, tz: float, max_r: float, gap: float) -> Vector2:
 			var angle := angle0 + TAU * k / steps
 			var x := tx + cos(angle) * radius
 			var z := tz + sin(angle) * radius
-			if blocked_exact(x, z, true) or not ground_ok(x, z, true) or not free_of_trunks(x, z, gap):
+			if blocked_exact(x, z, true, 1.0, crown) or not ground_ok(x, z, true) or not free_of_trunks(x, z, gap):
+				continue
+			if avoid_glades and is_glade(x, z):
 				continue
 			return Vector2(x, z)
 		radius += 0.5
 	return Vector2.INF
+
+
+## Crown radius (m) the resource tree will have in this zone.
+func _resource_crown(tree: Dictionary, species: int, zone: int) -> float:
+	var look := _resource_look(tree, species, zone, false)
+	return Rules.CROWN_RADIUS[species] * float(look[1])
 
 
 func _resource_look(tree: Dictionary, species: int, zone: int, inner: bool) -> Array:

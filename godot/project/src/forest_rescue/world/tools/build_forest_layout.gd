@@ -48,13 +48,13 @@ const SECTORS := {Z_ARENA: [12.0, 58.0], Z_TOP: [58.0, 104.0], Z_GROVE: [104.0, 
 ## Ambient species mix per zone (resource trees keep their species).
 const ZONE_MIX := [
 	{Rules.OAK: 0.92, Rules.PINE: 0.04, Rules.BIRCH: 0.04},                 # golden grove (big oaks)
-	{Rules.BIRCH: 0.45, Rules.OAK: 0.35, Rules.PINE: 0.20},                 # top: birch + oak
-	{Rules.PINE: 0.80, Rules.OAK: 0.12, Rules.BIRCH: 0.08},                 # arena pines
-	{Rules.BIRCH: 0.40, Rules.WILLOW: 0.22, Rules.PINE: 0.28, Rules.OAK: 0.10},  # east mixed
-	{Rules.WILLOW: 0.62, Rules.BIRCH: 0.22, Rules.PINE: 0.16},              # river willows
+	{Rules.BIRCH: 0.35, Rules.OAK: 0.45, Rules.PINE: 0.20},                 # top: birch + oak
+	{Rules.PINE: 0.78, Rules.OAK: 0.14, Rules.BIRCH: 0.08},                 # arena pines
+	{Rules.OAK: 0.45, Rules.BIRCH: 0.18, Rules.WILLOW: 0.15, Rules.PINE: 0.22},  # east mixed (deep-green broadleaf)
+	{Rules.WILLOW: 0.55, Rules.OAK: 0.20, Rules.BIRCH: 0.12, Rules.PINE: 0.13},  # river willows
 	{Rules.PINE: 0.92, Rules.BIRCH: 0.05, Rules.OAK: 0.03},                 # south spruce
 	{Rules.BIRCH: 0.45, Rules.PINE: 0.45, Rules.OAK: 0.10},                 # quarry (sparse)
-	{Rules.BIRCH: 0.45, Rules.PINE: 0.30, Rules.OAK: 0.25},                 # town belt
+	{Rules.OAK: 0.45, Rules.BIRCH: 0.25, Rules.PINE: 0.30},                 # town belt (green broadleaf)
 ]
 ## Ambient spacing (m) per zone: target trunk spacing incl. resource trees.
 const ZONE_SPACING := [13.0, 5.2, 3.7, 4.3, 4.8, 3.3, 9.0, 5.2]
@@ -335,7 +335,7 @@ func run() -> void:
 		var tz := float(tree.p[2])
 		var species: int = Rules.RESOURCE_SPECIES.get(String(tree.name), Rules.PINE)
 		var gap := Rules.MIN_TREE_GAP if species == Rules.PINE else 2.6
-		var crown := _resource_crown(tree, species, dominant_zone(tx, tz))
+		var crown := _resource_crown(tree, species, tx, tz)
 		var in_mask := blocked_exact(tx, tz, true, 1.0, crown) or not ground_ok(tx, tz, true) or is_glade(tx, tz)
 		var found := Vector2.INF
 		var reason := 0
@@ -353,8 +353,7 @@ func run() -> void:
 			var angle := rng.randf() * TAU
 			found = Vector2(tx + cos(angle) * 1.2, tz + sin(angle) * 1.2)
 		insert(trunk_grid, trunks, [found.x, found.y, gap])
-		var zone := dominant_zone(found.x, found.y)
-		var look := _resource_look(tree, species, zone, false)
+		var look := _resource_look(tree, species, found.x, found.y, false)
 		remap[tree.id] = [snappedf(found.x, 0.01), snappedf(found.y, 0.01), reason, look[0], look[1]]
 		reasons[["slot", "mask_push", "jitter", "kept"][reason]] += 1
 		displacements.append(Vector2(tx - found.x, tz - found.y).length())
@@ -404,7 +403,7 @@ func run() -> void:
 				best_score = score
 				best = q
 		insert(placed_inner_grid, placed_inner, [best.x, best.y, 0.0])
-		var look := _resource_look(tree, species, Z_BELT, true)
+		var look := _resource_look(tree, species, best.x, best.y, true)
 		inner_remap[tree.id] = [snappedf(best.x, 0.01), snappedf(best.y, 0.01), 0 if best != o else 3, look[0], look[1]]
 		inner_moved.append(best.distance_to(o))
 	inner_moved.sort()
@@ -446,14 +445,19 @@ func run() -> void:
 				continue
 			var scale_range: Array = AMBIENT_SCALE[species][zone]
 			var scale := lerpf(scale_range[0], scale_range[1], rng.randf())
+			scale = lerpf(scale, lerpf(0.34, 0.52, rng.randf()), openness(x, z) * (0.0 if zone == Z_GROVE and species == Rules.OAK else 0.85))
 			if blocked_exact(x, z, true, 1.0, Rules.CROWN_RADIUS[species] * scale):
 				continue
 			insert(trunk_grid, trunks, [x, z, minf(gap, 3.0 if species != Rules.OAK or zone != Z_GROVE else 6.0)])
 			var variants: Array = ZONE_VARIANTS[species][zone]
 			var variant: int = variants[rng.randi() % variants.size()]
-			trees.append([snappedf(x, 0.01), snappedf(z, 0.01), species, variant,
+			var drawn := species
+			if species == Rules.OAK and zone != Z_GROVE and not oak_is_golden(x, z, rng.randf()):
+				drawn = Rules.OAK_GREEN
+				variant = clampi(variant, 2, 4)
+			trees.append([snappedf(x, 0.01), snappedf(z, 0.01), drawn, variant,
 				snappedf(rng.randf() * 360.0, 0.1), snappedf(scale, 0.001), zone])
-			species_count[Rules.SPECIES[species]] = species_count.get(Rules.SPECIES[species], 0) + 1
+			species_count[Rules.SPECIES[drawn]] = species_count.get(Rules.SPECIES[drawn], 0) + 1
 	print("LAYOUT ambient trees=", trees.size(), " ", species_count)
 
 	# 5. Understory -----------------------------------------------------------------------------
@@ -645,19 +649,64 @@ func _nearest_free(tx: float, tz: float, max_r: float, gap: float, crown := 0.0,
 	return Vector2.INF
 
 
-## Crown radius (m) the resource tree will have in this zone.
-func _resource_crown(tree: Dictionary, species: int, zone: int) -> float:
-	var look := _resource_look(tree, species, zone, false)
+## Crown radius (m) the resource tree will have at (x, z).
+func _resource_crown(tree: Dictionary, species: int, x: float, z: float) -> float:
+	var look := _resource_look(tree, species, x, z, false)
 	return Rules.CROWN_RADIUS[species] * float(look[1])
 
 
-func _resource_look(tree: Dictionary, species: int, zone: int, inner: bool) -> Array:
+## Openness 0..1 from art/01: 1 inside/at the edge of clearings, site camps, trails, art glades
+## and landmark spots (young trees, saplings), 0 in forest cores (full-size trees).
+func openness(x: float, z: float) -> float:
+	var d := 99.0
+	var hit: Dictionary = atlas.nearest_route(x, z)
+	if not hit.is_empty():
+		d = minf(d, float(hit.distance) - 3.8)
+	for site in atlas.sites:
+		d = minf(d, Vector2(x, z).distance_to(Vector2(site.center.x, site.center.z)) - float(site.radius))
+	d = minf(d, Vector2(x, z).distance_to(Vector2(atlas.arena_center.x, atlas.arena_center.z)) - 17.0)
+	for disc in landmark_discs:
+		d = minf(d, Vector2(x, z).distance_to(disc[0]) - float(disc[1]))
+	var g := (glade.get_noise_2d(x, z) + 1.0) * 0.5
+	var zone := dominant_zone(x, z)
+	var threshold := 0.22 if zone == Z_GROVE else (0.15 if zone in [Z_TOP, Z_EAST, Z_BELT, Z_QUARRY] else 0.07)
+	var open_glade := 1.0 - smoothstep(threshold, threshold + 0.12, g)
+	return maxf(1.0 - smoothstep(2.0, 13.0, d), open_glade)
+
+
+## art/01 palette zoning: oaks are golden inside the NW grove (and its border, ~12 % accents
+## elsewhere, more near the grove), deep-green broadleaf (baked atlas copy) everywhere else.
+func oak_is_golden(x: float, z: float, roll: float) -> bool:
+	var w := zone_weights(x, z)
+	var gold := clampf(w[Z_GROVE] * 1.25 + w[Z_TOP] * 0.18 + w[Z_ARENA] * 0.16, 0.0, 1.0)
+	return roll < maxf(gold, 0.10)
+
+
+## Resource look: [kit variant (+GREEN_VARIANT_BASE for the green oak copy), absolute scale].
+## Openness decides the size: young trees/saplings (0.30–0.50) in openings, full size around the
+## kit recommendedScale in forest cores; grove pines stay young (art/01: few spruces in the grove).
+func _resource_look(tree: Dictionary, species: int, x: float, z: float, inner: bool) -> Array:
 	var h := Rules.id_hash(String(tree.id))
 	var u := clampf((float(tree.scale) - 0.45) / 0.85, 0.0, 1.0)
-	var r: Array = RESOURCE_SCALE_INNER[0 if species == Rules.OAK else 1] if inner else RESOURCE_SCALE_OUTER[zone][0 if species == Rules.OAK else 1]
+	var zone := Z_BELT if inner else dominant_zone(x, z)
 	var variants: Array = ZONE_VARIANTS[species][zone]
 	var variant: int = variants[int(h * 997.0) % variants.size()]
-	return [variant, snappedf(lerpf(r[0], r[1], u), 0.001)]
+	var scale := 0.0
+	if inner:
+		var r: Array = RESOURCE_SCALE_INNER[0 if species == Rules.OAK else 1]
+		scale = lerpf(r[0], r[1], u)
+	else:
+		var open := openness(x, z)
+		var young := lerpf(0.30, 0.50, u)
+		var core: float
+		if species == Rules.OAK:
+			core = lerpf(0.62, 0.92, u) if zone != Z_SPRUCE else lerpf(0.40, 0.52, u)
+		else:
+			core = lerpf(0.82, 1.14, u) if zone != Z_GROVE else lerpf(0.40, 0.52, u)
+		scale = lerpf(core, young, open)
+	if species == Rules.OAK and variant > 1 and not (zone == Z_GROVE or oak_is_golden(x, z, fposmod(h * 7.31, 1.0))):
+		variant += Rules.GREEN_VARIANT_BASE
+	return [variant, snappedf(scale, 0.001)]
 
 
 func _find_hero_spot() -> Vector2:

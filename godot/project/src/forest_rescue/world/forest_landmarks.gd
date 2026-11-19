@@ -67,30 +67,35 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 		var dir: Vector2 = face - spot
 		placements.append({"id": spec.id, "position": Vector3(spot.x, 0.0, spot.y), "yaw": atan2(dir.x, dir.y),
 			"footprint": spec.footprint, "kind": "landmark", "pad": true})
+	# art/01: every site has a camp (tarp, fire ring, crates) next to the cage inside its clearing.
+	# The camp stands at the clearing edge, as far as possible from the gameplay anchors (cage,
+	# guardian, artifact, escort approach) and from the trails, preferring the camera-far side.
 	for site in atlas.sites:
 		var center := Vector2(site.center.x, site.center.z)
-		var best_angle := 0.0
+		var anchors: Array = [site.cage, site.guardian, site.artifact, site.approach]
+		var best := Vector2.INF
 		var best_score := -INF
-		for k in 24:
-			var angle := TAU * k / 24.0
-			var p := center + Vector2(cos(angle), sin(angle)) * float(CAMP.distance)
-			var score := 0.0
-			var hit: Dictionary = atlas.nearest_route(p.x, p.y)
-			score += minf(hit.get("distance", 12.0), 12.0)
-			# keep away from the approach side (+offset) used by the escort
-			var approach: Vector2 = site.approach
-			score -= 6.0 * maxf(0.0, Vector2(cos(angle), sin(angle)).dot(approach.normalized()))
-			# art/01: the tent stands on the camera-far side of the cage (screen-up = world -X-Z)
-			score += 2.0 * Vector2(cos(angle), sin(angle)).dot(Vector2(-0.7071, -0.7071))
-			if not valid_spot(p, float(CAMP.footprint), masks, true):
-				score -= 100.0
-			if score > best_score:
-				best_score = score
-				best_angle = angle
-		if best_score < -50.0:
-			continue   # no valid camp spot next to this glade (routes on every side)
-		var spot := center + Vector2(cos(best_angle), sin(best_angle)) * float(CAMP.distance)
-		placements.append({"id": CAMP.id, "position": Vector3(spot.x, 0.0, spot.y), "yaw": atan2(center.x - spot.x, center.y - spot.y),
+		for ring in [6.2, 7.4, 8.8]:
+			for k in 36:
+				var angle := TAU * k / 36.0
+				var p := center + Vector2(cos(angle), sin(angle)) * ring
+				if not camp_spot_ok(p, float(CAMP.footprint), site):
+					continue
+				var clearance := INF
+				for anchor: Vector2 in anchors:
+					clearance = minf(clearance, p.distance_to(center + anchor))
+				var hit: Dictionary = atlas.nearest_route(p.x, p.y)
+				var trail: float = minf(hit.get("distance", 12.0), 12.0)
+				var score := minf(clearance, 6.0) * 1.6 + trail - ring * 0.4
+				score += 1.5 * Vector2(cos(angle), sin(angle)).dot(Vector2(-0.7071, -0.7071))
+				if clearance < 3.6:
+					score -= 50.0
+				if score > best_score:
+					best_score = score
+					best = p
+		if best == Vector2.INF:
+			continue
+		placements.append({"id": CAMP.id, "position": Vector3(best.x, 0.0, best.y), "yaw": atan2(center.x - best.x, center.y - best.y),
 			"footprint": CAMP.footprint, "kind": "camp", "site": site.id, "pad": true})
 	for placement in placements:
 		var p: Vector3 = placement.position
@@ -114,6 +119,24 @@ func valid_spot(p: Vector2, footprint: float, masks: RefCounted, camp := false) 
 		return false
 	if atlas.bridge_deck_rect().grow(footprint + 4.0).has_point(p):
 		return false
+	for placement in placements:
+		if placement.kind != "bridge" and Vector2(placement.position.x, placement.position.z).distance_to(p) < float(placement.footprint) + footprint + 1.0:
+			return false
+	return true
+
+
+## Camp spot test: inside or at the edge of its own clearing, off trails, other glades, river.
+func camp_spot_ok(p: Vector2, footprint: float, own_site: Dictionary) -> bool:
+	if maxf(absf(p.x), absf(p.y)) < 56.0 + footprint or maxf(absf(p.x), absf(p.y)) > 110.0 - footprint * 0.5:
+		return false
+	if atlas.river_bank_distance(p.x, p.y) < footprint + 1.5:
+		return false
+	var hit: Dictionary = atlas.nearest_route(p.x, p.y)
+	if not hit.is_empty() and hit.distance < footprint + 1.6:
+		return false
+	for site in atlas.sites:
+		if site.id != own_site.id and p.distance_to(Vector2(site.center.x, site.center.z)) < site.radius + footprint + 1.0:
+			return false
 	for placement in placements:
 		if placement.kind != "bridge" and Vector2(placement.position.x, placement.position.z).distance_to(p) < float(placement.footprint) + footprint + 1.0:
 			return false
@@ -258,20 +281,23 @@ func update_view(target: Vector3, zoom: float, visible_fn: Callable) -> int:
 			continue
 		var d: float = item.center.distance_to(Vector2(target.x, target.z))
 		var lod := 2
-		if zoom <= 50.0 and d <= 36.0:
+		if zoom <= 50.0 and d <= 30.0:
 			lod = 0
-		elif zoom <= 96.0:
+		elif zoom <= 96.0 and d <= 64.0:
 			lod = 1
 		_set_lod(item, lod)
-		tris += int(item.tris[lod])
+		if d <= zoom * 1.25 + item.radius:      # roughly inside the ortho view
+			tris += int(item.tris[lod])
 	if arena_root != null:
 		var center := Vector2(arena_root.position.x, arena_root.position.z)
 		var shown: bool = visible_fn.call(center.x, center.y, 20.0) if visible_fn.is_valid() else true
 		arena_root.visible = shown
 		if shown:
-			var lod := 0 if zoom <= 52.0 and center.distance_to(Vector2(target.x, target.z)) <= 48.0 else 1
+			var d := center.distance_to(Vector2(target.x, target.z))
+			var lod := 0 if zoom <= 34.0 and d <= 40.0 else 1
 			_set_arena_lod(lod)
-			tris += _count_tris(arena_root)
+			if d <= zoom * 1.25 + 24.0:
+				tris += _count_tris(arena_root)
 	return tris
 
 

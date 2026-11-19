@@ -319,7 +319,8 @@ def main():
     flesh = np.array([0.40, 0.19, 0.17])
     dark = np.array([0.09, 0.055, 0.045])
     # interior near the lips/front (what the closed mouth's slit shows) is a dark shadowed gap; deeper = flesh
-    depth_in = np.clip((-headvol - 0.035) / 0.06, 0, 1)
+    # what the closed mouth's lip slit exposes (within ~6 cm of the lip plane) reads as a dark shadowed gap
+    depth_in = np.minimum(np.clip((-headvol - 0.035) / 0.06, 0, 1), np.clip((np.abs(P[:, 2] - zl) - 0.035) / 0.05, 0, 1))
     fl = flesh[None, :] * depth_in[:, None] + dark[None, :] * (1 - depth_in[:, None])
     sel = inner_mouth
     base[sel] = fl[sel] * (0.85 + 0.15 * cvar[sel])[:, None]

@@ -45,7 +45,8 @@ def scene_setup():
                 m.node_tree.nodes.active = n
     for o in bpy.data.objects:
         if o.type == "MESH":
-            keep = o.name.endswith("_LOD0") or o.name.startswith("ground_qa")
+            keep = (o.name.endswith("_LOD0") or o.name.startswith(("ground_qa", "ground_grid"))
+                    or o.name in ("maw_body", "maw_teeth", "maw_claws", "maw_eyes", "maw_tongue", "maw_mouth"))
             o.hide_render = not keep
     if "ground_qa" not in bpy.data.objects:
         bpy.ops.mesh.primitive_plane_add(size=60, location=(0, 0, 0))

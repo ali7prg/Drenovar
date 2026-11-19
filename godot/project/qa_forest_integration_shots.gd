@@ -219,15 +219,21 @@ func run() -> void:
 	# (captive_variants.json + variant masks), seated, then leaving through the door. Rigs are
 	# built with the game's own Rig/look code on open town ground (presentation check only).
 	if wanted("variety"):
-		# Open, revealed, flat ground: the south half of the arena floor in the completed state.
-		await fresh("completed")
+		# Open, revealed ground: site 1's glade and the trail home (the layer's own rigs hidden and
+		# frozen for this presentation check).
+		await fresh("site01_discovered")
+		await preload_actors()
+		forest.set_process(false)
+		for id in forest.actors.rigs:
+			if is_instance_valid(forest.actors.rigs[id]):
+				forest.actors.rigs[id].visible = false
 		var Rig = load("res://src/forest_rescue/game/actor_rig.gd")
 		var cases := [["lf_site_12", "root"], ["lf_site_08", "iron"], ["lf_site_07", "oak"]]
 		var base := Vector3(64.0, 0, -76.0)
 		var built: Array = []
 		for i in cases.size():
 			var site_id: String = cases[i][0]
-			var spots := [Vector2(66.0, -78.0), Vector2(75.5, -73.5), Vector2(84.5, -78.5)]
+			var spots := [Vector2(-21.0, -66.5), Vector2(-16.0, -61.0), Vector2(-11.5, -55.5)]
 			var spot: Vector3 = forest.ground(spots[i].x, spots[i].y)
 			var cage = Rig.new()
 			cage.setup("variety_cage_%d" % i, forest.actors.cage_file(cases[i][1]))
@@ -270,7 +276,7 @@ func run() -> void:
 			look(built[i][0].global_position + Vector3(0, 1.0, 0.6), 7.0)
 			await frames(3)
 			await shoot("variety_seated_%s" % built[i][2])
-		var center: Vector3 = forest.ground(75.0, -76.0)
+		var center: Vector3 = forest.ground(-16.0, -61.0)
 		look(center, 30.0)
 		await frames(4)
 		await shoot("variety_seated_z30")
@@ -306,6 +312,7 @@ func run() -> void:
 			entry[0].queue_free()
 			for person in entry[1]:
 				person.queue_free()
+		forest.set_process(true)
 
 	# -------------------------------------------------- artifact seated in the door socket (glow)
 	if wanted("socket"):

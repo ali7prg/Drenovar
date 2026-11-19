@@ -208,9 +208,9 @@
       },
       "ikOverreach_m": 0.0,
       "loopSeamMaxQuatDiff": 0.0,
-      "groundSpeed_mps": 1.423,
-      "strideLength_m": 2.277,
-      "clawTipMinZ_planted_m": -0.0172
+      "groundSpeed_mps": 2.25,
+      "strideLength_m": 3.6,
+      "clawTipMinZ_planted_m": 0.011
     },
     "lf_boss_turn_left": {
       "seconds": 1.3,
@@ -225,7 +225,7 @@
       "ikOverreach_m": 0.0,
       "rootYawDeg": 45.0,
       "yawCurve": "yaw(t) = rootYawDeg * smoothstep(t/1.3) about the root origin (apply to the node while the clip plays; feet are planted in that frame)",
-      "clawTipMinZ_planted_m": 0.0108
+      "clawTipMinZ_planted_m": 0.0109
     },
     "lf_boss_turn_right": {
       "seconds": 1.3,
@@ -240,7 +240,7 @@
       "ikOverreach_m": 0.0,
       "rootYawDeg": -45.0,
       "yawCurve": "yaw(t) = rootYawDeg * smoothstep(t/1.3) about the root origin (apply to the node while the clip plays; feet are planted in that frame)",
-      "clawTipMinZ_planted_m": 0.0108
+      "clawTipMinZ_planted_m": 0.0109
     },
     "lf_boss_awaken": {
       "seconds": 4.2,
@@ -263,10 +263,10 @@
       "markers": {},
       "footSlip_m": {
         "L": 0.0,
-        "R": 0.0102
+        "R": 0.0
       },
-      "ikOverreach_m": 0.0604,
-      "clawTipMinZ_planted_m": 0.0092
+      "ikOverreach_m": 0.1417,
+      "clawTipMinZ_planted_m": 0.013
     },
     "lf_boss_hit": {
       "seconds": 0.55,
@@ -292,7 +292,7 @@
         "R": 0.0
       },
       "ikOverreach_m": 0.0,
-      "clawTipMinZ_planted_m": 0.0018
+      "clawTipMinZ_planted_m": 0.0112
     },
     "lf_boss_death": {
       "seconds": 5.2,
@@ -325,7 +325,7 @@
         "R": 0.0
       },
       "ikOverreach_m": 0.0,
-      "clawTipMinZ_planted_m": 0.0078
+      "clawTipMinZ_planted_m": 0.0128
     },
     "lf_boss_tail_sweep": {
       "seconds": 5.45,
@@ -340,10 +340,10 @@
       },
       "footSlip_m": {
         "L": 0.0,
-        "R": 0.0
+        "R": 0.0037
       },
-      "ikOverreach_m": 0.0,
-      "clawTipMinZ_planted_m": -0.0086
+      "ikOverreach_m": 0.0205,
+      "clawTipMinZ_planted_m": 0.0021
     },
     "lf_boss_lane_charge": {
       "seconds": 5.9,
@@ -384,7 +384,7 @@
       "clawTipMinZ_planted_m": 0.0118
     }
   },
-  "glbBytes": 14282208,
+  "glbBytes": 14297316,
   "textureProjection": {
     "coverageByView": {
       "left": 0.2754116039377006,
@@ -411,7 +411,7 @@
     "unit": "metre",
     "note": "Blender -Y forward exported to glTF +Z; feet on y=0, root at the origin"
   },
-  "notes": "Clips in place (root bone fixed). Turn clips: apply rootYawDeg with the documented curve to the node. lane_charge lunges the body ~2.6 m forward inside the clip and steps back during recovery (root stays on the mark). Markers are presentation-only (manifest). Keys sampled at 60 fps so 4.25/5.45/0.55 s are exact.",
+  "notes": "Clips in place (root bone fixed). Turn clips: apply rootYawDeg with the documented curve to the node. lane_charge lunges the body ~2.6 m forward inside the clip and steps back during recovery (root stays on the mark). Markers are presentation-only (manifest). Keys sampled at 60 fps so 4.25/5.45/0.55 s are exact. Claw tips >= 0 m in rest and on every planted frame (clips[*].clawTipMinZ_planted_m).",
   "recommendedScale": 1.52,
   "recommendedScaleInfo": {
     "source": "art/08_final_boss_arena.png, measured in image pixels (no perspective correction: the boss stands farther from the camera than the squad, so these ratios are lower bounds)",
@@ -432,6 +432,13 @@
     "recommendedScale_captain_only": 1.52,
     "arena_relative_ratio": 1.28,
     "note": "recommendedScale = art08 ratio (mean of the 4 squad figures) / 1.53. Relative to the arena floor the painted boss is only ~1.28x the model (floor ~2.7 boss lengths vs 3.5 in game); the boss_telegraphs shapes (jaw 9.5 m, tail 11.5 m) are authored for scale 1.0. The model itself stays at the key-stats scale (rig scale 1.0 in actor_director).",
-    "chosen_reason": "see meta recommendedScaleInfo"
+    "chosen": 1.52,
+    "candidates": {
+      "arena_relative": 1.28,
+      "captain": 1.52,
+      "squad_mean": 2.06
+    },
+    "choice_reason": "Godot city camera (zoom 40) with the boss at 1.0/1.28/1.52/2.06 next to art/08 (qa v2_iter13_scale_candidates.png): at 1.52 the boss spans ~0.36 of the arena floor width as in art/08 (1.28 -> 0.31, 2.06 -> 0.49) and its hip line is ~2.3x a squad member (art/08 captain ratio 2.32).",
+    "telegraphNote": "boss_telegraphs.gd shapes (jaw 9.5 m, tail 11.5 m, rings 6/11 m) are authored for scale 1.0; scale them with the boss if adopted (actor_director rig(..., scale))."
   }
 }

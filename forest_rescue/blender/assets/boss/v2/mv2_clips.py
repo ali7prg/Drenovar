@@ -761,7 +761,10 @@ def load_keypose_fit(path):
     for panel, r in data.items():
         if panel in WINDOWS:
             a, b = WINDOWS[panel]
-            OVERRIDES.setdefault(r["clip"], []).append((float(r["time"]), a, b, r["params"]))
+            # trust the fitted pose by its silhouette score: weak fits (IoU < ~0.6) leave the art-directed curve
+            trust = float(np.clip((float(r.get("iou", 0.0)) - 0.58) / 0.14, 0.0, 1.0))
+            if trust > 0:
+                OVERRIDES.setdefault(r["clip"], []).append((float(r["time"]), a, b, r["params"], trust))
     return True
 
 
@@ -782,8 +785,8 @@ def with_overrides(cid, fn):
 
     def g(t):
         ch = fn(t)
-        for (tk, a, b, prm) in OVERRIDES[cid]:
-            w = _window(t, a, tk, b)
+        for (tk, a, b, prm, trust) in OVERRIDES[cid]:
+            w = _window(t, a, tk, b) * trust
             if w <= 0:
                 continue
             if tk not in base_cache:

@@ -284,8 +284,8 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
     pid = OB[tri] * 1000003 + PI[tri]
     h1 = ((pid * 2654435761) % 1000) / 1000.0
     h2 = ((pid * 40503 + 17) % 997) / 997.0
-    jit = 1.0 + getattr(L, "POLY_JITTER", 0.08) * (h1 - 0.5) * 2
-    fill = np.clip(fill * jit[:, None] * np.stack([1 + 0.03 * (h2 - 0.5), np.ones_like(h2), 1 - 0.03 * (h2 - 0.5)], 1), 0, 1)
+    jit = 1.0 + min(getattr(L, "POLY_JITTER", 0.03), 0.03) * (h1 - 0.5) * 2
+    fill = np.clip(fill * jit[:, None] * np.stack([1 + 0.015 * (h2 - 0.5), np.ones_like(h2), 1 - 0.015 * (h2 - 0.5)], 1), 0, 1)
     mort = np.array([str(t).endswith("_mortar") for t in tags])
     if mort.any():
         fill[mort] = np.asarray(getattr(L, "MORTAR_RGB", (0.24, 0.22, 0.19)))

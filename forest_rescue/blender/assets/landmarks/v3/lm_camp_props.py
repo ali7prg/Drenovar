@@ -39,8 +39,8 @@ SWATCHES = {
     "wood_h": dict(box=(1504, 740, 1522, 830), metres=0.8, rotate=True),
     "cloth": dict(box=(1280, 718, 1386, 828), metres=1.4),
     "stone": dict(box=(1176, 820, 1206, 838), metres=0.6),
-    "ground": dict(box=(900, 835, 990, 845), metres=2.0),
-    "gravel": dict(box=(940, 780, 990, 800), metres=1.6),
+    "ground": dict(plane=dict(origin=(-1.2, -3.2, 0.0), ex=(1, 0, 0), ey=(0, 1, 0), size_m=1.8), metres=1.8),
+    "gravel": dict(plane=dict(origin=(-1.2, -3.2, 0.0), ex=(1, 0, 0), ey=(0, 1, 0), size_m=1.8), metres=1.8),
     "grass": dict(box=(760, 805, 800, 830), metres=1.2),
     "rope": dict(box=(1278, 720, 1300, 740), metres=0.3),
     "metal": dict(box=(1430, 740, 1470, 800), metres=0.4),
@@ -62,7 +62,7 @@ EDGE_WIDTH_M = 0.025
 EDGE_STRENGTH = {"stone": 0.45, "wood": 0.35}
 TAG_RGB = {"glass": (1.0, 0.82, 0.45)}
 CLASS_LAB = {"cloth": (np.array([42.0, 22.0, 26.0]), np.array([6.0, 4.0, 5.0]))}
-POLY_JITTER = 0.06
+POLY_JITTER = 0.03
 WIND = {"dir": (0.3, 1.0, 0.25), "amp": 0.10, "ztop": 2.7, "drop": 1.4}
 CARD_KINDS = {"grass_a": "grass", "weed_a": "weed", "fern_a": "fern", "grass_b": "grass"}
 LAYOUT = {}
@@ -150,38 +150,64 @@ def build(lod, cam=None, crop=None, mask=None, cards=None):
                       mat="rope", tag="lashing")
             if lod == 0:
                 g.cyl(p + np.array([0, 0, 0.35]), p + np.array([0, 0, 0.45]), 0.1, n=8, mat="rope", tag="lashing")
-    # tarp: bilinear sagging sheet between the pole tops + a hanging flap on the left (BL-FL) side
-    corners = {k: pos[k] + np.array([0, 0, hs[k]]) for k in pos}
+    # tarp: anchors back-projected from the painted corners with the solved camera; one canopy sagging between
+    # the front-left pole top, the lantern-pole tie (right), the back-right pole top and a high back-left pole top;
+    # the left side hangs down as a flap over the lying barrel / bag to the left pole and the ground.
+    def bp(px, py, z):
+        u, v = S(px, py)
+        return cam.on_plane_z(np.array([u + 0.5]), np.array([v + 0.5]), z)[0]
+    T_FL = pos["FL"] + np.array([0, 0, hs["FL"] + 0.05])
+    T_FR = pos["FR"] + np.array([0, 0, hs["FR"] - 0.12])
+    T_BR = pos["BR"] + np.array([0, 0, hs["BR"] + 0.04])
+    u_, v_ = S(868, 634)
+    T_BL = cam.on_plane(np.array([u_ + 0.5]), np.array([v_ + 0.5]), np.array([0.0, b / 2, 0.0]), np.array([0, 1.0, 0]))[0]
+    LAYOUT["backleft"] = T_BL.tolist()
+    # extra poles under the canopy (back-left, back-middle)
+    g.cyl(np.array([T_BL[0], T_BL[1], 0.0]), T_BL + np.array([0, 0, 0.12]), 0.08, 0.065, n=8 if lod == 0 else 5, mat="wood",
+          tag="pole", jitter=0.08)
+    bm = bp(995, 748, 0.0)
+    g.cyl(bm, bm + np.array([0, 0, 2.05]), 0.075, 0.065, n=8 if lod == 0 else 5, mat="wood", tag="pole")
+    # front-edge sag: painted lowest point of the front edge on the FL-FR vertical plane
+    nrm = np.cross(T_FR - T_FL, [0, 0, 1.0])
+    nrm /= np.linalg.norm(nrm)
+    u_, v_ = S(1000, 688)
+    sagP = cam.on_plane(np.array([u_ + 0.5]), np.array([v_ + 0.5]), T_FL, nrm)[0]
+    front_sag = float(np.clip((T_FL[2] + T_FR[2]) / 2 - sagP[2], 0.2, 1.4))
     nu, nv = (14, 10) if lod == 0 else ((7, 5) if lod == 1 else (3, 3))
     P = np.zeros((nu, nv, 3))
-    rng = np.random.default_rng(5)
     for i in range(nu):
         for j in range(nv):
             u, v = i / (nu - 1), j / (nv - 1)
-            q = (1 - u) * (1 - v) * corners["FL"] + u * (1 - v) * corners["FR"] + u * v * corners["BR"] + (1 - u) * v * corners["BL"]
-            sag = 0.45 * math.sin(math.pi * u) * math.sin(math.pi * v) + 0.75 * math.sin(math.pi * u) * (1 - v) ** 2 \
-                + 0.25 * math.sin(math.pi * v) * (1 - u)
-            fold = 0.05 * math.sin(u * 9.0 + v * 2.0) * math.sin(math.pi * v)
-            q = q + np.array([0, 0, -sag + fold])
-            P[i, j] = q
-    # overhang beyond the poles (canvas edges flop over)
+            q = (1 - u) * (1 - v) * T_FL + u * (1 - v) * T_FR + u * v * T_BR + (1 - u) * v * T_BL
+            sag = front_sag * math.sin(math.pi * u) * (1 - v) ** 1.5 + 0.35 * math.sin(math.pi * u) * math.sin(math.pi * v) \
+                + 0.15 * math.sin(math.pi * v) * (1 - u)
+            fold = 0.04 * math.sin(u * 11.0 + v * 3.0) * math.sin(math.pi * u)
+            P[i, j] = q + np.array([0, 0, -sag + fold])
     cloth.grid_surface(P, "cloth", "tarp")
+    # left flap: from the T_FL..T_BL edge down over the bag to the left pole top and the ground
+    L_top = pos["BL"] + np.array([0, 0, hs["BL"]])
+    G_back = bp(796, 748, 0.25)
+    G_front = bp(884, 730, 0.6)
     nf = 6 if lod == 0 else 3
-    F = np.zeros((nf, nv, 3))
+    Fp = np.zeros((nf, nv, 3))
     for i in range(nf):
         t = i / (nf - 1)
         for j in range(nv):
+            v = j / (nv - 1)
             top = P[0, j]
-            F[i, j] = top + np.array([-0.08 * t, -0.05 * t, -1.5 * t * (0.75 + 0.25 * (j / (nv - 1)))]) + \
-                np.array([0.03 * math.sin(j * 1.7) * t, 0, 0])
-    cloth.grid_surface(F, "cloth", "flap")
-    # guy ropes from the outer pole tops to pegs
+            low = (1 - v) * G_front + v * G_back
+            mid = (1 - v) * (0.5 * (top + G_front)) + v * L_top
+            q = (1 - t) ** 2 * top + 2 * t * (1 - t) * mid + t * t * low
+            Fp[i, j] = q + np.array([0.03 * math.sin(j * 1.9) * t, 0, 0])
+    cloth.grid_surface(Fp, "cloth", "flap")
+    # rope lashings at the tarp corners + guy ropes to pegs
     if lod < 2:
-        for k, d in (("FL", (-0.5, -0.6)), ("BL", (-0.7, 0.4)), ("BR", (0.5, 0.6))):
-            top = corners[k]
-            peg = pos[k] + np.array([d[0] * 1.4, d[1] * 1.0, 0.0])
-            g.tube([top, (top + peg) / 2 + np.array([0, 0, -0.05]), peg], 0.015, n=4, mat="rope", tag="guy")
-            g.cyl(peg, peg + np.array([0, 0, 0.18]), 0.03, n=4, mat="wood", tag="peg")
+        for T in (T_FL, T_FR, T_BR, T_BL, L_top):
+            g.cyl(T + np.array([0, 0, -0.12]), T + np.array([0, 0, 0.0]), 0.1, n=8, mat="rope", tag="lashing")
+        for T, d in ((T_FL, (-0.6, -1.2)), (L_top, (-1.4, -0.2)), (T_BR, (0.6, 1.2)), (T_FR, (1.0, -0.6))):
+            peg = np.array([T[0] + d[0], T[1] + d[1], 0.0])
+            g.tube([T, (T + peg) / 2 + np.array([0, 0, -0.04]), peg], 0.014, n=4, mat="rope", tag="guy")
+            g.cyl(peg, peg + np.array([0, 0, 0.16]), 0.03, n=4, mat="wood", tag="peg")
     props(g, lod, cam, pos, hs)
     base = Geo(seed=9 + lod)
     if cam is not None and mask is not None:
@@ -217,6 +243,16 @@ def props(g, lod, cam, pos, hs):
         return P
 
     b1 = bench(865, 812, 112, 0.18, "bench")
+    # barrel lying on its side under the flap, log seat at the left
+    Pl = gp(cam, 842, 762)
+    rl = mpx(cam, Pl, 26) * 0.5
+    ax = np.array([math.cos(0.3), math.sin(0.3), 0.0])
+    g.cyl(Pl + np.array([0, 0, rl]) - ax * rl * 1.2, Pl + np.array([0, 0, rl]) + ax * rl * 1.2, rl, n=10 if lod == 0 else 6,
+          mat="wood", tag="barrel")
+    if lod < 2:
+        Pg = gp(cam, 790, 800)
+        g.cyl(Pg + np.array([-0.45, 0.1, 0.18]), Pg + np.array([0.45, -0.1, 0.2]), 0.18, n=8 if lod == 0 else 5, mat="wood",
+              tag="log", jitter=0.06)
     bench(917, 755, 80, 0.12, "bench")
     if lod == 0:   # bedroll / bag on the front bench
         g.cyl(b1 + np.array([-0.35, 0, 0.62]), b1 + np.array([0.25, 0.02, 0.62]), 0.17, n=10, mat="cloth", tag="bedroll")

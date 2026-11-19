@@ -198,9 +198,14 @@ def project_painting(P, N, cam, img, zb, W, H, accept=None, power=1.0, depth_eps
     # 1/|n.v| <= 2) and a painting pixel is not magnified more than max_mag x the asset's typical footprint
     dist = np.linalg.norm(P - C, axis=1)
     foot = dist / cam.f / np.maximum(facing, 1e-3)
-    good_f = vis & (facing >= min_facing)
-    ref = np.median(foot[good_f]) if good_f.any() else 1.0
-    w = np.where(good_f & (foot <= max_mag * ref), facing, 0.0)
+    # near-horizontal faces (seen from above by the game camera): strict rule; steep faces: the painting is the
+    # best texture we have -> |n.v| >= 0.3 and magnification <= 3x
+    horiz = N[:, 2] > 0.7
+    mf = np.where(horiz, min_facing, min(min_facing, 0.3))
+    mm = np.where(horiz, max_mag, max(max_mag, 3.0) if max_mag < 1e8 else max_mag)
+    good_f = vis & (facing >= mf)
+    ref = np.median((dist / cam.f)[good_f]) if good_f.any() else 1.0
+    w = np.where(good_f & (foot <= mm * ref), facing, 0.0)
     if DEBUG:
         print(f"   project: n={len(P)} inframe={ok.mean():.3f} vis={vis.mean():.3f} facing>0.4={(facing > 0.4).mean():.3f} w>0.17={(w > 0.17).mean():.3f}", flush=True)
     col = bilinear(img, u, v)[:, :3]

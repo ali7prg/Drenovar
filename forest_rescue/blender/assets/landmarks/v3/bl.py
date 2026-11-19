@@ -72,7 +72,10 @@ def atlas_uv(objs, fixed_masks, margin=0.004, angle=60.0):
                              correct_aspect=True, scale_to_bounds=False)
     bpy.ops.uv.select_all(action="SELECT")
     bpy.ops.uv.average_islands_scale()
-    bpy.ops.uv.pack_islands(rotate=True, margin=margin)
+    try:
+        bpy.ops.uv.pack_islands(rotate=True, margin_method="FRACTION", margin=0.0015, shape_method="AABB")
+    except TypeError:
+        bpy.ops.uv.pack_islands(rotate=True, margin=margin)
     bpy.ops.object.mode_set(mode="OBJECT")
 
 

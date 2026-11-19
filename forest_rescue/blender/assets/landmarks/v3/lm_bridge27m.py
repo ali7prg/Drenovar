@@ -55,7 +55,7 @@ SWATCHES = {
     "wood": dict(box=(632, 176, 648, 250), metres=0.9),
     "wood_h": dict(box=(632, 176, 648, 250), metres=0.9, rotate=True),
     "stone": dict(box=(716, 166, 808, 252), metres=1.35),
-    "stone_face": dict(box=(740, 214, 772, 244), metres=0.55),
+    "stone_face": dict(box=(722, 214, 790, 248), metres=0.9),
     "ground": dict(box=(0, 140, 40, 180), metres=2.5),
     "water": dict(box=(400, 180, 470, 235), metres=5.0),
     "grass": dict(box=(55, 195, 100, 225), metres=1.6),
@@ -64,7 +64,12 @@ SWATCHES = {
     "metal": dict(box=(1430, 740, 1470, 800), metres=0.4),
 }
 CLASS_SWATCH = {"ground": {"water": "water", "veg": "grass", "stone": "gravel", "wood": "gravel", "z<-1.0": "water"}}
-MORTAR_RGB = (0.30, 0.27, 0.22)
+MORTAR_RGB = (0.27, 0.24, 0.20)
+EDGE_WIDTH_M = 0.03
+EDGE_STRENGTH = {"stone": 0.6, "wood": 0.3}
+TAG_RGB = {"deck": (0.58, 0.44, 0.31), "ramp": (0.58, 0.44, 0.31), "tower": (0.60, 0.56, 0.49),
+           "cornice": (0.56, 0.52, 0.45), "cap": (0.50, 0.46, 0.40), "gatepier": (0.60, 0.56, 0.49),
+           "post": (0.36, 0.25, 0.16), "rail": (0.45, 0.32, 0.21)}
 POLY_JITTER = 0.09
 WIND = {"dir": (0, 1, 0), "amp": 0.22, "drop": 2.2}
 SWATCH_FALLBACK = {"water": "ground", "rope": "wood", "roof": "stone", "glow": "metal"}

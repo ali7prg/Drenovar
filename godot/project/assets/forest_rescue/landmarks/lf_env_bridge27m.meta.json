@@ -283,8 +283,8 @@
   "qa": {
     "main_view": {
       "iou": 0.8837,
-      "colour_err": 0.1666,
-      "ssim": 0.2484,
+      "colour_err": 0.1549,
+      "ssim": 0.263,
       "ref_px": 121528,
       "render_px": 126670,
       "iou_structure_only": 0.4167381579753661
@@ -297,25 +297,25 @@
     "insets": {
       "side": {
         "iou": 0.3206,
-        "colour_err": 0.1737,
-        "ssim": 0.3845,
+        "colour_err": 0.1662,
+        "ssim": 0.3882,
         "ref_px": 69184,
         "render_px": 43127
       },
       "top": {
         "iou": 0.7786,
-        "colour_err": 0.1343,
-        "ssim": 0.197,
+        "colour_err": 0.0803,
+        "ssim": 0.2967,
         "ref_px": 121504,
         "render_px": 114349
       }
     },
     "texture": {
-      "texels": 682147,
-      "projected_frac": 0.026171778223755292,
-      "seconds": 7.1
+      "texels": 2256878,
+      "projected_frac": 0.027248260650332007,
+      "seconds": 17.7
     },
-    "sheets": "forest_rescue/qa/compare/lf_env_bridge27m/v3_iter06_*"
+    "sheets": "forest_rescue/qa/compare/lf_env_bridge27m/v3_iter08_*"
   },
   "clips": {
     "lf_banner_wind": {

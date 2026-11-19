@@ -301,7 +301,31 @@ def texture_atlas(L, asset, it, objs, face_tags, cam, crop, ref_mask, W, H, size
     alb = proj_alb * a[:, None] + fill * (1 - a[:, None])
     out = np.zeros(valid.shape + (3,))
     out[yy, xx] = alb
+    # painted edge definition: every UV island is one block / plank / beam face -> darken texels near the
+    # island border (mortar lines, plank gaps, bevel shadow) so blocks and planks read from the game camera
+    edge_w = getattr(L, "EDGE_WIDTH_M", 0.035)
+    area = 0.0
+    texel_m = None
+    if len(P) > 1000:
+        # texel size in metres from neighbouring texels
+        dpos = np.linalg.norm(Tx.pos[yy[:-1], xx[:-1]] - Tx.pos[yy[:-1], np.minimum(xx[:-1] + 1, valid.shape[1] - 1)], axis=1)
+        dpos = dpos[(dpos > 0) & (dpos < 0.2)]
+        texel_m = float(np.median(dpos)) if len(dpos) else 0.02
+    dist = ndi.distance_transform_edt(valid) * (texel_m or 0.02)
+    edge_k = np.zeros(valid.shape)
+    es = getattr(L, "EDGE_STRENGTH", {"stone": 0.55, "wood": 0.45})
+    for mc, st in es.items():
+        km = np.zeros(valid.shape, bool)
+        km[yy[mcls == mc], xx[mcls == mc]] = True
+        edge_k[km] = st
+    nomask = np.zeros(valid.shape, bool)
+    no_edge = np.array([str(t).endswith("_mortar") or str(t).startswith("base") for t in tags])
+    nomask[yy[no_edge], xx[no_edge]] = True
+    dark = 1.0 - edge_k * np.exp(-dist / edge_w)
+    dark[nomask] = 1.0
+    out = out * dark[..., None]
     out = tex.dilate(out, valid, 8)
+    print(f"[{asset}] texel {texel_m * 100 if texel_m else 0:.2f} cm", flush=True)
     # normal map: luminance high-pass + mortar/grain emphasis per class
     strength = np.zeros(valid.shape)
     st = getattr(L, "NORMAL_STRENGTH", {})

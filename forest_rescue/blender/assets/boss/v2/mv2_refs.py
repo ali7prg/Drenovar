@@ -62,7 +62,7 @@ SIDE_SCAR_POLY = [(117, 156), (123, 152), (134, 170), (149, 197), (143, 201), (1
 FRONT_BOX = (912, 100, 1162, 478)
 FRONT_GROUND = 466.0
 FRONT_TOP = 114.5            # head top row -> 3.60 m
-FRONT_AXIS_COL = 1032.0      # symmetry axis column (snout ridge / between the feet)
+FRONT_AXIS_COL = 1029.5      # symmetry axis column (mean of the left/right body extents)
 FRONT_PPM = (FRONT_GROUND - FRONT_TOP) / 3.60
 # pale tail "triangle" (sheet error) polygon
 FRONT_TRIANGLE_POLY = [(1004, 333), (1060, 333), (1046, 360), (1036, 400), (1032, 410), (1027, 400),

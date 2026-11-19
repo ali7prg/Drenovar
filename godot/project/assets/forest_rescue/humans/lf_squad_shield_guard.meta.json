@@ -3,7 +3,7 @@
   "generation": "v2 image-based (painted turnaround silhouettes + template depth, painting projection)",
   "rig": "human_shared",
   "tris": {
-    "LOD0": 13824,
+    "LOD0": 13624,
     "LOD1": 6790,
     "LOD2": 2423
   },
@@ -93,13 +93,13 @@
   },
   "bounds_m": {
     "min": [
-      -0.488,
-      -0.38,
+      -0.498,
+      -0.382,
       0.003
     ],
     "max": [
-      0.633,
-      0.34,
+      0.644,
+      0.338,
       2.3
     ]
   },
@@ -229,14 +229,14 @@
   },
   "sockets": {
     "hand_r": [
-      -0.462,
-      0.92,
-      0.025
+      -0.473,
+      0.917,
+      0.027
     ],
     "hand_l": [
-      0.462,
-      0.92,
-      0.025
+      0.473,
+      0.917,
+      0.027
     ],
     "head_top": [
       0.0,

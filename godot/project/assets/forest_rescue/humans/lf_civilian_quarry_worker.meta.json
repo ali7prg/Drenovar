@@ -93,8 +93,8 @@
   "bounds_m": {
     "min": [
       -0.333,
-      -0.188,
-      0.001
+      -0.191,
+      0.002
     ],
     "max": [
       0.333,
@@ -124,7 +124,7 @@
         "Left": 0.08,
         "Right": 0.09
       },
-      "ikOverreach_m": 0.0858,
+      "ikOverreach_m": 0.0868,
       "loopSeamMaxQuatDiff": 0.0
     },
     "lf_civilian_cage_wait": {
@@ -156,8 +156,8 @@
       "rootTranslation": "in_place",
       "markers": {},
       "footSlip_mm": {
-        "Left": 32.14,
-        "Right": 32.06
+        "Left": 0.45,
+        "Right": 0.45
       },
       "ikOverreach_m": 0.1189
     },
@@ -250,14 +250,14 @@
   },
   "sockets": {
     "hand_r": [
-      -0.338,
-      0.875,
-      0.021
+      -0.345,
+      0.872,
+      0.023
     ],
     "hand_l": [
-      0.338,
-      0.875,
-      0.021
+      0.345,
+      0.872,
+      0.023
     ],
     "head_top": [
       0.0,

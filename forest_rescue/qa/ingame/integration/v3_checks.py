@@ -85,15 +85,21 @@ def main():
             continue
         a = np.asarray(Image.open(p).convert("RGB"))
         X, Z = ground_points(target, 120.0, (a.shape[1], a.shape[0]))
-        outside = (np.abs(X) > 112) | (np.abs(Z) > 112)
-        fog = fog_like(a)
-        bare = outside & ~fog
+        outside = (np.abs(X) > 116) | (np.abs(Z) > 116)        # beyond ±112 + the 2–3 m soft fog band
+        # bare ground = the flat plane (saturated yellow-green / khaki) or open water (saturated blue)
+        f = a.astype(float) / 255.0
+        mx, mn = f.max(-1), f.min(-1)
+        sat = np.where(mx > 1e-6, (mx - mn) / np.maximum(mx, 1e-6), 0)
+        hue = np.degrees(np.arctan2(np.sqrt(3) * (f[..., 1] - f[..., 2]), 2 * f[..., 0] - f[..., 1] - f[..., 2])) % 360
+        plane = (hue > 35) & (hue < 110) & (sat > 0.28) & (mx > 0.35)
+        water = (hue > 180) & (hue < 230) & (sat > 0.35) & (mx > 0.35)
+        bare = outside & (plane | water)
         report["fog_edge"][name] = {"outside_px": int(outside.sum()), "outside_not_fog_px": int(bare.sum()),
                                     "outside_not_fog_pct": float(bare.sum()) * 100.0 / max(1, int(outside.sum()))}
         vis = a.copy()
         vis[bare] = [255, 0, 255]
         Image.fromarray(vis).save(os.path.join(shots, "v3edge_%s_check.png" % name))
-        print("edge %s: outside +-112 px %d, not fog %d (%.2f%%)" % (name, outside.sum(), bare.sum(),
+        print("edge %s: outside +-116 px %d, bare plane / water %d (%.2f%%)" % (name, outside.sum(), bare.sum(),
                                                                      report["fog_edge"][name]["outside_not_fog_pct"]))
     json.dump(report, open(os.path.join(shots, "v3_checks.json"), "w"), indent=1)
 

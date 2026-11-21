@@ -151,18 +151,22 @@ def main():
         g = stats(resample(Image.open(gpath).convert("RGB"), C.H / float(zone["zoom"])))
         d = layout_crowns(zone)
         big = [x for x in d if x >= 8.0]
+        import grade_metrics as GM
+        ga = GM.metrics(Image.open(gpath).convert("RGB"))
+        aa = GM.metrics(art.crop((x0, y0, x1, y1)))
         gc, gm = geometric(zone)
         ae = ART_ESTIMATE.get(zone["name"], (0.6, 0.15))
         row = {"art": a, "game": g, "art_crown_m": ART_CROWN.get(zone["name"], 10.0),
                "art_cover_est": ae[0], "art_meadow_est": ae[1], "game_cover_geo": gc, "game_meadow_geo": gm,
+               "veg_sat_ratio": ga["veg_sat"] / max(aa["veg_sat"], 1e-6), "contrast_ratio": ga["contrast"] / max(aa["contrast"], 1e-6),
                "game_crown_m_median": float(np.median(d)) if d else 0.0,
                "game_crown_m_median_visible": float(np.median(big)) if big else 0.0, "game_trees": len(d)}
         rows[zone["name"]] = row
         print("%-13s cover art %3.0f%% game %3.0f%% | meadow art %3.0f%% game %3.0f%% | crown art %4.1f m game %4.1f m "
-              "(canopy trees %4.1f, n=%d) | meadow HSV art (%3.0f %.2f %.2f) game (%3.0f %.2f %.2f)" % (
+              "(canopy trees %4.1f, n=%d) | meadow HSV art (%3.0f %.2f %.2f) game (%3.0f %.2f %.2f) | veg sat x%.2f contrast x%.2f" % (
                   zone["name"], ae[0] * 100, gc * 100, ae[1] * 100, gm * 100,
                   row["art_crown_m"], row["game_crown_m_median"], row["game_crown_m_median_visible"], len(d),
-                  *a["meadow_hsv"], *g["meadow_hsv"]))
+                  *a["meadow_hsv"], *g["meadow_hsv"], row["veg_sat_ratio"], row["contrast_ratio"]))
     json.dump(rows, open(os.path.join(shots, "v3_forest_metrics.json"), "w"), indent=1)
 
 

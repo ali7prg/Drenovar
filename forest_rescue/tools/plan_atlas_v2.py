@@ -122,14 +122,13 @@ def ray_to_square(angle, half, origin=(0.0, 0.0)):
     return o + d * lo
 
 
-def main(out_dir):
-    os.makedirs(out_dir, exist_ok=True)
+def art_control_points():
+    """(src art px, dst game screen (u, Y)) control pairs of the art/01 → game warp (see main)."""
     inv = json.load(open(INV))
     atlas = json.load(open(ATLAS))
     river = River(atlas)
     town = np.array(inv["town"]["centre"], float)
     rx, ry = inv["town"]["wallRadii"]
-
     src, dst = [], []
     # 1. town centre and wall ↔ base square ±56 + 4 m margin, same screen angle
     src.append(town)
@@ -180,8 +179,24 @@ def main(out_dir):
         ang = math.atan2(-d[1] / (ry / rx), d[0])
         src.append(p)
         dst.append(ray_to_square(ang, EXTENT - GLADE_R - 3.0))
-    src = np.array(src)
-    dst = np.array(dst)
+    return np.array(src), np.array(dst)
+
+
+def art_warps():
+    """(art px → game screen, game screen → art px) thin-plate splines."""
+    src, dst = art_control_points()
+    return (RBFInterpolator(src, dst, kernel="thin_plate_spline", smoothing=2.0),
+            RBFInterpolator(dst, src, kernel="thin_plate_spline", smoothing=2.0))
+
+
+def main(out_dir):
+    os.makedirs(out_dir, exist_ok=True)
+    inv = json.load(open(INV))
+    atlas = json.load(open(ATLAS))
+    river = River(atlas)
+    town = np.array(inv["town"]["centre"], float)
+    rx, ry = inv["town"]["wallRadii"]
+    src, dst = art_control_points()
     tps = RBFInterpolator(src, dst, kernel="thin_plate_spline", smoothing=2.0)
 
     def warp(p):

@@ -36,7 +36,7 @@ SITES = {"lf_site_02": ["mountain", "river", "leaf"], "lf_site_06": ["coal", "se
 DOOR_DROP = 0.62
 
 # sizes from the closed drawing's image ratios (wall 156 px : clamps 98 : rim 93 : top disc 64 at the dial row)
-PARAMS = dict(Rw=1.0, Rb=1.08, hb=0.12, zt=0.56, Rr=0.64, rc=0.67, dz=0.07,
+PARAMS = dict(Rw=1.1, Rt=0.9, Rb=1.14, hb=0.12, ox=0.0, oy=0.0, zt=0.56, Rr=0.64, rc=0.67, dz=0.07,
               R3=0.57, R2=0.53, R1=0.43, y2=0.12, y1=0.24,
               an=-48.0, ad=-86.0, dh=19.0, dt=0.36,
               sx=0.08, sw=1.05, sd=0.36, sh=0.16)
@@ -82,7 +82,7 @@ def key_rest(p):
 def key_in_niche(p):
     """Key centre standing upright in the niche (crystal on top, just proud of the wall)."""
     a = math.radians(p["an"])
-    r = p["Rw"] + 0.07
+    r = (p["Rw"] + p["Rt"]) * 0.5 + 0.07
     return np.array([r * math.cos(a), r * math.sin(a), p["zt"] * 0.5 + 0.08])
 
 
@@ -103,8 +103,8 @@ def points(p):
         "step_br": (p["sx"] + p["sw"] / 2, step_y(p) - p["sd"] / 2, 0.0),
         "niche_top": polar(p["Rw"] + 0.03, p["an"], p["zt"] + 0.08),
         "niche_bot": polar(p["Rw"] + 0.03, p["an"], 0.06),
-        "door_tl": polar(p["Rw"], p["ad"] - p["dh"], p["hb"] + p["dt"]),
-        "door_tr": polar(p["Rw"], p["ad"] + p["dh"], p["hb"] + p["dt"]),
+        "door_tl": polar(p["Rw"] + (p["Rt"] - p["Rw"]) * min(p["dt"], p["zt"] - p["hb"]) / (p["zt"] - p["hb"]), p["ad"] - p["dh"], p["hb"] + p["dt"]),
+        "door_tr": polar(p["Rw"] + (p["Rt"] - p["Rw"]) * min(p["dt"], p["zt"] - p["hb"]) / (p["zt"] - p["hb"]), p["ad"] + p["dh"], p["hb"] + p["dt"]),
         "door_bl": polar(p["Rw"], p["ad"] - p["dh"], p["hb"]),
         "door_br": polar(p["Rw"], p["ad"] + p["dh"], p["hb"]),
     }
@@ -121,7 +121,7 @@ def views():
          "clamp_b": (944, 68), "clamp_f": (944, 240), "clamp_l": (847, 146), "clamp_r": (1043, 146),
          "step_tl": (874, 344), "step_tr": (1033, 341), "step_bl": (876, 387), "step_br": (1031, 384)},
         pose=SOLVED_POSE_02, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None, solve_opts={"fov_prior": 20.0},
-        title="RUNE LOCK closed (site 02 glyphs set, key on the step)")
+        clip_below=391, title="RUNE LOCK closed (site 02 glyphs set, key on the step)")
     open_pose = dict(SOLVED_POSE_02)
     open_pose["door_pivot"] = {"loc": (0, 0, -DOOR_DROP)}
     open_pose["key_lever"] = "key_in_niche"
@@ -133,7 +133,7 @@ def views():
          "step_tl": (1262, 345), "step_tr": (1410, 343), "step_bl": (1265, 380), "step_br": (1408, 377),
          "door_tl": (1290, 272), "door_tr": (1390, 272), "door_bl": (1292, 345), "door_br": (1388, 345)},
         pose=open_pose, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None, solve_opts={"fov_prior": 20.0},
-        title="RUNE LOCK open (door down, key in the niche)", tex_weight=0.9)
+        clip_below=386, title="RUNE LOCK open (door down, key in the niche)", tex_weight=0.9)
     return [closed, opened]
 
 
@@ -142,14 +142,15 @@ def _resolve_pose(v, p):
         v.pose["key_lever"] = {"loc": tuple(key_in_niche(p) - key_rest(p)), "rot": (0.0, -math.pi / 2, 0.0)}
 
 
-def arc_wall(g, r0, r1, z0, z1, a0, a1, n, mat, tag, top=True, ends=True):
-    """Thick cylindrical wall segment between angles a0..a1 (radians, CCW), inner r0, outer r1."""
+def arc_wall(g, r0, r1, z0, z1, a0, a1, n, mat, tag, top=True, ends=True, r1_top=None):
+    """Thick wall segment between angles a0..a1 (radians, CCW), inner r0, outer r1 (r1_top at z1: tapered)."""
     a = np.linspace(a0, a1, n + 1)
     V = []
-    for rr in (r1, r0):
+    for k, rr in enumerate((r1, r0)):
         for z in (z0, z1):
+            r = rr if (k == 1 or r1_top is None or z == z0) else r1_top
             for ang in a:
-                V.append((rr * math.cos(ang), rr * math.sin(ang), z))
+                V.append((r * math.cos(ang), r * math.sin(ang), z))
     V = np.array(V)
     m = n + 1
     o0, o1, i0, i1 = 0, m, 2 * m, 3 * m
@@ -171,16 +172,28 @@ def build(A, p, lod):
     n = (64, 40, 24)[lod]
     Rw, Rb, hb, zt = p["Rw"], p["Rb"], p["hb"], p["zt"]
     ad, dh = math.radians(p["ad"]), math.radians(p["dh"])
-    # ---- plinth course + masonry wall with the door opening (front) + stone rim
+    # ---- plinth course + masonry wall with the door opening (front) + stone rim (drum offset ox, oy)
+    O = np.array([p["ox"], p["oy"], 0.0])
+    gd = pv2.G.Geo()
+    g_root = g
+    g = gd
     CG.ring_prism(g, (0, 0, 0), np.eye(3), Rb, Rw - 0.3, n, 0.0, hb, "stone", "plinth")
     if Rb > Rw + 0.02:     # sloped shoulder from the flared lower course up to the wall
         CG.lathe(g, [(Rb, hb), (Rw + 0.005, hb + 0.6 * (Rb - Rw))], (0, 0, 0), n=n, mat="stone", tag="plinth_slope",
                  cap_top=False, cap_bot=False)
-    arc_wall(g, Rw - 0.17, Rw, hb, zt, ad + dh, ad - dh + 2 * math.pi, n - 4, "stone", "wall", top=False)
+    Rt = p["Rt"]
+
+    def r_at(z):         # tapered drum (art/10: the base is drawn wider than the rim)
+        return Rw + (Rt - Rw) * (z - hb) / max(zt - hb, 1e-6)
+    arc_wall(g, Rt - 0.17, Rw, hb, zt, ad + dh, ad - dh + 2 * math.pi, n - 4, "stone", "wall", top=False, r1_top=Rt)
     # lintel over the door (the wall above the opening) and the jamb returns
-    arc_wall(g, Rw - 0.17, Rw, hb + p["dt"], zt, ad - dh, ad + dh, max(4, n // 10), "stone", "lintel", top=False,
-             ends=False)
-    CG.ring_prism(g, (0, 0, 0), np.eye(3), Rw + 0.025, p["Rr"], n, zt, zt + 0.06, "stone", "rim")
+    zd = min(hb + p["dt"], zt - 0.05)
+    arc_wall(g, Rt - 0.17, r_at(zd), zd, zt, ad - dh, ad + dh, max(4, n // 10), "stone", "lintel", top=False,
+             ends=False, r1_top=Rt)
+    CG.ring_prism(g, (0, 0, 0), np.eye(3), Rt + 0.025, p["Rr"] + 0.02, n, zt, zt + 0.06, "stone", "rim")
+    gd.transform(None, O)
+    g = g_root
+    g.extend(gd)
     # cavity behind the door: floor, back wall, side walls (dark), chest
     cy0 = Rw * math.sin(ad)
     cav_w = 2 * Rw * math.sin(dh) + 0.1
@@ -207,12 +220,12 @@ def build(A, p, lod):
         c = er * p["rc"]
         g.box(c + (0, 0, zt + 0.085), (0.2, 0.12, 0.035), R=Rm, mat="bronze", tag="clamp",
               chamfer=0.006 if lod == 0 else 0.0)
-        g.box(er * (Rw + 0.035) + (0, 0, zt - 0.015), (0.03, 0.11, 0.17), R=Rm, mat="bronze", tag="clamp")
+        g.box(er * (Rt + 0.035) + (0, 0, zt - 0.015), (0.03, 0.11, 0.17), R=Rm, mat="bronze", tag="clamp")
     # ---- key niche: arched bronze frame + dark back plate on the front-right wall
     a = math.radians(p["an"])
     er = np.array([math.cos(a), math.sin(a), 0.0])
     et = np.array([-math.sin(a), math.cos(a), 0.0])
-    base = er * (Rw + 0.01)
+    base = er * (r_at(zt * 0.5) + 0.01)
     w2 = 0.15
     z0n, z1n = 0.06, p["zt"] + 0.08 - w2
     ns = (9, 6, 4)[lod]
@@ -228,8 +241,8 @@ def build(A, p, lod):
           chamfer=0.02 if lod == 0 else 0.0)
     # ---- door panel (node door_pivot): the wall piece in the opening, slides down into the plinth
     door = A.part("door_pivot", None, (Rw * math.cos(ad), Rw * math.sin(ad), hb))
-    arc_wall(door.geo[lod], Rw - 0.15, Rw + 0.004, hb, hb + p["dt"], ad - dh + 0.01, ad + dh - 0.01, max(4, n // 10),
-             "stone", "door_panel")
+    arc_wall(door.geo[lod], Rt - 0.15, Rw + 0.004, hb, zd, ad - dh + 0.01, ad + dh - 0.01, max(4, n // 10),
+             "stone", "door_panel", r1_top=r_at(zd) + 0.004)
     # ---- discs (nodes ring_1..3), each about its own vertical axis
     for name, (R, cy, zb, ztop) in discs(p).items():
         part = A.part(name, None, (0.0, cy, zb))
@@ -284,8 +297,8 @@ def _silhouette_iou(p, views):
             Vw = V @ M[:3, :3].T + M[:3, 3]
             u, w, _z = v.cam.project(Vw)
             pts = np.stack([u, w], 1)
-            polys = [np.round(pts[f]).astype(np.int32) for f in F]
-            cv2.fillPoly(m, polys, 1)
+            for f in F:     # one convex face at a time (a multi-contour fillPoly XORs the overlaps)
+                cv2.fillConvexPoly(m, np.round(pts[f]).astype(np.int32), 1)
         ref, _ = v.mask()
         mm = m.astype(bool)
         out.append(float((mm & ref).sum()) / max(1.0, float((mm | ref).sum())))
@@ -297,16 +310,23 @@ def solve(views):
     for v in views:
         _resolve_pose(v, params)
     # plinth flare / height by silhouette IoU (the drum base is drawn wider than the dial's camera implies)
-    best = (_silhouette_iou(params, views)[0], params["Rb"], params["hb"])
-    for Rb in np.arange(params["Rw"], params["Rw"] + 0.36, 0.03):
-        for hb in (0.08, 0.14, 0.2, 0.26, 0.32):
-            q = dict(params, Rb=float(Rb), hb=float(hb))
-            iou = _silhouette_iou(q, views)[0]
-            if iou > best[0]:
-                best = (iou, float(Rb), float(hb))
-    params["Rb"], params["hb"] = best[1], best[2]
-    pv2.log(f"  plinth by silhouette IoU: Rb {best[1]:.3f} hb {best[2]:.2f} -> mean IoU {best[0]:.3f} "
-            f"{[round(x, 3) for x in _silhouette_iou(params, views)[1]]}")
+    # drum taper (rim radius Rt) and plinth (Rb, hb) by silhouette IoU, coordinate descent
+    best = _silhouette_iou(params, views)[0]
+    grids = {"Rt": np.arange(0.7, params["Rw"] + 0.001, 0.03), "Rb": np.arange(params["Rw"], params["Rw"] + 0.25, 0.03),
+             "hb": np.array([0.06, 0.1, 0.14, 0.18, 0.22]), "ox": np.arange(-0.1, 0.101, 0.02),
+             "oy": np.arange(-0.1, 0.101, 0.02), "Rw": np.arange(params["Rw"] - 0.12, params["Rw"] + 0.121, 0.03)}
+    for _round in range(2):
+        for key, grid in grids.items():
+            for val in grid:
+                q = dict(params)
+                q[key] = float(val)
+                iou = _silhouette_iou(q, views)[0]
+                if iou > best + 1e-4:
+                    best, params = iou, q
+    pv2.log(f"  drum by silhouette IoU: Rt {params['Rt']:.3f} Rb {params['Rb']:.3f} hb {params['hb']:.2f} -> mean IoU "
+            f"{best:.3f} {[round(x, 3) for x in _silhouette_iou(params, views)[1]]}")
+    for v in views:
+        _resolve_pose(v, params)
     return params
 
 

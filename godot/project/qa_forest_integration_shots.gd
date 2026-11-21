@@ -147,6 +147,19 @@ func run() -> void:
 	forest.client.host = stub
 	await frames(10, false)
 
+	# -------------------------------------------------- debug: realm state fixture (zz_probe_realm)
+	if wanted("zzprobe"):
+		await fresh("zz_probe_realm")
+		for site in ["lf_site_01", "lf_site_02"]:
+			look(anchor(site, "cage"), 16.0)
+			await preload_actors()
+			await frames(10)
+			await shoot("zzprobe_" + site)
+			for id in forest.actors.rigs:
+				var r = forest.actors.rigs[id]
+				if is_instance_valid(r) and String(id).begins_with("cage_"):
+					print("CAGE ", id, " state=", r.load_state, " vis=", r.visible, " tree=", r.is_visible_in_tree(), " parent=", r.get_parent().name, " pvis=", r.get_parent().visible, " pos=", r.global_position)
+
 	# -------------------------------------------------- hall III intro: the mare walks out of the mist
 	if wanted("intro"):
 		await fresh("intro_offer")

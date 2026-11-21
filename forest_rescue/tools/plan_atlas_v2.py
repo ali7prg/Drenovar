@@ -258,7 +258,8 @@ PLAN = {
     "junctions": {
         "lf_horse_origin": [-8.0, -55.0], "lf_junction_corridor": [-12.0, -60.0],
         "lf_junction_stones": [-58.0, -69.0], "lf_junction_grove": [-75.0, -40.0], "lf_junction_w": [-66.0, 2.0],
-        "lf_junction_wsw": [-63.0, 36.0], "lf_junction_sw": [-61.0, 63.0], "lf_junction_s": [-18.0, 65.0],
+        "lf_junction_wsw": [-63.0, 36.0], "lf_junction_sw": [-61.0, 63.0], "lf_junction_ssw": [-42.0, 69.0],
+        "lf_junction_s": [-18.0, 65.0],
         "lf_junction_quarry": [-20.0, 84.0], "lf_junction_sse": [28.0, 64.0], "lf_junction_south": [48.0, 72.0],
         "lf_junction_se": [64.0, 52.0], "lf_junction_e": [64.0, 24.0],
         "lf_bridge_west": [77.0, 20.0], "lf_bridge_east": [104.0, 20.0],
@@ -283,7 +284,9 @@ PLAN = {
         # west and quarry
         ["lf_junction_sw", "lf_site_03", []],
         ["lf_site_03", "lf_site_04", [[-58, 86]]],
-        ["lf_junction_sw", "lf_junction_s", [[-40, 68]]],
+        ["lf_junction_sw", "lf_junction_ssw", [[-52, 67]]],
+        ["lf_junction_ssw", "lf_junction_s", [[-30, 68]]],
+        ["lf_junction_ssw", "lf_site_04", [[-43, 78]]],
         ["lf_site_04", "lf_junction_quarry", [[-30, 88]]],
         ["lf_junction_s", "lf_junction_quarry", [[-16, 74]]],
         ["lf_junction_quarry", "quarry_mine", []],
@@ -292,6 +295,7 @@ PLAN = {
         # south: dark pines, dead tree, marsh
         ["lf_junction_s", "lf_junction_sse", [[6, 66]]],
         ["lf_junction_sse", "lf_junction_south", []],
+        ["lf_junction_sse", "lf_site_06", [[25, 84]]],
         ["lf_junction_south", "lf_site_07", [[50, 82]]],
         ["lf_site_06", "lf_site_07", [[44, 98]]],
         ["lf_site_07", "dead_tree", []],

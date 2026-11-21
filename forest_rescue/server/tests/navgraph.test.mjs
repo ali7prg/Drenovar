@@ -27,9 +27,9 @@ test('every CONTRACT target id exists (per-site key/cage/guardian, plates, trail
   assert.equal(home.y, atlas.landmarks.find(l => l.id === 'lf_horse_origin').center.y);
 });
 
-test('atlas v2: all 44 network ways with ≤0.5 spacing and y taken from the atlas samples (deck y only on the bridge)', () => {
+test('atlas v2: all 47 network ways with ≤0.5 spacing and y taken from the atlas samples (deck y only on the bridge)', () => {
   assert.equal(atlas.id, 'lost_forest_atlas_v2');
-  assert.equal(atlas.routes.length, 44);
+  assert.equal(atlas.routes.length, 47);
   for (const route of atlas.routes) {
     const way = g.ways.get(route.id);
     assert.ok(way, route.id);
@@ -71,7 +71,7 @@ test('water is crossed only on the approved 27 m deck of lf_route_bridge', () =>
   assert.throws(() => buildNavGraph(sparse), e => e.code === 'NAV_SPACING');
 });
 
-test('Dijkstra on the v2 network: the mare's trail past the stones, no cage on another site's way, the east bank only over the bridge', () => {
+test('Dijkstra on the v2 network: the mare trail past the stones, no other glade on a trip, the east bank only over the bridge', () => {
   const marks = (from, to) => expandSteps(g, planPath(g, from, to).steps).marks.map(m => m.nodeId);
   assert.deepEqual(marks('lf_home_reception', 'lf_site_01'),
     ['lf_home_reception', 'lf_horse_origin', 'lf_junction_corridor', 'lf_junction_stones', 'lf_junction_grove', 'lf_site_01']);
@@ -85,7 +85,7 @@ test('Dijkstra on the v2 network: the mare's trail past the stones, no cage on a
   const home = marks('lf_site_12:cage', 'lf_home_reception');
   assert.ok(home.includes('lf_bridge_crossing'));
   assert.equal(home.at(-1), 'lf_home_reception');
-  assert.deepEqual(marks('lf_site_12', 'lf_boss_ancient_maw'), ['lf_site_12', 'lf_boss_ancient_maw']);
+  assert.deepEqual(marks('lf_site_12', 'lf_boss_ancient_maw'), ['lf_site_12', 'lf_junction_ne', 'lf_boss_ancient_maw']);
   // trail cache: the cache is reachable only past the three landmarks in clue order
   for (const site of SITES.filter(s => s.variation === 'trail_cache')) {
     assert.deepEqual(marks(site.id, site.artifact.id), [site.id, ...site.puzzle.solution.map(s => site.id + ':landmark:' + s), site.artifact.id]);
@@ -93,7 +93,7 @@ test('Dijkstra on the v2 network: the mare's trail past the stones, no cage on a
   }
   const path = expandSteps(g, planPath(g, 'lf_home_reception', 'lf_boss_ancient_maw').steps);
   for (let i = 1; i < path.points.length; i++) assert.ok(hd(path.points[i - 1], path.points[i]) <= MAX_SPACING + 1e-9);
-  assert.ok(Math.abs(path.length - 576.73) < 0.5, 'length ' + path.length);
+  assert.ok(Math.abs(path.length - 577.33) < 0.5, 'length ' + path.length);
   const client = simplifyForClient(path);
   assert.ok(client.length < path.points.length / 4, 'projection is compacted');
   assert.deepEqual(client[0], {x: -8, y: 6.783, z: -52});

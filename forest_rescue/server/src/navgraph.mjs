@@ -193,7 +193,15 @@ function kindOf(id) {
   if (id === HORSE_ID) return 'horse_origin';
   if (id === BOSS_TARGET_ID) return 'boss_arena';
   if (id === HOME_ID) return 'home';
-  return 'site';
+  if (SITES.some(s => s.id === id)) return 'site';
+  return 'waypoint';   // atlas v2 trail junctions, landmark spots, the cage-less E-L glade (never a target)
+}
+
+/** The site whose glade a node belongs to (centre or sub-target), else null. */
+function gladeOf(node) {
+  if (!node) return null;
+  if (node.kind === 'site') return node.id;
+  return node.siteId ?? null;
 }
 
 export function isJunction(graph, ref) {
@@ -275,12 +283,18 @@ export function planPath(graph, fromRef, targetId) {
       }
     }
   }
+  // A trip never walks through another site's glade (the trails are a network; cages stand on
+  // spurs): a glade node only passes the walk on when the trip starts or ends in that glade.
+  const startGlade = from.junction ? gladeOf(from.junction) : null;
+  const targetGlade = gladeOf(graph.nodes.get(targetId));
   const done = new Set();
   while (heap.size) {
     const {id, d} = heap.pop();
     if (done.has(id)) continue;
     done.add(id);
     if (id === targetId) break;
+    const glade = gladeOf(graph.nodes.get(id));
+    if (glade && glade !== startGlade && glade !== targetGlade) continue;
     for (const e of graph.adjacency.get(id)) {
       const nd = d + e.length;
       if (nd < (dist.get(e.to) ?? Infinity) - 1e-12) {

@@ -967,7 +967,7 @@ func _plan_groves(resource_counts: PackedInt32Array) -> void:
 	var t0 := Time.get_ticks_msec()
 	grove_noise.seed = Rules.SEED + 51
 	grove_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	grove_noise.frequency = 1.0 / 34.0
+	grove_noise.frequency = 1.0 / 26.0
 	grove_noise.fractal_octaves = 2
 	var land := PackedInt32Array()
 	land.resize(8)
@@ -1029,32 +1029,37 @@ func _plan_groves(resource_counts: PackedInt32Array) -> void:
 			grid[key] = PackedInt32Array()
 		grid[key].append(grove_slots.size())
 		grove_slots.append([p, zone, false, 0])
-	# young-tree slots between the canopy trunks (same grove areas)
-	for c in cand:
-		var zone: int = c[2]
-		if float(c[3]) < cut[zone]:
-			continue
-		var p := Vector2(float(c[0]) + rng.randf_range(-0.9, 0.9), float(c[1]) + rng.randf_range(-0.9, 0.9))
-		var key := Vector2i(floori(p.x / GROVE_CELL), floori(p.y / GROVE_CELL))
-		var ok := true
-		for gz in range(key.y - 1, key.y + 2):
-			for gx in range(key.x - 1, key.x + 2):
-				for idx in grid.get(Vector2i(gx, gz), PackedInt32Array()):
-					var o: Vector2 = grove_slots[idx][0]
-					var lim := SUB_SLOT if int(grove_slots[idx][3]) == 1 else maxf(SUB_SLOT, ZONE_SLOT[zone] * 0.42)
-					if o.distance_squared_to(p) < lim * lim:
-						ok = false
+	# young-tree slots tucked behind / under each canopy crown (camera-far side, inside the crown):
+	# from the city camera the big crown covers them, so the grove reads as big individual crowns
+	var canopy_count := grove_slots.size()
+	for ci in canopy_count:
+		var cp: Vector2 = grove_slots[ci][0]
+		var zone: int = grove_slots[ci][1]
+		var reach: float = ZONE_SLOT[zone] * 0.55
+		for k in 3:
+			var ang := deg_to_rad(225.0 + rng.randf_range(-70.0, 70.0))
+			var p := cp + Vector2(cos(ang), sin(ang)) * rng.randf_range(SUB_SLOT, maxf(SUB_SLOT + 0.4, reach))
+			if maxf(absf(p.x), absf(p.y)) < CORE + 1.0 or blocked_exact(p.x, p.y, true) or not ground_ok(p.x, p.y, true):
+				continue
+			var key := Vector2i(floori(p.x / GROVE_CELL), floori(p.y / GROVE_CELL))
+			var ok := true
+			for gz in range(key.y - 1, key.y + 2):
+				for gx in range(key.x - 1, key.x + 2):
+					for idx in grid.get(Vector2i(gx, gz), PackedInt32Array()):
+						var o: Vector2 = grove_slots[idx][0]
+						if o.distance_squared_to(p) < SUB_SLOT * SUB_SLOT:
+							ok = false
+							break
+					if not ok:
 						break
 				if not ok:
 					break
-			if not ok:
-				break
-		if not ok or (hero != Vector2.INF and p.distance_to(hero) < HERO_CLEAR + 2.0):
-			continue
-		if not grid.has(key):
-			grid[key] = PackedInt32Array()
-		grid[key].append(grove_slots.size())
-		grove_slots.append([p, zone, false, 1])
+			if not ok or (hero != Vector2.INF and p.distance_to(hero) < HERO_CLEAR + 2.0):
+				continue
+			if not grid.has(key):
+				grid[key] = PackedInt32Array()
+			grid[key].append(grove_slots.size())
+			grove_slots.append([p, zone, false, 1])
 	grove_grid = grid
 	var per_zone := {}
 	for slot in grove_slots:
@@ -1079,7 +1084,7 @@ func _grove_look(tree: Dictionary, species: int, x: float, z: float, zone: int, 
 ## Nearest free grove slot of `zone` for a resource tree; the crown must clear the strict unit
 ## zones (glades, arena, horse spot, landmarks, water features); trails get the runtime fade.
 func _take_grove_slot(tree: Dictionary, species: int, zone: int, tx: float, tz: float) -> Vector2:
-	var p := _take_slot_kind(tree, species, zone, tx, tz, 0, 5)
+	var p := _take_slot_kind(tree, species, zone, tx, tz, 0, 4)
 	_last_sub = p == Vector2.INF
 	if p == Vector2.INF:
 		p = _take_slot_kind(tree, species, zone, tx, tz, 1, 14)

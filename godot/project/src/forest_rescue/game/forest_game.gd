@@ -283,7 +283,7 @@ func target_position(target_id: String) -> Vector3:
 		var site_id := "lf_site_" + base_id.trim_prefix("lf_key_")
 		return site_anchor(site_id).get("artifact", Vector3.INF)
 	var known := {HORSE_TARGET:Vector2(-8, -55), HOME_TARGET:Vector2(-8, -52), "lf_bridge_crossing":Vector2(90.5, 20),
-		BOSS_TARGET:Vector2(75, -86)}
+		BOSS_TARGET:Vector2(18, -92)}
 	if known.has(base_id):
 		var flat: Vector2 = known[base_id]
 		return ground(flat.x, flat.y)

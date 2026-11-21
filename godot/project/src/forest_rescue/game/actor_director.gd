@@ -54,7 +54,7 @@ const HORSE_BOSS_STAND_OFF := 21.0
 const LOD_ZOOM := [34.0, 72.0]
 const BOSS_LOD_SCALE := 1.4
 const BOSS_FIGHT_DISTANCE := 12.5
-const ARENA_FACING_DEG := 5.4
+const ARENA_FACING_DEG := 72.9         # authored fallback (atlas v2 entranceYawDeg); see arena_facing_deg()
 const SUPPLY_ITEMS := {"food":["supply_bread", "supply_sacks"], "wood":["supply_crate_closed"], "stone":["supply_crate_open"],
 	"iron":["supply_arrows", "supply_bandages"], "coins":["supply_coins", "supply_chest"]}
 
@@ -527,10 +527,15 @@ func horse_rest_point(node: String, fallback: Vector3) -> Vector3:
 	var p := center + back * 5.6 + right * side * 3.8
 	return game.ground(p.x, p.z)
 
+## The arena gap's facing (deg): the world's atlas entranceYawDeg, the authored value offline.
+func arena_facing_deg() -> float:
+	var value: Variant = game.world_call("arena_entrance_yaw_deg")
+	return float(value) if value != null else ARENA_FACING_DEG
+
 ## Point on the arena's entrance axis `distance` m from the centre (side offset in m).
 func boss_gap_point(distance: float, side := 0.0) -> Vector3:
 	var arena: Vector3 = game.target_position("lf_boss_ancient_maw")
-	var axis := Vector3(sin(deg_to_rad(ARENA_FACING_DEG)), 0, cos(deg_to_rad(ARENA_FACING_DEG)))
+	var axis := Vector3(sin(deg_to_rad(arena_facing_deg())), 0, cos(deg_to_rad(arena_facing_deg())))
 	var p := arena + axis * distance + Vector3(axis.z, 0, -axis.x) * side
 	return game.ground(p.x, p.z)
 
@@ -1366,7 +1371,7 @@ func battle_member_pose(index: int, fight: Dictionary, now: float) -> Dictionary
 	var site_id := String(fight.get("siteId", ""))
 	var boss_fight := String(fight.get("species", "")) == "ancient_maw"
 	var enemy: Vector3 = game.target_position("lf_boss_ancient_maw") if boss_fight else game.site_anchor(site_id).get("guardian", Vector3.ZERO)
-	var approach: Vector3 = enemy + Vector3(sin(deg_to_rad(ARENA_FACING_DEG)), 0, cos(deg_to_rad(ARENA_FACING_DEG))) * 10.0 if boss_fight else game.site_anchor(site_id).get("approach", enemy + Vector3(0, 0, 4))
+	var approach: Vector3 = enemy + Vector3(sin(deg_to_rad(arena_facing_deg())), 0, cos(deg_to_rad(arena_facing_deg()))) * 10.0 if boss_fight else game.site_anchor(site_id).get("approach", enemy + Vector3(0, 0, 4))
 	var away := (approach - enemy)
 	away.y = 0
 	away = away.normalized() if away.length_squared() > 0.01 else Vector3.BACK
@@ -1457,7 +1462,7 @@ func update_boss(now: float, delta: float) -> void:
 	var fight: Dictionary = game.client.battle()
 	var boss_fight: bool = not fight.is_empty() and String(fight.get("species", "")) == "ancient_maw"
 	var squad_pos := squad_focus()
-	var entrance_yaw := deg_to_rad(ARENA_FACING_DEG)
+	var entrance_yaw := deg_to_rad(arena_facing_deg())
 	var wanted := entrance_yaw
 	if boss_fight or (squad_pos != Vector3.INF and Vector2(squad_pos.x - arena.x, squad_pos.z - arena.z).length() < 34.0):
 		if squad_pos != Vector3.INF and Vector2(squad_pos.x - arena.x, squad_pos.z - arena.z).length() > 1.0:
@@ -1714,24 +1719,12 @@ func update_ribbon() -> void:
 func set_preview(target_id: String) -> void:
 	preview_target = target_id
 
-func route_index(node: String) -> int:
-	var base := node.get_slice(":", 0).get_slice("#", 0)
-	if base in ["lf_horse_origin", "lf_home_reception"]:
-		return 0
-	if base.begins_with("lf_site_"):
-		return int(base.trim_prefix("lf_site_"))
-	if base.begins_with("lf_key_"):
-		return int(base.trim_prefix("lf_key_"))
-	if base == "lf_boss_ancient_maw":
-		return 13
-	return -1
-
 func update_preview() -> void:
 	var squad: Dictionary = game.client.squad()
-	var from := route_index(String(squad.get("node", "")))
-	var to := route_index(preview_target)
-	var show_it := preview_target != "" and not (squad.get("move") is Dictionary) and from >= 0 and to >= 0 and absi(to - from) == 1
-	var signature := "%d>%d" % [from, to]
+	var from_node := String(squad.get("node", ""))
+	var show_it := preview_target != "" and not (squad.get("move") is Dictionary) and from_node != "" \
+		and from_node.get_slice(":", 0) != preview_target.get_slice(":", 0)
+	var signature := "%s>%s" % [from_node.get_slice(":", 0), preview_target.get_slice(":", 0)]
 	if not show_it:
 		if is_instance_valid(preview):
 			preview.hide()
@@ -1749,25 +1742,23 @@ func update_preview() -> void:
 	if signature == preview_signature:
 		return
 	preview_signature = signature
-	var low := mini(from, to)
-	var route_id := "lf_route_entry" if low == 0 else ("lf_route_boss" if low == 12 else "lf_route_%02d_%02d" % [low, low + 1])
-	var value: Variant = game.world_call("route_points", [route_id])
+	# atlas v2: the trail network's shortest walk (world trail_path, same no-transit rule as the
+	# server graph); a straight hint only when the world cannot answer.
+	var value: Variant = game.world_call("trail_path", [from_node, preview_target])
 	var points: Array = []
 	if value is PackedVector3Array and value.size() >= 2:
 		for p in value:
 			points.append(p)
 	else:
-		var a: Vector3 = game.target_position(String(squad.get("node", "")))
+		var a: Vector3 = game.target_position(from_node)
 		var b: Vector3 = game.target_position(preview_target)
 		if a == Vector3.INF or b == Vector3.INF:
 			preview.hide()
 			return
 		points = [a, b]
-	if to < from:
-		points.reverse()
 	var route := PathMotion.build(points)
 	var total := float(route.total)
-	var count := clampi(int(total / 1.4), 2, 300)
+	var count := clampi(int(total / 1.4), 2, 400)
 	var multimesh := preview.multimesh
 	multimesh.instance_count = count
 	for i in count:

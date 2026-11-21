@@ -3,12 +3,14 @@ extends SceneTree
 ##   godot --headless --path godot/project -s res://src/forest_rescue/world/tools/build_forest_layout.gd
 ## Output: res://data/forest_rescue/world/forest_layout_v2.json (see forest_layout_rules.gd).
 ##
-## Composition follows the art/01 masterplan in the CITY CAMERA's screen space (the painting is
-## drawn from that view: river vertical right of the town). Screen angle φ around the town
-## (CCW from screen-right; screen-up = world (-X,-Z)): golden-oak grove upper-left with the hero
-## cave oak, quarry lower-left (glade 08), dark spruce forest at the bottom, willows/reeds along
-## the river, arena pines upper-right, mixed broadleaf/birch transitions and a mixed belt
-## around the protected town. Zones blend over ~10 m with a warped angle (no straight borders).
+## Composition follows the art/01 masterplan (atlas v2, user zones) in the CITY CAMERA's screen
+## space (the painting is drawn from that view: river vertical right of the town). Screen angle φ
+## around the town (CCW from screen-right; screen-up = world (-X,-Z)), ForestAtlas.REGION_SECTORS:
+## big golden oaks with sunny meadows top / top-left (hollow oak at its mark, birches round glade
+## 01), golden + green oaks on the left, the limestone quarry lower-left (mine + glade 05), dark
+## pines with mossy ground at the bottom, willows / green deciduous on the east bank, pines in the
+## arena gorge top-right, reeds and willows round the river, the lake, the waterfall pond and the
+## marsh pools, a meadow belt round the walls. Zones blend over ~10 m with a warped angle.
 ##
 ## 1. Hero cave oak + landmark spots are reserved (trunk-free discs).
 ## 2. Outer resource trees (|x|>56 or |z|>56): every id is moved off its old sunflower-spiral
@@ -32,6 +34,7 @@ const ForestAtlas = preload("res://src/forest_rescue/world/forest_atlas.gd")
 const ForestTerrain = preload("res://src/forest_rescue/world/forest_terrain.gd")
 const ForestMasks = preload("res://src/forest_rescue/world/forest_masks.gd")
 const ForestLandmarks = preload("res://src/forest_rescue/world/forest_landmarks.gd")
+const ForestWater = preload("res://src/forest_rescue/world/forest_water.gd")
 
 const EXTENT := 140.0
 const CORE := 56.0
@@ -47,22 +50,29 @@ const Z_RIVER := 4
 const Z_SPRUCE := 5
 const Z_QUARRY := 6
 const Z_BELT := 7
-const ZONE_NAMES := ["golden_grove", "top_birch_oak", "arena_pines", "east_mixed", "river_willows", "south_spruce", "sw_quarry", "town_belt"]
-## Screen-angle sectors [from°, to°] (CCW from screen-right). Belt/river/quarry are spatial.
-const SECTORS := {Z_ARENA: [12.0, 58.0], Z_TOP: [58.0, 104.0], Z_GROVE: [104.0, 212.0], Z_SPRUCE: [226.0, 306.0], Z_EAST: [306.0, 372.0]}
+## Atlas v2 regions (ForestAtlas.REGION_SECTORS / REGION_NAMES, art/01 user zones): Z_TOP is the
+## west mixed golden + green oaks, Z_EAST the green deciduous + willows of the east bank, Z_SPRUCE
+## the dark south / south-east pines; belt, river (+ lake, pond, marsh) and quarry are spatial.
+const ZONE_NAMES := ["golden_grove", "west_mixed", "arena_rock", "east_willows", "river_willows", "south_pines", "sw_quarry", "town_belt"]
 ## Ambient species mix per zone (resource trees keep their species).
 const ZONE_MIX := [
-	{Rules.OAK: 0.92, Rules.PINE: 0.04, Rules.BIRCH: 0.04},                 # golden grove (big oaks)
-	{Rules.BIRCH: 0.35, Rules.OAK: 0.45, Rules.PINE: 0.20},                 # top: birch + oak
-	{Rules.PINE: 0.78, Rules.OAK: 0.14, Rules.BIRCH: 0.08},                 # arena pines
-	{Rules.OAK: 0.45, Rules.BIRCH: 0.18, Rules.WILLOW: 0.15, Rules.PINE: 0.22},  # east mixed (deep-green broadleaf)
-	{Rules.WILLOW: 0.55, Rules.OAK: 0.20, Rules.BIRCH: 0.12, Rules.PINE: 0.13},  # river willows
-	{Rules.PINE: 0.92, Rules.BIRCH: 0.05, Rules.OAK: 0.03},                 # south spruce
-	{Rules.BIRCH: 0.45, Rules.PINE: 0.45, Rules.OAK: 0.10},                 # quarry (sparse)
-	{Rules.OAK: 0.45, Rules.BIRCH: 0.25, Rules.PINE: 0.30},                 # town belt (green broadleaf)
+	{Rules.OAK: 0.90, Rules.BIRCH: 0.06, Rules.PINE: 0.04},                 # golden grove (few big oaks, meadows)
+	{Rules.OAK: 0.62, Rules.BIRCH: 0.20, Rules.PINE: 0.18},                 # west: golden + green oaks
+	{Rules.PINE: 0.80, Rules.OAK: 0.12, Rules.BIRCH: 0.08},                 # arena rock: pines in the gorge
+	{Rules.OAK: 0.46, Rules.WILLOW: 0.26, Rules.BIRCH: 0.16, Rules.PINE: 0.12},  # east: green deciduous + willows
+	{Rules.WILLOW: 0.58, Rules.OAK: 0.18, Rules.BIRCH: 0.12, Rules.PINE: 0.12},  # river / lake willows
+	{Rules.PINE: 0.93, Rules.BIRCH: 0.04, Rules.OAK: 0.03},                 # south pines (dark, dense)
+	{Rules.BIRCH: 0.42, Rules.PINE: 0.43, Rules.OAK: 0.15},                 # quarry (sparse)
+	{Rules.OAK: 0.50, Rules.BIRCH: 0.25, Rules.PINE: 0.25},                 # town belt (green broadleaf, meadows)
 ]
 ## Ambient spacing (m) per zone: target trunk spacing incl. resource trees.
-const ZONE_SPACING := [13.0, 5.2, 3.7, 4.3, 4.8, 3.3, 9.0, 5.2]
+const ZONE_SPACING := [15.0, 5.4, 3.9, 4.4, 4.8, 3.3, 9.0, 6.0]
+## Grove hero oaks (owner: "big bright golden oaks 1.5–2×, fewer larger trees, clumps and
+## open meadows"): every ambient grove oak at this absolute scale range (kit oak at 1.0 ≈ 13.6 m).
+const GROVE_OAK_SCALE := [1.35, 1.8]
+## Site 01 keeps birches around its glade (its text: white trunks): ambient trees within this
+## distance of its centre are birches.
+const BIRCH_RING := 17.0
 ## Absolute scale ranges per [zone][species] for AMBIENT trees (inside kit recommendedScale).
 const AMBIENT_SCALE := {
 	Rules.OAK: [[0.94, 1.10], [0.70, 0.88], [0.66, 0.80], [0.66, 0.82], [0.66, 0.80], [0.66, 0.78], [0.66, 0.78], [0.66, 0.82]],
@@ -104,13 +114,17 @@ const ZONE_UNDERSTORY := [
 ]
 const ZONE_UNDER_SPACING := [3.4, 3.2, 3.6, 3.3, 3.0, 3.1, 3.6, 3.5]
 ## Hero cave oak (art/01 top-left corner of the grove): screen φ≈149°, near the overview edge.
-const HERO_PREFERRED := Vector2(-104.0, 24.0)
+## (atlas v2: the hollow oak stands just beyond the end of the spur lf_trail_site_01__mark_hollow_oak_giant)
+const HERO_MARK := "lf_mark_hollow_oak_giant"
+const HERO_BACK := 5.4
+var hero_preferred := Vector2(-104.0, 24.0)
 const HERO_CLEAR := 9.5
 const QUARRY_PIT := 9.0           # art/01: open grey pit in front of the mine (no trunks)
 const ARENA_RIM_TREE := 26.0      # no kit trunk inside the arena GLB's own rim forest
 const ARENA_RIM_UNDER := 22.5     # no kit understory inside its cliff ring / rim shrubs
 const ARENA_VIEW_RADIUS := 19.5   # camera clearance: arena floor + cliff ring + entrance rocks
 var quarry_axis := 0.0            # direction (rad) from the pit centre to the cliff arc
+var water: Array = []             # ForestWater.bodies(atlas): lake, waterfall pond, marsh pools
 
 var atlas
 var terrain
@@ -195,13 +209,8 @@ func zone_weights(x: float, z: float) -> PackedFloat32Array:
 
 
 func _zone_weights_raw(x: float, z: float) -> PackedFloat32Array:
-	var w := PackedFloat32Array()
-	w.resize(8)
-	var phi := screen_angle(x, z) + warp.get_noise_2d(x, z) * 16.0
-	for zone in SECTORS:
-		var s: Array = SECTORS[zone]
-		w[zone] = _sector_weight(phi, s[0], s[1], 11.0)
-	# Quarry: around the SW quarry centre (glade 08 / mine), ragged edge.
+	var w: PackedFloat32Array = atlas.region_sector_weights(x, z, warp.get_noise_2d(x, z) * 16.0, 11.0)
+	# Quarry: around the SW quarry centre (mine / glade 05), ragged edge.
 	if quarry_center != Vector2.INF:
 		var dq := Vector2(x, z).distance_to(quarry_center) + warp.get_noise_2d(x * 1.7, z * 1.7) * 6.0
 		var q := 1.0 - smoothstep(18.0, 32.0, dq)
@@ -217,6 +226,8 @@ func _zone_weights_raw(x: float, z: float) -> PackedFloat32Array:
 	# River banks: willows and reeds (wet channel itself has no trees).
 	var bank: float = atlas.river_bank_distance(x, z)
 	var river := 1.0 - smoothstep(5.0, 13.0, bank + warp.get_noise_2d(x * 2.3, z * 2.3) * 3.0)
+	for body in water:
+		river = maxf(river, (1.0 - smoothstep(2.0, 11.0, ForestTerrain.shore_distance(body, x, z))) * (1.0 if body.kind != "marsh" else 0.35))
 	for i in w.size():
 		w[i] *= (1.0 - river * 0.8)
 	w[Z_RIVER] += river
@@ -261,6 +272,9 @@ func _build_unit_zones() -> void:
 		_add_unit_zone(c, c, float(site.radius))
 	# the arena floor AND its cliff ring / entrance rocks (≤ 19.5 m) stay visible from the camera
 	var arena := Vector2(atlas.arena_center.x, atlas.arena_center.z)
+	for extra in atlas.extra_glades:
+		var e := Vector2(extra.center.x, extra.center.z)
+		_add_unit_zone(e, e, float(extra.radius))
 	_add_unit_zone(arena, arena, ARENA_VIEW_RADIUS)
 	var horse := Vector2(atlas.horse_origin.x, atlas.horse_origin.z)
 	_add_unit_zone(horse, horse, HORSE_ZONE)
@@ -362,6 +376,9 @@ func ground_ok(x: float, z: float, tree: bool) -> bool:
 		return false
 	if atlas.river_bank_distance(x, z) < (1.2 if tree else 0.4):
 		return false
+	for body in water:
+		if ForestTerrain.shore_distance(body, x, z) < (1.6 if tree else 0.5):
+			return false
 	return terrain.slope_degrees(x, z) <= (28.0 if tree else 36.0)
 
 
@@ -376,7 +393,7 @@ func free_of_trunks(x: float, z: float, gap: float) -> bool:
 func is_glade(x: float, z: float) -> bool:
 	# Art glades: low-frequency noise holes (open grassy clearings between clumps, art/01 grove).
 	var zone := dominant_zone(x, z)
-	var threshold := 0.22 if zone == Z_GROVE else (0.15 if zone in [Z_TOP, Z_EAST, Z_BELT, Z_QUARRY] else 0.07)
+	var threshold := 0.3 if zone == Z_GROVE else (0.2 if zone == Z_BELT else (0.15 if zone in [Z_TOP, Z_EAST, Z_QUARRY] else 0.07))
 	return (glade.get_noise_2d(x, z) + 1.0) * 0.5 < threshold
 
 
@@ -409,16 +426,25 @@ func run() -> void:
 	landmarks.plan(atlas, masks, func(x: float, z: float) -> float: return ForestTerrain.base_height(x, z))
 	terrain.extra_pads = landmarks.pads()
 	terrain.quarry_center = landmarks.quarry_center()
+	water = ForestWater.bodies(atlas)
+	terrain.water_bodies = water
 	terrain.bake()
 	for disc in landmarks.clearances():
 		landmark_discs.append(disc)
 	for placement in landmarks.placements:
 		if placement.id == "lf_env_quarry_mine":
 			var mine_p := Vector2(placement.position.x, placement.position.z)
-			var glade_p := Vector2(atlas.site_by_id.lf_site_08.center.x, atlas.site_by_id.lf_site_08.center.z)
+			var glade_p := Vector2(atlas.site_by_id.lf_site_05.center.x, atlas.site_by_id.lf_site_05.center.z)
 			quarry_center = mine_p.lerp(glade_p, 0.45)
 			var axis := ((mine_p - glade_p).normalized() * 0.6 + Vector2(-0.7071, -0.7071) * 0.4).normalized()
 			quarry_axis = atan2(axis.y, axis.x)
+	var hero_mark: Vector2 = landmarks._node_xz(HERO_MARK)
+	if hero_mark != Vector2.INF:
+		hero_preferred = hero_mark + landmarks._away_from_trails(HERO_MARK, hero_mark) * HERO_BACK
+	if landmarks.dead_tree_spot != Vector2.INF:
+		landmark_discs.append([landmarks.dead_tree_spot, 3.2])
+	# waterfall outcrop + pond (ForestWater): no trunks on the rocks or round the fall
+	landmark_discs.append([Vector2(19.8, -67.3), 5.2])
 	landmarks.free()
 	_build_unit_zones()
 	print("LAYOUT terrain+masks ready ms=", Time.get_ticks_msec() - started, " quarry=", quarry_center, " unit zones=", unit_zones.size())
@@ -514,7 +540,10 @@ func run() -> void:
 	var placed_inner: Array = []
 	var placed_inner_grid := {}
 	var horse := Vector2(atlas.horse_origin.x, atlas.horse_origin.z)
-	var entry_route: PackedVector3Array = atlas.route_by_id["lf_route_entry"].points
+	var entry_route := PackedVector3Array()
+	for route in atlas.routes:
+		if route.from == "lf_horse_origin" or route.to == "lf_horse_origin":
+			entry_route.append_array(route.points)
 	for t in inner_order:
 		var tree: Dictionary = inner[t]
 		var o := Vector2(float(tree.p[0]), float(tree.p[2]))
@@ -588,10 +617,14 @@ func run() -> void:
 				spacing *= 0.92
 			var zone := Rules.pick_index(Array(w), rng.randf())
 			var species := Rules.pick_weighted(ZONE_MIX[zone], rng.randf())
+			var site01: Dictionary = atlas.site_by_id.get("lf_site_01", {})
+			if not site01.is_empty() and Vector2(x, z).distance_to(Vector2(site01.center.x, site01.center.z)) < BIRCH_RING:
+				species = Rules.BIRCH if rng.randf() < 0.85 else species
+				spacing = minf(spacing, 5.0)
 			var gap := spacing if species != Rules.PINE else spacing * 0.86
 			if not free_of_trunks(x, z, gap):
 				continue
-			var scale_range: Array = AMBIENT_SCALE[species][zone]
+			var scale_range: Array = GROVE_OAK_SCALE if (zone == Z_GROVE and species == Rules.OAK) else AMBIENT_SCALE[species][zone]
 			var scale := lerpf(scale_range[0], scale_range[1], rng.randf())
 			scale = lerpf(scale, lerpf(0.34, 0.52, rng.randf()), openness(x, z) * (0.0 if zone == Z_GROVE and species == Rules.OAK else 0.85))
 			if blocked_exact(x, z, true, 1.0, Rules.CROWN_RADIUS[species] * scale):
@@ -623,6 +656,7 @@ func run() -> void:
 	var log_grid := {}
 	var kinds_count := {}
 	_bank_dressing(trees, under, under_grid, logs, log_grid, kinds_count, species_count)
+	_water_dressing(trees, under, under_grid, logs, log_grid, kinds_count, species_count)
 	_quarry_cliffs(under, under_grid, logs, log_grid, kinds_count)
 	_shuffle(cells)
 	for cell: Vector2i in cells:
@@ -825,6 +859,12 @@ func _trail_dressing() -> Array:
 			for site in atlas.sites:
 				if q.distance_to(Vector2(site.center.x, site.center.z)) < float(site.radius) + 0.5:
 					in_glade = true
+			for extra in atlas.extra_glades:
+				if q.distance_to(Vector2(extra.center.x, extra.center.z)) < float(extra.radius) + 0.5:
+					in_glade = true
+			for body in water:
+				if ForestTerrain.shore_distance(body, q.x, q.y) < 0.6:
+					in_glade = true
 			if in_glade or terrain.slope_degrees(q.x, q.y) > 34.0:
 				continue
 			var crowded := false
@@ -908,6 +948,54 @@ func _bank_dressing(trees: Array, under: Array, under_grid: Dictionary, logs: Ar
 		z += 2.4
 
 
+## Atlas v2 water (art/01): reed beds ringing the lake, the waterfall pond and the marsh pools
+## (shore band -0.8 .. +1.4 m, patchy), a few stones at the pond dam, willows leaning over the
+## lake and the pond (never in front of a unit: camera clearance).
+func _water_dressing(trees: Array, under: Array, under_grid: Dictionary, logs: Array, log_grid: Dictionary,
+		kinds_count: Dictionary, species_count: Dictionary) -> void:
+	var reed := Rules.UNDERSTORY.find("reed")
+	for body in water:
+		var c: Vector2 = body.center
+		var r: float = body.radius
+		var perimeter := TAU * r
+		var steps := maxi(10, int(perimeter / 1.15))
+		var willow_next := 0.0
+		for k in steps:
+			var angle := TAU * (k + rng.randf() * 0.6) / steps
+			var shore := ForestTerrain.shore_radius(body, angle)
+			var patch := (clump.get_noise_2d(c.x + cos(angle) * 9.0, c.y + sin(angle) * 9.0) + 1.0) * 0.5
+			if patch > (0.32 if body.kind != "lake" else 0.4):
+				for j in (2 if body.kind == "lake" else 1):
+					var dist := shore + rng.randf_range(-0.8, 1.4)
+					var p := c + Vector2(cos(angle), sin(angle)) * dist
+					if _bank_ok(p.x, p.y, 1.0):
+						insert(under_grid, under, [snappedf(p.x, 0.01), snappedf(p.y, 0.01), 1.1, reed, 1 + rng.randi() % 3,
+							snappedf(rng.randf() * 360.0, 0.1), snappedf(lerpf(0.7, 1.1, rng.randf()), 0.001)])
+						kinds_count["water_reed"] = kinds_count.get("water_reed", 0) + 1
+			elif body.perched and rng.randf() < 0.35:
+				var p := c + Vector2(cos(angle), sin(angle)) * (shore + rng.randf_range(0.2, 0.9))
+				if _bank_ok(p.x, p.y, 1.4):
+					insert(under_grid, under, [snappedf(p.x, 0.01), snappedf(p.y, 0.01), 1.4, Rules.UNDERSTORY.find("quarry_rock"), 1,
+						snappedf(rng.randf() * 360.0, 0.1), snappedf(rng.randf_range(0.16, 0.3), 0.001)])
+					kinds_count["water_stone"] = kinds_count.get("water_stone", 0) + 1
+			if body.kind == "marsh":
+				continue
+			var along := angle * shore
+			if along >= willow_next:
+				var dist := shore + rng.randf_range(2.6, 4.4)
+				var p := c + Vector2(cos(angle), sin(angle)) * dist
+				var scale := lerpf(0.8, 1.0, rng.randf())
+				var variant := 2 + rng.randi() % 2
+				var yaw_deg := snappedf(rad_to_deg(atan2(-cos(angle), -sin(angle))) + lerpf(-35.0, 35.0, rng.randf()), 0.1)
+				if maxf(absf(p.x), absf(p.y)) > CORE + 1.0 and not blocked_exact(p.x, p.y, true, 1.0, 4.0) and ground_ok(p.x, p.y, true) \
+						and terrain.slope_degrees(p.x, p.y) < 34.0 and free_of_trunks(p.x, p.y, 3.4) \
+						and not tree_hides_units(p.x, p.y, Rules.WILLOW, variant, scale, deg_to_rad(yaw_deg)):
+					insert(trunk_grid, trunks, [p.x, p.y, 3.4])
+					trees.append([snappedf(p.x, 0.01), snappedf(p.y, 0.01), Rules.WILLOW, variant, yaw_deg, snappedf(scale, 0.001), Z_RIVER])
+					species_count[Rules.SPECIES[Rules.WILLOW]] = species_count.get(Rules.SPECIES[Rules.WILLOW], 0) + 1
+					willow_next = along + lerpf(7.0, 12.0, rng.randf())
+
+
 func _bank_ok(x: float, z: float, spacing: float) -> bool:
 	if maxf(absf(x), absf(z)) < CORE + 0.5 or maxf(absf(x), absf(z)) > EXTENT - 1.0:
 		return false
@@ -934,7 +1022,7 @@ func _quarry_cliffs(under: Array, under_grid: Dictionary, logs: Array, log_grid:
 	for disc in landmark_discs:
 		if Vector2(disc[0]).distance_to(quarry_center) < 14.0:
 			mine = disc[0]
-	var site: Dictionary = atlas.site_by_id.lf_site_08
+	var site: Dictionary = atlas.site_by_id.lf_site_05
 	var glade_c := Vector2(site.center.x, site.center.z)
 	var base_angle := quarry_axis
 	var kind := Rules.UNDERSTORY.find("quarry_rock")
@@ -1072,15 +1160,17 @@ func _openness_raw(x: float, z: float) -> float:
 	var d := 99.0
 	var hit: Dictionary = atlas.nearest_route(x, z)
 	if not hit.is_empty():
-		d = minf(d, float(hit.distance) - 3.8)
+		d = minf(d, float(hit.distance) - float(atlas.routes[hit.route].clear))
 	for site in atlas.sites:
 		d = minf(d, Vector2(x, z).distance_to(Vector2(site.center.x, site.center.z)) - float(site.radius))
+	for extra in atlas.extra_glades:
+		d = minf(d, Vector2(x, z).distance_to(Vector2(extra.center.x, extra.center.z)) - float(extra.radius))
 	d = minf(d, Vector2(x, z).distance_to(Vector2(atlas.arena_center.x, atlas.arena_center.z)) - 17.0)
 	for disc in landmark_discs:
 		d = minf(d, Vector2(x, z).distance_to(disc[0]) - float(disc[1]))
 	var g := (glade.get_noise_2d(x, z) + 1.0) * 0.5
 	var zone := dominant_zone(x, z)
-	var threshold := 0.22 if zone == Z_GROVE else (0.15 if zone in [Z_TOP, Z_EAST, Z_BELT, Z_QUARRY] else 0.07)
+	var threshold := 0.3 if zone == Z_GROVE else (0.2 if zone == Z_BELT else (0.15 if zone in [Z_TOP, Z_EAST, Z_QUARRY] else 0.07))
 	var open_glade := 1.0 - smoothstep(threshold, threshold + 0.12, g)
 	return maxf(1.0 - smoothstep(2.0, 13.0, d), open_glade)
 
@@ -1089,7 +1179,7 @@ func _openness_raw(x: float, z: float) -> float:
 ## elsewhere, more near the grove), deep-green broadleaf (baked atlas copy) everywhere else.
 func oak_is_golden(x: float, z: float, roll: float) -> bool:
 	var w := zone_weights(x, z)
-	var gold := clampf(w[Z_GROVE] * 1.25 + w[Z_TOP] * 0.18 + w[Z_ARENA] * 0.16, 0.0, 1.0)
+	var gold := clampf(w[Z_GROVE] * 1.25 + w[Z_TOP] * 0.55 + w[Z_ARENA] * 0.1, 0.0, 1.0)
 	return roll < maxf(gold, 0.10)
 
 
@@ -1125,7 +1215,7 @@ func _find_hero_spot() -> Vector2:
 	while radius <= 22.0:
 		for k in maxi(1, int(radius * 3.0)):
 			var angle := TAU * k / maxf(1.0, radius * 3.0)
-			var p: Vector2 = HERO_PREFERRED + Vector2(cos(angle), sin(angle)) * radius
+			var p: Vector2 = hero_preferred + Vector2(cos(angle), sin(angle)) * radius
 			var ok: bool = ground_ok(p.x, p.y, true) and float(terrain.slope_degrees(p.x, p.y)) < 14.0
 			var saved := hero
 			hero = Vector2.INF
@@ -1137,7 +1227,7 @@ func _find_hero_spot() -> Vector2:
 			if ok:
 				return p
 		radius += 1.0
-	return HERO_PREFERRED
+	return hero_preferred
 
 
 const HORSE_CLEAR := 3.9

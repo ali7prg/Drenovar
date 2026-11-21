@@ -346,6 +346,31 @@ func _mesh_for(asset: Dictionary, key: String, kind: int, variant: int, variant_
 	return mesh_keys[key]
 
 
+## Bare white dead tree (art/01 S-G, "built from kit pieces"): the golden oak v1 branch skeleton
+## (its bark surface only, every LOD) wearing the birch's white bark material.
+func _dead_tree_mesh() -> Array:
+	if mesh_keys.has("deadtree"):
+		return mesh_keys["deadtree"]
+	var oak: Dictionary = kit.tree_asset("lf_env_golden_oak")
+	var birch: Dictionary = kit.tree_asset("lf_env_birch")
+	if not oak.get("kit", false) or not birch.get("kit", false) or oak.variants.is_empty() or birch.variants.is_empty():
+		return []
+	var skeleton: Dictionary = oak.variants[0]
+	var bark: Material = (birch.variants[0].lods[0] as Mesh).surface_get_material(0)
+	var lods: Array = []
+	var tris: Array = []
+	for lod in 3:
+		var source: Mesh = skeleton.lods[lod]
+		var mesh := ArrayMesh.new()
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, source.surface_get_arrays(0))
+		mesh.surface_set_material(0, bark)
+		lods.append(mesh)
+		tris.append(ForestKit.mesh_triangles(mesh))
+	var index: int = canopy.register_mesh("deadtree", lods, tris, ForestCanopy.KIND_TREE, 4.5, 9.0)
+	mesh_keys["deadtree"] = [index, 1.0, "deadtree"]
+	return mesh_keys["deadtree"]
+
+
 func _tree_mesh(species: int, variant: int) -> Array:
 	var id: String = Rules.SPECIES[species]
 	var variants: Array = Rules.SPECIES_VARIANTS[species]
@@ -455,6 +480,12 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 			var y := height_at(xz.x, xz.y) + (float(item[6]) if item.size() > 6 else 0.0)
 			var basis := Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(Vector3.ONE * float(item[5]))
 			canopy.add_instance(mesh[0], Transform3D(basis, Vector3(xz.x, y - 0.03, xz.y)))
+	# art/01 S-G: the bare white dead tree at its mark (kit oak skeleton with birch bark).
+	if landmarks != null and landmarks.dead_tree_spot != Vector2.INF:
+		var dead := _dead_tree_mesh()
+		if not dead.is_empty():
+			var spot: Vector2 = landmarks.dead_tree_spot
+			canopy.add_instance(dead[0], Transform3D(Basis(Vector3.UP, 2.3).scaled(Vector3.ONE * 1.15), Vector3(spot.x, height_at(spot.x, spot.y) - 0.1, spot.y)))
 	# Waterfall outcrop (atlas v2): kit limestone rocks stacked into the cliff behind the fall.
 	var rock_mesh := _under_mesh(Rules.UNDERSTORY.find("rock"), 1)
 	for rock in ForestWater.outcrop_rocks():
@@ -861,6 +892,46 @@ func poi_position(target_id: String) -> Vector3:
 ## walk this polyline so they stay on the visual trail (same arc-length fraction / timing).
 func visual_path(path: Array) -> Array:
 	return atlas.visual_path(path) if atlas != null else path
+
+
+## WORLD_API v3.3 (atlas v2): the drawn trail (terrain-profile heights) from one atlas node to
+## another over the trail network (ForestAtlas.trail_legs: shortest, no transit through another
+## site's glade). Accepts CONTRACT ids: lf_key_NN / lf_site_NN:* → their glade, lf_boss_ancient_maw
+## → the arena, lf_home_reception → the horse origin. Empty when unknown or unreachable.
+func trail_path(from_id: String, to_id: String) -> PackedVector3Array:
+	var a := atlas_node_of(from_id)
+	var b := atlas_node_of(to_id)
+	var out := PackedVector3Array()
+	if a.is_empty() or b.is_empty():
+		return out
+	for leg in atlas.trail_legs(a, b):
+		var points := route_points(String(atlas.routes[leg[0]].id))
+		if not leg[1]:
+			points.reverse()
+		var start := 1 if not out.is_empty() else 0
+		for i in range(start, points.size()):
+			out.append(points[i])
+	return out
+
+
+## Atlas node of a CONTRACT target id ("" when it has none).
+func atlas_node_of(target_id: String) -> String:
+	var base := target_id.get_slice(":", 0).get_slice("#", 0)
+	if base.begins_with("lf_key_"):
+		base = "lf_site_" + base.trim_prefix("lf_key_")
+	match base:
+		"lf_boss_ancient_maw":
+			base = "lf_boss_arena"
+		"lf_home_reception":
+			base = "lf_horse_origin"
+	if atlas.site_by_id.has(base) or atlas.landmark_by_id.has(base):
+		return base
+	return ""
+
+
+## WORLD_API v3.3: the arena's entrance yaw (deg, atlas entranceYawDeg; the gap faces the trail).
+func arena_entrance_yaw_deg() -> float:
+	return atlas.arena_yaw_deg
 
 
 func route_points(route_id: String) -> PackedVector3Array:

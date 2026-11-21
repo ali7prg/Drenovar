@@ -322,6 +322,61 @@ func _nearest_in(grid: Dictionary, x: float, z: float, include_decor: bool, serv
 	return best
 
 
+## Shortest trail between two atlas nodes over the route network, as [[route index, forward]]
+## legs; never walks through another site's glade (the server navigation graph's rule: cages stand
+## on spurs, a glade only passes the walk on when the trip starts or ends there). [] if none.
+func trail_legs(from_id: String, to_id: String) -> Array:
+	if from_id == to_id:
+		return []
+	var adjacency := {}
+	for r in routes.size():
+		var route: Dictionary = routes[r]
+		if route.decor or String(route.from).is_empty() or String(route.to).is_empty():
+			continue
+		var pts: PackedVector3Array = route.points
+		var length := 0.0
+		for i in range(1, pts.size()):
+			length += Vector2(pts[i].x - pts[i - 1].x, pts[i].z - pts[i - 1].z).length()
+		if not adjacency.has(route.from):
+			adjacency[route.from] = []
+		if not adjacency.has(route.to):
+			adjacency[route.to] = []
+		adjacency[route.from].append([r, route.to, length, true])
+		adjacency[route.to].append([r, route.from, length, false])
+	if not adjacency.has(from_id) or not adjacency.has(to_id):
+		return []
+	var dist := {from_id: 0.0}
+	var back := {}
+	var done := {}
+	while true:
+		var best := ""
+		var best_d := INF
+		for node in dist:
+			if not done.has(node) and float(dist[node]) < best_d:
+				best_d = dist[node]
+				best = node
+		if best.is_empty() or best == to_id:
+			break
+		done[best] = true
+		if best != from_id and site_by_id.has(best):
+			continue          # no transit through another site's glade
+		for edge in adjacency[best]:
+			var other: String = edge[1]
+			var nd: float = best_d + float(edge[2])
+			if nd < float(dist.get(other, INF)):
+				dist[other] = nd
+				back[other] = [best, edge[0], edge[3]]
+	if not back.has(to_id):
+		return []
+	var legs: Array = []
+	var node := to_id
+	while node != from_id:
+		var step: Array = back[node]
+		legs.push_front([step[1], step[2]])
+		node = step[0]
+	return legs
+
+
 func route_points_world(route_id: String) -> PackedVector3Array:
 	var route: Dictionary = route_by_id.get(route_id, {})
 	return route.get("points", PackedVector3Array())

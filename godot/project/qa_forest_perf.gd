@@ -223,6 +223,8 @@ func actor_tris(forest: Node) -> Vector2i:
 
 func run_segments() -> void:
 	root.size = Vector2i(1366, 630)
+	if OS.get_cmdline_user_args().has("--no-msaa"):
+		root.msaa_3d = Viewport.MSAA_DISABLED       # look diagnosis (alpha-tested edge artefacts)
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
 	while game.get("scene_loading") or not is_instance_valid(game.get("stage")):

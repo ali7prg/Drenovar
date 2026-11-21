@@ -36,6 +36,8 @@ uniform float foliage_min_lod = 0.0;
 // painted gaps between the leaves read as shaded leaf mass, not black speckle. Faded out over mip 3..4, so the
 // zoom 68 / 120 look (and the impostor bake) keeps the painted contrast.
 uniform float foliage_floor = 0.75;
+// ... and a hue-kept luminance floor (linear) for the darkest painted texels (same fade).
+uniform float foliage_lum_floor = 0.05;
 uniform float painted_light_mix : hint_range(0.0, 1.0) = 0.3;
 uniform vec3 light_dir_world = vec3(0.45, 0.74, 0.5);   // direction TO the sun
 // Pass 2 colour grade of the forest materials only (kit vegetation, rocks, logs, landmarks; never the
@@ -168,8 +170,13 @@ void fragment() {
 			float lod = max(0.5 * log2(max(max(dot(du, du), dot(dv, dv)), 1e-8)), foliage_min_lod);
 			vec4 leaf = textureLod(albedo_texture, uv_a, lod);
 			vec3 soft = textureLod(albedo_texture, uv_a, lod + 2.5).rgb;
-			float lift = foliage_floor * (1.0 - smoothstep(3.0, 4.0, lod));
-			leaf.rgb = max(leaf.rgb, soft * lift);
+			float near = 1.0 - smoothstep(3.0, 4.0, lod);
+			float ll = dot(leaf.rgb, vec3(0.299, 0.587, 0.114));
+			float lmin = foliage_lum_floor * near;
+			if (ll < lmin) {
+				leaf.rgb *= min(lmin / max(ll, 1e-4), 4.0);
+			}
+			leaf.rgb = max(leaf.rgb, soft * foliage_floor * near);
 			c *= leaf;
 		} else {
 			c *= texture(albedo_texture, uv_a);

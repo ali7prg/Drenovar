@@ -138,6 +138,14 @@ LOD), `fog_culled` (instances removed because they stand deeper than 3 m inside 
     `device_spot()` stands the winch screen-left of its key spot (+1 m back) when the site's cage would hide it
     from the city camera; `device_focus()` is the mechanism UI camera target (winch zoom 24); `pit_void` is lifted
     0.29 m onto the terrain; the site name tag hides while a mechanism UI of that site is open.
+  - Close-zoom foliage (zoom 24–30: mechanism UI, battles). Identified with `--tint-kinds`: the dark-speckled blobs
+    round the glades are the kit brambles and young (small-scale) golden oaks. The speckle is the dark painted
+    interior of their leaf-card tiles. The painted include now samples kit leaf cards (`lf_foliage*`, cutout) no
+    finer than mip `foliage_min_lod` (`ForestKit.FOLIAGE_MIN_LOD` 1.6), lifts texels darker than `foliage_floor`
+    (0.75) x the card's own colour 2.5 mips coarser, and applies a hue-kept luminance floor
+    (`foliage_lum_floor`, 0.05 linear). Both lifts fade out over mip 3..4, so zoom 68 / 120 and the impostor bake
+    keep the painted contrast. `--no-foliage-min-lod` turns it off (A/B). Impostor atlas re-shipped (the include's
+    md5 is part of the signature).
   - QA: `qa_forest_perf.gd` look segments `t_winch_ui` (mechanism UI) and `t_bush_z120`; `--tint-kinds` (with
     `--save-frames`) also saves `<segment>_tint.png` with every forest MultiMesh drawn flat in its kind's colour.
 

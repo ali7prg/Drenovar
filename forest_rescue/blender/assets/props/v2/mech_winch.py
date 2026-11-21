@@ -33,7 +33,7 @@ PARAMS = dict(AX=1.42, L2=0.45, Rc=0.36, FXL=1.05, FXR=0.86, HX=1.02, GX=-0.83, 
               SPL=0.75, WH=0.42, WR=0.4, GR=1.0, TB=0.6,     # leg splay, pit wall height / width, ground ring, top block
               LW=0.26, FY=0.42, TZ=0.75, GRr=0.48, SH=0.42,   # leg width, front/back frame offset, tie drop below
                                                               # the axle, gear radius, stone pile height
-              SPIL=0.26, SPIR=-0.06, PX=0.0)                  # inner leg splay (left / right trestle), pit x offset
+              SPIL=0.26, SPIR=-0.06, PX=0.0, PSX=-0.36)       # ... back post x (art/10: under the tie, left of the rope)                  # inner leg splay (left / right trestle), pit x offset
 FREE = ["AX", "L2", "Rc", "FXL", "FXR", "HX", "GX", "KX", "Ls", "Ac", "Lg", "Wc", "Hc", "Zt"]
 PRIOR = 0.2
 
@@ -153,9 +153,6 @@ def build(A, p, lod):
                        chamfer=0.02 if lod == 0 else 0.0)
             g.beam((x - spread[-1] * 0.62, y * 0.95, 0.5), (x + spread[1] * 0.62, y * 0.95, 0.5), 0.14, 0.14, mat="wood", tag="cross",
                    chamfer=0.012 if lod == 0 else 0.0)
-            if sx < 0 and sy > 0:      # diagonal brace from the left trestle's inner leg to the tie (art/10)
-                g.beam((x + p["SPIL"] * 0.55, y * 0.8, 0.45), (x + p["SPIL"] + 0.35, p["FY"] * 0.5, AX - p["TZ"] - 0.05),
-                       0.12, 0.12, mat="wood", tag="brace")
             g.box((x - spread[-1], y * 1.15, 0.08), (0.3, 0.3, 0.2), mat="iron", tag="shoe")
             g.box((x + spread[1], y * 1.15, 0.08), (0.3, 0.3, 0.2), mat="iron", tag="shoe")
         g.box((x, 0.0, AX + p["TB"] - 0.02), (0.26, 0.74, 0.22), mat="wood", tag="top_block", chamfer=0.02 if lod == 0 else 0.0)
@@ -166,6 +163,14 @@ def build(A, p, lod):
     # tie beam between the trestles (lower, at the back) + front brace
     g.beam((-p["FXL"], p["FY"] * 0.5, AX - p["TZ"]), (p["FXR"], p["FY"] * 0.5, AX - p["TZ"]), 0.17, 0.17, mat="wood",
            tag="tie", chamfer=0.015 if lod == 0 else 0.0)
+    # back post under the tie left of the rope, on an iron shoe, braced from the left trestle (art/10)
+    post_x = p["PSX"]
+    yb_post = p["FY"] * 0.5
+    g.beam((post_x, yb_post, 0.0), (post_x, yb_post, AX - p["TZ"] + 0.05), p["LW"] * 0.9, p["LW"] * 0.9, mat="wood",
+           tag="post", chamfer=0.02 if lod == 0 else 0.0)
+    g.box((post_x, yb_post, 0.1), (0.3, 0.3, 0.2), mat="iron", tag="shoe")
+    g.beam((-p["FXL"] + p["SPIL"] * 0.7, yb_post, 0.55), (post_x - 0.05, yb_post, AX - p["TZ"] - 0.12), 0.13, 0.13,
+           mat="wood", tag="brace")
     # ---- drum node: wooden core, rope coil, iron flange, ratchet gear (left), axle through both trestles
     drum = A.part("drum", None, (0.0, 0.0, AX))
     dg = drum.geo[lod]
@@ -326,11 +331,11 @@ def solve(views):
     params, reps = pv2.solve_views(views, points, PARAMS, FREE, prior_sigma=PRIOR)
     best = _silhouette_iou(params, views)[0]
     # sane ranges only: a taller well wall or a wider ground patch can buy silhouette IoU without looking like art/10
-    grids = {"SPL": np.arange(0.3, 0.91, 0.05), "WH": np.arange(0.06, 0.36, 0.03), "SH": np.arange(0.25, 0.61, 0.05),
-             "GR": np.arange(0.3, 1.01, 0.1), "TB": np.arange(0.3, 0.71, 0.05), "PR": np.arange(0.55, 0.86, 0.05),
-             "LW": np.arange(0.18, 0.34, 0.03), "FY": np.arange(0.3, 0.71, 0.05), "TZ": np.arange(0.5, 1.01, 0.05),
-             "GRr": np.arange(0.36, 0.61, 0.04), "SPIL": np.arange(-0.1, 0.51, 0.06),
-             "SPIR": np.arange(-0.2, 0.41, 0.06), "PX": np.arange(-0.3, 0.21, 0.05)}
+    grids = {"SPL": np.arange(0.3, 0.91, 0.05), "WH": np.arange(0.06, 0.36, 0.03), "SH": np.arange(0.25, 0.81, 0.05),
+             "GR": np.arange(0.3, 1.41, 0.1), "TB": np.arange(0.3, 0.71, 0.05), "PR": np.arange(0.55, 0.86, 0.05),
+             "LW": np.arange(0.18, 0.34, 0.03), "FY": np.arange(0.25, 0.56, 0.05), "TZ": np.arange(0.5, 1.01, 0.05),
+             "GRr": np.arange(0.36, 0.61, 0.04), "SPIL": np.arange(0.14, 0.39, 0.06),
+             "SPIR": np.arange(-0.18, 0.07, 0.06), "PX": np.arange(-0.3, 0.21, 0.05), "PSX": np.arange(-0.5, -0.19, 0.05)}
     for _round in range(2):
         for key, grid in grids.items():
             for val in grid:

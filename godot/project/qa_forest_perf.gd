@@ -129,7 +129,13 @@ func run_segments() -> void:
 	var stage: Node3D = game.stage
 	var world: Node3D = stage.get("forest_world")
 	var results: Array = []
+	var only := ""
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--only="):
+			only = arg.trim_prefix("--only=")
 	for spec in SEGMENTS:
+		if not only.is_empty() and not String(spec.name).begins_with(only):
+			continue
 		# The city stage can be rebuilt when a state is accepted: always use the live one.
 		game.close_modal()
 		forest.actors.on_stage_changed()
@@ -197,6 +203,7 @@ func run_segments() -> void:
 			inst.append(int(snap.get("instances", 0)) + a.y)
 			shown_max = maxi(shown_max, a.y)
 		if OS.get_cmdline_user_args().has("--debug"):
+			print("CAM ", spec.name, " zoom=", game.stage.camera_zoom, " target=", game.stage.camera_target, " same=", forest.stage == game.stage, " unlocked=", forest.client.unlocked(), " active=", forest.city_active(), " fproc=", forest.can_process(), " lodzoom=", forest.actors.lod_zoom)
 			for id in forest.actors.rigs:
 				var r = forest.actors.rigs[id]
 				if is_instance_valid(r):

@@ -422,11 +422,27 @@ static func painted_material(original: Material, has_colors: bool, k: float, win
 	material.set_shader_parameter("light_dir_world", light_dir.normalized())
 	material.set_shader_parameter("use_ao", has_colors)
 	material.set_shader_parameter("vertex_wind", has_colors and wind)
+	material.set_shader_parameter("grade_regions", is_forest_material(name))
 	if fade:
 		materials.append(material)
 	fog_receivers.append(material)
 	_painted[key] = material
 	return material
+
+
+## Pass 2: the art/01 region colour grade applies to the forest's own materials only (kit
+## vegetation, rocks, logs, landmark / arena / camp materials) — never actors, cages, mechanisms,
+## artifacts or anything of the city.
+const FOREST_MATERIAL_PREFIXES := ["lf_bark", "lf_foliage", "lf_rock", "lf_env_", "lm_", "lf_arena", "m_lf_arena",
+	"lf_proc_", "lf_props_supplies", "lf_boss_arena"]
+
+
+static func is_forest_material(material_name: String) -> bool:
+	var n := material_name.to_lower()
+	for prefix in FOREST_MATERIAL_PREFIXES:
+		if n.begins_with(prefix):
+			return true
+	return false
 
 
 ## Replaces every surface material under `root` by its painted override (landmarks, arena).

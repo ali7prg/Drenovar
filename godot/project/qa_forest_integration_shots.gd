@@ -73,6 +73,10 @@ func shoot(name: String) -> void:
 	saved.append(path)
 
 func fresh(state_name: String) -> void:
+	await fresh_dict(fixture(state_name))
+
+
+func fresh_dict(state: Dictionary) -> void:
 	game.close_modal()
 	if forest.mech.is_open():
 		forest.mech.close()
@@ -80,7 +84,6 @@ func fresh(state_name: String) -> void:
 	forest.actors.first_state = true
 	forest.client.adv = {}
 	forest.client.primed = false
-	var state := fixture(state_name)
 	clock = float(state.get("adventure", {}).get("serverTime", -1.0))
 	forest.client.manual_clock_ms = clock
 	game.accept(state)
@@ -516,6 +519,78 @@ func run() -> void:
 		settle_world()
 		await frames(2)
 		await shoot("boss_85_z68")
+
+	# -------------------------------------------------- atlas v2 pass 2: every glade as art/01 paints it
+	# (QA projection: all 12 sites discovered, cages closed with their captives, guardians gone,
+	# camps lit, the whole forest revealed, no HUD), the same zone frames as qa_forest_world_shots.
+	if wanted("v2all"):
+		var all_state: Dictionary = fixture("boss_unlocked")
+		var adv: Dictionary = all_state.adventure
+		for poi in adv.pois:
+			if String(poi.get("kind", "")) != "site":
+				continue
+			poi.step = 3
+			poi.cagePose = "closed"
+			poi.discovered = true
+			poi.available = true
+			for person in poi.get("captives", []):
+				person.state = "caged"
+			if poi.get("guardian") is Dictionary:
+				poi.guardian.state = "defeated"
+			if poi.get("artifact") is Dictionary:
+				poi.artifact.state = "held"
+				poi.artifact.held = true
+		for site_entry in adv.campaign.sites:
+			site_entry.step = 3
+		adv.campaign.rescuedIds = []
+		adv.campaign.rescuedCount = 0
+		adv.campaign.phase = "rescue"
+		var bits := PackedByteArray()
+		bits.resize(392)
+		bits.fill(255)
+		adv.fog.visibleBase64 = Marshalls.raw_to_base64(bits)
+		adv.fog.revision = 9999
+		await fresh_dict(all_state)
+		game.hud.visible = false
+		if forest.get("hud") != null:
+			forest.hud.visible = false
+		look(Vector3(-80, 0, -14), 68.0)
+		await preload_actors(2.0)
+		forest.world.fog.set_dim(0.0)
+		forest.world.fog.finish_now()
+		var zones := [["grove", Vector3(-84, 0, -16)], ["stones", Vector3(-56, 0, -70)], ["west", Vector3(-76, 0, 52)],
+			["quarry", Vector3(-8, 0, 94)], ["south_pines", Vector3(62, 0, 92)], ["lake", Vector3(94, 0, 44)],
+			["river_bridge", Vector3(88, 0, 16)], ["east", Vector3(94, 0, -40)], ["waterfall", Vector3(22, 0, -66)],
+			["arena", Vector3(20, 0, -88)]]
+		for spec in zones:
+			look(spec[1], 68.0)
+			settle_world()
+			await preload_actors(0.4)
+			await frames(12)
+			await shoot("v2all_full_%s_z68" % spec[0])
+		for spec in [["grove", Vector3(-82, 0, -15)], ["south_pines", Vector3(60, 0, 92)], ["lake", Vector3(92, 0, 42)],
+				["quarry", Vector3(-6, 0, 98)], ["waterfall", Vector3(22, 0, -65)], ["arena", Vector3(19, 0, -90)],
+				["river_bridge", Vector3(90, 0, 20)], ["east", Vector3(93, 0, -38)]]:
+			look(spec[1], 34.0)
+			settle_world()
+			await preload_actors(0.3)
+			await frames(10)
+			await shoot("v2all_close_%s_z34" % spec[0])
+		look(Vector3(0, 0, 0), 120.0)
+		settle_world()
+		await frames(20)
+		await shoot("v2all_overview_z120")
+		root.size = Vector2i(1536, 1024)
+		await frames(6)
+		look(Vector3(17.8, 0, 13.6), 195.0)
+		settle_world()
+		await frames(20)
+		await shoot("v2all_full_overview_art01")
+		root.size = Vector2i(1366, 630)
+		await frames(6)
+		game.hud.visible = true
+		if forest.get("hud") != null:
+			forest.hud.visible = true
 
 	# -------------------------------------------------- art/01 overview: the whole revealed forest
 	if wanted("overview"):

@@ -31,7 +31,7 @@ const LIGHT_MIX := 0.35
 const MARK_LANDMARKS := [
 	{"id": "lf_env_ruined_watchpost", "mark": "lf_mark_ruined_arch", "back": 6.5, "footprint": 5.0},
 	{"id": "lf_env_standing_stones", "mark": "lf_mark_standing_stones", "back": 0.0, "footprint": 5.4, "face_node": "lf_junction_stones", "scale": 1.45},
-	{"id": "lf_env_quarry_mine", "mark": "lf_mark_quarry_mine", "back": 6.0, "footprint": 6.0},
+	{"id": "lf_env_quarry_mine", "mark": "lf_mark_quarry_mine", "back": 7.5, "footprint": 8.0, "scale": 1.5},
 	{"id": "lf_env_hunter_shelter", "mark": "lf_mark_hunter_shelter", "back": 5.2, "footprint": 4.6},
 ]
 ## Dead-tree set around lf_mark_dead_tree (offsets in the frame facing the trail end: +Z toward it).
@@ -446,6 +446,11 @@ func lod_paths(id: String, dir := "") -> Array:
 ## the supply items picked for this camp, the lean-to (platform tilted onto two posts).
 func _dress(node: Node3D, placement: Dictionary, lod: int) -> void:
 	var piece: String = placement.get("piece", "")
+	if placement.id == CAMP.id and piece in ["camp", "frame"]:
+		# pass 2: the camp's own painted ground patch (trampled dirt, gravel, stones) under the tent
+		for part in node.find_children("*", "Node3D", true, false):
+			if String(part.name).contains("_base"):
+				(part as Node3D).visible = true
 	if placement.id == CAMP.id and piece in ["frame", "fire", "fire_bench"]:
 		for part: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
 			if String(part.name).contains("cloth"):
@@ -772,7 +777,7 @@ func update_view(target: Vector3, zoom: float, visible_fn: Callable) -> int:
 ## loaded on a worker thread and swapped in; the previous instance is freed, so only one
 ## arena file stays resident. Painted kit material like the landmarks.
 const ARENA_FILES := ["lf_boss_arena_assembled.glb", "lf_boss_arena_assembled_lod1.glb", "lf_boss_arena_assembled_lod2.glb"]
-const ARENA_LOD_ZOOM := [34.0, 85.0]
+const ARENA_LOD_ZOOM := [34.0, 130.0]   # pass 2: the full file's cliffs/fossil wall/banners up to overview zoom
 var arena_node: Node3D
 var arena_cull: Array = []        # [[MeshInstance3D, Vector2 xz centre, radius]] of the shown file
 var arena_visible_fn := Callable()
@@ -857,6 +862,7 @@ func _swap_arena(scene: Variant, lod: int) -> void:
 	var node: Node3D = (scene as PackedScene).instantiate()
 	node.name = "LOD%d" % lod
 	ForestKit.paint_scene(node, LIGHT_MIX)
+	_shape_arena(node)
 	arena_root.add_child(node)
 	for player: AnimationPlayer in node.find_children("*", "AnimationPlayer", true, false):
 		if not player.get_animation_list().is_empty():
@@ -896,6 +902,51 @@ func _swap_arena(scene: Variant, lod: int) -> void:
 		world.call("_register_fog_receivers")
 	_cull_arena()
 	apply_arena_state(arena_state)
+
+
+## Pass 2 (art/01, art/08 from the city camera): the cliff ring, the fossil wall (ribs + skull) and
+## the banners stand taller (×1.35 / ×1.55 / ×1.3 in height, the wall also 1.25× wider) so they read
+## at zoom 68–120 instead of a sand pit, and the painted floor patch is clipped to the ring (its
+## path tongues beyond 21 m would hang over the river gorge at the new spot) except the entrance.
+const ARENA_LIFT := {"rock_": Vector3(1.0, 1.35, 1.0), "fossil_wall": Vector3(1.25, 1.55, 1.25), "banner_": Vector3(1.0, 1.3, 1.0)}
+const ARENA_FLOOR_KEEP := 21.0
+
+
+func _shape_arena(node: Node3D) -> void:
+	for part: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
+		var pname := String(part.name)
+		var parent_name := String(part.get_parent().name) if part.get_parent() != null else ""
+		for prefix in ARENA_LIFT:
+			if pname.begins_with(prefix) or parent_name.begins_with(prefix):
+				var holder: Node3D = part if pname.begins_with(prefix) else part.get_parent()
+				var box: AABB = holder.transform * part.get_aabb() if holder == part else holder.transform * (part.transform * part.get_aabb())
+				var pivot := Vector3(box.get_center().x, box.position.y, box.get_center().z)
+				var k: Vector3 = ARENA_LIFT[prefix]
+				holder.transform = Transform3D(Basis.from_scale(k), pivot - pivot * k) * holder.transform
+				break
+		if pname.begins_with("floor") and part.mesh != null:
+			part.mesh = _clip_floor(part.mesh, part.transform)
+
+
+func _clip_floor(mesh: Mesh, xf: Transform3D) -> Mesh:
+	var out := ArrayMesh.new()
+	for s in mesh.get_surface_count():
+		var arrays := mesh.surface_get_arrays(s)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var index: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array(range(verts.size()))
+		var kept := PackedInt32Array()
+		for t in range(0, index.size(), 3):
+			var c := xf * ((verts[index[t]] + verts[index[t + 1]] + verts[index[t + 2]]) / 3.0)
+			var angle := rad_to_deg(atan2(c.z, c.x))
+			var entrance := angle > 60.0 and angle < 120.0          # local +Z: the gap toward the trail
+			if Vector2(c.x, c.z).length() <= ARENA_FLOOR_KEEP or entrance:
+				kept.append_array(PackedInt32Array([index[t], index[t + 1], index[t + 2]]))
+		if kept.is_empty():
+			continue
+		arrays[Mesh.ARRAY_INDEX] = kept
+		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		out.surface_set_material(out.get_surface_count() - 1, mesh.surface_get_material(s))
+	return out
 
 
 func _cull_arena() -> void:

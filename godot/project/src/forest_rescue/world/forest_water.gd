@@ -31,7 +31,8 @@ const ROCK_HEIGHT := 5.76               # moss rock v1 LOD0 top (model space)
 const FALLS_LIP := Vector2(20.7, -66.6)
 const FALLS_FACING := Vector2(0.7071, 0.7071)
 const FALLS_WIDTH := 4.2
-const MARSH_POOLS := [[Vector2(68.0, 104.0), 3.0], [Vector2(73.5, 102.0), 2.0], [Vector2(64.5, 99.0), 1.8]]
+## Pass 2: the marsh pools sit right below glade 07's clearing (art/01 S-G), in the camera's view.
+const MARSH_POOLS := [[Vector2(70.5, 101.5), 3.4], [Vector2(65.0, 98.8), 2.6], [Vector2(63.2, 104.2), 2.2], [Vector2(76.0, 99.0), 1.9]]
 
 var atlas: RefCounted
 var items: Array = []        # [{node: MeshInstance3D, center: Vector2, radius}]

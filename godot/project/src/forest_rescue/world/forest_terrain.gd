@@ -33,7 +33,7 @@ const PAD_EXTRA_GRADE_DEG := 4.0
 const GLADE_DIRT := 8.5               # m: warm trampled-dirt pad under every glade's camp (pass 2)
 const WARM_DIRT := Color(1.1, 0.98, 0.8)
 const JUNCTION_LANDING := 2.4         # m: trails are level within this radius of a junction node      # grade a trail may gain on top of its atlas profile to meet its ends
-const TERRAIN_VERSION := 22
+const TERRAIN_VERSION := 23
 
 ## Atlas v2 region ground tints (ForestAtlas.REGION_NAMES order, art/01 crops at zoom 68):
 ## sunny warm meadow under the golden grove, olive mixed oaks, dry grey-olive arena rock, fresh
@@ -43,9 +43,9 @@ const REGION_TINTS := [
 	Color(1.07, 1.03, 0.82),   # golden_grove
 	Color(1.00, 1.01, 0.86),   # west_mixed
 	Color(0.96, 0.95, 0.88),   # arena_rock
-	Color(0.93, 1.05, 0.88),   # east_willows
+	Color(0.84, 0.95, 0.80),   # east_willows (art/01 right edge: deep shaded green)
 	Color(0.90, 1.01, 0.92),   # river
-	Color(0.70, 0.81, 0.73),   # south_pines
+	Color(0.60, 0.70, 0.62),   # south_pines (dark mossy floor under the pines)
 	Color(1.03, 1.00, 0.92),   # sw_quarry
 	Color(0.98, 1.06, 0.86),   # town_belt
 ]

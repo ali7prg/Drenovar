@@ -44,6 +44,37 @@ void vertex() {
 	NORMAL = normalize((VIEW_MATRIX * vec4(cross(right, up), 0.0)).xyz);
 }
 
+float grade_sector(float phi, float a, float b, float blend) {
+	float best = 0.0;
+	for (int k = -1; k <= 1; k++) {
+		float q = phi + 360.0 * float(k);
+		best = max(best, smoothstep(a - blend, a + blend, q) * (1.0 - smoothstep(b - blend, b + blend, q)));
+	}
+	return best;
+}
+
+float grade_river_center(float z) {
+	float k = (z + 25.0) / 15.0;
+	return z + 66.0 + 8.0 * sin(z * 0.068) + 3.5 * cos(z * 0.127 + 0.3) + 9.0 * exp(-k * k);
+}
+
+// Same art/01 region grade as forest_painted.gdshaderinc (impostors are always forest).
+vec3 grade_factors(vec3 p) {
+	float u = (p.x - p.z) * 0.70710678;
+	float w = (p.x + p.z) * 0.70710678;
+	float phi = degrees(atan(-w, u));
+	phi = phi < 0.0 ? phi + 360.0 : phi;
+	float outer = smoothstep(56.0, 66.0, max(abs(p.x), abs(p.z)));
+	float east = smoothstep(-4.0, 6.0, p.x - grade_river_center(p.z));
+	float grove = grade_sector(phi, 58.0, 214.0, 12.0) * (1.0 - east);
+	float south = grade_sector(phi, 232.0, 345.0, 12.0) * (1.0 - east);
+	float rest = clamp(1.0 - grove - south - east, 0.0, 1.0);
+	float sat = 1.0 + outer * (0.28 * grove - 0.1 * south - 0.04 * east);
+	float con = 1.0 + outer * (0.16 * grove + 0.24 * south + 0.2 * east + 0.14 * rest);
+	float lum = 1.0 + outer * (0.02 * grove - 0.2 * south - 0.18 * east);
+	return vec3(sat, con, lum);
+}
+
 void fragment() {
 	vec2 cell_xy = vec2(mod(cell, grid), floor(cell / grid));
 	vec4 c = texture(atlas, (cell_xy + clamp(UV, vec2(0.004), vec2(0.996))) / grid);
@@ -54,6 +85,12 @@ void fragment() {
 	// (approximation: the quad point itself) — buried parts fade into the mist colour, parts above
 	// the cloud top take the soft mist tint. The whole tree always keeps its crown.
 	vec3 fog = fog_receive(world, TIME);
+	{
+		vec3 gf = grade_factors(world);
+		float lum = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+		c.rgb = max(mix(vec3(lum), c.rgb, gf.x), vec3(0.0));
+		c.rgb = max((c.rgb - 0.32) * gf.y + 0.32, vec3(0.0)) * gf.z;
+	}
 	c.rgb = mix(c.rgb * (1.0 - fog.z), fog_silhouette, max(fog.y, fog.x));
 	ALBEDO = c.rgb;
 }

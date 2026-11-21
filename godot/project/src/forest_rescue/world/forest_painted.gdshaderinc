@@ -30,6 +30,42 @@ uniform vec3 tint_hair = vec3(1.0);
 uniform float alpha_cut = 0.5;
 uniform float painted_light_mix : hint_range(0.0, 1.0) = 0.3;
 uniform vec3 light_dir_world = vec3(0.45, 0.74, 0.5);   // direction TO the sun
+// Pass 2 colour grade of the forest materials only (kit vegetation, rocks, logs, landmarks; never the
+// city): saturation and luminance contrast around a mid pivot, tuned per zone against art/01.
+uniform bool grade_regions = false;      // ForestKit sets it on forest materials only
+uniform float grade_pivot = 0.32;
+
+float grade_sector(float phi, float a, float b, float blend) {
+	float best = 0.0;
+	for (int k = -1; k <= 1; k++) {
+		float q = phi + 360.0 * float(k);
+		best = max(best, smoothstep(a - blend, a + blend, q) * (1.0 - smoothstep(b - blend, b + blend, q)));
+	}
+	return best;
+}
+
+float grade_river_center(float z) {
+	float k = (z + 25.0) / 15.0;
+	return z + 66.0 + 8.0 * sin(z * 0.068) + 3.5 * cos(z * 0.127 + 0.3) + 9.0 * exp(-k * k);
+}
+
+// (saturation, contrast, luminance) multipliers by art/01 region (city camera screen angle around the
+// town, river side): saturated sunny golden grove / west oaks, dark misty south pines and east bank.
+vec3 grade_factors(vec3 p) {
+	float u = (p.x - p.z) * 0.70710678;
+	float w = (p.x + p.z) * 0.70710678;
+	float phi = degrees(atan(-w, u));
+	phi = phi < 0.0 ? phi + 360.0 : phi;
+	float outer = smoothstep(56.0, 66.0, max(abs(p.x), abs(p.z)));
+	float east = smoothstep(-4.0, 6.0, p.x - grade_river_center(p.z));
+	float grove = grade_sector(phi, 58.0, 214.0, 12.0) * (1.0 - east);
+	float south = grade_sector(phi, 232.0, 345.0, 12.0) * (1.0 - east);
+	float rest = clamp(1.0 - grove - south - east, 0.0, 1.0);
+	float sat = 1.0 + outer * (0.28 * grove - 0.1 * south - 0.04 * east);
+	float con = 1.0 + outer * (0.16 * grove + 0.24 * south + 0.2 * east + 0.14 * rest);
+	float lum = 1.0 + outer * (0.02 * grove - 0.2 * south - 0.18 * east);
+	return vec3(sat, con, lum);
+}
 uniform bool use_ao = true;
 uniform vec2 edge_fade = vec2(0.10, 0.30);
 uniform bool vertex_wind = true;
@@ -111,6 +147,12 @@ void fragment() {
 #endif
 	float lambert = max(dot(normalize(v_wn), normalize(light_dir_world)), 0.0);
 	vec3 lit = c.rgb * mix(1.0, lambert, painted_light_mix) * v_ao;
+	if (grade_regions) {
+		vec3 gf = grade_factors(world_pos);
+		float lum = dot(lit, vec3(0.299, 0.587, 0.114));
+		lit = max(mix(vec3(lum), lit, gf.x), vec3(0.0));
+		lit = max((lit - grade_pivot) * gf.y + grade_pivot, vec3(0.0)) * gf.z;
+	}
 	vec3 col = mix(lit * (1.0 - fog.z), fog_silhouette, max(fog.y, fog.x));
 #ifdef FADE
 	// Composite over the opaque scene (screen copy, this tree is not in it): every fragment that

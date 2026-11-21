@@ -487,7 +487,7 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 		var dead := _dead_tree_mesh()
 		if not dead.is_empty():
 			var spot: Vector2 = landmarks.dead_tree_spot
-			canopy.add_instance(dead[0], Transform3D(Basis(Vector3.UP, 2.3).scaled(Vector3.ONE * 1.15), Vector3(spot.x, height_at(spot.x, spot.y) - 0.1, spot.y)))
+			canopy.add_instance(dead[0], Transform3D(Basis(Vector3.UP, 2.3).scaled(Vector3.ONE * 1.45), Vector3(spot.x, height_at(spot.x, spot.y) - 0.1, spot.y)))
 	# Waterfall outcrop (atlas v2): kit limestone rocks stacked into the cliff behind the fall.
 	var rock_mesh := _under_mesh(Rules.UNDERSTORY.find("rock"), 1)
 	for rock in ForestWater.outcrop_rocks():

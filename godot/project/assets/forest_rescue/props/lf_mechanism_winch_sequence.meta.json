@@ -2,13 +2,13 @@
   "id": "lf_mechanism_winch_sequence",
   "generation": "props v2 material path: measured blueprint + solved painting camera + modelled geometry + seamless painted-style material tiles (colours measured on the painting)",
   "tris": {
-    "LOD0": 5901,
-    "LOD1": 3648,
-    "LOD2": 2264
+    "LOD0": 5853,
+    "LOD1": 3652,
+    "LOD2": 2268
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 3089,
+      "root": 3041,
       "drum": 328,
       "big_gear": 748,
       "pinion": 520,
@@ -21,7 +21,7 @@
       "pit_void": 2
     },
     "LOD1": {
-      "root": 1387,
+      "root": 1391,
       "drum": 220,
       "big_gear": 724,
       "pinion": 496,
@@ -34,7 +34,7 @@
       "pit_void": 2
     },
     "LOD2": {
-      "root": 968,
+      "root": 972,
       "drum": 136,
       "big_gear": 346,
       "pinion": 244,
@@ -118,15 +118,15 @@
   "vertexAONote": "COLOR_0.a = sqrt((F - 0.42) / 0.58), F = baked ambient occlusion x soft sun shadow (rest pose; moving parts by themselves); actor_rig enables the painted shader's use_ao for this asset",
   "vertexAOStats": {
     "LOD0": {
-      "mean": 0.68,
+      "mean": 0.731,
       "p10": 0.42
     },
     "LOD1": {
-      "mean": 0.665,
+      "mean": 0.72,
       "p10": 0.42
     },
     "LOD2": {
-      "mean": 0.66,
+      "mean": 0.714,
       "p10": 0.42
     }
   },
@@ -140,7 +140,7 @@
     ],
     "max": [
       2.464,
-      3.039,
+      3.045,
       1.744
     ]
   },
@@ -342,17 +342,17 @@
   "qa": {
     "views": {
       "main": {
-        "iou_raw": 0.7857,
-        "iou_filled": 0.873,
-        "colour_err": 0.148,
-        "colour_err_core": 0.1476,
+        "iou_raw": 0.7843,
+        "iou_filled": 0.8718,
+        "colour_err": 0.1458,
+        "colour_err_core": 0.1457,
         "ref_px": 129699,
-        "render_px": 110191,
+        "render_px": 109894,
         "ignored_px": 8126,
         "camera_rms_px": 2.5,
         "camera_max_px": 5.03,
         "camera_points": 17,
-        "iou_raw_open_mask": 0.8085
+        "iou_raw_open_mask": 0.8071
       }
     },
     "cameras": {
@@ -400,18 +400,18 @@
         ]
       },
       "wood": {
-        "px": 35498,
+        "px": 34228,
         "mean_srgb": [
-          150,
+          149,
           116,
           84
         ]
       },
       "iron": {
-        "px": 8716,
+        "px": 8616,
         "mean_srgb": [
           126,
-          98,
+          99,
           77
         ]
       },
@@ -432,11 +432,11 @@
         ]
       },
       "brass": {
-        "px": 1404,
+        "px": 2584,
         "mean_srgb": [
-          146,
-          106,
-          65
+          158,
+          118,
+          78
         ]
       },
       "void": {
@@ -451,9 +451,9 @@
     "calibration": {
       "stone": {
         "gain": [
-          1.426,
-          1.398,
-          1.274
+          1.393,
+          1.364,
+          1.242
         ],
         "px": 9270,
         "painting": [
@@ -462,16 +462,16 @@
           63
         ],
         "render": [
-          70,
-          58,
-          49
+          72,
+          59,
+          50
         ]
       },
       "ground": {
         "gain": [
-          1.042,
-          1.054,
-          0.993
+          1.032,
+          1.043,
+          0.983
         ],
         "px": 11270,
         "painting": [
@@ -480,34 +480,34 @@
           79
         ],
         "render": [
-          123,
-          100,
-          80
+          124,
+          101,
+          81
         ]
       },
       "wood": {
         "gain": [
-          1.006,
-          1.052,
-          1.133
+          1.119,
+          1.181,
+          1.288
         ],
-        "px": 41075,
+        "px": 39415,
         "painting": [
-          101,
-          78,
-          58
+          99,
+          77,
+          57
         ],
         "render": [
-          100,
-          74,
-          51
+          89,
+          65,
+          45
         ]
       },
       "rope": {
         "gain": [
           0.873,
-          0.886,
-          0.931
+          0.889,
+          0.937
         ],
         "px": 8827,
         "painting": [
@@ -522,13 +522,13 @@
         ]
       }
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_winch_sequence/v2_iter19_*",
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_winch_sequence/v2_iter24_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_winch --iter 19",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_winch --iter 24",
   "mechanism": "winch_sequence",
   "symbol_targets": {
     "brake": {
@@ -545,30 +545,30 @@
       "clip": "lf_rope_release",
       "nodes": {
         "drum": {
-          "rotation_x_deg": -138.73
+          "rotation_x_deg": -145.47
         },
         "crank": {
-          "rotation_x_deg": -138.73
+          "rotation_x_deg": -145.47
         },
         "big_gear": {
-          "rotation_about_own_axis_deg": -138.73,
+          "rotation_about_own_axis_deg": -145.47,
           "axis": "drum axle turned GT about the vertical toward the viewer",
           "teeth": 25
         },
         "pinion": {
-          "rotation_about_own_axis_deg": 216.77,
+          "rotation_about_own_axis_deg": 227.29,
           "ratio": 1.5625,
           "teeth": 16,
           "axis": "parallel to the big gear's"
         },
         "rope": {
-          "scale_y": 0.5847,
+          "scale_y": 0.5645,
           "note": "rope node scales along its own length (glTF Y)"
         },
         "chest": {
           "translation_offset": [
             0,
-            1.03,
+            1.08,
             0
           ]
         },
@@ -598,7 +598,7 @@
   "sockets": {
     "artifact_spot_raised": [
       0.0,
-      0.2323,
+      0.2823,
       0.23
     ]
   },

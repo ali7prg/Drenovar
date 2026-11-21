@@ -347,6 +347,14 @@ func run_segments() -> void:
 		if not save_frames.is_empty():
 			await RenderingServer.frame_post_draw
 			root.get_texture().get_image().save_png(save_frames.path_join(String(spec.name) + ".png"))
+			if OS.get_cmdline_user_args().has("--tint-kinds") and world != null:
+				# identification frame: every forest MultiMesh drawn flat in its kind's colour
+				tint_kinds(world)
+				for f in 3:
+					await process_frame
+				await RenderingServer.frame_post_draw
+				root.get_texture().get_image().save_png(save_frames.path_join(String(spec.name) + "_tint.png"))
+				tint_kinds(world, true)
 		for arr in [draws, prims, env, actors, totals, inst]:
 			arr.sort()
 		var row := {"segment": spec.name, "zoom": spec.zoom,
@@ -371,6 +379,30 @@ func run_segments() -> void:
 	file.store_string(JSON.stringify(report, "  "))
 	print("PERF_DONE ", path)
 	quit()
+
+
+## --tint-kinds (with --save-frames): flat colour per forest asset kind (ferns red, reeds orange, brambles blue,
+## grass magenta, branches brown, rocks grey, mushrooms white, golden oak yellow, green oak green, pine dark
+## green, birch lilac, willow cyan, hollow oak purple) to identify what a look defect is.
+const TINT_KINDS := {"under_fern": Color(1, 0, 0), "under_reed": Color(1, 0.5, 0), "under_bramble": Color(0, 0.3, 1),
+	"under_grass": Color(1, 0, 1), "under_branches": Color(0.5, 0.25, 0), "under_rock": Color(0.5, 0.5, 0.5),
+	"under_mushrooms": Color(1, 1, 1), "tree_lf_env_golden_oak_green": Color(0, 1, 0), "tree_lf_env_golden_oak": Color(1, 1, 0),
+	"tree_lf_env_dark_pine": Color(0, 0.4, 0.2), "tree_lf_env_birch": Color(0.8, 0.8, 1), "tree_lf_env_willow": Color(0, 1, 1),
+	"tree_lf_env_hollow_oak": Color(0.6, 0, 0.6)}
+
+func tint_kinds(world: Node, clear := false) -> void:
+	for node: MultiMeshInstance3D in world.find_children("*", "MultiMeshInstance3D", true, false):
+		if clear:
+			node.material_override = null
+			continue
+		var n := String(node.name)
+		for prefix in TINT_KINDS:
+			if n.begins_with(prefix):
+				var m := StandardMaterial3D.new()
+				m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				m.albedo_color = TINT_KINDS[prefix]
+				node.material_override = m
+				break
 
 
 func run() -> void:

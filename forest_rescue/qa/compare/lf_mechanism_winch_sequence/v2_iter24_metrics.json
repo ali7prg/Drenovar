@@ -1,0 +1,237 @@
+{
+  "qa": {
+    "main": {
+      "iou_raw": 0.7843,
+      "iou_filled": 0.8718,
+      "colour_err": 0.1458,
+      "colour_err_core": 0.1457,
+      "ref_px": 129699,
+      "render_px": 109894,
+      "ignored_px": 8126,
+      "camera_rms_px": 2.5,
+      "camera_max_px": 5.03,
+      "camera_points": 17,
+      "iou_raw_open_mask": 0.8071
+    }
+  },
+  "tris": {
+    "LOD0": 5853,
+    "LOD1": 3652,
+    "LOD2": 2268
+  },
+  "tris_by_node": {
+    "LOD0": {
+      "root": 3041,
+      "drum": 328,
+      "big_gear": 748,
+      "pinion": 520,
+      "crank": 412,
+      "pawl": 44,
+      "brake_lever": 234,
+      "rope": 128,
+      "chest": 262,
+      "chest_lid": 134,
+      "pit_void": 2
+    },
+    "LOD1": {
+      "root": 1391,
+      "drum": 220,
+      "big_gear": 724,
+      "pinion": 496,
+      "crank": 276,
+      "pawl": 36,
+      "brake_lever": 171,
+      "rope": 60,
+      "chest": 154,
+      "chest_lid": 122,
+      "pit_void": 2
+    },
+    "LOD2": {
+      "root": 972,
+      "drum": 136,
+      "big_gear": 346,
+      "pinion": 244,
+      "crank": 172,
+      "pawl": 36,
+      "brake_lever": 116,
+      "rope": 24,
+      "chest": 110,
+      "chest_lid": 110,
+      "pit_void": 2
+    }
+  },
+  "colour_ramps": {
+    "stone": {
+      "px": 5935,
+      "mean_srgb": [
+        103,
+        85,
+        72
+      ]
+    },
+    "ground": {
+      "px": 11559,
+      "mean_srgb": [
+        155,
+        127,
+        96
+      ]
+    },
+    "wood": {
+      "px": 34228,
+      "mean_srgb": [
+        149,
+        116,
+        84
+      ]
+    },
+    "iron": {
+      "px": 8616,
+      "mean_srgb": [
+        126,
+        99,
+        77
+      ]
+    },
+    "grass": {
+      "px": 403,
+      "mean_srgb": [
+        168,
+        145,
+        100
+      ]
+    },
+    "rope": {
+      "px": 8164,
+      "mean_srgb": [
+        172,
+        132,
+        89
+      ]
+    },
+    "brass": {
+      "px": 2584,
+      "mean_srgb": [
+        158,
+        118,
+        78
+      ]
+    },
+    "void": {
+      "px": 215,
+      "mean_srgb": [
+        49,
+        40,
+        32
+      ]
+    }
+  },
+  "calibration": {
+    "stone": {
+      "gain": [
+        1.393,
+        1.364,
+        1.242
+      ],
+      "px": 9270,
+      "painting": [
+        100,
+        81,
+        63
+      ],
+      "render": [
+        72,
+        59,
+        50
+      ]
+    },
+    "ground": {
+      "gain": [
+        1.032,
+        1.043,
+        0.983
+      ],
+      "px": 11270,
+      "painting": [
+        128,
+        105,
+        79
+      ],
+      "render": [
+        124,
+        101,
+        81
+      ]
+    },
+    "wood": {
+      "gain": [
+        1.119,
+        1.181,
+        1.288
+      ],
+      "px": 39415,
+      "painting": [
+        99,
+        77,
+        57
+      ],
+      "render": [
+        89,
+        65,
+        45
+      ]
+    },
+    "rope": {
+      "gain": [
+        0.873,
+        0.889,
+        0.937
+      ],
+      "px": 8827,
+      "painting": [
+        120,
+        91,
+        64
+      ],
+      "render": [
+        137,
+        103,
+        68
+      ]
+    }
+  },
+  "blueprint": {
+    "AX": 2.2727,
+    "L2": 0.5249,
+    "Rc": 0.4254,
+    "FXL": 1.2965,
+    "FXR": 0.8961,
+    "HX": 1.155,
+    "KX": -0.8151,
+    "Ls": 0.4908,
+    "Ac": 0.8093,
+    "Lg": 0.5971,
+    "PR": 0.85,
+    "PY": -0.18,
+    "Wc": 0.9463,
+    "Hc": 0.5525,
+    "Zt": 0.3508,
+    "SPL": 0.56,
+    "WH": 0.44,
+    "TB": 0.45,
+    "LW": 0.32,
+    "FY": 0.46,
+    "TZ": 0.68,
+    "SPIL": 0.3,
+    "SPIR": 0.06,
+    "PX": -0.3,
+    "PSX": -0.4,
+    "RGP": 0.52,
+    "GT": 45.0,
+    "PH": 197.5345,
+    "GBX": 0.2293,
+    "GBY": -0.22,
+    "GBZ": 0.091,
+    "HR": 0.19
+  }
+}

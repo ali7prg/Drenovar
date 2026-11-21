@@ -48,6 +48,7 @@ RT = paths.ensure(paths.RUNTIME, "props")
 SRC = paths.ensure(paths.SOURCES, "props")
 TEXM = paths.ensure(paths.TEXTURE_SOURCES, "props", "v2")
 PAINT_K = 0.38
+PROJ_EDGE_ERODE = 5          # px of the painting crop (review: no background colour on silhouette edges)
 # de-lighting exponent: 0 = albedo is the painted colour (measured in the game camera: full de-lighting made the
 # props 8-18 L* brighter than the painting under the game's painted-light path + FILMIC), 1 = full lambert de-light
 DELIGHT = 0.0
@@ -598,6 +599,9 @@ def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.
             Np = Np @ S[:3, :3].T
             Np /= np.maximum(np.linalg.norm(Np, axis=1, keepdims=True), 1e-9)
         ref_m, _ = v.mask()
+        # silhouette erosion: texels landing within PROJ_EDGE_ERODE px of the painting's outline take the swatch
+        # fill instead of the anti-aliased edge pixels (light background bleed along posts / cranks / rims)
+        ref_m = ndi.binary_erosion(ref_m, iterations=PROJ_EDGE_ERODE)
         if getattr(v, "proj_exclude", None):
             ref_m = ref_m.copy()
             for (a_, b_, c_, d_) in v.proj_exclude:

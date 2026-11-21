@@ -34,7 +34,7 @@ PARAMS = dict(AX=1.42, L2=0.45, Rc=0.36, FXL=1.05, FXR=0.86, HX=1.02, GX=-0.83, 
               LW=0.26, FY=0.42, TZ=0.75, GRr=0.48, SH=0.42,   # leg width, front/back frame offset, tie drop below
                                                               # the axle, gear radius, stone pile height
               SPIL=0.26, SPIR=-0.06, PX=0.0, PSX=-0.36,       # ... back post x (art/10: under the tie, left of the rope)
-              RG=0.5, RP=0.32, GT=18.0, GZ=0.2, HR=0.16, GRP=1.6)  # gear train: big gear / pinion radius, big gear
+              RG=0.52, RP=0.27, GT=66.0, GZ=0.2, HR=0.16, GRP=1.6)  # gear train: big gear / pinion radius, big gear
                                                               # tilt (deg, its face toward the viewer as painted),
                                                               # pinion drop below the axle; crank hub radius; grip scale                  # inner leg splay (left / right trestle), pit x offset
 FREE = ["AX", "L2", "Rc", "FXL", "FXR", "HX", "GX", "GZ", "KX", "Ls", "Ac", "Lg", "Wc", "Hc", "Zt"]
@@ -59,7 +59,7 @@ def points(p):
         "coil_lb": (-L2, 0.0, AX - Rc), "coil_rb": (L2, 0.0, AX - Rc),
         "hub_c": (H, -0.08, AX), "shaft_end": (H + p["Ls"], -0.05, AX),
         "grip_in": (H + p["Ls"] + 0.04, -0.1, AX - p["Ac"]), "grip_out": (H + p["Ls"] + 0.04 + p["Lg"], -0.1, AX - p["Ac"]),
-        "gear_c": (p["GX"], -0.25, AX - p["GZ"]), "knob": (p["KX"], -0.28, AX + 0.78),   # gear_c = pinion centre
+        "gear_c": tuple(pinion_centre(p)), "knob": (p["KX"], -0.28, AX + 0.78),   # gear_c = pinion centre
         "ttop_l": (-p["FXL"], 0.0, AX + 0.6), "ttop_r": (p["FXR"], 0.0, AX + 0.6),
         "chest_tl": (-p["Wc"] / 2, p["PY"] - 0.25, zt), "chest_tr": (p["Wc"] / 2, p["PY"] - 0.25, zt),
         "chest_bl": (-p["Wc"] / 2, p["PY"] - 0.25, zt - p["Hc"]), "chest_br": (p["Wc"] / 2, p["PY"] - 0.25, zt - p["Hc"]),
@@ -87,11 +87,13 @@ def big_gear_frame(p):
     axis = np.array([math.cos(t), -math.sin(t), 0.0])
     gu = np.array([math.sin(t), math.cos(t), 0.0])
     gw = np.array([0.0, 0.0, 1.0])
-    return np.array([-p["L2"] - 0.12, 0.0, p["AX"]]), axis, gu, gw
+    # painter's cheat (review): the wheel sits in front of the left A-frame's front legs, as drawn
+    return np.array([-p["L2"] - 0.12, -p["FY"] * 1.15 - 0.16, p["AX"]]), axis, gu, gw
 
 
 def pinion_centre(p):
-    return np.array([p["GX"], -0.25, p["AX"] - p["GZ"]])
+    # on the left trestle's front face (in front of the front legs), lower left of the big gear
+    return np.array([p["GX"], -p["FY"] * 1.15 - 0.2, p["AX"] - p["GZ"]])
 
 
 def gear_outline(r_root, r_tip, teeth, lod):
@@ -222,7 +224,9 @@ def build(A, p, lod):
     pg.prism(gear_outline(RP * 0.8, RP, PINION_TEETH, lod), -0.05, 0.05, "iron", "pinion", R=Rq, t=tuple(pc))
     pg.cyl(tuple(pc + (0, 0.06, 0)), tuple(pc + (0, -0.09, 0)), RP * 0.32, n=(12, 8, 6)[lod], mat="iron", tag="pinion_hub",
            up=(0, 0, 1))
-    g.beam(tuple(pc + (0, 0.12, 0)), (p["GX"], 0.12, AX - p["GZ"] + 0.02), 0.08, 0.08, mat="iron", tag="pinion_bracket")
+    g.beam(tuple(pc + (0, 0.04, 0)), (p["GX"], -p["FY"] * 1.15 + 0.05, AX - p["GZ"]), 0.09, 0.09, mat="iron", tag="pinion_bracket")
+    # stub axle from the drum axle out to the wheel's hub
+    g.beam((-p["L2"] - 0.12, 0.0, AX), tuple(gc + ga * 0.0), 0.09, 0.09, mat="iron", tag="gear_stub")
     # ---- crank node: hub disc, shaft stub, arm, long wooden grip
     H = p["HX"]
     crank = A.part("crank", None, (H, 0.0, AX))
@@ -257,14 +261,17 @@ def build(A, p, lod):
     pawl.geo[lod].cyl(tuple(pv + (-0.05, 0, 0)), tuple(pv + (0.05, 0, 0)), 0.03, n=6, mat="iron", tag="pawl_pin",
                       up=(0, 0, 1))
     # ---- brake lever node (pivot on the left trestle top), wooden knob
-    bp = np.array([p["KX"], -0.24, AX + 0.22])
+    bp = np.array([p["KX"] - 0.12, -0.3, AX + 0.22])
     brake = A.part("brake_lever", None, tuple(bp))
     bg = brake.geo[lod]
     knob_c = np.array([p["KX"], -0.28, AX + 0.78])
-    bg.beam(bp, knob_c - np.array([0, 0, 0.06]), 0.06, 0.06, mat="iron", tag="lever")
-    bg.rock(tuple(knob_c), (0.085, 0.085, 0.09), seed=5, sub=2 if lod == 0 else 1, mat="wood", tag="knob",
-            flat_bottom=False, rough=0.04)
-    bg.cyl(tuple(bp + (-0.06, 0, 0)), tuple(bp + (0.06, 0, 0)), 0.045, n=8, mat="iron", tag="lever_hub", up=(0, 0, 1))
+    # art/10: a brass lever rod with a turned brass knob, a brass collar at the pivot
+    bg.cyl(tuple(bp), tuple(knob_c - np.array([0, 0, 0.08])), 0.055, n=(10, 8, 6)[lod], mat="bronze", tag="lever",
+           up=(1, 0, 0))
+    CG.lathe(bg, [(0.035, 0.0), (0.09, 0.05), (0.125, 0.13), (0.105, 0.21), (0.0, 0.25)],
+             tuple(knob_c - np.array([0, 0, 0.1])), n=(12, 9, 6)[lod], mat="bronze", tag="knob")
+    bg.cyl(tuple(bp + (-0.07, 0, 0)), tuple(bp + (0.07, 0, 0)), 0.06, n=(10, 8, 6)[lod], mat="bronze", tag="lever_hub",
+           up=(0, 0, 1))
     # ---- rope node (top at the drum's front tangent, hangs to the chest hook at rest)
     travel, z_bottom = rise(p)
     hook_up = p["Hc"] + 0.22
@@ -386,8 +393,8 @@ def solve(views):
     params, reps = pv2.solve_views(views, points, PARAMS, FREE, prior_sigma=PRIOR)
     best = _silhouette_iou(params, views)[0]
     # sane ranges only: a taller well wall or a wider ground patch can buy silhouette IoU without looking like art/10
-    grids = {"SPL": np.arange(0.46, 0.55, 0.02), "RG": np.arange(0.5, 0.71, 0.03), "RP": np.arange(0.2, 0.33, 0.02),
-             "GT": np.arange(18.0, 46.0, 4.0), "HR": np.arange(0.16, 0.31, 0.03), "GRP": np.arange(0.8, 1.61, 0.1), "WH": np.arange(0.06, 0.36, 0.03), "SH": np.arange(0.25, 0.81, 0.05),
+    # review: the gears are fixed by the painting (faces toward the viewer as full toothed circles), not by IoU
+    grids = {"SPL": np.arange(0.46, 0.55, 0.02), "HR": np.arange(0.16, 0.31, 0.03), "GRP": np.arange(0.8, 1.61, 0.1), "WH": np.arange(0.06, 0.36, 0.03), "SH": np.arange(0.25, 0.81, 0.05),
              "GR": np.arange(0.3, 1.41, 0.1), "TB": np.arange(0.3, 0.71, 0.05), "PR": np.arange(0.55, 0.86, 0.05),
              "LW": np.arange(0.18, 0.34, 0.03), "FY": np.arange(0.25, 0.46, 0.05), "TZ": np.arange(0.5, 1.01, 0.05),
              "SPIL": np.arange(0.14, 0.39, 0.06),

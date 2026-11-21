@@ -137,7 +137,7 @@ func run() -> void:
 		if maxf(absf(x), absf(z)) <= 56.0:
 			bad_trees += 1
 			continue
-		# v2 rule: trunk ≥ route clearance + 1.4 m + 45 % of the crown (crowns may overhang a bit);
+		# v2 rule: trunk ≥ route clearance + ROUTE_TRUNK_MARGIN + ROUTE_CROWN_OVERHANG × crown (pass 3);
 		# atlas v2: on the far side of a trail (away from the camera) ≥ FAR_SIDE_TRUNK_CLEAR
 		var crown: float = world.TREE_CROWN[int(item[2])] * float(item[5])
 		# (the hollow-oak hero stands at the end of its own spur by design: the trail ends at its hollow)
@@ -390,7 +390,7 @@ func _route_trunk_violation(masks, x: float, z: float, crown: float, bare := fal
 				var ab := b - a
 				var t := clampf((Vector2(x, z) - a).dot(ab) / maxf(ab.length_squared(), 0.0001), 0.0, 1.0)
 				var offset := Vector2(x, z) - (a + ab * t)
-				var limit: float = float(mask.radius) + (0.0 if bare else Rules.ROUTE_TRUNK_MARGIN + crown * 0.45) - 0.05
+				var limit: float = float(mask.radius) + (0.0 if bare else Rules.ROUTE_TRUNK_MARGIN + crown * Rules.ROUTE_CROWN_OVERHANG) - 0.05
 				if dense or Rules.far_side(offset):
 					limit = Rules.FAR_SIDE_TRUNK_CLEAR - 0.05
 				if offset.length() < limit:

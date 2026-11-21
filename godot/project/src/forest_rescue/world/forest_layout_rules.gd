@@ -108,7 +108,10 @@ const MAX_SLOT_DISPLACEMENT := 4.0
 const MAX_INNER_JITTER := 4.0          # ≤ 3.5 m typical; ≤ 4.0 m to clear the hall-III entrance
 const MIN_TREE_GAP := 2.3
 ## Trunk clearance from a route centre line (route.clear + this); crowns may overhang.
-const ROUTE_TRUNK_MARGIN := 1.4
+const ROUTE_TRUNK_MARGIN := 0.8
+## Layout pass 3 (art/01: big crowns right up to the narrow trails): share of a crown radius kept off a
+## trail's clearance on the camera side (walkers behind a crown are faded whole at runtime).
+const ROUTE_CROWN_OVERHANG := 0.2
 const GLADE_TRUNK_MARGIN := 1.6
 ## Atlas v2 (art/01: trails wind through the forest): a trunk on the FAR side of a trail (away from
 ## the city camera, whose crowns are drawn further away from the trail) may stand this close to the

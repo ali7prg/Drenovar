@@ -390,7 +390,7 @@ func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown :=
 				var margin := 0.0
 				match String(mask.get("kind", "")):
 					"route":
-						margin = (Rules.ROUTE_TRUNK_MARGIN + crown * 0.45) * margin_scale if tree else 0.0
+						margin = (Rules.ROUTE_TRUNK_MARGIN + crown * Rules.ROUTE_CROWN_OVERHANG) * margin_scale if tree else 0.0
 						if tree:
 							var a := Vector2(float(mask.a.x), float(mask.a.z))
 							var b := Vector2(float(mask.b.x), float(mask.b.z))
@@ -1120,7 +1120,8 @@ func _take_slot_kind(tree: Dictionary, species: int, zone: int, tx: float, tz: f
 			grove_slots[best][2] = true
 			if blocked_exact(p.x, p.y, true, 1.0, crown, dense_pine_ok(zone, species)) or not free_of_trunks(p.x, p.y, 2.3) \
 					or tree_hides_units(p.x, p.y, species, int(look[0]) % Rules.GREEN_VARIANT_BASE, float(look[1]), float(tree.angle), true):
-				continue          # slot unusable for this crown: try the next ring (slot stays consumed)
+				grove_slots[best].append(true)      # failed for this crown: the ambient fill retries it smaller
+				continue          # try the next ring
 			return p
 	return Vector2.INF
 
@@ -1132,7 +1133,8 @@ func _fill_groves(trees: Array, species_count: Dictionary) -> void:
 	var placed := 0
 	for idx in order:
 		var slot: Array = grove_slots[idx]
-		if bool(slot[2]) or int(slot[3]) != 0:
+		var retry: bool = slot.size() > 4
+		if (bool(slot[2]) and not retry) or int(slot[3]) != 0:
 			continue
 		slot[2] = true
 		var p: Vector2 = slot[0]
@@ -1147,6 +1149,11 @@ func _fill_groves(trees: Array, species_count: Dictionary) -> void:
 			scale = lerpf(GROVE_OAK_SCALE[0], GROVE_OAK_SCALE[1], rng.randf()) * 0.82
 		scale = lerpf(scale, scale * 0.7, clampf(openness(p.x, p.y) - 0.5, 0.0, 0.5) * 2.0)
 		var crown: float = Rules.CROWN_RADIUS[species] * scale
+		for shrink in 3:
+			if not blocked_exact(p.x, p.y, true, 1.0, crown, dense_pine_ok(zone, species)):
+				break
+			scale *= 0.8           # a smaller crown where a big one would overhang a clearance
+			crown = Rules.CROWN_RADIUS[species] * scale
 		if blocked_exact(p.x, p.y, true, 1.0, crown, dense_pine_ok(zone, species)) or not ground_ok(p.x, p.y, true) \
 				or not free_of_trunks(p.x, p.y, 2.3):
 			continue

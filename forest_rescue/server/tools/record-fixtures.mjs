@@ -77,9 +77,10 @@ try {
   await save('site01_discovered');
   const first = s1.artifact.puzzle.solution[0];
   await journey.moveTo('lf_site_01:landmark:' + first);
+  await journey.input('lf_site_01', first);          // trail cache: the first mark entered at the mark (1 / 3)
   await save('site01_trail_1of3');
   await journey.moveTo(s1.artifact.id);
-  for (const symbol of s1.artifact.puzzle.solution) await journey.input('lf_site_01', symbol);
+  for (const symbol of s1.artifact.puzzle.solution.slice(1)) await journey.input('lf_site_01', symbol);
   await journey.task('lf_site_01', 'recover_artifact');
   await save('site01_artifact_found');
   await journey.moveTo('lf_site_01:guardian');

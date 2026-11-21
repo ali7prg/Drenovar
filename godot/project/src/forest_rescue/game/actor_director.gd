@@ -827,8 +827,8 @@ func update_sites(now: float, delta: float) -> void:
 		update_guardian(site_id, poi, anchor, now, delta, near)
 		var step := int(game.client.site_state(site_id).get("step", 0))
 		markers.append({"position":center + Vector3.UP * 2.0, "kind":"site", "id":site_id, "site":site_id})
-		var trail_open: bool = game.mech.is_open() and game.mech.site_id == site_id and game.mech.kind == "trail_cache"
-		if game.fog_clear(center) and not trail_open:
+		var mech_open: bool = game.mech.is_open() and game.mech.site_id == site_id
+		if game.fog_clear(center) and not mech_open:
 			tags.append({"position":center + Vector3.UP * 4.2, "text":game.site_name(site_id), "kind":"site", "step":step})
 		if String(poi.get("variation", "")) == "trail_cache" and game.mech.is_open() and game.mech.site_id == site_id:
 			for symbol in anchor.get("landmarks", {}):
@@ -884,6 +884,11 @@ func update_props(site_id: String, poi: Dictionary, anchor: Dictionary, near: bo
 		device = rig(mech_id, ASSETS + "props/lf_mechanism_%s.glb" % kind, "", 1.0, props_parent)
 		record.mechanism = mech_id
 		place_device(device, kind, anchor)
+		if kind == "winch_sequence" and device.is_ready() and not device.has_meta("void_lifted"):
+			var pit_void := device.part("pit_void")
+			if pit_void != null:
+				pit_void.position.y += PIT_VOID_LIFT
+			device.set_meta("void_lifted", true)
 		device.set_active(near and device.is_ready())
 		if device.is_ready():
 			update_mechanism_pose(site_id, kind, device, mechanism, state != "hidden", delta)
@@ -1047,7 +1052,7 @@ func update_roof(cage: Rig, site_id: String, poi: Dictionary, delta: float) -> v
 ## Device stands on the key spot; front (+Z) towards the approach. The paired latch is turned
 ## so its plates sit on the server's plate targets (and its front faces the city camera).
 func place_device(device: Rig, kind: String, anchor: Dictionary) -> void:
-	var spot: Vector3 = anchor.get("artifact", anchor.get("center", Vector3.ZERO))
+	var spot: Vector3 = device_spot(kind, anchor)
 	# P2.7: painted side towards the city camera (forest_game.PAINTED_DEVICE_YAW)
 	var yaw := deg_to_rad(float(game.PAINTED_DEVICE_YAW.get(kind, rad_to_deg(float(anchor.get("cage_yaw", 0.0))))))
 	if kind == "paired_latch" and anchor.get("plate_left") is Vector3 and anchor.get("plate_right") is Vector3:
@@ -1060,6 +1065,36 @@ func place_device(device: Rig, kind: String, anchor: Dictionary) -> void:
 			yaw += PI
 	device.position = game.ground(spot.x, spot.z)
 	device.rotation.y = yaw
+
+## The fixed city camera's screen-right axis on the ground (camera at target + (75, 83, 75)).
+const SCREEN_RIGHT := Vector3(0.70710678, 0.0, -0.70710678)
+## Winch (yaw 45°: its +X is screen right): right end of the crank grip, and the half screen width a cage
+## covers (root / iron / wood cages at their atlas yaw), metres.
+const WINCH_SCREEN_RIGHT := 2.5
+const CAGE_SCREEN_HALF := 2.1
+## Lift of the winch's dark pit mouth (node pit_void, 0.24 m below the ground at rest in the GLB = the painting's
+## view into the pit) onto the terrain surface, so the pit reads dark through the terrain in the game.
+const PIT_VOID_LIFT := 0.29
+
+## Ground spot of a mechanism device. The winch stands screen-left of its key spot when its site's cage, nearer
+## the city camera, would hide its right half (drum, right trestle, crank): it is shifted along the screen's
+## right axis until the crank clears the cage, so the whole painted face reads in the mechanism UI (art/10).
+func device_spot(kind: String, anchor: Dictionary) -> Vector3:
+	var spot: Vector3 = anchor.get("artifact", anchor.get("center", Vector3.ZERO))
+	if kind != "winch_sequence" or not anchor.get("cage") is Vector3:
+		return spot
+	var du := (spot - (anchor.cage as Vector3)).dot(SCREEN_RIGHT)
+	var need := -(WINCH_SCREEN_RIGHT + CAGE_SCREEN_HALF)
+	if du < 0.0 and du > need:
+		spot += SCREEN_RIGHT * (need - du)
+	return spot
+
+## Where the mechanism UI camera looks: the device's body (the winch's drum height), else its key spot.
+func device_focus(site_id: String) -> Vector3:
+	var device: Rig = rigs.get("mechanism_" + site_id)
+	if device != null and is_instance_valid(device):
+		return device.global_position + Vector3.UP * (1.1 if device.asset_path.contains("winch") else 0.4)
+	return game.site_anchor(site_id).get("artifact", game.target_position(site_id))
 
 func mechanism_feedback(site_id: String, symbol: String, ok: bool) -> void:
 	mechanism_symbols[site_id] = {"symbol":symbol, "ok":ok, "at":Time.get_ticks_msec()}
@@ -1076,11 +1111,11 @@ func mechanism_stable(device: Rig, kind: String, site_id: String, progress: int,
 				device.sample_into(pose, "lf_rune_ring%d_%s" % [k + 1, symbol], 99.0 if k < progress else 0.0, ["ring_%d" % (k + 1)])
 		"winch_sequence":
 			device.sample_into(pose, "lf_lock_mechanism", 0.0)
-			device.sample_into(pose, "lf_rope_release", 0.0, ["brake_lever", "chest", "crank", "drum", "rope"])
+			device.sample_into(pose, "lf_rope_release", 0.0, ["brake_lever", "chest", "crank", "drum", "rope", "big_gear", "pinion"])
 			device.sample_into(pose, "lf_winch_brake", 99.0 if progress >= 1 else 0.0, ["brake_lever"])
 			device.sample_into(pose, "lf_winch_pawl", 99.0 if progress >= 2 else 0.0, ["pawl"])
 			if solved:
-				device.sample_into(pose, "lf_rope_release", 99.0, ["brake_lever", "chest", "crank", "drum", "rope", "pawl"])
+				device.sample_into(pose, "lf_rope_release", 99.0, ["brake_lever", "chest", "crank", "drum", "rope", "pawl", "big_gear", "pinion"])
 				device.sample_into(pose, "lf_lock_mechanism", 99.0, ["chest", "chest_lid"])
 		"paired_latch":
 			device.sample_into(pose, "lf_latch_reset", 99.0)
@@ -1157,7 +1192,7 @@ func mechanism_steps(device: Rig, kind: String, site_id: String, before: int, af
 			"rune_lock":
 				steps.append({"clip":"lf_lock_mechanism", "nodes":["door_pivot", "key_lever"], "start":t})
 			"winch_sequence":
-				steps.append({"clip":"lf_rope_release", "nodes":["brake_lever", "chest", "crank", "drum", "rope", "pawl"], "start":t})
+				steps.append({"clip":"lf_rope_release", "nodes":["brake_lever", "chest", "crank", "drum", "rope", "pawl", "big_gear", "pinion"], "start":t})
 				steps.append({"clip":"lf_lock_mechanism", "nodes":["chest", "chest_lid"], "start":t + 1.3})
 			"paired_latch":
 				steps.append({"clip":"lf_lock_mechanism", "nodes":[], "start":t})

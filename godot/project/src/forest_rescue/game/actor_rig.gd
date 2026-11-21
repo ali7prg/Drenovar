@@ -254,6 +254,9 @@ func apply_look() -> void:
 	var k := float(meta.get("paintedLightMix", DEFAULT_LIGHT_MIX)) if painted else -1.0
 	var tints: Dictionary = variant.get("tint", {})
 	var uv2_set := glb_uv2_materials(asset_path) if k >= 0.0 else {}
+	# Material-path props (meta vertexAO, e.g. the winch): COLOR_0.a carries baked ambient occlusion + soft sun
+	# shadow; the painted shader applies it as mix(ao_floor, 1, a^2) (use_ao), never as wind.
+	var vertex_ao := bool(meta.get("vertexAO", false))
 	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 		if mesh.mesh == null:
 			continue
@@ -270,7 +273,9 @@ func apply_look() -> void:
 				mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				continue
 			if k >= 0.0:
-				material = ForestKit.painted_material(material, false, k, false, false)
+				var has_ao := vertex_ao and mesh.mesh is ArrayMesh \
+					and ((mesh.mesh as ArrayMesh).surface_get_format(s) & Mesh.ARRAY_FORMAT_COLOR) != 0
+				material = ForestKit.painted_material(material, has_ao, k, false, false)
 				if uv2_set.has(material_name) and material is ShaderMaterial:
 					material = material.duplicate()
 					material.set_shader_parameter("albedo_uv2", true)

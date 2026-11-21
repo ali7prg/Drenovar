@@ -138,7 +138,7 @@ def wood(size, lut, rng, lines=11, contrast=(0.06, 0.86)):
     return apply_ramp(stretch(rank01(t), *contrast), lut)
 
 
-def iron(size, lut, rust_col, rng, rust_amount=0.12, contrast=(0.12, 0.72)):
+def iron(size, lut, rust_col, rng, rust_amount=0.12, contrast=(0.15, 0.62)):
     """Forged iron, painted style: a dark warm-grey body with gentle hammered variation (small soft dimples), fine
     lighter scratches along a few directions, rare pits, small rust spots. The ramp's brightest part (the painting's
     edge highlights) is left out of the albedo."""
@@ -154,8 +154,8 @@ def iron(size, lut, rust_col, rng, rust_amount=0.12, contrast=(0.12, 0.72)):
         n_ = pnoise(H, W, 1.2 + 30 * abs(c_), 1.2 + 30 * abs(s_), rng)
         scr = np.maximum(scr, smoothstep(2.3, 3.0, n_))
     pits = smoothstep(2.2, 2.9, -pnoise(H, W, 1.6, 1.6, rng))
-    t = 0.5 * mott + 0.22 * facet_tone + 0.3 * dimple + 0.9 * scr - 0.8 * pits
-    t = blur_wrap(t, 0.7)
+    t = 0.6 * mott + 0.1 * facet_tone + 0.15 * dimple + 0.7 * scr - 0.8 * pits
+    t = blur_wrap(t, 0.9)
     col = apply_ramp(stretch(rank01(t), *contrast), lut)
     rmask = smoothstep(1.4, 2.2, fbm(H, W, W * 0.03, H * 0.03, rng, 3, 0.6) + 0.5 * pnoise(H, W, 3, 3, rng))
     if rmask.mean() > rust_amount:

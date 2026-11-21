@@ -192,9 +192,11 @@ func focus_camera() -> void:
 		return
 	previous_camera = {"target":stage.target, "zoom":stage.zoom}
 	var spot: Vector3 = game.site_anchor(site_id).get("artifact", game.target_position(site_id))
+	if game.get("actors") != null and game.actors.has_method("device_focus"):
+		spot = game.actors.device_focus(site_id)      # the device itself (the winch stands clear of its cage)
 	if spot == Vector3.INF:
 		return
-	var zoom := 24.0 if kind == "trail_cache" else 28.0
+	var zoom := 24.0 if kind in ["trail_cache", "winch_sequence"] else 28.0
 	var view := get_viewport_rect().size
 	var right := Vector3(1, 0, -1).normalized()
 	var shift := (view.x * 0.18) * zoom / maxf(view.y, 1.0)

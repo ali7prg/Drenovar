@@ -68,7 +68,9 @@ AO_SUN_STRENGTH = 0.38
 AO_DIST = 0.9
 AO_CLASS_STRENGTH = {"ground": 0.45, "grass": 0.3, "rope": 0.6}
 SHARP_TAGS = ("rubble", "lip")
-NO_CALIBRATE = ("brass",)
+NO_CALIBRATE = ("brass", "iron")
+IRON_BOXES = [(98, 553, 150, 568), (320, 668, 378, 688), (62, 748, 118, 776), (354, 752, 392, 790), (380, 588, 412, 622),
+              (190, 560, 210, 640), (318, 548, 392, 568)]
 GRASS_BOXES = [(30, 690, 72, 760), (455, 742, 500, 790), (160, 840, 200, 862), (8, 760, 40, 800)]
 _STATIC = ("root", "drum", "big_gear", "pinion", "crank")
 
@@ -90,6 +92,11 @@ def make_tiles(px, sheet, rng):
     gp = MT.pixels(sheet, GRASS_BOXES, lambda c: (c[:, 1] >= c[:, 0] - 0.03) & (c[:, 1] - c[:, 2] > 0.07))
     if len(gp) > 60:
         px["grass"] = gp
+    # iron from the painted brackets / shoes / housing / gear rim themselves (dark forged body; the brightest
+    # pixels are the painting's edge highlights)
+    ip = MT.pixels(sheet, IRON_BOXES, lambda c: ((c @ MT.LUMA) < 0.62) & (c[:, 0] - c[:, 2] < 0.2))
+    if len(ip) > 200:
+        px["iron"] = ip
     if "brass" in px and len(px["brass"]) > 80:
         b = px["brass"]
         px["brass"] = b[(b @ MT.LUMA) > np.percentile(b @ MT.LUMA, 45)]

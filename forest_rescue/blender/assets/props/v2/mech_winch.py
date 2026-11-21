@@ -29,7 +29,9 @@ PAWL_ON = math.radians(-24)
 TEETH = 22
 
 PARAMS = dict(AX=1.42, L2=0.45, Rc=0.36, FXL=1.05, FXR=0.86, HX=1.02, GX=-0.83, KX=-0.8, Ls=0.36, Ac=0.66, Lg=0.5,
-              PR=0.73, PY=-0.18, Wc=0.8, Hc=0.48, Zt=0.42)
+              PR=0.73, PY=-0.18, Wc=0.8, Hc=0.48, Zt=0.42,
+              SPL=0.75, WH=0.42, WR=0.4, GR=1.0, TB=0.6,     # leg splay, pit wall height / width, ground ring, top block
+              LW=0.26, FY=0.42, TZ=0.85, GRr=0.48)            # leg width, front/back frame offset, tie height, gear radius
 FREE = ["AX", "L2", "Rc", "FXL", "FXR", "HX", "GX", "KX", "Ls", "Ac", "Lg", "Wc", "Hc", "Zt"]
 PRIOR = 0.2
 
@@ -65,7 +67,10 @@ def views():
          "gear_c": (172, 613), "knob": (192, 522), "ttop_l": (148, 535), "ttop_r": (368, 535),
          "chest_tl": (222, 795), "chest_tr": (318, 797), "chest_bl": (222, 850), "chest_br": (316, 850)},
         pose={"chest": "raised"}, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None,
-        solve_opts={"fov_prior": 22.0}, title="WINCH main view (chest raised to the pit mouth)")
+        solve_opts={"fov_prior": 22.0}, title="WINCH main view (chest raised to the pit mouth)",
+        # the painted motion arrows are annotations, not geometry
+        ignore_boxes=[(148, 610, 195, 660), (418, 572, 472, 652), (280, 712, 306, 768)],
+        proj_exclude=[(148, 610, 195, 660), (418, 572, 472, 652), (280, 712, 306, 768)])
     return [v]
 
 
@@ -89,38 +94,53 @@ def build(A, p, lod):
     pit = np.array([0.0, PY, 0.0])
     rng = np.random.default_rng(7 + lod)
     # ---- ground ring, stone-lined well pit, rim stones
-    CG.ring_prism(g, tuple(pit), np.eye(3), PR + 1.25, PR + 0.06, n, -0.03, 0.0, "ground", "ground")
+    GR, WH, WR = p["GR"], p["WH"], p["WR"]
+    CG.ring_prism(g, tuple(pit), np.eye(3), PR + WR + GR, PR + 0.06, n, -0.03, 0.0, "ground", "ground")
     CG.ring_prism(g, tuple(pit), np.eye(3), PR + 0.08, PR, n, -PIT_D, 0.02, "stone", "pit_wall")
     CG.disc_prism(g, tuple(pit), np.eye(3), CG.ngon(PR, n), -PIT_D - 0.04, -PIT_D, "ground", "pit_floor")
-    nst = (16, 10, 6)[lod]
+    # raised well wall of big dressed blocks round the pit mouth (art/10), rubble outside it
+    nst = (18, 12, 8)[lod]
     for k in range(nst):
-        a = 2 * math.pi * k / nst + rng.uniform(-0.12, 0.12)
-        r = PR + 0.3 + rng.uniform(-0.04, 0.08)
-        c = pit + np.array([r * math.cos(a), r * math.sin(a), 0.1])
-        g.rock(tuple(c), (rng.uniform(0.2, 0.28), rng.uniform(0.16, 0.22), rng.uniform(0.13, 0.2)), seed=k,
-               sub=1, mat="stone", tag="rim_stone", flat_bottom=True, rough=0.12)
+        a = 2 * math.pi * k / nst + rng.uniform(-0.05, 0.05)
+        r = PR + WR * 0.5
+        c = pit + np.array([r * math.cos(a), r * math.sin(a), 0.0])
+        tang = np.array([-math.sin(a), math.cos(a), 0.0])
+        Rm = np.stack([tang, np.array([math.cos(a), math.sin(a), 0.0]), np.array([0, 0, 1.0])], 1)
+        h = WH * rng.uniform(0.8, 1.15)
+        g.box(tuple(c + (0, 0, h / 2)), (2 * math.pi * r / nst * 0.93, WR, h), R=Rm, mat="stone", tag="well_block",
+              chamfer=0.04 if lod == 0 else 0.0)
+    nrb = (14, 8, 5)[lod]
+    for k in range(nrb):
+        a = 2 * math.pi * k / nrb + rng.uniform(-0.2, 0.2)
+        r = PR + WR + 0.25 + rng.uniform(0.0, GR * 0.6)
+        c = pit + np.array([r * math.cos(a), r * math.sin(a), 0.08])
+        g.rock(tuple(c), (rng.uniform(0.18, 0.3), rng.uniform(0.15, 0.24), rng.uniform(0.12, 0.2)), seed=k + 40,
+               sub=1, mat="stone", tag="rubble", flat_bottom=True, rough=0.14)
     # ---- A-frame trestles (legs splayed along X, front + back frames), sills, top blocks, iron straps
     for sx, fx in ((-1, p["FXL"]), (1, p["FXR"])):
         x = sx * fx
-        top = np.array([x, 0.0, AX + 0.6])
+        top = np.array([x, 0.0, AX + p["TB"]])
         for sy in (-1, 1):
-            y = sy * 0.3
+            y = sy * p["FY"]
             for side in (-1, 1):
-                foot = np.array([x + side * 0.5, y * 1.2, 0.08])
-                g.beam(foot, top + np.array([side * 0.07, y * 0.4, -0.06]), 0.14, 0.16, mat="wood", tag="leg",
-                       chamfer=0.016 if lod == 0 else 0.0)
-            g.beam((x - 0.36, y * 0.95, 0.5), (x + 0.36, y * 0.95, 0.5), 0.11, 0.11, mat="wood", tag="cross",
+                foot = np.array([x + side * p["SPL"], y * 1.15, 0.08])
+                g.beam(foot, top + np.array([side * 0.07, y * 0.45, -0.06]), p["LW"], p["LW"] * 1.1, mat="wood", tag="leg",
+                       chamfer=0.02 if lod == 0 else 0.0)
+            g.beam((x - 0.42, y * 0.95, 0.5), (x + 0.42, y * 0.95, 0.5), 0.14, 0.14, mat="wood", tag="cross",
                    chamfer=0.012 if lod == 0 else 0.0)
-            g.box((x - 0.5, y * 1.2, 0.08), (0.24, 0.26, 0.18), mat="iron", tag="shoe")
-            g.box((x + 0.5, y * 1.2, 0.08), (0.24, 0.26, 0.18), mat="iron", tag="shoe")
-        g.box((x, 0.0, AX + 0.58), (0.26, 0.74, 0.22), mat="wood", tag="top_block", chamfer=0.02 if lod == 0 else 0.0)
+            # diagonal brace inside the trestle (art/10 left trestle)
+            g.beam((x - side * 0.0 - 0.38, y * 0.9, 0.55), (x + 0.1, y * 0.7, AX - 0.25), 0.11, 0.11, mat="wood", tag="brace")
+            g.box((x - p["SPL"], y * 1.2, 0.08), (0.24, 0.26, 0.18), mat="iron", tag="shoe")
+            g.box((x + p["SPL"], y * 1.2, 0.08), (0.24, 0.26, 0.18), mat="iron", tag="shoe")
+        g.box((x, 0.0, AX + p["TB"] - 0.02), (0.26, 0.74, 0.22), mat="wood", tag="top_block", chamfer=0.02 if lod == 0 else 0.0)
         g.box((x, -0.37, AX + 0.4), (0.3, 0.035, 0.12), mat="iron", tag="strap")
         g.box((x, -0.37, 0.45), (0.3, 0.035, 0.12), mat="iron", tag="strap")
         g.cyl((x - sx * 0.02, 0, AX), (x + sx * 0.14, 0, AX), 0.1, n=(12, 8, 6)[lod], mat="iron", tag="bearing",
               up=(0, 0, 1))
     # tie beam between the trestles (lower, at the back) + front brace
-    g.beam((-p["FXL"], 0.34, 0.62), (p["FXR"], 0.34, 0.62), 0.12, 0.12, mat="wood", tag="tie",
-           chamfer=0.015 if lod == 0 else 0.0)
+    for ty in (-p["FY"] * 0.9, p["FY"] * 0.9):
+        g.beam((-p["FXL"], ty, p["TZ"]), (p["FXR"], ty, p["TZ"]), 0.16, 0.16, mat="wood", tag="tie",
+               chamfer=0.015 if lod == 0 else 0.0)
     # ---- drum node: wooden core, rope coil, iron flange, ratchet gear (left), axle through both trestles
     drum = A.part("drum", None, (0.0, 0.0, AX))
     dg = drum.geo[lod]
@@ -128,7 +148,7 @@ def build(A, p, lod):
            up=(0, 0, 1))
     dg.cyl((-L2, 0, AX), (L2, 0, AX), Rc, n=(24, 16, 10)[lod], mat="rope", tag="coil", up=(0, 0, 1), caps=(False, False))
     dg.cyl((-L2 - 0.06, 0, AX), (-L2, 0, AX), Rc * 1.18, n=(20, 14, 8)[lod], mat="iron", tag="flange", up=(0, 0, 1))
-    gear = gear_outline(Rc * 1.05, Rc * 1.2, TEETH, lod)
+    gear = gear_outline(p["GRr"] * 0.86, p["GRr"], TEETH, lod)
     Rg = np.array([[0, 0, 1.0], [1.0, 0, 0], [0, 1.0, 0]])      # local x -> world y, y -> z, z (extrusion) -> x
     dg.prism(gear, -0.05, 0.05, "iron", "ratchet", R=Rg, t=(p["GX"], 0.0, AX))
     dg.cyl((-p["FXL"] - 0.2, 0, AX), (p["HX"], 0, AX), 0.045, n=(8, 6, 4)[lod], mat="iron", tag="axle", up=(0, 0, 1))
@@ -208,8 +228,94 @@ def _resolve_pose(v, p):
         v.pose["chest"] = {"loc": (0, 0, travel * CHEST_RAISED)}
 
 
+def _silhouette_iou(p, views):
+    import cv2
+    A = pv2.Asset(ID, ATLAS)
+    build(A, p, 2)
+    out = []
+    for v in views:
+        pose = dict(v.render_pose if v.render_pose is not None else v.pose)
+        if pose.get("chest") == "raised":
+            pose["chest"] = {"loc": (0, 0, rise(p)[0] * CHEST_RAISED)}
+        Wm = A.world_mats(pose)
+        W_, H_ = v.size
+        m = np.zeros((H_, W_), np.uint8)
+        for nm, part in A.parts.items():
+            M = Wm.get(nm)
+            if M is None:
+                continue
+            V, F, _, _, _ = part.geo[2].arrays()
+            if not len(V):
+                continue
+            Vw = V @ M[:3, :3].T + M[:3, 3]
+            u, w, _z = v.cam.project(Vw)
+            pts = np.stack([u, w], 1)
+            for f in F:
+                cv2.fillConvexPoly(m, np.round(pts[f]).astype(np.int32), 1)
+        ref, _ = v.mask()
+        mm = m.astype(bool)
+        ig = v.ignore()
+        if ig is not None:
+            mm, ref = mm & ~ig, ref & ~ig
+        out.append(float((mm & ref).sum()) / max(1.0, float((mm | ref).sum())))
+    return float(np.mean(out)), out
+
+
+def _refine_cameras(params, views):
+    import cv2
+    for v in views:
+        def score(cam):
+            keep = v.cam
+            v.cam = cam
+            val = _silhouette_iou(params, [v])[0]
+            v.cam = keep
+            return val
+        best = score(v.cam)
+        for _round in range(2):
+            for kind, steps in (("rx", np.radians([-1.2, -0.6, 0.6, 1.2])), ("ry", np.radians([-1.2, -0.6, 0.6, 1.2])),
+                                ("rz", np.radians([-1.0, -0.5, 0.5, 1.0])), ("tx", [-0.04, -0.02, 0.02, 0.04]),
+                                ("ty", [-0.04, -0.02, 0.02, 0.04]), ("f", [0.96, 0.98, 1.02, 1.04])):
+                for d in steps:
+                    c = v.cam
+                    R = cv2.Rodrigues(np.asarray(c.rvec, float))[0]
+                    C = -R.T @ np.asarray(c.tvec, float)
+                    f = c.f
+                    if kind in ("rx", "ry", "rz"):
+                        axis = {"rx": (1, 0, 0), "ry": (0, 1, 0), "rz": (0, 0, 1)}[kind]
+                        R2 = cv2.Rodrigues(np.asarray(axis, float) * d)[0] @ R
+                        t2 = -R2 @ C
+                    elif kind in ("tx", "ty"):
+                        R2 = R
+                        shift = np.array([d, 0.0, 0.0]) if kind == "tx" else np.array([0.0, d, 0.0])
+                        t2 = np.asarray(c.tvec, float) + shift * np.linalg.norm(C) * 0.1
+                    else:
+                        R2, t2, f = R, np.asarray(c.tvec, float), c.f * d
+                    cam = type(c)(f, c.cx, c.cy, cv2.Rodrigues(R2)[0].ravel(), t2, c.k1, c.k2, size=c.size)
+                    val = score(cam)
+                    if val > best + 1e-4:
+                        best, v.cam = val, cam
+        pv2.log(f"  [{v.name}] camera refined by silhouette: IoU {best:.3f}")
+
+
 def solve(views):
     params, reps = pv2.solve_views(views, points, PARAMS, FREE, prior_sigma=PRIOR)
+    best = _silhouette_iou(params, views)[0]
+    grids = {"SPL": np.arange(0.4, 1.21, 0.05), "WH": np.arange(0.3, 1.21, 0.05), "WR": np.arange(0.3, 1.11, 0.05),
+             "GR": np.arange(0.2, 1.31, 0.1), "TB": np.arange(0.15, 0.81, 0.05), "PR": np.arange(0.6, 1.61, 0.05),
+             "LW": np.arange(0.16, 0.41, 0.03), "FY": np.arange(0.25, 0.81, 0.05), "TZ": np.arange(0.4, 1.31, 0.05),
+             "GRr": np.arange(0.3, 0.71, 0.04)}
+    for _round in range(2):
+        for key, grid in grids.items():
+            for val in grid:
+                q = dict(params)
+                q[key] = float(val)
+                iou = _silhouette_iou(q, views)[0]
+                if iou > best + 1e-4:
+                    best, params = iou, q
+        if _round == 0:
+            _refine_cameras(params, views)
+            best = _silhouette_iou(params, views)[0]
+    pv2.log(f"  shape by silhouette IoU: " + ", ".join(f"{k} {params[k]:.2f}" for k in grids) + f" -> IoU {best:.3f}")
     for v in views:
         _resolve_pose(v, params)
     return params

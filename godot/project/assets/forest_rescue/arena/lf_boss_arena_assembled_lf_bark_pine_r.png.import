@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ba8yre0isuguf"
-path="res://.godot/imported/lf_boss_arena_assembled_lf_bark_pine_r.png-75c3c1bad4b7b9a288bbe93e1644258b.ctex"
+path.bptc="res://.godot/imported/lf_boss_arena_assembled_lf_bark_pine_r.png-75c3c1bad4b7b9a288bbe93e1644258b.bptc.ctex"
+path.astc="res://.godot/imported/lf_boss_arena_assembled_lf_bark_pine_r.png-75c3c1bad4b7b9a288bbe93e1644258b.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "99743dce46e694e410a0ad31f7b8fcd7"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_boss_arena_assembled_lf_bark_pine_r.png"
-dest_files=["res://.godot/imported/lf_boss_arena_assembled_lf_bark_pine_r.png-75c3c1bad4b7b9a288bbe93e1644258b.ctex"]
+dest_files=["res://.godot/imported/lf_boss_arena_assembled_lf_bark_pine_r.png-75c3c1bad4b7b9a288bbe93e1644258b.bptc.ctex", "res://.godot/imported/lf_boss_arena_assembled_lf_bark_pine_r.png-75c3c1bad4b7b9a288bbe93e1644258b.astc.ctex"]
 
 [params]
 

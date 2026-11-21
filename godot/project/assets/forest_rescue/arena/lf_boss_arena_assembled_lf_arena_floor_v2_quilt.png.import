@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://diuoiii28pmof"
-path="res://.godot/imported/lf_boss_arena_assembled_lf_arena_floor_v2_quilt.png-56357c497bc2282cf3bb32c2fab51266.ctex"
+path.bptc="res://.godot/imported/lf_boss_arena_assembled_lf_arena_floor_v2_quilt.png-56357c497bc2282cf3bb32c2fab51266.bptc.ctex"
+path.astc="res://.godot/imported/lf_boss_arena_assembled_lf_arena_floor_v2_quilt.png-56357c497bc2282cf3bb32c2fab51266.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0fcc0b38939bb1812ace3212c23caa76"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_boss_arena_assembled_lf_arena_floor_v2_quilt.png"
-dest_files=["res://.godot/imported/lf_boss_arena_assembled_lf_arena_floor_v2_quilt.png-56357c497bc2282cf3bb32c2fab51266.ctex"]
+dest_files=["res://.godot/imported/lf_boss_arena_assembled_lf_arena_floor_v2_quilt.png-56357c497bc2282cf3bb32c2fab51266.bptc.ctex", "res://.godot/imported/lf_boss_arena_assembled_lf_arena_floor_v2_quilt.png-56357c497bc2282cf3bb32c2fab51266.astc.ctex"]
 
 [params]
 

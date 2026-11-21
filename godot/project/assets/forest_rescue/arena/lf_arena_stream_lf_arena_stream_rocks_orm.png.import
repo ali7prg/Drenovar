@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dysmwcwo6ou2p"
-path="res://.godot/imported/lf_arena_stream_lf_arena_stream_rocks_orm.png-8034aff641e7ffe2489945eacd2078c9.ctex"
+path.bptc="res://.godot/imported/lf_arena_stream_lf_arena_stream_rocks_orm.png-8034aff641e7ffe2489945eacd2078c9.bptc.ctex"
+path.astc="res://.godot/imported/lf_arena_stream_lf_arena_stream_rocks_orm.png-8034aff641e7ffe2489945eacd2078c9.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "e947d5a4b68c568efc40e257b8fa8fab"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_arena_stream_lf_arena_stream_rocks_orm.png"
-dest_files=["res://.godot/imported/lf_arena_stream_lf_arena_stream_rocks_orm.png-8034aff641e7ffe2489945eacd2078c9.ctex"]
+dest_files=["res://.godot/imported/lf_arena_stream_lf_arena_stream_rocks_orm.png-8034aff641e7ffe2489945eacd2078c9.bptc.ctex", "res://.godot/imported/lf_arena_stream_lf_arena_stream_rocks_orm.png-8034aff641e7ffe2489945eacd2078c9.astc.ctex"]
 
 [params]
 

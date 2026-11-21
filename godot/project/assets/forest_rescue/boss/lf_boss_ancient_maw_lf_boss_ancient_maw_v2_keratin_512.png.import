@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://jvf3y822b322"
-path="res://.godot/imported/lf_boss_ancient_maw_lf_boss_ancient_maw_v2_keratin_512.png-738550556ed8a50feb9d1fbee6bef4cf.ctex"
+path.bptc="res://.godot/imported/lf_boss_ancient_maw_lf_boss_ancient_maw_v2_keratin_512.png-738550556ed8a50feb9d1fbee6bef4cf.bptc.ctex"
+path.astc="res://.godot/imported/lf_boss_ancient_maw_lf_boss_ancient_maw_v2_keratin_512.png-738550556ed8a50feb9d1fbee6bef4cf.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "1ce59e7071d9cc15abb706a0f4a3e995"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/boss/lf_boss_ancient_maw_lf_boss_ancient_maw_v2_keratin_512.png"
-dest_files=["res://.godot/imported/lf_boss_ancient_maw_lf_boss_ancient_maw_v2_keratin_512.png-738550556ed8a50feb9d1fbee6bef4cf.ctex"]
+dest_files=["res://.godot/imported/lf_boss_ancient_maw_lf_boss_ancient_maw_v2_keratin_512.png-738550556ed8a50feb9d1fbee6bef4cf.bptc.ctex", "res://.godot/imported/lf_boss_ancient_maw_lf_boss_ancient_maw_v2_keratin_512.png-738550556ed8a50feb9d1fbee6bef4cf.astc.ctex"]
 
 [params]
 

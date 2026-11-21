@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c1waaurebfg6j"
-path="res://.godot/imported/lf_civilian_courier_lf_civilian_courier_color.jpg-4fcc01e5ec0aa4b43727970dce86860c.ctex"
+path.bptc="res://.godot/imported/lf_civilian_courier_lf_civilian_courier_color.jpg-4fcc01e5ec0aa4b43727970dce86860c.bptc.ctex"
+path.astc="res://.godot/imported/lf_civilian_courier_lf_civilian_courier_color.jpg-4fcc01e5ec0aa4b43727970dce86860c.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5dc2b76c6c78c458fb28f7031e7aea0f"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_civilian_courier_lf_civilian_courier_color.jpg"
-dest_files=["res://.godot/imported/lf_civilian_courier_lf_civilian_courier_color.jpg-4fcc01e5ec0aa4b43727970dce86860c.ctex"]
+dest_files=["res://.godot/imported/lf_civilian_courier_lf_civilian_courier_color.jpg-4fcc01e5ec0aa4b43727970dce86860c.bptc.ctex", "res://.godot/imported/lf_civilian_courier_lf_civilian_courier_color.jpg-4fcc01e5ec0aa4b43727970dce86860c.astc.ctex"]
 
 [params]
 

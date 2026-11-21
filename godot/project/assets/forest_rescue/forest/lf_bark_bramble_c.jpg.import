@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://07tnhr22ji48"
-path="res://.godot/imported/lf_bark_bramble_c.jpg-1ae7611289fd70cc630bf306c98151c1.ctex"
+path.bptc="res://.godot/imported/lf_bark_bramble_c.jpg-1ae7611289fd70cc630bf306c98151c1.bptc.ctex"
+path.astc="res://.godot/imported/lf_bark_bramble_c.jpg-1ae7611289fd70cc630bf306c98151c1.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/forest/lf_bark_bramble_c.jpg"
-dest_files=["res://.godot/imported/lf_bark_bramble_c.jpg-1ae7611289fd70cc630bf306c98151c1.ctex"]
+dest_files=["res://.godot/imported/lf_bark_bramble_c.jpg-1ae7611289fd70cc630bf306c98151c1.bptc.ctex", "res://.godot/imported/lf_bark_bramble_c.jpg-1ae7611289fd70cc630bf306c98151c1.astc.ctex"]
 
 [params]
 

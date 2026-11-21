@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://deja6gou8h57r"
-path="res://.godot/imported/lf_arena_fossil_wall_lf_arena_fossil_wall_normal.png-face9debbb02cc191c6e23a2055e6e18.ctex"
+path.bptc="res://.godot/imported/lf_arena_fossil_wall_lf_arena_fossil_wall_normal.png-face9debbb02cc191c6e23a2055e6e18.bptc.ctex"
+path.astc="res://.godot/imported/lf_arena_fossil_wall_lf_arena_fossil_wall_normal.png-face9debbb02cc191c6e23a2055e6e18.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "20bd0a91dd9c1f57b94d58f502063f25"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_arena_fossil_wall_lf_arena_fossil_wall_normal.png"
-dest_files=["res://.godot/imported/lf_arena_fossil_wall_lf_arena_fossil_wall_normal.png-face9debbb02cc191c6e23a2055e6e18.ctex"]
+dest_files=["res://.godot/imported/lf_arena_fossil_wall_lf_arena_fossil_wall_normal.png-face9debbb02cc191c6e23a2055e6e18.bptc.ctex", "res://.godot/imported/lf_arena_fossil_wall_lf_arena_fossil_wall_normal.png-face9debbb02cc191c6e23a2055e6e18.astc.ctex"]
 
 [params]
 

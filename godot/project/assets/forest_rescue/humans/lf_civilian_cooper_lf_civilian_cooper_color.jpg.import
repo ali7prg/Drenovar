@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://tu6qmgr0q0c7"
-path="res://.godot/imported/lf_civilian_cooper_lf_civilian_cooper_color.jpg-ca00a61c9a1549c78dfa72b3a9c1e5fc.ctex"
+path.bptc="res://.godot/imported/lf_civilian_cooper_lf_civilian_cooper_color.jpg-ca00a61c9a1549c78dfa72b3a9c1e5fc.bptc.ctex"
+path.astc="res://.godot/imported/lf_civilian_cooper_lf_civilian_cooper_color.jpg-ca00a61c9a1549c78dfa72b3a9c1e5fc.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "7ad2493e2d9ff1aceb2f6d901fbace7d"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_civilian_cooper_lf_civilian_cooper_color.jpg"
-dest_files=["res://.godot/imported/lf_civilian_cooper_lf_civilian_cooper_color.jpg-ca00a61c9a1549c78dfa72b3a9c1e5fc.ctex"]
+dest_files=["res://.godot/imported/lf_civilian_cooper_lf_civilian_cooper_color.jpg-ca00a61c9a1549c78dfa72b3a9c1e5fc.bptc.ctex", "res://.godot/imported/lf_civilian_cooper_lf_civilian_cooper_color.jpg-ca00a61c9a1549c78dfa72b3a9c1e5fc.astc.ctex"]
 
 [params]
 

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://rr04o0v8mnn2"
-path="res://.godot/imported/lf_horse_origin_lf_horse_origin_body_orm.png-fe8fb81cf4e124d818b0b9bbd510aafe.ctex"
+path.bptc="res://.godot/imported/lf_horse_origin_lf_horse_origin_body_orm.png-fe8fb81cf4e124d818b0b9bbd510aafe.bptc.ctex"
+path.astc="res://.godot/imported/lf_horse_origin_lf_horse_origin_body_orm.png-fe8fb81cf4e124d818b0b9bbd510aafe.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6c50858480e5a62b37165779461af46c"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/horse/lf_horse_origin_lf_horse_origin_body_orm.png"
-dest_files=["res://.godot/imported/lf_horse_origin_lf_horse_origin_body_orm.png-fe8fb81cf4e124d818b0b9bbd510aafe.ctex"]
+dest_files=["res://.godot/imported/lf_horse_origin_lf_horse_origin_body_orm.png-fe8fb81cf4e124d818b0b9bbd510aafe.bptc.ctex", "res://.godot/imported/lf_horse_origin_lf_horse_origin_body_orm.png-fe8fb81cf4e124d818b0b9bbd510aafe.astc.ctex"]
 
 [params]
 

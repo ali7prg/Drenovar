@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bj2enxsol60v6"
-path="res://.godot/imported/lf_boss_arena_assembled_lf_bark_bramble_r.png-1e0e3d0dce8b5be09c9795f743e0e333.ctex"
+path.bptc="res://.godot/imported/lf_boss_arena_assembled_lf_bark_bramble_r.png-1e0e3d0dce8b5be09c9795f743e0e333.bptc.ctex"
+path.astc="res://.godot/imported/lf_boss_arena_assembled_lf_bark_bramble_r.png-1e0e3d0dce8b5be09c9795f743e0e333.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "94d4f56bf8bc6df6c221136c1f3e1701"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_boss_arena_assembled_lf_bark_bramble_r.png"
-dest_files=["res://.godot/imported/lf_boss_arena_assembled_lf_bark_bramble_r.png-1e0e3d0dce8b5be09c9795f743e0e333.ctex"]
+dest_files=["res://.godot/imported/lf_boss_arena_assembled_lf_bark_bramble_r.png-1e0e3d0dce8b5be09c9795f743e0e333.bptc.ctex", "res://.godot/imported/lf_boss_arena_assembled_lf_bark_bramble_r.png-1e0e3d0dce8b5be09c9795f743e0e333.astc.ctex"]
 
 [params]
 

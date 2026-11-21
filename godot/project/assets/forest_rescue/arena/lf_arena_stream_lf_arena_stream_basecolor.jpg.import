@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bq5qchlaykwpj"
-path="res://.godot/imported/lf_arena_stream_lf_arena_stream_basecolor.jpg-0e8d615dc7780da209392d95a861566c.ctex"
+path.bptc="res://.godot/imported/lf_arena_stream_lf_arena_stream_basecolor.jpg-0e8d615dc7780da209392d95a861566c.bptc.ctex"
+path.astc="res://.godot/imported/lf_arena_stream_lf_arena_stream_basecolor.jpg-0e8d615dc7780da209392d95a861566c.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6a80dca53db9af954d7a920e93c92c64"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_arena_stream_lf_arena_stream_basecolor.jpg"
-dest_files=["res://.godot/imported/lf_arena_stream_lf_arena_stream_basecolor.jpg-0e8d615dc7780da209392d95a861566c.ctex"]
+dest_files=["res://.godot/imported/lf_arena_stream_lf_arena_stream_basecolor.jpg-0e8d615dc7780da209392d95a861566c.bptc.ctex", "res://.godot/imported/lf_arena_stream_lf_arena_stream_basecolor.jpg-0e8d615dc7780da209392d95a861566c.astc.ctex"]
 
 [params]
 

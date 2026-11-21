@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://wam712dh086k"
-path="res://.godot/imported/lf_bark_birch_n.png-27a23511852286d3c753426f3ca45a26.ctex"
+path.bptc="res://.godot/imported/lf_bark_birch_n.png-27a23511852286d3c753426f3ca45a26.bptc.ctex"
+path.astc="res://.godot/imported/lf_bark_birch_n.png-27a23511852286d3c753426f3ca45a26.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/forest/lf_bark_birch_n.png"
-dest_files=["res://.godot/imported/lf_bark_birch_n.png-27a23511852286d3c753426f3ca45a26.ctex"]
+dest_files=["res://.godot/imported/lf_bark_birch_n.png-27a23511852286d3c753426f3ca45a26.bptc.ctex", "res://.godot/imported/lf_bark_birch_n.png-27a23511852286d3c753426f3ca45a26.astc.ctex"]
 
 [params]
 

@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c267te6bsrebd"
-path="res://.godot/imported/lf_civilian_cooper_variant_mask.png-24a7578a68e2be280adc9dfe500c9847.ctex"
+path.bptc="res://.godot/imported/lf_civilian_cooper_variant_mask.png-24a7578a68e2be280adc9dfe500c9847.bptc.ctex"
+path.astc="res://.godot/imported/lf_civilian_cooper_variant_mask.png-24a7578a68e2be280adc9dfe500c9847.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_civilian_cooper_variant_mask.png"
-dest_files=["res://.godot/imported/lf_civilian_cooper_variant_mask.png-24a7578a68e2be280adc9dfe500c9847.ctex"]
+dest_files=["res://.godot/imported/lf_civilian_cooper_variant_mask.png-24a7578a68e2be280adc9dfe500c9847.bptc.ctex", "res://.godot/imported/lf_civilian_cooper_variant_mask.png-24a7578a68e2be280adc9dfe500c9847.astc.ctex"]
 
 [params]
 

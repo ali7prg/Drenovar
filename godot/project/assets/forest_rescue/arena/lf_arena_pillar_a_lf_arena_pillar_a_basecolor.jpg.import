@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b118qr72o3ed4"
-path="res://.godot/imported/lf_arena_pillar_a_lf_arena_pillar_a_basecolor.jpg-cc97dd6d6174f44a0840091023e128a2.ctex"
+path.bptc="res://.godot/imported/lf_arena_pillar_a_lf_arena_pillar_a_basecolor.jpg-cc97dd6d6174f44a0840091023e128a2.bptc.ctex"
+path.astc="res://.godot/imported/lf_arena_pillar_a_lf_arena_pillar_a_basecolor.jpg-cc97dd6d6174f44a0840091023e128a2.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "3bd893ce045445eb2e669613aec2abb4"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_arena_pillar_a_lf_arena_pillar_a_basecolor.jpg"
-dest_files=["res://.godot/imported/lf_arena_pillar_a_lf_arena_pillar_a_basecolor.jpg-cc97dd6d6174f44a0840091023e128a2.ctex"]
+dest_files=["res://.godot/imported/lf_arena_pillar_a_lf_arena_pillar_a_basecolor.jpg-cc97dd6d6174f44a0840091023e128a2.bptc.ctex", "res://.godot/imported/lf_arena_pillar_a_lf_arena_pillar_a_basecolor.jpg-cc97dd6d6174f44a0840091023e128a2.astc.ctex"]
 
 [params]
 

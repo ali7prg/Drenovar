@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c8p8p61csspwe"
-path="res://.godot/imported/lf_arena_bones_lf_arena_bones_normal.png-1b0cf289bcd42364aa283cde2257ac81.ctex"
+path.bptc="res://.godot/imported/lf_arena_bones_lf_arena_bones_normal.png-1b0cf289bcd42364aa283cde2257ac81.bptc.ctex"
+path.astc="res://.godot/imported/lf_arena_bones_lf_arena_bones_normal.png-1b0cf289bcd42364aa283cde2257ac81.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "e26ef3638eb8bf3c628d23c5043a09e3"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_arena_bones_lf_arena_bones_normal.png"
-dest_files=["res://.godot/imported/lf_arena_bones_lf_arena_bones_normal.png-1b0cf289bcd42364aa283cde2257ac81.ctex"]
+dest_files=["res://.godot/imported/lf_arena_bones_lf_arena_bones_normal.png-1b0cf289bcd42364aa283cde2257ac81.bptc.ctex", "res://.godot/imported/lf_arena_bones_lf_arena_bones_normal.png-1b0cf289bcd42364aa283cde2257ac81.astc.ctex"]
 
 [params]
 

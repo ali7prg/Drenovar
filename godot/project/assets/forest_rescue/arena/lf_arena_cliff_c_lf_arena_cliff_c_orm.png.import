@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cblfg7b1kgod1"
-path="res://.godot/imported/lf_arena_cliff_c_lf_arena_cliff_c_orm.png-6ea11c5125cd6192c7c976098b96b629.ctex"
+path.bptc="res://.godot/imported/lf_arena_cliff_c_lf_arena_cliff_c_orm.png-6ea11c5125cd6192c7c976098b96b629.bptc.ctex"
+path.astc="res://.godot/imported/lf_arena_cliff_c_lf_arena_cliff_c_orm.png-6ea11c5125cd6192c7c976098b96b629.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "4d793fa57ad6bba32c734fb82a31aff5"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_arena_cliff_c_lf_arena_cliff_c_orm.png"
-dest_files=["res://.godot/imported/lf_arena_cliff_c_lf_arena_cliff_c_orm.png-6ea11c5125cd6192c7c976098b96b629.ctex"]
+dest_files=["res://.godot/imported/lf_arena_cliff_c_lf_arena_cliff_c_orm.png-6ea11c5125cd6192c7c976098b96b629.bptc.ctex", "res://.godot/imported/lf_arena_cliff_c_lf_arena_cliff_c_orm.png-6ea11c5125cd6192c7c976098b96b629.astc.ctex"]
 
 [params]
 

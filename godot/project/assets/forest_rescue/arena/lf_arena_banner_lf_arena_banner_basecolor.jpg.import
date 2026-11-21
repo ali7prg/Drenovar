@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dc3v188dghovq"
-path="res://.godot/imported/lf_arena_banner_lf_arena_banner_basecolor.jpg-10d1e185033258107758aebf368ac4cb.ctex"
+path.bptc="res://.godot/imported/lf_arena_banner_lf_arena_banner_basecolor.jpg-10d1e185033258107758aebf368ac4cb.bptc.ctex"
+path.astc="res://.godot/imported/lf_arena_banner_lf_arena_banner_basecolor.jpg-10d1e185033258107758aebf368ac4cb.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "045ef2c03505ab602c2a25eba7383460"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_arena_banner_lf_arena_banner_basecolor.jpg"
-dest_files=["res://.godot/imported/lf_arena_banner_lf_arena_banner_basecolor.jpg-10d1e185033258107758aebf368ac4cb.ctex"]
+dest_files=["res://.godot/imported/lf_arena_banner_lf_arena_banner_basecolor.jpg-10d1e185033258107758aebf368ac4cb.bptc.ctex", "res://.godot/imported/lf_arena_banner_lf_arena_banner_basecolor.jpg-10d1e185033258107758aebf368ac4cb.astc.ctex"]
 
 [params]
 

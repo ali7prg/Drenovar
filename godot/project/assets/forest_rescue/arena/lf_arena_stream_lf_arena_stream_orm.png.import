@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ct05lrc8rqc3c"
-path="res://.godot/imported/lf_arena_stream_lf_arena_stream_orm.png-7cf02cce8eeeebe64be19763e3c96efe.ctex"
+path.bptc="res://.godot/imported/lf_arena_stream_lf_arena_stream_orm.png-7cf02cce8eeeebe64be19763e3c96efe.bptc.ctex"
+path.astc="res://.godot/imported/lf_arena_stream_lf_arena_stream_orm.png-7cf02cce8eeeebe64be19763e3c96efe.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "dcee78e3a284f76f65ad20ac6c74def5"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_arena_stream_lf_arena_stream_orm.png"
-dest_files=["res://.godot/imported/lf_arena_stream_lf_arena_stream_orm.png-7cf02cce8eeeebe64be19763e3c96efe.ctex"]
+dest_files=["res://.godot/imported/lf_arena_stream_lf_arena_stream_orm.png-7cf02cce8eeeebe64be19763e3c96efe.bptc.ctex", "res://.godot/imported/lf_arena_stream_lf_arena_stream_orm.png-7cf02cce8eeeebe64be19763e3c96efe.astc.ctex"]
 
 [params]
 

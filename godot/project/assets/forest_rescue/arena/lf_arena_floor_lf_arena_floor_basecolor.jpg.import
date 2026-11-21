@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfktyxvuug0bi"
-path="res://.godot/imported/lf_arena_floor_lf_arena_floor_basecolor.jpg-17890cd1d93e7e574daf32776b6d1870.ctex"
+path.bptc="res://.godot/imported/lf_arena_floor_lf_arena_floor_basecolor.jpg-17890cd1d93e7e574daf32776b6d1870.bptc.ctex"
+path.astc="res://.godot/imported/lf_arena_floor_lf_arena_floor_basecolor.jpg-17890cd1d93e7e574daf32776b6d1870.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "3ef6d6ad1c392ca5c309ee3a6cd9dbf6"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/arena/lf_arena_floor_lf_arena_floor_basecolor.jpg"
-dest_files=["res://.godot/imported/lf_arena_floor_lf_arena_floor_basecolor.jpg-17890cd1d93e7e574daf32776b6d1870.ctex"]
+dest_files=["res://.godot/imported/lf_arena_floor_lf_arena_floor_basecolor.jpg-17890cd1d93e7e574daf32776b6d1870.bptc.ctex", "res://.godot/imported/lf_arena_floor_lf_arena_floor_basecolor.jpg-17890cd1d93e7e574daf32776b6d1870.astc.ctex"]
 
 [params]
 

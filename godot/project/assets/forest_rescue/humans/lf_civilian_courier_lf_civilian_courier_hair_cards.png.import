@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://histu5ebgg02"
-path="res://.godot/imported/lf_civilian_courier_lf_civilian_courier_hair_cards.png-19de5f40610cfeeb3aa205d04635bec1.ctex"
+path.bptc="res://.godot/imported/lf_civilian_courier_lf_civilian_courier_hair_cards.png-19de5f40610cfeeb3aa205d04635bec1.bptc.ctex"
+path.astc="res://.godot/imported/lf_civilian_courier_lf_civilian_courier_hair_cards.png-19de5f40610cfeeb3aa205d04635bec1.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0bcf5e6775b8ebbbc7151dfa0e898d95"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_civilian_courier_lf_civilian_courier_hair_cards.png"
-dest_files=["res://.godot/imported/lf_civilian_courier_lf_civilian_courier_hair_cards.png-19de5f40610cfeeb3aa205d04635bec1.ctex"]
+dest_files=["res://.godot/imported/lf_civilian_courier_lf_civilian_courier_hair_cards.png-19de5f40610cfeeb3aa205d04635bec1.bptc.ctex", "res://.godot/imported/lf_civilian_courier_lf_civilian_courier_hair_cards.png-19de5f40610cfeeb3aa205d04635bec1.astc.ctex"]
 
 [params]
 

@@ -1,312 +1,435 @@
 {
   "id": "lf_mechanism_rune_lock",
+  "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 3572,
-    "LOD1": 2480,
-    "LOD2": 1672
+    "LOD0": 5346,
+    "LOD1": 3250,
+    "LOD2": 1466
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 1852,
-      "door": 64,
-      "ring_3": 480,
-      "ring_2": 480,
-      "ring_1": 480,
-      "key_lever": 216
+      "root": 2570,
+      "door_pivot": 40,
+      "ring_3": 764,
+      "ring_2": 764,
+      "ring_1": 764,
+      "key_lever": 444
     },
     "LOD1": {
-      "root": 1412,
-      "door": 40,
-      "ring_3": 288,
-      "ring_2": 288,
-      "ring_1": 288,
-      "key_lever": 164
+      "root": 1622,
+      "door_pivot": 28,
+      "ring_3": 476,
+      "ring_2": 476,
+      "ring_1": 476,
+      "key_lever": 172
     },
     "LOD2": {
-      "root": 1056,
-      "door": 24,
-      "ring_3": 160,
-      "ring_2": 160,
-      "ring_1": 160,
-      "key_lever": 112
+      "root": 1022,
+      "door_pivot": 28,
+      "ring_3": 92,
+      "ring_2": 92,
+      "ring_1": 92,
+      "key_lever": 140
     }
   },
   "budget": "mechanism LOD0 <= 6000 tris",
   "bones": 0,
   "materials": [
+    "lf_mechanism_rune_lock_lod1_mat",
+    "lf_mechanism_rune_lock_lod2_mat",
     "lf_mechanism_rune_lock_mat"
   ],
   "textures": {
-    "baseColor": "2048 JPEG",
-    "metallicRoughness": "1024 JPEG (G rough, B metal)",
-    "normal": "2048 PNG"
+    "lf_mechanism_rune_lock_c.jpg": 2048,
+    "lf_mechanism_rune_lock_n.png": 1024,
+    "lf_mechanism_rune_lock_lod1_c.jpg": 1024,
+    "lf_mechanism_rune_lock_lod2_c.jpg": 512
   },
-  "coordinate_space": "glTF (Y up, metres); operator/front side faces +Z",
+  "texture_mode": "external JPEG/PNG next to the GLB (relative URIs); LOD1/LOD2 have their own atlases",
+  "paintedLightMix": 0.38,
+  "paintedLightNote": "albedo carries the painted light: shade = albedo * mix(1, lambert, paintedLightMix) (actor_rig.apply_look -> ForestKit.painted_material)",
+  "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -0.85,
+      -0.836,
       0.0,
-      1.15
+      -0.794
     ],
     "max": [
-      0.8,
-      1.0,
-      -0.8
+      0.808,
+      0.6,
+      0.946
     ]
   },
+  "lod_nodes": {
+    "LOD0": [
+      "lf_mechanism_rune_lock_LOD0",
+      "lf_mechanism_rune_lock_door_pivot_LOD0",
+      "lf_mechanism_rune_lock_key_lever_LOD0",
+      "lf_mechanism_rune_lock_ring_1_LOD0",
+      "lf_mechanism_rune_lock_ring_2_LOD0",
+      "lf_mechanism_rune_lock_ring_3_LOD0"
+    ],
+    "LOD1": [
+      "lf_mechanism_rune_lock_LOD1",
+      "lf_mechanism_rune_lock_door_pivot_LOD1",
+      "lf_mechanism_rune_lock_key_lever_LOD1",
+      "lf_mechanism_rune_lock_ring_1_LOD1",
+      "lf_mechanism_rune_lock_ring_2_LOD1",
+      "lf_mechanism_rune_lock_ring_3_LOD1"
+    ],
+    "LOD2": [
+      "lf_mechanism_rune_lock_LOD2",
+      "lf_mechanism_rune_lock_door_pivot_LOD2",
+      "lf_mechanism_rune_lock_key_lever_LOD2",
+      "lf_mechanism_rune_lock_ring_1_LOD2",
+      "lf_mechanism_rune_lock_ring_2_LOD2",
+      "lf_mechanism_rune_lock_ring_3_LOD2"
+    ]
+  },
+  "lod_note": "LOD meshes are siblings named *_LOD0/1/2 (actor_rig.set_lod); LOD1/LOD2 are hidden by default (KHR_node_visibility) so a plain instance shows LOD0 only.",
+  "hidden_by_default": [],
   "clips": {
     "lf_rune_ring1_mountain": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 1 turns mountain to the front index mark",
+      "nodes": [
+        "ring_1"
+      ]
     },
     "lf_rune_ring1_river": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 1 turns river to the front index mark",
+      "nodes": [
+        "ring_1"
+      ]
     },
     "lf_rune_ring1_leaf": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 1 turns leaf to the front index mark",
+      "nodes": [
+        "ring_1"
+      ]
     },
     "lf_rune_ring1_coal": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 1 turns coal to the front index mark",
+      "nodes": [
+        "ring_1"
+      ]
     },
     "lf_rune_ring1_seed": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 1 turns seed to the front index mark",
+      "nodes": [
+        "ring_1"
+      ]
     },
     "lf_rune_ring1_tree": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 1 turns tree to the front index mark",
+      "nodes": [
+        "ring_1"
+      ]
     },
     "lf_rune_ring1_sun": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 1 turns sun to the front index mark",
+      "nodes": [
+        "ring_1"
+      ]
     },
     "lf_rune_ring1_stone": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 1 turns stone to the front index mark",
+      "nodes": [
+        "ring_1"
+      ]
     },
     "lf_rune_ring1_root": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 1 turns root to the front index mark",
+      "nodes": [
+        "ring_1"
+      ]
     },
     "lf_rune_ring2_mountain": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 2 turns mountain to the front index mark",
+      "nodes": [
+        "ring_2"
+      ]
     },
     "lf_rune_ring2_river": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 2 turns river to the front index mark",
+      "nodes": [
+        "ring_2"
+      ]
     },
     "lf_rune_ring2_leaf": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 2 turns leaf to the front index mark",
+      "nodes": [
+        "ring_2"
+      ]
     },
     "lf_rune_ring2_coal": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 2 turns coal to the front index mark",
+      "nodes": [
+        "ring_2"
+      ]
     },
     "lf_rune_ring2_seed": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 2 turns seed to the front index mark",
+      "nodes": [
+        "ring_2"
+      ]
     },
     "lf_rune_ring2_tree": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 2 turns tree to the front index mark",
+      "nodes": [
+        "ring_2"
+      ]
     },
     "lf_rune_ring2_sun": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 2 turns sun to the front index mark",
+      "nodes": [
+        "ring_2"
+      ]
     },
     "lf_rune_ring2_stone": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 2 turns stone to the front index mark",
+      "nodes": [
+        "ring_2"
+      ]
     },
     "lf_rune_ring2_root": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 2 turns root to the front index mark",
+      "nodes": [
+        "ring_2"
+      ]
     },
     "lf_rune_ring3_mountain": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 3 turns mountain to the front index mark",
+      "nodes": [
+        "ring_3"
+      ]
     },
     "lf_rune_ring3_river": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 3 turns river to the front index mark",
+      "nodes": [
+        "ring_3"
+      ]
     },
     "lf_rune_ring3_leaf": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 3 turns leaf to the front index mark",
+      "nodes": [
+        "ring_3"
+      ]
     },
     "lf_rune_ring3_coal": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 3 turns coal to the front index mark",
+      "nodes": [
+        "ring_3"
+      ]
     },
     "lf_rune_ring3_seed": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 3 turns seed to the front index mark",
+      "nodes": [
+        "ring_3"
+      ]
     },
     "lf_rune_ring3_tree": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 3 turns tree to the front index mark",
+      "nodes": [
+        "ring_3"
+      ]
     },
     "lf_rune_ring3_sun": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 3 turns sun to the front index mark",
+      "nodes": [
+        "ring_3"
+      ]
     },
     "lf_rune_ring3_stone": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 3 turns stone to the front index mark",
+      "nodes": [
+        "ring_3"
+      ]
     },
     "lf_rune_ring3_root": {
       "seconds": 0.6,
-      "frames": 18,
       "loop": false,
+      "frames": 18,
       "markers": {
         "click": 0.5
       },
-      "glb_seconds": 0.6
+      "note": "ring 3 turns root to the front index mark",
+      "nodes": [
+        "ring_3"
+      ]
     },
     "lf_lock_mechanism": {
       "seconds": 1.8,
-      "frames": 54,
       "loop": false,
+      "frames": 54,
       "markers": {
         "key_turned": 0.8666666666666667,
         "door_open": 1.6666666666666667
       },
-      "glb_seconds": 1.8
+      "note": "key set into the niche and turned, rings settle, the door slides down into the plinth (solved pose = last frame)",
+      "nodes": [
+        "door_pivot",
+        "key_lever",
+        "ring_1",
+        "ring_2",
+        "ring_3"
+      ]
     }
   },
   "glb_nodes": [
@@ -335,217 +458,157 @@
     "lf_mechanism_rune_lock_ring_3_LOD2",
     "ring_3"
   ],
-  "glb_animations": {
-    "lf_lock_mechanism": [
-      [
-        "door_pivot",
-        "translation"
-      ],
-      [
-        "key_lever",
-        "translation"
-      ],
-      [
-        "key_lever",
-        "rotation"
-      ],
-      [
-        "ring_1",
-        "rotation"
-      ],
-      [
-        "ring_2",
-        "rotation"
-      ],
-      [
-        "ring_3",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring1_mountain": [
-      [
-        "ring_1",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring1_river": [
-      [
-        "ring_1",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring1_leaf": [
-      [
-        "ring_1",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring1_coal": [
-      [
-        "ring_1",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring1_seed": [
-      [
-        "ring_1",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring1_tree": [
-      [
-        "ring_1",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring1_sun": [
-      [
-        "ring_1",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring1_stone": [
-      [
-        "ring_1",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring1_root": [
-      [
-        "ring_1",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring2_mountain": [
-      [
-        "ring_2",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring2_river": [
-      [
-        "ring_2",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring2_leaf": [
-      [
-        "ring_2",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring2_coal": [
-      [
-        "ring_2",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring2_seed": [
-      [
-        "ring_2",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring2_tree": [
-      [
-        "ring_2",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring2_sun": [
-      [
-        "ring_2",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring2_stone": [
-      [
-        "ring_2",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring2_root": [
-      [
-        "ring_2",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring3_mountain": [
-      [
-        "ring_3",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring3_river": [
-      [
-        "ring_3",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring3_leaf": [
-      [
-        "ring_3",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring3_coal": [
-      [
-        "ring_3",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring3_seed": [
-      [
-        "ring_3",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring3_tree": [
-      [
-        "ring_3",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring3_sun": [
-      [
-        "ring_3",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring3_stone": [
-      [
-        "ring_3",
-        "rotation"
-      ]
-    ],
-    "lf_rune_ring3_root": [
-      [
-        "ring_3",
-        "rotation"
-      ]
-    ]
+  "glb_animations": [
+    "lf_lock_mechanism",
+    "lf_rune_ring1_mountain",
+    "lf_rune_ring1_river",
+    "lf_rune_ring1_leaf",
+    "lf_rune_ring1_coal",
+    "lf_rune_ring1_seed",
+    "lf_rune_ring1_tree",
+    "lf_rune_ring1_sun",
+    "lf_rune_ring1_stone",
+    "lf_rune_ring1_root",
+    "lf_rune_ring2_mountain",
+    "lf_rune_ring2_river",
+    "lf_rune_ring2_leaf",
+    "lf_rune_ring2_coal",
+    "lf_rune_ring2_seed",
+    "lf_rune_ring2_tree",
+    "lf_rune_ring2_sun",
+    "lf_rune_ring2_stone",
+    "lf_rune_ring2_root",
+    "lf_rune_ring3_mountain",
+    "lf_rune_ring3_river",
+    "lf_rune_ring3_leaf",
+    "lf_rune_ring3_coal",
+    "lf_rune_ring3_seed",
+    "lf_rune_ring3_tree",
+    "lf_rune_ring3_sun",
+    "lf_rune_ring3_stone",
+    "lf_rune_ring3_root"
+  ],
+  "blueprint": {
+    "Rw": 1.1746,
+    "Rt": 0.85,
+    "Rb": 1.1746,
+    "hb": 0.06,
+    "ox": -0.02,
+    "oy": -0.04,
+    "zt": 0.56,
+    "Rr": 0.64,
+    "rc": 0.67,
+    "dz": 0.07,
+    "R3": 0.616,
+    "R2": 0.4104,
+    "R1": 0.3476,
+    "y2": 0.1261,
+    "y1": 0.2159,
+    "an": -48.0,
+    "ad": -86.0,
+    "dh": 16.106,
+    "dt": 0.4049,
+    "sx": 0.08,
+    "sw": 0.9075,
+    "sd": 0.1764,
+    "sh": 0.1545
   },
-  "markers": {
-    "artifact_spot": {
-      "position": [
-        0.0,
-        0.34,
-        0.42
-      ],
-      "parent": "root"
+  "qa": {
+    "views": {
+      "closed": {
+        "iou_raw": 0.8961,
+        "iou_filled": 0.8992,
+        "colour_err": 0.058,
+        "colour_err_core": 0.0571,
+        "ref_px": 80572,
+        "render_px": 85931,
+        "ignored_px": 0,
+        "camera_rms_px": 8.33,
+        "camera_max_px": 15.48,
+        "camera_points": 14
+      },
+      "open": {
+        "iou_raw": 0.8953,
+        "iou_filled": 0.8991,
+        "colour_err": 0.1189,
+        "colour_err_core": 0.1187,
+        "ref_px": 84078,
+        "render_px": 86142,
+        "ignored_px": 0,
+        "camera_rms_px": 8.75,
+        "camera_max_px": 16.82,
+        "camera_points": 18
+      }
+    },
+    "cameras": {
+      "closed": {
+        "rms_px": 8.33,
+        "max_px": 15.48,
+        "n": 14,
+        "fov_deg": 21.06,
+        "per_point_px": {
+          "r1_left": 9.42,
+          "r1_right": 7.47,
+          "r1_back": 13.8,
+          "r1_front": 15.48,
+          "r2_front": 0.4,
+          "r3_front": 0.43,
+          "clamp_b": 7.94,
+          "clamp_f": 10.83,
+          "clamp_l": 11.38,
+          "clamp_r": 6.19,
+          "step_tl": 4.04,
+          "step_tr": 4.1,
+          "step_bl": 3.97,
+          "step_br": 0.28
+        }
+      },
+      "open": {
+        "rms_px": 8.75,
+        "max_px": 16.82,
+        "n": 18,
+        "fov_deg": 21.07,
+        "per_point_px": {
+          "r1_left": 13.53,
+          "r1_right": 13.4,
+          "r1_back": 14.93,
+          "r1_front": 16.82,
+          "r2_front": 0.3,
+          "r3_front": 0.63,
+          "clamp_b": 5.49,
+          "clamp_f": 9.96,
+          "clamp_l": 5.92,
+          "clamp_r": 8.78,
+          "step_tl": 5.06,
+          "step_tr": 3.89,
+          "step_bl": 1.87,
+          "step_br": 6.4,
+          "door_tl": 6.24,
+          "door_tr": 8.26,
+          "door_bl": 6.71,
+          "door_br": 5.39
+        }
+      }
+    },
+    "texture": {
+      "texels": 1880870,
+      "projected_frac": 0.1773,
+      "per_view_frac": {
+        "closed": 0.1564,
+        "open": 0.1571
+      },
+      "seconds": 12.8
+    },
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_rune_lock/v2_iter11_*",
+    "godot_import": {
+      "errors_warnings": 0,
+      "lines": []
     }
   },
-  "projection": {
-    "painted_fraction": 0.154,
-    "texel_mm": 2.406
-  },
-  "camera_fit_iou": {
-    "closed": 0.9099,
-    "open": 0.9301
-  },
-  "notes": "Rings share 10 engraved positions (blank + 9 symbols of sites 02/06/10). Drawing shows site 02 (mountain/river/leaf); comparisons use that solved pose. Door panel slides down into the plinth.",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_rune_lock --iter 11",
+  "mechanism": "rune_lock",
   "symbol_targets": {
-    "axis": "rings rotate about glTF +Y through the drum centre (node origin)",
+    "axis": "each ring disc rotates about glTF +Y through its own node origin (disc centre); discs are stacked rising toward the back",
     "ring_for_progress_step": {
       "1": "ring_1",
       "2": "ring_2",
@@ -632,7 +695,7 @@
       "clip": "lf_lock_mechanism",
       "door_pivot_open_offset_m": [
         0,
-        -0.44,
+        -0.434,
         0
       ],
       "key_lever_open": "end pose of lf_lock_mechanism"
@@ -640,14 +703,32 @@
   },
   "sockets": {
     "artifact_spot": [
-      0.0,
-      0.34,
-      0.42
+      -0.014,
+      0.294,
+      0.5682
     ],
     "front_index_mark": [
       0.0,
-      0.7,
-      0.57
-    ]
-  }
+      0.462,
+      0.469
+    ],
+    "glyph_front_positions": {
+      "ring_3": [
+        0.0,
+        0.4935,
+        0.35
+      ],
+      "ring_2": [
+        0.0,
+        0.5425,
+        0.1287
+      ],
+      "ring_1": [
+        0.0,
+        0.5915,
+        0.0238
+      ]
+    }
+  },
+  "notes": "v2: geometry measured on both art/10 drawings (closed + open), cameras solved; disc tops carry all ten engraved positions (painted style); door panel slides down into the plinth."
 }

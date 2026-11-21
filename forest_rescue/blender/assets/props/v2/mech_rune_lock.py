@@ -34,6 +34,9 @@ STEP = 36.0
 SITES = {"lf_site_02": ["mountain", "river", "leaf"], "lf_site_06": ["coal", "seed", "tree"],
          "lf_site_10": ["sun", "stone", "root"]}
 DOOR_DROP = 0.62
+# The painting has no absolute scale: the measured blueprint is shrunk uniformly to the v1 delivery's footprint
+# (~1.65 m wide) so the site layouts (cage / camp / squad stand-off) keep their spacing; cameras scale along.
+MODEL_SCALE = 0.7
 
 # sizes from the closed drawing's image ratios (wall 156 px : clamps 98 : rim 93 : top disc 64 at the dial row)
 PARAMS = dict(Rw=1.1, Rt=0.9, Rb=1.14, hb=0.12, ox=0.0, oy=0.0, zt=0.56, Rr=0.64, rc=0.67, dz=0.07,
@@ -113,7 +116,8 @@ def points(p):
             P[key] = (P[key][0] + p["ox"], P[key][1] + p["oy"], P[key][2])
     k = key_in_niche(p)
     P["gem_niche"] = (k[0], k[1], k[2] + 0.2)
-    return P
+    S = p.get("_scale", 1.0)
+    return {key: (v[0] * S, v[1] * S, v[2] * S) for key, v in P.items()}
 
 
 def views():
@@ -141,8 +145,11 @@ def views():
 
 
 def _resolve_pose(v, p):
-    if v.pose.get("key_lever") == "key_in_niche":
-        v.pose["key_lever"] = {"loc": tuple(key_in_niche(p) - key_rest(p)), "rot": (0.0, -math.pi / 2, 0.0)}
+    S = p.get("_scale", 1.0)
+    if "door_pivot" in v.pose:
+        v.pose["door_pivot"] = {"loc": (0, 0, -DOOR_DROP * S)}
+    if v.pose.get("key_lever") == "key_in_niche" or isinstance(v.pose.get("key_lever"), dict):
+        v.pose["key_lever"] = {"loc": tuple((key_in_niche(p) - key_rest(p)) * S), "rot": (0.0, -math.pi / 2, 0.0)}
 
 
 def arc_wall(g, r0, r1, z0, z1, a0, a1, n, mat, tag, top=True, ends=True, r1_top=None):
@@ -269,8 +276,16 @@ def build(A, p, lod):
     kg.rock(kp + (0.25, 0, 0.0), (0.085, 0.06, 0.06), seed=3, sub=2 if lod == 0 else 1, mat="gem", tag="key_gem",
             flat_bottom=False, rough=0.05)
     kg.box(kp + (-0.27, 0, -0.012), (0.06, 0.016, 0.07), mat="bronze", tag="key_bit")
+    S = p.get("_scale", 1.0)
     if lod == 0:
-        A.marker("artifact_spot", tuple(cc + O + (0, 0, 0.36)))
+        A.marker("artifact_spot", tuple((cc + O + (0, 0, 0.36)) * S))
+    if S != 1.0:
+        for part in A.parts.values():
+            gg = part.geo[lod]
+            gg.V = [V * S for V in gg.V]
+            if not getattr(part, "_scaled", False):
+                part.pivot = part.pivot * S
+                part._scaled = True
     return A
 
 
@@ -332,8 +347,11 @@ def solve(views):
                     best, params = iou, q
     pv2.log(f"  drum by silhouette IoU: Rt {params['Rt']:.3f} Rb {params['Rb']:.3f} hb {params['hb']:.2f} -> mean IoU "
             f"{best:.3f} {[round(x, 3) for x in _silhouette_iou(params, views)[1]]}")
+    params["_scale"] = MODEL_SCALE
     for v in views:
         _resolve_pose(v, params)
+        c = v.cam
+        v.cam = type(c)(c.f, c.cx, c.cy, c.rvec, c.tvec * MODEL_SCALE, c.k1, c.k2, size=c.size)
     return params
 
 
@@ -378,6 +396,7 @@ def post_texture(A, B, alb_img, info, p):
     ten positions (k at local angle 270 + 36k deg, glyph 'up' toward the disc centre) in the painted style."""
     import cv2
     P, N, part, yy, xx = info["P"], info["N"], info["part"], info["yy"], info["xx"]
+    P = P / p.get("_scale", 1.0)          # blueprint units (discs(), GLYPH_LAYOUT)
     pn = info["pnames"]
     alb = info["alb"]
     masks = _glyph_masks()
@@ -452,26 +471,30 @@ def clips(A, B):
                          {f"ring_{r}": (lambda t, tg=tgt: {"rot": (0, 0, tg * _out_back(t / 0.533))})},
                          markers={"click": 0.5}, note=f"ring {r} turns {gname} to the front index mark")
     p = A._params
-    kv = key_in_niche(p) - key_rest(p)
+    S = p.get("_scale", 1.0)
+    kv = (key_in_niche(p) - key_rest(p)) * S
 
     def key_track(t):
         a = _ease(t, 0.0, 0.53)
         b = _ease(t, 0.53, 0.87)
-        lift = math.sin(math.pi * a) * 0.35
+        lift = math.sin(math.pi * a) * 0.35 * S
         return {"loc": tuple(kv * a + np.array([0, 0, lift])), "rot": (0.0, -math.pi / 2 * a, math.pi / 2 * b)}
 
     def ring(r, sym):
         return lambda t: {"rot": (0, 0, ring_angle(sym) + math.radians(1.5) * math.sin(math.pi * _ease(t, 0.8, 1.0)))}
     pv2.add_clip(A, B, "lf_lock_mechanism", 1.8, {
         "key_lever": key_track,
-        "door_pivot": lambda t: {"loc": (0, 0, -DOOR_DROP * _ease(t, 0.93, 1.67) + 0.01 * math.sin(math.pi * _ease(t, 0.87, 1.0)))},
+        "door_pivot": lambda t: {"loc": (0, 0, (-DOOR_DROP * _ease(t, 0.93, 1.67) + 0.01 * math.sin(math.pi * _ease(t, 0.87, 1.0))) * S)},
         "ring_1": ring(1, "mountain"), "ring_2": ring(2, "river"), "ring_3": ring(3, "leaf"),
     }, markers={"key_turned": 26 / 30, "door_open": 50 / 30},
         note="key set into the niche and turned, rings settle, the door slides down into the plinth (solved pose = last frame)")
 
 
 def meta(A, p):
-    g = pv2.b2g
+    S = p.get("_scale", 1.0)
+
+    def g(v):
+        return pv2.b2g(tuple(np.asarray(v, float) * S))
     D = discs(p)
     cy0 = p["Rw"] * math.sin(math.radians(p["ad"]))
     return {
@@ -487,7 +510,7 @@ def meta(A, p):
                       for s, v in SITES.items()},
             "wrong_input": "tween the active ring to the chosen symbol (clip lf_rune_ring<k>_<symbol>), then tween all rings "
                            "back to rest_deg (server resets progress)",
-            "solved": {"clip": "lf_lock_mechanism", "door_pivot_open_offset_m": [0, -DOOR_DROP, 0],
+            "solved": {"clip": "lf_lock_mechanism", "door_pivot_open_offset_m": [0, round(-DOOR_DROP * S, 4), 0],
                        "key_lever_open": "end pose of lf_lock_mechanism"}},
         "sockets": {"artifact_spot": g((p["ox"], cy0 + 0.40 + p["oy"], p["hb"] + 0.36)),
                     "front_index_mark": g((0.0, -p["rc"], p["zt"] + 0.1)),

@@ -34,7 +34,7 @@ PARAMS = dict(AX=1.42, L2=0.45, Rc=0.36, FXL=1.05, FXR=0.86, HX=1.02, GX=-0.83, 
               LW=0.26, FY=0.42, TZ=0.75, GRr=0.48, SH=0.42,   # leg width, front/back frame offset, tie drop below
                                                               # the axle, gear radius, stone pile height
               SPIL=0.26, SPIR=-0.06, PX=0.0, PSX=-0.36,       # ... back post x (art/10: under the tie, left of the rope)
-              RG=0.52, RP=0.27, GT=66.0, GZ=0.2, HR=0.16, GRP=1.6)  # gear train: big gear / pinion radius, big gear
+              RG=0.52, RP=0.27, GT=45.0, GZ=0.2, HR=0.16, GRP=1.6)  # gear train: big gear / pinion radius, big gear
                                                               # tilt (deg, its face toward the viewer as painted),
                                                               # pinion drop below the axle; crank hub radius; grip scale                  # inner leg splay (left / right trestle), pit x offset
 FREE = ["AX", "L2", "Rc", "FXL", "FXR", "HX", "GX", "GZ", "KX", "Ls", "Ac", "Lg", "Wc", "Hc", "Zt"]
@@ -87,8 +87,9 @@ def big_gear_frame(p):
     axis = np.array([math.cos(t), -math.sin(t), 0.0])
     gu = np.array([math.sin(t), math.cos(t), 0.0])
     gw = np.array([0.0, 0.0, 1.0])
-    # painter's cheat (review): the wheel sits in front of the left A-frame's front legs, as drawn
-    return np.array([-p["L2"] - 0.12, -p["FY"] * 1.15 - 0.16, p["AX"]]), axis, gu, gw
+    # painter's cheat (review): as drawn, the wheel's left half lies in front of the left A-frame's legs and its
+    # right half behind the rope coil, so the wheel turns GT about the vertical, centred just behind the coil front
+    return np.array([-p["L2"] - 0.14, -0.3, p["AX"]]), axis, gu, gw
 
 
 def pinion_centre(p):

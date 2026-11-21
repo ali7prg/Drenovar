@@ -30,11 +30,16 @@ TEETH = 22
 
 PARAMS = dict(AX=1.42, L2=0.45, Rc=0.36, FXL=1.05, FXR=0.86, HX=1.02, GX=-0.83, KX=-0.8, Ls=0.36, Ac=0.66, Lg=0.5,
               PR=0.73, PY=-0.18, Wc=0.8, Hc=0.48, Zt=0.42,
-              SPL=0.75, WH=0.42, WR=0.4, GR=1.0, TB=0.6,     # leg splay, pit wall height / width, ground ring, top block
+              SPL=0.5, WH=0.42, WR=0.4, GR=1.0, TB=0.6,     # leg splay, pit wall height / width, ground ring, top block
               LW=0.26, FY=0.42, TZ=0.75, GRr=0.48, SH=0.42,   # leg width, front/back frame offset, tie drop below
                                                               # the axle, gear radius, stone pile height
-              SPIL=0.26, SPIR=-0.06, PX=0.0, PSX=-0.36)       # ... back post x (art/10: under the tie, left of the rope)                  # inner leg splay (left / right trestle), pit x offset
-FREE = ["AX", "L2", "Rc", "FXL", "FXR", "HX", "GX", "KX", "Ls", "Ac", "Lg", "Wc", "Hc", "Zt"]
+              SPIL=0.26, SPIR=-0.06, PX=0.0, PSX=-0.36,       # ... back post x (art/10: under the tie, left of the rope)
+              RG=0.55, RP=0.24, GT=31.0, GZ=0.2, HR=0.22, GRP=1.0)  # gear train: big gear / pinion radius, big gear
+                                                              # tilt (deg, its face toward the viewer as painted),
+                                                              # pinion drop below the axle; crank hub radius; grip scale                  # inner leg splay (left / right trestle), pit x offset
+FREE = ["AX", "L2", "Rc", "FXL", "FXR", "HX", "GX", "GZ", "KX", "Ls", "Ac", "Lg", "Wc", "Hc", "Zt"]
+GEAR_TEETH = 30              # big gear on the drum's left end (the pawl clicks over it)
+PINION_TEETH = 12
 PRIOR = 0.2
 
 
@@ -54,7 +59,7 @@ def points(p):
         "coil_lb": (-L2, 0.0, AX - Rc), "coil_rb": (L2, 0.0, AX - Rc),
         "hub_c": (H, -0.08, AX), "shaft_end": (H + p["Ls"], -0.05, AX),
         "grip_in": (H + p["Ls"] + 0.04, -0.1, AX - p["Ac"]), "grip_out": (H + p["Ls"] + 0.04 + p["Lg"], -0.1, AX - p["Ac"]),
-        "gear_c": (p["GX"], -0.18, AX), "knob": (p["KX"], -0.28, AX + 0.78),
+        "gear_c": (p["GX"], -0.25, AX - p["GZ"]), "knob": (p["KX"], -0.28, AX + 0.78),   # gear_c = pinion centre
         "ttop_l": (-p["FXL"], 0.0, AX + 0.6), "ttop_r": (p["FXR"], 0.0, AX + 0.6),
         "chest_tl": (-p["Wc"] / 2, p["PY"] - 0.25, zt), "chest_tr": (p["Wc"] / 2, p["PY"] - 0.25, zt),
         "chest_bl": (-p["Wc"] / 2, p["PY"] - 0.25, zt - p["Hc"]), "chest_br": (p["Wc"] / 2, p["PY"] - 0.25, zt - p["Hc"]),
@@ -74,6 +79,19 @@ def views():
         ignore_boxes=[(148, 610, 195, 660), (418, 572, 472, 652), (280, 712, 306, 768)],
         proj_exclude=[(148, 610, 195, 660), (418, 572, 472, 652), (280, 712, 306, 768)])
     return [v]
+
+
+def big_gear_frame(p):
+    """Centre, axis and in-plane axes of the big gear (left end of the drum, tilted GT toward the viewer)."""
+    t = math.radians(p["GT"])
+    axis = np.array([math.cos(t), -math.sin(t), 0.0])
+    gu = np.array([math.sin(t), math.cos(t), 0.0])
+    gw = np.array([0.0, 0.0, 1.0])
+    return np.array([-p["L2"] - 0.12, 0.0, p["AX"]]), axis, gu, gw
+
+
+def pinion_centre(p):
+    return np.array([p["GX"], -0.25, p["AX"] - p["GZ"]])
 
 
 def gear_outline(r_root, r_tip, teeth, lod):
@@ -178,23 +196,61 @@ def build(A, p, lod):
            up=(0, 0, 1))
     dg.cyl((-L2, 0, AX), (L2, 0, AX), Rc, n=(24, 16, 10)[lod], mat="rope", tag="coil", up=(0, 0, 1), caps=(False, False))
     dg.cyl((-L2 - 0.06, 0, AX), (-L2, 0, AX), Rc * 1.18, n=(20, 14, 8)[lod], mat="iron", tag="flange", up=(0, 0, 1))
-    gear = gear_outline(p["GRr"] * 0.86, p["GRr"], TEETH, lod)
-    Rg = np.array([[0, 0, 1.0], [1.0, 0, 0], [0, 1.0, 0]])      # local x -> world y, y -> z, z (extrusion) -> x
-    dg.prism(gear, -0.05, 0.05, "iron", "ratchet", R=Rg, t=(p["GX"], 0.0, AX))
-    dg.cyl((-p["FXL"] - 0.2, 0, AX), (p["HX"], 0, AX), 0.045, n=(8, 6, 4)[lod], mat="iron", tag="axle", up=(0, 0, 1))
+    dg.cyl((-p["FXL"] - 0.2, 0, AX), (p["HX"], 0, AX), 0.05, n=(8, 6, 4)[lod], mat="iron", tag="axle", up=(0, 0, 1))
+    # ---- gear train (art/10 left frame): the big toothed gear on the drum's left end (hub, spokes, toothed rim;
+    # tilted GT so its face shows as painted, turning about its own axis with the drum) and the small pinion on
+    # the left trestle meshing with its lower left (face to the viewer, turning at RG/RP the other way)
+    gc, ga, gu, gw = big_gear_frame(p)
+    big = A.part("big_gear", None, tuple(gc))
+    bgg = big.geo[lod]
+    Rb = np.stack([gu, gw, ga], 1)                         # local x, y in the gear plane, z = axis
+    RG, RP = p["RG"], p["RP"]
+    nt = GEAR_TEETH if lod < 2 else GEAR_TEETH // 2
+    outer = gear_outline(RG * 0.9, RG, nt, lod)
+    ring_in = np.array([(RG * 0.74 * math.cos(math.atan2(q[1], q[0])), RG * 0.74 * math.sin(math.atan2(q[1], q[0]))) for q in outer])
+    CG.outline_ring(bgg, tuple(gc), Rb, outer, ring_in, -0.045, 0.045, "iron", "gear_rim")
+    bgg.cyl(tuple(gc - ga * 0.07), tuple(gc + ga * 0.07), RG * 0.22, n=(14, 10, 6)[lod], mat="iron", tag="gear_hub",
+            up=tuple(gw))
+    for k in range(6 if lod < 2 else 4):
+        ang = 2 * math.pi * k / (6 if lod < 2 else 4)
+        d = gu * math.cos(ang) + gw * math.sin(ang)
+        bgg.beam(tuple(gc + d * RG * 0.18), tuple(gc + d * RG * 0.78), 0.07, 0.05, mat="iron", tag="gear_spoke")
+    pc = pinion_centre(p)
+    pin = A.part("pinion", None, tuple(pc))
+    pg = pin.geo[lod]
+    Rq = np.array([[1.0, 0, 0], [0, 0, 1.0], [0, -1.0, 0]])   # local x -> x, y -> -y? (z axis -> world -y: faces the viewer)
+    Rq = np.stack([np.array([1.0, 0, 0]), np.array([0, 0, 1.0]), np.array([0, -1.0, 0])], 1)
+    pg.prism(gear_outline(RP * 0.8, RP, PINION_TEETH, lod), -0.05, 0.05, "iron", "pinion", R=Rq, t=tuple(pc))
+    pg.cyl(tuple(pc + (0, 0.06, 0)), tuple(pc + (0, -0.09, 0)), RP * 0.32, n=(12, 8, 6)[lod], mat="iron", tag="pinion_hub",
+           up=(0, 0, 1))
+    g.beam(tuple(pc + (0, 0.12, 0)), (p["GX"], 0.12, AX - p["GZ"] + 0.02), 0.08, 0.08, mat="iron", tag="pinion_bracket")
     # ---- crank node: hub disc, shaft stub, arm, long wooden grip
     H = p["HX"]
     crank = A.part("crank", None, (H, 0.0, AX))
     cg = crank.geo[lod]
-    cg.cyl((H - 0.04, 0, AX), (H + 0.06, 0, AX), 0.16, n=(16, 10, 6)[lod], mat="iron", tag="hub", up=(0, 0, 1))
-    cg.cyl((H, 0, AX), (H + p["Ls"], 0, AX), 0.045, n=(8, 6, 4)[lod], mat="iron", tag="shaft", up=(0, 0, 1))
-    cg.beam((H + p["Ls"], -0.05, AX + 0.04), (H + p["Ls"], -0.08, AX - p["Ac"] - 0.03), 0.06, 0.04, mat="iron",
-            tag="crank_arm")
-    gx0 = H + p["Ls"] + 0.04
-    cg.cyl((gx0, -0.1, AX - p["Ac"]), (gx0 + p["Lg"], -0.1, AX - p["Ac"]), 0.055, n=(10, 7, 5)[lod], mat="wood",
-           tag="grip", up=(0, 0, 1))
+    HR = p["HR"]
+    cg.cyl((H - 0.05, 0, AX), (H + 0.08, 0, AX), HR, n=(18, 12, 8)[lod], mat="iron", tag="hub", up=(0, 0, 1))
+    cg.cyl((H + 0.08, 0, AX), (H + 0.13, 0, AX), HR * 0.62, n=(14, 10, 6)[lod], mat="iron", tag="hub_boss", up=(0, 0, 1))
+    xs = H + p["Ls"]
+    cg.cyl((H, 0, AX), (xs, 0, AX), 0.068, n=(10, 8, 5)[lod], mat="iron", tag="shaft", up=(0, 0, 1))
+    # L-shaped forged arm: elbow on the shaft end, flat bar down to the grip
+    cg.cyl((xs - 0.05, 0, AX), (xs + 0.05, 0, AX), 0.085, n=(12, 8, 6)[lod], mat="iron", tag="crank_elbow", up=(0, 0, 1))
+    cg.beam((xs, -0.02, AX + 0.02), (xs, -0.06, AX - p["Ac"] - 0.06), 0.13, 0.06, mat="iron", tag="crank_arm",
+            chamfer=0.01 if lod == 0 else 0.0)
+    cg.cyl((xs - 0.05, -0.06, AX - p["Ac"]), (xs + 0.06, -0.06, AX - p["Ac"]), 0.08, n=(12, 8, 6)[lod], mat="iron",
+           tag="crank_boss", up=(0, 0, 1))
+    # turned wooden grip (bulges + necks) with an iron end cap
+    gs = p["GRP"]
+    Lg = p["Lg"]
+    prof = [(0.05 * gs, 0.0), (0.072 * gs, 0.06), (0.08 * gs, 0.16), (0.066 * gs, 0.26), (0.075 * gs, 0.36),
+            (0.083 * gs, 0.46), (0.07 * gs, 0.56), (0.058 * gs, 0.62)]
+    prof = [(r, z * Lg / 0.62) for r, z in prof]
+    Rx = np.stack([np.array([0, 1.0, 0]), np.array([0, 0, 1.0]), np.array([1.0, 0, 0])], 1)   # lathe z -> world x
+    CG.lathe(cg, prof, (xs + 0.06, -0.06, AX - p["Ac"]), n=(12, 9, 6)[lod], mat="wood", tag="grip", R=Rx)
+    cg.cyl((xs + 0.06 + Lg - 0.01, -0.06, AX - p["Ac"]), (xs + 0.06 + Lg + 0.04, -0.06, AX - p["Ac"]), 0.062 * gs,
+           n=(12, 8, 6)[lod], mat="iron", tag="grip_cap", up=(0, 0, 1))
     # ---- pawl node (on the left trestle, over the gear)
-    pv = np.array([p["GX"] - 0.02, -0.2, AX + Rc * 1.35])
+    pv = gc + gw * (RG + 0.06) - ga * 0.02
     pawl = A.part("pawl", None, tuple(pv))
     ol = np.array([[0.0, -0.025], [0.12, -0.04], [0.16, -0.08], [0.11, -0.055], [0.0, 0.025]])
     Rp = np.array([[0, 0, 1.0], [1.0, 0, 0], [0, 1.0, 0]])
@@ -331,10 +387,11 @@ def solve(views):
     params, reps = pv2.solve_views(views, points, PARAMS, FREE, prior_sigma=PRIOR)
     best = _silhouette_iou(params, views)[0]
     # sane ranges only: a taller well wall or a wider ground patch can buy silhouette IoU without looking like art/10
-    grids = {"SPL": np.arange(0.3, 0.91, 0.05), "WH": np.arange(0.06, 0.36, 0.03), "SH": np.arange(0.25, 0.81, 0.05),
+    grids = {"SPL": np.arange(0.42, 0.63, 0.04), "RG": np.arange(0.44, 0.65, 0.03), "RP": np.arange(0.16, 0.31, 0.02),
+             "GT": np.arange(18.0, 46.0, 4.0), "HR": np.arange(0.16, 0.31, 0.03), "GRP": np.arange(0.8, 1.41, 0.1), "WH": np.arange(0.06, 0.36, 0.03), "SH": np.arange(0.25, 0.81, 0.05),
              "GR": np.arange(0.3, 1.41, 0.1), "TB": np.arange(0.3, 0.71, 0.05), "PR": np.arange(0.55, 0.86, 0.05),
              "LW": np.arange(0.18, 0.34, 0.03), "FY": np.arange(0.25, 0.56, 0.05), "TZ": np.arange(0.5, 1.01, 0.05),
-             "GRr": np.arange(0.36, 0.61, 0.04), "SPIL": np.arange(0.14, 0.39, 0.06),
+             "SPIL": np.arange(0.14, 0.39, 0.06),
              "SPIR": np.arange(-0.18, 0.07, 0.06), "PX": np.arange(-0.3, 0.21, 0.05), "PSX": np.arange(-0.5, -0.19, 0.05)}
     for _round in range(2):
         for key, grid in grids.items():

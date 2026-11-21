@@ -80,7 +80,8 @@ func build(forest_atlas: RefCounted, height_fn: Callable, noise: Texture2D) -> v
 	for body in bodies(atlas):
 		_build_body(body, noise)
 	_build_falls(height_fn, noise)
-	_build_mist(noise)
+	if MIST_ENABLED:
+		_build_mist(noise)
 
 
 func _build_body(body: Dictionary, noise: Texture2D) -> void:
@@ -249,6 +250,9 @@ func _add_curtain(node_name: String, lip: Vector2, top: float, bottom: float, wi
 ## Pass 4 (art/01: thin blue ground mist over the marsh pools, the lake and along the river): low drifting
 ## wisps (alpha <= 0.22) lying just above the water, kept off the trails and the bridge, so they never
 ## veil a trail, a camp or a unit; distinct from the opaque fog of war (thin, translucent, at water level).
+## Off (pass 4 review): at the game camera the wisps read as the same pale blue-grey cloud as the fog of
+## war and lighten the lake away from the river's deep teal, so per the mist rule they are skipped.
+const MIST_ENABLED := false
 const MIST_ALPHA := 0.1
 static var _mist_material: ShaderMaterial
 

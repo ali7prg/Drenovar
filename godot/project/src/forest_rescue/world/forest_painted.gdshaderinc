@@ -169,7 +169,7 @@ void fragment() {
 		// pass 4: warm beige limestone (art/01, art/08), the texture's noise strongly compressed (cracks kept),
 		// horizontal strata bands and a darker foot (cast shadow / AO) over limestone_base_y
 		float lc = 0.46 + (l - 0.42) * 0.42;
-		vec3 pale = vec3(lc) * vec3(1.13, 0.99, 0.78);
+		vec3 pale = vec3(lc) * vec3(1.2, 0.95, 0.8);      // art/01 ring / quarry ≈ sRGB (192-200, 163-173, 141-147)
 		float band = sin(world_pos.y * 3.1 + 1.3 * sin(world_pos.x * 0.31 + world_pos.z * 0.23));
 		pale *= 0.93 + 0.07 * smoothstep(-0.2, 0.6, band);
 		if (limestone_base_y > -50.0) {

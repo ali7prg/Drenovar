@@ -76,7 +76,7 @@ const BIRCH_RING := 17.0
 ## Absolute scale ranges per [zone][species] for AMBIENT trees (inside kit recommendedScale).
 const AMBIENT_SCALE := {
 	Rules.OAK: [[0.94, 1.10], [0.70, 0.88], [0.66, 0.80], [0.66, 0.82], [0.66, 0.80], [0.66, 0.78], [0.66, 0.78], [0.66, 0.82]],
-	Rules.PINE: [[0.78, 0.98], [0.80, 1.00], [0.90, 1.16], [0.84, 1.06], [0.80, 1.00], [0.92, 1.20], [0.80, 1.00], [0.78, 0.96]],
+	Rules.PINE: [[0.78, 0.98], [0.80, 1.00], [0.90, 1.16], [0.84, 1.06], [0.80, 1.00], [1.02, 1.30], [0.80, 1.00], [0.78, 0.96]],
 	Rules.BIRCH: [[0.80, 0.95], [0.86, 1.08], [0.80, 0.96], [0.86, 1.10], [0.84, 1.04], [0.80, 0.95], [0.84, 1.00], [0.82, 1.00]],
 	Rules.WILLOW: [[0.82, 0.98], [0.82, 1.0], [0.82, 1.0], [0.86, 1.06], [0.88, 1.12], [0.82, 1.0], [0.82, 1.0], [0.84, 1.0]],
 }
@@ -152,7 +152,7 @@ const GROVE_SCALE := [
 	[[0.7, 0.9], [0.95, 1.2]],     # arena rock: pines
 	[[0.8, 1.05], [0.9, 1.1]],     # east bank
 	[[0.8, 1.0], [0.9, 1.1]],      # river / lake
-	[[0.5, 0.7], [0.95, 1.2]],     # south pines (oaks are accents under the pines)
+	[[0.5, 0.7], [1.05, 1.32]],    # south pines (oaks are accents under the pines; pass 4: bigger crowns, cover)
 	[[0.7, 0.9], [0.85, 1.05]],    # quarry
 	[[0.7, 0.95], [0.85, 1.05]],   # town belt
 ]
@@ -1086,7 +1086,7 @@ func _grove_look(tree: Dictionary, species: int, x: float, z: float, zone: int, 
 	var u := clampf((float(tree.scale) - 0.45) / 0.85, 0.0, 1.0)
 	var r: Array = SUB_SCALE[0 if species == Rules.OAK else 1] if sub else GROVE_SCALE[zone][0 if species == Rules.OAK else 1]
 	if sub and species == Rules.PINE and zone in [Z_SPRUCE, Z_RIVER]:
-		r = [0.82, 1.02]          # pass 4: the dense dark south / lake pines (no small saplings)
+		r = [0.9, 1.12]           # pass 4: the dense dark south / lake pines (no small saplings)
 	var scale := lerpf(r[0], r[1], fposmod(u * 0.6 + Rules.id_hash(String(tree.id)) * 0.4, 1.0))
 	# glade / landmark edges keep a smaller tree (art/01: young trees at the clearing rims)
 	scale = lerpf(scale, scale * 0.7, clampf(openness(x, z) - 0.5, 0.0, 0.5) * 2.0)

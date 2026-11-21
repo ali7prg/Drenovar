@@ -516,6 +516,7 @@ func build_battle_header() -> void:
 	column.add_child(row)
 	battle_title = Style.label("", 16, Style.IVORY, true, 0)
 	battle_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	battle_title.custom_minimum_size.x = 210
 	battle_title.clip_text = true
 	row.add_child(battle_title)
 	battle_timer = Style.label("", 14, Color("#ffd49a"), false, 0)
@@ -528,7 +529,7 @@ func build_battle_header() -> void:
 	battle_retreat.pressed.connect(func(): game.request_action("retreat"))
 	row.add_child(battle_retreat)
 	battle_bar = ProgressBar.new()
-	battle_bar.custom_minimum_size = Vector2(380, 8)
+	battle_bar.custom_minimum_size = Vector2(470, 8)
 	battle_bar.show_percentage = false
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = Color("#c4472f")
@@ -543,7 +544,7 @@ func build_battle_header() -> void:
 	column.add_child(battle_bar)
 	battle_sub = Style.label("", 13, Color("#ffd49a"), false, 0)
 	battle_sub.clip_text = true
-	battle_sub.custom_minimum_size.x = 380
+	battle_sub.custom_minimum_size.x = 470
 	column.add_child(battle_sub)
 	battle_header.hide()
 

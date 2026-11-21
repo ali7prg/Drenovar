@@ -36,12 +36,16 @@ SITES = {"lf_site_02": ["mountain", "river", "leaf"], "lf_site_06": ["coal", "se
 DOOR_DROP = 0.62
 
 # sizes from the closed drawing's image ratios (wall 156 px : clamps 98 : rim 93 : top disc 64 at the dial row)
-PARAMS = dict(Rw=1.05, Rb=1.09, hb=0.08, zt=0.56, Rr=0.64, rc=0.67, dz=0.07,
+PARAMS = dict(Rw=1.0, Rb=1.08, hb=0.12, zt=0.56, Rr=0.64, rc=0.67, dz=0.07,
               R3=0.57, R2=0.53, R1=0.43, y2=0.12, y1=0.24,
               an=-48.0, ad=-86.0, dh=19.0, dt=0.36,
-              sx=0.08, sy=-1.3, sw=1.05, sd=0.36, sh=0.16)
-FREE = ["Rw", "zt", "dz", "R3", "R2", "R1", "y2", "y1", "an", "dh", "dt", "sy", "sw", "sd", "sh"]
+              sx=0.08, sw=1.05, sd=0.36, sh=0.16)
+FREE = ["Rw", "R3", "R2", "R1", "y2", "y1", "dh", "dt", "sw", "sd", "sh"]   # heights (zt, dz) held: the
+# dial-to-step drop is otherwise explained by depth instead of wall height (one-view ambiguity)
 PRIOR = 0.15
+# The painting's perspective is not one camera (the dial is drawn steeper than the drum base), so the wall
+# silhouette is not a correspondence: cameras come from the dial, clamps, step and door points; the drum's
+# plinth radius / height are then chosen by silhouette IoU (solve()).
 
 
 def ring_angle(symbol):
@@ -65,9 +69,14 @@ def polar(r, deg, z):
     return (r * math.cos(a), r * math.sin(a), z)
 
 
+def step_y(p):
+    """Threshold step centre (its back edge touches the drum wall in front of the door)."""
+    return -p["Rw"] - p["sd"] / 2 + 0.04
+
+
 def key_rest(p):
     """Key centre lying on the threshold step (rod along X, crystal at +X)."""
-    return np.array([p["sx"] - 0.06, p["sy"] + 0.02, p["sh"] + 0.045])
+    return np.array([p["sx"] - 0.06, step_y(p) + 0.02, p["sh"] + 0.045])
 
 
 def key_in_niche(p):
@@ -88,10 +97,10 @@ def points(p):
         "r2_front": (0, y2 - R2, z2t), "r3_front": (0, y3 - R3, z3t),
         "clamp_b": (0, p["rc"], zc), "clamp_f": (0, -p["rc"], zc), "clamp_l": (-p["rc"], 0, zc), "clamp_r": (p["rc"], 0, zc),
         "wall_l": (-p["Rw"], 0.0, p["zt"] * 0.5), "wall_r": (p["Rw"], 0.0, p["zt"] * 0.5),
-        "step_tl": (p["sx"] - p["sw"] / 2, p["sy"] + p["sd"] / 2, p["sh"]),
-        "step_tr": (p["sx"] + p["sw"] / 2, p["sy"] + p["sd"] / 2, p["sh"]),
-        "step_bl": (p["sx"] - p["sw"] / 2, p["sy"] - p["sd"] / 2, 0.0),
-        "step_br": (p["sx"] + p["sw"] / 2, p["sy"] - p["sd"] / 2, 0.0),
+        "step_tl": (p["sx"] - p["sw"] / 2, step_y(p) + p["sd"] / 2, p["sh"]),
+        "step_tr": (p["sx"] + p["sw"] / 2, step_y(p) + p["sd"] / 2, p["sh"]),
+        "step_bl": (p["sx"] - p["sw"] / 2, step_y(p) - p["sd"] / 2, 0.0),
+        "step_br": (p["sx"] + p["sw"] / 2, step_y(p) - p["sd"] / 2, 0.0),
         "niche_top": polar(p["Rw"] + 0.03, p["an"], p["zt"] + 0.08),
         "niche_bot": polar(p["Rw"] + 0.03, p["an"], 0.06),
         "door_tl": polar(p["Rw"], p["ad"] - p["dh"], p["hb"] + p["dt"]),
@@ -110,9 +119,7 @@ def views():
         {"r1_left": (877.5, 103), "r1_right": (1005, 103), "r1_back": (941, 79), "r1_front": (941, 126),
          "r2_front": (941, 168), "r3_front": (941, 218),
          "clamp_b": (944, 68), "clamp_f": (944, 240), "clamp_l": (847, 146), "clamp_r": (1043, 146),
-         "wall_l": (783, 265), "wall_r": (1096, 262),
-         "step_tl": (874, 344), "step_tr": (1033, 341), "step_bl": (876, 387), "step_br": (1031, 384),
-         "niche_top": (1050, 206), "niche_bot": (1050, 306)},
+         "step_tl": (874, 344), "step_tr": (1033, 341), "step_bl": (876, 387), "step_br": (1031, 384)},
         pose=SOLVED_POSE_02, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None, solve_opts={"fov_prior": 20.0},
         title="RUNE LOCK closed (site 02 glyphs set, key on the step)")
     open_pose = dict(SOLVED_POSE_02)
@@ -123,10 +130,8 @@ def views():
         {"r1_left": (1262, 103), "r1_right": (1398, 103), "r1_back": (1330, 78), "r1_front": (1330, 125),
          "r2_front": (1330, 168), "r3_front": (1330, 218),
          "clamp_b": (1330, 67), "clamp_f": (1331, 240), "clamp_l": (1229, 142), "clamp_r": (1428, 142),
-         "wall_l": (1172, 270), "wall_r": (1487, 270),
          "step_tl": (1262, 345), "step_tr": (1410, 343), "step_bl": (1265, 380), "step_br": (1408, 377),
-         "door_tl": (1290, 272), "door_tr": (1390, 272), "door_bl": (1292, 345), "door_br": (1388, 345),
-         "gem_niche": (1470, 186)},
+         "door_tl": (1290, 272), "door_tr": (1390, 272), "door_bl": (1292, 345), "door_br": (1388, 345)},
         pose=open_pose, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None, solve_opts={"fov_prior": 20.0},
         title="RUNE LOCK open (door down, key in the niche)", tex_weight=0.9)
     return [closed, opened]
@@ -168,6 +173,9 @@ def build(A, p, lod):
     ad, dh = math.radians(p["ad"]), math.radians(p["dh"])
     # ---- plinth course + masonry wall with the door opening (front) + stone rim
     CG.ring_prism(g, (0, 0, 0), np.eye(3), Rb, Rw - 0.3, n, 0.0, hb, "stone", "plinth")
+    if Rb > Rw + 0.02:     # sloped shoulder from the flared lower course up to the wall
+        CG.lathe(g, [(Rb, hb), (Rw + 0.005, hb + 0.6 * (Rb - Rw))], (0, 0, 0), n=n, mat="stone", tag="plinth_slope",
+                 cap_top=False, cap_bot=False)
     arc_wall(g, Rw - 0.17, Rw, hb, zt, ad + dh, ad - dh + 2 * math.pi, n - 4, "stone", "wall", top=False)
     # lintel over the door (the wall above the opening) and the jamb returns
     arc_wall(g, Rw - 0.17, Rw, hb + p["dt"], zt, ad - dh, ad + dh, max(4, n // 10), "stone", "lintel", top=False,
@@ -216,7 +224,7 @@ def build(A, p, lod):
     Rm = np.stack([et, np.array([0, 0, 1.0]), er], 1)          # local x = tangent, y = up, z = outward
     g.prism(poly, -0.02, 0.0, "iron", "niche_back", R=Rm, t=base)
     # ---- threshold step in front of the door (the key lies on it)
-    g.box((p["sx"], p["sy"], p["sh"] / 2), (p["sw"], p["sd"], p["sh"]), mat="stone", tag="step",
+    g.box((p["sx"], step_y(p), p["sh"] / 2), (p["sw"], p["sd"], p["sh"]), mat="stone", tag="step",
           chamfer=0.02 if lod == 0 else 0.0)
     # ---- door panel (node door_pivot): the wall piece in the opening, slides down into the plinth
     door = A.part("door_pivot", None, (Rw * math.cos(ad), Rw * math.sin(ad), hb))
@@ -256,10 +264,49 @@ SWATCHES = {
 }
 
 
+def _silhouette_iou(p, views):
+    """Mean silhouette IoU of the LOD2 blueprint over the solved views (polygon fill, no z-buffer needed)."""
+    import cv2
+    A = pv2.Asset(ID, ATLAS)
+    build(A, p, 2)
+    out = []
+    for v in views:
+        Wm = A.world_mats(v.pose)
+        W_, H_ = v.size
+        m = np.zeros((H_, W_), np.uint8)
+        for nm, part in A.parts.items():
+            M = Wm.get(nm)
+            if M is None:
+                continue
+            V, F, _, _, _ = part.geo[2].arrays()
+            if not len(V):
+                continue
+            Vw = V @ M[:3, :3].T + M[:3, 3]
+            u, w, _z = v.cam.project(Vw)
+            pts = np.stack([u, w], 1)
+            polys = [np.round(pts[f]).astype(np.int32) for f in F]
+            cv2.fillPoly(m, polys, 1)
+        ref, _ = v.mask()
+        mm = m.astype(bool)
+        out.append(float((mm & ref).sum()) / max(1.0, float((mm | ref).sum())))
+    return float(np.mean(out)), out
+
+
 def solve(views):
     params, reps = pv2.solve_views(views, points, PARAMS, FREE, prior_sigma=PRIOR)
     for v in views:
         _resolve_pose(v, params)
+    # plinth flare / height by silhouette IoU (the drum base is drawn wider than the dial's camera implies)
+    best = (_silhouette_iou(params, views)[0], params["Rb"], params["hb"])
+    for Rb in np.arange(params["Rw"], params["Rw"] + 0.36, 0.03):
+        for hb in (0.08, 0.14, 0.2, 0.26, 0.32):
+            q = dict(params, Rb=float(Rb), hb=float(hb))
+            iou = _silhouette_iou(q, views)[0]
+            if iou > best[0]:
+                best = (iou, float(Rb), float(hb))
+    params["Rb"], params["hb"] = best[1], best[2]
+    pv2.log(f"  plinth by silhouette IoU: Rb {best[1]:.3f} hb {best[2]:.2f} -> mean IoU {best[0]:.3f} "
+            f"{[round(x, 3) for x in _silhouette_iou(params, views)[1]]}")
     return params
 
 

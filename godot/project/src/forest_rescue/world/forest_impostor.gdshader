@@ -59,21 +59,28 @@ float grade_river_center(float z) {
 }
 
 // Same art/01 region grade as forest_painted.gdshaderinc (impostors are always forest).
-const vec3 GRADE_GROVE = vec3(1.30, 1.18, 1.0);
-const vec3 GRADE_SOUTH = vec3(0.86, 1.2, 0.86);
-const vec3 GRADE_EAST = vec3(0.94, 1.16, 0.88);
-const vec3 GRADE_REST = vec3(1.04, 1.24, 1.0);
+const vec3 GRADE_GROVE = vec3(1.45, 1.12, 1.0);
+const vec3 GRADE_SOUTH = vec3(0.80, 1.02, 0.92);
+const vec3 GRADE_EAST = vec3(0.88, 1.06, 0.9);
+const vec3 GRADE_REST = vec3(1.06, 1.3, 1.0);
+const vec3 GRADE_ARENA = vec3(1.12, 0.98, 1.0);    // arena rock sector (gorge, waterfall, arena)
+const vec3 GRADE_LAKE = vec3(0.72, 0.9, 0.96);     // the reedy lake's shores
+const vec2 GRADE_LAKE_CENTER = vec2(97.2, 32.4);
 vec3 grade_factors(vec3 p) {
 	float u = (p.x - p.z) * 0.70710678;
 	float w = (p.x + p.z) * 0.70710678;
 	float phi = degrees(atan(-w, u));
 	phi = phi < 0.0 ? phi + 360.0 : phi;
 	float outer = smoothstep(56.0, 66.0, max(abs(p.x), abs(p.z)));
-	float east = smoothstep(-4.0, 6.0, p.x - grade_river_center(p.z));
-	float grove = grade_sector(phi, 58.0, 214.0, 12.0) * (1.0 - east);
-	float south = grade_sector(phi, 232.0, 345.0, 12.0) * (1.0 - east);
-	float rest = clamp(1.0 - grove - south - east, 0.0, 1.0);
-	vec3 k = GRADE_GROVE * grove + GRADE_SOUTH * south + GRADE_EAST * east + GRADE_REST * rest;
+	float east_raw = smoothstep(-4.0, 6.0, p.x - grade_river_center(p.z));
+	float lake = 1.0 - smoothstep(18.0, 30.0, length(p.xz - GRADE_LAKE_CENTER));
+	float arena = grade_sector(phi, -8.0, 62.0, 10.0) * (1.0 - lake);
+	float east = east_raw * (1.0 - arena) * (1.0 - lake);
+	float grove = grade_sector(phi, 58.0, 214.0, 12.0) * (1.0 - east_raw) * (1.0 - arena);
+	float south = grade_sector(phi, 232.0, 345.0, 12.0) * (1.0 - east_raw) * (1.0 - lake);
+	float rest = clamp(1.0 - grove - south - east - arena - lake, 0.0, 1.0);
+	vec3 k = GRADE_GROVE * grove + GRADE_SOUTH * south + GRADE_EAST * east + GRADE_REST * rest
+		+ GRADE_ARENA * arena + GRADE_LAKE * lake;
 	return mix(vec3(1.0), k, outer);
 }
 

@@ -412,7 +412,7 @@ func _limestone_asset(asset: Dictionary, tag: String) -> Dictionary:
 				if material is ShaderMaterial:
 					if not materials.has(material):
 						var pale := (material as ShaderMaterial).duplicate() as ShaderMaterial
-						pale.set_shader_parameter("limestone", 0.88)
+						pale.set_shader_parameter("limestone", 0.8)
 						materials[material] = pale
 					material = materials[material]
 				mesh.surface_set_material(s, material)

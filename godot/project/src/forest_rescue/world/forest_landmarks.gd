@@ -909,19 +909,24 @@ func _swap_arena(scene: Variant, lod: int) -> void:
 ## the banners stand taller (×1.35 / ×1.55 / ×1.3 in height, the wall also 1.25× wider) so they read
 ## at zoom 68–120 instead of a sand pit, and the painted floor patch is clipped to the ring (its
 ## path tongues beyond 21 m would hang over the river gorge at the new spot) except the entrance.
-const ARENA_LIFT := {"rock_": Vector3(1.0, 1.35, 1.0), "fossil_wall": Vector3(1.3, 1.6, 1.3), "banner_": Vector3(1.45, 1.75, 1.45)}
+const ARENA_LIFT := {"rock_": Vector3(1.0, 1.35, 1.0), "fossil_wall": Vector3(1.3, 1.6, 1.3)}
+## the banners are skinned (cloth rig): their rig node is scaled about its foot instead
+const ARENA_BANNER_LIFT := Vector3(1.35, 1.6, 1.35)
 const ARENA_FLOOR_KEEP := 21.0
 ## Layout pass 2 (art/08 from the city camera): the cliff ring in pale grey-tan limestone (the kit
 ## moss rock's golden moss washed out), the fossil wall's pale ribs and skull lifted off the
 ## darker rock (albedo contrast), the entrance floor tongue kept to the trail's width.
-const ARENA_LIMESTONE := 0.72
-const ARENA_FOSSIL_CONTRAST := 1.9
-const ARENA_FOSSIL_GAIN := 1.18
-const ARENA_ENTRANCE_HALF := 4.5        # m: half width of the floor tongue beyond the ring
-const ARENA_ENTRANCE_REACH := 30.0      # m: its length from the arena centre
+const ARENA_LIMESTONE := 0.55
+const ARENA_FOSSIL_LIMESTONE := 0.85
+const ARENA_FOSSIL_CONTRAST := 1.5
+const ARENA_FOSSIL_GAIN := 1.1
+const ARENA_ENTRANCE_HALF := 3.0        # m: half width of the floor tongue beyond the ring
+const ARENA_ENTRANCE_REACH := 24.0      # m: its length from the arena centre
 
 
 func _shape_arena(node: Node3D) -> void:
+	for rig: Node3D in node.find_children("banner_*_rig*", "Node3D", true, false):
+		rig.scale = rig.scale * ARENA_BANNER_LIFT
 	for part: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
 		var pname := String(part.name)
 		var parent_name := String(part.get_parent().name) if part.get_parent() != null else ""
@@ -948,6 +953,7 @@ func _shape_arena(node: Node3D) -> void:
 					if rock:
 						look.set_shader_parameter("limestone", ARENA_LIMESTONE)
 					else:
+						look.set_shader_parameter("limestone", ARENA_FOSSIL_LIMESTONE)
 						look.set_shader_parameter("albedo_contrast", ARENA_FOSSIL_CONTRAST)
 						look.set_shader_parameter("albedo_gain", ARENA_FOSSIL_GAIN)
 					_arena_looks[key] = look

@@ -55,7 +55,8 @@ SHEETS = {
                    [("tele_tail_sweep_active.png", (183, 60, 1183, 560), "tail sweep active, zoom 34"),
                     ("tele_jaw_arc_warn.png", (183, 60, 1183, 560), "jaw arc telegraph")]),
     "art01_overview": ("01_world_masterplan.png", (0, 0, 1536, 1024), "art/01 — masterplan overview",
-                       [("overview_z130.png", None, "completed campaign, zoom 130")]),
+                       [("overview_z130.png", None, "completed campaign (server fog = explored routes), zoom 130"),
+                        ("full_overview_z140.png", None, "whole forest revealed (world QA projection), zoom 140")]),
 }
 
 

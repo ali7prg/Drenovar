@@ -130,6 +130,7 @@ func run_segments() -> void:
 	var world: Node3D = stage.get("forest_world")
 	var results: Array = []
 	for spec in SEGMENTS:
+		# The city stage can be rebuilt when a state is accepted: always use the live one.
 		game.close_modal()
 		forest.actors.on_stage_changed()
 		forest.actors.first_state = true
@@ -143,6 +144,10 @@ func run_segments() -> void:
 		game.result_notice.hide()
 		game.close_modal()
 		await process_frame
+		for settle in 5:
+			await process_frame
+		stage = game.stage
+		world = stage.get("forest_world")
 		if spec.get("intro", false):
 			forest.intro.begin(true)
 		var target := Vector3.INF
@@ -161,6 +166,8 @@ func run_segments() -> void:
 			clock += 1000.0 / 30.0
 			forest.client.manual_clock_ms = clock
 			target = forest.actors.squad_focus() if String(spec.target) == "squad" else forest.target_position(String(spec.target))
+			stage = game.stage
+			world = stage.get("forest_world")
 			if target != Vector3.INF:
 				stage.target = target
 			stage.zoom = float(spec.zoom)

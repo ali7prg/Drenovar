@@ -346,6 +346,50 @@ func biome_weights(x: float, z: float, softness := 3.2) -> PackedFloat32Array:
 	return weights
 
 
+## Atlas v2 regions (art/01 masterplan, user zones, masterplan_inventory.json biomesByScreenRegion)
+## in the city camera's screen space: φ = screen angle around the town, CCW from screen-right
+## (screen-up = world (-X,-Z)). Index order = the layout builder's zones:
+##   0 golden_grove (top / top-left: big golden oaks, sunny meadows, hollow oak, standing stones)
+##   1 west_mixed   (left: golden + green oaks)          2 arena_rock (top-right gorge: pines, rocks)
+##   3 east_willows (right: green deciduous, willows)    4 river (banks, lake, pond: willows, reeds)
+##   5 south_pines  (bottom / bottom-right: dark pines, mossy ground, marsh pools)
+##   6 sw_quarry    (bottom-left: limestone quarry)      7 town_belt (meadows round the walls)
+## Sector weights only (warped by phi_offset); quarry, belt and river terms are spatial and
+## added by the callers that know them (layout builder, terrain tint).
+const REGION_SECTORS := [[58.0, 160.0], [156.0, 214.0], [-8.0, 62.0], [318.0, 352.0], [], [234.0, 322.0], [206.0, 238.0], []]
+const REGION_NAMES := ["golden_grove", "west_mixed", "arena_rock", "east_willows", "river", "south_pines", "sw_quarry", "town_belt"]
+
+
+static func screen_angle(x: float, z: float) -> float:
+	return fposmod(rad_to_deg(atan2((-x - z) / sqrt(2.0), (x - z) / sqrt(2.0))), 360.0)
+
+
+static func _sector(phi: float, a: float, b: float, blend: float) -> float:
+	var best := 0.0
+	for shift in [-360.0, 0.0, 360.0]:
+		var p: float = phi + float(shift)
+		best = maxf(best, smoothstep(a - blend, a + blend, p) * (1.0 - smoothstep(b - blend, b + blend, p)))
+	return best
+
+
+## Unnormalised sector weights of the 8 regions at (x, z). East of the river the lower-right
+## sectors are willows / green deciduous (art/01 right edge), never the dark south pines.
+func region_sector_weights(x: float, z: float, phi_offset := 0.0, blend := 11.0) -> PackedFloat32Array:
+	var w := PackedFloat32Array()
+	w.resize(8)
+	var phi := screen_angle(x, z) + phi_offset
+	for i in REGION_SECTORS.size():
+		var s: Array = REGION_SECTORS[i]
+		if s.size() == 2:
+			w[i] = _sector(phi, s[0], s[1], blend)
+	var east := smoothstep(-4.0, 6.0, x - river_at(z).x)
+	if east > 0.0:
+		var pines := w[5] * east
+		w[5] -= pines
+		w[3] += pines
+	return w
+
+
 func nearest_biome(x: float, z: float) -> int:
 	var best := 0
 	var best_distance := INF

@@ -37,9 +37,8 @@ const MARK_LANDMARKS := [
 ## Dead-tree set around lf_mark_dead_tree (offsets in the frame facing the trail end: +Z toward it).
 const DEAD_TREE_BACK := 3.0
 const DEAD_TREE_SET := [
-	{"id": "lf_arena_pillar_a", "offset": Vector2(-3.6, 0.8), "yaw": 20.0, "scale": 0.85, "footprint": 1.4},
-	{"id": "lf_arena_pillar_b", "offset": Vector2(3.4, -1.2), "yaw": -35.0, "scale": 0.8, "footprint": 1.4},
-	{"id": "lf_arena_bones", "offset": Vector2(1.2, 2.6), "yaw": 64.0, "scale": 1.05, "footprint": 1.8},
+	# pass 4: the dark carved arena totems are gone (art/01 S-G shows pale stones, ForestWorld DEAD_TREE_STONES)
+	{"id": "lf_arena_bones", "offset": Vector2(1.6, 2.4), "yaw": 64.0, "scale": 1.6, "footprint": 2.2},
 ]
 const CAMP := {"id": "lf_env_camp_props", "footprint": 3.4, "distance": 10.2}
 ## Layout pass 3 (art/01 at zoom 68: every camp a focal point): tents, fences, crates, the fire and the

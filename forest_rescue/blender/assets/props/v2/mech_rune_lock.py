@@ -43,8 +43,8 @@ MODEL_SCALE = 0.7
 PARAMS = dict(Rw=1.1, Rt=0.9, Rb=1.14, hb=0.12, ox=0.0, oy=0.0, zt=0.56, Rr=0.64, rc=0.67, dz=0.07,
               R3=0.57, R2=0.53, R1=0.43, y2=0.12, y1=0.24,
               an=-48.0, ad=-86.0, dh=19.0, dt=0.36,
-              sx=0.08, sy=-1.4, sw=1.05, sd=0.36, sh=0.16)
-FREE = ["Rw", "R3", "R2", "R1", "y2", "y1", "dh", "dt", "sx", "sy", "sw", "sd", "sh"]   # heights (zt, dz) held: the
+              sx=0.08, sw=1.05, sd=0.36, sh=0.16)
+FREE = ["Rw", "R3", "R2", "R1", "y2", "y1", "dh", "dt", "sw", "sd", "sh"]   # heights (zt, dz) held: the
 # dial-to-step drop is otherwise explained by depth instead of wall height (one-view ambiguity)
 PRIOR = 0.15
 # The painting's perspective is not one camera (the dial is drawn steeper than the drum base), so the wall
@@ -74,8 +74,11 @@ def polar(r, deg, z):
 
 
 def step_y(p):
-    """Threshold step centre: solved from the drawing's step corners (independent of the drum radius search)."""
-    return p["sy"]
+    """Threshold step centre: at the drum wall in front of the door during the camera solve, then frozen at that
+    solved place (sy) so the drum-radius search never moves the step away from the drawing's step."""
+    if "sy" in p:
+        return p["sy"]
+    return -p["Rw"] - p["sd"] / 2 + 0.04
 
 
 def key_rest(p):
@@ -393,6 +396,7 @@ def _refine_cameras(params, views):
 
 def solve(views):
     params, reps = pv2.solve_views(views, points, PARAMS, FREE, prior_sigma=PRIOR)
+    params["sy"] = step_y(params)          # freeze the solved step (and the key on it)
     for v in views:
         _resolve_pose(v, params)
     # plinth flare / height by silhouette IoU (the drum base is drawn wider than the dial's camera implies)

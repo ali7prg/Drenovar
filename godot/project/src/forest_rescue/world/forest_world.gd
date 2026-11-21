@@ -23,6 +23,8 @@ const GROUND_SHADER = preload("res://src/forest_rescue/world/forest_ground.gdsha
 const SUN_ROTATION := Vector3(-0.837758, -0.558505, 0.0)   # landscape.gd city sun (-48°, -32°, 0)
 const PAINT_LIGHT_DIR := Vector3(-0.6, 0.68, 0.42)            # direction TO the crown light (kit vegetation / rocks)
 const QUARRY_KIND := 6                                         # Rules.UNDERSTORY "quarry_rock"
+const DEAD_TREE_SCALE := 0.72                                  # oak v1 skeleton ×0.72 ≈ 9.5 m (art/01 S-G)
+const DEAD_TREE_STONES := [[-3.4, 1.1, 20.0, 0.34], [3.2, -1.5, 75.0, 0.3], [1.3, 3.1, 140.0, 0.24], [-1.8, -2.9, 250.0, 0.2]]
 const QUARRY_LEDGE_SHAPE := Vector3(1.7, 0.8, 1.3)             # ledge slab: wide, low, deep
 const Rules = preload("res://src/forest_rescue/world/forest_layout_rules.gd")
 const PATH_SHADER = preload("res://src/forest_rescue/world/forest_path.gdshader")
@@ -186,6 +188,11 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 		for variant in Rules.SPECIES_VARIANTS[species]:
 			var mesh := _tree_mesh(species, variant)
 			bake_list.append([mesh[2], canopy.meshes[mesh[0]].lods[0]])
+	# pass 4: the bare white dead tree is a tree like the others (3D near, impostor far): a KIND_TREE mesh
+	# without an impostor is skipped where its cell draws impostors, so it was never seen
+	var dead_mesh := _dead_tree_mesh()
+	if not dead_mesh.is_empty():
+		bake_list.append([dead_mesh[2], canopy.meshes[dead_mesh[0]].lods[0]])
 	var signature := ""
 	for file in DirAccess.get_files_at(ForestKit.KIT_DIR):
 		if file.ends_with(".glb"):
@@ -635,12 +642,20 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 				shape = QUARRY_LEDGE_SHAPE          # pass 3: terraced limestone ledges (flat lit tops, faces)
 			var basis := Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(shape * float(item[5]))
 			canopy.add_instance(mesh[0], Transform3D(basis, Vector3(xz.x, y - 0.03, xz.y)))
-	# art/01 S-G: the bare white dead tree at its mark (kit oak skeleton with birch bark).
+	# art/01 S-G: the bare pale dead tree (~9.5 m) at its mark (kit oak skeleton with birch bark) with pale
+	# limestone stones round it (the bones module stands beside it, ForestLandmarks DEAD_TREE_SET).
 	if landmarks != null and landmarks.dead_tree_spot != Vector2.INF:
 		var dead := _dead_tree_mesh()
 		if not dead.is_empty():
 			var spot: Vector2 = landmarks.dead_tree_spot
-			canopy.add_instance(dead[0], Transform3D(Basis(Vector3.UP, 2.3).scaled(Vector3.ONE * 1.75), Vector3(spot.x, height_at(spot.x, spot.y) - 0.1, spot.y)))
+			var origin := Vector3(spot.x, height_at(spot.x, spot.y) - 0.1, spot.y)
+			canopy.add_instance(dead[0], Transform3D(Basis(Vector3.UP, 2.3).scaled(Vector3.ONE * DEAD_TREE_SCALE), origin))
+			_add_impostor(dead, origin, 2.3, DEAD_TREE_SCALE)
+			var stone := _under_mesh(Rules.UNDERSTORY.find("quarry_rock"), 1)
+			for st in DEAD_TREE_STONES:
+				var q: Vector2 = spot + Vector2(float(st[0]), float(st[1]))
+				canopy.add_instance(stone[0], Transform3D(Basis(Vector3.UP, deg_to_rad(float(st[2]))).scaled(Vector3(1.0, 1.35, 1.0) * float(st[3])),
+					Vector3(q.x, height_at(q.x, q.y) - 0.15, q.y)))
 	# Waterfall outcrop (atlas v2): kit limestone rocks stacked into the cliff behind the fall; pass 3
 	# (art/01): a dark wet rock face behind the white water.
 	var rock_mesh := _wet_rock_mesh()

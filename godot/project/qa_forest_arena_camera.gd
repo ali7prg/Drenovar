@@ -2,10 +2,10 @@ extends SceneTree
 ## Arena gameplay-camera check (atlas v2 arena spot, art/08): in each boss phase (hunt / fury /
 ## last_stand fixtures) the game's own fight camera (ActorDirector.boss_fight_frame + BOSS_FRAME_ZOOM,
 ## set once per battle) must show the boss and every squad member
-##  * in frame: their projected model bounds inside the viewport (24 px margin, the top 64 px kept for the
-##    compact battle panel);
-##  * unoccluded: rendering the frame with the actor hidden changes >= 20 % of its projected box (a fully
-##    visible humanoid fills ~35-45 % of its box; a cliff / tree in front would leave the box unchanged).
+##  * in frame: the actor's full silhouette (drawn flat magenta without depth test) inside the viewport
+##    (24 px margin, the top 64 px kept for the compact battle panel);
+##  * unoccluded: >= 60 % of that silhouette still shows when drawn flat magenta WITH the depth test (the
+##    rest is hidden by a cliff, a rock, a tree or a banner in front).
 ## One still per phase. Needs a renderer:
 ##   xvfb-run -a -s "-screen 0 1366x630x24" godot --path godot/project --rendering-driver vulkan --fixed-fps 30 \
 ##     -s qa_forest_arena_camera.gd [-- --out=<dir>]
@@ -15,7 +15,8 @@ const FPS := 30.0
 const PHASES := [["hunt", "boss_battle_10"], ["fury", "boss_battle_35"], ["last_stand", "boss_battle_60"]]
 const MARGIN := 24.0
 const PANEL_TOP := 64.0
-const MIN_VISIBLE := 0.2
+const MIN_VISIBLE := 0.6
+const MAGENTA := Color(1, 0, 1)
 
 class StubHost extends Node:
 	var main: Node
@@ -99,6 +100,27 @@ func grab() -> Image:
 	return root.get_texture().get_image()
 
 
+## Flat magenta override on a rig's meshes (depth test on / off), null to restore.
+func paint(rig: Node3D, material: Material) -> void:
+	for mesh: MeshInstance3D in (rig.model as Node).find_children("*", "MeshInstance3D", true, false):
+		mesh.material_override = material
+
+
+## Magenta pixel count and their bounding box.
+func magenta(img: Image) -> Array:
+	var count := 0
+	var lo := Vector2i(1 << 20, 1 << 20)
+	var hi := Vector2i(-1, -1)
+	for y in range(0, img.get_height(), 2):
+		for x in range(0, img.get_width(), 2):
+			var c := img.get_pixel(x, y)
+			if c.r > 0.85 and c.b > 0.85 and c.g < 0.2:
+				count += 1
+				lo = lo.min(Vector2i(x, y))
+				hi = hi.max(Vector2i(x, y))
+	return [count, Rect2(Vector2(lo), Vector2(hi - lo)) if count > 0 else Rect2()]
+
+
 func changed_share(a: Image, b: Image, rect: Rect2) -> float:
 	var r := Rect2i(rect.position.floor(), rect.size.ceil()).intersection(Rect2i(Vector2i.ZERO, a.get_size()))
 	if r.size.x <= 0 or r.size.y <= 0:
@@ -162,18 +184,27 @@ func run() -> void:
 			check(rig != null and is_instance_valid(rig) and rig.load_state == "ready" and rig.is_visible_in_tree(), "%s: %s shown" % [phase[0], id])
 			if rig == null or not is_instance_valid(rig) or rig.model == null:
 				continue
-			var rect := screen_rect(rig)
-			var inside := safe.encloses(rect)
-			check(inside, "%s: %s in frame (%s inside %s)" % [phase[0], id, rect, safe])
-			# hide only this actor's model for one frame and compare
-			(rig.model as Node3D).visible = false
+			var flat := StandardMaterial3D.new()
+			flat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			flat.albedo_color = MAGENTA
+			flat.cull_mode = BaseMaterial3D.CULL_DISABLED
+			var xray := flat.duplicate() as StandardMaterial3D
+			xray.no_depth_test = true
+			xray.render_priority = 100
+			paint(rig, xray)
 			await frames(1)
-			var without := await grab()
-			(rig.model as Node3D).visible = true
+			var all_px: Array = magenta(await grab())
+			paint(rig, flat)
 			await frames(1)
-			var share := changed_share(full, without, rect)
-			check(share >= MIN_VISIBLE, "%s: %s unoccluded (%.0f %% of its box changes when hidden)" % [phase[0], id, share * 100.0])
-			row.actors[id] = {"rect": [roundi(rect.position.x), roundi(rect.position.y), roundi(rect.size.x), roundi(rect.size.y)], "visibleShare": snappedf(share, 0.01)}
+			var seen_px: Array = magenta(await grab())
+			paint(rig, null)
+			await frames(1)
+			var rect: Rect2 = all_px[1]
+			check(int(all_px[0]) > 20 and safe.encloses(rect), "%s: %s in frame (silhouette %s inside %s)" % [phase[0], id, rect, safe])
+			var share := float(seen_px[0]) / float(maxi(1, int(all_px[0])))
+			check(share >= MIN_VISIBLE, "%s: %s unoccluded (%.0f %% of its silhouette visible)" % [phase[0], id, share * 100.0])
+			row.actors[id] = {"silhouette": [roundi(rect.position.x), roundi(rect.position.y), roundi(rect.size.x), roundi(rect.size.y)],
+				"silhouettePx": int(all_px[0]) * 4, "visibleShare": snappedf(share, 0.01)}
 		row.still = still
 		rows.append(row)
 	notes.phases = rows

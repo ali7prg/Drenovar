@@ -57,6 +57,16 @@ def main():
         b = np.asarray(Image.open(p1).convert("RGB")).astype(int)
         X, Z = ground_points((0.0, 0.0), float(z), (a.shape[1], a.shape[0]))
         core = (np.abs(X) <= 54) & (np.abs(Z) <= 54)
+        # pixels animated between two captures with the same setting (wind, water, fog drift, fire) are not
+        # evidence either way: the proof is on the static pixels (buildings, ground, roofs, walls)
+        p2 = os.path.join(shots, "v3city_boost_on2_z%d.png" % z)
+        if os.path.exists(p2):
+            c = np.asarray(Image.open(p2).convert("RGB")).astype(int)
+            static = np.abs(b - c).max(-1) <= 2
+        else:
+            static = np.ones(core.shape, bool)
+        report["city"].setdefault("static_core_px_z%d" % z, int((core & static).sum()))
+        core = core & static
         d = np.abs(a - b).max(-1)
         report["city"]["z%d" % z] = {"core_px": int(core.sum()), "core_max_abs_diff": int(d[core].max()) if core.any() else 0,
                                     "core_mean_abs_diff": float(d[core].mean()) if core.any() else 0.0,

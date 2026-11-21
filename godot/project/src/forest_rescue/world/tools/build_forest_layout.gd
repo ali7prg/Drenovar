@@ -66,7 +66,7 @@ const ZONE_MIX := [
 	{Rules.OAK: 0.50, Rules.BIRCH: 0.25, Rules.PINE: 0.25},                 # town belt (green broadleaf, meadows)
 ]
 ## Ambient spacing (m) per zone: target trunk spacing incl. resource trees.
-const ZONE_SPACING := [15.0, 5.4, 3.9, 4.4, 4.8, 2.6, 9.0, 6.0]
+const ZONE_SPACING := [15.0, 5.4, 3.9, 4.4, 4.8, 2.2, 9.0, 6.0]
 ## Grove hero oaks (owner: "big bright golden oaks 1.5–2×, fewer larger trees, clumps and
 ## open meadows"): every ambient grove oak at this absolute scale range (kit oak at 1.0 ≈ 13.6 m).
 const GROVE_OAK_SCALE := [1.35, 1.8]
@@ -133,7 +133,7 @@ const GLADE_CLEARING := 11.5
 ## and the sunny strip kept open on the camera side of every trail (art/01 trails run along the
 ## grove edges, the walkers in front of the crowns).
 const GROVES := true
-const ZONE_COVER := [0.64, 0.68, 0.70, 0.74, 0.62, 0.86, 0.46, 0.56]
+const ZONE_COVER := [0.64, 0.82, 0.80, 0.86, 0.72, 0.86, 0.62, 0.56]
 const ZONE_SLOT := [7.4, 6.4, 4.0, 6.0, 5.8, 3.4, 6.0, 6.4]   # canopy trunks: big crowns, overlapping
 const SUB_SLOT := 2.6                                            # young trees between the canopy trunks
 const SUB_SCALE := [[0.42, 0.58], [0.5, 0.7]]                    # [oak, pine] young look inside a grove

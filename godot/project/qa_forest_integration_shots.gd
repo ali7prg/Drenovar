@@ -658,6 +658,26 @@ func run() -> void:
 			settle_world()
 			await frames(16)
 			await shoot("v3edge_%s_z120" % spec[0])
+		root.size = Vector2i(1536, 1024)
+		await frames(6)
+		look(Vector3(17.8, 0, 13.6), 195.0)
+		settle_world()
+		await frames(20)
+		await shoot("v3_full_overview_art01")
+		root.size = Vector2i(1366, 630)
+		await frames(6)
+		game.hud.visible = true
+		if forest.get("hud") != null:
+			forest.hud.visible = true
+
+	# -------------------------------------------------- layout pass 3: city unchanged (same state, boost off / on)
+	if wanted("v3city"):
+		await fresh_dict(fixture("boss_unlocked"))
+		game.hud.visible = false
+		if forest.get("hud") != null:
+			forest.hud.visible = false
+		look(Vector3(0, 0, 0), 40.0)
+		await preload_actors(2.0)
 		# city same-state diff: forest grade on / off (city buildings, ground and lighting must not change)
 		for zoom_c in [40.0, 68.0]:
 			look(Vector3(0, 0, 0), zoom_c)
@@ -673,14 +693,8 @@ func run() -> void:
 				forest.world.impostors.set_grade_enabled(true)
 			await frames(6)
 			await shoot("v3city_boost_on_z%d" % int(zoom_c))
-		root.size = Vector2i(1536, 1024)
-		await frames(6)
-		look(Vector3(17.8, 0, 13.6), 195.0)
-		settle_world()
-		await frames(20)
-		await shoot("v3_full_overview_art01")
-		root.size = Vector2i(1366, 630)
-		await frames(6)
+			await frames(6)
+			await shoot("v3city_boost_on2_z%d" % int(zoom_c))      # same setting again: animation noise mask
 		game.hud.visible = true
 		if forest.get("hud") != null:
 			forest.hud.visible = true

@@ -1707,9 +1707,11 @@ func update_ribbon() -> void:
 		for i in count:
 			var d := total * float(i) / float(count - 1)
 			var sample := PathMotion.sample(route, d)
-			var p: Vector3 = game.ground(sample.position.x, sample.position.z) + Vector3.UP * 0.18
+			var p: Vector3 = game.ground(sample.position.x, sample.position.z) + Vector3.UP * 0.32
 			multimesh.set_instance_transform(i, Transform3D(Basis.IDENTITY, p))
-			multimesh.set_instance_custom_data(i, Color(d / maxf(total, 0.01), d, 0, 0))
+			multimesh.set_instance_custom_data(i, Color(d / maxf(total, 0.01), d, fposmod(float(i) * 0.6180339, 1.0), 0))
+		var seconds := maxf(0.5, (float(source.get("arriveAt", 0)) - float(source.get("departAt", 0))) / 1000.0)
+		(ribbon.material_override as ShaderMaterial).set_shader_parameter("speed", total / seconds)
 	var progress := 0.0
 	var sample_now := move_sample(source, now_ms())
 	progress = float(sample_now.distance)
@@ -1764,38 +1766,51 @@ func update_preview() -> void:
 	for i in count:
 		var d := total * float(i) / float(count - 1)
 		var sample := PathMotion.sample(route, d)
-		var p: Vector3 = game.ground(sample.position.x, sample.position.z) + Vector3.UP * 0.16
+		var p: Vector3 = game.ground(sample.position.x, sample.position.z) + Vector3.UP * 0.3
 		multimesh.set_instance_transform(i, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * 0.8), p))
-		multimesh.set_instance_custom_data(i, Color(d / maxf(total, 0.01), d, 0, 0))
+		multimesh.set_instance_custom_data(i, Color(d / maxf(total, 0.01), d, fposmod(float(i) * 0.6180339, 1.0), 0))
 
+## Route dots (art/07 panel 3) + P1.6 walked-route sparkles: camera-facing star sprites along the
+## move path. Ahead of the walkers they pulse calmly (gold dots); every point the walkers pass
+## twinkles a moment and fades out over ~3.5 s (age = distance behind / walk speed). Additive,
+## one layer, ≤ 400 sprites of 0.55 m: well inside the alpha-overdraw budget.
 func build_ribbon() -> MultiMeshInstance3D:
 	var node := MultiMeshInstance3D.new()
 	node.name = "RouteDots"
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.use_custom_data = true
-	var dot := SphereMesh.new()
-	dot.radius = 0.16
-	dot.height = 0.2
-	dot.radial_segments = 8
-	dot.rings = 3
-	multimesh.mesh = dot
+	var sprite := QuadMesh.new()
+	sprite.size = Vector2(0.55, 0.55)
+	multimesh.mesh = sprite
 	node.multimesh = multimesh
 	var shader := Shader.new()
 	shader.code = """
 shader_type spatial;
-render_mode unshaded, blend_add, depth_draw_never, shadows_disabled;
+render_mode unshaded, blend_add, depth_draw_never, shadows_disabled, cull_disabled;
 uniform float travelled = 0.0;
 uniform float dim = 1.0;
+uniform float speed = 2.0;
+uniform float fade_seconds = 3.5;
 varying float along;
+varying float seed;
 void vertex() {
 	along = INSTANCE_CUSTOM.g;
+	seed = INSTANCE_CUSTOM.b;
+	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0], INV_VIEW_MATRIX[1], INV_VIEW_MATRIX[2], MODEL_MATRIX[3]);
 }
 void fragment() {
+	vec2 p = UV * 2.0 - 1.0;
+	float core = exp(-dot(p, p) * 10.0);
+	float rays = exp(-abs(p.x) * 16.0) * exp(-abs(p.y) * 2.8) + exp(-abs(p.y) * 16.0) * exp(-abs(p.x) * 2.8);
 	float ahead = step(travelled, along);
-	float wave = 0.55 + 0.45 * sin(along * 1.7 - TIME * 5.0);
-	ALBEDO = mix(vec3(0.55, 0.42, 0.2), vec3(1.0, 0.8, 0.36), ahead);
-	ALPHA = (0.25 + 0.75 * ahead) * wave * dim;
+	float age = max(travelled - along, 0.0) / max(speed, 0.1);
+	float spark = (1.0 - ahead) * exp(-age * 2.2 / fade_seconds) * smoothstep(0.0, 0.25, age);
+	float twinkle = 0.5 + 0.5 * sin(TIME * (5.0 + seed * 6.0) + seed * 41.0);
+	float calm = ahead * (0.55 + 0.45 * sin(along * 1.7 - TIME * 5.0)) * 0.5;
+	float shape = mix(core, core * 0.8 + rays * 0.7, 1.0 - ahead);
+	ALBEDO = mix(vec3(1.0, 0.8, 0.36), vec3(1.0, 0.9, 0.6), 1.0 - ahead);
+	ALPHA = clamp(shape * (calm + spark * (0.35 + 0.95 * twinkle)) * dim, 0.0, 1.0);
 }
 """
 	var material := ShaderMaterial.new()

@@ -268,7 +268,64 @@ def v3_sheets(shots, before, before_prefix, tag="p3"):
         pair.save(os.path.join(OUT, "%s_pair_%s.jpg" % (tag, zone["name"])), quality=88)
 
 
+def v3_features(shots, tag="p3"):
+    """Feature crops at zoom 68 (bridge, waterfall, lake, quarry, arena, camp 01, south marsh) + the fog-edge and
+    city-diff evidence in one sheet each."""
+    names = [("bridge", "bridge: four towers, roofs, red banners"), ("waterfall", "waterfall: wet rock face, cascade, pond"),
+             ("lake", "lake: reeds, lily pads, shore rocks, pines"), ("quarry", "quarry: limestone terraces, mine, crane"),
+             ("arena", "arena: limestone ring, fossil ribs + skull, banners"), ("camp01", "camp 01: ochre pad, tent, fire"),
+             ("south_marsh", "south: dark pines, marsh pools, dead-tree set")]
+    tiles = []
+    for n, caption in names:
+        p = os.path.join(shots, "v3feat_%s_z68.png" % n)
+        if os.path.exists(p):
+            im = Image.open(p).convert("RGB")
+            label(im, "zoom 68 · " + caption, size=18)
+            tiles.append(im)
+    if tiles:
+        tw, th = W // 2, H // 2
+        cols = 2
+        rows = (len(tiles) + 1) // 2
+        sheet = Image.new("RGB", (cols * (tw + 8), 46 + rows * (th + 8)), (30, 27, 24))
+        ImageDraw.Draw(sheet).text((10, 12), "Layout pass 3 — feature crops at zoom 68 (QA full reveal)", font=font(19),
+                                   fill=(250, 240, 220))
+        for i, im in enumerate(tiles):
+            sheet.paste(im.resize((tw, th), Image.LANCZOS), ((i % cols) * (tw + 8), 46 + (i // cols) * (th + 8)))
+        sheet.save(os.path.join(OUT, "%s_features_z68.png" % tag))
+    ev = []
+    for n in ("ne", "se", "sw", "nw"):
+        p = os.path.join(shots, "v3edge_%s_check.png" % n)
+        if os.path.exists(p):
+            im = Image.open(p).convert("RGB")
+            label(im, "zoom 120, camera target at the %s limit · magenta = bare ground outside ±112 (must be none)" % n.upper(), size=16)
+            ev.append(im)
+    if ev:
+        tw, th = W // 2, H // 2
+        sheet = Image.new("RGB", (2 * (tw + 8), 46 + 2 * (th + 8)), (30, 27, 24))
+        ImageDraw.Draw(sheet).text((10, 12), "Fog edge: the four extreme reachable camera positions at zoom 120", font=font(19),
+                                   fill=(250, 240, 220))
+        for i, im in enumerate(ev):
+            sheet.paste(im.resize((tw, th), Image.LANCZOS), ((i % 2) * (tw + 8), 46 + (i // 2) * (th + 8)))
+        sheet.save(os.path.join(OUT, "%s_fog_edge_z120.png" % tag))
+    for z in (40, 68):
+        ps = [os.path.join(shots, f) for f in ("v3city_boost_off_z%d.png" % z, "v3city_boost_on_z%d.png" % z, "v3city_diff_z%d.png" % z)]
+        if all(os.path.exists(p) for p in ps):
+            ims = [Image.open(p).convert("RGB") for p in ps]
+            for im, t in zip(ims, ("forest grade (boost) OFF", "forest grade (boost) ON", "|diff| x8 (red), base square (green tint)")):
+                label(im, "city zoom %d · %s" % (z, t), size=16)
+            sheet = Image.new("RGB", (3 * (W // 2 + 8), H // 2 + 46), (30, 27, 24))
+            ImageDraw.Draw(sheet).text((10, 12), "City unchanged: same state, same camera, boost off vs on", font=font(19),
+                                       fill=(250, 240, 220))
+            for i, im in enumerate(ims):
+                sheet.paste(im.resize((W // 2, H // 2), Image.LANCZOS), (i * (W // 2 + 8), 46))
+            sheet.save(os.path.join(OUT, "%s_city_diff_z%d.png" % (tag, z)))
+
+
 def main():
+    if len(sys.argv) > 2 and sys.argv[1] == "--v3feat":
+        os.makedirs(OUT, exist_ok=True)
+        v3_features(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "p3")
+        return
     if len(sys.argv) > 2 and sys.argv[1] == "--v3":
         os.makedirs(OUT, exist_ok=True)
         v3_sheets(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5] if len(sys.argv) > 5 else "p3")

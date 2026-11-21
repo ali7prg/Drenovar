@@ -19,7 +19,7 @@ const ForestImpostors = preload("res://src/forest_rescue/world/forest_impostors.
 const ForestOccluders = preload("res://src/forest_rescue/world/forest_occluders.gd")
 const ForestWater = preload("res://src/forest_rescue/world/forest_water.gd")
 const SUN_ROTATION := Vector3(-0.837758, -0.558505, 0.0)   # landscape.gd city sun (-48°, -32°, 0)
-const PAINT_LIGHT_DIR := Vector3(-0.77, 0.6, 0.15)            # direction TO the painted light (forest only)
+const PAINT_LIGHT_DIR := Vector3(-0.6, 0.68, 0.42)            # direction TO the crown light (kit vegetation / rocks)
 const QUARRY_KIND := 6                                         # Rules.UNDERSTORY "quarry_rock"
 const QUARRY_LEDGE_SHAPE := Vector3(1.7, 0.8, 1.3)             # ledge slab: wide, low, deep
 const Rules = preload("res://src/forest_rescue/world/forest_layout_rules.gd")
@@ -156,9 +156,11 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	_cache.tiles = tiles
 	setup_ms.tiles = (Time.get_ticks_usec() - t) / 1000.0
 	t = Time.get_ticks_usec()
-	# layout pass 3 (art/01): the painted forest is lit from the screen's upper left (world -X, a little
-	# +Z, 37° up) so crowns read with a lit top-left and a shaded lower-right; the city keeps its sun.
-	ForestKit.light_dir = PAINT_LIGHT_DIR
+	# layout pass 3 (art/01): the kit crowns, bark and rocks are lit from the screen's upper left so they read
+	# with a lit top-left and a shaded lower-right; landmarks / props / actors keep the sun-based painted
+	# light (their textures carry the painting's own light); the city keeps its sun.
+	ForestKit.light_dir = Basis.from_euler(SUN_ROTATION).z.normalized()
+	ForestKit.crown_light_dir = PAINT_LIGHT_DIR
 	kit = ForestKit.new(data, stage.scenery_material)
 	canopy = ForestCanopy.new()
 	canopy.name = "Canopy"

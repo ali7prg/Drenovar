@@ -54,7 +54,7 @@ const REGION_TINTS := [
 var crown_shadows: Array = []
 const SHADOW_DARK := 0.66          # ground factor at a shadow's centre
 const SHADOW_SHIFT := 0.32         # shadow offset (× crown height) away from the painted light (screen lower right)
-const SHADOW_DIR := Vector2(0.98, -0.19)
+const SHADOW_DIR := Vector2(0.82, -0.57)       # away from the crown light (screen right, a little down)
 ## camp pad (art/01): warm ochre trampled dirt with a darker rim
 const PAD_OCHRE := Color(1.16, 0.96, 0.62)
 const PAD_RIM_DARK := 0.78

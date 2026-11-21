@@ -42,6 +42,11 @@ var wind_enabled := true
 static var materials: Array = []         # every painted kit ShaderMaterial (forest instances)
 static var fog_receivers: Array = []     # every painted ShaderMaterial (fog-aware mist fade/silhouettes)
 static var light_dir := Vector3(0.45, 0.74, 0.5)   # direction TO the sun (set by ForestWorld)
+## Layout pass 3 (art/01): the kit vegetation and rocks (crowns, bark, rocks) are lit from the screen's upper
+## left; landmarks, camps, cages, mechanisms and actors keep `light_dir` (their textures carry the painting's
+## own light). Set by ForestWorld; null-vector = use light_dir.
+static var crown_light_dir := Vector3.ZERO
+const CROWN_LIGHT_PREFIXES := ["lf_bark", "lf_foliage", "lf_rock"]
 static var _metas: Dictionary = {}
 
 
@@ -419,7 +424,8 @@ static func painted_material(original: Material, has_colors: bool, k: float, win
 	material.set_shader_parameter("use_albedo_texture", base.albedo_texture != null)
 	material.set_shader_parameter("alpha_cut", base.alpha_scissor_threshold if base.alpha_scissor_threshold > 0.0 else 0.5)
 	material.set_shader_parameter("painted_light_mix", VOLUME_LIGHT_MIX if name.contains("_vol") else k)
-	material.set_shader_parameter("light_dir_world", light_dir.normalized())
+	var crown := crown_light_dir != Vector3.ZERO and CROWN_LIGHT_PREFIXES.any(func(prefix): return name.begins_with(prefix))
+	material.set_shader_parameter("light_dir_world", (crown_light_dir if crown else light_dir).normalized())
 	material.set_shader_parameter("use_ao", has_colors)
 	material.set_shader_parameter("vertex_wind", has_colors and wind)
 	material.set_shader_parameter("grade_regions", is_forest_material(name))

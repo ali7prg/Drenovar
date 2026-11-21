@@ -133,11 +133,11 @@ const GLADE_CLEARING := 11.5
 ## and the sunny strip kept open on the camera side of every trail (art/01 trails run along the
 ## grove edges, the walkers in front of the crowns).
 const GROVES := true
-const ZONE_COVER := [0.46, 0.58, 0.62, 0.62, 0.46, 0.80, 0.30, 0.46]
-const ZONE_SLOT := [9.0, 7.6, 4.6, 7.2, 7.0, 3.6, 7.2, 7.6]   # canopy trunks: big crowns, a little overlap
+const ZONE_COVER := [0.64, 0.68, 0.70, 0.74, 0.62, 0.86, 0.46, 0.56]
+const ZONE_SLOT := [7.4, 6.4, 4.0, 6.0, 5.8, 3.4, 6.0, 6.4]   # canopy trunks: big crowns, overlapping
 const SUB_SLOT := 2.6                                            # young trees between the canopy trunks
 const SUB_SCALE := [[0.42, 0.58], [0.5, 0.7]]                    # [oak, pine] young look inside a grove
-const GROVE_BAND_NEAR := 7.0
+const GROVE_BAND_NEAR := 5.0
 const GROVE_BAND_FAR := 3.0
 const GROVE_STEP := 2.0
 const GROVE_CELL := 8.0

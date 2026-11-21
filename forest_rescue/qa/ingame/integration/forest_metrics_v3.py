@@ -86,6 +86,57 @@ def layout_crowns(zone):
     return diam
 
 
+# art/01 per-zone estimates (8 x 4 grid read on each zone's art rect, land = ground outside the town, the fog
+# and the water): canopy cover and meadow share of the land
+ART_ESTIMATE = {"grove": (0.65, 0.22), "stones": (0.52, 0.25), "west": (0.56, 0.22), "quarry": (0.45, 0.10),
+                "south_pines": (0.76, 0.08), "lake": (0.60, 0.10), "river_bridge": (0.60, 0.12), "east": (0.65, 0.12),
+                "waterfall": (0.62, 0.12), "arena": (0.55, 0.10)}
+
+
+def geometric(zone, step=1.0):
+    """Game canopy cover / meadow share of the frame's land from the layout: union of crown discs, trails
+    (2.4 m), glade pads (8.5 m), water (lake / pond / marsh / river) excluded from the meadow."""
+    lay = json.load(open(LAYOUT))
+    atlas = json.load(open(os.path.join(ROOT, "godot/project/data/forest_rescue/world/world-atlas.json")))
+    names = {t["id"]: t["name"] for t in json.load(open(GAME_JSON))["woods"]}
+    uc, yc = C.P.to_screen(zone["target"][0], zone["target"][1], 0.0)
+    half_u = zone["zoom"] * C.W / C.H / 2
+    half_y = zone["zoom"] / 2
+    # ground grid covering the frame
+    xs = np.arange(-140, 140, step)
+    X, Z = np.meshgrid(xs, xs)
+    U = (X - Z) / math.sqrt(2)
+    Y = (X + Z) / math.sqrt(2) * math.sin(math.radians(38)) + 6.5 * math.cos(math.radians(38)) * 0  # ground ~ datum
+    inside = (np.abs(U - uc) < half_u) & (np.abs(Y - yc) < half_y)
+    land = inside & ((np.abs(X) > 56) | (np.abs(Z) > 56)) & (np.abs(X) <= 112) & (np.abs(Z) <= 112)
+    crowns = np.zeros_like(land)
+    trees = [(t[0], t[1], CROWN_RADIUS[int(t[2])] * float(t[5])) for t in lay["trees"]]
+    trees += [(e[0], e[1], CROWN_RADIUS[0 if names.get(k) == "Дуб" else 1] * float(e[4])) for k, e in lay["resourceRemap"].items()]
+    for (x, z, r) in trees:
+        i0, i1 = int((x - r + 140) / step), int((x + r + 140) / step) + 1
+        j0, j1 = int((z - r + 140) / step), int((z + r + 140) / step) + 1
+        sub = (X[j0:j1, i0:i1] - x) ** 2 + (Z[j0:j1, i0:i1] - z) ** 2 < r * r
+        crowns[j0:j1, i0:i1] |= sub
+    open_ground = np.zeros_like(land)
+    for r in atlas["routes"]:
+        for smp in r["samples"][::2]:
+            i, j = int((smp["x"] + 140) / step), int((smp["z"] + 140) / step)
+            open_ground[max(0, j - 1):j + 2, max(0, i - 1):i + 2] = True
+    for s_ in atlas["sites"]:
+        c = s_["center"]
+        open_ground |= (X - c["x"]) ** 2 + (Z - c["z"]) ** 2 < 8.5 ** 2
+    water = np.zeros_like(land)
+    for smp in atlas["river"]["samples"]:
+        j = int((smp["z"] + 140) / step)
+        if 0 <= j < len(xs):
+            water[j, (xs >= smp["wetWest"]) & (xs <= smp["wetEast"])] = True
+    land &= ~water
+    n = max(1, int(land.sum()))
+    cover = float((crowns & land).sum()) / n
+    meadow = float((land & ~crowns & ~open_ground).sum()) / n
+    return cover, meadow
+
+
 def main():
     shots = sys.argv[1]
     zones = json.load(open(os.path.join(HERE, "zones_v3.json")))["zones"]
@@ -99,14 +150,17 @@ def main():
         a = stats(resample(art.crop((x0, y0, x1, y1)), ART_PX_PER_M))
         g = stats(resample(Image.open(gpath).convert("RGB"), C.H / float(zone["zoom"])))
         d = layout_crowns(zone)
-        big = [x for x in d if x >= 4.0]
+        big = [x for x in d if x >= 8.0]
+        gc, gm = geometric(zone)
+        ae = ART_ESTIMATE.get(zone["name"], (0.6, 0.15))
         row = {"art": a, "game": g, "art_crown_m": ART_CROWN.get(zone["name"], 10.0),
+               "art_cover_est": ae[0], "art_meadow_est": ae[1], "game_cover_geo": gc, "game_meadow_geo": gm,
                "game_crown_m_median": float(np.median(d)) if d else 0.0,
                "game_crown_m_median_visible": float(np.median(big)) if big else 0.0, "game_trees": len(d)}
         rows[zone["name"]] = row
-        print("%-13s cover art %4.0f%% game %4.0f%% | meadow art %4.0f%% game %4.0f%% | crown art %4.1f m game %4.1f m "
-              "(visible %4.1f, n=%d) | meadow HSV art (%3.0f %.2f %.2f) game (%3.0f %.2f %.2f)" % (
-                  zone["name"], a["cover"] * 100, g["cover"] * 100, a["meadow"] * 100, g["meadow"] * 100,
+        print("%-13s cover art %3.0f%% game %3.0f%% | meadow art %3.0f%% game %3.0f%% | crown art %4.1f m game %4.1f m "
+              "(canopy trees %4.1f, n=%d) | meadow HSV art (%3.0f %.2f %.2f) game (%3.0f %.2f %.2f)" % (
+                  zone["name"], ae[0] * 100, gc * 100, ae[1] * 100, gm * 100,
                   row["art_crown_m"], row["game_crown_m_median"], row["game_crown_m_median_visible"], len(d),
                   *a["meadow_hsv"], *g["meadow_hsv"]))
     json.dump(rows, open(os.path.join(shots, "v3_forest_metrics.json"), "w"), indent=1)

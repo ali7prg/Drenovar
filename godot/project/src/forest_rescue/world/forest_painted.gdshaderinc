@@ -111,7 +111,7 @@ void fragment() {
 #endif
 	float lambert = max(dot(normalize(v_wn), normalize(light_dir_world)), 0.0);
 	vec3 lit = c.rgb * mix(1.0, lambert, painted_light_mix) * v_ao;
-	vec3 col = mix(mix(lit, fog_veil_color, fog.z), fog_silhouette, max(fog.y, fog.x));
+	vec3 col = mix(lit * (1.0 - fog.z), fog_silhouette, max(fog.y, fog.x));
 #ifdef FADE
 	// Composite over the opaque scene (screen copy, this tree is not in it): every fragment that
 	// survives the depth test replaces the pixel with the same blend, so overlapping cards of the

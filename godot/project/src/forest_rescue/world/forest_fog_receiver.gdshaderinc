@@ -80,10 +80,11 @@ float fog_edge_offset(vec2 p, vec2 drift, float b) {
 	vec2 along = vec2(dot(p, wn), dot(p, vec2(-wn.y, wn.x)));
 	float t1 = texture(fog_noise_tex, vec2(along.x / 38.0, along.y / 9.0) - vec2(drift.x * 0.03, 0.0) + vec2(0.13, 0.57)).r;
 	float t2 = texture(fog_noise_tex, vec2(along.x / 17.0, along.y / 5.0) - vec2(drift.x * 0.05, 0.0) + vec2(0.61, 0.21)).g;
-	return 2.0 * clamp(b * 0.35 + t1 * 0.45 + t2 * 0.2, 0.0, 1.0) + fog_reveal_curl * 1.5 * t2;
+	return 1.0 * clamp(b * 0.35 + t1 * 0.45 + t2 * 0.2, 0.0, 1.0) + fog_reveal_curl * 1.0 * t2;
 }
 
-// 0 on explored ground (sdf ≥ 0) → 1 inside the fog, over the first ~2.5 m (+ lobes) of fog cells.
+// 0 on explored ground (sdf ≥ 0) → 1 inside the fog: a 2.5 m blend band (+ ≤ 1 m lobes) on the
+// fog side of the boundary (delivery spec: opaque soft fog with a 2–3 m blend band).
 float fog_edge_fogness(float sdf, float offset) {
 	return 1.0 - smoothstep(-2.5, 0.0, sdf + offset);
 }
@@ -96,8 +97,9 @@ float fog_domes(vec2 p, vec2 drift) {
 	return clamp(a * 0.55 + b * 0.2 + swell * 0.4 - 0.08, 0.0, 1.0);
 }
 
-// x = cover (fade into the mist colour), y = silhouette tint, z = explored-veil dim (0..1; off:
-// ForestWorld.DIM_EXPLORED = 0, revealed cells render exactly like the base)
+// x = cover (fade into the mist colour), y = silhouette tint, z = explored dim (0..≈0.09): known
+// forest away from the squad and the mare stays visible slightly darker (a plain darkening, no
+// haze colour); within the sight circles (reveal radius around squad / mare) it is exactly clean.
 vec3 fog_receive(vec3 p, float time) {
 	if (!fog_enabled) {
 		return vec3(0.0);
@@ -113,7 +115,7 @@ vec3 fog_receive(vec3 p, float time) {
 		for (int i = 0; i < 8; i++) {
 			if (i >= fog_sight_count) break;
 			vec4 c = fog_sights[i];
-			sight = max(sight, (1.0 - smoothstep(c.z * 0.75, c.z, distance(c.xy, p.xz))) * c.w);
+			sight = max(sight, (1.0 - smoothstep(c.z, c.z * 1.4, distance(c.xy, p.xz))) * c.w);
 		}
 		float outside = smoothstep(56.0, 66.0, max(abs(p.x), abs(p.z)));
 		veil = fog_dim_strength * smoothstep(0.0, 3.0, sdf) * outside * (1.0 - sight) * smoothstep(0.6, 1.6, y);

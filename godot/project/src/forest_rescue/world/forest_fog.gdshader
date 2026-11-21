@@ -14,9 +14,12 @@ render_mode unshaded, blend_mix, depth_draw_never, depth_test_default, cull_back
 //  * Density: the fragment marches the city camera's (fixed, orthographic) view ray from the
 //    cloud top down to the ground (heightmap); density detail is 3D noise in world space, so
 //    steep faces get puffs, never vertical streaks of a projected 2D texture.
-//  * Edge: signed distance to the explored edge + bounded noise lobes that only push the soft
-//    edge OUT into the fog cells (fogness = 0 on every revealed cell: revealed ground renders
-//    exactly like the base — no wisp sheet, haze bank or veil over it).
+//  * Edge: signed distance to the explored edge + bounded noise lobes (≤ 1 m) that only push the
+//    soft 2.5 m blend band OUT into the fog cells (fogness = 0 on every revealed cell: no wisp
+//    sheet or haze bank over revealed ground); past the band the fog is opaque (density 0.9/m,
+//    the top rises to canopy height within ~10 m, capped on the camera-near side).
+//  * Known ground away from the squad / mare (outside the sight circles, never the town) is only
+//    darkened by dim_strength (ForestWorld.DIM_EXPLORED ≈ 9 %), a plain multiply — no haze colour.
 //  * Reveal (~2 s): previous→target blend per pixel with a noise delay; revealing fog thins out
 //    and brightens (luminous wisps dissolving), the top sinks.
 // Colours are sRGB inputs chosen through the inverse of the city FILMIC tonemap so that on
@@ -47,7 +50,7 @@ uniform float reveal_t = 1.0;
 uniform float reveal_curl = 0.0;
 uniform float drift_speed = 0.45;        // m/s of the main billows (wind is unit length)
 uniform vec2 wind = vec2(0.83, 0.56);
-uniform float density = 0.40;            // extinction per metre inside deep fog (opaque)
+uniform float density = 0.90;            // extinction per metre inside the fog (opaque past the 2.5 m band)
 uniform float fog_top_abs = 17.0;
 uniform float dim_strength = 0.0;        // explored but not in current sight
 uniform vec4 sights[8];
@@ -60,7 +63,7 @@ uniform vec3 body_color : source_color = vec3(0.268, 0.322, 0.357);
 uniform vec3 lit_color : source_color = vec3(0.395, 0.452, 0.489);
 uniform vec3 sun_color : source_color = vec3(0.485, 0.515, 0.530);
 uniform vec3 haze_color : source_color = vec3(0.370, 0.418, 0.449);
-uniform vec3 veil_color : source_color = vec3(0.246, 0.300, 0.335);
+uniform vec3 veil_color : source_color = vec3(0.012, 0.016, 0.02);   // explored dim: plain darkening
 uniform float time_offset = 0.0;
 const int STEPS = 8;
 
@@ -159,7 +162,7 @@ float edge_offset(vec2 p, vec2 drift, float b) {
 	vec2 along = vec2(dot(p, wn), dot(p, vec2(-wn.y, wn.x)));
 	float t1 = texture(noise_tex, vec2(along.x / 38.0, along.y / 9.0) - vec2(drift.x * 0.03, 0.0) + vec2(0.13, 0.57)).r;
 	float t2 = texture(noise_tex, vec2(along.x / 17.0, along.y / 5.0) - vec2(drift.x * 0.05, 0.0) + vec2(0.61, 0.21)).g;
-	return 2.0 * clamp(b * 0.35 + t1 * 0.45 + t2 * 0.2, 0.0, 1.0) + reveal_curl * 1.5 * t2;
+	return 1.0 * clamp(b * 0.35 + t1 * 0.45 + t2 * 0.2, 0.0, 1.0) + reveal_curl * 1.0 * t2;
 }
 
 float edge_fogness(float sdf, float offset) {
@@ -281,7 +284,7 @@ void fragment() {
 		for (int i = 0; i < 8; i++) {
 			if (i >= sight_count) break;
 			vec4 c = sights[i];
-			sight = max(sight, (1.0 - smoothstep(c.z * 0.75, c.z, distance(c.xy, surface.xz))) * c.w);
+			sight = max(sight, (1.0 - smoothstep(c.z, c.z * 1.4, distance(c.xy, surface.xz))) * c.w);
 		}
 		float outside = smoothstep(56.0, 66.0, max(abs(surface.x), abs(surface.z)));
 		float explored = smoothstep(0.0, 3.0, (mix(s.g, s.r, reveal_t) - 0.5) * sdf_range);

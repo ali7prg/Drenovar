@@ -24,8 +24,10 @@ const RIVER_SHADER = preload("res://src/forest_rescue/world/forest_river.gdshade
 const SURFACES := "res://assets/city/premium/surfaces07/"
 
 const API_VERSION := 3
-## Explored-but-not-watched dim: 0 — revealed cells render exactly like the base (no veil).
-const DIM_EXPLORED := 0.0
+## Known forest away from the squad and the mare stays visible slightly dimmed (plain darkening
+## ≤ 9 %, no haze colour, never the town); within SIGHT_RADIUS of the squad / mare / escort the
+## revealed ground renders exactly like the base.
+const DIM_EXPLORED := 0.09
 const SIGHT_RADIUS := 10.0
 ## Kit v2 meshes keep their authored real-metre size (meta heightM/footprintM); the layout
 ## carries absolute instance scales. TREE_CROWN = nominal crown radius (m) for clearance QA.
@@ -589,15 +591,25 @@ func _process(delta: float) -> void:
 ## Whole-tree occluder fade: trees whose crown would hide a visible adventure actor or site prop
 ## from the city camera are drawn faded (forest_occluders.gd). Actors may set the meta
 ## "occluder_height" (m, default 2.0; props 2.6); "no_canopy_fade" excludes markers/decals.
+## Only targets around the camera focus count (ortho view ≈ ±1.1·zoom); from zoom 80 on (overview)
+## nothing is faded — the plates mark the units there.
+const OCCLUDER_MAX_ZOOM := 80.0
+
+
 func _update_occluders(delta: float) -> void:
-	if occluders == null:
+	if occluders == null or stage == null:
 		return
 	var targets: Array = []
-	for pair in [[_actors, 2.0], [_props, 2.6]]:
-		for child in (pair[0] as Node3D).get_children():
-			if child is Node3D and (child as Node3D).visible and not child.get_meta("no_canopy_fade", false):
-				var p: Vector3 = (child as Node3D).global_position
-				targets.append([p, float(child.get_meta("occluder_height", pair[1]))])
+	var zoom: float = stage.camera_zoom
+	if zoom <= OCCLUDER_MAX_ZOOM:
+		var focus := Vector2(stage.camera_target.x, stage.camera_target.z)
+		var reach := zoom * 1.1
+		for pair in [[_actors, 2.0], [_props, 2.6]]:
+			for child in (pair[0] as Node3D).get_children():
+				if child is Node3D and (child as Node3D).visible and not child.get_meta("no_canopy_fade", false):
+					var p: Vector3 = (child as Node3D).global_position
+					if Vector2(p.x, p.z).distance_to(focus) <= reach:
+						targets.append([p, float(child.get_meta("occluder_height", pair[1]))])
 	occluders.update_targets(targets, delta)
 
 

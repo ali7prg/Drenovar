@@ -54,6 +54,6 @@ void fragment() {
 	// (approximation: the quad point itself) — buried parts fade into the mist colour, parts above
 	// the cloud top take the soft mist tint. The whole tree always keeps its crown.
 	vec3 fog = fog_receive(world, TIME);
-	c.rgb = mix(mix(c.rgb, fog_veil_color, fog.z), fog_silhouette, max(fog.y, fog.x));
+	c.rgb = mix(c.rgb * (1.0 - fog.z), fog_silhouette, max(fog.y, fog.x));
 	ALBEDO = c.rgb;
 }

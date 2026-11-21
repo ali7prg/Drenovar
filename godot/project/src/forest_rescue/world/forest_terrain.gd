@@ -33,7 +33,7 @@ const PAD_EXTRA_GRADE_DEG := 4.0
 const GLADE_DIRT := 8.5               # m: warm trampled-dirt pad under every glade's camp (pass 2)
 const WARM_DIRT := Color(1.1, 0.98, 0.8)
 const JUNCTION_LANDING := 2.4         # m: trails are level within this radius of a junction node      # grade a trail may gain on top of its atlas profile to meet its ends
-const TERRAIN_VERSION := 25
+const TERRAIN_VERSION := 26
 
 ## Atlas v2 region ground tints (ForestAtlas.REGION_NAMES order, art/01 crops at zoom 68):
 ## sunny warm meadow under the golden grove, olive mixed oaks, dry grey-olive arena rock, fresh
@@ -46,7 +46,7 @@ const REGION_TINTS := [
 	Color(0.94, 0.97, 0.80),   # arena_rock
 	Color(0.80, 0.95, 0.72),   # east_willows (art/01 right edge: deep shaded green)
 	Color(0.86, 1.0, 0.84),    # river
-	Color(0.50, 0.62, 0.60),   # south_pines (dark cool mossy floor under the pines)
+	Color(0.46, 0.58, 0.54),   # south_pines (dark cool mossy floor under the pines)
 	Color(1.03, 1.00, 0.92),   # sw_quarry
 	Color(0.98, 1.06, 0.86),   # town_belt
 ]
@@ -504,15 +504,10 @@ func bake() -> void:
 			color = Color(color.r * (1.0 + 0.09 * patch), color.g * (1.0 + 0.07 * patch), color.b * (1.0 + 0.04 * patch))
 			for site in atlas.sites:
 				var gd := Vector2(x - site.center.x, z - site.center.z).length()
-				if gd < GLADE_DIRT + 3.0:
-					# layout pass 3 (art/01): a warm ochre trampled dirt pad (≈ 8.5 m) with a darker rim
-					var ang := atan2(z - site.center.z, x - site.center.x)
-					var ragged := 1.1 * sin(ang * 5.0 + site.center.x * 0.37) + 0.6 * sin(ang * 9.0 + site.center.z * 0.21)
-					var pad := 1.0 - smoothstep(GLADE_DIRT - 2.6, GLADE_DIRT - 0.4, gd + ragged * 0.7)
-					color = color.lerp(Color(color.r * PAD_OCHRE.r, color.g * PAD_OCHRE.g, color.b * PAD_OCHRE.b), pad)
-					var rim := smoothstep(GLADE_DIRT - 1.4, GLADE_DIRT - 0.2, gd + ragged * 0.7) * (1.0 - smoothstep(GLADE_DIRT + 0.2, GLADE_DIRT + 1.8, gd + ragged * 0.7))
-					color = Color(color.r * lerpf(1.0, PAD_RIM_DARK, rim), color.g * lerpf(1.0, PAD_RIM_DARK * 0.97, rim), color.b * lerpf(1.0, PAD_RIM_DARK * 0.9, rim))
-					earth[k] = maxf(earth[k], 0.9 * pad)
+				if gd < GLADE_DIRT:
+					# pass 4: the camp pad's colour, crisp ragged edge and rim are drawn by forest_ground.gdshader;
+					# the bake only keeps the soil channel inside the pad (soil normal / roughness)
+					earth[k] = maxf(earth[k], 0.9 * (1.0 - smoothstep(GLADE_DIRT - 2.0, GLADE_DIRT - 0.5, gd)))
 			if quarry_center != Vector2.INF:
 				var qd := Vector2(x, z).distance_to(quarry_center)
 				color = color.lerp(Color(1.22, 1.17, 1.06), (1.0 - smoothstep(12.0, 24.0, qd)) * 0.85)

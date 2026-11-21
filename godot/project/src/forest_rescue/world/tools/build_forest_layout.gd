@@ -428,8 +428,8 @@ func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown :=
 		var dq := Vector2(x, z).distance_to(quarry_center)
 		if dq < QUARRY_PIT + crown * 0.4:
 			return true
-		# the cliff/ledge arc behind the mine stays free of trunks (art/01: bare grey cliffs)
-		if dq < 24.0 + crown * 0.3:
+		# the cliff/ledge arc behind the mine stays free of trunks (art/01: bare limestone terraces)
+		if dq < 29.0 + crown * 0.3:
 			var a := atan2(z - quarry_center.y, x - quarry_center.x)
 			if absf(angle_difference(a, quarry_axis)) < deg_to_rad(110.0):
 				return true
@@ -1457,7 +1457,8 @@ func _quarry_cliffs(under: Array, under_grid: Dictionary, logs: Array, log_grid:
 	var glade_c := Vector2(site.center.x, site.center.z)
 	var base_angle := quarry_axis
 	var kind := Rules.UNDERSTORY.find("quarry_rock")
-	var tiers := [[12.0, 0.0, 1.45], [15.5, 2.2, 1.6], [19.0, 4.4, 1.75], [22.5, 6.4, 1.85]]   # pass 3: terraces
+	# pass 4: the terraces are clean procedural limestone ledges at runtime (ForestQuarry); no rock ledges
+	var tiers: Array = []
 	for tier in tiers.size():
 		var radius: float = tiers[tier][0]
 		var lift: float = tiers[tier][1]

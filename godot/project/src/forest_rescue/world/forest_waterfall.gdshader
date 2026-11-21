@@ -7,7 +7,7 @@ render_mode unshaded, blend_mix, depth_draw_never, cull_disabled;
 // soft broken side edges. COLOR.a fades the curtain at its sides.
 
 uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
-uniform vec3 water_color : source_color = vec3(0.24, 0.43, 0.48);
+uniform vec3 water_color : source_color = vec3(0.30, 0.48, 0.56);
 uniform vec3 streak_color : source_color = vec3(0.90, 0.95, 0.95);
 uniform vec3 foam_color : source_color = vec3(0.96, 0.98, 0.97);
 uniform float speed = 1.6;
@@ -40,7 +40,8 @@ void fragment() {
 	float side = COLOR.a;
 	float edge_noise = texture(noise_tex, vec2(uv.x * 2.0, (down - t * 2.0) / 2.6)).r;
 	float alpha = smoothstep(0.0, 0.35, side + (edge_noise - 0.5) * 0.35);
-	alpha *= 0.78 + 0.2 * streak;
+	alpha *= 0.2 + 0.76 * streak;                          // pass 4: translucent gaps show the dark wet rock
+	alpha = max(alpha, foot * 0.8 * side);                 // foamy foot stays white
 	alpha *= smoothstep(0.0, 0.04, uv.y) * 0.9 + 0.1;
 	ALBEDO = col;
 	ALPHA = clamp(alpha, 0.0, 0.96);

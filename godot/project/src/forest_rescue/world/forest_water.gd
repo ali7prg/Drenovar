@@ -52,8 +52,8 @@ static func bodies(forest_atlas: RefCounted) -> Array:
 		if feature.id == "lake":
 			out.append({"id": "lake", "kind": "lake", "center": feature.center, "radius": feature.radius,
 				"minor": float(feature.get("minor", feature.radius)), "rot": float(feature.get("rot", 0.0)),
-				"level": forest_atlas.WATER_LEVEL, "depth": 1.1, "bank": 0.42, "noise": 0.07, "seed": 1.7,
-				"perched": false, "lily": 0.22, "murk": 0.25, "river": 1.0})
+				"level": forest_atlas.WATER_LEVEL, "depth": 1.1, "bank": 0.42, "noise": 0.13, "seed": 1.7,
+				"perched": false, "lily": 0.22, "murk": 0.06, "river": 1.0, "depth_gain": 2.4, "edge_soft": 0.18})
 	out.append({"id": "pond", "kind": "pond", "center": POND_CENTER, "radius": POND_RADIUS,
 		"level": ForestTerrain.base_height(POND_CENTER.x, POND_CENTER.y) - 0.42, "depth": 0.7, "bank": 1.1,
 		"noise": 0.12, "seed": 4.1, "perched": true, "lily": 0.42, "murk": 0.12, "river": 0.0})
@@ -61,7 +61,8 @@ static func bodies(forest_atlas: RefCounted) -> Array:
 		var c: Vector2 = MARSH_POOLS[i][0]
 		out.append({"id": "marsh_%d" % i, "kind": "marsh", "center": c, "radius": float(MARSH_POOLS[i][1]),
 			"level": ForestTerrain.base_height(c.x, c.y) - 0.24, "depth": 0.4, "bank": 0.5, "noise": 0.16,
-			"seed": 2.3 + i, "perched": true, "lily": 0.2, "murk": 0.7, "river": 0.0})
+			"seed": 2.3 + i, "perched": true, "lily": 0.2, "murk": 0.85, "river": 0.0, "depth_gain": 1.3, "edge_soft": 0.6,
+			"murky_color": Color(0.15, 0.21, 0.17)})
 	return out
 
 
@@ -122,6 +123,10 @@ func _build_body(body: Dictionary, noise: Texture2D) -> void:
 	material.set_shader_parameter("murk", float(body.murk))
 	material.set_shader_parameter("lily_density", float(body.lily))
 	material.set_shader_parameter("river_blend", float(body.river))
+	material.set_shader_parameter("depth_gain", float(body.get("depth_gain", 1.0)))
+	material.set_shader_parameter("edge_soft", float(body.get("edge_soft", 0.16)))
+	if body.has("murky_color"):
+		material.set_shader_parameter("murky_color", body.murky_color)
 	if body.kind == "pond":
 		var foot := FALLS_LIP + FALLS_FACING * 1.6
 		material.set_shader_parameter("falls_point", Vector4(foot.x, foot.y, 3.4, 1.0))
@@ -152,26 +157,6 @@ func _build_falls(height_fn: Callable, noise: Texture2D) -> void:
 	# a third, narrow sheet stepping off a side ledge (art/01: the cascade splits on the rocks)
 	var side_lip := FALLS_LIP + across * (FALLS_WIDTH * 0.5 + 1.1) + FALLS_FACING * 0.7
 	_add_curtain("WaterfallStep", side_lip, lerpf(bottom, falls_top, 0.62), bottom, 1.7, 0.2, noise, 0.9)
-	# foam band on the ledge where the upper fall lands
-	var ledge_foam := MeshInstance3D.new()
-	ledge_foam.name = "WaterfallLedgeFoam"
-	var band := QuadMesh.new()
-	band.size = Vector2(FALLS_LOWER_WIDTH * 1.05, 1.3)
-	ledge_foam.mesh = band
-	var foam_mat := ShaderMaterial.new()
-	foam_mat.shader = FALLS_SHADER
-	foam_mat.render_priority = 3
-	foam_mat.set_shader_parameter("noise_tex", noise)
-	foam_mat.set_shader_parameter("width_m", FALLS_LOWER_WIDTH)
-	foam_mat.set_shader_parameter("height_m", 1.3)
-	foam_mat.set_shader_parameter("foam_only", true)
-	ledge_foam.material_override = foam_mat
-	ledge_foam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ledge_c := FALLS_LIP + FALLS_FACING * 0.75
-	ledge_foam.transform = Transform3D(Basis(Vector3.UP, atan2(FALLS_FACING.x, FALLS_FACING.y)) * Basis(Vector3.RIGHT, deg_to_rad(-70.0)),
-		Vector3(ledge_c.x, ledge_y + 0.05, ledge_c.y))
-	add_child(ledge_foam)
-	items.append({"node": ledge_foam, "center": ledge_c, "radius": 3.5})
 	# foam and spray at the foot
 	var plume := MeshInstance3D.new()
 	plume.name = "WaterfallSpray"
@@ -192,7 +177,7 @@ void fragment() {
 	float n2 = texture(noise_tex, UV * vec2(3.0, 2.0) + vec2(-TIME * 0.08, -TIME * 0.6)).g;
 	float body = (1.0 - smoothstep(0.35, 1.0, length(p * vec2(1.0, 1.35)))) * smoothstep(-1.0, -0.2, -p.y * 0.6 - 0.1);
 	ALBEDO = vec3(0.93, 0.96, 0.96);
-	ALPHA = clamp(body * (0.45 + 0.45 * n) * (0.7 + 0.3 * n2), 0.0, 0.85);
+	ALPHA = clamp(body * (0.35 + 0.4 * n) * (0.7 + 0.3 * n2), 0.0, 0.62);
 }
 """
 	var material := ShaderMaterial.new()

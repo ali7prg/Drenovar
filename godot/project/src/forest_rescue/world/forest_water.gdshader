@@ -17,6 +17,8 @@ uniform vec3 pad_light : source_color = vec3(0.33, 0.52, 0.19);
 uniform vec3 flower_color : source_color = vec3(0.98, 0.86, 0.90);
 uniform vec3 foam_color : source_color = vec3(0.90, 0.93, 0.92);
 uniform float murk = 0.0;            // 0 clear lake .. 1 marsh
+uniform float depth_gain = 1.0;      // pass 4: big bodies reach the river's deep teal sooner
+uniform float edge_soft = 0.16;      // pass 4: shoreline alpha ramp (marsh pools: soft, no decal edge)
 uniform float lily_density = 0.0;    // 0 none .. 1 dense lily pads
 uniform float river_blend = 0.0;     // 1: the body touches the river channel (lake)
 uniform vec4 falls_point = vec4(0.0, 0.0, 0.0, 0.0);   // xz of the fall's foot, radius, strength
@@ -47,7 +49,7 @@ void fragment() {
 	vec2 p = world.xz;
 	float inner = COLOR.a;                          // 1 deep inside .. 0 shore
 	float ripple = texture(noise_tex, p / 6.0 + vec2(TIME * 0.015, TIME * 0.01)).g;
-	float depth = smoothstep(0.0, 1.0, inner + (ripple - 0.5) * 0.12);
+	float depth = smoothstep(0.0, 1.0, inner * depth_gain + (ripple - 0.5) * 0.12);
 	depth = max(depth, river_depth(p) * river_blend);
 	vec3 col = mix(shallow_color, mix(mid_color, deep_color, smoothstep(0.35, 1.0, depth)), smoothstep(0.0, 0.45, depth));
 	col = mix(col, murky_color * (0.9 + 0.2 * ripple), murk * (1.0 - depth * 0.5));
@@ -95,5 +97,5 @@ void fragment() {
 	// darker wet rim right at the shore
 	col *= 1.0 - 0.16 * (1.0 - smoothstep(0.0, 0.35, inner));
 	ALBEDO = col;
-	ALPHA = smoothstep(0.0, 0.16, inner);
+	ALPHA = smoothstep(0.0, edge_soft, inner);
 }

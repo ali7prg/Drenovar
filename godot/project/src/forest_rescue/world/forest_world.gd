@@ -19,6 +19,7 @@ const ForestImpostors = preload("res://src/forest_rescue/world/forest_impostors.
 const ForestOccluders = preload("res://src/forest_rescue/world/forest_occluders.gd")
 const ForestWater = preload("res://src/forest_rescue/world/forest_water.gd")
 const ForestQuarry = preload("res://src/forest_rescue/world/forest_quarry.gd")
+const GROUND_SHADER = preload("res://src/forest_rescue/world/forest_ground.gdshader")
 const SUN_ROTATION := Vector3(-0.837758, -0.558505, 0.0)   # landscape.gd city sun (-48°, -32°, 0)
 const PAINT_LIGHT_DIR := Vector3(-0.6, 0.68, 0.42)            # direction TO the crown light (kit vegetation / rocks)
 const QUARRY_KIND := 6                                         # Rules.UNDERSTORY "quarry_rock"
@@ -152,6 +153,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 			tiles[tile_key] = rebuilt if rebuilt != null else false
 		if rebuilt is ArrayMesh:
 			part.mesh = rebuilt
+			_apply_forest_ground(part)
 		if Time.get_ticks_usec() - slice > 4000:
 			await get_tree().process_frame
 			slice = Time.get_ticks_usec()
@@ -327,6 +329,34 @@ func _build_paths() -> void:
 	paths.material_override = material
 	paths.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(paths)
+
+
+var _ground_material: ShaderMaterial
+
+
+## Layout pass 4: forest-touched ground tiles draw with forest_ground.gdshader (the city ground shader's
+## code path unchanged inside the base square; painted meadow detail and camp pads on the forest ring).
+func _apply_forest_ground(part: MeshInstance3D) -> void:
+	var source: Variant = part.material_override
+	if not source is ShaderMaterial:
+		return
+	if _ground_material == null:
+		_ground_material = ShaderMaterial.new()
+		_ground_material.shader = GROUND_SHADER
+		for name in ["grass", "earth", "rock", "normal_texture", "roughness_texture", "soil_normal", "soil_roughness",
+				"stone_normal", "stone_roughness", "settlement"]:
+			_ground_material.set_shader_parameter(name, (source as ShaderMaterial).get_shader_parameter(name))
+		_ground_material.set_shader_parameter("detail_noise", _noise_texture())
+		var pads := PackedVector4Array()
+		var glades: Array = atlas.sites.duplicate()
+		glades.append_array(atlas.extra_glades)
+		for glade in glades:
+			if pads.size() >= 16:
+				break
+			pads.append(Vector4(glade.center.x, glade.center.z, ForestTerrain.GLADE_DIRT, fposmod(glade.center.x * 0.37 + glade.center.z * 0.11, TAU)))
+		_ground_material.set_shader_parameter("pads", pads)
+		_ground_material.set_shader_parameter("pad_count", pads.size())
+	part.material_override = _ground_material
 
 
 func _noise_texture() -> Texture2D:

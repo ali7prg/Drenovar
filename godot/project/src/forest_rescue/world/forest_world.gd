@@ -19,6 +19,7 @@ const ForestImpostors = preload("res://src/forest_rescue/world/forest_impostors.
 const ForestOccluders = preload("res://src/forest_rescue/world/forest_occluders.gd")
 const ForestWater = preload("res://src/forest_rescue/world/forest_water.gd")
 const SUN_ROTATION := Vector3(-0.837758, -0.558505, 0.0)   # landscape.gd city sun (-48°, -32°, 0)
+const PAINT_LIGHT_DIR := Vector3(-0.77, 0.6, 0.15)            # direction TO the painted light (forest only)
 const Rules = preload("res://src/forest_rescue/world/forest_layout_rules.gd")
 const PATH_SHADER = preload("res://src/forest_rescue/world/forest_path.gdshader")
 const RIVER_SHADER = preload("res://src/forest_rescue/world/forest_river.gdshader")
@@ -126,6 +127,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 		terrain.extra_pads = landmarks.pads()
 		terrain.quarry_center = landmarks.quarry_center()
 		terrain.water_bodies = ForestWater.bodies(atlas)
+		terrain.crown_shadows = _crown_shadows()
 		var source_meshes: Array = []
 		for part: MeshInstance3D in ground_meshes:
 			source_meshes.append(part.mesh)
@@ -152,7 +154,9 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	_cache.tiles = tiles
 	setup_ms.tiles = (Time.get_ticks_usec() - t) / 1000.0
 	t = Time.get_ticks_usec()
-	ForestKit.light_dir = Basis.from_euler(SUN_ROTATION).z.normalized()
+	# layout pass 3 (art/01): the painted forest is lit from the screen's upper left (world -X, a little
+	# +Z, 37° up) so crowns read with a lit top-left and a shaded lower-right; the city keeps its sun.
+	ForestKit.light_dir = PAINT_LIGHT_DIR
 	kit = ForestKit.new(data, stage.scenery_material)
 	canopy = ForestCanopy.new()
 	canopy.name = "Canopy"
@@ -197,6 +201,27 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	set_process(true)
 	ready_for_frame = true
 	print("ForestWorld: ready ", setup_ms, " kit=", kit.kit_status().missing.size(), " missing kit assets")
+
+
+## Soft ground shadows under the crowns (layout pass 3): [x, z, crown radius, crown height] for every
+## outer tree of the layout (ambient + remapped resource trees); the terrain bake darkens a blob
+## offset away from the painted light.
+func _crown_shadows() -> Array:
+	var out: Array = []
+	if layout.is_empty():
+		return out
+	var heights := [13.6, 15.0, 12.0, 10.0, 14.0, 13.6]
+	for item in layout.get("trees", []):
+		var sp := int(item[2])
+		out.append([float(item[0]), float(item[1]), Rules.CROWN_RADIUS[sp] * float(item[5]), heights[sp] * float(item[5])])
+	var names := {}
+	for tree in data.woods:
+		names[tree.id] = tree.name
+	for id in layout.get("resourceRemap", {}):
+		var e: Array = layout.resourceRemap[id]
+		var sp: int = Rules.RESOURCE_SPECIES.get(String(names.get(id, "")), Rules.PINE)
+		out.append([float(e[0]), float(e[1]), Rules.CROWN_RADIUS[sp] * float(e[4]), heights[sp] * float(e[4])])
+	return out
 
 
 func _load_layout() -> Dictionary:
@@ -392,10 +417,23 @@ func _under_mesh(kind_index: int, variant: int) -> Array:
 	return _mesh_for(asset, "under:%s:%s" % [kind, variant_name], canopy_kind, 1, variant_name)
 
 
+## Pass 3 (art/01 waterfall): the kit moss rock v1 as dark wet stone (ForestKit painted copy with `wet`).
+func _wet_rock_mesh() -> Array:
+	var kind := "rock"
+	var spec: Array = Rules.UNDERSTORY_KIT[kind]
+	var names: Array = spec[1]
+	var asset := _shaded_asset(kit.understory_asset(kind, spec[0]), "wet", {"wet": 0.85})
+	return _mesh_for(asset, "under:rock_wet:%s" % names[0], ForestCanopy.KIND_ROCK, 1, names[0])
+
+
 ## Pass 2 (art/01 quarry): the quarry ledges, cliffs and boulders are the kit moss rock in a pale
 ## limestone look (ForestKit painted material copy with `limestone`, cracks and shading kept).
 func _limestone_asset(asset: Dictionary, tag: String) -> Dictionary:
-	var key := "limestone:%s:%s" % [tag, asset.get("id", "")]
+	return _shaded_asset(asset, tag, {"limestone": 0.8})
+
+
+func _shaded_asset(asset: Dictionary, tag: String, params: Dictionary) -> Dictionary:
+	var key := "shaded:%s:%s" % [tag, asset.get("id", "")]
 	if mesh_keys.has(key):
 		return mesh_keys[key]
 	var copy := asset.duplicate()
@@ -412,7 +450,8 @@ func _limestone_asset(asset: Dictionary, tag: String) -> Dictionary:
 				if material is ShaderMaterial:
 					if not materials.has(material):
 						var pale := (material as ShaderMaterial).duplicate() as ShaderMaterial
-						pale.set_shader_parameter("limestone", 0.8)
+						for name in params:
+							pale.set_shader_parameter(name, params[name])
 						materials[material] = pale
 					material = materials[material]
 				mesh.surface_set_material(s, material)
@@ -523,8 +562,9 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 		if not dead.is_empty():
 			var spot: Vector2 = landmarks.dead_tree_spot
 			canopy.add_instance(dead[0], Transform3D(Basis(Vector3.UP, 2.3).scaled(Vector3.ONE * 1.45), Vector3(spot.x, height_at(spot.x, spot.y) - 0.1, spot.y)))
-	# Waterfall outcrop (atlas v2): kit limestone rocks stacked into the cliff behind the fall.
-	var rock_mesh := _under_mesh(Rules.UNDERSTORY.find("rock"), 1)
+	# Waterfall outcrop (atlas v2): kit limestone rocks stacked into the cliff behind the fall; pass 3
+	# (art/01): a dark wet rock face behind the white water.
+	var rock_mesh := _wet_rock_mesh()
 	for rock in ForestWater.outcrop_rocks():
 		var basis := Basis(Vector3.UP, float(rock[2])).scaled(rock[3])
 		canopy.add_instance(rock_mesh[0], Transform3D(basis, Vector3(rock[0], height_at(rock[0], rock[1]) - 0.2, rock[1])))

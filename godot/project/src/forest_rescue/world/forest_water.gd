@@ -53,10 +53,10 @@ static func bodies(forest_atlas: RefCounted) -> Array:
 			out.append({"id": "lake", "kind": "lake", "center": feature.center, "radius": feature.radius,
 				"minor": float(feature.get("minor", feature.radius)), "rot": float(feature.get("rot", 0.0)),
 				"level": forest_atlas.WATER_LEVEL, "depth": 1.1, "bank": 0.42, "noise": 0.07, "seed": 1.7,
-				"perched": false, "lily": 0.12, "murk": 0.2, "river": 1.0})
+				"perched": false, "lily": 0.22, "murk": 0.25, "river": 1.0})
 	out.append({"id": "pond", "kind": "pond", "center": POND_CENTER, "radius": POND_RADIUS,
 		"level": ForestTerrain.base_height(POND_CENTER.x, POND_CENTER.y) - 0.42, "depth": 0.7, "bank": 1.1,
-		"noise": 0.12, "seed": 4.1, "perched": true, "lily": 0.3, "murk": 0.12, "river": 0.0})
+		"noise": 0.12, "seed": 4.1, "perched": true, "lily": 0.42, "murk": 0.12, "river": 0.0})
 	for i in MARSH_POOLS.size():
 		var c: Vector2 = MARSH_POOLS[i][0]
 		out.append({"id": "marsh_%d" % i, "kind": "marsh", "center": c, "radius": float(MARSH_POOLS[i][1]),

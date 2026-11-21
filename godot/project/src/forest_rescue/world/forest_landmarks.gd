@@ -42,6 +42,9 @@ const DEAD_TREE_SET := [
 	{"id": "lf_arena_bones", "offset": Vector2(1.2, 2.6), "yaw": 64.0, "scale": 0.8, "footprint": 1.8},
 ]
 const CAMP := {"id": "lf_env_camp_props", "footprint": 3.4, "distance": 10.2}
+## Layout pass 3 (art/01 at zoom 68: every camp a focal point): tents, fences, crates, the fire and the
+## camp extras drawn 1.25× (cages and people keep their scale).
+const CAMP_SCALE := 1.25
 ## Yaw (deg) showing the city camera (azimuth 45°) the painted side of a landmark: 45° minus the
 ## painting camera's azimuth around the model, from the landmarks v3 camera solves
 ## (forest_rescue/qa/compare/<id>/v3_iter*_camera.json): camp −36.7°, watchpost −1.6°, hunter
@@ -173,7 +176,7 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 		# P2.7: the camp's painted side faces the city camera (± the style's variation)
 		var yaw := deg_to_rad((PAINTED_YAW_MIRRORED if mirror else float(PAINTED_YAW[CAMP.id])) + float(style.get("yaw", 0.0)))
 		placements.append({"id": CAMP.id, "position": Vector3(best.x, 0.0, best.y), "yaw": yaw, "footprint": main_fp,
-			"kind": "camp", "site": site.id, "pad": main_fp >= 3.0, "piece": main_kind, "mirror": mirror})
+			"kind": "camp", "site": site.id, "pad": main_fp >= 3.0, "piece": main_kind, "mirror": mirror, "scale": CAMP_SCALE})
 		var fz := Vector2(sin(yaw), cos(yaw))          # camp frame +Z (model +Z) in world xz
 		var fx := Vector2(fz.y, -fz.x)                 # camp frame +X
 		for extra in style.get("extras", []):
@@ -192,7 +195,7 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 					continue
 				var extra_yaw := yaw + deg_to_rad(float(extra[2])) * (-1.0 if mirror != (attempt % 2 == 1) else 1.0)
 				placements.append({"id": _piece_asset(kind), "position": Vector3(p.x, 0.0, p.y), "yaw": extra_yaw,
-					"footprint": fp, "kind": "camp_piece", "site": site.id, "pad": false, "piece": kind,
+					"footprint": fp, "kind": "camp_piece", "site": site.id, "pad": false, "piece": kind, "scale": CAMP_SCALE,
 					"items": String(extra[0]).get_slice(":", 1) if String(extra[0]).contains(":") else ""})
 				placed = true
 				break
@@ -422,6 +425,8 @@ func populate() -> void:
 			tris.append(_count_tris(node))
 		if placement.kind == "camp":
 			holder.add_child(_fire_glow())
+		if placement.kind == "bridge":
+			holder.add_child(_bridge_dressing())
 		tris_by_lod[placement.id] = tris
 		items.append({"node": holder, "lods": lods, "players": players, "center": Vector2(placement.position.x, placement.position.z),
 			"radius": maxf(4.0, float(placement.footprint)) if placement.kind != "bridge" else 17.0, "lod": -1, "id": placement.id,
@@ -631,6 +636,70 @@ func _proc_mesh(kind: String) -> Mesh:
 
 
 static var _proc_materials: Dictionary = {}
+
+
+## Layout pass 3 (art/01: the bridge's four towers with red banners read at zoom 68): a dark red
+## pyramid roof on each tower and the arena's red banner (lf_arena_banner, wind clip) on top.
+const BRIDGE_TOWERS := [Vector2(-7.25, -2.95), Vector2(-7.25, 2.95), Vector2(7.25, -2.95), Vector2(7.25, 2.95)]
+const BRIDGE_TOWER_TOP := 5.75
+const BRIDGE_ROOF := 1.5
+const BRIDGE_BANNER_SCALE := 0.8
+
+
+func _bridge_dressing() -> Node3D:
+	var root := Node3D.new()
+	root.name = "BridgeDressing"
+	var roof := _roof_mesh(1.0, BRIDGE_ROOF)
+	var banner_path := ARENA_DIR + "lf_arena_banner.glb"
+	var banner_scene: Variant = load(banner_path) if ResourceLoader.exists(banner_path) else null
+	for t: Vector2 in BRIDGE_TOWERS:
+		var cap := MeshInstance3D.new()
+		cap.mesh = roof
+		cap.position = Vector3(t.x, BRIDGE_TOWER_TOP, t.y)
+		root.add_child(cap)
+		if banner_scene is PackedScene:
+			var banner: Node3D = (banner_scene as PackedScene).instantiate()
+			ForestKit.paint_scene(banner, LIGHT_MIX)
+			banner.position = Vector3(t.x, BRIDGE_TOWER_TOP + BRIDGE_ROOF * 0.55, t.y)
+			banner.rotation.y = deg_to_rad(45.0)          # cloth faces the city camera (+X +Z)
+			banner.scale = Vector3.ONE * BRIDGE_BANNER_SCALE
+			root.add_child(banner)
+			for player: AnimationPlayer in banner.find_children("*", "AnimationPlayer", true, false):
+				if not player.get_animation_list().is_empty():
+					var clip: String = player.get_animation_list()[0]
+					player.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+					player.play(clip)
+	return root
+
+
+static var _roof_cache: ArrayMesh
+
+
+func _roof_mesh(half: float, height: float) -> ArrayMesh:
+	if _roof_cache != null:
+		return _roof_cache
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var corners := [Vector3(-half, 0, -half), Vector3(half, 0, -half), Vector3(half, 0, half), Vector3(-half, 0, half)]
+	var apex := Vector3(0, height, 0)
+	for i in 4:
+		var a: Vector3 = corners[i]
+		var b: Vector3 = corners[(i + 1) % 4]
+		var n := (b - a).cross(apex - a).normalized() * -1.0
+		for tri in [[a, apex, b], [a, b, apex]]:       # both windings: no culling surprises
+			for v in tri:
+				st.set_normal(n)
+				st.set_uv(Vector2(v.x * 0.5 + 0.5, v.y / height))
+				st.add_vertex(v)
+	var mesh := st.commit()
+	var base := StandardMaterial3D.new()
+	base.resource_name = "lf_proc_bridge_roof"
+	var texture: Variant = load(LANDMARK_DIR + "lm_wood_c.jpg") if ResourceLoader.exists(LANDMARK_DIR + "lm_wood_c.jpg") else null
+	base.albedo_texture = texture
+	base.albedo_color = Color(0.62, 0.26, 0.18)
+	mesh.surface_set_material(0, ForestKit.painted_material(base, false, LIGHT_MIX, false))
+	_roof_cache = mesh
+	return mesh
 
 
 static func _material(kind: String) -> Material:

@@ -33,22 +33,31 @@ const PAD_EXTRA_GRADE_DEG := 4.0
 const GLADE_DIRT := 8.5               # m: warm trampled-dirt pad under every glade's camp (pass 2)
 const WARM_DIRT := Color(1.1, 0.98, 0.8)
 const JUNCTION_LANDING := 2.4         # m: trails are level within this radius of a junction node      # grade a trail may gain on top of its atlas profile to meet its ends
-const TERRAIN_VERSION := 24
+const TERRAIN_VERSION := 25
 
 ## Atlas v2 region ground tints (ForestAtlas.REGION_NAMES order, art/01 crops at zoom 68):
 ## sunny warm meadow under the golden grove, olive mixed oaks, dry grey-olive arena rock, fresh
 ## green willow banks, cool riverside, dark mossy blue-green floor under the south pines, pale
 ## limestone quarry, lush meadow belt round the walls. FLOOR_SHADE = darkest canopy-floor factor.
+## Layout pass 3: warm yellow-green meadow grass (art/01) instead of khaki; south cooler and darker.
 const REGION_TINTS := [
-	Color(1.07, 1.03, 0.82),   # golden_grove
-	Color(1.00, 1.01, 0.86),   # west_mixed
-	Color(0.96, 0.95, 0.88),   # arena_rock
-	Color(0.84, 0.95, 0.80),   # east_willows (art/01 right edge: deep shaded green)
-	Color(0.90, 1.01, 0.92),   # river
-	Color(0.60, 0.70, 0.62),   # south_pines (dark mossy floor under the pines)
+	Color(1.02, 1.07, 0.66),   # golden_grove (sunny yellow-green meadows)
+	Color(0.96, 1.05, 0.70),   # west_mixed
+	Color(0.94, 0.97, 0.80),   # arena_rock
+	Color(0.80, 0.95, 0.72),   # east_willows (art/01 right edge: deep shaded green)
+	Color(0.86, 1.0, 0.84),    # river
+	Color(0.50, 0.62, 0.60),   # south_pines (dark cool mossy floor under the pines)
 	Color(1.03, 1.00, 0.92),   # sw_quarry
 	Color(0.98, 1.06, 0.86),   # town_belt
 ]
+## soft crown shadows (layout pass 3): [x, z, crown radius, crown height] set by ForestWorld / the builder
+var crown_shadows: Array = []
+const SHADOW_DARK := 0.66          # ground factor at a shadow's centre
+const SHADOW_SHIFT := 0.32         # shadow offset (× crown height) away from the painted light (screen lower right)
+const SHADOW_DIR := Vector2(0.98, -0.19)
+## camp pad (art/01): warm ochre trampled dirt with a darker rim
+const PAD_OCHRE := Color(1.16, 0.96, 0.62)
+const PAD_RIM_DARK := 0.78
 const FLOOR_SHADE := [0.9, 0.84, 0.82, 0.84, 0.86, 0.68, 0.9, 0.88]
 const WET_TINT := Color(0.80, 0.93, 0.86)
 
@@ -490,14 +499,20 @@ func bake() -> void:
 			for body in water_bodies:
 				wet = maxf(wet, 1.0 - smoothstep(0.0, 3.5, shore_distance(body, x, z)))
 			color = color.lerp(WET_TINT, wet * 0.8)
+			# art/01 meadow grass: light and dark patches (low-frequency variation)
+			var patch := 0.5 * sin(x * 0.11 + z * 0.07) + 0.35 * sin(z * 0.19 - x * 0.05 + 1.3) + 0.25 * sin((x + z) * 0.31)
+			color = Color(color.r * (1.0 + 0.09 * patch), color.g * (1.0 + 0.07 * patch), color.b * (1.0 + 0.04 * patch))
 			for site in atlas.sites:
 				var gd := Vector2(x - site.center.x, z - site.center.z).length()
-				if gd < GLADE_DIRT + 2.0:
-					color = color.lerp(Color(color.r * WARM_DIRT.r, color.g * WARM_DIRT.g, color.b * WARM_DIRT.b), 1.0 - smoothstep(GLADE_DIRT - 2.0, GLADE_DIRT + 1.5, gd))
-					# layout pass 2 (art/01): a trampled sandy dirt pad under the camp, ragged edge
-					var ragged := 1.1 * sin(atan2(z - site.center.z, x - site.center.x) * 5.0 + site.center.x * 0.37) \
-						+ 0.6 * sin(atan2(z - site.center.z, x - site.center.x) * 9.0 + site.center.z * 0.21)
-					earth[k] = maxf(earth[k], 0.82 * (1.0 - smoothstep(GLADE_DIRT - 3.2, GLADE_DIRT - 0.2, gd + ragged)))
+				if gd < GLADE_DIRT + 3.0:
+					# layout pass 3 (art/01): a warm ochre trampled dirt pad (≈ 8.5 m) with a darker rim
+					var ang := atan2(z - site.center.z, x - site.center.x)
+					var ragged := 1.1 * sin(ang * 5.0 + site.center.x * 0.37) + 0.6 * sin(ang * 9.0 + site.center.z * 0.21)
+					var pad := 1.0 - smoothstep(GLADE_DIRT - 2.6, GLADE_DIRT - 0.4, gd + ragged * 0.7)
+					color = color.lerp(Color(color.r * PAD_OCHRE.r, color.g * PAD_OCHRE.g, color.b * PAD_OCHRE.b), pad)
+					var rim := smoothstep(GLADE_DIRT - 1.4, GLADE_DIRT - 0.2, gd + ragged * 0.7) * (1.0 - smoothstep(GLADE_DIRT + 0.2, GLADE_DIRT + 1.8, gd + ragged * 0.7))
+					color = Color(color.r * lerpf(1.0, PAD_RIM_DARK, rim), color.g * lerpf(1.0, PAD_RIM_DARK * 0.97, rim), color.b * lerpf(1.0, PAD_RIM_DARK * 0.9, rim))
+					earth[k] = maxf(earth[k], 0.9 * pad)
 			if quarry_center != Vector2.INF:
 				var qd := Vector2(x, z).distance_to(quarry_center)
 				color = color.lerp(Color(1.12, 1.1, 1.04), (1.0 - smoothstep(12.0, 24.0, qd)) * 0.8)
@@ -508,9 +523,42 @@ func bake() -> void:
 			# mossy and dark under the south pines, sunny under the golden grove.
 			var floor_shade := lerpf(shade_min, 1.0, clampf(earth[k] * 1.4, 0.0, 1.0) * (1.0 - 0.45 * weights[5]))
 			color = Color(color.r * floor_shade, color.g * floor_shade, color.b * floor_shade)
+			var shade := _crown_shade(x, z)
+			color = Color(color.r * shade, color.g * shade, color.b * minf(1.0, shade * 1.06))
 			tint[k] = Color(1, 1, 1).lerp(color, core)
 	stats.changed_vertices = changed
 	grid_ready = true
+
+
+var _shadow_grid := {}
+
+
+## Soft crown shadows: ground factor at (x, z) (1 = sunlit). Blobs offset from the trunk toward the
+## screen lower right (away from the painted light), one per crown, overlapping blobs darken a bit more.
+func _crown_shade(x: float, z: float) -> float:
+	if crown_shadows.is_empty():
+		return 1.0
+	if _shadow_grid.is_empty():
+		for i in crown_shadows.size():
+			var c: Array = crown_shadows[i]
+			var center := Vector2(float(c[0]), float(c[1])) + SHADOW_DIR * float(c[3]) * SHADOW_SHIFT
+			var key := Vector2i(floori(center.x / 12.0), floori(center.y / 12.0))
+			if not _shadow_grid.has(key):
+				_shadow_grid[key] = PackedInt32Array()
+			_shadow_grid[key].append(i)
+	var key := Vector2i(floori(x / 12.0), floori(z / 12.0))
+	var dark := 0.0
+	for gz in range(key.y - 1, key.y + 2):
+		for gx in range(key.x - 1, key.x + 2):
+			for i in _shadow_grid.get(Vector2i(gx, gz), PackedInt32Array()):
+				var c: Array = crown_shadows[i]
+				var center := Vector2(float(c[0]), float(c[1])) + SHADOW_DIR * float(c[3]) * SHADOW_SHIFT
+				var r: float = maxf(1.5, float(c[2]) * 0.95)
+				var d := Vector2(x, z).distance_to(center)
+				if d < r * 1.3:
+					var w := 1.0 - smoothstep(r * 0.35, r * 1.3, d)
+					dark = dark + (1.0 - dark) * w * 0.85
+	return lerpf(1.0, SHADOW_DARK, clampf(dark, 0.0, 1.0))
 
 
 ## Atlas v2 region weights for the ground tint (same regions as the layout builder's zones):

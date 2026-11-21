@@ -86,7 +86,7 @@ vec3 grade_factors(vec3 p) {
 
 void fragment() {
 	vec2 cell_xy = vec2(mod(cell, grid), floor(cell / grid));
-	vec4 c = texture(atlas, (cell_xy + clamp(UV, vec2(0.004), vec2(0.996))) / grid);
+	vec4 c = texture(atlas, (cell_xy + clamp(UV, vec2(0.004), vec2(0.996))) / grid, -0.6);   // crisp crowns at zoom 68-120
 	if (c.a < alpha_cut) {
 		discard;
 	}

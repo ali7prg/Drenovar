@@ -41,6 +41,8 @@ uniform float limestone : hint_range(0.0, 1.0) = 0.0;
 // skull against the darker rock); 1 = as painted.
 uniform float albedo_contrast = 1.0;
 uniform float albedo_gain = 1.0;
+// Pass 3 (art/01 waterfall): dark wet stone (desaturated, darkened, a cool sheen); 0 = as painted.
+uniform float wet : hint_range(0.0, 1.0) = 0.0;
 
 float grade_sector(float phi, float a, float b, float blend) {
 	float best = 0.0;
@@ -150,6 +152,10 @@ void fragment() {
 		float l = dot(c.rgb, vec3(0.299, 0.587, 0.114));
 		vec3 pale = clamp(vec3(l) * vec3(1.05, 1.0, 0.9) + vec3(0.1, 0.095, 0.08), 0.0, 1.0);
 		c.rgb = mix(c.rgb, pale, limestone);
+	}
+	if (wet > 0.0) {
+		float l = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+		c.rgb = mix(c.rgb, vec3(l) * vec3(0.5, 0.56, 0.6) + vec3(0.02, 0.03, 0.04), wet);
 	}
 	if (albedo_contrast != 1.0 || albedo_gain != 1.0) {
 		float l = dot(c.rgb, vec3(0.299, 0.587, 0.114));

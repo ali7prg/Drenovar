@@ -1379,19 +1379,19 @@ func _water_dressing(trees: Array, under: Array, under_grid: Dictionary, logs: A
 			var angle := TAU * (k + rng.randf() * 0.6) / steps
 			var shore := ForestTerrain.shore_radius(body, angle)
 			var patch := (clump.get_noise_2d(c.x + cos(angle) * 9.0, c.y + sin(angle) * 9.0) + 1.0) * 0.5
-			if patch > (0.32 if body.kind != "lake" else 0.4):
-				for j in (2 if body.kind == "lake" else 1):
+			if patch > (0.32 if body.kind != "lake" else 0.27):
+				for j in (3 if body.kind == "lake" else 1):
 					var dist := shore + rng.randf_range(-0.8, 1.4)
 					var p := c + Vector2(cos(angle), sin(angle)) * dist
 					if _bank_ok(p.x, p.y, 1.0):
 						insert(under_grid, under, [snappedf(p.x, 0.01), snappedf(p.y, 0.01), 1.1, reed, 1 + rng.randi() % 3,
 							snappedf(rng.randf() * 360.0, 0.1), snappedf(lerpf(0.7, 1.1, rng.randf()), 0.001)])
 						kinds_count["water_reed"] = kinds_count.get("water_reed", 0) + 1
-			elif (body.perched or body.kind == "lake") and rng.randf() < (0.35 if body.perched else 0.45):
+			elif (body.perched or body.kind == "lake") and rng.randf() < (0.35 if body.perched else 0.75):
 				var p := c + Vector2(cos(angle), sin(angle)) * (shore + rng.randf_range(0.2, 0.9))
 				if _bank_ok(p.x, p.y, 1.4):
 					insert(under_grid, under, [snappedf(p.x, 0.01), snappedf(p.y, 0.01), 1.4, Rules.UNDERSTORY.find("quarry_rock"), 1,
-						snappedf(rng.randf() * 360.0, 0.1), snappedf(rng.randf_range(0.16, 0.3), 0.001)])
+						snappedf(rng.randf() * 360.0, 0.1), snappedf(rng.randf_range(0.16, 0.3) * (1.6 if body.kind == "lake" else 1.0), 0.001)])
 					kinds_count["water_stone"] = kinds_count.get("water_stone", 0) + 1
 			if body.kind == "marsh":
 				continue
@@ -1402,13 +1402,18 @@ func _water_dressing(trees: Array, under: Array, under_grid: Dictionary, logs: A
 				var scale := lerpf(0.8, 1.0, rng.randf())
 				var variant := 2 + rng.randi() % 2
 				var yaw_deg := snappedf(rad_to_deg(atan2(-cos(angle), -sin(angle))) + lerpf(-35.0, 35.0, rng.randf()), 0.1)
+				# pass 3 (art/01): dark pines crowd the lake shore between the willows
+				var sp := Rules.PINE if body.kind == "lake" and rng.randf() < 0.6 else Rules.WILLOW
+				if sp == Rules.PINE:
+					scale = lerpf(0.95, 1.2, rng.randf())
+					variant = 2 + rng.randi() % 3
 				if maxf(absf(p.x), absf(p.y)) > CORE + 1.0 and not blocked_exact(p.x, p.y, true, 1.0, 4.0) and ground_ok(p.x, p.y, true) \
-						and terrain.slope_degrees(p.x, p.y) < 34.0 and free_of_trunks(p.x, p.y, 3.4) \
-						and not tree_hides_units(p.x, p.y, Rules.WILLOW, variant, scale, deg_to_rad(yaw_deg)):
+						and terrain.slope_degrees(p.x, p.y) < 34.0 and free_of_trunks(p.x, p.y, 3.0 if sp == Rules.PINE else 3.4) \
+						and not tree_hides_units(p.x, p.y, sp, variant, scale, deg_to_rad(yaw_deg), true):
 					insert(trunk_grid, trunks, [p.x, p.y, 3.4])
-					trees.append([snappedf(p.x, 0.01), snappedf(p.y, 0.01), Rules.WILLOW, variant, yaw_deg, snappedf(scale, 0.001), Z_RIVER])
-					species_count[Rules.SPECIES[Rules.WILLOW]] = species_count.get(Rules.SPECIES[Rules.WILLOW], 0) + 1
-					willow_next = along + lerpf(7.0, 12.0, rng.randf())
+					trees.append([snappedf(p.x, 0.01), snappedf(p.y, 0.01), sp, variant, yaw_deg, snappedf(scale, 0.001), Z_RIVER])
+					species_count[Rules.SPECIES[sp]] = species_count.get(Rules.SPECIES[sp], 0) + 1
+					willow_next = along + (lerpf(3.5, 6.0, rng.randf()) if sp == Rules.PINE else lerpf(7.0, 12.0, rng.randf()))
 
 
 func _bank_ok(x: float, z: float, spacing: float) -> bool:

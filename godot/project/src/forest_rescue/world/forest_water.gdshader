@@ -12,8 +12,8 @@ uniform vec3 deep_color : source_color = vec3(0.16, 0.29, 0.34);
 uniform vec3 mid_color : source_color = vec3(0.24, 0.40, 0.45);
 uniform vec3 shallow_color : source_color = vec3(0.39, 0.55, 0.57);
 uniform vec3 murky_color : source_color = vec3(0.30, 0.38, 0.30);     // reedy / marsh shallows
-uniform vec3 pad_color : source_color = vec3(0.36, 0.52, 0.22);
-uniform vec3 pad_light : source_color = vec3(0.55, 0.68, 0.30);
+uniform vec3 pad_color : source_color = vec3(0.20, 0.38, 0.14);   // pass 3: deep green pads (art/01), not yellow dots
+uniform vec3 pad_light : source_color = vec3(0.33, 0.52, 0.19);
 uniform vec3 flower_color : source_color = vec3(0.98, 0.86, 0.90);
 uniform vec3 foam_color : source_color = vec3(0.90, 0.93, 0.92);
 uniform float murk = 0.0;            // 0 clear lake .. 1 marsh
@@ -51,12 +51,14 @@ void fragment() {
 	depth = max(depth, river_depth(p) * river_blend);
 	vec3 col = mix(shallow_color, mix(mid_color, deep_color, smoothstep(0.35, 1.0, depth)), smoothstep(0.0, 0.45, depth));
 	col = mix(col, murky_color * (0.9 + 0.2 * ripple), murk * (1.0 - depth * 0.5));
+	// pass 3: the river's painted variation on the still water (no flat teal sheet)
+	col *= 0.9 + 0.16 * ripple;
 	// soft painted sky glints on the still surface
 	float glint = texture(noise_tex, p / 3.1 + vec2(TIME * 0.02, -TIME * 0.013)).b;
 	col += vec3(0.07, 0.08, 0.08) * smoothstep(0.78, 0.95, glint * 0.7 + ripple * 0.3) * depth;
 	// lily pads: one jittered pad per 1.1 m cell (notched discs), a few with a pale flower
 	if (lily_density > 0.0) {
-		vec2 cell = floor(p / 1.1);
+		vec2 cell = floor(p / 1.6);
 		float pad = 0.0;
 		float flower = 0.0;
 		float shade = 0.0;
@@ -64,10 +66,11 @@ void fragment() {
 			for (int i = -1; i <= 1; i++) {
 				vec2 c = cell + vec2(float(i), float(j));
 				vec2 h = hash2(c);
-				if (h.x > lily_density) continue;
-				vec2 centre = (c + 0.2 + 0.6 * hash2(c + 7.1)) * 1.1;
+				// pads cluster toward the shore (and thin out over the deep middle)
+				if (h.x > lily_density * (1.4 - inner)) continue;
+				vec2 centre = (c + 0.2 + 0.6 * hash2(c + 7.1)) * 1.6;
 				vec2 d = p - centre;
-				float r = 0.22 + 0.2 * h.y;
+				float r = 0.34 + 0.3 * h.y;
 				float ang = mod(atan(d.y, d.x) - h.x * 6.28318 + 3.14159, 6.28318) - 3.14159;
 				float notch = step(abs(ang), 0.32);
 				float disc = (1.0 - smoothstep(r - 0.03, r, length(d))) * (1.0 - notch);
@@ -78,7 +81,7 @@ void fragment() {
 				}
 			}
 		}
-		pad *= smoothstep(0.15, 0.45, inner);
+		pad *= smoothstep(0.08, 0.3, inner);
 		col = mix(col, mix(pad_color, pad_light, shade), pad);
 		col = mix(col, flower_color, flower * pad);
 	}

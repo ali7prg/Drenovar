@@ -63,10 +63,10 @@ SMOOTH_ANGLE = 40.0
 # place), the chest / lid only themselves (they travel), rope and pit void none; soft sun shadow toward the
 # light between the painting's and the game's (model space)
 AO_SUN = (-0.612, -0.331, 0.719)
-AO_STRENGTH = 0.8
+AO_STRENGTH = 0.55
 AO_SUN_STRENGTH = 0.38
 AO_DIST = 0.9
-AO_CLASS_STRENGTH = {"ground": 0.45, "grass": 0.3, "rope": 0.6}
+AO_CLASS_STRENGTH = {"ground": 0.35, "grass": 0.25, "rope": 0.45}
 SHARP_TAGS = ("rubble", "lip")
 NO_CALIBRATE = ("brass", "iron")
 IRON_BOXES = [(98, 553, 150, 568), (320, 668, 378, 688), (62, 748, 118, 776), (354, 752, 392, 790), (380, 588, 412, 622),
@@ -418,12 +418,10 @@ def build(A, p, lod):
         # top block (cap timber along Y), its iron strap with bolts, the axle bearing
         g.box((x, 0.0, AX + p["TB"] - 0.02), (0.30, 0.78, 0.24), mat="wood", tag="top_block", chamfer=ch_b)
         g.box((x, -0.41, AX + p["TB"] - 0.04), (0.36, 0.04, 0.14), mat="iron", tag="strap")
-        g.box((x, 0.0, AX + p["TB"] + 0.105), (0.36, 0.86, 0.035), mat="iron", tag="strap", skip=("-z",))
+        g.box((x, 0.41, AX + p["TB"] - 0.04), (0.36, 0.04, 0.14), mat="iron", tag="strap")
         if lod == 0:
             for off in (-0.11, 0.11):
                 bolt(g, (x + off, -0.43, AX + p["TB"] - 0.04), (0, -1, 0), r=0.028)
-            bolt(g, (x, -0.2, AX + p["TB"] + 0.123), (0, 0, 1), r=0.026)
-            bolt(g, (x, 0.2, AX + p["TB"] + 0.123), (0, 0, 1), r=0.026)
         g.cyl((x - sx * 0.02, 0, AX), (x + sx * 0.16, 0, AX), 0.11, n=(12, 8, 6)[lod], mat="iron", tag="bearing",
               up=(0, 0, 1))
     # iron shoes at every foot (bolted fronts)
@@ -530,7 +528,7 @@ def build(A, p, lod):
     brake = A.part("brake_lever", None, tuple(bp))
     bg = brake.geo[lod]
     knob_c = np.array([p["KX"], -0.28, AX + 0.78])
-    bg.cyl(tuple(bp), tuple(knob_c - np.array([0, 0, 0.08])), 0.05, n=(10, 8, 6)[lod], mat="brass", tag="lever",
+    bg.cyl(tuple(bp), tuple(knob_c - np.array([0, 0, 0.08])), 0.038, n=(10, 8, 6)[lod], mat="brass", tag="lever",
            up=(1, 0, 0))
     CG.lathe(bg, [(0.035, 0.0), (0.075, 0.03), (0.105, 0.09), (0.112, 0.15), (0.095, 0.21), (0.05, 0.245), (0.0, 0.255)],
              tuple(knob_c - np.array([0, 0, 0.1])), n=(12, 9, 6)[lod], mat="brass", tag="knob")
@@ -552,9 +550,8 @@ def build(A, p, lod):
     hg = chest.geo[lod]
     body_h = Hc * 0.62
     D = 0.4
-    hg.box(tuple(cb + (0, 0, body_h / 2)), (Wc, D, body_h), mat="wood", tag="chest_body", chamfer=0.015 if lod == 0 else 0.0)
-    hg.box(tuple(cb + (0, -D / 2 - 0.006, body_h * 0.5)), (Wc * 0.8, 0.014, body_h * 0.7), mat="brass", tag="chest_panel",
-           skip=("+y",))
+    hg.box(tuple(cb + (0, 0, body_h / 2)), (Wc, D, body_h), mat="brass", tag="chest_body", chamfer=0.015 if lod == 0 else 0.0)
+    hg.box(tuple(cb + (0, 0, 0.025)), (Wc + 0.02, D + 0.02, 0.05), mat="wood", tag="chest_plinth", skip=("-z",))
     for xx in ((-Wc * 0.42, Wc * 0.42) if lod == 2 else (-Wc * 0.42, -Wc * 0.14, Wc * 0.14, Wc * 0.42)):
         hg.box(tuple(cb + (xx, 0, body_h / 2)), (0.055, D + 0.024, body_h + 0.01), mat="iron", tag="chest_band",
                skip=("-z",))
@@ -575,7 +572,7 @@ def build(A, p, lod):
     a = np.linspace(0, math.pi, nl + 1)
     rr = D / 2
     prof2 = np.stack([rr * np.cos(a), rr * 0.75 * np.sin(a)], 1)       # (y, z) dome profile
-    for xx0, xx1, mat_, tag_ in ((-Wc / 2, Wc / 2, "wood", "chest_lid"),):
+    for xx0, xx1, mat_, tag_ in ((-Wc / 2, Wc / 2, "brass", "chest_lid"),):
         Vd = [cb + np.array([xx, q[0], body_h + q[1]]) for xx in (xx0, xx1) for q in prof2]
         Vd = np.array(Vd)
         k1 = nl + 1

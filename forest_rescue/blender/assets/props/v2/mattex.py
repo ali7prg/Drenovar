@@ -109,7 +109,7 @@ def stretch(t, lo, hi):
 
 
 # ----------------------------------------------------------------------------- materials
-def wood(size, lut, rng, lines=11, contrast=(0.06, 0.86)):
+def wood(size, lut, rng, lines=13, contrast=(0.05, 0.8)):
     """Weathered oak, grain along u (x), painted style: broad warm tone bands along the grain, crisp dark latewood
     lines that come and go, a few long seasoning checks and knots, soft lighter weathered streaks. Fine fibre noise is
     kept faint (no zebra / speckle at full resolution)."""

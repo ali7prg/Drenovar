@@ -76,14 +76,14 @@ def step_y(p):
 
 def key_rest(p):
     """Key centre lying on the threshold step (rod along X, crystal at +X)."""
-    return np.array([p["sx"] - 0.06, step_y(p) + 0.02, p["sh"] + 0.045])
+    return np.array([p["sx"] - 0.06 + p["ox"], step_y(p) + 0.02 + p["oy"], p["sh"] + 0.045])
 
 
 def key_in_niche(p):
     """Key centre standing upright in the niche (crystal on top, just proud of the wall)."""
     a = math.radians(p["an"])
     r = (p["Rw"] + p["Rt"]) * 0.5 + 0.07
-    return np.array([r * math.cos(a), r * math.sin(a), p["zt"] * 0.5 + 0.08])
+    return np.array([r * math.cos(a) + p["ox"], r * math.sin(a) + p["oy"], p["zt"] * 0.5 + 0.08])
 
 
 def points(p):
@@ -108,6 +108,9 @@ def points(p):
         "door_bl": polar(p["Rw"], p["ad"] - p["dh"], p["hb"]),
         "door_br": polar(p["Rw"], p["ad"] + p["dh"], p["hb"]),
     }
+    for key in list(P):
+        if key.startswith("step_") or key.startswith("door_") or key.startswith("niche_"):
+            P[key] = (P[key][0] + p["ox"], P[key][1] + p["oy"], P[key][2])
     k = key_in_niche(p)
     P["gem_niche"] = (k[0], k[1], k[2] + 0.2)
     return P
@@ -133,7 +136,7 @@ def views():
          "step_tl": (1262, 345), "step_tr": (1410, 343), "step_bl": (1265, 380), "step_br": (1408, 377),
          "door_tl": (1290, 272), "door_tr": (1390, 272), "door_bl": (1292, 345), "door_br": (1388, 345)},
         pose=open_pose, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None, solve_opts={"fov_prior": 20.0},
-        clip_below=386, title="RUNE LOCK open (door down, key in the niche)", tex_weight=0.9)
+        clip_below=386, title="RUNE LOCK open (door down, key in the niche)", tex_weight=0.6)
     return [closed, opened]
 
 
@@ -191,9 +194,6 @@ def build(A, p, lod):
     arc_wall(g, Rt - 0.17, r_at(zd), zd, zt, ad - dh, ad + dh, max(4, n // 10), "stone", "lintel", top=False,
              ends=False, r1_top=Rt)
     CG.ring_prism(g, (0, 0, 0), np.eye(3), Rt + 0.025, p["Rr"] + 0.02, n, zt, zt + 0.06, "stone", "rim")
-    gd.transform(None, O)
-    g = g_root
-    g.extend(gd)
     # cavity behind the door: floor, back wall, side walls (dark), chest
     cy0 = Rw * math.sin(ad)
     cav_w = 2 * Rw * math.sin(dh) + 0.1
@@ -209,7 +209,8 @@ def build(A, p, lod):
     if lod < 2:
         for xx in (-0.17, 0.0, 0.17):
             g.box(cc + (xx, 0, 0.14), (0.035, 0.34, 0.3), mat="bronze", tag="chest_band")
-    # ---- bronze rim, dial bed, four riveted clamps (painting: back, front, left, right)
+    # ---- bronze rim, dial bed, four riveted clamps (painting: back, front, left, right): on the dial axis
+    g = g_root
     CG.ring_prism(g, (0, 0, 0), np.eye(3), p["Rr"], p["Rr"] - 0.075, n, zt + 0.01, zt + 0.075, "bronze", "bronze_rim")
     CG.disc_prism(g, (0, 0, 0), np.eye(3), CG.ngon(p["Rr"] - 0.07, n), zt, zt + 0.07, "bronze", "dial_bed")
     for deg in (90.0, -90.0, 180.0, 0.0):
@@ -221,7 +222,8 @@ def build(A, p, lod):
         g.box(c + (0, 0, zt + 0.085), (0.2, 0.12, 0.035), R=Rm, mat="bronze", tag="clamp",
               chamfer=0.006 if lod == 0 else 0.0)
         g.box(er * (Rt + 0.035) + (0, 0, zt - 0.015), (0.03, 0.11, 0.17), R=Rm, mat="bronze", tag="clamp")
-    # ---- key niche: arched bronze frame + dark back plate on the front-right wall
+    # ---- key niche: arched bronze frame + dark back plate on the front-right wall (drum group)
+    g = gd
     a = math.radians(p["an"])
     er = np.array([math.cos(a), math.sin(a), 0.0])
     et = np.array([-math.sin(a), math.cos(a), 0.0])
@@ -239,10 +241,15 @@ def build(A, p, lod):
     # ---- threshold step in front of the door (the key lies on it)
     g.box((p["sx"], step_y(p), p["sh"] / 2), (p["sw"], p["sd"], p["sh"]), mat="stone", tag="step",
           chamfer=0.02 if lod == 0 else 0.0)
+    gd.transform(None, O)
+    g = g_root
+    g.extend(gd)
     # ---- door panel (node door_pivot): the wall piece in the opening, slides down into the plinth
-    door = A.part("door_pivot", None, (Rw * math.cos(ad), Rw * math.sin(ad), hb))
-    arc_wall(door.geo[lod], Rt - 0.15, Rw + 0.004, hb, zd, ad - dh + 0.01, ad + dh - 0.01, max(4, n // 10),
+    door = A.part("door_pivot", None, (Rw * math.cos(ad) + O[0], Rw * math.sin(ad) + O[1], hb))
+    dgeo = pv2.G.Geo()
+    arc_wall(dgeo, Rt - 0.15, Rw + 0.004, hb, zd, ad - dh + 0.01, ad + dh - 0.01, max(4, n // 10),
              "stone", "door_panel", r1_top=r_at(zd) + 0.004)
+    door.geo[lod].extend(dgeo.transform(None, O))
     # ---- discs (nodes ring_1..3), each about its own vertical axis
     for name, (R, cy, zb, ztop) in discs(p).items():
         part = A.part(name, None, (0.0, cy, zb))
@@ -263,7 +270,7 @@ def build(A, p, lod):
             flat_bottom=False, rough=0.05)
     kg.box(kp + (-0.27, 0, -0.012), (0.06, 0.016, 0.07), mat="bronze", tag="key_bit")
     if lod == 0:
-        A.marker("artifact_spot", tuple(cc + (0, 0, 0.36)))
+        A.marker("artifact_spot", tuple(cc + O + (0, 0, 0.36)))
     return A
 
 
@@ -332,7 +339,8 @@ def solve(views):
 
 # ------------------------------------------------------------------ glyphs (all ten positions on every disc)
 GLYPH_LAYOUT = {   # ring: (glyph centre radius, tangential size, radial size) in metres
-    "ring_1": (0.27, 0.15, 0.13), "ring_2": (0.40, 0.2, 0.15), "ring_3": (0.475, 0.22, 0.13)}
+    "ring_1": (0.25, 0.16, 0.14), "ring_2": (0.31, 0.2, 0.15), "ring_3": (0.5, 0.22, 0.13)}
+PAINTED = {"ring_2": "river", "ring_3": "leaf"}     # painted (projected) at their own position, kept
 GLYPH_FILL = np.array([0.17, 0.18, 0.12])
 GLYPH_EDGE = np.array([0.80, 0.60, 0.33])
 
@@ -381,6 +389,8 @@ def post_texture(A, B, alb_img, info, p):
             continue
         sel = (part == pn.index(name)) & (N[:, 2] > 0.85)
         sel_all[name] = sel
+        if name != "ring_1":
+            continue        # ring_2 / ring_3 keep their painted front glyph (river / leaf at its own position)
         lum = alb[sel] @ np.array([0.299, 0.587, 0.114])
         med = np.median(lum)
         dark = lum < med * 0.7
@@ -398,7 +408,10 @@ def post_texture(A, B, alb_img, info, p):
         y = P[idx, 1] - cy
         fill = np.zeros(len(idx))
         edge = np.zeros(len(idx))
+        painted = PAINTED.get(name)
         for k, gname in enumerate(GLYPHS):
+            if gname == painted:
+                continue
             ang = math.radians(270.0 + STEP * k)
             cx, cyy = rg * math.cos(ang), rg * math.sin(ang)
             # glyph frame: v ('up') toward the disc centre, u = v rotated -90 deg (reads left->right at the front)
@@ -476,7 +489,7 @@ def meta(A, p):
                            "back to rest_deg (server resets progress)",
             "solved": {"clip": "lf_lock_mechanism", "door_pivot_open_offset_m": [0, -DOOR_DROP, 0],
                        "key_lever_open": "end pose of lf_lock_mechanism"}},
-        "sockets": {"artifact_spot": g((0.0, cy0 + 0.40, p["hb"] + 0.36)),
+        "sockets": {"artifact_spot": g((p["ox"], cy0 + 0.40 + p["oy"], p["hb"] + 0.36)),
                     "front_index_mark": g((0.0, -p["rc"], p["zt"] + 0.1)),
                     "glyph_front_positions": {nm: g((0.0, D[nm][1] - GLYPH_LAYOUT[nm][0], D[nm][3])) for nm in D}},
         "notes": "v2: geometry measured on both art/10 drawings (closed + open), cameras solved; disc tops carry all ten "

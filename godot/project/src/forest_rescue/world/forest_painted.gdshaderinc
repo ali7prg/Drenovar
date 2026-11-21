@@ -43,6 +43,15 @@ uniform float albedo_contrast = 1.0;
 uniform float albedo_gain = 1.0;
 // Pass 3 (art/01 waterfall): dark wet stone (desaturated, darkened, a cool sheen); 0 = as painted.
 uniform float wet : hint_range(0.0, 1.0) = 0.0;
+// Pass 4 (art/01 crown colour, set per species by ForestWorld): hue rotation (deg) and saturation of the
+// albedo (pines toward blue-green teal, oaks toward golden olive), the AO floor of the vertex AO (lifts the
+// shaded inner crown) and a half-wrapped painted light (no black backs; ForestKit for kit bark/foliage/rock).
+uniform float hue_shift = 0.0;
+uniform float albedo_sat = 1.0;
+uniform float ao_floor = 0.42;
+uniform bool wrap_light = false;
+// Pass 4 (arena ring): world height of the ground under the limestone (strata / foot shadow); <-50 = off
+uniform float limestone_base_y = -100.0;
 
 float grade_sector(float phi, float a, float b, float blend) {
 	float best = 0.0;
@@ -131,7 +140,7 @@ void vertex() {
 		VERTEX += ldir * (trunk + branch) * wind_strength;
 		VERTEX += NORMAL * leaf * wind_strength;
 	}
-	v_ao = use_ao ? mix(0.42, 1.0, COLOR.a * COLOR.a) : 1.0;
+	v_ao = use_ao ? mix(ao_floor, 1.0, COLOR.a * COLOR.a) : 1.0;
 	v_wn = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	if (INSTANCE_CUSTOM.r > 0.5) {
@@ -148,12 +157,25 @@ void fragment() {
 		vec3 m = texture(variant_mask, UV).rgb;
 		c.rgb *= mix(vec3(1.0), tint_cloth, m.r) * mix(vec3(1.0), tint_hair, m.g);
 	}
+	if (hue_shift != 0.0 || albedo_sat != 1.0) {
+		float ha = radians(hue_shift);
+		vec3 k = vec3(0.57735027);
+		vec3 rc = c.rgb * cos(ha) + cross(k, c.rgb) * sin(ha) + k * dot(k, c.rgb) * (1.0 - cos(ha));
+		float lr = dot(rc, vec3(0.299, 0.587, 0.114));
+		c.rgb = max(mix(vec3(lr), rc, albedo_sat), vec3(0.0));
+	}
 	if (limestone > 0.0) {
 		float l = dot(c.rgb, vec3(0.299, 0.587, 0.114));
-		// pass 3: warm beige limestone with the texture's noise compressed (cracks kept, no grey speckle)
-		float lc = 0.47 + (l - 0.42) * 0.72;
-		vec3 pale = clamp(vec3(lc) * vec3(1.1, 1.02, 0.86), 0.0, 1.0);
-		c.rgb = mix(c.rgb, pale, limestone);
+		// pass 4: warm beige limestone (art/01, art/08), the texture's noise strongly compressed (cracks kept),
+		// horizontal strata bands and a darker foot (cast shadow / AO) over limestone_base_y
+		float lc = 0.46 + (l - 0.42) * 0.42;
+		vec3 pale = vec3(lc) * vec3(1.13, 0.99, 0.78);
+		float band = sin(world_pos.y * 3.1 + 1.3 * sin(world_pos.x * 0.31 + world_pos.z * 0.23));
+		pale *= 0.93 + 0.07 * smoothstep(-0.2, 0.6, band);
+		if (limestone_base_y > -50.0) {
+			pale *= mix(0.72, 1.0, smoothstep(0.0, 2.6, world_pos.y - limestone_base_y));
+		}
+		c.rgb = mix(c.rgb, clamp(pale, 0.0, 1.0), limestone);
 	}
 	if (wet > 0.0) {
 		float l = dot(c.rgb, vec3(0.299, 0.587, 0.114));
@@ -181,7 +203,8 @@ void fragment() {
 	ALPHA_SCISSOR_THRESHOLD = alpha_cut;
 #endif
 #endif
-	float lambert = max(dot(normalize(v_wn), normalize(light_dir_world)), 0.0);
+	float ndl = dot(normalize(v_wn), normalize(light_dir_world));
+	float lambert = wrap_light ? clamp(ndl * 0.6 + 0.4, 0.0, 1.0) : max(ndl, 0.0);
 	vec3 lit = c.rgb * mix(1.0, lambert, painted_light_mix) * v_ao;
 	if (grade_regions) {
 		vec3 gf = grade_factors(world_pos);

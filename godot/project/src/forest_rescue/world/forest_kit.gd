@@ -426,6 +426,7 @@ static func painted_material(original: Material, has_colors: bool, k: float, win
 	material.set_shader_parameter("painted_light_mix", VOLUME_LIGHT_MIX if name.contains("_vol") else k)
 	var crown := crown_light_dir != Vector3.ZERO and CROWN_LIGHT_PREFIXES.any(func(prefix): return name.begins_with(prefix))
 	material.set_shader_parameter("light_dir_world", (crown_light_dir if crown else light_dir).normalized())
+	material.set_shader_parameter("wrap_light", crown)       # pass 4: lit top-left without black backs
 	material.set_shader_parameter("use_ao", has_colors)
 	material.set_shader_parameter("vertex_wind", has_colors and wind)
 	material.set_shader_parameter("grade_regions", is_forest_material(name))
@@ -441,6 +442,15 @@ static func painted_material(original: Material, has_colors: bool, k: float, win
 ## artifacts or anything of the city.
 const FOREST_MATERIAL_PREFIXES := ["lf_bark", "lf_foliage", "lf_rock", "lf_env_", "lm_", "lf_arena", "m_lf_arena",
 	"lf_proc_", "lf_props_supplies", "lf_boss_arena"]
+
+
+## Registers a ShaderMaterial copied from a painted material (per-species colour, limestone / wet looks)
+## with the fog (receivers) and, when its source fades with the occluders, the fade list.
+static func register_copy(source: Material, copy: ShaderMaterial) -> void:
+	if not fog_receivers.has(copy):
+		fog_receivers.append(copy)
+	if materials.has(source) and not materials.has(copy):
+		materials.append(copy)
 
 
 ## QA (layout pass 3, city-unchanged proof): switch the forest colour grade ("boost") on / off on every

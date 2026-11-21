@@ -14,7 +14,7 @@ const SHADER := preload("res://src/forest_rescue/world/forest_impostor.gdshader"
 const CAMERA_OFFSET := Vector3(75, 83, 75)
 const YAWS := 4
 const CELL_PIXELS := 320
-const BAKE_VERSION := "painted_v3_topleft"
+const BAKE_VERSION := "painted_v4_species"
 
 static var _atlas: ImageTexture
 static var _cells: Dictionary = {}        # mesh key -> {first_cell, size: Vector2 (world w,h), center: Vector3}

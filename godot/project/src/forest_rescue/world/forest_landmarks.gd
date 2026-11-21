@@ -989,10 +989,10 @@ const ARENA_FLOOR_KEEP := 21.0
 ## Layout pass 2 (art/08 from the city camera): the cliff ring in pale grey-tan limestone (the kit
 ## moss rock's golden moss washed out), the fossil wall's pale ribs and skull lifted off the
 ## darker rock (albedo contrast), the entrance floor tongue kept to the trail's width.
-const ARENA_LIMESTONE := 0.55
+const ARENA_LIMESTONE := 0.82
 const ARENA_FOSSIL_LIMESTONE := 1.0
-const ARENA_FOSSIL_CONTRAST := 1.5
-const ARENA_FOSSIL_GAIN := 1.1
+const ARENA_FOSSIL_CONTRAST := 1.0
+const ARENA_FOSSIL_GAIN := 1.0
 const ARENA_ENTRANCE_HALF := 3.0        # m: half width of the floor tongue beyond the ring
 const ARENA_ENTRANCE_REACH := 24.0      # m: its length from the arena centre
 
@@ -1020,7 +1020,8 @@ func _shape_arena(node: Node3D) -> void:
 			var bones := MeshInstance3D.new()
 			bones.name = "FossilBones"
 			bones.mesh = _fossil_bones_mesh()
-			bones.transform = part.transform
+			# undo the wall's extra height lift: uniform 1.3 scale for the bones (round ribs, not stretched)
+			bones.transform = part.transform * Transform3D(Basis.from_scale(Vector3(1.0, ARENA_LIFT.fossil_wall.x / ARENA_LIFT.fossil_wall.y, 1.0)), Vector3.ZERO)
 			part.get_parent().add_child(bones)
 		if (rock or fossil) and part.mesh != null:
 			for surface in part.mesh.get_surface_count():
@@ -1030,54 +1031,79 @@ func _shape_arena(node: Node3D) -> void:
 				var key := [material, rock]
 				if not _arena_looks.has(key):
 					var look := (material as ShaderMaterial).duplicate() as ShaderMaterial
+					look.set_shader_parameter("limestone_base_y", atlas.arena_center.y if atlas != null else -100.0)
 					if rock:
 						look.set_shader_parameter("limestone", ARENA_LIMESTONE)
 					else:
 						look.set_shader_parameter("limestone", ARENA_FOSSIL_LIMESTONE)
 						look.set_shader_parameter("albedo_contrast", ARENA_FOSSIL_CONTRAST)
 						look.set_shader_parameter("albedo_gain", ARENA_FOSSIL_GAIN)
+					ForestKit.register_copy(material, look)
 					_arena_looks[key] = look
 				part.set_surface_override_material(surface, _arena_looks[key])
 
 
 var _arena_looks := {}
 static var _bones_mesh: ArrayMesh
-const BONE_COLOR := Color(0.88, 0.83, 0.7)
+const BONE_COLOR := Color(0.93, 0.88, 0.75)
 
 
-## Rib arches (spine on the wall top, ribs curving down to the floor in front of the face) and a skull
-## lying at the right end, in the fossil wall mesh's local frame (face +Z, top y ≈ 5.6, x −6.6..6.8).
+## Pass 4 (art/01, art/08): a skeleton lying along the cliff top of the fossil wall — a knobbly spine,
+## curved ivory ribs arching up and over the cliff edge (they read as arches from the city camera) and the
+## big skull with open jaws at the right end. Wall-local frame with a uniform 1.3 scale (the wall's 1.6
+## height lift is undone by the node's own y scale): face +Z, top y ≈ 6.88, x −6.6..6.8.
+const FOSSIL_TOP := 6.88
+
+
 func _fossil_bones_mesh() -> ArrayMesh:
 	if _bones_mesh != null:
 		return _bones_mesh
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for k in 6:
-		var x := -5.4 + k * 1.25
-		var pts: Array = []
-		var radii: Array = []
-		for i in 9:
-			var t := float(i) / 8.0
-			pts.append(Vector3(x + 0.35 * t, 5.0 * cos(t * PI * 0.5) + 0.15, 1.5 + 3.1 * sin(t * PI * 0.5)))
-			radii.append(lerpf(0.26, 0.13, t))
-		_tube(st, pts, radii, 7)
-	# spine along the wall top
+	var spine_y := func(x: float) -> float: return FOSSIL_TOP + 0.3 + 0.22 * sin(x * 0.5)
+	# spine + vertebrae
 	var spine: Array = []
 	var sr: Array = []
-	for i in 8:
-		spine.append(Vector3(-6.0 + i * 1.05, 5.25 + 0.15 * sin(i * 1.3), 1.45))
-		sr.append(0.3)
-	_tube(st, spine, sr, 7)
-	# skull (cranium + snout + jaw) lying at the right end, facing the arena
-	_ellipsoid(st, Vector3(4.4, 1.25, 2.7), Vector3(1.5, 1.05, 1.15), 8, 12)
-	_ellipsoid(st, Vector3(5.9, 0.9, 3.0), Vector3(1.25, 0.6, 0.75), 6, 10)
-	_ellipsoid(st, Vector3(5.6, 0.3, 3.2), Vector3(1.35, 0.28, 0.6), 5, 10)
+	var x := -6.0
+	while x <= 4.7:
+		spine.append(Vector3(x, spine_y.call(x), -0.9))
+		sr.append(0.26)
+		x += 0.5
+	_tube(st, spine, sr, 8)
+	x = -5.8
+	while x <= 4.6:
+		_ellipsoid(st, Vector3(x, spine_y.call(x) + 0.12, -0.9), Vector3(0.22, 0.3, 0.34), 5, 8)
+		x += 0.55
+	# ribs arching over the cliff edge
+	for i in 9:
+		var xi := -5.2 + i * 1.05
+		var bulge := sin(PI * (i + 0.5) / 9.0)
+		var half := 1.25 + 0.6 * bulge
+		var rise := 1.4 + 1.0 * bulge
+		var pts: Array = []
+		var radii: Array = []
+		for k in 15:
+			var t := float(k) / 14.0
+			var phi := PI * t
+			pts.append(Vector3(xi - 0.5 * t, spine_y.call(xi) + rise * sin(phi) - 0.45 * t, -0.9 + half * (1.0 - cos(phi))))
+			radii.append(lerpf(0.21, 0.08, t))
+		_tube(st, pts, radii, 7)
+	# skull with open jaws at the right end
+	_ellipsoid(st, Vector3(5.6, FOSSIL_TOP + 0.75, -0.3), Vector3(1.3, 0.95, 1.05), 9, 14)
+	_ellipsoid(st, Vector3(7.0, FOSSIL_TOP + 0.5, 0.15), Vector3(1.4, 0.55, 0.7), 7, 12)
+	_ellipsoid(st, Vector3(6.9, FOSSIL_TOP - 0.05, 0.45), Vector3(1.3, 0.22, 0.55), 5, 10)
+	_ellipsoid(st, Vector3(5.2, FOSSIL_TOP + 1.45, -0.5), Vector3(0.8, 0.35, 0.6), 5, 8)      # brow ridge
+	for k in 8:
+		var tx := 6.2 + k * 0.24
+		_ellipsoid(st, Vector3(tx, FOSSIL_TOP + 0.12, 0.62), Vector3(0.07, 0.2, 0.07), 3, 5)
+		_ellipsoid(st, Vector3(tx + 0.1, FOSSIL_TOP + 0.24, 0.55), Vector3(0.06, 0.16, 0.06), 3, 5)
 	var mesh := st.commit()
 	# dark eye socket + nostril (separate surface, dark)
 	var st2 := SurfaceTool.new()
 	st2.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_ellipsoid(st2, Vector3(4.9, 1.55, 3.55), Vector3(0.38, 0.34, 0.3), 5, 8)
-	_ellipsoid(st2, Vector3(6.8, 1.05, 3.45), Vector3(0.18, 0.14, 0.14), 4, 6)
+	_ellipsoid(st2, Vector3(5.95, FOSSIL_TOP + 1.0, 0.62), Vector3(0.4, 0.33, 0.32), 5, 8)
+	_ellipsoid(st2, Vector3(7.95, FOSSIL_TOP + 0.62, 0.55), Vector3(0.16, 0.12, 0.14), 4, 6)
+	_ellipsoid(st2, Vector3(7.2, FOSSIL_TOP + 0.22, 0.62), Vector3(0.9, 0.08, 0.12), 4, 8)       # mouth gap
 	st2.commit(mesh)
 	var bone := StandardMaterial3D.new()
 	bone.resource_name = "lf_proc_fossil_bone"

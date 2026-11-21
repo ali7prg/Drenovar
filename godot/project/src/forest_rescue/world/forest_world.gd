@@ -18,6 +18,7 @@ const ForestLandmarks = preload("res://src/forest_rescue/world/forest_landmarks.
 const ForestImpostors = preload("res://src/forest_rescue/world/forest_impostors.gd")
 const ForestOccluders = preload("res://src/forest_rescue/world/forest_occluders.gd")
 const ForestWater = preload("res://src/forest_rescue/world/forest_water.gd")
+const ForestQuarry = preload("res://src/forest_rescue/world/forest_quarry.gd")
 const SUN_ROTATION := Vector3(-0.837758, -0.558505, 0.0)   # landscape.gd city sun (-48°, -32°, 0)
 const PAINT_LIGHT_DIR := Vector3(-0.6, 0.68, 0.42)            # direction TO the crown light (kit vegetation / rocks)
 const QUARRY_KIND := 6                                         # Rules.UNDERSTORY "quarry_rock"
@@ -50,6 +51,7 @@ var canopy: Node3D
 var fog: Node3D
 var landmarks: Node3D
 var water: Node3D                         # ForestWater (lake, waterfall + pond, marsh pools)
+var quarry: Node3D                        # ForestQuarry (pass 4: limestone terraces + timber crane)
 var paths: MeshInstance3D
 var _actors := Node3D.new()
 var _props := Node3D.new()
@@ -173,6 +175,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	water.name = "Water"
 	add_child(water)
 	water.build(atlas, func(x: float, z: float) -> float: return terrain.ground_height(x, z), _noise_texture())
+	_build_quarry()
 	impostors = ForestImpostors.new()
 	impostors.name = "Impostors"
 	add_child(impostors)
@@ -205,6 +208,28 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	set_process(true)
 	ready_for_frame = true
 	print("ForestWorld: ready ", setup_ms, " kit=", kit.kit_status().missing.size(), " missing kit assets")
+
+
+## Pass 4 (art/01 quarry): terraces + crane round the quarry pit (ForestQuarry), off trails / glade 05 / mine.
+func _build_quarry() -> void:
+	if landmarks == null:
+		return
+	var center: Vector2 = landmarks.quarry_center()
+	var mine := Vector2.INF
+	for placement in landmarks.placements:
+		if placement.id == "lf_env_quarry_mine":
+			mine = Vector2(placement.position.x, placement.position.z)
+	var site: Dictionary = atlas.site_by_id.get("lf_site_05", {})
+	if center == Vector2.INF or mine == Vector2.INF or site.is_empty():
+		return
+	var glade := Vector2(site.center.x, site.center.z)
+	var axis_v := ((mine - glade).normalized() * 0.6 + Vector2(-0.7071, -0.7071) * 0.4).normalized()
+	quarry = ForestQuarry.new()
+	quarry.name = "Quarry"
+	add_child(quarry)
+	quarry.build(center, atan2(axis_v.y, axis_v.x), mine, glade, float(site.radius),
+		func(x: float, z: float) -> float: return terrain.ground_height(x, z),
+		func(x: float, z: float) -> float: return float(atlas.nearest_route(x, z, false).get("distance", 99.0)))
 
 
 ## Soft ground shadows under the crowns (layout pass 3): [x, z, crown radius, crown height] for every
@@ -402,11 +427,27 @@ func _dead_tree_mesh() -> Array:
 	return mesh_keys["deadtree"]
 
 
+## Layout pass 4 (art/01 crown colour, measured with crown_hsv.py): per-species foliage colour (hue
+## rotation, saturation) and a lifted AO floor (shaded inner crown never near black). Pines blue-green teal,
+## oaks golden olive, the hollow oak golden like the grove instead of orange-red.
+const FOLIAGE_LOOK := {
+	"lf_env_dark_pine": {"hue_shift": 30.0, "albedo_sat": 1.35, "ao_floor": 0.62},
+	"lf_env_golden_oak": {"hue_shift": -9.0, "albedo_sat": 1.0, "ao_floor": 0.6},
+	"lf_env_golden_oak_green": {"hue_shift": -8.0, "albedo_sat": 1.05, "ao_floor": 0.6},
+	"lf_env_birch": {"hue_shift": -6.0, "albedo_sat": 1.0, "ao_floor": 0.6},
+	"lf_env_willow": {"hue_shift": -6.0, "albedo_sat": 1.0, "ao_floor": 0.6},
+	"lf_env_hollow_oak": {"hue_shift": 17.0, "albedo_sat": 0.92, "ao_floor": 0.6},
+}
+
+
 func _tree_mesh(species: int, variant: int) -> Array:
 	var id: String = Rules.SPECIES[species]
 	var variants: Array = Rules.SPECIES_VARIANTS[species]
 	var v: int = variant if variants.has(variant) else int(variants[(maxi(variant, 1) - 1) % variants.size()])
-	return _mesh_for(kit.tree_asset(id), "tree:%s:v%d" % [id, v], ForestCanopy.KIND_TREE, v, "v%d" % v)
+	var asset: Dictionary = kit.tree_asset(id)
+	if FOLIAGE_LOOK.has(id) and asset.get("kit", false):
+		asset = _shaded_asset(asset, "look:" + id, FOLIAGE_LOOK[id], "lf_foliage")
+	return _mesh_for(asset, "tree:%s:v%d" % [id, v], ForestCanopy.KIND_TREE, v, "v%d" % v)
 
 
 func _under_mesh(kind_index: int, variant: int) -> Array:
@@ -436,7 +477,7 @@ func _limestone_asset(asset: Dictionary, tag: String) -> Dictionary:
 	return _shaded_asset(asset, tag, {"limestone": 0.8})
 
 
-func _shaded_asset(asset: Dictionary, tag: String, params: Dictionary) -> Dictionary:
+func _shaded_asset(asset: Dictionary, tag: String, params: Dictionary, prefix := "") -> Dictionary:
 	var key := "shaded:%s:%s" % [tag, asset.get("id", "")]
 	if mesh_keys.has(key):
 		return mesh_keys[key]
@@ -451,11 +492,12 @@ func _shaded_asset(asset: Dictionary, tag: String, params: Dictionary) -> Dictio
 			for s in lod.get_surface_count():
 				mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, lod.surface_get_arrays(s))
 				var material: Material = lod.surface_get_material(s)
-				if material is ShaderMaterial:
+				if material is ShaderMaterial and (prefix.is_empty() or String(material.resource_name).to_lower().begins_with(prefix)):
 					if not materials.has(material):
 						var pale := (material as ShaderMaterial).duplicate() as ShaderMaterial
 						for name in params:
 							pale.set_shader_parameter(name, params[name])
+						ForestKit.register_copy(material, pale)
 						materials[material] = pale
 					material = materials[material]
 				mesh.surface_set_material(s, material)
@@ -648,6 +690,8 @@ func on_camera_changed() -> void:
 		last_cull.landmark_tris = landmarks.update_view(target, zoom, Callable(self, "area_displayed"))
 	if water != null:
 		water.update_view(Callable(self, "area_displayed"))
+		if quarry != null:
+			quarry.update_view(Callable(self, "area_displayed"))
 	last_cull.select = selected
 	last_cull.cull_ms = (Time.get_ticks_usec() - started) / 1000.0
 

@@ -49,6 +49,7 @@ var tag := "probe"
 var out_dir := "res://../../forest_rescue/qa/ingame/world"
 var frames_per_scenario := 90
 var segments_mode := false
+var save_frames := ""
 
 ## --segments: actor-aware probe. One scenario per evidence video segment at its busiest moment,
 ## played from recorded realm fixtures through a stub transport (live choreography included):
@@ -91,6 +92,8 @@ func _initialize() -> void:
 			frames_per_scenario = int(arg.trim_prefix("--frames="))
 		elif arg == "--segments":
 			segments_mode = true
+		elif arg.begins_with("--save-frames="):
+			save_frames = arg.trim_prefix("--save-frames=")     # last frame of every segment (texture A/B checks)
 	if OS.get_cmdline_user_args().has("--entry"):
 		call_deferred("run_entry")
 		return
@@ -321,6 +324,9 @@ func run_segments() -> void:
 				var r = forest.actors.rigs[id]
 				if is_instance_valid(r):
 					print("RIG ", spec.name, " ", id, " ", r.load_state, " vis=", r.visible, " tree=", r.is_visible_in_tree(), " lod=", r.lod_level, " pos=", r.global_position.snapped(Vector3.ONE * 0.1))
+		if not save_frames.is_empty():
+			await RenderingServer.frame_post_draw
+			root.get_texture().get_image().save_png(save_frames.path_join(String(spec.name) + ".png"))
 		for arr in [draws, prims, env, actors, totals, inst]:
 			arr.sort()
 		var row := {"segment": spec.name, "zoom": spec.zoom,

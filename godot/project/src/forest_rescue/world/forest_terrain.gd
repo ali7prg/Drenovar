@@ -29,8 +29,9 @@ const PAD_TIE := 6.0
 const ARENA_BLEND_OUTER := 19.0
 const ARENA_DISH := 0.3
 const GLADE_PAD_BLEND := 2.0
-const PAD_EXTRA_GRADE_DEG := 4.0      # grade a trail may gain on top of its atlas profile to meet its ends
-const TERRAIN_VERSION := 18
+const PAD_EXTRA_GRADE_DEG := 4.0
+const JUNCTION_LANDING := 2.4         # m: trails are level within this radius of a junction node      # grade a trail may gain on top of its atlas profile to meet its ends
+const TERRAIN_VERSION := 20
 
 ## Atlas v2 region ground tints (ForestAtlas.REGION_NAMES order, art/01 crops at zoom 68):
 ## sunny warm meadow under the golden grove, olive mixed oaks, dry grey-olive arena rock, fresh
@@ -191,7 +192,7 @@ func _prepare_profiles() -> void:
 			var deck_end: bool = node_id == "lf_bridge_west" or node_id == "lf_bridge_east"
 			pad_heights[node_id] = atlas.BRIDGE_DECK_Y if deck_end else float(node.center.y)
 			centers[node_id] = Vector2(float(node.center.x), float(node.center.z))
-			radii[node_id] = 0.6
+			radii[node_id] = 0.6 if deck_end else JUNCTION_LANDING   # every trail is level there
 			fixed[node_id] = true
 	junction_pads.clear()
 	for node_id in fixed:
@@ -280,43 +281,6 @@ func _prepare_profiles() -> void:
 					s = minf(s, absf(along[i] - value))
 				if s < RAMP_LENGTH:
 					profile[i] = lerpf(profile[i], atlas.BRIDGE_DECK_Y, 1.0 - smoothstep(0.0, RAMP_LENGTH, s))
-		# A trail that passes close by a glade it does not end at runs level with that glade's pad
-		# while it skirts it (the glade blend ring would otherwise cut a step into the trail); the
-		# correction is spread along the trail so the added grade stays ≤ 7°.
-		var corr := PackedFloat32Array()
-		corr.resize(n)
-		corr.fill(0.0)
-		var any := false
-		for pad_id in centers:
-			if pad_id == route.from or pad_id == route.to or fixed.has(pad_id) or pad_id == "lf_boss_arena":
-				continue
-			var c: Vector2 = centers[pad_id]
-			var pr: float = radii[pad_id]
-			for i in n:
-				var dd := Vector2(points[i].x, points[i].z).distance_to(c)
-				if dd < pr + 4.0 and on_deck[i] == 0:
-					var w := 1.0 - smoothstep(pr + 1.5, pr + 4.0, dd)
-					var want: float = (float(pad_heights[pad_id]) - profile[i]) * w
-					if absf(want) > absf(corr[i]):
-						corr[i] = want
-						any = true
-		if any:
-			# grade-limited spread of the correction (forward + backward passes)
-			var g := tan(deg_to_rad(7.0))
-			var spread := corr.duplicate()
-			for i in range(1, n):
-				var ds := along[i] - along[i - 1]
-				var carried := spread[i - 1] - signf(spread[i - 1]) * minf(absf(spread[i - 1]), g * ds)
-				if absf(carried) > absf(spread[i]):
-					spread[i] = carried
-			for i in range(n - 2, -1, -1):
-				var ds := along[i + 1] - along[i]
-				var carried := spread[i + 1] - signf(spread[i + 1]) * minf(absf(spread[i + 1]), g * ds)
-				if absf(carried) > absf(spread[i]):
-					spread[i] = carried
-			for i in n:
-				if on_deck[i] == 0 and not ((i < link[3] and not link[1].is_empty()) or (i > link[4] and not link[2].is_empty())):
-					profile[i] += spread[i]
 		# Two light smoothing passes (deck samples stay fixed).
 		for _pass in 2:
 			var copy := profile.duplicate()
@@ -372,12 +336,6 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 			h = lerpf(h, road_height(hit) - 0.03, w)
 		# art/07: a narrow worn dirt band (the path ribbon draws the trail itself)
 		dirt = maxf(dirt, (0.45 if decor else 0.52) * (1.0 - smoothstep(0.15, 0.9, hit.distance)))
-	# trail junctions: a small flat landing at the node height (every trail meets it there), so
-	# the ground never creases where the nearest trail switches
-	for pad in junction_pads:
-		var jd: float = Vector2(x, z).distance_to(pad[0])
-		if jd < 4.5:
-			h = lerpf(h, float(pad[1]) - 0.03, 1.0 - smoothstep(1.8, 4.5, jd))
 	# outside a clearing, a trail passing by (not ending there) keeps its walking band: its profile
 	# already meets the pad height at the closest approach (_prepare_profiles)
 	var road_w := 0.0

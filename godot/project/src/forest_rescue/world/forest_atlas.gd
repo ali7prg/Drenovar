@@ -110,9 +110,11 @@ func load_from(path: String) -> bool:
 			points.append(Vector3(float(sample.x), float(sample.targetRoadY), float(sample.z)))
 			base.append(float(sample.y))
 		var bridge_route := String(route.get("traversal", "")).contains("bridge")
+		var visual := meander(String(route.id), points, bridge_route)
+		visual = _keep_off_glades(visual, String(route.get("from", "")), String(route.get("to", "")))
 		var entry := {"id": route.id, "from": route.get("from", ""), "to": route.get("to", ""),
 			"width": float(route.get("width", 2.8)), "clear": float(route.get("clearVegetationRadius", 3.8)),
-			"server_points": points, "points": meander(String(route.id), points, bridge_route), "base": base,
+			"server_points": points, "points": visual, "base": base,
 			"bridge": bridge_route, "decor": false}
 		routes.append(entry)
 		route_by_id[entry.id] = entry
@@ -232,6 +234,50 @@ func meander(id: String, points: PackedVector3Array, bridge_route: bool) -> Pack
 		var tangent := Vector2(b.x - a.x, b.z - a.z).normalized()
 		var normal := Vector2(-tangent.y, tangent.x)
 		out[i] = Vector3(points[i].x + normal.x * offset, points[i].y, points[i].z + normal.y * offset)
+	return out
+
+
+## Atlas v2: a drawn trail that passes a glade it neither starts nor ends at keeps GLADE_SKIRT m
+## off the clearing edge (the server way may run 1 m outside it; the visual trail bends out ≤ 3 m,
+## smoothly), so the flat glade pad and the trail's own grade never fight over the same ground.
+const GLADE_SKIRT := 3.6
+
+
+func _keep_off_glades(points: PackedVector3Array, from_id: String, to_id: String) -> PackedVector3Array:
+	var n := points.size()
+	if n < 3:
+		return points
+	var push := PackedVector2Array()
+	push.resize(n)
+	push.fill(Vector2.ZERO)
+	var any := false
+	var glades: Array = []
+	for site in sites:
+		if site.id != from_id and site.id != to_id:
+			glades.append([Vector2(site.center.x, site.center.z), float(site.radius)])
+	for glade in extra_glades:
+		if glade.id != from_id and glade.id != to_id:
+			glades.append([Vector2(glade.center.x, glade.center.z), float(glade.radius)])
+	for i in n:
+		var p := Vector2(points[i].x, points[i].z)
+		for g in glades:
+			var c: Vector2 = g[0]
+			var want: float = float(g[1]) + GLADE_SKIRT
+			var d := p.distance_to(c)
+			if d < want and d > 0.01:
+				push[i] += (p - c) / d * (want - d)
+				any = true
+	if not any:
+		return points
+	for _pass in 4:      # spread the bend along the trail (no kinks)
+		var copy := push.duplicate()
+		for i in range(1, n - 1):
+			var avg := (push[i - 1] + push[i] * 2.0 + push[i + 1]) * 0.25
+			copy[i] = avg if avg.length() > push[i].length() else push[i]
+		push = copy
+	var out := points.duplicate()
+	for i in range(1, n - 1):
+		out[i] = Vector3(points[i].x + push[i].x, points[i].y, points[i].z + push[i].y)
 	return out
 
 

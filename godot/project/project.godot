@@ -33,3 +33,54 @@ renderer/rendering_method.mobile="mobile"
 rendering_device/driver.ios="metal"
 textures/vram_compression/import_etc2_astc=true
 anti_aliasing/quality/msaa_3d=1
+
+[shader_globals]
+
+fog_reveal_t={
+"type": "float",
+"value": 1.0
+}
+fog_reveal_curl={
+"type": "float",
+"value": 0.0
+}
+fog_dim_strength={
+"type": "float",
+"value": 0.0
+}
+fog_sight_count={
+"type": "int",
+"value": 0
+}
+fog_sight_0={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+fog_sight_1={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+fog_sight_2={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+fog_sight_3={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+fog_sight_4={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+fog_sight_5={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+fog_sight_6={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+fog_sight_7={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}

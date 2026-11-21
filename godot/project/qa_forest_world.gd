@@ -139,7 +139,8 @@ func run() -> void:
 		# v2 rule: trunk ≥ route clearance + 1.4 m + 45 % of the crown (crowns may overhang a bit);
 		# atlas v2: on the far side of a trail (away from the camera) ≥ FAR_SIDE_TRUNK_CLEAR
 		var crown: float = world.TREE_CROWN[int(item[2])] * float(item[5])
-		if _route_trunk_violation(masks, x, z, crown):
+		# (the hollow-oak hero stands at the end of its own spur by design: the trail ends at its hollow)
+		if int(item[2]) != Rules.HOLLOW_OAK and _route_trunk_violation(masks, x, z, crown):
 			bad_trees += 1
 			print("QA bad ambient tree (route clearance): ", item)
 		for site in world.atlas.sites:
@@ -190,7 +191,7 @@ func run() -> void:
 	var hiding_ambient := 0
 	for item in layout.trees:
 		var cap := Rules.crown_capsule(float(item[0]), float(item[1]), int(item[2]), int(item[3]), float(item[5]), deg_to_rad(float(item[4])))
-		if hides.call(cap):
+		if hides.call(cap) and int(item[2]) != Rules.HOLLOW_OAK:   # hero: faded by the occluders at its hollow
 			hiding_ambient += 1
 			print("QA ambient tree hiding a unit zone: ", item)
 	check(hiding_ambient == 0, "ambient trees whose crown hides a trail / glade / arena / horse-spot unit: %d" % hiding_ambient)

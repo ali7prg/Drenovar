@@ -43,8 +43,8 @@ MODEL_SCALE = 0.7
 PARAMS = dict(Rw=1.1, Rt=0.9, Rb=1.14, hb=0.12, ox=0.0, oy=0.0, zt=0.56, Rr=0.64, rc=0.67, dz=0.07,
               R3=0.57, R2=0.53, R1=0.43, y2=0.12, y1=0.24,
               an=-48.0, ad=-86.0, dh=19.0, dt=0.36,
-              sx=0.08, sw=1.05, sd=0.36, sh=0.16)
-FREE = ["Rw", "R3", "R2", "R1", "y2", "y1", "dh", "dt", "sw", "sd", "sh"]   # heights (zt, dz) held: the
+              sx=0.08, sy=-1.4, sw=1.05, sd=0.36, sh=0.16)
+FREE = ["Rw", "R3", "R2", "R1", "y2", "y1", "dh", "dt", "sx", "sy", "sw", "sd", "sh"]   # heights (zt, dz) held: the
 # dial-to-step drop is otherwise explained by depth instead of wall height (one-view ambiguity)
 PRIOR = 0.15
 # The painting's perspective is not one camera (the dial is drawn steeper than the drum base), so the wall
@@ -74,13 +74,13 @@ def polar(r, deg, z):
 
 
 def step_y(p):
-    """Threshold step centre (its back edge touches the drum wall in front of the door)."""
-    return -p["Rw"] - p["sd"] / 2 + 0.04
+    """Threshold step centre: solved from the drawing's step corners (independent of the drum radius search)."""
+    return p["sy"]
 
 
 def key_rest(p):
     """Key centre lying on the threshold step (rod along X, crystal at +X)."""
-    return np.array([p["sx"] - 0.12 + p["ox"], step_y(p) + 0.02 + p["oy"], p["sh"] + 0.045 * KEY_SIZE])
+    return np.array([p["sx"] - 0.12, step_y(p) + 0.02, p["sh"] + 0.045 * KEY_SIZE])
 
 
 def key_in_niche(p):
@@ -88,7 +88,7 @@ def key_in_niche(p):
     a = math.radians(p["an"])
     r = (p["Rw"] + p["Rt"]) * 0.5 + 0.07
     # rod centre in the niche: the bit end inside, the crystal standing above the niche top (art/10 open)
-    return np.array([r * math.cos(a) + p["ox"], r * math.sin(a) + p["oy"], p["zt"] * 0.5 + 0.08 + 0.06 * KEY_SIZE])
+    return np.array([r * math.cos(a) + p["ox"], r * math.sin(a) + p["oy"], p["zt"] * 0.5 + 0.2 + 0.06 * KEY_SIZE])
 
 
 def points(p):
@@ -114,7 +114,7 @@ def points(p):
         "door_br": polar(p["Rw"], p["ad"] + p["dh"], p["hb"]),
     }
     for key in list(P):
-        if key.startswith("step_") or key.startswith("door_") or key.startswith("niche_"):
+        if key.startswith("door_") or key.startswith("niche_"):
             P[key] = (P[key][0] + p["ox"], P[key][1] + p["oy"], P[key][2])
     k = key_in_niche(p)
     P["gem_niche"] = (k[0], k[1], k[2] + 0.2)
@@ -150,7 +150,7 @@ def views():
          "door_tl": (1290, 272), "door_tr": (1390, 272), "door_bl": (1292, 345), "door_br": (1388, 345)},
         pose=open_proj, render_pose=open_render, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None,
         solve_opts={"fov_prior": 20.0}, clip_below=386, title="RUNE LOCK open (door down, key in the niche)",
-        tex_weight=0.9, proj_exclude=[(1440, 160, 1500, 330)])
+        tex_weight=1.0, proj_exclude=[(1440, 160, 1500, 330)])
     return [closed, opened]
 
 
@@ -259,9 +259,14 @@ def build(A, p, lod):
     Rm = np.stack([et, np.array([0, 0, 1.0]), er], 1)          # local x = tangent, y = up, z = outward
     g.prism(poly, -0.02, 0.0, "iron", "niche_back", R=Rm, t=base)
     # ---- threshold step in front of the door (the key lies on it)
-    stp = A.part("step", None, (p["sx"] + O[0], step_y(p) + O[1], 0.0))
-    stp.geo[lod].box((p["sx"] + O[0], step_y(p) + O[1], p["sh"] / 2), (p["sw"], p["sd"], p["sh"]), mat="stone", tag="step",
+    stp = A.part("step", None, (p["sx"], step_y(p), 0.0))
+    stp.geo[lod].box((p["sx"], step_y(p), p["sh"] / 2), (p["sw"], p["sd"], p["sh"]), mat="stone", tag="step",
                      chamfer=0.02 if lod == 0 else 0.0)
+    # the step's back joins the plinth (no gap under the door when the drum radius changes)
+    gap = -(Rb * 0.98) - (step_y(p) + p["sd"] / 2)
+    if gap > 0.02:
+        stp.geo[lod].box((p["sx"], step_y(p) + p["sd"] / 2 + gap / 2, p["sh"] * 0.45), (p["sw"] * 0.9, gap + 0.04, p["sh"] * 0.9),
+                         mat="stone", tag="step_link")
     gd.transform(None, O)
     g = g_root
     g.extend(gd)

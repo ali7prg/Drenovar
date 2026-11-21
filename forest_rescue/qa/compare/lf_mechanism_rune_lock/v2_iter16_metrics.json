@@ -1,0 +1,68 @@
+{
+  "qa": {
+    "closed": {
+      "iou_raw": 0.6691,
+      "iou_filled": 0.6691,
+      "colour_err": 0.1674,
+      "colour_err_core": 0.1673,
+      "ref_px": 80572,
+      "render_px": 114798,
+      "ignored_px": 0,
+      "camera_rms_px": 16.19,
+      "camera_max_px": 38.61,
+      "camera_points": 14
+    },
+    "open": {
+      "iou_raw": 0.0,
+      "iou_filled": 0.0,
+      "colour_err": 1.0,
+      "colour_err_core": 1.0,
+      "ref_px": 84078,
+      "render_px": 0,
+      "ignored_px": 0,
+      "camera_rms_px": 51.85,
+      "camera_max_px": 92.21,
+      "camera_points": 18
+    }
+  },
+  "tris": {
+    "LOD0": 6122,
+    "LOD1": 3738,
+    "LOD2": 1762
+  },
+  "texture": {
+    "texels": 1583904,
+    "projected_frac": 0.163,
+    "per_view_frac": {
+      "closed": 0.0,
+      "open": 0.164
+    },
+    "seconds": 13.2
+  },
+  "blueprint": {
+    "Rw": 15.6286,
+    "Rt": 15.5986,
+    "Rb": 15.9186,
+    "hb": 0.16,
+    "ox": -0.16,
+    "oy": -0.14,
+    "zt": 0.56,
+    "Rr": 0.64,
+    "rc": 0.67,
+    "dz": 0.07,
+    "R3": 1.2313,
+    "R2": 0.2059,
+    "R1": 0.2968,
+    "y2": 0.1366,
+    "y1": 0.6698,
+    "an": -48.0,
+    "ad": -86.0,
+    "dh": 15.654,
+    "dt": 0.1443,
+    "sx": 0.1646,
+    "sy": -16.722,
+    "sw": 7.8836,
+    "sd": 1.8446,
+    "sh": -0.6625
+  }
+}

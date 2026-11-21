@@ -33,6 +33,32 @@ const LAYERS := [{"name": "FogVolume", "drift": 0.45}]
 
 static var _noise_texture: ImageTexture
 static var _noise3d: ImageTexture3D
+## iPhone entry: the seeded fog noise (pure CPU, ~1-2 s) is generated on a worker thread while the terrain
+## bakes (ForestWorld.setup → prepare_noise_async); build() then only wraps the images in textures.
+static var _noise_image: Image
+static var _noise3d_images: Array[Image] = []
+static var _noise_task := -1
+
+
+static func prepare_noise_async() -> void:
+	if _noise_task >= 0 or _noise_texture != null:
+		return
+	_noise_task = WorkerThreadPool.add_task(_make_noise_job, true, "forest fog noise")
+
+
+static func _make_noise_job() -> void:
+	_noise_image = make_noise_image(256)
+	_noise3d_images = make_noise_3d_images(48, 48, 24)
+
+
+static func noise_ready() -> bool:
+	return _noise_task < 0 or WorkerThreadPool.is_task_completed(_noise_task)
+
+
+static func _finish_noise_task() -> void:
+	if _noise_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_noise_task)
+		_noise_task = -2
 static var _dome_texture: ImageTexture
 const PAINT_TEX := "res://assets/forest_rescue/world/lf_fog_painted.png"
 static var _shell_mesh: ArrayMesh
@@ -62,10 +88,15 @@ func _ready() -> void:
 func build(height_fn: Callable, light_dir: Vector3) -> void:
 	state_image.fill(Color(0, 0, FOG_TOP / HEIGHT_RANGE, FOG_TOP / HEIGHT_RANGE))
 	state_texture = ImageTexture.create_from_image(state_image)
+	_finish_noise_task()
 	if _noise_texture == null:
-		_noise_texture = ImageTexture.create_from_image(make_noise_image(256))
+		_noise_texture = ImageTexture.create_from_image(_noise_image if _noise_image != null else make_noise_image(256))
 	if _noise3d == null:
-		_noise3d = make_noise_3d(48, 48, 24)
+		if _noise3d_images.size() == 24:
+			_noise3d = ImageTexture3D.new()
+			_noise3d.create(Image.FORMAT_L8, 48, 48, 24, false, _noise3d_images)
+		else:
+			_noise3d = make_noise_3d(48, 48, 24)
 	if _dome_texture == null:
 		_dome_texture = make_dome_texture(256)
 	var key := "shell_v5"
@@ -228,6 +259,20 @@ static func make_dome_texture(size: int) -> ImageTexture:
 
 
 ## Seamless 3D noise (L8, w×h×d) for world-space cloud puffs and wisps (sampled with repeat).
+static func make_noise_3d_images(w: int, h: int, d: int) -> Array[Image]:
+	var noise := FastNoiseLite.new()
+	noise.seed = 2207
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	noise.fractal_octaves = 3
+	noise.frequency = 4.0 / w
+	var images: Array[Image] = noise.get_seamless_image_3d(w, h, d, false, 0.1, true)
+	for image in images:
+		if image.get_format() != Image.FORMAT_L8:
+			image.convert(Image.FORMAT_L8)
+	return images
+
+
 static func make_noise_3d(w: int, h: int, d: int) -> ImageTexture3D:
 	var noise := FastNoiseLite.new()
 	noise.seed = 2207

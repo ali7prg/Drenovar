@@ -112,6 +112,7 @@ func run_entry() -> void:
 	var ready_at := -1
 	var frame := 0
 	var forest_started := -1
+	var stages: Array = []
 	while frame < 4000:
 		await process_frame
 		frame += 1
@@ -119,11 +120,13 @@ func run_entry() -> void:
 		var ms := (now - last) / 1000.0
 		last = now
 		intervals.append(ms)
-		var stage: Node = game.get("stage") if is_instance_valid(game) else null
-		var world: Node = stage.get("forest_world") if is_instance_valid(stage) else null
+		# the stage is only published to the game when its build is done: find the world layer in the tree
+		var world: Node = root.find_child("ForestWorld", true, false)
 		if world != null and forest_started < 0:
 			forest_started = frame
-		var where := "city" if world == null else ("forest:" + str(world.get("setup_ms")))
+		# each setup step sets its label, runs, then awaits: the label seen now names the work of this interval
+		var where := "city" if world == null else ("forest:" + String(world.get("setup_stage")))
+		stages.append(where)
 		if ms > longest:
 			longest = ms
 			longest_at = "frame %d %s" % [frame, where.left(160)]
@@ -139,8 +142,9 @@ func run_entry() -> void:
 	var top := []
 	var order := range(forest_intervals.size())
 	order.sort_custom(func(a: int, b: int) -> bool: return forest_intervals[a] > forest_intervals[b])
+	var offset := maxi(0, forest_started - 1)
 	for i in mini(6, order.size()):
-		top.append(snappedf(forest_intervals[order[i]], 0.1))
+		top.append("%.0f ms (%s)" % [forest_intervals[order[i]], stages[offset + order[i]] if offset + order[i] < stages.size() else "?"])
 	var ForestImpostors = load("res://src/forest_rescue/world/forest_impostors.gd")
 	var row := {"format": "drenovar-forest-entry-probe-v1", "renderer": RenderingServer.get_current_rendering_method(),
 		"adapter": RenderingServer.get_video_adapter_name(),
@@ -150,7 +154,11 @@ func run_entry() -> void:
 		"forestEntryMs": snappedf(Array(forest_intervals).reduce(func(a, b): return a + b, 0.0), 1.0),
 		"longestFrameMs": snappedf(longest_forest, 0.1), "longestFrameAt": longest_at,
 		"topFramesMs": top, "p50Ms": snappedf(pick.call(0.5), 0.1), "p95Ms": snappedf(pick.call(0.95), 0.1),
-		"p99Ms": snappedf(pick.call(0.99), 0.1), "impostorSource": String(ForestImpostors.source)}
+		"p99Ms": snappedf(pick.call(0.99), 0.1), "impostorSource": String(ForestImpostors.source),
+		"impostorShippedNote": String(ForestImpostors.shipped_note)}
+	var world_now: Node = root.find_child("ForestWorld", true, false)
+	if world_now != null:
+		row.impostorSignatureParts = world_now.get("impostor_signature_parts")
 	print("PERF_ENTRY ", JSON.stringify(row))
 	quit()
 

@@ -25,6 +25,7 @@ const SHIPPED_JSON := SHIPPED_DIR + "forest_impostors.json"
 
 static var _atlas: Texture2D
 static var source := ""                   # shipped | cache | baked (QA / perf report)
+static var shipped_note := ""             # why the shipped bake was not used (QA / perf report)
 static var _cells: Dictionary = {}        # mesh key -> {first_cell, size: Vector2 (world w,h), center: Vector3}
 static var _grid := 1
 
@@ -194,9 +195,11 @@ func _render(pending: Array, sun_rotation: Vector3, environment: Environment) ->
 
 func _load_shipped(digest: String, editor_check: Dictionary) -> void:
 	if not FileAccess.file_exists(SHIPPED_JSON) or not ResourceLoader.exists(SHIPPED_PNG):
+		shipped_note = "missing json %s / png %s" % [FileAccess.file_exists(SHIPPED_JSON), ResourceLoader.exists(SHIPPED_PNG)]
 		return
 	var info: Variant = JSON.parse_string(FileAccess.get_file_as_string(SHIPPED_JSON))
 	if not info is Dictionary or String(info.get("signature", "")) != digest:
+		shipped_note = "signature %s != shipped %s" % [digest, String(info.get("signature", "")) if info is Dictionary else "?"]
 		return
 	if OS.has_feature("editor") and not editor_check.is_empty() and info.get("kitMd5", {}) != editor_check:
 		push_warning("ForestImpostors: the shipped atlas predates a kit GLB change; baking at runtime (re-ship with --ship-impostors)")
@@ -208,6 +211,7 @@ func _load_shipped(digest: String, editor_check: Dictionary) -> void:
 		await get_tree().process_frame
 	var texture := ResourceLoader.load_threaded_get(SHIPPED_PNG) as Texture2D
 	if texture == null:
+		shipped_note = "texture load failed"
 		return
 	_atlas = texture
 	_grid = int(info.grid)

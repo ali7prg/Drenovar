@@ -76,6 +76,8 @@ var received_at_ms := 0
 var server_time_ms := 0.0
 var last_cull := {}
 var setup_ms := {}
+var setup_stage := ""                    # entry probe: the setup step running in the current frame
+var impostor_signature_parts: Array = [] # entry probe: which signature part differs between editor and pack
 var remap: Dictionary = {}               # resource id -> Vector2 (visual position, layout)
 var resource_look: Dictionary = {}       # resource id -> [kit variant, absolute scale]
 var visual_pos: Dictionary = {}          # resource id -> Vector2 actually rendered (last build)
@@ -94,6 +96,8 @@ var _sight_timer := 0.0
 
 func setup(owner: Node3D, ground_meshes: Array) -> void:
 	var started := Time.get_ticks_usec()
+	ForestFog.prepare_noise_async()
+	setup_stage = "data"
 	stage = owner
 	data = owner.data
 	name = "ForestWorld"
@@ -122,6 +126,8 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 			masks.add(mask)
 		_cache.masks = masks
 	setup_ms.data = (Time.get_ticks_usec() - started) / 1000.0
+	await get_tree().process_frame
+	setup_stage = "landmarks.plan"
 	# Landmarks first: their pads take part in the terrain bake.
 	landmarks = ForestLandmarks.new()
 	landmarks.name = "Landmarks"
@@ -131,10 +137,14 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	var key := "terrain_v%d_%s" % [ForestTerrain.TERRAIN_VERSION, atlas.atlas_id]
 	terrain = _cache.get(key)
 	if terrain == null:
+		await get_tree().process_frame
+		setup_stage = "terrain.new"
 		terrain = ForestTerrain.new(atlas)
 		terrain.extra_pads = landmarks.pads()
 		terrain.quarry_center = landmarks.quarry_center()
 		terrain.water_bodies = ForestWater.bodies(atlas)
+		await get_tree().process_frame
+		setup_stage = "terrain.shadows+tiles"
 		terrain.crown_shadows = _crown_shadows()
 		var source_meshes: Array = []
 		for part: MeshInstance3D in ground_meshes:
@@ -143,6 +153,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 		await get_tree().process_frame
 		# iPhone entry: the bake (pure array work, ~1-4 s) runs on a worker thread while the city keeps
 		# animating; nothing reads `terrain` before it is cached below
+		setup_stage = "terrain.bake (thread)"
 		var bake_task := WorkerThreadPool.add_task(terrain.bake, true, "forest terrain bake")
 		while not WorkerThreadPool.is_task_completed(bake_task):
 			await get_tree().process_frame
@@ -174,8 +185,10 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	ForestKit.light_dir = Basis.from_euler(SUN_ROTATION).z.normalized()
 	ForestKit.crown_light_dir = PAINT_LIGHT_DIR
 	await get_tree().process_frame
+	setup_stage = "kit"
 	kit = ForestKit.new(data, stage.scenery_material)
 	await get_tree().process_frame
+	setup_stage = "canopy+paths"
 	canopy = ForestCanopy.new()
 	canopy.name = "Canopy"
 	add_child(canopy)
@@ -183,14 +196,17 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	add_child(occluders)
 	_build_paths()
 	await get_tree().process_frame
+	setup_stage = "river+water"
 	_restyle_river()
 	water = ForestWater.new()
 	water.name = "Water"
 	add_child(water)
 	water.build(atlas, func(x: float, z: float) -> float: return terrain.ground_height(x, z), _noise_texture())
 	await get_tree().process_frame
+	setup_stage = "quarry"
 	_build_quarry()
 	await get_tree().process_frame
+	setup_stage = "impostor meshes"
 	impostors = ForestImpostors.new()
 	impostors.name = "Impostors"
 	add_child(impostors)
@@ -199,6 +215,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 		for variant in Rules.SPECIES_VARIANTS[species]:
 			var mesh := _tree_mesh(species, variant)
 			bake_list.append([mesh[2], canopy.meshes[mesh[0]].lods[0]])
+		await get_tree().process_frame       # iPhone entry: one species' meshes per frame
 	# pass 4: the bare white dead tree is a tree like the others (3D near, impostor far): a KIND_TREE mesh
 	# without an impostor is skipped where its cell draws impostors, so it was never seen
 	var dead_mesh := _dead_tree_mesh()
@@ -209,6 +226,8 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	# are checked in the editor only (ForestImpostors stores them with the shipped bake)
 	var signature := "%s;%s;%s;%s;" % [str(FOLIAGE_LOOK), str(PAINT_LIGHT_DIR), FileAccess.get_md5(ForestKit.KIT_JSON),
 		(load(PAINTED_INCLUDE) as ShaderInclude).code.md5_text()]
+	impostor_signature_parts = [str(FOLIAGE_LOOK).md5_text(), str(PAINT_LIGHT_DIR), FileAccess.get_md5(ForestKit.KIT_JSON),
+		(load(PAINTED_INCLUDE) as ShaderInclude).code.md5_text()]
 	for entry in bake_list:
 		signature += String(entry[0]) + ";"
 	var kit_md5 := {}
@@ -216,20 +235,26 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 		for file in ResourceLoader.list_directory(ForestKit.KIT_DIR):
 			if file.ends_with(".glb"):
 				kit_md5[file] = FileAccess.get_md5(ForestKit.KIT_DIR + file)
+	setup_stage = "impostors"
 	await impostors.bake(bake_list, SUN_ROTATION, stage.camera.environment, signature, kit_md5)
+	setup_stage = "fog"
 	canopy.impostors = impostors
 	setup_ms.impostors = (Time.get_ticks_usec() - t) / 1000.0
 	fog = ForestFog.new()
 	fog.name = "Fog"
 	add_child(fog)
 	var light: Vector3 = -stage.shadow_direction if stage.shadow_direction != Vector3.ZERO else Vector3(0.45, 0.74, 0.5)
+	while not ForestFog.noise_ready():
+		await get_tree().process_frame
 	await get_tree().process_frame
 	fog.build(func(x: float, z: float) -> float: return terrain.ground_height(x, z), light)
 	await get_tree().process_frame
 	fog.reveal_finished.connect(func() -> void: fog_reveal_finished.emit(fog_revision))
 	landmarks.arena_clear_discs = [[ForestWater.POND_CENTER, ForestWater.POND_RADIUS + 4.5], [ForestWater.FALLS_LIP + ForestWater.FALLS_FACING * 2.0, 4.0]]
+	setup_stage = "landmarks.populate"
 	landmarks.populate()
 	await get_tree().process_frame
+	setup_stage = "fog receivers"
 	_register_fog_receivers()
 	setup_ms.visuals = (Time.get_ticks_usec() - t) / 1000.0
 	apply_adventure({})
@@ -592,6 +617,8 @@ static func _excluded(p: Vector2, exclusions: Array) -> bool:
 
 func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 	var started := Time.get_ticks_usec()
+	var previous_stage := setup_stage
+	setup_stage = "city forest instances"
 	city_state = city
 	if occluders != null:
 		occluders.clear()
@@ -686,6 +713,7 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 	_register_fog_receivers()
 	_apply_fog_cull()
 	last_cull.build_ms = (Time.get_ticks_usec() - started) / 1000.0
+	setup_stage = previous_stage
 	if stage.camera != null and stage.camera.is_inside_tree():
 		on_camera_changed()
 	call_deferred("_emit_ready_once")

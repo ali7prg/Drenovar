@@ -232,8 +232,9 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 		signature += String(entry[0]) + ";"
 	var kit_md5 := {}
 	if OS.has_feature("editor"):
+		# only where the raw GLBs exist (an editor binary running an exported pack has none)
 		for file in ResourceLoader.list_directory(ForestKit.KIT_DIR):
-			if file.ends_with(".glb"):
+			if file.ends_with(".glb") and FileAccess.file_exists(ForestKit.KIT_DIR + file):
 				kit_md5[file] = FileAccess.get_md5(ForestKit.KIT_DIR + file)
 	setup_stage = "impostors"
 	await impostors.bake(bake_list, SUN_ROTATION, stage.camera.environment, signature, kit_md5)

@@ -203,6 +203,7 @@ func _load_shipped(digest: String, editor_check: Dictionary) -> void:
 		return
 	if OS.has_feature("editor") and not editor_check.is_empty() and info.get("kitMd5", {}) != editor_check:
 		push_warning("ForestImpostors: the shipped atlas predates a kit GLB change; baking at runtime (re-ship with --ship-impostors)")
+		shipped_note = "kit GLB md5 mismatch (editor)"
 		return
 	# threaded: the city keeps animating while the atlas streams in (synchronous load as the fallback)
 	var texture: Texture2D = null

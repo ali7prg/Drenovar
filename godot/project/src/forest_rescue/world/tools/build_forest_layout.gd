@@ -128,6 +128,34 @@ var water: Array = []             # ForestWater.bodies(atlas): lake, waterfall p
 var glade_clearings: Array = []   # [[Vector2, radius]] visual glade clearings (pass 2)
 const GLADE_CLEARING := 11.5
 
+## Layout pass 3 (art/01: big individual crowns standing in groves on sunny meadows). Canopy cover
+## of the zone's forest land (crown discs, art/01 crops at zoom 68), trunk spacing inside a grove,
+## and the sunny strip kept open on the camera side of every trail (art/01 trails run along the
+## grove edges, the walkers in front of the crowns).
+const GROVES := true
+const ZONE_COVER := [0.46, 0.58, 0.62, 0.62, 0.46, 0.80, 0.30, 0.46]
+const ZONE_SLOT := [8.2, 7.0, 4.4, 6.6, 6.2, 3.7, 6.6, 6.8]
+const GROVE_BAND_NEAR := 7.0
+const GROVE_BAND_FAR := 3.0
+const GROVE_STEP := 2.0
+const GROVE_CELL := 8.0
+## pass 3 absolute scales [zone] -> [oak range, pine range] (crowns: oak 14 m, pine 6 m at 1.0;
+## art/01 oak crowns 10–17 m, pines 5–7 m)
+const GROVE_SCALE := [
+	[[0.95, 1.25], [0.8, 1.0]],    # golden grove: big golden oaks
+	[[0.8, 1.1], [0.9, 1.1]],      # west mixed
+	[[0.7, 0.9], [0.95, 1.2]],     # arena rock: pines
+	[[0.8, 1.05], [0.9, 1.1]],     # east bank
+	[[0.8, 1.0], [0.9, 1.1]],      # river / lake
+	[[0.5, 0.7], [0.95, 1.2]],     # south pines (oaks are accents under the pines)
+	[[0.7, 0.9], [0.85, 1.05]],    # quarry
+	[[0.7, 0.95], [0.85, 1.05]],   # town belt
+]
+var grove_noise := FastNoiseLite.new()
+var grove_slots: Array = []        # [Vector2, zone, taken]
+var grove_grid := {}               # Vector2i -> PackedInt32Array
+var grove_stats := {}
+
 var atlas
 var terrain
 var masks
@@ -502,6 +530,9 @@ func run() -> void:
 	hero = _find_hero_spot()
 	print("LAYOUT hero cave oak at ", hero)
 
+	if GROVES:
+		_plan_groves()
+
 	# 2. Outer resource remap -------------------------------------------------------------------
 	var outer: Array = []
 	var inner: Array = []
@@ -524,6 +555,19 @@ func run() -> void:
 		var tz := float(tree.p[2])
 		var species: int = Rules.RESOURCE_SPECIES.get(String(tree.name), Rules.PINE)
 		var gap := Rules.MIN_TREE_GAP if species == Rules.PINE else 2.6
+		if GROVES:
+			# pass 3: the tree moves to the nearest free grove slot of its own zone (same id / species)
+			var home_zone := dominant_zone(tx, tz)
+			var slot := _take_grove_slot(tree, species, home_zone, tx, tz)
+			if slot != Vector2.INF:
+				insert(trunk_grid, trunks, [slot.x, slot.y, gap])
+				var glook := _grove_look(tree, species, slot.x, slot.y, home_zone)
+				if tree_hides_units(slot.x, slot.y, species, int(glook[0]) % Rules.GREEN_VARIANT_BASE, float(glook[1]), float(tree.angle)):
+					camera_occluders.append(String(tree.id))          # walkers behind it: runtime whole-tree fade
+				remap[tree.id] = [snappedf(slot.x, 0.01), snappedf(slot.y, 0.01), 0, glook[0], glook[1]]
+				reasons["slot"] += 1
+				displacements.append(Vector2(tx - slot.x, tz - slot.y).length())
+				continue
 		var crown := _resource_crown(tree, species, tx, tz)
 		var in_mask := blocked_exact(tx, tz, true, 1.0, crown) or not ground_ok(tx, tz, true) or is_glade(tx, tz)
 		var found := Vector2.INF
@@ -648,7 +692,9 @@ func run() -> void:
 		for i in span:
 			cells.append(Vector2i(i, j))
 	_shuffle(cells)
-	for pass_index in 2:
+	if GROVES:
+		_fill_groves(trees, species_count)
+	for pass_index in (0 if GROVES else 2):
 		for cell: Vector2i in cells:
 			var x := -EXTENT + cell.x + rng.randf()
 			var z := -EXTENT + cell.y + rng.randf()
@@ -878,6 +924,222 @@ func run() -> void:
 	print("LAYOUT_DONE trees=", trees.size(), " remap=", remap.size(), " inner=", inner_remap.size(), " understory=", understory.size(),
 		" innerUnder=", inner_under.size(), " ms=", Time.get_ticks_msec() - started)
 	quit()
+
+
+# ---------------------------------------------------------------------------------------------
+# Pass 3 groves
+
+func _grove_value(x: float, z: float) -> float:
+	return (grove_noise.get_noise_2d(x, z) + 1.0) * 0.5
+
+
+## Camera-side strip of a trail (sunny meadow in front of the walkers) and a narrow far-side strip.
+func _in_trail_band(x: float, z: float, zone: int) -> bool:
+	if zone == Z_SPRUCE:
+		return false          # the dense south pines crowd the trails (pass 2 rule)
+	var reach := GROVE_BAND_NEAR + 4.0
+	for gz in range(floori((z - reach) / masks.cell), floori((z + reach) / masks.cell) + 1):
+		for gx in range(floori((x - reach) / masks.cell), floori((x + reach) / masks.cell) + 1):
+			for index in masks.grid.get(Vector2i(gx, gz), PackedInt32Array()):
+				var mask: Dictionary = masks.masks[index]
+				if String(mask.get("kind", "")) != "route":
+					continue
+				var a := Vector2(float(mask.a.x), float(mask.a.z))
+				var b := Vector2(float(mask.b.x), float(mask.b.z))
+				var ab := b - a
+				var t := clampf((Vector2(x, z) - a).dot(ab) / maxf(ab.length_squared(), 0.0001), 0.0, 1.0)
+				var off := Vector2(x, z) - (a + ab * t)
+				var limit := GROVE_BAND_FAR if Rules.far_side(off) else GROVE_BAND_NEAR
+				if off.length() < limit:
+					return true
+	return false
+
+
+func _plan_groves() -> void:
+	var t0 := Time.get_ticks_msec()
+	grove_noise.seed = Rules.SEED + 51
+	grove_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	grove_noise.frequency = 1.0 / 34.0
+	grove_noise.fractal_octaves = 2
+	var land := PackedInt32Array()
+	land.resize(8)
+	var values: Array = []
+	for i in 8:
+		values.append(PackedFloat32Array())
+	var cand: Array = []
+	var x := -EXTENT + 1.0
+	while x < EXTENT:
+		var z := -EXTENT + 1.0
+		while z < EXTENT:
+			if maxf(absf(x), absf(z)) >= CORE + 1.0 and not blocked_exact(x, z, true) and ground_ok(x, z, true):
+				var zone := dominant_zone(x, z)
+				land[zone] += 1
+				if not _in_trail_band(x, z, zone):
+					var v := _grove_value(x, z)
+					cand.append([x, z, zone, v])
+					values[zone].append(v)
+			z += GROVE_STEP
+		x += GROVE_STEP
+	# trunk area share per zone so that crowns (trunk area grown by ~0.6 crown radius) give ZONE_COVER
+	var cut := PackedFloat32Array()
+	cut.resize(8)
+	for zone in 8:
+		var vals: PackedFloat32Array = values[zone]
+		if vals.is_empty():
+			cut[zone] = 2.0
+			continue
+		vals.sort()
+		var want := clampf(ZONE_COVER[zone] * 0.72 * float(land[zone]) / float(vals.size()), 0.0, 0.97)
+		cut[zone] = vals[clampi(int((1.0 - want) * vals.size()), 0, vals.size() - 1)]
+	_shuffle(cand)
+	var grid := {}
+	for c in cand:
+		var zone: int = c[2]
+		if float(c[3]) < cut[zone]:
+			continue
+		var p := Vector2(float(c[0]) + rng.randf_range(-0.9, 0.9), float(c[1]) + rng.randf_range(-0.9, 0.9))
+		var sp: float = ZONE_SLOT[zone] * rng.randf_range(0.85, 1.1)
+		var key := Vector2i(floori(p.x / GROVE_CELL), floori(p.y / GROVE_CELL))
+		var ok := true
+		for gz in range(key.y - 1, key.y + 2):
+			for gx in range(key.x - 1, key.x + 2):
+				for idx in grid.get(Vector2i(gx, gz), PackedInt32Array()):
+					var o: Vector2 = grove_slots[idx][0]
+					if o.distance_squared_to(p) < sp * sp:
+						ok = false
+						break
+				if not ok:
+					break
+			if not ok:
+				break
+		if not ok:
+			continue
+		if hero != Vector2.INF and p.distance_to(hero) < HERO_CLEAR + 2.0:
+			continue
+		if not grid.has(key):
+			grid[key] = PackedInt32Array()
+		grid[key].append(grove_slots.size())
+		grove_slots.append([p, zone, false])
+	grove_grid = grid
+	var per_zone := {}
+	for slot in grove_slots:
+		per_zone[ZONE_NAMES[int(slot[1])]] = per_zone.get(ZONE_NAMES[int(slot[1])], 0) + 1
+	grove_stats = {"slots": per_zone, "land_cells": land, "cut": cut}
+	print("LAYOUT groves: slots ", per_zone, " ms=", Time.get_ticks_msec() - t0)
+
+
+## Pass 3 look of a tree in a grove: kit variant (+green copy) and the feature-tree scale.
+func _grove_look(tree: Dictionary, species: int, x: float, z: float, zone: int) -> Array:
+	var look := _resource_look(tree, species, x, z, false)
+	var u := clampf((float(tree.scale) - 0.45) / 0.85, 0.0, 1.0)
+	var r: Array = GROVE_SCALE[zone][0 if species == Rules.OAK else 1]
+	var scale := lerpf(r[0], r[1], fposmod(u * 0.6 + Rules.id_hash(String(tree.id)) * 0.4, 1.0))
+	# glade / landmark edges keep a smaller tree (art/01: young trees at the clearing rims)
+	scale = lerpf(scale, scale * 0.7, clampf(openness(x, z) - 0.5, 0.0, 0.5) * 2.0)
+	return [look[0], snappedf(scale, 0.001)]
+
+
+## Nearest free grove slot of `zone` for a resource tree; the crown must clear the strict unit
+## zones (glades, arena, horse spot, landmarks, water features); trails get the runtime fade.
+func _take_grove_slot(tree: Dictionary, species: int, zone: int, tx: float, tz: float) -> Vector2:
+	var key := Vector2i(floori(tx / GROVE_CELL), floori(tz / GROVE_CELL))
+	for ring in 12:
+		var best := -1
+		var best_d := INF
+		for gz in range(key.y - ring, key.y + ring + 1):
+			for gx in range(key.x - ring, key.x + ring + 1):
+				if ring > 0 and absi(gx - key.x) != ring and absi(gz - key.y) != ring:
+					continue
+				for idx in grove_grid.get(Vector2i(gx, gz), PackedInt32Array()):
+					var slot: Array = grove_slots[idx]
+					if bool(slot[2]) or int(slot[1]) != zone:
+						continue
+					var d := (slot[0] as Vector2).distance_squared_to(Vector2(tx, tz))
+					if d < best_d:
+						best_d = d
+						best = idx
+		if best >= 0:
+			var p: Vector2 = grove_slots[best][0]
+			var look := _grove_look(tree, species, p.x, p.y, zone)
+			var crown: float = Rules.CROWN_RADIUS[species] * float(look[1])
+			grove_slots[best][2] = true
+			if blocked_exact(p.x, p.y, true, 1.0, crown, dense_pine_ok(zone, species)) or not free_of_trunks(p.x, p.y, 2.3) \
+					or tree_hides_units(p.x, p.y, species, int(look[0]) % Rules.GREEN_VARIANT_BASE, float(look[1]), float(tree.angle), true):
+				continue          # slot unusable for this crown: try the next ring (slot stays consumed)
+			return p
+	return Vector2.INF
+
+
+## Ambient feature trees on the free grove slots + a few solitary trees on the meadows.
+func _fill_groves(trees: Array, species_count: Dictionary) -> void:
+	var order := range(grove_slots.size())
+	_shuffle(order)
+	var placed := 0
+	for idx in order:
+		var slot: Array = grove_slots[idx]
+		if bool(slot[2]):
+			continue
+		slot[2] = true
+		var p: Vector2 = slot[0]
+		var zone: int = slot[1]
+		var species := Rules.pick_weighted(ZONE_MIX[zone], rng.randf())
+		var site01: Dictionary = atlas.site_by_id.get("lf_site_01", {})
+		if not site01.is_empty() and p.distance_to(Vector2(site01.center.x, site01.center.z)) < BIRCH_RING:
+			species = Rules.BIRCH if rng.randf() < 0.85 else species
+		var r: Array = GROVE_SCALE[zone][0 if species == Rules.OAK else 1] if species in [Rules.OAK, Rules.PINE] else AMBIENT_SCALE[species][zone]
+		var scale := lerpf(r[0], r[1], rng.randf())
+		if zone == Z_GROVE and species == Rules.OAK:
+			scale = lerpf(GROVE_OAK_SCALE[0], GROVE_OAK_SCALE[1], rng.randf()) * 0.82
+		scale = lerpf(scale, scale * 0.7, clampf(openness(p.x, p.y) - 0.5, 0.0, 0.5) * 2.0)
+		var crown: float = Rules.CROWN_RADIUS[species] * scale
+		if blocked_exact(p.x, p.y, true, 1.0, crown, dense_pine_ok(zone, species)) or not ground_ok(p.x, p.y, true) \
+				or not free_of_trunks(p.x, p.y, 2.3):
+			continue
+		var variants: Array = ZONE_VARIANTS[species][zone]
+		var variant: int = variants[rng.randi() % variants.size()]
+		var drawn := species
+		if species == Rules.OAK and zone != Z_GROVE and not oak_is_golden(p.x, p.y, rng.randf()):
+			drawn = Rules.OAK_GREEN
+			variant = clampi(variant, 2, 4)
+		var yaw_deg := snappedf(rng.randf() * 360.0, 0.1)
+		if tree_hides_units(p.x, p.y, drawn, variant, scale, deg_to_rad(yaw_deg), true):
+			continue          # never in front of a glade, the arena, the horse spot or a landmark
+		insert(trunk_grid, trunks, [p.x, p.y, 3.0])
+		trees.append([snappedf(p.x, 0.01), snappedf(p.y, 0.01), drawn, variant, yaw_deg, snappedf(scale, 0.001), zone])
+		species_count[Rules.SPECIES[drawn]] = species_count.get(Rules.SPECIES[drawn], 0) + 1
+		placed += 1
+	# solitary big trees on the meadows (art/01: single oaks / pines between the groves)
+	var solitary := 0
+	var tries := 0
+	while solitary < 70 and tries < 4000:
+		tries += 1
+		var x := rng.randf_range(-EXTENT + 4.0, EXTENT - 4.0)
+		var z := rng.randf_range(-EXTENT + 4.0, EXTENT - 4.0)
+		if maxf(absf(x), absf(z)) < CORE + 4.0:
+			continue
+		var zone := dominant_zone(x, z)
+		if zone == Z_SPRUCE or _grove_value(x, z) > 0.5:
+			continue
+		var species := Rules.OAK if zone in [Z_GROVE, Z_TOP, Z_EAST, Z_BELT] else Rules.pick_weighted(ZONE_MIX[zone], rng.randf())
+		var r2: Array = GROVE_SCALE[zone][0 if species == Rules.OAK else 1] if species in [Rules.OAK, Rules.PINE] else AMBIENT_SCALE[species][zone]
+		var scale := lerpf(r2[0], r2[1], rng.randf())
+		var crown: float = Rules.CROWN_RADIUS[species] * scale
+		if blocked_exact(x, z, true, 1.0, crown) or not ground_ok(x, z, true) or not free_of_trunks(x, z, 14.0) or is_glade(x, z):
+			continue
+		var drawn := species
+		var variants: Array = ZONE_VARIANTS[species][zone]
+		var variant: int = variants[rng.randi() % variants.size()]
+		if species == Rules.OAK and zone != Z_GROVE and not oak_is_golden(x, z, rng.randf()):
+			drawn = Rules.OAK_GREEN
+			variant = clampi(variant, 2, 4)
+		var yaw_deg := snappedf(rng.randf() * 360.0, 0.1)
+		if tree_hides_units(x, z, drawn, variant, scale, deg_to_rad(yaw_deg)):
+			continue
+		insert(trunk_grid, trunks, [x, z, 3.0])
+		trees.append([snappedf(x, 0.01), snappedf(z, 0.01), drawn, variant, yaw_deg, snappedf(scale, 0.001), zone])
+		species_count[Rules.SPECIES[drawn]] = species_count.get(Rules.SPECIES[drawn], 0) + 1
+		solitary += 1
+	print("LAYOUT groves: ambient on slots=", placed, " solitary=", solitary)
 
 
 ## Debug (--probe=cx,cz,r): why no ambient pine stands on each 2 m cell of a region (ASCII map,

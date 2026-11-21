@@ -19,6 +19,8 @@ func site_anchor(site_id: String) -> Dictionary     # {center, cage, guardian, a
                                                     #  plate_left, plate_right, landmarks:{symbol:Vector3}, cage_yaw}
 func poi_position(target_id: String) -> Vector3     # CONTRACT targetIds incl. lf_home_reception
 func route_points(route_id: String) -> PackedVector3Array
+func trail_path(from_id: String, to_id: String) -> PackedVector3Array   # v3.3: shortest drawn trail between CONTRACT ids
+func arena_entrance_yaw_deg() -> float               # v3.3: atlas entranceYawDeg of the boss arena
 func actors_root() -> Node3D                        # parent for adventure actors (fog-aware culling)
 func props_root() -> Node3D                         # parent for site props (cages, mechanisms)
 func fog_cleared_at(x: float, z: float) -> bool     # projection says visible (for hiding POIs/actors)
@@ -120,4 +122,31 @@ LOD), `fog_culled` (instances removed because they stand deeper than 3 m inside 
   - Gameplay layer (forest_game.gd): while the squad or an escort is under way the client reads `/api/state`
     every 1.2 s of server time, so each committed checkpoint reveal dissolves on its own (~2 s per cell)
     instead of all at once on arrival.
+* v3.3 (2026-11-21, atlas v2 — API additive, API_VERSION unchanged):
+  - The world copy of the atlas is v2 (`data/forest_rescue/world/world-atlas.json` = `lost_forest_atlas_v2`,
+    art/01 masterplan network; CONTRACT v1.3): 47 routes `lf_trail_<from>__<to>` + `lf_route_bridge`, junctions
+    `lf_junction_*`, landmark spots `lf_mark_*`, glade `lf_glade_el`, arena (18, -92) with `entranceYawDeg` 72.9,
+    river `features` lake (101, 38) r 11 / pond (15, -70) r 6.5. v1 route ids (`lf_route_entry`, `lf_route_NN_MM`,
+    `lf_route_boss`) are gone; `route_points()` takes the v2 ids. The decorative (visual-only) trails are retired:
+    every drawn trail is a server way.
+  - `trail_path(from_id, to_id)`: the drawn trail (terrain-profile heights) of the shortest walk over the network
+    between two CONTRACT ids (`lf_key_NN` / `lf_site_NN:*` → its glade, `lf_boss_ancient_maw` → the arena,
+    `lf_home_reception` → the horse origin), never through another site's glade (the server rule); empty when
+    unknown. The director's golden preview dots use it (was: consecutive v1 route ids).
+  - `arena_entrance_yaw_deg()`: the arena gap's facing (atlas). The arena GLB, the boss framing and the mare's
+    wait point follow it (was a 5.4° constant).
+  - Atlas regions (`ForestAtlas.region_sector_weights`, REGION_NAMES): golden grove (top / top-left), west mixed
+    oaks, arena rock (top-right gorge), east willows, river, south pines, sw quarry, town belt — used by the layout
+    builder zones and the ground tint (sunny meadow under the grove, dark mossy floor under the south pines).
+  - `forest_layout_v2.json` rebuilt on atlas v2 (same layout id/version; resource ids unchanged): grove oaks at
+    1.35–1.8 absolute scale with open meadows, birches round glade 01, the hollow oak beyond the end of its spur,
+    reeds/willows round the lake, the pond and the marsh pools, quarry ledges round the mine and glade 05.
+  - Water (`ForestWater`, forest_water.gd/.gdshader, forest_waterfall.gdshader): the reedy lake (river level,
+    seamless with the restyled river), a perched lily pond with a waterfall from a limestone outcrop next to
+    `lf_junction_waterfall` (22.6, -64.7), three marsh pools below glade 07; terrain basins in ForestTerrain
+    (`water_bodies`, TERRAIN_VERSION 12). Hidden under unexplored fog like every forest visual.
+  - Landmarks at the atlas marks (watchpost, standing stones, quarry mine, hunter shelter), the dead-tree set
+    (arena pillars + bones modules around a bare white tree built from kit bark), a camp at every glade (13)
+    with per-glade styles (tent / bare frame / fire ring / fire + bench, supplies, lanterns, rope, signposts,
+    stone wall, split-rail fences, hide racks, drying frames, lean-tos; mirrored/rotated, no two neighbours alike).
 

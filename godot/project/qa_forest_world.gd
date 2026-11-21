@@ -139,7 +139,7 @@ func run() -> void:
 		var hit: Dictionary = world.atlas.nearest_route(x, z)
 		# v2 rule: trunk ≥ route clearance + 1.4 m + 45 % of the crown (crowns may overhang a bit)
 		var crown: float = world.TREE_CROWN[int(item[2])] * float(item[5])
-		if not hit.is_empty() and hit.distance < 3.8 + Rules.ROUTE_TRUNK_MARGIN + crown * 0.45 - 0.05:
+		if not hit.is_empty() and hit.distance < float(world.atlas.routes[hit.route].clear) + Rules.ROUTE_TRUNK_MARGIN + crown * 0.45 - 0.05:
 			bad_trees += 1
 		for site in world.atlas.sites:
 			if Vector2(x, z).distance_to(Vector2(site.center.x, site.center.z)) < site.radius + Rules.GLADE_TRUNK_MARGIN + crown * 0.4 - 0.05:
@@ -206,7 +206,9 @@ func run() -> void:
 				if not listed.has(id):
 					unlisted += 1
 	check(unlisted == 0, "resource trees hiding a unit zone but not listed for the runtime fade: %d" % unlisted)
-	check(hiding_resource <= 120, "too many resource trees still hiding unit zones: %d" % hiding_resource)
+	# atlas v2: 47 trails (≈ 3.6× the v1 trail length) between the fixed resource ids (≤ 4 m slots), so
+	# more of them keep a crown over some trail; every one is listed and faded whole at runtime.
+	check(hiding_resource <= 260, "too many resource trees still hiding unit zones: %d" % hiding_resource)
 	notes.camera_clearance = {"ambient_hiding": hiding_ambient, "resource_hiding": hiding_resource, "listed": listed.size()}
 	for path in ["res://src/forest_rescue/world/forest_painted.gdshaderinc", "res://src/forest_rescue/world/forest_impostor.gdshader",
 			"res://src/forest_rescue/world/forest_fog.gdshader", "res://src/forest_rescue/world/forest_fog_receiver.gdshaderinc"]:
@@ -293,7 +295,7 @@ func run() -> void:
 					worst_route = route.id + " at " + str(p0)
 	notes.max_route_slope = rad_to_deg(atan(worst_step))
 	check(rad_to_deg(atan(worst_step)) < 25.0, "route height discontinuity/slope %.1f° on %s" % [rad_to_deg(atan(worst_step)), worst_route])
-	for site in world.atlas.sites:
+	for site in world.atlas.sites + world.atlas.extra_glades:
 		var c: Vector3 = site.center
 		var spread := 0.0
 		var pad_y: float = world.height_at(c.x, c.z)

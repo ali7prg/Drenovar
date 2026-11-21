@@ -90,7 +90,8 @@ func run() -> void:
 	# reveal: squad along entry → 01 → 02 (≈ 70 m) in 9 s
 	world.apply_adventure(adventure(true, town, 1))
 	world.fog.finish_now()
-	var points := path_points(["lf_route_entry", "lf_route_01_02"])
+	var points := path_points(["lf_trail_horse_origin__junction_corridor", "lf_trail_junction_corridor__junction_stones",
+		"lf_trail_junction_stones__junction_grove"])
 	var lengths := PackedFloat32Array([0.0])
 	for i in range(1, points.size()):
 		lengths.append(lengths[i - 1] + Vector2(points[i].x - points[i - 1].x, points[i].z - points[i - 1].z).length())

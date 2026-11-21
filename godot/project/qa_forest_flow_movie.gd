@@ -70,7 +70,7 @@ func run() -> void:
 			await seconds(7.0)
 		"rescue":
 			await fresh("site01_battle_victory")
-			look(Vector3(-20, 6, -66), 22.0)
+			look(forest.target_position("lf_site_01:cage"), 22.0)
 			await seconds(1.0)
 			var opened := fixture("site01_cage_open")
 			forest.client.manual_clock_ms = float(opened.adventure.serverTime)
@@ -80,10 +80,10 @@ func run() -> void:
 			game.close_modal()
 			await seconds(9.0)
 			await fresh("site01_escort_walking")
-			look(Vector3(-14, 6, -59), 28.0)
+			look(forest.actors.squad_focus() if forest.actors.squad_focus() != Vector3.INF else forest.target_position("lf_site_01"), 28.0)
 			await seconds(5.0)
 		"boss":
 			await fresh("boss_battle_10")
-			look(Vector3(75, 6, -84), 44.0)
+			look(forest.target_position("lf_boss_ancient_maw") + Vector3(0, 0, 2), 44.0)
 			await seconds(14.0)
 	quit(0)

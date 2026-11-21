@@ -161,13 +161,13 @@ func run() -> void:
 	if wanted("guardian_battle"):
 		await fresh("site01_battle_active")
 		await preload_actors()
-		look(Vector3(-20, 6, -62), 30.0)
+		look(forest.target_position("lf_site_01") + Vector3(0, 0, 3), 30.0)
 		await shoot("guardian_battle", 1.0)
 
 	if wanted("cage_open"):
 		await fresh("site01_battle_victory")
 		await preload_actors()
-		look(Vector3(-20, 6, -66), 24.0)
+		look(forest.target_position("lf_site_01:cage"), 24.0)
 		await create_timer(0.4).timeout
 		forest.client.manual_clock_ms = -1.0
 		game.accept(fixture("site01_cage_open"))
@@ -179,14 +179,14 @@ func run() -> void:
 		await preload_actors()
 		var walk: Dictionary = forest.client.escort()
 		var mid: Vector3 = forest.actors.squad_focus()
-		look(mid if mid != Vector3.INF else Vector3(-12, 6, -58), 30.0)
+		look(mid if mid != Vector3.INF else forest.target_position("lf_site_01"), 30.0)
 		await shoot("escort_home", 1.0)
 
 	if wanted("boss"):
 		for pct in [10, 35, 60, 85]:
 			await fresh("boss_battle_%d" % pct)
 			await preload_actors()
-			look(Vector3(75, 6, -84), 46.0)
+			look(forest.target_position("lf_boss_ancient_maw") + Vector3(0, 0, 2), 46.0)
 			await shoot("boss_telegraph_%d" % pct, 0.8)
 
 	if wanted("rewards"):

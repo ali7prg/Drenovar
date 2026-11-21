@@ -447,13 +447,10 @@ func _dress(node: Node3D, placement: Dictionary, lod: int) -> void:
 				(part as Node3D).visible = wanted.has(item) and n.ends_with("_LOD%d" % lod)
 	elif placement.get("piece", "") == "lean_to":
 		# platform planks leaning at 62° on a cross pole held by two posts (art/01 lean-to)
-		var planks := Node3D.new()
+		var lean := Transform3D(Basis(Vector3.RIGHT, deg_to_rad(-62.0)), Vector3(0.0, 0.05, -0.5))
 		for child in node.get_children():
-			node.remove_child(child)
-			planks.add_child(child)
-		planks.rotation.x = deg_to_rad(-62.0)
-		planks.position = Vector3(0.0, 0.05, -0.5)
-		node.add_child(planks)
+			if child is Node3D:
+				(child as Node3D).transform = lean * (child as Node3D).transform
 		var frame := MeshInstance3D.new()
 		frame.mesh = _proc_mesh("lean_to_frame")
 		node.add_child(frame)

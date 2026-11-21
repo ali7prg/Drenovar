@@ -244,7 +244,8 @@ func run() -> void:
 		forest.actors.tick(0.05)
 	check(forest.actors.rigs.has("guardian_lf_site_01") and forest.actors.rigs.has("lf_captive_01_c"), "guardian + caged captives present")
 	var leader: Dictionary = forest.actors.motion.get("squad_0", {})
-	check(not leader.is_empty() and leader.position.distance_to(Vector3(-20, leader.position.y, -65)) < 3.5, "squad representatives at the site")
+	var site01: Vector3 = forest.target_position("lf_site_01")
+	check(not leader.is_empty() and leader.position.distance_to(Vector3(site01.x, leader.position.y, site01.z)) < 4.0, "squad representatives at the site")
 
 	# 8. Live transitions: cage opening choreography (key into socket, latch, door, exit).
 	reset_actors()
@@ -310,7 +311,8 @@ func run() -> void:
 	for event in fight.timeline:
 		if String(event.get("type", "")) == "telegraph":
 			var t := float(event.t) + 0.5
-			tele.update_from_battle(fight, t, Vector3(75, 6.5, -86), 0.0, Vector3(75, 6.5, -76))
+			var arena_c: Vector3 = forest.target_position("lf_boss_ancient_maw")
+			tele.update_from_battle(fight, t, arena_c, 0.0, arena_c + Vector3(0, 0, 10))
 			hit_any = hit_any or (tele.decals.size() > 0 and tele.current_warning() == content.text("boss.telegraph." + String(event.attack)))
 	check(hit_any, "telegraph decals with authored warnings")
 

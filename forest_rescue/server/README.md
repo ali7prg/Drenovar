@@ -75,12 +75,18 @@ adventure-access.mjs, actual ECO-05 level) → receipt replay/409 → strict all
 context → delivered reducers → one candidate snapshot committed with the receipt by revision CAS (retry
 recomputes everything from the fresh snapshot). The client never sends proofs, positions, time or amounts.
 
-**Navigation graph** (`src/navgraph.mjs`): the 13 atlas routes (samples ≤ 0.5, y from the samples), a
-3-unit spur to `lf_home_reception` (-8, -52), glade spokes to cage/guardian/key from the atlas offsets,
-paired-latch plates (key ± 2.6 z) and trail-cache landmarks (the cache is reachable only past the three
-landmarks in clue order). Water is allowed only on the approved deck of `lf_route_10_11` (deck y = 1.1,
-inserted `lf_bridge_crossing` junction); the build fails closed otherwise. Dijkstra on junctions; a stopped
-squad can rest on a fine node `<way>#<index>`.
+**Navigation graph** (`src/navgraph.mjs`): the ways of atlas v2 (`data/world-atlas.v2.json`, the art/01
+masterplan network: 47 trails between glades, junctions `lf_junction_*`, landmark spots `lf_mark_*`, the
+cage-less glade `lf_glade_el`; samples ≤ 0.5, y from the samples; the delivered v1 atlas is kept for content
+checks), a 3-unit spur to `lf_home_reception` (-8, -52), glade spokes to cage/guardian/key from the atlas
+offsets, paired-latch plates (key ± 2.6 z) and trail-cache landmarks (the cache is reachable only past the three
+landmarks in clue order). Water is allowed only on the approved deck of the bridge way (`lf_route_bridge`; v1
+`lf_route_10_11`; deck y = 1.1, inserted `lf_bridge_crossing` junction); the build fails closed otherwise.
+Dijkstra on junctions, never through another site's glade (a glade node only carries a trip on when the trip
+starts or ends there); junctions / landmark spots are `waypoint`s (never targets). A stopped squad can rest on a
+fine node `<way>#<index>`. A save written on another graph (`field.graphId`, e.g. atlas v1) is re-bound when
+nothing moves and the squad stands on a named node (its fog restarts from the town default), else
+`NAV_GRAPH_MISMATCH` (CONTRACT v1.3).
 
 **Movement**: server-timed moves (`departAt/arriveAt`, speed 0.6 × slowest troop speed; escort ≤ 1.6;
 horse leads ≤ 1.5 s ahead and waits). `settle(now)` commits traversal checkpoints every 4 units with a

@@ -525,7 +525,7 @@ func run() -> void:
 		settle_world()
 		await frames(20)
 		await shoot("overview_z130")
-		look(Vector3(-20, 0, -40), 68.0)
+		look(forest.target_position("lf_site_01") + Vector3(6, 0, -4), 68.0)
 		await frames(10)
 		await shoot("overview_z68")
 

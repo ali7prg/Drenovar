@@ -582,15 +582,23 @@ func run() -> void:
 			scale = lerpf(scale, lerpf(0.34, 0.52, rng.randf()), openness(x, z) * (0.0 if zone == Z_GROVE and species == Rules.OAK else 0.85))
 			if blocked_exact(x, z, true, 1.0, Rules.CROWN_RADIUS[species] * scale):
 				continue
-			insert(trunk_grid, trunks, [x, z, minf(gap, 3.0 if species != Rules.OAK or zone != Z_GROVE else 6.0)])
 			var variants: Array = ZONE_VARIANTS[species][zone]
 			var variant: int = variants[rng.randi() % variants.size()]
 			var drawn := species
 			if species == Rules.OAK and zone != Z_GROVE and not oak_is_golden(x, z, rng.randf()):
 				drawn = Rules.OAK_GREEN
 				variant = clampi(variant, 2, 4)
+			var yaw_deg := snappedf(rng.randf() * 360.0, 0.1)
+			# Camera clearance: a crown that would hide a unit on a trail / in a glade is made
+			# young (low crown, units seen past it) or the spot stays open (understory only).
+			if tree_hides_units(x, z, drawn, variant, scale, deg_to_rad(yaw_deg)):
+				var young := lerpf(0.34, 0.46, rng.randf())
+				if young >= scale or tree_hides_units(x, z, drawn, variant, young, deg_to_rad(yaw_deg)):
+					continue
+				scale = young
+			insert(trunk_grid, trunks, [x, z, minf(gap, 3.0 if species != Rules.OAK or zone != Z_GROVE else 6.0)])
 			trees.append([snappedf(x, 0.01), snappedf(z, 0.01), drawn, variant,
-				snappedf(rng.randf() * 360.0, 0.1), snappedf(scale, 0.001), zone])
+				yaw_deg, snappedf(scale, 0.001), zone])
 			species_count[Rules.SPECIES[drawn]] = species_count.get(Rules.SPECIES[drawn], 0) + 1
 	print("LAYOUT ambient trees=", trees.size(), " ", species_count)
 
@@ -742,10 +750,14 @@ func run() -> void:
 			"resourceRemap": "{id: [x, z, reasonCode, kitVariant, absoluteScale]} for every outer resource tree",
 			"innerRemap": "{id: [x, z, reasonCode(0 jittered / 3 kept), kitVariant, absoluteScale]} for every inner (±56) resource tree",
 			"understory": "[x, z, kindIndex, variant(1-based in Rules.UNDERSTORY_KIT), yawDeg, absoluteScale, (heightOffset)]"},
+		"cameraClearance": {"unitHeight": Rules.UNIT_HEIGHT, "trailHalf": TRAIL_UNIT_HALF, "viewShift": Rules.VIEW_SHIFT,
+			"rule": "no crown between the city camera and a unit on a trail / in a glade / arena / horse spot (Rules.crown_capsule)"},
+		"cameraOccluders": camera_occluders,
 		"trees": trees, "resourceRemap": remap, "innerRemap": inner_remap, "understory": understory, "innerUnderstory": inner_under}
 	var file := FileAccess.open(Rules.LAYOUT_PATH, FileAccess.WRITE)
 	file.store_string(JSON.stringify(result, "", false))
 	file.close()
+	print("LAYOUT camera occluders (resource ids, runtime fade)=", camera_occluders.size())
 	print("LAYOUT_DONE trees=", trees.size(), " remap=", remap.size(), " inner=", inner_remap.size(), " understory=", understory.size(),
 		" innerUnder=", inner_under.size(), " ms=", Time.get_ticks_msec() - started)
 	quit()
@@ -788,12 +800,15 @@ func _bank_dressing(trees: Array, under: Array, under_grid: Dictionary, logs: Ar
 			# willows on the bank top, leaning over the water
 			if z >= willow_next[side]:
 				var x := edge + out * lerpf(1.4, 3.2, rng.randf())
+				var scale := lerpf(0.82, 1.02, rng.randf())
+				var variant := 2 + rng.randi() % 2
+				var yaw_deg := snappedf(rad_to_deg(atan2(-out, 0.0)) + lerpf(-40.0, 40.0, rng.randf()), 0.1)
 				if maxf(absf(x), absf(z)) > CORE + 1.0 and not blocked_exact(x, z, true, 1.0, 4.0) \
-						and terrain.ground_height(x, z) > -0.4 and terrain.slope_degrees(x, z) < 38.0 and free_of_trunks(x, z, 3.2):
+						and terrain.ground_height(x, z) > -0.4 and terrain.slope_degrees(x, z) < 38.0 and free_of_trunks(x, z, 3.2) \
+						and not tree_hides_units(x, z, Rules.WILLOW, variant, scale, deg_to_rad(yaw_deg)):
 					insert(trunk_grid, trunks, [x, z, 3.2])
-					var scale := lerpf(0.82, 1.02, rng.randf())
-					trees.append([snappedf(x, 0.01), snappedf(z, 0.01), Rules.WILLOW, 2 + rng.randi() % 2,
-						snappedf(rad_to_deg(atan2(-out, 0.0)) + lerpf(-40.0, 40.0, rng.randf()), 0.1), snappedf(scale, 0.001), Z_RIVER])
+					trees.append([snappedf(x, 0.01), snappedf(z, 0.01), Rules.WILLOW, variant,
+						yaw_deg, snappedf(scale, 0.001), Z_RIVER])
 					species_count[Rules.SPECIES[Rules.WILLOW]] = species_count.get(Rules.SPECIES[Rules.WILLOW], 0) + 1
 					willow_next[side] = z + lerpf(9.0, 17.0, rng.randf())
 				else:

@@ -529,8 +529,8 @@
       "closed": {
         "iou_raw": 0.8995,
         "iou_filled": 0.8995,
-        "colour_err": 0.069,
-        "colour_err_core": 0.0683,
+        "colour_err": 0.072,
+        "colour_err_core": 0.0706,
         "ref_px": 80572,
         "render_px": 83391,
         "ignored_px": 0,
@@ -541,8 +541,8 @@
       "open": {
         "iou_raw": 0.9272,
         "iou_filled": 0.9272,
-        "colour_err": 0.0944,
-        "colour_err_core": 0.0942,
+        "colour_err": 0.0963,
+        "colour_err_core": 0.0957,
         "ref_px": 84078,
         "render_px": 84995,
         "ignored_px": 0,
@@ -603,20 +603,20 @@
     },
     "texture": {
       "texels": 2084268,
-      "projected_frac": 0.1839,
+      "projected_frac": 0.1777,
       "per_view_frac": {
-        "closed": 0.1177,
-        "open": 0.1201
+        "closed": 0.1115,
+        "open": 0.1161
       },
-      "seconds": 18.4
+      "seconds": 17.5
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_rune_lock/v2_iter23_*",
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_rune_lock/v2_iter24_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_rune_lock --iter 23",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_rune_lock --iter 24",
   "mechanism": "rune_lock",
   "symbol_targets": {
     "axis": "each ring disc rotates about glTF +Y through its own node origin (disc centre); discs are stacked rising toward the back",

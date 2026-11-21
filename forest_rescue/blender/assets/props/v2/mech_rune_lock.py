@@ -346,20 +346,22 @@ def solve(views):
         _resolve_pose(v, params)
     # plinth flare / height by silhouette IoU (the drum base is drawn wider than the dial's camera implies)
     # drum taper (rim radius Rt) and plinth (Rb, hb) by silhouette IoU, coordinate descent
-    best = _silhouette_iou(params, views)[0]
-    # pass 4: near-vertical walls (no taper buying the camera residual): only the plinth steps, the drum
+    # pass 4: near-vertical walls (no taper buying the camera residual): only the stepped plinth, the drum
     # radius and its offset under the dial are searched
     params["Rt"] = params["Rw"] - 0.03
-    grids = {"Rb": np.arange(params["Rw"] + 0.06, params["Rw"] + 0.3, 0.03),
-             "hb": np.array([0.08, 0.12, 0.16, 0.2]), "ox": np.arange(-0.1, 0.101, 0.02),
-             "oy": np.arange(-0.1, 0.101, 0.02), "Rw": np.arange(params["Rw"] - 0.15, params["Rw"] + 0.151, 0.03)}
+    best = _silhouette_iou(params, views)[0]
     for _round in range(2):
+        grids = {"Rw": np.arange(params["Rw"] - 0.15, params["Rw"] + 0.151, 0.03),
+                 "Rb": np.arange(params["Rw"] + 0.06, params["Rw"] + 0.42, 0.03),
+                 "hb": np.array([0.08, 0.12, 0.16, 0.2, 0.25, 0.3]), "ox": np.arange(-0.1, 0.101, 0.02),
+                 "oy": np.arange(-0.1, 0.101, 0.02)}
         for key, grid in grids.items():
             for val in grid:
                 q = dict(params)
                 q[key] = float(val)
                 if key == "Rw":
                     q["Rt"] = q["Rw"] - 0.03
+                    q["Rb"] = max(q["Rb"], q["Rw"] + 0.06)
                 iou = _silhouette_iou(q, views)[0]
                 if iou > best + 1e-4:
                     best, params = iou, q

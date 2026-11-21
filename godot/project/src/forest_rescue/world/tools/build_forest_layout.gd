@@ -21,6 +21,11 @@ extends SceneTree
 ## 5. Understory by zone (ferns, brambles, rocks, logs, branches, quarry boulders, reeds).
 ## Resource-tree look (kit variant + absolute scale) is chosen per zone so that the zone's
 ## dominant species reads as in art/01 even though resource species are fixed by id.
+## Camera clearance (all steps): no crown may sit between the fixed city camera (38°, from +X+Z)
+## and a unit on a trail, in a glade, in the arena or at the horse spot (Rules.crown_capsule vs
+## the unit zones). Ambient trees that would are made young (low crown) or not planted; resource
+## trees take another slot inside their displacement limit or the young look; the few left are
+## listed in `cameraOccluders` and faded whole at runtime (forest_occluders.gd).
 
 const Rules = preload("res://src/forest_rescue/world/forest_layout_rules.gd")
 const ForestAtlas = preload("res://src/forest_rescue/world/forest_atlas.gd")
@@ -117,6 +122,14 @@ var quarry_center := Vector2.INF
 var trunks: Array = []               # [x, z, gap] all placed trunks (resource + ambient)
 var trunk_grid := {}
 var data: Dictionary
+## Unit zones for the camera clearance: [a: Vector2, b: Vector2, half width] (discs: a == b).
+var unit_zones: Array = []
+var unit_zone_grid := {}
+const UNIT_ZONE_CELL := 8.0
+const TRAIL_UNIT_HALF := 1.6         # squad column / escort file half width on a trail
+const HORSE_ZONE := 4.0
+const HOME_ZONE := 3.0
+var camera_occluders: Array = []     # resource ids still hiding a unit zone (runtime fade)
 
 
 func _initialize() -> void:
@@ -229,6 +242,63 @@ func pick_zone(x: float, z: float) -> int:
 
 
 # ---------------------------------------------------------------------------------------------
+# Camera clearance (unit zones vs crowns seen from the fixed city camera)
+
+func _build_unit_zones() -> void:
+	unit_zones.clear()
+	unit_zone_grid.clear()
+	for route in atlas.routes:
+		var points: PackedVector3Array = route.points
+		for i in range(points.size() - 1):
+			_add_unit_zone(Vector2(points[i].x, points[i].z), Vector2(points[i + 1].x, points[i + 1].z), TRAIL_UNIT_HALF)
+	for site in atlas.sites:
+		var c := Vector2(site.center.x, site.center.z)
+		_add_unit_zone(c, c, float(site.radius))
+	var arena := Vector2(atlas.arena_center.x, atlas.arena_center.z)
+	_add_unit_zone(arena, arena, ForestAtlas.ARENA_RADIUS)
+	var horse := Vector2(atlas.horse_origin.x, atlas.horse_origin.z)
+	_add_unit_zone(horse, horse, HORSE_ZONE)
+	_add_unit_zone(ForestAtlas.HOME_RECEPTION, ForestAtlas.HOME_RECEPTION, HOME_ZONE)
+
+
+func _add_unit_zone(a: Vector2, b: Vector2, half: float) -> void:
+	var index := unit_zones.size()
+	unit_zones.append([a, b, half])
+	var lo := a.min(b) - Vector2.ONE * half
+	var hi := a.max(b) + Vector2.ONE * half
+	for gz in range(floori(lo.y / UNIT_ZONE_CELL), floori(hi.y / UNIT_ZONE_CELL) + 1):
+		for gx in range(floori(lo.x / UNIT_ZONE_CELL), floori(hi.x / UNIT_ZONE_CELL) + 1):
+			var key := Vector2i(gx, gz)
+			if not unit_zone_grid.has(key):
+				unit_zone_grid[key] = PackedInt32Array()
+			unit_zone_grid[key].append(index)
+
+
+## True when a crown capsule (Rules.crown_capsule) covers any unit zone.
+func capsule_hits_units(capsule: Array) -> bool:
+	var a: Vector2 = capsule[0]
+	var b: Vector2 = capsule[1]
+	var r: float = capsule[2] + Rules.UNIT_RADIUS
+	var lo := a.min(b) - Vector2.ONE * r
+	var hi := a.max(b) + Vector2.ONE * r
+	var seen := {}
+	for gz in range(floori(lo.y / UNIT_ZONE_CELL), floori(hi.y / UNIT_ZONE_CELL) + 1):
+		for gx in range(floori(lo.x / UNIT_ZONE_CELL), floori(hi.x / UNIT_ZONE_CELL) + 1):
+			for index in unit_zone_grid.get(Vector2i(gx, gz), PackedInt32Array()):
+				if seen.has(index):
+					continue
+				seen[index] = true
+				var zone: Array = unit_zones[index]
+				if Rules.segment_segment_distance(a, b, zone[0], zone[1]) < r + float(zone[2]):
+					return true
+	return false
+
+
+func tree_hides_units(x: float, z: float, species: int, variant: int, scale: float, yaw: float) -> bool:
+	return capsule_hits_units(Rules.crown_capsule(x, z, species, variant, scale, yaw))
+
+
+# ---------------------------------------------------------------------------------------------
 # Clearances
 
 ## crown: crown radius (m) of the tree that would stand here; up to ~45 % of it may overhang a
@@ -336,7 +406,8 @@ func run() -> void:
 			var axis := ((mine_p - glade_p).normalized() * 0.6 + Vector2(-0.7071, -0.7071) * 0.4).normalized()
 			quarry_axis = atan2(axis.y, axis.x)
 	landmarks.free()
-	print("LAYOUT terrain+masks ready ms=", Time.get_ticks_msec() - started, " quarry=", quarry_center)
+	_build_unit_zones()
+	print("LAYOUT terrain+masks ready ms=", Time.get_ticks_msec() - started, " quarry=", quarry_center, " unit zones=", unit_zones.size())
 
 	# 1. Hero cave oak ------------------------------------------------------------------------
 	hero = _find_hero_spot()
@@ -368,7 +439,18 @@ func run() -> void:
 		var in_mask := blocked_exact(tx, tz, true, 1.0, crown) or not ground_ok(tx, tz, true) or is_glade(tx, tz)
 		var found := Vector2.INF
 		var reason := 0
+		# Camera clearance first (a slot whose crown — natural or young look — hides no unit zone),
+		# then the plain v2 rules (the tree is then faded whole at runtime when it hides an actor).
+		_cam_tree = tree
+		_cam_species = species
 		if not in_mask:
+			found = _best_spot(tx, tz, 1.0, Rules.MAX_SLOT_DISPLACEMENT, gap, 60, crown)
+		if found == Vector2.INF:
+			found = _nearest_free(tx, tz, 6.5, gap, crown, true)
+			if found != Vector2.INF and Vector2(tx, tz).distance_to(found) > Rules.MAX_SLOT_DISPLACEMENT:
+				reason = 1 if in_mask else 2
+		_cam_tree = {}
+		if found == Vector2.INF and not in_mask:
 			found = _best_spot(tx, tz, 1.0, Rules.MAX_SLOT_DISPLACEMENT, gap, 40, crown)
 		if found == Vector2.INF:
 			reason = 1 if in_mask else 2
@@ -394,7 +476,7 @@ func run() -> void:
 		if found == Vector2.INF:
 			found = Vector2(tx, tz)
 		insert(trunk_grid, trunks, [found.x, found.y, gap])
-		var look := _resource_look(tree, species, found.x, found.y, false)
+		var look := _camera_look(tree, species, found.x, found.y, false)
 		remap[tree.id] = [snappedf(found.x, 0.01), snappedf(found.y, 0.01), reason, look[0], look[1]]
 		reasons[["slot", "mask_push", "jitter", "kept"][reason]] += 1
 		displacements.append(Vector2(tx - found.x, tz - found.y).length())
@@ -429,6 +511,8 @@ func run() -> void:
 		# The hall-III entrance (art/18): the horse spot and the entry trail stay trunk-free.
 		var on_entrance := o.distance_to(horse) < HORSE_CLEAR or _entry_distance(o, entry_route) < ENTRY_CLEAR
 		var reach := Rules.MAX_INNER_JITTER if on_entrance else 3.5
+		# inner trees whose crown could hide the mare / squad at the entrance prefer clear slots
+		var near_units := o.distance_to(horse) < 40.0
 		for k in (60 if on_entrance else 28):
 			var angle := rng.randf() * TAU
 			var dist := lerpf(1.0, reach, sqrt(rng.randf()))
@@ -447,11 +531,13 @@ func run() -> void:
 			if not ok:
 				continue
 			var score := (clump.get_noise_2d(q.x, q.y) + 1.0) * 0.6 + rng.randf() * 0.5
+			if near_units:
+				score += 2.0 * _cam_state_for(tree, species, q.x, q.y, true)
 			if score > best_score:
 				best_score = score
 				best = q
 		insert(placed_inner_grid, placed_inner, [best.x, best.y, 0.0])
-		var look := _resource_look(tree, species, best.x, best.y, true)
+		var look := _camera_look(tree, species, best.x, best.y, true)
 		inner_remap[tree.id] = [snappedf(best.x, 0.01), snappedf(best.y, 0.01), 0 if best != o else 3, look[0], look[1]]
 		inner_moved.append(best.distance_to(o))
 	inner_moved.sort()
@@ -792,6 +878,11 @@ func _best_spot(tx: float, tz: float, min_d: float, max_d: float, gap: float, tr
 		if blocked_exact(x, z, true, 1.0, crown) or not ground_ok(x, z, true) or not free_of_trunks(x, z, gap) or is_glade(x, z):
 			continue
 		var score := (clump.get_noise_2d(x, z) + 1.0) * 0.7 + rng.randf() * 0.45
+		if not _cam_tree.is_empty():
+			var cam := _cam_state_for(_cam_tree, _cam_species, x, z, false)
+			if cam == 0:
+				continue
+			score += 0.8 * (cam - 1)
 		if score > best_score:
 			best_score = score
 			best = Vector2(x, z)
@@ -812,6 +903,8 @@ func _nearest_free(tx: float, tz: float, max_r: float, gap: float, crown := 0.0,
 				continue
 			if avoid_glades and is_glade(x, z):
 				continue
+			if not _cam_tree.is_empty() and _cam_state_for(_cam_tree, _cam_species, x, z, false) == 0:
+				continue
 			return Vector2(x, z)
 		radius += 0.5
 	return Vector2.INF
@@ -821,6 +914,39 @@ func _nearest_free(tx: float, tz: float, max_r: float, gap: float, crown := 0.0,
 func _resource_crown(tree: Dictionary, species: int, x: float, z: float) -> float:
 	var look := _resource_look(tree, species, x, z, false)
 	return Rules.CROWN_RADIUS[species] * float(look[1])
+
+
+var _cam_tree: Dictionary = {}       # resource tree being placed (camera clearance active)
+var _cam_species := 0
+
+
+## Young look of a resource tree (low crown: the camera sees units past it).
+func _young_scale(tree: Dictionary) -> float:
+	var u := clampf((float(tree.scale) - 0.45) / 0.85, 0.0, 1.0)
+	return snappedf(lerpf(0.30, 0.36, u), 0.001)
+
+
+## Camera clearance of a resource tree at (x, z): 2 = natural look hides no unit zone,
+## 1 = only the young look does not, 0 = both hide a unit zone.
+func _cam_state_for(tree: Dictionary, species: int, x: float, z: float, inner: bool) -> int:
+	var look := _resource_look(tree, species, x, z, inner)
+	var variant: int = int(look[0]) % Rules.GREEN_VARIANT_BASE
+	var yaw := float(tree.angle)
+	if not tree_hides_units(x, z, species, variant, float(look[1]), yaw):
+		return 2
+	return 1 if not tree_hides_units(x, z, species, variant, _young_scale(tree), yaw) else 0
+
+
+## Resource look at the final slot, made young when the natural crown would hide a unit zone;
+## ids that still hide one are listed (runtime whole-tree fade).
+func _camera_look(tree: Dictionary, species: int, x: float, z: float, inner: bool) -> Array:
+	var look := _resource_look(tree, species, x, z, inner)
+	var state := _cam_state_for(tree, species, x, z, inner)
+	if state == 1:
+		look[1] = minf(float(look[1]), _young_scale(tree))
+	elif state == 0:
+		camera_occluders.append(String(tree.id))
+	return look
 
 
 ## Openness 0..1 from art/01: 1 inside/at the edge of clearings, site camps, trails, art glades

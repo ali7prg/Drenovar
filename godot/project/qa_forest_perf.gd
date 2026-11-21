@@ -77,6 +77,7 @@ const SEGMENTS := [
 	{"name": "t_winch_ui", "fixture": "site03_winch_solved", "target": "lf_site_03", "zoom": 28.0, "seconds": 1.0, "mech_ui": "lf_site_03"},
 	{"name": "t_bush_z26", "fixture": "site02_rune_1of3", "target": "lf_site_02", "zoom": 26.0, "seconds": 1.0},
 	{"name": "t_bush_z68", "fixture": "site02_rune_1of3", "target": "lf_site_02", "zoom": 68.0, "seconds": 1.0},
+	{"name": "t_bush_z120", "fixture": "site02_rune_1of3", "target": "lf_site_02", "zoom": 120.0, "seconds": 1.0},
 ]
 
 class StubHost extends Node:
@@ -391,7 +392,10 @@ const TINT_KINDS := {"under_fern": Color(1, 0, 0), "under_reed": Color(1, 0.5, 0
 	"tree_lf_env_hollow_oak": Color(0.6, 0, 0.6)}
 
 func tint_kinds(world: Node, clear := false) -> void:
-	for node: MultiMeshInstance3D in world.find_children("*", "MultiMeshInstance3D", true, false):
+	var canopy: Node = world.get("canopy")          # re-parented under the stage's forest group (attach_canopy)
+	if canopy == null:
+		return
+	for node: MultiMeshInstance3D in canopy.find_children("*", "MultiMeshInstance3D", true, false):
 		if clear:
 			node.material_override = null
 			continue

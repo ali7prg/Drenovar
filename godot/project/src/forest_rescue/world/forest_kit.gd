@@ -433,7 +433,7 @@ static func painted_material(original: Material, has_colors: bool, k: float, win
 	material.set_shader_parameter("albedo_color", base.albedo_color)
 	material.set_shader_parameter("use_albedo_texture", base.albedo_texture != null)
 	material.set_shader_parameter("alpha_cut", base.alpha_scissor_threshold if base.alpha_scissor_threshold > 0.0 else 0.5)
-	if cutout and name.begins_with("lf_foliage"):
+	if cutout and name.begins_with("lf_foliage") and not OS.get_cmdline_user_args().has("--no-foliage-min-lod"):
 		material.set_shader_parameter("foliage_min_lod", FOLIAGE_MIN_LOD)
 	material.set_shader_parameter("painted_light_mix", VOLUME_LIGHT_MIX if name.contains("_vol") else k)
 	var crown := crown_light_dir != Vector3.ZERO and CROWN_LIGHT_PREFIXES.any(func(prefix): return name.begins_with(prefix))

@@ -1,0 +1,558 @@
+{
+ "rows": [
+  {
+   "id": "lf_site_01",
+   "key": "NW-A",
+   "x": -80.0,
+   "z": -14.0,
+   "theta": 125.07375449334829,
+   "y": 6.237962115671403,
+   "relief": 0.19676867318126412,
+   "bank": 124.52802,
+   "cheb": 80.0,
+   "nearest_glade": 54.3323108288245,
+   "nearest_landmark": 17.0,
+   "arena": 125.25174649480941,
+   "ok": true,
+   "theta_art": 148.8162091334671
+  },
+  {
+   "id": "lf_site_02",
+   "key": "NW-B",
+   "x": -86.0,
+   "z": 40.0,
+   "theta": 159.94390526342457,
+   "y": 7.318453007087204,
+   "relief": 2.5463588611576524,
+   "bank": 192.35793,
+   "cheb": 86.0,
+   "nearest_glade": 36.76955262170047,
+   "nearest_landmark": 28.844410203711913,
+   "arena": 168.04761230080004,
+   "ok": true,
+   "theta_art": 164.6174276498516
+  },
+  {
+   "id": "lf_site_03",
+   "key": "W-C",
+   "x": -72.0,
+   "z": 74.0,
+   "theta": 180.7848246029919,
+   "y": 8.952651880708556,
+   "relief": 0.31418132840751234,
+   "bank": 194.73917,
+   "cheb": 74.0,
+   "nearest_glade": 34.539832078341085,
+   "nearest_landmark": 58.034472514187634,
+   "arena": 188.8279640307547,
+   "ok": true,
+   "theta_art": 181.0284443782868
+  },
+  {
+   "id": "lf_site_04",
+   "key": "W-D",
+   "x": -40.0,
+   "z": 87.0,
+   "theta": 200.30844183652195,
+   "y": 8.8023192436319,
+   "relief": 0.5165513932532786,
+   "bank": 185.793645,
+   "cheb": 87.0,
+   "nearest_glade": 34.539832078341085,
+   "nearest_landmark": 28.178005607210743,
+   "arena": 188.16216410320115,
+   "ok": true,
+   "theta_art": 197.3905208948001
+  },
+  {
+   "id": "lf_site_05",
+   "key": "SW-E",
+   "x": 2.0,
+   "z": 92.0,
+   "theta": 226.24536426676835,
+   "y": 3.2392254963559513,
+   "relief": 0.32808076424614363,
+   "bank": 153.54696,
+   "cheb": 92.0,
+   "nearest_glade": 29.410882339705484,
+   "nearest_landmark": 18.788294228055936,
+   "arena": 184.69434208984313,
+   "ok": true,
+   "theta_art": 227.82273951521077
+  },
+  {
+   "id": "lf_site_06",
+   "key": "SW-F",
+   "x": 30.0,
+   "z": 101.0,
+   "theta": 241.54298340456253,
+   "y": 2.9111131905302785,
+   "relief": 0.12206612310003484,
+   "bank": 139.42382500000002,
+   "cheb": 101.0,
+   "nearest_glade": 29.154759474226502,
+   "nearest_landmark": 42.20189569201838,
+   "arena": 193.3726971420733,
+   "ok": true,
+   "theta_art": 236.66329714573706
+  },
+  {
+   "id": "lf_site_07",
+   "key": "S-G",
+   "x": 57.0,
+   "z": 90.0,
+   "theta": 257.347443499442,
+   "y": 2.9030781663893217,
+   "relief": 0.18144949023805657,
+   "bank": 94.75016,
+   "cheb": 90.0,
+   "nearest_glade": 29.154759474226502,
+   "nearest_landmark": 15.652475842498529,
+   "arena": 186.1316738225926,
+   "ok": true,
+   "theta_art": 266.502519669963
+  },
+  {
+   "id": "lf_site_08",
+   "key": "S-H",
+   "x": 98.0,
+   "z": 85.0,
+   "theta": 274.06336599293303,
+   "y": 3.1133555214196065,
+   "relief": 0.30244981011758476,
+   "bank": 43.78847000000002,
+   "cheb": 98.0,
+   "nearest_glade": 40.496913462633174,
+   "nearest_landmark": 21.37755832643195,
+   "arena": 194.23954283306992,
+   "ok": true,
+   "theta_art": 296.2089908961446
+  },
+  {
+   "id": "lf_site_09",
+   "key": "SE-I",
+   "x": 84.0,
+   "z": 47.0,
+   "theta": 285.77194805685485,
+   "y": 3.0243826371000835,
+   "relief": 1.1794707636444268,
+   "bank": 26.802915000000013,
+   "cheb": 84.0,
+   "nearest_glade": 40.496913462633174,
+   "nearest_landmark": 24.758836806279895,
+   "arena": 153.87332452377834,
+   "ok": true,
+   "theta_art": 317.2659467440084
+  },
+  {
+   "id": "lf_site_10",
+   "key": "SE-J",
+   "x": 96.0,
+   "z": -20.0,
+   "theta": 326.76828893202065,
+   "y": 4.982674420800034,
+   "relief": 4.388742500868834,
+   "bank": 45.80112,
+   "cheb": 96.0,
+   "nearest_glade": 32.2490309931942,
+   "nearest_landmark": 84.2140130857092,
+   "arena": 106.15083607772479,
+   "ok": true,
+   "theta_art": 331.06767775891666
+  },
+  {
+   "id": "lf_site_11",
+   "key": "E-K",
+   "x": 92.0,
+   "z": -52.0,
+   "theta": 344.47588900324575,
+   "y": 6.645085051408168,
+   "relief": 0.40812434483728843,
+   "bank": 65.64282,
+   "cheb": 92.0,
+   "nearest_glade": 32.2490309931942,
+   "nearest_landmark": 79.07591289387686,
+   "arena": 84.11896337925236,
+   "ok": true,
+   "theta_art": 351.5557701550948
+  },
+  {
+   "id": "lf_site_12",
+   "key": "NE-M",
+   "x": 42.0,
+   "z": -70.0,
+   "theta": 14.036243467926479,
+   "y": 6.44012792013263,
+   "relief": 0.3202677621548853,
+   "bank": 34.66579,
+   "cheb": 70.0,
+   "nearest_glade": 34.0,
+   "nearest_landmark": 27.0,
+   "arena": 32.55764119219941,
+   "ok": true,
+   "theta_art": 38.02262252210086
+  },
+  {
+   "id": "lf_glade_el",
+   "key": "E-L",
+   "x": 72.0,
+   "z": -86.0,
+   "theta": 5.063616853030085,
+   "y": 6.472718884402876,
+   "relief": 0.30281439389753295,
+   "bank": 84.90353999999999,
+   "cheb": 86.0,
+   "nearest_glade": 34.0,
+   "nearest_landmark": 59.20304046246274,
+   "arena": 54.3323108288245,
+   "ok": true,
+   "theta_art": 9.863496932118785
+  }
+ ],
+ "trails": [
+  {
+   "from": "lf_horse_origin",
+   "to": "lf_junction_corridor",
+   "length": 6.4031242374328485,
+   "wet_samples": 0,
+   "max_slope": 0.38980042477993176,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_corridor",
+   "to": "lf_junction_stones",
+   "length": 48.11911632256513,
+   "wet_samples": 0,
+   "max_slope": 39.226550925450404,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_stones",
+   "to": "lf_junction_grove",
+   "length": 34.45486062719434,
+   "wet_samples": 0,
+   "max_slope": 24.63752740204757,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_grove",
+   "to": "lf_site_01",
+   "length": 27.0,
+   "wet_samples": 0,
+   "max_slope": 41.54261896694026,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_01",
+   "to": "hollow_oak_giant",
+   "length": 17.0,
+   "wet_samples": 0,
+   "max_slope": 0.8045881252877158,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_grove",
+   "to": "lf_junction_w",
+   "length": 43.56337477408326,
+   "wet_samples": 0,
+   "max_slope": 34.42946483768175,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_01",
+   "to": "ruined_arch",
+   "length": 31.72396871419846,
+   "wet_samples": 0,
+   "max_slope": 1.384292395150609,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_w",
+   "to": "ruined_arch",
+   "length": 14.560219778561036,
+   "wet_samples": 0,
+   "max_slope": 0.7996044109555926,
+   "core_samples": 0
+  },
+  {
+   "from": "ruined_arch",
+   "to": "lf_site_02",
+   "length": 29.37368183545877,
+   "wet_samples": 0,
+   "max_slope": 19.987025910003243,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_w",
+   "to": "lf_junction_wsw",
+   "length": 34.52017887979059,
+   "wet_samples": 0,
+   "max_slope": 25.529637256176684,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_02",
+   "to": "lf_junction_wsw",
+   "length": 23.704699910719626,
+   "wet_samples": 0,
+   "max_slope": 7.858959040121104,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_wsw",
+   "to": "lf_junction_sw",
+   "length": 28.246209340460474,
+   "wet_samples": 0,
+   "max_slope": 25.30623329640986,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_sw",
+   "to": "lf_site_03",
+   "length": 15.556349186104045,
+   "wet_samples": 0,
+   "max_slope": 0.7696182529360427,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_03",
+   "to": "lf_site_04",
+   "length": 36.46684529190572,
+   "wet_samples": 0,
+   "max_slope": 1.6499647523128411,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_sw",
+   "to": "lf_junction_s",
+   "length": 43.79063645609742,
+   "wet_samples": 0,
+   "max_slope": 42.826528378791984,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_04",
+   "to": "lf_junction_quarry",
+   "length": 20.8202052353899,
+   "wet_samples": 0,
+   "max_slope": 25.945694554124966,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_s",
+   "to": "lf_junction_quarry",
+   "length": 19.989874071561893,
+   "wet_samples": 0,
+   "max_slope": 19.530254055755627,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_quarry",
+   "to": "quarry_mine",
+   "length": 16.76305461424021,
+   "wet_samples": 0,
+   "max_slope": 1.179068274049412,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_quarry",
+   "to": "lf_site_05",
+   "length": 24.42220510185596,
+   "wet_samples": 0,
+   "max_slope": 37.35918697203259,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_05",
+   "to": "lf_site_06",
+   "length": 30.160184344215295,
+   "wet_samples": 0,
+   "max_slope": 1.4542317357028134,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_s",
+   "to": "lf_junction_sse",
+   "length": 46.11154633330315,
+   "wet_samples": 0,
+   "max_slope": 42.04583701848384,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_sse",
+   "to": "lf_junction_south",
+   "length": 21.540659228538015,
+   "wet_samples": 0,
+   "max_slope": 1.6302052527381843,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_south",
+   "to": "lf_site_07",
+   "length": 20.82818483992022,
+   "wet_samples": 0,
+   "max_slope": 0.34213125511174153,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_06",
+   "to": "lf_site_07",
+   "length": 29.5821585857501,
+   "wet_samples": 0,
+   "max_slope": 0.8263459308799571,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_07",
+   "to": "dead_tree",
+   "length": 15.652475842498529,
+   "wet_samples": 0,
+   "max_slope": 0.7642668403655156,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_south",
+   "to": "lf_junction_se",
+   "length": 25.804039413421552,
+   "wet_samples": 0,
+   "max_slope": 0.8177958921065159,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_se",
+   "to": "lf_site_08",
+   "length": 47.86627592621745,
+   "wet_samples": 0,
+   "max_slope": 1.7177208205058876,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_07",
+   "to": "lf_site_08",
+   "length": 43.309270525893254,
+   "wet_samples": 0,
+   "max_slope": 1.7080035082670997,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_se",
+   "to": "lf_site_09",
+   "length": 20.638345536096118,
+   "wet_samples": 0,
+   "max_slope": 0.7473570006367117,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_08",
+   "to": "hunter_shelter",
+   "length": 21.37755832643195,
+   "wet_samples": 0,
+   "max_slope": 0.9193706482998623,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_09",
+   "to": "hunter_shelter",
+   "length": 24.847843053657993,
+   "wet_samples": 0,
+   "max_slope": 1.7374906719166083,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_se",
+   "to": "lf_junction_e",
+   "length": 28.635642126552707,
+   "wet_samples": 0,
+   "max_slope": 24.02636896761394,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_e",
+   "to": "lf_bridge_west",
+   "length": 13.601470508735444,
+   "wet_samples": 0,
+   "max_slope": 0.9615940901954901,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_bridge_west",
+   "to": "lf_bridge_east",
+   "length": 27.0,
+   "wet_samples": 0,
+   "max_slope": 0.0,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_bridge_east",
+   "to": "lf_site_10",
+   "length": 41.11454913855034,
+   "wet_samples": 0,
+   "max_slope": 36.83774089206167,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_10",
+   "to": "lf_junction_ene",
+   "length": 18.027756377319946,
+   "wet_samples": 0,
+   "max_slope": 19.166424644145984,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_ene",
+   "to": "lf_site_11",
+   "length": 14.866068747318506,
+   "wet_samples": 0,
+   "max_slope": 1.250595547272796,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_11",
+   "to": "lf_glade_el",
+   "length": 39.979748143123786,
+   "wet_samples": 0,
+   "max_slope": 1.2545346489262377,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_ene",
+   "to": "lf_glade_el",
+   "length": 54.30194339616981,
+   "wet_samples": 0,
+   "max_slope": 1.4708357507654977,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_glade_el",
+   "to": "lf_junction_ne",
+   "length": 16.15549442140351,
+   "wet_samples": 0,
+   "max_slope": 0.9431055796391986,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_ne",
+   "to": "lf_site_12",
+   "length": 18.163816367292046,
+   "wet_samples": 0,
+   "max_slope": 0.6879124429985747,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_junction_ne",
+   "to": "boss_arena",
+   "length": 41.001149191529024,
+   "wet_samples": 0,
+   "max_slope": 1.5041367053766665,
+   "core_samples": 0
+  },
+  {
+   "from": "lf_site_12",
+   "to": "waterfall_pond",
+   "length": 27.0,
+   "wet_samples": 0,
+   "max_slope": 1.7388102931319718,
+   "core_samples": 0
+  }
+ ]
+}

@@ -214,7 +214,7 @@ def main(out_dir):
     return plan
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and (len(sys.argv) < 3):
     main(sys.argv[1] if len(sys.argv) > 1 else ".")
 
 
@@ -533,3 +533,121 @@ def report(out_dir, plan, raw):
 if __name__ == "__main__" and len(sys.argv) > 2 and sys.argv[2] == "--report":
     raw = json.load(open(os.path.join(sys.argv[1], "plan_raw.json")))
     report(sys.argv[1], PLAN, raw)
+
+
+def path_lengths(plan):
+    """Shortest walk (m) from the home reception (via the horse origin) to every glade."""
+    import heapq
+    nodes, trails = trail_points(plan)
+    graph = {}
+    for a, b, pts in trails:
+        L = sum(math.dist(pts[i], pts[i + 1]) for i in range(len(pts) - 1)) * 1.06   # + meander
+        graph.setdefault(a, []).append((b, L))
+        graph.setdefault(b, []).append((a, L))
+    dist = {"lf_horse_origin": 3.0}
+    queue = [(3.0, "lf_horse_origin")]
+    while queue:
+        d, n = heapq.heappop(queue)
+        if d > dist.get(n, 1e9):
+            continue
+        for m, L in graph.get(n, []):
+            if d + L < dist.get(m, 1e9):
+                dist[m] = d + L
+                heapq.heappush(queue, (d + L, m))
+    return dist
+
+
+def profile_check(plan):
+    """Grade-limited road profile (≤ 12°) over the natural ground: worst cut/fill per trail."""
+    nodes, trails = trail_points(plan)
+    worst = []
+    for a, b, pts in trails:
+        dense = []
+        for k in range(len(pts) - 1):
+            p, q = np.array(pts[k], float), np.array(pts[k + 1], float)
+            n = max(1, int(math.dist(p, q) / 0.5))
+            for i in range(n):
+                dense.append(p + (q - p) * i / n)
+        dense.append(np.array(pts[-1], float))
+        on_deck = [abs(r[1] - 20) < 2.5 and 76.5 <= r[0] <= 104.5 for r in dense]
+        g = np.array([1.1 if on_deck[i] else base_height(r[0], r[1]) for i, r in enumerate(dense)])
+        k = 16
+        sm = np.array([g[max(0, i - k):i + k + 1].mean() for i in range(len(g))])
+        lim = math.tan(math.radians(12.0)) * 0.5
+        prof = sm.copy()
+        for _ in range(3):
+            for i in range(1, len(prof)):
+                prof[i] = min(max(prof[i], prof[i - 1] - lim), prof[i - 1] + lim)
+            for i in range(len(prof) - 2, -1, -1):
+                prof[i] = min(max(prof[i], prof[i + 1] - lim), prof[i + 1] + lim)
+        worst.append((a, b, float(np.max(np.abs(prof - g)))))
+    return worst
+
+
+ACTS = {"lf_site_01": 1, "lf_site_02": 1, "lf_site_03": 1, "lf_site_04": 2, "lf_site_05": 2, "lf_site_06": 2,
+        "lf_site_07": 3, "lf_site_08": 3, "lf_site_09": 3, "lf_site_10": 4, "lf_site_11": 4, "lf_site_12": 4}
+
+
+def table_sheet(out_dir, plan):
+    river = River(json.load(open(ATLAS)))
+    rows = validate(plan, river)
+    walk = path_lengths(plan)
+    prof = {(a, b): c for a, b, c in profile_check(plan)}
+    inv = json.load(open(INV))
+    town = np.array(inv["town"]["centre"], float)
+    rx, ry = inv["town"]["wallRadii"]
+    arts = {c["key"]: c["cage"] for c in inv["cages"]}
+    head = ["glade", "art", "act", "x", "z", "θ art", "θ game", "Cheb", "y", "relief r9", "river bank", "nearest", "walk from home", "check"]
+    lines = []
+    for r in rows:
+        ta, _ = art_theta(arts[r["key"]], town, rx, ry)
+        lines.append([r["id"], r["key"], str(ACTS.get(r["id"], "-")), "%.0f" % r["x"], "%.0f" % r["z"], "%.0f°" % ta, "%.0f°" % r["theta"],
+                      "%.0f" % r["cheb"], "%.1f" % r["y"], "%.1f m" % r["relief"], "%.0f m dry" % r["bank"] if r["bank"] >= 10 else "%.0f m WET" % r["bank"],
+                      "%.0f m" % r["nearest_glade"], "%.0f m / %.0f s" % (walk.get(r["id"], 0), walk.get(r["id"], 0) / 2.4), "OK" if r["ok"] else "CHECK"])
+    lm_lines = [["%s" % l[0], "(%.0f, %.0f)" % (l[1], l[2]), "%.0f°" % screen_theta(l[1], l[2])] for l in plan["landmarks"]]
+    f = ImageFont.truetype(FONT, 17)
+    fb = ImageFont.truetype(BOLD, 17)
+    widths = [130, 64, 44, 60, 60, 74, 86, 64, 56, 100, 120, 90, 175, 70]
+    W = max(sum(widths) + 40, 1500)
+    H = 60 + 28 * (len(lines) + 2) + 30 + 26 * (len(lm_lines) + 2) + 220
+    img = Image.new("RGB", (W, H), (28, 26, 24))
+    d = ImageDraw.Draw(img)
+    d.text((14, 14), "atlas v2 plan — glade centres (world XZ), screen direction around the town (art → game), dry / slope / spacing checks",
+           font=ImageFont.truetype(BOLD, 19), fill=(250, 240, 220))
+    y = 52
+    x = 14
+    for h, w in zip(head, widths):
+        d.text((x, y), h, font=fb, fill=(255, 220, 160))
+        x += w
+    y += 30
+    for row in lines:
+        x = 14
+        for v, w in zip(row, widths):
+            d.text((x, y), v, font=f, fill=(255, 110, 110) if v in ("CHECK",) or "WET" in v else (235, 235, 230))
+            x += w
+        y += 28
+    y += 16
+    d.text((14, y), "landmarks (world XZ, screen θ)", font=fb, fill=(255, 220, 160))
+    y += 28
+    for row in lm_lines:
+        d.text((14, y), "%-20s %-14s %s" % tuple(row), font=f, fill=(235, 235, 230))
+        y += 26
+    total = sum(math.dist(*seg) for _, _, pts in trail_points(plan)[1] for seg in zip(pts[:-1], pts[1:]))
+    worst = max(prof.items(), key=lambda kv: kv[1])
+    notes = ["trails: %d ways, %.0f m, no wet sample except the bridge deck; grade-limited profiles (≤ 12°) need ≤ %.1f m cut/fill (%s → %s)" %
+             (len(plan["trails"]), total, worst[1], worst[0][0], worst[0][1]),
+             "relief r9 = max − min natural ground height within 9 m of the glade centre (the glade pad flattens r 7 + 2 m blend)",
+             "walk = shortest path from the home reception through the horse origin (fixed) at the squad speed 2.4 m/s (+6 % meander)",
+             "all trips start at the north gate (home spur, entrance corridor (-8,-55)→(-12,-60) unchanged): an inner trail along the",
+             "west and south walls links the radial trails; no cage stands on it; sites 10–12, the E-L glade and the arena are across the bridge"]
+    y += 14
+    for n in notes:
+        d.text((14, y), n, font=ImageFont.truetype(FONT, 16), fill=(210, 210, 200))
+        y += 24
+    path = os.path.join(out_dir, "atlas_v2_plan_table.png")
+    img.save(path)
+    return path
+
+
+if __name__ == "__main__" and len(sys.argv) > 2 and sys.argv[2] == "--table":
+    print(table_sheet(sys.argv[1], PLAN))

@@ -12,7 +12,7 @@ const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
 const HudAction = preload("res://src/hud_action.gd")
 const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
-const RECRUIT_ORDER := ["ENG-09", "ENG-08", "ENG-01", "ENG-02", "ENG-07", "ENG-10", "ENG-03", "ENG-04", "ENG-05", "ENG-06"]
+const RECRUIT_ORDER := ["ENG-08", "ENG-01", "ENG-02", "ENG-03", "ENG-04", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
 const RESOURCE_NAMES := {"food":"Еда","wood":"Дерево","stone":"Камень","iron":"Железо","coins":"Монеты"}
 const SCENE_REUSE_SECONDS := 40.0
@@ -1490,7 +1490,7 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 		var costs := {}
 		for resource in ["wood", "food", "iron", "coins"]:
 			var cost := int(unit.get(resource, 0))
-			if resource == "iron" and state.city.get("kingdom") != null and unit.id in ["ENG-09", "ENG-08", "ENG-01"]:
+			if resource == "iron" and state.city.get("kingdom") != null and unit.id in ["ENG-08", "ENG-01"]:
 				cost = 0
 			costs[resource] = cost * int(amount)
 		var reduction := clampi(int(building.level) - 1, 0, 4) * 8 if state.city.get("kingdom", state.city.get("legacyUpgrades")) is Dictionary else 0
@@ -1848,7 +1848,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			if units.is_empty():
 				row(slots, "Добавить войска из списка")
 			if state.get("encounters", []).any(func(target): return target.id == id and target.get("species") == "tenerys" and int(target.level) == 1):
-				row(slots, "Ориентир для Тенериса I: 15 новобранцев (900 мощи).")
+				row(slots, "Ориентир для Тенериса I: 11 копейщиков (около 960 мощи).")
 		preview.revision += 1
 		preview.units = units
 		submit.order = {}
@@ -2868,7 +2868,7 @@ func run_smoke() -> void:
 		get_tree().quit(2)
 		return
 	var city_children: int = stage.trees.node.get_child_count()
-	if stage.parade_slots.size() != int(state.healthy.get("ENG-09", 0)):
+	if stage.parade_slots.size() != int(state.healthy.get("ENG-01", 0)):
 		printerr("Parade composition differs from the server garrison.")
 		get_tree().quit(23)
 		return
@@ -2877,19 +2877,19 @@ func run_smoke() -> void:
 		return
 	var barracks: Dictionary = state.city.buildings.filter(func(b): return b.type == "MIL-01")[0]
 	inspect_building(barracks)
-	var footman := unit_for_id("ENG-09")
-	if footman.is_empty() or not modal.visible:
+	var spearman := unit_for_id("ENG-01")
+	if spearman.is_empty() or not modal.visible:
 		get_tree().quit(10)
 		return
-	show_recruitment(barracks, footman, true)
+	show_recruitment(barracks, spearman, true)
 	var preview_view := modal_body.find_child("RecruitPreview", true, false) as SubViewportContainer
 	var preview_deadline := Time.get_ticks_msec() + 5000
 	while preview_view != null and preview_view.get_child_count() == 0 and Time.get_ticks_msec() < preview_deadline:
 		await get_tree().process_frame
-	if preview_view == null or preview_view.get_child_count() != 1 or data.unitModels.size() != 10:
+	if preview_view == null or preview_view.get_child_count() != 1 or data.unitModels.size() != 6:
 		get_tree().quit(15)
 		return
-	var training: Dictionary = await request("command", {"kind":"train", "buildingId":barracks.id, "unitId":footman.id, "quantity":2})
+	var training: Dictionary = await request("command", {"kind":"train", "buildingId":barracks.id, "unitId":spearman.id, "quantity":2})
 	var queue: Array = training.get("city", {}).get("military", {}).get("queues", {}).get(barracks.id, [])
 	if queue.size() != 1 or int(queue[0].quantity) != 2:
 		printerr(training.get("error", "Training order missing"))
@@ -2898,7 +2898,7 @@ func run_smoke() -> void:
 	accept(training)
 	stage.present_training(state, float(queue[0].startsAt) + 1)
 	var training_actor := stage.training.get_node_or_null(NodePath(barracks.id))
-	if training_actor == null or training_actor.get_meta("clip", "") != data.unitModels[footman.id].drill:
+	if training_actor == null or training_actor.get_meta("clip", "") != data.unitModels[spearman.id].drill:
 		get_tree().quit(22)
 		return
 	var cancelled: Dictionary = await request("command", {"kind":"cancelTraining", "orderId":queue[0].id})
@@ -3052,7 +3052,7 @@ func run_smoke() -> void:
 		get_tree().quit(20)
 		return
 	var encounter: Dictionary = state.world.encounters[0]
-	var order := {"kind":"worldMarch","worldKind":"velkor","encounterId":encounter.id,"units":{"ENG-09":int(state.healthy["ENG-09"])}}
+	var order := {"kind":"worldMarch","worldKind":"velkor","encounterId":encounter.id,"units":{"ENG-01":int(state.healthy["ENG-01"])}}
 	var preview: Dictionary = await request("march-preview",order)
 	if preview.get("path",[]).size() < 2:
 		printerr(preview)

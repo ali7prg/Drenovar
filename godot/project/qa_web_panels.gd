@@ -45,7 +45,7 @@ func run() -> void:
 	if game.player_id.is_empty():
 		game.player_id = "fixture"
 		game.state = game.state.duplicate(true)
-		game.state.healthy = {"ENG-09": 18, "ENG-01": 6}
+		game.state.healthy = {"ENG-01": 18, "ENG-02": 6}
 	var barracks: Dictionary = game.recruitment_buildings()[0]
 	game.inspect_building(barracks)
 	var recruit := find_button(game.modal_body, "Подготовка войск")
@@ -57,7 +57,7 @@ func run() -> void:
 	await settle_and_capture("recruitment")
 	check(game.modal_title.text.begins_with("Казармы пехоты · ур."), "Recruitment heading differs")
 	check(game.modal_body.find_child("RecruitPreview", true, false) != null, "Missing 3D preview")
-	check(find_button(game.modal_body, "Пеший новобранец") != null, "Missing roster card")
+	check(find_button(game.modal_body, "Копейщик") != null, "Missing roster card")
 	check(find_button(game.modal_footer, "Готовые войска →") != null, "Missing garrison link")
 	check_safe(game)
 	var slider := game.modal_body.find_children("*", "HSlider", true, false)[0] as HSlider
@@ -83,7 +83,7 @@ func run() -> void:
 	await process_frame
 	check(game.modal_body.find_children("*", "Label", true, false).any(func(label): return label.text == "Копейщик"), "Unit switch did not update the preview caption")
 	if game.loopback:
-		game.open_recruitment(barracks, "ENG-09", 2)
+		game.open_recruitment(barracks, "ENG-01", 2)
 		var train := game.modal_body.find_children("*", "Button", true, false).filter(func(button): return button.text.begins_with("Обучить 2"))[0] as Button
 		check(not train.disabled, "Training submission unexpectedly disabled")
 		var wood := int(game.balance("wood"))

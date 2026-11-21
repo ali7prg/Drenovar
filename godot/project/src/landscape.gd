@@ -1262,6 +1262,8 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 		var retained := {}
 		for i in range(cache.slots.size()):
 			var slot: Dictionary = cache.slots[i]
+			if not data.unitModels.has(slot.id):
+				continue
 			var key := "%s:%d" % [slot.id, int(slot.index)]
 			var node_name := "%s_%d" % [slot.id, int(slot.index)]
 			var unit := actor.get_node_or_null(NodePath(node_name)) as Node3D
@@ -1391,8 +1393,10 @@ func present_training(state: Dictionary, server_ms: float) -> void:
 		var orders: Array = queues.get(id, [])
 		var order: Dictionary = {} if orders.is_empty() else orders[0]
 		var active := not order.is_empty() and server_ms >= float(order.startsAt) and server_ms < float(order.endsAt)
-		var fallback: String = {"INF-01":"ENG-09", "RNG-01":"ENG-03", "CAV-01":"ENG-05"}[group]
+		var fallback: String = {"INF-01":"ENG-01", "RNG-01":"ENG-03", "CAV-01":"ENG-06"}[group]
 		var unit_id: String = order.get("unitId", fallback) if active else fallback
+		if not data.unitModels.has(unit_id):
+			unit_id = fallback
 		var visual: Dictionary = data.unitModels[unit_id]
 		var actor := training.get_node_or_null(NodePath(id)) as Node3D
 		if actor != null and actor.get_meta("unit_id") != unit_id:

@@ -162,46 +162,6 @@
     },
     {
       "unit": {
-        "id": "ENG-05",
-        "name": "Конный разведчик",
-        "name_en": "Mounted Scout",
-        "unit_class": "Лёгкая конница",
-        "power": 114,
-        "attack": 78,
-        "defense": 45,
-        "hp": 150,
-        "speed": 8,
-        "wood": 60,
-        "iron": 18,
-        "food": 75,
-        "coins": 110,
-        "train_seconds": 75,
-        "food_upkeep_per_hour": 0.16,
-        "unlocks_at": "Конюшня ур. 1",
-        "role": "Разведка, перехват обозов и быстрые походы.",
-        "strengths": "Высокая скорость марша, обнаружение целей.",
-        "weakness": "Слабее рыцарей и копейщиков в прямом бою.",
-        "special": "+20% к скорости похода отряда разведки, не к урону.",
-        "image_filename": "ENG-05_Mounted_Scout.png",
-        "approved_name_en": "English Mounted Scout",
-        "training_building": "CAV-01",
-        "source_unlock_text": "Конюшня ур. 1",
-        "production_asset_status": "not_accepted",
-        "balance_status": "initial_founder_supplied_not_pvp_validated",
-        "legacyLevel": 1
-      },
-      "model_mapping": {
-        "preview": "res://assets/army/assets/ENG-05-scout-lod1.glb",
-        "field": "res://assets/army/assets/ENG-05-scout-lod2.glb",
-        "drill": "Mounted_Drill"
-      },
-      "current_hall_building_requirement": [
-        5,
-        1
-      ]
-    },
-    {
-      "unit": {
         "id": "ENG-06",
         "name": "Конный рыцарь",
         "name_en": "Mounted Knight",
@@ -234,46 +194,6 @@
         "preview": "res://assets/army/assets/ENG-06-knight-lod1.glb",
         "field": "res://assets/army/assets/ENG-06-knight-lod2.glb",
         "drill": "Mounted_Drill"
-      },
-      "current_hall_building_requirement": [
-        5,
-        5
-      ]
-    },
-    {
-      "unit": {
-        "id": "ENG-07",
-        "name": "Тяжёлый пеший воин",
-        "name_en": "Man-at-Arms",
-        "unit_class": "Тяжёлая пехота",
-        "power": 140,
-        "attack": 97,
-        "defense": 115,
-        "hp": 210,
-        "speed": 3,
-        "wood": 60,
-        "iron": 65,
-        "food": 70,
-        "coins": 150,
-        "train_seconds": 110,
-        "food_upkeep_per_hour": 0.2,
-        "unlocks_at": "Казармы ур. 5 + кузница ур. 2",
-        "role": "Медленный защитник переднего ряда.",
-        "strengths": "Выдерживает сильные удары и удерживает проходы.",
-        "weakness": "Плохо преследует стрелков и конницу, дорогой в железе.",
-        "special": "+20% защиты при обороне ворот и узких проходов.",
-        "image_filename": "ENG-07_Man-at-Arms.png",
-        "approved_name_en": "English Men-at-Arms",
-        "training_building": "INF-01",
-        "source_unlock_text": "Казармы ур. 5 + кузница ур. 2",
-        "production_asset_status": "not_accepted",
-        "balance_status": "initial_founder_supplied_not_pvp_validated",
-        "legacyLevel": 5
-      },
-      "model_mapping": {
-        "preview": "res://assets/army/assets/ENG-07-authored-menatarms21-lod1.glb",
-        "field": "res://assets/army/assets/ENG-07-authored-menatarms21-lod2.glb",
-        "drill": "Sword_Drill"
       },
       "current_hall_building_requirement": [
         5,
@@ -318,86 +238,6 @@
       "current_hall_building_requirement": [
         2,
         2
-      ]
-    },
-    {
-      "unit": {
-        "id": "ENG-09",
-        "name": "Пеший новобранец",
-        "name_en": "Levy Footman",
-        "unit_class": "Лёгкая пехота",
-        "power": 60,
-        "attack": 42,
-        "defense": 38,
-        "hp": 100,
-        "speed": 4,
-        "wood": 25,
-        "iron": 5,
-        "food": 30,
-        "coins": 20,
-        "train_seconds": 18,
-        "food_upkeep_per_hour": 0.05,
-        "unlocks_at": "Ратуша ур. 1",
-        "role": "Первый и самый дешёвый солдат.",
-        "strengths": "Низкая стоимость, быстрое пополнение отрядов.",
-        "weakness": "Низкая стойкость и слабая эффективность против элиты.",
-        "special": "Быстрая подготовка, без дополнительных бонусов.",
-        "image_filename": "ENG-09_Levy_Footman.png",
-        "approved_name_en": "English Levy Footman",
-        "training_building": "INF-01",
-        "source_unlock_text": "Ратуша ур. 1",
-        "production_asset_status": "not_accepted",
-        "balance_status": "initial_founder_supplied_not_pvp_validated",
-        "legacyLevel": 1
-      },
-      "model_mapping": {
-        "preview": "res://assets/army/assets/ENG-09-footman27-lod1.glb",
-        "field": "res://assets/army/assets/ENG-09-footman27-lod2.glb",
-        "drill": "Sword_Drill"
-      },
-      "current_hall_building_requirement": [
-        1,
-        1
-      ]
-    },
-    {
-      "unit": {
-        "id": "ENG-10",
-        "name": "Лёгкий метатель дротиков",
-        "name_en": "Light Skirmisher",
-        "unit_class": "Лёгкие стрелки",
-        "power": 76,
-        "attack": 68,
-        "defense": 35,
-        "hp": 95,
-        "speed": 5,
-        "wood": 35,
-        "iron": 10,
-        "food": 25,
-        "coins": 45,
-        "train_seconds": 32,
-        "food_upkeep_per_hour": 0.07,
-        "unlocks_at": "Казармы ур. 2",
-        "role": "Быстрый отряд метательного оружия.",
-        "strengths": "Хорош для кратких стычек и беспокойства медленной пехоты.",
-        "weakness": "Уязвим против конницы и тяжёлых щитов.",
-        "special": "+20% к урону против медленной пехоты без щитов.",
-        "image_filename": "ENG-10_Light_Skirmisher.png",
-        "approved_name_en": "English Light Javelin Skirmisher",
-        "training_building": "RNG-01",
-        "source_unlock_text": "Казармы ур. 2",
-        "production_asset_status": "not_accepted",
-        "balance_status": "initial_founder_supplied_not_pvp_validated",
-        "legacyLevel": 2
-      },
-      "model_mapping": {
-        "preview": "res://assets/army/assets/ENG-10-javelin27-lod1.glb",
-        "field": "res://assets/army/assets/ENG-10-javelin27-lod2.glb",
-        "drill": "Javelin_Drill"
-      },
-      "current_hall_building_requirement": [
-        4,
-        1
       ]
     }
   ],

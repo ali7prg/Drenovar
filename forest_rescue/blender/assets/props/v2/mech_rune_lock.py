@@ -35,13 +35,13 @@ SITES = {"lf_site_02": ["mountain", "river", "leaf"], "lf_site_06": ["coal", "se
          "lf_site_10": ["sun", "stone", "root"]}
 DOOR_DROP = 0.62
 
-PARAMS = dict(Rw=0.95, Rb=1.0, hb=0.1, zt=0.56, Rr=0.64, rc=0.68, dz=0.065,
-              R3=0.555, R2=0.5, R1=0.41, y2=0.12, y1=0.24,
-              an=-38.0, nz=0.34, nh=0.5, ad=-86.0, dh=21.0, dt=0.56,
-              sx=0.08, sy=-1.25, sw=1.05, sd=0.36, sh=0.16)
-FREE = ["Rw", "Rb", "zt", "Rr", "rc", "dz", "R3", "R2", "R1", "y2", "y1", "an", "nz", "nh", "dh", "dt",
-        "sx", "sy", "sw", "sd", "sh"]
-PRIOR = 0.3
+# sizes from the closed drawing's image ratios (wall 156 px : clamps 98 : rim 93 : top disc 64 at the dial row)
+PARAMS = dict(Rw=1.05, Rb=1.09, hb=0.08, zt=0.56, Rr=0.64, rc=0.67, dz=0.07,
+              R3=0.57, R2=0.53, R1=0.43, y2=0.12, y1=0.24,
+              an=-48.0, ad=-86.0, dh=19.0, dt=0.36,
+              sx=0.08, sy=-1.3, sw=1.05, sd=0.36, sh=0.16)
+FREE = ["Rw", "zt", "dz", "R3", "R2", "R1", "y2", "y1", "an", "dh", "dt", "sy", "sw", "sd", "sh"]
+PRIOR = 0.15
 
 
 def ring_angle(symbol):
@@ -74,7 +74,7 @@ def key_in_niche(p):
     """Key centre standing upright in the niche (crystal on top, just proud of the wall)."""
     a = math.radians(p["an"])
     r = p["Rw"] + 0.07
-    return np.array([r * math.cos(a), r * math.sin(a), p["nz"] + 0.12])
+    return np.array([r * math.cos(a), r * math.sin(a), p["zt"] * 0.5 + 0.08])
 
 
 def points(p):
@@ -87,13 +87,13 @@ def points(p):
         "r1_left": (-R1, y1, z1t), "r1_right": (R1, y1, z1t), "r1_back": (0, y1 + R1, z1t), "r1_front": (0, y1 - R1, z1t),
         "r2_front": (0, y2 - R2, z2t), "r3_front": (0, y3 - R3, z3t),
         "clamp_b": (0, p["rc"], zc), "clamp_f": (0, -p["rc"], zc), "clamp_l": (-p["rc"], 0, zc), "clamp_r": (p["rc"], 0, zc),
-        "wall_l": (-p["Rw"], 0.0, 0.3), "wall_r": (p["Rw"], 0.0, 0.3),
+        "wall_l": (-p["Rw"], 0.0, p["zt"] * 0.5), "wall_r": (p["Rw"], 0.0, p["zt"] * 0.5),
         "step_tl": (p["sx"] - p["sw"] / 2, p["sy"] + p["sd"] / 2, p["sh"]),
         "step_tr": (p["sx"] + p["sw"] / 2, p["sy"] + p["sd"] / 2, p["sh"]),
         "step_bl": (p["sx"] - p["sw"] / 2, p["sy"] - p["sd"] / 2, 0.0),
         "step_br": (p["sx"] + p["sw"] / 2, p["sy"] - p["sd"] / 2, 0.0),
-        "niche_top": polar(p["Rw"] + 0.03, p["an"], p["nz"] + p["nh"] / 2),
-        "niche_bot": polar(p["Rw"] + 0.03, p["an"], p["nz"] - p["nh"] / 2),
+        "niche_top": polar(p["Rw"] + 0.03, p["an"], p["zt"] + 0.08),
+        "niche_bot": polar(p["Rw"] + 0.03, p["an"], 0.06),
         "door_tl": polar(p["Rw"], p["ad"] - p["dh"], p["hb"] + p["dt"]),
         "door_tr": polar(p["Rw"], p["ad"] + p["dh"], p["hb"] + p["dt"]),
         "door_bl": polar(p["Rw"], p["ad"] - p["dh"], p["hb"]),
@@ -110,9 +110,9 @@ def views():
         {"r1_left": (877.5, 103), "r1_right": (1005, 103), "r1_back": (941, 79), "r1_front": (941, 126),
          "r2_front": (941, 168), "r3_front": (941, 218),
          "clamp_b": (944, 68), "clamp_f": (944, 240), "clamp_l": (847, 146), "clamp_r": (1043, 146),
-         "wall_l": (787, 275), "wall_r": (1094, 272),
+         "wall_l": (783, 265), "wall_r": (1096, 262),
          "step_tl": (874, 344), "step_tr": (1033, 341), "step_bl": (876, 387), "step_br": (1031, 384),
-         "niche_top": (1048, 206), "niche_bot": (1047, 308)},
+         "niche_top": (1050, 206), "niche_bot": (1050, 306)},
         pose=SOLVED_POSE_02, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None, solve_opts={"fov_prior": 20.0},
         title="RUNE LOCK closed (site 02 glyphs set, key on the step)")
     open_pose = dict(SOLVED_POSE_02)
@@ -161,6 +161,7 @@ def arc_wall(g, r0, r1, z0, z1, a0, a1, n, mat, tag, top=True, ends=True):
 
 
 def build(A, p, lod):
+    A._params = p
     g = A.g("root", lod)
     n = (64, 40, 24)[lod]
     Rw, Rb, hb, zt = p["Rw"], p["Rb"], p["hb"], p["zt"]
@@ -189,7 +190,7 @@ def build(A, p, lod):
             g.box(cc + (xx, 0, 0.14), (0.035, 0.34, 0.3), mat="bronze", tag="chest_band")
     # ---- bronze rim, dial bed, four riveted clamps (painting: back, front, left, right)
     CG.ring_prism(g, (0, 0, 0), np.eye(3), p["Rr"], p["Rr"] - 0.075, n, zt + 0.01, zt + 0.075, "bronze", "bronze_rim")
-    CG.disc_prism(g, (0, 0, 0), np.eye(3), None, CG.ngon(p["Rr"] - 0.07, n), zt, zt + 0.07, "bronze", "dial_bed")
+    CG.disc_prism(g, (0, 0, 0), np.eye(3), CG.ngon(p["Rr"] - 0.07, n), zt, zt + 0.07, "bronze", "dial_bed")
     for deg in (90.0, -90.0, 180.0, 0.0):
         a = math.radians(deg)
         er = np.array([math.cos(a), math.sin(a), 0.0])
@@ -205,7 +206,7 @@ def build(A, p, lod):
     et = np.array([-math.sin(a), math.cos(a), 0.0])
     base = er * (Rw + 0.01)
     w2 = 0.15
-    z0n, z1n = p["nz"] - p["nh"] / 2, p["nz"] + p["nh"] / 2 - w2
+    z0n, z1n = 0.06, p["zt"] + 0.08 - w2
     ns = (9, 6, 4)[lod]
     arch = [base + et * (w2 * math.cos(t)) + np.array([0, 0, z1n + w2 * math.sin(t)]) for t in np.linspace(0, math.pi, ns)]
     pathl = [base + et * w2 + np.array([0, 0, z0n])] + arch + [base - et * w2 + np.array([0, 0, z0n])]
@@ -225,7 +226,7 @@ def build(A, p, lod):
     for name, (R, cy, zb, ztop) in discs(p).items():
         part = A.part(name, None, (0.0, cy, zb))
         dg = part.geo[lod]
-        CG.disc_prism(dg, (0.0, cy, 0.0), np.eye(3), None, CG.ngon(R, n), zb, ztop, "bronze", "disc")
+        CG.disc_prism(dg, (0.0, cy, 0.0), np.eye(3), CG.ngon(R, n), zb, ztop, "bronze", "disc")
         if lod < 2:
             CG.ring_prism(dg, (0.0, cy, 0.0), np.eye(3), R, R - 0.022, n, ztop, ztop + 0.012, "bronze", "disc_lip")
     # ---- key (node key_lever): bronze rod, collars, claw, green crystal

@@ -404,7 +404,7 @@ func run_turn(id: String, actor: Rig) -> bool:
 func update_horse(now: float, delta: float) -> void:
 	var horse: Dictionary = adv.get("horse", {})
 	var actor := rig("horse", HORSE_GLB)
-	actor.set_meta("occluder_height", 2.4)
+	actor.set_meta("canopy_fade_radius", 6.0)
 	if not bool(horse.get("visible", false)) and intro_horse.is_empty():
 		actor.set_active(false)
 		return
@@ -585,7 +585,10 @@ func update_squad(now: float, delta: float) -> void:
 			continue
 		var paths := squad_model_paths(index)
 		var actor := rig(id, paths[0], paths[1])
-		actor.set_meta("occluder_height", 2.0)
+		if index == 0:
+			actor.set_meta("canopy_fade_radius", 8.5)
+		else:
+			actor.set_meta("no_canopy_fade", true)
 		if choreo_owns(id):
 			if show_actor(actor, actor.position):
 				markers.append({"position":actor.position + Vector3.UP * 1.4, "kind":"squad", "id":id})
@@ -1222,7 +1225,10 @@ func update_captives(site_id: String, poi: Dictionary, anchor: Dictionary, now: 
 		var actor := rig(id, ASSETS + "humans/lf_civilian_%s.glb" % visual, "", float(look.get("scale", 1.0)))
 		if fresh:
 			actor.variant = look
-			actor.set_meta("occluder_height", 1.9)
+			if index > 0:
+				actor.set_meta("no_canopy_fade", true)
+			else:
+				actor.set_meta("canopy_fade_radius", 7.0)
 		if choreo_owns(id):
 			show_actor(actor, actor.position, near or arriving)
 			continue
@@ -1285,7 +1291,7 @@ func update_guardian(site_id: String, poi: Dictionary, anchor: Dictionary, now: 
 	var actor := rig(id, paths[0], paths[1], 1.02 + 0.16 * level)
 	if fresh:
 		actor.painted = false
-		actor.set_meta("occluder_height", 3.0)
+		actor.set_meta("canopy_fade_radius", 6.5)
 	var home: Vector3 = anchor.get("guardian", anchor.get("center", Vector3.ZERO))
 	var approach: Vector3 = anchor.get("approach", home + Vector3(0, 0, 4))
 	var squad_pos := squad_focus()
@@ -1435,7 +1441,7 @@ func update_boss(now: float, delta: float) -> void:
 	var actor := rig("boss", BOSS_GLB, "", boss_scale)
 	if fresh:
 		actor.lod_scale = BOSS_LOD_SCALE
-		actor.set_meta("occluder_height", 7.0)
+		actor.set_meta("canopy_fade_radius", 13.0)
 	var fight: Dictionary = game.client.battle()
 	var boss_fight: bool = not fight.is_empty() and String(fight.get("species", "")) == "ancient_maw"
 	var squad_pos := squad_focus()

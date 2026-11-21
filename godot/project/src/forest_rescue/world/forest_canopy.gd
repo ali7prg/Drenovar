@@ -164,48 +164,6 @@ func _buffers(cell: int) -> Dictionary:
 	return shown_buffers.get(cell, {}) if cull_fn.is_valid() else cell_buffers[cell]
 
 
-## Instances of a cell that survive the fog cull ({} for an empty cell).
-func visible_buffers(cell: int) -> Dictionary:
-	if not cell_buffers.has(cell):
-		return {}
-	return _buffers(cell)
-
-
-## LOD the trees of `cell` are drawn with right now (2 = impostor / far mesh).
-func tree_lod_at(cell: int) -> int:
-	var cls: String = chunk_class.get(chunk_for_cell(cell), "fogOnly")
-	var distance := Vector2(_last_target.x, _last_target.z).distance_to(cell_center(cell)) - CELL * 0.7
-	return maxi(0, lod_for(KIND_TREE, cls, _last_zoom, maxf(distance, 0.0)))
-
-
-## Hides (or shows again) one tree — its kit instance and its impostor — found by its base
-## position: the occluder-fade copy draws it meanwhile (forest_occluders.gd). Flags live in
-## INSTANCE_CUSTOM (kit: r = 1 hidden; impostor: b = 0 hidden); the batches holding the cell are
-## re-uploaded on the next update_view().
-func set_instance_hidden(cell: int, mesh_index: int, origin: Vector2, hidden: bool) -> void:
-	var dicts: Array = [cell_buffers.get(cell, {})]
-	if shown_buffers.has(cell) and not is_same(shown_buffers[cell], cell_buffers.get(cell)):
-		dicts.append(shown_buffers[cell])
-	for buffers: Dictionary in dicts:
-		if buffers.has(mesh_index):
-			buffers[mesh_index] = _flag(buffers[mesh_index], origin, 3, 11, 12, 1.0 if hidden else 0.0)
-	if cell_impostor.has(cell):
-		cell_impostor[cell] = _flag(cell_impostor[cell], origin, 12, 13, 14, 0.0 if hidden else 1.0)
-	if shown_impostor.has(cell):
-		shown_impostor[cell] = _flag(shown_impostor[cell], origin, 12, 13, 14, 0.0 if hidden else 1.0)
-	for key in selection.keys():
-		if (selection[key] as PackedInt32Array).has(cell):
-			selection[key] = PackedInt32Array([-1])
-
-
-static func _flag(buffer: PackedFloat32Array, origin: Vector2, x_at: int, z_at: int, flag_at: int, value: float) -> PackedFloat32Array:
-	for n in buffer.size() / STRIDE:
-		var o := n * STRIDE
-		if absf(buffer[o + x_at] - origin.x) < 0.006 and absf(buffer[o + z_at] - origin.y) < 0.006:
-			buffer[o + flag_at] = value
-	return buffer
-
-
 func _impostor_buffer(cell: int) -> PackedFloat32Array:
 	return shown_impostor.get(cell, PackedFloat32Array()) if cull_fn.is_valid() else cell_impostor.get(cell, PackedFloat32Array())
 
@@ -254,13 +212,7 @@ func chunk_for_cell(cell: int) -> String:
 	return id if not id.is_empty() else "edge"
 
 
-var _last_target := Vector3.ZERO
-var _last_zoom := 68.0
-
-
 func update_view(camera: Camera3D, target: Vector3, zoom: float) -> void:
-	_last_target = target
-	_last_zoom = zoom
 	var planes := camera.get_frustum()
 	var wanted: Dictionary = {}
 	var tris := 0

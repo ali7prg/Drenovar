@@ -17,7 +17,7 @@ const FADE_SHADER := preload("res://src/forest_rescue/world/forest_wind_fade.gds
 const FADE_CUTOUT_SHADER := preload("res://src/forest_rescue/world/forest_wind_cutout_fade.gdshader")
 
 const MIN_OPACITY := 0.35
-const MAX_FADED := 20
+const MAX_FADED := 8
 const FADE_IN_SECONDS := 0.3
 const FADE_OUT_SECONDS := 0.45
 const HOLD_SECONDS := 0.6          # a tree stays faded this long after it stops hiding anyone

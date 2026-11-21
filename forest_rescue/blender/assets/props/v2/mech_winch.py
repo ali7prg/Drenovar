@@ -31,8 +31,9 @@ TEETH = 22
 PARAMS = dict(AX=1.42, L2=0.45, Rc=0.36, FXL=1.05, FXR=0.86, HX=1.02, GX=-0.83, KX=-0.8, Ls=0.36, Ac=0.66, Lg=0.5,
               PR=0.73, PY=-0.18, Wc=0.8, Hc=0.48, Zt=0.42,
               SPL=0.75, WH=0.42, WR=0.4, GR=1.0, TB=0.6,     # leg splay, pit wall height / width, ground ring, top block
-              LW=0.26, FY=0.42, TZ=0.75, GRr=0.48, SH=0.42)   # leg width, front/back frame offset, tie drop below
+              LW=0.26, FY=0.42, TZ=0.75, GRr=0.48, SH=0.42,   # leg width, front/back frame offset, tie drop below
                                                               # the axle, gear radius, stone pile height
+              SPIL=0.26, SPIR=-0.06, PX=0.0)                  # inner leg splay (left / right trestle), pit x offset
 FREE = ["AX", "L2", "Rc", "FXL", "FXR", "HX", "GX", "KX", "Ls", "Ac", "Lg", "Wc", "Hc", "Zt"]
 PRIOR = 0.2
 
@@ -92,7 +93,7 @@ def build(A, p, lod):
     n = (28, 18, 12)[lod]
     AX, L2, Rc = p["AX"], p["L2"], p["Rc"]
     PR, PY = p["PR"], p["PY"]
-    pit = np.array([0.0, PY, 0.0])
+    pit = np.array([p["PX"], PY, 0.0])
     rng = np.random.default_rng(7 + lod)
     # ---- ground patch round a square stone-lined pit (art/10: dressed-block shaft, the back wall's courses show
     #      through the mouth), rough stone piles round the trestle feet, small stones along the front edge
@@ -111,28 +112,29 @@ def build(A, p, lod):
     courses = (3, 2, 1)[lod]
     ch = 0.012 if lod == 0 else 0.0
     yb = PY + hy + t / 2
-    CG.masonry_run(g, (-hx - t, yb), (hx + t, yb), -0.55, WH, t, courses + 1, 0.42, rng, mat="stone", tag="pit_wall",
+    px = p["PX"]
+    CG.masonry_run(g, (px - hx - t, yb), (px + hx + t, yb), -0.55, WH, t, courses + 1, 0.42, rng, mat="stone", tag="pit_wall",
                    chamfer=ch, lod=lod)
     for sx_ in (-1, 1):
-        xs = sx_ * (hx + t / 2)
+        xs = px + sx_ * (hx + t / 2)
         CG.masonry_run(g, (xs, PY - hy), (xs, PY + hy), -0.55, 0.06, t, courses, 0.4, rng, mat="stone", tag="pit_wall",
                        chamfer=ch, lod=lod)
-    g.box((0.0, PY - hy - t / 2, (0.03 - PIT_D) / 2), (2 * hx + 2 * t, t, PIT_D + 0.03), mat="stone", tag="pit_wall")
-    g.box((0.0, yb, (-0.55 - PIT_D) / 2), (2 * hx + 2 * t, t, PIT_D - 0.55), mat="stone", tag="pit_wall")
+    g.box((px, PY - hy - t / 2, (0.03 - PIT_D) / 2), (2 * hx + 2 * t, t, PIT_D + 0.03), mat="stone", tag="pit_wall")
+    g.box((px, yb, (-0.55 - PIT_D) / 2), (2 * hx + 2 * t, t, PIT_D - 0.55), mat="stone", tag="pit_wall")
     for sx_ in (-1, 1):
-        g.box((sx_ * (hx + t / 2), PY, (-0.55 - PIT_D) / 2), (t, 2 * hy, PIT_D - 0.55), mat="stone", tag="pit_wall")
-    g.box((0.0, PY, -PIT_D - 0.02), (2 * hx, 2 * hy, 0.04), mat="ground", tag="pit_floor")
+        g.box((px + sx_ * (hx + t / 2), PY, (-0.55 - PIT_D) / 2), (t, 2 * hy, PIT_D - 0.55), mat="stone", tag="pit_wall")
+    g.box((px, PY, -PIT_D - 0.02), (2 * hx, 2 * hy, 0.04), mat="ground", tag="pit_floor")
     npile = (8, 5, 3)[lod]
     for sx_ in (-1, 1):
         for k in range(npile):
-            cx = sx_ * (hx + t + 0.12 + rng.uniform(0.0, 0.55))
+            cx = px + sx_ * (hx + t + 0.12 + rng.uniform(0.0, 0.55))
             cy = PY + rng.uniform(-hy - 0.35, hy + 0.15)
             h = SH * rng.uniform(0.55, 1.0)
             g.rock((cx, cy, h * 0.35), (rng.uniform(0.2, 0.32), rng.uniform(0.18, 0.28), h * 0.5), seed=k + 40 + 20 * (sx_ + 1),
                    sub=1, mat="stone", tag="rubble", flat_bottom=True, rough=0.14)
     nfr = (6, 4, 2)[lod]
     for k in range(nfr):
-        cx = -hx + (k + 0.5) * 2 * hx / nfr + rng.uniform(-0.08, 0.08)
+        cx = px - hx + (k + 0.5) * 2 * hx / nfr + rng.uniform(-0.08, 0.08)
         cy = PY - hy - t - 0.12 + rng.uniform(-0.06, 0.06)
         g.rock((cx, cy, 0.05), (rng.uniform(0.13, 0.2), rng.uniform(0.1, 0.15), rng.uniform(0.07, 0.11)), seed=k + 90,
                sub=1, mat="stone", tag="rubble", flat_bottom=True, rough=0.14)
@@ -140,19 +142,22 @@ def build(A, p, lod):
     for sx, fx in ((-1, p["FXL"]), (1, p["FXR"])):
         x = sx * fx
         top = np.array([x, 0.0, AX + p["TB"]])
+        # outer legs splay by SPL, inner legs by SPIL / SPIR (art/10: both right-trestle feet stand right of its
+        # top, the inner feet frame the pit)
+        spread = {-1: p["SPL"], 1: p["SPIL"]} if sx < 0 else {-1: p["SPIR"], 1: p["SPL"]}
         for sy in (-1, 1):
             y = sy * p["FY"]
             for side in (-1, 1):
-                foot = np.array([x + side * p["SPL"], y * 1.15, 0.08])
+                foot = np.array([x + side * spread[side], y * 1.15, 0.08])
                 g.beam(foot, top + np.array([side * 0.07, y * 0.45, -0.06]), p["LW"], p["LW"] * 1.1, mat="wood", tag="leg",
                        chamfer=0.02 if lod == 0 else 0.0)
-            g.beam((x - 0.42, y * 0.95, 0.5), (x + 0.42, y * 0.95, 0.5), 0.14, 0.14, mat="wood", tag="cross",
+            g.beam((x - spread[-1] * 0.62, y * 0.95, 0.5), (x + spread[1] * 0.62, y * 0.95, 0.5), 0.14, 0.14, mat="wood", tag="cross",
                    chamfer=0.012 if lod == 0 else 0.0)
             if sx < 0 and sy > 0:      # diagonal brace from the left trestle's inner leg to the tie (art/10)
-                g.beam((x + p["SPL"] * 0.55, y * 0.8, 0.45), (x + p["SPL"] + 0.35, p["FY"] * 0.5, AX - p["TZ"] - 0.05),
+                g.beam((x + p["SPIL"] * 0.55, y * 0.8, 0.45), (x + p["SPIL"] + 0.35, p["FY"] * 0.5, AX - p["TZ"] - 0.05),
                        0.12, 0.12, mat="wood", tag="brace")
-            g.box((x - p["SPL"], y * 1.2, 0.08), (0.24, 0.26, 0.18), mat="iron", tag="shoe")
-            g.box((x + p["SPL"], y * 1.2, 0.08), (0.24, 0.26, 0.18), mat="iron", tag="shoe")
+            g.box((x - spread[-1], y * 1.15, 0.08), (0.3, 0.3, 0.2), mat="iron", tag="shoe")
+            g.box((x + spread[1], y * 1.15, 0.08), (0.3, 0.3, 0.2), mat="iron", tag="shoe")
         g.box((x, 0.0, AX + p["TB"] - 0.02), (0.26, 0.74, 0.22), mat="wood", tag="top_block", chamfer=0.02 if lod == 0 else 0.0)
         g.box((x, -0.37, AX + 0.4), (0.3, 0.035, 0.12), mat="iron", tag="strap")
         g.box((x, -0.37, 0.45), (0.3, 0.035, 0.12), mat="iron", tag="strap")
@@ -321,10 +326,11 @@ def solve(views):
     params, reps = pv2.solve_views(views, points, PARAMS, FREE, prior_sigma=PRIOR)
     best = _silhouette_iou(params, views)[0]
     # sane ranges only: a taller well wall or a wider ground patch can buy silhouette IoU without looking like art/10
-    grids = {"SPL": np.arange(0.4, 1.01, 0.05), "WH": np.arange(0.06, 0.36, 0.03), "SH": np.arange(0.25, 0.61, 0.05),
-             "GR": np.arange(0.3, 1.01, 0.1), "TB": np.arange(0.3, 0.71, 0.05), "PR": np.arange(0.7, 1.11, 0.05),
+    grids = {"SPL": np.arange(0.3, 0.91, 0.05), "WH": np.arange(0.06, 0.36, 0.03), "SH": np.arange(0.25, 0.61, 0.05),
+             "GR": np.arange(0.3, 1.01, 0.1), "TB": np.arange(0.3, 0.71, 0.05), "PR": np.arange(0.55, 0.86, 0.05),
              "LW": np.arange(0.18, 0.34, 0.03), "FY": np.arange(0.3, 0.71, 0.05), "TZ": np.arange(0.5, 1.01, 0.05),
-             "GRr": np.arange(0.36, 0.61, 0.04)}
+             "GRr": np.arange(0.36, 0.61, 0.04), "SPIL": np.arange(-0.1, 0.51, 0.06),
+             "SPIR": np.arange(-0.2, 0.41, 0.06), "PX": np.arange(-0.3, 0.21, 0.05)}
     for _round in range(2):
         for key, grid in grids.items():
             for val in grid:

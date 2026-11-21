@@ -1,0 +1,60 @@
+{
+  "qa": {
+    "main": {
+      "iou_raw": 0.7892,
+      "iou_filled": 0.8289,
+      "colour_err": 0.079,
+      "colour_err_core": 0.0779,
+      "ref_px": 129699,
+      "render_px": 123104,
+      "ignored_px": 8126,
+      "camera_rms_px": 3.66,
+      "camera_max_px": 9.55,
+      "camera_points": 16
+    }
+  },
+  "tris": {
+    "LOD0": 5908,
+    "LOD1": 3094,
+    "LOD2": 2038
+  },
+  "texture": {
+    "texels": 2671450,
+    "projected_frac": 0.0834,
+    "per_view_frac": {
+      "main": 0.0834
+    },
+    "seconds": 13.7
+  },
+  "blueprint": {
+    "AX": 2.0899,
+    "L2": 0.495,
+    "Rc": 0.3929,
+    "FXL": 1.2063,
+    "FXR": 0.8615,
+    "HX": 1.1304,
+    "GX": -0.9398,
+    "KX": -0.6897,
+    "Ls": 0.3931,
+    "Ac": 0.7205,
+    "Lg": 0.5274,
+    "PR": 0.85,
+    "PY": -0.18,
+    "Wc": 0.8934,
+    "Hc": 0.5146,
+    "Zt": 0.3614,
+    "SPL": 0.8,
+    "WH": 0.42,
+    "WR": 0.4,
+    "GR": 1.0,
+    "TB": 0.5,
+    "LW": 0.33,
+    "FY": 0.7,
+    "TZ": 0.6,
+    "GRr": 0.6,
+    "SH": 0.6,
+    "SPIL": 0.5,
+    "SPIR": 0.4,
+    "PX": -0.05
+  }
+}

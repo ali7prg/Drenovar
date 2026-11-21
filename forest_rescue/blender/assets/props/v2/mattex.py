@@ -271,6 +271,38 @@ def ground(size, dirt_lut, leaf_cols, grass_col, pebble_lut, rng, leaves=0.16, g
     return np.clip(blur_wrap(col, 0.5), 0, 1)
 
 
+def wood_sawn(size, lut, rng, contrast=(0.2, 0.8)):
+    """Sawn golden oak beam, painted style: long calm grain (tone bands stretched along u, a few long dark
+    latewood lines), sparse long seasoning checks, faint fibre - low stripe contrast."""
+    H = W = size
+    yy, xx = np.mgrid[0:H, 0:W].astype(float)
+    warp = pnoise(H, W, W * 0.9, H * 0.18, rng) * 0.45 + pnoise(H, W, W * 0.3, H * 0.06, rng) * 0.05
+    ph = 2 * math.pi * (6 * yy / H + warp)
+    late = smoothstep(0.9, 0.995, 0.5 + 0.5 * np.sin(ph))
+    fade = smoothstep(-0.4, 0.8, pnoise(H, W, W * 0.6, H * 0.08, rng))
+    band = pnoise(H, W, W * 1.2, H * 0.12, rng)
+    low = pnoise(H, W, W * 0.6, H * 0.4, rng)
+    fibre = pnoise(H, W, W * 0.2, 2.0, rng)
+    checks = smoothstep(2.5, 3.1, pnoise(H, W, W * 1.0, 1.8, rng)) * smoothstep(0.0, 0.9, pnoise(H, W, W * 0.4, H * 0.3, rng))
+    t = 0.55 * band + 0.35 * low + 0.06 * fibre - 0.55 * late * fade - 1.8 * checks
+    t = blur_wrap(t, 1.0)
+    return apply_ramp(stretch(rank01(t), *contrast), lut)
+
+
+def iron_smooth(size, base_col, rng, var=0.07):
+    """Smooth forged iron: an even dark grey-black body, gentle broad variation, a few faint fine scratches (the
+    worn bevels come from the trim band)."""
+    H = W = size
+    low = fbm(H, W, W * 0.25, H * 0.25, rng, 3, 0.5)
+    scr = np.zeros((H, W))
+    for ang in rng.uniform(0, math.pi, 3):
+        c_, s_ = math.cos(ang), math.sin(ang)
+        scr = np.maximum(scr, smoothstep(2.5, 3.1, pnoise(H, W, 1.2 + 40 * abs(c_), 1.2 + 40 * abs(s_), rng)))
+    f = 1.0 + var * low + 0.25 * scr
+    f = blur_wrap(f, 0.8)
+    return np.clip(np.asarray(base_col)[None, None] * f[..., None], 0, 1)
+
+
 def trim(tile, amount=-0.42, width=0.075):
     """Trim band for faces mapped across their full width (pv2mat TRIM_CLASSES): the tile's top / bottom rows (the
     face's long edges) darkened (amount < 0: painted edge occlusion on timbers) or lightened (> 0: worn bevel

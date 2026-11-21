@@ -68,7 +68,7 @@ AO_SUN_STRENGTH = 0.38
 AO_DIST = 0.9
 AO_CLASS_STRENGTH = {"ground": 0.35, "grass": 0.25, "rope": 0.45}
 SHARP_TAGS = ("rubble", "lip", "pit_ring", "leg", "cross", "top_block", "tie", "post", "brace", "top_rail")
-NO_CALIBRATE = ("brass", "iron", "wood", "stone")
+NO_CALIBRATE = ("brass", "iron", "wood")
 WOOD_BOXES = [(340, 690, 362, 745), (78, 650, 108, 735), (322, 595, 345, 640), (285, 650, 330, 664), (240, 690, 262, 740)]
 STONE_BOXES = [(22, 778, 112, 828), (380, 800, 440, 835), (140, 790, 210, 840), (300, 852, 360, 872)]
 IRON_BOXES = [(98, 553, 150, 568), (320, 668, 378, 688), (62, 748, 118, 776), (354, 752, 392, 790), (380, 588, 412, 622),
@@ -108,7 +108,16 @@ def make_tiles(px, sheet, rng):
     if "brass" in px and len(px["brass"]) > 80:
         b = px["brass"]
         px["brass"] = b[(b @ MT.LUMA) > np.percentile(b @ MT.LUMA, 45)]
-    return pv2mat.default_tiles(sys.modules[__name__], px, sheet, rng)
+    T = pv2mat.default_tiles(sys.modules[__name__], px, sheet, rng)
+    # sawn golden-oak beams: long calm grain, low stripe contrast
+    T["wood"] = MT.wood_sawn(512, MT.ramp(px["wood"]), rng)
+    # smooth dark grey-black forged iron (lighter worn bevels from the trim band)
+    ir = px["iron"]
+    lum = ir @ MT.LUMA
+    base = ir[(lum > np.percentile(lum, 20)) & (lum < np.percentile(lum, 50))].mean(0)
+    base = base.mean() + (base - base.mean()) * 0.45
+    T["iron"] = MT.iron_smooth(512, base, rng)
+    return T
 
 
 TILE_CHROMA = 1.15
@@ -119,7 +128,7 @@ TRIM_AMOUNT = {"wood": -0.5, "iron": 0.75}
 TRIM_WIDTH = {"wood": 0.04, "iron": 0.06}
 TRIM_TAGS = {"wood": ("leg", "cross", "top_block", "top_rail", "tie", "post", "brace", "chest_plinth"),
              "iron": ("strap", "band", "shoe", "housing_plate", "pinion_bracket", "lever_bracket", "chest_band",
-                      "crank_arm", "gear", "pinion", "chest_lock")}
+                      "crank_arm", "chest_lock")}
 # gear train / crank check: lf_rope_release frames, front-plane box (model metres x0, z0, x1, z1)
 CLIP_SHEET = {"clip": "lf_rope_release", "times": (0.0, 0.45, 0.8, 1.3), "box": (-1.9, 1.3, 2.3, 3.2)}
 # QA close-ups (sheet px): gears, crank, chest + pit, left trestle top + brake
@@ -272,7 +281,7 @@ def unit(v):
     return v / max(np.linalg.norm(v), 1e-12)
 
 
-def bolt(g, p, n, r=0.034, h=0.028, k=5, tag="bolt", mat="brass"):
+def bolt(g, p, n, r=0.027, h=0.024, k=6, tag="bolt", mat="brass"):
     """Domed bolt head on a face (base ring at p, outward normal n): k-sided frustum + cap."""
     n = unit(n)
     R = G.frame_from(n)
@@ -354,11 +363,9 @@ def build(A, p, lod):
                        tag="pit_ring", chamfer=0.0, lod=1)
         CG.masonry_run(g, (xs, yf + t / 2), (xs, yb - t / 2), WH * 0.5, WH * 0.9, t, 1, 0.4, rng, mat="stone",
                        tag="pit_ring", chamfer=0.0, lod=1)
-    FH = WH * 0.42
-    CG.masonry_run(g, (xb[0], yf), (xb[1], yf), 0.0, FH * 0.5, t, 1, 0.38, rng, mat="stone", tag="pit_ring",
-                   chamfer=0.0, lod=1)
-    CG.masonry_run(g, (xb[0] + 0.06, yf), (xb[1] - 0.06, yf), FH * 0.5, FH, t, 1, 0.38, rng, mat="stone",
-                   tag="pit_ring", chamfer=0.02, lod=top_lod)
+    FH = 0.09                     # front: one low course of cut blocks, the hanging chest shows over it
+    CG.masonry_run(g, (xb[0], yf), (xb[1], yf), 0.0, FH, t, 1, 0.38, rng, mat="stone", tag="pit_ring",
+                   chamfer=0.02, lod=top_lod)
     # pit shaft below the mouth (inner faces only, dark masonry) and the floor
     g.box((PX, yf, -PIT_D / 2), (2 * hx + 2 * t, t, PIT_D), mat="stone", tag="pit_wall", skip=("-y", "-z", "+z"))
     g.box((PX, yb, -PIT_D / 2), (2 * hx + 2 * t, t, PIT_D), mat="stone", tag="pit_wall", skip=("+y", "-z", "+z"))

@@ -729,7 +729,7 @@ def run(M, modname, it, do_export=True, do_godot=True):
             pv2.log("  colour calibration gains: " + ", ".join(f"{c} {d['gain']}" for c, d in gains_log.items()))
             for c, amt in getattr(M, "TRIM_AMOUNT", {}).items():
                 if c in tiles:
-                    tiles[c] = MT.trim(tiles[c], amt)
+                    tiles[c] = MT.trim(tiles[c], amt, getattr(M, "TRIM_WIDTH", {}).get(c, 0.075))
                     set_tile(imgs[c], tiles[c])
             # the game's FILMIC tonemap desaturates the unshaded painted path: tiles carry a little extra chroma
             ch = float(getattr(M, "TILE_CHROMA", 1.0))

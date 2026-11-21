@@ -216,3 +216,320 @@ def main(out_dir):
 
 if __name__ == "__main__":
     main(sys.argv[1] if len(sys.argv) > 1 else ".")
+
+
+# ============================================================================================
+# Constraint-resolved v2 plan (authored from the TPS warp; see the plan sheet). Positions are
+# world XZ; every entry keeps its art/01 screen direction around the town (θ, CCW from screen
+# right) and its side of the river; the TPS output is shown next to it on the sheet.
+PLAN = {
+    "sites": [
+        # id, art key, x, z, zone
+        ["lf_site_01", "NW-A", -80.0, -14.0, "grove"],
+        ["lf_site_02", "NW-B", -86.0, 40.0, "grove"],
+        ["lf_site_03", "W-C", -72.0, 74.0, "mixed"],
+        ["lf_site_04", "W-D", -40.0, 87.0, "mixed"],
+        ["lf_site_05", "SW-E", 2.0, 92.0, "quarry"],
+        ["lf_site_06", "SW-F", 30.0, 101.0, "pines"],
+        ["lf_site_07", "S-G", 57.0, 90.0, "pines"],
+        ["lf_site_08", "S-H", 98.0, 85.0, "pines"],
+        ["lf_site_09", "SE-I", 84.0, 47.0, "lake"],
+        ["lf_site_10", "SE-J", 96.0, -20.0, "willows"],
+        ["lf_site_11", "E-K", 92.0, -52.0, "willows"],
+        ["lf_site_12", "NE-M", 42.0, -70.0, "arena_rock"],
+    ],
+    "extra_glades": [["lf_glade_el", "E-L", 72.0, -86.0, "willows"]],
+    "landmarks": [
+        ["hollow_oak_giant", -95.0, -6.0],
+        ["ruined_arch", -70.0, 16.0],
+        ["standing_stones", -62.0, -80.0],
+        ["quarry_mine", -15.0, 100.0],
+        ["dead_tree", 64.0, 76.0],
+        ["hunter_shelter", 102.0, 64.0],
+        ["waterfall_pond", 15.0, -70.0],
+        ["lake_marsh", 101.0, 38.0],
+        ["bridge", 90.482, 20.0],
+        ["boss_arena", 18.0, -92.0],
+    ],
+    # junctions (server nodes) and trails (way polylines between named nodes, world XZ)
+    "junctions": {
+        "lf_horse_origin": [-8.0, -55.0], "lf_junction_corridor": [-12.0, -60.0],
+        "lf_junction_stones": [-58.0, -69.0], "lf_junction_grove": [-75.0, -40.0], "lf_junction_w": [-66.0, 2.0],
+        "lf_junction_wsw": [-63.0, 36.0], "lf_junction_sw": [-61.0, 63.0], "lf_junction_s": [-18.0, 65.0],
+        "lf_junction_quarry": [-20.0, 84.0], "lf_junction_sse": [28.0, 64.0], "lf_junction_south": [48.0, 72.0],
+        "lf_junction_se": [64.0, 52.0], "lf_junction_e": [64.0, 24.0],
+        "lf_bridge_west": [77.0, 20.0], "lf_bridge_east": [104.0, 20.0],
+        "lf_junction_ene": [97.0, -38.0], "lf_junction_ne": [57.0, -80.0],
+    },
+    "trails": [
+        # [from, to, [intermediate XZ points]] — north: the mare's trail past the standing stones
+        ["lf_horse_origin", "lf_junction_corridor", []],
+        ["lf_junction_corridor", "lf_junction_stones", [[-26, -66], [-42, -71]]],
+        ["lf_junction_stones", "lf_junction_grove", [[-70, -56]]],
+        ["lf_junction_grove", "lf_site_01", [[-80, -28]]],
+        ["lf_site_01", "hollow_oak_giant", []],
+        # the grove loop and the inner west trail
+        ["lf_junction_grove", "lf_junction_w", [[-67, -20]]],
+        ["lf_site_01", "ruined_arch", [[-76, 2]]],
+        ["lf_junction_w", "ruined_arch", []],
+        ["ruined_arch", "lf_site_02", [[-80, 26]]],
+        ["lf_junction_w", "lf_junction_wsw", [[-62, 18]]],
+        ["lf_site_02", "lf_junction_wsw", [[-74, 40]]],
+        ["lf_junction_wsw", "lf_junction_sw", [[-66, 50]]],
+        # west and quarry
+        ["lf_junction_sw", "lf_site_03", []],
+        ["lf_site_03", "lf_site_04", [[-58, 86]]],
+        ["lf_junction_sw", "lf_junction_s", [[-40, 68]]],
+        ["lf_site_04", "lf_junction_quarry", [[-30, 88]]],
+        ["lf_junction_s", "lf_junction_quarry", [[-16, 74]]],
+        ["lf_junction_quarry", "quarry_mine", []],
+        ["lf_junction_quarry", "lf_site_05", [[-8, 92]]],
+        ["lf_site_05", "lf_site_06", [[16, 100]]],
+        # south: dark pines, dead tree, marsh
+        ["lf_junction_s", "lf_junction_sse", [[6, 66]]],
+        ["lf_junction_sse", "lf_junction_south", []],
+        ["lf_junction_south", "lf_site_07", [[50, 82]]],
+        ["lf_site_06", "lf_site_07", [[44, 98]]],
+        ["lf_site_07", "dead_tree", []],
+        ["lf_junction_south", "lf_junction_se", [[58, 62]]],
+        ["lf_junction_se", "lf_site_08", [[80, 68], [92, 76]]],
+        ["lf_site_07", "lf_site_08", [[78, 94]]],
+        ["lf_junction_se", "lf_site_09", [[74, 50]]],
+        ["lf_site_08", "hunter_shelter", []],
+        ["lf_site_09", "hunter_shelter", [[92, 56]]],
+        # the bridge and the east bank up to the arena
+        ["lf_junction_se", "lf_junction_e", [[67, 38]]],
+        ["lf_junction_e", "lf_bridge_west", []],
+        ["lf_bridge_west", "lf_bridge_east", []],
+        ["lf_bridge_east", "lf_site_10", [[103, 2]]],
+        ["lf_site_10", "lf_junction_ene", []],
+        ["lf_junction_ene", "lf_site_11", []],
+        ["lf_site_11", "lf_glade_el", [[84, -72]]],
+        ["lf_junction_ene", "lf_glade_el", [[82, -62]]],
+        ["lf_glade_el", "lf_junction_ne", []],
+        ["lf_junction_ne", "lf_site_12", [[50, -74]]],
+        ["lf_junction_ne", "boss_arena", [[44, -86]]],
+        ["lf_site_12", "waterfall_pond", [[28, -70]]],
+    ],
+}
+
+
+def screen_theta(x, z):
+    u, w = (x - z) / SQ2, (x + z) / SQ2
+    return math.degrees(math.atan2(-w, u)) % 360.0
+
+
+def art_theta(p, town, rx, ry):
+    dx, dy = (p[0] - town[0]) / rx, -(p[1] - town[1]) / ry
+    return math.degrees(math.atan2(dy, dx)) % 360.0, math.hypot(dx, dy)
+
+
+def validate(plan, river):
+    rows = []
+    glades = [(s[0], s[1], s[2], s[3]) for s in plan["sites"]] + [(g[0], g[1], g[2], g[3]) for g in plan["extra_glades"]]
+    arena = next(l for l in plan["landmarks"] if l[0] == "boss_arena")
+    for gid, key, x, z in glades:
+        hs = [base_height(x + r * math.cos(a), z + r * math.sin(a)) for r in (0, 3, 6, 9) for a in np.linspace(0, 2 * math.pi, 12, endpoint=False)]
+        bank = river.bank(x, z)
+        cheb = max(abs(x), abs(z))
+        near = min(math.hypot(x - g[2], z - g[3]) for g in glades if g[0] != gid)
+        lm = min(math.hypot(x - l[1], z - l[2]) for l in plan["landmarks"] if l[0] not in ("boss_arena", "lake_marsh", "bridge"))
+        arena_d = math.hypot(x - arena[1], z - arena[2])
+        ok = bank >= 10 and 65 <= cheb <= 103 and near >= 20 and arena_d >= 30 and max(hs) - min(hs) <= 4.5
+        rows.append({"id": gid, "key": key, "x": x, "z": z, "theta": screen_theta(x, z), "y": base_height(x, z),
+                     "relief": max(hs) - min(hs), "bank": bank, "cheb": cheb, "nearest_glade": near, "nearest_landmark": lm,
+                     "arena": arena_d, "ok": ok})
+    return rows
+
+
+def trail_points(plan):
+    nodes = {k: v for k, v in plan["junctions"].items()}
+    for s in plan["sites"]:
+        nodes[s[0]] = [s[2], s[3]]
+    for g in plan["extra_glades"]:
+        nodes[g[0]] = [g[2], g[3]]
+    for l in plan["landmarks"]:
+        nodes[l[0]] = [l[1], l[2]]
+    out = []
+    for a, b, mid in plan["trails"]:
+        pts = [nodes[a]] + [list(p) for p in mid] + [nodes[b]]
+        out.append((a, b, pts))
+    return nodes, out
+
+
+def check_trails(plan, river):
+    nodes, trails = trail_points(plan)
+    report = []
+    deck = (77.0 - 0.5, 104.0 + 0.5)
+    for a, b, pts in trails:
+        wet = 0
+        steep = 0.0
+        length = 0.0
+        inside_core = 0
+        for k in range(len(pts) - 1):
+            p, q = np.array(pts[k], float), np.array(pts[k + 1], float)
+            L = np.linalg.norm(q - p)
+            length += L
+            n = max(1, int(L / 1.0))
+            prev_h = None
+            for i in range(n + 1):
+                r = p + (q - p) * i / n
+                on_deck = abs(r[1] - 20.0) < 2.5 and deck[0] <= r[0] <= deck[1]
+                if river.bank(r[0], r[1]) < 2.0 and not on_deck:
+                    wet += 1
+                if max(abs(r[0]), abs(r[1])) < 55.0 and not (a == "lf_horse_origin" or b == "lf_horse_origin"):
+                    inside_core += 1
+                h = 1.1 if on_deck else base_height(r[0], r[1])
+                if prev_h is not None and not on_deck:
+                    steep = max(steep, math.degrees(math.atan(abs(h - prev_h) / (L / n))))
+                prev_h = h
+        report.append({"from": a, "to": b, "length": length, "wet_samples": wet, "max_slope": steep, "core_samples": inside_core})
+    return report
+
+
+ZONE_COLORS = {"grove": (214, 170, 40), "mixed": (150, 160, 60), "quarry": (175, 168, 150), "pines": (40, 80, 70),
+               "lake": (70, 140, 130), "willows": (95, 150, 80), "arena_rock": (165, 150, 120), "town": (110, 150, 70)}
+
+
+def zone_of(x, z, river):
+    cheb = max(abs(x), abs(z))
+    if cheb < 56:
+        return "town"
+    th = screen_theta(x, z)
+    east = river.bank(x, z) > 0 and x > river.at(z)[0]
+    if cheb < 66 and not east:
+        return "town"
+    if east:
+        if 20 <= th <= 80:
+            return "arena_rock"
+        return "willows"
+    if 75 <= th < 160:
+        return "grove"
+    if 160 <= th < 208:
+        return "mixed"
+    if 208 <= th < 245:
+        return "quarry"
+    if 245 <= th < 300:
+        return "pines"
+    if 300 <= th < 345:
+        return "lake"
+    return "willows"
+
+
+def draw_sheet(out_dir, plan, rows, trail_report, raw):
+    river = River(json.load(open(ATLAS)))
+    art = Image.open(ART).convert("RGB")
+    inv = json.load(open(INV))
+    town = np.array(inv["town"]["centre"], float)
+    rx, ry = inv["town"]["wallRadii"]
+    d = ImageDraw.Draw(art)
+    f = ImageFont.truetype(BOLD, 20)
+    for c in inv["cages"]:
+        x, y = c["cage"]
+        d.ellipse((x - 14, y - 14, x + 14, y + 14), outline=(255, 40, 40), width=4)
+        d.text((x + 16, y - 12), c["key"], font=f, fill=(255, 255, 255), stroke_width=3, stroke_fill=(0, 0, 0))
+    for l in inv["landmarks"]:
+        x, y = l["at"]
+        d.rectangle((x - 9, y - 9, x + 9, y + 9), outline=(40, 160, 255), width=4)
+    # game screen plan: U right, Y down (flat ground projection), 3.4 px per m
+    k = 3.3
+    W, H = int(330 * k), int(210 * k)
+    cx, cy = W // 2, H // 2
+    plan_img = Image.new("RGB", (W, H), (34, 40, 44))
+    px = plan_img.load()
+    for j in range(0, H, 2):
+        for i in range(0, W, 2):
+            U = (i - cx) / k
+            Y = (j - cy) / k
+            w = Y / S38
+            x, z = (U + w) / SQ2, (w - U) / SQ2
+            if max(abs(x), abs(z)) > EXTENT:
+                continue
+            col = ZONE_COLORS[zone_of(x, z, river)]
+            if river.bank(x, z) < 0:
+                col = (50, 110, 170)
+            for a in (0, 1):
+                for b in (0, 1):
+                    if i + a < W and j + b < H:
+                        px[i + a, j + b] = col
+    d2 = ImageDraw.Draw(plan_img)
+
+    def S(x, z):
+        u, w = (x - z) / SQ2, (x + z) / SQ2
+        return cx + u * k, cy + w * S38 * k
+
+    for half, colr, wd in ((CORE, (240, 230, 200), 3), (EXTENT, (230, 230, 230), 2)):
+        corners = [S(-half, -half), S(half, -half), S(half, half), S(-half, half), S(-half, -half)]
+        d2.line(corners, fill=colr, width=wd)
+    nodes, trails = trail_points(plan)
+    for a, b, pts in trails:
+        d2.line([S(*p) for p in pts], fill=(236, 205, 140), width=4)
+    for name, (x, z) in plan["junctions"].items():
+        sx, sy = S(x, z)
+        d2.ellipse((sx - 4, sy - 4, sx + 4, sy + 4), fill=(255, 230, 160))
+    f2 = ImageFont.truetype(BOLD, 15)
+    for r in rows:
+        sx, sy = S(r["x"], r["z"])
+        rr = 7 * k
+        d2.ellipse((sx - rr, sy - rr * S38, sx + rr, sy + rr * S38), outline=(255, 255, 255) if r["ok"] else (255, 60, 60), width=3)
+        label = (r["id"].replace("lf_site_", "S") if r["id"].startswith("lf_site") else "E-L") + " " + r["key"]
+        d2.text((sx + 10, sy - 18), label, font=f2, fill=(255, 255, 255), stroke_width=3, stroke_fill=(0, 0, 0))
+    for l in plan["landmarks"]:
+        sx, sy = S(l[1], l[2])
+        if l[0] == "boss_arena":
+            rr = 15 * k
+            d2.ellipse((sx - rr, sy - rr * S38, sx + rr, sy + rr * S38), outline=(255, 140, 40), width=4)
+        elif l[0] == "lake_marsh":
+            rr = 11 * k
+            d2.ellipse((sx - rr, sy - rr * S38, sx + rr, sy + rr * S38), fill=(60, 120, 175), outline=(120, 190, 120), width=3)
+        else:
+            d2.rectangle((sx - 6, sy - 6, sx + 6, sy + 6), fill=(60, 170, 255), outline=(0, 0, 0))
+        d2.text((sx + 8, sy + 4), l[0].replace("_", " "), font=ImageFont.truetype(FONT, 13), fill=(220, 240, 255), stroke_width=2, stroke_fill=(0, 0, 0))
+    # TPS raw positions (faint) for reference
+    for s in raw["sites"]:
+        sx, sy = S(s["x"], s["z"])
+        d2.line((sx - 5, sy - 5, sx + 5, sy + 5), fill=(255, 120, 120), width=2)
+        d2.line((sx - 5, sy + 5, sx + 5, sy - 5), fill=(255, 120, 120), width=2)
+    hx, hy = S(-8, -55)
+    d2.ellipse((hx - 7, hy - 7, hx + 7, hy + 7), fill=(200, 60, 40))
+    d2.text((hx + 8, hy - 4), "horse origin / corridor", font=ImageFont.truetype(FONT, 13), fill=(255, 220, 200), stroke_width=2, stroke_fill=(0, 0, 0))
+    # compose: art (scaled) | plan
+    art_s = art.resize((int(art.width * H / art.height), H), Image.LANCZOS)
+    sheet = Image.new("RGB", (art_s.width + W + 20, H + 60), (24, 22, 20))
+    sheet.paste(art_s, (0, 60))
+    sheet.paste(plan_img, (art_s.width + 20, 60))
+    dd = ImageDraw.Draw(sheet)
+    dd.text((10, 14), "art/01 (user zones; cages red, landmarks blue)", font=ImageFont.truetype(BOLD, 22), fill=(250, 240, 220))
+    dd.text((art_s.width + 30, 14), "proposed atlas v2 in the game camera's screen space (38° ortho; red x = raw TPS warp)",
+            font=ImageFont.truetype(BOLD, 22), fill=(250, 240, 220))
+    path = os.path.join(out_dir, "atlas_v2_plan.png")
+    sheet.save(path)
+    return path
+
+
+def report(out_dir, plan, raw):
+    river = River(json.load(open(ATLAS)))
+    rows = validate(plan, river)
+    trails = check_trails(plan, river)
+    inv = json.load(open(INV))
+    town = np.array(inv["town"]["centre"], float)
+    rx, ry = inv["town"]["wallRadii"]
+    arts = {c["key"]: c["cage"] for c in inv["cages"]}
+    print("\n%-11s %-5s %8s %8s %7s %7s %6s %6s %6s %6s %6s %s" % ("glade", "art", "x", "z", "θ game", "θ art", "y", "relief", "bank", "cheb", "near", "ok"))
+    for r in rows:
+        ta, _ = art_theta(arts[r["key"]], town, rx, ry)
+        r["theta_art"] = ta
+        print("%-11s %-5s %8.1f %8.1f %7.1f %7.1f %6.2f %6.2f %6.1f %6.1f %6.1f %s" % (r["id"], r["key"], r["x"], r["z"], r["theta"], ta, r["y"], r["relief"], r["bank"], r["cheb"], r["nearest_glade"], "OK" if r["ok"] else "CHECK"))
+    print("\ntrails: total %.0f m in %d ways; wet samples %d; max slope %.1f°" % (sum(t["length"] for t in trails), len(trails),
+          sum(t["wet_samples"] for t in trails), max(t["max_slope"] for t in trails)))
+    for t in trails:
+        if t["wet_samples"] or t["max_slope"] > 22 or t["core_samples"]:
+            print("  CHECK", t)
+    sheet = draw_sheet(out_dir, plan, rows, trails, raw)
+    json.dump({"rows": rows, "trails": trails}, open(os.path.join(out_dir, "atlas_v2_plan_checks.json"), "w"), indent=1)
+    print("sheet", sheet)
+
+
+if __name__ == "__main__" and len(sys.argv) > 2 and sys.argv[2] == "--report":
+    raw = json.load(open(os.path.join(sys.argv[1], "plan_raw.json")))
+    report(sys.argv[1], PLAN, raw)

@@ -122,6 +122,29 @@ LOD), `fog_culled` (instances removed because they stand deeper than 3 m inside 
   - Gameplay layer (forest_game.gd): while the squad or an escort is under way the client reads `/api/state`
     every 1.2 s of server time, so each committed checkpoint reveal dissolves on its own (~2 s per cell)
     instead of all at once on arrival.
+* v3.5 (2026-11-21, layout pass 4 + phone-build readiness — no gameplay API change, API_VERSION unchanged):
+  - Impostors ship in the pack: `res://assets/forest_rescue/impostors/forest_impostors.png` (imported lossless with
+    mipmaps, same 320 px cells) + `forest_impostors.json` (cells, signature, kit GLB md5s). `ForestImpostors.bake()`
+    loads them (threaded) when the signature matches, else the user:// cache, else bakes at runtime (fallback);
+    `ForestImpostors.source` = shipped | cache | baked. The signature is export-safe (bake keys, FOLIAGE_LOOK, kit json
+    and painted-shader digests; no directory listing / mtimes); the kit GLB md5s are compared in the editor only.
+    Re-ship after a look / kit change: any rendering run with `-- --ship-impostors`, then import.
+  - Loading: the terrain bake runs on a WorkerThreadPool task (the city keeps drawing frames); the world setup
+    yields a frame between its heavy steps (kit, canopy, paths, river, water, quarry, impostors, fog, landmarks).
+  - Export safety: ActorRig reads UV2 material names from `res://assets/forest_rescue/uv2_materials.json`
+    (`world/tools/build_uv2_manifest.gd`; raw .glb only as an editor fallback); ForestKit lists kit GLBs with
+    `ResourceLoader.list_directory` (an exported pack lists `*.glb.import`).
+  - Arena assembled LOD0/1/2 GLBs reference shared textures (the kit's lf_foliage_atlas / bark / limestone, the
+    banner / fossil-wall extractions) instead of three embedded copies (`forest_rescue/tools/dedupe_glb_textures.py`).
+  - Layout pass 4: south pines bigger away from the trails; ambient pines over a trail point with more than 16
+    crowns are dropped (`TRAIL_CROWN_LIMIT`, ForestOccluders.MAX_FADED 18). Ground: art/01 meadow grade
+    (`forest_ground.gdshader` meadow_grade), camp pads; limestone warmer (ring / quarry); mist wisps off
+    (`ForestWater.MIST_ENABLED` false: they read as fog of war). Winch v2 (lf_mechanism_winch_sequence) keeps the v1
+    node / clip contract.
+  - QA: `qa_forest_captives.gd` (12 sites caged, exit, escort; one still per act), `qa_forest_arena_camera.gd`
+    (boss + squad in frame and unoccluded in the hunt / fury / last_stand fight camera), `qa_forest_perf.gd --entry`
+    (entry frame times) and per-segment frame-time p50/p95/p99/max, texture / video memory and pipeline compilations.
+
 * v3.4 (2026-11-21, layout passes 2–3 — no API change, API_VERSION unchanged):
   - Atlas lake enlarged (CONTRACT v1.4): ellipse centre (97.2, 32.4), 18.5 × 10 m, across the channel south of the
     bridge; the glade 09 → hunter shelter trail runs along its south-west shore (fog reveal by normal play).

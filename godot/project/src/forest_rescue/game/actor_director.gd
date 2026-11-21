@@ -1392,9 +1392,47 @@ func battle_elapsed(fight: Dictionary, now: float) -> float:
 func timeline(fight: Dictionary) -> Array:
 	return fight.get("timeline", [])
 
+## iPhone hot path (battle): the fight timeline is indexed once by event time; the per-frame pose / HP / FX
+## queries read only the events of their time window (binary search) instead of scanning every event.
+var _tl_source: Array = []
+var _tl_times := PackedFloat32Array()
+var _tl_events: Array = []
+var _tl_hp_times := PackedFloat32Array()
+var _tl_hp_values := PackedFloat32Array()
+
+func _index_timeline(fight: Dictionary) -> void:
+	var events: Array = timeline(fight)
+	if is_same(events, _tl_source):
+		return
+	_tl_source = events
+	var order: Array = events.duplicate()
+	order.sort_custom(func(a, b) -> bool: return float(a.get("t", 0.0)) < float(b.get("t", 0.0)))
+	_tl_events = order
+	_tl_times = PackedFloat32Array()
+	_tl_hp_times = PackedFloat32Array()
+	_tl_hp_values = PackedFloat32Array()
+	for event in order:
+		_tl_times.append(float(event.get("t", 0.0)))
+		if event.has("hp"):
+			_tl_hp_times.append(float(event.get("t", 0.0)))
+			_tl_hp_values.append(float(event.hp))
+
+## Events with from_t <= t <= to_t, in time order.
+func timeline_window(fight: Dictionary, from_t: float, to_t: float) -> Array:
+	_index_timeline(fight)
+	var lo := _tl_times.bsearch(from_t, true)
+	var hi := _tl_times.bsearch(to_t, false)
+	return _tl_events.slice(lo, hi) if hi > lo else []
+
+## Last event hp at or before t (or `fallback`).
+func timeline_hp(fight: Dictionary, t: float, fallback: float) -> float:
+	_index_timeline(fight)
+	var i := _tl_hp_times.bsearch(t, false) - 1
+	return _tl_hp_values[i] if i >= 0 else fallback
+
 func latest_event(fight: Dictionary, elapsed: float, actor: String, window: float, type := "") -> Dictionary:
 	var best := {}
-	for event in timeline(fight):
+	for event in timeline_window(fight, elapsed - window, elapsed):
 		var at := float(event.get("t", 0.0))
 		if at > elapsed or elapsed - at > window:
 			continue
@@ -1409,7 +1447,7 @@ func latest_event(fight: Dictionary, elapsed: float, actor: String, window: floa
 func guardian_battle_pose(actor: Rig, fight: Dictionary, now: float) -> void:
 	var elapsed := battle_elapsed(fight, now)
 	var ending := float(fight.get("endsAt", now)) <= now
-	for event in timeline(fight):
+	for event in timeline_window(fight, -1.0e9, elapsed):
 		if String(event.get("type", "")) == "death" and String(event.get("actor", "")) == "guardian" and float(event.get("t", 0.0)) <= elapsed:
 			actor.pose_at(["Death"], elapsed - float(event.t))
 			return
@@ -1446,7 +1484,7 @@ func battle_member_pose(index: int, fight: Dictionary, now: float) -> Dictionary
 	var elapsed := battle_elapsed(fight, now)
 	if float(fight.get("endsAt", now)) <= now:
 		return {"position":p, "yaw":yaw, "clip":["lf_soldier_guard", "lf_soldier_idle", "Idle"]}
-	for event in timeline(fight):
+	for event in timeline_window(fight, elapsed - 1.25, elapsed):
 		var at := float(event.get("t", 0.0))
 		if at > elapsed or elapsed - at > 1.25:
 			continue
@@ -1475,9 +1513,7 @@ func update_battle_hud(now: float) -> void:
 		hp = float(guardian.get("hp", 0))
 		hp_max = float(guardian.get("hpMax", 1))
 	var elapsed := battle_elapsed(fight, now)
-	for event in timeline(fight):
-		if float(event.get("t", 0.0)) <= elapsed and event.has("hp"):
-			hp = float(event.hp)
+	hp = timeline_hp(fight, elapsed, hp)
 	var left := maxi(0, ceili((float(fight.get("endsAt", now)) - now) / 1000.0))
 	var title: String = game.content.text("site.guardian", {"name":game.content.species_name(species), "level":int(fight.get("level")) if fight.get("level") != null else 1})
 	var clock := "%d:%02d" % [left / 60, left % 60]

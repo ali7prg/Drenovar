@@ -127,6 +127,9 @@ var quarry_axis := 0.0            # direction (rad) from the pit centre to the c
 var water: Array = []             # ForestWater.bodies(atlas): lake, waterfall pond, marsh pools
 var glade_clearings: Array = []   # [[Vector2, radius]] visual glade clearings (pass 2)
 const GLADE_CLEARING := 11.5
+## pass 4 (art/01 S-G: small camps in the dense dark pine forest): the south / lake glades keep a
+## clearing just past the 8.5 m camp pad; pines stand at its edge (crowns overhang toward the pad)
+const GLADE_CLEARING_DENSE := 9.6
 
 ## Layout pass 3 (art/01: big individual crowns standing in groves on sunny meadows). Canopy cover
 ## of the zone's forest land (crown discs, art/01 crops at zoom 68), trunk spacing inside a grove,
@@ -519,7 +522,8 @@ func run() -> void:
 	# art/01 (pass 2): every glade sits in an open sunny clearing of ~11.5 m radius (camp, fire,
 	# cage, props) — no trunk inside and crowns overhang it only a little (the gameplay pad stays 7 m)
 	for site in atlas.sites:
-		glade_clearings.append([Vector2(site.center.x, site.center.z), GLADE_CLEARING])
+		var gc := Vector2(site.center.x, site.center.z)
+		glade_clearings.append([gc, GLADE_CLEARING_DENSE if dominant_zone(gc.x, gc.y) in [Z_SPRUCE, Z_RIVER] else GLADE_CLEARING])
 	for extra in atlas.extra_glades:
 		glade_clearings.append([Vector2(extra.center.x, extra.center.z), GLADE_CLEARING])
 	# (f) the bridge ends: towers and red banners read (no trunk within 9 m of either deck end)

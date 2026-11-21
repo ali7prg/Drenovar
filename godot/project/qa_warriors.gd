@@ -16,7 +16,7 @@ func check(condition: bool, detail: String) -> void:
 
 func run() -> void:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/game.json"))
-	check(data.unitModels.size() == 6, "All six warrior definitions are required")
+	check(data.unitModels.size() == 5, "All five warrior definitions are required")
 	for id in data.unitModels:
 		var visual: Dictionary = data.unitModels[id]
 		for role in ["preview", "field"]:

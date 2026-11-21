@@ -199,46 +199,6 @@
         5,
         5
       ]
-    },
-    {
-      "unit": {
-        "id": "ENG-08",
-        "name": "Городской ополченец",
-        "name_en": "Town Militia",
-        "unit_class": "Гарнизон",
-        "power": 70,
-        "attack": 48,
-        "defense": 48,
-        "hp": 110,
-        "speed": 4,
-        "wood": 25,
-        "iron": 7,
-        "food": 25,
-        "coins": 25,
-        "train_seconds": 25,
-        "food_upkeep_per_hour": 0.06,
-        "unlocks_at": "Ратуша ур. 1",
-        "role": "Массовая недорогая оборона поселения.",
-        "strengths": "Дешёвый гарнизон, полезен для защиты ресурсов.",
-        "weakness": "Слаб в длительном открытом бою против профессиональных воинов.",
-        "special": "+15% к защите при обороне собственного города.",
-        "image_filename": "ENG-08_Town_Militia.png",
-        "approved_name_en": "English Militia",
-        "training_building": "INF-01",
-        "source_unlock_text": "Ратуша ур. 1",
-        "production_asset_status": "not_accepted",
-        "balance_status": "initial_founder_supplied_not_pvp_validated",
-        "legacyLevel": 1
-      },
-      "model_mapping": {
-        "preview": "res://assets/army/assets/ENG-08-militia27-lod1.glb",
-        "field": "res://assets/army/assets/ENG-08-militia27-lod2.glb",
-        "drill": "Sword_Drill"
-      },
-      "current_hall_building_requirement": [
-        2,
-        2
-      ]
     }
   ],
   "culture_headers": [

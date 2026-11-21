@@ -12,7 +12,7 @@ const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
 const HudAction = preload("res://src/hud_action.gd")
 const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
-const RECRUIT_ORDER := ["ENG-08", "ENG-01", "ENG-02", "ENG-03", "ENG-04", "ENG-06"]
+const RECRUIT_ORDER := ["ENG-01", "ENG-02", "ENG-03", "ENG-04", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
 const RESOURCE_NAMES := {"food":"Еда","wood":"Дерево","stone":"Камень","iron":"Железо","coins":"Монеты"}
 const SCENE_REUSE_SECONDS := 40.0
@@ -1490,7 +1490,7 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 		var costs := {}
 		for resource in ["wood", "food", "iron", "coins"]:
 			var cost := int(unit.get(resource, 0))
-			if resource == "iron" and state.city.get("kingdom") != null and unit.id in ["ENG-08", "ENG-01"]:
+			if resource == "iron" and state.city.get("kingdom") != null and unit.id == "ENG-01":
 				cost = 0
 			costs[resource] = cost * int(amount)
 		var reduction := clampi(int(building.level) - 1, 0, 4) * 8 if state.city.get("kingdom", state.city.get("legacyUpgrades")) is Dictionary else 0
@@ -1848,7 +1848,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			if units.is_empty():
 				row(slots, "Добавить войска из списка")
 			if state.get("encounters", []).any(func(target): return target.id == id and target.get("species") == "tenerys" and int(target.level) == 1):
-				row(slots, "Ориентир для Тенериса I: 11 копейщиков (около 960 мощи).")
+				row(slots, "Ориентир для Тенериса I: 5 копейщиков (435 мощи).")
 		preview.revision += 1
 		preview.units = units
 		submit.order = {}
@@ -2886,7 +2886,7 @@ func run_smoke() -> void:
 	var preview_deadline := Time.get_ticks_msec() + 5000
 	while preview_view != null and preview_view.get_child_count() == 0 and Time.get_ticks_msec() < preview_deadline:
 		await get_tree().process_frame
-	if preview_view == null or preview_view.get_child_count() != 1 or data.unitModels.size() != 6:
+	if preview_view == null or preview_view.get_child_count() != 1 or data.unitModels.size() != 5:
 		get_tree().quit(15)
 		return
 	var training: Dictionary = await request("command", {"kind":"train", "buildingId":barracks.id, "unitId":spearman.id, "quantity":2})

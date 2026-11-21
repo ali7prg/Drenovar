@@ -30,8 +30,8 @@ void fragment() {
 	// vertical streaks (painted look): broad white ribbons with teal gaps, racing down
 	float s1 = texture(noise_tex, vec2(across / 1.1, (down - t * 2.2) / 4.5)).r;
 	float s2 = texture(noise_tex, vec2(across / 0.5 + 0.37, (down - t * 2.9) / 2.2)).g;
-	float streak = smoothstep(0.42, 0.66, s1 * 0.6 + s2 * 0.5);
-	vec3 col = mix(water_color, streak_color, 0.12 + 0.86 * streak);
+	float streak = smoothstep(0.56, 0.8, s1 * 0.6 + s2 * 0.5);          // pass 4: sparser white streaks
+	vec3 col = mix(water_color, streak_color, 0.08 + 0.9 * streak);
 	// glassy darker lip at the top, whiter and broken towards the foot
 	col = mix(col * 0.86, col, smoothstep(0.0, 0.18, uv.y));
 	float foot = smoothstep(0.62, 1.0, uv.y);
@@ -40,7 +40,7 @@ void fragment() {
 	float side = COLOR.a;
 	float edge_noise = texture(noise_tex, vec2(uv.x * 2.0, (down - t * 2.0) / 2.6)).r;
 	float alpha = smoothstep(0.0, 0.35, side + (edge_noise - 0.5) * 0.35);
-	alpha *= 0.2 + 0.76 * streak;                          // pass 4: translucent gaps show the dark wet rock
+	alpha *= 0.3 + 0.66 * streak;                          // pass 4: translucent blue gaps show the dark wet rock
 	alpha = max(alpha, foot * 0.8 * side);                 // foamy foot stays white
 	alpha *= smoothstep(0.0, 0.04, uv.y) * 0.9 + 0.1;
 	ALBEDO = col;

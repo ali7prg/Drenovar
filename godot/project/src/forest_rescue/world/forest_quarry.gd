@@ -32,10 +32,10 @@ func build(center: Vector2, axis: float, mine: Vector2, glade: Vector2, glade_r:
 	for k in TIERS:
 		var r_in := r0 + k * TIER_DEPTH
 		var r_out := r_in + TIER_DEPTH
-		var top := h0 + (k + 1) * TIER_RISE
+		var top_base := h0 + (k + 1) * TIER_RISE
 		var half := deg_to_rad(float(HALF_SPAN[k]))
 		var n := int(ceil(rad_to_deg(2.0 * half) / SEG_DEG))
-		var keep: Array = []
+		var keep: Array[bool] = []
 		for i in n:
 			var a := axis - half + 2.0 * half * (i + 0.5) / n
 			var mid := center + Vector2(cos(a), sin(a)) * (r_in + TIER_DEPTH * 0.5)
@@ -43,13 +43,22 @@ func build(center: Vector2, axis: float, mine: Vector2, glade: Vector2, glade_r:
 			var ok: bool = float(route_dist.call(mid.x, mid.y)) > TRAIL_KEEP and float(route_dist.call(face.x, face.y)) > TRAIL_KEEP
 			ok = ok and mid.distance_to(glade) > glade_r + 2.0 and face.distance_to(mine) > MINE_KEEP and mid.distance_to(mine) > MINE_KEEP
 			keep.append(ok)
+		# drop isolated short runs (they read as loose boxes between trails)
+		var run_start := 0
+		for i in n + 1:
+			if i == n or not keep[i]:
+				if i - run_start < 4:
+					for j in range(run_start, i):
+						keep[j] = false
+				run_start = i + 1
 		for i in n:
 			if not keep[i]:
 				continue
 			var a0 := axis - half + 2.0 * half * i / n
 			var a1 := axis - half + 2.0 * half * (i + 1) / n
-			var e0 := 0.22 * sin(a0 * 9.0 + k * 1.7)          # irregular ledge edge
-			var e1 := 0.22 * sin(a1 * 9.0 + k * 1.7)
+			var e0 := 0.55 * sin(a0 * 7.0 + k * 1.7) + 0.3 * sin(a0 * 17.0 + k)       # irregular ledge edge
+			var e1 := 0.55 * sin(a1 * 7.0 + k * 1.7) + 0.3 * sin(a1 * 17.0 + k)
+			var top := top_base + 0.28 * sin(float(i) * 1.37 + k * 2.1)              # uneven ledge heights
 			var d0 := Vector2(cos(a0), sin(a0))
 			var d1 := Vector2(cos(a1), sin(a1))
 			var i0 := center + d0 * (r_in + e0)
@@ -84,7 +93,8 @@ func build(center: Vector2, axis: float, mine: Vector2, glade: Vector2, glade_r:
 	base.albedo_texture = load(ROCK_TEX) if ResourceLoader.exists(ROCK_TEX) else null
 	var material := ForestKit.painted_material(base, true, LIGHT_MIX, false)
 	if material is ShaderMaterial:
-		material.set_shader_parameter("limestone", 0.92)
+		material.set_shader_parameter("limestone", 1.0)
+		material.set_shader_parameter("albedo_color", Color(1.12, 1.02, 0.84))     # warm cream (art/01 quarry)
 		material.set_shader_parameter("limestone_base_y", h0)
 		material.set_shader_parameter("ao_floor", 0.3)
 		material.set_shader_parameter("vertex_wind", false)
@@ -96,6 +106,7 @@ func build(center: Vector2, axis: float, mine: Vector2, glade: Vector2, glade_r:
 	add_child(node)
 	items.append({"node": node, "center": center, "radius": r0 + TIERS * TIER_DEPTH + 3.0})
 	_build_crane(center, axis, mine, r0, h0, height_fn, route_dist)
+	print("ForestQuarry: ", items.size(), " items (terraces + crane) r0=", snappedf(r0, 0.1))
 
 
 func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, n: Vector3, ao: float, top: bool) -> void:

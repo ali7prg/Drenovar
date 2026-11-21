@@ -99,7 +99,7 @@ func build(center: Vector2, axis: float, mine: Vector2, glade: Vector2, glade_r:
 
 
 func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, n: Vector3, ao: float, top: bool) -> void:
-	var verts := [a, b, c, a, c, d]
+	var verts: Array[Vector3] = [a, b, c, a, c, d]
 	for v: Vector3 in verts:
 		st.set_normal(n)
 		st.set_color(Color(1, 1, 1, ao))
@@ -122,9 +122,9 @@ func _side(st: SurfaceTool, inner: Vector2, outer: Vector2, top: float, height_f
 func _build_crane(center: Vector2, axis: float, mine: Vector2, r0: float, h0: float, height_fn: Callable,
 		route_dist: Callable) -> void:
 	var spot := Vector2.INF
-	for side in [1.0, -1.0]:
-		for off in [52.0, 62.0, 42.0, 72.0]:
-			var a := axis + side * deg_to_rad(off)
+	for side: float in [1.0, -1.0]:
+		for off: float in [52.0, 62.0, 42.0, 72.0]:
+			var a: float = axis + side * deg_to_rad(off)
 			var p := center + Vector2(cos(a), sin(a)) * (r0 + TIER_DEPTH * 1.5)
 			if float(route_dist.call(p.x, p.y)) > 4.5 and p.distance_to(mine) > 6.5:
 				spot = p
@@ -180,14 +180,14 @@ func _beam(st: SurfaceTool, a: Vector3, b: Vector3, w: float) -> void:
 	var up := Vector3.UP if absf(f.dot(Vector3.UP)) < 0.95 else Vector3.RIGHT
 	var r := f.cross(up).normalized() * w * 0.5
 	var u := r.cross(f).normalized() * w * 0.5
-	var corners := [-r - u, r - u, r + u, -r + u]
+	var corners: Array[Vector3] = [-r - u, r - u, r + u, -r + u]
 	for i in 4:
 		var c0: Vector3 = corners[i]
 		var c1: Vector3 = corners[(i + 1) % 4]
 		var n := (c0 + c1).normalized()
 		var length := axis.length()
-		var quad := [a + c0, a + c1, b + c1, a + c0, b + c1, b + c0]
-		var uvs := [Vector2(0, 0), Vector2(w, 0), Vector2(w, length), Vector2(0, 0), Vector2(w, length), Vector2(0, length)]
+		var quad: Array[Vector3] = [a + c0, a + c1, b + c1, a + c0, b + c1, b + c0]
+		var uvs: Array[Vector2] = [Vector2(0, 0), Vector2(w, 0), Vector2(w, length), Vector2(0, 0), Vector2(w, length), Vector2(0, length)]
 		for j in 6:
 			st.set_normal(n)
 			st.set_uv(uvs[j] / 1.6)
@@ -195,7 +195,7 @@ func _beam(st: SurfaceTool, a: Vector3, b: Vector3, w: float) -> void:
 	for end in [[a, -f], [b, f]]:
 		var o: Vector3 = end[0]
 		var nn: Vector3 = end[1]
-		var cap := [o + corners[0], o + corners[1], o + corners[2], o + corners[0], o + corners[2], o + corners[3]]
+		var cap: Array[Vector3] = [o + corners[0], o + corners[1], o + corners[2], o + corners[0], o + corners[2], o + corners[3]]
 		for v: Vector3 in cap:
 			st.set_normal(nn)
 			st.set_uv(Vector2(0.5, 0.5))

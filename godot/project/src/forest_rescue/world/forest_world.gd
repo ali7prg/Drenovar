@@ -20,6 +20,8 @@ const ForestOccluders = preload("res://src/forest_rescue/world/forest_occluders.
 const ForestWater = preload("res://src/forest_rescue/world/forest_water.gd")
 const SUN_ROTATION := Vector3(-0.837758, -0.558505, 0.0)   # landscape.gd city sun (-48°, -32°, 0)
 const PAINT_LIGHT_DIR := Vector3(-0.77, 0.6, 0.15)            # direction TO the painted light (forest only)
+const QUARRY_KIND := 6                                         # Rules.UNDERSTORY "quarry_rock"
+const QUARRY_LEDGE_SHAPE := Vector3(1.7, 0.8, 1.3)             # ledge slab: wide, low, deep
 const Rules = preload("res://src/forest_rescue/world/forest_layout_rules.gd")
 const PATH_SHADER = preload("res://src/forest_rescue/world/forest_path.gdshader")
 const RIVER_SHADER = preload("res://src/forest_rescue/world/forest_river.gdshader")
@@ -554,14 +556,17 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 				continue
 			var mesh := _under_mesh(int(item[2]), int(item[3]))
 			var y := height_at(xz.x, xz.y) + (float(item[6]) if item.size() > 6 else 0.0)
-			var basis := Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(Vector3.ONE * float(item[5]))
+			var shape := Vector3.ONE
+			if int(item[2]) == QUARRY_KIND and int(item[3]) == 2:
+				shape = QUARRY_LEDGE_SHAPE          # pass 3: terraced limestone ledges (flat lit tops, faces)
+			var basis := Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(shape * float(item[5]))
 			canopy.add_instance(mesh[0], Transform3D(basis, Vector3(xz.x, y - 0.03, xz.y)))
 	# art/01 S-G: the bare white dead tree at its mark (kit oak skeleton with birch bark).
 	if landmarks != null and landmarks.dead_tree_spot != Vector2.INF:
 		var dead := _dead_tree_mesh()
 		if not dead.is_empty():
 			var spot: Vector2 = landmarks.dead_tree_spot
-			canopy.add_instance(dead[0], Transform3D(Basis(Vector3.UP, 2.3).scaled(Vector3.ONE * 1.45), Vector3(spot.x, height_at(spot.x, spot.y) - 0.1, spot.y)))
+			canopy.add_instance(dead[0], Transform3D(Basis(Vector3.UP, 2.3).scaled(Vector3.ONE * 1.75), Vector3(spot.x, height_at(spot.x, spot.y) - 0.1, spot.y)))
 	# Waterfall outcrop (atlas v2): kit limestone rocks stacked into the cliff behind the fall; pass 3
 	# (art/01): a dark wet rock face behind the white water.
 	var rock_mesh := _wet_rock_mesh()

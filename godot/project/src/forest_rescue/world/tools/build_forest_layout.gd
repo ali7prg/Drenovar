@@ -1379,8 +1379,8 @@ func _water_dressing(trees: Array, under: Array, under_grid: Dictionary, logs: A
 			var angle := TAU * (k + rng.randf() * 0.6) / steps
 			var shore := ForestTerrain.shore_radius(body, angle)
 			var patch := (clump.get_noise_2d(c.x + cos(angle) * 9.0, c.y + sin(angle) * 9.0) + 1.0) * 0.5
-			if patch > (0.32 if body.kind != "lake" else 0.27):
-				for j in (3 if body.kind == "lake" else 1):
+			if patch > (0.32 if body.kind == "pond" else (0.27 if body.kind == "lake" else 0.18)):
+				for j in (3 if body.kind == "lake" else (2 if body.kind == "marsh" else 1)):
 					var dist := shore + rng.randf_range(-0.8, 1.4)
 					var p := c + Vector2(cos(angle), sin(angle)) * dist
 					if _bank_ok(p.x, p.y, 1.0):
@@ -1446,7 +1446,7 @@ func _quarry_cliffs(under: Array, under_grid: Dictionary, logs: Array, log_grid:
 	var glade_c := Vector2(site.center.x, site.center.z)
 	var base_angle := quarry_axis
 	var kind := Rules.UNDERSTORY.find("quarry_rock")
-	var tiers := [[11.5, 0.0, 1.2], [14.5, 1.8, 1.35], [17.5, 3.6, 1.45], [20.5, 5.2, 1.5]]
+	var tiers := [[12.0, 0.0, 1.45], [15.5, 2.2, 1.6], [19.0, 4.4, 1.75], [22.5, 6.4, 1.85]]   # pass 3: terraces
 	for tier in tiers.size():
 		var radius: float = tiers[tier][0]
 		var lift: float = tiers[tier][1]

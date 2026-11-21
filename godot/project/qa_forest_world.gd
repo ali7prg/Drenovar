@@ -9,6 +9,7 @@ const ForestFlags = preload("res://src/forest_rescue/world/forest_flags.gd")
 const ForestMasks = preload("res://src/forest_rescue/world/forest_masks.gd")
 const ForestFog = preload("res://src/forest_rescue/world/forest_fog.gd")
 const Rules = preload("res://src/forest_rescue/world/forest_layout_rules.gd")
+const ForestOccluders = preload("res://src/forest_rescue/world/forest_occluders.gd")
 
 var failures: Array[String] = []
 var checks := 0
@@ -194,20 +195,21 @@ func run() -> void:
 				return true
 		return false
 	var hiding_ambient := 0
-	var dense_over_trail := 0
+	var over_trail := 0
+	var caps: Array = []
 	for item in layout.trees:
 		var cap := Rules.crown_capsule(float(item[0]), float(item[1]), int(item[2]), int(item[3]), float(item[5]), deg_to_rad(float(item[4])))
-		# pass 2: the dense south pines (zone 5) may stand in front of a trail — the walkers behind
-		# them are faded through whole at runtime (ForestOccluders) — never in front of a glade,
+		caps.append(cap)
+		# layout pass 3 (art/01 groves of big crowns): a crown may stand in front of a trail — the walkers
+		# behind it are faded through whole at runtime (ForestOccluders) — never in front of a glade,
 		# the arena or the horse spot
-		var dense_pine := int(item[2]) == Rules.PINE and item.size() > 6 and int(item[6]) == 5
-		if hides.call(cap, dense_pine) and int(item[2]) != Rules.HOLLOW_OAK:   # hero: faded by the occluders at its hollow
+		if hides.call(cap, true) and int(item[2]) != Rules.HOLLOW_OAK:   # hero: faded by the occluders at its hollow
 			hiding_ambient += 1
-			print("QA ambient tree hiding a unit zone: ", item)
-		elif dense_pine and hides.call(cap, false):
-			dense_over_trail += 1
-	check(hiding_ambient == 0, "ambient trees whose crown hides a trail / glade / arena / horse-spot unit: %d" % hiding_ambient)
-	notes.dense_south_pines_over_trails = dense_over_trail
+			print("QA ambient tree hiding a glade / arena / horse-spot unit: ", item)
+		elif hides.call(cap, false):
+			over_trail += 1
+	check(hiding_ambient == 0, "ambient trees whose crown hides a glade / arena / horse-spot unit: %d" % hiding_ambient)
+	notes.ambient_crowns_over_trails = over_trail
 	var listed: Array = layout.get("cameraOccluders", [])
 	var woods := {}
 	for tree in data.woods:
@@ -224,9 +226,38 @@ func run() -> void:
 				if not listed.has(id):
 					unlisted += 1
 	check(unlisted == 0, "resource trees hiding a unit zone but not listed for the runtime fade: %d" % unlisted)
-	# atlas v2: 47 trails (≈ 3.6× the v1 trail length) between the fixed resource ids (≤ 4 m slots), so
-	# more of them keep a crown over some trail; every one is listed and faded whole at runtime.
-	check(hiding_resource <= 260, "too many resource trees still hiding unit zones: %d" % hiding_resource)
+	# layout pass 3: every trail point must be revealable by the runtime whole-tree fade — no more crowns
+	# over a walker than ForestOccluders fades at once
+	for section in ["resourceRemap"]:
+		for id in layout[section]:
+			var e: Array = layout[section][id]
+			var species: int = Rules.RESOURCE_SPECIES.get(String(woods[id].name), Rules.PINE)
+			caps.append(Rules.crown_capsule(float(e[0]), float(e[1]), species, int(e[3]) % Rules.GREEN_VARIANT_BASE, float(e[4]), float(woods[id].angle)))
+	var cap_grid := {}
+	for i in caps.size():
+		var cp: Array = caps[i]
+		var lo: Vector2 = (cp[0] as Vector2).min(cp[1]) - Vector2.ONE * float(cp[2])
+		var hi: Vector2 = (cp[0] as Vector2).max(cp[1]) + Vector2.ONE * float(cp[2])
+		for gz in range(floori(lo.y / 8.0), floori(hi.y / 8.0) + 1):
+			for gx in range(floori(lo.x / 8.0), floori(hi.x / 8.0) + 1):
+				var key := Vector2i(gx, gz)
+				if not cap_grid.has(key):
+					cap_grid[key] = PackedInt32Array()
+				cap_grid[key].append(i)
+	var worst := 0
+	for route in world.atlas.routes:
+		var pts: PackedVector3Array = route.points
+		for i in range(0, pts.size(), 4):
+			var q := Vector2(pts[i].x, pts[i].z)
+			var n := 0
+			for idx in cap_grid.get(Vector2i(floori(q.x / 8.0), floori(q.y / 8.0)), PackedInt32Array()):
+				var cp: Array = caps[idx]
+				if Rules.segment_segment_distance(cp[0], cp[1], q, q) < float(cp[2]) + Rules.UNIT_RADIUS + 0.6:
+					n += 1
+			worst = maxi(worst, n)
+	var fade_cap: int = ForestOccluders.MAX_FADED
+	check(worst <= fade_cap, "a trail point hidden by %d crowns (> %d faded at once)" % [worst, fade_cap])
+	notes.trail_occlusion = {"worst_crowns_over_a_walker": worst, "fade_capacity": fade_cap, "resource_hiding": hiding_resource}
 	notes.camera_clearance = {"ambient_hiding": hiding_ambient, "resource_hiding": hiding_resource, "listed": listed.size()}
 	for path in ["res://src/forest_rescue/world/forest_painted.gdshaderinc", "res://src/forest_rescue/world/forest_impostor.gdshader",
 			"res://src/forest_rescue/world/forest_fog.gdshader", "res://src/forest_rescue/world/forest_fog_receiver.gdshaderinc"]:

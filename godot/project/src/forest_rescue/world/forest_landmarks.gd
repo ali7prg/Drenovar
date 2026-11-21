@@ -37,14 +37,17 @@ const MARK_LANDMARKS := [
 ## Dead-tree set around lf_mark_dead_tree (offsets in the frame facing the trail end: +Z toward it).
 const DEAD_TREE_BACK := 3.0
 const DEAD_TREE_SET := [
-	{"id": "lf_arena_pillar_a", "offset": Vector2(-3.6, 0.8), "yaw": 20.0, "scale": 0.72, "footprint": 1.4},
-	{"id": "lf_arena_pillar_b", "offset": Vector2(3.4, -1.2), "yaw": -35.0, "scale": 0.66, "footprint": 1.4},
-	{"id": "lf_arena_bones", "offset": Vector2(1.2, 2.6), "yaw": 64.0, "scale": 0.8, "footprint": 1.8},
+	{"id": "lf_arena_pillar_a", "offset": Vector2(-3.6, 0.8), "yaw": 20.0, "scale": 0.85, "footprint": 1.4},
+	{"id": "lf_arena_pillar_b", "offset": Vector2(3.4, -1.2), "yaw": -35.0, "scale": 0.8, "footprint": 1.4},
+	{"id": "lf_arena_bones", "offset": Vector2(1.2, 2.6), "yaw": 64.0, "scale": 1.05, "footprint": 1.8},
 ]
 const CAMP := {"id": "lf_env_camp_props", "footprint": 3.4, "distance": 10.2}
 ## Layout pass 3 (art/01 at zoom 68: every camp a focal point): tents, fences, crates, the fire and the
 ## camp extras drawn 1.25× (cages and people keep their scale).
 const CAMP_SCALE := 1.25
+## pass 3: the art/01 signature landmarks keep LOD0 to zoom 72 and LOD1 to the overview zoom
+const SIGNATURE_LANDMARKS := ["lf_env_bridge27m", "lf_env_quarry_mine", "lf_env_ruined_watchpost", "lf_env_standing_stones",
+	"lf_env_hunter_shelter"]
 ## Yaw (deg) showing the city camera (azimuth 45°) the painted side of a landmark: 45° minus the
 ## painting camera's azimuth around the model, from the landmarks v3 camera solves
 ## (forest_rescue/qa/compare/<id>/v3_iter*_camera.json): camp −36.7°, watchpost −1.6°, hunter
@@ -817,9 +820,10 @@ func update_view(target: Vector3, zoom: float, visible_fn: Callable) -> int:
 			continue
 		var d: float = item.center.distance_to(Vector2(target.x, target.z))
 		var lod := 2
-		if zoom <= 50.0 and d <= 30.0:
+		var signature: bool = item.id in SIGNATURE_LANDMARKS
+		if zoom <= (72.0 if signature else 50.0) and d <= (44.0 if signature else 30.0):
 			lod = 0
-		elif zoom <= 96.0 and d <= 64.0:
+		elif zoom <= (135.0 if signature else 96.0) and d <= (120.0 if signature else 64.0):
 			lod = 1
 		_set_lod(item, lod)
 		if d <= zoom * 1.25 + item.radius:      # roughly inside the ortho view
@@ -986,7 +990,7 @@ const ARENA_FLOOR_KEEP := 21.0
 ## moss rock's golden moss washed out), the fossil wall's pale ribs and skull lifted off the
 ## darker rock (albedo contrast), the entrance floor tongue kept to the trail's width.
 const ARENA_LIMESTONE := 0.55
-const ARENA_FOSSIL_LIMESTONE := 0.85
+const ARENA_FOSSIL_LIMESTONE := 1.0
 const ARENA_FOSSIL_CONTRAST := 1.5
 const ARENA_FOSSIL_GAIN := 1.1
 const ARENA_ENTRANCE_HALF := 3.0        # m: half width of the floor tongue beyond the ring
@@ -1011,6 +1015,13 @@ func _shape_arena(node: Node3D) -> void:
 			part.mesh = _clip_floor(part.mesh, part.transform)
 		var rock := pname.begins_with("rock_") or parent_name.begins_with("rock_")
 		var fossil := pname.begins_with("fossil_wall") or parent_name.begins_with("fossil_wall")
+		if pname.begins_with("fossil_wall") and part.get_parent() != null:
+			# pass 3 (art/08): pale rib arches and the skull in front of the wall (procedural bone)
+			var bones := MeshInstance3D.new()
+			bones.name = "FossilBones"
+			bones.mesh = _fossil_bones_mesh()
+			bones.transform = part.transform
+			part.get_parent().add_child(bones)
 		if (rock or fossil) and part.mesh != null:
 			for surface in part.mesh.get_surface_count():
 				var material := part.get_active_material(surface)
@@ -1030,6 +1041,95 @@ func _shape_arena(node: Node3D) -> void:
 
 
 var _arena_looks := {}
+static var _bones_mesh: ArrayMesh
+const BONE_COLOR := Color(0.88, 0.83, 0.7)
+
+
+## Rib arches (spine on the wall top, ribs curving down to the floor in front of the face) and a skull
+## lying at the right end, in the fossil wall mesh's local frame (face +Z, top y ≈ 5.6, x −6.6..6.8).
+func _fossil_bones_mesh() -> ArrayMesh:
+	if _bones_mesh != null:
+		return _bones_mesh
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for k in 6:
+		var x := -5.4 + k * 1.25
+		var pts: Array = []
+		var radii: Array = []
+		for i in 9:
+			var t := float(i) / 8.0
+			pts.append(Vector3(x + 0.35 * t, 5.0 * cos(t * PI * 0.5) + 0.15, 1.5 + 3.1 * sin(t * PI * 0.5)))
+			radii.append(lerpf(0.26, 0.13, t))
+		_tube(st, pts, radii, 7)
+	# spine along the wall top
+	var spine: Array = []
+	var sr: Array = []
+	for i in 8:
+		spine.append(Vector3(-6.0 + i * 1.05, 5.25 + 0.15 * sin(i * 1.3), 1.45))
+		sr.append(0.3)
+	_tube(st, spine, sr, 7)
+	# skull (cranium + snout + jaw) lying at the right end, facing the arena
+	_ellipsoid(st, Vector3(4.4, 1.25, 2.7), Vector3(1.5, 1.05, 1.15), 8, 12)
+	_ellipsoid(st, Vector3(5.9, 0.9, 3.0), Vector3(1.25, 0.6, 0.75), 6, 10)
+	_ellipsoid(st, Vector3(5.6, 0.3, 3.2), Vector3(1.35, 0.28, 0.6), 5, 10)
+	var mesh := st.commit()
+	# dark eye socket + nostril (separate surface, dark)
+	var st2 := SurfaceTool.new()
+	st2.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_ellipsoid(st2, Vector3(4.9, 1.55, 3.55), Vector3(0.38, 0.34, 0.3), 5, 8)
+	_ellipsoid(st2, Vector3(6.8, 1.05, 3.45), Vector3(0.18, 0.14, 0.14), 4, 6)
+	st2.commit(mesh)
+	var bone := StandardMaterial3D.new()
+	bone.resource_name = "lf_proc_fossil_bone"
+	bone.albedo_color = BONE_COLOR
+	mesh.surface_set_material(0, ForestKit.painted_material(bone, false, LIGHT_MIX, false))
+	var dark := StandardMaterial3D.new()
+	dark.resource_name = "lf_proc_fossil_socket"
+	dark.albedo_color = Color(0.16, 0.13, 0.11)
+	mesh.surface_set_material(1, ForestKit.painted_material(dark, false, LIGHT_MIX, false))
+	_bones_mesh = mesh
+	return mesh
+
+
+static func _tube(st: SurfaceTool, pts: Array, radii: Array, sides: int) -> void:
+	var rings: Array = []
+	for i in pts.size():
+		var a: Vector3 = pts[maxi(i - 1, 0)]
+		var b: Vector3 = pts[mini(i + 1, pts.size() - 1)]
+		var t := (b - a).normalized()
+		var n := t.cross(Vector3.UP)
+		if n.length() < 0.01:
+			n = t.cross(Vector3.RIGHT)
+		n = n.normalized()
+		var bn := t.cross(n).normalized()
+		var ring: Array = []
+		for k in sides:
+			var ang := TAU * k / sides
+			ring.append([pts[i] + (n * cos(ang) + bn * sin(ang)) * float(radii[i]), (n * cos(ang) + bn * sin(ang))])
+		rings.append(ring)
+	for i in pts.size() - 1:
+		for k in sides:
+			var k2 := (k + 1) % sides
+			for v in [rings[i][k], rings[i + 1][k], rings[i + 1][k2], rings[i][k], rings[i + 1][k2], rings[i][k2]]:
+				st.set_normal(v[1])
+				st.add_vertex(v[0])
+
+
+static func _ellipsoid(st: SurfaceTool, c: Vector3, r: Vector3, rings: int, segs: int) -> void:
+	var grid: Array = []
+	for i in rings + 1:
+		var phi := PI * float(i) / rings
+		var row: Array = []
+		for j in segs + 1:
+			var th := TAU * float(j) / segs
+			var n := Vector3(sin(phi) * cos(th), cos(phi), sin(phi) * sin(th))
+			row.append([c + Vector3(n.x * r.x, n.y * r.y, n.z * r.z), Vector3(n.x / r.x, n.y / r.y, n.z / r.z).normalized()])
+		grid.append(row)
+	for i in rings:
+		for j in segs:
+			for v in [grid[i][j], grid[i + 1][j], grid[i + 1][j + 1], grid[i][j], grid[i + 1][j + 1], grid[i][j + 1]]:
+				st.set_normal(v[1])
+				st.add_vertex(v[0])
 
 
 func _clip_floor(mesh: Mesh, xf: Transform3D) -> Mesh:

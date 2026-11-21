@@ -515,7 +515,9 @@ func bake() -> void:
 					earth[k] = maxf(earth[k], 0.9 * pad)
 			if quarry_center != Vector2.INF:
 				var qd := Vector2(x, z).distance_to(quarry_center)
-				color = color.lerp(Color(1.12, 1.1, 1.04), (1.0 - smoothstep(12.0, 24.0, qd)) * 0.8)
+				color = color.lerp(Color(1.22, 1.17, 1.06), (1.0 - smoothstep(12.0, 24.0, qd)) * 0.85)
+				# pass 3 (art/01): a pale stony quarry floor (stone texture channel) in the pit
+				rock[k] = maxf(rock[k], 0.6 * (1.0 - smoothstep(9.0, 17.0, qd)))
 			var limestone := weights[6] + 0.5 * weights[2]
 			rock[k] = maxf(rock[k], smoothstep(16.0, 30.0, slope) * (0.45 + 0.5 * limestone) * core)
 			earth[k] = maxf(earth[k], limestone * 0.18 * core)

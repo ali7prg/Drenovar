@@ -195,7 +195,7 @@ def arc_wall(g, r0, r1, z0, z1, a0, a1, n, mat, tag, top=True, ends=True, r1_top
 def build(A, p, lod):
     A._params = p
     g = A.g("root", lod)
-    n = (40, 30, 20)[lod]          # perf: e_site2 total tris budget (180k); was (56, 36, 24) at iter 20
+    n = (32, 24, 16)[lod]          # perf: e_site2 total tris budget (180k); was (56, 36, 24) at iter 20
     Rw, Rb, hb, zt = p["Rw"], p["Rb"], p["hb"], p["zt"]
     ad, dh = math.radians(p["ad"]), math.radians(p["dh"])
     # ---- plinth course + masonry wall with the door opening (front) + stone rim (drum offset ox, oy)

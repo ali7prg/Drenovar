@@ -34,7 +34,7 @@ PARAMS = dict(AX=1.42, L2=0.45, Rc=0.36, FXL=1.05, FXR=0.86, HX=1.02, GX=-0.83, 
               LW=0.26, FY=0.42, TZ=0.75, GRr=0.48, SH=0.42,   # leg width, front/back frame offset, tie drop below
                                                               # the axle, gear radius, stone pile height
               SPIL=0.26, SPIR=-0.06, PX=0.0, PSX=-0.36,       # ... back post x (art/10: under the tie, left of the rope)
-              RG=0.55, RP=0.24, GT=31.0, GZ=0.2, HR=0.22, GRP=1.0)  # gear train: big gear / pinion radius, big gear
+              RG=0.5, RP=0.32, GT=18.0, GZ=0.2, HR=0.16, GRP=1.6)  # gear train: big gear / pinion radius, big gear
                                                               # tilt (deg, its face toward the viewer as painted),
                                                               # pinion drop below the axle; crank hub radius; grip scale                  # inner leg splay (left / right trestle), pit x offset
 FREE = ["AX", "L2", "Rc", "FXL", "FXR", "HX", "GX", "GZ", "KX", "Ls", "Ac", "Lg", "Wc", "Hc", "Zt"]
@@ -142,7 +142,7 @@ def build(A, p, lod):
     for sx_ in (-1, 1):
         g.box((px + sx_ * (hx + t / 2), PY, (-0.55 - PIT_D) / 2), (t, 2 * hy, PIT_D - 0.55), mat="stone", tag="pit_wall")
     g.box((px, PY, -PIT_D - 0.02), (2 * hx, 2 * hy, 0.04), mat="ground", tag="pit_floor")
-    npile = (6, 4, 3)[lod]
+    npile = (5, 4, 3)[lod]
     for sx_ in (-1, 1):
         for k in range(npile):
             cx = px + sx_ * (hx + t + 0.12 + rng.uniform(0.0, 0.55))
@@ -150,7 +150,7 @@ def build(A, p, lod):
             h = SH * rng.uniform(0.55, 1.0)
             g.rock((cx, cy, h * 0.35), (rng.uniform(0.2, 0.32), rng.uniform(0.18, 0.28), h * 0.5), seed=k + 40 + 20 * (sx_ + 1),
                    sub=1, mat="stone", tag="rubble", flat_bottom=True, rough=0.14)
-    nfr = (6, 4, 2)[lod]
+    nfr = (4, 3, 2)[lod]
     for k in range(nfr):
         cx = px - hx + (k + 0.5) * 2 * hx / nfr + rng.uniform(-0.08, 0.08)
         cy = PY - hy - t - 0.12 + rng.uniform(-0.06, 0.06)
@@ -211,8 +211,8 @@ def build(A, p, lod):
     CG.outline_ring(bgg, tuple(gc), Rb, outer, ring_in, -0.045, 0.045, "iron", "gear_rim")
     bgg.cyl(tuple(gc - ga * 0.07), tuple(gc + ga * 0.07), RG * 0.22, n=(14, 10, 6)[lod], mat="iron", tag="gear_hub",
             up=tuple(gw))
-    for k in range(5 if lod < 2 else 3):
-        ang = 2 * math.pi * k / (5 if lod < 2 else 3)
+    for k in range(4 if lod < 2 else 3):
+        ang = 2 * math.pi * k / (4 if lod < 2 else 3)
         d = gu * math.cos(ang) + gw * math.sin(ang)
         bgg.beam(tuple(gc + d * RG * 0.18), tuple(gc + d * RG * 0.78), 0.07, 0.05, mat="iron", tag="gear_spoke")
     pc = pinion_centre(p)
@@ -245,7 +245,7 @@ def build(A, p, lod):
             (0.083 * gs, 0.46), (0.07 * gs, 0.56), (0.058 * gs, 0.62)]
     prof = [(r, z * Lg / 0.62) for r, z in prof]
     Rx = np.stack([np.array([0, 1.0, 0]), np.array([0, 0, 1.0]), np.array([1.0, 0, 0])], 1)   # lathe z -> world x
-    CG.lathe(cg, prof, (xs + 0.06, -0.06, AX - p["Ac"]), n=(12, 9, 6)[lod], mat="wood", tag="grip", R=Rx)
+    CG.lathe(cg, prof, (xs + 0.06, -0.06, AX - p["Ac"]), n=(10, 8, 6)[lod], mat="wood", tag="grip", R=Rx)
     cg.cyl((xs + 0.06 + Lg - 0.01, -0.06, AX - p["Ac"]), (xs + 0.06 + Lg + 0.04, -0.06, AX - p["Ac"]), 0.062 * gs,
            n=(12, 8, 6)[lod], mat="iron", tag="grip_cap", up=(0, 0, 1))
     # ---- pawl node (on the left trestle, over the gear)

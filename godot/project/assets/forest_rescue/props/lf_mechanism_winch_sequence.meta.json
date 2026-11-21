@@ -2,17 +2,17 @@
   "id": "lf_mechanism_winch_sequence",
   "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 6292,
-    "LOD1": 3954,
+    "LOD0": 5928,
+    "LOD1": 3846,
     "LOD2": 2430
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 3800,
+      "root": 3480,
       "drum": 228,
-      "big_gear": 880,
+      "big_gear": 868,
       "pinion": 232,
-      "crank": 504,
+      "crank": 472,
       "pawl": 36,
       "brake_lever": 360,
       "rope": 60,
@@ -20,11 +20,11 @@
       "chest_lid": 36
     },
     "LOD1": {
-      "root": 2004,
+      "root": 1924,
       "drum": 156,
-      "big_gear": 864,
+      "big_gear": 852,
       "pinion": 216,
-      "crank": 344,
+      "crank": 328,
       "pawl": 36,
       "brake_lever": 120,
       "rope": 50,
@@ -258,7 +258,7 @@
     "SPIR": 0.06,
     "PX": -0.3,
     "PSX": -0.35,
-    "RG": 0.5,
+    "RG": 0.53,
     "RP": 0.32,
     "GT": 18.0,
     "GZ": 0.1174,
@@ -268,12 +268,12 @@
   "qa": {
     "views": {
       "main": {
-        "iou_raw": 0.8056,
-        "iou_filled": 0.8589,
-        "colour_err": 0.0824,
-        "colour_err_core": 0.0815,
+        "iou_raw": 0.8049,
+        "iou_filled": 0.8593,
+        "colour_err": 0.0826,
+        "colour_err_core": 0.0816,
         "ref_px": 129699,
-        "render_px": 112757,
+        "render_px": 112754,
         "ignored_px": 8126,
         "camera_rms_px": 2.36,
         "camera_max_px": 4.71,
@@ -307,20 +307,20 @@
       }
     },
     "texture": {
-      "texels": 2774038,
-      "projected_frac": 0.0713,
+      "texels": 2702228,
+      "projected_frac": 0.0718,
       "per_view_frac": {
-        "main": 0.0715
+        "main": 0.072
       },
-      "seconds": 17.4
+      "seconds": 15.5
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_winch_sequence/v2_iter08_*",
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_winch_sequence/v2_iter09_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_winch --iter 8",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_winch --iter 9",
   "mechanism": "winch_sequence",
   "symbol_targets": {
     "brake": {
@@ -347,8 +347,8 @@
           "axis": "drum axle tilted GT toward the viewer"
         },
         "pinion": {
-          "rotation_y_deg": 173.62,
-          "ratio": 1.563
+          "rotation_y_deg": 184.04,
+          "ratio": 1.656
         },
         "rope": {
           "scale_y": 0.6698,

@@ -863,9 +863,51 @@ func run() -> void:
 	file.store_string(JSON.stringify(result, "", false))
 	file.close()
 	print("LAYOUT camera occluders (resource ids, runtime fade)=", camera_occluders.size())
+	for arg in OS.get_cmdline_user_args():
+		if String(arg).begins_with("--probe="):
+			var v := String(arg).trim_prefix("--probe=").split_floats(",")
+			_probe_region(v[0], v[1], v[2])
 	print("LAYOUT_DONE trees=", trees.size(), " remap=", remap.size(), " inner=", inner_remap.size(), " understory=", understory.size(),
 		" innerUnder=", inner_under.size(), " ms=", Time.get_ticks_msec() - started)
 	quit()
+
+
+## Debug (--probe=cx,cz,r): why no ambient pine stands on each 2 m cell of a region (ASCII map,
+## screen-agnostic world grid; x → columns, z → rows).
+func _probe_region(cx: float, cz: float, r: float) -> void:
+	var counts := {}
+	var lines: Array = []
+	var z := cz - r
+	while z <= cz + r:
+		var line := ""
+		var x := cx - r
+		while x <= cx + r:
+			var code := "."
+			var scale := 1.06
+			var crown: float = Rules.CROWN_RADIUS[Rules.PINE] * scale
+			if blocked_exact(x, z, true):
+				code = "B"
+			elif not ground_ok(x, z, true):
+				code = "g"
+			elif is_glade(x, z):
+				code = "o"
+			elif not free_of_trunks(x, z, 2.2):
+				code = "t"
+			elif blocked_exact(x, z, true, 1.0, crown):
+				code = "c"
+			elif tree_hides_units(x, z, Rules.PINE, 2, scale, 0.0, true):
+				code = "S"
+			elif tree_hides_units(x, z, Rules.PINE, 2, scale, 0.0):
+				code = "T"
+			code = code if dominant_zone(x, z) == Z_SPRUCE or code != "." else "z"
+			counts[code] = counts.get(code, 0) + 1
+			line += code
+			x += 2.0
+		lines.append(line)
+		z += 2.0
+	print("PROBE ", cx, ",", cz, " r=", r, " counts=", counts)
+	for line in lines:
+		print("PROBE| ", line)
 
 
 ## Trail-edge dressing (art/07 panels 1–3): along every visual trail (atlas.routes incl. the

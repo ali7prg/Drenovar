@@ -28,6 +28,10 @@ uniform sampler2D variant_mask : hint_default_black, filter_linear_mipmap, repea
 uniform vec3 tint_cloth = vec3(1.0);
 uniform vec3 tint_hair = vec3(1.0);
 uniform float alpha_cut = 0.5;
+// Close-zoom foliage (kit leaf cards, lf_foliage*): never sample the atlas finer than mip `foliage_min_lod`, so a
+// near crown / bush reads as the soft painted clusters of the far look (no dark speckle, no pinholes between the
+// leaves); far zooms already sample coarser mips and are unchanged. 0 = off (every other material).
+uniform float foliage_min_lod = 0.0;
 uniform float painted_light_mix : hint_range(0.0, 1.0) = 0.3;
 uniform vec3 light_dir_world = vec3(0.45, 0.74, 0.5);   // direction TO the sun
 // Pass 2 colour grade of the forest materials only (kit vegetation, rocks, logs, landmarks; never the
@@ -151,7 +155,20 @@ void vertex() {
 void fragment() {
 	vec4 c = albedo_color;
 	if (use_albedo_texture) {
-		c *= texture(albedo_texture, albedo_uv2 ? UV2 : UV);
+		vec2 uv_a = albedo_uv2 ? UV2 : UV;
+#ifdef CUTOUT
+		if (foliage_min_lod > 0.0) {
+			vec2 ts = vec2(textureSize(albedo_texture, 0));
+			vec2 du = dFdx(uv_a * ts);
+			vec2 dv = dFdy(uv_a * ts);
+			float lod = 0.5 * log2(max(max(dot(du, du), dot(dv, dv)), 1e-8));
+			c *= textureLod(albedo_texture, uv_a, max(lod, foliage_min_lod));
+		} else {
+			c *= texture(albedo_texture, uv_a);
+		}
+#else
+		c *= texture(albedo_texture, uv_a);
+#endif
 	}
 	if (use_variant_mask) {
 		vec3 m = texture(variant_mask, UV).rgb;

@@ -19,6 +19,10 @@ const FALLEN_BARK_V2 := KIT_DIR + "lf_bark_fallen_v2_c.jpg"
 const WIND_SHADER := preload("res://src/forest_rescue/world/forest_wind.gdshader")
 const CUTOUT_SHADER := preload("res://src/forest_rescue/world/forest_wind_cutout.gdshader")
 const VOLUME_LIGHT_MIX := 0.5            # lf_foliage_vol (forest_kit.json "shading")
+## Close-zoom foliage (zoom 24–30: mechanism UI, battles): the leaf-card atlas is never sampled finer than this
+## mip (forest_painted.gdshaderinc foliage_min_lod), so bushes and young crowns read as clean painted clusters;
+## zoom 68 / 120 already sample coarser mips (unchanged).
+const FOLIAGE_MIN_LOD := 1.6
 const DEFAULT_LIGHT_MIX := 0.3
 
 ## Legacy stand-ins (game.json model keys / cityDetails keys), used only when a kit asset is absent.
@@ -429,6 +433,8 @@ static func painted_material(original: Material, has_colors: bool, k: float, win
 	material.set_shader_parameter("albedo_color", base.albedo_color)
 	material.set_shader_parameter("use_albedo_texture", base.albedo_texture != null)
 	material.set_shader_parameter("alpha_cut", base.alpha_scissor_threshold if base.alpha_scissor_threshold > 0.0 else 0.5)
+	if cutout and name.begins_with("lf_foliage"):
+		material.set_shader_parameter("foliage_min_lod", FOLIAGE_MIN_LOD)
 	material.set_shader_parameter("painted_light_mix", VOLUME_LIGHT_MIX if name.contains("_vol") else k)
 	var crown := crown_light_dir != Vector3.ZERO and CROWN_LIGHT_PREFIXES.any(func(prefix): return name.begins_with(prefix))
 	material.set_shader_parameter("light_dir_world", (crown_light_dir if crown else light_dir).normalized())

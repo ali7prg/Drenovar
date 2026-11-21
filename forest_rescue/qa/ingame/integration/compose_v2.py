@@ -164,7 +164,13 @@ def main():
     # ---- overview in the painting's framing (1536 × 1024, town where art/01 has it) ------------
     framed = os.path.join(shots, prefix + "full_overview_art01.png")
     if os.path.exists(framed):
-        game = Image.open(framed).convert("RGB").resize((1536, 1024), Image.LANCZOS)
+        game = Image.open(framed).convert("RGB")
+        # the window may come out shorter than requested: keep the ortho height, centre-crop to 3:2
+        cw = int(round(game.height * 1.5))
+        if game.width > cw:
+            x0 = (game.width - cw) // 2
+            game = game.crop((x0, 0, x0 + cw, game.height))
+        game = game.resize((1536, 1024), Image.LANCZOS)
         ref = art_img.copy()
         label(ref, "art/01 masterplan", size=22)
         g = game.copy()

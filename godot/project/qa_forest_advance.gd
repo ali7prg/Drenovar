@@ -8,6 +8,8 @@ extends SceneTree
 var game: Node
 var forest: Node
 var until := "boss_unlocked"
+## "<siteId>:<taskId>": stop right before the guide's attempt_task for that task (squad in place).
+var until_task := ""
 var steps := 0
 
 func _initialize() -> void:
@@ -82,12 +84,18 @@ func run() -> void:
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--until="):
 			until = argument.trim_prefix("--until=")
+		elif argument.begins_with("--until-task="):
+			until_task = argument.trim_prefix("--until-task=")
 	game = load("res://main.tscn").instantiate()
 	root.add_child(game)
 	while game.scene_loading or not is_instance_valid(game.stage) or game.player_id.is_empty():
 		await process_frame
 	forest = game.forest_game
 	await frames(5)
+	# Fresh profile: hall III and a real army (test endpoints of the local realm only).
+	if forest.client.hall_level() < 3:
+		await test_post("/test/hall?level=3")
+		await test_post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-07":30000}})
 	await refresh()
 	# Hall III intro (one-time presentation): acknowledge it the way «Пропустить» does.
 	var deadline := Time.get_ticks_msec() + 8000
@@ -123,6 +131,9 @@ func run() -> void:
 			await form_squad()
 			continue
 		if String(step.get("panel", "")) == "journal":
+			break
+		if not until_task.is_empty() and String(step.get("action", "")) == "attempt_task" \
+				and "%s:%s" % [site_id, String(step.get("fields", {}).get("taskId", ""))] == until_task:
 			break
 		if bool(step.get("enabled", false)) and not String(step.get("action", "")).is_empty():
 			var action := String(step.action)

@@ -180,6 +180,10 @@ func run() -> void:
 	forest.client.manual_clock_ms = clock
 	if part == "boss":
 		await run_boss()
+	elif part == "unlock1":
+		await refresh()
+		close_popups()
+		await run_unlock1()
 	elif part == "rest":
 		await refresh()
 		close_popups()
@@ -328,6 +332,24 @@ func run_early() -> void:
 	game.close_modal()
 	await hold(1.0)
 	mark("d_end")
+
+# ---------------------------------------------------------------- site 1 unlock → exit → escort start (c)
+func run_unlock1() -> void:
+	follow = false
+	var cage: Vector3 = forest.target_position("lf_site_01:cage")
+	game.stage.target = cage + Vector3(0.8, 0, 2.6)
+	game.stage.zoom = 13.0
+	game.stage.update_camera(0, true)
+	await hold(1.2)
+	mark("u_start")
+	await do_step("attempt_task", "unlock_cage")
+	await hold(10.5)
+	mark("u_exit")
+	follow = true
+	follow_zoom = 20.0
+	await do_step("escort_start")
+	await hold(4.5)
+	mark("u_end")
 
 # ---------------------------------------------------------------- rest of site 1: escort (c end), (g), (d)
 func run_rest() -> void:

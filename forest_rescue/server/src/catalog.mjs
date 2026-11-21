@@ -1,6 +1,7 @@
 // Troop and creature stat tables used by the deterministic battle adapter.
 //
-// TROOPS mirror docs/06_TROOP_CATALOG.json (cross-checked by tests/catalog.test.mjs).
+// TROOPS: the forest squad roster live on production (2026-11-21: ENG-01/02/03/04/06 only); every entry mirrors
+// docs/06_TROOP_CATALOG.json (cross-checked by tests/catalog.test.mjs).
 // CREATURES: tenerys/velkor levels 1–3 mirror the v92 creature specs exported to the
 // client (godot/project/assets/game.json, godot/tools/starter-state.json). The v92
 // catalog.mjs (`creatureSpec`) was NOT available in this session, so kamneklyk and
@@ -15,12 +16,7 @@ export const TROOPS = Object.freeze({
   'ENG-02': unit('ENG-02', 'Мечник со щитом', 'Пехота', 107, 77, 78, 156, 4),
   'ENG-03': unit('ENG-03', 'Английский длиннолучник', 'Дальний бой', 83, 98, 28, 95, 4),
   'ENG-04': unit('ENG-04', 'Арбалетчик', 'Дальний бой', 91, 116, 35, 98, 3),
-  'ENG-05': unit('ENG-05', 'Конный разведчик', 'Лёгкая конница', 114, 78, 45, 150, 8),
   'ENG-06': unit('ENG-06', 'Конный рыцарь', 'Тяжёлая конница', 200, 150, 125, 250, 7),
-  'ENG-07': unit('ENG-07', 'Тяжёлый пеший воин', 'Тяжёлая пехота', 140, 97, 115, 210, 3),
-  'ENG-08': unit('ENG-08', 'Городской ополченец', 'Гарнизон', 70, 48, 48, 110, 4),
-  'ENG-09': unit('ENG-09', 'Пеший новобранец', 'Лёгкая пехота', 60, 42, 38, 100, 4),
-  'ENG-10': unit('ENG-10', 'Лёгкий метатель дротиков', 'Лёгкие стрелки', 76, 68, 35, 95, 5),
 });
 
 const RANGED = new Set(['Дальний бой', 'Лёгкие стрелки']);

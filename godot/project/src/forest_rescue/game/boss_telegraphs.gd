@@ -66,8 +66,9 @@ void fragment() {
 		float span = outer_m - inner_m;
 		ends = smoothstep(0.0, 0.07, uv.x) * smoothstep(1.0, 0.93, uv.x);
 		for (int i = 0; i < 4; i++) {
-			float at = outer_m - span * 0.15 * float(i);
-			// arcs light up one after another while the telegraph fills (outer first), all flare in the hit window
+			// close to the boss on the swept side (art/08), 12 % of the reach apart
+			float at = inner_m + span * (0.18 + 0.12 * float(i));
+			// arcs light up one after another while the telegraph fills (inner first), all flare in the hit window
 			float on = smoothstep(float(i) * 0.22, float(i) * 0.22 + 0.12, fill) * (0.75 + 0.25 * sin(TIME * 7.0 - float(i) * 1.3)) + active;
 			float g = glow_line(r - at);
 			core += smoothstep(0.55, 1.0, g) * min(on, 1.6);

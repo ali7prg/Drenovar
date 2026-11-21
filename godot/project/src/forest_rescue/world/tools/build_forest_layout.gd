@@ -109,6 +109,7 @@ const HERO_CLEAR := 9.5
 const QUARRY_PIT := 9.0           # art/01: open grey pit in front of the mine (no trunks)
 const ARENA_RIM_TREE := 26.0      # no kit trunk inside the arena GLB's own rim forest
 const ARENA_RIM_UNDER := 22.5     # no kit understory inside its cliff ring / rim shrubs
+const ARENA_VIEW_RADIUS := 19.5   # camera clearance: arena floor + cliff ring + entrance rocks
 var quarry_axis := 0.0            # direction (rad) from the pit centre to the cliff arc
 
 var atlas
@@ -256,8 +257,9 @@ func _build_unit_zones() -> void:
 	for site in atlas.sites:
 		var c := Vector2(site.center.x, site.center.z)
 		_add_unit_zone(c, c, float(site.radius))
+	# the arena floor AND its cliff ring / entrance rocks (≤ 19.5 m) stay visible from the camera
 	var arena := Vector2(atlas.arena_center.x, atlas.arena_center.z)
-	_add_unit_zone(arena, arena, ForestAtlas.ARENA_RADIUS)
+	_add_unit_zone(arena, arena, ARENA_VIEW_RADIUS)
 	var horse := Vector2(atlas.horse_origin.x, atlas.horse_origin.z)
 	_add_unit_zone(horse, horse, HORSE_ZONE)
 	_add_unit_zone(ForestAtlas.HOME_RECEPTION, ForestAtlas.HOME_RECEPTION, HOME_ZONE)

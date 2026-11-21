@@ -176,7 +176,7 @@ func run() -> void:
 		var c := Vector2(site.center.x, site.center.z)
 		zones.append([c, c, float(site.radius)])
 	var arena_c := Vector2(world.atlas.arena_center.x, world.atlas.arena_center.z)
-	zones.append([arena_c, arena_c, 15.0])
+	zones.append([arena_c, arena_c, 19.5])
 	var horse_c := Vector2(world.atlas.horse_origin.x, world.atlas.horse_origin.z)
 	zones.append([horse_c, horse_c, 4.0])
 	var hides := func(cap: Array) -> bool:

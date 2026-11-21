@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ke2h3ubythh8"
-path="res://.godot/imported/lf_squad_captain_lf_squad_captain_hair_cards.png-ba1c74147716398e8ae9980f60ab04a3.ctex"
+path.bptc="res://.godot/imported/lf_squad_captain_lf_squad_captain_hair_cards.png-ba1c74147716398e8ae9980f60ab04a3.bptc.ctex"
+path.astc="res://.godot/imported/lf_squad_captain_lf_squad_captain_hair_cards.png-ba1c74147716398e8ae9980f60ab04a3.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2ff6865a0f38b8369788c65832f30423"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_squad_captain_lf_squad_captain_hair_cards.png"
-dest_files=["res://.godot/imported/lf_squad_captain_lf_squad_captain_hair_cards.png-ba1c74147716398e8ae9980f60ab04a3.ctex"]
+dest_files=["res://.godot/imported/lf_squad_captain_lf_squad_captain_hair_cards.png-ba1c74147716398e8ae9980f60ab04a3.bptc.ctex", "res://.godot/imported/lf_squad_captain_lf_squad_captain_hair_cards.png-ba1c74147716398e8ae9980f60ab04a3.astc.ctex"]
 
 [params]
 

@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dl40myj517oxd"
-path="res://.godot/imported/lf_bark_pine_n.png-a5fc16b5e2b313cf25c0ec15dc50dd61.ctex"
+path.bptc="res://.godot/imported/lf_bark_pine_n.png-a5fc16b5e2b313cf25c0ec15dc50dd61.bptc.ctex"
+path.astc="res://.godot/imported/lf_bark_pine_n.png-a5fc16b5e2b313cf25c0ec15dc50dd61.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/forest/lf_bark_pine_n.png"
-dest_files=["res://.godot/imported/lf_bark_pine_n.png-a5fc16b5e2b313cf25c0ec15dc50dd61.ctex"]
+dest_files=["res://.godot/imported/lf_bark_pine_n.png-a5fc16b5e2b313cf25c0ec15dc50dd61.bptc.ctex", "res://.godot/imported/lf_bark_pine_n.png-a5fc16b5e2b313cf25c0ec15dc50dd61.astc.ctex"]
 
 [params]
 

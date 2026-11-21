@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d05wynsy6ns10"
-path="res://.godot/imported/lf_bark_willow_n.png-6f14d25ffde4568616b4135d2ee09989.ctex"
+path.bptc="res://.godot/imported/lf_bark_willow_n.png-6f14d25ffde4568616b4135d2ee09989.bptc.ctex"
+path.astc="res://.godot/imported/lf_bark_willow_n.png-6f14d25ffde4568616b4135d2ee09989.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/forest/lf_bark_willow_n.png"
-dest_files=["res://.godot/imported/lf_bark_willow_n.png-6f14d25ffde4568616b4135d2ee09989.ctex"]
+dest_files=["res://.godot/imported/lf_bark_willow_n.png-6f14d25ffde4568616b4135d2ee09989.bptc.ctex", "res://.godot/imported/lf_bark_willow_n.png-6f14d25ffde4568616b4135d2ee09989.astc.ctex"]
 
 [params]
 

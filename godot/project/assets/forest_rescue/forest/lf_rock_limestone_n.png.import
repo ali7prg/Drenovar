@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bgi8gcvuxsj0m"
-path="res://.godot/imported/lf_rock_limestone_n.png-4c903d290a46bed9df43adb5b81d7228.ctex"
+path.bptc="res://.godot/imported/lf_rock_limestone_n.png-4c903d290a46bed9df43adb5b81d7228.bptc.ctex"
+path.astc="res://.godot/imported/lf_rock_limestone_n.png-4c903d290a46bed9df43adb5b81d7228.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/forest/lf_rock_limestone_n.png"
-dest_files=["res://.godot/imported/lf_rock_limestone_n.png-4c903d290a46bed9df43adb5b81d7228.ctex"]
+dest_files=["res://.godot/imported/lf_rock_limestone_n.png-4c903d290a46bed9df43adb5b81d7228.bptc.ctex", "res://.godot/imported/lf_rock_limestone_n.png-4c903d290a46bed9df43adb5b81d7228.astc.ctex"]
 
 [params]
 

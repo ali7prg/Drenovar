@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://5fq6boq3wow6"
-path="res://.godot/imported/lf_rock_quarry_r.png-337a6a4c687bf3edfa0a6a3a133fb21a.ctex"
+path.bptc="res://.godot/imported/lf_rock_quarry_r.png-337a6a4c687bf3edfa0a6a3a133fb21a.bptc.ctex"
+path.astc="res://.godot/imported/lf_rock_quarry_r.png-337a6a4c687bf3edfa0a6a3a133fb21a.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/forest/lf_rock_quarry_r.png"
-dest_files=["res://.godot/imported/lf_rock_quarry_r.png-337a6a4c687bf3edfa0a6a3a133fb21a.ctex"]
+dest_files=["res://.godot/imported/lf_rock_quarry_r.png-337a6a4c687bf3edfa0a6a3a133fb21a.bptc.ctex", "res://.godot/imported/lf_rock_quarry_r.png-337a6a4c687bf3edfa0a6a3a133fb21a.astc.ctex"]
 
 [params]
 

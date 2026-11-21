@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c8lo6fp7s4lhm"
-path="res://.godot/imported/lf_squad_captain_lf_squad_captain_color.jpg-15ec0b5d03295010f593e0b58ee9a685.ctex"
+path.bptc="res://.godot/imported/lf_squad_captain_lf_squad_captain_color.jpg-15ec0b5d03295010f593e0b58ee9a685.bptc.ctex"
+path.astc="res://.godot/imported/lf_squad_captain_lf_squad_captain_color.jpg-15ec0b5d03295010f593e0b58ee9a685.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "85c3683efcac3a53013590b243d0f661"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_squad_captain_lf_squad_captain_color.jpg"
-dest_files=["res://.godot/imported/lf_squad_captain_lf_squad_captain_color.jpg-15ec0b5d03295010f593e0b58ee9a685.ctex"]
+dest_files=["res://.godot/imported/lf_squad_captain_lf_squad_captain_color.jpg-15ec0b5d03295010f593e0b58ee9a685.bptc.ctex", "res://.godot/imported/lf_squad_captain_lf_squad_captain_color.jpg-15ec0b5d03295010f593e0b58ee9a685.astc.ctex"]
 
 [params]
 

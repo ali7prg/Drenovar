@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dm6qm24bk2v0q"
-path="res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_color.jpg-ad06a778e49db71afec3da36c366a9ff.ctex"
+path.bptc="res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_color.jpg-ad06a778e49db71afec3da36c366a9ff.bptc.ctex"
+path.astc="res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_color.jpg-ad06a778e49db71afec3da36c366a9ff.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "1db3b6d0db6280809768423aae436e7b"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_civilian_quarry_worker_lf_civilian_quarry_worker_color.jpg"
-dest_files=["res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_color.jpg-ad06a778e49db71afec3da36c366a9ff.ctex"]
+dest_files=["res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_color.jpg-ad06a778e49db71afec3da36c366a9ff.bptc.ctex", "res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_color.jpg-ad06a778e49db71afec3da36c366a9ff.astc.ctex"]
 
 [params]
 

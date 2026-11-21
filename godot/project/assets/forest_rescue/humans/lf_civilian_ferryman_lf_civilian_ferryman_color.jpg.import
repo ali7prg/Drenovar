@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://s4iisde0o7x5"
-path="res://.godot/imported/lf_civilian_ferryman_lf_civilian_ferryman_color.jpg-cc79149bf943150ac7cb425136bb4bc8.ctex"
+path.bptc="res://.godot/imported/lf_civilian_ferryman_lf_civilian_ferryman_color.jpg-cc79149bf943150ac7cb425136bb4bc8.bptc.ctex"
+path.astc="res://.godot/imported/lf_civilian_ferryman_lf_civilian_ferryman_color.jpg-cc79149bf943150ac7cb425136bb4bc8.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "330ead85c887e8d9e2d3223042a9c44d"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_civilian_ferryman_lf_civilian_ferryman_color.jpg"
-dest_files=["res://.godot/imported/lf_civilian_ferryman_lf_civilian_ferryman_color.jpg-cc79149bf943150ac7cb425136bb4bc8.ctex"]
+dest_files=["res://.godot/imported/lf_civilian_ferryman_lf_civilian_ferryman_color.jpg-cc79149bf943150ac7cb425136bb4bc8.bptc.ctex", "res://.godot/imported/lf_civilian_ferryman_lf_civilian_ferryman_color.jpg-cc79149bf943150ac7cb425136bb4bc8.astc.ctex"]
 
 [params]
 

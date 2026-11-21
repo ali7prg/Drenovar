@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dgtab1bh53my"
-path="res://.godot/imported/lf_bark_hollow_n.png-09b12c485f2e8cd814a778f6f5079e6f.ctex"
+path.bptc="res://.godot/imported/lf_bark_hollow_n.png-09b12c485f2e8cd814a778f6f5079e6f.bptc.ctex"
+path.astc="res://.godot/imported/lf_bark_hollow_n.png-09b12c485f2e8cd814a778f6f5079e6f.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/forest/lf_bark_hollow_n.png"
-dest_files=["res://.godot/imported/lf_bark_hollow_n.png-09b12c485f2e8cd814a778f6f5079e6f.ctex"]
+dest_files=["res://.godot/imported/lf_bark_hollow_n.png-09b12c485f2e8cd814a778f6f5079e6f.bptc.ctex", "res://.godot/imported/lf_bark_hollow_n.png-09b12c485f2e8cd814a778f6f5079e6f.astc.ctex"]
 
 [params]
 

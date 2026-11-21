@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bekp4d76t7734"
-path="res://.godot/imported/lf_bark_oak_c.jpg-c2f23e52d2d608159abc27f42e7bd8d9.ctex"
+path.bptc="res://.godot/imported/lf_bark_oak_c.jpg-c2f23e52d2d608159abc27f42e7bd8d9.bptc.ctex"
+path.astc="res://.godot/imported/lf_bark_oak_c.jpg-c2f23e52d2d608159abc27f42e7bd8d9.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/forest/lf_bark_oak_c.jpg"
-dest_files=["res://.godot/imported/lf_bark_oak_c.jpg-c2f23e52d2d608159abc27f42e7bd8d9.ctex"]
+dest_files=["res://.godot/imported/lf_bark_oak_c.jpg-c2f23e52d2d608159abc27f42e7bd8d9.bptc.ctex", "res://.godot/imported/lf_bark_oak_c.jpg-c2f23e52d2d608159abc27f42e7bd8d9.astc.ctex"]
 
 [params]
 

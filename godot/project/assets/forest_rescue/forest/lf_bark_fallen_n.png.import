@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://btt3bhksl4cmj"
-path="res://.godot/imported/lf_bark_fallen_n.png-2b3fd4349a5e76eb1b6e299d5dfa13f9.ctex"
+path.bptc="res://.godot/imported/lf_bark_fallen_n.png-2b3fd4349a5e76eb1b6e299d5dfa13f9.bptc.ctex"
+path.astc="res://.godot/imported/lf_bark_fallen_n.png-2b3fd4349a5e76eb1b6e299d5dfa13f9.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/forest/lf_bark_fallen_n.png"
-dest_files=["res://.godot/imported/lf_bark_fallen_n.png-2b3fd4349a5e76eb1b6e299d5dfa13f9.ctex"]
+dest_files=["res://.godot/imported/lf_bark_fallen_n.png-2b3fd4349a5e76eb1b6e299d5dfa13f9.bptc.ctex", "res://.godot/imported/lf_bark_fallen_n.png-2b3fd4349a5e76eb1b6e299d5dfa13f9.astc.ctex"]
 
 [params]
 

@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c3to04qtdm5ab"
-path="res://.godot/imported/lf_civilian_herbalist_variant_mask.png-f6b3bf68644dcdf1c40f440be0d1cef9.ctex"
+path.bptc="res://.godot/imported/lf_civilian_herbalist_variant_mask.png-f6b3bf68644dcdf1c40f440be0d1cef9.bptc.ctex"
+path.astc="res://.godot/imported/lf_civilian_herbalist_variant_mask.png-f6b3bf68644dcdf1c40f440be0d1cef9.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_civilian_herbalist_variant_mask.png"
-dest_files=["res://.godot/imported/lf_civilian_herbalist_variant_mask.png-f6b3bf68644dcdf1c40f440be0d1cef9.ctex"]
+dest_files=["res://.godot/imported/lf_civilian_herbalist_variant_mask.png-f6b3bf68644dcdf1c40f440be0d1cef9.bptc.ctex", "res://.godot/imported/lf_civilian_herbalist_variant_mask.png-f6b3bf68644dcdf1c40f440be0d1cef9.astc.ctex"]
 
 [params]
 

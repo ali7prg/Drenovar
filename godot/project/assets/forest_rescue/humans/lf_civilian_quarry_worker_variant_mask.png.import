@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://x85587dqo4na"
-path="res://.godot/imported/lf_civilian_quarry_worker_variant_mask.png-d703dc1eb34110954124a4f76784ebd6.ctex"
+path.bptc="res://.godot/imported/lf_civilian_quarry_worker_variant_mask.png-d703dc1eb34110954124a4f76784ebd6.bptc.ctex"
+path.astc="res://.godot/imported/lf_civilian_quarry_worker_variant_mask.png-d703dc1eb34110954124a4f76784ebd6.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_civilian_quarry_worker_variant_mask.png"
-dest_files=["res://.godot/imported/lf_civilian_quarry_worker_variant_mask.png-d703dc1eb34110954124a4f76784ebd6.ctex"]
+dest_files=["res://.godot/imported/lf_civilian_quarry_worker_variant_mask.png-d703dc1eb34110954124a4f76784ebd6.bptc.ctex", "res://.godot/imported/lf_civilian_quarry_worker_variant_mask.png-d703dc1eb34110954124a4f76784ebd6.astc.ctex"]
 
 [params]
 

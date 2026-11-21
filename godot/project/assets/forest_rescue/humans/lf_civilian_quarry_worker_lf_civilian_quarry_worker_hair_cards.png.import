@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bs3voo6jq2vfi"
-path="res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_hair_cards.png-d7bfe8ce768d6e0c02b2557c0ccd46e7.ctex"
+path.bptc="res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_hair_cards.png-d7bfe8ce768d6e0c02b2557c0ccd46e7.bptc.ctex"
+path.astc="res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_hair_cards.png-d7bfe8ce768d6e0c02b2557c0ccd46e7.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "645bc06ecfc508741c4939ef1f6f9941"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_civilian_quarry_worker_lf_civilian_quarry_worker_hair_cards.png"
-dest_files=["res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_hair_cards.png-d7bfe8ce768d6e0c02b2557c0ccd46e7.ctex"]
+dest_files=["res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_hair_cards.png-d7bfe8ce768d6e0c02b2557c0ccd46e7.bptc.ctex", "res://.godot/imported/lf_civilian_quarry_worker_lf_civilian_quarry_worker_hair_cards.png-d7bfe8ce768d6e0c02b2557c0ccd46e7.astc.ctex"]
 
 [params]
 

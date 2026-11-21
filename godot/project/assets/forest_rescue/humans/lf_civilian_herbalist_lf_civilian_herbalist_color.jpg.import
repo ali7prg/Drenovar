@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cf4hob2b4oq85"
-path="res://.godot/imported/lf_civilian_herbalist_lf_civilian_herbalist_color.jpg-5a80000b485062f97c5409c0a09de211.ctex"
+path.bptc="res://.godot/imported/lf_civilian_herbalist_lf_civilian_herbalist_color.jpg-5a80000b485062f97c5409c0a09de211.bptc.ctex"
+path.astc="res://.godot/imported/lf_civilian_herbalist_lf_civilian_herbalist_color.jpg-5a80000b485062f97c5409c0a09de211.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "51fc9bf0b6a6c166b66df29b39fb86c9"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_civilian_herbalist_lf_civilian_herbalist_color.jpg"
-dest_files=["res://.godot/imported/lf_civilian_herbalist_lf_civilian_herbalist_color.jpg-5a80000b485062f97c5409c0a09de211.ctex"]
+dest_files=["res://.godot/imported/lf_civilian_herbalist_lf_civilian_herbalist_color.jpg-5a80000b485062f97c5409c0a09de211.bptc.ctex", "res://.godot/imported/lf_civilian_herbalist_lf_civilian_herbalist_color.jpg-5a80000b485062f97c5409c0a09de211.astc.ctex"]
 
 [params]
 

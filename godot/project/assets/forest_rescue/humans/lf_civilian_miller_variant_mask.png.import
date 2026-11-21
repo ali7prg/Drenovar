@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d2c11sldtuub2"
-path="res://.godot/imported/lf_civilian_miller_variant_mask.png-c8888aa417caba5b7c1bc6544d4417fb.ctex"
+path.bptc="res://.godot/imported/lf_civilian_miller_variant_mask.png-c8888aa417caba5b7c1bc6544d4417fb.bptc.ctex"
+path.astc="res://.godot/imported/lf_civilian_miller_variant_mask.png-c8888aa417caba5b7c1bc6544d4417fb.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_civilian_miller_variant_mask.png"
-dest_files=["res://.godot/imported/lf_civilian_miller_variant_mask.png-c8888aa417caba5b7c1bc6544d4417fb.ctex"]
+dest_files=["res://.godot/imported/lf_civilian_miller_variant_mask.png-c8888aa417caba5b7c1bc6544d4417fb.bptc.ctex", "res://.godot/imported/lf_civilian_miller_variant_mask.png-c8888aa417caba5b7c1bc6544d4417fb.astc.ctex"]
 
 [params]
 

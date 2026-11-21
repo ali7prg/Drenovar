@@ -122,6 +122,25 @@ LOD), `fog_culled` (instances removed because they stand deeper than 3 m inside 
   - Gameplay layer (forest_game.gd): while the squad or an escort is under way the client reads `/api/state`
     every 1.2 s of server time, so each committed checkpoint reveal dissolves on its own (~2 s per cell)
     instead of all at once on arrival.
+* v3.7 (2026-11-21, winch material path + close-zoom foliage — no gameplay API change, API_VERSION unchanged):
+  - Winch (lf_mechanism_winch_sequence, props v2 iter 24) rebuilt on the props v2 material path
+    (`forest_rescue/blender/assets/props/v2/pv2mat.py`, `mattex.py`; a module opts in with `MATERIAL_MODE`):
+    modelled geometry (25 / 16-tooth gears with hubs and spokes, bolts, forged crank, turned grip, modelled grass
+    blades), one seamless painted-style tile per material (wood, iron, rope, stone, brass, ground, grass, void;
+    `<id>_<material>_c.jpg` next to the GLB, VRAM compressed), UVs box-mapped in metres (TEXCOORD_0, repeat),
+    no alpha, no painting projection. The projection atlases `<id>_c.jpg / _n.png / _lod1_c.jpg / _lod2_c.jpg`
+    are gone. Same nodes and clips; new node `pit_void` (dark pit mouth). In `lf_rope_release` the big gear turns
+    with the drum and the pinion the other way at 25/16 = 1.5625 (crank 1:1 on the axle).
+  - Meta `vertexAO: true` (new, additive): COLOR_0.a = sqrt((F - 0.42) / 0.58), F = baked ambient occlusion x soft
+    sun shadow; `ActorRig.apply_look` then builds the painted material with `use_ao` for surfaces that carry
+    vertex colours (never wind). Assets without the flag are unchanged.
+  - ActorDirector: the winch's big_gear / pinion are sampled with the drum in the stable and live poses;
+    `device_spot()` stands the winch screen-left of its key spot (+1 m back) when the site's cage would hide it
+    from the city camera; `device_focus()` is the mechanism UI camera target (winch zoom 24); `pit_void` is lifted
+    0.29 m onto the terrain; the site name tag hides while a mechanism UI of that site is open.
+  - QA: `qa_forest_perf.gd` look segments `t_winch_ui` (mechanism UI) and `t_bush_z120`; `--tint-kinds` (with
+    `--save-frames`) also saves `<segment>_tint.png` with every forest MultiMesh drawn flat in its kind's colour.
+
 * v3.6 (2026-11-21, phone memory + hot paths — no gameplay API change, API_VERSION unchanged):
   - Every 3D texture under `assets/forest_rescue/**` (187, incl. the shipped impostor atlas) imports VRAM
     Compressed, high quality (BPTC desktop / ASTC 4x4 iOS), mipmaps on, normal maps with the normal-map setting

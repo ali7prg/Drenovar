@@ -157,7 +157,7 @@ func run() -> void:
 	var refused: Dictionary = await forest.request_action("move", {"targetId":"lf_horse_origin"})
 	check(not bool(refused.get("ok", true)), "locked: adventure command refused locally")
 	# Real army for real battles (a 5-recruit starter squad loses to Tenerys I).
-	await test_post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-07":30000}})
+	await test_post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-06":30000}})
 	# Hall III: intro offered once; presentation starts by itself in the safe city view.
 	await test_post("/test/hall?level=3")
 	await refresh()

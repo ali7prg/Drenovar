@@ -218,7 +218,7 @@ func run() -> void:
 # ---------------------------------------------------------------- early slice (a)–(e), (g)
 func run_early() -> void:
 	await post("/test/hall?level=2")
-	await post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-07":30000}})
+	await post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-06":30000}})
 	await refresh()
 	follow = false
 	var entrance: Vector3 = forest.target_position("lf_horse_origin")
@@ -352,7 +352,7 @@ func run_early() -> void:
 ## the server reveals the fog checkpoint by checkpoint (every 4 units, radius 10).
 func run_follow() -> void:
 	await post("/test/hall?level=3")
-	await post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-07":30000}})
+	await post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-06":30000}})
 	await refresh()
 	var deadline := 20
 	while String(forest.client.adv.get("intro", {}).get("status", "")) != "acknowledged" and deadline > 0:
@@ -561,7 +561,7 @@ func run_boss() -> void:
 	follow_zoom = 46.0
 	# Squad for the finale (formed at the reception): a measured force so the fight runs through
 	# all three phases and every telegraphed attack before the Ancient Maw falls.
-	await act("form_squad", {"units":{"ENG-02":boss_units, "ENG-03":boss_units, "ENG-07":boss_units}})
+	await act("form_squad", {"units":{"ENG-02":boss_units, "ENG-03":boss_units, "ENG-06":boss_units}})
 	await hold(0.5)
 	mark("f_prep")
 	await travel(1.0)           # home → arena (cut)

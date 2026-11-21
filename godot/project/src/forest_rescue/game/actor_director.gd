@@ -643,8 +643,8 @@ func squad_model_paths(index: int) -> Array:
 		if data.unitModels.has(id) and not data.unitModels[id].get("mounted", false):
 			fallback = data.unitModels[id].field
 			break
-	if fallback.is_empty() and data.unitModels.has("ENG-09"):
-		fallback = data.unitModels["ENG-09"].field
+	if fallback.is_empty() and data.unitModels.has("ENG-01"):        # forest roster: ENG-01/02/03/04/06 only
+		fallback = data.unitModels["ENG-01"].field
 	return [SQUAD_GLBS[index], fallback]
 
 func update_squad(now: float, delta: float) -> void:

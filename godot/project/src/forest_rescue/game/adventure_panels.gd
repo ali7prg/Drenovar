@@ -7,7 +7,9 @@ extends RefCounted
 const Style = preload("res://src/forest_rescue/game/hud_style.gd")
 const RESOURCE_ORDER := ["food", "wood", "stone", "iron", "coins"]
 const ROMAN := ["I", "II", "III", "IV"]
-const RECRUIT_ORDER := ["ENG-09", "ENG-08", "ENG-01", "ENG-02", "ENG-07", "ENG-10", "ENG-03", "ENG-04", "ENG-05", "ENG-06"]
+## Forest squad roster (production server, 2026-11-21): only these five units can join the squad; any
+## other unit the city owns is never offered here.
+const RECRUIT_ORDER := ["ENG-01", "ENG-02", "ENG-03", "ENG-04", "ENG-06"]
 
 var game: Node
 var main: Node

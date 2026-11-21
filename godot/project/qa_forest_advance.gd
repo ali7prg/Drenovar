@@ -95,7 +95,7 @@ func run() -> void:
 	# Fresh profile: hall III and a real army (test endpoints of the local realm only).
 	if forest.client.hall_level() < 3:
 		await test_post("/test/hall?level=3")
-		await test_post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-07":30000}})
+		await test_post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-06":30000}})
 	await refresh()
 	# Hall III intro (one-time presentation): acknowledge it the way «Пропустить» does.
 	var deadline := Time.get_ticks_msec() + 8000

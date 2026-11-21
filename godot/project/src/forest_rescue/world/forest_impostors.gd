@@ -204,14 +204,17 @@ func _load_shipped(digest: String, editor_check: Dictionary) -> void:
 	if OS.has_feature("editor") and not editor_check.is_empty() and info.get("kitMd5", {}) != editor_check:
 		push_warning("ForestImpostors: the shipped atlas predates a kit GLB change; baking at runtime (re-ship with --ship-impostors)")
 		return
-	# threaded: the city keeps animating while the atlas streams in
-	if ResourceLoader.load_threaded_request(SHIPPED_PNG, "Texture2D") != OK:
-		return
-	while ResourceLoader.load_threaded_get_status(SHIPPED_PNG) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-		await get_tree().process_frame
-	var texture := ResourceLoader.load_threaded_get(SHIPPED_PNG) as Texture2D
+	# threaded: the city keeps animating while the atlas streams in (synchronous load as the fallback)
+	var texture: Texture2D = null
+	var request := ResourceLoader.load_threaded_request(SHIPPED_PNG, "Texture2D")
+	if request == OK:
+		while ResourceLoader.load_threaded_get_status(SHIPPED_PNG) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			await get_tree().process_frame
+		texture = ResourceLoader.load_threaded_get(SHIPPED_PNG) as Texture2D
 	if texture == null:
-		shipped_note = "texture load failed"
+		texture = load(SHIPPED_PNG) as Texture2D
+		shipped_note = "threaded request %d; synchronous load %s" % [request, texture != null]
+	if texture == null:
 		return
 	_atlas = texture
 	_grid = int(info.grid)

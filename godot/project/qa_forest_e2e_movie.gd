@@ -98,7 +98,7 @@ func run() -> void:
 	clock = float(game.state.get("serverTime", 0)) + 1000.0
 	forest.client.manual_clock_ms = clock
 	await post("/test/hall?level=2")
-	await post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-07":30000}})
+	await post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-06":30000}})
 	await refresh()
 	say("locked hall II")
 	follow = false

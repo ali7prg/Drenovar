@@ -57,6 +57,8 @@ def assign_uvs(g, M, rng):
         frames[pi] = (c, R, rng.uniform(0, 1, 2))
     tile = M.TILE_M
     rows = getattr(M, "ROPE_ROWS", 4)
+    trims = dict(getattr(M, "TRIM_CLASSES", {}))     # class -> max face width (m) that takes the trim mapping
+    trim_tags = {c: tuple(t) for c, t in getattr(M, "TRIM_TAGS", {}).items()}
     out = []
     for fi, (f, mc, tg, uv) in enumerate(zip(F, Mc, Tg, UV)):
         rule = rule_for(str(tg), M.UV_RULES)
@@ -81,6 +83,17 @@ def assign_uvs(g, M, rng):
         n = n / max(np.linalg.norm(n), 1e-12)
         k = int(np.argmax(np.abs(n @ R)))
         uvm = q[:, [1, 2]] if k == 0 else (q[:, [0, 2]] if k == 1 else q[:, [0, 1]])
+        ttags = trim_tags.get(str(mc))
+        if rule == "box" and str(mc) in trims and len(f) == 4 and (ttags is None or str(tg).startswith(ttags)):
+            # trim: an elongated face (beam side, strap, band) takes the tile's full height across its width, so the
+            # tile's edge band lands on the face's long edges; u stays metric along the grain
+            span = np.ptp(uvm, 0)
+            a_, b_ = (0, 1) if span[0] >= span[1] else (1, 0)
+            if span[b_] <= trims[str(mc)] and span[a_] >= span[b_] * 1.15:
+                along = uvm[:, a_] / tile.get(str(mc), 1.0) + off[0]
+                across = (uvm[:, b_] - uvm[:, b_].min()) / max(span[b_], 1e-6)
+                out.append([(float(x), float(y)) for x, y in zip(along, across)])
+                continue
         if rule == "tube":
             # one rope row across the tube's diameter, the lay along its length
             d = max(float(np.ptp(q[:, 1])), float(np.ptp(q[:, 2])), 0.02)
@@ -714,6 +727,10 @@ def run(M, modname, it, do_export=True, do_godot=True):
                 tiles[c] = np.clip(tiles[c] * gn[None, None], 0, 1)
                 set_tile(imgs[c], tiles[c])
             pv2.log("  colour calibration gains: " + ", ".join(f"{c} {d['gain']}" for c, d in gains_log.items()))
+            for c, amt in getattr(M, "TRIM_AMOUNT", {}).items():
+                if c in tiles:
+                    tiles[c] = MT.trim(tiles[c], amt)
+                    set_tile(imgs[c], tiles[c])
             # the game's FILMIC tonemap desaturates the unshaded painted path: tiles carry a little extra chroma
             ch = float(getattr(M, "TILE_CHROMA", 1.0))
             if ch != 1.0:

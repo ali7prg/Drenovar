@@ -109,7 +109,7 @@ def stretch(t, lo, hi):
 
 
 # ----------------------------------------------------------------------------- materials
-def wood(size, lut, rng, lines=13, contrast=(0.05, 0.8)):
+def wood(size, lut, rng, lines=13, contrast=(0.04, 0.78)):
     """Weathered oak, grain along u (x), painted style: broad warm tone bands along the grain, crisp dark latewood
     lines that come and go, a few long seasoning checks and knots, soft lighter weathered streaks. Fine fibre noise is
     kept faint (no zebra / speckle at full resolution)."""
@@ -269,6 +269,17 @@ def ground(size, dirt_lut, leaf_cols, grass_col, pebble_lut, rng, leaves=0.16, g
         tone = gcol * rng.uniform(0.7, 1.25) * (0.75 + 0.35 * k)[:, None]
         col[py_, px_] = np.clip(tone, 0, 1)
     return np.clip(blur_wrap(col, 0.5), 0, 1)
+
+
+def trim(tile, amount=-0.42, width=0.075):
+    """Trim band for faces mapped across their full width (pv2mat TRIM_CLASSES): the tile's top / bottom rows (the
+    face's long edges) darkened (amount < 0: painted edge occlusion on timbers) or lightened (> 0: worn bevel
+    highlight on forged iron). Seamless (both borders get the same band)."""
+    H = tile.shape[0]
+    v = (np.arange(H) + 0.5) / H
+    e = np.exp(-v / width) + np.exp(-(1 - v) / width)
+    f = 1.0 + amount * np.clip(e, 0, 1)
+    return np.clip(tile * f[:, None, None], 0, 1)
 
 
 def grass(size, root_col, mid_col, tip_col):

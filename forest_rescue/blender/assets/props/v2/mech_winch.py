@@ -103,7 +103,14 @@ def make_tiles(px, sheet, rng):
     return pv2mat.default_tiles(sys.modules[__name__], px, sheet, rng)
 
 
-TILE_CHROMA = 1.18
+TILE_CHROMA = 1.15
+# trim mapping (pv2mat): beam / strap faces up to this wide take the tile across their width; the wood tile's
+# borders darken (art/10 paints every timber edge dark), the iron tile's lighten (worn bevels catch the light)
+TRIM_CLASSES = {"wood": 0.42, "iron": 0.3}
+TRIM_AMOUNT = {"wood": -0.45, "iron": 0.55}
+TRIM_TAGS = {"wood": ("leg", "cross", "top_block", "top_rail", "tie", "post", "brace", "chest_plinth"),
+             "iron": ("strap", "band", "shoe", "housing_plate", "pinion_bracket", "lever_bracket", "chest_band",
+                      "crank_arm")}
 # gear train / crank check: lf_rope_release frames, front-plane box (model metres x0, z0, x1, z1)
 CLIP_SHEET = {"clip": "lf_rope_release", "times": (0.0, 0.45, 0.8, 1.3), "box": (-1.9, 1.3, 2.3, 3.2)}
 # QA close-ups (sheet px): gears, crank, chest + pit, left trestle top + brake

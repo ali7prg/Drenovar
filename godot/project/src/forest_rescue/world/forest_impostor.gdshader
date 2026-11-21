@@ -61,11 +61,11 @@ float grade_river_center(float z) {
 
 // Same art/01 region grade as forest_painted.gdshaderinc (impostors are always forest).
 const vec3 GRADE_GROVE = vec3(1.52, 1.12, 1.0);
-const vec3 GRADE_SOUTH = vec3(1.0, 0.85, 0.85);      // pass 4: blue-green pines, lifted shadows (crown_hsv.py)
+const vec3 GRADE_SOUTH = vec3(1.0, 1.0, 0.9);        // pass 4: blue-green pines, lifted shadows (crown_hsv.py)
 const vec3 GRADE_EAST = vec3(0.88, 1.2, 0.86);
 const vec3 GRADE_REST = vec3(1.1, 1.6, 1.0);
 const vec3 GRADE_ARENA = vec3(1.18, 1.0, 1.0);     // arena rock sector (gorge, waterfall, arena)
-const vec3 GRADE_LAKE = vec3(0.95, 0.65, 0.88);    // the reedy lake's shores (pass 4: no dark pines)
+const vec3 GRADE_LAKE = vec3(1.0, 0.95, 0.9);      // the reedy lake's shores (pass 4: no dark pines)
 const vec2 GRADE_LAKE_CENTER = vec2(97.2, 32.4);
 vec3 grade_factors(vec3 p) {
 	float u = (p.x - p.z) * 0.70710678;

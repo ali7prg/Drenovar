@@ -248,7 +248,7 @@ func _add_curtain(node_name: String, lip: Vector2, top: float, bottom: float, wi
 ## Pass 4 (art/01: thin blue ground mist over the marsh pools, the lake and along the river): low drifting
 ## wisps (alpha <= 0.22) lying just above the water, kept off the trails and the bridge, so they never
 ## veil a trail, a camp or a unit; distinct from the opaque fog of war (thin, translucent, at water level).
-const MIST_ALPHA := 0.22
+const MIST_ALPHA := 0.1
 static var _mist_material: ShaderMaterial
 
 
@@ -270,7 +270,7 @@ void fragment() {
 	float body = 1.0 - smoothstep(0.35, 1.0, length(p * vec2(1.0, 1.25)));
 	float n = texture(noise_tex, wpos.xz / 17.0 + vec2(TIME * 0.012, TIME * 0.007)).r;
 	float n2 = texture(noise_tex, wpos.xz / 6.5 + vec2(-TIME * 0.02, TIME * 0.015)).a;
-	ALBEDO = vec3(0.8, 0.87, 0.93);
+	ALBEDO = vec3(0.62, 0.72, 0.8);
 	ALPHA = clamp(body * smoothstep(0.35, 0.75, n * 0.7 + n2 * 0.45), 0.0, 1.0) * max_alpha;
 }
 """

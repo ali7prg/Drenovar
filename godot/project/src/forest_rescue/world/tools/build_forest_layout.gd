@@ -66,7 +66,7 @@ const ZONE_MIX := [
 	{Rules.OAK: 0.50, Rules.BIRCH: 0.25, Rules.PINE: 0.25},                 # town belt (green broadleaf, meadows)
 ]
 ## Ambient spacing (m) per zone: target trunk spacing incl. resource trees.
-const ZONE_SPACING := [15.0, 5.4, 3.9, 4.4, 4.8, 1.85, 9.0, 6.0]
+const ZONE_SPACING := [15.0, 5.4, 3.9, 4.4, 4.8, 1.7, 9.0, 6.0]
 ## Grove hero oaks (owner: "big bright golden oaks 1.5–2×, fewer larger trees, clumps and
 ## open meadows"): every ambient grove oak at this absolute scale range (kit oak at 1.0 ≈ 13.6 m).
 const GROVE_OAK_SCALE := [1.35, 1.8]
@@ -129,7 +129,7 @@ var glade_clearings: Array = []   # [[Vector2, radius]] visual glade clearings (
 const GLADE_CLEARING := 11.5
 ## pass 4 (art/01 S-G: small camps in the dense dark pine forest): the south / lake glades keep a
 ## clearing just past the 8.5 m camp pad; pines stand at its edge (crowns overhang toward the pad)
-const GLADE_CLEARING_DENSE := 9.6
+const GLADE_CLEARING_DENSE := 9.0
 
 ## Layout pass 3 (art/01: big individual crowns standing in groves on sunny meadows). Canopy cover
 ## of the zone's forest land (crown discs, art/01 crops at zoom 68), trunk spacing inside a grove,

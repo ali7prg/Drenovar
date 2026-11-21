@@ -4,7 +4,7 @@ height in metres), compares the pad (ellipse 0.35-0.8 x the 8.5 m pad radius, ex
 middle) with the meadow ring just outside it (1.3-1.7 x), as median CIELAB; ΔE76 >= 15 required. Also reports the
 pad's median sRGB (target warm sand ~ (185, 150, 105)) and the meadow HSV.
 
-    /opt/tools/blender-venv/bin/python forest_rescue/qa/ingame/integration/pad_metrics.py <png> <zoom> [<png> <zoom> ...]
+    /opt/tools/blender-venv/bin/python forest_rescue/qa/ingame/integration/pad_metrics.py <png> <zoom> <glade ground height> [...]
 """
 import math
 import sys
@@ -24,23 +24,24 @@ def srgb_to_lab(rgb):
     return np.stack([116 * f[..., 1] - 16, 500 * (f[..., 0] - f[..., 1]), 200 * (f[..., 1] - f[..., 2])], -1)
 
 
-def ring_mask(h, w, zoom, r0, r1):
+def ring_mask(h, w, zoom, r0, r1, ground_h=0.0):
     ppm = h / zoom
     yy, xx = np.mgrid[0:h, 0:w]
+    cy = h / 2 - ground_h * math.cos(math.radians(38.0)) * ppm      # the glade stands ground_h above the target
     dx = (xx - w / 2) / ppm
-    dy = (yy - h / 2) / ppm / math.sin(math.radians(38.0))
+    dy = (yy - cy) / ppm / math.sin(math.radians(38.0))
     d = np.hypot(dx, dy)
     return (d >= r0) & (d <= r1)
 
 
 def main():
     args = sys.argv[1:]
-    for i in range(0, len(args), 2):
-        path, zoom = args[i], float(args[i + 1])
+    for i in range(0, len(args), 3):
+        path, zoom, gh = args[i], float(args[i + 1]), float(args[i + 2])
         a = np.asarray(Image.open(path).convert("RGB")).astype(float)
         h, w = a.shape[:2]
-        pad = ring_mask(h, w, zoom, PAD_R * 0.35, PAD_R * 0.8)
-        meadow = ring_mask(h, w, zoom, PAD_R * 1.3, PAD_R * 1.7)
+        pad = ring_mask(h, w, zoom, PAD_R * 0.35, PAD_R * 0.8, gh)
+        meadow = ring_mask(h, w, zoom, PAD_R * 1.3, PAD_R * 1.7, gh)
         lum = a @ np.array([0.299, 0.587, 0.114])
         mx, mn = a.max(-1), a.min(-1)
         sat = (mx - mn) / np.maximum(mx, 1)

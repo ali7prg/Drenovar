@@ -1084,8 +1084,10 @@ func _fossil_bones_mesh() -> ArrayMesh:
 		for k in 15:
 			var t := float(k) / 14.0
 			var phi := PI * t
-			pts.append(Vector3(xi - 0.5 * t, spine_y.call(xi) + rise * sin(phi) - 0.45 * t, -0.9 + half * (1.0 - cos(phi))))
-			radii.append(lerpf(0.21, 0.08, t))
+			# the rib sweeps back along the spine as it arches over (reads as a curved rib, not a bar)
+			pts.append(Vector3(xi - 1.5 * sin(phi * 0.5) - 0.3 * t, spine_y.call(xi) + rise * sin(phi) - 0.45 * t,
+				-0.9 + half * (1.0 - cos(phi))))
+			radii.append(lerpf(0.25, 0.1, t))
 		_tube(st, pts, radii, 7)
 	# skull with open jaws at the right end
 	_ellipsoid(st, Vector3(5.6, FOSSIL_TOP + 0.75, -0.3), Vector3(1.3, 0.95, 1.05), 9, 14)

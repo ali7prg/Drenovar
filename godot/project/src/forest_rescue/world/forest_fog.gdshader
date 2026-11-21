@@ -14,9 +14,9 @@ render_mode unshaded, blend_mix, depth_draw_never, depth_test_default, cull_back
 //  * Density: the fragment marches the city camera's (fixed, orthographic) view ray from the
 //    cloud top down to the ground (heightmap); density detail is 3D noise in world space, so
 //    steep faces get puffs, never vertical streaks of a projected 2D texture.
-//  * Edge: signed distance to the explored edge + bounded noise (≤ 2.6 m into explored ground,
-//    never reveals). Over the explored edge band the shell rises into a thin sheet at ~13 m that
-//    only draws soft light wisps drifting with the wind (art/07 panel 3) — no veil there.
+//  * Edge: signed distance to the explored edge + bounded noise lobes that only push the soft
+//    edge OUT into the fog cells (fogness = 0 on every revealed cell: revealed ground renders
+//    exactly like the base — no wisp sheet, haze bank or veil over it).
 //  * Reveal (~2 s): previous→target blend per pixel with a noise delay; revealing fog thins out
 //    and brightens (luminous wisps dissolving), the top sinks.
 // Colours are sRGB inputs chosen through the inverse of the city FILMIC tonemap so that on
@@ -54,8 +54,6 @@ uniform vec4 sights[8];
 uniform int sight_count = 0;
 uniform vec3 light_dir = vec3(0.45, 0.74, 0.5);
 uniform vec3 view_dir = vec3(-0.5414, -0.5991, -0.5414);   // city camera: normalize(-(75, 83, 75))
-uniform float wisp_height = 13.0;        // wisp sheet over the explored edge band (m)
-uniform float wisp_alpha = 0.34;
 // sRGB inputs (see header): on screen ≈ #3a4d58 / #5a6d79 / #81939f / #98a5ac.
 uniform vec3 valley_color : source_color = vec3(0.180, 0.231, 0.262);
 uniform vec3 body_color : source_color = vec3(0.268, 0.322, 0.357);
@@ -67,7 +65,6 @@ uniform float time_offset = 0.0;
 const int STEPS = 8;
 
 varying vec3 world;
-varying float wisp_lift;
 
 vec2 state_uv(vec2 p) {
 	return (p - domain.xy) / domain.zw;
@@ -155,10 +152,18 @@ vec3 painted(vec2 p, float time) {
 	return mix(vec3(lum), m, 0.72);
 }
 
-float wisp_band(float sdf) {
-	// only over explored ground (the bank itself stays the cloud top): rises right after the edge,
-	// plateau over the first ~5 m of revealed forest, descends gently further inside
-	return smoothstep(1.0, 3.0, sdf) * (1.0 - smoothstep(7.0, 17.0, sdf));
+// Edge lobes / wind tendrils ≥ 0 (same as forest_fog_receiver.gdshaderinc fog_edge_offset) and
+// the edge profile: 0 on explored ground (sdf ≥ 0) → 1 over the first ~2.5 m (+ lobes) of fog.
+float edge_offset(vec2 p, vec2 drift, float b) {
+	vec2 wn = normalize(wind);
+	vec2 along = vec2(dot(p, wn), dot(p, vec2(-wn.y, wn.x)));
+	float t1 = texture(noise_tex, vec2(along.x / 38.0, along.y / 9.0) - vec2(drift.x * 0.03, 0.0) + vec2(0.13, 0.57)).r;
+	float t2 = texture(noise_tex, vec2(along.x / 17.0, along.y / 5.0) - vec2(drift.x * 0.05, 0.0) + vec2(0.61, 0.21)).g;
+	return 2.0 * clamp(b * 0.35 + t1 * 0.45 + t2 * 0.2, 0.0, 1.0) + reveal_curl * 1.5 * t2;
+}
+
+float edge_fogness(float sdf, float offset) {
+	return 1.0 - smoothstep(-2.5, 0.0, sdf + offset);
 }
 
 void vertex() {
@@ -167,9 +172,7 @@ void vertex() {
 	vec4 sm = state_smooth(world.xz);
 	float top = mix(sm.a, sm.b, reveal_t) * height_range;
 	float cloud = cloud_height(top, world.xz, drift_of(TIME));
-	float sdf = (mix(s.g, s.r, reveal_t) - 0.5) * sdf_range;
-	wisp_lift = wisp_band(sdf);
-	world.y += max(max(cloud, wisp_height * wisp_lift), 0.3);
+	world.y += max(cloud, 0.3);
 	VERTEX = (inverse(MODEL_MATRIX) * vec4(world, 1.0)).xyz;
 }
 
@@ -189,8 +192,7 @@ void fragment() {
 	vec4 s_out = texture(state_tex, state_uv(surface.xz));
 	float sdf_entry = (mix(s_in.g, s_in.r, reveal_t) - 0.5) * sdf_range;
 	float sdf_min = (min(min(s_in.r, s_in.g), min(s_out.r, s_out.g)) - 0.5) * sdf_range;
-	float band = wisp_band(sdf_entry);
-	if (dim_strength <= 0.0 && sdf_min > 2.5 && band < 0.01) {
+	if (dim_strength <= 0.0 && sdf_min > 2.5) {
 		discard;
 	}
 
@@ -225,9 +227,9 @@ void fragment() {
 	float trans = 1.0;
 	vec3 acc = vec3(0.0);
 	float step_len = t_hit / float(STEPS);
-	// No march from lifted/explored entries: without a depth buffer it would paint far banks over
-	// the revealed trees in front (wisps only there).
-	int steps = (sdf_entry > 2.0 || band > 0.02) ? 0 : STEPS;
+	// No march from entries well inside explored ground: without a depth buffer it would paint far
+	// banks over the revealed trees in front.
+	int steps = sdf_entry > 2.0 ? 0 : STEPS;
 	for (int i = 0; i < steps; i++) {
 		vec3 p = entry + view_dir * (t_hit * (float(i) + 0.5) / float(STEPS));
 		vec4 s = texture(state_tex, state_uv(p.xz));
@@ -235,12 +237,7 @@ void fragment() {
 		float local_t = smoothstep(delay * 0.5, delay * 0.5 + 0.5, reveal_t);
 		float sdf = (mix(s.g, s.r, local_t) - 0.5) * sdf_range;
 		float b = billow(p.xz, drift);
-		vec2 wn = normalize(wind);
-		vec2 along = vec2(dot(p.xz, wn), dot(p.xz, vec2(-wn.y, wn.x)));
-		float t1 = texture(noise_tex, vec2(along.x / 38.0, along.y / 9.0) - vec2(drift.x * 0.03, 0.0) + vec2(0.13, 0.57)).r;
-		float t2 = texture(noise_tex, vec2(along.x / 17.0, along.y / 5.0) - vec2(drift.x * 0.05, 0.0) + vec2(0.61, 0.21)).g;
-		float offset = -2.6 + 3.0 * (b * 0.35 + t1 * 0.45 + t2 * 0.2) - reveal_curl * 2.0 * t2;
-		float fogness = 1.0 - smoothstep(-1.5, 1.5, sdf + offset);
+		float fogness = edge_fogness(sdf, edge_offset(p.xz, drift, b));
 		if (fogness < 0.004) {
 			continue;
 		}
@@ -276,26 +273,8 @@ void fragment() {
 	float alpha = 1.0 - trans;
 	vec3 color = alpha > 0.0001 ? acc / alpha : shade;
 
-	// ---- wisps over the explored edge band (thin light mist drifting over the edge trees) ----
-	if (band > 0.01) {
-		vec2 wn = normalize(wind);
-		vec2 along = vec2(dot(entry.xz, wn), dot(entry.xz, vec2(-wn.y, wn.x)));
-		vec3 wq = vec3((along.x - time * drift_speed * 1.2) / 120.0, entry.y / 30.0 + time * drift_speed * 0.007, along.y / 36.0);
-		float w1 = texture(noise3d, wq).r;
-		vec3 pw = painted(vec2(along.x * 0.6, along.y * 1.6), time);
-		float lum = dot(pw, vec3(0.3, 0.55, 0.15));
-		float wisp = smoothstep(0.46, 0.74, w1 * 0.6 + smoothstep(0.30, 0.42, lum) * 0.4) * smoothstep(0.6, 1.0, band);
-		// soft haze bank rising over the first metres of revealed forest (art/07 panel 3)
-		float sdf_e2 = (mix(s_in.g, s_in.r, reveal_t) - 0.5) * sdf_range;
-		float bank = 0.16 * (1.0 - smoothstep(1.5, 7.0, sdf_e2));
-		float a_w = (wisp_alpha * wisp + bank) * (1.0 - 0.5 * reveal_curl);
-		vec3 wc = mix(haze_color, sun_color, 0.3 + 0.5 * smoothstep(0.3, 0.45, lum));
-		color = (color * alpha + (1.0 - alpha) * a_w * wc) / max(1.0 - (1.0 - alpha) * (1.0 - a_w), 1e-4);
-		alpha = 1.0 - (1.0 - alpha) * (1.0 - a_w);
-	}
-
-	// ---- explored but not currently watched: a light ground-level veil (never the town) -----
-	// (faded out under the wisp sheet so the revealed edge trees never get a dark band)
+	// ---- explored but not currently watched: optional ground-level dim (ForestWorld keeps it at 0:
+	// revealed cells render exactly like the base) ---------------------------------------------
 	if (dim_strength > 0.0) {
 		vec4 s = texture(state_tex, state_uv(surface.xz));
 		float sight = 0.0;
@@ -306,7 +285,7 @@ void fragment() {
 		}
 		float outside = smoothstep(56.0, 66.0, max(abs(surface.x), abs(surface.z)));
 		float explored = smoothstep(0.0, 3.0, (mix(s.g, s.r, reveal_t) - 0.5) * sdf_range);
-		float veil = dim_strength * explored * outside * (1.0 - sight) * (1.0 - band);
+		float veil = dim_strength * explored * outside * (1.0 - sight);
 		float total = 1.0 - (1.0 - alpha) * (1.0 - veil);
 		color = (color * alpha + (1.0 - alpha) * veil * veil_color) / max(total, 1e-4);
 		alpha = total;

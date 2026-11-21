@@ -23,7 +23,8 @@ const RIVER_SHADER = preload("res://src/forest_rescue/world/forest_river.gdshade
 const SURFACES := "res://assets/city/premium/surfaces07/"
 
 const API_VERSION := 3
-const DIM_EXPLORED := 0.14
+## Explored-but-not-watched dim: 0 — revealed cells render exactly like the base (no veil).
+const DIM_EXPLORED := 0.0
 const SIGHT_RADIUS := 10.0
 ## Kit v2 meshes keep their authored real-metre size (meta heightM/footprintM); the layout
 ## carries absolute instance scales. TREE_CROWN = nominal crown radius (m) for clearance QA.

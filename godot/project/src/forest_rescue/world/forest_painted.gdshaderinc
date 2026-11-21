@@ -10,7 +10,7 @@
 // Unshaded (no second lighting pass); still casts shadows and takes the city depth fog.
 
 #ifdef FADE
-render_mode unshaded, cull_disabled, depth_draw_always;
+render_mode unshaded, cull_disabled, depth_draw_always, fog_disabled;
 #else
 render_mode unshaded, cull_disabled, depth_draw_opaque;
 #endif
@@ -39,10 +39,15 @@ uniform vec3 wind_dir = vec3(0.83, 0.0, 0.56);
 uniform float trunk_amp = 0.05;
 uniform float branch_amp = 0.14;
 uniform float leaf_amp = 0.04;
-// Whole-tree fade (ForestWorld occluder fade): opacity < 1 composites this surface over the
-// opaque scene behind it (screen copy) — a smooth single-layer fade, never a dither. Only the
-// per-tree faded copies (FADE define, forest_wind_fade*.gdshader) use it.
-uniform float tree_opacity : hint_range(0.0, 1.0) = 1.0;
+// Whole-tree occluder fade (ForestOccluders): a tree that would hide an adventure actor from the
+// fixed city camera is drawn by a separate copy with the FADE variant (forest_wind_fade*.gdshader)
+// that composites it over the opaque scene behind it (screen copy) at `tree_opacity` (≥ 0.35) —
+// a smooth single-layer fade of the WHOLE tree, never a dither or a crown cut. Its canopy
+// instance is hidden meanwhile (INSTANCE_CUSTOM.r > 0.5 collapses the instance; plain meshes
+// have INSTANCE_CUSTOM = 0).
+#ifdef FADE
+instance uniform float tree_opacity : hint_range(0.0, 1.0) = 1.0;
+#endif
 
 #include "res://src/forest_rescue/world/forest_fog_receiver.gdshaderinc"
 
@@ -72,6 +77,9 @@ void vertex() {
 	v_ao = use_ao ? mix(0.42, 1.0, COLOR.a * COLOR.a) : 1.0;
 	v_wn = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	if (INSTANCE_CUSTOM.r > 0.5) {
+		VERTEX = vec3(0.0);       // canopy instance drawn by its occluder-fade copy right now
+	}
 }
 
 void fragment() {

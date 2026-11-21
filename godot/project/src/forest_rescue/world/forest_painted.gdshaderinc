@@ -151,7 +151,7 @@ void fragment() {
 	if (limestone > 0.0) {
 		float l = dot(c.rgb, vec3(0.299, 0.587, 0.114));
 		// pass 3: warm beige limestone with the texture's noise compressed (cracks kept, no grey speckle)
-		float lc = 0.56 + (l - 0.42) * 0.5;
+		float lc = 0.47 + (l - 0.42) * 0.72;
 		vec3 pale = clamp(vec3(lc) * vec3(1.1, 1.02, 0.86), 0.0, 1.0);
 		c.rgb = mix(c.rgb, pale, limestone);
 	}

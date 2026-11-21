@@ -136,6 +136,9 @@ func run_segments() -> void:
 	for spec in SEGMENTS:
 		if not only.is_empty() and not String(spec.name).begins_with(only):
 			continue
+		# The intro presentation owns the camera while it runs: end it before the next scenario.
+		if forest.intro.presenting():
+			forest.intro.finish_presentation()
 		# The city stage can be rebuilt when a state is accepted: always use the live one.
 		game.close_modal()
 		forest.actors.on_stage_changed()

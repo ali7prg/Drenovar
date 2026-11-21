@@ -2,8 +2,11 @@
 // Mirrors forest_fog.gdshader's volume (same state/heightmap/noise textures and billow field):
 // fog_cover(world) = how deep this fragment sits inside the fog volume (0 clear .. 1 buried),
 // fog_tint(world)  = how much a fragment above the cloud top should read as a dark silhouette.
-// Trees under fog are therefore either hidden (eroded/dithered away below the billowing cloud top)
-// or soft dark silhouettes fading into the mist above it — never hard-cut slices by the shell.
+// Trees under fog fade smoothly into the mist colour below the billowing cloud top and take a
+// soft light-mist tint above it (no erosion, no dither: a tree always keeps its whole crown);
+// the alpha-blended fog shell drawn over them does the actual covering, and instances deeper
+// than the blend band are culled on the CPU. Revealed cells receive nothing (the soft edge lies
+// entirely on the fog side of the explored boundary, see fog_edge_offset).
 // ForestFog pushes these uniforms (fog_enabled false = no fog, e.g. legacy/tests).
 
 uniform bool fog_enabled = false;
@@ -69,13 +72,20 @@ uniform vec4 fog_sights[8];
 uniform int fog_sight_count = 0;
 uniform vec3 fog_veil_color : source_color = vec3(0.246, 0.300, 0.335);
 
-// Same edge field as forest_fog.gdshader (edge_offset): lobes + wind-elongated tendrils.
+// Same edge field as forest_fog.gdshader (edge_offset): lobes + wind-elongated tendrils. The offset
+// is ≥ 0, so the fog never reaches into explored ground: fogness = 0 for sdf ≥ 0 and the lobes
+// only push the soft edge further out into the fog cells (fog_edge_fogness).
 float fog_edge_offset(vec2 p, vec2 drift, float b) {
 	vec2 wn = normalize(fog_wind);
 	vec2 along = vec2(dot(p, wn), dot(p, vec2(-wn.y, wn.x)));
 	float t1 = texture(fog_noise_tex, vec2(along.x / 38.0, along.y / 9.0) - vec2(drift.x * 0.03, 0.0) + vec2(0.13, 0.57)).r;
 	float t2 = texture(fog_noise_tex, vec2(along.x / 17.0, along.y / 5.0) - vec2(drift.x * 0.05, 0.0) + vec2(0.61, 0.21)).g;
-	return -2.6 + 3.0 * (b * 0.35 + t1 * 0.45 + t2 * 0.2) - fog_reveal_curl * 2.0 * t2;
+	return 2.0 * clamp(b * 0.35 + t1 * 0.45 + t2 * 0.2, 0.0, 1.0) + fog_reveal_curl * 1.5 * t2;
+}
+
+// 0 on explored ground (sdf ≥ 0) → 1 inside the fog, over the first ~2.5 m (+ lobes) of fog cells.
+float fog_edge_fogness(float sdf, float offset) {
+	return 1.0 - smoothstep(-2.5, 0.0, sdf + offset);
 }
 
 // Same cloud-top relief as forest_fog.gdshader (domes / cloud_height).
@@ -86,7 +96,8 @@ float fog_domes(vec2 p, vec2 drift) {
 	return clamp(a * 0.55 + b * 0.2 + swell * 0.4 - 0.08, 0.0, 1.0);
 }
 
-// x = cover (hide: dithered/eroded away), y = silhouette tint, z = explored-veil dim (0..1)
+// x = cover (fade into the mist colour), y = silhouette tint, z = explored-veil dim (0..1; off:
+// ForestWorld.DIM_EXPLORED = 0, revealed cells render exactly like the base)
 vec3 fog_receive(vec3 p, float time) {
 	if (!fog_enabled) {
 		return vec3(0.0);
@@ -107,12 +118,12 @@ vec3 fog_receive(vec3 p, float time) {
 		float outside = smoothstep(56.0, 66.0, max(abs(p.x), abs(p.z)));
 		veil = fog_dim_strength * smoothstep(0.0, 3.0, sdf) * outside * (1.0 - sight) * smoothstep(0.6, 1.6, y);
 	}
-	if (sdf > 3.0) {
+	if (sdf >= 0.0) {
 		return vec3(0.0, 0.0, veil);
 	}
 	vec2 drift = fog_wind * time * fog_drift_speed;
 	float b = fog_billow(p.xz, drift);
-	float fogness = 1.0 - smoothstep(-1.5, 1.5, sdf + fog_edge_offset(p.xz, drift, b));
+	float fogness = fog_edge_fogness(sdf, fog_edge_offset(p.xz, drift, b));
 	vec4 sm = fog_state_smooth(p.xz);
 	float top = mix(sm.a, sm.b, local_t) * fog_height_range;
 	float cloud = top * (0.86 + 0.28 * fog_domes(p.xz, drift));

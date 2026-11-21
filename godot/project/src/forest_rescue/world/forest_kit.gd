@@ -39,8 +39,8 @@ var scenery_material: Material          # landscape material for legacy city det
 var missing: Dictionary = {}            # asset id -> reason
 var loaded: Dictionary = {}             # asset id -> source path
 var wind_enabled := true
-static var materials: Array = []         # every painted ShaderMaterial (canopy fade uniforms)
-static var fog_receivers: Array = []     # every painted ShaderMaterial (fog-aware erosion/silhouettes)
+static var materials: Array = []         # every painted kit ShaderMaterial (forest instances)
+static var fog_receivers: Array = []     # every painted ShaderMaterial (fog-aware mist fade/silhouettes)
 static var light_dir := Vector3(0.45, 0.74, 0.5)   # direction TO the sun (set by ForestWorld)
 static var _metas: Dictionary = {}
 
@@ -440,20 +440,6 @@ static func paint_scene(root: Node, k: float) -> void:
 			if part.mesh is ArrayMesh:
 				has_colors = (part.mesh.surface_get_format(s) & Mesh.ARRAY_FORMAT_COLOR) != 0
 			part.set_surface_override_material(s, painted_material(original, has_colors, k, false, false))
-
-
-## Pushes fade circles (Vector4 x, ground y, z, radius) to every kit/impostor material.
-static func set_fade_circles(circles: Array, extra: Array = []) -> void:
-	var packed: Array[Vector4] = []
-	for c in circles.slice(0, 8):
-		packed.append(c)
-	var count := packed.size()
-	while packed.size() < 8:
-		packed.append(Vector4.ZERO)
-	for material: ShaderMaterial in materials + extra:
-		if material != null:
-			material.set_shader_parameter("fade_circles", packed)
-			material.set_shader_parameter("fade_count", count)
 
 
 func _legacy_tree(asset_id: String) -> Dictionary:

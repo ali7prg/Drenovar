@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://tb4nyb2agva7"
-path="res://.godot/imported/lf_env_ruined_watchpost_lod2_c.jpg-f0b7d58b0230b72069ba0cc900c9fe93.ctex"
+path.bptc="res://.godot/imported/lf_env_ruined_watchpost_lod2_c.jpg-f0b7d58b0230b72069ba0cc900c9fe93.bptc.ctex"
+path.astc="res://.godot/imported/lf_env_ruined_watchpost_lod2_c.jpg-f0b7d58b0230b72069ba0cc900c9fe93.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/landmarks/lf_env_ruined_watchpost_lod2_c.jpg"
-dest_files=["res://.godot/imported/lf_env_ruined_watchpost_lod2_c.jpg-f0b7d58b0230b72069ba0cc900c9fe93.ctex"]
+dest_files=["res://.godot/imported/lf_env_ruined_watchpost_lod2_c.jpg-f0b7d58b0230b72069ba0cc900c9fe93.bptc.ctex", "res://.godot/imported/lf_env_ruined_watchpost_lod2_c.jpg-f0b7d58b0230b72069ba0cc900c9fe93.astc.ctex"]
 
 [params]
 

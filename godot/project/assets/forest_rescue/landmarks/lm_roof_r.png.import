@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://2scmyoptwr8h"
-path="res://.godot/imported/lm_roof_r.png-0f8388fcc51cf975756e1b44fa4dafc1.ctex"
+path.bptc="res://.godot/imported/lm_roof_r.png-0f8388fcc51cf975756e1b44fa4dafc1.bptc.ctex"
+path.astc="res://.godot/imported/lm_roof_r.png-0f8388fcc51cf975756e1b44fa4dafc1.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/landmarks/lm_roof_r.png"
-dest_files=["res://.godot/imported/lm_roof_r.png-0f8388fcc51cf975756e1b44fa4dafc1.ctex"]
+dest_files=["res://.godot/imported/lm_roof_r.png-0f8388fcc51cf975756e1b44fa4dafc1.bptc.ctex", "res://.godot/imported/lm_roof_r.png-0f8388fcc51cf975756e1b44fa4dafc1.astc.ctex"]
 
 [params]
 

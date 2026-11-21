@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cxmpl8ro4wrys"
-path="res://.godot/imported/lf_env_camp_props_lod1_c.jpg-c332034932cd234b4798e89bbb283f68.ctex"
+path.bptc="res://.godot/imported/lf_env_camp_props_lod1_c.jpg-c332034932cd234b4798e89bbb283f68.bptc.ctex"
+path.astc="res://.godot/imported/lf_env_camp_props_lod1_c.jpg-c332034932cd234b4798e89bbb283f68.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/landmarks/lf_env_camp_props_lod1_c.jpg"
-dest_files=["res://.godot/imported/lf_env_camp_props_lod1_c.jpg-c332034932cd234b4798e89bbb283f68.ctex"]
+dest_files=["res://.godot/imported/lf_env_camp_props_lod1_c.jpg-c332034932cd234b4798e89bbb283f68.bptc.ctex", "res://.godot/imported/lf_env_camp_props_lod1_c.jpg-c332034932cd234b4798e89bbb283f68.astc.ctex"]
 
 [params]
 

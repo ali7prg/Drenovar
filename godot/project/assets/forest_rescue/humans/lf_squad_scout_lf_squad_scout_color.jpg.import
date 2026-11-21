@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cnajr8l7cph6n"
-path="res://.godot/imported/lf_squad_scout_lf_squad_scout_color.jpg-6382f0ba02c55b6d3a9e6df9763e2680.ctex"
+path.bptc="res://.godot/imported/lf_squad_scout_lf_squad_scout_color.jpg-6382f0ba02c55b6d3a9e6df9763e2680.bptc.ctex"
+path.astc="res://.godot/imported/lf_squad_scout_lf_squad_scout_color.jpg-6382f0ba02c55b6d3a9e6df9763e2680.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a41bc4cc356f2c160df81e76054623e4"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_squad_scout_lf_squad_scout_color.jpg"
-dest_files=["res://.godot/imported/lf_squad_scout_lf_squad_scout_color.jpg-6382f0ba02c55b6d3a9e6df9763e2680.ctex"]
+dest_files=["res://.godot/imported/lf_squad_scout_lf_squad_scout_color.jpg-6382f0ba02c55b6d3a9e6df9763e2680.bptc.ctex", "res://.godot/imported/lf_squad_scout_lf_squad_scout_color.jpg-6382f0ba02c55b6d3a9e6df9763e2680.astc.ctex"]
 
 [params]
 

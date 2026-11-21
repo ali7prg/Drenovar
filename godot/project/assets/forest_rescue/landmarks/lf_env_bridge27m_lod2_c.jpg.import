@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bxr5cgvde344q"
-path="res://.godot/imported/lf_env_bridge27m_lod2_c.jpg-08f5fe6ca0b3e7010f4d5e2e363d2d0b.ctex"
+path.bptc="res://.godot/imported/lf_env_bridge27m_lod2_c.jpg-08f5fe6ca0b3e7010f4d5e2e363d2d0b.bptc.ctex"
+path.astc="res://.godot/imported/lf_env_bridge27m_lod2_c.jpg-08f5fe6ca0b3e7010f4d5e2e363d2d0b.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/landmarks/lf_env_bridge27m_lod2_c.jpg"
-dest_files=["res://.godot/imported/lf_env_bridge27m_lod2_c.jpg-08f5fe6ca0b3e7010f4d5e2e363d2d0b.ctex"]
+dest_files=["res://.godot/imported/lf_env_bridge27m_lod2_c.jpg-08f5fe6ca0b3e7010f4d5e2e363d2d0b.bptc.ctex", "res://.godot/imported/lf_env_bridge27m_lod2_c.jpg-08f5fe6ca0b3e7010f4d5e2e363d2d0b.astc.ctex"]
 
 [params]
 

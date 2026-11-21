@@ -12,6 +12,10 @@ extends RefCounted
 
 const KIT_DIR := "res://assets/forest_rescue/forest/"
 const KIT_JSON := KIT_DIR + "forest_kit.json"
+## P2.7b: the kit fallen trunk's unseen faces were mirrored "camo" strips; this copy of its atlas carries real
+## painted bark / moss from the trunk's own painted side, tiled along the log without mirroring (the vendor
+## file stays unchanged; forest_rescue/qa/ingame/integration: look_trunk12).
+const FALLEN_BARK_V2 := KIT_DIR + "lf_bark_fallen_v2_c.jpg"
 const WIND_SHADER := preload("res://src/forest_rescue/world/forest_wind.gdshader")
 const CUTOUT_SHADER := preload("res://src/forest_rescue/world/forest_wind_cutout.gdshader")
 const VOLUME_LIGHT_MIX := 0.5            # lf_foliage_vol (forest_kit.json "shading")
@@ -418,7 +422,10 @@ static func painted_material(original: Material, has_colors: bool, k: float, win
 	var material := ShaderMaterial.new()
 	material.shader = CUTOUT_SHADER if cutout else WIND_SHADER
 	material.resource_name = base.resource_name
-	material.set_shader_parameter("albedo_texture", base.albedo_texture)
+	var albedo: Texture2D = base.albedo_texture
+	if name == "lf_bark_fallen" and ResourceLoader.exists(FALLEN_BARK_V2):
+		albedo = load(FALLEN_BARK_V2)
+	material.set_shader_parameter("albedo_texture", albedo)
 	material.set_shader_parameter("albedo_color", base.albedo_color)
 	material.set_shader_parameter("use_albedo_texture", base.albedo_texture != null)
 	material.set_shader_parameter("alpha_cut", base.alpha_scissor_threshold if base.alpha_scissor_threshold > 0.0 else 0.5)

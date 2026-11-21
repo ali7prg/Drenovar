@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://babn025fvulx8"
-path="res://.godot/imported/lf_squad_shield_guard_lf_squad_shield_guard_props.jpg-480f211ffdc7f4594fba5c07d0afd5b8.ctex"
+path.bptc="res://.godot/imported/lf_squad_shield_guard_lf_squad_shield_guard_props.jpg-480f211ffdc7f4594fba5c07d0afd5b8.bptc.ctex"
+path.astc="res://.godot/imported/lf_squad_shield_guard_lf_squad_shield_guard_props.jpg-480f211ffdc7f4594fba5c07d0afd5b8.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "89a29e23f599ff0d37da2e6593451fb7"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/humans/lf_squad_shield_guard_lf_squad_shield_guard_props.jpg"
-dest_files=["res://.godot/imported/lf_squad_shield_guard_lf_squad_shield_guard_props.jpg-480f211ffdc7f4594fba5c07d0afd5b8.ctex"]
+dest_files=["res://.godot/imported/lf_squad_shield_guard_lf_squad_shield_guard_props.jpg-480f211ffdc7f4594fba5c07d0afd5b8.bptc.ctex", "res://.godot/imported/lf_squad_shield_guard_lf_squad_shield_guard_props.jpg-480f211ffdc7f4594fba5c07d0afd5b8.astc.ctex"]
 
 [params]
 

@@ -270,8 +270,8 @@
       "main": {
         "iou_raw": 0.8067,
         "iou_filled": 0.8647,
-        "colour_err": 0.0833,
-        "colour_err_core": 0.0815,
+        "colour_err": 0.0857,
+        "colour_err_core": 0.0838,
         "ref_px": 129699,
         "render_px": 115478,
         "ignored_px": 8126,
@@ -308,19 +308,19 @@
     },
     "texture": {
       "texels": 2806689,
-      "projected_frac": 0.0652,
+      "projected_frac": 0.0606,
       "per_view_frac": {
-        "main": 0.0653
+        "main": 0.0607
       },
-      "seconds": 14.7
+      "seconds": 17.7
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_winch_sequence/v2_iter12_*",
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_winch_sequence/v2_iter13_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_winch --iter 12",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_winch --iter 13",
   "mechanism": "winch_sequence",
   "symbol_targets": {
     "brake": {

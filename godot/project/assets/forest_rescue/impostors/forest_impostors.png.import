@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dd5ilvy6pgbk7"
-path="res://.godot/imported/forest_impostors.png-164e537d45a2f634e6c986939139184e.ctex"
+path.bptc="res://.godot/imported/forest_impostors.png-164e537d45a2f634e6c986939139184e.bptc.ctex"
+path.astc="res://.godot/imported/forest_impostors.png-164e537d45a2f634e6c986939139184e.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/impostors/forest_impostors.png"
-dest_files=["res://.godot/imported/forest_impostors.png-164e537d45a2f634e6c986939139184e.ctex"]
+dest_files=["res://.godot/imported/forest_impostors.png-164e537d45a2f634e6c986939139184e.bptc.ctex", "res://.godot/imported/forest_impostors.png-164e537d45a2f634e6c986939139184e.astc.ctex"]
 
 [params]
 

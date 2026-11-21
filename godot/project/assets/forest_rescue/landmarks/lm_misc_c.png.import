@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d2v1aut7uipiy"
-path="res://.godot/imported/lm_misc_c.png-812e899d8885add932d255cd64760a66.ctex"
+path.bptc="res://.godot/imported/lm_misc_c.png-812e899d8885add932d255cd64760a66.bptc.ctex"
+path.astc="res://.godot/imported/lm_misc_c.png-812e899d8885add932d255cd64760a66.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/landmarks/lm_misc_c.png"
-dest_files=["res://.godot/imported/lm_misc_c.png-812e899d8885add932d255cd64760a66.ctex"]
+dest_files=["res://.godot/imported/lm_misc_c.png-812e899d8885add932d255cd64760a66.bptc.ctex", "res://.godot/imported/lm_misc_c.png-812e899d8885add932d255cd64760a66.astc.ctex"]
 
 [params]
 

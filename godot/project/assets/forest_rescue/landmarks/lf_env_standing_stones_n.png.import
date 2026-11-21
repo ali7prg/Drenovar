@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ch87l26h7cai7"
-path="res://.godot/imported/lf_env_standing_stones_n.png-3b9079cde2c4e9c101c50d9af7db3f6d.ctex"
+path.bptc="res://.godot/imported/lf_env_standing_stones_n.png-3b9079cde2c4e9c101c50d9af7db3f6d.bptc.ctex"
+path.astc="res://.godot/imported/lf_env_standing_stones_n.png-3b9079cde2c4e9c101c50d9af7db3f6d.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/landmarks/lf_env_standing_stones_n.png"
-dest_files=["res://.godot/imported/lf_env_standing_stones_n.png-3b9079cde2c4e9c101c50d9af7db3f6d.ctex"]
+dest_files=["res://.godot/imported/lf_env_standing_stones_n.png-3b9079cde2c4e9c101c50d9af7db3f6d.bptc.ctex", "res://.godot/imported/lf_env_standing_stones_n.png-3b9079cde2c4e9c101c50d9af7db3f6d.astc.ctex"]
 
 [params]
 

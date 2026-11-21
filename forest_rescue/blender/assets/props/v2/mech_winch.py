@@ -305,6 +305,10 @@ def build(A, p, lod):
 
 
 STRICT_FACING = ("wood",)
+# review (gear train): the painting cannot texture the gears cleanly (drawn with a painter's cheat) → clean iron
+# swatch with the painted light, crisp teeth from the geometry; a wider silhouette trim against the light edge bleed
+NO_PROJECT_TAGS = ("gear_rim", "gear_spoke", "gear_hub", "pinion", "pinion_hub", "pinion_bracket", "gear_stub")
+EDGE_ERODE = 8
 SWATCHES = {
     "wood": dict(sheet=SHEET, box=(336, 690, 356, 740), metres=0.35, angle=-8.0, tile_v="stack"),
     "rope": dict(sheet=SHEET, box=(250, 575, 300, 600), metres=0.25),

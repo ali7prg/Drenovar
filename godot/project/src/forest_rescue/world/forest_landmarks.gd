@@ -386,7 +386,34 @@ func populate() -> void:
 	missing.clear()
 	loaded.clear()
 	_cut_cache.clear()
+	# iPhone entry: the landmark GLBs load on worker threads (the city keeps drawing), then the instancing is
+	# time-sliced (about 8 ms of it per frame). Callers await populate().
+	var wanted := {}
 	for placement in placements:
+		if not String(placement.id).begins_with("proc_"):
+			for path in lod_paths(placement.id, placement.get("dir", "")):
+				if not String(path).is_empty() and not wanted.has(path) and not ResourceLoader.has_cached(path):
+					if ResourceLoader.load_threaded_request(path) == OK:
+						wanted[path] = true
+	var held := {}
+	var tree := get_tree()
+	while tree != null:
+		var pending := false
+		for path in wanted:
+			if not held.has(path):
+				var status := ResourceLoader.load_threaded_get_status(path)
+				if status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+					pending = true
+				else:
+					held[path] = ResourceLoader.load_threaded_get(path) if status == ResourceLoader.THREAD_LOAD_LOADED else null
+		if not pending:
+			break
+		await tree.process_frame
+	var slice := Time.get_ticks_usec()
+	for placement in placements:
+		if tree != null and Time.get_ticks_usec() - slice > 8000:
+			await tree.process_frame
+			slice = Time.get_ticks_usec()
 		var proc: bool = String(placement.id).begins_with("proc_")
 		var paths := [] if proc else lod_paths(placement.id, placement.get("dir", ""))
 		if not proc and paths[0].is_empty():

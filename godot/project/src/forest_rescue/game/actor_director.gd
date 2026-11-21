@@ -284,6 +284,9 @@ func on_rig_ready(actor: Node3D) -> void:
 static var pipelines_warmed := false
 
 func warm_pipelines() -> void:
+	var world_node: Variant = game.get("world")
+	if world_node is Node and world_node.get("setup_stage") != null:
+		world_node.set("setup_stage", "pipeline warm-up")
 	var paths: Array = [HORSE_GLB, BOSS_GLB, SUPPLIES_GLB]
 	paths.append_array(SQUAD_GLBS)
 	for file in CAGE_FILES.values():
@@ -329,6 +332,8 @@ func warm_pipelines() -> void:
 		drop(id)
 	if fx != null and fx.has_method("glow_world"):
 		fx.glow_world("__warm", Vector3.INF)
+	if world_node is Node and is_instance_valid(world_node) and world_node.get("setup_stage") != null:
+		world_node.set("setup_stage", "post-setup (warmed)")
 
 func tick(delta: float) -> void:
 	if not game.client.unlocked():

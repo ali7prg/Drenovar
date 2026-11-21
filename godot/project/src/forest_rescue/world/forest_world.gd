@@ -252,13 +252,16 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	fog.reveal_finished.connect(func() -> void: fog_reveal_finished.emit(fog_revision))
 	landmarks.arena_clear_discs = [[ForestWater.POND_CENTER, ForestWater.POND_RADIUS + 4.5], [ForestWater.FALLS_LIP + ForestWater.FALLS_FACING * 2.0, 4.0]]
 	setup_stage = "landmarks.populate"
-	landmarks.populate()
+	await landmarks.populate()
 	await get_tree().process_frame
 	setup_stage = "fog receivers"
 	_register_fog_receivers()
 	setup_ms.visuals = (Time.get_ticks_usec() - t) / 1000.0
+	await get_tree().process_frame
+	setup_stage = "adventure state"
 	apply_adventure({})
 	setup_ms.total = (Time.get_ticks_usec() - started) / 1000.0
+	setup_stage = "post-setup (city build / first ticks)"
 	set_process(true)
 	ready_for_frame = true
 	print("ForestWorld: ready ", setup_ms, " kit=", kit.kit_status().missing.size(), " missing kit assets")

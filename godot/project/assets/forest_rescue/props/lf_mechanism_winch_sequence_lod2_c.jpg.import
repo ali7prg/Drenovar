@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvu313d803vr5"
-path="res://.godot/imported/lf_mechanism_winch_sequence_lod2_c.jpg-a2d0b6dad3b2b10ad55be8b402043641.ctex"
+path.bptc="res://.godot/imported/lf_mechanism_winch_sequence_lod2_c.jpg-a2d0b6dad3b2b10ad55be8b402043641.bptc.ctex"
+path.astc="res://.godot/imported/lf_mechanism_winch_sequence_lod2_c.jpg-a2d0b6dad3b2b10ad55be8b402043641.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/props/lf_mechanism_winch_sequence_lod2_c.jpg"
-dest_files=["res://.godot/imported/lf_mechanism_winch_sequence_lod2_c.jpg-a2d0b6dad3b2b10ad55be8b402043641.ctex"]
+dest_files=["res://.godot/imported/lf_mechanism_winch_sequence_lod2_c.jpg-a2d0b6dad3b2b10ad55be8b402043641.bptc.ctex", "res://.godot/imported/lf_mechanism_winch_sequence_lod2_c.jpg-a2d0b6dad3b2b10ad55be8b402043641.astc.ctex"]
 
 [params]
 

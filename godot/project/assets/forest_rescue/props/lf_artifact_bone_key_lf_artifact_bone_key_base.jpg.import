@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://y0a5lsamlyo1"
-path="res://.godot/imported/lf_artifact_bone_key_lf_artifact_bone_key_base.jpg-c329055a6bc448c0779ae9d0b923653b.ctex"
+path.bptc="res://.godot/imported/lf_artifact_bone_key_lf_artifact_bone_key_base.jpg-c329055a6bc448c0779ae9d0b923653b.bptc.ctex"
+path.astc="res://.godot/imported/lf_artifact_bone_key_lf_artifact_bone_key_base.jpg-c329055a6bc448c0779ae9d0b923653b.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "1dd306092c781b39c0ecaf878cd9ee5a"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/props/lf_artifact_bone_key_lf_artifact_bone_key_base.jpg"
-dest_files=["res://.godot/imported/lf_artifact_bone_key_lf_artifact_bone_key_base.jpg-c329055a6bc448c0779ae9d0b923653b.ctex"]
+dest_files=["res://.godot/imported/lf_artifact_bone_key_lf_artifact_bone_key_base.jpg-c329055a6bc448c0779ae9d0b923653b.bptc.ctex", "res://.godot/imported/lf_artifact_bone_key_lf_artifact_bone_key_base.jpg-c329055a6bc448c0779ae9d0b923653b.astc.ctex"]
 
 [params]
 

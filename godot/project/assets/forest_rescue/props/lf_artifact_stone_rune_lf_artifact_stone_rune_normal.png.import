@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://pwcqycrtb03s"
-path="res://.godot/imported/lf_artifact_stone_rune_lf_artifact_stone_rune_normal.png-d1ea881a359558e57b632c5ff2a788a8.ctex"
+path.bptc="res://.godot/imported/lf_artifact_stone_rune_lf_artifact_stone_rune_normal.png-d1ea881a359558e57b632c5ff2a788a8.bptc.ctex"
+path.astc="res://.godot/imported/lf_artifact_stone_rune_lf_artifact_stone_rune_normal.png-d1ea881a359558e57b632c5ff2a788a8.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "bff215e2004e2c4c68c7366d88beada7"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/props/lf_artifact_stone_rune_lf_artifact_stone_rune_normal.png"
-dest_files=["res://.godot/imported/lf_artifact_stone_rune_lf_artifact_stone_rune_normal.png-d1ea881a359558e57b632c5ff2a788a8.ctex"]
+dest_files=["res://.godot/imported/lf_artifact_stone_rune_lf_artifact_stone_rune_normal.png-d1ea881a359558e57b632c5ff2a788a8.bptc.ctex", "res://.godot/imported/lf_artifact_stone_rune_lf_artifact_stone_rune_normal.png-d1ea881a359558e57b632c5ff2a788a8.astc.ctex"]
 
 [params]
 

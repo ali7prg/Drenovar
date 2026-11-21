@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bvpqgjocv71jc"
-path="res://.godot/imported/lf_mechanism_trail_cache_lod2_c.jpg-dd735289af0720508000dc163598159b.ctex"
+path.bptc="res://.godot/imported/lf_mechanism_trail_cache_lod2_c.jpg-dd735289af0720508000dc163598159b.bptc.ctex"
+path.astc="res://.godot/imported/lf_mechanism_trail_cache_lod2_c.jpg-dd735289af0720508000dc163598159b.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/props/lf_mechanism_trail_cache_lod2_c.jpg"
-dest_files=["res://.godot/imported/lf_mechanism_trail_cache_lod2_c.jpg-dd735289af0720508000dc163598159b.ctex"]
+dest_files=["res://.godot/imported/lf_mechanism_trail_cache_lod2_c.jpg-dd735289af0720508000dc163598159b.bptc.ctex", "res://.godot/imported/lf_mechanism_trail_cache_lod2_c.jpg-dd735289af0720508000dc163598159b.astc.ctex"]
 
 [params]
 

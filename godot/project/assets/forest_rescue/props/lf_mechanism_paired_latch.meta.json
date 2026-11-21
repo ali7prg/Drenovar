@@ -219,8 +219,8 @@
       "unpressed": {
         "iou_raw": 0.8348,
         "iou_filled": 0.879,
-        "colour_err": 0.0489,
-        "colour_err_core": 0.0479,
+        "colour_err": 0.0546,
+        "colour_err_core": 0.0523,
         "ref_px": 96210,
         "render_px": 94316,
         "ignored_px": 0,
@@ -254,19 +254,15 @@
     },
     "texture": {
       "texels": 2996009,
-      "projected_frac": 0.2642,
+      "projected_frac": 0.2419,
       "per_view_frac": {
-        "unpressed": 0.2645
+        "unpressed": 0.2423
       },
-      "seconds": 18.7
+      "seconds": 17.0
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_paired_latch/v2_iter04_*",
-    "godot_import": {
-      "errors_warnings": 0,
-      "lines": []
-    }
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_paired_latch/v2_iter30_*"
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_paired_latch --iter 4",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_paired_latch --iter 30",
   "mechanism": "paired_latch",
   "sockets": {
     "plate_left": [

@@ -122,6 +122,22 @@ LOD), `fog_culled` (instances removed because they stand deeper than 3 m inside 
   - Gameplay layer (forest_game.gd): while the squad or an escort is under way the client reads `/api/state`
     every 1.2 s of server time, so each committed checkpoint reveal dissolves on its own (~2 s per cell)
     instead of all at once on arrival.
+* v3.6 (2026-11-21, phone memory + hot paths — no gameplay API change, API_VERSION unchanged):
+  - Every 3D texture under `assets/forest_rescue/**` (187, incl. the shipped impostor atlas) imports VRAM
+    Compressed, high quality (BPTC desktop / ASTC 4x4 iOS), mipmaps on, normal maps with the normal-map setting
+    (`forest_rescue/tools/forest_textures_vram.py`; `--keep=` keeps a texture lossless).
+  - Fog: `fog_reveal_t`, `fog_reveal_curl`, `fog_dim_strength`, `fog_sight_0..7`, `fog_sight_count` are project
+    global shader uniforms (project.godot [shader_globals]) set once per change, not per receiver material.
+    `ForestFog.set_target()` computes the distance fields on a worker thread for animated (gameplay) updates and
+    emits `target_applied`; ForestWorld culls on that signal. ForestCanopy.set_cull() reuses a mixed cell's
+    filtered instances while its fog samples are unchanged (`cell_key`, spatial bucketing).
+  - Battle: ActorDirector indexes the fight timeline once (`timeline_window`, `timeline_hp`, binary search) instead
+    of scanning every event per actor per frame.
+  - Kit fallen trunk (P2.7b): runtime albedo override `lf_bark_fallen_v2_c.jpg` (real painted bark / moss on the
+    unseen faces, no mirrored camo); the vendor file is unchanged.
+  - Local QA server copy: TROOPS = ENG-01/02/03/04/06 (production roster); tests and the local starter moved from
+    ENG-09 to ENG-01.
+
 * v3.5 (2026-11-21, layout pass 4 + phone-build readiness — no gameplay API change, API_VERSION unchanged):
   - Impostors ship in the pack: `res://assets/forest_rescue/impostors/forest_impostors.png` (imported lossless with
     mipmaps, same 320 px cells) + `forest_impostors.json` (cells, signature, kit GLB md5s). `ForestImpostors.bake()`

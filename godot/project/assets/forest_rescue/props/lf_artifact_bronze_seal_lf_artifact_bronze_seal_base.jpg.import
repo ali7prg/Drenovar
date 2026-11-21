@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c4opsijneunqw"
-path="res://.godot/imported/lf_artifact_bronze_seal_lf_artifact_bronze_seal_base.jpg-5719684961247086f7768bf58e305410.ctex"
+path.bptc="res://.godot/imported/lf_artifact_bronze_seal_lf_artifact_bronze_seal_base.jpg-5719684961247086f7768bf58e305410.bptc.ctex"
+path.astc="res://.godot/imported/lf_artifact_bronze_seal_lf_artifact_bronze_seal_base.jpg-5719684961247086f7768bf58e305410.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6933e15a6ec091f857283e4675c5379b"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/props/lf_artifact_bronze_seal_lf_artifact_bronze_seal_base.jpg"
-dest_files=["res://.godot/imported/lf_artifact_bronze_seal_lf_artifact_bronze_seal_base.jpg-5719684961247086f7768bf58e305410.ctex"]
+dest_files=["res://.godot/imported/lf_artifact_bronze_seal_lf_artifact_bronze_seal_base.jpg-5719684961247086f7768bf58e305410.bptc.ctex", "res://.godot/imported/lf_artifact_bronze_seal_lf_artifact_bronze_seal_base.jpg-5719684961247086f7768bf58e305410.astc.ctex"]
 
 [params]
 

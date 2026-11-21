@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c5qwnjyur1036"
-path="res://.godot/imported/lf_mechanism_rune_lock_c.jpg-ce30d2ed8ab1412ff811d06035cf494f.ctex"
+path.bptc="res://.godot/imported/lf_mechanism_rune_lock_c.jpg-ce30d2ed8ab1412ff811d06035cf494f.bptc.ctex"
+path.astc="res://.godot/imported/lf_mechanism_rune_lock_c.jpg-ce30d2ed8ab1412ff811d06035cf494f.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/props/lf_mechanism_rune_lock_c.jpg"
-dest_files=["res://.godot/imported/lf_mechanism_rune_lock_c.jpg-ce30d2ed8ab1412ff811d06035cf494f.ctex"]
+dest_files=["res://.godot/imported/lf_mechanism_rune_lock_c.jpg-ce30d2ed8ab1412ff811d06035cf494f.bptc.ctex", "res://.godot/imported/lf_mechanism_rune_lock_c.jpg-ce30d2ed8ab1412ff811d06035cf494f.astc.ctex"]
 
 [params]
 

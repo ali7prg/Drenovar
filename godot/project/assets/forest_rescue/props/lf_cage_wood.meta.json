@@ -233,8 +233,8 @@
       "closed34": {
         "iou_raw": 0.8251,
         "iou_filled": 0.9489,
-        "colour_err": 0.0868,
-        "colour_err_core": 0.0771,
+        "colour_err": 0.0932,
+        "colour_err_core": 0.0823,
         "ref_px": 88026,
         "render_px": 80981,
         "ignored_px": 0,
@@ -245,8 +245,8 @@
       "open34": {
         "iou_raw": 0.7985,
         "iou_filled": 0.9569,
-        "colour_err": 0.1191,
-        "colour_err_core": 0.1103,
+        "colour_err": 0.1177,
+        "colour_err_core": 0.1084,
         "ref_px": 82099,
         "render_px": 71639,
         "ignored_px": 37698,
@@ -302,22 +302,18 @@
     },
     "texture": {
       "texels": 2376448,
-      "projected_frac": 0.2261,
+      "projected_frac": 0.1982,
       "per_view_frac": {
-        "closed34": 0.1405,
-        "open34": 0.1307,
-        "mirror_x_closed": 0.1327,
-        "back_from_left": 0.1237
+        "closed34": 0.1173,
+        "open34": 0.1094,
+        "mirror_x_closed": 0.1065,
+        "back_from_left": 0.1004
       },
-      "seconds": 32.8
+      "seconds": 37.2
     },
-    "sheets": "forest_rescue/qa/compare/lf_cage_wood/v2_iter09_*",
-    "godot_import": {
-      "errors_warnings": 0,
-      "lines": []
-    }
+    "sheets": "forest_rescue/qa/compare/lf_cage_wood/v2_iter30_*"
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_oak --iter 9",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py cage_oak --iter 30",
   "door_open_deg": -95.0,
   "door_open_deg_note": "signed Godot rotation.y of door_pivot for the open pose (actor_director.swing_door fallback adds door_open_deg * amount: negative = outward)",
   "sockets": {

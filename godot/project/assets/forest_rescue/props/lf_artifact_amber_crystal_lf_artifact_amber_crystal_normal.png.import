@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bidc6vehg5xmu"
-path="res://.godot/imported/lf_artifact_amber_crystal_lf_artifact_amber_crystal_normal.png-8ab43d251be06c69788eaec00e98cc41.ctex"
+path.bptc="res://.godot/imported/lf_artifact_amber_crystal_lf_artifact_amber_crystal_normal.png-8ab43d251be06c69788eaec00e98cc41.bptc.ctex"
+path.astc="res://.godot/imported/lf_artifact_amber_crystal_lf_artifact_amber_crystal_normal.png-8ab43d251be06c69788eaec00e98cc41.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "4726587540b65957d0a8698e04c72bd6"
@@ -14,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/forest_rescue/props/lf_artifact_amber_crystal_lf_artifact_amber_crystal_normal.png"
-dest_files=["res://.godot/imported/lf_artifact_amber_crystal_lf_artifact_amber_crystal_normal.png-8ab43d251be06c69788eaec00e98cc41.ctex"]
+dest_files=["res://.godot/imported/lf_artifact_amber_crystal_lf_artifact_amber_crystal_normal.png-8ab43d251be06c69788eaec00e98cc41.bptc.ctex", "res://.godot/imported/lf_artifact_amber_crystal_lf_artifact_amber_crystal_normal.png-8ab43d251be06c69788eaec00e98cc41.astc.ctex"]
 
 [params]
 

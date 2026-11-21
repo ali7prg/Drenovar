@@ -153,8 +153,8 @@
       "crate_closed": {
         "iou_raw": 0.9488,
         "iou_filled": 0.9488,
-        "colour_err": 0.0863,
-        "colour_err_core": 0.0831,
+        "colour_err": 0.0925,
+        "colour_err_core": 0.0877,
         "ref_px": 23973,
         "render_px": 24274,
         "ignored_px": 0,
@@ -165,8 +165,8 @@
       "crate_open": {
         "iou_raw": 0.818,
         "iou_filled": 0.818,
-        "colour_err": 0.0673,
-        "colour_err_core": 0.0625,
+        "colour_err": 0.0723,
+        "colour_err_core": 0.0669,
         "ref_px": 24878,
         "render_px": 26452,
         "ignored_px": 0,
@@ -177,8 +177,8 @@
       "blankets": {
         "iou_raw": 0.8625,
         "iou_filled": 0.8625,
-        "colour_err": 0.0786,
-        "colour_err_core": 0.0746,
+        "colour_err": 0.0861,
+        "colour_err_core": 0.0797,
         "ref_px": 22581,
         "render_px": 24300,
         "ignored_px": 0,
@@ -189,8 +189,8 @@
       "sacks": {
         "iou_raw": 0.8545,
         "iou_filled": 0.8545,
-        "colour_err": 0.0822,
-        "colour_err_core": 0.0778,
+        "colour_err": 0.0953,
+        "colour_err_core": 0.0885,
         "ref_px": 25236,
         "render_px": 26237,
         "ignored_px": 0,
@@ -201,8 +201,8 @@
       "coins": {
         "iou_raw": 0.7515,
         "iou_filled": 0.7515,
-        "colour_err": 0.0916,
-        "colour_err_core": 0.0862,
+        "colour_err": 0.0999,
+        "colour_err_core": 0.0935,
         "ref_px": 10437,
         "render_px": 9453,
         "ignored_px": 0,
@@ -213,8 +213,8 @@
       "arrows": {
         "iou_raw": 0.5843,
         "iou_filled": 0.5985,
-        "colour_err": 0.1763,
-        "colour_err_core": 0.1721,
+        "colour_err": 0.1796,
+        "colour_err_core": 0.1755,
         "ref_px": 18679,
         "render_px": 12746,
         "ignored_px": 0,
@@ -225,8 +225,8 @@
       "bread": {
         "iou_raw": 0.7604,
         "iou_filled": 0.7604,
-        "colour_err": 0.072,
-        "colour_err_core": 0.0677,
+        "colour_err": 0.0814,
+        "colour_err_core": 0.0762,
         "ref_px": 15507,
         "render_px": 14246,
         "ignored_px": 0,
@@ -237,8 +237,8 @@
       "bandages": {
         "iou_raw": 0.6218,
         "iou_filled": 0.6218,
-        "colour_err": 0.1055,
-        "colour_err_core": 0.0972,
+        "colour_err": 0.1373,
+        "colour_err_core": 0.1241,
         "ref_px": 9197,
         "render_px": 10840,
         "ignored_px": 0,
@@ -249,8 +249,8 @@
       "chest": {
         "iou_raw": 0.874,
         "iou_filled": 0.874,
-        "colour_err": 0.0951,
-        "colour_err_core": 0.0935,
+        "colour_err": 0.0973,
+        "colour_err_core": 0.0954,
         "ref_px": 91271,
         "render_px": 92825,
         "ignored_px": 0,
@@ -376,27 +376,23 @@
     },
     "texture": {
       "texels": 2810223,
-      "projected_frac": 0.1597,
+      "projected_frac": 0.1476,
       "per_view_frac": {
-        "crate_closed": 0.0358,
-        "crate_open": 0.0386,
-        "blankets": 0.0202,
-        "sacks": 0.0155,
-        "coins": 0.0041,
-        "arrows": 0.004,
-        "bread": 0.0046,
-        "bandages": 0.0034,
-        "chest": 0.0336
+        "crate_closed": 0.0323,
+        "crate_open": 0.0359,
+        "blankets": 0.0186,
+        "sacks": 0.014,
+        "coins": 0.0037,
+        "arrows": 0.0037,
+        "bread": 0.0041,
+        "bandages": 0.0027,
+        "chest": 0.0327
       },
-      "seconds": 22.1
+      "seconds": 35.4
     },
-    "sheets": "forest_rescue/qa/compare/lf_props_supplies/v2_iter07_*",
-    "godot_import": {
-      "errors_warnings": 0,
-      "lines": []
-    }
+    "sheets": "forest_rescue/qa/compare/lf_props_supplies/v2_iter30_*"
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py supplies --iter 7",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py supplies --iter 30",
   "items": {
     "supply_crate_closed": {
       "painted_box": [

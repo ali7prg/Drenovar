@@ -3,15 +3,17 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dcm6wuq1hxyu"
-path="res://.godot/imported/lf_props_supplies_c.jpg-422e987be7cd5b43c8f10532f937863c.ctex"
+path.bptc="res://.godot/imported/lf_props_supplies_c.jpg-422e987be7cd5b43c8f10532f937863c.bptc.ctex"
+path.astc="res://.godot/imported/lf_props_supplies_c.jpg-422e987be7cd5b43c8f10532f937863c.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/forest_rescue/props/lf_props_supplies_c.jpg"
-dest_files=["res://.godot/imported/lf_props_supplies_c.jpg-422e987be7cd5b43c8f10532f937863c.ctex"]
+dest_files=["res://.godot/imported/lf_props_supplies_c.jpg-422e987be7cd5b43c8f10532f937863c.bptc.ctex", "res://.godot/imported/lf_props_supplies_c.jpg-422e987be7cd5b43c8f10532f937863c.astc.ctex"]
 
 [params]
 

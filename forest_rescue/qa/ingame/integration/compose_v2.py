@@ -96,8 +96,10 @@ def art_crop(art_img, inv, target, zoom, size):
     s = zoom / H
     half_h = 0.5 * H * s * float(np.linalg.norm(jy))
     half_w = 0.5 * W * s * float(np.linalg.norm(ju))
-    # keep the frame aspect (mean magnification)
+    # keep the frame aspect (mean magnification); near the map edge the warp stretches strongly,
+    # so the crop is capped at the median scale of the inner forest (≈ 3.6 art px per m)
     hh = 0.5 * (half_h + half_w * H / W)
+    hh = min(hh, 0.5 * H * s * 3.6)
     hw = hh * W / H
     box = (int(centre[0] - hw), int(centre[1] - hh), int(centre[0] + hw), int(centre[1] + hh))
     canvas = Image.new("RGB", (box[2] - box[0], box[3] - box[1]), (30, 27, 24))

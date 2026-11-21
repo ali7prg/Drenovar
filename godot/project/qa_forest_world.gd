@@ -164,6 +164,56 @@ func run() -> void:
 		if not mask.is_empty():
 			remap_in_mask += 1
 	check(remap_in_mask == 0, "remapped resource trees still inside route/glade/arena/bridge masks: %d" % remap_in_mask)
+	# ---- Camera clearance (checkpoint-2 P0.2): no crown between the city camera and a unit ----
+	# on a trail / in a glade / arena / horse spot; resource trees that cannot move are young and
+	# listed for the runtime whole-tree fade; the crown cut-away and every Bayer dither are gone.
+	var zones: Array = []
+	for route in world.atlas.routes:
+		var pts: PackedVector3Array = route.points
+		for i in range(pts.size() - 1):
+			zones.append([Vector2(pts[i].x, pts[i].z), Vector2(pts[i + 1].x, pts[i + 1].z), 1.6])
+	for site in world.atlas.sites:
+		var c := Vector2(site.center.x, site.center.z)
+		zones.append([c, c, float(site.radius)])
+	var arena_c := Vector2(world.atlas.arena_center.x, world.atlas.arena_center.z)
+	zones.append([arena_c, arena_c, 15.0])
+	var horse_c := Vector2(world.atlas.horse_origin.x, world.atlas.horse_origin.z)
+	zones.append([horse_c, horse_c, 4.0])
+	var hides := func(cap: Array) -> bool:
+		for zone in zones:
+			if Rules.segment_segment_distance(cap[0], cap[1], zone[0], zone[1]) < float(cap[2]) + Rules.UNIT_RADIUS + float(zone[2]):
+				return true
+		return false
+	var hiding_ambient := 0
+	for item in layout.trees:
+		var cap := Rules.crown_capsule(float(item[0]), float(item[1]), int(item[2]), int(item[3]), float(item[5]), deg_to_rad(float(item[4])))
+		if hides.call(cap):
+			hiding_ambient += 1
+	check(hiding_ambient == 0, "ambient trees whose crown hides a trail / glade / arena / horse-spot unit: %d" % hiding_ambient)
+	var listed: Array = layout.get("cameraOccluders", [])
+	var woods := {}
+	for tree in data.woods:
+		woods[tree.id] = tree
+	var hiding_resource := 0
+	var unlisted := 0
+	for section in ["resourceRemap", "innerRemap"]:
+		for id in layout[section]:
+			var e: Array = layout[section][id]
+			var species: int = Rules.RESOURCE_SPECIES.get(String(woods[id].name), Rules.PINE)
+			var cap := Rules.crown_capsule(float(e[0]), float(e[1]), species, int(e[3]) % Rules.GREEN_VARIANT_BASE, float(e[4]), float(woods[id].angle))
+			if hides.call(cap):
+				hiding_resource += 1
+				if not listed.has(id):
+					unlisted += 1
+	check(unlisted == 0, "resource trees hiding a unit zone but not listed for the runtime fade: %d" % unlisted)
+	check(hiding_resource <= 120, "too many resource trees still hiding unit zones: %d" % hiding_resource)
+	notes.camera_clearance = {"ambient_hiding": hiding_ambient, "resource_hiding": hiding_resource, "listed": listed.size()}
+	for path in ["res://src/forest_rescue/world/forest_painted.gdshaderinc", "res://src/forest_rescue/world/forest_impostor.gdshader",
+			"res://src/forest_rescue/world/forest_fog.gdshader", "res://src/forest_rescue/world/forest_fog_receiver.gdshaderinc"]:
+		var code := FileAccess.get_file_as_string(path)
+		check(not code.contains("bayer") and not code.contains("FRAGCOORD"), "screen-door dither left in " + path)
+		check(not code.contains("fade_circles"), "crown cut-away left in " + path)
+	check(world.get("occluders") != null and world.occluders.has_method("query"), "whole-tree occluder fade missing")
 	# ---- Chunk selection + pinning (port of selectChunks) ------------------------------------
 	var all := ForestMasks.all_chunks()
 	check(all.size() == 16 and all[0].id == "lf_chunk_0_0" and all[15].id == "lf_chunk_3_3", "16 chunks lf_chunk_X_Z")

@@ -145,7 +145,8 @@ class Asset:
                 continue
             loc = np.asarray(spec.get("loc", (0, 0, 0)), float) if isinstance(spec, dict) else np.zeros(3)
             rot = spec.get("rot", (0, 0, 0)) if isinstance(spec, dict) else (0, 0, 0)
-            L = T4(p.pivot + loc) @ R4(euler_R(rot)) @ T4(-p.pivot)
+            scl = np.asarray(spec.get("scale", (1, 1, 1)), float) if isinstance(spec, dict) else np.ones(3)
+            L = T4(p.pivot + loc) @ R4(euler_R(rot)) @ R4(np.diag(scl)) @ T4(-p.pivot)
             W[name] = par @ L
         return W
 
@@ -377,8 +378,10 @@ class Built:
         self.mats = {}
 
 
-def realize(asset, mats):
-    """mats: {lod: {slot: material}}. Creates empties (parts), meshes and marker empties at rest."""
+def realize(asset, mats, slotmap=None):
+    """mats: {lod: {slot: material}}. Creates empties (parts), meshes and marker empties at rest.
+    slotmap: material class -> slot name (default slot_of: one atlas slot; the material path maps class -> class)."""
+    slotmap = slotmap or slot_of
     B = Built()
     for name, p in asset.parts.items():
         if name == "root":
@@ -401,7 +404,7 @@ def realize(asset, mats):
             if not g.F:
                 continue
             nm = f"{asset.id}_LOD{lod}" if name == "root" else f"{asset.id}_{name}_LOD{lod}"
-            o, fixed, M, Tg = bl.object_from_geo(nm, _GV(g, p.pivot if name != "root" else (0, 0, 0), slot_of),
+            o, fixed, M, Tg = bl.object_from_geo(nm, _GV(g, p.pivot if name != "root" else (0, 0, 0), slotmap),
                                                  mats[lod], smooth_mats=())
             _, _, Mo, Tgo, _ = g.arrays()
             smooth_cls = {"rope", "root", "cloth", "bone", "crystal", "bread", "sack", "smooth"}
@@ -442,7 +445,7 @@ def set_pose(asset, B, pose):
         spec = spec if isinstance(spec, dict) else {}
         e.location = tuple(np.asarray(e["rest_loc"], float) + np.asarray(spec.get("loc", (0, 0, 0)), float))
         e.rotation_euler = tuple(spec.get("rot", (0, 0, 0)))
-        e.scale = (1, 1, 1)
+        e.scale = tuple(spec.get("scale", (1, 1, 1)))
     bpy.context.view_layer.update()
 
 

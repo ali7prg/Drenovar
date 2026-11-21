@@ -1,0 +1,57 @@
+{
+  "source": "forest_rescue/delivery/art/01_world_masterplan.png (1536x1024); zones circled by the user in masterplan_zones_annotated_by_user.jpg",
+  "units": "pixels of the 1536x1024 image, x to the right, y down; approximate centres read from 2x crops",
+  "userDirection": "The user (owner) decided on 2026-11-21 that the in-game layout must follow this masterplan: zones, glades with cages and camps, landmarks and a branching network of winding trails. Not all cages strung along one trail.",
+  "town": {"centre": [752, 442], "wallRadii": [208, 158], "northGate": [800, 290], "southGate": [775, 600]},
+  "cages": [
+    {"key": "NW-A", "cage": [280, 225], "tent": [335, 205], "fire": [320, 240], "zone": "golden-oak grove, beside the giant hollow oak", "proposedSite": "lf_site_01 (act 1, add birches around the glade: 'white trunks' in its text)"},
+    {"key": "NW-B", "cage": [240, 335], "tent": [180, 320], "fire": [208, 345], "zone": "golden-oak grove west, ruined arch at [375, 340]", "proposedSite": "lf_site_02 (act 1)"},
+    {"key": "W-C", "cage": [312, 448], "tent": [260, 440], "fire": [282, 460], "fence": [355, 440], "zone": "mixed oaks west of the town", "proposedSite": "lf_site_03 (act 1)"},
+    {"key": "W-D", "cage": [235, 565], "fire": [255, 590], "fence": [185, 570], "bench": [290, 575], "zone": "west, above the quarry", "proposedSite": "lf_site_04 (act 2)"},
+    {"key": "SW-E", "cage": [325, 800], "tent": [355, 765], "fire": [357, 815], "zone": "quarry floor (crane [245, 690], mine mouth [150, 800], rails and cart [200, 840], cart [305, 740])", "proposedSite": "lf_site_05 (act 2)"},
+    {"key": "SW-F", "cage": [345, 912], "tent": [390, 910], "fire": [372, 930], "fence": [350, 880], "zone": "below the quarry, pines", "proposedSite": "lf_site_06 (act 2)"},
+    {"key": "S-G", "cage": [717, 877], "fire": [750, 885], "hideRack": [695, 845], "zone": "dark pines south, dead white tree [775, 830], stone pillars [635, 830] and [805, 860], bones [545, 870], marsh pools [700-850, 900-980]", "proposedSite": "lf_site_07 (act 3)"},
+    {"key": "S-H", "cage": [1065, 925], "fire": [1040, 920], "hideRack": [1000, 880], "zone": "dark pines south-east (small circle)", "proposedSite": "lf_site_08 (act 3)"},
+    {"key": "SE-I", "cage": [1255, 795], "fire": [1300, 830], "zone": "marsh / lake shore, hunter shelter [1300, 760]", "proposedSite": "lf_site_09 (act 3)"},
+    {"key": "SE-J", "cage": [1295, 670], "fire": [1330, 685], "frames": [[1270, 640], [1355, 660]], "zone": "east of the lake", "proposedSite": "lf_site_10 (act 4)"},
+    {"key": "E-K", "cage": [1355, 510], "fire": [1385, 528], "frames": [[1340, 480]], "zone": "willows below the waterfall", "proposedSite": "lf_site_11 (act 4)"},
+    {"key": "E-L", "cage": [1335, 365], "fire": [1300, 375], "leanTo": [1355, 350], "zone": "east, below the arena", "proposedSite": "none: keep the glade and camp, no cage (13 cages on the art, 12 sites in the campaign)"},
+    {"key": "NE-M", "cage": [1050, 265], "fire": [1080, 278], "leanTo": [1105, 262], "zone": "east bank under the arena cliffs", "proposedSite": "lf_site_12 'Роща старых костей' (act 4, last before the boss)"}
+  ],
+  "landmarks": [
+    {"id": "hollow_oak_giant", "at": [245, 170], "note": "huge golden oak with a hollow at the base, the grove's hero tree"},
+    {"id": "ruined_arch", "at": [375, 340], "asset": "lf_env_ruined_watchpost"},
+    {"id": "standing_stones", "at": [760, 120], "asset": "lf_env_standing_stones"},
+    {"id": "horse_and_squad", "at": [720, 225], "note": "the mare leads the squad with a banner from the town north towards the stones"},
+    {"id": "quarry_mine", "at": [245, 740], "asset": "lf_env_quarry_mine", "note": "crane [245, 690], mine mouth [150, 800], rails"},
+    {"id": "dead_tree", "at": [775, 830], "note": "bare white dead tree, stone pillars around"},
+    {"id": "hunter_shelter", "at": [1300, 760], "asset": "lf_env_hunter_shelter"},
+    {"id": "waterfall", "at": [1235, 430], "note": "falls from the east cliff into a pond with lily pads, reeds and willows [1150-1300, 440-520]"},
+    {"id": "lake_marsh", "at": [1170, 700], "note": "river widens into a reedy lake / marsh south-east of the bridge"},
+    {"id": "bridge", "at": [1100, 575], "asset": "lf_env_bridge27m", "note": "four towers with red banners"},
+    {"id": "boss_arena", "at": [1250, 150], "asset": "lf_boss_arena_assembled", "note": "cliff ring, fossil ribs and skull on the back wall, banners; trail enters from the bottom-left [1175, 215]"}
+  ],
+  "river": {"centreline": [[965, 0], [975, 300], [985, 540], [1060, 600], [1040, 700], [1060, 820], [1180, 860], [1450, 900]], "note": "gorge at the top, bends east under the bridge, then a reedy lake and a meander to the bottom-right"},
+  "trailsApprox": [
+    {"name": "horse trail", "points": [[490, 360], [570, 300], [700, 245], [770, 225], [790, 190], [760, 160], [760, 120]]},
+    {"name": "grove north loop", "points": [[560, 310], [430, 290], [365, 260], [290, 230], [240, 270], [130, 300], [115, 360], [170, 385], [240, 335]]},
+    {"name": "grove to town west", "points": [[240, 335], [300, 370], [400, 395], [455, 400], [490, 360]]},
+    {"name": "west to quarry", "points": [[455, 420], [420, 470], [312, 448], [230, 490], [165, 540], [160, 590], [230, 620], [330, 640], [410, 660], [450, 750], [370, 820], [325, 800]]},
+    {"name": "quarry south", "points": [[300, 840], [250, 870], [270, 900], [345, 912]]},
+    {"name": "south gate west branch", "points": [[775, 600], [750, 640], [710, 700], [640, 760], [600, 820], [640, 870], [717, 877]]},
+    {"name": "south gate east branch", "points": [[775, 600], [800, 680], [900, 740], [975, 800], [950, 860], [1040, 920]]},
+    {"name": "bridge east and SE loop", "points": [[960, 600], [1100, 575], [1240, 590], [1290, 640], [1295, 670], [1350, 760], [1255, 795]]},
+    {"name": "east up to the arena", "points": [[1240, 590], [1330, 560], [1355, 510], [1390, 440], [1335, 365], [1230, 345], [1190, 285], [1175, 215]]},
+    {"name": "river bank to NE-M", "points": [[1000, 150], [1040, 200], [1050, 265]]}
+  ],
+  "biomesByScreenRegion": {
+    "topLeft_and_top": "golden oaks (large, bright yellow crowns) with green oaks; giant hollow oak; open grassy meadows between groves",
+    "left": "mixed golden and green oaks",
+    "bottomLeft": "limestone quarry cliffs, rocks, a few oaks and pines",
+    "bottom": "dark pines, marsh pools with reeds, dead trees",
+    "bottomRight": "dark pines, marsh/lake with reeds, willows",
+    "right": "green deciduous and willows along the water, waterfall cliff",
+    "topRight": "rocky gorge and the arena on a limestone outcrop, pines in the fog",
+    "aroundTown": "green deciduous trees and meadows, trails radiating from the gates"
+  }
+}

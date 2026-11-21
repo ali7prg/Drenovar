@@ -141,7 +141,12 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 			source_meshes.append(part.mesh)
 		terrain.read_tiles(source_meshes)
 		await get_tree().process_frame
-		terrain.bake()
+		# iPhone entry: the bake (pure array work, ~1-4 s) runs on a worker thread while the city keeps
+		# animating; nothing reads `terrain` before it is cached below
+		var bake_task := WorkerThreadPool.add_task(terrain.bake, true, "forest terrain bake")
+		while not WorkerThreadPool.is_task_completed(bake_task):
+			await get_tree().process_frame
+		WorkerThreadPool.wait_for_task_completion(bake_task)
 		_cache[key] = terrain
 		_cache.tiles = {}
 	setup_ms.terrain = (Time.get_ticks_usec() - t) / 1000.0
@@ -168,19 +173,24 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	# light (their textures carry the painting's own light); the city keeps its sun.
 	ForestKit.light_dir = Basis.from_euler(SUN_ROTATION).z.normalized()
 	ForestKit.crown_light_dir = PAINT_LIGHT_DIR
+	await get_tree().process_frame
 	kit = ForestKit.new(data, stage.scenery_material)
+	await get_tree().process_frame
 	canopy = ForestCanopy.new()
 	canopy.name = "Canopy"
 	add_child(canopy)
 	occluders = ForestOccluders.new(self, canopy)
 	add_child(occluders)
 	_build_paths()
+	await get_tree().process_frame
 	_restyle_river()
 	water = ForestWater.new()
 	water.name = "Water"
 	add_child(water)
 	water.build(atlas, func(x: float, z: float) -> float: return terrain.ground_height(x, z), _noise_texture())
+	await get_tree().process_frame
 	_build_quarry()
+	await get_tree().process_frame
 	impostors = ForestImpostors.new()
 	impostors.name = "Impostors"
 	add_child(impostors)
@@ -213,10 +223,13 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	fog.name = "Fog"
 	add_child(fog)
 	var light: Vector3 = -stage.shadow_direction if stage.shadow_direction != Vector3.ZERO else Vector3(0.45, 0.74, 0.5)
+	await get_tree().process_frame
 	fog.build(func(x: float, z: float) -> float: return terrain.ground_height(x, z), light)
+	await get_tree().process_frame
 	fog.reveal_finished.connect(func() -> void: fog_reveal_finished.emit(fog_revision))
 	landmarks.arena_clear_discs = [[ForestWater.POND_CENTER, ForestWater.POND_RADIUS + 4.5], [ForestWater.FALLS_LIP + ForestWater.FALLS_FACING * 2.0, 4.0]]
 	landmarks.populate()
+	await get_tree().process_frame
 	_register_fog_receivers()
 	setup_ms.visuals = (Time.get_ticks_usec() - t) / 1000.0
 	apply_adventure({})
@@ -835,18 +848,30 @@ const OCCLUDER_MAX_ZOOM := 80.0
 func _update_occluders(delta: float) -> void:
 	if occluders == null or stage == null:
 		return
-	var targets: Array = []
+	# iPhone hot path: the target list is only gathered when the occluder query is due (every
+	# ForestOccluders.UPDATE_SECONDS), into a reused array
+	if occluders._timer - delta > 0.0:
+		occluders._timer -= delta
+		return
+	_occluder_targets.clear()
 	var zoom: float = stage.camera_zoom
 	if zoom <= OCCLUDER_MAX_ZOOM:
 		var focus := Vector2(stage.camera_target.x, stage.camera_target.z)
 		var reach := zoom * 1.1
-		for pair in [[_actors, 2.0], [_props, 2.6]]:
-			for child in (pair[0] as Node3D).get_children():
-				if child is Node3D and (child as Node3D).visible and not child.get_meta("no_canopy_fade", false):
-					var p: Vector3 = (child as Node3D).global_position
-					if Vector2(p.x, p.z).distance_to(focus) <= reach:
-						targets.append([p, float(child.get_meta("occluder_height", pair[1]))])
-	occluders.update_targets(targets, delta)
+		_gather_targets(_actors, 2.0, focus, reach)
+		_gather_targets(_props, 2.6, focus, reach)
+	occluders.update_targets(_occluder_targets, delta)
+
+
+var _occluder_targets: Array = []
+
+
+func _gather_targets(root: Node3D, height: float, focus: Vector2, reach: float) -> void:
+	for child in root.get_children():
+		if child is Node3D and (child as Node3D).visible and not child.get_meta("no_canopy_fade", false):
+			var p: Vector3 = (child as Node3D).global_position
+			if Vector2(p.x, p.z).distance_to(focus) <= reach:
+				_occluder_targets.append([p, float(child.get_meta("occluder_height", height))])
 
 
 func _cull_fogged_children(root: Node3D) -> void:

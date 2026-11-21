@@ -91,11 +91,98 @@ func _initialize() -> void:
 			frames_per_scenario = int(arg.trim_prefix("--frames="))
 		elif arg == "--segments":
 			segments_mode = true
+	if OS.get_cmdline_user_args().has("--entry"):
+		call_deferred("run_entry")
+		return
 	call_deferred("run_segments" if segments_mode else "run")
+
+
+## Entry probe (iPhone smoothness): every frame interval from main.tscn's instantiation until the forest
+## world is ready (+1 s), the longest single frame and where the world setup was, and the impostor source.
+func run_entry() -> void:
+	root.size = Vector2i(1366, 630)
+	var t_start := Time.get_ticks_usec()
+	var game = load("res://main.tscn").instantiate()
+	root.add_child(game)
+	var first_frame_us := Time.get_ticks_usec() - t_start
+	var intervals := PackedFloat32Array()
+	var longest := 0.0
+	var longest_at := ""
+	var last := Time.get_ticks_usec()
+	var ready_at := -1
+	var frame := 0
+	var forest_started := -1
+	while frame < 4000:
+		await process_frame
+		frame += 1
+		var now := Time.get_ticks_usec()
+		var ms := (now - last) / 1000.0
+		last = now
+		intervals.append(ms)
+		var stage: Node = game.get("stage") if is_instance_valid(game) else null
+		var world: Node = stage.get("forest_world") if is_instance_valid(stage) else null
+		if world != null and forest_started < 0:
+			forest_started = frame
+		var where := "city" if world == null else ("forest:" + str(world.get("setup_ms")))
+		if ms > longest:
+			longest = ms
+			longest_at = "frame %d %s" % [frame, where.left(160)]
+		if world != null and world.get("_ready_emitted") == true and ready_at < 0:
+			ready_at = frame
+		if ready_at > 0 and frame > ready_at + 30:
+			break
+	var forest_intervals := intervals.slice(maxi(0, forest_started - 1)) if forest_started > 0 else PackedFloat32Array()
+	var sorted := forest_intervals.duplicate()
+	sorted.sort()
+	var pick := func(q: float) -> float: return sorted[clampi(int(q * (sorted.size() - 1)), 0, sorted.size() - 1)] if not sorted.is_empty() else 0.0
+	var longest_forest := sorted[-1] if not sorted.is_empty() else 0.0
+	var top := []
+	var order := range(forest_intervals.size())
+	order.sort_custom(func(a: int, b: int) -> bool: return forest_intervals[a] > forest_intervals[b])
+	for i in mini(6, order.size()):
+		top.append(snappedf(forest_intervals[order[i]], 0.1))
+	var ForestImpostors = load("res://src/forest_rescue/world/forest_impostors.gd")
+	var row := {"format": "drenovar-forest-entry-probe-v1", "renderer": RenderingServer.get_current_rendering_method(),
+		"adapter": RenderingServer.get_video_adapter_name(),
+		"limits": "SOFTWARE-RENDERED desktop (llvmpipe/Xvfb) timings, NOT iPhone 12.",
+		"mainSceneInstantiateMs": snappedf(first_frame_us / 1000.0, 0.1),
+		"framesUntilForestReady": ready_at, "forestFrames": forest_intervals.size(),
+		"forestEntryMs": snappedf(Array(forest_intervals).reduce(func(a, b): return a + b, 0.0), 1.0),
+		"longestFrameMs": snappedf(longest_forest, 0.1), "longestFrameAt": longest_at,
+		"topFramesMs": top, "p50Ms": snappedf(pick.call(0.5), 0.1), "p95Ms": snappedf(pick.call(0.95), 0.1),
+		"p99Ms": snappedf(pick.call(0.99), 0.1), "impostorSource": String(ForestImpostors.source)}
+	print("PERF_ENTRY ", JSON.stringify(row))
+	quit()
 
 
 func fixture(name: String) -> Dictionary:
 	return JSON.parse_string(FileAccess.get_file_as_string(FIXTURES + name + ".json"))
+
+
+## Pipeline compilations so far (Godot 4.4+ monitors): canvas, mesh (on mesh load), surface (on material /
+## surface setup), draw (needed at draw time: the stutter kind), specialization (background).
+func pipeline_counts() -> Dictionary:
+	return {"canvas": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_CANVAS),
+		"mesh": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_MESH),
+		"surface": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SURFACE),
+		"draw": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW),
+		"specialization": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SPECIALIZATION)}
+
+
+static func pipeline_delta(a: Dictionary, b: Dictionary) -> Dictionary:
+	var out := {}
+	for k in b:
+		out[k] = int(b[k]) - int(a.get(k, 0))
+	return out
+
+
+static func frame_stats(intervals: PackedFloat32Array) -> Dictionary:
+	var sorted := intervals.duplicate()
+	sorted.sort()
+	if sorted.is_empty():
+		return {}
+	var at := func(q: float) -> float: return snappedf(sorted[clampi(int(q * (sorted.size() - 1)), 0, sorted.size() - 1)], 0.1)
+	return {"frames": sorted.size(), "p50Ms": at.call(0.5), "p95Ms": at.call(0.95), "p99Ms": at.call(0.99), "maxMs": snappedf(sorted[-1], 0.1)}
 
 
 ## Visible triangles of every adventure rig (actors + props) at its current LOD.
@@ -166,6 +253,11 @@ func run_segments() -> void:
 			var rig = forest.actors.rigs[id]
 			if is_instance_valid(rig) and rig.load_state == "loading":
 				rig.poll_load(true)
+		var pipes_before := pipeline_counts()
+		var intervals := PackedFloat32Array()
+		var last_us := Time.get_ticks_usec()
+		var tex_mem := 0.0
+		var vid_mem := 0.0
 		if spec.has("live"):
 			game.accept(fixture(spec.live))
 			game.battle_results.pending.clear()
@@ -182,6 +274,11 @@ func run_segments() -> void:
 			stage.zoom = float(spec.zoom)
 			stage.update_camera(0.0, true)
 			await process_frame
+			var now_us := Time.get_ticks_usec()
+			intervals.append((now_us - last_us) / 1000.0)
+			last_us = now_us
+			tex_mem = maxf(tex_mem, Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED))
+			vid_mem = maxf(vid_mem, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED))
 		if world != null and world.get("landmarks") != null and world.landmarks.has_method("finish_arena_load"):
 			world.landmarks.finish_arena_load()
 		var draws := PackedInt32Array()
@@ -195,6 +292,11 @@ func run_segments() -> void:
 			clock += 1000.0 / 30.0
 			forest.client.manual_clock_ms = clock
 			await process_frame
+			var now2_us := Time.get_ticks_usec()
+			intervals.append((now2_us - last_us) / 1000.0)
+			last_us = now2_us
+			tex_mem = maxf(tex_mem, Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED))
+			vid_mem = maxf(vid_mem, Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED))
 			draws.append(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME))
 			prims.append(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME))
 			var snap: Dictionary = world.perf_snapshot() if world != null else {}
@@ -218,13 +320,17 @@ func run_segments() -> void:
 			"envBudgetOk": env[-1] <= 110000, "totalBudgetOk": totals[-1] <= 180000,
 			"drawCallsMedian": draws[draws.size() / 2], "drawCallsMax": draws[-1],
 			"primitivesMedian": prims[prims.size() / 2], "primitivesMax": prims[-1],
-			"instancesMax": inst[-1], "actorRigsVisibleMax": shown_max}
+			"instancesMax": inst[-1], "actorRigsVisibleMax": shown_max,
+			"frameTime": frame_stats(intervals), "textureMemMiBMax": snappedf(tex_mem / 1048576.0, 0.1),
+			"videoMemMiBMax": snappedf(vid_mem / 1048576.0, 0.1),
+			"pipelineCompilations": pipeline_delta(pipes_before, pipeline_counts())}
 		results.append(row)
 		print("PERF_SEGMENT ", JSON.stringify(row))
 	var report := {"format": "drenovar-forest-segment-probe-v1", "tag": tag,
 		"renderer": RenderingServer.get_current_rendering_method(), "adapter": RenderingServer.get_video_adapter_name(),
 		"viewport": str(root.size), "targets": {"envTris": 110000, "totalTris": 180000},
-		"limits": "SOFTWARE-RENDERED desktop (llvmpipe/Xvfb) counts and timings; NOT iPhone 12 measurements. Triangles: environment = forest instances (tris_est) + landmarks/arena at the chosen LOD; actors = visible meshes of adventure rigs at their LOD (upper bound, before Godot's automatic mesh LOD). draw calls / primitives are renderer totals incl. shadow passes.",
+		"impostorSource": String(load("res://src/forest_rescue/world/forest_impostors.gd").source),
+		"limits": "SOFTWARE-RENDERED desktop (llvmpipe/Xvfb) counts and timings; NOT iPhone 12 measurements. Frame times are whole-frame intervals of the software renderer (relative comparisons only). Triangles: environment = forest instances (tris_est) + landmarks/arena at the chosen LOD; actors = visible meshes of adventure rigs at their LOD (upper bound, before Godot's automatic mesh LOD). draw calls / primitives are renderer totals incl. shadow passes.",
 		"segments": results}
 	var path := out_dir.path_join("perf_segments_" + tag + ".json")
 	var file := FileAccess.open(path, FileAccess.WRITE)

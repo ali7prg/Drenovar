@@ -242,18 +242,21 @@ def v3_sheets(shots, before, before_prefix, tag="p3"):
             if -40 < gx < W + 40 and -40 < gy < H + 40:
                 _marker(dg, (gx, gy), a["label"], col)
         label(crop, "art/01 · %s" % zone["caption"], size=15)
-        label(after, "AFTER pass 3 · frame from the art rect (target %.0f,%.0f zoom %.0f) · %s" % (
-            zone["target"][0], zone["target"][1], zone["zoom"], zone["name"]), size=15)
-        b_path = os.path.join(before, before_prefix + "full_%s_z68.png" % zone["name"])
+        label(after, "AFTER %s · frame from the art rect (target %.0f,%.0f zoom %.0f) · %s" % (
+            "pass 4" if tag.startswith("p4") else "pass 3", zone["target"][0], zone["target"][1], zone["zoom"], zone["name"]), size=15)
+        # before_prefix with "{zone}": a same-frame earlier pass (p4: the pass-3 v3_zone_<zone>.png)
+        b_name = before_prefix.format(zone=zone["name"]) if "{zone}" in before_prefix else before_prefix + "full_%s_z68.png" % zone["name"]
+        b_path = os.path.join(before, b_name)
         b = Image.open(b_path).convert("RGB") if os.path.exists(b_path) else Image.new("RGB", (W, H), (40, 40, 40))
-        label(b, "BEFORE (pass 2c, old frame at zoom 68) · " + zone["name"], size=15)
+        label(b, ("BEFORE (pass 3, same frame) · " if "{zone}" in before_prefix else "BEFORE (pass 2c, old frame at zoom 68) · ") + zone["name"], size=15)
         rows.append((crop, b, after))
     scale = 0.5
     tw, th = int(W * scale), int(H * scale)
     for chunk in range(0, len(rows), 5):
         part = rows[chunk:chunk + 5]
         sheet = Image.new("RGB", (3 * tw + 24, 50 + len(part) * (th + 8)), (30, 27, 24))
-        ImageDraw.Draw(sheet).text((10, 12), "Layout pass 3 — art/01 rect | before (2c) | after (same region via the layout's "
+        ImageDraw.Draw(sheet).text((10, 12), ("Layout pass 4 — art/01 rect | before (pass 3) | after" if tag.startswith("p4") else
+                                    "Layout pass 3 — art/01 rect | before (2c) | after") + " (same region via the layout's "
                                    "art->screen mapping; matching anchors marked)", font=font(19), fill=(250, 240, 220))
         for i, row in enumerate(part):
             y = 50 + i * (th + 8)
@@ -287,7 +290,7 @@ def v3_features(shots, tag="p3"):
         cols = 2
         rows = (len(tiles) + 1) // 2
         sheet = Image.new("RGB", (cols * (tw + 8), 46 + rows * (th + 8)), (30, 27, 24))
-        ImageDraw.Draw(sheet).text((10, 12), "Layout pass 3 — feature crops at zoom 68 (QA full reveal)", font=font(19),
+        ImageDraw.Draw(sheet).text((10, 12), "Layout pass %s — feature crops at zoom 68 (QA full reveal)" % ("4" if tag.startswith("p4") else "3"), font=font(19),
                                    fill=(250, 240, 220))
         for i, im in enumerate(tiles):
             sheet.paste(im.resize((tw, th), Image.LANCZOS), ((i % cols) * (tw + 8), 46 + (i // cols) * (th + 8)))

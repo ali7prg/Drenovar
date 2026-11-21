@@ -1068,6 +1068,8 @@ func place_device(device: Rig, kind: String, anchor: Dictionary) -> void:
 
 ## The fixed city camera's screen-right axis on the ground (camera at target + (75, 83, 75)).
 const SCREEN_RIGHT := Vector3(0.70710678, 0.0, -0.70710678)
+const SCREEN_TOWARD := Vector3(0.70710678, 0.0, 0.70710678)
+const WINCH_BACK := 1.0
 ## Winch (yaw 45°: its +X is screen right): right end of the crank grip, and the half screen width a cage
 ## covers (root / iron / wood cages at their atlas yaw), metres.
 const WINCH_SCREEN_RIGHT := 2.5
@@ -1087,6 +1089,8 @@ func device_spot(kind: String, anchor: Dictionary) -> Vector3:
 	var need := -(WINCH_SCREEN_RIGHT + CAGE_SCREEN_HALF)
 	if du < 0.0 and du > need:
 		spot += SCREEN_RIGHT * (need - du)
+		# and a step away from the camera: the guardian waiting in front stays below the pit on screen
+		spot -= SCREEN_TOWARD * WINCH_BACK
 	return spot
 
 ## Where the mechanism UI camera looks: the device's body (the winch's drum height), else its key spot.

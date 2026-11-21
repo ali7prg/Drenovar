@@ -589,12 +589,57 @@ def game_view(A, B, out_png, light_game, lod=0, res=900, pose=None, k=0.55, titl
     return rgba
 
 
+def clip_sheet(A, B, M, out_png, light):
+    """Frames of a clip rendered from the city-camera direction, cropped round M.CLIP_SHEET['box'] (model metres:
+    x0, z0, x1, z1 on the front plane) - gear train / crank check."""
+    from PIL import Image
+    from mathutils import Vector
+    spec = M.CLIP_SHEET
+    clip = spec["clip"]
+    frames = []
+    for t in spec["times"]:
+        pv2.pose_from_clip(A, B, clip, t)
+        objs = [o for (l_, nm), o in B.objs.items() if l_ == 0]
+        use_qa_ao(objs, light, True)
+        bl.only(objs)
+        e = math.atan(83.0 / (75.0 * math.sqrt(2)))
+        d = Vector((0.0, math.cos(e), -math.sin(e)))
+        x0, z0, x1, z1 = spec["box"]
+        c = Vector(((x0 + x1) / 2, 0.0, (z0 + z1) / 2))
+        cd = bpy.data.cameras.get("mat_clip") or bpy.data.cameras.new("mat_clip")
+        co = bpy.data.objects.get("mat_clip") or core.link(bpy.data.objects.new("mat_clip", cd))
+        cd.type = "ORTHO"
+        cd.ortho_scale = max(x1 - x0, z1 - z0)
+        cd.clip_start = 0.01
+        cd.clip_end = 60
+        co.location = c - d * 20
+        co.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
+        sc = bpy.context.scene
+        sc.camera = co
+        sc.render.resolution_x = 420
+        sc.render.resolution_y = int(420 * (z1 - z0) / max(x1 - x0, 1e-6))
+        rgba = bl.render_rgba()
+        use_qa_ao(objs, light, False)
+        bg = np.array([0.8, 0.72, 0.55])
+        img = (np.clip(rgba[..., :3] * rgba[..., 3:4] + bg * (1 - rgba[..., 3:4]), 0, 1) * 255).astype(np.uint8)
+        frames.append(pv2._label(img, f"{clip} t={t:.2f}s"))
+    pv2.clear_actions(A, B)
+    h = max(f.shape[0] for f in frames)
+    frames = [np.concatenate([f, np.full((h - f.shape[0], f.shape[1], 3), 30, np.uint8)], 0) for f in frames]
+    Image.fromarray(np.concatenate(sum([[f, np.full((h, 6, 3), 30, np.uint8)] for f in frames], [])[:-1], 1)).save(out_png)
+
+
 # ============================================================================ run
 def run(M, modname, it, do_export=True, do_godot=True):
     import json
     t0 = time.time()
     aid = M.ID
     core.reset()
+    qdir = os.environ.get("PV2_QA_DIR")
+    if qdir:
+        # development iterations: QA sheets to a scratch folder (the repo keeps the shipped iteration's)
+        os.makedirs(qdir, exist_ok=True)
+        pv2.qa_path = lambda a_, it_, name, ext="png": os.path.join(qdir, f"v2_iter{it_:02d}_{name}.{ext}")
     pv2.PAINT_K = getattr(M, "PAINT_K", pv2.PAINT_K)
     k = pv2.PAINT_K
     pv2.log(f"[{aid}] iter {it} (material path, paintedLightMix {k})")
@@ -669,6 +714,16 @@ def run(M, modname, it, do_export=True, do_godot=True):
                 tiles[c] = np.clip(tiles[c] * gn[None, None], 0, 1)
                 set_tile(imgs[c], tiles[c])
             pv2.log("  colour calibration gains: " + ", ".join(f"{c} {d['gain']}" for c, d in gains_log.items()))
+            # the game's FILMIC tonemap desaturates the unshaded painted path: tiles carry a little extra chroma
+            ch = float(getattr(M, "TILE_CHROMA", 1.0))
+            if ch != 1.0:
+                for c in tiles:
+                    if c in ("void",):
+                        continue
+                    lab = tex.to_lab(tiles[c].reshape(-1, 3))
+                    lab[:, 1:] *= ch
+                    tiles[c] = tex.from_lab(lab).reshape(tiles[c].shape)
+                    set_tile(imgs[c], tiles[c])
             continue
         dbg = os.environ.get("PV2_DEBUG_DIR")
         if dbg:
@@ -709,6 +764,8 @@ def run(M, modname, it, do_export=True, do_godot=True):
                   title=f"LOD{lod} {tris[f'LOD{lod}']} tris")
     # ---- clips, export
     M.clips(A, B)
+    if hasattr(M, "CLIP_SHEET"):
+        clip_sheet(A, B, M, pv2.qa_path(aid, it, "clip_frames"), lg)
     pv2.clear_actions(A, B)
     out = {}
     files = {c: f"{aid}_{c}_c.jpg" for c in tiles}

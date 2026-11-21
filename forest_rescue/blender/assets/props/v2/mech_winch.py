@@ -36,7 +36,7 @@ MATERIAL_MODE = True
 PAINT_K = 0.55               # paintedLightMix: the tiles carry no painted light, the engine light gives the form
 
 PIT_D = 1.0
-CHEST_TOP_CLEAR = 0.05       # end of the raise: chest bottom this far above the ground (clear of the pit mouth)
+CHEST_TOP_CLEAR = 0.1        # end of the raise: chest bottom this far above the ground (clear of the pit mouth)
 BRAKE_ON = math.radians(-48)
 PAWL_ON = math.radians(-24)
 GEAR_TEETH = 25              # big gear on the drum's left end (the pawl clicks over it)
@@ -103,6 +103,9 @@ def make_tiles(px, sheet, rng):
     return pv2mat.default_tiles(sys.modules[__name__], px, sheet, rng)
 
 
+TILE_CHROMA = 1.18
+# gear train / crank check: lf_rope_release frames, front-plane box (model metres x0, z0, x1, z1)
+CLIP_SHEET = {"clip": "lf_rope_release", "times": (0.0, 0.45, 0.8, 1.3), "box": (-1.9, 1.3, 2.3, 3.2)}
 # QA close-ups (sheet px): gears, crank, chest + pit, left trestle top + brake
 CLOSEUPS = [(100, 510, 280, 680), (360, 560, 520, 712), (180, 728, 380, 876), (40, 515, 200, 650)]
 # UV rules per tag prefix (pv2mat.assign_uvs): default "box" = metre box mapping in the primitive's own frame,

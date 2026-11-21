@@ -109,6 +109,10 @@ def run(modname, it, do_export=True, do_godot=True):
     pv2.STRICT_FACING_CLASSES = set(getattr(M, "STRICT_FACING", ()))
     alb0, nrm0, info, tstats = pv2.texture_lod0(A, B, tviews, M.SWATCHES, M.ATLAS, it, gate=getattr(M, "GATE", None),
                                                 edge=getattr(M, "EDGE", None))
+    if hasattr(M, "post_texture"):
+        # module hook: engrave / paint what the painting cannot provide (e.g. the rune lock's other glyph
+        # positions); updates both the LOD0 atlas and info["alb"] (the LOD1/LOD2 transfer source)
+        alb0 = M.post_texture(A, B, alb0, info, params)
     files = {"c0": f"{aid}_c.jpg", "n0": f"{aid}_n.png", "c1": f"{aid}_lod1_c.jpg", "c2": f"{aid}_lod2_c.jpg"}
     pv2.save_png(os.path.join(pv2.TEXM, f"{aid}_c.png"), alb0)
     pv2.save_png(os.path.join(pv2.TEXM, f"{aid}_n.png"), nrm0)

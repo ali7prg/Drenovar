@@ -691,7 +691,7 @@ def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.
     stats = dict(texels=int(len(P)), projected_frac=round(float((a > 0.5).mean()), 4),
                  per_view_frac={k: round(x, 4) for k, x in per_view.items()}, seconds=round(time.time() - t0, 1))
     log_fn(f"  texture: projected {stats['projected_frac']:.1%} {stats['per_view_frac']} ({stats['seconds']}s)")
-    info = dict(P=P, alb=alb, part=part)
+    info = dict(P=P, alb=alb, part=part, yy=yy, xx=xx, N=N, cls=cls, tags=tags, pnames=list(D["pnames"]))
     return out, nrm, info, stats
 
 

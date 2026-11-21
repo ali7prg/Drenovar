@@ -59,14 +59,7 @@ static func bodies(forest_atlas: RefCounted) -> Array:
 
 
 static func shore_radius(body: Dictionary, angle: float) -> float:
-	var s: float = body.seed
-	return float(body.radius) * (1.0 + float(body.noise) * (0.6 * sin(3.0 * angle + s) + 0.4 * sin(5.0 * angle + 2.1 * s)))
-
-
-## Signed distance (m) to a body's shoreline: < 0 in the water.
-static func shore_distance(body: Dictionary, x: float, z: float) -> float:
-	var d := Vector2(x, z) - Vector2(body.center)
-	return d.length() - shore_radius(body, atan2(d.y, d.x))
+	return ForestTerrain.shore_radius(body, angle)
 
 
 func build(forest_atlas: RefCounted, height_fn: Callable, noise: Texture2D) -> void:

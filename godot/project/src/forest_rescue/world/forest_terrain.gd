@@ -12,7 +12,10 @@ extends RefCounted
 ##   * arena bowl: shallow dish r=15 at the authored height, blend to 19 m;
 ##   * road profiles: atlas targetRoadY (12° limited), half-width 1.4, side blend 3 m,
 ##     tied into pads (6 m) and lifted to the bridge deck with 10 m ramps;
-##   * bridge: deck top 1.1 over x∈[76.98, 103.98], z∈[18, 22] (height_at only, terrain untouched).
+##   * bridge: deck top 1.1 over x∈[76.98, 103.98], z∈[18, 22] (height_at only, terrain untouched);
+##   * atlas v2 water (ForestWater.bodies): basins for the reedy lake (river level, marshy banks),
+##     the perched lily pond under the waterfall and the south marsh pools — carved after the
+##     river protection, never under a trail's walking band or a glade pad.
 
 const GRID_N := 187
 const GRID_MIN := -135.625
@@ -25,18 +28,24 @@ const RAMP_LENGTH := 10.0
 const PAD_TIE := 6.0
 const ARENA_BLEND_OUTER := 19.0
 const ARENA_DISH := 0.3
-const TERRAIN_VERSION := 11
+const GLADE_PAD_BLEND := 2.0
+const TERRAIN_VERSION := 12
 
-const BIOME_TINTS := [
-	Color(1.05, 1.04, 0.86),   # lf_biome_1 Берёзовый дозор — warm birch light
-	Color(0.97, 0.95, 0.86),   # lf_biome_2 Ломаный известняк — dry olive-grey
-	Color(0.78, 0.86, 0.80),   # lf_biome_3 Тёмная хвоя — deep blue-green shade
-	Color(0.90, 0.86, 0.77),   # lf_biome_4 Угольное возрождение — ash brown
-	Color(0.97, 1.07, 0.86),   # lf_biome_5 Ольховые луга — lush meadow
-	Color(0.86, 0.98, 0.82),   # lf_biome_6 Папоротниковый кряж — fern green
-	Color(0.90, 1.01, 0.92),   # lf_biome_7 Речные террасы — cool riverside
-	Color(1.02, 0.96, 0.80),   # lf_biome_8 Древняя роща — old golden olive
+## Atlas v2 region ground tints (ForestAtlas.REGION_NAMES order, art/01 crops at zoom 68):
+## sunny warm meadow under the golden grove, olive mixed oaks, dry grey-olive arena rock, fresh
+## green willow banks, cool riverside, dark mossy blue-green floor under the south pines, pale
+## limestone quarry, lush meadow belt round the walls. FLOOR_SHADE = darkest canopy-floor factor.
+const REGION_TINTS := [
+	Color(1.07, 1.03, 0.82),   # golden_grove
+	Color(1.00, 1.01, 0.86),   # west_mixed
+	Color(0.96, 0.95, 0.88),   # arena_rock
+	Color(0.93, 1.05, 0.88),   # east_willows
+	Color(0.90, 1.01, 0.92),   # river
+	Color(0.70, 0.81, 0.73),   # south_pines
+	Color(1.03, 1.00, 0.92),   # sw_quarry
+	Color(0.98, 1.06, 0.86),   # town_belt
 ]
+const FLOOR_SHADE := [0.9, 0.84, 0.82, 0.84, 0.86, 0.68, 0.9, 0.88]
 const WET_TINT := Color(0.80, 0.93, 0.86)
 
 var atlas: RefCounted
@@ -53,6 +62,7 @@ var stats := {}
 var extra_pads: Array = []               # [[Vector2 centre, radius, height]] landmark/camp pads
 var quarry_center := Vector2.INF         # SW quarry pit: grey stone/gravel ground (art/01)
 var pad_heights: Dictionary = {}         # site id -> reconciled pad height (centre + route ends)
+var water_bodies: Array = []             # ForestWater.bodies(atlas): lake / pond / marsh pools
 
 
 func _init(forest_atlas: RefCounted = null) -> void:
@@ -160,6 +170,10 @@ func _prepare_profiles() -> void:
 		pad_heights[site.id] = float(site.center.y)
 		centers[site.id] = Vector2(site.center.x, site.center.z)
 		radii[site.id] = float(site.radius)
+	for glade in atlas.extra_glades:
+		pad_heights[glade.id] = float(glade.center.y)
+		centers[glade.id] = Vector2(glade.center.x, glade.center.z)
+		radii[glade.id] = float(glade.radius)
 	pad_heights["lf_boss_arena"] = float(atlas.arena_center.y)
 	centers["lf_boss_arena"] = Vector2(atlas.arena_center.x, atlas.arena_center.z)
 	radii["lf_boss_arena"] = atlas.ARENA_RADIUS
@@ -305,6 +319,13 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 			h = lerpf(h, float(pad_heights.get(site.id, site.center.y)), 1.0 - smoothstep(r, r + site.blend, d))
 		if d < r + 1.0:
 			dirt = maxf(dirt, 0.55 * (1.0 - smoothstep(2.5, r + 0.5, d)))
+	for glade in atlas.extra_glades:   # atlas v2: glades without a site (E-L camp)
+		var d := Vector2(x - glade.center.x, z - glade.center.z).length()
+		var r: float = glade.radius
+		if d < r + GLADE_PAD_BLEND:
+			h = lerpf(h, float(pad_heights.get(glade.id, glade.center.y)), 1.0 - smoothstep(r, r + GLADE_PAD_BLEND, d))
+		if d < r + 1.0:
+			dirt = maxf(dirt, 0.5 * (1.0 - smoothstep(2.5, r + 0.5, d)))
 	var ad := Vector2(x - atlas.arena_center.x, z - atlas.arena_center.z).length()
 	if ad < ARENA_BLEND_OUTER:
 		var floor_y: float = float(pad_heights.get("lf_boss_arena", atlas.arena_center.y)) - ARENA_DISH * (1.0 - pow(minf(ad, 15.0) / 15.0, 2.0))
@@ -320,7 +341,59 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 	# Never touch the wet river channel; blend back over 2 m outside the wet edge.
 	var bank: float = atlas.river_bank_distance(x, z)
 	var keep := smoothstep(0.0, 2.0, bank) * core
-	return Vector4(lerpf(h0, h, keep), dirt * core, stone * core, road_distance)
+	var out := lerpf(h0, h, keep)
+	# Atlas v2 water basins (after the river protection: the lake widens the channel itself).
+	for body in water_bodies:
+		var shaped := _water_shape(body, x, z, out, road_distance)
+		out = shaped.x
+		dirt = maxf(dirt, shaped.y * 0.5)
+	return Vector4(out, dirt * core, stone * core, road_distance)
+
+
+## Irregular shoreline radius of a water body at a polar angle around its centre.
+static func shore_radius(body: Dictionary, angle: float) -> float:
+	var s: float = body.seed
+	return float(body.radius) * (1.0 + float(body.noise) * (0.6 * sin(3.0 * angle + s) + 0.4 * sin(5.0 * angle + 2.1 * s)))
+
+
+## Signed distance (m) to a body's shoreline: < 0 in the water.
+static func shore_distance(body: Dictionary, x: float, z: float) -> float:
+	var d := Vector2(x, z) - Vector2(body.center)
+	return d.length() - shore_radius(body, atan2(d.y, d.x))
+
+
+## Basin of one water body: a bowl below the water inside the shore, a 0.7 m muddy margin just
+## under the water line (the water mesh's own soft edge draws the shoreline), then a bank rising
+## `bank` m per m; perched bodies get a low dam where the natural ground lies below the water.
+## Trails (walking band + 2 m) and glade pads are never cut. Returns (height, mud weight).
+func _water_shape(body: Dictionary, x: float, z: float, h: float, road_distance: float) -> Vector2:
+	var c: Vector2 = body.center
+	var reach: float = float(body.radius) * 1.3 + 14.0
+	if absf(x - c.x) > reach or absf(z - c.y) > reach:
+		return Vector2(h, 0.0)
+	var sd := shore_distance(body, x, z)
+	var level: float = body.level
+	var target: float
+	if sd < 0.0:
+		var depth_t := clampf(-sd / maxf(1.0, float(body.radius) * 0.6), 0.0, 1.0)
+		target = level - 0.25 - float(body.depth) * smoothstep(0.0, 1.0, depth_t)
+	elif sd < 0.7:
+		target = level - 0.25
+	else:
+		target = level - 0.25 + float(body.bank) * (sd - 0.7)
+	var carved := minf(h, target)
+	if body.perched and sd >= 0.0:
+		var rim_w := 1.0 - smoothstep(0.9, 2.2, sd)
+		carved = maxf(carved, level + 0.16 - (1.0 - rim_w) * 50.0)
+	var guard := smoothstep(ROAD_HALF_WIDTH - 1.2, ROAD_HALF_WIDTH + 1.0, road_distance)
+	for site in atlas.sites:
+		var gd := Vector2(x - site.center.x, z - site.center.z).length()
+		guard = minf(guard, smoothstep(float(site.radius) + 0.4, float(site.radius) + 2.6, gd))
+	for glade in atlas.extra_glades:
+		var gd := Vector2(x - glade.center.x, z - glade.center.z).length()
+		guard = minf(guard, smoothstep(float(glade.radius) + 0.4, float(glade.radius) + 2.6, gd))
+	var mud := (1.0 - smoothstep(0.4, 2.2, sd)) * guard
+	return Vector2(lerpf(h, carved, guard), mud)
 
 
 func bake() -> void:
@@ -360,21 +433,56 @@ func bake() -> void:
 			var gx := (heights[k + 1] - heights[k - 1]) / (2.0 * GRID_STEP)
 			var gz := (heights[k + GRID_N] - heights[k - GRID_N]) / (2.0 * GRID_STEP)
 			var slope := rad_to_deg(atan(sqrt(gx * gx + gz * gz)))
-			var weights: PackedFloat32Array = atlas.biome_weights(x, z)
+			var weights := region_weights(x, z)
 			var color := Color(0, 0, 0)
+			var shade_min := 0.0
 			for b in weights.size():
-				color += BIOME_TINTS[b % BIOME_TINTS.size()] * weights[b]
+				color += REGION_TINTS[b] * weights[b]
+				shade_min += float(FLOOR_SHADE[b]) * weights[b]
 			var bank: float = atlas.river_bank_distance(x, z)
-			color = color.lerp(WET_TINT, (1.0 - smoothstep(0.0, 5.0, bank)) * 0.8)
-			var limestone := weights[1] if weights.size() > 1 else 0.0
+			var wet := 1.0 - smoothstep(0.0, 5.0, bank)
+			for body in water_bodies:
+				wet = maxf(wet, 1.0 - smoothstep(0.0, 3.5, shore_distance(body, x, z)))
+			color = color.lerp(WET_TINT, wet * 0.8)
+			var limestone := weights[6] + 0.5 * weights[2]
 			rock[k] = maxf(rock[k], smoothstep(16.0, 30.0, slope) * (0.45 + 0.5 * limestone) * core)
 			earth[k] = maxf(earth[k], limestone * 0.18 * core)
-			# Shaded forest floor (darker under the canopy, light on paths/glades), as in art/01.
-			var floor_shade := lerpf(0.80, 1.0, clampf(earth[k] * 1.4, 0.0, 1.0))
+			# Shaded forest floor (darker under the canopy, light on paths/glades), as in art/01:
+			# mossy and dark under the south pines, sunny under the golden grove.
+			var floor_shade := lerpf(shade_min, 1.0, clampf(earth[k] * 1.4, 0.0, 1.0))
 			color = Color(color.r * floor_shade, color.g * floor_shade, color.b * floor_shade)
 			tint[k] = Color(1, 1, 1).lerp(color, core)
 	stats.changed_vertices = changed
 	grid_ready = true
+
+
+## Atlas v2 region weights for the ground tint (same regions as the layout builder's zones):
+## warped screen sectors + the quarry pit, the meadow belt round the walls and the river banks.
+func region_weights(x: float, z: float) -> PackedFloat32Array:
+	var phi_offset := 9.0 * sin(x * 0.043 + z * 0.027) + 6.0 * sin(z * 0.061 - x * 0.019)
+	var w: PackedFloat32Array = atlas.region_sector_weights(x, z, phi_offset)
+	if quarry_center != Vector2.INF:
+		var q := 1.0 - smoothstep(16.0, 30.0, Vector2(x, z).distance_to(quarry_center) + 3.0 * sin(x * 0.31 + z * 0.17))
+		for i in w.size():
+			w[i] *= 1.0 - q
+		w[6] = maxf(w[6], q * 1.2)
+	var belt := 1.0 - smoothstep(4.0, 16.0, maxf(absf(x), absf(z)) - CORE + 3.0 * sin(z * 0.09 + x * 0.05))
+	for i in w.size():
+		w[i] *= 1.0 - belt * 0.85
+	w[7] += belt
+	var river := 1.0 - smoothstep(4.0, 12.0, atlas.river_bank_distance(x, z))
+	for i in w.size():
+		w[i] *= 1.0 - river * 0.8
+	w[4] += river
+	var total := 0.0
+	for v in w:
+		total += v
+	if total <= 0.0001:
+		w[3] = 1.0
+		return w
+	for i in w.size():
+		w[i] /= total
+	return w
 
 
 # --------------------------------------------------------------------------------------------

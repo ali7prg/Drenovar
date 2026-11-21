@@ -17,6 +17,7 @@ const ForestFog = preload("res://src/forest_rescue/world/forest_fog.gd")
 const ForestLandmarks = preload("res://src/forest_rescue/world/forest_landmarks.gd")
 const ForestImpostors = preload("res://src/forest_rescue/world/forest_impostors.gd")
 const ForestOccluders = preload("res://src/forest_rescue/world/forest_occluders.gd")
+const ForestWater = preload("res://src/forest_rescue/world/forest_water.gd")
 const SUN_ROTATION := Vector3(-0.837758, -0.558505, 0.0)   # landscape.gd city sun (-48°, -32°, 0)
 const Rules = preload("res://src/forest_rescue/world/forest_layout_rules.gd")
 const PATH_SHADER = preload("res://src/forest_rescue/world/forest_path.gdshader")
@@ -45,6 +46,7 @@ var layout: Dictionary = {}
 var canopy: Node3D
 var fog: Node3D
 var landmarks: Node3D
+var water: Node3D                         # ForestWater (lake, waterfall + pond, marsh pools)
 var paths: MeshInstance3D
 var _actors := Node3D.new()
 var _props := Node3D.new()
@@ -123,6 +125,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 		terrain = ForestTerrain.new(atlas)
 		terrain.extra_pads = landmarks.pads()
 		terrain.quarry_center = landmarks.quarry_center()
+		terrain.water_bodies = ForestWater.bodies(atlas)
 		var source_meshes: Array = []
 		for part: MeshInstance3D in ground_meshes:
 			source_meshes.append(part.mesh)
@@ -158,6 +161,10 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	add_child(occluders)
 	_build_paths()
 	_restyle_river()
+	water = ForestWater.new()
+	water.name = "Water"
+	add_child(water)
+	water.build(atlas, func(x: float, z: float) -> float: return terrain.ground_height(x, z), _noise_texture())
 	impostors = ForestImpostors.new()
 	impostors.name = "Impostors"
 	add_child(impostors)
@@ -218,7 +225,8 @@ func _build_paths() -> void:
 		var on_deck: PackedByteArray = terrain.road_on_deck[r]
 		var profile: PackedFloat32Array = terrain.road_profiles[r]
 		var run_start := -1
-		var entry: bool = atlas.routes[r].id == "lf_route_entry"
+		# the mare's first trail leaves the base at the horse origin (inside ±56): drawn in full
+		var entry: bool = atlas.routes[r].from == "lf_horse_origin" or atlas.routes[r].to == "lf_horse_origin"
 		for i in points.size():
 			var p := points[i]
 			var skip := on_deck[i] == 1 or (maxf(absf(p.x), absf(p.z)) < 56.0 and not entry)
@@ -266,14 +274,21 @@ func _build_paths() -> void:
 	add_child(paths)
 
 
+func _noise_texture() -> Texture2D:
+	return ForestFog._noise_texture if ForestFog._noise_texture != null else ImageTexture.create_from_image(ForestFog.make_noise_image(128))
+
+
 ## The city water strip gets the art/01 river material (world layer only; flag OFF keeps the
 ## original material). The strip is found by its shader, nothing else in landscape.gd changes.
 func _restyle_river() -> void:
 	var material := ShaderMaterial.new()
 	material.shader = RIVER_SHADER
-	material.set_shader_parameter("noise_tex", ForestFog._noise_texture if ForestFog._noise_texture != null else ImageTexture.create_from_image(ForestFog.make_noise_image(128)))
+	material.set_shader_parameter("noise_tex", _noise_texture())
 	var deck: Rect2 = atlas.bridge_deck_rect()
 	material.set_shader_parameter("bridge_rect", Vector4(deck.position.x, deck.position.y, deck.size.x, deck.size.y))
+	for feature in atlas.water_features:
+		if feature.id == "lake":
+			material.set_shader_parameter("lake_circle", Vector4(feature.center.x, feature.center.y, feature.radius, 1.0))
 	for child in stage.get_children():
 		if child is MeshInstance3D and child.material_override is ShaderMaterial:
 			var shader: Shader = (child.material_override as ShaderMaterial).shader
@@ -440,6 +455,11 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 			var y := height_at(xz.x, xz.y) + (float(item[6]) if item.size() > 6 else 0.0)
 			var basis := Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(Vector3.ONE * float(item[5]))
 			canopy.add_instance(mesh[0], Transform3D(basis, Vector3(xz.x, y - 0.03, xz.y)))
+	# Waterfall outcrop (atlas v2): kit limestone rocks stacked into the cliff behind the fall.
+	var rock_mesh := _under_mesh(Rules.UNDERSTORY.find("rock"), 1)
+	for rock in ForestWater.outcrop_rocks():
+		var basis := Basis(Vector3.UP, float(rock[2])).scaled(rock[3])
+		canopy.add_instance(rock_mesh[0], Transform3D(basis, Vector3(rock[0], height_at(rock[0], rock[1]) - 0.2, rock[1])))
 	_refresh_local_anchors()
 	_register_fog_receivers()
 	_apply_fog_cull()
@@ -511,6 +531,8 @@ func on_camera_changed() -> void:
 	last_cull = canopy.last_stats.duplicate()
 	if landmarks != null:
 		last_cull.landmark_tris = landmarks.update_view(target, zoom, Callable(self, "area_displayed"))
+	if water != null:
+		water.update_view(Callable(self, "area_displayed"))
 	last_cull.select = selected
 	last_cull.cull_ms = (Time.get_ticks_usec() - started) / 1000.0
 

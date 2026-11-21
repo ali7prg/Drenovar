@@ -15,6 +15,7 @@ uniform vec3 foam_color : source_color = vec3(0.86, 0.90, 0.88);
 uniform vec3 light_dir_world = vec3(0.45, 0.74, 0.5);
 uniform vec4 bridge_rect = vec4(76.982, 18.0, 27.0, 4.0);   // shade under the deck (x, z, w, d)
 uniform float flow_speed = 1.1;
+uniform vec4 lake_circle = vec4(0.0, 0.0, 0.0, 0.0);   // atlas v2 reedy lake (x, z, r, on): no bank foam/rim inside
 
 varying vec3 world;
 
@@ -45,6 +46,9 @@ void fragment() {
 	float streak = texture(noise_tex, vec2(q.x / 3.5, (q.y - t) / 21.0)).r;
 	float ripple = texture(noise_tex, vec2(q.x / 7.0 + 0.3, (q.y - t * 1.4) / 9.0)).g;
 	float depth = 1.0 - smoothstep(0.25, 0.95, u + (ripple - 0.5) * 0.18);
+	// the reedy lake shares this depth field (forest_water.gdshader takes the same max)
+	float ld = length(p - lake_circle.xy) / max(lake_circle.z, 0.01);
+	depth = max(depth, lake_circle.w * smoothstep(0.0, 1.0, pow(clamp((1.0 - ld) / 0.55, 0.0, 1.0), 0.8)));
 	vec3 col = mix(shallow_color, mix(mid_color, deep_color, smoothstep(0.35, 1.0, depth)), smoothstep(0.0, 0.45, depth));
 	col *= 0.93 + 0.14 * streak;
 	// sun glints on ripple crests (sparse, soft)
@@ -52,10 +56,11 @@ void fragment() {
 	// foam where the water meets the bank / bank rocks, broken and drifting
 	float foam_n = texture(noise_tex, vec2(q.x / 2.2, (q.y - t * 0.6) / 4.0)).b;
 	float foam_patch = texture(noise_tex, vec2(p.x / 19.0, p.y / 23.0)).r;   // rocky stretches
-	float foam = smoothstep(0.82, 0.97, u) * smoothstep(0.55, 0.85, foam_n) * smoothstep(0.42, 0.62, foam_patch);
+	float in_lake = lake_circle.w * (1.0 - smoothstep(lake_circle.z - 1.5, lake_circle.z + 1.0, length(p - lake_circle.xy)));
+	float foam = smoothstep(0.82, 0.97, u) * smoothstep(0.55, 0.85, foam_n) * smoothstep(0.42, 0.62, foam_patch) * (1.0 - in_lake);
 	col = mix(col, foam_color, clamp(foam, 0.0, 0.7));
-	// wet dark rim where the water laps the bank
-	col *= 1.0 - 0.18 * smoothstep(0.9, 1.0, u);
+	// wet dark rim where the water laps the bank (none where the river opens into the lake)
+	col *= 1.0 - 0.18 * smoothstep(0.9, 1.0, u) * (1.0 - in_lake);
 	// shade under the bridge deck (soft)
 	vec2 b0 = bridge_rect.xy;
 	vec2 b1 = bridge_rect.xy + bridge_rect.zw;

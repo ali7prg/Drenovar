@@ -398,7 +398,6 @@ func run_site2() -> void:
 	await do_step("attempt_task", "discover")
 	await hold(0.6)
 	follow_zoom = 22.0
-	await do_step("move")        # to the rune lock
 	mark("e_rune")
 	forest.mech.open("lf_site_02")
 	await hold(1.0)
@@ -409,6 +408,7 @@ func run_site2() -> void:
 	await hold(2.0)
 	forest.mech.close()
 	follow_zoom = 26.0
+	await do_step("move")        # to the revealed seal (lf_key_02)
 	await do_step("attempt_task", "recover_artifact")
 	await do_step("move")        # to the guardian
 	await hold(1.5)

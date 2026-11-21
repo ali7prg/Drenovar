@@ -15,8 +15,16 @@ const CAMERA_OFFSET := Vector3(75, 83, 75)
 const YAWS := 4
 const CELL_PIXELS := 320
 const BAKE_VERSION := "painted_v4c_species"
+## Offline bake shipped in the pack (iPhone: no impostor bake while the forest loads): the atlas PNG
+## (imported lossless with mipmaps, the same CELL_PIXELS cells) + the cell table, written by any
+## rendering run started with `-- --ship-impostors` when the signature changed. Loaded directly when its
+## signature matches; else the user:// cache; else a runtime bake (fallback, then cached).
+const SHIPPED_DIR := "res://assets/forest_rescue/impostors/"
+const SHIPPED_PNG := SHIPPED_DIR + "forest_impostors.png"
+const SHIPPED_JSON := SHIPPED_DIR + "forest_impostors.json"
 
-static var _atlas: ImageTexture
+static var _atlas: Texture2D
+static var source := ""                   # shipped | cache | baked (QA / perf report)
 static var _cells: Dictionary = {}        # mesh key -> {first_cell, size: Vector2 (world w,h), center: Vector3}
 static var _grid := 1
 
@@ -37,18 +45,29 @@ func can_render() -> bool:
 
 
 ## meshes: Array of [key: String, mesh: Mesh]. sun_rotation: the city sun's rotation (radians).
-func bake(meshes: Array, sun_rotation: Vector3, environment: Environment, signature := "") -> void:
-	var cache := "user://forest_rescue_v1_impostors_%s" % str(hash(signature + BAKE_VERSION + str(CELL_PIXELS) + str(YAWS) + str(sun_rotation)))
+## signature: export-safe content signature (ForestWorld: bake keys, looks, kit json / shader digests);
+## editor_check: kit GLB md5s (editor only: an exported pack has no raw .glb), stored with the shipped bake.
+func bake(meshes: Array, sun_rotation: Vector3, environment: Environment, signature := "", editor_check := {}) -> void:
+	var digest := ("%s|%s|%d|%d|%.4f,%.4f,%.4f" % [signature, BAKE_VERSION, CELL_PIXELS, YAWS,
+		sun_rotation.x, sun_rotation.y, sun_rotation.z]).md5_text()
+	var cache := "user://forest_rescue_v1_impostors_%s" % digest
 	if _atlas == null and not signature.is_empty():
-		_load_cache(cache)
+		await _load_shipped(digest, editor_check)
+		if _atlas == null:
+			_load_cache(cache)
+			if _atlas != null:
+				source = "cache"
 	var pending: Array = []
 	for entry in meshes:
 		if not _cells.has(entry[0]):
 			pending.append(entry)
 	if not pending.is_empty() and can_render():
 		await _render(pending, sun_rotation, environment)
+		source = "baked"
 		if not signature.is_empty():
 			_save_cache(cache)
+			if OS.get_cmdline_user_args().has("--ship-impostors"):
+				_save_shipped(digest, editor_check)
 	available = _atlas != null and not _cells.is_empty()
 	if available:
 		material = ShaderMaterial.new()
@@ -173,6 +192,50 @@ func _render(pending: Array, sun_rotation: Vector3, environment: Environment) ->
 	_atlas = ImageTexture.create_from_image(atlas_image)
 
 
+func _load_shipped(digest: String, editor_check: Dictionary) -> void:
+	if not FileAccess.file_exists(SHIPPED_JSON) or not ResourceLoader.exists(SHIPPED_PNG):
+		return
+	var info: Variant = JSON.parse_string(FileAccess.get_file_as_string(SHIPPED_JSON))
+	if not info is Dictionary or String(info.get("signature", "")) != digest:
+		return
+	if OS.has_feature("editor") and not editor_check.is_empty() and info.get("kitMd5", {}) != editor_check:
+		push_warning("ForestImpostors: the shipped atlas predates a kit GLB change; baking at runtime (re-ship with --ship-impostors)")
+		return
+	# threaded: the city keeps animating while the atlas streams in
+	if ResourceLoader.load_threaded_request(SHIPPED_PNG, "Texture2D") != OK:
+		return
+	while ResourceLoader.load_threaded_get_status(SHIPPED_PNG) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		await get_tree().process_frame
+	var texture := ResourceLoader.load_threaded_get(SHIPPED_PNG) as Texture2D
+	if texture == null:
+		return
+	_atlas = texture
+	_grid = int(info.grid)
+	_cells = {}
+	for key in info.cells:
+		var c: Dictionary = info.cells[key]
+		_cells[key] = {"first_cell": int(c.first), "size": Vector2(float(c.w), float(c.h)),
+			"center": Vector3(float(c.cx), float(c.cy), float(c.cz))}
+	source = "shipped"
+
+
+func _save_shipped(digest: String, editor_check: Dictionary) -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(SHIPPED_DIR))
+	var image := _atlas.get_image()
+	if image.has_mipmaps():
+		image.clear_mipmaps()
+	image.save_png(ProjectSettings.globalize_path(SHIPPED_PNG))
+	var cells := {}
+	for key in _cells:
+		var c: Dictionary = _cells[key]
+		cells[key] = {"first": c.first_cell, "w": c.size.x, "h": c.size.y, "cx": c.center.x, "cy": c.center.y, "cz": c.center.z}
+	var file := FileAccess.open(ProjectSettings.globalize_path(SHIPPED_JSON), FileAccess.WRITE)
+	file.store_string(JSON.stringify({"signature": digest, "bakeVersion": BAKE_VERSION, "cellPixels": CELL_PIXELS,
+		"yaws": YAWS, "grid": _grid, "cells": cells, "kitMd5": editor_check}, "\t") + "\n")
+	file.close()
+	print("FOREST_IMPOSTORS_SHIPPED grid=%d cells=%d -> %s (import it: lossless, mipmaps)" % [_grid, cells.size(), SHIPPED_PNG])
+
+
 func _load_cache(base: String) -> void:
 	if not FileAccess.file_exists(base + ".json") or not FileAccess.file_exists(base + ".png"):
 		return
@@ -202,7 +265,7 @@ func _save_cache(base: String) -> void:
 	file.store_string(JSON.stringify({"grid": _grid, "cells": cells}))
 
 
-static func atlas_texture() -> ImageTexture:
+static func atlas_texture() -> Texture2D:
 	return _atlas
 
 

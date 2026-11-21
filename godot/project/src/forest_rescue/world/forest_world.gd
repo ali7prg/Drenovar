@@ -20,6 +20,7 @@ const ForestOccluders = preload("res://src/forest_rescue/world/forest_occluders.
 const ForestWater = preload("res://src/forest_rescue/world/forest_water.gd")
 const ForestQuarry = preload("res://src/forest_rescue/world/forest_quarry.gd")
 const GROUND_SHADER = preload("res://src/forest_rescue/world/forest_ground.gdshader")
+const PAINTED_INCLUDE := "res://src/forest_rescue/world/forest_painted.gdshaderinc"   # impostor bake signature
 const SUN_ROTATION := Vector3(-0.837758, -0.558505, 0.0)   # landscape.gd city sun (-48°, -32°, 0)
 const PAINT_LIGHT_DIR := Vector3(-0.6, 0.68, 0.42)            # direction TO the crown light (kit vegetation / rocks)
 const QUARRY_KIND := 6                                         # Rules.UNDERSTORY "quarry_rock"
@@ -193,13 +194,19 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	var dead_mesh := _dead_tree_mesh()
 	if not dead_mesh.is_empty():
 		bake_list.append([dead_mesh[2], canopy.meshes[dead_mesh[0]].lods[0]])
-	var signature := ""
-	for file in DirAccess.get_files_at(ForestKit.KIT_DIR):
-		if file.ends_with(".glb"):
-			signature += "%s:%d;" % [file, FileAccess.get_modified_time(ForestKit.KIT_DIR + file)]
+	# export-safe signature (no file listings / mtimes: an exported pack has neither the raw .glb nor
+	# modification times): bake keys, the looks, the kit json and painted shader digests; the kit GLB md5s
+	# are checked in the editor only (ForestImpostors stores them with the shipped bake)
+	var signature := "%s;%s;%s;%s;" % [str(FOLIAGE_LOOK), str(PAINT_LIGHT_DIR), FileAccess.get_md5(ForestKit.KIT_JSON),
+		(load(PAINTED_INCLUDE) as ShaderInclude).code.md5_text()]
 	for entry in bake_list:
 		signature += String(entry[0]) + ";"
-	await impostors.bake(bake_list, SUN_ROTATION, stage.camera.environment, signature)
+	var kit_md5 := {}
+	if OS.has_feature("editor"):
+		for file in ResourceLoader.list_directory(ForestKit.KIT_DIR):
+			if file.ends_with(".glb"):
+				kit_md5[file] = FileAccess.get_md5(ForestKit.KIT_DIR + file)
+	await impostors.bake(bake_list, SUN_ROTATION, stage.camera.environment, signature, kit_md5)
 	canopy.impostors = impostors
 	setup_ms.impostors = (Time.get_ticks_usec() - t) / 1000.0
 	fog = ForestFog.new()

@@ -223,11 +223,10 @@ func _kit_files(asset_id: String) -> PackedStringArray:
 				elif variant is String and variant.ends_with(".glb"):
 					files.append(_res(variant))
 	if files.is_empty():
-		var dir := DirAccess.open(KIT_DIR)
-		if dir != null:
-			for file in dir.get_files():
-				if file.ends_with(".glb") and file.begins_with(asset_id):
-					files.append(KIT_DIR + file)
+		# ResourceLoader.list_directory: works in an exported pack too (DirAccess lists *.glb.import there)
+		for file in ResourceLoader.list_directory(KIT_DIR):
+			if file.ends_with(".glb") and file.begins_with(asset_id):
+				files.append(KIT_DIR + file)
 	var existing := PackedStringArray()
 	for file in files:
 		if ResourceLoader.exists(file) and not existing.has(file):

@@ -68,6 +68,9 @@ const SEGMENTS := [
 	{"name": "f_boss_fight_z40", "fixture": "boss_battle_35", "target": "lf_boss_ancient_maw", "zoom": 40.0, "seconds": 1.0},
 	{"name": "f_boss_fight_z68", "fixture": "boss_battle_60", "target": "lf_boss_ancient_maw", "zoom": 68.0, "seconds": 1.0},
 	{"name": "g_escort_walking_z30", "fixture": "site01_escort_walking", "target": "squad", "zoom": 30.0, "seconds": 1.0},
+	# look checks (run with --only=t_): the trail cache in its mechanism-UI zoom, the kit fallen trunk close up
+	{"name": "t_trail_cache_z24", "fixture": "site01_trail_1of3", "target": "lf_site_01", "zoom": 24.0, "seconds": 1.0},
+	{"name": "t_fallen_trunk_z12", "fixture": "site01_trail_1of3", "target_xz": [-74.04, 2.8], "zoom": 12.0, "seconds": 0.5},
 ]
 
 class StubHost extends Node:
@@ -232,6 +235,8 @@ func run_segments() -> void:
 		if arg.begins_with("--only="):
 			only = arg.trim_prefix("--only=")
 	for spec in SEGMENTS:
+		if String(spec.name).begins_with("t_") and not only.begins_with("t_"):
+			continue          # look checks only on request
 		if not only.is_empty() and not String(spec.name).begins_with(only):
 			continue
 		# The intro presentation owns the camera while it runs: end it before the next scenario.
@@ -277,7 +282,11 @@ func run_segments() -> void:
 		for step in int(float(spec.seconds) * 30.0):
 			clock += 1000.0 / 30.0
 			forest.client.manual_clock_ms = clock
-			target = forest.actors.squad_focus() if String(spec.target) == "squad" else forest.target_position(String(spec.target))
+			if spec.has("target_xz"):
+				target = Vector3(float(spec.target_xz[0]), 0.0, float(spec.target_xz[1]))
+				target.y = float(world.height_at(target.x, target.z)) if world != null else 0.0
+			else:
+				target = forest.actors.squad_focus() if String(spec.target) == "squad" else forest.target_position(String(spec.target))
 			stage = game.stage
 			world = stage.get("forest_world")
 			if target != Vector3.INF:

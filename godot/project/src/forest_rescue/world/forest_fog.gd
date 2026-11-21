@@ -31,6 +31,9 @@ const HEIGHT_LO := -4.0
 const HEIGHT_SPAN := 40.0
 const LAYERS := [{"name": "FogVolume", "drift": 0.45}]
 
+signal target_applied
+var _target_serial := 0
+
 static var _noise_texture: ImageTexture
 static var _noise3d: ImageTexture3D
 ## iPhone entry: the seeded fog noise (pure CPU, ~1-2 s) is generated on a worker thread while the terrain
@@ -147,11 +150,11 @@ func set_receivers(list: Array) -> void:
 		material.set_shader_parameter("fog_height_lo", HEIGHT_LO)
 		material.set_shader_parameter("fog_height_span", HEIGHT_SPAN)
 		material.set_shader_parameter("fog_sdf_range", SDF_RANGE)
-		material.set_shader_parameter("fog_reveal_t", reveal_t)
 		material.set_shader_parameter("fog_drift_speed", 0.0 if reduced_motion else LAYERS[0].drift)
 		material.set_shader_parameter("fog_deep_top", FOG_TOP)
-		material.set_shader_parameter("fog_dim_strength", dim_strength)
-	_push_sights_to(receivers, "fog_sights", "fog_sight_count")
+	RenderingServer.global_shader_parameter_set("fog_reveal_t", reveal_t)
+	RenderingServer.global_shader_parameter_set("fog_dim_strength", dim_strength)
+	_push_sight_globals()
 
 
 ## Smoothed ground for the fog volume floor: max over a 6 m neighbourhood (13 taps), so the
@@ -492,11 +495,30 @@ static func fog_tops(bits: PackedByteArray) -> PackedFloat32Array:
 func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, seconds := REVEAL_SECONDS) -> void:
 	if bits.size() != BYTES:
 		return
+	_target_serial += 1
+	var serial := _target_serial
+	var tops: PackedFloat32Array
+	var sdf: PackedFloat32Array
+	if animate and target_bits.size() == BYTES and is_inside_tree():
+		# iPhone hot path: a checkpoint reveal during play computes the distance fields on a worker thread
+		# (the main thread keeps drawing); the newest target wins
+		var job := {}
+		var task := WorkerThreadPool.add_task(func() -> void:
+			job.tops = fog_tops(bits)
+			job.sdf = signed_distance(bits))
+		while not WorkerThreadPool.is_task_completed(task):
+			await get_tree().process_frame
+		WorkerThreadPool.wait_for_task_completion(task)
+		if serial != _target_serial:
+			return
+		tops = job.tops
+		sdf = job.sdf
+	else:
+		tops = fog_tops(bits)
+		sdf = signed_distance(bits)
 	var previous := target_bits
 	target_bits = bits
 	anchor_bits = anchors if anchors.size() == BYTES else PackedByteArray()
-	var tops := fog_tops(bits)
-	var sdf := signed_distance(bits)
 	sdf_grid = sdf
 	var grows := false
 	var first := previous.size() != BYTES
@@ -530,6 +552,7 @@ func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, 
 		revealing = false
 		_settle()
 	_push_reveal()
+	target_applied.emit()
 
 
 func _settle() -> void:
@@ -558,9 +581,8 @@ func _push_reveal() -> void:
 	for material in materials:
 		material.set_shader_parameter("reveal_t", reveal_t)
 		material.set_shader_parameter("reveal_curl", curl)
-	for material: ShaderMaterial in receivers:
-		material.set_shader_parameter("fog_reveal_t", reveal_t)
-		material.set_shader_parameter("fog_reveal_curl", curl)
+	RenderingServer.global_shader_parameter_set("fog_reveal_t", reveal_t)
+	RenderingServer.global_shader_parameter_set("fog_reveal_curl", curl)
 
 
 func finish_now() -> void:
@@ -583,8 +605,7 @@ func set_dim(strength: float) -> void:
 	dim_strength = strength
 	for material in materials:
 		material.set_shader_parameter("dim_strength", strength)
-	for material: ShaderMaterial in receivers:
-		material.set_shader_parameter("fog_dim_strength", strength)
+	RenderingServer.global_shader_parameter_set("fog_dim_strength", strength)
 
 
 var _sights: Array[Vector4] = []
@@ -600,7 +621,15 @@ func set_sights(points: Array) -> void:
 		packed.append(Vector4.ZERO)
 	_sights = packed
 	_push_sights_to(materials, "sights", "sight_count")
-	_push_sights_to(receivers, "fog_sights", "fog_sight_count")
+	_push_sight_globals()
+
+
+func _push_sight_globals() -> void:
+	if _sights.is_empty():
+		return
+	for i in 8:
+		RenderingServer.global_shader_parameter_set("fog_sight_%d" % i, _sights[i])
+	RenderingServer.global_shader_parameter_set("fog_sight_count", _sight_count)
 
 
 func _push_sights_to(list: Array, array_name: String, count_name: String) -> void:

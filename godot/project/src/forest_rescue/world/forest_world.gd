@@ -251,6 +251,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	fog.build(func(x: float, z: float) -> float: return terrain.ground_height(x, z), light)
 	await get_tree().process_frame
 	fog.reveal_finished.connect(func() -> void: fog_reveal_finished.emit(fog_revision))
+	fog.target_applied.connect(_on_fog_target_applied)
 	landmarks.arena_clear_discs = [[ForestWater.POND_CENTER, ForestWater.POND_RADIUS + 4.5], [ForestWater.FALLS_LIP + ForestWater.FALLS_FACING * 2.0, 4.0]]
 	setup_stage = "landmarks.populate"
 	await landmarks.populate()
@@ -818,6 +819,20 @@ func _instance_kept(x: float, z: float) -> bool:
 	return fog == null or fog.sdf_at(x, z) >= -FOG_BAND
 
 
+## Spatial bucketing for the fog cull: a canopy cell whose fog distance samples (3×3, 0.5 m steps) are
+## unchanged keeps its previous filtered instances instead of re-testing every one.
+func _cell_cull_key(cell: int) -> int:
+	if fog == null:
+		return 0
+	var c: Vector2 = ForestCanopy.cell_center(cell)
+	var h := ForestCanopy.CELL * 0.5
+	var key := 17
+	for dz in [-h, 0.0, h]:
+		for dx in [-h, 0.0, h]:
+			key = key * 31 + int(round(clampf(fog.sdf_at(c.x + dx, c.y + dz), -40.0, 40.0) * 2.0))
+	return key
+
+
 ## Whole 14 m canopy cell kept (1) / culled (-1) / mixed (0), from the SDF at its centre.
 func _cell_cull_state(cell: int) -> int:
 	if fog == null:
@@ -831,11 +846,17 @@ func _cell_cull_state(cell: int) -> int:
 	return 0
 
 
+func _on_fog_target_applied() -> void:
+	_apply_fog_cull()
+	if canopy != null and stage != null and stage.camera != null:
+		on_camera_changed()
+
+
 func _apply_fog_cull() -> void:
 	if canopy == null or fog == null:
 		return
 	var started := Time.get_ticks_usec()
-	canopy.set_cull(Callable(self, "_instance_kept"), Callable(self, "_cell_cull_state"))
+	canopy.set_cull(Callable(self, "_instance_kept"), Callable(self, "_cell_cull_state"), Callable(self, "_cell_cull_key"))
 	fog_cull_stats = {"ms": (Time.get_ticks_usec() - started) / 1000.0, "culled": canopy.culled}
 
 
@@ -955,11 +976,8 @@ func apply_adventure(adv: Dictionary) -> void:
 		var first := last_fog_key.is_empty()
 		last_fog_key = key
 		displayed_bits = shown
-		fog.set_target(shown, anchor_bits, not first and not reduced_motion)
 		fog.set_dim(0.0 if locked else DIM_EXPLORED)
-		_apply_fog_cull()
-		if canopy != null and stage != null and stage.camera != null:
-			on_camera_changed()
+		fog.set_target(shown, anchor_bits, not first and not reduced_motion)   # → target_applied → cull
 	var boss: Dictionary = adventure.get("boss", {}) if adventure.get("boss") is Dictionary else {}
 	if boss.has("state"):
 		set_boss_arena_state(String(boss.state))

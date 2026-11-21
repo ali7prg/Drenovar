@@ -26,7 +26,7 @@ test('hall I/II: locked projection, every adventure/intro command refused before
       assert.equal(s.adventure.fog.explorationLocked, true);
       assert.equal(s.adventure.intro.offer, false);
       assert.ok(bit(s, 0, 0) && !bit(s, -12, -60), 'town visible, no entrance corridor yet');
-      for (const body of [client.adv('form_squad', {units: {'ENG-09': 1}}), client.adv('claim_rewards'), client.adv('set_auto_refill', {enabled: true}), client.intro('start_intro'), client.intro('skip_intro')]) {
+      for (const body of [client.adv('form_squad', {units: {'ENG-01': 1}}), client.adv('claim_rewards'), client.adv('set_auto_refill', {enabled: true}), client.intro('start_intro'), client.intro('skip_intro')]) {
         const r = await client.send(body);
         assert.equal(r.status, 403, JSON.stringify(body));
         assert.equal(r.body.error, 'FOREST_LOCKED_HALL_LEVEL');
@@ -37,7 +37,7 @@ test('hall I/II: locked projection, every adventure/intro command refused before
     for (const ns of ['adventures', 'adventureMechanisms', 'adventureFog', 'adventureAccess', 'rewardReservePrefs', 'adventureField']) assert.equal(saved[ns], undefined, ns);
     // A receipt stored while unlocked is NOT replayed once the hall gate is closed.
     await client.hall(3);
-    const body = client.adv('form_squad', {units: {'ENG-09': 2}});
+    const body = client.adv('form_squad', {units: {'ENG-01': 2}});
     assert.equal((await client.send(body, {key: 'receipt-before-lock-1'})).status, 200);
     await client.hall(2);
     const replay = await client.send(body, {key: 'receipt-before-lock-1'});

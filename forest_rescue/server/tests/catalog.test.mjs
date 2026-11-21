@@ -12,13 +12,15 @@ const repo = new URL('../../../', import.meta.url);
 const readJson = path => JSON.parse(readFileSync(new URL(path, repo), 'utf8'));
 const has = path => existsSync(new URL(path, repo));
 
-test('troop stats mirror docs/06_TROOP_CATALOG.json', {skip: !has('docs/06_TROOP_CATALOG.json')}, () => {
+test('troop stats mirror docs/06_TROOP_CATALOG.json (forest roster: the 5 live units)', {skip: !has('docs/06_TROOP_CATALOG.json')}, () => {
   const catalog = readJson('docs/06_TROOP_CATALOG.json').units.map(u => u.unit);
-  assert.equal(catalog.length, Object.keys(TROOPS).length);
-  for (const u of catalog) {
-    const t = TROOPS[u.id];
-    assert.ok(t, u.id);
-    assert.deepEqual([t.name, t.unitClass, t.power, t.attack, t.defense, t.hp, t.speed], [u.name, u.unit_class, u.power, u.attack, u.defense, u.hp, u.speed], u.id);
+  // production roster 2026-11-21: only ENG-01/02/03/04/06 may join a forest squad
+  assert.deepEqual(Object.keys(TROOPS).sort(), ['ENG-01', 'ENG-02', 'ENG-03', 'ENG-04', 'ENG-06']);
+  for (const id of Object.keys(TROOPS)) {
+    const t = TROOPS[id];
+    const u = catalog.find(c => c.id === id);
+    assert.ok(u, id);
+    assert.deepEqual([t.name, t.unitClass, t.power, t.attack, t.defense, t.hp, t.speed], [u.name, u.unit_class, u.power, u.attack, u.defense, u.hp, u.speed], id);
   }
 });
 

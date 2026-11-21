@@ -113,7 +113,10 @@ func add_impostor(transform: Transform3D, custom: Color) -> void:
 
 ## Re-filters every cell with keep(x, z) (cell-level shortcut via cell_state(cell) when given:
 ## 1 = whole cell kept, -1 = whole cell culled, 0 = test each instance). Forces re-upload.
-func set_cull(keep: Callable, cell_state: Callable = Callable()) -> void:
+var _cull_cache := {}      # cell -> [fog key, kept buffers, kept impostors, culled count, source buffers]
+
+
+func set_cull(keep: Callable, cell_state: Callable = Callable(), cell_key: Callable = Callable()) -> void:
 	cull_fn = keep
 	shown_buffers.clear()
 	shown_impostor.clear()
@@ -121,6 +124,16 @@ func set_cull(keep: Callable, cell_state: Callable = Callable()) -> void:
 	for cell in cell_buffers:
 		var state := 1 if not keep.is_valid() else (int(cell_state.call(cell)) if cell_state.is_valid() else 0)
 		var buffers: Dictionary = cell_buffers[cell]
+		# mixed cell whose fog samples did not change since the last cull: reuse its filtered buffers
+		var key: int = int(cell_key.call(cell)) if state == 0 and cell_key.is_valid() else 0
+		if state == 0 and cell_key.is_valid() and _cull_cache.has(cell) and _cull_cache[cell][0] == key and is_same(_cull_cache[cell][4], buffers):
+			var cached: Array = _cull_cache[cell]
+			if not (cached[1] as Dictionary).is_empty():
+				shown_buffers[cell] = cached[1]
+			if not (cached[2] as PackedFloat32Array).is_empty():
+				shown_impostor[cell] = cached[2]
+			culled += int(cached[3])
+			continue
 		if state == 1:
 			shown_buffers[cell] = buffers
 			if cell_impostor.has(cell):
@@ -130,6 +143,7 @@ func set_cull(keep: Callable, cell_state: Callable = Callable()) -> void:
 			for buffer: PackedFloat32Array in buffers.values():
 				culled += buffer.size() / STRIDE
 			continue
+		var culled_before := culled
 		var kept := {}
 		for mesh_index in buffers:
 			var filtered := _filter(buffers[mesh_index], keep)
@@ -137,10 +151,13 @@ func set_cull(keep: Callable, cell_state: Callable = Callable()) -> void:
 				kept[mesh_index] = filtered
 		if not kept.is_empty():
 			shown_buffers[cell] = kept
+		var filtered_i := PackedFloat32Array()
 		if cell_impostor.has(cell):
-			var filtered_i := _filter(cell_impostor[cell], keep, true)
+			filtered_i = _filter(cell_impostor[cell], keep, true)
 			if not filtered_i.is_empty():
 				shown_impostor[cell] = filtered_i
+		if cell_key.is_valid():
+			_cull_cache[cell] = [key, kept, filtered_i, culled - culled_before, buffers]
 	for key in selection.keys():
 		selection[key] = PackedInt32Array([-1])
 

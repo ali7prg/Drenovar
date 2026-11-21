@@ -20,9 +20,9 @@ test('same inputs → identical report; the seed only jitters details', () => {
 
 test('outcome follows the real troop stats: more/better units win, a starter squad loses', () => {
   const spec = creatureSpec('tenerys', 1);
-  assert.equal(simulateGuardian({units: {'ENG-09': 5}, spec, seed: 1}).outcome, 'defeat');
-  assert.equal(simulateGuardian({units: {'ENG-09': 600}, spec, seed: 1}).outcome, 'victory');
-  const recruits = simulateGuardian({units: {'ENG-09': 400}, spec, seed: 7});
+  assert.equal(simulateGuardian({units: {'ENG-01': 5}, spec, seed: 1}).outcome, 'defeat');
+  assert.equal(simulateGuardian({units: {'ENG-01': 600}, spec, seed: 1}).outcome, 'victory');
+  const recruits = simulateGuardian({units: {'ENG-01': 400}, spec, seed: 7});
   const knights = simulateGuardian({units: {'ENG-06': 120}, spec, seed: 7}); // same power as 400 recruits
   assert.equal(knights.outcome, 'victory');
   assert.ok(knocked(knights) * 200 < knocked(recruits) * 60 * 2, 'stronger stat profile loses less power');
@@ -65,7 +65,7 @@ test('boss: hunt → fury → last_stand with the exact telegraph/active/recover
   const at = stateAt(r.timeline, r.hpMax, 0);
   assert.deepEqual(at, {hp: 78000, phase: 'hunt'});
   // an under-strength squad loses without an unwarned instant kill
-  const weak = simulateBoss({units: {'ENG-09': 50}, boss: BOSS, seed: 3});
+  const weak = simulateBoss({units: {'ENG-01': 50}, boss: BOSS, seed: 3});
   assert.equal(weak.outcome, 'defeat');
   const firstHit = weak.timeline.find(e => e.type === 'hit' && e.actor === 'boss');
   const tg = weak.timeline.find(e => e.type === 'telegraph');
@@ -73,9 +73,9 @@ test('boss: hunt → fury → last_stand with the exact telegraph/active/recover
 });
 
 test('losses split wounded/dead deterministically; retreat counts only hits so far', () => {
-  assert.deepEqual(splitLosses({'ENG-06': 10, 'ENG-09': 1}, 'victory'), {wounded: {'ENG-06': 6, 'ENG-09': 1}, dead: {'ENG-06': 4}});
+  assert.deepEqual(splitLosses({'ENG-06': 10, 'ENG-01': 1}, 'victory'), {wounded: {'ENG-06': 6, 'ENG-01': 1}, dead: {'ENG-06': 4}});
   assert.deepEqual(splitLosses({'ENG-06': 10}, 'defeat'), {wounded: {'ENG-06': 4}, dead: {'ENG-06': 6}});
-  const r = simulateGuardian({units: {'ENG-09': 900}, spec: creatureSpec('velkor', 2), seed: 5});
+  const r = simulateGuardian({units: {'ENG-01': 620}, spec: creatureSpec('velkor', 2), seed: 5});
   const mid = r.knocks[1].t;
   const partial = knockedUntil(r.knocks, mid);
   assert.ok(Object.values(partial)[0] < Object.values(r.totalKnocked)[0]);

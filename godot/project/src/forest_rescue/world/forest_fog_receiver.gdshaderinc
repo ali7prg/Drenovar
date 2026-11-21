@@ -18,7 +18,9 @@ uniform float fog_height_range = 30.0;
 uniform float fog_height_lo = -4.0;
 uniform float fog_height_span = 40.0;
 uniform float fog_sdf_range = 64.0;
-uniform float fog_reveal_t = 1.0;
+// iPhone hot path: the reveal / dim / sight values are project-wide global uniforms (project.godot
+// [shader_globals]) set once per change by ForestFog, not on every receiver material each frame
+global uniform float fog_reveal_t;
 uniform float fog_drift_speed = 0.6;
 uniform vec2 fog_wind = vec2(0.83, 0.56);
 uniform sampler2D fog_dome_tex : filter_linear_mipmap, repeat_enable;
@@ -66,10 +68,17 @@ float fog_billow(vec2 p, vec2 drift) {
 }
 
 uniform float fog_deep_top = 17.0;
-uniform float fog_reveal_curl = 0.0;
-uniform float fog_dim_strength = 0.0;
-uniform vec4 fog_sights[8];
-uniform int fog_sight_count = 0;
+global uniform float fog_reveal_curl;
+global uniform float fog_dim_strength;
+global uniform vec4 fog_sight_0;
+global uniform vec4 fog_sight_1;
+global uniform vec4 fog_sight_2;
+global uniform vec4 fog_sight_3;
+global uniform vec4 fog_sight_4;
+global uniform vec4 fog_sight_5;
+global uniform vec4 fog_sight_6;
+global uniform vec4 fog_sight_7;
+global uniform int fog_sight_count;
 uniform vec3 fog_veil_color : source_color = vec3(0.246, 0.300, 0.335);
 
 // Same edge field as forest_fog.gdshader (edge_offset): lobes + wind-elongated tendrils. The offset
@@ -112,6 +121,7 @@ vec3 fog_receive(vec3 p, float time) {
 	float veil = 0.0;
 	if (fog_dim_strength > 0.0 && sdf > 0.0) {
 		float sight = 0.0;
+		vec4 fog_sights[8] = vec4[8](fog_sight_0, fog_sight_1, fog_sight_2, fog_sight_3, fog_sight_4, fog_sight_5, fog_sight_6, fog_sight_7);
 		for (int i = 0; i < 8; i++) {
 			if (i >= fog_sight_count) break;
 			vec4 c = fog_sights[i];

@@ -52,9 +52,9 @@ test('order, arrival and proofs: nothing completes without the server records', 
 });
 
 test('defeat and retreat keep keys, people and rewards; losses hit the real army; a wiped squad returns home', async () => {
-  const {realm, client, journey} = await adventurer({idPrefix: 'defeat', army: {'ENG-09': 5, 'ENG-06': 3000}, prologue: false});
+  const {realm, client, journey} = await adventurer({idPrefix: 'defeat', army: {'ENG-01': 5, 'ENG-06': 3000}, prologue: false});
   try {
-    await journey.prologue({'ENG-09': 5});
+    await journey.prologue({'ENG-01': 5});
     await journey.completeSite('lf_site_01', {stopBefore: 'engage'});
     const before = await client.state();
     const fight = await client.ok('engage_guardian', {siteId: 'lf_site_01'});
@@ -66,10 +66,10 @@ test('defeat and retreat keep keys, people and rewards; losses hit the real army
     assert.deepEqual(lost.adventure.escrow, before.adventure.escrow);
     assert.deepEqual(lost.adventure.campaign.sites[0], before.adventure.campaign.sites[0], 'key kept, step kept');
     assert.equal(lost.adventure.pois.find(p => p.id === 'lf_site_01').guardian.state, 'alive');
-    const dead = lost.adventure.battle.losses.dead['ENG-09'] ?? 0, wounded = lost.adventure.battle.losses.wounded['ENG-09'] ?? 0;
+    const dead = lost.adventure.battle.losses.dead['ENG-01'] ?? 0, wounded = lost.adventure.battle.losses.wounded['ENG-01'] ?? 0;
     assert.equal(dead + wounded, 5);
-    assert.equal(lost.city.military.owned['ENG-09'] ?? 0, before.city.military.owned['ENG-09'] - dead);
-    assert.equal(lost.wounded['ENG-09'] ?? 0, wounded);
+    assert.equal(lost.city.military.owned['ENG-01'] ?? 0, before.city.military.owned['ENG-01'] - dead);
+    assert.equal(lost.wounded['ENG-01'] ?? 0, wounded);
     assert.equal(lost.adventure.squad.node, 'lf_home_reception', 'nobody left: the squad record returns home');
     assert.deepEqual(lost.adventure.squad.units, {});
     // Re-form at home with real healthy knights, walk back, retreat mid-fight, then win.
@@ -148,8 +148,8 @@ test('stop at the next graph node, redirect, pause, escort rules, squad reservat
   try {
     const s0 = await client.state();
     assert.equal(s0.healthy['ENG-06'] ?? 0, 0, 'reserved squad units are not free');
-    assert.equal(s0.healthy['ENG-09'], 5, 'starter recruits stay free at home');
-    await code(client.send(client.adv('form_squad', {units: {'ENG-09': 1}})), 409, 'SQUAD_BUSY');
+    assert.equal(s0.healthy['ENG-01'], 5, 'starter recruits stay free at home');
+    await code(client.send(client.adv('form_squad', {units: {'ENG-01': 1}})), 409, 'SQUAD_BUSY');
     const go = await client.ok('move', {targetId: 'lf_site_03'});
     await client.clock(go.adventure.squad.move.departAt + 3000);
     const stopped = await client.ok('stop');

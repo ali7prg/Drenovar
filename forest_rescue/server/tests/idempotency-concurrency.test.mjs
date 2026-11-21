@@ -150,7 +150,7 @@ test('second profile of the same account is fully isolated (namespaces, receipts
     assert.equal(locked.status, 403, 'B is gated by its OWN hall, not A’s receipt');
     assert.equal(locked.body.error, 'FOREST_LOCKED_HALL_LEVEL');
     await other.hall(3);
-    const bForm = await other.send(other.adv('form_squad', {units: {'ENG-09': 5}}), {key: 'shared-key-00000001'});
+    const bForm = await other.send(other.adv('form_squad', {units: {'ENG-01': 5}}), {key: 'shared-key-00000001'});
     assert.equal(bForm.status, 200);
     assert.equal(bForm.body.replayed, false, 'receipts are per selected settlement');
     const aAfter = await client.state();

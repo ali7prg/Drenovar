@@ -26,7 +26,7 @@ export function newPlayer({id, login, now, name = 'Английское посе
         {id: 'building-v1-3', type: 'MIL-01', plotId: 'v1-3', level: 1},
       ],
       demo: {unlimitedResources: false, wallet: {food: 400, stone: 0, iron: 0, coins: 400}},
-      military: {schema: 1, serial: 0, owned: {'ENG-09': 5}, queues: {}, receipts: {}, garrison: null},
+      military: {schema: 1, serial: 0, owned: {'ENG-01': 5}, queues: {}, receipts: {}, garrison: null},
       kingdom: {schema: 1, revision: 0, lastAt: now, carry: {}, clearedPlots: ['v1-0', 'v1-1', 'v1-2', 'v1-3'], order: null, receipts: {},
         guide: {entered: false, collected: false, seen: {}, skipped: false}},
     },

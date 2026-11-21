@@ -143,7 +143,7 @@ func run() -> void:
 		# (the hollow-oak hero stands at the end of its own spur by design: the trail ends at its hollow)
 		# pass 2 (art/01 dark dense south pines): a south pine stands FAR_SIDE_TRUNK_CLEAR off a trail
 		# centre on both sides, its crown may overhang the trail (walkers faded through at runtime)
-		var dense_pine := int(item[2]) == Rules.PINE and item.size() > 6 and int(item[6]) == 5
+		var dense_pine: bool = int(item[2]) == Rules.PINE and item.size() > 6 and int(item[6]) == 5
 		if int(item[2]) != Rules.HOLLOW_OAK and _route_trunk_violation(masks, x, z, crown, dense_pine, dense_pine):
 			bad_trees += 1
 			print("QA bad ambient tree (route clearance): ", item)
@@ -249,12 +249,12 @@ func run() -> void:
 		var pts: PackedVector3Array = route.points
 		for i in range(0, pts.size(), 4):
 			var q := Vector2(pts[i].x, pts[i].z)
-			var n := 0
+			var crowns_over := 0
 			for idx in cap_grid.get(Vector2i(floori(q.x / 8.0), floori(q.y / 8.0)), PackedInt32Array()):
 				var cp: Array = caps[idx]
 				if Rules.segment_segment_distance(cp[0], cp[1], q, q) < float(cp[2]) + Rules.UNIT_RADIUS + 0.6:
-					n += 1
-			worst = maxi(worst, n)
+					crowns_over += 1
+			worst = maxi(worst, crowns_over)
 	var fade_cap: int = ForestOccluders.MAX_FADED
 	check(worst <= fade_cap, "a trail point hidden by %d crowns (> %d faded at once)" % [worst, fade_cap])
 	notes.trail_occlusion = {"worst_crowns_over_a_walker": worst, "fade_capacity": fade_cap, "resource_hiding": hiding_resource}

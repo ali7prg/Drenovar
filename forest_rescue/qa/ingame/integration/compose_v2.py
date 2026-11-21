@@ -206,7 +206,73 @@ def before_after(shots, prefix, before, before_prefix, tag):
         sheet.save(os.path.join(OUT, "%s_overview_same_framing.png" % tag))
 
 
+def _marker(draw, xy, text, colour, size=15):
+    x, y = xy
+    draw.ellipse([x - 9, y - 9, x + 9, y + 9], outline=colour, width=3)
+    draw.line([x - 13, y, x + 13, y], fill=colour, width=1)
+    draw.line([x, y - 13, x, y + 13], fill=colour, width=1)
+    draw.text((x + 11, y - 18), text, font=font(size), fill=colour, stroke_width=2, stroke_fill=(0, 0, 0))
+
+
+def v3_sheets(shots, before, before_prefix, tag="p3"):
+    """Pass 3: art rect | before (2c frame) | after (frame derived from the art rect through the layout's
+    art->screen mapping), with the zone's anchors (cages / sites, landmarks) marked on the art and after panels."""
+    zones = json.load(open(os.path.join(HERE, "zones_v3.json")))["zones"]
+    art_img = Image.open(ART).convert("RGB")
+    colours = [(255, 230, 60), (90, 220, 255), (255, 120, 200), (140, 255, 120), (255, 160, 60), (200, 160, 255),
+               (255, 255, 255)]
+    rows = []
+    for zone in zones:
+        after_path = os.path.join(shots, "v3_zone_%s.png" % zone["name"])
+        if not os.path.exists(after_path):
+            continue
+        x0, y0, x1, y1 = zone["art_rect"]
+        crop = art_img.crop((x0, y0, x1, y1)).resize((W, H), Image.LANCZOS)
+        after = Image.open(after_path).convert("RGB")
+        da, dg = ImageDraw.Draw(crop), ImageDraw.Draw(after)
+        uc, yc = P.to_screen(zone["target"][0], zone["target"][1], 0.0)
+        k = H / float(zone["zoom"])
+        for i, a in enumerate(zone["anchors"][:6]):
+            col = colours[i % len(colours)]
+            ax = (a["art"][0] - x0) * W / float(x1 - x0)
+            ay = (a["art"][1] - y0) * H / float(y1 - y0)
+            _marker(da, (ax, ay), a["label"], col)
+            u, y = P.to_screen(a["world"][0], a["world"][1])
+            gx, gy = W / 2 + (u - uc) * k, H / 2 + (y - yc) * k
+            if -40 < gx < W + 40 and -40 < gy < H + 40:
+                _marker(dg, (gx, gy), a["label"], col)
+        label(crop, "art/01 · %s" % zone["caption"], size=15)
+        label(after, "AFTER pass 3 · frame from the art rect (target %.0f,%.0f zoom %.0f) · %s" % (
+            zone["target"][0], zone["target"][1], zone["zoom"], zone["name"]), size=15)
+        b_path = os.path.join(before, before_prefix + "full_%s_z68.png" % zone["name"])
+        b = Image.open(b_path).convert("RGB") if os.path.exists(b_path) else Image.new("RGB", (W, H), (40, 40, 40))
+        label(b, "BEFORE (pass 2c, old frame at zoom 68) · " + zone["name"], size=15)
+        rows.append((crop, b, after))
+    scale = 0.5
+    tw, th = int(W * scale), int(H * scale)
+    for chunk in range(0, len(rows), 5):
+        part = rows[chunk:chunk + 5]
+        sheet = Image.new("RGB", (3 * tw + 24, 50 + len(part) * (th + 8)), (30, 27, 24))
+        ImageDraw.Draw(sheet).text((10, 12), "Layout pass 3 — art/01 rect | before (2c) | after (same region via the layout's "
+                                   "art->screen mapping; matching anchors marked)", font=font(19), fill=(250, 240, 220))
+        for i, row in enumerate(part):
+            y = 50 + i * (th + 8)
+            for j, im in enumerate(row):
+                sheet.paste(im.resize((tw, th), Image.LANCZOS), (j * (tw + 12), y))
+        sheet.save(os.path.join(OUT, "%s_zones_%d.png" % (tag, chunk // 5 + 1)))
+    # full-size pairs for close inspection
+    for zone, row in zip(zones, rows):
+        pair = Image.new("RGB", (2 * W + 12, H), (30, 27, 24))
+        pair.paste(row[0], (0, 0))
+        pair.paste(row[2], (W + 12, 0))
+        pair.save(os.path.join(OUT, "%s_pair_%s.jpg" % (tag, zone["name"])), quality=88)
+
+
 def main():
+    if len(sys.argv) > 2 and sys.argv[1] == "--v3":
+        os.makedirs(OUT, exist_ok=True)
+        v3_sheets(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5] if len(sys.argv) > 5 else "p3")
+        return
     if len(sys.argv) > 4 and sys.argv[3] == "--before":
         os.makedirs(OUT, exist_ok=True)
         before_after(sys.argv[1], sys.argv[2], sys.argv[4], sys.argv[5], sys.argv[6] if len(sys.argv) > 6 else "p2")

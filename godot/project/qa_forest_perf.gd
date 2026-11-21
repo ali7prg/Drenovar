@@ -189,6 +189,11 @@ func run_segments() -> void:
 			totals.append(e + a.x)
 			inst.append(int(snap.get("instances", 0)) + a.y)
 			shown_max = maxi(shown_max, a.y)
+		if OS.get_cmdline_user_args().has("--debug"):
+			for id in forest.actors.rigs:
+				var r = forest.actors.rigs[id]
+				if is_instance_valid(r):
+					print("RIG ", spec.name, " ", id, " ", r.load_state, " vis=", r.visible, " tree=", r.is_visible_in_tree(), " lod=", r.lod_level, " pos=", r.global_position.snapped(Vector3.ONE * 0.1))
 		for arr in [draws, prims, env, actors, totals, inst]:
 			arr.sort()
 		var row := {"segment": spec.name, "zoom": spec.zoom,

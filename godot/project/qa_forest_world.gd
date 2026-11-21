@@ -255,6 +255,8 @@ func run() -> void:
 				var cp: Array = caps[idx]
 				if Rules.segment_segment_distance(cp[0], cp[1], q, q) < float(cp[2]) + Rules.UNIT_RADIUS + 0.6:
 					crowns_over += 1
+			if crowns_over > worst:
+				notes.trail_occlusion_worst_at = [snappedf(q.x, 0.1), snappedf(q.y, 0.1), String(route.get("id", ""))]
 			worst = maxi(worst, crowns_over)
 	var fade_cap: int = ForestOccluders.MAX_FADED
 	check(worst <= fade_cap, "a trail point hidden by %d crowns (> %d faded at once)" % [worst, fade_cap])

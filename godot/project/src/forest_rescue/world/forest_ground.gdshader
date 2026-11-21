@@ -22,7 +22,7 @@ uniform sampler2D detail_noise : filter_linear_mipmap, repeat_enable;   // RGBA 
 uniform vec4 pads[16];               // camp pads: xz centre, radius, seed
 uniform int pad_count = 0;
 uniform vec3 meadow_mul = vec3(0.8, 0.58, 0.42);   // art/01 meadow (H≈49-58, S≈.5-.57, V≈.49-.56; pad_metrics / forest_metrics_v3)
-uniform vec3 pad_color : source_color = vec3(0.725, 0.588, 0.412);   // warm sand (185, 150, 105)
+uniform vec3 pad_color : source_color = vec3(0.66, 0.53, 0.37);   // renders ≈ warm sand (185, 150, 105) (pad_metrics.py)
 uniform float detail_on = 1.0;
 
 varying vec3 terrain_position;

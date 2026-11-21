@@ -14,6 +14,7 @@ uniform float speed = 1.6;
 uniform float width_m = 2.4;
 uniform float height_m = 5.0;
 uniform bool foam_only = false;     // the foam band on a ledge (a quad, no fall)
+uniform float seed = 0.0;           // pass 4: per-stream noise offset
 
 void fragment() {
 	vec2 uv = UV;
@@ -28,8 +29,8 @@ void fragment() {
 		ALPHA = clamp(body * (0.55 + 0.5 * fn0), 0.0, 0.92);
 	} else {
 	// vertical streaks (painted look): broad white ribbons with teal gaps, racing down
-	float s1 = texture(noise_tex, vec2(across / 1.1, (down - t * 2.2) / 4.5)).r;
-	float s2 = texture(noise_tex, vec2(across / 0.5 + 0.37, (down - t * 2.9) / 2.2)).g;
+	float s1 = texture(noise_tex, vec2(across / 1.1 + seed, (down - t * 2.2) / 4.5)).r;
+	float s2 = texture(noise_tex, vec2(across / 0.5 + 0.37 + seed * 2.0, (down - t * 2.9) / 2.2)).g;
 	float streak = smoothstep(0.56, 0.8, s1 * 0.6 + s2 * 0.5);          // pass 4: sparser white streaks
 	vec3 col = mix(water_color, streak_color, 0.08 + 0.9 * streak);
 	// glassy darker lip at the top, whiter and broken towards the foot

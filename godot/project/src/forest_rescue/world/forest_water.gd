@@ -35,6 +35,8 @@ const FALLS_WIDTH := 3.8
 ## FALLS_LEDGE of its height and drops on in a wider lower sheet into a foaming pond.
 const FALLS_LEDGE := 0.5
 const FALLS_LOWER_WIDTH := 5.0
+## [offset across the lip, width, lip height offset, offset out from the rock, noise seed]
+const FALLS_STREAMS := [[-1.45, 1.05, -0.35, 0.15, 0.13], [0.15, 1.55, 0.15, 0.0, 0.47], [1.65, 0.85, -0.9, 0.25, 0.81]]
 ## Pass 2: the marsh pools sit right below glade 07's clearing (art/01 S-G), in the camera's view.
 const MARSH_POOLS := [[Vector2(70.5, 101.8), 4.0], [Vector2(64.6, 99.3), 3.0], [Vector2(63.0, 105.0), 2.5], [Vector2(76.4, 99.6), 2.1]]
 
@@ -150,14 +152,12 @@ func _build_falls(height_fn: Callable, noise: Texture2D) -> void:
 	var pond_level: float = ForestTerrain.base_height(POND_CENTER.x, POND_CENTER.y) - 0.42
 	var bottom := pond_level + 0.02
 	var across := Vector2(-FALLS_FACING.y, FALLS_FACING.x)
-	var ledge_y := lerpf(bottom, falls_top, FALLS_LEDGE)
-	# upper fall from the lip onto the ledge, the wider lower fall from the ledge into the pond
-	_add_curtain("Waterfall", FALLS_LIP, falls_top, ledge_y - 0.25, FALLS_WIDTH, 0.12, noise, 0.3)
-	var lower_lip := FALLS_LIP + FALLS_FACING * 1.0
-	_add_curtain("WaterfallLower", lower_lip, ledge_y + 0.1, bottom, FALLS_LOWER_WIDTH, 0.1, noise, 0.45)
-	# a third, narrow sheet stepping off a side ledge (art/01: the cascade splits on the rocks)
-	var side_lip := FALLS_LIP + across * (FALLS_WIDTH * 0.5 + 1.1) + FALLS_FACING * 0.7
-	_add_curtain("WaterfallStep", side_lip, lerpf(bottom, falls_top, 0.62), bottom, 1.7, 0.2, noise, 0.9)
+	# pass 4 (art/01: water over a dark rock lip, not a white sheet): three streams of different widths and
+	# lip heights with dark wet rock between them, each a translucent streaked curtain
+	for spec in FALLS_STREAMS:
+		var lip: Vector2 = FALLS_LIP + across * float(spec[0]) + FALLS_FACING * float(spec[3])
+		_add_curtain("Waterfall%d" % FALLS_STREAMS.find(spec), lip, falls_top + float(spec[2]), bottom, float(spec[1]), 0.1,
+			noise, 0.4, float(spec[4]))
 	# foam and spray at the foot
 	var plume := MeshInstance3D.new()
 	plume.name = "WaterfallSpray"
@@ -193,7 +193,7 @@ void fragment() {
 	items.append({"node": plume, "center": foot, "radius": 3.0})
 
 
-func _add_curtain(node_name: String, lip: Vector2, top: float, bottom: float, width: float, out0: float, noise: Texture2D, spread := 0.35) -> void:
+func _add_curtain(node_name: String, lip: Vector2, top: float, bottom: float, width: float, out0: float, noise: Texture2D, spread := 0.35, seed := 0.0) -> void:
 	var across := Vector2(-FALLS_FACING.y, FALLS_FACING.x)
 	var rows := 12
 	var cols := 8
@@ -236,6 +236,7 @@ func _add_curtain(node_name: String, lip: Vector2, top: float, bottom: float, wi
 	material.set_shader_parameter("noise_tex", noise)
 	material.set_shader_parameter("width_m", width)
 	material.set_shader_parameter("height_m", maxf(1.0, top - bottom))
+	material.set_shader_parameter("seed", seed)
 	var node := MeshInstance3D.new()
 	node.name = node_name
 	node.mesh = mesh

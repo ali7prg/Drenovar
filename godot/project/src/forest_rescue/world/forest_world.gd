@@ -468,9 +468,9 @@ func _dead_tree_mesh() -> Array:
 ## rotation, saturation) and a lifted AO floor (shaded inner crown never near black). Pines blue-green teal,
 ## oaks golden olive, the hollow oak golden like the grove instead of orange-red.
 const FOLIAGE_LOOK := {
-	"lf_env_dark_pine": {"hue_shift": 30.0, "albedo_sat": 1.35, "ao_floor": 0.62},
-	"lf_env_golden_oak": {"hue_shift": -9.0, "albedo_sat": 1.0, "ao_floor": 0.6},
-	"lf_env_golden_oak_green": {"hue_shift": -8.0, "albedo_sat": 1.05, "ao_floor": 0.6},
+	"lf_env_dark_pine": {"hue_shift": 32.0, "albedo_sat": 1.35, "ao_floor": 0.56},
+	"lf_env_golden_oak": {"hue_shift": -16.0, "albedo_sat": 1.0, "ao_floor": 0.6},
+	"lf_env_golden_oak_green": {"hue_shift": -10.0, "albedo_sat": 1.05, "ao_floor": 0.6},
 	"lf_env_birch": {"hue_shift": -6.0, "albedo_sat": 1.0, "ao_floor": 0.6},
 	"lf_env_willow": {"hue_shift": -6.0, "albedo_sat": 1.0, "ao_floor": 0.6},
 	"lf_env_hollow_oak": {"hue_shift": 17.0, "albedo_sat": 0.92, "ao_floor": 0.6},

@@ -71,11 +71,11 @@ float grade_river_center(float z) {
 // zoom 68 (forest_rescue/qa/ingame/integration/grade_metrics.py: vegetation saturation and luminance
 // contrast within ~10 % per zone). Contrast acts on luminance only (hue and saturation kept).
 const vec3 GRADE_GROVE = vec3(1.52, 1.12, 1.0);
-const vec3 GRADE_SOUTH = vec3(0.80, 1.15, 0.88);
+const vec3 GRADE_SOUTH = vec3(1.0, 0.85, 0.85);      // pass 4: blue-green pines, lifted shadows (crown_hsv.py)
 const vec3 GRADE_EAST = vec3(0.88, 1.2, 0.86);
 const vec3 GRADE_REST = vec3(1.1, 1.6, 1.0);
 const vec3 GRADE_ARENA = vec3(1.18, 1.0, 1.0);     // arena rock sector (gorge, waterfall, arena)
-const vec3 GRADE_LAKE = vec3(0.72, 0.9, 0.96);     // the reedy lake's shores
+const vec3 GRADE_LAKE = vec3(0.95, 0.65, 0.88);    // the reedy lake's shores (pass 4: no dark pines)
 const vec2 GRADE_LAKE_CENTER = vec2(97.2, 32.4);
 // (saturation, contrast, luminance) multipliers by art/01 region (city camera screen angle around the
 // town, river side): saturated sunny golden grove / west oaks, dark misty south pines and east bank.

@@ -45,7 +45,7 @@ RATIO = GEAR_TEETH / PINION_TEETH
 PARAMS = dict(AX=2.188, L2=0.512, Rc=0.41, FXL=1.264, FXR=0.876, HX=1.164, KX=-0.7525, Ls=0.419, Ac=0.762, Lg=0.56,
               PR=0.80, PY=-0.18, Wc=0.925, Hc=0.5375, Zt=0.353,
               SPL=0.48, WH=0.38, TB=0.45, LW=0.30, FY=0.42, TZ=0.62, SPIL=0.30, SPIR=0.0, PX=-0.22, PSX=-0.35,
-              RGP=0.50, GT=45.0, PH=199.0, GBX=0.0, GBY=-0.22, GBZ=0.0, HR=0.19)
+              RGP=0.52, GT=45.0, PH=199.0, GBX=0.15, GBY=-0.22, GBZ=0.1, HR=0.19)
 FREE = ["AX", "L2", "Rc", "FXL", "FXR", "HX", "KX", "Ls", "Ac", "Lg", "Wc", "Hc", "Zt", "PH", "GBX", "GBZ"]
 PRIOR = 0.2
 
@@ -115,7 +115,7 @@ def views():
          "gear_c": (166, 621), "bgear_c": (229, 591), "knob": (192, 522), "ttop_l": (148, 535), "ttop_r": (368, 535),
          "chest_tl": (222, 795), "chest_tr": (318, 797), "chest_bl": (222, 850), "chest_br": (316, 850)},
         pose={"chest": "raised"}, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None,
-        solve_opts={"fov_prior": 22.0}, title="WINCH main view (chest raised to the pit mouth)",
+        solve_opts={"fov_prior": 22.0, "f_prior": (1370.0, 0.08)}, title="WINCH main view (chest raised to the pit mouth)",
         # the painted motion arrows are annotations, not geometry
         ignore_boxes=[(148, 610, 195, 660), (418, 572, 472, 652), (280, 712, 306, 768)],
         proj_exclude=[(148, 610, 195, 660), (418, 572, 472, 652), (280, 712, 306, 768)])

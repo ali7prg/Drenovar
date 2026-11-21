@@ -1,0 +1,273 @@
+{
+  "qa": {
+    "main": {
+      "iou_raw": 0.7795,
+      "iou_filled": 0.8645,
+      "colour_err": 0.1545,
+      "colour_err_core": 0.1535,
+      "ref_px": 129699,
+      "render_px": 113236,
+      "ignored_px": 8126,
+      "camera_rms_px": 2.62,
+      "camera_max_px": 5.07,
+      "camera_points": 17,
+      "iou_raw_open_mask": 0.8018
+    }
+  },
+  "tris": {
+    "LOD0": 7117,
+    "LOD1": 4175,
+    "LOD2": 2320
+  },
+  "tris_by_node": {
+    "LOD0": {
+      "root": 3675,
+      "drum": 328,
+      "big_gear": 948,
+      "pinion": 648,
+      "crank": 412,
+      "pawl": 44,
+      "brake_lever": 260,
+      "rope": 128,
+      "chest": 314,
+      "chest_lid": 358,
+      "pit_void": 2
+    },
+    "LOD1": {
+      "root": 1445,
+      "drum": 220,
+      "big_gear": 924,
+      "pinion": 624,
+      "crank": 276,
+      "pawl": 36,
+      "brake_lever": 184,
+      "rope": 60,
+      "chest": 154,
+      "chest_lid": 250,
+      "pit_void": 2
+    },
+    "LOD2": {
+      "root": 906,
+      "drum": 136,
+      "big_gear": 436,
+      "pinion": 304,
+      "crank": 172,
+      "pawl": 36,
+      "brake_lever": 116,
+      "rope": 24,
+      "chest": 110,
+      "chest_lid": 78,
+      "pit_void": 2
+    }
+  },
+  "colour_ramps": {
+    "stone": {
+      "px": 10146,
+      "mean_srgb": [
+        132,
+        109,
+        85
+      ]
+    },
+    "ground": {
+      "px": 11454,
+      "mean_srgb": [
+        157,
+        130,
+        97
+      ]
+    },
+    "wood": {
+      "px": 42965,
+      "mean_srgb": [
+        145,
+        115,
+        87
+      ]
+    },
+    "iron": {
+      "px": 11597,
+      "mean_srgb": [
+        146,
+        116,
+        90
+      ]
+    },
+    "grass": {
+      "px": 461,
+      "mean_srgb": [
+        170,
+        145,
+        102
+      ]
+    },
+    "rope": {
+      "px": 9287,
+      "mean_srgb": [
+        162,
+        124,
+        85
+      ]
+    },
+    "brass": {
+      "px": 1704,
+      "mean_srgb": [
+        128,
+        94,
+        60
+      ]
+    },
+    "void": {
+      "px": 277,
+      "mean_srgb": [
+        64,
+        52,
+        43
+      ]
+    }
+  },
+  "calibration": {
+    "stone": {
+      "gain": [
+        0.957,
+        0.941,
+        0.901
+      ],
+      "px": 9830,
+      "painting": [
+        103,
+        83,
+        64
+      ],
+      "render": [
+        107,
+        89,
+        71
+      ]
+    },
+    "ground": {
+      "gain": [
+        1.018,
+        1.028,
+        0.996
+      ],
+      "px": 11321,
+      "painting": [
+        130,
+        107,
+        80
+      ],
+      "render": [
+        127,
+        104,
+        80
+      ]
+    },
+    "wood": {
+      "gain": [
+        0.857,
+        0.862,
+        0.88
+      ],
+      "px": 40932,
+      "painting": [
+        101,
+        78,
+        58
+      ],
+      "render": [
+        118,
+        90,
+        66
+      ]
+    },
+    "iron": {
+      "gain": [
+        0.839,
+        0.832,
+        0.82
+      ],
+      "px": 10941,
+      "painting": [
+        95,
+        74,
+        57
+      ],
+      "render": [
+        114,
+        90,
+        70
+      ]
+    },
+    "rope": {
+      "gain": [
+        0.843,
+        0.851,
+        0.883
+      ],
+      "px": 8874,
+      "painting": [
+        119,
+        91,
+        63
+      ],
+      "render": [
+        142,
+        107,
+        72
+      ]
+    },
+    "brass": {
+      "gain": [
+        0.843,
+        0.857,
+        0.901
+      ],
+      "px": 1620,
+      "painting": [
+        90,
+        65,
+        41
+      ],
+      "render": [
+        107,
+        76,
+        46
+      ]
+    }
+  },
+  "blueprint": {
+    "AX": 2.2572,
+    "L2": 0.5208,
+    "Rc": 0.4234,
+    "FXL": 1.2851,
+    "FXR": 0.8875,
+    "HX": 1.1895,
+    "KX": -0.814,
+    "Ls": 0.4477,
+    "Ac": 0.7984,
+    "Lg": 0.5976,
+    "PR": 0.85,
+    "PY": -0.18,
+    "Wc": 0.9414,
+    "Hc": 0.5529,
+    "Zt": 0.3512,
+    "SPL": 0.56,
+    "WH": 0.44,
+    "TB": 0.45,
+    "LW": 0.32,
+    "FY": 0.42,
+    "TZ": 0.68,
+    "SPIL": 0.3,
+    "SPIR": 0.06,
+    "PX": -0.3,
+    "PSX": -0.4,
+    "RGP": 0.52,
+    "GT": 45.0,
+    "PH": 196.6768,
+    "GBX": 0.225,
+    "GBY": -0.22,
+    "GBZ": 0.0958,
+    "HR": 0.19
+  }
+}

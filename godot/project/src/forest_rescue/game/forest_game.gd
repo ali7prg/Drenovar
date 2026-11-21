@@ -294,6 +294,13 @@ func target_position(target_id: String) -> Vector3:
 	return Vector3.INF
 
 ## Site anchors from the world layer; authored atlas offsets as a fallback.
+## Yaw (deg) that shows the city camera the painted side of a prop: 45° (camera azimuth) minus the
+## painting camera's azimuth around the model (+Z = 0°, toward +X positive), read from the props v2
+## camera solves (forest_rescue/qa/compare/<prop>/*camera*.png): wood cage seen front-left (~ -35°),
+## iron / root cages and the mechanisms nearly from the front (~ -10° / 0°).
+const PAINTED_CAGE_YAW := {"oak": 80.0, "iron": 55.0, "root": 55.0}
+const PAINTED_DEVICE_YAW := {"trail_cache": 75.0, "rune_lock": 45.0, "winch_sequence": 45.0}
+
 func site_anchor(site_id: String) -> Dictionary:
 	var poi := client.poi(site_id)
 	var targets: Dictionary = poi.get("targets", {})
@@ -331,6 +338,10 @@ func site_anchor(site_id: String) -> Dictionary:
 		anchor["landmarks"] = marks_now
 	if not anchor.has("approach") and anchor.get("center") is Vector3 and anchor.get("guardian") is Vector3:
 		anchor["approach"] = anchor.center + (anchor.guardian - anchor.center).normalized() * 7.5
+	# P2.7: the cage is turned so the fixed city camera (azimuth 45°, from +X+Z) sees the side the
+	# props v2 pipeline painted (the painting camera's azimuth around the model, see PAINTED_YAW);
+	# seats, door, exit and gather points all follow this yaw.
+	anchor["cage_yaw"] = deg_to_rad(float(PAINTED_CAGE_YAW.get(String(poi.get("cage", "oak")), 80.0)))
 	anchors_cache[cache_key] = anchor
 	return anchor
 

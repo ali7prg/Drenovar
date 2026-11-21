@@ -987,7 +987,8 @@ func update_roof(cage: Rig, site_id: String, poi: Dictionary, delta: float) -> v
 ## so its plates sit on the server's plate targets (and its front faces the city camera).
 func place_device(device: Rig, kind: String, anchor: Dictionary) -> void:
 	var spot: Vector3 = anchor.get("artifact", anchor.get("center", Vector3.ZERO))
-	var yaw := float(anchor.get("cage_yaw", 0.0))
+	# P2.7: painted side towards the city camera (forest_game.PAINTED_DEVICE_YAW)
+	var yaw := deg_to_rad(float(game.PAINTED_DEVICE_YAW.get(kind, rad_to_deg(float(anchor.get("cage_yaw", 0.0))))))
 	if kind == "paired_latch" and anchor.get("plate_left") is Vector3 and anchor.get("plate_right") is Vector3:
 		var a: Vector3 = anchor.plate_left
 		var b: Vector3 = anchor.plate_right

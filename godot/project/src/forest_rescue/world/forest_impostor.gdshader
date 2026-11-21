@@ -59,6 +59,10 @@ float grade_river_center(float z) {
 }
 
 // Same art/01 region grade as forest_painted.gdshaderinc (impostors are always forest).
+const vec3 GRADE_GROVE = vec3(1.30, 1.18, 1.0);
+const vec3 GRADE_SOUTH = vec3(0.86, 1.2, 0.86);
+const vec3 GRADE_EAST = vec3(0.94, 1.16, 0.88);
+const vec3 GRADE_REST = vec3(1.04, 1.24, 1.0);
 vec3 grade_factors(vec3 p) {
 	float u = (p.x - p.z) * 0.70710678;
 	float w = (p.x + p.z) * 0.70710678;
@@ -69,10 +73,8 @@ vec3 grade_factors(vec3 p) {
 	float grove = grade_sector(phi, 58.0, 214.0, 12.0) * (1.0 - east);
 	float south = grade_sector(phi, 232.0, 345.0, 12.0) * (1.0 - east);
 	float rest = clamp(1.0 - grove - south - east, 0.0, 1.0);
-	float sat = 1.0 + outer * (0.28 * grove - 0.1 * south - 0.04 * east);
-	float con = 1.0 + outer * (0.16 * grove + 0.24 * south + 0.2 * east + 0.14 * rest);
-	float lum = 1.0 + outer * (0.02 * grove - 0.2 * south - 0.18 * east);
-	return vec3(sat, con, lum);
+	vec3 k = GRADE_GROVE * grove + GRADE_SOUTH * south + GRADE_EAST * east + GRADE_REST * rest;
+	return mix(vec3(1.0), k, outer);
 }
 
 void fragment() {
@@ -87,9 +89,9 @@ void fragment() {
 	vec3 fog = fog_receive(world, TIME);
 	{
 		vec3 gf = grade_factors(world);
-		float lum = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+		float lum = max(dot(c.rgb, vec3(0.299, 0.587, 0.114)), 1e-4);
 		c.rgb = max(mix(vec3(lum), c.rgb, gf.x), vec3(0.0));
-		c.rgb = max((c.rgb - 0.32) * gf.y + 0.32, vec3(0.0)) * gf.z;
+		c.rgb *= max((lum - 0.32) * gf.y + 0.32, 0.0) * gf.z / lum;
 	}
 	c.rgb = mix(c.rgb * (1.0 - fog.z), fog_silhouette, max(fog.y, fog.x));
 	ALBEDO = c.rgb;

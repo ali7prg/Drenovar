@@ -31,7 +31,7 @@ const LIGHT_MIX := 0.35
 const MARK_LANDMARKS := [
 	{"id": "lf_env_ruined_watchpost", "mark": "lf_mark_ruined_arch", "back": 6.5, "footprint": 5.0},
 	{"id": "lf_env_standing_stones", "mark": "lf_mark_standing_stones", "back": 0.0, "footprint": 5.4, "face_node": "lf_junction_stones", "scale": 1.45},
-	{"id": "lf_env_quarry_mine", "mark": "lf_mark_quarry_mine", "back": 7.5, "footprint": 8.0, "scale": 1.5},
+	{"id": "lf_env_quarry_mine", "mark": "lf_mark_quarry_mine", "back": 8.5, "footprint": 9.5, "scale": 1.95},
 	{"id": "lf_env_hunter_shelter", "mark": "lf_mark_hunter_shelter", "back": 5.2, "footprint": 4.6},
 ]
 ## Dead-tree set around lf_mark_dead_tree (offsets in the frame facing the trail end: +Z toward it).
@@ -504,11 +504,11 @@ void fragment() {
 	if (pool > 0.5) {
 		float r = length(p);
 		ALBEDO = vec3(1.0, 0.55, 0.18);
-		ALPHA = (1.0 - smoothstep(0.0, 1.0, r)) * 0.3 * flicker;
+		ALPHA = (1.0 - smoothstep(0.0, 1.0, r)) * 0.42 * flicker;
 	} else {
 		p.y += 0.15;
 		float core = exp(-dot(p * vec2(1.6, 1.0), p * vec2(1.6, 1.0)) * 5.0);
-		float halo = exp(-dot(p, p) * 1.8) * 0.35;
+		float halo = exp(-dot(p, p) * 1.6) * 0.5;
 		ALBEDO = mix(vec3(1.0, 0.45, 0.1), vec3(1.0, 0.85, 0.45), core);
 		ALPHA = clamp((core + halo) * flicker, 0.0, 1.0);
 	}
@@ -520,15 +520,16 @@ void fragment() {
 		_pool_material.set_shader_parameter("pool", 1.0)
 	var flame := MeshInstance3D.new()
 	var quad := QuadMesh.new()
-	quad.size = Vector2(1.3, 1.5)
+	# pass 2 (art/01 at zoom 68–120: every camp's fire glows): a bigger flame + halo and pool
+	quad.size = Vector2(2.0, 2.4)
 	flame.mesh = quad
 	flame.material_override = _glow_material
-	flame.position = Vector3(FIRE_CENTER.x, 0.75, FIRE_CENTER.y)
+	flame.position = Vector3(FIRE_CENTER.x, 1.05, FIRE_CENTER.y)
 	flame.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(flame)
 	var light_pool := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
-	plane.size = Vector2(3.6, 3.6)
+	plane.size = Vector2(5.6, 5.6)
 	light_pool.mesh = plane
 	light_pool.material_override = _pool_material
 	light_pool.position = Vector3(FIRE_CENTER.x, 0.08, FIRE_CENTER.y)
@@ -908,8 +909,16 @@ func _swap_arena(scene: Variant, lod: int) -> void:
 ## the banners stand taller (×1.35 / ×1.55 / ×1.3 in height, the wall also 1.25× wider) so they read
 ## at zoom 68–120 instead of a sand pit, and the painted floor patch is clipped to the ring (its
 ## path tongues beyond 21 m would hang over the river gorge at the new spot) except the entrance.
-const ARENA_LIFT := {"rock_": Vector3(1.0, 1.35, 1.0), "fossil_wall": Vector3(1.25, 1.55, 1.25), "banner_": Vector3(1.0, 1.3, 1.0)}
+const ARENA_LIFT := {"rock_": Vector3(1.0, 1.35, 1.0), "fossil_wall": Vector3(1.3, 1.6, 1.3), "banner_": Vector3(1.45, 1.75, 1.45)}
 const ARENA_FLOOR_KEEP := 21.0
+## Layout pass 2 (art/08 from the city camera): the cliff ring in pale grey-tan limestone (the kit
+## moss rock's golden moss washed out), the fossil wall's pale ribs and skull lifted off the
+## darker rock (albedo contrast), the entrance floor tongue kept to the trail's width.
+const ARENA_LIMESTONE := 0.72
+const ARENA_FOSSIL_CONTRAST := 1.9
+const ARENA_FOSSIL_GAIN := 1.18
+const ARENA_ENTRANCE_HALF := 4.5        # m: half width of the floor tongue beyond the ring
+const ARENA_ENTRANCE_REACH := 30.0      # m: its length from the arena centre
 
 
 func _shape_arena(node: Node3D) -> void:
@@ -926,6 +935,26 @@ func _shape_arena(node: Node3D) -> void:
 				break
 		if pname.begins_with("floor") and part.mesh != null:
 			part.mesh = _clip_floor(part.mesh, part.transform)
+		var rock := pname.begins_with("rock_") or parent_name.begins_with("rock_")
+		var fossil := pname.begins_with("fossil_wall") or parent_name.begins_with("fossil_wall")
+		if (rock or fossil) and part.mesh != null:
+			for surface in part.mesh.get_surface_count():
+				var material := part.get_active_material(surface)
+				if not material is ShaderMaterial:
+					continue
+				var key := [material, rock]
+				if not _arena_looks.has(key):
+					var look := (material as ShaderMaterial).duplicate() as ShaderMaterial
+					if rock:
+						look.set_shader_parameter("limestone", ARENA_LIMESTONE)
+					else:
+						look.set_shader_parameter("albedo_contrast", ARENA_FOSSIL_CONTRAST)
+						look.set_shader_parameter("albedo_gain", ARENA_FOSSIL_GAIN)
+					_arena_looks[key] = look
+				part.set_surface_override_material(surface, _arena_looks[key])
+
+
+var _arena_looks := {}
 
 
 func _clip_floor(mesh: Mesh, xf: Transform3D) -> Mesh:
@@ -937,8 +966,8 @@ func _clip_floor(mesh: Mesh, xf: Transform3D) -> Mesh:
 		var kept := PackedInt32Array()
 		for t in range(0, index.size(), 3):
 			var c := xf * ((verts[index[t]] + verts[index[t + 1]] + verts[index[t + 2]]) / 3.0)
-			var angle := rad_to_deg(atan2(c.z, c.x))
-			var entrance := angle > 60.0 and angle < 120.0          # local +Z: the gap toward the trail
+			# local +Z: the gap toward the trail — a tongue of the trail's width, not a slab
+			var entrance := c.z > 0.0 and absf(c.x) < ARENA_ENTRANCE_HALF and c.z < ARENA_ENTRANCE_REACH
 			if Vector2(c.x, c.z).length() <= ARENA_FLOOR_KEEP or entrance:
 				kept.append_array(PackedInt32Array([index[t], index[t + 1], index[t + 2]]))
 		if kept.is_empty():

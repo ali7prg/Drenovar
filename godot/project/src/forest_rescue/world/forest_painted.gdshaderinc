@@ -56,6 +56,13 @@ float grade_river_center(float z) {
 	return z + 66.0 + 8.0 * sin(z * 0.068) + 3.5 * cos(z * 0.127 + 0.3) + 9.0 * exp(-k * k);
 }
 
+// (saturation, luminance contrast, luminance) per art/01 region, tuned against the art/01 crops at
+// zoom 68 (forest_rescue/qa/ingame/integration/grade_metrics.py: vegetation saturation and luminance
+// contrast within ~10 % per zone). Contrast acts on luminance only (hue and saturation kept).
+const vec3 GRADE_GROVE = vec3(1.30, 1.18, 1.0);
+const vec3 GRADE_SOUTH = vec3(0.86, 1.2, 0.86);
+const vec3 GRADE_EAST = vec3(0.94, 1.16, 0.88);
+const vec3 GRADE_REST = vec3(1.04, 1.24, 1.0);
 // (saturation, contrast, luminance) multipliers by art/01 region (city camera screen angle around the
 // town, river side): saturated sunny golden grove / west oaks, dark misty south pines and east bank.
 vec3 grade_factors(vec3 p) {
@@ -68,10 +75,8 @@ vec3 grade_factors(vec3 p) {
 	float grove = grade_sector(phi, 58.0, 214.0, 12.0) * (1.0 - east);
 	float south = grade_sector(phi, 232.0, 345.0, 12.0) * (1.0 - east);
 	float rest = clamp(1.0 - grove - south - east, 0.0, 1.0);
-	float sat = 1.0 + outer * (0.28 * grove - 0.1 * south - 0.04 * east);
-	float con = 1.0 + outer * (0.16 * grove + 0.24 * south + 0.2 * east + 0.14 * rest);
-	float lum = 1.0 + outer * (0.02 * grove - 0.2 * south - 0.18 * east);
-	return vec3(sat, con, lum);
+	vec3 k = GRADE_GROVE * grove + GRADE_SOUTH * south + GRADE_EAST * east + GRADE_REST * rest;
+	return mix(vec3(1.0), k, outer);
 }
 uniform bool use_ao = true;
 uniform vec2 edge_fade = vec2(0.10, 0.30);
@@ -165,9 +170,9 @@ void fragment() {
 	vec3 lit = c.rgb * mix(1.0, lambert, painted_light_mix) * v_ao;
 	if (grade_regions) {
 		vec3 gf = grade_factors(world_pos);
-		float lum = dot(lit, vec3(0.299, 0.587, 0.114));
+		float lum = max(dot(lit, vec3(0.299, 0.587, 0.114)), 1e-4);
 		lit = max(mix(vec3(lum), lit, gf.x), vec3(0.0));
-		lit = max((lit - grade_pivot) * gf.y + grade_pivot, vec3(0.0)) * gf.z;
+		lit *= max((lum - grade_pivot) * gf.y + grade_pivot, 0.0) * gf.z / lum;
 	}
 	vec3 col = mix(lit * (1.0 - fog.z), fog_silhouette, max(fog.y, fog.x));
 #ifdef FADE

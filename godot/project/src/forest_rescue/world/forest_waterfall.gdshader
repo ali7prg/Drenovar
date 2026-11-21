@@ -7,22 +7,31 @@ render_mode unshaded, blend_mix, depth_draw_never, cull_disabled;
 // soft broken side edges. COLOR.a fades the curtain at its sides.
 
 uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
-uniform vec3 water_color : source_color = vec3(0.47, 0.64, 0.66);
-uniform vec3 streak_color : source_color = vec3(0.86, 0.93, 0.93);
-uniform vec3 foam_color : source_color = vec3(0.95, 0.97, 0.96);
+uniform vec3 water_color : source_color = vec3(0.24, 0.43, 0.48);
+uniform vec3 streak_color : source_color = vec3(0.90, 0.95, 0.95);
+uniform vec3 foam_color : source_color = vec3(0.96, 0.98, 0.97);
 uniform float speed = 1.6;
 uniform float width_m = 2.4;
 uniform float height_m = 5.0;
+uniform bool foam_only = false;     // the foam band on a ledge (a quad, no fall)
 
 void fragment() {
 	vec2 uv = UV;
 	float t = TIME * speed;
 	float across = uv.x * width_m;
 	float down = uv.y * height_m;
-	float s1 = texture(noise_tex, vec2(across / 0.9, (down - t * 2.2) / 3.2)).r;
-	float s2 = texture(noise_tex, vec2(across / 0.45 + 0.37, (down - t * 2.9) / 1.6)).g;
-	float streak = smoothstep(0.45, 0.85, s1 * 0.6 + s2 * 0.5);
-	vec3 col = mix(water_color, streak_color, 0.35 + 0.55 * streak);
+	if (foam_only) {
+		vec2 p = UV * 2.0 - 1.0;
+		float fn0 = texture(noise_tex, vec2(across / 0.8 + t * 0.05, (down + t * 0.4) / 0.9)).b;
+		float body = (1.0 - smoothstep(0.55, 1.0, abs(p.x))) * (1.0 - smoothstep(0.3, 1.0, abs(p.y)));
+		ALBEDO = foam_color;
+		ALPHA = clamp(body * (0.55 + 0.5 * fn0), 0.0, 0.92);
+	} else {
+	// vertical streaks (painted look): broad white ribbons with teal gaps, racing down
+	float s1 = texture(noise_tex, vec2(across / 1.1, (down - t * 2.2) / 4.5)).r;
+	float s2 = texture(noise_tex, vec2(across / 0.5 + 0.37, (down - t * 2.9) / 2.2)).g;
+	float streak = smoothstep(0.42, 0.66, s1 * 0.6 + s2 * 0.5);
+	vec3 col = mix(water_color, streak_color, 0.12 + 0.86 * streak);
 	// glassy darker lip at the top, whiter and broken towards the foot
 	col = mix(col * 0.86, col, smoothstep(0.0, 0.18, uv.y));
 	float foot = smoothstep(0.62, 1.0, uv.y);
@@ -35,4 +44,5 @@ void fragment() {
 	alpha *= smoothstep(0.0, 0.04, uv.y) * 0.9 + 0.1;
 	ALBEDO = col;
 	ALPHA = clamp(alpha, 0.0, 0.96);
+	}
 }

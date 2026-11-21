@@ -33,7 +33,7 @@ const PAD_EXTRA_GRADE_DEG := 4.0
 const GLADE_DIRT := 8.5               # m: warm trampled-dirt pad under every glade's camp (pass 2)
 const WARM_DIRT := Color(1.1, 0.98, 0.8)
 const JUNCTION_LANDING := 2.4         # m: trails are level within this radius of a junction node      # grade a trail may gain on top of its atlas profile to meet its ends
-const TERRAIN_VERSION := 23
+const TERRAIN_VERSION := 24
 
 ## Atlas v2 region ground tints (ForestAtlas.REGION_NAMES order, art/01 crops at zoom 68):
 ## sunny warm meadow under the golden grove, olive mixed oaks, dry grey-olive arena rock, fresh
@@ -494,6 +494,10 @@ func bake() -> void:
 				var gd := Vector2(x - site.center.x, z - site.center.z).length()
 				if gd < GLADE_DIRT + 2.0:
 					color = color.lerp(Color(color.r * WARM_DIRT.r, color.g * WARM_DIRT.g, color.b * WARM_DIRT.b), 1.0 - smoothstep(GLADE_DIRT - 2.0, GLADE_DIRT + 1.5, gd))
+					# layout pass 2 (art/01): a trampled sandy dirt pad under the camp, ragged edge
+					var ragged := 1.1 * sin(atan2(z - site.center.z, x - site.center.x) * 5.0 + site.center.x * 0.37) \
+						+ 0.6 * sin(atan2(z - site.center.z, x - site.center.x) * 9.0 + site.center.z * 0.21)
+					earth[k] = maxf(earth[k], 0.82 * (1.0 - smoothstep(GLADE_DIRT - 3.2, GLADE_DIRT - 0.2, gd + ragged)))
 			if quarry_center != Vector2.INF:
 				var qd := Vector2(x, z).distance_to(quarry_center)
 				color = color.lerp(Color(1.12, 1.1, 1.04), (1.0 - smoothstep(12.0, 24.0, qd)) * 0.8)

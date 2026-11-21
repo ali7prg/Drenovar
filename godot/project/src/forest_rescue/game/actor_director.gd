@@ -277,6 +277,59 @@ func on_rig_ready(actor: Node3D) -> void:
 	(actor as Rig).set_lod(lod_for(zoom, (actor as Rig).lod_scale), true)
 
 # ------------------------------------------------------------------ per frame
+## iPhone smoothness: once per session, as soon as the forest is up, every adventure model (with its painted
+## look) and the reward FX are instanced for a few frames far below the terrain, so their pipelines are built
+## before play: no pipeline compilation when an actor, a cage opening or the boss first appears
+## (qa_forest_perf --segments reports the RENDERING_INFO_PIPELINE_COMPILATIONS_* deltas per moment).
+static var pipelines_warmed := false
+
+func warm_pipelines() -> void:
+	var paths: Array = [HORSE_GLB, BOSS_GLB, SUPPLIES_GLB]
+	paths.append_array(SQUAD_GLBS)
+	for file in CAGE_FILES.values():
+		var path := ASSETS + "props/%s.glb" % file
+		if not paths.has(path):
+			paths.append(path)
+	for dir in ["props/", "humans/"]:
+		for file in ResourceLoader.list_directory(ASSETS + dir):
+			if file.ends_with(".glb") and (file.begins_with("lf_mechanism_") or file.begins_with("lf_artifact_") or file.begins_with("lf_civilian_")):
+				paths.append(ASSETS + dir + file)
+	for site in game.content.campaign.get("sites", []):
+		var guardian: Variant = site.get("guardian")
+		if guardian is Dictionary:
+			var g_path: String = guardian_paths(guardian)[0]
+			if not g_path.is_empty() and not paths.has(g_path):
+				paths.append(g_path)
+	var ids: Array = []
+	for i in paths.size():
+		var id := "__warm_%d" % i
+		var actor := rig(id, String(paths[i]))
+		actor.position = Vector3(float(i % 8) * 4.0, -400.0, float(i / 8) * 4.0)
+		ids.append(id)
+	var fx: Variant = game.get("fx")
+	if fx != null and fx.has_method("ensure_world") and fx.ensure_world():
+		fx.burst_world(Vector3(0, -400, -8))
+		fx.glow_world("__warm", Vector3(0, -400, -12))
+	for attempt in 900:
+		var loading := false
+		for id in ids:
+			var actor: Rig = rigs.get(id)
+			if actor != null and is_instance_valid(actor) and actor.load_state == "loading":
+				loading = true
+		if not loading:
+			break
+		await game.get_tree().process_frame
+	for id in ids:
+		var actor: Rig = rigs.get(id)
+		if actor != null and is_instance_valid(actor):
+			actor.visible = true
+	for frame in 3:
+		await game.get_tree().process_frame
+	for id in ids:
+		drop(id)
+	if fx != null and fx.has_method("glow_world"):
+		fx.glow_world("__warm", Vector3.INF)
+
 func tick(delta: float) -> void:
 	if not game.client.unlocked():
 		if root != null and is_instance_valid(root):
@@ -292,6 +345,9 @@ func tick(delta: float) -> void:
 		return
 	if not ensure_roots():
 		return
+	if not pipelines_warmed:
+		pipelines_warmed = true
+		warm_pipelines()
 	adv = game.client.adv
 	markers.clear()
 	tags.clear()

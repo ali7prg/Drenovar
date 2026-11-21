@@ -2,36 +2,36 @@
   "id": "lf_mechanism_rune_lock",
   "generation": "props v2: measured blueprint + solved painting cameras + painting projection",
   "tris": {
-    "LOD0": 5472,
-    "LOD1": 3418,
-    "LOD2": 1762
+    "LOD0": 2582,
+    "LOD1": 1818,
+    "LOD2": 1090
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 2950,
+      "root": 1362,
       "step": 40,
-      "door_pivot": 34,
-      "ring_3": 668,
-      "ring_2": 668,
-      "ring_1": 668,
+      "door_pivot": 28,
+      "ring_3": 236,
+      "ring_2": 236,
+      "ring_1": 236,
       "key_lever": 444
     },
     "LOD1": {
-      "root": 1910,
+      "root": 1030,
       "step": 24,
       "door_pivot": 28,
-      "ring_3": 428,
-      "ring_2": 428,
-      "ring_1": 428,
+      "ring_3": 188,
+      "ring_2": 188,
+      "ring_1": 188,
       "key_lever": 172
     },
     "LOD2": {
-      "root": 1294,
+      "root": 766,
       "step": 24,
       "door_pivot": 28,
-      "ring_3": 92,
-      "ring_2": 92,
-      "ring_1": 92,
+      "ring_3": 44,
+      "ring_2": 44,
+      "ring_1": 44,
       "key_lever": 140
     }
   },
@@ -54,12 +54,12 @@
   "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -0.773,
+      -0.794,
       0.0,
-      -0.717
+      -0.724
     ],
     "max": [
-      0.801,
+      0.794,
       0.6,
       0.922
     ]
@@ -499,11 +499,11 @@
     "lf_rune_ring3_root"
   ],
   "blueprint": {
-    "Rw": 0.8946,
-    "Rt": 0.8646,
-    "Rb": 1.1246,
+    "Rw": 0.9046,
+    "Rt": 0.8746,
+    "Rb": 1.1346,
     "hb": 0.02,
-    "ox": 0.02,
+    "ox": 0.0,
     "oy": -0.1,
     "zt": 0.56,
     "Rr": 0.64,
@@ -527,24 +527,24 @@
   "qa": {
     "views": {
       "closed": {
-        "iou_raw": 0.895,
-        "iou_filled": 0.895,
-        "colour_err": 0.0723,
-        "colour_err_core": 0.0717,
+        "iou_raw": 0.8995,
+        "iou_filled": 0.8995,
+        "colour_err": 0.069,
+        "colour_err_core": 0.0683,
         "ref_px": 80572,
-        "render_px": 83009,
+        "render_px": 83391,
         "ignored_px": 0,
         "camera_rms_px": 8.33,
         "camera_max_px": 15.48,
         "camera_points": 14
       },
       "open": {
-        "iou_raw": 0.9276,
-        "iou_filled": 0.9276,
-        "colour_err": 0.0958,
-        "colour_err_core": 0.0956,
+        "iou_raw": 0.9272,
+        "iou_filled": 0.9272,
+        "colour_err": 0.0944,
+        "colour_err_core": 0.0942,
         "ref_px": 84078,
-        "render_px": 84518,
+        "render_px": 84995,
         "ignored_px": 0,
         "camera_rms_px": 8.75,
         "camera_max_px": 16.82,
@@ -602,21 +602,21 @@
       }
     },
     "texture": {
-      "texels": 2014758,
-      "projected_frac": 0.1844,
+      "texels": 2084268,
+      "projected_frac": 0.1839,
       "per_view_frac": {
-        "closed": 0.1168,
-        "open": 0.1211
+        "closed": 0.1177,
+        "open": 0.1201
       },
-      "seconds": 18.8
+      "seconds": 18.4
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_rune_lock/v2_iter20_*",
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_rune_lock/v2_iter23_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_rune_lock --iter 20",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_rune_lock --iter 23",
   "mechanism": "rune_lock",
   "symbol_targets": {
     "axis": "each ring disc rotates about glTF +Y through its own node origin (disc centre); discs are stacked rising toward the back",
@@ -714,9 +714,9 @@
   },
   "sockets": {
     "artifact_spot": [
-      0.014,
+      0.0,
       0.266,
-      0.4147
+      0.4217
     ],
     "front_index_mark": [
       0.0,

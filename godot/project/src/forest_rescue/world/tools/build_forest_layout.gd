@@ -66,7 +66,7 @@ const ZONE_MIX := [
 	{Rules.OAK: 0.50, Rules.BIRCH: 0.25, Rules.PINE: 0.25},                 # town belt (green broadleaf, meadows)
 ]
 ## Ambient spacing (m) per zone: target trunk spacing incl. resource trees.
-const ZONE_SPACING := [15.0, 5.4, 3.9, 4.4, 4.8, 3.3, 9.0, 6.0]
+const ZONE_SPACING := [15.0, 5.4, 3.9, 4.4, 4.8, 2.6, 9.0, 6.0]
 ## Grove hero oaks (owner: "big bright golden oaks 1.5–2×, fewer larger trees, clumps and
 ## open meadows"): every ambient grove oak at this absolute scale range (kit oak at 1.0 ≈ 13.6 m).
 const GROVE_OAK_SCALE := [1.35, 1.8]
@@ -119,12 +119,14 @@ const HERO_MARK := "lf_mark_hollow_oak_giant"
 const HERO_BACK := 5.4
 var hero_preferred := Vector2(-104.0, 24.0)
 const HERO_CLEAR := 9.5
-const QUARRY_PIT := 9.0           # art/01: open grey pit in front of the mine (no trunks)
+const QUARRY_PIT := 12.0          # art/01: open pale pit in front of the mine (no trunks)
 const ARENA_RIM_TREE := 26.0      # no kit trunk inside the arena GLB's own rim forest
 const ARENA_RIM_UNDER := 22.5     # no kit understory inside its cliff ring / rim shrubs
 const ARENA_VIEW_RADIUS := 19.5   # camera clearance: arena floor + cliff ring + entrance rocks
 var quarry_axis := 0.0            # direction (rad) from the pit centre to the cliff arc
 var water: Array = []             # ForestWater.bodies(atlas): lake, waterfall pond, marsh pools
+var glade_clearings: Array = []   # [[Vector2, radius]] visual glade clearings (pass 2)
+const GLADE_CLEARING := 11.5
 
 var atlas
 var terrain
@@ -266,7 +268,7 @@ func _build_unit_zones() -> void:
 			continue                   # decorative trails: nobody walks there
 		var points: PackedVector3Array = route.points
 		for i in range(points.size() - 1):
-			_add_unit_zone(Vector2(points[i].x, points[i].z), Vector2(points[i + 1].x, points[i + 1].z), TRAIL_UNIT_HALF)
+			_add_unit_zone(Vector2(points[i].x, points[i].z), Vector2(points[i + 1].x, points[i + 1].z), TRAIL_UNIT_HALF, true)
 	for site in atlas.sites:
 		var c := Vector2(site.center.x, site.center.z)
 		_add_unit_zone(c, c, float(site.radius))
@@ -285,14 +287,18 @@ func _build_unit_zones() -> void:
 	for disc in landmark_discs:
 		_add_unit_zone(disc[0], disc[0], minf(3.5, float(disc[1]) * 0.6))
 	_add_unit_zone(arena, arena, ARENA_VIEW_RADIUS)
+	var deck_rect: Rect2 = atlas.bridge_deck_rect()
+	for end_x in [deck_rect.position.x, deck_rect.end.x]:
+		var tower := Vector2(end_x, atlas.BRIDGE_CENTER.z)
+		_add_unit_zone(tower, tower, 4.5)
 	var horse := Vector2(atlas.horse_origin.x, atlas.horse_origin.z)
 	_add_unit_zone(horse, horse, HORSE_ZONE)
 	_add_unit_zone(ForestAtlas.HOME_RECEPTION, ForestAtlas.HOME_RECEPTION, HOME_ZONE)
 
 
-func _add_unit_zone(a: Vector2, b: Vector2, half: float) -> void:
+func _add_unit_zone(a: Vector2, b: Vector2, half: float, trail := false) -> void:
 	var index := unit_zones.size()
-	unit_zones.append([a, b, half])
+	unit_zones.append([a, b, half, trail])
 	var lo := a.min(b) - Vector2.ONE * half
 	var hi := a.max(b) + Vector2.ONE * half
 	for gz in range(floori(lo.y / UNIT_ZONE_CELL), floori(hi.y / UNIT_ZONE_CELL) + 1):
@@ -304,7 +310,7 @@ func _add_unit_zone(a: Vector2, b: Vector2, half: float) -> void:
 
 
 ## True when a crown capsule (Rules.crown_capsule) covers any unit zone.
-func capsule_hits_units(capsule: Array) -> bool:
+func capsule_hits_units(capsule: Array, strict_only := false) -> bool:
 	var a: Vector2 = capsule[0]
 	var b: Vector2 = capsule[1]
 	var r: float = capsule[2] + Rules.UNIT_RADIUS + 0.1     # + snapping margin (layout stores 0.01 m / 0.001)
@@ -318,13 +324,22 @@ func capsule_hits_units(capsule: Array) -> bool:
 					continue
 				seen[index] = true
 				var zone: Array = unit_zones[index]
+				if strict_only and bool(zone[3]):
+					continue
 				if Rules.segment_segment_distance(a, b, zone[0], zone[1]) < r + float(zone[2]):
 					return true
 	return false
 
 
-func tree_hides_units(x: float, z: float, species: int, variant: int, scale: float, yaw: float) -> bool:
-	return capsule_hits_units(Rules.crown_capsule(x, z, species, variant, scale, yaw))
+func tree_hides_units(x: float, z: float, species: int, variant: int, scale: float, yaw: float, strict_only := false) -> bool:
+	return capsule_hits_units(Rules.crown_capsule(x, z, species, variant, scale, yaw), strict_only)
+
+
+## Pass 2 (art/01 south): the dark pine forest stays dense — a pine there may stand in front of a
+## trail (the walkers behind it are faded whole at runtime by ForestOccluders), never in front of a
+## glade, the arena, the horse spot, a landmark, the water features or the bridge towers.
+func dense_pine_ok(zone: int, species: int) -> bool:
+	return zone == Z_SPRUCE and species == Rules.PINE
 
 
 # ---------------------------------------------------------------------------------------------
@@ -372,6 +387,9 @@ func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown :=
 	for disc in landmark_discs:
 		if Vector2(x, z).distance_to(disc[0]) < float(disc[1]) * (1.0 if tree else 0.75):
 			return true
+	for disc in glade_clearings:
+		if Vector2(x, z).distance_to(disc[0]) < (float(disc[1]) + crown * 0.3 if tree else float(disc[1]) * 0.66):
+			return true
 	if hero != Vector2.INF and Vector2(x, z).distance_to(hero) < (HERO_CLEAR if tree else 5.5):
 		return true
 	if tree and quarry_center != Vector2.INF:
@@ -379,9 +397,9 @@ func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown :=
 		if dq < QUARRY_PIT + crown * 0.4:
 			return true
 		# the cliff/ledge arc behind the mine stays free of trunks (art/01: bare grey cliffs)
-		if dq < 21.0 + crown * 0.3:
+		if dq < 24.0 + crown * 0.3:
 			var a := atan2(z - quarry_center.y, x - quarry_center.x)
-			if absf(angle_difference(a, quarry_axis)) < deg_to_rad(80.0):
+			if absf(angle_difference(a, quarry_axis)) < deg_to_rad(110.0):
 				return true
 	return false
 
@@ -409,7 +427,7 @@ func free_of_trunks(x: float, z: float, gap: float) -> bool:
 func is_glade(x: float, z: float) -> bool:
 	# Art glades: low-frequency noise holes (open grassy clearings between clumps, art/01 grove).
 	var zone := dominant_zone(x, z)
-	var threshold := 0.3 if zone == Z_GROVE else (0.2 if zone == Z_BELT else (0.15 if zone in [Z_TOP, Z_EAST, Z_QUARRY] else 0.07))
+	var threshold := 0.3 if zone == Z_GROVE else (0.2 if zone == Z_BELT else (0.15 if zone in [Z_TOP, Z_EAST, Z_QUARRY] else (0.02 if zone == Z_SPRUCE else 0.07)))
 	return (glade.get_noise_2d(x, z) + 1.0) * 0.5 < threshold
 
 
@@ -464,12 +482,16 @@ func run() -> void:
 	landmark_discs.append([Vector2(19.8, -67.3), 5.2])
 	landmark_discs.append([ForestWater.POND_CENTER, ForestWater.POND_RADIUS + 3.5])
 	landmark_discs.append([ForestWater.POND_CENTER + Vector2(3.5, 3.5), 4.5])
-	# art/01: every glade sits in an open sunny clearing (camp, fire, props): a meadow ring of
-	# 3 m round the 7 m clearing stays free of trunks (young trees grow round it, see openness)
+	# art/01 (pass 2): every glade sits in an open sunny clearing of ~11.5 m radius (camp, fire,
+	# cage, props) — no trunk inside and crowns overhang it only a little (the gameplay pad stays 7 m)
 	for site in atlas.sites:
-		landmark_discs.append([Vector2(site.center.x, site.center.z), float(site.radius) + 3.0])
+		glade_clearings.append([Vector2(site.center.x, site.center.z), GLADE_CLEARING])
 	for extra in atlas.extra_glades:
-		landmark_discs.append([Vector2(extra.center.x, extra.center.z), float(extra.radius) + 3.0])
+		glade_clearings.append([Vector2(extra.center.x, extra.center.z), GLADE_CLEARING])
+	# (f) the bridge ends: towers and red banners read (no trunk within 9 m of either deck end)
+	var deck: Rect2 = atlas.bridge_deck_rect()
+	for end_x in [deck.position.x, deck.end.x]:
+		landmark_discs.append([Vector2(end_x, atlas.BRIDGE_CENTER.z), 9.0])
 	landmarks.free()
 	_build_unit_zones()
 	print("LAYOUT terrain+masks ready ms=", Time.get_ticks_msec() - started, " quarry=", quarry_center, " unit zones=", unit_zones.size())
@@ -664,10 +686,13 @@ func run() -> void:
 			# Camera clearance: a crown that would hide a unit on a trail / in a glade is made
 			# young (low crown, units seen past it) or the spot stays open (understory only).
 			if tree_hides_units(x, z, drawn, variant, scale, deg_to_rad(yaw_deg)):
-				var young := lerpf(0.34, 0.46, rng.randf())
-				if young >= scale or tree_hides_units(x, z, drawn, variant, young, deg_to_rad(yaw_deg)):
-					continue
-				scale = young
+				if dense_pine_ok(zone, drawn) and not tree_hides_units(x, z, drawn, variant, scale, deg_to_rad(yaw_deg), true):
+					pass                     # dense south pines: trail walkers are faded through at runtime
+				else:
+					var young := lerpf(0.34, 0.46, rng.randf())
+					if young >= scale or tree_hides_units(x, z, drawn, variant, young, deg_to_rad(yaw_deg)):
+						continue
+					scale = young
 			insert(trunk_grid, trunks, [x, z, minf(gap, 3.0 if species != Rules.OAK or zone != Z_GROVE else 6.0)])
 			trees.append([snappedf(x, 0.01), snappedf(z, 0.01), drawn, variant,
 				yaw_deg, snappedf(scale, 0.001), zone])
@@ -1051,13 +1076,13 @@ func _quarry_cliffs(under: Array, under_grid: Dictionary, logs: Array, log_grid:
 	var glade_c := Vector2(site.center.x, site.center.z)
 	var base_angle := quarry_axis
 	var kind := Rules.UNDERSTORY.find("quarry_rock")
-	var tiers := [[12.5, 0.0, 1.05], [15.5, 1.6, 1.2], [18.5, 3.2, 1.3]]
+	var tiers := [[11.5, 0.0, 1.2], [14.5, 1.8, 1.35], [17.5, 3.6, 1.45], [20.5, 5.2, 1.5]]
 	for tier in tiers.size():
 		var radius: float = tiers[tier][0]
 		var lift: float = tiers[tier][1]
 		var scale: float = tiers[tier][2]
-		var arc := deg_to_rad(150.0 - tier * 20.0)
-		var steps := int(arc * radius / 5.6)
+		var arc := deg_to_rad(210.0 - tier * 25.0)
+		var steps := int(arc * radius / 5.0)
 		for k in steps + 1:
 			var a := base_angle - arc * 0.5 + arc * k / maxf(1.0, steps) + rng.randf_range(-0.05, 0.05)
 			var c := quarry_center + Vector2(cos(a), sin(a)) * (radius + rng.randf_range(-0.8, 0.8))
@@ -1074,7 +1099,7 @@ func _quarry_cliffs(under: Array, under_grid: Dictionary, logs: Array, log_grid:
 			insert(log_grid, logs, [c.x, c.y, 0.0])
 			kinds_count["quarry_ledge"] = kinds_count.get("quarry_ledge", 0) + 1
 	# boulder piles in the pit, between the glade and the cliffs
-	for k in 16:
+	for k in 26:
 		var a := base_angle + rng.randf_range(-1.6, 1.6)
 		var c := quarry_center + Vector2(cos(a), sin(a)) * rng.randf_range(4.0, 11.0)
 		if mine != Vector2.INF and c.distance_to(mine) < 6.5:
@@ -1162,6 +1187,11 @@ func _cam_state_for(tree: Dictionary, species: int, x: float, z: float, inner: b
 func _camera_look(tree: Dictionary, species: int, x: float, z: float, inner: bool) -> Array:
 	var look := _resource_look(tree, species, x, z, inner)
 	var state := _cam_state_for(tree, species, x, z, inner)
+	if state < 2 and not inner and dense_pine_ok(dominant_zone(x, z), species):
+		var variant: int = int(look[0]) % Rules.GREEN_VARIANT_BASE
+		if not tree_hides_units(x, z, species, variant, float(look[1]), float(tree.angle), true):
+			camera_occluders.append(String(tree.id))      # natural look; faded whole when it hides walkers
+			return look
 	if state < 2:
 		# young look (low, small crown): clear for the camera, or at least the smallest occluder
 		look[1] = minf(float(look[1]), _young_scale(tree))
@@ -1194,7 +1224,7 @@ func _openness_raw(x: float, z: float) -> float:
 		d = minf(d, Vector2(x, z).distance_to(disc[0]) - float(disc[1]))
 	var g := (glade.get_noise_2d(x, z) + 1.0) * 0.5
 	var zone := dominant_zone(x, z)
-	var threshold := 0.3 if zone == Z_GROVE else (0.2 if zone == Z_BELT else (0.15 if zone in [Z_TOP, Z_EAST, Z_QUARRY] else 0.07))
+	var threshold := 0.3 if zone == Z_GROVE else (0.2 if zone == Z_BELT else (0.15 if zone in [Z_TOP, Z_EAST, Z_QUARRY] else (0.02 if zone == Z_SPRUCE else 0.07)))
 	var open_glade := 1.0 - smoothstep(threshold, threshold + 0.12, g)
 	return maxf(1.0 - smoothstep(2.0, 13.0, d), open_glade)
 

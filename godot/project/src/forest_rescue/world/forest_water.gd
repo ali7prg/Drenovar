@@ -16,20 +16,21 @@ const ForestTerrain = preload("res://src/forest_rescue/world/forest_terrain.gd")
 const WATER_SHADER = preload("res://src/forest_rescue/world/forest_water.gdshader")
 const FALLS_SHADER = preload("res://src/forest_rescue/world/forest_waterfall.gdshader")
 
-const POND_CENTER := Vector2(22.6, -64.7)
-const POND_RADIUS := 2.5
+const POND_CENTER := Vector2(23.0, -64.3)
+const POND_RADIUS := 3.4
 ## Outcrop rocks [x, z, yaw°, scale]: kit lf_env_moss_rock v1 (limestone, 9.3 × 6.5 × 5.8 m).
 const OUTCROP := [
-	[19.5, -67.9, 228.0, Vector3(0.5, 0.95, 0.46)],
-	[17.6, -65.4, 132.0, Vector3(0.34, 0.6, 0.33)],
-	[21.9, -69.6, 32.0, Vector3(0.3, 0.52, 0.3)],
-	[24.6, -62.1, 300.0, Vector3(0.16, 0.2, 0.16)],
+	[19.3, -68.1, 228.0, Vector3(0.64, 1.12, 0.52)],
+	[17.2, -65.2, 132.0, Vector3(0.4, 0.7, 0.38)],
+	[22.2, -70.0, 32.0, Vector3(0.36, 0.62, 0.34)],
+	[25.4, -61.6, 300.0, Vector3(0.18, 0.22, 0.18)],
+	[20.0, -61.4, 75.0, Vector3(0.16, 0.2, 0.17)],
 ]
 const ROCK_HEIGHT := 5.76               # moss rock v1 LOD0 top (model space)
 ## The fall: lip on the outcrop's south-east face, facing the camera (+X +Z).
-const FALLS_LIP := Vector2(20.55, -66.75)
+const FALLS_LIP := Vector2(20.7, -66.6)
 const FALLS_FACING := Vector2(0.7071, 0.7071)
-const FALLS_WIDTH := 2.3
+const FALLS_WIDTH := 4.2
 const MARSH_POOLS := [[Vector2(68.0, 104.0), 3.0], [Vector2(73.5, 102.0), 2.0], [Vector2(64.5, 99.0), 1.8]]
 
 var atlas: RefCounted
@@ -45,8 +46,9 @@ static func bodies(forest_atlas: RefCounted) -> Array:
 	for feature in forest_atlas.water_features:
 		if feature.id == "lake":
 			out.append({"id": "lake", "kind": "lake", "center": feature.center, "radius": feature.radius,
-				"level": forest_atlas.WATER_LEVEL, "depth": 1.1, "bank": 0.42, "noise": 0.09, "seed": 1.7,
-				"perched": false, "lily": 0.0, "murk": 0.22, "river": 1.0})
+				"minor": float(feature.get("minor", feature.radius)), "rot": float(feature.get("rot", 0.0)),
+				"level": forest_atlas.WATER_LEVEL, "depth": 1.1, "bank": 0.42, "noise": 0.07, "seed": 1.7,
+				"perched": false, "lily": 0.12, "murk": 0.2, "river": 1.0})
 	out.append({"id": "pond", "kind": "pond", "center": POND_CENTER, "radius": POND_RADIUS,
 		"level": ForestTerrain.base_height(POND_CENTER.x, POND_CENTER.y) - 0.42, "depth": 0.7, "bank": 1.1,
 		"noise": 0.12, "seed": 4.1, "perched": true, "lily": 0.3, "murk": 0.12, "river": 0.0})
@@ -117,7 +119,7 @@ func _build_body(body: Dictionary, noise: Texture2D) -> void:
 	material.set_shader_parameter("river_blend", float(body.river))
 	if body.kind == "pond":
 		var foot := FALLS_LIP + FALLS_FACING * 0.75
-		material.set_shader_parameter("falls_point", Vector4(foot.x, foot.y, 1.25, 1.0))
+		material.set_shader_parameter("falls_point", Vector4(foot.x, foot.y, 2.4, 1.0))
 	var node := MeshInstance3D.new()
 	node.name = "Water_" + String(body.id)
 	node.mesh = mesh
@@ -127,28 +129,72 @@ func _build_body(body: Dictionary, noise: Texture2D) -> void:
 	items.append({"node": node, "center": c, "radius": float(body.radius) * 1.2})
 
 
-## Curtain from the outcrop lip (top of the main rock) down to the pond, bulging slightly out.
+## The cascade (pass 2: readable at zoom 68): a wide main curtain from the outcrop lip down to the
+## pond, a narrower second sheet stepping off a ledge beside it, and a soft foam / spray plume
+## where they hit the water (additive billboard). Curtains bulge slightly out from the rock.
 func _build_falls(height_fn: Callable, noise: Texture2D) -> void:
 	var main: Array = OUTCROP[0]
 	var base_y: float = height_fn.call(float(main[0]), float(main[1])) - 0.2
-	falls_top = base_y + ROCK_HEIGHT * (main[3] as Vector3).y * 0.9
+	falls_top = base_y + ROCK_HEIGHT * (main[3] as Vector3).y * 0.88
 	var pond_level: float = ForestTerrain.base_height(POND_CENTER.x, POND_CENTER.y) - 0.42
 	var bottom := pond_level + 0.02
 	var across := Vector2(-FALLS_FACING.y, FALLS_FACING.x)
-	var rows := 10
-	var cols := 6
+	_add_curtain("Waterfall", FALLS_LIP, falls_top, bottom, FALLS_WIDTH, 0.12, noise)
+	# second, lower sheet stepping off a ledge on the left of the main fall
+	var side_lip := FALLS_LIP + across * (FALLS_WIDTH * 0.5 + 0.9) + FALLS_FACING * 0.6
+	_add_curtain("WaterfallStep", side_lip, lerpf(bottom, falls_top, 0.55), bottom, 1.6, 0.2, noise)
+	# foam and spray at the foot
+	var plume := MeshInstance3D.new()
+	plume.name = "WaterfallSpray"
+	var quad := QuadMesh.new()
+	quad.size = Vector2(FALLS_WIDTH * 1.5, 2.4)
+	plume.mesh = quad
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode unshaded, blend_mix, depth_draw_never, shadows_disabled, cull_disabled;
+uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
+void vertex() {
+	MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0], INV_VIEW_MATRIX[1], INV_VIEW_MATRIX[2], MODEL_MATRIX[3]);
+}
+void fragment() {
+	vec2 p = UV * 2.0 - 1.0;
+	float n = texture(noise_tex, UV * vec2(1.5, 1.0) + vec2(TIME * 0.05, -TIME * 0.35)).r;
+	float n2 = texture(noise_tex, UV * vec2(3.0, 2.0) + vec2(-TIME * 0.08, -TIME * 0.6)).g;
+	float body = (1.0 - smoothstep(0.35, 1.0, length(p * vec2(1.0, 1.35)))) * smoothstep(-1.0, -0.2, -p.y * 0.6 - 0.1);
+	ALBEDO = vec3(0.93, 0.96, 0.96);
+	ALPHA = clamp(body * (0.45 + 0.45 * n) * (0.7 + 0.3 * n2), 0.0, 0.85);
+}
+"""
+	var material := ShaderMaterial.new()
+	material.shader = shader
+	material.render_priority = 3
+	material.set_shader_parameter("noise_tex", noise)
+	plume.material_override = material
+	plume.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var foot := FALLS_LIP + FALLS_FACING * 1.1
+	plume.position = Vector3(foot.x, bottom + 0.9, foot.y)
+	add_child(plume)
+	items.append({"node": plume, "center": foot, "radius": 3.0})
+
+
+func _add_curtain(node_name: String, lip: Vector2, top: float, bottom: float, width: float, out0: float, noise: Texture2D) -> void:
+	var across := Vector2(-FALLS_FACING.y, FALLS_FACING.x)
+	var rows := 12
+	var cols := 8
 	var vertices := PackedVector3Array()
 	var uvs := PackedVector2Array()
 	var colors := PackedColorArray()
 	var indices := PackedInt32Array()
 	for j in rows + 1:
 		var v := float(j) / rows
-		var out := 0.12 + 0.75 * pow(v, 1.5)
-		var y := lerpf(falls_top, bottom, v) + 0.25 * sin(v * PI) * 0.3
-		var width := FALLS_WIDTH * (0.82 + 0.3 * v)
+		var out := out0 + 0.95 * pow(v, 1.5)
+		var y := lerpf(top, bottom, v)
+		var w := width * (0.85 + 0.35 * v)
 		for i in cols + 1:
 			var u := float(i) / cols
-			var p := FALLS_LIP + FALLS_FACING * out + across * (u - 0.5) * width
+			var bulge := 0.18 * sin(u * PI) * (1.0 - v)
+			var p := lip + FALLS_FACING * (out + bulge) + across * (u - 0.5) * w
 			vertices.append(Vector3(p.x, y, p.y))
 			uvs.append(Vector2(u, v))
 			colors.append(Color(1, 1, 1, 1.0 - pow(absf(u * 2.0 - 1.0), 3.0)))
@@ -173,15 +219,15 @@ func _build_falls(height_fn: Callable, noise: Texture2D) -> void:
 	material.shader = FALLS_SHADER
 	material.render_priority = 2
 	material.set_shader_parameter("noise_tex", noise)
-	material.set_shader_parameter("width_m", FALLS_WIDTH)
-	material.set_shader_parameter("height_m", maxf(1.0, falls_top - bottom))
+	material.set_shader_parameter("width_m", width)
+	material.set_shader_parameter("height_m", maxf(1.0, top - bottom))
 	var node := MeshInstance3D.new()
-	node.name = "Waterfall"
+	node.name = node_name
 	node.mesh = mesh
 	node.material_override = material
 	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(node)
-	items.append({"node": node, "center": FALLS_LIP, "radius": 3.0})
+	items.append({"node": node, "center": lip, "radius": 3.0 + width * 0.5})
 
 
 ## Outcrop rock instances for the canopy: [[x, z, yaw (rad), scale Vector3]].

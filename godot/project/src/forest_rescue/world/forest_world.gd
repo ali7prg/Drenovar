@@ -290,6 +290,7 @@ func _restyle_river() -> void:
 	for feature in atlas.water_features:
 		if feature.id == "lake":
 			material.set_shader_parameter("lake_circle", Vector4(feature.center.x, feature.center.y, feature.radius, 1.0))
+			material.set_shader_parameter("lake_shape", Vector4(float(feature.minor) / float(feature.radius), cos(float(feature.rot)), sin(float(feature.rot)), 0.0))
 	for child in stage.get_children():
 		if child is MeshInstance3D and child.material_override is ShaderMaterial:
 			var shader: Shader = (child.material_override as ShaderMaterial).shader

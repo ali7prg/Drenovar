@@ -34,7 +34,7 @@ var arena_yaw_deg := 5.4                 # atlas v2: entranceYawDeg (gap toward 
 var horse_origin := Vector3(-8.0, 6.783492739619742, -55.0)
 var landmark_by_id: Dictionary = {}      # atlas landmarks (v2: junctions, art landmark spots, glades)
 var extra_glades: Array = []             # [{id, center: Vector3, radius}] glades without a site (v2 E-L)
-var water_features: Array = []           # [{id, center: Vector2, radius}] lake / pond (river widenings)
+var water_features: Array = []           # [{id, center: Vector2, radius, minor, rot}] lake (ellipse) / pond (river widenings)
 var bridge: Dictionary = {}
 var fog_spec: Dictionary = {}
 var streaming: Dictionary = {}
@@ -144,7 +144,8 @@ func load_from(path: String) -> bool:
 	for key in ["lake", "pond"]:
 		var f: Variant = features.get(key)
 		if f is Dictionary:
-			water_features.append({"id": key, "center": Vector2(float(f.center[0]), float(f.center[1])), "radius": float(f.radius)})
+			water_features.append({"id": key, "center": Vector2(float(f.center[0]), float(f.center[1])), "radius": float(f.radius),
+				"minor": float(f.get("minor", f.radius)), "rot": deg_to_rad(float(f.get("rotDeg", 0.0)))})
 	for sample in river.get("samples", []):
 		river_z.append(float(sample.z))
 		river_center.append(float(sample.center))

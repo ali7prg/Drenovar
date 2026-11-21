@@ -15,7 +15,8 @@ uniform vec3 foam_color : source_color = vec3(0.86, 0.90, 0.88);
 uniform vec3 light_dir_world = vec3(0.45, 0.74, 0.5);
 uniform vec4 bridge_rect = vec4(76.982, 18.0, 27.0, 4.0);   // shade under the deck (x, z, w, d)
 uniform float flow_speed = 1.1;
-uniform vec4 lake_circle = vec4(0.0, 0.0, 0.0, 0.0);   // atlas v2 reedy lake (x, z, r, on): no bank foam/rim inside
+uniform vec4 lake_circle = vec4(0.0, 0.0, 0.0, 0.0);   // atlas v2 reedy lake (x, z, semi-major, on): no bank foam/rim inside
+uniform vec4 lake_shape = vec4(1.0, 1.0, 0.0, 0.0);    // (semi-minor / semi-major, cos rot, sin rot, -): an ellipse
 
 varying vec3 world;
 
@@ -47,7 +48,9 @@ void fragment() {
 	float ripple = texture(noise_tex, vec2(q.x / 7.0 + 0.3, (q.y - t * 1.4) / 9.0)).g;
 	float depth = 1.0 - smoothstep(0.25, 0.95, u + (ripple - 0.5) * 0.18);
 	// the reedy lake shares this depth field (forest_water.gdshader takes the same max)
-	float ld = length(p - lake_circle.xy) / max(lake_circle.z, 0.01);
+	vec2 lq = p - lake_circle.xy;
+	vec2 lr = vec2(dot(lq, lake_shape.yz), dot(lq, vec2(-lake_shape.z, lake_shape.y)));
+	float ld = length(vec2(lr.x, lr.y / max(lake_shape.x, 0.05))) / max(lake_circle.z, 0.01);
 	depth = max(depth, lake_circle.w * smoothstep(0.0, 1.0, pow(clamp((1.0 - ld) / 0.55, 0.0, 1.0), 0.8)));
 	vec3 col = mix(shallow_color, mix(mid_color, deep_color, smoothstep(0.35, 1.0, depth)), smoothstep(0.0, 0.45, depth));
 	col *= 0.93 + 0.14 * streak;
@@ -56,7 +59,7 @@ void fragment() {
 	// foam where the water meets the bank / bank rocks, broken and drifting
 	float foam_n = texture(noise_tex, vec2(q.x / 2.2, (q.y - t * 0.6) / 4.0)).b;
 	float foam_patch = texture(noise_tex, vec2(p.x / 19.0, p.y / 23.0)).r;   // rocky stretches
-	float in_lake = lake_circle.w * (1.0 - smoothstep(lake_circle.z - 1.5, lake_circle.z + 1.0, length(p - lake_circle.xy)));
+	float in_lake = lake_circle.w * (1.0 - smoothstep(1.0 - 1.5 / max(lake_circle.z, 1.0), 1.0 + 1.0 / max(lake_circle.z, 1.0), ld));
 	float foam = smoothstep(0.82, 0.97, u) * smoothstep(0.55, 0.85, foam_n) * smoothstep(0.42, 0.62, foam_patch) * (1.0 - in_lake);
 	col = mix(col, foam_color, clamp(foam, 0.0, 0.7));
 	// wet dark rim where the water laps the bank (none where the river opens into the lake)

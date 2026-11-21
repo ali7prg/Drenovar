@@ -30,8 +30,10 @@ const ARENA_BLEND_OUTER := 19.0
 const ARENA_DISH := 0.3
 const GLADE_PAD_BLEND := 2.0
 const PAD_EXTRA_GRADE_DEG := 4.0
+const GLADE_DIRT := 8.5               # m: warm trampled-dirt pad under every glade's camp (pass 2)
+const WARM_DIRT := Color(1.1, 0.98, 0.8)
 const JUNCTION_LANDING := 2.4         # m: trails are level within this radius of a junction node      # grade a trail may gain on top of its atlas profile to meet its ends
-const TERRAIN_VERSION := 20
+const TERRAIN_VERSION := 22
 
 ## Atlas v2 region ground tints (ForestAtlas.REGION_NAMES order, art/01 crops at zoom 68):
 ## sunny warm meadow under the golden grove, olive mixed oaks, dry grey-olive arena rock, fresh
@@ -351,8 +353,8 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 			if road_w > 0.0 and road_route.from != site.id and road_route.to != site.id:
 				w *= 1.0 - road_w * smoothstep(r - 0.5, r + 0.5, d)
 			h = lerpf(h, float(pad_heights.get(site.id, site.center.y)), w)
-		if d < r + 1.0:
-			dirt = maxf(dirt, 0.55 * (1.0 - smoothstep(2.5, r + 0.5, d)))
+		if d < GLADE_DIRT + 1.5:
+			dirt = maxf(dirt, 0.6 * (1.0 - smoothstep(GLADE_DIRT - 3.0, GLADE_DIRT + 1.0, d)))
 	for glade in atlas.extra_glades:   # atlas v2: glades without a site (E-L camp)
 		var d := Vector2(x - glade.center.x, z - glade.center.z).length()
 		var r: float = glade.radius
@@ -361,8 +363,8 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 			if road_w > 0.0 and road_route.from != glade.id and road_route.to != glade.id:
 				w *= 1.0 - road_w * smoothstep(r - 0.5, r + 0.5, d)
 			h = lerpf(h, float(pad_heights.get(glade.id, glade.center.y)), w)
-		if d < r + 1.0:
-			dirt = maxf(dirt, 0.5 * (1.0 - smoothstep(2.5, r + 0.5, d)))
+		if d < GLADE_DIRT + 1.5:
+			dirt = maxf(dirt, 0.55 * (1.0 - smoothstep(GLADE_DIRT - 3.0, GLADE_DIRT + 1.0, d)))
 	var ad := Vector2(x - atlas.arena_center.x, z - atlas.arena_center.z).length()
 	if ad < ARENA_BLEND_OUTER:
 		var floor_y: float = float(pad_heights.get("lf_boss_arena", atlas.arena_center.y)) - ARENA_DISH * (1.0 - pow(minf(ad, 15.0) / 15.0, 2.0))
@@ -371,10 +373,10 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 		stone = maxf(stone, 0.45 * smoothstep(12.0, 15.0, ad) * (1.0 - smoothstep(16.5, 19.5, ad)))
 	if quarry_center != Vector2.INF:
 		var dq := Vector2(x, z).distance_to(quarry_center)
-		if dq < 24.0:
+		if dq < 28.0:
 			var n := 0.5 + 0.5 * sin(x * 0.61 + z * 0.37) * cos(x * 0.29 - z * 0.53)
-			stone = maxf(stone, 0.85 * (1.0 - smoothstep(10.0 + 4.0 * n, 21.0, dq)))
-			dirt = maxf(dirt, 0.45 * (1.0 - smoothstep(14.0, 23.0, dq)))
+			stone = maxf(stone, 0.92 * (1.0 - smoothstep(13.0 + 4.0 * n, 25.0, dq)))
+			dirt = maxf(dirt, 0.5 * (1.0 - smoothstep(16.0, 27.0, dq)))
 	# Never touch the wet river channel; blend back over 2 m outside the wet edge.
 	var bank: float = atlas.river_bank_distance(x, z)
 	var keep := smoothstep(0.0, 2.0, bank) * core
@@ -387,10 +389,17 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 	return Vector4(out, dirt * core, stone * core, road_distance)
 
 
-## Irregular shoreline radius of a water body at a polar angle around its centre.
+## Irregular shoreline radius of a water body at a polar angle around its centre (an ellipse when
+## the body has `minor` / `rot`: semi-axes radius × minor, major axis at angle rot).
 static func shore_radius(body: Dictionary, angle: float) -> float:
 	var s: float = body.seed
-	return float(body.radius) * (1.0 + float(body.noise) * (0.6 * sin(3.0 * angle + s) + 0.4 * sin(5.0 * angle + 2.1 * s)))
+	var a: float = body.radius
+	var r := a
+	if body.has("minor") and float(body.minor) < a - 0.01:
+		var b: float = body.minor
+		var phi := angle - float(body.get("rot", 0.0))
+		r = a * b / sqrt(pow(b * cos(phi), 2.0) + pow(a * sin(phi), 2.0))
+	return r * (1.0 + float(body.noise) * (0.6 * sin(3.0 * angle + s) + 0.4 * sin(5.0 * angle + 2.1 * s)))
 
 
 ## Signed distance (m) to a body's shoreline: < 0 in the water.
@@ -405,14 +414,14 @@ static func shore_distance(body: Dictionary, x: float, z: float) -> float:
 ## Trails (walking band + 2 m) and glade pads are never cut. Returns (height, mud weight).
 func _water_shape(body: Dictionary, x: float, z: float, h: float, road_distance: float) -> Vector2:
 	var c: Vector2 = body.center
-	var reach: float = float(body.radius) * 1.3 + 14.0
+	var reach: float = float(body.radius) * 1.15 + 14.0
 	if absf(x - c.x) > reach or absf(z - c.y) > reach:
 		return Vector2(h, 0.0)
 	var sd := shore_distance(body, x, z)
 	var level: float = body.level
 	var target: float
 	if sd < 0.0:
-		var depth_t := clampf(-sd / maxf(1.0, float(body.radius) * 0.6), 0.0, 1.0)
+		var depth_t := clampf(-sd / maxf(1.0, float(body.get("minor", body.radius)) * 0.6), 0.0, 1.0)
 		target = level - 0.25 - float(body.depth) * smoothstep(0.0, 1.0, depth_t)
 	elif sd < 0.7:
 		target = level - 0.25
@@ -481,12 +490,19 @@ func bake() -> void:
 			for body in water_bodies:
 				wet = maxf(wet, 1.0 - smoothstep(0.0, 3.5, shore_distance(body, x, z)))
 			color = color.lerp(WET_TINT, wet * 0.8)
+			for site in atlas.sites:
+				var gd := Vector2(x - site.center.x, z - site.center.z).length()
+				if gd < GLADE_DIRT + 2.0:
+					color = color.lerp(Color(color.r * WARM_DIRT.r, color.g * WARM_DIRT.g, color.b * WARM_DIRT.b), 1.0 - smoothstep(GLADE_DIRT - 2.0, GLADE_DIRT + 1.5, gd))
+			if quarry_center != Vector2.INF:
+				var qd := Vector2(x, z).distance_to(quarry_center)
+				color = color.lerp(Color(1.12, 1.1, 1.04), (1.0 - smoothstep(12.0, 24.0, qd)) * 0.8)
 			var limestone := weights[6] + 0.5 * weights[2]
 			rock[k] = maxf(rock[k], smoothstep(16.0, 30.0, slope) * (0.45 + 0.5 * limestone) * core)
 			earth[k] = maxf(earth[k], limestone * 0.18 * core)
 			# Shaded forest floor (darker under the canopy, light on paths/glades), as in art/01:
 			# mossy and dark under the south pines, sunny under the golden grove.
-			var floor_shade := lerpf(shade_min, 1.0, clampf(earth[k] * 1.4, 0.0, 1.0))
+			var floor_shade := lerpf(shade_min, 1.0, clampf(earth[k] * 1.4, 0.0, 1.0) * (1.0 - 0.45 * weights[5]))
 			color = Color(color.r * floor_shade, color.g * floor_shade, color.b * floor_shade)
 			tint[k] = Color(1, 1, 1).lerp(color, core)
 	stats.changed_vertices = changed

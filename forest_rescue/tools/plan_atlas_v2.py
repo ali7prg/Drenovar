@@ -265,7 +265,7 @@ PLAN = {
         ["dead_tree", 64.0, 76.0],
         ["hunter_shelter", 102.0, 64.0],
         ["waterfall_pond", 15.0, -70.0],
-        ["lake_marsh", 101.0, 38.0],
+        ["lake_marsh", 95.5, 34.5],
         ["bridge", 90.482, 20.0],
         ["boss_arena", 18.0, -92.0],
     ],
@@ -319,7 +319,8 @@ PLAN = {
         ["lf_site_07", "lf_site_08", [[78, 94]]],
         ["lf_junction_se", "lf_site_09", [[74, 50]]],
         ["lf_site_08", "hunter_shelter", []],
-        ["lf_site_09", "hunter_shelter", [[92, 56]]],
+        # pass 2 (coordinator): along the reedy lake's south-west shore, so the walk reveals the lake
+        ["lf_site_09", "hunter_shelter", [[89.3, 43.1], [96.3, 47.6], [101.6, 52.7], [103.3, 57.8]]],
         # the bridge and the east bank up to the arena
         ["lf_junction_se", "lf_junction_e", [[67, 38]]],
         ["lf_junction_e", "lf_bridge_west", []],
@@ -682,7 +683,10 @@ if __name__ == "__main__" and len(sys.argv) > 2 and sys.argv[2] == "--table":
 # as ways (samples ≤ 0.5 m, grade-limited targetRoadY), the river with the reedy-lake widening
 # and the waterfall pond, everything else (fog, streaming, zones, reserve masks) from v1.
 
-LAKE = {"center": [101.0, 38.0], "radius": 11.0}
+# pass 2: an ellipse along the river's west bank, as big as the ground between glade 09, the bridge
+# and the west bank allows (radius = semi-major axis, minor = semi-minor, rotDeg = major-axis angle
+# in the XZ plane, atan2(z, x)); the glade 09 → hunter shelter trail runs along its south-west shore.
+LAKE = {"center": [95.5, 34.5], "radius": 15.0, "minor": 7.5, "rotDeg": 36.87}
 POND = {"center": [15.0, -70.0], "radius": 6.5}
 LANDMARK_ROLES = {
     "hollow_oak_giant": "art/01 grove hero tree (lf_env_hollow_oak, hero scale)",
@@ -694,6 +698,26 @@ LANDMARK_ROLES = {
     "waterfall_pond": "art/01 waterfall from the east cliff into a pond with reeds",
     "lake_marsh": "art/01 reedy lake: the river widening south of the bridge",
 }
+
+
+def ellipse_x_span(spec, z):
+    """(min x, max x) of a water feature (circle, or ellipse with minor/rotDeg) at depth z, else None."""
+    cx, cz = spec["center"]
+    a = spec["radius"]
+    b = spec.get("minor", a)
+    r = math.radians(spec.get("rotDeg", 0.0))
+    ux, uz = math.cos(r), math.sin(r)
+    vx, vz = -uz, ux
+    dz = z - cz
+    # ((dx ux + dz uz)/a)^2 + ((dx vx + dz vz)/b)^2 = 1, quadratic in dx
+    A = ux * ux / (a * a) + vx * vx / (b * b)
+    B = 2 * (ux * uz * dz / (a * a) + vx * vz * dz / (b * b))
+    C = (uz * dz) ** 2 / (a * a) + (vz * dz) ** 2 / (b * b) - 1.0
+    disc = B * B - 4 * A * C
+    if disc <= 0:
+        return None
+    root = math.sqrt(disc)
+    return cx + (-B - root) / (2 * A), cx + (-B + root) / (2 * A)
 
 
 def catmull(points, step=0.49):
@@ -817,16 +841,28 @@ def write_atlas(server_path, client_path):
     for s in atlas["river"]["samples"]:
         z = s["z"]
         for spec, side in ((LAKE, "west"), (POND, "east")):
-            cx, cz = spec["center"]
-            r = spec["radius"]
-            if abs(z - cz) < r:
-                half = math.sqrt(r * r - (z - cz) ** 2)
+            span = ellipse_x_span(spec, z)
+            if span is not None:
                 if side == "west":
-                    s["wetWest"] = round(min(s["wetWest"], cx - half), 5)
+                    s["wetWest"] = round(min(s["wetWest"], span[0]), 5)
                 else:
-                    s["wetEast"] = round(max(s["wetEast"], cx + half), 5)
+                    s["wetEast"] = round(max(s["wetEast"], span[1]), 5)
     atlas["river"]["features"] = {"lake": LAKE, "pond": POND,
-                                  "note": "wet bounds widened for the reedy lake (west of the channel) and the waterfall pond (east bank)"}
+                                  "note": "wet bounds widened for the reedy lake (west of the channel; pass 2: an ellipse along the west bank) and the waterfall pond (east bank)"}
+    # every trail sample stays >= 1.5 m off the widened wet bounds (the bridge deck excepted)
+    zs = [s["z"] for s in atlas["river"]["samples"]]
+    worst = (99.0, None)
+    for route in routes:
+        for smp in route["samples"]:
+            if route["id"] == "lf_route_bridge":
+                continue
+            k = min(range(len(zs)), key=lambda i: abs(zs[i] - smp["z"]))
+            w = atlas["river"]["samples"][k]
+            d = max(w["wetWest"] - smp["x"], smp["x"] - w["wetEast"])
+            if d < worst[0]:
+                worst = (d, route["id"])
+    print("closest trail sample to the widened wet bounds: %.2f m (%s)" % worst)
+    assert worst[0] >= 1.5, "a trail runs into the widened water"
     atlas["runtimeCopy"] = {"source": "forest_rescue/server/data/world-atlas.v2.json", "copiedBy": "integration agent 2026-11-21"}
     for path in (server_path, client_path):
         os.makedirs(os.path.dirname(path), exist_ok=True)

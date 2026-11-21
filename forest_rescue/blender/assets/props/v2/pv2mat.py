@@ -183,7 +183,7 @@ def measure_ramps(A, v, k, M, log=pv2.log):
         ramps[c] = px
         stats[c] = dict(px=int(sel.sum()), mean_srgb=[round(float(x) * 255) for x in px.mean(0)])
     log("  painted pixels per class (de-lit): " + ", ".join(f"{c} {s['px']} {s['mean_srgb']}" for c, s in stats.items()))
-    return ramps, stats, (cls, classes)
+    return ramps, stats, (cls, classes, nrm)
 
 
 # ============================================================================ tiles
@@ -261,7 +261,7 @@ def smooth_by_angle(B, angle=40.0):
 def class_gains(rgba, v, cls_info, classes_wanted, ig=None):
     """Per-class mean colour of the painting / of the render on the same pixels (sRGB)."""
     from scipy import ndimage as ndi
-    cls, classes = cls_info
+    cls, classes = cls_info[0], cls_info[1]
     ref, _ = v.mask()
     a = rgba[..., 3] > 0.9
     use = ndi.binary_erosion(ref & a, iterations=2)
@@ -489,7 +489,7 @@ def run(M, modname, it, do_export=True, do_godot=True):
         if dbg:
             os.makedirs(dbg, exist_ok=True)
             np.savez_compressed(os.path.join(dbg, f"{aid}_iter{it}_render.npz"), rgba=rgba.astype(np.float32),
-                                cls=cls_info[0], classes=np.array(cls_info[1]))
+                                cls=cls_info[0], classes=np.array(cls_info[1]), nrm=cls_info[2].astype(np.float32))
         m = pv2.compare(v, rgba, pv2.qa_path(aid, it, v.name),
                         f"{aid} v2 iter {it} (material path): {v.title or v.name} | solved camera rms "
                         f"{v.rep['rms_px']:.2f}px (n={v.rep['n']}) | painted light k={k}", ignore=ign)

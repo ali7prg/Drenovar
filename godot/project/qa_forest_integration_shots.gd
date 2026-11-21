@@ -160,6 +160,42 @@ func run() -> void:
 				if is_instance_valid(r) and String(id).begins_with("cage_"):
 					print("CAGE ", id, " state=", r.load_state, " vis=", r.visible, " tree=", r.is_visible_in_tree(), " parent=", r.get_parent().name, " pvis=", r.get_parent().visible, " pos=", r.global_position)
 
+	# -------------------------------------------------- P0 set: the playable zooms (24 mechanism UI,
+	# 34 route/intro, 68 default, 120 overview) + a z12 close-up, same camera before/after.
+	var p0_all := only.is_empty() or only.has("p0")
+	var p0_some := p0_all
+	for item in only:
+		p0_some = p0_some or item.begins_with("p0_")
+	if p0_some:
+		var scenes := [
+			["horse", "horse_joined", "horse", [12.0, 24.0, 34.0, 68.0, 120.0]],
+			["route", "prologue_moving", "squad", [12.0, 34.0, 68.0]],
+			["site01", "site01_arrived", "site", [12.0, 24.0, 34.0, 68.0]],
+			["escort", "site01_escort_walking", "squad", [12.0, 34.0, 68.0]],
+			["overview", "completed", "overview", [120.0]],
+		]
+		for scene in scenes:
+			if not p0_all and not only.has("p0_" + scene[0]):
+				continue
+			await fresh(scene[1])
+			await preload_actors()
+			await frames(30)
+			var at := Vector3.ZERO
+			match String(scene[2]):
+				"horse":
+					at = forest.target_position("lf_horse_origin")
+				"squad":
+					at = forest.actors.squad_focus()
+				"site":
+					at = anchor("lf_site_01", "center")
+				"overview":
+					at = Vector3(2, 0, -6)
+			for zoom in scene[3]:
+				look(at + (Vector3(0, 0.8, 0) if zoom <= 12.0 else Vector3.ZERO), zoom)
+				settle_world()
+				await frames(12)
+				await shoot("p0_%s_z%d" % [scene[0], int(zoom)])
+
 	# -------------------------------------------------- hall III intro: the mare walks out of the mist
 	if wanted("intro"):
 		await fresh("intro_offer")

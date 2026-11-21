@@ -88,61 +88,79 @@ func _active_count() -> int:
 
 
 ## Trees whose crown hides at least one target: key -> {score, cell, mesh, origin, transform}.
+## Same geometry as the layout builder (Rules.crown_capsule), inlined: crown centre C, the crown
+## part between heights max(h0 - target height, 0) and h1 projected along the camera view.
 func query(targets: Array) -> Dictionary:
 	var result := {}
 	last_query.targets = targets.size()
 	last_query.candidates = 0
+	last_query.hiding = 0
 	if targets.is_empty() or canopy == null:
-		last_query.hiding = 0
 		return result
-	var lo := Vector2(INF, INF)
-	var hi := Vector2(-INF, -INF)
-	for t in targets:
-		var g := Vector2((t[0] as Vector3).x, (t[0] as Vector3).z)
-		lo = lo.min(g)
-		hi = hi.max(g)
-	# A crown hides a target only from the camera side (+X+Z): trunks within [lo - BEHIND, hi + REACH].
-	var box_lo := lo - Vector2.ONE * BEHIND
-	var box_hi := hi + Vector2.ONE * REACH
-	var c0 := Vector2i(clampi(floori((box_lo.x + ForestCanopy.EXTENT) / ForestCanopy.CELL), 0, ForestCanopy.CELLS - 1),
-		clampi(floori((box_lo.y + ForestCanopy.EXTENT) / ForestCanopy.CELL), 0, ForestCanopy.CELLS - 1))
-	var c1 := Vector2i(clampi(floori((box_hi.x + ForestCanopy.EXTENT) / ForestCanopy.CELL), 0, ForestCanopy.CELLS - 1),
-		clampi(floori((box_hi.y + ForestCanopy.EXTENT) / ForestCanopy.CELL), 0, ForestCanopy.CELLS - 1))
-	for j in range(c0.y, c1.y + 1):
-		for i in range(c0.x, c1.x + 1):
-			var cell := j * ForestCanopy.CELLS + i
-			var buffers: Dictionary = canopy.visible_buffers(cell)
-			for mesh_index in buffers:
-				var shape := _shape(mesh_index)
-				if shape.is_empty():
-					continue
-				var buffer: PackedFloat32Array = buffers[mesh_index]
-				for n in buffer.size() / ForestCanopy.STRIDE:
-					var o := n * ForestCanopy.STRIDE
-					var x := buffer[o + 3]
-					var z := buffer[o + 11]
-					if x < box_lo.x or x > box_hi.x or z < box_lo.y or z > box_hi.y:
+	# A crown hides a target only from the camera side (+X+Z): per target, trunks inside
+	# [g - BEHIND, g + REACH]; canopy cells touching those boxes.
+	var cell_targets := {}
+	for index in targets.size():
+		var feet: Vector3 = targets[index][0]
+		var c0 := _cell_xy(feet.x - BEHIND, feet.z - BEHIND)
+		var c1 := _cell_xy(feet.x + REACH, feet.z + REACH)
+		for j in range(c0.y, c1.y + 1):
+			for i in range(c0.x, c1.x + 1):
+				var cell := j * ForestCanopy.CELLS + i
+				if not cell_targets.has(cell):
+					cell_targets[cell] = PackedInt32Array()
+				cell_targets[cell].append(index)
+	var shift := Vector2.ONE * Rules.VIEW_SHIFT
+	for cell in cell_targets:
+		var near: PackedInt32Array = cell_targets[cell]
+		var buffers: Dictionary = canopy.visible_buffers(cell)
+		for mesh_index in buffers:
+			var shape := _shape(mesh_index)
+			if shape.is_empty():
+				continue
+			var dims: Array = Rules.crown_shape(shape[0], shape[1])
+			var offset := Vector2(float(dims[3]), float(dims[4]))
+			var buffer: PackedFloat32Array = buffers[mesh_index]
+			for n in buffer.size() / ForestCanopy.STRIDE:
+				var o := n * ForestCanopy.STRIDE
+				var x := buffer[o + 3]
+				var z := buffer[o + 11]
+				var score := 0.0
+				var tested := false
+				var crown_c := Vector2.ZERO
+				var h0 := 0.0
+				var r := 0.0
+				var a := Vector2.ZERO
+				for index in near:
+					var feet: Vector3 = targets[index][0]
+					if x < feet.x - BEHIND or x > feet.x + REACH or z < feet.z - BEHIND or z > feet.z + REACH:
 						continue
-					last_query.candidates += 1
-					var axis := Vector3(buffer[o], buffer[o + 4], buffer[o + 8])
-					var scale := axis.length()
-					var yaw := atan2(-axis.z, axis.x)
-					var score := 0.0
-					for t in targets:
-						var feet: Vector3 = t[0]
-						var capsule := Rules.crown_capsule(x, z, shape[0], shape[1], scale, yaw, float(t[1]))
-						var g := Vector2(feet.x, feet.z)
-						var p := Geometry2D.get_closest_point_to_segment(g, capsule[0], capsule[1])
-						if p.distance_to(g) < float(capsule[2]) + Rules.UNIT_RADIUS:
-							score += 10.0 - minf(9.0, Vector2(x, z).distance_to(g) * 0.25)
-					if score > 0.0:
-						var key := "%d:%d:%.2f:%.2f" % [cell, mesh_index, x, z]
-						result[key] = {"score": score, "cell": cell, "mesh": mesh_index, "origin": Vector2(x, z),
-							"transform": Transform3D(Basis(Vector3(buffer[o], buffer[o + 4], buffer[o + 8]),
-								Vector3(buffer[o + 1], buffer[o + 5], buffer[o + 9]), Vector3(buffer[o + 2], buffer[o + 6], buffer[o + 10])),
-								Vector3(x, buffer[o + 7], z))}
+					if not tested:
+						tested = true
+						last_query.candidates += 1
+						var axis := Vector3(buffer[o], buffer[o + 4], buffer[o + 8])
+						var scale := axis.length()
+						crown_c = Vector2(x, z) + offset.rotated(-atan2(-axis.z, axis.x)) * scale
+						h0 = float(dims[0]) * scale
+						r = float(dims[2]) * scale + Rules.UNIT_RADIUS
+						a = crown_c - shift * (float(dims[1]) * scale)
+					var g := Vector2(feet.x, feet.z)
+					var b := crown_c - shift * maxf(0.0, h0 - float(targets[index][1]))
+					if Geometry2D.get_closest_point_to_segment(g, a, b).distance_squared_to(g) < r * r:
+						score += 10.0 - minf(9.0, Vector2(x, z).distance_to(g) * 0.25)
+				if score > 0.0:
+					var key := "%d:%d:%.2f:%.2f" % [cell, mesh_index, x, z]
+					result[key] = {"score": score, "cell": cell, "mesh": mesh_index, "origin": Vector2(x, z),
+						"transform": Transform3D(Basis(Vector3(buffer[o], buffer[o + 4], buffer[o + 8]),
+							Vector3(buffer[o + 1], buffer[o + 5], buffer[o + 9]), Vector3(buffer[o + 2], buffer[o + 6], buffer[o + 10])),
+							Vector3(x, buffer[o + 7], z))}
 	last_query.hiding = result.size()
 	return result
+
+
+static func _cell_xy(x: float, z: float) -> Vector2i:
+	return Vector2i(clampi(floori((x + ForestCanopy.EXTENT) / ForestCanopy.CELL), 0, ForestCanopy.CELLS - 1),
+		clampi(floori((z + ForestCanopy.EXTENT) / ForestCanopy.CELL), 0, ForestCanopy.CELLS - 1))
 
 
 ## [species, variant] for a canopy tree mesh ("tree:<asset>:v<n>"), [] for anything else.
@@ -230,3 +248,7 @@ static func _fade_material(source: Material) -> Material:
 
 static func clear_cache() -> void:
 	_fade_materials.clear()
+
+
+func _exit_tree() -> void:
+	clear()

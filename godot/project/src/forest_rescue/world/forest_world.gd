@@ -16,6 +16,7 @@ const ForestCanopy = preload("res://src/forest_rescue/world/forest_canopy.gd")
 const ForestFog = preload("res://src/forest_rescue/world/forest_fog.gd")
 const ForestLandmarks = preload("res://src/forest_rescue/world/forest_landmarks.gd")
 const ForestImpostors = preload("res://src/forest_rescue/world/forest_impostors.gd")
+const ForestOccluders = preload("res://src/forest_rescue/world/forest_occluders.gd")
 const SUN_ROTATION := Vector3(-0.837758, -0.558505, 0.0)   # landscape.gd city sun (-48°, -32°, 0)
 const Rules = preload("res://src/forest_rescue/world/forest_layout_rules.gd")
 const PATH_SHADER = preload("res://src/forest_rescue/world/forest_path.gdshader")
@@ -70,8 +71,7 @@ var city_state: Dictionary = {}
 var arena_state := "locked"
 var site_steps: Dictionary = {}
 var impostors: Node
-var _fade_key := ""
-var _fade_timer := 0.0
+var occluders: Node3D                     # ForestOccluders (whole-tree fade of crowns hiding actors)
 var _cull_timer := 0.0
 var _sight_timer := 0.0
 
@@ -152,6 +152,8 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	canopy = ForestCanopy.new()
 	canopy.name = "Canopy"
 	add_child(canopy)
+	occluders = ForestOccluders.new(self, canopy)
+	add_child(occluders)
 	_build_paths()
 	_restyle_river()
 	impostors = ForestImpostors.new()
@@ -367,6 +369,8 @@ static func _excluded(p: Vector2, exclusions: Array) -> bool:
 func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 	var started := Time.get_ticks_usec()
 	city_state = city
+	if occluders != null:
+		occluders.clear()
 	canopy.clear_instances()
 	stage.selectable_trees.clear()
 	stage.standing_tree_cells.clear()
@@ -570,10 +574,7 @@ func chunk_explored(id: String) -> bool:
 
 
 func _process(delta: float) -> void:
-	_fade_timer -= delta
-	if _fade_timer <= 0.0:
-		_fade_timer = 0.15
-		_update_fade_circles()
+	_update_occluders(delta)
 	_cull_timer -= delta
 	if _cull_timer <= 0.0:
 		_cull_timer = 0.25
@@ -585,22 +586,19 @@ func _process(delta: float) -> void:
 		_update_sights()
 
 
-## Canopy fade around adventure actors and pinned areas (crowns dither away above 1.2 m).
-func _update_fade_circles() -> void:
-	var circles: Array = []
-	for child in _actors.get_children():
-		if child is Node3D and (child as Node3D).visible and not child.get_meta("no_canopy_fade", false):
-			var p: Vector3 = (child as Node3D).global_position
-			circles.append(Vector4(p.x, p.y, p.z, float(child.get_meta("canopy_fade_radius", 6.5))))
-	for id in pinned:
-		var area: Dictionary = pinned[id]
-		var c: Vector3 = area.center
-		circles.append(Vector4(c.x, height_at(c.x, c.z), c.z, maxf(4.0, float(area.radius))))
-	var key := str(circles)
-	if key == _fade_key:
+## Whole-tree occluder fade: trees whose crown would hide a visible adventure actor or site prop
+## from the city camera are drawn faded (forest_occluders.gd). Actors may set the meta
+## "occluder_height" (m, default 2.0; props 2.6); "no_canopy_fade" excludes markers/decals.
+func _update_occluders(delta: float) -> void:
+	if occluders == null:
 		return
-	_fade_key = key
-	ForestKit.set_fade_circles(circles, [impostors.material] if impostors != null and impostors.material != null else [])
+	var targets: Array = []
+	for pair in [[_actors, 2.0], [_props, 2.6]]:
+		for child in (pair[0] as Node3D).get_children():
+			if child is Node3D and (child as Node3D).visible and not child.get_meta("no_canopy_fade", false):
+				var p: Vector3 = (child as Node3D).global_position
+				targets.append([p, float(child.get_meta("occluder_height", pair[1]))])
+	occluders.update_targets(targets, delta)
 
 
 func _cull_fogged_children(root: Node3D) -> void:

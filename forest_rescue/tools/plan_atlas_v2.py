@@ -651,3 +651,165 @@ def table_sheet(out_dir, plan):
 
 if __name__ == "__main__" and len(sys.argv) > 2 and sys.argv[2] == "--table":
     print(table_sheet(sys.argv[1], PLAN))
+
+
+# ============================================================================================
+# Atlas v2 writer (after the plan checkpoint): sites, junction / landmark nodes, the trail network
+# as ways (samples ≤ 0.5 m, grade-limited targetRoadY), the river with the reedy-lake widening
+# and the waterfall pond, everything else (fog, streaming, zones, reserve masks) from v1.
+
+LAKE = {"center": [101.0, 38.0], "radius": 11.0}
+POND = {"center": [15.0, -70.0], "radius": 6.5}
+LANDMARK_ROLES = {
+    "hollow_oak_giant": "art/01 grove hero tree (lf_env_hollow_oak, hero scale)",
+    "ruined_arch": "art/01 ruined arch (lf_env_ruined_watchpost)",
+    "standing_stones": "art/01 stone row above the town (lf_env_standing_stones)",
+    "quarry_mine": "art/01 quarry: mine mouth, crane, rails (lf_env_quarry_mine)",
+    "dead_tree": "art/01 bare white dead tree, stone pillars, bones",
+    "hunter_shelter": "art/01 hunter shelter by the marsh (lf_env_hunter_shelter)",
+    "waterfall_pond": "art/01 waterfall from the east cliff into a pond with reeds",
+    "lake_marsh": "art/01 reedy lake: the river widening south of the bridge",
+}
+
+
+def catmull(points, step=0.5):
+    """Centripetal-ish Catmull-Rom through the control points, resampled to ≤ step."""
+    pts = [np.array(p, float) for p in points]
+    if len(pts) == 2:
+        dense = [pts[0] + (pts[1] - pts[0]) * t for t in np.linspace(0, 1, 200)]
+    else:
+        ext = [pts[0] * 2 - pts[1]] + pts + [pts[-1] * 2 - pts[-2]]
+        dense = []
+        for i in range(1, len(ext) - 2):
+            p0, p1, p2, p3 = ext[i - 1], ext[i], ext[i + 1], ext[i + 2]
+            for t in np.linspace(0, 1, 60, endpoint=False):
+                t2, t3 = t * t, t * t * t
+                dense.append(0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3))
+        dense.append(pts[-1])
+    # arc-length resample
+    seg = [np.linalg.norm(dense[i + 1] - dense[i]) for i in range(len(dense) - 1)]
+    total = float(sum(seg))
+    n = max(1, int(math.ceil(total / step - 1e-9)))
+    cum = np.concatenate([[0.0], np.cumsum(seg)])
+    out = []
+    for k in range(n + 1):
+        s = total * k / n
+        i = min(int(np.searchsorted(cum, s, side="right") - 1), len(dense) - 2)
+        f = 0.0 if seg[i] < 1e-9 else (s - cum[i]) / seg[i]
+        out.append(dense[i] + (dense[i + 1] - dense[i]) * f)
+    out[0] = pts[0]
+    out[-1] = pts[-1]
+    return out
+
+
+def road_profile(samples, on_deck):
+    g = np.array([1.1 if on_deck[i] else base_height(p[0], p[1]) for i, p in enumerate(samples)])
+    k = 16
+    sm = np.array([g[max(0, i - k):i + k + 1].mean() for i in range(len(g))])
+    lim = math.tan(math.radians(12.0)) * 0.5
+    prof = sm.copy()
+    for i, d in enumerate(on_deck):
+        if d:
+            prof[i] = 1.1
+    for _ in range(4):
+        for i in range(1, len(prof)):
+            if not on_deck[i]:
+                prof[i] = min(max(prof[i], prof[i - 1] - lim), prof[i - 1] + lim)
+        for i in range(len(prof) - 2, -1, -1):
+            if not on_deck[i]:
+                prof[i] = min(max(prof[i], prof[i + 1] - lim), prof[i + 1] + lim)
+    return g, prof
+
+
+def write_atlas(server_path, client_path):
+    v1 = json.load(open(ATLAS))
+    atlas = json.loads(json.dumps(v1))
+    atlas["id"] = "lost_forest_atlas_v2"
+    atlas["schemaVersion"] = 2
+    atlas["derivedFrom"] = {"atlas": v1["id"], "masterplan": "forest_rescue/delivery/art/01_world_masterplan.png",
+                            "decision": "owner 2026-11-21: the in-game layout follows art/01 (zones, glades with cages and camps, "
+                                        "landmarks, a branching network of winding trails)",
+                            "tool": "forest_rescue/tools/plan_atlas_v2.py"}
+    nodes, trails = trail_points(PLAN)
+    # sites: new centres (pad height = natural ground at the centre), chunk ids, offsets unchanged
+    by_id = {s["id"]: s for s in atlas["sites"]}
+    for sid, key, x, z, zone in PLAN["sites"]:
+        site = by_id[sid]
+        site["center"] = {"x": x, "y": round(base_height(x, z), 5), "z": z}
+        site["chunkId"] = "lf_chunk_%d_%d" % (min(3, max(0, int((x + 112) // 56))), min(3, max(0, int((z + 112) // 56))))
+        site["masterplanKey"] = key
+        site["status"] = "atlas_v2_masterplan"
+    # landmarks: horse origin, bridge kept; arena moved; junctions, glade E-L, art landmarks added
+    keep = [l for l in atlas["landmarks"] if l["id"] in ("lf_horse_origin", "lf_bridge_crossing")]
+    arena = next(l for l in atlas["landmarks"] if l["id"] == "lf_boss_arena")
+    ax, az = next((l[1], l[2]) for l in PLAN["landmarks"] if l[0] == "boss_arena")
+    arena["center"] = {"x": ax, "y": round(base_height(ax, az), 5), "z": az}
+    entry = np.array(PLAN["junctions"]["lf_junction_ne"]) - np.array([ax, az])
+    arena["entranceYawDeg"] = round(math.degrees(math.atan2(entry[0], entry[1])), 2)
+    arena["status"] = "atlas_v2_masterplan"
+    landmarks = keep + [arena]
+    for jid, (x, z) in PLAN["junctions"].items():
+        if jid == "lf_horse_origin":
+            continue
+        landmarks.append({"id": jid, "center": {"x": x, "y": round(base_height(x, z), 5), "z": z}, "role": "trail junction (nav node)"})
+    for gid, key, x, z, zone in PLAN["extra_glades"]:
+        landmarks.append({"id": gid, "center": {"x": x, "y": round(base_height(x, z), 5), "z": z}, "clearingRadius": 7,
+                          "role": "glade with a camp, no cage (art/01 %s)" % key})
+    for lid, x, z in PLAN["landmarks"]:
+        if lid in ("bridge", "boss_arena"):
+            continue
+        landmarks.append({"id": "lf_mark_" + lid, "center": {"x": x, "y": round(base_height(x, z), 5), "z": z},
+                          "role": LANDMARK_ROLES.get(lid, lid)})
+    atlas["landmarks"] = landmarks
+    # node ids used by the trails: art landmark names → lf_mark_*, bridge/arena → atlas ids
+    def node_id(n):
+        if n == "boss_arena":
+            return "lf_boss_arena"
+        if n in LANDMARK_ROLES:
+            return "lf_mark_" + n
+        return n
+    routes = []
+    deck_x = (77.0, 104.0)
+    for a, b, pts in trails:
+        rid = "lf_route_bridge" if {a, b} == {"lf_bridge_west", "lf_bridge_east"} else "lf_trail_%s__%s" % (node_id(a).replace("lf_", ""), node_id(b).replace("lf_", ""))
+        if rid == "lf_route_bridge":
+            n = int(round((deck_x[1] - deck_x[0]) / 0.5))
+            samples = [np.array([deck_x[0] + (deck_x[1] - deck_x[0]) * i / n, 20.0]) for i in range(n + 1)]
+            if a == "lf_bridge_east":
+                samples.reverse()
+        else:
+            samples = catmull(pts)
+        on_deck = [rid == "lf_route_bridge" for _ in samples]
+        g, prof = road_profile(samples, on_deck)
+        routes.append({"id": rid, "from": node_id(a), "to": node_id(b), "width": 2.4, "clearVegetationRadius": 3.0,
+                       "controls": [{"x": round(float(p[0]), 3), "z": round(float(p[1]), 3)} for p in pts],
+                       "geometry": "Catmull-Rom through the controls, resampled at <=0.5 units",
+                       "traversal": "walk+bridge" if rid == "lf_route_bridge" else "walk",
+                       "samples": [{"x": round(float(p[0]), 5), "y": round(float(g[i]), 5), "z": round(float(p[1]), 5),
+                                    "targetRoadY": round(float(prof[i]), 5)} for i, p in enumerate(samples)]})
+    atlas["routes"] = routes
+    # river: reedy lake (widening south of the bridge) and the waterfall pond on the east bank
+    river = River(v1)
+    for s in atlas["river"]["samples"]:
+        z = s["z"]
+        for spec, side in ((LAKE, "west"), (POND, "east")):
+            cx, cz = spec["center"]
+            r = spec["radius"]
+            if abs(z - cz) < r:
+                half = math.sqrt(r * r - (z - cz) ** 2)
+                if side == "west":
+                    s["wetWest"] = round(min(s["wetWest"], cx - half), 5)
+                else:
+                    s["wetEast"] = round(max(s["wetEast"], cx + half), 5)
+    atlas["river"]["features"] = {"lake": LAKE, "pond": POND,
+                                  "note": "wet bounds widened for the reedy lake (west of the channel) and the waterfall pond (east bank)"}
+    atlas["runtimeCopy"] = {"source": "forest_rescue/server/data/world-atlas.v2.json", "copiedBy": "integration agent 2026-11-21"}
+    for path in (server_path, client_path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        json.dump(atlas, open(path, "w"), ensure_ascii=False, indent=None, separators=(",", ":"))
+    print("atlas v2:", len(atlas["sites"]), "sites,", len(atlas["landmarks"]), "landmarks,", len(routes), "routes,",
+          sum(len(r["samples"]) for r in routes), "samples →", server_path, client_path)
+
+
+if __name__ == "__main__" and len(sys.argv) > 3 and sys.argv[1] == "--write":
+    write_atlas(sys.argv[2], sys.argv[3])

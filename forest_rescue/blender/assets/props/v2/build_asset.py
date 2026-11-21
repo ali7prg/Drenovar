@@ -44,6 +44,10 @@ def swap_images(mat, col=None, nrm=None):
 def run(modname, it, do_export=True, do_godot=True):
     t0 = time.time()
     M = importlib.import_module(modname)
+    if getattr(M, "MATERIAL_MODE", False):
+        # clean modelled geometry + seamless painted-style material tiles (no projection atlas, no alpha)
+        import pv2mat
+        return pv2mat.run(M, modname, it, do_export, do_godot)
     aid = M.ID
     core.reset()
     pv2.log(f"[{aid}] iter {it}")

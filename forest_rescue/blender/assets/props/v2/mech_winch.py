@@ -55,6 +55,11 @@ TILE_M = {"wood": 0.9, "iron": 0.45, "rope": 0.28, "stone": 0.7, "brass": 0.22, 
 ROPE_ROWS = 4                # rope tile: 4 turns across v
 ROPE_D = 0.07                # rope diameter on the drum (one row)
 VOID_COLOUR = (0.055, 0.045, 0.038)
+# game sun (forest_world SUN_ROTATION) in the model's frame at the device yaw 45 deg (Blender axes)
+GAME_LIGHT = (-0.652, -0.15, 0.743)
+SMOOTH_ANGLE = 40.0
+# QA close-ups (sheet px): gears, crank, chest + pit, left trestle top + brake
+CLOSEUPS = [(100, 510, 280, 680), (360, 560, 520, 712), (180, 728, 380, 876), (40, 515, 200, 650)]
 # UV rules per tag prefix (pv2mat.assign_uvs): default "box" = metre box mapping in the primitive's own frame,
 # u along its longest axis (grain along every beam); "coil" = rope turns round the drum axle (X); "tube" = rope
 # along its length; "fixed" = UVs authored with the geometry (grass blades)
@@ -715,6 +720,20 @@ def solve(views):
 def _resolve_pose(v, p):
     if v.pose.get("chest") == "raised":
         v.pose.update(drawn_pose(p))
+
+
+def solved_pose(p):
+    """End pose of lf_lock_mechanism (QA render): chest raised clear, lid open, drum / crank / gears turned."""
+    from mathutils import Matrix, Vector
+    travel, _ = rise(p)
+    L0 = rope_len(p)
+    turn = -travel / p["Rc"]
+    _, ax, _, _ = big_gear_frame(p)
+    eb = tuple(Matrix.Rotation(turn, 3, Vector(tuple(ax))).to_euler("XYZ"))
+    ep = tuple(Matrix.Rotation(-turn * RATIO, 3, Vector(tuple(ax))).to_euler("XYZ"))
+    return {"chest": {"loc": (0, 0, travel)}, "rope": {"scale": (1, 1, (L0 - travel) / L0)},
+            "chest_lid": {"rot": (-math.radians(105), 0, 0)}, "drum": {"rot": (turn, 0, 0)}, "crank": {"rot": (turn, 0, 0)},
+            "pawl": {"rot": (PAWL_ON, 0, 0)}, "big_gear": {"rot": eb}, "pinion": {"rot": ep}}
 
 
 # ---------------------------------------------------------------------------------------------- clips

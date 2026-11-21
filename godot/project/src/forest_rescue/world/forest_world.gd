@@ -188,6 +188,7 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	var light: Vector3 = -stage.shadow_direction if stage.shadow_direction != Vector3.ZERO else Vector3(0.45, 0.74, 0.5)
 	fog.build(func(x: float, z: float) -> float: return terrain.ground_height(x, z), light)
 	fog.reveal_finished.connect(func() -> void: fog_reveal_finished.emit(fog_revision))
+	landmarks.arena_clear_discs = [[ForestWater.POND_CENTER, ForestWater.POND_RADIUS + 4.5], [ForestWater.FALLS_LIP + ForestWater.FALLS_FACING * 2.0, 4.0]]
 	landmarks.populate()
 	_register_fog_receivers()
 	setup_ms.visuals = (Time.get_ticks_usec() - t) / 1000.0
@@ -215,12 +216,12 @@ func _build_paths() -> void:
 	var colors := PackedColorArray()
 	var normals := PackedVector3Array()
 	var indices := PackedInt32Array()
-	# art/07: a narrow worn dirt trail (≈ 2.2 m, decorative trails ≈ 1.6 m) whose edges are
-	# overgrown with grass (forest_path.gdshader), on the meandered visual trail (ForestAtlas).
+	# art/07: a narrow worn dirt trail (≈ 1.6 m) whose edges are overgrown with grass
+	# (forest_path.gdshader), on the meandered visual trail (ForestAtlas).
 	for r in atlas.routes.size():
 		var decor: bool = atlas.routes[r].get("decor", false)
-		var half := 0.8 if decor else 1.1
-		var fringe := 0.6 if decor else 0.75
+		var half := 0.7 if decor else 0.8
+		var fringe := 0.5 if decor else 0.55
 		var points: PackedVector3Array = atlas.routes[r].points
 		var on_deck: PackedByteArray = terrain.road_on_deck[r]
 		var profile: PackedFloat32Array = terrain.road_profiles[r]
@@ -879,6 +880,9 @@ func poi_position(target_id: String) -> Vector3:
 	if target_id.begins_with("lf_key_"):
 		var anchor := site_anchor("lf_site_" + target_id.trim_prefix("lf_key_"))
 		return anchor.get("artifact", Vector3.INF)
+	if atlas.landmark_by_id.has(target_id):        # atlas v2 waypoints: junctions, marks, lf_glade_el
+		var node: Dictionary = atlas.landmark_by_id[target_id]
+		return ground_point(float(node.center.x), float(node.center.z))
 	var parts := target_id.split(":")
 	var anchor := site_anchor(parts[0])
 	if anchor.is_empty():

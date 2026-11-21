@@ -136,10 +136,10 @@ func run() -> void:
 		if maxf(absf(x), absf(z)) <= 56.0:
 			bad_trees += 1
 			continue
-		var hit: Dictionary = world.atlas.nearest_route(x, z)
-		# v2 rule: trunk ≥ route clearance + 1.4 m + 45 % of the crown (crowns may overhang a bit)
+		# v2 rule: trunk ≥ route clearance + 1.4 m + 45 % of the crown (crowns may overhang a bit);
+		# atlas v2: on the far side of a trail (away from the camera) ≥ FAR_SIDE_TRUNK_CLEAR
 		var crown: float = world.TREE_CROWN[int(item[2])] * float(item[5])
-		if not hit.is_empty() and hit.distance < float(world.atlas.routes[hit.route].clear) + Rules.ROUTE_TRUNK_MARGIN + crown * 0.45 - 0.05:
+		if _route_trunk_violation(masks, x, z, crown):
 			bad_trees += 1
 		for site in world.atlas.sites:
 			if Vector2(x, z).distance_to(Vector2(site.center.x, site.center.z)) < site.radius + Rules.GLADE_TRUNK_MARGIN + crown * 0.4 - 0.05:
@@ -324,6 +324,28 @@ func run() -> void:
 	notes.kit = world.kit_status()
 	stage.free()
 	finish()
+
+
+## Same route-clearance rule as the layout builder (blocked_exact), per route capsule.
+func _route_trunk_violation(masks, x: float, z: float, crown: float) -> bool:
+	var reach := 6.0 + crown * 0.55
+	for gz in range(floori((z - reach) / masks.cell), floori((z + reach) / masks.cell) + 1):
+		for gx in range(floori((x - reach) / masks.cell), floori((x + reach) / masks.cell) + 1):
+			for index in masks.grid.get(Vector2i(gx, gz), PackedInt32Array()):
+				var mask: Dictionary = masks.masks[index]
+				if String(mask.get("kind", "")) != "route":
+					continue
+				var a := Vector2(float(mask.a.x), float(mask.a.z))
+				var b := Vector2(float(mask.b.x), float(mask.b.z))
+				var ab := b - a
+				var t := clampf((Vector2(x, z) - a).dot(ab) / maxf(ab.length_squared(), 0.0001), 0.0, 1.0)
+				var offset := Vector2(x, z) - (a + ab * t)
+				var limit: float = float(mask.radius) + Rules.ROUTE_TRUNK_MARGIN + crown * 0.45 - 0.05
+				if Rules.far_side(offset):
+					limit = Rules.FAR_SIDE_TRUNK_CLEAR - 0.05
+				if offset.length() < limit:
+					return true
+	return false
 
 
 func finish() -> void:

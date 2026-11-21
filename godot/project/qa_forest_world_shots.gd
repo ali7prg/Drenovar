@@ -277,6 +277,23 @@ func run() -> void:
 	world.fog.set_dim(0.0)
 	await shot("full_overview_z120", Vector3(0, 0, 0), 120.0)
 	await shot("full_overview_z140", Vector3(0, 0, 0), 140.0)
+	# art/01 framing (1536 × 1024 like the painting): the whole forest square, the town where the
+	# painting has it (49 % across, 43 % down) — side by side with art/01 in compose_v2.py
+	if wants("full_overview_art01"):
+		root.size = Vector2i(1536, 1024)
+		await settle(4)
+		await shot("full_overview_art01", Vector3(17.8, 0, 13.6), 195.0)
+		root.size = Vector2i(1366, 630)
+		await settle(4)
+	# close-ups of the art/01 landmarks and camps (zoom 30)
+	for spec in [["camp01", world.poi_position("lf_site_01")], ["camp04", world.poi_position("lf_site_04")],
+			["camp07", world.poi_position("lf_site_07")], ["camp10", world.poi_position("lf_site_10")],
+			["campEL", world.poi_position("lf_glade_el") if world.poi_position("lf_glade_el") != Vector3.INF else Vector3(72, 0, -86)],
+			["falls", Vector3(21.5, 0, -64.5)], ["deadtree", Vector3(65, 0, 76)], ["mine", Vector3(-10, 0, 104)],
+			["stones_close", Vector3(-61, 0, -77)], ["hollow_oak", Vector3(-99, 0, -2)], ["lake_close", Vector3(97, 0, 40)],
+			["shelter", Vector3(104, 0, 60)], ["arch", Vector3(-70, 0, 22)]]:
+		var at: Vector3 = spec[1]
+		await shot("close_%s_z30" % spec[0], Vector3(at.x, 0, at.z), 30.0)
 	# atlas v2 regions (art/01 user zones): grove + hollow oak, stones, west oaks, quarry, south
 	# pines + marsh, lake, bridge, east willows, the waterfall below the arena, the arena, the town.
 	for spec in [["grove", Vector3(-84, 0, -16)], ["stones", Vector3(-56, 0, -70)], ["west", Vector3(-76, 0, 52)],

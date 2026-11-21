@@ -83,6 +83,7 @@ var arena_parts: Array = []       # [MeshInstance3D, Mesh LOD0, Mesh LOD1]
 var arena_lod := -1
 var tris_by_lod := {}             # placement id -> [tris LOD0, LOD1, LOD2]
 var dead_tree_spot := Vector2.INF # where ForestWorld plants the bare white tree
+var arena_clear_discs: Array = [] # [[Vector2, radius]]: the arena GLB's rim trees/shrubs kept off (waterfall pond)
 var _cut_cache: Dictionary = {}   # "fire|bench:lod" -> [[Mesh, Transform3D, material overrides]]
 
 
@@ -803,7 +804,18 @@ func _swap_arena(scene: Variant, lod: int) -> void:
 			continue
 		var box: AABB = part.global_transform * part.get_aabb()
 		var c := box.get_center()
-		arena_cull.append([part, Vector2(c.x, c.z), maxf(box.size.x, box.size.z) * 0.5])
+		# atlas v2: the rim trees / shrubs of the arena file that would stand in the waterfall
+		# pond (or in front of the fall) stay hidden
+		var cleared := false
+		var pname := String(part.name)
+		if pname.begins_with("tree_") or pname.begins_with("shrub_") or pname.begins_with("tuft_") \
+				or (part.get_parent() != null and (String(part.get_parent().name).begins_with("tree_") or String(part.get_parent().name).begins_with("shrub_"))):
+			for disc in arena_clear_discs:
+				if Vector2(c.x, c.z).distance_to(disc[0]) < float(disc[1]):
+					cleared = true
+		if cleared:
+			part.visible = false
+		arena_cull.append([part, Vector2(c.x, c.z), maxf(box.size.x, box.size.z) * 0.5, cleared])
 	var world := get_parent()
 	if world != null and world.has_method("_register_fog_receivers"):
 		world.call("_register_fog_receivers")
@@ -817,7 +829,7 @@ func _cull_arena() -> void:
 	for entry in arena_cull:
 		var part: MeshInstance3D = entry[0]
 		if is_instance_valid(part):
-			part.visible = bool(arena_visible_fn.call(entry[1].x, entry[1].y, float(entry[2])))
+			part.visible = not bool(entry[3]) and bool(arena_visible_fn.call(entry[1].x, entry[1].y, float(entry[2])))
 
 
 func _set_arena_lod(lod: int) -> void:

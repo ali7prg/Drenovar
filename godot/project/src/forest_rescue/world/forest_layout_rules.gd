@@ -110,6 +110,15 @@ const MIN_TREE_GAP := 2.3
 ## Trunk clearance from a route centre line (route.clear + this); crowns may overhang.
 const ROUTE_TRUNK_MARGIN := 1.4
 const GLADE_TRUNK_MARGIN := 1.6
+## Atlas v2 (art/01: trails wind through the forest): a trunk on the FAR side of a trail (away from
+## the city camera, whose crowns are drawn further away from the trail) may stand this close to the
+## trail centre line; near-side trees keep the full margin and the crown-capsule camera clearance.
+const FAR_SIDE_TRUNK_CLEAR := 2.3
+
+
+## True when `offset` (tree − nearest trail point) points away from the city camera (screen-up).
+static func far_side(offset: Vector2) -> bool:
+	return offset.dot(Vector2(-0.7071, -0.7071)) > 0.3 * offset.length()
 
 
 static func pick_weighted(mix: Dictionary, roll: float) -> int:

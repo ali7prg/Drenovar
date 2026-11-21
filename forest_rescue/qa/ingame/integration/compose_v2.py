@@ -85,6 +85,28 @@ def sample(img, px, py):
     return out
 
 
+def art_crop(art_img, inv, target, zoom, size):
+    """Rectangular art/01 crop with the frame's aspect, centred where the warp puts the frame centre
+    and scaled by the warp's local magnification (no resampling distortion)."""
+    u0, y0 = P.to_screen(target[0], target[1], h=0.0)
+    centre = inv(np.array([[u0, y0]]))[0]
+    e = 2.0
+    ju = (inv(np.array([[u0 + e, y0]]))[0] - inv(np.array([[u0 - e, y0]]))[0]) / (2 * e)
+    jy = (inv(np.array([[u0, y0 + e]]))[0] - inv(np.array([[u0, y0 - e]]))[0]) / (2 * e)
+    s = zoom / H
+    half_h = 0.5 * H * s * float(np.linalg.norm(jy))
+    half_w = 0.5 * W * s * float(np.linalg.norm(ju))
+    # keep the frame aspect (mean magnification)
+    hh = 0.5 * (half_h + half_w * H / W)
+    hw = hh * W / H
+    box = (int(centre[0] - hw), int(centre[1] - hh), int(centre[0] + hw), int(centre[1] + hh))
+    canvas = Image.new("RGB", (box[2] - box[0], box[3] - box[1]), (30, 27, 24))
+    clip = (max(0, box[0]), max(0, box[1]), min(art_img.width, box[2]), min(art_img.height, box[3]))
+    if clip[2] > clip[0] and clip[3] > clip[1]:
+        canvas.paste(art_img.crop(clip), (clip[0] - box[0], clip[1] - box[1]))
+    return canvas.resize(size, Image.LANCZOS), box
+
+
 def art_in_frame(art, inv, target, zoom, step=6):
     """art/01 resampled into the game frame (target, zoom) through the inverse warp."""
     xs, ys = frame_screen(target, zoom)
@@ -137,7 +159,23 @@ def main():
     art = np.asarray(art_img).astype(float)
     fwd, inv = P.art_warps()
     report = {}
-    # ---- overview: same framing both ways -------------------------------------------------
+    # ---- overview in the painting's framing (1536 × 1024, town where art/01 has it) ------------
+    framed = os.path.join(shots, prefix + "full_overview_art01.png")
+    if os.path.exists(framed):
+        game = Image.open(framed).convert("RGB").resize((1536, 1024), Image.LANCZOS)
+        ref = art_img.copy()
+        label(ref, "art/01 masterplan", size=22)
+        g = game.copy()
+        label(g, "in game · QA full reveal · city camera, zoom 195, town placed as in art/01", size=22)
+        pair = Image.new("RGB", (1536 * 2 + 12, 1024 + 56), (30, 27, 24))
+        ImageDraw.Draw(pair).text((10, 12), "Atlas v2 vs art/01 — the whole forest, same framing (the painting enlarges "
+                                  "the walled town ~1.7×; the forest square ±112 fills both frames)", font=font(22),
+                                  fill=(250, 240, 220))
+        pair.paste(ref, (0, 52))
+        pair.paste(g, (1536 + 12, 52))
+        pair.save(os.path.join(OUT, "v2_overview_same_framing.png"))
+        report["overview_same_framing"] = True
+    # ---- overview: the painting warped into the game frame (diagnostic of the TPS) ------------
     over_path = os.path.join(shots, prefix + "full_overview_z140.png")
     if os.path.exists(over_path):
         game = Image.open(over_path).convert("RGB")
@@ -151,18 +189,8 @@ def main():
                                    "into the frame, bottom: the game)", font=font(20), fill=(250, 240, 220))
         sheet.paste(a, (0, 50))
         sheet.paste(g, (0, 54 + H))
-        sheet.save(os.path.join(OUT, "v2_overview_frame.png"))
-        ga = game_in_art(np.asarray(game).astype(float), fwd, target, zoom)
-        label(ga, "in game (zoom 140) resampled into the art/01 framing")
-        ref = art_img.copy()
-        label(ref, "art/01 masterplan")
-        pair = Image.new("RGB", (1536 * 2 + 12, 1024 + 54), (30, 27, 24))
-        ImageDraw.Draw(pair).text((10, 12), "Atlas v2 vs art/01 — overview in the painting's framing (left: art/01, "
-                                  "right: the game frame through the same warp)", font=font(22), fill=(250, 240, 220))
-        pair.paste(ref, (0, 50))
-        pair.paste(ga, (1536 + 12, 50))
-        pair.save(os.path.join(OUT, "v2_overview_art_framing.png"))
-        report["overview"] = True
+        sheet.save(os.path.join(OUT, "v2_overview_tps_frame.png"))
+        report["overview_tps"] = True
     # ---- per zone at zoom 68 ----------------------------------------------------------------
     rows = []
     for name, target, caption in ZONES:
@@ -170,8 +198,8 @@ def main():
         if not os.path.exists(path):
             continue
         game = Image.open(path).convert("RGB")
-        a = art_in_frame(art, inv, target, 68.0)
-        label(a, "art/01 · " + caption, size=15)
+        a, box = art_crop(art_img, inv, target, 68.0, (W, H))
+        label(a, "art/01 crop %s · %s" % (str(box), caption), size=15)
         g = game.copy()
         label(g, "in game · zoom 68 · " + name, size=15)
         rows.append((name, a, g))
@@ -181,8 +209,8 @@ def main():
         for chunk in range(0, len(rows), 5):
             part = rows[chunk:chunk + 5]
             sheet = Image.new("RGB", (2 * tw + 12, 50 + len(part) * (th + 8)), (30, 27, 24))
-            ImageDraw.Draw(sheet).text((10, 12), "Atlas v2 per region at zoom 68 — art/01 through the same camera frame | "
-                                       "in game (QA full reveal)", font=font(19), fill=(250, 240, 220))
+            ImageDraw.Draw(sheet).text((10, 12), "Atlas v2 per region at zoom 68 — art/01 crop at the warped frame centre and "
+                                       "scale | in game (QA full reveal)", font=font(19), fill=(250, 240, 220))
             for i, (name, a, g) in enumerate(part):
                 y = 50 + i * (th + 8)
                 sheet.paste(a.resize((tw, th), Image.LANCZOS), (0, y))

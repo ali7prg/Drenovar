@@ -29,7 +29,7 @@ const PAD_TIE := 6.0
 const ARENA_BLEND_OUTER := 19.0
 const ARENA_DISH := 0.3
 const GLADE_PAD_BLEND := 2.0
-const TERRAIN_VERSION := 12
+const TERRAIN_VERSION := 13
 
 ## Atlas v2 region ground tints (ForestAtlas.REGION_NAMES order, art/01 crops at zoom 68):
 ## sunny warm meadow under the golden grove, olive mixed oaks, dry grey-olive arena rock, fresh
@@ -311,7 +311,7 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 			var w := 1.0 - smoothstep(ROAD_HALF_WIDTH, ROAD_HALF_WIDTH + ROAD_BLEND, hit.distance)
 			h = lerpf(h, road_height(hit) - 0.03, w)
 		# art/07: a narrow worn dirt band (the path ribbon draws the trail itself)
-		dirt = maxf(dirt, (0.5 if decor else 0.62) * (1.0 - smoothstep(0.3, 1.2, hit.distance)))
+		dirt = maxf(dirt, (0.45 if decor else 0.52) * (1.0 - smoothstep(0.15, 0.9, hit.distance)))
 	for site in atlas.sites:   # glade pads last: always flat inside the clearing radius
 		var d := Vector2(x - site.center.x, z - site.center.z).length()
 		var r: float = site.radius

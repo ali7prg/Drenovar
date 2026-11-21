@@ -95,7 +95,7 @@ const RESOURCE_SCALE_OUTER := [
 const RESOURCE_SCALE_INNER := [[0.46, 0.58], [0.60, 0.74]]
 ## Kit variant palettes per zone & species (art/01: v2+; v1 = art/02 hero accents).
 const ZONE_VARIANTS := {
-	Rules.OAK: [[2, 3, 4], [2, 3, 4, 1], [1, 2, 3], [2, 3, 4, 1], [2, 3, 4], [1, 2, 3], [2, 3, 4], [2, 3, 4, 1]],
+	Rules.OAK: [[2, 3, 4, 1], [2, 3, 4, 1], [2, 3], [2, 3, 4], [2, 3, 4], [2, 3], [2, 3, 4], [2, 3, 4]],
 	Rules.PINE: [[1, 1, 2], [2, 3, 4], [2, 3, 4], [2, 3, 4], [2, 3], [2, 3, 4], [1, 2, 3], [2, 3, 4]],
 	Rules.BIRCH: [[2, 3], [2, 3, 1], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3, 1], [2, 3]],
 	Rules.WILLOW: [[2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3]],
@@ -275,6 +275,15 @@ func _build_unit_zones() -> void:
 	for extra in atlas.extra_glades:
 		var e := Vector2(extra.center.x, extra.center.z)
 		_add_unit_zone(e, e, float(extra.radius))
+	# signature features stay visible for the city camera like the units (art/01): the waterfall and
+	# its pond, the marsh pools, the landmark spots (crowns in front of them are planted young/away)
+	_add_unit_zone(ForestWater.POND_CENTER, ForestWater.POND_CENTER, ForestWater.POND_RADIUS + 0.8)
+	_add_unit_zone(ForestWater.FALLS_LIP, ForestWater.FALLS_LIP, 2.0)
+	for body in water:
+		if body.kind == "marsh":
+			_add_unit_zone(body.center, body.center, float(body.radius))
+	for disc in landmark_discs:
+		_add_unit_zone(disc[0], disc[0], minf(3.5, float(disc[1]) * 0.6))
 	_add_unit_zone(arena, arena, ARENA_VIEW_RADIUS)
 	var horse := Vector2(atlas.horse_origin.x, atlas.horse_origin.z)
 	_add_unit_zone(horse, horse, HORSE_ZONE)
@@ -335,6 +344,13 @@ func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown :=
 				match String(mask.get("kind", "")):
 					"route":
 						margin = (Rules.ROUTE_TRUNK_MARGIN + crown * 0.45) * margin_scale if tree else 0.0
+						if tree:
+							var a := Vector2(float(mask.a.x), float(mask.a.z))
+							var b := Vector2(float(mask.b.x), float(mask.b.z))
+							var ab := b - a
+							var t := clampf((Vector2(x, z) - a).dot(ab) / maxf(ab.length_squared(), 0.0001), 0.0, 1.0)
+							if Rules.far_side(Vector2(x, z) - (a + ab * t)):
+								margin = Rules.FAR_SIDE_TRUNK_CLEAR - float(mask.radius)
 					"glade":
 						margin = (Rules.GLADE_TRUNK_MARGIN + crown * 0.4) * margin_scale if tree else 0.3
 					"arena":
@@ -1157,10 +1173,9 @@ func openness(x: float, z: float) -> float:
 
 
 func _openness_raw(x: float, z: float) -> float:
+	# atlas v2: trails wind through mature forest (art/01), so only glades, the arena and the
+	# landmark spots open the forest up (young trees, saplings) — trails do not.
 	var d := 99.0
-	var hit: Dictionary = atlas.nearest_route(x, z)
-	if not hit.is_empty():
-		d = minf(d, float(hit.distance) - float(atlas.routes[hit.route].clear))
 	for site in atlas.sites:
 		d = minf(d, Vector2(x, z).distance_to(Vector2(site.center.x, site.center.z)) - float(site.radius))
 	for extra in atlas.extra_glades:
@@ -1180,7 +1195,7 @@ func _openness_raw(x: float, z: float) -> float:
 func oak_is_golden(x: float, z: float, roll: float) -> bool:
 	var w := zone_weights(x, z)
 	var gold := clampf(w[Z_GROVE] * 1.25 + w[Z_TOP] * 0.55 + w[Z_ARENA] * 0.1, 0.0, 1.0)
-	return roll < maxf(gold, 0.10)
+	return roll < maxf(gold, 0.04)
 
 
 ## Resource look: [kit variant (+GREEN_VARIANT_BASE for the green oak copy), absolute scale].

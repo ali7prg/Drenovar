@@ -141,6 +141,7 @@ func run() -> void:
 		var crown: float = world.TREE_CROWN[int(item[2])] * float(item[5])
 		if _route_trunk_violation(masks, x, z, crown):
 			bad_trees += 1
+			print("QA bad ambient tree (route clearance): ", item)
 		for site in world.atlas.sites:
 			if Vector2(x, z).distance_to(Vector2(site.center.x, site.center.z)) < site.radius + Rules.GLADE_TRUNK_MARGIN + crown * 0.4 - 0.05:
 				bad_trees += 1
@@ -160,9 +161,11 @@ func run() -> void:
 	var remap_in_mask := 0
 	for id in layout.resourceRemap:
 		var e: Array = layout.resourceRemap[id]
-		var mask: Dictionary = masks.hit(float(e[0]), float(e[1]), 0.0, ["route", "glade", "arena", "bridge"])
-		if not mask.is_empty():
+		# atlas v2: on the far side of a trail a trunk may stand FAR_SIDE_TRUNK_CLEAR off its centre
+		var mask: Dictionary = masks.hit(float(e[0]), float(e[1]), 0.0, ["glade", "arena", "bridge"])
+		if not mask.is_empty() or _route_trunk_violation(masks, float(e[0]), float(e[1]), 0.0, true):
 			remap_in_mask += 1
+			print("QA resource tree in a clearance: ", id, " ", e)
 	check(remap_in_mask == 0, "remapped resource trees still inside route/glade/arena/bridge masks: %d" % remap_in_mask)
 	# ---- Camera clearance (checkpoint-2 P0.2): no crown between the city camera and a unit ----
 	# on a trail / in a glade / arena / horse spot; resource trees that cannot move are young and
@@ -189,6 +192,7 @@ func run() -> void:
 		var cap := Rules.crown_capsule(float(item[0]), float(item[1]), int(item[2]), int(item[3]), float(item[5]), deg_to_rad(float(item[4])))
 		if hides.call(cap):
 			hiding_ambient += 1
+			print("QA ambient tree hiding a unit zone: ", item)
 	check(hiding_ambient == 0, "ambient trees whose crown hides a trail / glade / arena / horse-spot unit: %d" % hiding_ambient)
 	var listed: Array = layout.get("cameraOccluders", [])
 	var woods := {}
@@ -326,8 +330,9 @@ func run() -> void:
 	finish()
 
 
-## Same route-clearance rule as the layout builder (blocked_exact), per route capsule.
-func _route_trunk_violation(masks, x: float, z: float, crown: float) -> bool:
+## Same route-clearance rule as the layout builder (blocked_exact), per route capsule; `bare`
+## checks the plain clearance (route.clear, far side FAR_SIDE_TRUNK_CLEAR) without the crown margin.
+func _route_trunk_violation(masks, x: float, z: float, crown: float, bare := false) -> bool:
 	var reach := 6.0 + crown * 0.55
 	for gz in range(floori((z - reach) / masks.cell), floori((z + reach) / masks.cell) + 1):
 		for gx in range(floori((x - reach) / masks.cell), floori((x + reach) / masks.cell) + 1):
@@ -340,7 +345,7 @@ func _route_trunk_violation(masks, x: float, z: float, crown: float) -> bool:
 				var ab := b - a
 				var t := clampf((Vector2(x, z) - a).dot(ab) / maxf(ab.length_squared(), 0.0001), 0.0, 1.0)
 				var offset := Vector2(x, z) - (a + ab * t)
-				var limit: float = float(mask.radius) + Rules.ROUTE_TRUNK_MARGIN + crown * 0.45 - 0.05
+				var limit: float = float(mask.radius) + (0.0 if bare else Rules.ROUTE_TRUNK_MARGIN + crown * 0.45) - 0.05
 				if Rules.far_side(offset):
 					limit = Rules.FAR_SIDE_TRUNK_CLEAR - 0.05
 				if offset.length() < limit:

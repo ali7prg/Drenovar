@@ -29,7 +29,7 @@ const PAD_TIE := 6.0
 const ARENA_BLEND_OUTER := 19.0
 const ARENA_DISH := 0.3
 const GLADE_PAD_BLEND := 2.0
-const TERRAIN_VERSION := 13
+const TERRAIN_VERSION := 14
 
 ## Atlas v2 region ground tints (ForestAtlas.REGION_NAMES order, art/01 crops at zoom 68):
 ## sunny warm meadow under the golden grove, olive mixed oaks, dry grey-olive arena rock, fresh
@@ -267,6 +267,42 @@ func _prepare_profiles() -> void:
 			profile = copy
 		road_profiles.append(profile)
 		road_on_deck.append(on_deck)
+	# Junction reconciliation (atlas v2 network): every trail ending at the same non-pad node meets
+	# it at the node's height (the atlas node y; the deck height at the bridge ends), the correction
+	# fading out along the trail over a length that keeps the added grade ≤ 8°. (The atlas profiles
+	# are grade-limited per trail and may end up to 3 m apart at a shared junction.)
+	for r in atlas.routes.size():
+		var route: Dictionary = atlas.routes[r]
+		if route.bridge or route.get("decor", false):
+			continue
+		for end in [0, 1]:
+			var node_id: String = route.from if end == 0 else route.to
+			if node_id.is_empty() or centers.has(node_id):
+				continue
+			var target := INF
+			if node_id == "lf_bridge_west" or node_id == "lf_bridge_east":
+				target = atlas.BRIDGE_DECK_Y
+			elif atlas.landmark_by_id.has(node_id):
+				target = float(atlas.landmark_by_id[node_id].center.y)
+			if target == INF:
+				continue
+			var profile: PackedFloat32Array = road_profiles[r]
+			var pts: PackedVector3Array = route.points
+			var n := profile.size()
+			var i := 0 if end == 0 else n - 1
+			var delta := target - profile[i]
+			if absf(delta) < 0.01:
+				continue
+			var length := clampf(absf(delta) / tan(deg_to_rad(8.0)), 6.0, 40.0)
+			var step := 1 if end == 0 else -1
+			var acc := 0.0
+			while i >= 0 and i < n and acc <= length:
+				profile[i] += delta * (1.0 - smoothstep(0.0, length, acc))
+				var j := i + step
+				if j >= 0 and j < n:
+					acc += Vector2(pts[j].x - pts[i].x, pts[j].z - pts[i].z).length()
+				i = j
+			road_profiles[r] = profile
 
 
 ## Final road height at a nearest-route hit (see ForestAtlas.nearest_route).

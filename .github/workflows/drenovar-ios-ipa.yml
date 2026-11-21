@@ -1,0 +1,60 @@
+name: DRENOVAR iOS unsigned IPA (SideStore)
+
+# Builds the same kind of package as the original native iOS test build: an
+# unsigned arm64 IPA that the owner installs with SideStore (no App Store,
+# no TestFlight, no Apple signing data in this repository).
+# Runs only when the build request file or this workflow changes, so the
+# frequent work-in-progress commits on the branch do not start macOS builds.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/kind-babbage-4swyw3]
+    paths:
+      - godot/ios-build-request.txt
+      - .github/workflows/drenovar-ios-ipa.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: drenovar-ios-ipa
+  cancel-in-progress: true
+
+jobs:
+  iphone:
+    runs-on: macos-15
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: godot
+
+      - name: Install Godot 4.6.3 and the matching iOS template
+        run: |
+          curl -fL --retry 3 'https://downloads.godotengine.org/?version=4.6.3&flavor=stable&slug=macos.universal.zip' -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          printf '%s\n' "GODOT_BIN=$RUNNER_TEMP/godot/Godot.app/Contents/MacOS/Godot" >> "$GITHUB_ENV"
+          python3 godot/tools/ios-template.py "$HOME/Library/Application Support/Godot/export_templates/4.6.3.stable/ios.zip"
+
+      - name: Import, export and link the unsigned arm64 IPA
+        run: bash godot/tools/package-ios.sh "$GITHUB_WORKSPACE/godot/build/ios"
+
+      - name: Check that the forest and adventure data are in the pack
+        run: python3 godot/tools/check-ios-pack.py godot/build/ios/DRENOVAR.pck
+
+      - name: Name the package after its version
+        run: |
+          version=$(sed -n 's/^application\/short_version="\(.*\)"/\1/p' godot/project/export_presets.cfg)
+          build=$(sed -n 's/^application\/version="\(.*\)"/\1/p' godot/project/export_presets.cfg)
+          mv godot/build/ios/DRENOVAR-unsigned.ipa "godot/build/ios/DRENOVAR-${version}-${build}-unsigned.ipa"
+          printf '%s\n' "IPA_NAME=DRENOVAR-${version}-${build}-unsigned" >> "$GITHUB_ENV"
+          ls -l godot/build/ios/*.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.IPA_NAME }}
+          path: godot/build/ios/${{ env.IPA_NAME }}.ipa
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

@@ -1,0 +1,4 @@
+Changing this file starts the unsigned iOS IPA build for SideStore
+(.github/workflows/drenovar-ios-ipa.yml) on branch claude/kind-babbage-4swyw3.
+
+Request 1: pipeline check with the current work-in-progress forest (not for installing).

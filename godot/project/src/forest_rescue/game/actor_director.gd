@@ -1432,8 +1432,10 @@ func battle_member_pose(index: int, fight: Dictionary, now: float) -> Dictionary
 	var away := (approach - enemy)
 	away.y = 0
 	away = away.normalized() if away.length_squared() > 0.01 else Vector3.BACK
-	var distance := BOSS_FIGHT_DISTANCE if boss_fight else 3.6
-	var spread: float = ([0.0, -0.42, 0.42] if boss_fight else [0.0, -0.75, 0.75])[index]
+	# boss fight: a tight wedge inside the entrance gap — at ±24° the wing soldiers stood behind the entrance
+	# rocks from the city camera (qa_forest_arena_camera: 2-17 % of their silhouette visible)
+	var distance: float = ([BOSS_FIGHT_DISTANCE, BOSS_FIGHT_DISTANCE - 1.2, BOSS_FIGHT_DISTANCE - 1.2][index]) if boss_fight else 3.6
+	var spread: float = ([0.0, -0.17, 0.17] if boss_fight else [0.0, -0.75, 0.75])[index]
 	var p := enemy + away.rotated(Vector3.UP, spread) * distance
 	var yaw := PathMotion.yaw_of(enemy - p)
 	var elapsed := battle_elapsed(fight, now)

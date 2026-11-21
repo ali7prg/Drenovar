@@ -2,14 +2,16 @@ extends SceneTree
 ## P2.9 captive check (layout v2 / atlas v2):
 ##  A. all 12 sites closed: each site's three captives stand / sit inside their cage (footprint of the
 ##     cage model, 0.12 m margin) on the cage floor over the terrain, never under it or floating;
-##  B. site 01 cage opening (site01_battle_victory → live site01_cage_open): the captives leave through
+##  B. site 01 cage opening (site01_battle_victory → live site01_cage_open, key + cage choreography, 24 s):
+##     the captives leave through
 ##     the door (no teleport: ≤ 0.6 m per frame), end outside the cage on the ground;
-##  C. site 01 escort (site01_escort_walking → live site01_escort_home): they walk behind the squad on the
+##  C. site 01 escort (site01_escort_walking, the clock running): they walk behind the squad on the
 ##     trail (move, stay on the ground, within 9 m of the squad focus);
 ##  D. one still per act (sites 01 / 04 / 07 / 10 at zoom 22, fog revealed) when a renderer exists.
-##   xvfb-run -a -s "-screen 0 1366x630x24" godot --path godot/project --rendering-driver vulkan \
+##   xvfb-run -a -s "-screen 0 1366x630x24" godot --path godot/project --rendering-driver vulkan --fixed-fps 30 \
 ##     -s qa_forest_captives.gd [-- --out=<dir>]
-## Headless runs do A–C (no stills).
+## Headless runs (godot --headless --fixed-fps 30 …) do A–C (no stills). --fixed-fps 30 is required: the
+## choreography advances by frame delta.
 
 const FIXTURES := "res://data/forest_rescue/game/fixtures/"
 const FPS := 30.0
@@ -194,7 +196,10 @@ func run() -> void:
 		var ids := captive_ids(site_id)
 		check(ids.size() == 3, "%s: three captives in the state (%d)" % [site_id, ids.size()])
 		sites_checked += 1
-		for id in ids:
+		var base_gap: float = cage.global_position.y - ground(cage.global_position)
+		check(absf(base_gap) <= 0.15, "%s: cage stands on the terrain (%.2f m)" % [site_id, base_gap])
+		for index in ids.size():
+			var id: String = ids[index]
 			var rig = forest.actors.rigs.get(id)
 			check(rig != null and rig.load_state == "ready", "%s: rig ready" % id)
 			if rig == null:
@@ -204,13 +209,19 @@ func run() -> void:
 			var inside := minf(minf(p.x - box.position.x, box.end.x - p.x), minf(p.z - box.position.z, box.end.z - p.z))
 			worst_inside = minf(worst_inside, inside)
 			check(inside >= 0.12, "%s: inside its cage footprint (margin %.2f m) at %s" % [id, inside, p.snapped(Vector3.ONE * 0.01)])
+			# on the cage floor: the cage's captive_slot node (raised floors: iron / stone cages), which itself
+			# lies over the terrain
 			var above := p.y - ground(p)
-			worst_floor = maxf(worst_floor, absf(above - 0.15))
-			check(above >= -0.05 and above <= 0.45, "%s: on the cage floor over the terrain (%.2f m above ground)" % [id, above])
+			var slot: Node3D = cage.part("captive_slot_%d" % (index % 3))
+			var floor_y: float = slot.global_position.y if slot != null else ground(p) + 0.12
+			worst_floor = maxf(worst_floor, absf(p.y - floor_y))
+			check(absf(p.y - floor_y) <= 0.06, "%s: on its cage floor slot (%.2f m off)" % [id, p.y - floor_y])
+			check(above >= -0.05 and above <= 0.75, "%s: cage floor over the terrain (%.2f m above ground)" % [id, above])
 			check(p.y >= box.position.y - 0.05, "%s: not under the cage base" % id)
 	notes.sites = sites_checked
 	notes.captives = captives_checked
 	notes.worst_inside_margin_m = snappedf(worst_inside, 0.01)
+	notes.worst_floor_offset_m = snappedf(worst_floor, 0.01)
 	# ---------------------------------------------------------------- D. one still per act
 	var rendering := DisplayServer.get_name() != "headless"
 	if rendering:
@@ -248,10 +259,12 @@ func run() -> void:
 	var last := {}
 	var max_step := 0.0
 	live(fixture("site01_cage_open"))
-	for step in int(9.0 * FPS):
+	for step in int(24.0 * FPS):
 		await frames(1)
 		for id in ids01:
 			var rig = forest.actors.rigs.get(id)
+			if step % 45 == 0 and OS.get_cmdline_user_args().has("--debug"):
+				print("B ", step, " ", id, " ", rig != null and is_instance_valid(rig), " ", rig.global_position if rig != null and is_instance_valid(rig) else Vector3.INF, " choreo=", forest.actors.choreo.keys())
 			if rig == null or not is_instance_valid(rig):
 				continue
 			var p: Vector3 = rig.global_position
@@ -274,11 +287,10 @@ func run() -> void:
 	await apply(fixture("site01_escort_walking"))
 	await frames(20)
 	await load_rigs()
-	live(fixture("site01_escort_home"))
 	var start := {}
 	var worst_gap := 0.0
 	var worst_ground := 0.0
-	for step in int(4.0 * FPS):
+	for step in int(5.0 * FPS):
 		await frames(1)
 		var focus: Vector3 = forest.actors.squad_focus()
 		look(focus, 30.0)

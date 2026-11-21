@@ -1,0 +1,10 @@
+CLIPS ["Idle", "Walk", "Attack", "Hit", "Death", "Sword_Drill", "Walk_Start", "Idle_Ready", "Attack_Release", "Hit_Shield", "Death_Fall"]
+   idle -> Idle, walk -> Walk, attack -> Attack, hit -> Hit, death -> Death
+CLIPS ["Idle", "Walk", "Combat_Idle", "Battle_Walk", "Attack", "Aim_Attack", "Block_Hit", "Hit", "Death"]
+   idle -> Combat_Idle, walk -> Battle_Walk, attack -> Aim_Attack, hit -> Block_Hit
+CLIPS ["Idle", "Walk", "Bridle_Adjust", "Sidewalk", "Trot_To_Walk", "Hit", "Death"]
+   idle -> Bridle_Adjust, walk -> Sidewalk
+CLIPS ["Idle", "Walk", "Hit", "Death", "Sword_Drill"]
+   attack|Sword_Drill -> Sword_Drill
+CLIPS ["Idle", "Walk", "Hit", "Death", "Sword_Drill", "Sword_Drill_Fast"]
+   attack|Sword_Drill -> Sword_Drill_Fast

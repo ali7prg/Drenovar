@@ -1,0 +1,120 @@
+{
+ "model": "res://assets/army/assets/ENG-01-spearman27-lod2.glb",
+ "rows": [
+  {
+   "distance": 3.0,
+   "primitives": 21898,
+   "projection": "perspective"
+  },
+  {
+   "distance": 5.0,
+   "primitives": 19146,
+   "projection": "perspective"
+  },
+  {
+   "distance": 8.0,
+   "primitives": 15042,
+   "projection": "perspective"
+  },
+  {
+   "distance": 10.0,
+   "primitives": 13074,
+   "projection": "perspective"
+  },
+  {
+   "distance": 12.0,
+   "primitives": 11788,
+   "projection": "perspective"
+  },
+  {
+   "distance": 15.0,
+   "primitives": 9888,
+   "projection": "perspective"
+  },
+  {
+   "distance": 20.0,
+   "primitives": 6317,
+   "projection": "perspective"
+  },
+  {
+   "distance": 25.0,
+   "primitives": 6309,
+   "projection": "perspective"
+  },
+  {
+   "distance": 30.0,
+   "primitives": 5489,
+   "projection": "perspective"
+  },
+  {
+   "distance": 40.0,
+   "primitives": 4091,
+   "projection": "perspective"
+  },
+  {
+   "distance": 50.0,
+   "primitives": 4091,
+   "projection": "perspective"
+  },
+  {
+   "distance": 68.0,
+   "primitives": 3725,
+   "projection": "perspective"
+  },
+  {
+   "distance": 90.0,
+   "primitives": 2800,
+   "projection": "perspective"
+  },
+  {
+   "distance": 120.0,
+   "primitives": 2800,
+   "projection": "perspective"
+  },
+  {
+   "distance": 132.0,
+   "primitives": 2800,
+   "projection": "perspective"
+  },
+  {
+   "primitives": 5489,
+   "projection": "orthogonal",
+   "size": 24.0
+  },
+  {
+   "primitives": 4327,
+   "projection": "orthogonal",
+   "size": 30.0
+  },
+  {
+   "primitives": 3725,
+   "projection": "orthogonal",
+   "size": 40.0
+  },
+  {
+   "primitives": 3725,
+   "projection": "orthogonal",
+   "size": 50.0
+  },
+  {
+   "primitives": 2800,
+   "projection": "orthogonal",
+   "size": 70.0
+  },
+  {
+   "primitives": 2800,
+   "projection": "orthogonal",
+   "size": 90.0
+  },
+  {
+   "primitives": 2800,
+   "projection": "orthogonal",
+   "size": 120.0
+  },
+  {
+   "primitives": 0,
+   "projection": "empty"
+  }
+ ],
+ "viewport": "(1366.0, 630.0)"
+}

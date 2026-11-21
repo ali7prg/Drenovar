@@ -1,0 +1,7 @@
+{
+  "ENG-01": {"preview": "res://assets/army/eng-squad60/ENG-01-spearman60-lod1.glb", "field": "res://assets/army/eng-squad60/ENG-01-spearman60-lod2.glb", "drill": "Spear_Drill"},
+  "ENG-02": {"preview": "res://assets/army/eng-squad60/ENG-02-swordsman60-lod1.glb", "field": "res://assets/army/eng-squad60/ENG-02-swordsman60-lod2.glb", "drill": "Sword_Drill"},
+  "ENG-03": {"preview": "res://assets/army/eng-squad60/ENG-03-longbowman60-lod1.glb", "field": "res://assets/army/eng-squad60/ENG-03-longbowman60-lod2.glb", "drill": "Bow_Draw"},
+  "ENG-04": {"preview": "res://assets/army/eng-squad60/ENG-04-crossbowman60-lod1.glb", "field": "res://assets/army/eng-squad60/ENG-04-crossbowman60-lod2.glb", "drill": "Crossbow_Reload"},
+  "ENG-06": {"preview": "res://assets/army/eng-squad60/ENG-06-knight60-lod1.glb", "field": "res://assets/army/eng-squad60/ENG-06-knight60-lod2.glb", "drill": "Mounted_Drill"}
+}

@@ -1,0 +1,1128 @@
+{
+ "ENG-01/field": {
+  "Walk": {
+   "length": 1.25,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.627,
+     "stance_runs": 1,
+     "speed_model": 0.3974,
+     "speed_game": 0.457,
+     "z_range": 0.2977,
+     "lift_max": 0.0958,
+     "contact_y": 0.0343,
+     "lateral_drift_in_stance": 0.0
+    },
+    "RightFoot": {
+     "stance_fraction": 0.64,
+     "stance_runs": 1,
+     "speed_model": 0.3963,
+     "speed_game": 0.4557,
+     "z_range": 0.2985,
+     "lift_max": 0.0961,
+     "contact_y": 0.0343,
+     "lateral_drift_in_stance": 0.0
+    }
+   },
+   "speed_model": 0.3968,
+   "speed_game": 0.4564,
+   "cycle_distance_model": 0.4961,
+   "cycle_distance_game": 0.5705
+  },
+  "Run": {
+   "length": 0.82,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.6,
+     "stance_runs": 1,
+     "speed_model": 0.95,
+     "speed_game": 1.0926,
+     "z_range": 0.474,
+     "lift_max": 0.1596,
+     "contact_y": 0.0344,
+     "lateral_drift_in_stance": 0.0
+    },
+    "RightFoot": {
+     "stance_fraction": 0.62,
+     "stance_runs": 1,
+     "speed_model": 0.9663,
+     "speed_game": 1.1112,
+     "z_range": 0.4787,
+     "lift_max": 0.1615,
+     "contact_y": 0.033,
+     "lateral_drift_in_stance": 0.0
+    }
+   },
+   "speed_model": 0.9582,
+   "speed_game": 1.1019,
+   "cycle_distance_model": 0.7857,
+   "cycle_distance_game": 0.9035
+  },
+  "idle_pose": {
+   "Chest": [
+    -0.002,
+    1.351,
+    0.0013
+   ],
+   "Head": [
+    -0.001,
+    1.641,
+    -0.0006
+   ],
+   "Hips": [
+    0.0,
+    0.951,
+    0.0
+   ],
+   "LeftFoot": [
+    0.122,
+    0.095,
+    0.063
+   ],
+   "LeftHand": [
+    0.3255,
+    1.024,
+    0.1789
+   ],
+   "LeftToe": [
+    0.122,
+    0.035,
+    0.205
+   ],
+   "LeftUpperArm": [
+    0.2232,
+    1.4152,
+    -0.0036
+   ],
+   "Neck": [
+    -0.0014,
+    1.511,
+    0.0002
+   ],
+   "RightFoot": [
+    -0.116,
+    0.095,
+    0.0
+   ],
+   "RightHand": [
+    -0.3357,
+    1.0103,
+    0.1781
+   ],
+   "RightToe": [
+    -0.116,
+    0.035,
+    0.142
+   ],
+   "RightUpperArm": [
+    -0.2267,
+    1.4168,
+    0.0053
+   ]
+  }
+ },
+ "ENG-02/field": {
+  "Walk": {
+   "length": 1.25,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.627,
+     "stance_runs": 1,
+     "speed_model": 0.3974,
+     "speed_game": 0.457,
+     "z_range": 0.2977,
+     "lift_max": 0.0958,
+     "contact_y": 0.0343,
+     "lateral_drift_in_stance": 0.0
+    },
+    "RightFoot": {
+     "stance_fraction": 0.64,
+     "stance_runs": 1,
+     "speed_model": 0.3963,
+     "speed_game": 0.4557,
+     "z_range": 0.2985,
+     "lift_max": 0.0961,
+     "contact_y": 0.0343,
+     "lateral_drift_in_stance": 0.0
+    }
+   },
+   "speed_model": 0.3968,
+   "speed_game": 0.4564,
+   "cycle_distance_model": 0.4961,
+   "cycle_distance_game": 0.5705
+  },
+  "Run": {
+   "length": 0.82,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.6,
+     "stance_runs": 1,
+     "speed_model": 0.95,
+     "speed_game": 1.0926,
+     "z_range": 0.474,
+     "lift_max": 0.1596,
+     "contact_y": 0.0344,
+     "lateral_drift_in_stance": 0.0
+    },
+    "RightFoot": {
+     "stance_fraction": 0.62,
+     "stance_runs": 1,
+     "speed_model": 0.9663,
+     "speed_game": 1.1112,
+     "z_range": 0.4787,
+     "lift_max": 0.1615,
+     "contact_y": 0.033,
+     "lateral_drift_in_stance": 0.0
+    }
+   },
+   "speed_model": 0.9582,
+   "speed_game": 1.1019,
+   "cycle_distance_model": 0.7857,
+   "cycle_distance_game": 0.9035
+  },
+  "idle_pose": {
+   "Chest": [
+    -0.002,
+    1.351,
+    0.0013
+   ],
+   "Head": [
+    -0.001,
+    1.641,
+    -0.0006
+   ],
+   "Hips": [
+    0.0,
+    0.951,
+    0.0
+   ],
+   "LeftFoot": [
+    0.122,
+    0.095,
+    0.063
+   ],
+   "LeftHand": [
+    0.3255,
+    1.024,
+    0.1789
+   ],
+   "LeftToe": [
+    0.122,
+    0.035,
+    0.205
+   ],
+   "LeftUpperArm": [
+    0.2232,
+    1.4152,
+    -0.0036
+   ],
+   "Neck": [
+    -0.0014,
+    1.511,
+    0.0002
+   ],
+   "RightFoot": [
+    -0.116,
+    0.095,
+    0.0
+   ],
+   "RightHand": [
+    -0.3357,
+    1.0103,
+    0.1781
+   ],
+   "RightToe": [
+    -0.116,
+    0.035,
+    0.142
+   ],
+   "RightUpperArm": [
+    -0.2267,
+    1.4168,
+    0.0053
+   ]
+  }
+ },
+ "ENG-03/field": {
+  "Walk": {
+   "length": 1.25,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.627,
+     "stance_runs": 1,
+     "speed_model": 0.3974,
+     "speed_game": 0.457,
+     "z_range": 0.2977,
+     "lift_max": 0.0958,
+     "contact_y": 0.0343,
+     "lateral_drift_in_stance": 0.0
+    },
+    "RightFoot": {
+     "stance_fraction": 0.64,
+     "stance_runs": 1,
+     "speed_model": 0.3963,
+     "speed_game": 0.4557,
+     "z_range": 0.2985,
+     "lift_max": 0.0961,
+     "contact_y": 0.0343,
+     "lateral_drift_in_stance": 0.0
+    }
+   },
+   "speed_model": 0.3968,
+   "speed_game": 0.4564,
+   "cycle_distance_model": 0.4961,
+   "cycle_distance_game": 0.5705
+  },
+  "Run": {
+   "length": 0.82,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.6,
+     "stance_runs": 1,
+     "speed_model": 0.95,
+     "speed_game": 1.0926,
+     "z_range": 0.474,
+     "lift_max": 0.1596,
+     "contact_y": 0.0344,
+     "lateral_drift_in_stance": 0.0
+    },
+    "RightFoot": {
+     "stance_fraction": 0.62,
+     "stance_runs": 1,
+     "speed_model": 0.9663,
+     "speed_game": 1.1112,
+     "z_range": 0.4787,
+     "lift_max": 0.1615,
+     "contact_y": 0.033,
+     "lateral_drift_in_stance": 0.0
+    }
+   },
+   "speed_model": 0.9582,
+   "speed_game": 1.1019,
+   "cycle_distance_model": 0.7857,
+   "cycle_distance_game": 0.9035
+  },
+  "idle_pose": {
+   "Chest": [
+    -0.002,
+    1.351,
+    0.0013
+   ],
+   "Head": [
+    -0.001,
+    1.641,
+    -0.0006
+   ],
+   "Hips": [
+    0.0,
+    0.951,
+    0.0
+   ],
+   "LeftFoot": [
+    0.122,
+    0.095,
+    0.063
+   ],
+   "LeftHand": [
+    0.3255,
+    1.024,
+    0.1789
+   ],
+   "LeftToe": [
+    0.122,
+    0.035,
+    0.205
+   ],
+   "LeftUpperArm": [
+    0.2232,
+    1.4152,
+    -0.0036
+   ],
+   "Neck": [
+    -0.0014,
+    1.511,
+    0.0002
+   ],
+   "RightFoot": [
+    -0.116,
+    0.095,
+    0.0
+   ],
+   "RightHand": [
+    -0.3357,
+    1.0103,
+    0.1781
+   ],
+   "RightToe": [
+    -0.116,
+    0.035,
+    0.142
+   ],
+   "RightUpperArm": [
+    -0.2267,
+    1.4168,
+    0.0053
+   ]
+  }
+ },
+ "ENG-04/field": {
+  "Walk": {
+   "length": 1.25,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.627,
+     "stance_runs": 1,
+     "speed_model": 0.3974,
+     "speed_game": 0.457,
+     "z_range": 0.2977,
+     "lift_max": 0.0958,
+     "contact_y": 0.0343,
+     "lateral_drift_in_stance": 0.0
+    },
+    "RightFoot": {
+     "stance_fraction": 0.64,
+     "stance_runs": 1,
+     "speed_model": 0.3963,
+     "speed_game": 0.4557,
+     "z_range": 0.2985,
+     "lift_max": 0.0961,
+     "contact_y": 0.0343,
+     "lateral_drift_in_stance": 0.0
+    }
+   },
+   "speed_model": 0.3968,
+   "speed_game": 0.4564,
+   "cycle_distance_model": 0.4961,
+   "cycle_distance_game": 0.5705
+  },
+  "Run": {
+   "length": 0.82,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.6,
+     "stance_runs": 1,
+     "speed_model": 0.95,
+     "speed_game": 1.0926,
+     "z_range": 0.474,
+     "lift_max": 0.1596,
+     "contact_y": 0.0344,
+     "lateral_drift_in_stance": 0.0
+    },
+    "RightFoot": {
+     "stance_fraction": 0.62,
+     "stance_runs": 1,
+     "speed_model": 0.9663,
+     "speed_game": 1.1112,
+     "z_range": 0.4787,
+     "lift_max": 0.1615,
+     "contact_y": 0.033,
+     "lateral_drift_in_stance": 0.0
+    }
+   },
+   "speed_model": 0.9582,
+   "speed_game": 1.1019,
+   "cycle_distance_model": 0.7857,
+   "cycle_distance_game": 0.9035
+  },
+  "idle_pose": {
+   "Chest": [
+    -0.002,
+    1.351,
+    0.0013
+   ],
+   "Head": [
+    -0.001,
+    1.641,
+    -0.0006
+   ],
+   "Hips": [
+    0.0,
+    0.951,
+    0.0
+   ],
+   "LeftFoot": [
+    0.122,
+    0.095,
+    0.063
+   ],
+   "LeftHand": [
+    0.3255,
+    1.024,
+    0.1789
+   ],
+   "LeftToe": [
+    0.122,
+    0.035,
+    0.205
+   ],
+   "LeftUpperArm": [
+    0.2232,
+    1.4152,
+    -0.0036
+   ],
+   "Neck": [
+    -0.0014,
+    1.511,
+    0.0002
+   ],
+   "RightFoot": [
+    -0.116,
+    0.095,
+    0.0
+   ],
+   "RightHand": [
+    -0.3357,
+    1.0103,
+    0.1781
+   ],
+   "RightToe": [
+    -0.116,
+    0.035,
+    0.142
+   ],
+   "RightUpperArm": [
+    -0.2267,
+    1.4168,
+    0.0053
+   ]
+  }
+ },
+ "ENG-05/field": {
+  "Walk": {
+   "length": 1.4333,
+   "feet": {
+    "FrontLHoof": {
+     "stance_fraction": 0.593,
+     "stance_runs": 1,
+     "speed_model": 0.4646,
+     "speed_game": 0.5343,
+     "z_range": 0.4591,
+     "lift_max": 0.099,
+     "contact_y": 0.0331,
+     "lateral_drift_in_stance": 0.0007
+    },
+    "FrontRHoof": {
+     "stance_fraction": 0.581,
+     "stance_runs": 1,
+     "speed_model": 0.4649,
+     "speed_game": 0.5346,
+     "z_range": 0.4569,
+     "lift_max": 0.0999,
+     "contact_y": 0.0327,
+     "lateral_drift_in_stance": 0.0005
+    },
+    "HindLHoof": {
+     "stance_fraction": 0.674,
+     "stance_runs": 1,
+     "speed_model": 0.4663,
+     "speed_game": 0.5363,
+     "z_range": 0.4579,
+     "lift_max": 0.0991,
+     "contact_y": 0.0675,
+     "lateral_drift_in_stance": 0.0005
+    },
+    "HindRHoof": {
+     "stance_fraction": 0.674,
+     "stance_runs": 1,
+     "speed_model": 0.4656,
+     "speed_game": 0.5354,
+     "z_range": 0.4544,
+     "lift_max": 0.1003,
+     "contact_y": 0.0676,
+     "lateral_drift_in_stance": 0.0006
+    }
+   },
+   "speed_model": 0.4653,
+   "speed_game": 0.5352,
+   "cycle_distance_model": 0.667,
+   "cycle_distance_game": 0.7671
+  },
+  "Run": {
+   "length": 0.8667,
+   "feet": {
+    "FrontLHoof": {
+     "stance_fraction": 0.547,
+     "stance_runs": 1,
+     "speed_model": 1.4776,
+     "speed_game": 1.6992,
+     "z_range": 0.7322,
+     "lift_max": 0.2053,
+     "contact_y": 0.033,
+     "lateral_drift_in_stance": 0.0009
+    },
+    "FrontRHoof": {
+     "stance_fraction": 0.377,
+     "stance_runs": 1,
+     "speed_model": 1.3813,
+     "speed_game": 1.5885,
+     "z_range": 0.7117,
+     "lift_max": 0.2076,
+     "contact_y": 0.0321,
+     "lateral_drift_in_stance": 0.0005
+    },
+    "HindLHoof": {
+     "stance_fraction": 0.472,
+     "stance_runs": 1,
+     "speed_model": 1.4948,
+     "speed_game": 1.7191,
+     "z_range": 0.6871,
+     "lift_max": 0.2096,
+     "contact_y": 0.0641,
+     "lateral_drift_in_stance": 0.0005
+    },
+    "HindRHoof": {
+     "stance_fraction": 0.528,
+     "stance_runs": 1,
+     "speed_model": 1.4494,
+     "speed_game": 1.6668,
+     "z_range": 0.7104,
+     "lift_max": 0.2124,
+     "contact_y": 0.0616,
+     "lateral_drift_in_stance": 0.0004
+    }
+   },
+   "speed_model": 1.4508,
+   "speed_game": 1.6684,
+   "cycle_distance_model": 1.2573,
+   "cycle_distance_game": 1.4459
+  },
+  "idle_pose": {
+   "Chest": [
+    0.0,
+    2.2717,
+    -0.4066
+   ],
+   "FrontLHoof": [
+    0.2723,
+    0.0337,
+    0.1402
+   ],
+   "FrontRHoof": [
+    -0.3211,
+    0.0337,
+    0.1402
+   ],
+   "Head": [
+    0.0,
+    2.568,
+    -0.3989
+   ],
+   "HindLHoof": [
+    0.2271,
+    0.0681,
+    -0.7104
+   ],
+   "HindRHoof": [
+    -0.2759,
+    0.0681,
+    -0.7104
+   ],
+   "Hips": [
+    0.0,
+    1.863,
+    -0.414
+   ],
+   "HorseBack": [
+    -0.0244,
+    1.5698,
+    -0.9708
+   ],
+   "HorseHead": [
+    -0.0191,
+    1.9326,
+    1.2514
+   ],
+   "HorseRoot": [
+    0.0,
+    -0.004,
+    0.0
+   ],
+   "LeftFoot": [
+    0.463,
+    1.192,
+    -0.308
+   ],
+   "LeftHand": [
+    0.2624,
+    2.1284,
+    0.0327
+   ],
+   "LeftToe": [
+    0.4815,
+    1.1114,
+    -0.177
+   ],
+   "LeftUpperArm": [
+    0.2311,
+    2.3381,
+    -0.4049
+   ],
+   "Neck": [
+    0.0,
+    2.4351,
+    -0.4024
+   ],
+   "RightFoot": [
+    -0.463,
+    1.192,
+    -0.308
+   ],
+   "RightHand": [
+    -0.358,
+    2.1254,
+    -0.1183
+   ],
+   "RightToe": [
+    -0.4815,
+    1.1114,
+    -0.177
+   ],
+   "RightUpperArm": [
+    -0.2311,
+    2.3381,
+    -0.4049
+   ]
+  }
+ },
+ "ENG-06/field": {
+  "Walk": {
+   "length": 1.4333,
+   "feet": {
+    "FrontLHoof": {
+     "stance_fraction": 0.593,
+     "stance_runs": 1,
+     "speed_model": 0.4646,
+     "speed_game": 0.5343,
+     "z_range": 0.4591,
+     "lift_max": 0.099,
+     "contact_y": 0.0331,
+     "lateral_drift_in_stance": 0.0007
+    },
+    "FrontRHoof": {
+     "stance_fraction": 0.581,
+     "stance_runs": 1,
+     "speed_model": 0.4649,
+     "speed_game": 0.5346,
+     "z_range": 0.4569,
+     "lift_max": 0.0999,
+     "contact_y": 0.0327,
+     "lateral_drift_in_stance": 0.0005
+    },
+    "HindLHoof": {
+     "stance_fraction": 0.674,
+     "stance_runs": 1,
+     "speed_model": 0.4663,
+     "speed_game": 0.5363,
+     "z_range": 0.4579,
+     "lift_max": 0.0991,
+     "contact_y": 0.0675,
+     "lateral_drift_in_stance": 0.0005
+    },
+    "HindRHoof": {
+     "stance_fraction": 0.674,
+     "stance_runs": 1,
+     "speed_model": 0.4656,
+     "speed_game": 0.5354,
+     "z_range": 0.4544,
+     "lift_max": 0.1003,
+     "contact_y": 0.0676,
+     "lateral_drift_in_stance": 0.0006
+    }
+   },
+   "speed_model": 0.4653,
+   "speed_game": 0.5352,
+   "cycle_distance_model": 0.667,
+   "cycle_distance_game": 0.7671
+  },
+  "Run": {
+   "length": 0.8667,
+   "feet": {
+    "FrontLHoof": {
+     "stance_fraction": 0.547,
+     "stance_runs": 1,
+     "speed_model": 1.4776,
+     "speed_game": 1.6992,
+     "z_range": 0.7322,
+     "lift_max": 0.2053,
+     "contact_y": 0.033,
+     "lateral_drift_in_stance": 0.0009
+    },
+    "FrontRHoof": {
+     "stance_fraction": 0.377,
+     "stance_runs": 1,
+     "speed_model": 1.3813,
+     "speed_game": 1.5885,
+     "z_range": 0.7117,
+     "lift_max": 0.2076,
+     "contact_y": 0.0321,
+     "lateral_drift_in_stance": 0.0005
+    },
+    "HindLHoof": {
+     "stance_fraction": 0.472,
+     "stance_runs": 1,
+     "speed_model": 1.4948,
+     "speed_game": 1.7191,
+     "z_range": 0.6871,
+     "lift_max": 0.2096,
+     "contact_y": 0.0641,
+     "lateral_drift_in_stance": 0.0005
+    },
+    "HindRHoof": {
+     "stance_fraction": 0.528,
+     "stance_runs": 1,
+     "speed_model": 1.4494,
+     "speed_game": 1.6668,
+     "z_range": 0.7104,
+     "lift_max": 0.2124,
+     "contact_y": 0.0616,
+     "lateral_drift_in_stance": 0.0004
+    }
+   },
+   "speed_model": 1.4508,
+   "speed_game": 1.6684,
+   "cycle_distance_model": 1.2573,
+   "cycle_distance_game": 1.4459
+  },
+  "idle_pose": {
+   "Chest": [
+    0.0,
+    2.2809,
+    -0.4064
+   ],
+   "FrontLHoof": [
+    0.2723,
+    0.0337,
+    0.1402
+   ],
+   "FrontRHoof": [
+    -0.3211,
+    0.0337,
+    0.1402
+   ],
+   "Head": [
+    0.0,
+    2.5838,
+    -0.3986
+   ],
+   "HindLHoof": [
+    0.2271,
+    0.0681,
+    -0.7104
+   ],
+   "HindRHoof": [
+    -0.2759,
+    0.0681,
+    -0.7104
+   ],
+   "Hips": [
+    0.0,
+    1.863,
+    -0.414
+   ],
+   "HorseBack": [
+    -0.0244,
+    1.5698,
+    -0.9708
+   ],
+   "HorseHead": [
+    -0.0191,
+    1.9326,
+    1.2514
+   ],
+   "HorseRoot": [
+    0.0,
+    -0.004,
+    0.0
+   ],
+   "LeftFoot": [
+    0.463,
+    1.192,
+    -0.308
+   ],
+   "LeftHand": [
+    0.2676,
+    2.1234,
+    0.0478
+   ],
+   "LeftToe": [
+    0.484,
+    1.1074,
+    -0.1588
+   ],
+   "LeftUpperArm": [
+    0.2511,
+    2.3488,
+    -0.4047
+   ],
+   "Neck": [
+    0.0,
+    2.448,
+    -0.4021
+   ],
+   "RightFoot": [
+    -0.463,
+    1.192,
+    -0.308
+   ],
+   "RightHand": [
+    -0.358,
+    2.1254,
+    -0.1183
+   ],
+   "RightToe": [
+    -0.484,
+    1.1074,
+    -0.1588
+   ],
+   "RightUpperArm": [
+    -0.2511,
+    2.3488,
+    -0.4047
+   ]
+  }
+ },
+ "ENG-07/field": {
+  "Walk": {
+   "length": 1.3,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.641,
+     "stance_runs": 1,
+     "speed_model": 0.3558,
+     "speed_game": 0.4092,
+     "z_range": 0.2786,
+     "lift_max": 0.0755,
+     "contact_y": 0.0293,
+     "lateral_drift_in_stance": 0.0
+    },
+    "RightFoot": {
+     "stance_fraction": 0.641,
+     "stance_runs": 1,
+     "speed_model": 0.3554,
+     "speed_game": 0.4087,
+     "z_range": 0.2788,
+     "lift_max": 0.075,
+     "contact_y": 0.0296,
+     "lateral_drift_in_stance": 0.0
+    }
+   },
+   "speed_model": 0.3556,
+   "speed_game": 0.4089,
+   "cycle_distance_model": 0.4623,
+   "cycle_distance_game": 0.5316
+  },
+  "Run": {
+   "length": 0.86,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.635,
+     "stance_runs": 1,
+     "speed_model": 0.8729,
+     "speed_game": 1.0038,
+     "z_range": 0.4547,
+     "lift_max": 0.14,
+     "contact_y": 0.0294,
+     "lateral_drift_in_stance": 0.0002
+    },
+    "RightFoot": {
+     "stance_fraction": 0.635,
+     "stance_runs": 1,
+     "speed_model": 0.8818,
+     "speed_game": 1.0141,
+     "z_range": 0.4562,
+     "lift_max": 0.1395,
+     "contact_y": 0.0296,
+     "lateral_drift_in_stance": 0.0002
+    }
+   },
+   "speed_model": 0.8774,
+   "speed_game": 1.009,
+   "cycle_distance_model": 0.7545,
+   "cycle_distance_game": 0.8677
+  },
+  "idle_pose": {
+   "Chest": [
+    -0.0021,
+    1.338,
+    0.0013
+   ],
+   "Head": [
+    -0.001,
+    1.678,
+    0.0013
+   ],
+   "Hips": [
+    0.0,
+    0.928,
+    0.0
+   ],
+   "LeftFoot": [
+    0.17,
+    0.09,
+    0.075
+   ],
+   "LeftHand": [
+    0.3472,
+    1.1069,
+    0.2514
+   ],
+   "LeftToe": [
+    0.17,
+    0.03,
+    0.215
+   ],
+   "LeftUpperArm": [
+    0.2234,
+    1.4773,
+    0.0153
+   ],
+   "Neck": [
+    -0.0015,
+    1.518,
+    0.0013
+   ],
+   "RightFoot": [
+    -0.17,
+    0.09,
+    0.025
+   ],
+   "RightHand": [
+    -0.353,
+    1.0441,
+    0.1814
+   ],
+   "RightToe": [
+    -0.17,
+    0.03,
+    0.165
+   ],
+   "RightUpperArm": [
+    -0.2266,
+    1.4787,
+    0.0153
+   ]
+  }
+ },
+ "ENG-09/field": {
+  "Walk": {
+   "length": 1.25,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.627,
+     "stance_runs": 1,
+     "speed_model": 0.3974,
+     "speed_game": 0.457,
+     "z_range": 0.2977,
+     "lift_max": 0.0958,
+     "contact_y": 0.0343,
+     "lateral_drift_in_stance": 0.0
+    },
+    "RightFoot": {
+     "stance_fraction": 0.64,
+     "stance_runs": 1,
+     "speed_model": 0.3963,
+     "speed_game": 0.4557,
+     "z_range": 0.2985,
+     "lift_max": 0.0961,
+     "contact_y": 0.0343,
+     "lateral_drift_in_stance": 0.0
+    }
+   },
+   "speed_model": 0.3968,
+   "speed_game": 0.4564,
+   "cycle_distance_model": 0.4961,
+   "cycle_distance_game": 0.5705
+  },
+  "Run": {
+   "length": 0.82,
+   "feet": {
+    "LeftFoot": {
+     "stance_fraction": 0.6,
+     "stance_runs": 1,
+     "speed_model": 0.95,
+     "speed_game": 1.0926,
+     "z_range": 0.474,
+     "lift_max": 0.1596,
+     "contact_y": 0.0344,
+     "lateral_drift_in_stance": 0.0
+    },
+    "RightFoot": {
+     "stance_fraction": 0.62,
+     "stance_runs": 1,
+     "speed_model": 0.9663,
+     "speed_game": 1.1112,
+     "z_range": 0.4787,
+     "lift_max": 0.1615,
+     "contact_y": 0.033,
+     "lateral_drift_in_stance": 0.0
+    }
+   },
+   "speed_model": 0.9582,
+   "speed_game": 1.1019,
+   "cycle_distance_model": 0.7857,
+   "cycle_distance_game": 0.9035
+  },
+  "idle_pose": {
+   "Chest": [
+    -0.002,
+    1.351,
+    0.0013
+   ],
+   "Head": [
+    -0.001,
+    1.641,
+    -0.0006
+   ],
+   "Hips": [
+    0.0,
+    0.951,
+    0.0
+   ],
+   "LeftFoot": [
+    0.122,
+    0.095,
+    0.063
+   ],
+   "LeftHand": [
+    0.3255,
+    1.024,
+    0.1789
+   ],
+   "LeftToe": [
+    0.122,
+    0.035,
+    0.205
+   ],
+   "LeftUpperArm": [
+    0.2232,
+    1.4152,
+    -0.0036
+   ],
+   "Neck": [
+    -0.0014,
+    1.511,
+    0.0002
+   ],
+   "RightFoot": [
+    -0.116,
+    0.095,
+    0.0
+   ],
+   "RightHand": [
+    -0.3357,
+    1.0103,
+    0.1781
+   ],
+   "RightToe": [
+    -0.116,
+    0.035,
+    0.142
+   ],
+   "RightUpperArm": [
+    -0.2267,
+    1.4168,
+    0.0053
+   ]
+  }
+ }
+}

@@ -1,0 +1,470 @@
+{
+ "hl_validate_0.456": {
+  "case": "flat straight 0.456 m/s (= infantry Walk speed x1.15)",
+  "route": {
+   "length": 5.928,
+   "speed": 0.456,
+   "turn_deg": 0.0,
+   "metrics": {
+    "cross_slope": 0.0781669616699219,
+    "length": 5.92800140380859,
+    "min_y": 5.54858255386353,
+    "slope_abs_mean": 0.0374770801442003,
+    "slope_max": 0.0597414475812299,
+    "slope_mean": 0.0159429384177665
+   }
+  },
+  "summary": {
+   "ENG-01": {
+    "members": 2,
+    "slide_max_m": 0.002,
+    "slide_max_pct_leg": 0.18,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0019,
+    "cycle_speed_mps_mean": 0.46,
+    "cycle_vs_path_pct_mean": 0.89,
+    "path_speed_mps_mean": 0.456,
+    "pass_speed": true,
+    "pass_slide": true
+   },
+   "ENG-02": {
+    "members": 2,
+    "slide_max_m": 0.002,
+    "slide_max_pct_leg": 0.18,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0019,
+    "cycle_speed_mps_mean": 0.46,
+    "cycle_vs_path_pct_mean": 0.87,
+    "path_speed_mps_mean": 0.456,
+    "pass_speed": true,
+    "pass_slide": true
+   },
+   "ENG-06": {
+    "members": 1,
+    "slide_max_m": 0.0524,
+    "slide_max_pct_leg": 4.09,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0443,
+    "cycle_speed_mps_mean": 0.5388,
+    "cycle_vs_path_pct_mean": 18.15,
+    "path_speed_mps_mean": 0.456,
+    "pass_speed": false,
+    "pass_slide": true
+   },
+   "ENG-03": {
+    "members": 2,
+    "slide_max_m": 0.0017,
+    "slide_max_pct_leg": 0.16,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.001,
+    "cycle_speed_mps_mean": 0.4599,
+    "cycle_vs_path_pct_mean": 0.86,
+    "path_speed_mps_mean": 0.456,
+    "pass_speed": true,
+    "pass_slide": true
+   },
+   "ENG-04": {
+    "members": 2,
+    "slide_max_m": 0.0008,
+    "slide_max_pct_leg": 0.07,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0006,
+    "cycle_speed_mps_mean": 0.4595,
+    "cycle_vs_path_pct_mean": 0.77,
+    "path_speed_mps_mean": 0.456,
+    "pass_speed": true,
+    "pass_slide": true
+   }
+  }
+ },
+ "hl_validate_0.535": {
+  "case": "flat straight 0.535 m/s (= horse Walk speed x1.15)",
+  "route": {
+   "length": 6.955,
+   "speed": 0.535,
+   "turn_deg": 0.0,
+   "metrics": {
+    "cross_slope": 0.050906499226888,
+    "length": 6.95499801635742,
+    "min_y": 6.50200796127319,
+    "slope_abs_mean": 0.0300759982658829,
+    "slope_max": 0.0536156654388996,
+    "slope_mean": -0.0146888609302721
+   }
+  },
+  "summary": {
+   "ENG-01": {
+    "members": 2,
+    "slide_max_m": 0.0376,
+    "slide_max_pct_leg": 3.48,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0357,
+    "cycle_speed_mps_mean": 0.4599,
+    "cycle_vs_path_pct_mean": -14.03,
+    "path_speed_mps_mean": 0.535,
+    "pass_speed": false,
+    "pass_slide": true
+   },
+   "ENG-02": {
+    "members": 2,
+    "slide_max_m": 0.0375,
+    "slide_max_pct_leg": 3.47,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0362,
+    "cycle_speed_mps_mean": 0.46,
+    "cycle_vs_path_pct_mean": -14.02,
+    "path_speed_mps_mean": 0.535,
+    "pass_speed": false,
+    "pass_slide": true
+   },
+   "ENG-06": {
+    "members": 1,
+    "slide_max_m": 0.0024,
+    "slide_max_pct_leg": 0.19,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0018,
+    "cycle_speed_mps_mean": 0.5387,
+    "cycle_vs_path_pct_mean": 0.69,
+    "path_speed_mps_mean": 0.535,
+    "pass_speed": true,
+    "pass_slide": true
+   },
+   "ENG-03": {
+    "members": 2,
+    "slide_max_m": 0.0362,
+    "slide_max_pct_leg": 3.35,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0268,
+    "cycle_speed_mps_mean": 0.4599,
+    "cycle_vs_path_pct_mean": -14.02,
+    "path_speed_mps_mean": 0.535,
+    "pass_speed": false,
+    "pass_slide": true
+   },
+   "ENG-04": {
+    "members": 2,
+    "slide_max_m": 0.0375,
+    "slide_max_pct_leg": 3.47,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0294,
+    "cycle_speed_mps_mean": 0.4601,
+    "cycle_vs_path_pct_mean": -14.02,
+    "path_speed_mps_mean": 0.5351,
+    "pass_speed": false,
+    "pass_slide": true
+   }
+  }
+ },
+ "hl_march_s0": {
+  "case": "flat, 60 deg turn, 1.2 m/s",
+  "route": {
+   "length": 15.6,
+   "speed": 1.2,
+   "turn_deg": 60.0,
+   "metrics": {
+    "cross_slope": 0.0748689969380697,
+    "length": 15.6000013947487,
+    "min_y": 6.77159833908081,
+    "slope_abs_mean": 0.0206785394809909,
+    "slope_max": 0.0467631898541775,
+    "slope_mean": -0.00184242110794275
+   }
+  },
+  "summary": {
+   "ENG-01": {
+    "members": 2,
+    "slide_max_m": 0.3702,
+    "slide_max_pct_leg": 34.24,
+    "turn_slide_max_m": 0.9054,
+    "slide_median_m": 0.339,
+    "cycle_speed_mps_mean": 0.4599,
+    "cycle_vs_path_pct_mean": -61.67,
+    "path_speed_mps_mean": 1.1999,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-02": {
+    "members": 2,
+    "slide_max_m": 0.3702,
+    "slide_max_pct_leg": 34.24,
+    "turn_slide_max_m": 0.5805,
+    "slide_median_m": 0.2343,
+    "cycle_speed_mps_mean": 0.4599,
+    "cycle_vs_path_pct_mean": -61.68,
+    "path_speed_mps_mean": 1.2002,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-06": {
+    "members": 1,
+    "slide_max_m": 0.4093,
+    "slide_max_pct_leg": 31.95,
+    "turn_slide_max_m": 1.1668,
+    "slide_median_m": 0.2527,
+    "cycle_speed_mps_mean": 0.5383,
+    "cycle_vs_path_pct_mean": -55.15,
+    "path_speed_mps_mean": 1.2001,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-03": {
+    "members": 2,
+    "slide_max_m": 0.37,
+    "slide_max_pct_leg": 34.21,
+    "turn_slide_max_m": 0.4859,
+    "slide_median_m": 0.3022,
+    "cycle_speed_mps_mean": 0.4599,
+    "cycle_vs_path_pct_mean": -61.66,
+    "path_speed_mps_mean": 1.1999,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-04": {
+    "members": 2,
+    "slide_max_m": 0.3701,
+    "slide_max_pct_leg": 34.23,
+    "turn_slide_max_m": 2.6839,
+    "slide_median_m": 0.3484,
+    "cycle_speed_mps_mean": 0.4606,
+    "cycle_vs_path_pct_mean": -70.82,
+    "path_speed_mps_mean": 1.7513,
+    "pass_speed": false,
+    "pass_slide": false
+   }
+  }
+ },
+ "hl_march_s1": {
+  "case": "slope route (grade 0.146 mean), 60 deg turn, 1.2 m/s",
+  "route": {
+   "length": 15.6,
+   "speed": 1.2,
+   "turn_deg": 60.0,
+   "metrics": {
+    "cross_slope": 0.120363235473633,
+    "length": 15.5999999046326,
+    "min_y": 6.33800268173218,
+    "slope_abs_mean": 0.146238607553793,
+    "slope_max": 0.220719843952108,
+    "slope_mean": 0.146238607553793
+   }
+  },
+  "summary": {
+   "ENG-01": {
+    "members": 2,
+    "slide_max_m": 0.3206,
+    "slide_max_pct_leg": 29.65,
+    "turn_slide_max_m": 1.0482,
+    "slide_median_m": 0.2035,
+    "cycle_speed_mps_mean": 0.461,
+    "cycle_vs_path_pct_mean": -61.86,
+    "path_speed_mps_mean": 1.2089,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-02": {
+    "members": 2,
+    "slide_max_m": 0.3579,
+    "slide_max_pct_leg": 33.1,
+    "turn_slide_max_m": 1.0432,
+    "slide_median_m": 0.1911,
+    "cycle_speed_mps_mean": 0.46,
+    "cycle_vs_path_pct_mean": -61.66,
+    "path_speed_mps_mean": 1.1999,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-06": {
+    "members": 1,
+    "slide_max_m": 0.2315,
+    "slide_max_pct_leg": 18.07,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.1212,
+    "cycle_speed_mps_mean": 0.5387,
+    "cycle_vs_path_pct_mean": -55.1,
+    "path_speed_mps_mean": 1.1999,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-03": {
+    "members": 2,
+    "slide_max_m": 0.3579,
+    "slide_max_pct_leg": 33.1,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.1111,
+    "cycle_speed_mps_mean": 0.4598,
+    "cycle_vs_path_pct_mean": -61.7,
+    "path_speed_mps_mean": 1.2006,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-04": {
+    "members": 2,
+    "slide_max_m": 0.296,
+    "slide_max_pct_leg": 27.38,
+    "turn_slide_max_m": 1.2412,
+    "slide_median_m": 0.2374,
+    "cycle_speed_mps_mean": 0.4599,
+    "cycle_vs_path_pct_mean": -61.68,
+    "path_speed_mps_mean": 1.2004,
+    "pass_speed": false,
+    "pass_slide": false
+   }
+  }
+ },
+ "hl_slope_0.456": {
+  "case": "slope (grade 0.166) straight 0.456 m/s",
+  "route": {
+   "length": 5.928,
+   "speed": 0.456,
+   "turn_deg": 0.0,
+   "metrics": {
+    "cross_slope": 0.124415715535482,
+    "length": 5.92800140380859,
+    "min_y": 6.33800268173218,
+    "slope_abs_mean": 0.165953039278353,
+    "slope_max": 0.212653925580328,
+    "slope_mean": 0.165953039278353
+   }
+  },
+  "summary": {
+   "ENG-01": {
+    "members": 2,
+    "slide_max_m": 0.0012,
+    "slide_max_pct_leg": 0.11,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0007,
+    "cycle_speed_mps_mean": 0.46,
+    "cycle_vs_path_pct_mean": 0.89,
+    "path_speed_mps_mean": 0.456,
+    "pass_speed": true,
+    "pass_slide": true
+   },
+   "ENG-02": {
+    "members": 2,
+    "slide_max_m": 0.0014,
+    "slide_max_pct_leg": 0.13,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0011,
+    "cycle_speed_mps_mean": 0.46,
+    "cycle_vs_path_pct_mean": 0.88,
+    "path_speed_mps_mean": 0.456,
+    "pass_speed": true,
+    "pass_slide": true
+   },
+   "ENG-06": {
+    "members": 1,
+    "slide_max_m": 0.0331,
+    "slide_max_pct_leg": 2.58,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0154,
+    "cycle_speed_mps_mean": 0.5388,
+    "cycle_vs_path_pct_mean": 18.14,
+    "path_speed_mps_mean": 0.4561,
+    "pass_speed": false,
+    "pass_slide": true
+   },
+   "ENG-03": {
+    "members": 2,
+    "slide_max_m": 0.002,
+    "slide_max_pct_leg": 0.18,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0019,
+    "cycle_speed_mps_mean": 0.46,
+    "cycle_vs_path_pct_mean": 0.89,
+    "path_speed_mps_mean": 0.456,
+    "pass_speed": true,
+    "pass_slide": true
+   },
+   "ENG-04": {
+    "members": 2,
+    "slide_max_m": 0.002,
+    "slide_max_pct_leg": 0.18,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.0019,
+    "cycle_speed_mps_mean": 0.46,
+    "cycle_vs_path_pct_mean": 0.88,
+    "path_speed_mps_mean": 0.456,
+    "pass_speed": true,
+    "pass_slide": true
+   }
+  }
+ },
+ "hl_slope_1.2": {
+  "case": "slope (grade -0.196) straight 1.2 m/s",
+  "route": {
+   "length": 15.6,
+   "speed": 1.2,
+   "turn_deg": 0.0,
+   "metrics": {
+    "cross_slope": 0.1249893506368,
+    "length": 15.6000061035156,
+    "min_y": 7.16447448730469,
+    "slope_abs_mean": 0.196026330608186,
+    "slope_max": 0.307447357330737,
+    "slope_mean": -0.196026330608186
+   }
+  },
+  "summary": {
+   "ENG-01": {
+    "members": 2,
+    "slide_max_m": 0.3577,
+    "slide_max_pct_leg": 33.08,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.1757,
+    "cycle_speed_mps_mean": 0.4593,
+    "cycle_vs_path_pct_mean": -61.72,
+    "path_speed_mps_mean": 1.2001,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-02": {
+    "members": 2,
+    "slide_max_m": 0.333,
+    "slide_max_pct_leg": 30.8,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.2097,
+    "cycle_speed_mps_mean": 0.4601,
+    "cycle_vs_path_pct_mean": -61.66,
+    "path_speed_mps_mean": 1.2001,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-06": {
+    "members": 1,
+    "slide_max_m": 0.3863,
+    "slide_max_pct_leg": 30.16,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.1707,
+    "cycle_speed_mps_mean": 0.5194,
+    "cycle_vs_path_pct_mean": -56.7,
+    "path_speed_mps_mean": 1.1996,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-03": {
+    "members": 2,
+    "slide_max_m": 0.3083,
+    "slide_max_pct_leg": 28.51,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.1358,
+    "cycle_speed_mps_mean": 0.458,
+    "cycle_vs_path_pct_mean": -61.83,
+    "path_speed_mps_mean": 1.1999,
+    "pass_speed": false,
+    "pass_slide": false
+   },
+   "ENG-04": {
+    "members": 2,
+    "slide_max_m": 0.296,
+    "slide_max_pct_leg": 27.38,
+    "turn_slide_max_m": 0.0,
+    "slide_median_m": 0.1542,
+    "cycle_speed_mps_mean": 0.4597,
+    "cycle_vs_path_pct_mean": -61.69,
+    "path_speed_mps_mean": 1.1998,
+    "pass_speed": false,
+    "pass_slide": false
+   }
+  }
+ }
+}

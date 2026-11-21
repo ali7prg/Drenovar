@@ -49,6 +49,7 @@ var battle_title: Label
 var battle_sub: Label
 var battle_bar: ProgressBar
 var battle_retreat: Button
+var battle_timer: Label
 var arrow: Control
 var arrow_target := Vector3.INF
 var arrow_label := ""
@@ -491,53 +492,69 @@ func build_invite() -> void:
 	add_child(invite_button)
 	invite_button.hide()
 
+## Compact battle panel (art/08): one slim block at the top edge, left of the DRENOVAR resource
+## row — name · timer · «Отступить» on one line, a thin HP bar, the current telegraph warning in
+## one short line. It never covers the fight: the fight camera frames the boss below it.
 func build_battle_header() -> void:
 	battle_header = PanelContainer.new()
 	battle_header.name = "BattleHeader"
-	battle_header.add_theme_stylebox_override("panel", Style.dark_panel())
+	var panel: StyleBoxTexture = Style.dark_panel().duplicate()
+	panel.content_margin_top = 6
+	panel.content_margin_bottom = 6
+	panel.content_margin_left = 12
+	panel.content_margin_right = 12
+	battle_header.add_theme_stylebox_override("panel", panel)
 	battle_header.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(battle_header)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 4)
+	column.add_theme_constant_override("separation", 3)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	battle_header.add_child(column)
-	battle_title = Style.label("", 20, Style.IVORY, true, 0)
-	battle_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	column.add_child(battle_title)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(row)
+	battle_title = Style.label("", 16, Style.IVORY, true, 0)
+	battle_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	battle_title.clip_text = true
+	row.add_child(battle_title)
+	battle_timer = Style.label("", 14, Color("#ffd49a"), false, 0)
+	row.add_child(battle_timer)
+	battle_retreat = Button.new()
+	battle_retreat.text = text("boss.retreat")
+	battle_retreat.custom_minimum_size = Vector2(0, 26)
+	battle_retreat.add_theme_font_size_override("font_size", 13)
+	Style.apply_button(battle_retreat, "leather")
+	battle_retreat.pressed.connect(func(): game.request_action("retreat"))
+	row.add_child(battle_retreat)
 	battle_bar = ProgressBar.new()
-	battle_bar.custom_minimum_size = Vector2(360, 14)
+	battle_bar.custom_minimum_size = Vector2(380, 8)
 	battle_bar.show_percentage = false
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = Color("#c4472f")
-	fill.set_corner_radius_all(4)
+	fill.set_corner_radius_all(3)
 	var back := StyleBoxFlat.new()
 	back.bg_color = Color("#2a1712")
 	back.border_color = Color("#8a6a3c")
 	back.set_border_width_all(1)
-	back.set_corner_radius_all(4)
+	back.set_corner_radius_all(3)
 	battle_bar.add_theme_stylebox_override("fill", fill)
 	battle_bar.add_theme_stylebox_override("background", back)
 	column.add_child(battle_bar)
-	battle_sub = Style.label("", 16, Color("#ffd49a"), false, 0)
-	battle_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	battle_sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	battle_sub = Style.label("", 13, Color("#ffd49a"), false, 0)
+	battle_sub.clip_text = true
 	battle_sub.custom_minimum_size.x = 380
 	column.add_child(battle_sub)
-	battle_retreat = Button.new()
-	battle_retreat.text = text("boss.retreat")
-	battle_retreat.custom_minimum_size = Vector2(0, 40)
-	battle_retreat.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	Style.apply_button(battle_retreat, "leather")
-	battle_retreat.pressed.connect(func(): game.request_action("retreat"))
-	column.add_child(battle_retreat)
 	battle_header.hide()
 
-func show_battle(title: String, hp: float, hp_max: float, sub: String, can_retreat: bool) -> void:
+func show_battle(title: String, hp: float, hp_max: float, sub: String, can_retreat: bool, timer := "") -> void:
 	battle_title.text = title
 	battle_bar.max_value = maxf(1.0, hp_max)
 	battle_bar.value = clampf(hp, 0.0, battle_bar.max_value)
 	battle_sub.text = sub
 	battle_sub.visible = not sub.is_empty()
+	battle_timer.text = timer
+	battle_timer.visible = not timer.is_empty()
 	battle_retreat.visible = can_retreat
 	if not battle_header.visible:
 		battle_header.show()
@@ -677,7 +694,10 @@ func layout() -> void:
 	if battle_header.visible:
 		battle_header.reset_size()
 		var size_now := battle_header.get_combined_minimum_size()
-		battle_header.position = Vector2((view.x - size_now.x) * 0.5, 64)
+		# Top edge, between the profile button and the resource row (≈ 57 % of the width).
+		var lane_left := 150.0
+		var lane_right := maxf(lane_left + size_now.x, view.x * 0.56)
+		battle_header.position = Vector2(lane_left + (lane_right - lane_left - size_now.x) * 0.5, 6)
 	last_nav_edge = right_edge
 
 func layout_hint() -> void:

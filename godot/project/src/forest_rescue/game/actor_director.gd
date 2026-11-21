@@ -1405,22 +1405,34 @@ func update_battle_hud(now: float) -> void:
 			hp = float(event.hp)
 	var left := maxi(0, ceili((float(fight.get("endsAt", now)) - now) / 1000.0))
 	var title: String = game.content.text("site.guardian", {"name":game.content.species_name(species), "level":int(fight.get("level")) if fight.get("level") != null else 1})
-	var sub := "%d:%02d" % [left / 60, left % 60]
+	var clock := "%d:%02d" % [left / 60, left % 60]
+	var sub := ""
 	if boss_fight:
 		var phase := String(adv.get("boss", {}).get("phase", "hunt"))
 		var shown := latest_event(fight, elapsed, "boss", 9999.0, "phase")
 		if not shown.is_empty():
 			phase = String(shown.get("phase", phase))
 		title = "%s · %s" % [game.content.species_name(species), game.content.text("boss.phase." + phase)]
-		var warning: String = telegraphs.current_warning()
-		if not warning.is_empty():
-			sub = warning + " · " + sub
-	game.hud.show_battle(title, hp, hp_max, sub, true)
+		sub = telegraphs.current_warning()
+	game.hud.show_battle(title, hp, hp_max, sub, true, clock)
 
 func on_battle_report(_report_id: String) -> void:
 	last_battle = game.client.battle()
 
 # ------------------------------------------------------------------ boss
+## Fight framing: the camera target between the boss and the squad's fighting spot (the squad
+## stands BOSS_FIGHT_DISTANCE m before the boss on the entrance axis), zoom 36 — inside the arena
+## the server revealed along the squad's route; the panel stays above the boss.
+const BOSS_FRAME_ZOOM := 36.0
+var boss_framed_for := ""
+
+func boss_fight_frame() -> Vector3:
+	var arena: Vector3 = game.target_position("lf_boss_ancient_maw")
+	if arena == Vector3.INF:
+		return Vector3.INF
+	var squad_spot := boss_gap_point(BOSS_FIGHT_DISTANCE)
+	return arena.lerp(squad_spot, 0.5)
+
 func update_boss(now: float, delta: float) -> void:
 	var boss_state: Dictionary = adv.get("boss", {})
 	var state := String(boss_state.get("state", "locked"))
@@ -1448,6 +1460,14 @@ func update_boss(now: float, delta: float) -> void:
 	var current_yaw := float(state_motion.get("yaw", wanted))
 	place("boss", actor, arena, current_yaw if not state_motion.is_empty() else wanted, delta)
 	var elapsed := battle_elapsed(fight, now) if boss_fight else 0.0
+	# Fight camera (art/08): once per boss battle the city camera flies to frame the revealed arena
+	# — boss above the middle (below the compact panel), squad and entrance banners below.
+	if boss_fight and String(fight.get("outcome", "pending")) == "pending":
+		var report := String(fight.get("reportId", ""))
+		if report != boss_framed_for:
+			boss_framed_for = report
+			if game.world != null and game.world.has_method("focus_on"):
+				game.world.focus_on(boss_fight_frame(), BOSS_FRAME_ZOOM)
 	var defeated := state == "defeated" or (boss_fight and String(fight.get("outcome", "")) == "victory" and float(fight.get("endsAt", 0)) <= now)
 	var death_event := latest_event(fight, elapsed, "boss", 9999.0, "death") if boss_fight else {}
 	if not death_event.is_empty():

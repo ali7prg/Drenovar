@@ -3,9 +3,10 @@ extends Node3D
 ## timeline: frontal sector (jaw_arc), rear/side arc (tail_sweep), fixed lane (lane_charge,
 ## committed at the end of its telegraph) and two rings with explicit gaps (stomp_waves).
 ## Shapes are authored for the boss at scale 1.0 and scaled with it (scale_factor = meta
-## recommendedScale 1.52). Look (art/08): thin glowing orange arcs over a faint warm fill;
-## the arcs sweep outward while the telegraph fills, flare white-hot in the active window and
-## fade during recovery. Presentation only: the server decides hits; the decal shows where/when.
+## recommendedScale 1.52). Look (art/08): 3–4 thin, bright, saturated orange glowing arcs on the
+## swept side (metric line width ~0.25 m, soft halo, no translucent fill band); they light up one
+## after another while the telegraph fills, flare in the active window and fade during recovery.
+## Presentation only: the server decides hits; the decal shows where/when.
 
 const SHAPES := {
 	"jaw_arc":{"kind":"sector", "inner":1.6, "outer":9.5, "from":-42.0, "to":42.0, "color":Color("#ff6a1a")},
@@ -38,58 +39,70 @@ func setup(owner_game: Node) -> void:
 	shader.code = """
 shader_type spatial;
 render_mode unshaded, cull_disabled, depth_draw_never, blend_mix, shadows_disabled, fog_disabled;
+// art/08: 3–4 THIN, bright, saturated orange glowing arcs on the ground on the swept side — no
+// broad translucent bands. Line widths are metric (inner/outer radii passed in metres).
 uniform vec4 tint : source_color = vec4(1.0, 0.48, 0.1, 1.0);
 uniform float fill = 0.0;      // telegraph progress 0..1
 uniform float active = 0.0;    // 1 inside the hit window
 uniform float fade = 1.0;      // recovery fade-out
 uniform int kind = 0;          // 0 sector, 1 lane, 2 rings
-float glow_line(float x, float at, float core, float halo) {
-	float d = abs(x - at);
-	return smoothstep(core, core * 0.25, d) + 0.5 * smoothstep(halo, 0.0, d);
+uniform float inner_m = 2.0;   // sector: radial span in metres (uv.y 0..1)
+uniform float outer_m = 10.0;
+uniform float width_m = 4.0;   // lane width / ring band in metres (uv.x / uv.y span)
+uniform float length_m = 20.0; // lane length in metres
+uniform float line_m = 0.13;   // half width of a line core (m)
+uniform float halo_m = 0.55;   // glow halo (m)
+float glow_line(float d) {
+	d = abs(d);
+	return smoothstep(line_m, line_m * 0.35, d) + 0.42 * smoothstep(halo_m, 0.0, d) * smoothstep(0.0, line_m, d);
 }
 void fragment() {
 	vec2 uv = UV;
-	float ends = smoothstep(0.0, 0.1, uv.x) * smoothstep(1.0, 0.9, uv.x);
-	float light = 0.0;
-	float wash = 0.0;
+	float core = 0.0;
+	float halo = 0.0;
+	float ends = 1.0;
 	if (kind == 0) {
-		// Sector (art/08): three close concentric arcs near the rim + the rim itself; a wavefront
-		// sweeps outwards with the fill, everything flares in the active window.
-		for (int i = 0; i < 3; i++) {
-			float at = 0.62 + 0.13 * float(i);
-			light += glow_line(uv.y, at, 0.035, 0.11) * (0.45 + 0.55 * step(at, fill + 0.04));
+		float r = mix(inner_m, outer_m, uv.y);
+		float span = outer_m - inner_m;
+		ends = smoothstep(0.0, 0.07, uv.x) * smoothstep(1.0, 0.93, uv.x);
+		for (int i = 0; i < 4; i++) {
+			float at = outer_m - span * 0.15 * float(i);
+			// arcs light up one after another while the telegraph fills (outer first), all flare in the hit window
+			float on = smoothstep(float(i) * 0.22, float(i) * 0.22 + 0.12, fill) * (0.75 + 0.25 * sin(TIME * 7.0 - float(i) * 1.3)) + active;
+			float g = glow_line(r - at);
+			core += smoothstep(0.55, 1.0, g) * min(on, 1.6);
+			halo += g * min(on, 1.2);
 		}
-		light += glow_line(uv.y, 0.975, 0.03, 0.09);
-		light += glow_line(uv.y, fill, 0.04, 0.16) * (1.0 - active) * 0.7;
-		wash = (0.05 + 0.12 * step(uv.y, fill)) * smoothstep(0.0, 0.3, uv.y);
-		light *= ends;
-		wash *= ends;
 	} else if (kind == 1) {
-		// Lane: glowing side edges, chevrons running forward, warm fill growing along it.
-		float side = min(uv.x, 1.0 - uv.x);
-		light = glow_line(side, 0.03, 0.04, 0.14);
-		float chevron = fract(uv.y * 6.0 - abs(uv.x - 0.5) * 1.4 - TIME * 1.3);
-		light += smoothstep(0.09, 0.0, abs(chevron - 0.5)) * 0.7 * step(0.1, side) * step(uv.y, fill + 0.05);
-		wash = 0.05 + 0.12 * step(uv.y, fill);
-		float tip = smoothstep(1.0, 0.88, uv.y) * smoothstep(0.0, 0.05, uv.y);
-		light *= tip;
-		wash *= tip;
+		// Lane: two thin glowing edges + three thin chevrons running forward.
+		float x = (uv.x - 0.5) * width_m;
+		float y = uv.y * length_m;
+		float edge = glow_line(abs(x) - width_m * 0.5 + line_m * 1.5);
+		float chev = 0.0;
+		for (int i = 0; i < 3; i++) {
+			float at = fract(float(i) / 3.0 + TIME * 0.45) * length_m;
+			chev += glow_line(y - at - abs(x) * 0.8) * step(abs(x), width_m * 0.42) * step(y, length_m * (fill + 0.08));
+		}
+		ends = smoothstep(0.0, 1.0, y) * smoothstep(length_m, length_m - 2.0, y);
+		float on = smoothstep(0.0, 0.15, fill) + active;
+		core = smoothstep(0.55, 1.0, edge + chev) * min(on, 1.6);
+		halo = (edge + chev) * min(on, 1.2);
 	} else {
-		// Ring band: a hot line at the centre (two thin echoes); in the active window the wave runs out.
-		float wave = mix(0.5, fract(TIME * 2.4), active);
-		light = glow_line(uv.y, 0.5, 0.16, 0.42) + 0.7 * glow_line(uv.y, 0.2, 0.07, 0.16) + 0.7 * glow_line(uv.y, 0.8, 0.07, 0.16);
-		light += glow_line(uv.y, wave, 0.07, 0.22) * active;
-		wash = 0.05 + 0.08 * fill;
-		light *= ends;
-		wash *= ends;
+		// Stomp rings: one thin bright ring line per band (+ a thin echo), gaps cut by the mesh.
+		float y = (uv.y - 0.5) * width_m;
+		float wave = mix(0.0, (fract(TIME * 2.4) - 0.5) * width_m, active);
+		float g = glow_line(y) + 0.55 * glow_line(y - width_m * 0.32) + glow_line(y - wave) * active;
+		ends = 1.0;
+		float on = smoothstep(0.0, 0.15, fill) + active;
+		core = smoothstep(0.55, 1.0, g) * min(on, 1.6);
+		halo = g * min(on, 1.2);
 	}
-	// Painted glow (art/08): saturated orange lines with a lighter core, a soft warm halo;
-	// HDR brightness lifts them above the floor, the active window turns them hot.
-	// Saturated orange (the FILMIC tonemap whitens strong HDR values): brightness stays near 1.
-	vec3 hot = vec3(1.0, 0.72, 0.28);
-	float core = clamp(light - 0.55, 0.0, 1.0);
-	vec3 col = mix(tint.rgb, hot, clamp(core * 0.7 + active * 0.35, 0.0, 1.0)) * (0.98 + 0.25 * active + 0.12 * core);
-	float alpha = clamp(light * 0.95 + wash * (1.1 + active), 0.0, 0.95) * (0.6 + 0.4 * fill);
+	core *= ends;
+	halo *= ends;
+	// Saturated orange with a hot core (FILMIC keeps it orange below ~1.2), soft orange halo.
+	vec3 hot = vec3(1.0, 0.78, 0.38);
+	vec3 col = mix(tint.rgb * 1.08, hot, clamp(core * 0.6 + active * 0.25, 0.0, 1.0)) * (1.0 + 0.18 * active);
+	float alpha = clamp(core * 0.95 + halo * 0.38, 0.0, 0.97) * (0.55 + 0.45 * smoothstep(0.0, 0.3, fill));
 	ALBEDO = col;
 	ALPHA = alpha * fade;
 }
@@ -207,6 +220,16 @@ func draw_decal(id: String, attack: String, boss_pos: Vector3, direction: float,
 		material.shader = shader
 		material.set_shader_parameter("tint", shape.color)
 		material.set_shader_parameter("kind", KIND_ID.get(String(shape.kind), 0))
+		var k := scale_factor
+		match String(shape.kind):
+			"sector":
+				material.set_shader_parameter("inner_m", float(shape.inner) * k)
+				material.set_shader_parameter("outer_m", float(shape.outer) * k)
+			"lane":
+				material.set_shader_parameter("width_m", float(shape.width) * k)
+				material.set_shader_parameter("length_m", float(shape.length) * k)
+			"rings":
+				material.set_shader_parameter("width_m", float(shape.band) * k)
 		# Drawn before the fog shell: where the projection is still fog, the mist veils the decal.
 		material.render_priority = -10
 		node.material_override = material

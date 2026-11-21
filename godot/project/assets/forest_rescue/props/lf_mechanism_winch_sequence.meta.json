@@ -2,39 +2,39 @@
   "id": "lf_mechanism_winch_sequence",
   "generation": "props v2 material path: measured blueprint + solved painting camera + modelled geometry + seamless painted-style material tiles (colours measured on the painting)",
   "tris": {
-    "LOD0": 5853,
-    "LOD1": 3652,
-    "LOD2": 2268
+    "LOD0": 5677,
+    "LOD1": 3640,
+    "LOD2": 2340
   },
   "tris_by_node": {
     "LOD0": {
-      "root": 3041,
+      "root": 2829,
       "drum": 328,
-      "big_gear": 748,
-      "pinion": 520,
+      "big_gear": 712,
+      "pinion": 484,
       "crank": 412,
       "pawl": 44,
       "brake_lever": 234,
       "rope": 128,
-      "chest": 262,
-      "chest_lid": 134,
+      "chest": 274,
+      "chest_lid": 230,
       "pit_void": 2
     },
     "LOD1": {
-      "root": 1391,
+      "root": 1327,
       "drum": 220,
-      "big_gear": 724,
-      "pinion": 496,
+      "big_gear": 696,
+      "pinion": 468,
       "crank": 276,
       "pawl": 36,
       "brake_lever": 171,
       "rope": 60,
-      "chest": 154,
-      "chest_lid": 122,
+      "chest": 166,
+      "chest_lid": 218,
       "pit_void": 2
     },
     "LOD2": {
-      "root": 972,
+      "root": 936,
       "drum": 136,
       "big_gear": 346,
       "pinion": 244,
@@ -42,8 +42,8 @@
       "pawl": 36,
       "brake_lever": 116,
       "rope": 24,
-      "chest": 110,
-      "chest_lid": 110,
+      "chest": 122,
+      "chest_lid": 206,
       "pit_void": 2
     }
   },
@@ -118,7 +118,7 @@
   "vertexAONote": "COLOR_0.a = sqrt((F - 0.42) / 0.58), F = baked ambient occlusion x soft sun shadow (rest pose; moving parts by themselves); actor_rig enables the painted shader's use_ao for this asset",
   "vertexAOStats": {
     "LOD0": {
-      "mean": 0.731,
+      "mean": 0.73,
       "p10": 0.42
     },
     "LOD1": {
@@ -134,14 +134,14 @@
   "coordinate_space": "glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",
   "bounds_m": {
     "min": [
-      -3.198,
+      -3.105,
       -1.04,
-      -2.265
+      -2.414
     ],
     "max": [
-      2.464,
+      2.439,
       3.045,
-      1.744
+      1.643
     ]
   },
   "lod_nodes": {
@@ -324,10 +324,10 @@
     "SPL": 0.56,
     "WH": 0.44,
     "TB": 0.45,
-    "LW": 0.32,
+    "LW": 0.245,
     "FY": 0.46,
     "TZ": 0.68,
-    "SPIL": 0.3,
+    "SPIL": 0.2,
     "SPIR": 0.06,
     "PX": -0.3,
     "PSX": -0.4,
@@ -342,17 +342,17 @@
   "qa": {
     "views": {
       "main": {
-        "iou_raw": 0.7843,
-        "iou_filled": 0.8718,
-        "colour_err": 0.1458,
-        "colour_err_core": 0.1457,
+        "iou_raw": 0.7458,
+        "iou_filled": 0.8558,
+        "colour_err": 0.1468,
+        "colour_err_core": 0.1464,
         "ref_px": 129699,
-        "render_px": 109894,
+        "render_px": 104548,
         "ignored_px": 8126,
         "camera_rms_px": 2.5,
         "camera_max_px": 5.03,
         "camera_points": 17,
-        "iou_raw_open_mask": 0.8071
+        "iou_raw_open_mask": 0.7732
       }
     },
     "cameras": {
@@ -384,151 +384,133 @@
     },
     "colour_ramps": {
       "stone": {
-        "px": 5935,
+        "px": 7371,
         "mean_srgb": [
-          103,
-          85,
-          72
+          106,
+          88,
+          74
         ]
       },
       "ground": {
-        "px": 11559,
+        "px": 9802,
         "mean_srgb": [
           155,
-          127,
+          128,
           96
         ]
       },
       "wood": {
-        "px": 34228,
+        "px": 27069,
         "mean_srgb": [
-          149,
-          116,
-          84
+          148,
+          115,
+          82
         ]
       },
       "iron": {
-        "px": 8616,
+        "px": 10887,
         "mean_srgb": [
-          126,
-          99,
+          127,
+          100,
           77
         ]
       },
-      "grass": {
-        "px": 403,
+      "brass": {
+        "px": 2348,
         "mean_srgb": [
-          168,
-          145,
+          164,
+          125,
+          86
+        ]
+      },
+      "grass": {
+        "px": 428,
+        "mean_srgb": [
+          167,
+          144,
           100
         ]
       },
       "rope": {
-        "px": 8164,
+        "px": 8486,
         "mean_srgb": [
-          172,
-          132,
+          171,
+          131,
           89
         ]
       },
-      "brass": {
-        "px": 2584,
-        "mean_srgb": [
-          158,
-          118,
-          78
-        ]
-      },
       "void": {
-        "px": 215,
+        "px": 81,
         "mean_srgb": [
-          49,
-          40,
-          32
+          62,
+          50,
+          41
         ]
       }
     },
     "calibration": {
       "stone": {
         "gain": [
-          1.393,
-          1.364,
-          1.242
+          1.515,
+          1.474,
+          1.357
         ],
-        "px": 9270,
+        "px": 10746,
         "painting": [
-          100,
-          81,
-          63
+          96,
+          79,
+          62
         ],
         "render": [
-          72,
-          59,
-          50
+          64,
+          53,
+          46
         ]
       },
       "ground": {
         "gain": [
-          1.032,
-          1.043,
-          0.983
+          1.056,
+          1.066,
+          1.038
         ],
-        "px": 11270,
+        "px": 9412,
         "painting": [
           128,
-          105,
-          79
+          106,
+          80
         ],
         "render": [
-          124,
-          101,
-          81
-        ]
-      },
-      "wood": {
-        "gain": [
-          1.119,
-          1.181,
-          1.288
-        ],
-        "px": 39415,
-        "painting": [
+          122,
           99,
-          77,
-          57
-        ],
-        "render": [
-          89,
-          65,
-          45
+          77
         ]
       },
       "rope": {
         "gain": [
-          0.873,
-          0.889,
-          0.937
+          0.876,
+          0.892,
+          0.94
         ],
-        "px": 8827,
+        "px": 9130,
         "painting": [
           120,
           91,
-          64
+          63
         ],
         "render": [
           137,
-          103,
-          68
+          102,
+          67
         ]
       }
     },
-    "sheets": "forest_rescue/qa/compare/lf_mechanism_winch_sequence/v2_iter24_*",
+    "sheets": "forest_rescue/qa/compare/lf_mechanism_winch_sequence/v2_iter26_*",
     "godot_import": {
       "errors_warnings": 0,
       "lines": []
     }
   },
-  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_winch --iter 24",
+  "build": "python3 forest_rescue/blender/run_limited.py forest_rescue/blender/assets/props/v2/build_asset.py mech_winch --iter 26",
   "mechanism": "winch_sequence",
   "symbol_targets": {
     "brake": {

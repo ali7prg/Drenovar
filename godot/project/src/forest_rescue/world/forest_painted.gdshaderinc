@@ -32,6 +32,10 @@ uniform float alpha_cut = 0.5;
 // near crown / bush reads as the soft painted clusters of the far look (no dark speckle, no pinholes between the
 // leaves); far zooms already sample coarser mips and are unchanged. 0 = off (every other material).
 uniform float foliage_min_lod = 0.0;
+// ... and lift every texel darker than `foliage_floor` x the card's own soft colour (2.5 mips coarser): the dark
+// painted gaps between the leaves read as shaded leaf mass, not black speckle. Faded out over mip 3..4, so the
+// zoom 68 / 120 look (and the impostor bake) keeps the painted contrast.
+uniform float foliage_floor = 0.75;
 uniform float painted_light_mix : hint_range(0.0, 1.0) = 0.3;
 uniform vec3 light_dir_world = vec3(0.45, 0.74, 0.5);   // direction TO the sun
 // Pass 2 colour grade of the forest materials only (kit vegetation, rocks, logs, landmarks; never the
@@ -161,8 +165,12 @@ void fragment() {
 			vec2 ts = vec2(textureSize(albedo_texture, 0));
 			vec2 du = dFdx(uv_a * ts);
 			vec2 dv = dFdy(uv_a * ts);
-			float lod = 0.5 * log2(max(max(dot(du, du), dot(dv, dv)), 1e-8));
-			c *= textureLod(albedo_texture, uv_a, max(lod, foliage_min_lod));
+			float lod = max(0.5 * log2(max(max(dot(du, du), dot(dv, dv)), 1e-8)), foliage_min_lod);
+			vec4 leaf = textureLod(albedo_texture, uv_a, lod);
+			vec3 soft = textureLod(albedo_texture, uv_a, lod + 2.5).rgb;
+			float lift = foliage_floor * (1.0 - smoothstep(3.0, 4.0, lod));
+			leaf.rgb = max(leaf.rgb, soft * lift);
+			c *= leaf;
 		} else {
 			c *= texture(albedo_texture, uv_a);
 		}

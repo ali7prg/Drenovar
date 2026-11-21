@@ -1,4 +1,4 @@
-// Adventure navigation graph from world-atlas.json: routes, glade targets, bridge-only
+// Adventure navigation graph from atlas v2 (server/data/world-atlas.v2.json): network ways, glade targets, bridge-only
 // water crossing, Dijkstra paths, y from samples, validation failures.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -27,13 +27,14 @@ test('every CONTRACT target id exists (per-site key/cage/guardian, plates, trail
   assert.equal(home.y, atlas.landmarks.find(l => l.id === 'lf_horse_origin').center.y);
 });
 
-test('all 13 routes are ways with ≤0.5 spacing and y taken from the atlas samples (deck y only on the bridge)', () => {
-  assert.equal(atlas.routes.length, 13);
+test('atlas v2: all 44 network ways with ≤0.5 spacing and y taken from the atlas samples (deck y only on the bridge)', () => {
+  assert.equal(atlas.id, 'lost_forest_atlas_v2');
+  assert.equal(atlas.routes.length, 44);
   for (const route of atlas.routes) {
     const way = g.ways.get(route.id);
     assert.ok(way, route.id);
     for (let i = 1; i < way.points.length; i++) assert.ok(hd(way.points[i - 1], way.points[i]) <= MAX_SPACING + 1e-9);
-    const extra = route.id === 'lf_route_10_11' ? 1 : 0; // inserted bridge-centre junction
+    const extra = route.id === 'lf_route_bridge' ? 1 : 0; // inserted bridge-centre junction
     assert.equal(way.points.length, route.samples.length + extra);
     for (const s of route.samples) {
       const p = way.points.find(q => q.x === s.x && q.z === s.z);
@@ -45,9 +46,9 @@ test('all 13 routes are ways with ≤0.5 spacing and y taken from the atlas samp
   for (const way of g.ways.values()) for (let i = 1; i < way.points.length; i++) assert.ok(hd(way.points[i - 1], way.points[i]) <= MAX_SPACING + 1e-9, way.id);
 });
 
-test('water is crossed only on the approved 27 m deck of lf_route_10_11', () => {
+test('water is crossed only on the approved 27 m deck of lf_route_bridge', () => {
   const bridge = atlas.landmarks.find(l => l.id === 'lf_bridge_crossing');
-  const way = g.ways.get('lf_route_10_11');
+  const way = g.ways.get('lf_route_bridge');
   const deck = way.points.filter((p, i) => way.deck[i]);
   assert.ok(deck.length > 50);
   assert.ok(deck.every(p => p.z === 20 && p.x >= bridge.west.x && p.x <= bridge.east.x && p.y === bridge.structuralHeight));
@@ -55,13 +56,13 @@ test('water is crossed only on the approved 27 m deck of lf_route_10_11', () => 
   assert.deepEqual([center.x, center.y, center.z], [bridge.center.x, 1.1, 20]);
   // Moving one sample of another route into the river makes the build fail closed.
   const broken = structuredClone(atlas);
-  const r = broken.routes.find(x => x.id === 'lf_route_09_10');
+  const r = broken.routes.find(x => x.samples.length > 60 && x.id !== 'lf_route_bridge');
   r.samples[40] = {...r.samples[40], x: 90.48, z: 20};
   r.samples[41] = {...r.samples[41], x: 90.5, z: 20.2};
   assert.throws(() => buildNavGraph(broken), e => ['NAV_WATER_OUTSIDE_BRIDGE', 'NAV_SPACING'].includes(e.code));
   // The same river crossing 3 units beside the approved deck rectangle is not a bridge.
   const water = structuredClone(atlas);
-  const w = water.routes.find(x => x.id === 'lf_route_10_11');
+  const w = water.routes.find(x => x.id === 'lf_route_bridge');
   for (const s of w.samples) if (s.z === 20 && s.x >= 77 && s.x <= 104) s.z = 23;
   assert.throws(() => buildNavGraph(water), e => /^NAV_/.test(e.code));
   assert.doesNotThrow(() => buildNavGraph(structuredClone(atlas)));
@@ -70,11 +71,17 @@ test('water is crossed only on the approved 27 m deck of lf_route_10_11', () => 
   assert.throws(() => buildNavGraph(sparse), e => e.code === 'NAV_SPACING');
 });
 
-test('Dijkstra: home → sites follow the authored chain; the east bank is reached only over the bridge', () => {
+test('Dijkstra on the v2 network: the mare's trail past the stones, no cage on another site's way, the east bank only over the bridge', () => {
   const marks = (from, to) => expandSteps(g, planPath(g, from, to).steps).marks.map(m => m.nodeId);
-  assert.deepEqual(marks('lf_home_reception', 'lf_site_01'), ['lf_home_reception', 'lf_horse_origin', 'lf_site_01']);
+  assert.deepEqual(marks('lf_home_reception', 'lf_site_01'),
+    ['lf_home_reception', 'lf_horse_origin', 'lf_junction_corridor', 'lf_junction_stones', 'lf_junction_grove', 'lf_site_01']);
   const east = marks('lf_site_10', 'lf_site_12');
-  assert.deepEqual(east, ['lf_site_10', 'lf_bridge_crossing', 'lf_site_11', 'lf_site_12']);
+  assert.deepEqual(east, ['lf_site_10', 'lf_junction_ese', 'lf_junction_ene', 'lf_glade_el', 'lf_junction_ne', 'lf_site_12']);
+  for (const site of SITES) {
+    // a trip from home to a site never walks through another site's glade
+    const through = marks('lf_home_reception', site.id).filter(id => /^lf_site_\d\d$/.test(id));
+    assert.deepEqual(through, [site.id], site.id);
+  }
   const home = marks('lf_site_12:cage', 'lf_home_reception');
   assert.ok(home.includes('lf_bridge_crossing'));
   assert.equal(home.at(-1), 'lf_home_reception');
@@ -86,7 +93,7 @@ test('Dijkstra: home → sites follow the authored chain; the east bank is reach
   }
   const path = expandSteps(g, planPath(g, 'lf_home_reception', 'lf_boss_ancient_maw').steps);
   for (let i = 1; i < path.points.length; i++) assert.ok(hd(path.points[i - 1], path.points[i]) <= MAX_SPACING + 1e-9);
-  assert.ok(Math.abs(path.length - 536.65) < 0.5, 'length ' + path.length);
+  assert.ok(Math.abs(path.length - 576.73) < 0.5, 'length ' + path.length);
   const client = simplifyForClient(path);
   assert.ok(client.length < path.points.length / 4, 'projection is compacted');
   assert.deepEqual(client[0], {x: -8, y: 6.783, z: -52});
@@ -94,9 +101,10 @@ test('Dijkstra: home → sites follow the authored chain; the east bank is reach
 });
 
 test('fine nodes: canonical junction names; graph id is stable', () => {
-  assert.equal(resolveRef(g, 'lf_route_01_02#0'), null, 'endpoints use the junction name');
-  assert.ok(resolveRef(g, 'lf_route_01_02#10').way);
-  assert.equal(resolveRef(g, 'lf_route_01_02#999'), null);
+  const way = 'lf_trail_junction_corridor__junction_stones';
+  assert.equal(resolveRef(g, way + '#0'), null, 'endpoints use the junction name');
+  assert.ok(resolveRef(g, way + '#10').way);
+  assert.equal(resolveRef(g, way + '#999'), null);
   assert.equal(buildNavGraph().graphId, g.graphId);
   assert.match(g.graphId, /^fr-nav-1-[0-9a-f]{16}$/);
 });

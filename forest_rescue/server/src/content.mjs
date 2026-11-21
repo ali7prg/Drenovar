@@ -4,7 +4,7 @@
 import {data, campaignFsm} from './vendor.mjs';
 import {stableShuffle} from './util.mjs';
 
-const {campaign, atlas} = data;
+const {campaign, atlas, atlasV1} = data;
 export const CAMPAIGN_ID = campaignFsm.CAMPAIGN_ID;
 export const SITE_IDS = campaignFsm.SITE_IDS;
 export const TASKS = campaignFsm.TASKS;
@@ -41,8 +41,12 @@ export const SITES = Object.freeze(campaign.sites.map((raw, index) => {
   assert(raw.artifact.id === campaignFsm.artifactId(id), 'CONTENT_ARTIFACT_MISMATCH');
   const captiveIds = campaignFsm.captiveIds(id);
   assert(raw.captives.length === 3 && raw.captives.every((c, i) => c.id === captiveIds[i]), 'CONTENT_CAPTIVE_MISMATCH');
+  // The delivered campaign references the delivered v1 layout; atlas v2 (owner decision, art/01
+  // masterplan) moves the glades — the site ids, order and everything else stay as delivered.
+  const v1 = atlasV1.sites.find(s => s.id === id);
+  assert(v1 && v1.center.x === raw.layoutCenterXZReference[0] && v1.center.z === raw.layoutCenterXZReference[1], 'CONTENT_ATLAS_MISMATCH');
   const place = atlas.sites.find(s => s.id === id);
-  assert(place && place.center.x === raw.layoutCenterXZReference[0] && place.center.z === raw.layoutCenterXZReference[1], 'CONTENT_ATLAS_MISMATCH');
+  assert(place, 'CONTENT_ATLAS_MISMATCH');
   const solution = Object.freeze([...raw.artifact.puzzle.solution]);
   return Object.freeze({
     id, number: raw.number, name: raw.name, act: raw.act, variation: raw.variation,

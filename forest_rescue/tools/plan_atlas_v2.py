@@ -29,7 +29,10 @@ from scipy.interpolate import RBFInterpolator
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 ART = os.path.join(ROOT, "forest_rescue/delivery/art/01_world_masterplan.png")
 INV = os.path.join(ROOT, "forest_rescue/qa/references/user/masterplan_inventory.json")
-ATLAS = os.path.join(ROOT, "godot/project/data/forest_rescue/world/world-atlas.json")
+# v1 geography (the delivered atlas, never modified): river, fog spec, sites' campaign fields.
+ATLAS = os.path.join(ROOT, "forest_rescue/delivery/data/world-atlas.json")
+SERVER_V2 = os.path.join(ROOT, "forest_rescue/server/data/world-atlas.v2.json")
+CLIENT_V2 = os.path.join(ROOT, "godot/project/data/forest_rescue/world/world-atlas.json")
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
@@ -259,7 +262,8 @@ PLAN = {
         "lf_junction_quarry": [-20.0, 84.0], "lf_junction_sse": [28.0, 64.0], "lf_junction_south": [48.0, 72.0],
         "lf_junction_se": [64.0, 52.0], "lf_junction_e": [64.0, 24.0],
         "lf_bridge_west": [77.0, 20.0], "lf_bridge_east": [104.0, 20.0],
-        "lf_junction_ene": [97.0, -38.0], "lf_junction_ne": [57.0, -80.0],
+        "lf_junction_ese": [106.0, -2.0], "lf_junction_ene": [97.0, -38.0], "lf_junction_ne": [57.0, -80.0],
+        "lf_junction_waterfall": [25.0, -69.0],
     },
     "trails": [
         # [from, to, [intermediate XZ points]] — north: the mare's trail past the standing stones
@@ -301,15 +305,16 @@ PLAN = {
         ["lf_junction_se", "lf_junction_e", [[67, 38]]],
         ["lf_junction_e", "lf_bridge_west", []],
         ["lf_bridge_west", "lf_bridge_east", []],
-        ["lf_bridge_east", "lf_site_10", [[103, 2]]],
-        ["lf_site_10", "lf_junction_ene", []],
+        ["lf_bridge_east", "lf_junction_ese", []],
+        ["lf_junction_ese", "lf_site_10", [[101, -12]]],
+        ["lf_junction_ese", "lf_junction_ene", [[104, -22]]],
         ["lf_junction_ene", "lf_site_11", []],
         ["lf_site_11", "lf_glade_el", [[84, -72]]],
         ["lf_junction_ene", "lf_glade_el", [[82, -62]]],
         ["lf_glade_el", "lf_junction_ne", []],
         ["lf_junction_ne", "lf_site_12", [[50, -74]]],
         ["lf_junction_ne", "boss_arena", [[44, -86]]],
-        ["lf_site_12", "waterfall_pond", [[28, -70]]],
+        ["lf_site_12", "lf_junction_waterfall", [[33, -71]]],
     ],
 }
 
@@ -672,7 +677,7 @@ LANDMARK_ROLES = {
 }
 
 
-def catmull(points, step=0.5):
+def catmull(points, step=0.49):
     """Centripetal-ish Catmull-Rom through the control points, resampled to ≤ step."""
     pts = [np.array(p, float) for p in points]
     if len(pts) == 2:
@@ -773,7 +778,7 @@ def write_atlas(server_path, client_path):
     for a, b, pts in trails:
         rid = "lf_route_bridge" if {a, b} == {"lf_bridge_west", "lf_bridge_east"} else "lf_trail_%s__%s" % (node_id(a).replace("lf_", ""), node_id(b).replace("lf_", ""))
         if rid == "lf_route_bridge":
-            n = int(round((deck_x[1] - deck_x[0]) / 0.5))
+            n = int(math.ceil((deck_x[1] - deck_x[0]) / 0.49))
             samples = [np.array([deck_x[0] + (deck_x[1] - deck_x[0]) * i / n, 20.0]) for i in range(n + 1)]
             if a == "lf_bridge_east":
                 samples.reverse()

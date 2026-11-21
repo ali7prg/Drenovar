@@ -66,7 +66,7 @@ test('hall III opens only the entrance corridor; hidden or unavailable targets a
     assert.ok(s.adventure.campaign.sites.every(x => !x.available && !x.visible));
     await client.army({'ENG-06': 50});
     await client.ok('form_squad', {units: {'ENG-06': 50}});
-    for (const targetId of ['lf_site_01', 'lf_site_04', 'lf_key_01', 'lf_site_01:cage', 'lf_bridge_crossing', 'lf_boss_ancient_maw', 'lf_route_01_02#10', 'nowhere']) {
+    for (const targetId of ['lf_site_01', 'lf_site_04', 'lf_key_01', 'lf_site_01:cage', 'lf_bridge_crossing', 'lf_boss_ancient_maw', 'lf_trail_junction_corridor__junction_stones#10', 'nowhere']) {
       const r = await client.send(client.adv('move', {targetId}));
       assert.equal(r.status, 404, targetId);
       assert.equal(r.body.error, 'TARGET_UNKNOWN');

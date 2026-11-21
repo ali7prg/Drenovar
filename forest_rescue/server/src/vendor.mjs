@@ -16,10 +16,15 @@ function readJson(name) {
   return JSON.parse(readFileSync(new URL('data/' + name, VENDOR_DIR), 'utf8'));
 }
 
+// World geography: atlas v2 (owner decision 2026-11-21: the layout follows the art/01 masterplan)
+// is server-owned data next to the sources; the delivered v1 atlas stays vendored byte-identical.
+const ATLAS_V2 = new URL('../data/world-atlas.v2.json', import.meta.url);
+
 export const data = Object.freeze({
   campaign: readJson('campaign.json'),
   economy: readJson('economy.json'),
-  atlas: readJson('world-atlas.json'),
+  atlas: JSON.parse(readFileSync(ATLAS_V2, 'utf8')),
+  atlasV1: readJson('world-atlas.json'),
   unlockIntro: readJson('unlock-intro.json'),
   persistence: readJson('persistence-contract.json'),
   uiRu: readJson('ui.ru.json'),

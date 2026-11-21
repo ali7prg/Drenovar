@@ -8,14 +8,19 @@
 //   that stopped between junctions sits on a fine node "<wayId>#<index>".
 // * Validation at build time (fail closed): spacing ≤0.5, bounds [-112,112), dry ground
 //   by the atlas river samples except on the approved deck of the new bridge on
-//   lf_route_10_11, glade points inside their clearing, endpoints match atlas centres.
+//   bridge way (v2 lf_route_bridge, v1 lf_route_10_11), glade points inside their clearing, endpoints
+//   match atlas centres. Atlas v2 (server/data/world-atlas.v2.json, art/01 masterplan) is a network:
+//   junction landmarks, radial trails and loops; Dijkstra runs on the junctions unchanged.
 import {data} from './vendor.mjs';
 import {SITES, HOME_ID, HORSE_ID, BRIDGE_ID, BOSS_TARGET_ID} from './content.mjs';
 import {sha256Hex, round} from './util.mjs';
 
 export const MAX_SPACING = 0.5;
 const EPS = 1e-6;
-const BRIDGE_ROUTE = 'lf_route_10_11';
+// The way that crosses the river on the approved deck: atlas v2 'lf_route_bridge' (v1: lf_route_10_11),
+// recognised by its 'walk+bridge' traversal so a different atlas keeps working.
+const BRIDGE_ROUTE_IDS = ['lf_route_bridge', 'lf_route_10_11'];
+const isBridgeRoute = route => BRIDGE_ROUTE_IDS.includes(route.id) || String(route.traversal ?? '').includes('bridge');
 export const HOME_OFFSET_Z = 3; // home reception: 3 units south (town side) of the horse origin
 const PLATE_OFFSET = 2.6;
 // Trail landmarks (glade-local, x mirrored to the artifact side): outside the guardian zone.
@@ -75,7 +80,7 @@ export function buildNavGraph(atlas = data.atlas) {
     const pts = route.samples.map(s => ({x: s.x, y: s.y, z: s.z, deck: false}));
     if (hdist(pts[0], from) > EPS || hdist(pts[pts.length - 1], to) > EPS) throw navError('NAV_ROUTE_ENDPOINT', {route: route.id});
     const junctions = [];
-    if (route.id === BRIDGE_ROUTE) {
+    if (isBridgeRoute(route)) {
       // Approved geometry: the samples ON the bridge axis between the two bank entries
       // (west (77,20) … east (104,20); the atlas road profile there is the 1.1 deck).
       const c = bridge.center;
@@ -94,7 +99,7 @@ export function buildNavGraph(atlas = data.atlas) {
     addNode(fromId, {...pts[0], y: pts[0].y}, {kind: kindOf(fromId)});
     addNode(toId, pts[pts.length - 1], {kind: kindOf(toId)});
     junctions.push({index: 0, nodeId: fromId}, {index: pts.length - 1, nodeId: toId});
-    addWay(route.id, 'route', pts, junctions, {deck: pts.map(p => p.deck)});
+    addWay(route.id, 'route', pts, junctions, {deck: pts.map(p => p.deck), bridge: isBridgeRoute(route)});
   }
 
   // 2. Home reception spur (north approach of the settlement, inside the protected square).
@@ -157,7 +162,7 @@ export function buildNavGraph(atlas = data.atlas) {
       if (![p.x, p.y, p.z].every(Number.isFinite) || p.x < -112 || p.x >= 112 || p.z < -112 || p.z >= 112) throw navError('NAV_OUT_OF_BOUNDS', {way: way.id, i});
       if (i > 0 && hdist(pts[i - 1], p) > MAX_SPACING + 1e-9) throw navError('NAV_SPACING', {way: way.id, i});
       const wet = riverWetAt(atlas.river, p.x, p.z);
-      if (wet && !(way.id === BRIDGE_ROUTE && way.deck[i])) throw navError('NAV_WATER_OUTSIDE_BRIDGE', {way: way.id, i});
+      if (wet && !(way.bridge && way.deck[i])) throw navError('NAV_WATER_OUTSIDE_BRIDGE', {way: way.id, i});
       if (way.kind === 'glade') {
         const site = nodes.get(way.siteId);
         if (hdist(site, p) > SITES.find(s => s.id === way.siteId).clearingRadius + EPS) throw navError('NAV_OUTSIDE_CLEARING', {way: way.id, i});

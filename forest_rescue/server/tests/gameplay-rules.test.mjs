@@ -154,7 +154,7 @@ test('stop at the next graph node, redirect, pause, escort rules, squad reservat
     await client.clock(go.adventure.squad.move.departAt + 3000);
     const stopped = await client.ok('stop');
     const target = stopped.adventure.squad.move.targetId;
-    assert.match(target, /^lf_route_entry#\d+$/);
+    assert.match(target, /^lf_trail_[a-z0-9_]+#\d+$/);
     assert.ok(stopped.adventure.squad.move.arriveAt - stopped.adventure.serverTime < 400, 'stops at the next node (≤0.5 units)');
     const at = await client.advance(1000);
     assert.equal(at.adventure.squad.node, target);

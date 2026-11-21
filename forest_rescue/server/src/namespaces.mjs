@@ -62,18 +62,21 @@ function loadPrefs(saved) {
 }
 
 function loadField(saved, campaign, graph) {
-  if (saved === undefined) return {field: deriveFieldFromCampaign(campaign, graph.graphId), migrated: campaign.phase !== 'prologue'};
+  if (saved === undefined) return {field: deriveFieldFromCampaign(campaign, graph.graphId), migrated: campaign.phase !== 'prologue', rebound: false};
   const field = clone(validateField(saved));
-  if (!resolveRef(graph, field.squad.node)) throw Object.assign(new Error('NAV_GRAPH_MISMATCH'), {code: 'NAV_GRAPH_MISMATCH'});
   if (field.graphId !== graph.graphId) {
-    // A different navigation graph may only be re-bound while nothing is in motion on it.
+    // A different navigation graph (e.g. atlas v1 → v2) may only be re-bound while nothing is in
+    // motion and the squad stands on a named node that still exists (home, horse origin, a site
+    // or its sub-targets); positions are node names, so they map 1:1. Anything else fails closed.
     const walking = Object.values(field.escorts).some(e => e.state === 'walking');
     if (field.squad.move !== null || walking || !graph.nodes.has(field.squad.node)) {
       throw Object.assign(new Error('NAV_GRAPH_MISMATCH'), {code: 'NAV_GRAPH_MISMATCH'});
     }
     field.graphId = graph.graphId;
+    return {field, migrated: false, rebound: true};
   }
-  return {field, migrated: false};
+  if (!resolveRef(graph, field.squad.node)) throw Object.assign(new Error('NAV_GRAPH_MISMATCH'), {code: 'NAV_GRAPH_MISMATCH'});
+  return {field, migrated: false, rebound: false};
 }
 
 /** Load (and lazily initialise absent) namespaces; throws AdventureError on bad data. */
@@ -98,6 +101,12 @@ export function loadBundle(p, graph) {
     const r = loadField(raw.field, bundle.campaign, graph);
     bundle.field = r.field;
     bundle.fieldMigrated = r.migrated;
+    // Explored cells of another graph follow its trails, not this one's: on a re-bind the fog
+    // starts again from the delivered default (protected town; the squad re-reveals as it walks).
+    if (r.rebound) {
+      bundle.fog = fogModule.createFogState();
+      bundle.graphRebound = true;
+    }
   });
   bundle.loadedJson = Object.fromEntries(NAMES.map(n => [n, JSON.stringify(bundle[n])]));
   return bundle;

@@ -38,7 +38,7 @@ PARAMS = dict(AX=1.42, L2=0.45, Rc=0.36, FXL=1.05, FXR=0.86, HX=1.02, GX=-0.83, 
                                                               # tilt (deg, its face toward the viewer as painted),
                                                               # pinion drop below the axle; crank hub radius; grip scale                  # inner leg splay (left / right trestle), pit x offset
 FREE = ["AX", "L2", "Rc", "FXL", "FXR", "HX", "GX", "GZ", "KX", "Ls", "Ac", "Lg", "Wc", "Hc", "Zt"]
-GEAR_TEETH = 30              # big gear on the drum's left end (the pawl clicks over it)
+GEAR_TEETH = 24              # big gear on the drum's left end (the pawl clicks over it)
 PINION_TEETH = 12
 PRIOR = 0.2
 
@@ -127,7 +127,7 @@ def build(A, p, lod):
         wob = 1.0 + 0.07 * math.sin(3 * a + 1.0) + 0.04 * math.sin(7 * a + 2.0)
         outer.append(((hx + t + GR) * wob * c, (hy + t + GR * 0.75) * wob * s_))
     CG.outline_ring(g, tuple(pit), np.eye(3), outer, inner, -0.03, 0.0, "ground", "ground")
-    courses = (3, 2, 1)[lod]
+    courses = (2, 2, 1)[lod]
     ch = 0.012 if lod == 0 else 0.0
     yb = PY + hy + t / 2
     px = p["PX"]
@@ -142,7 +142,7 @@ def build(A, p, lod):
     for sx_ in (-1, 1):
         g.box((px + sx_ * (hx + t / 2), PY, (-0.55 - PIT_D) / 2), (t, 2 * hy, PIT_D - 0.55), mat="stone", tag="pit_wall")
     g.box((px, PY, -PIT_D - 0.02), (2 * hx, 2 * hy, 0.04), mat="ground", tag="pit_floor")
-    npile = (8, 5, 3)[lod]
+    npile = (6, 4, 3)[lod]
     for sx_ in (-1, 1):
         for k in range(npile):
             cx = px + sx_ * (hx + t + 0.12 + rng.uniform(0.0, 0.55))
@@ -211,15 +211,14 @@ def build(A, p, lod):
     CG.outline_ring(bgg, tuple(gc), Rb, outer, ring_in, -0.045, 0.045, "iron", "gear_rim")
     bgg.cyl(tuple(gc - ga * 0.07), tuple(gc + ga * 0.07), RG * 0.22, n=(14, 10, 6)[lod], mat="iron", tag="gear_hub",
             up=tuple(gw))
-    for k in range(6 if lod < 2 else 4):
-        ang = 2 * math.pi * k / (6 if lod < 2 else 4)
+    for k in range(5 if lod < 2 else 3):
+        ang = 2 * math.pi * k / (5 if lod < 2 else 3)
         d = gu * math.cos(ang) + gw * math.sin(ang)
         bgg.beam(tuple(gc + d * RG * 0.18), tuple(gc + d * RG * 0.78), 0.07, 0.05, mat="iron", tag="gear_spoke")
     pc = pinion_centre(p)
     pin = A.part("pinion", None, tuple(pc))
     pg = pin.geo[lod]
-    Rq = np.array([[1.0, 0, 0], [0, 0, 1.0], [0, -1.0, 0]])   # local x -> x, y -> -y? (z axis -> world -y: faces the viewer)
-    Rq = np.stack([np.array([1.0, 0, 0]), np.array([0, 0, 1.0]), np.array([0, -1.0, 0])], 1)
+    Rq = np.stack([np.array([1.0, 0, 0]), np.array([0, 0, 1.0]), np.array([0, -1.0, 0])], 1)   # pinion axis -> world -Y
     pg.prism(gear_outline(RP * 0.8, RP, PINION_TEETH, lod), -0.05, 0.05, "iron", "pinion", R=Rq, t=tuple(pc))
     pg.cyl(tuple(pc + (0, 0.06, 0)), tuple(pc + (0, -0.09, 0)), RP * 0.32, n=(12, 8, 6)[lod], mat="iron", tag="pinion_hub",
            up=(0, 0, 1))
@@ -387,10 +386,10 @@ def solve(views):
     params, reps = pv2.solve_views(views, points, PARAMS, FREE, prior_sigma=PRIOR)
     best = _silhouette_iou(params, views)[0]
     # sane ranges only: a taller well wall or a wider ground patch can buy silhouette IoU without looking like art/10
-    grids = {"SPL": np.arange(0.42, 0.63, 0.04), "RG": np.arange(0.44, 0.65, 0.03), "RP": np.arange(0.16, 0.31, 0.02),
-             "GT": np.arange(18.0, 46.0, 4.0), "HR": np.arange(0.16, 0.31, 0.03), "GRP": np.arange(0.8, 1.41, 0.1), "WH": np.arange(0.06, 0.36, 0.03), "SH": np.arange(0.25, 0.81, 0.05),
+    grids = {"SPL": np.arange(0.46, 0.55, 0.02), "RG": np.arange(0.5, 0.71, 0.03), "RP": np.arange(0.2, 0.33, 0.02),
+             "GT": np.arange(18.0, 46.0, 4.0), "HR": np.arange(0.16, 0.31, 0.03), "GRP": np.arange(0.8, 1.61, 0.1), "WH": np.arange(0.06, 0.36, 0.03), "SH": np.arange(0.25, 0.81, 0.05),
              "GR": np.arange(0.3, 1.41, 0.1), "TB": np.arange(0.3, 0.71, 0.05), "PR": np.arange(0.55, 0.86, 0.05),
-             "LW": np.arange(0.18, 0.34, 0.03), "FY": np.arange(0.25, 0.56, 0.05), "TZ": np.arange(0.5, 1.01, 0.05),
+             "LW": np.arange(0.18, 0.34, 0.03), "FY": np.arange(0.25, 0.46, 0.05), "TZ": np.arange(0.5, 1.01, 0.05),
              "SPIL": np.arange(0.14, 0.39, 0.06),
              "SPIR": np.arange(-0.18, 0.07, 0.06), "PX": np.arange(-0.3, 0.21, 0.05), "PSX": np.arange(-0.5, -0.19, 0.05)}
     for _round in range(2):
@@ -438,18 +437,33 @@ def clips(A, B):
 
     def rs(t):
         return raise_state(_ease(t, 0.13, 1.2))
+
+    # gear train: the big gear turns with the drum about its own (tilted) axis, the pinion the other way at RG/RP
+    _, g_axis, _, _ = big_gear_frame(p)
+    ratio = p["RG"] / p["RP"]
+    prev = {}
+
+    def gear_rot(key, angle):
+        from mathutils import Matrix, Vector
+        m = Matrix.Rotation(angle, 3, Vector(tuple(g_axis)))
+        e = m.to_euler("XYZ", prev[key]) if key in prev else m.to_euler("XYZ")
+        prev[key] = e
+        return tuple(e)
     pv2.add_clip(A, B, "lf_rope_release", 1.3, {
         "brake_lever": lambda t: {"rot": (BRAKE_ON * (1 - _ease(t, 0.0, 0.17)), 0, 0)},
         "drum": lambda t: {"rot": (rs(t)[0], 0, 0)},
         "crank": lambda t: {"rot": (rs(t)[0], 0, 0)},
+        "big_gear": lambda t: {"rot": gear_rot("release", rs(t)[0])},
+        "pinion": lambda t: {"rot": (0, -rs(t)[0] * ratio, 0)},
         "rope": lambda t: {"scale": (1, 1, rs(t)[1])},
         "chest": lambda t: {"loc": (0, 0, rs(t)[2]), "rot": (0, 0, math.radians(4) * math.sin(t * 10.5) * (1 - _ease(t, 1.0, 1.3)))},
-        "pawl": lambda t: {"rot": (PAWL_ON + math.radians(7) * abs(math.sin(-rs(t)[0] * TEETH / 2)) * (1 - _ease(t, 1.13, 1.3)), 0, 0)},
+        "pawl": lambda t: {"rot": (PAWL_ON + math.radians(7) * abs(math.sin(-rs(t)[0] * GEAR_TEETH / 2)) * (1 - _ease(t, 1.13, 1.3)), 0, 0)},
     }, markers={"chest_clear_of_pit": 1.0}, note="crank turns the drum, the rope shortens, the chest rises out of the pit")
     up = raise_state(1.0)
     pv2.add_clip(A, B, "lf_lock_mechanism", 1.8, {
         "chest": lambda t: {"loc": (0, 0, up[2]), "rot": (0, 0, math.radians(3) * math.sin(t * 12.0) * (1 - _ease(t, 0, 1.0)))},
         "drum": lambda t: {"rot": (up[0], 0, 0)}, "crank": lambda t: {"rot": (up[0], 0, 0)},
+        "big_gear": lambda t: {"rot": gear_rot("lock", up[0])}, "pinion": lambda t: {"rot": (0, -up[0] * ratio, 0)},
         "rope": lambda t: {"scale": (1, 1, up[1])}, "pawl": lambda t: {"rot": (PAWL_ON, 0, 0)},
         "chest_lid": lambda t: {"rot": (-math.radians(105) * _ease(t, 0.47, 1.53), 0, 0)},
     }, markers={"lid_unlocked": 14 / 30, "lid_open": 46 / 30}, note="chest hangs clear, the lid unlocks and opens")
@@ -471,6 +485,8 @@ def meta(A, p):
             "raise": {"clip": "lf_rope_release", "nodes": {
                 "drum": {"rotation_x_deg": round(math.degrees(up_turn), 2)},
                 "crank": {"rotation_x_deg": round(math.degrees(up_turn), 2)},
+                "big_gear": {"rotation_about_own_axis_deg": round(math.degrees(up_turn), 2), "axis": "drum axle tilted GT toward the viewer"},
+                "pinion": {"rotation_y_deg": round(-math.degrees(up_turn) * p["RG"] / p["RP"], 2), "ratio": round(p["RG"] / p["RP"], 3)},
                 "rope": {"scale_y": round((L0 - travel) / L0, 4), "note": "rope node scales along its own length (glTF Y)"},
                 "chest": {"translation_offset": [0, round(travel, 4), 0]}, "brake_lever": {"rotation_x_deg": 0.0}}},
             "solved": {"clip": "lf_lock_mechanism", "chest_lid": {"rotation_x_deg": -105.0}},
@@ -478,5 +494,7 @@ def meta(A, p):
             "sites": ["lf_site_03", "lf_site_07", "lf_site_11"], "order": ["brake", "pawl", "raise"]},
         "sockets": {"artifact_spot_raised": g(tuple(cb + (0, 0, travel + p["Hc"] * 0.33)))},
         "notes": "v2: blueprint measured on the art/10 main drawing (camera solved), painting projection; crank and drum "
-                 "share the axle (1:1); the pawl clicks over the 22-tooth ratchet while raising.",
+                 "share the axle (1:1); the big 30-tooth gear on the drum's left end turns with the drum, the 12-tooth "
+                 "pinion on the left trestle the other way at RG/RP; the pawl clicks over the big gear while raising. "
+                 "Nodes big_gear / pinion are additive (the director samples every animated node of a clip).",
     }

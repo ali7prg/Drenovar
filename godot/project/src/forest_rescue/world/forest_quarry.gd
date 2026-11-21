@@ -130,15 +130,22 @@ func _side(st: SurfaceTool, inner: Vector2, outer: Vector2, top: float, height_f
 
 ## Timber crane (art/01: a tall frame with a boom over the pit): an A-frame mast with braces and a back
 ## stay, a boom from the mast foot out over the pit, the rope with a hook and a limestone block, a winch drum.
+## Pass 4 review: the crane is a hero element of art/01 and must read at zoom 40–68 → CRANE_SCALE (mast
+## ≈ 15 m, boom ≈ 13 m over the pit); its larger footprint keeps further off the trails and the mine.
+const CRANE_SCALE := 1.8
+
 func _build_crane(center: Vector2, axis: float, mine: Vector2, r0: float, h0: float, height_fn: Callable,
 		route_dist: Callable) -> void:
 	var spot := Vector2.INF
-	for side: float in [1.0, -1.0]:
-		for off: float in [52.0, 62.0, 42.0, 72.0]:
-			var a: float = axis + side * deg_to_rad(off)
-			var p := center + Vector2(cos(a), sin(a)) * (r0 + TIER_DEPTH * 1.5)
-			if float(route_dist.call(p.x, p.y)) > 4.5 and p.distance_to(mine) > 6.5:
-				spot = p
+	for clearance: Array in [[4.5 + 2.6 * (CRANE_SCALE - 1.0), 6.5 + 3.0 * (CRANE_SCALE - 1.0)], [4.5, 6.5]]:
+		for side: float in [1.0, -1.0]:
+			for off: float in [52.0, 62.0, 42.0, 72.0]:
+				var a: float = axis + side * deg_to_rad(off)
+				var p := center + Vector2(cos(a), sin(a)) * (r0 + TIER_DEPTH * 1.5)
+				if float(route_dist.call(p.x, p.y)) > float(clearance[0]) and p.distance_to(mine) > float(clearance[1]):
+					spot = p
+					break
+			if spot != Vector2.INF:
 				break
 		if spot != Vector2.INF:
 			break
@@ -181,8 +188,9 @@ func _build_crane(center: Vector2, axis: float, mine: Vector2, r0: float, h0: fl
 	var to_pit := (center - spot).normalized()
 	node.position = Vector3(spot.x, float(height_fn.call(spot.x, spot.y)) - 0.1, spot.y)
 	node.rotation.y = atan2(to_pit.x, to_pit.y)
+	node.scale = Vector3.ONE * CRANE_SCALE
 	add_child(node)
-	items.append({"node": node, "center": spot, "radius": 8.0})
+	items.append({"node": node, "center": spot, "radius": 8.0 * CRANE_SCALE})
 
 
 func _beam(st: SurfaceTool, a: Vector3, b: Vector3, w: float) -> void:

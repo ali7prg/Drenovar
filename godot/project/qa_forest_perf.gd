@@ -73,6 +73,8 @@ const SEGMENTS := [
 	{"name": "t_fallen_trunk_z12", "fixture": "site01_trail_1of3", "target_xz": [-74.04, 2.8], "zoom": 12.0, "seconds": 0.5},
 	{"name": "t_trail_cache_ui", "fixture": "site01_trail_1of3", "target": "lf_site_01", "zoom": 24.0, "seconds": 1.0, "mech_ui": "lf_site_01"},
 	{"name": "t_winch_z26", "fixture": "site03_winch_solved", "target": "lf_site_03", "zoom": 26.0, "seconds": 1.0},
+	# the winch in its mechanism UI (zoom 28, the panel on the left): must read clearly, not hidden by the cage
+	{"name": "t_winch_ui", "fixture": "site03_winch_solved", "target": "lf_site_03", "zoom": 28.0, "seconds": 1.0, "mech_ui": "lf_site_03"},
 	{"name": "t_bush_z26", "fixture": "site02_rune_1of3", "target": "lf_site_02", "zoom": 26.0, "seconds": 1.0},
 	{"name": "t_bush_z68", "fixture": "site02_rune_1of3", "target": "lf_site_02", "zoom": 68.0, "seconds": 1.0},
 ]

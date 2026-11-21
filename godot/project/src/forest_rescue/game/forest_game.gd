@@ -375,6 +375,7 @@ func _process(delta: float) -> void:
 	intro.tick(delta)
 	mech.tick(delta)
 	schedule_settle_poll()
+	schedule_move_poll()
 	# The next-step guide is cheap but string-heavy: refresh at 5 Hz or right after a new state.
 	guide_timer -= delta
 	if guide_timer <= 0.0 or guide_signature.is_empty():
@@ -451,6 +452,28 @@ func schedule_settle_poll() -> void:
 		return
 	settle_polled_for = settle
 	settle_poll_ticks = ticks
+	main.poll_account_state()
+
+## The fog follows the squad's confirmed movement: while the squad or an escort is under way the
+## state is read every MOVE_POLL_MS of server time (each read settles the traversal checkpoints —
+## every 4 units, reveal radius 10 — on the server), so the fog dissolves cell by cell along the
+## walk (≈2 s per newly revealed cell) instead of all at once on arrival.
+const MOVE_POLL_MS := 1200.0
+var move_polled_at := -INF
+
+func schedule_move_poll() -> void:
+	if not client.available():
+		return
+	var now := client.server_now()
+	var moving := false
+	for movable in [client.squad().get("move"), client.escort().get("move")]:
+		if movable is Dictionary and float(movable.get("arriveAt", 0.0)) > now and float(movable.get("departAt", now)) <= now:
+			moving = true
+	if not moving or now - move_polled_at < MOVE_POLL_MS:
+		return
+	if main.busy or main.polling_state or client.in_flight:
+		return
+	move_polled_at = now
 	main.poll_account_state()
 
 func _notification(what: int) -> void:

@@ -47,6 +47,15 @@ func post(path: String, body: Variant = null) -> Dictionary:
 func sync_clock() -> void:
 	await post("/test/clock?time=%d" % int(clock))
 
+## Fire-and-forget clock sync (no movie frames spent waiting): during walks the realm's simulated
+## clock follows the movie clock, so the client's own move polls (forest_game.schedule_move_poll)
+## read the server's traversal checkpoints as they are reached — the fog dissolves cell by cell.
+func sync_clock_nowait() -> void:
+	var client := HTTPRequest.new()
+	root.add_child(client)
+	client.request_completed.connect(func(_r, _c, _h, _b): client.queue_free())
+	client.request(endpoint + "/test/clock?time=%d" % int(clock), PackedStringArray(["Content-Type: application/json"]), HTTPClient.METHOD_POST, "")
+
 func refresh() -> void:
 	await sync_clock()
 	while game.busy:
@@ -64,6 +73,8 @@ func frame() -> void:
 	clock += 1000.0 / FPS
 	frame_count += 1
 	forest.client.manual_clock_ms = clock
+	if frame_count % 9 == 0 and forest.client.last_settle_ms() != INF and clock < forest.client.last_settle_ms() + 200.0:
+		sync_clock_nowait()
 	if game.result_open and game.modal.visible:
 		result_frames += 1
 		if result_frames > int(FPS * 2.0):
@@ -193,6 +204,8 @@ func run() -> void:
 		await refresh()
 		close_popups()
 		await run_site2()
+	elif part == "follow":
+		await run_follow()
 	else:
 		await run_early()
 	mark("end")
@@ -332,6 +345,53 @@ func run_early() -> void:
 	game.close_modal()
 	await hold(1.0)
 	mark("d_end")
+
+# ---------------------------------------------------------------- P0 clip: squad follows the mare, fog dissolves
+## Fresh realm: hall III (intro acknowledged like «Пропустить»), squad formed in its panel, then the
+## city camera follows the squad (zoom 36) from the base edge along the entry trail to site 1 while
+## the server reveals the fog checkpoint by checkpoint (every 4 units, radius 10).
+func run_follow() -> void:
+	await post("/test/hall?level=3")
+	await post("/test/army", {"units":{"ENG-02":30000, "ENG-03":30000, "ENG-07":30000}})
+	await refresh()
+	var deadline := 20
+	while String(forest.client.adv.get("intro", {}).get("status", "")) != "acknowledged" and deadline > 0:
+		deadline -= 1
+		if forest.intro.presenting():
+			forest.intro.on_skip()
+		else:
+			await forest.request_action("skip_intro", {}, "adventure_intro")
+		await hold(0.3)
+		await refresh()
+	close_popups()
+	follow = false
+	var origin: Vector3 = forest.target_position("lf_horse_origin")
+	game.stage.target = origin + Vector3(-2, 0, -2)
+	game.stage.zoom = 36.0
+	game.stage.update_camera(0, true)
+	await hold(0.6)
+	if not game.modal.visible:
+		forest.panels.open_squad()
+	await hold(0.3)
+	for spin: SpinBox in game.modal_body.find_children("Squad_*", "SpinBox", true, false):
+		spin.value = spin.max_value
+	var submit: Button = game.modal_body.find_child("SquadSubmit", true, false)
+	if submit != null:
+		submit.pressed.emit()
+	await forest.wait_idle()
+	close_popups()
+	await hold(0.5)
+	mark("f_start")
+	follow = true
+	follow_zoom = 36.0
+	follow_offset = Vector3(-2.5, 0, -2.5)     # a little ahead: the mare leads at the fog edge
+	for i in 4:
+		if String(forest.client.squad().get("node", "")) == "lf_site_01":
+			break
+		await continue_step()
+		await hold(0.6)
+	await hold(2.5)
+	mark("f_end")
 
 # ---------------------------------------------------------------- site 1 unlock → exit → escort start (c)
 func run_unlock1() -> void:

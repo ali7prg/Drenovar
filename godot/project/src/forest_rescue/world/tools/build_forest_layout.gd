@@ -1022,7 +1022,7 @@ func _water_dressing(trees: Array, under: Array, under_grid: Dictionary, logs: A
 						insert(under_grid, under, [snappedf(p.x, 0.01), snappedf(p.y, 0.01), 1.1, reed, 1 + rng.randi() % 3,
 							snappedf(rng.randf() * 360.0, 0.1), snappedf(lerpf(0.7, 1.1, rng.randf()), 0.001)])
 						kinds_count["water_reed"] = kinds_count.get("water_reed", 0) + 1
-			elif body.perched and rng.randf() < 0.35:
+			elif (body.perched or body.kind == "lake") and rng.randf() < (0.35 if body.perched else 0.45):
 				var p := c + Vector2(cos(angle), sin(angle)) * (shore + rng.randf_range(0.2, 0.9))
 				if _bank_ok(p.x, p.y, 1.4):
 					insert(under_grid, under, [snappedf(p.x, 0.01), snappedf(p.y, 0.01), 1.4, Rules.UNDERSTORY.find("quarry_rock"), 1,

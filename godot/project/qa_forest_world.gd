@@ -140,7 +140,10 @@ func run() -> void:
 		# atlas v2: on the far side of a trail (away from the camera) ≥ FAR_SIDE_TRUNK_CLEAR
 		var crown: float = world.TREE_CROWN[int(item[2])] * float(item[5])
 		# (the hollow-oak hero stands at the end of its own spur by design: the trail ends at its hollow)
-		if int(item[2]) != Rules.HOLLOW_OAK and _route_trunk_violation(masks, x, z, crown):
+		# pass 2 (art/01 dark dense south pines): a south pine stands FAR_SIDE_TRUNK_CLEAR off a trail
+		# centre on both sides, its crown may overhang the trail (walkers faded through at runtime)
+		var dense_pine := int(item[2]) == Rules.PINE and item.size() > 6 and int(item[6]) == 5
+		if int(item[2]) != Rules.HOLLOW_OAK and _route_trunk_violation(masks, x, z, crown, dense_pine, dense_pine):
 			bad_trees += 1
 			print("QA bad ambient tree (route clearance): ", item)
 		for site in world.atlas.sites:
@@ -175,26 +178,36 @@ func run() -> void:
 	for route in world.atlas.routes:
 		var pts: PackedVector3Array = route.points
 		for i in range(pts.size() - 1):
-			zones.append([Vector2(pts[i].x, pts[i].z), Vector2(pts[i + 1].x, pts[i + 1].z), 1.6])
+			zones.append([Vector2(pts[i].x, pts[i].z), Vector2(pts[i + 1].x, pts[i + 1].z), 1.6, true])
 	for site in world.atlas.sites:
 		var c := Vector2(site.center.x, site.center.z)
-		zones.append([c, c, float(site.radius)])
+		zones.append([c, c, float(site.radius), false])
 	var arena_c := Vector2(world.atlas.arena_center.x, world.atlas.arena_center.z)
-	zones.append([arena_c, arena_c, 19.5])
+	zones.append([arena_c, arena_c, 19.5, false])
 	var horse_c := Vector2(world.atlas.horse_origin.x, world.atlas.horse_origin.z)
-	zones.append([horse_c, horse_c, 4.0])
-	var hides := func(cap: Array) -> bool:
+	zones.append([horse_c, horse_c, 4.0, false])
+	var hides := func(cap: Array, strict_only: bool) -> bool:
 		for zone in zones:
+			if strict_only and bool(zone[3]):
+				continue
 			if Rules.segment_segment_distance(cap[0], cap[1], zone[0], zone[1]) < float(cap[2]) + Rules.UNIT_RADIUS + float(zone[2]):
 				return true
 		return false
 	var hiding_ambient := 0
+	var dense_over_trail := 0
 	for item in layout.trees:
 		var cap := Rules.crown_capsule(float(item[0]), float(item[1]), int(item[2]), int(item[3]), float(item[5]), deg_to_rad(float(item[4])))
-		if hides.call(cap) and int(item[2]) != Rules.HOLLOW_OAK:   # hero: faded by the occluders at its hollow
+		# pass 2: the dense south pines (zone 5) may stand in front of a trail — the walkers behind
+		# them are faded through whole at runtime (ForestOccluders) — never in front of a glade,
+		# the arena or the horse spot
+		var dense_pine := int(item[2]) == Rules.PINE and item.size() > 6 and int(item[6]) == 5
+		if hides.call(cap, dense_pine) and int(item[2]) != Rules.HOLLOW_OAK:   # hero: faded by the occluders at its hollow
 			hiding_ambient += 1
 			print("QA ambient tree hiding a unit zone: ", item)
+		elif dense_pine and hides.call(cap, false):
+			dense_over_trail += 1
 	check(hiding_ambient == 0, "ambient trees whose crown hides a trail / glade / arena / horse-spot unit: %d" % hiding_ambient)
+	notes.dense_south_pines_over_trails = dense_over_trail
 	var listed: Array = layout.get("cameraOccluders", [])
 	var woods := {}
 	for tree in data.woods:
@@ -206,7 +219,7 @@ func run() -> void:
 			var e: Array = layout[section][id]
 			var species: int = Rules.RESOURCE_SPECIES.get(String(woods[id].name), Rules.PINE)
 			var cap := Rules.crown_capsule(float(e[0]), float(e[1]), species, int(e[3]) % Rules.GREEN_VARIANT_BASE, float(e[4]), float(woods[id].angle))
-			if hides.call(cap):
+			if hides.call(cap, false):
 				hiding_resource += 1
 				if not listed.has(id):
 					unlisted += 1
@@ -333,7 +346,7 @@ func run() -> void:
 
 ## Same route-clearance rule as the layout builder (blocked_exact), per route capsule; `bare`
 ## checks the plain clearance (route.clear, far side FAR_SIDE_TRUNK_CLEAR) without the crown margin.
-func _route_trunk_violation(masks, x: float, z: float, crown: float, bare := false) -> bool:
+func _route_trunk_violation(masks, x: float, z: float, crown: float, bare := false, dense := false) -> bool:
 	var reach := 6.0 + crown * 0.55
 	for gz in range(floori((z - reach) / masks.cell), floori((z + reach) / masks.cell) + 1):
 		for gx in range(floori((x - reach) / masks.cell), floori((x + reach) / masks.cell) + 1):
@@ -347,7 +360,7 @@ func _route_trunk_violation(masks, x: float, z: float, crown: float, bare := fal
 				var t := clampf((Vector2(x, z) - a).dot(ab) / maxf(ab.length_squared(), 0.0001), 0.0, 1.0)
 				var offset := Vector2(x, z) - (a + ab * t)
 				var limit: float = float(mask.radius) + (0.0 if bare else Rules.ROUTE_TRUNK_MARGIN + crown * 0.45) - 0.05
-				if Rules.far_side(offset):
+				if dense or Rules.far_side(offset):
 					limit = Rules.FAR_SIDE_TRUNK_CLEAR - 0.05
 				if offset.length() < limit:
 					return true

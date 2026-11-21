@@ -265,7 +265,7 @@ PLAN = {
         ["dead_tree", 64.0, 76.0],
         ["hunter_shelter", 102.0, 64.0],
         ["waterfall_pond", 15.0, -70.0],
-        ["lake_marsh", 95.5, 34.5],
+        ["lake_marsh", 97.2, 32.4],
         ["bridge", 90.482, 20.0],
         ["boss_arena", 18.0, -92.0],
     ],
@@ -686,7 +686,7 @@ if __name__ == "__main__" and len(sys.argv) > 2 and sys.argv[2] == "--table":
 # pass 2: an ellipse along the river's west bank, as big as the ground between glade 09, the bridge
 # and the west bank allows (radius = semi-major axis, minor = semi-minor, rotDeg = major-axis angle
 # in the XZ plane, atan2(z, x)); the glade 09 → hunter shelter trail runs along its south-west shore.
-LAKE = {"center": [95.5, 34.5], "radius": 15.0, "minor": 7.5, "rotDeg": 36.87}
+LAKE = {"center": [97.2, 32.4], "radius": 18.5, "minor": 10.0, "rotDeg": 36.87}
 POND = {"center": [15.0, -70.0], "radius": 6.5}
 LANDMARK_ROLES = {
     "hollow_oak_giant": "art/01 grove hero tree (lf_env_hollow_oak, hero scale)",
@@ -840,15 +840,15 @@ def write_atlas(server_path, client_path):
     river = River(v1)
     for s in atlas["river"]["samples"]:
         z = s["z"]
-        for spec, side in ((LAKE, "west"), (POND, "east")):
+        for spec, side in ((LAKE, "both"), (POND, "east")):
             span = ellipse_x_span(spec, z)
             if span is not None:
-                if side == "west":
+                if side in ("west", "both"):
                     s["wetWest"] = round(min(s["wetWest"], span[0]), 5)
-                else:
+                if side in ("east", "both"):
                     s["wetEast"] = round(max(s["wetEast"], span[1]), 5)
     atlas["river"]["features"] = {"lake": LAKE, "pond": POND,
-                                  "note": "wet bounds widened for the reedy lake (west of the channel; pass 2: an ellipse along the west bank) and the waterfall pond (east bank)"}
+                                  "note": "wet bounds widened for the reedy lake (pass 2 layout 2: an ellipse across the channel south of the bridge, as big as the ground between glade 09, the bridge and the east bank allows) and the waterfall pond (east bank)"}
     # every trail sample stays >= 1.5 m off the widened wet bounds (the bridge deck excepted)
     zs = [s["z"] for s in atlas["river"]["samples"]]
     worst = (99.0, None)

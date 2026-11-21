@@ -347,7 +347,9 @@ func dense_pine_ok(zone: int, species: int) -> bool:
 
 ## crown: crown radius (m) of the tree that would stand here; up to ~45 % of it may overhang a
 ## path or glade (art/01: trails stay readable between the crowns).
-func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown := 0.0) -> bool:
+## dense: a south pine (pass 2, art/01 dark dense pine forest) — trunks stand FAR_SIDE_TRUNK_CLEAR
+## off a trail centre on both sides and the crowns may overhang it (narrow trails between pines).
+func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown := 0.0, dense := false) -> bool:
 	if maxf(absf(x), absf(z)) < CORE + (0.8 if tree else 0.3):
 		return true
 	var reach := 6.0 + crown * 0.55
@@ -364,7 +366,7 @@ func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown :=
 							var b := Vector2(float(mask.b.x), float(mask.b.z))
 							var ab := b - a
 							var t := clampf((Vector2(x, z) - a).dot(ab) / maxf(ab.length_squared(), 0.0001), 0.0, 1.0)
-							if Rules.far_side(Vector2(x, z) - (a + ab * t)):
+							if dense or Rules.far_side(Vector2(x, z) - (a + ab * t)):
 								margin = Rules.FAR_SIDE_TRUNK_CLEAR - float(mask.radius)
 					"glade":
 						margin = (Rules.GLADE_TRUNK_MARGIN + crown * 0.4) * margin_scale if tree else 0.3
@@ -652,7 +654,8 @@ func run() -> void:
 			var z := -EXTENT + cell.y + rng.randf()
 			if maxf(absf(x), absf(z)) < CORE + 0.8:
 				continue
-			if blocked_exact(x, z, true) or not ground_ok(x, z, true) or is_glade(x, z):
+			var dense_spot := dominant_zone(x, z) == Z_SPRUCE
+			if blocked_exact(x, z, true, 1.0, 0.0, dense_spot) or not ground_ok(x, z, true) or is_glade(x, z):
 				continue
 			var w := zone_weights(x, z)
 			var spacing := 0.0
@@ -664,6 +667,11 @@ func run() -> void:
 				spacing *= 0.92
 			var zone := Rules.pick_index(Array(w), rng.randf())
 			var species := Rules.pick_weighted(ZONE_MIX[zone], rng.randf())
+			if dense_spot and species != Rules.PINE:
+				# only the pines of the dense south forest may crowd a trail
+				if blocked_exact(x, z, true):
+					continue
+			var dense_pine := dense_spot and zone == Z_SPRUCE and species == Rules.PINE
 			var site01: Dictionary = atlas.site_by_id.get("lf_site_01", {})
 			if not site01.is_empty() and Vector2(x, z).distance_to(Vector2(site01.center.x, site01.center.z)) < BIRCH_RING:
 				species = Rules.BIRCH if rng.randf() < 0.85 else species
@@ -674,7 +682,7 @@ func run() -> void:
 			var scale_range: Array = GROVE_OAK_SCALE if (zone == Z_GROVE and species == Rules.OAK) else AMBIENT_SCALE[species][zone]
 			var scale := lerpf(scale_range[0], scale_range[1], rng.randf())
 			scale = lerpf(scale, lerpf(0.34, 0.52, rng.randf()), openness(x, z) * (0.0 if zone == Z_GROVE and species == Rules.OAK else 0.85))
-			if blocked_exact(x, z, true, 1.0, Rules.CROWN_RADIUS[species] * scale):
+			if blocked_exact(x, z, true, 1.0, Rules.CROWN_RADIUS[species] * scale, dense_pine):
 				continue
 			var variants: Array = ZONE_VARIANTS[species][zone]
 			var variant: int = variants[rng.randi() % variants.size()]
@@ -686,7 +694,7 @@ func run() -> void:
 			# Camera clearance: a crown that would hide a unit on a trail / in a glade is made
 			# young (low crown, units seen past it) or the spot stays open (understory only).
 			if tree_hides_units(x, z, drawn, variant, scale, deg_to_rad(yaw_deg)):
-				if dense_pine_ok(zone, drawn) and not tree_hides_units(x, z, drawn, variant, scale, deg_to_rad(yaw_deg), true):
+				if dense_pine and not tree_hides_units(x, z, drawn, variant, scale, deg_to_rad(yaw_deg), true):
 					pass                     # dense south pines: trail walkers are faded through at runtime
 				else:
 					var young := lerpf(0.34, 0.46, rng.randf())
@@ -1294,10 +1302,10 @@ func _resource_look(tree: Dictionary, species: int, x: float, z: float, inner: b
 		scale = lerpf(r[0], r[1], u)
 	else:
 		var open := openness(x, z)
-		var young := lerpf(0.30, 0.50, u)
+		var young := lerpf(0.30, 0.50, u) if not (zone == Z_SPRUCE and species == Rules.OAK) else lerpf(0.27, 0.34, u)
 		var core: float
 		if species == Rules.OAK:
-			core = lerpf(0.62, 0.92, u) if zone != Z_SPRUCE else lerpf(0.40, 0.52, u)
+			core = lerpf(0.62, 0.92, u) if zone != Z_SPRUCE else lerpf(0.30, 0.38, u)
 		else:
 			core = lerpf(0.82, 1.14, u) if zone != Z_GROVE else lerpf(0.40, 0.52, u)
 		scale = lerpf(core, young, open)

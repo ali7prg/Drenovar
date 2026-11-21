@@ -34,6 +34,13 @@ uniform vec3 light_dir_world = vec3(0.45, 0.74, 0.5);   // direction TO the sun
 // city): saturation and luminance contrast around a mid pivot, tuned per zone against art/01.
 uniform bool grade_regions = false;      // ForestKit sets it on forest materials only
 uniform float grade_pivot = 0.32;
+// Pass 2 (art/01 quarry, art/08 arena cliffs): pale grey-beige limestone look for the kit moss
+// rock (its cracks and shading kept, the golden moss washed out); 0 = painted texture as is.
+uniform float limestone : hint_range(0.0, 1.0) = 0.0;
+// Pass 2 (art/08 fossil wall): luminance contrast of the albedo around its mean (pale ribs and
+// skull against the darker rock); 1 = as painted.
+uniform float albedo_contrast = 1.0;
+uniform float albedo_gain = 1.0;
 
 float grade_sector(float phi, float a, float b, float blend) {
 	float best = 0.0;
@@ -126,6 +133,15 @@ void fragment() {
 	if (use_variant_mask) {
 		vec3 m = texture(variant_mask, UV).rgb;
 		c.rgb *= mix(vec3(1.0), tint_cloth, m.r) * mix(vec3(1.0), tint_hair, m.g);
+	}
+	if (limestone > 0.0) {
+		float l = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+		vec3 pale = clamp(vec3(l) * vec3(1.07, 1.03, 0.94) * 1.18 + vec3(0.13, 0.125, 0.11), 0.0, 1.0);
+		c.rgb = mix(c.rgb, pale, limestone);
+	}
+	if (albedo_contrast != 1.0 || albedo_gain != 1.0) {
+		float l = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+		c.rgb = max(c.rgb + vec3((l - 0.36) * (albedo_contrast - 1.0)), vec3(0.0)) * albedo_gain;
 	}
 	// Under the fog: parts below the billowing cloud top fade smoothly into the mist colour, parts
 	// above it take a soft mist tint (the shell drawn over them does the covering). No erosion.

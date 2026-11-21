@@ -386,7 +386,42 @@ func _under_mesh(kind_index: int, variant: int) -> Array:
 	var names: Array = spec[1]
 	var variant_name: String = names[(maxi(variant, 1) - 1) % names.size()]
 	var canopy_kind := ForestCanopy.KIND_ROCK if kind in Rules.LARGE_UNDERSTORY else ForestCanopy.KIND_UNDER
-	return _mesh_for(kit.understory_asset(kind, spec[0]), "under:%s:%s" % [kind, variant_name], canopy_kind, 1, variant_name)
+	var asset: Dictionary = kit.understory_asset(kind, spec[0])
+	if kind == "quarry_rock":
+		asset = _limestone_asset(asset, "quarry")
+	return _mesh_for(asset, "under:%s:%s" % [kind, variant_name], canopy_kind, 1, variant_name)
+
+
+## Pass 2 (art/01 quarry): the quarry ledges, cliffs and boulders are the kit moss rock in a pale
+## limestone look (ForestKit painted material copy with `limestone`, cracks and shading kept).
+func _limestone_asset(asset: Dictionary, tag: String) -> Dictionary:
+	var key := "limestone:%s:%s" % [tag, asset.get("id", "")]
+	if mesh_keys.has(key):
+		return mesh_keys[key]
+	var copy := asset.duplicate()
+	var variants: Array = []
+	var materials := {}
+	for entry: Dictionary in asset.get("variants", []):
+		var e := entry.duplicate()
+		var lods: Array = []
+		for lod: Mesh in entry.lods:
+			var mesh := ArrayMesh.new()
+			for s in lod.get_surface_count():
+				mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, lod.surface_get_arrays(s))
+				var material: Material = lod.surface_get_material(s)
+				if material is ShaderMaterial:
+					if not materials.has(material):
+						var pale := (material as ShaderMaterial).duplicate() as ShaderMaterial
+						pale.set_shader_parameter("limestone", 0.88)
+						materials[material] = pale
+					material = materials[material]
+				mesh.surface_set_material(s, material)
+			lods.append(mesh)
+		e.lods = lods
+		variants.append(e)
+	copy.variants = variants
+	mesh_keys[key] = copy
+	return copy
 
 
 ## Visual position of a resource tree (natural slot from the layout; the original spot when the

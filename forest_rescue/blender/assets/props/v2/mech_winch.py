@@ -45,7 +45,7 @@ RATIO = GEAR_TEETH / PINION_TEETH
 
 PARAMS = dict(AX=2.188, L2=0.512, Rc=0.41, FXL=1.264, FXR=0.876, HX=1.164, KX=-0.7525, Ls=0.419, Ac=0.762, Lg=0.56,
               PR=0.80, PY=-0.18, Wc=0.925, Hc=0.5375, Zt=0.353,
-              SPL=0.48, WH=0.38, TB=0.45, LW=0.30, FY=0.42, TZ=0.62, SPIL=0.30, SPIR=0.0, PX=-0.22, PSX=-0.35,
+              SPL=0.48, WH=0.38, TB=0.45, LW=0.245, FY=0.42, TZ=0.62, SPIL=0.30, SPIR=0.0, PX=-0.22, PSX=-0.35,
               RGP=0.52, GT=45.0, PH=199.0, GBX=0.15, GBY=-0.22, GBZ=0.1, HR=0.19)
 FREE = ["AX", "L2", "Rc", "FXL", "FXR", "HX", "KX", "Ls", "Ac", "Lg", "Wc", "Hc", "Zt", "PH", "GBX", "GBZ"]
 PRIOR = 0.2
@@ -67,8 +67,10 @@ AO_STRENGTH = 0.55
 AO_SUN_STRENGTH = 0.38
 AO_DIST = 0.9
 AO_CLASS_STRENGTH = {"ground": 0.35, "grass": 0.25, "rope": 0.45}
-SHARP_TAGS = ("rubble", "lip")
-NO_CALIBRATE = ("brass", "iron")
+SHARP_TAGS = ("rubble", "lip", "pit_ring", "leg", "cross", "top_block", "tie", "post", "brace", "top_rail")
+NO_CALIBRATE = ("brass", "iron", "wood", "stone")
+WOOD_BOXES = [(340, 690, 362, 745), (78, 650, 108, 735), (322, 595, 345, 640), (285, 650, 330, 664), (240, 690, 262, 740)]
+STONE_BOXES = [(22, 778, 112, 828), (380, 800, 440, 835), (140, 790, 210, 840), (300, 852, 360, 872)]
 IRON_BOXES = [(98, 553, 150, 568), (320, 668, 378, 688), (62, 748, 118, 776), (354, 752, 392, 790), (380, 588, 412, 622),
               (190, 560, 210, 640), (318, 548, 392, 568)]
 GRASS_BOXES = [(30, 690, 72, 760), (455, 742, 500, 790), (160, 840, 200, 862), (8, 760, 40, 800)]
@@ -97,6 +99,12 @@ def make_tiles(px, sheet, rng):
     ip = MT.pixels(sheet, IRON_BOXES, lambda c: ((c @ MT.LUMA) < 0.62) & (c[:, 0] - c[:, 2] < 0.2))
     if len(ip) > 200:
         px["iron"] = ip
+    wp = MT.pixels(sheet, WOOD_BOXES, lambda c: (c[:, 0] - c[:, 2] > 0.1) & ((c @ MT.LUMA) > 0.22) & ((c @ MT.LUMA) < 0.72))
+    if len(wp) > 200:
+        px["wood"] = wp
+    sp = MT.pixels(sheet, STONE_BOXES, lambda c: (np.abs(c[:, 0] - c[:, 2]) < 0.13) & ((c @ MT.LUMA) > 0.16))
+    if len(sp) > 200:
+        px["stone"] = sp
     if "brass" in px and len(px["brass"]) > 80:
         b = px["brass"]
         px["brass"] = b[(b @ MT.LUMA) > np.percentile(b @ MT.LUMA, 45)]
@@ -107,10 +115,11 @@ TILE_CHROMA = 1.15
 # trim mapping (pv2mat): beam / strap faces up to this wide take the tile across their width; the wood tile's
 # borders darken (art/10 paints every timber edge dark), the iron tile's lighten (worn bevels catch the light)
 TRIM_CLASSES = {"wood": 0.42, "iron": 0.3}
-TRIM_AMOUNT = {"wood": -0.45, "iron": 0.55}
+TRIM_AMOUNT = {"wood": -0.5, "iron": 0.75}
+TRIM_WIDTH = {"wood": 0.04, "iron": 0.06}
 TRIM_TAGS = {"wood": ("leg", "cross", "top_block", "top_rail", "tie", "post", "brace", "chest_plinth"),
              "iron": ("strap", "band", "shoe", "housing_plate", "pinion_bracket", "lever_bracket", "chest_band",
-                      "crank_arm")}
+                      "crank_arm", "gear", "pinion", "chest_lock")}
 # gear train / crank check: lf_rope_release frames, front-plane box (model metres x0, z0, x1, z1)
 CLIP_SHEET = {"clip": "lf_rope_release", "times": (0.0, 0.45, 0.8, 1.3), "box": (-1.9, 1.3, 2.3, 3.2)}
 # QA close-ups (sheet px): gears, crank, chest + pit, left trestle top + brake
@@ -250,9 +259,6 @@ def gear(g, c, Rm, n, r_pitch, add, ded, phase, half_t, lod, tag, spokes, hub_r,
     axis = Rm[:, 2]
     g.cyl(tuple(c - axis * hub_half), tuple(c + axis * hub_half), hub_r, n=(14, 10, 8)[lod], mat="iron",
           tag=tag + "_hub", up=tuple(Rm[:, 1]))
-    if lod < 2:
-        g.cyl(tuple(c + axis * hub_half), tuple(c + axis * (hub_half + 0.03)), hub_r * 0.55, n=(10, 8, 6)[lod],
-              mat="iron", tag=tag + "_hub", up=tuple(Rm[:, 1]))
     for k in range(spokes):
         a = phase + 2 * math.pi * (k + 0.25) / spokes
         d = Rm[:, 0] * math.cos(a) + Rm[:, 1] * math.sin(a)
@@ -266,7 +272,7 @@ def unit(v):
     return v / max(np.linalg.norm(v), 1e-12)
 
 
-def bolt(g, p, n, r=0.03, h=0.022, k=5, tag="bolt"):
+def bolt(g, p, n, r=0.034, h=0.028, k=5, tag="bolt", mat="brass"):
     """Domed bolt head on a face (base ring at p, outward normal n): k-sided frustum + cap."""
     n = unit(n)
     R = G.frame_from(n)
@@ -282,7 +288,7 @@ def bolt(g, p, n, r=0.03, h=0.022, k=5, tag="bolt"):
         if nrm @ (P.mean(0) - (np.asarray(p) - n * 0.01)) < 0:
             f = f[::-1]
         F2.append(f)
-    return g.add(V, F2, "iron", tag)
+    return g.add(V, F2, mat, tag)
 
 
 def tuft(g, base, rng, n=6, h=0.32, spread=0.1, lean=0.35, w=0.04, tag="grass"):
@@ -329,36 +335,35 @@ def build(A, p, lod):
     PR, PY, PX = p["PR"], p["PY"], p["PX"]
     LW, FY = p["LW"], p["FY"]
     rng = np.random.default_rng(7 + lod)
-    ch_b = 0.025 if lod == 0 else 0.0
-    # ---------------- pit: dressed-block walls (back wall rises WH above the ground, sides / front a low lip)
+    ch_b = 0.014 if lod == 0 else 0.0
+    # ---------------- pit: a ring of cut grey stone blocks (two courses, art/10) round the dark mouth; the back
+    # and side walls stand WH above the ground, the front ring lower so the hanging chest shows over it
     hx, hy, t = PR, PR * 0.78, 0.2
     WH = p["WH"]
-    courses_up = (2, 2, 1)[lod]
     xb = (PX - hx - t, PX + hx + t)
     yb = PY + hy + t / 2
-    CG.masonry_run(g, (xb[0], yb), (xb[1], yb), 0.0, WH * 0.5, t, 1, 0.42, rng, mat="stone", tag="pit_wall",
+    yf = PY - hy - t / 2
+    top_lod = lod if lod < 2 else 1
+    CG.masonry_run(g, (xb[0], yb), (xb[1], yb), 0.0, WH * 0.5, t, 1, 0.42, rng, mat="stone", tag="pit_ring",
                    chamfer=0.0, lod=1)
-    CG.masonry_run(g, (xb[0] + 0.12, yb), (xb[1] - 0.05, yb), WH * 0.5, WH, t, 1, 0.42, rng, mat="stone", tag="pit_wall",
-                   chamfer=0.02, lod=lod)
-    CG.masonry_run(g, (xb[0], yb), (xb[1], yb), -0.5, 0.0, t, 2 if lod == 0 else 1, 0.42, rng, mat="stone",
-                   tag="pit_wall", chamfer=0.0, lod=1, skip=("-z", "+y"))
+    CG.masonry_run(g, (xb[0] + 0.1, yb), (xb[1] - 0.05, yb), WH * 0.5, WH, t, 1, 0.42, rng, mat="stone",
+                   tag="pit_ring", chamfer=0.02, lod=top_lod)
     for sx_ in (-1, 1):
         xs = PX + sx_ * (hx + t / 2)
-        CG.masonry_run(g, (xs, PY - hy - t), (xs, PY + hy), -0.5, 0.08, t, 2 if lod == 0 else 1, 0.4, rng, mat="stone",
-                       tag="pit_wall", chamfer=0.0, lod=1, skip=("-z",))
-    # front lip: a course of rough stones at the mouth
-    nfr = (5, 4, 3)[lod]
-    for k in range(nfr):
-        cx = PX - hx - t * 0.5 + (k + 0.5) * (2 * hx + t) / nfr + rng.uniform(-0.04, 0.04)
-        g.rock((cx, PY - hy - t / 2 + rng.uniform(-0.03, 0.03), 0.02),
-               (rng.uniform(0.17, 0.22), rng.uniform(0.12, 0.16), rng.uniform(0.07, 0.1)), seed=k + 90,
-               sub=1 if (lod == 0 and k % 2 == 0) else 0, mat="stone", tag="lip", flat_bottom=True, rough=0.12)
+        CG.masonry_run(g, (xs, yf + t / 2), (xs, yb - t / 2), 0.0, WH * 0.5, t, 1, 0.4, rng, mat="stone",
+                       tag="pit_ring", chamfer=0.0, lod=1)
+        CG.masonry_run(g, (xs, yf + t / 2), (xs, yb - t / 2), WH * 0.5, WH * 0.9, t, 1, 0.4, rng, mat="stone",
+                       tag="pit_ring", chamfer=0.0, lod=1)
+    FH = WH * 0.42
+    CG.masonry_run(g, (xb[0], yf), (xb[1], yf), 0.0, FH * 0.5, t, 1, 0.38, rng, mat="stone", tag="pit_ring",
+                   chamfer=0.0, lod=1)
+    CG.masonry_run(g, (xb[0] + 0.06, yf), (xb[1] - 0.06, yf), FH * 0.5, FH, t, 1, 0.38, rng, mat="stone",
+                   tag="pit_ring", chamfer=0.02, lod=top_lod)
     # pit shaft below the mouth (inner faces only, dark masonry) and the floor
-    g.box((PX, PY - hy - t / 2, (-0.5 - PIT_D) / 2), (2 * hx + 2 * t, t, PIT_D - 0.5), mat="stone", tag="pit_wall",
-          skip=("-y", "-z", "+z"))
-    g.box((PX, yb, (-0.5 - PIT_D) / 2), (2 * hx + 2 * t, t, PIT_D - 0.5), mat="stone", tag="pit_wall", skip=("+y", "-z", "+z"))
+    g.box((PX, yf, -PIT_D / 2), (2 * hx + 2 * t, t, PIT_D), mat="stone", tag="pit_wall", skip=("-y", "-z", "+z"))
+    g.box((PX, yb, -PIT_D / 2), (2 * hx + 2 * t, t, PIT_D), mat="stone", tag="pit_wall", skip=("+y", "-z", "+z"))
     for sx_ in (-1, 1):
-        g.box((PX + sx_ * (hx + t / 2), PY, (-0.5 - PIT_D) / 2), (t, 2 * hy, PIT_D - 0.5), mat="stone", tag="pit_wall",
+        g.box((PX + sx_ * (hx + t / 2), PY, -PIT_D / 2), (t, 2 * hy, PIT_D), mat="stone", tag="pit_wall",
               skip=("-z", "+z", "+x" if sx_ > 0 else "-x"))
     g.box((PX, PY, -PIT_D - 0.02), (2 * hx, 2 * hy, 0.04), mat="ground", tag="pit_floor", skip=("-z",))
     # ---------------- dirt patch round the pit (fitted outline), outer edge sloping into the terrain
@@ -387,7 +392,7 @@ def build(A, p, lod):
     piles = p.get("_rocks") or [(-1.35, -0.55, 0.36, 0.30), (-1.75, -0.1, 0.30, 0.26), (-0.95, -0.95, 0.24, 0.2),
                                 (1.05, -0.85, 0.32, 0.26), (1.45, -0.35, 0.30, 0.24), (0.75, -1.05, 0.22, 0.18),
                                 (-1.55, 0.55, 0.26, 0.2), (1.35, 0.5, 0.26, 0.2)]
-    keep = len(piles) if lod == 0 else (6 if lod == 1 else 4)
+    keep = (6, 5, 3)[lod]
     for k, (cx, cy, r, h) in enumerate(piles[:keep]):
         g.rock((cx + PX * 0.0, cy, h * 0.3), (r, r * rng.uniform(0.75, 0.95), h * 0.6), seed=k + 40,
                sub=1 if ((lod == 0 and k < 5) or (lod == 1 and k < 3)) else 0, mat="stone", tag="rubble",
@@ -404,7 +409,7 @@ def build(A, p, lod):
             for side in (-1, 1):
                 foot = np.array([x + side * spread[side], y * 1.15, 0.0])
                 head = top + np.array([side * 0.07, y * 0.45, -0.06])
-                g.beam(tuple(foot), tuple(head), LW, LW * 1.1, mat="wood", tag="leg", chamfer=ch_b)
+                g.beam(tuple(foot), tuple(head), LW, LW * 1.04, mat="wood", tag="leg", chamfer=ch_b)
                 legs.append((foot, head))
                 shoes.append((foot, sy, side, sx))
             # cross beam (low) between the two legs of this frame
@@ -416,27 +421,26 @@ def build(A, p, lod):
             # mid iron bands on the front legs (art/10: bolted bands where the tie / braces join)
             if sy < 0 and lod < 2:
                 for (foot, head) in legs:
-                    c, d = band_on_beam(g, foot, head, 0.47, LW, LW * 1.1, 0.13, tag="band")
+                    c, d = band_on_beam(g, foot, head, 0.47, LW + 0.03, LW * 1.04 + 0.03, 0.22, tag="band")
                     if lod == 0:
                         nrm = np.array([0.0, -1.0, 0.0])
-                        for off in (-0.08, 0.08):
-                            bolt(g, c + nrm * (LW * 1.1 / 2 + 0.016) + np.cross(d, nrm) * off * 0 + np.array([off, 0, 0]),
-                                 nrm, r=0.026, h=0.02)
+                        for off in (-0.07, 0.07):
+                            bolt(g, c + nrm * (LW * 1.04 / 2 + 0.032) + d * off, nrm)
         # top block (cap timber along Y), its iron strap with bolts, the axle bearing
         g.box((x, 0.0, AX + p["TB"] - 0.02), (0.30, 0.78, 0.24), mat="wood", tag="top_block", chamfer=ch_b)
-        g.box((x, -0.41, AX + p["TB"] - 0.04), (0.36, 0.04, 0.14), mat="iron", tag="strap")
-        g.box((x, 0.41, AX + p["TB"] - 0.04), (0.36, 0.04, 0.14), mat="iron", tag="strap")
+        g.box((x, -0.415, AX + p["TB"] - 0.04), (0.42, 0.06, 0.2), mat="iron", tag="strap")
+        g.box((x, 0.415, AX + p["TB"] - 0.04), (0.42, 0.06, 0.2), mat="iron", tag="strap")
         if lod == 0:
-            for off in (-0.11, 0.11):
-                bolt(g, (x + off, -0.43, AX + p["TB"] - 0.04), (0, -1, 0), r=0.028)
+            for off in (-0.13, 0.0, 0.13):
+                bolt(g, (x + off, -0.445, AX + p["TB"] - 0.04), (0, -1, 0))
         g.cyl((x - sx * 0.02, 0, AX), (x + sx * 0.16, 0, AX), 0.11, n=(12, 8, 6)[lod], mat="iron", tag="bearing",
               up=(0, 0, 1))
     # iron shoes at every foot (bolted fronts)
     for (foot, sy, side, sx) in shoes:
-        g.box((foot[0], foot[1], 0.1), (0.36, 0.36, 0.22), mat="iron", tag="shoe", skip=("-z",), chamfer=0.0)
+        g.box((foot[0], foot[1], 0.13), (0.36, 0.36, 0.28), mat="iron", tag="shoe", skip=("-z",), chamfer=0.0)
         if lod == 0 and sy < 0:
             for off in (-0.1, 0.1):
-                bolt(g, (foot[0] + off, foot[1] - 0.18, 0.12), (0, -1, 0), r=0.026)
+                bolt(g, (foot[0] + off, foot[1] - 0.18, 0.15), (0, -1, 0))
     # top rail between the trestle tops (behind the drum), tie beam (lower, at the back), brace and back post
     g.beam((-p["FXL"] + 0.1, 0.30, AX + p["TB"] - 0.02), (p["FXR"] - 0.1, 0.30, AX + p["TB"] - 0.02), 0.17, 0.2,
            mat="wood", tag="top_rail", chamfer=ch_b * 0.6)
@@ -461,12 +465,8 @@ def build(A, p, lod):
     g.beam((p["FXR"] + 0.17, -0.12, AX), tuple(hc - hax * 0.06), 0.12, 0.16, mat="iron", tag="housing_plate")
     if lod == 0:
         for (dy, dz) in ((-0.15, 0.19), (0.12, 0.19), (-0.15, -0.19), (0.12, -0.19)):
-            bolt(g, (p["FXR"] + 0.195, -0.1 + dy, AX + dz), (1, 0, 0), r=0.024)
-        for k in range(4):
-            a = 2 * math.pi * k / 4 + 0.6
-            Rh = G.frame_from(hax)
-            q = hc + hax * 0.03 + p["HR"] * 0.8 * (math.cos(a) * Rh[:, 1] + math.sin(a) * Rh[:, 2])
-            bolt(g, q, hax, r=0.022)
+            bolt(g, (p["FXR"] + 0.195, -0.1 + dy, AX + dz), (1, 0, 0), r=0.028)
+
     # ---------------- drum node: oak core, rope coil, iron flanges, axle through both trestles
     drum = A.part("drum", None, (0.0, 0.0, AX))
     dg = drum.geo[lod]
@@ -498,7 +498,7 @@ def build(A, p, lod):
     g.box((pc[0], leg_y - 0.03, pc[2]), (0.26, 0.04, 0.26), mat="iron", tag="pinion_bracket")
     if lod == 0:
         for (dx, dz) in ((-0.09, 0.09), (0.09, 0.09), (-0.09, -0.09), (0.09, -0.09)):
-            bolt(g, (pc[0] + dx, leg_y - 0.05, pc[2] + dz), (0, -1, 0), r=0.02)
+            bolt(g, (pc[0] + dx, leg_y - 0.05, pc[2] + dz), (0, -1, 0), r=0.026)
     # stub axle from the drum axle out to the big gear's hub
     g.beam((-L2 - 0.12, 0.0, AX), tuple(gc), 0.09, 0.09, mat="iron", tag="gear_stub")
     # ---------------- crank node: shaft, forged L-shaped arm, turned wooden grip with an iron collar and end cap
@@ -562,7 +562,8 @@ def build(A, p, lod):
     for xx in ((-Wc * 0.42, Wc * 0.42) if lod == 2 else (-Wc * 0.42, -Wc * 0.14, Wc * 0.14, Wc * 0.42)):
         hg.box(tuple(cb + (xx, 0, body_h / 2)), (0.055, D + 0.024, body_h + 0.01), mat="iron", tag="chest_band",
                skip=("-z",))
-    hg.box(tuple(cb + (0, -D / 2 - 0.02, body_h * 0.72)), (0.12, 0.03, 0.16), mat="brass", tag="chest_lock")
+    hg.box(tuple(cb + (0, -D / 2 - 0.02, body_h * 0.7)), (0.15, 0.03, 0.19), mat="iron", tag="chest_lock")
+    hg.box(tuple(cb + (0, -D / 2 - 0.04, body_h * 0.72)), (0.05, 0.02, 0.08), mat="brass", tag="chest_hasp")
     if lod == 0:
         for xx in (-Wc * 0.42, Wc * 0.42):
             for zz in (0.06, body_h - 0.06):
@@ -578,7 +579,7 @@ def build(A, p, lod):
     nl = (10, 7, 4)[lod]
     a = np.linspace(0, math.pi, nl + 1)
     rr = D / 2
-    prof2 = np.stack([rr * np.cos(a), rr * 0.75 * np.sin(a)], 1)       # (y, z) dome profile
+    prof2 = np.stack([rr * np.cos(a), rr * 1.0 * np.sin(a)], 1)        # (y, z) dome profile
     for xx0, xx1, mat_, tag_ in ((-Wc / 2, Wc / 2, "brass", "chest_lid"),):
         Vd = [cb + np.array([xx, q[0], body_h + q[1]]) for xx in (xx0, xx1) for q in prof2]
         Vd = np.array(Vd)
@@ -595,8 +596,8 @@ def build(A, p, lod):
                 f = f[::-1]
             F2.append(f)
         lg.add(Vd, F2, mat_, tag_)
-    prof3 = np.stack([rr * np.cos(np.linspace(0, math.pi, 7)), rr * 0.75 * np.sin(np.linspace(0, math.pi, 7))], 1)
-    for xx in (-Wc * 0.42, Wc * 0.42):
+    prof3 = np.stack([rr * np.cos(np.linspace(0, math.pi, 7)), rr * 1.0 * np.sin(np.linspace(0, math.pi, 7))], 1)
+    for xx in (-Wc * 0.42, -Wc * 0.14, Wc * 0.14, Wc * 0.42):
         band = [cb + np.array([xx, q[0] * 1.06, body_h + q[1] * 1.06 + 0.004]) for q in prof3]
         CG.sweep_rect(lg, np.array(band), 0.055, 0.014, up=(1, 0, 0), mat="iron", tag="chest_band", caps=False)
     if lod == 0:
@@ -724,9 +725,9 @@ def _fit_ground(params, v):
     ang = np.arctan2(pts[:, 1] - PY, pts[:, 0] - PX)
     rad = np.hypot(pts[:, 0] - PX, pts[:, 1] - PY)
     # angular profile: front half from the painting, back half an ellipse through the side extremes
-    bins = np.linspace(-math.pi, math.pi, 49)
-    prof = np.full(48, np.nan)
-    for i in range(48):
+    bins = np.linspace(-math.pi, math.pi, 37)
+    prof = np.full(36, np.nan)
+    for i in range(36):
         k = (ang >= bins[i]) & (ang < bins[i + 1])
         if k.any():
             prof[i] = np.median(rad[k])
@@ -736,7 +737,7 @@ def _fit_ground(params, v):
     out = []
     for i, a in enumerate(centres):
         if np.isfinite(prof[i]) and math.sin(a) < 0.15:
-            r = float(np.clip(prof[i] * 0.88, 1.2, 2.6))
+            r = float(np.clip(prof[i] * 0.8, 1.2, 2.3))
         else:
             c_, s_ = math.cos(a), math.sin(a)
             r = 1.0 / math.sqrt((c_ / max(rx, 1.6)) ** 2 + (s_ / ry_back) ** 2)
@@ -760,7 +761,7 @@ def solve(views):
     params, reps = pv2.solve_views(views, points, PARAMS, FREE, prior_sigma=PRIOR)
     v = views[0]
     best = _silhouette_iou(params, views)[0]
-    grids = {"LW": np.arange(0.26, 0.33, 0.02), "SPL": np.arange(0.40, 0.57, 0.04), "SPIL": np.arange(0.2, 0.39, 0.06),
+    grids = {"SPL": np.arange(0.40, 0.57, 0.04), "SPIL": np.arange(0.2, 0.39, 0.06),
              "SPIR": np.arange(-0.12, 0.07, 0.06), "FY": np.arange(0.36, 0.47, 0.05), "TZ": np.arange(0.5, 0.76, 0.06),
              "PSX": np.arange(-0.5, -0.19, 0.1), "WH": np.arange(0.26, 0.45, 0.06), "PR": np.arange(0.7, 0.86, 0.05),
              "PX": np.arange(-0.3, 0.06, 0.08)}

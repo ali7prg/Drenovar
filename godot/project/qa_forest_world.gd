@@ -369,6 +369,7 @@ func run() -> void:
 	check(world.poi_position("lf_home_reception").distance_to(Vector3(-7, 0, -51)) < 10.0, "lf_home_reception position")
 	check(world.poi_position("lf_site_03:cage") != Vector3.INF and world.poi_position("lf_key_05") != Vector3.INF, "poi target ids")
 	check(world.focus_bounds() == Rect2(-112, -112, 224, 224), "focus_bounds")
+	_check_uv2_manifest()
 	notes.perf = world.perf_snapshot()
 	notes.legacy_batches = legacy_batches
 	notes.kit = world.kit_status()
@@ -397,6 +398,37 @@ func _route_trunk_violation(masks, x: float, z: float, crown: float, bare := fal
 				if offset.length() < limit:
 					return true
 	return false
+
+
+## Phone-build readiness: an exported pack has no raw .glb, so ActorRig reads the UV2 material names from
+## the generated manifest. Every GLB whose baseColorTexture uses texCoord 1 must be listed with exactly
+## those materials (and nothing stale may be listed).
+func _check_uv2_manifest() -> void:
+	const ActorRig := preload("res://src/forest_rescue/game/actor_rig.gd")
+	var listed: Dictionary = ActorRig.uv2_manifest_entries()
+	var glbs: Array = []
+	_collect_glbs("res://assets", glbs)
+	var with_uv2 := 0
+	for path: String in glbs:
+		var raw: Array = ActorRig.glb_uv2_materials_raw(path).keys()
+		raw.sort()
+		var have: Array = listed.get(path, [])
+		if not raw.is_empty():
+			with_uv2 += 1
+		check(raw == have, "uv2 manifest entry for %s: glb %s manifest %s" % [path, raw, have])
+	for path: String in listed:
+		check(path in glbs, "uv2 manifest lists a missing GLB %s" % path)
+	check(with_uv2 > 0 and glbs.size() > 100, "uv2 manifest scan: %d GLBs, %d with UV2 materials" % [glbs.size(), with_uv2])
+	notes.uv2_manifest = {"glbs": glbs.size(), "with_uv2": with_uv2}
+
+
+static func _collect_glbs(dir_path: String, out: Array) -> void:
+	for sub in DirAccess.get_directories_at(dir_path):
+		if not sub.begins_with("."):
+			_collect_glbs(dir_path.path_join(sub), out)
+	for file in DirAccess.get_files_at(dir_path):
+		if file.get_extension().to_lower() == "glb":
+			out.append(dir_path.path_join(file))
 
 
 func finish() -> void:

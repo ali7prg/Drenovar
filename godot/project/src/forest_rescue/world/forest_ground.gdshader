@@ -47,10 +47,9 @@ vec2 hash22(vec2 p) {
 	return fract((p3.xx + p3.yz) * p3.zy);
 }
 
-vec3 forest_detail(vec3 albedo, vec3 grass_tex, vec2 p, float ring) {
-	float earth_w = UV2.x;
-	float rock_w = UV2.y;
-	vec3 tint = COLOR.rgb;
+vec3 forest_detail(vec3 albedo, vec3 grass_tex, vec2 p, float ring, vec2 uv, vec2 uv2, vec3 tint) {
+	float earth_w = uv2.x;
+	float rock_w = uv2.y;
 	float tint_l = dot(tint, vec3(0.299, 0.587, 0.114));
 	float meadow = (1.0 - earth_w) * (1.0 - rock_w);
 	// shaded floor under the pines (the ground bake darkens it): needles + moss, no flowers
@@ -109,7 +108,7 @@ vec3 forest_detail(vec3 albedo, vec3 grass_tex, vec2 p, float ring) {
 		float a = atan(d.y, d.x);
 		float edge = pd.z + 0.75 * sin(a * 5.0 + pd.w) + 0.45 * sin(a * 9.0 + pd.w * 1.7) + (n_mid.r - 0.5) * 0.8;
 		float pad = 1.0 - smoothstep(edge - 0.35, edge + 0.1, dist);
-		float soil = dot(texture(earth, UV * 0.85).rgb, vec3(0.333));
+		float soil = dot(texture(earth, uv * 0.85).rgb, vec3(0.333));
 		vec3 sand = pad_color * (0.82 + 0.4 * soil) * (0.94 + 0.12 * n_hi.g);
 		sand = mix(sand, sand * vec3(0.78, 0.72, 0.66), smoothstep(0.62, 0.8, n_hi.b) * 0.5);   // trampled darker spots
 		float rim = smoothstep(edge - 1.05, edge - 0.45, dist) * (1.0 - smoothstep(edge - 0.2, edge + 0.25, dist));
@@ -139,7 +138,7 @@ void fragment() {
 	vec3 albedo = land * COLOR.rgb;
 	float ring = smoothstep(56.5, 59.0, max(abs(world_pos.x), abs(world_pos.z)));
 	if (ring > 0.0) {
-		albedo = forest_detail(albedo, grass_tex, world_pos.xz, ring);
+		albedo = forest_detail(albedo, grass_tex, world_pos.xz, ring, UV, UV2, COLOR.rgb);
 	}
 	ALBEDO = albedo;
 	NORMAL_MAP = texture(normal_texture, UV).rgb;

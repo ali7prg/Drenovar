@@ -175,7 +175,7 @@ class ViewSpec:
     def __init__(self, name, sheet_name, box, points, pose=None, project=True, light=(-0.45, -0.55, 0.70),
                  thresh=0.10, fill_holes=40, exclude=(), clip_below=None, iou_ignore=None, weight=1.0,
                  shadow=None, solve_opts=None, hide_parts=(), title="", ignore_boxes=(), render_pose=None,
-                 tex_weight=1.0, sym=None, qa=True):
+                 tex_weight=1.0, sym=None, qa=True, proj_exclude=()):
         self.name, self.sheet_name, self.box = name, sheet_name, tuple(box)
         self.points = dict(points)
         self.pose = dict(pose or {})
@@ -188,6 +188,7 @@ class ViewSpec:
         self.title = title
         self.ignore_boxes = list(ignore_boxes)
         self.render_pose = render_pose
+        self.proj_exclude = list(proj_exclude)   # sheet boxes this view never paints from (the mask keeps them)
         self.tex_weight = tex_weight
         self.sym = None if sym is None else np.asarray(sym, float)
         self.qa = qa
@@ -597,6 +598,10 @@ def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.
             Np = Np @ S[:3, :3].T
             Np /= np.maximum(np.linalg.norm(Np, axis=1, keepdims=True), 1e-9)
         ref_m, _ = v.mask()
+        if getattr(v, "proj_exclude", None):
+            ref_m = ref_m.copy()
+            for (a_, b_, c_, d_) in v.proj_exclude:
+                ref_m[max(0, b_ - v.box[1]):max(0, d_ - v.box[1]), max(0, a_ - v.box[0]):max(0, c_ - v.box[0])] = False
         crop = v.crop
         c = np.zeros((len(P), 3))
         w = np.zeros(len(P))

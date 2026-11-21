@@ -129,7 +129,8 @@ def views():
          "r2_front": (941, 168), "r3_front": (941, 218),
          "clamp_b": (944, 68), "clamp_f": (944, 240), "clamp_l": (847, 146), "clamp_r": (1043, 146),
          "step_tl": (874, 344), "step_tr": (1033, 341), "step_bl": (876, 387), "step_br": (1031, 384)},
-        pose=SOLVED_POSE_02, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None, solve_opts={"fov_prior": 20.0},
+        pose=dict(SOLVED_POSE_02, step="hide"), render_pose=dict(SOLVED_POSE_02), light=LIGHT, thresh=0.085,
+        fill_holes=True, shadow=None, solve_opts={"fov_prior": 20.0},
         clip_below=391, title="RUNE LOCK closed (site 02 glyphs set, key on the step)")
     open_pose = dict(SOLVED_POSE_02)
     open_pose["door_pivot"] = {"loc": (0, 0, -DOOR_DROP)}
@@ -149,7 +150,7 @@ def views():
          "door_tl": (1290, 272), "door_tr": (1390, 272), "door_bl": (1292, 345), "door_br": (1388, 345)},
         pose=open_proj, render_pose=open_render, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None,
         solve_opts={"fov_prior": 20.0}, clip_below=386, title="RUNE LOCK open (door down, key in the niche)",
-        tex_weight=0.9)
+        tex_weight=0.9, proj_exclude=[(1440, 160, 1500, 330)])
     return [closed, opened]
 
 
@@ -211,7 +212,8 @@ def build(A, p, lod):
     zd = min(hb + p["dt"], zt - 0.05)
     arc_wall(g, Rt - 0.17, r_at(zd), zd, zt, ad - dh, ad + dh, max(4, n // 10), "stone", "lintel", top=False,
              ends=False, r1_top=Rt)
-    CG.ring_prism(g, (0, 0, 0), np.eye(3), Rt + 0.025, p["Rr"] + 0.02, n, zt, zt + 0.06, "stone", "rim")
+    CG.ring_prism(g, (0, 0, 0), np.eye(3), Rt + 0.025, p["Rr"] - 0.05, n, zt, zt + 0.06, "stone", "rim")
+    CG.disc_prism(g, (0, 0, 0), np.eye(3), CG.ngon(Rt - 0.05, n), zt - 0.02, zt + 0.005, "iron", "dial_well")
     # cavity behind the door: floor, back wall, side walls (dark), chest
     cy0 = Rw * math.sin(ad)
     cav_w = 2 * Rw * math.sin(dh) + 0.1
@@ -257,8 +259,9 @@ def build(A, p, lod):
     Rm = np.stack([et, np.array([0, 0, 1.0]), er], 1)          # local x = tangent, y = up, z = outward
     g.prism(poly, -0.02, 0.0, "iron", "niche_back", R=Rm, t=base)
     # ---- threshold step in front of the door (the key lies on it)
-    g.box((p["sx"], step_y(p), p["sh"] / 2), (p["sw"], p["sd"], p["sh"]), mat="stone", tag="step",
-          chamfer=0.02 if lod == 0 else 0.0)
+    stp = A.part("step", None, (p["sx"] + O[0], step_y(p) + O[1], 0.0))
+    stp.geo[lod].box((p["sx"] + O[0], step_y(p) + O[1], p["sh"] / 2), (p["sw"], p["sd"], p["sh"]), mat="stone", tag="step",
+                     chamfer=0.02 if lod == 0 else 0.0)
     gd.transform(None, O)
     g = g_root
     g.extend(gd)
@@ -319,7 +322,7 @@ def _silhouette_iou(p, views):
     build(A, p, 2)
     out = []
     for v in views:
-        Wm = A.world_mats(v.pose)
+        Wm = A.world_mats(v.render_pose if v.render_pose is not None else v.pose)
         W_, H_ = v.size
         m = np.zeros((H_, W_), np.uint8)
         for nm, part in A.parts.items():
@@ -338,6 +341,49 @@ def _silhouette_iou(p, views):
         mm = m.astype(bool)
         out.append(float((mm & ref).sum()) / max(1.0, float((mm | ref).sum())))
     return float(np.mean(out)), out
+
+
+def _refine_cameras(params, views):
+    import cv2
+    for vi, v in enumerate(views):
+        others = [w for w in views if w is not v]
+
+        def score(cam):
+            keep = v.cam
+            v.cam = cam
+            val = _silhouette_iou(params, [v])[0]
+            v.cam = keep
+            return val
+
+        best = score(v.cam)
+        for _round in range(2):
+            for kind, steps in (("rx", np.radians([-1.2, -0.6, 0.6, 1.2])), ("ry", np.radians([-1.2, -0.6, 0.6, 1.2])),
+                                ("rz", np.radians([-1.0, -0.5, 0.5, 1.0])), ("tx", [-0.04, -0.02, 0.02, 0.04]),
+                                ("ty", [-0.04, -0.02, 0.02, 0.04]), ("f", [0.96, 0.98, 1.02, 1.04])):
+                for d in steps:
+                    c = v.cam
+                    R = cv2.Rodrigues(np.asarray(c.rvec, float))[0]
+                    C = -R.T @ np.asarray(c.tvec, float)
+                    f = c.f
+                    if kind in ("rx", "ry", "rz"):
+                        axis = {"rx": (1, 0, 0), "ry": (0, 1, 0), "rz": (0, 0, 1)}[kind]
+                        dR = cv2.Rodrigues(np.asarray(axis, float) * d)[0]
+                        R2 = dR @ R
+                        t2 = -R2 @ C
+                    elif kind in ("tx", "ty"):
+                        R2 = R
+                        shift = np.array([d, 0.0, 0.0]) if kind == "tx" else np.array([0.0, d, 0.0])
+                        t2 = np.asarray(c.tvec, float) + shift * np.linalg.norm(C) * 0.1
+                    else:
+                        R2 = R
+                        t2 = np.asarray(c.tvec, float)
+                        f = c.f * d
+                    cam = type(c)(f, c.cx, c.cy, cv2.Rodrigues(R2)[0].ravel(), t2, c.k1, c.k2, size=c.size)
+                    val = score(cam)
+                    if val > best + 1e-4:
+                        best = val
+                        v.cam = cam
+        pv2.log(f"  [{v.name}] camera refined by silhouette: IoU {best:.3f}")
 
 
 def solve(views):
@@ -367,6 +413,22 @@ def solve(views):
                     best, params = iou, q
     pv2.log(f"  drum by silhouette IoU: Rt {params['Rt']:.3f} Rb {params['Rb']:.3f} hb {params['hb']:.2f} -> mean IoU "
             f"{best:.3f} {[round(x, 3) for x in _silhouette_iou(params, views)[1]]}")
+    # camera refinement by silhouette (the 14-18 point solve leaves ~8 px residuals): small rotations about
+    # the camera axes, image shifts and focal changes per view, then the drum once more
+    _refine_cameras(params, views)
+    for key in ("Rw", "Rb", "hb", "ox", "oy"):
+        base = params[key]
+        for val in np.arange(base - 0.06, base + 0.061, 0.02):
+            q = dict(params)
+            q[key] = float(val)
+            if key == "Rw":
+                q["Rt"] = q["Rw"] - 0.03
+                q["Rb"] = max(q["Rb"], q["Rw"] + 0.06)
+            iou = _silhouette_iou(q, views)[0]
+            if iou > best + 1e-4:
+                best, params = iou, q
+    pv2.log(f"  after camera refinement: mean IoU {_silhouette_iou(params, views)[0]:.3f} "
+            f"{[round(x, 3) for x in _silhouette_iou(params, views)[1]]}")
     params["_scale"] = MODEL_SCALE
     for v in views:
         _resolve_pose(v, params)

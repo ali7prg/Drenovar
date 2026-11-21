@@ -85,7 +85,7 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 				var clearance := INF
 				for anchor: Vector2 in anchors:
 					clearance = minf(clearance, p.distance_to(center + anchor))
-				var hit: Dictionary = atlas.nearest_route(p.x, p.y)
+				var hit: Dictionary = atlas.nearest_route(p.x, p.y, false)
 				var trail: float = minf(hit.get("distance", 12.0), 12.0)
 				var score: float = minf(clearance, 6.0) * 1.6 + trail - float(ring) * 0.4
 				score += 1.5 * Vector2(cos(angle), sin(angle)).dot(Vector2(-0.7071, -0.7071))
@@ -109,7 +109,7 @@ func valid_spot(p: Vector2, footprint: float, masks: RefCounted, camp := false) 
 		return false
 	if atlas.river_bank_distance(p.x, p.y) < footprint + 2.0:
 		return false
-	var hit: Dictionary = atlas.nearest_route(p.x, p.y)
+	var hit: Dictionary = atlas.nearest_route(p.x, p.y, false)
 	if not hit.is_empty() and hit.distance < footprint + 1.8:
 		return false
 	for site in atlas.sites:

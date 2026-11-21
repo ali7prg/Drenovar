@@ -251,6 +251,8 @@ func _build_unit_zones() -> void:
 	unit_zones.clear()
 	unit_zone_grid.clear()
 	for route in atlas.routes:
+		if route.get("decor", false):
+			continue                   # decorative trails: nobody walks there
 		var points: PackedVector3Array = route.points
 		for i in range(points.size() - 1):
 			_add_unit_zone(Vector2(points[i].x, points[i].z), Vector2(points[i + 1].x, points[i + 1].z), TRAIL_UNIT_HALF)
@@ -701,6 +703,11 @@ func run() -> void:
 		understory.append(row)
 	print("LAYOUT understory=", understory.size(), " ", kinds_count)
 
+	# 5b. Trail edges (art/07): small stones, roots (fallen branches), grass tufts and ferns on
+	#     both sides of every trail, just outside its walking width; low, never in front of units.
+	var dressing := _trail_dressing()
+	print("LAYOUT trail dressing=", dressing.size())
+
 	# 6. Inner understory near inner trees (runtime filters plots/roads/buildings again) --------
 	var reserve_rects: Array = []
 	for mask in atlas.reserve_masks:
@@ -761,10 +768,12 @@ func run() -> void:
 		"format": {"trees": "[x, z, speciesIndex, kitVariant(1..4), yawDeg, absoluteScale, zoneIndex]",
 			"resourceRemap": "{id: [x, z, reasonCode, kitVariant, absoluteScale]} for every outer resource tree",
 			"innerRemap": "{id: [x, z, reasonCode(0 jittered / 3 kept), kitVariant, absoluteScale]} for every inner (±56) resource tree",
-			"understory": "[x, z, kindIndex, variant(1-based in Rules.UNDERSTORY_KIT), yawDeg, absoluteScale, (heightOffset)]"},
+			"understory": "[x, z, kindIndex, variant(1-based in Rules.UNDERSTORY_KIT), yawDeg, absoluteScale, (heightOffset)]",
+			"trailDressing": "same as understory; stones/roots/grass/ferns at the trail edges (≥ walking width)"},
 		"cameraClearance": {"unitHeight": Rules.UNIT_HEIGHT, "trailHalf": TRAIL_UNIT_HALF, "viewShift": Rules.VIEW_SHIFT,
 			"rule": "no crown between the city camera and a unit on a trail / in a glade / arena / horse spot (Rules.crown_capsule)"},
 		"cameraOccluders": camera_occluders,
+		"trailDressing": dressing,
 		"trees": trees, "resourceRemap": remap, "innerRemap": inner_remap, "understory": understory, "innerUnderstory": inner_under}
 	var file := FileAccess.open(Rules.LAYOUT_PATH, FileAccess.WRITE)
 	file.store_string(JSON.stringify(result, "", false))
@@ -773,6 +782,77 @@ func run() -> void:
 	print("LAYOUT_DONE trees=", trees.size(), " remap=", remap.size(), " inner=", inner_remap.size(), " understory=", understory.size(),
 		" innerUnder=", inner_under.size(), " ms=", Time.get_ticks_msec() - started)
 	quit()
+
+
+## Trail-edge dressing (art/07 panels 1–3): along every visual trail (atlas.routes incl. the
+## decorative network), alternating sides every 1.4–3 m, an item 1.25–2.3 m from the centre line
+## (decorative trails 1.0–1.8 m): grass tufts, small mossy stones, roots (fallen branches laid
+## along the trail), ferns, a few mushrooms. Kept off glades, the base, the bridge, the arena and
+## the wet river channel.
+func _trail_dressing() -> Array:
+	var out: Array = []
+	var grid := {}
+	var store: Array = []
+	var kinds := ["grass", "rock", "branches", "fern", "mushrooms"]
+	var weights := [0.42, 0.26, 0.16, 0.11, 0.05]
+	for route in atlas.routes:
+		var decor: bool = route.get("decor", false)
+		var points: PackedVector3Array = route.points
+		var along := 0.0
+		var next := rng.randf_range(0.5, 2.0)
+		for i in range(1, points.size()):
+			var a := Vector2(points[i - 1].x, points[i - 1].z)
+			var b := Vector2(points[i].x, points[i].z)
+			along += a.distance_to(b)
+			if along < next:
+				continue
+			next = along + rng.randf_range(1.4, 3.0)
+			var tangent := (b - a).normalized()
+			var normal := Vector2(-tangent.y, tangent.x)
+			var side := -1.0 if rng.randf() < 0.5 else 1.0
+			var lateral := rng.randf_range(1.0, 1.8) if decor else rng.randf_range(1.25, 2.3)
+			var q := b + normal * side * lateral
+			if maxf(absf(q.x), absf(q.y)) < CORE + 0.5 or maxf(absf(q.x), absf(q.y)) > EXTENT - 1.0:
+				continue
+			var hit: Dictionary = atlas.nearest_route(q.x, q.y)
+			if not hit.is_empty() and float(hit.distance) < (0.95 if decor else 1.15):
+				continue
+			if atlas.river_bank_distance(q.x, q.y) < 0.5 or atlas.bridge_deck_rect().grow(3.0).has_point(q):
+				continue
+			if q.distance_to(Vector2(atlas.arena_center.x, atlas.arena_center.z)) < ARENA_RIM_UNDER:
+				continue
+			var in_glade := false
+			for site in atlas.sites:
+				if q.distance_to(Vector2(site.center.x, site.center.z)) < float(site.radius) + 0.5:
+					in_glade = true
+			if in_glade or terrain.slope_degrees(q.x, q.y) > 34.0:
+				continue
+			var crowded := false
+			for other in near_points(q.x, q.y, 1.6, grid, store):
+				if q.distance_to(Vector2(other[0], other[1])) < 1.1:
+					crowded = true
+					break
+			if crowded:
+				continue
+			insert(grid, store, [q.x, q.y, 0.0])
+			var kind_name: String = kinds[Rules.pick_index(weights, rng.randf())]
+			var spec: Array = Rules.UNDERSTORY_KIT[kind_name]
+			var variant := 1 + rng.randi() % (spec[1] as Array).size()
+			var yaw := rng.randf() * 360.0
+			var scale := rng.randf_range(0.8, 1.15)
+			match kind_name:
+				"rock":
+					scale = rng.randf_range(0.16, 0.32)
+				"branches":
+					scale = rng.randf_range(0.5, 0.75)
+					yaw = rad_to_deg(atan2(tangent.x, tangent.y)) + rng.randf_range(-25.0, 25.0)
+				"fern":
+					scale = rng.randf_range(0.6, 0.85)
+				"mushrooms":
+					scale = rng.randf_range(0.8, 1.1)
+			out.append([snappedf(q.x, 0.01), snappedf(q.y, 0.01), Rules.UNDERSTORY.find(kind_name), variant,
+				snappedf(yaw, 0.1), snappedf(scale, 0.001)])
+	return out
 
 
 ## River banks (art/01 east river): boulders half in the water along both wet edges, reed beds

@@ -25,7 +25,7 @@ const RAMP_LENGTH := 10.0
 const PAD_TIE := 6.0
 const ARENA_BLEND_OUTER := 19.0
 const ARENA_DISH := 0.3
-const TERRAIN_VERSION := 10
+const TERRAIN_VERSION := 11
 
 const BIOME_TINTS := [
 	Color(1.05, 1.04, 0.86),   # lf_biome_1 Берёзовый дозор — warm birch light
@@ -207,7 +207,8 @@ func _prepare_profiles() -> void:
 		var along := PackedFloat32Array()
 		along.resize(n)
 		for i in n:
-			profile[i] = points[i].y
+			# decorative trails (no server way) lie on the natural ground
+			profile[i] = base_height(points[i].x, points[i].z) if route.get("decor", false) else points[i].y
 			along[i] = 0.0 if i == 0 else along[i - 1] + Vector2(points[i].x - points[i - 1].x, points[i].z - points[i - 1].z).length()
 			var on: bool = route.bridge and absf(points[i].z - atlas.BRIDGE_CENTER.z) < 0.6 \
 				and points[i].x >= deck.position.x - 0.05 and points[i].x <= deck.end.x + 0.05
@@ -287,13 +288,16 @@ func evaluate(x: float, z: float, h0: float) -> Vector4:
 			dirt = maxf(dirt, 0.35 * (1.0 - smoothstep(pr * 0.5, pr + 1.0, pd)))
 	var hit: Dictionary = atlas.nearest_route(x, z)
 	if not hit.is_empty():
+		var decor: bool = atlas.routes[hit.route].get("decor", false)
 		road_distance = hit.distance
 		# Deck segments also shape the banks under the deck ends (abutments); the river
-		# protection below keeps the wet channel itself untouched.
-		if hit.distance < ROAD_HALF_WIDTH + ROAD_BLEND:
+		# protection below keeps the wet channel itself untouched. Decorative trails only
+		# colour the ground (worn dirt), they never reshape it.
+		if not decor and hit.distance < ROAD_HALF_WIDTH + ROAD_BLEND:
 			var w := 1.0 - smoothstep(ROAD_HALF_WIDTH, ROAD_HALF_WIDTH + ROAD_BLEND, hit.distance)
 			h = lerpf(h, road_height(hit) - 0.03, w)
-		dirt = maxf(dirt, 0.85 * (1.0 - smoothstep(0.5, 1.7, hit.distance)))
+		# art/07: a narrow worn dirt band (the path ribbon draws the trail itself)
+		dirt = maxf(dirt, (0.5 if decor else 0.62) * (1.0 - smoothstep(0.3, 1.2, hit.distance)))
 	for site in atlas.sites:   # glade pads last: always flat inside the clearing radius
 		var d := Vector2(x - site.center.x, z - site.center.z).length()
 		var r: float = site.radius

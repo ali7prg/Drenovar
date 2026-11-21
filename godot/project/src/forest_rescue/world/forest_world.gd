@@ -208,9 +208,12 @@ func _build_paths() -> void:
 	var colors := PackedColorArray()
 	var normals := PackedVector3Array()
 	var indices := PackedInt32Array()
-	var half := 1.45
-	var fringe := 0.9
+	# art/07: a narrow worn dirt trail (≈ 2.2 m, decorative trails ≈ 1.6 m) whose edges are
+	# overgrown with grass (forest_path.gdshader), on the meandered visual trail (ForestAtlas).
 	for r in atlas.routes.size():
+		var decor: bool = atlas.routes[r].get("decor", false)
+		var half := 0.8 if decor else 1.1
+		var fringe := 0.6 if decor else 0.75
 		var points: PackedVector3Array = atlas.routes[r].points
 		var on_deck: PackedByteArray = terrain.road_on_deck[r]
 		var profile: PackedFloat32Array = terrain.road_profiles[r]
@@ -830,6 +833,12 @@ func poi_position(target_id: String) -> Vector3:
 	if parts.size() == 1:
 		return anchor.center
 	return anchor.get(parts[1], Vector3.INF)
+
+
+## v3.3: a server move path ({x,y,z} points) as the drawn, meandered trail (densified); actors
+## walk this polyline so they stay on the visual trail (same arc-length fraction / timing).
+func visual_path(path: Array) -> Array:
+	return atlas.visual_path(path) if atlas != null else path
 
 
 func route_points(route_id: String) -> PackedVector3Array:

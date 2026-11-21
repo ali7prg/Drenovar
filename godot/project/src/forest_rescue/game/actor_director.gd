@@ -330,12 +330,18 @@ func squad_member_count() -> int:
 		return 0
 	return clampi(int(squad.get("members", 3)), 1, 3)
 
+## Presentation route of a server move: its path mapped onto the drawn, meandered trail
+## (world.visual_path) — same arc-length fraction and timing as the server move.
 func route_for(key: String, path: Array) -> Dictionary:
 	if not routes.has(key):
-		routes[key] = PathMotion.build(path)
+		routes[key] = PathMotion.build(visual_path(path))
 		if routes.size() > 24:
 			routes.erase(routes.keys()[0])
 	return routes[key]
+
+func visual_path(path: Array) -> Array:
+	var value: Variant = game.world_call("visual_path", [path])
+	return value if value is Array and not (value as Array).is_empty() else path
 
 ## Sub-target kind of a CONTRACT targetId («lf_site_01:cage» → cage, lf_key_NN → key).
 static func target_kind(target_id: String) -> String:
@@ -1688,7 +1694,7 @@ func update_ribbon() -> void:
 	ribbon.show()
 	if signature != ribbon_signature:
 		ribbon_signature = signature
-		var route := PathMotion.build(source.get("path", []))
+		var route := PathMotion.build(visual_path(source.get("path", [])))
 		var total := float(route.total)
 		var count := clampi(int(total / 1.15), 2, 400)
 		var multimesh := ribbon.multimesh

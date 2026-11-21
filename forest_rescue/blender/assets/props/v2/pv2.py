@@ -524,8 +524,21 @@ class Swatches:
         for cls, s in spec.items():
             img = sheet(s["sheet"])
             x0, y0, x1, y1 = s["box"]
+            if s.get("angle"):
+                # deskew: rotate the painting about the box centre so the grain runs along u
+                import cv2
+                cx, cy = (x0 + x1) / 2.0, (y0 + y1) / 2.0
+                M = cv2.getRotationMatrix2D((cx, cy), float(s["angle"]), 1.0)
+                img = cv2.warpAffine(np.asarray(img, np.float32), M, (img.shape[1], img.shape[0]),
+                                     flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
             patch = img[y0:y1, x0:x1]
-            if s.get("tile_v") and patch.shape[1] > patch.shape[0]:
+            if s.get("tile_v") == "stack" and patch.shape[1] > patch.shape[0]:
+                # a strip with the grain along its length: stack shifted (never mirrored) copies across the
+                # grain into a square tile — reads as neighbouring planks / staves, no chevron "camo"
+                reps = int(np.ceil(patch.shape[1] / patch.shape[0]))
+                rows = [np.roll(patch, int(k * patch.shape[1] * 0.37) % patch.shape[1], axis=1) for k in range(reps)]
+                patch = np.concatenate(rows, 0)[:patch.shape[1]]
+            elif s.get("tile_v") and patch.shape[1] > patch.shape[0]:
                 # a strip with the grain along its length: mirror-tile it across the grain into a square tile
                 reps = int(np.ceil(patch.shape[1] / patch.shape[0]))
                 rows = [patch if k % 2 == 0 else patch[::-1] for k in range(reps)]

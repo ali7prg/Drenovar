@@ -154,7 +154,63 @@ def game_in_art(game, fwd, target, zoom, size=(1536, 1024), step=6):
     return Image.fromarray(sample(game, full[..., 0], full[..., 1]).astype(np.uint8))
 
 
+def before_after(shots, prefix, before, before_prefix, tag):
+    """Pass-2 sheets: art/01 crop | before | after per zone at zoom 68 (same camera frames)."""
+    art_img = Image.open(ART).convert("RGB")
+    fwd, inv = P.art_warps()
+    rows = []
+    for name, target, caption in ZONES:
+        a_path = os.path.join(shots, prefix + "full_%s_z68.png" % name)
+        b_path = os.path.join(before, before_prefix + "full_%s_z68.png" % name)
+        if not (os.path.exists(a_path) and os.path.exists(b_path)):
+            continue
+        crop, box = art_crop(art_img, inv, target, 68.0, (W, H))
+        label(crop, "art/01 · " + caption, size=15)
+        b = Image.open(b_path).convert("RGB")
+        label(b, "BEFORE (atlas v2 checkpoint) · zoom 68 · " + name, size=15)
+        a = Image.open(a_path).convert("RGB")
+        label(a, "AFTER (layout pass 2, all sites discovered) · zoom 68 · " + name, size=15)
+        rows.append((crop, b, a))
+    scale = 0.5
+    tw, th = int(W * scale), int(H * scale)
+    for chunk in range(0, len(rows), 5):
+        part = rows[chunk:chunk + 5]
+        sheet = Image.new("RGB", (3 * tw + 24, 50 + len(part) * (th + 8)), (30, 27, 24))
+        ImageDraw.Draw(sheet).text((10, 12), "Layout pass 2 — art/01 crop | before | after, zoom 68, city camera, QA full "
+                                   "reveal", font=font(19), fill=(250, 240, 220))
+        for i, row in enumerate(part):
+            y = 50 + i * (th + 8)
+            for j, im in enumerate(row):
+                sheet.paste(im.resize((tw, th), Image.LANCZOS), (j * (tw + 12), y))
+        sheet.save(os.path.join(OUT, "%s_zones_z68_%d.png" % (tag, chunk // 5 + 1)))
+    # overview, same framing: art/01 | before | after
+    paths = [os.path.join(before, before_prefix + "full_overview_art01.png"), os.path.join(shots, prefix + "full_overview_art01.png")]
+    if all(os.path.exists(x) for x in paths):
+        ims = []
+        for x in paths:
+            g = Image.open(x).convert("RGB")
+            cw = int(round(g.height * 1.5))
+            if g.width > cw:
+                x0 = (g.width - cw) // 2
+                g = g.crop((x0, 0, x0 + cw, g.height))
+            ims.append(g.resize((1024, 683), Image.LANCZOS))
+        ref = art_img.resize((1024, 683), Image.LANCZOS)
+        label(ref, "art/01", size=20)
+        label(ims[0], "BEFORE", size=20)
+        label(ims[1], "AFTER (pass 2)", size=20)
+        sheet = Image.new("RGB", (3 * 1024 + 24, 683 + 56), (30, 27, 24))
+        ImageDraw.Draw(sheet).text((10, 12), "Layout pass 2 — the whole forest, same framing (art/01 | before | after)",
+                                   font=font(22), fill=(250, 240, 220))
+        for j, im in enumerate([ref] + ims):
+            sheet.paste(im, (j * 1036, 52))
+        sheet.save(os.path.join(OUT, "%s_overview_same_framing.png" % tag))
+
+
 def main():
+    if len(sys.argv) > 4 and sys.argv[3] == "--before":
+        os.makedirs(OUT, exist_ok=True)
+        before_after(sys.argv[1], sys.argv[2], sys.argv[4], sys.argv[5], sys.argv[6] if len(sys.argv) > 6 else "p2")
+        return
     shots, prefix = sys.argv[1], sys.argv[2]
     os.makedirs(OUT, exist_ok=True)
     art_img = Image.open(ART).convert("RGB")

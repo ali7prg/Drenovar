@@ -164,7 +164,9 @@ def build(A, p, lod):
 
 STRICT_FACING = ("wood",)
 SWATCHES = {
-    "wood": dict(sheet=SHEET, box=(500, 262, 620, 280), metres=1.0, tile_v=True),
+    # P2.7b: a real patch of the log's side staves, deskewed so the grain runs along the log (+X),
+    # cross-faded tileable (no mirrored tiling = no chevron "camo" on the unseen faces)
+    "wood": dict(sheet=SHEET, box=(448, 264, 590, 290), metres=1.2, angle=-14.0, tile_v="stack"),
     "stone": dict(sheet=SHEET, box=(240, 95, 290, 135), metres=0.8),
     "birch": dict(sheet=SHEET, box=(60, 140, 90, 200), metres=0.6),
     "bronze": dict(sheet=SHEET, box=(408, 252, 430, 268), metres=0.15),

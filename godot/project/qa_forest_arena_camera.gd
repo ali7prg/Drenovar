@@ -114,7 +114,8 @@ func magenta(img: Image) -> Array:
 	for y in range(0, img.get_height(), 2):
 		for x in range(0, img.get_width(), 2):
 			var c := img.get_pixel(x, y)
-			if c.r > 0.85 and c.b > 0.85 and c.g < 0.2:
+			# magenta, also under the additive telegraph / spark FX (they add yellow, never green-only)
+			if c.r > 0.7 and c.b > 0.6 and c.g < 0.55 and c.r - c.g > 0.35 and c.b - c.g > 0.25:
 				count += 1
 				lo = lo.min(Vector2i(x, y))
 				hi = hi.max(Vector2i(x, y))

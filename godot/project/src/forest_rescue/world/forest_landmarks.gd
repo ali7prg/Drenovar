@@ -30,7 +30,7 @@ const LIGHT_MIX := 0.35
 
 const MARK_LANDMARKS := [
 	{"id": "lf_env_ruined_watchpost", "mark": "lf_mark_ruined_arch", "back": 6.5, "footprint": 5.0},
-	{"id": "lf_env_standing_stones", "mark": "lf_mark_standing_stones", "back": 0.0, "footprint": 4.4, "face_node": "lf_junction_stones"},
+	{"id": "lf_env_standing_stones", "mark": "lf_mark_standing_stones", "back": 0.0, "footprint": 5.4, "face_node": "lf_junction_stones", "scale": 1.45},
 	{"id": "lf_env_quarry_mine", "mark": "lf_mark_quarry_mine", "back": 6.0, "footprint": 6.0},
 	{"id": "lf_env_hunter_shelter", "mark": "lf_mark_hunter_shelter", "back": 5.2, "footprint": 4.6},
 ]
@@ -42,6 +42,13 @@ const DEAD_TREE_SET := [
 	{"id": "lf_arena_bones", "offset": Vector2(1.2, 2.6), "yaw": 64.0, "scale": 0.8, "footprint": 1.8},
 ]
 const CAMP := {"id": "lf_env_camp_props", "footprint": 3.4, "distance": 10.2}
+## Yaw (deg) showing the city camera (azimuth 45°) the painted side of a landmark: 45° minus the
+## painting camera's azimuth around the model, from the landmarks v3 camera solves
+## (forest_rescue/qa/compare/<id>/v3_iter*_camera.json): camp −36.7°, watchpost −1.6°, hunter
+## shelter −43.5°, quarry mine −4.6°, standing stones −3.7°. A mirrored camp sees +36.7°.
+const PAINTED_YAW := {"lf_env_camp_props": 81.7, "lf_env_ruined_watchpost": 46.6, "lf_env_hunter_shelter": 88.5,
+	"lf_env_quarry_mine": 49.6, "lf_env_standing_stones": 48.7}
+const PAINTED_YAW_MIRRORED := 8.3
 ## art/01 camps (masterplan_inventory.json per-cage notes; no two neighbouring glades alike).
 ## main: camp = lf_env_camp_props (red tarp, fire ring, crates, lantern), frame = the same without
 ## its tarp (bare drying poles), fire / fire_bench = the fire ring (+ the log bench) cut out of it.
@@ -104,8 +111,11 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 		var dir: Vector2 = face - spot
 		if dir.length() < 0.5:
 			dir = -away
-		placements.append({"id": spec.id, "position": Vector3(spot.x, 0.0, spot.y), "yaw": atan2(dir.x, dir.y),
-			"footprint": spec.footprint, "kind": "landmark", "pad": true, "mark": spec.mark})
+		# P2.7: landmarks show the city camera their painted side (PAINTED_YAW: 45° − the solved
+		# painting camera's azimuth around the model); the spot itself stays beside the trail end
+		var yaw: float = deg_to_rad(PAINTED_YAW[spec.id]) if PAINTED_YAW.has(spec.id) else atan2(dir.x, dir.y)
+		placements.append({"id": spec.id, "position": Vector3(spot.x, 0.0, spot.y), "yaw": yaw,
+			"footprint": spec.footprint, "kind": "landmark", "pad": true, "mark": spec.mark, "scale": float(spec.get("scale", 1.0))})
 	# Dead-tree set: the tree stands DEAD_TREE_BACK beyond the end of the trail from glade 07.
 	var dead: Vector2 = _node_xz("lf_mark_dead_tree")
 	if dead != Vector2.INF:
@@ -159,8 +169,9 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 					best = p
 		if best == Vector2.INF:
 			continue
-		var yaw := atan2(center.x - best.x, center.y - best.y) + deg_to_rad(float(style.get("yaw", 0.0)))
 		var mirror: bool = style.get("mirror", false)
+		# P2.7: the camp's painted side faces the city camera (± the style's variation)
+		var yaw := deg_to_rad((PAINTED_YAW_MIRRORED if mirror else float(PAINTED_YAW[CAMP.id])) + float(style.get("yaw", 0.0)))
 		placements.append({"id": CAMP.id, "position": Vector3(best.x, 0.0, best.y), "yaw": yaw, "footprint": main_fp,
 			"kind": "camp", "site": site.id, "pad": main_fp >= 3.0, "piece": main_kind, "mirror": mirror})
 		var fz := Vector2(sin(yaw), cos(yaw))          # camp frame +Z (model +Z) in world xz
@@ -409,6 +420,8 @@ func populate() -> void:
 			lods.append(node)
 			players.append(node.find_children("*", "AnimationPlayer", true, false))
 			tris.append(_count_tris(node))
+		if placement.kind == "camp":
+			holder.add_child(_fire_glow())
 		tris_by_lod[placement.id] = tris
 		items.append({"node": holder, "lods": lods, "players": players, "center": Vector2(placement.position.x, placement.position.z),
 			"radius": maxf(4.0, float(placement.footprint)) if placement.kind != "bridge" else 17.0, "lod": -1, "id": placement.id,
@@ -455,6 +468,68 @@ func _dress(node: Node3D, placement: Dictionary, lod: int) -> void:
 		var frame := MeshInstance3D.new()
 		frame.mesh = _proc_mesh("lean_to_frame")
 		node.add_child(frame)
+
+
+## art/01 glades are lively: the camp fire glows. A flickering camera-facing flame glow over the fire
+## ring (lf_env_camp_props socket fire_light) and a soft warm pool of light on the ground, both
+## additive (2 quads, one layer) — no light source, the city lighting is unchanged.
+static var _glow_material: ShaderMaterial
+static var _pool_material: ShaderMaterial
+
+
+func _fire_glow() -> Node3D:
+	var root := Node3D.new()
+	root.name = "FireGlow"
+	if _glow_material == null:
+		_glow_material = ShaderMaterial.new()
+		var shader := Shader.new()
+		shader.code = """
+shader_type spatial;
+render_mode unshaded, blend_add, depth_draw_never, shadows_disabled, cull_disabled;
+uniform float pool = 0.0;
+void vertex() {
+	if (pool < 0.5) {
+		MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0], INV_VIEW_MATRIX[1], INV_VIEW_MATRIX[2], MODEL_MATRIX[3]);
+	}
+}
+void fragment() {
+	vec2 p = UV * 2.0 - 1.0;
+	float seed = MODEL_MATRIX[3].x * 0.37 + MODEL_MATRIX[3].z * 0.11;
+	float flicker = 0.82 + 0.12 * sin(TIME * 9.0 + seed) + 0.06 * sin(TIME * 23.0 + seed * 3.0);
+	if (pool > 0.5) {
+		float r = length(p);
+		ALBEDO = vec3(1.0, 0.55, 0.18);
+		ALPHA = (1.0 - smoothstep(0.0, 1.0, r)) * 0.3 * flicker;
+	} else {
+		p.y += 0.15;
+		float core = exp(-dot(p * vec2(1.6, 1.0), p * vec2(1.6, 1.0)) * 5.0);
+		float halo = exp(-dot(p, p) * 1.8) * 0.35;
+		ALBEDO = mix(vec3(1.0, 0.45, 0.1), vec3(1.0, 0.85, 0.45), core);
+		ALPHA = clamp((core + halo) * flicker, 0.0, 1.0);
+	}
+}
+"""
+		_glow_material.shader = shader
+		_glow_material.set_shader_parameter("pool", 0.0)
+		_pool_material = _glow_material.duplicate()
+		_pool_material.set_shader_parameter("pool", 1.0)
+	var flame := MeshInstance3D.new()
+	var quad := QuadMesh.new()
+	quad.size = Vector2(1.3, 1.5)
+	flame.mesh = quad
+	flame.material_override = _glow_material
+	flame.position = Vector3(FIRE_CENTER.x, 0.75, FIRE_CENTER.y)
+	flame.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(flame)
+	var light_pool := MeshInstance3D.new()
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(3.6, 3.6)
+	light_pool.mesh = plane
+	light_pool.material_override = _pool_material
+	light_pool.position = Vector3(FIRE_CENTER.x, 0.08, FIRE_CENTER.y)
+	light_pool.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(light_pool)
+	return root
 
 
 ## Triangles of a camp mesh whose centroid lies in the fire ring (+ the log bench), below 1.1 m.

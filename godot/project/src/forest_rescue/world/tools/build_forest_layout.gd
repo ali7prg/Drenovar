@@ -459,8 +459,17 @@ func run() -> void:
 		hero_preferred = hero_mark + landmarks._away_from_trails(HERO_MARK, hero_mark) * HERO_BACK
 	if landmarks.dead_tree_spot != Vector2.INF:
 		landmark_discs.append([landmarks.dead_tree_spot, 3.2])
-	# waterfall outcrop + pond (ForestWater): no trunks on the rocks or round the fall
+	# waterfall outcrop + pond (ForestWater): no trunks on the rocks, round the pond or between the
+	# pond and the camera (resource trees are pushed out ≤ 6.5 m like from any clearance)
 	landmark_discs.append([Vector2(19.8, -67.3), 5.2])
+	landmark_discs.append([ForestWater.POND_CENTER, ForestWater.POND_RADIUS + 3.5])
+	landmark_discs.append([ForestWater.POND_CENTER + Vector2(3.5, 3.5), 4.5])
+	# art/01: every glade sits in an open sunny clearing (camp, fire, props): a meadow ring of
+	# 3 m round the 7 m clearing stays free of trunks (young trees grow round it, see openness)
+	for site in atlas.sites:
+		landmark_discs.append([Vector2(site.center.x, site.center.z), float(site.radius) + 3.0])
+	for extra in atlas.extra_glades:
+		landmark_discs.append([Vector2(extra.center.x, extra.center.z), float(extra.radius) + 3.0])
 	landmarks.free()
 	_build_unit_zones()
 	print("LAYOUT terrain+masks ready ms=", Time.get_ticks_msec() - started, " quarry=", quarry_center, " unit zones=", unit_zones.size())
@@ -737,7 +746,7 @@ func run() -> void:
 		var variant := 1 + rng.randi() % (spec[1] as Array).size()
 		var scale := lerpf(0.8, 1.2, rng.randf())
 		if kind_name == "rock":
-			scale = lerpf(0.55, 0.95, rng.randf())
+			scale = lerpf(0.3, 0.52, rng.randf())       # moss rock v1 is 9 × 6 m at 1.0
 		elif kind_name == "quarry_rock":
 			scale = lerpf(0.7, 1.25, rng.randf())
 		elif kind_name == "trunk":

@@ -68,7 +68,7 @@ func build(height_fn: Callable, light_dir: Vector3) -> void:
 		_noise3d = make_noise_3d(48, 48, 24)
 	if _dome_texture == null:
 		_dome_texture = make_dome_texture(256)
-	var key := "shell_v4"
+	var key := "shell_v5"
 	if _shell_mesh == null or _shell_key != key:
 		_shell_mesh = make_shell_mesh(height_fn)
 		_height_texture = make_height_texture(height_fn)
@@ -149,10 +149,12 @@ static func make_height_texture(height_fn: Callable) -> ImageTexture:
 ## Terrain-following grid: 4 m inside ±144, 8 m out to ±224, hole over the always-clear town.
 static func make_shell_mesh(height_fn: Callable) -> ArrayMesh:
 	var coords := PackedFloat32Array()
-	var c := -224.0
-	while c <= 224.0001:
+	# pass 3: the shell reaches ±480 m so no camera pose (targets clamp to ±147 / ±118, zoom ≤ 120) ever
+	# shows the bare ground beyond the forest
+	var c := -480.0
+	while c <= 480.0001:
 		coords.append(c)
-		c += 4.0 if absf(c) < 144.0 else 8.0
+		c += 4.0 if absf(c) < 144.0 else (8.0 if absf(c) < 224.0 else 32.0)
 	var n := coords.size()
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()

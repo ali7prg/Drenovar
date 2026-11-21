@@ -702,13 +702,15 @@ func run() -> void:
 	_shuffle(cells)
 	if GROVES:
 		_fill_groves(trees, species_count)
-	for pass_index in (0 if GROVES else 2):
+	for pass_index in 2:
 		for cell: Vector2i in cells:
 			var x := -EXTENT + cell.x + rng.randf()
 			var z := -EXTENT + cell.y + rng.randf()
 			if maxf(absf(x), absf(z)) < CORE + 0.8:
 				continue
 			var dense_spot := dominant_zone(x, z) == Z_SPRUCE
+			if GROVES and not dense_spot:
+				continue          # pass 3: groves everywhere else; the south stays the dense dark pine forest
 			if blocked_exact(x, z, true, 1.0, 0.0, dense_spot) or not ground_ok(x, z, true) or is_glade(x, z):
 				continue
 			var w := zone_weights(x, z)

@@ -953,13 +953,14 @@ func _cam_state_for(tree: Dictionary, species: int, x: float, z: float, inner: b
 
 
 ## Resource look at the final slot, made young when the natural crown would hide a unit zone;
-## ids that still hide one are listed (runtime whole-tree fade).
+## ids that still hide one (young as well) are listed — runtime whole-tree fade.
 func _camera_look(tree: Dictionary, species: int, x: float, z: float, inner: bool) -> Array:
 	var look := _resource_look(tree, species, x, z, inner)
 	var state := _cam_state_for(tree, species, x, z, inner)
-	if state == 1:
+	if state < 2:
+		# young look (low, small crown): clear for the camera, or at least the smallest occluder
 		look[1] = minf(float(look[1]), _young_scale(tree))
-	elif state == 0:
+	if state == 0:
 		camera_occluders.append(String(tree.id))
 	return look
 

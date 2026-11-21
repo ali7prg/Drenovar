@@ -546,7 +546,7 @@ func _under_mesh(kind_index: int, variant: int) -> Array:
 	var asset: Dictionary = kit.understory_asset(kind, spec[0])
 	if kind == "quarry_rock":
 		asset = _limestone_asset(asset, "quarry")
-	if UNDER_LOOK.has(kind) and asset.get("kit", false):
+	if UNDER_LOOK.has(kind) and asset.get("kit", false) and not OS.get_cmdline_user_args().has("--no-under-look"):
 		asset = _shaded_asset(asset, "look:under:" + kind, UNDER_LOOK[kind], "lf_foliage")
 	return _mesh_for(asset, "under:%s:%s" % [kind, variant_name], canopy_kind, 1, variant_name)
 

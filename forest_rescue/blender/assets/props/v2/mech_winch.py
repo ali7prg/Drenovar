@@ -129,20 +129,7 @@ def build(A, p, lod):
         inner.append((k * c, k * s_))
         wob = 1.0 + 0.07 * math.sin(3 * a + 1.0) + 0.04 * math.sin(7 * a + 2.0)
         outer.append(((hx + t + GR) * wob * c, (hy + t + GR * 0.75) * wob * s_))
-    # (review) no ground plane beyond the painted footprint: stones + opaque grass tufts only
-    ntuft = (10, 6, 0)[lod]
-    for k in range(ntuft):
-        a = 2 * math.pi * k / max(ntuft, 1) + rng.uniform(-0.25, 0.25)
-        r = (hx + t + 0.35) * rng.uniform(1.0, 1.35)
-        tc = pit + np.array([r * math.cos(a) * 1.15, r * math.sin(a) * 0.8, 0.0])
-        for b in range(7):
-            ang = rng.uniform(0, 2 * math.pi)
-            lean = np.array([math.cos(ang), math.sin(ang), 0.0]) * rng.uniform(0.04, 0.12)
-            side = np.array([-math.sin(ang), math.cos(ang), 0.0]) * 0.025
-            base = tc + np.array([rng.uniform(-0.1, 0.1), rng.uniform(-0.1, 0.1), 0.0])
-            tip = base + lean + np.array([0, 0, rng.uniform(0.18, 0.34)])
-            V = np.array([base - side, base + side, tip])
-            g.add(V, [[0, 1, 2], [0, 2, 1]], "grass", "grass")
+    CG.outline_ring(g, tuple(pit), np.eye(3), outer, inner, -0.03, 0.0, "ground", "ground")
     courses = (2, 2, 1)[lod]
     ch = 0.012 if lod == 0 else 0.0
     yb = PY + hy + t / 2
@@ -318,18 +305,10 @@ def build(A, p, lod):
 
 
 STRICT_FACING = ("wood",)
-# review (gear train): the painting cannot texture the gears cleanly (drawn with a painter's cheat) → clean iron
-# swatch with the painted light, crisp teeth from the geometry; a wider silhouette trim against the light edge bleed
-NO_PROJECT_TAGS = ()
-# review (final): a modelled mechanism with material textures (swatches sampled from the painting) — the painting
-# is projected only onto the chest, where it truly fits
-PROJECT_ONLY_TAGS = ("chest_body", "chest_band", "chest_lock", "chest_lid")
-EDGE_ERODE = 8
 SWATCHES = {
     "wood": dict(sheet=SHEET, box=(336, 690, 356, 740), metres=0.35, angle=-8.0, tile_v="stack"),
     "rope": dict(sheet=SHEET, box=(250, 575, 300, 600), metres=0.25),
-    "iron": dict(sheet=SHEET, box=(100, 650, 145, 668), metres=0.3),
-    "grass": dict(sheet=SHEET, box=(8, 700, 48, 740), metres=0.35),
+    "iron": dict(sheet=SHEET, box=(112, 553, 160, 566), metres=0.25),
     "stone": dict(sheet=SHEET, box=(60, 790, 110, 820), metres=0.4),
     "ground": dict(sheet=SHEET, box=(20, 842, 80, 862), metres=0.5),
     "bronze": dict(sheet=SHEET, box=(262, 812, 272, 824), metres=0.06),

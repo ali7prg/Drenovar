@@ -71,6 +71,10 @@ const SEGMENTS := [
 	# look checks (run with --only=t_): the trail cache in its mechanism-UI zoom, the kit fallen trunk close up
 	{"name": "t_trail_cache_z24", "fixture": "site01_trail_1of3", "target": "lf_site_01", "zoom": 24.0, "seconds": 1.0},
 	{"name": "t_fallen_trunk_z12", "fixture": "site01_trail_1of3", "target_xz": [-74.04, 2.8], "zoom": 12.0, "seconds": 0.5},
+	{"name": "t_trail_cache_ui", "fixture": "site01_trail_1of3", "target": "lf_site_01", "zoom": 24.0, "seconds": 1.0, "mech_ui": "lf_site_01"},
+	{"name": "t_winch_z26", "fixture": "site03_winch_solved", "target": "lf_site_03", "zoom": 26.0, "seconds": 1.0},
+	{"name": "t_bush_z26", "fixture": "site02_rune_1of3", "target": "lf_site_02", "zoom": 26.0, "seconds": 1.0},
+	{"name": "t_bush_z68", "fixture": "site02_rune_1of3", "target": "lf_site_02", "zoom": 68.0, "seconds": 1.0},
 ]
 
 class StubHost extends Node:
@@ -274,6 +278,10 @@ func run_segments() -> void:
 		var last_us := Time.get_ticks_usec()
 		var tex_mem := 0.0
 		var vid_mem := 0.0
+		if spec.has("mech_ui"):
+			forest.mech.open(String(spec.mech_ui))      # the mechanism UI owns the camera (its own zoom)
+			for f in 20:
+				await process_frame
 		if spec.has("live"):
 			game.accept(fixture(spec.live))
 			game.battle_results.pending.clear()
@@ -289,10 +297,11 @@ func run_segments() -> void:
 				target = forest.actors.squad_focus() if String(spec.target) == "squad" else forest.target_position(String(spec.target))
 			stage = game.stage
 			world = stage.get("forest_world")
-			if target != Vector3.INF:
-				stage.target = target
-			stage.zoom = float(spec.zoom)
-			stage.update_camera(0.0, true)
+			if not spec.has("mech_ui"):
+				if target != Vector3.INF:
+					stage.target = target
+				stage.zoom = float(spec.zoom)
+				stage.update_camera(0.0, true)
 			await process_frame
 			var now_us := Time.get_ticks_usec()
 			intervals.append((now_us - last_us) / 1000.0)

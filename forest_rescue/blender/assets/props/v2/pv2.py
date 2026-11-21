@@ -551,7 +551,8 @@ class Swatches:
         return self.sw.get(cls) or next(iter(self.sw.values()))
 
 
-def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.25, edge=None, log_fn=log, no_project=()):
+def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.25, edge=None, log_fn=log, no_project=(),
+                 project_only=()):
     """Albedo + normal atlas for LOD0 from all projecting views. Returns (alb_img, nrm_img, info, stats)."""
     t0 = time.time()
     rest(asset, B)
@@ -632,6 +633,9 @@ def texture_lod0(asset, B, views, swatch_spec, size, it, gate=None, tone_cell=0.
         if no_project:
             # parts the painting cannot texture cleanly (e.g. a gear drawn with a painter's cheat): swatch fill only
             w = np.where(np.isin(tags, list(no_project)), 0.0, w)
+        if project_only:
+            # material-based asset: only these parts take the painting, everything else the sampled swatches
+            w = np.where(np.isin(tags, list(project_only)), w, 0.0)
         shade = tex.lambert_shade(Np, v.light, PAINT_K) ** DELIGHT
         wp = (w * v.tex_weight) ** 10
         acc += (c / shade[:, None]) * wp[:, None]

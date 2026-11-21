@@ -546,7 +546,16 @@ func _under_mesh(kind_index: int, variant: int) -> Array:
 	var asset: Dictionary = kit.understory_asset(kind, spec[0])
 	if kind == "quarry_rock":
 		asset = _limestone_asset(asset, "quarry")
+	if UNDER_LOOK.has(kind) and asset.get("kit", false):
+		asset = _shaded_asset(asset, "look:under:" + kind, UNDER_LOOK[kind], "lf_foliage")
 	return _mesh_for(asset, "under:%s:%s" % [kind, variant_name], canopy_kind, 1, variant_name)
+
+
+## Close-zoom bushes (review at zoom 26: the golden brambles read as dark-speckled blobs with black holes):
+## interior leaves keep a brightness floor, cards seen edge-on stay filled, a lower cutout closes the holes.
+const UNDER_LOOK := {
+	"bramble": {"ao_floor": 0.8, "alpha_cut": 0.32, "edge_fade": Vector2(0.0, 0.04), "albedo_gain": 1.05},
+}
 
 
 ## Pass 3 (art/01 waterfall): the kit moss rock v1 as dark wet stone (ForestKit painted copy with `wet`).

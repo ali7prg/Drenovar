@@ -110,6 +110,7 @@ def run(modname, it, do_export=True, do_godot=True):
     pv2.PROJ_EDGE_ERODE = int(getattr(M, "EDGE_ERODE", 5))
     alb0, nrm0, info, tstats = pv2.texture_lod0(A, B, tviews, M.SWATCHES, M.ATLAS, it, gate=getattr(M, "GATE", None),
                                                 no_project=getattr(M, "NO_PROJECT_TAGS", ()),
+                                                project_only=getattr(M, "PROJECT_ONLY_TAGS", ()),
                                                 edge=getattr(M, "EDGE", None))
     if hasattr(M, "post_texture"):
         # module hook: engrave / paint what the painting cannot provide (e.g. the rune lock's other glyph

@@ -60,7 +60,12 @@ func shoot(name: String) -> void:
 		var rig = forest.actors.rigs[id]
 		if is_instance_valid(rig):
 			summary.append("%s:%s:%s:L%d:%s" % [id, rig.load_state, "v" if rig.is_visible_in_tree() else "h", rig.lod_level, rig.current_id])
-	var line := "SHOT %s zoom=%.1f actors=%s" % [name, game.stage.camera_zoom, ", ".join(summary)]
+	var occl := ""
+	var world = forest.world
+	if world != null and world.get("occluders") != null:
+		var q: Dictionary = world.occluders.last_query
+		occl = " occluders(hiding=%d faded=%d targets=%d cand=%d ms=%.2f)" % [int(q.hiding), world.occluders.faded.size(), int(q.targets), int(q.candidates), float(q.ms)]
+	var line := "SHOT %s zoom=%.1f%s actors=%s" % [name, game.stage.camera_zoom, occl, ", ".join(summary)]
 	print(line)
 	report.append(line)
 	var path := out.path_join(prefix + name + ".png")
@@ -195,6 +200,14 @@ func run() -> void:
 				settle_world()
 				await frames(12)
 				await shoot("p0_%s_z%d" % [scene[0], int(zoom)])
+				var layers: Array = root.find_children("*", "CanvasLayer", true, false)
+				for layer: CanvasLayer in layers:
+					layer.set_meta("p0_was_visible", layer.visible)
+					layer.visible = false
+				await frames(2, false)
+				await shoot("p0_%s_z%d_nohud" % [scene[0], int(zoom)])
+				for layer: CanvasLayer in layers:
+					layer.visible = bool(layer.get_meta("p0_was_visible", true))
 
 	# -------------------------------------------------- hall III intro: the mare walks out of the mist
 	if wanted("intro"):

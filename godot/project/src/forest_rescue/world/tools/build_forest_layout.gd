@@ -744,6 +744,8 @@ func run() -> void:
 			var scale_range: Array = GROVE_OAK_SCALE if (zone == Z_GROVE and species == Rules.OAK) else AMBIENT_SCALE[species][zone]
 			var scale := lerpf(scale_range[0], scale_range[1], rng.randf())
 			scale = lerpf(scale, lerpf(0.34, 0.52, rng.randf()), openness(x, z) * (0.0 if zone == Z_GROVE and species == Rules.OAK else (0.15 if dense_pine else 0.85)))
+			if dense_pine:
+				scale = minf(scale, _dense_pine_cap(x, z))
 			if blocked_exact(x, z, true, 1.0, Rules.CROWN_RADIUS[species] * scale, dense_pine):
 				continue
 			var variants: Array = ZONE_VARIANTS[species][zone]
@@ -1090,7 +1092,27 @@ func _grove_look(tree: Dictionary, species: int, x: float, z: float, zone: int, 
 	var scale := lerpf(r[0], r[1], fposmod(u * 0.6 + Rules.id_hash(String(tree.id)) * 0.4, 1.0))
 	# glade / landmark edges keep a smaller tree (art/01: young trees at the clearing rims)
 	scale = lerpf(scale, scale * 0.7, clampf(openness(x, z) - 0.5, 0.0, 0.5) * 2.0)
+	if species == Rules.PINE and zone == Z_SPRUCE:
+		scale = minf(scale, _dense_pine_cap(x, z))
 	return [look[0], snappedf(scale, 0.001)]
+
+
+## pass 4: the south pines grow big away from the trails (cover, art/01) but stay at the pass-3 size
+## within a few metres of one, so no trail point has more crowns over a walker than the runtime fades.
+## The crown capsule (Rules.crown_capsule, variant 0, no yaw) is tested: a pine whose bigger crown would
+## reach over a trail keeps the old size.
+func _dense_pine_cap(x: float, z: float) -> float:
+	for cap: float in [1.32, 1.24, 1.16, 1.08]:
+		var capsule := Rules.crown_capsule(x, z, Rules.PINE, 0, cap, 0.0)
+		var clear := true
+		for t: float in [0.0, 0.5, 1.0]:
+			var q: Vector2 = (capsule[0] as Vector2).lerp(capsule[1], t)
+			if float(atlas.nearest_route(q.x, q.y, false).get("distance", 99.0)) < float(capsule[2]) + Rules.UNIT_RADIUS + 1.6:
+				clear = false
+				break
+		if clear:
+			return cap
+	return 1.02
 
 
 ## Nearest free grove slot of `zone` for a resource tree; the crown must clear the strict unit

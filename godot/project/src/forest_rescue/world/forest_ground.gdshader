@@ -23,6 +23,7 @@ uniform vec4 pads[16];               // camp pads: xz centre, radius, seed
 uniform int pad_count = 0;
 uniform vec3 meadow_mul = vec3(0.7, 0.45, 0.32);   // art/01 meadow (H≈49-58, S≈.5-.57, V≈.49-.56; pad_metrics / forest_metrics_v3)
 uniform vec3 pad_color : source_color = vec3(0.66, 0.53, 0.37);   // renders ≈ warm sand (185, 150, 105) (pad_metrics.py)
+uniform vec3 meadow_grade = vec3(0.85, 0.72, 0.8);   // linear; ≈ sRGB x(0.93, 0.86, 0.90)
 uniform float detail_on = 1.0;
 
 varying vec3 terrain_position;
@@ -94,6 +95,10 @@ vec3 forest_detail(vec3 albedo, vec3 grass_tex, vec2 p, float ring, vec2 uv, vec
 	vec3 scol = vec3(0.6, 0.58, 0.52) * (0.85 + 0.3 * clamp(dot(normalize(sd + vec2(0.001)), vec2(-0.7, -0.7)), -1.0, 1.0));
 	m = mix(m, scol, stone * meadow);
 	vec3 out_col = mix(albedo, m, meadow);
+	// pass 4: art/01 meadow grade on every yellow-green ground texel of the ring (grass, soil-blended
+	// meadow; not trails / sand / rocks): hue toward ~50-55, value down a little (forest_metrics_v3)
+	float greenish = smoothstep(0.015, 0.07, out_col.g - out_col.b) * smoothstep(-0.05, 0.01, out_col.g - out_col.r * 0.9);
+	out_col = mix(out_col, out_col * meadow_grade, greenish * (1.0 - rock_w));
 	// --- camp pads: crisp warm sand with a darker rim (art/01: every camp a focal point)
 	for (int i = 0; i < 16; i++) {
 		if (i >= pad_count) {

@@ -33,6 +33,9 @@ var saved: PackedStringArray = []
 var report: Array = []
 var clock := 0.0
 
+var looks: Array = []
+
+
 func _initialize() -> void:
 	call_deferred("run")
 
@@ -143,6 +146,12 @@ func run() -> void:
 			prefix = argument.trim_prefix("--prefix=")
 		elif argument.begins_with("--shots="):
 			only = argument.trim_prefix("--shots=").split(",", false)
+		elif argument.begins_with("--looks="):
+			# x,z,zoom,name;x,z,zoom,name … (group v3look: full-reveal state, quick inspection frames)
+			for spec in argument.trim_prefix("--looks=").split(";", false):
+				var f := spec.split(",", false)
+				if f.size() >= 4:
+					looks.append([Vector3(float(f[0]), 0, float(f[1])), float(f[2]), f[3]])
 	DirAccess.make_dir_recursive_absolute(out)
 	root.size = Vector2i(1366, 630)
 	game = load("res://main.tscn").instantiate()
@@ -666,6 +675,52 @@ func run() -> void:
 		await shoot("v3_full_overview_art01")
 		root.size = Vector2i(1366, 630)
 		await frames(6)
+		game.hud.visible = true
+		if forest.get("hud") != null:
+			forest.hud.visible = true
+
+	# -------------------------------------------------- quick inspection frames (full reveal, all sites closed)
+	if wanted("v3look") and not looks.is_empty():
+		var st4: Dictionary = fixture("boss_unlocked")
+		var adv4: Dictionary = st4.adventure
+		for poi in adv4.pois:
+			if String(poi.get("kind", "")) != "site":
+				continue
+			poi.step = 3
+			poi.cagePose = "closed"
+			poi.discovered = true
+			poi.available = true
+			for person in poi.get("captives", []):
+				person.state = "caged"
+			if poi.get("guardian") is Dictionary:
+				poi.guardian.state = "defeated"
+			if poi.get("artifact") is Dictionary:
+				poi.artifact.state = "held"
+				poi.artifact.held = true
+		for site_entry in adv4.campaign.sites:
+			site_entry.step = 3
+		adv4.campaign.rescuedIds = []
+		adv4.campaign.rescuedCount = 0
+		adv4.campaign.phase = "rescue"
+		var bits4 := PackedByteArray()
+		bits4.resize(392)
+		bits4.fill(255)
+		adv4.fog.visibleBase64 = Marshalls.raw_to_base64(bits4)
+		adv4.fog.revision = 9999
+		await fresh_dict(st4)
+		game.hud.visible = false
+		if forest.get("hud") != null:
+			forest.hud.visible = false
+		look(looks[0][0], float(looks[0][1]))
+		await preload_actors(2.0)
+		forest.world.fog.set_dim(0.0)
+		forest.world.fog.finish_now()
+		for spec in looks:
+			look(spec[0], float(spec[1]))
+			settle_world()
+			await preload_actors(0.3)
+			await frames(10)
+			await shoot("look_%s" % spec[2])
 		game.hud.visible = true
 		if forest.get("hud") != null:
 			forest.hud.visible = true

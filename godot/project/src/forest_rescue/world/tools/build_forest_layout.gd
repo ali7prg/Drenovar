@@ -66,7 +66,7 @@ const ZONE_MIX := [
 	{Rules.OAK: 0.50, Rules.BIRCH: 0.25, Rules.PINE: 0.25},                 # town belt (green broadleaf, meadows)
 ]
 ## Ambient spacing (m) per zone: target trunk spacing incl. resource trees.
-const ZONE_SPACING := [15.0, 5.4, 3.9, 4.4, 4.8, 2.2, 9.0, 6.0]
+const ZONE_SPACING := [15.0, 5.4, 3.9, 4.4, 4.8, 1.85, 9.0, 6.0]
 ## Grove hero oaks (owner: "big bright golden oaks 1.5–2×, fewer larger trees, clumps and
 ## open meadows"): every ambient grove oak at this absolute scale range (kit oak at 1.0 ≈ 13.6 m).
 const GROVE_OAK_SCALE := [1.35, 1.8]
@@ -420,7 +420,9 @@ func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown :=
 		if Vector2(x, z).distance_to(disc[0]) < float(disc[1]) * (1.0 if tree else 0.75):
 			return true
 	for disc in glade_clearings:
-		if Vector2(x, z).distance_to(disc[0]) < (float(disc[1]) + crown * 0.3 if tree else float(disc[1]) * 0.66):
+		# pass 4: the dense south pines stand right at the clearing edge (crowns overhang it)
+		var keep: float = (float(disc[1]) + (0.4 if dense else crown * 0.3)) if tree else float(disc[1]) * 0.66
+		if Vector2(x, z).distance_to(disc[0]) < keep:
 			return true
 	if hero != Vector2.INF and Vector2(x, z).distance_to(hero) < (HERO_CLEAR if tree else 5.5):
 		return true
@@ -459,7 +461,7 @@ func free_of_trunks(x: float, z: float, gap: float) -> bool:
 func is_glade(x: float, z: float) -> bool:
 	# Art glades: low-frequency noise holes (open grassy clearings between clumps, art/01 grove).
 	var zone := dominant_zone(x, z)
-	var threshold := 0.3 if zone == Z_GROVE else (0.2 if zone == Z_BELT else (0.15 if zone in [Z_TOP, Z_EAST, Z_QUARRY] else (0.02 if zone == Z_SPRUCE else 0.07)))
+	var threshold := 0.3 if zone == Z_GROVE else (0.2 if zone == Z_BELT else (0.15 if zone in [Z_TOP, Z_EAST, Z_QUARRY] else (0.0 if zone == Z_SPRUCE else 0.07)))
 	return (glade.get_noise_2d(x, z) + 1.0) * 0.5 < threshold
 
 
@@ -737,7 +739,7 @@ func run() -> void:
 				continue
 			var scale_range: Array = GROVE_OAK_SCALE if (zone == Z_GROVE and species == Rules.OAK) else AMBIENT_SCALE[species][zone]
 			var scale := lerpf(scale_range[0], scale_range[1], rng.randf())
-			scale = lerpf(scale, lerpf(0.34, 0.52, rng.randf()), openness(x, z) * (0.0 if zone == Z_GROVE and species == Rules.OAK else 0.85))
+			scale = lerpf(scale, lerpf(0.34, 0.52, rng.randf()), openness(x, z) * (0.0 if zone == Z_GROVE and species == Rules.OAK else (0.15 if dense_pine else 0.85)))
 			if blocked_exact(x, z, true, 1.0, Rules.CROWN_RADIUS[species] * scale, dense_pine):
 				continue
 			var variants: Array = ZONE_VARIANTS[species][zone]
@@ -961,7 +963,7 @@ func _in_trail_band(x: float, z: float, zone: int) -> bool:
 				var ab := b - a
 				var t := clampf((Vector2(x, z) - a).dot(ab) / maxf(ab.length_squared(), 0.0001), 0.0, 1.0)
 				var off := Vector2(x, z) - (a + ab * t)
-				var limit := GROVE_BAND_FAR if Rules.far_side(off) else GROVE_BAND_NEAR
+				var limit := GROVE_BAND_FAR if Rules.far_side(off) else (2.0 if zone == Z_RIVER else GROVE_BAND_NEAR)
 				if off.length() < limit:
 					return true
 	return false
@@ -1079,6 +1081,8 @@ func _grove_look(tree: Dictionary, species: int, x: float, z: float, zone: int, 
 	var look := _resource_look(tree, species, x, z, false)
 	var u := clampf((float(tree.scale) - 0.45) / 0.85, 0.0, 1.0)
 	var r: Array = SUB_SCALE[0 if species == Rules.OAK else 1] if sub else GROVE_SCALE[zone][0 if species == Rules.OAK else 1]
+	if sub and species == Rules.PINE and zone in [Z_SPRUCE, Z_RIVER]:
+		r = [0.82, 1.02]          # pass 4: the dense dark south / lake pines (no small saplings)
 	var scale := lerpf(r[0], r[1], fposmod(u * 0.6 + Rules.id_hash(String(tree.id)) * 0.4, 1.0))
 	# glade / landmark edges keep a smaller tree (art/01: young trees at the clearing rims)
 	scale = lerpf(scale, scale * 0.7, clampf(openness(x, z) - 0.5, 0.0, 0.5) * 2.0)
@@ -1390,7 +1394,7 @@ func _water_dressing(trees: Array, under: Array, under_grid: Dictionary, logs: A
 			var angle := TAU * (k + rng.randf() * 0.6) / steps
 			var shore := ForestTerrain.shore_radius(body, angle)
 			var patch := (clump.get_noise_2d(c.x + cos(angle) * 9.0, c.y + sin(angle) * 9.0) + 1.0) * 0.5
-			if patch > (0.32 if body.kind == "pond" else (0.27 if body.kind == "lake" else 0.18)):
+			if patch > (0.32 if body.kind == "pond" else (0.27 if body.kind == "lake" else -1.0)):
 				for j in (3 if body.kind == "lake" else (2 if body.kind == "marsh" else 1)):
 					var dist := shore + rng.randf_range(-0.8, 1.4)
 					var p := c + Vector2(cos(angle), sin(angle)) * dist

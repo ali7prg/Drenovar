@@ -253,25 +253,36 @@ func run() -> void:
 	await shot("unlocked_horse_z30", Vector3(-11, 0, -58), 30.0)
 	if horse != null:
 		horse.queue_free()
-	# 3. Partly explored: act 1 done, the squad halfway along route 03→04 (art/07 panels).
-	await apply(adventure(true, explored_bits(["lf_route_entry", "lf_route_01_02", "lf_route_02_03", "lf_route_03_04"], 0.5), 2, "acknowledged", "lf_site_03"))
-	await shot("partial_squad_z40", Vector3(-72, 0, -52), 40.0)
-	await shot("partial_path_z40", Vector3(-38, 0, -66), 40.0)
-	await shot("partial_edge_z68", Vector3(-55, 0, -58), 68.0)
+	# 3. Partly explored (atlas v2): the mare's trail past the standing stones into the grove, the
+	#    squad halfway down the last leg to glade 01 (art/07 panels).
+	var to_site01 := ["lf_trail_horse_origin__junction_corridor", "lf_trail_junction_corridor__junction_stones",
+		"lf_trail_junction_stones__junction_grove", "lf_trail_junction_grove__site_01"]
+	await apply(adventure(true, explored_bits(to_site01, 0.5), 2, "acknowledged", "lf_junction_grove"))
+	await shot("partial_squad_z40", Vector3(-74, 0, -36), 40.0)
+	await shot("partial_path_z40", Vector3(-44, 0, -70), 40.0)
+	await shot("partial_edge_z68", Vector3(-58, 0, -56), 68.0)
 	await shot("partial_overview_z130", Vector3(-10, 0, -10), 130.0)
-	# 3b. Only the boss route explored (the live finale): the arena is partly revealed and its
-	#     rim (kit trees/rocks inside the arena GLB) must not show through the deep fog.
-	await apply(adventure(true, explored_bits(["lf_route_entry", "lf_route_boss"]), 4, "acknowledged", "lf_boss_ancient_maw"))
-	await shot("partial_arena_z40", Vector3(75, 0, -84), 40.0)
-	await shot("partial_arena_z68", Vector3(75, 0, -84), 68.0)
+	# 3b. Only the way to the boss explored (the live finale): the arena is partly revealed and
+	#     its rim (kit trees/rocks inside the arena GLB) must not show through the deep fog.
+	var to_arena: Array = []
+	var node := "lf_horse_origin"
+	for leg in world.atlas.trail_legs("lf_horse_origin", "lf_boss_arena"):
+		to_arena.append(world.atlas.routes[leg[0]].id)
+	await apply(adventure(true, explored_bits(to_arena), 4, "acknowledged", "lf_boss_ancient_maw"))
+	var arena_at: Vector3 = world.poi_position("lf_boss_ancient_maw")
+	await shot("partial_arena_z40", arena_at + Vector3(0, 0, 2), 40.0)
+	await shot("partial_arena_z68", arena_at + Vector3(0, 0, 2), 68.0)
 	# 4. Fully explored: composition vs. the masterplan, biomes, bridge, arena.
 	await apply(adventure(true, all_bits(), 3, "acknowledged", "lf_site_12"))
 	world.fog.set_dim(0.0)
 	await shot("full_overview_z120", Vector3(0, 0, 0), 120.0)
 	await shot("full_overview_z140", Vector3(0, 0, 0), 140.0)
-	for spec in [["grove", Vector3(-88, 0, 8)], ["spruce", Vector3(38, 0, 84)], ["river_bridge", Vector3(88, 0, 16)],
-			["quarry", Vector3(-31, 0, 92)], ["arena", Vector3(75, 0, -84)], ["town", Vector3(5, 0, -4)],
-			["top_birch", Vector3(-30, 0, -72)], ["east", Vector3(98, 0, -30)]]:
+	# atlas v2 regions (art/01 user zones): grove + hollow oak, stones, west oaks, quarry, south
+	# pines + marsh, lake, bridge, east willows, the waterfall below the arena, the arena, the town.
+	for spec in [["grove", Vector3(-84, 0, -16)], ["stones", Vector3(-56, 0, -70)], ["west", Vector3(-76, 0, 52)],
+			["quarry", Vector3(-8, 0, 94)], ["south_pines", Vector3(62, 0, 92)], ["lake", Vector3(94, 0, 44)],
+			["river_bridge", Vector3(88, 0, 16)], ["east", Vector3(94, 0, -40)], ["waterfall", Vector3(22, 0, -66)],
+			["arena", Vector3(20, 0, -88)], ["town", Vector3(5, 0, -4)]]:
 		await shot("full_%s_z68" % spec[0], spec[1], 68.0)
 		await shot("full_%s_z40" % spec[0], spec[1], 40.0)
 	var file := FileAccess.open(out.path_join(prefix + "shots.json"), FileAccess.WRITE)

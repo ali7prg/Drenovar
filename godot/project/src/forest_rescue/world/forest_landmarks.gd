@@ -115,7 +115,9 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 		for spec in DEAD_TREE_SET:
 			var p: Vector2 = dead_tree_spot + basis_x * spec.offset.x + basis_z * spec.offset.y
 			if not valid_spot(p, float(spec.footprint), masks, true):
-				continue
+				p = find_spot(p, float(spec.footprint), masks)
+				if p.distance_to(dead_tree_spot) > 7.0:
+					continue
 			placements.append({"id": spec.id, "position": Vector3(p.x, 0.0, p.y), "yaw": atan2(basis_z.x, basis_z.y) + deg_to_rad(spec.yaw),
 				"footprint": spec.footprint, "kind": "landmark", "pad": false, "dir": ARENA_DIR, "scale": float(spec.scale)})
 	# art/01: every glade has a camp next to its cage (+ the E-L glade without a cage), styled per
@@ -169,19 +171,22 @@ func plan(forest_atlas: RefCounted, masks: RefCounted, height_fn: Callable) -> v
 			if mirror:
 				offset.x = -offset.x
 			var placed := false
-			for attempt in 2:
-				var o := offset if attempt == 0 else Vector2(-offset.x, offset.y)
+			for attempt in 6:
+				# as authored, mirrored, then pulled in / pushed out along the offset
+				var o := offset if attempt % 2 == 0 else Vector2(-offset.x, offset.y)
+				o *= [1.0, 1.0, 0.8, 0.8, 1.2, 1.2][attempt]
 				var p: Vector2 = best + fx * o.x + fz * o.y
 				if not _extra_ok(p, fp, site, anchors):
 					continue
-				var extra_yaw := yaw + deg_to_rad(float(extra[2])) * (-1.0 if mirror != (attempt == 1) else 1.0)
+				var extra_yaw := yaw + deg_to_rad(float(extra[2])) * (-1.0 if mirror != (attempt % 2 == 1) else 1.0)
 				placements.append({"id": _piece_asset(kind), "position": Vector3(p.x, 0.0, p.y), "yaw": extra_yaw,
 					"footprint": fp, "kind": "camp_piece", "site": site.id, "pad": false, "piece": kind,
 					"items": String(extra[0]).get_slice(":", 1) if String(extra[0]).contains(":") else ""})
 				placed = true
 				break
 			if not placed:
-				print("ForestLandmarks: camp extra %s dropped at %s" % [extra[0], site.id])
+				print("ForestLandmarks: camp extra %s dropped at %s (%s)" % [extra[0], site.id,
+					_extra_reason(best + fx * offset.x + fz * offset.y, fp, site, anchors)])
 	for placement in placements:
 		var p: Vector3 = placement.position
 		if placement.kind != "bridge":
@@ -282,21 +287,30 @@ func camp_spot_ok(p: Vector2, footprint: float, own_site: Dictionary) -> bool:
 ## Camp extra test: off the walking band of every trail, ≥ 1.8 m (+ footprint) from the glade's
 ## gameplay anchors, near its own clearing, dry, and not on another placement.
 func _extra_ok(p: Vector2, footprint: float, site: Dictionary, anchors: Array) -> bool:
+	return _extra_reason(p, footprint, site, anchors).is_empty()
+
+
+func _extra_reason(p: Vector2, footprint: float, site: Dictionary, anchors: Array) -> String:
 	var center := Vector2(site.center.x, site.center.z)
-	if p.distance_to(center) > float(site.radius) + 3.5 or maxf(absf(p.x), absf(p.y)) < 56.5 + footprint:
-		return false
+	if p.distance_to(center) > float(site.radius) + 6.0 or maxf(absf(p.x), absf(p.y)) < 56.5 + footprint:
+		return "far"
 	if atlas.river_bank_distance(p.x, p.y) < footprint + 1.2:
-		return false
+		return "river"
 	var hit: Dictionary = atlas.nearest_route(p.x, p.y)
-	if not hit.is_empty() and hit.distance < footprint + 1.5:
-		return false
+	if not hit.is_empty() and hit.distance < footprint + 1.3:
+		return "trail %.1f" % hit.distance
 	for anchor: Vector2 in anchors:
-		if p.distance_to(center + anchor) < footprint + 1.8:
-			return false
+		if p.distance_to(center + anchor) < footprint * 0.6 + 1.6:
+			return "anchor"
 	for placement in placements:
-		if placement.kind != "bridge" and Vector2(placement.position.x, placement.position.z).distance_to(p) < float(placement.footprint) + footprint + 0.3:
-			return false
-	return true
+		if placement.kind == "bridge":
+			continue
+		# pieces of the same camp may stand close (footprints are conservative radii)
+		var same: bool = placement.get("site", "") == site.id
+		var limit: float = (float(placement.footprint) + footprint) * (0.55 if same else 1.0) + (0.0 if same else 0.3)
+		if Vector2(placement.position.x, placement.position.z).distance_to(p) < limit:
+			return "overlap " + String(placement.get("piece", placement.id))
+	return ""
 
 
 func find_spot(preferred: Vector2, footprint: float, masks: RefCounted) -> Vector2:

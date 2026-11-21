@@ -845,6 +845,8 @@ func run() -> void:
 		kinds_count[kind_name] = kinds_count.get(kind_name, 0) + 1
 	var understory: Array = []
 	for item in under:
+		if not masks.hit(float(item[0]), float(item[1]), 0.0, ["core", "route", "glade", "arena", "bridge", "reserve"]).is_empty():
+			continue          # safety net: nothing of the understory inside a trail / glade / arena / bridge clearance
 		var row := [item[0], item[1], item[3], item[4], item[5], item[6]]
 		if item.size() > 7 and float(item[7]) != 0.0:
 			row.append(item[7])          # height offset (stacked quarry ledges)

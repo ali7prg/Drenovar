@@ -162,6 +162,7 @@ func run() -> void:
 		var mask: Dictionary = masks.hit(x, z, 0.0, ["core", "route", "glade", "arena", "bridge", "reserve"])
 		if not mask.is_empty():
 			bad_under += 1
+			print("QA understory inside a mask: ", item, " ", mask.get("kind", ""), " ", mask.get("id", ""))
 	check(bad_under == 0, "understory inside masks: %d" % bad_under)
 	var remap_in_mask := 0
 	for id in layout.resourceRemap:

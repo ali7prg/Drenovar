@@ -122,6 +122,23 @@ LOD), `fog_culled` (instances removed because they stand deeper than 3 m inside 
   - Gameplay layer (forest_game.gd): while the squad or an escort is under way the client reads `/api/state`
     every 1.2 s of server time, so each committed checkpoint reveal dissolves on its own (~2 s per cell)
     instead of all at once on arrival.
+* v3.4 (2026-11-21, layout passes 2–3 — no API change, API_VERSION unchanged):
+  - Atlas lake enlarged (CONTRACT v1.4): ellipse centre (97.2, 32.4), 18.5 × 10 m, across the channel south of the
+    bridge; the glade 09 → hunter shelter trail runs along its south-west shore (fog reveal by normal play).
+  - `forest_layout_v2.json` (same id / version, resource ids and count unchanged): outer resource trees are moved
+    into groves of their own zone (median move ≈ 15 m) — big canopy crowns at the art/01 scale (oaks 0.7–1.25,
+    pines 0.85–1.2) with young trees tucked behind them, sunny meadows between the groves and along the camera
+    side of the trails, the dense dark south pines kept; trees may stand in front of trail walkers (the runtime
+    whole-tree fade, `ForestOccluders.MAX_FADED` 18, reveals them), never in front of a glade, the arena or the
+    horse spot. Route trunk clearance `Rules.ROUTE_TRUNK_MARGIN` 0.8 m + `ROUTE_CROWN_OVERHANG` 0.2 × crown.
+  - Look (forest materials only; the city keeps its sun, ground and buildings): painted light from the screen's
+    upper left (`ForestWorld.PAINT_LIGHT_DIR`), region colour grade with luminance-only contrast
+    (`GRADE_*` in forest_painted.gdshaderinc / forest_impostor.gdshader), soft crown shadows and warm meadow /
+    ochre camp-pad tints in the ground bake (TERRAIN_VERSION 25), impostor cells 320 px, kit rock variants
+    `limestone` (quarry, arena ring) and `wet` (waterfall face), bridge tower roofs + banners, fossil ribs and
+    skull at the arena wall, camp props ×1.25, the fog shell out to ±480 m.
+  - QA hooks: `ForestKit.set_grade_enabled(bool)`, `ForestImpostors.set_grade_enabled(bool)` (city same-state diff).
+
 * v3.3 (2026-11-21, atlas v2 — API additive, API_VERSION unchanged):
   - The world copy of the atlas is v2 (`data/forest_rescue/world/world-atlas.json` = `lost_forest_atlas_v2`,
     art/01 masterplan network; CONTRACT v1.3): 47 routes `lf_trail_<from>__<to>` + `lf_route_bridge`, junctions

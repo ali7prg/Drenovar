@@ -244,3 +244,11 @@ checkpoint and the client dissolves each newly revealed cell; changelog v1.2).
     (`godot/project/data/forest_rescue/world/world-atlas.json`) is the v2 file, so visual trails, glades and the
     arena match the server ways (WORLD_API v3.3).
 
+* v1.4 (2026-11-21, atlas v2 lake — data only; wire format, ways, nodes and `graphId` unchanged):
+  * **World.** `river.features.lake` (atlas v2, server and client copies, written by `plan_atlas_v2.py`) is the
+    reedy lake as big as the ground between glade 09, the bridge and the east bank allows: centre (97.2, 32.4),
+    semi-axes 18.5 × 10 m, major axis at 36.87° (was (95.5, 34.5), 15 × 7.5). River samples 66–79 widen their
+    `wetWest` **and** `wetEast` to the ellipse (it now spans the channel); `lf_mark_lake_marsh` moves to the new
+    centre. No way point moved: every trail sample stays ≥ 3.5 m off the widened wet bounds (planner assert ≥ 1.5 m),
+    so the navigation graph, `graphId`, saves and the recorded fixtures are unchanged.
+

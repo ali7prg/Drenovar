@@ -34,6 +34,7 @@ STEP = 36.0
 SITES = {"lf_site_02": ["mountain", "river", "leaf"], "lf_site_06": ["coal", "seed", "tree"],
          "lf_site_10": ["sun", "stone", "root"]}
 DOOR_DROP = 0.62
+KEY_SIZE = 1.9            # the painted key spans ~0.42 of the drum width
 # The painting has no absolute scale: the measured blueprint is shrunk uniformly to the v1 delivery's footprint
 # (~1.65 m wide) so the site layouts (cage / camp / squad stand-off) keep their spacing; cameras scale along.
 MODEL_SCALE = 0.7
@@ -79,14 +80,15 @@ def step_y(p):
 
 def key_rest(p):
     """Key centre lying on the threshold step (rod along X, crystal at +X)."""
-    return np.array([p["sx"] - 0.06 + p["ox"], step_y(p) + 0.02 + p["oy"], p["sh"] + 0.045])
+    return np.array([p["sx"] - 0.12 + p["ox"], step_y(p) + 0.02 + p["oy"], p["sh"] + 0.045 * KEY_SIZE])
 
 
 def key_in_niche(p):
     """Key centre standing upright in the niche (crystal on top, just proud of the wall)."""
     a = math.radians(p["an"])
     r = (p["Rw"] + p["Rt"]) * 0.5 + 0.07
-    return np.array([r * math.cos(a) + p["ox"], r * math.sin(a) + p["oy"], p["zt"] * 0.5 + 0.08])
+    # rod centre in the niche: the bit end inside, the crystal standing above the niche top (art/10 open)
+    return np.array([r * math.cos(a) + p["ox"], r * math.sin(a) + p["oy"], p["zt"] * 0.5 + 0.08 + 0.06 * KEY_SIZE])
 
 
 def points(p):
@@ -132,6 +134,12 @@ def views():
     open_pose = dict(SOLVED_POSE_02)
     open_pose["door_pivot"] = {"loc": (0, 0, -DOOR_DROP)}
     open_pose["key_lever"] = "key_in_niche"
+    # pass 4: the dial texture comes from the closed drawing only (two cameras with ~8 px residuals ghosted
+    # the glyphs); the open view still renders the rings for its QA comparison
+    open_render = dict(open_pose)
+    open_proj = dict(open_pose)
+    for r in ("ring_1", "ring_2", "ring_3"):
+        open_proj[r] = "hide"
     opened = pv2.ViewSpec(
         "open", SHEET, (1156, 40, 1500, 400),
         {"r1_left": (1262, 103), "r1_right": (1398, 103), "r1_back": (1330, 78), "r1_front": (1330, 125),
@@ -139,17 +147,21 @@ def views():
          "clamp_b": (1330, 67), "clamp_f": (1331, 240), "clamp_l": (1229, 142), "clamp_r": (1428, 142),
          "step_tl": (1262, 345), "step_tr": (1410, 343), "step_bl": (1265, 380), "step_br": (1408, 377),
          "door_tl": (1290, 272), "door_tr": (1390, 272), "door_bl": (1292, 345), "door_br": (1388, 345)},
-        pose=open_pose, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None, solve_opts={"fov_prior": 20.0},
-        clip_below=386, title="RUNE LOCK open (door down, key in the niche)", tex_weight=0.6)
+        pose=open_proj, render_pose=open_render, light=LIGHT, thresh=0.085, fill_holes=True, shadow=None,
+        solve_opts={"fov_prior": 20.0}, clip_below=386, title="RUNE LOCK open (door down, key in the niche)",
+        tex_weight=0.9)
     return [closed, opened]
 
 
 def _resolve_pose(v, p):
     S = p.get("_scale", 1.0)
-    if "door_pivot" in v.pose:
-        v.pose["door_pivot"] = {"loc": (0, 0, -DOOR_DROP * S)}
-    if v.pose.get("key_lever") == "key_in_niche" or isinstance(v.pose.get("key_lever"), dict):
-        v.pose["key_lever"] = {"loc": tuple((key_in_niche(p) - key_rest(p)) * S), "rot": (0.0, -math.pi / 2, 0.0)}
+    for pose in (v.pose, v.render_pose):
+        if pose is None:
+            continue
+        if "door_pivot" in pose:
+            pose["door_pivot"] = {"loc": (0, 0, -DOOR_DROP * S)}
+        if pose.get("key_lever") == "key_in_niche" or isinstance(pose.get("key_lever"), dict):
+            pose["key_lever"] = {"loc": tuple((key_in_niche(p) - key_rest(p)) * S), "rot": (0.0, -math.pi / 2, 0.0)}
 
 
 def arc_wall(g, r0, r1, z0, z1, a0, a1, n, mat, tag, top=True, ends=True, r1_top=None):
@@ -187,10 +199,9 @@ def build(A, p, lod):
     gd = pv2.G.Geo()
     g_root = g
     g = gd
+    # stepped plinth (art/10): two courses stepping in to the vertical drum wall
     CG.ring_prism(g, (0, 0, 0), np.eye(3), Rb, Rw - 0.3, n, 0.0, hb, "stone", "plinth")
-    if Rb > Rw + 0.02:     # sloped shoulder from the flared lower course up to the wall
-        CG.lathe(g, [(Rb, hb), (Rw + 0.005, hb + 0.6 * (Rb - Rw))], (0, 0, 0), n=n, mat="stone", tag="plinth_slope",
-                 cap_top=False, cap_bot=False)
+    CG.ring_prism(g, (0, 0, 0), np.eye(3), (Rb + Rw) * 0.5, Rw - 0.3, n, hb, hb + 0.09, "stone", "plinth_step")
     Rt = p["Rt"]
 
     def r_at(z):         # tapered drum (art/10: the base is drawn wider than the rim)
@@ -269,13 +280,15 @@ def build(A, p, lod):
     key = A.part("key_lever", None, tuple(kp))
     kg = key.geo[lod]
     m = (8, 6, 4)[lod]
-    kg.cyl(kp + (-0.24, 0, 0), kp + (0.12, 0, 0), 0.024, n=m, mat="bronze", tag="key_rod", up=(0, 0, 1))
+    K = KEY_SIZE
+    kg.cyl(kp + (-0.24 * K, 0, 0), kp + (0.12 * K, 0, 0), 0.024 * K, n=m, mat="bronze", tag="key_rod", up=(0, 0, 1))
     for xx in (-0.14, 0.06):
-        kg.cyl(kp + (xx - 0.015, 0, 0), kp + (xx + 0.015, 0, 0), 0.036, n=m, mat="bronze", tag="key_collar", up=(0, 0, 1))
-    kg.cyl(kp + (0.12, 0, 0), kp + (0.17, 0, 0), 0.03, 0.06, n=m, mat="bronze", tag="key_claw", up=(0, 0, 1))
-    kg.rock(kp + (0.25, 0, 0.0), (0.085, 0.06, 0.06), seed=3, sub=2 if lod == 0 else 1, mat="gem", tag="key_gem",
-            flat_bottom=False, rough=0.05)
-    kg.box(kp + (-0.27, 0, -0.012), (0.06, 0.016, 0.07), mat="bronze", tag="key_bit")
+        kg.cyl(kp + ((xx - 0.015) * K, 0, 0), kp + ((xx + 0.015) * K, 0, 0), 0.036 * K, n=m, mat="bronze", tag="key_collar",
+               up=(0, 0, 1))
+    kg.cyl(kp + (0.12 * K, 0, 0), kp + (0.17 * K, 0, 0), 0.03 * K, 0.06 * K, n=m, mat="bronze", tag="key_claw", up=(0, 0, 1))
+    kg.rock(kp + (0.25 * K, 0, 0.0), (0.085 * K, 0.06 * K, 0.06 * K), seed=3, sub=2 if lod == 0 else 1, mat="gem",
+            tag="key_gem", flat_bottom=False, rough=0.05)
+    kg.box(kp + (-0.27 * K, 0, -0.012 * K), (0.06 * K, 0.016 * K, 0.07 * K), mat="bronze", tag="key_bit")
     S = p.get("_scale", 1.0)
     if lod == 0:
         A.marker("artifact_spot", tuple((cc + O + (0, 0, 0.36)) * S))
@@ -334,14 +347,19 @@ def solve(views):
     # plinth flare / height by silhouette IoU (the drum base is drawn wider than the dial's camera implies)
     # drum taper (rim radius Rt) and plinth (Rb, hb) by silhouette IoU, coordinate descent
     best = _silhouette_iou(params, views)[0]
-    grids = {"Rt": np.arange(0.7, params["Rw"] + 0.001, 0.03), "Rb": np.arange(params["Rw"], params["Rw"] + 0.25, 0.03),
-             "hb": np.array([0.06, 0.1, 0.14, 0.18, 0.22]), "ox": np.arange(-0.1, 0.101, 0.02),
-             "oy": np.arange(-0.1, 0.101, 0.02), "Rw": np.arange(params["Rw"] - 0.12, params["Rw"] + 0.121, 0.03)}
+    # pass 4: near-vertical walls (no taper buying the camera residual): only the plinth steps, the drum
+    # radius and its offset under the dial are searched
+    params["Rt"] = params["Rw"] - 0.03
+    grids = {"Rb": np.arange(params["Rw"] + 0.06, params["Rw"] + 0.3, 0.03),
+             "hb": np.array([0.08, 0.12, 0.16, 0.2]), "ox": np.arange(-0.1, 0.101, 0.02),
+             "oy": np.arange(-0.1, 0.101, 0.02), "Rw": np.arange(params["Rw"] - 0.15, params["Rw"] + 0.151, 0.03)}
     for _round in range(2):
         for key, grid in grids.items():
             for val in grid:
                 q = dict(params)
                 q[key] = float(val)
+                if key == "Rw":
+                    q["Rt"] = q["Rw"] - 0.03
                 iou = _silhouette_iou(q, views)[0]
                 if iou > best + 1e-4:
                     best, params = iou, q
@@ -356,9 +374,10 @@ def solve(views):
 
 
 # ------------------------------------------------------------------ glyphs (all ten positions on every disc)
-GLYPH_LAYOUT = {   # ring: (glyph centre radius, tangential size, radial size) in metres
-    "ring_1": (0.25, 0.16, 0.14), "ring_2": (0.31, 0.2, 0.15), "ring_3": (0.5, 0.22, 0.13)}
-PAINTED = {"ring_2": "river", "ring_3": "leaf"}     # painted (projected) at their own position, kept
+GLYPH_LAYOUT = {   # ring: (glyph centre radius, tangential size, radial size) in metres — pass 4: small, near the rim
+    "ring_1": (0.29, 0.085, 0.075), "ring_2": (0.4, 0.09, 0.08), "ring_3": (0.5, 0.09, 0.075)}
+ENGRAVE_DEPTH = 0.32      # pass 4: shallow, low contrast (share of the way to the dark fill colour)
+PAINTED = {"ring_1": "mountain", "ring_2": "river", "ring_3": "leaf"}   # painted (projected), kept big and clean
 GLYPH_FILL = np.array([0.17, 0.18, 0.12])
 GLYPH_EDGE = np.array([0.80, 0.60, 0.33])
 
@@ -408,8 +427,8 @@ def post_texture(A, B, alb_img, info, p):
             continue
         sel = (part == pn.index(name)) & (N[:, 2] > 0.85)
         sel_all[name] = sel
-        if name != "ring_1":
-            continue        # ring_2 / ring_3 keep their painted front glyph (river / leaf at its own position)
+        if name in PAINTED:
+            continue        # every ring keeps its painted front glyph (mountain / river / leaf), no inpainting
         lum = alb[sel] @ np.array([0.299, 0.587, 0.114])
         med = np.median(lum)
         dark = lum < med * 0.7
@@ -442,8 +461,9 @@ def post_texture(A, B, alb_img, info, p):
             f, e = masks[gname]
             fill = np.maximum(fill, _sample(f, u, v))
             edge = np.maximum(edge, _sample(e, u, v))
-        col = col * (1 - edge[:, None] * 0.8) + GLYPH_EDGE * edge[:, None] * 0.8
-        col = col * (1 - fill[:, None]) + GLYPH_FILL * fill[:, None]
+        col = col * (1 - edge[:, None] * 0.25) + GLYPH_EDGE * edge[:, None] * 0.25
+        fill_col = col * 0.62                                   # darker bronze, not black: a shallow engraving
+        col = col * (1 - fill[:, None] * ENGRAVE_DEPTH) + fill_col * fill[:, None] * ENGRAVE_DEPTH
         out[yy[idx], xx[idx]] = col
         alb[idx] = col
     info["alb"] = alb

@@ -1,0 +1,209 @@
+{
+ "note": "share of near-black pixels (sRGB luminance < 30 / < 50) inside forest foliage, mask = kind-tinted frame (qa_forest_perf.gd --tint-kinds, whole meshes incl. bark), values from the normal frame; llvmpipe 1366x630",
+ "site02_z26": {
+  "before": {
+   "bramble": {
+    "px": 9045,
+    "lt30": "15.0%",
+    "lt50": "26.1%",
+    "mean_lum": 76.9
+   },
+   "golden_oak": {
+    "px": 8417,
+    "lt30": "11.6%",
+    "lt50": "19.1%",
+    "mean_lum": 105.3
+   },
+   "fern": {
+    "px": 7313,
+    "lt30": "0.2%",
+    "lt50": "1.2%",
+    "mean_lum": 123.5
+   },
+   "grass": {
+    "px": 209,
+    "lt30": "0.0%",
+    "lt50": "13.9%",
+    "mean_lum": 108.6
+   },
+   "ALL": {
+    "px": 24984,
+    "lt30": "9.4%",
+    "lt50": "16.4%",
+    "mean_lum": 100.4
+   }
+  },
+  "after": {
+   "bramble": {
+    "px": 9045,
+    "lt30": "11.2%",
+    "lt50": "24.9%",
+    "mean_lum": 77.7
+   },
+   "golden_oak": {
+    "px": 8417,
+    "lt30": "7.5%",
+    "lt50": "15.4%",
+    "mean_lum": 109.2
+   },
+   "fern": {
+    "px": 7313,
+    "lt30": "0.4%",
+    "lt50": "1.2%",
+    "mean_lum": 123.1
+   },
+   "grass": {
+    "px": 209,
+    "lt30": "0.0%",
+    "lt50": "13.4%",
+    "mean_lum": 110.1
+   },
+   "ALL": {
+    "px": 24984,
+    "lt30": "6.7%",
+    "lt50": "14.6%",
+    "mean_lum": 101.9
+   }
+  },
+  "after_no_msaa": {
+   "bramble": {
+    "px": 9045,
+    "lt30": "11.3%",
+    "lt50": "24.8%",
+    "mean_lum": 77.4
+   },
+   "golden_oak": {
+    "px": 8417,
+    "lt30": "7.4%",
+    "lt50": "15.3%",
+    "mean_lum": 109.2
+   },
+   "fern": {
+    "px": 7313,
+    "lt30": "0.4%",
+    "lt50": "1.5%",
+    "mean_lum": 123.1
+   },
+   "grass": {
+    "px": 209,
+    "lt30": "0.0%",
+    "lt50": "12.0%",
+    "mean_lum": 109.7
+   },
+   "ALL": {
+    "px": 24984,
+    "lt30": "6.7%",
+    "lt50": "14.7%",
+    "mean_lum": 101.8
+   }
+  }
+ },
+ "site03_z26": {
+  "before": {
+   "fern": {
+    "px": 13215,
+    "lt30": "0.4%",
+    "lt50": "1.6%",
+    "mean_lum": 120.5
+   },
+   "green_oak": {
+    "px": 11516,
+    "lt30": "7.1%",
+    "lt50": "14.2%",
+    "mean_lum": 112.2
+   },
+   "golden_oak": {
+    "px": 5188,
+    "lt30": "21.0%",
+    "lt50": "37.6%",
+    "mean_lum": 67.6
+   },
+   "bramble": {
+    "px": 4194,
+    "lt30": "11.3%",
+    "lt50": "21.0%",
+    "mean_lum": 85.5
+   },
+   "grass": {
+    "px": 209,
+    "lt30": "0.0%",
+    "lt50": "0.0%",
+    "mean_lum": 109.5
+   },
+   "ALL": {
+    "px": 34322,
+    "lt30": "7.1%",
+    "lt50": "13.6%",
+    "mean_lum": 105.4
+   }
+  },
+  "after": {
+   "fern": {
+    "px": 13215,
+    "lt30": "0.1%",
+    "lt50": "0.7%",
+    "mean_lum": 121.8
+   },
+   "green_oak": {
+    "px": 11516,
+    "lt30": "0.4%",
+    "lt50": "7.1%",
+    "mean_lum": 116.2
+   },
+   "golden_oak": {
+    "px": 5188,
+    "lt30": "17.6%",
+    "lt50": "35.0%",
+    "mean_lum": 69.6
+   },
+   "bramble": {
+    "px": 4194,
+    "lt30": "6.6%",
+    "lt50": "16.3%",
+    "mean_lum": 86.7
+   },
+   "grass": {
+    "px": 209,
+    "lt30": "0.0%",
+    "lt50": "0.0%",
+    "mean_lum": 110.7
+   },
+   "ALL": {
+    "px": 34322,
+    "lt30": "3.7%",
+    "lt50": "9.9%",
+    "mean_lum": 107.7
+   }
+  }
+ },
+ "z68": {
+  "before": {
+   "bramble": {
+    "px": 372,
+    "lt30": "12.6%",
+    "lt50": "25.0%",
+    "mean_lum": 74.6
+   },
+   "ALL": {
+    "px": 372,
+    "lt30": "12.6%",
+    "lt50": "25.0%",
+    "mean_lum": 74.6
+   }
+  },
+  "after": {
+   "bramble": {
+    "px": 372,
+    "lt30": "10.8%",
+    "lt50": "21.8%",
+    "mean_lum": 75.1
+   },
+   "ALL": {
+    "px": 372,
+    "lt30": "10.8%",
+    "lt50": "21.8%",
+    "mean_lum": 75.1
+   }
+  }
+ }
+}

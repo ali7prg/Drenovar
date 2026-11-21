@@ -770,7 +770,8 @@ func run() -> void:
 			trees.append([snappedf(x, 0.01), snappedf(z, 0.01), drawn, variant,
 				yaw_deg, snappedf(scale, 0.001), zone])
 			species_count[Rules.SPECIES[drawn]] = species_count.get(Rules.SPECIES[drawn], 0) + 1
-	print("LAYOUT ambient trees=", trees.size(), " ", species_count)
+	var thinned := _thin_trail_crowns(trees, remap)
+	print("LAYOUT ambient trees=", trees.size(), " ", species_count, " thinned_over_trails=", thinned)
 
 	# 5. Understory -----------------------------------------------------------------------------
 	var under: Array = []
@@ -1102,6 +1103,59 @@ func _grove_look(tree: Dictionary, species: int, x: float, z: float, zone: int, 
 
 ## pass 4: the south pines grow big away from the trails (cover, art/01) but keep the pass-3 size where
 ## the bigger crown would reach over one, so no trail point has more crowns over a walker than the runtime fades.
+## pass 4 (dense south pines up to the trails): no trail point may lie under more crowns than the runtime
+## fades at once (ForestOccluders.MAX_FADED = 18, qa_forest_world). Ambient pines over the worst points are
+## dropped, the one standing farthest toward the camera first, until every point has <= TRAIL_CROWN_LIMIT.
+const TRAIL_CROWN_LIMIT := 16
+
+func _thin_trail_crowns(trees: Array, remap: Dictionary) -> int:
+	var caps: Array = []                 # [a, b, radius, ambient index or -1]
+	for i in trees.size():
+		var t: Array = trees[i]
+		var c := Rules.crown_capsule(float(t[0]), float(t[1]), int(t[2]), int(t[3]), float(t[5]), deg_to_rad(float(t[4])))
+		caps.append([c[0], c[1], c[2], i])
+	var woods := {}
+	for tree in data.woods:
+		woods[tree.id] = tree
+	for id in remap:
+		var e: Array = remap[id]
+		var species: int = Rules.RESOURCE_SPECIES.get(String(woods[id].name), Rules.PINE)
+		var c := Rules.crown_capsule(float(e[0]), float(e[1]), species, int(e[3]) % Rules.GREEN_VARIANT_BASE, float(e[4]), float(woods[id].angle))
+		caps.append([c[0], c[1], c[2], -1])
+	var drop := {}
+	for route in atlas.routes:
+		var pts: PackedVector3Array = route.points
+		for i in range(0, pts.size(), 2):
+			var q := Vector2(pts[i].x, pts[i].z)
+			var over: Array = []
+			for cp: Array in caps:
+				if int(cp[3]) >= 0 and drop.has(int(cp[3])):
+					continue
+				if (cp[0] as Vector2).distance_to(q) > 40.0:
+					continue
+				if Rules.segment_segment_distance(cp[0], cp[1], q, q) < float(cp[2]) + Rules.UNIT_RADIUS + 0.6:
+					over.append(cp)
+			if over.size() <= TRAIL_CROWN_LIMIT:
+				continue
+			over.sort_custom(func(a: Array, b: Array) -> bool: return (a[0] as Vector2).distance_to(q) > (b[0] as Vector2).distance_to(q))
+			var excess := over.size() - TRAIL_CROWN_LIMIT
+			for cp: Array in over:
+				if excess <= 0:
+					break
+				var index := int(cp[3])
+				if index >= 0 and int(trees[index][2]) == Rules.PINE:
+					drop[index] = true
+					excess -= 1
+	if drop.is_empty():
+		return 0
+	var kept: Array = []
+	for i in trees.size():
+		if not drop.has(i):
+			kept.append(trees[i])
+	trees.assign(kept)
+	return drop.size()
+
+
 ## The crown capsule (Rules.crown_capsule, variant 0, no yaw) of the bigger crown must keep clear of every trail.
 func _pine_crown_clear(x: float, z: float, scale: float) -> bool:
 	var capsule := Rules.crown_capsule(x, z, Rules.PINE, 0, scale, 0.0)

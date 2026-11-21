@@ -1421,9 +1421,9 @@ func on_battle_report(_report_id: String) -> void:
 
 # ------------------------------------------------------------------ boss
 ## Fight framing: the camera target between the boss and the squad's fighting spot (the squad
-## stands BOSS_FIGHT_DISTANCE m before the boss on the entrance axis), zoom 36 — inside the arena
+## stands BOSS_FIGHT_DISTANCE m before the boss on the entrance axis), zoom 32 — inside the arena
 ## the server revealed along the squad's route; the panel stays above the boss.
-const BOSS_FRAME_ZOOM := 36.0
+const BOSS_FRAME_ZOOM := 32.0
 var boss_framed_for := ""
 
 func boss_fight_frame() -> Vector3:

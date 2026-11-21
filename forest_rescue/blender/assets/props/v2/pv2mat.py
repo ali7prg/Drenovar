@@ -170,8 +170,9 @@ def measure_ramps(A, v, k, M, log=pv2.log):
     gates = dict(DEFAULT_RAMP_GATES)
     gates.update(getattr(M, "RAMP_GATES", {}))
     far_bg = np.linalg.norm(crop - bgc[None, None], axis=2) > 0.075
+    bg_ok = set(getattr(M, "RAMP_BG_OK", ("stone", "ground")))     # these really are close to the backdrop grey
     for ci, c in enumerate(classes):
-        sel = (cls == ci) & ref & far_bg
+        sel = (cls == ci) & ref & (True if c in bg_ok else far_bg)
         # one-pixel class border trimmed (anti-aliased neighbours of other materials)
         sel &= ndi.binary_erosion(cls == ci, iterations=1)
         if c in gates:
@@ -201,7 +202,7 @@ def default_tiles(M, px, sheet, rng):
         rust = ir[(chroma(ir) > np.percentile(chroma(ir), 85)) & (ir[:, 0] > ir[:, 2] + 0.06)]
         rust_col = rust.mean(0) if len(rust) > 20 else np.array([0.45, 0.3, 0.2])
         base = ir[chroma(ir) <= np.percentile(chroma(ir), 80)]
-        T["iron"] = MT.iron(512, MT.ramp(base), rust_col, rng, rust_amount=0.10)
+        T["iron"] = MT.iron(512, MT.ramp(base), rust_col, rng, rust_amount=0.05)
     if "rope" in px:
         T["rope"] = MT.rope(512, MT.ramp(px["rope"]), rng, rows=getattr(M, "ROPE_ROWS", 4))
     if "stone" in px:
@@ -215,7 +216,7 @@ def default_tiles(M, px, sheet, rng):
     if gr_px is None or len(gr_px) < 40:
         gr_px = np.array([[0.30, 0.30, 0.16], [0.45, 0.42, 0.22], [0.62, 0.55, 0.3]])
     gs = gr_px[np.argsort(gr_px @ L)]
-    g_root, g_mid, g_tip = gs[int(len(gs) * 0.15)], gs[int(len(gs) * 0.5)], gs[int(len(gs) * 0.85)]
+    g_root, g_mid, g_tip = gs[int(len(gs) * 0.3)], gs[int(len(gs) * 0.62)], gs[int(len(gs) * 0.92)]
     if "ground" in px:
         gp = px["ground"]
         dirt = gp[chroma(gp) < np.percentile(chroma(gp), 70)]
@@ -338,13 +339,16 @@ def bake_vertex_ao(A, B, M, log=pv2.log):
                     trees[occ] = BVHTree.FromPolygons([tuple(v) for v in np.concatenate(Vs)], Ps)
                 tree = trees[occ]
                 F = []
-                for p in P:
+                fcls = B.finfo[(lod, nm)]["cls"]
+                cstr = getattr(M, "AO_CLASS_STRENGTH", {})
+                for pi_, p in enumerate(P):
                     Q = V[p]
                     n = np.cross(Q[1] - Q[0], Q[2] - Q[0])
                     if len(p) > 3:
                         n = n + np.cross(Q[2] - Q[0], Q[3] - Q[0])
                     nn = np.linalg.norm(n)
                     n = n / nn if nn > 1e-12 else np.array([0, 0, 1.0])
+                    fstr = cstr.get(str(fcls[pi_]), strength) if cstr else strength
                     Rf = np.array(pv2.G.frame_from(n))       # local X = n
                     dirs = H[:, 2:3] * n + H[:, 0:1] * Rf[:, 1] + H[:, 1:2] * Rf[:, 2]
                     dirs = [Vector(tuple(d)) for d in dirs]
@@ -358,7 +362,7 @@ def bake_vertex_ao(A, B, M, log=pv2.log):
                             if hit[0] is not None:
                                 occl += 1.0 - (hit[3] / dist) ** 0.5 * 0.6
                         ao = 1.0 - occl / len(dirs)
-                        f = 1.0 - strength * (1.0 - ao)
+                        f = 1.0 - fstr * (1.0 - ao)
                         if cone is not None and float(n @ cone[0]) > 0.02:
                             sh = 0
                             for d in cone:

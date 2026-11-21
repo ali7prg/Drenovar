@@ -109,7 +109,7 @@ def stretch(t, lo, hi):
 
 
 # ----------------------------------------------------------------------------- materials
-def wood(size, lut, rng, lines=11, contrast=(0.08, 0.92)):
+def wood(size, lut, rng, lines=11, contrast=(0.06, 0.86)):
     """Weathered oak, grain along u (x), painted style: broad warm tone bands along the grain, crisp dark latewood
     lines that come and go, a few long seasoning checks and knots, soft lighter weathered streaks. Fine fibre noise is
     kept faint (no zebra / speckle at full resolution)."""
@@ -138,26 +138,32 @@ def wood(size, lut, rng, lines=11, contrast=(0.08, 0.92)):
     return apply_ramp(stretch(rank01(t), *contrast), lut)
 
 
-def iron(size, lut, rust_col, rng, rust_amount=0.12, contrast=(0.1, 0.9)):
-    """Forged iron: soft mottling, shallow hammer dimples (periodic Voronoi, no hard rims), a few pits, rust
-    blooms in the darker hollows."""
+def iron(size, lut, rust_col, rng, rust_amount=0.12, contrast=(0.12, 0.72)):
+    """Forged iron, painted style: a dark warm-grey body with gentle hammered variation (small soft dimples), fine
+    lighter scratches along a few directions, rare pits, small rust spots. The ramp's brightest part (the painting's
+    edge highlights) is left out of the albedo."""
     H = W = size
-    f1, f2, cid = voronoi(H, W, 48, rng)
-    cell = np.sqrt(H * W / 48.0)
-    dimple = smoothstep(0.0, 0.75, f1 / cell)                              # 0 at a dent's centre -> 1 at its edge
-    facet_tone = (rng.uniform(-1, 1, 48))[cid]
-    mott = fbm(H, W, W * 0.12, H * 0.12, rng, 4, 0.5)
-    pits = smoothstep(2.0, 2.8, -pnoise(H, W, 1.8, 1.8, rng))
-    t = 0.65 * mott + 0.18 * facet_tone + 0.3 * dimple - 0.8 * pits
-    t = blur_wrap(t, 1.0)
+    f1, f2, cid = voronoi(H, W, 140, rng)
+    cell = np.sqrt(H * W / 140.0)
+    dimple = smoothstep(0.0, 0.8, f1 / cell)
+    facet_tone = (rng.uniform(-1, 1, 140))[cid]
+    mott = fbm(H, W, W * 0.05, H * 0.05, rng, 4, 0.5)
+    scr = np.zeros((H, W))
+    for ang in rng.uniform(0, math.pi, 3):
+        c_, s_ = math.cos(ang), math.sin(ang)
+        n_ = pnoise(H, W, 1.2 + 30 * abs(c_), 1.2 + 30 * abs(s_), rng)
+        scr = np.maximum(scr, smoothstep(2.3, 3.0, n_))
+    pits = smoothstep(2.2, 2.9, -pnoise(H, W, 1.6, 1.6, rng))
+    t = 0.5 * mott + 0.22 * facet_tone + 0.3 * dimple + 0.9 * scr - 0.8 * pits
+    t = blur_wrap(t, 0.7)
     col = apply_ramp(stretch(rank01(t), *contrast), lut)
-    rmask = smoothstep(1.0, 1.8, fbm(H, W, W * 0.08, H * 0.08, rng, 3, 0.6) + 0.5 * pnoise(H, W, 6, 6, rng))
+    rmask = smoothstep(1.4, 2.2, fbm(H, W, W * 0.03, H * 0.03, rng, 3, 0.6) + 0.5 * pnoise(H, W, 3, 3, rng))
     if rmask.mean() > rust_amount:
         rmask *= rust_amount / rmask.mean()
-    rmask = blur_wrap(np.clip(rmask, 0, 1), 1.2)
+    rmask = blur_wrap(np.clip(rmask, 0, 1), 0.8)
     shade = (col @ LUMA)[..., None] / max(float(np.asarray(rust_col) @ LUMA), 1e-3)
-    rust = np.clip(np.asarray(rust_col)[None, None] * (0.75 + 0.5 * np.clip(shade, 0.4, 1.6)), 0, 1)
-    return col * (1 - 0.7 * rmask[..., None]) + rust * (0.7 * rmask[..., None])
+    rust = np.clip(np.asarray(rust_col)[None, None] * (0.7 + 0.4 * np.clip(shade, 0.4, 1.6)), 0, 1)
+    return col * (1 - 0.65 * rmask[..., None]) + rust * (0.65 * rmask[..., None])
 
 
 def rope(size, lut, rng, rows=4, strands_per_tile=6, contrast=(0.05, 0.95)):
@@ -180,17 +186,19 @@ def rope(size, lut, rng, rows=4, strands_per_tile=6, contrast=(0.05, 0.95)):
     return apply_ramp(stretch(rank01(t), *contrast), lut)
 
 
-def stone(size, lut, moss_col, rng, moss=0.10, contrast=(0.1, 0.9)):
-    """Grey dressed / rough stone: broad mineral mottling, faint speckle, a few hairline cracks, lichen / moss."""
+def stone(size, lut, moss_col, rng, moss=0.10, contrast=(0.12, 0.95)):
+    """Grey stone, painted style: angular mineral patches (periodic Voronoi cells of slightly different tone with
+    soft edges), mottling, fine speckle, dark hairline cracks, lichen / moss in the low spots."""
     H = W = size
-    mott = fbm(H, W, W * 0.14, H * 0.14, rng, 5, 0.5)
-    speck = pnoise(H, W, 1.4, 1.4, rng)
-    f1, f2, _ = voronoi(H, W, 12, rng)
-    crack = (1.0 - smoothstep(0.0, 2.0, f2 - f1)) * smoothstep(0.3, 1.3, pnoise(H, W, W * 0.1, H * 0.1, rng))
-    t = 0.85 * mott + 0.1 * speck - 0.9 * crack
-    t = blur_wrap(t, 0.8)
+    f1, f2, cid = voronoi(H, W, 26, rng)
+    patch = rng.uniform(-1, 1, 26)[cid] * smoothstep(0.0, 6.0, f2 - f1)
+    mott = fbm(H, W, W * 0.1, H * 0.1, rng, 5, 0.55)
+    speck = pnoise(H, W, 1.3, 1.3, rng)
+    crack = (1.0 - smoothstep(0.0, 1.6, f2 - f1)) * smoothstep(-0.2, 0.8, pnoise(H, W, W * 0.08, H * 0.08, rng))
+    t = 0.45 * patch + 0.6 * mott + 0.15 * speck - 1.0 * crack
+    t = blur_wrap(t, 0.7)
     col = apply_ramp(stretch(rank01(t), *contrast), lut)
-    m = smoothstep(1.2, 2.0, fbm(H, W, W * 0.06, H * 0.06, rng, 3, 0.6) + 0.4 * pnoise(H, W, 3, 3, rng))
+    m = smoothstep(1.2, 2.0, -mott + 0.4 * pnoise(H, W, 3, 3, rng))
     if m.mean() > moss:
         m *= moss / m.mean()
     m = np.clip(m, 0, 1)
@@ -199,7 +207,7 @@ def stone(size, lut, moss_col, rng, moss=0.10, contrast=(0.1, 0.9)):
     return col * (1 - 0.7 * m[..., None]) + mc * (0.7 * m[..., None])
 
 
-def brass(size, lut, rng, contrast=(0.12, 0.88)):
+def brass(size, lut, rng, contrast=(0.2, 0.92)):
     """Cast brass / bronze: soft broad tone, faint brushed streaks, a little darker patina."""
     H = W = size
     low = fbm(H, W, W * 0.25, H * 0.25, rng, 3, 0.5)
@@ -213,8 +221,8 @@ def brass(size, lut, rng, contrast=(0.12, 0.88)):
 def ground(size, dirt_lut, leaf_cols, grass_col, pebble_lut, rng, leaves=0.16, grass=0.10, pebbles=0.06):
     """Forest-floor dirt: mottled soil, scattered pebbles, fallen leaves (rotated lens shapes), short grass sprigs."""
     H = W = size
-    soil = fbm(H, W, W * 0.06, H * 0.06, rng, 5, 0.55)
-    col = apply_ramp(stretch(rank01(blur_wrap(soil, 0.8)), 0.05, 0.95), dirt_lut)
+    soil = 0.6 * fbm(H, W, W * 0.025, H * 0.025, rng, 4, 0.55) + 0.4 * fbm(H, W, W * 0.08, H * 0.08, rng, 2, 0.5)
+    col = apply_ramp(stretch(rank01(blur_wrap(soil, 0.8)), 0.18, 0.86), dirt_lut)
     yy, xx = np.mgrid[0:H, 0:W].astype(float)
     # pebbles: periodic Voronoi cells, a share of them filled as rounded stones
     f1, f2, cid = voronoi(H, W, 220, rng)

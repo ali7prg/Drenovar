@@ -66,8 +66,10 @@ AO_SUN = (-0.612, -0.331, 0.719)
 AO_STRENGTH = 0.8
 AO_SUN_STRENGTH = 0.38
 AO_DIST = 0.9
+AO_CLASS_STRENGTH = {"ground": 0.45, "grass": 0.3, "rope": 0.6}
 SHARP_TAGS = ("rubble", "lip")
 NO_CALIBRATE = ("brass",)
+GRASS_BOXES = [(30, 690, 72, 760), (455, 742, 500, 790), (160, 840, 200, 862), (8, 760, 40, 800)]
 _STATIC = ("root", "drum", "big_gear", "pinion", "crank")
 
 
@@ -85,6 +87,9 @@ def make_tiles(px, sheet, rng):
     import pv2mat
     import mattex as MT
     px = dict(px)
+    gp = MT.pixels(sheet, GRASS_BOXES, lambda c: (c[:, 1] >= c[:, 0] - 0.03) & (c[:, 1] - c[:, 2] > 0.07))
+    if len(gp) > 60:
+        px["grass"] = gp
     if "brass" in px and len(px["brass"]) > 80:
         b = px["brass"]
         px["brass"] = b[(b @ MT.LUMA) > np.percentile(b @ MT.LUMA, 45)]
@@ -131,7 +136,7 @@ def points(p):
     return {
         "coil_lt": (-L2, 0.0, AX + Rc), "coil_rt": (L2, 0.0, AX + Rc),
         "coil_lb": (-L2, 0.0, AX - Rc), "coil_rb": (L2, 0.0, AX - Rc),
-        "hub_c": (H, -0.08, AX), "shaft_end": (H + p["Ls"], -0.05, AX),
+        "hub_c": (H + 0.04, -0.36, AX), "shaft_end": (H + p["Ls"], -0.05, AX),
         "grip_in": (H + p["Ls"] + 0.04, -0.1, AX - p["Ac"]), "grip_out": (H + p["Ls"] + 0.04 + p["Lg"], -0.1, AX - p["Ac"]),
         "gear_c": tuple(pinion_centre(p)), "bgear_c": tuple(gc), "knob": (p["KX"], -0.28, AX + 0.78),
         "ttop_l": (-p["FXL"], 0.0, AX + 0.6), "ttop_r": (p["FXR"], 0.0, AX + 0.6),
@@ -196,6 +201,27 @@ def tooth_outline(n, r_root, r_tip, phase, lod):
     return np.array(pts)
 
 
+def rim_open_back(g, c, Rm, outer, inner, z0, z1, tag):
+    """Toothed rim: outer (teeth) and inner walls plus the front face (+axis, toward the viewer); the back face is
+    never seen from the painting or the city camera and is left open (double-sided painted shader)."""
+    n = len(outer)
+    V = []
+    for z in (z0, z1):
+        for q in outer:
+            V.append((q[0], q[1], z))
+        for q in inner:
+            V.append((q[0], q[1], z))
+    V = np.array(V) @ np.asarray(Rm).T + np.asarray(c, float)
+    F = []
+    o0, i0, o1, i1 = 0, n, 2 * n, 3 * n
+    for k in range(n):
+        k2 = (k + 1) % n
+        F.append([o0 + k, o0 + k2, o1 + k2, o1 + k])
+        F.append([i0 + k2, i0 + k, i1 + k, i1 + k2])
+        F.append([o1 + k, o1 + k2, i1 + k2, i1 + k])
+    return g.add(V, F, "iron", tag)
+
+
 def gear(g, c, Rm, n, r_pitch, add, ded, phase, half_t, lod, tag, spokes, hub_r, hub_half, r_in_k=0.78):
     """Toothed iron wheel in the plane of Rm (columns: in-plane u, in-plane w, axis): rim with real teeth, a hub
     boss through the axis and flat spokes."""
@@ -203,7 +229,7 @@ def gear(g, c, Rm, n, r_pitch, add, ded, phase, half_t, lod, tag, spokes, hub_r,
     outer = tooth_outline(n, r_root, r_tip, phase, lod)
     r_in = r_root * r_in_k
     inner = np.array([(r_in * math.cos(math.atan2(q[1], q[0])), r_in * math.sin(math.atan2(q[1], q[0]))) for q in outer])
-    CG.outline_ring(g, tuple(c), Rm, outer, inner, -half_t, half_t, "iron", tag + "_rim")
+    rim_open_back(g, c, Rm, outer, inner, -half_t, half_t, tag + "_rim")
     axis = Rm[:, 2]
     g.cyl(tuple(c - axis * hub_half), tuple(c + axis * hub_half), hub_r, n=(14, 10, 8)[lod], mat="iron",
           tag=tag + "_hub", up=tuple(Rm[:, 1]))
@@ -223,7 +249,7 @@ def unit(v):
     return v / max(np.linalg.norm(v), 1e-12)
 
 
-def bolt(g, p, n, r=0.03, h=0.022, k=6, tag="bolt"):
+def bolt(g, p, n, r=0.03, h=0.022, k=5, tag="bolt"):
     """Domed bolt head on a face (base ring at p, outward normal n): k-sided frustum + cap."""
     n = unit(n)
     R = G.frame_from(n)
@@ -293,8 +319,10 @@ def build(A, p, lod):
     courses_up = (2, 2, 1)[lod]
     xb = (PX - hx - t, PX + hx + t)
     yb = PY + hy + t / 2
-    CG.masonry_run(g, (xb[0], yb), (xb[1], yb), 0.0, WH, t, courses_up, 0.42, rng, mat="stone", tag="pit_wall",
-                   chamfer=0.015, lod=lod)
+    CG.masonry_run(g, (xb[0], yb), (xb[1], yb), 0.0, WH * 0.5, t, 1, 0.42, rng, mat="stone", tag="pit_wall",
+                   chamfer=0.0, lod=1)
+    CG.masonry_run(g, (xb[0] + 0.12, yb), (xb[1] - 0.05, yb), WH * 0.5, WH, t, 1, 0.42, rng, mat="stone", tag="pit_wall",
+                   chamfer=0.02, lod=lod)
     CG.masonry_run(g, (xb[0], yb), (xb[1], yb), -0.5, 0.0, t, 2 if lod == 0 else 1, 0.42, rng, mat="stone",
                    tag="pit_wall", chamfer=0.0, lod=1, skip=("-z", "+y"))
     for sx_ in (-1, 1):
@@ -307,7 +335,7 @@ def build(A, p, lod):
         cx = PX - hx - t * 0.5 + (k + 0.5) * (2 * hx + t) / nfr + rng.uniform(-0.04, 0.04)
         g.rock((cx, PY - hy - t / 2 + rng.uniform(-0.03, 0.03), 0.02),
                (rng.uniform(0.17, 0.22), rng.uniform(0.12, 0.16), rng.uniform(0.07, 0.1)), seed=k + 90,
-               sub=1 if lod == 0 else 0, mat="stone", tag="lip", flat_bottom=True, rough=0.12)
+               sub=1 if (lod == 0 and k % 2 == 0) else 0, mat="stone", tag="lip", flat_bottom=True, rough=0.12)
     # pit shaft below the mouth (inner faces only, dark masonry) and the floor
     g.box((PX, PY - hy - t / 2, (-0.5 - PIT_D) / 2), (2 * hx + 2 * t, t, PIT_D - 0.5), mat="stone", tag="pit_wall",
           skip=("-y", "-z", "+z"))
@@ -345,7 +373,8 @@ def build(A, p, lod):
     keep = len(piles) if lod == 0 else (6 if lod == 1 else 4)
     for k, (cx, cy, r, h) in enumerate(piles[:keep]):
         g.rock((cx + PX * 0.0, cy, h * 0.3), (r, r * rng.uniform(0.75, 0.95), h * 0.6), seed=k + 40,
-               sub=1 if (lod == 0 or (lod == 1 and k < 4)) else 0, mat="stone", tag="rubble", flat_bottom=True, rough=0.15)
+               sub=1 if ((lod == 0 and k < 5) or (lod == 1 and k < 3)) else 0, mat="stone", tag="rubble",
+               flat_bottom=True, rough=0.15)
     # ---------------- A-frame trestles
     shoes = []
     for sx, fx in ((-1, p["FXL"]), (1, p["FXR"])):
@@ -408,12 +437,13 @@ def build(A, p, lod):
     # ---------------- crank bearing housing on the right trestle (painter's cheat: its face turned to the viewer)
     H = p["HX"]
     hax = unit((1.0, -1.15, 0.0))
-    hc = np.array([H - 0.02, -0.02, AX])
+    hc = np.array([H + 0.02, -0.33, AX])
     g.cyl(tuple(hc - hax * 0.1), tuple(hc + hax * 0.03), p["HR"], n=(18, 12, 8)[lod], mat="iron", tag="housing",
           up=(0, 0, 1))
     g.cyl(tuple(hc + hax * 0.03), tuple(hc + hax * 0.1), p["HR"] * 0.62, n=(14, 10, 6)[lod], mat="iron",
           tag="housing", up=(0, 0, 1))
     g.box((p["FXR"] + 0.17, -0.1, AX), (0.05, 0.42, 0.5), mat="iron", tag="housing_plate")
+    g.beam((p["FXR"] + 0.17, -0.12, AX), tuple(hc - hax * 0.06), 0.12, 0.16, mat="iron", tag="housing_plate")
     if lod == 0:
         for (dy, dz) in ((-0.15, 0.19), (0.12, 0.19), (-0.15, -0.19), (0.12, -0.19)):
             bolt(g, (p["FXR"] + 0.195, -0.1 + dy, AX + dz), (1, 0, 0), r=0.024)
@@ -486,14 +516,14 @@ def build(A, p, lod):
     pawl.geo[lod].cyl(tuple(pv - ga * 0.05), tuple(pv + ga * 0.05), 0.032, n=(8, 6, 6)[lod], mat="iron", tag="pawl_pin",
                       up=(0, 0, 1))
     # ---------------- brake lever node (pivot on the left trestle top), brass rod and turned brass knob
-    bp = np.array([p["KX"] - 0.12, -0.3, AX + 0.22])
+    bp = np.array([p["KX"] - 0.2, -0.3, AX + 0.22])
     brake = A.part("brake_lever", None, tuple(bp))
     bg = brake.geo[lod]
     knob_c = np.array([p["KX"], -0.28, AX + 0.78])
     bg.cyl(tuple(bp), tuple(knob_c - np.array([0, 0, 0.08])), 0.05, n=(10, 8, 6)[lod], mat="brass", tag="lever",
            up=(1, 0, 0))
     CG.lathe(bg, [(0.035, 0.0), (0.075, 0.03), (0.105, 0.09), (0.112, 0.15), (0.095, 0.21), (0.05, 0.245), (0.0, 0.255)],
-             tuple(knob_c - np.array([0, 0, 0.1])), n=(14, 10, 6)[lod], mat="brass", tag="knob")
+             tuple(knob_c - np.array([0, 0, 0.1])), n=(12, 9, 6)[lod], mat="brass", tag="knob")
     bg.cyl(tuple(bp + (-0.07, 0, 0)), tuple(bp + (0.07, 0, 0)), 0.06, n=(12, 8, 6)[lod], mat="brass", tag="lever_hub",
            up=(0, 0, 1))
     g.beam((-p["FXL"] + 0.1, -0.3, bp[2]), (bp[0] - 0.05, -0.3, bp[2]), 0.1, 0.12, mat="iron", tag="lever_bracket")
@@ -520,7 +550,7 @@ def build(A, p, lod):
                skip=("-z",))
     hg.box(tuple(cb + (0, -D / 2 - 0.02, body_h * 0.72)), (0.12, 0.03, 0.16), mat="brass", tag="chest_lock")
     if lod == 0:
-        for xx in (-Wc * 0.42, -Wc * 0.14, Wc * 0.14, Wc * 0.42):
+        for xx in (-Wc * 0.42, Wc * 0.42):
             for zz in (0.06, body_h - 0.06):
                 bolt(hg, cb + np.array([xx, -D / 2 - 0.012, zz]), (0, -1, 0), r=0.016, h=0.012, k=5)
     sling = [cb + np.array([-Wc * 0.45, 0, Hc - 0.02]), cb + np.array([-Wc * 0.2, 0, Hc + 0.12]),
@@ -551,8 +581,9 @@ def build(A, p, lod):
                 f = f[::-1]
             F2.append(f)
         lg.add(Vd, F2, mat_, tag_)
-    for xx in ((-Wc * 0.42, Wc * 0.42) if lod == 2 else (-Wc * 0.42, -Wc * 0.14, Wc * 0.14, Wc * 0.42)):
-        band = [cb + np.array([xx, q[0] * 1.06, body_h + q[1] * 1.06 + 0.004]) for q in prof2]
+    prof3 = np.stack([rr * np.cos(np.linspace(0, math.pi, 7)), rr * 0.75 * np.sin(np.linspace(0, math.pi, 7))], 1)
+    for xx in (-Wc * 0.42, Wc * 0.42):
+        band = [cb + np.array([xx, q[0] * 1.06, body_h + q[1] * 1.06 + 0.004]) for q in prof3]
         CG.sweep_rect(lg, np.array(band), 0.055, 0.014, up=(1, 0, 0), mat="iron", tag="chest_band", caps=False)
     if lod == 0:
         A.marker("artifact_spot", tuple(cb + (0, 0, body_h * 0.5)), parent="chest")
@@ -691,7 +722,7 @@ def _fit_ground(params, v):
     out = []
     for i, a in enumerate(centres):
         if np.isfinite(prof[i]) and math.sin(a) < 0.15:
-            r = float(np.clip(prof[i], 1.2, 2.9))
+            r = float(np.clip(prof[i] * 0.88, 1.2, 2.6))
         else:
             c_, s_ = math.cos(a), math.sin(a)
             r = 1.0 / math.sqrt((c_ / max(rx, 1.6)) ** 2 + (s_ / ry_back) ** 2)

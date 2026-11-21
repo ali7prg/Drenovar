@@ -12,6 +12,7 @@ uniform sampler2D atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform float grid = 8.0;
 uniform float sway = 0.06;
 uniform float alpha_cut = 0.5;
+uniform bool grade_on = true;      // QA toggle (ForestImpostors.set_grade_enabled)
 
 #include "res://src/forest_rescue/world/forest_fog_receiver.gdshaderinc"
 
@@ -94,7 +95,7 @@ void fragment() {
 	// (approximation: the quad point itself) — buried parts fade into the mist colour, parts above
 	// the cloud top take the soft mist tint. The whole tree always keeps its crown.
 	vec3 fog = fog_receive(world, TIME);
-	{
+	if (grade_on) {
 		vec3 gf = grade_factors(world);
 		float lum = max(dot(c.rgb, vec3(0.299, 0.587, 0.114)), 1e-4);
 		c.rgb = max(mix(vec3(lum), c.rgb, gf.x), vec3(0.0));

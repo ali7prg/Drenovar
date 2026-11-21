@@ -204,3 +204,9 @@ func _save_cache(base: String) -> void:
 
 static func atlas_texture() -> ImageTexture:
 	return _atlas
+
+
+## QA toggle of the forest colour grade on the impostor cards (see ForestKit.set_grade_enabled).
+func set_grade_enabled(enabled: bool) -> void:
+	if material != null:
+		material.set_shader_parameter("grade_on", enabled)

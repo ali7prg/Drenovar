@@ -9,6 +9,7 @@ extends SceneTree
 
 const FIXTURES := "res://data/forest_rescue/game/fixtures/"
 const PathMotion = preload("res://src/forest_rescue/game/path_motion.gd")
+const ForestKit = preload("res://src/forest_rescue/world/forest_kit.gd")
 const FPS := 30.0
 
 class StubHost extends Node:
@@ -586,6 +587,98 @@ func run() -> void:
 		settle_world()
 		await frames(20)
 		await shoot("v2all_full_overview_art01")
+		root.size = Vector2i(1366, 630)
+		await frames(6)
+		game.hud.visible = true
+		if forest.get("hud") != null:
+			forest.hud.visible = true
+
+	# -------------------------------------------------- layout pass 3: art-derived zone frames, feature
+	# crops at zoom 68, overviews, the four extreme camera positions at zoom 120 (fog edge) and the city
+	# same-state diff with the forest grade ("boost") on / off
+	if wanted("v3"):
+		var all3: Dictionary = fixture("boss_unlocked")
+		var adv3: Dictionary = all3.adventure
+		for poi in adv3.pois:
+			if String(poi.get("kind", "")) != "site":
+				continue
+			poi.step = 3
+			poi.cagePose = "closed"
+			poi.discovered = true
+			poi.available = true
+			for person in poi.get("captives", []):
+				person.state = "caged"
+			if poi.get("guardian") is Dictionary:
+				poi.guardian.state = "defeated"
+			if poi.get("artifact") is Dictionary:
+				poi.artifact.state = "held"
+				poi.artifact.held = true
+		for site_entry in adv3.campaign.sites:
+			site_entry.step = 3
+		adv3.campaign.rescuedIds = []
+		adv3.campaign.rescuedCount = 0
+		adv3.campaign.phase = "rescue"
+		var bits3 := PackedByteArray()
+		bits3.resize(392)
+		bits3.fill(255)
+		adv3.fog.visibleBase64 = Marshalls.raw_to_base64(bits3)
+		adv3.fog.revision = 9999
+		await fresh_dict(all3)
+		game.hud.visible = false
+		if forest.get("hud") != null:
+			forest.hud.visible = false
+		look(Vector3(-80, 0, -14), 68.0)
+		await preload_actors(2.0)
+		forest.world.fog.set_dim(0.0)
+		forest.world.fog.finish_now()
+		var zones_path := ProjectSettings.globalize_path("res://").path_join("../../forest_rescue/qa/ingame/integration/zones_v3.json").simplify_path()
+		var zf: Variant = JSON.parse_string(FileAccess.get_file_as_string(zones_path))
+		if zf is Dictionary:
+			for zone in zf.zones:
+				look(Vector3(float(zone.target[0]), 0, float(zone.target[1])), float(zone.zoom))
+				settle_world()
+				await preload_actors(0.4)
+				await frames(12)
+				await shoot("v3_zone_%s" % zone.name)
+		for spec in [["bridge", Vector3(90.5, 0, 20)], ["waterfall", Vector3(21, 0, -66)], ["lake", Vector3(95, 0, 34)],
+				["quarry", Vector3(-12, 0, 98)], ["arena", Vector3(18, 0, -90)], ["camp01", Vector3(-80, 0, -14)],
+				["south_marsh", Vector3(64, 0, 96)]]:
+			look(spec[1], 68.0)
+			settle_world()
+			await preload_actors(0.3)
+			await frames(10)
+			await shoot("v3feat_%s_z68" % spec[0])
+		look(Vector3(0, 0, 0), 120.0)
+		settle_world()
+		await frames(20)
+		await shoot("v3_overview_z120")
+		for spec in [["ne", Vector3(147, 0, -118)], ["se", Vector3(147, 0, 118)], ["sw", Vector3(-147, 0, 118)],
+				["nw", Vector3(-147, 0, -118)]]:
+			look(spec[1], 120.0)
+			settle_world()
+			await frames(16)
+			await shoot("v3edge_%s_z120" % spec[0])
+		# city same-state diff: forest grade on / off (city buildings, ground and lighting must not change)
+		for zoom_c in [40.0, 68.0]:
+			look(Vector3(0, 0, 0), zoom_c)
+			settle_world()
+			await frames(12)
+			ForestKit.set_grade_enabled(false)
+			if forest.world.get("impostors") != null:
+				forest.world.impostors.set_grade_enabled(false)
+			await frames(6)
+			await shoot("v3city_boost_off_z%d" % int(zoom_c))
+			ForestKit.set_grade_enabled(true)
+			if forest.world.get("impostors") != null:
+				forest.world.impostors.set_grade_enabled(true)
+			await frames(6)
+			await shoot("v3city_boost_on_z%d" % int(zoom_c))
+		root.size = Vector2i(1536, 1024)
+		await frames(6)
+		look(Vector3(17.8, 0, 13.6), 195.0)
+		settle_world()
+		await frames(20)
+		await shoot("v3_full_overview_art01")
 		root.size = Vector2i(1366, 630)
 		await frames(6)
 		game.hud.visible = true

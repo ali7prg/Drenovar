@@ -1,0 +1,916 @@
+{
+ "frame": [
+  1366,
+  630
+ ],
+ "camera": "city ortho, offset (75, 83, 75), size = zoom (vertical metres)",
+ "mapping": "plan_atlas_v2.art_warps (art px -> game screen U, Y metres; Y = (x+z)/sqrt2 sin38 - (h-6.5) cos38)",
+ "zones": [
+  {
+   "name": "grove",
+   "caption": "golden-oak grove, glade 01 (NW-A), hollow oak",
+   "art_rect": [
+    0,
+    0,
+    867,
+    400
+   ],
+   "target": [
+    -76.07,
+    -24.9
+   ],
+   "zoom": 74.5,
+   "screen_centre": [
+    -36.18,
+    -43.75
+   ],
+   "anchors": [
+    {
+     "id": "lf_site_01",
+     "label": "NW-A",
+     "art": [
+      280,
+      225
+     ],
+     "world": [
+      -80.0,
+      -14.0
+     ]
+    },
+    {
+     "id": "lf_site_02",
+     "label": "NW-B",
+     "art": [
+      240,
+      335
+     ],
+     "world": [
+      -86.0,
+      40.0
+     ]
+    },
+    {
+     "id": "lf_mark_hollow_oak_giant",
+     "label": "hollow_oak_giant",
+     "art": [
+      245,
+      170
+     ],
+     "world": [
+      -95.0,
+      -6.0
+     ]
+    },
+    {
+     "id": "lf_mark_ruined_arch",
+     "label": "ruined_arch",
+     "art": [
+      375,
+      340
+     ],
+     "world": [
+      -70.0,
+      16.0
+     ]
+    },
+    {
+     "id": "lf_mark_standing_stones",
+     "label": "standing_stones",
+     "art": [
+      760,
+      120
+     ],
+     "world": [
+      -62.0,
+      -80.0
+     ]
+    },
+    {
+     "id": "lf_horse_origin",
+     "label": "horse_and_squad",
+     "art": [
+      720,
+      225
+     ],
+     "world": [
+      -8,
+      -55
+     ]
+    }
+   ]
+  },
+  {
+   "name": "stones",
+   "caption": "standing stones and the mare's trail above the town",
+   "art_rect": [
+    266,
+    0,
+    1134,
+    400
+   ],
+   "target": [
+    -34.33,
+    -55.49
+   ],
+   "zoom": 72.6,
+   "screen_centre": [
+    14.96,
+    -40.38
+   ],
+   "anchors": [
+    {
+     "id": "lf_site_01",
+     "label": "NW-A",
+     "art": [
+      280,
+      225
+     ],
+     "world": [
+      -80.0,
+      -14.0
+     ]
+    },
+    {
+     "id": "lf_site_12",
+     "label": "NE-M",
+     "art": [
+      1050,
+      265
+     ],
+     "world": [
+      42.0,
+      -70.0
+     ]
+    },
+    {
+     "id": "lf_mark_ruined_arch",
+     "label": "ruined_arch",
+     "art": [
+      375,
+      340
+     ],
+     "world": [
+      -70.0,
+      16.0
+     ]
+    },
+    {
+     "id": "lf_mark_standing_stones",
+     "label": "standing_stones",
+     "art": [
+      760,
+      120
+     ],
+     "world": [
+      -62.0,
+      -80.0
+     ]
+    },
+    {
+     "id": "lf_horse_origin",
+     "label": "horse_and_squad",
+     "art": [
+      720,
+      225
+     ],
+     "world": [
+      -8,
+      -55
+     ]
+    }
+   ]
+  },
+  {
+   "name": "west",
+   "caption": "west: golden + green oaks, glades 02 / 03, ruined arch",
+   "art_rect": [
+    0,
+    185,
+    867,
+    585
+   ],
+   "target": [
+    -42.22,
+    19.37
+   ],
+   "zoom": 86.6,
+   "screen_centre": [
+    -43.55,
+    -9.61
+   ],
+   "anchors": [
+    {
+     "id": "lf_site_01",
+     "label": "NW-A",
+     "art": [
+      280,
+      225
+     ],
+     "world": [
+      -80.0,
+      -14.0
+     ]
+    },
+    {
+     "id": "lf_site_02",
+     "label": "NW-B",
+     "art": [
+      240,
+      335
+     ],
+     "world": [
+      -86.0,
+      40.0
+     ]
+    },
+    {
+     "id": "lf_site_03",
+     "label": "W-C",
+     "art": [
+      312,
+      448
+     ],
+     "world": [
+      -72.0,
+      74.0
+     ]
+    },
+    {
+     "id": "lf_site_04",
+     "label": "W-D",
+     "art": [
+      235,
+      565
+     ],
+     "world": [
+      -40.0,
+      87.0
+     ]
+    },
+    {
+     "id": "lf_mark_ruined_arch",
+     "label": "ruined_arch",
+     "art": [
+      375,
+      340
+     ],
+     "world": [
+      -70.0,
+      16.0
+     ]
+    },
+    {
+     "id": "lf_horse_origin",
+     "label": "horse_and_squad",
+     "art": [
+      720,
+      225
+     ],
+     "world": [
+      -8,
+      -55
+     ]
+    }
+   ]
+  },
+  {
+   "name": "quarry",
+   "caption": "SW quarry: mine, crane, ledges, glade 05 (SW-E)",
+   "art_rect": [
+    0,
+    515,
+    867,
+    915
+   ],
+   "target": [
+    3.52,
+    79.45
+   ],
+   "zoom": 52.1,
+   "screen_centre": [
+    -53.69,
+    38.79
+   ],
+   "anchors": [
+    {
+     "id": "lf_site_04",
+     "label": "W-D",
+     "art": [
+      235,
+      565
+     ],
+     "world": [
+      -40.0,
+      87.0
+     ]
+    },
+    {
+     "id": "lf_site_05",
+     "label": "SW-E",
+     "art": [
+      325,
+      800
+     ],
+     "world": [
+      2.0,
+      92.0
+     ]
+    },
+    {
+     "id": "lf_site_06",
+     "label": "SW-F",
+     "art": [
+      345,
+      912
+     ],
+     "world": [
+      30.0,
+      101.0
+     ]
+    },
+    {
+     "id": "lf_site_07",
+     "label": "S-G",
+     "art": [
+      717,
+      877
+     ],
+     "world": [
+      57.0,
+      90.0
+     ]
+    },
+    {
+     "id": "lf_mark_quarry_mine",
+     "label": "quarry_mine",
+     "art": [
+      245,
+      740
+     ],
+     "world": [
+      -15.0,
+      100.0
+     ]
+    },
+    {
+     "id": "lf_mark_dead_tree",
+     "label": "dead_tree",
+     "art": [
+      775,
+      830
+     ],
+     "world": [
+      64.0,
+      76.0
+     ]
+    }
+   ]
+  },
+  {
+   "name": "south_pines",
+   "caption": "dark pines: glade 07 (S-G), dead tree, marsh pools",
+   "art_rect": [
+    286,
+    624,
+    1154,
+    1024
+   ],
+   "target": [
+    50.24,
+    78.65
+   ],
+   "zoom": 40.0,
+   "screen_centre": [
+    -20.09,
+    58.93
+   ],
+   "anchors": [
+    {
+     "id": "lf_site_05",
+     "label": "SW-E",
+     "art": [
+      325,
+      800
+     ],
+     "world": [
+      2.0,
+      92.0
+     ]
+    },
+    {
+     "id": "lf_site_06",
+     "label": "SW-F",
+     "art": [
+      345,
+      912
+     ],
+     "world": [
+      30.0,
+      101.0
+     ]
+    },
+    {
+     "id": "lf_site_07",
+     "label": "S-G",
+     "art": [
+      717,
+      877
+     ],
+     "world": [
+      57.0,
+      90.0
+     ]
+    },
+    {
+     "id": "lf_site_08",
+     "label": "S-H",
+     "art": [
+      1065,
+      925
+     ],
+     "world": [
+      98.0,
+      85.0
+     ]
+    },
+    {
+     "id": "lf_mark_dead_tree",
+     "label": "dead_tree",
+     "art": [
+      775,
+      830
+     ],
+     "world": [
+      64.0,
+      76.0
+     ]
+    }
+   ]
+  },
+  {
+   "name": "lake",
+   "caption": "reedy lake, glade 09 (SE-I), hunter shelter",
+   "art_rect": [
+    669,
+    515,
+    1536,
+    915
+   ],
+   "target": [
+    82.54,
+    39.99
+   ],
+   "zoom": 44.4,
+   "screen_centre": [
+    30.09,
+    56.37
+   ],
+   "anchors": [
+    {
+     "id": "lf_site_07",
+     "label": "S-G",
+     "art": [
+      717,
+      877
+     ],
+     "world": [
+      57.0,
+      90.0
+     ]
+    },
+    {
+     "id": "lf_site_09",
+     "label": "SE-I",
+     "art": [
+      1255,
+      795
+     ],
+     "world": [
+      84.0,
+      47.0
+     ]
+    },
+    {
+     "id": "lf_site_10",
+     "label": "SE-J",
+     "art": [
+      1295,
+      670
+     ],
+     "world": [
+      96.0,
+      -20.0
+     ]
+    },
+    {
+     "id": "lf_mark_dead_tree",
+     "label": "dead_tree",
+     "art": [
+      775,
+      830
+     ],
+     "world": [
+      64.0,
+      76.0
+     ]
+    },
+    {
+     "id": "lf_mark_hunter_shelter",
+     "label": "hunter_shelter",
+     "art": [
+      1300,
+      760
+     ],
+     "world": [
+      102.0,
+      64.0
+     ]
+    },
+    {
+     "id": "lf_mark_lake_marsh",
+     "label": "lake_marsh",
+     "art": [
+      1170,
+      700
+     ],
+     "world": [
+      97.2,
+      32.4
+     ]
+    },
+    {
+     "id": "lf_bridge_crossing",
+     "label": "bridge",
+     "art": [
+      1100,
+      575
+     ],
+     "world": [
+      90.48200135039062,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "name": "river_bridge",
+   "caption": "the bridge (four towers, red banners)",
+   "art_rect": [
+    666,
+    365,
+    1534,
+    765
+   ],
+   "target": [
+    53.64,
+    3.02
+   ],
+   "zoom": 85.9,
+   "screen_centre": [
+    35.79,
+    29.53
+   ],
+   "anchors": [
+    {
+     "id": "lf_site_10",
+     "label": "SE-J",
+     "art": [
+      1295,
+      670
+     ],
+     "world": [
+      96.0,
+      -20.0
+     ]
+    },
+    {
+     "id": "lf_site_11",
+     "label": "E-K",
+     "art": [
+      1355,
+      510
+     ],
+     "world": [
+      92.0,
+      -52.0
+     ]
+    },
+    {
+     "id": "lf_glade_el",
+     "label": "E-L",
+     "art": [
+      1335,
+      365
+     ],
+     "world": [
+      72.0,
+      -86.0
+     ]
+    },
+    {
+     "id": "lf_mark_hunter_shelter",
+     "label": "hunter_shelter",
+     "art": [
+      1300,
+      760
+     ],
+     "world": [
+      102.0,
+      64.0
+     ]
+    },
+    {
+     "id": "lf_junction_waterfall",
+     "label": "waterfall",
+     "art": [
+      1235,
+      430
+     ],
+     "world": [
+      25.0,
+      -69.0
+     ]
+    },
+    {
+     "id": "lf_mark_lake_marsh",
+     "label": "lake_marsh",
+     "art": [
+      1170,
+      700
+     ],
+     "world": [
+      97.2,
+      32.4
+     ]
+    },
+    {
+     "id": "lf_bridge_crossing",
+     "label": "bridge",
+     "art": [
+      1100,
+      575
+     ],
+     "world": [
+      90.48200135039062,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "name": "east",
+   "caption": "east bank willows: glades 10 / 11",
+   "art_rect": [
+    669,
+    215,
+    1536,
+    615
+   ],
+   "target": [
+    54.0,
+    -44.78
+   ],
+   "zoom": 51.5,
+   "screen_centre": [
+    69.85,
+    3.82
+   ],
+   "anchors": [
+    {
+     "id": "lf_site_11",
+     "label": "E-K",
+     "art": [
+      1355,
+      510
+     ],
+     "world": [
+      92.0,
+      -52.0
+     ]
+    },
+    {
+     "id": "lf_glade_el",
+     "label": "E-L",
+     "art": [
+      1335,
+      365
+     ],
+     "world": [
+      72.0,
+      -86.0
+     ]
+    },
+    {
+     "id": "lf_site_12",
+     "label": "NE-M",
+     "art": [
+      1050,
+      265
+     ],
+     "world": [
+      42.0,
+      -70.0
+     ]
+    },
+    {
+     "id": "lf_horse_origin",
+     "label": "horse_and_squad",
+     "art": [
+      720,
+      225
+     ],
+     "world": [
+      -8,
+      -55
+     ]
+    },
+    {
+     "id": "lf_junction_waterfall",
+     "label": "waterfall",
+     "art": [
+      1235,
+      430
+     ],
+     "world": [
+      25.0,
+      -69.0
+     ]
+    },
+    {
+     "id": "lf_bridge_crossing",
+     "label": "bridge",
+     "art": [
+      1100,
+      575
+     ],
+     "world": [
+      90.48200135039062,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "name": "waterfall",
+   "caption": "waterfall into the lily pond below the arena",
+   "art_rect": [
+    669,
+    245,
+    1536,
+    645
+   ],
+   "target": [
+    54.58,
+    -34.89
+   ],
+   "zoom": 66.0,
+   "screen_centre": [
+    63.26,
+    9.66
+   ],
+   "anchors": [
+    {
+     "id": "lf_site_11",
+     "label": "E-K",
+     "art": [
+      1355,
+      510
+     ],
+     "world": [
+      92.0,
+      -52.0
+     ]
+    },
+    {
+     "id": "lf_glade_el",
+     "label": "E-L",
+     "art": [
+      1335,
+      365
+     ],
+     "world": [
+      72.0,
+      -86.0
+     ]
+    },
+    {
+     "id": "lf_site_12",
+     "label": "NE-M",
+     "art": [
+      1050,
+      265
+     ],
+     "world": [
+      42.0,
+      -70.0
+     ]
+    },
+    {
+     "id": "lf_junction_waterfall",
+     "label": "waterfall",
+     "art": [
+      1235,
+      430
+     ],
+     "world": [
+      25.0,
+      -69.0
+     ]
+    },
+    {
+     "id": "lf_bridge_crossing",
+     "label": "bridge",
+     "art": [
+      1100,
+      575
+     ],
+     "world": [
+      90.48200135039062,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "name": "arena",
+   "caption": "the arena on its outcrop, glade E-L, glade 12",
+   "art_rect": [
+    669,
+    0,
+    1536,
+    400
+   ],
+   "target": [
+    15.46,
+    -89.44
+   ],
+   "zoom": 56.6,
+   "screen_centre": [
+    74.18,
+    -32.42
+   ],
+   "anchors": [
+    {
+     "id": "lf_glade_el",
+     "label": "E-L",
+     "art": [
+      1335,
+      365
+     ],
+     "world": [
+      72.0,
+      -86.0
+     ]
+    },
+    {
+     "id": "lf_site_12",
+     "label": "NE-M",
+     "art": [
+      1050,
+      265
+     ],
+     "world": [
+      42.0,
+      -70.0
+     ]
+    },
+    {
+     "id": "lf_mark_standing_stones",
+     "label": "standing_stones",
+     "art": [
+      760,
+      120
+     ],
+     "world": [
+      -62.0,
+      -80.0
+     ]
+    },
+    {
+     "id": "lf_horse_origin",
+     "label": "horse_and_squad",
+     "art": [
+      720,
+      225
+     ],
+     "world": [
+      -8,
+      -55
+     ]
+    },
+    {
+     "id": "lf_boss_arena",
+     "label": "boss_arena",
+     "art": [
+      1250,
+      150
+     ],
+     "world": [
+      18.0,
+      -92.0
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -437,6 +437,16 @@ const FOREST_MATERIAL_PREFIXES := ["lf_bark", "lf_foliage", "lf_rock", "lf_env_"
 	"lf_proc_", "lf_props_supplies", "lf_boss_arena"]
 
 
+## QA (layout pass 3, city-unchanged proof): switch the forest colour grade ("boost") on / off on every
+## painted material made so far (forest materials only ever carry it).
+static func set_grade_enabled(enabled: bool) -> void:
+	for key in _painted:
+		var material: Variant = _painted[key]
+		if material is ShaderMaterial and is_instance_valid(material):
+			var m := material as ShaderMaterial
+			m.set_shader_parameter("grade_regions", enabled and is_forest_material(String(m.resource_name)))
+
+
 static func is_forest_material(material_name: String) -> bool:
 	var n := material_name.to_lower()
 	for prefix in FOREST_MATERIAL_PREFIXES:

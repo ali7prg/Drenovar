@@ -278,7 +278,7 @@ func _add_unit_zone(a: Vector2, b: Vector2, half: float) -> void:
 func capsule_hits_units(capsule: Array) -> bool:
 	var a: Vector2 = capsule[0]
 	var b: Vector2 = capsule[1]
-	var r: float = capsule[2] + Rules.UNIT_RADIUS
+	var r: float = capsule[2] + Rules.UNIT_RADIUS + 0.1     # + snapping margin (layout stores 0.01 m / 0.001)
 	var lo := a.min(b) - Vector2.ONE * r
 	var hi := a.max(b) + Vector2.ONE * r
 	var seen := {}
@@ -321,7 +321,10 @@ func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown :=
 						margin = (2.0 + crown * 0.4) * margin_scale if tree else 0.5
 					"bridge":
 						margin = 0.8
-					"core", "reserve":
+					"reserve":
+						if tree:
+							continue
+					"core":
 						continue
 				if ForestMasks.inside_mask(x, z, mask, margin):
 					return true

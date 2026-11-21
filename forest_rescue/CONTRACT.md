@@ -149,6 +149,9 @@ All `move`/`battle`/`escort` objects carry server timestamps. The client interpo
 `position(t)` along `path` with `t = serverTime + (localNow - receivedAt)`. Arrival is
 committed by the server lazily on the next request after `arriveAt` (settle); the client
 re-polls `/api/state` at `arriveAt + 250 ms`. Animations never commit anything.
+While a squad or escort move is under way the client also re-reads `/api/state` about every 1.2 s
+(each read settles the committed traversal checkpoints, so `fog.visibleBase64` grows checkpoint by
+checkpoint and the client dissolves each newly revealed cell; changelog v1.2).
 
 ## 6. Error codes
 
@@ -206,3 +209,7 @@ re-polls `/api/state` at `arriveAt + 250 ms`. Animations never commit anything.
   * **Session entry.** `POST /api/session/new` for a login that already has a settlement returns it (200) and
     counts as a new foreground entry (an interrupted `playing` intro becomes a deferred invitation); clients
     should call it once per app launch. Local realm only: body `{"additional":true}` creates another profile.
+* v1.2 (2026-11-21, client timing note — no server or wire change): during squad/escort moves the Godot client
+  polls `GET /api/state` every ~1.2 s of server time (previously only at `arriveAt + 250 ms` and the 5 s idle
+  poll), so traversal fog reveals reach the client per checkpoint (every 4 units, radius 10) and dissolve
+  gradually. Fog still opens only from server cells; the client never reveals by time or event.

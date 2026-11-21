@@ -90,3 +90,34 @@ LOD), `fog_culled` (instances removed because they stand deeper than 3 m inside 
     uniforms `albedo_uv2` (glTF baseColorTexture.texCoord 1), `use_variant_mask` / `variant_mask` /
     `tint_cloth` / `tint_hair` (captive look variation through `<civilian>_variant_mask.png`). Defaults
     leave the kit unchanged.
+* v3.2 (2026-11-21, checkpoint-2 P0 — API additive, API_VERSION unchanged):
+  - No screen-door dither anywhere: the Bayer canopy fade, the Bayer fog cover and the impostor fade are
+    removed. Fog receivers (kit trees, landmarks, impostors, actors/props) now fade parts below the cloud top
+    smoothly into the mist colour (`fog_receive().x`), never erode or discard them; leaf cards keep their
+    alpha test only (a tree always keeps its whole crown). The alpha-blended fog shell does the covering.
+  - Crown cut-away removed: `ForestKit.set_fade_circles` and the `fade_circles` uniforms are gone; actor metas
+    `canopy_fade_radius` are replaced by `occluder_height` (m, default 2.0 actors / 2.6 props); the meta
+    `no_canopy_fade` still excludes markers/decals.
+  - Layout camera clearance (`forest_layout_v2.json`, rebuilt): no crown between the fixed city camera and a
+    unit on a trail (±1.6 m), in a glade, the arena or at the horse spot/home reception
+    (`Rules.crown_capsule`, measured crown shapes `Rules.CROWN_SHAPE`). Ambient trees that would hide one are
+    planted young or not at all (understory instead); resource trees keep their ids and displacement limits
+    (≤ 4 m / 6.5 m outer, ≤ 3.5–4 m inner), take a clear slot when one exists, otherwise the young look; the
+    rest (`cameraOccluders`, 93 ids) are faded at runtime. Understory also stays out of reserve masks.
+  - `occluders` (ForestOccluders, forest_occluders.gd): every 0.2 s the trees whose crown hides a visible
+    actor/prop near the camera focus (zoom ≤ 80) are drawn — at most 8, nearest first — by a per-tree copy
+    that composites the WHOLE tree over the scene at 0.35 opacity (forest_wind_fade*.gdshader, screen copy,
+    `instance uniform tree_opacity`), fading in 0.3 s / out 0.45 s; the canopy/impostor instance is hidden
+    meanwhile (`canopy.set_instance_hidden`, INSTANCE_CUSTOM r = 1 kit / b = 0 impostor) and a shadow-only
+    copy keeps the shadow. `occluders.last_query` reports targets / candidates / hiding / ms.
+  - Fog look (delivery spec WORLD_LAYOUT_AND_FOG_RU §79–95): the soft edge lies entirely on the fog side of
+    the explored boundary (2.5 m blend band + ≤ 1 m wind lobes; revealed cells receive no fog), opaque past
+    the band (density 0.9 /m, top rises to canopy height within ~10 m, camera-near cap unchanged); the wisp
+    sheet and haze bank over revealed ground are removed. Known forest away from the squad and the mare
+    (outside the sight circles: reveal radius 10 m, falling off to 14 m) stays visible dimmed by
+    `DIM_EXPLORED` 0.09 as a plain darkening (no haze colour, never inside the town). Projection rules are
+    unchanged: fog opens only from server cells (squad's confirmed checkpoints, entrance corridor).
+  - Gameplay layer (forest_game.gd): while the squad or an escort is under way the client reads `/api/state`
+    every 1.2 s of server time, so each committed checkpoint reveal dissolves on its own (~2 s per cell)
+    instead of all at once on arrival.
+

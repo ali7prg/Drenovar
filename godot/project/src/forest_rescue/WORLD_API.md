@@ -141,8 +141,16 @@ LOD), `fog_culled` (instances removed because they stand deeper than 3 m inside 
     (`forest_ground.gdshader` meadow_grade), camp pads; limestone warmer (ring / quarry); mist wisps off
     (`ForestWater.MIST_ENABLED` false: they read as fog of war). Winch v2 (lf_mechanism_winch_sequence) keeps the v1
     node / clip contract.
+  - Entry time-slicing (iPhone): fog noise generated on a worker thread (`ForestFog.prepare_noise_async`), landmark GLBs
+    loaded on worker threads and instanced ≤ ~8 ms per frame (`await ForestLandmarks.populate()`), impostor meshes one
+    species per frame; `ForestWorld.setup_stage` names the running step (entry probe). ActorDirector warms every adventure
+    model + reward FX once per session (`warm_pipelines`, far below the terrain for 3 frames); boss-fight wedge
+    tightened to ±0.17 rad inside the entrance gap (the wing soldiers stood behind the entrance rocks).
+  - Squad roster (production, 2026-11-21): the squad panel offers only ENG-01/02/03/04/06 (`adventure_panels.gd`
+    RECRUIT_ORDER); the soldier model fallback is ENG-01; QA fixtures / e2e armies use ENG-06 for ENG-07, ENG-01 for ENG-09.
   - QA: `qa_forest_captives.gd` (12 sites caged, exit, escort; one still per act), `qa_forest_arena_camera.gd`
-    (boss + squad in frame and unoccluded in the hunt / fury / last_stand fight camera), `qa_forest_perf.gd --entry`
+    (boss + squad in frame and unoccluded in the hunt / fury / last_stand fight camera: each actor drawn flat magenta with
+    and without the depth test, ≥ 60 % of the silhouette visible), `qa_forest_perf.gd --entry`
     (entry frame times) and per-segment frame-time p50/p95/p99/max, texture / video memory and pipeline compilations.
 
 * v3.4 (2026-11-21, layout passes 2–3 — no API change, API_VERSION unchanged):

@@ -19,6 +19,7 @@ the other way at 25/16 = 1.5625, the crank 1:1 on the axle. Rest = chest at the 
 New node pit_void: the dark pit mouth (the game lifts it to the terrain surface, see actor_director).
 """
 import math
+import sys
 
 import numpy as np
 
@@ -58,6 +59,38 @@ VOID_COLOUR = (0.055, 0.045, 0.038)
 # game sun (forest_world SUN_ROTATION) in the model's frame at the device yaw 45 deg (Blender axes)
 GAME_LIGHT = (-0.652, -0.15, 0.743)
 SMOOTH_ANGLE = 40.0
+# baked vertex AO (pv2mat.bake_vertex_ao): static parts occlude each other (the drum, gears and crank turn in
+# place), the chest / lid only themselves (they travel), rope and pit void none; soft sun shadow toward the
+# light between the painting's and the game's (model space)
+AO_SUN = (-0.612, -0.331, 0.719)
+AO_STRENGTH = 0.8
+AO_SUN_STRENGTH = 0.38
+AO_DIST = 0.9
+SHARP_TAGS = ("rubble", "lip")
+NO_CALIBRATE = ("brass",)
+_STATIC = ("root", "drum", "big_gear", "pinion", "crank")
+
+
+def ao_occluders(part):
+    if part in _STATIC or part in ("brake_lever", "pawl"):
+        return _STATIC + (part,)
+    if part in ("chest", "chest_lid"):
+        return ("chest", "chest_lid")
+    return ()
+
+
+def make_tiles(px, sheet, rng):
+    """Default painting-measured tiles, brass from the lit half of its painted pixels (the painting's brass reads by
+    its highlights; the game has no specular)."""
+    import pv2mat
+    import mattex as MT
+    px = dict(px)
+    if "brass" in px and len(px["brass"]) > 80:
+        b = px["brass"]
+        px["brass"] = b[(b @ MT.LUMA) > np.percentile(b @ MT.LUMA, 45)]
+    return pv2mat.default_tiles(sys.modules[__name__], px, sheet, rng)
+
+
 # QA close-ups (sheet px): gears, crank, chest + pit, left trestle top + brake
 CLOSEUPS = [(100, 510, 280, 680), (360, 560, 520, 712), (180, 728, 380, 876), (40, 515, 200, 650)]
 # UV rules per tag prefix (pv2mat.assign_uvs): default "box" = metre box mapping in the primitive's own frame,

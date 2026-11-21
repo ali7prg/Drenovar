@@ -53,6 +53,7 @@ PROJ_EDGE_ERODE = 5          # px of the painting crop (review: no background co
 # props 8-18 L* brighter than the painting under the game's painted-light path + FILMIC), 1 = full lambert de-light
 DELIGHT = 0.0
 STRICT_FACING_CLASSES = set()      # material classes that use |n.v| >= 0.5 on steep faces too (set per module)
+EXPORT_VERTEX_COLOR = "NONE"       # glTF COLOR_0 ("ACTIVE": the material path's baked vertex AO in alpha)
 _SH = {}
 
 
@@ -929,7 +930,7 @@ def export(asset, B, path, texfiles):
     core.export_glb(path, objs, animations=bool(asset.clips),
                     extra={"export_animation_mode": "NLA_TRACKS", "export_optimize_animation_size": False,
                            "export_def_bones": False, "export_skins": False, "export_current_frame": True,
-                           "export_optimize_animation_keep_anim_object": True, "export_vertex_color": "NONE",
+                           "export_optimize_animation_keep_anim_object": True, "export_vertex_color": EXPORT_VERTEX_COLOR,
                            "export_image_format": "AUTO"})
     bpy.context.scene.frame_set(0)
     glbx.externalize(path, texfiles)

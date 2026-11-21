@@ -250,12 +250,180 @@ def set_tile(img, arr):
     img.pack()
 
 
-def smooth_by_angle(B, angle=40.0):
-    for o in B.objs.values():
+def smooth_by_angle(B, angle=40.0, sharp_tags=()):
+    """Smooth shading split at edges sharper than `angle`; faces whose tag starts with one of sharp_tags (rubble,
+    rough stones) keep every edge sharp (faceted)."""
+    import bmesh
+    for key, o in B.objs.items():
         me = o.data
         me.polygons.foreach_set("use_smooth", np.ones(len(me.polygons), bool))
         me.set_sharp_from_angle(angle=math.radians(angle))
+        tags = B.finfo[key]["tag"]
+        if sharp_tags and any(str(t).startswith(sharp_tags) for t in tags):
+            bm = bmesh.new()
+            bm.from_mesh(me)
+            bm.faces.ensure_lookup_table()
+            for f in bm.faces:
+                if str(tags[f.index]).startswith(sharp_tags):
+                    for e in f.edges:
+                        e.smooth = False
+            bm.to_mesh(me)
+            bm.free()
         me.update()
+
+
+# ============================================================================ baked vertex AO (COLOR_0 alpha)
+AO_FLOOR = 0.42          # forest_painted.gdshaderinc: v_ao = mix(ao_floor, 1, COLOR.a^2)
+
+
+def _hemi_dirs(n, seed=3):
+    """Cosine-weighted hemisphere directions (local frame, +Z up), stratified."""
+    rng = np.random.default_rng(seed)
+    k = int(math.ceil(math.sqrt(n)))
+    out = []
+    for i in range(k):
+        for j in range(k):
+            u1 = (i + rng.uniform(0.1, 0.9)) / k
+            u2 = (j + rng.uniform(0.1, 0.9)) / k
+            r, phi = math.sqrt(u1), 2 * math.pi * u2
+            out.append((r * math.cos(phi), r * math.sin(phi), math.sqrt(max(0.0, 1 - u1))))
+    return np.array(out[:n])
+
+
+def bake_vertex_ao(A, B, M, log=pv2.log):
+    """Per face-corner ambient occlusion (cosine-weighted hemisphere, distance falloff) times a soft sun-shadow term
+    (cone of rays toward M.AO_SUN) for every LOD mesh at rest, each part occluded by M.ao_occluders(part) only
+    (moving parts by themselves). Written as colour attribute 'Col' (RGB 1, A = sqrt((F - floor) / (1 - floor)),
+    the game's painted shader turns A back into F)."""
+    from mathutils import Vector
+    from mathutils.bvhtree import BVHTree
+    rays = getattr(M, "AO_RAYS", 40)
+    dist = getattr(M, "AO_DIST", 0.9)
+    strength = getattr(M, "AO_STRENGTH", 0.75)
+    sun = getattr(M, "AO_SUN", None)
+    sun_strength = getattr(M, "AO_SUN_STRENGTH", 0.35)
+    H = _hemi_dirs(rays)
+    cone = None
+    if sun is not None:
+        L = np.asarray(sun, float)
+        L /= np.linalg.norm(L)
+        Rl = np.array(pv2.G.frame_from(L))
+        cone = [L] + [Rl[:, 0] * math.cos(0.12) + math.sin(0.12) * (Rl[:, 1] * math.cos(a) + Rl[:, 2] * math.sin(a))
+                      for a in np.linspace(0, 2 * math.pi, 6, endpoint=False)]
+    stats = {}
+    for lod in range(3):
+        geo = {}
+        for (l_, nm), o in B.objs.items():
+            if l_ != lod:
+                continue
+            me = o.data
+            mw = np.array(o.matrix_world)
+            co = np.empty(len(me.vertices) * 3)
+            me.vertices.foreach_get("co", co)
+            V = co.reshape(-1, 3) @ mw[:3, :3].T + mw[:3, 3]
+            geo[nm] = (o, V, [list(p.vertices) for p in me.polygons])
+        trees = {}
+        vals = []
+        for nm, (o, V, P) in geo.items():
+            occ = tuple(sorted(x for x in M.ao_occluders(nm) if x in geo))
+            if not occ:
+                F = np.ones(sum(len(p) for p in P))
+            else:
+                if occ not in trees:
+                    Vs, Ps, off = [], [], 0
+                    for x in occ:
+                        Vs.append(geo[x][1])
+                        Ps += [[i + off for i in p] for p in geo[x][2]]
+                        off += len(geo[x][1])
+                    trees[occ] = BVHTree.FromPolygons([tuple(v) for v in np.concatenate(Vs)], Ps)
+                tree = trees[occ]
+                F = []
+                for p in P:
+                    Q = V[p]
+                    n = np.cross(Q[1] - Q[0], Q[2] - Q[0])
+                    if len(p) > 3:
+                        n = n + np.cross(Q[2] - Q[0], Q[3] - Q[0])
+                    nn = np.linalg.norm(n)
+                    n = n / nn if nn > 1e-12 else np.array([0, 0, 1.0])
+                    Rf = np.array(pv2.G.frame_from(n))       # local X = n
+                    dirs = H[:, 2:3] * n + H[:, 0:1] * Rf[:, 1] + H[:, 1:2] * Rf[:, 2]
+                    dirs = [Vector(tuple(d)) for d in dirs]
+                    cen = Q.mean(0)
+                    for q in Q:
+                        o_ = q + (cen - q) * 0.12 + n * 0.006
+                        ov = Vector(tuple(o_))
+                        occl = 0.0
+                        for d in dirs:
+                            hit = tree.ray_cast(ov, d, dist)
+                            if hit[0] is not None:
+                                occl += 1.0 - (hit[3] / dist) ** 0.5 * 0.6
+                        ao = 1.0 - occl / len(dirs)
+                        f = 1.0 - strength * (1.0 - ao)
+                        if cone is not None and float(n @ cone[0]) > 0.02:
+                            sh = 0
+                            for d in cone:
+                                if tree.ray_cast(ov, Vector(tuple(d)), 6.0)[0] is not None:
+                                    sh += 1
+                            f *= 1.0 - sun_strength * sh / len(cone)
+                        F.append(f)
+                F = np.array(F)
+            F = np.clip(F, AO_FLOOR, 1.0)
+            a = np.sqrt((F - AO_FLOOR) / (1.0 - AO_FLOOR))
+            me = o.data
+            attr = me.color_attributes.get("Col") or me.color_attributes.new("Col", "BYTE_COLOR", "CORNER")
+            cols = np.ones((len(me.loops), 4), np.float32)
+            cols[:, 3] = a.astype(np.float32)
+            attr.data.foreach_set("color", cols.ravel())
+            me.color_attributes.active_color = attr
+            me.color_attributes.render_color_index = list(me.color_attributes).index(attr)
+            vals.append(F)
+        allF = np.concatenate(vals) if vals else np.ones(1)
+        stats[f"LOD{lod}"] = dict(mean=round(float(allF.mean()), 3), p10=round(float(np.percentile(allF, 10)), 3))
+    log(f"  vertex AO baked: {stats}")
+    return stats
+
+
+def qa_material_ao(src, k, light):
+    """QA twin of the game's painted shader with vertex AO: emission = albedo * mix(1, lambert, k) *
+    mix(AO_FLOOR, 1, Col.a^2)."""
+    name = f"{src.name}_qaao{k:.2f}"
+    if bpy.data.materials.get(name):
+        return bpy.data.materials[name]
+    base = bl.painted_qa_material(src, k, light)
+    m = base.copy()
+    m.name = name
+    nt = m.node_tree
+    em = next(n for n in nt.nodes if n.type == "EMISSION")
+    link = next(l_ for l_ in nt.links if l_.to_node == em and l_.to_socket.name == "Color")
+    src_sock = link.from_socket
+    nt.links.remove(link)
+    vc = nt.nodes.new("ShaderNodeVertexColor")
+    vc.layer_name = "Col"
+    sq = nt.nodes.new("ShaderNodeMath")
+    sq.operation = "MULTIPLY"
+    nt.links.new(vc.outputs["Alpha"], sq.inputs[0])
+    nt.links.new(vc.outputs["Alpha"], sq.inputs[1])
+    mx = nt.nodes.new("ShaderNodeMath")
+    mx.operation = "MULTIPLY_ADD"
+    mx.inputs[1].default_value = 1.0 - AO_FLOOR
+    mx.inputs[2].default_value = AO_FLOOR
+    nt.links.new(sq.outputs["Value"], mx.inputs[0])
+    sc = nt.nodes.new("ShaderNodeVectorMath")
+    sc.operation = "SCALE"
+    nt.links.new(src_sock, sc.inputs[0])
+    nt.links.new(mx.outputs["Value"], sc.inputs["Scale"])
+    nt.links.new(sc.outputs["Vector"], em.inputs["Color"])
+    return m
+
+
+def use_qa_ao(objs, light, on=True):
+    for o in objs:
+        for i, s_ in enumerate(o.material_slots):
+            if on:
+                s_.link = "OBJECT"
+                s_.material = qa_material_ao(o.data.materials[i], pv2.PAINT_K, light)
+            else:
+                s_.link = "DATA"
 
 
 def class_gains(rgba, v, cls_info, classes_wanted, ig=None):
@@ -459,9 +627,21 @@ def run(M, modname, it, do_export=True, do_godot=True):
     sheet = np.asarray(Image.open(os.path.join(pv2.paths.ART, M.SHEET)).convert("RGB"), np.float64) / 255.0
     trng = np.random.default_rng(11)
     tiles = M.make_tiles(px, sheet, trng) if hasattr(M, "make_tiles") else default_tiles(M, px, sheet, trng)
+    dbg = os.environ.get("PV2_DEBUG_DIR")
+    if dbg:
+        os.makedirs(dbg, exist_ok=True)
+        np.savez_compressed(os.path.join(dbg, f"{aid}_iter{it}_tiles.npz"), **{c: t.astype(np.float32) for c, t in tiles.items()},
+                            **{"px_" + c: np.asarray(v_, np.float32) for c, v_ in px.items()})
     imgs, mats = make_materials(aid, tiles)
     B = pv2.realize(A, {lod: mats for lod in range(3)}, slotmap=lambda m: m)
-    smooth_by_angle(B, getattr(M, "SMOOTH_ANGLE", 40.0))
+    smooth_by_angle(B, getattr(M, "SMOOTH_ANGLE", 40.0), tuple(getattr(M, "SHARP_TAGS", ())))
+    ao_stats = None
+    if hasattr(M, "ao_occluders"):
+        ao_stats = bake_vertex_ao(A, B, M)
+        pv2.use_qa = use_qa_ao            # QA renders = the game's painted shader incl. the vertex AO
+        pv2.EXPORT_VERTEX_COLOR = "ACTIVE"
+    else:
+        pv2.EXPORT_VERTEX_COLOR = "NONE"
     tris, by_node = {}, {}
     for lod in range(3):
         by_node[f"LOD{lod}"] = {nm: core.tri_count(o) for (l_, nm), o in B.objs.items() if l_ == lod}
@@ -477,7 +657,8 @@ def run(M, modname, it, do_export=True, do_godot=True):
         rgba = pv2.render_view(A, B, v, ss=2)
         ign = v.ignore()
         if rnd == 0:
-            gains = class_gains(rgba, v, cls_info, [c for c in tiles if c not in ("void", "grass")], ign)
+            skip = set(getattr(M, "NO_CALIBRATE", ())) | {"void", "grass"}
+            gains = class_gains(rgba, v, cls_info, [c for c in tiles if c not in skip], ign)
             for c, (gn, n_, pm, rm) in gains.items():
                 gains_log[c] = dict(gain=[round(float(x), 3) for x in gn], px=n_,
                                     painting=[round(float(x) * 255) for x in pm], render=[round(float(x) * 255) for x in rm])
@@ -556,6 +737,10 @@ def run(M, modname, it, do_export=True, do_godot=True):
                          "UVs box-mapped in metres (TEXCOORD_0, repeat); no alpha",
             tile_metres={c: M.TILE_M.get(c) for c in tiles if c in M.TILE_M},
             paintedLightMix=k,
+            vertexAO=ao_stats is not None,
+            vertexAONote="COLOR_0.a = sqrt((F - 0.42) / 0.58), F = baked ambient occlusion x soft sun shadow (rest pose; "
+                         "moving parts by themselves); actor_rig enables the painted shader's use_ao for this asset",
+            vertexAOStats=ao_stats,
             paintedLightNote="tiles carry no painted light: shade = albedo * mix(1, lambert, paintedLightMix) "
                              "(actor_rig.apply_look -> ForestKit.painted_material)",
             coordinate_space="glTF (Y up, metres) relative to the GLB root; front (door / main face) faces +Z",

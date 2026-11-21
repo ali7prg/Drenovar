@@ -137,6 +137,21 @@ def class_raster(A, v, lod=0):
     return cls, classes, nrm
 
 
+def _l(c):
+    return c @ np.array([0.299, 0.587, 0.114])
+
+
+# plausibility gates on the painting's raw colours (misregistered pixels of other materials / background out)
+DEFAULT_RAMP_GATES = {
+    "wood": lambda c: (c[..., 0] - c[..., 2] > 0.08) & (_l(c) > 0.1) & (_l(c) < 0.85),
+    "iron": lambda c: (_l(c) < 0.5) & (c[..., 0] - c[..., 2] < 0.22),
+    "rope": lambda c: (c[..., 0] - c[..., 2] > 0.1) & (_l(c) > 0.12),
+    "stone": lambda c: (np.abs(c[..., 0] - c[..., 2]) < 0.16) & (_l(c) > 0.12),
+    "brass": lambda c: (c[..., 0] - c[..., 2] > 0.12) & (_l(c) > 0.12),
+    "grass": lambda c: (c[..., 1] - c[..., 2] > 0.04) & (np.abs(c[..., 0] - c[..., 1]) < 0.14),
+}
+
+
 def measure_ramps(A, v, k, M, log=pv2.log):
     """De-lit colour ramps of every class from the painting pixels the posed geometry covers (eroded mask)."""
     from scipy import ndimage as ndi
@@ -151,10 +166,16 @@ def measure_ramps(A, v, k, M, log=pv2.log):
     L /= np.linalg.norm(L)
     shade = (1 - k) + k * np.clip(nrm @ L, 0, 1)
     ramps, stats = {}, {}
+    _, bgc = v.mask()
+    gates = dict(DEFAULT_RAMP_GATES)
+    gates.update(getattr(M, "RAMP_GATES", {}))
+    far_bg = np.linalg.norm(crop - bgc[None, None], axis=2) > 0.075
     for ci, c in enumerate(classes):
-        sel = (cls == ci) & ref
+        sel = (cls == ci) & ref & far_bg
         # one-pixel class border trimmed (anti-aliased neighbours of other materials)
         sel &= ndi.binary_erosion(cls == ci, iterations=1)
+        if c in gates:
+            sel &= gates[c](crop)
         if sel.sum() < 40:
             continue
         px = crop[sel] / np.maximum(shade[sel], 0.3)[:, None]
@@ -464,6 +485,11 @@ def run(M, modname, it, do_export=True, do_godot=True):
                 set_tile(imgs[c], tiles[c])
             pv2.log("  colour calibration gains: " + ", ".join(f"{c} {d['gain']}" for c, d in gains_log.items()))
             continue
+        dbg = os.environ.get("PV2_DEBUG_DIR")
+        if dbg:
+            os.makedirs(dbg, exist_ok=True)
+            np.savez_compressed(os.path.join(dbg, f"{aid}_iter{it}_render.npz"), rgba=rgba.astype(np.float32),
+                                cls=cls_info[0], classes=np.array(cls_info[1]))
         m = pv2.compare(v, rgba, pv2.qa_path(aid, it, v.name),
                         f"{aid} v2 iter {it} (material path): {v.title or v.name} | solved camera rms "
                         f"{v.rep['rms_px']:.2f}px (n={v.rep['n']}) | painted light k={k}", ignore=ign)

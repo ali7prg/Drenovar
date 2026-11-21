@@ -53,7 +53,7 @@ PRIOR = 0.2
 CLASSES = ("wood", "iron", "rope", "stone", "brass", "ground", "grass", "void")
 TILE_M = {"wood": 0.9, "iron": 0.45, "rope": 0.28, "stone": 0.7, "brass": 0.22, "ground": 2.2, "grass": 1.0}
 ROPE_ROWS = 4                # rope tile: 4 turns across v
-ROPE_D = 0.07                # rope diameter on the drum (one row)
+ROPE_D = 0.11                # rope diameter on the drum (one row): art/10 shows ~9 turns across the coil
 VOID_COLOUR = (0.055, 0.045, 0.038)
 # game sun (forest_world SUN_ROTATION) in the model's frame at the device yaw 45 deg (Blender axes)
 GAME_LIGHT = (-0.652, -0.15, 0.743)

@@ -109,59 +109,58 @@ def stretch(t, lo, hi):
 
 
 # ----------------------------------------------------------------------------- materials
-def wood(size, lut, rng, lines=16):
-    """Weathered oak, grain along u (x): long warped latewood lines, fibre streaks, a few seasoning checks and
-    knots, silvery weathered streaks."""
+def wood(size, lut, rng, lines=11, contrast=(0.08, 0.92)):
+    """Weathered oak, grain along u (x), painted style: broad warm tone bands along the grain, crisp dark latewood
+    lines that come and go, a few long seasoning checks and knots, soft lighter weathered streaks. Fine fibre noise is
+    kept faint (no zebra / speckle at full resolution)."""
     H = W = size
     yy, xx = np.mgrid[0:H, 0:W].astype(float)
-    warp = pnoise(H, W, W * 0.35, H * 0.10, rng) * 0.55 + pnoise(H, W, W * 0.08, H * 0.03, rng) * 0.12
+    warp = pnoise(H, W, W * 0.4, H * 0.14, rng) * 0.5 + pnoise(H, W, W * 0.1, H * 0.05, rng) * 0.08
     ph = 2 * math.pi * (lines * yy / H + warp)
-    late = (0.5 + 0.5 * np.sin(ph)) ** 7                                   # narrow dark latewood lines
-    ph2 = 2 * math.pi * ((lines * 2 + 3) * yy / H + warp * 1.6 + 0.3)
-    late2 = (0.5 + 0.5 * np.sin(ph2)) ** 9
-    fade = smoothstep(-0.6, 0.9, pnoise(H, W, W * 0.25, H * 0.05, rng))    # lines come and go along the grain
-    fibre = pnoise(H, W, W * 0.06, 1.3, rng)
-    fibre2 = pnoise(H, W, W * 0.025, 0.8, rng)
-    low = pnoise(H, W, W * 0.30, H * 0.12, rng)
-    chk = pnoise(H, W, W * 0.45, 1.6, rng)
-    checks = smoothstep(2.3, 2.9, chk) * smoothstep(0.2, 1.0, pnoise(H, W, W * 0.2, H * 0.2, rng))
-    weather = smoothstep(0.8, 2.0, pnoise(H, W, W * 0.10, 2.5, rng))
-    # knots: a few dark lens-shaped spots (periodic placement), lines darkened round them
+    late = smoothstep(0.82, 0.985, 0.5 + 0.5 * np.sin(ph))                 # crisp dark latewood lines
+    fade = smoothstep(-0.5, 0.7, pnoise(H, W, W * 0.3, H * 0.06, rng))      # lines come and go along the grain
+    band = pnoise(H, W, W * 0.5, H * 0.07, rng)                              # broad tone bands along the grain
+    low = pnoise(H, W, W * 0.35, H * 0.25, rng)
+    fibre = pnoise(H, W, W * 0.08, 1.6, rng)
+    chk = pnoise(H, W, W * 0.6, 1.8, rng)
+    checks = smoothstep(2.4, 3.0, chk) * smoothstep(0.0, 0.9, pnoise(H, W, W * 0.25, H * 0.25, rng))
+    weather = smoothstep(0.9, 2.2, pnoise(H, W, W * 0.15, 3.0, rng))
     knots = np.zeros((H, W))
     for _ in range(2):
         cx, cy = rng.uniform(0, W), rng.uniform(0, H)
-        rx, ry = rng.uniform(0.025, 0.04) * W, rng.uniform(0.012, 0.02) * H
+        rx, ry = rng.uniform(0.02, 0.032) * W, rng.uniform(0.011, 0.016) * H
         dx = (xx - cx + W / 2) % W - W / 2
         dy = (yy - cy + H / 2) % H - H / 2
         r = np.sqrt((dx / rx) ** 2 + (dy / ry) ** 2)
-        knots = np.maximum(knots, 1.0 - smoothstep(0.55, 1.0, r))
-        knots = np.maximum(knots, 0.35 * (1.0 - smoothstep(1.0, 2.6, r)))
-    t = (0.55 * low + 0.45 * fibre + 0.18 * fibre2 - 1.25 * late * fade - 0.55 * late2 * (1 - fade)
-         - 2.4 * checks - 1.9 * knots + 0.55 * weather)
-    t = blur_wrap(t, 0.6)
-    return apply_ramp(stretch(rank01(t), 0.03, 0.97), lut)
+        knots = np.maximum(knots, 1.0 - smoothstep(0.6, 1.0, r))
+    t = (0.5 * band + 0.35 * low + 0.12 * fibre - 0.95 * late * fade - 2.2 * checks - 1.6 * knots + 0.4 * weather)
+    t = blur_wrap(t, 0.8)
+    return apply_ramp(stretch(rank01(t), *contrast), lut)
 
 
-def iron(size, lut, rust_col, rng, rust_amount=0.12):
-    """Forged iron: hammered facets (periodic Voronoi with lighter rims), soft mottling, pits, rust blooms."""
+def iron(size, lut, rust_col, rng, rust_amount=0.12, contrast=(0.1, 0.9)):
+    """Forged iron: soft mottling, shallow hammer dimples (periodic Voronoi, no hard rims), a few pits, rust
+    blooms in the darker hollows."""
     H = W = size
-    f1, f2, cid = voronoi(H, W, 60, rng)
-    rim = smoothstep(0.0, 6.0, f2 - f1)                                    # 0 on the facet ridges
-    facet_tone = (rng.uniform(-1, 1, 60))[cid]
-    mott = fbm(H, W, W * 0.10, H * 0.10, rng, 4, 0.55)
-    pits = smoothstep(1.7, 2.6, -pnoise(H, W, 1.6, 1.6, rng))
-    t = 0.55 * mott + 0.35 * facet_tone + 0.35 * (1.0 - rim) - 1.2 * pits
-    t = blur_wrap(t, 0.7)
-    col = apply_ramp(stretch(rank01(t), 0.04, 0.96), lut)
-    rmask = smoothstep(0.9, 1.7, fbm(H, W, W * 0.07, H * 0.07, rng, 3, 0.6) + 0.6 * pnoise(H, W, 5, 5, rng))
-    rmask *= rust_amount / max(rmask.mean(), 1e-6) if rmask.mean() > rust_amount else 1.0
-    rmask = np.clip(rmask, 0, 1)
+    f1, f2, cid = voronoi(H, W, 48, rng)
+    cell = np.sqrt(H * W / 48.0)
+    dimple = smoothstep(0.0, 0.75, f1 / cell)                              # 0 at a dent's centre -> 1 at its edge
+    facet_tone = (rng.uniform(-1, 1, 48))[cid]
+    mott = fbm(H, W, W * 0.12, H * 0.12, rng, 4, 0.5)
+    pits = smoothstep(2.0, 2.8, -pnoise(H, W, 1.8, 1.8, rng))
+    t = 0.65 * mott + 0.18 * facet_tone + 0.3 * dimple - 0.8 * pits
+    t = blur_wrap(t, 1.0)
+    col = apply_ramp(stretch(rank01(t), *contrast), lut)
+    rmask = smoothstep(1.0, 1.8, fbm(H, W, W * 0.08, H * 0.08, rng, 3, 0.6) + 0.5 * pnoise(H, W, 6, 6, rng))
+    if rmask.mean() > rust_amount:
+        rmask *= rust_amount / rmask.mean()
+    rmask = blur_wrap(np.clip(rmask, 0, 1), 1.2)
     shade = (col @ LUMA)[..., None] / max(float(np.asarray(rust_col) @ LUMA), 1e-3)
     rust = np.clip(np.asarray(rust_col)[None, None] * (0.75 + 0.5 * np.clip(shade, 0.4, 1.6)), 0, 1)
-    return col * (1 - 0.8 * rmask[..., None]) + rust * (0.8 * rmask[..., None])
+    return col * (1 - 0.7 * rmask[..., None]) + rust * (0.7 * rmask[..., None])
 
 
-def rope(size, lut, rng, rows=4, strands_per_tile=6):
+def rope(size, lut, rng, rows=4, strands_per_tile=6, contrast=(0.05, 0.95)):
     """Rows of twisted three-strand rope along v (one row = one rope diameter); u along the rope."""
     H = W = size
     yy, xx = np.mgrid[0:H, 0:W].astype(float)
@@ -176,37 +175,39 @@ def rope(size, lut, rng, rows=4, strands_per_tile=6):
     strand_edge = (1.0 - s) ** 6                                          # dark line between strands
     strand_body = np.sin(math.pi * ((ph / (2 * math.pi)) % 1.0)) ** 0.8   # each strand round
     fib = pnoise(H, W, 2.2, 0.7, rng) * 0.5 + pnoise(H, W, 6.0, 1.5, rng) * 0.5
-    t = 1.25 * across + 0.45 * strand_body - 1.1 * strand_edge + 0.22 * fib
-    t = blur_wrap(t, 0.6)
-    return apply_ramp(stretch(rank01(t), 0.03, 0.97), lut)
+    t = 1.25 * across + 0.45 * strand_body - 1.1 * strand_edge + 0.15 * fib
+    t = blur_wrap(t, 0.7)
+    return apply_ramp(stretch(rank01(t), *contrast), lut)
 
 
-def stone(size, lut, moss_col, rng, moss=0.10):
-    """Grey dressed stone: mottled mineral tone, fine speckle, a few hairline cracks, lichen / moss spots."""
+def stone(size, lut, moss_col, rng, moss=0.10, contrast=(0.1, 0.9)):
+    """Grey dressed / rough stone: broad mineral mottling, faint speckle, a few hairline cracks, lichen / moss."""
     H = W = size
-    mott = fbm(H, W, W * 0.12, H * 0.12, rng, 5, 0.55)
-    speck = pnoise(H, W, 1.2, 1.2, rng)
-    f1, f2, _ = voronoi(H, W, 14, rng)
-    crack = (1.0 - smoothstep(0.0, 2.2, f2 - f1)) * smoothstep(0.0, 1.2, pnoise(H, W, W * 0.1, H * 0.1, rng))
-    t = 0.8 * mott + 0.18 * speck - 1.1 * crack
-    t = blur_wrap(t, 0.6)
-    col = apply_ramp(stretch(rank01(t), 0.04, 0.96), lut)
-    m = smoothstep(1.1, 1.9, fbm(H, W, W * 0.06, H * 0.06, rng, 3, 0.6) + 0.5 * pnoise(H, W, 3, 3, rng))
-    m = np.clip(m * (moss / max(m.mean(), 1e-6)), 0, 1) if m.mean() > moss else m
+    mott = fbm(H, W, W * 0.14, H * 0.14, rng, 5, 0.5)
+    speck = pnoise(H, W, 1.4, 1.4, rng)
+    f1, f2, _ = voronoi(H, W, 12, rng)
+    crack = (1.0 - smoothstep(0.0, 2.0, f2 - f1)) * smoothstep(0.3, 1.3, pnoise(H, W, W * 0.1, H * 0.1, rng))
+    t = 0.85 * mott + 0.1 * speck - 0.9 * crack
+    t = blur_wrap(t, 0.8)
+    col = apply_ramp(stretch(rank01(t), *contrast), lut)
+    m = smoothstep(1.2, 2.0, fbm(H, W, W * 0.06, H * 0.06, rng, 3, 0.6) + 0.4 * pnoise(H, W, 3, 3, rng))
+    if m.mean() > moss:
+        m *= moss / m.mean()
+    m = np.clip(m, 0, 1)
     shade = np.clip((col @ LUMA)[..., None] / max(float(np.asarray(moss_col) @ LUMA), 1e-3), 0.5, 1.4)
     mc = np.clip(np.asarray(moss_col)[None, None] * shade, 0, 1)
-    return col * (1 - 0.75 * m[..., None]) + mc * (0.75 * m[..., None])
+    return col * (1 - 0.7 * m[..., None]) + mc * (0.7 * m[..., None])
 
 
-def brass(size, lut, rng):
-    """Cast brass / bronze: soft broad tone, faint brushed streaks, darker patina in blotches."""
+def brass(size, lut, rng, contrast=(0.12, 0.88)):
+    """Cast brass / bronze: soft broad tone, faint brushed streaks, a little darker patina."""
     H = W = size
     low = fbm(H, W, W * 0.25, H * 0.25, rng, 3, 0.5)
     brush = pnoise(H, W, W * 0.2, 1.5, rng)
-    pat = smoothstep(0.8, 1.8, fbm(H, W, W * 0.08, H * 0.08, rng, 3, 0.6))
-    t = 0.8 * low + 0.25 * brush - 1.0 * pat
-    t = blur_wrap(t, 0.8)
-    return apply_ramp(stretch(rank01(t), 0.05, 0.95), lut)
+    pat = smoothstep(1.2, 2.0, fbm(H, W, W * 0.08, H * 0.08, rng, 3, 0.6))
+    t = 0.85 * low + 0.2 * brush - 0.6 * pat
+    t = blur_wrap(t, 1.0)
+    return apply_ramp(stretch(rank01(t), *contrast), lut)
 
 
 def ground(size, dirt_lut, leaf_cols, grass_col, pebble_lut, rng, leaves=0.16, grass=0.10, pebbles=0.06):

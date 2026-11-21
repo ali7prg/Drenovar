@@ -500,10 +500,17 @@ func run() -> void:
 		for pct in [10, 35, 60, 85]:
 			await fresh("boss_battle_%d" % pct)
 			var arena: Vector3 = forest.target_position("lf_boss_ancient_maw")
-			look(arena + Vector3(0, 0, 3), 40.0)
+			# the game's own fight framing (actor_director.boss_fight_frame, zoom 36)
+			var frame_at: Vector3 = forest.actors.boss_fight_frame() if forest.actors.has_method("boss_fight_frame") else arena + Vector3(0, 0, 3)
+			look(frame_at, 36.0)
 			await preload_actors()
 			await frames(int(FPS * 0.8))
-			await shoot("boss_%d_z40" % pct)
+			await shoot("boss_%d_z36" % pct)
+			if pct == 35:
+				forest.world.canopy.visible = false
+				await frames(3)
+				await shoot("boss_35_z36_arena_only")
+				forest.world.canopy.visible = true
 		look(forest.target_position("lf_boss_ancient_maw"), 68.0)
 		await frames(4)
 		settle_world()
@@ -529,7 +536,8 @@ func run() -> void:
 			await fresh("boss_battle_%d" % pct)
 			var fight: Dictionary = forest.client.battle()
 			var arena: Vector3 = forest.target_position("lf_boss_ancient_maw")
-			look(arena + Vector3(0, 0, 4), 34.0)
+			var frame_at: Vector3 = forest.actors.boss_fight_frame() if forest.actors.has_method("boss_fight_frame") else arena + Vector3(0, 0, 4)
+			look(frame_at, 36.0)
 			await preload_actors()
 			var death_at := INF
 			for event in fight.get("timeline", []):

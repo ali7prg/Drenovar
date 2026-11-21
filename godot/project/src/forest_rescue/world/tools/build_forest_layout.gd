@@ -107,6 +107,8 @@ const ZONE_UNDER_SPACING := [3.4, 3.2, 3.6, 3.3, 3.0, 3.1, 3.6, 3.5]
 const HERO_PREFERRED := Vector2(-104.0, 24.0)
 const HERO_CLEAR := 9.5
 const QUARRY_PIT := 9.0           # art/01: open grey pit in front of the mine (no trunks)
+const ARENA_RIM_TREE := 26.0      # no kit trunk inside the arena GLB's own rim forest
+const ARENA_RIM_UNDER := 22.5     # no kit understory inside its cliff ring / rim shrubs
 var quarry_axis := 0.0            # direction (rad) from the pit centre to the cliff arc
 
 var atlas
@@ -328,6 +330,11 @@ func blocked_exact(x: float, z: float, tree: bool, margin_scale := 1.0, crown :=
 						continue
 				if ForestMasks.inside_mask(x, z, mask, margin):
 					return true
+	# Boss arena (art/08): the arena GLB carries its own cliff ring (rocks 15–19 m), rim shrubs
+	# (~20 m) and rim pines (22–25 m); kit trees and rocks never intersect them or the entrance.
+	var arena_d := Vector2(x, z).distance_to(Vector2(atlas.arena_center.x, atlas.arena_center.z))
+	if arena_d < (ARENA_RIM_TREE + crown * 0.35 if tree else ARENA_RIM_UNDER):
+		return true
 	for disc in landmark_discs:
 		if Vector2(x, z).distance_to(disc[0]) < float(disc[1]) * (1.0 if tree else 0.75):
 			return true

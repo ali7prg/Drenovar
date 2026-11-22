@@ -10,6 +10,7 @@ const TouchScroll = preload("res://src/touch_scroll.gd")
 const SessionStore = preload("res://src/session_store.gd")
 const Interface = preload("res://src/ui_theme.gd")
 const WebPanels = preload("res://src/web_panel_theme.gd")
+const UiKit = preload("res://src/ui_kit.gd")
 const MarchMap = preload("res://src/march_map.gd")
 const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
@@ -80,6 +81,16 @@ var modal_tools: HBoxContainer
 var modal_footer: HBoxContainer
 var modal_header: PanelContainer
 var modal_divider: ColorRect
+# Premium window parts (src/ui_kit.gd).
+var modal_vignette: TextureRect
+var modal_frame: Panel
+var modal_hero: Control
+var modal_content: MarginContainer
+var modal_side_space: Array = []
+var modal_flourishes: Array = []
+var modal_titles: VBoxContainer
+var modal_header_balance: Control
+var modal_layout := "center"
 var web_sheet_style: StyleBoxTexture
 var result_sheet_style: StyleBoxTexture
 var result_notice: Button
@@ -246,6 +257,8 @@ func _ready() -> void:
 	add_child(old_api)
 	var launch := LaunchScreen.new()
 	add_child(launch)
+	# Window kit textures decode on worker threads while the launch screen shows.
+	UiKit.preload_async()
 	# Give the branded screen a frame before parsing game data and loading meshes.
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -391,7 +404,7 @@ func build_ui() -> void:
 	profile_button = hud_action(bar, "Профиль", "profile", show_account)
 	profile_button.name = "ProfileButton"
 	var wallet := HBoxContainer.new()
-	wallet.add_theme_constant_override("separation", 2)
+	wallet.add_theme_constant_override("separation", 6)
 	wallet.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	wallet.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	wallet.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -433,15 +446,20 @@ func build_ui() -> void:
 	map_controls.add_child(navigation)
 	message = Label.new()
 	message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	message.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	message.add_theme_color_override("font_color", UiKit.IVORY)
 	message.add_theme_color_override("font_outline_color", Color("#121916"))
-	message.add_theme_constant_override("outline_size", 7)
+	message.add_theme_constant_override("outline_size", 4)
+	message.add_theme_font_override("font", UiKit.LABEL_FONT)
+	message.add_theme_stylebox_override("normal", UiKit.toast_style())
+	message.self_modulate.a = 0.0
 	outer.add_child(message)
 	connection_badge = Label.new()
 	connection_badge.name = "ConnectionBadge"
 	connection_badge.text = OFFLINE_NOTICE
 	connection_badge.add_theme_font_size_override("font_size", 15)
 	connection_badge.add_theme_color_override("font_color", Color("#ffd9a8"))
-	connection_badge.add_theme_stylebox_override("normal", Interface.style(Color("#1b1f22cc"), Color("#a8743f"), 1, 14, 5))
+	connection_badge.add_theme_stylebox_override("normal", UiKit.toast_style())
 	connection_badge.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	connection_badge.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	connection_badge.offset_top = 60
@@ -469,46 +487,82 @@ func build_ui() -> void:
 	root.add_child(dimmer)
 	dimmer.hide()
 	modal = PanelContainer.new()
-	modal.theme = WebPanels.make_theme(root.theme)
-	web_sheet_style = WebPanels.gradient_style(Color("#30353b"), Color("#1d2025"), WebPanels.BRASS, 18, 14)
-	result_sheet_style = WebPanels.gradient_style(Color("#354c34"), Color("#122a21"), Color("#e5c57d"), 20, 15)
+	modal.name = "Modal"
+	# Premium window (src/ui_kit.gd): carved oak header band, linen body, bronze rim.
+	modal.theme = UiKit.theme(root.theme)
+	web_sheet_style = UiKit.body_style()
+	result_sheet_style = UiKit.nine("kit_body_dark", Vector4.ZERO, Vector4.ZERO, true)
 	modal.add_theme_stylebox_override("panel", web_sheet_style)
 	root.add_child(modal)
+	modal_vignette = UiKit.make_vignette()
+	modal.add_child(modal_vignette)
 	var inner := VBoxContainer.new()
-	inner.add_theme_constant_override("separation", 8)
+	inner.add_theme_constant_override("separation", 0)
 	modal.add_child(inner)
 	var header := PanelContainer.new()
 	modal_header = header
-	header.add_theme_stylebox_override("panel", Interface.style(Color("#272c31"), Color.TRANSPARENT, 4, 7, 4))
+	header.name = "ModalHeader"
+	header.add_theme_stylebox_override("panel", UiKit.header_style())
+	header.custom_minimum_size.y = 70
 	inner.add_child(header)
 	var heading := HBoxContainer.new()
+	heading.add_theme_constant_override("separation", 6)
 	header.add_child(heading)
+	# Balances the close button so the title stays centred on the window.
+	modal_header_balance = Control.new()
+	modal_header_balance.custom_minimum_size.x = 56
+	modal_header_balance.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	heading.add_child(modal_header_balance)
+	var centre := HBoxContainer.new()
+	centre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	centre.alignment = BoxContainer.ALIGNMENT_CENTER
+	centre.add_theme_constant_override("separation", 10)
+	heading.add_child(centre)
+	modal_flourishes = [UiKit.flourish(false), UiKit.flourish(true)]
+	centre.add_child(modal_flourishes[0])
 	var titles := VBoxContainer.new()
-	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	titles.add_theme_constant_override("separation", 0)
-	heading.add_child(titles)
-	modal_eyebrow = Label.new()
-	modal_eyebrow.add_theme_font_size_override("font_size", 14)
-	modal_eyebrow.add_theme_color_override("font_color", WebPanels.GOLD)
+	titles.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	titles.alignment = BoxContainer.ALIGNMENT_CENTER
+	titles.add_theme_constant_override("separation", -2)
+	centre.add_child(titles)
+	centre.add_child(modal_flourishes[1])
+	modal_titles = titles
+	modal_eyebrow = UiKit.eyebrow_label()
 	titles.add_child(modal_eyebrow)
-	modal_title = Label.new()
-	modal_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	modal_title.add_theme_font_override("font", TITLE_FONT)
-	modal_title.add_theme_font_size_override("font_size", 31)
-	modal_title.add_theme_color_override("font_color", WebPanels.IVORY)
+	modal_title = UiKit.title_label(30)
 	modal_title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	titles.add_child(modal_title)
-	var close_button := button(heading,"×",close_modal)
-	close_button.custom_minimum_size = Vector2(62, 57)
-	close_button.tooltip_text = "Закрыть"
-	close_button.accessibility_name = "Закрыть"
+	var close_button := UiKit.close_button(close_modal)
+	heading.add_child(close_button)
+	# Kept for callers of the previous layout; the bronze trim of the band is the divider now.
 	var divider := ColorRect.new()
 	modal_divider = divider
-	divider.color = Color("#77684a")
-	divider.custom_minimum_size.y = 1
+	divider.color = Color.TRANSPARENT
+	divider.custom_minimum_size.y = 0
+	divider.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	inner.add_child(divider)
+	var body_row := HBoxContainer.new()
+	body_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body_row.add_theme_constant_override("separation", 0)
+	inner.add_child(body_row)
+	modal_side_space = [Control.new(), Control.new()]
+	modal_hero = Control.new()
+	modal_hero.name = "ModalHero"
+	modal_hero.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	body_row.add_child(modal_side_space[0])
+	body_row.add_child(modal_hero)
+	modal_content = MarginContainer.new()
+	modal_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body_row.add_child(modal_content)
+	body_row.add_child(modal_side_space[1])
+	for side_space: Control in modal_side_space:
+		side_space.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		side_space.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 10)
+	modal_content.add_child(column)
 	modal_tools = HBoxContainer.new()
-	inner.add_child(modal_tools)
+	column.add_child(modal_tools)
 	var scroll := TouchScroll.new()
 	modal_scroll = scroll
 	scroll.press_root = modal
@@ -516,18 +570,22 @@ func build_ui() -> void:
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.follow_focus = true
-	inner.add_child(scroll)
+	column.add_child(scroll)
 	modal_body = VBoxContainer.new()
 	modal_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	modal_body.add_theme_constant_override("separation",8)
+	modal_body.add_theme_constant_override("separation",10)
 	scroll.add_child(modal_body)
 	modal_status = Label.new()
 	modal_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	modal_status.add_theme_color_override("font_color", Color("#ffc28b"))
+	modal_status.add_theme_color_override("font_color", UiKit.WARN)
 	modal_status.hide()
-	inner.add_child(modal_status)
+	column.add_child(modal_status)
 	modal_footer = HBoxContainer.new()
-	inner.add_child(modal_footer)
+	modal_footer.alignment = BoxContainer.ALIGNMENT_CENTER
+	modal_footer.add_theme_constant_override("separation", 18)
+	column.add_child(modal_footer)
+	modal_frame = UiKit.make_frame()
+	modal.add_child(modal_frame)
 	place_modal("center")
 	modal.hide()
 	result_notice = Button.new()
@@ -588,8 +646,11 @@ func setup_resource_icons() -> void:
 func add_resource_button(wallet: Container, key: String) -> void:
 	var control := button(wallet, "", show_economy.bind(key))
 	control.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
-	control.custom_minimum_size = Vector2(108, 44)
-	Interface.hud_button(control)
+	control.custom_minimum_size = Vector2(112, 42)
+	# Dark oak pill under each balance (src/ui_kit.gd).
+	var chip := UiKit.hud_chip_styles()
+	for state_name: String in chip:
+		control.add_theme_stylebox_override(state_name, chip[state_name])
 	resource_buttons[key] = control
 	var card := HBoxContainer.new()
 	card.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -630,8 +691,14 @@ func add_resource_icon(parent: Control, key: String, pixels: float) -> void:
 	parent.add_child(icon)
 
 func panel(inset := 14, dialog := false) -> PanelContainer:
+	# Window sub-panel: a linen card in a bronze hairline (src/ui_kit.gd).
 	var control := PanelContainer.new()
-	control.add_theme_stylebox_override("panel", Interface.panel_style(inset, dialog))
+	var card := UiKit.row_style().duplicate() as StyleBoxTexture
+	card.content_margin_left = inset
+	card.content_margin_right = inset
+	card.content_margin_top = maxi(inset - 4, 4)
+	card.content_margin_bottom = inset
+	control.add_theme_stylebox_override("panel", card)
 	return control
 
 func button(parent: Container, title: String, action: Callable, enabled := true) -> Button:
@@ -653,11 +720,8 @@ func row(parent: Container, title: String) -> void:
 func bind_countdown(label: Label, title: String, ends_at: float) -> void:
 	var update := func():
 		var left := display_end(ends_at) - timer_now()
-		if left <= 0.0:
-			label.text = "%s · %s" % [title, timer_end_label()]
-			return
-		var seconds := ceili(left / 1000.0)
-		label.text = "%s · %s" % [title, clock_text(seconds)]
+		var value := timer_end_label() if left <= 0.0 else clock_text(ceili(left / 1000.0))
+		label.text = value if title.is_empty() else "%s · %s" % [title, value]
 	var clock := Timer.new()
 	clock.wait_time = 1.0
 	clock.autostart = true
@@ -671,9 +735,8 @@ static func clock_text(seconds: int) -> String:
 	return "%d:%02d" % [seconds / 60, seconds % 60]
 
 func countdown(title: String, ends_at: float) -> void:
-	var label := Label.new()
-	modal_body.add_child(label)
-	bind_countdown(label, title, ends_at)
+	# Hourglass pill: what is running on the left, the time left in gold on the right.
+	bind_countdown(UiKit.timer_pill(modal_body, title, ""), "", ends_at)
 
 func balance(id: String) -> int:
 	if id == "wood":
@@ -799,7 +862,7 @@ func add_workers_note(parent: Container) -> void:
 	if ends < INF and ends > timer_now():
 		var label := Label.new()
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.add_theme_color_override("font_color", Color("#ffc28b"))
+		label.add_theme_color_override("font_color", UiKit.WARN)
 		parent.add_child(label)
 		bind_countdown(label, workers_busy_text() + " · свободен через", ends)
 	else:
@@ -890,9 +953,7 @@ func show_economy(resource := "") -> void:
 
 func add_economy_card(resource: String, selected: bool) -> void:
 	var card := PanelContainer.new()
-	var accent: Color = Interface.RESOURCES[resource]
-	var border := accent.darkened(0.38) if selected else Color("#41574a")
-	card.add_theme_stylebox_override("panel", Interface.style(Color("#22312a"), border, 10, 10, 7))
+	card.add_theme_stylebox_override("panel", UiKit.row_style())
 	modal_body.add_child(card)
 	var contents := HBoxContainer.new()
 	contents.add_theme_constant_override("separation", 11)
@@ -902,8 +963,9 @@ func add_economy_card(resource: String, selected: bool) -> void:
 	values.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	contents.add_child(values)
 	var total := Label.new()
-	total.add_theme_color_override("font_color", accent)
-	total.add_theme_font_size_override("font_size", 24 if selected else 18)
+	total.add_theme_color_override("font_color", UiKit.INK)
+	total.add_theme_font_override("font", UiKit.LABEL_FONT)
+	total.add_theme_font_size_override("font_size", 24 if selected else 19)
 	values.add_child(total)
 	var production := Label.new()
 	production.add_theme_font_size_override("font_size", 15 if selected else 14)
@@ -939,7 +1001,7 @@ func refresh_economy() -> void:
 		labels.total.text = "%s — %s" % [RESOURCE_NAMES[resource], format_balance(value)]
 		var status := "Производство приостановлено" if stopped else "+%d/мин" % rate
 		labels.production.text = "Запас основателя" if founder else status + " · предел производства — " + format_balance(limit)
-		labels.production.add_theme_color_override("font_color", Color("#f4c592") if stopped else Interface.MUTED)
+		labels.production.add_theme_color_override("font_color", UiKit.WARN if stopped else UiKit.INK_MUTED)
 
 func format_balance(value: int) -> String:
 	var digits := str(value)
@@ -956,6 +1018,28 @@ var build_cards := {}
 
 func building_card(type: String) -> Texture2D:
 	var key: String = data.types.get(type, "")
+	if key.is_empty():
+		return null
+	if not build_cards.has(key):
+		var path := "res://assets/ui/buildings/%s.png" % key
+		build_cards[key] = load(path) if ResourceLoader.exists(path) else null
+	return build_cards[key]
+
+# Card art of a V6 building type: the model the city shows for its instance, else the
+# model of the same purpose (premium window hero, src/ui_kit.gd).
+const V6_CARD_KEYS := {"B01":"hall", "B02":"house", "B03":"warehouse", "B05":"market27", "B06":"lumber",
+	"B07":"quarry27", "B08":"ironmine27", "B11":"barracks26", "B12":"range26", "B13":"stables26",
+	"B15":"academy27", "B16":"hospital27", "B20":"well", "B21":"lumber"}
+
+func v6_card(type: String) -> Texture2D:
+	var instance: Dictionary = v6_panels.building(type) if v6_panels.enabled() else {}
+	if not instance.is_empty():
+		for city_building in state.city.get("buildings", []):
+			if str(city_building.get("id", "")) == str(instance.id):
+				var art := building_card(str(city_building.type))
+				if art != null:
+					return art
+	var key: String = V6_CARD_KEYS.get(type, "")
 	if key.is_empty():
 		return null
 	if not build_cards.has(key):
@@ -1031,7 +1115,7 @@ func show_build_menu(group := build_group) -> void:
 	modal_tools.add_child(status)
 	if not builder_ready():
 		bind_countdown(status, workers_busy_text(), next_worker_free_at())
-		status.add_theme_color_override("font_color", Color("#ffc28b"))
+		status.add_theme_color_override("font_color", UiKit.WARN)
 		if not order.is_empty() and order.kind != "clear":
 			var hurry := button(modal_tools, "Ускорить", show_speedups.bind("construction", order, ""))
 			hurry.add_theme_font_size_override("font_size", 16)
@@ -1039,7 +1123,7 @@ func show_build_menu(group := build_group) -> void:
 		status.text = "Ратуша · ур. %d" % hall_level()
 		if worker_total() > 1:
 			status.text += " · рабочих свободно %d из %d" % [free_workers(), worker_total()]
-		status.add_theme_color_override("font_color", WebPanels.GOLD)
+		status.add_theme_color_override("font_color", UiKit.BRONZE)
 	var strip := HBoxContainer.new()
 	strip.add_theme_constant_override("separation", 10)
 	strip.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -1511,9 +1595,13 @@ func show_build_details(definition: Dictionary) -> void:
 	var metrics: Dictionary = data.buildingTerms.get(definition.id, {})
 	if metrics.get("production") != null:
 		row(info, "Производство · +%d/мин" % int(metrics.rates[0]))
+	var cost_plate := PanelContainer.new()
+	cost_plate.add_theme_stylebox_override("panel", UiKit.nine("kit_strip", Vector4(26, 14, 26, 14), Vector4(30, 8, 30, 8)))
+	info.add_child(cost_plate)
 	var cost_row := HBoxContainer.new()
-	cost_row.add_theme_constant_override("separation", 14)
-	info.add_child(cost_row)
+	cost_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	cost_row.add_theme_constant_override("separation", 18)
+	cost_plate.add_child(cost_row)
 	fill_cost_row(cost_row, option.terms.cost)
 	row(info, "Время · %d сек." % int(option.terms.seconds))
 	var worker_free := builder_ready()
@@ -1533,7 +1621,7 @@ func show_build_details(definition: Dictionary) -> void:
 		var why := Label.new()
 		why.text = reason
 		why.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		why.add_theme_color_override("font_color", WebPanels.GOLD)
+		why.add_theme_color_override("font_color", UiKit.WARN)
 		info.add_child(why)
 	var can_build: bool = reason.is_empty() and not player_id.is_empty()
 	var placeable: bool = option.state == "ready" and worker_free and not site.is_empty()
@@ -2311,9 +2399,12 @@ func close_modal() -> void:
 		dialog_tween.kill()
 	dimmer.hide()
 	modal.hide()
+	modal.scale = Vector2.ONE
+	modal.modulate.a = 1.0
 	empty(modal_body)
 	empty(modal_tools)
 	empty(modal_footer)
+	empty(modal_hero)
 
 func show_world_overview() -> void:
 	if scene_loading or map_name != "world":
@@ -2491,9 +2582,14 @@ func building_definition(type: String) -> Dictionary:
 	return {}
 
 func place_modal(layout: String) -> void:
+	modal_layout = layout
 	var anchors := Rect2(0.5, 0.5, 0, 0)
-	var offsets := Rect2(-300, -220, 600, 440)
+	var offsets := Rect2(-320, -232, 640, 464)
 	match layout:
+		"full":
+			# Full-screen window (premium kit): header band across the screen.
+			anchors = Rect2(0, 0, 1, 1)
+			offsets = Rect2(0, 0, 0, 0)
 		"wide":
 			anchors = Rect2(0, 0, 1, 1)
 			offsets = Rect2(48, 13, -96, -26)
@@ -2523,8 +2619,51 @@ func place_modal(layout: String) -> void:
 	modal.offset_top = offsets.position.y
 	modal.offset_right = offsets.end.x
 	modal.offset_bottom = offsets.end.y
+	arrange_modal()
 
-func open_modal(title: String, layout := "center", eyebrow := "") -> void:
+# Frame, header and content column for the current layout (src/ui_kit.gd).
+func arrange_modal() -> void:
+	var full := modal_layout == "full"
+	var docked := modal_layout in ["right", "left", "city_target", "sheet"]
+	modal_frame.visible = not full
+	modal_header.custom_minimum_size.y = 70 if full else 62
+	modal_title.add_theme_font_size_override("font_size", 32 if full or modal_layout == "wide" else (23 if docked else 26))
+	var roomy := full or modal_layout in ["wide", "garrison"]
+	for art: Control in modal_flourishes:
+		art.visible = roomy
+	# Centred titles size to their text on wide windows; narrow ones trim with an ellipsis.
+	modal_title.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING if roomy else TextServer.OVERRUN_TRIM_ELLIPSIS
+	modal_titles.size_flags_horizontal = Control.SIZE_SHRINK_CENTER if roomy else Control.SIZE_EXPAND_FILL
+	var view := Vector2(1366, 630)
+	if is_inside_tree():
+		view = get_viewport().get_visible_rect().size
+	var hero_on := full and modal_hero.get_child_count() > 0
+	modal_hero.visible = hero_on
+	modal_hero.custom_minimum_size.x = roundf(view.x * 0.4) if hero_on else 0.0
+	for side_space: Control in modal_side_space:
+		side_space.visible = full and not hero_on
+	if full and not hero_on:
+		modal_content.size_flags_horizontal = Control.SIZE_FILL
+		modal_content.custom_minimum_size.x = minf(900.0, view.x - 56.0)
+	else:
+		modal_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		modal_content.custom_minimum_size.x = 0.0
+	var side := 28 if full else 22
+	modal_content.add_theme_constant_override("margin_left", 8 if hero_on else side)
+	modal_content.add_theme_constant_override("margin_right", side)
+	modal_content.add_theme_constant_override("margin_top", 12)
+	modal_content.add_theme_constant_override("margin_bottom", 18 if full else 20)
+
+# Optional illustration column of a full-screen window: art over a tinted ink-wash splash.
+func set_modal_hero(art: Texture2D, tint := Color("#a87d44"), caption := "") -> void:
+	empty(modal_hero)
+	if art != null:
+		var picture := UiKit.hero(art, Color(tint, 0.62), caption)
+		picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		modal_hero.add_child(picture)
+	arrange_modal()
+
+func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D = null) -> void:
 	action_ring.close()
 	cancel_placement()
 	modal_scroll.horizontal = false
@@ -2536,6 +2675,7 @@ func open_modal(title: String, layout := "center", eyebrow := "") -> void:
 	modal_header.visible = not result_open
 	modal_divider.visible = not result_open
 	modal.add_theme_stylebox_override("panel", result_sheet_style if result_open else web_sheet_style)
+	modal_vignette.visible = not result_open
 	economy_rows.clear()
 	economy_source_label = null
 	starter_panel_open = false
@@ -2549,18 +2689,20 @@ func open_modal(title: String, layout := "center", eyebrow := "") -> void:
 	if is_instance_valid(stage):
 		stage.clear_route()
 	modal_title.text = title
-	modal_title.add_theme_font_size_override("font_size", 31)
 	modal_eyebrow.text = eyebrow
 	modal_eyebrow.visible = not eyebrow.is_empty()
 	modal_status.hide()
 	empty(modal_body)
 	empty(modal_tools)
 	empty(modal_footer)
+	empty(modal_hero)
 	modal_tools.hide()
 	modal_footer.hide()
 	place_modal(layout)
+	if art != null:
+		set_modal_hero(art)
 	modal_body.get_parent().set_deferred("scroll_vertical", 0)
-	dimmer.color = Color.TRANSPARENT if layout in ["left", "right", "city_target"] else (Color("#10141740") if layout == "sheet" else Color("#101417a0"))
+	dimmer.color = Color.TRANSPARENT if layout in ["left", "right", "city_target"] else (Color("#10141740") if layout == "sheet" else Color("#0b0805b0"))
 	if result_open:
 		dimmer.color = Color("#09140bc9")
 		result_notice.hide()
@@ -2568,21 +2710,29 @@ func open_modal(title: String, layout := "center", eyebrow := "") -> void:
 	modal.show()
 	modal_scroll.set_modal_active(true)
 	if entering:
-		modal.modulate.a = 0.82
+		# Quick settle (fade + 2 % scale, 120 ms); input is live from the first frame.
+		modal.modulate.a = 0.75
+		modal.pivot_offset = modal.get_rect().size * 0.5 if modal.size.x > 0 else Vector2.ZERO
+		modal.scale = Vector2(0.985, 0.985) if layout != "sheet" else Vector2.ONE
 		dialog_tween = create_tween()
-		dialog_tween.tween_property(modal, "modulate:a", 1.0, 0.13)
+		dialog_tween.tween_property(modal, "modulate:a", 1.0, 0.12)
+		dialog_tween.parallel().tween_property(modal, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		if layout == "sheet":
 			# Bottom sheet slides up from the screen edge.
 			var rest := modal.offset_top
 			modal.offset_top = rest + 60
 			modal.offset_bottom += 60
-			dialog_tween.parallel().tween_property(modal, "offset_top", rest, 0.16).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-			dialog_tween.parallel().tween_property(modal, "offset_bottom", modal.offset_bottom - 60, 0.16).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+			dialog_tween.parallel().tween_property(modal, "offset_top", rest, 0.14).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+			dialog_tween.parallel().tween_property(modal, "offset_bottom", modal.offset_bottom - 60, 0.14).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	else:
+		modal.scale = Vector2.ONE
 
 func panel_action(parent: Container, caption: String, action: Callable, enabled := true, danger := false) -> Button:
 	var control := button(parent, caption, action, enabled)
-	control.custom_minimum_size.y = 51
-	WebPanels.primary(control, danger)
+	control.custom_minimum_size.y = 54
+	if parent == modal_footer and control.custom_minimum_size.x < 260:
+		control.custom_minimum_size.x = 260
+	UiKit.style_button(control, "danger" if danger else "primary", 20)
 	return control
 
 func panel_art(parent: Container, path: String, pixels: Vector2) -> TextureRect:
@@ -2950,7 +3100,7 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 		var tab := button(modal_tools, RECRUIT_FACILITIES[type], open_recruitment.bind(candidate), index >= 0)
 		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		if candidate.get("id") == building.id:
-			tab.add_theme_stylebox_override("normal", Interface.style(Color("#504331"), Color("#d3ae6b"), 7, 8, 6))
+			UiKit.style_button(tab, "primary")
 	button(modal_tools, "I · Англия ▾", show_military_cultures)
 
 	var layout := HBoxContainer.new()
@@ -2989,6 +3139,7 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	rank.add_theme_color_override("font_color", RANK_COLOURS[tier - 1][0].lightened(0.45))
 	display.add_child(rank)
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.add_theme_color_override("font_color", UiKit.IVORY)
 	name_label.add_theme_font_override("font", TITLE_FONT)
 	name_label.add_theme_font_size_override("font_size", 26)
 	display.add_child(name_label)
@@ -2996,6 +3147,7 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	role.text = unit.role
 	role.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	role.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	role.add_theme_color_override("font_color", Color("#e3d6bb"))
 	display.add_child(role)
 
 	var browser := VBoxContainer.new()
@@ -3070,7 +3222,8 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	var quote := Label.new()
 	quote.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var terms := panel(8)
-	terms.add_theme_stylebox_override("panel", Interface.style(Color("#272c31"), Color("#846d4d"), 6, 8, 6))
+	terms.add_theme_stylebox_override("panel", UiKit.nine("kit_strip", Vector4(26, 14, 26, 14), Vector4(30, 8, 30, 10)))
+	quote.add_theme_color_override("font_color", Color("#e9dcc2"))
 	order.add_child(terms)
 	var terms_box := VBoxContainer.new()
 	terms.add_child(terms_box)
@@ -3082,7 +3235,7 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	var train := panel_action(order, "Обучить", func(): pass)
 	var reason := Label.new()
 	reason.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	reason.add_theme_color_override("font_color", WebPanels.GOLD)
+	reason.add_theme_color_override("font_color", UiKit.WARN)
 	order.add_child(reason)
 	var levels: Array = data.unitRequirements[unit.id]
 	if not state.city.get("kingdom") is Dictionary:
@@ -3369,8 +3522,9 @@ func load_unit_preview(preview: SubViewportContainer, visual: Dictionary, framin
 func add_upgrade_preview(parent: Container, building: Dictionary, level: int, terms: Dictionary) -> void:
 	var title := Label.new()
 	title.text = "Улучшение: уровень %d → %d" % [level, level + 1]
-	title.add_theme_font_size_override("font_size", 19)
-	title.add_theme_color_override("font_color", Color("#f1d79a"))
+	title.add_theme_font_size_override("font_size", 20)
+	title.add_theme_font_override("font", UiKit.LABEL_FONT)
+	title.add_theme_color_override("font_color", UiKit.BRONZE)
 	parent.add_child(title)
 	var pair := HBoxContainer.new()
 	pair.add_theme_constant_override("separation", 6)
@@ -3384,7 +3538,7 @@ func add_upgrade_preview(parent: Container, building: Dictionary, level: int, te
 		var caption := Label.new()
 		caption.text = ("Сейчас · ур. %d" if target == level else "После · ур. %d") % target
 		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		caption.add_theme_color_override("font_color", Color("#d9cfb8") if target == level else Color("#9fe08a"))
+		caption.add_theme_color_override("font_color", UiKit.INK_MUTED if target == level else UiKit.GOOD)
 		column.add_child(caption)
 		load_building_preview(preview, building.type, target)
 	row(parent, "Время улучшения · %s" % duration_label(int(terms.seconds)))
@@ -3393,7 +3547,7 @@ func add_upgrade_preview(parent: Container, building: Dictionary, level: int, te
 		var label := Label.new()
 		label.text = "▲ " + str(gain)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.add_theme_color_override("font_color", Color("#9fe08a"))
+		label.add_theme_color_override("font_color", UiKit.GOOD)
 		parent.add_child(label)
 
 func upgrade_gains(type: String, level: int) -> Array:
@@ -3576,8 +3730,8 @@ func inspect_encounter(encounter: Dictionary) -> void:
 	health.value = int(encounter.hp) if available else 0
 	health.show_percentage = false
 	health.custom_minimum_size.y = 9
-	health.add_theme_stylebox_override("background", Interface.style(Color("#1c2524"), Color("#756345"), 4, 0, 0))
-	health.add_theme_stylebox_override("fill", Interface.style(Color("#bcb968"), Color.TRANSPARENT, 4, 0, 0))
+	health.add_theme_stylebox_override("background", UiKit.nine("kit_track", Vector4(11, 10, 11, 10), Vector4.ZERO))
+	health.add_theme_stylebox_override("fill", UiKit.nine("kit_fill_green", Vector4(11, 10, 11, 10), Vector4.ZERO))
 	details.add_child(health)
 	row(details, "%d / %d здоровья" % [int(health.value), int(spec.hp)])
 	var rewards: Dictionary = spec.get("rewards", {})
@@ -3685,7 +3839,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 	var summary := Label.new()
 	summary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	summary.add_theme_color_override("font_color", WebPanels.GOLD)
+	summary.add_theme_color_override("font_color", UiKit.BRONZE)
 	summary.add_theme_font_size_override("font_size", 18)
 	var quote := Label.new()
 	quote.name = "MarchQuote"
@@ -3799,8 +3953,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		if available < 1:
 			continue
 		var tier := recruit_tier(unit.id)
-		var entry := panel(5)
-		entry.add_theme_stylebox_override("panel", WebPanels.gradient_style(Color("#30363b"), Color("#1d2125"), Color("#846d4d"), 6))
+		var entry := panel(8)
 		roster.add_child(entry)
 		roster.move_child(entry, first_row_index)
 		first_row_index += 1
@@ -3816,6 +3969,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		var badge := Label.new()
 		badge.text = ["I", "II", "III", "IV", "V"][tier - 1]
 		badge.add_theme_font_size_override("font_size", 12)
+		badge.add_theme_color_override("font_color", UiKit.IVORY)
 		badge.add_theme_color_override("font_outline_color", Color("#120e0a"))
 		badge.add_theme_constant_override("outline_size", 4)
 		badge.size_flags_vertical = Control.SIZE_SHRINK_END
@@ -5789,6 +5943,9 @@ func apply_not_modified(response: Dictionary, sent_tag: String, tag_serial: int)
 
 func _process(delta: float) -> void:
 	advance_server_clock(delta)
+	# The notice banner (src/ui_kit.gd toast) shows only while there is a notice.
+	if message != null:
+		message.self_modulate.a = 0.0 if message.text.is_empty() else 1.0
 	drain_retired_scenes()
 	memory_peak_mb = maxf(memory_peak_mb, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0)
 	diagnostics.heartbeat(map_name, memory_in_use_mb(),

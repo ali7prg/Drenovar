@@ -1,6 +1,7 @@
 extends RefCounted
 
 const Palette = preload("res://src/ui_theme.gd")
+const UiKit = preload("res://src/ui_kit.gd")
 const BRASS := Color("#a4814d")
 const IVORY := Color("#f2e7d0")
 const GOLD := Color("#ebcc89")
@@ -63,6 +64,10 @@ static func make_theme(base: Theme) -> Theme:
 	return theme
 
 static func primary(control: Button, danger := false) -> void:
+	# Premium kit: gilded bronze (or cranberry enamel for danger) plate.
+	UiKit.style_button(control, "danger" if danger else "primary", 19)
+
+static func primary_flat(control: Button, danger := false) -> void:
 	var top := Color("#894d49") if danger else Color("#f1d497")
 	var bottom := Color("#773c39") if danger else Color("#b98b4c")
 	var edge := Color("#d59978") if danger else Color("#efce87")

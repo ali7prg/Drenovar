@@ -1,5 +1,7 @@
 extends ScrollContainer
 
+const UiKit = preload("res://src/ui_kit.gd")
+
 # Finger travel (in canvas units) before a touch becomes a scroll. 9 units was
 # ~0.9 mm on an iPhone 12 (17 device pixels), so ordinary finger roll on a tap
 # turned it into a drag and the press was lost. 16 units is ~10 pt, the iOS norm.
@@ -159,6 +161,8 @@ func highlight(target: BaseButton) -> void:
 	pressed_button = target
 	pressed_tint_from = target.self_modulate
 	target.self_modulate = pressed_tint_from * PRESSED_TINT
+	# Press-in on touch-down (premium kit): the plate visibly gives under the finger.
+	UiKit.press_in(target)
 
 func hold_highlight() -> void:
 	# Keep the tint for a moment so even a quick tap is visibly acknowledged.
@@ -173,11 +177,13 @@ func hold_highlight() -> void:
 		get_tree().create_timer(PRESS_HOLD_SEC).timeout.connect(func():
 			var remaining := target_ref.get_ref() as BaseButton
 			if remaining != null:
-				remaining.self_modulate = tint)
+				remaining.self_modulate = tint
+				UiKit.press_out(remaining))
 
 func release_highlight() -> void:
 	if is_instance_valid(pressed_button):
 		pressed_button.self_modulate = pressed_tint_from
+		UiKit.press_out(pressed_button)
 	pressed_button = null
 
 func slider_at(at: Vector2) -> HSlider:

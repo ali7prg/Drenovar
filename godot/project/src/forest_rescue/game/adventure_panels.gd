@@ -25,7 +25,7 @@ func _init(owner_game: Node) -> void:
 func t(key: String, args := {}) -> String:
 	return content.text(key, args)
 
-func body_label(value: String, size := 18, color := Color("#f2e7d0")) -> Label:
+func body_label(value: String, size := 18, color := Color("#2b2016")) -> Label:
 	var label := Label.new()
 	label.text = value
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -35,7 +35,7 @@ func body_label(value: String, size := 18, color := Color("#f2e7d0")) -> Label:
 	return label
 
 func heading(value: String) -> Label:
-	var label := body_label(value, 22, Color("#ebcc89"))
+	var label := body_label(value, 22, Color("#8d5f22"))
 	label.add_theme_font_override("font", Style.TITLE_FONT)
 	return label
 
@@ -64,7 +64,7 @@ func open_route() -> void:
 	if not suggested.is_empty() and String(step.get("action", "")) == "move":
 		action("%s → %s" % [t("hud.continue"), game.target_name(suggested)], close_then(func(): game.request_action("move", {"targetId":suggested})), true, true)
 	if not String(step.get("hint", "")).is_empty():
-		body_label(String(step.hint), 16, Color("#d9cdb2"))
+		body_label(String(step.hint), 16, Color("#6a5843"))
 	var targets: Array[String] = []
 	if bool(client.adv.get("horse", {}).get("visible", false)):
 		targets.append("lf_horse_origin")
@@ -89,14 +89,14 @@ func open_route() -> void:
 # ------------------------------------------------------------------ squad («Отряд»)
 func open_squad() -> void:
 	main.open_modal(t("hud.squad"), "left", t("title").to_upper())
-	body_label(t("hud.squadNote"), 16, Color("#d9cdb2"))
+	body_label(t("hud.squadNote"), 16, Color("#6a5843"))
 	var squad: Dictionary = client.squad()
 	var current: Dictionary = squad.get("units", {})
 	if not current.is_empty():
 		var parts: PackedStringArray = []
 		for id in current:
 			parts.append("%s × %d" % [main.unit_for_id(id).get("name", id), int(current[id])])
-		body_label(" · ".join(parts), 17, Color("#ebcc89"))
+		body_label(" · ".join(parts), 17, Color("#8d5f22"))
 	var healthy: Dictionary = main.state.get("healthy", {})
 	var pool := {}
 	for id in healthy:
@@ -107,7 +107,7 @@ func open_squad() -> void:
 	for id in pool:
 		total += int(pool[id])
 	if total <= 0:
-		body_label(t("hud.squadEmpty"), 17, Color("#ffc28b"))
+		body_label(t("hud.squadEmpty"), 17, Color("#9c4f10"))
 		return
 	var spins := {}
 	for id in RECRUIT_ORDER:
@@ -155,7 +155,7 @@ func open_journal() -> void:
 		if client.available():
 			body_label(t("forest.locked.progress", {"level":clampi(client.hall_level(), 1, 3)}), 16)
 		return
-	body_label(t("objective." + phase), 19, Color("#ebcc89"))
+	body_label(t("objective." + phase), 19, Color("#8d5f22"))
 	var tasks_done := 0
 	for entry in camp.get("sites", []):
 		tasks_done += int(entry.get("step", 0))
@@ -164,7 +164,7 @@ func open_journal() -> void:
 	var chip := func(text_value: String):
 		var label := Label.new()
 		label.text = text_value
-		label.add_theme_color_override("font_color", Color("#d9cdb2"))
+		label.add_theme_color_override("font_color", Color("#6a5843"))
 		tools.add_child(label)
 	chip.call(t("campaign.progress", {"count":tasks_done}) + "   ")
 	chip.call(t("people.progress", {"count":int(camp.get("rescuedCount", camp.get("rescuedIds", []).size()))}))
@@ -187,13 +187,13 @@ func open_journal() -> void:
 	sound.button_pressed = game.sound_enabled
 	sound.toggled.connect(func(on): game.set_sound(on))
 	controls.add_child(sound)
-	body_label(t("pause.note"), 15, Color("#b9ae96"))
+	body_label(t("pause.note"), 15, Color("#6a5843"))
 	var unlocked_acts: Array = camp.get("actUnlocked", [true, false, false, false])
 	for act in 4:
 		var act_open: bool = bool(unlocked_acts[act]) if act < unlocked_acts.size() else false
 		heading("%s · %s" % [ROMAN[act], ", ".join(PackedStringArray(site_names_for_act(act + 1)))] if act_open else ROMAN[act])
 		if not act_open:
-			body_label(t("act.locked"), 16, Color("#b9ae96"))
+			body_label(t("act.locked"), 16, Color("#6a5843"))
 			continue
 		for site_id in content.site_order:
 			var site: Dictionary = content.site(site_id)
@@ -316,10 +316,10 @@ func open_rewards() -> void:
 			cell.name = "%s_%s" % [key, String(pair[0]).get_slice(".", 1)]
 			cell.text = t(pair[0], {"amount":content.format_amount(int(pair[1].get(key, 0)))})
 			cell.add_theme_font_size_override("font_size", 15)
-			cell.add_theme_color_override("font_color", Color("#d9cdb2") if pair[0] != "reward.pending" else Color("#ebcc89"))
+			cell.add_theme_color_override("font_color", Color("#6a5843") if pair[0] != "reward.pending" else Color("#8d5f22"))
 			grid.add_child(cell)
 		pending_total += int(pending.get(key, 0))
-	body_label(t("reward.capacity") if pending_total > 0 else t("reward.reserve"), 15, Color("#b9ae96"))
+	body_label(t("reward.capacity") if pending_total > 0 else t("reward.reserve"), 15, Color("#6a5843"))
 	var claim := action(t("reward.claim"), func(): await claim_rewards(), pending_total > 0 and client.unlocked(), true)
 	claim.name = "ClaimRewards"
 	var toggle := CheckButton.new()
@@ -328,9 +328,9 @@ func open_rewards() -> void:
 	toggle.button_pressed = bool(client.adv.get("autoRefill", false))
 	toggle.disabled = not client.unlocked()
 	main.modal_body.add_child(toggle)
-	body_label(t("reward.autoRefill.description"), 15, Color("#b9ae96"))
+	body_label(t("reward.autoRefill.description"), 15, Color("#6a5843"))
 	if not toggle.button_pressed:
-		body_label(t("reward.autoRefill.off"), 15, Color("#8f8775"))
+		body_label(t("reward.autoRefill.off"), 15, Color("#8a7a64"))
 	toggle.toggled.connect(func(on):
 		var result: Dictionary = await game.request_action("set_auto_refill", {"enabled":on})
 		if main.modal.visible and main.modal_title.text == t("hud.rewards"):
@@ -410,14 +410,14 @@ func open_horse() -> void:
 		body_label(String(paragraph), 17)
 	if int(client.site_state("lf_site_01").get("step", 0)) >= 5:
 		var spoken: Dictionary = content.line("horse_return")
-		body_label("%s: «%s»" % [spoken.get("speaker", ""), spoken.get("text", "")], 17, Color("#f4e1b4"))
+		body_label("%s: «%s»" % [spoken.get("speaker", ""), spoken.get("text", "")], 17, Color("#5a3510"))
 	if client.phase() == "prologue":
 		action(t("button.follow"), close_then(func(): game.on_continue_pressed()), true, true)
 
 func open_boss() -> void:
 	var boss: Dictionary = content.campaign.get("boss", {})
 	main.open_modal(String(boss.get("displayName", "")), "left", t("title").to_upper())
-	body_label(String(boss.get("visualDirection", "")), 16, Color("#d9cdb2"))
+	body_label(String(boss.get("visualDirection", "")), 16, Color("#6a5843"))
 	var state := String(client.adv.get("boss", {}).get("state", "locked"))
 	if state == "locked":
 		body_label(t("boss.locked"))
@@ -428,7 +428,7 @@ func open_boss() -> void:
 		var attacks: PackedStringArray = []
 		for attack in phase.get("attacks", []):
 			attacks.append(t("boss.telegraph." + String(attack)))
-		body_label("%s — %s" % [t("boss.phase." + String(phase.get("id", ""))), "; ".join(attacks)], 15, Color("#cfc3a8"))
+		body_label("%s — %s" % [t("boss.phase." + String(phase.get("id", ""))), "; ".join(attacks)], 15, Color("#6a5843"))
 	if state in ["available", "active"] or client.phase() in ["boss_unlocked", "boss_active"]:
 		action(t("boss.begin"), close_then(func(): game.on_continue_pressed()), true, true)
 

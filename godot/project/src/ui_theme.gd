@@ -1,5 +1,7 @@
 extends RefCounted
 
+const UiKit = preload("res://src/ui_kit.gd")
+
 const GOLD := Color("#e7c17d")
 const INK := Color("#111916")
 const TEXT := Color("#f6f0e4")
@@ -44,10 +46,9 @@ static func button_styles(accent: Color = GOLD, filled := false) -> Dictionary:
 		"focus":focus
 	}
 
-static func accent_button(control: Button, accent: Color = GOLD) -> void:
-	var styles := button_styles(accent, true)
-	for state in styles:
-		control.add_theme_stylebox_override(state, styles[state])
+static func accent_button(control: Button, _accent: Color = GOLD) -> void:
+	# Premium kit: lapis enamel plate (secondary action).
+	UiKit.style_button(control, "secondary")
 
 static func hud_button(control: Button, framed := false) -> void:
 	for state in ["normal", "hover", "pressed", "disabled", "focus"]:

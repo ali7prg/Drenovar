@@ -213,11 +213,51 @@ func clips(stage) -> void:
 	parent.free()
 
 # --- 4/5. the fight in the scene ------------------------------------------------------
+# DRENOVAR-V6-ROSTER-5: the simulator case predates the five-unit roster and names all ten
+# types; ENG-05/07/08/09/10 have no model in 1022, so their soldiers were never drawn (0 swings)
+# yet held places in the crowd. The server converts retired ids 1:1 on load with this table
+# (DRENOVAR-Server-v92/dist/city/retired-units.js, used by v6/roster.mjs); it is applied here
+# to the party and the server events, each converted soldier keeping a member index of its own.
+const RETIRED_UNITS := {"ENG-05": "ENG-02", "ENG-07": "ENG-02", "ENG-08": "ENG-01", "ENG-09": "ENG-01", "ENG-10": "ENG-03"}
+
+func roster5(source: Dictionary) -> Dictionary:
+	var out: Dictionary = source.duplicate(true)
+	var party := {}
+	var member := {}
+	for id in out.party:
+		if not RETIRED_UNITS.has(id):
+			party[id] = int(out.party[id])
+	for id in out.party:
+		if RETIRED_UNITS.has(id):
+			var kept: String = RETIRED_UNITS[id]
+			for index in int(out.party[id]):
+				member["%s:%d" % [id, index]] = [kept, int(party.get(kept, 0)) + index]
+			party[kept] = int(party.get(kept, 0)) + int(out.party[id])
+	out.party = party
+	for event in out.result.events:
+		var key := "%s:%d" % [event.unitId, int(event.index)]
+		if member.has(key):
+			event.unitId = member[key][0]
+			event.index = member[key][1]
+	return out
+
 func scene(game, stage) -> void:
 	var cases := {}
 	for c in JSON.parse_string(FileAccess.get_file_as_string("res://tests/combat_v010/server_combat_cases.json")).cases:
 		cases[c.name] = c
-	var mixed: Dictionary = cases.mixed_all_types_velkor
+	var mixed: Dictionary = roster5(cases.mixed_all_types_velkor)
+	check(mixed.party.keys().all(func(id): return stage.data.unitModels.has(id)), "the shown party holds kept units only: " + str(mixed.party))
+	# The game loads troop models in the background (Landscape.model_ready) and prewarms them
+	# while the party is chosen (main.gd). This loop plays the shown fight without frames, so a
+	# model still loading would leave its soldiers out of the whole fight: wait for them first.
+	var ids: Array = mixed.party.keys()
+	stage.prewarm_troops(ids)
+	var models_ready := func() -> bool:
+		return ids.all(func(id): return stage.model_ready(str(stage.data.unitModels[id].field)) and CombatV010.ready_for("troop", id))
+	var deadline := Time.get_ticks_msec() + 60000
+	while not models_ready.call() and Time.get_ticks_msec() < deadline:
+		await process_frame
+	check(models_ready.call(), "troop models of the party loaded before the shown fight")
 	var state: Dictionary = game.state.duplicate(true)
 	var enc: Dictionary = state.world.encounters[0]
 	enc.patrol = []

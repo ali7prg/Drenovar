@@ -12,8 +12,15 @@ extends SceneTree
 ## - a type built to its limit draws grey with the stamp and «1/1», cannot be built, and its tap
 ##   opens the existing building's window;
 ## - «Сейчас/После» show exactly the scenes the city draws, for every type and level;
-## - placement: glowing plots, the banner, a tap on a plot quotes it, «Построить» sends the
-##   order on that plot; «Списком» falls back to the plot list; «Отмена» clears everything.
+## - placement: glowing plots, the banner, a tap on a plot quotes it (named «Участок N», never
+##   by its id), the floating confirm never covers the plot, the ghost is the building's own
+##   translucent scene, «Построить» sends the order on that plot; «Списком» falls back to the
+##   plot list; «Отмена» clears everything;
+## - the open level (main.gd MAX_OPEN_BUILDING_LEVEL, V for now): barracks IV still offers V; at
+##   V and above «После» is a «Скоро» card, «Улучшить» is a disabled «Скоро», and no entry point
+##   (ring, button, confirm(), request(), command(), legacy orders) sends a quote or an order;
+##   no card of the strip names a level past V as a requirement;
+## - the live pair renders while it moves and then holds its picture.
 
 const V6Build = preload("res://src/v6_build.gd")
 const BuildingStage = preload("res://src/building_stage.gd")
@@ -157,7 +164,8 @@ func run() -> void:
 	if not check(hall.get("state", "") == "maxed", "town hall reads as built to its limit: " + str(hall.get("state", ""))): return
 	var hall_card := card("B01")
 	if not check(hall_card != null and hall_card.material == BuildCard.grey(), "maxed card is greyscale"): return
-	if not check(hall_card.stamp != null and hall_card.stamp.visible, "maxed card shows the stamp"): return
+	if not check(hall_card.stamp != null and hall_card.stamp.visible and hall_card.stamp.caption()[0] == "Больше строить", "maxed card shows the plain caption"): return
+	if not check(not hall_card.stamp is BaseButton and hall_card.stamp.get_child_count() == 0, "the caption is text, not a button"): return
 	if not check(hall_card.built_text == "1/1" and not hall_card.level_text.is_empty(), "maxed card shows 1/1 and its level"): return
 	var cards_before: int = strip.cards.size()
 	strip.scroll_to_type("B01", false)
@@ -250,13 +258,23 @@ func run() -> void:
 	var screen: Vector2 = game.stage.camera.unproject_position(plot.position)
 	build.tap_city(screen)
 	if not check(str(build.placing.plot) == str(plot.id), "a tap near a plot chooses it"): return
-	if not check(place.bubble.visible and place.bubble_title.text == "Участок " + str(plot.id), "floating confirm opens over the plot"): return
+	if not check(place.bubble.visible and place.bubble_title.text == build.plot_name(str(plot.id)) and place.bubble_title.text.begins_with("Участок " + str(plot.id).trim_prefix("v1-")) and not place.bubble_title.text.contains("v1-"), "floating confirm names the plot: " + place.bubble_title.text): return
 	if not check(place.go.disabled, "«Построить» waits for the quote"): return
 	if not check(await wait_for(func(): return build.quote_ready()), "the plot is quoted"): return
 	if not check(not build.placing.quote.is_empty() and not place.go.disabled and place.go.text == "Построить", "«Построить» is live once quoted"): return
 	if not check(place.cost_row.get_child_count() > 0 and place.time_label.text == game.v6_panels.duration(int(build.placing.quote.duration_seconds)), "confirm shows the quoted cost and time"): return
 	await frames(2)
 	if not check(place.pointer.visible, "the confirm points at the plot"): return
+	# The camera eases to the plot; the confirm stays clear of the plot and its ghost all along.
+	for step in 40:
+		await process_frame
+		if not check(not place.bubble.get_global_rect().intersects(place.plot_rect(game.stage.camera)), "the confirm never covers the plot (frame %d)" % step): return
+	var ghost: Node3D = game.stage.placement_ghost
+	if not check(await wait_for(func(): return ghost.get_child_count() > 0, 10.0), "the ghost's scene is there"): return
+	var parts: Array = ghost.find_children("*", "MeshInstance3D", true, false)
+	if not check(not parts.is_empty() and ghost.visible, "the ghost stands on the plot"): return
+	var surface: Material = parts[0].get_surface_override_material(0)
+	if not check(surface is ShaderMaterial and surface.shader == game.stage.PLACEMENT_GHOST and surface.shader.code.contains("ALPHA = clamp(ghost_alpha"), "the ghost is the building's own translucent scene"): return
 	place.go.pressed.emit()
 	var chosen := str(plot.id)
 	if not check(await wait_for(func(): return not game.command_in_progress and game.state.v6.orders.any(func(o): return o.status == "pending" and str(o.get("building", "")) == buildable and str(o.get("plot", "")) == chosen)), "the order stands on the chosen plot"): return
@@ -281,7 +299,7 @@ func run() -> void:
 	var second_name := str(game.v6_panels.row_for(second, 1).get("name_ru", ""))
 	if not check(await wait_for(func(): return game.modal.visible and game.modal_title.text == second_name), "«Списком» opens the building window"): return
 	var list: Node = game.modal_body.find_child("PlotList", true, false)
-	if not check(not build.placing_active() and list != null and list.get_child_count() > 0 and str(list.get_child(0).text).begins_with("Участок "), "the plot list is offered"): return
+	if not check(not build.placing_active() and list != null and list.get_child_count() > 0 and str(list.get_child(0).text).begins_with("Участок ") and not str(list.get_child(0).text).contains("v1-"), "the plot list is offered by name"): return
 	list.get_child(0).pressed.emit()
 	if not check(await wait_for(func(): return game.modal_title.text == "Подтвердить работу" and game.modal_eyebrow.text.contains("УЧАСТОК")), "a listed plot opens the confirm for that plot"): return
 	if not check(await wait_for(func(): return find_button(game.modal, "Начать") != null), "the listed plot can be started"): return
@@ -341,17 +359,27 @@ func run() -> void:
 			if not check(BuildingStage.runtime_type(game.data, str(b.conceptType)) == str(b.type), "city type of " + str(b.conceptType)): return
 	if not check(compared >= 20 * 11, "most types have city models: %d (%s)" % [compared, str(without)]): return
 	cases.append({"case":"models", "compared":compared, "without_city_model":without})
-	# The pair at a level where the model changes (barracks V -> VI) and inside a family.
+	# The pair inside a family (barracks II -> III), up to the open level (IV -> V), at the open
+	# level (V: «Скоро»), above it (a fixture at VII: shown, not upgradable) and at XI.
+	var cap: int = game.MAX_OPEN_BUILDING_LEVEL
 	var fresh := 0
-	for pair: Array in [["B11", 5], ["B11", 2], ["B11", 11]]:
+	for pair: Array in [["B11", 2], ["B11", cap - 1], ["B11", cap], ["B11", 7], ["B11", 11]]:
 		await seed_case(str(pair[0]), int(pair[1]))
 		var level: int = pair[1]
 		await game.v6_panels.inspect(str(pair[0]))
 		var stage: Node = game.modal_hero.find_child("BuildingStage", true, false)
 		if not check(stage != null, "inspect shows the live pair"): return
 		var runtime := BuildingStage.runtime_type(game.data, str(pair[0]))
-		if level < 11:
-			if not check(stage.levels == [level, level + 1], "pair is now and next: " + str(stage.levels)): return
+		var row: Node = game.modal_body.find_child("KitTimeAction", true, false)
+		var main_action := ""
+		var main_button: Button = null
+		if row != null:
+			for child in row.get_children():
+				if child is Button:
+					main_action = child.text
+					main_button = child
+		if level < cap:
+			if not check(stage.levels == [level, level + 1] and not stage.soon, "pair is now and next: " + str(stage.levels)): return
 			if not check(stage.captions[0] == "Сейчас · ур. " + V6Build.ROMAN[level - 1] and stage.captions[1] == "После · ур. " + V6Build.ROMAN[level], "pair captions " + str(stage.captions)): return
 			for side in 2:
 				var visual: Array = game.stage.level_visual(runtime, stage.levels[side])
@@ -364,16 +392,65 @@ func run() -> void:
 				if not check(stage.fresh_model() == differs, "a new model is marked as new"): return
 				if differs:
 					fresh += 1
-			var row: Node = game.modal_body.find_child("KitTimeAction", true, false)
-			var main_action := ""
-			if row != null:
-				for child in row.get_children():
-					if child is Button:
-						main_action = child.text
 			if not check(main_action == "Улучшить" or main_action.begins_with("Сначала: "), "one main upgrade action: " + main_action): return
+			if level == cap - 1 and main_action == "Улучшить":
+				# IV -> V is still offered: the quote opens for V.
+				var sent: int = game.quotes_sent
+				main_button.pressed.emit()
+				if not check(await wait_for(func(): return game.modal_title.text == "Подтвердить работу" and find_button(game.modal, "Начать") != null), "level %d still upgrades to %d" % [level, level + 1]): return
+				if not check(game.quotes_sent == sent + 1 and game.modal_eyebrow.text == "УЛУЧШЕНИЕ ДО УР. " + V6Build.ROMAN[level], "the quote is for the open level"): return
+		elif level < 11:
+			if not check(stage.levels == [level, 0] and stage.soon and stage.captions[1] == "После · скоро" and stage.paths[1] == "", "«После» past the open level is a «Скоро» card: " + str(stage.levels)): return
+			if not check(stage.captions[0] == "Сейчас · ур. " + V6Build.ROMAN[level - 1], "the standing building shows as it is"): return
+			if not check(main_button != null and main_button.text == "Скоро" and main_button.disabled and find_button(game.modal_body, "Улучшить") == null, "a disabled «Скоро» instead of «Улучшить»: " + main_action): return
+			if not check(game.modal_body.find_child("KitRequirements", true, false) == null and game.modal_body.find_child("KitTimer", true, false) == null, "no cost, time or requirements of the next level"): return
+			var sent: int = game.quotes_sent
+			var refused: int = game.capped_requests
+			var orders: int = game.state.v6.orders.size()
+			main_button.pressed.emit()
+			var b: Dictionary = game.v6_panels.building("B11")
+			await game.open_building_ring({"item": game.state.city.buildings.filter(func(x): return x.get("conceptType", "") == "B11")[0], "position": Vector3.ZERO})
+			var ring_labels: Array = game.action_ring.buttons.map(func(x): return x.tooltip_text)
+			if not check(not ring_labels.has("Улучшить") and ring_labels.has("Сведения"), "the ring offers no upgrade: " + str(ring_labels)): return
+			game.action_ring.close()
+			await game.v6_panels.confirm({"kind": "construction", "building": "B11", "target": level + 1})
+			var direct: Dictionary = await game.request("command", {"kind": "v6quote", "intent": {"kind": "construction", "building": "B11", "target": level + 1, "economy_version": game.v6_panels.VERSION}})
+			var ordered: bool = await game.command({"kind": "v6", "intent": {"kind": "construction", "building": "B11", "target": level + 1, "economy_version": game.v6_panels.VERSION}})
+			var legacy_upgrade: bool = await game.command({"kind": "kingdom", "action": "upgrade", "buildingId": str(b.get("id", "")), "expectedLevel": level})
+			var legacy_level: bool = await game.command({"kind": "legacyBuilding", "action": "level", "buildingId": str(b.get("id", "")), "level": level + 1})
+			if not check(game.quotes_sent == sent and game.capped_requests == refused + 5 and direct.get("capped", false) and not ordered and not legacy_upgrade and not legacy_level, "no entry point asks past the open level (%d refused)" % (game.capped_requests - refused)): return
+			if not check(game.state.v6.orders.size() == orders and game.modal_title.text != "Подтвердить работу", "nothing was started"): return
+			cases.append({"case": "open_level", "level": level, "refused": game.capped_requests - refused})
 		else:
-			if not check(stage.levels == [11, 0] and stage.captions[0] == "Окончательный уровень · ур. XI", "XI shows the building alone"): return
+			if not check(stage.levels == [11, 0] and not stage.soon and stage.captions[0] == "Окончательный уровень · ур. XI", "XI shows the building alone"): return
 	cases.append({"case":"pair", "fresh_models":fresh})
+	# The strip never names a level past the open one as reachable.
+	if not check(await open_strip(0), "strip opens for the open-level check"): return
+	var romans_past: Array = V6Build.ROMAN.slice(cap)
+	var soon_types: Array = []
+	for type: String in build.states:
+		var note := str(build.states[type].get("note", ""))
+		for numeral: String in romans_past:
+			if not check(not note.contains(" " + numeral + " ") and not note.ends_with(" " + numeral), "card %s names no level past the open one: %s" % [type, note]): return
+		if build.states[type].state == "soon":
+			soon_types.append(type)
+	cases.append({"case":"strip_open_level", "soon":soon_types})
+	# The live pair renders only while it moves (render on demand).
+	await seed_case("B11", 2)
+	await game.v6_panels.inspect("B11")
+	var live: Node = game.modal_hero.find_child("BuildingStage", true, false)
+	if not check(await wait_for(func(): return live.models_placed >= 2 and live.view.modulate.a > 0.99, 20.0), "the pair is shown"): return
+	if not check(await wait_for(func(): return not live.rendering(), 6.0), "after the intro turn the pair holds its picture"): return
+	var held: int = live.rendered_frames
+	await frames(30)
+	if not check(live.rendered_frames == held and not live.rendering(), "an idle window renders no 3D"): return
+	live.drag_begin()
+	live.drag_by(40.0)
+	await frames(2)
+	if not check(live.rendered_frames > held, "turning the pair renders it"): return
+	live.drag_end()
+	if not check(await wait_for(func(): return not live.rendering(), 10.0), "and it holds again once it settles"): return
+	cases.append({"case":"render_on_demand", "frames_while_turning": live.rendered_frames - held})
 	# An unbuilt type: «Будет построено · ур. I».
 	await seed_case("B02", 6)
 	var unbuilt := ""

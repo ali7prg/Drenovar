@@ -5,10 +5,10 @@ extends SceneTree
 ##   VK_ICD_FILENAMES=/opt/lavapipe/lvp_icd.json xvfb-run -a -s "-screen 0 1366x630x24" \
 ##     godot --path godot/project --rendering-driver vulkan --rendering-method mobile \
 ##     -s qa_build_strip_shots.gd -- --server=http://127.0.0.1:8792 --shots=/abs/dir [--prefix=after_]
-##     [--size=1366x630] [--only=build,maxed,swipe,upgrade,confirm,place]
+##     [--size=1366x630] [--only=build,maxed,swipe,upgrade,confirm,place,soon]
 ## The strip shots use a young settlement (the fixture's house case at VI: eleven types built,
-## sixteen to build); the upgrade and confirm shots use barracks V, whose level-VI scene is a
-## new model. Works on the stage-2 code too (before shots): it opens the old windows there.
+## sixteen to build); the upgrade and confirm shots use barracks IV -> V, the soon shot barracks
+## V (levels past V are not offered yet). Works on the stage-2 code too (before shots): it opens the old windows there.
 ## Prints BUILD_SHOTS with the saved names and the window-open main-thread times.
 
 var game: Node
@@ -145,16 +145,24 @@ func run() -> void:
 		else:
 			await timed("inspect_unbuilt", game.v6_panels.inspect.bind("B05"))
 			await shot("place")
+	# Barracks IV: the upgrade to V (the open level, main.gd MAX_OPEN_BUILDING_LEVEL) and its
+	# quote; barracks V: «После» is the «Скоро» card.
 	if wanted("upgrade") or wanted("confirm"):
-		await seed_case("B11", 5)
+		await seed_case("B11", 4)
 		await game.v6_panels.load_catalogue()
 		await frames(30)
 		if wanted("upgrade"):
 			await timed("inspect", game.v6_panels.inspect.bind("B11"))
-			await shot("upgrade_B11", 60)
+			await shot("upgrade_B11", 90)
 		if wanted("confirm"):
-			await timed("confirm", game.v6_panels.confirm.bind({"kind":"construction", "building":"B11", "target":6}))
+			await timed("confirm", game.v6_panels.confirm.bind({"kind":"construction", "building":"B11", "target":5}))
 			await wait_until(func(): return game.modal_footer.get_child_count() > 0, 10.0)
 			await shot("confirm_B11", 40)
+	if wanted("soon"):
+		await seed_case("B11", 5)
+		await game.v6_panels.load_catalogue()
+		await frames(30)
+		await timed("inspect_soon", game.v6_panels.inspect.bind("B11"))
+		await shot("upgrade_B11_soon", 90)
 	print("BUILD_SHOTS ", JSON.stringify({"saved": saved, "timings": timings}))
 	quit(0)

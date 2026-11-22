@@ -8,6 +8,11 @@ class FixtureUI extends Control:
 	const UiKit = preload("res://src/ui_kit.gd")
 	const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
 	const RESOURCE_NAMES = {"wood":"Дерево","food":"Еда","stone":"Камень","iron":"Железо","coins":"Монеты"}
+	# The open building level lives in main.gd only; the controller reads it from its UI.
+	const Main = preload("res://src/main.gd")
+	const MAX_OPEN_BUILDING_LEVEL = Main.MAX_OPEN_BUILDING_LEVEL
+	const SOON_LINE = Main.SOON_LINE
+	var capped_requests := 0
 	var state := {"economy_version":"DRENOVAR-V6-C1.0","items":{"construction-1":3},"v6":{"buildings":[],"orders":[],"rewards":{},"stock":{},"capacities":{},"escrow":{},"production_per_hour":{},"production_stopped":{},"workforce":{"used":0,"capacity":5},"army_used":0,"army_capacity":100}}
 	var modal_generation := 0
 	var modal_body := VBoxContainer.new()

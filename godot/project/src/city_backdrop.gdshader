@@ -6,8 +6,8 @@ render_mode unshaded;
 // deepens toward the edges and under the cards. One texture read per pixel.
 
 uniform bool plain = false;
-uniform float dim = 0.5;
-uniform float saturation = 0.72;
+uniform float dim = 0.6;
+uniform float saturation = 0.8;
 uniform vec3 warm = vec3(1.06, 0.96, 0.84);
 
 void fragment() {
@@ -17,6 +17,6 @@ void fragment() {
 	vec2 centred = (UV - vec2(0.56, 0.42)) * vec2(1.0, 1.25);
 	float vignette = smoothstep(0.95, 0.25, length(centred));
 	float floor_shade = mix(1.0, 0.72, smoothstep(0.55, 1.0, UV.y));
-	colour *= mix(0.55, 1.0, vignette) * floor_shade;
+	colour *= mix(0.62, 1.0, vignette) * floor_shade;
 	COLOR = vec4(colour, 1.0);
 }

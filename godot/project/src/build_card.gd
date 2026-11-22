@@ -19,6 +19,8 @@ const SIZE := Vector2(236, 470)
 ## The card body starts this far down; the building rises above it into the gap.
 const TOP := 30.0
 const ART := 232.0
+## The diorama sits this far up, so roofs rise past the top of the card.
+const ART_LIFT := 16.0
 const GREY_SHADER := preload("res://src/build_card_grey.gdshader")
 const DONE_STATES := ["maxed", "group", "start"]
 
@@ -138,13 +140,7 @@ func _draw() -> void:
 	var sun := 150.0
 	draw_texture_rect(UiKit.tex("kit_solar"), Rect2(Vector2(size.x * 0.5 - sun * 0.5, panel.position.y + 10), Vector2(sun, sun)), false, Color(1.0, 0.86, 0.6, 0.16))
 	draw_texture_rect(UiKit.warm_glow(), Rect2(panel.position.x - 30, panel.position.y + 30, panel.size.x + 60, panel.size.y + 10), false, Color(1, 1, 1, 0.45 if dim else 0.85))
-	if art != null:
-		var tone := Color(0.6, 0.57, 0.55) if state == "locked" else (Color(0.8, 0.78, 0.76) if state == "noplot" else Color.WHITE)
-		if pressed:
-			tone = tone.darkened(0.08)
-		draw_texture_rect(art, Rect2((size.x - ART) * 0.5, 0.0, ART, ART), false, tone)
-	if state == "locked":
-		UiKit.KitPaint.lock(self, Vector2(size.x * 0.5, panel.position.y + panel.size.y * 0.5 + 6.0), 54.0)
+	# (The diorama itself is drawn last, over the frame, so a tall roof breaks out above it.)
 	# Name on a carved oak band across the card.
 	var band := Rect2(0, TOP + 196, size.x, 42)
 	draw_style_box(style("band"), band)
@@ -171,6 +167,13 @@ func _draw() -> void:
 	var right := UiKit.KitText.line(time_text if state == "busy" else built_text, UiKit.LABEL_FONT, 17)
 	right.draw(get_canvas_item(), Vector2(foot.end.x - 10 - right.get_size().x, foot.position.y + roundf((foot.size.y - right.get_size().y) * 0.5)), UiKit.INK)
 	draw_style_box(style("frame_lit" if lit else "frame"), body)
+	if art != null:
+		var tone := Color(0.6, 0.57, 0.55) if state == "locked" else (Color(0.8, 0.78, 0.76) if state == "noplot" else Color.WHITE)
+		if pressed:
+			tone = tone.darkened(0.08)
+		draw_texture_rect(art, Rect2((size.x - ART) * 0.5, -ART_LIFT, ART, ART), false, tone)
+	if state == "locked":
+		UiKit.KitPaint.lock(self, Vector2(size.x * 0.5, panel.position.y + panel.size.y * 0.5 + 6.0), 54.0)
 
 # Cost in rows of three (icon and amount, red where the stock is short) and the build time.
 func draw_cost(y: float) -> void:

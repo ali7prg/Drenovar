@@ -18,6 +18,8 @@ signal closed
 
 var swipe: Swipe
 var rail: VBoxContainer
+var rail_light: RailLight
+var selected_category := 0
 var medals: Array = []
 var heading: Heading
 var close_button: Button
@@ -32,6 +34,10 @@ func _ready() -> void:
 	heading.name = "StripHeading"
 	heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(heading)
+	rail_light = RailLight.new()
+	rail_light.name = "RailLight"
+	rail_light.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(rail_light)
 	rail = VBoxContainer.new()
 	rail.name = "CategoryRail"
 	rail.add_theme_constant_override("separation", 10)
@@ -70,14 +76,28 @@ func set_categories(entries: Array, selected: int) -> void:
 		badge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		rail.add_child(medal)
 		medals.append(medal)
+	select_category(selected)
 	layout()
 
 func select_category(selected: int) -> void:
+	selected_category = selected
 	for index in medals.size():
 		var medal = medals[index]
 		medal.selected = index == selected
 		medal.disc = UiKit.tex("kit_rail_on" if index == selected else "kit_rail")
+		# On the dark city the chosen medallion must stand out: the others step back.
+		medal.modulate = Color.WHITE if index == selected else Color(0.74, 0.71, 0.68)
 		medal.queue_redraw()
+	place_light.call_deferred()
+
+## The warm pool and the gold notch behind the chosen medallion (after the rail has sorted).
+func place_light() -> void:
+	if rail_light == null or selected_category >= medals.size():
+		return
+	var medal: Control = medals[selected_category]
+	rail_light.size = size
+	rail_light.at = rail.position + medal.position + Vector2(medal.size.x * 0.5, 44.0)
+	rail_light.queue_redraw()
 
 func set_heading(title: String, info: String) -> void:
 	heading.title = title
@@ -102,6 +122,21 @@ func layout() -> void:
 	swipe.position = Vector2(left, 84)
 	swipe.size = Vector2(maxf(100.0, w - left), maxf(100.0, h - 84 - 6))
 	swipe.layout_cards()
+	place_light.call_deferred()
+
+## Light behind the chosen category: a warm pool and a small gold notch toward the cards.
+class RailLight extends Control:
+	var at := Vector2(-1000, -1000)
+
+	func _draw() -> void:
+		draw_texture_rect(UiKit.warm_glow(), Rect2(at - Vector2(84, 70), Vector2(168, 140)), false, Color(1, 1, 1, 0.95))
+		var tip := at + Vector2(58, 0)
+		var notch := PackedVector2Array([tip + Vector2(-7, -9), tip + Vector2(4, 0), tip + Vector2(-7, 9)])
+		var shade := PackedVector2Array()
+		for p in notch:
+			shade.append(p + Vector2(0, 2))
+		draw_colored_polygon(shade, Color(0, 0, 0, 0.45))
+		draw_colored_polygon(notch, UiKit.GOLD)
 
 ## Title plate: the window's name in the display face on carved oak, the builders and plots
 ## under it.
@@ -151,6 +186,7 @@ class Swipe extends Control:
 	const PAD_LEFT := 4.0
 	const PAD_RIGHT := 64.0
 	var track: Control
+	var edge: Control
 	var indicator: Control
 	var cards: Array = []
 	var offset := 0.0
@@ -178,6 +214,10 @@ class Swipe extends Control:
 		track.name = "Track"
 		track.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(track)
+		edge = Edge.new()
+		edge.swipe = self
+		edge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(edge)
 		indicator = Indicator.new()
 		indicator.swipe = self
 		indicator.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -228,6 +268,9 @@ class Swipe extends Control:
 			card.position = Vector2(index * pitch(), top)
 		indicator.position = Vector2(0, size.y - 12)
 		indicator.size = Vector2(size.x - PAD_RIGHT, 6)
+		# Over the card bodies only, so the city between and below them is not darkened.
+		edge.position = Vector2(0, top + BuildCard.TOP)
+		edge.size = Vector2(size.x, BuildCard.SIZE.y - BuildCard.TOP)
 		apply()
 
 	func apply() -> void:
@@ -240,6 +283,7 @@ class Swipe extends Control:
 			var x := index * pitch()
 			card.visible = x + BuildCard.SIZE.x > left and x < right
 		indicator.queue_redraw()
+		edge.queue_redraw()
 
 	## Taps on cards are honoured unless the finger or the mouse just dragged the strip.
 	func tap_allowed() -> bool:
@@ -422,6 +466,41 @@ class Swipe extends Control:
 				mouse_dragging = true
 			if mouse_dragging:
 				swipe_to(event.position)
+
+## Soft shade at the strip's edges: a card sliding out of view sinks into shadow instead of
+## being cut by a hard line (one gradient quad per edge, only while cards lie past that edge).
+class Edge extends Control:
+	const WIDTH := 64.0
+	static var fades := {}
+	var swipe
+
+	## The shade ramp, dark at the left (or, mirrored, at the right).
+	static func gradient(mirrored := false) -> GradientTexture2D:
+		if not fades.has(mirrored):
+			var ramp := Gradient.new()
+			ramp.set_color(0, Color(0.04, 0.025, 0.012, 0.92))
+			ramp.set_color(1, Color(0.04, 0.025, 0.012, 0.0))
+			ramp.add_point(0.45, Color(0.04, 0.025, 0.012, 0.45))
+			var fade := GradientTexture2D.new()
+			fade.gradient = ramp
+			fade.width = 64
+			fade.height = 1
+			if mirrored:
+				fade.fill_from = Vector2(1, 0)
+				fade.fill_to = Vector2(0, 0)
+			fades[mirrored] = fade
+		return fades[mirrored]
+
+	func _draw() -> void:
+		if swipe == null:
+			return
+		var hidden_left := clampf(float(swipe.offset) / 48.0, 0.0, 1.0)
+		var hidden_right := clampf((float(swipe.max_offset()) - float(swipe.offset)) / 48.0, 0.0, 1.0)
+		if hidden_left > 0.0:
+			draw_texture_rect(gradient(), Rect2(0, 0, WIDTH, size.y), false, Color(1, 1, 1, hidden_left))
+		if hidden_right > 0.0:
+			# Mirrored: the dark side at the right edge.
+			draw_texture_rect(gradient(true), Rect2(size.x - WIDTH * 0.75, 0, WIDTH * 0.75, size.y), false, Color(1, 1, 1, hidden_right * 0.8))
 
 ## The bronze scroll indicator under the cards.
 class Indicator extends Control:

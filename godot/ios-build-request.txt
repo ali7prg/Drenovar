@@ -3,4 +3,5 @@ Changing this file is the only push that may start the unsigned iOS test IPA bui
 GitHub Release DRENOVAR-game-<build>.ipa) on branch claude/kind-babbage-4swyw3.
 The build can also be started by hand (workflow_dispatch). Routine pushes never build.
 
-No build requested yet for 1022 (0.6.0).
+Build requested: 1022 (0.6.0), 2026-11-22, from the merged 1021 line with the forest
+adventure, five-unit roster, conditional polls and the fast launch.

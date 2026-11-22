@@ -50,7 +50,10 @@ func run() -> void:
 	await game.show_scene("world")
 	if game.map_name != "world" or not is_instance_valid(game.stage.combat_view): failures.append("world combat presentation missing")
 	await game.show_scene("city")
-	if models != 21 or architecture != 162: failures.append("model coverage changed")
+	# Build 1022: five-unit roster (ENG-01, 02, 03, 04, 06) x preview+field, plus the siege ram field model.
+	if models != 11 or architecture != 162: failures.append("model coverage changed")
+	for kept in ["ENG-01", "ENG-02", "ENG-03", "ENG-04", "ENG-06"]:
+		if not game.data.unitModels.has(kept): failures.append("missing unit model " + kept)
 	print(JSON.stringify({"entry":entry,"build":ProjectSettings.get_setting("application/config/build_number"),"models_loaded":models,"architecture":architecture,"failures":failures,"scope":"Linux exported game pack; no physical iPhone acceptance"}))
 	game.queue_free()
 	await process_frame

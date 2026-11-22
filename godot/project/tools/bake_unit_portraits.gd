@@ -13,6 +13,7 @@ extends SceneTree
 ## builds its mesh from the same recipe when the scene is not on disk.
 
 const WarriorVisual = preload("res://src/warrior_visual.gd")
+const UnitStage = preload("res://src/unit_stage.gd")
 const PORTRAIT := Vector2i(576, 704)   # final 288 x 352
 const BUST := Vector2i(384, 384)       # final 128 x 128
 var out := "/tmp/unit_portraits"
@@ -74,33 +75,22 @@ func bake(id: String, scene: PackedScene, drill: String) -> void:
 			unit.rotation_degrees.y = -28.0
 		pose(unit, "Recruit_Showcase" if drill == "Mounted_Drill" else "Idle")
 		await process_frame
-		var bounds := AABB()
-		for part: MeshInstance3D in unit.find_children("*", "MeshInstance3D", true, false):
-			var box := part.global_transform * part.get_aabb()
-			bounds = box if not bounds.has_volume() else bounds.merge(box)
+		var shape := UnitStage.figure(unit)
 		var camera := Camera3D.new()
 		holder.add_child(camera)
-		# One 3/4 view for every unit: from the front-right, a little above the chest.
-		var direction := Vector3(0.62, 0.2, 1.0).normalized()
-		camera.fov = 24.0
 		var aspect := float(size.x) / float(size.y)
-		var target := bounds.get_center()
-		var extent := bounds.size.y * 0.5
-		if bust:
-			# Head and shoulders (the rider and the horse's head for the knight).
-			var height := bounds.size.y
-			target = Vector3(bounds.get_center().x, bounds.position.y + height * (0.8 if warrior and drill != "Mounted_Drill" else 0.74), bounds.get_center().z)
-			extent = height * (0.2 if drill != "Mounted_Drill" else 0.26)
-			if not warrior:
-				target = bounds.get_center()
-				extent = bounds.size.y * 0.55
+		if bust and warrior:
+			# Head and shoulders (the rider, with the horse's neck below, for the knight).
+			var mounted := drill == "Mounted_Drill"
+			var head := {"top": shape.top + 0.02, "bottom": shape.top - (0.78 if mounted else 0.66),
+				"box": AABB(Vector3(shape.box.get_center().x - 0.3, shape.top - 0.7, shape.box.get_center().z - 0.3), Vector3(0.6, 0.7, 0.6))}
+			UnitStage.frame_camera(camera, head, aspect, 0.96, 0.5)
+		elif bust:
+			UnitStage.frame_camera(camera, shape, aspect, 1.0, 0.5, 1.02)
 		else:
-			extent = maxf(extent, maxf(bounds.size.x, bounds.size.z) * 0.5 / aspect) * 1.06
-		var distance := extent / tan(deg_to_rad(camera.fov * 0.5))
-		camera.position = target + direction * distance
-		camera.look_at(target)
+			UnitStage.frame_camera(camera, shape, aspect, 1.0 / 1.06, 0.5)
 		camera.make_current()
-		lights(holder)
+		UnitStage.light_rig(holder)
 		await RenderingServer.frame_post_draw
 		await RenderingServer.frame_post_draw
 		await RenderingServer.frame_post_draw
@@ -120,35 +110,3 @@ func pose(unit: Node3D, clip: String) -> void:
 		player.play(chosen)
 		player.seek(player.get_animation(chosen).length * 0.25, true)
 		player.pause()
-
-# Warm key from the upper left, cool fill from the right, bright rim from behind.
-func lights(parent: Node3D) -> void:
-	var key := DirectionalLight3D.new()
-	key.rotation_degrees = Vector3(-38, -32, 0)
-	key.light_color = Color("#ffe7c7")
-	key.light_energy = 1.75
-	key.shadow_enabled = true
-	key.shadow_blur = 1.5
-	parent.add_child(key)
-	var fill := DirectionalLight3D.new()
-	fill.rotation_degrees = Vector3(-12, 62, 0)
-	fill.light_color = Color("#c6d6ea")
-	fill.light_energy = 0.42
-	parent.add_child(fill)
-	var rim := DirectionalLight3D.new()
-	rim.rotation_degrees = Vector3(-22, 160, 0)
-	rim.light_color = Color("#fff0d6")
-	rim.light_energy = 1.35
-	parent.add_child(rim)
-	var world := WorldEnvironment.new()
-	var env := Environment.new()
-	env.background_mode = Environment.BG_CLEAR_COLOR
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color("#d3d6d4")
-	env.ambient_light_energy = 0.42
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_exposure = 1.0
-	WarriorVisual.add_reflections(env, Color("#8b9874"))
-	env.background_mode = Environment.BG_CLEAR_COLOR
-	world.environment = env
-	parent.add_child(world)

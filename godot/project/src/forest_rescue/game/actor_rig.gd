@@ -30,6 +30,11 @@ static var scenes: Dictionary = {}
 static var requested: Dictionary = {}
 static var metas: Dictionary = {}
 static var reported_missing: Dictionary = {}
+## Threaded actor loads still in progress. 1022: one at a time. Four creatures v2 guardians (three LODs,
+## ~40 textures each) requested together filled every WorkerThreadPool thread and deadlocked the
+## texture upload against the main thread in the rendered game (Godot 4.6.3, mobile renderer).
+static var loading: Dictionary = {}
+const MAX_PARALLEL_LOADS := 1
 
 var actor_id := ""
 var asset_path := ""
@@ -80,19 +85,29 @@ static func fetch(path: String) -> Variant:
 			push_warning("Forest rescue asset missing (presentation skipped until it lands): " + path)
 		return false
 	if not requested.has(path):
+		collect_loads()
+		if loading.size() >= MAX_PARALLEL_LOADS:
+			return null
 		requested[path] = true
 		if ResourceLoader.load_threaded_request(path, "PackedScene") != OK:
 			scenes[path] = load(path)
 			return scenes[path]
-	var status := ResourceLoader.load_threaded_get_status(path)
-	if status == ResourceLoader.THREAD_LOAD_LOADED:
-		scenes[path] = ResourceLoader.load_threaded_get(path)
-		return scenes[path]
-	if status == ResourceLoader.THREAD_LOAD_FAILED or status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-		scenes[path] = false
-		push_warning("Forest rescue asset failed to load: " + path)
-		return false
-	return null
+		loading[path] = true
+	collect_loads()
+	return scenes.get(path) if scenes.has(path) else null
+
+## Moves finished threaded loads into the scene cache (also those whose rig is gone).
+static func collect_loads() -> void:
+	for path in loading.keys():
+		var status := ResourceLoader.load_threaded_get_status(path)
+		if status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			continue
+		loading.erase(path)
+		if status == ResourceLoader.THREAD_LOAD_LOADED:
+			scenes[path] = ResourceLoader.load_threaded_get(path)
+		else:
+			scenes[path] = false
+			push_warning("Forest rescue asset failed to load: " + path)
 
 ## Blocking variant used by QA/capture so a frame never shows a half-loaded scene.
 static func fetch_now(path: String) -> Variant:
@@ -103,6 +118,7 @@ static func fetch_now(path: String) -> Variant:
 	if requested.has(path):
 		var status := ResourceLoader.load_threaded_get_status(path)
 		if status == ResourceLoader.THREAD_LOAD_IN_PROGRESS or status == ResourceLoader.THREAD_LOAD_LOADED:
+			loading.erase(path)
 			scenes[path] = ResourceLoader.load_threaded_get(path)
 			return scenes[path]
 	scenes[path] = load(path)

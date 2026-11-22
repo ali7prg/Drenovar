@@ -16,6 +16,8 @@ var failures: Array[String] = []
 var steps := 0
 var shots_dir := ""
 var report := {"tasks": [], "battles": [], "cages": []}
+const ActorRig := preload("res://src/forest_rescue/game/actor_rig.gd")
+var peak_actor_loads := 0
 
 func check(value: bool, detail: String) -> void:
 	checks += 1
@@ -31,6 +33,12 @@ func _initialize() -> void:
 		if arg.begins_with("--shots="):
 			shots_dir = arg.trim_prefix("--shots=")
 	call_deferred("run")
+
+## Threaded actor loads in flight, sampled every frame: the rendered game deadlocked with four
+## creatures v2 guardians loading at once (1022 gate: one at a time).
+func _process(_delta: float) -> bool:
+	peak_actor_loads = maxi(peak_actor_loads, ActorRig.loading.size())
+	return false
 
 func frames(count: int) -> void:
 	for i in count:
@@ -216,6 +224,8 @@ func run() -> void:
 	report.commands = commands.size()
 	report.statuses = commands.map(func(r): return int(r.status))
 	report.steps = steps
+	report.peak_actor_loads = peak_actor_loads
+	check(peak_actor_loads <= ActorRig.MAX_PARALLEL_LOADS, "actor models load one at a time (peak %d)" % peak_actor_loads)
 	print("QA_FOREST_V6_REPORT ", JSON.stringify(report))
 	print("QA_FOREST_V6 steps=%d commands=%d checks=%d failures=%d" % [steps, forest.client.sent_log.size(), checks, failures.size()])
 	for failure in failures:

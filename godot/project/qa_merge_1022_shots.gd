@@ -32,6 +32,8 @@ func _initialize() -> void:
 func frames(count: int) -> void:
 	for i in count:
 		await process_frame
+		if OS.has_environment("QA_SHOTS_TRACE") and i % 10 == 0:
+			print("FRAME ", i, " ", Time.get_ticks_msec())
 
 func shot(name: String) -> void:
 	await frames(12)

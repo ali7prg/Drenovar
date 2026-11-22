@@ -494,6 +494,7 @@ func _notification(what: int) -> void:
 		var Rig = load("res://src/forest_rescue/game/actor_rig.gd")
 		Rig.scenes.clear()
 		Rig.requested.clear()
+		Rig.loading.clear()
 		Rig.metas.clear()
 		Rig.uv2_materials.clear()
 		return

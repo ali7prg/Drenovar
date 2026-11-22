@@ -403,6 +403,17 @@ func run() -> void:
 			await process_frame
 		await frames(2)
 		check(bool(forest.client.adv.get("autoRefill", false)), "auto-refill opt-in stored by server")
+	# The whole campaign on the V6 stack: every adventure command of every launch, as the fixture logged it.
+	var log_value: Variant = await test_post("/qa/requests")
+	var fixture_log: Array = log_value if log_value is Array else []
+	var commands: Array = fixture_log.filter(func(r): return str(r.get("kind", "")) in ["adventure", "adventure_intro"])
+	var statuses := {}
+	for r in commands:
+		statuses[str(int(r.get("status", 0)))] = int(statuses.get(str(int(r.get("status", 0))), 0)) + 1
+	report.adventure_commands = commands.size()
+	report.adventure_command_statuses = statuses
+	check(commands.size() > 100 and commands.all(func(r): return str(r.get("economy", "")) == "DRENOVAR-V6-C1.0"), "all %d adventure commands on the V6 stack (economy header)" % commands.size())
+	check(commands.all(func(r): return int(r.get("status", 0)) == 200 or int(r.get("status", 0)) == 201), "every adventure command answered 200: " + str(statuses))
 	for entry in forest.client.sent_log:
 		check(String(entry.body.get("requestId", "")) == String(entry.key), "requestId equals Idempotency-Key")
 		for forbidden in ["success", "reward", "rewards", "wallet", "capacity", "ownerId", "playerId", "time", "position", "revision", "proof"]:

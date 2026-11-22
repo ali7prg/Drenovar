@@ -3,7 +3,8 @@ extends SceneTree
 ##   xvfb-run -a -s "-screen 0 1366x630x24" godot --path godot/project --rendering-driver vulkan \
 ##     --rendering-method mobile -s qa_merge_1022_shots.gd -- --server=http://127.0.0.1:8799 --shots=<dir>
 ## city.png (the 1021 city with the forest layer), roster_army.png (army panel), roster_recruit.png
-## (barracks recruitment), forest_off_locked.png (camera over the forest with the adventure off).
+## (barracks recruitment), forest_off.png (camera over the outer forest with the adventure off: the 1021
+## forest, no forest layer loaded).
 ## With -- --adventure (fixture with DRENOVAR_QA_ADVENTURE=1): forest_on_unlocked.png (town hall III,
 ## intro invitation), forest_on_forest.png (camera over the forest, adventure bar).
 
@@ -51,13 +52,13 @@ func run() -> void:
 	while (game.scene_loading or not is_instance_valid(game.stage) or game.player_id.is_empty()) and Time.get_ticks_msec() < deadline:
 		await process_frame
 	print("STAGE scene ", Time.get_ticks_msec())
-	# let the launch screen fade and the forest world finish
-	var world: Node = root.find_child("ForestWorld", true, false)
+	# 1022: the forest layers are lazy. With the adventure off they never load (1021 forest); with it on,
+	# main loads the game layer after the launch and ForestGame attaches the world layer by itself.
 	deadline = Time.get_ticks_msec() + 240000
-	while (world == null or world.get("_ready_emitted") != true) and Time.get_ticks_msec() < deadline:
-		await process_frame
-		world = root.find_child("ForestWorld", true, false)
-	print("STAGE world ", Time.get_ticks_msec())
+	if adventure:
+		while (game.forest_game == null or not game.forest_game.world_ready()) and Time.get_ticks_msec() < deadline:
+			await process_frame
+	print("STAGE world ", Time.get_ticks_msec(), " forest_game=", game.forest_game != null, " forest_world=", game.stage.forest_world != null)
 	await frames(90)
 	print("STAGE settled ", Time.get_ticks_msec())
 	if adventure:
@@ -93,10 +94,10 @@ func run() -> void:
 		await frames(60)
 		await shot("roster_recruit")
 		game.close_modal()
-	# camera over the outer forest: locked (fogged) with the adventure off
+	# camera over the outer forest with the adventure off: the 1021 forest (no layer, no fog, no card)
 	game.stage.target = Vector3(-78.0, 0.0, 30.0)
 	game.stage.update_camera(0, true)
 	await frames(120)
-	await shot("forest_off_locked")
-	print("MERGE_1022_SHOTS ", JSON.stringify(saved), " adventure_known=", game.forest_game.client.known)
+	await shot("forest_off")
+	print("MERGE_1022_SHOTS ", JSON.stringify(saved), " forest_game_loaded=", game.forest_game != null, " forest_world=", game.stage.forest_world != null)
 	quit(0)

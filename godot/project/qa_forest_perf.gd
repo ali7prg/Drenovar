@@ -130,9 +130,14 @@ func run_entry() -> void:
 	var frame := 0
 	var forest_started := -1
 	var stages: Array = []
+	var layers_requested := false
 	while frame < 4000:
 		await process_frame
 		frame += 1
+		# 1022: the forest layers load after the city is interactive (as with an adventure-on server)
+		if not layers_requested and not game.scene_loading and is_instance_valid(game.stage):
+			layers_requested = true
+			bring_layers(game)
 		var now := Time.get_ticks_usec()
 		var ms := (now - last) / 1000.0
 		last = now
@@ -178,6 +183,12 @@ func run_entry() -> void:
 		row.impostorSignatureParts = world_now.get("impostor_signature_parts")
 	print("PERF_ENTRY ", JSON.stringify(row))
 	quit()
+
+
+## 1022: both forest layers are lazy; perf runs ask for them the way an adventure-on server would.
+func bring_layers(game: Node) -> void:
+	var forest: Node = await game.ensure_forest_game()
+	await forest.ensure_world()
 
 
 func fixture(name: String) -> Dictionary:
@@ -237,6 +248,7 @@ func run_segments() -> void:
 	root.add_child(game)
 	while game.get("scene_loading") or not is_instance_valid(game.get("stage")):
 		await process_frame
+	await bring_layers(game)
 	var forest: Node = game.forest_game
 	var stub := StubHost.new()
 	stub.main = game
@@ -436,6 +448,7 @@ func run() -> void:
 		if waited > 4000:
 			quit(2)
 			return
+	await bring_layers(game)
 	game.set_process(false)
 	var stage: Node3D = game.stage
 	var world: Node3D = stage.get("forest_world")

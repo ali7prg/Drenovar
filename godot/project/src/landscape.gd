@@ -60,7 +60,7 @@ const Formations = preload("res://src/formations.gd")
 # [forest_rescue_v1 hook] versioned world layer flag; OFF = legacy forest (rollback).
 const ForestFlags = preload("res://src/forest_rescue/world/forest_flags.gd")
 var forest_world: Node3D = null
-var forest_attach_state := ""   # "", "attaching", "attached", "failed" (1022 lazy world layer)
+var forest_attach_state := ""   # "", "attaching", "attached", "failed", "off" (1022 lazy world layer)
 var forest_last_city: Dictionary = {}
 var forest_last_state: Dictionary = {}
 var forest_last_exclusions: Array = []
@@ -4108,7 +4108,10 @@ func shift_camera_target(offset: Vector3) -> void:
 # setup runs hidden (heavy steps on worker threads, the rest sliced), the rebuilt ground tiles and river
 # are committed together, then the kit forest replaces the 1021 trees in a staged swap.
 func attach_forest_world(gate := Callable()) -> void:
-	if forest_world != null or forest_attach_state != "" or map_name != "city" or not ForestFlags.enabled():
+	if forest_world != null or forest_attach_state != "" or map_name != "city":
+		return
+	if not ForestFlags.enabled():
+		forest_attach_state = "off"   # rollback flag: the 1021 forest stays (asked once, not every frame)
 		return
 	forest_attach_state = "attaching"
 	await ForestFlags.load_staged(ForestFlags.WORLD_LAYER, get_tree(), gate)

@@ -195,17 +195,22 @@ def body_tile(out):
     save('kit_body', a, out)
 
 
-def header_band(out):
-    w, h = 256, 68
+def header_band(out, name='kit_header', plank_h=56.0, split=None):
+    """Carved oak header band. The tall variant (full-screen windows) is two boards: the
+    upper one carries the resource plates, the lower one the window title."""
+    w, h = 256, int(plank_h) + 12
     W, H = w * S, h * S
     x, y = grid(W, H)
     a = canvas(w, h)
-    plank_h = 56.0
     rgb = wood(W, H, 11)
     # Plank shading: darker toward its top and bottom edges, carved grooves.
     edge = smooth(0, 7, y) * smooth(0, 9, plank_h - y)
+    if split is not None:
+        # Joint between the two boards: a shaded seam, each board rounded toward it.
+        edge = edge * (0.55 + 0.45 * smooth(0, 5, np.abs(y - split)))
     rgb *= (0.62 + 0.38 * edge)[..., None]
-    for gy in (5.0, plank_h - 6.0):
+    grooves = [5.0, plank_h - 6.0] + ([split - 1.0] if split is not None else [])
+    for gy in grooves:
         groove = np.exp(-((y - gy) / 0.55) ** 2)
         lip = np.exp(-((y - gy - 1.0) / 0.55) ** 2)
         rgb = rgb * (1 - 0.45 * groove)[..., None] + lip[..., None] * hexc('#8a6440')[:3] * 0.35
@@ -225,7 +230,70 @@ def header_band(out):
     # Soft shadow under the trim onto the window body.
     shadow = (1 - smooth(bot, h, y)) * (y > bot) * 0.55
     a = over(a, np.zeros_like(metal), shadow)
-    save('kit_header', a, out)
+    save(name, a, out)
+
+
+def dais(out):
+    """Carved oak band of the recruitment dais (3D drum around the stone slab; tiles on x).
+    Slavic three-sided notch carving: a chain of lozenges with six-petal rosettes, notched
+    triangle borders and bead ridges; the deepest cuts carry gold leaf. Writes the albedo
+    (kit_dais) and a tangent-space normal map (kit_dais_n, OpenGL convention: +Y up)."""
+    w, h = 256, 40
+    W, H = w * S, h * S
+    x, y = grid(W, H)
+    rgb = wood(W, H, 171, dark='#2b1b0f', mid='#4b311f', light_c='#6e4c2f', stretch=40.0)
+    period = 32.0
+    lx = np.mod(x, period) - period / 2.0
+    ly = y - h / 2.0
+    cut = np.zeros((H, W), np.float32)      # depth of the carving, 0..1
+    gild = np.zeros((H, W), np.float32)
+    ridge = np.zeros((H, W), np.float32)
+    # Bead ridges along both edges.
+    for gy in (2.6, h - 2.6):
+        ridge = np.maximum(ridge, np.clip(1.0 - ((y - gy) / 1.5) ** 2, 0, 1))
+    # Notched triangles under the top bead and over the bottom one (alternating).
+    tx = np.mod(x, 8.0) - 4.0
+    for top, sign in ((5.2, 1.0), (h - 5.2, -1.0)):
+        t = (y - top) * sign  # 0 at the bead, grows toward the centre
+        tri = np.maximum(np.abs(tx) - (3.6 - t * 0.9), -t)
+        tri = np.maximum(tri, t - 4.0)
+        cut = np.maximum(cut, coverage(tri) * smooth(0.0, 4.0, t) * 0.8)
+    # Lozenge chain: an outline groove around each period, a raised inner field.
+    rho = np.abs(lx) / 13.0 + np.abs(ly) / 10.5
+    outline = np.abs(rho - 1.0) * 9.0 - 1.0
+    cut = np.maximum(cut, coverage(outline) * 0.85)
+    gild = np.maximum(gild, coverage(np.abs(rho - 1.0) * 9.0 - 0.45) * 0.9)
+    # Six-petal rosette in each lozenge (the deepest cuts, gilded).
+    r = np.sqrt(lx ** 2 + ly ** 2)
+    ang = np.arctan2(ly, lx)
+    petal = r - (5.6 * np.abs(np.cos(3.0 * ang)) ** 0.7 + 0.4)
+    cut = np.maximum(cut, coverage(petal) * smooth(0.0, 5.0, 5.8 - r) * 1.0)
+    gild = np.maximum(gild, coverage(petal + 0.6) * 0.95)
+    hub = r - 1.1
+    cut = np.minimum(cut, 1.0 - coverage(hub) * 0.7)
+    # Small diamonds where two lozenges meet.
+    jx = np.mod(x + period / 2.0, period) - period / 2.0
+    knot = np.abs(jx) / 3.2 + np.abs(ly) / 3.2 - 1.0
+    cut = np.maximum(cut, coverage(knot * 3.0) * 0.7)
+    height = ridge * 0.8 - cut * 1.2
+    # Albedo: carved faces catch less light and show the darker end grain.
+    lit = light(height, 1.3)
+    rgb = rgb * (0.78 + 0.32 * lit)[..., None] * (1.0 - 0.32 * cut)[..., None]
+    gold = bronze(light(height * 0.6, 1.2), 1.0, 'gold')
+    rgb = rgb * (1 - gild[..., None] * 0.85) + gold * gild[..., None] * 0.85
+    a = canvas(w, h)
+    a[..., :3] = rgb
+    a[..., 3] = 1.0
+    save('kit_dais', a, out)
+    gy_, gx_ = np.gradient(height * 2.2)
+    nx, ny, nz = -gx_, gy_, np.ones_like(height)
+    n = np.sqrt(nx * nx + ny * ny + nz * nz)
+    normal = canvas(w, h)
+    normal[..., 0] = nx / n * 0.5 + 0.5
+    normal[..., 1] = ny / n * 0.5 + 0.5
+    normal[..., 2] = nz / n * 0.5 + 0.5
+    normal[..., 3] = 1.0
+    save('kit_dais_n', normal, out)
 
 
 def frame(out):
@@ -719,6 +787,8 @@ def main():
     body_dark(out)
     hourglass(out)
     header_band(out)
+    header_band(out, 'kit_header_tall', 80.0, 31.0)
+    dais(out)
     frame(out)
     for kind in BUTTONS:
         button(out, kind)

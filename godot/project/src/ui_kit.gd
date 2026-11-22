@@ -303,6 +303,34 @@ static func label(parent: Node, text: String, size := 18, colour := INK, font: F
 		parent.add_child(item)
 	return item
 
+## Vector marks drawn with Polygon2D. The kit fonts have no arrows, ticks or hourglass, and
+## a missing glyph sends every shaping pass to the system font fallback (~2.5 ms per label).
+const MARKS := {
+	"arrow": [Vector2(0.0, 0.38), Vector2(0.56, 0.38), Vector2(0.56, 0.16), Vector2(1.0, 0.5),
+		Vector2(0.56, 0.84), Vector2(0.56, 0.62), Vector2(0.0, 0.62)],
+	"tick": [Vector2(0.0, 0.52), Vector2(0.16, 0.36), Vector2(0.38, 0.58), Vector2(0.84, 0.1),
+		Vector2(1.0, 0.26), Vector2(0.38, 0.9)],
+	"lozenge": [Vector2(0.5, 0.12), Vector2(0.88, 0.5), Vector2(0.5, 0.88), Vector2(0.12, 0.5)],
+}
+
+static func mark(parent: Node, shape: String, colour: Color, size := 18.0) -> Control:
+	var box := Control.new()
+	box.name = "KitMark"
+	box.custom_minimum_size = Vector2(size, size)
+	box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var shape_points := PackedVector2Array()
+	for point: Vector2 in MARKS[shape]:
+		shape_points.append(point * size)
+	var polygon := Polygon2D.new()
+	polygon.polygon = shape_points
+	polygon.color = colour
+	polygon.antialiased = true
+	box.add_child(polygon)
+	if parent != null:
+		parent.add_child(box)
+	return box
+
 ## Section header: title in bronze small caps between two cross-stitch rushnyk bands.
 static func section_header(parent: Node, text: String) -> HBoxContainer:
 	var row := HBoxContainer.new()
@@ -410,10 +438,13 @@ static func timer_pill(parent: Node, caption: String, time_text: String) -> Labe
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	plate.add_child(row)
-	var glass := Label.new()
-	glass.text = "⧗"
-	glass.add_theme_font_size_override("font_size", 22)
-	glass.add_theme_color_override("font_color", GOLD)
+	var glass := TextureRect.new()
+	glass.texture = tex("kit_hourglass")
+	glass.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	glass.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	glass.custom_minimum_size = Vector2(22, 26)
+	glass.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	glass.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(glass)
 	var title := Label.new()
 	title.text = caption
@@ -598,6 +629,7 @@ static func stat_row(parent: Node, name: String, value: String, gain := "") -> H
 	right.autowrap_mode = TextServer.AUTOWRAP_OFF
 	right.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	if not gain.is_empty():
+		mark(line, "arrow", GOOD, 16.0)
 		var plus := label(line, gain, 19, GOOD, LABEL_FONT)
 		plus.autowrap_mode = TextServer.AUTOWRAP_OFF
 	if parent != null:

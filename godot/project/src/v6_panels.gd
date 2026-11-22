@@ -224,13 +224,13 @@ func inspect(type: String) -> void:
 		ui.modal_body.add_child(step)
 		ui.UiKit.label(step, "Уровень " + ROMAN[level-1], 26, ui.UiKit.INK, ui.UiKit.LABEL_FONT, false)
 		if not upcoming.is_empty():
-			ui.UiKit.label(step, "➜", 26, ui.UiKit.GOOD, ui.UiKit.LABEL_FONT, false)
+			ui.UiKit.mark(step, "arrow", ui.UiKit.GOOD, 24.0)
 			ui.UiKit.label(step, ROMAN[level], 26, ui.UiKit.GOOD, ui.UiKit.LABEL_FONT, false)
 		for metric: String in row.effects:
 			var later: Variant = upcoming.get("effects", {}).get(metric)
 			var gain := ""
 			if later != null and str(later) != str(row.effects[metric]):
-				gain = "→ " + metric_value(metric, later)
+				gain = metric_value(metric, later)
 			ui.UiKit.stat_row(ui.modal_body, str(catalogue.get("metrics", {}).get(metric, {}).get("name_ru", metric)), metric_value(metric, row.effects[metric]), gain)
 	if level < 11:
 		var next: Dictionary = upcoming
@@ -240,7 +240,12 @@ func inspect(type: String) -> void:
 		for d: Dictionary in next.requirements:
 			var current: Dictionary = building(d.building_id)
 			var ok: bool = int(current.get("level", 0)) >= int(d.level)
-			ui.UiKit.label(ui.modal_body, "%s %s ≥ %s" % ["✓" if ok else "•", row_for(d.building_id, 1).name_ru, ROMAN[int(d.level)-1]], 17, ui.UiKit.GOOD if ok else ui.UiKit.BAD)
+			var need := HBoxContainer.new()
+			need.name = "KitRequirement"
+			need.add_theme_constant_override("separation", 10)
+			ui.modal_body.add_child(need)
+			ui.UiKit.mark(need, "tick" if ok else "lozenge", ui.UiKit.GOOD if ok else ui.UiKit.BAD, 18.0)
+			ui.UiKit.label(need, "%s · уровень %s или выше" % [row_for(d.building_id, 1).name_ru, ROMAN[int(d.level)-1]], 17, ui.UiKit.GOOD if ok else ui.UiKit.BAD)
 		var action := {"kind":"construction", "building":type, "target":level+1}
 		if level > 0:
 			var check: Button = ui.panel_action(ui.modal_body, "Проверить улучшение", confirm.bind(action))

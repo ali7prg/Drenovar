@@ -43,7 +43,11 @@ const TEXTURES := ["kit_body", "kit_body_dark", "kit_hourglass", "kit_header", "
 	"kit_field", "kit_track", "kit_fill", "kit_fill_green", "kit_knob", "kit_stitch", "kit_rosette",
 	"kit_flourish", "kit_splash", "kit_header_tall", "kit_dais", "kit_dais_n", "kit_dais_top", "kit_ink", "kit_solar",
 	"kit_beam", "kit_emb_inf", "kit_emb_bow", "kit_emb_horse", "kit_emb_ram", "kit_emb_town", "kit_emb_craft", "kit_emb_wall", "kit_ic_attack", "kit_ic_defence",
-	"kit_ic_health", "kit_ic_power", "kit_ic_wall", "kit_ic_places", "kit_ic_batch"]
+	"kit_ic_health", "kit_ic_power", "kit_ic_wall", "kit_ic_places", "kit_ic_batch",
+	"kit_emb_book", "kit_emb_heal", "kit_emb_sheaf", "kit_emb_sword", "kit_emb_shield", "kit_emb_march", "kit_emb_map",
+	"kit_emb_scroll", "kit_emb_menu", "kit_emb_info", "kit_emb_up", "kit_emb_speed", "kit_emb_move", "kit_emb_trade", "kit_emb_helm",
+	"kit_item_build_1", "kit_item_build_2", "kit_item_build_3", "kit_item_build_4", "kit_item_build_5",
+	"kit_item_train_1", "kit_item_train_2", "kit_item_train_3", "kit_item_train_4", "kit_item_train_5"]
 
 static var textures := {}
 static var requested := {}

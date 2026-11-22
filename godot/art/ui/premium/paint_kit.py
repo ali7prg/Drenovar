@@ -1210,6 +1210,363 @@ def dais_top(out):
     save('kit_dais_top', a, out)
 
 
+
+# ---------------------------------------------------------------- queues, HUD and ring (stage 4a)
+
+ITEM_TIERS = ['#8a9097', '#3f8a4b', '#2f6aa8', '#7b45a8', '#d39a2c']
+
+
+def hourglass_parts(x, y, cx, cy, h, w):
+    """A forged hourglass standing at (cx, cy): two caps, two turned posts and rounded glass
+    bulbs. Returns (metal sdf, glass sdf, sand mask, glass inside mask)."""
+    top, bottom = cy - h / 2, cy + h / 2
+    cap_h = h * 0.085
+    caps = np.minimum(sdf_round(x, y, cx, top + cap_h, w / 2, cap_h, cap_h * 0.6),
+                      sdf_round(x, y, cx, bottom - cap_h, w / 2, cap_h, cap_h * 0.6))
+    # knobs on the caps
+    caps = np.minimum(caps, np.minimum(sdf_circle(x, y, cx - w / 2 + 1.2, top + cap_h, cap_h * 1.05),
+                                       sdf_circle(x, y, cx + w / 2 - 1.2, top + cap_h, cap_h * 1.05)))
+    caps = np.minimum(caps, np.minimum(sdf_circle(x, y, cx - w / 2 + 1.2, bottom - cap_h, cap_h * 1.05),
+                                       sdf_circle(x, y, cx + w / 2 - 1.2, bottom - cap_h, cap_h * 1.05)))
+    post_x = w / 2 - cap_h * 1.1
+    posts = None
+    for side in (-1.0, 1.0):
+        px = cx + side * post_x
+        bead = (np.sin((y - top) / h * math.pi * 6.0) * 0.5 + 0.5) * 0.45
+        seg = sdf_segment(x, y, px, top + cap_h * 1.5, px, bottom - cap_h * 1.5) - (0.85 + bead)
+        posts = seg if posts is None else np.minimum(posts, seg)
+    # glass: rounded bulbs meeting at a narrow waist
+    inner_h = h / 2 - cap_h * 2.0
+    t = np.clip(np.abs(y - cy) / inner_h, 0, 1)
+    half_w = 1.0 + (post_x - 2.4) * np.sqrt(np.sin(t * math.pi * 0.5)) * (1.0 - 0.18 * smooth(0.82, 1.0, t))
+    glass = np.maximum(np.abs(x - cx) - half_w, np.abs(y - cy) - inner_h)
+    # sand: the lower part of the upper bulb, the stream, and a mound in the lower bulb
+    upper_sand = np.maximum(glass + 0.9, np.maximum(y - (cy - 0.6), -(y - (cy - inner_h * 0.48))))
+    stream = np.maximum(np.abs(x - cx) - 0.55, np.maximum(-(y - cy), y - (cy + inner_h)))
+    mound_top = cy + inner_h * 0.42 + (np.abs(x - cx) / max(post_x, 1.0)) ** 1.6 * inner_h * 0.36
+    lower_sand = np.maximum(glass + 0.9, -(y - mound_top))
+    sand = np.minimum.reduce([upper_sand, stream, lower_sand])
+    metal = np.minimum(caps, posts)
+    return metal, glass, sand
+
+
+def convex(x, y, points):
+    """halfplanes() for a convex polygon given in either winding."""
+    area = sum(points[i][0] * points[(i + 1) % len(points)][1] - points[(i + 1) % len(points)][0] * points[i][1] for i in range(len(points)))
+    return halfplanes(x, y, points if area > 0 else points[::-1])
+
+
+def forge(a, d, tone='gold', bevel=1.4, outline=0.9, grooves=None, shadow=0.6, polish=1.0):
+    """relief() composited over an existing canvas."""
+    H, W = d.shape
+    t = -d
+    height = smooth(0, bevel, t)
+    if grooves is not None:
+        height = height - grooves * 0.9
+    metal = bronze(light(height, 1.7), polish, tone)
+    if grooves is not None:
+        metal = metal * (1.0 - 0.55 * grooves[..., None])
+    if shadow > 0:
+        sh = blur(coverage(d - outline), 1.0) * shadow
+        a = over(a, np.zeros((H, W, 3), np.float32), drop(sh, max(1, int(1.1 * S))))
+    a = over(a, np.broadcast_to(hexc('#1a0f06')[:3], (H, W, 3)).copy(), coverage(d - outline))
+    a = over(a, metal, coverage(d))
+    return a
+
+
+def tool_axe(x, y, cx, cy, size, deg):
+    """A bearded carpenter's axe, the haft along the rotated vertical."""
+    ax_, ay_ = rot(x, y, cx, cy, deg)
+    k = size / 42.0
+    handle = sdf_segment(ax_, ay_, cx, cy + 21 * k, cx, cy - 19 * k) - 1.5 * k
+    blade = halfplanes(ax_, ay_, [(cx + 0.5 * k, cy - 18 * k), (cx + 15 * k, cy - 24.5 * k), (cx + 15 * k, cy - 2.5 * k), (cx + 0.5 * k, cy - 12 * k)])
+    blade = np.maximum(blade, sdf_circle(ax_, ay_, cx - 7 * k, cy - 14.5 * k, 21.5 * k))
+    blade = np.maximum(blade, -sdf_circle(ax_, ay_, cx + 5.5 * k, cy - 2.0 * k, 6.0 * k))
+    poll = sdf_round(ax_, ay_, cx - 2.2 * k, cy - 15.5 * k, 2.4 * k, 3.6 * k, 0.8 * k)
+    grooves = np.exp(-(np.abs(blade + 1.5 * k) / 0.45) ** 2) * coverage(blade) * 0.55
+    for gy in (6.0, 12.0):  # leather wraps on the haft
+        grooves += np.exp(-((ay_ - (cy + gy * k)) / 0.5) ** 2) * coverage(handle) * 0.6
+    return np.minimum.reduce([handle, blade, poll]), grooves
+
+
+def tool_arrow(x, y, cx, cy, size, deg):
+    """An arrow with a leaf-shaped head and three fletching vanes, along the rotated vertical."""
+    ax_, ay_ = rot(x, y, cx, cy, deg)
+    k = size / 42.0
+    shaft = sdf_segment(ax_, ay_, cx, cy + 19 * k, cx, cy - 14 * k) - 1.05 * k
+    head = sdf_ucap(ax_, ay_, cx, cy - 15.5 * k, 3.6 * k, cx, cy - 24.5 * k, 0.4 * k)
+    socket = sdf_round(ax_, ay_, cx, cy - 12.5 * k, 1.6 * k, 2.2 * k, 0.6 * k)
+    vanes = None
+    for side in (-1.0, 1.0):
+        vane = halfplanes(ax_, ay_, [(cx, cy + 9 * k), (cx + side * 4.8 * k, cy + 13 * k), (cx + side * 4.8 * k, cy + 21 * k), (cx, cy + 18 * k)][::(1 if side > 0 else -1)])
+        vanes = vane if vanes is None else np.minimum(vanes, vane)
+    nock = sdf_circle(ax_, ay_, cx, cy + 20.5 * k, 1.5 * k)
+    grooves = np.exp(-((ax_ - cx) / 0.45) ** 2) * coverage(head) * 0.7
+    for gy in (11.0, 14.0, 17.0):
+        grooves += np.exp(-((ay_ - (cy + gy * k)) / 0.4) ** 2) * coverage(vanes) * 0.45
+    return np.minimum.reduce([shaft, head, socket, vanes, nock]), grooves
+
+
+def item_tile(x, y, w, h, colour, tier):
+    """Enamel tile of a speed-up item in its tier colour: a bronze bezel with gilt corner
+    lozenges, guilloche rings and rays under a warm glaze, a gloss at the top."""
+    H, W = x.shape
+    a = np.zeros((H, W, 4), np.float32)
+    c = w / 2
+    d = sdf_chamfer(x, y, c, c, c - 2.2, c - 2.2, 10.0)
+    sh = blur(coverage(d), 1.4) * 0.5
+    a = over(a, np.zeros((H, W, 3), np.float32), drop(sh, int(1.4 * S)))
+    t = -d
+    base = hexc(colour)[:3]
+    rr = np.sqrt((x - w * 0.38) ** 2 + (y - h * 0.32) ** 2) / (w * 0.72)
+    shade = np.clip(1.32 - 0.78 * rr, 0.42, 1.35)
+    face = np.clip(base[None, None, :] * shade[..., None], 0, 1)
+    # guilloche: fine rings and rays engraved round the centre
+    r = np.sqrt((x - c) ** 2 + (y - c) ** 2)
+    ang = np.arctan2(y - c, x - c)
+    rings = np.cos(r * 2.1) * 0.5 + 0.5
+    rays = np.cos(ang * 24.0) * 0.5 + 0.5
+    engraving = (rings * 0.55 + rays * 0.45) * smooth(6.0, 14.0, r)
+    face = face * (1.0 - 0.07 * engraving[..., None]) + 0.03 * engraving[..., None]
+    # a light pool behind the emblem
+    pool = np.exp(-((x - c) ** 2 + (y - c * 0.95) ** 2) / (2 * (w * 0.24) ** 2))
+    face = np.clip(face + pool[..., None] * (np.array([1.0, 0.93, 0.78]) - face) * (0.22 + 0.05 * tier if tier < 5 else 0.05), 0, 1)
+    if tier == 5:
+        face = face * (0.86 + 0.14 * smooth(0, 1, 1 - pool))[..., None] * np.array([0.98, 0.9, 0.78])
+    bez = 4.6
+    height = smooth(0, bez * 0.45, t) * (1 - smooth(bez * 0.55, bez + 0.4, t))
+    metal = bronze(light(height, 1.7), 1.0, 'gold' if tier >= 4 else 'bronze')
+    rim = 1 - smooth(bez - 0.35, bez + 0.35, t)
+    inner = np.exp(-((t - bez - 1.0) / 1.6) ** 2) * 0.45 * (1 - rim)
+    face = face * (1 - inner[..., None])
+    gloss = np.exp(-((x - c) ** 2 / (2 * (w * 0.3) ** 2) + (y - h * 0.2) ** 2 / (2 * (h * 0.08) ** 2))) * smooth(bez, bez + 3, t)
+    face = np.clip(face + gloss[..., None] * 0.18, 0, 1)
+    rgb = face * (1 - rim[..., None]) + metal * rim[..., None]
+    a = over(a, rgb, coverage(d))
+    # gilt lozenges on the bezel at the four chamfers
+    studs = None
+    for sx, sy in ((7.6, 7.6), (w - 7.6, 7.6), (7.6, h - 7.6), (w - 7.6, h - 7.6)):
+        s = sdf_rhombus(x, y, sx, sy, 2.4, 2.4)
+        studs = s if studs is None else np.minimum(studs, s)
+    a = forge(a, studs, 'gold', bevel=0.8, outline=0.5, shadow=0.3)
+    return a
+
+
+def items(out):
+    """Speed-up items (stage 4a): one tile per tier (I grey 1 min, II green 5 min, III blue
+    15 min, IV purple 1 h–3 h, V amber 8 h and more) for each kind: construction (an
+    hourglass over a crossed carpenter's axe) and training (an hourglass over a crossed
+    arrow). The duration is drawn on the tile at runtime (crisp at any scale)."""
+    w = h = 72
+    W, H = w * S, h * S
+    x, y = grid(W, H)
+    for kind in ('build', 'train'):
+        for tier, colour in enumerate(ITEM_TIERS, 1):
+            a = item_tile(x, y, w, h, colour, tier)
+            cx, cy = w / 2, h / 2
+            if kind == 'build':
+                tool, grooves = tool_axe(x, y, cx + 4.0, cy + 3.5, 46.0, -40)
+            else:
+                tool, grooves = tool_arrow(x, y, cx + 1.0, cy - 0.5, 56.0, -45)
+            a = forge(a, tool, 'bronze', bevel=1.2, outline=0.85, grooves=np.clip(grooves, 0, 1), shadow=0.55)
+            cx -= 4.0
+            cy += 1.5
+            metal, glass, sand = hourglass_parts(x, y, cx, cy, 33.0, 19.0)
+            # shadow of the hourglass on the tool and the enamel
+            sh = blur(coverage(np.minimum(metal, glass) - 1.0), 1.4) * 0.55
+            a = over(a, np.zeros((H, W, 3), np.float32), drop(sh, int(1.2 * S)))
+            # glass: a pale cool fill, darker at the edge, a bright streak on the left
+            edge = np.exp(-(glass / 0.9) ** 2)
+            glass_rgb = np.broadcast_to(hexc('#f3efe4')[:3], (H, W, 3)).copy()
+            glass_rgb = glass_rgb * (1 - 0.35 * edge[..., None])
+            a = over(a, np.broadcast_to(hexc('#1a0f06')[:3], (H, W, 3)).copy(), coverage(glass - 0.7) * 0.85)
+            a = over(a, glass_rgb, coverage(glass) * 0.55)
+            sand_rgb = ramp(np.clip((y - (cy - 14)) / 30.0, 0, 1), [(0.0, '#ffe7a3'), (0.6, '#e9b54f'), (1.0, '#b77a22')])
+            a = over(a, sand_rgb, coverage(sand))
+            streak = coverage(np.maximum(glass + 1.2, np.abs(x - (cx - 3.4)) - 0.6)) * smooth(0, 3, np.abs(y - cy))
+            a = over(a, np.ones((H, W, 3), np.float32), streak * 0.55)
+            a = forge(a, metal, 'gold', bevel=1.1, outline=0.8, shadow=0.0, polish=1.2)
+            save('kit_item_%s_%d' % (kind, tier), a, out)
+
+
+def stage4_emblems(out):
+    """Forged emblems of stage 4a, the same 56-unit family as emblems(): research (an open
+    book and a quill), healing (a bowl with a healing herb), production (a bound sheaf),
+    attack (crossed swords), defence (an almond shield), march (a swallow-tailed standard),
+    the map (an eight-ray compass star), reports (a sealed scroll), the menu, info, upgrade
+    (a double chevron), speed-up (a winged hourglass), move (four arrows), trade (scales)
+    and the player's crest (a pointed Rus' helmet)."""
+    n = 56
+    W = H = n * S
+    x, y = grid(W, H)
+    # Research: an open book on a slant with a quill.
+    left = halfplanes(x, y, [(6.0, 18.0), (27.0, 22.0), (27.0, 46.0), (6.0, 42.0)])
+    right = halfplanes(x, y, [(29.0, 22.0), (50.0, 18.0), (50.0, 42.0), (29.0, 46.0)])
+    spine = sdf_segment(x, y, 28.0, 21.0, 28.0, 47.5) - 1.4
+    book = np.minimum.reduce([left, right, spine])
+    grooves = np.zeros_like(x)
+    for i, ly in enumerate((25.5, 29.5, 33.5, 37.5)):
+        grooves += np.exp(-(sdf_segment(x, y, 10.0, ly - 3.0 + 0.0, 24.0, ly) / 0.45) ** 2) * 0.55
+        grooves += np.exp(-(sdf_segment(x, y, 32.0, ly, 46.0, ly - 3.0) / 0.45) ** 2) * 0.55
+    qx, qy = rot(x, y, 40, 14, -38)
+    vane = np.minimum(sdf_ucap(qx, qy, 40.0, 10.0, 3.6, 40.0, 1.0, 0.5), sdf_ucap(qx, qy, 40.0, 10.0, 3.6, 40.0, 21.0, 0.4))
+    quill = np.minimum(vane, sdf_segment(qx, qy, 40.0, 12.0, 40.0, 27.0) - 0.7)
+    grooves += np.exp(-((qx - 40.0) / 0.4) ** 2) * coverage(vane) * 0.6
+    for by in (5.0, 8.0, 11.0, 14.0, 17.0):
+        grooves += np.exp(-((qy - by - np.abs(qx - 40.0) * 0.6) / 0.4) ** 2) * coverage(vane + 0.6) * 0.45
+    grooves += np.exp(-(quill / 0.45) ** 2) * coverage(book) * 0.9
+    save('kit_emb_book', relief(np.minimum(book, quill), n, grooves=np.clip(grooves, 0, 1)), out)
+    # Healing: a footed bowl with a three-leaf herb rising from it.
+    bowl = np.maximum(sdf_circle(x, y, 28.0, 28.0, 19.0), -(y - 31.0))
+    bowl = np.minimum(bowl, sdf_round(x, y, 28.0, 31.5, 20.0, 1.8, 1.0))
+    foot = np.minimum(sdf_segment(x, y, 28.0, 46.0, 28.0, 50.0) - 2.2, sdf_round(x, y, 28.0, 51.0, 9.0, 1.8, 1.0))
+    stem = sdf_segment(x, y, 28.0, 30.0, 28.0, 12.0) - 1.0
+    leaves = None
+    for (lx, ly, deg) in ((28.0, 8.0, 0), (20.5, 16.5, -48), (35.5, 16.5, 48)):
+        rx, ry = rot(x, y, lx, ly + 5.0, deg)
+        leaf = sdf_ucap(rx, ry, lx, ly + 6.0, 3.6, lx, ly - 3.0, 0.5)
+        leaves = leaf if leaves is None else np.minimum(leaves, leaf)
+    d = np.minimum.reduce([bowl, foot, stem, leaves])
+    grooves = np.exp(-((y - 36.0) / 0.45) ** 2) * coverage(bowl) * 0.5 + np.exp(-((y - 40.5) / 0.45) ** 2) * coverage(bowl) * 0.4
+    grooves += np.exp(-(np.abs(sdf_rhombus(x, y, 28.0, 38.0, 4.0, 3.0)) / 0.45) ** 2) * 0.6
+    save('kit_emb_heal', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Production: a sheaf of grain bound at the waist.
+    parts = []
+    grooves = np.zeros_like(x)
+    for deg in (-26, -13, 0, 13, 26):
+        rx, ry = rot(x, y, 28.0, 34.0, deg)
+        parts.append(sdf_segment(rx, ry, 28.0, 50.0, 28.0, 16.0) - 1.0)
+        ear = sdf_ucap(rx, ry, 28.0, 17.0, 3.4, 28.0, 4.5, 0.8)
+        parts.append(ear)
+        for gy in (8.0, 11.5, 15.0):
+            grooves += np.exp(-((ry - gy) / 0.4) ** 2) * coverage(ear) * 0.55
+    band = sdf_round(x, y, 28.0, 36.0, 8.5, 2.6, 1.2)
+    d = np.minimum.reduce(parts + [band])
+    grooves += np.exp(-(band / 0.45) ** 2) * 0.8
+    save('kit_emb_sheaf', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Attack: two crossed swords.
+    parts = []
+    grooves = np.zeros_like(x)
+    for deg in (-42, 42):
+        rx, ry = rot(x, y, 28.0, 28.0, deg)
+        blade = halfplanes(rx, ry, [(28.0, 3.0), (30.6, 8.0), (30.6, 37.0), (25.4, 37.0), (25.4, 8.0)])
+        guard = sdf_segment(rx, ry, 20.5, 38.5, 35.5, 38.5) - 1.5
+        grip = sdf_segment(rx, ry, 28.0, 39.0, 28.0, 46.5) - 1.4
+        pommel = sdf_circle(rx, ry, 28.0, 48.5, 2.6)
+        parts += [blade, guard, grip, pommel]
+        grooves += np.exp(-((rx - 28.0) / 0.45) ** 2) * coverage(blade) * 0.55
+    save('kit_emb_sword', relief(np.minimum.reduce(parts), n, grooves=np.clip(grooves, 0, 1)), out)
+    # Defence: an almond (kite) shield with a boss and a cross band.
+    upper = np.maximum(sdf_circle(x, y, 28.0, 20.0, 17.0), y - 20.0)
+    lower = np.maximum.reduce([sdf_circle(x, y, 1.6, 20.0, 43.4), sdf_circle(x, y, 54.4, 20.0, 43.4), 20.0 - y])
+    shield = np.minimum(upper, lower)
+    grooves = np.exp(-(np.abs(shield + 2.6) / 0.5) ** 2) * coverage(shield) * 0.55
+    grooves += (np.exp(-((x - 28.0) / 0.5) ** 2) + np.exp(-((y - 24.0) / 0.5) ** 2)) * coverage(shield + 3.4) * 0.45
+    boss = sdf_circle(x, y, 28.0, 24.0, 4.2)
+    save('kit_emb_shield', relief(np.minimum(shield, boss), n, grooves=np.clip(grooves, 0, 1)), out)
+    # March: a swallow-tailed standard on a spear.
+    pole = sdf_segment(x, y, 14.0, 9.0, 14.0, 52.0) - 1.5
+    tip_ = sdf_rhombus(x, y, 14.0, 5.5, 2.8, 5.0)
+    flag = halfplanes(x, y, [(15.0, 11.0), (48.0, 13.0), (48.0, 33.0), (15.0, 31.0)])
+    flag = np.maximum(flag, -halfplanes(x, y, [(49.0, 16.0), (49.0, 30.0), (38.0, 23.0)]))
+    grooves = np.exp(-(np.abs(sdf_rhombus(x, y, 28.0, 21.5, 5.5, 5.5)) / 0.5) ** 2) * coverage(flag) * 0.7
+    grooves += np.exp(-((y - 16.0) / 0.45) ** 2) * coverage(flag) * 0.3
+    save('kit_emb_march', relief(np.minimum.reduce([pole, tip_, flag]), n, grooves=np.clip(grooves, 0, 1)), out)
+    # Map: an eight-ray compass star in a ring.
+    rays = None
+    for i in range(8):
+        a0 = math.tau * i / 8
+        long = 22.0 if i % 2 == 0 else 14.0
+        px, py = 28.0 + long * math.sin(a0), 28.0 - long * math.cos(a0)
+        lx, ly = 28.0 + 4.2 * math.sin(a0 + math.pi / 2), 28.0 - 4.2 * math.cos(a0 + math.pi / 2)
+        rx2, ry2 = 28.0 + 4.2 * math.sin(a0 - math.pi / 2), 28.0 - 4.2 * math.cos(a0 - math.pi / 2)
+        tri = halfplanes(x, y, [(px, py), (lx, ly), (rx2, ry2)][::-1])
+        tri = np.minimum(tri, halfplanes(x, y, [(px, py), (rx2, ry2), (lx, ly)][::-1]))
+        rays = tri if rays is None else np.minimum(rays, tri)
+    ring = np.abs(sdf_circle(x, y, 28.0, 28.0, 15.5)) - 1.3
+    d = np.minimum(rays, ring)
+    grooves = ring_groove(x, y, 28.0, 28.0, 2.6, 0.5) * 0.8
+    for i in range(8):
+        a0 = math.tau * i / 8
+        grooves += np.exp(-(sdf_segment(x, y, 28.0, 28.0, 28.0 + 20.0 * math.sin(a0), 28.0 - 20.0 * math.cos(a0)) / 0.45) ** 2) * coverage(rays) * 0.45
+    save('kit_emb_map', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Reports: a scroll, rolled at both ends, with a wax seal.
+    sheet = sdf_round(x, y, 28.0, 28.0, 15.0, 15.5, 1.0)
+    rolls = np.minimum(sdf_round(x, y, 28.0, 12.5, 18.5, 3.6, 3.4), sdf_round(x, y, 28.0, 43.5, 18.5, 3.6, 3.4))
+    seal = sdf_circle(x, y, 36.0, 40.0, 6.0)
+    d = np.minimum.reduce([sheet, rolls, seal])
+    grooves = np.zeros_like(x)
+    for ly in (20.0, 24.5, 29.0, 33.5):
+        grooves += np.exp(-(sdf_segment(x, y, 17.0, ly, 39.0 if ly < 30 else 29.0, ly) / 0.45) ** 2) * coverage(sheet) * 0.6
+    grooves += np.exp(-(rolls / 0.45) ** 2) * coverage(sheet) * 0.8
+    grooves += ring_groove(x, y, 36.0, 40.0, 3.6, 0.5) * 0.7 + np.exp(-(seal / 0.45) ** 2) * 0.8
+    save('kit_emb_scroll', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Menu: three bars, each led by a lozenge.
+    parts = []
+    for ly in (16.0, 28.0, 40.0):
+        parts.append(sdf_round(x, y, 32.0, ly, 14.0, 2.6, 1.6))
+        parts.append(sdf_rhombus(x, y, 11.5, ly, 4.0, 4.0))
+    save('kit_emb_menu', relief(np.minimum.reduce(parts), n), out)
+    # Info: a serif «i» in a ring.
+    stem_ = sdf_round(x, y, 28.0, 33.0, 3.2, 11.0, 1.0)
+    serif = np.minimum(sdf_round(x, y, 26.0, 23.0, 5.2, 1.6, 0.8), sdf_round(x, y, 28.0, 43.5, 7.2, 1.6, 0.8))
+    dot = sdf_circle(x, y, 28.0, 13.5, 3.6)
+    ring = np.abs(sdf_circle(x, y, 28.0, 28.0, 23.0)) - 1.6
+    save('kit_emb_info', relief(np.minimum.reduce([stem_, serif, dot, ring]), n), out)
+    # Upgrade: a double chevron.
+    parts = []
+    for top_y in (8.0, 24.0):
+        parts.append(convex(x, y, [(28.0, top_y), (28.0, top_y + 11.0), (16.0, top_y + 23.0), (9.0, top_y + 16.5)]))
+        parts.append(convex(x, y, [(28.0, top_y), (47.0, top_y + 16.5), (40.0, top_y + 23.0), (28.0, top_y + 11.0)]))
+    chev = np.minimum.reduce(parts)
+    left_half = halfplanes(x, y, [(28.0, 0.0), (28.0, 56.0), (0.0, 56.0), (0.0, 0.0)])
+    grooves = np.exp(-((x - 28.0) / 0.45) ** 2) * coverage(chev) * 0.5
+    save('kit_emb_up', relief(chev, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Speed-up: an hourglass with a wing on either side.
+    metal, glass, sand = hourglass_parts(x, y, 28.0, 28.0, 40.0, 20.0)
+    wings = None
+    for side in (-1.0, 1.0):
+        for i, (len_, yy) in enumerate(((13.0, 22.0), (11.0, 27.0), (8.5, 32.0))):
+            fx = 28.0 + side * 10.5
+            feather = sdf_ucap(x, y, fx, yy, 2.4, fx + side * len_, yy - 7.0 + i * 1.5, 0.6)
+            wings = feather if wings is None else np.minimum(wings, feather)
+    body = np.minimum.reduce([metal, glass, wings])
+    grooves = coverage(glass + 0.8) * 0.55 * (1 - coverage(sand + 0.3)) + np.exp(-(glass / 0.45) ** 2) * 0.6
+    save('kit_emb_speed', relief(body, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Move: four arrows from the centre.
+    parts = [sdf_circle(x, y, 28.0, 28.0, 4.0)]
+    for deg in (0, 90, 180, 270):
+        rx, ry = rot(x, y, 28.0, 28.0, deg)
+        parts.append(sdf_segment(rx, ry, 28.0, 28.0, 28.0, 12.0) - 1.6)
+        parts.append(convex(rx, ry, [(28.0, 3.5), (35.0, 12.5), (21.0, 12.5)]))
+    save('kit_emb_move', relief(np.minimum.reduce(parts), n), out)
+    # Trade: balance scales.
+    post = sdf_segment(x, y, 28.0, 8.0, 28.0, 46.0) - 1.6
+    base_ = sdf_round(x, y, 28.0, 48.0, 11.0, 2.2, 1.2)
+    beam_ = sdf_segment(x, y, 9.0, 14.0, 47.0, 14.0) - 1.4
+    knob_ = sdf_circle(x, y, 28.0, 7.5, 3.0)
+    pans = None
+    for px in (12.0, 44.0):
+        cords = np.minimum(sdf_segment(x, y, px, 14.0, px - 6.5, 30.0), sdf_segment(x, y, px, 14.0, px + 6.5, 30.0)) - 0.6
+        pan = np.maximum(sdf_circle(x, y, px, 26.0, 8.0), -(y - 30.0))
+        part = np.minimum(cords, pan)
+        pans = part if pans is None else np.minimum(pans, part)
+    save('kit_emb_trade', relief(np.minimum.reduce([post, base_, beam_, knob_, pans]), n), out)
+    # Crest: a pointed Rus' helmet (shelom) with a nasal and a mail curtain.
+    dome = np.maximum(sdf_ucap(x, y, 28.0, 30.0, 15.5, 28.0, 6.0, 1.2), y - 30.0)
+    brim = sdf_round(x, y, 28.0, 31.0, 16.0, 2.4, 1.2)
+    nasal = sdf_round(x, y, 28.0, 37.0, 2.0, 6.5, 0.8)
+    mail = np.minimum(sdf_round(x, y, 16.0, 41.0, 4.6, 9.5, 3.4), sdf_round(x, y, 40.0, 41.0, 4.6, 9.5, 3.4))
+    finial = sdf_circle(x, y, 28.0, 4.5, 2.2)
+    d = np.minimum.reduce([dome, brim, nasal, mail, finial])
+    grooves = np.exp(-((x - 28.0) / 0.45) ** 2) * coverage(dome) * 0.5
+    for ly in (35.5, 39.0, 42.5, 46.0):
+        grooves += np.exp(-((y - ly) / 0.45) ** 2) * coverage(mail + 0.5) * 0.5
+    for brow in (21.0, 35.0):
+        grooves += np.exp(-(np.abs(sdf_circle(x, y, brow, 34.5, 5.5)) / 0.45) ** 2) * coverage(brim) * (y < 33.0) * 0.7
+    grooves += np.exp(-(np.abs(sdf_ucap(x, y, 28.0, 30.0, 11.5, 28.0, 9.0, 1.0)) / 0.45) ** 2) * coverage(dome) * 0.35
+    save('kit_emb_helm', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else 'kit_png'
     os.makedirs(out, exist_ok=True)
@@ -1248,6 +1605,8 @@ def main():
     solar(out)
     beam(out)
     dais_top(out)
+    items(out)
+    stage4_emblems(out)
     total = sum(os.path.getsize(os.path.join(out, f)) for f in os.listdir(out))
     print('painted', len(os.listdir(out)), 'textures,', total // 1024, 'KiB of PNG in', out)
 

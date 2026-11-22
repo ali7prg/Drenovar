@@ -249,7 +249,7 @@ def dais(out):
     w, h = 256, 40
     W, H = w * S, h * S
     x, y = grid(W, H)
-    rgb = wood(W, H, 171, dark='#2b1b0f', mid='#4b311f', light_c='#6e4c2f', stretch=40.0)
+    rgb = wood(W, H, 171, dark='#3a2614', mid='#62432a', light_c='#8a6440', stretch=40.0)
     period = 32.0
     lx = np.mod(x, period) - period / 2.0
     ly = y - h / 2.0
@@ -287,8 +287,11 @@ def dais(out):
     # Albedo: carved faces catch less light and show the darker end grain.
     lit = light(height, 1.3)
     rgb = rgb * (0.78 + 0.32 * lit)[..., None] * (1.0 - 0.32 * cut)[..., None]
-    gold = bronze(light(height * 0.6, 1.2), 1.0, 'gold')
-    rgb = rgb * (1 - gild[..., None] * 0.85) + gold * gild[..., None] * 0.85
+    # No gilding (it read as a gold trophy base): the deepest cuts are darker end grain,
+    # the raised faces weathered to a lighter, greyer oak.
+    rgb = rgb * (1.0 - 0.3 * gild)[..., None]
+    weather = smooth(0.2, 0.8, ridge + (1.0 - cut) * 0.4) * (0.5 + 0.5 * fbm(W, H, 6, 3, 172))
+    rgb = rgb * (1 - 0.25 * weather[..., None]) + hexc('#8f8577')[:3] * 0.25 * weather[..., None]
     a = canvas(w, h)
     a[..., :3] = rgb
     a[..., 3] = 1.0
@@ -788,6 +791,372 @@ def hourglass(out):
     save('kit_hourglass', a, out)
 
 
+
+# ---------------------------------------------------------------- recruitment stage (stage 2b)
+
+def rot(x, y, cx, cy, deg):
+    """Coordinates rotated by deg around (cx, cy): shapes drawn in the rotated frame."""
+    a = math.radians(deg)
+    dx, dy = x - cx, y - cy
+    return cx + dx * math.cos(a) + dy * math.sin(a), cy - dx * math.sin(a) + dy * math.cos(a)
+
+
+def sdf_ucap(x, y, ax, ay, ra, bx, by, rb):
+    """Uneven capsule from (ax, ay) radius ra to (bx, by) radius rb (exact, 2D)."""
+    px, py = x - ax, y - ay
+    dx, dy = bx - ax, by - ay
+    h = math.hypot(dx, dy)
+    ux, uy = dx / h, dy / h
+    qx = px * uy - py * ux
+    qy = px * ux + py * uy
+    qx = np.abs(qx)
+    b = (ra - rb) / h
+    a = math.sqrt(max(0.0, 1.0 - b * b))
+    k = qx * a - qy * b  # cross of (b, a) and (qx, qy) rearranged
+    k = -qx * b + qy * a
+    d_a = np.sqrt(qx * qx + qy * qy) - ra
+    d_b = np.sqrt(qx * qx + (qy - h) ** 2) - rb
+    d_m = qx * a + qy * b - ra
+    return np.where(k < 0.0, d_a, np.where(k > a * h, d_b, d_m))
+
+
+def halfplanes(x, y, points):
+    """Convex polygon (clockwise in screen space) as the max of its edge half-planes."""
+    d = None
+    n = len(points)
+    for i in range(n):
+        ax, ay = points[i]
+        bx, by = points[(i + 1) % n]
+        ex, ey = bx - ax, by - ay
+        ln = math.hypot(ex, ey)
+        side = ((x - ax) * ey - (y - ay) * ex) / ln
+        d = side if d is None else np.maximum(d, side)
+    return d
+
+
+def relief(d, size, tone='gold', bevel=1.3, outline=0.85, grooves=None, shadow=0.55):
+    """A forged glyph: bevelled metal inside the signed distance d, a dark outline around
+    it (reads on linen and on enamel) and a soft drop shadow. grooves (0..1) are cut
+    lines inside the glyph (eye, rings): darker and lower."""
+    H, W = d.shape
+    t = -d
+    height = smooth(0, bevel, t)
+    if grooves is not None:
+        height = height - grooves * 0.9
+    metal = bronze(light(height, 1.7), 1.0, tone)
+    if grooves is not None:
+        metal = metal * (1.0 - 0.55 * grooves[..., None])
+    a = np.zeros((H, W, 4), np.float32)
+    if shadow > 0:
+        sh = blur(coverage(d - outline), 0.9) * shadow
+        a = over(a, np.zeros((H, W, 3), np.float32), drop(sh, max(1, int(0.9 * S))))
+    a = over(a, np.broadcast_to(hexc('#1a0f06')[:3], (H, W, 3)).copy(), coverage(d - outline))
+    a = over(a, metal, coverage(d))
+    return a
+
+
+def ring_groove(x, y, cx, cy, r, w=0.55):
+    return np.exp(-((np.sqrt((x - cx) ** 2 + (y - cy) ** 2) - r) / w) ** 2)
+
+
+def emblems(out):
+    """Rail emblems of the training buildings: forged gold glyphs that sit on the enamel
+    discs of kit_rail / kit_rail_on (spear and shield, bow, horse head, ram)."""
+    n = 56
+    W = H = n * S
+    x, y = grid(W, H)
+    # Infantry: a spear across, a round shield with a boss in front of it.
+    rx, ry = rot(x, y, 28, 28, -40)
+    shaft = sdf_segment(rx, ry, 28, 50, 28, 12) - 1.25
+    head = sdf_rhombus(rx, ry, 28, 8.0, 3.2, 7.5)
+    spear = np.minimum(shaft, head)
+    shield = sdf_circle(x, y, 24, 31, 13.5)
+    d = np.minimum(spear, shield)
+    grooves = ring_groove(x, y, 24, 31, 10.6, 0.5) * coverage(shield)
+    grooves += np.exp(-(np.sqrt((x - 24) ** 2 + (y - 31) ** 2) - 3.6) ** 2 / 0.4) * 0.8
+    # the shield covers the spear: a thin cut where they meet
+    grooves += np.exp(-(shield / 0.45) ** 2) * coverage(spear) * 0.9
+    save('kit_emb_inf', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Archers: a drawn bow facing up-left with a nocked arrow.
+    rx, ry = rot(x, y, 28, 28, 35)
+    rr = np.sqrt((rx - 40.0) ** 2 + (ry - 28.0) ** 2)
+    thick = 1.0 + 1.3 * np.clip(1.0 - np.abs(ry - 28.0) / 20.0, 0, 1)
+    bow = np.maximum(np.abs(rr - 22.0) - thick, rx - 29.5)
+    string = np.minimum(sdf_segment(rx, ry, 29.6, 8.6, 36.5, 28.0), sdf_segment(rx, ry, 29.6, 47.4, 36.5, 28.0)) - 0.45
+    shaft = sdf_segment(rx, ry, 9.0, 28.0, 39.0, 28.0) - 0.75
+    tip = halfplanes(rx, ry, [(3.5, 28.0), (10.5, 24.4), (10.5, 31.6)])
+    fletch = np.minimum(halfplanes(rx, ry, [(36.0, 28.0), (41.5, 23.6), (43.0, 23.6), (39.0, 28.0)]),
+                        halfplanes(rx, ry, [(36.0, 28.0), (39.0, 28.0), (43.0, 32.4), (41.5, 32.4)]))
+    d = np.minimum.reduce([bow, string, shaft, tip, fletch])
+    save('kit_emb_bow', relief(d, n), out)
+    # Cavalry: a horse head in profile, facing left, with an arched neck and a mane.
+    head = sdf_ucap(x, y, 27.5, 17.5, 6.6, 12.0, 33.5, 4.6)
+    cheek = sdf_circle(x, y, 27.5, 23.5, 7.4)
+    neck = sdf_ucap(x, y, 31.5, 20.0, 7.0, 39.5, 47.0, 10.5)
+    ex, ey = rot(x, y, 30.0, 10.5, -18)
+    ear = sdf_rhombus(ex, ey, 30.0, 10.5, 2.4, 5.4)
+    # mane: a saw edge along the back of the neck
+    mx0, my0, mx1, my1 = 33.0, 12.0, 47.5, 41.0
+    mdx, mdy = mx1 - mx0, my1 - my0
+    ml = math.hypot(mdx, mdy)
+    tpar = np.clip(((x - mx0) * mdx + (y - my0) * mdy) / (ml * ml), 0, 1)
+    saw = np.mod(tpar * 7.0, 1.0)
+    mane = sdf_segment(x, y, mx0, my0, mx1, my1) - (1.4 + 2.6 * saw)
+    d = np.minimum.reduce([head, cheek, neck, ear, mane])
+    d = np.maximum(d, y - 50.5)
+    grooves = np.exp(-((x - 24.0) ** 2 + (y - 19.5) ** 2) / 1.6)          # eye
+    grooves += np.exp(-((x - 13.2) ** 2 + (y - 31.0) ** 2) / 1.0) * 0.8   # nostril
+    grooves += np.exp(-(sdf_segment(x, y, 15.0, 34.5, 22.0, 31.0) / 0.45) ** 2) * 0.6  # mouth
+    grooves += np.exp(-(np.abs(sdf_circle(x, y, 27.5, 23.5, 7.4)) / 0.5) ** 2) * coverage(head) * 0.5  # jaw line
+    grooves += np.exp(-(np.abs(mane + 1.2) / 0.45) ** 2) * coverage(neck) * 0.6
+    save('kit_emb_horse', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Siege: a battering ram under its roof, on two wheels.
+    roof = halfplanes(x, y, [(28.0, 8.0), (50.0, 24.5), (6.0, 24.5)])
+    roof = np.maximum(roof, -halfplanes(x, y, [(28.0, 13.0), (42.5, 23.6), (13.5, 23.6)]) - 0.0)
+    posts = np.minimum(sdf_segment(x, y, 13.0, 24.0, 13.0, 39.0), sdf_segment(x, y, 43.0, 24.0, 43.0, 39.0)) - 1.3
+    log = sdf_segment(x, y, 8.0, 32.0, 48.0, 32.0) - 3.4
+    head_r = sdf_circle(x, y, 6.5, 32.0, 4.8)
+    beam = sdf_segment(x, y, 10.0, 39.5, 47.0, 39.5) - 1.3
+    wheels = np.minimum(sdf_circle(x, y, 16.0, 44.0, 6.2), sdf_circle(x, y, 40.0, 44.0, 6.2))
+    d = np.minimum.reduce([roof, posts, log, head_r, beam, wheels])
+    grooves = ring_groove(x, y, 16.0, 44.0, 3.6, 0.45) + ring_groove(x, y, 40.0, 44.0, 3.6, 0.45)
+    grooves += (np.exp(-((x - 16.0) ** 2 + (y - 44.0) ** 2) / 1.2) + np.exp(-((x - 40.0) ** 2 + (y - 44.0) ** 2) / 1.2)) * 0.8
+    grooves += np.exp(-(np.abs(log) / 0.5) ** 2) * coverage(wheels) * 0.7
+    for gx in (20.0, 27.0, 34.0):
+        grooves += np.exp(-((x - gx) / 0.45) ** 2) * coverage(log) * 0.45
+    save('kit_emb_ram', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+
+
+def stat_icons(out):
+    """Small forged icons for figures and chips (24 units): attack, defence, health, power,
+    wall damage, army places, batch."""
+    n = 24
+    W = H = n * S
+    x, y = grid(W, H)
+    def put(name, d, grooves=None, tone='bronze'):
+        save(name, relief(d, n, tone=tone, bevel=0.9, outline=0.75, grooves=grooves, shadow=0.35), out)
+    # sword, point up-right
+    rx, ry = rot(x, y, 12, 12, -45)
+    blade = halfplanes(rx, ry, [(12.0, 1.0), (13.7, 4.0), (13.7, 15.0), (10.3, 15.0), (10.3, 4.0)])
+    guard = sdf_segment(rx, ry, 7.0, 15.8, 17.0, 15.8) - 1.05
+    grip = sdf_segment(rx, ry, 12.0, 16.5, 12.0, 20.5) - 0.95
+    pommel = sdf_circle(rx, ry, 12.0, 21.6, 1.5)
+    grooves = np.exp(-((rx - 12.0) / 0.4) ** 2) * coverage(blade) * 0.5
+    put('kit_ic_attack', np.minimum.reduce([blade, guard, grip, pommel]), grooves)
+    # heater shield with a cross
+    top = sdf_round(x, y, 12.0, 8.0, 8.2, 5.5, 1.6)
+    point = np.maximum(sdf_circle(x, y, 18.0, 9.0, 12.8), sdf_circle(x, y, 6.0, 9.0, 12.8))
+    shield = np.maximum(np.minimum(top, np.maximum(point, -(y - 8.0))), -(y - 2.5))
+    grooves = (np.exp(-((x - 12.0) / 0.5) ** 2) + np.exp(-((y - 9.5) / 0.5) ** 2)) * coverage(shield + 1.4) * 0.7
+    put('kit_ic_defence', shield, np.clip(grooves, 0, 1))
+    # heart
+    hx = np.abs(x - 12.0)
+    lobes = sdf_circle(hx, y, 4.6, 9.0, 4.9)
+    tip = halfplanes(x, y, [(12.0, 21.0), (3.0, 10.6), (7.0, 6.8), (12.0, 10.0), (17.0, 6.8), (21.0, 10.6)][::-1])
+    tip = np.maximum(halfplanes(x, y, [(2.2, 10.2), (21.8, 10.2), (12.0, 21.2)]), -100)
+    put('kit_ic_health', np.minimum(lobes, tip), tone='gold')
+    # eight-pointed star (two squares)
+    box = np.maximum(np.abs(x - 12.0), np.abs(y - 12.0)) - 6.6
+    qx, qy = rot(x, y, 12, 12, 45)
+    box2 = np.maximum(np.abs(qx - 12.0), np.abs(qy - 12.0)) - 6.6
+    star = np.minimum(box, box2)
+    grooves = ring_groove(x, y, 12.0, 12.0, 3.3, 0.45)
+    put('kit_ic_power', star, grooves, tone='gold')
+    # wall with battlements and a crack
+    wall = np.maximum(np.abs(x - 12.0) - 8.5, np.abs(y - 15.5) - 6.0)
+    for mx in (5.0, 12.0, 19.0):
+        wall = np.minimum(wall, np.maximum(np.abs(x - mx) - 2.0, np.abs(y - 7.5) - 2.6))
+    crack = np.minimum(sdf_segment(x, y, 13.0, 10.5, 10.5, 15.0), sdf_segment(x, y, 10.5, 15.0, 14.0, 21.0))
+    grooves = np.exp(-(crack / 0.55) ** 2) + np.exp(-((y - 15.5) / 0.4) ** 2) * 0.35
+    put('kit_ic_wall', wall, np.clip(grooves, 0, 1))
+    # banner on a pole (army places)
+    pole = sdf_segment(x, y, 6.0, 2.5, 6.0, 22.0) - 1.0
+    flag = np.maximum(halfplanes(x, y, [(6.5, 3.5), (20.5, 4.5), (20.5, 14.5), (6.5, 14.0)]),
+                      -halfplanes(x, y, [(21.5, 5.0), (21.5, 14.0), (15.0, 9.5)]))
+    knob = sdf_circle(x, y, 6.0, 2.2, 1.6)
+    grooves = np.exp(-(sdf_segment(x, y, 9.0, 7.0, 13.5, 9.2) / 0.45) ** 2) * 0.6
+    put('kit_ic_places', np.minimum.reduce([pole, flag, knob]), grooves)
+    # batch: three spears
+    parts = []
+    for sx in (6.0, 12.0, 18.0):
+        parts.append(sdf_segment(x, y, sx, 9.0, sx, 22.0) - 0.9)
+        parts.append(sdf_rhombus(x, y, sx, 5.6, 2.1, 4.2))
+    put('kit_ic_batch', np.minimum.reduce(parts))
+
+
+def ink(out):
+    """Painterly watercolour splash behind the recruitment hero (white, alpha; tinted at
+    runtime by the tier). A tall ragged blot whose edge is hard and pooled in places and
+    soft in others, a dense core low behind the figure that washes out upward, a few
+    blooms, dry-brush strokes swept out of it, granulation and splatter. 1 texel per unit
+    (soft by nature). RGB carries the value (pooled edges are darker), alpha the density."""
+    n = 512
+    y, x = np.mgrid[0:n, 0:n].astype(np.float32)
+    u, v = (x - n / 2) / (n / 2), (y - n / 2) / (n / 2)
+    warp_x = fbm(n, n, 2, 4, 411, 0.55) - 0.5
+    warp_y = fbm(n, n, 2, 4, 412, 0.55) - 0.5
+    uu, vv = u + warp_x * 0.5, v + warp_y * 0.38
+    r = np.sqrt((uu / 0.74) ** 2 + (vv / 0.9) ** 2)
+    ragged = (fbm(n, n, 10, 3, 413, 0.6) - 0.5) * 0.14
+    field_v = r + ragged
+    # edge character varies round the blot: hard and pooled here, soft and bleeding there
+    hard = smooth(0.35, 0.65, fbm(n, n, 3, 2, 414, 0.5))
+    soft_w = 0.03 + 0.2 * (1.0 - hard)
+    body = 1.0 - smooth(0.86 - soft_w, 0.86, field_v)
+    pool = np.exp(-((field_v - 0.84) / 0.035) ** 2) * hard * body
+    # dense core low behind the figure, washing out toward the top
+    core = np.exp(-((u * 1.1) ** 2 + ((v - 0.18) * 0.9) ** 2) / 0.32)
+    wash = 0.42 + 0.45 * core + 0.13 * smooth(-0.2, 0.9, v)
+    bloom = fbm(n, n, 4, 4, 415, 0.55)
+    bloom_edges = np.exp(-((bloom - 0.55) / 0.02) ** 2) * smooth(0.3, 0.7, 1.0 - core)
+    density = body * (wash * (0.85 + 0.3 * (bloom - 0.5))) + pool * 0.5 + bloom_edges * body * 0.18
+    # dry-brush strokes swept out of the blot (lower right and upper left)
+    strokes = np.zeros((n, n), np.float32)
+    rng = np.random.default_rng(416)
+    for angle, cx, cy, length, width in ((-28, 0.42, 0.62, 0.9, 0.07), (-22, 0.32, 0.74, 0.7, 0.05), (152, -0.5, -0.42, 0.6, 0.05),
+                                         (-35, 0.55, 0.38, 0.55, 0.04), (160, -0.6, -0.2, 0.45, 0.035), (-10, -0.15, 0.86, 0.8, 0.05)):
+        a = math.radians(angle)
+        du, dv = math.cos(a), math.sin(a)
+        along = (u - cx) * du + (v - cy) * dv
+        across = -(u - cx) * dv + (v - cy) * du
+        # bristles: streaks along the stroke (noise across it), broken where the brush ran dry
+        seed = int(rng.integers(1000))
+        lanes = np.random.default_rng(seed).random(400).astype(np.float32)
+        lane = np.interp((across / width + 1.0) * 100.0, np.arange(400, dtype=np.float32), lanes)
+        dry = fbm(n, n, 3, 3, seed + 1, 0.55)
+        taper = np.clip(1.0 - np.abs(along) / length, 0, 1) ** 0.6
+        profile = 1.0 - smooth(0.5, 1.0, np.abs(across) / (width * (0.35 + 0.65 * taper) + 1e-4))
+        ink_left = smooth(0.25, 0.55, lane * 0.6 + dry * 0.7 - (1.0 - taper) * 0.5)
+        strokes = np.maximum(strokes, profile * ink_left * taper * 0.85)
+    density = np.maximum(density, strokes * (1.0 - body * 0.6))
+    # splatter
+    for _ in range(110):
+        ang = rng.random() * math.tau
+        dist = 0.86 + rng.random() ** 1.5 * 0.32
+        cx = n / 2 + math.cos(ang) * dist * n / 2 * 0.74
+        cy = n / 2 + math.sin(ang) * dist * n / 2 * 0.9
+        rad = 0.7 + rng.random() ** 3 * 5.5
+        if cx < 6 or cy < 6 or cx > n - 6 or cy > n - 6:
+            continue
+        dot = np.sqrt((x - cx) ** 2 + (y - cy) ** 2) - rad
+        density = np.maximum(density, np.clip(0.5 - dot, 0, 1) * (0.5 + 0.45 * rng.random()))
+    grain = np.random.default_rng(417).random((n, n)).astype(np.float32)
+    grain = np.asarray(Image.fromarray((grain * 255).astype(np.uint8), 'L').resize((n // 2, n // 2), Image.BILINEAR).resize((n, n), Image.BICUBIC), np.float32) / 255.0
+    density = density * (0.86 + 0.24 * grain)
+    edge_fade = smooth(0.0, 0.05, np.minimum.reduce([x, y, n - 1 - x, n - 1 - y]) / n)
+    alpha = np.clip(density, 0, 1) * edge_fade
+    value = np.clip(1.0 - 0.45 * pool - 0.15 * bloom_edges - 0.18 * core * body, 0.4, 1.0)
+    a = np.zeros((n, n, 4), np.float32)
+    a[..., 0] = value
+    a[..., 1] = value
+    a[..., 2] = value
+    a[..., 3] = alpha
+    Image.fromarray((np.clip(a, 0, 1) * 255 + 0.5).astype(np.uint8), 'RGBA').save(os.path.join(out, 'kit_ink.png'), optimize=True)
+
+
+def solar(out):
+    """Carved solar medallion behind the hero: a double ring with a band of notched
+    triangles (three-sided notch carving), an inner ring of lozenges and the six-petal
+    rosette drawn with compass arcs, the oldest carved sign of Russian wooden houses.
+    Relief in grey (lit from the upper left), alpha = carved area; tinted at runtime."""
+    w = h = 160
+    W, H = w * S, h * S
+    x, y = grid(W, H)
+    c = w / 2
+    r = np.sqrt((x - c) ** 2 + (y - c) ** 2)
+    ang = np.arctan2(y - c, x - c)
+    lines = np.zeros((H, W), np.float32)
+    for rad in (78.0, 74.5, 61.0, 57.5):
+        lines = np.maximum(lines, np.exp(-((r - rad) / 0.7) ** 2))
+    # notched triangles between 61 and 74.5
+    k = 28
+    local = np.mod(ang * k / math.tau, 1.0) - 0.5
+    tri_h = (r - 61.5) / 12.5
+    tri = coverage((np.abs(local) * 2.0 - (1.0 - tri_h)) * 4.0) * (tri_h > 0) * (tri_h < 1)
+    # lozenges between 48 and 57
+    k2 = 16
+    local2 = (np.mod(ang * k2 / math.tau, 1.0) - 0.5) * (math.tau * 52.5 / k2)
+    loz = np.abs(local2) / 6.0 + np.abs(r - 52.5) / 3.6 - 1.0
+    loz_m = coverage(loz * 3.0)
+    # rosette: six arcs of radius R centred on a circle of radius R
+    R = 40.0
+    ros = np.zeros((H, W), np.float32)
+    for i in range(6):
+        a0 = math.tau * i / 6.0
+        px, py = c + R * math.cos(a0), c + R * math.sin(a0)
+        dd = np.abs(np.sqrt((x - px) ** 2 + (y - py) ** 2) - R)
+        ros = np.maximum(ros, np.exp(-(dd / 0.75) ** 2) * (r < R + 0.5))
+    ros = np.maximum(ros, np.exp(-((r - R) / 0.75) ** 2))
+    hub = np.exp(-((r - 4.0) / 0.7) ** 2)
+    cut = np.clip(np.maximum.reduce([lines, tri * 0.85, loz_m * 0.8, ros, hub]), 0, 1)
+    height = -cut
+    lit = light(height, 1.4)
+    value = np.clip(0.62 + 0.5 * (lit - 0.62), 0, 1)
+    a = canvas(w, h)
+    a[..., 0] = value
+    a[..., 1] = value
+    a[..., 2] = value
+    a[..., 3] = np.clip(cut * 0.9 + 0.08 * (r < 78.5), 0, 1) * (r < 79.0)
+    save('kit_solar', a, out)
+
+
+def beam(out):
+    """Warm light falling on the hero from the upper left: a soft cone with dust. White,
+    alpha; tinted warm and drawn rotated at runtime. 1 texel per unit."""
+    w, h = 96, 320
+    y, x = np.mgrid[0:h, 0:w].astype(np.float32)
+    t = y / h
+    half = 10.0 + 34.0 * t
+    across = np.abs(x - w / 2) / half
+    alpha = (1.0 - smooth(0.35, 1.0, across)) * (1.0 - smooth(0.55, 1.0, t)) * smooth(0.0, 0.12, t)
+    dust = fbm(w, h, 6, 3, 501, 0.6)
+    alpha = alpha * (0.75 + 0.4 * dust)
+    a = np.zeros((h, w, 4), np.float32)
+    a[..., :3] = 1.0
+    a[..., 3] = np.clip(alpha, 0, 1)
+    Image.fromarray((a * 255 + 0.5).astype(np.uint8), 'RGBA').save(os.path.join(out, 'kit_beam.png'), optimize=True)
+
+
+def dais_top(out):
+    """End grain of the oak plinth: growth rings round a darker heart, drying cracks,
+    a strip of bark at the rim and moss creeping in from it. Opaque surface texture."""
+    w = h = 128
+    W, H = w * S, h * S
+    x, y = grid(W, H)
+    c = w / 2
+    dx, dy = x - c, y - c
+    r = np.sqrt(dx * dx + dy * dy) / (w / 2 - 1.0)
+    ang = np.arctan2(dy, dx)
+    warp = (fbm(W, H, 3, 3, 601, 0.55) - 0.5) * 0.05
+    rr = r + warp
+    rings = np.sin(rr * math.tau * 13.0 + (fbm(W, H, 8, 2, 607) - 0.5) * 2.0) * 0.5 + 0.5
+    rings = rings ** 4
+    base = ramp(np.clip(0.55 + 0.25 * (fbm(W, H, 4, 3, 602) - 0.5) + 0.12 * rr, 0, 1),
+                [(0.0, '#4a3220'), (0.5, '#7a5a3a'), (1.0, '#a07a52')])
+    rgb = base * (1.0 - 0.14 * rings)[..., None]
+    rgb = rgb * (0.82 + 0.18 * smooth(0.0, 0.25, r))[..., None]
+    cracks = np.zeros((H, W), np.float32)
+    rng = np.random.default_rng(603)
+    for _ in range(5):
+        a0 = rng.random() * math.tau
+        span = 0.25 + rng.random() * 0.45
+        da = np.angle(np.exp(1j * (ang - a0 - 0.12 * np.sin(rr * 9.0))))
+        width = 0.012 * (1.0 - np.clip(rr / span, 0, 1))
+        cracks = np.maximum(cracks, smooth(0.0, 1.0, 1.0 - np.abs(da) / np.maximum(width, 1e-4) * 0.5) * (rr < span) * (rr > 0.06))
+    rgb = rgb * (1.0 - 0.6 * cracks)[..., None]
+    bark = smooth(0.94, 0.965, r)
+    bark_rgb = ramp(fbm(W, H, 18, 2, 604), [(0.0, '#1f150d'), (1.0, '#4b3726')])
+    rgb = rgb * (1 - bark[..., None]) + bark_rgb * bark[..., None]
+    moss_n = fbm(W, H, 6, 4, 605, 0.6)
+    moss = smooth(0.78, 0.97, r + (moss_n - 0.5) * 0.35) * smooth(0.52, 0.66, moss_n)
+    moss_rgb = ramp(fbm(W, H, 20, 2, 606), [(0.0, '#3e4a1f'), (0.6, '#62732c'), (1.0, '#8a9a45')])
+    rgb = rgb * (1 - moss[..., None] * 0.9) + moss_rgb * (moss[..., None] * 0.9)
+    a = canvas(w, h)
+    a[..., :3] = rgb
+    a[..., 3] = 1.0
+    save('kit_dais_top', a, out)
+
+
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else 'kit_png'
     os.makedirs(out, exist_ok=True)
@@ -819,6 +1188,12 @@ def main():
     embroidery(out)
     flourish(out)
     splash(out)
+    emblems(out)
+    stat_icons(out)
+    ink(out)
+    solar(out)
+    beam(out)
+    dais_top(out)
     total = sum(os.path.getsize(os.path.join(out, f)) for f in os.listdir(out))
     print('painted', len(os.listdir(out)), 'textures,', total // 1024, 'KiB of PNG in', out)
 

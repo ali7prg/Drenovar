@@ -8,12 +8,15 @@ extends SceneTree
 ##   godot --headless --path godot/project -s res://tools/bake_ui_kit.gd -- --src=/tmp/kit_png
 ## kit_splash.png is soft and painted at 1 texel per unit (no override).
 ## kit_dais*.png are 3D surface textures of the recruitment dais: mipmapped, no override,
-## kit_dais_n is a normal map. --only=a,b bakes just those names.
+## kit_dais_n is a normal map. kit_ink, kit_beam, kit_solar and kit_dais_top are lossy.
+## --only=a,b bakes just those names.
 
 const OUT := "res://assets/ui/premium"
 const SCALE := 2.0
-const ONE_TO_ONE := ["kit_splash"]
-const SURFACES := ["kit_dais", "kit_dais_n"]
+const ONE_TO_ONE := ["kit_splash", "kit_ink", "kit_beam"]
+const SURFACES := ["kit_dais", "kit_dais_n", "kit_dais_top"]
+## Soft painted washes: lossy WebP keeps them small (they have no hard edges to ring).
+const LOSSY := ["kit_ink", "kit_beam", "kit_solar", "kit_dais_top"]
 
 func _initialize() -> void:
 	var src := ""
@@ -46,7 +49,10 @@ func _initialize() -> void:
 		if surface:
 			image.generate_mipmaps(name.ends_with("_n"))
 		var texture := PortableCompressedTexture2D.new()
-		texture.create_from_image(image, PortableCompressedTexture2D.COMPRESSION_MODE_LOSSLESS, name.ends_with("_n"))
+		if name in LOSSY:
+			texture.create_from_image(image, PortableCompressedTexture2D.COMPRESSION_MODE_LOSSY, false, 0.86)
+		else:
+			texture.create_from_image(image, PortableCompressedTexture2D.COMPRESSION_MODE_LOSSLESS, name.ends_with("_n"))
 		if name not in ONE_TO_ONE and not surface:
 			texture.size_override = Vector2(image.get_size()) / SCALE
 		var path := OUT.path_join(name + ".res")

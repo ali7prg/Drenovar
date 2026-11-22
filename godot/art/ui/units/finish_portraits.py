@@ -6,9 +6,11 @@
 Full figures become 288 x 352 (cards show them at ~118 x 144 canvas units, 2.4x), busts
 128 x 128 (64-unit slots, 2x). Pillow resizes RGBA premultiplied, so the transparent edge
 keeps no dark fringe. Lossy WebP at q90 with an exact alpha plane: visually lossless,
-a fraction of a PNG.
+a fraction of a PNG. framing.json (each unit's measured silhouette, read by the stage and
+the portrait placement) is copied as it is.
 """
 import os
+import shutil
 import sys
 
 from PIL import Image
@@ -30,6 +32,10 @@ def main() -> None:
         image.save(path, 'WEBP', quality=90, alpha_quality=100, method=6, exact=False)
         total += os.path.getsize(path)
         print(path, os.path.getsize(path))
+    framing = os.path.join(source, 'framing.json')
+    if os.path.exists(framing):
+        shutil.copyfile(framing, os.path.join(target, 'framing.json'))
+        print('framing.json copied')
     print('portraits:', total // 1024, 'KiB')
 
 

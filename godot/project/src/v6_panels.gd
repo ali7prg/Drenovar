@@ -210,7 +210,7 @@ func move_building(b: Dictionary, environment: String) -> void:
 		for other: Dictionary in ui.state.v6.buildings:
 			occupied = occupied or other.plot == plot
 		if not occupied:
-			ui.button(ui.modal_body, "Участок " + plot, send.bind({"kind":"move", "building_id":b.id, "plot":plot}))
+			ui.button(ui.modal_body, build.plot_name(plot), send.bind({"kind":"move", "building_id":b.id, "plot":plot}))
 
 ## The construction strip (src/v6_build.gd): every type of the catalogue as a card over the
 ## blurred city. `plot`: an empty plot the player tapped (placement starts there).
@@ -307,7 +307,7 @@ func inspect(type: String) -> void:
 			for plot: String in build.free_plots(str(next.environment)):
 				var placement: Dictionary = action.duplicate()
 				placement.plot = plot
-				var choice: Button = ui.button(plots, "Участок " + plot, confirm.bind(placement))
+				var choice: Button = ui.button(plots, build.plot_name(plot), confirm.bind(placement))
 				choice.custom_minimum_size = Vector2(180, 48)
 			if plots.get_child_count() == 0:
 				muted("Нет свободного участка: %s." % build.TERRAIN.get(str(next.environment), str(next.environment)))
@@ -386,7 +386,7 @@ func confirm(action: Dictionary) -> void:
 	if action.get("kind", "") == "construction" and target > 0:
 		eyebrow = "СТРОИТЕЛЬСТВО · УР. I" if target == 1 else "УЛУЧШЕНИЕ ДО УР. " + ROMAN[clampi(target, 1, 11) - 1]
 		if action.has("plot"):
-			eyebrow += " · УЧАСТОК " + str(action.plot)
+			eyebrow += " · " + build.plot_name(str(action.plot), false).to_upper()
 	elif action.get("kind", "") == "repair_wall":
 		eyebrow = "РЕМОНТ СТЕНЫ"
 	ui.open_modal("Подтвердить работу", "full", eyebrow, ui.v6_card(type))

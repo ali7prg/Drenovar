@@ -348,6 +348,32 @@ func card_tapped(type: String) -> void:
 
 # ------------------------------------------------------------------ placement
 
+## Human name of a plot: «Участок 4» (the number the web client shows for v1-4) and, where the
+## plot has one, its place from the server's terrain tags: «Участок 4 · на опушке».
+const PLOT_PLACES := [["center", "в центре"], ["ore", "у рудной жилы"], ["rock", "у скал"],
+	["shore", "у берега"], ["forest_edge", "на опушке"], ["edge", "на краю поселения"]]
+
+func plot_name(id: String, with_place := true) -> String:
+	var title := "Участок " + id.trim_prefix("v1-")
+	if not with_place:
+		return title
+	var place_name := plot_place(id)
+	return title if place_name.is_empty() else title + " · " + place_name
+
+func plot_place(id: String) -> String:
+	var tags: Array = ui.state.get("v6_plots", {}).get(id, [])
+	for pair: Array in PLOT_PLACES:
+		if pair[0] in tags:
+			return pair[1]
+	# A plain plot near the town hall says so.
+	var hall: Dictionary = panels.building("B01")
+	var at := plot_position(id)
+	if not hall.is_empty() and at != Vector3.INF:
+		var heart := plot_position(str(hall.get("plot", "")))
+		if heart != Vector3.INF and Vector2(at.x - heart.x, at.z - heart.z).length() < 17.0:
+			return "у ратуши"
+	return ""
+
 func placing_active() -> bool:
 	return not placing.is_empty()
 
@@ -450,10 +476,12 @@ func pick_plot(id: String) -> void:
 	placing.plot = id
 	placing.quote = {}
 	placing.pending = true
+	# The camera eases to the chosen plot, so the floating confirm has room beside it.
+	ui.stage.target = plot.position
 	ui.stage.move_placement(plot.position, "ready", false)
 	ui.stage.highlight_plot_glow(plot.position)
 	var row: Dictionary = placing.row
-	place.show_offer(plot.position, row.get("cost", {}), panels.duration(build_seconds(int(row.get("duration_seconds", 0)))), id)
+	place.show_offer(plot.position, row.get("cost", {}), panels.duration(build_seconds(int(row.get("duration_seconds", 0)))), plot_name(id))
 	quote_serial += 1
 	var serial := quote_serial
 	var intent := {"kind": "construction", "building": placing.type, "target": 1, "plot": id, "economy_version": VERSION}

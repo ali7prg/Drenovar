@@ -65,6 +65,15 @@ func advance_to(server_ms: float) -> void:
 	await refresh()
 
 var boot_ms: Array[int] = []
+var started_ms := 0
+## What the run covered (printed as QA_FOREST_E2E_REPORT).
+var report := {"tasks": {}, "guardian_victories": [], "cages": [], "escorts": [], "boss_phases_shown": [],
+	"boss_phase_events": [], "reloads": []}
+
+func on_adventure_events(events: Array) -> void:
+	for event in events:
+		if event is Dictionary and String(event.get("type", "")) == "boss_phase":
+			report.boss_phase_events.append(String(event.get("phase", "")))
 
 ## One app launch: the city first, then (1022) the lazy forest game layer and its world layer.
 func boot() -> void:
@@ -87,6 +96,7 @@ func boot() -> void:
 	while not forest.world_ready() and Time.get_ticks_msec() < deadline:
 		await process_frame
 	check(forest.world_ready(), "forest world layer attached by itself after the city (reload %d)" % reloads)
+	forest.client.events_arrived.connect(on_adventure_events)
 	await frames(3)
 	while not forest.entered_session and Time.get_ticks_msec() < deadline:
 		await process_frame
@@ -120,6 +130,7 @@ func reload(reason: String) -> void:
 				check(not has_rig, "home captive absent after reload " + String(person.id))
 		if String(poi.get("guardian", {}).get("state", "")) == "defeated":
 			check(not forest.actors.rigs.has("guardian_" + site_id), "defeated guardian removed after reload " + site_id)
+	report.reloads.append(reason)
 	note("reload %d (%s) ok" % [reloads, reason])
 
 func form_squad_from_panel() -> void:
@@ -173,8 +184,29 @@ func solve_mechanism(site_id: String) -> void:
 	check(bool(forest.mech.mechanism().get("solved", false)), "mechanism solved through the UI " + site_id)
 	forest.mech.close()
 
+## The boss fight in its three phases: as the server clock passes each phase change of the server
+## timeline, the server projection, the client's battle view and the battle header show that phase.
+func check_boss_phases(fight: Dictionary, from_ms: float, to_ms: float) -> void:
+	for event in fight.get("timeline", []):
+		if String(event.get("type", "")) != "phase":
+			continue
+		var at := float(fight.startedAt) + float(event.t) * 1000.0
+		if at < from_ms or at >= to_ms:
+			continue
+		var id := String(event.phase)
+		await advance_to(at + 150.0)
+		for i in 3:
+			forest.actors.tick(0.05)
+		var shown := String(forest.client.battle().get("phase", ""))
+		check(shown == id and String(forest.client.adv.get("boss", {}).get("phase", "")) == id, "boss phase %s projected at %.1f s (battle %s)" % [id, float(event.t), shown])
+		var header: String = forest.hud.battle_title.text if forest.hud.battle_header.visible else ""
+		check(header.contains(forest.content.text("boss.phase." + id)), "battle header shows the boss phase %s: %s" % [id, header])
+		report.boss_phases_shown.append(id)
+		note("boss phase %s at %.1f s" % [id, float(event.t)])
+
 func run() -> void:
 	root.size = Vector2i(1366, 630)
+	started_ms = Time.get_ticks_msec()
 	await boot()
 	if finished:
 		return
@@ -266,20 +298,49 @@ func run() -> void:
 				var after_step := int(forest.client.site_state(site_id).get("step", 0))
 				check(after_step == before_step + 1, "task %s/%s completed" % [site_id, task_id])
 				note("%s %s → step %d" % [site_id, task_id, after_step])
+				if after_step == before_step + 1:
+					if not report.tasks.has(site_id):
+						report.tasks[site_id] = []
+					report.tasks[site_id].append(task_id)
+				if task_id == "unlock_cage":
+					var freed := 0
+					for person in forest.client.poi(site_id).get("captives", []):
+						freed += 1 if String(person.get("state", "")) != "caged" else 0
+					check(freed == 3, "cage opened: three captives out of the cage at " + site_id)
+					report.cages.append(site_id)
+				if task_id == "escort_home":
+					var home := 0
+					for person in forest.client.poi(site_id).get("captives", []):
+						home += 1 if String(person.get("state", "")) == "home" else 0
+					check(home == 3, "escort home: three captives home from " + site_id)
+					report.escorts.append(site_id)
 				if reload_points.get(site_id, []).has(task_id) or (task_id == "unlock_cage"):
 					await reload("%s after %s" % [site_id, task_id])
 			elif action == "engage_guardian" or action == "engage_boss":
 				var fight: Dictionary = forest.client.battle()
 				check(not fight.is_empty() and fight.has("timeline"), "battle with server timeline " + action)
-				if site_id == "lf_site_01" or action == "engage_boss":
-					await advance_to(float(fight.startedAt) + (float(fight.endsAt) - float(fight.startedAt)) * 0.5)
+				var boss_fight := action == "engage_boss"
+				var mid := float(fight.startedAt) + (float(fight.endsAt) - float(fight.startedAt)) * 0.5
+				if boss_fight:
+					var ids: Array = (fight.get("timeline", []) as Array).filter(func(e): return String(e.get("type", "")) == "phase").map(func(e): return String(e.phase))
+					check(ids == ["hunt", "fury", "last_stand"], "boss timeline: three phases in order " + str(ids))
+					report.boss_timeline_phases = ids
+					await check_boss_phases(fight, -INF, mid)
+				if site_id == "lf_site_01" or boss_fight:
+					await advance_to(mid)
 					await reload("mid-battle " + action)
 					for i in 3:
 						forest.actors.tick(0.05)
 					check(forest.hud.battle_header.visible, "battle header restored mid-battle")
+				if boss_fight:
+					await check_boss_phases(fight, mid, float(fight.endsAt))
 				await advance_to(float(fight.endsAt) + 300.0)
 				var result: Dictionary = forest.client.battle()
 				check(String(result.get("outcome", "")) == "victory", "battle victory " + action + " " + String(result.get("outcome", "")))
+				if action == "engage_guardian" and String(result.get("outcome", "")) == "victory":
+					report.guardian_victories.append("%s:%s" % [site_id, String(fight.get("species", ""))])
+				if boss_fight:
+					report.boss_outcome = String(result.get("outcome", ""))
 				game.close_modal()
 			elif action == "escort_start":
 				var walk: Dictionary = forest.client.escort()
@@ -293,6 +354,16 @@ func run() -> void:
 	check(int(forest.client.campaign().get("rescuedCount", 0)) == 36, "36 rescued")
 	var boss_state := String(forest.client.adv.get("boss", {}).get("state", ""))
 	check(boss_state == "defeated", "boss defeated")
+	# Coverage of the whole adventure in this one run (the real client, the V6 code).
+	var all_tasks := 0
+	for site_id in report.tasks:
+		all_tasks += (report.tasks[site_id] as Array).size()
+	var five := (forest.client.campaign().get("sites", []) as Array).all(func(e): return int(e.get("step", 0)) == 5)
+	check(report.tasks.size() == 12 and all_tasks == 60 and five, "all 12 sites, every task (%d sites, %d tasks)" % [report.tasks.size(), all_tasks])
+	check(report.guardian_victories.size() == 12, "12 guardian battles won: %d" % report.guardian_victories.size())
+	check(report.cages.size() == 12 and report.escorts.size() == 12, "12 cages opened, 12 escorts home: %d / %d" % [report.cages.size(), report.escorts.size()])
+	check(report.boss_phases_shown == ["hunt", "fury", "last_stand"], "boss shown in its three phases: " + str(report.boss_phases_shown))
+	check(report.boss_phase_events.has("fury") and report.boss_phase_events.has("last_stand"), "boss phase changes announced to the client: " + str(report.boss_phase_events))
 	await reload("completed")
 	# Rewards: earned = claimed + pending; claim through the panel (warehouse fills, rest kept).
 	forest.panels.open_rewards()
@@ -307,6 +378,7 @@ func run() -> void:
 			await process_frame
 		await frames(2)
 	var escrow: Dictionary = forest.client.adv.escrow
+	report.reward = {"earned": escrow.earned.duplicate(), "claimed": escrow.claimed.duplicate(), "pending": escrow.pending.duplicate()}
 	for key in ["food", "wood", "stone", "iron", "coins"]:
 		check(int(escrow.earned[key]) == int(escrow.claimed[key]) + int(escrow.pending[key]), "earned = claimed + pending " + key)
 		check(int(escrow.pending[key]) <= int(pending_before[key]), "pending did not grow " + key)
@@ -335,7 +407,14 @@ func finish() -> void:
 		return
 	finished = true
 	var commands: int = forest.client.sent_log.size() if is_instance_valid(forest) else 0
+	report.boot_ms = {"count": boot_ms.size(), "min": boot_ms.min() if not boot_ms.is_empty() else 0, "max": boot_ms.max() if not boot_ms.is_empty() else 0}
+	report.run_s = snappedf((Time.get_ticks_msec() - started_ms) / 1000.0, 0.1)
+	print("QA_FOREST_E2E_REPORT ", JSON.stringify(report))
 	print("QA_FOREST_E2E steps=", steps, " reloads=", reloads, " commands=", commands, " checks=", checks, " failures=", failures.size())
 	for failure in failures:
 		print("  FAIL ", failure)
-	quit(0 if failures.is_empty() else 1)
+	var code := 0 if failures.is_empty() else 1
+	if is_instance_valid(game):
+		game.queue_free()
+		await frames(3)
+	quit(code)

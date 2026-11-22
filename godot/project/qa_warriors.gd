@@ -16,7 +16,7 @@ func check(condition: bool, detail: String) -> void:
 
 func run() -> void:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/game.json"))
-	check(data.unitModels.size() == 10, "All ten warrior definitions are required")
+	check(data.unitModels.size() == 5, "All five warrior definitions are required (DRENOVAR-V6-ROSTER-5)")
 	for id in data.unitModels:
 		var visual: Dictionary = data.unitModels[id]
 		for role in ["preview", "field"]:
@@ -42,7 +42,7 @@ func run() -> void:
 				clips.append_array(player.get_animation_list())
 			for required in ["Idle", "Walk", visual.drill]:
 				check(clips.has(required), "%s %s misses %s" % [id, role, required])
-			if role == "preview" and id in ["ENG-05", "ENG-06"]:
+			if role == "preview" and id == "ENG-06":
 				check(clips.has("Recruit_Showcase"), id + " lacks mounted showcase")
 			actor.free()
 			print(id, " ", role, " · ", materials.size(), " materials, ", textured, " with albedo and normal maps")

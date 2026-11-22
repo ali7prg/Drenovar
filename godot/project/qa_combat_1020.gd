@@ -56,8 +56,10 @@ func run() -> void:
 func crowd(stage) -> void:
 	var slots: Array = []
 	var origins := {}
-	var kinds := [["ENG-01", 3, false, false], ["ENG-02", 4, false, false], ["ENG-09", 2, false, false],
-		["ENG-05", 3, true, false], ["ENG-06", 2, true, false], ["ENG-03", 4, false, true], ["ENG-04", 3, false, true], ["ENG-10", 3, false, true]]
+	# DRENOVAR-V6-ROSTER-5: the five kept units (ENG-05/07/08/09/10 retired).
+	# Same crowd as before: footmen counted as spearmen, scouts as knights, skirmishers as longbowmen.
+	var kinds := [["ENG-01", 5, false, false], ["ENG-02", 4, false, false],
+		["ENG-06", 5, true, false], ["ENG-03", 7, false, true], ["ENG-04", 3, false, true]]
 	var row := 0
 	for kind in kinds:
 		for index in int(kind[1]):
@@ -172,7 +174,7 @@ func ambient(stage) -> void:
 func clips(stage) -> void:
 	var parent := Node3D.new()
 	stage.add_child(parent)
-	for id in ["ENG-01", "ENG-02", "ENG-05", "ENG-04", "ENG-03", "ENG-10"]:
+	for id in ["ENG-01", "ENG-02", "ENG-06", "ENG-04", "ENG-03"]:
 		while not CombatV010.ready_for("troop", id):
 			OS.delay_msec(5)
 		var unit: Node3D = stage.add_warrior(parent, stage.data.unitModels[id].field, Transform3D.IDENTITY)
@@ -181,7 +183,7 @@ func clips(stage) -> void:
 		var window: Vector2 = CombatV010.attack_window(unit, 0.0)
 		check(CombatV010.strike_window(id, info.ranged).distance_to(window) < 1.0, "%s: strike window before creation %s != installed %s" % [id, CombatV010.strike_window(id, info.ranged), window])
 		var player: AnimationPlayer = info.player
-		if id in ["ENG-01", "ENG-02", "ENG-05", "ENG-04"]:
+		if id in ["ENG-01", "ENG-02", "ENG-06", "ENG-04"]:
 			check(info.clips.get(&"attack_a") == &"Attack" and info.clips.get(&"idle") == &"Idle", id + " does not fight with its authored Attack/Idle: " + str(info.clips))
 		else:
 			check(info.clips.is_empty(), id + " should keep the library clips: " + str(info.clips))
@@ -189,7 +191,7 @@ func clips(stage) -> void:
 			check(info.clips.get(&"block") == &"Shield_Block", id + " has no shield block")
 		if id == "ENG-04":
 			check(absf(float(info.reload_ms) - 2000.0) < 1.0 and absf(window.x - 760.0) < 1.0, "crossbow: release 0.5 s + flight, reload 2 s: %s %s" % [window, info.get("reload_ms")])
-		if id in ["ENG-01", "ENG-02", "ENG-05"]:
+		if id in ["ENG-01", "ENG-02", "ENG-06"]:
 			# The wrist is forward of its stance at the contact time (the authored blow).
 			var skeleton: Skeleton3D = unit.find_children("*", "Skeleton3D", true, false)[0]
 			var wrist := skeleton.find_bone("wrist.R")
@@ -256,7 +258,7 @@ func scene(game, stage) -> void:
 				if not unit is Node3D or unit.name == &"Ferry":
 					continue
 				var key := String(unit.name).replace("_", ":")
-				if key.begins_with("ENG-03") or key.begins_with("ENG-04") or key.begins_with("ENG-10") or plan.get("reserve_rows", {}).get(key, 0) >= 3:
+				if key.begins_with("ENG-03") or key.begins_with("ENG-04") or plan.get("reserve_rows", {}).get(key, 0) >= 3:
 					continue
 				engaged_frames += 1
 				var clip: String = unit.get_meta("clip", "")
@@ -301,7 +303,7 @@ func scene(game, stage) -> void:
 	var server_creature: Array = mixed.result.events.filter(func(e): return e.kind != "soldier_attack").map(func(e): return float(e.at) * float(army.get("stretched", 1.0)))
 	for feint in feints:
 		check(not server_creature.any(func(s): return absf(s - float(feint.at)) < stage.FEINT_CLEAR_MS - 400.0), "swipe %.0f too close to a server creature attack" % feint.at)
-		check(str(feint.target).get_slice(":", 0) in ["ENG-01", "ENG-02", "ENG-07", "ENG-08", "ENG-09"], "swipe at a soldier without a shield: " + str(feint.target))
+		check(str(feint.target).get_slice(":", 0) in ["ENG-01", "ENG-02"], "swipe at a soldier without a shield: " + str(feint.target))
 	check(blocks.size() >= 1, "a swiped soldier raises its shield: %s" % str(blocks.keys()))
 	check(beast_attacks.size() >= 2, "the creature strikes during the fight: %s" % str(beast_attacks.keys()))
 	stage.engage_sync = false

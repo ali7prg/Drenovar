@@ -6,8 +6,8 @@ extends SceneTree
 
 const REQUIRED := ["Idle", "Walk", "Run", "Attack", "Hit", "Death"]
 # Field LODs may not be heavier than the 0.5.9 field models they replace (+3%).
-const FIELD_BUDGET := {"ENG-01": 21898, "ENG-02": 21401, "ENG-03": 20275, "ENG-04": 21989, "ENG-05": 29114,
-	"ENG-06": 34754, "ENG-07": 17591, "ENG-08": 22548, "ENG-09": 22360, "ENG-10": 21316}
+# DRENOVAR-V6-ROSTER-5: ENG-05/07/08/09/10 are retired (no models in the pack).
+const FIELD_BUDGET := {"ENG-01": 21898, "ENG-02": 21401, "ENG-03": 20275, "ENG-04": 21989, "ENG-06": 34754}
 var failures: Array[String] = []
 var checks := 0
 var rows: Array = []

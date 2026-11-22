@@ -17,7 +17,7 @@ var results := []
 var fast_travel := false
 var evidence_root := ""
 var attack_shots := 0
-var selected_units := {"ENG-01":20,"ENG-03":20,"ENG-05":5}
+var selected_units := {"ENG-01":20,"ENG-03":20,"ENG-06":5}
 var start_level := 1
 
 func _initialize() -> void:

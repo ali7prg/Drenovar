@@ -272,7 +272,7 @@ func frame(state: Dictionary, now: float, map_name: String) -> Dictionary:
 						record({"id":key,"phase":"late-completion","at":at,"received":stamp,"shown":frame_time})
 				var kind: String = str(e[1]) if e is Array else str(e.kind)
 				var unit_id: String = str(e[2]) if e is Array else str(e.unitId)
-				var released: bool = kind == "soldier_attack" and unit_id in ["ENG-03","ENG-04","ENG-10"]
+				var released: bool = kind == "soldier_attack" and unit_id in ["ENG-03","ENG-04"]
 				var flags: Dictionary = seen[key]
 				if not flags.contact or (released and not flags.release):
 					pending.append([key, at, released, e])

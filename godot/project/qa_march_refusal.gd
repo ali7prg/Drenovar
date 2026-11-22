@@ -104,7 +104,7 @@ func run() -> void:
 	game.poll = 1.0e6
 	await fresh_state()
 	var target: Dictionary = game.state.encounters.filter(func(e): return int(e.level) == 1)[0]
-	var soldiers_before := int(game.state.healthy.get("ENG-09", 0))
+	var soldiers_before := int(game.state.healthy.get("ENG-01", 0))
 	var armies_before := armies().size()
 	if mode == "wait":
 		# Open the window while the creature rests at (-44,-44) (route open), press when it
@@ -121,7 +121,7 @@ func run() -> void:
 		check(not game.march_wall().is_empty(), "City wall stands (town hall III): the order carries the wall")
 		# Creatures beyond the wall (server with the patch): the route preview leaves through a gate.
 		for other in game.state.encounters.filter(func(e): return int(e.level) == 2):
-			var preview: Dictionary = await game.send_request("march-preview", {"kind": "deploy", "encounterId": other.id, "units": {"ENG-09": 1}, "wall": game.march_wall()}, false, 5.0)
+			var preview: Dictionary = await game.send_request("march-preview", {"kind": "deploy", "encounterId": other.id, "units": {"ENG-01": 1}, "wall": game.march_wall()}, false, 5.0)
 			if preview.has("path"):
 				wall_route(preview.path, Vector2(float(other.position.x), float(other.position.z)), "Tenerys %d (preview)" % int(other.level))
 			else:
@@ -146,7 +146,7 @@ func run() -> void:
 		check(refusals[0] == 0 and game.last_command_error != BLOCKED, "The server never refused the timed order")
 		if left:
 			check(armies().back().get("target", "") == target.id, "Army marches to Tenerys I")
-			check(int(game.state.healthy.get("ENG-09", 0)) < soldiers_before, "Soldiers left the garrison")
+			check(int(game.state.healthy.get("ENG-01", 0)) < soldiers_before, "Soldiers left the garrison")
 			check(not game.modal.visible or game.modal_title.text != "Создать войско", "March window closed after the order")
 		print("QA_MARCH_REFUSAL mode=", mode, " checks=", checks, " failures=", failures)
 		quit(0 if failures == 0 else 1)
@@ -165,7 +165,7 @@ func run() -> void:
 			check(send.text == "Ждём путь…" and send.disabled, "Refused order waits for an open route (button: %s)" % send.text)
 			check(game.modal_status.visible and game.modal_status.text.begins_with("Путь перекрыт постройкой"), "Status explains the wait: " + game.modal_status.text)
 			check(await wait_until(func(): return quote().text.begins_with("Путь к цели перекрыт постройкой"), 5.0), "Route preview keeps asking: " + quote().text)
-			check(armies().size() == armies_before and int(game.state.healthy.get("ENG-09", 0)) == soldiers_before, "No army, no soldiers lost while waiting")
+			check(armies().size() == armies_before and int(game.state.healthy.get("ENG-01", 0)) == soldiers_before, "No army, no soldiers lost while waiting")
 			var gave_up: bool = await wait_until(func(): return quote().text == BLOCKED, 30.0)
 			check(gave_up, "After one patrol round the refusal is shown (%s)" % quote().text)
 			send = send_button()
@@ -188,13 +188,13 @@ func run() -> void:
 			check(left, "The refused order left by itself once the creature walked out")
 			if left:
 				check(armies().back().get("target", "") == target.id, "Army marches to Tenerys I")
-				check(int(game.state.healthy.get("ENG-09", 0)) < soldiers_before, "Soldiers left the garrison")
+				check(int(game.state.healthy.get("ENG-01", 0)) < soldiers_before, "Soldiers left the garrison")
 				check(not game.modal.visible or game.modal_title.text != "Создать войско", "March window closed after the order")
 		_:
 			var army_ok: bool = armies().size() == armies_before + 1 and armies().back().get("target", "") == target.id
 			check(army_ok, "Army marched to Tenerys I next to the building")
 			check(not game.modal.visible or game.modal_title.text != "Создать войско", "March window closed after the order")
-			check(int(game.state.healthy.get("ENG-09", 0)) < soldiers_before, "Soldiers left the garrison")
+			check(int(game.state.healthy.get("ENG-01", 0)) < soldiers_before, "Soldiers left the garrison")
 			if army_ok:
 				var path: Array = armies().back().get("path", [])
 				wall_route(path, Vector2(-40, -40), "Tenerys I (order)")

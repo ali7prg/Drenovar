@@ -23,7 +23,8 @@ const TownGround = preload("res://src/town_ground.gd")
 const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
 # FOREST_RESCUE hook: gameplay layer of «Лес потерянных» (src/forest_rescue/game/).
 const ForestGame = preload("res://src/forest_rescue/game/forest_game.gd")
-const RECRUIT_ORDER := ["ENG-09", "ENG-08", "ENG-01", "ENG-02", "ENG-07", "ENG-10", "ENG-03", "ENG-04", "ENG-05", "ENG-06"]
+# DRENOVAR-V6-ROSTER-5: spearman, swordsman, longbowman, crossbowman, knight (ENG-05/07/08/09/10 retired).
+const RECRUIT_ORDER := ["ENG-01", "ENG-02", "ENG-03", "ENG-04", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
 const RESOURCE_NAMES := {"food":"Еда","wood":"Дерево","stone":"Камень","iron":"Железо","coins":"Монеты"}
 const SCENE_REUSE_SECONDS := 40.0
@@ -102,7 +103,10 @@ var saved_session_error := false
 var login_proof := ""
 var login_deadline := 0
 var login_link_used := false
+# True while a foreground (player-initiated) request is in flight. 1022: it no longer refuses
+# other requests (the pool keeps several kept-alive connections); routine polls skip a beat.
 var busy := false
+var foreground_in_flight := 0
 var api := ApiPool.new()
 # Connections to the old server during a settlement transfer.
 var old_api := ApiPool.new()
@@ -156,6 +160,27 @@ var diagnostics := SessionDiagnostics.new()
 var combat_diagnostics: CanvasLayer = null
 const OFFLINE_NOTICE := "Нет связи · повторяем"
 var offline_notice_shown := false
+# 1022 network rules (drenovar-server v6/docs/STATUS-1022-SERVER.md §10–11): transient failures
+# are repeated silently with the same Idempotency-Key; the connection pill shows only after
+# 10 s without any 200 or 304.
+const COMMAND_RETRY_DELAYS := [0.4, 1.2, 2.8]
+const COMMAND_RETRY_WINDOW_MS := 30000
+const CONNECTION_NOTICE_AFTER_MS := 10000
+var last_ok_msec := 0
+var next_notice_check_msec := 0
+# Conditional state polls (v6/docs/CONDITIONAL-STATE-1022.md): the full tagged answer is kept
+# (never an advanced copy); a 304 re-applies it with the time moved on. Off for the rest of the
+# session after an unexpected 304; never required (no tag ever is fine).
+const CONDITIONAL_POLLS := true
+const STATE_ETAG_PATTERN := "^W/\"v6s1\\.\\d{1,15}\\.\\d{13,15}\\.[0-9a-f]{32}\"$"
+var conditional_polls_ok := true
+var state_etag := ""
+var state_etag_owner := ""
+var state_etag_serial := 0
+var state_cache: Dictionary = {}
+var not_modified_polls := 0
+var full_polls := 0
+var etag_regex: RegEx = null
 # Small pill under the resource bar; replaces the large centre message for link state.
 var connection_badge: Label
 var building_plates: Control
@@ -180,6 +205,7 @@ var fling_velocity := Vector2.ZERO
 var fling_point := Vector2.ZERO
 
 func _ready() -> void:
+	last_ok_msec = Time.get_ticks_msec()
 	Input.use_accumulated_input = false
 	frame_samples.resize(240)
 	motion_samples.resize(120)
@@ -3066,7 +3092,7 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 		var costs := {}
 		for resource in ["wood", "food", "iron", "coins"]:
 			var cost := int(unit.get(resource, 0))
-			if resource == "iron" and state.city.get("kingdom") != null and unit.id in ["ENG-09", "ENG-08", "ENG-01"]:
+			if resource == "iron" and state.city.get("kingdom") != null and unit.id == "ENG-01":
 				cost = 0
 			costs[resource] = cost * int(amount)
 		var reduction := clampi(int(building.level) - 1, 0, 4) * 8 if state.city.get("kingdom", state.city.get("legacyUpgrades")) is Dictionary else 0
@@ -3721,7 +3747,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 			if units.is_empty():
 				row(slots, "Добавить войска из списка")
 			if state.get("encounters", []).any(func(target): return target.id == id and target.get("species") == "tenerys" and int(target.level) == 1):
-				row(slots, "Ориентир для Тенериса I: 15 новобранцев (900 мощи).")
+				row(slots, "Ориентир для Тенериса I: 11 копейщиков (около 960 мощи).")
 		preview.revision += 1
 		preview.units = units
 		submit.order = {}
@@ -4746,6 +4772,7 @@ func sign_out() -> void:
 	await show_account()
 
 func reset_session(reason := "auth_401") -> void:
+	drop_state_tag()
 	diagnostics.log_event("session_reset", {"reason": reason}, Time.get_unix_time_from_system())
 	request_generation += 1
 	SessionStore.forget()
@@ -4988,6 +5015,7 @@ var confirmed_server_ms := 0.0
 var confirmed_local_ms := 0.0
 var timer_clock_last := 0.0
 var queued_commands := 0
+var command_retries := 0
 
 func instant_order(order: Dictionary) -> bool:
 	return order.get("kind", "") in ["kingdom", "resource", "legacyBuilding"] and order.get("action", "") in INSTANT_ACTIONS
@@ -5034,15 +5062,17 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	var key: String = str(order.get("requestId", ""))
 	if key.is_empty():
 		key = retry_keys.get(signature, Crypto.new().generate_random_bytes(16).hex_encode())
+	var first_sent := Time.get_ticks_msec()
 	var response: Dictionary = await request("command", order, key)
-	# Quiet retries with the same idempotency key (the server never applies an
-	# order twice): a dropped mobile connection is usually back within a second.
-	for pause in [0.4, 1.2]:
-		if not (response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500):
+	# Quiet retries with the same idempotency key and body (the server never applies an
+	# order twice): a dropped mobile connection is usually back within a second (rule 10).
+	for pause in COMMAND_RETRY_DELAYS:
+		if not transient_failure(response) or Time.get_ticks_msec() - first_sent + int(pause * 1000.0) > COMMAND_RETRY_WINDOW_MS:
 			break
+		command_retries += 1
 		await get_tree().create_timer(pause).timeout
 		response = await request("command", order, key)
-	if response.get("transportFailure", false) or int(response.get("httpStatus", 0)) >= 500:
+	if transient_failure(response):
 		retry_keys[signature] = key
 	else:
 		retry_keys.erase(signature)
@@ -5403,7 +5433,7 @@ func display_end(ends_at: float) -> float:
 	return ends_at + expected_latency_ms()
 
 func server_reachable() -> bool:
-	return connected() and diagnostics.network_failures < 2 and not showing_cached_state
+	return connected() and not connection_notice_due() and not showing_cached_state
 
 # What a timer shows at and after zero: the server is asked; without a link the
 # result is not presented as done.
@@ -5445,12 +5475,16 @@ func request(path: String, payload: Variant = null, idempotency_key := "") -> Di
 			accept(check)
 	return response
 
-func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0, idempotency_key := "", host := "", is_current := Callable()) -> Dictionary:
-	if foreground and busy:
-		return {"error":"Подожди завершения предыдущего запроса."}
+func send_request(path: String, payload: Variant = null, foreground := true, timeout_seconds := 12.0, idempotency_key := "", host := "", is_current := Callable(), extra_headers := PackedStringArray()) -> Dictionary:
+	# 1022: a tap never waits for (or is refused by) another request in flight.
 	if foreground:
+		foreground_in_flight += 1
 		busy = true
 		request_generation += 1
+	# Rule 4/6: a command, session, login or profile answer replaces the cached tagged state.
+	if payload != null and host.is_empty() and not path.ends_with("march-preview") \
+			and not (payload is Dictionary and payload.get("kind", "") in ["v6catalog", "v6quote"]):
+		drop_state_tag()
 	var headers := PackedStringArray(["Accept: application/json", "Accept-Encoding: gzip"])
 	if host.is_empty():
 		headers.append("X-Drenovar-Economy: DRENOVAR-V6-C1.0")
@@ -5476,6 +5510,7 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 		if request_key.is_empty():
 			request_key = Crypto.new().generate_random_bytes(16).hex_encode()
 		headers.append("Idempotency-Key: "+request_key)
+	headers.append_array(extra_headers)
 	# Kept-alive connections: a command no longer pays for a new TCP and TLS handshake.
 	pool.configure(base)
 	var started_us := Time.get_ticks_usec()
@@ -5484,7 +5519,9 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	# An obsolete read-only preview is cancelled deliberately. It must not report
 	# a network outage after its window closed or a newer request succeeded.
 	if is_current.is_valid() and not is_current.call():
-		if foreground: busy = false
+		if foreground:
+			foreground_in_flight = maxi(0, foreground_in_flight - 1)
+			busy = foreground_in_flight > 0
 		return {"cancelled":true}
 	var elapsed_ms := (Time.get_ticks_usec() - started_us) / 1000.0
 	if result[0] == HTTPRequest.RESULT_SUCCESS and int(result[1]) > 0 and int(result[1]) < 500:
@@ -5492,7 +5529,8 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 		if latency_samples.size() > 12:
 			latency_samples.pop_front()
 	if foreground:
-		busy = false
+		foreground_in_flight = maxi(0, foreground_in_flight - 1)
+		busy = foreground_in_flight > 0
 		last_command_ms = elapsed_ms
 	# An HTTP 5xx response proves that the server was reached. Keep transport and
 	# server failures separate; Cloudflare CPU errors are not a lost connection.
@@ -5501,6 +5539,8 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 		Time.get_unix_time_from_system(), Time.get_ticks_msec())
 	if transport_ok:
 		diagnostics.server_result(int(result[1]), Time.get_unix_time_from_system())
+		if (int(result[1]) >= 200 and int(result[1]) < 300) or int(result[1]) == 304:
+			last_ok_msec = Time.get_ticks_msec()
 	update_connection_notice()
 	if not transport_ok:
 		if result[0] == HTTPRequest.RESULT_TIMEOUT:
@@ -5508,23 +5548,110 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 		if result[0] == HTTPRequest.RESULT_TLS_HANDSHAKE_ERROR:
 			return {"error":"Не удалось установить защищённое соединение с сервером.", "transportFailure":true}
 		return {"error":"Сервер недоступен", "transportFailure":true}
+	# Rule 2: a 304 (conditional state poll) is a success with an empty body. It is handled
+	# before the empty-body and JSON paths, which would read it as an outage.
+	if int(result[1]) == 304:
+		return {"notModified":true, "httpStatus":304, "etag":header_value(result[2], "etag"),
+			"serverTime":header_value(result[2], "x-drenovar-server-time"), "quietUntil":header_value(result[2], "x-drenovar-quiet-until")}
 	var response := JSON.new()
 	if response.parse(result[3].get_string_from_utf8()) == OK and response.data is Dictionary:
 		if int(result[1]) >= 400:
 			response.data.httpStatus = result[1]
+		elif not extra_headers.is_empty():
+			var tag := header_value(result[2], "etag")
+			if not tag.is_empty():
+				response.data["__etag"] = tag
 		return response.data
 	# Preserve the status on HTML/empty error pages too, so the existing bounded
 	# retry keeps the original Idempotency-Key and cannot create another army.
-	return {"error":"Сервер временно перегружен. Повторите попытку." if int(result[1]) >= 500 else "Сервер вернул неожиданный ответ (HTTP %d)." % int(result[1]), "httpStatus":int(result[1])}
+	return {"error":"Сервер временно перегружен. Повторите попытку." if int(result[1]) >= 500 else "Сервер вернул неожиданный ответ (HTTP %d)." % int(result[1]),
+		"httpStatus":int(result[1]), "unreadable":true}
+
+static func header_value(headers: PackedStringArray, name: String) -> String:
+	for line in headers:
+		var colon := line.find(":")
+		if colon > 0 and line.substr(0, colon).strip_edges().to_lower() == name:
+			return line.substr(colon + 1).strip_edges()
+	return ""
+
+# Rule 10: failures that are repeated silently (the outcome is unknown or the server was busy).
+static func transient_failure(response: Dictionary) -> bool:
+	if response.get("transportFailure", false) or response.get("unreadable", false):
+		return true
+	var status := int(response.get("httpStatus", 0))
+	if status in [408, 425, 429, 500, 502, 503, 504, 530] or (status >= 520 and status <= 527):
+		return true
+	return status == 409 and response.get("retryable", false) == true
+
+func drop_state_tag() -> void:
+	state_etag = ""
+	state_etag_owner = ""
+	state_cache = {}
+	state_etag_serial += 1
+
+func state_tag_owner() -> String:
+	return endpoint + "|" + session + "|" + player_id
+
+# Rule 2/3/12: the cached full answer with the time moved on to the 304's server time.
+func advanced_state(server_ms: float) -> Dictionary:
+	var next: Dictionary = state_cache.duplicate(true)
+	next.serverTime = server_ms
+	if next.get("adventure") is Dictionary:
+		next.adventure.serverTime = server_ms
+	var v6: Variant = next.get("v6")
+	if v6 is Dictionary and v6.get("stock") is Dictionary:
+		var t := floorf(server_ms / 1000.0)
+		var since := t - float(v6.get("server_time", t))
+		for resource in v6.stock:
+			if bool(v6.get("production_stopped", {}).get(resource, false)):
+				continue
+			var carry_value: Variant = v6.get("carry", {}).get(resource, 0)
+			var carry := 0.0
+			if carry_value is Dictionary:
+				var d := float(str(carry_value.get("d", "1")))
+				carry = float(str(carry_value.get("n", "0"))) / d if d != 0.0 else 0.0
+			else:
+				carry = float(carry_value) / 36000000.0
+			var produced := float(v6.stock[resource]) + carry + float(v6.get("production_per_hour", {}).get(resource, 0)) * since / 3600.0
+			var cap := floorf(float(v6.get("capacities", {}).get(resource, INF)) - float(v6.get("escrow", {}).get(resource, 0)))
+			v6.stock[resource] = int(minf(cap, floorf(produced - 0.0000001)))
+		# The server's projection (v6/game.mjs project): wood in progress, the rest in the wallet.
+		if next.get("city") is Dictionary:
+			if next.city.get("progress") is Dictionary and v6.stock.has("wood"):
+				next.city.progress.wood = v6.stock.wood
+			if next.city.get("demo") is Dictionary and next.city.demo.get("wallet") is Dictionary:
+				for resource in v6.stock:
+					if resource != "wood":
+						next.city.demo.wallet[resource] = v6.stock[resource]
+	# Creatures walk their patrol with time alone (core.mjs refresh).
+	for list: Variant in [next.get("encounters", []), next.get("world", {}).get("encounters", [])]:
+		if not list is Array:
+			continue
+		for encounter: Variant in list:
+			if not encounter is Dictionary or str(encounter.get("status", "")) != "alive" or (encounter.get("patrol", []) as Array).size() < 2:
+				continue
+			var at := creature_point(encounter, server_ms)
+			if encounter.get("position") is Dictionary:
+				encounter.position.x = at.x
+				encounter.position.z = at.y
+			if encounter.has("spawnedAt") and encounter.has("behavior"):
+				var cycle := fposmod(maxf(0.0, server_ms - float(encounter.spawnedAt)), PATROL_ROUND_MS)
+				encounter.behavior = "idle" if cycle < 4000.0 else "roaming"
+	return next
+
+func connection_notice_due() -> bool:
+	return connected() and (diagnostics.network_failures > 0 or diagnostics.server_failures > 0) \
+		and Time.get_ticks_msec() - last_ok_msec >= CONNECTION_NOTICE_AFTER_MS
 
 func update_connection_notice() -> void:
-	# Two consecutive transport failures mean the link is down, not a single blip.
-	# Shown as a small pill under the resources, never over the game.
-	var offline := diagnostics.network_failures >= 2 and connected()
+	# 1022 rule 10: a blip is repeated silently; the small pill under the resources shows only
+	# after 10 s without any 200 or 304 (never over the game).
+	var due := connection_notice_due()
+	var offline := due and diagnostics.network_failures > 0
 	offline_notice_shown = offline
 	if is_instance_valid(connection_badge):
 		connection_badge.text = OFFLINE_NOTICE if offline else "Ошибка сервера · повторяем"
-		connection_badge.visible = offline or (diagnostics.server_failures >= 2 and connected())
+		connection_badge.visible = due
 
 func poll_account_state(due := false) -> void:
 	if restore_running or login_in_progress or not connected() or (player_id.is_empty() and not restoring_session):
@@ -5539,12 +5666,34 @@ func poll_account_state(due := false) -> void:
 	polling_state = true
 	polls_in_flight += 1
 	var generation := request_generation
-	var response := await send_request("state" if loopback else "native/game/state", null, false)
+	# Conditional poll (rule 5): opt in on the state poll only; If-None-Match only while the
+	# state from that tagged answer is the one on screen, for the same session and player.
+	var conditional := PackedStringArray()
+	var sent_tag := ""
+	var tag_serial := state_etag_serial
+	if CONDITIONAL_POLLS and conditional_polls_ok:
+		conditional.append("X-Drenovar-Conditional: 1")
+		if not state_etag.is_empty() and state_etag_owner == state_tag_owner() and not showing_cached_state and not state_cache.is_empty():
+			sent_tag = state_etag
+			conditional.append("If-None-Match: " + sent_tag)
+		elif not state_etag.is_empty():
+			drop_state_tag()
+			tag_serial = state_etag_serial
+	var response := await send_request("state" if loopback else "native/game/state", null, false, 12.0, "", "", Callable(), conditional)
 	polls_in_flight -= 1
 	polling_state = polls_in_flight > 0
+	if response.get("notModified", false):
+		apply_not_modified(response, sent_tag, tag_serial)
+		return
+	var tag: String = str(response.get("__etag", ""))
+	response.erase("__etag")
+	if not sent_tag.is_empty() and not response.has("city") and tag_serial == state_etag_serial:
+		drop_state_tag()  # rule 6: an error on a tagged poll
 	# An older answer never replaces a newer state: accept() compares serverTime.
 	if restoring_session and generation != request_generation:
 		return
+	if response.has("city"):
+		full_polls += 1
 	if restoring_session:
 		if not restore_running:
 			apply_restored_state(response)
@@ -5552,9 +5701,38 @@ func poll_account_state(due := false) -> void:
 		reset_session()
 	elif response.get("profileChanged", false):
 		player_id = ""
+		drop_state_tag()
 		await sync_account()
 	else:
+		var cache: Dictionary = response.duplicate(true) if not tag.is_empty() and response.has("city") else {}
 		accept(response)
+		# Keep the tag only for the answer now on screen (accept() may refuse a stale one).
+		if is_same(state, response) and not cache.is_empty() and tag_serial == state_etag_serial \
+				and etag_matcher().search(tag) != null:
+			state_cache = cache
+			state_etag = tag
+			state_etag_owner = state_tag_owner()
+		elif is_same(state, response):
+			drop_state_tag()
+
+func etag_matcher() -> RegEx:
+	if etag_regex == null:
+		etag_regex = RegEx.create_from_string(STATE_ETAG_PATTERN)
+	return etag_regex
+
+# Rule 2/7: the cached state with the time advanced (stock, creatures, clock); an unexpected
+# 304 (another tag, no server time, nothing sent) turns conditional polls off for the session.
+func apply_not_modified(response: Dictionary, sent_tag: String, tag_serial: int) -> void:
+	if tag_serial != state_etag_serial:
+		return  # the tag was dropped meanwhile (a command answer replaced the cache)
+	var server_time := float(str(response.get("serverTime", "")).to_int())
+	if sent_tag.is_empty() or str(response.get("etag", "")) != sent_tag or server_time <= 0.0 or state_cache.is_empty():
+		conditional_polls_ok = false
+		drop_state_tag()
+		diagnostics.log_event("conditional_off", {"reason": "unexpected_304"}, Time.get_unix_time_from_system())
+		return
+	not_modified_polls += 1
+	accept(advanced_state(server_time))
 
 func _process(delta: float) -> void:
 	advance_server_clock(delta)
@@ -5653,18 +5831,15 @@ func _process(delta: float) -> void:
 		stage.present_training(state, now)
 		next_training_update = now + 300.0
 	poll += delta
-	if poll <= 0.8 or busy or login_in_progress:
+	if Time.get_ticks_msec() >= next_notice_check_msec:
+		next_notice_check_msec = Time.get_ticks_msec() + 1000
+		update_connection_notice()
+	if poll <= 0.65 or busy or login_in_progress:
 		return
-	var active_march: bool = state.world.armies.any(func(army): return army.owner == player_id or army.target == player_id)
-	active_march = active_march or state.get("armies", []).any(func(army): return army.status != "returned")
-	# Back off while the server is unreachable: 0.8/5 s normally, up to 15 s offline.
-	var interval := (0.8 if active_march else 5.0) * pow(2.0, mini(diagnostics.network_failures, 4))
-	interval = minf(interval, maxf(15.0, 0.8 if active_march else 5.0))
+	var interval := poll_interval()
 	if restoring_session or not login_proof.is_empty():
 		# Retry a pending server restore or browser confirmation promptly.
 		interval = 1.5
-	elif diagnostics.network_failures > 0:
-		interval = minf(interval, 4.0)
 	if state_save_pending and Time.get_ticks_msec() - state_saved_msec >= STATE_SAVE_INTERVAL_MSEC:
 		remember_state()
 	if poll > interval:
@@ -5673,6 +5848,27 @@ func _process(delta: float) -> void:
 			await finish_login()
 		elif connected() and (not player_id.is_empty() or restoring_session):
 			await poll_account_state()
+
+# Rule 11 (server net-policy): 650 ms only within 3 s of a visible fight (an army within 3 s of
+# arrival, a fight, a return started less than 3 s ago), 2 s while any army is out, 4 s at rest;
+# after n >= 2 failures in a row base x 2^(n-1), up to 15 s.
+func poll_interval() -> float:
+	var now := timer_now()
+	var armies: Array = state.get("world", {}).get("armies", []).filter(func(army): return army.get("owner") == player_id or army.get("target") == player_id)
+	armies.append_array(state.get("armies", []).filter(func(army): return army.get("status", "") != "returned"))
+	var base := 4.0
+	for army: Dictionary in armies:
+		base = minf(base, 2.0)
+		var arrive := float(army.get("arrivesAt", army.get("battleAt", 0.0)))
+		var ends := float(army.get("battleEndsAt", army.get("returnStartsAt", arrive)))
+		var back := float(army.get("returnStartsAt", ends))
+		if arrive > 0.0 and ((now >= arrive - 3000.0 and now <= maxf(ends, arrive)) or (now >= back and now < back + 3000.0)):
+			base = 0.65
+			break
+	var failures := maxi(diagnostics.network_failures, diagnostics.server_failures)
+	if failures >= 2:
+		return minf(base * pow(2.0, failures - 1), 15.0)
+	return base
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventMouseButton or \
@@ -6075,7 +6271,7 @@ func run_smoke() -> void:
 		get_tree().quit(2)
 		return
 	var city_children: int = stage.trees.node.get_child_count()
-	if stage.parade_slots.size() != int(state.healthy.get("ENG-09", 0)):
+	if stage.parade_slots.size() != int(state.healthy.get("ENG-01", 0)):
 		printerr("Parade composition differs from the server garrison.")
 		get_tree().quit(23)
 		return
@@ -6084,7 +6280,7 @@ func run_smoke() -> void:
 		return
 	var barracks: Dictionary = state.city.buildings.filter(func(b): return b.type == "MIL-01")[0]
 	inspect_building(barracks)
-	var footman := unit_for_id("ENG-09")
+	var footman := unit_for_id("ENG-01")
 	if footman.is_empty() or not modal.visible:
 		get_tree().quit(10)
 		return
@@ -6093,7 +6289,7 @@ func run_smoke() -> void:
 	var preview_deadline := Time.get_ticks_msec() + 5000
 	while preview_view != null and preview_view.get_child_count() == 0 and Time.get_ticks_msec() < preview_deadline:
 		await get_tree().process_frame
-	if preview_view == null or preview_view.get_child_count() != 1 or data.unitModels.size() != 10:
+	if preview_view == null or preview_view.get_child_count() != 1 or not RECRUIT_ORDER.all(func(id): return data.unitModels.has(id)):
 		get_tree().quit(15)
 		return
 	var training: Dictionary = await request("command", {"kind":"train", "buildingId":barracks.id, "unitId":footman.id, "quantity":2})
@@ -6259,7 +6455,7 @@ func run_smoke() -> void:
 		get_tree().quit(20)
 		return
 	var encounter: Dictionary = state.world.encounters[0]
-	var order := {"kind":"worldMarch","worldKind":"velkor","encounterId":encounter.id,"units":{"ENG-09":int(state.healthy["ENG-09"])}}
+	var order := {"kind":"worldMarch","worldKind":"velkor","encounterId":encounter.id,"units":{"ENG-01":int(state.healthy["ENG-01"])}}
 	var preview: Dictionary = await request("march-preview",order)
 	if preview.get("path",[]).size() < 2:
 		printerr(preview)

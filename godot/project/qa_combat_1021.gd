@@ -114,7 +114,7 @@ func ferry_rows() -> void:
 		if r.get("ferry", false):
 			route = r
 			break
-	var units := {"ENG-01": 6, "ENG-02": 6, "ENG-03": 4, "ENG-05": 4, "ENG-06": 4}
+	var units := {"ENG-01": 6, "ENG-02": 6, "ENG-03": 4, "ENG-04": 4, "ENG-06": 4}
 	stage.prewarm_troops(units.keys())
 	for id in units:
 		while not stage.model_ready(str(data.unitModels[id].field)) or not CombatV010.ready_for("troop", id):
@@ -230,6 +230,8 @@ func run() -> void:
 		"units": case.party.duplicate(), "startsAt": arrive - walk, "arrivesAt": arrive, "battleAt": arrive}
 	stage.prewarm_troops(case.party.keys())
 	for id in case.party:
+		if not game.data.unitModels.has(id):
+			continue  # DRENOVAR-V6-ROSTER-5: a retired unit in a recorded case has no model
 		while not stage.model_ready(str(game.data.unitModels[id].field)) or not CombatV010.ready_for("troop", id):
 			await process_frame
 	stage.lanes.slice_override = 1000000

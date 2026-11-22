@@ -20,6 +20,7 @@ signal ready_to_show(rig: Node3D)
 signal clip_finished(rig: Node3D, clip_id: String)
 
 const ForestKit = preload("res://src/forest_rescue/world/forest_kit.gd")
+const CreatureVisuals = preload("res://src/creature_visuals.gd")
 ## Painted-light mix for delivered assets whose meta has none (horse, rune lock, winch,
 ## artifacts): same family as the props v2 (0.38) / humans (0.40).
 const DEFAULT_LIGHT_MIX := 0.38
@@ -49,6 +50,10 @@ var lod_scale := 1.0
 var last_position_ms := 0.0
 var marker_cursor := -1.0
 var model_scale := 1.0
+## 1022: a campaign guardian drawn with the game's creatures v2 model (src/creature_visuals.gd owns its
+## level materials, LOD switch and authored clip names; semantic ids "Idle", "Attack"... map to them).
+var creature_species := ""
+var creature_level := 1
 var model_yaw := 0.0
 var tint := Color.WHITE
 var hold_pending := ""
@@ -215,10 +220,13 @@ func poll_load(blocking := false) -> void:
 			if bool(spec.get("loop", false)) or clip_name in ["Idle", "Walk", "Run"]:
 				animation.loop_mode = Animation.LOOP_LINEAR
 		player.animation_finished.connect(_on_animation_finished)
+	var creature_v2 := not creature_species.is_empty() and CreatureVisuals.active(creature_species) and not using_fallback
+	if creature_v2:
+		CreatureVisuals.install(model, creature_species, creature_level, model_scale)
 	for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 		var lower := String(mesh.name).to_lower()
 		for level in 3:
-			if lower.ends_with("_lod%d" % level) or lower.contains("_lod%d_" % level):
+			if not creature_v2 and (lower.ends_with("_lod%d" % level) or lower.contains("_lod%d_" % level)):
 				lods[level].append(mesh)
 		if tint != Color.WHITE:
 			apply_tint(mesh)
@@ -354,6 +362,10 @@ func resolve(candidates: Array) -> String:
 	var found := ""
 	for wanted in candidates:
 		var id := String(wanted)
+		if not creature_species.is_empty() and model != null and CreatureVisuals.owns(model):
+			var authored := String(CreatureVisuals.clip_name(creature_species, id))
+			if not authored.is_empty():
+				id = authored
 		for clip_name in names:
 			if clip_name == id or clip_name.ends_with("|" + id) or clip_name.ends_with("/" + id):
 				found = clip_name
@@ -364,7 +376,7 @@ func resolve(candidates: Array) -> String:
 					found = clip_name
 					break
 		if not found.is_empty():
-			reverse[found] = id
+			reverse[found] = String(wanted)
 			break
 	resolved[key] = found
 	return found

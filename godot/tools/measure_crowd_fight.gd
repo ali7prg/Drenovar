@@ -103,7 +103,7 @@ func run():
 	for key in plan.get("reserve_rows", {}):
 		if int(plan.reserve_rows[key]) >= 3:
 			far += 1
-			if key.begins_with("ENG-05") or key.begins_with("ENG-06"): riders_far += 1
+			if key.begins_with("ENG-06"): riders_far += 1
 	var counts: Array = dist.keys().map(func(k): return int(swings.get(k, 0)))
 	counts.sort()
 	cost.sort()

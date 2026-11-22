@@ -51,7 +51,7 @@ const SOURCE_FIGHT := {
 }
 # Authored Attack lengths (s) of the troops06 models, for strike scheduling before
 # any soldier of the type exists; install() uses the clip itself.
-const SOURCE_ATTACK_S := {"ENG-05": 1.3333, "ENG-06": 1.5417}
+const SOURCE_ATTACK_S := {"ENG-06": 1.5417}
 const SOURCE_RELOAD_S := 2.0
 const CREATURE_CLIPS := ["idle", "combat_idle", "walk", "run", "alert", "attack_a", "attack_b", "hit_front", "hit_left", "hit_right", "death"]
 

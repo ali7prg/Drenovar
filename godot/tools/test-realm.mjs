@@ -101,7 +101,7 @@ const server=createServer(async (incoming,out)=>{
    player.city.buildings.push({id:'building-v1-33',type:'ECO-03',plotId:'v1-33',level:1});
    // Town hall III: the client draws the city wall (main and side gates) and sends it with a march.
    player.city.buildings.find(building=>building.type==='ECO-05').level=3;
-   player.city.military.owned={...player.city.military.owned,'ENG-09':20};
+   player.city.military.owned={...player.city.military.owned,'ENG-01':20};
    snapshot.repository.players[0]=[id,{...entry,state:JSON.stringify(player)}];
    if(blockedCreatureFixture==='1')simulatedTime=simulatedTime??Date.now();
    const fixtureNow=simulatedTime??Date.now();

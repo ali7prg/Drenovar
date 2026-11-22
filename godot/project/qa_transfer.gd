@@ -62,7 +62,7 @@ func run() -> void:
 	await game.finish_login(true)
 	check(await wait_until(func(): return SessionStore.is_device(game.session) and not game.player_id.is_empty() and game.state.has("city"), 30.0), "Device account holds the transferred settlement")
 	check(SessionStore.read_session() == game.session, "Device session saved on the phone")
-	check(int(game.state.healthy.get("ENG-09", 0)) == 110 and int(game.state.healthy.get("ENG-01", 0)) == 90, "Soldiers moved: %s" % str(game.state.healthy))
+	check(int(game.state.healthy.get("ENG-02", 0)) == 110 and int(game.state.healthy.get("ENG-01", 0)) == 90, "Soldiers moved: %s" % str(game.state.healthy))
 	check(int(game.state.city.demo.wallet.get("iron", 0)) == 997700 and game.state.get("nickname") == "Ali", "Resources and nickname moved")
 	check(game.message.text.contains("перенесено"), "Message: " + game.message.text)
 	var level := 0

@@ -100,7 +100,7 @@ func run() -> void:
 	for k in 9:
 		var q := home.lerp(beast, k / 8.0)
 		path.append({"x": q.x, "z": q.z})
-	var party := {"ENG-01": 8, "ENG-02": 8, "ENG-03": 6, "ENG-05": 2}
+	var party := {"ENG-01": 8, "ENG-02": 8, "ENG-03": 6, "ENG-06": 2}
 	var events := []
 	var hp := 1400.0
 	for k in 14:

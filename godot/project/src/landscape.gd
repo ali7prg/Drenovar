@@ -1610,7 +1610,7 @@ func present_parade() -> void:
 		if existing != null:
 			existing.visible = visible_rank
 			existing.process_mode = Node.PROCESS_MODE_INHERIT if visible_rank else Node.PROCESS_MODE_DISABLED
-		elif visible_rank and made < 4:
+		elif visible_rank and made < 4 and data.unitModels.has(slot.id):
 			var actor := add_warrior(parade, data.unitModels[slot.id].field, Transform3D(Basis.IDENTITY, slot.position))
 			actor.name = "rank" + str(i)
 			play_animation(actor, "Idle", "", -1.0, fposmod(float(i) * 0.381966, 1.0))
@@ -2059,7 +2059,7 @@ func present_battle_fx(id: String, p: Vector3, encounter: Dictionary, army: Dict
 			var attacker: Vector3=members.get(strike_shower(route,float(hit[0]),str(hit[5]),int(hit[6])),centre)
 			var direction: Vector3=(attacker-p).normalized()
 			var contact:=p+direction*minf(creature_body(encounter).y,attacker.distance_to(p)*.5)
-			battle_fx.spark(contact,age/180.0,Color("#9a8060") if creature_species(encounter) in ["dragor","kamneklyk"] else Color("#94745a"),(.70 if str(hit[5]) in ["ENG-01","ENG-05","ENG-06"] else .45)*beast_k,fposmod(at*.013,1.0))
+			battle_fx.spark(contact,age/180.0,Color("#9a8060") if creature_species(encounter) in ["dragor","kamneklyk"] else Color("#94745a"),(.70 if str(hit[5]) in ["ENG-01","ENG-06"] else .45)*beast_k,fposmod(at*.013,1.0))
 	# Same target and exact authoritative tick only. Final contact remains separate.
 	var numbers := {}
 	for hit in timeline.hits:
@@ -2449,7 +2449,7 @@ func beast_feints(army_id: String, plan: Dictionary, cache: Dictionary, rows: Ar
 		var key := "%s:%d" % [slot.id, int(slot.index)]
 		if slot.ranged or slot.mounted or fallen.has(key) or not plan.places.has(key) or plan.get("reserves", {}).get(key, false):
 			continue
-		if slot.id not in ["ENG-01", "ENG-02", "ENG-07", "ENG-08", "ENG-09"]:
+		if slot.id not in ["ENG-01", "ENG-02"]:
 			continue # the shield bearers (their models have Shield_Block)
 		var place: Vector3 = plan.places[key]
 		var to := Vector3(place.x - beast.x, 0.0, place.z - beast.z)
@@ -2867,6 +2867,9 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 			var node_name := "%s_%d" % [slot.id, int(slot.index)]
 			var unit := actor.get_node_or_null(NodePath(node_name)) as Node3D
 			if unit == null:
+				# A retired unit id (DRENOVAR-V6-ROSTER-5) has no model: the server converts saves on load.
+				if not data.unitModels.has(slot.id):
+					continue
 				if creation_budget <= 0 or not model_ready(str(data.unitModels[slot.id].field)) \
 						or not CombatV010.ready_for("troop", slot.id):
 					continue
@@ -3095,7 +3098,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				elif strike > -INF and (slot.ranged or events.get("strikers",{}).has(key)):
 					clip = "attack"
 					phase = (elapsed - strike + prepare) / 1000.0
-					if not slot.ranged and slot.id not in ["ENG-01","ENG-05","ENG-06"]:
+					if not slot.ranged and slot.id not in ["ENG-01","ENG-06"]:
 						# Weapon sweep timed to the swing's contact frame (event time).
 						battle_fx.slash(place, beast if hunt else p,(elapsed-strike+70.0)/170.0,Color("#b7b8ac"),.85 * unit_k)
 				elif block > -INF:
@@ -3109,7 +3112,7 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 					clip = "attack"
 					phase = (elapsed - ambient + prepare) / 1000.0
 					if not slot.ranged:
-						if slot.id not in ["ENG-01","ENG-05","ENG-06"]:
+						if slot.id not in ["ENG-01","ENG-06"]:
 							battle_fx.slash(place, beast, (elapsed - ambient + 70.0) / 170.0, Color("#b7b8ac"), .75 * unit_k)
 						if elapsed >= ambient and elapsed - ambient <= 160.0 and ambient_sparks < 4:
 							# The blow lands on the creature's hide (no number: not a server blow).
@@ -3184,13 +3187,6 @@ func present_armies(state: Dictionary, server_ms: float) -> void:
 				draw_arrow(unit, shot, beast if hunt else p, (elapsed - shown + 260.0) / 260.0, slot.id, "%s/%s/%s" % [id,key,shown])
 			elif shot != null:
 				shot.hide()
-			if slot.id == "ENG-10":
-				var held := unit.find_child("Javelin",true,false) as Node3D
-				if held != null:
-					if v010:
-						held.visible = not (clip == "attack" and not CombatV010.javelin_in_hand(unit, clip_time))
-					else:
-						held.visible = not (clip == "attack" and phase >= 0.5 and phase < 0.85)
 			foot_contacts.sample(self,unit,clip,bool(slot.mounted),server_ms)
 			if not fighting and clip != "death":
 				walkers.append(Vector2(unit.global_position.x, unit.global_position.z))
@@ -3920,7 +3916,7 @@ func draw_arrow(unit: Node3D, shaft: MeshInstance3D, destination: Vector3, phase
 		unit.add_child(shaft)
 	if shaft.get_meta("event_id", "") != event_id or not shaft.has_meta("origin"):
 		var origin := unit.global_position + Vector3.UP * 1.35 * unit_k
-		var bone_name := "wrist.R" if unit_id == "ENG-10" else "wrist.L"
+		var bone_name := "wrist.L"
 		for skeleton: Skeleton3D in unit.find_children("*","Skeleton3D",true,false):
 			var bone := skeleton.find_bone(bone_name)
 			if bone >= 0:
@@ -3932,7 +3928,7 @@ func draw_arrow(unit: Node3D, shaft: MeshInstance3D, destination: Vector3, phase
 	var b := destination + Vector3.UP * 1.45 * beast_k
 	var tip := a.lerp(b, phase) + Vector3.UP * sin(PI * phase) * 0.6 * unit_k
 	var direction := (b-a).normalized()
-	var length := (1.5 if unit_id == "ENG-10" else 0.42 if unit_id == "ENG-04" else 0.85) * unit_k
+	var length := (0.42 if unit_id == "ENG-04" else 0.85) * unit_k
 	var tail := tip-direction*length
 	if direction.length_squared() <= 0.00001:
 		shaft.hide()
@@ -3959,8 +3955,10 @@ func present_training(state: Dictionary, server_ms: float) -> void:
 		var orders: Array = queues.get(id, [])
 		var order: Dictionary = {} if orders.is_empty() else orders[0]
 		var active := not order.is_empty() and server_ms >= float(order.startsAt) and server_ms < float(order.endsAt)
-		var fallback: String = {"INF-01":"ENG-09", "RNG-01":"ENG-03", "CAV-01":"ENG-05"}[group]
+		var fallback: String = {"INF-01":"ENG-01", "RNG-01":"ENG-03", "CAV-01":"ENG-06"}[group]
 		var unit_id: String = order.get("unitId", fallback) if active else fallback
+		if not data.unitModels.has(unit_id):
+			unit_id = fallback  # a retired unit id (DRENOVAR-V6-ROSTER-5) from an old answer
 		var visual: Dictionary = data.unitModels[unit_id]
 		var actor := training.get_node_or_null(NodePath(id)) as Node3D
 		if actor != null and actor.get_meta("unit_id") != unit_id:

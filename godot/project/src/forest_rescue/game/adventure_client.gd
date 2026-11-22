@@ -13,8 +13,10 @@ signal network_status(status: String, detail: String)
 
 const CAMPAIGN_ID := "forest_rescue_v1"
 const SCHEMA_VERSION := 1
-const RETRY_DELAYS := [0.6, 1.4, 2.8, 4.5]
-const UNCERTAIN_HTTP := [408, 425, 429, 500, 502, 503, 504]
+# 1022: one network stack with the city (main.gd COMMAND_RETRY_DELAYS / transient_failure):
+# silent repeats after 0.4, 1.2 and 2.8 s with the same Idempotency-Key and body.
+const RETRY_DELAYS := [0.4, 1.2, 2.8]
+const UNCERTAIN_HTTP := [408, 425, 429, 500, 502, 503, 504, 520, 521, 522, 523, 524, 525, 526, 527, 530]
 const TRANSPORT_ERRORS := ["Сервер недоступен", "Сервер не ответил вовремя. Проверь соединение и повтори.",
 	"Не удалось установить защищённое соединение с сервером."]
 const LOCAL_BUSY := "Подожди завершения предыдущего запроса."
@@ -189,10 +191,7 @@ func _deliver() -> Dictionary:
 	in_flight = true
 	network_status.emit("pending", content.text("network.pending"))
 	while true:
-		var waited := 0
-		while host.busy and waited < 600:
-			await host.get_tree().process_frame
-			waited += 1
+		# 1022: requests no longer wait for one another (main.send_request never refuses).
 		pending.attempts = int(pending.attempts) + 1
 		sent_log.append({"key":pending.key, "body":pending.body.duplicate(true), "attempt":pending.attempts})
 		var response: Dictionary = await host.request("command", pending.body, pending.key)
@@ -237,7 +236,8 @@ func classify(response: Dictionary) -> String:
 	var status := int(response.get("httpStatus", 0))
 	var code := String(response.get("error", ""))
 	if status > 0:
-		if status in UNCERTAIN_HTTP or (status == 409 and code == "CAS_CONFLICT_RETRY"):
+		if status in UNCERTAIN_HTTP or (status == 409 and (code == "CAS_CONFLICT_RETRY" or response.get("retryable", false) == true)) \
+				or response.get("unreadable", false):
 			return "uncertain"
 		return "definitive"
 	if code == LOCAL_BUSY:

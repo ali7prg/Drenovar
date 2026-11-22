@@ -115,7 +115,7 @@ func run() -> void:
 	# replies, the button is free again, the server's answer replaces the row.
 	await fresh_state()
 	var range_building: Dictionary = game.state.city.buildings.filter(func(b): return b.type == "MIL-01")[0]
-	game.open_recruitment(range_building, "ENG-09", 1)
+	game.open_recruitment(range_building, "ENG-01", 1)
 	var food_before := int(game.state.city.demo.wallet.food)
 	var queued_before: int = game.state.city.military.queues.get(range_building.id, []).size()
 	var train_button: Button = game.modal_body.find_children("*", "Button", true, false).filter(func(b): return b.text.begins_with("Обучить"))[0]
@@ -140,7 +140,7 @@ func run() -> void:
 	await fresh_state()
 	var wallet_before: Dictionary = game.state.city.demo.wallet.duplicate()
 	var barracks: Dictionary = game.state.city.buildings.filter(func(b): return b.type == "MIL-01")[0]
-	var train := {"kind": "train", "buildingId": barracks.id, "unitId": "ENG-09", "quantity": 2, "paidTraining": true,
+	var train := {"kind": "train", "buildingId": barracks.id, "unitId": "ENG-01", "quantity": 2, "paidTraining": true,
 		"requestId": "qa-train-%d" % Time.get_ticks_msec()}
 	var once: Dictionary = await game.request("command", train, train.requestId)
 	var again: Dictionary = await game.request("command", train, train.requestId)
@@ -149,16 +149,16 @@ func run() -> void:
 	check(once.has("city") and queue.size() == 1 and int(queue[0].quantity) == 2, "Repeated command made one order")
 	check(int(game.state.city.demo.wallet.food) == int(wallet_before.food) - 60, "Repeated command charged once (food %d → %d)" % [int(wallet_before.food), int(game.state.city.demo.wallet.food)])
 	# --- 5. Training ends exactly at its end, once.
-	var owned_before := int(game.state.healthy.get("ENG-09", 0))
+	var owned_before := int(game.state.healthy.get("ENG-01", 0))
 	var train_ends := float(queue[0].endsAt)
 	await set_clock(train_ends - 1.0)
 	await fresh_state()
-	check(int(game.state.healthy.get("ENG-09", 0)) == owned_before, "No soldiers 1 ms before the end")
+	check(int(game.state.healthy.get("ENG-01", 0)) == owned_before, "No soldiers 1 ms before the end")
 	await set_clock(train_ends)
 	await fresh_state()
-	check(int(game.state.healthy.get("ENG-09", 0)) == owned_before + 2, "Soldiers at the end (%d → %d)" % [owned_before, int(game.state.healthy.get("ENG-09", 0))])
+	check(int(game.state.healthy.get("ENG-01", 0)) == owned_before + 2, "Soldiers at the end (%d → %d)" % [owned_before, int(game.state.healthy.get("ENG-01", 0))])
 	await fresh_state()
-	check(int(game.state.healthy.get("ENG-09", 0)) == owned_before + 2, "Soldiers granted once")
+	check(int(game.state.healthy.get("ENG-01", 0)) == owned_before + 2, "Soldiers granted once")
 	# --- 4. Upgrade at the edge of its timer (first building the server accepts).
 	await game.command({"kind": "kingdom", "action": "enter"})
 	var camp: Dictionary = game.state.city.buildings.filter(func(b): return b.type == "RES-01")[0]

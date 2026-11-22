@@ -81,7 +81,7 @@ func run() -> void:
  target=game.state.encounters.filter(func(e):return int(e.level)==1)[0]
  game.inspect_encounter(target);await process_frame;await process_frame;await tap(find_button(game.modal_footer,"Атаковать"))
  await wait_until(func():return game.modal_title.text=="Создать войско",5)
- select_party({"ENG-03":5,"ENG-05":2})
+ select_party({"ENG-03":5,"ENG-06":2})
  await create_timer(1.6).timeout
  send=game.modal_footer.find_child("MarchSend",true,false)
  check(not send.disabled,"preview503 does not forbid authoritative command")

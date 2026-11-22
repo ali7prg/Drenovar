@@ -24,6 +24,7 @@ extends Node
 ##   yaw the node with the meta rootYawDeg smoothstep curve (horse turns the same way).
 
 const Rig = preload("res://src/forest_rescue/game/actor_rig.gd")
+const CreatureVisuals = preload("res://src/creature_visuals.gd")
 const PathMotion = preload("res://src/forest_rescue/game/path_motion.gd")
 const Telegraphs = preload("res://src/forest_rescue/game/boss_telegraphs.gd")
 const ASSETS := "res://assets/forest_rescue/"
@@ -1372,14 +1373,16 @@ func update_captives(site_id: String, poi: Dictionary, anchor: Dictionary, now: 
 # ------------------------------------------------------------------ guardians (original creature models)
 func guardian_paths(spec: Dictionary) -> Array:
 	# Product decision (2026-11-18): campaign guardians use the game's EXISTING creature
-	# models (data.creatureModels, species × level 1–3) — no new guardian art.
+	# models — no new guardian art. 1022: the 1021 creatures v2 model, rig and clips
+	# (CreatureVisuals, as the city and world hunts); data.creatureModels only when v2 is off.
 	var species := String(spec.get("species", "tenerys"))
 	var level := clampi(int(spec.get("level", 1)), 1, 3)
 	var original := ""
 	var models: Dictionary = game.main.data.get("creatureModels", {})
 	if models.has(species):
 		original = String(models[species][level - 1])
-	return [original, original]
+	var shown := CreatureVisuals.model_path(species, level, original)
+	return [shown, original if shown != original else ""]
 
 func update_guardian(site_id: String, poi: Dictionary, anchor: Dictionary, now: float, delta: float, near: bool) -> void:
 	var spec: Dictionary = poi.get("guardian", {})
@@ -1393,11 +1396,18 @@ func update_guardian(site_id: String, poi: Dictionary, anchor: Dictionary, now: 
 	var level := clampi(int(spec.get("level", 1)), 1, 3)
 	var paths := guardian_paths(spec)
 	var fresh := not rigs.has(id)
-	# Same scale rule as ordinary hunts in landscape.gd (1.02 + 0.16 × level), original materials.
-	var actor := rig(id, paths[0], paths[1], 1.02 + 0.16 * level)
+	# Same scale rule as ordinary hunts in landscape.gd (1.02 + 0.16 × level, creatures v2 display
+	# scale), original materials.
+	var species := String(spec.get("species", "tenerys"))
+	var actor := rig(id, paths[0], paths[1], (1.02 + 0.16 * level) * CreatureVisuals.display_scale(species))
 	if fresh:
 		actor.painted = false
 		actor.set_meta("occluder_height", 3.0)
+		if CreatureVisuals.active(species):
+			actor.creature_species = species
+			actor.creature_level = level
+	if actor.model != null and CreatureVisuals.owns(actor.model) and is_instance_valid(game.stage) and game.stage.camera != null:
+		CreatureVisuals.update_lod(actor.model, game.stage.camera)
 	var home: Vector3 = anchor.get("guardian", anchor.get("center", Vector3.ZERO))
 	var approach: Vector3 = anchor.get("approach", home + Vector3(0, 0, 4))
 	var squad_pos := squad_focus()

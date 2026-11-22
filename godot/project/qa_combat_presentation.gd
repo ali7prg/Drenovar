@@ -7,7 +7,7 @@ func check(ok: bool, message: String) -> void:
 	checks += 1
 	if not ok: failures.append(message); push_error(message)
 func _initialize() -> void:
-	for unit in ["ENG-03","ENG-04","ENG-10"]:
+	for unit in ["ENG-03","ENG-04"]:
 		for cadence in [200,800,1200]:
 			var clock = Clock.new()
 			var next := 0
@@ -67,7 +67,7 @@ func _initialize() -> void:
 	check(range(17).all(func(i):return float(ats[i+1])-float(ats[i]) > 250.0),"volley blows are apart: "+str(ats))
 	check(shown.presentation.events.map(func(e):return e.creatureHP) == volley.map(func(e):return e.creatureHP),"volley HP sequence unchanged")
 	# A walk long enough for the whole stretch (the walk home may at most double its speed).
-	var kill := {"id":"kill","units":{"ENG-05":6},"startsAt":0,"arrivesAt":30000,"battleAt":30000,"battleEndsAt":30600,"returnStartsAt":30600,"presentation":{"events":[{"at":0,"kind":"soldier_attack","unitId":"ENG-03","index":0,"creatureHP":900},{"at":600,"kind":"soldier_attack","unitId":"ENG-05","index":0,"creatureHP":0}]}}
+	var kill := {"id":"kill","units":{"ENG-06":6},"startsAt":0,"arrivesAt":30000,"battleAt":30000,"battleEndsAt":30600,"returnStartsAt":30600,"presentation":{"events":[{"at":0,"kind":"soldier_attack","unitId":"ENG-03","index":0,"creatureHP":900},{"at":600,"kind":"soldier_attack","unitId":"ENG-05","index":0,"creatureHP":0}]}}
 	Clock.stretch(kill,{})
 	var shown_end := float(kill.battleEndsAt) - 30000.0
 	check(shown_end >= Clock.MIN_FIGHT_MS and shown_end - float(kill.presentation.events[-1].at) >= 800.0,"killing blow at the battle end is shown inside the fight: %s / %s"%[kill.presentation.events[-1].at, shown_end])

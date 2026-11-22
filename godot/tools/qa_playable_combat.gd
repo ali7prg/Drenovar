@@ -92,7 +92,7 @@ func run() -> void:
 	var chosen: Dictionary = {}
 	for target in game.state.encounters:
 		if int(target.level) != 1: continue
-		var preview: Dictionary = await game.send_request("march-preview", {"kind":"deploy", "encounterId":target.id, "units":{"ENG-03":5,"ENG-05":2}, "wall":game.march_wall()}, false, 5.0)
+		var preview: Dictionary = await game.send_request("march-preview", {"kind":"deploy", "encounterId":target.id, "units":{"ENG-03":5,"ENG-06":2}, "wall":game.march_wall()}, false, 5.0)
 		if preview.has("path"): chosen = target; break
 	if not check(not chosen.is_empty(), "server supplies a reachable target"): finish(); return
 	game.inspect_encounter(chosen)
@@ -102,7 +102,7 @@ func run() -> void:
 	# Input values in the genuine roster controls. Final command is a touch.
 	var spins: Array = game.modal_body.find_children("*", "SpinBox", true, false)
 	var roster: Array = game.data.englishRoster.filter(func(unit): return int(garrison.get(unit.id, 0)) > 0)
-	for i in spins.size(): spins[i].value = 5 if roster[i].id == "ENG-03" else 2 if roster[i].id == "ENG-05" else 0
+	for i in spins.size(): spins[i].value = 5 if roster[i].id == "ENG-03" else 2 if roster[i].id == "ENG-06" else 0
 	var send: Button = game.modal_footer.find_child("MarchSend", true, false)
 	if not check(await wait_until(func(): return send.get_meta("route_ready", false) and not send.disabled, 35), "selected formation has server route"): finish(); return
 	await shot("01-formation")
@@ -112,7 +112,7 @@ func run() -> void:
 	battle_id = army.id
 	process_frame.connect(observe_actions)
 	write_json("departed-army.json", army)
-	check(int(army.units.get("ENG-03",0)) == 5 and int(army.units.get("ENG-05",0)) == 2 and game.total_units(army.units) == 7, "server army equals selected formation")
+	check(int(army.units.get("ENG-03",0)) == 5 and int(army.units.get("ENG-06",0)) == 2 and game.total_units(army.units) == 7, "server army equals selected formation")
 	check(game.state.armies.filter(func(a): return a.target == chosen.id).size() == 1, "one army from one touch")
 	game.close_modal()
 	game.followed_army = battle_id
@@ -140,7 +140,7 @@ func run() -> void:
 	await shot("04-continue")
 	check(await wait_until(func(): return game.state.armies.all(func(a): return a.id != battle_id or a.status == "returned"), 180), "survivors return through real server clock")
 	await game.sync_account()
-	for unit_id in ["ENG-03", "ENG-05"]:
+	for unit_id in ["ENG-03", "ENG-06"]:
 		var expected: int = int(garrison.get(unit_id, 0)) - int(report.dead.get(unit_id, 0)) - int(report.wounded.get(unit_id, 0))
 		check(int(game.state.healthy.get(unit_id, 0)) == expected, "returned garrison matches report: " + unit_id)
 	# Existing encrypted session survives a full scene teardown/restart.

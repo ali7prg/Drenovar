@@ -64,8 +64,8 @@ func run() -> void:
 	while game.command_in_progress or game.speedup_in_flight:
 		await process_frame
 	sent[0] = game.api.requests_total - before
-	# command() retries a lost answer twice with the same key: 1 order = up to 3 requests.
-	check(sent[0] >= 1 and sent[0] <= 3, "Requests for one press: %d" % sent[0])
+	# command() retries a lost answer three times with the same key (1022: 0.4, 1.2, 2.8 s): 1 order = up to 4 requests.
+	check(sent[0] >= 1 and sent[0] <= 4, "Requests for one press: %d" % sent[0])
 	var keys: Array = game.retry_keys.values()
 	check(keys.size() == 1, "A failed speedup must keep one idempotency key for a retry: %d" % keys.size())
 	# Preview for a longer order: 20:00 left, 5 min -> 15:00.
@@ -89,7 +89,7 @@ func run() -> void:
 	check(not barracks.is_empty(), "No barracks in the demo city")
 	if not barracks.is_empty():
 		var b: Dictionary = barracks[0]
-		game.state.city.military.queues[b.id] = [{"id": "ord-1", "unitId": "ENG-09", "quantity": 2, "startsAt": game.timer_now() - 1000.0, "endsAt": game.timer_now() + 60000.0}]
+		game.state.city.military.queues[b.id] = [{"id": "ord-1", "unitId": "ENG-01", "quantity": 2, "startsAt": game.timer_now() - 1000.0, "endsAt": game.timer_now() + 60000.0}]
 		game.close_modal()
 		var captured := []
 		var ring = game.action_ring

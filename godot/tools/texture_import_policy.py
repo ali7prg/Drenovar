@@ -14,7 +14,8 @@ import re
 import sys
 
 THREE_D = ("army/", "city/", "city-details/", "city-ground/", "creature-assets37/", "creatures-v2/", "world-ground/",
-           "world-scenery/", "environment/surfaces20.png", "environment/forest60")
+           "world-scenery/", "environment/surfaces20.png", "environment/forest60",
+           "forest_rescue/")  # 1022: the forest adventure's kit, landmarks, props, actors, arena and impostors
 TWO_D = ("ui/", "icons/", "intro/", "creatures37/", "environment/atlas.webp")
 TWO_D_NAMES = ("_portrait_",)  # creatures-v2/<id>/<id>_portrait_<level>.webp: hunt panel art, not a 3D texture
 
@@ -28,7 +29,8 @@ def policy(project, check=False):
             continue
         if rel.startswith(TWO_D) or not rel.startswith(THREE_D) or any(n in os.path.basename(rel) for n in TWO_D_NAMES):
             continue
-        normal = "normal" in os.path.basename(rel).lower()
+        base = os.path.basename(rel).lower()
+        normal = "normal" in base or (rel.startswith("forest_rescue/") and re.search(r"_n\.(png|jpg|webp)\.import$", base) is not None)
         wanted = {"compress/mode": "2", "mipmaps/generate": "true", "compress/normal_map": "1" if normal else "0",
                   "detect_3d/compress_to": "0"}
         new = text

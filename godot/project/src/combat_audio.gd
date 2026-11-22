@@ -45,13 +45,13 @@ func consume(stage: Node3D) -> void:
 		if actor!=null:position=actor.global_position
 		var family: String
 		var priority:=2
-		if marker.phase=="release":family={"ENG-03":"bow","ENG-04":"crossbow","ENG-10":"javelin"}.get(e.get("unitId"),"bow")
+		if marker.phase=="release":family={"ENG-03":"bow","ENG-04":"crossbow"}.get(e.get("unitId"),"bow")
 		elif e.kind=="soldier_attack":
 			family="fall" if float(e.get("creatureHP",1))<=0 else "flesh"
 			if family=="fall":priority=3
 		else:
 			var key:="%s:%d"%[e.get("unitId",""),int(e.get("index",0))]
 			position=stage.army_routes.get(marker.army_id,{}).get("member_at",{}).get(key,position)
-			family="fall" if float(e.get("hp",1))<=0 else "armor" if e.get("unitId") in ["ENG-06","ENG-07","ENG-09"] else "wood"
+			family="fall" if float(e.get("hp",1))<=0 else "armor" if e.get("unitId") in ["ENG-06"] else "wood"
 			if family=="fall":priority=3
 		cue(marker.id+"/"+marker.phase,family,position,priority,marker.lateness)

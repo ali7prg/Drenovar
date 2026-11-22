@@ -107,7 +107,7 @@ func run() -> void:
 	for k in 13:
 		var q := home.lerp(beast, k / 12.0)
 		path.append({"x": q.x, "z": q.z})
-	var party := {"ENG-01": 6, "ENG-02": 6, "ENG-03": 4, "ENG-05": 2}
+	var party := {"ENG-01": 6, "ENG-02": 6, "ENG-03": 4, "ENG-06": 2}
 	var start := 700000.0
 	var arrive := start + 16000.0
 	var army := {"id": "world-hunt", "owner": me, "target": target.id, "name": target.spec.name, "worldKind": "velkor",

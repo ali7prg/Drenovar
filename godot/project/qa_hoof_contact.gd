@@ -54,7 +54,7 @@ func run() -> void:
 	# world map (with its quicker run); both must keep their hooves planted.
 	for scale in [Landscape.FIELD_UNIT_SCALE, Landscape.WORLD_UNIT_SCALE]:
 		var run_max: float = Landscape.RUN_TEMPO.y if scale >= Landscape.FIELD_UNIT_SCALE else Landscape.WORLD_RUN_TEMPO
-		for id in ["ENG-05","ENG-06"]:
+		for id in ["ENG-06"]:
 			for lod in [1,2]:
 				var actor: Node3D=load("res://assets/army/troops06/%s-lod%d.gltf"%[id,lod]).instantiate()
 				root.add_child(actor);actor.scale=Vector3.ONE*scale
@@ -66,7 +66,7 @@ func run() -> void:
 					if not player.has_animation(clip): continue
 					var cfg: Dictionary=GAITS[clip]
 					var length: float=player.get_animation(clip).length
-					var speed: float = (8.0 if id=="ENG-05" else 7.0) if clip=="Run" else float(cfg.speed)*float(scale)
+					var speed: float = 7.0 if clip=="Run" else float(cfg.speed)*float(scale)
 					var tempo: float = minf(1.6,speed/(1.4645*scale)) if baseline and clip=="Run" else Landscape.gait_for(id,speed,scale,run_max)[1]
 					var dt := length/600.0/tempo
 					var slips: Array[float]=[];var height_range:=0.0

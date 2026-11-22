@@ -96,7 +96,7 @@ func verify(stage, name: String, result: Dictionary, body: float) -> void:
 func run() -> void:
 	root.size = Vector2i(1366, 630)
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/game.json"))
-	var units := {"ENG-01": 6, "ENG-02": 6, "ENG-03": 4, "ENG-05": 4, "ENG-06": 4}
+	var units := {"ENG-01": 6, "ENG-02": 6, "ENG-03": 4, "ENG-04": 4, "ENG-06": 4}
 	# City like the owner's (16 buildings at level V, the wall), the server's own routes
 	# (marchRoute with the client's wall, tests/march_lanes/owner_city_routes.json:
 	# godot/tools/dump_owner_city.gd + march-lane-routes.mjs).

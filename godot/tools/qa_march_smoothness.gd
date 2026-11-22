@@ -64,7 +64,7 @@ func run() -> void:
 	check(await wait_until(func(): return game.modal_title.text == "Создать войско", 5), "Attack opens formation")
 	# 200 members, mixed: melee, riders and archers (archers were the slowest).
 	var roster: Array = game.data.englishRoster.filter(func(u): return u.id != "SIEGE-RAM-01" and int(game.state.healthy.get(u.id, 0)) > 0)
-	var wanted := {"ENG-01": 70, "ENG-02": 60, "ENG-03": 40, "ENG-05": 30}
+	var wanted := {"ENG-01": 70, "ENG-02": 60, "ENG-03": 40, "ENG-06": 30}
 	var spins: Array = game.modal_body.find_children("*", "SpinBox", true, false)
 	if "--first-two" in OS.get_cmdline_user_args():
 		# The window's own preselection plus 20 in each of the first two rows.

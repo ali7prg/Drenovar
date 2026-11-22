@@ -62,7 +62,7 @@ func run() -> void:
 				var top := box.end.y
 				if not is_nan(neck) and not is_nan(foot) and top > neck:
 					# Head height approximated as crown minus neck base; realistic adults ~7-7.5 heads.
-					row.heads_tall = snappedf((top - foot) / maxf(0.001, top - neck), 0.01) if id not in ["ENG-05", "ENG-06"] else "mounted"
+					row.heads_tall = snappedf((top - foot) / maxf(0.001, top - neck), 0.01) if id != "ENG-06" else "mounted"
 				row.head_bone_y = snappedf(head, 0.001) if not is_nan(head) else null
 			var players := model.find_children("*", "AnimationPlayer", true, false)
 			row.clips = Array(players[0].get_animation_list()) if not players.is_empty() else []

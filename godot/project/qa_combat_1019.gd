@@ -49,20 +49,20 @@ func run() -> void:
 func strikes(stage) -> void:
 	var slots: Array = []
 	for i in 6:
-		slots.append({"id": "ENG-05", "index": i, "ranged": false, "mounted": true})
+		slots.append({"id": "ENG-06", "index": i, "ranged": false, "mounted": true})
 	for i in 4:
 		slots.append({"id": "ENG-01", "index": i, "ranged": false, "mounted": false})
 	# One rider in contact, four in the first reserve row, one far away (row 3).
-	var plan := {"reserves": {"ENG-05:1": true, "ENG-05:2": true, "ENG-05:3": true, "ENG-05:4": true, "ENG-05:5": true},
-		"reserve_rows": {"ENG-05:1": 1, "ENG-05:2": 1, "ENG-05:3": 1, "ENG-05:4": 1, "ENG-05:5": 3}}
+	var plan := {"reserves": {"ENG-06:1": true, "ENG-06:2": true, "ENG-06:3": true, "ENG-06:4": true, "ENG-06:5": true},
+		"reserve_rows": {"ENG-06:1": 1, "ENG-06:2": 1, "ENG-06:3": 1, "ENG-06:4": 1, "ENG-06:5": 3}}
 	var events: Array = []
 	# 11 server riders strike four times each, all within 3.2 s; spearmen too.
 	for round in 4:
 		for member in 11:
-			events.append([float(round * 900 + member * 30), "soldier_attack", "ENG-05", member, 1000.0])
+			events.append([float(round * 900 + member * 30), "soldier_attack", "ENG-06", member, 1000.0])
 		for member in 8:
 			events.append([float(round * 900 + member * 40 + 10), "soldier_attack", "ENG-01", member, 1000.0])
-	events.append([500.0, "creature_attack", "ENG-05", 4, 0])
+	events.append([500.0, "creature_attack", "ENG-06", 4, 0])
 	events.sort_custom(func(a, b): return a[0] < b[0])
 	var memo := {}
 	var army := {"id": "qa-strikes", "battle": {"events": events}}
@@ -70,20 +70,20 @@ func strikes(stage) -> void:
 	var members: Dictionary = result.members
 	var riders := 0
 	for key in members:
-		if key.begins_with("ENG-05") and members[key].any(func(e): return e[1] == "soldier_attack"):
+		if key.begins_with("ENG-06") and members[key].any(func(e): return e[1] == "soldier_attack"):
 			riders += 1
 	check(riders >= 5, "cavalry blows shown by %d riders, expected the contact rider and the first reserve row" % riders)
 	# The far rider (no room within reach) takes a blow only when the nearer riders are busy.
 	var first_round: Array = []
 	for key in members:
 		for e in members[key]:
-			if e[1] == "soldier_attack" and e[2] == "ENG-05" and float(e[0]) < 200.0:
+			if e[1] == "soldier_attack" and e[2] == "ENG-06" and float(e[0]) < 200.0:
 				first_round.append([float(e[0]), key])
 	first_round.sort()
-	var nearer_first := first_round.size() >= 5 and first_round.slice(0, 5).all(func(item): return item[1] != "ENG-05:5")
+	var nearer_first := first_round.size() >= 5 and first_round.slice(0, 5).all(func(item): return item[1] != "ENG-06:5")
 	check(nearer_first, "far reserve rider took a blow while a nearer rider was free: " + str(first_round.slice(0, 6)))
-	check(result.far.has("ENG-05:5") and not result.far.has("ENG-05:1"), "far reserves not marked")
-	check(members.get("ENG-05:4", []).any(func(e): return e[1] == "creature_attack"), "the creature's blow left its own member")
+	check(result.far.has("ENG-06:5") and not result.far.has("ENG-06:1"), "far reserves not marked")
+	check(members.get("ENG-06:4", []).any(func(e): return e[1] == "creature_attack"), "the creature's blow left its own member")
 	var cut := 0
 	for key in members:
 		var window: Vector2 = result.windows[key.get_slice(":", 0)]
@@ -104,7 +104,7 @@ func strikes(stage) -> void:
 			before["%s|%s|%d" % [e[0], e[2], e[3]]] = key
 	var more: Array = events.duplicate()
 	for member in 11:
-		more.append([3600.0 + member * 30, "soldier_attack", "ENG-05", member, 1000.0])
+		more.append([3600.0 + member * 30, "soldier_attack", "ENG-06", member, 1000.0])
 	var later: Dictionary = stage.battle_events({"id": "qa-strikes", "battle": {"events": more}}, slots, plan, memo).members
 	var moved := 0
 	for key in later:
@@ -116,8 +116,8 @@ func strikes(stage) -> void:
 	# A type whose every drawn soldier is far in reserve still swings.
 	var far := {"reserves": {}, "reserve_rows": {}}
 	for i in 6:
-		far.reserves["ENG-05:%d" % i] = true
-		far.reserve_rows["ENG-05:%d" % i] = 3
+		far.reserves["ENG-06:%d" % i] = true
+		far.reserve_rows["ENG-06:%d" % i] = 3
 	var forced: Dictionary = stage.battle_events(army, slots, far, {})
 	check(not forced.forced.is_empty() and not forced.strikers.is_empty(), "a type with only far reserves stands idle")
 
@@ -207,7 +207,7 @@ func column(game, stage) -> void:
 	var start := 900000.0
 	var arrive := start + 30000.0
 	var army := {"id": "qa-column", "status": "outbound", "target": target.id, "path": path,
-		"units": {"ENG-01": 8, "ENG-02": 8, "ENG-03": 6, "ENG-05": 2}, "startsAt": start, "arrivesAt": arrive, "owner": state.get("playerId", "")}
+		"units": {"ENG-01": 8, "ENG-02": 8, "ENG-03": 6, "ENG-06": 2}, "startsAt": start, "arrivesAt": arrive, "owner": state.get("playerId", "")}
 	state.armies = [army]
 	state.encounters = [target]
 	stage.engage_sync = true

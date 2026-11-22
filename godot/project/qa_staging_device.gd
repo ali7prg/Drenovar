@@ -59,7 +59,7 @@ func run() -> void:
 				barracks = building
 		check(not barracks.is_empty(), "Settlement has barracks")
 		if not barracks.is_empty():
-			var training: Dictionary = await game.request("command", {"kind":"train", "buildingId":barracks.id, "unitId":"ENG-09", "quantity":1})
+			var training: Dictionary = await game.request("command", {"kind":"train", "buildingId":barracks.id, "unitId":"ENG-01", "quantity":1})
 			var queue: Array = training.get("city", {}).get("military", {}).get("queues", {}).get(barracks.id, [])
 			check(queue.size() >= 1, "Training order accepted by the server (%s)" % training.get("error", "queued"))
 			if training.has("city"):
@@ -75,7 +75,7 @@ func run() -> void:
 		if encounter.get("species") == "tenerys" and int(encounter.level) == 1 and encounter.status == "alive":
 			target = encounter
 	check(not target.is_empty(), "Tenerys I alive in the settlement")
-	check(int(game.state.healthy.get("ENG-09", 0)) > 0, "Soldiers available: %d" % int(game.state.healthy.get("ENG-09", 0)))
+	check(int(game.state.healthy.get("ENG-01", 0)) > 0, "Soldiers available: %d" % int(game.state.healthy.get("ENG-01", 0)))
 	if target.is_empty():
 		finish()
 		return

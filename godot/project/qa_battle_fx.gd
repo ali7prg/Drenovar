@@ -38,12 +38,12 @@ func run() -> void:
 	var hp := max_hp
 	for i in 30:
 		hp -= 50.0
-		events.append([300.0 + i * 120.0, "soldier_attack", ["ENG-09", "ENG-01"][i % 2], i % 6, hp])
+		events.append([300.0 + i * 120.0, "soldier_attack", ["ENG-02", "ENG-01"][i % 2], i % 6, hp])
 		if i % 4 == 0:
-			events.append([360.0 + i * 120.0, "bite", "ENG-09", i % 8, 10])
+			events.append([360.0 + i * 120.0, "bite", "ENG-02", i % 8, 10])
 	var start := 100000.0
 	var army := {"id":"army-qa", "status":"fighting", "target":enc.id, "path":[{"x":at.x - 16,"z":at.z + 2},{"x":at.x,"z":at.z}],
-		"units":{"ENG-09":8, "ENG-01":4}, "startsAt":start - 20000, "arrivesAt":start, "battleAt":start, "battleEndsAt":start + 9000, "events":events, "fallen":[]}
+		"units":{"ENG-02":8, "ENG-01":4}, "startsAt":start - 20000, "arrivesAt":start, "battleAt":start, "battleEndsAt":start + 9000, "events":events, "fallen":[]}
 	state.world.armies = [army]
 	stage.target = at
 	stage.zoom = 46.0
@@ -89,7 +89,7 @@ func run() -> void:
 	army.erase("returnPath")
 	enc.status = "defeated"
 	enc.hp = 0
-	events.append([300.0 + 30 * 120.0, "soldier_attack", "ENG-09", 0, 0])
+	events.append([300.0 + 30 * 120.0, "soldier_attack", "ENG-02", 0, 0])
 	stage.fx_timelines.clear()
 	stage.present_armies(state, start + 1200.0)
 	stage.present_creatures(state, start + 1200.0, 0.016)

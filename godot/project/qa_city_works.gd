@@ -119,8 +119,14 @@ func run() -> void:
 	check(game.balance("wood") == wood_before, "Wood counted without the server")
 	check(city.progress.job != null and not game.shown_job.is_empty(), "Job vanished before the server confirmed")
 	game.diagnostics.network_failures = 3
+	# 1022: a blip (an answer less than 10 s ago) is no outage; 10 s without any 200/304 is.
+	var last_ok: int = game.last_ok_msec
+	game.last_ok_msec = Time.get_ticks_msec()
+	check(game.timer_end_label() == "Завершаем…", "A blip shown as an outage: " + game.timer_end_label())
+	game.last_ok_msec = Time.get_ticks_msec() - 11000
 	check(game.timer_end_label() == "Нет связи · ждём сервер", "Offline zero shown as done: " + game.timer_end_label())
 	game.diagnostics.network_failures = 0
+	game.last_ok_msec = last_ok
 	# A late answer (older server time) never replaces the newer confirmed state.
 	var stale: Dictionary = game.state.duplicate(true)
 	stale.serverTime = float(game.state.serverTime) - 5000.0

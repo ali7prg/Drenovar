@@ -41,7 +41,7 @@ await handleGame(new Request(OLD + '/api/session/new', {method: 'POST', body: '{
   for (const entry of snap.repository.players) {
     const p = JSON.parse(entry[1].state);
     p.city.buildings.find(b => b.type === 'ECO-05').level = 2;
-    p.city.military.owned['ENG-09'] = 110; p.city.military.owned['ENG-01'] = 90;
+    p.city.military.owned['ENG-02'] = 110; p.city.military.owned['ENG-01'] = 90;
     p.city.demo.wallet = {...p.city.demo.wallet, food: 1000000, stone: 998900, iron: 997700, coins: 990600};
     p.city.progress.wood = 992300; p.nickname = 'Ali';
     entry[1].state = JSON.stringify(p);

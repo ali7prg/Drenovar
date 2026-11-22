@@ -64,12 +64,12 @@ func run() -> void:
 	check(int(game.state.items.get("march-1", 0)) == 3, "Starter kit from the server: march-1 ×%d" % int(game.state.items.get("march-1", 0)))
 	# Soldiers for a march.
 	var barracks: Dictionary = game.state.city.buildings.filter(func(b): return b.type == "MIL-01")[0]
-	await game.command({"kind": "train", "buildingId": barracks.id, "unitId": "ENG-09", "quantity": 10, "paidTraining": true, "requestId": "qa-sp-%d" % Time.get_ticks_msec()})
+	await game.command({"kind": "train", "buildingId": barracks.id, "unitId": "ENG-01", "quantity": 10, "paidTraining": true, "requestId": "qa-sp-%d" % Time.get_ticks_msec()})
 	var queue: Array = game.state.city.military.queues[barracks.id]
 	await set_clock(float(queue[-1].endsAt))
 	await fresh_state()
 	var target: Dictionary = game.state.encounters.filter(func(e): return int(e.level) == 1)[0]
-	var sent: bool = await game.command({"kind": "deploy", "encounterId": target.id, "units": {"ENG-09": 10}})
+	var sent: bool = await game.command({"kind": "deploy", "encounterId": target.id, "units": {"ENG-01": 10}})
 	check(sent, "Army sent: " + game.message.text)
 	var army: Dictionary = game.state.armies[-1]
 	await set_clock(float(army.startsAt) + 500.0)

@@ -11,6 +11,7 @@ const SessionStore = preload("res://src/session_store.gd")
 const Interface = preload("res://src/ui_theme.gd")
 const WebPanels = preload("res://src/web_panel_theme.gd")
 const UiKit = preload("res://src/ui_kit.gd")
+const UnitStage = preload("res://src/unit_stage.gd")
 const MarchMap = preload("res://src/march_map.gd")
 const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
@@ -91,6 +92,15 @@ var modal_flourishes: Array = []
 var modal_titles: VBoxContainer
 var modal_header_balance: Control
 var modal_layout := "center"
+# Share of the screen width the hero column of a full-screen window takes (the recruitment
+# window sets a wider one for its rail and 3D stage; reset on every open).
+var modal_hero_share := 0.4
+# Upper board of the tall header of full-screen windows: section line on the left, the
+# player's resources (live) on the right.
+var modal_top: Control
+var modal_crumb: Label
+var modal_wallet: HBoxContainer
+var modal_wallet_amounts := {}
 var web_sheet_style: StyleBoxTexture
 var result_sheet_style: StyleBoxTexture
 var result_notice: Button
@@ -316,6 +326,8 @@ func _ready() -> void:
 	launch.finish()
 	launch_done = true
 	warm_panel_textures()
+	# Unit portraits (cards, queues, army) decode on worker threads now, not on first use.
+	UnitStage.warm_portraits(data.get("unitModels", {}).keys() + ["SIEGE-RAM-01"])
 	maybe_start_forest_game() # FOREST_RESCUE hook: only after the city is interactive
 	if restoring_session and not showing_cached_state:
 		message.text = "Подключаемся к поселению…"
@@ -584,6 +596,7 @@ func build_ui() -> void:
 	modal_footer.alignment = BoxContainer.ALIGNMENT_CENTER
 	modal_footer.add_theme_constant_override("separation", 18)
 	column.add_child(modal_footer)
+	build_modal_top()
 	modal_frame = UiKit.make_frame()
 	modal.add_child(modal_frame)
 	place_modal("center")
@@ -2073,7 +2086,7 @@ func show_armies() -> void:
 		if available > 0:
 			var entry := HBoxContainer.new()
 			modal_body.add_child(entry)
-			panel_art(entry, unit.id + ".png", Vector2(56, 56))
+			unit_art(entry, unit.id, Vector2(56, 56))
 			var details := button(entry, "%s · %d" % [unit.name, available], show_garrison_unit.bind(unit, available))
 			details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
@@ -2136,14 +2149,10 @@ func refresh_hud() -> void:
 		return
 	for id in RESOURCE_NAMES:
 		var value := balance(id)
-		var amount := str(value)
-		if value >= 1000000:
-			amount = "%.1f млн" % (value / 1000000.0)
-		elif value >= 1000:
-			amount = "%.1f тыс" % (value / 1000.0)
-		resource_amounts[id].text = amount.replace(".", ",")
+		resource_amounts[id].text = short_amount(value)
 		resource_buttons[id].tooltip_text = "%s · %s" % [RESOURCE_NAMES[id], format_balance(value)]
 		resource_buttons[id].accessibility_name = resource_buttons[id].tooltip_text
+	refresh_modal_wallet()
 	if not connected():
 		message.text = ""
 	elif v6_panels.enabled():
@@ -2626,8 +2635,18 @@ func arrange_modal() -> void:
 	var full := modal_layout == "full"
 	var docked := modal_layout in ["right", "left", "city_target", "sheet"]
 	modal_frame.visible = not full
-	modal_header.custom_minimum_size.y = 70 if full else 62
-	var title_size := 32 if full or modal_layout == "wide" else (23 if docked else 26)
+	# Full windows: the tall two-board band (resources above, a larger title below).
+	var band := UiKit.header_tall_style() if full else UiKit.header_style()
+	if modal_header.get_theme_stylebox("panel") != band:
+		modal_header.add_theme_stylebox_override("panel", band)
+	modal_header.custom_minimum_size.y = 92 if full else 62
+	var title_size := 40 if full else (32 if modal_layout == "wide" else (23 if docked else 26))
+	var top_on := full and not result_open
+	if modal_top.visible != top_on:
+		modal_top.visible = top_on
+	modal_crumb.text = modal_eyebrow.text
+	modal_eyebrow.visible = not full and not modal_eyebrow.text.is_empty()
+	refresh_modal_wallet()
 	if modal_title.get_theme_font_size("font_size") != title_size:
 		modal_title.add_theme_font_size_override("font_size", title_size)
 	var roomy := full or modal_layout in ["wide", "garrison"]
@@ -2641,7 +2660,7 @@ func arrange_modal() -> void:
 		view = get_viewport().get_visible_rect().size
 	var hero_on := full and modal_hero.get_child_count() > 0
 	modal_hero.visible = hero_on
-	modal_hero.custom_minimum_size.x = roundf(view.x * 0.4) if hero_on else 0.0
+	modal_hero.custom_minimum_size.x = roundf(view.x * modal_hero_share) if hero_on else 0.0
 	for side_space: Control in modal_side_space:
 		side_space.visible = full and not hero_on
 	if full and not hero_on:
@@ -2660,6 +2679,83 @@ func arrange_modal() -> void:
 	modal_content.end_bulk_theme_override()
 
 # Optional illustration column of a full-screen window: art over a tinted ink-wash splash.
+# Section line and resource plates on the upper board of the tall header (full windows).
+func build_modal_top() -> void:
+	modal_top = Control.new()
+	modal_top.name = "ModalTop"
+	modal_top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	modal.add_child(modal_top)
+	modal_crumb = UiKit.eyebrow_label()
+	modal_crumb.name = "ModalCrumb"
+	modal_crumb.add_theme_font_size_override("font_size", 14)
+	modal_crumb.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	modal_crumb.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	modal_crumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	modal_top.add_child(modal_crumb)
+	modal_crumb.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	modal_crumb.offset_left = 30
+	modal_crumb.offset_right = -660
+	modal_crumb.offset_top = 1
+	modal_crumb.offset_bottom = 30
+	modal_wallet = HBoxContainer.new()
+	modal_wallet.name = "ModalWallet"
+	modal_wallet.alignment = BoxContainer.ALIGNMENT_END
+	modal_wallet.add_theme_constant_override("separation", 8)
+	modal_wallet.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	modal_top.add_child(modal_wallet)
+	modal_wallet.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	modal_wallet.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	modal_wallet.offset_right = -82
+	modal_wallet.offset_top = 3
+	modal_wallet.offset_bottom = 28
+	for id: String in RESOURCE_NAMES:
+		var plate := PanelContainer.new()
+		plate.name = "Wallet_" + id
+		plate.add_theme_stylebox_override("panel", UiKit.flat(Color("#120b06c0"), Color("#c9a25e55"), 7, Vector2(8, 0)))
+		plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		modal_wallet.add_child(plate)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 5)
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		plate.add_child(row)
+		add_resource_icon(row, id, 21)
+		var amount := Label.new()
+		amount.add_theme_font_override("font", UiKit.LABEL_FONT)
+		amount.add_theme_font_size_override("font_size", 16)
+		amount.add_theme_color_override("font_color", UiKit.IVORY)
+		amount.add_theme_color_override("font_outline_color", UiKit.SHADE)
+		amount.add_theme_constant_override("outline_size", 3)
+		amount.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		amount.custom_minimum_size.x = 64
+		amount.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(amount)
+		modal_wallet_amounts[id] = amount
+	modal_top.hide()
+
+func short_amount(value: int) -> String:
+	var amount := str(value)
+	if value >= 1000000:
+		amount = "%.1f млн" % (value / 1000000.0)
+	elif value >= 1000:
+		amount = "%.1f тыс" % (value / 1000.0)
+	return amount.replace(".", ",")
+
+func refresh_modal_wallet() -> void:
+	if not is_instance_valid(modal_top) or not modal_top.visible or not state.has("city"):
+		return
+	for id: String in modal_wallet_amounts:
+		var value := balance(id)
+		var label: Label = modal_wallet_amounts[id]
+		label.text = short_amount(value)
+		label.get_parent().get_parent().tooltip_text = "%s · %s" % [RESOURCE_NAMES[id], format_balance(value)]
+
+## Title and section line of the open window (a window that switches in place).
+func set_modal_heading(title: String, eyebrow: String) -> void:
+	modal_title.text = title
+	modal_eyebrow.text = eyebrow
+	modal_crumb.text = eyebrow
+	modal_eyebrow.visible = not eyebrow.is_empty() and modal_layout != "full"
+
 func set_modal_hero(art: Texture2D, tint := Color("#b98c52"), caption := "") -> void:
 	empty(modal_hero)
 	if art != null:
@@ -2701,6 +2797,7 @@ func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D
 	modal_title.text = title
 	modal_eyebrow.text = eyebrow
 	modal_eyebrow.visible = not eyebrow.is_empty()
+	modal_hero_share = 0.4
 	modal_status.hide()
 	empty(modal_body)
 	empty(modal_tools)
@@ -2761,7 +2858,8 @@ func warm_panel_textures() -> void:
 	var pending: Array[String] = []
 	for id in RECRUIT_ORDER:
 		var full: String = "res://assets/ui/web-panels/" + id + ".png"
-		if ResourceLoader.exists(full) and ResourceLoader.load_threaded_request(full, "Texture2D") == OK:
+		# Units with a baked portrait (assets/ui/units) do not need the older panel art.
+		if not ResourceLoader.exists(UnitStage.PORTRAIT_DIR + id + ".webp") and ResourceLoader.exists(full) and ResourceLoader.load_threaded_request(full, "Texture2D") == OK:
 			pending.append(full)
 	var atlas: String = data.environmentAtlas
 	if environment_atlas == null and ResourceLoader.load_threaded_request(atlas, "Texture2D") == OK:
@@ -2792,6 +2890,23 @@ func warm_panel_textures() -> void:
 				var key: String = full.trim_prefix("res://assets/ui/web-panels/")
 				if texture != null and not panel_textures.has(key):
 					panel_textures[key] = texture
+
+## Baked portrait of a unit (tools/bake_unit_portraits.gd): the full figure, or the bust for
+## small slots. Falls back to the older painted panel art for units without one.
+func unit_portrait(id: String, bust := false) -> Texture2D:
+	var baked := UnitStage.portrait(id, bust)
+	return baked if baked != null else panel_texture(id + ".png")
+
+func unit_art(parent: Container, id: String, pixels: Vector2) -> TextureRect:
+	var art := TextureRect.new()
+	art.texture = unit_portrait(id, true)
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	art.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	art.custom_minimum_size = pixels
+	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(art)
+	return art
 
 func panel_texture(path: String) -> Texture2D:
 	if not panel_textures.has(path):
@@ -3138,7 +3253,7 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 	layout.add_child(stage_panel)
 	var display := VBoxContainer.new()
 	stage_panel.add_child(display)
-	var preview := create_unit_preview(display, 258, panel_texture(unit.id + ".png"))
+	var preview := create_unit_preview(display, 258, unit_portrait(unit.id))
 	preview.name = "RecruitPreview"
 	# Rank-coloured glow behind the unit (I grey ... V gold), under the live 3D view.
 	var glow := TextureRect.new()
@@ -3188,7 +3303,7 @@ func show_recruitment(building: Dictionary, unit: Dictionary, queue_has_room: bo
 		var card := button(cards, candidate.name, open_recruitment.bind(building, id, quantity))
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.custom_minimum_size.y = 94
-		card.icon = panel_texture(id + ".png")
+		card.icon = unit_portrait(id)
 		card.expand_icon = true
 		card.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		card.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
@@ -3923,7 +4038,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 				var unit: Dictionary = unit_for_id(unit_id)
 				var slot := HBoxContainer.new()
 				slots.add_child(slot)
-				panel_art(slot, unit_id + ".png", Vector2(46, 46))
+				unit_art(slot, unit_id, Vector2(46, 46))
 				var remove := button(slot, "%s × %d" % [unit.name, units[unit_id]], func(): selected[unit_id].value = 0)
 				remove.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				remove.accessibility_name = "Убрать из отряда: " + unit.name
@@ -3988,7 +4103,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		frame.add_theme_stylebox_override("panel", WebPanels.gradient_style(RANK_COLOURS[tier - 1][0], RANK_COLOURS[tier - 1][1],
 			RANK_COLOURS[tier - 1][0].lightened(0.3), 2, 5))
 		controls.add_child(frame)
-		panel_art(frame, unit.id + ".png", Vector2(52, 52))
+		unit_art(frame, unit.id, Vector2(52, 52))
 		var badge := Label.new()
 		badge.text = ["I", "II", "III", "IV", "V"][tier - 1]
 		badge.add_theme_font_size_override("font_size", 12)
@@ -4898,6 +5013,7 @@ func show_cached_state(cached: Dictionary) -> void:
 	showing_cached_state = true
 	battle_results.observe(player_id, state.get("reports", []))
 	refresh_hud()
+	v6_panels.state_changed()
 	if is_instance_valid(stage):
 		stage.present(state)
 	forest_state_changed() # FOREST_RESCUE hook: the saved copy may carry state.adventure

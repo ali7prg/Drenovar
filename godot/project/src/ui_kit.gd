@@ -41,7 +41,7 @@ const TEXTURES := ["kit_body", "kit_body_dark", "kit_hourglass", "kit_header", "
 	"kit_btn_tertiary", "kit_btn_tertiary_pressed", "kit_btn_disabled", "kit_rail", "kit_rail_on",
 	"kit_card_fill", "kit_card_frame", "kit_badge", "kit_strip", "kit_pill", "kit_row", "kit_tile",
 	"kit_field", "kit_track", "kit_fill", "kit_fill_green", "kit_knob", "kit_stitch", "kit_rosette",
-	"kit_flourish", "kit_splash"]
+	"kit_flourish", "kit_splash", "kit_header_tall", "kit_dais", "kit_dais_n"]
 
 static var textures := {}
 static var requested := {}
@@ -118,6 +118,14 @@ static func body_style() -> StyleBoxTexture:
 ## Carved oak header band: 56 units of plank, an 8-unit bronze trim, 4 units of shadow.
 static func header_style() -> StyleBoxTexture:
 	var box := nine("kit_header", Vector4(0, 10, 0, 16), Vector4(14, 4, 10, 15))
+	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
+	return box
+
+## Tall band of full-screen windows: two boards (an upper one of 31 units for the section
+## line and the resources, a lower one of 48 for the title), the same trim. Shown at its
+## painted height (92), so the seam stays where it was carved.
+static func header_tall_style() -> StyleBoxTexture:
+	var box := nine("kit_header_tall", Vector4(0, 10, 0, 16), Vector4(14, 31, 10, 13))
 	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE
 	return box
 
@@ -529,99 +537,211 @@ static func quantity(parent: Node, low: int, high: int, value: int) -> Array:
 	return [slider, field]
 
 ## Tier card: tier-coloured enamel inside a bronze chamfered frame, a kokoshnik badge with
-## the Roman numeral, art, title and a count plate.
-static func tier_card(tier: int, title: String, count_text: String, art: Texture2D, selected := false) -> Button:
-	tier = clampi(tier, 1, TIERS.size())
-	var colour: Color = TIERS[tier - 1]
-	var card := Button.new()
-	card.name = "KitTier%d" % tier
+## the Roman numeral, art, title and a count plate. closed: a veil and a bronze padlock over
+## the art, count_text then says what opens it. One drawn node (KitTierCard).
+static func tier_card(tier: int, title: String, count_text: String, art: Texture2D, selected := false, closed := false) -> BaseButton:
+	var card := KitTierCard.new()
+	card.tier = clampi(tier, 1, TIERS.size())
+	var colour: Color = TIERS[card.tier - 1]
+	card.name = "KitTier%d" % card.tier
 	card.custom_minimum_size = Vector2(112, 156)
 	card.tooltip_text = title
-	card.accessibility_name = title
-	card.clip_contents = false
-	var fill := nine("kit_card_fill", Vector4(14, 14, 14, 14), Vector4(8, 8, 8, 8)).duplicate() as StyleBoxTexture
-	fill.modulate_color = colour.lightened(0.12)
-	var pressed := fill.duplicate() as StyleBoxTexture
-	pressed.modulate_color = colour.darkened(0.15)
-	for state in ["normal", "hover", "focus", "disabled"]:
-		card.add_theme_stylebox_override(state, fill)
-	card.add_theme_stylebox_override("pressed", pressed)
-	var glow := TextureRect.new()
-	glow.texture = tex("kit_splash")
-	glow.modulate = Color(colour.lightened(0.55), 0.55)
-	glow.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	glow.offset_left = 4
-	glow.offset_right = -4
-	glow.offset_top = 10
-	glow.offset_bottom = -34
-	glow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	glow.stretch_mode = TextureRect.STRETCH_SCALE
-	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.add_child(glow)
-	if art != null:
-		var picture := TextureRect.new()
-		picture.texture = art
-		picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		picture.offset_left = 6
-		picture.offset_right = -6
-		picture.offset_top = 14
-		picture.offset_bottom = -36
-		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		card.add_child(picture)
-	var plate := Panel.new()
-	plate.add_theme_stylebox_override("panel", flat(Color("#1e140dcc"), Color.TRANSPARENT, 4, Vector2.ZERO))
-	plate.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	plate.offset_left = 5
-	plate.offset_right = -5
-	plate.offset_top = -32
-	plate.offset_bottom = -5
-	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.add_child(plate)
-	var count := Label.new()
-	count.text = count_text
-	count.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	count.add_theme_font_override("font", LABEL_FONT)
-	count.add_theme_font_size_override("font_size", 18)
-	count.add_theme_color_override("font_color", IVORY)
-	count.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	plate.add_child(count)
-	var frame := Panel.new()
-	frame.add_theme_stylebox_override("panel", nine("kit_card_frame", Vector4(16, 16, 16, 16), Vector4.ZERO, false, false))
-	frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if selected:
-		frame.modulate = Color(1.25, 1.15, 0.85)
-	card.add_child(frame)
-	var badge := TextureRect.new()
-	badge.texture = tex("kit_badge")
-	badge.position = Vector2(4, -6)
-	badge.size = Vector2(36, 34)
-	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.add_child(badge)
-	var numeral := Label.new()
-	numeral.text = ["I", "II", "III", "IV", "V"][tier - 1]
-	numeral.position = Vector2(0, 8)
-	numeral.size = Vector2(36, 24)
-	numeral.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	numeral.add_theme_font_override("font", LABEL_FONT)
-	numeral.add_theme_font_size_override("font_size", 15)
-	numeral.add_theme_color_override("font_color", GOLD)
-	badge.add_child(numeral)
-	if selected:
-		var ring := Panel.new()
-		ring.add_theme_stylebox_override("panel", flat(Color.TRANSPARENT, Color("#ffd36b"), 10, Vector2.ZERO, 3))
-		ring.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		ring.offset_left = -3
-		ring.offset_top = -3
-		ring.offset_right = 3
-		ring.offset_bottom = 3
-		ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		card.add_child(ring)
+	card.accessibility_name = title + (" · закрыто" if closed else "")
+	card.art = art
+	card.count_text = count_text
+	card.selected = selected
+	card.closed = closed
+	card.colour = colour
+	card.fill = tinted("kit_card_fill", Vector4(14, 14, 14, 14), colour.lightened(0.12))
+	card.fill_pressed = tinted("kit_card_fill", Vector4(14, 14, 14, 14), colour.darkened(0.15))
+	card.frame = tinted("kit_card_frame", Vector4(16, 16, 16, 16), Color(1.25, 1.15, 0.85) if selected else Color.WHITE)
+	card.splash = tex("kit_splash")
+	card.badge = tex("kit_badge")
+	card.plate = flat(Color("#1e140de0"), Color.TRANSPARENT, 4, Vector2.ZERO)
+	card.veil = flat(Color("#140c0699"), Color.TRANSPARENT, 8, Vector2.ZERO)
+	card.ring = flat(Color("#ffd36b33"), Color("#ffd36b"), 12, Vector2.ZERO, 3)
+	card.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	return card
+
+static func tinted(name: String, margin: Vector4, colour: Color) -> StyleBoxTexture:
+	var key := "tint|%s|%s" % [name, colour.to_html()]
+	if not styles.has(key):
+		var box := StyleBoxTexture.new()
+		box.texture = tex(name)
+		box.texture_margin_left = margin.x
+		box.texture_margin_top = margin.y
+		box.texture_margin_right = margin.z
+		box.texture_margin_bottom = margin.w
+		box.modulate_color = colour
+		styles[key] = box
+	return styles[key]
+
+# A TextureButton with no textures: a button that draws only what _draw draws (no theme
+# boxes to override, so a card costs one node and no style work when a window opens).
+class KitTierCard extends TextureButton:
+	var tier := 1
+	var art: Texture2D
+	var count_text := ""
+	var selected := false
+	var closed := false
+	var colour := Color.WHITE
+	var fill: StyleBox
+	var fill_pressed: StyleBox
+	var frame: StyleBox
+	var plate: StyleBox
+	var veil: StyleBox
+	var ring: StyleBox
+	var splash: Texture2D
+	var badge: Texture2D
+
+	func _draw() -> void:
+		var pressed := get_draw_mode() == DRAW_PRESSED or get_draw_mode() == DRAW_HOVER_PRESSED
+		var rect := Rect2(Vector2.ZERO, size)
+		if selected:
+			draw_style_box(ring, rect.grow(4))
+		draw_style_box(fill_pressed if pressed else fill, rect)
+		draw_texture_rect(splash, Rect2(4, 10, size.x - 8, size.y - 44), false, Color(colour.lightened(0.6), 0.6))
+		if art != null:
+			var box := Rect2(5, 8, size.x - 10, size.y - 40)
+			var source := art.get_size()
+			var k := minf(box.size.x / source.x, box.size.y / source.y)
+			var drawn := source * k
+			draw_texture_rect(art, Rect2(Vector2(box.position.x + (box.size.x - drawn.x) * 0.5, box.end.y - drawn.y), drawn), false,
+				Color(0.62, 0.6, 0.6) if closed else Color.WHITE)
+		if closed:
+			draw_style_box(veil, Rect2(4, 4, size.x - 8, size.y - 36))
+			KitPaint.lock(self, Vector2(size.x * 0.5, (size.y - 32.0) * 0.5 + 4.0), 46.0)
+		draw_style_box(plate, Rect2(5, size.y - 33, size.x - 10, 28))
+		var count := KitText.line(count_text, LABEL_FONT, 15 if closed else 19, size.x - 16)
+		count.draw(get_canvas_item(), Vector2(roundf((size.x - count.get_size().x) * 0.5), size.y - 33 + floorf((28 - count.get_size().y) * 0.5)), GOLD_DIM if closed else IVORY)
+		draw_style_box(frame, rect)
+		draw_texture_rect(badge, Rect2(4, -6, 38, 36), false)
+		var numeral := KitText.line(["I", "II", "III", "IV", "V"][tier - 1], TITLE_FONT, 15)
+		numeral.draw(get_canvas_item(), Vector2(roundf(23 - numeral.get_size().x * 0.5), 3), GOLD)
+
+## Drawing helpers shared by the drawn kit nodes.
+class KitPaint:
+	static var bodies := {}
+
+	## Bronze padlock (locked units): shackle, body, keyhole.
+	static func lock(item: CanvasItem, centre: Vector2, s: float) -> void:
+		var dark := Color("#2a1a0a")
+		var metal := Color("#d8b46a")
+		item.draw_arc(centre + Vector2(0, -s * 0.12), s * 0.23, PI, TAU, 28, dark, s * 0.13, true)
+		item.draw_arc(centre + Vector2(0, -s * 0.12), s * 0.23, PI, TAU, 28, metal, s * 0.075, true)
+		for side: float in [-1.0, 1.0]:
+			item.draw_line(centre + Vector2(side * s * 0.23, -s * 0.12), centre + Vector2(side * s * 0.23, 0.0), metal, s * 0.075, true)
+		var key := int(s)
+		if not bodies.has(key):
+			var body := StyleBoxFlat.new()
+			body.bg_color = Color("#8d5f22")
+			body.border_color = dark
+			body.set_border_width_all(2)
+			body.set_corner_radius_all(int(s * 0.1))
+			body.anti_aliasing = true
+			var shine := StyleBoxFlat.new()
+			shine.bg_color = Color("#e2b766")
+			shine.set_corner_radius_all(int(s * 0.08))
+			shine.anti_aliasing = true
+			bodies[key] = [body, shine]
+		var rect := Rect2(centre + Vector2(-s * 0.36, -s * 0.04), Vector2(s * 0.72, s * 0.52))
+		item.draw_style_box(bodies[key][0], rect)
+		item.draw_style_box(bodies[key][1], Rect2(rect.position + Vector2(3, 3), Vector2(rect.size.x - 6, rect.size.y * 0.42)))
+		item.draw_circle(centre + Vector2(0, s * 0.17), s * 0.075, dark)
+		item.draw_rect(Rect2(centre + Vector2(-s * 0.03, s * 0.18), Vector2(s * 0.06, s * 0.16)), dark)
+
+static func lock_icon(size := 40.0) -> Control:
+	var control := KitLock.new()
+	control.name = "KitLock"
+	control.custom_minimum_size = Vector2(size, size)
+	control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return control
+
+class KitLock extends Control:
+	func _draw() -> void:
+		KitPaint.lock(self, size * 0.5 - Vector2(0, size.y * 0.06), minf(size.x, size.y))
+
+## A row of figures: values in bronze over their captions (unit stats under a title). One
+## drawn node; pairs are [caption, value].
+static func figures(parent: Node, pairs: Array) -> Control:
+	var row := KitFigures.new()
+	row.name = "KitFigures"
+	row.pairs = pairs
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	# Columns as wide as the widest caption (at least 76), so «Мест в армии» is not cut.
+	for pair: Array in pairs:
+		row.column = maxf(row.column, ceilf(KitText.line(str(pair[0]), BODY_FONT, 14).get_size().x) + 6.0)
+	row.custom_minimum_size = Vector2(row.column * pairs.size() + KitFigures.GAP * maxi(0, pairs.size() - 1), 46)
+	if parent != null:
+		parent.add_child(row)
+	return row
+
+class KitFigures extends Control:
+	const GAP := 4.0
+	var column := 76.0
+	var pairs: Array = []
+
+	func _draw() -> void:
+		for index in pairs.size():
+			var left := index * (column + GAP)
+			var value := KitText.line(str(pairs[index][1]), LABEL_FONT, 22)
+			var caption := KitText.line(str(pairs[index][0]), BODY_FONT, 14)
+			value.draw(get_canvas_item(), Vector2(roundf(left + (column - value.get_size().x) * 0.5), 0), BRONZE)
+			caption.draw(get_canvas_item(), Vector2(roundf(left + (column - caption.get_size().x) * 0.5), 26), INK_MUTED)
+
+## Rail medallion with a portrait (recruitment buildings): bronze-rimmed enamel disc, the
+## face clipped round inside it, a caption under it; gold glow when selected, a small
+## hourglass while the building is training. One drawn node (KitMedal).
+static func rail_medal(face: Texture2D, selected: bool, caption: String, busy := false) -> BaseButton:
+	var control := KitMedal.new()
+	control.face = face
+	control.selected = selected
+	control.caption = caption
+	control.busy = busy
+	control.disc = tex("kit_rail_on" if selected else "kit_rail")
+	control.glass = tex("kit_hourglass")
+	control.custom_minimum_size = Vector2(100, 108)
+	control.accessibility_name = caption
+	control.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	return control
+
+class KitMedal extends TextureButton:
+	var face: Texture2D
+	var selected := false
+	var caption := ""
+	var busy := false
+	var disc: Texture2D
+	var glass: Texture2D
+
+	func _draw() -> void:
+		var pressed := get_draw_mode() == DRAW_PRESSED or get_draw_mode() == DRAW_HOVER_PRESSED
+		var centre := Vector2(size.x * 0.5, 44.0 + (1.5 if pressed else 0.0))
+		var d := 80.0
+		var radius := d * 0.385
+		if selected:
+			d *= 1.106
+			radius = d * 0.342
+		draw_texture_rect(disc, Rect2(centre - Vector2(d, d) * 0.5, Vector2(d, d)), false,
+			Color(0.84, 0.8, 0.76) if pressed else Color.WHITE)
+		if face != null:
+			var points := PackedVector2Array()
+			var uvs := PackedVector2Array()
+			for i in 48:
+				var along := Vector2.from_angle(TAU * i / 48.0)
+				points.append(centre + along * radius)
+				uvs.append(Vector2(0.5, 0.5) + along * 0.5)
+			draw_polygon(points, PackedColorArray([Color(0.85, 0.82, 0.78) if pressed else Color.WHITE]), uvs, face)
+			draw_arc(centre, radius - 1.0, 0.0, TAU, 48, Color(0, 0, 0, 0.35), 3.0, true)
+		var title := KitText.line(caption, LABEL_FONT, 16)
+		title.draw(get_canvas_item(), Vector2(roundf((size.x - title.get_size().x) * 0.5), size.y - title.get_size().y - 1.0), BRONZE if selected else INK_MUTED)
+		if busy:
+			# Training here: a small hourglass on a dark enamel dot at the rim.
+			var dot := centre + Vector2(radius * 0.86, -radius * 0.86)
+			draw_circle(dot, 13.0, Color("#c59a4f"))
+			draw_circle(dot, 11.5, Color("#22170f"))
+			draw_texture_rect(glass, Rect2(dot - Vector2(7, 9), Vector2(14, 18)), false)
+
 
 ## Icon tile (dark enamel square in bronze) holding a texture.
 ## Item tile; count_text ("×3") sits in the lower right corner like a stack count.

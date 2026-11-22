@@ -1,6 +1,8 @@
 extends RefCounted
 
 const VERSION := "DRENOVAR-V6-C1.0"
+const Recruit = preload("res://src/v6_recruit.gd")
+const UnitStage = preload("res://src/unit_stage.gd")
 const ROMAN := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"]
 var ui: Node
 var catalogue: Dictionary = {}
@@ -8,6 +10,8 @@ var catalogue_loading := false
 var quote_request := 0
 var navigation_request := 0
 var submitting := false
+# Recruitment window of the training buildings (src/v6_recruit.gd).
+var recruit
 
 func begin_view() -> int:
 	navigation_request += 1
@@ -16,6 +20,30 @@ signal catalogue_loaded(success: bool)
 
 func _init(owner_node: Node) -> void:
 	ui = owner_node
+	recruit = Recruit.new(self)
+
+## New confirmed server state (main.gd accept): the open recruitment window follows it.
+func state_changed() -> void:
+	if recruit != null and recruit.is_open():
+		recruit.refresh()
+
+## Starts loading the 3D unit of a training building on a worker thread, so its window
+## opens in one frame and the live model is ready (or nearly) when the stage asks for it.
+func warm_recruitment(type: String) -> void:
+	if not Recruit.trains(type) or catalogue.is_empty():
+		return
+	var chosen: String = recruit.chosen.get(type, "")
+	if chosen.is_empty():
+		chosen = recruit.default_unit(recruit.units_of(type))
+	if not chosen.is_empty():
+		UnitStage.request(UnitStage.model_for(ui.data, chosen))
+
+## Test and screenshot hooks of the recruitment window.
+func recruit_pick(unit_id: String) -> void:
+	recruit.pick(unit_id)
+
+func recruit_details() -> void:
+	recruit.toggle_details()
 
 func enabled() -> bool:
 	return ui.state.get("economy_version", "") == VERSION and ui.state.get("v6") is Dictionary
@@ -83,7 +111,8 @@ func open_ring(marker: Dictionary) -> void:
 			actions.append(["Очереди", "speed", queues])
 			break
 	if type in ["B11", "B12", "B13", "B15", "B16", "B17"]:
-		actions.append(["Работы здания", "heal" if type == "B16" else "train", services.bind(type)])
+		actions.append(["Обучение" if Recruit.trains(type) else "Работы здания", "heal" if type == "B16" else "train", services.bind(type)])
+		warm_recruitment(type)
 	if type == "B05":
 		actions.append(["Рынок", "trade", trade])
 	if type in ["B18", "B19"]:
@@ -99,11 +128,19 @@ func building(type: String) -> Dictionary:
 			return b
 	return {}
 
+# Index of the catalogue rows by type and level (built once per catalogue): the windows
+# look rows up dozens of times while they open.
+var row_index := {}
+var row_index_source: Array = []
+
 func row_for(type: String, level: int) -> Dictionary:
-	for row: Dictionary in catalogue.get("buildings", []):
-		if row.building_id == type and int(row.level) == level:
-			return row
-	return {}
+	var rows: Array = catalogue.get("buildings", [])
+	if not is_same(rows, row_index_source):
+		row_index.clear()
+		for row: Dictionary in rows:
+			row_index["%s|%d" % [row.building_id, int(row.level)]] = row
+		row_index_source = rows
+	return row_index.get("%s|%d" % [type, level], {})
 
 func warnings() -> void:
 	for warning: Dictionary in ui.state.v6.get("warnings", []):
@@ -216,6 +253,7 @@ func inspect(type: String) -> void:
 	var level: int = int(b.get("level", 0))
 	var row: Dictionary = row_for(type, maxi(1, level))
 	ui.open_modal(str(row.name_ru), "full", "УРОВЕНЬ " + (ROMAN[level-1] if level > 0 else "НЕ ПОСТРОЕНО"), ui.v6_card(type))
+	warm_recruitment(type)
 	var upcoming: Dictionary = row_for(type, level + 1) if level < 11 else {}
 	if level > 0:
 		var step := HBoxContainer.new()
@@ -468,6 +506,10 @@ func services(type: String) -> void:
 		return
 	if navigation != navigation_request or generation != ui.modal_generation:
 		return
+	if Recruit.trains(type) and int(building(type).get("level", 0)) > 0:
+		# Training buildings: the recruitment window (switches in place when it is open).
+		recruit.open(type)
+		return
 	ui.open_modal(str(row_for(type, 1).name_ru), "full", "РАБОТЫ ЗДАНИЯ", ui.v6_card(type))
 	section_title("Количество")
 	var amount: SpinBox = ui.UiKit.quantity(ui.modal_body, 1, 4000, 1)[1]
@@ -499,8 +541,9 @@ func unit_card(control: Button, unit_id: String) -> void:
 	control.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	control.begin_bulk_theme_override()
 	control.add_theme_font_size_override("font_size", 21)
-	if ResourceLoader.exists("res://assets/ui/web-panels/" + unit_id + ".png"):
-		control.icon = ui.panel_texture(unit_id + ".png")
+	var face: Texture2D = ui.unit_portrait(unit_id, true)
+	if face != null:
+		control.icon = face
 		control.expand_icon = true
 		control.add_theme_constant_override("icon_max_width", 58)
 		control.add_theme_constant_override("h_separation", 16)
@@ -654,8 +697,11 @@ func objectives() -> void:
 			var objective: String = step.id
 			ui.button(ui.modal_body, "Получить награду", func(): await ui.command({"kind":"starter71", "objectiveId":objective}); objectives())
 
-func speedups(order: Dictionary) -> void:
+## Speed-up items for a running order. `back` reopens the window it came from (the
+## recruitment window); without it the settlement queues open after a use.
+func speedups(order: Dictionary, back := Callable()) -> void:
 	begin_view()
+	var after := back if back.is_valid() else queues
 	ui.open_modal("Ускорить работу", "full", "ПРЕДМЕТЫ УСКОРЕНИЯ")
 	var queue: String = "construction" if order.kind == "construction" else "training"
 	time_card("До завершения", ceili((float(order.ends_at)*1000.0-ui.timer_now())/1000.0), float(order.ends_at)*1000.0)
@@ -695,7 +741,7 @@ func speedups(order: Dictionary) -> void:
 				if remaining <= 0:
 					note.text = "Работа завершена. Обновляем состояние…"
 					await ui.ensure_v6_ready(true)
-					queues()
+					after.call()
 					return
 				if seconds > remaining and confirmation.item != item:
 					confirmation.item = item
@@ -703,7 +749,7 @@ func speedups(order: Dictionary) -> void:
 					return
 				body.confirmUnused = seconds > remaining
 				if await ui.command(body):
-					queues()
+					after.call()
 			)
 			use.size_flags_horizontal = Control.SIZE_SHRINK_END
 			use.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -711,6 +757,12 @@ func speedups(order: Dictionary) -> void:
 			ui.UiKit.style_button(use, "secondary")
 	muted("Неиспользованный остаток ускорения пропадёт." if grid.get_child_count() else "Ускорителей пока нет. Таймер продолжает идти.")
 	ui.modal_body.add_child(note)
+	if back.is_valid():
+		var home: Button = ui.button(ui.modal_body, "Вернуться к обучению", back)
+		home.name = "SpeedBack"
+		ui.UiKit.style_button(home, "tertiary", 18)
+		home.custom_minimum_size = Vector2(260, 48)
+		home.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
 func army() -> void:
 	var navigation := begin_view()
@@ -727,6 +779,7 @@ func army() -> void:
 	ui.UiKit.stat_row(ui.modal_body, "Отрядов одновременно", str(int(ui.state.v6.march_parallel)))
 	ui.UiKit.stat_row(ui.modal_body, "Коек в лазарете", str(int(ui.state.v6.hospital_capacity)))
 	muted("Таран занимает 5 мест. Новые раненые сверх коек станут погибшими; доступно коек %d." % int(ui.state.v6.hospital_capacity))
+	army_units()
 	var more := links()
 	link(more, "Показать плац в городе", ui.open_parade)
 	link(more, "Раненые и лечение", services.bind("B16"))
@@ -750,6 +803,37 @@ func army() -> void:
 	for target: Dictionary in ui.state.get("world", {}).get("cities", []):
 		if target.id != ui.state.playerId and target.get("pvp", false):
 			ui.button(ui.modal_body, "Поход: " + str(target.name), formation.bind(str(target.id), str(target.name)))
+
+# Troops at home as portrait tiles (baked busts, ui_premium/STAGE2.md) with their counts.
+func army_units() -> void:
+	var home: Dictionary = ui.state.v6.get("healthy", {})
+	var shown: Array = []
+	for unit: Dictionary in catalogue.get("units", []):
+		var count := int(home.get(unit.unit_id, 0))
+		if unit.unit_id == "SIEGE-RAM-01":
+			count = ui.state.v6.get("machines", []).filter(func(m): return m.get("location", "") == "home").size()
+		if count > 0:
+			shown.append([str(unit.unit_id), str(unit.name_ru), count])
+	if shown.is_empty():
+		return
+	section_title("Войска в городе")
+	var flow := HFlowContainer.new()
+	flow.name = "ArmyUnits"
+	flow.add_theme_constant_override("h_separation", 14)
+	flow.add_theme_constant_override("v_separation", 10)
+	ui.modal_body.add_child(flow)
+	for entry: Array in shown:
+		var cell := VBoxContainer.new()
+		cell.add_theme_constant_override("separation", 2)
+		cell.tooltip_text = "%s · %s" % [entry[1], ui.format_balance(entry[2])]
+		flow.add_child(cell)
+		var tile: Control = ui.UiKit.icon_tile(UnitStage.portrait(entry[0], true), 76, ui.UiKit.compact(entry[2]))
+		tile.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		cell.add_child(tile)
+		var caption: Label = ui.UiKit.label(cell, entry[1], 14, ui.UiKit.INK_MUTED, null, false)
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		caption.custom_minimum_size.x = 92
+		caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 
 func formation(target: String, name: String) -> void:
 	begin_view()

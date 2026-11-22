@@ -1,4 +1,4 @@
-# DRENOVAR window inventory (premium UI, stage 1)
+# DRENOVAR window inventory (premium UI, stages 1–2)
 
 Every window, modal, popup, toast and HUD panel in the Godot client, as of the stage-1 premium kit.
 This is the checklist for later stages: 2 recruitment, 3 build + upgrade, 4 speed-ups, 5 everything
@@ -44,7 +44,8 @@ All windows share one modal (`build_ui` in `src/main.gd`):
 | Подтвердить работу (quote) | `confirm` :286 | full + hero | «Проверить улучшение», plot picks, research, heal, train | «Рассчитываем…», then the server quote: cost, time, reserve; footer primary «Начать» / cancel; errors such as «Все строители заняты» | 3 |
 | Очереди поселения | `queues` :385 | full | Economy link, catalogue link, ring «Очереди», notifications | Attack warnings, section «Работы»: order cards (icon tile, name, kind, timer pill, progress bar, reserve, danger «Отменить работу», secondary «Использовать ускоритель»), green claim buttons, section «Запасы поселения» + stock lines | 3 / 4 |
 | Ускорить работу | `speedups` :634 | full | Queue card «Использовать ускоритель», `show_speedups` | Timer pill «До завершения», hint, item rows (hourglass tile, «Ускорение · N», what it shortens, «В наличии: N», secondary «Использовать»), loss warning | 4 |
-| Building works (barracks, range, stables, academy, hospital, siege) | `services` :446 | full + hero | Ring «Работы здания», `open_recruitment`, `show_hospital` | Section «Количество» + slider/field (`UiKit.quantity`), section «Отряды»/«Исследования»/«Раненые», unit plates with portraits, research and heal buttons | 2 |
+| Recruitment (barracks, range, stables, siege workshop) — stage 2 | `services` → `V6Recruit.open` (src/v6_recruit.gd) | full + rail + 3D stage | Ring «Обучение», rail medallions, `open_recruitment` | Rail of training buildings, live unit on a dais (src/unit_stage.gd), tier cards, summary + «Подробнее», quantity/«Макс», cost strip, time, «Обучить», lock panel, running orders with «Ускорить»/«Отменить», completion banner (`STAGE2.md`) | 2 (done) |
+| Building works (academy, hospital) | `services` | full + hero | Ring «Работы здания», `show_hospital` | Section «Количество» + slider/field (`UiKit.quantity`), section «Исследования»/«Раненые», research and heal buttons | 5 |
 | Рынок | `trade` :491 | full + hero | Ring «Рынок», `show_trade` | Section «Сделка», slider/field, per resource: icon + name, green «Купить X», secondary «Продать X», stock lines | 5 |
 | Экономика поселения | `economy` :154 | full | HUD resource counters, city actions | Section «Запасы и доход», resource lines (icon, name, stock / cap · reserve, green «+N/ч» or warning), workers, army, links | 5 |
 | Армия и осада | `army` :697 | full | HUD «Армия», city actions | Army / march / parallel / beds stat lines, army capacity bar, ram note, links (plaza, wounded), section «Отряды в походе» | 5 |
@@ -136,10 +137,10 @@ their own colours.
 
 ## Notes for the next stages
 
-- Recruitment (stage 2): the V6 path is `services`.
-  - Tier cards and rail buttons exist in the kit (`UiKit.tier_card`, `UiKit.rail_button`) but are not
-    used yet.
-  - The legacy `show_recruitment` keeps its garrison layout.
+- Recruitment (stage 2, done; see `STAGE2.md`): training buildings open the recruitment window.
+  - All full-screen windows now have the tall header with the player's resources and a 40 px title.
+  - Unit portraits (`assets/ui/units`) replace the painted unit art everywhere a unit icon appears.
+  - The legacy `show_recruitment` keeps its garrison layout (with the new portraits).
 - Build / upgrade (stage 3):
   - `catalog` and `inspect` already use the kit.
   - The confirm window is still a plain list, and the server-quote layout needs a proper cost/time card.

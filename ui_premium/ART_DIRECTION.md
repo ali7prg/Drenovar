@@ -40,7 +40,7 @@ no traced shapes.
 
 | Role | Face | Size (canvas px) | Notes |
 |---|---|---|---|
-| Window title | Ruslan Display (OFL) | 32 full / 26 centred / 23 docked | Old-Rus display capitals, gold on oak; level steps use it too (its I reads as a numeral) |
+| Window title | Ruslan Display (OFL) | 40 full (stage 2) / 32 wide / 26 centred / 23 docked | Old-Rus display capitals, gold on oak; level steps use it too (its I reads as a numeral) |
 | Eyebrow | Noto Serif | 13, letter-spaced caps | Above the title, dim gold |
 | Labels, buttons, values | Philosopher Bold (OFL) | 17–21 | Cyrillic humanist with calligraphic terminals |
 | Body | Noto Serif | 15–19 | Long text, notes |
@@ -76,9 +76,12 @@ Button enamels:
 ## Components (src/ui_kit.gd)
 
 - **Full-screen frame**:
-  - Oak header band (56 px plank, bronze lozenge trim, shadow), eyebrow + title, flourishes, close medallion
+  - Oak header band (56 px plank, bronze lozenge trim, shadow), eyebrow + title, flourishes, close medallion.
+    Full-screen windows (stage 2) use the tall two-board band (`kit_header_tall`, 92 px): section line
+    and the player's resources on the upper board, the title and close medallion on the lower one
   - Linen body
-  - Optional hero column (40 %): ink-wash splash, ground shadow, rising embers
+  - Optional hero column (40 %): ink-wash splash, ground shadow, rising embers. The recruitment window
+    (stage 2, `STAGE2.md`) widens it to 43 % for a rail and the live 3D stage on a carved dais
   - Centred 900 px content column when there is no hero
   - Footer for the call to action
 - **Docked and centred windows**: the same header and body, with a bronze rim and corner brackets.

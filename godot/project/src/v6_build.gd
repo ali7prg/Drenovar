@@ -55,7 +55,7 @@ const BLURBS := {
 	"B27": "Больше железа из руды",
 }
 ## Strip order: what can be built first, what is finished last.
-const ORDER := {"build": 0, "short": 1, "busy": 2, "locked": 3, "noplot": 4, "maxed": 5, "group": 5, "start": 5}
+const ORDER := {"build": 0, "short": 1, "busy": 2, "locked": 3, "noplot": 4, "soon": 4, "maxed": 5, "group": 5, "start": 5}
 const TERRAIN := {"dry": "сухая земля", "fertile": "плодородная земля", "forest": "лес", "forest_edge": "опушка",
 	"rock": "скалы", "ore": "рудная жила", "shore": "берег", "edge": "край поселения", "perimeter": "граница поселения",
 	"center": "центр"}
@@ -153,6 +153,12 @@ func card_state(type: String) -> Dictionary:
 			info.state = "busy"
 			info.order = order
 			return info
+	# A type whose level I needs a building past the open level (main.gd MAX_OPEN_BUILDING_LEVEL)
+	# is not offered yet: the card says «скоро», never «Нужно: … VI».
+	if not panels.level_open(type, 1):
+		info.state = "soon"
+		info.note = "Откроется с новыми уровнями зданий"
+		return info
 	for d: Dictionary in row.get("requirements", []):
 		if level_of(str(d.building_id)) < int(d.level):
 			info.missing.append({"building": str(d.building_id), "level": int(d.level)})
@@ -169,7 +175,7 @@ func card_state(type: String) -> Dictionary:
 	var use := plot_use()
 	if int(use[0]) >= int(use[1]):
 		info.state = "noplot"
-		info.note = "Все участки заняты: улучшите ратушу"
+		info.note = "Все участки заняты: улучшите ратушу" if panels.level_open("B01", level_of("B01") + 1) else "Все участки заняты"
 		return info
 	if free_plots(str(row.get("environment", ""))).is_empty():
 		info.state = "noplot"
@@ -393,7 +399,7 @@ func placement_plots() -> Array:
 ## the building's terrain glow and the player taps one.
 func begin_placement(type: String) -> void:
 	var row: Dictionary = panels.row_for(type, 1)
-	if row.is_empty() or ui.map_name != "city" or not is_instance_valid(ui.stage):
+	if row.is_empty() or ui.map_name != "city" or not is_instance_valid(ui.stage) or not panels.level_open(type, 1):
 		panels.inspect(type)
 		return
 	var plots: Array = []

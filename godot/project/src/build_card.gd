@@ -10,6 +10,8 @@ extends TextureButton
 ## - busy    being built: a progress bar and the time left;
 ## - locked  the art dimmed under a bronze padlock, the missing requirement in ochre;
 ## - noplot  dimmed, the reason (no free plot of its terrain, no open plot) in ochre;
+## - soon    its level I needs a building past the open level (main.gd MAX_OPEN_BUILDING_LEVEL):
+##   dimmed, «Откроется с новыми уровнями зданий» in ochre, «Скоро» where the cost would be;
 ## - maxed / group / start  built to the limit: the whole card in a light silver greyscale
 ##   (one shared material), no glow, no cost; a plain caption «Больше строить нельзя» where the
 ##   cost would be (a child node, so it keeps its colour; nothing about it looks like a
@@ -160,7 +162,7 @@ func _draw() -> void:
 	draw_style_box(style("body"), body)
 	# Enamel panel under the diorama's tile, with a pool of warm light on it.
 	var panel := Rect2(7, TOP + 7, size.x - 14, ART_FOOT - 2.0)
-	var dim := state in ["locked", "noplot"]
+	var dim := state in ["locked", "noplot", "soon"]
 	draw_style_box(style("panel_dim" if dim else "panel"), panel)
 	draw_texture_rect(UiKit.warm_glow(), Rect2(panel.position.x - 20, panel.position.y - 10, panel.size.x + 40, panel.size.y + 20), false, Color(1, 1, 1, 0.4 if dim else 0.75))
 	# (The diorama itself is drawn last, over the frame, so the building rises above the card.)
@@ -173,13 +175,16 @@ func _draw() -> void:
 	name_line.draw(get_canvas_item(), name_at, UiKit.GOLD)
 	var y := band.end.y + 6.0
 	# What it gives, or what stands in the way.
-	var line_text := note if not note.is_empty() and state in ["locked", "noplot"] else blurb
+	var line_text := note if not note.is_empty() and state in ["locked", "noplot", "soon"] else blurb
 	var words := paragraph(line_text, UiKit.BODY_FONT, 14, size.x - 24.0)
 	words.draw(get_canvas_item(), Vector2(12, y), UiKit.WARN if line_text == note else UiKit.INK_MUTED)
 	y += 42.0
 	if not done():
 		if state == "busy":
 			draw_busy(y)
+		elif state == "soon":
+			var soon := UiKit.KitText.line("Скоро", UiKit.LABEL_FONT, 19)
+			soon.draw(get_canvas_item(), Vector2(roundf((size.x - soon.get_size().x) * 0.5), y + 14.0), UiKit.BRONZE)
 		else:
 			draw_cost(y)
 	# Foot: «Построено x/max».
@@ -191,7 +196,7 @@ func _draw() -> void:
 	right.draw(get_canvas_item(), Vector2(foot.end.x - 9 - right.get_size().x, foot.position.y + roundf((foot.size.y - right.get_size().y) * 0.5)), UiKit.INK)
 	draw_style_box(style("frame_lit" if lit else "frame"), body)
 	if art != null:
-		var tone := Color(0.6, 0.57, 0.55) if state == "locked" else (Color(0.8, 0.78, 0.76) if state == "noplot" else Color.WHITE)
+		var tone := Color(0.6, 0.57, 0.55) if state in ["locked", "soon"] else (Color(0.8, 0.78, 0.76) if state == "noplot" else Color.WHITE)
 		if pressed:
 			tone = tone.darkened(0.08)
 		var picture := art_rect()

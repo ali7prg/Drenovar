@@ -110,7 +110,9 @@ func open_ring(marker: Dictionary) -> void:
 		ui.show_error({"error":"Здание изменилось. Выберите его снова после обновления города."})
 		return
 	var type: String = b.type
-	var actions: Array = [["Улучшить" if int(b.level) < 11 else "Сведения", "upgrade" if int(b.level) < 11 else "info", inspect_instance.bind(str(b.id))]]
+	# Past the open level (main.gd MAX_OPEN_BUILDING_LEVEL) the ring offers the window, not an upgrade.
+	var upgradable: bool = int(b.level) < 11 and level_open(type, int(b.level) + 1)
+	var actions: Array = [["Улучшить" if upgradable else "Сведения", "upgrade" if upgradable else "info", inspect_instance.bind(str(b.id))]]
 	for order: Dictionary in ui.state.v6.orders:
 		if order.status == "pending" and order.get("instance_id", "") == b.id:
 			actions.append(["Очереди", "speed", queues])
@@ -126,6 +128,20 @@ func open_ring(marker: Dictionary) -> void:
 		actions.append(["Производство", "collect", economy])
 	actions.append(["Переместить", "move", move_building.bind(b, str(row_for(type,int(b.level)).environment))])
 	ui.action_ring.open(str(b.id), "%s · %s" % [row_for(type,1).name_ru, ROMAN[int(b.level)-1]], marker.position, ui.stage.camera, actions)
+
+## A level the game offers now: at most MAX_OPEN_BUILDING_LEVEL, and every building it needs
+## can be reached too (a requirement past the open level counts only when it already stands).
+func level_open(type: String, target: int) -> bool:
+	if target > ui.MAX_OPEN_BUILDING_LEVEL:
+		return false
+	var row := row_for(type, target)
+	for d: Dictionary in row.get("requirements", []):
+		if int(d.level) > ui.MAX_OPEN_BUILDING_LEVEL and int(building(str(d.building_id)).get("level", 0)) < int(d.level):
+			return false
+	for d: Dictionary in row.get("resource_source_requirements", []):
+		if int(d.source_level) > ui.MAX_OPEN_BUILDING_LEVEL and int(building(str(d.source_building)).get("level", 0)) < int(d.source_level):
+			return false
+	return true
 
 func building(type: String) -> Dictionary:
 	for b: Dictionary in ui.state.v6.buildings:
@@ -243,20 +259,22 @@ func inspect(type: String) -> void:
 	var level: int = int(b.get("level", 0))
 	var row: Dictionary = row_for(type, maxi(1, level))
 	ui.open_modal(str(row.name_ru), "full", "УРОВЕНЬ " + (ROMAN[level-1] if level > 0 else "НЕ ПОСТРОЕНО"))
+	# The next level is offered only up to the open level; past it «После» is a «Скоро» card.
+	var open := level < 11 and level_open(type, level + 1)
 	var stage := BuildingStage.new()
-	stage.setup(ui.data, type, level)
+	stage.setup(ui.data, type, level, 11, false, level > 0 and level < 11 and not open)
 	ui.modal_hero.add_child(stage)
 	stage.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	ui.modal_hero_share = 0.5
 	ui.arrange_modal()
 	warm_recruitment(type)
-	var upcoming: Dictionary = row_for(type, level + 1) if level < 11 else {}
+	var upcoming: Dictionary = row_for(type, level + 1) if open else {}
 	# Effects: now, and what the next level adds (green). Unbuilt: what level I gives.
 	var stats := VBoxContainer.new()
 	stats.name = "Effects"
 	stats.add_theme_constant_override("separation", 0)
 	ui.modal_body.add_child(stats)
-	var shown: Dictionary = row if level > 0 else upcoming
+	var shown: Dictionary = row if level > 0 else row_for(type, 1)
 	for metric: String in shown.get("effects", {}):
 		if metric == "workers_required":
 			continue
@@ -265,7 +283,9 @@ func inspect(type: String) -> void:
 		if level > 0 and not upcoming.is_empty():
 			gain = delta_value(metric, now, upcoming.get("effects", {}).get(metric))
 		ui.UiKit.stat_row(stats, str(catalogue.get("metrics", {}).get(metric, {}).get("name_ru", metric)), metric_value(metric, now), gain, true, true)
-	if level < 11:
+	if level < 11 and not open:
+		soon_section(level)
+	elif level < 11:
 		var next: Dictionary = upcoming
 		section_title(("Улучшение до ур. " + ROMAN[level]) if level > 0 else "Строительство · ур. I")
 		cost_cards(next.cost)
@@ -333,6 +353,23 @@ func inspect(type: String) -> void:
 
 ## Requirements of the next level as chips: the building's diorama, its name and level, a
 ## tick or a cross; a missing one opens that building's window.
+## Past the open level: no cost, no time, no requirements; one line and a disabled «Скоро»
+## where «Улучшить» would be (in the same row, so the window keeps its shape).
+func soon_section(level: int) -> void:
+	section_title("Следующий уровень · скоро" if level > 0 else "Строительство · скоро")
+	var go := HBoxContainer.new()
+	go.name = "KitTimeAction"
+	go.add_theme_constant_override("separation", 14)
+	ui.modal_body.add_child(go)
+	var line: Label = ui.UiKit.label(go, ui.SOON_LINE + ".", 17, ui.UiKit.INK_MUTED)
+	line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	line.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var main: Button = ui.panel_action(go, "Скоро", func(): pass, false)
+	main.name = "SoonAction"
+	main.tooltip_text = ui.SOON_LINE
+	main.custom_minimum_size.x = 300
+
 func requirement_chips(type: String, next: Dictionary) -> void:
 	var needs := HFlowContainer.new()
 	needs.name = "KitRequirements"
@@ -377,6 +414,11 @@ func delta_value(metric: String, now: Variant, later: Variant) -> String:
 ## shows what the work gives (the server's effects before and after), the cost against the
 ## stock, the time with the bonus, the builders and workers it takes, and «Начать».
 func confirm(action: Dictionary) -> void:
+	# Past the open level nothing is asked of the server (main.gd MAX_OPEN_BUILDING_LEVEL).
+	if str(action.get("kind", "")) == "construction" and not level_open(str(action.get("building", "")), int(action.get("target", 0))):
+		ui.capped_requests += 1
+		ui.message.text = ui.SOON_LINE
+		return
 	var navigation := begin_view()
 	quote_request += 1
 	var request_id := quote_request

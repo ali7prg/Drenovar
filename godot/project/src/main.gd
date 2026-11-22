@@ -32,6 +32,12 @@ const ForestFlags = preload("res://src/forest_rescue/world/forest_flags.gd")
 const RECRUIT_ORDER := ["ENG-01", "ENG-02", "ENG-03", "ENG-04", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
 const RESOURCE_NAMES := {"food":"Еда","wood":"Дерево","stone":"Камень","iron":"Железо","coins":"Монеты"}
+## The highest building level the game offers for now (owner, stage 3): the level scenes above V
+## are not made yet, so nothing in the client takes a building past it: the V6 building window
+## and its quote, the action ring, the construction strip, the commands and the legacy flows
+## all read this one constant. Raise it when the level-VI models ship.
+const MAX_OPEN_BUILDING_LEVEL := 5
+const SOON_LINE := "Новые уровни зданий скоро появятся"
 const SCENE_REUSE_SECONDS := 40.0
 const SCENE_REUSE_HARD_LIMIT := 60.0
 # With VRAM-compressed textures both scenes fit together, so the inactive one is
@@ -3033,7 +3039,7 @@ func open_building_ring(marker: Dictionary) -> void:
 	var building: Dictionary = marker.item
 	var level := int(building.level)
 	var actions: Array = []
-	var upgradable: bool = level < 5 and building.type in data.upgradable
+	var upgradable: bool = level < MAX_OPEN_BUILDING_LEVEL and building.type in data.upgradable
 	actions.append(["Улучшить" if upgradable else "Сведения", "upgrade" if upgradable else "info", inspect_building.bind(building)])
 	var construction := building_order(str(building.id))
 	if not construction.is_empty() and construction.get("kind", "") != "clear":
@@ -3082,7 +3088,7 @@ func inspect_building(building: Dictionary) -> void:
 	if not state.city.get("kingdom") is Dictionary:
 		var definition := building_definition(building.type)
 		if not state.city.get("legacyUpgrades") is Dictionary:
-			for target_level in range(1, int(definition.get("maxLevel", 1)) + 1):
+			for target_level in range(1, mini(int(definition.get("maxLevel", 1)), MAX_OPEN_BUILDING_LEVEL) + 1):
 				if target_level != level:
 					button(modal_body, "Уровень %d" % target_level, command.bind({"kind":"legacyBuilding",
 						"action":"level", "buildingId":building.id, "level":target_level}), not player_id.is_empty())
@@ -3090,7 +3096,7 @@ func inspect_building(building: Dictionary) -> void:
 			if variant.id != building.type and variant.base == definition.get("base", building.type) and data.types.has(variant.id):
 				button(modal_body, variant.ru, command.bind({"kind":"legacyBuilding", "action":"variant",
 					"buildingId":building.id, "type":variant.id}), not player_id.is_empty())
-	if level < 5 and building.type in data.upgradable:
+	if level < MAX_OPEN_BUILDING_LEVEL and building.type in data.upgradable:
 		var terms: Dictionary = data.buildingTerms[building.type].upgrades[level - 1]
 		add_upgrade_preview(modal_body, building, level, terms)
 		var available := can_afford(terms.cost) and construction.is_empty() and builder_ready()
@@ -3108,8 +3114,8 @@ func inspect_building(building: Dictionary) -> void:
 		elif construction.is_empty() and not can_afford(terms.cost):
 			row(modal_body, "Недостаточно ресурсов.")
 		panel_action(modal_body,"Улучшить",command.bind({"kind":"kingdom","action":"upgrade","buildingId":building.id,"expectedLevel":level}),not player_id.is_empty() and available)
-	elif level >= 5 and building.type in data.upgradable:
-		row(modal_body, "Достигнут максимальный уровень текущего этапа.")
+	elif level >= MAX_OPEN_BUILDING_LEVEL and building.type in data.upgradable:
+		row(modal_body, "Достигнут максимальный уровень текущего этапа. " + SOON_LINE + ".")
 	if building.type in data.producers:
 		button(modal_body, "Собрать ресурсы", command.bind({"kind":"kingdom","action":"collect","buildingId":building.id}),not player_id.is_empty())
 	if building.type == "ECO-03":
@@ -5466,7 +5472,30 @@ var command_retries := 0
 func instant_order(order: Dictionary) -> bool:
 	return order.get("kind", "") in ["kingdom", "resource", "legacyBuilding"] and order.get("action", "") in INSTANT_ACTIONS
 
+## True when an order or a quote would take a building past MAX_OPEN_BUILDING_LEVEL.
+func beyond_open_level(order: Variant) -> bool:
+	if not order is Dictionary:
+		return false
+	match str(order.get("kind", "")):
+		"v6", "v6quote":
+			var intent: Variant = order.get("intent", {})
+			return intent is Dictionary and str(intent.get("kind", "")) == "construction" and int(intent.get("target", 0)) > MAX_OPEN_BUILDING_LEVEL
+		"kingdom":
+			return str(order.get("action", "")) == "upgrade" and int(order.get("expectedLevel", 0)) >= MAX_OPEN_BUILDING_LEVEL
+		"legacyBuilding":
+			return str(order.get("action", "")) == "level" and int(order.get("level", 0)) > MAX_OPEN_BUILDING_LEVEL
+	return false
+
+## Upgrades past the open level that reached the client's last guard (nothing is sent), and the
+## quotes actually sent (tests and diagnostics).
+var capped_requests := 0
+var quotes_sent := 0
+
 func command(order: Dictionary, after_success := Callable()) -> bool:
+	if beyond_open_level(order):
+		capped_requests += 1
+		message.text = SOON_LINE
+		return false
 	if is_v6_server() and order.get("kind", "") not in ["v6", "v6quote", "v6catalog", "deploy", "worldMarch", "recall", "retreat", "editNames", "relocateCity", "resource", "speedup", "starter71", "v6collect"]:
 		if not await ensure_v6_ready():
 			return false
@@ -5907,8 +5936,13 @@ func ensure_v6_ready(force_refresh := false) -> bool:
 	return false
 
 func request(path: String, payload: Variant = null, idempotency_key := "") -> Dictionary:
+	if path == "command" and beyond_open_level(payload):
+		capped_requests += 1
+		return {"ok": false, "capped": true, "reason": {"message": SOON_LINE}}
 	if not connected():
 		return {"error":"Сначала войди в аккаунт."}
+	if payload is Dictionary and payload.get("kind", "") == "v6quote":
+		quotes_sent += 1
 	var query_only: bool = payload is Dictionary and payload.get("kind", "") in ["v6catalog", "v6quote"]
 	var response := await send_request(path if loopback else "native/game/" + path, payload, not query_only, 20.0 if query_only else 12.0, idempotency_key)
 	if not loopback and response.get("httpStatus", 0) == 401:

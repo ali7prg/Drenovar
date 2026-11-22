@@ -464,14 +464,17 @@ func lock_panel(item: Dictionary) -> void:
 	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	texts.add_theme_constant_override("separation", 4)
 	row.add_child(texts)
-	UiKit.label(texts, "Откроется, когда выполнены условия", 20, UiKit.INK, UiKit.LABEL_FONT)
+	# A unit that needs a building past the open level (main.gd MAX_OPEN_BUILDING_LEVEL) is not
+	# offered yet: no upgrade is suggested for it.
+	var later := requirements(item).any(func(need: Array) -> bool: return not need[2] and int(need[1]) > ui.MAX_OPEN_BUILDING_LEVEL)
+	UiKit.label(texts, "Откроется с новыми уровнями зданий" if later else "Откроется, когда выполнены условия", 20, UiKit.INK, UiKit.LABEL_FONT)
 	for need: Array in requirements(item):
 		var line := HBoxContainer.new()
 		line.add_theme_constant_override("separation", 10)
 		texts.add_child(line)
 		UiKit.mark(line, "tick" if need[2] else "lozenge", UiKit.GOOD if need[2] else UiKit.BAD, 18.0)
 		UiKit.label(line, "%s · уровень %s" % [need[0], ROMAN[int(need[1]) - 1]], 18, UiKit.GOOD if need[2] else UiKit.BAD, null, false)
-	var upgrade: Button = ui.button(row, "Улучшить здание", panels.inspect.bind(type if level_of(type) < int(item.get("required_building", 1)) else "B01"))
+	var upgrade: Button = ui.button(row, "Скоро" if later else "Улучшить здание", panels.inspect.bind(type if level_of(type) < int(item.get("required_building", 1)) else "B01"), not later)
 	upgrade.name = "RecruitUpgrade"
 	UiKit.style_button(upgrade, "secondary", 18)
 	upgrade.custom_minimum_size = Vector2(220, 52)

@@ -529,6 +529,9 @@ var captions: Array = ["", ""]
 var paths: Array = ["", ""]
 var scales: Array = [1.0, 1.0]
 var placeholders: Array = [null, null]
+## «После» is past the open level (main.gd MAX_OPEN_BUILDING_LEVEL): the right slot is a veiled
+## «Скоро» card drawn in 2D, with no model and no level number.
+var soon := false
 ## Camera-plane extents of each side's building ({"right": [low, high], "up": [low, high]} from
 ## its tile centre), measured when it is placed: a scene whose yard reaches past the tile widens
 ## the view, so both sides keep one scale and nothing is cut off.
@@ -568,15 +571,16 @@ static func family(path: String) -> String:
 
 ## The upgrade pair of a V6 type: «Сейчас» at `current` and «После» at `current + 1`. At level
 ## 0 only «После · ур. I» stands; at XI only «Сейчас». only_next: «После» alone (the quote).
-func setup(game_data: Dictionary, v6_type: String, current: int, final_level := 11, only_next := false) -> void:
+func setup(game_data: Dictionary, v6_type: String, current: int, final_level := 11, only_next := false, next_soon := false) -> void:
 	data = game_data
 	type = v6_type
 	runtime_id = runtime_type(data, type)
+	soon = next_soon and current >= 1 and current < final_level and not only_next
 	if only_next:
 		levels = [0, clampi(current + 1, 1, final_level)]
 	elif current <= 0:
 		levels = [0, 1]
-	elif current >= final_level:
+	elif current >= final_level or soon:
 		levels = [current, 0]
 	else:
 		levels = [current, current + 1]
@@ -595,8 +599,10 @@ func setup(game_data: Dictionary, v6_type: String, current: int, final_level := 
 		placeholders[side] = card_art("tile")
 	if levels[0] == 0 and levels[1] == 1:
 		captions[1] = "Будет построено · ур. I"
-	if levels[1] == 0:
+	if levels[1] == 0 and not soon:
 		captions[0] = "Окончательный уровень · ур. XI"
+	if soon:
+		captions[1] = "После · скоро"
 
 ## The first level of a family is all new against the level before it (nothing to light).
 func family_start(level: int) -> bool:
@@ -606,7 +612,7 @@ func family_start(level: int) -> bool:
 	return not before.is_empty() and not str(paths[1]).is_empty() and family(str(before[0])) != family(str(paths[1]))
 
 func pair() -> bool:
-	return levels[0] > 0 and levels[1] > 0
+	return levels[0] > 0 and (levels[1] > 0 or soon)
 
 func sides() -> Array:
 	var out: Array = []
@@ -774,9 +780,11 @@ func _draw() -> void:
 			draw_colored_polygon(outline, Color(0, 0, 0, 0.45))
 			draw_colored_polygon(shape, UiKit.GOLD)
 
+	if soon:
+		draw_soon(art_rect(1, frame))
 	# Caption plates under the tiles: «Сейчас · ур. V» in ivory, «После · ур. VI» in gold.
 	var strip := UiKit.nine("kit_strip", Vector4(26, 14, 26, 14), Vector4.ZERO)
-	for side: int in sides():
+	for side: int in (sides() + [1] if soon else sides()):
 		var centre_x := art_rect(side, frame).get_center().x
 		var words := UiKit.KitText.line(str(captions[side]), UiKit.LABEL_FONT, 19)
 		var width := words.get_size().x + 64.0
@@ -791,6 +799,34 @@ func _draw() -> void:
 			var ribbon := Rect2(roundf(centre_x - note.get_size().x * 0.5 - 16.0), plate.position.y - 30.0, note.get_size().x + 32.0, 26.0)
 			draw_style_box(UiKit.flat(Color("#8e2a1e"), Color("#e9c779"), 5, Vector2.ZERO, 2), ribbon)
 			note.draw(get_canvas_item(), Vector2(ribbon.position.x + 16.0, ribbon.position.y + roundf((26.0 - note.get_size().y) * 0.5)), UiKit.GOLD)
+
+## The «Скоро» card in the «После» slot: the empty diorama tile under a dark linen veil, a
+## carved plate «Скоро» and one line. No model, no level number.
+func draw_soon(slot: Rect2) -> void:
+	var card := Rect2(slot.position.x + slot.size.x * 0.1, slot.position.y + slot.size.y * 0.06, slot.size.x * 0.8, slot.size.y * 0.9)
+	var tile: Texture2D = card_art("tile")
+	if tile != null:
+		draw_texture_rect(tile, slot, false, Color(0.42, 0.4, 0.38, 0.75))
+	var veil := UiKit.flat(Color("#1d1510c8"), Color("#b8873e"), 14, Vector2.ZERO, 2)
+	draw_style_box(veil, card)
+	draw_style_box(UiKit.flat(Color(0, 0, 0, 0), Color("#e9c77955"), 10, Vector2.ZERO, 1), card.grow(-6))
+	var sun := minf(card.size.x, card.size.y) * 0.62
+	draw_texture_rect(UiKit.tex("kit_solar"), Rect2(card.get_center() - Vector2(sun, sun) * 0.5 - Vector2(0, card.size.y * 0.1), Vector2(sun, sun)), false, Color(0.95, 0.78, 0.45, 0.16))
+	var word := UiKit.KitText.line("Скоро", UiKit.TITLE_FONT, 30)
+	var plate_width := word.get_size().x + 70.0
+	var plate := Rect2(roundf(card.get_center().x - plate_width * 0.5), roundf(card.get_center().y - 34.0), plate_width, 48.0)
+	draw_style_box(UiKit.nine("kit_strip", Vector4(26, 14, 26, 14), Vector4.ZERO), plate)
+	var at := Vector2(roundf(plate.get_center().x - word.get_size().x * 0.5), plate.position.y + roundf((plate.size.y - word.get_size().y) * 0.5))
+	word.draw_outline(get_canvas_item(), at, 6, UiKit.SHADE)
+	word.draw(get_canvas_item(), at, UiKit.GOLD)
+	var line := UiKit.KitText.line("Новые уровни зданий", UiKit.LABEL_FONT, 17)
+	var line2 := UiKit.KitText.line("скоро появятся", UiKit.LABEL_FONT, 17)
+	var y := plate.end.y + 12.0
+	for text: TextLine in [line, line2]:
+		var p := Vector2(roundf(card.get_center().x - text.get_size().x * 0.5), y)
+		text.draw_outline(get_canvas_item(), p, 4, UiKit.SHADE)
+		text.draw(get_canvas_item(), p, UiKit.IVORY)
+		y += text.get_size().y
 
 # Built after the window's first frame: the open itself costs no 3D work.
 func _notification(what: int) -> void:
@@ -892,7 +928,8 @@ func _process(delta: float) -> void:
 			if absf(spin) <= 0.001:
 				spin = 0.0
 	var turn := spin + intro_turn()
-	if not is_equal_approx(turn, shown_turn):
+	var moving := dragging or intro_running() or absf(spin_velocity) > 0.0005 or (resting and absf(spin) > 0.0)
+	if moving or turn != shown_turn:
 		shown_turn = turn
 		for mount in mounts:
 			if mount != null:
@@ -916,6 +953,9 @@ func rendering() -> bool:
 ## The intro: the pair comes in turned 14° and swings to the front view (1.4 s, ease out).
 const INTRO_TURN := 0.245
 const INTRO_SECONDS := 1.4
+
+func intro_running() -> bool:
+	return intro_msec >= 0 and Time.get_ticks_msec() - intro_msec < INTRO_SECONDS * 1000.0
 
 func intro_turn() -> float:
 	if intro_msec < 0:

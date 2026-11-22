@@ -1,0 +1,25 @@
+Re-run after the two fixes (qa_forest_e2e for the lazy forest layers on the V6 fixture; qa_combat_1020 root cause).
+Godot 4.6.3.stable.official.7d41c59c4 headless, Node v24.22.1, Linux, this machine. Server checkout 08db61a4c2a30a49baa684a0a9134c955d8ee334.
+Fixture: godot/tools/qa-v6-1022-server.mjs (synthetic, in-memory; DRENOVAR_SERVER_ROOT = local server checkout), a fresh one per run.
+Logs: after_fixes/<suite>.log. Root cause of the qa_combat_1020 failures: COMBAT_1020_BISECT.txt.
+
+Game commit 149de2ed8425efc24c5af053948d19490d8deb69, 2026-11-22T08:11:13Z-08:15:13Z:
+qa_forest_world rc=0 secs=12 :: QA_FOREST_WORLD checks=2958 failures=0
+qa_forest_flow rc=0 secs=10 :: QA_FOREST_FLOW checks=166 failures=0
+qa_forest_captives rc=0 secs=18 :: QA_FOREST_CAPTIVES checks=226 failures=0
+qa_forest_v6 rc=0 secs=11 :: QA_FOREST_V6 steps=17 commands=20 checks=43 failures=0
+qa_net_1022 rc=0 secs=14 :: QA_NET_1022 checks=48 failures=0
+qa_combat_1020 rc=0 secs=3 :: checks=5500 failures=0
+qa_combat_1021 rc=0 secs=7 :: checks=22 failures=0
+qa_creatures_v2 rc=0 secs=2 :: QA_CREATURES checks=310 failures=0
+qa_warriors rc=0 secs=0 :: QA_WARRIORS checks=72 failures=0
+qa_troops06 rc=0 secs=1 :: QA_TROOPS06 checks=122 failures=0
+qa_instant_start run1 rc=0 secs=6 :: QA_INSTANT_START checks=12 failures=0 launch_ms=1161
+qa_instant_start run2 rc=0 secs=6 :: QA_INSTANT_START checks=12 failures=0 launch_ms=1183
+qa_instant_start run3 rc=0 secs=7 :: QA_INSTANT_START checks=12 failures=0 launch_ms=1172
+
+qa_forest_e2e, game commit 5a2d412 (149de2e + the boss model and request-log checks), 2026-11-22T08:18:12Z-08:20:37Z,
+fixture with DRENOVAR_QA_ADVENTURE=1 DRENOVAR_QA_CONDITIONAL=1 DRENOVAR_QA_HALL=2:
+qa_forest_e2e run1 rc=0 secs=69 :: QA_FOREST_E2E steps=214 reloads=21 commands=2 checks=966 failures=0
+qa_forest_e2e run2 rc=0 secs=72 :: QA_FOREST_E2E steps=214 reloads=21 commands=2 checks=966 failures=0
+(Two earlier runs at 149de2e, before those two checks were added: 964/0 and 964/0.)

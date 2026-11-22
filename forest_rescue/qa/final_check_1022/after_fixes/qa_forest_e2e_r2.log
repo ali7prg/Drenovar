@@ -1,0 +1,145 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 87.303, &"terrain": 2685.909, &"tiles": 63.564, &"impostors": 218.193, &"visuals": 1132.162, &"total": 4231.907 } kit=0 missing kit assets
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 3.491, &"terrain": 0.018, &"tiles": 0.357, &"impostors": 132.688, &"visuals": 218.861, &"total": 472.65 } kit=0 missing kit assets
+E2E reload 1 (intro interrupted) ok
+E2E lf_site_01 discover → step 1
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.531, &"terrain": 0.013, &"tiles": 0.292, &"impostors": 126.124, &"visuals": 234.758, &"total": 544.263 } kit=0 missing kit assets
+E2E reload 2 (lf_site_01 after discover) ok
+E2E lf_site_01 recover_artifact → step 2
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.129, &"terrain": 0.012, &"tiles": 0.255, &"impostors": 115.59, &"visuals": 218.476, &"total": 483.327 } kit=0 missing kit assets
+E2E reload 3 (lf_site_01 after recover_artifact) ok
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.039, &"terrain": 0.015, &"tiles": 0.272, &"impostors": 122.2, &"visuals": 210.081, &"total": 504.701 } kit=0 missing kit assets
+E2E reload 4 (mid-battle engage_guardian) ok
+E2E lf_site_01 defeat_guardian → step 3
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.633, &"terrain": 0.017, &"tiles": 0.316, &"impostors": 120.754, &"visuals": 212.973, &"total": 510.788 } kit=0 missing kit assets
+E2E reload 5 (lf_site_01 after defeat_guardian) ok
+E2E lf_site_01 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 3.215, &"terrain": 0.016, &"tiles": 0.318, &"impostors": 115.067, &"visuals": 205.781, &"total": 463.642 } kit=0 missing kit assets
+E2E reload 6 (lf_site_01 after unlock_cage) ok
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 1.693, &"terrain": 0.013, &"tiles": 0.307, &"impostors": 113.412, &"visuals": 205.179, &"total": 457.726 } kit=0 missing kit assets
+E2E reload 7 (escort walking) ok
+E2E lf_site_01 escort_home → step 5
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.217, &"terrain": 0.016, &"tiles": 0.307, &"impostors": 126.695, &"visuals": 216.957, &"total": 549.95 } kit=0 missing kit assets
+E2E reload 8 (lf_site_01 after escort_home) ok
+E2E lf_site_02 discover → step 1
+E2E lf_site_02 recover_artifact → step 2
+E2E lf_site_02 defeat_guardian → step 3
+E2E lf_site_02 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.141, &"terrain": 0.014, &"tiles": 0.27, &"impostors": 105.985, &"visuals": 181.292, &"total": 441.948 } kit=0 missing kit assets
+E2E reload 9 (lf_site_02 after unlock_cage) ok
+E2E lf_site_02 escort_home → step 5
+E2E lf_site_03 discover → step 1
+E2E lf_site_03 recover_artifact → step 2
+E2E lf_site_03 defeat_guardian → step 3
+E2E lf_site_03 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.409, &"terrain": 0.015, &"tiles": 0.295, &"impostors": 120.799, &"visuals": 207.359, &"total": 465.763 } kit=0 missing kit assets
+E2E reload 10 (lf_site_03 after unlock_cage) ok
+E2E lf_site_03 escort_home → step 5
+E2E lf_site_04 discover → step 1
+E2E lf_site_04 recover_artifact → step 2
+E2E lf_site_04 defeat_guardian → step 3
+E2E lf_site_04 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 1.945, &"terrain": 0.016, &"tiles": 0.278, &"impostors": 118.165, &"visuals": 209.725, &"total": 499.089 } kit=0 missing kit assets
+E2E reload 11 (lf_site_04 after unlock_cage) ok
+E2E lf_site_04 escort_home → step 5
+E2E lf_site_05 discover → step 1
+E2E lf_site_05 recover_artifact → step 2
+E2E lf_site_05 defeat_guardian → step 3
+E2E lf_site_05 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.635, &"terrain": 0.02, &"tiles": 0.335, &"impostors": 108.887, &"visuals": 209.126, &"total": 543.973 } kit=0 missing kit assets
+E2E reload 12 (lf_site_05 after unlock_cage) ok
+E2E lf_site_05 escort_home → step 5
+E2E lf_site_06 discover → step 1
+E2E lf_site_06 recover_artifact → step 2
+E2E lf_site_06 defeat_guardian → step 3
+E2E lf_site_06 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.624, &"terrain": 0.012, &"tiles": 0.24, &"impostors": 104.098, &"visuals": 206.164, &"total": 448.207 } kit=0 missing kit assets
+E2E reload 13 (lf_site_06 after unlock_cage) ok
+E2E lf_site_06 escort_home → step 5
+E2E lf_site_07 discover → step 1
+E2E lf_site_07 recover_artifact → step 2
+E2E lf_site_07 defeat_guardian → step 3
+E2E lf_site_07 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.121, &"terrain": 0.019, &"tiles": 0.375, &"impostors": 130.893, &"visuals": 223.004, &"total": 528.459 } kit=0 missing kit assets
+E2E reload 14 (lf_site_07 after unlock_cage) ok
+E2E lf_site_07 escort_home → step 5
+E2E lf_site_08 discover → step 1
+E2E lf_site_08 recover_artifact → step 2
+E2E lf_site_08 defeat_guardian → step 3
+E2E lf_site_08 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 1.992, &"terrain": 0.015, &"tiles": 0.28, &"impostors": 134.501, &"visuals": 218.325, &"total": 533.459 } kit=0 missing kit assets
+E2E reload 15 (lf_site_08 after unlock_cage) ok
+E2E lf_site_08 escort_home → step 5
+E2E lf_site_09 discover → step 1
+E2E lf_site_09 recover_artifact → step 2
+E2E lf_site_09 defeat_guardian → step 3
+E2E lf_site_09 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 1.62, &"terrain": 0.016, &"tiles": 0.258, &"impostors": 140.273, &"visuals": 222.304, &"total": 482.586 } kit=0 missing kit assets
+E2E reload 16 (lf_site_09 after unlock_cage) ok
+E2E lf_site_09 escort_home → step 5
+E2E lf_site_10 discover → step 1
+E2E lf_site_10 recover_artifact → step 2
+E2E lf_site_10 defeat_guardian → step 3
+E2E lf_site_10 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.19, &"terrain": 0.016, &"tiles": 0.272, &"impostors": 115.49, &"visuals": 204.013, &"total": 516.107 } kit=0 missing kit assets
+E2E reload 17 (lf_site_10 after unlock_cage) ok
+E2E lf_site_10 escort_home → step 5
+E2E lf_site_11 discover → step 1
+E2E lf_site_11 recover_artifact → step 2
+E2E lf_site_11 defeat_guardian → step 3
+E2E lf_site_11 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.066, &"terrain": 0.042, &"tiles": 0.318, &"impostors": 146.691, &"visuals": 253.029, &"total": 547.533 } kit=0 missing kit assets
+E2E reload 18 (lf_site_11 after unlock_cage) ok
+E2E lf_site_11 escort_home → step 5
+E2E lf_site_12 discover → step 1
+E2E lf_site_12 recover_artifact → step 2
+E2E lf_site_12 defeat_guardian → step 3
+E2E lf_site_12 unlock_cage → step 4
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.854, &"terrain": 0.015, &"tiles": 0.281, &"impostors": 121.753, &"visuals": 221.54, &"total": 502.757 } kit=0 missing kit assets
+E2E reload 19 (lf_site_12 after unlock_cage) ok
+E2E lf_site_12 escort_home → step 5
+E2E boss phase hunt at 0.0 s
+E2E boss phase fury at 5.3 s
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 2.147, &"terrain": 0.013, &"tiles": 0.311, &"impostors": 146.089, &"visuals": 274.202, &"total": 559.225 } kit=0 missing kit assets
+E2E reload 20 (mid-battle engage_boss) ok
+E2E boss phase last_stand at 15.8 s
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 4.507, &"terrain": 0.014, &"tiles": 0.294, &"impostors": 117.186, &"visuals": 226.738, &"total": 524.781 } kit=0 missing kit assets
+E2E reload 21 (completed) ok
+QA_FOREST_E2E_REPORT {"adventure_command_statuses":{"200":198},"adventure_commands":198,"boot_ms":{"count":22,"max":7339,"min":1436},"boss_model":"res://assets/forest_rescue/boss/lf_boss_ancient_maw.glb","boss_outcome":"victory","boss_phase_events":["hunt","fury","last_stand"],"boss_phases_shown":["hunt","fury","last_stand"],"boss_timeline_phases":["hunt","fury","last_stand"],"cages":["lf_site_01","lf_site_02","lf_site_03","lf_site_04","lf_site_05","lf_site_06","lf_site_07","lf_site_08","lf_site_09","lf_site_10","lf_site_11","lf_site_12"],"escorts":["lf_site_01","lf_site_02","lf_site_03","lf_site_04","lf_site_05","lf_site_06","lf_site_07","lf_site_08","lf_site_09","lf_site_10","lf_site_11","lf_site_12"],"guardian_victories":["lf_site_01:tenerys","lf_site_02:tenerys","lf_site_03:tenerys","lf_site_04:tenerys","lf_site_05:velkor","lf_site_06:kamneklyk","lf_site_07:tenerys","lf_site_08:velkor","lf_site_09:kamneklyk","lf_site_10:dragor","lf_site_11:dragor","lf_site_12:dragor"],"reloads":["intro interrupted","lf_site_01 after discover","lf_site_01 after recover_artifact","mid-battle engage_guardian","lf_site_01 after defeat_guardian","lf_site_01 after unlock_cage","escort walking","lf_site_01 after escort_home","lf_site_02 after unlock_cage","lf_site_03 after unlock_cage","lf_site_04 after unlock_cage","lf_site_05 after unlock_cage","lf_site_06 after unlock_cage","lf_site_07 after unlock_cage","lf_site_08 after unlock_cage","lf_site_09 after unlock_cage","lf_site_10 after unlock_cage","lf_site_11 after unlock_cage","lf_site_12 after unlock_cage","mid-battle engage_boss","completed"],"reward":{"claimed":{"coins":24009.0,"food":0.0,"iron":25000.0,"stone":25000.0,"wood":23728.0},"earned":{"coins":190000.0,"food":2325000.0,"iron":1025000.0,"stone":1590000.0,"wood":2385000.0},"pending":{"coins":165991.0,"food":2325000.0,"iron":1000000.0,"stone":1565000.0,"wood":2361272.0}},"run_s":71.3,"tasks":{"lf_site_01":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"],"lf_site_02":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"],"lf_site_03":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"],"lf_site_04":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"],"lf_site_05":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"],"lf_site_06":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"],"lf_site_07":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"],"lf_site_08":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"],"lf_site_09":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"],"lf_site_10":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"],"lf_site_11":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"],"lf_site_12":["discover","recover_artifact","defeat_guardian","unlock_cage","escort_home"]}}
+QA_FOREST_E2E steps=214 reloads=21 commands=2 checks=966 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 13 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+ERROR: Pages in use exist at exit in PagedAllocator: N7Variant5Pools12BucketMediumE
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)
+ERROR: Pages in use exist at exit in PagedAllocator: N7Variant5Pools11BucketSmallE
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)
+ERROR: 11 RID allocations of type 'N26RendererEnvironmentStorage11EnvironmentE' were leaked at exit.
+ERROR: 10 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 16 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N17RendererSceneCull6CameraE' were leaked at exit.

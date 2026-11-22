@@ -1,0 +1,9 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 71.847, &"terrain": 2321.107, &"tiles": 37.71, &"impostors": 216.231, &"visuals": 1134.771, &"total": 3793.322 } kit=0 missing kit assets
+QA_FOREST_FLOW checks=166 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 4 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

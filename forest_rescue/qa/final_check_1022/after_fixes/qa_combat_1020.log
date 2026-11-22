@@ -1,0 +1,13 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+{"checks":5500,"failures":[],"method":"headless Linux, real Landscape, server simulator events; not iPhone acceptance","notes":{"ENG-01_mid_blow_share":0.4,"ENG-01_wrist_forward_at_contact_m":0.34,"ENG-02_mid_blow_share":0.37,"ENG-02_wrist_forward_at_contact_m":0.22,"ENG-06_mid_blow_share":0.58,"ENG-06_wrist_forward_at_contact_m":0.13,"ambient_swings_in_9s":[4,6],"crowd":{"archers_from_outline_m":5.01,"largest_gap_deg":50.0,"melee_from_outline_m":2.83},"scene":{"blocks":2,"clear_m":3.9,"creature_attack_moments":10,"feints":2,"fewest_swings":3,"melee_at_creature":16,"mid_blow_share":0.41,"riders_far":0,"shown_fight_ms":10400.0}}}
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+ERROR: Pages in use exist at exit in PagedAllocator: N7Variant5Pools12BucketMediumE
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)
+ERROR: 1830 RID allocations of type 'P11GodotBody3D' were leaked at exit.
+ERROR: 1 RID allocations of type 'P11GodotArea3D' were leaked at exit.
+ERROR: 1 RID allocations of type 'P12GodotSpace3D' were leaked at exit.
+ERROR: 1179 RID allocations of type 'P12GodotShape3D' were leaked at exit.

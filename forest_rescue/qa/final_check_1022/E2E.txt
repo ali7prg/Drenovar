@@ -1,2 +1,54 @@
-qa_forest_e2e rc=143 secs=31 :: 
-  (stopped by hand after the SCRIPT ERROR: the pre-merge harness reads game.forest_game at boot; in 1022 that layer is created lazily after launch, so it is null. Harness not updated for 1022; not a game failure.)
+qa_forest_e2e on 1022: the whole adventure in the real client, on the V6 server code (2026-11-22)
+
+First pass of this check (f895ac8): rc=143, stopped by hand. The pre-merge harness read game.forest_game at
+boot; 1022 creates that layer lazily after the launch, so it was null. Harness, not game.
+
+Fixed in 1ec0d1f/c5076de, bbdc5f5, 5a2d412 (harness only, no game code changed):
+- boot() waits, at every launch and reload, for the lazy game layer (main.ensure/maybe_start_forest_game) and then
+  for its world layer (ForestGame.world_ready) on the real lazy path; it checks that --forest-eager is NOT in use.
+- It runs against the synthetic V6 fixture godot/tools/qa-v6-1022-server.mjs (the server line production uses)
+  instead of the old forest_rescue/server/local-realm: DRENOVAR_QA_ADVENTURE=1 DRENOVAR_QA_CONDITIONAL=1
+  DRENOVAR_QA_HALL=2. The fixture's /test/clock, /test/hall and /test/army cover everything the harness used.
+  Nothing else in the harness relied on eager-only state.
+
+Result (game 5a2d412, server checkout 08db61a, two runs on fresh fixtures): steps=214 reloads=21 commands=2 checks=966 failures=0
+Both runs identical: after_fixes/qa_forest_e2e_r1.log, after_fixes/qa_forest_e2e_r2.log (RERUNS_AFTER_FIXES.txt).
+Run time about 70 s each; 22 launches of main.tscn, 1319-6695 ms each until the forest layers were ready.
+
+Covered in one run:
+- hall II locked (no POIs, a command refused locally), hall III unlock, intro shown once, interrupted by a reload,
+  offered again as an invitation (no auto-replay), acknowledged; intro awards nothing; squad formed in the squad panel;
+- all 12 sites x 5 tasks = 60 tasks through the HUD «Продолжить» guide, mechanisms solved in the mechanism UI
+  (one wrong input first on rune lock / winch: only the attempt resets), paired latch held;
+- 12 guardian battles won on the server timeline: tenerys, tenerys, tenerys, tenerys, velkor, kamneklyk, tenerys, velkor, kamneklyk, dragor, dragor, dragor;
+- 12 cages opened (3 captives out each), 12 escorts of exactly three, 3 home each; 36 rescued;
+- the boss Ancient Maw: timeline phases ['hunt', 'fury', 'last_stand']; as the server clock passed each one, the server
+  projection, the client's battle view and the battle header showed it (hunt 0.0 s, fury 5.3 s, last_stand 15.8 s);
+  the phase changes reached the client as events ['hunt', 'fury', 'last_stand']; the final model
+  res://assets/forest_rescue/boss/lf_boss_ancient_maw.glb was loaded and drawn; outcome victory;
+- campaign completed; reward panel claim: earned = claimed + pending for each resource, pending did not grow;
+  earned food 2,325,000 / wood 2,385,000 / stone 1,590,000 / iron 1,025,000 / coins 190,000
+  = 7,515,000 in total; auto-refill opt-in stored by the server;
+- 21 reloads (new main.tscn each, lazy layers again), incl. mid-guardian-battle, mid-boss-battle and an escort
+  walking; after each: progress, site steps and rescued count kept, no choreography replayed, defeated guardians and
+  home captives not drawn again, battle header restored mid-fight;
+- every adventure command of the campaign, as the fixture logged it: 198 commands on the V6 stack
+  (economy header DRENOVAR-V6-C1.0), statuses {'200': 198}. The client's own send log (only the last
+  launch's, "commands=2" in the summary line, as at d419e5b) has requestId = Idempotency-Key and no success,
+  reward, wallet, capacity, owner, time, position, revision or proof field.
+
+Against d419e5b (pre-merge, old local realm, 882/0, 214 steps, 21 reloads): the same 214 steps and 21 reloads, and
+all 882 of its checks are still made and pass; none was dropped. The 84 new checks:
+  44 = 22 launches x 2 (lazy path without --forest-eager; world layer attached by itself)
+   1   city comes from the V6 fixture
+  24   12 cages x 3 captives out, 12 escorts x 3 home
+   8   boss: 3 phases in order on the timeline, 3 x (projection + battle view, battle header), final model drawn
+   5   final tallies: 12 sites / 60 tasks, 12 guardian victories, 12 cages / 12 escorts, 3 boss phases shown,
+       phase changes announced
+   2   fixture request log: all adventure commands on the V6 stack, all answered 200
+At d419e5b most actor GLBs did not exist yet ("asset missing, presentation skipped"); on 1022 none is missing.
+
+Game bugs found: none.
+Not covered: rendering (headless: models load, nothing is drawn to a screen), touch input, sound, the phone.
+Exit messages: the process ends with leak notices (ObjectDB, ~10 environments/materials) from 22 main.tscn instances
+made in one process; the app makes one per launch. Not investigated further.

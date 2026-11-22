@@ -278,6 +278,7 @@ func scene(game, stage) -> void:
 	stage.zoom = 30.0
 	stage.update_camera(0, true)
 	var swings := {}
+	var type_frames := {} # unit type -> (engaged frames, mid-blow frames)
 	var attack_frames := 0
 	var engaged_frames := 0
 	var blocks := {}
@@ -302,6 +303,9 @@ func scene(game, stage) -> void:
 					continue
 				engaged_frames += 1
 				var clip: String = unit.get_meta("clip", "")
+				var kind := key.get_slice(":", 0)
+				var tally: Vector2i = type_frames.get(kind, Vector2i.ZERO)
+				type_frames[kind] = tally + Vector2i(1, 1 if clip == "attack" else 0)
 				if clip == "attack":
 					attack_frames += 1
 					var shown_at: float = unit.get_meta("ambient_strike", -INF) if float(unit.get_meta("v010_strike", -INF)) == -INF else float(unit.get_meta("v010_strike"))
@@ -327,7 +331,15 @@ func scene(game, stage) -> void:
 	check(melee >= 10, "melee soldiers at the creature: %d" % melee)
 	check(fewest >= 3, "every melee soldier at the creature swings at least 3 times in the shown fight: fewest %d" % fewest)
 	var share := float(attack_frames) / maxf(1.0, engaged_frames)
-	check(share > 0.45, "the crowd is mostly mid-blow, not standing: %.0f %% of soldier frames" % (share * 100.0))
+	# DRENOVAR-V6-ROSTER-5: up to 1021 the ten-type crowd was 54 % mid-blow here, raised by the
+	# retired types' longer blows (scout 72 %, heavy foot, militia and recruit 56-58 %). The kept
+	# types swing as they did then (measured at 83d5473 in this fight: spearman 45 %, swordsman
+	# 40 %, knight 58 %); the five-unit crowd, mostly spearmen and swordsmen, is about 41 %.
+	check(share > 0.38, "the crowd keeps swinging, not standing: %.0f %% of soldier frames mid-blow" % (share * 100.0))
+	for kind in type_frames:
+		var type_share := float(type_frames[kind].y) / maxf(1.0, type_frames[kind].x)
+		check(type_share > 0.33, "%s soldiers keep swinging: %.0f %% of their frames mid-blow" % [kind, type_share * 100.0])
+		notes["%s_mid_blow_share" % kind] = snappedf(type_share, 0.01)
 	var riders_far := 0
 	for slot in cache.get("slots", []):
 		if slot.mounted and int(plan.reserve_rows.get("%s:%d" % [slot.id, int(slot.index)], 0)) >= 3:

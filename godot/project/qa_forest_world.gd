@@ -32,11 +32,67 @@ func build_city(data: Dictionary, flag_on: bool) -> Node3D:
 	var stage: Node3D = load("res://src/landscape.gd").new()
 	root.add_child(stage)
 	await stage.setup(data, data.demo, "city", {})
+	# 1022: the city is built with the 1021 forest; the world layer is attached afterwards (lazy path).
+	check(stage.forest_world == null, "the city build itself creates no forest_world (lazy layer)")
+	if flag_on:
+		var legacy_trees: Node = stage.trees.get("node")
+		check(legacy_trees != null and legacy_trees.find_child("Canopy", true, false) == null, "the city opens with the 1021 forest")
+		await stage.attach_forest_world()
+		check(stage.forest_attach_state == "attached", "world layer attached after the city: " + stage.forest_attach_state)
+		check(not is_instance_valid(legacy_trees), "the 1021 trees are replaced once the kit forest is built")
+		check(stage.find_child("ForestReplaced", true, false) == null, "no replaced forest group left behind")
 	return stage
+
+
+## 1022: every resource the two layers preload (transitively) is in ForestFlags.GAME_LAYER / WORLD_LAYER,
+## leaves before the scripts that preload them, so load_staged() never compiles a whole layer in one frame.
+func check_layer_lists() -> void:
+	for entry in [[ForestFlags.GAME_LAYER, ForestFlags.GAME_LAYER_SCRIPT], [ForestFlags.WORLD_LAYER, ForestFlags.WORLD_LAYER_SCRIPT]]:
+		var listed: Array = entry[0]
+		var wanted: Array = []
+		_preload_order(String(entry[1]), {}, wanted)
+		for path in wanted:
+			# forest_flags.gd is preloaded by landscape.gd / main.gd themselves (tiny, no dependencies).
+			var always_loaded: bool = path == "res://src/forest_rescue/world/forest_flags.gd" or \
+				(ResourceLoader.has_cached(path) and not String(path).begins_with("res://src/forest_rescue"))
+			check(listed.has(path) or always_loaded,
+				"%s preloads %s: missing from its staged list" % [String(entry[1]).get_file(), path])
+		var position := {}
+		for i in listed.size():
+			position[listed[i]] = i
+		for path in wanted:
+			for dep in _preloads(path):
+				if position.has(path) and position.has(dep):
+					check(position[dep] < position[path], "staged order: %s before %s" % [dep.get_file(), String(path).get_file()])
+		check(listed.back() == entry[1], "staged list ends with " + String(entry[1]).get_file())
+
+
+static func _preloads(path: String) -> Array:
+	var out: Array = []
+	if not (path.ends_with(".gd") or path.ends_with(".gdshader") or path.ends_with(".gdshaderinc")):
+		return out
+	var regex := RegEx.create_from_string("preload\\(\"(res://[^\"]+)\"\\)")
+	for line in FileAccess.get_file_as_string(path).split("\n"):
+		if line.strip_edges().begins_with("#"):
+			continue
+		for m in regex.search_all(line):
+			if not out.has(m.get_string(1)):
+				out.append(m.get_string(1))
+	return out
+
+
+static func _preload_order(path: String, seen: Dictionary, out: Array) -> void:
+	if seen.has(path):
+		return
+	seen[path] = true
+	for dep in _preloads(path):
+		_preload_order(dep, seen, out)
+	out.append(path)
 
 
 func run() -> void:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/game.json"))
+	check_layer_lists()
 	# ---- Rollback: flag OFF builds the legacy forest and no world layer -----------------------
 	var legacy: Node3D = await build_city(data, false)
 	check(legacy.forest_world == null, "flag OFF must not create forest_world")

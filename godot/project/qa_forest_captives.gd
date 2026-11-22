@@ -151,7 +151,9 @@ func run() -> void:
 	root.add_child(game)
 	while game.get("scene_loading") or not is_instance_valid(game.get("stage")):
 		await process_frame
-	forest = game.forest_game
+	# 1022: both forest layers are lazy; the QA asks for them (a fixture state follows below).
+	forest = await game.ensure_forest_game()
+	check(await forest.ensure_world(), "world layer attached after the city (lazy path)")
 	var stub := StubHost.new()
 	stub.main = game
 	root.add_child(stub)

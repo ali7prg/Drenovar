@@ -166,9 +166,10 @@ func run() -> void:
 	game.diagnostics.server_failures = 0
 	report.cadence = {"rest": 4.0, "march": 2.0, "fight": 0.65, "backoff_n2": 8.0, "backoff_max": 15.0}
 	# --- adventure off on the server: forest locked, no forest requests, no extra polling
-	var forest: Node = game.forest_game
-	check(not forest.client.known and not forest.client.available(), "no state.adventure: the forest stays locked")
-	check(forest.locked_reason() == "unavailable" and not forest.hud.bar.visible, "locked forest: no adventure bar")
+	# 1022: without state.adventure neither forest layer is ever loaded (the city keeps the 1021 forest).
+	check(not game.adventure_offered(game.state), "no state.adventure from this server")
+	check(game.forest_game == null and not game.forest_game_loading, "adventure off: the forest game layer is not loaded")
+	check(game.stage.forest_world == null and game.stage.forest_attach_state == "", "adventure off: no forest world layer, 1021 forest")
 	log_start = (await fixture_log()).size()
 	game.set_process(true)
 	var watch_until := Time.get_ticks_msec() + 9000
@@ -181,6 +182,7 @@ func run() -> void:
 	check(idle.all(func(r): return str(r.path).ends_with("/state")), "only state polls while idle: " + str(idle.map(func(r): return r.path)))
 	check(idle.all(func(r): return str(r.get("kind", "")) not in ["adventure", "adventure_intro"]), "no adventure commands with the adventure off")
 	check(not game.connection_badge.visible and not game.message.text.contains("Сервер недоступен"), "no notices while idle")
+	check(game.forest_game == null and game.stage.forest_world == null, "still no forest layer after 9 s of polling")
 	report.idle_9s = {"polls": idle_polls, "statuses": idle.map(func(r): return int(r.status))}
 	report.counters = {"not_modified": game.not_modified_polls, "full": game.full_polls, "retries": game.command_retries}
 	print("QA_NET_1022_REPORT ", JSON.stringify(report))

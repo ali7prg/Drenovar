@@ -523,6 +523,14 @@ static func fog_tops(bits: PackedByteArray) -> PackedFloat32Array:
 
 ## Sets the displayed target. animate=false snaps (reduced motion / first frame).
 ## State texel: R target clear, G previous clear, B target fog top, A previous fog top.
+## 1022 lazy attach: while the world layer is still hidden, its first target is computed on a worker
+## thread as well (ForestWorld waits for target_pending() before it shows the layer).
+var threaded_snap := false
+var _applied_serial := 0
+
+func target_pending() -> bool:
+	return _applied_serial != _target_serial
+
 func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, seconds := REVEAL_SECONDS) -> void:
 	if bits.size() != BYTES:
 		return
@@ -530,7 +538,7 @@ func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, 
 	var serial := _target_serial
 	var tops: PackedFloat32Array
 	var sdf: PackedFloat32Array
-	if animate and target_bits.size() == BYTES and is_inside_tree():
+	if ((animate and target_bits.size() == BYTES) or threaded_snap) and is_inside_tree():
 		# iPhone hot path: a checkpoint reveal during play computes the distance fields on a worker thread
 		# (the main thread keeps drawing); the newest target wins
 		var job := {}
@@ -583,6 +591,7 @@ func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, 
 		revealing = false
 		_settle()
 	_push_reveal()
+	_applied_serial = serial
 	target_applied.emit()
 
 

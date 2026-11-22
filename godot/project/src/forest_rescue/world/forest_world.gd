@@ -76,6 +76,13 @@ var received_at_ms := 0
 var server_time_ms := 0.0
 var last_cull := {}
 var setup_ms := {}
+## 1022 lazy attach (landscape.attach_forest_world): the city is already on screen, so setup() keeps the
+## rebuilt ground tiles and the river restyle aside and commit_ground() applies them in one frame, right
+## before the kit forest replaces the 1021 trees.
+var deferred_commit := false
+var initial_adventure: Dictionary = {}   # deferred setup: state.adventure as the city was presented
+var _pending_tiles: Array = []
+var _pending_river := false
 var setup_stage := ""                    # entry probe: the setup step running in the current frame
 var impostor_signature_parts: Array = [] # entry probe: which signature part differs between editor and pack
 var remap: Dictionary = {}               # resource id -> Vector2 (visual position, layout)
@@ -197,8 +204,11 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 			rebuilt = terrain.rebuild_tile(part.mesh)
 			tiles[tile_key] = rebuilt if rebuilt != null else false
 		if rebuilt is ArrayMesh:
-			part.mesh = rebuilt
-			_apply_forest_ground(part)
+			if deferred_commit:
+				_pending_tiles.append([part, rebuilt])
+			else:
+				part.mesh = rebuilt
+				_apply_forest_ground(part)
 		if Time.get_ticks_usec() - slice > 4000:
 			await get_tree().process_frame
 			slice = Time.get_ticks_usec()
@@ -223,7 +233,10 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	_build_paths()
 	await get_tree().process_frame
 	setup_stage = "river+water"
-	_restyle_river()
+	if deferred_commit:
+		_pending_river = true
+	else:
+		_restyle_river()
 	water = ForestWater.new()
 	water.name = "Water"
 	add_child(water)
@@ -293,12 +306,33 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	setup_ms.visuals = (Time.get_ticks_usec() - t) / 1000.0
 	await get_tree().process_frame
 	setup_stage = "adventure state"
-	apply_adventure({})
+	if deferred_commit:
+		# the layer is still hidden: the first fog target (distance fields) is computed off the main thread
+		fog.threaded_snap = true
+		apply_adventure(initial_adventure)
+		while fog.target_pending():
+			await get_tree().process_frame
+		fog.threaded_snap = false
+	else:
+		apply_adventure({})
 	setup_ms.total = (Time.get_ticks_usec() - started) / 1000.0
 	setup_stage = "post-setup (city build / first ticks)"
 	set_process(true)
 	ready_for_frame = true
 	print("ForestWorld: ready ", setup_ms, " kit=", kit.kit_status().missing.size(), " missing kit assets")
+
+
+## Applies what a deferred setup kept aside (see deferred_commit).
+func commit_ground() -> void:
+	for entry in _pending_tiles:
+		var part: MeshInstance3D = entry[0]
+		if is_instance_valid(part):
+			part.mesh = entry[1]
+			_apply_forest_ground(part)
+	_pending_tiles.clear()
+	if _pending_river:
+		_pending_river = false
+		_restyle_river()
 
 
 ## Pass 4 (art/01 quarry): terraces + crane round the quarry pit (ForestQuarry), off trails / glade 05 / mine.
@@ -1135,8 +1169,12 @@ func apply_adventure(adv: Dictionary) -> void:
 	if not locked and not entrance_released and String(intro.get("status", "acknowledged")) != "acknowledged":
 		var corridor: Dictionary = atlas.entrance_corridor
 		hold_bits = ForestFog.corridor_bits(corridor.from, corridor.to, corridor.radius)
+		# 1022: the town square once per call (it was rebuilt for every byte: ~150 ms per state while the
+		# intro was pending, on the main thread).
+		var town := ForestFog.default_town_bits()
+		var shown_now := displayed_bits.size() == ForestFog.BYTES
 		for i in ForestFog.BYTES:
-			hold_bits[i] = hold_bits[i] & ~ForestFog.default_town_bits()[i] & ~(displayed_bits[i] if displayed_bits.size() == ForestFog.BYTES else 0)
+			hold_bits[i] = hold_bits[i] & ~town[i] & ~(displayed_bits[i] if shown_now else 0)
 	else:
 		hold_bits = PackedByteArray()
 		if not locked:

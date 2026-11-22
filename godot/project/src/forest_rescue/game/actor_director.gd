@@ -284,6 +284,8 @@ func on_rig_ready(actor: Node3D) -> void:
 ## (qa_forest_perf --segments reports the RENDERING_INFO_PIPELINE_COMPILATIONS_* deltas per moment).
 static var pipelines_warmed := false
 
+const WARM_PER_FRAME := 4
+
 func warm_pipelines() -> void:
 	var world_node: Variant = game.get("world")
 	if world_node is Node and world_node.get("setup_stage") != null:
@@ -305,11 +307,16 @@ func warm_pipelines() -> void:
 			if not g_path.is_empty() and not paths.has(g_path):
 				paths.append(g_path)
 	var ids: Array = []
+	# 1022: the layer arrives while the city is interactive: a few rigs per frame (their models load one
+	# at a time, ActorRig.MAX_PARALLEL_LOADS) and, below, a few shown per frame so the pipelines compile
+	# over several frames instead of in one.
 	for i in paths.size():
 		var id := "__warm_%d" % i
 		var actor := rig(id, String(paths[i]))
 		actor.position = Vector3(float(i % 8) * 4.0, -400.0, float(i / 8) * 4.0)
 		ids.append(id)
+		if i % WARM_PER_FRAME == WARM_PER_FRAME - 1:
+			await game.get_tree().process_frame
 	var fx: Variant = game.get("fx")
 	if fx != null and fx.has_method("ensure_world") and fx.ensure_world():
 		fx.burst_world(Vector3(0, -400, -8))
@@ -323,10 +330,12 @@ func warm_pipelines() -> void:
 		if not loading:
 			break
 		await game.get_tree().process_frame
-	for id in ids:
-		var actor: Rig = rigs.get(id)
+	for i in ids.size():
+		var actor: Rig = rigs.get(ids[i])
 		if actor != null and is_instance_valid(actor):
 			actor.visible = true
+		if i % WARM_PER_FRAME == WARM_PER_FRAME - 1:
+			await game.get_tree().process_frame
 	for frame in 3:
 		await game.get_tree().process_frame
 	for id in ids:

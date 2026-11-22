@@ -21,8 +21,9 @@ const BuildingPlates = preload("res://src/building_plates.gd")
 const CityDefence = preload("res://src/city_defence.gd")
 const TownGround = preload("res://src/town_ground.gd")
 const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
-# FOREST_RESCUE hook: gameplay layer of «Лес потерянных» (src/forest_rescue/game/).
-const ForestGame = preload("res://src/forest_rescue/game/forest_game.gd")
+# FOREST_RESCUE hook: gameplay layer of «Лес потерянных» (src/forest_rescue/game/). 1022: not preloaded
+# (its scripts compile in ~0.3 s); created after the launch, only when the server projects the adventure.
+const ForestFlags = preload("res://src/forest_rescue/world/forest_flags.gd")
 # DRENOVAR-V6-ROSTER-5: spearman, swordsman, longbowman, crossbowman, knight (ENG-05/07/08/09/10 retired).
 const RECRUIT_ORDER := ["ENG-01", "ENG-02", "ENG-03", "ENG-04", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
@@ -153,7 +154,10 @@ var action_list_key := ""
 var next_training_update := 0.0
 var followed_army := ""
 var next_minimap_draw := 0
-var forest_game: Node # FOREST_RESCUE hook
+var forest_game: Node # FOREST_RESCUE hook (null until the server offers the adventure)
+var forest_game_loading := false
+var launch_done := false
+signal forest_game_ready
 var diagnostics := SessionDiagnostics.new()
 # Combat diagnostics overlay and event log (off unless switched on in the
 # smoothness panel or with --combat-diagnostics); see src/combat_diagnostics.gd.
@@ -260,10 +264,10 @@ func _ready() -> void:
 	state = data.demo
 	add_child(hud)
 	build_ui()
-	# FOREST_RESCUE hook: adventure overlay, actors, intro and network client.
-	forest_game = ForestGame.new()
-	add_child(forest_game)
-	forest_game.setup(self)
+	# FOREST_RESCUE hook: adventure overlay, actors, intro and network client. 1022: lazy, see
+	# maybe_start_forest_game() (QA/capture tools may ask for the eager 1021+forest order).
+	if ForestFlags.eager():
+		await ensure_forest_game()
 	if loopback:
 		await sync_account(true)
 	else:
@@ -297,7 +301,9 @@ func _ready() -> void:
 	diagnostics.log_event("launch", {"city_ms": city_built_ms, "first_frames_ms": warm.x, "first_frames": warm.y,
 		"total_ms": Time.get_ticks_msec() - launch_started}, Time.get_unix_time_from_system(), false)
 	launch.finish()
+	launch_done = true
 	warm_panel_textures()
+	maybe_start_forest_game() # FOREST_RESCUE hook: only after the city is interactive
 	if restoring_session and not showing_cached_state:
 		message.text = "Подключаемся к поселению…"
 	if endpoint == LIVE_SERVER and (not v6_panels.enabled() or not login_proof.is_empty()) and not smoke:
@@ -4667,6 +4673,40 @@ func finish_login(manual := false) -> void:
 		show_error(response)
 	login_in_progress = false
 
+# FOREST_RESCUE hook (1022): the adventure layer follows the server. A state without state.adventure
+# (production today) never loads it; with it, it loads after the launch, one script per frame.
+func adventure_offered(value: Dictionary) -> bool:
+	var adventure: Variant = value.get("adventure")
+	return adventure is Dictionary and not str(adventure.get("campaignId", "")).is_empty()
+
+func forest_state_changed() -> void:
+	if forest_game != null:
+		forest_game.on_state(state)
+	else:
+		maybe_start_forest_game()
+
+func maybe_start_forest_game() -> void:
+	if forest_game == null and not forest_game_loading and launch_done and adventure_offered(state):
+		ensure_forest_game()
+
+## Creates the adventure layer (QA may await it directly). Returns it once its setup has run.
+func ensure_forest_game() -> Node:
+	if forest_game != null:
+		return forest_game
+	if forest_game_loading:
+		await forest_game_ready
+		return forest_game
+	forest_game_loading = true
+	await ForestFlags.load_staged(ForestFlags.GAME_LAYER, get_tree(), prewarm_may_continue)
+	var layer: Node = load(ForestFlags.GAME_LAYER_SCRIPT).new()
+	add_child(layer)
+	layer.setup(self)
+	forest_game = layer
+	forest_game_loading = false
+	layer.on_state(state)
+	forest_game_ready.emit()
+	return forest_game
+
 func show_cached_state(cached: Dictionary) -> void:
 	if cached.is_empty():
 		return
@@ -4683,6 +4723,7 @@ func show_cached_state(cached: Dictionary) -> void:
 	refresh_hud()
 	if is_instance_valid(stage):
 		stage.present(state)
+	forest_state_changed() # FOREST_RESCUE hook: the saved copy may carry state.adventure
 
 func restore_account() -> void:
 	restoring_session = true
@@ -4785,8 +4826,7 @@ func reset_session(reason := "auth_401") -> void:
 	state = data.demo
 	if is_instance_valid(stage):
 		stage.present(state)
-	if forest_game != null: # FOREST_RESCUE hook
-		forest_game.on_state(state)
+	forest_state_changed() # FOREST_RESCUE hook
 	refresh_hud()
 
 func show_reports() -> void:
@@ -4948,8 +4988,7 @@ func accept(response: Dictionary) -> void:
 	refresh_hud()
 	if is_instance_valid(stage):
 		stage.present(state)
-	if forest_game != null: # FOREST_RESCUE hook: ingest state.adventure
-		forest_game.on_state(state)
+	forest_state_changed() # FOREST_RESCUE hook: ingest state.adventure
 	refresh_economy()
 	if starter_panel_open and not command_in_progress and state.get("starterEligible71", false):
 		show_starter_goals()

@@ -105,6 +105,8 @@ func pick(screen_position: Vector2) -> bool:
 	if intro.presenting():
 		return true
 	if client.unlocked():
+		if not world_ready():
+			return false
 		var picked: Dictionary = actors.pick(screen_position)
 		if picked.is_empty():
 			return false
@@ -170,6 +172,33 @@ func track_stage() -> void:
 					world.clock_source = Callable(client, "server_now")
 			actors.on_stage_changed()
 			sync_world()
+
+# ------------------------------------------------------------------ lazy world layer (1022)
+## The city opens with the 1021 forest. The world layer (terrain, kit forest, fog, landmarks) is attached
+## after the launch and only while the server projects the adventure; actors, the intro and the adventure
+## bar wait for it. Until then a tap on the forest only shows the locked card.
+func world_ready() -> bool:
+	return world != null and is_instance_valid(world) and world.get("_ready_emitted") == true
+
+func maybe_attach_world() -> void:
+	if world != null or not client.known or not main.launch_done or not city_active():
+		return
+	if not stage.has_method("attach_forest_world") or String(stage.get("forest_attach_state")) != "":
+		return
+	if client.unlocked():
+		hud.toast(content.text("hud.preparing"), "info", 3.0)
+	stage.attach_forest_world(main.prewarm_may_continue)
+
+## QA: attaches the world layer now (whatever the launch state) and waits until it is ready.
+func ensure_world(timeout_ms := 120000) -> bool:
+	track_stage()
+	if is_instance_valid(stage) and stage.has_method("attach_forest_world") and String(stage.get("forest_attach_state")) == "":
+		stage.attach_forest_world()
+	var deadline := Time.get_ticks_msec() + timeout_ms
+	while not world_ready() and Time.get_ticks_msec() < deadline:
+		await get_tree().process_frame
+		track_stage()
+	return world_ready()
 
 func world_call(method: String, args: Array = []) -> Variant:
 	if world != null and is_instance_valid(world) and world.has_method(method):
@@ -373,6 +402,7 @@ func locked_reason() -> String:
 # ------------------------------------------------------------------ frame loop
 func _process(delta: float) -> void:
 	track_stage()
+	maybe_attach_world()
 	var active := city_active()
 	hud.visible = active
 	mech.visible = active and mech.is_open()
@@ -381,7 +411,8 @@ func _process(delta: float) -> void:
 		return
 	update_locked_dwell()
 	update_visibility()
-	actors.tick(delta)
+	if world_ready():
+		actors.tick(delta)
 	hud.tick(delta)
 	intro.tick(delta)
 	mech.tick(delta)
@@ -407,7 +438,7 @@ func update_visibility() -> void:
 	var modal_open: bool = main.modal.visible
 	var unlocked := client.unlocked()
 	var presenting := intro.presenting()
-	var show_bar := unlocked and not modal_open and not presenting and not mech.is_open()
+	var show_bar := unlocked and world_ready() and not modal_open and not presenting and not mech.is_open()
 	if hud.bar.visible != show_bar:
 		hud.bar.visible = show_bar
 		hud.layout()

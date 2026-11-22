@@ -86,7 +86,11 @@ func run() -> void:
 	root.add_child(game)
 	while game.scene_loading or not is_instance_valid(game.stage):
 		await process_frame
-	forest = game.forest_game
+	# 1022: a state without state.adventure never loads the forest layers (production today).
+	await frames(30)
+	check(game.forest_game == null and game.stage.forest_world == null, "no adventure: neither forest layer is loaded")
+	forest = await game.ensure_forest_game()
+	check(await forest.ensure_world(), "world layer attached after the city (lazy path)")
 	var content = forest.content
 	check(content.loaded, "authored content loaded: " + str(content.missing))
 	# Delivered JSON copies are byte-identical to forest_rescue/delivery/data.

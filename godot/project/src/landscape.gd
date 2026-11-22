@@ -60,6 +60,10 @@ const Formations = preload("res://src/formations.gd")
 # [forest_rescue_v1 hook] versioned world layer flag; OFF = legacy forest (rollback).
 const ForestFlags = preload("res://src/forest_rescue/world/forest_flags.gd")
 var forest_world: Node3D = null
+var forest_attach_state := ""   # "", "attaching", "attached", "failed" (1022 lazy world layer)
+var forest_last_city: Dictionary = {}
+var forest_last_state: Dictionary = {}
+var forest_last_exclusions: Array = []
 var city_ground_meshes: Array = []
 const GaitTable = preload("res://src/gait_table.gd")
 const CombatSlots = preload("res://src/combat_slots.gd")
@@ -298,7 +302,10 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 		zoom = 70.0
 		target = Vector3(5, 0, -4)
 		build_water()
-		await _setup_forest_world()  # [forest_rescue_v1 hook]
+		# [forest_rescue_v1 hook] 1022: the city opens with the 1021 forest; ForestGame attaches the world
+		# layer after the launch (attach_forest_world), only when the server offers the adventure.
+		if ForestFlags.eager():
+			await _setup_forest_world()
 	else:
 		fit_world()
 		await build_world_scenery()
@@ -689,19 +696,31 @@ func batch_mesh(parent: Node3D, mesh: Mesh, offset: Transform3D, cells: Dictiona
 		"origins":origins_by_cell, "low":low_by_cell, "high":high_by_cell,
 		"total":count, "visible":0, "capacity":0, "layer":layer})
 
-func build_forest(city: Dictionary, exclusions: Array, rebuild_ground := true, staged := false) -> void:
+func build_forest(city: Dictionary, exclusions: Array, rebuild_ground := true, staged := false, swap := false) -> void:
 	# Trees and stumps depend on felled trees; understory and meadow only on exclusions
 	# and streets. A felled tree therefore never rebuilds the ground cover.
+	forest_last_city = city  # [forest_rescue_v1 hook] the lazy world layer rebuilds from these
+	forest_last_exclusions = exclusions
 	# [forest_rescue_v1 hook] 1022: a newly felled tree takes only its own instances out.
 	if forest_world != null and not rebuild_ground and is_instance_valid(trees.get("node")) and forest_world.fell_trees(city):
 		return
 	if forest_world != null:
 		forest_world.detach_canopy()  # [forest_rescue_v1 hook] survives the group rebuild
+	# [forest_rescue_v1 hook] swap (lazy world layer): the 1021 trees and ground cover stay on screen
+	# until the world layer's forest has been built, then go in one frame.
+	var replaced: Array = []
 	if is_instance_valid(trees.get("node")):
-		trees.node.free()
+		if swap:
+			trees.node.name = "ForestReplaced"
+			replaced.append(trees.node)
+		else:
+			trees.node.free()
 	if rebuild_ground:
 		for child in city_ground_detail.get_children():
-			child.free()
+			if swap:
+				replaced.append(child)
+			else:
+				child.free()
 	render_batches = render_batches.filter(func(batch): return is_instance_valid(batch.node))
 	var group := Node3D.new()
 	group.name = "Forest"
@@ -719,6 +738,12 @@ func build_forest(city: Dictionary, exclusions: Array, rebuild_ground := true, s
 			forest_world.build_city_forest(city, exclusions, false)
 		if rebuild_ground:
 			build_meadow(exclusions)
+		for node in replaced:
+			if is_instance_valid(node):
+				node.free()
+		if not replaced.is_empty():
+			render_batches = render_batches.filter(func(batch): return is_instance_valid(batch.node))
+			update_visible_batches()
 		return
 	var felled := {}
 	for id in city.get("progress", {}).get("felled", []):
@@ -1223,6 +1248,7 @@ func present_city(state: Dictionary, staged := false) -> void:
 	# staged=true is used only by setup(): the first build yields between phases so
 	# no single frame carries the whole settlement. Later updates stay synchronous.
 	var city: Dictionary = state.city
+	forest_last_state = state  # [forest_rescue_v1 hook] for the lazy world layer
 	if forest_world != null:
 		forest_world.apply_state_hint(state)  # [forest_rescue_v1 hook]
 	var progress: Dictionary = city.get("progress", {})
@@ -4076,6 +4102,40 @@ func zoom_at(amount: float, position: Vector2) -> void:
 func shift_camera_target(offset: Vector3) -> void:
 	target.x = clampf(target.x + offset.x, -147, 147)
 	target.z = clampf(target.z + offset.z, -118, 118)
+
+# [forest_rescue_v1 hook] 1022: lazy world layer. Called by ForestGame once the city is interactive and the
+# server projects the adventure (QA may call it directly). The layer's scripts load one per frame, its
+# setup runs hidden (heavy steps on worker threads, the rest sliced), the rebuilt ground tiles and river
+# are committed together, then the kit forest replaces the 1021 trees in a staged swap.
+func attach_forest_world(gate := Callable()) -> void:
+	if forest_world != null or forest_attach_state != "" or map_name != "city" or not ForestFlags.enabled():
+		return
+	forest_attach_state = "attaching"
+	await ForestFlags.load_staged(ForestFlags.WORLD_LAYER, get_tree(), gate)
+	var script: Variant = load(ForestFlags.WORLD_LAYER_SCRIPT)
+	if not script is GDScript or not is_inside_tree():
+		forest_attach_state = "failed"
+		return
+	var world: Node3D = script.new()
+	world.deferred_commit = true
+	world.visible = false
+	world.city_state = forest_last_state.get("city", {}) if forest_last_state.get("city") is Dictionary else {}
+	var adventure: Variant = forest_last_state.get("adventure")
+	world.initial_adventure = adventure if adventure is Dictionary else {}
+	add_child(world)
+	await world.setup(self, city_ground_meshes)
+	if not is_instance_valid(world) or not is_inside_tree():
+		forest_attach_state = "failed"
+		return
+	world.commit_ground()
+	forest_world = world
+	world.visible = true
+	if not forest_last_city.is_empty():
+		await build_forest(forest_last_city, forest_last_exclusions, true, true, true)
+	if is_instance_valid(forest_world):
+		forest_world.apply_state_hint(forest_last_state)
+		forest_world.on_camera_changed()
+	forest_attach_state = "attached"
 
 # [forest_rescue_v1 hook] World layer for «Лес потерянных» (src/forest_rescue/world/*).
 # Loaded only when the flag is ON, so a broken/missing layer can never affect the rollback path.

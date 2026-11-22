@@ -55,7 +55,7 @@ func intro_state() -> Dictionary:
 
 func safe() -> bool:
 	var main: Node = game.main
-	if not game.city_active() or not game.foreground or main.modal.visible or main.scene_loading:
+	if not game.city_active() or not game.foreground or main.modal.visible or main.scene_loading or not game.world_ready():
 		return false
 	if main.result_open or main.result_notice.visible:
 		return false
@@ -80,7 +80,7 @@ func refresh_invite() -> void:
 	var hud: Control = game.hud
 	var intro := intro_state()
 	var status := String(intro.get("status", "acknowledged"))
-	var show: bool = game.client.unlocked() and not presenting() and status != "acknowledged" and (bool(intro.get("deferred", false)) or status == "playing" or not bool(intro.get("offer", true)))
+	var show: bool = game.client.unlocked() and game.world_ready() and not presenting() and status != "acknowledged" and (bool(intro.get("deferred", false)) or status == "playing" or not bool(intro.get("offer", true)))
 	if show:
 		hud.invite_button.text = t("intro.continue") if status == "playing" else t("intro.start")
 	if hud.invite_button.visible != show:

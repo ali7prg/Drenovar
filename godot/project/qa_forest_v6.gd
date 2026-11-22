@@ -121,7 +121,21 @@ func run() -> void:
 	var deadline := Time.get_ticks_msec() + 90000
 	while (game.scene_loading or not is_instance_valid(game.stage) or game.player_id.is_empty()) and Time.get_ticks_msec() < deadline:
 		await process_frame
+	# 1022 production path: the server projects state.adventure, so after the launch main loads the game
+	# layer (one script per frame) and ForestGame attaches the world layer by itself.
+	var city_at := Time.get_ticks_msec()
+	deadline = Time.get_ticks_msec() + 90000
+	while game.forest_game == null and Time.get_ticks_msec() < deadline:
+		await process_frame
 	forest = game.forest_game
+	check(forest != null, "forest game layer loaded after the launch (server offers the adventure)")
+	if forest == null:
+		quit(1)
+		return
+	while not forest.world_ready() and Time.get_ticks_msec() < deadline:
+		await process_frame
+	check(forest.world_ready(), "world layer attached by itself after the city")
+	report.layers_ready_after_city_ms = Time.get_ticks_msec() - city_at
 	await frames(3)
 	check(game.loopback and str(game.state.get("economy_version", "")) == "DRENOVAR-V6-C1.0", "city from the V6 fixture")
 	check(forest.client.known, "the V6 server projects state.adventure")

@@ -927,6 +927,59 @@ def emblems(out):
     save('kit_emb_ram', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
 
 
+def category_emblems(out):
+    """Rail emblems of the construction strip (stage 3): the settlement (an izba with a
+    carved ridge), crafts (an axe crossed over a pick) and defence (a gate tower with
+    battlements). The army reuses kit_emb_inf. Same 56-unit forged glyphs as emblems()."""
+    n = 56
+    W = H = n * S
+    x, y = grid(W, H)
+    # Settlement: a log house under a steep roof, the ridge ending in crossed horse-head
+    # horns (konyok), a chimney and a small window.
+    roof = halfplanes(x, y, [(28.0, 9.5), (49.5, 28.0), (6.5, 28.0)])
+    body = sdf_round(x, y, 28.0, 38.0, 15.5, 10.5, 1.0)
+    chimney = sdf_round(x, y, 39.0, 15.0, 2.6, 5.5, 0.6)
+    horns = np.minimum(sdf_segment(x, y, 28.0, 10.0, 22.5, 4.0), sdf_segment(x, y, 28.0, 10.0, 33.5, 4.0)) - 1.25
+    knobs = np.minimum(sdf_circle(x, y, 22.0, 3.6, 2.1), sdf_circle(x, y, 34.0, 3.6, 2.1))
+    d = np.minimum.reduce([roof, body, chimney, horns, knobs])
+    d = np.maximum(d, y - 49.0)
+    grooves = np.zeros_like(x)
+    for ly in (32.0, 37.0, 42.0, 47.0):  # log courses
+        grooves += np.exp(-((y - ly) / 0.42) ** 2) * coverage(body) * 0.55
+    window = sdf_round(x, y, 21.0, 38.5, 3.6, 3.3, 0.5)
+    door = sdf_round(x, y, 34.5, 42.0, 3.4, 6.6, 0.8)
+    grooves += coverage(window) * 0.95 + coverage(door) * 0.85
+    grooves += np.exp(-(np.abs(halfplanes(x, y, [(28.0, 14.5), (43.0, 27.0), (13.0, 27.0)])) / 0.5) ** 2) * coverage(roof) * 0.7
+    save('kit_emb_town', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Crafts: a bearded axe and a pick crossed.
+    ax_, ay_ = rot(x, y, 28, 28, 42)
+    handle = sdf_segment(ax_, ay_, 28.0, 50.0, 28.0, 8.0) - 1.4
+    blade = halfplanes(ax_, ay_, [(28.5, 9.0), (43.0, 2.5), (43.0, 25.0), (28.5, 15.0)])
+    blade = np.maximum(blade, sdf_circle(ax_, ay_, 21.0, 13.5, 21.0))       # convex cutting edge
+    blade = np.maximum(blade, -sdf_circle(ax_, ay_, 33.5, 25.5, 6.2))       # the bearded hook
+    axe = np.minimum(handle, blade)
+    px_, py_ = rot(x, y, 28, 28, -42)
+    shaft = sdf_segment(px_, py_, 28.0, 50.0, 28.0, 9.0) - 1.4
+    pick = np.minimum(sdf_ucap(px_, py_, 28.0, 9.5, 2.6, 13.0, 15.0, 0.7), sdf_ucap(px_, py_, 28.0, 9.5, 2.6, 43.0, 15.0, 0.7))
+    d = np.minimum.reduce([axe, shaft, pick])
+    grooves = np.exp(-(np.abs(blade + 1.6) / 0.45) ** 2) * coverage(blade) * 0.6
+    grooves += np.exp(-(axe / 0.45) ** 2) * coverage(shaft) * 0.9  # the axe lies over the pick
+    save('kit_emb_craft', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Defence: a gate tower with merlons, an arched gate and an arrow slit.
+    tower = sdf_round(x, y, 28.0, 33.0, 13.5, 17.0, 1.0)
+    for mx in (17.5, 28.0, 38.5):
+        tower = np.minimum(tower, sdf_round(x, y, mx, 13.5, 3.4, 4.0, 0.6))
+    walls = np.minimum(sdf_round(x, y, 9.0, 40.0, 5.0, 10.0, 0.8), sdf_round(x, y, 47.0, 40.0, 5.0, 10.0, 0.8))
+    d = np.minimum(tower, walls)
+    gate = np.minimum(sdf_round(x, y, 28.0, 43.0, 6.0, 7.5, 0.5), sdf_circle(x, y, 28.0, 36.0, 6.0))
+    slit = sdf_round(x, y, 28.0, 24.0, 1.2, 4.2, 0.6)
+    grooves = coverage(gate) * 0.95 + coverage(slit) * 0.95
+    grooves += np.exp(-(np.abs(tower + 2.2) / 0.5) ** 2) * coverage(tower) * 0.35
+    for ly in (30.0, 36.5):
+        grooves += np.exp(-((y - ly) / 0.4) ** 2) * coverage(walls) * 0.5
+    save('kit_emb_wall', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+
+
 def stat_icons(out):
     """Small forged icons for figures and chips (24 units): attack, defence, health, power,
     wall damage, army places, batch."""
@@ -1189,6 +1242,7 @@ def main():
     flourish(out)
     splash(out)
     emblems(out)
+    category_emblems(out)
     stat_icons(out)
     ink(out)
     solar(out)

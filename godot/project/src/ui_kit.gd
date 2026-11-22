@@ -41,7 +41,9 @@ const TEXTURES := ["kit_body", "kit_body_dark", "kit_hourglass", "kit_header", "
 	"kit_btn_tertiary", "kit_btn_tertiary_pressed", "kit_btn_disabled", "kit_rail", "kit_rail_on",
 	"kit_card_fill", "kit_card_frame", "kit_badge", "kit_strip", "kit_pill", "kit_row", "kit_tile",
 	"kit_field", "kit_track", "kit_fill", "kit_fill_green", "kit_knob", "kit_stitch", "kit_rosette",
-	"kit_flourish", "kit_splash", "kit_header_tall", "kit_dais", "kit_dais_n"]
+	"kit_flourish", "kit_splash", "kit_header_tall", "kit_dais", "kit_dais_n", "kit_dais_top", "kit_ink", "kit_solar",
+	"kit_beam", "kit_emb_inf", "kit_emb_bow", "kit_emb_horse", "kit_emb_ram", "kit_ic_attack", "kit_ic_defence",
+	"kit_ic_health", "kit_ic_power", "kit_ic_wall", "kit_ic_places", "kit_ic_batch"]
 
 static var textures := {}
 static var requested := {}
@@ -552,14 +554,16 @@ static func tier_card(tier: int, title: String, count_text: String, art: Texture
 	card.selected = selected
 	card.closed = closed
 	card.colour = colour
-	card.fill = tinted("kit_card_fill", Vector4(14, 14, 14, 14), colour.lightened(0.12))
-	card.fill_pressed = tinted("kit_card_fill", Vector4(14, 14, 14, 14), colour.darkened(0.15))
-	card.frame = tinted("kit_card_frame", Vector4(16, 16, 16, 16), Color(1.25, 1.15, 0.85) if selected else Color.WHITE)
-	card.splash = tex("kit_splash")
+	card.fill = tinted("kit_card_fill", Vector4(14, 14, 14, 14), colour.lightened(0.18))
+	card.fill_pressed = tinted("kit_card_fill", Vector4(14, 14, 14, 14), colour.darkened(0.1))
+	card.frame = tinted("kit_card_frame", Vector4(16, 16, 16, 16), Color(1.3, 1.18, 0.86) if selected else Color.WHITE)
+	card.ink = tex("kit_ink")
+	card.solar = tex("kit_solar")
 	card.badge = tex("kit_badge")
-	card.plate = flat(Color("#1e140de0"), Color.TRANSPARENT, 4, Vector2.ZERO)
+	card.troops = tex("kit_ic_places")
+	card.plate = flat(Color("#1e140de8"), Color("#c59a4f88"), 4, Vector2.ZERO)
 	card.veil = flat(Color("#140c0699"), Color.TRANSPARENT, 8, Vector2.ZERO)
-	card.ring = flat(Color("#ffd36b33"), Color("#ffd36b"), 12, Vector2.ZERO, 3)
+	card.ring = flat(Color("#ffd36b40"), Color("#ffd36b"), 12, Vector2.ZERO, 3)
 	card.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	return card
 
@@ -591,8 +595,10 @@ class KitTierCard extends TextureButton:
 	var plate: StyleBox
 	var veil: StyleBox
 	var ring: StyleBox
-	var splash: Texture2D
+	var ink: Texture2D
+	var solar: Texture2D
 	var badge: Texture2D
+	var troops: Texture2D
 
 	func _draw() -> void:
 		var pressed := get_draw_mode() == DRAW_PRESSED or get_draw_mode() == DRAW_HOVER_PRESSED
@@ -600,24 +606,41 @@ class KitTierCard extends TextureButton:
 		if selected:
 			draw_style_box(ring, rect.grow(4))
 		draw_style_box(fill_pressed if pressed else fill, rect)
-		draw_texture_rect(splash, Rect2(4, 10, size.x - 8, size.y - 44), false, Color(colour.lightened(0.6), 0.6))
+		# Tier enamel: a dark ink wash in the tier colour behind the figure, and the carved
+		# solar sign faint above it.
+		var inner := Rect2(5, 6, size.x - 10, size.y - 42)
+		draw_texture_rect(ink, inner.grow_individual(10, 6, 10, 0), false, Color(colour.darkened(0.42), 0.88))
+		var disc := minf(inner.size.x, inner.size.y) * 0.92
+		draw_texture_rect(solar, Rect2(Vector2(size.x * 0.5 - disc * 0.5, inner.position.y + 4), Vector2(disc, disc)), false, Color(colour.lightened(0.6), 0.28))
 		if art != null:
 			var box := Rect2(5, 8, size.x - 10, size.y - 40)
 			var source := art.get_size()
 			var k := minf(box.size.x / source.x, box.size.y / source.y)
 			var drawn := source * k
 			draw_texture_rect(art, Rect2(Vector2(box.position.x + (box.size.x - drawn.x) * 0.5, box.end.y - drawn.y), drawn), false,
-				Color(0.62, 0.6, 0.6) if closed else Color.WHITE)
+				Color(0.55, 0.53, 0.53) if closed else Color.WHITE)
 		if closed:
 			draw_style_box(veil, Rect2(4, 4, size.x - 8, size.y - 36))
-			KitPaint.lock(self, Vector2(size.x * 0.5, (size.y - 32.0) * 0.5 + 4.0), 46.0)
-		draw_style_box(plate, Rect2(5, size.y - 33, size.x - 10, 28))
-		var count := KitText.line(count_text, LABEL_FONT, 15 if closed else 19, size.x - 16)
-		count.draw(get_canvas_item(), Vector2(roundf((size.x - count.get_size().x) * 0.5), size.y - 33 + floorf((28 - count.get_size().y) * 0.5)), GOLD_DIM if closed else IVORY)
+			KitPaint.lock(self, Vector2(size.x * 0.5, (size.y - 32.0) * 0.5 + 4.0), 50.0)
+		# Count plate: dark oak with a bronze edge, a banner (troops in the army) and the count.
+		var base := Rect2(5, size.y - 34, size.x - 10, 29)
+		draw_style_box(plate, base)
+		var count := KitText.line(count_text, LABEL_FONT, 15 if closed else 19, size.x - (20.0 if closed else 44.0))
+		var count_w := count.get_size().x + (0.0 if closed else 22.0)
+		var left := roundf((size.x - count_w) * 0.5)
+		if not closed and troops != null:
+			draw_texture_rect(troops, Rect2(left, base.position.y + 5, 18, 18), false)
+			left += 22.0
+		count.draw(get_canvas_item(), Vector2(left, base.position.y + floorf((29 - count.get_size().y) * 0.5)), GOLD_DIM if closed else IVORY)
 		draw_style_box(frame, rect)
-		draw_texture_rect(badge, Rect2(4, -6, 38, 36), false)
-		var numeral := KitText.line(["I", "II", "III", "IV", "V"][tier - 1], TITLE_FONT, 15)
-		numeral.draw(get_canvas_item(), Vector2(roundf(23 - numeral.get_size().x * 0.5), 3), GOLD)
+		# Small gilt lozenges in the corners of the frame.
+		for corner: Vector2 in [Vector2(10, 10), Vector2(size.x - 10, 10), Vector2(10, size.y - 10), Vector2(size.x - 10, size.y - 10)]:
+			if corner == Vector2(10, 10):
+				continue
+			draw_colored_polygon(PackedVector2Array([corner + Vector2(0, -4), corner + Vector2(4, 0), corner + Vector2(0, 4), corner + Vector2(-4, 0)]), GOLD_DIM)
+		draw_texture_rect(badge, Rect2(4, -6, 40, 38), false)
+		var numeral := KitText.line(["I", "II", "III", "IV", "V"][tier - 1], TITLE_FONT, 16)
+		numeral.draw(get_canvas_item(), Vector2(roundf(24 - numeral.get_size().x * 0.5), 3), GOLD)
 
 ## Drawing helpers shared by the drawn kit nodes.
 class KitPaint:
@@ -661,41 +684,95 @@ class KitLock extends Control:
 	func _draw() -> void:
 		KitPaint.lock(self, size * 0.5 - Vector2(0, size.y * 0.06), minf(size.x, size.y))
 
-## A row of figures: values in bronze over their captions (unit stats under a title). One
-## drawn node; pairs are [caption, value].
+## A row of figures: a forged icon and the value in bronze (unit stats under a title). One
+## drawn node; pairs are [caption, value, icon name]; the caption is the tooltip of its
+## column (and the whole row's accessible text).
 static func figures(parent: Node, pairs: Array) -> Control:
 	var row := KitFigures.new()
 	row.name = "KitFigures"
 	row.pairs = pairs
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.mouse_filter = Control.MOUSE_FILTER_PASS
 	row.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	# Columns as wide as the widest caption (at least 76), so «Мест в армии» is not cut.
+	var words: PackedStringArray = []
 	for pair: Array in pairs:
-		row.column = maxf(row.column, ceilf(KitText.line(str(pair[0]), BODY_FONT, 14).get_size().x) + 6.0)
-	row.custom_minimum_size = Vector2(row.column * pairs.size() + KitFigures.GAP * maxi(0, pairs.size() - 1), 46)
+		row.icons.append(tex(str(pair[2])) if pair.size() > 2 else null)
+		var width := 26.0 + ceilf(KitText.line(str(pair[1]), LABEL_FONT, 22).get_size().x)
+		row.widths.append(width)
+		words.append("%s %s" % [pair[0], pair[1]])
+	row.accessibility_name = " · ".join(words)
+	var total := 0.0
+	for width: float in row.widths:
+		total += width
+	row.custom_minimum_size = Vector2(total + KitFigures.GAP * maxi(0, pairs.size() - 1), 32)
 	if parent != null:
 		parent.add_child(row)
 	return row
 
 class KitFigures extends Control:
-	const GAP := 4.0
-	var column := 76.0
+	const GAP := 18.0
 	var pairs: Array = []
+	var icons: Array = []
+	var widths: Array = []
 
 	func _draw() -> void:
+		var left := 0.0
 		for index in pairs.size():
-			var left := index * (column + GAP)
+			var icon: Texture2D = icons[index]
+			if icon != null:
+				draw_texture_rect(icon, Rect2(left, 4, 23, 23), false)
 			var value := KitText.line(str(pairs[index][1]), LABEL_FONT, 22)
-			var caption := KitText.line(str(pairs[index][0]), BODY_FONT, 14)
-			value.draw(get_canvas_item(), Vector2(roundf(left + (column - value.get_size().x) * 0.5), 0), BRONZE)
-			caption.draw(get_canvas_item(), Vector2(roundf(left + (column - caption.get_size().x) * 0.5), 26), INK_MUTED)
+			value.draw(get_canvas_item(), Vector2(left + 27, roundf((size.y - value.get_size().y) * 0.5)), BRONZE)
+			left += float(widths[index]) + GAP
+
+	func _get_tooltip(at: Vector2) -> String:
+		var left := 0.0
+		for index in pairs.size():
+			if at.x < left + float(widths[index]) + GAP * 0.5:
+				return "%s: %s" % [pairs[index][0], pairs[index][1]]
+			left += float(widths[index]) + GAP
+		return ""
+
+## A compact chip: forged icon, a short value and a small «i»; the long explanation is its
+## tooltip (desktop) and what `pressed` shows (touch). Dark oak pill, warn = ochre text.
+static func chip(icon_name: String, text: String, tip: String, warn := false) -> BaseButton:
+	var control := KitChip.new()
+	control.icon = tex(icon_name)
+	control.text = text
+	control.warn = warn
+	control.tooltip_text = tip
+	control.accessibility_name = tip
+	control.pill = nine("kit_pill", Vector4(18, 12, 18, 12), Vector4.ZERO)
+	var width := ceilf(KitText.line(text, LABEL_FONT, 17).get_size().x)
+	control.custom_minimum_size = Vector2(width + 78, 36)
+	control.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return control
+
+class KitChip extends TextureButton:
+	var icon: Texture2D
+	var text := ""
+	var warn := false
+	var pill: StyleBox
+
+	func _draw() -> void:
+		var pressed := get_draw_mode() == DRAW_PRESSED or get_draw_mode() == DRAW_HOVER_PRESSED
+		draw_style_box(pill, Rect2(Vector2.ZERO, size))
+		if icon != null:
+			draw_texture_rect(icon, Rect2(10, (size.y - 24) * 0.5, 24, 24), false)
+		var words := KitText.line(text, LABEL_FONT, 17)
+		words.draw(get_canvas_item(), Vector2(40, roundf((size.y - words.get_size().y) * 0.5)), Color("#f0a35a") if warn else IVORY)
+		var at := Vector2(size.x - 18, size.y * 0.5)
+		draw_circle(at, 9.0, Color("#c59a4f"))
+		draw_circle(at, 7.5, Color("#ffffff22") if pressed else Color("#2b1f16"))
+		var mark := KitText.line("i", LABEL_FONT, 14)
+		mark.draw(get_canvas_item(), at - mark.get_size() * 0.5, GOLD)
 
 ## Rail medallion with a portrait (recruitment buildings): bronze-rimmed enamel disc, the
 ## face clipped round inside it, a caption under it; gold glow when selected, a small
 ## hourglass while the building is training. One drawn node (KitMedal).
-static func rail_medal(face: Texture2D, selected: bool, caption: String, busy := false) -> BaseButton:
+static func rail_medal(face: Texture2D, selected: bool, caption: String, busy := false, emblem: Texture2D = null) -> BaseButton:
 	var control := KitMedal.new()
 	control.face = face
+	control.emblem = emblem
 	control.selected = selected
 	control.caption = caption
 	control.busy = busy
@@ -708,6 +785,7 @@ static func rail_medal(face: Texture2D, selected: bool, caption: String, busy :=
 
 class KitMedal extends TextureButton:
 	var face: Texture2D
+	var emblem: Texture2D
 	var selected := false
 	var caption := ""
 	var busy := false
@@ -724,7 +802,12 @@ class KitMedal extends TextureButton:
 			radius = d * 0.342
 		draw_texture_rect(disc, Rect2(centre - Vector2(d, d) * 0.5, Vector2(d, d)), false,
 			Color(0.84, 0.8, 0.76) if pressed else Color.WHITE)
-		if face != null:
+		if emblem != null:
+			# Forged emblem of the branch on the enamel (reads at a glance, unlike a bust).
+			var side := radius * 1.62
+			var tone := Color(0.88, 0.84, 0.8) if pressed else (Color(1.12, 1.06, 0.95) if selected else Color.WHITE)
+			draw_texture_rect(emblem, Rect2(centre - Vector2(side, side) * 0.5, Vector2(side, side)), false, tone)
+		elif face != null:
 			var points := PackedVector2Array()
 			var uvs := PackedVector2Array()
 			for i in 48:
@@ -733,8 +816,11 @@ class KitMedal extends TextureButton:
 				uvs.append(Vector2(0.5, 0.5) + along * 0.5)
 			draw_polygon(points, PackedColorArray([Color(0.85, 0.82, 0.78) if pressed else Color.WHITE]), uvs, face)
 			draw_arc(centre, radius - 1.0, 0.0, TAU, 48, Color(0, 0, 0, 0.35), 3.0, true)
+		# Gold on a dark outline: it reads on linen and on the ink wash alike.
 		var title := KitText.line(caption, LABEL_FONT, 16)
-		title.draw(get_canvas_item(), Vector2(roundf((size.x - title.get_size().x) * 0.5), size.y - title.get_size().y - 1.0), BRONZE if selected else INK_MUTED)
+		var at := Vector2(roundf((size.x - title.get_size().x) * 0.5), size.y - title.get_size().y - 1.0)
+		title.draw_outline(get_canvas_item(), at, 4, SHADE)
+		title.draw(get_canvas_item(), at, GOLD if selected else GOLD_DIM)
 		if busy:
 			# Training here: a small hourglass on a dark enamel dot at the rim.
 			var dot := centre + Vector2(radius * 0.86, -radius * 0.86)
@@ -1076,6 +1162,43 @@ static func embers(width: float, height: float) -> CPUParticles2D:
 	motes.color_ramp = fade
 	return motes
 
+## Warm candle glow (radial, amber to nothing): behind the recruitment stage and, added,
+## round the figure.
+static func warm_glow() -> GradientTexture2D:
+	if styles.has("warm_glow"):
+		return styles.warm_glow
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.45, 1.0])
+	gradient.colors = PackedColorArray([Color(1.0, 0.82, 0.52, 0.55), Color(1.0, 0.74, 0.42, 0.22), Color(1.0, 0.7, 0.4, 0.0)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 128
+	texture.height = 128
+	styles.warm_glow = texture
+	return texture
+
+## Window vignette of the recruitment window: clear in the middle, a band of warm fire light
+## toward the edges and a deep red-brown at the rim (our firelit hall, not flames).
+static func warm_vignette_texture() -> GradientTexture2D:
+	if styles.has("warm_vignette"):
+		return styles.warm_vignette
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.52, 0.8, 0.94, 1.0])
+	gradient.colors = PackedColorArray([Color(0.6, 0.35, 0.12, 0.0), Color(0.7, 0.38, 0.12, 0.05), Color(0.86, 0.44, 0.12, 0.22),
+		Color(0.48, 0.2, 0.06, 0.46), Color(0.26, 0.09, 0.03, 0.66)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.02, 0.5)
+	texture.width = 128
+	texture.height = 64
+	styles.warm_vignette = texture
+	return texture
+
 static func ground_shadow() -> GradientTexture2D:
 	if styles.has("ground"):
 		return styles.ground
@@ -1091,6 +1214,48 @@ static func ground_shadow() -> GradientTexture2D:
 	texture.height = 64
 	styles.ground = texture
 	return texture
+
+# ------------------------------------------------------------------ warm-up
+
+## Every glyph the windows' Russian text uses.
+const WARM_GLYPHS := "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0123456789 .,:;!?·—–-+×/%()«»…IVX"
+
+## Renders the glyphs of the windows' fonts at the sizes (and outlines) they use, a little
+## per frame after launch, from a node out of sight: the first window then opens as fast as
+## the later ones (shaping new glyphs at a new size is most of a cold open). combos are
+## [font, size, outline]; each is drawn in two halves on two frames.
+static func warm_text(parent: Node, combos: Array) -> void:
+	var node := KitWarm.new()
+	node.name = "KitWarm"
+	node.combos = combos
+	parent.add_child(node)
+
+class KitWarm extends Control:
+	var combos: Array = []
+	var step := 0
+
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		position = Vector2(-6000, -6000)
+		size = Vector2(4, 4)
+
+	func _process(_delta: float) -> void:
+		if step >= combos.size() * 2:
+			queue_free()
+			return
+		queue_redraw()
+
+	func _draw() -> void:
+		if step >= combos.size() * 2:
+			return
+		var combo: Array = combos[step / 2]
+		var half := WARM_GLYPHS.length() / 2
+		var text := WARM_GLYPHS.substr(0, half) if step % 2 == 0 else WARM_GLYPHS.substr(half)
+		step += 1
+		var font: Font = combo[0]
+		if int(combo[2]) > 0:
+			font.draw_string_outline(get_canvas_item(), Vector2(0, 40), text, HORIZONTAL_ALIGNMENT_LEFT, -1, int(combo[1]), int(combo[2]))
+		font.draw_string(get_canvas_item(), Vector2(0, 40), text, HORIZONTAL_ALIGNMENT_LEFT, -1, int(combo[1]))
 
 # ------------------------------------------------------------------ toasts / HUD
 

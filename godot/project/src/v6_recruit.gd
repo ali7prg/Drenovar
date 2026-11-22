@@ -18,7 +18,9 @@ const ROMAN := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI
 const TRAINING := ["B11", "B12", "B13", "B17"]
 const BRANCH := {"B11": "Пехота", "B12": "Стрелки", "B13": "Конница", "B17": "Осада"}
 const RESOURCES := ["wood", "food", "stone", "iron", "coins"]
-const CARD := Vector2(128, 178)
+const CARD := Vector2(146, 204)
+## Forged emblem of each training building on its rail medallion.
+const EMBLEMS := {"B11": "kit_emb_inf", "B12": "kit_emb_bow", "B13": "kit_emb_horse", "B17": "kit_emb_ram"}
 
 var panels
 var ui
@@ -40,6 +42,7 @@ var cost_cells := {}
 var clock: Label
 var train_button: Button
 var hint: Label
+var explaining := ""
 var cards := {}
 var shown_signature := ""
 var watched := {}
@@ -199,6 +202,9 @@ func build_hero(item: Dictionary) -> void:
 	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	stage.info_pressed.connect(toggle_details)
 	hero.add_child(stage)
+	stage.attach_backdrop(ui.modal_hero)
+	# A firelit hall round the window (main.open_modal puts the plain vignette back).
+	ui.modal_vignette.texture = UiKit.warm_vignette_texture()
 	build_rail()
 	ui.modal_hero_share = 0.43
 	ui.arrange_modal()
@@ -213,9 +219,8 @@ func build_rail() -> void:
 		var list := units_of(building_type)
 		if list.is_empty():
 			continue
-		var face: String = list[0].unit_id
 		var busy: bool = ui.state.v6.orders.any(func(o): return o.status == "pending" and str(o.building) == building_type)
-		var medal := UiKit.rail_medal(UnitStage.portrait(face, true), building_type == type, str(BRANCH.get(building_type, "")), busy)
+		var medal := UiKit.rail_medal(null, building_type == type, str(BRANCH.get(building_type, "")), busy, UiKit.tex(EMBLEMS[building_type]))
 		medal.name = "Rail" + building_type
 		medal.tooltip_text = str(panels.row_for(building_type, 1).get("name_ru", building_type))
 		medal.pressed.connect(panels.services.bind(building_type))
@@ -241,6 +246,7 @@ func render() -> void:
 	clock = null
 	train_button = null
 	hint = null
+	explaining = ""
 	cancel_armed = ""
 	var item := unit(unit_id)
 	shown_signature = signature()
@@ -255,13 +261,11 @@ func render() -> void:
 	else:
 		if not queue_full():
 			order_panel(item)
+			chips_row(item)
 		for order: Dictionary in orders():
 			queue_card(order)
-		var free := maxi(0, effect(prefix() + "_orders") - orders().size())
-		if free > 0:
-			free_slot(free)
 		if queue_full():
-			UiKit.label(ui.modal_body, "Очередь здания заполнена: %d из %d. Новое обучение — после завершения или отмены." % [orders().size(), maxi(1, effect(prefix() + "_orders"))], 16, UiKit.INK_MUTED)
+			chips_row(item)
 	if type == "B17" and not details:
 		for machine: Dictionary in ui.state.v6.get("machines", []):
 			if machine.location == "home" and int(machine.hp) < int(machine.max_hp):
@@ -294,7 +298,17 @@ func top_row(item: Dictionary) -> void:
 	info.add_theme_constant_override("separation", 4)
 	row.add_child(info)
 	var stats := roster(unit_id)
-	UiKit.label(info, unit_name(unit_id), 25, UiKit.INK, UiKit.LABEL_FONT, false)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 10)
+	info.add_child(head)
+	var name := UiKit.label(head, unit_name(unit_id), 26, UiKit.INK, UiKit.LABEL_FONT, false)
+	name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	var more: Button = ui.button(head, "Назад" if details else "Подробнее", toggle_details)
+	more.name = "RecruitDetails"
+	UiKit.style_button(more, "tertiary", 17)
+	more.custom_minimum_size = Vector2(136, 42)
+	more.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var kind := str(stats.get("unit_class", "Осадная машина" if type == "B17" else BRANCH.get(type, "")))
 	UiKit.label(info, "%s · ступень %s · в войске %s" % [kind, ROMAN[tier_of(item) - 1], ui.format_balance(owned(unit_id))], 16, UiKit.INK_MUTED, null, false)
 	var role := str(stats.get("role", ""))
@@ -303,21 +317,14 @@ func top_row(item: Dictionary) -> void:
 	if not role.is_empty():
 		var text := UiKit.label(info, role, 16, UiKit.INK)
 		text.max_lines_visible = 2
-	var figures := HBoxContainer.new()
-	figures.add_theme_constant_override("separation", 10)
-	info.add_child(figures)
 	var values: Array = []
 	if type == "B17":
-		values = [["Урон стене", int(item.get("wall_damage_per_strike", 0))], ["Мест в армии", int(item.get("army_slots", 1))]]
+		values = [["Урон стене за удар", int(item.get("wall_damage_per_strike", 0)), "kit_ic_wall"], ["Мест в армии", int(item.get("army_slots", 1)), "kit_ic_places"]]
 	else:
-		values = [["Атака", int(stats.get("attack", 0))], ["Защита", int(stats.get("defense", 0))], ["Здоровье", int(stats.get("hp", 0))], ["Мощь", int(item.get("power_reference", stats.get("power", 0)))]]
-	UiKit.figures(figures, values)
-	var more: Button = ui.button(figures, "Назад" if details else "Подробнее", toggle_details)
-	more.name = "RecruitDetails"
-	UiKit.style_button(more, "tertiary", 17)
-	more.custom_minimum_size = Vector2(138, 44)
-	more.size_flags_horizontal = Control.SIZE_SHRINK_END | Control.SIZE_EXPAND
-	more.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		values = [["Атака", int(stats.get("attack", 0)), "kit_ic_attack"], ["Защита", int(stats.get("defense", 0)), "kit_ic_defence"],
+			["Здоровье", int(stats.get("hp", 0)), "kit_ic_health"], ["Мощь", int(item.get("power_reference", stats.get("power", 0))), "kit_ic_power"]]
+	var figures := UiKit.figures(info, values)
+	figures.name = "RecruitFigures"
 
 func order_panel(item: Dictionary) -> void:
 	var limit := maxi(1, effect(prefix() + "_batch"))
@@ -360,10 +367,43 @@ func order_panel(item: Dictionary) -> void:
 	train_button.name = "RecruitTrain"
 	UiKit.style_button(train_button, "primary", 22)
 	train_button.custom_minimum_size = Vector2(250, 56)
+
+## Batch limit, army places and queue places as compact chips; each one's long explanation
+## is its tooltip and shows in the line under the chips when tapped. That line otherwise
+## only carries the reason an order cannot go (red).
+func chips_row(item: Dictionary) -> void:
+	var row := HBoxContainer.new()
+	row.name = "RecruitChips"
+	row.add_theme_constant_override("separation", 10)
+	ui.modal_body.add_child(row)
+	var batch := effect(prefix() + "_batch")
+	var used := int(ui.state.v6.get("army_used", 0))
+	var capacity := int(ui.state.v6.get("army_capacity", 0))
+	var places := maxi(1, int(item.get("army_slots", 1)))
+	var slots := maxi(1, effect(prefix() + "_orders"))
+	var free := maxi(0, slots - orders().size())
+	var chips := [
+		["RecruitBatch", "kit_ic_batch", "до " + ui.format_balance(batch), "Партия: до %s за один приказ." % ui.format_balance(batch), false],
+		["RecruitArmy", "kit_ic_places", "%s / %s" % [ui.format_balance(used), ui.format_balance(capacity)],
+			"Армия: занято %s мест из %s; %s занимает %d." % [ui.format_balance(used), ui.format_balance(capacity), unit_name(unit_id), places], used + places > capacity],
+		["RecruitQueue", "kit_hourglass", "%d / %d" % [orders().size(), slots],
+			("Очередь здания: свободно %d из %d. " % [free, slots]) + ("Приказы идут друг за другом; ресурсы резервируются, отмена их вернёт." if free > 0 else "Новое обучение — после завершения или отмены."), free == 0],
+	]
+	for entry: Array in chips:
+		var chip := UiKit.chip(str(entry[1]), str(entry[2]), str(entry[3]), bool(entry[4]))
+		chip.name = str(entry[0])
+		chip.pressed.connect(explain.bind(str(entry[3])))
+		row.add_child(chip)
 	# One line (no wrapping pass when the window opens); long reasons end with an ellipsis.
 	hint = UiKit.label(ui.modal_body, "", 15, UiKit.INK_MUTED, null, false)
 	hint.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	hint.name = "RecruitHint"
+	hint.visible = false
+
+## A chip tapped: its explanation under the chips (a second tap hides it).
+func explain(text: String) -> void:
+	explaining = "" if explaining == text else text
+	update_quote()
 
 func resource_of(tip: String) -> String:
 	for resource: String in RESOURCES:
@@ -374,6 +414,7 @@ func resource_of(tip: String) -> String:
 ## Cost, time, limits and the state of «Обучить» for the current quantity.
 func update_quote() -> void:
 	if field == null or not is_instance_valid(field):
+		update_hint("")
 		return
 	var item := unit(unit_id)
 	var count := int(field.value)
@@ -397,12 +438,16 @@ func update_quote() -> void:
 		reason = "Не хватает: " + ", ".join(short) + "."
 	elif places > free:
 		reason = "В армии свободно %s мест из %s." % [ui.format_balance(maxi(0, free)), ui.format_balance(int(ui.state.v6.get("army_capacity", 0)))]
-	if hint != null:
-		hint.text = reason if not reason.is_empty() else "Партия до %s · армия %s / %s · ресурсы резервируются, отмена их вернёт." % [
-			ui.format_balance(effect(prefix() + "_batch")), ui.format_balance(int(ui.state.v6.get("army_used", 0))), ui.format_balance(int(ui.state.v6.get("army_capacity", 0)))]
-		hint.add_theme_color_override("font_color", UiKit.BAD if not reason.is_empty() else UiKit.INK_MUTED)
+	update_hint(reason)
 	if train_button != null and not submitting:
 		train_button.disabled = not reason.is_empty()
+
+func update_hint(reason: String) -> void:
+	if hint == null or not is_instance_valid(hint):
+		return
+	hint.text = reason if not reason.is_empty() else explaining
+	hint.visible = not hint.text.is_empty()
+	hint.add_theme_color_override("font_color", UiKit.BAD if not reason.is_empty() else UiKit.INK_MUTED)
 
 func lock_panel(item: Dictionary) -> void:
 	var card := PanelContainer.new()
@@ -432,7 +477,7 @@ func lock_panel(item: Dictionary) -> void:
 	upgrade.custom_minimum_size = Vector2(220, 52)
 	upgrade.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var cost := cost_for(item, 1)
-	UiKit.label(ui.modal_body, "Стоимость одного воина и время обучения на нынешнем уровне здания:", 15, UiKit.INK_MUTED)
+	UiKit.label(ui.modal_body, "Один воин на нынешнем уровне здания:", 15, UiKit.INK_MUTED)
 	var strip := UiKit.cost_strip(ui.modal_body, cost, ui.resource_icons, {}, ui.RESOURCE_NAMES)
 	strip.name = "RecruitCost"
 	UiKit.timer_pill(ui.modal_body, "Время обучения", panels.duration(seconds_for(item, 1)))
@@ -463,29 +508,6 @@ func details_sheet(item: Dictionary) -> void:
 			var line := UiKit.label(ui.modal_body, caption + ": " + text, 16, UiKit.INK)
 			line.name = "RecruitNote"
 	UiKit.label(ui.modal_body, "Требуется: " + " · ".join(requirements(item).map(func(n): return "%s %s" % [n[0], ROMAN[int(n[1]) - 1]])), 15, UiKit.INK_MUTED)
-
-## An empty place in the building's queue: where a new order will appear.
-func free_slot(free: int) -> void:
-	var card := PanelContainer.new()
-	card.name = "RecruitFreeSlot"
-	card.add_theme_stylebox_override("panel", UiKit.flat(Color("#5a3c1a12"), Color("#8a6a4055"), 10, Vector2(14, 10)))
-	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ui.modal_body.add_child(card)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	card.add_child(row)
-	var glass := TextureRect.new()
-	glass.texture = UiKit.tex("kit_hourglass")
-	glass.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	glass.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	glass.custom_minimum_size = Vector2(22, 28)
-	glass.modulate = Color(1, 1, 1, 0.55)
-	glass.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(glass)
-	# Orders of a building run one after another (v6/orders.mjs: starts at the queue's end).
-	var places := "Свободно мест в очереди: %d из %d" % [free, maxi(1, effect(prefix() + "_orders"))]
-	UiKit.label(row, places + (" · обучение начнётся сразу." if orders().is_empty() else " · новое начнётся после текущего."), 16, UiKit.INK_MUTED, null, false)
 
 func queue_card(order: Dictionary) -> void:
 	var card := PanelContainer.new()
@@ -581,6 +603,7 @@ func train() -> void:
 			button.disabled = false
 		if is_instance_valid(hint):
 			hint.text = text
+			hint.visible = true
 			hint.add_theme_color_override("font_color", UiKit.BAD)
 		return
 	intent.expected_duration_seconds = int(response.quote.duration_seconds)

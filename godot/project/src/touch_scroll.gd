@@ -25,6 +25,13 @@ var sliding := false
 # A drag area under the finger (group "panel_drag": drag_begin, drag_by(dx), drag_end),
 # e.g. the turntable of the recruitment stage.
 var dragger: Control
+# A swipe area under the finger (group "panel_swipe": swipe_begin(at) -> caught, swipe_to(at),
+# swipe_end(at)), e.g. the card strip of the construction window. A touch there taps its
+# button only on release and only if the finger did not travel; past the slop sideways it
+# moves the strip instead, and a touch on a gliding strip just catches it.
+var swiper: Control
+var swiping := false
+var caught := false
 # Controls that can receive the press highlight (the modal panel).
 var press_root: Control
 var pressed_button: BaseButton
@@ -60,6 +67,7 @@ func cancel_touch() -> void:
 	instant = false
 	release_highlight()
 	end_drag_area()
+	end_swipe(previous)
 	finger = -1
 	slider = null
 	sliding = false
@@ -90,14 +98,18 @@ func _input(event: InputEvent) -> void:
 			slider = slider_at(origin) if can_scroll else null
 			sliding = false
 			scrolled = false
-			highlight(button_at(origin))
-			if not is_instance_valid(pressed_button) and slider == null:
+			swiper = swipe_area_at(origin) if slider == null else null
+			swiping = false
+			caught = swiper != null and swiper.swipe_begin(origin)
+			if not caught:
+				highlight(button_at(origin))
+			if not is_instance_valid(pressed_button) and slider == null and swiper == null:
 				dragger = drag_area_at(origin)
 				if dragger != null:
 					dragger.drag_begin()
 			# No scroll can start from here (fixed header/footer, or a list that fits):
 			# act on touch-down instead of waiting for the finger to lift.
-			if is_instance_valid(pressed_button) and slider == null and \
+			if is_instance_valid(pressed_button) and slider == null and swiper == null and \
 					(not is_ancestor_of(pressed_button) or not content_scrolls()):
 				instant = true
 				tap.call_deferred(origin, gesture_revision)
@@ -105,6 +117,11 @@ func _input(event: InputEvent) -> void:
 		elif not event.pressed and event.index == finger:
 			finger = -1
 			end_drag_area()
+			if is_instance_valid(swiper) and (swiping or caught):
+				end_swipe(event.position)
+				release_highlight()
+				return
+			end_swipe(event.position)
 			if instant:
 				instant = false
 				return
@@ -121,6 +138,15 @@ func _input(event: InputEvent) -> void:
 		if event.index != finger or instant:
 			return
 		var travel: Vector2 = event.position - origin
+		if is_instance_valid(swiper):
+			if not swiping and not finger_drag_started and travel.length() >= TAP_SLOP:
+				finger_drag_started = true
+				swiping = absf(travel.x) >= absf(travel.y) * 0.75
+				release_highlight()
+			if swiping:
+				swiper.swipe_to(event.position)
+			previous = event.position
+			return
 		if is_instance_valid(dragger):
 			dragger.drag_by(event.position.x - previous.x)
 			previous = event.position
@@ -209,6 +235,19 @@ func end_drag_area() -> void:
 	if is_instance_valid(dragger):
 		dragger.drag_end()
 	dragger = null
+
+func swipe_area_at(at: Vector2) -> Control:
+	for item: Control in get_tree().get_nodes_in_group("panel_swipe"):
+		if is_instance_valid(press_root) and press_root.is_ancestor_of(item) and item.is_visible_in_tree() and item.get_global_rect().has_point(at):
+			return item
+	return null
+
+func end_swipe(at: Vector2) -> void:
+	if is_instance_valid(swiper):
+		swiper.swipe_end(at)
+	swiper = null
+	swiping = false
+	caught = false
 
 func slider_at(at: Vector2) -> HSlider:
 	for item: HSlider in get_tree().get_nodes_in_group("panel_slider"):

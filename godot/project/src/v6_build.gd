@@ -234,6 +234,25 @@ func open_strip(hint := "") -> void:
 		entries.append([CATEGORIES[index][0], UiKit.tex(CATEGORIES[index][1]), buildable_count(index)])
 	view.set_categories(entries, category)
 	show_category(category, false)
+	prepare_place()
+
+## Builds the placement banner and confirm (hidden) a few frames after the strip is up, so the
+## first tap on a card does not pay for them.
+func prepare_place() -> void:
+	if place != null and is_instance_valid(place):
+		return
+	for i in 3:
+		await ui.get_tree().process_frame
+	if not is_open() or (place != null and is_instance_valid(place)):
+		return
+	ensure_place()
+
+func ensure_place() -> void:
+	if place == null or not is_instance_valid(place):
+		place = BuildPlace.new()
+		place.build = self
+		ui.modal.get_parent().add_child(place)
+		ui.modal.get_parent().move_child(place, ui.dimmer.get_index())
 
 func best_category_for(plot: String) -> int:
 	var tags: Array = ui.state.get("v6_plots", {}).get(plot, [])
@@ -368,11 +387,7 @@ func begin_placement(type: String) -> void:
 	var nearest: Dictionary = plots[0]
 	ui.stage.target = nearest.position
 	ui.stage.zoom = clampf(ui.stage.zoom, 46.0, 72.0)
-	if place == null or not is_instance_valid(place):
-		place = BuildPlace.new()
-		place.build = self
-		ui.modal.get_parent().add_child(place)
-		ui.modal.get_parent().move_child(place, ui.dimmer.get_index())
+	ensure_place()
 	place.begin(str(row.get("name_ru", type)), plots.size())
 	if not hint.is_empty() and plots.any(func(p): return p.id == hint):
 		pick_plot(hint)

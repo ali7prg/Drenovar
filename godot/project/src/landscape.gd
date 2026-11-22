@@ -4234,17 +4234,29 @@ func show_plot_glow(model_path: String, model_scale: float, plots: Array) -> voi
 	placement_plate.material_override = placement_material(Color(0.4, 0.95, 0.5, 0.22))
 	placement_plate.visible = false
 	placement.add_child(placement_plate)
-	if not model_path.is_empty():
-		placement_ghost = add_model(placement, model_path, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * model_scale), Vector3.ZERO))
-	else:
-		placement_ghost = Node3D.new()
-		placement.add_child(placement_ghost)
+	placement_ghost = Node3D.new()
+	placement_ghost.name = "Ghost"
+	placement.add_child(placement_ghost)
 	# The ghost shows through the trees of a forest plot as a faint gold silhouette.
 	placement_overlay = placement_material(Color(1.0, 0.85, 0.5, 0.22))
 	placement_overlay.no_depth_test = true
-	for part: MeshInstance3D in placement_ghost.find_children("*", "MeshInstance3D", true, false):
-		part.material_overlay = placement_overlay
 	placement_ghost.visible = false
+	if not model_path.is_empty():
+		attach_ghost(model_path, model_scale, placement)
+
+## The ghost's scene loads on a worker thread: a first load() of an unbuilt type's level scene
+## took 10-40 ms on the main thread, right on the tap of a card. The ghost stays hidden until a
+## plot is chosen, so it is almost always there in time.
+func attach_ghost(model_path: String, model_scale: float, session: Node3D) -> void:
+	while not model_ready(model_path):
+		await get_tree().process_frame
+		if session != placement or not is_instance_valid(session):
+			return
+	if session != placement or not is_instance_valid(placement_ghost):
+		return
+	var model := add_model(placement_ghost, model_path, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * model_scale), Vector3.ZERO))
+	for part: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		part.material_overlay = placement_overlay
 
 ## The chosen plot burns brighter than the others.
 func highlight_plot_glow(at: Vector3) -> void:

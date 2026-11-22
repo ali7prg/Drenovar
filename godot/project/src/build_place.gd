@@ -239,6 +239,7 @@ func _process(_delta: float) -> void:
 	bubble.size = bubble.get_combined_minimum_size()
 	var at := point - Vector2(bubble.size.x * 0.5, bubble.size.y + 14.0)
 	bubble.position = Vector2(clampf(at.x, 12.0, view.x - bubble.size.x - 12.0), clampf(at.y, 130.0, view.y - bubble.size.y - 12.0))
-	pointer.position = Vector2(clampf(point.x - 13.0, bubble.position.x + 12.0, bubble.end.x - 38.0), bubble.end.y - 1.0)
+	var bottom_right := bubble.position + bubble.size
+	pointer.position = Vector2(clampf(point.x - 13.0, bubble.position.x + 12.0, bottom_right.x - 38.0), bottom_right.y - 1.0)
 	pointer.visible = bubble.visible
 

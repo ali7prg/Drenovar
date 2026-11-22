@@ -9,6 +9,15 @@ extends SceneTree
 ##     -s res://tools/bake_building_art.gd -- --out=/tmp/building_art [--only=B01,B02] [--level=1]
 ##   python3 godot/art/ui/buildings/finish_art.py /tmp/building_art godot/project/assets/ui/buildings/v6
 ## Renders at RENDER px; the finisher downsizes (premultiplied Lanczos) to the card size.
+##
+## Framing (polish pass 4): the cards draw the building rising out of the card's top edge, so
+## the picture is close on the building. Each type's tile shrinks to the building's footprint
+## (with a margin of turf), the camera comes down to CARD_VIEW (about 23 degrees above the
+## ground instead of 30, so the turf foreshortens and the building stands taller) and the view
+## fits that tile and the building: the building fills as much of the picture as its yard
+## allows and the tile is a base under it, not a lawn round it. The soil bottom sits at BOTTOM
+## and the tile is centred across. The empty tile keeps the full-size framing of
+## the live upgrade view (its placeholder there; src/building_stage.gd ART_SHARE).
 
 const BuildingStage = preload("res://src/building_stage.gd")
 const RENDER := Vector2i(1040, 1040)
@@ -16,6 +25,13 @@ const RENDER := Vector2i(1040, 1040)
 ## this far down the picture, and the view keeps room for a building this tall.
 const SHARE := 0.94
 const BOTTOM := 0.975
+## Close framing: free space at each side and at the top (fractions of the picture), turf
+## round the footprint (metres) and the smallest tile (fraction of the full one).
+const SIDE_MARGIN := 0.035
+const TOP_MARGIN := 0.02
+const TURF := 1.1
+const MIN_TILE := 0.4
+const CARD_VIEW := Vector3(0.82, 0.55, 1.0)
 var out := "/tmp/building_art"
 var only: PackedStringArray = []
 var level := 1
@@ -68,13 +84,21 @@ func bake(type: String, scene: PackedScene, scale: float) -> Dictionary:
 	var tile := BuildingStage.make_tile(hash(type) % 97)
 	holder.add_child(tile)
 	var height := 0.0
-	if scene != null:
-		var model := BuildingStage.place_building(holder, scene, scale)
-		height = BuildingStage.model_height(model)
+	var shrink := 1.0
 	var camera := Camera3D.new()
 	holder.add_child(camera)
 	camera.make_current()
-	BuildingStage.aim(camera, Vector3.ZERO, float(RENDER.x) / RENDER.y, SHARE, BOTTOM)
+	if scene != null:
+		var model := BuildingStage.place_building(holder, scene, scale)
+		height = BuildingStage.model_height(model)
+		shrink = close_framing(camera, holder, tile, model)
+		# The smaller view needs denser shadow maps.
+		var key := holder.find_child("Key", true, false) as DirectionalLight3D
+		if key != null:
+			key.directional_shadow_max_distance = 60.0
+			key.shadow_blur = 1.2
+	else:
+		BuildingStage.aim(camera, Vector3.ZERO, float(RENDER.x) / RENDER.y, SHARE, BOTTOM)
 	for i in 6:
 		await process_frame
 	await RenderingServer.frame_post_draw
@@ -82,5 +106,53 @@ func bake(type: String, scene: PackedScene, scale: float) -> Dictionary:
 	image.save_png(out.path_join(type + ".png"))
 	viewport.queue_free()
 	await process_frame
-	print("BAKED ", type, " height=", snappedf(height, 0.01))
-	return {"height": snappedf(height, 0.01)}
+	print("BAKED ", type, " height=", snappedf(height, 0.01), " tile=", snappedf(shrink, 0.01))
+	return {"height": snappedf(height, 0.01), "tile": snappedf(shrink, 0.01)}
+
+## Shrinks the tile to the building's footprint and aims the camera close (see the header).
+## Returns the tile's scale.
+func close_framing(camera: Camera3D, holder: Node3D, tile: Node3D, model: Node3D) -> float:
+	var reach := 0.0
+	for part: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if part.mesh == null or not part.visible:
+			continue
+		var box: AABB = (holder.global_transform.affine_inverse() * part.global_transform) * part.get_aabb()
+		for corner in 8:
+			var p := box.get_endpoint(corner)
+			# Parts on the ground count for the footprint; roofs overhang.
+			reach = maxf(reach, Vector2(p.x, p.z).length() * (1.0 if p.y < 1.5 else 0.8))
+	var shrink := clampf((reach + TURF) / (BuildingStage.TILE_HALF * 1.05), MIN_TILE, 1.0)
+	tile.scale = Vector3(shrink, 0.45 + 0.55 * shrink, shrink)
+	var direction := CARD_VIEW.normalized()
+	var right := Vector3.UP.cross(direction).normalized()
+	var basis := [right, direction.cross(right).normalized(), direction]
+	var low := Vector2(INF, INF)
+	var high := Vector2(-INF, -INF)
+	for corner in 48:
+		var angle := TAU * float(corner) / 48.0
+		var r := BuildingStage.outline(angle, 0) * 1.01 * shrink
+		for y: float in [0.0, (-BuildingStage.TILE_DEPTH - 0.3) * tile.scale.y]:
+			var p := Vector3(cos(angle) * r, y, sin(angle) * r)
+			var at := Vector2(p.dot(basis[0] as Vector3), p.dot(basis[1] as Vector3))
+			low = low.min(at)
+			high = high.max(at)
+	for part: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if part.mesh == null or not part.visible:
+			continue
+		var box: AABB = (holder.global_transform.affine_inverse() * part.global_transform) * part.get_aabb()
+		for corner in 8:
+			var p := box.get_endpoint(corner)
+			var at := Vector2(p.dot(basis[0] as Vector3), p.dot(basis[1] as Vector3))
+			low.x = minf(low.x, at.x)
+			high = high.max(at)
+	var half := maxf(-low.x, high.x)
+	var view := maxf(2.0 * half / (1.0 - 2.0 * SIDE_MARGIN), (high.y - low.y) / (BOTTOM - TOP_MARGIN))
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.keep_aspect = Camera3D.KEEP_HEIGHT
+	camera.size = view
+	camera.near = 0.5
+	camera.far = 400.0
+	var target: Vector3 = (basis[1] as Vector3) * (low.y + (BOTTOM - 0.5) * view)
+	camera.position = target + (basis[2] as Vector3) * 120.0
+	camera.look_at(target, Vector3.UP)
+	return shrink

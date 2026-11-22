@@ -119,8 +119,11 @@ func layout() -> void:
 	var top := 96.0
 	rail.position = Vector2(18, roundf(top + maxf(0.0, (h - top - 12.0 - rail_size.y) * 0.5)))
 	var left := 18.0 + maxf(100.0, rail_size.x) + 20.0
-	swipe.position = Vector2(left, 84)
-	swipe.size = Vector2(maxf(100.0, w - left), maxf(100.0, h - 84 - 6))
+	# The strip holds the lower part of the screen (the card bodies take about the lower half,
+	# the buildings rise above them), so the player's city reads above it.
+	var tall := minf(Swipe.HEIGHT, h - 90.0)
+	swipe.position = Vector2(left, h - tall - 2.0)
+	swipe.size = Vector2(maxf(100.0, w - left), tall)
 	swipe.layout_cards()
 	place_light.call_deferred()
 
@@ -185,6 +188,10 @@ class Swipe extends Control:
 	const GLIDE := 0.26
 	const PAD_LEFT := 4.0
 	const PAD_RIGHT := 64.0
+	## Room above the cards for the dioramas, and below them for the indicator.
+	const HEAD := 30.0
+	const FOOT := 22.0
+	const HEIGHT := HEAD + BuildCard.SIZE.y + FOOT
 	var track: Control
 	var edge: Control
 	var indicator: Control
@@ -261,7 +268,7 @@ class Swipe extends Control:
 	func layout_cards() -> void:
 		if track == null:
 			return
-		var top := roundf(maxf(0.0, (size.y - 18.0 - BuildCard.SIZE.y) * 0.5))
+		var top := roundf(maxf(0.0, size.y - FOOT - BuildCard.SIZE.y))
 		for index in cards.size():
 			var card: Control = cards[index]
 			card.size = BuildCard.SIZE

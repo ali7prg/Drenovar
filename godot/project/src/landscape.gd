@@ -106,6 +106,7 @@ const WORLD_RUN_TEMPO := 2.5
 var run_tempo_max := RUN_TEMPO.y
 const MARCH_LINE := preload("res://src/fx_march.gdshader")
 const PLOT_GLOW := preload("res://src/plot_glow.gdshader")
+const PLACEMENT_GHOST := preload("res://src/placement_ghost.gdshader")
 # Creature bodies at scale 1, measured from the GLB models: half length (the head
 # is at +X) and half width. Battle places hug this outline.
 const CREATURE_BODY := {"velkor": Vector2(2.51, 1.19), "tenerys": Vector2(2.63, 0.69),
@@ -4215,6 +4216,10 @@ func show_placement(model_path: String, model_scale: float, plots: Array) -> voi
 var plot_ring_material: ShaderMaterial
 var plot_plate_material: StandardMaterial3D
 var plot_ghost_material: StandardMaterial3D
+## The translucent ghost: one material per surface material of the level scenes (uniforms of
+## one shader, placement_ghost.gdshader), kept for the session.
+var ghost_template: ShaderMaterial
+var ghost_materials := {}
 
 ## Creates them ahead of the first placement (the construction strip calls this while open).
 func prepare_plot_glow() -> void:
@@ -4222,11 +4227,13 @@ func prepare_plot_glow() -> void:
 		return
 	plot_ring_material = ShaderMaterial.new()
 	plot_ring_material.shader = PLOT_GLOW
-	plot_plate_material = placement_material(Color(0.4, 0.95, 0.5, 0.22))
+	plot_plate_material = placement_material(Color(1.0, 0.82, 0.45, 0.14))
 	# The ghost shows through the trees of a forest plot as a faint gold silhouette.
-	plot_ghost_material = placement_material(Color(1.0, 0.85, 0.5, 0.22))
+	plot_ghost_material = placement_material(Color(1.0, 0.85, 0.5, 0.1))
 	plot_ghost_material.no_depth_test = true
-	for material: Material in [plot_ring_material, plot_plate_material, plot_ghost_material]:
+	ghost_template = ShaderMaterial.new()
+	ghost_template.shader = PLACEMENT_GHOST
+	for material: Material in [plot_ring_material, plot_plate_material, plot_ghost_material, ghost_template]:
 		material.get_rid()
 
 func show_plot_glow(model_path: String, model_scale: float, plots: Array) -> void:
@@ -4274,7 +4281,32 @@ func attach_ghost(model_path: String, model_scale: float, session: Node3D) -> vo
 		return
 	var model := add_model(placement_ghost, model_path, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * model_scale), Vector3.ZERO))
 	for part: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if part.mesh != null:
+			for index in part.mesh.get_surface_count():
+				part.set_surface_override_material(index, ghost_material(part.get_active_material(index)))
 		part.material_overlay = placement_overlay
+
+## The translucent ghost version of a level scene's surface material (its colours, see
+## placement_ghost.gdshader).
+func ghost_material(source: Material) -> ShaderMaterial:
+	var key := source.get_rid().get_id() if source != null else 0
+	if ghost_materials.has(key):
+		return ghost_materials[key]
+	var ghost := ShaderMaterial.new()
+	ghost.shader = PLACEMENT_GHOST
+	if source is BaseMaterial3D:
+		var base := source as BaseMaterial3D
+		ghost.set_shader_parameter("albedo_texture", base.albedo_texture)
+		ghost.set_shader_parameter("use_texture", 1.0 if base.albedo_texture != null else 0.0)
+		ghost.set_shader_parameter("albedo_color", base.albedo_color)
+		ghost.set_shader_parameter("triplanar", 1.0 if base.uv1_triplanar else 0.0)
+		ghost.set_shader_parameter("uv_scale", base.uv1_scale.x)
+	else:
+		ghost.set_shader_parameter("use_texture", 0.0)
+		ghost.set_shader_parameter("albedo_color", Color(0.85, 0.78, 0.66))
+	ghost_materials[key] = ghost
+	return ghost
 
 ## The chosen plot burns brighter than the others.
 func highlight_plot_glow(at: Vector3) -> void:
@@ -4296,8 +4328,10 @@ func move_placement(at: Vector3, plate_state: String, lifted: bool) -> void:
 	if not is_instance_valid(placement):
 		return
 	var color := Color(0.4, 0.95, 0.5) if plate_state == "ready" else (Color(1.0, 0.7, 0.28) if plate_state == "forest" else Color(1.0, 0.36, 0.3))
-	(placement_plate.material_override as StandardMaterial3D).albedo_color = Color(color, 0.34)
-	placement_overlay.albedo_color = Color(color.lightened(0.2), 0.2)
+	# The V6 ghost (translucent, in its own colours) keeps its faint gold plate and silhouette.
+	if placement_overlay != plot_ghost_material:
+		(placement_plate.material_override as StandardMaterial3D).albedo_color = Color(color, 0.34)
+		placement_overlay.albedo_color = Color(color.lightened(0.2), 0.2)
 	placement_lift = 1.2 if lifted else 0.0
 	placement_plate.position = at + Vector3.UP * 0.18
 	placement_ghost.position = at + Vector3.UP * placement_lift

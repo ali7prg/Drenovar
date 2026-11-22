@@ -7,7 +7,8 @@ extends Control
 ## rim, seen from the front right at a three-quarter view through an orthographic lens.
 ##
 ## - The card art of the strip (assets/ui/buildings/v6/<type>.webp) is baked from level I with
-##   exactly this rig (tools/bake_building_art.gd, godot/art/ui/buildings/finish_art.py).
+##   this rig (tools/bake_building_art.gd, godot/art/ui/buildings/finish_art.py), framed closer
+##   on the building (a tile shrunk to its footprint, a lower camera).
 ## - The upgrade window shows the building live: «Сейчас» (the current level) and «После» (the
 ##   next one) on two tiles side by side in one SubViewport, turning gently together. The parts
 ##   the next level adds glow gold (building_new_parts.gdshader reads the UV2 build data of the
@@ -20,6 +21,10 @@ extends Control
 ##   already in memory because the city shows it).
 ## - The SubViewport and everything in it are children of this node: nothing 3D outlives the
 ##   window. It renders at device resolution with 4x MSAA.
+## - It renders only while something moves: the models arriving, the short intro turn, a
+##   finger turning the pair and its ease back. Then it holds its last picture
+##   (UPDATE_DISABLED) and the idle window costs no 3D work. The new-parts glow is steady in
+##   3D; its breathing is a 2D light over the «После» building (one additive quad).
 
 const UiKit = preload("res://src/ui_kit.gd")
 const NEW_PARTS := preload("res://src/building_new_parts.gdshader")
@@ -147,7 +152,8 @@ static func tile_materials() -> Dictionary:
 		return materials
 	var grass := StandardMaterial3D.new()
 	grass.albedo_texture = surface(GRASS)
-	grass.albedo_color = Color("#ffffff")
+	# A mossy, slightly muted turf: the building is the subject, not the lawn.
+	grass.albedo_color = Color("#cfd6b4")
 	grass.vertex_color_use_as_albedo = true
 	grass.uv1_triplanar = true
 	grass.uv1_scale = Vector3.ONE * 0.62
@@ -540,6 +546,13 @@ var dragging := false
 var last_drag_msec := 0
 var fade: Tween
 var built_usec := 0
+## Frames the live view still has to render (render on demand, see the header).
+var dirty_frames := 0
+## Frames it has rendered (tests and measurements).
+var rendered_frames := 0
+var shown_turn := INF
+var intro_msec := -1
+var breath: Breath
 
 ## «После» is a new model, not the same one grown (the level scenes come from another family
 ## of the architecture kit, e.g. the wooden levels I–V and the stone levels VI–XI): the whole
@@ -578,8 +591,8 @@ func setup(game_data: Dictionary, v6_type: String, current: int, final_level := 
 			request(paths[side])
 		var roman: String = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"][level - 1]
 		captions[side] = ("Сейчас · ур. " if side == 0 else "После · ур. ") + roman
-		# Level I is exactly the card art; the others start on the empty tile.
-		placeholders[side] = card_art(type) if level == 1 else card_art("tile")
+		# The empty tile (baked with this view's framing; the card art is framed closer).
+		placeholders[side] = card_art("tile")
 	if levels[0] == 0 and levels[1] == 1:
 		captions[1] = "Будет построено · ур. I"
 	if levels[1] == 0:
@@ -624,6 +637,10 @@ func layout() -> void:
 	if viewport != null:
 		viewport.size = render_size()
 		frame_camera()
+		mark_dirty()
+	if breath != null:
+		breath.size = size
+		place_breath()
 	queue_redraw()
 
 func render_size() -> Vector2i:
@@ -800,9 +817,10 @@ func build_world() -> void:
 	viewport.own_world_3d = true
 	viewport.transparent_bg = true
 	viewport.msaa_3d = Viewport.MSAA_4X
-	viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
+	viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	viewport.size = render_size()
 	add_child(viewport)
+	mark_dirty(3)
 	var holder := Node3D.new()
 	viewport.add_child(holder)
 	light_rig(holder)
@@ -854,13 +872,16 @@ func _process(delta: float) -> void:
 			model_ext[side] = plane_extents(model, mounts[side])
 			models_placed += 1
 			frame_camera()
+			place_breath()
+			# A few frames, so the shadows of the new model settle in the held picture.
+			mark_dirty(3)
 			queue_redraw()
 		elif not requested.has(paths[side]) and not scenes.has(paths[side]):
 			waiting.erase(side)
 	if waiting.is_empty() and view.modulate.a < 0.01 and (fade == null or not fade.is_running()):
 		reveal()
-	# Both tiles turn together: the finger's turn, then a slow sway (±6° over 10 s) so the
-	# view never freezes.
+	# Both tiles turn together: a short intro turn when they appear, the finger's turn with its
+	# glide, then an ease back to the front view, where the picture holds.
 	var resting := not dragging and Time.get_ticks_msec() - last_drag_msec > 2500
 	if not dragging:
 		if absf(spin_velocity) > 0.0005:
@@ -868,14 +889,60 @@ func _process(delta: float) -> void:
 			spin_velocity *= pow(0.02, delta)
 		elif resting and absf(spin) > 0.001:
 			spin = lerp_angle(spin, 0.0, 1.0 - pow(0.15, delta))
-	var sway := sin(Time.get_ticks_msec() * 0.001 * TAU / 10.0) * deg_to_rad(6.0) if resting else 0.0
-	for mount in mounts:
-		if mount != null:
-			mount.rotation.y = spin + sway
+			if absf(spin) <= 0.001:
+				spin = 0.0
+	var turn := spin + intro_turn()
+	if not is_equal_approx(turn, shown_turn):
+		shown_turn = turn
+		for mount in mounts:
+			if mount != null:
+				mount.rotation.y = turn
+		mark_dirty(2)
+	if dirty_frames > 0:
+		dirty_frames -= 1
+		rendered_frames += 1
+		viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	elif viewport.render_target_update_mode != SubViewport.UPDATE_DISABLED:
+		viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+
+## The live view renders on the next `frames` frames, then holds its picture.
+func mark_dirty(frames := 2) -> void:
+	dirty_frames = maxi(dirty_frames, frames)
+
+## True while the live view still renders (tests and measurements).
+func rendering() -> bool:
+	return dirty_frames > 0 or (viewport != null and viewport.render_target_update_mode != SubViewport.UPDATE_DISABLED)
+
+## The intro: the pair comes in turned 14° and swings to the front view (1.4 s, ease out).
+const INTRO_TURN := 0.245
+const INTRO_SECONDS := 1.4
+
+func intro_turn() -> float:
+	if intro_msec < 0:
+		return INTRO_TURN
+	var t := clampf((Time.get_ticks_msec() - intro_msec) / (INTRO_SECONDS * 1000.0), 0.0, 1.0)
+	return INTRO_TURN * pow(1.0 - t, 3.0)
+
+## The breathing light over the «После» building when its new parts glow.
+func place_breath() -> void:
+	if breath == null:
+		return
+	var lit: bool = int(levels[1]) > 1 and pair() and not fresh_model() and not family_start(int(levels[1]))
+	breath.visible = lit
+	if lit:
+		breath.at = art_rect(1, framing())
 
 func reveal() -> void:
 	if fade != null:
 		fade.kill()
+	intro_msec = Time.get_ticks_msec()
+	if breath == null:
+		breath = Breath.new()
+		breath.name = "NewPartsBreath"
+		breath.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(breath)
+		breath.size = size
+	place_breath()
 	fade = create_tween()
 	fade.tween_method(func(alpha: float):
 		view.modulate.a = alpha
@@ -885,6 +952,29 @@ func reveal() -> void:
 func drag_begin() -> void:
 	dragging = true
 	spin_velocity = 0.0
+
+## A soft gold light breathing over the «После» building (2D, additive: no 3D render).
+class Breath extends Control:
+	var at := Rect2():
+		set(value):
+			at = value
+			queue_redraw()
+	var loop: Tween
+
+	func _ready() -> void:
+		var light := CanvasItemMaterial.new()
+		light.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		material = light
+		modulate.a = 0.25
+		loop = create_tween().set_loops()
+		loop.tween_property(self, "modulate:a", 1.0, 1.9).set_trans(Tween.TRANS_SINE)
+		loop.tween_property(self, "modulate:a", 0.25, 1.9).set_trans(Tween.TRANS_SINE)
+
+	func _draw() -> void:
+		if at.size.x < 2.0:
+			return
+		var glow := Rect2(at.position + Vector2(at.size.x * 0.1, at.size.y * 0.04), Vector2(at.size.x * 0.8, at.size.y * 0.68))
+		draw_texture_rect(UiKit.warm_glow(), glow, false, Color(1.0, 0.72, 0.3, 0.3))
 
 func drag_by(dx: float) -> void:
 	var turn := dx * 0.0085

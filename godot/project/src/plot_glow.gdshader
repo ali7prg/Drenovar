@@ -16,7 +16,8 @@ void fragment() {
 	float pulse = 0.72 + 0.28 * sin(TIME * 2.6);
 	float ring = exp(-pow((r - 0.74) / 0.045, 2.0));
 	float halo = exp(-pow((r - 0.74) / 0.16, 2.0)) * 0.3;
-	float disc = (1.0 - smoothstep(0.0, 0.78, r)) * (0.07 + 0.3 * chosen);
+	// The chosen plot's ghost stands inside the ring: its disc stays faint so the ghost reads.
+	float disc = (1.0 - smoothstep(0.0, 0.78, r)) * (0.07 - 0.04 * chosen);
 	float glow = (ring + halo) * mix(pulse, 1.0, chosen) + disc;
 	glow *= 1.0 - smoothstep(0.92, 1.0, r);
 	ALBEDO = colour.rgb * glow * strength * (1.0 + chosen * 0.9);

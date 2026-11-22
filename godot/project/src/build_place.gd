@@ -62,12 +62,35 @@ func make_banner() -> void:
 	cancel.pressed.connect(func(): build.cancel_placement())
 	row.add_child(cancel)
 
-## The small pointer under the floating confirm, toward the plot.
+## The small pointer of the floating confirm toward the plot; `toward` is the side of the
+## bubble it sits on (and points out of): "left", "right", "down" or "up".
 class Pointer extends Control:
+	const LONG := 26.0
+	const DEEP := 14.0
+	var toward := "down":
+		set(value):
+			if toward != value:
+				toward = value
+				queue_redraw()
+
 	func _draw() -> void:
-		var w := size.x
-		draw_colored_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w * 0.5, size.y)]), Color("#b8873e"))
-		draw_colored_polygon(PackedVector2Array([Vector2(3, 0), Vector2(w - 3, 0), Vector2(w * 0.5, size.y - 4)]), Color("#f4e8cf"))
+		var outer: PackedVector2Array
+		var inner: PackedVector2Array
+		match toward:
+			"left":
+				outer = PackedVector2Array([Vector2(DEEP, 0), Vector2(DEEP, LONG), Vector2(0, LONG * 0.5)])
+				inner = PackedVector2Array([Vector2(DEEP + 1, 3), Vector2(DEEP + 1, LONG - 3), Vector2(4, LONG * 0.5)])
+			"right":
+				outer = PackedVector2Array([Vector2(0, 0), Vector2(0, LONG), Vector2(DEEP, LONG * 0.5)])
+				inner = PackedVector2Array([Vector2(-1, 3), Vector2(-1, LONG - 3), Vector2(DEEP - 4, LONG * 0.5)])
+			"up":
+				outer = PackedVector2Array([Vector2(0, DEEP), Vector2(LONG, DEEP), Vector2(LONG * 0.5, 0)])
+				inner = PackedVector2Array([Vector2(3, DEEP + 1), Vector2(LONG - 3, DEEP + 1), Vector2(LONG * 0.5, 4)])
+			_:
+				outer = PackedVector2Array([Vector2(0, 0), Vector2(LONG, 0), Vector2(LONG * 0.5, DEEP)])
+				inner = PackedVector2Array([Vector2(3, -1), Vector2(LONG - 3, -1), Vector2(LONG * 0.5, DEEP - 4)])
+		draw_colored_polygon(outer, Color("#b8873e"))
+		draw_colored_polygon(inner, Color("#f4e8cf"))
 
 var pointer: Control
 
@@ -160,9 +183,10 @@ func begin(title: String, count: int) -> void:
 	appear.tween_property(banner, "position:y", 58.0, 0.22).set_delay(0.12).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	set_process(true)
 
-func show_offer(at: Vector3, price: Dictionary, time_text: String, plot: String) -> void:
+## The floating confirm for a plot; `plot_title` is its human name (V6Build.plot_name).
+func show_offer(at: Vector3, price: Dictionary, time_text: String, plot_title: String) -> void:
 	anchor = at
-	bubble_title.text = "Участок " + plot
+	bubble_title.text = plot_title
 	fill_cost(price)
 	time_label.text = time_text
 	problem.hide()
@@ -170,7 +194,7 @@ func show_offer(at: Vector3, price: Dictionary, time_text: String, plot: String)
 	go.text = "Расчёт…"
 	bubble.show()
 	bubble.size = bubble.get_combined_minimum_size()
-	bubble.pivot_offset = Vector2(bubble.size.x * 0.5, bubble.size.y)
+	bubble.pivot_offset = Vector2(0.0, bubble.size.y * 0.5)
 	bubble.scale = Vector2(0.9, 0.9)
 	bubble.modulate.a = 0.0
 	var pop := create_tween().set_parallel()
@@ -228,18 +252,72 @@ func covers(at: Vector2) -> bool:
 		return false
 	return banner.get_global_rect().grow(8).has_point(at) or (bubble.visible and bubble.get_global_rect().grow(8).has_point(at))
 
+## Screen rect of the chosen plot with its ghost: the ring round it and the building's head
+## room above it. The floating confirm never covers it.
+const PLOT_REACH := 6.5
+const GHOST_HEIGHT := 8.0
+const SAFE_TOP := 130.0
+const GAP := 18.0
+
+func plot_rect(camera: Camera3D) -> Rect2:
+	var box := Rect2()
+	var first := true
+	for offset: Vector3 in [Vector3(PLOT_REACH, 0, 0), Vector3(-PLOT_REACH, 0, 0), Vector3(0, 0, PLOT_REACH), Vector3(0, 0, -PLOT_REACH),
+			Vector3(PLOT_REACH * 0.7, GHOST_HEIGHT, PLOT_REACH * 0.7), Vector3(-PLOT_REACH * 0.7, GHOST_HEIGHT, -PLOT_REACH * 0.7),
+			Vector3(PLOT_REACH * 0.7, GHOST_HEIGHT, -PLOT_REACH * 0.7), Vector3(-PLOT_REACH * 0.7, GHOST_HEIGHT, PLOT_REACH * 0.7)]:
+		var point := camera.unproject_position(anchor + offset)
+		if first:
+			box = Rect2(point, Vector2.ZERO)
+			first = false
+		else:
+			box = box.expand(point)
+	return box
+
+## Where the floating confirm goes: beside the plot (right, then left), else above or below
+## it, inside the safe part of the screen and never over the plot.
+func bubble_place(plot: Rect2, bubble_size: Vector2, view: Vector2) -> Array:
+	var centre := plot.get_center()
+	var candidates := [
+		["left", Vector2(plot.end.x + GAP, centre.y - bubble_size.y * 0.5)],
+		["right", Vector2(plot.position.x - GAP - bubble_size.x, centre.y - bubble_size.y * 0.5)],
+		["down", Vector2(centre.x - bubble_size.x * 0.5, plot.position.y - GAP - bubble_size.y)],
+		["up", Vector2(centre.x - bubble_size.x * 0.5, plot.end.y + GAP)]]
+	var keep_clear := plot.grow(6.0)
+	for candidate: Array in candidates:
+		var at: Vector2 = candidate[1]
+		at = Vector2(clampf(at.x, 12.0, view.x - bubble_size.x - 12.0), clampf(at.y, SAFE_TOP, view.y - bubble_size.y - 12.0))
+		if not Rect2(at, bubble_size).intersects(keep_clear):
+			return [candidate[0], at]
+	# No room anywhere (a plot that fills the screen): beside it, as far right as it goes.
+	return ["left", Vector2(view.x - bubble_size.x - 12.0, clampf(centre.y - bubble_size.y * 0.5, SAFE_TOP, view.y - bubble_size.y - 12.0))]
+
 func _process(_delta: float) -> void:
 	if not bubble.visible or anchor == Vector3.INF or not is_instance_valid(build.ui.stage):
 		return
 	var camera: Camera3D = build.ui.stage.camera
 	if camera.is_position_behind(anchor):
 		return
-	var point := camera.unproject_position(anchor + Vector3.UP * 7.0)
 	var view := get_viewport_rect().size
 	bubble.size = bubble.get_combined_minimum_size()
-	var at := point - Vector2(bubble.size.x * 0.5, bubble.size.y + 14.0)
-	bubble.position = Vector2(clampf(at.x, 12.0, view.x - bubble.size.x - 12.0), clampf(at.y, 130.0, view.y - bubble.size.y - 12.0))
-	var bottom_right := bubble.position + bubble.size
-	pointer.position = Vector2(clampf(point.x - 13.0, bubble.position.x + 12.0, bottom_right.x - 38.0), bottom_right.y - 1.0)
+	var plot := plot_rect(camera)
+	var placed := bubble_place(plot, bubble.size, view)
+	bubble.position = placed[1]
+	var side: String = placed[0]
+	pointer.toward = side
+	var centre := plot.get_center()
+	var long := Pointer.LONG
+	var deep := Pointer.DEEP
+	match side:
+		"left":
+			pointer.size = Vector2(deep, long)
+			pointer.position = Vector2(bubble.position.x - deep + 1.0, clampf(centre.y - long * 0.5, bubble.position.y + 10.0, bubble.position.y + bubble.size.y - long - 10.0))
+		"right":
+			pointer.size = Vector2(deep, long)
+			pointer.position = Vector2(bubble.position.x + bubble.size.x - 1.0, clampf(centre.y - long * 0.5, bubble.position.y + 10.0, bubble.position.y + bubble.size.y - long - 10.0))
+		"up":
+			pointer.size = Vector2(long, deep)
+			pointer.position = Vector2(clampf(centre.x - long * 0.5, bubble.position.x + 12.0, bubble.position.x + bubble.size.x - long - 12.0), bubble.position.y - deep + 1.0)
+		_:
+			pointer.size = Vector2(long, deep)
+			pointer.position = Vector2(clampf(centre.x - long * 0.5, bubble.position.x + 12.0, bubble.position.x + bubble.size.x - long - 12.0), bubble.position.y + bubble.size.y - 1.0)
 	pointer.visible = bubble.visible
-

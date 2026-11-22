@@ -106,25 +106,38 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	add_child(_actors)
 	add_child(_props)
 	atlas = _cache.get("atlas")
-	if atlas == null:
-		atlas = ForestAtlas.load_default()
-		_cache.atlas = atlas
 	layout = _cache.get("layout", {})
-	if layout.is_empty():
-		layout = _load_layout()
+	masks = _cache.get("masks")
+	if atlas == null or layout.is_empty() or masks == null:
+		# 1022 (iPhone entry): atlas, layout and static masks (~0.3 s of parsing in one frame on desktop)
+		# load on a worker thread; nothing reads them before this await returns.
+		var loaded := {}
+		var load_data := func() -> void:
+			var loaded_atlas: Variant = atlas if atlas != null else ForestAtlas.load_default()
+			loaded.atlas = loaded_atlas
+			loaded.layout = layout if not layout.is_empty() else _load_layout()
+			if masks == null:
+				var set := ForestMasks.MaskSet.new(8.0)
+				for mask in loaded_atlas.static_masks():
+					set.add(mask)
+				loaded.masks = set
+		var data_task := WorkerThreadPool.add_task(load_data, true, "forest data")
+		while not WorkerThreadPool.is_task_completed(data_task):
+			await get_tree().process_frame
+		WorkerThreadPool.wait_for_task_completion(data_task)
+		atlas = loaded.atlas
+		layout = loaded.layout
+		_cache.atlas = atlas
 		_cache.layout = layout
+		if loaded.has("masks"):
+			masks = loaded.masks
+			_cache.masks = masks
 	for section in ["resourceRemap", "innerRemap"]:
 		for id in layout.get(section, {}):
 			var entry: Array = layout[section][id]
 			remap[id] = Vector2(float(entry[0]), float(entry[1]))
 			if entry.size() >= 5:
 				resource_look[id] = [int(entry[3]), float(entry[4])]
-	masks = _cache.get("masks")
-	if masks == null:
-		masks = ForestMasks.MaskSet.new(8.0)
-		for mask in atlas.static_masks():
-			masks.add(mask)
-		_cache.masks = masks
 	setup_ms.data = (Time.get_ticks_usec() - started) / 1000.0
 	await get_tree().process_frame
 	setup_stage = "landmarks.plan"
@@ -132,7 +145,11 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	landmarks = ForestLandmarks.new()
 	landmarks.name = "Landmarks"
 	add_child(landmarks)
-	landmarks.plan(atlas, masks, func(x: float, z: float) -> float: return ForestTerrain.base_height(x, z))
+	# 1022 (iPhone entry): the placement search is pure array work: a worker thread, not one long frame.
+	var plan_task := WorkerThreadPool.add_task(landmarks.plan.bind(atlas, masks, func(x: float, z: float) -> float: return ForestTerrain.base_height(x, z)), true, "forest landmarks plan")
+	while not WorkerThreadPool.is_task_completed(plan_task):
+		await get_tree().process_frame
+	WorkerThreadPool.wait_for_task_completion(plan_task)
 	var t := Time.get_ticks_usec()
 	var key := "terrain_v%d_%s" % [ForestTerrain.TERRAIN_VERSION, atlas.atlas_id]
 	terrain = _cache.get(key)
@@ -145,11 +162,20 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 		terrain.water_bodies = ForestWater.bodies(atlas)
 		await get_tree().process_frame
 		setup_stage = "terrain.shadows+tiles"
-		terrain.crown_shadows = _crown_shadows()
-		var source_meshes: Array = []
+		var shadows := []
+		var shadow_task := WorkerThreadPool.add_task(func() -> void: shadows.append(_crown_shadows()), true, "forest crown shadows")
+		while not WorkerThreadPool.is_task_completed(shadow_task):
+			await get_tree().process_frame
+		WorkerThreadPool.wait_for_task_completion(shadow_task)
+		terrain.crown_shadows = shadows[0]
+		var source_arrays: Array = []
 		for part: MeshInstance3D in ground_meshes:
-			source_meshes.append(part.mesh)
-		terrain.read_tiles(source_meshes)
+			source_arrays.append(part.mesh.surface_get_arrays(0))
+		# 1022 (iPhone entry): the tile scan is pure array work, on a worker thread.
+		var tiles_task := WorkerThreadPool.add_task(terrain.read_tiles.bind(source_arrays), true, "forest terrain tiles")
+		while not WorkerThreadPool.is_task_completed(tiles_task):
+			await get_tree().process_frame
+		WorkerThreadPool.wait_for_task_completion(tiles_task)
 		await get_tree().process_frame
 		# iPhone entry: the bake (pure array work, ~1-4 s) runs on a worker thread while the city keeps
 		# animating; nothing reads `terrain` before it is cached below
@@ -248,7 +274,13 @@ func setup(owner: Node3D, ground_meshes: Array) -> void:
 	while not ForestFog.noise_ready():
 		await get_tree().process_frame
 	await get_tree().process_frame
-	fog.build(func(x: float, z: float) -> float: return terrain.ground_height(x, z), light)
+	var fog_ground := func(x: float, z: float) -> float: return terrain.ground_height(x, z)
+	# 1022 (iPhone entry): the fog's grid, height map and billows are computed off the main thread.
+	var fog_task := WorkerThreadPool.add_task(ForestFog.prepare_build.bind(fog_ground), true, "forest fog prepare")
+	while not WorkerThreadPool.is_task_completed(fog_task):
+		await get_tree().process_frame
+	WorkerThreadPool.wait_for_task_completion(fog_task)
+	fog.build(fog_ground, light)
 	await get_tree().process_frame
 	fog.reveal_finished.connect(func() -> void: fog_reveal_finished.emit(fog_revision))
 	fog.target_applied.connect(_on_fog_target_applied)
@@ -711,7 +743,7 @@ func build_city_forest(city: Dictionary, exclusions: Array, staged := false) -> 
 		canopy.add_instance(mesh[0], transform)
 		_add_impostor(mesh, transform.origin, float(tree.angle), scale)
 		count += 1
-		if staged and count % 32 == 0:
+		if staged and count % 8 == 0:
 			var next: int = await stage.setup_slice(slice)
 			if next != slice:
 				build_parts.frames += 1
@@ -731,7 +763,7 @@ func build_city_forest(city: Dictionary, exclusions: Array, staged := false) -> 
 		canopy.add_instance(mesh[0], transform)
 		_add_impostor(mesh, transform.origin, deg_to_rad(float(item[4])), scale)
 		count += 1
-		if staged and count % 32 == 0:
+		if staged and count % 8 == 0:
 			var next: int = await stage.setup_slice(slice)
 			if next != slice:
 				build_parts.frames += 1
@@ -756,7 +788,7 @@ func build_city_forest(city: Dictionary, exclusions: Array, staged := false) -> 
 			var basis := Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(shape * float(item[5]))
 			canopy.add_instance(mesh[0], Transform3D(basis, Vector3(xz.x, y - 0.03, xz.y)))
 			count += 1
-			if staged and count % 64 == 0:
+			if staged and count % 16 == 0:
 				var next: int = await stage.setup_slice(slice)
 				if next != slice:
 					build_parts.frames += 1
@@ -798,6 +830,12 @@ func build_city_forest(city: Dictionary, exclusions: Array, staged := false) -> 
 	_register_fog_receivers()
 	_apply_fog_cull()
 	build_parts.fog_cull_ms = (Time.get_ticks_usec() - part) / 1000.0
+	if staged:
+		# the first canopy upload (on_camera_changed) gets a frame of its own
+		await stage.yield_frame()
+		build_parts.frames += 1
+		if serial != _forest_build_serial:
+			return
 	last_cull.build_ms = (Time.get_ticks_usec() - started) / 1000.0
 	_built_felled = felled
 	_built_ok = true

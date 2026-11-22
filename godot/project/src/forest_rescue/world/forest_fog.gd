@@ -67,6 +67,9 @@ const PAINT_TEX := "res://assets/forest_rescue/world/lf_fog_painted.png"
 static var _shell_mesh: ArrayMesh
 static var _shell_key := ""
 static var _height_texture: ImageTexture
+## 1022 (iPhone entry): the CPU part of build() — shell grid, height map, dome billows (~0.5 s in one
+## frame on desktop) — is prepared on a worker thread (prepare_build); build() creates the resources.
+static var _prepared := {}
 
 var state_image := Image.create(GRID, GRID, false, Image.FORMAT_RGBA8)
 var state_texture: ImageTexture
@@ -101,12 +104,13 @@ func build(height_fn: Callable, light_dir: Vector3) -> void:
 		else:
 			_noise3d = make_noise_3d(48, 48, 24)
 	if _dome_texture == null:
-		_dome_texture = make_dome_texture(256)
+		_dome_texture = ImageTexture.create_from_image(_prepared.dome) if _prepared.has("dome") else make_dome_texture(256)
 	var key := "shell_v5"
 	if _shell_mesh == null or _shell_key != key:
-		_shell_mesh = make_shell_mesh(height_fn)
-		_height_texture = make_height_texture(height_fn)
+		_shell_mesh = shell_mesh_from(_prepared.shell) if _prepared.has("shell") else make_shell_mesh(height_fn)
+		_height_texture = ImageTexture.create_from_image(_prepared.height) if _prepared.has("height") else make_height_texture(height_fn)
 		_shell_key = key
+	_prepared = {}
 	var material := ShaderMaterial.new()
 	material.shader = SHADER
 	material.render_priority = 10
@@ -167,7 +171,22 @@ static func smoothed_ground(height_fn: Callable, x: float, z: float) -> float:
 	return h
 
 
+## Worker-thread part of build() (pure array / image work; height_fn must be read-only).
+static func prepare_build(height_fn: Callable) -> void:
+	var ready := {}
+	if _dome_texture == null:
+		ready.dome = make_dome_image(256)
+	if _shell_mesh == null or _shell_key != "shell_v5":
+		ready.shell = make_shell_arrays(height_fn)
+		ready.height = make_height_image(height_fn)
+	_prepared = ready
+
+
 static func make_height_texture(height_fn: Callable) -> ImageTexture:
+	return ImageTexture.create_from_image(make_height_image(height_fn))
+
+
+static func make_height_image(height_fn: Callable) -> Image:
 	var n := 141
 	var image := Image.create(n, n, false, Image.FORMAT_L8)
 	for j in n:
@@ -177,11 +196,21 @@ static func make_height_texture(height_fn: Callable) -> ImageTexture:
 			var h := smoothed_ground(height_fn, x, z)
 			var v := clampf((h - HEIGHT_LO) / HEIGHT_SPAN, 0.0, 1.0)
 			image.set_pixel(i, j, Color(v, v, v, 1.0))
-	return ImageTexture.create_from_image(image)
+	return image
 
 
 ## Terrain-following grid: 4 m inside ±144, 8 m out to ±224, hole over the always-clear town.
 static func make_shell_mesh(height_fn: Callable) -> ArrayMesh:
+	return shell_mesh_from(make_shell_arrays(height_fn))
+
+
+static func shell_mesh_from(arrays: Array) -> ArrayMesh:
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
+
+
+static func make_shell_arrays(height_fn: Callable) -> Array:
 	var coords := PackedFloat32Array()
 	# pass 3: the shell reaches ±480 m so no camera pose (targets clamp to ±147 / ±118, zoom ≤ 120) ever
 	# shows the bare ground beyond the forest
@@ -216,14 +245,16 @@ static func make_shell_mesh(height_fn: Callable) -> ArrayMesh:
 	arrays[Mesh.ARRAY_VERTEX] = vertices
 	arrays[Mesh.ARRAY_NORMAL] = normals
 	arrays[Mesh.ARRAY_INDEX] = indices
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	return mesh
+	return arrays
 
 
 ## Cauliflower domes: inverted Worley F1 (distance to the nearest feature point) shaped into round
 ## caps, two tileable octaves in R (~6 cells per tile) and G (~6 per tile, sampled 2.3× smaller).
 static func make_dome_texture(size: int) -> ImageTexture:
+	return ImageTexture.create_from_image(make_dome_image(size))
+
+
+static func make_dome_image(size: int) -> Image:
 	var octaves: Array[Image] = []
 	for k in 2:
 		var noise := FastNoiseLite.new()
@@ -258,7 +289,7 @@ static func make_dome_texture(size: int) -> ImageTexture:
 				acc += out.get_pixel(posmod(x + o.x, size), posmod(y + o.y, size))
 			soft.set_pixel(x, y, Color(acc.r / 5.0, acc.g / 5.0, 0.0, 1.0))
 	soft.generate_mipmaps()
-	return ImageTexture.create_from_image(soft)
+	return soft
 
 
 ## Seamless 3D noise (L8, w×h×d) for world-space cloud puffs and wisps (sampled with repeat).

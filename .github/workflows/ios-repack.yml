@@ -7,11 +7,14 @@ name: DRENOVAR iOS test IPA (repack on Linux)
 # reused byte-for-byte, the game pack is exported here from this commit.
 # The IPA is unsigned; SideStore/AltStore re-sign it on install.
 
-# 1022: never on routine pushes. Run it by hand (workflow_dispatch) when a build is wanted.
-# (A push trigger on godot/ios-build-request.txt alone is added after the 1021+forest merge
-# lands, so the merge push itself cannot start a build.)
+# 1022: never on routine pushes. Run it by hand (workflow_dispatch), or change
+# godot/ios-build-request.txt on the 1022 branch: that file alone starts a build.
+# (Added after the 1021+forest merge landed, so the merge push itself could not start one.)
 on:
   workflow_dispatch:
+  push:
+    branches: [claude/kind-babbage-4swyw3]
+    paths: [godot/ios-build-request.txt]
 
 
 permissions:

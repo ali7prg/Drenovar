@@ -115,8 +115,9 @@ func read_tiles(tile_meshes: Array) -> void:
 	heights0.fill(NAN)
 	diag.resize((GRID_N - 1) * (GRID_N - 1))
 	diag.fill(0)
-	for mesh: Mesh in tile_meshes:
-		var arrays := mesh.surface_get_arrays(0)
+	for tile: Variant in tile_meshes:
+		# a Mesh, or its surface arrays read beforehand on the main thread (1022: read_tiles runs on a worker)
+		var arrays: Array = tile if tile is Array else (tile as Mesh).surface_get_arrays(0)
 		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 		var cells := PackedInt32Array()

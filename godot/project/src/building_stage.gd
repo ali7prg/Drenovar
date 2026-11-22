@@ -515,6 +515,10 @@ var captions: Array = ["", ""]
 var paths: Array = ["", ""]
 var scales: Array = [1.0, 1.0]
 var placeholders: Array = [null, null]
+## Camera-plane extents of each side's building ({"right": [low, high], "up": [low, high]} from
+## its tile centre), measured when it is placed: a scene whose yard reaches past the tile widens
+## the view, so both sides keep one scale and nothing is cut off.
+var model_ext: Array = [{}, {}]
 var view: TextureRect
 var viewport: SubViewport
 var camera: Camera3D
@@ -618,27 +622,77 @@ func render_size() -> Vector2i:
 	var scale := get_viewport().get_final_transform().get_scale() if is_inside_tree() else Vector2.ONE
 	return Vector2i(maxi(2, roundi(size.x * scale.x)), maxi(2, roundi(size.y * scale.y)))
 
+## Extents of one side: its tile (with LIVE_HEIGHT of head room) and its building.
+func side_extents(side: int) -> Dictionary:
+	var ext := extents(LIVE_HEIGHT)
+	var own: Dictionary = model_ext[side]
+	if own.is_empty():
+		return ext
+	return {"right": [minf(float(ext.right[0]), float(own.right[0])), maxf(float(ext.right[1]), float(own.right[1]))],
+		"up": [minf(float(ext.up[0]), float(own.up[0])), maxf(float(ext.up[1]), float(own.up[1]))]}
+
 ## Framing in the camera plane: {view_height, view_width, centre_right, centre_up, spacing}.
 func framing() -> Dictionary:
-	var ext := extents(LIVE_HEIGHT)
-	var wide: float = float(ext.right[1]) - float(ext.right[0])
-	var spacing := wide * PAIR_SPACING if pair() else 0.0
+	var tile := extents(LIVE_HEIGHT)
+	var tile_wide: float = float(tile.right[1]) - float(tile.right[0])
+	var spacing := 0.0
+	var left: float
+	var right: float
+	var low: float
+	var high: float
+	if pair():
+		var a := side_extents(0)
+		var b := side_extents(1)
+		# Centre to centre: the usual gap between the tiles, more when a building reaches past
+		# its tile.
+		spacing = maxf(tile_wide * PAIR_SPACING, float(a.right[1]) - float(b.right[0]) + tile_wide * (PAIR_SPACING - 1.0))
+		left = -spacing * 0.5 + float(a.right[0])
+		right = spacing * 0.5 + float(b.right[1])
+		low = minf(float(a.up[0]), float(b.up[0]))
+		high = maxf(float(a.up[1]), float(b.up[1]))
+	else:
+		var list := sides()
+		var only := side_extents(list[0] if not list.is_empty() else 1)
+		left = float(only.right[0])
+		right = float(only.right[1])
+		low = float(only.up[0])
+		high = float(only.up[1])
 	var aspect := size.x / maxf(1.0, size.y)
 	var bottom := (size.y - CAPTION_BAND) / maxf(1.0, size.y)
-	var view_width := (wide + spacing) / LIVE_SHARE
+	var view_width := (right - left) / LIVE_SHARE
 	var view_height := view_width / maxf(0.1, aspect)
-	var tall: float = float(ext.up[1]) - float(ext.up[0])
+	var tall := high - low
 	if tall > view_height * (bottom - 0.02):
 		view_height = tall / (bottom - 0.02)
 		view_width = view_height * aspect
-	var centre_right: float = (float(ext.right[0]) + float(ext.right[1])) * 0.5
+	var centre_right := (left + right) * 0.5
 	# Centre a building of usual height (7 m) in the space above the captions; taller ones still
 	# have the head room of LIVE_HEIGHT.
 	var usual := extents(7.0)
 	var used := (float(usual.up[1]) - float(usual.up[0])) / view_height
 	bottom = minf(bottom, (bottom + used) * 0.5 + 0.03)
-	var centre_up: float = float(ext.up[0]) + (bottom - 0.5) * view_height
+	var centre_up := low + (bottom - 0.5) * view_height
 	return {"view_height": view_height, "view_width": view_width, "right": centre_right, "up": centre_up, "spacing": spacing, "bottom": bottom}
+
+## Camera-plane extents of a placed building relative to its mount (the tile centre), with a
+## little room for the sway.
+static func plane_extents(model: Node3D, mount: Node3D) -> Dictionary:
+	var basis := axes()
+	var low := Vector2(INF, INF)
+	var high := Vector2(-INF, -INF)
+	var to_mount := mount.global_transform.affine_inverse()
+	for part: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if part.mesh == null or not part.visible:
+			continue
+		var box: AABB = (to_mount * part.global_transform) * part.get_aabb()
+		for corner in 8:
+			var p := box.get_endpoint(corner)
+			var at := Vector2(p.dot(basis[0] as Vector3), p.dot(basis[1] as Vector3))
+			low = low.min(at)
+			high = high.max(at)
+	if low.x == INF:
+		return {}
+	return {"right": [low.x * 1.05, high.x * 1.05], "up": [low.y, high.y]}
 
 ## Offset of a tile along the camera's right axis.
 func tile_offset(side: int, frame: Dictionary) -> float:
@@ -788,8 +842,11 @@ func _process(delta: float) -> void:
 		var scene := take(str(paths[side]))
 		if scene != null:
 			waiting.erase(side)
-			place_building(mounts[side], scene, float(scales[side]), side == 1 and int(levels[1]) > 1 and not fresh_model() and not family_start(int(levels[1])))
+			var model := place_building(mounts[side], scene, float(scales[side]), side == 1 and int(levels[1]) > 1 and not fresh_model() and not family_start(int(levels[1])))
+			model_ext[side] = plane_extents(model, mounts[side])
 			models_placed += 1
+			frame_camera()
+			queue_redraw()
 		elif not requested.has(paths[side]) and not scenes.has(paths[side]):
 			waiting.erase(side)
 	if waiting.is_empty() and view.modulate.a < 0.01 and (fade == null or not fade.is_running()):

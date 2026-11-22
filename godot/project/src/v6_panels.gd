@@ -6,6 +6,8 @@ const UnitStage = preload("res://src/unit_stage.gd")
 const V6Build = preload("res://src/v6_build.gd")
 const BuildingStage = preload("res://src/building_stage.gd")
 const Queues = preload("res://src/v6_queues.gd")
+const Services = preload("res://src/v6_services.gd")
+const Army = preload("res://src/v6_army.gd")
 const ROMAN := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"]
 var ui: Node
 var catalogue: Dictionary = {}
@@ -19,6 +21,10 @@ var recruit
 var build
 # Queues and speed-ups window (src/v6_queues.gd).
 var queue_view
+# Academy and infirmary windows (src/v6_services.gd).
+var service_view
+# Army and march windows (src/v6_army.gd).
+var army_view
 
 func begin_view() -> int:
 	navigation_request += 1
@@ -30,6 +36,8 @@ func _init(owner_node: Node) -> void:
 	recruit = Recruit.new(self)
 	build = V6Build.new(self)
 	queue_view = Queues.new(self)
+	service_view = Services.new(self)
+	army_view = Army.new(self)
 
 ## New confirmed server state (main.gd accept): the open recruitment window follows it.
 func state_changed() -> void:
@@ -602,6 +610,12 @@ func services(type: String) -> void:
 		# Training buildings: the recruitment window (switches in place when it is open).
 		recruit.open(type)
 		return
+	if type == "B15" and int(building(type).get("level", 0)) > 0:
+		service_view.research()
+		return
+	if type == "B16" and int(building(type).get("level", 0)) > 0:
+		service_view.hospital()
+		return
 	ui.open_modal(str(row_for(type, 1).name_ru), "full", "РАБОТЫ ЗДАНИЯ", ui.v6_card(type))
 	section_title("Количество")
 	var amount: SpinBox = ui.UiKit.quantity(ui.modal_body, 1, 4000, 1)[1]
@@ -802,96 +816,8 @@ func army() -> void:
 		return
 	if navigation != navigation_request or generation != ui.modal_generation:
 		return
-	ui.open_modal("Армия и осада", "full", "ПОХОДЫ")
-	warnings()
-	ui.UiKit.stat_row(ui.modal_body, "Армия", "%d / %d" % [int(ui.state.v6.army_used), int(ui.state.v6.army_capacity)])
-	ui.UiKit.progress_bar(ui.modal_body, float(ui.state.v6.army_used) / maxf(1.0, float(ui.state.v6.army_capacity)))
-	ui.UiKit.stat_row(ui.modal_body, "Поход", "до %d мест" % int(ui.state.v6.march_capacity))
-	ui.UiKit.stat_row(ui.modal_body, "Отрядов одновременно", str(int(ui.state.v6.march_parallel)))
-	ui.UiKit.stat_row(ui.modal_body, "Коек в лазарете", str(int(ui.state.v6.hospital_capacity)))
-	muted("Таран занимает 5 мест. Новые раненые сверх коек станут погибшими; доступно коек %d." % int(ui.state.v6.hospital_capacity))
-	army_units()
-	var more := links()
-	link(more, "Показать плац в городе", ui.open_parade)
-	link(more, "Раненые и лечение", services.bind("B16"))
-	var marching := false
-	for march: Dictionary in ui.state.get("armies", []) + ui.state.get("world", {}).get("armies", []):
-		if march.get("owner", ui.state.playerId) != ui.state.playerId or march.status == "returned":
-			continue
-		if not marching:
-			marching = true
-			section_title("Отряды в походе")
-		ui.UiKit.label(ui.modal_body, "%s · %s" % [str(march.name), {"outbound":"В пути к цели", "fighting":"В бою", "returning":"Возвращается"}.get(str(march.status), str(march.status))], 19, ui.UiKit.INK, ui.UiKit.LABEL_FONT)
-		if march.has("cargo") and not march.cargo.get("issued", false):
-			ui.row(ui.modal_body, "Груз поступит по прибытии отряда:")
-			for resource: String in march.cargo.resources:
-				if int(march.cargo.resources[resource]) > 0:
-					ui.row(ui.modal_body, "%s: %d" % [ui.RESOURCE_NAMES[resource], int(march.cargo.resources[resource])])
-		ui.button(ui.modal_body, "Показать отряд", ui.focus_army.bind(march))
-		if march.status in ["outbound", "fighting"]:
-			var action := {"kind":"recall" if march.status == "outbound" else "retreat", "armyId":march.id}
-			ui.button(ui.modal_body, "Отозвать" if march.status == "outbound" else "Отступить", func(): await ui.command(action); army())
-	for target: Dictionary in ui.state.get("world", {}).get("cities", []):
-		if target.id != ui.state.playerId and target.get("pvp", false):
-			ui.button(ui.modal_body, "Поход: " + str(target.name), formation.bind(str(target.id), str(target.name)))
-
-# Troops at home as portrait tiles (baked busts, ui_premium/STAGE2.md) with their counts.
-func army_units() -> void:
-	var home: Dictionary = ui.state.v6.get("healthy", {})
-	var shown: Array = []
-	for unit: Dictionary in catalogue.get("units", []):
-		var count := int(home.get(unit.unit_id, 0))
-		if unit.unit_id == "SIEGE-RAM-01":
-			count = ui.state.v6.get("machines", []).filter(func(m): return m.get("location", "") == "home").size()
-		if count > 0:
-			shown.append([str(unit.unit_id), str(unit.name_ru), count])
-	if shown.is_empty():
-		return
-	section_title("Войска в городе")
-	var flow := HFlowContainer.new()
-	flow.name = "ArmyUnits"
-	flow.add_theme_constant_override("h_separation", 14)
-	flow.add_theme_constant_override("v_separation", 10)
-	ui.modal_body.add_child(flow)
-	for entry: Array in shown:
-		var cell := VBoxContainer.new()
-		cell.add_theme_constant_override("separation", 2)
-		cell.tooltip_text = "%s · %s" % [entry[1], ui.format_balance(entry[2])]
-		flow.add_child(cell)
-		var tile: Control = ui.UiKit.icon_tile(UnitStage.portrait(entry[0], true), 76, ui.UiKit.compact(entry[2]))
-		tile.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		cell.add_child(tile)
-		var caption: Label = ui.UiKit.label(cell, entry[1], 14, ui.UiKit.INK_MUTED, null, false)
-		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		caption.custom_minimum_size.x = 92
-		caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	army_view.army()
 
 func formation(target: String, name: String) -> void:
 	begin_view()
-	ui.open_modal("Поход: " + name, "full", "СОСТАВ")
-	var inputs: Dictionary = {}
-	for unit: Dictionary in catalogue.units:
-		var available: int = int(ui.state.v6.healthy.get(unit.unit_id, 0))
-		if available <= 0:
-			continue
-		ui.row(ui.modal_body, "%s · доступно %d · мест %d" % [str(unit.name_ru), available, int(unit.army_slots)])
-		var input := SpinBox.new()
-		input.min_value = 0
-		input.max_value = mini(available, int(ui.state.v6.march_capacity)/int(unit.army_slots))
-		input.custom_minimum_size = Vector2(180, 48)
-		ui.modal_body.add_child(input)
-		inputs[unit.unit_id] = input
-	ui.button(ui.modal_body, "Рассчитать поход", func():
-		var units: Dictionary = {}
-		for id: String in inputs:
-			if int(inputs[id].value) > 0:
-				units[id] = int(inputs[id].value)
-		var body := {"kind":"worldMarch", "worldKind":"pvp", "encounterId":target, "units":units}
-		var result: Dictionary = await ui.request("march-preview", body)
-		if result.has("error"):
-			ui.show_error(result)
-			return
-		ui.open_modal("Отправить отряд", "center", "ПОДТВЕРЖДЕНИЕ")
-		ui.row(ui.modal_body, "Дорога: %d с · %d мест. Потери зависят от гарнизона и сопровождения." % [int(ceil(float(result.travelMs)/1000.0)), int(result.total)])
-		ui.button(ui.modal_body, "Отправить", func(): await ui.command(body); army())
-	)
+	army_view.formation(target, name)

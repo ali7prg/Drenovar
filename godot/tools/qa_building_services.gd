@@ -90,11 +90,14 @@ func run() -> void:
 			if not check(await wait_for(func():return not game.command_in_progress and not game.v6_panels.recruit.submitting and game.state.v6.orders.all(func(o):return o.status!="pending")),"training cancelled "+type):return
 			cases.append({"service":type,"status":"passed","window":"recruitment"})
 			continue
-		var selected: Button=null
-		for child: Node in game.modal_body.get_children():
-			if child is Button:
-				selected=child
-				break
+		# The academy and the infirmary (ui_premium/STAGE4A.md) name their first action
+		# «ServiceAction»: the first family's «Исследовать», the infirmary's «Лечить».
+		var selected: Button=game.modal_body.find_child("ServiceAction",true,false)
+		if selected==null:
+			for child: Node in game.modal_body.get_children():
+				if child is Button:
+					selected=child
+					break
 		if not check(selected!=null,"service action exists "+type):return
 		selected.pressed.emit()
 		if not check(await wait_for(func():return game.modal_title.text=="Подтвердить работу" and not game.busy and not texts(game.modal_body).has("Рассчитываем стоимость и время…")),"service quote "+type):return

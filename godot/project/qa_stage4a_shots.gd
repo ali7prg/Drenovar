@@ -229,12 +229,21 @@ func run() -> void:
 		for city: Dictionary in game.state.get("world", {}).get("cities", []):
 			if city.id != game.state.playerId and city.get("pvp", false):
 				target = city
-		if not target.is_empty():
-			await timed("formation", func(): game.v6_panels.formation(str(target.id), str(target.name)))
-			await shot("formation")
+		if target.is_empty():
+			# The fixture has no rival city: a stand-in target (display only).
+			target = {"id": "qa-target", "name": "Застава Ярополка"}
+		await timed("formation", func(): game.v6_panels.formation(str(target.id), str(target.name)))
+		await shot("formation")
+		game.close_modal()
 	if wanted("compose"):
 		var encounters: Array = game.state.get("encounters", [])
-		if not encounters.is_empty():
+		if encounters.is_empty():
+			# The settlement fixture has no creature nearby: a stand-in (display only).
+			encounters = [{"id": "qa-prey", "level": 2, "status": "active", "hp": 100, "species": "tenerys", "spec": {"name": "Тенерис"}}]
+			game.state.encounters = encounters
+		if game.state.get("healthy", {}).is_empty():
+			game.state.healthy = {"ENG-01": 61, "ENG-03": 40, "ENG-06": 16}
+		if true:
 			var prey: Dictionary = encounters[0]
 			await timed("compose", func(): game.compose_march("city", str(prey.id), game.encounter_title(prey)))
 			await shot("compose", 30)

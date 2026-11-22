@@ -1,6 +1,7 @@
 extends Node
 
 const V6Panels = preload("res://src/v6_panels.gd")
+const ReportRow = preload("res://src/report_row.gd")
 var v6_panels = V6Panels.new(self)
 
 const Landscape = preload("res://src/landscape.gd")
@@ -1899,8 +1900,13 @@ func show_speedups(queue: String, order: Dictionary, building_id: String) -> voi
 		var count := int(state.get("items", {}).get(id, 0))
 		owned_any = owned_any or count > 0
 		var label := "%s · в наличии %d" % [speed_duration(duration), count]
-		button(modal_body, label, preview_speedup.bind(queue, order, building_id, id),
+		var use := button(modal_body, label, preview_speedup.bind(queue, order, building_id, id),
 			count > 0 and not player_id.is_empty() and not speedup_in_flight)
+		# The painted item of its tier (stage 4a), the same art as the V6 window.
+		use.icon = UiKit.tex("kit_item_%s_%d" % ["train" if queue == "training" else "build", V6Panels.Queues.tier_of(duration)])
+		use.expand_icon = true
+		use.add_theme_constant_override("icon_max_width", 44)
+		use.custom_minimum_size.y = maxf(use.custom_minimum_size.y, 56)
 	if ids.is_empty():
 		row(modal_body, "Ускорение этой очереди сервер пока не поддерживает. " + SPEED_SERVER_PENDING)
 	elif not owned_any:
@@ -4154,14 +4160,16 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		formation.size_flags_stretch_ratio = 0.74
 		layout.add_child(formation)
 		var aside := VBoxContainer.new()
+		aside.add_theme_constant_override("separation", 8)
 		formation.add_child(aside)
-		row(aside, "СОСТАВ ОТРЯДА")
+		UiKit.section_header(aside, "Состав отряда")
+		slots.add_theme_constant_override("separation", 6)
 		aside.add_child(slots)
-		row(aside, "%s → %s" % [state.city.name, title])
+		UiKit.label(aside, "%s → %s" % [state.city.name, title], 17, UiKit.BRONZE, UiKit.LABEL_FONT)
 		route_map.custom_minimum_size.y = 90
 		route_map.hide()
 		aside.add_child(route_map)
-		button(aside, "Обучить ещё воинов", show_training_buildings)
+		UiKit.style_button(button(aside, "Обучить ещё воинов", show_training_buildings), "secondary", 18)
 	else:
 		roster.add_child(route_map)
 		route_map.hide()
@@ -4235,8 +4243,12 @@ func compose_march(kind: String, id: String, title: String) -> void:
 				var unit: Dictionary = unit_for_id(unit_id)
 				var slot := HBoxContainer.new()
 				slots.add_child(slot)
-				unit_art(slot, unit_id, Vector2(46, 46))
+				var portrait := PanelContainer.new()
+				portrait.add_theme_stylebox_override("panel", UiKit.tinted("kit_card_fill", Vector4(14, 14, 14, 14), UiKit.TIERS[recruit_tier(unit_id) - 1].lightened(0.18)))
+				slot.add_child(portrait)
+				unit_art(portrait, unit_id, Vector2(46, 46))
 				var remove := button(slot, "%s × %d" % [unit.name, units[unit_id]], func(): selected[unit_id].value = 0)
+				UiKit.style_button(remove, "tertiary", 17)
 				remove.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				remove.accessibility_name = "Убрать из отряда: " + unit.name
 			if units.is_empty():
@@ -4271,12 +4283,12 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		fill_party(selected, all_available)
 		selection_batch.active = false
 		update.call()
-	var heading := Label.new()
-	heading.text = "Доступные войска"
+	var heading := UiKit.label(tools, "Доступные войска", 20, UiKit.INK, UiKit.LABEL_FONT)
 	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tools.add_child(heading)
-	button(tools, "Все доступные", set_party.bind(true))
+	heading.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	UiKit.style_button(button(tools, "Все доступные", set_party.bind(true)), "secondary", 18)
 	var clear_party := button(modal_footer, "Очистить", set_party.bind(false))
+	UiKit.style_button(clear_party, "tertiary", 18)
 	# Load the models of every troop type on hand while the party is chosen.
 	if is_instance_valid(stage):
 		stage.prewarm_troops(state.get("healthy", {}).keys())
@@ -4288,7 +4300,8 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		if available < 1:
 			continue
 		var tier := recruit_tier(unit.id)
-		var entry := panel(8)
+		var entry := PanelContainer.new()
+		entry.add_theme_stylebox_override("panel", UiKit.row_style())
 		roster.add_child(entry)
 		roster.move_child(entry, first_row_index)
 		first_row_index += 1
@@ -4296,11 +4309,11 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		entry.add_child(card)
 		var controls := HBoxContainer.new()
 		card.add_child(controls)
+		controls.add_theme_constant_override("separation", 8)
 		var frame := PanelContainer.new()
-		frame.add_theme_stylebox_override("panel", WebPanels.gradient_style(RANK_COLOURS[tier - 1][0], RANK_COLOURS[tier - 1][1],
-			RANK_COLOURS[tier - 1][0].lightened(0.3), 2, 5))
+		frame.add_theme_stylebox_override("panel", UiKit.tinted("kit_card_fill", Vector4(14, 14, 14, 14), UiKit.TIERS[tier - 1].lightened(0.18)))
 		controls.add_child(frame)
-		unit_art(frame, unit.id, Vector2(52, 52))
+		unit_art(frame, unit.id, Vector2(56, 56))
 		var badge := Label.new()
 		badge.text = ["I", "II", "III", "IV", "V"][tier - 1]
 		badge.add_theme_font_size_override("font_size", 12)
@@ -4314,16 +4327,25 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		var info := VBoxContainer.new()
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		controls.add_child(info)
-		row(info, unit.name)
-		row(info, ("%s %d" % ["Доступно" if city else "В гарнизоне", available]))
+		info.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		info.add_theme_constant_override("separation", 0)
+		UiKit.label(info, unit.name, 19, UiKit.INK, UiKit.LABEL_FONT)
+		UiKit.label(info, "%s %s" % ["Доступно" if city else "В гарнизоне", format_balance(available)], 15, UiKit.INK_MUTED)
 		var amount := SpinBox.new()
-		button(controls, "−", func(): amount.value -= 1)
+		var less := button(controls, "−", func(): amount.value -= 1)
+		UiKit.style_button(less, "tertiary", 22)
+		less.custom_minimum_size = Vector2(46, 46)
+		less.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		amount.min_value = 0
 		amount.max_value = mini(available, march_limit())
 		amount.custom_minimum_size.x = 70
 		amount.get_line_edit().editable = city
+		amount.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		controls.add_child(amount)
-		button(controls, "+", func(): amount.value += 1)
+		var more := button(controls, "+", func(): amount.value += 1)
+		UiKit.style_button(more, "tertiary", 22)
+		more.custom_minimum_size = Vector2(46, 46)
+		more.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		selected[unit.id] = amount
 		if true:
 			var slider := HSlider.new()
@@ -5319,15 +5341,53 @@ func reset_session(reason := "auth_401") -> void:
 	forest_state_changed() # FOREST_RESCUE hook
 	refresh_hud()
 
+## The chronicle of battles (premium UI stage 4a): one drawn row per report, newest first,
+## with the outcome badge, the opponent, when it was, the losses and the spoils.
 func show_reports() -> void:
-	open_modal("Летопись сражений", "right")
-	if state.reports.is_empty():
-		row(modal_body,"Пока нет боевых отчётов.")
+	open_modal("Летопись сражений", "full", "ОТЧЁТЫ О БОЯХ")
+	var reports: Array = state.get("reports", []).duplicate()
+	if reports.is_empty():
+		UiKit.label(modal_body, "Пока нет боевых отчётов. Они появятся после первого похода или охоты.", 17, UiKit.INK_MUTED)
+		mark_reports_seen()
 		return
-	var reports: Array = state.reports.duplicate()
 	reports.reverse()
-	for report in reports:
-		button(modal_body, "%s · %s" % [report.creature.name, battle_outcome(report)], show_report.bind(report))
+	var now := timer_now()
+	for report: Dictionary in reports:
+		var row := ReportRow.new()
+		row.name = "Report_" + str(report.get("id", modal_body.get_child_count()))
+		row.outcome = "scout" if report.get("outcome", "") == "scout" else ("victory" if report.get("outcome", "") == "victory" else "defeat")
+		var opponent: Dictionary = report.get("creature", {})
+		row.opponent = "%s · ур. %d" % [str(opponent.get("name", "Цель")), int(opponent.get("level", 1))] if opponent.has("level") else str(opponent.get("name", "Цель"))
+		row.when = report_age(now - float(report.get("finishedAt", now)))
+		var parts: Array[String] = []
+		for section: Array in [["surviving", "в строю"], ["wounded", "ранены"], ["dead", "погибли"]]:
+			var count := total_units(report.get(section[0], {}))
+			if count > 0:
+				parts.append("%s %s" % [format_balance(count), section[1]])
+		row.losses = ", ".join(parts)
+		var resources: Dictionary = report.get("rewards", {}).get("resources", {})
+		for id in RESOURCE_NAMES:
+			if int(resources.get(id, 0)) > 0:
+				row.spoils.append([resource_icons.get(id), "+" + short_amount(int(resources[id]))])
+		if int(report.get("rewards", {}).get("xp", 0)) > 0:
+			row.spoils.append([UiKit.tex("kit_ic_power"), "+%s опыта" % format_balance(int(report.rewards.xp))])
+		row.unread = float(report.get("finishedAt", 0.0)) > reports_seen_ms
+		row.tooltip_text = "%s · %s" % [str(opponent.get("name", "Цель")), battle_outcome(report)]
+		row.accessibility_name = row.tooltip_text
+		row.pressed.connect(show_report.bind(report))
+		modal_body.add_child(row)
+	mark_reports_seen()
+
+static func report_age(milliseconds: float) -> String:
+	var minutes := int(maxf(0.0, milliseconds) / 60000.0)
+	if minutes < 1:
+		return "только что"
+	if minutes < 60:
+		return "%d мин назад" % minutes
+	if minutes < 24 * 60:
+		return "%d ч назад" % (minutes / 60)
+	var days := minutes / (24 * 60)
+	return "вчера" if days == 1 else "%d дн. назад" % days
 
 func battle_outcome(report: Dictionary) -> String:
 	return "Победа" if report.outcome == "victory" else "Поражение"
@@ -5366,8 +5426,19 @@ func show_report(report: Dictionary, announced := false) -> void:
 	var spacer := Control.new()
 	spacer.custom_minimum_size.x = 48
 	heading.add_child(spacer)
-	var sigil := result_label(heading, "⚔", 37, Color("#e5c57d"))
+	var sigil := Control.new()
+	sigil.name = "ReportSigil"
+	sigil.custom_minimum_size = Vector2(0, 74)
 	sigil.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sigil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sigil_emblem: String = ReportRow.badge_of("victory" if victory else str(report.get("outcome", "defeat")))[2]
+	sigil.draw.connect(func():
+		var d := 72.0
+		var centre := Vector2(sigil.size.x * 0.5, 37.0)
+		sigil.draw_circle(centre + Vector2(0, 3), d * 0.5 + 2.0, Color(0, 0, 0, 0.4), true, -1.0, true)
+		sigil.draw_texture_rect(UiKit.tex("kit_rail_on" if victory else "kit_rail"), Rect2(centre - Vector2(d, d) * 0.5, Vector2(d, d)), false)
+		sigil.draw_texture_rect(UiKit.tex(sigil_emblem), Rect2(centre - Vector2(d, d) * 0.29, Vector2(d, d) * 0.58), false))
+	heading.add_child(sigil)
 	var back := close_modal if announced else show_reports
 	# Kit bronze medallion (the result sheet has no header band of its own).
 	var dismiss := UiKit.close_button(back)
@@ -5380,15 +5451,49 @@ func show_report(report: Dictionary, announced := false) -> void:
 	var stats := HBoxContainer.new()
 	stats.add_theme_constant_override("separation", 9)
 	modal_body.add_child(stats)
-	for section in [["surviving", "В строю"], ["wounded", "Ранены"], ["dead", "Погибли"]]:
-		var box := panel(5)
+	for section in [["surviving", "В строю", Color("#9fe08f")], ["wounded", "Ранены", Color("#f0c76a")], ["dead", "Погибли", Color("#f08a7a")]]:
+		var box := PanelContainer.new()
 		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		box.add_theme_stylebox_override("panel", Interface.style(Color("#162e24"), Color("#a8995966"), 7, 5, 7))
+		box.add_theme_stylebox_override("panel", report_tile_style())
 		stats.add_child(box)
 		var labels := VBoxContainer.new()
+		labels.add_theme_constant_override("separation", 0)
 		box.add_child(labels)
-		result_label(labels, format_balance(total_units(report.get(section[0], {}))), 33, WebPanels.IVORY, true)
-		result_label(labels, section[1], 15, Color("#b6c4ab"))
+		result_label(labels, format_balance(total_units(report.get(section[0], {}))), 31, section[2], true)
+		result_label(labels, section[1], 15, Color("#d8c7a4"))
+	# Each unit of the party: its portrait, then standing, wounded and fallen.
+	var unit_ids: Array = []
+	for section in ["surviving", "wounded", "dead"]:
+		for unit_id in report.get(section, {}):
+			if not unit_id in unit_ids:
+				unit_ids.append(unit_id)
+	if not unit_ids.is_empty():
+		var table := VBoxContainer.new()
+		table.name = "ReportUnits"
+		table.add_theme_constant_override("separation", 4)
+		modal_body.add_child(table)
+		var header := HBoxContainer.new()
+		header.add_theme_constant_override("separation", 10)
+		table.add_child(header)
+		var indent := Control.new()
+		indent.custom_minimum_size.x = 40
+		header.add_child(indent)
+		var header_name := result_label(header, "Отряд", 14, Color("#b9a580"))
+		header_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		header_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for caption in ["в строю", "ранены", "погибли"]:
+			result_label(header, caption, 14, Color("#b9a580")).custom_minimum_size.x = 64
+		for unit_id in unit_ids:
+			var line := HBoxContainer.new()
+			line.add_theme_constant_override("separation", 10)
+			table.add_child(line)
+			unit_art(line, str(unit_id), Vector2(40, 40))
+			var unit_name := result_label(line, str(unit_for_id(str(unit_id)).get("name", unit_id)), 16, Color("#efe2c6"))
+			unit_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+			unit_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			for section in [["surviving", Color("#9fe08f")], ["wounded", Color("#f0c76a")], ["dead", Color("#f08a7a")]]:
+				var count := result_label(line, format_balance(int(report.get(section[0], {}).get(unit_id, 0))), 17, section[1])
+				count.custom_minimum_size.x = 64
 	# Attack on a city: what its wall and watchtower added to the defenders.
 	var fort: Variant = report.get("fortification")
 	if fort is Dictionary:
@@ -5418,6 +5523,8 @@ func show_report(report: Dictionary, announced := false) -> void:
 	if int(rewards.get("xp", 0)) > 0:
 		add_reward_chip(loot, "Опыт", int(rewards.xp))
 	loot.visible = loot.get_child_count() > 0
+	# The spoils right under the figures, the per-unit table after them.
+	modal_body.move_child(loot, stats.get_index() + 1)
 	var wounded := total_units(report.get("wounded", {}))
 	var dead := total_units(report.get("dead", {}))
 	var recovery := "Уцелевшие пополнят гарнизон после возвращения."
@@ -5432,15 +5539,47 @@ func show_report(report: Dictionary, announced := false) -> void:
 	var continue_button := panel_action(modal_footer, "Продолжить", back)
 	continue_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
+static var report_tile: StyleBox
+static var reward_plate: StyleBox
+
+## Dark enamel tile of a report figure in a bronze rim.
+static func report_tile_style() -> StyleBox:
+	if report_tile == null:
+		var tile := StyleBoxFlat.new()
+		tile.bg_color = Color("#1f1710")
+		tile.border_color = Color("#b48a4a")
+		tile.set_border_width_all(2)
+		tile.set_corner_radius_all(8)
+		tile.content_margin_top = 6
+		tile.content_margin_bottom = 6
+		tile.shadow_color = Color(0, 0, 0, 0.35)
+		tile.shadow_size = 3
+		report_tile = tile
+	return report_tile
+
 func add_reward_chip(parent: Container, name: String, amount: int, icon := "") -> void:
-	var chip := panel(5)
-	chip.add_theme_stylebox_override("panel", Interface.style(Color("#0c2119"), Color("#b49a5980"), 5, 8, 4))
+	# An oak plate with the resource icon and the credited amount (the label text is what
+	# the reward checks read: «Еда +1 500»).
+	if reward_plate == null:
+		reward_plate = UiKit.nine("kit_strip", Vector4(26, 14, 26, 14), Vector4(24, 4, 24, 6))
+	var chip := PanelContainer.new()
+	chip.add_theme_stylebox_override("panel", reward_plate)
 	parent.add_child(chip)
 	var content := HBoxContainer.new()
+	content.add_theme_constant_override("separation", 6)
 	chip.add_child(content)
 	if not icon.is_empty():
-		add_resource_icon(content, icon, 24)
-	result_label(content, "%s +%s" % [name, format_balance(amount)], 17, WebPanels.IVORY)
+		add_resource_icon(content, icon, 26)
+	elif name == "Опыт":
+		var star := TextureRect.new()
+		star.texture = UiKit.tex("kit_ic_power")
+		star.custom_minimum_size = Vector2(24, 24)
+		star.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		star.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		star.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		content.add_child(star)
+	var value := result_label(content, "%s +%s" % [name, format_balance(amount)], 17, UiKit.GOLD)
+	value.add_theme_font_override("font", UiKit.LABEL_FONT)
 
 func accept(response: Dictionary) -> void:
 	if not loopback and response.has("city") and response.get("economy_version", "") != "DRENOVAR-V6-C1.0":

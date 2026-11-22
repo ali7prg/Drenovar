@@ -334,6 +334,13 @@ func run() -> void:
 					check(forest.hud.battle_header.visible, "battle header restored mid-battle")
 				if boss_fight:
 					await check_boss_phases(fight, mid, float(fight.endsAt))
+					# The final boss model, loaded in the background like every forest actor.
+					var wait_until := Time.get_ticks_msec() + 30000
+					while (forest.actors.rigs.get("boss") == null or forest.actors.rigs.boss.model == null) and Time.get_ticks_msec() < wait_until:
+						await process_frame
+					var boss_rig: Node = forest.actors.rigs.get("boss")
+					check(boss_rig != null and boss_rig.model != null, "boss drawn with its model during the fight")
+					report.boss_model = String(boss_rig.asset_path) if boss_rig != null and boss_rig.model != null else ""
 				await advance_to(float(fight.endsAt) + 300.0)
 				var result: Dictionary = forest.client.battle()
 				check(String(result.get("outcome", "")) == "victory", "battle victory " + action + " " + String(result.get("outcome", "")))

@@ -404,7 +404,7 @@ func build_ui() -> void:
 	profile_button = hud_action(bar, "Профиль", "profile", show_account)
 	profile_button.name = "ProfileButton"
 	var wallet := HBoxContainer.new()
-	wallet.add_theme_constant_override("separation", 6)
+	wallet.add_theme_constant_override("separation", 2)
 	wallet.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	wallet.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	wallet.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -646,11 +646,9 @@ func setup_resource_icons() -> void:
 func add_resource_button(wallet: Container, key: String) -> void:
 	var control := button(wallet, "", show_economy.bind(key))
 	control.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
-	control.custom_minimum_size = Vector2(112, 42)
-	# Dark oak pill under each balance (src/ui_kit.gd).
-	var chip := UiKit.hud_chip_styles()
-	for state_name: String in chip:
-		control.add_theme_stylebox_override(state_name, chip[state_name])
+	control.custom_minimum_size = Vector2(108, 44)
+	# No backing plate over the city (qa_camera_hud); the outline + shadow carry legibility.
+	Interface.hud_button(control)
 	resource_buttons[key] = control
 	var card := HBoxContainer.new()
 	card.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

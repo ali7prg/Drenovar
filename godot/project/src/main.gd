@@ -5649,14 +5649,19 @@ func advanced_state(server_ms: float) -> Dictionary:
 			# Counted in the server's carry units (1/36 000 000 of a resource; an hour of production is
 			# pph × 10 000 units per second), so a whole stock stays whole: the old "− 1e-7 before the
 			# floor" turned an idle 0 into −1 (stone and iron showed −1 after a 304). A rational carry
-			# {n, d} is taken one unit low, so the client never shows more than the server.
+			# {n, d} (a fraction of one resource) is converted exactly with integers while n × 36e6 fits
+			# in 64 bits, so a whole stock stays whole (taking it one unit low showed 401 for 402.0);
+			# only larger values fall back to floats, one unit low, so the client never shows more.
 			var carry_value: Variant = v6.get("carry", {}).get(resource, 0)
 			var carry_units := 0.0
 			if carry_value is Dictionary:
-				var numerator := str(carry_value.get("n", "0"))
-				var d := float(str(carry_value.get("d", "1")))
-				if numerator != "0" and d != 0.0:
-					carry_units = maxf(0.0, floorf(float(numerator) / d * CARRY_UNITS) - 1.0)
+				var numerator := str(carry_value.get("n", "0")).strip_edges()
+				var denominator := str(carry_value.get("d", "1")).strip_edges()
+				if numerator.is_valid_int() and denominator.is_valid_int() and numerator.length() <= 11 \
+						and denominator.length() <= 18 and denominator.to_int() > 0 and numerator.to_int() >= 0:
+					carry_units = float((numerator.to_int() * int(CARRY_UNITS)) / denominator.to_int())
+				elif numerator != "0" and float(denominator) != 0.0:
+					carry_units = maxf(0.0, floorf(float(numerator) / float(denominator) * CARRY_UNITS) - 1.0)
 			else:
 				carry_units = floorf(float(carry_value))
 			var gained := float(v6.get("production_per_hour", {}).get(resource, 0)) * since * (CARRY_UNITS / 3600.0)

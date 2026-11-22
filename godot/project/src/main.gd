@@ -1026,8 +1026,10 @@ func building_card(type: String) -> Texture2D:
 # Card art of a V6 building type: the model the city shows for its instance, else the
 # model of the same purpose (premium window hero, src/ui_kit.gd).
 const V6_CARD_KEYS := {"B01":"hall", "B02":"house", "B03":"warehouse", "B05":"market27", "B06":"lumber",
-	"B07":"quarry27", "B08":"ironmine27", "B11":"barracks26", "B12":"range26", "B13":"stables26",
-	"B15":"academy27", "B16":"hospital27", "B20":"well", "B21":"lumber"}
+	"B07":"quarry27", "B08":"ironmine27", "B09":"farm", "B10":"hunt27", "B11":"barracks26", "B12":"range26",
+	"B13":"stables26", "B14":"smith", "B15":"academy27", "B16":"hospital27", "B17":"workshop27", "B18":"gate27",
+	"B19":"watchtower27", "B20":"well", "B21":"lumber", "B22":"farm", "B23":"hunt27", "B24":"fishing27",
+	"B25":"herbal27"}
 
 func v6_card(type: String) -> Texture2D:
 	var instance: Dictionary = v6_panels.building(type) if v6_panels.enabled() else {}

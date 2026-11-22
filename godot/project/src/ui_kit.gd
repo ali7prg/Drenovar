@@ -602,7 +602,8 @@ static func tier_card(tier: int, title: String, count_text: String, art: Texture
 	return card
 
 ## Icon tile (dark enamel square in bronze) holding a texture.
-static func icon_tile(icon: Texture2D, size := 64) -> PanelContainer:
+## Item tile; count_text ("×3") sits in the lower right corner like a stack count.
+static func icon_tile(icon: Texture2D, size := 64, count_text := "") -> PanelContainer:
 	var tile := PanelContainer.new()
 	tile.custom_minimum_size = Vector2(size, size)
 	tile.add_theme_stylebox_override("panel", nine("kit_tile", Vector4(14, 14, 14, 14), Vector4(8, 8, 8, 8)))
@@ -615,6 +616,19 @@ static func icon_tile(icon: Texture2D, size := 64) -> PanelContainer:
 		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		tile.add_child(picture)
+	if not count_text.is_empty():
+		var count := Label.new()
+		count.name = "KitCount"
+		count.text = count_text
+		count.add_theme_font_override("font", LABEL_FONT)
+		count.add_theme_font_size_override("font_size", 16)
+		count.add_theme_color_override("font_color", IVORY)
+		count.add_theme_color_override("font_outline_color", Color("#1a120a"))
+		count.add_theme_constant_override("outline_size", 5)
+		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		count.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tile.add_child(count)
 	return tile
 
 ## Stat line: name on the left, value (and an optional green gain) on the right, a bronze

@@ -222,10 +222,11 @@ func inspect(type: String) -> void:
 		step.alignment = BoxContainer.ALIGNMENT_CENTER
 		step.add_theme_constant_override("separation", 18)
 		ui.modal_body.add_child(step)
-		ui.UiKit.label(step, "Уровень " + ROMAN[level-1], 26, ui.UiKit.INK, ui.UiKit.LABEL_FONT, false)
+		# Display face: Philosopher's capital I reads like a lower-case l in numerals.
+		ui.UiKit.label(step, "Уровень " + ROMAN[level-1], 25, ui.UiKit.INK, ui.UiKit.TITLE_FONT, false)
 		if not upcoming.is_empty():
 			ui.UiKit.mark(step, "arrow", ui.UiKit.GOOD, 24.0)
-			ui.UiKit.label(step, ROMAN[level], 26, ui.UiKit.GOOD, ui.UiKit.LABEL_FONT, false)
+			ui.UiKit.label(step, ROMAN[level], 25, ui.UiKit.GOOD, ui.UiKit.TITLE_FONT, false)
 		for metric: String in row.effects:
 			var later: Variant = upcoming.get("effects", {}).get(metric)
 			var gain := ""
@@ -245,7 +246,7 @@ func inspect(type: String) -> void:
 			need.add_theme_constant_override("separation", 10)
 			ui.modal_body.add_child(need)
 			ui.UiKit.mark(need, "tick" if ok else "lozenge", ui.UiKit.GOOD if ok else ui.UiKit.BAD, 18.0)
-			ui.UiKit.label(need, "%s · уровень %s или выше" % [row_for(d.building_id, 1).name_ru, ROMAN[int(d.level)-1]], 17, ui.UiKit.GOOD if ok else ui.UiKit.BAD)
+			ui.UiKit.label(need, "%s · уровень %s или выше" % [row_for(d.building_id, 1).name_ru, ROMAN[int(d.level)-1]], 17, ui.UiKit.GOOD if ok else ui.UiKit.BAD).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var action := {"kind":"construction", "building":type, "target":level+1}
 		if level > 0:
 			var check: Button = ui.panel_action(ui.modal_body, "Проверить улучшение", confirm.bind(action))
@@ -502,7 +503,7 @@ func trade() -> void:
 		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		deals.add_child(name)
 		ui.add_resource_icon(name, r, 34)
-		ui.UiKit.label(name, str(ui.RESOURCE_NAMES[r]), 19, ui.UiKit.INK, ui.UiKit.LABEL_FONT).size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		ui.UiKit.label(name, str(ui.RESOURCE_NAMES[r]), 19, ui.UiKit.INK, ui.UiKit.LABEL_FONT, false).size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var buy: Button = ui.button(deals, "Купить " + str(ui.RESOURCE_NAMES[r]), func(): send({"kind":"trade", "direction":"buy", "resource":r, "quantity":int(amount.value)}))
 		ui.UiKit.style_button(buy, "green", 17)
 		buy.custom_minimum_size.x = 200
@@ -516,8 +517,16 @@ func metric_value(metric: String, value: Variant) -> String:
 	if metric.ends_with("_bp"):
 		return String.num(float(value) / 100.0, 2) + "%"
 	if metric.ends_with("_rate_h") or metric.ends_with("_hp_h"):
-		return "%s/ч" % str(value)
-	return str(value)
+		return "%s/ч" % plain_number(value)
+	return plain_number(value)
+
+# 3000.0 reads "3 000"; fractions keep up to two decimals.
+func plain_number(value: Variant) -> String:
+	if not (value is float or value is int):
+		return str(value)
+	if is_equal_approx(float(value), roundf(float(value))):
+		return ui.format_balance(int(roundf(float(value))))
+	return String.num(float(value), 2)
 
 func account() -> void:
 	begin_view()
@@ -646,13 +655,14 @@ func speedups(order: Dictionary) -> void:
 			var line := HBoxContainer.new()
 			line.add_theme_constant_override("separation", 14)
 			card.add_child(line)
-			line.add_child(ui.UiKit.icon_tile(ui.UiKit.tex("kit_hourglass"), 60))
+			line.add_child(ui.UiKit.icon_tile(ui.UiKit.tex("kit_hourglass"), 64, "×%d" % count))
 			var texts := VBoxContainer.new()
 			texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			texts.alignment = BoxContainer.ALIGNMENT_CENTER
 			line.add_child(texts)
 			ui.UiKit.label(texts, "Ускорение · %s" % duration(seconds), 20, ui.UiKit.INK, ui.UiKit.LABEL_FONT)
-			ui.UiKit.label(texts, "Сокращает %s работы «%s» на %s · в наличии: %d" % ["время", "Строительство" if queue == "construction" else "Обучение", duration(seconds), count], 16, ui.UiKit.INK_MUTED)
+			ui.UiKit.label(texts, "Сокращает время работы «%s» на %s" % ["Строительство" if queue == "construction" else "Обучение", duration(seconds)], 16, ui.UiKit.INK_MUTED)
+			ui.UiKit.label(texts, "В наличии: %d" % count, 16, ui.UiKit.BRONZE, ui.UiKit.LABEL_FONT)
 			var use := work_button(line, "Использовать", func():
 				var remaining: float = (float(order.ends_at)*1000.0-ui.timer_now())/1000.0
 				if remaining <= 0:

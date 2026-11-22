@@ -124,6 +124,10 @@ func run() -> void:
 			for item: Dictionary in game.state.v6.orders:
 				if item.status == "pending":
 					order = item
+	if order.is_empty():
+		for item: Dictionary in game.state.v6.get("orders", []):
+			if item.status == "pending":
+				order = item
 	if wanted("queues"):
 		await timed("queues", game.v6_panels.queues)
 		await shot("queues")

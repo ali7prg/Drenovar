@@ -2408,6 +2408,7 @@ func close_modal() -> void:
 		dialog_tween.kill()
 	dimmer.hide()
 	modal.hide()
+	cover_city(false)
 	modal.scale = Vector2.ONE
 	modal.modulate.a = 1.0
 	empty(modal_body)
@@ -2833,6 +2834,19 @@ func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D
 			dialog_tween.parallel().tween_property(modal, "offset_bottom", modal.offset_bottom - 60, 0.14).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	else:
 		modal.scale = Vector2.ONE
+	# A full-screen window hides the whole city: its 3D pass is skipped once the window has
+	# settled (the recruitment stage renders in its own SubViewport).
+	if layout != "full":
+		cover_city(false)
+	elif entering and dialog_tween != null and dialog_tween.is_running():
+		dialog_tween.finished.connect(func(): cover_city(modal.visible and modal_layout == "full"))
+	else:
+		cover_city(true)
+
+func cover_city(covered: bool) -> void:
+	var view := get_viewport()
+	if view != null and view.disable_3d != covered:
+		view.disable_3d = covered
 
 func panel_action(parent: Container, caption: String, action: Callable, enabled := true, danger := false) -> Button:
 	var control := button(parent, caption, action, enabled)

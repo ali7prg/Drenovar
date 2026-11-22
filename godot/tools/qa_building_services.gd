@@ -75,6 +75,21 @@ func run() -> void:
 		await admin("case",{"type":type,"level":11})
 		await game.sync_account()
 		await game.v6_panels.services(type)
+		if type in ["B11","B12","B13","B17"]:
+			# Training buildings open the recruitment window (ui_premium/STAGE2.md): «Обучить»
+			# checks the server quote and sends that order in place; the running order and its
+			# cancel (two taps) stay in the same window.
+			var train: Button=game.modal.find_child("RecruitTrain",true,false)
+			if not check(train!=null and not train.disabled,"training available "+type+str(texts(game.modal_body))):return
+			train.pressed.emit()
+			if not check(await wait_for(func():return not game.command_in_progress and not game.v6_panels.recruit.submitting and game.state.v6.orders.any(func(o):return o.status=="pending")),"training accepted "+type):return
+			if not check(await wait_for(func():return game.modal.find_child("RecruitOrder",true,false)!=null),"order shown in the window "+type):return
+			var stop: Button=game.modal.find_child("RecruitCancel",true,false)
+			stop.pressed.emit()
+			stop.pressed.emit()
+			if not check(await wait_for(func():return not game.command_in_progress and not game.v6_panels.recruit.submitting and game.state.v6.orders.all(func(o):return o.status!="pending")),"training cancelled "+type):return
+			cases.append({"service":type,"status":"passed","window":"recruitment"})
+			continue
 		var selected: Button=null
 		for child: Node in game.modal_body.get_children():
 			if child is Button:

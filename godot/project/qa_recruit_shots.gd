@@ -98,7 +98,7 @@ func run() -> void:
 	await wait_until(func(): return game.v6_panels.enabled(), 30.0)
 	await game.v6_panels.load_catalogue()
 	# Owned troops: three finished orders (the fixture clock only moves when told to).
-	await train("ENG-01", 40)
+	await train("ENG-01", 24)
 	await train("ENG-03", 24)
 	await train("ENG-06", 12)
 	var last := 0
@@ -146,7 +146,10 @@ func run() -> void:
 					await game.v6_panels.queues()
 				await shot("recruit_progress")
 			if wanted("speedups"):
-				await game.v6_panels.speedups(pending()[0])
+				if premium():
+					await game.v6_panels.speedups(pending()[0], game.v6_panels.services.bind("B11"))
+				else:
+					await game.v6_panels.speedups(pending()[0])
 				await shot("recruit_speedups")
 	if game.modal.visible:
 		game.close_modal()

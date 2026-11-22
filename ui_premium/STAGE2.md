@@ -214,6 +214,69 @@ The side-by-side sheets with the reference stayed outside the repository.
   - The badge-shadow hairline is gone.
   - The model cache is dropped on close.
   - The city's 3D pass is skipped under full-screen windows.
+- **Pass 3** (review before stage 3; the `after_*` stills were re-shot after it):
+  - **Atmosphere.**
+    - The stage is now the dominant element. A large, saturated ink-and-watercolour splash
+      (`kit_ink`, 512², painted by `paint_kit.py`) is drawn in the tier colour: I iron-grey,
+      II green, III blue, IV purple, V amber.
+      - It is laid in four passes: a mirrored bleed, the splash twice, and a dark core.
+      - It has hard pooled edges, bristle strokes, splatter and granulation.
+    - A carved Slavic solar medallion sits inside it (`kit_solar`: notched double ring,
+      lozenges and a six-petal rosette).
+    - A warm beam and a bloom fall on the figure from the upper left (`kit_beam`, additive).
+    - A candle glow sits behind the stage.
+    - The recruitment window has its own firelit vignette, warm toward the edges and deep
+      red-brown at the rim, instead of the plain one.
+  - **Hero framing.**
+    - Every unit is framed on its posed silhouette, weapons included. The portrait bake
+      measures it over eight poses of the stage animation and stores it in
+      `assets/ui/units/framing.json`. The lance tip stays inside the stage, below the header.
+    - The figure fills the stage from 3.5 % to 82 % of its height. Cards use the same silhouette
+      cut at the helmet, so a lance does not shrink the knight on a card.
+    - The gold dais is gone. It is replaced by a plinth built in code (`make_plinth`):
+      - an oak log section with end grain, cracks, bark and moss on top (`kit_dais_top`) and a
+        band of Slavic notch carving round the side (`kit_dais`, repainted without gilding);
+      - a contact shade at its foot;
+      - an irregular mossy field stone under it with a dark ring where the oak stands, and a
+        soft shadow on the wash.
+    - The ram gets a wide, low plinth round its wheels and a narrower framing (70 % of the
+      stage width). It no longer stands on a high dais, and the name plate sits on the plinth's
+      front edge with no gap.
+  - **Rail.** The rail now shows painted bronze emblems instead of busts (`kit_emb_inf`
+    spear and shield, `kit_emb_bow`, `kit_emb_horse`, `kit_emb_ram`), with a gold ring on the
+    selected one and a label under each.
+  - **Less text.**
+    - The two hint lines became three icon chips:
+      - batch limit «до N»;
+      - army «used / capacity», orange when the batch does not fit;
+      - queue «orders / places», with the hourglass icon, orange when full.
+    - Each chip has an «i». Its tooltip (or a tap) shows the long explanation in one line under
+      the chips; quote failures use the same line in red.
+    - The tiny eyebrow «ОБУЧЕНИЕ ВОЙСК · УРОВЕНЬ N» moved into a small plate hanging under the
+      title.
+    - Unit figures are icons with numbers: attack, defence, health and power; wall damage and
+      army places for the ram. The caption is the tooltip.
+  - **Unit render.**
+    - Key light is warmer (#ffdcb0, 1.85) with soft shadows, fill is cool, and the rim is warm.
+      A cooler kicker light sits on the other side.
+    - Filmic tonemap at exposure 1.0.
+    - Rim and kicker add only a little specular and no sun in the reflection sky, so polished
+      metal no longer flares.
+    - Skin has less sheen. Cloth, leather and horse coats get a faint velvet rim.
+    - The plinth materials are matt, because a grazing sheen made the end grain look like vinyl.
+    - At rest the unit sways ±5° over 11 s, so the stage never freezes.
+    - All 12 portraits were rebaked with the same rig.
+  - **Tier cards.** Cards are larger (146×204) and drawn on the tier colour with the ink wash and
+    a faint solar disc. They have:
+    - a gilt ornament frame with corner lozenges;
+    - a bronze-edged owned-count plate with the banner icon;
+    - a larger numeral badge;
+    - a darker veil over locked tiers.
+  - **First open.** After the launch screen is gone, `main.warm_windows()` shapes the window fonts'
+    glyphs at the sizes and outlines the window uses. It does a few sizes per frame, about 40
+    frames in all, from an off-screen node (`UiKit.warm_text`). It also makes the stage's gradients,
+    framing and environment, and starts decoding the plinth stone (`UnitStage.warm_stage`). The
+    launch itself is unchanged.
 
 ## Measurements
 
@@ -230,12 +293,15 @@ software rasteriser) under xvfb, against the synthetic localhost fixture.
 | warm open, median of 5 | B11 4.9 ms, B12 8.5 ms (an earlier run: 5.3 and 7.7) | ≈1.6–1.8 ms |
 | first open of each building in a session | B11 6.6, B12 7.5, B13 5.1, B17 6.0 ms (a second run: 7.8, 5.8, 5.9, 8.6) | B11 7.3, B12 2.8, B13 1.8, B17 2.0 ms |
 | first open at 2532×1170 | 10.5 ms | — |
-| first open ever, headless (`qa_recruitment`, cold glyphs and textures) | 14.8–16 ms | — |
+| first open ever, headless (`qa_recruitment`, cold glyphs and textures; before pass 3) | 14.8–16 ms | — |
+| first open ever after pass 3, headless (`qa_recruitment`, after the post-launch warm-up) | 6.5 / 8.2 ms (11.3 ms if opened before the warm-up ends) | — |
+| first open ever after pass 3, lavapipe (`qa_recruit_shots`, B11) | 8.6 / 9.8 ms (14.8 ms before the warm-up was wired) | — |
+| later opens after pass 3, lavapipe | B11 4.0, B12 4.9, B13 4.6–6.3, B17 4.7–7.8 ms | — |
 | 3D world build, one frame later (`frame_post_draw`) | 1.9–2.5 ms | — |
 
 The window builds about five times as many controls as the old one. It costs about three times as
-much on the main thread, and still fits one 60 Hz frame (16.7 ms). The first open of a session is
-the closest to that limit. The model loads on a worker thread and does not add to these numbers.
+much on the main thread, and still fits one 60 Hz frame (16.7 ms). After pass 3 the first open of a
+session is within the range of the later ones, instead of about twice as slow. The model loads on a worker thread and does not add to these numbers.
 
 **Per frame while open** (median of 90 frames after 20 frames of warm-up; draw calls are the
 whole frame, all viewports):
@@ -253,9 +319,14 @@ The live stage renders at device resolution with 4× MSAA. With the city skipped
 window, the open recruitment window costs about a sixth of the city frame on this renderer.
 
 **Assets**:
-- 12 unit portraits: 117 KiB (WebP q90; full figures 288×352, busts 128×128).
+- 12 unit portraits: 146 KiB after pass 3 (WebP q90; full figures 288×352, busts 128×128),
+  plus `framing.json`.
+- Pass-3 kit textures: 234 KiB in all.
+  - `kit_ink` 66 KB, `kit_solar` 49 KB, `kit_beam` 6 KB, `kit_dais_top` 10 KB (all lossy).
+  - Four rail emblems, 8–9 KB each.
+  - Seven stat icons, 1–2.5 KB each.
 - `kit_header_tall.res`: 43 KB.
-- `kit_dais.res`: 58 KB.
+- `kit_dais.res`: 50 KB (repainted in pass 3).
 - `kit_dais_n.res`: 6 KB.
 - `kit_badge.res`: 2.6 KB (rebaked).
 - Stills in `ui_premium/shots/stage2/` (JPEG q85): about 150 KB each at 1366×630, 350 KB at 2532×1170.
@@ -292,6 +363,17 @@ window, the open recruitment window costs about a sixth of the city frame on thi
   longer open the works → confirm → queues chain. Each of B11, B12, B13 and B17 now uses 4 checks
   (available, accepted, shown in the window, cancelled) instead of 5. The removed check was for the
   confirm window, which these buildings no longer have. The hospital and academy keep the old path.
+- **Pass 3.** `qa_recruitment` waits for the post-launch warm-up to finish (`launch_done`
+  and no `KitWarm` node) before its first open. A player cannot tap a building within the
+  first second after the launch screen. The pass-3 re-run passed with the same counts:
+  - `qa_recruitment` 56;
+  - `qa_building_actions` 297 states / 4469 checks;
+  - `qa_building_services` 42;
+  - `qa_button_responsiveness` 50;
+  - `qa_panel_latency` 26;
+  - `qa_troops06` 122;
+  - `qa_v6_panel_feedback` 12;
+  - `qa_instant_start` 12 (launch 1.4–1.7 s headless).
 - **Test environment.**
   - `qa_net_1022` runs its fixture without `DRENOVAR_QA_ADVENTURE`; with adventures on, its town
     checks fail.
@@ -302,24 +384,25 @@ window, the open recruitment window costs about a sixth of the city frame on thi
 
 ## Still below the reference
 
+After pass 3:
 - **The model, not the frame.** The reference's hero units are high-detail sculpted models in
-  dynamic poses, with rich materials and a rock plinth that merges into the ink wash. Ours are the
-  game's own preview models (lower poly, simpler textures) in a calm idle on a carved dais.
-  - The composition matches, but the figure is the weakest part of the window. Better unit art is
-    an art-production task, not UI work.
-  - The knight's lance runs under the header band; the reference keeps weapons inside the wash.
-- **Few tiers per building.** The reference shows five to seven tier cards per building. The V6
-  catalogue has one or two units per training building, so the card row looks sparse and the
-  summary takes the room.
-- **More words than icons.** The hint line, the free-queue row and the locked-unit requirements are
-  text. The reference says the same with icons and one short line.
-- **No atmosphere layer.** There is no animated border glow or vignette around the stage (the
-  reference has a fire-lit frame). Embers and the halo are the only motion besides the unit.
-- **The ram stands high.** Its dais sits higher than the troops' (the framing fits its length), so
-  there is a gap between the dais and the name plate.
+  dynamic poses with rich materials. Ours are the game's own preview models (lower poly, simpler
+  textures) in a calm idle.
+  - Lighting, rim and materials now get the most out of them. The figure is still the weakest
+    part of the window, and better unit art is an art-production task.
+  - The spearman's kettle-hat brim still reads as a bright ring. That is its pale metal under the
+    key light, from the model's texture.
+- **Few tiers per building.** The V6 catalogue has one or two units per training building. The
+  reference shows five to seven cards. Larger, richer cards and the summary beside them fill the
+  row, but it is not the reference's full strip.
+- **Atmosphere is static.** The splash, medallion, light beam and vignette are painted. Only the
+  embers, the sway and the idle animation move. There is no animated fire or glow at the window
+  edges.
+- **The ram is box-like.** It is built from simple CI geometry, so even well framed on its plinth
+  it looks blockier than the troops.
+  - Its first live frame on lavapipe takes about 0.5 s while its material compiles. This is a
+    software-renderer cost of the one-time shader build, not measured on a phone.
+  - The stills used a locally built ram scene in the git-ignored
+    `assets/city/architecture-v6/units/`, which was removed afterwards.
 - **Untested on a phone.** No real-device frame time was measured. The lavapipe GPU numbers only
   give relative costs.
-- **First open is close to a frame.** The first open of a session is close to one 60 Hz frame on
-  the main thread (cold glyphs). Pre-shaping the window's fonts during warm-up would remove that.
-- **The rail shows busts, not emblems.** This is deliberate (the unit you will train), but it is
-  less instantly readable than the reference's branch emblems at small sizes.

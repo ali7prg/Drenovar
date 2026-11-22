@@ -105,6 +105,7 @@ const RUN_TEMPO := Vector2(0.0, 1.6)
 const WORLD_RUN_TEMPO := 2.5
 var run_tempo_max := RUN_TEMPO.y
 const MARCH_LINE := preload("res://src/fx_march.gdshader")
+const PLOT_GLOW := preload("res://src/plot_glow.gdshader")
 # Creature bodies at scale 1, measured from the GLB models: half length (the head
 # is at +X) and half width. Battle places hug this outline.
 const CREATURE_BODY := {"velkor": Vector2(2.51, 1.19), "tenerys": Vector2(2.63, 0.69),
@@ -4205,6 +4206,61 @@ func show_placement(model_path: String, model_scale: float, plots: Array) -> voi
 	for part: MeshInstance3D in placement_ghost.find_children("*", "MeshInstance3D", true, false):
 		part.material_overlay = placement_overlay
 
+## Placing a new building of the V6 economy (premium UI stage 3, src/v6_build.gd): the free
+## plots of its terrain glow warm gold (plot_glow.gdshader on a quad above each plot); the
+## ghost and its plate wait hidden until the player taps a plot (move_placement shows them).
+func show_plot_glow(model_path: String, model_scale: float, plots: Array) -> void:
+	clear_placement()
+	placement = Node3D.new()
+	placement.name = "Placement"
+	add_child(placement)
+	var glow := ShaderMaterial.new()
+	glow.shader = PLOT_GLOW
+	var quad := PlaneMesh.new()
+	quad.size = Vector2(15.0, 15.0)
+	for plot in plots:
+		var ring := MeshInstance3D.new()
+		ring.mesh = quad
+		ring.material_override = glow
+		ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		ring.position = plot.position + Vector3.UP * 0.35
+		placement.add_child(ring)
+		placement_rings.append(ring)
+	placement_plate = MeshInstance3D.new()
+	var plate := PlaneMesh.new()
+	plate.size = Vector2(12.4, 12.4)
+	placement_plate.mesh = plate
+	placement_plate.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	placement_plate.material_override = placement_material(Color(0.4, 0.95, 0.5, 0.22))
+	placement_plate.visible = false
+	placement.add_child(placement_plate)
+	if not model_path.is_empty():
+		placement_ghost = add_model(placement, model_path, Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * model_scale), Vector3.ZERO))
+	else:
+		placement_ghost = Node3D.new()
+		placement.add_child(placement_ghost)
+	# The ghost shows through the trees of a forest plot as a faint gold silhouette.
+	placement_overlay = placement_material(Color(1.0, 0.85, 0.5, 0.22))
+	placement_overlay.no_depth_test = true
+	for part: MeshInstance3D in placement_ghost.find_children("*", "MeshInstance3D", true, false):
+		part.material_overlay = placement_overlay
+	placement_ghost.visible = false
+
+## The chosen plot burns brighter than the others.
+func highlight_plot_glow(at: Vector3) -> void:
+	for ring: MeshInstance3D in placement_rings:
+		var chosen := Vector2(ring.position.x, ring.position.z).distance_to(Vector2(at.x, at.z)) < 0.5
+		if chosen and ring.material_override.get_meta("chosen", false) == false:
+			var bright := ring.material_override.duplicate() as ShaderMaterial
+			bright.set_shader_parameter("chosen", 1.0)
+			bright.set_meta("chosen", true)
+			ring.material_override = bright
+		elif not chosen and ring.material_override.get_meta("chosen", false):
+			for other: MeshInstance3D in placement_rings:
+				if not other.material_override.get_meta("chosen", false):
+					ring.material_override = other.material_override
+					break
+
 # valid: green plate (buildable); otherwise amber (forest, must be cleared) or red (no plot).
 func move_placement(at: Vector3, plate_state: String, lifted: bool) -> void:
 	if not is_instance_valid(placement):
@@ -4215,6 +4271,8 @@ func move_placement(at: Vector3, plate_state: String, lifted: bool) -> void:
 	placement_lift = 1.2 if lifted else 0.0
 	placement_plate.position = at + Vector3.UP * 0.18
 	placement_ghost.position = at + Vector3.UP * placement_lift
+	placement_plate.visible = true
+	placement_ghost.visible = true
 
 func placement_position() -> Vector3:
 	return placement_plate.position - Vector3.UP * 0.18 if is_instance_valid(placement_plate) else Vector3.ZERO

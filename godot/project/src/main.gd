@@ -12,6 +12,8 @@ const Interface = preload("res://src/ui_theme.gd")
 const WebPanels = preload("res://src/web_panel_theme.gd")
 const UiKit = preload("res://src/ui_kit.gd")
 const UnitStage = preload("res://src/unit_stage.gd")
+const BuildingStage = preload("res://src/building_stage.gd")
+const CityBackdrop = preload("res://src/city_backdrop.gd")
 const MarchMap = preload("res://src/march_map.gd")
 const BattleResults = preload("res://src/battle_results.gd")
 const WarriorVisual = preload("res://src/warrior_visual.gd")
@@ -112,6 +114,8 @@ var economy_rows: Dictionary = {}
 var economy_source_label: Label
 var starter_panel_open := false
 var relocation_pins: Control
+## The blurred city behind the construction strip (src/city_backdrop.gd).
+var city_backdrop: CityBackdrop
 var minimap: Minimap
 var environment_atlas: Texture2D
 var endpoint := LIVE_SERVER
@@ -500,6 +504,11 @@ func build_ui() -> void:
 	dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
 	root.add_child(dimmer)
 	dimmer.hide()
+	city_backdrop = CityBackdrop.new()
+	root.add_child(city_backdrop)
+	city_backdrop.settled.connect(func():
+		if modal.visible and modal_layout == "strip":
+			cover_city(true))
 	modal = PanelContainer.new()
 	modal.name = "Modal"
 	# Premium window (src/ui_kit.gd): carved oak header band, linen body, bronze rim.
@@ -1047,6 +1056,11 @@ const V6_CARD_KEYS := {"B01":"hall", "B02":"house", "B03":"warehouse", "B05":"ma
 	"B25":"herbal27"}
 
 func v6_card(type: String) -> Texture2D:
+	# The diorama of the construction strip (level I on its turf tile, baked from the city's
+	# own scene): one look for the building in every window.
+	var diorama := BuildingStage.card_art(type)
+	if diorama != null:
+		return diorama
 	var instance: Dictionary = v6_panels.building(type) if v6_panels.enabled() else {}
 	if not instance.is_empty():
 		for city_building in state.city.get("buildings", []):
@@ -1465,6 +1479,8 @@ func update_placement_bar() -> void:
 	placement_bar.position = Vector2(clampf(at.x, 12, view.x - bar_size.x - 12), clampf(at.y, 70, view.y - bar_size.y - 12))
 
 func cancel_placement() -> void:
+	if v6_panels != null and v6_panels.build != null:
+		v6_panels.build.cancel_placement()
 	if placing.is_empty():
 		return
 	placing = {}
@@ -2411,6 +2427,7 @@ func close_modal() -> void:
 	dimmer.hide()
 	modal.hide()
 	cover_city(false)
+	city_backdrop.close()
 	modal.scale = Vector2.ONE
 	modal.modulate.a = 1.0
 	empty(modal_body)
@@ -2619,6 +2636,11 @@ func place_modal(layout: String) -> void:
 			offsets = Rect2(-480, 13, 960, -26)
 		"result":
 			offsets = Rect2(-310, -249, 620, 498)
+		"strip":
+			# Construction strip (src/build_strip.gd): the whole screen, no panel; the blurred
+			# city (city_backdrop) is the window's background.
+			anchors = Rect2(0, 0, 1, 1)
+			offsets = Rect2(0, 0, 0, 0)
 		"sheet":
 			# Bottom sheet: the city stays visible above it.
 			anchors = Rect2(0, 1, 1, 0)
@@ -2636,15 +2658,16 @@ func place_modal(layout: String) -> void:
 # Frame, header and content column for the current layout (src/ui_kit.gd).
 func arrange_modal() -> void:
 	var full := modal_layout == "full"
+	var strip := modal_layout == "strip"
 	var docked := modal_layout in ["right", "left", "city_target", "sheet"]
-	modal_frame.visible = not full
+	modal_frame.visible = not full and not strip
 	# Full windows: the tall two-board band (resources above, a larger title below).
 	var band := UiKit.header_tall_style() if full else UiKit.header_style()
 	if modal_header.get_theme_stylebox("panel") != band:
 		modal_header.add_theme_stylebox_override("panel", band)
 	modal_header.custom_minimum_size.y = 92 if full else 62
 	var title_size := 40 if full else (32 if modal_layout == "wide" else (23 if docked else 26))
-	var top_on := full and not result_open
+	var top_on := (full or strip) and not result_open
 	if modal_top.visible != top_on:
 		modal_top.visible = top_on
 	modal_crumb.text = modal_eyebrow.text
@@ -2678,6 +2701,8 @@ func arrange_modal() -> void:
 	# Full windows leave room for the section plate that hangs under the title.
 	var crumb_on := full and not modal_eyebrow.text.is_empty()
 	var margins := {"margin_left": 8 if hero_on else side, "margin_right": side + (10 if hero_on else 0), "margin_top": 22 if crumb_on else 12, "margin_bottom": 18 if full else 20}
+	if strip:
+		margins = {"margin_left": 0, "margin_right": 0, "margin_top": 0, "margin_bottom": 0}
 	modal_content.begin_bulk_theme_override()
 	for key: String in margins:
 		if modal_content.get_theme_constant(key) != margins[key]:
@@ -2777,6 +2802,17 @@ func set_modal_hero(art: Texture2D, tint := Color("#b98c52"), caption := "") -> 
 		add_hero_art(art, tint, caption)
 	arrange_modal()
 
+## The live view of a building's level in the window's hero (the quote window of a build or an
+## upgrade, src/building_stage.gd): «После · ур. N» on its turf tile, the new parts glowing.
+func building_hero(type: String, level: int) -> void:
+	empty(modal_hero)
+	var view := BuildingStage.new()
+	view.setup(data, type, level - 1, 11, true)
+	modal_hero.add_child(view)
+	view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	modal_hero_share = 0.42
+	arrange_modal()
+
 func add_hero_art(art: Texture2D, tint := Color("#b98c52"), caption := "") -> void:
 	var picture := UiKit.hero(art, Color(tint, 0.5), caption)
 	picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -2785,18 +2821,20 @@ func add_hero_art(art: Texture2D, tint := Color("#b98c52"), caption := "") -> vo
 func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D = null) -> void:
 	action_ring.close()
 	cancel_placement()
+	var strip := layout == "strip"
 	modal_scroll.horizontal = false
 	modal_scroll.outside_tap = Callable()
 	modal_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	modal_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	modal_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED if strip else ScrollContainer.SCROLL_MODE_AUTO
 	modal_scroll.scroll_horizontal = 0
 	result_open = layout == "result"
-	modal_header.visible = not result_open
+	modal_header.visible = not result_open and not strip
 	modal_divider.visible = not result_open
-	var sheet := result_sheet_style if result_open else web_sheet_style
+	var sheet: StyleBox = UiKit.bare() if strip else (result_sheet_style if result_open else web_sheet_style)
 	if modal.get_theme_stylebox("panel") != sheet:
 		modal.add_theme_stylebox_override("panel", sheet)
-	modal_vignette.visible = not result_open
+	modal_vignette.visible = not result_open and not strip
+	modal.modulate.a = 1.0
 	if modal_vignette.texture != UiKit.vignette_texture():
 		modal_vignette.texture = UiKit.vignette_texture()
 	economy_rows.clear()
@@ -2826,7 +2864,7 @@ func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D
 		add_hero_art(art)
 	place_modal(layout)
 	modal_body.get_parent().set_deferred("scroll_vertical", 0)
-	dimmer.color = Color.TRANSPARENT if layout in ["left", "right", "city_target"] else (Color("#10141740") if layout == "sheet" else Color("#0b0805b0"))
+	dimmer.color = Color.TRANSPARENT if layout in ["left", "right", "city_target", "strip"] else (Color("#10141740") if layout == "sheet" else Color("#0b0805b0"))
 	if result_open:
 		dimmer.color = Color("#09140bc9")
 		result_notice.hide()
@@ -2850,6 +2888,13 @@ func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D
 			dialog_tween.parallel().tween_property(modal, "offset_bottom", modal.offset_bottom - 60, 0.14).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	else:
 		modal.scale = Vector2.ONE
+	# The construction strip stands on a blurred snapshot of the city; the city's own 3D pass
+	# stops once the snapshot is on screen (city_backdrop.settled).
+	if strip:
+		if not city_backdrop.visible:
+			city_backdrop.open(stage.camera if is_instance_valid(stage) else null, not entering)
+		return
+	city_backdrop.close()
 	# A full-screen window hides the whole city: its 3D pass is skipped once the window has
 	# settled (the recruitment stage renders in its own SubViewport).
 	if layout != "full":
@@ -2911,6 +2956,8 @@ func warm_panel_textures() -> void:
 	var atlas: String = data.environmentAtlas
 	if environment_atlas == null and ResourceLoader.load_threaded_request(atlas, "Texture2D") == OK:
 		pending.append(atlas)
+	# The dioramas of the construction strip and the turf of its live 3D view.
+	BuildingStage.warm_art(V6_CARD_KEYS.keys() + ["B04", "B26", "B27"])
 	# Building card art too: the build catalogue and the premium window heroes show it.
 	var card_keys := {}
 	for key: String in V6_CARD_KEYS.values() + data.types.values():
@@ -6370,6 +6417,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
 		return
 	if event is InputEventScreenTouch:
+		if event.pressed and v6_panels.build.blocks_touch(event.position):
+			return
 		if event.pressed and not placing.is_empty() and placement_bar.visible and \
 				placement_bar.get_global_rect().grow(6).has_point(event.position):
 			return
@@ -6414,6 +6463,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func pick_marker(screen_position: Vector2) -> void:
 	if not placing.is_empty():
 		tap_placement(screen_position)
+		return
+	if v6_panels.build.placing_active():
+		v6_panels.build.tap_city(screen_position)
 		return
 	var distance := 38.0
 	var best := {}
@@ -6591,7 +6643,7 @@ func show_relocation_list() -> void:
 
 func inspect_plot(plot: Dictionary) -> void:
 	if is_v6_server():
-		await v6_panels.catalog()
+		await v6_panels.catalog(str(plot.get("id", "")))
 		return
 	open_modal("Участок", "right")
 	row(modal_body, "Координаты · %d : %d" % [roundi(plot.x), roundi(plot.z)])

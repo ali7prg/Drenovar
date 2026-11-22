@@ -3,6 +3,8 @@ extends RefCounted
 const VERSION := "DRENOVAR-V6-C1.0"
 const Recruit = preload("res://src/v6_recruit.gd")
 const UnitStage = preload("res://src/unit_stage.gd")
+const V6Build = preload("res://src/v6_build.gd")
+const BuildingStage = preload("res://src/building_stage.gd")
 const ROMAN := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"]
 var ui: Node
 var catalogue: Dictionary = {}
@@ -12,6 +14,8 @@ var navigation_request := 0
 var submitting := false
 # Recruitment window of the training buildings (src/v6_recruit.gd).
 var recruit
+# Construction strip and placement of new buildings (src/v6_build.gd).
+var build
 
 func begin_view() -> int:
 	navigation_request += 1
@@ -21,6 +25,7 @@ signal catalogue_loaded(success: bool)
 func _init(owner_node: Node) -> void:
 	ui = owner_node
 	recruit = Recruit.new(self)
+	build = V6Build.new(self)
 
 ## New confirmed server state (main.gd accept): the open recruitment window follows it.
 func state_changed() -> void:
@@ -207,38 +212,23 @@ func move_building(b: Dictionary, environment: String) -> void:
 		if not occupied:
 			ui.button(ui.modal_body, "Участок " + plot, send.bind({"kind":"move", "building_id":b.id, "plot":plot}))
 
-func catalog() -> void:
+## The construction strip (src/v6_build.gd): every type of the catalogue as a card over the
+## blurred city. `plot`: an empty plot the player tapped (placement starts there).
+func catalog(plot := "") -> void:
 	var navigation := begin_view()
 	var generation: int = ui.modal_generation
 	if not await load_catalogue():
 		return
 	if navigation != navigation_request or generation != ui.modal_generation:
 		return
-	ui.open_modal("Строительство", "full", "27 ТИПОВ · I–XI")
-	muted("Пшеница и рыбалка занимают один общий пищевой участок.")
-	var grid := GridContainer.new()
-	grid.name = "Catalogue"
-	grid.columns = 3
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
-	ui.modal_body.add_child(grid)
-	for row: Dictionary in catalogue.buildings:
-		if int(row.level) != 1:
-			continue
-		var b: Dictionary = building(row.building_id)
-		var built := not b.is_empty()
-		var art: Texture2D = ui.v6_card(str(row.building_id))
-		if art == null:
-			art = load("res://assets/ui/actions/build.svg")
-		var tile: Button = ui.UiKit.tile_button(str(row.name_ru), "Уровень " + ROMAN[int(b.level)-1] if built else "Построить",
-			art, ui.UiKit.INK_MUTED if built else ui.UiKit.GOOD)
-		tile.pressed.connect(inspect.bind(str(row.building_id)))
-		grid.add_child(tile)
-	var more := links()
-	link(more, "Все очереди", queues)
-	link(more, "Армия и осада", army)
-	link(more, "Подключить другое устройство", account)
+	build.open_strip(plot)
 
+## The building window (premium UI stage 3): the live «Сейчас · ур. N» ➜ «После · ур. N+1»
+## pair of the exact scenes the city draws (src/building_stage.gd; the parts the next level
+## adds glow gold), the effects with their green gains, the cost with icons (red where short),
+## the time with the construction bonus, «Улучшить», and the requirements as chips (a missing
+## one goes to its building). Unbuilt types show «Будет построено · ур. I», «Построить» and
+## the plot list; XI shows the building alone.
 func inspect(type: String) -> void:
 	var navigation := begin_view()
 	var generation: int = ui.modal_generation
@@ -252,75 +242,75 @@ func inspect(type: String) -> void:
 	var b: Dictionary = building(type)
 	var level: int = int(b.get("level", 0))
 	var row: Dictionary = row_for(type, maxi(1, level))
-	ui.open_modal(str(row.name_ru), "full", "УРОВЕНЬ " + (ROMAN[level-1] if level > 0 else "НЕ ПОСТРОЕНО"), ui.v6_card(type))
+	ui.open_modal(str(row.name_ru), "full", "УРОВЕНЬ " + (ROMAN[level-1] if level > 0 else "НЕ ПОСТРОЕНО"))
+	var stage := BuildingStage.new()
+	stage.setup(ui.data, type, level)
+	ui.modal_hero.add_child(stage)
+	stage.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	ui.modal_hero_share = 0.5
+	ui.arrange_modal()
 	warm_recruitment(type)
 	var upcoming: Dictionary = row_for(type, level + 1) if level < 11 else {}
-	if level > 0:
-		var step := HBoxContainer.new()
-		step.alignment = BoxContainer.ALIGNMENT_CENTER
-		step.add_theme_constant_override("separation", 18)
-		ui.modal_body.add_child(step)
-		# Display face: Philosopher's capital I reads like a lower-case l in numerals.
-		ui.UiKit.label(step, "Уровень " + ROMAN[level-1], 25, ui.UiKit.INK, ui.UiKit.TITLE_FONT, false)
-		if not upcoming.is_empty():
-			ui.UiKit.mark(step, "arrow", ui.UiKit.GOOD, 24.0)
-			ui.UiKit.label(step, ROMAN[level], 25, ui.UiKit.GOOD, ui.UiKit.TITLE_FONT, false)
-		# Effects as a compact ruled list, so the cost, time and requirements stay on screen.
-		var stats := VBoxContainer.new()
-		stats.name = "Effects"
-		stats.add_theme_constant_override("separation", 0)
-		ui.modal_body.add_child(stats)
-		for metric: String in row.effects:
-			var later: Variant = upcoming.get("effects", {}).get(metric)
-			var gain := ""
-			if later != null and str(later) != str(row.effects[metric]):
-				gain = metric_value(metric, later)
-			ui.UiKit.stat_row(stats, str(catalogue.get("metrics", {}).get(metric, {}).get("name_ru", metric)), metric_value(metric, row.effects[metric]), gain, true)
+	# Effects: now, and what the next level adds (green). Unbuilt: what level I gives.
+	var stats := VBoxContainer.new()
+	stats.name = "Effects"
+	stats.add_theme_constant_override("separation", 0)
+	ui.modal_body.add_child(stats)
+	var shown: Dictionary = row if level > 0 else upcoming
+	for metric: String in shown.get("effects", {}):
+		if metric == "workers_required":
+			continue
+		var now: Variant = shown.effects[metric]
+		var gain := ""
+		if level > 0 and not upcoming.is_empty():
+			gain = delta_value(metric, now, upcoming.get("effects", {}).get(metric))
+		ui.UiKit.stat_row(stats, str(catalogue.get("metrics", {}).get(metric, {}).get("name_ru", metric)), metric_value(metric, now), gain, true, true)
 	if level < 11:
 		var next: Dictionary = upcoming
-		# The step above already reads «Уровень II ➜ III» in the display face.
-		section_title("Следующий уровень" if level > 0 else "Строительство · " + ROMAN[level])
-		# What it costs, then the time and the action on one row, then what it needs.
+		section_title(("Улучшение до ур. " + ROMAN[level]) if level > 0 else "Строительство · ур. I")
 		cost_cards(next.cost)
-		var action := {"kind":"construction", "building":type, "target":level+1}
-		if level > 0:
-			# The time pill and the call to action share a row, so the action is in view without
-			# scrolling; it stays in the body, where qa_building_actions looks for it.
-			var go := HBoxContainer.new()
-			go.name = "KitTimeAction"
-			go.add_theme_constant_override("separation", 14)
-			ui.modal_body.add_child(go)
-			ui.UiKit.timer_pill(go, "Базовое время", duration(int(next.duration_seconds)))
-			var pill: Control = go.get_child(0)
-			pill.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			var check: Button = ui.panel_action(go, "Проверить улучшение", confirm.bind(action))
-			check.custom_minimum_size.x = 300
-		else:
-			time_card("Базовое время", int(next.duration_seconds))
-			ui.row(ui.modal_body, "Выберите участок подходящей местности: " + str(next.environment))
-			for plot: String in ui.state.get("v6_plots", {}):
-				if next.environment in ui.state.v6_plots[plot]:
-					var placement: Dictionary = action.duplicate()
-					placement.plot = plot
-					ui.button(ui.modal_body, "Участок " + plot, confirm.bind(placement))
-		# Requirements in two columns under the action (the server quote names any that are missing).
-		var needs := HFlowContainer.new()
-		needs.name = "KitRequirements"
-		needs.add_theme_constant_override("h_separation", 16)
-		needs.add_theme_constant_override("v_separation", 4)
-		if not next.requirements.is_empty():
-			ui.modal_body.add_child(needs)
+		var missing: Array = []
 		for d: Dictionary in next.requirements:
-			var current: Dictionary = building(d.building_id)
-			var ok: bool = int(current.get("level", 0)) >= int(d.level)
-			var need := HBoxContainer.new()
-			need.name = "KitRequirement"
-			need.add_theme_constant_override("separation", 10)
-			need.custom_minimum_size.x = 340
-			needs.add_child(need)
-			ui.UiKit.mark(need, "tick" if ok else "lozenge", ui.UiKit.GOOD if ok else ui.UiKit.BAD, 18.0)
-			ui.UiKit.label(need, "%s · уровень %s или выше" % [row_for(d.building_id, 1).name_ru, ROMAN[int(d.level)-1]], 17, ui.UiKit.GOOD if ok else ui.UiKit.BAD).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			if str(d.building_id) != type and int(building(d.building_id).get("level", 0)) < int(d.level):
+				missing.append(d)
+		var action := {"kind":"construction", "building":type, "target":level+1}
+		# Time (with the construction bonus) and the call to action on one row, in view without
+		# scrolling; it stays in the body, where qa_building_actions looks for it.
+		var go := HBoxContainer.new()
+		go.name = "KitTimeAction"
+		go.add_theme_constant_override("separation", 14)
+		ui.modal_body.add_child(go)
+		var seconds: int = build.build_seconds(int(next.duration_seconds))
+		ui.UiKit.timer_pill(go, "Время" if seconds == int(next.duration_seconds) else "Время · с бонусом", duration(seconds))
+		var pill: Control = go.get_child(0)
+		pill.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		pill.tooltip_text = "Базовое время %s" % duration(int(next.duration_seconds))
+		var main: Button
+		if not missing.is_empty():
+			var first: Dictionary = missing[0]
+			main = ui.panel_action(go, "Сначала: %s %s" % [row_for(first.building_id, 1).get("name_ru", first.building_id), ROMAN[int(first.level)-1]], inspect.bind(str(first.building_id)))
+			ui.UiKit.style_button(main, "secondary", 19)
+		elif level > 0:
+			main = ui.panel_action(go, "Улучшить", confirm.bind(action))
+		else:
+			main = ui.panel_action(go, "Построить", build.begin_placement.bind(type))
+		main.custom_minimum_size.x = 300
+		requirement_chips(type, next)
+		if level == 0:
+			section_title("Или участок из списка")
+			var plots := HFlowContainer.new()
+			plots.name = "PlotList"
+			plots.add_theme_constant_override("h_separation", 10)
+			plots.add_theme_constant_override("v_separation", 8)
+			ui.modal_body.add_child(plots)
+			for plot: String in build.free_plots(str(next.environment)):
+				var placement: Dictionary = action.duplicate()
+				placement.plot = plot
+				var choice: Button = ui.button(plots, "Участок " + plot, confirm.bind(placement))
+				choice.custom_minimum_size = Vector2(180, 48)
+			if plots.get_child_count() == 0:
+				muted("Нет свободного участка: %s." % build.TERRAIN.get(str(next.environment), str(next.environment)))
 	else:
 		ui.row(ui.modal_body, "XI — окончательный уровень.")
 	if type == "B18" and level > 0:
@@ -341,11 +331,67 @@ func inspect(type: String) -> void:
 		link(more, "Переместить здание", move_building.bind(b, str(row.environment)))
 	link(more, "Очереди и отмена", queues)
 
+## Requirements of the next level as chips: the building's diorama, its name and level, a
+## tick or a cross; a missing one opens that building's window.
+func requirement_chips(type: String, next: Dictionary) -> void:
+	var needs := HFlowContainer.new()
+	needs.name = "KitRequirements"
+	needs.add_theme_constant_override("h_separation", 10)
+	needs.add_theme_constant_override("v_separation", 8)
+	var seen := {}
+	for d: Dictionary in next.get("requirements", []):
+		var other := str(d.building_id)
+		if other == type or seen.has(other):
+			continue
+		seen[other] = true
+		var met: bool = int(building(other).get("level", 0)) >= int(d.level)
+		var chip: BaseButton = ui.UiKit.need_chip(ui.v6_card(other), "%s · %s" % [row_for(other, 1).get("name_ru", other), ROMAN[int(d.level)-1]], met)
+		chip.name = "Need_" + other
+		if not met:
+			chip.pressed.connect(inspect.bind(other))
+		needs.add_child(chip)
+	if needs.get_child_count() > 0:
+		muted("Требуется")
+		ui.modal_body.add_child(needs)
+	else:
+		needs.free()
+
+## The green gain of an effect from one level to the next ("+300", "+10%"), or "" when it
+## does not change.
+func delta_value(metric: String, now: Variant, later: Variant) -> String:
+	if later == null or str(later) == str(now):
+		return ""
+	if (now is float or now is int) and (later is float or later is int):
+		var change := float(later) - float(now)
+		if is_zero_approx(change):
+			return ""
+		var sign := "+" if change > 0.0 else "−"
+		if metric.ends_with("_bp"):
+			return sign + String.num(absf(change) / 100.0, 2).trim_suffix("0").trim_suffix("0").trim_suffix(".") + "%"
+		if metric.ends_with("_rate_h") or metric.ends_with("_hp_h"):
+			return sign + "%s/ч" % plain_number(absf(change))
+		return sign + plain_number(absf(change))
+	return metric_value(metric, later)
+
+## The quote window: the server's exact cost and time before a work starts. For a building it
+## shows what the work gives (the server's effects before and after), the cost against the
+## stock, the time with the bonus, the builders and workers it takes, and «Начать».
 func confirm(action: Dictionary) -> void:
 	var navigation := begin_view()
 	quote_request += 1
 	var request_id := quote_request
-	ui.open_modal("Подтвердить работу", "full", "УЛУЧШЕНИЕ ПОСЕЛЕНИЯ", ui.v6_card(str(action.get("building", ""))))
+	var type := str(action.get("building", ""))
+	var target := int(action.get("target", 0))
+	var eyebrow := "УЛУЧШЕНИЕ ПОСЕЛЕНИЯ"
+	if action.get("kind", "") == "construction" and target > 0:
+		eyebrow = "СТРОИТЕЛЬСТВО · УР. I" if target == 1 else "УЛУЧШЕНИЕ ДО УР. " + ROMAN[clampi(target, 1, 11) - 1]
+		if action.has("plot"):
+			eyebrow += " · УЧАСТОК " + str(action.plot)
+	elif action.get("kind", "") == "repair_wall":
+		eyebrow = "РЕМОНТ СТЕНЫ"
+	ui.open_modal("Подтвердить работу", "full", eyebrow, ui.v6_card(type))
+	if target > 0 and ui.has_method("building_hero"):
+		ui.building_hero(type, target)
 	var panel_generation: int = ui.modal_generation
 	ui.row(ui.modal_body, "Рассчитываем стоимость и время…")
 	var intent: Dictionary = action.duplicate(true)
@@ -365,11 +411,35 @@ func confirm(action: Dictionary) -> void:
 			ui.button(ui.modal_body, "Повторить расчёт", confirm.bind(action))
 		return
 	var q: Dictionary = response.quote
+	var before: Dictionary = q.get("effects_before", {})
+	var after: Dictionary = q.get("effects_after", {})
+	if not after.is_empty():
+		section_title("Что даст работа")
+		var stats := VBoxContainer.new()
+		stats.name = "Effects"
+		stats.add_theme_constant_override("separation", 0)
+		ui.modal_body.add_child(stats)
+		for metric: String in after:
+			if metric == "workers_required":
+				continue
+			var now: Variant = before.get(metric, 0)
+			var name := str(catalogue.get("metrics", {}).get(metric, {}).get("name_ru", metric))
+			if before.is_empty():
+				ui.UiKit.stat_row(stats, name, metric_value(metric, after[metric]), "", true)
+			else:
+				ui.UiKit.stat_row(stats, name, metric_value(metric, now), delta_value(metric, now, after[metric]), true, true)
 	section_title("Стоимость работы")
 	cost_cards(q.cost)
 	time_card("До завершения", int(q.duration_seconds))
 	if int(q.speed_bp) > 0:
-		muted("Бонус скорости +%.2f%%" % (float(q.speed_bp)/100.0))
+		muted("Базовое время %s · бонус скорости +%s%%" % [duration(int(q.get("base_seconds", q.duration_seconds))), String.num(float(q.speed_bp)/100.0, 2).trim_suffix("0").trim_suffix("0").trim_suffix(".")])
+	if q.get("kind", "") in ["construction", "repair_wall"]:
+		var builders: Array = build.builder_use()
+		var note := "Строители: свободно %d из %d" % [maxi(0, int(builders[1]) - int(builders[0])), int(builders[1])]
+		if int(q.get("reserved_workers", 0)) > 0:
+			var force: Dictionary = ui.state.v6.get("workforce", {})
+			note += " · работники +%d (заняты %d из %d)" % [int(q.reserved_workers), int(force.get("used", 0)), int(force.get("capacity", 0))]
+		muted(note)
 	muted("Отмена вернёт резерв невыполненной части ремонта." if action.kind == "repair_wall" else "Ресурсы резервируются при начале работы. При отмене до завершения резерв возвращается.")
 	intent.expected_duration_seconds = int(q.duration_seconds)
 	ui.modal_footer.show()

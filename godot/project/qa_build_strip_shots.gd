@@ -122,7 +122,7 @@ func run() -> void:
 		game.v6_panels.build.show_category(1)
 		await frames(20)
 		# A finger flick to the left: the strip is caught mid-glide.
-		strip().fling(-2600.0)
+		strip().fling(2600.0)
 		await frames(5)
 		await RenderingServer.frame_post_draw
 		var dir := ProjectSettings.globalize_path(shots_dir)

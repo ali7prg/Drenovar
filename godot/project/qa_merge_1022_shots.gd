@@ -14,6 +14,7 @@ var adventure := false
 
 func post(path: String, body: Variant = null) -> void:
 	var client := HTTPRequest.new()
+	client.timeout = 15.0
 	root.add_child(client)
 	client.request(game.endpoint + path, PackedStringArray(["Content-Type: application/json"]), HTTPClient.METHOD_POST,
 		"" if body == null else JSON.stringify(body))
@@ -47,16 +48,20 @@ func run() -> void:
 	var deadline := Time.get_ticks_msec() + 240000
 	while (game.scene_loading or not is_instance_valid(game.stage) or game.player_id.is_empty()) and Time.get_ticks_msec() < deadline:
 		await process_frame
+	print("STAGE scene ", Time.get_ticks_msec())
 	# let the launch screen fade and the forest world finish
 	var world: Node = root.find_child("ForestWorld", true, false)
 	deadline = Time.get_ticks_msec() + 240000
 	while (world == null or world.get("_ready_emitted") != true) and Time.get_ticks_msec() < deadline:
 		await process_frame
 		world = root.find_child("ForestWorld", true, false)
+	print("STAGE world ", Time.get_ticks_msec())
 	await frames(90)
+	print("STAGE settled ", Time.get_ticks_msec())
 	if adventure:
 		await post("/test/army", {"units": {"ENG-02": 3000, "ENG-03": 3000, "ENG-06": 3000}})
 		await post("/test/hall?level=3")
+		print("STAGE posted ", Time.get_ticks_msec())
 		var fresh: Dictionary = await game.request("state")
 		if fresh.has("city"):
 			game.accept(fresh)

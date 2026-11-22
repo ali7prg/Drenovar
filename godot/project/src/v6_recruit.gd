@@ -445,14 +445,12 @@ func details_sheet(item: Dictionary) -> void:
 	grid.add_theme_constant_override("h_separation", 28)
 	grid.add_theme_constant_override("v_separation", 0)
 	ui.modal_body.add_child(grid)
+	# The figures row above already shows the headline numbers; the sheet adds the rest.
 	var rows: Array = []
 	if type == "B17":
-		rows = [["Урон стене за удар", str(int(item.get("wall_damage_per_strike", 0)))], ["Удар каждые", "%d с" % int(item.get("strike_period_seconds", 0))],
-			["Урон обычным войскам", str(int(item.get("normal_troop_damage", 0)))], ["Мест в армии", str(int(item.get("army_slots", 1)))]]
+		rows = [["Удар каждые", "%d с" % int(item.get("strike_period_seconds", 0))], ["Урон обычным войскам", str(int(item.get("normal_troop_damage", 0)))]]
 	else:
-		rows = [["Атака", str(int(stats.get("attack", 0)))], ["Защита", str(int(stats.get("defense", 0)))],
-			["Здоровье", str(int(stats.get("hp", 0)))], ["Скорость", str(stats.get("speed", "—"))],
-			["Мощь", str(int(item.get("power_reference", stats.get("power", 0))))], ["Мест в армии", str(int(item.get("army_slots", 1)))]]
+		rows = [["Скорость", str(stats.get("speed", "—"))], ["Мест в армии", str(int(item.get("army_slots", 1)))]]
 	rows.append(["Содержание в час", "нет" if float(item.get("upkeep_per_hour", 0)) <= 0.0 else str(item.upkeep_per_hour)])
 	rows.append(["Обучение одного", panels.duration(seconds_for(item, 1))])
 	for pair: Array in rows:

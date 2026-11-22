@@ -21,8 +21,8 @@ const WarriorVisual = preload("res://src/warrior_visual.gd")
 const VIEW := Vector3(0.62, 0.2, 1.0)
 const FOV := 24.0
 ## The figure (feet to helmet) fills this share of the stage height; its centre sits here.
-const FIGURE_SHARE := 0.6
-const FIGURE_CENTRE := 0.44
+const FIGURE_SHARE := 0.66
+const FIGURE_CENTRE := 0.43
 const PORTRAIT_DIR := "res://assets/ui/units/"
 const DAIS_STONE := "res://assets/city/premium/surfaces07/stone-albedo.jpg"
 
@@ -80,7 +80,8 @@ static func request(path: String) -> void:
 		# The dais stone (shared with the city ground) decodes on a worker as well.
 		requested[DAIS_STONE] = ResourceLoader.load_threaded_request(DAIS_STONE, "Texture2D") == OK
 
-## The loaded scene, or null while the worker is still busy. The last three stay cached.
+## The loaded scene, or null while the worker is still busy. While the window is open the
+## last three stay cached (switching back and forth between units costs no reload).
 static func take(path: String) -> PackedScene:
 	if scenes.has(path):
 		recent.erase(path)
@@ -405,8 +406,23 @@ func _draw() -> void:
 		draw_texture_rect(splash, Rect2(size.x * 0.1, size.y * 0.06, size.x * 0.8, size.y * 0.72), false, Color(tint.darkened(0.5), 0.78))
 		draw_texture_rect(splash, Rect2(size.x * 0.2, size.y * 0.12, size.x * 0.6, size.y * 0.5), false, Color(tint.darkened(0.62), 0.55))
 		draw_texture_rect(splash, Rect2(size.x * 0.32, size.y * 0.06, size.x * 0.36, size.y * 0.3), false, Color(tint.lightened(0.3), 0.22))
+		draw_halo()
 	if ground != null:
 		draw_texture_rect(ground, Rect2(size.x * 0.12, size.y * 0.7, size.x * 0.76, size.y * 0.2), false, Color(1, 1, 1, 0.9))
+
+# A faint carved ring behind the figure: two hairline circles with a lozenge every 30°,
+# in a light shade of the tier colour (our own ornament, drawn; no texture).
+func draw_halo() -> void:
+	var centre := Vector2(size.x * 0.5, size.y * 0.4)
+	var radius := minf(size.x * 0.4, size.y * 0.36)
+	var colour := Color(tint.lightened(0.55), 0.2)
+	draw_arc(centre, radius, 0.0, TAU, 96, colour, 1.5, true)
+	draw_arc(centre, radius * 0.9, 0.0, TAU, 96, Color(colour, 0.12), 1.0, true)
+	for index in 12:
+		var along := Vector2.from_angle(TAU * index / 12.0 - PI * 0.5)
+		var at := centre + along * radius * 0.95
+		var side := along.orthogonal() * 4.0
+		draw_colored_polygon(PackedVector2Array([at + along * 7.0, at + side, at - along * 7.0, at - side]), colour)
 
 func _process(delta: float) -> void:
 	if not world_built:
@@ -428,6 +444,13 @@ func _process(delta: float) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_ENTER_TREE and not world_built:
 		build_world.call_deferred()
+	elif what == NOTIFICATION_EXIT_TREE:
+		# The window closed: nothing 3D outlives it (the viewport, world, model instance and
+		# lights are children of this node; the loaded scenes go too, so their meshes and
+		# textures leave memory). A ring or inspector of a training building requests the
+		# model again on a worker thread before the next open.
+		scenes.clear()
+		recent.clear()
 
 # Built after the window's first frame: the open itself costs no 3D work.
 func build_world() -> void:
@@ -479,7 +502,7 @@ func place_model(scene: PackedScene) -> void:
 	var box: AABB = shape.box
 	# Warriors stand on a round slab a little wider than their stance; the ram's slab is
 	# sized to its wheelbase (its long axis overhangs a little, as on a display plinth).
-	var radius := clampf(maxf(box.size.x, box.size.z) * 0.5 * 0.78, 0.5, 1.6) if warrior else clampf(maxf(box.size.x, box.size.z) * 0.5 * 0.8, 0.8, 3.0)
+	var radius := clampf(maxf(box.size.x, box.size.z) * 0.5 * 0.72, 0.46, 1.6) if warrior else clampf(maxf(box.size.x, box.size.z) * 0.5 * 0.8, 0.8, 3.0)
 	var dais := make_dais(radius)
 	dais.position = Vector3(box.get_center().x, shape.bottom, box.get_center().z)
 	mount.add_child(dais)

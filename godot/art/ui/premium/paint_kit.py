@@ -123,6 +123,14 @@ def over(dst, rgb, alpha):
     return dst
 
 
+def drop(alpha, rows):
+    """Shift a shadow down by whole texels without wrapping (np.roll would bring the
+    bottom rows back in at the top edge)."""
+    moved = np.zeros_like(alpha)
+    moved[rows:] = alpha[:alpha.shape[0] - rows]
+    return moved
+
+
 def blur(alpha, radius):
     im = Image.fromarray((np.clip(alpha, 0, 1) * 255).astype(np.uint8), 'L')
     from PIL import ImageFilter
@@ -475,7 +483,7 @@ def card_parts(out):
     ring_m = 1 - smooth(2.4, 3.2, t)
     rgb = face * (1 - ring_m[..., None]) + metal * ring_m[..., None]
     sh = blur(coverage(shape_d - 0.2), 1.0) * 0.5
-    b = over(b, np.zeros((BH, BW, 3), np.float32), np.roll(sh, int(1.5 * S), axis=0))
+    b = over(b, np.zeros((BH, BW, 3), np.float32), drop(sh, int(1.5 * S)))
     b = over(b, rgb, coverage(shape_d))
     save('kit_badge', b, out)
 

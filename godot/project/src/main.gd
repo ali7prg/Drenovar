@@ -2754,6 +2754,14 @@ func warm_panel_textures() -> void:
 	var atlas: String = data.environmentAtlas
 	if environment_atlas == null and ResourceLoader.load_threaded_request(atlas, "Texture2D") == OK:
 		pending.append(atlas)
+	# Building card art too: the build catalogue and the premium window heroes show it.
+	var card_keys := {}
+	for key: String in V6_CARD_KEYS.values() + data.types.values():
+		card_keys[key] = true
+	for key: String in card_keys:
+		var card := "res://assets/ui/buildings/%s.png" % key
+		if not build_cards.has(key) and ResourceLoader.exists(card) and ResourceLoader.load_threaded_request(card, "Texture2D") == OK:
+			pending.append(card)
 	while not pending.is_empty():
 		await get_tree().process_frame
 		for full: String in pending.duplicate():
@@ -2763,6 +2771,11 @@ func warm_panel_textures() -> void:
 				if full == atlas:
 					if environment_atlas == null:
 						environment_atlas = texture
+					continue
+				if full.begins_with("res://assets/ui/buildings/"):
+					var card_key := full.get_file().get_basename()
+					if texture != null and build_cards.get(card_key) == null:
+						build_cards[card_key] = texture
 					continue
 				var key: String = full.trim_prefix("res://assets/ui/web-panels/")
 				if texture != null and not panel_textures.has(key):

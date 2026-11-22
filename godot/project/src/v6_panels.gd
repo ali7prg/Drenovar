@@ -655,7 +655,7 @@ func speedups(order: Dictionary) -> void:
 			var line := HBoxContainer.new()
 			line.add_theme_constant_override("separation", 14)
 			card.add_child(line)
-			line.add_child(ui.UiKit.icon_tile(ui.UiKit.tex("kit_hourglass"), 64, "×%d" % count))
+			line.add_child(ui.UiKit.icon_tile(ui.UiKit.tex("kit_hourglass"), 64))
 			var texts := VBoxContainer.new()
 			texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			texts.alignment = BoxContainer.ALIGNMENT_CENTER

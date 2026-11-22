@@ -1,0 +1,10 @@
+{
+  "service": "drenovar",
+  "environment": "v6-release-adapter",
+  "deployCommit": "0d201de08bc8234c224de71614cddae29b8cd0b8",
+  "economy": "DRENOVAR-V6-C1.0",
+  "api": 6,
+  "schema": 6,
+  "combatPresentation": 1,
+  "cityNavigation": "cached-grid-v1"
+}

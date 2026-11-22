@@ -215,6 +215,49 @@ func set_instance_hidden(cell: int, mesh_index: int, origin: Vector2, hidden: bo
 			selection[key] = PackedInt32Array([-1])
 
 
+## 1022: takes the tree instances standing exactly at `origin` (x/z) out of their cell — a
+## felled tree's kit instance and its impostor — without touching the other cells. Returns the
+## number of kit instances removed; the cell's batches re-upload on the next update_view().
+func remove_tree_at(origin: Vector2) -> int:
+	var cell := cell_of(origin.x, origin.y)
+	var removed := 0
+	var buffers: Dictionary = cell_buffers.get(cell, {})
+	for mesh_index in buffers.keys():
+		if int(meshes[mesh_index].kind) != KIND_TREE:
+			continue
+		var source: PackedFloat32Array = buffers[mesh_index]
+		var kept := _without(source, origin, 3, 11)
+		removed += (source.size() - kept.size()) / STRIDE
+		if kept.is_empty():
+			buffers.erase(mesh_index)
+		else:
+			buffers[mesh_index] = kept
+	if cell_impostor.has(cell):
+		var kept_i := _without(cell_impostor[cell], origin, 12, 13)
+		if kept_i.is_empty():
+			cell_impostor.erase(cell)
+		else:
+			cell_impostor[cell] = kept_i
+	_cull_cache.erase(cell)
+	if shown_buffers.has(cell) and not is_same(shown_buffers[cell], buffers):
+		shown_buffers.erase(cell)
+	shown_impostor.erase(cell)
+	for key in selection.keys():
+		if (selection[key] as PackedInt32Array).has(cell):
+			selection[key] = PackedInt32Array([-1])
+	return removed
+
+
+static func _without(buffer: PackedFloat32Array, origin: Vector2, x_at: int, z_at: int) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	for n in buffer.size() / STRIDE:
+		var o := n * STRIDE
+		if absf(buffer[o + x_at] - origin.x) < 0.006 and absf(buffer[o + z_at] - origin.y) < 0.006:
+			continue
+		out.append_array(buffer.slice(o, o + STRIDE))
+	return out
+
+
 static func _flag(buffer: PackedFloat32Array, origin: Vector2, x_at: int, z_at: int, flag_at: int, value: float) -> PackedFloat32Array:
 	for n in buffer.size() / STRIDE:
 		var o := n * STRIDE

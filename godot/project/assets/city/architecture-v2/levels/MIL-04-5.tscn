@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://assets/city/architecture-v2/levels/MIL-04-5.res" id="1_ymkms"]
+
+[node name="MIL_04_5" type="Node3D" unique_id=499450961]
+metadata/series = "B14_Blacksmith"
+metadata/lanes = []
+metadata/worker_offset = Vector3(-1, 0, 3.4)
+
+[node name="Architecture" type="MeshInstance3D" parent="." unique_id=1044461004]
+mesh = ExtResource("1_ymkms")

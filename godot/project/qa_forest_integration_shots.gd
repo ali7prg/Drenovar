@@ -90,6 +90,7 @@ func fresh_dict(state: Dictionary) -> void:
 	forest.client.primed = false
 	clock = float(state.get("adventure", {}).get("serverTime", -1.0))
 	forest.client.manual_clock_ms = clock
+	game.showing_cached_state = true  # 1022: fixtures may be older than the state on screen
 	game.accept(state)
 	game.battle_results.pending.clear()
 	game.result_notice.hide()
@@ -102,6 +103,7 @@ func live(state_name: String, keep_clock := true) -> void:
 	if not keep_clock:
 		clock = float(state.get("adventure", {}).get("serverTime", clock))
 		forest.client.manual_clock_ms = clock
+	game.showing_cached_state = true  # 1022: fixtures may be older than the state on screen
 	game.accept(state)
 	game.battle_results.pending.clear()
 	game.result_notice.hide()
@@ -155,6 +157,10 @@ func run() -> void:
 	DirAccess.make_dir_recursive_absolute(out)
 	root.size = Vector2i(1366, 630)
 	game = load("res://main.tscn").instantiate()
+	# 1022: offline, fixture-fed (forest local-realm states predate V6): an unreachable loopback
+	# endpoint, so accept() takes them and nothing reaches a real server (1021 qa_city_works pattern).
+	game.endpoint = "http://127.0.0.1:9"
+	game.loopback = true
 	root.add_child(game)
 	while game.scene_loading or not is_instance_valid(game.stage):
 		await process_frame

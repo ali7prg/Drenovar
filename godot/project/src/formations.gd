@@ -1,6 +1,6 @@
 extends RefCounted
 
-const GROUPS := ["INF-01", "CAV-01", "RNG-01"]
+const GROUPS := ["INF-01", "CAV-01", "RNG-01", "SIEGE"]
 const FIELD_LIMIT := 24
 
 # Match representedMembers60, including the original server indices used by combat events.
@@ -34,7 +34,7 @@ static func field_slots(bag: Dictionary, roster: Array) -> Array[Dictionary]:
 	var roles := {}
 	for unit in roster:
 		roles[unit.id] = unit.training_building
-	var groups := {"INF-01":[], "CAV-01":[], "RNG-01":[]}
+	var groups := {"INF-01":[], "CAV-01":[], "RNG-01":[], "SIEGE":[]}
 	for entry in assigned:
 		var role: String = roles.get(entry.id, "INF-01")
 		for index in range(int(entry.count)):
@@ -43,7 +43,7 @@ static func field_slots(bag: Dictionary, roster: Array) -> Array[Dictionary]:
 	var depth := 0.0
 	for role in GROUPS:
 		var members: Array = groups[role]
-		var mounted: bool = role == "CAV-01"
+		var mounted: bool = role in ["CAV-01", "SIEGE"]
 		var width := 4 if mounted else 5
 		var spacing := 2.4 if mounted else 1.45
 		var row_depth := 3.7 if mounted else 1.7
@@ -61,7 +61,7 @@ static func field_slots(bag: Dictionary, roster: Array) -> Array[Dictionary]:
 	return slots
 
 static func parade_slots(bag: Dictionary, roster: Array) -> Array[Dictionary]:
-	var groups := {"INF-01":[], "CAV-01":[], "RNG-01":[]}
+	var groups := {"INF-01":[], "CAV-01":[], "RNG-01":[], "SIEGE":[]}
 	var remaining := bag.duplicate()
 	for role in GROUPS:
 		var members: Array = groups[role]
@@ -87,4 +87,44 @@ static func parade_slots(bag: Dictionary, roster: Array) -> Array[Dictionary]:
 			slots.append({"id":members[i], "offset":Vector2(x, -6 + floori((i % 12) / 3.0) * 1.45), "mounted":false})
 	for i in range(cavalry.size()):
 		slots.append({"id":cavalry[i], "offset":Vector2(1.2 if i % 2 else -1.2, -5 + floori(i / 2.0) * 4), "mounted":true})
+	for i in range(mini(4, int(bag.get("SIEGE-RAM-01", 0)))):
+		slots.append({"id":"SIEGE-RAM-01", "offset":Vector2((i - 1.5) * 3.1, 5.5), "mounted":true})
 	return slots
+
+# A returning formation has new positions, never new identities. Older city
+# responses carry the full death history; the paired V6 projection also supplies
+# surviving members for reconnects and for world armies with compact events.
+static func returning_slots(army: Dictionary, roster: Array) -> Array[Dictionary]:
+	var presentation: Dictionary = army.get("presentation", {})
+	var survivors := {}
+	var explicit: Variant = presentation.get("returnMembers")
+	if explicit is Array:
+		for member in explicit:
+			var id := str(member.unitId)
+			if not survivors.has(id):
+				survivors[id] = []
+			survivors[id].append(int(member.index))
+	else:
+		var dead := {}
+		var events: Array = army.get("battle", {}).get("events", []) if army.get("battle") is Dictionary else army.get("events", [])
+		for e in events:
+			if e is Dictionary and e.get("kind") != "soldier_attack" and e.get("hp", -1) == 0:
+				dead["%s:%d" % [e.unitId, int(e.index)]] = true
+			elif e is Array and e[1] != "soldier_attack" and e[4] == 0:
+				dead["%s:%d" % [e[2], int(e[3])]] = true
+		for member in army.get("fallen", []):
+			dead["%s:%d" % [member[0], int(member[1])]] = true
+		var original: Dictionary = presentation.get("originalUnits", army.units)
+		for id in original:
+			survivors[id] = []
+			for index in int(original[id]):
+				if not dead.has("%s:%d" % [id,index]):
+					survivors[id].append(index)
+	var slots := field_slots(army.get("returnUnits", army.units), roster)
+	var result: Array[Dictionary] = []
+	for slot in slots:
+		var indices: Array = survivors.get(slot.id, [])
+		if int(slot.index) < indices.size():
+			slot.index = indices[int(slot.index)]
+			result.append(slot)
+	return result

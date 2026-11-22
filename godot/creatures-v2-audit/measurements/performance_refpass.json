@@ -1,0 +1,107 @@
+{
+ "probe": "godot/project/profile_creatures_v2.gd -- --flag=on --count=12 --seconds=15 --runs=2 [--near]",
+ "pass": "creature-references (18.11.2026), after the model changes",
+ "note": "Linux container, Xvfb, Vulkan Forward Mobile on llvmpipe (CPU); not a target device. Compare with performance.json (same probe, same renderer, before this pass).",
+ "results": [
+  {
+   "renderer": "mobile",
+   "result": {
+    "cold_load_ms": {
+     "res://assets/creatures-v2/dragor/dragor_runtime.gltf": 37.8,
+     "res://assets/creatures-v2/kamneklyk/kamneklyk_runtime.gltf": 47.0,
+     "res://assets/creatures-v2/tenerys/tenerys_runtime.gltf": 36.9,
+     "res://assets/creatures-v2/velkor/velkor_runtime.gltf": 44.8
+    },
+    "creatures": 12,
+    "flag": "creatures-v2",
+    "lod_counts": {
+     "1": 9,
+     "2": 3
+    },
+    "method": "Linux container, Xvfb, CPU rasteriser; not a target device",
+    "renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "runs": [
+     {
+      "draw_calls": 67,
+      "frames": 65,
+      "median_ms": 229.43,
+      "p95_ms": 252.79,
+      "primitives": 992095
+     },
+     {
+      "draw_calls": 67,
+      "frames": 65,
+      "median_ms": 229.67,
+      "p95_ms": 255.07,
+      "primitives": 992038
+     }
+    ],
+    "seconds": 15.0,
+    "static_mem_mb": 76.3,
+    "texture_mem_mb": 74.9,
+    "video_mem_mb": 127.9,
+    "view": "near"
+   }
+  },
+  {
+   "renderer": "mobile",
+   "result": {
+    "cold_load_ms": {
+     "res://assets/creatures-v2/dragor/dragor_runtime.gltf": 23.1,
+     "res://assets/creatures-v2/kamneklyk/kamneklyk_runtime.gltf": 42.9,
+     "res://assets/creatures-v2/tenerys/tenerys_runtime.gltf": 39.9,
+     "res://assets/creatures-v2/velkor/velkor_runtime.gltf": 45.0
+    },
+    "creatures": 12,
+    "flag": "creatures-v2",
+    "lod_counts": {
+     "1": 1,
+     "2": 11
+    },
+    "method": "Linux container, Xvfb, CPU rasteriser; not a target device",
+    "renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "runs": [
+     {
+      "draw_calls": 72,
+      "frames": 128,
+      "median_ms": 116.49,
+      "p95_ms": 131.24,
+      "primitives": 363952
+     },
+     {
+      "draw_calls": 72,
+      "frames": 127,
+      "median_ms": 116.9,
+      "p95_ms": 136.92,
+      "primitives": 363952
+     }
+    ],
+    "seconds": 15.0,
+    "static_mem_mb": 76.3,
+    "texture_mem_mb": 74.9,
+    "video_mem_mb": 127.9,
+    "view": "far"
+   }
+  }
+ ],
+ "before_same_probe": {
+  "far": {
+   "median_ms": [
+    112.36,
+    114.04
+   ],
+   "draw_calls": 54,
+   "primitives": 281554,
+   "video_mem_mb": 118.4
+  },
+  "near": {
+   "median_ms": [
+    200.4,
+    196.79
+   ],
+   "draw_calls": 52,
+   "primitives": 842560,
+   "video_mem_mb": 118.4
+  }
+ }
+}

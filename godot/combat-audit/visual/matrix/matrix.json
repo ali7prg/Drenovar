@@ -1,0 +1,661 @@
+[
+  {
+    "actors": 15,
+    "at": 1794800014507.0,
+    "case": "M-city-L1-ENG-01",
+    "clips": {
+      "attack": 14,
+      "run": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800014507.0,
+    "case": "M-city-L1-ENG-02",
+    "clips": {
+      "attack": 14,
+      "run": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800013707.0,
+    "case": "M-city-L1-ENG-03",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800017743.0,
+    "case": "M-city-L1-ENG-04",
+    "clips": {
+      "run": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800008254.0,
+    "case": "M-city-L1-ENG-05",
+    "clips": {
+      "attack": 14,
+      "run": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800009119.0,
+    "case": "M-city-L1-ENG-06",
+    "clips": {
+      "run": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800018543.0,
+    "case": "M-city-L1-ENG-07",
+    "clips": {
+      "attack": 11,
+      "idle": 4
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800014507.0,
+    "case": "M-city-L1-ENG-08",
+    "clips": {
+      "attack": 14,
+      "run": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800014507.0,
+    "case": "M-city-L1-ENG-09",
+    "clips": {
+      "attack": 14,
+      "run": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800011286.0,
+    "case": "M-city-L1-ENG-10",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800020507.0,
+    "case": "M-city-L2-ENG-01",
+    "clips": {
+      "attack": 1,
+      "run": 13,
+      "walk": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 14
+  },
+  {
+    "actors": 15,
+    "at": 1794800020507.0,
+    "case": "M-city-L2-ENG-02",
+    "clips": {
+      "attack": 1,
+      "run": 13,
+      "walk": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 14
+  },
+  {
+    "actors": 15,
+    "at": 1794800019707.0,
+    "case": "M-city-L2-ENG-03",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800025743.0,
+    "case": "M-city-L2-ENG-04",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800011254.0,
+    "case": "M-city-L2-ENG-05",
+    "clips": {
+      "run": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 15
+  },
+  {
+    "actors": 15,
+    "at": 1794800012547.0,
+    "case": "M-city-L2-ENG-06",
+    "clips": {
+      "run": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 15
+  },
+  {
+    "actors": 15,
+    "at": 1794800026543.0,
+    "case": "M-city-L2-ENG-07",
+    "clips": {
+      "idle": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 14
+  },
+  {
+    "actors": 15,
+    "at": 1794800020507.0,
+    "case": "M-city-L2-ENG-08",
+    "clips": {
+      "attack": 1,
+      "run": 13,
+      "walk": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 14
+  },
+  {
+    "actors": 15,
+    "at": 1794800020507.0,
+    "case": "M-city-L2-ENG-09",
+    "clips": {
+      "attack": 1,
+      "death": 1,
+      "run": 12,
+      "walk": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 14
+  },
+  {
+    "actors": 15,
+    "at": 1794800016086.0,
+    "case": "M-city-L2-ENG-10",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800016350.0,
+    "case": "M-city-L3-ENG-01",
+    "clips": {
+      "attack": 14,
+      "death": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800016350.0,
+    "case": "M-city-L3-ENG-02",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800015550.0,
+    "case": "M-city-L3-ENG-03",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800020200.0,
+    "case": "M-city-L3-ENG-04",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800009175.0,
+    "case": "M-city-L3-ENG-05",
+    "clips": {
+      "attack": 14,
+      "death": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800010172.0,
+    "case": "M-city-L3-ENG-06",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800021000.0,
+    "case": "M-city-L3-ENG-07",
+    "clips": {
+      "attack": 12,
+      "idle": 3
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800016350.0,
+    "case": "M-city-L3-ENG-08",
+    "clips": {
+      "attack": 14,
+      "death": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800016350.0,
+    "case": "M-city-L3-ENG-09",
+    "clips": {
+      "attack": 14,
+      "death": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800012760.0,
+    "case": "M-city-L3-ENG-10",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800015876.0,
+    "case": "M-world-L1-ENG-01",
+    "clips": {
+      "attack": 14,
+      "run": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800015876.0,
+    "case": "M-world-L1-ENG-02",
+    "clips": {
+      "attack": 14,
+      "run": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800015076.0,
+    "case": "M-world-L1-ENG-03",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800019568.0,
+    "case": "M-world-L1-ENG-04",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800008938.0,
+    "case": "M-world-L1-ENG-05",
+    "clips": {
+      "attack": 2,
+      "idle": 6,
+      "run": 6,
+      "trot": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 13
+  },
+  {
+    "actors": 15,
+    "at": 1794800009901.0,
+    "case": "M-world-L1-ENG-06",
+    "clips": {
+      "attack": 2,
+      "idle": 6,
+      "run": 6,
+      "trot": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 13
+  },
+  {
+    "actors": 15,
+    "at": 1794800020568.0,
+    "case": "M-world-L1-ENG-07",
+    "clips": {
+      "attack": 11,
+      "idle": 4
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800015876.0,
+    "case": "M-world-L1-ENG-08",
+    "clips": {
+      "attack": 14,
+      "run": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800015876.0,
+    "case": "M-world-L1-ENG-09",
+    "clips": {
+      "attack": 14,
+      "run": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800012381.0,
+    "case": "M-world-L1-ENG-10",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800019481.0,
+    "case": "M-world-L2-ENG-01",
+    "clips": {
+      "attack": 2,
+      "idle": 13
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 13
+  },
+  {
+    "actors": 15,
+    "at": 1794800019481.0,
+    "case": "M-world-L2-ENG-02",
+    "clips": {
+      "attack": 2,
+      "idle": 13
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 13
+  },
+  {
+    "actors": 15,
+    "at": 1794800018681.0,
+    "case": "M-world-L2-ENG-03",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 4
+  },
+  {
+    "actors": 15,
+    "at": 1794800024375.0,
+    "case": "M-world-L2-ENG-04",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 1
+  },
+  {
+    "actors": 15,
+    "at": 1794800010741.0,
+    "case": "M-world-L2-ENG-05",
+    "clips": {
+      "idle": 4,
+      "run": 9,
+      "trot": 2
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 15
+  },
+  {
+    "actors": 15,
+    "at": 1794800011961.0,
+    "case": "M-world-L2-ENG-06",
+    "clips": {
+      "idle": 4,
+      "run": 9,
+      "trot": 1,
+      "walk": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 15
+  },
+  {
+    "actors": 15,
+    "at": 1794800025375.0,
+    "case": "M-world-L2-ENG-07",
+    "clips": {
+      "attack": 2,
+      "idle": 13
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 13
+  },
+  {
+    "actors": 15,
+    "at": 1794800019481.0,
+    "case": "M-world-L2-ENG-08",
+    "clips": {
+      "attack": 3,
+      "death": 1,
+      "idle": 11
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 12
+  },
+  {
+    "actors": 15,
+    "at": 1794800019481.0,
+    "case": "M-world-L2-ENG-09",
+    "clips": {
+      "attack": 3,
+      "death": 1,
+      "idle": 11
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 12
+  },
+  {
+    "actors": 15,
+    "at": 1794800015265.0,
+    "case": "M-world-L2-ENG-10",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 4
+  },
+  {
+    "actors": 15,
+    "at": 1794800018170.0,
+    "case": "M-world-L3-ENG-01",
+    "clips": {
+      "attack": 10,
+      "death": 1,
+      "idle": 4
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 4
+  },
+  {
+    "actors": 15,
+    "at": 1794800018170.0,
+    "case": "M-world-L3-ENG-02",
+    "clips": {
+      "attack": 7,
+      "death": 1,
+      "idle": 4,
+      "run": 3
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 7
+  },
+  {
+    "actors": 15,
+    "at": 1794800017370.0,
+    "case": "M-world-L3-ENG-03",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800022627.0,
+    "case": "M-world-L3-ENG-04",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  },
+  {
+    "actors": 15,
+    "at": 1794800010085.0,
+    "case": "M-world-L3-ENG-05",
+    "clips": {
+      "attack": 1,
+      "death": 1,
+      "idle": 4,
+      "run": 8,
+      "trot": 1
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 14
+  },
+  {
+    "actors": 15,
+    "at": 1794800011212.0,
+    "case": "M-world-L3-ENG-06",
+    "clips": {
+      "attack": 2,
+      "idle": 4,
+      "run": 9
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 13
+  },
+  {
+    "actors": 15,
+    "at": 1794800023627.0,
+    "case": "M-world-L3-ENG-07",
+    "clips": {
+      "attack": 9,
+      "idle": 6
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 4
+  },
+  {
+    "actors": 15,
+    "at": 1794800018170.0,
+    "case": "M-world-L3-ENG-08",
+    "clips": {
+      "attack": 10,
+      "death": 1,
+      "idle": 4
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 4
+  },
+  {
+    "actors": 15,
+    "at": 1794800018170.0,
+    "case": "M-world-L3-ENG-09",
+    "clips": {
+      "attack": 10,
+      "death": 1,
+      "idle": 4
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 4
+  },
+  {
+    "actors": 15,
+    "at": 1794800014216.0,
+    "case": "M-world-L3-ENG-10",
+    "clips": {
+      "attack": 15
+    },
+    "method": "stopped current-code replay, contact+200ms; NOT continuous/device acceptance",
+    "reserve": 0
+  }
+]

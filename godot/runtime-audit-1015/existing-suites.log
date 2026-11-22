@@ -1,0 +1,4 @@
+QA_HUNT checks=50 failures=0
+QA_WORLD_HUNT checks=22 failures=0
+QA_BATTLE_FX checks=22 failures=0
+QA_BATTLE_SLOTS failures=0

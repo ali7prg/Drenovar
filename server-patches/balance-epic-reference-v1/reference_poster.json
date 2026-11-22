@@ -1,0 +1,364 @@
+{
+  "schema_version": 1,
+  "preset_id": "epic_reference_v1",
+  "status": "DESIGN_REFERENCE_NOT_RUNTIME_CONFIG",
+  "auto_apply": false,
+  "source": "Числа HP/атаки/защиты/рекомендуемой силы и основных наград из пользовательского постера; не фактический баланс v92.",
+  "notes": [
+    "Новые ключи ресурсов являются предложением, их надо сопоставить существующему инвентарю.",
+    "Мясо сопоставлено food, шкура — hides, рога — antlers, кости — bones, когти — claws; в текущем dragor видовой ресурс armor_plates, а на постере минерал. Не заменять автоматически.",
+    "Дополнительная награда показана только на уровне 2, трофей только на уровне 3; накопительное наследование не предполагается.",
+    "На плакате заголовок Награды (гарантированно). Все перечисленные награды трактуются как гарантированные, в том числе редкие. Редкость предмета не означает шанс выпадения.",
+    "Количество трофеев уровня 3 принято равным 1; мелкие подписи неоднозначны. Это явное проектное допущение.",
+    "Правила cooldown, timings, attack multipliers в техническом тексте — новые проектные предложения."
+  ],
+  "creatures": [
+    {
+      "id": "velkor",
+      "display_name": "Лесной Велькор",
+      "habitats": [
+        "forest"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "hp": 18000,
+          "attack": 1200,
+          "defense": 800,
+          "recommended_power": 1500,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 1000
+            },
+            {
+              "key": "hides",
+              "quantity": 20
+            },
+            {
+              "key": "antlers",
+              "quantity": 5
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "hp": 36000,
+          "attack": 2400,
+          "defense": 1600,
+          "recommended_power": 3500,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 2500
+            },
+            {
+              "key": "hides",
+              "quantity": 40
+            },
+            {
+              "key": "antlers",
+              "quantity": 10
+            },
+            {
+              "key": "forest_essence",
+              "display_name": "Лесная эссенция",
+              "quantity": 1,
+              "requires_catalog_mapping": true
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "hp": 72000,
+          "attack": 4800,
+          "defense": 3200,
+          "recommended_power": 7000,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 5000
+            },
+            {
+              "key": "hides",
+              "quantity": 80
+            },
+            {
+              "key": "antlers",
+              "quantity": 20
+            },
+            {
+              "key": "velkor_antler_trophy",
+              "display_name": "Рог Велькора",
+              "quantity": 1,
+              "requires_catalog_mapping": true,
+              "quantity_source": "design_assumption"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kamneklyk",
+      "display_name": "Камнеклык",
+      "habitats": [
+        "meadow",
+        "hills"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "hp": 24000,
+          "attack": 1600,
+          "defense": 1200,
+          "recommended_power": 2000,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 1200
+            },
+            {
+              "key": "hides",
+              "quantity": 25
+            },
+            {
+              "key": "bones",
+              "quantity": 10
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "hp": 48000,
+          "attack": 3200,
+          "defense": 2400,
+          "recommended_power": 4500,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 3000
+            },
+            {
+              "key": "hides",
+              "quantity": 50
+            },
+            {
+              "key": "bones",
+              "quantity": 20
+            },
+            {
+              "key": "stone_fragment",
+              "display_name": "Каменный фрагмент",
+              "quantity": 1,
+              "requires_catalog_mapping": true
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "hp": 96000,
+          "attack": 6400,
+          "defense": 4800,
+          "recommended_power": 9000,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 6000
+            },
+            {
+              "key": "hides",
+              "quantity": 100
+            },
+            {
+              "key": "bones",
+              "quantity": 40
+            },
+            {
+              "key": "kamneklyk_plate",
+              "display_name": "Пластина Камнеклыка",
+              "quantity": 1,
+              "requires_catalog_mapping": true,
+              "quantity_source": "design_assumption"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tenerys",
+      "display_name": "Тенерис",
+      "habitats": [
+        "twilight_forest",
+        "borderlands"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "hp": 20000,
+          "attack": 1800,
+          "defense": 700,
+          "recommended_power": 1800,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 800
+            },
+            {
+              "key": "hides",
+              "quantity": 20
+            },
+            {
+              "key": "claws",
+              "quantity": 5
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "hp": 40000,
+          "attack": 3600,
+          "defense": 1400,
+          "recommended_power": 4000,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 2000
+            },
+            {
+              "key": "hides",
+              "quantity": 40
+            },
+            {
+              "key": "claws",
+              "quantity": 10
+            },
+            {
+              "key": "twilight_essence",
+              "display_name": "Сумрачная эссенция",
+              "quantity": 1,
+              "requires_catalog_mapping": true
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "hp": 80000,
+          "attack": 7200,
+          "defense": 2800,
+          "recommended_power": 8000,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 4000
+            },
+            {
+              "key": "hides",
+              "quantity": 80
+            },
+            {
+              "key": "claws",
+              "quantity": 20
+            },
+            {
+              "key": "tenerys_fang_trophy",
+              "display_name": "Клык Тенериса",
+              "quantity": 1,
+              "requires_catalog_mapping": true,
+              "quantity_source": "design_assumption"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dragor",
+      "display_name": "Горный Драгар",
+      "habitats": [
+        "mountains"
+      ],
+      "levels": [
+        {
+          "level": 1,
+          "hp": 60000,
+          "attack": 4000,
+          "defense": 3000,
+          "recommended_power": 5000,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 3000
+            },
+            {
+              "key": "hides",
+              "quantity": 30
+            },
+            {
+              "key": "mineral",
+              "quantity": 10,
+              "requires_catalog_mapping": true
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "hp": 120000,
+          "attack": 8000,
+          "defense": 6000,
+          "recommended_power": 10000,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 6000
+            },
+            {
+              "key": "hides",
+              "quantity": 60
+            },
+            {
+              "key": "mineral",
+              "quantity": 20,
+              "requires_catalog_mapping": true
+            },
+            {
+              "key": "dragarite",
+              "display_name": "Драгарит",
+              "quantity": 1,
+              "requires_catalog_mapping": true
+            }
+          ]
+        },
+        {
+          "level": 3,
+          "hp": 240000,
+          "attack": 16000,
+          "defense": 12000,
+          "recommended_power": 18000,
+          "guaranteed_rewards": [
+            {
+              "key": "food",
+              "quantity": 12000
+            },
+            {
+              "key": "hides",
+              "quantity": 120
+            },
+            {
+              "key": "mineral",
+              "quantity": 40,
+              "requires_catalog_mapping": true
+            },
+            {
+              "key": "glowing_plates",
+              "display_name": "Редкий материал Драгара",
+              "quantity": 1,
+              "requires_catalog_mapping": true,
+              "quantity_source": "design_assumption",
+              "provisional_label_from_poster": "Пылающие пластины",
+              "display_name_is_provisional": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

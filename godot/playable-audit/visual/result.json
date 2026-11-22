@@ -1,0 +1,22 @@
+{
+  "checks": 22,
+  "clip_samples": 29,
+  "clock": "wall clock, unchanged solver and travel time",
+  "device": "Linux Godot; no physical iPhone acceptance",
+  "entry": "main.tscn, interactive UI and HTTP",
+  "failures": [
+    "actual game renders scheduled attacks"
+  ],
+  "observed_actions": [
+    "idle",
+    "trot",
+    "run",
+    "walk"
+  ],
+  "phases": {
+    "fighting": 1794825646022.62,
+    "outbound": 1794825631775.62,
+    "returning": 1794825649552.53
+  },
+  "status": "failed"
+}

@@ -1,0 +1,414 @@
+{
+ "id": "velkor",
+ "name": "Лесной Велькор",
+ "version": "creatures-v2 1.0 (2026-11-17)",
+ "units": "metre",
+ "up": "+Y",
+ "forward": "+X",
+ "pivot": "ground, body centre",
+ "authored_bounds_m": {
+  "x": [
+   -1.76,
+   2.035
+  ],
+  "half_width": 0.644,
+  "top": 3.17
+ },
+ "display_scale_in_game": 1.323,
+ "battle_outline_m": [
+  2.511,
+  0.851
+ ],
+ "bones": 41,
+ "max_influences": 4,
+ "sockets": [
+  "socket_head",
+  "socket_mouth",
+  "socket_chest",
+  "socket_foot_front_l",
+  "socket_foot_hind_l",
+  "socket_antler_l",
+  "socket_foot_front_r",
+  "socket_foot_hind_r",
+  "socket_antler_r",
+  "socket_tail_tip"
+ ],
+ "material_slots": [
+  "Body",
+  "AntlerBark"
+ ],
+ "lods": {
+  "lod0": {
+   "file": "velkor_lod0.glb",
+   "bytes": 29150380,
+   "triangles": 62112,
+   "materials": [
+    "M_Velkor_Body_LOD0",
+    "M_Velkor_AntlerBark_LOD0",
+    "M_Velkor_FurCards_LOD0"
+   ],
+   "textures": [
+    "velkor_LOD0_body_BaseColor",
+    "velkor_LOD0_body_Normal",
+    "velkor_LOD0_body_ORM",
+    "velkor_LOD0_body_Emissive",
+    "velkor_LOD0_horn_BaseColor",
+    "velkor_LOD0_horn_Normal",
+    "velkor_LOD0_horn_ORM",
+    "velkor_LOD0_horn_Emissive",
+    "velkor_LOD0_fur_BaseColor",
+    "velkor_LOD0_fur_Normal",
+    "velkor_LOD0_fur_ORM"
+   ]
+  },
+  "lod1": {
+   "file": "velkor_lod1.glb",
+   "bytes": 9946416,
+   "triangles": 26342,
+   "materials": [
+    "M_Velkor_Body_LOD1",
+    "M_Velkor_AntlerBark_LOD1",
+    "M_Velkor_FurCards_LOD1"
+   ],
+   "textures": [
+    "velkor_LOD1_body_BaseColor",
+    "velkor_LOD1_body_Normal",
+    "velkor_LOD1_body_ORM",
+    "velkor_LOD1_body_Emissive",
+    "velkor_LOD1_horn_BaseColor",
+    "velkor_LOD1_horn_Normal",
+    "velkor_LOD1_horn_ORM",
+    "velkor_LOD1_horn_Emissive",
+    "velkor_LOD1_fur_BaseColor",
+    "velkor_LOD1_fur_Normal",
+    "velkor_LOD1_fur_ORM"
+   ]
+  },
+  "lod2": {
+   "file": "velkor_lod2.glb",
+   "bytes": 3193324,
+   "triangles": 6716,
+   "materials": [
+    "M_Velkor_Body_LOD2",
+    "M_Velkor_AntlerBark_LOD2",
+    "M_Velkor_FurCards_LOD2"
+   ],
+   "textures": [
+    "velkor_LOD2_body_BaseColor",
+    "velkor_LOD2_body_Normal",
+    "velkor_LOD2_body_ORM",
+    "velkor_LOD2_body_Emissive",
+    "velkor_LOD2_horn_BaseColor",
+    "velkor_LOD2_horn_Normal",
+    "velkor_LOD2_horn_ORM",
+    "velkor_LOD2_horn_Emissive",
+    "velkor_LOD2_fur_BaseColor",
+    "velkor_LOD2_fur_Normal",
+    "velkor_LOD2_fur_ORM"
+   ]
+  }
+ },
+ "clips": {
+  "idle": {
+   "name": "velkor__idle",
+   "frames": 90,
+   "length_s": 3.0,
+   "loop": true,
+   "events": []
+  },
+  "walk": {
+   "name": "velkor__walk",
+   "frames": 36,
+   "length_s": 1.2,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 9,
+     "time": 0.3,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 18,
+     "time": 0.6,
+     "foot": "hind_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 27,
+     "time": 0.9,
+     "foot": "front_l"
+    }
+   ],
+   "speed_mps": 1.6
+  },
+  "alert": {
+   "name": "velkor__alert",
+   "frames": 30,
+   "length_s": 1.0,
+   "loop": false,
+   "events": []
+  },
+  "run": {
+   "name": "velkor__run",
+   "frames": 21,
+   "length_s": 0.7,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 9,
+     "time": 0.3,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 11,
+     "time": 0.36666666666666664,
+     "foot": "front_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 19,
+     "time": 0.6333333333333333,
+     "foot": "hind_r"
+    }
+   ],
+   "speed_mps": 6.0
+  },
+  "turn_left": {
+   "name": "velkor__turn_left",
+   "frames": 24,
+   "length_s": 0.8,
+   "loop": false,
+   "events": [],
+   "motion_keys": [
+    "yaw_deg",
+    "yaw"
+   ]
+  },
+  "turn_right": {
+   "name": "velkor__turn_right",
+   "frames": 24,
+   "length_s": 0.8,
+   "loop": false,
+   "events": [],
+   "motion_keys": [
+    "yaw_deg",
+    "yaw"
+   ]
+  },
+  "roar": {
+   "name": "velkor__roar",
+   "frames": 72,
+   "length_s": 2.4,
+   "loop": false,
+   "events": [
+    {
+     "event": "sound",
+     "frame": 16,
+     "time": 0.5333333333333333
+    },
+    {
+     "event": "rune_pulse",
+     "frame": 24,
+     "time": 0.8
+    }
+   ]
+  },
+  "attack_antler_sweep": {
+   "name": "velkor__attack_antler_sweep",
+   "frames": 45,
+   "length_s": 1.5,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "whoosh",
+     "frame": 19
+    },
+    {
+     "event": "contact",
+     "frame": 22
+    },
+    {
+     "event": "recovery",
+     "frame": 27
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     18
+    ],
+    "active": [
+     18,
+     27
+    ],
+    "recovery": [
+     27,
+     45
+    ],
+    "impact": 22
+   }
+  },
+  "attack_charge": {
+   "name": "velkor__attack_charge",
+   "frames": 66,
+   "length_s": 2.2,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "launch",
+     "frame": 21
+    },
+    {
+     "event": "contact",
+     "frame": 34
+    },
+    {
+     "event": "brake",
+     "frame": 42
+    },
+    {
+     "event": "recovery",
+     "frame": 46
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     21
+    ],
+    "active": [
+     21,
+     42
+    ],
+    "recovery": [
+     42,
+     66
+    ],
+    "impact": 34
+   },
+   "motion_keys": [
+    "forward_m"
+   ]
+  },
+  "hit": {
+   "name": "velkor__hit",
+   "frames": 18,
+   "length_s": 0.6,
+   "loop": false,
+   "events": [
+    {
+     "event": "hit",
+     "frame": 2
+    }
+   ]
+  },
+  "death": {
+   "name": "velkor__death",
+   "frames": 84,
+   "length_s": 2.8,
+   "loop": false,
+   "events": [
+    {
+     "event": "collapse",
+     "frame": 10
+    },
+    {
+     "event": "ground_contact",
+     "frame": 40
+    },
+    {
+     "event": "dead",
+     "frame": 84
+    }
+   ]
+  },
+  "rest": {
+   "name": "velkor__rest",
+   "frames": 120,
+   "length_s": 4.0,
+   "loop": true,
+   "events": []
+  }
+ },
+ "semantic_states": {
+  "Idle": "idle",
+  "Walk": "walk",
+  "Run": "run",
+  "Alert": "alert",
+  "Attack": "attack_antler_sweep",
+  "Hit": "hit",
+  "Death": "death",
+  "Roar": "roar"
+ },
+ "server_events": {
+  "creature_attack": "attack_antler_sweep",
+  "antler_charge": "attack_charge"
+ },
+ "levels": {
+  "1": {
+   "emission_strength": 0.9,
+   "tint_g": [
+    0.84,
+    0.66,
+    0.28,
+    0.0
+   ],
+   "emit_r": 0.0,
+   "emit_b": 0.0
+  },
+  "2": {
+   "emission_strength": 1.25,
+   "tint_g": [
+    0.84,
+    0.66,
+    0.28,
+    0.0
+   ],
+   "emit_r": 0.9,
+   "emit_b": 0.2
+  },
+  "3": {
+   "emission_strength": 1.7,
+   "tint_g": [
+    0.86,
+    0.66,
+    0.24,
+    0.85
+   ],
+   "emit_r": 1.2,
+   "emit_b": 0.9
+  }
+ },
+ "emission_color": "#55D675",
+ "gpu_texture_estimate_mb": {
+  "godot_runtime_lod1_lod2": 8.3,
+  "lod0": 26.7
+ },
+ "compression": "none (core glTF 2.0 + KHR_materials_emissive_strength); Godot imports textures as VRAM-compressed (ASTC/ETC2 on iOS)",
+ "licences": "All geometry, textures and animation generated by godot/art/creatures-v2 (DRENOVAR project). No third-party assets.",
+ "provenance": "Procedural SDF sculpt + QuadriFlow/decimation + xatlas + Cycles bakes + procedural PBR + IK keyed clips"
+}

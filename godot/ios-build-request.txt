@@ -1,4 +1,6 @@
-Changing this file starts the unsigned iOS IPA build for SideStore
-(.github/workflows/drenovar-ios-ipa.yml) on branch claude/kind-babbage-4swyw3.
+Changing this file is the only push that may start the unsigned iOS test IPA build
+(.github/workflows/ios-repack.yml: Linux repack onto the pinned engine capsule,
+GitHub Release DRENOVAR-game-<build>.ipa) on branch claude/kind-babbage-4swyw3.
+The build can also be started by hand (workflow_dispatch). Routine pushes never build.
 
-Request 1: pipeline check with the current work-in-progress forest (not for installing).
+No build requested yet for 1022 (0.6.0).

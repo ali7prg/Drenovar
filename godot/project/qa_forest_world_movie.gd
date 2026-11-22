@@ -55,6 +55,10 @@ func run() -> void:
 			scenario = arg.trim_prefix("--scenario=")
 	root.size = Vector2i(1366, 630)
 	game = load("res://main.tscn").instantiate()
+	# 1022: offline, fixture-fed (forest local-realm states predate V6): an unreachable loopback
+	# endpoint, so accept() takes them and nothing reaches a real server (1021 qa_city_works pattern).
+	game.endpoint = "http://127.0.0.1:9"
+	game.loopback = true
 	root.add_child(game)
 	while game.get("scene_loading") or not is_instance_valid(game.get("stage")):
 		await process_frame

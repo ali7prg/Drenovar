@@ -1,0 +1,8 @@
+{
+  "build": "1013",
+  "bundle_id": "com.drenovar.game.v6test",
+  "ipa_sha256": "be128e345e6281bf396c76b8c9235e636a92e0b256d96020da497a776b0c73f0",
+  "ipa_bytes": 248439527,
+  "pck_sha256": "ba9fe43f212ed25e130c9c1c34440e687d4e89f67041d379f430c6e5557c1fbc",
+  "engine_sha256": "d9816f67f540bbebccfdb2a5ecf9460feda71c05247e4e80601caf44973bfaae"
+}

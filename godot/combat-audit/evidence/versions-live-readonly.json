@@ -1,0 +1,18 @@
+[
+  {
+    "url": "https://drenovar-v92-staging.ali069587.workers.dev/api/v6/version",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://drenovar-v92-staging.ali069587.workers.dev/api/health",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://drenovar-game.ali069587.workers.dev/api/v6/version",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "url": "https://drenovar-game.ali069587.workers.dev/api/health",
+    "error": "HTTP Error 403: Forbidden"
+  }
+]

@@ -1,0 +1,1324 @@
+{
+  "status": "passed",
+  "states": 162,
+  "units": 1,
+  "models": 163,
+  "bufferChecks": 13741,
+  "componentChecks": 86115372,
+  "textureFiles": 18,
+  "float32AttributesPreserved": true,
+  "indicesPreserved": true,
+  "geometrySimplification": false,
+  "textureResizing": false,
+  "decoder": "meshoptimizer 1.3.0; EXT_meshopt_compression v0 codec",
+  "files": [
+    {
+      "key": "ALT-02-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 17362,
+      "bytes": 1338888,
+      "sha256": "f07b99a6b7934ac34af26c3c74931538063c64bddf6d3277818a33a8496fd92d"
+    },
+    {
+      "key": "ALT-02-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 17434,
+      "bytes": 1308400,
+      "sha256": "1cdba268c6b4d5911085afcb64793e2f770b26b216f86dcb0621d43fbfd47a0e"
+    },
+    {
+      "key": "ALT-02-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 22578,
+      "bytes": 1718860,
+      "sha256": "26942419b1106b7bab290d1b3738c13a47d06a2af7132a055ecbaa39dbd1ca3d"
+    },
+    {
+      "key": "ALT-02-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23224,
+      "bytes": 1779536,
+      "sha256": "3e54f9e1cef3330a43f7430d15e8a8005dd545eef3ed79b4cbece291d548e252"
+    },
+    {
+      "key": "ALT-02-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 24180,
+      "bytes": 1838440,
+      "sha256": "9364de083c4b46c0684a38b06cd63b1dd8bb7d49c04eba4689dbf91b3109a34a"
+    },
+    {
+      "key": "ALT-02-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 26304,
+      "bytes": 1977660,
+      "sha256": "494b38b654ea2910b23161c3a50490fbc7c1b1249944a6335ca0e3e87da84496"
+    },
+    {
+      "key": "ALT-05-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23434,
+      "bytes": 2034204,
+      "sha256": "3257facd1f85e284dc0e34bec6e559bbd549794221c3fb69203d4bf5709de000"
+    },
+    {
+      "key": "ALT-05-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23482,
+      "bytes": 2005980,
+      "sha256": "49414124a3791becfae0d2d61ced819375ff36650b98d31ae7074a868c238ad1"
+    },
+    {
+      "key": "ALT-05-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 28514,
+      "bytes": 2458256,
+      "sha256": "21d26450ac4fb1ca33cc206e50991a77befda4aa32247b57af6ba97087687444"
+    },
+    {
+      "key": "ALT-05-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 29594,
+      "bytes": 2604600,
+      "sha256": "b63f4d28eb51172393caa5e9565d49088dd6aa4e40f7bb742088de7fdf180838"
+    },
+    {
+      "key": "ALT-05-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 30442,
+      "bytes": 2593256,
+      "sha256": "b15433e4baceb2ac56fa33b01f2b6a5bf9911549a2f87aa6512a63733af77241"
+    },
+    {
+      "key": "ALT-05-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 32018,
+      "bytes": 2651292,
+      "sha256": "59b33c082d334b97c1972639932310bf3ca4ccd4ad7081eb593a7e750cf9aa59"
+    },
+    {
+      "key": "ALT-06-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 19502,
+      "bytes": 1511664,
+      "sha256": "6ffbf4f6e6d5fab152ac7d75fa33f0d0705ec556effa94f94dab4360cde51ac4"
+    },
+    {
+      "key": "ALT-06-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 19574,
+      "bytes": 1477504,
+      "sha256": "ff727ccffec5f0ed86020a26b3d25935f2ad81f72c5698ca2c30b79989f62eb9"
+    },
+    {
+      "key": "ALT-06-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 26496,
+      "bytes": 2050100,
+      "sha256": "7ec47f1fce0fff7c395bb66ba2020e07ee0af48c0ac229ce3a477e9a5388e1f8"
+    },
+    {
+      "key": "ALT-06-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 27444,
+      "bytes": 2150600,
+      "sha256": "6c3d29294615e973f7b38849c4e06e4c1071563cb76944277166455dcfde3ef9"
+    },
+    {
+      "key": "ALT-06-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 29544,
+      "bytes": 2274568,
+      "sha256": "4c9c5c61b0e3f97743f85a59bb6fd91960e5d2328c95a7d88c79dc7258a88916"
+    },
+    {
+      "key": "ALT-06-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 36380,
+      "bytes": 2712168,
+      "sha256": "997d2e10de151440bdd4711735bc46a8d77151771ac0ba2ea65cd3ab28bb35e1"
+    },
+    {
+      "key": "ALT-07-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 12322,
+      "bytes": 983044,
+      "sha256": "73281b10261b7b23978383cdcfbe15849d64d42f46cd9cb6f44fd9c0b4cfb211"
+    },
+    {
+      "key": "ALT-07-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 12370,
+      "bytes": 963388,
+      "sha256": "07c18c27a6d5b3d920e60822ccaa53b8513f4b15692a29b904882203ae93f39f"
+    },
+    {
+      "key": "ALT-07-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 17498,
+      "bytes": 1375236,
+      "sha256": "44d76469b148253ecf5d94d9d069a8c5f6c30e305bce55741d3fa6c46bc87bfc"
+    },
+    {
+      "key": "ALT-07-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 18336,
+      "bytes": 1455208,
+      "sha256": "9c275bab6afab821bd98e03e0fa262c9868fd2efa21322e5185fbe029667dd7c"
+    },
+    {
+      "key": "ALT-07-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 19032,
+      "bytes": 1486684,
+      "sha256": "e915d344252c508d5e47b91b5688de264950eee0f6714322d4cb8c7f758fc119"
+    },
+    {
+      "key": "ALT-07-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 24696,
+      "bytes": 1857724,
+      "sha256": "d0efbe2e0711875ba13d52a77ec59dacf9cf63b51a4b497d7c112e259ced5fce"
+    },
+    {
+      "key": "ALT-08-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 15166,
+      "bytes": 1247044,
+      "sha256": "01feb6631189b713158297a76b0dad41e05984e1907a504b67f8f28e17ef3c90"
+    },
+    {
+      "key": "ALT-08-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 15214,
+      "bytes": 1222452,
+      "sha256": "b353b82986f227e4f7107d1c1d82490b86a6ad97a4df7ae8912e341487005da7"
+    },
+    {
+      "key": "ALT-08-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 20086,
+      "bytes": 1602968,
+      "sha256": "8db3b067a2d2ef7fdf75eda0c6cea194c3c13a77d2a60add0213d66f9d1d43bd"
+    },
+    {
+      "key": "ALT-08-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 20650,
+      "bytes": 1674376,
+      "sha256": "fc35a7b95ef1f5a7988b202c92bfb83752883b02ff490d2484eb6f395ceb8218"
+    },
+    {
+      "key": "ALT-08-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 24154,
+      "bytes": 1908176,
+      "sha256": "c09ad376aa0952dc768a21a05fc358bf51cd5e36578e4c0b518c88ed0b89dbc9"
+    },
+    {
+      "key": "ALT-08-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 25862,
+      "bytes": 2008996,
+      "sha256": "018def487bfd903ba95154f85397d076464805c974842dbf06f4385611f848df"
+    },
+    {
+      "key": "ALT-09-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 16512,
+      "bytes": 1276688,
+      "sha256": "70d928e62f4bb5273bf4a8f31da2444bfc2bc4cec1161503315be6ec27ff05c7"
+    },
+    {
+      "key": "ALT-09-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 16584,
+      "bytes": 1247272,
+      "sha256": "647500f3a3d0b89e48af5218a0407dfa5dbca2d0ccd8fe849f13c495b4587216"
+    },
+    {
+      "key": "ALT-09-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 21520,
+      "bytes": 1640856,
+      "sha256": "82c873724a90470ea076717b15649f7fb3447cccd8009dfde35337222c02a6e6"
+    },
+    {
+      "key": "ALT-09-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 22288,
+      "bytes": 1705484,
+      "sha256": "f3474cfc9d7d8f4d83dfcc70124db5ace13ef0706b678be1a6d92b4266ea9b4a"
+    },
+    {
+      "key": "ALT-09-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 22824,
+      "bytes": 1724672,
+      "sha256": "0736d756e53717eb44bccce00a04d3517b8e86b2a50ecc8fd3ef5951297e4c07"
+    },
+    {
+      "key": "ALT-09-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 25096,
+      "bytes": 1878552,
+      "sha256": "8650130ed5b68334a544a93a6e8880c6b308bc87e76496cb4beaecd189a03113"
+    },
+    {
+      "key": "ALT-10-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 16474,
+      "bytes": 1269508,
+      "sha256": "ee22ca7410e5b6b47098ab1d38ea067888e35867a99a646c85a3cccce173bab7"
+    },
+    {
+      "key": "ALT-10-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 16522,
+      "bytes": 1240000,
+      "sha256": "4e7df22aacd84ca1aa6209f1e4611414d93a3055a3319094726ab9c7bc2c3d36"
+    },
+    {
+      "key": "ALT-10-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 19898,
+      "bytes": 1535600,
+      "sha256": "ab036abc4b0506262d963f8549ffa794c9620dd492053deaec77068f048d7dca"
+    },
+    {
+      "key": "ALT-10-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 24394,
+      "bytes": 1885804,
+      "sha256": "f2dc3fbf0ddfc9062d8c16903e435ea64f85d0a682a8f0ae63add8007bf0e3a1"
+    },
+    {
+      "key": "ALT-10-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 24802,
+      "bytes": 1867788,
+      "sha256": "ab5829945f8b39c8a5eebeabff0bb244beb9b243470d4ebc0012350eafec7e09"
+    },
+    {
+      "key": "ALT-10-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 24890,
+      "bytes": 1854588,
+      "sha256": "bf98d4191848e0c29c61dc4d1da4c782d6623862f89c7275e7c4c446c0181928"
+    },
+    {
+      "key": "ECO-01-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 25198,
+      "bytes": 1905568,
+      "sha256": "45b9a45dc879f5116ff0366deaabbebf72e12ddbb5d2304031371018cdc00039"
+    },
+    {
+      "key": "ECO-01-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 25270,
+      "bytes": 1861404,
+      "sha256": "7b6f70c4225ef7fef5bb91d1b04ad47fbd92d9bf83dd19c63d1ba8dccd09aca8"
+    },
+    {
+      "key": "ECO-01-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 33376,
+      "bytes": 2539464,
+      "sha256": "8a17078984f4296f2592e04925766b253daf31717739f050943202bfca11792a"
+    },
+    {
+      "key": "ECO-01-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 34430,
+      "bytes": 2652908,
+      "sha256": "251fec89099dcedac1c585495ddd024e4f20bcf136d06b69e438fcbd83c162cf"
+    },
+    {
+      "key": "ECO-01-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 35678,
+      "bytes": 2678888,
+      "sha256": "4a142a640f21856d8b047e56262dbdae9ee7f2dec0e91af8ff76d784ecf34640"
+    },
+    {
+      "key": "ECO-01-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 42474,
+      "bytes": 3094404,
+      "sha256": "8176ddf03253e179cb83152f85fcdc7664a910e5c50400929b96580e88a2e4b0"
+    },
+    {
+      "key": "ECO-02-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23652,
+      "bytes": 1769580,
+      "sha256": "8535944a60f95da8a86192b109a547bd6f7f08f66b83a8eee59188d771136a6c"
+    },
+    {
+      "key": "ECO-02-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23748,
+      "bytes": 1730616,
+      "sha256": "a6fbbc1568d55e4b0098d81099a6bc5a2f7125c17881f754289d758846abc3f3"
+    },
+    {
+      "key": "ECO-02-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 26996,
+      "bytes": 2031308,
+      "sha256": "526ebf9872341e541fb17155bb500ddab2a5ac2acb529d672820bc66fc45001b"
+    },
+    {
+      "key": "ECO-02-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 32928,
+      "bytes": 2505560,
+      "sha256": "521e29e06d40b531f83611a95671cfd4eec0eeb22c1ccba76369602b44d99b3e"
+    },
+    {
+      "key": "ECO-02-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 33352,
+      "bytes": 2477964,
+      "sha256": "fbf72d4d88d4eb90dfb883f7b5dd95efcc87553c28b7a08904505405c8ba7f8b"
+    },
+    {
+      "key": "ECO-02-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 36072,
+      "bytes": 2629332,
+      "sha256": "9fbc3cd806f336654bd2c3a41b5456dd4cdd3662bec2b5a08f38de6fc0321e6e"
+    },
+    {
+      "key": "ECO-03-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23238,
+      "bytes": 1834536,
+      "sha256": "0b15c25739c9182a2f41d3723da200d993ff018ab57243b91358122e39772626"
+    },
+    {
+      "key": "ECO-03-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23334,
+      "bytes": 1788520,
+      "sha256": "614b3e866c53acedf4f7f9fdf1213719b2de8ea103be1ec6c7a776b4882db8f9"
+    },
+    {
+      "key": "ECO-03-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 35446,
+      "bytes": 2696028,
+      "sha256": "25fc675a6682b62ad7eeac13eae8fdf1e0a647c006b56cc6e45a4762f1bc2fb6"
+    },
+    {
+      "key": "ECO-03-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 36510,
+      "bytes": 2794120,
+      "sha256": "746bbe9878bd4985379818d92f261a0616c033ed538f6de572404a32abd7ca0b"
+    },
+    {
+      "key": "ECO-03-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 36754,
+      "bytes": 2783900,
+      "sha256": "0882664d9dd0d8785f5a3b92c0f1fa176d343a0ebeb134ccd27cbd8d51e660f3"
+    },
+    {
+      "key": "ECO-03-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 43118,
+      "bytes": 3210044,
+      "sha256": "354abdae99a175ce3621359fba8642463db70cffcbffa8fef1e29b6fbb27dedc"
+    },
+    {
+      "key": "ECO-04-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 22244,
+      "bytes": 1693368,
+      "sha256": "0773a2569a179bd346310380bda5e797c42f1ee914432b1405855f15846498dd"
+    },
+    {
+      "key": "ECO-04-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 22340,
+      "bytes": 1658524,
+      "sha256": "bb472117dcbd5cc4fd440bed9aa1e8e4770ff52e38a067458df2022c2163869a"
+    },
+    {
+      "key": "ECO-04-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 29958,
+      "bytes": 2319616,
+      "sha256": "4474721ac67805efae6e6bd8cedad5a45745968fb70f4a1fad96ddee50d1e4f5"
+    },
+    {
+      "key": "ECO-04-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 31050,
+      "bytes": 2434744,
+      "sha256": "9d10928c860dc6b472442f5fde6cae18a2b57567b13572c2e6d117825c15dd5c"
+    },
+    {
+      "key": "ECO-04-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 31542,
+      "bytes": 2407660,
+      "sha256": "8f9578eadf2be61e33c5b2da65c8b8e1e54f6c11e20cf1809cfabbec28ed5aa9"
+    },
+    {
+      "key": "ECO-04-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 37976,
+      "bytes": 2794996,
+      "sha256": "e74e5470d814615918766811e4e4eea84fe9ffa495e160f2bb0ba4c50d83e156"
+    },
+    {
+      "key": "ECO-05-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 37206,
+      "bytes": 2676476,
+      "sha256": "a6b7e8be2b260c9e39f5645446d08eddc8caab5024a0d9cc4719f0e5570472c4"
+    },
+    {
+      "key": "ECO-05-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 37318,
+      "bytes": 2626880,
+      "sha256": "b844f46aed05055fa2a3bbc9e29128459191278c4101109a57e93b1271c65ce3"
+    },
+    {
+      "key": "ECO-05-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 42462,
+      "bytes": 3119076,
+      "sha256": "30243ae22686294dba9602d9a8d0371594dd1b6ff22e57635a4bf093f06cdbbb"
+    },
+    {
+      "key": "ECO-05-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 43398,
+      "bytes": 3249256,
+      "sha256": "b1da1fc9a189169ffc2adffff27060f14dacdd0819e57ca6f548cb0d15cd0102"
+    },
+    {
+      "key": "ECO-05-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 49042,
+      "bytes": 3557792,
+      "sha256": "dafa0f7200f112a96e083ab5bbe6170f759b88c9d98b7bbb4fe4cece2299b5e7"
+    },
+    {
+      "key": "ECO-05-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 56122,
+      "bytes": 3963444,
+      "sha256": "5c48635c540d84641508dcc20e272f8cd159cafa11e586ba587a6d69f89bf5cd"
+    },
+    {
+      "key": "MIL-01-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23424,
+      "bytes": 1788456,
+      "sha256": "f23e2d4abdd3c515382a9e348eaebb57452b59d7a55256036e3b80eec23f0b80"
+    },
+    {
+      "key": "MIL-01-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23560,
+      "bytes": 1756548,
+      "sha256": "efa94a0a63ffd2f358d6f93a5fea1beb4b29238b3ea7223d2fcbf35ac2833eaa"
+    },
+    {
+      "key": "MIL-01-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 30386,
+      "bytes": 2340484,
+      "sha256": "8de0e24f3be13f4baadfd0bc4058fc57c84e28a87327ba4f4c7b6ecdb3c09bd9"
+    },
+    {
+      "key": "MIL-01-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 31646,
+      "bytes": 2472704,
+      "sha256": "5fe9e055be9d3e5ed66620ad392f7047e12a13ef44d9de611d5df112f3122871"
+    },
+    {
+      "key": "MIL-01-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 32090,
+      "bytes": 2446472,
+      "sha256": "005f4003770b53a6741a9ff7e72a1b659b9cc2af9d22a338fbdc1aad64adfb2a"
+    },
+    {
+      "key": "MIL-01-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 37438,
+      "bytes": 2731980,
+      "sha256": "804b472ba6c8fe9087d41924e1549dab0ba3f07fead467e5bfe99b77f1155949"
+    },
+    {
+      "key": "MIL-02-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 19554,
+      "bytes": 1514160,
+      "sha256": "4fe9d9f5e40ed4a9e042478f802deb8e580c3c5c6c8d2597f6c98fad626636a3"
+    },
+    {
+      "key": "MIL-02-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 19626,
+      "bytes": 1482604,
+      "sha256": "549c3a71d5374eb8339a7794d48c1b0593ab041f710901d73e300cb23292bc21"
+    },
+    {
+      "key": "MIL-02-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 26092,
+      "bytes": 2014336,
+      "sha256": "a40e12fd354f96f6295a63e941cbb92c2f02acd08b07c85aeb95f19a74077d48"
+    },
+    {
+      "key": "MIL-02-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 26812,
+      "bytes": 2090284,
+      "sha256": "62eecdc5c9d4d2b9a298d01f85b990b4cdced338e118c463f55e730ff312cbe7"
+    },
+    {
+      "key": "MIL-02-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 28864,
+      "bytes": 2209176,
+      "sha256": "5ae7eeffd5c52ea4bfc768fd596427a9b2a2d0361371a3be0874ba9dba05f3b3"
+    },
+    {
+      "key": "MIL-02-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 34556,
+      "bytes": 2565416,
+      "sha256": "6ce805ae93499bf9f968a6fe2f089e0d7e8c9b94f247935f75497c602fc3fd0a"
+    },
+    {
+      "key": "MIL-03-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 15574,
+      "bytes": 1212388,
+      "sha256": "4c05abd50a297098ff95e09109bb9f9453e07d6048d01b7a3592af8014081d77"
+    },
+    {
+      "key": "MIL-03-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 15622,
+      "bytes": 1183908,
+      "sha256": "ecbc83d4a3712a6a1d7df83603006dd32455e041dca9f7a3eae6eb7992b6c901"
+    },
+    {
+      "key": "MIL-03-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 18758,
+      "bytes": 1453700,
+      "sha256": "45252aa93d6205e479d87fe43afa26f6b327eab564337f8cc5a5c324bd01d7e5"
+    },
+    {
+      "key": "MIL-03-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 19634,
+      "bytes": 1541104,
+      "sha256": "135a781c38101e9cb2602b961db60a756e13d27084c93022edd2f402889853a6"
+    },
+    {
+      "key": "MIL-03-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23030,
+      "bytes": 1756312,
+      "sha256": "66c051505d0db30cec16466625b1b2a14074d682b3ea72148b19990851f08efc"
+    },
+    {
+      "key": "MIL-03-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 24814,
+      "bytes": 1862792,
+      "sha256": "357cc1c0c67d41e057e460df50a332c765baa09c0313421f7efdbf4b167044b6"
+    },
+    {
+      "key": "MIL-04-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 17614,
+      "bytes": 1386324,
+      "sha256": "fc6990da5c843703d27234bfd5df89def5971343e15eca477411b8a3be382ff8"
+    },
+    {
+      "key": "MIL-04-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 17686,
+      "bytes": 1354088,
+      "sha256": "2caaab7a156e6024c1a75ad4e1f0991e1c72f6fd924a8dcddade24aabe013589"
+    },
+    {
+      "key": "MIL-04-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 22782,
+      "bytes": 1764736,
+      "sha256": "4572d1823600d444522eb14c0ce04cd6a6015fd375d7ee56768d25a22f6e619d"
+    },
+    {
+      "key": "MIL-04-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23718,
+      "bytes": 1844696,
+      "sha256": "e9eb1c0893a3420883273de40bbce8b95d2d923eb9b6f88e1d38f629ef496759"
+    },
+    {
+      "key": "MIL-04-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23850,
+      "bytes": 1824444,
+      "sha256": "bae5d08f45639ccf0e79bb3c806ac72c8cff955394f187ca61dfe914c3f6e546"
+    },
+    {
+      "key": "MIL-04-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23990,
+      "bytes": 1823320,
+      "sha256": "a14cd0fd03fff635c84cc84bed3bf67964fb444188e393d2e6004972c05950cb"
+    },
+    {
+      "key": "MIL-05-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 27656,
+      "bytes": 2129560,
+      "sha256": "652dc3c1905cd32eeb19b005c4a71eb15472f30e4f82eed567674d516181f954"
+    },
+    {
+      "key": "MIL-05-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 27792,
+      "bytes": 2087340,
+      "sha256": "6d023d33decb004c226b9c0d59016cf52d9b01ab1e820164641b35caf7c2b948"
+    },
+    {
+      "key": "MIL-05-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 34762,
+      "bytes": 2700216,
+      "sha256": "5acf753e05510114dcd942d0a88f767775e0ef68822f5522f14cba986cec352d"
+    },
+    {
+      "key": "MIL-05-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 41102,
+      "bytes": 3208824,
+      "sha256": "c71ed7db83d956290f2c57dbd1bb66b08e78068fb059dc1cd6e1a01f253f0795"
+    },
+    {
+      "key": "MIL-05-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 41882,
+      "bytes": 3175364,
+      "sha256": "1b6bd8b70741e500aa755c75c8fedcd709f362bc525cb521ceea00ffdd85aafa"
+    },
+    {
+      "key": "MIL-05-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 49198,
+      "bytes": 3630352,
+      "sha256": "dc70595662128f8dae2a74bd5079e62e75f8051ae2aaebe0492a82a167b53840"
+    },
+    {
+      "key": "RES-01-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 17242,
+      "bytes": 1376332,
+      "sha256": "7ec70767cc1a80fa9e7f4a835e3ee634a2939698071808a247b2aa49a0afd66e"
+    },
+    {
+      "key": "RES-01-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 17314,
+      "bytes": 1346592,
+      "sha256": "2095f430bbcc65b5fbe78bb3e6f99461aa2761aa187e989e73bd5717c087a531"
+    },
+    {
+      "key": "RES-01-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 22250,
+      "bytes": 1751256,
+      "sha256": "cca8966fdbe807c543fdaf692c926845e21828b647b1701802cc24ebb9733844"
+    },
+    {
+      "key": "RES-01-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23028,
+      "bytes": 1826872,
+      "sha256": "a6522de12adc20e30b74396d09615040f37061b112d92cff34257fe26bbe7eeb"
+    },
+    {
+      "key": "RES-01-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23552,
+      "bytes": 1844892,
+      "sha256": "164b40d8b3f8249b16d08b35903079fc324728589d8505715fcd9025bb21bcd5"
+    },
+    {
+      "key": "RES-01-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 29534,
+      "bytes": 2229144,
+      "sha256": "c760d18602c2257888d8660f1e899ba94c17ed3e014e0b60aa019235b46ab356"
+    },
+    {
+      "key": "RES-02-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 14400,
+      "bytes": 1127444,
+      "sha256": "caa24e29fa138e57087299d1f9124eb542326d6e7c3aa9b054781f6fb6789c67"
+    },
+    {
+      "key": "RES-02-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 14472,
+      "bytes": 1103024,
+      "sha256": "f25363d8e501d983badcfc843109514b76218254e0dada9382effafbbc4fb7a4"
+    },
+    {
+      "key": "RES-02-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 19408,
+      "bytes": 1493364,
+      "sha256": "fef04a0adde7a5dc64f3de899f85bf4463b7d7cc9b406565f4844c6eff309fdc"
+    },
+    {
+      "key": "RES-02-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 20332,
+      "bytes": 1567860,
+      "sha256": "45128d66224e6f95f45c40faa5978b0d816b7d8341a29cdace1c82c723132d53"
+    },
+    {
+      "key": "RES-02-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 20714,
+      "bytes": 1577952,
+      "sha256": "c7408cf73c158621e5bf7d29faf2e3e5128d567e1ee2ba43fc1df68f20bcd35e"
+    },
+    {
+      "key": "RES-02-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 26582,
+      "bytes": 1973388,
+      "sha256": "856b2265698e7c4444bb1c162e4ea1c73dad7a0a317fdf625d9767ed44404024"
+    },
+    {
+      "key": "RES-03-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 7634,
+      "bytes": 577356,
+      "sha256": "e6b699f5de0711d86e82b50a7db93d56d10ed5e09a6e1ede1b13203b25788510"
+    },
+    {
+      "key": "RES-03-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 7658,
+      "bytes": 565588,
+      "sha256": "cc623bcc9aa6d79ec609ee2767cd94a359caf8ff0b7889be6a9f90ee51c1c9db"
+    },
+    {
+      "key": "RES-03-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 14820,
+      "bytes": 1137572,
+      "sha256": "25c59d0fe44b18c50bf8cd9e75ecf482233084d9358ac4aa0313cb860d961049"
+    },
+    {
+      "key": "RES-03-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 21036,
+      "bytes": 1593204,
+      "sha256": "c02d9d2e6777c327560ce33c1ab053e6004d1727730c20103f678c7e612091f5"
+    },
+    {
+      "key": "RES-03-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 21252,
+      "bytes": 1573048,
+      "sha256": "0629f7ae9e03aa3efcc68abb2b26a0833391dd3d759b65f100cc22faddeaf4a8"
+    },
+    {
+      "key": "RES-03-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23556,
+      "bytes": 1758384,
+      "sha256": "57f1b721a729eae65e924581f3abe0490ac6d802012ef7299a9c76e3b4a2d2b2"
+    },
+    {
+      "key": "RES-04-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 12970,
+      "bytes": 1082464,
+      "sha256": "25c1c28cf90362fc71e056aa57a9dd77fc9635caa6cbbb67f6204bd983390e6d"
+    },
+    {
+      "key": "RES-04-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 13018,
+      "bytes": 1063972,
+      "sha256": "83ca14b16854cec0627ad604f0e1f940bfc3627349a7ca4d828a08ce0ebf2a69"
+    },
+    {
+      "key": "RES-04-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 18226,
+      "bytes": 1472084,
+      "sha256": "becac9e7cafd0e4ae5e3f35afadc845265ce1b8d6724cd1dcc0db0af22092ace"
+    },
+    {
+      "key": "RES-04-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 18942,
+      "bytes": 1565172,
+      "sha256": "976065c838eb55ddff00852d932b933529000d992f35d75a7b154efc34e1a15b"
+    },
+    {
+      "key": "RES-04-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 20322,
+      "bytes": 1644888,
+      "sha256": "90d46eaeb29371fb5d1a71b23f29dcdc5e4774d8e673adb56a9c7b72f438bb3b"
+    },
+    {
+      "key": "RES-04-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 21802,
+      "bytes": 1727840,
+      "sha256": "646125d0190795a108e77f536f032ad39b241fb21a3c6c7f09bb0f792d9caa2f"
+    },
+    {
+      "key": "RES-05-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 15122,
+      "bytes": 1194544,
+      "sha256": "cfb94ee584da4d657497d0327ef91a680f16a8175e4e3b3ade2d03a70733091b"
+    },
+    {
+      "key": "RES-05-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 15194,
+      "bytes": 1166712,
+      "sha256": "910dd9f038a643f1a94b8aa23d78394373403f66bc803c626db3af925194451b"
+    },
+    {
+      "key": "RES-05-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 20322,
+      "bytes": 1572596,
+      "sha256": "a49636cb58983a891ccd720cfcf7ce7ab5f456d024cdcba9a1f8c4bb17db0e1a"
+    },
+    {
+      "key": "RES-05-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 21090,
+      "bytes": 1636028,
+      "sha256": "ca5e88a8f4ac9efce56e8f1dff8c6cea5dc1656a6ada02cd89f4b244ff3d34b6"
+    },
+    {
+      "key": "RES-05-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 23798,
+      "bytes": 1839768,
+      "sha256": "2192b2d0ae290dac4543f6d25d18910fdeae2383c0334432a53f0a0a729bd930"
+    },
+    {
+      "key": "RES-05-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 29114,
+      "bytes": 2190600,
+      "sha256": "0cfeee14f6e0e63981ced29782568233836ff8ffee08d2fa0fd8e3b910ab32c0"
+    },
+    {
+      "key": "SUP-01-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 21876,
+      "bytes": 1692084,
+      "sha256": "16868782d2cb7407470225c256deddc93c3603fadcb02cb6d2a40cc864e8f281"
+    },
+    {
+      "key": "SUP-01-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 21972,
+      "bytes": 1656432,
+      "sha256": "80bd71fa0abdfe47170195ea144eecd9c9c711766ccf221d2019632d45865a51"
+    },
+    {
+      "key": "SUP-01-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 27292,
+      "bytes": 2108864,
+      "sha256": "4870506318aa3ac7f27db3d077975ea4e420062097987ebe39c24e672031aef3"
+    },
+    {
+      "key": "SUP-01-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 31632,
+      "bytes": 2456016,
+      "sha256": "9ec89c5be5e655794104ea8a699f14beaf66703f410a3958318ce4ff8eeb12f0"
+    },
+    {
+      "key": "SUP-01-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 32280,
+      "bytes": 2447476,
+      "sha256": "64d97f35b7c392e8d7ca212ca1375036d79bd26e9dd1ec249e99a4ea893b59d5"
+    },
+    {
+      "key": "SUP-01-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 33912,
+      "bytes": 2532776,
+      "sha256": "8023767c2b36c6a0c7649d764982ed6f361ec69ee699934c0f2cc4c648657603"
+    },
+    {
+      "key": "SUP-02-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 20732,
+      "bytes": 1612644,
+      "sha256": "e670e3d0a43f3cb9f9d338c6629b5ce784d7332f2b9deb972b7a68f983632295"
+    },
+    {
+      "key": "SUP-02-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 20804,
+      "bytes": 1576880,
+      "sha256": "e8174fec61a14d8baef05989032ce88cede357a73cd25871e20e0c707671eca9"
+    },
+    {
+      "key": "SUP-02-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 25900,
+      "bytes": 1991352,
+      "sha256": "5a4dad1eebfeeaadfa60853d564ce87b9ba1b26b2d63f748b6048087189b82d0"
+    },
+    {
+      "key": "SUP-02-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 26812,
+      "bytes": 2067632,
+      "sha256": "32160d52c2e7041f5489bf1932fadf7a32269057ea833cba44c796246aefd37c"
+    },
+    {
+      "key": "SUP-02-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 27380,
+      "bytes": 2087308,
+      "sha256": "ec6aa881bb287f34d68004b3f55b3c910ea9081329761fd61e5ad1bc86a84f9c"
+    },
+    {
+      "key": "SUP-02-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 29084,
+      "bytes": 2199624,
+      "sha256": "5ea6702213818d7696c4e6d1eeb7507d90af24b4b4e4b402d1df189b8c49c5ef"
+    },
+    {
+      "key": "SUP-03-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 25452,
+      "bytes": 1800844,
+      "sha256": "0244b7854aa376464db68867d5c41c0080ac61c7888ae5520435bd00424a3268"
+    },
+    {
+      "key": "SUP-03-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 29020,
+      "bytes": 2086640,
+      "sha256": "411fb05fb9a5874d3c0c4ac57d127bfcc9cb5478635b9a544c61880c011b268f"
+    },
+    {
+      "key": "SUP-03-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 32092,
+      "bytes": 2339580,
+      "sha256": "72c95ef445315dee0f05884de5057571f99a28b2895351a6baa436e4fdd7771c"
+    },
+    {
+      "key": "SUP-03-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 32740,
+      "bytes": 2437288,
+      "sha256": "b4badbd34bda232b49d2d99a0b248f47a6719eacef5a4f8383873780e120b60e"
+    },
+    {
+      "key": "SUP-03-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 33088,
+      "bytes": 2373232,
+      "sha256": "100ac47d62db3d62c5afb8a19fe1bb811db1e40426b6e124f0ef6e8e7c50172e"
+    },
+    {
+      "key": "SUP-03-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 38964,
+      "bytes": 2742116,
+      "sha256": "e91c4fcb846f34f2dd0789e3e2dfeb3863df3cc436001dfea9c978308c0e0aec"
+    },
+    {
+      "key": "SUP-04-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 24786,
+      "bytes": 1818648,
+      "sha256": "8efe1800e282ae55c22ffea70f3a03d41385970c333b9a8f8cf7f54f00e2d1c9"
+    },
+    {
+      "key": "SUP-04-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 24858,
+      "bytes": 1781468,
+      "sha256": "f12cb69cefa2f3ad9c09da352dd10b7bc31923fad22db648406c8934a351b0ba"
+    },
+    {
+      "key": "SUP-04-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 32068,
+      "bytes": 2402696,
+      "sha256": "c4d88e01ce1d644e57ca93a45102a90cd85c214324657880716de4d04ba9d10b"
+    },
+    {
+      "key": "SUP-04-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 34648,
+      "bytes": 2656480,
+      "sha256": "7ab640aefd11142fdb848f7b5f7f4280398f68f84a455c2c0f0fa7397a7f96b8"
+    },
+    {
+      "key": "SUP-04-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 34924,
+      "bytes": 2584088,
+      "sha256": "b9633e2f3aa195c9b50c8aff6d9e4b4bd3b8dc680d7cec865c1e47c1254d5f06"
+    },
+    {
+      "key": "SUP-04-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 36736,
+      "bytes": 2657656,
+      "sha256": "d0d8c87ec0c39910abe5cc55737bc12684e4920dfdb83232fdc5b29d59ffa162"
+    },
+    {
+      "key": "SUP-05-6",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 5440,
+      "bytes": 450868,
+      "sha256": "abd53acfbaf1a92c05ad6feffd7abc80a0a300624c8a43fc55500c8708385e19"
+    },
+    {
+      "key": "SUP-05-7",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 5464,
+      "bytes": 440424,
+      "sha256": "cebf328953480aa49e34ad89add5258f3faeceed396babe5bd1f11fd351cfa25"
+    },
+    {
+      "key": "SUP-05-8",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 12458,
+      "bytes": 977264,
+      "sha256": "643ce4c6c789085a2fceda67d03f6318a48da034d8082afdb62767f966240519"
+    },
+    {
+      "key": "SUP-05-9",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 13290,
+      "bytes": 1046656,
+      "sha256": "35734059b732f4740ca8998b66733cd1f551a57597e9396ad715a4b17e08249a"
+    },
+    {
+      "key": "SUP-05-10",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 18634,
+      "bytes": 1428164,
+      "sha256": "0f3a8f7ab602723693f5072ce99ac924980b381522f592d299daeeddc861a60f"
+    },
+    {
+      "key": "SUP-05-11",
+      "kind": "building",
+      "status": "passed",
+      "triangles": 19370,
+      "bytes": 1482744,
+      "sha256": "e227b35881ab4c6fedd96a2990d163d0bcf7a5467cc49f5caf3cf057e0ed8286"
+    },
+    {
+      "key": "SIEGE-RAM-01",
+      "kind": "unit",
+      "status": "passed",
+      "triangles": 1880,
+      "bytes": 178492,
+      "sha256": "f4b780d7fcccc5c51222e3ee95258967ea127fd5cf3b62a6cadcaf1f36943594"
+    }
+  ],
+  "notMeasured": [
+    "Safari/iPhone 12 GPU frame time",
+    "Texture look in both running clients is separately reviewed"
+  ]
+}

@@ -1,0 +1,66 @@
+[
+  {
+    "file": "godot/project/assets/army/troops06/ENG-05-lod2.gltf",
+    "checks": {
+      "meshes": true,
+      "nodes": true,
+      "skins": true,
+      "materials": true,
+      "textures": true,
+      "images": true,
+      "scenes": true,
+      "original_binary_prefix_unchanged": true
+    },
+    "source_sha256": "6717c75ebc40d3209f2b77ca5903c19f48d94d4a1a0058ffeadf4ddec64146ba",
+    "after_sha256": "47dbe382667545e481f5152ce334417fbf8a3fb69345e989af835ac7b41e5ade",
+    "animation_bytes_added": 100676
+  },
+  {
+    "file": "godot/project/assets/army/troops06/ENG-06-lod2.gltf",
+    "checks": {
+      "meshes": true,
+      "nodes": true,
+      "skins": true,
+      "materials": true,
+      "textures": true,
+      "images": true,
+      "scenes": true,
+      "original_binary_prefix_unchanged": true
+    },
+    "source_sha256": "22ab3ecf6eccc0072c2671fee3f80a9f13143cd553b268cc76452f6a1840f56b",
+    "after_sha256": "fe93b6adcc4603e1bd5f0a8f40ae8b90b94b9e76b73d9c8153faa5113f3623a4",
+    "animation_bytes_added": 100676
+  },
+  {
+    "file": "godot/project/assets/army/troops06/ENG-05-lod1.gltf",
+    "checks": {
+      "meshes": true,
+      "nodes": true,
+      "skins": true,
+      "materials": true,
+      "textures": true,
+      "images": true,
+      "scenes": true,
+      "original_binary_prefix_unchanged": true
+    },
+    "source_sha256": "eef45a7f252b9921119091a6c85db4b3149b7ad831d6a47224c1a93228bd6bf6",
+    "after_sha256": "53994d0aac95db9eb213465f5d056d77bdba75675395ba1d6581f066c46323f9",
+    "animation_bytes_added": 100676
+  },
+  {
+    "file": "godot/project/assets/army/troops06/ENG-06-lod1.gltf",
+    "checks": {
+      "meshes": true,
+      "nodes": true,
+      "skins": true,
+      "materials": true,
+      "textures": true,
+      "images": true,
+      "scenes": true,
+      "original_binary_prefix_unchanged": true
+    },
+    "source_sha256": "8dc7b301b0db8712118ffbc4530751a8458fb6f6dc0fc6ef29c56fccb806c2c2",
+    "after_sha256": "1865aabc24b677186052c1906ad1f377ca676e491875ff3ecb5352724793fbd1",
+    "animation_bytes_added": 100676
+  }
+]

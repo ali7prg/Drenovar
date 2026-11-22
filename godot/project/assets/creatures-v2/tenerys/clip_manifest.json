@@ -1,0 +1,527 @@
+{
+ "species": "tenerys",
+ "clip_count": 14,
+ "naming": "<species>__<name>",
+ "fps": 30,
+ "semantic_states": {
+  "Idle": "idle",
+  "Walk": "walk",
+  "Run": "run",
+  "Alert": "alert",
+  "Attack": "attack_bite",
+  "Hit": "hit",
+  "Death": "death",
+  "Roar": "howl"
+ },
+ "server_events": {
+  "creature_attack": "attack_bite",
+  "pounce": "attack_pounce"
+ },
+ "clips": {
+  "idle": {
+   "name": "tenerys__idle",
+   "frames": 90,
+   "fps": 30.0,
+   "length_s": 3.0,
+   "loop": true,
+   "events": []
+  },
+  "walk": {
+   "name": "tenerys__walk",
+   "frames": 36,
+   "fps": 30.0,
+   "length_s": 1.2,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 9,
+     "time": 0.3,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 18,
+     "time": 0.6,
+     "foot": "hind_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 27,
+     "time": 0.9,
+     "foot": "front_l"
+    }
+   ],
+   "speed_mps": 1.5
+  },
+  "stalk": {
+   "name": "tenerys__stalk",
+   "frames": 48,
+   "fps": 30.0,
+   "length_s": 1.6,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 12,
+     "time": 0.4,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 24,
+     "time": 0.8,
+     "foot": "hind_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 36,
+     "time": 1.2,
+     "foot": "front_l"
+    }
+   ],
+   "speed_mps": 0.75
+  },
+  "run": {
+   "name": "tenerys__run",
+   "frames": 18,
+   "fps": 30.0,
+   "length_s": 0.6,
+   "loop": true,
+   "events": [
+    {
+     "event": "footstep",
+     "frame": 0,
+     "time": 0.0,
+     "foot": "hind_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 9,
+     "time": 0.3,
+     "foot": "front_r"
+    },
+    {
+     "event": "footstep",
+     "frame": 10,
+     "time": 0.3333333333333333,
+     "foot": "front_l"
+    },
+    {
+     "event": "footstep",
+     "frame": 17,
+     "time": 0.5666666666666667,
+     "foot": "hind_r"
+    }
+   ],
+   "speed_mps": 8.0
+  },
+  "turn_left": {
+   "name": "tenerys__turn_left",
+   "frames": 18,
+   "fps": 30.0,
+   "length_s": 0.6,
+   "loop": false,
+   "events": [],
+   "motion": {
+    "yaw_deg": 45.0,
+    "yaw": [
+     0.0,
+     0.010006554378100824,
+     0.038164532976942674,
+     0.08168140899333463,
+     0.13776465562408577,
+     0.2036217460660051,
+     0.27646015351590186,
+     0.3534873511705849,
+     0.4319108122268634,
+     0.5089380098815465,
+     0.5817764173314431,
+     0.6476335077733625,
+     0.7037167544041137,
+     0.7472336304205056,
+     0.7753916090193474,
+     0.7853981633974483,
+     0.7853981633974483,
+     0.7853981633974483,
+     0.7853981633974483
+    ]
+   }
+  },
+  "turn_right": {
+   "name": "tenerys__turn_right",
+   "frames": 18,
+   "fps": 30.0,
+   "length_s": 0.6,
+   "loop": false,
+   "events": [],
+   "motion": {
+    "yaw_deg": -45.0,
+    "yaw": [
+     -0.0,
+     -0.010006554378100824,
+     -0.038164532976942674,
+     -0.08168140899333463,
+     -0.13776465562408577,
+     -0.2036217460660051,
+     -0.27646015351590186,
+     -0.3534873511705849,
+     -0.4319108122268634,
+     -0.5089380098815465,
+     -0.5817764173314431,
+     -0.6476335077733625,
+     -0.7037167544041137,
+     -0.7472336304205056,
+     -0.7753916090193474,
+     -0.7853981633974483,
+     -0.7853981633974483,
+     -0.7853981633974483,
+     -0.7853981633974483
+    ]
+   }
+  },
+  "howl": {
+   "name": "tenerys__howl",
+   "frames": 75,
+   "fps": 30.0,
+   "length_s": 2.5,
+   "loop": false,
+   "events": [
+    {
+     "event": "sound",
+     "frame": 18,
+     "time": 0.6
+    }
+   ]
+  },
+  "attack_bite": {
+   "name": "tenerys__attack_bite",
+   "frames": 24,
+   "fps": 30.0,
+   "length_s": 0.8,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "whoosh",
+     "frame": 8
+    },
+    {
+     "event": "contact",
+     "frame": 10
+    },
+    {
+     "event": "recovery",
+     "frame": 12
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     8
+    ],
+    "active": [
+     8,
+     12
+    ],
+    "recovery": [
+     12,
+     24
+    ],
+    "impact": 10
+   },
+   "contact_s": 0.3333,
+   "normalized": {
+    "windup": [
+     0,
+     0.333
+    ],
+    "active": [
+     0.333,
+     0.5
+    ],
+    "recovery": [
+     0.5,
+     1.0
+    ],
+    "impact": 0.417
+   }
+  },
+  "attack_claw": {
+   "name": "tenerys__attack_claw",
+   "frames": 30,
+   "fps": 30.0,
+   "length_s": 1.0,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "whoosh",
+     "frame": 11
+    },
+    {
+     "event": "contact",
+     "frame": 13
+    },
+    {
+     "event": "recovery",
+     "frame": 16
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     10
+    ],
+    "active": [
+     10,
+     16
+    ],
+    "recovery": [
+     16,
+     30
+    ],
+    "impact": 13
+   },
+   "contact_s": 0.4333,
+   "normalized": {
+    "windup": [
+     0,
+     0.333
+    ],
+    "active": [
+     0.333,
+     0.533
+    ],
+    "recovery": [
+     0.533,
+     1.0
+    ],
+    "impact": 0.433
+   }
+  },
+  "attack_pounce": {
+   "name": "tenerys__attack_pounce",
+   "frames": 48,
+   "fps": 30.0,
+   "length_s": 1.6,
+   "loop": false,
+   "events": [
+    {
+     "event": "windup",
+     "frame": 0
+    },
+    {
+     "event": "takeoff",
+     "frame": 15
+    },
+    {
+     "event": "contact",
+     "frame": 32
+    },
+    {
+     "event": "land",
+     "frame": 32
+    },
+    {
+     "event": "recovery",
+     "frame": 35
+    }
+   ],
+   "windows": {
+    "windup": [
+     0,
+     31
+    ],
+    "active": [
+     31,
+     35
+    ],
+    "recovery": [
+     35,
+     48
+    ],
+    "impact": 32
+   },
+   "motion": {
+    "forward_m": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.035937500000000004,
+     0.1375,
+     0.29531250000000003,
+     0.5,
+     0.7421875,
+     1.0125,
+     1.3015625000000002,
+     1.6,
+     1.8984375,
+     2.1875,
+     2.4578125,
+     2.7,
+     2.9046875,
+     3.0625,
+     3.1640625,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2,
+     3.2
+    ]
+   },
+   "contact_s": 1.0667,
+   "normalized": {
+    "windup": [
+     0,
+     0.646
+    ],
+    "active": [
+     0.646,
+     0.729
+    ],
+    "recovery": [
+     0.729,
+     1.0
+    ],
+    "impact": 0.667
+   }
+  },
+  "dodge": {
+   "name": "tenerys__dodge",
+   "frames": 24,
+   "fps": 30.0,
+   "length_s": 0.8,
+   "loop": false,
+   "events": [
+    {
+     "event": "push",
+     "frame": 5
+    },
+    {
+     "event": "land",
+     "frame": 16
+    }
+   ],
+   "motion": {
+    "side_m": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.032607062359128476,
+     0.12201352366641621,
+     0.2555972952667167,
+     0.4207362885048835,
+     0.60480841472577,
+     0.7951915852742298,
+     0.9792637114951164,
+     1.1444027047332832,
+     1.2779864763335838,
+     1.3673929376408713,
+     1.4,
+     1.4,
+     1.4,
+     1.4,
+     1.4,
+     1.4,
+     1.4,
+     1.4,
+     1.4
+    ],
+    "window": [
+     5,
+     16
+    ]
+   }
+  },
+  "hit": {
+   "name": "tenerys__hit",
+   "frames": 15,
+   "fps": 30.0,
+   "length_s": 0.5,
+   "loop": false,
+   "events": [
+    {
+     "event": "hit",
+     "frame": 2
+    }
+   ]
+  },
+  "death": {
+   "name": "tenerys__death",
+   "frames": 72,
+   "fps": 30.0,
+   "length_s": 2.4,
+   "loop": false,
+   "events": [
+    {
+     "event": "collapse",
+     "frame": 10
+    },
+    {
+     "event": "ground_contact",
+     "frame": 34
+    },
+    {
+     "event": "dead",
+     "frame": 72
+    }
+   ]
+  },
+  "alert": {
+   "name": "tenerys__alert",
+   "frames": 24,
+   "fps": 30.0,
+   "length_s": 0.8,
+   "loop": false,
+   "events": []
+  }
+ }
+}

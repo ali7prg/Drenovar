@@ -1,0 +1,28 @@
+[
+  {
+    "worker": "drenovar-v92-staging",
+    "status": 200,
+    "result": {
+      "service": "drenovar",
+      "sourceCommit": "365276cc169943adc48847c0e9d86ae23e77fb3e",
+      "deployCommit": "85508a72f2a3cbdd2ed00fc27489283659bf286e",
+      "economy": "DRENOVAR-V6-C1.0",
+      "environment": "staging-only",
+      "productionReady": false
+    }
+  },
+  {
+    "worker": "drenovar-game",
+    "status": 200,
+    "result": {
+      "service": "drenovar",
+      "environment": "v6-release-adapter",
+      "deployCommit": "0d201de08bc8234c224de71614cddae29b8cd0b8",
+      "economy": "DRENOVAR-V6-C1.0",
+      "api": 6,
+      "schema": 6,
+      "combatPresentation": 1,
+      "cityNavigation": "cached-grid-v1"
+    }
+  }
+]

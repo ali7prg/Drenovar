@@ -1,0 +1,19 @@
+✔ one contact per event, ordered independently of ordinary/batched duplicate packets (19.489952ms)
+✔ 14-event audit fixture retains identity and chronology; attack protects itself from light Hit (0.862718ms)
+✔ terminal latch survives duplicate and late packets; new generation can respawn (0.252043ms)
+✔ projection adds stable IDs without changing events and exposes no future damage (0.730267ms)
+✔ ten sequential generations release queues and tombstones (0.238882ms)
+✔ screen labels avoid contacts and each other, keep the finishing event first (1.04881ms)
+✔ all ten web weapon clips prepare before the server contact, on a stable event token (0.810338ms)
+✔ the same original soldiers survive a return and a cold reconnect; dead actors stay terminal (0.602444ms)
+✔ visual return waits for contact/death while the authoritative result is unchanged (0.604797ms)
+✔ web approach keeps its speed and position continuous when preparation begins (0.591717ms)
+✔ world defeat survives a cold state fetch for the presentation tail, with authoritative return units (192.349529ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 343.449863

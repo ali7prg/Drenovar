@@ -1,0 +1,815 @@
+{
+ "method": "godot/tools/measure_crowd_fight.gd, Linux, Godot 4.6.3 headless, real Landscape of main.tscn, server simulator case mixed_all_types_velkor (30 soldiers, 24 drawn), the game's own CombatPresentation.stretch, 50 ms steps; 1019 = sources of dfec498, 1020 = this build. Script times are wall-clock on a shared 4-core VM (noise about 0.4 ms). Not an iPhone measurement.",
+ "runs": [
+  {
+   "far_reserves": 0,
+   "mid_blow_share": 0.5,
+   "present_ms_max": 4.22,
+   "present_ms_median": 2.1,
+   "present_ms_p95": 3.26,
+   "present_ms_p99": 3.46,
+   "riders_far": 0,
+   "scene": "city",
+   "shown_fight_ms": 10400.0,
+   "soldiers": 24,
+   "soldiers_without_swing": 0,
+   "swings_median": 4,
+   "swings_min": 2,
+   "build": "1020",
+   "spot": "city",
+   "per_type_swings_and_distance_m": {
+    "ENG-01": [
+     [
+      5,
+      5.4
+     ],
+     [
+      4,
+      2.7
+     ],
+     [
+      5,
+      3.4
+     ]
+    ],
+    "ENG-02": [
+     [
+      5,
+      5.7
+     ],
+     [
+      4,
+      2.2
+     ],
+     [
+      4,
+      4.3
+     ]
+    ],
+    "ENG-03": [
+     [
+      3,
+      7.0
+     ],
+     [
+      3,
+      6.7
+     ],
+     [
+      2,
+      7.2
+     ]
+    ],
+    "ENG-04": [
+     [
+      2,
+      5.9
+     ],
+     [
+      2,
+      8.3
+     ],
+     [
+      2,
+      6.1
+     ]
+    ],
+    "ENG-05": [
+     [
+      4,
+      5.4
+     ],
+     [
+      4,
+      3.8
+     ]
+    ],
+    "ENG-06": [
+     [
+      3,
+      5.3
+     ],
+     [
+      4,
+      5.7
+     ]
+    ],
+    "ENG-07": [
+     [
+      5,
+      4.0
+     ],
+     [
+      6,
+      2.2
+     ]
+    ],
+    "ENG-08": [
+     [
+      6,
+      3.7
+     ],
+     [
+      6,
+      2.3
+     ]
+    ],
+    "ENG-09": [
+     [
+      6,
+      3.3
+     ],
+     [
+      6,
+      3.0
+     ]
+    ],
+    "ENG-10": [
+     [
+      3,
+      8.6
+     ],
+     [
+      3,
+      8.2
+     ]
+    ]
+   }
+  },
+  {
+   "far_reserves": 0,
+   "mid_blow_share": 0.51,
+   "present_ms_max": 6.74,
+   "present_ms_median": 2.36,
+   "present_ms_p95": 3.36,
+   "present_ms_p99": 3.61,
+   "riders_far": 0,
+   "scene": "world",
+   "shown_fight_ms": 10400.0,
+   "soldiers": 24,
+   "soldiers_without_swing": 0,
+   "swings_median": 4,
+   "swings_min": 2,
+   "build": "1020",
+   "spot": "world___x__0_35___z__60_13",
+   "per_type_swings_and_distance_m": {
+    "ENG-01": [
+     [
+      5,
+      5.3
+     ],
+     [
+      4,
+      2.9
+     ],
+     [
+      5,
+      3.0
+     ]
+    ],
+    "ENG-02": [
+     [
+      3,
+      4.1
+     ],
+     [
+      5,
+      4.8
+     ],
+     [
+      3,
+      3.7
+     ]
+    ],
+    "ENG-03": [
+     [
+      3,
+      8.5
+     ],
+     [
+      3,
+      7.7
+     ],
+     [
+      2,
+      7.4
+     ]
+    ],
+    "ENG-04": [
+     [
+      2,
+      7.7
+     ],
+     [
+      2,
+      7.8
+     ],
+     [
+      2,
+      6.9
+     ]
+    ],
+    "ENG-05": [
+     [
+      3,
+      5.8
+     ],
+     [
+      6,
+      5.8
+     ]
+    ],
+    "ENG-06": [
+     [
+      4,
+      7.3
+     ],
+     [
+      3,
+      6.2
+     ]
+    ],
+    "ENG-07": [
+     [
+      6,
+      5.6
+     ],
+     [
+      6,
+      3.0
+     ]
+    ],
+    "ENG-08": [
+     [
+      6,
+      2.5
+     ],
+     [
+      6,
+      3.4
+     ]
+    ],
+    "ENG-09": [
+     [
+      6,
+      3.7
+     ],
+     [
+      6,
+      3.0
+     ]
+    ],
+    "ENG-10": [
+     [
+      3,
+      8.4
+     ],
+     [
+      3,
+      7.4
+     ]
+    ]
+   }
+  },
+  {
+   "far_reserves": 0,
+   "mid_blow_share": 0.5,
+   "present_ms_max": 4.75,
+   "present_ms_median": 1.94,
+   "present_ms_p95": 2.35,
+   "present_ms_p99": 2.86,
+   "riders_far": 0,
+   "scene": "world",
+   "shown_fight_ms": 10400.0,
+   "soldiers": 24,
+   "soldiers_without_swing": 0,
+   "swings_median": 4,
+   "swings_min": 2,
+   "build": "1020",
+   "spot": "world___x__50___z__30",
+   "per_type_swings_and_distance_m": {
+    "ENG-01": [
+     [
+      5,
+      5.3
+     ],
+     [
+      4,
+      3.1
+     ],
+     [
+      5,
+      3.5
+     ]
+    ],
+    "ENG-02": [
+     [
+      5,
+      4.1
+     ],
+     [
+      4,
+      2.8
+     ],
+     [
+      4,
+      3.9
+     ]
+    ],
+    "ENG-03": [
+     [
+      3,
+      8.5
+     ],
+     [
+      3,
+      7.4
+     ],
+     [
+      2,
+      7.5
+     ]
+    ],
+    "ENG-04": [
+     [
+      2,
+      6.5
+     ],
+     [
+      2,
+      7.0
+     ],
+     [
+      2,
+      6.7
+     ]
+    ],
+    "ENG-05": [
+     [
+      4,
+      5.8
+     ],
+     [
+      4,
+      4.7
+     ]
+    ],
+    "ENG-06": [
+     [
+      3,
+      4.0
+     ],
+     [
+      4,
+      5.8
+     ]
+    ],
+    "ENG-07": [
+     [
+      5,
+      5.6
+     ],
+     [
+      6,
+      2.8
+     ]
+    ],
+    "ENG-08": [
+     [
+      6,
+      3.8
+     ],
+     [
+      6,
+      2.9
+     ]
+    ],
+    "ENG-09": [
+     [
+      6,
+      3.4
+     ],
+     [
+      6,
+      3.3
+     ]
+    ],
+    "ENG-10": [
+     [
+      3,
+      7.4
+     ],
+     [
+      3,
+      7.8
+     ]
+    ]
+   }
+  },
+  {
+   "far_reserves": 5,
+   "mid_blow_share": 0.27,
+   "present_ms_max": 6.28,
+   "present_ms_median": 1.98,
+   "present_ms_p95": 3.23,
+   "present_ms_p99": 3.9,
+   "riders_far": 0,
+   "scene": "city",
+   "shown_fight_ms": 7400.0,
+   "soldiers": 24,
+   "soldiers_without_swing": 2,
+   "swings_median": 1,
+   "swings_min": 0,
+   "build": "1019",
+   "spot": "city",
+   "per_type_swings_and_distance_m": {
+    "ENG-01": [
+     [
+      1,
+      4.1
+     ],
+     [
+      1,
+      2.4
+     ],
+     [
+      0,
+      4.5
+     ]
+    ],
+    "ENG-02": [
+     [
+      1,
+      3.6
+     ],
+     [
+      1,
+      2.6
+     ],
+     [
+      1,
+      3.6
+     ]
+    ],
+    "ENG-03": [
+     [
+      1,
+      8.0
+     ],
+     [
+      1,
+      8.6
+     ],
+     [
+      0,
+      7.7
+     ]
+    ],
+    "ENG-04": [
+     [
+      1,
+      7.2
+     ],
+     [
+      1,
+      8.0
+     ],
+     [
+      1,
+      9.8
+     ]
+    ],
+    "ENG-05": [
+     [
+      1,
+      6.1
+     ],
+     [
+      1,
+      5.5
+     ]
+    ],
+    "ENG-06": [
+     [
+      1,
+      5.8
+     ],
+     [
+      1,
+      6.0
+     ]
+    ],
+    "ENG-07": [
+     [
+      1,
+      3.1
+     ],
+     [
+      1,
+      2.1
+     ]
+    ],
+    "ENG-08": [
+     [
+      1,
+      3.0
+     ],
+     [
+      1,
+      3.5
+     ]
+    ],
+    "ENG-09": [
+     [
+      1,
+      2.4
+     ],
+     [
+      1,
+      2.5
+     ]
+    ],
+    "ENG-10": [
+     [
+      1,
+      9.8
+     ],
+     [
+      1,
+      9.8
+     ]
+    ]
+   }
+  },
+  {
+   "far_reserves": 4,
+   "mid_blow_share": 0.27,
+   "present_ms_max": 4.49,
+   "present_ms_median": 1.87,
+   "present_ms_p95": 2.25,
+   "present_ms_p99": 4.45,
+   "riders_far": 4,
+   "scene": "world",
+   "shown_fight_ms": 7400.0,
+   "soldiers": 24,
+   "soldiers_without_swing": 3,
+   "swings_median": 1,
+   "swings_min": 0,
+   "build": "1019",
+   "spot": "world___x__0_35___z__60_13",
+   "per_type_swings_and_distance_m": {
+    "ENG-01": [
+     [
+      1,
+      4.0
+     ],
+     [
+      0,
+      5.6
+     ],
+     [
+      1,
+      5.4
+     ]
+    ],
+    "ENG-02": [
+     [
+      1,
+      4.0
+     ],
+     [
+      1,
+      2.7
+     ],
+     [
+      0,
+      6.0
+     ]
+    ],
+    "ENG-03": [
+     [
+      1,
+      10.1
+     ],
+     [
+      1,
+      9.9
+     ],
+     [
+      0,
+      9.1
+     ]
+    ],
+    "ENG-04": [
+     [
+      1,
+      11.2
+     ],
+     [
+      1,
+      9.3
+     ],
+     [
+      1,
+      11.2
+     ]
+    ],
+    "ENG-05": [
+     [
+      1,
+      8.0
+     ],
+     [
+      1,
+      9.8
+     ]
+    ],
+    "ENG-06": [
+     [
+      1,
+      9.8
+     ],
+     [
+      1,
+      9.8
+     ]
+    ],
+    "ENG-07": [
+     [
+      1,
+      3.6
+     ],
+     [
+      1,
+      2.8
+     ]
+    ],
+    "ENG-08": [
+     [
+      1,
+      2.9
+     ],
+     [
+      1,
+      3.3
+     ]
+    ],
+    "ENG-09": [
+     [
+      1,
+      3.6
+     ],
+     [
+      1,
+      2.9
+     ]
+    ],
+    "ENG-10": [
+     [
+      1,
+      12.8
+     ],
+     [
+      1,
+      12.8
+     ]
+    ]
+   }
+  },
+  {
+   "far_reserves": 1,
+   "mid_blow_share": 0.27,
+   "present_ms_max": 4.28,
+   "present_ms_median": 2.41,
+   "present_ms_p95": 3.29,
+   "present_ms_p99": 4.23,
+   "riders_far": 1,
+   "scene": "world",
+   "shown_fight_ms": 7400.0,
+   "soldiers": 24,
+   "soldiers_without_swing": 3,
+   "swings_median": 1,
+   "swings_min": 0,
+   "build": "1019",
+   "spot": "world___x__50___z__30",
+   "per_type_swings_and_distance_m": {
+    "ENG-01": [
+     [
+      1,
+      4.0
+     ],
+     [
+      1,
+      2.8
+     ],
+     [
+      0,
+      5.4
+     ]
+    ],
+    "ENG-02": [
+     [
+      1,
+      4.0
+     ],
+     [
+      0,
+      5.0
+     ],
+     [
+      1,
+      4.8
+     ]
+    ],
+    "ENG-03": [
+     [
+      1,
+      10.3
+     ],
+     [
+      1,
+      10.1
+     ],
+     [
+      0,
+      9.6
+     ]
+    ],
+    "ENG-04": [
+     [
+      1,
+      9.2
+     ],
+     [
+      1,
+      9.1
+     ],
+     [
+      1,
+      9.2
+     ]
+    ],
+    "ENG-05": [
+     [
+      1,
+      7.6
+     ],
+     [
+      1,
+      8.0
+     ]
+    ],
+    "ENG-06": [
+     [
+      1,
+      7.7
+     ],
+     [
+      1,
+      8.9
+     ]
+    ],
+    "ENG-07": [
+     [
+      1,
+      3.1
+     ],
+     [
+      1,
+      3.1
+     ]
+    ],
+    "ENG-08": [
+     [
+      1,
+      3.0
+     ],
+     [
+      1,
+      3.0
+     ]
+    ],
+    "ENG-09": [
+     [
+      1,
+      2.8
+     ],
+     [
+      1,
+      6.0
+     ]
+    ],
+    "ENG-10": [
+     [
+      1,
+      10.3
+     ],
+     [
+      1,
+      10.6
+     ]
+    ]
+   }
+  }
+ ]
+}

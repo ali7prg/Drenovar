@@ -1,0 +1,36 @@
+{
+  "checked_at": "2026-11-16T10:44:13.418033+00:00",
+  "method": "GET public metadata; no account or database writes",
+  "/__health": {
+    "service": "drenovar",
+    "environment": "v6-release-adapter",
+    "deployCommit": "e5062aa292da895653c07dab50ce9b85a2a4ee11",
+    "economy": "DRENOVAR-V6-C1.0",
+    "api": 6,
+    "schema": 6
+  },
+  "/api/auth/info": {
+    "login": "device",
+    "transfer": false,
+    "owner_login": true,
+    "new_settlements": false,
+    "open": true,
+    "environment": "v6-release-adapter",
+    "economy_version": "DRENOVAR-V6-C1.0",
+    "api_version": 6,
+    "schema_version": 6,
+    "productionReady": false
+  },
+  "/api/v6/version": {
+    "login": "device",
+    "transfer": false,
+    "owner_login": true,
+    "new_settlements": false,
+    "open": true,
+    "environment": "v6-release-adapter",
+    "economy_version": "DRENOVAR-V6-C1.0",
+    "api_version": 6,
+    "schema_version": 6,
+    "productionReady": false
+  }
+}

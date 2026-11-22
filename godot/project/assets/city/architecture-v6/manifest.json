@@ -1,0 +1,8401 @@
+{
+	"economy_version": "DRENOVAR-V6-C1.0",
+	"legacy_preservation": "All architecture-v2 files remain byte-identical; see legacy-sha256.json",
+	"levels": {
+		"ALT-02": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500080108643,
+						4.98351860046387,
+						6.30000066757202
+					],
+					"min": [
+						-6.10916805267334,
+						-0.389999985694885,
+						-5.82429933547974
+					]
+				},
+				"id": "B21",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-02-10.tscn",
+				"scale": 1.0,
+				"series": "B21_Sawmill",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 24180.0,
+				"type": "ALT-02",
+				"web": "/assets/city/architecture-v6/web/ALT-02-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500080108643,
+						7.08000040054321,
+						6.30000066757202
+					],
+					"min": [
+						-6.10916805267334,
+						-0.389999985694885,
+						-5.82429933547974
+					]
+				},
+				"id": "B21",
+				"level": 11.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-02-11.tscn",
+				"scale": 1.0,
+				"series": "B21_Sawmill",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 26304.0,
+				"type": "ALT-02",
+				"web": "/assets/city/architecture-v6/web/ALT-02-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.77904796600342,
+						4.98351860046387,
+						6.30000066757202
+					],
+					"min": [
+						-6.10916805267334,
+						-0.273999929428101,
+						-5.82429933547974
+					]
+				},
+				"id": "B21",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-02-6.tscn",
+				"scale": 1.0,
+				"series": "B21_Sawmill",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 17362.0,
+				"type": "ALT-02",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ALT-02-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ALT-02-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.77904796600342,
+						4.98351860046387,
+						6.30000066757202
+					],
+					"min": [
+						-6.10916805267334,
+						-0.273999929428101,
+						-5.82429933547974
+					]
+				},
+				"id": "B21",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-02-7.tscn",
+				"scale": 1.0,
+				"series": "B21_Sawmill",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 17434.0,
+				"type": "ALT-02",
+				"web": "/assets/city/architecture-v6/web/ALT-02-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.77904796600342,
+						4.98351860046387,
+						6.30000066757202
+					],
+					"min": [
+						-6.10916805267334,
+						-0.273999929428101,
+						-5.82429933547974
+					]
+				},
+				"id": "B21",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-02-8.tscn",
+				"scale": 1.0,
+				"series": "B21_Sawmill",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 22578.0,
+				"type": "ALT-02",
+				"web": "/assets/city/architecture-v6/web/ALT-02-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.77904796600342,
+						4.98351860046387,
+						6.30000066757202
+					],
+					"min": [
+						-6.10916805267334,
+						-0.389999985694885,
+						-5.82429933547974
+					]
+				},
+				"id": "B21",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-02-9.tscn",
+				"scale": 1.0,
+				"series": "B21_Sawmill",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 23224.0,
+				"type": "ALT-02",
+				"web": "/assets/city/architecture-v6/web/ALT-02-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"ALT-05": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.273999929428101,
+						-6.02622032165527
+					]
+				},
+				"id": "B22",
+				"level": 10.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-05-10.tscn",
+				"scale": 1.0,
+				"series": "B22_WheatFarm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 30442.0,
+				"type": "ALT-05",
+				"web": "/assets/city/architecture-v6/web/ALT-05-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						6.07999992370605,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.273999929428101,
+						-6.02622032165527
+					]
+				},
+				"id": "B22",
+				"level": 11.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-05-11.tscn",
+				"scale": 1.0,
+				"series": "B22_WheatFarm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 32018.0,
+				"type": "ALT-05",
+				"web": "/assets/city/architecture-v6/web/ALT-05-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.56149101257324,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.66936206817627,
+						-0.273999929428101,
+						-6.02622032165527
+					]
+				},
+				"id": "B22",
+				"level": 6.0,
+				"materials": [
+					"canvas",
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-05-6.tscn",
+				"scale": 1.0,
+				"series": "B22_WheatFarm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 23434.0,
+				"type": "ALT-05",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ALT-05-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ALT-05-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.56149101257324,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.66936206817627,
+						-0.273999929428101,
+						-6.02622032165527
+					]
+				},
+				"id": "B22",
+				"level": 7.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-05-7.tscn",
+				"scale": 1.0,
+				"series": "B22_WheatFarm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 23482.0,
+				"type": "ALT-05",
+				"web": "/assets/city/architecture-v6/web/ALT-05-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.56149101257324,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.66936206817627,
+						-0.273999929428101,
+						-6.02622032165527
+					]
+				},
+				"id": "B22",
+				"level": 8.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-05-8.tscn",
+				"scale": 1.0,
+				"series": "B22_WheatFarm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 28514.0,
+				"type": "ALT-05",
+				"web": "/assets/city/architecture-v6/web/ALT-05-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.56149101257324,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.66936206817627,
+						-0.273999929428101,
+						-6.02622032165527
+					]
+				},
+				"id": "B22",
+				"level": 9.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-05-9.tscn",
+				"scale": 1.0,
+				"series": "B22_WheatFarm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 29594.0,
+				"type": "ALT-05",
+				"web": "/assets/city/architecture-v6/web/ALT-05-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"ALT-06": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						6.26999998092651,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-6.00905990600586
+					]
+				},
+				"id": "B23",
+				"level": 10.0,
+				"materials": [
+					"canvas",
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-06-10.tscn",
+				"scale": 1.0,
+				"series": "B23_HuntingLodge",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 29544.0,
+				"type": "ALT-06",
+				"web": "/assets/city/architecture-v6/web/ALT-06-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						8.10000038146973,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-6.00905990600586
+					]
+				},
+				"id": "B23",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"canvas",
+					"cloth_blue",
+					"cloth_red",
+					"cloth_teal",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-06-11.tscn",
+				"scale": 1.0,
+				"series": "B23_HuntingLodge",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 36380.0,
+				"type": "ALT-06",
+				"web": "/assets/city/architecture-v6/web/ALT-06-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.7114577293396,
+						6.26999950408936,
+						6.30000019073486
+					],
+					"min": [
+						-5.61088037490845,
+						-0.273999929428101,
+						-6.00905990600586
+					]
+				},
+				"id": "B23",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"plank",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-06-6.tscn",
+				"scale": 1.0,
+				"series": "B23_HuntingLodge",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 19502.0,
+				"type": "ALT-06",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ALT-06-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ALT-06-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.7114577293396,
+						6.26999950408936,
+						6.30000019073486
+					],
+					"min": [
+						-5.61088037490845,
+						-0.273999929428101,
+						-6.00905990600586
+					]
+				},
+				"id": "B23",
+				"level": 7.0,
+				"materials": [
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"plank",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-06-7.tscn",
+				"scale": 1.0,
+				"series": "B23_HuntingLodge",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 19574.0,
+				"type": "ALT-06",
+				"web": "/assets/city/architecture-v6/web/ALT-06-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.7114577293396,
+						6.26999950408936,
+						6.30000019073486
+					],
+					"min": [
+						-5.61088037490845,
+						-0.273999929428101,
+						-6.00905990600586
+					]
+				},
+				"id": "B23",
+				"level": 8.0,
+				"materials": [
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"plank",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-06-8.tscn",
+				"scale": 1.0,
+				"series": "B23_HuntingLodge",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 26496.0,
+				"type": "ALT-06",
+				"web": "/assets/city/architecture-v6/web/ALT-06-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.7114577293396,
+						6.26999998092651,
+						6.30000019073486
+					],
+					"min": [
+						-5.61088037490845,
+						-0.389999985694885,
+						-6.00905990600586
+					]
+				},
+				"id": "B23",
+				"level": 9.0,
+				"materials": [
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"plank",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-06-9.tscn",
+				"scale": 1.0,
+				"series": "B23_HuntingLodge",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 27444.0,
+				"type": "ALT-06",
+				"web": "/assets/city/architecture-v6/web/ALT-06-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"ALT-07": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.12000036239624,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.600000023841858,
+						-5.90618133544922
+					]
+				},
+				"id": "B24",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-07-10.tscn",
+				"scale": 1.0,
+				"series": "B24_FishingHut",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 19032.0,
+				"type": "ALT-07",
+				"web": "/assets/city/architecture-v6/web/ALT-07-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.12000036239624,
+						7.80000066757202,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.600000023841858,
+						-5.90618133544922
+					]
+				},
+				"id": "B24",
+				"level": 11.0,
+				"materials": [
+					"cloth_teal",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-07-11.tscn",
+				"scale": 1.0,
+				"series": "B24_FishingHut",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 24696.0,
+				"type": "ALT-07",
+				"web": "/assets/city/architecture-v6/web/ALT-07-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						6.11999988555908,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.97354984283447,
+						-0.600000023841858,
+						-5.90618133544922
+					]
+				},
+				"id": "B24",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"rope",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-07-6.tscn",
+				"scale": 1.0,
+				"series": "B24_FishingHut",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 12322.0,
+				"type": "ALT-07",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ALT-07-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ALT-07-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						6.11999988555908,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.97354984283447,
+						-0.600000023841858,
+						-5.90618133544922
+					]
+				},
+				"id": "B24",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-07-7.tscn",
+				"scale": 1.0,
+				"series": "B24_FishingHut",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 12370.0,
+				"type": "ALT-07",
+				"web": "/assets/city/architecture-v6/web/ALT-07-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						6.11999988555908,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.97354984283447,
+						-0.600000023841858,
+						-5.90618133544922
+					]
+				},
+				"id": "B24",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-07-8.tscn",
+				"scale": 1.0,
+				"series": "B24_FishingHut",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 17498.0,
+				"type": "ALT-07",
+				"web": "/assets/city/architecture-v6/web/ALT-07-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						6.11999988555908,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.97354984283447,
+						-0.600000023841858,
+						-5.90618133544922
+					]
+				},
+				"id": "B24",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-07-9.tscn",
+				"scale": 1.0,
+				"series": "B24_FishingHut",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 18336.0,
+				"type": "ALT-07",
+				"web": "/assets/city/architecture-v6/web/ALT-07-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"ALT-08": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						4.43000030517578,
+						6.29999971389771
+					],
+					"min": [
+						-6.03500032424927,
+						-0.273999929428101,
+						-5.90418577194214
+					]
+				},
+				"id": "B25",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"lavender",
+					"oak",
+					"path",
+					"plank",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-08-10.tscn",
+				"scale": 1.0,
+				"series": "B25_HerbalGarden",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 24154.0,
+				"type": "ALT-08",
+				"web": "/assets/city/architecture-v6/web/ALT-08-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						5.38000011444092,
+						6.29999971389771
+					],
+					"min": [
+						-6.03500032424927,
+						-0.273999929428101,
+						-5.90418577194214
+					]
+				},
+				"id": "B25",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"lavender",
+					"oak",
+					"path",
+					"plank",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-08-11.tscn",
+				"scale": 1.0,
+				"series": "B25_HerbalGarden",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 25862.0,
+				"type": "ALT-08",
+				"web": "/assets/city/architecture-v6/web/ALT-08-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.68465042114258,
+						4.43000030517578,
+						6.29999971389771
+					],
+					"min": [
+						-5.77630043029785,
+						-0.273999929428101,
+						-5.90418577194214
+					]
+				},
+				"id": "B25",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"lavender",
+					"oak",
+					"path",
+					"plank",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-08-6.tscn",
+				"scale": 1.0,
+				"series": "B25_HerbalGarden",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 15166.0,
+				"type": "ALT-08",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ALT-08-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ALT-08-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.68465042114258,
+						4.43000030517578,
+						6.29999971389771
+					],
+					"min": [
+						-5.77630043029785,
+						-0.273999929428101,
+						-5.90418577194214
+					]
+				},
+				"id": "B25",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"lavender",
+					"oak",
+					"path",
+					"plank",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-08-7.tscn",
+				"scale": 1.0,
+				"series": "B25_HerbalGarden",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 15214.0,
+				"type": "ALT-08",
+				"web": "/assets/city/architecture-v6/web/ALT-08-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.68465042114258,
+						4.43000030517578,
+						6.29999971389771
+					],
+					"min": [
+						-5.77630043029785,
+						-0.273999929428101,
+						-5.90418577194214
+					]
+				},
+				"id": "B25",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"lavender",
+					"oak",
+					"path",
+					"plank",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-08-8.tscn",
+				"scale": 1.0,
+				"series": "B25_HerbalGarden",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 20086.0,
+				"type": "ALT-08",
+				"web": "/assets/city/architecture-v6/web/ALT-08-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.68465042114258,
+						4.43000030517578,
+						6.29999971389771
+					],
+					"min": [
+						-5.77630043029785,
+						-0.273999929428101,
+						-5.90418577194214
+					]
+				},
+				"id": "B25",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"lavender",
+					"oak",
+					"path",
+					"plank",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/ALT-08-9.tscn",
+				"scale": 1.0,
+				"series": "B25_HerbalGarden",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 20650.0,
+				"type": "ALT-08",
+				"web": "/assets/city/architecture-v6/web/ALT-08-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"ALT-09": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						4.8813943862915,
+						6.29999971389771
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.98864889144897
+					]
+				},
+				"id": "B26",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-09-10.tscn",
+				"scale": 1.0,
+				"series": "B26_StoneWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 22824.0,
+				"type": "ALT-09",
+				"web": "/assets/city/architecture-v6/web/ALT-09-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						6.88000011444092,
+						6.29999971389771
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.98864889144897
+					]
+				},
+				"id": "B26",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-09-11.tscn",
+				"scale": 1.0,
+				"series": "B26_StoneWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 25096.0,
+				"type": "ALT-09",
+				"web": "/assets/city/architecture-v6/web/ALT-09-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.96665906906128,
+						4.8813943862915,
+						6.29999971389771
+					],
+					"min": [
+						-5.58709383010864,
+						-0.273999929428101,
+						-5.98864889144897
+					]
+				},
+				"id": "B26",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-09-6.tscn",
+				"scale": 1.0,
+				"series": "B26_StoneWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 16512.0,
+				"type": "ALT-09",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ALT-09-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ALT-09-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.96665906906128,
+						4.8813943862915,
+						6.29999971389771
+					],
+					"min": [
+						-5.58709383010864,
+						-0.273999929428101,
+						-5.98864889144897
+					]
+				},
+				"id": "B26",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-09-7.tscn",
+				"scale": 1.0,
+				"series": "B26_StoneWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 16584.0,
+				"type": "ALT-09",
+				"web": "/assets/city/architecture-v6/web/ALT-09-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.96665906906128,
+						4.8813943862915,
+						6.29999971389771
+					],
+					"min": [
+						-5.58709383010864,
+						-0.273999929428101,
+						-5.98864889144897
+					]
+				},
+				"id": "B26",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-09-8.tscn",
+				"scale": 1.0,
+				"series": "B26_StoneWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 21520.0,
+				"type": "ALT-09",
+				"web": "/assets/city/architecture-v6/web/ALT-09-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.96665906906128,
+						4.8813943862915,
+						6.29999971389771
+					],
+					"min": [
+						-5.58709383010864,
+						-0.389999985694885,
+						-5.98864889144897
+					]
+				},
+				"id": "B26",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-09-9.tscn",
+				"scale": 1.0,
+				"series": "B26_StoneWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 22288.0,
+				"type": "ALT-09",
+				"web": "/assets/city/architecture-v6/web/ALT-09-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"ALT-10": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.1385498046875,
+						6.96999979019165,
+						6.30000019073486
+					],
+					"min": [
+						-6.0423526763916,
+						-0.389999985694885,
+						-5.71331787109375
+					]
+				},
+				"id": "B27",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-10-10.tscn",
+				"scale": 1.0,
+				"series": "B27_Smelter",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 24802.0,
+				"type": "ALT-10",
+				"web": "/assets/city/architecture-v6/web/ALT-10-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.1385498046875,
+						8.67000007629395,
+						6.30000019073486
+					],
+					"min": [
+						-6.0423526763916,
+						-0.389999985694885,
+						-5.71331787109375
+					]
+				},
+				"id": "B27",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-10-11.tscn",
+				"scale": 1.0,
+				"series": "B27_Smelter",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 24890.0,
+				"type": "ALT-10",
+				"web": "/assets/city/architecture-v6/web/ALT-10-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						6.1385498046875,
+						6.96999931335449,
+						6.30000019073486
+					],
+					"min": [
+						-6.0423526763916,
+						-0.273999929428101,
+						-5.71331787109375
+					]
+				},
+				"id": "B27",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-10-6.tscn",
+				"scale": 1.0,
+				"series": "B27_Smelter",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 16474.0,
+				"type": "ALT-10",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ALT-10-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ALT-10-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						6.1385498046875,
+						6.96999931335449,
+						6.30000019073486
+					],
+					"min": [
+						-6.0423526763916,
+						-0.273999929428101,
+						-5.71331787109375
+					]
+				},
+				"id": "B27",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-10-7.tscn",
+				"scale": 1.0,
+				"series": "B27_Smelter",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 16522.0,
+				"type": "ALT-10",
+				"web": "/assets/city/architecture-v6/web/ALT-10-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						6.1385498046875,
+						6.96999931335449,
+						6.30000019073486
+					],
+					"min": [
+						-6.0423526763916,
+						-0.273999929428101,
+						-5.71331787109375
+					]
+				},
+				"id": "B27",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-10-8.tscn",
+				"scale": 1.0,
+				"series": "B27_Smelter",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 19898.0,
+				"type": "ALT-10",
+				"web": "/assets/city/architecture-v6/web/ALT-10-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						6.1385498046875,
+						6.96999979019165,
+						6.30000019073486
+					],
+					"min": [
+						-6.0423526763916,
+						-0.389999985694885,
+						-5.71331787109375
+					]
+				},
+				"id": "B27",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ALT-10-9.tscn",
+				"scale": 1.0,
+				"series": "B27_Smelter",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 24394.0,
+				"type": "ALT-10",
+				"web": "/assets/city/architecture-v6/web/ALT-10-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"ECO-01": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500080108643,
+						5.73000001907349,
+						6.30000066757202
+					],
+					"min": [
+						-6.05008602142334,
+						-0.389999985694885,
+						-5.99979639053345
+					]
+				},
+				"id": "B03",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-01-10.tscn",
+				"scale": 1.0,
+				"series": "B03_Warehouse",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 35678.0,
+				"type": "ECO-01",
+				"web": "/assets/city/architecture-v6/web/ECO-01-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500080108643,
+						7.80000066757202,
+						6.30000066757202
+					],
+					"min": [
+						-6.05008602142334,
+						-0.389999985694885,
+						-5.99979639053345
+					]
+				},
+				"id": "B03",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-01-11.tscn",
+				"scale": 1.0,
+				"series": "B03_Warehouse",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 42474.0,
+				"type": "ECO-01",
+				"web": "/assets/city/architecture-v6/web/ECO-01-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.75461196899414,
+						5.72999954223633,
+						6.30000019073486
+					],
+					"min": [
+						-6.05008602142334,
+						-0.273999929428101,
+						-5.58197689056396
+					]
+				},
+				"id": "B03",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-01-6.tscn",
+				"scale": 1.0,
+				"series": "B03_Warehouse",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 25198.0,
+				"type": "ECO-01",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ECO-01-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ECO-01-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.75461196899414,
+						5.72999954223633,
+						6.30000019073486
+					],
+					"min": [
+						-6.05008602142334,
+						-0.273999929428101,
+						-5.58197689056396
+					]
+				},
+				"id": "B03",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-01-7.tscn",
+				"scale": 1.0,
+				"series": "B03_Warehouse",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 25270.0,
+				"type": "ECO-01",
+				"web": "/assets/city/architecture-v6/web/ECO-01-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.87499904632568,
+						5.72999954223633,
+						6.30000019073486
+					],
+					"min": [
+						-6.05008602142334,
+						-0.273999929428101,
+						-5.58197689056396
+					]
+				},
+				"id": "B03",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-01-8.tscn",
+				"scale": 1.0,
+				"series": "B03_Warehouse",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 33376.0,
+				"type": "ECO-01",
+				"web": "/assets/city/architecture-v6/web/ECO-01-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.87499904632568,
+						5.73000001907349,
+						6.30000019073486
+					],
+					"min": [
+						-6.05008602142334,
+						-0.389999985694885,
+						-5.58197689056396
+					]
+				},
+				"id": "B03",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-01-9.tscn",
+				"scale": 1.0,
+				"series": "B03_Warehouse",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 34430.0,
+				"type": "ECO-01",
+				"web": "/assets/city/architecture-v6/web/ECO-01-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"ECO-02": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						5.68000030517578,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.92408466339111
+					]
+				},
+				"id": "B04",
+				"level": 10.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-02-10.tscn",
+				"scale": 1.0,
+				"series": "B04_Granary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 33352.0,
+				"type": "ECO-02",
+				"web": "/assets/city/architecture-v6/web/ECO-02-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						6.58000040054321,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.92408466339111
+					]
+				},
+				"id": "B04",
+				"level": 11.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-02-11.tscn",
+				"scale": 1.0,
+				"series": "B04_Granary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 36072.0,
+				"type": "ECO-02",
+				"web": "/assets/city/architecture-v6/web/ECO-02-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.72197961807251,
+						5.68000030517578,
+						6.30000019073486
+					],
+					"min": [
+						-5.68606233596802,
+						-0.273999929428101,
+						-5.92408466339111
+					]
+				},
+				"id": "B04",
+				"level": 6.0,
+				"materials": [
+					"canvas",
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-02-6.tscn",
+				"scale": 1.0,
+				"series": "B04_Granary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 23652.0,
+				"type": "ECO-02",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ECO-02-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ECO-02-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.72197961807251,
+						5.68000030517578,
+						6.30000019073486
+					],
+					"min": [
+						-5.68606233596802,
+						-0.273999929428101,
+						-5.92408466339111
+					]
+				},
+				"id": "B04",
+				"level": 7.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-02-7.tscn",
+				"scale": 1.0,
+				"series": "B04_Granary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 23748.0,
+				"type": "ECO-02",
+				"web": "/assets/city/architecture-v6/web/ECO-02-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.72197961807251,
+						5.68000030517578,
+						6.30000019073486
+					],
+					"min": [
+						-5.68606233596802,
+						-0.273999929428101,
+						-5.92408466339111
+					]
+				},
+				"id": "B04",
+				"level": 8.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-02-8.tscn",
+				"scale": 1.0,
+				"series": "B04_Granary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 26996.0,
+				"type": "ECO-02",
+				"web": "/assets/city/architecture-v6/web/ECO-02-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.72197961807251,
+						5.68000030517578,
+						6.30000019073486
+					],
+					"min": [
+						-5.68606233596802,
+						-0.389999985694885,
+						-5.92408466339111
+					]
+				},
+				"id": "B04",
+				"level": 9.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-02-9.tscn",
+				"scale": 1.0,
+				"series": "B04_Granary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 32928.0,
+				"type": "ECO-02",
+				"web": "/assets/city/architecture-v6/web/ECO-02-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"ECO-03": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500080108643,
+						4.73000001907349,
+						6.30000066757202
+					],
+					"min": [
+						-6.0729341506958,
+						-0.389999985694885,
+						-5.59453248977661
+					]
+				},
+				"id": "B05",
+				"level": 10.0,
+				"materials": [
+					"brass",
+					"cloth_wine",
+					"dark_oak",
+					"earth",
+					"glass",
+					"glow",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-03-10.tscn",
+				"scale": 1.0,
+				"series": "B05_Marketplace",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 36754.0,
+				"type": "ECO-03",
+				"web": "/assets/city/architecture-v6/web/ECO-03-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500080108643,
+						7.99999952316284,
+						6.30000066757202
+					],
+					"min": [
+						-6.0729341506958,
+						-0.389999985694885,
+						-5.59453248977661
+					]
+				},
+				"id": "B05",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_wine",
+					"dark_oak",
+					"earth",
+					"glass",
+					"glow",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-03-11.tscn",
+				"scale": 1.0,
+				"series": "B05_Marketplace",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 43118.0,
+				"type": "ECO-03",
+				"web": "/assets/city/architecture-v6/web/ECO-03-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.94783496856689,
+						4.72999954223633,
+						6.30000066757202
+					],
+					"min": [
+						-6.0729341506958,
+						-0.273999929428101,
+						-5.59453248977661
+					]
+				},
+				"id": "B05",
+				"level": 6.0,
+				"materials": [
+					"brass",
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-03-6.tscn",
+				"scale": 1.0,
+				"series": "B05_Marketplace",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 23238.0,
+				"type": "ECO-03",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ECO-03-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ECO-03-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.94783496856689,
+						4.72999954223633,
+						6.30000066757202
+					],
+					"min": [
+						-6.0729341506958,
+						-0.273999929428101,
+						-5.59453248977661
+					]
+				},
+				"id": "B05",
+				"level": 7.0,
+				"materials": [
+					"brass",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-03-7.tscn",
+				"scale": 1.0,
+				"series": "B05_Marketplace",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 23334.0,
+				"type": "ECO-03",
+				"web": "/assets/city/architecture-v6/web/ECO-03-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.94783496856689,
+						4.72999954223633,
+						6.30000066757202
+					],
+					"min": [
+						-6.0729341506958,
+						-0.273999929428101,
+						-5.59453248977661
+					]
+				},
+				"id": "B05",
+				"level": 8.0,
+				"materials": [
+					"brass",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-03-8.tscn",
+				"scale": 1.0,
+				"series": "B05_Marketplace",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 35446.0,
+				"type": "ECO-03",
+				"web": "/assets/city/architecture-v6/web/ECO-03-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.94783496856689,
+						4.73000001907349,
+						6.30000066757202
+					],
+					"min": [
+						-6.0729341506958,
+						-0.389999985694885,
+						-5.59453248977661
+					]
+				},
+				"id": "B05",
+				"level": 9.0,
+				"materials": [
+					"brass",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-03-9.tscn",
+				"scale": 1.0,
+				"series": "B05_Marketplace",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 36510.0,
+				"type": "ECO-03",
+				"web": "/assets/city/architecture-v6/web/ECO-03-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"ECO-04": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500080108643,
+						5.86999988555908,
+						6.29999971389771
+					],
+					"min": [
+						-6.04260349273682,
+						-0.389999985694885,
+						-5.98321104049683
+					]
+				},
+				"id": "B02",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"leaves",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-04-10.tscn",
+				"scale": 1.0,
+				"series": "B02_House",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 31542.0,
+				"type": "ECO-04",
+				"web": "/assets/city/architecture-v6/web/ECO-04-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500080108643,
+						7.73000001907349,
+						6.29999971389771
+					],
+					"min": [
+						-6.04260349273682,
+						-0.389999985694885,
+						-5.98321104049683
+					]
+				},
+				"id": "B02",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"cloth_teal",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"leaves",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-04-11.tscn",
+				"scale": 1.0,
+				"series": "B02_House",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 37976.0,
+				"type": "ECO-04",
+				"web": "/assets/city/architecture-v6/web/ECO-04-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.54162216186523,
+						5.86999988555908,
+						6.29999971389771
+					],
+					"min": [
+						-6.04260349273682,
+						-0.273999929428101,
+						-5.98321104049683
+					]
+				},
+				"id": "B02",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-04-6.tscn",
+				"scale": 1.0,
+				"series": "B02_House",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 22244.0,
+				"type": "ECO-04",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ECO-04-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ECO-04-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.54162216186523,
+						5.86999988555908,
+						6.29999971389771
+					],
+					"min": [
+						-6.04260349273682,
+						-0.273999929428101,
+						-5.98321104049683
+					]
+				},
+				"id": "B02",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-04-7.tscn",
+				"scale": 1.0,
+				"series": "B02_House",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 22340.0,
+				"type": "ECO-04",
+				"web": "/assets/city/architecture-v6/web/ECO-04-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.54162216186523,
+						5.86999988555908,
+						6.29999971389771
+					],
+					"min": [
+						-6.04260349273682,
+						-0.273999929428101,
+						-5.98321104049683
+					]
+				},
+				"id": "B02",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-04-8.tscn",
+				"scale": 1.0,
+				"series": "B02_House",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 29958.0,
+				"type": "ECO-04",
+				"web": "/assets/city/architecture-v6/web/ECO-04-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.54162216186523,
+						5.86999988555908,
+						6.29999971389771
+					],
+					"min": [
+						-6.04260349273682,
+						-0.389999985694885,
+						-5.98321104049683
+					]
+				},
+				"id": "B02",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-04-9.tscn",
+				"scale": 1.0,
+				"series": "B02_House",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 31050.0,
+				"type": "ECO-04",
+				"web": "/assets/city/architecture-v6/web/ECO-04-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"ECO-05": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						9.02641868591309,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.400000005960464,
+						-5.81932544708252
+					]
+				},
+				"id": "B01",
+				"level": 10.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"glass",
+					"glow",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-05-10.tscn",
+				"scale": 1.0,
+				"series": "B01_TownHall",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 49042.0,
+				"type": "ECO-05",
+				"web": "/assets/city/architecture-v6/web/ECO-05-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						10.1000003814697,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.400000005960464,
+						-5.81932544708252
+					]
+				},
+				"id": "B01",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"glass",
+					"glow",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-05-11.tscn",
+				"scale": 1.0,
+				"series": "B01_TownHall",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 56122.0,
+				"type": "ECO-05",
+				"web": "/assets/city/architecture-v6/web/ECO-05-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.72116422653198,
+						9.02641868591309,
+						6.30000019073486
+					],
+					"min": [
+						-5.77853345870972,
+						-0.400000005960464,
+						-5.81932544708252
+					]
+				},
+				"id": "B01",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-05-6.tscn",
+				"scale": 1.0,
+				"series": "B01_TownHall",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 37206.0,
+				"type": "ECO-05",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/ECO-05-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/ECO-05-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.72116422653198,
+						9.02641868591309,
+						6.30000019073486
+					],
+					"min": [
+						-5.77853345870972,
+						-0.400000005960464,
+						-5.81932544708252
+					]
+				},
+				"id": "B01",
+				"level": 7.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-05-7.tscn",
+				"scale": 1.0,
+				"series": "B01_TownHall",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 37318.0,
+				"type": "ECO-05",
+				"web": "/assets/city/architecture-v6/web/ECO-05-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.72116422653198,
+						9.02641868591309,
+						6.30000019073486
+					],
+					"min": [
+						-5.77853345870972,
+						-0.400000005960464,
+						-5.81932544708252
+					]
+				},
+				"id": "B01",
+				"level": 8.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-05-8.tscn",
+				"scale": 1.0,
+				"series": "B01_TownHall",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 42462.0,
+				"type": "ECO-05",
+				"web": "/assets/city/architecture-v6/web/ECO-05-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.72116422653198,
+						9.02641868591309,
+						6.30000019073486
+					],
+					"min": [
+						-5.77853345870972,
+						-0.400000005960464,
+						-5.81932544708252
+					]
+				},
+				"id": "B01",
+				"level": 9.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/ECO-05-9.tscn",
+				"scale": 1.0,
+				"series": "B01_TownHall",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 43398.0,
+				"type": "ECO-05",
+				"web": "/assets/city/architecture-v6/web/ECO-05-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"MIL-01": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.09254026412964,
+						5.13000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.74978065490723
+					]
+				},
+				"id": "B11",
+				"level": 10.0,
+				"materials": [
+					"brass",
+					"canvas",
+					"cloth_red",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"glow",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-01-10.tscn",
+				"scale": 1.0,
+				"series": "B11_InfantryBarracks",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 32090.0,
+				"type": "MIL-01",
+				"web": "/assets/city/architecture-v6/web/MIL-01-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.09254026412964,
+						6.56999969482422,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.74978065490723
+					]
+				},
+				"id": "B11",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"canvas",
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"glow",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-01-11.tscn",
+				"scale": 1.0,
+				"series": "B11_InfantryBarracks",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 37438.0,
+				"type": "MIL-01",
+				"web": "/assets/city/architecture-v6/web/MIL-01-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						6.09253978729248,
+						5.13000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.9974536895752,
+						-0.370000004768372,
+						-5.74978065490723
+					]
+				},
+				"id": "B11",
+				"level": 6.0,
+				"materials": [
+					"canvas",
+					"clay_roof",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-01-6.tscn",
+				"scale": 1.0,
+				"series": "B11_InfantryBarracks",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 23424.0,
+				"type": "MIL-01",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/MIL-01-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/MIL-01-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						6.09253978729248,
+						5.13000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.9974536895752,
+						-0.370000004768372,
+						-5.74978065490723
+					]
+				},
+				"id": "B11",
+				"level": 7.0,
+				"materials": [
+					"brass",
+					"canvas",
+					"cloth_red",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-01-7.tscn",
+				"scale": 1.0,
+				"series": "B11_InfantryBarracks",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 23560.0,
+				"type": "MIL-01",
+				"web": "/assets/city/architecture-v6/web/MIL-01-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						6.09253978729248,
+						5.13000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.9974536895752,
+						-0.370000004768372,
+						-5.74978065490723
+					]
+				},
+				"id": "B11",
+				"level": 8.0,
+				"materials": [
+					"brass",
+					"canvas",
+					"cloth_red",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-01-8.tscn",
+				"scale": 1.0,
+				"series": "B11_InfantryBarracks",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 30386.0,
+				"type": "MIL-01",
+				"web": "/assets/city/architecture-v6/web/MIL-01-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						6.09253978729248,
+						5.13000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.9974536895752,
+						-0.389999985694885,
+						-5.74978065490723
+					]
+				},
+				"id": "B11",
+				"level": 9.0,
+				"materials": [
+					"brass",
+					"canvas",
+					"cloth_red",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"oak_light",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-01-9.tscn",
+				"scale": 1.0,
+				"series": "B11_InfantryBarracks",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 31646.0,
+				"type": "MIL-01",
+				"web": "/assets/city/architecture-v6/web/MIL-01-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"MIL-02": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						4.53000020980835,
+						6.30000019073486
+					],
+					"min": [
+						-6.27500009536743,
+						-0.389999985694885,
+						-5.5944766998291
+					]
+				},
+				"id": "B12",
+				"level": 10.0,
+				"materials": [
+					"cloth_red",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"iron",
+					"linen",
+					"oak",
+					"oak_light",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-02-10.tscn",
+				"scale": 1.0,
+				"series": "B12_ArcheryRange",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 28864.0,
+				"type": "MIL-02",
+				"web": "/assets/city/architecture-v6/web/MIL-02-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						7.80000066757202,
+						6.30000019073486
+					],
+					"min": [
+						-6.27500009536743,
+						-0.389999985694885,
+						-5.5944766998291
+					]
+				},
+				"id": "B12",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_red",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"iron",
+					"linen",
+					"oak",
+					"oak_light",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-02-11.tscn",
+				"scale": 1.0,
+				"series": "B12_ArcheryRange",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 34556.0,
+				"type": "MIL-02",
+				"web": "/assets/city/architecture-v6/web/MIL-02-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.56888246536255,
+						4.53000020980835,
+						6.30000019073486
+					],
+					"min": [
+						-6.27500009536743,
+						-0.370000004768372,
+						-5.5944766998291
+					]
+				},
+				"id": "B12",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"cloth_red",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"iron",
+					"linen",
+					"oak",
+					"path",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-02-6.tscn",
+				"scale": 1.0,
+				"series": "B12_ArcheryRange",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 19554.0,
+				"type": "MIL-02",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/MIL-02-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/MIL-02-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.56888246536255,
+						4.53000020980835,
+						6.30000019073486
+					],
+					"min": [
+						-6.27500009536743,
+						-0.370000004768372,
+						-5.5944766998291
+					]
+				},
+				"id": "B12",
+				"level": 7.0,
+				"materials": [
+					"cloth_red",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"iron",
+					"linen",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-02-7.tscn",
+				"scale": 1.0,
+				"series": "B12_ArcheryRange",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 19626.0,
+				"type": "MIL-02",
+				"web": "/assets/city/architecture-v6/web/MIL-02-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.56888246536255,
+						4.53000020980835,
+						6.30000019073486
+					],
+					"min": [
+						-6.27500009536743,
+						-0.370000004768372,
+						-5.5944766998291
+					]
+				},
+				"id": "B12",
+				"level": 8.0,
+				"materials": [
+					"cloth_red",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"iron",
+					"linen",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-02-8.tscn",
+				"scale": 1.0,
+				"series": "B12_ArcheryRange",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 26092.0,
+				"type": "MIL-02",
+				"web": "/assets/city/architecture-v6/web/MIL-02-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.56888246536255,
+						4.53000020980835,
+						6.30000019073486
+					],
+					"min": [
+						-6.27500009536743,
+						-0.389999985694885,
+						-5.5944766998291
+					]
+				},
+				"id": "B12",
+				"level": 9.0,
+				"materials": [
+					"cloth_red",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"iron",
+					"linen",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-02-9.tscn",
+				"scale": 1.0,
+				"series": "B12_ArcheryRange",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 26812.0,
+				"type": "MIL-02",
+				"web": "/assets/city/architecture-v6/web/MIL-02-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"MIL-03": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						4.83000040054321,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.83821487426758
+					]
+				},
+				"id": "B13",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-03-10.tscn",
+				"scale": 1.0,
+				"series": "B13_Stables",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 23030.0,
+				"type": "MIL-03",
+				"web": "/assets/city/architecture-v6/web/MIL-03-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						6.48000049591064,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.83821487426758
+					]
+				},
+				"id": "B13",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-03-11.tscn",
+				"scale": 1.0,
+				"series": "B13_Stables",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 24814.0,
+				"type": "MIL-03",
+				"web": "/assets/city/architecture-v6/web/MIL-03-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.77540874481201,
+						4.83000040054321,
+						6.30000019073486
+					],
+					"min": [
+						-5.69497394561768,
+						-0.374000012874603,
+						-5.83821487426758
+					]
+				},
+				"id": "B13",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-03-6.tscn",
+				"scale": 1.0,
+				"series": "B13_Stables",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 15574.0,
+				"type": "MIL-03",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/MIL-03-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/MIL-03-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.77540874481201,
+						4.83000040054321,
+						6.30000019073486
+					],
+					"min": [
+						-5.69497394561768,
+						-0.374000012874603,
+						-5.83821487426758
+					]
+				},
+				"id": "B13",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-03-7.tscn",
+				"scale": 1.0,
+				"series": "B13_Stables",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 15622.0,
+				"type": "MIL-03",
+				"web": "/assets/city/architecture-v6/web/MIL-03-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.77540922164917,
+						4.83000040054321,
+						6.30000019073486
+					],
+					"min": [
+						-5.83499956130981,
+						-0.374000012874603,
+						-5.83821487426758
+					]
+				},
+				"id": "B13",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-03-8.tscn",
+				"scale": 1.0,
+				"series": "B13_Stables",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 18758.0,
+				"type": "MIL-03",
+				"web": "/assets/city/architecture-v6/web/MIL-03-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.77540922164917,
+						4.83000040054321,
+						6.30000019073486
+					],
+					"min": [
+						-5.83499956130981,
+						-0.389999985694885,
+						-5.83821487426758
+					]
+				},
+				"id": "B13",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"drill",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-03-9.tscn",
+				"scale": 1.0,
+				"series": "B13_Stables",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 19634.0,
+				"type": "MIL-03",
+				"web": "/assets/city/architecture-v6/web/MIL-03-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"MIL-04": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.11343812942505,
+						6.36999988555908,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.97801113128662
+					]
+				},
+				"id": "B14",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-04-10.tscn",
+				"scale": 1.0,
+				"series": "B14_Blacksmith",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 23850.0,
+				"type": "MIL-04",
+				"web": "/assets/city/architecture-v6/web/MIL-04-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.11343812942505,
+						6.96999979019165,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.97801113128662
+					]
+				},
+				"id": "B14",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-04-11.tscn",
+				"scale": 1.0,
+				"series": "B14_Blacksmith",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 23990.0,
+				"type": "MIL-04",
+				"web": "/assets/city/architecture-v6/web/MIL-04-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						6.11343812942505,
+						6.36999988555908,
+						6.30000019073486
+					],
+					"min": [
+						-5.91031980514526,
+						-0.273999929428101,
+						-5.97801113128662
+					]
+				},
+				"id": "B14",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-04-6.tscn",
+				"scale": 1.0,
+				"series": "B14_Blacksmith",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 17614.0,
+				"type": "MIL-04",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/MIL-04-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/MIL-04-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						6.11343812942505,
+						6.36999988555908,
+						6.30000019073486
+					],
+					"min": [
+						-5.91031980514526,
+						-0.273999929428101,
+						-5.97801113128662
+					]
+				},
+				"id": "B14",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-04-7.tscn",
+				"scale": 1.0,
+				"series": "B14_Blacksmith",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 17686.0,
+				"type": "MIL-04",
+				"web": "/assets/city/architecture-v6/web/MIL-04-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						6.11343812942505,
+						6.36999988555908,
+						6.30000019073486
+					],
+					"min": [
+						-5.91031980514526,
+						-0.273999929428101,
+						-5.97801113128662
+					]
+				},
+				"id": "B14",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-04-8.tscn",
+				"scale": 1.0,
+				"series": "B14_Blacksmith",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 22782.0,
+				"type": "MIL-04",
+				"web": "/assets/city/architecture-v6/web/MIL-04-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						6.11343812942505,
+						6.36999988555908,
+						6.30000019073486
+					],
+					"min": [
+						-5.91031980514526,
+						-0.389999985694885,
+						-5.97801113128662
+					]
+				},
+				"id": "B14",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"ember",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-04-9.tscn",
+				"scale": 1.0,
+				"series": "B14_Blacksmith",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 23718.0,
+				"type": "MIL-04",
+				"web": "/assets/city/architecture-v6/web/MIL-04-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"MIL-05": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						5.68000030517578,
+						6.29999971389771
+					],
+					"min": [
+						-6.14050149917603,
+						-0.389999985694885,
+						-5.91607999801636
+					]
+				},
+				"id": "B15",
+				"level": 10.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"glow",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-05-10.tscn",
+				"scale": 1.0,
+				"series": "B15_MilitaryAcademy",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 41882.0,
+				"type": "MIL-05",
+				"web": "/assets/city/architecture-v6/web/MIL-05-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						8.89999961853027,
+						6.29999971389771
+					],
+					"min": [
+						-6.14050149917603,
+						-0.389999985694885,
+						-5.91607999801636
+					]
+				},
+				"id": "B15",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"glow",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-05-11.tscn",
+				"scale": 1.0,
+				"series": "B15_MilitaryAcademy",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 49198.0,
+				"type": "MIL-05",
+				"web": "/assets/city/architecture-v6/web/MIL-05-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						6.0068507194519,
+						5.68000030517578,
+						6.29999971389771
+					],
+					"min": [
+						-6.14050149917603,
+						-0.273999929428101,
+						-5.91607999801636
+					]
+				},
+				"id": "B15",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-05-6.tscn",
+				"scale": 1.0,
+				"series": "B15_MilitaryAcademy",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 27656.0,
+				"type": "MIL-05",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/MIL-05-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/MIL-05-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						6.0068507194519,
+						5.68000030517578,
+						6.29999971389771
+					],
+					"min": [
+						-6.14050149917603,
+						-0.273999929428101,
+						-5.91607999801636
+					]
+				},
+				"id": "B15",
+				"level": 7.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-05-7.tscn",
+				"scale": 1.0,
+				"series": "B15_MilitaryAcademy",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 27792.0,
+				"type": "MIL-05",
+				"web": "/assets/city/architecture-v6/web/MIL-05-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						6.0068507194519,
+						5.68000030517578,
+						6.29999971389771
+					],
+					"min": [
+						-6.14050149917603,
+						-0.273999929428101,
+						-5.91607999801636
+					]
+				},
+				"id": "B15",
+				"level": 8.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-05-8.tscn",
+				"scale": 1.0,
+				"series": "B15_MilitaryAcademy",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 34762.0,
+				"type": "MIL-05",
+				"web": "/assets/city/architecture-v6/web/MIL-05-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						6.0068507194519,
+						5.68000030517578,
+						6.29999971389771
+					],
+					"min": [
+						-6.14050149917603,
+						-0.389999985694885,
+						-5.91607999801636
+					]
+				},
+				"id": "B15",
+				"level": 9.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"map_blue",
+					"map_green",
+					"oak",
+					"oak_light",
+					"parchment",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/MIL-05-9.tscn",
+				"scale": 1.0,
+				"series": "B15_MilitaryAcademy",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 41102.0,
+				"type": "MIL-05",
+				"web": "/assets/city/architecture-v6/web/MIL-05-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"RES-01": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.99668884277344
+					]
+				},
+				"id": "B06",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-01-10.tscn",
+				"scale": 1.0,
+				"series": "B06_LumberCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 23552.0,
+				"type": "RES-01",
+				"web": "/assets/city/architecture-v6/web/RES-01-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						7.03000020980835,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.99668884277344
+					]
+				},
+				"id": "B06",
+				"level": 11.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"oak_light",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-01-11.tscn",
+				"scale": 1.0,
+				"series": "B06_LumberCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 29534.0,
+				"type": "RES-01",
+				"web": "/assets/city/architecture-v6/web/RES-01-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.95980596542358,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.76739358901978,
+						-0.273999929428101,
+						-5.99668884277344
+					]
+				},
+				"id": "B06",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-01-6.tscn",
+				"scale": 1.0,
+				"series": "B06_LumberCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 17242.0,
+				"type": "RES-01",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/RES-01-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/RES-01-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.95980596542358,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.76739358901978,
+						-0.273999929428101,
+						-5.99668884277344
+					]
+				},
+				"id": "B06",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-01-7.tscn",
+				"scale": 1.0,
+				"series": "B06_LumberCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 17314.0,
+				"type": "RES-01",
+				"web": "/assets/city/architecture-v6/web/RES-01-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.95980596542358,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.76739358901978,
+						-0.273999929428101,
+						-5.99668884277344
+					]
+				},
+				"id": "B06",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-01-8.tscn",
+				"scale": 1.0,
+				"series": "B06_LumberCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 22250.0,
+				"type": "RES-01",
+				"web": "/assets/city/architecture-v6/web/RES-01-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.95980596542358,
+						4.63000011444092,
+						6.30000019073486
+					],
+					"min": [
+						-5.76739358901978,
+						-0.389999985694885,
+						-5.99668884277344
+					]
+				},
+				"id": "B06",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-01-9.tscn",
+				"scale": 1.0,
+				"series": "B06_LumberCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 23028.0,
+				"type": "RES-01",
+				"web": "/assets/city/architecture-v6/web/RES-01-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"RES-02": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						4.99895524978638,
+						6.30000066757202
+					],
+					"min": [
+						-6.12437009811401,
+						-0.389999985694885,
+						-5.83541917800903
+					]
+				},
+				"id": "B07",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-02-10.tscn",
+				"scale": 1.0,
+				"series": "B07_StoneQuarry",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 20714.0,
+				"type": "RES-02",
+				"web": "/assets/city/architecture-v6/web/RES-02-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						7.70000028610229,
+						6.30000066757202
+					],
+					"min": [
+						-6.12437009811401,
+						-0.389999985694885,
+						-5.83541917800903
+					]
+				},
+				"id": "B07",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-02-11.tscn",
+				"scale": 1.0,
+				"series": "B07_StoneQuarry",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 26582.0,
+				"type": "RES-02",
+				"web": "/assets/city/architecture-v6/web/RES-02-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.90994882583618,
+						4.99895477294922,
+						6.30000066757202
+					],
+					"min": [
+						-6.12437009811401,
+						-0.273999929428101,
+						-5.83541917800903
+					]
+				},
+				"id": "B07",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-02-6.tscn",
+				"scale": 1.0,
+				"series": "B07_StoneQuarry",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 14400.0,
+				"type": "RES-02",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/RES-02-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/RES-02-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.90994882583618,
+						4.99895477294922,
+						6.30000066757202
+					],
+					"min": [
+						-6.12437009811401,
+						-0.273999929428101,
+						-5.83541917800903
+					]
+				},
+				"id": "B07",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-02-7.tscn",
+				"scale": 1.0,
+				"series": "B07_StoneQuarry",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 14472.0,
+				"type": "RES-02",
+				"web": "/assets/city/architecture-v6/web/RES-02-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.90994882583618,
+						4.99895477294922,
+						6.30000066757202
+					],
+					"min": [
+						-6.12437009811401,
+						-0.273999929428101,
+						-5.83541917800903
+					]
+				},
+				"id": "B07",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-02-8.tscn",
+				"scale": 1.0,
+				"series": "B07_StoneQuarry",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 19408.0,
+				"type": "RES-02",
+				"web": "/assets/city/architecture-v6/web/RES-02-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.90994882583618,
+						4.99895524978638,
+						6.30000066757202
+					],
+					"min": [
+						-6.12437009811401,
+						-0.389999985694885,
+						-5.83541917800903
+					]
+				},
+				"id": "B07",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-02-9.tscn",
+				"scale": 1.0,
+				"series": "B07_StoneQuarry",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 20332.0,
+				"type": "RES-02",
+				"web": "/assets/city/architecture-v6/web/RES-02-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"RES-03": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.12223529815674,
+						7.82177019119263,
+						6.30000019073486
+					],
+					"min": [
+						-6.10192203521729,
+						-0.389999985694885,
+						-5.98514461517334
+					]
+				},
+				"id": "B08",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-03-10.tscn",
+				"scale": 1.0,
+				"series": "B08_IronMine",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 21252.0,
+				"type": "RES-03",
+				"web": "/assets/city/architecture-v6/web/RES-03-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.12223529815674,
+						8.19999980926514,
+						6.30000019073486
+					],
+					"min": [
+						-6.10192203521729,
+						-0.389999985694885,
+						-5.98514461517334
+					]
+				},
+				"id": "B08",
+				"level": 11.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-03-11.tscn",
+				"scale": 1.0,
+				"series": "B08_IronMine",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 23556.0,
+				"type": "RES-03",
+				"web": "/assets/city/architecture-v6/web/RES-03-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						6.12223529815674,
+						7.82176971435547,
+						6.30000019073486
+					],
+					"min": [
+						-6.10192203521729,
+						-0.273999929428101,
+						-5.98514461517334
+					]
+				},
+				"id": "B08",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"soot",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-03-6.tscn",
+				"scale": 1.0,
+				"series": "B08_IronMine",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 7634.0,
+				"type": "RES-03",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/RES-03-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/RES-03-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						6.12223529815674,
+						7.82176971435547,
+						6.30000019073486
+					],
+					"min": [
+						-6.10192203521729,
+						-0.273999929428101,
+						-5.98514461517334
+					]
+				},
+				"id": "B08",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-03-7.tscn",
+				"scale": 1.0,
+				"series": "B08_IronMine",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 7658.0,
+				"type": "RES-03",
+				"web": "/assets/city/architecture-v6/web/RES-03-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						6.12223529815674,
+						7.82176971435547,
+						6.30000019073486
+					],
+					"min": [
+						-6.10192203521729,
+						-0.273999929428101,
+						-5.98514461517334
+					]
+				},
+				"id": "B08",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-03-8.tscn",
+				"scale": 1.0,
+				"series": "B08_IronMine",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 14820.0,
+				"type": "RES-03",
+				"web": "/assets/city/architecture-v6/web/RES-03-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						6.12223529815674,
+						7.82177019119263,
+						6.30000019073486
+					],
+					"min": [
+						-6.10192203521729,
+						-0.389999985694885,
+						-5.98514461517334
+					]
+				},
+				"id": "B08",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"soot",
+					"stone",
+					"stone_light",
+					"stone_rough"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-03-9.tscn",
+				"scale": 1.0,
+				"series": "B08_IronMine",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 21036.0,
+				"type": "RES-03",
+				"web": "/assets/city/architecture-v6/web/RES-03-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"RES-04": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						4.52999973297119,
+						6.30000066757202
+					],
+					"min": [
+						-6.03500032424927,
+						-0.273999929428101,
+						-5.92155694961548
+					]
+				},
+				"id": "B09",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"leaves",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/RES-04-10.tscn",
+				"scale": 1.0,
+				"series": "B09_Farm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 20322.0,
+				"type": "RES-04",
+				"web": "/assets/city/architecture-v6/web/RES-04-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						5.18000030517578,
+						6.30000066757202
+					],
+					"min": [
+						-6.03500032424927,
+						-0.273999929428101,
+						-5.92155694961548
+					]
+				},
+				"id": "B09",
+				"level": 11.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"leaves",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/RES-04-11.tscn",
+				"scale": 1.0,
+				"series": "B09_Farm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 21802.0,
+				"type": "RES-04",
+				"web": "/assets/city/architecture-v6/web/RES-04-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.81657409667969,
+						4.52999973297119,
+						6.30000066757202
+					],
+					"min": [
+						-5.8083438873291,
+						-0.273999929428101,
+						-5.92155694961548
+					]
+				},
+				"id": "B09",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"leaves",
+					"oak",
+					"path",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/RES-04-6.tscn",
+				"scale": 1.0,
+				"series": "B09_Farm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 12970.0,
+				"type": "RES-04",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/RES-04-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/RES-04-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.81657409667969,
+						4.52999973297119,
+						6.30000066757202
+					],
+					"min": [
+						-5.8083438873291,
+						-0.273999929428101,
+						-5.92155694961548
+					]
+				},
+				"id": "B09",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"leaves",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/RES-04-7.tscn",
+				"scale": 1.0,
+				"series": "B09_Farm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 13018.0,
+				"type": "RES-04",
+				"web": "/assets/city/architecture-v6/web/RES-04-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.81657409667969,
+						4.52999973297119,
+						6.30000066757202
+					],
+					"min": [
+						-5.8083438873291,
+						-0.273999929428101,
+						-5.92155694961548
+					]
+				},
+				"id": "B09",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"leaves",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/RES-04-8.tscn",
+				"scale": 1.0,
+				"series": "B09_Farm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 18226.0,
+				"type": "RES-04",
+				"web": "/assets/city/architecture-v6/web/RES-04-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.81657409667969,
+						4.52999973297119,
+						6.30000066757202
+					],
+					"min": [
+						-5.8083438873291,
+						-0.273999929428101,
+						-5.92155694961548
+					]
+				},
+				"id": "B09",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"hay",
+					"iron",
+					"leaves",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": true,
+				"path": "res://assets/city/architecture-v6/levels/RES-04-9.tscn",
+				"scale": 1.0,
+				"series": "B09_Farm",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 18942.0,
+				"type": "RES-04",
+				"web": "/assets/city/architecture-v6/web/RES-04-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"RES-05": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						4.43000030517578,
+						6.30000066757202
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.97076082229614
+					]
+				},
+				"id": "B10",
+				"level": 10.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-05-10.tscn",
+				"scale": 1.0,
+				"series": "B10_HuntingCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 23798.0,
+				"type": "RES-05",
+				"web": "/assets/city/architecture-v6/web/RES-05-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						7.5,
+						6.30000066757202
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.97076082229614
+					]
+				},
+				"id": "B10",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"canvas",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-05-11.tscn",
+				"scale": 1.0,
+				"series": "B10_HuntingCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 29114.0,
+				"type": "RES-05",
+				"web": "/assets/city/architecture-v6/web/RES-05-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.69150400161743,
+						4.43000030517578,
+						6.30000066757202
+					],
+					"min": [
+						-5.70540761947632,
+						-0.273999929428101,
+						-5.97076082229614
+					]
+				},
+				"id": "B10",
+				"level": 6.0,
+				"materials": [
+					"canvas",
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-05-6.tscn",
+				"scale": 1.0,
+				"series": "B10_HuntingCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 15122.0,
+				"type": "RES-05",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/RES-05-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/RES-05-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.69150400161743,
+						4.43000030517578,
+						6.30000066757202
+					],
+					"min": [
+						-5.70540761947632,
+						-0.273999929428101,
+						-5.97076082229614
+					]
+				},
+				"id": "B10",
+				"level": 7.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-05-7.tscn",
+				"scale": 1.0,
+				"series": "B10_HuntingCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 15194.0,
+				"type": "RES-05",
+				"web": "/assets/city/architecture-v6/web/RES-05-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.69150400161743,
+						4.43000030517578,
+						6.30000066757202
+					],
+					"min": [
+						-5.70540761947632,
+						-0.273999929428101,
+						-5.97076082229614
+					]
+				},
+				"id": "B10",
+				"level": 8.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-05-8.tscn",
+				"scale": 1.0,
+				"series": "B10_HuntingCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 20322.0,
+				"type": "RES-05",
+				"web": "/assets/city/architecture-v6/web/RES-05-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.69150400161743,
+						4.43000030517578,
+						6.30000066757202
+					],
+					"min": [
+						-5.70540761947632,
+						-0.389999985694885,
+						-5.97076082229614
+					]
+				},
+				"id": "B10",
+				"level": 9.0,
+				"materials": [
+					"canvas",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/RES-05-9.tscn",
+				"scale": 1.0,
+				"series": "B10_HuntingCamp",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 21090.0,
+				"type": "RES-05",
+				"web": "/assets/city/architecture-v6/web/RES-05-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"SUP-01": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						4.82999992370605,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.57608509063721
+					]
+				},
+				"id": "B16",
+				"level": 10.0,
+				"materials": [
+					"canvas",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"linen",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-01-10.tscn",
+				"scale": 1.0,
+				"series": "B16_Infirmary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 32280.0,
+				"type": "SUP-01",
+				"web": "/assets/city/architecture-v6/web/SUP-01-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						5.68000030517578,
+						6.30000019073486
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.57608509063721
+					]
+				},
+				"id": "B16",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"canvas",
+					"cloth_blue",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"linen",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-01-11.tscn",
+				"scale": 1.0,
+				"series": "B16_Infirmary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 33912.0,
+				"type": "SUP-01",
+				"web": "/assets/city/architecture-v6/web/SUP-01-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.77282428741455,
+						4.82999992370605,
+						6.30000019073486
+					],
+					"min": [
+						-5.92933750152588,
+						-0.273999929428101,
+						-5.57608509063721
+					]
+				},
+				"id": "B16",
+				"level": 6.0,
+				"materials": [
+					"canvas",
+					"clay_roof",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"linen",
+					"oak",
+					"path",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-01-6.tscn",
+				"scale": 1.0,
+				"series": "B16_Infirmary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 21876.0,
+				"type": "SUP-01",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/SUP-01-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/SUP-01-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.77282428741455,
+						4.82999992370605,
+						6.30000019073486
+					],
+					"min": [
+						-5.92933750152588,
+						-0.273999929428101,
+						-5.57608509063721
+					]
+				},
+				"id": "B16",
+				"level": 7.0,
+				"materials": [
+					"canvas",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"linen",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-01-7.tscn",
+				"scale": 1.0,
+				"series": "B16_Infirmary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 21972.0,
+				"type": "SUP-01",
+				"web": "/assets/city/architecture-v6/web/SUP-01-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.77282428741455,
+						4.82999992370605,
+						6.30000019073486
+					],
+					"min": [
+						-5.92933750152588,
+						-0.273999929428101,
+						-5.57608509063721
+					]
+				},
+				"id": "B16",
+				"level": 8.0,
+				"materials": [
+					"canvas",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"linen",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-01-8.tscn",
+				"scale": 1.0,
+				"series": "B16_Infirmary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 27292.0,
+				"type": "SUP-01",
+				"web": "/assets/city/architecture-v6/web/SUP-01-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.77282428741455,
+						4.83000040054321,
+						6.30000019073486
+					],
+					"min": [
+						-5.92933750152588,
+						-0.389999985694885,
+						-5.57608509063721
+					]
+				},
+				"id": "B16",
+				"level": 9.0,
+				"materials": [
+					"canvas",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"herb",
+					"iron",
+					"linen",
+					"oak",
+					"path",
+					"slate_roof",
+					"soil",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-01-9.tscn",
+				"scale": 1.0,
+				"series": "B16_Infirmary",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 31632.0,
+				"type": "SUP-01",
+				"web": "/assets/city/architecture-v6/web/SUP-01-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"SUP-02": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						5.38256454467773,
+						6.29999971389771
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-6.02764463424683
+					]
+				},
+				"id": "B17",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"shingle",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-02-10.tscn",
+				"scale": 1.0,
+				"series": "B17_SiegeWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 27380.0,
+				"type": "SUP-02",
+				"web": "/assets/city/architecture-v6/web/SUP-02-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						7.68000078201294,
+						6.29999971389771
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-6.02764463424683
+					]
+				},
+				"id": "B17",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_blue",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"plank",
+					"rope",
+					"shingle",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-02-11.tscn",
+				"scale": 1.0,
+				"series": "B17_SiegeWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 29084.0,
+				"type": "SUP-02",
+				"web": "/assets/city/architecture-v6/web/SUP-02-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.72385501861572,
+						5.38256454467773,
+						6.29999971389771
+					],
+					"min": [
+						-5.71123600006104,
+						-0.273999929428101,
+						-6.02764463424683
+					]
+				},
+				"id": "B17",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"rope",
+					"shingle",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-02-6.tscn",
+				"scale": 1.0,
+				"series": "B17_SiegeWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 20732.0,
+				"type": "SUP-02",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/SUP-02-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/SUP-02-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.72385501861572,
+						5.38256454467773,
+						6.29999971389771
+					],
+					"min": [
+						-5.71123600006104,
+						-0.273999929428101,
+						-6.02764463424683
+					]
+				},
+				"id": "B17",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"rope",
+					"shingle",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-02-7.tscn",
+				"scale": 1.0,
+				"series": "B17_SiegeWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 20804.0,
+				"type": "SUP-02",
+				"web": "/assets/city/architecture-v6/web/SUP-02-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.72385501861572,
+						5.38256454467773,
+						6.29999971389771
+					],
+					"min": [
+						-5.71123600006104,
+						-0.273999929428101,
+						-6.02764463424683
+					]
+				},
+				"id": "B17",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"rope",
+					"shingle",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-02-8.tscn",
+				"scale": 1.0,
+				"series": "B17_SiegeWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 25900.0,
+				"type": "SUP-02",
+				"web": "/assets/city/architecture-v6/web/SUP-02-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.72385501861572,
+						5.38256454467773,
+						6.29999971389771
+					],
+					"min": [
+						-5.71123600006104,
+						-0.389999985694885,
+						-6.02764463424683
+					]
+				},
+				"id": "B17",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"log",
+					"oak",
+					"path",
+					"rope",
+					"shingle",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-02-9.tscn",
+				"scale": 1.0,
+				"series": "B17_SiegeWorkshop",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 26812.0,
+				"type": "SUP-02",
+				"web": "/assets/city/architecture-v6/web/SUP-02-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"SUP-03": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.08500003814697,
+						7.82803869247437,
+						6.30000066757202
+					],
+					"min": [
+						-6.08500003814697,
+						-0.389999985694885,
+						-5.94606637954712
+					]
+				},
+				"id": "B18",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-03-10.tscn",
+				"scale": 1.0,
+				"series": "B18_WallsandGate",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 33088.0,
+				"type": "SUP-03",
+				"web": "/assets/city/architecture-v6/web/SUP-03-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.08500003814697,
+						10.1000003814697,
+						6.30000066757202
+					],
+					"min": [
+						-6.08500003814697,
+						-0.389999985694885,
+						-5.94606637954712
+					]
+				},
+				"id": "B18",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-03-11.tscn",
+				"scale": 1.0,
+				"series": "B18_WallsandGate",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 38964.0,
+				"type": "SUP-03",
+				"web": "/assets/city/architecture-v6/web/SUP-03-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						6.05999994277954,
+						6.56999969482422,
+						6.30000066757202
+					],
+					"min": [
+						-6.05999994277954,
+						-0.273999929428101,
+						-5.94606637954712
+					]
+				},
+				"id": "B18",
+				"level": 6.0,
+				"materials": [
+					"earth",
+					"glass",
+					"path",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-03-6.tscn",
+				"scale": 1.0,
+				"series": "B18_WallsandGate",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 25452.0,
+				"type": "SUP-03",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/SUP-03-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/SUP-03-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						6.05999994277954,
+						7.82803821563721,
+						6.30000066757202
+					],
+					"min": [
+						-6.05999994277954,
+						-0.273999929428101,
+						-5.94606637954712
+					]
+				},
+				"id": "B18",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-03-7.tscn",
+				"scale": 1.0,
+				"series": "B18_WallsandGate",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 29020.0,
+				"type": "SUP-03",
+				"web": "/assets/city/architecture-v6/web/SUP-03-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						6.05999994277954,
+						7.82803821563721,
+						6.30000066757202
+					],
+					"min": [
+						-6.05999994277954,
+						-0.273999929428101,
+						-5.94606637954712
+					]
+				},
+				"id": "B18",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-03-8.tscn",
+				"scale": 1.0,
+				"series": "B18_WallsandGate",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 32092.0,
+				"type": "SUP-03",
+				"web": "/assets/city/architecture-v6/web/SUP-03-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						6.06999969482422,
+						7.82803869247437,
+						6.30000066757202
+					],
+					"min": [
+						-6.06999969482422,
+						-0.389999985694885,
+						-5.94606637954712
+					]
+				},
+				"id": "B18",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-03-9.tscn",
+				"scale": 1.0,
+				"series": "B18_WallsandGate",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 32740.0,
+				"type": "SUP-03",
+				"web": "/assets/city/architecture-v6/web/SUP-03-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"SUP-04": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						8.93101406097412,
+						6.30000066757202
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.9817681312561
+					]
+				},
+				"id": "B19",
+				"level": 10.0,
+				"materials": [
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-04-10.tscn",
+				"scale": 1.0,
+				"series": "B19_Watchtower",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 34924.0,
+				"type": "SUP-04",
+				"web": "/assets/city/architecture-v6/web/SUP-04-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						10.6800003051758,
+						6.30000066757202
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.9817681312561
+					]
+				},
+				"id": "B19",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"cloth_red",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-04-11.tscn",
+				"scale": 1.0,
+				"series": "B19_Watchtower",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 36736.0,
+				"type": "SUP-04",
+				"web": "/assets/city/architecture-v6/web/SUP-04-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.84035062789917,
+						8.93101406097412,
+						6.30000066757202
+					],
+					"min": [
+						-6.00343656539917,
+						-0.273999929428101,
+						-5.9817681312561
+					]
+				},
+				"id": "B19",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-04-6.tscn",
+				"scale": 1.0,
+				"series": "B19_Watchtower",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 24786.0,
+				"type": "SUP-04",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/SUP-04-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/SUP-04-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.84035062789917,
+						8.93101406097412,
+						6.30000066757202
+					],
+					"min": [
+						-6.00343656539917,
+						-0.273999929428101,
+						-5.9817681312561
+					]
+				},
+				"id": "B19",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-04-7.tscn",
+				"scale": 1.0,
+				"series": "B19_Watchtower",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 24858.0,
+				"type": "SUP-04",
+				"web": "/assets/city/architecture-v6/web/SUP-04-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.84035062789917,
+						8.93101406097412,
+						6.30000066757202
+					],
+					"min": [
+						-6.00343656539917,
+						-0.273999929428101,
+						-5.9817681312561
+					]
+				},
+				"id": "B19",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-04-8.tscn",
+				"scale": 1.0,
+				"series": "B19_Watchtower",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 32068.0,
+				"type": "SUP-04",
+				"web": "/assets/city/architecture-v6/web/SUP-04-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.84035062789917,
+						8.93101406097412,
+						6.30000066757202
+					],
+					"min": [
+						-6.00343656539917,
+						-0.389999985694885,
+						-5.9817681312561
+					]
+				},
+				"id": "B19",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"slate_roof",
+					"stone",
+					"stone_light"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-04-9.tscn",
+				"scale": 1.0,
+				"series": "B19_Watchtower",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 34648.0,
+				"type": "SUP-04",
+				"web": "/assets/city/architecture-v6/web/SUP-04-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		},
+		"SUP-05": {
+			"10": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						4.43000030517578,
+						6.30000066757202
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.87123918533325
+					]
+				},
+				"id": "B20",
+				"level": 10.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-05-10.tscn",
+				"scale": 1.0,
+				"series": "B20_Well",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Heavy masonry, metal joints and complete working infrastructure",
+				"triangles": 18634.0,
+				"type": "SUP-05",
+				"web": "/assets/city/architecture-v6/web/SUP-05-10.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"11": {
+				"bounds": {
+					"max": [
+						6.03500032424927,
+						5.48000001907349,
+						6.30000066757202
+					],
+					"min": [
+						-6.03500032424927,
+						-0.389999985694885,
+						-5.87123918533325
+					]
+				},
+				"id": "B20",
+				"level": 11.0,
+				"materials": [
+					"brass",
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-05-11.tscn",
+				"scale": 1.0,
+				"series": "B20_Well",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Finished silhouette and final fittings; no unfinished XII reserve",
+				"triangles": 19370.0,
+				"type": "SUP-05",
+				"web": "/assets/city/architecture-v6/web/SUP-05-11.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"6": {
+				"bounds": {
+					"max": [
+						5.9762487411499,
+						4.27999973297119,
+						6.30000066757202
+					],
+					"min": [
+						-5.67802715301514,
+						-0.273999929428101,
+						-5.87123918533325
+					]
+				},
+				"id": "B20",
+				"level": 6.0,
+				"materials": [
+					"clay_roof",
+					"dark_oak",
+					"earth",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-05-6.tscn",
+				"scale": 1.0,
+				"series": "B20_Well",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Stone load-bearing buildings; natural fields and functional wood retained",
+				"triangles": 5440.0,
+				"type": "SUP-05",
+				"upgrade_from_path": "res://assets/city/architecture-v6/transitions/SUP-05-5-to-6-from.tscn",
+				"web": "/assets/city/architecture-v6/web/SUP-05-6.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"7": {
+				"bounds": {
+					"max": [
+						5.9762487411499,
+						4.27999973297119,
+						6.30000066757202
+					],
+					"min": [
+						-5.67802715301514,
+						-0.273999929428101,
+						-5.87123918533325
+					]
+				},
+				"id": "B20",
+				"level": 7.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-05-7.tscn",
+				"scale": 1.0,
+				"series": "B20_Well",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Slate roofing, iron ties and metal joints",
+				"triangles": 5464.0,
+				"type": "SUP-05",
+				"web": "/assets/city/architecture-v6/web/SUP-05-7.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"8": {
+				"bounds": {
+					"max": [
+						5.9762487411499,
+						4.43000030517578,
+						6.30000066757202
+					],
+					"min": [
+						-5.67802715301514,
+						-0.273999929428101,
+						-5.87123918533325
+					]
+				},
+				"id": "B20",
+				"level": 8.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-05-8.tscn",
+				"scale": 1.0,
+				"series": "B20_Well",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Functional annexes and arcaded sections",
+				"triangles": 12458.0,
+				"type": "SUP-05",
+				"web": "/assets/city/architecture-v6/web/SUP-05-8.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			},
+			"9": {
+				"bounds": {
+					"max": [
+						5.9762487411499,
+						4.43000030517578,
+						6.30000066757202
+					],
+					"min": [
+						-5.67802715301514,
+						-0.389999985694885,
+						-5.87123918533325
+					]
+				},
+				"id": "B20",
+				"level": 9.0,
+				"materials": [
+					"dark_oak",
+					"earth",
+					"glass",
+					"iron",
+					"oak",
+					"path",
+					"rope",
+					"slate_roof",
+					"stone",
+					"stone_light",
+					"water"
+				],
+				"natural_fields": false,
+				"path": "res://assets/city/architecture-v6/levels/SUP-05-9.tscn",
+				"scale": 1.0,
+				"series": "B20_Well",
+				"site": {
+					"center": [
+						0.0,
+						0.0,
+						0.0
+					],
+					"radius": 6.1
+				},
+				"stage": "Strengthened supports and organised yard logistics",
+				"triangles": 13290.0,
+				"type": "SUP-05",
+				"web": "/assets/city/architecture-v6/web/SUP-05-9.glb",
+				"worker": [
+					0.0,
+					0.0,
+					5.9
+				]
+			}
+		}
+	},
+	"source": "13_BUILDING_PASSPORTS_RU.md",
+	"states": 162.0,
+	"units": {
+		"SIEGE-RAM-01": {
+			"bounds": {
+				"max": [
+					1.05499994754791,
+					2.98000001907349,
+					1.95000016689301
+				],
+				"min": [
+					-1.05499994754791,
+					-0.0192190296947956,
+					-1.60000002384186
+				]
+			},
+			"forward": "+Z",
+			"id": "SIEGE-RAM-01",
+			"kind": "unit",
+			"materials": [
+				"dark_oak",
+				"iron",
+				"log",
+				"oak",
+				"shingle"
+			],
+			"name": "Battering ram",
+			"path": "res://assets/city/architecture-v6/units/SIEGE-RAM-01.tscn",
+			"scale": 1.0,
+			"source": "recipes.ram_display",
+			"static": true,
+			"triangles": 1880.0,
+			"web": "/assets/city/architecture-v6/web/SIEGE-RAM-01.glb"
+		}
+	},
+	"version": "DRENOVAR-V6-C1.0-ART1",
+	"web_mapping": "Dominant-face planar UV equivalent of native triplanar on planar architecture; sloped-face seams require visual review",
+	"web_textures": "Full source resolution; PBR textures shared externally by GLBs"
+}

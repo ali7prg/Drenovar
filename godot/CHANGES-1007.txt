@@ -1,0 +1,12 @@
+Build 1007 — building dialogs and responsive feedback
+
+- Open the quote dialog immediately, with a loading state and retry on failure.
+- Warm the shared building catalogue after authoritative state arrives.
+- Show costs in resource cards, readable durations and a fixed primary action.
+- Show speedups in a compact grid, with one overflow warning and confirmation.
+- Disable pending action buttons so repeated taps cannot enqueue duplicate orders.
+- Render queues from command responses without an extra forced state request.
+
+Validation: Godot 4.6.3 script import; delayed-transport panel regression;
+API pool regression (32 checks). Test IPA uses the unchanged 4.6.3 arm64 engine
+capsule. Physical iPhone verification is still required.

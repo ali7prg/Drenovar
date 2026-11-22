@@ -116,6 +116,10 @@ func run_entry() -> void:
 	root.size = Vector2i(1366, 630)
 	var t_start := Time.get_ticks_usec()
 	var game = load("res://main.tscn").instantiate()
+	# 1022: offline, fixture-fed (forest local-realm states predate V6): an unreachable loopback
+	# endpoint, so accept() takes them and nothing reaches a real server (1021 qa_city_works pattern).
+	game.endpoint = "http://127.0.0.1:9"
+	game.loopback = true
 	root.add_child(game)
 	var first_frame_us := Time.get_ticks_usec() - t_start
 	var intervals := PackedFloat32Array()
@@ -226,6 +230,10 @@ func run_segments() -> void:
 	if OS.get_cmdline_user_args().has("--no-msaa"):
 		root.msaa_3d = Viewport.MSAA_DISABLED       # look diagnosis (alpha-tested edge artefacts)
 	var game = load("res://main.tscn").instantiate()
+	# 1022: offline, fixture-fed (forest local-realm states predate V6): an unreachable loopback
+	# endpoint, so accept() takes them and nothing reaches a real server (1021 qa_city_works pattern).
+	game.endpoint = "http://127.0.0.1:9"
+	game.loopback = true
 	root.add_child(game)
 	while game.get("scene_loading") or not is_instance_valid(game.get("stage")):
 		await process_frame
@@ -260,6 +268,7 @@ func run_segments() -> void:
 		var state := fixture(spec.fixture)
 		var clock := float(state.get("adventure", {}).get("serverTime", 0.0))
 		forest.client.manual_clock_ms = clock
+		game.showing_cached_state = true  # 1022: fixtures may be older than the state on screen
 		game.accept(state)
 		game.battle_results.pending.clear()
 		game.result_notice.hide()
@@ -288,6 +297,7 @@ func run_segments() -> void:
 			for f in 20:
 				await process_frame
 		if spec.has("live"):
+			game.showing_cached_state = true  # 1022: fixtures may be older than the state on screen
 			game.accept(fixture(spec.live))
 			game.battle_results.pending.clear()
 			game.result_notice.hide()
@@ -414,6 +424,10 @@ func tint_kinds(world: Node, clear := false) -> void:
 func run() -> void:
 	root.size = Vector2i(1366, 630)
 	var game = load("res://main.tscn").instantiate()
+	# 1022: offline, fixture-fed (forest local-realm states predate V6): an unreachable loopback
+	# endpoint, so accept() takes them and nothing reaches a real server (1021 qa_city_works pattern).
+	game.endpoint = "http://127.0.0.1:9"
+	game.loopback = true
 	root.add_child(game)
 	var waited := 0
 	while game.get("scene_loading") or not is_instance_valid(game.get("stage")):

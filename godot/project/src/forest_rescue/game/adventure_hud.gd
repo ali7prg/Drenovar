@@ -669,20 +669,31 @@ func layout() -> void:
 	var buttons_width := 76.0 + 72.0 + 108.0 + 16.0
 	var strip_min := 36.0 + 6.0 + 46.0 * 5.0 + 4.0 * 13.0 + 24.0
 	compact = available < 200.0 + 16.0 + strip_min + 84.0 + buttons_width
+	# 1022: the 1021 navigation starts further left (874 px of 1366); a compact row narrows the task
+	# card and the reward cells so the reward strip and «За спасение:» stay on screen.
+	var cell_width := 40.0 if compact else 46.0
+	var card_width := 184.0 if compact else 200.0
+	strip_min = 30.0 + 6.0 + cell_width * 5.0 + 4.0 * 13.0 + 24.0 if compact else strip_min
 	# «За спасение:» stays visible: inline beside the chest when there is room (art/07),
 	# otherwise stacked under a smaller chest.
 	reward_caption.visible = not reward_caption.text.is_empty()
 	strip_head.vertical = compact
 	reward_caption.add_theme_font_size_override("font_size", 11 if compact else 13)
 	strip_chest.custom_minimum_size = Vector2(30, 30) if compact else Vector2(36, 40)
-	task_card.custom_minimum_size.x = 200.0
+	task_card.custom_minimum_size.x = card_width
 	for key in reward_cells:
-		reward_cells[key].custom_minimum_size.x = 46.0
-	route_button.custom_minimum_size.x = 76.0
-	squad_button.custom_minimum_size.x = 72.0
-	continue_button.custom_minimum_size.x = 108.0
+		reward_cells[key].custom_minimum_size.x = cell_width
+	route_button.custom_minimum_size.x = 70.0 if compact else 76.0
+	squad_button.custom_minimum_size.x = 66.0 if compact else 72.0
+	continue_button.custom_minimum_size.x = 100.0 if compact else 108.0
+	task_dots.custom_minimum_size.x = 72.0 if compact else 96.0
+	bar.add_theme_constant_override("separation", 6 if compact else 8)
+	if reward_strip.get_child_count() > 0:
+		reward_strip.get_child(0).add_theme_constant_override("separation", 3 if compact else 6)
+	for key in reward_amounts:
+		reward_amounts[key].add_theme_font_size_override("font_size", 12 if compact else 14)
 	reward_strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	reward_strip.visible = available >= 200.0 + 16.0 + strip_min + buttons_width
+	reward_strip.visible = available >= card_width + 16.0 + strip_min + buttons_width
 	bar.position = Vector2(52, view.y - 84 - 8)
 	bar.size = Vector2(maxf(available, 300.0), 84)
 	layout_hint()

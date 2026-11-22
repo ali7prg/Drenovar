@@ -59,6 +59,7 @@ func fresh(state_name: String, live := false) -> void:
 	# Freeze presentation time at the recorded server time: llvmpipe needs seconds per frame,
 	# and a still must show the recorded moment (mid-battle, mid-walk), not a later one.
 	forest.client.manual_clock_ms = float(state.get("adventure", {}).get("serverTime", -1.0))
+	game.showing_cached_state = true  # 1022: fixtures may be older than the state on screen
 	game.accept(state)
 	# Recorded fixtures carry earlier battle reports: keep DRENOVAR's own result popup for the
 	# battle shots only (it is the separate ordinary-loot line), not over unrelated scenes.
@@ -99,6 +100,10 @@ func run() -> void:
 	DirAccess.make_dir_recursive_absolute(out)
 	root.size = Vector2i(1366, 630)
 	game = load("res://main.tscn").instantiate()
+	# 1022: offline, fixture-fed (forest local-realm states predate V6): an unreachable loopback
+	# endpoint, so accept() takes them and nothing reaches a real server (1021 qa_city_works pattern).
+	game.endpoint = "http://127.0.0.1:9"
+	game.loopback = true
 	root.add_child(game)
 	while game.scene_loading or not is_instance_valid(game.stage):
 		await process_frame
@@ -170,6 +175,7 @@ func run() -> void:
 		look(forest.target_position("lf_site_01:cage"), 24.0)
 		await create_timer(0.4).timeout
 		forest.client.manual_clock_ms = -1.0
+		game.showing_cached_state = true  # 1022: fixtures may be older than the state on screen
 		game.accept(fixture("site01_cage_open"))
 		await shoot("cage_unlock_key", 1.5)
 		await shoot("cage_open_exit", 2.6)

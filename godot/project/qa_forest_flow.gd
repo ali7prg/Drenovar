@@ -65,6 +65,9 @@ func frames(count: int) -> void:
 		await process_frame
 
 func reset_actors() -> void:
+	# 1022: the next fixture may be older than the one on screen; 1021's accept() drops an older
+	# answer of the same player unless the state on screen is only a cached copy.
+	game.showing_cached_state = true
 	forest.actors.on_stage_changed()
 	forest.actors.first_state = true
 	forest.client.adv = {}
@@ -76,6 +79,10 @@ func _initialize() -> void:
 func run() -> void:
 	root.size = Vector2i(1366, 630)
 	game = load("res://main.tscn").instantiate()
+	# 1022: offline, fixture-fed (forest local-realm states predate V6): an unreachable loopback
+	# endpoint, so accept() takes them and nothing reaches a real server (1021 qa_city_works pattern).
+	game.endpoint = "http://127.0.0.1:9"
+	game.loopback = true
 	root.add_child(game)
 	while game.scene_loading or not is_instance_valid(game.stage):
 		await process_frame
@@ -114,7 +121,10 @@ func run() -> void:
 	forest.hud.locked_dismissed = false
 	forest.locked_shown_for_excursion = false
 	await frames(2)
-	await create_timer(0.35).timeout
+	# the dwell is 200 ms of real time; 1021 frames are fast enough that 0.35 s of fixed-fps frames is less
+	var dwell_until := Time.get_ticks_msec() + 350
+	while Time.get_ticks_msec() < dwell_until:
+		await process_frame
 	await frames(2)
 	check(forest.hud.locked_card.visible, "dwell over forest shows locked card")
 	check(forest.hud.locked_title.text == content.text("forest.locked.title"), "locked title from ui.ru.json")
@@ -296,6 +306,7 @@ func run() -> void:
 		forest.mech.on_progress(item[1], false)
 		check(forest.mech.feedback.text == content.text("mechanism.wrong"), "wrong input feedback " + item[2])
 		forest.mech.close()
+	game.showing_cached_state = true
 	game.accept(fixture("site03_winch_solved"))
 	var winch_poi: Dictionary = forest.client.poi("lf_site_03")
 	check(String(winch_poi.get("variation", "")) == "winch_sequence", "winch fixture")

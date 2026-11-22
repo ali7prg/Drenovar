@@ -1,0 +1,288 @@
+diff --git a/DRENOVAR-Server-v92/gameplay37/server/world62.mjs b/DRENOVAR-Server-v92/gameplay37/server/world62.mjs
+index 10ff3dc..be41ef3 100644
+--- a/DRENOVAR-Server-v92/gameplay37/server/world62.mjs
++++ b/DRENOVAR-Server-v92/gameplay37/server/world62.mjs
+@@ -36,6 +36,45 @@ export const velkorSites=[1,2,3].map((level,i)=>{
+  return {id:'velkor-'+level,position:from,patrol:to?[from,to]:null,level,spec:creatureSpec('velkor',level)};
+ });
+ 
++// creatures-world-v1: Камнеклык on the hills and Горный Драгор in the highlands join the shared
++// map next to the unchanged velkor-1..3. Sites are deterministic (same ids and positions on every
++// server), on dry land, away from settlement slots and other creatures, on ground flat enough for
++// the creature's body; the battle, rewards and respawn rules are the Velkor ones with the species'
++// own catalog spec. Levels 1..3 each; ids kamneklyk-<level>, dragor-<level>.
++const flatness=(x,z,r)=>{const h0=height(x,z);let worst=0;for(let a=0;a<8;a++){const q=height(x+Math.cos(a*Math.PI/4)*r,z+Math.sin(a*Math.PI/4)*r);worst=Math.max(worst,Math.abs(q-h0));}return worst;};
++function placeCreatures(species,band,radius,slope,taken){
++ const candidates=[];
++ for(let x=-130;x<=130;x+=2.5)for(let z=-100;z<=100;z+=2.5){
++  const h=height(x,z);
++  if(h<band[0]||h>band[1])continue;
++  if(sites.some(s=>Math.hypot(x-s.x,z-s.z)<16))continue;
++  if(taken.some(t=>Math.hypot(x-t.x,z-t.z)<22))continue;
++  if(flatness(x,z,radius)>radius*slope)continue;
++  const near=Math.min(...sites.map(s=>Math.hypot(x-s.x,z-s.z)));
++  candidates.push({x,z,score:h*0.05-near*0.01-flatness(x,z,radius)});
++ }
++ candidates.sort((a,b)=>b.score-a.score||a.x-b.x||a.z-b.z);
++ const chosen=[];
++ for(const c of candidates){
++  if(chosen.length===3)break;
++  if(chosen.some(o=>Math.hypot(c.x-o.x,c.z-o.z)<28))continue;
++  chosen.push(c);
++ }
++ return chosen.map((from,i)=>{
++  const level=i+1;
++  const to=[0,1,2,3,4,5,6,7].map(k=>({x:from.x+Math.cos(k*Math.PI/4)*2.4,z:from.z+Math.sin(k*Math.PI/4)*2.4}))
++   .find(p=>Math.abs(height(p.x,p.z)-height(from.x,from.z))<.55);
++  taken.push({x:from.x,z:from.z});
++  return {id:species+'-'+level,position:{x:from.x,z:from.z},patrol:to?[{x:from.x,z:from.z},to]:null,level,spec:creatureSpec(species,level)};
++ });
++}
++const occupied=velkorSites.map(s=>s.position);
++export const worldCreatureSites=[...velkorSites,
++ ...placeCreatures('kamneklyk',[9,20],2.6,0.75,occupied),
++ ...placeCreatures('dragor',[21,34],3.4,0.5,occupied)];
++export const worldSite=id=>worldCreatureSites.find(s=>s.id===id);
++const worldKindOf=site=>site.spec.id;
++
+ export function assignSlot62(game,p) {
+  if(point(p))return;
+  const used=new Set(worldPlayers(game).map(other=>other.worldSlot62));
+@@ -94,7 +133,7 @@ export function worldPath(from,to) {
+ }
+ function validatedTarget(game,p,body,now) {
+  const all=worldPlayers(game),open=orders(all).filter(charge);
+- const target=body.worldKind==='pvp'?all.find(q=>q.id===body.encounterId):velkorSites.find(s=>s.id===body.encounterId);
++ const target=body.worldKind==='pvp'?all.find(q=>q.id===body.encounterId):worldSite(body.encounterId);
+  if(!target||target.id===p.id)throw Error('Цель недоступна');
+  if(body.worldKind==='pvp'){
+   const ownReason=pvpReason72(hallLevel(p.city),p.competitiveEligible!==false);
+@@ -105,9 +144,11 @@ function validatedTarget(game,p,body,now) {
+   if(!point(target))throw Error('Город ещё не размещён на общей карте');
+   return {id:target.id,name:target.city.name,level:currentHall72(target.city,now),position:point(target)};
+  }
+- if(body.worldKind!=='velkor')throw Error('Неизвестная цель');
++ // worldKind is the creature's species; 'velkor' stays accepted for every world creature (clients
++ // before creatures-world-v1 only knew it) and is normalised to the site's species when sent.
++ if(body.worldKind!=='velkor'&&body.worldKind!==worldKindOf(target))throw Error('Неизвестная цель');
+  if(open.some(a=>a.target===target.id)||orders(all).some(a=>a.target===target.id&&a.cooldownUntil>now))
+-  throw Error('Велькор занят или ещё не вернулся');
++  throw Error(target.spec.name+' занят или ещё не вернулся');
+  if(hallLevel(p.city)<target.spec.requiredHall)throw Error('Нужна ратуша '+target.spec.requiredHall);
+  return {...target,position:beastPose63({...target,status:'alive'},now).position,name:target.spec.name};
+ }
+@@ -128,7 +169,8 @@ export function sendWorld62(game,p,body,now) {
+  for(const [id,q] of Object.entries(body.units))p.city.military.owned[id]-=q;
+  const startsAt=now+1400;
+  p.worldOrders62=own;
+- own.push({id:randomUUID(),owner:p.id,target:body.encounterId,name,level,worldKind:body.worldKind,
++ const kind=body.worldKind==='pvp'?'pvp':worldKindOf(worldSite(body.encounterId));
++ own.push({id:randomUUID(),owner:p.id,target:body.encounterId,name,level,worldKind:kind,
+   units:structuredClone(body.units),path,speed,travelMs,createdAt:now,startsAt,arrivesAt:startsAt+travelMs,
+   status:'outbound',seed:randomInt(1,0xffffffff)});
+ }
+@@ -179,7 +221,7 @@ export function settleWorld62(game,now) {
+      a.defenders=garrison(d);game.putPlayer(d);
+      a.calculation=duel62(a.units,a.defenders,a.seed);
+     }else{
+-     const spec=velkorSites.find(s=>s.id===a.target).spec;
++     const spec=worldSite(a.target).spec;
+      const {events,...summary}=simulate(a.units,spec,a.seed);
+      const representatives=new Set(representedMembers60(a.units).map(m=>m.id+':'+m.index));
+      const hits=new Map();
+@@ -210,7 +252,7 @@ export function settleWorld62(game,now) {
+      d.reports.push(report(a,'defender',{name:p.city.name,level:hallLevel(p.city),species:'pvp'},win?'defeat':'victory',a.defenders,calc.defender,defLoot));
+      game.putPlayer(d);
+     }else if(win){
+-     const spec=velkorSites.find(s=>s.id===a.target).spec;
++     const spec=worldSite(a.target).spec;
+      loot.resources.food=award(p,'food',spec.rewards.food);
+      loot.items[spec.item]=spec.rewards.material;
+      loot.xp=spec.xp;
+@@ -234,7 +276,7 @@ export function publicWorld62(game,p,now) {
+    const level=currentHall72(q.city,now),pvpReason=pvpReason72(level,q.competitiveEligible!==false);
+    return {id:q.id,name:q.city.name,nickname:q.nickname??null,level,slot:'slot-'+q.worldSlot62,position:point(q),pvp:!pvpReason,pvpReason};
+   }),
+-  encounters:velkorSites.map(e=>{
++  encounters:worldCreatureSites.map(e=>{
+    const active=all.find(a=>a.target===e.id&&charge(a)), defeated=all.find(a=>a.target===e.id&&a.cooldownUntil>now);
+    const status=active?'reserved':defeated?'defeated':'alive';
+    const position=(active??defeated)?.path.at(-1)??beastPose63({...e,status},now).position;
+diff --git a/v6/marches.mjs b/v6/marches.mjs
+index 157bc53..99f7c8a 100644
+--- a/v6/marches.mjs
++++ b/v6/marches.mjs
+@@ -1,7 +1,7 @@
+ import {randomUUID,randomInt} from 'node:crypto';
+ import {worldSites62} from '../DRENOVAR-Server-v92/dist/environment/world-sites62.js';
+ import {beastPose63} from '../DRENOVAR-Server-v92/dist/environment/world-motion63.js';
+-import {worldPath,velkorSites} from '../DRENOVAR-Server-v92/gameplay37/server/world62.mjs';
++import {worldPath,worldSite} from '../DRENOVAR-Server-v92/gameplay37/server/world62.mjs';
+ import {creatureSpec,units} from '../DRENOVAR-Server-v92/gameplay37/server/catalog.mjs';
+ import {home,marchRoute,routeUsesFerry,distance,positionAt} from '../DRENOVAR-Server-v92/gameplay37/server/navigation.mjs';
+ import {copy,requireRule,level,effect,slots,bonuses} from './economy.mjs';
+@@ -24,8 +24,9 @@ export function preview(game,p,body,now){
+       requireRule(!players(game).some(q=>marching(q).some(a=>a.worldKind==='pvp'&&a.target===target.id&&['outbound','fighting'].includes(a.status))),'TARGET_BUSY','Поселение уже атаковано');
+       target={id:target.id,name:target.city.name,level:level(target.v6,'B01'),position:sites[target.worldSlot62]};
+     }else{
+-      requireRule(body.worldKind==='velkor','TARGET','Неизвестная цель');target=velkorSites.find(e=>e.id===body.encounterId);
+-      requireRule(target,'TARGET','Нет такой цели');requireRule(level(p.v6,'B01')>=target.spec.requiredHall,'HALL','Недостаточный уровень ратуши');
++      // creatures-world-v1: any world creature; worldKind is its species ('velkor' accepted for all).
++      target=worldSite(body.encounterId);
++      requireRule(target,'TARGET','Нет такой цели');requireRule(body.worldKind==='velkor'||body.worldKind===target.spec.id,'TARGET','Неизвестная цель');requireRule(level(p.v6,'B01')>=target.spec.requiredHall,'HALL','Недостаточный уровень ратуши');
+       requireRule(!players(game).some(q=>(q.worldOrders62??[]).some(a=>a.target===target.id&&(['outbound','fighting'].includes(a.status)||a.cooldownUntil>now))),'TARGET_BUSY','Цель занята или восстанавливается');
+       target={...target,name:target.spec.name,position:beastPose63({...target,status:'alive'},now).position};
+     }
+@@ -41,7 +42,8 @@ export function preview(game,p,body,now){
+ }
+ export function send(game,p,body,now){
+   const route=preview(game,p,body,now),id=randomUUID(),conditions=dispatch(p.v6,body.units,id),startsAt=now+1400;
+-  const a={...route,id,target:body.encounterId,owner:p.id,worldKind:body.worldKind??null,units:copy(body.units),status:'outbound',map:body.worldKind?'world':'city',createdAt:now,startsAt,arrivesAt:startsAt+route.travelMs,seed:randomInt(1,0xffffffff),ramConditions:conditions,engine_version:'DRENOVAR-V6-C1.0-SIEGE-P1',attackBonuses:bonuses(p.v6),workshop:Math.max(1,level(p.v6,'B17'))};
++  const kind=body.worldKind&&body.worldKind!=='pvp'?worldSite(body.encounterId).spec.id:body.worldKind??null;
++  const a={...route,id,target:body.encounterId,owner:p.id,worldKind:kind,units:copy(body.units),status:'outbound',map:body.worldKind?'world':'city',createdAt:now,startsAt,arrivesAt:startsAt+route.travelMs,seed:randomInt(1,0xffffffff),ramConditions:conditions,engine_version:'DRENOVAR-V6-C1.0-SIEGE-P1',attackBonuses:bonuses(p.v6),workshop:Math.max(1,level(p.v6,'B17'))};
+   if(body.worldKind)(p.worldOrders62??=[]).push(a);else{p.armies.push(a);const e=game.getEncounter(a.target);e.status='reserved';e.reservedBy=a.id;game.putEncounter(e);}
+   return a;
+ }
+diff --git a/v6/tests/world-creatures.test.mjs b/v6/tests/world-creatures.test.mjs
+new file mode 100644
+index 0000000..d94c708
+--- /dev/null
++++ b/v6/tests/world-creatures.test.mjs
+@@ -0,0 +1,97 @@
++// creatures-world-v1: Камнеклык and Горный Драгор world hunts next to the unchanged Velkor sites.
++import test from 'node:test';import assert from 'node:assert/strict';import {DatabaseSync} from 'node:sqlite';
++import {V6GameServer,project} from '../game.mjs';import {WORLD} from '../terrain.mjs';
++import {velkorSites,worldCreatureSites,worldSite,publicWorld62} from '../../DRENOVAR-Server-v92/gameplay37/server/world62.mjs';
++import {creatureSpec} from '../../DRENOVAR-Server-v92/gameplay37/server/catalog.mjs';
++import {height} from '../../DRENOVAR-Server-v92/dist/environment/world-field56.js';
++import {worldSites62} from '../../DRENOVAR-Server-v92/dist/environment/world-sites62.js';
++
++const VELKOR_BEFORE={'velkor-1':[-0.3463220833800733,-60.12934748083353],'velkor-2':[13.212685558434668,-6.9091741899474535],'velkor-3':[14.46700602537021,-45.68362508993596]};
++
++test('world creature sites: velkor-1..3 unchanged, three Kamneklyk and three Dragor sites on dry ground away from towns',()=>{
++ assert.deepEqual(worldCreatureSites.slice(0,3),velkorSites);
++ for(const s of velkorSites){assert.equal(s.position.x,VELKOR_BEFORE[s.id][0]);assert.equal(s.position.z,VELKOR_BEFORE[s.id][1]);}
++ const ids=worldCreatureSites.map(s=>s.id);
++ assert.deepEqual(ids,['velkor-1','velkor-2','velkor-3','kamneklyk-1','kamneklyk-2','kamneklyk-3','dragor-1','dragor-2','dragor-3']);
++ assert.equal(new Set(ids).size,ids.length);
++ const towns=worldSites62();
++ for(const s of worldCreatureSites.slice(3)){
++  const [species,level]=s.id.split('-');
++  assert.equal(s.spec.id,species);assert.equal(s.level,Number(level));assert.deepEqual(s.spec,creatureSpec(species,s.level));
++  assert.ok(height(s.position.x,s.position.z)>2,s.id+' on land');
++  assert.ok(towns.every(t=>Math.hypot(t.x-s.position.x,t.z-s.position.z)>=16),s.id+' away from every settlement slot');
++  assert.ok(worldCreatureSites.every(o=>o===s||Math.hypot(o.position.x-s.position.x,o.position.z-s.position.z)>=22),s.id+' away from other creatures');
++  assert.ok(s.patrol&&s.patrol.length===2,s.id+' patrols');
++ }
++ // highlands for Dragor, hills for Kamneklyk (02_CREATURES.txt habitats)
++ for(const s of worldCreatureSites.filter(s=>s.spec.id==='dragor'))assert.ok(height(s.position.x,s.position.z)>=21,s.id+' in the highlands');
++ for(const s of worldCreatureSites.filter(s=>s.spec.id==='kamneklyk'))assert.ok(height(s.position.x,s.position.z)>=9,s.id+' on the hills');
++});
++
++function world(){
++ let now=0;const sql=new DatabaseSync(':memory:'),game=new V6GameServer(sql,{clock:()=>now,worldEnabled:true,v6World:WORLD});
++ const player=(units)=>{const id=game.newSession().playerId,p=game.getPlayer(id);p.v6.buildings.find(b=>b.type==='B01').level=11;p.v6.healthy=structuredClone(units);game.putPlayer(project(p));return id;};
++ return {sql,game,player,clock:{get now(){return now;},set now(v){now=v;}}};
++}
++
++// Party sizes that win while the creature still reaches its third (special) attack.
++for(const [species,ability,level,party] of [['kamneklyk','tusk_sweep',3,150],['dragor','shockwave',1,60]])
++ test(`V6 world hunt of ${species}: species worldKind, server battle with ${ability}, reward once, return, cooldown`,()=>{
++  const {sql,game,player,clock}=world();
++  try{
++   const id=player({'ENG-01':party*3}),target=worldSite(species+'-'+level);
++   const action={kind:'worldMarch',worldKind:species,encounterId:target.id,units:{'ENG-01':party}};
++   const started=game.command(id,'world-'+species,action);
++   const order=()=>game.getPlayer(id).worldOrders62[0];
++   assert.equal(order().worldKind,species);
++   assert.ok(started.world.encounters.some(e=>e.id===target.id&&e.status==='reserved'),'target reserved while the army marches');
++   // a second player may not attack the reserved creature
++   const other=player({'ENG-01':50});
++   assert.throws(()=>game.command(other,'world-'+species+'-other',{...action,units:{'ENG-01':50}}),/занята|восстанавливается/);
++   clock.now=order().arrivesAt;game.state(id);
++   const battle=structuredClone(order().battle);assert.equal(battle.outcome,'victory');
++   assert.ok(battle.events.some(e=>e.kind===ability),'the species special attack is part of the server battle');
++   const food0=game.state(id).v6.stock.food;
++   clock.now=order().battleEndsAt;const ended=game.state(id);
++   assert.equal(ended.reports.length,1);assert.equal(ended.reports[0].creature.species,species);
++   assert.equal(ended.reports[0].rewards.items[creatureSpec(species,level).item],creatureSpec(species,level).rewards.material);
++   const stock=structuredClone(ended.v6.stock);
++   // repeated polls and the same command again do not grant the reward twice
++   assert.deepEqual(game.state(id).v6.stock,stock);
++   assert.equal(game.command(id,'world-'+species,action).reports.length,1);
++   assert.deepEqual(game.state(id).v6.stock,stock);
++   assert.ok(game.state(id).world.encounters.some(e=>e.id===target.id&&e.status==='defeated'&&e.hp===0),'defeated until respawn');
++   assert.throws(()=>game.command(id,'world-'+species+'-again',action),/занята|восстанавливается/);
++   clock.now=order().returnsAt;const back=game.state(id);
++   assert.equal(back.v6.healthy['ENG-01'],party*2+battle.surviving['ENG-01']);
++   assert.ok(stock.food>=food0);
++   clock.now=order().cooldownUntil+1;
++   assert.ok(game.state(id).world.encounters.some(e=>e.id===target.id&&e.status==='alive'),'respawned after the catalog cooldown');
++  }finally{sql.close();}
++ });
++
++test('legacy worldKind "velkor" addressed to a Kamneklyk site is accepted and recorded as kamneklyk',()=>{
++ const {sql,game,player}=world();
++ try{
++  const id=player({'ENG-01':80});
++  game.command(id,'legacy-kind',{kind:'worldMarch',worldKind:'velkor',encounterId:'kamneklyk-2',units:{'ENG-01':60}});
++  assert.equal(game.getPlayer(id).worldOrders62[0].worldKind,'kamneklyk');
++  assert.throws(()=>game.command(id,'wrong-kind',{kind:'worldMarch',worldKind:'dragor',encounterId:'kamneklyk-3',units:{'ENG-01':1}}),/Неизвестная цель|TARGET/);
++ }finally{sql.close();}
++});
++
++test('defeat against Dragor III: no hunt reward, survivors come home, the creature stays alive',()=>{
++ const {sql,game,player,clock}=world();
++ try{
++  const id=player({'ENG-09':12});
++  game.command(id,'dragor-defeat',{kind:'worldMarch',worldKind:'dragor',encounterId:'dragor-3',units:{'ENG-09':12}});
++  const order=()=>game.getPlayer(id).worldOrders62[0];
++  clock.now=order().arrivesAt;game.state(id);const battle=structuredClone(order().battle);assert.equal(battle.outcome,'defeat');
++  clock.now=order().battleEndsAt;const ended=game.state(id);
++  assert.equal(ended.reports[0].outcome,'defeat');
++  assert.deepEqual(ended.reports[0].rewards.items,{});
++  assert.ok(game.state(id).world.encounters.some(e=>e.id==='dragor-3'&&e.status==='alive'));
++  clock.now=order().returnsAt;const back=game.state(id);
++  assert.equal(back.v6.healthy['ENG-09']??0,battle.surviving['ENG-09']??0);
++ }finally{sql.close();}
++});
+diff --git a/v6/timeline.mjs b/v6/timeline.mjs
+index 76dd2da..6a0f8ba 100644
+--- a/v6/timeline.mjs
++++ b/v6/timeline.mjs
+@@ -2,7 +2,7 @@ import {jobs,finishResource,earn} from './legacy-services.mjs';
+ import {battlePresentation} from './presentation.mjs';
+ import {creatureSpec} from '../DRENOVAR-Server-v92/gameplay37/server/catalog.mjs';
+ import {simulate} from '../DRENOVAR-Server-v92/gameplay37/server/combat.mjs';
+-import {velkorSites} from '../DRENOVAR-Server-v92/gameplay37/server/world62.mjs';
++import {worldSite} from '../DRENOVAR-Server-v92/gameplay37/server/world62.mjs';
+ import {positionAt,distance} from '../DRENOVAR-Server-v92/gameplay37/server/navigation.mjs';
+ import {level,bonuses,copy,vector,requireRule,slots} from './economy.mjs';
+ import {settle,grantReward,claim} from './orders.mjs';
+@@ -28,7 +28,7 @@ function start(game,all,p,a){
+   d.v6.garrison_reserved=copy(a.defenders);a.defenceBonuses=bonuses(d.v6);a.initialWallHp=Q.ceil(Q.q(d.v6.wall_hp_exact??d.v6.wall_hp));
+   a.calculation=simulateSiege({attacker:a.units,defender:a.defenders,wallHp:a.initialWallHp,workshop:a.workshop,seed:a.seed,ramConditions:a.ramConditions,attackBonuses:a.attackBonuses,defenceBonuses:a.defenceBonuses,events:false,visuals:true});
+  }else{
+-  const e=a.worldKind?velkorSites.find(e=>e.id===a.target):game.getEncounter(a.target),spec=e.spec??creatureSpec(e.species,e.level);
++  const e=a.worldKind?worldSite(a.target):game.getEncounter(a.target),spec=e.spec??creatureSpec(e.species,e.level);
+   a.battle=simulate(a.units,spec,a.seed,{attackBp:a.attackBonuses.attack,defenceBp:a.attackBonuses.defence});
+   if(!a.worldKind){e.status='fighting';game.putEncounter(e);}
+  }
+@@ -47,7 +47,7 @@ function finish(game,all,p,a){
+   report(d,a,calc.defender,!win,{resources:{},items:{},xp:0,losses:raidReport},'defender',p.city.name);
+   returnMachines(p.v6,a,result);
+  }else{
+-  result=a.battle;win=result.outcome==='victory';const e=a.worldKind?velkorSites.find(e=>e.id===a.target):game.getEncounter(a.target),spec=e.spec??creatureSpec(e.species,e.level);
++  result=a.battle;win=result.outcome==='victory';const e=a.worldKind?worldSite(a.target):game.getEncounter(a.target),spec=e.spec??creatureSpec(e.species,e.level);
+   if(win){resources.food=spec.rewards.food;items[spec.item]=spec.rewards.material;if(!a.worldKind&&spec.id!=='dragor')items.hides=spec.rewards.hides;
+    if(spec.id==='dragor'){resources.stone=[20,50,100][e.level-1];resources.iron=[5,15,30][e.level-1];}
+    if(!a.worldKind&&random(a.seed^0x6a09e667)()<spec.rewards.rareChance)items[spec.rare]=1;
+@@ -72,7 +72,7 @@ export function retreat(game,all,p,id,now){
+  const a=marches(p).find(a=>a.id===id);requireRule(a?.status==='fighting','RETREAT','Этот отряд сейчас не сражается');
+  const elapsed=Math.max(0,now-a.arrivesAt);
+  if(a.worldKind==='pvp')a.calculation=simulateSiege({attacker:a.units,defender:a.defenders,wallHp:a.initialWallHp,workshop:a.workshop,seed:a.seed,ramConditions:a.ramConditions,attackBonuses:a.attackBonuses,defenceBonuses:a.defenceBonuses,events:false,visuals:true,retreatAt:Math.floor(elapsed/200)*200});
+- else{const e=a.worldKind?velkorSites.find(e=>e.id===a.target):game.getEncounter(a.target),spec=e.spec??creatureSpec(e.species,e.level);a.battle=simulate(a.units,spec,a.seed,{attackBp:a.attackBonuses.attack,defenceBp:a.attackBonuses.defence,retreatAt:Math.floor(elapsed/200)*200});}
++ else{const e=a.worldKind?worldSite(a.target):game.getEncounter(a.target),spec=e.spec??creatureSpec(e.species,e.level);a.battle=simulate(a.units,spec,a.seed,{attackBp:a.attackBonuses.attack,defenceBp:a.attackBonuses.defence,retreatAt:Math.floor(elapsed/200)*200});}
+  a.battleEndsAt=now;finish(game,all,p,a);updateFlags(all);for(const q of all){updateAway(q);game.putPlayer(q);}
+ }
+ export function settleTimeline(game,now){

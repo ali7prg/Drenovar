@@ -87,6 +87,10 @@ func run() -> void:
 		elif argument.begins_with("--until-task="):
 			until_task = argument.trim_prefix("--until-task=")
 	game = load("res://main.tscn").instantiate()
+	# 1022: offline, fixture-fed (forest local-realm states predate V6): an unreachable loopback
+	# endpoint, so accept() takes them and nothing reaches a real server (1021 qa_city_works pattern).
+	game.endpoint = "http://127.0.0.1:9"
+	game.loopback = true
 	root.add_child(game)
 	while game.scene_loading or not is_instance_valid(game.stage) or game.player_id.is_empty():
 		await process_frame

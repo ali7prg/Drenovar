@@ -7,7 +7,11 @@ The adventure reads its JSON data with FileAccess at runtime. Such files are not
 Godot resources, so the export only packs them through the preset's include filter.
 This check fails when any tracked JSON under project/data or project/assets is
 missing from the pack, so a build cannot silently ship without the forest data.
+Files the iOS preset excludes on purpose (exclude_filter: web previews, review
+material, retired army sources) are not required.
 """
+import fnmatch
+import re
 import struct
 import sys
 from pathlib import Path
@@ -41,12 +45,27 @@ def pack_names(path: Path) -> set:
         return names
 
 
+def preset_excludes() -> list:
+    """exclude_filter of the first export preset (Godot's '*' also matches '/', as fnmatch does)."""
+    text = (PROJECT / "export_presets.cfg").read_text(encoding="utf-8")
+    found = re.search(r'^exclude_filter="([^"]*)"', text, re.M)
+    return [part.strip() for part in found.group(1).split(",") if part.strip()] if found else []
+
+
 def main() -> None:
     names = pack_names(Path(sys.argv[1]))
+    excludes = preset_excludes()
     required = []
+    skipped = 0
     for folder in ("data", "assets"):
         for item in sorted((PROJECT / folder).rglob("*.json")):
-            required.append(item.relative_to(PROJECT).as_posix())
+            relative = item.relative_to(PROJECT).as_posix()
+            if any(fnmatch.fnmatchcase(relative, pattern) for pattern in excludes):
+                skipped += 1
+                continue
+            required.append(relative)
+    if skipped:
+        print(f"{skipped} JSON files excluded by the preset's exclude_filter (not required)")
     missing = [item for item in required if item not in names]
     for item in missing:
         print(f"MISSING {item}")

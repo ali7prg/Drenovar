@@ -1,0 +1,236 @@
+{
+ "preset_id": "epic_reference_v1",
+ "status": "INACTIVE_PROPOSAL",
+ "auto_apply": false,
+ "method": "level I = live catalog; level II/III = live level I x poster(level)/poster(level I); rewards on existing item keys",
+ "creatures": {
+  "velkor": [
+   {
+    "level": 1,
+    "hp": 1900,
+    "attack": 95,
+    "defense": 35,
+    "recommended_power_hint": 1500,
+    "rewards": {
+     "food": 1000,
+     "hides": 20,
+     "antlers": 5
+    },
+    "unmapped_rewards": []
+   },
+   {
+    "level": 2,
+    "hp": 3800,
+    "attack": 190,
+    "defense": 70,
+    "recommended_power_hint": 3500,
+    "rewards": {
+     "food": 2500,
+     "hides": 40,
+     "antlers": 10
+    },
+    "unmapped_rewards": [
+     {
+      "key": "forest_essence",
+      "name": "Лесная эссенция",
+      "quantity": 1
+     }
+    ]
+   },
+   {
+    "level": 3,
+    "hp": 7600,
+    "attack": 380,
+    "defense": 140,
+    "recommended_power_hint": 7000,
+    "rewards": {
+     "food": 5000,
+     "hides": 80,
+     "antlers": 20
+    },
+    "unmapped_rewards": [
+     {
+      "key": "velkor_antler_trophy",
+      "name": "Рог Велькора",
+      "quantity": 1
+     }
+    ]
+   }
+  ],
+  "kamneklyk": [
+   {
+    "level": 1,
+    "hp": 2300,
+    "attack": 110,
+    "defense": 70,
+    "recommended_power_hint": 2000,
+    "rewards": {
+     "food": 1200,
+     "hides": 25,
+     "bones": 10
+    },
+    "unmapped_rewards": []
+   },
+   {
+    "level": 2,
+    "hp": 4600,
+    "attack": 220,
+    "defense": 140,
+    "recommended_power_hint": 4500,
+    "rewards": {
+     "food": 3000,
+     "hides": 50,
+     "bones": 20
+    },
+    "unmapped_rewards": [
+     {
+      "key": "stone_fragment",
+      "name": "Каменный фрагмент",
+      "quantity": 1
+     }
+    ]
+   },
+   {
+    "level": 3,
+    "hp": 9200,
+    "attack": 440,
+    "defense": 280,
+    "recommended_power_hint": 9000,
+    "rewards": {
+     "food": 6000,
+     "hides": 100,
+     "bones": 40
+    },
+    "unmapped_rewards": [
+     {
+      "key": "kamneklyk_plate",
+      "name": "Пластина Камнеклыка",
+      "quantity": 1
+     }
+    ]
+   }
+  ],
+  "tenerys": [
+   {
+    "level": 1,
+    "hp": 1400,
+    "attack": 80,
+    "defense": 25,
+    "recommended_power_hint": 1800,
+    "rewards": {
+     "food": 800,
+     "hides": 20,
+     "claws": 5
+    },
+    "unmapped_rewards": []
+   },
+   {
+    "level": 2,
+    "hp": 2800,
+    "attack": 160,
+    "defense": 50,
+    "recommended_power_hint": 4000,
+    "rewards": {
+     "food": 2000,
+     "hides": 40,
+     "claws": 10
+    },
+    "unmapped_rewards": [
+     {
+      "key": "twilight_essence",
+      "name": "Сумрачная эссенция",
+      "quantity": 1
+     }
+    ]
+   },
+   {
+    "level": 3,
+    "hp": 5600,
+    "attack": 320,
+    "defense": 100,
+    "recommended_power_hint": 8000,
+    "rewards": {
+     "food": 4000,
+     "hides": 80,
+     "claws": 20
+    },
+    "unmapped_rewards": [
+     {
+      "key": "tenerys_fang_trophy",
+      "name": "Клык Тенериса",
+      "quantity": 1
+     }
+    ]
+   }
+  ],
+  "dragor": [
+   {
+    "level": 1,
+    "hp": 6500,
+    "attack": 190,
+    "defense": 120,
+    "recommended_power_hint": 5000,
+    "rewards": {
+     "food": 3000,
+     "hides": 30,
+     "armor_plates": 10
+    },
+    "unmapped_rewards": [
+     {
+      "key": "mineral",
+      "name": "mineral",
+      "quantity": 10
+     }
+    ]
+   },
+   {
+    "level": 2,
+    "hp": 13000,
+    "attack": 380,
+    "defense": 240,
+    "recommended_power_hint": 10000,
+    "rewards": {
+     "food": 6000,
+     "hides": 60,
+     "armor_plates": 20
+    },
+    "unmapped_rewards": [
+     {
+      "key": "mineral",
+      "name": "mineral",
+      "quantity": 20
+     },
+     {
+      "key": "dragarite",
+      "name": "Драгарит",
+      "quantity": 1
+     }
+    ]
+   },
+   {
+    "level": 3,
+    "hp": 26000,
+    "attack": 760,
+    "defense": 480,
+    "recommended_power_hint": 18000,
+    "rewards": {
+     "food": 12000,
+     "hides": 120,
+     "armor_plates": 40
+    },
+    "unmapped_rewards": [
+     {
+      "key": "mineral",
+      "name": "mineral",
+      "quantity": 40
+     },
+     {
+      "key": "glowing_plates",
+      "name": "Редкий материал Драгара",
+      "quantity": 1
+     }
+    ]
+   }
+  ]
+ }
+}

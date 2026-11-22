@@ -1,0 +1,55 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+BEAST (36.0, 3.074471, 46.0) BODY (3.1034, 0.8142)
+RAY 0 { "valid": true, "position": (36.0, 3.18054, 47.98569), "basis": [X: (-0.99956, -0.029662, 0.0), Y: (-0.02966, 0.999478, -0.012811), Z: (0.00038, -0.012805, -0.999918)], "normal": (-0.02966, 0.999478, -0.012811), "points": [(36.44, 3.19928, 48.48569), (36.44, 3.187189, 47.48569), (35.56, 3.173892, 48.48569), (35.56, 3.160349, 47.48569)], "residual": 0.00036292336881, "half": (0.44, 0.5) }
+RAY 1 { "valid": true, "position": (38.1069, 3.202842, 48.1069), "basis": [X: (-0.70501, 0.076948, 0.70501), Y: (0.035675, 0.996686, -0.073108), Z: (-0.708299, -0.026391, -0.705419)], "normal": (0.035675, 0.996686, -0.073108), "points": [(38.77158, 3.182051, 48.14933), (38.06448, 3.155605, 47.44222), (38.14933, 3.250078, 48.77158), (37.44222, 3.223409, 48.06448)], "residual": 0.00005572498776, "half": (0.44, 0.5) }
+RAY 2 { "valid": false, "reason": "mesh_intersection", "obstacles": ["tree_footprint_proxy:(39.18821, 46.73422)"] }
+RAY 3 { "valid": true, "position": (37.39113, 3.102414, 44.60887), "basis": [X: (0.70675, 0.03177, 0.70675), Y: (-0.032575, 0.999393, -0.01235), Z: (-0.706713, -0.014294, 0.707356)], "normal": (-0.032575, 0.999393, -0.01235), "points": [(37.43356, 3.095583, 43.94419), (36.72645, 3.081255, 44.6513), (38.05581, 3.123537, 44.56644), (37.3487, 3.109245, 45.27355)], "residual": 0.000009056821, "half": (0.44, 0.5) }
+RAY 4 { "valid": true, "position": (36.0, 3.0496, 44.01431), "basis": [X: (0.999469, 0.032595, 0.0), Y: (-0.032592, 0.999392, -0.012363), Z: (-0.000403, 0.012357, 0.999924)], "normal": (-0.032592, 0.999392, -0.012363), "points": [(35.56, 3.029066, 43.51431), (35.56, 3.04134, 44.51431), (36.44, 3.057667, 43.51431), (36.44, 3.070135, 44.51431)], "residual": 0.00004836916924, "half": (0.44, 0.5) }
+RAY 5 { "valid": true, "position": (33.8931, 3.021678, 43.8931), "basis": [X: (0.704967, -0.077734, -0.704967), Y: (0.03409, 0.996541, -0.075795), Z: (0.70842, 0.029401, 0.705178)], "normal": (0.03409, 0.996541, -0.075795), "points": [(33.22842, 3.041188, 43.85067), (33.93552, 3.070646, 44.55778), (33.85067, 2.97244, 43.22842), (34.55778, 3.002167, 43.93552)], "residual": 0.00006747990847, "half": (0.44, 0.5) }
+RAY 6 { "valid": true, "position": (33.17871, 3.068042, 46.0), "basis": [X: (-0.0, -0.014399, -0.999896), Y: (-0.028738, 0.999483, -0.014393), Z: (0.999587, 0.028735, -0.000414)], "normal": (-0.028738, 0.999483, -0.014393), "points": [(32.67871, 3.060001, 46.44), (33.67871, 3.088595, 46.44), (32.67871, 3.047169, 45.56), (33.67871, 3.076082, 45.56)], "residual": 0.0000799484551, "half": (0.44, 0.5) }
+RAY 7 { "valid": true, "position": (34.60887, 3.130339, 47.39113), "basis": [X: (-0.706759, -0.031359, -0.706759), Y: (-0.02988, 0.999449, -0.014466), Z: (0.706823, 0.010894, -0.707306)], "normal": (-0.02988, 0.999449, -0.014466), "points": [(34.56644, 3.138625, 48.05581), (35.27355, 3.149597, 47.3487), (33.94419, 3.111082, 47.43356), (34.6513, 3.121922, 46.72645)], "residual": 0.00003300327808, "half": (0.44, 0.5) }
+BATCH @MultiMeshInstance3D@81 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@82 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@83 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@84 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@85 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@86 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@87 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@88 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@89 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@90 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@91 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@92 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@93 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@94 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@95 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@96 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@97 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@98 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@99 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@100 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@101 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@102 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@103 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@104 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@105 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@106 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@107 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@108 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@109 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@110 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@111 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@112 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@113 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@114 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@115 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@116 layer  ["city", "far", "detail", "resource", "tree_lod", "tree_best"] shader res://src/forest.gdshader
+BATCH @MultiMeshInstance3D@117 layer  ["city", "far", "detail", "resource"] shader non-shader
+BATCH @MultiMeshInstance3D@118 layer  ["city", "far", "detail", "resource"] shader non-shader
+BATCH @MultiMeshInstance3D@119 layer  ["city", "far", "detail", "resource"] shader non-shader
+BATCH @MultiMeshInstance3D@120 layer  ["city", "far", "detail", "resource"] shader non-shader
+BATCH @MultiMeshInstance3D@121 layer  ["city", "far", "detail", "resource"] shader non-shader
+BATCH @MultiMeshInstance3D@122 layer  ["city", "far", "detail", "resource"] shader non-shader
+BATCH @MultiMeshInstance3D@123 layer  ["city", "far", "detail", "resource"] shader res://src/meadow.gdshader
+BATCH @MultiMeshInstance3D@124 layer  ["city", "far", "detail", "resource"] shader res://src/meadow.gdshader

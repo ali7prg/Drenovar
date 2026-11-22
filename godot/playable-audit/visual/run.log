@@ -1,0 +1,33 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 25.0.7-2+deb13u1 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 19.1.7, 256 bits)
+
+PLAYABLE_CHECK synthetic loopback only true
+PLAYABLE_CHECK normal game ready true
+PLAYABLE_CHECK interactive V6 account loaded true
+PLAYABLE_CHECK server supplies a reachable target true
+PLAYABLE_CHECK touch target within viewport: @Button@295 true
+PLAYABLE_CHECK Attack opens formation true
+PLAYABLE_CHECK touch target within viewport: @Button@320 true
+PLAYABLE_CHECK selected formation has server route true
+PLAYABLE_CHECK touch target within viewport: MarchSend true
+PLAYABLE_CHECK one touch starts a real army true
+PLAYABLE_CHECK server army equals selected formation true
+PLAYABLE_CHECK one army from one touch true
+PLAYABLE_PHASE outbound
+PLAYABLE_PHASE fighting
+PLAYABLE_PHASE returning
+PLAYABLE_CHECK real server battle produces a report true
+PLAYABLE_CHECK normal gameplay reaches march and combat true
+PLAYABLE_CHECK actual game renders scheduled attacks false
+PLAYABLE_CHECK result becomes available after visual contact true
+PLAYABLE_CHECK touch target within viewport: @Button@474 true
+PLAYABLE_CHECK Continue restores game control true
+PLAYABLE_CHECK survivors return through real server clock true
+PLAYABLE_CHECK returned garrison matches report: ENG-03 true
+PLAYABLE_CHECK returned garrison matches report: ENG-05 true
+PLAYABLE_CHECK restart restores same settlement true
+{"checks":22,"clip_samples":29,"clock":"wall clock, unchanged solver and travel time","device":"Linux Godot; no physical iPhone acceptance","entry":"main.tscn, interactive UI and HTTP","failures":["actual game renders scheduled attacks"],"observed_actions":["idle","trot","run","walk"],"phases":{"fighting":1794825646022.62,"outbound":1794825631775.62,"returning":1794825649552.53},"status":"failed"}
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)

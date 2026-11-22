@@ -1,0 +1,75 @@
+{
+  "tool": "original_schema_in_memory_migration_check",
+  "sqlite_version": "3.53.1",
+  "database": ":memory: (one fresh DB per migration)",
+  "production_access": false,
+  "source_modified": false,
+  "migrations": [
+    {
+      "path": "drizzle/0000_closed_nightmare.sql",
+      "sha256": "0c730729a7f6df0cd8975d1dd13c9260e667e0389361be2ad7de349e57a82a6e",
+      "applied": true,
+      "schema_matches": true,
+      "table_names": [
+        "game_realm37"
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "not_null": true,
+          "primary_key": true
+        },
+        {
+          "name": "revision",
+          "type": "INTEGER",
+          "not_null": true,
+          "primary_key": false
+        },
+        {
+          "name": "data",
+          "type": "TEXT",
+          "not_null": true,
+          "primary_key": false
+        }
+      ],
+      "player_row_count": 0,
+      "no_data_statements": true,
+      "passed": true
+    },
+    {
+      "path": "hosting37/drizzle/0000_closed_nightmare.sql",
+      "sha256": "0c730729a7f6df0cd8975d1dd13c9260e667e0389361be2ad7de349e57a82a6e",
+      "applied": true,
+      "schema_matches": true,
+      "table_names": [
+        "game_realm37"
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT",
+          "not_null": true,
+          "primary_key": true
+        },
+        {
+          "name": "revision",
+          "type": "INTEGER",
+          "not_null": true,
+          "primary_key": false
+        },
+        {
+          "name": "data",
+          "type": "TEXT",
+          "not_null": true,
+          "primary_key": false
+        }
+      ],
+      "player_row_count": 0,
+      "no_data_statements": true,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "both_migrations_identical": true
+}

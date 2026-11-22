@@ -1,0 +1,1329 @@
+{
+	"checks": 1787,
+	"coverage": {
+		"late_states": 162,
+		"legacy_states": 135,
+		"native_gate_clearance_levels": [
+			6,
+			7,
+			8,
+			9,
+			10,
+			11
+		],
+		"total_states": 297
+	},
+	"engine": "4.6.3-stable (official)",
+	"failures": [],
+	"not_measured": [
+		"iPhone 12 frame time and memory",
+		"both-client gameplay integration (separate tests)"
+	],
+	"states": [
+		{
+			"level": 6,
+			"sha256": "d551301df08d323e99d468d65b4c6813ba95d541c3c91469539d2df8a0aec669",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 17362,
+			"type": "ALT-02"
+		},
+		{
+			"level": 7,
+			"sha256": "5cf3680fab70ceccc2ee1a96cd4f4b23787359e57cd1afec0da76e149c8ef791",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 17434,
+			"type": "ALT-02"
+		},
+		{
+			"level": 8,
+			"sha256": "c84b7233eea1f0941044d0b229cf07259f5c199026ca0be485c62fa21519ee03",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 22578,
+			"type": "ALT-02"
+		},
+		{
+			"level": 9,
+			"sha256": "c5b4b88e1fad369e0b80f9796ee3119570a6f842f53d8de6dd6b0bd19d262116",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 23224,
+			"type": "ALT-02"
+		},
+		{
+			"level": 10,
+			"sha256": "e051769c3ada00eebe27d97fa163e589f8fa2f3a958c693dc7e4620283ad48b6",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 24180,
+			"type": "ALT-02"
+		},
+		{
+			"level": 11,
+			"sha256": "2e959b678b880843cff8b02622ecebb5055f1f0b205654c9c2cc6b1242e98aff",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 26304,
+			"type": "ALT-02"
+		},
+		{
+			"level": 6,
+			"sha256": "875238e7cbb43559ffcc40dcaa83a4407279a705d505056599b24bcac5b33ce0",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 23434,
+			"type": "ALT-05"
+		},
+		{
+			"level": 7,
+			"sha256": "38f4cb3192be42171a06c1c258df6dad93bfc8252b771e83615cd917ca99c226",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 23482,
+			"type": "ALT-05"
+		},
+		{
+			"level": 8,
+			"sha256": "571883cb7ebc644539c8bdde5ab62e8692883fa44e10235f2731a72c67237cea",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 28514,
+			"type": "ALT-05"
+		},
+		{
+			"level": 9,
+			"sha256": "97b5d07aaa8f4802b47916c9540bde9608fc8c005a084f63fd0bfaeb7583c25e",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 29594,
+			"type": "ALT-05"
+		},
+		{
+			"level": 10,
+			"sha256": "936045db45e7f2d6e7d3bfada1cc4d4cdf5e60e9f83b7e0d38554e92394cc847",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 30442,
+			"type": "ALT-05"
+		},
+		{
+			"level": 11,
+			"sha256": "7c42e702e4d0f53f1f1efabd26a3239774efc74332f757e21e2b737df6e830a2",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 32018,
+			"type": "ALT-05"
+		},
+		{
+			"level": 6,
+			"sha256": "c7f8248ad99a88ad65af978f8cb31ecd417da61d7af2b70e38b3f678b805601c",
+			"status": "passed",
+			"surfaces": 17,
+			"triangles": 19502,
+			"type": "ALT-06"
+		},
+		{
+			"level": 7,
+			"sha256": "6d2630b2cec4e0580e2e0425266177a2ae2d2510490c3cf0d966e718c25bf769",
+			"status": "passed",
+			"surfaces": 17,
+			"triangles": 19574,
+			"type": "ALT-06"
+		},
+		{
+			"level": 8,
+			"sha256": "b2467f344f90a8a8e815bad066beb45637ce39526968aee367a766cd0eee63bd",
+			"status": "passed",
+			"surfaces": 17,
+			"triangles": 26496,
+			"type": "ALT-06"
+		},
+		{
+			"level": 9,
+			"sha256": "85780bd38c2263e729d92c0f7b35a1c83984f48234be5b4f77e36148a7c9cce3",
+			"status": "passed",
+			"surfaces": 17,
+			"triangles": 27444,
+			"type": "ALT-06"
+		},
+		{
+			"level": 10,
+			"sha256": "2673e35effd455a60e9a6ded8d7979072113310de98808feb78dc22901844bbe",
+			"status": "passed",
+			"surfaces": 19,
+			"triangles": 29544,
+			"type": "ALT-06"
+		},
+		{
+			"level": 11,
+			"sha256": "3536bd1a6720ef0a45a786190057574142bd721a1de3b178571fe6271029e5f9",
+			"status": "passed",
+			"surfaces": 21,
+			"triangles": 36380,
+			"type": "ALT-06"
+		},
+		{
+			"level": 6,
+			"sha256": "a784c427e35d5bc36d5b206316bf6a54d7a980345806d98ad05a1d0ad79f2b0b",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 12322,
+			"type": "ALT-07"
+		},
+		{
+			"level": 7,
+			"sha256": "4bd62c4792a51f1a0fd610766762d7f21efc213e054469b37e8bea882d46de0c",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 12370,
+			"type": "ALT-07"
+		},
+		{
+			"level": 8,
+			"sha256": "d382485d996ab1e0bd6b44d187bf045582bfe157aa110426575e12faa91c18cc",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 17498,
+			"type": "ALT-07"
+		},
+		{
+			"level": 9,
+			"sha256": "e5591cd225f4ffa3d9381f017a20a1aac1785765cc80c840270047ad1999e06a",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 18336,
+			"type": "ALT-07"
+		},
+		{
+			"level": 10,
+			"sha256": "aa3a4fe2f56f328265147727d9c6a9f80a588b8488dc4ddc365e08283f0cf2aa",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 19032,
+			"type": "ALT-07"
+		},
+		{
+			"level": 11,
+			"sha256": "3282bd6809bc46bcc452e3f25aa549a732501931bd8b1ee7884d8a389d130160",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 24696,
+			"type": "ALT-07"
+		},
+		{
+			"level": 6,
+			"sha256": "0dd8646eb932dbcdd328170106ff451166a7fb82b79fd19e144b6db5c867f96d",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 15166,
+			"type": "ALT-08"
+		},
+		{
+			"level": 7,
+			"sha256": "73dde9070f1f008f1071729188ab7f4f2fa9e1b8db579d711bfcecb002694844",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 15214,
+			"type": "ALT-08"
+		},
+		{
+			"level": 8,
+			"sha256": "4d13e975db1ce9dc4122ce734d65adbc27616d777aeb29fb22d9e1ef9940845c",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 20086,
+			"type": "ALT-08"
+		},
+		{
+			"level": 9,
+			"sha256": "15c9f10bdb6f8670645160d4cb22a9cd40b70b3b3d73ff77a16dc0a37fde5ab4",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 20650,
+			"type": "ALT-08"
+		},
+		{
+			"level": 10,
+			"sha256": "c3a7135fbc6144a82c7a381caa6a6c8b12b9100fad4a5290991a4988a3798b01",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 24154,
+			"type": "ALT-08"
+		},
+		{
+			"level": 11,
+			"sha256": "f73cf02ce4fb318e5ded23cb84f878e841644445e7c42739eb3ddbfb3186c58a",
+			"status": "passed",
+			"surfaces": 16,
+			"triangles": 25862,
+			"type": "ALT-08"
+		},
+		{
+			"level": 6,
+			"sha256": "615ba6228d257394fae94409c297c27eea16857a89ad635cbee75a48771aed9a",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 16512,
+			"type": "ALT-09"
+		},
+		{
+			"level": 7,
+			"sha256": "9b3919725827ba1c09a94ccecdbc7a5b3e00e1867c569fb9d1126f845ec5501e",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 16584,
+			"type": "ALT-09"
+		},
+		{
+			"level": 8,
+			"sha256": "46f22273372cdb21845f4aae1506507685fa44c627d10af9ebca1feb159e1a37",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 21520,
+			"type": "ALT-09"
+		},
+		{
+			"level": 9,
+			"sha256": "126d37fb9702ce206f0da0110a324b808a34bef6590f5fdf15e482d8fe950dcd",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 22288,
+			"type": "ALT-09"
+		},
+		{
+			"level": 10,
+			"sha256": "d032675753331ab0848eba7313bb0c242c74523d28ec5d6518fdda7f12e9e430",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 22824,
+			"type": "ALT-09"
+		},
+		{
+			"level": 11,
+			"sha256": "771970861d2f69096e855b77a6116f68af10eea2fd19756a51632b83ba7d54a1",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 25096,
+			"type": "ALT-09"
+		},
+		{
+			"level": 6,
+			"sha256": "5638c9ba2588712b90e4225e05b5d0751f0254b3bf1647cbb0e8918dc6316ab7",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 16474,
+			"type": "ALT-10"
+		},
+		{
+			"level": 7,
+			"sha256": "98108f46ea0005589c7fbf1c654e8684e71c6ce3f232edcd87ab70e113e9f146",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 16522,
+			"type": "ALT-10"
+		},
+		{
+			"level": 8,
+			"sha256": "b6b6e5a16bca25cf32cca5c6740a159112ecda3a574cf3e3c6dbaf4c0c96230f",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 19898,
+			"type": "ALT-10"
+		},
+		{
+			"level": 9,
+			"sha256": "44c2df2ca80b29aec86bdabecb0ba5b292922eb28e6b22eb2374186869945496",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 24394,
+			"type": "ALT-10"
+		},
+		{
+			"level": 10,
+			"sha256": "bb1156ff54d6a017e807c108fc78507420e02000087bf1c5ade8f7ed09199774",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 24802,
+			"type": "ALT-10"
+		},
+		{
+			"level": 11,
+			"sha256": "56b4d39e3795bda99abd02158bd8a44f6529822050e8c9dc46a6081afe048d21",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 24890,
+			"type": "ALT-10"
+		},
+		{
+			"level": 6,
+			"sha256": "882487c9a212ab94651bbfb1e79c46f0c4f8fd398bfe474a017dbbe05a722105",
+			"status": "passed",
+			"surfaces": 9,
+			"triangles": 25198,
+			"type": "ECO-01"
+		},
+		{
+			"level": 7,
+			"sha256": "0a391bba237f6e9a2b6c253daabf1522034f1dc6ca8cd9b7d5316ded7740efca",
+			"status": "passed",
+			"surfaces": 9,
+			"triangles": 25270,
+			"type": "ECO-01"
+		},
+		{
+			"level": 8,
+			"sha256": "4eaa694d2a4eb736f9198f841b2b415e40f02d08dda3cb5c0eab34a518574d73",
+			"status": "passed",
+			"surfaces": 9,
+			"triangles": 33376,
+			"type": "ECO-01"
+		},
+		{
+			"level": 9,
+			"sha256": "3abf8209f3ecb37c78a16e2b478dcc70c84b29bd3638f990278c55c5d6e5a2c6",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 34430,
+			"type": "ECO-01"
+		},
+		{
+			"level": 10,
+			"sha256": "edbd0e6b16579e6f1356b7dfb7c3d22f93451f5caf4dd428ec15ba37950d170e",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 35678,
+			"type": "ECO-01"
+		},
+		{
+			"level": 11,
+			"sha256": "41a66d8cd8107217cebe67ea0158ef7e0573d4544e19616abec3a7ab58126bd5",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 42474,
+			"type": "ECO-01"
+		},
+		{
+			"level": 6,
+			"sha256": "c91f2ab774019f1afa5016622b7d085efcb45e83247f7fa05abd9ea9bb60c186",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 23652,
+			"type": "ECO-02"
+		},
+		{
+			"level": 7,
+			"sha256": "d1927ce7a17c3733314182c845ca72e5616dd5c099fd4e56197adab727531071",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 23748,
+			"type": "ECO-02"
+		},
+		{
+			"level": 8,
+			"sha256": "c7f272ee04cc349c77a5bb5480eb6bc589444fcae3b2279d7e68124f1ef4237c",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 26996,
+			"type": "ECO-02"
+		},
+		{
+			"level": 9,
+			"sha256": "235e4399e59fea0d5cd40719da47679d7e6774cdfdb3749ae5f06116cf64a2a5",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 32928,
+			"type": "ECO-02"
+		},
+		{
+			"level": 10,
+			"sha256": "27d610c10deae17b42b4fb8681348aee5832f3c5e9b6f802ea3a9ac0053674d8",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 33352,
+			"type": "ECO-02"
+		},
+		{
+			"level": 11,
+			"sha256": "c3e0f2c571294bd5cebc240d018c8c58998ea7f40e5c8730ec386a07c593bffc",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 36072,
+			"type": "ECO-02"
+		},
+		{
+			"level": 6,
+			"sha256": "352e0095d5629d67da5645c2ba63863cec127f360b64d5ab88038c00d64d40ec",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 23238,
+			"type": "ECO-03"
+		},
+		{
+			"level": 7,
+			"sha256": "84667c7addbb659297503ebeef25ec9360aa715b51b1800052c41be459a6230a",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 23334,
+			"type": "ECO-03"
+		},
+		{
+			"level": 8,
+			"sha256": "15bc458a852431076545beebcfe085514cf252e11bcd9d2e1e894249a74d9772",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 35446,
+			"type": "ECO-03"
+		},
+		{
+			"level": 9,
+			"sha256": "c83cc40c8de15fd05cdfa8c17d195b16a73deb822163ee3c69e6bcf6ca709349",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 36510,
+			"type": "ECO-03"
+		},
+		{
+			"level": 10,
+			"sha256": "92db94ae3196758e0c0f44eaae9f2185137108751f27f79d31fc56454d151829",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 36754,
+			"type": "ECO-03"
+		},
+		{
+			"level": 11,
+			"sha256": "bd6ab0c27395e96dbf0a8618e2ce1c7877a87cc67c2eaea9da2b0cdf2b34eaf3",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 43118,
+			"type": "ECO-03"
+		},
+		{
+			"level": 6,
+			"sha256": "0a61bf5da4529add6e0953c86d28447175c12ac53cf7d88cc80f841f69c8315c",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 22244,
+			"type": "ECO-04"
+		},
+		{
+			"level": 7,
+			"sha256": "135c956a2e354c79a430e6dbba24e3d33b4edda35d1a71633e10154c542f0774",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 22340,
+			"type": "ECO-04"
+		},
+		{
+			"level": 8,
+			"sha256": "822b3cb9882c4d29048abfa954061aeece11dd2ae50b9961a4eafd79ebf15164",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 29958,
+			"type": "ECO-04"
+		},
+		{
+			"level": 9,
+			"sha256": "96f6259e80d06866f2abb309dd616493258c3a2a554659f3bcc5349c21d90567",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 31050,
+			"type": "ECO-04"
+		},
+		{
+			"level": 10,
+			"sha256": "9b424e75540d42b255d312eae88aa44a0e20ba421f161657f343846ff79a1ca7",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 31542,
+			"type": "ECO-04"
+		},
+		{
+			"level": 11,
+			"sha256": "6bffb69a2dd9ce377cc14006d2e16b00a178be2340b8f89fbb2c60c0712ffc5b",
+			"status": "passed",
+			"surfaces": 15,
+			"triangles": 37976,
+			"type": "ECO-04"
+		},
+		{
+			"level": 6,
+			"sha256": "1245a365d4c8d53efef7ba3bc6de1fa3798ccd9a41cf595431efef6eb343c85b",
+			"status": "passed",
+			"surfaces": 9,
+			"triangles": 37206,
+			"type": "ECO-05"
+		},
+		{
+			"level": 7,
+			"sha256": "308e40b34e728cc58a28238dbfdad55cd251a22962a32d28bf442aafbdabf98f",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 37318,
+			"type": "ECO-05"
+		},
+		{
+			"level": 8,
+			"sha256": "c9995995b795adf73a00cd0090cd0375115f43d9a8534112f070f24564cb480a",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 42462,
+			"type": "ECO-05"
+		},
+		{
+			"level": 9,
+			"sha256": "d0ea36414bf529426b30dd96bbff8fc1aee3ecbefa773f567f9b329adc021f52",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 43398,
+			"type": "ECO-05"
+		},
+		{
+			"level": 10,
+			"sha256": "0f7427b74d3d86b1cd46f1323f2a355f60cb5e0e2d0d7bad5aa01d530446496b",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 49042,
+			"type": "ECO-05"
+		},
+		{
+			"level": 11,
+			"sha256": "457e39502754b826abd83a3d0cd1e864133b33368af5ab36d12aa81c53abfa8a",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 56122,
+			"type": "ECO-05"
+		},
+		{
+			"level": 6,
+			"sha256": "7cb1bfac9f77396fd84b9cb7083b26f9d60bcd74ed84334b883ef56b53f7d27a",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 23424,
+			"type": "MIL-01"
+		},
+		{
+			"level": 7,
+			"sha256": "ad12d55a2155adf17e07c0ada730c2624b39852dab43d45e641f42aecebd121d",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 23560,
+			"type": "MIL-01"
+		},
+		{
+			"level": 8,
+			"sha256": "3b36f46be822188e50bd76e27efc72da519c5df9bfa17d3007290b37a2bd4321",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 30386,
+			"type": "MIL-01"
+		},
+		{
+			"level": 9,
+			"sha256": "d5e0e2d486774f329ed2601db08efe489cc75e38534cddd13d9668c48be60ca1",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 31646,
+			"type": "MIL-01"
+		},
+		{
+			"level": 10,
+			"sha256": "97ce740569ace78a2a44d51d73be21161053993e9ca203f045176c6cefedd1df",
+			"status": "passed",
+			"surfaces": 15,
+			"triangles": 32090,
+			"type": "MIL-01"
+		},
+		{
+			"level": 11,
+			"sha256": "d06c9e0761d8209cc50e5aaf08a74e92d97d2f0565dab8d801b66773dc6b99e7",
+			"status": "passed",
+			"surfaces": 16,
+			"triangles": 37438,
+			"type": "MIL-01"
+		},
+		{
+			"level": 6,
+			"sha256": "f722bf309ec2ea082e9ab0d1efe2fa4da31f1fc74900cbc8f1af8f56fd9c3399",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 19554,
+			"type": "MIL-02"
+		},
+		{
+			"level": 7,
+			"sha256": "2e39f0b2795f7d36a6bff2e5988d99da727980d2992c86b28c5d1e94ffbba9b0",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 19626,
+			"type": "MIL-02"
+		},
+		{
+			"level": 8,
+			"sha256": "c976bc4074aa53865ca2f9537841410feb11a960740063c90fd2717056edb354",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 26092,
+			"type": "MIL-02"
+		},
+		{
+			"level": 9,
+			"sha256": "2d09d50e2230d8d0f895cc6f35541b4e29f38fca3fbfc3e5abf99e67270c1049",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 26812,
+			"type": "MIL-02"
+		},
+		{
+			"level": 10,
+			"sha256": "a7d1e0bd10be489de88a08c98d0267f9a3bba7f81bebd31470b3add58902e768",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 28864,
+			"type": "MIL-02"
+		},
+		{
+			"level": 11,
+			"sha256": "910ecfb3c74ad6a4fd100bb8e65256dcc1ba773b091a0f0875c37c16bde6e176",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 34556,
+			"type": "MIL-02"
+		},
+		{
+			"level": 6,
+			"sha256": "f8ceba3ab02970b0bbb557d2501706f62434f1086cd3a50554f28b5cfecd601e",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 15574,
+			"type": "MIL-03"
+		},
+		{
+			"level": 7,
+			"sha256": "3378f6aa5d07440308d8a5be8f58f3166f8adac275077d81c5578dc4a012c18d",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 15622,
+			"type": "MIL-03"
+		},
+		{
+			"level": 8,
+			"sha256": "cd0a332870ad800b6969e46cf34282e986e524f542edc9f570acf13814ba685e",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 18758,
+			"type": "MIL-03"
+		},
+		{
+			"level": 9,
+			"sha256": "50689a4d5c5b25b23f0f1fd6f2c735f703464ccbb8056acee5793f6ad9defc00",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 19634,
+			"type": "MIL-03"
+		},
+		{
+			"level": 10,
+			"sha256": "2edd68a8924d7df240569c37c35d51c7b4886abea5e50677d5bec2117fd72a73",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 23030,
+			"type": "MIL-03"
+		},
+		{
+			"level": 11,
+			"sha256": "bcc1fc462e5c8b87e087b9df6354f0c8e9a5cca2f18106e92198959f0f93bc9b",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 24814,
+			"type": "MIL-03"
+		},
+		{
+			"level": 6,
+			"sha256": "c761e3fff06f958c822a5dd3e6201c0e6b50184caab9969377ddbe293e2ab6da",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 17614,
+			"type": "MIL-04"
+		},
+		{
+			"level": 7,
+			"sha256": "485ba77ec6ca5e7aec56317dc15b1b9584a728861e11b78c6b4ceb959223ee4d",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 17686,
+			"type": "MIL-04"
+		},
+		{
+			"level": 8,
+			"sha256": "d477d8b2e56ef2c2377a822a453ab6f2a8cd63e75d41e83655a0a568b987f995",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 22782,
+			"type": "MIL-04"
+		},
+		{
+			"level": 9,
+			"sha256": "e312965de68ac935d29969788f86c6b32a425da1cfbdc84c77af2371e7356580",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 23718,
+			"type": "MIL-04"
+		},
+		{
+			"level": 10,
+			"sha256": "5590f91dd8829ba6c6f5d44a3140249e7d9d594c8f0585b44024017e35af3ebd",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 23850,
+			"type": "MIL-04"
+		},
+		{
+			"level": 11,
+			"sha256": "7dc71d331882b7d5fc288d5adb085bd8120d6f347b65c8fe93214a1fa419ba63",
+			"status": "passed",
+			"surfaces": 16,
+			"triangles": 23990,
+			"type": "MIL-04"
+		},
+		{
+			"level": 6,
+			"sha256": "f9f589ffe2d4da6db9b6352efb73dc851b8fcbb7caeec413be8c9923e9669438",
+			"status": "passed",
+			"surfaces": 15,
+			"triangles": 27656,
+			"type": "MIL-05"
+		},
+		{
+			"level": 7,
+			"sha256": "5ba7207c7c0fdf939f08bed623c01908ed0c406f3c3478c0a95691275a91b25f",
+			"status": "passed",
+			"surfaces": 16,
+			"triangles": 27792,
+			"type": "MIL-05"
+		},
+		{
+			"level": 8,
+			"sha256": "e425636eaa86e60ba6a7f5da166fe691eaac486bbe77a062b94e39e4af38963e",
+			"status": "passed",
+			"surfaces": 16,
+			"triangles": 34762,
+			"type": "MIL-05"
+		},
+		{
+			"level": 9,
+			"sha256": "bc52f2c76da388175c77bc618a6fec38e6ea026728851bde0a41f722e9a697dc",
+			"status": "passed",
+			"surfaces": 16,
+			"triangles": 41102,
+			"type": "MIL-05"
+		},
+		{
+			"level": 10,
+			"sha256": "d1a0b82cf323625b79e92dd418355dd8bd949e2e7a59a8a04fd0d6e79e0046dc",
+			"status": "passed",
+			"surfaces": 17,
+			"triangles": 41882,
+			"type": "MIL-05"
+		},
+		{
+			"level": 11,
+			"sha256": "c8228f68dbb9b83d8d591ed04e2ce872b77fb957139fdf5d2747102572099aaf",
+			"status": "passed",
+			"surfaces": 17,
+			"triangles": 49198,
+			"type": "MIL-05"
+		},
+		{
+			"level": 6,
+			"sha256": "31ec4f5f61f616117075f63060756677305425e3838b2405e37f7a91fc2a28fd",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 17242,
+			"type": "RES-01"
+		},
+		{
+			"level": 7,
+			"sha256": "cb926339b5af729bf4fffeb99e67663a2e7852139b7cecfcad84a4940adc9072",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 17314,
+			"type": "RES-01"
+		},
+		{
+			"level": 8,
+			"sha256": "ef86e66399bf42b022588347b3481902327dbb2c0276e377690373a603412cdd",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 22250,
+			"type": "RES-01"
+		},
+		{
+			"level": 9,
+			"sha256": "43e06d87a4754de3cf26e895c384d32368279741eede9dcbae6f3da68e4ba778",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 23028,
+			"type": "RES-01"
+		},
+		{
+			"level": 10,
+			"sha256": "fe19b75d1ae88efdedcf36cefaea92601c9922d5788f49be919f40190e242007",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 23552,
+			"type": "RES-01"
+		},
+		{
+			"level": 11,
+			"sha256": "13c1889a359f3a8c6d47ee9e0f8d971fe3f8fd3eff95ee2f6a7a7910b5d15efa",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 29534,
+			"type": "RES-01"
+		},
+		{
+			"level": 6,
+			"sha256": "20f0a92d6e14dc26d5f2c999f7ff20468929e7d933176caee232fd5b2cd2a83c",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 14400,
+			"type": "RES-02"
+		},
+		{
+			"level": 7,
+			"sha256": "0987bcaa12401767e5431b09ce3721c608712ecdb8133cac47f0676d571ce116",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 14472,
+			"type": "RES-02"
+		},
+		{
+			"level": 8,
+			"sha256": "ff28b71425c76bb04d1e6b0ef5b904ff3d9b6a67058973d3441f2d176808a689",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 19408,
+			"type": "RES-02"
+		},
+		{
+			"level": 9,
+			"sha256": "557fd3b71e0f87f28812a6227bcb47436ee7289a5f26db7f633c628b58a45a68",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 20332,
+			"type": "RES-02"
+		},
+		{
+			"level": 10,
+			"sha256": "acec3c03463b08a9b8164759808327055a464024c6057de38329c8a701f4e13a",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 20714,
+			"type": "RES-02"
+		},
+		{
+			"level": 11,
+			"sha256": "d32bca86b6a855f62656e2ec7d0a33bc40ae3ae71b6e6f2c96642e82cbbb57e6",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 26582,
+			"type": "RES-02"
+		},
+		{
+			"level": 6,
+			"sha256": "348ae0d6ec5de8ed9676c450d03cf3aed18f03c54c230bf1c20fb74b29bb6251",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 7634,
+			"type": "RES-03"
+		},
+		{
+			"level": 7,
+			"sha256": "393d246cb592161da5e283c292aaab882f62fcbc4b7369a28118dff28184431c",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 7658,
+			"type": "RES-03"
+		},
+		{
+			"level": 8,
+			"sha256": "608695fbbec326ff4206152fa0a4445bb57cf348007adf2d0b7fa0daf5dcdbce",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 14820,
+			"type": "RES-03"
+		},
+		{
+			"level": 9,
+			"sha256": "fe387869bc7256788eb0a223d62ba8b39c460eddbd8039e844fab568ccfb6a99",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 21036,
+			"type": "RES-03"
+		},
+		{
+			"level": 10,
+			"sha256": "6b96f249877347d1ae78f7c03a76aca21e90a32bf8f7c4d4105086c72e8d18a4",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 21252,
+			"type": "RES-03"
+		},
+		{
+			"level": 11,
+			"sha256": "12725a079dc3179267f547ee84957d6742a7084d08b9157d77330bfc3f16a448",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 23556,
+			"type": "RES-03"
+		},
+		{
+			"level": 6,
+			"sha256": "a0f54110ee3d33cee545147b77078fd28ab2dfd347d3bf1822cff0ef33255490",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 12970,
+			"type": "RES-04"
+		},
+		{
+			"level": 7,
+			"sha256": "58adbe9bf432918e940bd5bdfcd04b4d3376147d043d36474c958a81bc1d26d5",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 13018,
+			"type": "RES-04"
+		},
+		{
+			"level": 8,
+			"sha256": "6bc4d429e574c0cd5d64cf62a5672ed9798865e04c3dc165ca591dd70a98a6ea",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 18226,
+			"type": "RES-04"
+		},
+		{
+			"level": 9,
+			"sha256": "cc51c01effa7387d62b0de23a89068abe667e58cf5a55a9e6cad0cafc98d14e7",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 18942,
+			"type": "RES-04"
+		},
+		{
+			"level": 10,
+			"sha256": "941fafaeff8dfcc422cf2e5a57f10418b0e567885d7309dfefb1c83dd2fc08a5",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 20322,
+			"type": "RES-04"
+		},
+		{
+			"level": 11,
+			"sha256": "314c88cf8fc98787ef3578dee7ff0292771ff52b80f1f69c4627c9bd9460183e",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 21802,
+			"type": "RES-04"
+		},
+		{
+			"level": 6,
+			"sha256": "a12778a1f2ee63385bebfaf6ee637170bf149b57c4cbd0047932c4c2b9df593c",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 15122,
+			"type": "RES-05"
+		},
+		{
+			"level": 7,
+			"sha256": "2bb0212b79859b1c37bdc597fec26e8d733c2edc7f3183ea22396c6a38aa04a3",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 15194,
+			"type": "RES-05"
+		},
+		{
+			"level": 8,
+			"sha256": "cc4b1ce71c8b35c09fb9160e739998afcdd714cbc23024647366205eb156daf8",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 20322,
+			"type": "RES-05"
+		},
+		{
+			"level": 9,
+			"sha256": "df414c0ad19ba493154c93906d2c2c1eb91e471947228e4ab16b545d07c928b6",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 21090,
+			"type": "RES-05"
+		},
+		{
+			"level": 10,
+			"sha256": "084a671b7ea48f160528b2c44280f90d01121a1779cf4eb6feb06c6855302940",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 23798,
+			"type": "RES-05"
+		},
+		{
+			"level": 11,
+			"sha256": "af7a96f6a225f9faae5a6d623e346c2f2e1fe5c9fab93a3d4e01ffb93b0f0459",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 29114,
+			"type": "RES-05"
+		},
+		{
+			"level": 6,
+			"sha256": "5154e8cad5767b9b5997346454d71134efcd44ec93321eaf1f9021843ed38682",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 21876,
+			"type": "SUP-01"
+		},
+		{
+			"level": 7,
+			"sha256": "d284f67b381fba67b16999d599f4bfdf10c53a95bcfce17b50eb456891966257",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 21972,
+			"type": "SUP-01"
+		},
+		{
+			"level": 8,
+			"sha256": "bc1144476d364197cf27949ee7744845eeb4853a5e4104ccd4e575e925c4dd78",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 27292,
+			"type": "SUP-01"
+		},
+		{
+			"level": 9,
+			"sha256": "9aa144acb9ecdbd42f3da18689102bee256462fb7d13a4637e08ebf32787709c",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 31632,
+			"type": "SUP-01"
+		},
+		{
+			"level": 10,
+			"sha256": "311c9fddc8fd2153ad8b99dfb747cc3fbb28459b0e2247b979a910ac462d660e",
+			"status": "passed",
+			"surfaces": 14,
+			"triangles": 32280,
+			"type": "SUP-01"
+		},
+		{
+			"level": 11,
+			"sha256": "57dc0048be9204e1f26a02380cd19d7509d2c889bdde13c6c8280d9bd2fe0536",
+			"status": "passed",
+			"surfaces": 16,
+			"triangles": 33912,
+			"type": "SUP-01"
+		},
+		{
+			"level": 6,
+			"sha256": "2103c6999f71df110d49d8ba43fb0129429d6be50746e0397e9bce236b37d07e",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 20732,
+			"type": "SUP-02"
+		},
+		{
+			"level": 7,
+			"sha256": "9005b23eedd34c2504c6176535fcbd3bd6ad5ce42c35d274169c784fb540a45b",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 20804,
+			"type": "SUP-02"
+		},
+		{
+			"level": 8,
+			"sha256": "39b8ef8b3b853d0a8f1831b76bca20b2f4a35a33b6784f87651b79643ade9b04",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 25900,
+			"type": "SUP-02"
+		},
+		{
+			"level": 9,
+			"sha256": "d000e118dbe3492a19d503d8f6de9cf1c9043ddf3bcf836a2887768acf9e6905",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 26812,
+			"type": "SUP-02"
+		},
+		{
+			"level": 10,
+			"sha256": "77de5db637bc313ab3cc2f57dd8c29d00ae74a67acb63232f033c360ba7db937",
+			"status": "passed",
+			"surfaces": 13,
+			"triangles": 27380,
+			"type": "SUP-02"
+		},
+		{
+			"level": 11,
+			"sha256": "0ed403b7c4ffb08196bdabfd25f908a64cffbd79d708f5a0d90f863fb7767fb1",
+			"status": "passed",
+			"surfaces": 15,
+			"triangles": 29084,
+			"type": "SUP-02"
+		},
+		{
+			"level": 6,
+			"sha256": "e1fa41d051b54eeb871f683546a2d41c968a2d94ac103ae811d8876b77ea442a",
+			"status": "passed",
+			"surfaces": 5,
+			"triangles": 25452,
+			"type": "SUP-03"
+		},
+		{
+			"level": 7,
+			"sha256": "92a58f7fe0613490bcd452538858e6532b3380224f5e6f9fb3a50c3250d121e4",
+			"status": "passed",
+			"surfaces": 8,
+			"triangles": 29020,
+			"type": "SUP-03"
+		},
+		{
+			"level": 8,
+			"sha256": "88cab2334ff7a3436a17c85a1a2fbd180282cf8ab8f7b48ae76fc6c1862a2cad",
+			"status": "passed",
+			"surfaces": 8,
+			"triangles": 32092,
+			"type": "SUP-03"
+		},
+		{
+			"level": 9,
+			"sha256": "2385b156fdc6b662a28ad50df3467bc6d9296bd3e3e0e950799046294dbf273c",
+			"status": "passed",
+			"surfaces": 8,
+			"triangles": 32740,
+			"type": "SUP-03"
+		},
+		{
+			"level": 10,
+			"sha256": "e403e99a71d7581e21992bd834fc0740448bf6ebf0c8159ab9459d1c604aed1b",
+			"status": "passed",
+			"surfaces": 8,
+			"triangles": 33088,
+			"type": "SUP-03"
+		},
+		{
+			"level": 11,
+			"sha256": "32c8fbe1265b15916940dbb9f9cbab56afa2a029ac7fc5dc6bec69c013f618ef",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 38964,
+			"type": "SUP-03"
+		},
+		{
+			"level": 6,
+			"sha256": "366b0bababb5d8e06badb0ee4402503ec7d3cdd0e7eaef79de1191428b2f9a2a",
+			"status": "passed",
+			"surfaces": 9,
+			"triangles": 24786,
+			"type": "SUP-04"
+		},
+		{
+			"level": 7,
+			"sha256": "9e0d2568ee5ae60d1dec41574ca925f9db6ce0efcb4713fcf5696e19bdfff3de",
+			"status": "passed",
+			"surfaces": 9,
+			"triangles": 24858,
+			"type": "SUP-04"
+		},
+		{
+			"level": 8,
+			"sha256": "323837e31e506c210b5ec94332d948284db4a245e8fb083d2ce5f4bda1c2bfa2",
+			"status": "passed",
+			"surfaces": 9,
+			"triangles": 32068,
+			"type": "SUP-04"
+		},
+		{
+			"level": 9,
+			"sha256": "62b6923a69ce4c70f777611073280e7bf7145413b3e8bad9e357785cbea2f795",
+			"status": "passed",
+			"surfaces": 9,
+			"triangles": 34648,
+			"type": "SUP-04"
+		},
+		{
+			"level": 10,
+			"sha256": "97097cfc7b33b6836d76895658d6838f2a9521969697bd52393938233c8d7cf1",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 34924,
+			"type": "SUP-04"
+		},
+		{
+			"level": 11,
+			"sha256": "d59b315de0ff9cfef5b54502d8783be16e2703e3b8db43f0a5261ad4b112a08a",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 36736,
+			"type": "SUP-04"
+		},
+		{
+			"level": 6,
+			"sha256": "41ceed305f55e78f5f98e9f0d91ee691574e48d5f2f6ffc37e6bc1b4ef5e48a7",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 5440,
+			"type": "SUP-05"
+		},
+		{
+			"level": 7,
+			"sha256": "f087cd55c17e5c81b86a4e549509ed10608027ce5eaa1120d0a19efea4b3faf0",
+			"status": "passed",
+			"surfaces": 10,
+			"triangles": 5464,
+			"type": "SUP-05"
+		},
+		{
+			"level": 8,
+			"sha256": "719f4a4b418f661abd2ca11aa7457d4bd3cbd9534e04b90fb30f884061388d8e",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 12458,
+			"type": "SUP-05"
+		},
+		{
+			"level": 9,
+			"sha256": "64a2eee7823d19cb02d7356a98a563937a3770ba762d15e2dd338cfca643bc14",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 13290,
+			"type": "SUP-05"
+		},
+		{
+			"level": 10,
+			"sha256": "662b9247c9020a0b864ba9ccb6a3f04bcb848e6546fd6bba1edb8a8b8324de25",
+			"status": "passed",
+			"surfaces": 11,
+			"triangles": 18634,
+			"type": "SUP-05"
+		},
+		{
+			"level": 11,
+			"sha256": "440f31ff729724794de4febe0b9ad859fe604e0f454c008df9915702a93a6006",
+			"status": "passed",
+			"surfaces": 12,
+			"triangles": 19370,
+			"type": "SUP-05"
+		}
+	],
+	"status": "passed",
+	"units": [
+		{
+			"id": "SIEGE-RAM-01",
+			"sha256": "6370655c00715141df72da66b751753385d663d10b384309c0fe1eda303427d1",
+			"status": "passed",
+			"triangles": 1880
+		}
+	]
+}

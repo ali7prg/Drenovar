@@ -1,0 +1,5 @@
+{
+  "status": "passed",
+  "checks": 6,
+  "scope": "encrypted snapshot cache bound to server origin; staging cache cannot masquerade as main city"
+}

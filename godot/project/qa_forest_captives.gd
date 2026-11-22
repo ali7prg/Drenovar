@@ -70,6 +70,8 @@ func apply(state: Dictionary) -> void:
 	forest.client.primed = false
 	clock = float(state.get("adventure", {}).get("serverTime", 0.0))
 	forest.client.manual_clock_ms = clock
+	# 1022: fixtures jump back in time; 1021's accept() keeps a newer state unless the one on screen is a cached copy
+	game.showing_cached_state = true
 	game.accept(state)
 	game.battle_results.pending.clear()
 	game.result_notice.hide()
@@ -142,6 +144,10 @@ func cage_center(site_id: String) -> Vector3:
 func run() -> void:
 	root.size = Vector2i(1366, 630)
 	game = load("res://main.tscn").instantiate()
+	# 1022: offline, fixture-fed (forest local-realm states predate V6): an unreachable loopback
+	# endpoint, so accept() takes them and nothing reaches a real server (1021 qa_city_works pattern).
+	game.endpoint = "http://127.0.0.1:9"
+	game.loopback = true
 	root.add_child(game)
 	while game.get("scene_loading") or not is_instance_valid(game.get("stage")):
 		await process_frame

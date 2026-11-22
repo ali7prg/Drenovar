@@ -629,8 +629,34 @@ static func _excluded(p: Vector2, exclusions: Array) -> bool:
 	return false
 
 
-func build_city_forest(city: Dictionary, exclusions: Array) -> void:
+## Trees, stumps and understory of the city map (pickable resource trees keep the legacy rule).
+## staged=true (the city load, landscape.build_forest(..., staged)): the instance build yields to the
+## next frame whenever the landscape's setup budget is used up (stage.setup_slice: 3.5 ms in game,
+## 45 ms under the launch screen, 2 ms in a background build), so no single frame carries the whole
+## forest (it was one 2.4 s frame on the desktop software renderer). A newer build cancels an older
+## staged one at its next yield. staged=false (a felled tree) stays synchronous.
+## 1022: the 1021 town rules apply too: no tree on the wall band / gate roads (stage.walls.blocks),
+## no wild understory inside the town (stage.in_town).
+var _forest_build_serial := 0
+var build_parts: Dictionary = {}
+
+func _city_blocked(p: Vector2, exclusions: Array, street_margin: float) -> bool:
+	if _excluded(p, exclusions):
+		return true
+	if street_margin > 0.0 and stage.on_street(p, street_margin):
+		return true
+	var walls: Variant = stage.get("walls")
+	return walls != null and walls.blocks(p.x, p.y)
+
+
+func build_city_forest(city: Dictionary, exclusions: Array, staged := false) -> void:
+	_forest_build_serial += 1
+	var serial := _forest_build_serial
 	var started := Time.get_ticks_usec()
+	var slice := started
+	var part := started
+	build_parts = {"staged": staged, "frames": 1}
+	_built_ok = false
 	var previous_stage := setup_stage
 	setup_stage = "city forest instances"
 	city_state = city
@@ -646,16 +672,18 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 	var kingdom: bool = city.get("kingdom") is Dictionary
 	var stump: Dictionary = kit.stump_asset()
 	var stump_mesh: Array = _mesh_for(stump, "stump:resource", ForestCanopy.KIND_STUMP, 1)
+	var town_check: bool = stage.has_method("in_town")
+	var count := 0
 	for tree in data.woods:
 		if tree.village and not kingdom:
 			continue
 		# Pickable set exactly as the legacy forest (decided on the original spot); the visual
 		# slot falls back to the original spot when the player's property covers it.
 		var original := Vector2(float(tree.p[0]), float(tree.p[2]))
-		if _excluded(original, exclusions) or stage.on_street(original, 1.5):
+		if _city_blocked(original, exclusions, 1.5):
 			continue
 		var xz := _tree_xz(tree)
-		if xz != original and (_excluded(xz, exclusions) or stage.on_street(xz, 1.5)):
+		if xz != original and _city_blocked(xz, exclusions, 1.5):
 			xz = original
 		visual_pos[tree.id] = xz
 		var y := height_at(xz.x, xz.y)
@@ -663,7 +691,9 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 		entry.p = [xz.x, y, xz.y]
 		stage.selectable_trees.append(entry)
 		if felled.has(tree.id):
-			canopy.add_instance(stump_mesh[0], Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * 0.7), Vector3(xz.x, y, xz.y)))
+			# 1021: a felled tree is cleared away completely inside the town; the wild forest keeps a stump.
+			if not (town_check and stage.in_town(xz.x, xz.y)):
+				canopy.add_instance(stump_mesh[0], Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * 0.7), Vector3(xz.x, y, xz.y)))
 			continue
 		var cell := Vector2i(floori(xz.x / 4.0), floori(xz.y / 4.0))
 		if not stage.standing_tree_cells.has(cell):
@@ -680,9 +710,19 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 		var transform := Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * scale), Vector3(xz.x, y - 0.05, xz.y))
 		canopy.add_instance(mesh[0], transform)
 		_add_impostor(mesh, transform.origin, float(tree.angle), scale)
+		count += 1
+		if staged and count % 32 == 0:
+			var next: int = await stage.setup_slice(slice)
+			if next != slice:
+				build_parts.frames += 1
+				if serial != _forest_build_serial:
+					return
+			slice = next
+	build_parts.resource_ms = (Time.get_ticks_usec() - part) / 1000.0
+	part = Time.get_ticks_usec()
 	for item in layout.get("trees", []):
 		var xz := Vector2(float(item[0]), float(item[1]))
-		if _excluded(xz, exclusions):
+		if _city_blocked(xz, exclusions, 0.0):
 			continue
 		var mesh := _tree_mesh(int(item[2]), int(item[3]))
 		var scale := float(item[5])
@@ -690,11 +730,23 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 			Vector3(xz.x, height_at(xz.x, xz.y) - 0.05, xz.y))
 		canopy.add_instance(mesh[0], transform)
 		_add_impostor(mesh, transform.origin, deg_to_rad(float(item[4])), scale)
+		count += 1
+		if staged and count % 32 == 0:
+			var next: int = await stage.setup_slice(slice)
+			if next != slice:
+				build_parts.frames += 1
+				if serial != _forest_build_serial:
+					return
+			slice = next
+	build_parts.ambient_ms = (Time.get_ticks_usec() - part) / 1000.0
+	part = Time.get_ticks_usec()
 	for list_name in ["understory", "innerUnderstory"]:
 		var inner: bool = list_name == "innerUnderstory"
 		for item in layout.get(list_name, []):
 			var xz := Vector2(float(item[0]), float(item[1]))
-			if _excluded(xz, exclusions) or (inner and stage.on_street(xz, 1.7)):
+			if _city_blocked(xz, exclusions, 1.7 if inner else 0.0):
+				continue
+			if inner and town_check and stage.in_town(xz.x, xz.y):
 				continue
 			var mesh := _under_mesh(int(item[2]), int(item[3]))
 			var y := height_at(xz.x, xz.y) + (float(item[6]) if item.size() > 6 else 0.0)
@@ -703,6 +755,16 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 				shape = QUARRY_LEDGE_SHAPE          # pass 3: terraced limestone ledges (flat lit tops, faces)
 			var basis := Basis(Vector3.UP, deg_to_rad(float(item[4]))).scaled(shape * float(item[5]))
 			canopy.add_instance(mesh[0], Transform3D(basis, Vector3(xz.x, y - 0.03, xz.y)))
+			count += 1
+			if staged and count % 64 == 0:
+				var next: int = await stage.setup_slice(slice)
+				if next != slice:
+					build_parts.frames += 1
+					if serial != _forest_build_serial:
+						return
+				slice = next
+	build_parts.understory_ms = (Time.get_ticks_usec() - part) / 1000.0
+	part = Time.get_ticks_usec()
 	# art/01 S-G: the bare pale dead tree (~9.5 m) at its mark (kit oak skeleton with birch bark) with pale
 	# limestone stones round it (the bones module stands beside it, ForestLandmarks DEAD_TREE_SET).
 	if landmarks != null and landmarks.dead_tree_spot != Vector2.INF:
@@ -723,14 +785,79 @@ func build_city_forest(city: Dictionary, exclusions: Array) -> void:
 	for rock in ForestWater.outcrop_rocks():
 		var basis := Basis(Vector3.UP, float(rock[2])).scaled(rock[3])
 		canopy.add_instance(rock_mesh[0], Transform3D(basis, Vector3(rock[0], height_at(rock[0], rock[1]) - 0.2, rock[1])))
+	if staged:
+		var next: int = await stage.setup_slice(slice)
+		if next != slice:
+			build_parts.frames += 1
+			if serial != _forest_build_serial:
+				return
+		slice = next
+	build_parts.extras_ms = (Time.get_ticks_usec() - part) / 1000.0
+	part = Time.get_ticks_usec()
 	_refresh_local_anchors()
 	_register_fog_receivers()
 	_apply_fog_cull()
+	build_parts.fog_cull_ms = (Time.get_ticks_usec() - part) / 1000.0
 	last_cull.build_ms = (Time.get_ticks_usec() - started) / 1000.0
+	_built_felled = felled
+	_built_ok = true
 	setup_stage = previous_stage
 	if stage.camera != null and stage.camera.is_inside_tree():
 		on_camera_changed()
 	call_deferred("_emit_ready_once")
+
+
+## 1022: the felled set the instance buffers hold; a newly felled tree then only takes its own
+## instances out (fell_trees) instead of rebuilding every cell (134 ms -> a few ms per felling).
+var _built_felled := {}
+var _built_ok := false
+var last_fell_ms := 0.0
+
+
+## Applies newly felled trees to the built city forest: their kit instances and impostors leave
+## their cells, a stump stays in the wild forest (none inside the town, as in 1021). Returns false
+## when a full build is needed (nothing built yet, or a felled tree came back).
+func fell_trees(city: Dictionary) -> bool:
+	if not _built_ok or canopy == null or stage == null:
+		return false
+	var now := {}
+	for id in city.get("progress", {}).get("felled", []):
+		now[id] = true
+	for id in _built_felled:
+		if not now.has(id):
+			return false
+	city_state = city
+	var added := {}
+	for id in now:
+		if not _built_felled.has(id) and visual_pos.has(id):
+			added[id] = true
+	_built_felled = now
+	if added.is_empty():
+		return true
+	var started := Time.get_ticks_usec()
+	var town_check: bool = stage.has_method("in_town")
+	var stump_mesh: Array = _mesh_for(kit.stump_asset(), "stump:resource", ForestCanopy.KIND_STUMP, 1)
+	for tree in data.woods:
+		if not added.has(tree.id):
+			continue
+		var xz: Vector2 = visual_pos[tree.id]
+		canopy.remove_tree_at(xz)
+		var cell := Vector2i(floori(xz.x / 4.0), floori(xz.y / 4.0))
+		var standing: Array = stage.standing_tree_cells.get(cell, [])
+		standing.erase(xz)
+		if standing.is_empty():
+			stage.standing_tree_cells.erase(cell)
+		if not (town_check and stage.in_town(xz.x, xz.y)):
+			var y := height_at(xz.x, xz.y)
+			canopy.add_instance(stump_mesh[0], Transform3D(Basis(Vector3.UP, float(tree.angle)).scaled(Vector3.ONE * 0.7), Vector3(xz.x, y, xz.y)))
+	if occluders != null:
+		occluders.clear()
+	_refresh_local_anchors()
+	_apply_fog_cull()
+	last_fell_ms = (Time.get_ticks_usec() - started) / 1000.0
+	if stage.camera != null and stage.camera.is_inside_tree():
+		on_camera_changed()
+	return true
 
 
 func _register_fog_receivers() -> void:

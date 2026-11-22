@@ -1,0 +1,1638 @@
+{
+  "status": "passed",
+  "validator": "Khronos gltf-validator 2.0.0-dev.3.10",
+  "errors": 0,
+  "warnings": 0,
+  "files": [
+    {
+      "key": "ALT-02-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-02-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-02-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-02-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-02-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-02-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-05-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 16
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-05-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 16
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-05-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 16
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-05-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 18
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-05-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 18
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-05-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 18
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-06-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 25,
+        "UNUSED_MESH_TANGENT": 8
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-06-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 8,
+        "UNUSED_OBJECT": 25
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-06-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 8,
+        "UNUSED_OBJECT": 25
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-06-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 8,
+        "UNUSED_OBJECT": 25
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-06-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 10,
+        "UNUSED_OBJECT": 29
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-06-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 12,
+        "UNUSED_OBJECT": 33
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-07-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-07-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-07-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-07-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-07-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-07-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 17
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-08-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 17,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-08-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 17,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-08-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 17,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-08-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 19,
+        "UNUSED_MESH_TANGENT": 5
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-08-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 19,
+        "UNUSED_MESH_TANGENT": 5
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-08-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 7,
+        "UNUSED_OBJECT": 23
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-09-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-09-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-09-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-09-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-09-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-09-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 18
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-10-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-10-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-10-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-10-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-10-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "ALT-10-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 6,
+        "UNUSED_OBJECT": 19
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-01-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 11,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-01-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 11,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-01-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 11,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-01-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-01-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-01-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 18
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-02-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 13
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-02-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 13
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-02-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 13
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-02-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 13
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-02-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 13
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-02-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 13
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-03-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 13
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-03-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 13
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-03-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 13
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-03-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 13
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-03-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 17
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-03-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 17
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-04-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-04-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-04-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-04-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-04-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 16,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-04-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 7,
+        "UNUSED_OBJECT": 22
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-05-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 11,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-05-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 15
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-05-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 15
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-05-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 15
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-05-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 17
+      },
+      "messages": []
+    },
+    {
+      "key": "ECO-05-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 17
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-01-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 15
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-01-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 19
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-01-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 19
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-01-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 19
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-01-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 6,
+        "UNUSED_OBJECT": 21
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-01-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 7,
+        "UNUSED_OBJECT": 23
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-02-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 16,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-02-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 16
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-02-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 16
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-02-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 16
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-02-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 17
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-02-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 19
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-03-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-03-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-03-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-03-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-03-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-03-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 18
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-04-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 18,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-04-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 18,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-04-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 18,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-04-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 18,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-04-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 18,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-04-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 6,
+        "UNUSED_OBJECT": 22
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-05-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 22,
+        "UNUSED_MESH_TANGENT": 7
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-05-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 8,
+        "UNUSED_OBJECT": 24
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-05-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 8,
+        "UNUSED_OBJECT": 24
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-05-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 8,
+        "UNUSED_OBJECT": 24
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-05-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 9,
+        "UNUSED_OBJECT": 26
+      },
+      "messages": []
+    },
+    {
+      "key": "MIL-05-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 9,
+        "UNUSED_OBJECT": 26
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-01-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-01-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-01-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-01-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-01-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-01-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 16,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-02-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-02-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-02-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-02-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-02-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-02-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 18
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-03-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-03-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-03-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-03-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-03-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-03-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 14,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-04-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 16,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-04-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 16,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-04-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 16,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-04-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 18,
+        "UNUSED_MESH_TANGENT": 5
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-04-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 18,
+        "UNUSED_MESH_TANGENT": 5
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-04-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 6,
+        "UNUSED_OBJECT": 20
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-05-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 16
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-05-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 16
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-05-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 16
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-05-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 16
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-05-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 16
+      },
+      "messages": []
+    },
+    {
+      "key": "RES-05-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 6,
+        "UNUSED_OBJECT": 20
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-01-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 6,
+        "UNUSED_OBJECT": 20
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-01-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 6,
+        "UNUSED_OBJECT": 20
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-01-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 6,
+        "UNUSED_OBJECT": 20
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-01-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 6,
+        "UNUSED_OBJECT": 20
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-01-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 6,
+        "UNUSED_OBJECT": 20
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-01-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 8,
+        "UNUSED_OBJECT": 24
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-02-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-02-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-02-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-02-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-02-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 16,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-02-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 20
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-03-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 6,
+        "UNUSED_MESH_TANGENT": 1
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-03-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 10,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-03-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 10,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-03-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 10,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-03-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 10,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-03-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 14
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-04-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 11,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-04-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 11,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-04-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 11,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-04-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 11,
+        "UNUSED_MESH_TANGENT": 2
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-04-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 3,
+        "UNUSED_OBJECT": 13
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-04-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 4,
+        "UNUSED_OBJECT": 15
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-05-6",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-05-7",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 13,
+        "UNUSED_MESH_TANGENT": 3
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-05-8",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-05-9",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-05-10",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 15,
+        "UNUSED_MESH_TANGENT": 4
+      },
+      "messages": []
+    },
+    {
+      "key": "SUP-05-11",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_MESH_TANGENT": 5,
+        "UNUSED_OBJECT": 17
+      },
+      "messages": []
+    },
+    {
+      "key": "SIEGE-RAM-01",
+      "errors": 0,
+      "warnings": 0,
+      "information": {
+        "UNUSED_OBJECT": 6,
+        "UNUSED_MESH_TANGENT": 1
+      },
+      "messages": []
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+SMOOTHNESS Attack opens formation true
+SMOOTHNESS march accepted and window closed true
+SMOOTHNESS march accepted within 2 s on loopback (75 ms) true
+SMOOTHNESS one army sent true
+SMOOTHNESS no frame stalls during march and fight (worst 74.7 ms) true
+SMOOTHNESS marching army is drawn true
+SMOOTHNESS fight plays attack clips true
+SMOOTHNESS contact places refined before the result true
+{"accepted_ms":75,"checks":8,"clips":["run","trot","walk","idle","attack"],"failures":[],"level":1,"method":"Linux Godot headless main scene, real touch, loopback synthetic V6 server, real travel time; not iPhone FPS","units":{"ENG-01":20.0,"ENG-02":20.0,"ENG-03":300.0,"ENG-05":300.0},"worst_frame_ms":74.669}

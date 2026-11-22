@@ -1,0 +1,170 @@
+{
+ "tool": "godot/project/qa_march_lanes.gd",
+ "method": "headless Linux, real Landscape and obstacles, server routes; not iPhone acceptance",
+ "checks": 99,
+ "failures": [],
+ "fields": {
+  "obstacle_samples_server_route": "points every 0.5 m of the server route inside a trunk, a house, a rock, a fence, a building or the palisade",
+  "obstacle_samples_lane": "the same for the planned march lane",
+  "plan_cpu_ms": "time until the lane is ready, headless with unpaced frames, 6 ms slices (the column is mustering): about the CPU time of the plan on this PC",
+  "longest_frame_ms": "longest frame of the headless scene while planning",
+  "moved_m": "largest sideways shift from the server route",
+  "narrowest_m": "smallest clearance along the lane"
+ },
+ "routes": {
+  "city-33a0bb73": {
+   "lane_m": 93.0,
+   "longest_frame_ms": 10.2,
+   "moved_m": 7.0,
+   "narrowest_m": 0.0,
+   "obstacle_samples_lane": 2,
+   "obstacle_samples_server_route": 30,
+   "plan_cpu_ms": 64.7,
+   "samples": 145,
+   "server_route_m": 85.3
+  },
+  "city-ac515370": {
+   "lane_m": 56.6,
+   "longest_frame_ms": 7.2,
+   "moved_m": 5.3,
+   "narrowest_m": 0.78,
+   "obstacle_samples_lane": 0,
+   "obstacle_samples_server_route": 12,
+   "plan_cpu_ms": 58.2,
+   "samples": 98,
+   "server_route_m": 53.5
+  },
+  "city-d97c6546-ferry": {
+   "lane_m": 98.0,
+   "longest_frame_ms": 7.7,
+   "moved_m": 5.5,
+   "narrowest_m": 0.0,
+   "obstacle_samples_lane": 14,
+   "obstacle_samples_server_route": 29,
+   "plan_cpu_ms": 65.9,
+   "samples": 161,
+   "server_route_m": 91.6
+  },
+  "city-t-44_-44": {
+   "lane_m": 93.0,
+   "longest_frame_ms": 8.0,
+   "moved_m": 7.0,
+   "narrowest_m": 0.0,
+   "obstacle_samples_lane": 2,
+   "obstacle_samples_server_route": 30,
+   "plan_cpu_ms": 58.6,
+   "samples": 145,
+   "server_route_m": 85.3
+  },
+  "city-t-46_30": {
+   "lane_m": 52.8,
+   "longest_frame_ms": 8.5,
+   "moved_m": 3.4,
+   "narrowest_m": 0.75,
+   "obstacle_samples_lane": 0,
+   "obstacle_samples_server_route": 6,
+   "plan_cpu_ms": 48.5,
+   "samples": 85,
+   "server_route_m": 51.8
+  },
+  "city-t-50_0": {
+   "lane_m": 69.6,
+   "longest_frame_ms": 8.0,
+   "moved_m": 5.9,
+   "narrowest_m": 0.85,
+   "obstacle_samples_lane": 0,
+   "obstacle_samples_server_route": 45,
+   "plan_cpu_ms": 53.8,
+   "samples": 122,
+   "server_route_m": 59.0
+  },
+  "city-t10_-50": {
+   "lane_m": 180.5,
+   "longest_frame_ms": 8.9,
+   "moved_m": 8.0,
+   "narrowest_m": 0.0,
+   "obstacle_samples_lane": 6,
+   "obstacle_samples_server_route": 26,
+   "plan_cpu_ms": 129.1,
+   "samples": 324,
+   "server_route_m": 167.6
+  },
+  "city-t40_44": {
+   "lane_m": 56.2,
+   "longest_frame_ms": 9.7,
+   "moved_m": 5.1,
+   "narrowest_m": 0.0,
+   "obstacle_samples_lane": 1,
+   "obstacle_samples_server_route": 43,
+   "plan_cpu_ms": 65.2,
+   "samples": 94,
+   "server_route_m": 51.6
+  },
+  "city-t44_-40-ferry": {
+   "lane_m": 95.2,
+   "longest_frame_ms": 9.0,
+   "moved_m": 6.0,
+   "narrowest_m": 0.0,
+   "obstacle_samples_lane": 14,
+   "obstacle_samples_server_route": 29,
+   "plan_cpu_ms": 97.1,
+   "samples": 156,
+   "server_route_m": 85.9
+  },
+  "city-t52_10": {
+   "lane_m": 81.3,
+   "longest_frame_ms": 7.8,
+   "moved_m": 7.8,
+   "narrowest_m": 0.32,
+   "obstacle_samples_lane": 1,
+   "obstacle_samples_server_route": 44,
+   "plan_cpu_ms": 53.5,
+   "samples": 131,
+   "server_route_m": 72.4
+  },
+  "world-10": {
+   "lane_m": 46.2,
+   "longest_frame_ms": 9.3,
+   "moved_m": 6.0,
+   "narrowest_m": 0.03,
+   "obstacle_samples_lane": 0,
+   "obstacle_samples_server_route": 12,
+   "plan_cpu_ms": 43.8,
+   "samples": 70,
+   "server_route_m": 38.5
+  },
+  "world-11": {
+   "lane_m": 49.7,
+   "longest_frame_ms": 3.3,
+   "moved_m": 4.5,
+   "narrowest_m": 0.68,
+   "obstacle_samples_lane": 0,
+   "obstacle_samples_server_route": 6,
+   "plan_cpu_ms": 5.6,
+   "samples": 81,
+   "server_route_m": 43.0
+  },
+  "world-12": {
+   "lane_m": 44.6,
+   "longest_frame_ms": 4.6,
+   "moved_m": 3.8,
+   "narrowest_m": 0.2,
+   "obstacle_samples_lane": 2,
+   "obstacle_samples_server_route": 2,
+   "plan_cpu_ms": 7.0,
+   "samples": 76,
+   "server_route_m": 42.8
+  },
+  "world-13": {
+   "lane_m": 58.5,
+   "longest_frame_ms": 5.5,
+   "moved_m": 4.3,
+   "narrowest_m": 0.0,
+   "obstacle_samples_lane": 0,
+   "obstacle_samples_server_route": 16,
+   "plan_cpu_ms": 7.9,
+   "samples": 92,
+   "server_route_m": 53.9
+  }
+ }
+}

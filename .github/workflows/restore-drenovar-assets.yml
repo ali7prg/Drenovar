@@ -3,6 +3,8 @@ name: Restore pinned DRENOVAR Godot assets
 on:
   workflow_dispatch:
   push:
+    # 1022: main only — the job pushes HEAD:main, so a feature-branch push must never start it.
+    branches: [main]
     paths:
       - .github/workflows/restore-drenovar-assets.yml
       - godot/tools/verify_drenovar_asset_snapshot.py

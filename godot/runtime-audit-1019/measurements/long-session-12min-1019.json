@@ -1,0 +1,278 @@
+{
+ "record": "P_long.jsonl",
+ "hunts": 16,
+ "scene_switches": 8,
+ "per_hunt": [
+  {
+   "hunt": 0,
+   "species": "tenerys",
+   "level": 1.0,
+   "nodes": 473.0,
+   "objects": 4142.0,
+   "mem_mb": 230.1,
+   "fx_max": 1,
+   "frame_p95": 7.1,
+   "frame_max": 4009.9,
+   "minutes": 0.5
+  },
+  {
+   "hunt": 1,
+   "species": "velkor",
+   "level": 1.0,
+   "nodes": 1093.0,
+   "objects": 6431.0,
+   "mem_mb": 249.8,
+   "fx_max": 1,
+   "frame_p95": 7.12,
+   "frame_max": 4011.61,
+   "minutes": 1.1
+  },
+  {
+   "hunt": 2,
+   "species": "tenerys",
+   "level": 2.0,
+   "nodes": 1072.0,
+   "objects": 4985.0,
+   "mem_mb": 221.5,
+   "fx_max": 1,
+   "frame_p95": 7.16,
+   "frame_max": 4013.93,
+   "minutes": 2.0
+  },
+  {
+   "hunt": 3,
+   "species": "tenerys",
+   "level": 3.0,
+   "nodes": 1015.0,
+   "objects": 4942.0,
+   "mem_mb": 225.8,
+   "fx_max": 1,
+   "frame_p95": 7.15,
+   "frame_max": 4015.76,
+   "minutes": 2.7
+  },
+  {
+   "hunt": 4,
+   "species": "velkor",
+   "level": 2.0,
+   "nodes": 1064.0,
+   "objects": 6133.0,
+   "mem_mb": 247.2,
+   "fx_max": 1,
+   "frame_p95": 7.67,
+   "frame_max": 4015.03,
+   "minutes": 3.5
+  },
+  {
+   "hunt": 5,
+   "species": "tenerys",
+   "level": 1.0,
+   "nodes": 1045.0,
+   "objects": 4934.0,
+   "mem_mb": 227.3,
+   "fx_max": 1,
+   "frame_p95": 7.1,
+   "frame_max": 4015.56,
+   "minutes": 4.1
+  },
+  {
+   "hunt": 6,
+   "species": "tenerys",
+   "level": 2.0,
+   "nodes": 1072.0,
+   "objects": 5044.0,
+   "mem_mb": 231.4,
+   "fx_max": 1,
+   "frame_p95": 7.11,
+   "frame_max": 4011.44,
+   "minutes": 4.9
+  },
+  {
+   "hunt": 7,
+   "species": "velkor",
+   "level": 3.0,
+   "nodes": 1065.0,
+   "objects": 6412.0,
+   "mem_mb": 247.7,
+   "fx_max": 1,
+   "frame_p95": 7.13,
+   "frame_max": 4013.04,
+   "minutes": 6.5
+  },
+  {
+   "hunt": 8,
+   "species": "tenerys",
+   "level": 3.0,
+   "nodes": 1015.0,
+   "objects": 4819.0,
+   "mem_mb": 224.8,
+   "fx_max": 1,
+   "frame_p95": 7.16,
+   "frame_max": 4014.73,
+   "minutes": 7.2
+  },
+  {
+   "hunt": 9,
+   "species": "tenerys",
+   "level": 1.0,
+   "nodes": 473.0,
+   "objects": 4069.0,
+   "mem_mb": 222.0,
+   "fx_max": 1,
+   "frame_p95": 7.1,
+   "frame_max": 4014.15,
+   "minutes": 8.0
+  },
+  {
+   "hunt": 10,
+   "species": "tenerys",
+   "level": 2.0,
+   "nodes": 1072.0,
+   "objects": 4987.0,
+   "mem_mb": 226.1,
+   "fx_max": 1,
+   "frame_p95": 7.1,
+   "frame_max": 4010.4,
+   "minutes": 8.8
+  },
+  {
+   "hunt": 11,
+   "species": "tenerys",
+   "level": 3.0,
+   "nodes": 1015.0,
+   "objects": 4944.0,
+   "mem_mb": 227.4,
+   "fx_max": 1,
+   "frame_p95": 7.11,
+   "frame_max": 4016.28,
+   "minutes": 9.5
+  },
+  {
+   "hunt": 12,
+   "species": "tenerys",
+   "level": 1.0,
+   "nodes": 1045.0,
+   "objects": 4960.0,
+   "mem_mb": 232.3,
+   "fx_max": 1,
+   "frame_p95": 7.11,
+   "frame_max": 4011.29,
+   "minutes": 10.0
+  },
+  {
+   "hunt": 13,
+   "species": "tenerys",
+   "level": 2.0,
+   "nodes": 1072.0,
+   "objects": 5021.0,
+   "mem_mb": 232.5,
+   "fx_max": 1,
+   "frame_p95": 7.12,
+   "frame_max": 4010.97,
+   "minutes": 10.8
+  },
+  {
+   "hunt": 14,
+   "species": "tenerys",
+   "level": 3.0,
+   "nodes": 1015.0,
+   "objects": 4969.0,
+   "mem_mb": 233.4,
+   "fx_max": 1,
+   "frame_p95": 7.13,
+   "frame_max": 4013.66,
+   "minutes": 11.6
+  },
+  {
+   "hunt": 15,
+   "species": "tenerys",
+   "level": 1.0,
+   "nodes": 1045.0,
+   "objects": 5043.0,
+   "mem_mb": 232.5,
+   "fx_max": 1,
+   "frame_p95": 8.37,
+   "frame_max": 4017.98,
+   "minutes": 12.2
+  }
+ ],
+ "trend": {
+  "nodes": [
+   783.0,
+   1030.0
+  ],
+  "objects": [
+   5286.5,
+   5006.0
+  ],
+  "mem_mb": [
+   239.9,
+   232.9
+  ]
+ },
+ "diagnostics": {
+  "log_rows": 600,
+  "log_total": 11575,
+  "bytes": 39153,
+  "frames": {
+   "combat_max_ms": 34.22,
+   "combat_p95_ms": 2.95,
+   "diagnostics_max_ms": 149.49,
+   "diagnostics_p95_ms": 0.52,
+   "fps_avg": 138.6,
+   "frames": 1200,
+   "max": 185.1,
+   "over_100ms": 2,
+   "over_25ms": 4,
+   "over_50ms": 2,
+   "p50": 6.9,
+   "p95": 10.2,
+   "p99": 14.0
+  },
+  "counters": {
+   "app_background": 16,
+   "app_foreground": 16,
+   "army_created": 16,
+   "army_hidden": 16,
+   "army_removed": 16,
+   "clock_caught_up": 150,
+   "clock_held": 29,
+   "creature_attack_cut": 1,
+   "creature_attack_end": 33,
+   "creature_attack_start": 34,
+   "creature_created": 18,
+   "creature_death": 16,
+   "creature_hidden": 27,
+   "creature_jump": 2,
+   "creature_reaction": 125,
+   "creature_removed": 24,
+   "creature_shown": 3,
+   "delay_settled": 22,
+   "delay_slew": 8572,
+   "diagnostics_on": 1,
+   "scene": 9,
+   "slow_poll": 56,
+   "soldier_attack_cut": 31,
+   "soldier_attack_end": 657,
+   "soldier_attack_next": 78,
+   "soldier_attack_start": 688,
+   "soldier_created": 404,
+   "soldier_death": 20,
+   "soldier_fallen": 20,
+   "soldier_jump": 51,
+   "soldier_removed": 384,
+   "stall": 40
+  },
+  "clock": {
+   "caught_up_ms": 38285.1662597656,
+   "delay_ms": 2376.0,
+   "delay_target_ms": 2376.0,
+   "held_ms": 0.0
+  },
+  "objects": {
+   "nodes": 473.0,
+   "objects": 4165.0,
+   "orphans": 0.0
+  }
+ }
+}

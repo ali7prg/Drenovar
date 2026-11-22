@@ -1,0 +1,14 @@
+Server v92 365276c + server-patches/v92-speedups-v2, v22.23.4
+gameplay37/tests/server.mjs exit=0
+gameplay37/tests/hosted.mjs exit=0
+gameplay37/tests/accounts40.mjs exit=0
+gameplay37/tests/economy62.mjs exit=0
+gameplay37/tests/founder42.mjs exit=0
+gameplay37/tests/world62.mjs exit=0
+gameplay37/tests/native-session.mjs exit=0
+gameplay37/tests/paid-training92.mjs exit=0
+gameplay37/tests/closed-cycle61.mjs exit=0
+gameplay37/tests/upgrades-v1.mjs exit=0
+gameplay37/tests/performance43.mjs exit=0
+gameplay37/tests/repeated43.mjs exit=0
+gameplay37/tests/speedups-v2.mjs exit=0

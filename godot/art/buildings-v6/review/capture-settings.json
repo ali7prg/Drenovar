@@ -1,0 +1,17 @@
+{
+  "source": "actual Godot mesh renderer, no retouching",
+  "states": 162,
+  "engine": "Godot 4.6.3",
+  "renderer": "OpenGL compatibility on software LLVMpipe",
+  "camera": "fixed orthographic 18.5m, position(15,17,20), target(0,2.7,0)",
+  "lighting": "same directional/ambient settings for all captures, 4xMSAA, shadows on",
+  "source_capture_px": [
+    480,
+    420
+  ],
+  "contact_cell_px": [
+    320,
+    280
+  ],
+  "not_a_device_benchmark": true
+}

@@ -50,6 +50,17 @@ func test_post(path: String, body: Variant = null) -> Dictionary:
 	var parsed: Variant = JSON.parse_string(result[3].get_string_from_utf8()) if not result[3].is_empty() else {}
 	return parsed if parsed is Dictionary else {"httpStatus":result[1]}
 
+## The V6 fixture's request log (a JSON array; test_post keeps only objects).
+func fixture_requests() -> Array:
+	var client := HTTPRequest.new()
+	client.body_size_limit = -1
+	root.add_child(client)
+	client.request(game.endpoint + "/qa/requests", PackedStringArray(["Content-Type: application/json"]), HTTPClient.METHOD_POST, "")
+	var result: Array = await client.request_completed
+	client.queue_free()
+	var parsed: Variant = JSON.parse_string(result[3].get_string_from_utf8()) if not result[3].is_empty() else null
+	return parsed if parsed is Array else []
+
 func refresh() -> void:
 	while game.busy:
 		await process_frame
@@ -404,8 +415,7 @@ func run() -> void:
 		await frames(2)
 		check(bool(forest.client.adv.get("autoRefill", false)), "auto-refill opt-in stored by server")
 	# The whole campaign on the V6 stack: every adventure command of every launch, as the fixture logged it.
-	var log_value: Variant = await test_post("/qa/requests")
-	var fixture_log: Array = log_value if log_value is Array else []
+	var fixture_log: Array = await fixture_requests()
 	var commands: Array = fixture_log.filter(func(r): return str(r.get("kind", "")) in ["adventure", "adventure_intro"])
 	var statuses := {}
 	for r in commands:

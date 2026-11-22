@@ -115,7 +115,9 @@ Button enamels:
 
 ## Rules for later stages
 
-- One primary (gold) action per window, placed in the footer when the body can scroll.
+- One primary (gold) action per window, placed in the footer when the body can scroll. The building
+  inspector is the exception: its action shares a row with the timer pill inside the body, where
+  `qa_building_actions` looks for it, and stays in view.
 - Show a gain as the current value, a drawn green arrow and the next value. Never use text arrows.
 - Costs always go in the oak cost strip, timers always in the timer pill.
 - Never put ornament behind text, and never trim a title.

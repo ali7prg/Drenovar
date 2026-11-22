@@ -392,10 +392,17 @@ static func cost_strip(parent: Node, cost: Dictionary, icons: Dictionary, stock:
 		var amount := int(cost[resource])
 		if amount <= 0:
 			continue
+		# One bare PanelContainer per resource with the exact «Name: amount» tooltip
+		# (qa_building_actions reads the server cost from these).
+		var cell := PanelContainer.new()
+		cell.add_theme_stylebox_override("panel", bare())
+		cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cell.tooltip_text = "%s: %d" % [names.get(resource, resource), amount]
+		row.add_child(cell)
 		var item := HBoxContainer.new()
 		item.add_theme_constant_override("separation", 6)
 		item.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_child(item)
+		cell.add_child(item)
 		if icons.has(resource):
 			var icon := TextureRect.new()
 			icon.texture = icons[resource]
@@ -420,6 +427,11 @@ static func cost_strip(parent: Node, cost: Dictionary, icons: Dictionary, stock:
 	if parent != null:
 		parent.add_child(plate)
 	return plate
+
+static func bare() -> StyleBoxEmpty:
+	if not styles.has("bare"):
+		styles["bare"] = StyleBoxEmpty.new()
+	return styles["bare"]
 
 static func compact(value: int) -> String:
 	if value >= 1000000:
@@ -647,7 +659,7 @@ static func icon_tile(icon: Texture2D, size := 64, count_text := "") -> PanelCon
 static func stat_row(parent: Node, name: String, value: String, gain := "", compact := false) -> Control:
 	var line := KitLine.new()
 	line.name = "KitStat"
-	line.custom_minimum_size.y = 38 if compact else 37
+	line.custom_minimum_size.y = 33 if compact else 37
 	line.rule_inside = compact
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	line.name_text = name
@@ -735,7 +747,8 @@ class KitLine extends Control:
 		if icon != null:
 			draw_texture_rect(icon, Rect2(0.0, floorf((size.y - 32.0) / 2.0), 32.0, 32.0), false)
 			x = 44.0
-		var right := size.x
+		# Inset on the right: the window's scroll indicator runs along that edge.
+		var right := size.x - 12.0
 		if not gain_text.is_empty():
 			var gain := KitText.line(gain_text, LABEL_FONT, 19)
 			right -= gain.get_size().x

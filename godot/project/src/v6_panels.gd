@@ -240,31 +240,49 @@ func inspect(type: String) -> void:
 			ui.UiKit.stat_row(stats, str(catalogue.get("metrics", {}).get(metric, {}).get("name_ru", metric)), metric_value(metric, row.effects[metric]), gain, true)
 	if level < 11:
 		var next: Dictionary = upcoming
-		section_title("Следующий уровень · " + ROMAN[level])
+		# The step above already reads «Уровень II ➜ III» in the display face.
+		section_title("Следующий уровень" if level > 0 else "Строительство · " + ROMAN[level])
+		# What it costs, then the time and the action on one row, then what it needs.
 		cost_cards(next.cost)
-		time_card("Базовое время", int(next.duration_seconds))
-		for d: Dictionary in next.requirements:
-			var current: Dictionary = building(d.building_id)
-			var ok: bool = int(current.get("level", 0)) >= int(d.level)
-			var need := HBoxContainer.new()
-			need.name = "KitRequirement"
-			need.add_theme_constant_override("separation", 10)
-			ui.modal_body.add_child(need)
-			ui.UiKit.mark(need, "tick" if ok else "lozenge", ui.UiKit.GOOD if ok else ui.UiKit.BAD, 18.0)
-			ui.UiKit.label(need, "%s · уровень %s или выше" % [row_for(d.building_id, 1).name_ru, ROMAN[int(d.level)-1]], 17, ui.UiKit.GOOD if ok else ui.UiKit.BAD).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var action := {"kind":"construction", "building":type, "target":level+1}
 		if level > 0:
-			# The call to action sits in the footer, always in view (not at the end of the scroll).
-			ui.modal_footer.show()
-			var check: Button = ui.panel_action(ui.modal_footer, "Проверить улучшение", confirm.bind(action))
-			check.custom_minimum_size.x = 340
+			# The time pill and the call to action share a row, so the action is in view without
+			# scrolling; it stays in the body, where qa_building_actions looks for it.
+			var go := HBoxContainer.new()
+			go.name = "KitTimeAction"
+			go.add_theme_constant_override("separation", 14)
+			ui.modal_body.add_child(go)
+			ui.UiKit.timer_pill(go, "Базовое время", duration(int(next.duration_seconds)))
+			var pill: Control = go.get_child(0)
+			pill.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			var check: Button = ui.panel_action(go, "Проверить улучшение", confirm.bind(action))
+			check.custom_minimum_size.x = 300
 		else:
+			time_card("Базовое время", int(next.duration_seconds))
 			ui.row(ui.modal_body, "Выберите участок подходящей местности: " + str(next.environment))
 			for plot: String in ui.state.get("v6_plots", {}):
 				if next.environment in ui.state.v6_plots[plot]:
 					var placement: Dictionary = action.duplicate()
 					placement.plot = plot
 					ui.button(ui.modal_body, "Участок " + plot, confirm.bind(placement))
+		# Requirements in two columns under the action (the server quote names any that are missing).
+		var needs := HFlowContainer.new()
+		needs.name = "KitRequirements"
+		needs.add_theme_constant_override("h_separation", 16)
+		needs.add_theme_constant_override("v_separation", 4)
+		if not next.requirements.is_empty():
+			ui.modal_body.add_child(needs)
+		for d: Dictionary in next.requirements:
+			var current: Dictionary = building(d.building_id)
+			var ok: bool = int(current.get("level", 0)) >= int(d.level)
+			var need := HBoxContainer.new()
+			need.name = "KitRequirement"
+			need.add_theme_constant_override("separation", 10)
+			need.custom_minimum_size.x = 340
+			needs.add_child(need)
+			ui.UiKit.mark(need, "tick" if ok else "lozenge", ui.UiKit.GOOD if ok else ui.UiKit.BAD, 18.0)
+			ui.UiKit.label(need, "%s · уровень %s или выше" % [row_for(d.building_id, 1).name_ru, ROMAN[int(d.level)-1]], 17, ui.UiKit.GOOD if ok else ui.UiKit.BAD).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	else:
 		ui.row(ui.modal_body, "XI — окончательный уровень.")
 	if type == "B18" and level > 0:
@@ -322,7 +340,8 @@ func confirm(action: Dictionary) -> void:
 func duration(seconds: int) -> String:
 	seconds = maxi(0, seconds)
 	if seconds >= 3600:
-		return "%d ч %d мин" % [seconds / 3600, (seconds % 3600) / 60]
+		var minutes := (seconds % 3600) / 60
+		return "%d ч %d мин" % [seconds / 3600, minutes] if minutes else "%d ч" % (seconds / 3600)
 	if seconds >= 60:
 		return "%d мин%s" % [seconds / 60, " %d с" % (seconds % 60) if seconds % 60 else ""]
 	return "%d с" % seconds

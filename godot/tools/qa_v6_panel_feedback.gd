@@ -5,6 +5,7 @@ extends SceneTree
 class FixtureUI extends Control:
 	const Interface = preload("res://src/ui_theme.gd")
 	const WebPanels = preload("res://src/web_panel_theme.gd")
+	const UiKit = preload("res://src/ui_kit.gd")
 	const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
 	const RESOURCE_NAMES = {"wood":"Дерево","food":"Еда","stone":"Камень","iron":"Железо","coins":"Монеты"}
 	var state := {"economy_version":"DRENOVAR-V6-C1.0","items":{"construction-1":3},"v6":{"buildings":[],"orders":[],"rewards":{},"stock":{},"capacities":{},"escrow":{},"production_per_hour":{},"production_stopped":{},"workforce":{"used":0,"capacity":5},"army_used":0,"army_capacity":100}}
@@ -12,6 +13,7 @@ class FixtureUI extends Control:
 	var modal_body := VBoxContainer.new()
 	var modal_footer := HBoxContainer.new()
 	var modal_title := Label.new()
+	var resource_icons := {}
 	var request_count := 0
 	var command_count := 0
 	var ready_count := 0
@@ -48,7 +50,8 @@ class FixtureUI extends Control:
 		command_count += 1
 		await get_tree().create_timer(0.25).timeout
 		return true
-	func open_modal(title: String,_layout := "",_eyebrow := "") -> void:
+	func v6_card(_type: String) -> Texture2D:return null
+	func open_modal(title: String,_layout := "",_eyebrow := "",_art: Texture2D = null) -> void:
 		modal_generation += 1
 		modal_title.text = title
 		empty(modal_body)
@@ -86,7 +89,7 @@ func run() -> void:
 	check(ui.modal_title.text=="Подтвердить работу","quote panel opens synchronously")
 	check(ui.modal_footer.get_child_count()==0,"cannot submit before authoritative quote")
 	await create_timer(0.3).timeout
-	check(ui.modal_body.find_children("*","GridContainer",true,false).size()==1,"cost cards rendered")
+	check(ui.modal_body.find_children("KitCost","PanelContainer",true,false).size()==1,"cost cards rendered")
 	check(ui.modal_footer.get_child_count()==1,"fixed primary action rendered")
 	if OS.get_cmdline_user_args().has("--capture"):
 		await process_frame
@@ -101,9 +104,9 @@ func run() -> void:
 	await create_timer(0.3).timeout
 	check(ui.request_count==1,"no second request after command success")
 	panels.speedups({"kind":"construction","id":"fixture","ends_at":Time.get_unix_time_from_system()+7200})
-	var grid: GridContainer=ui.modal_body.find_children("*","GridContainer",true,false)[0]
-	check(grid.get_child_count()==1,"speedup cards use available stock")
-	var use: Button=grid.get_child(0)
+	var uses: Array=ui.modal_body.find_children("*","Button",true,false).filter(func(b:Button):return b.text=="Использовать")
+	check(uses.size()==1,"speedup cards use available stock")
+	var use: Button=uses[0]
 	use.pressed.emit();use.pressed.emit()
 	check(ui.command_count==2,"speedup double press sends once")
 	await create_timer(0.3).timeout

@@ -80,9 +80,11 @@ func run() -> void:
 	root.add_child(game)
 	var deadline := Time.get_ticks_msec() + 240000
 	while (game.scene_loading or not is_instance_valid(game.stage) or game.player_id.is_empty()) and Time.get_ticks_msec() < deadline:
+		if fast and is_instance_valid(game.stage):
+			game.stage.visible = false
 		await process_frame
 	await wait_until(func(): return game.v6_panels.enabled(), 30.0)
-	await frames(90)
+	await frames(30 if fast else 90)
 	if game.modal.visible:
 		game.close_modal()
 	# Catalogue once, so the timed opens below measure the windows, not the network.

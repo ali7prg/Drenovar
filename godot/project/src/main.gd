@@ -5632,6 +5632,8 @@ func state_tag_owner() -> String:
 	return endpoint + "|" + session + "|" + player_id
 
 # Rule 2/3/12: the cached full answer with the time moved on to the 304's server time.
+const CARRY_UNITS := 36000000.0
+
 func advanced_state(server_ms: float) -> Dictionary:
 	var next: Dictionary = state_cache.duplicate(true)
 	next.serverTime = server_ms
@@ -5644,16 +5646,23 @@ func advanced_state(server_ms: float) -> Dictionary:
 		for resource in v6.stock:
 			if bool(v6.get("production_stopped", {}).get(resource, false)):
 				continue
+			# Counted in the server's carry units (1/36 000 000 of a resource; an hour of production is
+			# pph × 10 000 units per second), so a whole stock stays whole: the old "− 1e-7 before the
+			# floor" turned an idle 0 into −1 (stone and iron showed −1 after a 304). A rational carry
+			# {n, d} is taken one unit low, so the client never shows more than the server.
 			var carry_value: Variant = v6.get("carry", {}).get(resource, 0)
-			var carry := 0.0
+			var carry_units := 0.0
 			if carry_value is Dictionary:
+				var numerator := str(carry_value.get("n", "0"))
 				var d := float(str(carry_value.get("d", "1")))
-				carry = float(str(carry_value.get("n", "0"))) / d if d != 0.0 else 0.0
+				if numerator != "0" and d != 0.0:
+					carry_units = maxf(0.0, floorf(float(numerator) / d * CARRY_UNITS) - 1.0)
 			else:
-				carry = float(carry_value) / 36000000.0
-			var produced := float(v6.stock[resource]) + carry + float(v6.get("production_per_hour", {}).get(resource, 0)) * since / 3600.0
+				carry_units = floorf(float(carry_value))
+			var gained := float(v6.get("production_per_hour", {}).get(resource, 0)) * since * (CARRY_UNITS / 3600.0)
+			var units := float(v6.stock[resource]) * CARRY_UNITS + carry_units + floorf(gained)
 			var cap := floorf(float(v6.get("capacities", {}).get(resource, INF)) - float(v6.get("escrow", {}).get(resource, 0)))
-			v6.stock[resource] = int(minf(cap, floorf(produced - 0.0000001)))
+			v6.stock[resource] = int(minf(cap, floorf(units / CARRY_UNITS)))
 		# The server's projection (v6/game.mjs project): wood in progress, the rest in the wallet.
 		if next.get("city") is Dictionary:
 			if next.city.get("progress") is Dictionary and v6.stock.has("wood"):

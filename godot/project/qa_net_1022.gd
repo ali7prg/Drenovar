@@ -22,6 +22,11 @@ func check(value: bool, detail: String) -> void:
 		failures.append(detail)
 		push_error("QA_NET_1022: " + detail)
 
+static func _carry_is_zero(value: Variant) -> bool:
+	if value is Dictionary:
+		return str(value.get("n", "0")) == "0"
+	return float(value) == 0.0
+
 func _initialize() -> void:
 	call_deferred("run")
 
@@ -86,11 +91,20 @@ func run() -> void:
 	var advanced_wood := int(game.balance("wood"))
 	var cycle: Array = (await fixture_log()).slice(log_start).filter(func(r): return str(r.path).ends_with("/state"))
 	var full: Dictionary = await game.send_request("state", null, false)
+	# 1022 fix: exact, not within 1 (the old tolerance hid an idle 0 shown as -1 after a 304).
 	var stock_ok := full.has("v6")
 	if stock_ok:
 		for resource in full.v6.stock:
-			stock_ok = stock_ok and absi(int(game.state.v6.stock.get(resource, -99)) - int(full.v6.stock[resource])) <= 1
-	check(stock_ok, "stock advanced on the 304 equals a full answer: %s vs %s" % [str(game.state.get("v6", {}).get("stock")), str(full.get("v6", {}).get("stock"))])
+			stock_ok = stock_ok and int(game.state.v6.stock.get(resource, -99)) == int(full.v6.stock[resource])
+	check(stock_ok, "stock advanced on the 304 equals a full answer exactly: %s vs %s" % [str(game.state.get("v6", {}).get("stock")), str(full.get("v6", {}).get("stock"))])
+	check((game.state.get("v6", {}).get("stock", {}) as Dictionary).values().all(func(v): return int(v) >= 0), "no negative stock after a 304")
+	var idle_kept := true
+	for resource in game.state_cache.get("v6", {}).get("stock", {}):
+		if float(game.state_cache.v6.get("production_per_hour", {}).get(resource, 0)) == 0.0 and _carry_is_zero(game.state_cache.v6.get("carry", {}).get(resource, 0)):
+			idle_kept = idle_kept and int(game.state.v6.stock[resource]) == int(game.state_cache.v6.stock[resource])
+	check(idle_kept, "a resource without production keeps its exact stock on a 304")
+	for resource in ["stone", "iron"]:
+		check(game.balance(resource) >= 0, "HUD %s is not negative after a 304 (%d)" % [resource, game.balance(resource)])
 	check(advanced_wood == int(game.state.v6.stock.wood), "HUD wood follows the advanced stock")
 	check(not game.connection_badge.visible, "no connection notice around a 304")
 	check(cycle.any(func(r): return int(r.status) == 304 and r.ifNoneMatch), "fixture saw If-None-Match answered by 304")

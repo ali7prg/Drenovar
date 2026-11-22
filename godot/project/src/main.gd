@@ -80,6 +80,10 @@ var dimmer: ColorRect
 var dialog_tween: Tween
 var message: Label
 var profile_button: Button
+# Finish time of the newest battle report the player has seen (the «Отчёты» badge counts
+# the newer ones); kept in user://hud.cfg.
+var reports_seen_ms := 0.0
+const HUD_STATE_PATH := "user://hud.cfg"
 var modal: PanelContainer
 var modal_title: Label
 var modal_eyebrow: Label
@@ -411,6 +415,7 @@ func build_ui() -> void:
 	building_plates.name = "BuildingPlates"
 	building_plates.game = self
 	root.add_child(building_plates)
+	action_ring.clock = timer_now
 	root.add_child(action_ring)
 	var outer := VBoxContainer.new()
 	outer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -427,6 +432,9 @@ func build_ui() -> void:
 	setup_resource_icons()
 	profile_button = hud_action(bar, "Профиль", "profile", show_account)
 	profile_button.name = "ProfileButton"
+	var saved := ConfigFile.new()
+	if saved.load(HUD_STATE_PATH) == OK:
+		reports_seen_ms = float(saved.get_value("hud", "reports_seen_ms", 0.0))
 	var wallet := HBoxContainer.new()
 	wallet.add_theme_constant_override("separation", 2)
 	wallet.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -436,15 +444,18 @@ func build_ui() -> void:
 	bar.add_child(wallet)
 	for key in RESOURCE_NAMES:
 		add_resource_button(wallet, key)
+	# One soft oak ribbon behind the counters (the counters themselves stay plate-less).
+	wallet.draw.connect(draw_wallet_band.bind(wallet))
+	wallet.sort_children.connect(wallet.queue_redraw)
 	var navigation := HBoxContainer.new()
 	navigation.add_theme_constant_override("separation", 5)
 	navigation.alignment = BoxContainer.ALIGNMENT_END
 	nav_buttons.city = hud_action(navigation, "Город", "city", show_scene.bind("city"))
 	nav_buttons.world = hud_action(navigation, "Карта", "world", show_scene.bind("world"))
 	nav_buttons.build = hud_action(navigation, "Строить", "build", show_build_menu)
-	hud_action(navigation, "Армия", "army", show_armies)
-	hud_action(navigation, "Отчёты", "reports", show_reports)
-	hud_action(navigation, "Меню", "menu", show_controls_menu)
+	nav_buttons.army = hud_action(navigation, "Армия", "army", show_armies)
+	nav_buttons.reports = hud_action(navigation, "Отчёты", "reports", show_reports)
+	nav_buttons.menu = hud_action(navigation, "Меню", "menu", show_controls_menu)
 	var space := Control.new()
 	space.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	space.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -707,6 +718,72 @@ func add_resource_button(wallet: Container, key: String) -> void:
 	amount.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	labels.add_child(amount)
 	resource_amounts[key] = amount
+
+static var wallet_band: GradientTexture2D
+
+## The ribbon behind the resource counters: dark oak fading out at both ends, a bronze
+## hairline along its foot and a small lozenge between counters. Drawn by the wallet row
+## itself, only when its layout changes.
+func draw_wallet_band(wallet: Control) -> void:
+	var shown: Array = wallet.get_children().filter(func(c): return c is Control and c.visible)
+	if shown.is_empty():
+		return
+	var first: Control = shown[0]
+	var last: Control = shown[-1]
+	var rect := Rect2(first.position.x - 34.0, first.position.y - 3.0, last.position.x + last.size.x - first.position.x + 58.0, first.size.y + 6.0)
+	if wallet_band == null:
+		var fade := Gradient.new()
+		fade.offsets = PackedFloat32Array([0.0, 0.12, 0.88, 1.0])
+		fade.colors = PackedColorArray([Color(0.08, 0.05, 0.03, 0.0), Color(0.08, 0.05, 0.03, 0.58), Color(0.08, 0.05, 0.03, 0.58), Color(0.08, 0.05, 0.03, 0.0)])
+		wallet_band = GradientTexture2D.new()
+		wallet_band.gradient = fade
+		wallet_band.width = 128
+		wallet_band.height = 4
+	wallet.draw_texture_rect(wallet_band, rect, false)
+	var foot := Rect2(rect.position.x, rect.end.y - 1.0, rect.size.x, 1.5)
+	wallet.draw_texture_rect(wallet_band, foot, false, Color(3.2, 2.4, 1.3, 1.0))
+	for index in range(1, shown.size()):
+		var x: float = shown[index].position.x - 1.0
+		var y := rect.get_center().y
+		wallet.draw_colored_polygon(PackedVector2Array([Vector2(x, y - 4.0), Vector2(x + 3.0, y), Vector2(x, y + 4.0), Vector2(x - 3.0, y)]), Color("#c9a05aaa"))
+
+## Badges of the HUD medallions and the profile line: unread reports, free builders.
+func refresh_hud_badges() -> void:
+	if not nav_buttons.has("reports"):
+		return
+	var unread := 0
+	for report in state.get("reports", []):
+		if report is Dictionary and float(report.get("finishedAt", 0.0)) > reports_seen_ms:
+			unread += 1
+	nav_buttons.reports.set_badge("" if unread == 0 else ("9+" if unread > 9 else str(unread)))
+	var free := 0
+	if v6_panels.enabled() and v6_panels.build != null:
+		var use: Array = v6_panels.build.builder_use()
+		free = maxi(0, int(use[1]) - int(use[0]))
+	nav_buttons.build.set_badge(str(free) if free > 0 else "", true)
+	var name_text := str(state.get("city", {}).get("name", ""))
+	if name_text.is_empty():
+		name_text = str(state.get("nickname", "Профиль"))
+	var line := ""
+	if v6_panels.enabled():
+		var hall: Dictionary = v6_panels.building("B01")
+		if not hall.is_empty():
+			line = "%s %s" % [str(v6_panels.row_for("B01", 1).get("name_ru", "Ратуша")), V6Panels.ROMAN[clampi(int(hall.get("level", 1)), 1, 11) - 1]]
+	profile_button.set_profile(name_text, line)
+
+func mark_reports_seen() -> void:
+	var newest := reports_seen_ms
+	for report in state.get("reports", []):
+		if report is Dictionary:
+			newest = maxf(newest, float(report.get("finishedAt", 0.0)))
+	if newest == reports_seen_ms:
+		return
+	reports_seen_ms = newest
+	var saved := ConfigFile.new()
+	saved.load(HUD_STATE_PATH)
+	saved.set_value("hud", "reports_seen_ms", reports_seen_ms)
+	saved.save(HUD_STATE_PATH)
+	refresh_hud_badges()
 
 func add_resource_icon(parent: Control, key: String, pixels: float) -> void:
 	var icon := TextureRect.new()
@@ -2177,6 +2254,7 @@ func refresh_hud() -> void:
 		resource_buttons[id].tooltip_text = "%s · %s" % [RESOURCE_NAMES[id], format_balance(value)]
 		resource_buttons[id].accessibility_name = resource_buttons[id].tooltip_text
 	refresh_modal_wallet()
+	refresh_hud_badges()
 	if not connected():
 		message.text = ""
 	elif v6_panels.enabled():

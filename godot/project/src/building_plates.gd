@@ -5,8 +5,11 @@ extends Control
 # plot under construction. One Control draws them all (no node per building), so
 # the cost is a handful of text draws per frame.
 
+const UiKit = preload("res://src/ui_kit.gd")
 var game: Node
 var font: Font
+var pill: StyleBox
+var glass: Texture2D
 const NAME_SIZE := 15
 const BADGE_RADIUS := 11.0
 const MAX_ZOOM := 118.0
@@ -20,6 +23,8 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	font = get_theme_default_font()
+	pill = UiKit.nine("kit_pill", Vector4(18, 12, 18, 12), Vector4.ZERO)
+	glass = UiKit.tex("kit_hourglass")
 
 func _process(_delta: float) -> void:
 	queue_redraw()
@@ -40,6 +45,15 @@ func _draw() -> void:
 	# Fade the plates as the camera pulls back.
 	var alpha := clampf((MAX_ZOOM - stage.camera_zoom) / 20.0, 0.0, 1.0)
 	var sites: Array = game.shown_sites
+	# Running jobs of the V6 buildings (training, research, healing, repairs): a timer plate
+	# over the building, like the construction bar (premium UI stage 4a).
+	var jobs := {}
+	if game.v6_panels.enabled():
+		for order: Dictionary in game.state.v6.orders:
+			if order.status == "pending" and order.kind != "construction":
+				var type := str(order.get("building", ""))
+				if not jobs.has(type) or float(order.starts_at) < float(jobs[type].starts_at):
+					jobs[type] = order
 	for marker in stage.place_markers:
 		if not marker.get("kind", "") in ["building", "wall"]:
 			continue
@@ -53,9 +67,14 @@ func _draw() -> void:
 		var title: String = "Стены" if marker.kind == "wall" else game.building_title(building.type).get_slice("/", 0)
 		draw_name(at, title, alpha)
 		draw_badge(at + Vector2(0, 17), int(building.get("level", 1)), alpha)
+		var shown := false
 		for site in sites:
 			if site.get("key", "") == str(building.get("id", "_")):
 				draw_progress(at + Vector2(0, 38), site, alpha)
+				shown = true
+		var job: Variant = jobs.get(str(building.get("conceptType", building.get("type", ""))))
+		if not shown and job != null:
+			draw_progress(at + Vector2(0, 38), {"started": float(job.starts_at) * 1000.0, "ends": float(job.ends_at) * 1000.0, "key": str(job.id)}, alpha)
 	# Trees being felled (one per busy worker): progress bar over each.
 	for job in game.shown_jobs:
 		var tree: Dictionary = stage.works.tree_by_id(job.tree)
@@ -98,6 +117,8 @@ func draw_badge(center: Vector2, level: int, alpha: float) -> void:
 var bar_floor := {}
 
 func draw_progress(at: Vector2, work: Dictionary, alpha: float) -> void:
+	if alpha < 0.4:
+		return
 	var now: float = game.timer_now()
 	# The bar includes the network round trip, so it fills when the answer arrives.
 	var starts := float(work.get("started", float(work.get("ends", 0.0)) - 60000.0))
@@ -111,13 +132,15 @@ func draw_progress(at: Vector2, work: Dictionary, alpha: float) -> void:
 		if bar_floor.size() > 32:
 			bar_floor.clear()
 		bar_floor[key] = fraction
-	var rect := Rect2(at + Vector2(-48, 0), Vector2(96, 9))
-	draw_rect(rect.grow(1.5), Color(BAR_BACK, 0.9 * alpha))
-	draw_rect(Rect2(rect.position, Vector2(rect.size.x * fraction, rect.size.y)), Color(BAR_FILL, alpha))
 	var label := "Отправляем…"
 	if confirmed:
 		label = game.clock_text(ceili((ends - now) / 1000.0)) if now < ends else game.timer_end_label()
-	var size := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13)
-	var base := at + Vector2(-size.x * 0.5, 24)
-	draw_string_outline(font, base, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, 4, Color(OUTLINE, alpha))
-	draw_string(font, base, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(1, 0.93, 0.78, alpha))
+	# An oak pill in a bronze rim: the hourglass, the time in gold, a gold line filling along
+	# its foot.
+	var line := UiKit.KitText.line(label, UiKit.LABEL_FONT, 14)
+	var width := maxf(96.0, line.get_size().x + 46.0)
+	var rect := Rect2(at + Vector2(-width * 0.5, -2.0), Vector2(width, 25.0))
+	draw_style_box(pill, rect)
+	draw_rect(Rect2(rect.position + Vector2(10, rect.size.y - 6.0), Vector2((rect.size.x - 20.0) * fraction, 2.5)), Color(0.93, 0.72, 0.31, alpha))
+	draw_texture_rect(glass, Rect2(rect.position + Vector2(9, 5), Vector2(12, 14)), false, Color(1, 1, 1, alpha))
+	line.draw(get_canvas_item(), Vector2(rect.position.x + 27.0, rect.position.y + roundf((rect.size.y - 3.0 - line.get_size().y) * 0.5)), Color(UiKit.GOLD, alpha))

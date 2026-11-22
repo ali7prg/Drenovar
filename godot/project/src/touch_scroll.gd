@@ -31,6 +31,9 @@ var dragger: Control
 # moves the strip instead, and a touch on a gliding strip just catches it.
 var swiper: Control
 var swiping := false
+# Another list of the panel that scrolls on its own (group "panel_scroll", a ScrollContainer
+# outside this one), e.g. the queue rail beside the speed-up items: a drag there scrolls it.
+var side_scroll: ScrollContainer
 var caught := false
 # Controls that can receive the press highlight (the modal panel).
 var press_root: Control
@@ -68,6 +71,7 @@ func cancel_touch() -> void:
 	release_highlight()
 	end_drag_area()
 	end_swipe(previous)
+	side_scroll = null
 	finger = -1
 	slider = null
 	sliding = false
@@ -101,6 +105,9 @@ func _input(event: InputEvent) -> void:
 			swiper = swipe_area_at(origin) if slider == null else null
 			swiping = false
 			caught = swiper != null and swiper.swipe_begin(origin)
+			side_scroll = side_scroll_at(origin) if slider == null and swiper == null else null
+			if side_scroll != null:
+				offset = float(side_scroll.scroll_vertical)
 			if not caught:
 				highlight(button_at(origin))
 			if not is_instance_valid(pressed_button) and slider == null and swiper == null:
@@ -109,7 +116,11 @@ func _input(event: InputEvent) -> void:
 					dragger.drag_begin()
 			# No scroll can start from here (fixed header/footer, or a list that fits):
 			# act on touch-down instead of waiting for the finger to lift.
-			if is_instance_valid(pressed_button) and slider == null and swiper == null and \
+			var side_scrolls := side_scroll != null and side_scroll.is_ancestor_of(pressed_button) if is_instance_valid(pressed_button) else false
+			if side_scrolls:
+				var side_bar := side_scroll.get_v_scroll_bar()
+				side_scrolls = side_bar.max_value - side_bar.page > 1.0
+			if is_instance_valid(pressed_button) and slider == null and swiper == null and not side_scrolls and \
 					(not is_ancestor_of(pressed_button) or not content_scrolls()):
 				instant = true
 				tap.call_deferred(origin, gesture_revision)
@@ -154,7 +165,13 @@ func _input(event: InputEvent) -> void:
 		if not finger_drag_started and travel.length() >= TAP_SLOP:
 			finger_drag_started = true
 			sliding = is_instance_valid(slider) and absf(travel.x) > absf(travel.y)
-		if sliding and is_instance_valid(slider):
+		if is_instance_valid(side_scroll) and finger_drag_started:
+			var side_bar := side_scroll.get_v_scroll_bar()
+			offset = clampf(offset + previous.y - event.position.y, 0.0, maxf(0.0, side_bar.max_value - side_bar.page))
+			if roundi(offset) != side_scroll.scroll_vertical:
+				scrolled = true
+			side_scroll.scroll_vertical = roundi(offset)
+		elif sliding and is_instance_valid(slider):
 			var track := slider.get_global_rect()
 			slider.ratio = clampf((event.position.x - track.position.x) / track.size.x, 0.0, 1.0)
 		elif can_scroll and finger_drag_started and horizontal:
@@ -248,6 +265,12 @@ func end_swipe(at: Vector2) -> void:
 	swiper = null
 	swiping = false
 	caught = false
+
+func side_scroll_at(at: Vector2) -> ScrollContainer:
+	for item: ScrollContainer in get_tree().get_nodes_in_group("panel_scroll"):
+		if is_instance_valid(press_root) and press_root.is_ancestor_of(item) and item.is_visible_in_tree() and item.get_global_rect().has_point(at):
+			return item
+	return null
 
 func slider_at(at: Vector2) -> HSlider:
 	for item: HSlider in get_tree().get_nodes_in_group("panel_slider"):

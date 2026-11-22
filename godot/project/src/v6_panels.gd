@@ -5,6 +5,7 @@ const Recruit = preload("res://src/v6_recruit.gd")
 const UnitStage = preload("res://src/unit_stage.gd")
 const V6Build = preload("res://src/v6_build.gd")
 const BuildingStage = preload("res://src/building_stage.gd")
+const Queues = preload("res://src/v6_queues.gd")
 const ROMAN := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"]
 var ui: Node
 var catalogue: Dictionary = {}
@@ -16,6 +17,8 @@ var submitting := false
 var recruit
 # Construction strip and placement of new buildings (src/v6_build.gd).
 var build
+# Queues and speed-ups window (src/v6_queues.gd).
+var queue_view
 
 func begin_view() -> int:
 	navigation_request += 1
@@ -26,11 +29,14 @@ func _init(owner_node: Node) -> void:
 	ui = owner_node
 	recruit = Recruit.new(self)
 	build = V6Build.new(self)
+	queue_view = Queues.new(self)
 
 ## New confirmed server state (main.gd accept): the open recruitment window follows it.
 func state_changed() -> void:
 	if recruit != null and recruit.is_open():
 		recruit.refresh()
+	if queue_view != null and queue_view.is_open():
+		queue_view.refresh()
 
 ## Starts loading the 3D unit of a training building on a worker thread, so its window
 ## opens in one frame and the live model is ready (or nearly) when the stage asks for it.
@@ -110,16 +116,28 @@ func open_ring(marker: Dictionary) -> void:
 		ui.show_error({"error":"Здание изменилось. Выберите его снова после обновления города."})
 		return
 	var type: String = b.type
-	# Past the open level (main.gd MAX_OPEN_BUILDING_LEVEL) the ring offers the window, not an upgrade.
-	var upgradable: bool = int(b.level) < 11 and level_open(type, int(b.level) + 1)
-	var actions: Array = [["Улучшить" if upgradable else "Сведения", "upgrade" if upgradable else "info", inspect_instance.bind(str(b.id))]]
-	for order: Dictionary in ui.state.v6.orders:
-		if order.status == "pending" and order.get("instance_id", "") == b.id:
-			actions.append(["Очереди", "speed", queues])
-			break
+	var level := int(b.level)
+	# Past the open level (main.gd MAX_OPEN_BUILDING_LEVEL) the ring offers the window, not an
+	# upgrade: «Сведения» always, «Улучшить» below the open level, a dim «Скоро» from it on.
+	var upgradable: bool = level < 11 and level_open(type, level + 1)
+	var actions: Array = [["Сведения", "info", inspect_instance.bind(str(b.id)), {"primary": false}]]
+	if upgradable:
+		actions.append(["Улучшить", "upgrade", inspect_instance.bind(str(b.id)), {"primary": true}])
+	elif level < 11:
+		actions.append(["Скоро", "upgrade", inspect_instance.bind(str(b.id)), {"soon": true}])
 	if type in ["B11", "B12", "B13", "B15", "B16", "B17"]:
-		actions.append(["Обучение" if Recruit.trains(type) else "Работы здания", "heal" if type == "B16" else "train", services.bind(type)])
+		var emblem: String = {"B11": "kit_emb_inf", "B12": "kit_emb_bow", "B13": "kit_emb_horse", "B15": "kit_emb_book", "B16": "kit_emb_heal", "B17": "kit_emb_ram"}[type]
+		actions.append(["Обучение" if Recruit.trains(type) else ("Исследования" if type == "B15" else ("Лечение" if type == "B16" else "Работы здания")),
+			"heal" if type == "B16" else "train", services.bind(type), {"emblem": emblem}])
 		warm_recruitment(type)
+	# A running job here: «Ускорить» with its time left (or «Очередь» for jobs no item speeds up).
+	var job := running_job(b)
+	if not job.is_empty():
+		var started: bool = float(job.get("starts_at", 0)) * 1000.0 <= ui.timer_now()
+		if job.kind in ["construction", "train", "siege"] and started:
+			actions.append(["Ускорить", "speed", speedups.bind(job), {"ends": float(job.ends_at) * 1000.0}])
+		else:
+			actions.append(["Очередь", "queue", queue_view.open.bind(job), {"ends": float(job.ends_at) * 1000.0}])
 	if type == "B05":
 		actions.append(["Рынок", "trade", trade])
 	if type in ["B18", "B19"]:
@@ -128,6 +146,18 @@ func open_ring(marker: Dictionary) -> void:
 		actions.append(["Производство", "collect", economy])
 	actions.append(["Переместить", "move", move_building.bind(b, str(row_for(type,int(b.level)).environment))])
 	ui.action_ring.open(str(b.id), "%s · %s" % [row_for(type,1).name_ru, ROMAN[int(b.level)-1]], marker.position, ui.stage.camera, actions)
+
+## The job running in a building now: its construction, or the first started order of the
+## building's own queue (training, research, healing, repairs).
+func running_job(b: Dictionary) -> Dictionary:
+	var best := {}
+	for order: Dictionary in ui.state.v6.orders:
+		if order.status != "pending":
+			continue
+		var here: bool = str(order.get("instance_id", "")) == str(b.id) or (str(order.get("building", "")) == str(b.type) and order.kind != "construction")
+		if here and (best.is_empty() or float(order.starts_at) < float(best.starts_at)):
+			best = order
+	return best
 
 ## A level the game offers now: at most MAX_OPEN_BUILDING_LEVEL, and every building it needs
 ## can be reached too (a requirement past the open level counts only when it already stands).
@@ -550,66 +580,16 @@ func send(action: Dictionary) -> void:
 	if success and navigation == navigation_request:
 		await queues()
 
+## Every running job of the settlement with its speed-ups (src/v6_queues.gd).
 func queues() -> void:
 	var navigation := begin_view()
 	var generation: int = ui.modal_generation
+	# The catalogue (names) is loaded after sign-in (main.gd); the queues need only the state.
 	if not await ui.ensure_v6_ready():
 		return
 	if navigation != navigation_request or generation != ui.modal_generation:
 		return
-	ui.open_modal("Очереди поселения", "full", "ЗАКАЗЫ И РЕЗЕРВ")
-	warnings()
-	section_title("Работы")
-	var count := 0
-	for order: Dictionary in ui.state.v6.orders:
-		if order.status != "pending":
-			continue
-		count += 1
-		var names := {"construction":"Строительство", "train":"Обучение", "heal":"Лечение", "research":"Исследование", "siege":"Сборка таранов", "repair_ram":"Ремонт тарана", "repair_wall":"Ремонт стены"}
-		var card: PanelContainer = ui.panel(14)
-		ui.modal_body.add_child(card)
-		var box := VBoxContainer.new()
-		box.add_theme_constant_override("separation", 8)
-		card.add_child(box)
-		var head := HBoxContainer.new()
-		head.add_theme_constant_override("separation", 12)
-		box.add_child(head)
-		var art: Texture2D = ui.v6_card(str(order.building))
-		if art != null:
-			head.add_child(ui.UiKit.icon_tile(art, 64))
-		var titles := VBoxContainer.new()
-		titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		titles.alignment = BoxContainer.ALIGNMENT_CENTER
-		head.add_child(titles)
-		ui.UiKit.label(titles, str(row_for(str(order.building), 1).get("name_ru", order.building)), 20, ui.UiKit.INK, ui.UiKit.LABEL_FONT)
-		ui.UiKit.label(titles, str(names.get(order.kind, order.kind)), 16, ui.UiKit.INK_MUTED)
-		var starts := float(order.starts_at) * 1000.0
-		var ends := float(order.ends_at) * 1000.0
-		if starts > ui.timer_now():
-			ui.bind_countdown(ui.UiKit.timer_pill(box, "Ожидание начала", ""), "", starts)
-		ui.bind_countdown(ui.UiKit.timer_pill(box, "До завершения", ""), "", ends)
-		if ends > starts:
-			ui.UiKit.progress_bar(box, (ui.timer_now() - starts) / (ends - starts))
-		var reserved: Array[String] = []
-		for resource: String in order.get("escrow", {}):
-			if int(order.escrow[resource]) > 0:
-				reserved.append(ui.RESOURCE_NAMES.get(resource,resource) + " " + ui.format_balance(int(order.escrow[resource])))
-		if not reserved.is_empty():
-			ui.UiKit.label(box, "Резерв заказа: " + ", ".join(reserved), 16, ui.UiKit.INK_MUTED)
-		var actions := HBoxContainer.new()
-		actions.add_theme_constant_override("separation", 12)
-		box.add_child(actions)
-		var cancel: Button = link(actions, "Отменить работу", send.bind({"kind":"cancel", "order_id":order.id}))
-		ui.UiKit.style_button(cancel, "danger")
-		if order.kind in ["construction", "train", "siege"]:
-			ui.UiKit.style_button(link(actions, "Использовать ускоритель", speedups.bind(order)), "secondary")
-	if count == 0:
-		muted("Активных заказов нет.")
-	for receipt: String in ui.state.v6.rewards:
-		if ui.state.v6.rewards[receipt].status == "pending":
-			ui.UiKit.style_button(ui.button(ui.modal_body, "Получить награду " + receipt, send.bind({"kind":"claim", "receipt_id":receipt})), "green")
-	section_title("Запасы поселения")
-	stock_line(false)
+	queue_view.open()
 
 func services(type: String) -> void:
 	var navigation := begin_view()
@@ -809,72 +789,11 @@ func objectives() -> void:
 			var objective: String = step.id
 			ui.button(ui.modal_body, "Получить награду", func(): await ui.command({"kind":"starter71", "objectiveId":objective}); objectives())
 
-## Speed-up items for a running order. `back` reopens the window it came from (the
-## recruitment window); without it the settlement queues open after a use.
+## Speed-up items for a running order: the queues window on that job. `back` reopens the
+## window it came from (the recruitment window) when the job is done.
 func speedups(order: Dictionary, back := Callable()) -> void:
 	begin_view()
-	var after := back if back.is_valid() else queues
-	ui.open_modal("Ускорить работу", "full", "ПРЕДМЕТЫ УСКОРЕНИЯ")
-	var queue: String = "construction" if order.kind == "construction" else "training"
-	time_card("До завершения", ceili((float(order.ends_at)*1000.0-ui.timer_now())/1000.0), float(order.ends_at)*1000.0)
-	muted("Выберите ускоритель для текущей работы.")
-	var grid := VBoxContainer.new()
-	grid.name = "SpeedItems"
-	grid.add_theme_constant_override("separation", 10)
-	ui.modal_body.add_child(grid)
-	var tiers := [60, 300, 900, 1800, 3600, 7200, 18000, 36000]
-	var confirmation := {"item":""}
-	var note := Label.new()
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.add_theme_color_override("font_color", ui.UiKit.WARN)
-	note.add_theme_font_size_override("font_size", 16)
-	for index: int in tiers.size():
-		var item: String = queue + "-" + str(index+1)
-		var count: int = int(ui.state.items.get(item, 0))
-		if count > 0:
-			var seconds: int = tiers[index]
-			var body := {"kind":"speedup", "queue":queue, "item":item, "orderId":order.id, "expectedEndsAt":float(order.ends_at)*1000.0, "confirmUnused":false}
-			var card := PanelContainer.new()
-			card.add_theme_stylebox_override("panel", ui.UiKit.row_style())
-			grid.add_child(card)
-			var line := HBoxContainer.new()
-			line.add_theme_constant_override("separation", 14)
-			card.add_child(line)
-			line.add_child(ui.UiKit.icon_tile(ui.UiKit.tex("kit_hourglass"), 64))
-			var texts := VBoxContainer.new()
-			texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			texts.alignment = BoxContainer.ALIGNMENT_CENTER
-			line.add_child(texts)
-			ui.UiKit.label(texts, "Ускорение · %s" % duration(seconds), 20, ui.UiKit.INK, ui.UiKit.LABEL_FONT)
-			ui.UiKit.label(texts, "Сокращает время работы «%s» на %s" % ["Строительство" if queue == "construction" else "Обучение", duration(seconds)], 16, ui.UiKit.INK_MUTED)
-			ui.UiKit.label(texts, "В наличии: %d" % count, 16, ui.UiKit.BRONZE, ui.UiKit.LABEL_FONT)
-			var use := work_button(line, "Использовать", func():
-				var remaining: float = (float(order.ends_at)*1000.0-ui.timer_now())/1000.0
-				if remaining <= 0:
-					note.text = "Работа завершена. Обновляем состояние…"
-					await ui.ensure_v6_ready(true)
-					after.call()
-					return
-				if seconds > remaining and confirmation.item != item:
-					confirmation.item = item
-					note.text = "Остаток %s пропадёт. Нажмите ускоритель ещё раз, чтобы подтвердить." % duration(ceili(seconds-remaining))
-					return
-				body.confirmUnused = seconds > remaining
-				if await ui.command(body):
-					after.call()
-			)
-			use.size_flags_horizontal = Control.SIZE_SHRINK_END
-			use.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			use.custom_minimum_size = Vector2(190, 52)
-			ui.UiKit.style_button(use, "secondary")
-	muted("Неиспользованный остаток ускорения пропадёт." if grid.get_child_count() else "Ускорителей пока нет. Таймер продолжает идти.")
-	ui.modal_body.add_child(note)
-	if back.is_valid():
-		var home: Button = ui.button(ui.modal_body, "Вернуться к обучению", back)
-		home.name = "SpeedBack"
-		ui.UiKit.style_button(home, "tertiary", 18)
-		home.custom_minimum_size = Vector2(260, 48)
-		home.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	queue_view.open(order, back, "Ускорить работу")
 
 func army() -> void:
 	var navigation := begin_view()

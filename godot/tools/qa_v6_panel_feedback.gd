@@ -18,6 +18,11 @@ class FixtureUI extends Control:
 	var modal_body := VBoxContainer.new()
 	var modal_footer := HBoxContainer.new()
 	var modal_title := Label.new()
+	# The full-window parts the queues and speed-ups window uses (src/v6_queues.gd).
+	var modal_tools := HBoxContainer.new()
+	var modal_hero := Control.new()
+	var modal_hero_share := 0.4
+	var speed_items := {"construction-1":{"kind":"construction","seconds":60},"construction-2":{"kind":"construction","seconds":300},"training-1":{"kind":"training","seconds":60}}
 	var resource_icons := {}
 	var request_count := 0
 	var command_count := 0
@@ -39,7 +44,9 @@ class FixtureUI extends Control:
 		modal_title.add_theme_font_override("font",TITLE_FONT)
 		modal_title.add_theme_font_size_override("font_size",30)
 		content.add_child(modal_title)
+		content.add_child(modal_tools)
 		content.add_child(modal_body)
+		add_child(modal_hero)
 		modal_body.add_theme_constant_override("separation",10)
 		content.add_child(modal_footer)
 	func ensure_v6_ready(_force := false) -> bool:
@@ -51,16 +58,21 @@ class FixtureUI extends Control:
 		if fail_quote:
 			return {"error":"Нет соединения"}
 		return {"ok":true,"quote":{"cost":{"wood":1870,"food":680,"stone":374,"iron":57,"coins":510},"base_seconds":7200,"duration_seconds":7200,"speed_bp":0}}
-	func command(_order: Dictionary) -> bool:
+	func command(_order: Dictionary,_after := Callable()) -> bool:
 		command_count += 1
 		await get_tree().create_timer(0.25).timeout
 		return true
 	func v6_card(_type: String) -> Texture2D:return null
+	func speed_catalog() -> Dictionary:return speed_items
+	func arrange_modal() -> void:pass
+	func set_modal_heading(title: String,_eyebrow: String) -> void:modal_title.text = title
 	func open_modal(title: String,_layout := "",_eyebrow := "",_art: Texture2D = null) -> void:
 		modal_generation += 1
 		modal_title.text = title
 		empty(modal_body)
 		empty(modal_footer)
+		empty(modal_tools)
+		empty(modal_hero)
 	func empty(parent: Node) -> void:
 		for child in parent.get_children():
 			parent.remove_child(child)

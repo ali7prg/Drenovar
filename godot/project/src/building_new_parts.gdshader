@@ -8,7 +8,7 @@ render_mode blend_add, unshaded, depth_draw_never, cull_back, shadows_disabled, 
 // godot/art/buildings-v6/build.gd). A soft pulse and a rim make them read at a glance.
 
 uniform vec4 glow : source_color = vec4(1.0, 0.74, 0.32, 1.0);
-uniform float strength = 0.55;
+uniform float strength = 0.34;
 uniform float pulse_speed = 1.6;
 
 varying float fresh;
@@ -23,5 +23,5 @@ void fragment() {
 	}
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.0);
 	float pulse = 0.62 + 0.38 * sin(TIME * pulse_speed);
-	ALBEDO = glow.rgb * strength * pulse * (0.38 + 0.9 * rim);
+	ALBEDO = glow.rgb * strength * pulse * (0.22 + 1.0 * rim);
 }

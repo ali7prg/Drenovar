@@ -75,12 +75,12 @@ func run() -> void:
 				if item.tooltip_text==("Улучшить" if level<11 else "Сведения"):action=item
 			if not check(action!=null,"correct ring action "+type+str(level)):return
 			action.pressed.emit()
-			if not check(await wait_for(func():return button(game.modal_body,"Проверить улучшение")!=null if level<11 else texts(game.modal_body).has("XI — окончательный уровень.")),"inspector "+type+str(level)):return
+			if not check(await wait_for(func():return button(game.modal_body,"Улучшить")!=null if level<11 else texts(game.modal_body).has("XI — окончательный уровень.")),"inspector "+type+str(level)):return
 			if level==11:
-				if not check(button(game.modal_body,"Проверить улучшение")==null,"no hidden XII "+type):return
+				if not check(button(game.modal_body,"Улучшить")==null,"no hidden XII "+type):return
 				cases.append({"type":type,"level":level,"status":"passed"})
 				continue
-			button(game.modal_body,"Проверить улучшение").pressed.emit()
+			button(game.modal_body,"Улучшить").pressed.emit()
 			if not check(await wait_for(func():return game.modal_title.text=="Подтвердить работу" and not game.busy and not texts(game.modal_body).has("Рассчитываем стоимость и время…")),"quote response "+type+str(level)):return
 			if not check(button(game.modal,"Начать")!=null,"upgrade available "+type+str(level)+" "+str(texts(game.modal_body))):return
 			for resource: String in setup.expected.cost:

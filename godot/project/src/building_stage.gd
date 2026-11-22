@@ -491,3 +491,353 @@ static func model_height(model: Node3D) -> float:
 		if part.mesh != null:
 			top = maxf(top, (part.global_transform * part.get_aabb()).end.y)
 	return top
+
+# ------------------------------------------------------------------ the live view
+
+## Tiles of the «Сейчас / После» pair: centre to centre, in tile widths.
+const PAIR_SPACING := 1.08
+## Framing of the live view: the tiles take this share of the width; the soil bottom sits
+## this far down, above the caption plates.
+const LIVE_SHARE := 0.95
+const CAPTION_BAND := 58.0
+## Head room of the live view (metres): the tallest level scenes stand inside it.
+const LIVE_HEIGHT := 11.0
+## The baked art was framed with these (tools/bake_building_art.gd): placeholders line up.
+const ART_SHARE := 0.94
+const ART_BOTTOM := 0.975
+
+var data: Dictionary
+var type := ""
+var runtime_id := ""
+## [level shown on the left, level on the right]; 0 = no tile there.
+var levels: Array = [0, 0]
+var captions: Array = ["", ""]
+var paths: Array = ["", ""]
+var scales: Array = [1.0, 1.0]
+var placeholders: Array = [null, null]
+var view: TextureRect
+var viewport: SubViewport
+var camera: Camera3D
+var mounts: Array = []
+var waiting: Array = []
+var world_built := false
+var models_placed := 0
+var spin := 0.0
+var spin_velocity := 0.0
+var dragging := false
+var last_drag_msec := 0
+var fade: Tween
+var built_usec := 0
+
+## «После» is a new model, not the same one grown (the level scenes come from another family
+## of the architecture kit, e.g. the wooden levels I–V and the stone levels VI–XI): the whole
+## building is new, so no part is lit; a gold «Новый облик» ribbon marks it instead.
+func fresh_model() -> bool:
+	if not pair() or str(paths[0]).is_empty() or str(paths[1]).is_empty():
+		return false
+	return family(str(paths[0])) != family(str(paths[1]))
+
+static func family(path: String) -> String:
+	var parts := path.trim_prefix("res://").split("/")
+	return parts[2] if parts.size() > 2 else path
+
+## The upgrade pair of a V6 type: «Сейчас» at `current` and «После» at `current + 1`. At level
+## 0 only «После · ур. I» stands; at XI only «Сейчас». only_next: «После» alone (the quote).
+func setup(game_data: Dictionary, v6_type: String, current: int, final_level := 11, only_next := false) -> void:
+	data = game_data
+	type = v6_type
+	runtime_id = runtime_type(data, type)
+	if only_next:
+		levels = [0, clampi(current + 1, 1, final_level)]
+	elif current <= 0:
+		levels = [0, 1]
+	elif current >= final_level:
+		levels = [current, 0]
+	else:
+		levels = [current, current + 1]
+	for side in 2:
+		var level: int = levels[side]
+		if level <= 0:
+			continue
+		var visual := level_visual(data, runtime_id, level)
+		if not visual.is_empty() and ResourceLoader.exists(str(visual[0])):
+			paths[side] = str(visual[0])
+			scales[side] = float(visual[1])
+			request(paths[side])
+		var roman: String = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"][level - 1]
+		captions[side] = ("Сейчас · ур. " if side == 0 else "После · ур. ") + roman
+		# Level I is exactly the card art; the others start on the empty tile.
+		placeholders[side] = card_art(type) if level == 1 else card_art("tile")
+	if levels[0] == 0 and levels[1] == 1:
+		captions[1] = "Будет построено · ур. I"
+	if levels[1] == 0:
+		captions[0] = "Окончательный уровень · ур. XI"
+
+## The first level of a family is all new against the level before it (nothing to light).
+func family_start(level: int) -> bool:
+	if level <= 1:
+		return true
+	var before := level_visual(data, runtime_id, level - 1)
+	return not before.is_empty() and not str(paths[1]).is_empty() and family(str(before[0])) != family(str(paths[1]))
+
+func pair() -> bool:
+	return levels[0] > 0 and levels[1] > 0
+
+func sides() -> Array:
+	var out: Array = []
+	for side in 2:
+		if levels[side] > 0:
+			out.append(side)
+	return out
+
+func _ready() -> void:
+	name = "BuildingStage"
+	add_to_group("panel_drag")
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	view = TextureRect.new()
+	view.name = "LiveView"
+	view.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	view.stretch_mode = TextureRect.STRETCH_SCALE
+	view.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	view.modulate.a = 0.0
+	add_child(view)
+	resized.connect(layout)
+	layout()
+
+func layout() -> void:
+	if view == null:
+		return
+	view.position = Vector2.ZERO
+	view.size = Vector2(size.x, size.y)
+	if viewport != null:
+		viewport.size = render_size()
+		frame_camera()
+	queue_redraw()
+
+func render_size() -> Vector2i:
+	var scale := get_viewport().get_final_transform().get_scale() if is_inside_tree() else Vector2.ONE
+	return Vector2i(maxi(2, roundi(size.x * scale.x)), maxi(2, roundi(size.y * scale.y)))
+
+## Framing in the camera plane: {view_height, view_width, centre_right, centre_up, spacing}.
+func framing() -> Dictionary:
+	var ext := extents(LIVE_HEIGHT)
+	var wide: float = float(ext.right[1]) - float(ext.right[0])
+	var spacing := wide * PAIR_SPACING if pair() else 0.0
+	var aspect := size.x / maxf(1.0, size.y)
+	var bottom := (size.y - CAPTION_BAND) / maxf(1.0, size.y)
+	var view_width := (wide + spacing) / LIVE_SHARE
+	var view_height := view_width / maxf(0.1, aspect)
+	var tall: float = float(ext.up[1]) - float(ext.up[0])
+	if tall > view_height * (bottom - 0.02):
+		view_height = tall / (bottom - 0.02)
+		view_width = view_height * aspect
+	var centre_right: float = (float(ext.right[0]) + float(ext.right[1])) * 0.5
+	# Centre a building of usual height (7 m) in the space above the captions; taller ones still
+	# have the head room of LIVE_HEIGHT.
+	var usual := extents(7.0)
+	var used := (float(usual.up[1]) - float(usual.up[0])) / view_height
+	bottom = minf(bottom, (bottom + used) * 0.5 + 0.03)
+	var centre_up: float = float(ext.up[0]) + (bottom - 0.5) * view_height
+	return {"view_height": view_height, "view_width": view_width, "right": centre_right, "up": centre_up, "spacing": spacing, "bottom": bottom}
+
+## Offset of a tile along the camera's right axis.
+func tile_offset(side: int, frame: Dictionary) -> float:
+	if not pair():
+		return 0.0
+	return (-0.5 if side == 0 else 0.5) * float(frame.spacing)
+
+## Screen point of a camera-plane position (right, up) relative to the world origin.
+func to_screen(right: float, up: float, frame: Dictionary) -> Vector2:
+	return Vector2(size.x * 0.5 + (right - float(frame.right)) / float(frame.view_width) * size.x,
+		size.y * 0.5 - (up - float(frame.up)) / float(frame.view_height) * size.y)
+
+## Rect of the baked art of a tile so that it lies exactly where the live tile will stand.
+func art_rect(side: int, frame: Dictionary) -> Rect2:
+	var ext := extents(LIVE_HEIGHT)
+	var art_width: float = (float(ext.right[1]) - float(ext.right[0])) / ART_SHARE
+	var art_centre_right: float = (float(ext.right[0]) + float(ext.right[1])) * 0.5 + tile_offset(side, frame)
+	var art_centre_up: float = float(ext.up[0]) + (ART_BOTTOM - 0.5) * art_width
+	var centre := to_screen(art_centre_right, art_centre_up, frame)
+	var pixels := art_width / float(frame.view_width) * size.x
+	return Rect2(centre - Vector2(pixels, pixels) * 0.5, Vector2(pixels, pixels))
+
+func _draw() -> void:
+	if size.x < 4.0:
+		return
+	var frame := framing()
+	# A pool of warm light behind the tiles and the carved sun faint over it.
+	var glow := UiKit.warm_glow()
+	draw_texture_rect(glow, Rect2(-size.x * 0.1, size.y * 0.04, size.x * 1.2, size.y * 0.92), false, Color(1, 1, 1, 0.9))
+	var sun := minf(size.x, size.y) * 0.78
+	draw_texture_rect(UiKit.tex("kit_solar"), Rect2(Vector2(size.x * 0.5 - sun * 0.5, size.y * 0.06), Vector2(sun, sun)), false, Color(0.55, 0.38, 0.18, 0.07))
+	# Soft shadows under the tiles (always; the live view draws over them).
+	for side: int in sides():
+		var rect := art_rect(side, frame)
+		var shade := UiKit.ground_shadow()
+		draw_texture_rect(shade, Rect2(rect.position.x + rect.size.x * 0.06, rect.end.y - rect.size.y * 0.2, rect.size.x * 0.88, rect.size.y * 0.2), false, Color(1, 1, 1, 0.55))
+	# Placeholders until the live view has faded in.
+	if view.modulate.a < 0.99:
+		for side: int in sides():
+			var art: Texture2D = placeholders[side]
+			if art != null:
+				draw_texture_rect(art, art_rect(side, frame), false, Color(1, 1, 1, 1.0 - view.modulate.a))
+	if pair():
+		# The gold chevron between «Сейчас» and «После».
+		var middle := Vector2(size.x * 0.5, size.y - CAPTION_BAND * 0.5 - 2.0)
+		var points := PackedVector2Array([middle + Vector2(-13, -15), middle + Vector2(3, 0), middle + Vector2(-13, 15), middle + Vector2(-5, 0)])
+		var ahead := PackedVector2Array()
+		for p in points:
+			ahead.append(p + Vector2(13, 0))
+		for shape: PackedVector2Array in [points, ahead]:
+			var outline := PackedVector2Array()
+			for p in shape:
+				outline.append(p + Vector2(0, 2))
+			draw_colored_polygon(outline, Color(0, 0, 0, 0.45))
+			draw_colored_polygon(shape, UiKit.GOLD)
+
+	# Caption plates under the tiles: «Сейчас · ур. V» in ivory, «После · ур. VI» in gold.
+	var strip := UiKit.nine("kit_strip", Vector4(26, 14, 26, 14), Vector4.ZERO)
+	for side: int in sides():
+		var centre_x := art_rect(side, frame).get_center().x
+		var words := UiKit.KitText.line(str(captions[side]), UiKit.LABEL_FONT, 19)
+		var width := words.get_size().x + 64.0
+		var plate := Rect2(roundf(centre_x - width * 0.5), size.y - CAPTION_BAND + 6.0, width, 40.0)
+		draw_style_box(strip, plate)
+		var at := Vector2(roundf(centre_x - words.get_size().x * 0.5), plate.position.y + roundf((plate.size.y - words.get_size().y) * 0.5))
+		words.draw_outline(get_canvas_item(), at, 4, UiKit.SHADE)
+		words.draw(get_canvas_item(), at, UiKit.GOLD if side == 1 else UiKit.IVORY)
+		if side == 1 and fresh_model():
+			# «Новый облик»: a red enamel ribbon with gold letters over the «После» caption.
+			var note := UiKit.KitText.line("Новый облик", UiKit.LABEL_FONT, 16)
+			var ribbon := Rect2(roundf(centre_x - note.get_size().x * 0.5 - 16.0), plate.position.y - 30.0, note.get_size().x + 32.0, 26.0)
+			draw_style_box(UiKit.flat(Color("#8e2a1e"), Color("#e9c779"), 5, Vector2.ZERO, 2), ribbon)
+			note.draw(get_canvas_item(), Vector2(ribbon.position.x + 16.0, ribbon.position.y + roundf((26.0 - note.get_size().y) * 0.5)), UiKit.GOLD)
+
+# Built after the window's first frame: the open itself costs no 3D work.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_ENTER_TREE and not world_built:
+		build_world.call_deferred()
+	elif what == NOTIFICATION_EXIT_TREE:
+		# Nothing 3D outlives the window: the viewport and the instances are children of this
+		# node; the next level's scene leaves memory too (the city keeps the current one).
+		scenes.clear()
+
+func build_world() -> void:
+	if world_built or not is_inside_tree():
+		return
+	if DisplayServer.get_name() == "headless":
+		await get_tree().process_frame
+	else:
+		await RenderingServer.frame_post_draw
+	if not is_inside_tree() or world_built:
+		return
+	var started := Time.get_ticks_usec()
+	world_built = true
+	viewport = SubViewport.new()
+	viewport.name = "PairViewport"
+	viewport.own_world_3d = true
+	viewport.transparent_bg = true
+	viewport.msaa_3d = Viewport.MSAA_4X
+	viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
+	viewport.size = render_size()
+	add_child(viewport)
+	var holder := Node3D.new()
+	viewport.add_child(holder)
+	light_rig(holder)
+	camera = Camera3D.new()
+	holder.add_child(camera)
+	camera.make_current()
+	var frame := framing()
+	var basis := axes()
+	mounts = [null, null]
+	for side: int in sides():
+		var mount := Node3D.new()
+		mount.name = "Tile%d" % side
+		mount.position = (basis[0] as Vector3) * tile_offset(side, frame)
+		holder.add_child(mount)
+		mount.add_child(make_tile(hash(type) % 97 + side * 13))
+		mounts[side] = mount
+		if not str(paths[side]).is_empty():
+			waiting.append(side)
+	frame_camera()
+	view.texture = viewport.get_texture()
+	built_usec = Time.get_ticks_usec() - started
+	set_process(true)
+
+func frame_camera() -> void:
+	if camera == null:
+		return
+	var frame := framing()
+	var basis := axes()
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.keep_aspect = Camera3D.KEEP_HEIGHT
+	camera.size = float(frame.view_height)
+	camera.near = 0.5
+	camera.far = 400.0
+	var target: Vector3 = (basis[0] as Vector3) * float(frame.right) + (basis[1] as Vector3) * float(frame.up)
+	camera.position = target + (basis[2] as Vector3) * 120.0
+	camera.look_at(target, Vector3.UP)
+	for side: int in sides():
+		if mounts.size() > side and mounts[side] != null:
+			mounts[side].position = (basis[0] as Vector3) * tile_offset(side, frame)
+
+func _process(delta: float) -> void:
+	if not world_built:
+		return
+	for side: int in waiting.duplicate():
+		var scene := take(str(paths[side]))
+		if scene != null:
+			waiting.erase(side)
+			place_building(mounts[side], scene, float(scales[side]), side == 1 and int(levels[1]) > 1 and not fresh_model() and not family_start(int(levels[1])))
+			models_placed += 1
+		elif not requested.has(paths[side]) and not scenes.has(paths[side]):
+			waiting.erase(side)
+	if waiting.is_empty() and view.modulate.a < 0.01 and (fade == null or not fade.is_running()):
+		reveal()
+	# Both tiles turn together: the finger's turn, then a slow sway (±6° over 10 s) so the
+	# view never freezes.
+	var resting := not dragging and Time.get_ticks_msec() - last_drag_msec > 2500
+	if not dragging:
+		if absf(spin_velocity) > 0.0005:
+			spin += spin_velocity
+			spin_velocity *= pow(0.02, delta)
+		elif resting and absf(spin) > 0.001:
+			spin = lerp_angle(spin, 0.0, 1.0 - pow(0.15, delta))
+	var sway := sin(Time.get_ticks_msec() * 0.001 * TAU / 10.0) * deg_to_rad(6.0) if resting else 0.0
+	for mount in mounts:
+		if mount != null:
+			mount.rotation.y = spin + sway
+
+func reveal() -> void:
+	if fade != null:
+		fade.kill()
+	fade = create_tween()
+	fade.tween_method(func(alpha: float):
+		view.modulate.a = alpha
+		queue_redraw(), 0.0, 1.0, 0.3).set_trans(Tween.TRANS_SINE)
+
+# Turning by finger (TouchScroll, group "panel_drag") or mouse.
+func drag_begin() -> void:
+	dragging = true
+	spin_velocity = 0.0
+
+func drag_by(dx: float) -> void:
+	var turn := dx * 0.0085
+	spin += turn
+	spin_velocity = turn
+	last_drag_msec = Time.get_ticks_msec()
+
+func drag_end() -> void:
+	dragging = false
+	last_drag_msec = Time.get_ticks_msec()
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			drag_begin()
+		else:
+			drag_end()
+		accept_event()
+	elif event is InputEventMouseMotion and dragging:
+		drag_by(event.relative.x)
+		accept_event()

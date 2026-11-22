@@ -63,9 +63,9 @@ func run() -> void:
 	game.showing_cached_state=true
 	await game.inspect_building(current)
 	if not check(game.v6_panels.enabled() and not game.showing_cached_state,"stale legacy cache refreshed before building action"):return
-	if not check(button(game.modal_body,"Проверить улучшение")!=null,"current inspector restored"):return
+	if not check(button(game.modal_body,"Улучшить")!=null,"current inspector restored"):return
 	await game.command({"kind":"kingdom","action":"upgrade","buildingId":current.id,"expectedLevel":1})
-	if not check(button(game.modal_body,"Проверить улучшение")!=null,"retained legacy callback opens current inspector"):return
+	if not check(button(game.modal_body,"Улучшить")!=null,"retained legacy callback opens current inspector"):return
 	game.v6_panels.catalogue={}
 	await admin("fault",{"kind":"v6catalog"})
 	if not check(not await game.v6_panels.load_catalogue(),"temporary catalogue failure is not accepted"):return

@@ -42,7 +42,7 @@ const TEXTURES := ["kit_body", "kit_body_dark", "kit_hourglass", "kit_header", "
 	"kit_card_fill", "kit_card_frame", "kit_badge", "kit_strip", "kit_pill", "kit_row", "kit_tile",
 	"kit_field", "kit_track", "kit_fill", "kit_fill_green", "kit_knob", "kit_stitch", "kit_rosette",
 	"kit_flourish", "kit_splash", "kit_header_tall", "kit_dais", "kit_dais_n", "kit_dais_top", "kit_ink", "kit_solar",
-	"kit_beam", "kit_emb_inf", "kit_emb_bow", "kit_emb_horse", "kit_emb_ram", "kit_ic_attack", "kit_ic_defence",
+	"kit_beam", "kit_emb_inf", "kit_emb_bow", "kit_emb_horse", "kit_emb_ram", "kit_emb_town", "kit_emb_craft", "kit_emb_wall", "kit_ic_attack", "kit_ic_defence",
 	"kit_ic_health", "kit_ic_power", "kit_ic_wall", "kit_ic_places", "kit_ic_batch"]
 
 static var textures := {}
@@ -766,6 +766,49 @@ class KitChip extends TextureButton:
 		var mark := KitText.line("i", LABEL_FONT, 14)
 		mark.draw(get_canvas_item(), at - mark.get_size() * 0.5, GOLD)
 
+## Requirement of an upgrade or a build (premium UI stage 3): the building's diorama in a small
+## round frame, «Ратуша · VI» and a mark — a green tick when met, a red cross when missing. A
+## missing one is a button (the window goes to that building); a met one is disabled.
+static func need_chip(art: Texture2D, text: String, met: bool) -> BaseButton:
+	var control := KitNeed.new()
+	control.art = art
+	control.text = text
+	control.met = met
+	control.disabled = met
+	control.pill = flat(Color("#2b1f16f2") if not met else Color("#2b1f16c8"), Color("#c59a4f") if not met else Color("#c59a4f88"), 20, Vector2.ZERO, 2 if not met else 1)
+	control.tooltip_text = text + (" · выполнено" if met else " · не выполнено, перейти к зданию")
+	control.accessibility_name = control.tooltip_text
+	var width := ceilf(KitText.line(text, LABEL_FONT, 17).get_size().x)
+	control.custom_minimum_size = Vector2(width + 100, 42)
+	control.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	control.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	return control
+
+class KitNeed extends TextureButton:
+	var art: Texture2D
+	var text := ""
+	var met := false
+	var pill: StyleBox
+
+	func _draw() -> void:
+		var pressed := get_draw_mode() == DRAW_PRESSED or get_draw_mode() == DRAW_HOVER_PRESSED
+		draw_style_box(pill, Rect2(Vector2.ZERO, size))
+		var centre := Vector2(22, size.y * 0.5)
+		draw_circle(centre, 18.0, Color("#c59a4f") if not met else Color("#8d6a3a"))
+		draw_circle(centre, 16.5, Color("#3a2a1c"))
+		if art != null:
+			draw_texture_rect(art, Rect2(centre - Vector2(19, 21), Vector2(38, 38)), false, Color(0.85, 0.82, 0.8) if pressed else Color.WHITE)
+		var words := KitText.line(text, LABEL_FONT, 17)
+		words.draw(get_canvas_item(), Vector2(48, roundf((size.y - words.get_size().y) * 0.5)), IVORY if not met else GOLD_DIM)
+		var mark := Vector2(size.x - 22, size.y * 0.5)
+		draw_circle(mark, 12.0, Color("#e9c779") if not met else Color("#b9d9a0"))
+		draw_circle(mark, 10.5, BAD if not met else GOOD)
+		if met:
+			draw_polyline(PackedVector2Array([mark + Vector2(-5, 0), mark + Vector2(-1.5, 4), mark + Vector2(5.5, -4.5)]), IVORY, 2.6, true)
+		else:
+			draw_line(mark + Vector2(-4.5, -4.5), mark + Vector2(4.5, 4.5), IVORY, 2.6, true)
+			draw_line(mark + Vector2(4.5, -4.5), mark + Vector2(-4.5, 4.5), IVORY, 2.6, true)
+
 ## Rail medallion with a portrait (recruitment buildings): bronze-rimmed enamel disc, the
 ## face clipped round inside it, a caption under it; gold glow when selected, a small
 ## hourglass while the building is training. One drawn node (KitMedal).
@@ -862,8 +905,11 @@ static func icon_tile(icon: Texture2D, size := 64, count_text := "") -> PanelCon
 ## Stat line: name on the left, value (and an optional green gain) on the right, a bronze
 ## hairline under it — for building effects and upgrade deltas.
 ## compact: a 38-unit row with its rule inside (for a list with no gap between rows).
-static func stat_row(parent: Node, name: String, value: String, gain := "", compact := false) -> Control:
+## delta: the gain is a difference ("+300", green, after the value) rather than the next value
+## (after an arrow).
+static func stat_row(parent: Node, name: String, value: String, gain := "", compact := false, delta := false) -> Control:
 	var line := KitLine.new()
+	line.gain_arrow = not delta
 	line.name = "KitStat"
 	line.custom_minimum_size.y = 33 if compact else 37
 	line.rule_inside = compact
@@ -946,6 +992,7 @@ class KitLine extends Control:
 	var value_size := 19
 	var value_colour := INK
 	var gain_text := ""
+	var gain_arrow := true
 	var rule_inside := false
 
 	func _draw() -> void:
@@ -959,12 +1006,15 @@ class KitLine extends Control:
 			var gain := KitText.line(gain_text, LABEL_FONT, 19)
 			right -= gain.get_size().x
 			gain.draw(get_canvas_item(), Vector2(right, _top(gain)), GOOD)
-			right -= 26.0
-			var points := PackedVector2Array()
-			for point: Vector2 in MARKS.arrow:
-				points.append(Vector2(right, floorf(size.y / 2.0) - 8.0) + point * 16.0)
-			draw_colored_polygon(points, GOOD)
-			right -= 10.0
+			if gain_arrow:
+				right -= 26.0
+				var points := PackedVector2Array()
+				for point: Vector2 in MARKS.arrow:
+					points.append(Vector2(right, floorf(size.y / 2.0) - 8.0) + point * 16.0)
+				draw_colored_polygon(points, GOOD)
+				right -= 10.0
+			else:
+				right -= 12.0
 		if not value_text.is_empty():
 			var value := KitText.line(value_text, value_font, value_size)
 			right -= value.get_size().x

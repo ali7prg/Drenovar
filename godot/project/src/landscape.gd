@@ -4209,13 +4209,33 @@ func show_placement(model_path: String, model_scale: float, plots: Array) -> voi
 ## Placing a new building of the V6 economy (premium UI stage 3, src/v6_build.gd): the free
 ## plots of its terrain glow warm gold (plot_glow.gdshader on a quad above each plot); the
 ## ghost and its plate wait hidden until the player taps a plot (move_placement shows them).
+## The materials of the placement on glowing plots live as long as the city: a
+## StandardMaterial3D's shader is shared per feature set and freed with its last material, so
+## new ones on every placement rebuilt two shader variants on the tap (about 15 ms).
+var plot_ring_material: ShaderMaterial
+var plot_plate_material: StandardMaterial3D
+var plot_ghost_material: StandardMaterial3D
+
+## Creates them ahead of the first placement (the construction strip calls this while open).
+func prepare_plot_glow() -> void:
+	if plot_ring_material != null:
+		return
+	plot_ring_material = ShaderMaterial.new()
+	plot_ring_material.shader = PLOT_GLOW
+	plot_plate_material = placement_material(Color(0.4, 0.95, 0.5, 0.22))
+	# The ghost shows through the trees of a forest plot as a faint gold silhouette.
+	plot_ghost_material = placement_material(Color(1.0, 0.85, 0.5, 0.22))
+	plot_ghost_material.no_depth_test = true
+	for material: Material in [plot_ring_material, plot_plate_material, plot_ghost_material]:
+		material.get_rid()
+
 func show_plot_glow(model_path: String, model_scale: float, plots: Array) -> void:
 	clear_placement()
+	prepare_plot_glow()
 	placement = Node3D.new()
 	placement.name = "Placement"
 	add_child(placement)
-	var glow := ShaderMaterial.new()
-	glow.shader = PLOT_GLOW
+	var glow := plot_ring_material
 	var quad := PlaneMesh.new()
 	quad.size = Vector2(15.0, 15.0)
 	for plot in plots:
@@ -4231,15 +4251,13 @@ func show_plot_glow(model_path: String, model_scale: float, plots: Array) -> voi
 	plate.size = Vector2(12.4, 12.4)
 	placement_plate.mesh = plate
 	placement_plate.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	placement_plate.material_override = placement_material(Color(0.4, 0.95, 0.5, 0.22))
+	placement_plate.material_override = plot_plate_material
 	placement_plate.visible = false
 	placement.add_child(placement_plate)
 	placement_ghost = Node3D.new()
 	placement_ghost.name = "Ghost"
 	placement.add_child(placement_ghost)
-	# The ghost shows through the trees of a forest plot as a faint gold silhouette.
-	placement_overlay = placement_material(Color(1.0, 0.85, 0.5, 0.22))
-	placement_overlay.no_depth_test = true
+	placement_overlay = plot_ghost_material
 	placement_ghost.visible = false
 	if not model_path.is_empty():
 		attach_ghost(model_path, model_scale, placement)

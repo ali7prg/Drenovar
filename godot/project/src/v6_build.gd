@@ -239,13 +239,26 @@ func open_strip(hint := "") -> void:
 ## Builds the placement banner and confirm (hidden) a few frames after the strip is up, so the
 ## first tap on a card does not pay for them.
 func prepare_place() -> void:
-	if place != null and is_instance_valid(place):
-		return
 	for i in 3:
 		await ui.get_tree().process_frame
-	if not is_open() or (place != null and is_instance_valid(place)):
+	if not is_open():
 		return
 	ensure_place()
+	if is_instance_valid(ui.stage) and ui.stage.has_method("prepare_plot_glow"):
+		ui.stage.prepare_plot_glow()
+
+## First-open costs of the strip, paid once after launch (main.warm_panel_textures) instead of
+## in the first tap on «Строить»: the card class with its grey material and stamp, the card
+## style boxes, and the viewports of the blurred city.
+func warm() -> void:
+	var card := BuildCard.new()
+	card.state = "maxed"
+	card.refresh()
+	for key: String in ["body", "panel", "panel_dim", "band", "frame", "frame_lit", "foot", "shadow", "glow", "track", "fill"]:
+		BuildCard.style(key)
+	card.free()
+	if is_instance_valid(ui.city_backdrop):
+		ui.city_backdrop.prepare()
 
 func ensure_place() -> void:
 	if place == null or not is_instance_valid(place):

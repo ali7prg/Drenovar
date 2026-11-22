@@ -2984,6 +2984,10 @@ func warm_panel_textures() -> void:
 				var key: String = full.trim_prefix("res://assets/ui/web-panels/")
 				if texture != null and not panel_textures.has(key):
 					panel_textures[key] = texture
+	# The construction strip's first open (card class and styles, the blurred city's
+	# viewports), a few frames after launch rather than in the first tap on «Строить».
+	await get_tree().process_frame
+	v6_panels.build.warm()
 
 ## Baked portrait of a unit (tools/bake_unit_portraits.gd): the full figure, or the bust for
 ## small slots. Falls back to the older painted panel art for units without one.

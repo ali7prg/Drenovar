@@ -77,6 +77,16 @@ func build_viewports() -> void:
 	blur_rect.texture = snap.get_texture()
 	picture.texture = soft.get_texture()
 
+## Builds the viewports ahead of the first open (after launch); they stay idle until then.
+func prepare() -> void:
+	if soft != null or DisplayServer.get_name() == "headless" or not is_inside_tree():
+		return
+	build_viewports()
+	var pixels := snapshot_size()
+	snap.size = pixels
+	soft.size = pixels
+	blur_rect.size = Vector2(pixels)
+
 ## Takes the snapshot from `camera` and fades the backdrop in (over the live city).
 func open(camera: Camera3D, instant := false) -> void:
 	if fade != null:

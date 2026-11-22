@@ -39,9 +39,9 @@ All windows share one modal (`build_ui` in `src/main.gd`):
 
 | Window | Where | Layout | Reached from | Content now | Stage |
 |---|---|---|---|---|---|
-| Строительство (construction strip) — stage 3 | `catalog` → `V6Build.open_strip` (src/v6_build.gd, src/build_strip.gd) | strip (whole screen over the blurred city) | HUD «Строить», city actions «Строить», plot tap, notifications | Title plate with builders and plots, rail of four category medallions with buildable counts, swipeable strip of carved cards (`src/build_card.gd`: diorama, name, blurb, cost, time, «Построено x/1»; grey with «Больше строить нельзя» when built), placement on glowing plots with a floating confirm (`src/build_place.gd`) (`STAGE3.md`) | 3 (done) |
-| Building inspect / upgrade — stage 3 | `inspect` (also `inspect_instance`) | full + live 3D pair | Building action ring «Улучшить/Сведения», strip card of a built type, requirement chips, defence (B18) | Live «Сейчас · ур. N» ➜ «После · ур. N+1» (src/building_stage.gd; the city's own level scenes, new parts lit, «Новый облик» at a family change), effects with green deltas, «Улучшение до ур. X» cost strip, time pill with bonus + one main action «Улучшить» / «Построить» / «Сначала: X N» (in `modal_body`, where qa_building_actions looks for it), requirement chips (✓ / ✗, a missing one opens that building), plot list for an unbuilt type, wall strength (B18), links | 3 (done) |
-| Подтвердить работу (quote) — stage 3 | `confirm` | full + live «После» hero | «Улучшить», plot list, research, heal, train | Eyebrow naming the work and plot, «Рассчитываем…», then the server quote: «Что даст работа» (effects before/after with deltas), cost strip, time, base time and bonus, builders and workers, reserve; footer primary «Начать»; errors such as «Все строители заняты» | 3 (done) |
+| Строительство (construction strip) — stage 3 | `catalog` → `V6Build.open_strip` (src/v6_build.gd, src/build_strip.gd) | strip (whole screen over the blurred city) | HUD «Строить», city actions «Строить», plot tap, notifications | Title plate with builders and plots, rail of four category medallions with buildable counts, swipeable strip of carved cards in the lower part of the screen, the blurred city above (`src/build_card.gd`: diorama breaking out above the card, name, blurb, cost, time, «Построено x/1»; light silver with a plain caption «Больше строить нельзя» when built), placement on glowing plots with «Участок N · на опушке», a translucent ghost of the building and a floating confirm that keeps clear of the plot (`src/build_place.gd`) (`STAGE3.md`) | 3 (done) |
+| Building inspect / upgrade — stage 3 | `inspect` (also `inspect_instance`) | full + live 3D pair | Building action ring «Улучшить/Сведения», strip card of a built type, requirement chips, defence (B18) | Live «Сейчас · ур. N» ➜ «После · ур. N+1» (src/building_stage.gd; the city's own level scenes, new parts lit, rendered on demand: still unless turning), at level V and above a veiled «Скоро» card with a disabled «Скоро» button (`main.MAX_OPEN_BUILDING_LEVEL`), effects with green deltas, «Улучшение до ур. X» cost strip, time pill with bonus + one main action «Улучшить» / «Построить» / «Сначала: X N» (in `modal_body`, where qa_building_actions looks for it), requirement chips (✓ / ✗, a missing one opens that building), plot list for an unbuilt type, wall strength (B18), links | 3 (done) |
+| Подтвердить работу (quote) — stage 3 | `confirm` | full + live «После» hero | «Улучшить», plot list, research, heal, train | Eyebrow naming the work and plot (refused before any request past `MAX_OPEN_BUILDING_LEVEL`), «Рассчитываем…», then the server quote: «Что даст работа» (effects before/after with deltas), cost strip, time, base time and bonus, builders and workers, reserve; footer primary «Начать»; errors such as «Все строители заняты» | 3 (done) |
 | Очереди поселения | `queues` :385 | full | Economy link, catalogue link, ring «Очереди», notifications | Attack warnings, section «Работы»: order cards (icon tile, name, kind, timer pill, progress bar, reserve, danger «Отменить работу», secondary «Использовать ускоритель»), green claim buttons, section «Запасы поселения» + stock lines | 3 / 4 |
 | Ускорить работу | `speedups` :634 | full | Queue card «Использовать ускоритель», `show_speedups` | Timer pill «До завершения», hint, item rows (hourglass tile, «Ускорение · N», what it shortens, «В наличии: N», secondary «Использовать»), loss warning | 4 |
 | Recruitment (barracks, range, stables, siege workshop) — stage 2 | `services` → `V6Recruit.open` (src/v6_recruit.gd) | full + rail + 3D stage | Ring «Обучение», rail medallions, `open_recruitment` | Rail of training buildings, live unit on a dais (src/unit_stage.gd), tier cards, summary + «Подробнее», quantity/«Макс», cost strip, time, «Обучить», lock panel, running orders with «Ускорить»/«Отменить», completion banner (`STAGE2.md`) | 2 (done) |
@@ -80,7 +80,7 @@ All windows share one modal (`build_ui` in `src/main.gd`):
 | Garrison unit / disband | `show_garrison_unit` :2081 / :2088 | center / garrison | legacy | Garrison row | Unit card, disband confirm | 2 |
 | Ступени армии | `show_military_cultures` :2094 | garrison | legacy | Garrison | Tiers per culture | 2 |
 | Военные здания | `show_training_buildings` :2107 | center | legacy (V6 → catalog) | Army | Training buildings | 2 |
-| Building (legacy) | `inspect_building` :2841 | right | legacy (V6 → inspect) | Building tap | Upgrade preview (BRONZE / INK_MUTED / GOOD), actions | 3 |
+| Building (legacy) | `inspect_building` :2841 | right | legacy (V6 → inspect) | Building tap | Upgrade preview (BRONZE / INK_MUTED / GOOD), actions; no upgrade past `MAX_OPEN_BUILDING_LEVEL` | 3 |
 | Оборона поселения | `show_city_defence` :2965 | right | legacy (V6 → inspect B18) | Walls | Walls, towers (qa_city_walls texts) | 5 |
 | Отменить обучение? | `confirm_cancel_training` :3006 | center | legacy | Recruitment | Confirm | 2 |
 | Recruitment (legacy) | `show_recruitment` :3115 | garrison | legacy (V6 → services) | Barracks | Tabs (selected = primary), unit name / role, terms plate on a kit strip, train | 2 |
@@ -141,9 +141,11 @@ their own colours.
   - All full-screen windows now have the tall header with the player's resources and a 40 px title.
   - Unit portraits (`assets/ui/units`) replace the painted unit art everywhere a unit icon appears.
   - The legacy `show_recruitment` keeps its garrison layout (with the new portraits).
-- Build / upgrade (stage 3):
-  - `catalog` and `inspect` already use the kit.
-  - The confirm window is still a plain list, and the server-quote layout needs a proper cost/time card.
+- Build / upgrade (stage 3, done; see `STAGE3.md`):
+  - The strip, the building window and the quote are rebuilt; the legacy build sheet keeps its
+    stage-1 look.
+  - Building levels stop at V for now (`main.MAX_OPEN_BUILDING_LEVEL`). Raise the constant when the
+    level-VI models are ready; `qa_build_strip` and `qa_building_actions` read it.
 - Speed-ups (stage 4): the V6 list uses kit rows. The legacy texts «N мин · в наличии K» are
   protected by `qa_speedups` / `qa_server_speedups`.
 - Everything else (stage 5) has the kit frame, fonts and buttons, but most bodies are still plain rows.

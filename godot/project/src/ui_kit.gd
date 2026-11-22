@@ -241,6 +241,9 @@ static func button_styles(kind: String) -> Dictionary:
 ## kind: primary (gilded), secondary (lapis), green (forest enamel), danger (cranberry),
 ## tertiary (linen plate). Sets styles, font and text colours on one button.
 static func style_button(control: Button, kind := "tertiary", font_size := 19) -> Button:
+	# One theme notification for all the overrides below (callers often style a button
+	# that is already in the window; each override would otherwise re-run its theme cache).
+	control.begin_bulk_theme_override()
 	var boxes := button_styles(kind)
 	for state: String in boxes:
 		control.add_theme_stylebox_override(state, boxes[state])
@@ -252,6 +255,7 @@ static func style_button(control: Button, kind := "tertiary", font_size := 19) -
 	control.add_theme_constant_override("outline_size", colours[2])
 	control.add_theme_font_override("font", LABEL_FONT)
 	control.add_theme_font_size_override("font_size", font_size)
+	control.end_bulk_theme_override()
 	if control.custom_minimum_size.y < 46:
 		control.custom_minimum_size.y = 46
 	return control
@@ -332,47 +336,45 @@ static func mark(parent: Node, shape: String, colour: Color, size := 18.0) -> Co
 	return box
 
 ## Section header: title in bronze small caps between two cross-stitch rushnyk bands.
-static func section_header(parent: Node, text: String) -> HBoxContainer:
-	var row := HBoxContainer.new()
+static func section_header(parent: Node, text: String) -> Control:
+	var row := KitSection.new()
 	row.name = "KitSection"
-	row.add_theme_constant_override("separation", 10)
+	row.title_text = text
+	row.custom_minimum_size.y = 30
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(_stitch_band())
-	var title := Label.new()
-	title.text = text
-	title.add_theme_font_override("font", LABEL_FONT)
-	title.add_theme_font_size_override("font_size", 21)
-	title.add_theme_color_override("font_color", Color("#5a3510"))
-	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	title.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	row.add_child(title)
-	row.add_child(_stitch_band())
+	row.accessibility_name = text
+	row.stitch = tex("kit_stitch")
+	row.rosette = tex("kit_rosette")
 	if parent != null:
 		parent.add_child(row)
 	return row
 
-static func _stitch_band() -> HBoxContainer:
-	var band := HBoxContainer.new()
-	band.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	band.add_theme_constant_override("separation", 0)
-	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var line := TextureRect.new()
-	line.texture = tex("kit_stitch")
-	line.stretch_mode = TextureRect.STRETCH_TILE
-	line.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	line.custom_minimum_size = Vector2(24, 12)
-	line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	line.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	line.modulate = Color(1, 1, 1, 0.9)
-	band.add_child(line)
-	var rose := TextureRect.new()
-	rose.texture = tex("kit_rosette")
-	rose.custom_minimum_size = Vector2(13, 13)
-	rose.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	rose.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	band.add_child(rose)
-	return band
+## Section header in one node: rushnyk cross-stitch bands with rosettes either side of
+## a bronze title.
+class KitSection extends Control:
+	var title_text := ""
+	var stitch: Texture2D
+	var rosette: Texture2D
+
+	func _draw() -> void:
+		var title := KitText.line(title_text, LABEL_FONT, 21)
+		var centre := size.x / 2.0
+		var half := title.get_size().x / 2.0
+		title.draw(get_canvas_item(), Vector2(roundf(centre - half), floorf((size.y - title.get_size().y) / 2.0)), Color("#5a3510"))
+		var mid := floorf(size.y / 2.0)
+		var gap := half + 12.0
+		for side: float in [-1.0, 1.0]:
+			var inner := centre + side * gap
+			var outer := 0.0 if side < 0.0 else size.x
+			var rose_inner := Rect2(inner - (13.0 if side < 0.0 else 0.0), mid - 6.5, 13.0, 13.0)
+			var rose_outer := Rect2(outer - (0.0 if side < 0.0 else 13.0), mid - 6.5, 13.0, 13.0)
+			var from := minf(rose_inner.position.x, rose_outer.position.x) + 13.0
+			var to := maxf(rose_inner.position.x, rose_outer.position.x)
+			if stitch != null and to - from > 4.0:
+				draw_texture_rect(stitch, Rect2(from, mid - 6.0, to - from, 12.0), true, Color(1, 1, 1, 0.9))
+			if rosette != null:
+				draw_texture_rect(rosette, rose_inner, false)
+				draw_texture_rect(rosette, rose_outer, false)
 
 ## Dark oak strip with resource icons and amounts; an amount above the stock turns red.
 ## icons: resource id -> Texture2D; stock: resource id -> available amount (or empty).
@@ -499,6 +501,14 @@ static func quantity(parent: Node, low: int, high: int, value: int) -> Array:
 	field.value = value
 	field.custom_minimum_size = Vector2(128, 46)
 	field.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# The slider is the touch control; the field is for typing, without the tiny arrows.
+	field.begin_bulk_theme_override()
+	for icon_name in ["up", "up_hover", "up_pressed", "up_disabled", "down", "down_hover", "down_pressed", "down_disabled", "updown"]:
+		field.add_theme_icon_override(icon_name, blank_icon())
+	field.add_theme_constant_override("buttons_width", 0)
+	field.add_theme_constant_override("set_min_buttons_width_from_icons", 0)
+	field.add_theme_constant_override("field_and_buttons_separation", 0)
+	field.end_bulk_theme_override()
 	row.add_child(field)
 	slider.value_changed.connect(func(v: float): if not is_equal_approx(field.value, v): field.value = v)
 	field.value_changed.connect(func(v: float): if not is_equal_approx(slider.value, v): slider.value = v)
@@ -633,22 +643,19 @@ static func icon_tile(icon: Texture2D, size := 64, count_text := "") -> PanelCon
 
 ## Stat line: name on the left, value (and an optional green gain) on the right, a bronze
 ## hairline under it — for building effects and upgrade deltas.
-static func stat_row(parent: Node, name: String, value: String, gain := "") -> HBoxContainer:
-	var line := HBoxContainer.new()
+## compact: a 38-unit row with its rule inside (for a list with no gap between rows).
+static func stat_row(parent: Node, name: String, value: String, gain := "", compact := false) -> Control:
+	var line := KitLine.new()
 	line.name = "KitStat"
-	line.add_theme_constant_override("separation", 10)
-	var left := label(line, name, 18, INK)
-	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var right := label(line, value, 19, INK, LABEL_FONT)
-	right.autowrap_mode = TextServer.AUTOWRAP_OFF
-	right.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	if not gain.is_empty():
-		mark(line, "arrow", GOOD, 16.0)
-		var plus := label(line, gain, 19, GOOD, LABEL_FONT)
-		plus.autowrap_mode = TextServer.AUTOWRAP_OFF
+	line.custom_minimum_size.y = 38 if compact else 37
+	line.rule_inside = compact
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.name_text = name
+	line.value_text = value
+	line.gain_text = gain
+	line.accessibility_name = "%s: %s%s" % [name, value, (" → " + gain) if not gain.is_empty() else ""]
 	if parent != null:
 		parent.add_child(line)
-		hairline(parent)
 	return line
 
 static func hairline(parent: Node) -> void:
@@ -659,72 +666,130 @@ static func hairline(parent: Node) -> void:
 	parent.add_child(rule)
 
 ## Resource line: icon, name, amount / limit, rate (or a warning) on the right.
-static func resource_row(parent: Node, icon: Texture2D, name: String, amount: String, rate: String, warning := false) -> HBoxContainer:
-	var line := HBoxContainer.new()
+static func resource_row(parent: Node, icon: Texture2D, name: String, amount: String, rate: String, warning := false) -> Control:
+	var line := KitLine.new()
 	line.name = "KitResource"
-	line.add_theme_constant_override("separation", 12)
-	if icon != null:
-		var picture := TextureRect.new()
-		picture.texture = icon
-		picture.custom_minimum_size = Vector2(32, 32)
-		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		picture.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		line.add_child(picture)
-	var title := label(line, name, 18, INK)
-	title.custom_minimum_size.x = 110
-	title.autowrap_mode = TextServer.AUTOWRAP_OFF
-	var value := label(line, amount, 19, INK, LABEL_FONT)
-	value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	value.autowrap_mode = TextServer.AUTOWRAP_OFF
-	var speed := label(line, rate, 17, WARN if warning else GOOD, LABEL_FONT)
-	speed.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	speed.autowrap_mode = TextServer.AUTOWRAP_OFF
+	line.custom_minimum_size.y = 43
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.icon = icon
+	line.name_text = name
+	line.middle_text = amount
+	line.value_text = rate
+	line.value_size = 17
+	line.value_colour = WARN if warning else GOOD
+	line.accessibility_name = "%s: %s, %s" % [name, amount, rate]
 	if parent != null:
 		parent.add_child(line)
-		hairline(parent)
 	return line
 
 ## Catalogue tile: art on the left, name and state on the right, linen plate.
 static func tile_button(title: String, note: String, art: Texture2D, note_colour := INK_MUTED) -> Button:
-	var control := Button.new()
+	var control := KitTile.new()
 	control.custom_minimum_size = Vector2(250, 84)
 	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	control.tooltip_text = title
 	control.accessibility_name = title
 	style_button(control, "tertiary")
 	control.text = ""
-	var row := HBoxContainer.new()
-	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	row.offset_left = 14
-	row.offset_right = -14
-	row.offset_top = 6
-	row.offset_bottom = -8
-	row.add_theme_constant_override("separation", 10)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	control.add_child(row)
-	var picture := TextureRect.new()
-	picture.texture = art
-	picture.custom_minimum_size = Vector2(84, 0)
-	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(picture)
-	var texts := VBoxContainer.new()
-	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	texts.alignment = BoxContainer.ALIGNMENT_CENTER
-	texts.add_theme_constant_override("separation", 0)
-	texts.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(texts)
-	var name_label := label(texts, title, 18, INK, LABEL_FONT)
-	name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var state := label(texts, note, 15, note_colour)
-	state.autowrap_mode = TextServer.AUTOWRAP_OFF
-	state.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	control.art = art
+	control.title_text = title
+	control.note_text = note
+	control.note_colour = note_colour
 	return control
+
+## Session cache of shaped text for the drawn kit controls (KitTile, KitLine): a string is
+## shaped once, later windows only draw it. width < 0 draws untrimmed; otherwise ellipsis.
+class KitText:
+	static var lines := {}
+
+	static func line(text: String, font: Font, font_size: int, width := -1.0) -> TextLine:
+		var key := "%d|%d|%s" % [font.get_instance_id(), font_size, text]
+		var shaped: TextLine = lines.get(key)
+		if shaped == null:
+			if lines.size() > 600:
+				lines.clear()
+			shaped = TextLine.new()
+			shaped.add_string(text, font, font_size)
+			shaped.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			lines[key] = shaped
+		if not is_equal_approx(shaped.width, width):
+			shaped.width = width
+		return shaped
+
+## One-node stat / resource line: optional icon, name, a middle value (resource rows),
+## a right-hand value with an optional green gain after a drawn arrow, and the bronze
+## hairline drawn in the gap under the row (no separate rule node).
+class KitLine extends Control:
+	var icon: Texture2D
+	var name_text := ""
+	var middle_text := ""
+	var value_text := ""
+	var value_font: Font = LABEL_FONT
+	var value_size := 19
+	var value_colour := INK
+	var gain_text := ""
+	var rule_inside := false
+
+	func _draw() -> void:
+		var x := 0.0
+		if icon != null:
+			draw_texture_rect(icon, Rect2(0.0, floorf((size.y - 32.0) / 2.0), 32.0, 32.0), false)
+			x = 44.0
+		var right := size.x
+		if not gain_text.is_empty():
+			var gain := KitText.line(gain_text, LABEL_FONT, 19)
+			right -= gain.get_size().x
+			gain.draw(get_canvas_item(), Vector2(right, _top(gain)), GOOD)
+			right -= 26.0
+			var points := PackedVector2Array()
+			for point: Vector2 in MARKS.arrow:
+				points.append(Vector2(right, floorf(size.y / 2.0) - 8.0) + point * 16.0)
+			draw_colored_polygon(points, GOOD)
+			right -= 10.0
+		if not value_text.is_empty():
+			var value := KitText.line(value_text, value_font, value_size)
+			right -= value.get_size().x
+			value.draw(get_canvas_item(), Vector2(right, _top(value)), value_colour)
+			right -= 16.0
+		if not middle_text.is_empty():
+			var title := KitText.line(name_text, BODY_FONT, 18, 110.0)
+			title.draw(get_canvas_item(), Vector2(x, _top(title)), INK)
+			var middle := KitText.line(middle_text, LABEL_FONT, 19, maxf(10.0, right - x - 122.0))
+			middle.draw(get_canvas_item(), Vector2(x + 122.0, _top(middle)), INK)
+		else:
+			var title := KitText.line(name_text, BODY_FONT, 18, maxf(10.0, right - x))
+			title.draw(get_canvas_item(), Vector2(x, _top(title)), INK)
+		draw_rect(Rect2(0.0, size.y - 1.0 if rule_inside else size.y + 5.0, size.x, 1.0), Color("#a67c3f55"))
+
+	func _top(line: TextLine) -> float:
+		return floorf((size.y - line.get_size().y) / 2.0)
+
+## Catalogue tile drawn in one node: card art on the left, name and state on the right.
+## The text is shaped once per string for the whole session (shaped_line), so reopening
+## a catalogue costs no shaping; a tile with Label children cost ~0.16 ms to enter the tree.
+class KitTile extends Button:
+	var art: Texture2D
+	var title_text := ""
+	var note_text := ""
+	var note_colour := Color.BLACK
+
+	func _draw() -> void:
+		var mode := get_draw_mode()
+		var shift := 2.0 if mode == DRAW_PRESSED or mode == DRAW_HOVER_PRESSED else 0.0
+		var box := Rect2(14.0, 7.0 + shift, 84.0, size.y - 16.0)
+		if art != null:
+			var source := art.get_size()
+			var k := minf(box.size.x / source.x, box.size.y / source.y)
+			var drawn := source * k
+			draw_texture_rect(art, Rect2(box.position + (box.size - drawn) / 2.0, drawn), false)
+		var x := 108.0
+		var width := maxf(10.0, size.x - x - 18.0)
+		var title := KitText.line(title_text, LABEL_FONT, 18, width)
+		var note := KitText.line(note_text, BODY_FONT, 15, width)
+		var top := floorf((size.y - title.get_size().y - note.get_size().y) / 2.0 + shift - 1.0)
+		title.draw(get_canvas_item(), Vector2(x, top), INK)
+		note.draw(get_canvas_item(), Vector2(x, top + title.get_size().y), note_colour)
+
 
 static func row_style() -> StyleBoxTexture:
 	return nine("kit_row", Vector4(14, 14, 14, 14), Vector4(14, 10, 14, 12))
@@ -764,46 +829,16 @@ static func list_row(parent: Node, icon: Texture2D, title: String, subtitle: Str
 
 ## Hero illustration: a tinted ink-wash splash with the art centred over it.
 static func hero(art: Texture2D, tint: Color, caption := "") -> Control:
-	var box := Control.new()
+	var box := KitHero.new()
 	box.name = "KitHero"
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Two washes: a wide warm one and a deeper core, so the art sits in a painted pool.
-	for layer in [[Vector4(0, 4, 0, -4), Color(tint, tint.a * 0.75)], [Vector4(70, 70, -70, -80), Color(tint.darkened(0.25), tint.a * 0.55)]]:
-		var splash := TextureRect.new()
-		splash.texture = tex("kit_splash")
-		splash.modulate = layer[1]
-		splash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		splash.offset_left = layer[0].x
-		splash.offset_top = layer[0].y
-		splash.offset_right = layer[0].z
-		splash.offset_bottom = layer[0].w
-		splash.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		splash.stretch_mode = TextureRect.STRETCH_SCALE
-		splash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		box.add_child(splash)
-	var ground := TextureRect.new()
-	ground.texture = ground_shadow()
-	ground.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	ground.offset_left = -170
-	ground.offset_right = 170
-	ground.offset_top = -150 if not caption.is_empty() else -120
-	ground.offset_bottom = -70 if not caption.is_empty() else -40
-	ground.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	ground.stretch_mode = TextureRect.STRETCH_SCALE
-	ground.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_child(ground)
-	var picture := TextureRect.new()
-	picture.name = "Art"
-	picture.texture = art
-	picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	picture.offset_left = 56
-	picture.offset_right = -56
-	picture.offset_top = 70
-	picture.offset_bottom = -84 if not caption.is_empty() else -60
-	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_child(picture)
+	box.art = art
+	box.tint = tint
+	box.splash = tex("kit_splash")
+	box.ground = ground_shadow()
+	box.lifted = not caption.is_empty()
+	box.motes = embers(400.0, 500.0)
+	box.add_child(box.motes)
 	if not caption.is_empty():
 		var plate := PanelContainer.new()
 		plate.add_theme_stylebox_override("panel", nine("kit_strip", Vector4(26, 14, 26, 14), Vector4(30, 4, 30, 6)))
@@ -821,6 +856,92 @@ static func hero(art: Texture2D, tint: Color, caption := "") -> Control:
 		plate.add_child(text)
 		box.add_child(plate)
 	return box
+
+## Window hero in one node: the art over two ink-wash splashes (a wide warm one and a
+## deeper core) and a soft ground shadow.
+class KitHero extends Control:
+	var art: Texture2D
+	var tint := Color.WHITE
+	var splash: Texture2D
+	var ground: Texture2D
+	var lifted := false
+	var motes: CPUParticles2D
+
+	func _notification(what: int) -> void:
+		if what == NOTIFICATION_RESIZED and motes != null:
+			motes.position = Vector2(size.x * 0.5, size.y - (110.0 if lifted else 80.0))
+			motes.emission_rect_extents = Vector2(size.x * 0.3, 16.0)
+
+	func _draw() -> void:
+		if splash != null:
+			draw_texture_rect(splash, Rect2(0.0, 4.0, size.x, size.y - 8.0), false, Color(tint, tint.a * 0.75))
+			draw_texture_rect(splash, Rect2(70.0, 70.0, size.x - 140.0, size.y - 150.0), false, Color(tint.darkened(0.25), tint.a * 0.55))
+		var bottom := size.y - (70.0 if lifted else 40.0)
+		if ground != null:
+			draw_texture_rect(ground, Rect2(size.x / 2.0 - 170.0, bottom - 80.0, 340.0, 80.0), false)
+		if art != null:
+			var box := Rect2(56.0, 70.0, size.x - 112.0, size.y - 70.0 - (84.0 if lifted else 60.0))
+			var source := art.get_size()
+			var k := minf(box.size.x / source.x, box.size.y / source.y)
+			var drawn := (source * k).floor()
+			var at := (box.position + (box.size - drawn) / 2.0).floor()
+			draw_texture_rect(art, Rect2(at, drawn), false)
+			# Linen mist over the foot of the art: card renders end in a hard crop line.
+			if splash != null:
+				var foot := at.y + drawn.y
+				var mist := Rect2(at.x - drawn.x * 0.12, foot - 46.0, drawn.x * 1.24, 84.0)
+				draw_texture_rect(splash, mist, false, Color("#f2e8d5f2"))
+				draw_texture_rect(splash, mist.grow_individual(-drawn.x * 0.1, -16.0, -drawn.x * 0.1, -22.0), false, Color("#f4ebd9"))
+
+static func blank_icon() -> Texture2D:
+	if not styles.has("blank"):
+		styles.blank = ImageTexture.create_from_image(Image.create_empty(1, 1, false, Image.FORMAT_RGBA8))
+	return styles.blank
+
+## Soft warm mote for the hero's drifting embers and dust.
+static func mote() -> GradientTexture2D:
+	if styles.has("mote"):
+		return styles.mote
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.35, 1.0])
+	gradient.colors = PackedColorArray([Color(1, 0.93, 0.75, 1), Color(1, 0.8, 0.45, 0.55), Color(1, 0.7, 0.3, 0)])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 16
+	texture.height = 16
+	styles.mote = texture
+	return texture
+
+## Embers and dust rising slowly through the hero art (a dozen CPU particles at 30 fps).
+static func embers(width: float, height: float) -> CPUParticles2D:
+	var motes := CPUParticles2D.new()
+	motes.name = "KitEmbers"
+	motes.texture = mote()
+	motes.amount = 14
+	motes.lifetime = 5.0
+	motes.preprocess = 5.0
+	motes.fixed_fps = 30
+	motes.local_coords = true
+	motes.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	motes.emission_rect_extents = Vector2(width * 0.32, 18.0)
+	motes.position = Vector2(width * 0.5, height - 90.0)
+	motes.direction = Vector2(0, -1)
+	motes.spread = 18.0
+	motes.gravity = Vector2(0, -6)
+	motes.initial_velocity_min = 10.0
+	motes.initial_velocity_max = 24.0
+	motes.angular_velocity_min = -20.0
+	motes.angular_velocity_max = 20.0
+	motes.scale_amount_min = 0.25
+	motes.scale_amount_max = 0.7
+	var fade := Gradient.new()
+	fade.offsets = PackedFloat32Array([0.0, 0.2, 0.75, 1.0])
+	fade.colors = PackedColorArray([Color(1, 0.85, 0.55, 0), Color(1, 0.82, 0.5, 0.85), Color(1, 0.7, 0.4, 0.5), Color(1, 0.6, 0.3, 0)])
+	motes.color_ramp = fade
+	return motes
 
 static func ground_shadow() -> GradientTexture2D:
 	if styles.has("ground"):

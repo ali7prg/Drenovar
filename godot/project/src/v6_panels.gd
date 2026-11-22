@@ -227,12 +227,17 @@ func inspect(type: String) -> void:
 		if not upcoming.is_empty():
 			ui.UiKit.mark(step, "arrow", ui.UiKit.GOOD, 24.0)
 			ui.UiKit.label(step, ROMAN[level], 25, ui.UiKit.GOOD, ui.UiKit.TITLE_FONT, false)
+		# Effects as a compact ruled list, so the cost, time and requirements stay on screen.
+		var stats := VBoxContainer.new()
+		stats.name = "Effects"
+		stats.add_theme_constant_override("separation", 0)
+		ui.modal_body.add_child(stats)
 		for metric: String in row.effects:
 			var later: Variant = upcoming.get("effects", {}).get(metric)
 			var gain := ""
 			if later != null and str(later) != str(row.effects[metric]):
 				gain = metric_value(metric, later)
-			ui.UiKit.stat_row(ui.modal_body, str(catalogue.get("metrics", {}).get(metric, {}).get("name_ru", metric)), metric_value(metric, row.effects[metric]), gain)
+			ui.UiKit.stat_row(stats, str(catalogue.get("metrics", {}).get(metric, {}).get("name_ru", metric)), metric_value(metric, row.effects[metric]), gain, true)
 	if level < 11:
 		var next: Dictionary = upcoming
 		section_title("Следующий уровень · " + ROMAN[level])
@@ -249,8 +254,9 @@ func inspect(type: String) -> void:
 			ui.UiKit.label(need, "%s · уровень %s или выше" % [row_for(d.building_id, 1).name_ru, ROMAN[int(d.level)-1]], 17, ui.UiKit.GOOD if ok else ui.UiKit.BAD).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var action := {"kind":"construction", "building":type, "target":level+1}
 		if level > 0:
-			var check: Button = ui.panel_action(ui.modal_body, "Проверить улучшение", confirm.bind(action))
-			check.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			# The call to action sits in the footer, always in view (not at the end of the scroll).
+			ui.modal_footer.show()
+			var check: Button = ui.panel_action(ui.modal_footer, "Проверить улучшение", confirm.bind(action))
 			check.custom_minimum_size.x = 340
 		else:
 			ui.row(ui.modal_body, "Выберите участок подходящей местности: " + str(next.environment))
@@ -472,12 +478,14 @@ func services(type: String) -> void:
 func unit_card(control: Button, unit_id: String) -> void:
 	control.custom_minimum_size.y = 76
 	control.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	control.begin_bulk_theme_override()
 	control.add_theme_font_size_override("font_size", 21)
 	if ResourceLoader.exists("res://assets/ui/web-panels/" + unit_id + ".png"):
 		control.icon = ui.panel_texture(unit_id + ".png")
 		control.expand_icon = true
 		control.add_theme_constant_override("icon_max_width", 58)
 		control.add_theme_constant_override("h_separation", 16)
+	control.end_bulk_theme_override()
 
 func trade() -> void:
 	var navigation := begin_view()

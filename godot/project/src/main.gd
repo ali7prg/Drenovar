@@ -2627,7 +2627,9 @@ func arrange_modal() -> void:
 	var docked := modal_layout in ["right", "left", "city_target", "sheet"]
 	modal_frame.visible = not full
 	modal_header.custom_minimum_size.y = 70 if full else 62
-	modal_title.add_theme_font_size_override("font_size", 32 if full or modal_layout == "wide" else (23 if docked else 26))
+	var title_size := 32 if full or modal_layout == "wide" else (23 if docked else 26)
+	if modal_title.get_theme_font_size("font_size") != title_size:
+		modal_title.add_theme_font_size_override("font_size", title_size)
 	var roomy := full or modal_layout in ["wide", "garrison"]
 	for art: Control in modal_flourishes:
 		art.visible = roomy
@@ -2649,19 +2651,25 @@ func arrange_modal() -> void:
 		modal_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		modal_content.custom_minimum_size.x = 0.0
 	var side := 28 if full else 22
-	modal_content.add_theme_constant_override("margin_left", 8 if hero_on else side)
-	modal_content.add_theme_constant_override("margin_right", side)
-	modal_content.add_theme_constant_override("margin_top", 12)
-	modal_content.add_theme_constant_override("margin_bottom", 18 if full else 20)
+	# Full windows keep air between the values and the scroll bar on the right.
+	var margins := {"margin_left": 8 if hero_on else side, "margin_right": side + (10 if hero_on else 0), "margin_top": 12, "margin_bottom": 18 if full else 20}
+	modal_content.begin_bulk_theme_override()
+	for key: String in margins:
+		if modal_content.get_theme_constant(key) != margins[key]:
+			modal_content.add_theme_constant_override(key, margins[key])
+	modal_content.end_bulk_theme_override()
 
 # Optional illustration column of a full-screen window: art over a tinted ink-wash splash.
-func set_modal_hero(art: Texture2D, tint := Color("#a87d44"), caption := "") -> void:
+func set_modal_hero(art: Texture2D, tint := Color("#b98c52"), caption := "") -> void:
 	empty(modal_hero)
 	if art != null:
-		var picture := UiKit.hero(art, Color(tint, 0.62), caption)
-		picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		modal_hero.add_child(picture)
+		add_hero_art(art, tint, caption)
 	arrange_modal()
+
+func add_hero_art(art: Texture2D, tint := Color("#b98c52"), caption := "") -> void:
+	var picture := UiKit.hero(art, Color(tint, 0.5), caption)
+	picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	modal_hero.add_child(picture)
 
 func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D = null) -> void:
 	action_ring.close()
@@ -2674,7 +2682,9 @@ func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D
 	result_open = layout == "result"
 	modal_header.visible = not result_open
 	modal_divider.visible = not result_open
-	modal.add_theme_stylebox_override("panel", result_sheet_style if result_open else web_sheet_style)
+	var sheet := result_sheet_style if result_open else web_sheet_style
+	if modal.get_theme_stylebox("panel") != sheet:
+		modal.add_theme_stylebox_override("panel", sheet)
 	modal_vignette.visible = not result_open
 	economy_rows.clear()
 	economy_source_label = null
@@ -2698,9 +2708,9 @@ func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D
 	empty(modal_hero)
 	modal_tools.hide()
 	modal_footer.hide()
-	place_modal(layout)
 	if art != null:
-		set_modal_hero(art)
+		add_hero_art(art)
+	place_modal(layout)
 	modal_body.get_parent().set_deferred("scroll_vertical", 0)
 	dimmer.color = Color.TRANSPARENT if layout in ["left", "right", "city_target"] else (Color("#10141740") if layout == "sheet" else Color("#0b0805b0"))
 	if result_open:
@@ -5046,8 +5056,9 @@ func show_report(report: Dictionary, announced := false) -> void:
 	var sigil := result_label(heading, "⚔", 37, Color("#e5c57d"))
 	sigil.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var back := close_modal if announced else show_reports
-	var dismiss := button(heading, "×", back)
-	dismiss.custom_minimum_size = Vector2(58, 54)
+	# Kit bronze medallion (the result sheet has no header band of its own).
+	var dismiss := UiKit.close_button(back)
+	heading.add_child(dismiss)
 	dismiss.tooltip_text = "Закрыть"
 	dismiss.accessibility_name = "Закрыть результат боя"
 	result_label(modal_body, title, 37, Color("#f1d28c"), true)

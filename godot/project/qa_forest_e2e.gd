@@ -1,13 +1,22 @@
 extends SceneTree
-## End-to-end QA of «Лес потерянных» against the local realm (forest_rescue/server/local-realm).
-## The game plays itself the way a player would: HUD «Продолжить» (guide), squad panel,
-## mechanism UI, reward panel. The server clock is advanced through /test/clock; the scene
-## is really reloaded (new main.tscn instance) at several steps to verify restored poses.
-## Run:  node forest_rescue/server/local-realm/server.mjs   (fresh DRENOVAR_FR_DB)
-##       godot --headless --path godot/project -s qa_forest_e2e.gd -- --server=http://127.0.0.1:8418
+## End-to-end QA of «Лес потерянных» on the V6 server line (1022): the real game scene against the
+## synthetic in-memory V6 fixture with the adventure switched on (the path production uses).
+## The game plays all 12 sites and the boss itself the way a player would: HUD «Продолжить» (guide),
+## squad panel, mechanism UI, reward panel. The server clock is advanced through /test/clock; the
+## scene is really reloaded (new main.tscn instance) at several steps to verify restored poses.
+## 1022 launch order: main.tscn opens the city first; the forest game layer and its world layer load
+## lazily afterwards (only because the server projects state.adventure). boot() waits for both on
+## that real lazy path (no --forest-eager).
+## Run:  DRENOVAR_SERVER_ROOT=<server checkout> DRENOVAR_QA_PORT=8801 DRENOVAR_QA_ADVENTURE=1 \
+##         DRENOVAR_QA_CONDITIONAL=1 DRENOVAR_QA_HALL=2 node godot/tools/qa-v6-1022-server.mjs
+##       godot --headless --path godot/project -s qa_forest_e2e.gd -- --server=http://127.0.0.1:8801
+## (Before 1022 it ran against the old local realm, forest_rescue/server/local-realm/server.mjs.)
+
+const ForestFlags := preload("res://src/forest_rescue/world/forest_flags.gd")
 
 var game: Node
 var forest: Node
+var finished := false
 var checks := 0
 var failures: Array[String] = []
 var reloads := 0
@@ -55,17 +64,34 @@ func advance_to(server_ms: float) -> void:
 	await test_post("/test/clock?time=%d" % int(ceil(target)))
 	await refresh()
 
+var boot_ms: Array[int] = []
+
+## One app launch: the city first, then (1022) the lazy forest game layer and its world layer.
 func boot() -> void:
+	var started := Time.get_ticks_msec()
 	game = load("res://main.tscn").instantiate()
 	root.add_child(game)
-	var deadline := Time.get_ticks_msec() + 60000
+	var deadline := Time.get_ticks_msec() + 120000
 	while (game.scene_loading or not is_instance_valid(game.stage) or game.player_id.is_empty()) and Time.get_ticks_msec() < deadline:
 		await process_frame
+	# 1022: the game layer is created after the launch, once the server projects state.adventure.
+	while game.forest_game == null and Time.get_ticks_msec() < deadline:
+		await process_frame
 	forest = game.forest_game
+	if forest == null:
+		check(false, "forest game layer loaded lazily after the launch (reload %d)" % reloads)
+		finish()
+		return
+	check(not ForestFlags.eager(), "lazy forest path (no --forest-eager)")
+	# The world layer (terrain, forest, fog, landmarks) attaches itself after the city.
+	while not forest.world_ready() and Time.get_ticks_msec() < deadline:
+		await process_frame
+	check(forest.world_ready(), "forest world layer attached by itself after the city (reload %d)" % reloads)
 	await frames(3)
 	while not forest.entered_session and Time.get_ticks_msec() < deadline:
 		await process_frame
 	await frames(3)
+	boot_ms.append(Time.get_ticks_msec() - started)
 
 func reload(reason: String) -> void:
 	reloads += 1
@@ -73,6 +99,8 @@ func reload(reason: String) -> void:
 	game.queue_free()
 	await frames(2)
 	await boot()
+	if finished:
+		return
 	var after: Dictionary = forest.client.adv
 	check(forest.client.available(), "adventure after reload " + reason)
 	check(forest.actors.choreo.is_empty(), "no replayed choreography after reload " + reason)
@@ -148,7 +176,10 @@ func solve_mechanism(site_id: String) -> void:
 func run() -> void:
 	root.size = Vector2i(1366, 630)
 	await boot()
+	if finished:
+		return
 	check(game.loopback, "running against the loopback realm")
+	check(str(game.state.get("economy_version", "")) == "DRENOVAR-V6-C1.0", "city from the V6 fixture (production server line)")
 	check(forest.client.known, "server exposes state.adventure")
 	# Hall II: locked; no POIs.
 	await test_post("/test/hall?level=2")
@@ -297,7 +328,14 @@ func run() -> void:
 		check(String(entry.body.get("requestId", "")) == String(entry.key), "requestId equals Idempotency-Key")
 		for forbidden in ["success", "reward", "rewards", "wallet", "capacity", "ownerId", "playerId", "time", "position", "revision", "proof"]:
 			check(not entry.body.has(forbidden), "client never sends " + forbidden)
-	print("QA_FOREST_E2E steps=", steps, " reloads=", reloads, " commands=", forest.client.sent_log.size(), " checks=", checks, " failures=", failures.size())
+	finish()
+
+func finish() -> void:
+	if finished:
+		return
+	finished = true
+	var commands: int = forest.client.sent_log.size() if is_instance_valid(forest) else 0
+	print("QA_FOREST_E2E steps=", steps, " reloads=", reloads, " commands=", commands, " checks=", checks, " failures=", failures.size())
 	for failure in failures:
 		print("  FAIL ", failure)
 	quit(0 if failures.is_empty() else 1)

@@ -1,0 +1,8 @@
+qa_instant_start run2 rc=0 :: QA_INSTANT_START checks=12 failures=0 launch_ms=1272
+qa_instant_start run3 rc=0 :: QA_INSTANT_START checks=12 failures=0 launch_ms=1179
+qa_instant_start run4 rc=0 :: QA_INSTANT_START checks=12 failures=0 launch_ms=998
+profile_launch_1022 adventure-off rc=0
+capture rc=0 :: CAPTURED adventure=true keys=22
+profile_launch_1022 adventure-on run1 rc=0
+profile_launch_1022 adventure-on run2 rc=0
+end 2026-11-22T07:39:49Z

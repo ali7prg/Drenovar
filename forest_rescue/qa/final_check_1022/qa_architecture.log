@@ -1,0 +1,116 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+LEVEL_SCENES changes=135 carried=0
+SHARED_ASSETS compared=108 of 108
+WORKER ALT-02-1 lumber points=1 hits=0
+WORKER ALT-02-2 lumber points=1 hits=0
+WORKER ALT-02-3 lumber points=1 hits=0
+WORKER ALT-02-4 lumber points=1 hits=0
+WORKER ALT-02-5 lumber points=1 hits=0
+WORKER ALT-05-1 farm points=1 hits=0
+WORKER ALT-05-2 farm points=1 hits=0
+WORKER ALT-05-3 farm points=1 hits=0
+WORKER ALT-05-4 farm points=1 hits=0
+WORKER ALT-05-5 farm points=1 hits=0
+WORKER ALT-09-1 quarry27 points=1 hits=0
+WORKER ALT-09-2 quarry27 points=1 hits=0
+WORKER ALT-09-3 quarry27 points=1 hits=0
+WORKER ALT-09-4 quarry27 points=1 hits=0
+WORKER ALT-09-5 quarry27 points=1 hits=0
+WORKER ALT-10-1 smith points=1 hits=0
+WORKER ALT-10-2 smith points=1 hits=0
+WORKER ALT-10-3 smith points=1 hits=0
+WORKER ALT-10-4 smith points=1 hits=0
+WORKER ALT-10-5 smith points=1 hits=0
+WORKER ECO-01-1 warehouse points=1 hits=0
+LANE ECO-01-2 cart lane (1.95, 0.0, 6.6)->(1.95, 0.12, 5.9) blocked=0 step=0.017 grade=0.172 samples=8
+WORKER ECO-01-2 warehouse points=1 hits=0
+LANE ECO-01-3 cart lane (1.95, 0.0, 6.6)->(1.95, 0.12, 5.9) blocked=0 step=0.017 grade=0.172 samples=8
+WORKER ECO-01-3 warehouse points=1 hits=0
+LANE ECO-01-4 cart lane (1.45, 0.0, 6.6)->(1.45, 0.12, 5.9) blocked=0 step=0.017 grade=0.172 samples=8
+WORKER ECO-01-4 warehouse points=1 hits=0
+LANE ECO-01-5 cart lane (1.45, 0.0, 6.6)->(1.45, 0.12, 5.9) blocked=0 step=0.017 grade=0.172 samples=8
+WORKER ECO-01-5 warehouse points=1 hits=0
+WORKER ECO-02-1 warehouse points=1 hits=0
+WORKER ECO-02-2 warehouse points=1 hits=0
+WORKER ECO-02-3 warehouse points=1 hits=0
+WORKER ECO-02-4 warehouse points=1 hits=0
+WORKER ECO-02-5 warehouse points=1 hits=0
+WORKER ECO-03-1 market27 points=1 hits=0
+WORKER ECO-03-2 market27 points=1 hits=0
+LANE ECO-03-3 unit lane (0.0, 0.0, 7.0)->(0.0, 0.0, 3.85) blocked=0 step=0.018 grade=0.036 samples=33
+WORKER ECO-03-3 market27 points=1 hits=0
+LANE ECO-03-4 unit lane (0.0, 0.0, 7.0)->(0.0, 0.0, 3.85) blocked=0 step=0.018 grade=0.036 samples=33
+WORKER ECO-03-4 market27 points=1 hits=0
+LANE ECO-03-5 unit lane (0.0, 0.0, 7.0)->(0.0, 0.0, 3.85) blocked=0 step=0.017 grade=0.034 samples=33
+LANE ECO-03-5 ring lane (0.0, 0.0, 1.75)->(1.7, 0.0, 1.7) blocked=0 step=0.000 grade=0.000 samples=73
+LANE ECO-03-5 unit lane (3.45, 0.0, -0.6)->(3.45, 0.0, -6.2) blocked=0 step=0.040 grade=0.080 samples=57
+WORKER ECO-03-5 market27 points=1 hits=0
+WORKER ECO-05-1 starterHall points=36 hits=0
+WORKER ECO-05-2 hall points=36 hits=0
+WORKER ECO-05-3 hall points=36 hits=0
+WORKER ECO-05-4 hall points=36 hits=0
+WORKER ECO-05-5 hall points=36 hits=0
+WORKER MIL-04-1 smith points=1 hits=0
+WORKER MIL-04-2 smith points=1 hits=0
+WORKER MIL-04-3 smith points=1 hits=0
+WORKER MIL-04-4 smith points=1 hits=0
+WORKER MIL-04-5 smith points=1 hits=0
+WORKER RES-01-1 lumber points=1 hits=0
+WORKER RES-01-2 lumber points=1 hits=0
+WORKER RES-01-3 lumber points=1 hits=0
+WORKER RES-01-4 lumber points=1 hits=0
+WORKER RES-01-5 lumber points=1 hits=0
+WORKER RES-02-1 quarry27 points=1 hits=0
+WORKER RES-02-2 quarry27 points=1 hits=0
+WORKER RES-02-3 quarry27 points=1 hits=0
+WORKER RES-02-4 quarry27 points=1 hits=0
+WORKER RES-02-5 quarry27 points=1 hits=0
+LANE RES-03-1 rail lane (1.3, 0.0, 2.6)->(1.3, 0.0, 0.7) blocked=0 step=0.080 grade=0.160 samples=20
+WORKER RES-03-1 ironmine27 points=1 hits=0
+LANE RES-03-2 rail lane (1.3, 0.0, 2.6)->(1.3, 0.0, 0.7) blocked=0 step=0.080 grade=0.160 samples=20
+WORKER RES-03-2 ironmine27 points=1 hits=0
+LANE RES-03-3 rail lane (1.3, 0.0, 2.6)->(1.3, 0.0, 0.7) blocked=0 step=0.080 grade=0.160 samples=20
+WORKER RES-03-3 ironmine27 points=1 hits=0
+LANE RES-03-4 rail lane (1.3, 0.0, 2.6)->(1.3, 0.0, 0.7) blocked=0 step=0.080 grade=0.160 samples=20
+WORKER RES-03-4 ironmine27 points=1 hits=0
+LANE RES-03-5 rail lane (1.3, 0.0, 2.6)->(1.3, 0.0, 0.7) blocked=0 step=0.080 grade=0.110 samples=20
+WORKER RES-03-5 ironmine27 points=1 hits=0
+WORKER RES-04-1 farm points=1 hits=0
+WORKER RES-04-2 farm points=1 hits=0
+WORKER RES-04-3 farm points=1 hits=0
+WORKER RES-04-4 farm points=1 hits=0
+WORKER RES-04-5 farm points=1 hits=0
+LANE SUP-03-1 cart lane (0.0, 0.0, 6.2)->(0.0, 0.0, -6.2) blocked=0 step=0.000 grade=0.000 samples=125
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE SUP-03-2 cart lane (0.0, 0.0, 6.2)->(0.0, 0.0, -6.2) blocked=0 step=0.000 grade=0.000 samples=125
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE SUP-03-3 cart lane (0.0, 0.0, 6.2)->(0.0, 0.0, -6.2) blocked=0 step=0.000 grade=0.000 samples=125
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE SUP-03-4 cart lane (0.0, 0.0, 6.2)->(0.0, 0.0, -6.2) blocked=0 step=0.000 grade=0.000 samples=125
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+LANE SUP-03-5 cart lane (0.0, 0.0, 6.2)->(0.0, 0.0, -6.2) blocked=0 step=0.000 grade=0.000 samples=125
+ERROR: The object does not have any 'meta' values with the key 'worker_offset'.
+   at: get_meta (core/object/object.cpp:1177)
+   GDScript backtrace (most recent call first):
+       [0] check_level (res://qa_architecture.gd:79)
+       [1] sweep_lanes (res://qa_architecture.gd:161)
+QA_ARCHITECTURE checks=988 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)

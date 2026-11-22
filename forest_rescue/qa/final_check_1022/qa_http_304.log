@@ -1,0 +1,3 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+QA_HTTP_304 checks=15 failures=0 pool_304_ms=14 httprequest_ms=27 httprequest_code=304 connections_opened=1 reused=4

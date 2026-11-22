@@ -1,0 +1,27 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ok  Settlement builds through the paid queue
+ok  RES-01 Лагерь лесорубов: built (built)
+ok  RES-02 Каменоломня: built (built)
+ok  RES-03 Железная шахта: built (built)
+ok  RES-04 Ферма: built (built)
+ok  RES-05 Охотничий лагерь: can be built (short)
+ok  ECO-01 Склад: built (built)
+ok  ECO-02 Амбар: built (built)
+ok  ECO-03 Рынок: built (built)
+ok  ECO-04 Жилой дом: built (built)
+ok  MIL-01 Казармы: built (built)
+ok  MIL-02 Стрельбище: built (built)
+ok  MIL-03 Конюшня: built (built)
+ok  MIL-04 Кузница: can be built (short)
+ok  MIL-05 Военная академия: can be built (short)
+ok  SUP-01 Лазарет: built (built)
+ok  SUP-02 Осадная мастерская: can be built (short)
+ok  SUP-03 Стены и ворота: built (built)
+ok  SUP-04 Сторожевая башня: built (built)
+ok  SUP-05 Колодец: built (built)
+ok  Лазарет card names the building that holds it: Уже есть: Сад травника (5 ур.). Одно здание каждого назначения; улучшение — в самом здании.
+ok  Without the server feature: free placement as before
+QA_LEGACY_BUILD checks=22 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)

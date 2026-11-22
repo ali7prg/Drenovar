@@ -1,0 +1,15 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+SCRIPT ERROR: Invalid access to property or key 'entered_session' on a base object of type 'Nil'.
+          at: boot (res://qa_forest_e2e.gd:66)
+          GDScript backtrace (most recent call first):
+              [0] boot (res://qa_forest_e2e.gd:66)
+              [1] frames (res://qa_forest_e2e.gd:32)
+SCRIPT ERROR: Invalid access to property or key 'client' on a base object of type 'Nil'.
+          at: run (res://qa_forest_e2e.gd:152)
+          GDScript backtrace (most recent call first):
+              [0] run (res://qa_forest_e2e.gd:152)
+              [1] boot (res://qa_forest_e2e.gd:66)
+              [2] frames (res://qa_forest_e2e.gd:32)
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 71.871, &"terrain": 2147.609, &"tiles": 64.476, &"impostors": 232.087, &"visuals": 1092.706, &"total": 3564.701 } kit=0 missing kit assets

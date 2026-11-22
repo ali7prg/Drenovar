@@ -1,0 +1,21 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 79.637, &"terrain": 2563.872, &"tiles": 72.529, &"impostors": 254.188, &"visuals": 1116.209, &"total": 4059.809 } kit=0 missing kit assets
+PROFILE_LAUNCH {"adventure_known":true,"before_launch":{"max":91.6,"n":5,"over50":2,"p99":91.6},"city_shown":true,"forest_ready_ms":6585,"forest_world":true,"instantiate_ms":2.0,"interactive":{"max":119.6,"n":1994,"over50":6,"p99":27.9},"launch_ms":1314,"load_ms":859.9,"ready_sync_ms":124.7,"scene_ms":174}
+LONG_FRAME 48.2 ||res://src/forest_rescue/game/adventure_panels.gd|gameload end@1703
+LONG_FRAME 89.7 ||res://src/forest_rescue/game/boss_telegraphs.gd|gameload end@1904
+LONG_FRAME 62.4 ||res://src/forest_rescue/game/adventure_audio.gd|gameload end@1982
+LONG_FRAME 38.3 ||res://src/forest_rescue/game/forest_game.gd|gameload end@2020
+LONG_FRAME 34.4 attaching||res://src/forest_rescue/world/forest_atlas.gd| end@2093
+LONG_FRAME 52.5 attaching||res://src/forest_rescue/world/forest_fog.gd| end@2199
+LONG_FRAME 119.6 attaching||res://src/forest_rescue/world/forest_river.gdshader| end@2427
+LONG_FRAME 53.8 attaching|kit|| end@5376
+LONG_FRAME 33.9 attaching|canopy+paths|| end@5410
+LONG_FRAME 38.8 attaching|river+water|| end@5449
+LONG_FRAME 39.6 attaching|city forest instances|| end@6863
+LONG_FRAME 66.0 attached|pipeline warm-up|| end@6993
+LONG_FRAME 44.6 attached|pipeline warm-up|| end@7037
+LONG_FRAME 46.1 attached|pipeline warm-up|| end@7084
+LONG_FRAME 46.6 attached|pipeline warm-up|| end@7130
+LONG_FRAME 43.8 attached|pipeline warm-up|| end@7174

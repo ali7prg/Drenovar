@@ -1,0 +1,56 @@
+✔ hall I/II: locked projection, every adventure/intro command refused before receipt replay, saved bytes untouched (299.411763ms)
+✔ hall III opens only the entrance corridor; hidden or unavailable targets are unknown (404, no leak) (71.602742ms)
+✔ a hall upgrade 2→3 unlocks only when the server construction order completes (60.068873ms)
+✔ intro lifecycle: start/finish, skip, defer, interrupted playing → deferred on entry, no auto-replay, no rewards (97.409483ms)
+✔ existing campaign progress without an intro namespace migrates to acknowledged(existing_progress) without touching progress (36.369636ms)
+✔ same inputs → identical report; the seed only jitters details (3.537481ms)
+✔ outcome follows the real troop stats: more/better units win, a starter squad loses (1.665912ms)
+✔ boss: hunt → fury → last_stand with the exact telegraph/active/recovery seconds of campaign.json (1.82832ms)
+✔ losses split wounded/dead deterministically; retreat counts only hits so far (0.470319ms)
+✔ claim retried after a conflicting spend recomputes the transfer from the fresh wallet (527.624678ms)
+✔ retry re-applies the hall gate and the durable task step from the fresh snapshot (73.821544ms)
+✔ persistent conflicts end with CAS_CONFLICT_RETRY and no effect of the losing command (93.451577ms)
+✔ troop stats mirror docs/06_TROOP_CATALOG.json (forest roster: the 5 live units) (70.734398ms)
+✔ tenerys/velkor specs mirror the v92 specs exported to the client (2.181634ms)
+✔ city rules mirror the client game data and the delivered economy figures (32.114596ms)
+✔ content model matches the delivered campaign data and FSM (0.683716ms)
+✔ CONTRACT §3 shape holds at every step of a full campaign; §4 events carry their fields (4711.356724ms)
+✔ v92 wiring: gate before receipt replay for adventure kinds only; receipts, replay, mismatch; publicState (22.375051ms)
+✔ v92 wiring: legacy import never carries adventure namespaces; auto-refill hook for paid branches (1.826287ms)
+# delivered suite: tests 74 pass 74 fail 0
+✔ delivered reference suite: 74/74 pass unchanged (1035.857864ms)
+✔ full warehouse: claim moves only free capacity, keeps the remainder, never cuts an over-cap balance (477.111856ms)
+✔ claim formula at a 2000 capacity (new-city storage) through the module ports (4.47561ms)
+✔ auto-refill: off by default; opt-in refills from escrow only after a real paid command; never on polls or below hall III (319.965009ms)
+✔ order, arrival and proofs: nothing completes without the server records (451.657303ms)
+✔ defeat and retreat keep keys, people and rewards; losses hit the real army; a wiped squad returns home (371.082747ms)
+✔ paired latch: needs two members held simultaneously; moving away releases the plates (863.717343ms)
+✔ higher guardians keep their hall requirement (HALL_LEVEL_TOO_LOW, not a silent lock) (1912.748456ms)
+✔ stop at the next graph node, redirect, pause, escort rules, squad reservation (199.381342ms)
+✔ lost response: same key + same body replays the current state without effects (also after restart); changed body → 409 (215.12723ms)
+✔ two concurrent claims transfer the free capacity once; a concurrent same-key retry has no second effect (420.606005ms)
+✔ double cage open (sequential and concurrent) spends the key and pays once (213.49277ms)
+✔ repeated victory: a campaign guardian never respawns; a report cannot pay twice (320.883798ms)
+✔ second profile of the same account is fully isolated (namespaces, receipts, hall gate) (78.490676ms)
+✔ strict allowlist: client-declared success, rewards, wallet, owner, time, positions or proofs are refused without effects (109.201965ms)
+✔ every CONTRACT target id exists (per-site key/cage/guardian, plates, trail landmarks, bridge, boss, home) (1.744303ms)
+✔ atlas v2: all 47 network ways with ≤0.5 spacing and y taken from the atlas samples (deck y only on the bridge) (14.228028ms)
+✔ water is crossed only on the approved 27 m deck of lf_route_bridge (39.487076ms)
+✔ Dijkstra on the v2 network: the mare trail past the stones, no other glade on a trip, the east bank only over the bridge (22.490116ms)
+✔ fine nodes: canonical junction names; graph id is stable (8.603483ms)
+✔ corrupt and future-schema namespaces → explicit error on read and write, never a silent reset (510.947504ms)
+✔ only absent namespaces are lazily initialised; existing ones are kept verbatim (57.009705ms)
+✔ real process restart (SIGTERM) keeps fog, movement, progress and rewards (525.226711ms)
+# playthrough steps 204 restart checks 204 events 305 army left {"ENG-01":5,"ENG-06":5346} wounded {"ENG-06":982}
+✔ complete campaign: 12 sites, 4 mechanisms, boss, exact 7,515,000 reward, restart after every step (10937.688148ms)
+✔ vendored files match SHA256SUMS (4.832332ms)
+✔ vendored files are byte-identical to the delivery package and its manifest (3.313621ms)
+✔ server sources import the reference modules only through src/vendor.mjs (0.848079ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16611.76145

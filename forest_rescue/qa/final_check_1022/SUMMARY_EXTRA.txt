@@ -1,0 +1,2 @@
+qa_combat_1020 rc=1 secs=2 :: 
+qa_combat_1021 rc=0 secs=7 :: 

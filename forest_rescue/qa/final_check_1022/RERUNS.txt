@@ -1,0 +1,12 @@
+start 2026-11-22T07:33:08Z
+qa_build_menu run1 rc=0 :: QA_BUILD_MENU open_ms=51.8 cards=19 QA_BUILD_MENU checks=20 failures=0  
+qa_build_menu run2 rc=0 :: QA_BUILD_MENU open_ms=36.6 cards=19 QA_BUILD_MENU checks=20 failures=0  
+qa_build_menu run3 rc=0 :: QA_BUILD_MENU open_ms=33.3 cards=19 QA_BUILD_MENU checks=20 failures=0  
+qa_build_menu run4 rc=0 :: QA_BUILD_MENU open_ms=33.2 cards=19 QA_BUILD_MENU checks=20 failures=0  
+qa_build_menu run5 rc=0 :: QA_BUILD_MENU open_ms=34.9 cards=19 QA_BUILD_MENU checks=20 failures=0  
+qa_net_1022 run1 rc=0 :: QA_NET_1022 checks=48 failures=0 
+qa_net_1022 run2 rc=1 :: QA_NET_1022 checks=48 failures=1 ERROR: QA_NET_1022: stock advanced on the 304 equals a full answer exactly: { "wood": 501, "food": 401, "stone": 0, "iron": 0, "coins": 400 } vs { "wood": 501.0, "food": 402.0, "stone": 0.0, "iron": 0.0, "coins": 400.0 } 
+qa_net_1022 run3 rc=1 :: QA_NET_1022 checks=48 failures=1 ERROR: QA_NET_1022: stock advanced on the 304 equals a full answer exactly: { "wood": 501, "food": 401, "stone": 0, "iron": 0, "coins": 400 } vs { "wood": 501.0, "food": 402.0, "stone": 0.0, "iron": 0.0, "coins": 400.0 } 
+qa_net_1022 run4 rc=0 :: QA_NET_1022 checks=48 failures=0 
+qa_net_1022 run5 rc=1 :: QA_NET_1022 checks=48 failures=1 ERROR: QA_NET_1022: stock advanced on the 304 equals a full answer exactly: { "wood": 501, "food": 401, "stone": 0, "iron": 0, "coins": 400 } vs { "wood": 501.0, "food": 402.0, "stone": 0.0, "iron": 0.0, "coins": 400.0 } 
+end 2026-11-22T07:34:34Z

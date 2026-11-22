@@ -1,0 +1,39 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 142.464, &"terrain": 2827.464, &"tiles": 42.216, &"impostors": 2494.403, &"visuals": 10145.508, &"total": 14766.384 } kit=0 missing kit assets
+ERROR: Condition "CryptoCore::b64_decode(&w[0], buf.size(), &arr_len, (unsigned char *)cstr.get_data(), strlen) != OK" is true. Returning: Vector<uint8_t>()
+   at: base64_to_raw (core/core_bind.cpp:1357)
+   GDScript backtrace (most recent call first):
+       [0] decode_base64 (res://src/forest_rescue/world/forest_fog.gd:355)
+       [1] run (res://qa_forest_world.gd:355)
+       [2] build_city (res://qa_forest_world.gd:44)
+       [3] attach_forest_world (res://src/landscape.gd:4141)
+       [4] build_forest (res://src/landscape.gd:747)
+       [5] build_city_forest (res://src/forest_rescue/world/forest_world.gd:879)
+       [6] yield_frame (res://src/landscape.gd:880)
+ERROR: Condition "CryptoCore::b64_decode(&w[0], buf.size(), &arr_len, (unsigned char *)cstr.get_data(), strlen) != OK" is true. Returning: Vector<uint8_t>()
+   at: base64_to_raw (core/core_bind.cpp:1357)
+   GDScript backtrace (most recent call first):
+       [0] decode_base64 (res://src/forest_rescue/world/forest_fog.gd:355)
+       [1] apply_adventure (res://src/forest_rescue/world/forest_world.gd:1156)
+       [2] run (res://qa_forest_world.gd:385)
+       [3] build_city (res://qa_forest_world.gd:44)
+       [4] attach_forest_world (res://src/landscape.gd:4141)
+       [5] build_forest (res://src/landscape.gd:747)
+       [6] build_city_forest (res://src/forest_rescue/world/forest_world.gd:879)
+       [7] yield_frame (res://src/landscape.gd:880)
+WARNING: ForestWorld: invalid fog projection → locked town default (fail closed)
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] apply_adventure (res://src/forest_rescue/world/forest_world.gd:1159)
+         [1] run (res://qa_forest_world.gd:385)
+         [2] build_city (res://qa_forest_world.gd:44)
+         [3] attach_forest_world (res://src/landscape.gd:4141)
+         [4] build_forest (res://src/landscape.gd:747)
+         [5] build_city_forest (res://src/forest_rescue/world/forest_world.gd:879)
+         [6] yield_frame (res://src/landscape.gd:880)
+QA_FOREST_WORLD_NOTES {"ambient_crowns_over_trails":144,"camera_clearance":{"ambient_hiding":0,"listed":204,"resource_hiding":192},"inner_jitter":{"count":673,"max_m":3.84721922874451,"median_m":2.66089653968811},"kit":{"kitJson":true,"landmarks_loaded":{"lf_arena_bones":"res://assets/forest_rescue/arena/lf_arena_bones.glb","lf_boss_arena":"res://assets/forest_rescue/arena/lf_boss_arena_assembled.glb","lf_env_bridge27m":"res://assets/forest_rescue/landmarks/lf_env_bridge27m.glb","lf_env_camp_props":"res://assets/forest_rescue/landmarks/lf_env_camp_props.glb","lf_env_hunter_shelter":"res://assets/forest_rescue/landmarks/lf_env_hunter_shelter.glb","lf_env_lantern":"res://assets/forest_rescue/landmarks/lf_env_lantern.glb","lf_env_platform":"res://assets/forest_rescue/landmarks/lf_env_platform.glb","lf_env_quarry_mine":"res://assets/forest_rescue/landmarks/lf_env_quarry_mine.glb","lf_env_rope_coil":"res://assets/forest_rescue/landmarks/lf_env_rope_coil.glb","lf_env_ruined_watchpost":"res://assets/forest_rescue/landmarks/lf_env_ruined_watchpost.glb","lf_env_signpost":"res://assets/forest_rescue/landmarks/lf_env_signpost.glb","lf_env_standing_stones":"res://assets/forest_rescue/landmarks/lf_env_standing_stones.glb","lf_env_stone_wall":"res://assets/forest_rescue/landmarks/lf_env_stone_wall.glb","lf_props_supplies":"res://assets/forest_rescue/props/lf_props_supplies.glb","proc_drying_frame":"procedural (kit wood)","proc_fence":"procedural (kit wood)","proc_hide_rack":"procedural (kit wood)"},"landmarks_missing":{},"loaded":{"lf_env_birch":"lf_env_birch.glb","lf_env_bramble#bramble":"lf_env_bramble.glb","lf_env_dark_pine":"lf_env_dark_pine.glb","lf_env_fallen_branches#branches":"lf_env_fallen_branches.glb","lf_env_fallen_trunk#trunk":"lf_env_fallen_trunk.glb","lf_env_golden_oak":"lf_env_golden_oak.glb","lf_env_golden_oak_green":"lf_env_golden_oak.glb + lf_foliage_atlas_green.png","lf_env_grass_tuft#grass":"lf_env_grass_tuft.glb","lf_env_hollow_oak":"lf_env_hollow_oak.glb","lf_env_moss_rock#quarry_rock":"lf_env_moss_rock.glb","lf_env_moss_rock#rock":"lf_env_moss_rock.glb","lf_env_mushrooms#mushrooms":"lf_env_mushrooms.glb","lf_env_reed_fern#fern":"lf_env_reed_fern.glb","lf_env_reed_fern#reed":"lf_env_reed_fern.glb","lf_env_willow":"lf_env_willow.glb"},"missing":{}},"legacy_batches":45,"max_route_slope":24.5154965322498,"perf":{"batches":9,"build_ms":0.0,"cull_ms":5.106,"fog_cull_ms":1.716,"fog_culled":4375,"fog_only_chunks":12,"fog_shells":1,"full_chunks":4,"instances":790,"landmark_tris":0,"lod0":0,"lod1":0,"lod2":790,"overflow":0,"proxy_chunks":0,"setup_ms":{"data":142.464,"impostors":2494.403,"terrain":2827.464,"tiles":42.216,"total":14766.384,"visuals":10145.508},"tris_est":2862,"uploads":67},"remap":{"max_m":116.782157897949,"median_m":16.4632892608643,"moved_ge_0_5m_pct":99.3971868720697,"outer":1493,"p95_m":67.5146789550781},"trail_occlusion":{"fade_capacity":18,"resource_hiding":192,"worst_crowns_over_a_walker":16},"trail_occlusion_worst_at":[84.0,93.2,"lf_trail_site_07__site_08"],"uv2_manifest":{"glbs":570,"with_uv2":3}}
+QA_FOREST_WORLD checks=2958 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)

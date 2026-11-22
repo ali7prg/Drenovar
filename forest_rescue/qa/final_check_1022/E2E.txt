@@ -1,0 +1,2 @@
+qa_forest_e2e rc=143 secs=31 :: 
+  (stopped by hand after the SCRIPT ERROR: the pre-merge harness reads game.forest_game at boot; in 1022 that layer is created lazily after launch, so it is null. Harness not updated for 1022; not a game failure.)

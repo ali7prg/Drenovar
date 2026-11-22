@@ -1,0 +1,5 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+QA_PREWARM finish_after_request_ms=431 label=мир, дозагрузка из фона
+QA_PREWARM cached_switch_ms=3.255 memory_mb=141.0
+QA_PREWARM checks=9 failures=0

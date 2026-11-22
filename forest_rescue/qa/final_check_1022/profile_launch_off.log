@@ -1,0 +1,3 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+PROFILE_LAUNCH {"adventure_known":false,"before_launch":{"max":90.5,"n":5,"over50":2,"p99":90.5},"city_shown":true,"forest_ready_ms":-1,"forest_world":false,"instantiate_ms":1.6,"interactive":{"max":15.9,"n":1450,"over50":0,"p99":7.1},"launch_ms":1141,"load_ms":713.5,"ready_sync_ms":121.0,"scene_ms":154}

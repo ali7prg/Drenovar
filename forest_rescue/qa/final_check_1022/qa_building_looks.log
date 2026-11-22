@@ -1,0 +1,46 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ERROR: upgrade L1: 4 of 5 buildings have a marker
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://qa_building_looks.gd:25)
+       [1] verify (res://qa_building_looks.gd:77)
+       [2] run (res://qa_building_looks.gd:107)
+FAIL upgrade L1: 4 of 5 buildings have a marker
+STEP L1 ["ECO-05:ECO-05-1.tscn","RES-01:RES-01-1.tscn","RES-04:RES-04-1.tscn","MIL-01:MIL-01-1.tscn"]
+ERROR: upgrade L2: 4 of 5 buildings have a marker
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://qa_building_looks.gd:25)
+       [1] verify (res://qa_building_looks.gd:77)
+       [2] run (res://qa_building_looks.gd:107)
+FAIL upgrade L2: 4 of 5 buildings have a marker
+STEP L2 ["ECO-05:ECO-05-1.tscn","RES-01:RES-01-1.tscn","RES-04:RES-04-1.tscn","MIL-01:MIL-01-1.tscn"]
+ERROR: upgrade L3: 4 of 5 buildings have a marker
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://qa_building_looks.gd:25)
+       [1] verify (res://qa_building_looks.gd:77)
+       [2] run (res://qa_building_looks.gd:107)
+FAIL upgrade L3: 4 of 5 buildings have a marker
+STEP L3 ["ECO-05:ECO-05-1.tscn","RES-01:RES-01-1.tscn","RES-04:RES-04-1.tscn","MIL-01:MIL-01-1.tscn"]
+ERROR: upgrade L4: 4 of 5 buildings have a marker
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://qa_building_looks.gd:25)
+       [1] verify (res://qa_building_looks.gd:77)
+       [2] run (res://qa_building_looks.gd:107)
+FAIL upgrade L4: 4 of 5 buildings have a marker
+STEP L4 ["ECO-05:ECO-05-1.tscn","RES-01:RES-01-1.tscn","RES-04:RES-04-1.tscn","MIL-01:MIL-01-1.tscn"]
+ERROR: upgrade L5: 4 of 5 buildings have a marker
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://qa_building_looks.gd:25)
+       [1] verify (res://qa_building_looks.gd:77)
+       [2] run (res://qa_building_looks.gd:107)
+FAIL upgrade L5: 4 of 5 buildings have a marker
+STEP L5 ["ECO-05:ECO-05-1.tscn","RES-01:RES-01-1.tscn","RES-04:RES-04-1.tscn","MIL-01:MIL-01-1.tscn"]
+SAVED /root/.local/share/godot/app_userdata/DRENOVAR/qa_building_looks.json
+QA_BUILDING_LOOKS upgrade checks=25 failures=5
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)

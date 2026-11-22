@@ -1,0 +1,8 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+TROOP06 {"field_head":1.59,"field_triangles":21231,"preview_head":1.59,"preview_triangles":55144,"unit":"ENG-01"}
+TROOP06 {"field_head":1.61,"field_triangles":20748,"preview_head":1.61,"preview_triangles":68092,"unit":"ENG-02"}
+TROOP06 {"field_head":1.66,"field_triangles":19654,"preview_head":1.66,"preview_triangles":60596,"unit":"ENG-03"}
+TROOP06 {"field_head":1.57,"field_triangles":21320,"preview_head":1.57,"preview_triangles":53364,"unit":"ENG-04"}
+TROOP06 {"field_head":2.52,"field_triangles":33691,"preview_head":2.52,"preview_triangles":118230,"unit":"ENG-06"}
+QA_TROOPS06 checks=122 failures=0

@@ -1,0 +1,12 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ERROR: QA_NET_1022: stock advanced on the 304 equals a full answer exactly: { "wood": 501, "food": 401, "stone": 0, "iron": 0, "coins": 400 } vs { "wood": 501.0, "food": 402.0, "stone": 0.0, "iron": 0.0, "coins": 400.0 }
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://qa_net_1022.gd:23)
+       [1] run (res://qa_net_1022.gd:99)
+       [2] send_request (res://src/main.gd:5603)
+       [3] request (res://src/api_pool.gd:129)
+QA_NET_1022_REPORT {"304_cycle":{"polls":[[200,false,true],[304,true,true]],"server_time_after_304":1795332871089,"server_time_tagged":1795332862053,"wood_after_304":501,"wood_full":501,"wood_tagged":500},"banner":{"after_10s":true,"after_success":false,"after_two_failures":false},"cadence":{"backoff_max":15.0,"backoff_n2":8.0,"fight":0.65,"march":2.0,"rest":4.0},"city_load_ms":1159,"counters":{"full":2,"not_modified":3,"retries":3},"healthy":{"ENG-01":40.0,"ENG-02":40.0,"ENG-03":40.0,"ENG-04":20.0,"ENG-06":20.0},"idle_9s":{"polls":2,"statuses":[304,304]},"retry_503":[["89754069366ab609",503,"503"],["89754069366ab609",503,"503"],["89754069366ab609",200,""]],"retry_503_ms":1629,"roster":["ENG-01","ENG-02","ENG-03","ENG-04","ENG-06"],"silent_retry":[["a55f66c9c624872d",200,"drop"],["a55f66c9c624872d",200,"drop"],["a55f66c9c624872d",200,""]],"silent_retry_ms":443}
+QA_NET_1022 checks=48 failures=1
+  FAIL stock advanced on the 304 equals a full answer exactly: { "wood": 501, "food": 401, "stone": 0, "iron": 0, "coins": 400 } vs { "wood": 501.0, "food": 402.0, "stone": 0.0, "iron": 0.0, "coins": 400.0 }

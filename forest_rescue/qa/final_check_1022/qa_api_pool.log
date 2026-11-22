@@ -1,0 +1,5 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+QA_API_POOL sequential_ms=[6.878, 13.728, 13.741, 6.893, 13.754, 13.752, 6.899, 13.742, 13.737, 6.814] new_connections=0
+QA_API_POOL reused=18 total=26 opened=8
+QA_API_POOL checks=36 failures=0

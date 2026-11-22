@@ -1,0 +1,10 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 85.477, &"terrain": 2546.763, &"tiles": 43.522, &"impostors": 184.639, &"visuals": 1006.072, &"total": 4003.032 } kit=0 missing kit assets
+FOREST_V6 lf_site_01 discover -> step 1
+FOREST_V6 lf_site_01 recover_artifact -> step 2
+FOREST_V6 lf_site_01 defeat_guardian -> step 3
+FOREST_V6 lf_site_01 unlock_cage -> step 4
+QA_FOREST_V6_REPORT {"battles":[{"events":17,"guardian_model":"res://assets/creatures-v2/tenerys/tenerys_runtime.gltf","outcome":"victory","site":"lf_site_01","species":"tenerys"}],"cages":[{"freed":3,"site":"lf_site_01"}],"commands":20,"layers_ready_after_city_ms":5296,"peak_actor_loads":1,"statuses":[200,200,200,200,200,200,200,200,200,200,200,200,200,200,200,200,200,200,200,200],"steps":17,"tasks":["lf_site_01/discover","lf_site_01/recover_artifact","lf_site_01/defeat_guardian","lf_site_01/unlock_cage"]}
+QA_FOREST_V6 steps=17 commands=20 checks=43 failures=0

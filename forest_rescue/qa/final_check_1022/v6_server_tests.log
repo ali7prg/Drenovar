@@ -1,0 +1,134 @@
+# V6 campaign steps 202 restart checks 202 events 305 claims 6 army left {"ENG-01":3,"ENG-06":4731} wounded {"ENG-06":20} realm revision 282
+✔ complete campaign on V6: 12 sites, 4 mechanisms, boss, 7,515,000 escrowed, V6 wallet claims, identical state across restarts (4632.750239ms)
+✔ hall I/II: locked projection, 403 before any receipt, nothing stored; hall III unlocks (23.013602ms)
+✔ only the five troop types form a squad; units come from the real V6 army (49.09586ms)
+✔ idempotency: same key and body replays without effects; changed body → 409; receipts are hashed and bounded (21.70973ms)
+✔ polls between traversal checkpoints do not write; each checkpoint and the arrival do (54.456326ms)
+✔ session/new of an existing account: the full state and a foreground entry (interrupted intro → invitation) (20.538095ms)
+✔ feature flag off: no adventure field and no adventure effects (18.117397ms)
+✔ switching the adventure off keeps forest progress; switching it on again resumes it (46.00757ms)
+✔ an adventure command that loses every CAS retry answers CAS_CONFLICT_RETRY and stores nothing (240.973797ms)
+✔ a legacy save never brings adventure progress into V6 (0.606742ms)
+✔ the realm stays one consistent snapshot after the adventure (load verifies hashes) (18.631792ms)
+✔ a 200ms city fight remains renderable when the first poll is 800ms after arrival (127.851893ms)
+✔ moving long-returned battle logs keeps every answer identical; CAS, cold row first, restore (118.021887ms)
+✔ one contact per event, ordered independently of ordinary/batched duplicate packets (11.838749ms)
+✔ 14-event audit fixture retains identity and chronology; attack protects itself from light Hit (0.565144ms)
+✔ terminal latch survives duplicate and late packets; new generation can respawn (0.551836ms)
+✔ projection adds stable IDs without changing events and exposes no future damage (0.729295ms)
+✔ ten sequential generations release queues and tombstones (0.394725ms)
+✔ screen labels avoid contacts and each other, keep the finishing event first (1.083055ms)
+✔ all ten web weapon clips prepare before the server contact, on a stable event token (0.816243ms)
+✔ the same original soldiers survive a return and a cold reconnect; dead actors stay terminal (0.740461ms)
+✔ visual return waits for contact/death while the authoritative result is unchanged (0.787509ms)
+✔ web approach keeps its speed and position continuous when preparation begins (0.503251ms)
+✔ world defeat survives a cold state fetch for the presentation tail, with authoritative return units (152.685564ms)
+✔ old clients: without the opt-in header nothing changes, with the switch on or off (92.087742ms)
+✔ a quiet city: ETag, then 304 after one root-row read and no write (19.789553ms)
+✔ the tag binds the caller, the player header, the deployment and the realm revision (33.065543ms)
+✔ commands and other paths ignore conditional headers (19.494904ms)
+✔ never quiet while a march is out; orders and respawns bound the horizon (91.011464ms)
+✔ within every horizon a full poll shows the same state and does not write (3928.576632ms)
+ℹ tagged answers 177, full polls inside horizons 531, event-bounded horizons 53, changed right after 53
+✔ forest pollers: an idle forest gets 304, a moving squad never a tag (118.243603ms)
+ℹ polls while moving 9, horizon at rest 29600 ms
+✔ forest: within every horizon a full poll shows the same state and does not write (1280.682496ms)
+ℹ tagged 73, checked 146, moves 24, untagged polls while moving 27
+✔ through the Site gateway: a tagged 200, then a 304 without a body (14.759949ms)
+✔ authorized duplicate removal preserves original, all resources, troops, paid receipts and the first V barracks (3.741697ms)
+✔ ambiguous buildings or active paid work stop duplicate removal (1.202188ms)
+✔ 27 types, 297 states, 270 upgrades; every payable transition starts, persists, finishes once (276.098236ms)
+✔ reserved spending is not a production exploit; refund uses snapshot, cap independent (1.482296ms)
+✔ all five resources are checked atomically; changing the same key fails (0.800357ms)
+✔ overflow and huge pending rewards are preserved and replay cannot duplicate (0.768012ms)
+✔ online increments and offline settlement preserve rational carry exactly (76.051279ms)
+✔ two builders start at Hall IV; future workforce includes concurrent increments (1.088559ms)
+✔ food variants remain one instance, same ledger and level, require authoritative shore (1.003993ms)
+✔ 44 research purchases are separate, sequential and do not change accepted timers (20.789126ms)
+✔ army slots include wounded, healing and prepaid recruitment; cancel never clones soldiers (1.058616ms)
+✔ training whole-batch rounding and saved queued terms (0.860157ms)
+✔ trade checks receiving capacity including escrow and shares UTC gross quota (0.869159ms)
+✔ existing hosted CAS: mobile → web → process restart → mobile; replay and simultaneous spend (159.527328ms)
+✔ validated chunked snapshot is read once per HTTP request, with no cross-request cache (95.503592ms)
+✔ a CAS conflict discards the consumed preflight row and preserves the winning command (42.447584ms)
+✔ adventure off: the forest module is never loaded, conditional polls included (281.920499ms)
+✔ adventure on (control): the same requests load the forest module (346.187062ms)
+✔ duplicate migration stays blocked by default; explicit isolated P2 preserves archive and compensates once (31.913161ms)
+✔ migration preserves overflow, old ALT identity, troops, wounds, progress and claimed rewards; second run does nothing (31.894699ms)
+✔ ambiguous duplicates, historical research and all active queues block atomic migration without invented refunds (39.838925ms)
+✔ recorded legacy order drains under pinned engine; old charge and duration are not repriced to C1 (16.49797ms)
+✔ restore actual isolated SQLite backup after migration, verify complete snapshot hash (17.959446ms)
+✔ all 3249 cached terrain cells equal the authoritative landform (19.807304ms)
+✔ 216 routes/refusals, all coordinates and travel distance match deployed e5062aa exactly (337.787292ms)
+✔ 600 randomized/boundary routes preserve every baseline coordinate and distance across 3 city sizes and 4 wall variants (1394.289207ms)
+# polls 175 revisions A (write every poll) 185 B (skip time-only) 10 final B revision 11
+✔ skipped time-only writes give the same answers as writing every poll (orders, training, hunt, adventure move) (1183.592204ms)
+# continuous scenario polls 52 skipped writes 46
+✔ skipped writes stay exact for continuous wall repair, healing, research and stock at the storage cap (318.038832ms)
+✔ two distinct device secrets pair once; app → browser → app share a persisted authoritative order (102.33113ms)
+✔ empty native account, unsupported legacy transfer and logout have safe V6 responses without creating or deleting cities (22.449663ms)
+✔ real server reproduces free active/B22 progression without resource grants or PvP (3646.260757ms)
+✔ real server reproduces free casual/B22 progression without resource grants or PvP (2853.476484ms)
+✔ real server reproduces free active/B24 progression without resource grants or PvP (2889.835421ms)
+✔ V6 local hunt: authoritative intermediate HP, reward and surviving troops only once (65.44545ms)
+✔ V6 world hunt: authoritative intermediate HP, reward and surviving troops only once (31.620771ms)
+✔ cutover CAS is atomic and repeatable; rejects changed source, altered plan and future time (65.787233ms)
+{"e":"/api/state","m":"GET","s":503,"rt":2,"d1":0}
+{"e":"/api/state","m":"GET","s":200,"rt":2,"d1":0}
+{"e":"/api/pair/create","m":"POST","s":200,"rt":3,"d1":2}
+{"e":"/api/pair/accept","m":"POST","s":200,"rt":3,"d1":0}
+{"e":"/api/state","m":"GET","s":200,"rt":1,"d1":1}
+✔ locked release adapter preserves existing account through migration, pairs browser and refuses old clients before writes (48.924083ms)
+✔ continuous repair is exact across polling, pause, restart and partial cancellation (34.520908ms)
+✔ repair production never mines refundable capacity and large polling equals small polling at cap (170.121472ms)
+✔ ram manufacture and repair preserve identity, slots and immutable charge on cancellation (2.151394ms)
+✔ loot exposes prepaid reserves once; cancellation cannot recreate loot; hospital excess dies (1.05564ms)
+✔ catalogue keeps exactly ENG-01/02/03/04/06 with C1.0 numbers; the spearman unlocks at hall I / barracks I (1.324357ms)
+✔ the forest squad uses the same five troop types and the server troop stats (0.192576ms)
+✔ new settlement: 3 spearmen; training a spearman works at hall I / barracks I; a retired type is refused (98.85096ms)
+✔ 1:1 conversion: army, queues, receipts, wounded, healing, marches, reports and adventure; counts merged, totals kept, idempotent (1.105299ms)
+✔ realm migration: CAS, receipt, every retired id gone, cold refreshBackups first in the same batch, verified restore, re-run no-op (6.391193ms)
+✔ no V6 or original request path reads refreshBackups (11.589618ms)
+✔ the server-side copies of the adventure namespace roots and the CAS message equal the module (0.468254ms)
+✔ frontier preserves stable-sort order across decreases, ties and duplicate entries (361.201731ms)
+✔ earned speedups change one frozen order once; late retry survives more than 64 unrelated commands (193.302706ms)
+✔ finite forest work shares builders, completes at original deadline and credits only one persistent reward (16.295999ms)
+✔ starter claims preserve order and cannot be duplicated with a fresh request key (11.487744ms)
+✔ legacy realm drains both local orders and the original world resolver before atomic conversion (26.799436ms)
+✔ large C1 and preserved legacy armies resolve without recursion or deleting overflow (140.554712ms)
+{"e":"/api/state","m":"GET","s":200,"rt":2,"d1":0}
+{"e":"/api/pair/create","m":"POST","s":200,"rt":3,"d1":0}
+{"e":"/api/pair/accept","m":"POST","s":200,"rt":3,"d1":0}
+{"e":"/api/command","m":"POST","s":200,"rt":2,"d1":0}
+{"e":"/api/state","m":"GET","s":200,"rt":1,"d1":0}
+{"e":"/api/command","m":"POST","s":200,"rt":1,"d1":0}
+{"e":"/api/command","m":"POST","s":200,"rt":2,"d1":1}
+{"e":"/api/state","m":"GET","s":200,"rt":1,"d1":0}
+{"e":"/api/session/new","m":"POST","s":200,"rt":1,"d1":1}
+✔ existing signed-in web owner and new phone use the one migrated city, queues and durable receipts (106.960916ms)
+✔ main-city bridge refuses another Site identity, cross-origin writes and unsupported destinations without changing the city (31.831773ms)
+✔ a forged or expired old-web proof cannot claim the main city or change its save (25.871208ms)
+{"e":"/api/state","m":"GET","s":404,"rt":1,"d1":1}
+{"e":"/api/account","m":"GET","s":404,"rt":1,"d1":0}
+{"e":"/api/session/new","m":"POST","s":403,"rt":1,"d1":0}
+✔ unlinked devices cannot create a replacement city or write the owner snapshot by polling (20.994653ms)
+✔ legacy owner writes are frozen for verified Site and native accounts only (4.582228ms)
+✔ shared gateway rejects redirects without forwarding a device key to another origin (0.823153ms)
+✔ legacy account verification uses manual redirect handling and rejects a login redirect before touching saves (0.850426ms)
+{"e":"/api/state","m":"GET","s":200,"rt":2,"d1":1}
+✔ phone ChatGPT approval and exchange link the existing main city without creating or importing a city (29.250155ms)
+✔ real game server: 40 rams breach XI at 180s, return with same IDs and never duplicate on replay (126.306051ms)
+✔ real game server: undefended rams die to garrison and never become wounded (38.527365ms)
+✔ real game server: precise withdrawal applies damage once and frees target; repair resumes after battle (43.480124ms)
+✔ raid cargo is debited once at battle, stays in transit and credits with overflow only on return (31.878679ms)
+✔ tower API reveals incoming path only inside its C1 discovery radius (20.149814ms)
+✔ D1-safe chunks preserve >2 MiB including Unicode; CAS is atomic and does not accumulate old parts (102.936805ms)
+✔ real hosted server resumes a large durable ledger and accepted construction after a fresh adapter (457.531828ms)
+ℹ tests 102
+ℹ suites 0
+ℹ pass 102
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15186.613037

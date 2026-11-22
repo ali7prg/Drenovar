@@ -1,0 +1,8 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 176.614, &"terrain": 3197.721, &"tiles": 37.572, &"impostors": 254.987, &"visuals": 1116.298, &"total": 4872.783 } kit=0 missing kit assets
+QA_FOREST_CAPTIVES_NOTES {"captives":36,"escort_worst_gap_m":4.7,"exit_max_step_m":0.03,"sites":12,"worst_floor_offset_m":0.0,"worst_inside_margin_m":1.45}
+QA_FOREST_CAPTIVES checks=226 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)

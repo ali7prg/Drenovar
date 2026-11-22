@@ -1,0 +1,19 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ERROR: restart: 4 of 5 buildings have a marker
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://qa_building_looks.gd:25)
+       [1] verify (res://qa_building_looks.gd:77)
+       [2] run (res://qa_building_looks.gd:124)
+FAIL restart: 4 of 5 buildings have a marker
+RESTART building-v1-0 L1 ECO-05-1.tscn plot=v1-0 marker=[-5.0, 5.26626968383789, -5.0] name=Ратуша/главное здание
+RESTART building-v1-1 L1 RES-01-1.tscn plot=v1-1 marker=[-16.0, 6.57369709014893, -5.0] name=Лагерь лесорубов
+RESTART building-v1-2 L1 RES-04-1.tscn plot=v1-2 marker=[7.0, 5.58242034912109, -4.0] name=Ферма
+RESTART building-v1-3 L1 MIL-01-1.tscn plot=v1-3 marker=[-5.0, 5.44875383377075, 8.0] name=Казармы
+QA_BUILDING_LOOKS restart checks=26 failures=1
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.

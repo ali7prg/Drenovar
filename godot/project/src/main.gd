@@ -2956,8 +2956,7 @@ func warm_panel_textures() -> void:
 	var atlas: String = data.environmentAtlas
 	if environment_atlas == null and ResourceLoader.load_threaded_request(atlas, "Texture2D") == OK:
 		pending.append(atlas)
-	# The dioramas of the construction strip and the turf of its live 3D view.
-	BuildingStage.warm_art(V6_CARD_KEYS.keys() + ["B04", "B26", "B27"])
+	warm_dioramas()
 	# Building card art too: the build catalogue and the premium window heroes show it.
 	var card_keys := {}
 	for key: String in V6_CARD_KEYS.values() + data.types.values():
@@ -2988,6 +2987,22 @@ func warm_panel_textures() -> void:
 	# viewports), a few frames after launch rather than in the first tap on «Строить».
 	await get_tree().process_frame
 	v6_panels.build.warm()
+
+## The dioramas of the construction strip and the turf of its live 3D view, decoded on worker
+## threads once the server is known to be V6 (the legacy build sheet never shows them), four
+## at a time, so the decoding does not slow whatever the player opens first.
+func warm_dioramas() -> void:
+	var deadline := Time.get_ticks_msec() + 60000
+	while not is_v6_server():
+		if Time.get_ticks_msec() > deadline or not is_inside_tree():
+			return
+		await get_tree().create_timer(0.5).timeout
+	var types: Array = V6_CARD_KEYS.keys() + ["B04", "B26", "B27"]
+	for start in range(0, types.size(), 4):
+		var batch: Array = types.slice(start, start + 4)
+		BuildingStage.warm_art(batch)
+		while BuildingStage.art_loading(batch) and is_inside_tree():
+			await get_tree().process_frame
 
 ## Baked portrait of a unit (tools/bake_unit_portraits.gd): the full figure, or the bust for
 ## small slots. Falls back to the older painted panel art for units without one.

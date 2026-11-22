@@ -98,6 +98,14 @@ static func warm_art(types: Array) -> void:
 		if not ResourceLoader.has_cached(path) and not requested.has(path):
 			requested[path] = ResourceLoader.load_threaded_request(path, "Texture2D") == OK
 
+## True while any of these types' art is still decoding.
+static func art_loading(types: Array) -> bool:
+	for type: String in types:
+		var path := ART_DIR + type + ".webp"
+		if not arts.has(type) and ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			return true
+	return false
+
 ## Starts loading a level scene on a worker thread (harmless when loaded or loading).
 static func request(path: String) -> void:
 	if path.is_empty() or scenes.has(path) or requested.has(path) or not ResourceLoader.exists(path):

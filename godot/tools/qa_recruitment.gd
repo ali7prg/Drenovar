@@ -74,6 +74,9 @@ func run() -> void:
 	if not check(await game.v6_panels.load_catalogue(), "catalogue"): return
 	var recruit = game.v6_panels.recruit
 
+	# The first open of the session, after the post-launch warm-up (glyphs, stage gradients;
+	# under a second, so before a player's first tap on a building).
+	await wait_for(func(): return game.launch_done and game.hud.find_child("KitWarm", false, false) == null, 30.0)
 	# Open: one window, rail of every training building, stage, tier cards.
 	await game.v6_panels.services("B11")
 	if not check(recruit.is_open() and game.modal_layout == "full", "recruitment window opens"): return

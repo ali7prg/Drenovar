@@ -99,6 +99,7 @@ var modal_hero_share := 0.4
 # player's resources (live) on the right.
 var modal_top: Control
 var modal_crumb: Label
+var modal_crumb_plate: PanelContainer
 var modal_wallet: HBoxContainer
 var modal_wallet_amounts := {}
 var web_sheet_style: StyleBoxTexture
@@ -328,6 +329,7 @@ func _ready() -> void:
 	warm_panel_textures()
 	# Unit portraits (cards, queues, army) decode on worker threads now, not on first use.
 	UnitStage.warm_portraits(data.get("unitModels", {}).keys() + ["SIEGE-RAM-01"])
+	warm_windows()
 	maybe_start_forest_game() # FOREST_RESCUE hook: only after the city is interactive
 	if restoring_session and not showing_cached_state:
 		message.text = "Подключаемся к поселению…"
@@ -2646,6 +2648,7 @@ func arrange_modal() -> void:
 	if modal_top.visible != top_on:
 		modal_top.visible = top_on
 	modal_crumb.text = modal_eyebrow.text
+	modal_crumb_plate.visible = not modal_crumb.text.is_empty()
 	modal_eyebrow.visible = not full and not modal_eyebrow.text.is_empty()
 	refresh_modal_wallet()
 	if modal_title.get_theme_font_size("font_size") != title_size:
@@ -2672,7 +2675,9 @@ func arrange_modal() -> void:
 		modal_content.custom_minimum_size.x = 0.0
 	var side := 28 if full else 22
 	# Full windows keep air between the values and the scroll bar on the right.
-	var margins := {"margin_left": 8 if hero_on else side, "margin_right": side + (10 if hero_on else 0), "margin_top": 12, "margin_bottom": 18 if full else 20}
+	# Full windows leave room for the section plate that hangs under the title.
+	var crumb_on := full and not modal_eyebrow.text.is_empty()
+	var margins := {"margin_left": 8 if hero_on else side, "margin_right": side + (10 if hero_on else 0), "margin_top": 22 if crumb_on else 12, "margin_bottom": 18 if full else 20}
 	modal_content.begin_bulk_theme_override()
 	for key: String in margins:
 		if modal_content.get_theme_constant(key) != margins[key]:
@@ -2686,18 +2691,26 @@ func build_modal_top() -> void:
 	modal_top.name = "ModalTop"
 	modal_top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	modal.add_child(modal_top)
+	# The section line hangs under the title on a small oak plate (it read poorly as a tiny
+	# line in the corner of the upper board).
+	modal_crumb_plate = PanelContainer.new()
+	modal_crumb_plate.name = "ModalCrumbPlate"
+	modal_crumb_plate.add_theme_stylebox_override("panel", UiKit.nine("kit_strip", Vector4(26, 14, 26, 14), Vector4(26, 3, 26, 5)))
+	modal_crumb_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	modal_top.add_child(modal_crumb_plate)
+	modal_crumb_plate.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	modal_crumb_plate.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	modal_crumb_plate.offset_left = 0
+	modal_crumb_plate.offset_right = 0
+	modal_crumb_plate.offset_top = 80
+	modal_crumb_plate.offset_bottom = 108
 	modal_crumb = UiKit.eyebrow_label()
 	modal_crumb.name = "ModalCrumb"
-	modal_crumb.add_theme_font_size_override("font_size", 14)
-	modal_crumb.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	modal_crumb.add_theme_font_size_override("font_size", 15)
+	modal_crumb.add_theme_color_override("font_color", UiKit.GOLD)
 	modal_crumb.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	modal_crumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	modal_top.add_child(modal_crumb)
-	modal_crumb.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	modal_crumb.offset_left = 30
-	modal_crumb.offset_right = -660
-	modal_crumb.offset_top = 1
-	modal_crumb.offset_bottom = 30
+	modal_crumb_plate.add_child(modal_crumb)
 	modal_wallet = HBoxContainer.new()
 	modal_wallet.name = "ModalWallet"
 	modal_wallet.alignment = BoxContainer.ALIGNMENT_END
@@ -2755,6 +2768,7 @@ func set_modal_heading(title: String, eyebrow: String) -> void:
 	modal_title.text = title
 	modal_eyebrow.text = eyebrow
 	modal_crumb.text = eyebrow
+	modal_crumb_plate.visible = not eyebrow.is_empty()
 	modal_eyebrow.visible = not eyebrow.is_empty() and modal_layout != "full"
 
 func set_modal_hero(art: Texture2D, tint := Color("#b98c52"), caption := "") -> void:
@@ -2783,6 +2797,8 @@ func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D
 	if modal.get_theme_stylebox("panel") != sheet:
 		modal.add_theme_stylebox_override("panel", sheet)
 	modal_vignette.visible = not result_open
+	if modal_vignette.texture != UiKit.vignette_texture():
+		modal_vignette.texture = UiKit.vignette_texture()
 	economy_rows.clear()
 	economy_source_label = null
 	starter_panel_open = false
@@ -2865,6 +2881,23 @@ func panel_art(parent: Container, path: String, pixels: Vector2) -> TextureRect:
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(art)
 	return art
+
+## Font sizes (and outlines) of the premium windows, as their first open shapes them.
+const WARM_TEXT_SIZES := {"title": [[40, 0], [40, 1], [40, 6]],
+	"label": [[14, 0], [15, 0], [15, 3], [16, 0], [16, 3], [16, 4], [17, 0], [18, 0], [21, 0], [21, 4], [22, 0], [22, 4], [26, 0]],
+	"body": [[15, 0], [16, 0], [17, 0]]}
+
+## After launch (the launch screen is gone): the glyphs of the window fonts are shaped a
+## few sizes per frame and the stage's gradients and framing are made, so the first window
+## of a session opens as fast as the later ones. Adds nothing to the launch itself.
+func warm_windows() -> void:
+	var fonts := {"title": UiKit.TITLE_FONT, "label": UiKit.LABEL_FONT, "body": UiKit.BODY_FONT}
+	var combos: Array = []
+	for key: String in WARM_TEXT_SIZES:
+		for pair: Array in WARM_TEXT_SIZES[key]:
+			combos.append([fonts[key], pair[0], pair[1]])
+	UiKit.warm_text(hud, combos)
+	UnitStage.warm_stage()
 
 func warm_panel_textures() -> void:
 	# Decode recruitment portraits on a worker thread after launch, so the first

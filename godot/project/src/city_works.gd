@@ -16,6 +16,12 @@ var stage: Node3D
 var data: Dictionary
 var lumberjack: Node3D
 var lumber_tree := ""
+## Build 1024: the walk in was checked against the townsfolk's map of the town (it loads on a
+## worker after the launch; until then the first turn is taken, and checked again once it is in).
+var lumber_checked := false
+## Build 1024: the builders stand on the ground the townsfolk walk on (stage.walk_ground; placed
+## again once the townsfolk are in).
+var builders_on_town := false
 var lumber_from := Vector3.ZERO
 var lumber_at := Vector3.ZERO
 var lumber_face := 0.0
@@ -187,16 +193,32 @@ func present_lumberjack(job: Dictionary, now_ms: float) -> void:
 	if not is_instance_valid(lumberjack):
 		lumberjack = make_worker("Worker_Lumberjack")
 	seen_work[tree_id] = true
-	if lumber_tree != tree_id:
+	var town_ready: bool = stage.townsfolk != null and stage.townsfolk.rebuilds > 0
+	if lumber_tree != tree_id or (town_ready and not lumber_checked):
 		lumber_tree = tree_id
+		lumber_checked = town_ready
 		var trunk: Vector3 = stage.array_point(tree.p)
 		# Stand on the side facing the camera so the swing is visible.
 		var side: Vector3 = stage.camera.global_position - trunk
 		side.y = 0.0
 		side = side.normalized() if side.length_squared() > 0.01 else Vector3.BACK
 		side = side.rotated(Vector3.UP, 0.6)
-		lumber_at = stage.ground_point(trunk + side * 1.55)
-		lumber_from = stage.ground_point(trunk + side * 7.0)
+		# Build 1024: the nearest turn from there whose walk in is clear of other trunks,
+		# buildings, water and the wall (a shorter walk when none is).
+		var walk := 7.0
+		var found := false
+		for length in [7.0, 4.0]:
+			for turn in [0.0, 0.5, -0.5, 1.0, -1.0, 1.6, -1.6, 2.3, -2.3, PI]:
+				var dir := side.rotated(Vector3.UP, turn)
+				if not town_ready or stage.townsfolk.approach_clear(Vector2(trunk.x, trunk.z), Vector2(dir.x, dir.z), 1.55, length):
+					side = dir
+					walk = length
+					found = true
+					break
+			if found:
+				break
+		lumber_at = stage.walk_ground(trunk + side * 1.55)
+		lumber_from = stage.walk_ground(trunk + side * walk)
 		lumber_face = atan2(trunk.x - lumber_at.x, trunk.z - lumber_at.z)
 	lumberjack.visible = true
 	lumber_ends = float(job.get("ends", 0.0))
@@ -204,7 +226,7 @@ func present_lumberjack(job: Dictionary, now_ms: float) -> void:
 	var walking := clampf((now_ms - started) / (WALK_SECONDS * 1000.0), 0.0, 1.0)
 	var seconds := (now_ms - started) / 1000.0
 	if walking < 1.0:
-		lumberjack.position = lumber_from.lerp(lumber_at, walking)
+		lumberjack.position = stage.walk_ground(lumber_from.lerp(lumber_at, walking))
 		lumberjack.rotation.y = lumber_face
 		var stride := sin(seconds * 11.0)
 		pose(lumberjack, stride * 0.5, stride * 0.55)
@@ -285,9 +307,11 @@ func present_builders(site: Dictionary, now_ms: float) -> void:
 	var started := float(site.get("started", now_ms))
 	var ends := float(site.get("ends", now_ms + 1.0))
 	var progress := clampf((now_ms - started) / maxf(ends - started, 1.0), 0.0, 1.0)
-	if builder_site != key or site_signature != site_key(site):
-		builder_site = key
-		build_site(site)
+	if builder_site != key or site_signature != site_key(site) or (stage.townsfolk != null and not builders_on_town):
+		if builder_site != key or site_signature != site_key(site):
+			builder_site = key
+			build_site(site)
+		builders_on_town = stage.townsfolk != null
 		var offsets := [Vector3(site_box.position.x - 0.9, 0, site_box.end.z + 0.9), Vector3(site_box.end.x + 0.9, 0, site_box.end.z + 0.4)]
 		var spots: Array = site.get("layout", {}).get("builders", [])
 		if spots.size() >= 2 and not site.has("frame"):
@@ -295,7 +319,7 @@ func present_builders(site: Dictionary, now_ms: float) -> void:
 		if site.has("frame"):
 			offsets = [Vector3(-4.6, 0, 4.2), Vector3(4.8, 0, 3.6)]
 		for index in builders.size():
-			var p: Vector3 = stage.ground_point(centre + offsets[index])
+			var p: Vector3 = stage.walk_ground(centre + offsets[index])
 			builders[index].position = p
 			builders[index].rotation.y = atan2(centre.x - p.x, centre.z - p.z)
 	site_node.visible = true
@@ -572,7 +596,7 @@ func animate_site(site: Dictionary, progress: float, now_ms: float) -> void:
 			var walk := fposmod(seconds / 7.0, 1.0)
 			var leg := walk * 2.0 if walk < 0.5 else (1.0 - walk) * 2.0
 			var at := from.lerp(to, smoothstep(0.0, 1.0, leg))
-			site_carrier.position = stage.ground_point(at)
+			site_carrier.position = stage.walk_ground(at)
 			var dir := (to - from) if walk < 0.5 else (from - to)
 			site_carrier.rotation.y = atan2(dir.x, dir.z)
 			var stride := sin(seconds * 9.0)

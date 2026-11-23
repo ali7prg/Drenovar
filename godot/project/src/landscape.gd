@@ -29,6 +29,10 @@ const CityWorks = preload("res://src/city_works.gd")
 const CityWalls = preload("res://src/city_walls.gd")
 const TownPlan = preload("res://src/town_plan.gd")
 const TownGround = preload("res://src/town_ground.gd")
+# Build 1024: the people walking the town (src/townsfolk.gd). Their script and the forest rescue
+# actor scripts it uses (~0.2 s of compiling on a desktop) load on a worker after the launch, as
+# the 1022 world layer does; until then the town is empty and walk_ground() is ground_point().
+const TOWNSFOLK_SCRIPT := "res://src/townsfolk.gd"
 const TOWN_LOTS := "res://assets/city/town_lots.json"
 # B18 gate scenes are authored at plot scale; in the city wall they stand larger so
 # the carriageway and towers match the height of the ring curtain.
@@ -46,6 +50,10 @@ var walls := CityWalls.new()
 # Yards, streets and their dressing (build 52): see src/town_plan.gd.
 var town_plan := TownPlan.new()
 var town := TownGround.new()
+var townsfolk: Node3D = null
+var townsfolk_load := ""
+var townsfolk_hall := 1
+var townsfolk_district: Variant = null
 var town_lots: Dictionary = {}
 var town_rebuilds := 0
 var forest_materials := {}
@@ -179,6 +187,8 @@ var detail_layer := true
 var selectable_trees: Array = []
 var standing_tree_cells: Dictionary = {}
 var parade := Node3D.new()
+# Build 1024: the rigid ambient Worker_* models are gone (the townsfolk replace them); the node
+# stays, empty, for the tools that list it.
 var workers := Node3D.new()
 var parade_center := Vector3.ZERO
 var parade_slots: Array[Dictionary] = []
@@ -1282,7 +1292,6 @@ func present_city(state: Dictionary, staged := false) -> void:
 	# Descriptors of every static city node. Unchanged nodes are reused instead of
 	# re-instantiating GLB scenes after each authoritative state update.
 	var wanted_buildings: Array = []
-	var wanted_workers: Array = []
 	if district is Dictionary:
 		exclusions.append(Rect2(district.x - 15.7, district.z - 12.7, 31.4, 25.4))
 	var hall_level := 1
@@ -1323,13 +1332,11 @@ func present_city(state: Dictionary, staged := false) -> void:
 			var level_model: Dictionary = level_model_for(building.type, int(building.level))
 			if not level_model.is_empty():
 				wanted_buildings.append(["model", level_model.path, model_transform(x,y,z,0,float(level_model.get("scale", 1.0)))])
-				wanted_workers.append([id, Vector3(x,y,z), level_worker_offset(level_model)])
 			else:
 				# The scattered level props of 0.5.9 (city-details/<type>-<level>.glb) are
 				# replaced by the yard dressing of the town plan, the same for every building.
 				var scale := float(asset.scale)*(1+0.055*(int(building.level)-1))
 				wanted_buildings.append(["model", asset.path, model_transform(x,y,z,0,scale)])
-				wanted_workers.append([id, Vector3(x,y,z)])
 			town_buildings.append({"id": building.id, "type": building.type, "level": int(building.level),
 				"x": x, "z": z, "hall": city_base_type(building.type) == "ECO-05"})
 			place_markers.append({"position":Vector3(x,y+5,z),"id":building.id,"kind":"building","item":building})
@@ -1392,7 +1399,6 @@ func present_city(state: Dictionary, staged := false) -> void:
 	work_sites = plot_positions
 	if staged:
 		await yield_frame()
-	sync_city_workers(wanted_workers)
 	if geometries.get("town_built", "") != geometries.get("town_signature", "") or not is_instance_valid(city_road_mesh):
 		geometries["town_built"] = geometries.get("town_signature", "")
 		town.build(town_plan, static_height)
@@ -1416,6 +1422,11 @@ func present_city(state: Dictionary, staged := false) -> void:
 			ground_rebuilds += 1
 	sync_parade(army, district)
 	update_visible_batches()
+	# Streets, yards, trees, the wall and the parade are final: the townsfolk plan their walks.
+	townsfolk_hall = hall_level
+	townsfolk_district = district
+	if townsfolk != null:
+		townsfolk.sync(hall_level, district)
 
 func city_base_type(type: String) -> String:
 	for definition in data.buildings:
@@ -1458,34 +1469,6 @@ func sync_city_buildings(wanted: Array) -> void:
 		if not kept.has(signature):
 			existing[signature].free()
 
-func sync_city_workers(wanted: Array) -> void:
-	var existing := {}
-	for child in workers.get_children():
-		var signature: String = child.get_meta("city_signature", "")
-		if signature.is_empty() or existing.has(signature):
-			child.free()
-		else:
-			existing[signature] = child
-	var kept := {}
-	for item in wanted:
-		var signature := "%s|%s|%s" % [item[0], var_to_str(item[1]), var_to_str(item[2] if item.size() > 2 else null)]
-		if existing.has(signature) and not kept.has(signature):
-			kept[signature] = true
-			continue
-		var before := workers.get_child_count()
-		add_worker(item[0], item[1], item[2] if item.size() > 2 else null)
-		if workers.get_child_count() > before:
-			workers.get_child(workers.get_child_count() - 1).set_meta("city_signature", signature)
-			city_nodes_created += 1
-		kept[signature] = true
-	for signature in existing:
-		if not kept.has(signature):
-			existing[signature].free()
-
-func level_worker_offset(level_model: Dictionary) -> Variant:
-	var w: Variant = level_model.get("worker")
-	return Vector3(float(w[0]), float(w[1]), float(w[2])) if w is Array and w.size() == 3 else null
-
 # [scene path, scale] that the city shows for a type at a level (level scene or the
 # shared model grown by level), or [] when the type has no model.
 func level_visual(type: String, level: int) -> Array:
@@ -1506,57 +1489,51 @@ func level_model_for(type: String, level: int) -> Dictionary:
 	var entry: Variant = levels.get(str(level))
 	return entry if entry is Dictionary else {}
 
-func add_worker(building: String, base: Vector3, offset_override: Variant = null) -> void:
-	var worker: String = {
-		"hall":"Worker_Carrier", "starterHall":"Worker_Carrier", "warehouse":"Worker_Carrier",
-		"market27":"Worker_Carrier", "quarry27":"Worker_Carrier", "ironmine27":"Worker_Carrier",
-		"farm":"Worker_Farmer", "lumber":"Worker_Lumberjack", "smith":"Worker_Smith"
-	}.get(building, "")
-	if worker.is_empty():
-		return
-	var offset := Vector3(3.2 if building == "farm" else (-3.4 if building == "lumber" else 0.0), 0.0, 2.8)
-	if building in ["hall", "starterHall"]:
-		offset.z = 4.1 if building == "starterHall" else 5.2
-	if offset_override is Vector3:
-		# reworked levels keep the worker on open ground clear of their new stairs and posts
-		offset = offset_override
-	var p := ground_point(base + offset)
-	var actor := add_model(workers, data.models[worker].path, model_transform(p.x, p.y, p.z, 0.0, 1.25))
-	actor.set_meta("base", base + offset)
-	actor.set_meta("building", building)
-	for player: AnimationPlayer in actor.find_children("*", "AnimationPlayer", true, false):
-		var motions := Animation.new()
-		for clip in player.get_animation_list():
-			if clip == "RESET":
-				continue
-			var part: Animation = player.get_animation(clip)
-			motions.length = maxf(motions.length, part.length)
-			for track in range(part.get_track_count()):
-				part.copy_track(track, motions)
-		if motions.get_track_count() > 0:
-			motions.loop_mode = Animation.LOOP_LINEAR
-			var library := AnimationLibrary.new()
-			library.add_animation("work", motions)
-			player.add_animation_library("ambient", library)
-			player.play("ambient/work")
-
+# The townsfolk walk on the clock of the server (seconds); see src/townsfolk.gd.
 func present_workers(time: float) -> void:
-	var phase := fposmod(time, 12.0) / 12.0 * TAU
-	for actor: Node3D in workers.get_children():
-		var p: Vector3 = actor.get_meta("base")
-		var kind: String = actor.get_meta("building")
-		var on_screen := camera.is_position_in_frustum(p + Vector3.UP)
-		actor.visible = on_screen
-		actor.process_mode = Node.PROCESS_MODE_INHERIT if on_screen else Node.PROCESS_MODE_DISABLED
-		if not on_screen:
-			continue
-		if kind in ["hall", "starterHall"]:
-			p += Vector3(sin(phase) * 1.65, 0.0, cos(phase) * 0.42)
-			p = ground_point(p) + Vector3.UP * absf(sin(time * 5.0)) * 0.035
-			actor.rotation.y = atan2(cos(phase) * 1.65, -sin(phase) * 0.42)
-		else:
-			p.y = static_height(p.x, p.z) + (sin(time * 2.0) * 0.025 if kind == "farm" else 0.0)
-		actor.position = p
+	if townsfolk != null or attach_townsfolk():
+		townsfolk.present(time)
+
+# Starts the townsfolk script loading on a worker (first call) and adds the townsfolk once it is
+# in. True when they are there.
+func attach_townsfolk() -> bool:
+	if townsfolk != null:
+		return true
+	if map_name != "city" or townsfolk_load == "failed":
+		return false
+	if townsfolk_load.is_empty():
+		townsfolk_load = "loading"
+		if ResourceLoader.load_threaded_request(TOWNSFOLK_SCRIPT) != OK:
+			townsfolk_load = "failed"
+			return false
+	var status := ResourceLoader.load_threaded_get_status(TOWNSFOLK_SCRIPT)
+	if status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		return false
+	var script: Variant = ResourceLoader.load_threaded_get(TOWNSFOLK_SCRIPT) if status == ResourceLoader.THREAD_LOAD_LOADED else null
+	if not script is GDScript:
+		townsfolk_load = "failed"
+		return false
+	townsfolk = script.new()
+	townsfolk.setup(self)
+	add_child(townsfolk)
+	townsfolk.sync(townsfolk_hall, townsfolk_district)
+	townsfolk_load = "ready"
+	return true
+
+# Where feet stand: the drawn town ground on streets and yards (lifted over the terrain,
+# src/town_ground.gd), elsewhere the drawn terrain (its vertex grid, not the smooth
+# sample_city between the vertices). CityWorks walkers use it, so no worker sinks into a
+# street or floats over a hollow.
+func walk_ground(p: Vector3) -> Vector3:
+	if map_name != "city" or townsfolk == null:
+		return ground_point(p)
+	if townsfolk.cover(p.x, p.z) >= 0.5:
+		p.y = townsfolk.ground_y(p.x, p.z)
+	elif forest_world != null and maxf(absf(p.x), absf(p.z)) > 56.0:
+		p.y = forest_world.height_at(p.x, p.z)  # [forest_rescue_v1 hook] earthworks/bridge
+	else:
+		p.y = townsfolk.terrain_y(p.x, p.z)
+	return p
 
 func add_city_detail(parent: Node3D, path: String, p: Vector3) -> void:
 	var detail := add_model(parent, path, Transform3D(Basis.IDENTITY, p))

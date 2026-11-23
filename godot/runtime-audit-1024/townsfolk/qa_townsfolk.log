@@ -1,0 +1,57 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+plan: 50.2 ms over 5 frames { "g_streets": 71, "g_doors": 1234, "g_square": 321, "g_validate": 3958, "g_edges": 29, "graph": 34610, "plan": 950, "t_dense": 2040, "timelines": 12208 }
+hall 1: 6 people (lumberjack, farmer, steward, messenger, stroller, stroller)
+stride: walk 1.1940 m/s (STRIDE_SPEED 1.193), loaded 0.9434 m/s (0.944)
+  sharp turn 2.58 rad: stroller|town#0 leg 2 at 2.60/10.76 (-15.12047, 0.762661)
+  sharp turn 2.54 rad: stroller|town#0 leg 2 at 2.60/10.76 (-15.11896, 0.762752)
+  close 1.03 s: lumberjack|building-v1-1#0 k0 10.5/15.8 v0.94 h0.00 yaw0.52 (-7.192349, -0.209694) | stroller|town#0 k0 0.8/13.5 v0.84 h0.00 yaw-1.14 (-7.727499, -0.242802)
+  sharp turn 1.94 rad: stroller|town#0 leg 2 at 2.58/10.76 (-15.1333, 0.761351)
+  sharp turn 0.91 rad: stroller|town#0 leg 2 at 2.61/10.76 (-15.10996, 0.763293)
+hall 1: min tree 6.35 m, geometry hits 0, footprint 0, water 0, wall 0, troops/sites 0, ground worst 0.025 m (0 >= 5 cm, 0 on frayed edges), heading worst 0.167 rad/frame, stride worst 0.0 % of 15508, close pairs 15 (longest 1.07 s), entries 10, loaded legs 8, update median 70 us p95 115 us (all 6 on screen)
+  closest pair: lumberjack|building-v1-1#0 (kind 0 10.5/15.8 v 0.94 hold 0.00, (-7.170371, -0.187547)) / stroller|town#0 (kind 0 0.8/13.5 v 0.84 hold 0.00, (-7.753072, -0.231098))
+hall 1: 4 sharp turns (> 0.5 rad in one frame) in 16075 walking frames
+hall 1 default view: 6 of 6 on screen, update median 122 us p95 201 us (evaluate 56, hold 6, pose 49 us per frame)
+hall 1 process time per frame: 1.918 ms with 6 people on screen, 1.042 ms without the townsfolk
+hall 1 lumberjack: 300 samples, nearest other trunk 1.33 m, building hits 0, ground worst 0.000 m
+plan: 63.4 ms over 10 frames { "g_streets": 189, "g_doors": 2402, "g_square": 106, "g_validate": 9943, "g_edges": 51, "graph": 29226, "plan": 899, "t_dense": 3921, "timelines": 32512 }
+hall 3: 10 people (lumberjack, farmer, carrier, smith, steward, messenger, stroller, stroller, stroller, stroller)
+  close 1.03 s: lumberjack|building-v1-1#0 k0 10.0/11.9 v0.94 h0.00 yaw2.08 (-7.377228, -0.561785) | stroller|town#1 k1 2.0/2.7 v0.00 h0.00 yaw1.34 (-7.79672, -0.509611)
+hall 3: min tree 1.56 m, geometry hits 0, footprint 0, water 0, wall 0, troops/sites 0, ground worst 0.010 m (0 >= 5 cm, 0 on frayed edges), heading worst 0.167 rad/frame, stride worst 0.0 % of 27291, close pairs 15 (longest 1.20 s), entries 19, loaded legs 16, update median 73 us p95 120 us (all 10 on screen)
+  closest pair: lumberjack|building-v1-1#0 (kind 0 10.1/11.9 v 0.94 hold 0.00, (-7.240583, -0.63803)) / stroller|town#1 (kind 1 2.2/2.7 v 0.00 hold 0.00, (-7.79672, -0.509611))
+hall 3: 0 sharp turns (> 0.5 rad in one frame) in 28054 walking frames
+hall 3 default view: 10 of 10 on screen, update median 139 us p95 220 us (evaluate 76, hold 7, pose 56 us per frame)
+hall 3 process time per frame: 3.441 ms with 10 people on screen, 1.968 ms without the townsfolk
+hall 3 lumberjack: 300 samples, nearest other trunk 1.09 m, building hits 0, ground worst 0.000 m
+hall 3 site: 1760 samples, 0 in the site area; site carrier ground worst 0.000 m, building hits 0
+plan: 144.5 ms over 22 frames { "g_streets": 337, "g_doors": 5230, "g_square": 417, "g_validate": 25476, "g_edges": 84, "graph": 62107, "plan": 1628, "t_dense": 11371, "timelines": 79736 }
+hall 5: 12 people (farmer, quarryman, carrier, smith, messenger, stroller, stroller, stroller, stroller, stroller, helper, resident)
+hall 5: 5 people left out (no free place at a stop)
+  left out: stroller|town#5 at square (slot 1, room -1.00)
+  left out: helper|building-v1-2#0 at RES-04 (slot 1, room 0.30)
+  left out: helper|building-v1-13#0 at ECO-01 (slot 3, room 1.85)
+  left out: healer|building-v1-9#0 at ECO-01 (slot 3, room 1.85)
+  left out: resident|building-v1-8#0 at ECO-04 (slot 3, room 1.85)
+  sharp turn 2.26 rad: stroller|town#1 leg 0 at 31.93/34.45 (23.92112, 17.79093)
+  sharp turn 0.59 rad: stroller|town#1 leg 0 at 31.95/34.45 (23.89414, 17.78992)
+  sharp turn -0.61 rad: stroller|town#2 leg 0 at 2.65/11.62 (-15.21, 0.939073)
+  sharp turn -1.14 rad: stroller|town#2 leg 0 at 2.68/11.62 (-15.21, 0.910766)
+hall 5: min tree 1.81 m, geometry hits 0, footprint 0, water 0, wall 0, troops/sites 0, ground worst 0.022 m (0 >= 5 cm, 0 on frayed edges), heading worst 0.167 rad/frame, stride worst 0.0 % of 35388, close pairs 9 (longest 0.67 s), entries 14, loaded legs 11, update median 147 us p95 222 us (all 12 on screen)
+  closest pair: stroller|town#1 (kind 0 10.9/43.0 v 0.81 hold 0.00, (18.16255, 3.676023)) / stroller|town#4 (kind 0 36.8/46.7 v 0.84 hold 0.00, (18.73962, 3.789407))
+hall 5: 50 sharp turns (> 0.5 rad in one frame) in 35919 walking frames
+hall 5 default view: 11 of 12 on screen, update median 183 us p95 252 us (evaluate 82, hold 11, pose 70 us per frame)
+hall 5 process time per frame: 3.062 ms with 11 people on screen, 2.774 ms without the townsfolk
+hall 5 lumberjack: 300 samples, nearest other trunk 1.10 m, building hits 0, ground worst 0.000 m
+solid triangles 29426
+hall 1 people=6 median_us=70 p95_us=115 close_longest=1.07 min_tree=6.35 ground_worst=0.025
+hall 1 default view: 6 on screen, update median 122 us
+hall 1 process 1.918 ms with, 1.042 ms without
+solid triangles 70614
+hall 3 people=10 median_us=73 p95_us=120 close_longest=1.20 min_tree=1.56 ground_worst=0.010
+hall 3 default view: 10 on screen, update median 139 us
+hall 3 process 3.441 ms with, 1.968 ms without
+solid triangles 59892
+solid triangles 143996
+hall 5 people=12 median_us=147 p95_us=222 close_longest=0.67 min_tree=1.81 ground_worst=0.022
+hall 5 default view: 11 on screen, update median 183 us
+hall 5 process 3.062 ms with, 2.774 ms without
+QA_TOWNSFOLK checks=70 failures=0

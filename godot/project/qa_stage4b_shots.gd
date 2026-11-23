@@ -323,6 +323,9 @@ func run() -> void:
 				rival.level = 7
 				rival.wallLevel = 3
 				rival.pvp = true
+				# A neighbour's spot east of the player's city (display only), not on top of it.
+				var spot: Dictionary = own.get("position", {"x": 0, "z": 0})
+				rival.position = {"x": float(spot.get("x", 0)) + 42.0, "z": float(spot.get("z", 0)) + 30.0}
 			if not rival.is_empty():
 				await timed("settlement_rival", func(): game.inspect_settlement(rival))
 				await shot("settlement_rival")

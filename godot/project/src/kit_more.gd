@@ -396,27 +396,49 @@ class CodePlate extends Control:
 ## A row of oak chips: [[icon Texture2D or null, text], ...]; for distances, times and
 ## coordinates on the world cards. One node.
 class ChipRow extends Control:
+	const LINE := 34.0
+	const LINE_GAP := 6.0
 	var chips: Array = []
 
 	func _init() -> void:
-		custom_minimum_size.y = 34
+		custom_minimum_size.y = LINE
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		resized.connect(fit)
 
-	func _draw() -> void:
+	## The pills in reading order at this width, [rect, line, chip]: a chip that does not fit
+	## goes to the next line (a distance after three rewards in a side window), never dropped.
+	func pills() -> Array:
+		var placed: Array = []
 		var x := 0.0
+		var y := 0.0
 		for chip: Array in chips:
 			var words := UiKit.KitText.line(str(chip[1]), UiKit.LABEL_FONT, 16)
 			var w := words.get_size().x + (54.0 if chip[0] != null else 28.0)
 			if x + w > size.x and x > 0.0:
-				break
-			var pill := Rect2(x, 2.0, w, size.y - 4.0)
-			draw_style_box(UiKit.nine("kit_pill", Vector4(18, 12, 18, 12), Vector4.ZERO), pill)
-			var tx := x + 14.0
-			if chip[0] != null:
-				draw_texture_rect(chip[0], Rect2(x + 10.0, pill.get_center().y - 11.0, 22, 22), false)
-				tx = x + 38.0
-			words.draw(get_canvas_item(), Vector2(tx, roundf(pill.get_center().y - words.get_size().y * 0.5)), UiKit.GOLD if chip.size() < 3 else chip[2])
+				x = 0.0
+				y += LINE + LINE_GAP
+			placed.append([Rect2(x, y + 2.0, w, LINE - 4.0), words, chip])
 			x += w + 10.0
+		return placed
+
+	## Height for the lines the chips take at the current width.
+	func fit() -> void:
+		var placed := pills()
+		var height := LINE if placed.is_empty() else (placed[-1][0] as Rect2).end.y + 2.0
+		if not is_equal_approx(custom_minimum_size.y, height):
+			custom_minimum_size.y = height
+		queue_redraw()
+
+	func _draw() -> void:
+		for entry: Array in pills():
+			var pill: Rect2 = entry[0]
+			var chip: Array = entry[2]
+			draw_style_box(UiKit.nine("kit_pill", Vector4(18, 12, 18, 12), Vector4.ZERO), pill)
+			var tx := pill.position.x + 14.0
+			if chip[0] != null:
+				draw_texture_rect(chip[0], Rect2(pill.position.x + 10.0, pill.get_center().y - 11.0, 22, 22), false)
+				tx = pill.position.x + 38.0
+			entry[1].draw(get_canvas_item(), Vector2(tx, roundf(pill.get_center().y - entry[1].get_size().y * 0.5)), UiKit.GOLD if chip.size() < 3 else chip[2])
 
 # ------------------------------------------------------------------ portrait card
 

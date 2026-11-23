@@ -15,6 +15,11 @@ extends SceneTree
 #     stride speed measured from the
 #     planted foot equals STRIDE_SPEED, and ground speed = playback x stride (within 10 %);
 #   - no two people closer than 0.6 m for more than MOMENT (1.5 s);
+#   - no stepping on the spot: nobody turns back (> 120 deg between two 0.15 m steps) twice
+#     within 2 m and 3 s, and nobody moves while standing at a stop (work, wait, talk);
+#   - one network: every door on one part of the walk graph (the plan's lanes joined round
+#     fences, corners and buildings that grew over them);
+#   - neighbours who meet stand at their two places at the same time (>= 3 s), facing;
 #   - CityWorks walkers (the lumberjack's approach, the site carrier) on the drawn ground and
 #     clear of trees and buildings;
 #   - update cost per frame (all people on screen, and the default view).
@@ -39,6 +44,8 @@ var capsule := CapsuleShape3D.new()
 var town_mesh: TriangleMesh
 var terrain: Array = []
 var report: Array = []
+## People on screen every 0.5 s of each view (written with --dump for the plots).
+var visible_series := {}
 
 func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
@@ -177,8 +184,14 @@ func mask_cover(x: float, z: float) -> float:
 
 ## The drawn ground under (x, z): the town ground where its shader keeps it, else the terrain
 ## (the higher one where both are there); NAN on the frayed edge where either may show.
-func drawn_ground(x: float, z: float) -> float:
+func drawn_ground(x: float, z: float, feet := NAN) -> float:
 	var best := -INF
+	if not is_nan(tf.floor_at(Vector2(x, z))) and not is_nan(feet) and is_instance_valid(solids):
+		# On the square a market draws: its paving (a ray down against the building meshes).
+		var query := PhysicsRayQueryParameters3D.create(Vector3(x, feet + 0.45, z), Vector3(x, feet - 0.6, z))
+		var hit := solids.get_world_3d().direct_space_state.intersect_ray(query)
+		if not hit.is_empty():
+			return hit.position.y
 	var cover := mask_cover(x, z)
 	if cover > 0.25 and cover < 0.75:
 		return NAN
@@ -210,7 +223,8 @@ func nearest_trunk(p: Vector2) -> float:
 
 func in_footprint_off_street(p: Vector2) -> bool:
 	for lot: Dictionary in stage.town_plan.lots:
-		if (lot.body as Rect2).has_point(p) and not tf.on_street_band(p):
+		# (The square a market draws inside its footprint is walked.)
+		if (lot.body as Rect2).has_point(p) and not tf.on_street_band(p) and is_nan(tf.floor_at(p)) and not tf.in_green_yard(p):
 			return true
 	return false
 
@@ -251,6 +265,89 @@ func wait_ready(seconds: float) -> bool:
 		await process_frame
 	return false
 
+## The walk graph: every door on one part; the street nodes too (the plan's lanes that a
+## fence end, a yard's corner, a gate's plinth or a building cut joined round them).
+func network_checks(label: String) -> void:
+	var door_parts := {}
+	for li in tf.door_node:
+		door_parts[tf.component[tf.door_node[li]]] = true
+	var street_parts := {}
+	for n: int in tf.street_nodes:
+		if n < tf.g_edges.size() and not tf.g_edges[n].is_empty():
+			street_parts[tf.component[n]] = int(street_parts.get(tf.component[n], 0)) + 1
+	var detours: Array = tf.bridges.map(func(b): return "%s-%s %.1f m" % [str(b[0]), str(b[1]), b[2]])
+	print("%s: %d doors on %d part(s), street nodes on %d part(s) %s, %d detours %s" % [label, tf.door_node.size(), door_parts.size(), street_parts.size(), str(street_parts.values()), detours.size(), str(detours)])
+	check(door_parts.size() == 1, "%s: the doors are on %d separate parts of the walk graph" % [label, door_parts.size()])
+	check(street_parts.size() == 1, "%s: the streets are cut in %d parts" % [label, street_parts.size()])
+	report.append("%s doors=%d door_parts=%d street_parts=%d detours=%d" % [label, tf.door_node.size(), door_parts.size(), street_parts.size(), detours.size()])
+	# Two people meeting never stand in the only way between two parts of the town: without
+	# their two places every door and every other place is still reached.
+	var cut_by := 0
+	for pair: Array in tf.meet_pairs:
+		var skip := {pair[0]: true, pair[1]: true}
+		var start: int = tf.door_node.values()[0]
+		var seen := {start: true}
+		var queue: Array = [start]
+		while not queue.is_empty():
+			var n: int = queue.pop_back()
+			for e: int in tf.g_edges[n]:
+				if not tf.e_live[e]:
+					continue
+				var m: int = tf.e_b[e] if tf.e_a[e] == n else tf.e_a[e]
+				if not seen.has(m) and not skip.has(m):
+					seen[m] = true
+					queue.append(m)
+		var lost: Array = []
+		for li in tf.door_node:
+			if tf.component[tf.door_node[li]] == tf.component[start] and not seen.has(tf.door_node[li]):
+				lost.append(tf.lot_base[li])
+		for n: int in tf.yard_spots:
+			if not skip.has(n) and n < tf.g_edges.size() and not tf.g_edges[n].is_empty() and tf.component[n] == tf.component[start] and not seen.has(n):
+				lost.append("%s %s" % [tf.place_kind.get(n, ""), str(tf.g_nodes[n])])
+		if not lost.is_empty():
+			cut_by += 1
+			print("  meeting places %s / %s are the only way to %s" % [str(tf.g_nodes[pair[0]]), str(tf.g_nodes[pair[1]]), str(lost)])
+	print("%s: %d meeting pairs, %d of them in the only way somewhere" % [label, tf.meet_pairs.size(), cut_by])
+	check(cut_by == 0, "%s: %d meeting pairs stand in the only way between parts of the town" % [label, cut_by])
+
+## Neighbours who meet: each pair (two people whose meeting places face each other) stands at
+## its places at the same time for >= 3 s, each facing the other (the plan's clocks, before
+## anyone is held back on the way).
+func meeting_checks(label: String) -> void:
+	var meeting: Array = tf.people.filter(func(p): return p.meet_phase >= 0)
+	var pairs := 0
+	for a in meeting:
+		for b in meeting:
+			if a.key >= b.key or a.spot_a[a.meet_phase].distance_to(b.spot_a[b.meet_phase]) > Townsfolk.MEET_HALF * 2.0 + 0.05:
+				continue
+			pairs += 1
+			var start: float = a.starts[a.meet_phase] - a.phase
+			var together := 0.0
+			var facing := true
+			var t := start - 2.0
+			while t < start + Townsfolk.MEET_DWELL + 2.0:
+				var da: float = a.delay
+				var db: float = b.delay
+				a.delay = 0.0
+				b.delay = 0.0
+				tf.evaluate(a, t)
+				tf.evaluate(b, t)
+				a.delay = da
+				b.delay = db
+				if a.index == a.meet_phase and b.index == b.meet_phase and a.kinds[a.index] == Townsfolk.K_DWELL and b.kinds[b.index] == Townsfolk.K_DWELL:
+					together += 0.1
+					if not a.turning and not b.turning:
+						var to_b: Vector2 = b.at - a.at
+						var look_a := Vector2(sin(a.want_yaw), cos(a.want_yaw))
+						var look_b := Vector2(sin(b.want_yaw), cos(b.want_yaw))
+						if look_a.dot(to_b.normalized()) < 0.85 or look_b.dot(-to_b.normalized()) < 0.85:
+							facing = false
+				t += 0.1
+			print("%s: %s and %s meet for %.1f s%s" % [label, a.key, b.key, together, "" if facing else " (not facing)"])
+			check(together >= 3.0 and facing, "%s: %s and %s stand together %.1f s, facing %s" % [label, a.key, b.key, together, str(facing)])
+	print("%s: %d meetings" % [label, pairs])
+	report.append("%s meetings=%d" % [label, pairs])
+
 func scenario(hall: int, expected: int) -> void:
 	await town(hall)
 	var label := "hall %d" % hall
@@ -264,6 +361,8 @@ func scenario(hall: int, expected: int) -> void:
 	for line in tf.left_out:
 		print("  left out: ", line)
 	tf.dropped_legs = 0
+	network_checks(label)
+	meeting_checks(label)
 	tf.simulate_all = true
 	var loaded: bool = await wait_ready(60.0)
 	check(loaded, "%s: models not loaded in 60 s" % label)
@@ -310,6 +409,22 @@ func scenario(hall: int, expected: int) -> void:
 	var prev_step := PackedVector2Array()
 	var sharp_turns := 0
 	var walk_frames := 0
+	# Stepping on the spot: the last 0.15 m step of each person and its last turn back.
+	var step_from := PackedVector2Array()
+	var step_dir := PackedVector2Array()
+	var back_t := PackedFloat64Array()
+	var back_at := PackedVector2Array()
+	var reversals := 0
+	var jitter := 0
+	var drift := 0
+	var drift_worst := 0.0
+	step_from.resize(count)
+	step_dir.resize(count)
+	back_t.resize(count)
+	back_t.fill(-100.0)
+	back_at.resize(count)
+	var tracked := PackedByteArray()
+	tracked.resize(count)
 	prev_walked.resize(count)
 	prev_step.resize(count)
 	prev_v.resize(count)
@@ -355,6 +470,31 @@ func scenario(hall: int, expected: int) -> void:
 						stride_fail += 1
 						if stride_fail <= 3:
 							print("  stride %.2f: %s kind %d local %.2f/%.2f v %.2f hold %.2f rate %.2f at %s" % [ratio, p.key, p.kinds[p.index], p.local, p.lengths[p.index], p.v, p.hold, p.rig.player.speed_scale, str(p.pos)])
+			if p.shown and p.alpha >= 0.5:
+				if tracked[i] == 0:
+					tracked[i] = 1
+					step_from[i] = p.pos
+					step_dir[i] = Vector2.ZERO
+				else:
+					var moved_step: Vector2 = p.pos - step_from[i]
+					if moved_step.length() >= 0.15:
+						if step_dir[i] != Vector2.ZERO and absf(moved_step.angle_to(step_dir[i])) > 2.094:
+							reversals += 1
+							if t - back_t[i] < 3.0 and p.pos.distance_to(back_at[i]) < 2.0:
+								jitter += 1
+								if jitter <= 5:
+									print("  turned back twice in %.2f s, %.2f m: %s kind %d leg %d at %s" % [t - back_t[i], p.pos.distance_to(back_at[i]), p.key, p.kinds[p.index], p.leg[p.index], str(p.pos)])
+							back_t[i] = t
+							back_at[i] = p.pos
+						step_dir[i] = moved_step
+						step_from[i] = p.pos
+				if p.kinds[p.index] == Townsfolk.K_DWELL and prev_index[i] == p.index and prev_shown[i] == 1:
+					var still: float = p.pos.distance_to(prev_at[i])
+					drift_worst = maxf(drift_worst, still)
+					if still > 0.001:
+						drift += 1
+			else:
+				tracked[i] = 0
 			prev_shown[i] = 1 if visible else 0
 			prev_v[i] = p.v if p.walking else 0.0
 			prev_walked[i] = p.walked
@@ -384,6 +524,8 @@ func scenario(hall: int, expected: int) -> void:
 						geometry_at.append("%s %s %s" % [p.key, str(at2), last_hit])
 				if in_footprint_off_street(at2):
 					footprint_hits += 1
+					if footprint_hits <= 3:
+						print("  in a footprint at %s (%s kind %d)" % [str(at2), p.key, p.kinds[p.index]])
 				if stage.sample_city(at2.x, at2.y) < -0.25:
 					water_hits += 1
 				if stage.walls.visible and not stage.walls.inside(at2.x, at2.y, 0.5):
@@ -391,7 +533,7 @@ func scenario(hall: int, expected: int) -> void:
 				for rect: Rect2 in district_rects:
 					if rect.has_point(at2):
 						blocked_hits += 1
-				var ground := drawn_ground(at2.x, at2.y)
+				var ground := drawn_ground(at2.x, at2.y, feet.y)
 				if is_nan(ground):
 					ground_skipped += 1
 					ground = feet.y
@@ -447,13 +589,19 @@ func scenario(hall: int, expected: int) -> void:
 	check(sharp_turns * 500 <= walk_frames, "%s: %d sharp turns of the walked line in %d walking frames" % [label, sharp_turns, walk_frames])
 	check(stride_samples > 100 and stride_fail == 0, "%s: ground speed differs from the stride by %.1f %% (%d of %d)" % [label, stride_worst * 100.0, stride_fail, stride_samples])
 	check(worst_close <= MOMENT, "%s: two people closer than 0.6 m for %.2f s" % [label, worst_close])
+	print("%s: %d turns back (> 120 deg between 0.15 m steps), %d twice within 2 m / 3 s; standing: %d frames moved (worst %.4f m)" % [label, reversals, jitter, drift, drift_worst])
+	check(jitter == 0, "%s: %d times someone turned back twice within 2 m and 3 s (stepping on the spot)" % [label, jitter])
+	check(drift == 0, "%s: %d frames someone standing at a stop moved (up to %.4f m)" % [label, drift, drift_worst])
+	report.append("%s turns_back=%d twice_2m_3s=%d standing_moved=%d" % [label, reversals, jitter, drift])
 	check(inside_count >= 2, "%s: nobody went in through a door (%d)" % [label, inside_count])
 	check(prop_legs >= 1 or hall == 1, "%s: nobody carried a load" % label)
-	check(median < 200, "%s: townsfolk update median %d us (all on screen)" % [label, median])
+	# Everybody evaluated and posed every frame (the worst case): 15 us a person.
+	check(median < 15 * count, "%s: townsfolk update median %d us with all %d on screen (budget %d)" % [label, median, count, 15 * count])
 	report.append("%s people=%d median_us=%d p95_us=%d close_longest=%.2f min_tree=%.2f ground_worst=%.3f" % [label, count, median, p95, worst_close, min_tree, ground_worst])
 	if not dump_dir.is_empty():
 		write_dump(hall, trails)
 	await default_view_cost(label)
+	await visible_counts(label)
 	await works_checks(label)
 	if hall == 3:
 		await site_checks(label)
@@ -515,27 +663,67 @@ func site_checks(label: String) -> void:
 	stage.works.present({}, {}, timer, 0.03)
 
 ## Real frames at the default zoom: what an off-screen person costs (no AnimationPlayer).
+## Skeletons posed and triangles drawn by the people on screen now.
+func on_screen_load() -> Vector2i:
+	var skeletons := 0
+	var triangles := 0
+	for p in tf.people:
+		if not p.shown or p.rig == null:
+			continue
+		skeletons += 1
+		for mesh in p.rig.lods[p.lod]:
+			if is_instance_valid(mesh) and mesh.mesh != null:
+				triangles += mesh_triangles(mesh.mesh)
+	return Vector2i(skeletons, triangles)
+
+var triangle_cache := {}
+
+func mesh_triangles(mesh: Mesh) -> int:
+	if not triangle_cache.has(mesh):
+		var total := 0
+		for surface in mesh.get_surface_count():
+			var arrays := mesh.surface_get_arrays(surface)
+			var indices: Variant = arrays[Mesh.ARRAY_INDEX]
+			total += (indices as PackedInt32Array).size() / 3 if indices is PackedInt32Array and not (indices as PackedInt32Array).is_empty() else (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+		triangle_cache[mesh] = total
+	return triangle_cache[mesh]
+
+## The player's first view of the city (zoom 70 at the start target): the townsfolk's update
+## (script; budget at hall V: median <= 0.30 ms, p95 <= 0.45 ms), the AnimationPlayers advanced
+## at ANIM_FAR_HZ (measured apart), and the engine's whole process time with and without them.
 func default_view_cost(label: String) -> void:
 	tf.simulate_all = false
-	stage.target = Vector3(-3, 0, 0)
+	stage.target = Vector3(5, 0, -4)
 	stage.zoom = 70.0
 	stage.update_camera(0, true)
 	await frames(3)
 	tf.update_samples = PackedInt32Array()
+	tf.anim_samples = PackedInt32Array()
 	tf.section_usec = PackedInt64Array([0, 0, 0])
-	for i in 150:
+	for i in 300:
 		tf.present(Time.get_unix_time_from_system())
 		await process_frame
 	var shown := 0
 	for p in tf.people:
 		if p.shown:
 			shown += 1
+	var load := on_screen_load()
 	var costs := Array(tf.update_samples)
 	costs.sort()
+	var anim := Array(tf.anim_samples)
+	anim.sort()
+	var anim_mean := 0.0
+	for a in anim:
+		anim_mean += a
+	anim_mean /= maxf(1.0, anim.size())
 	var sections: PackedInt64Array = tf.section_usec
-	print("%s default view: %d of %d on screen, update median %d us p95 %d us (evaluate %d, hold %d, pose %d us per frame)" % [label, shown, tf.people.size(),
-		costs[costs.size() / 2], costs[int(costs.size() * 0.95)], sections[0] / costs.size(), sections[1] / costs.size(), sections[2] / costs.size()])
-	report.append("%s default view: %d on screen, update median %d us" % [label, shown, costs[costs.size() / 2]])
+	var median: int = costs[costs.size() / 2]
+	var p95: int = costs[int(costs.size() * 0.95)]
+	print("%s default view: %d of %d on screen (%d skeletons, %d triangles), update median %d us p95 %d us (evaluate %d, hold %d, pose %d us per frame); animation (manual %s, %.0f Hz) mean %.0f us p95 %d us per frame" % [label, shown, tf.people.size(),
+		load.x, load.y, median, p95, sections[0] / costs.size(), sections[1] / costs.size(), sections[2] / costs.size(), str(tf.anim_manual), Townsfolk.ANIM_FAR_HZ, anim_mean, anim[int(anim.size() * 0.95)]])
+	report.append("%s default view: %d on screen, update median %d us p95 %d us, animation mean %.0f us" % [label, shown, median, p95, anim_mean])
+	if label == "hall 5":
+		check(median <= 300 and p95 <= 450, "%s default view: townsfolk update median %d us p95 %d us (budget 300 / 450)" % [label, median, p95])
 	# Engine side (AnimationPlayer, skeletons, transforms) of the people on screen: the frame's
 	# process time with them, and with the townsfolk node switched off.
 	var with_people := 0.0
@@ -564,7 +752,95 @@ func default_view_cost(label: String) -> void:
 		if p.rig != null and (p.rig.visible or p.rig.process_mode != Node.PROCESS_MODE_DISABLED and p.ready):
 			active += 1
 	check(active == 0, "%s: %d people still animated off screen" % [label, active])
-	stage.target = Vector3(-3, 0, 0)
+	stage.target = Vector3(5, 0, -4)
+	stage.update_camera(0, true)
+
+## A point hidden from the camera by a building (a ray towards the camera hits its meshes).
+func hidden_by_building(at: Vector3) -> bool:
+	if not is_instance_valid(solids):
+		return false
+	var back: Vector3 = stage.camera.global_transform.basis.z
+	var query := PhysicsRayQueryParameters3D.create(at, at + back * 150.0)
+	return not solids.get_world_3d().direct_space_state.intersect_ray(query).is_empty()
+
+## How many people a player sees: 120 s on the clock at 30 Hz with the camera still, at the
+## default view (zoom 70 at the start target) and close up (zoom 34, as a tap on a building
+## zooms) over the hall square, the warehouse, the market, the farm and the lumber camp.
+## Counted: in the camera frustum, not inside a building (alpha >= 0.5); and of those, the ones
+## no building hides (a ray from the chest to the camera), every 0.5 s (the series, --dump).
+func visible_counts(label: String) -> void:
+	var views: Array = [["default z70", Vector3(5, 0, -4), 70.0]]
+	for type in ["ECO-05", "ECO-01", "ECO-03", "RES-04", "RES-01"]:
+		for marker: Dictionary in stage.place_markers:
+			if marker.get("kind", "") == "building" and str(marker.item.get("type", "")) == type:
+				views.append(["%s z34" % type, marker.position - Vector3.UP * 5.0 + Vector3(0, 0, 4), 34.0])
+				break
+	tf.simulate_all = false
+	var camera: Camera3D = stage.camera
+	var close_sum := 0.0
+	var close_frames := 0
+	var close_min := 1000
+	for view: Array in views:
+		stage.target = view[1]
+		stage.zoom = view[2]
+		stage.update_camera(0, true)
+		await frames(2)
+		var start := 1794380000.0
+		var low := 1000
+		var high := 0
+		var total := 0
+		var steps := int(SECONDS / DT)
+		var series := PackedInt32Array()
+		var load_sum := Vector2i.ZERO
+		var load_max := Vector2i.ZERO
+		var open_total := 0
+		var open_low := 1000
+		var near_series := PackedInt32Array()
+		var centre := Vector2(float(view[1].x), float(view[1].z))
+		for step in steps:
+			tf.present(start + step * DT)
+			var seen := 0
+			var open := 0
+			var near := 0
+			for p in tf.people:
+				if p.alpha >= 0.5 and camera.is_position_in_frustum(Vector3(p.pos.x, p.y + 0.9, p.pos.y)):
+					seen += 1
+					if step % 15 == 0 and not hidden_by_building(Vector3(p.pos.x, p.y + 1.0, p.pos.y)):
+						open += 1
+						if p.pos.distance_to(centre) < 15.0:
+							near += 1
+			low = mini(low, seen)
+			high = maxi(high, seen)
+			total += seen
+			if step % 15 == 0:
+				series.append(open)
+				near_series.append(near)
+				open_total += open
+				open_low = mini(open_low, open)
+				var load := on_screen_load()
+				load_sum += load
+				load_max = Vector2i(maxi(load_max.x, load.x), maxi(load_max.y, load.y))
+		var mean := float(total) / steps
+		var samples := maxi(1, series.size())
+		var near_low := 1000
+		var near_sum := 0
+		for v in near_series:
+			near_low = mini(near_low, v)
+			near_sum += v
+		print("%s visible %s: min %d mean %.1f max %d of %d in the frame; not behind a building min %d mean %.1f; of those within 15 m of the view's centre min %d mean %.1f; skeletons mean %.1f max %d, triangles mean %d max %d" % [label, view[0], low, mean, high, tf.people.size(),
+			open_low, float(open_total) / samples, near_low, float(near_sum) / samples, float(load_sum.x) / samples, load_max.x, load_sum.y / samples, load_max.y])
+		visible_series["%s %s" % [label, view[0]]] = Array(series)
+		visible_series["%s %s near" % [label, view[0]]] = Array(near_series)
+		if view[2] < 50.0:
+			close_sum += open_total
+			close_frames += samples
+			close_min = mini(close_min, open_low)
+		else:
+			report.append("%s visible z70 min %d mean %.1f (in the frame), %d / %.1f not behind a building" % [label, low, mean, open_low, float(open_total) / samples])
+	if close_frames > 0:
+		report.append("%s visible z34 (5 views, not behind a building) min %d mean %.1f" % [label, close_min, close_sum / close_frames])
+	stage.target = Vector3(5, 0, -4)
+	stage.zoom = 70.0
 	stage.update_camera(0, true)
 
 ## CityWorks: the lumberjack's walk to a tree and the site carrier's walk stay on the drawn
@@ -665,9 +941,13 @@ func run() -> void:
 	while not stage.attach_townsfolk():
 		await process_frame
 	tf = stage.townsfolk
-	await scenario(1, 6)
-	await scenario(3, 9)
-	await scenario(5, 12)
+	await scenario(1, 8)
+	await scenario(3, 14)
+	await scenario(5, 20)
+	if not dump_dir.is_empty():
+		var file := FileAccess.open(dump_dir.path_join("townsfolk_visible.json"), FileAccess.WRITE)
+		file.store_string(JSON.stringify(visible_series))
+		file.close()
 	for line in report:
 		print(line)
 	print("QA_TOWNSFOLK checks=%d failures=%d" % [checks, failures])

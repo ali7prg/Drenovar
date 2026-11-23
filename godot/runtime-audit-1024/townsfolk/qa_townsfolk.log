@@ -1,57 +1,111 @@
 Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
-plan: 50.2 ms over 5 frames { "g_streets": 71, "g_doors": 1234, "g_square": 321, "g_validate": 3958, "g_edges": 29, "graph": 34610, "plan": 950, "t_dense": 2040, "timelines": 12208 }
-hall 1: 6 people (lumberjack, farmer, steward, messenger, stroller, stroller)
+
+plan: 66.7 ms over 8 frames { "g_streets": 141, "g_doors": 1433, "g_square": 466, "g_validate": 5889, "g_edges": 46, "g_bridge": 21, "g_places": 1549, "graph": 41351, "plan": 1235, "t_dense": 4305, "timelines": 20812 }
+hall 1: 8 people (lumberjack, farmer, neighbour, neighbour, steward, stroller, messenger, stroller)
+hall 1: 4 doors on 1 part(s), street nodes on 1 part(s) [8], 0 detours []
+hall 1: 1 meeting pairs, 0 of them in the only way somewhere
+hall 1: neighbour|building-v1-1#0 and neighbour|building-v1-2#0 meet for 5.5 s
+hall 1: 1 meetings
 stride: walk 1.1940 m/s (STRIDE_SPEED 1.193), loaded 0.9434 m/s (0.944)
-  sharp turn 2.58 rad: stroller|town#0 leg 2 at 2.60/10.76 (-15.12047, 0.762661)
-  sharp turn 2.54 rad: stroller|town#0 leg 2 at 2.60/10.76 (-15.11896, 0.762752)
-  close 1.03 s: lumberjack|building-v1-1#0 k0 10.5/15.8 v0.94 h0.00 yaw0.52 (-7.192349, -0.209694) | stroller|town#0 k0 0.8/13.5 v0.84 h0.00 yaw-1.14 (-7.727499, -0.242802)
-  sharp turn 1.94 rad: stroller|town#0 leg 2 at 2.58/10.76 (-15.1333, 0.761351)
-  sharp turn 0.91 rad: stroller|town#0 leg 2 at 2.61/10.76 (-15.10996, 0.763293)
-hall 1: min tree 6.35 m, geometry hits 0, footprint 0, water 0, wall 0, troops/sites 0, ground worst 0.025 m (0 >= 5 cm, 0 on frayed edges), heading worst 0.167 rad/frame, stride worst 0.0 % of 15508, close pairs 15 (longest 1.07 s), entries 10, loaded legs 8, update median 70 us p95 115 us (all 6 on screen)
-  closest pair: lumberjack|building-v1-1#0 (kind 0 10.5/15.8 v 0.94 hold 0.00, (-7.170371, -0.187547)) / stroller|town#0 (kind 0 0.8/13.5 v 0.84 hold 0.00, (-7.753072, -0.231098))
-hall 1: 4 sharp turns (> 0.5 rad in one frame) in 16075 walking frames
-hall 1 default view: 6 of 6 on screen, update median 122 us p95 201 us (evaluate 56, hold 6, pose 49 us per frame)
-hall 1 process time per frame: 1.918 ms with 6 people on screen, 1.042 ms without the townsfolk
-hall 1 lumberjack: 300 samples, nearest other trunk 1.33 m, building hits 0, ground worst 0.000 m
-plan: 63.4 ms over 10 frames { "g_streets": 189, "g_doors": 2402, "g_square": 106, "g_validate": 9943, "g_edges": 51, "graph": 29226, "plan": 899, "t_dense": 3921, "timelines": 32512 }
-hall 3: 10 people (lumberjack, farmer, carrier, smith, steward, messenger, stroller, stroller, stroller, stroller)
-  close 1.03 s: lumberjack|building-v1-1#0 k0 10.0/11.9 v0.94 h0.00 yaw2.08 (-7.377228, -0.561785) | stroller|town#1 k1 2.0/2.7 v0.00 h0.00 yaw1.34 (-7.79672, -0.509611)
-hall 3: min tree 1.56 m, geometry hits 0, footprint 0, water 0, wall 0, troops/sites 0, ground worst 0.010 m (0 >= 5 cm, 0 on frayed edges), heading worst 0.167 rad/frame, stride worst 0.0 % of 27291, close pairs 15 (longest 1.20 s), entries 19, loaded legs 16, update median 73 us p95 120 us (all 10 on screen)
-  closest pair: lumberjack|building-v1-1#0 (kind 0 10.1/11.9 v 0.94 hold 0.00, (-7.240583, -0.63803)) / stroller|town#1 (kind 1 2.2/2.7 v 0.00 hold 0.00, (-7.79672, -0.509611))
-hall 3: 0 sharp turns (> 0.5 rad in one frame) in 28054 walking frames
-hall 3 default view: 10 of 10 on screen, update median 139 us p95 220 us (evaluate 76, hold 7, pose 56 us per frame)
-hall 3 process time per frame: 3.441 ms with 10 people on screen, 1.968 ms without the townsfolk
-hall 3 lumberjack: 300 samples, nearest other trunk 1.09 m, building hits 0, ground worst 0.000 m
-hall 3 site: 1760 samples, 0 in the site area; site carrier ground worst 0.000 m, building hits 0
-plan: 144.5 ms over 22 frames { "g_streets": 337, "g_doors": 5230, "g_square": 417, "g_validate": 25476, "g_edges": 84, "graph": 62107, "plan": 1628, "t_dense": 11371, "timelines": 79736 }
-hall 5: 12 people (farmer, quarryman, carrier, smith, messenger, stroller, stroller, stroller, stroller, stroller, helper, resident)
-hall 5: 5 people left out (no free place at a stop)
-  left out: stroller|town#5 at square (slot 1, room -1.00)
+  sharp turn -0.55 rad: steward|building-v1-0#0 leg 1 at 28.62/29.39 (-14.70008, 0.237275)
+  close 1.03 s: neighbour|building-v1-1#0 k1 2.7/3.4 v0.00 h0.00 yaw-1.52 (-12.61, 0.38) | steward|building-v1-0#0 k0 2.2/10.0 v0.94 h0.19 yaw1.24 (-12.08266, 0.360224)
+  sharp turn -0.60 rad: steward|building-v1-0#0 leg 1 at 28.62/29.39 (-14.7008, 0.240376)
+hall 1: min tree 5.45 m, geometry hits 0, footprint 0, water 0, wall 0, troops/sites 0, ground worst 0.032 m (0 >= 5 cm, 0 on frayed edges), heading worst 0.167 rad/frame, stride worst 0.0 % of 18584, close pairs 27 (longest 1.10 s), entries 18, loaded legs 5, update median 70 us p95 120 us (all 8 on screen)
+  closest pair: neighbour|building-v1-1#0 (kind 1 2.8/3.4 v 0.00 hold 0.00, (-12.61, 0.38)) / steward|building-v1-0#0 (kind 0 2.3/10.0 v 0.94 hold 0.19, (-12.02348, 0.380614))
+hall 1: 2 sharp turns (> 0.5 rad in one frame) in 19425 walking frames
+hall 1: 26 turns back (> 120 deg between 0.15 m steps), 0 twice within 2 m / 3 s; standing: 0 frames moved (worst 0.0000 m)
+hall 1 default view: 8 of 8 on screen (8 skeletons, 17062 triangles), update median 90 us p95 159 us (evaluate 35, hold 3, pose 40 us per frame); animation (manual true, 20 Hz) mean 28 us p95 89 us per frame
+hall 1 process time per frame: 1.014 ms with 8 people on screen, 1.141 ms without the townsfolk
+hall 1 visible default z70: min 5 mean 7.1 max 8 of 8 in the frame; not behind a building min 4 mean 6.4; of those within 15 m of the view's centre min 3 mean 5.4; skeletons mean 7.2 max 8, triangles mean 15400 max 17062
+hall 1 visible ECO-05 z34: min 5 mean 7.2 max 8 of 8 in the frame; not behind a building min 4 mean 6.4; of those within 15 m of the view's centre min 3 mean 6.2; skeletons mean 7.2 max 8, triangles mean 42071 max 46610
+hall 1 visible RES-04 z34: min 5 mean 7.2 max 8 of 8 in the frame; not behind a building min 4 mean 6.4; of those within 15 m of the view's centre min 3 mean 5.1; skeletons mean 7.2 max 8, triangles mean 42071 max 46610
+hall 1 visible RES-01 z34: min 5 mean 7.2 max 8 of 8 in the frame; not behind a building min 4 mean 6.4; of those within 15 m of the view's centre min 0 mean 3.4; skeletons mean 7.2 max 8, triangles mean 42071 max 46610
+hall 1 lumberjack: 300 samples, nearest other trunk 1.27 m, building hits 0, ground worst 0.000 m
+plan: 258.1 ms over 36 frames { "g_streets": 258, "g_doors": 2393, "g_square": 2539, "g_validate": 14642, "g_edges": 68, "g_bridge": 80370, "g_places": 9981, "graph": 129742, "plan": 7323, "t_dense": 44317, "timelines": 117903 }
+hall 3: 14 people (lumberjack, farmer, neighbour, neighbour, steward, stroller, messenger, carrier, merchant, smith, petitioner, stroller, neighbour, neighbour)
+hall 3: 1 people left out (no free place at a stop)
+  left out: petitioner|building-v1-4#0 at ECO-01 (slot 5, room 2.26)
+hall 3: 8 doors on 1 part(s), street nodes on 1 part(s) [22], 1 detours ["(-15.21, 0.95)-(-19.275, 16.95) 25.4 m"]
+hall 3: 2 meeting pairs, 0 of them in the only way somewhere
+hall 3: neighbour|building-v1-4#0 and neighbour|building-v1-7#0 meet for 5.5 s
+hall 3: neighbour|building-v1-1#0 and neighbour|building-v1-3#0 meet for 5.5 s
+hall 3: 2 meetings
+  sharp turn 1.80 rad: neighbour|building-v1-4#0 leg 0 at 1.14/33.16 (-19.23868, 18.03995)
+  sharp turn 0.79 rad: neighbour|building-v1-4#0 leg 0 at 6.47/33.16 (-14.11959, 16.59795)
+  sharp turn -0.53 rad: neighbour|building-v1-4#0 leg 0 at 24.36/33.16 (-8.521561, 0.214605)
+  sharp turn -1.33 rad: neighbour|building-v1-4#0 leg 0 at 27.90/33.16 (-5.061223, -0.269361)
+hall 3: min tree 1.53 m, geometry hits 0, footprint 0, water 0, wall 0, troops/sites 0, ground worst 0.009 m (0 >= 5 cm, 0 on frayed edges), heading worst 0.167 rad/frame, stride worst 0.0 % of 40908, close pairs 17 (longest 0.70 s), entries 14, loaded legs 4, update median 128 us p95 201 us (all 14 on screen)
+  closest pair: steward|building-v1-0#0 (kind 0 110.3/129.2 v 1.16 hold 0.00, (8.427814, -13.01398)) / neighbour|building-v1-3#0 (kind 0 4.0/72.3 v 1.20 hold 0.00, (8.710287, -12.52109))
+hall 3: 10 sharp turns (> 0.5 rad in one frame) in 41248 walking frames
+hall 3: 16 turns back (> 120 deg between 0.15 m steps), 0 twice within 2 m / 3 s; standing: 0 frames moved (worst 0.0000 m)
+hall 3 default view: 14 of 14 on screen (14 skeletons, 29861 triangles), update median 104 us p95 191 us (evaluate 46, hold 6, pose 48 us per frame); animation (manual true, 20 Hz) mean 46 us p95 171 us per frame
+hall 3 process time per frame: 2.198 ms with 14 people on screen, 1.612 ms without the townsfolk
+hall 3 visible default z70: min 11 mean 13.1 max 14 of 14 in the frame; not behind a building min 10 mean 12.3; of those within 15 m of the view's centre min 0 mean 1.5; skeletons mean 13.2 max 14, triangles mean 28083 max 29861
+hall 3 visible ECO-05 z34: min 9 mean 11.6 max 14 of 14 in the frame; not behind a building min 8 mean 10.9; of those within 15 m of the view's centre min 0 mean 1.6; skeletons mean 11.6 max 14, triangles mean 67791 max 81698
+hall 3 visible ECO-01 z34: min 8 mean 10.0 max 13 of 14 in the frame; not behind a building min 6 mean 9.3; of those within 15 m of the view's centre min 1 mean 3.5; skeletons mean 10.0 max 13, triangles mean 58571 max 75879
+hall 3 visible ECO-03 z34: min 10 mean 12.4 max 14 of 14 in the frame; not behind a building min 9 mean 11.5; of those within 15 m of the view's centre min 3 mean 4.9; skeletons mean 12.4 max 14, triangles mean 72406 max 81698
+hall 3 visible RES-04 z34: min 10 mean 13.0 max 14 of 14 in the frame; not behind a building min 10 mean 12.2; of those within 15 m of the view's centre min 0 mean 2.3; skeletons mean 13.1 max 14, triangles mean 76164 max 81698
+hall 3 visible RES-01 z34: min 4 mean 8.0 max 11 of 14 in the frame; not behind a building min 4 mean 7.3; of those within 15 m of the view's centre min 0 mean 1.4; skeletons mean 8.0 max 11, triangles mean 46771 max 64241
+hall 3 lumberjack: 300 samples, nearest other trunk 1.47 m, building hits 0, ground worst 0.000 m
+hall 3 site: 2744 samples, 0 in the site area; site carrier ground worst 0.000 m, building hits 0
+plan: 368.6 ms over 41 frames { "g_streets": 401, "g_doors": 5211, "g_square": 2817, "g_validate": 29122, "g_edges": 100, "g_bridge": 53382, "g_places": 47570, "graph": 173515, "plan": 35058, "t_dense": 47627, "timelines": 153679 }
+hall 5: 20 people (lumberjack, farmer, neighbour, neighbour, steward, stroller, messenger, carrier, merchant, smith, water carrier, petitioner, petitioner, stroller, neighbour, neighbour, quarryman, stroller, helper, helper)
+hall 5: 2 people left out (no free place at a stop)
   left out: helper|building-v1-2#0 at RES-04 (slot 1, room 0.30)
-  left out: helper|building-v1-13#0 at ECO-01 (slot 3, room 1.85)
-  left out: healer|building-v1-9#0 at ECO-01 (slot 3, room 1.85)
-  left out: resident|building-v1-8#0 at ECO-04 (slot 3, room 1.85)
-  sharp turn 2.26 rad: stroller|town#1 leg 0 at 31.93/34.45 (23.92112, 17.79093)
-  sharp turn 0.59 rad: stroller|town#1 leg 0 at 31.95/34.45 (23.89414, 17.78992)
-  sharp turn -0.61 rad: stroller|town#2 leg 0 at 2.65/11.62 (-15.21, 0.939073)
-  sharp turn -1.14 rad: stroller|town#2 leg 0 at 2.68/11.62 (-15.21, 0.910766)
-hall 5: min tree 1.81 m, geometry hits 0, footprint 0, water 0, wall 0, troops/sites 0, ground worst 0.022 m (0 >= 5 cm, 0 on frayed edges), heading worst 0.167 rad/frame, stride worst 0.0 % of 35388, close pairs 9 (longest 0.67 s), entries 14, loaded legs 11, update median 147 us p95 222 us (all 12 on screen)
-  closest pair: stroller|town#1 (kind 0 10.9/43.0 v 0.81 hold 0.00, (18.16255, 3.676023)) / stroller|town#4 (kind 0 36.8/46.7 v 0.84 hold 0.00, (18.73962, 3.789407))
-hall 5: 50 sharp turns (> 0.5 rad in one frame) in 35919 walking frames
-hall 5 default view: 11 of 12 on screen, update median 183 us p95 252 us (evaluate 82, hold 11, pose 70 us per frame)
-hall 5 process time per frame: 3.062 ms with 11 people on screen, 2.774 ms without the townsfolk
-hall 5 lumberjack: 300 samples, nearest other trunk 1.10 m, building hits 0, ground worst 0.000 m
+  left out: helper|building-v1-4#0 at ECO-01 (slot 5, room 1.85)
+hall 5: 14 doors on 1 part(s), street nodes on 1 part(s) [38], 2 detours ["(10.445, 31.65)-(16.09, 19.595) 18.8 m", "(-4.8, 16.86)-(-9.240001, 1.1) 21.3 m"]
+hall 5: 3 meeting pairs, 0 of them in the only way somewhere
+hall 5: neighbour|building-v1-12#0 and neighbour|building-v1-7#0 meet for 5.5 s
+hall 5: neighbour|building-v1-13#0 and neighbour|building-v1-4#0 meet for 5.5 s
+hall 5: 2 meetings
+  sharp turn 1.30 rad: lumberjack|building-v1-1#0 leg 1 at 21.79/50.83 (-11.10049, 14.625)
+  sharp turn -0.53 rad: lumberjack|building-v1-1#0 leg 1 at 28.52/50.83 (-4.8, 16.87399)
+  sharp turn -0.67 rad: lumberjack|building-v1-1#0 leg 1 at 28.55/50.83 (-4.8, 16.90528)
+  sharp turn -1.05 rad: lumberjack|building-v1-1#0 leg 1 at 32.52/50.83 (-4.81982, 20.86)
+  close 1.03 s: petitioner|building-v1-7#0 k0 88.5/107.8 v1.09 h0.00 yaw-1.94 (-7.967979, 15.64447) | petitioner|building-v1-13#0 k1 0.8/2.8 v0.00 h0.00 yaw3.04 (-7.4, 15.66)
+hall 5: min tree 1.04 m, geometry hits 0, footprint 0, water 0, wall 0, troops/sites 0, ground worst 0.019 m (0 >= 5 cm, 5 on frayed edges), heading worst 0.167 rad/frame, stride worst 0.1 % of 59781, close pairs 48 (longest 1.03 s), entries 15, loaded legs 14, update median 206 us p95 287 us (all 20 on screen)
+  closest pair: petitioner|building-v1-7#0 (kind 0 88.5/107.8 v 1.09 hold 0.00, (-7.967979, 15.64447)) / petitioner|building-v1-13#0 (kind 1 0.8/2.8 v 0.00 hold 0.00, (-7.4, 15.66))
+hall 5: 17 sharp turns (> 0.5 rad in one frame) in 60323 walking frames
+hall 5: 28 turns back (> 120 deg between 0.15 m steps), 0 twice within 2 m / 3 s; standing: 0 frames moved (worst 0.0000 m)
+hall 5 default view: 17 of 20 on screen (17 skeletons, 36261 triangles), update median 160 us p95 315 us (evaluate 70, hold 12, pose 78 us per frame); animation (manual true, 20 Hz) mean 58 us p95 200 us per frame
+hall 5 process time per frame: 2.005 ms with 17 people on screen, 1.391 ms without the townsfolk
+hall 5 visible default z70: min 18 mean 19.4 max 20 of 20 in the frame; not behind a building min 14 mean 17.9; of those within 15 m of the view's centre min 0 mean 1.6; skeletons mean 19.5 max 20, triangles mean 41532 max 42661
+hall 5 visible ECO-05 z34: min 10 mean 14.3 max 18 of 20 in the frame; not behind a building min 10 mean 12.9; of those within 15 m of the view's centre min 0 mean 1.7; skeletons mean 14.3 max 18, triangles mean 83280 max 105032
+hall 5 visible ECO-01 z34: min 10 mean 13.1 max 17 of 20 in the frame; not behind a building min 9 mean 12.1; of those within 15 m of the view's centre min 2 mean 4.8; skeletons mean 13.1 max 17, triangles mean 76740 max 99213
+hall 5 visible ECO-03 z34: min 15 mean 18.3 max 20 of 20 in the frame; not behind a building min 12 mean 16.8; of those within 15 m of the view's centre min 3 mean 6.3; skeletons mean 18.3 max 20, triangles mean 106702 max 116728
+hall 5 visible RES-04 z34: min 15 mean 18.3 max 20 of 20 in the frame; not behind a building min 13 mean 16.9; of those within 15 m of the view's centre min 1 mean 3.1; skeletons mean 18.3 max 20, triangles mean 106653 max 116728
+hall 5 visible RES-01 z34: min 5 mean 10.4 max 16 of 20 in the frame; not behind a building min 4 mean 9.2; of those within 15 m of the view's centre min 0 mean 1.8; skeletons mean 10.5 max 16, triangles mean 61118 max 93336
+hall 5 lumberjack: 300 samples, nearest other trunk 1.27 m, building hits 0, ground worst 0.000 m
+hall 1 doors=4 door_parts=1 street_parts=1 detours=0
+hall 1 meetings=1
 solid triangles 29426
-hall 1 people=6 median_us=70 p95_us=115 close_longest=1.07 min_tree=6.35 ground_worst=0.025
-hall 1 default view: 6 on screen, update median 122 us
-hall 1 process 1.918 ms with, 1.042 ms without
+hall 1 turns_back=26 twice_2m_3s=0 standing_moved=0
+hall 1 people=8 median_us=70 p95_us=120 close_longest=1.10 min_tree=5.45 ground_worst=0.032
+hall 1 default view: 8 on screen, update median 90 us p95 159 us, animation mean 28 us
+hall 1 process 1.014 ms with, 1.141 ms without
+hall 1 visible z70 min 5 mean 7.1 (in the frame), 4 / 6.4 not behind a building
+hall 1 visible z34 (5 views, not behind a building) min 4 mean 6.4
+hall 3 doors=8 door_parts=1 street_parts=1 detours=1
+hall 3 meetings=2
 solid triangles 70614
-hall 3 people=10 median_us=73 p95_us=120 close_longest=1.20 min_tree=1.56 ground_worst=0.010
-hall 3 default view: 10 on screen, update median 139 us
-hall 3 process 3.441 ms with, 1.968 ms without
+hall 3 turns_back=16 twice_2m_3s=0 standing_moved=0
+hall 3 people=14 median_us=128 p95_us=201 close_longest=0.70 min_tree=1.53 ground_worst=0.009
+hall 3 default view: 14 on screen, update median 104 us p95 191 us, animation mean 46 us
+hall 3 process 2.198 ms with, 1.612 ms without
+hall 3 visible z70 min 11 mean 13.1 (in the frame), 10 / 12.3 not behind a building
+hall 3 visible z34 (5 views, not behind a building) min 4 mean 10.2
 solid triangles 59892
+hall 5 doors=14 door_parts=1 street_parts=1 detours=2
+hall 5 meetings=2
 solid triangles 143996
-hall 5 people=12 median_us=147 p95_us=222 close_longest=0.67 min_tree=1.81 ground_worst=0.022
-hall 5 default view: 11 on screen, update median 183 us
-hall 5 process 3.062 ms with, 2.774 ms without
-QA_TOWNSFOLK checks=70 failures=0
+hall 5 turns_back=28 twice_2m_3s=0 standing_moved=0
+hall 5 people=20 median_us=206 p95_us=287 close_longest=1.03 min_tree=1.04 ground_worst=0.019
+hall 5 default view: 17 on screen, update median 160 us p95 315 us, animation mean 58 us
+hall 5 process 2.005 ms with, 1.391 ms without
+hall 5 visible z70 min 18 mean 19.4 (in the frame), 14 / 17.9 not behind a building
+hall 5 visible z34 (5 views, not behind a building) min 4 mean 13.6
+QA_TOWNSFOLK checks=91 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 10 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

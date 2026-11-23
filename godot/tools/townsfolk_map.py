@@ -2,8 +2,10 @@
 """Top-down debug map of the townsfolk (build 1024) from qa_townsfolk.gd --dump=DIR:
 building footprints (grey), yards (tan), solid ground of the buildings (dark), streets (paving),
 the town square, standing trees (green dots, 0.9 m rings), water (blue), the wall, gate posts,
-troop ground / parade / sites (red hatch), the walk graph (thin: live, red: cut) and every
-person's trail over 120 simulated seconds (one colour per person).
+troop ground / parade / sites (red hatch), the walk graph (thin: live, red: cut), the places
+people stop at (diamonds: tan forecourt, cyan work, white gate, yellow square, magenta meeting),
+meeting pairs (magenta bars), detours (orange) and every person's trail over 120 simulated
+seconds (one colour per person).
 
     python3 godot/tools/townsfolk_map.py DIR/townsfolk_hall5.json OUT.png [--solids assets/city/town_solids.json]
 """
@@ -18,6 +20,10 @@ HALF = 64.0
 COLOURS = [(230, 25, 75), (60, 180, 75), (255, 225, 25), (0, 130, 200), (245, 130, 48), (145, 30, 180),
            (70, 240, 240), (240, 50, 230), (210, 245, 60), (250, 190, 212), (0, 128, 128), (220, 190, 255),
            (170, 110, 40), (255, 250, 200), (128, 0, 0), (170, 255, 195)]
+
+
+PLACE_COLOURS = {"yard": (255, 200, 120), "work": (0, 230, 255), "gate": (255, 255, 255), "meet": (255, 0, 255),
+                 "square": (255, 255, 0), "stall": (255, 120, 0)}
 
 
 def px(x, z):
@@ -98,6 +104,15 @@ def main():
     for x, z in d["spots"]:
         c = px(x, z)
         draw.rectangle([c[0] - 5, c[1] - 5, c[0] + 5, c[1] + 5], outline=(255, 255, 0, 255), width=2)
+    for b in d.get("bridges", []):
+        draw.line([px(b[0], b[1]), px(b[2], b[3])], fill=(255, 140, 0, 255), width=3)
+    for m in d.get("meets", []):
+        draw.line([px(m[0], m[1]), px(m[2], m[3])], fill=(255, 0, 255, 255), width=3)
+    for x, z, kind in d.get("places", []):
+        c = px(x, z)
+        colour = PLACE_COLOURS.get(kind, (255, 255, 255))
+        draw.polygon([(c[0], c[1] - 6), (c[0] + 6, c[1]), (c[0], c[1] + 6), (c[0] - 6, c[1])],
+                     outline=colour + (255,), fill=colour + (90,))
     try:
         font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 15)
     except OSError:

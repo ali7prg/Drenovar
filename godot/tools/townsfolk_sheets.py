@@ -5,8 +5,9 @@
 
 For every sequence folder (f0000.jpg ..., captured at 12 fps, or at 3 fps = one per 0.33 s when
 it has at most 60 frames): OUT_DIR/<name>_sheet.jpg (one frame per 0.33 s, 5 columns, the time
-in the corner), OUT_DIR/<name>.mp4 (H.264) and OUT_DIR/<name>.gif (half size), both in real time. The LOD and shadow comparisons become
-OUT_DIR/lod_comparison.jpg and OUT_DIR/shadow_comparison.jpg.
+in the corner), OUT_DIR/<name>.mp4 (H.264) and OUT_DIR/<name>.gif (half size), both in real time. The LOD, shadow and
+scale comparisons become OUT_DIR/lod_comparison.jpg, OUT_DIR/shadow_comparison.jpg and
+OUT_DIR/scale_comparison.jpg.
 """
 import os
 import subprocess
@@ -70,7 +71,7 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
     for name in sorted(os.listdir(src)):
         folder = os.path.join(src, name)
-        if not os.path.isdir(folder) or name in ("lod", "shadow"):
+        if not os.path.isdir(folder) or name in ("lod", "shadow", "scale"):
             continue
         frames = sorted(f for f in os.listdir(folder) if f.endswith(".jpg"))
         if not frames:
@@ -108,7 +109,25 @@ def main():
                     labels.append("%s, zoom %d" % ("sun shadow + contact blob" if kind == "real" else "contact blob only", zoom))
         if paths:
             grid(paths, labels, os.path.join(out_dir, "shadow_comparison.jpg"), 2)
-
+    scale = os.path.join(src, "scale")
+    if os.path.isdir(scale):
+        # The same frame with the people at 1.00 and at 1.12 of their size: someone standing at a
+        # house's door (zoom 20), two neighbours meeting at the well (zoom 24); crops at 1.5x.
+        paths, labels = [], []
+        for name, box, where in (("door_z20_%s.jpg", (423, 115, 943, 435), "zoom 20, at a house's door"),
+                                 ("scale_%s.jpg", (650, 105, 1170, 425), "zoom 24, meeting at the well")):
+            for tag, size in (("100", "people at 1.00 (kept)"), ("112", "people at 1.12")):
+                p = os.path.join(scale, name % tag)
+                if not os.path.exists(p):
+                    continue
+                crop = Image.open(p).crop(box)
+                crop = crop.resize((crop.width * 3 // 2, crop.height * 3 // 2), Image.LANCZOS)
+                cp = os.path.join(scale, (name % tag).replace(".jpg", "_crop.jpg"))
+                crop.save(cp, quality=90)
+                paths.append(cp)
+                labels.append("%s, %s" % (size, where))
+        if paths:
+            grid(paths, labels, os.path.join(out_dir, "scale_comparison.jpg"), 2)
 
 if __name__ == "__main__":
     main()

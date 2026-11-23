@@ -33,6 +33,9 @@ const TownPlan = preload("res://src/town_plan.gd")
 const TownGround = preload("res://src/town_ground.gd")
 ## Ground each building level really takes (tools/measure_town_solids.gd).
 const SOLIDS := "res://assets/city/town_solids.json"
+## The gate's height spans in the table (tools/measure_town_solids.gd).
+const SPAN_BASE := -3.2
+const SPAN_STEP := 0.025
 
 const HUMAN := "res://assets/forest_rescue/humans/lf_civilian_%s.glb"
 const CLIP_NAMES: Array[StringName] = [&"lf_civilian_wait", &"lf_civilian_follow", &"lf_civilian_follow_tired",
@@ -59,6 +62,16 @@ const SQUARE_BAND := 0.45
 const DOOR_BAND := 0.45
 const SAMPLE_STEP := 0.5
 const MAX_DELAY := 40.0
+## Two people meeting stand this far either side of the middle (m), facing each other.
+const MEET_HALF := 0.7
+## How long two people who meet stand together (s).
+const MEET_DWELL := 5.5
+## Where people stand at a door with room in front: the middle, then a step either side.
+const DOOR_PLACES: Array[float] = [0.0, -0.95, 0.95, -1.9, 1.9]
+## A detour round what cuts a street keeps within this distance beyond the street's band (m),
+## and joins parts of the network at most BRIDGE_MAX apart.
+const BRIDGE_REACH := 1.6
+const BRIDGE_MAX := 30.0
 enum { K_WALK, K_DWELL, K_ENTER, K_INSIDE, K_LEAVE }
 
 # Building roles by base type.
@@ -95,6 +108,8 @@ class Person extends RefCounted:
 	var idle_rate := 1.0
 	var prop_kind := ""
 	var variant: Dictionary = {}
+	## The phase where this person meets its partner (-1: no partner).
+	var meet_phase := -1
 	# Timeline (one entry per phase).
 	var kinds := PackedInt32Array()
 	var starts := PackedFloat32Array()
@@ -123,6 +138,14 @@ class Person extends RefCounted:
 	var prop_shown := false
 	var delay := 0.0
 	var hold := 0.0
+	## Zoomed out: animation time not yet given to the AnimationPlayer (manual mode).
+	var anim_acc := 0.0
+	## Clock of the last evaluate() and of the last pose (zoomed out each person is placed
+	## every other frame).
+	var eval_t := -1.0
+	var pose_t := -1.0
+	## Standing or inside: nothing about this person changes before this clock time.
+	var steady_until := -1.0
 	var lod := -1
 	var blob_hidden := false
 	var pos := Vector2.ZERO
@@ -180,6 +203,15 @@ var blobs: MultiMeshInstance3D
 ## (at the default zoom it is 2-4 px, and each person would be one more skinned draw in the
 ## shadow pass). The contact blob grounds them at every zoom (one draw for all).
 const SHADOW_ZOOM := 50.0
+## Zoomed out (people a few pixels tall) the clips are posed ANIM_FAR_HZ times a second, each
+## person on its own beat: the AnimationPlayers run in manual mode, advanced from present().
+const ANIM_FAR_ZOOM := 50.0
+const ANIM_FAR_HZ := 20.0
+const FAR_STRIDE := 3
+var anim_manual := false
+## QA: microseconds per frame spent advancing the AnimationPlayers in manual mode.
+var anim_samples := PackedInt32Array()
+var frame_count := 0
 var cast_real_shadows := false
 
 # Graph of the walkable town.
@@ -203,8 +235,24 @@ var door_in := {}
 var door_room := {}
 var street_segs: Array = []
 var spot_nodes := PackedInt32Array()
-## Places in the forecourts beside the door paths, where a passer-by stops to look (node -> yaw).
+## Places to stop that are not doors (node -> the yaw a person there faces): the forecourts
+## beside the door paths, work places round the buildings, the gates, the meeting places.
 var yard_spots := {}
+## What each such place is ("yard", "work", "gate", "meet", "square") and whose yard (-1: none).
+var place_kind := {}
+var place_lot := {}
+## The nodes of each yard's path from its street exit to the door.
+var lot_nodes := {}
+## Two places facing each other, 1.4 m apart, where two people meet: [node a, node b, lot or -1].
+var meet_pairs: Array = []
+## QA: detours laid round what cuts a street (a fence end, a gate's plinth): [from, to, metres].
+var bridges: Array = []
+## Nodes of the street centre lines (the ends detours join).
+var street_nodes := {}
+var corridor_memo := PackedByteArray()
+var tried_islands := {}
+## The street node each door path leaves from.
+var lot_entry := {}
 var square_nodes := {}
 var stop_users := {}
 var route_cache := {}
@@ -215,6 +263,10 @@ var blocked_rects: Array[Rect2] = []
 var extra_trees := {}
 var heights := PackedFloat32Array()
 var solid_lots: Array = []
+## Squares a building draws itself (the market from level III): [rect, x0, z0, w, h, bytes,
+## plot height, lot] with the top of the floor per 25 cm cell (tools/measure_town_solids.gd).
+var floors: Array = []
+var green_yards: Array[Rect2] = []
 ## The wall's main gate scene (rotated, scaled): [inverse transform, x0, z0, w, h, bits].
 var solid_gate: Array = []
 static var solid_table: Dictionary = {}
@@ -244,7 +296,36 @@ func grid_height(ix: int, iz: int) -> float:
 ## of static_height, split along the (1,0)-(0,1) diagonal, lifted by LIFT), or the terrain where
 ## its coarser grid rises above it (concave spots such as the edge of a flattened plot).
 func ground_y(x: float, z: float) -> float:
-	return maxf(town_y(x, z), terrain_y(x, z))
+	var y := NAN
+	if not green_yards.is_empty() and in_green_yard(Vector2(x, z)) and mask_cover(x, z) < 0.5:
+		# The grass round a market's own square: the town ground is not drawn there.
+		y = terrain_y(x, z)
+	else:
+		y = maxf(town_y(x, z), terrain_y(x, z))
+	if not floors.is_empty():
+		var f := floor_at(Vector2(x, z))
+		if not is_nan(f):
+			y = maxf(y, f)
+	return y
+
+## Inside the lot of a market that draws its own square (its fence and counters are solid).
+func in_green_yard(p: Vector2) -> bool:
+	for rect: Rect2 in green_yards:
+		if rect.has_point(p):
+			return true
+	return false
+
+## The floor of a square a building draws itself at p (NAN: none).
+func floor_at(p: Vector2) -> float:
+	for entry: Array in floors:
+		if not (entry[0] as Rect2).has_point(p):
+			continue
+		var w: int = entry[3]
+		var i: int = floori((p.y - float(entry[2])) / 0.25) * w + floori((p.x - float(entry[1])) / 0.25)
+		var b: int = (entry[5] as PackedByteArray)[i]
+		if b > 0:
+			return float(entry[6]) + SPAN_BASE + b * SPAN_STEP
+	return NAN
 
 func town_y(x: float, z: float) -> float:
 	if absf(x) >= 63.0 or absf(z) >= 63.0:
@@ -343,14 +424,26 @@ func cover(x: float, z: float) -> float:
 ## Ground a building really takes (walls, fences, stairs, beds, grown by a body width).
 func solid_at(p: Vector2) -> bool:
 	if not solid_gate.is_empty():
-		var local: Vector3 = (solid_gate[0] as Transform3D) * Vector3(p.x, 0.0, p.y)
+		var inverse: Transform3D = solid_gate[0]
+		var local: Vector3 = inverse * Vector3(p.x, 0.0, p.y)
 		var cx := floori(local.x / 0.25) - int(solid_gate[1])
 		var cz := floori(local.z / 0.25) - int(solid_gate[2])
 		var gw: int = solid_gate[3]
 		if cx >= 0 and cz >= 0 and cx < gw and cz < int(solid_gate[4]):
 			var gi := cz * gw + cx
-			var gate_bits: PackedByteArray = solid_gate[5]
-			if gate_bits[gi >> 3] & (1 << (gi & 7)):
+			var gate_bytes: PackedByteArray = solid_gate[5]
+			if solid_gate[6]:
+				# What of the gate stands here, against the knees and the head of a walker on
+				# the ground here (its paving at street level is walked).
+				var low := gate_bytes[gi * 2]
+				var high := gate_bytes[gi * 2 + 1]
+				if low <= high:
+					var g := ground_y(p.x, p.y)
+					var knee := (inverse * Vector3(p.x, g + 0.15, p.y)).y
+					var head := (inverse * Vector3(p.x, g + 2.0, p.y)).y
+					if SPAN_BASE + high * SPAN_STEP > knee and SPAN_BASE + low * SPAN_STEP < head:
+						return true
+			elif gate_bytes[gi >> 3] & (1 << (gi & 7)):
 				return true
 	var feet := NAN
 	for entry: Array in solid_lots:
@@ -359,6 +452,10 @@ func solid_at(p: Vector2) -> bool:
 		# Feet below the building's base (a plot on a slope): its low parts count as well.
 		if is_nan(feet):
 			feet = town_y(p.x, p.y)
+			if not floors.is_empty():
+				var f := floor_at(p)
+				if not is_nan(f):
+					feet = f
 		var mask: Array = entry[2] if feet < float(entry[1]) - 0.07 else entry[3]
 		if mask.is_empty() or not (mask[0] as Rect2).has_point(p):
 			continue
@@ -380,6 +477,13 @@ func solid_entry(type: String, level: int) -> Dictionary:
 func collect_solids() -> void:
 	solid_lots.clear()
 	solid_gate.clear()
+	floors.clear()
+	green_yards.clear()
+	# A market that draws its own square leaves its yard green round it (src/town_plan.gd):
+	# walked to and from its gate like any yard (its fence and stalls are in the solids table).
+	for lot: Dictionary in plan.lots:
+		if TownPlan.own_square(lot):
+			green_yards.append((lot.rect as Rect2).grow(-0.15))
 	if solid_table.is_empty() and FileAccess.file_exists(SOLIDS):
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SOLIDS))
 		solid_table = parsed.get("types", {}) if parsed is Dictionary else {}
@@ -387,8 +491,13 @@ func collect_solids() -> void:
 	if gate is Node3D and is_instance_valid(gate) and stage.walls.visible:
 		var level := int(str(gate.scene_file_path).get_file().get_basename().get_slice("-", 2))
 		var entry := solid_entry("SUP-03", level)
-		if not entry.is_empty():
-			solid_gate = [(gate as Node3D).global_transform.affine_inverse(), int(entry.x0), int(entry.z0), int(entry.w), int(entry.h), entry.raw]
+		var spans: Variant = entry.get("spans")
+		if spans is Dictionary and int(spans.w) > 0:
+			if not spans.has("raw"):
+				spans.raw = Marshalls.base64_to_raw(str(spans.bytes))
+			solid_gate = [(gate as Node3D).global_transform.affine_inverse(), int(spans.x0), int(spans.z0), int(spans.w), int(spans.h), spans.raw, true]
+		elif not entry.is_empty():
+			solid_gate = [(gate as Node3D).global_transform.affine_inverse(), int(entry.x0), int(entry.z0), int(entry.w), int(entry.h), entry.raw, false]
 	for lot: Dictionary in plan.lots:
 		var entry := solid_entry(str(lot.type), int(lot.level))
 		if entry.is_empty():
@@ -400,6 +509,14 @@ func collect_solids() -> void:
 		reach = reach.merge(base[0])
 		# [both masks' rect, the plot's ground height, base mask, solid mask]
 		solid_lots.append([reach, float(stage.sample_city(at.x, at.y)), base, solid])
+		var floor_entry: Variant = entry.get("floor")
+		if TownPlan.own_square(lot) and floor_entry is Dictionary and int(floor_entry.w) > 0:
+			if not floor_entry.has("raw"):
+				floor_entry.raw = Marshalls.base64_to_raw(str(floor_entry.bytes))
+			var ox := at.x + int(floor_entry.x0) * 0.25
+			var oz := at.y + int(floor_entry.z0) * 0.25
+			floors.append([Rect2(ox, oz, int(floor_entry.w) * 0.25 - 0.0001, int(floor_entry.h) * 0.25 - 0.0001), ox, oz, int(floor_entry.w), int(floor_entry.h),
+				floor_entry.raw, float(stage.sample_city(at.x, at.y)), plan.lots.find(lot)])
 
 ## A mask of the table placed round a plot centre: [rect, x0, z0, w, h, bits].
 static func placed_mask(entry: Dictionary, at: Vector2) -> Array:
@@ -414,6 +531,38 @@ var mask_bytes := PackedByteArray()
 var mask_of: Image = null
 
 func painted(x: float, z: float) -> bool:
+	var town: TownPlan = stage.town_plan if stage != null else null
+	if town == null or town.mask == null:
+		return false
+	if not floors.is_empty() and not is_nan(floor_at(Vector2(x, z))):
+		return true
+	if in_green_yard(Vector2(x, z)):
+		return true
+	return mask_painted(x, z)
+
+## The town ground's mask at (x, z) filtered as its shader samples it (it draws >= 0.5).
+func mask_cover(x: float, z: float) -> float:
+	var town: TownPlan = stage.town_plan if stage != null else null
+	if town == null or town.mask == null:
+		return 0.0
+	if mask_of != town.mask:
+		mask_of = town.mask
+		mask_bytes = town.mask.get_data()
+	var u := (x + TownPlan.HALF) / TownPlan.CELL - 0.5
+	var v := (z + TownPlan.HALF) / TownPlan.CELL - 0.5
+	var i := floori(u)
+	var j := floori(v)
+	if i < 0 or j < 0 or i >= TownPlan.SIZE - 1 or j >= TownPlan.SIZE - 1:
+		return 0.0
+	var at := func(a: int, b: int) -> float:
+		var k := (b * TownPlan.SIZE + a) * 4
+		return maxi(mask_bytes[k], mask_bytes[k + 1]) / 255.0
+	var fu := u - i
+	var fv := v - j
+	return lerpf(lerpf(at.call(i, j), at.call(i + 1, j), fu), lerpf(at.call(i, j + 1), at.call(i + 1, j + 1), fu), fv)
+
+## The town ground's own mask: drawn here (earth or paving).
+func mask_painted(x: float, z: float) -> bool:
 	var town: TownPlan = stage.town_plan if stage != null else null
 	if town == null or town.mask == null:
 		return false
@@ -494,6 +643,7 @@ func rebuild() -> void:
 	collect_solids()
 	memo.resize(MEMO_SIZE * MEMO_SIZE)
 	memo.fill(0)
+	mark_kerbs()
 	build_profile.clear()
 	var mark := Time.get_ticks_usec()
 	if not await build_graph(serial):
@@ -511,13 +661,21 @@ func rebuild() -> void:
 				stop_users[door_node[home]] = users
 	build_profile["plan"] = Time.get_ticks_usec() - mark
 	mark = Time.get_ticks_usec()
-	var wanted := clampi(4 + 2 * hall_level, 6, 14)
+	var wanted := people_wanted(hall_level)
 	var fresh: Array[Person] = []
+	var partner := {}
 	crowded = 0
 	left_out.clear()
 	for spec: Dictionary in specs:
 		if fresh.size() >= wanted:
 			break
+		var pair: String = spec.get("pair", "")
+		# Both who meet, or neither.
+		if not pair.is_empty() and not partner.has(pair) and fresh.size() + 2 > wanted:
+			continue
+		if not pair.is_empty() and partner.has(pair) and partner[pair] == null:
+			partner.erase(pair)
+			continue
 		var person := Person.new()
 		person.key = spec.key
 		person.role = spec.role
@@ -526,7 +684,20 @@ func rebuild() -> void:
 		person.seed = spec.seed
 		person.prop_kind = spec.prop
 		if await build_timeline(person, spec.visits, serial):
-			fresh.append(person)
+			if pair.is_empty():
+				fresh.append(person)
+			elif partner.has(pair):
+				align_pair(partner[pair], person)
+				fresh.append(partner[pair])
+				fresh.append(person)
+				partner.erase(pair)
+			else:
+				partner[pair] = person
+		elif not pair.is_empty():
+			if partner.has(pair):
+				partner.erase(pair)
+			else:
+				partner[pair] = null
 		if not await next_slice(serial):
 			return
 	build_profile["timelines"] = Time.get_ticks_usec() - mark
@@ -550,6 +721,40 @@ func rebuild() -> void:
 	ensure_blobs()
 	building = false
 	last_build_usec = Time.get_ticks_usec() - started
+
+## How many people walk the town at each level of the hall: 8 at I, 14 at III, 20 at V (each
+## costs ~10 us of script a frame on screen, see qa_townsfolk.gd).
+static func people_wanted(level: int) -> int:
+	return clampi(5 + 3 * level, 8, 20)
+
+## Two people who meet: one cycle as long as the other's (the time inside, or the longest wait,
+## grows) and clocks set so both stand at the meeting places at the same time.
+func align_pair(a: Person, b: Person) -> void:
+	var c := maxf(a.cycle, b.cycle)
+	pad(a, c - a.cycle)
+	pad(b, c - b.cycle)
+	a.phase = fposmod(a.phase, c)
+	if a.meet_phase >= 0 and b.meet_phase >= 0:
+		b.phase = fposmod(a.phase + b.starts[b.meet_phase] - a.starts[a.meet_phase], c)
+
+func pad(p: Person, extra: float) -> void:
+	if extra <= 0.001:
+		return
+	var k := -1
+	for i in p.kinds.size():
+		if p.kinds[i] == K_INSIDE:
+			k = i
+			break
+	if k < 0:
+		for i in p.kinds.size():
+			if p.kinds[i] == K_DWELL and i != p.meet_phase and (k < 0 or p.lengths[i] > p.lengths[k]):
+				k = i
+	if k < 0:
+		return
+	p.lengths[k] += extra
+	for i in range(k + 1, p.kinds.size()):
+		p.starts[i] += extra
+	p.cycle += extra
 
 ## Next slice of a background plan; false when a newer plan has started or the town is gone.
 func next_slice(serial: int) -> bool:
@@ -678,10 +883,14 @@ func clear_at(p: Vector2, near_bodies: Array, near_posts: PackedVector2Array) ->
 	if solid_at(p):
 		return false
 	for rect: Rect2 in near_bodies:
-		if rect.has_point(p):
+		# (A cell is walked anywhere in it: one whose centre is within half a cell of a
+		# footprint counts as in it.)
+		if rect.grow(MEMO_CELL * 0.5 + 0.01).has_point(p):
 			# A footprint is the box round the whole model (yard fences, drill grounds): where
-			# the town plan lays a street through an empty corner of it, the street is walked.
-			if not on_street_band(p):
+			# the town plan lays a street through an empty corner of it, the street is walked;
+			# so is the square a market draws itself.
+			# (A cell is walked anywhere in it: its centre well inside the street's band.)
+			if not on_street_band(p, 0.15) and (floors.is_empty() or is_nan(floor_at(p))) and not in_green_yard(p):
 				return false
 			break
 	for post in near_posts:
@@ -721,10 +930,11 @@ func approach_clear(trunk: Vector2, dir: Vector2, near: float, far: float) -> bo
 	return true
 
 ## On the paved band of a street (not a gate road).
-func on_street_band(p: Vector2) -> bool:
+func on_street_band(p: Vector2, inset := 0.0) -> bool:
 	for s: Array in street_segs:
 		var q := Geometry2D.get_closest_point_to_segment(p, s[0], s[1])
-		if p.distance_squared_to(q) <= float(s[2]) * float(s[2]):
+		var half := float(s[2]) - inset
+		if p.distance_squared_to(q) <= half * half:
 			return true
 	return false
 
@@ -744,7 +954,7 @@ func blocked_reason(p: Vector2) -> String:
 	if solid_at(p):
 		return "solid"
 	for i in bodies.size():
-		if bodies[i].has_point(p) and not on_street_band(p):
+		if bodies[i].has_point(p) and not on_street_band(p, 0.15) and (floors.is_empty() or is_nan(floor_at(p))) and not in_green_yard(p):
 			return "body:%d" % i
 	for post in posts:
 		if p.distance_squared_to(post) < POST_CLEAR * POST_CLEAR:
@@ -834,6 +1044,12 @@ func build_graph(serial := -1) -> bool:
 	door_room.clear()
 	spot_nodes = PackedInt32Array()
 	yard_spots.clear()
+	place_kind.clear()
+	place_lot.clear()
+	lot_nodes.clear()
+	lot_entry.clear()
+	meet_pairs.clear()
+	bridges.clear()
 	square_nodes.clear()
 	var g_mark := Time.get_ticks_usec()
 	# Streets: centre lines split at every crossing and junction (gate roads run outside the wall).
@@ -866,6 +1082,12 @@ func build_graph(serial := -1) -> bool:
 		along.sort_custom(func(x, y): return x[0] < y[0])
 		for k in range(1, along.size()):
 			add_edge(along[k - 1][1], along[k][1], maxf(0.0, float(s[2]) - EDGE_MARGIN))
+	street_nodes.clear()
+	for e in e_a.size():
+		street_nodes[e_a[e]] = true
+		street_nodes[e_b[e]] = true
+	corridor_memo.resize(MEMO_SIZE * MEMO_SIZE)
+	corridor_memo.fill(0)
 	build_profile["g_streets"] = Time.get_ticks_usec() - g_mark
 	g_mark = Time.get_ticks_usec()
 	# Doors: from the yard's street exit to a stop in front of the building.
@@ -884,14 +1106,24 @@ func build_graph(serial := -1) -> bool:
 		if not TownPlan.inside(r.grow(0.05), 0.2, stop) and not (lot.hall and square.has_point(stop)):
 			continue
 		door_in[li] = Vector2(0.0, 1.0) if back else Vector2(0.0, -1.0)
+		if not lot.hall and not walkable(stop):
+			# Steps or a porch reach past the plan's footprint: the stop moves out in front of them.
+			for k in range(1, 6):
+				var q := stop - (door_in[li] as Vector2) * (0.25 * k)
+				if walkable(q):
+					stop = q
+					break
 		if lot.hall and square.has_area() and square.grow(-0.3).has_point(stop):
 			# The hall's door opens on the square: people come up to it from straight in front.
 			var n := add_node(stop)
-			var front := stop + Vector2(0.0, 1.4)
-			if square.grow(-0.2).has_point(front):
+			# Straight in front, well inside the square (its edge is not painted).
+			var front := stop + Vector2(0.0, minf(1.4, square.end.y - 0.6 - stop.y))
+			lot_nodes[li] = [n]
+			if front.y - stop.y >= 0.7 and square.grow(-0.2).has_point(front):
 				var approach := add_node(front)
 				add_edge(approach, n, DOOR_BAND, 1)
 				on_square.append(approach)
+				lot_nodes[li].append(approach)
 			else:
 				on_square.append(n)
 			door_node[li] = n
@@ -926,10 +1158,14 @@ func build_graph(serial := -1) -> bool:
 				way.append(across)
 		way.append(stop)
 		var previous := entry
+		var path_nodes: Array = []
 		for k in range(1, way.size()):
 			var n := add_node(way[k])
 			add_edge(previous, n, DOOR_BAND, 1)
 			previous = n
+			path_nodes.append(n)
+		lot_nodes[li] = path_nodes
+		lot_entry[li] = entry
 		door_node[li] = previous
 		door_stop[li] = stop
 		door_lot[previous] = li
@@ -948,17 +1184,26 @@ func build_graph(serial := -1) -> bool:
 							far = false
 					if not far:
 						continue
+					# Joined to the point of the door path that leads out soonest (the walk to
+					# it and on does not run past it to the door and back).
 					var joined_to := -1
-					for w in range(way.size() - 1, -1, -1):
+					var best_cost := INF
+					var from_exit := 0.0
+					for w in way.size():
 						var at: Vector2 = way[w]
-						if at.distance_to(stop) > 0.6 and band_clear(at, q, 0.0):
+						if w > 0:
+							from_exit += at.distance_to(way[w - 1])
+						var cost := from_exit + at.distance_to(q)
+						if cost < best_cost and at.distance_to(stop) > 0.6 and band_clear(at, q, 0.0):
+							best_cost = cost
 							joined_to = add_node(at)
-							break
 					if joined_to < 0:
 						continue
 					var n := add_node(q)
 					add_edge(joined_to, n, 0.0, 1)
 					yard_spots[n] = atan2(door_in[li].x, door_in[li].y)
+					place_kind[n] = "yard"
+					place_lot[n] = li
 					break
 	build_profile["g_doors"] = Time.get_ticks_usec() - g_mark
 	g_mark = Time.get_ticks_usec()
@@ -970,21 +1215,140 @@ func build_graph(serial := -1) -> bool:
 				hall_stop = door_stop[li]
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash(str(square))
-		var wanted := clampi(int(square.get_area() / 12.0), 1, 5)
+		# A square no deeper in front of the hall's door than a street is one: people walk along
+		# it (a line of points down its middle) and wait at the hall's door, no one stands about.
+		var narrow: bool = hall_stop is Vector2 and square.end.y - (hall_stop as Vector2).y < 3.0
+		if narrow:
+			# The line nearest the door that is open along most of the square (lamps and
+			# benches stand along its front edge).
+			var stop_at: Vector2 = hall_stop
+			var row_z := stop_at.y + 0.6
+			var best_open := -1
+			for k in range(5, 12):
+				var z := stop_at.y + 0.1 * k
+				var open := 0
+				var x := square.position.x + 0.5
+				while x <= square.end.x - 0.5:
+					if walkable(Vector2(x, z)):
+						open += 1
+					x += 0.25
+				if open > best_open:
+					best_open = open
+					row_z = z
+			var first := stop_at.x - 2.4 * floorf((stop_at.x - square.position.x - 0.9) / 2.4)
+			var x := first
+			while x <= square.end.x - 0.9:
+				var q := Vector2(x, row_z)
+				if walkable(q):
+					on_square.append(add_node(q))
+				x += 2.4
+			# Two people meet at the square's quiet end, past the row's last point where no one
+			# walks through, facing each other: side on to the city camera (looking along x = z)
+			# where there is room, so neither hides the other; else across the square.
+			var row_lo := INF
+			var row_hi := -INF
+			for n in on_square:
+				row_lo = minf(row_lo, g_nodes[n].x)
+				row_hi = maxf(row_hi, g_nodes[n].x)
+			var quiet: Array = []
+			var qx := square.position.x + 0.9
+			while qx <= square.end.x - 0.9:
+				if qx >= row_hi + 1.0 or qx <= row_lo - 1.0:
+					var qz := square.position.y + 0.8
+					while qz <= square.end.y - 0.8:
+						quiet.append(Vector2(qx, qz))
+						qz += 0.1
+				qx += 0.25
+			quiet.sort_custom(func(x, y): return x.distance_squared_to(hall_stop) < y.distance_squared_to(hall_stop))
+			for axis: Vector2 in [Vector2(0.7071, -0.7071), Vector2(0.0, 1.0), Vector2(0.6, 0.8), Vector2(-0.6, 0.8)]:
+				for m: Vector2 in quiet:
+					if not meet_pairs.is_empty():
+						break
+					if m.distance_to(hall_stop) < 3.0:
+						continue
+					var a := m - axis * MEET_HALF
+					var b := m + axis * MEET_HALF
+					if not walkable(a) or not walkable(b) or not walkable(m) \
+							or not walkable(a - axis * 0.3) or not walkable(b + axis * 0.3):
+						continue
+					var busy := false
+					for n in g_nodes.size():
+						if g_nodes[n].distance_to(a) < 1.6 or g_nodes[n].distance_to(b) < 1.6:
+							busy = true
+							break
+					if busy:
+						continue
+					var na := add_node(a)
+					var nb := add_node(b)
+					meet_pairs.append([na, nb, -1])
+					for pair_node: int in [na, nb]:
+						place_kind[pair_node] = "meet"
+						place_lot[pair_node] = -1
+					yard_spots[na] = atan2(axis.x, axis.y)
+					yard_spots[nb] = atan2(-axis.x, -axis.y)
+					break
+		# Where two people meet on the square: two places facing each other (along the square's
+		# long side), clear of the hall's door and of each other.
+		var long_axis := Vector2.RIGHT if square.size.x >= square.size.y else Vector2.DOWN
+		var centres: Array = []
+		var gx := square.position.x + 1.4
+		while gx <= square.end.x - 1.4:
+			var gz := square.position.y + 0.9
+			while gz <= square.end.y - 0.9:
+				centres.append(Vector2(gx, gz))
+				gz += 0.5
+			gx += 0.5
+		# Farthest from the hall's door first.
+		if hall_stop is Vector2:
+			centres.sort_custom(func(x, y): return x.distance_squared_to(hall_stop) > y.distance_squared_to(hall_stop))
+		for m: Vector2 in centres:
+			if meet_pairs.size() >= 2 or narrow:
+				break
+			var a := m - long_axis * MEET_HALF
+			var b := m + long_axis * MEET_HALF
+			if hall_stop is Vector2 and m.distance_to(hall_stop) < 3.0:
+				continue
+			var far := true
+			for pair: Array in meet_pairs:
+				if g_nodes[pair[0]].lerp(g_nodes[pair[1]], 0.5).distance_to(m) < 3.6:
+					far = false
+			# (Not where a street comes onto the square: the way in would run between them.)
+			for n: int in street_nodes:
+				if g_nodes[n].distance_to(a) < 2.6 or g_nodes[n].distance_to(b) < 2.6:
+					far = false
+					break
+			if not far or not walkable(a) or not walkable(b) or not walkable(m):
+				continue
+			var na := add_node(a)
+			var nb := add_node(b)
+			meet_pairs.append([na, nb, -1])
+			for pair_node: int in [na, nb]:
+				place_kind[pair_node] = "meet"
+				place_lot[pair_node] = -1
+			yard_spots[na] = atan2(long_axis.x, long_axis.y)
+			yard_spots[nb] = atan2(-long_axis.x, -long_axis.y)
+		var wanted := clampi(int(square.get_area() / 6.0), 2, 8)
 		var tries := 0
-		while spot_nodes.size() < wanted and tries < 60:
+		while spot_nodes.size() < wanted and tries < 120 and not narrow:
 			tries += 1
-			var p := Vector2(rng.randf_range(square.position.x + 1.2, square.end.x - 1.2), rng.randf_range(square.position.y + 1.4, square.end.y - 1.0))
+			var p := Vector2(rng.randf_range(square.position.x + 1.0, square.end.x - 1.0), rng.randf_range(square.position.y + 0.9, square.end.y - 0.8))
 			if hall_stop is Vector2 and p.distance_to(hall_stop) < 2.6:
 				continue
 			var far := true
 			for n in spot_nodes:
-				if g_nodes[n].distance_to(p) < 2.4:
+				if g_nodes[n].distance_to(p) < 2.2:
+					far = false
+			for pair: Array in meet_pairs:
+				if g_nodes[pair[0]].distance_to(p) < 2.0 or g_nodes[pair[1]].distance_to(p) < 2.0:
 					far = false
 			var near: Array = nearby(p, p, 1.0)
 			if not far or not clear_at(p, near[0], near[1]):
 				continue
-			spot_nodes.append(add_node(p))
+			var sn := add_node(p)
+			spot_nodes.append(sn)
+			place_kind[sn] = "square"
+			place_lot[sn] = -1
+			yard_spots[sn] = rng.randf_range(-PI, PI)
 		for n in g_nodes.size():
 			# Door stops are reached by their own path (the hall's from straight in front).
 			if square.grow(0.2).has_point(g_nodes[n]) and not on_square.has(n) and not door_lot.has(n):
@@ -1005,10 +1369,14 @@ func build_graph(serial := -1) -> bool:
 	var spots := PackedVector2Array()
 	for n in spot_nodes:
 		spots.append(g_nodes[n])
+	for pair: Array in meet_pairs:
+		spots.append(g_nodes[pair[0]])
+		spots.append(g_nodes[pair[1]])
 	# ... and the places in front of the hall's door where people wait.
 	var hall_front := PackedVector2Array()
 	for li in door_lot.values():
-		if plan.lots[li].hall:
+		# (On a square no deeper than a street people pass those at the door closer.)
+		if plan.lots[li].hall and not (square.has_area() and square.end.y - door_stop[li].y < 3.0):
 			for k in range(-2, 3):
 				hall_front.append(door_stop[li] + Vector2(0.95 * k, 0.0))
 			# ... and the way up to it (its front point).
@@ -1052,6 +1420,23 @@ func build_graph(serial := -1) -> bool:
 			e_lat[e] = found
 	build_profile["g_validate"] = Time.get_ticks_usec() - g_mark - g_slept
 	build_profile["g_edges"] = e_a.size()
+	link()
+	g_mark = Time.get_ticks_usec()
+	if not await bridge(serial):
+		return false
+	tried_islands.clear()
+	if not await bridge_islands(serial):
+		return false
+	build_profile["g_bridge"] = Time.get_ticks_usec() - g_mark
+	g_mark = Time.get_ticks_usec()
+	if not await add_places(serial):
+		return false
+	build_profile["g_places"] = Time.get_ticks_usec() - g_mark
+	link()
+	return true
+
+## The live edges of every node and the parts of the network that reach each other.
+func link() -> void:
 	g_edges.clear()
 	for n in g_nodes.size():
 		g_edges.append(PackedInt32Array())
@@ -1059,7 +1444,6 @@ func build_graph(serial := -1) -> bool:
 		if e_live[e] == 1:
 			g_edges[e_a[e]].append(e)
 			g_edges[e_b[e]].append(e)
-	# Parts of the network that reach each other (a street laid through a fence cuts the town).
 	component = PackedInt32Array()
 	component.resize(g_nodes.size())
 	component.fill(-1)
@@ -1078,7 +1462,757 @@ func build_graph(serial := -1) -> bool:
 					component[o] = part
 					stack.append(o)
 		part += 1
+	route_cache.clear()
+
+# ------------------------------------------------------------------ kerbs, detours, places
+
+## Yard kerbs (src/town_ground.gd lays them along the open edges of every yard from level II,
+## broken at the door, at streets and where another yard is): never stepped over.
+func mark_kerbs() -> void:
+	var town = stage.town
+	for lot: Dictionary in plan.lots:
+		var level := int(lot.level)
+		if level < 2 or lot.hall or TownPlan.own_square(lot):
+			continue
+		var r: Rect2 = lot.rect
+		var width := 0.3 if level >= 4 else 0.2
+		var inset := width * 0.5 + 0.08
+		var open: Array = lot.open
+		var edges := [
+			[Vector2(r.position.x + inset, r.position.y + inset), Vector2(r.position.x + inset, r.end.y - inset), open[0], false],
+			[Vector2(r.end.x - inset, r.position.y + inset), Vector2(r.end.x - inset, r.end.y - inset), open[1], false],
+			[Vector2(r.position.x + inset, r.position.y + inset), Vector2(r.end.x - inset, r.position.y + inset), open[2], false],
+			[Vector2(r.position.x + inset, r.end.y - inset), Vector2(r.end.x - inset, r.end.y - inset), open[3], true],
+		]
+		var near_segments: Array = plan.segments.filter(func(sg): return plan.street_rect(sg).grow(0.6).intersects(r.grow(0.6)))
+		var near_lots: Array = plan.lots.filter(func(other): return other != lot and other.rect.grow(0.2).intersects(r.grow(0.2)))
+		for edge: Array in edges:
+			if not edge[2]:
+				continue
+			var a: Vector2 = edge[0]
+			var b: Vector2 = edge[1]
+			var steps := maxi(1, ceili(a.distance_to(b) / 0.2))
+			for k in range(steps + 1):
+				var p := a.lerp(b, float(k) / steps)
+				if not near_segments.is_empty() and town.on_street(plan, p, 0.15, near_segments):
+					continue
+				if edge[3] and absf(p.x - float(lot.door_x)) < TownPlan.DOOR_GAP * 0.5:
+					continue
+				var other_yard := false
+				for other: Dictionary in near_lots:
+					if (other.rect as Rect2).grow(0.05).has_point(p):
+						other_yard = true
+						break
+				if not other_yard:
+					block_memo(p, width * 0.5 + 0.22)
+
+## Marks the walkability memo blocked round p.
+func block_memo(p: Vector2, radius: float) -> void:
+	var i0 := floori((p.x - radius + 64.0) / MEMO_CELL)
+	var i1 := floori((p.x + radius + 64.0) / MEMO_CELL)
+	var j0 := floori((p.y - radius + 64.0) / MEMO_CELL)
+	var j1 := floori((p.y + radius + 64.0) / MEMO_CELL)
+	for j in range(maxi(j0, 0), mini(j1, MEMO_SIZE - 1) + 1):
+		for i in range(maxi(i0, 0), mini(i1, MEMO_SIZE - 1) + 1):
+			var centre := Vector2((i + 0.5) * MEMO_CELL - 64.0, (j + 0.5) * MEMO_CELL - 64.0)
+			if centre.distance_squared_to(p) <= (radius + MEMO_CELL * 0.5) * (radius + MEMO_CELL * 0.5):
+				memo[j * MEMO_SIZE + i] = 2
+
+## Within reach of the town's streets (their band and BRIDGE_REACH beyond it) or the square:
+## where a detour may run (not across a yard).
+func corridor(p: Vector2) -> bool:
+	var i := floori((p.x + 64.0) / MEMO_CELL)
+	var j := floori((p.y + 64.0) / MEMO_CELL)
+	if i < 0 or j < 0 or i >= MEMO_SIZE or j >= MEMO_SIZE or corridor_memo.is_empty():
+		return false
+	var k := j * MEMO_SIZE + i
+	if corridor_memo[k] == 0:
+		var centre := Vector2((i + 0.5) * MEMO_CELL - 64.0, (j + 0.5) * MEMO_CELL - 64.0)
+		var inside := plan.plaza.has_area() and plan.plaza.grow(0.3).has_point(centre)
+		if not inside:
+			for sg: Dictionary in plan.segments:
+				var reach := float(sg.w) * 0.5 + BRIDGE_REACH
+				if centre.distance_squared_to(Geometry2D.get_closest_point_to_segment(centre, sg.a, sg.b)) <= reach * reach:
+					inside = true
+					break
+		corridor_memo[k] = 1 if inside else 2
+	return corridor_memo[k] == 1
+
+## A straight line walked (every 25 cm cell it passes through) and within the corridor.
+func fine_clear(a: Vector2, b: Vector2, in_corridor := false) -> bool:
+	var i := floori((a.x + 64.0) / MEMO_CELL)
+	var j := floori((a.y + 64.0) / MEMO_CELL)
+	var i1 := floori((b.x + 64.0) / MEMO_CELL)
+	var j1 := floori((b.y + 64.0) / MEMO_CELL)
+	var d := b - a
+	var step_i := 1 if d.x > 0.0 else -1
+	var step_j := 1 if d.y > 0.0 else -1
+	var next_x := ((i + (1 if step_i > 0 else 0)) * MEMO_CELL - 64.0)
+	var next_z := ((j + (1 if step_j > 0 else 0)) * MEMO_CELL - 64.0)
+	var t_x := (next_x - a.x) / d.x if absf(d.x) > 0.000001 else INF
+	var t_z := (next_z - a.y) / d.y if absf(d.y) > 0.000001 else INF
+	var dt_x := MEMO_CELL / absf(d.x) if absf(d.x) > 0.000001 else INF
+	var dt_z := MEMO_CELL / absf(d.y) if absf(d.y) > 0.000001 else INF
+	for guard in 4096:
+		var centre := Vector2((i + 0.5) * MEMO_CELL - 64.0, (j + 0.5) * MEMO_CELL - 64.0)
+		if not walkable(centre) or (in_corridor and not corridor(centre)):
+			return false
+		if i == i1 and j == j1:
+			return true
+		if t_x < t_z:
+			i += step_i
+			t_x += dt_x
+		else:
+			j += step_j
+			t_z += dt_z
 	return true
+
+## Shortest walk on the 25 cm walkability grid from a to b, within the corridor and at most
+## `limit` m long ([] when there is none), straightened (string pulling).
+func grid_path(a: Vector2, b: Vector2, limit: float, anywhere := false) -> PackedVector2Array:
+	var box := Rect2(a, Vector2.ZERO).expand(b).grow(5.0)
+	var x0 := floori((box.position.x + 64.0) / MEMO_CELL)
+	var z0 := floori((box.position.y + 64.0) / MEMO_CELL)
+	var w := ceili(box.size.x / MEMO_CELL) + 1
+	var h := ceili(box.size.y / MEMO_CELL) + 1
+	var count := w * h
+	var cost := PackedFloat32Array()
+	cost.resize(count)
+	cost.fill(INF)
+	var parent := PackedInt32Array()
+	parent.resize(count)
+	parent.fill(-1)
+	var state := PackedByteArray()
+	state.resize(count)
+	state.fill(0)
+	var centre := func(c: int) -> Vector2:
+		return Vector2((x0 + c % w + 0.5) * MEMO_CELL - 64.0, (z0 + c / w + 0.5) * MEMO_CELL - 64.0)
+	var cell_of := func(p: Vector2) -> int:
+		var cx := floori((p.x + 64.0) / MEMO_CELL) - x0
+		var cz := floori((p.y + 64.0) / MEMO_CELL) - z0
+		return cz * w + cx if cx >= 0 and cz >= 0 and cx < w and cz < h else -1
+	var start: int = cell_of.call(a)
+	var goal: int = cell_of.call(b)
+	if start < 0 or goal < 0:
+		return PackedVector2Array()
+	var passable := func(c: int) -> bool:
+		if state[c] == 0:
+			var q: Vector2 = centre.call(c)
+			state[c] = 1 if walkable(q) and (anywhere or corridor(q)) else 2
+		return state[c] == 1
+	state[start] = 1
+	state[goal] = 1
+	var heap_d := PackedFloat32Array()
+	var heap_n := PackedInt32Array()
+	cost[start] = 0.0
+	heap_push(heap_d, heap_n, 0.0, start)
+	var steps_limit := limit / MEMO_CELL
+	var found := false
+	var gx := goal % w
+	var gz := goal / w
+	while not heap_n.is_empty():
+		var c := heap_pop(heap_d, heap_n)
+		if c == goal:
+			found = true
+			break
+		var cx := c % w
+		var cz := c / w
+		for dz in range(-1, 2):
+			for dx in range(-1, 2):
+				if dx == 0 and dz == 0:
+					continue
+				var nx := cx + dx
+				var nz := cz + dz
+				if nx < 0 or nz < 0 or nx >= w or nz >= h:
+					continue
+				var n := nz * w + nx
+				if not passable.call(n):
+					continue
+				if dx != 0 and dz != 0 and (not passable.call(cz * w + nx) or not passable.call(nz * w + cx)):
+					continue
+				var g := cost[c] + (1.4142 if dx != 0 and dz != 0 else 1.0)
+				if g > steps_limit or g >= cost[n]:
+					continue
+				cost[n] = g
+				parent[n] = c
+				heap_push(heap_d, heap_n, g + Vector2(nx - gx, nz - gz).length(), n)
+	if not found:
+		return PackedVector2Array()
+	var cells := PackedVector2Array()
+	var c := goal
+	while c >= 0:
+		cells.append(centre.call(c))
+		if c == start:
+			break
+		c = parent[c]
+	cells.reverse()
+	cells[0] = a
+	cells[cells.size() - 1] = b
+	var out := PackedVector2Array([a])
+	var i := 0
+	while i < cells.size() - 1:
+		var j := cells.size() - 1
+		while j > i + 1 and not fine_clear(cells[i], cells[j], not anywhere):
+			j -= 1
+		out.append(cells[j])
+		i = j
+	return out
+
+## Lanes the town plan lays through a fence, a yard's corner or a gate's plinth cut the street
+## network in parts. Each part is joined to the nearest other one by the shortest walk round
+## what is in the way, within reach of the streets (BRIDGE_REACH beyond their band), when there
+## is one no longer than twice the gap and 8 m.
+func bridge(serial: int) -> bool:
+	var tried := {}
+	var attempts := 0
+	for round in 12:
+		var groups := {}
+		for n: int in street_nodes:
+			if g_edges[n].is_empty() or not walkable(g_nodes[n]):
+				continue
+			var c: int = component[n]
+			if not groups.has(c):
+				groups[c] = PackedInt32Array()
+			groups[c].append(n)
+		var keys: Array = groups.keys()
+		var best: Array = []
+		for i in keys.size():
+			for j in range(i + 1, keys.size()):
+				# The three nearest pairs of street nodes of the two parts.
+				var pairs: Array = []
+				for a: int in groups[keys[i]]:
+					for b: int in groups[keys[j]]:
+						var d := g_nodes[a].distance_to(g_nodes[b])
+						if d <= BRIDGE_MAX and not tried.has("%d|%d" % [mini(a, b), maxi(a, b)]):
+							pairs.append([d, a, b])
+				pairs.sort_custom(func(x, y): return x[0] < y[0])
+				for pair: Array in pairs.slice(0, 3):
+					best.append(pair)
+		if best.is_empty():
+			return true
+		best.sort_custom(func(x, y): return x[0] < y[0])
+		var joined := false
+		for candidate: Array in best:
+			if attempts >= 24:
+				return true
+			attempts += 1
+			tried["%d|%d" % [mini(candidate[1], candidate[2]), maxi(candidate[1], candidate[2])]] = true
+			if serial >= 0 and not await next_slice(serial):
+				return false
+			var a := g_nodes[candidate[1]]
+			var b := g_nodes[candidate[2]]
+			var path := grid_path(a, b, float(candidate[0]) * 2.0 + 8.0)
+			if path.size() < 2:
+				continue
+			lay_detour(candidate[1], candidate[2], path)
+			joined = true
+			break
+		if not joined:
+			return true
+		link()
+	return true
+
+## A part of the network with doors on it that no detour along the streets reaches (the plan's
+## lane to it runs under a building that grew over it, or the last stretch of a door path is
+## built over): joined to the town by the shortest walk across the ground in between.
+func bridge_islands(serial: int) -> bool:
+	for round in 6:
+		var counts := {}
+		for n: int in street_nodes:
+			if not g_edges[n].is_empty():
+				counts[component[n]] = counts.get(component[n], 0) + 1
+		var main := -1
+		for c: int in counts:
+			if main < 0 or counts[c] > counts[main]:
+				main = c
+		if main < 0:
+			return true
+		var islands := {}
+		for li: int in door_node:
+			var c: int = component[door_node[li]]
+			if c != main and not tried_islands.has(c):
+				islands[c] = true
+		if islands.is_empty():
+			return true
+		var targets := PackedInt32Array()
+		for n in g_nodes.size():
+			if component[n] == main and n < g_edges.size() and not g_edges[n].is_empty() and not yard_spots.has(n) and walkable(g_nodes[n]):
+				targets.append(n)
+		var joined := false
+		for c: int in islands:
+			tried_islands[c] = true
+			# For each node of the town, the nearest of the island; tried in order of distance,
+			# at most six, each 5 m from those before (different ways out).
+			var from := PackedInt32Array()
+			for a in g_nodes.size():
+				if component[a] == c and not yard_spots.has(a) and walkable(g_nodes[a]):
+					from.append(a)
+			var pairs: Array = []
+			for b: int in targets:
+				var best := -1
+				var best_d := BRIDGE_MAX
+				for a: int in from:
+					var d := g_nodes[a].distance_to(g_nodes[b])
+					if d < best_d:
+						best_d = d
+						best = a
+				if best >= 0:
+					pairs.append([best_d, best, b])
+			pairs.sort_custom(func(x, y): return x[0] < y[0])
+			var chosen: Array = []
+			for pair: Array in pairs:
+				if chosen.size() >= 6:
+					break
+				var spread := true
+				for other: Array in chosen:
+					if g_nodes[other[2]].distance_to(g_nodes[pair[2]]) < 5.0:
+						spread = false
+						break
+				if spread:
+					chosen.append(pair)
+			for pair: Array in chosen:
+				if serial >= 0 and not await next_slice(serial):
+					return false
+				var path := grid_path(g_nodes[pair[1]], g_nodes[pair[2]], float(pair[0]) * 1.8 + 6.0, true)
+				if path.size() < 2:
+					continue
+				lay_detour(pair[1], pair[2], path)
+				joined = true
+				break
+			if joined:
+				break
+		if not joined:
+			return true
+		link()
+		tried_islands.clear()
+	return true
+
+## Lays a detour found on the grid as edges (kind 3) from node a to node b; each corner also
+## joins the network nodes it sees close by, so no way through it runs on to a node and back.
+func lay_detour(a: int, b: int, path: PackedVector2Array) -> void:
+	var previous := a
+	var length := 0.0
+	var made: Array = []
+	for k in range(1, path.size()):
+		var n: int = b if k == path.size() - 1 else add_node(path[k])
+		add_edge(previous, n, 0.0, 3)
+		length += g_nodes[previous].distance_to(g_nodes[n])
+		previous = n
+		if k < path.size() - 1:
+			made.append(n)
+	for n: int in made:
+		var joins := 0
+		for m in g_nodes.size():
+			if joins >= 3 or m == n or m >= g_edges.size() or g_edges[m].is_empty() or yard_spots.has(m):
+				continue
+			if g_nodes[m].distance_to(g_nodes[n]) < 3.0 and fine_clear(g_nodes[m], g_nodes[n], true):
+				add_edge(m, n, 0.0, 3)
+				joins += 1
+	bridges.append([g_nodes[a], g_nodes[b], length])
+
+## Places to stop beyond the doors: work places round each building in its yard (a field's
+## edge, the lumber yard, the store's yard: beside the building, facing it), the inner side of
+## the wall's gates (looking out), and at the well and the market two places facing each other
+## where neighbours meet. Each is joined by one straight line checked clear (kerbs included).
+func add_places(serial: int) -> bool:
+	var taken := PackedVector2Array()
+	for n in yard_spots:
+		taken.append(g_nodes[n])
+		if place_kind.get(n, "") == "yard":
+			join_place(n)
+	for li: int in door_node.keys():
+		if serial >= 0 and not await next_slice(serial):
+			return false
+		var lot: Dictionary = plan.lots[li]
+		if lot.hall or TownPlan.own_square(lot):
+			continue
+		var body: Rect2 = lot.body
+		var inner := (lot.rect as Rect2).grow(-0.45)
+		var anchors: Array = (lot_nodes.get(li, []) as Array).duplicate()
+		for n in yard_spots:
+			if place_lot.get(n, -1) == li:
+				anchors.append(n)
+		var stop: Vector2 = door_stop[li]
+		var want := clampi(2 + int(lot.level) / 2, 2, 4)
+		# How far each node of the door path is from its street node (along the path).
+		var out_cost := {}
+		var walked := 0.0
+		var last: Vector2 = g_nodes[lot_entry[li]] if lot_entry.has(li) else stop
+		if lot_entry.has(li):
+			anchors.push_front(lot_entry[li])
+			out_cost[lot_entry[li]] = 0.0
+		for m: int in lot_nodes.get(li, []):
+			walked += g_nodes[m].distance_to(last)
+			last = g_nodes[m]
+			out_cost[m] = walked
+		var made := 0
+		var candidates: Array = []
+		# Along each side of the building, 0.8 m out from its footprint, facing it.
+		for side: Array in [[body.position, Vector2.RIGHT, Vector2.UP, body.size.x], [Vector2(body.position.x, body.end.y), Vector2.RIGHT, Vector2.DOWN, body.size.x],
+				[body.position, Vector2.DOWN, Vector2.LEFT, body.size.y], [Vector2(body.end.x, body.position.y), Vector2.DOWN, Vector2.RIGHT, body.size.y]]:
+			var steps := maxi(2, floori(float(side[3]) / 1.4))
+			for k in range(1, steps):
+				var q: Vector2 = side[0] + side[1] * (float(side[3]) * k / steps) + side[2] * 0.8
+				candidates.append([q, atan2(-side[2].x, -side[2].y)])
+		var rng := seeded("work%d" % li)
+		for k in range(candidates.size() - 1, 0, -1):
+			var m := rng.randi() % (k + 1)
+			var t: Array = candidates[k]
+			candidates[k] = candidates[m]
+			candidates[m] = t
+		for candidate: Array in candidates:
+			if made >= want:
+				break
+			var q: Vector2 = candidate[0]
+			if not inner.has_point(q) or q.distance_to(stop) < 1.8 or not walkable(q):
+				continue
+			var crowded_here := false
+			for other in taken:
+				if other.distance_to(q) < 2.0:
+					crowded_here = true
+					break
+			for post in posts:
+				if post.distance_to(q) < 1.2:
+					crowded_here = true
+			if crowded_here:
+				continue
+			# Joined where the way out is soonest: along the door path from its street node
+			# (the walk from the place on does not run past it to the door and back).
+			var anchor := -1
+			var anchor_cost := INF
+			for m: int in anchors:
+				var d := g_nodes[m].distance_to(q)
+				var cost: float = d + float(out_cost.get(m, 3.0))
+				if d < 10.0 and cost < anchor_cost and d > 1.2 and fine_clear(g_nodes[m], q):
+					anchor_cost = cost
+					anchor = m
+			if anchor < 0:
+				continue
+			var by_door := false
+			for x: float in DOOR_PLACES:
+				if q.distance_to(stop + Vector2(x, 0.0)) < 1.0:
+					by_door = true
+			if by_door or on_a_way(q, 0.6):
+				continue
+			var n := add_node(q)
+			add_edge(anchor, n, 0.0, 1)
+			join_place(n)
+			yard_spots[n] = candidate[1]
+			place_kind[n] = "work"
+			place_lot[n] = li
+			anchors.append(n)
+			taken.append(q)
+			made += 1
+		if made < 2 and (lot_base[li] in FARM or lot_base[li] in LUMBER or lot_base[li] in STORE):
+			# The building fills its yard (a big farm's fields): places at the yard's edge, on
+			# the street beside it (by its kerb, out of the walkers' way), facing the yard.
+			var r: Rect2 = lot.rect
+			var edge_spots: Array = []
+			for side: Array in [[r.position, Vector2.RIGHT, Vector2.UP, r.size.x], [Vector2(r.position.x, r.end.y), Vector2.RIGHT, Vector2.DOWN, r.size.x],
+					[r.position, Vector2.DOWN, Vector2.LEFT, r.size.y], [Vector2(r.end.x, r.position.y), Vector2.DOWN, Vector2.RIGHT, r.size.y]]:
+				var steps := maxi(2, floori(float(side[3]) / 1.4))
+				for k in range(1, steps):
+					var q: Vector2 = side[0] + side[1] * (float(side[3]) * k / steps) + side[2] * 0.45
+					for sg: Dictionary in plan.segments:
+						if sg.gate or float(sg.w) < 2.5:
+							continue
+						var off := q.distance_to(Geometry2D.get_closest_point_to_segment(q, sg.a, sg.b))
+						if off <= float(sg.w) * 0.5 and off >= float(sg.w) * 0.5 - 0.55:
+							edge_spots.append([q, atan2(-side[2].x, -side[2].y)])
+							break
+			for candidate: Array in edge_spots:
+				if made >= 2:
+					break
+				var q: Vector2 = candidate[0]
+				if q.distance_to(stop) < 2.5 or not walkable(q) or on_a_way(q, 0.9):
+					continue
+				var crowded_here := false
+				for other in taken:
+					if other.distance_to(q) < 2.5:
+						crowded_here = true
+						break
+				for post in posts:
+					if post.distance_to(q) < 1.2:
+						crowded_here = true
+				if crowded_here:
+					continue
+				var anchor := nearest_joined(q, 2.5)
+				if anchor < 0:
+					anchor = split_street(q)
+				if anchor < 0 or component[anchor] != component[door_node[li]] or not fine_clear(g_nodes[anchor], q):
+					continue
+				var n := add_node(q)
+				add_edge(anchor, n, 0.0, 1)
+				join_place(n)
+				yard_spots[n] = candidate[1]
+				place_kind[n] = "work"
+				place_lot[n] = li
+				taken.append(q)
+				made += 1
+	link()
+	# The inner side of each gate of the wall: on its road, where it is walked, looking out.
+	if stage.walls.visible:
+		for road: Array in stage.walls.gate_roads:
+			var inward: Vector2 = (road[0] - road[1]).normalized()
+			var wall_at: Vector2 = road[0] - inward * 7.0
+			for k: float in [3.5, 4.5, 5.5, 6.5, 8.0, 9.5, 11.0]:
+				var q := wall_at + inward * k
+				if not walkable(q) or not stage.walls.inside(q.x, q.y, 3.0) or not walkable(q + inward * 0.6):
+					continue
+				var anchor := nearest_joined(q, 9.0)
+				if anchor < 0:
+					continue
+				var n := add_node(q)
+				add_edge(anchor, n, 0.0, 1)
+				join_place(n)
+				yard_spots[n] = atan2(-inward.x, -inward.y)
+				place_kind[n] = "gate"
+				place_lot[n] = -1
+				taken.append(q)
+				break
+	link()
+	# A market that draws its own square: a way in through the gate of its fence to the middle
+	# of the square, and stalls (beside a counter, facing it) where the merchant stands and
+	# loads are left.
+	var market_ways := {}
+	for li: int in door_node.keys():
+		var lot: Dictionary = plan.lots[li]
+		if not TownPlan.own_square(lot) or floors.is_empty():
+			continue
+		if serial >= 0 and not await next_slice(serial):
+			return false
+		var body: Rect2 = lot.body
+		var inward: Vector2 = door_in[li]
+		var stop: Vector2 = door_stop[li]
+		var cells := PackedVector2Array()
+		var sum := Vector2.ZERO
+		var z := body.position.y + 0.125
+		while z < body.end.y:
+			var x := body.position.x + 0.125
+			while x < body.end.x:
+				var q := Vector2(x, z)
+				if not is_nan(floor_at(q)) and walkable(q):
+					cells.append(q)
+					sum += q
+				x += 0.25
+			z += 0.25
+		if cells.size() < 24:
+			continue
+		var roomy_at := func(q: Vector2) -> bool:
+			return walkable(q + Vector2(0.3, 0.0)) and walkable(q - Vector2(0.3, 0.0)) and walkable(q + Vector2(0.0, 0.3)) and walkable(q - Vector2(0.0, 0.3))
+		var gate_in := Vector2.INF
+		for k in range(1, 20):
+			var q := stop + inward * (0.25 * k)
+			if not is_nan(floor_at(q)) and walkable(q):
+				var deeper := q + inward * 0.5
+				gate_in = deeper if walkable(deeper) and not is_nan(floor_at(deeper)) else q
+				break
+		if gate_in == Vector2.INF or not fine_clear(stop, gate_in):
+			continue
+		var middle := sum / cells.size()
+		var hub := Vector2.INF
+		for q in cells:
+			if q.distance_to(gate_in) > 1.5 and roomy_at.call(q) and fine_clear(gate_in, q) \
+					and (hub == Vector2.INF or q.distance_squared_to(middle) < hub.distance_squared_to(middle)):
+				hub = q
+		var n_gate := add_node(gate_in)
+		add_edge(door_node[li], n_gate, 0.0, 1)
+		var ways: Array = [gate_in]
+		if hub != Vector2.INF:
+			add_edge(n_gate, add_node(hub), 0.0, 1)
+			ways.append(hub)
+		market_ways[li] = ways
+		link()
+		var order := Array(cells)
+		order.sort_custom(func(a, b): return a.distance_squared_to(middle) < b.distance_squared_to(middle))
+		var stalls := 0
+		for q: Vector2 in order:
+			if stalls >= 3:
+				break
+			if q.distance_to(gate_in) < 1.5 or (hub != Vector2.INF and q.distance_to(hub) < 1.2) or not roomy_at.call(q):
+				continue
+			var crowded_here := false
+			for other in taken:
+				if other.distance_to(q) < 2.2:
+					crowded_here = true
+					break
+			if crowded_here:
+				continue
+			var facing := Vector2.ZERO
+			for k in 8:
+				var d := Vector2.from_angle(k * PI / 4.0)
+				if solid_at(q + d * 0.6) and walkable(q + d * 0.2):
+					facing = d
+					break
+			if facing == Vector2.ZERO or on_a_way(q, 0.7):
+				continue
+			var anchor := nearest_joined(q, 8.0)
+			if anchor < 0 or component[anchor] != component[door_node[li]]:
+				continue
+			var n := add_node(q)
+			add_edge(anchor, n, 0.0, 1)
+			join_place(n)
+			yard_spots[n] = atan2(facing.x, facing.y)
+			place_kind[n] = "work"
+			place_lot[n] = li
+			taken.append(q)
+			stalls += 1
+			link()
+	# Meeting places in front of the well and the market: the nearest clear pair of places in
+	# front of the door, beside the way in (the door's own places and its lead point left free);
+	# at a market with its own square, on the square.
+	for li in doors_of(WELL) + doors_of(MARKET):
+		if serial >= 0 and not await next_slice(serial):
+			return false
+		var outward := -(door_in.get(li, Vector2(0.0, -1.0)) as Vector2)
+		var across := Vector2(-outward.y, outward.x)
+		var stop: Vector2 = door_stop[li]
+		var keep_free := PackedVector2Array([stop + outward * 1.1])
+		for x: float in DOOR_PLACES:
+			keep_free.append(stop + across * x)
+		var centres: Array = []
+		var on_floor := market_ways.has(li)
+		if on_floor:
+			var ways: Array = market_ways[li]
+			var middle: Vector2 = ways[ways.size() - 1]
+			across = Vector2.RIGHT
+			for q: Vector2 in ways:
+				keep_free.append(q)
+			var body: Rect2 = plan.lots[li].body
+			var z := body.position.y + 0.25
+			while z < body.end.y:
+				var x := body.position.x + 0.25
+				while x < body.end.x:
+					if not is_nan(floor_at(Vector2(x, z))):
+						centres.append(Vector2(x, z))
+					x += 0.25
+				z += 0.25
+			centres.sort_custom(func(x, y): return x.distance_squared_to(middle) < y.distance_squared_to(middle))
+		else:
+			for out_k in range(4, 13):
+				for side_k in range(-8, 9):
+					centres.append(stop + outward * (out_k * 0.3) + across * (side_k * 0.4))
+			centres.sort_custom(func(x, y): return x.distance_squared_to(stop + outward * 2.4) < y.distance_squared_to(stop + outward * 2.4))
+		for m: Vector2 in centres:
+			var a := m - across * MEET_HALF
+			var b := m + across * MEET_HALF
+			var crowded_here := false
+			for q in keep_free:
+				if q.distance_to(a) < 1.3 or q.distance_to(b) < 1.3 or q.distance_to(m) < 1.3:
+					crowded_here = true
+					break
+			for other in taken:
+				if other.distance_to(a) < 1.5 or other.distance_to(b) < 1.5:
+					crowded_here = true
+					break
+			if crowded_here or not walkable(a) or not walkable(b) or not walkable(m):
+				continue
+			if on_floor and (is_nan(floor_at(a)) or is_nan(floor_at(b)) or not walkable(a - across * 0.35) or not walkable(b + across * 0.35)):
+				continue
+			var anchor_a := nearest_joined(a, 6.0)
+			var anchor_b := nearest_joined(b, 6.0)
+			if anchor_a < 0 or anchor_b < 0 or component[anchor_a] != component[anchor_b] or component[anchor_a] != component[door_node[li]]:
+				continue
+			var na := add_node(a)
+			var nb := add_node(b)
+			add_edge(anchor_a, na, 0.0, 1)
+			add_edge(anchor_b, nb, 0.0, 1)
+			join_place(na)
+			join_place(nb)
+			yard_spots[na] = atan2(across.x, across.y)
+			yard_spots[nb] = atan2(-across.x, -across.y)
+			for pair_node: int in [na, nb]:
+				place_kind[pair_node] = "meet"
+				place_lot[pair_node] = li
+			meet_pairs.append([na, nb, li])
+			taken.append(a)
+			taken.append(b)
+			link()
+			break
+	return true
+
+## A place also joins the network nodes it sees close by (not other places), so the way to it
+## and on does not run past it to its anchor and back.
+func join_place(n: int, reach := 4.0, most := 3) -> void:
+	var near: Array = []
+	for m in g_nodes.size():
+		if m == n or m >= g_edges.size() or g_edges[m].is_empty() or yard_spots.has(m):
+			continue
+		var d := g_nodes[m].distance_to(g_nodes[n])
+		if d < reach and d > 0.3:
+			near.append([d, m])
+	near.sort_custom(func(x, y): return x[0] < y[0])
+	# Its own edges so far (to its anchor): a join only where it saves a detour of a metre.
+	var own: Array = []
+	for e in e_a.size():
+		if e_live[e] == 1 and (e_a[e] == n or e_b[e] == n):
+			own.append(e_b[e] if e_a[e] == n else e_a[e])
+	var joins := 0
+	for item: Array in near:
+		if joins >= most:
+			break
+		var e := edge_between(n, item[1])
+		if e >= 0 and e_live[e] == 1:
+			continue
+		var via := INF
+		for m: int in own:
+			via = minf(via, g_nodes[item[1]].distance_to(g_nodes[m]) + g_nodes[m].distance_to(g_nodes[n]))
+		if float(item[0]) > via - 1.0:
+			continue
+		if fine_clear(g_nodes[item[1]], g_nodes[n]):
+			e = add_edge(item[1], n, 0.0, 1)
+			e_live[e] = 1
+			e_lat[e] = 0.0
+			e_shift[e] = 0.0
+			joins += 1
+
+## Someone standing at p would stand on a way walked (a live edge passes within `reach`).
+func on_a_way(p: Vector2, reach := 0.8) -> bool:
+	for e in e_a.size():
+		if e_live[e] == 1 and p.distance_squared_to(Geometry2D.get_closest_point_to_segment(p, g_nodes[e_a[e]], g_nodes[e_b[e]])) < reach * reach:
+			return true
+	return false
+
+## A node on the street edge nearest p (within 2 m of its line), the edge split there (-1: none).
+func split_street(p: Vector2) -> int:
+	var best := -1
+	var best_d := 2.0
+	var at := Vector2.ZERO
+	for e in e_a.size():
+		if e_live[e] == 0 or e_kind[e] != 0:
+			continue
+		var q := Geometry2D.get_closest_point_to_segment(p, g_nodes[e_a[e]], g_nodes[e_b[e]])
+		var d := q.distance_to(p)
+		if d < best_d and q.distance_to(g_nodes[e_a[e]]) > 0.5 and q.distance_to(g_nodes[e_b[e]]) > 0.5:
+			best_d = d
+			best = e
+			at = q
+	if best < 0:
+		return -1
+	var n := add_node(at)
+	var a := e_a[best]
+	var b := e_b[best]
+	e_live[best] = 0
+	for pair: Array in [[a, n], [n, b]]:
+		var e := add_edge(pair[0], pair[1], e_lat[best], 0)
+		e_live[e] = 1
+		e_lat[e] = e_lat[best]
+		e_shift[e] = e_shift[best]
+	link()
+	return n
+
+## The nearest node of the network (one with live edges) joined to p by a clear straight line.
+func nearest_joined(p: Vector2, reach: float) -> int:
+	var best := -1
+	var best_d := reach
+	for n in g_nodes.size():
+		if n >= g_edges.size() or g_edges[n].is_empty():
+			continue
+		var d := g_nodes[n].distance_to(p)
+		if d < best_d and d > 0.5 and fine_clear(g_nodes[n], p):
+			best_d = d
+			best = n
+	return best
 
 ## Shortest node path (Dijkstra, binary heap), [] when unreachable.
 func route(from: int, to: int) -> PackedInt32Array:
@@ -1106,6 +2240,10 @@ func route(from: int, to: int) -> PackedInt32Array:
 		for e in g_edges[n]:
 			var m := e_b[e] if e_a[e] == n else e_a[e]
 			var nd := d + g_nodes[n].distance_to(g_nodes[m]) + (0.6 if square_nodes.has(m) and square_nodes.has(n) else 0.0)
+			if n != from and yard_spots.has(n):
+				# A place someone may stand on is walked through only when there is no other way
+				# (where two people meet, not even then while a long way round exists).
+				nd += 40.0 if place_kind.get(n, "") == "meet" else 4.0
 			if nd < dist[m]:
 				dist[m] = nd
 				prev[m] = n
@@ -1239,14 +2377,15 @@ func walk_line(nodes: PackedInt32Array, side: float, start: Vector2, finish: Vec
 		raw.append(finish_lead)
 	raw.append(finish)
 	# Offsets on short connector edges can fold the line back on itself: such a vertex goes
-	# (the lead points lie on the route, so only offset corners can fold).
+	# when the line straight past it is clear (a detour's corner that is needed stays).
 	var folded := true
 	while folded and raw.size() > 2:
 		folded = false
 		for i in range(1, raw.size() - 1):
 			var d1 := raw[i] - raw[i - 1]
 			var d2 := raw[i + 1] - raw[i]
-			if d1.length_squared() > 0.000001 and d2.length_squared() > 0.000001 and absf(d1.angle_to(d2)) > 2.0:
+			if d1.length_squared() > 0.000001 and d2.length_squared() > 0.000001 and absf(d1.angle_to(d2)) > 2.0 \
+					and band_clear(raw[i - 1], raw[i + 1], 0.0):
 				raw.remove_at(i)
 				folded = true
 				break
@@ -1368,148 +2507,335 @@ func delivery(home: int, groups: Array) -> int:
 	return to
 
 ## A visit: a stop (graph node), what is done there and what is carried away from it.
+## Optional: "dwell" (seconds, Vector2 range), "acts" (clips played one after another while
+## standing), "face" (yaw), "meet" (the stop where this person meets its partner).
 func visit_door(li: int, action: int, enter: bool, carry_out: bool, drop := false) -> Dictionary:
 	return {"node": door_node[li], "lot": li, "action": action, "enter": enter, "carry_out": carry_out, "drop": drop}
 
-func visit_spot(n: int, action: int) -> Dictionary:
-	return {"node": n, "lot": -1, "action": action, "enter": false, "carry_out": false, "drop": false}
+func visit_spot(n: int, action: int, carry_out := false, drop := false, dwell := Vector2(2.0, 6.0), acts: Array = []) -> Dictionary:
+	return {"node": n, "lot": -1, "action": action, "enter": false, "carry_out": carry_out, "drop": drop, "dwell": dwell,
+		"acts": acts if not acts.is_empty() else [action]}
+
+## The places of a yard of the kinds asked (nearest the door first).
+func places_of(li: int, kinds: Array) -> Array:
+	var out: Array = []
+	for n in yard_spots:
+		if place_lot.get(n, -1) == li and place_kind.get(n, "") in kinds and n < g_edges.size() and not g_edges[n].is_empty():
+			out.append(n)
+	var stop: Vector2 = door_stop.get(li, Vector2.ZERO)
+	out.sort_custom(func(a, b): return g_nodes[a].distance_squared_to(stop) < g_nodes[b].distance_squared_to(stop))
+	return out
+
+## The same part of the street network.
+func same_part(a: int, b: int) -> bool:
+	return a >= 0 and b >= 0 and component[a] == component[b]
+
+## A place in a yard nobody else has, that `home` can walk to (-1: none).
+func free_place(li: int, kinds: Array, home: int, claimed: Dictionary) -> int:
+	for n in places_of(li, kinds):
+		if not claimed.has(n) and (home < 0 or same_part(door_node[home], n)):
+			claimed[n] = true
+			return n
+	return -1
+
+## Where a stroller may stop: free places (the square, forecourts, work places nobody works at,
+## the gates) and the doors with room in front, all in one part of the network.
+func stroll_pool(claimed: Dictionary, part: int) -> Array:
+	var pool: Array = []
+	for n in yard_spots:
+		var kind: String = place_kind.get(n, "")
+		if claimed.has(n) or kind == "meet" or n >= g_edges.size() or g_edges[n].is_empty() or component[n] != part:
+			continue
+		pool.append(visit_spot(n, C_LOOK if n % 3 != 0 else C_IDLE, false, false, Vector2(2.5, 6.0)))
+	for li in door_node:
+		if roomy(li) and component[door_node[li]] == part and not lot_base[li] in HOUSE and int(door_users.get(li, 0)) < 3:
+			pool.append(visit_door(li, C_LOOK, false, false))
+	if pool.size() < 3:
+		# A small town: the houses' doors too, and the busier doors once more.
+		for li in door_node:
+			if roomy(li) and component[door_node[li]] == part and (lot_base[li] in HOUSE or int(door_users.get(li, 0)) >= 3) \
+					and int(door_users.get(li, 0)) < 5 and not plan.lots[li].hall:
+				pool.append(visit_door(li, C_LOOK, false, false))
+	return pool
+
+## The part of the network with the most doors.
+func main_part() -> int:
+	var count := {}
+	for li in door_node:
+		var c: int = component[door_node[li]]
+		count[c] = int(count.get(c, 0)) + 1
+	var best := -1
+	for c in count:
+		if best < 0 or count[c] > count[best]:
+			best = c
+	return best
 
 ## The people this town could have, in priority order (rebuild takes as many as the hall
-## allows: 6 at I .. 14 at V). Every destination is one the person can walk to from home.
+## allows: 8 at I, 14 at III, 20 at V). The workers' errands go where the goods belong, however
+## far (camp -> store, farm -> granary, store <-> market, forge <-> store, water from the well);
+## strollers cross the town; neighbours meet face to face at the square, the well or the market.
+var door_users := {}
+
 func plan_people() -> Array:
 	door_load.clear()
+	door_users.clear()
 	var specs: Array = []
-	var extra: Array = []
+	var claimed := {}
+	var keys_used := {}
 	var hall := hall_lot()
 	var visuals_used := {}
-	var add := func(list: Array, role: String, home: int, visuals: Array, prop: String, visits: Array) -> void:
+	var add := func(role: String, home: int, visuals: Array, prop: String, visits: Array, pair := "") -> void:
 		if visits.size() < 2:
 			return
 		var key := "%s|%s" % [role, str(plan.lots[home].id) if home >= 0 else "town"]
 		var n := 0
-		while specs.any(func(s): return s.key == key + "#%d" % n) or extra.any(func(s): return s.key == key + "#%d" % n):
+		while keys_used.has(key + "#%d" % n):
 			n += 1
 		key += "#%d" % n
+		keys_used[key] = true
 		var rng := seeded(key)
 		var visual: String = visuals[rng.randi() % visuals.size()]
-		if visuals_used.get(visual, 0) > 2:
+		if visuals_used.get(visual, 0) > 3:
 			for alternative in visuals:
 				if visuals_used.get(alternative, 0) < visuals_used.get(visual, 0):
 					visual = alternative
 		visuals_used[visual] = visuals_used.get(visual, 0) + 1
-		list.append({"key": key, "role": role, "home": home, "visual": visual, "prop": prop, "visits": visits, "seed": hash(key)})
-	var deliver := func(list: Array, role: String, home: int, visuals: Array, prop: String, groups: Array, action: int) -> void:
-		var to := delivery(home, groups)
-		if to >= 0:
-			add.call(list, role, home, visuals, prop, [visit_door(home, C_IDLE, true, true), visit_door(to, action, false, false, true)])
-	# Producers take their goods to the store (or the market, or the hall).
-	for li in doors_of(LUMBER):
-		deliver.call(specs, "lumberjack", li, ["quarry_worker", "ferryman"], "log", [STORE, MARKET], C_THANK)
-	for li in doors_of(FARM):
-		deliver.call(specs, "farmer", li, ["miller"], "sack", [["ECO-02"], STORE, MARKET], C_THANK)
-	for li in doors_of(QUARRY):
-		deliver.call(specs, "quarryman", li, ["quarry_worker", "cooper"], "stone", [SMITH, STORE], C_REACT)
-	for li in doors_of(HERBAL):
-		deliver.call(specs, "herbalist", li, ["herbalist"], "basket", [HOSPITAL, MARKET], C_THANK)
-	for li in doors_of(STORE):
-		deliver.call(specs, "carrier", li, ["cooper", "courier"], "crate", [MARKET], C_THANK)
-		break
-	# The smith fetches ore or iron and goes back to the forge.
-	for li in doors_of(SMITH):
-		var from := delivery(li, [QUARRY, STORE])
-		if from >= 0:
-			add.call(specs, "smith", li, ["cooper"], "ore", [visit_door(li, C_IDLE, true, false), visit_door(from, C_LOOK, false, true)])
-	# The hall's steward walks round the town and back; a messenger runs from the barracks.
+		for v: Dictionary in visits:
+			if v.lot >= 0:
+				door_users[v.lot] = int(door_users.get(v.lot, 0)) + 1
+		specs.append({"key": key, "role": role, "home": home, "visual": visual, "prop": prop, "visits": visits, "seed": hash(key), "pair": pair})
+	var part := main_part()
+	# A worker's round: home (in through the door), the work in its yard (picking the load up),
+	# the long walk to where the load goes (put down there).
+	var worker := func(role: String, li: int, visuals: Array, prop: String, groups: Array, work_acts: Array) -> void:
+		var to := delivery(li, groups)
+		if to < 0:
+			return
+		var visits: Array = [visit_door(li, C_IDLE, true, false)]
+		var work := free_place(li, ["work", "yard"], li, claimed)
+		if work >= 0:
+			visits.append(visit_spot(work, work_acts[0], true, false, Vector2(5.0, 9.0), work_acts))
+		else:
+			visits[0].carry_out = true
+		# At a market the load goes to a stall when one is free.
+		var stall := -1
+		if lot_base[to] in MARKET:
+			stall = free_place(to, ["work"], li, claimed)
+			if stall < 0:
+				stall = free_place(to, ["yard"], li, claimed)
+		visits.append(visit_spot(stall, C_THANK, false, true, Vector2(3.0, 5.0)) if stall >= 0 else visit_door(to, C_THANK, false, false, true))
+		add.call(role, li, visuals, prop, visits)
+	var stroller := func(k: int) -> void:
+		var pool := stroll_pool(claimed, part)
+		if pool.size() < 3:
+			return
+		var rng := seeded("stroller%d" % k)
+		var here: Dictionary = pool[rng.randi() % pool.size()]
+		# Every other stroller sets out from the hall's square (from hall III; at I the square
+		# has room to stand about and does not need them).
+		if k % 2 == 0 and hall >= 0 and int(plan.lots[hall].level) >= 3:
+			for v: Dictionary in pool:
+				if v.lot == hall and hall >= 0:
+					here = v
+					break
+		var visits: Array = [here]
+		pool.erase(here)
+		# Each next stop far across the town (one of the three farthest still free).
+		for step in 3:
+			var from_node: int = here.node
+			var ranked: Array = pool.filter(func(v): return v.node != from_node)
+			ranked.sort_custom(func(a, b): return route_length(from_node, a.node) > route_length(from_node, b.node))
+			if ranked.is_empty() or route_length(from_node, ranked[0].node) < 8.0:
+				break
+			here = ranked[rng.randi() % mini(3, ranked.size())]
+			pool.erase(here)
+			visits.append(here)
+		for v in visits:
+			if v.lot < 0:
+				claimed[v.node] = true
+		add.call("stroller", -1, ["herbalist", "ferryman", "courier", "miller", "cooper"], "", visits)
+	var meeting := func(k: int) -> void:
+		# Two neighbours from two homes meet face to face, talk a while and part.
+		# The square first, then the well, then the market.
+		var pair: Array = []
+		var best := -1
+		for candidate: Array in meet_pairs:
+			if not claimed.has(candidate[0]) and component[candidate[0]] == part and component[candidate[1]] == part:
+				var on_square := int(candidate[2]) < 0
+				var score := (2 if (k == 0) == on_square else 0) + (1 if not on_square and lot_base[candidate[2]] in WELL else 0)
+				if score > best:
+					best = score
+					pair = candidate
+		if pair.is_empty():
+			return
+		var homes: Array = doors_of(HOUSE) + doors_of(WELL) + doors_of(FARM) + doors_of(STORE) + doors_of(MILITARY) + doors_of(LUMBER) + [hall]
+		homes = homes.filter(func(li): return li >= 0 and roomy(li) and component[door_node[li]] == part)
+		if homes.size() < 2:
+			return
+		var rng := seeded("meet%d" % k)
+		var first: int = homes[(k * 2) % homes.size()]
+		var second: int = homes[(k * 2 + 1) % homes.size()]
+		if first == second:
+			second = homes[(k * 2 + 2) % homes.size()]
+		claimed[pair[0]] = true
+		claimed[pair[1]] = true
+		var tag := "pair%d" % k
+		var acts := [[C_THANK, C_LOOK], [C_REACT, C_THANK]]
+		for side in 2:
+			var home: int = first if side == 0 else second
+			var meet := visit_spot(pair[side], acts[side][0], false, false, Vector2(MEET_DWELL, MEET_DWELL), [acts[side][rng.randi() % 2]])
+			meet.face = yard_spots[pair[side]]
+			meet.meet = true
+			# (Then on somewhere else than home.)
+			var pool: Array = stroll_pool(claimed, part).filter(func(v): return v.lot != home and v.node != door_node[home])
+			var visits: Array = [visit_door(home, C_IDLE, true, false), meet]
+			if not pool.is_empty():
+				pool.sort_custom(func(a, b): return route_length(pair[side], a.node) > route_length(pair[side], b.node))
+				var after: Dictionary = pool[rng.randi() % mini(3, pool.size())]
+				if after.lot < 0:
+					claimed[after.node] = true
+				visits.append(after)
+			add.call("neighbour", home, ["herbalist", "miller", "ferryman", "courier", "cooper"], "", visits, tag)
+	var lumber := doors_of(LUMBER)
+	var farms := doors_of(FARM)
+	var stores := doors_of(STORE)
+	var markets := doors_of(MARKET)
+	# --- in priority order ---
+	if not lumber.is_empty():
+		worker.call("lumberjack", lumber[0], ["quarry_worker", "ferryman"], "log", [STORE, MARKET], [C_LOOK, C_REACT])
+	if not farms.is_empty():
+		worker.call("farmer", farms[0], ["miller"], "sack", [["ECO-02"], STORE, MARKET], [C_LOOK, C_IDLE])
+	meeting.call(0)
 	if hall >= 0:
+		# The hall's steward walks to the two farthest doors and back.
 		var rounds: Array = [visit_door(hall, C_IDLE, true, false)]
 		var others: Array = door_node.keys().filter(func(li): return li != hall and not lot_base[li] in HOUSE and joined(hall, li) and roomy(li))
-		others.sort()
-		var rng := seeded("steward")
+		others.sort_custom(func(a, b): return route_length(door_node[hall], door_node[a]) > route_length(door_node[hall], door_node[b]))
 		for k in mini(2, others.size()):
-			var pick: int = others[rng.randi() % others.size()]
-			others.erase(pick)
-			rounds.append(visit_door(pick, C_LOOK if k == 0 else C_THANK, false, false))
-		add.call(specs, "steward", hall, ["courier", "miller"], "", rounds)
+			rounds.append(visit_door(others[k], C_LOOK if k == 0 else C_THANK, false, false))
+		add.call("steward", hall, ["courier", "miller"], "", rounds)
+	stroller.call(0)
 	for li in doors_of(MILITARY):
-		# To the hall, unless its door is already busy with deliveries.
-		var to := hall if joined(li, hall) and int(door_load.get(hall, 0)) < 2 else first_door([STORE, SMITH, MARKET, HOUSE, FARM, LUMBER], li)
-		if to >= 0:
-			add.call(specs, "messenger", li, ["courier", "ferryman"], "", [visit_door(li, C_IDLE, true, false), visit_door(to, C_REACT, false, false)])
-		break
-	# Strollers: the square, the houses, the market and the well (one part of town each, the
-	# biggest part first).
-	var parts := {}
-	var spots_all: Array = Array(spot_nodes) + yard_spots.keys()
-	for n in spots_all:
-		if g_edges[n].is_empty():
-			continue
-		var c: int = component[n]
-		if not parts.has(c):
-			parts[c] = []
-		parts[c].append(visit_spot(n, C_LOOK if n % 3 != 0 else C_IDLE))
-	var spots_taken := {}
-	var ranked: Array = parts.keys().filter(func(c): return parts[c].size() >= 2)
-	ranked.sort_custom(func(a, b): return parts[a].size() > parts[b].size())
-	if ranked.is_empty():
-		for li in door_node:
-			var c: int = component[door_node[li]]
-			if not parts.has(c):
-				parts[c] = []
-			parts[c].append(visit_door(li, C_LOOK, false, false))
-		ranked = parts.keys().filter(func(c): return parts[c].size() >= 2)
-	for k in 6:
-		if ranked.is_empty():
+		# The messenger runs from the barracks to the hall (or the farthest door) and on to a gate.
+		var to := hall if joined(li, hall) and hall != li else first_door([STORE, SMITH, MARKET, FARM, LUMBER], li)
+		if to < 0:
 			break
-		var places: Array = parts[ranked[k % ranked.size()]]
-		var rng := seeded("stroller%d" % k)
-		var route_visits: Array = []
-		var pool := places.duplicate()
-		# A walk round the neighbourhood: each next place among the two nearest left.
-		# Spots on the square already taken by another stroller are left to them.
-		var own: Array = pool.filter(func(v): return v.lot >= 0 or not spots_taken.has(v.node))
-		if own.size() >= 2:
-			pool = own
-		var here: Dictionary = pool[rng.randi() % pool.size()]
-		for step in mini(3, pool.size()):
-			pool.erase(here)
-			route_visits.append(here)
-			if pool.is_empty():
+		var visits: Array = [visit_door(li, C_IDLE, true, false), visit_door(to, C_REACT, false, false)]
+		for n in yard_spots:
+			if place_kind.get(n, "") == "gate" and not claimed.has(n) and same_part(door_node[li], n):
+				claimed[n] = true
+				visits.append(visit_spot(n, C_LOOK, false, false, Vector2(3.0, 6.0)))
 				break
-			var from_node: int = here.node
-			pool.sort_custom(func(a, b): return route_length(from_node, a.node) < route_length(from_node, b.node))
-			here = pool[rng.randi() % mini(2, pool.size())]
-		for v in route_visits:
-			if v.lot < 0:
-				spots_taken[v.node] = true
-		add.call(extra if k >= 2 else specs, "stroller", -1, ["herbalist", "ferryman", "courier", "miller"], "", route_visits)
-	# Second hands at the bigger workplaces, and the households.
-	for li in doors_of(LUMBER) + doors_of(FARM) + doors_of(STORE):
-		if int(plan.lots[li].level) >= 3:
-			var groups: Array = [MARKET] if lot_base[li] in STORE else [STORE, MARKET]
-			var prop := "log" if lot_base[li] in LUMBER else ("sack" if lot_base[li] in FARM else "crate")
-			deliver.call(extra, "helper", li, ["ferryman", "quarry_worker", "cooper", "miller"], prop, groups, C_THANK)
-	# More errands: a visitor from the hall to the market, the healer, the water carrier.
-	var market := first_door([MARKET], hall)
-	if hall >= 0 and market >= 0:
-		add.call(extra, "visitor", hall, ["courier", "herbalist", "ferryman"], "basket",
-			[visit_door(hall, C_IDLE, true, false), visit_door(market, C_THANK, false, true)])
-	for li in doors_of(HOSPITAL):
-		var to := first_door([HERBAL, MARKET, STORE], li)
-		if to >= 0:
-			add.call(extra, "healer", li, ["herbalist"], "basket", [visit_door(li, C_IDLE, true, false), visit_door(to, C_LOOK, false, true)])
+		add.call("messenger", li, ["courier", "ferryman"], "", visits)
+		break
+	if not stores.is_empty() and not markets.is_empty():
+		worker.call("carrier", stores[0], ["cooper", "courier"], "crate", [MARKET], [C_LOOK, C_THANK])
+	for li in markets:
+		# The merchant keeps a stall: long waits there facing the street, now and then inside.
+		# (Its stalls first: the counters of a market's own square, the work places round a
+		# smaller one; its forecourt after.)
+		var stall_a := free_place(li, ["work"], li, claimed)
+		if stall_a < 0:
+			stall_a = free_place(li, ["yard"], li, claimed)
+		var stall_b := free_place(li, ["work"], li, claimed)
+		if stall_b < 0:
+			stall_b = free_place(li, ["yard"], li, claimed)
+		if stall_a < 0:
+			break
+		var visits: Array = []
+		for n in [stall_a, stall_b]:
+			if n < 0:
+				continue
+			var v := visit_spot(n, C_IDLE, false, false, Vector2(12.0, 20.0), [C_IDLE, C_THANK, C_LOOK])
+			v.face = wrapf(float(yard_spots[n]) + PI, -PI, PI)
+			visits.append(v)
+			# (A market with its own square is gone into through its gate: no door to go in.)
+			if visits.size() == 1 and not TownPlan.own_square(plan.lots[li]):
+				visits.append(visit_door(li, C_IDLE, true, false))
+		if visits.size() == 1:
+			visits.append(visit_door(li, C_LOOK, false, false))
+		add.call("merchant", li, ["cooper", "miller", "herbalist"], "", visits)
+		break
+	for li in doors_of(SMITH):
+		# The smith fetches iron from the store (or ore from the quarry) and back to the forge.
+		var from := delivery(li, [STORE, QUARRY])
+		if from >= 0:
+			add.call("smith", li, ["cooper"], "ore", [visit_door(li, C_IDLE, true, false), visit_door(from, C_LOOK, false, true)])
+		break
 	for li in doors_of(WELL):
+		# Water from the well: a rest there, then the walk to a house, the market or the hall.
 		var to := first_door([HOUSE, MARKET], li)
 		if to < 0 and joined(li, hall):
 			to = hall
 		if to >= 0:
-			add.call(extra, "water carrier", li, ["miller", "ferryman"], "sack", [visit_door(li, C_REACT, false, true), visit_door(to, C_IDLE, false, false, true)])
+			var rest := visit_door(li, C_IDLE, false, true)
+			rest.dwell = Vector2(8.0, 14.0)
+			rest.acts = [C_IDLE, C_LOOK]
+			add.call("water carrier", li, ["miller", "ferryman"], "sack", [rest, visit_door(to, C_IDLE, false, false, true)])
+		break
+	# Petitioners: from home to the hall's door, a long wait there, a look round a yard or a gate
+	# near the hall, and back to its door for another wait.
+	if hall >= 0 and int(plan.lots[hall].level) >= 3:
+		var petitioner_homes: Array = (doors_of(HOUSE) + doors_of(WELL) + doors_of(STORE) + doors_of(FARM)).filter(func(li): return joined(li, hall) and roomy(li))
+		var hall_at: Vector2 = door_stop[hall]
+		for k in mini(2, petitioner_homes.size()):
+			var home: int = petitioner_homes[(k * 3) % petitioner_homes.size()]
+			var nearest := -1
+			for n in yard_spots:
+				var kind: String = place_kind.get(n, "")
+				if claimed.has(n) or not kind in ["yard", "gate", "work", "square"] or n >= g_edges.size() or g_edges[n].is_empty() \
+						or not same_part(door_node[hall], n) or g_nodes[n].distance_to(hall_at) < 4.0:
+					continue
+				if nearest < 0 or g_nodes[n].distance_to(hall_at) < g_nodes[nearest].distance_to(hall_at):
+					nearest = n
+			var visits: Array = [visit_door(home, C_IDLE, true, false)]
+			for w in 2:
+				var wait := visit_door(hall, C_THANK, false, false)
+				wait.dwell = Vector2(8.0, 14.0)
+				wait.acts = [C_IDLE, C_THANK, C_LOOK] if (k + w) % 2 == 0 else [C_LOOK, C_IDLE, C_REACT]
+				visits.append(wait)
+				if w == 0:
+					if nearest >= 0 and g_nodes[nearest].distance_to(hall_at) < 30.0:
+						claimed[nearest] = true
+						visits.append(visit_spot(nearest, C_LOOK, false, false, Vector2(4.0, 8.0), [C_LOOK, C_IDLE]))
+					else:
+						break
+			add.call("petitioner", home, ["herbalist", "miller", "courier", "cooper"], "", visits)
+	stroller.call(1)
+	meeting.call(1)
+	for li in doors_of(QUARRY):
+		worker.call("quarryman", li, ["quarry_worker", "cooper"], "stone", [SMITH, STORE], [C_LOOK, C_REACT])
+		break
+	for li in doors_of(HERBAL):
+		worker.call("herbalist", li, ["herbalist"], "basket", [HOSPITAL, MARKET], [C_LOOK, C_THANK])
+		break
+	stroller.call(2)
+	# Second hands at the bigger workplaces.
+	for li in lumber + farms + stores:
+		if int(plan.lots[li].level) >= 3:
+			var groups: Array = [MARKET] if lot_base[li] in STORE else [STORE, MARKET]
+			var prop := "log" if lot_base[li] in LUMBER else ("sack" if lot_base[li] in FARM else "crate")
+			worker.call("helper", li, ["ferryman", "quarry_worker", "cooper", "miller"], prop, groups, [C_REACT, C_LOOK])
+	for li in doors_of(HOSPITAL):
+		var to := first_door([HERBAL, MARKET, STORE], li)
+		if to >= 0:
+			add.call("healer", li, ["herbalist"], "basket", [visit_door(li, C_IDLE, true, false), visit_door(to, C_LOOK, false, true)])
+		break
 	for li in doors_of(HOUSE):
 		var well := first_door([WELL], li)
-		var to := well if well >= 0 else delivery(li, [MARKET])
+		var to := well if well >= 0 else delivery(li, [MARKET, STORE])
 		if to >= 0:
-			add.call(extra, "resident", li, ["herbalist", "miller", "ferryman"], "basket" if well >= 0 else "",
+			add.call("resident", li, ["herbalist", "miller", "ferryman"], "basket" if well >= 0 else "",
 				[visit_door(li, C_IDLE, true, false), visit_door(to, C_LOOK, false, well >= 0)])
-	specs.append_array(extra)
+	stroller.call(3)
+	meeting.call(2)
+	stroller.call(4)
+	var market := first_door([MARKET], hall)
+	if hall >= 0 and market >= 0:
+		add.call("visitor", hall, ["courier", "herbalist", "ferryman"], "basket",
+			[visit_door(hall, C_IDLE, true, false), visit_door(market, C_THANK, false, true)])
+	for k in range(5, 9):
+		stroller.call(k)
 	return specs
 
 ## Turns a list of visits into this person's day: walks, stops, the door and the time inside.
@@ -1541,14 +2867,19 @@ func build_timeline(p: Person, visits: Array, serial := -1) -> bool:
 	var spots: Array[Vector2] = []
 	var leads: Array[Vector2] = []
 	var claims := PackedInt32Array()
+	var own_slot := {}
 	for visit: Dictionary in visits:
 		var node: int = visit.node
 		# Places are claimed only once the whole day works out (see the end).
 		var users: Array = stop_users.get(node, [])
 		var slot := users.find(p.key)
-		if slot < 0:
+		if slot < 0 and own_slot.has(node):
+			# (The same stop twice in a day: the same place.)
+			slot = own_slot[node]
+		elif slot < 0:
 			slot = users.size() + int(claims.count(node))
 			claims.append(node)
+			own_slot[node] = slot
 		var base := g_nodes[node]
 		# Each user of a door has a place of its own: the middle, then a step either side (three
 		# at most; one where the door has no room in front). Everybody comes and goes through the
@@ -1559,12 +2890,15 @@ func build_timeline(p: Person, visits: Array, serial := -1) -> bool:
 		if visit.lot >= 0:
 			var outward := -(door_in.get(visit.lot, Vector2(0.0, -1.0)) as Vector2)
 			var room := float(door_room.get(visit.lot, 1.4))
-			var places := 3 if room >= 0.65 else 1
+			var places := DOOR_PLACES.size() if room >= 0.65 else 1
 			if room >= 0.65:
 				lead = base + outward * minf(1.1, room - 0.25)
 			var free := 0
 			for k in places:
-				var place := base + Vector2([0.0, -0.95, 0.95][k], 0.0)
+				if TownPlan.own_square(plan.lots[visit.lot]) and absf(DOOR_PLACES[k]) > 1.0:
+					# (A market's gate: its paved apron only, the grass round it is lower.)
+					continue
+				var place := base + Vector2(DOOR_PLACES[k], 0.0)
 				if walkable(place) and (lead == Vector2.INF or k == 0 or band_clear(lead, place, 0.0)):
 					if free == slot:
 						spot = place
@@ -1610,8 +2944,8 @@ func build_timeline(p: Person, visits: Array, serial := -1) -> bool:
 		if serial >= 0 and not await next_slice(serial):
 			return false
 	var dense_mark := Time.get_ticks_usec()
-	# Each walked line sampled every 0.35 m with the drawn ground under it: walking is a binary
-	# search and a lerp per frame.
+	# Each walked line sampled every 0.35 m with the drawn ground under it (every 4.4 cm across
+	# a step, e.g. from the grass onto paving): walking is a binary search and a lerp per frame.
 	for i in count:
 		var line: PackedVector2Array = lines[i]
 		var dense := PackedVector3Array()
@@ -1621,7 +2955,15 @@ func build_timeline(p: Person, visits: Array, serial := -1) -> bool:
 			var pieces := maxi(1, ceili(a.distance_to(b) / 0.35))
 			for m in pieces:
 				var q := a.lerp(b, float(m) / pieces)
-				dense.append(Vector3(q.x, ground_y(q.x, q.y), q.y))
+				var y := ground_y(q.x, q.y)
+				if not dense.is_empty():
+					var before := dense[dense.size() - 1]
+					if absf(y - before.y) > 0.03:
+						var from := Vector2(before.x, before.z)
+						for f in range(1, 8):
+							var r := from.lerp(q, f / 8.0)
+							dense.append(Vector3(r.x, ground_y(r.x, r.y), r.y))
+				dense.append(Vector3(q.x, y, q.y))
 		var last := line[line.size() - 1]
 		dense.append(Vector3(last.x, ground_y(last.x, last.y), last.y))
 		var cum := PackedFloat32Array()
@@ -1665,22 +3007,40 @@ func build_timeline(p: Person, visits: Array, serial := -1) -> bool:
 			t = add_phase(p, K_LEAVE, t, STEP_SECONDS, -1, 0.0, C_WALK, -1.0, 1 if visit.carry_out else 0, spot, doorway, out_yaw, out_yaw)
 			t = add_phase(p, K_DWELL, t, TURN_WINDOW + rng.randf_range(0.3, 1.2), -1, 0.0, C_IDLE, -1.0, 1 if visit.carry_out else 0, spot, spot, out_yaw, next_yaw)
 		else:
-			var action: int = visit.action
-			var dwell := rng.randf_range(2.0, 6.0)
-			var gesture := -1.0
-			if action != C_IDLE:
-				dwell = maxf(dwell, GESTURE_SECONDS[action] + TURN_WINDOW + 0.9)
-				gesture = rng.randf_range(0.35, dwell - TURN_WINDOW - GESTURE_SECONDS[action] - 0.2)
+			var acts: Array = visit.get("acts", [visit.action])
+			var span: Vector2 = visit.get("dwell", Vector2(2.0, 6.0))
 			var carry_mode := 0
 			if carried_in and visit.drop:
 				carry_mode = 2
 			elif carried_in or visit.carry_out:
 				carry_mode = 1 if carried_in else 3
+			# A load is put down or picked up with a gesture.
+			if (carry_mode == 2 or carry_mode == 3) and int(acts[0]) == C_IDLE:
+				acts = [C_THANK] + acts
 			if yard_spots.has(visit.node):
-				facing = float(yard_spots[visit.node]) + rng.randf_range(-0.5, 0.5)
+				facing = float(yard_spots[visit.node]) + rng.randf_range(-0.35, 0.35)
 			elif visit.lot < 0 and arrive_dir != Vector2.ZERO:
 				facing = atan2(arrive_dir.x, arrive_dir.y) + rng.randf_range(-1.2, 1.2)
-			t = add_phase(p, K_DWELL, t, dwell, -1, 0.0, action, gesture, carry_mode, spot, spot, facing, next_yaw)
+			if visit.has("face"):
+				facing = float(visit.face)
+			if visit.get("meet", false):
+				p.meet_phase = p.kinds.size()
+			# Standing here: one stretch per clip (a gesture somewhere in it), the turn to the
+			# next leg at the end of the last.
+			var each := rng.randf_range(span.x, span.y) / acts.size()
+			for k in acts.size():
+				var action: int = acts[k]
+				var last := k == acts.size() - 1
+				var tail := TURN_WINDOW if last else 0.0
+				var length := maxf(each, tail + 0.6)
+				var gesture := -1.0
+				if action != C_IDLE:
+					length = maxf(length, GESTURE_SECONDS[action] + tail + 0.9)
+					gesture = rng.randf_range(0.35, length - tail - GESTURE_SECONDS[action] - 0.2)
+				var mode := carry_mode
+				if k > 0:
+					mode = 1 if carry_mode == 1 or carry_mode == 3 else 0
+				t = add_phase(p, K_DWELL, t, length, -1, 0.0, action, gesture, mode, spot, spot, facing, next_yaw if last else facing)
 	p.cycle = maxf(t, 1.0)
 	p.phase = rng.randf() * p.cycle
 	for node in claims:
@@ -1726,6 +3086,7 @@ func evaluate(p: Person, t: float) -> void:
 	p.walking = false
 	p.turning = false
 	p.clip_offset = 0.0
+	p.steady_until = -1.0
 	match p.kinds[i]:
 		K_WALK:
 			var line: PackedVector3Array = p.lines[p.leg[i]]
@@ -1789,6 +3150,19 @@ func evaluate(p: Person, t: float) -> void:
 				1: p.carrying = true
 				2: p.carrying = gesture < 0.0 or local < gesture + 0.5
 				3: p.carrying = gesture >= 0.0 and local >= gesture + 0.5
+			# The next change: the turn, the gesture's start and end, the load put down.
+			var next := p.lengths[i]
+			if local < turn_at:
+				next = turn_at
+			if gesture >= 0.0:
+				if local < gesture:
+					next = minf(next, gesture)
+				elif local < gesture + GESTURE_SECONDS[action]:
+					next = minf(next, gesture + GESTURE_SECONDS[action])
+				if local < gesture + 0.5:
+					next = minf(next, gesture + 0.5)
+			# (A delay being made up runs this clock up to twice as fast.)
+			p.steady_until = t + (next - local) * (0.5 if p.delay > 0.0 else 1.0) - 0.002
 		K_ENTER:
 			var k := local / p.lengths[i]
 			p.at = p.spot_a[i].lerp(p.spot_b[i], k)
@@ -1802,6 +3176,7 @@ func evaluate(p: Person, t: float) -> void:
 			p.alpha = 0.0
 			p.clip_want = C_IDLE
 			p.carrying = false
+			p.steady_until = t + (p.lengths[i] - local) * (0.5 if p.delay > 0.0 else 1.0) - 0.002
 		K_LEAVE:
 			var k := local / p.lengths[i]
 			p.at = p.spot_b[i].lerp(p.spot_a[i], k)
@@ -1894,30 +3269,68 @@ func present(t: float) -> void:
 		for p in people:
 			for mesh in p.meshes:
 				mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var manual := zoom > ANIM_FAR_ZOOM + 3.0 or (anim_manual and zoom > ANIM_FAR_ZOOM - 3.0)
+	if manual != anim_manual:
+		anim_manual = manual
+		for p in people:
+			if p.ready:
+				set_manual(p)
+	frame_count += 1
 	var mark := Time.get_ticks_usec()
-	for p in people:
+	var count := people.size()
+	# Zoomed out (people a few pixels tall: 0.06 m, a 20th of a second's walk, is under a
+	# pixel) each person on screen is placed every FAR_STRIDE-th frame, on its own beat (with
+	# its pose, ANIM_FAR_HZ).
+	var halved := anim_manual and not jumped and not simulate_all
+	for i in count:
+		var p := people[i]
+		# Off screen only the clock runs: the place is worked out every sixth frame (for the
+		# test whether the person comes into view, and for those walking behind).
+		if not p.shown and not jumped and not simulate_all and (frame_count + i) % 6 != 0 and p.ready:
+			continue
+		if halved and p.shown and (frame_count + i) % FAR_STRIDE != 0:
+			continue
+		if p.steady_until > t and not jumped and not simulate_all:
+			# Standing (or inside) with nothing changing yet.
+			continue
 		var was_index := p.index
 		var was_walked := p.walked
 		var was_walking := p.walking
+		var since := t - p.eval_t
+		p.eval_t = t
 		evaluate(p, t)
 		p.pos = p.at
 		# The feet keep pace with the distance actually walked since the last frame (held back
 		# behind someone included).
-		if p.walking and was_walking and p.index == was_index and dt > 0.0:
-			p.v = maxf(0.0, p.walked - was_walked) / dt
+		if p.walking and was_walking and p.index == was_index and since > 0.0 and since < 0.3 and p.shown:
+			p.v = maxf(0.0, p.walked - was_walked) / since
 	var mark2 := Time.get_ticks_usec()
 	section_usec[0] += mark2 - mark
-	# Holding back changes slowly: worked out at 30 Hz.
+	# Holding back changes slowly: worked out at 30 Hz (15 Hz zoomed out).
 	hold_dt += dt
-	if follow and hold_dt > 0.0 and (hold_dt >= 0.03 or simulate_all):
+	if follow and hold_dt > 0.0 and (hold_dt >= (0.066 if anim_manual else 0.03) or simulate_all):
 		hold_back(hold_dt)
 		hold_dt = 0.0
 	mark = Time.get_ticks_usec()
 	section_usec[1] += mark - mark2
 	var blob_index := 0
-	for p in people:
-		var yaw := p.want_yaw
+	var anim_spent := 0
+	for i in count:
+		var p := people[i]
+		if halved and p.shown and (frame_count + i) % FAR_STRIDE != 0 and p.heading == p.want_yaw:
+			# (Not its beat; still turning, it turns every frame.)
+			blob_index += 1
+			continue
 		var on_screen := p.alpha > 0.01 and (simulate_all or camera.is_position_in_frustum(Vector3(p.pos.x, p.y + 0.9, p.pos.y)))
+		if on_screen and not p.shown and not jumped and p.eval_t != t:
+			# Coming into view: the place of this very frame.
+			p.eval_t = t
+			evaluate(p, t)
+			p.pos = p.at
+			on_screen = p.alpha > 0.01
+		var pdt := clampf(t - p.pose_t, 0.0, 0.25) if p.pose_t >= 0.0 else dt
+		p.pose_t = t
+		var yaw := p.want_yaw
 		if not p.ready:
 			p.ready = p.rig != null and p.rig.is_ready()
 			if p.ready:
@@ -1942,7 +3355,7 @@ func present(t: float) -> void:
 			p.heading = yaw
 		else:
 			var turn := angle_difference(p.heading, yaw)
-			var limit := TURN_RATE * dt
+			var limit := TURN_RATE * pdt
 			p.heading = wrapf(p.heading + clampf(turn, -limit, limit), -PI, PI)
 		var place := Vector3(p.pos.x, p.y, p.pos.y)
 		if snap or place != p.placed or p.heading != p.placed_yaw:
@@ -1954,6 +3367,13 @@ func present(t: float) -> void:
 				var size := 0.95 * p.scale * (0.35 + 0.65 * p.alpha)
 				blobs.multimesh.set_instance_transform(blob_index, Transform3D(Basis().scaled(Vector3(size, 1.0, size)), place + Vector3.UP * 0.025))
 		animate(p, snap)
+		if anim_manual and p.rig.player != null:
+			p.anim_acc += pdt
+			if snap or p.anim_acc >= 1.0 / ANIM_FAR_HZ:
+				var before := Time.get_ticks_usec()
+				p.rig.player.advance(p.anim_acc)
+				p.anim_acc = 0.0
+				anim_spent += Time.get_ticks_usec() - before
 		if absf(p.alpha - p.alpha_now) > 0.001:
 			p.alpha_now = p.alpha
 			for mesh in p.meshes:
@@ -1962,11 +3382,23 @@ func present(t: float) -> void:
 			p.prop_shown = p.carrying
 			p.prop.visible = p.carrying
 		blob_index += 1
-	var spent := Time.get_ticks_usec() - started
-	section_usec[2] += Time.get_ticks_usec() - mark
+	# The townsfolk's own update (the AnimationPlayers' work, done by the engine at full rate
+	# close up, is measured apart).
+	var spent := Time.get_ticks_usec() - started - anim_spent
+	section_usec[2] += Time.get_ticks_usec() - mark - anim_spent
 	update_usec = spent
 	if update_samples.size() < 4096:
 		update_samples.append(spent)
+	if anim_samples.size() < 4096:
+		anim_samples.append(anim_spent)
+
+## Manual mode (zoomed out) or the engine's own (close up); each person on its own beat.
+func set_manual(p: Person) -> void:
+	var player: AnimationPlayer = p.rig.player
+	if player == null:
+		return
+	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL if anim_manual else AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
+	p.anim_acc = fposmod(float(p.seed % 977) * 0.0131, 1.0 / ANIM_FAR_HZ)
 
 func animate(p: Person, snap: bool) -> void:
 	var player: AnimationPlayer = p.rig.player
@@ -1983,10 +3415,13 @@ func animate(p: Person, snap: bool) -> void:
 			player.seek(fposmod(float(p.seed % 1000) * 0.0131, 1.0) * player.current_animation_length, true)
 	elif snap and want >= C_LOOK:
 		player.seek(p.clip_offset, true)
+	var rate := 1.0
 	if want == C_WALK or want == C_LOADED:
-		player.speed_scale = clampf(p.v / (STRIDE_SPEED[want] * p.scale), 0.05, 2.0)
-	else:
-		player.speed_scale = p.idle_rate if want == C_IDLE else 1.0
+		rate = clampf(p.v / (STRIDE_SPEED[want] * p.scale), 0.05, 2.0)
+	elif want == C_IDLE:
+		rate = p.idle_rate
+	if rate != player.speed_scale:
+		player.speed_scale = rate
 
 # ------------------------------------------------------------------ nodes
 
@@ -2023,6 +3458,7 @@ func prepare(p: Person) -> void:
 				mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if cast_real_shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	if rig.player != null:
 		rig.player.playback_default_blend_time = BLEND
+		set_manual(p)
 	if p.prop_kind.is_empty() or rig.model == null:
 		return
 	var skeleton: Skeleton3D = null
@@ -2159,4 +3595,7 @@ func debug_dump() -> Dictionary:
 	return {"edges": edges, "people": persons, "posts": Array(posts).map(func(v: Vector2): return [v.x, v.y]),
 		"blocked": blocked_rects.map(func(r: Rect2): return [r.position.x, r.position.y, r.size.x, r.size.y]),
 		"spots": Array(spot_nodes).map(func(n: int): return [g_nodes[n].x, g_nodes[n].y]),
-		"doors": door_stop.values().map(func(v: Vector2): return [v.x, v.y])}
+		"doors": door_stop.values().map(func(v: Vector2): return [v.x, v.y]),
+		"places": yard_spots.keys().map(func(n: int): return [g_nodes[n].x, g_nodes[n].y, place_kind.get(n, "")]),
+		"meets": meet_pairs.map(func(m: Array): return [g_nodes[m[0]].x, g_nodes[m[0]].y, g_nodes[m[1]].x, g_nodes[m[1]].y]),
+		"bridges": bridges.map(func(b: Array): return [b[0].x, b[0].y, b[1].x, b[1].y, b[2]])}

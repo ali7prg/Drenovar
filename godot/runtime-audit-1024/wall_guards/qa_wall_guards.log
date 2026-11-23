@@ -1,0 +1,74 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+hall I: settled in 900 frames (worst frame 8.3 ms, the guards' worst 0.00 ms; models instanced so far 0, worst 0.00 ms)
+hall I: settled in 1 frames (worst frame 6.9 ms, the guards' worst 0.01 ms; models instanced so far 0, worst 0.00 ms)
+hall I, no wall: wall shown false, 0 guards, 0 drawn
+plan: 110.6 ms over 17 frames { "g_streets": 257, "g_doors": 2264, "g_square": 3443, "g_validate": 11955, "g_edges": 40, "g_bridge": 26, "g_places": 7626, "graph": 42241, "plan": 2425, "t_dense": 11880, "timelines": 65069 }
+hall II wall I: settled in 14 frames (worst frame 7.0 ms, the guards' worst 4.17 ms; models instanced so far 8, worst 1.76 ms)
+hall II wall I: wall level 1, 6 towers, 1 gates, walkway {  }; 8 guards { "gate": 2, "tower": 6 } { "ENG-03": 5, "ENG-04": 3 } (defence table: 16 archers), 0 stretches [], plan 3.80 ms
+  plan steps (us): { "route": 22, "step0": 22, "gate_tests": 110, "gate_town_tests": 2, "gate": 994, "timelines": 2675, "posts": 2770 } over 1 frames, the dearest 3.80 ms
+probe ray down the first tower (-18.83719, 1.08739, -33.40593): (-18.83719, 12.71514, -33.40593) (deck top 7.232)
+hall II wall I: seen from the game's camera (head or chest clear of the wall, gate and buildings) 75 % of the time, by role { "gate": 0.0, "tower": 1.0 }
+hall II wall I: feet worst 0.0000 m (gate0 on ground at (24.25098, 0.461958, 22.17992)), by role { "gate": 0.00002065300941, "tower": 0.00000095367432 }; capsule r0.25 hits 0 []; widest body worst 0.34 m (tower52-0 (tower) by wall:tower_pillars), by role { "gate": 1.5, "tower": 0.33984375 }
+hall II wall I: heading worst 0.060 rad/frame; 9 turns back, 0 twice within 2 m / 3 s; standing drift 0; stride worst 0.0 % of 632; closest pair 9.75 m; flourishes 10; townsfolk nearest 5.41 m (0 < 0.45 m)
+plan: 310.1 ms over 41 frames { "g_streets": 442, "g_doors": 3734, "g_square": 3855, "g_validate": 21775, "g_edges": 68, "g_bridge": 99076, "g_places": 18309, "graph": 168677, "plan": 11360, "t_dense": 49779, "timelines": 125186 }
+hall III wall II: settled in 39 frames (worst frame 50.0 ms, the guards' worst 3.88 ms; models instanced so far 11, worst 1.76 ms)
+hall III wall II: wall level 2, 10 towers, 3 gates, walkway { "top": 3.55, "offset": 1.1575, "half": 0.4125, "deck": 1.02, "deck_half": 0.65 }; 11 guards { "gate": 2, "patrol": 6, "tower": 3 } { "ENG-03": 7, "ENG-04": 4 } (defence table: 40 archers), 9 stretches [6.4, 26.9, 6.8, 22.0, 18.9, 22.7, 19.2, 6.7, 29.7], plan 2.42 ms
+  plan steps (us): { "route": 22, "step0": 22, "gate_tests": 310, "gate_town_tests": 2, "gate": 919, "timelines": 1313, "posts": 1469 } over 1 frames, the dearest 3.80 ms
+probe ray down the first tower (-27.49113, 5.162728, -38.95578): (-27.49113, 18.65722, -38.95578) (deck top 12.308)
+hall III wall II: seen from the game's camera (head or chest clear of the wall, gate and buildings) 63 % of the time, by role { "gate": 0.0, "patrol": 0.82, "tower": 0.67 }
+hall III wall II: feet worst 0.0108 m (patrol5 on wall:walkway at (18.59466, 5.668949, -33.29045)), by role { "gate": 0.00002703070641, "patrol": 0.01079559326172, "tower": 0.00000095367432 }; capsule r0.25 hits 0 []; widest body worst 0.36 m (tower130-0 (tower) by wall:tower_pillars), by role { "gate": 1.5, "patrol": 0.38671875, "tower": 0.36328125 }
+hall III wall II: heading worst 0.139 rad/frame; 20 turns back, 0 twice within 2 m / 3 s; standing drift 0; stride worst 0.0 % of 10210; closest pair 4.80 m; flourishes 12; townsfolk nearest 5.56 m (0 < 0.45 m)
+plan: 317.6 ms over 39 frames { "g_streets": 564, "g_doors": 3898, "g_square": 3551, "g_validate": 23298, "g_edges": 68, "g_bridge": 84077, "g_places": 11289, "graph": 179453, "plan": 7622, "t_dense": 47820, "timelines": 125404 }
+hall III wall III: settled in 39 frames (worst frame 30.9 ms, the guards' worst 3.74 ms; models instanced so far 14, worst 1.76 ms)
+hall III wall III: wall level 3, 11 towers, 3 gates, walkway { "top": 5.2, "offset": 0.95, "half": 0.7, "deck": 0.95, "deck_half": 0.75 }; 14 guards { "gate": 2, "patrol": 8, "tower": 4 } { "ENG-03": 9, "ENG-04": 5 } (defence table: 50 archers), 9 stretches [6.4, 26.7, 6.5, 17.9, 7.8, 17.9, 25.6, 6.4, 29.7], plan 2.24 ms
+  plan steps (us): { "route": 90, "step0": 90, "gate_tests": 236, "gate_town_tests": 2, "gate": 539, "timelines": 1290, "posts": 1601 } over 1 frames, the dearest 3.80 ms
+probe ray down the first tower (-29.68294, 5.133574, -38.74445): (-29.68294, 20.6253, -38.74445) (deck top 13.279)
+hall III wall III: seen from the game's camera (head or chest clear of the wall, gate and buildings) 45 % of the time, by role { "gate": 0.0, "patrol": 0.78, "tower": 0.0 }
+hall III wall III: feet worst 0.0201 m (patrol2 on wall:walkway at (-25.20406, 8.541269, 34.92775)), by role { "gate": 0.00001314282417, "patrol": 0.02009391784668, "tower": 0.00000095367432 }; capsule r0.25 hits 0 []; widest body worst 0.34 m (tower50-0 (tower) by wall:tower_pillars), by role { "gate": 1.5, "patrol": 0.41015625, "tower": 0.33984375 }
+hall III wall III: heading worst 0.167 rad/frame; 33 turns back, 0 twice within 2 m / 3 s; standing drift 0; stride worst 0.0 % of 11524; closest pair 3.81 m; flourishes 16; townsfolk nearest 5.92 m (0 < 0.45 m)
+plan: 259.5 ms over 36 frames { "g_streets": 255, "g_doors": 2272, "g_square": 2168, "g_validate": 14557, "g_edges": 68, "g_bridge": 74947, "g_places": 10285, "graph": 123899, "plan": 7311, "t_dense": 40376, "timelines": 125118 }
+hall IV wall IV: settled in 38 frames (worst frame 30.2 ms, the guards' worst 3.80 ms; models instanced so far 18, worst 1.76 ms)
+hall IV wall IV: wall level 4, 14 towers, 3 gates, walkway { "top": 5.18, "offset": -0.225, "half": 0.965, "deck": -0.25, "deck_half": 1.1 }; 18 guards { "gate": 2, "patrol": 10, "tower": 6 } { "ENG-03": 12, "ENG-04": 6 } (defence table: 72 archers), 13 stretches [7.7, 6.3, 16.3, 9.7, 8.0, 16.4, 11.8, 16.2, 17.3, 16.6, 12.0, 7.5, 16.2], plan 2.75 ms
+  plan steps (us): { "route": 23, "step0": 23, "gate_tests": 301, "gate_town_tests": 2, "gate": 609, "timelines": 1838, "posts": 2117 } over 1 frames, the dearest 3.80 ms
+probe ray down the first tower (-29.68294, 5.133574, -38.74445): (-29.68294, 22.76174, -38.74445) (deck top 14.279)
+hall IV wall IV: seen from the game's camera (head or chest clear of the wall, gate and buildings) 39 % of the time, by role { "gate": 0.0, "patrol": 0.7, "tower": 0.0 }
+hall IV wall IV: feet worst 0.0029 m (patrol7 on wall:gallery_deck at (-37.56662, 10.05992, -32.52761)), by role { "gate": 0.00013935565948, "patrol": 0.00288963317871, "tower": 0.00000095367432 }; capsule r0.25 hits 0 []; widest body worst 0.36 m (tower50-0 (tower) by wall:tower_pillars), by role { "gate": 1.5, "patrol": 0.5625, "tower": 0.36328125 }
+hall IV wall IV: heading worst 0.167 rad/frame; 40 turns back, 0 twice within 2 m / 3 s; standing drift 0; stride worst 0.0 % of 14570; closest pair 4.46 m; flourishes 24; townsfolk nearest 5.83 m (0 < 0.45 m)
+plan: 512.5 ms over 54 frames { "g_streets": 506, "g_doors": 6035, "g_square": 2767, "g_validate": 28099, "g_edges": 112, "g_bridge": 145840, "g_places": 43395, "graph": 257654, "plan": 62266, "t_dense": 87519, "timelines": 185616 }
+hall V wall V: settled in 52 frames (worst frame 64.3 ms, the guards' worst 4.48 ms; models instanced so far 20, worst 1.76 ms)
+hall V wall V: wall level 5, 15 towers, 4 gates, walkway { "top": 6.28, "offset": -0.05, "half": 0.98, "deck": -0.25, "deck_half": 1.25, "roof": true }; 20 guards { "gate": 2, "patrol": 10, "tower": 8 } { "ENG-03": 13, "ENG-04": 7 } (defence table: 98 archers), 10 stretches [22.2, 6.6, 13.8, 8.9, 13.4, 20.6, 14.0, 14.1, 6.8, 13.4], plan 3.69 ms
+  plan steps (us): { "route": 37, "step0": 37, "gate_tests": 374, "gate_town_tests": 2, "gate": 862, "timelines": 2444, "posts": 2779 } over 1 frames, the dearest 3.80 ms
+probe ray down the first tower (-23.61942, 5.156503, -44.95125): (-23.61942, 25.269, -44.95125) (deck top 15.502)
+hall V wall V: seen from the game's camera (head or chest clear of the wall, gate and buildings) 18 % of the time, by role { "gate": 1.0, "patrol": 0.17, "tower": 0.0 }
+hall V wall V: feet worst 0.0019 m (patrol9 on wall:gallery_deck at (33.26758, 7.061014, -22.13324)), by role { "gate": 0.00003409385681, "patrol": 0.00193357467651, "tower": 0.00000095367432 }; capsule r0.25 hits 0 []; widest body worst 0.29 m (tower119-0 (tower) by wall:tower_merlons), by role { "gate": 1.5, "patrol": 1.5, "tower": 0.29296875 }
+hall V wall V: heading worst 0.167 rad/frame; 46 turns back, 0 twice within 2 m / 3 s; standing drift 0; stride worst 0.0 % of 13857; closest pair 4.57 m; flourishes 19; townsfolk nearest 15.73 m (0 < 0.45 m)
+hall V wall V default view (zoom 70): 16 of 20 guards on screen (16 skeletons, 306780 source triangles, LOD2), update median 85 us p95 160 us max 2454 us; animation (manual true, 20 Hz) mean 42 us p95 142 us
+hall V wall V process time per frame: 3.412 ms with the guards, 4.137 ms without
+hall V wall V close up (zoom 30): 4 on screen, 4 with LOD1 meshes, 235152 source triangles, shadows true, manual false
+  re-plan steps (us): { "route": 4688, "step0": 745, "step1": 849, "points": 1005, "step2": 1544, "gate": 23, "timelines": 2025, "posts": 2370 }
+re-plan wall V -> IV: 1 re-plans, plan 7.08 ms CPU over 6 frames (the dearest 2.40 ms), 19 of 19 models kept, 0 instanced anew; present_city 72.1 ms (the wall itself), guards' worst frame 2.99 ms
+watchtower built: 1 re-plans (the wall bulges round it when it moves the ring), 19 guards
+back to hall I: settled in 22 frames (worst frame 40.1 ms, the guards' worst 0.35 ms; models instanced so far 20, worst 1.76 ms)
+hall I again: wall shown false, 0 guards, 0 drawn
+levels: {"1":{"archers_table":16,"clearance_by_role":{"gate":1.5,"tower":0.33984375},"clearance_worst":0.33984375,"feet_by_role":{"gate":0.0000206530094146729,"tower":0.00000095367431640625},"feet_worst":0.0000206530094146729,"guards":8,"roles":{"gate":2,"tower":6},"seen":0.75,"seen_by_role":{"gate":0.0,"tower":1.0},"units":{"ENG-03":5,"ENG-04":3}},"2":{"archers_table":40,"clearance_by_role":{"gate":1.5,"patrol":0.38671875,"tower":0.36328125},"clearance_worst":0.36328125,"feet_by_role":{"gate":0.0000270307064056396,"patrol":0.0107955932617188,"tower":0.00000095367431640625},"feet_worst":0.0107955932617188,"guards":11,"roles":{"gate":2,"patrol":6,"tower":3},"seen":0.63,"seen_by_role":{"gate":0.0,"patrol":0.82,"tower":0.67},"units":{"ENG-03":7,"ENG-04":4}},"3":{"archers_table":50,"clearance_by_role":{"gate":1.5,"patrol":0.41015625,"tower":0.33984375},"clearance_worst":0.33984375,"feet_by_role":{"gate":0.0000131428241729736,"patrol":0.0200939178466797,"tower":0.00000095367431640625},"feet_worst":0.0200939178466797,"guards":14,"roles":{"gate":2,"patrol":8,"tower":4},"seen":0.45,"seen_by_role":{"gate":0.0,"patrol":0.78,"tower":0.0},"units":{"ENG-03":9,"ENG-04":5}},"4":{"archers_table":72,"clearance_by_role":{"gate":1.5,"patrol":0.5625,"tower":0.36328125},"clearance_worst":0.36328125,"feet_by_role":{"gate":0.000139355659484863,"patrol":0.00288963317871094,"tower":0.00000095367431640625},"feet_worst":0.00288963317871094,"guards":18,"roles":{"gate":2,"patrol":10,"tower":6},"seen":0.39,"seen_by_role":{"gate":0.0,"patrol":0.7,"tower":0.0},"units":{"ENG-03":12,"ENG-04":6}},"5":{"archers_table":98,"clearance_by_role":{"gate":1.5,"patrol":1.5,"tower":0.29296875},"clearance_worst":0.29296875,"feet_by_role":{"gate":0.0000340938568115234,"patrol":0.00193357467651367,"tower":0.00000095367431640625},"feet_worst":0.00193357467651367,"guards":20,"roles":{"gate":2,"patrol":10,"tower":8},"seen":0.18,"seen_by_role":{"gate":1.0,"patrol":0.17,"tower":0.0},"units":{"ENG-03":13,"ENG-04":7}}}
+guards' worst frame over all level changes 4.48 ms; 20 models instanced, median 0.74 ms, worst 1.76 ms
+hall I, no wall: walls false, guards 0
+wall solids: 84704 triangles
+L1 guards=8 feet_worst=0.0000 (gate0 on ground) clearance_worst=0.34 (tower52-0 (tower) by wall:tower_pillars) jitter=0 heading_worst=0.060 stride_worst=0.0% closest=9.75
+wall solids: 123332 triangles
+L2 guards=11 feet_worst=0.0108 (patrol5 on wall:walkway) clearance_worst=0.36 (tower130-0 (tower) by wall:tower_pillars) jitter=0 heading_worst=0.139 stride_worst=0.0% closest=4.80
+wall solids: 84804 triangles
+L3 guards=14 feet_worst=0.0201 (patrol2 on wall:walkway) clearance_worst=0.34 (tower50-0 (tower) by wall:tower_pillars) jitter=0 heading_worst=0.167 stride_worst=0.0% closest=3.81
+wall solids: 96216 triangles
+L4 guards=18 feet_worst=0.0029 (patrol7 on wall:gallery_deck) clearance_worst=0.36 (tower50-0 (tower) by wall:tower_pillars) jitter=0 heading_worst=0.167 stride_worst=0.0% closest=4.46
+wall solids: 149670 triangles
+L5 guards=20 feet_worst=0.0019 (patrol9 on wall:gallery_deck) clearance_worst=0.29 (tower119-0 (tower) by wall:tower_merlons) jitter=0 heading_worst=0.167 stride_worst=0.0% closest=4.57
+hall V wall V default view: 16/20 on screen, 16 skeletons, 306780 triangles, update median 85 us p95 160 us, animation mean 42 us p95 142 us
+hall V wall V process 3.412 ms with guards, 4.137 ms without
+hall V wall V close up: 4 on screen (LOD1 4), 235152 triangles
+re-plan V->IV: plan 7.08 ms CPU over 6 frames (dearest 2.40 ms), 19/19 models kept, 0 new, guards' worst frame 2.99 ms
+watchtower built: 1 re-plans, 19 guards
+hall I again: walls false, guards 0
+guards' worst frame 4.48 ms; models instanced 20 (median 0.74 ms, worst 1.76 ms)
+QA_WALL_GUARDS checks=85 failures=0

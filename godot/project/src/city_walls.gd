@@ -54,6 +54,12 @@ var main_gate_span := 0.0
 var main_gate_half := GATE_HALF
 var signature := ""
 var tower_count := 0
+## Build 1024: every tower collect() drew, for the wall guards (src/wall_guards.gd) standing on
+## their decks: {"index": wall sample, "p": ground at the tower's centre, "out": outward,
+## "size": side of the body, "deck": top of the deck above p.y, "gate": gate index or -1}.
+var towers: Array = []
+## Build 1024: how many times the ring was drawn (build()); the guards re-plan when it changes.
+var builds := 0
 var node: Node3D
 var height_at: Callable
 
@@ -398,6 +404,39 @@ static func wall_top(level: int) -> float:
 		top += 2.4
 	return top
 
+# Build 1024: where the wall guards walk along the curtain (the same numbers as collect()):
+# "top" is the walking surface above the wall line's ground (which follows the slope from
+# sample to sample), "offset" the middle of the free band towards the yard (negative: outward of
+# the wall line), "half" the half width of that band (between the posts, merlons, gallery boards
+# and rails), "deck" / "deck_half" the middle and half width of the boards themselves, "roof"
+# a covered gallery (gallery_roof()). Level I has no walkway (a bare palisade): {}.
+static func walkway(level: int) -> Dictionary:
+	var st := style(level)
+	var fh: float = st.footing
+	var h: float = st.height
+	var thick: float = st.thick
+	match clampi(level, 1, 5):
+		2:
+			# deck fh+h-1.25 .. +0.2, 0.37..1.67 m in; heavy posts up to r+0.475, rail from r+1.30
+			var r: float = st.stake
+			var low := r + 0.475
+			var high := r + 1.35 - 0.05
+			return {"top": fh + h - 1.05, "offset": (low + high) * 0.5, "half": (high - low) * 0.5, "deck": r + 0.75, "deck_half": 0.65}
+		3:
+			# deck fh+h-0.2 .. fh+h, 0.2..1.7 m in; the timber merlons on the wall line (0.25 deep)
+			return {"top": fh + h, "offset": 0.95, "half": 0.7, "deck": 0.95, "deck_half": 0.75}
+		4:
+			# gallery deck on the stone course; boards outside, a hand rail inside
+			var low := -(thick * 0.5 + 0.55 - 0.06)
+			var high := thick * 0.5 + 0.1 - 0.06
+			return {"top": fh + h + 0.2 + 0.18, "offset": (low + high) * 0.5, "half": (high - low) * 0.5, "deck": -0.25, "deck_half": (thick + 0.8) * 0.5}
+		5:
+			# covered gallery: merlons and the outer posts outside, the inner posts inside
+			var low := -(thick * 0.5 + 0.55) + 0.25 + 0.12
+			var high := thick * 0.5 + 0.2 - 0.12
+			return {"top": fh + h + 0.2 + 0.18, "offset": (low + high) * 0.5, "half": (high - low) * 0.5, "deck": -0.25, "deck_half": (thick + 0.8) * 0.5, "roof": true}
+	return {}
+
 static func tier(level: int) -> String:
 	if level >= 4:
 		return "stone"
@@ -427,6 +466,7 @@ func piece(along: Vector3, inward: Vector3, size: Vector3, origin: Vector3) -> T
 # Adds this wall to `parts` (one batch per part and material), moved by `xform`.
 func collect(parts: Dictionary, xform := Transform3D.IDENTITY) -> void:
 	tower_count = 0
+	towers.clear()
 	if not visible or radii.is_empty():
 		return
 	var level := clampi(wall_level, 1, 5)
@@ -509,12 +549,24 @@ func collect(parts: Dictionary, xform := Transform3D.IDENTITY) -> void:
 					put(parts, "merlons", "box", "stone_wall", piece(flat, inward, Vector3(0.62, 0.95, 0.45), p + outer + Vector3.UP * (top + 0.18 + 0.47)), xform)
 				put(parts, "gallery_posts", "box", "timber", piece(flat, inward, Vector3(0.24, 2.2, 0.24), a + outer + inward * 0.25 + Vector3.UP * (top + 1.25)), xform)
 				put(parts, "gallery_posts", "box", "timber", piece(flat, inward, Vector3(0.24, 2.2, 0.24), a + inward * (thick * 0.5 + 0.2) + Vector3.UP * (top + 1.25)), xform)
-				# covered gallery: roof slab sloping down to the outside
-				var roof_basis := Basis(flat * (length + 0.12), Vector3.UP * 0.16, inward * (thick + 1.9)).rotated(flat, -0.38 if inward.cross(flat).y > 0.0 else 0.38)
-				put(parts, "gallery_roof", "box", "roof", Transform3D(roof_basis, (a + b) * 0.5 + Vector3.UP * (top + 2.55) - inward * 0.2), xform)
+				# covered gallery: roof slab sloping down to the outside (gallery_roof())
+				put(parts, "gallery_roof", "box", "roof", gallery_roof(a, b, level), xform)
 	collect_towers(parts, xform, points, level)
 
+# The covered gallery's roof slab over the wall segment a-b (wall V): sloping down to the outside.
+func gallery_roof(a: Vector3, b: Vector3, level: int) -> Transform3D:
+	var st := style(level)
+	var thick: float = st.thick
+	var top: float = st.footing + st.height + 0.2
+	var along := b - a
+	var length := along.length()
+	var flat := Vector3(along.x, 0.0, along.z).normalized()
+	var inward := inward_of(a, b)
+	var roof_basis := Basis(flat * (length + 0.12), Vector3.UP * 0.16, inward * (thick + 1.9)).rotated(flat, -0.38 if inward.cross(flat).y > 0.0 else 0.38)
+	return Transform3D(roof_basis, (a + b) * 0.5 + Vector3.UP * (top + 2.55) - inward * 0.2)
+
 func build(parent: Node3D) -> void:
+	builds += 1
 	if is_instance_valid(node):
 		node.free()
 	node = null
@@ -643,6 +695,7 @@ func collect_towers(parts: Dictionary, xform: Transform3D, points: Array, level:
 		placed.append(p)
 		var out := Vector3(p.x - center.x, 0.0, p.z - center.y).normalized()
 		tower_at(parts, xform, p, out, size, tower_height, level)
+		towers.append({"index": i, "p": p, "out": out, "size": size, "deck": tower_height + 0.345, "gate": -1})
 		count += 1
 	var top := wall_top(level)
 	for gi in gates.size():
@@ -658,6 +711,8 @@ func collect_towers(parts: Dictionary, xform: Transform3D, points: Array, level:
 			continue
 		tower_at(parts, xform, left, out, size + 0.6, tower_height + 1.2, level)
 		tower_at(parts, xform, right, out, size + 0.6, tower_height + 1.2, level)
+		towers.append({"index": posmod(g - h, SAMPLES), "p": left, "out": out, "size": size + 0.6, "deck": tower_height + 1.2 + 0.345, "gate": gi})
+		towers.append({"index": posmod(g + h, SAMPLES), "p": right, "out": out, "size": size + 0.6, "deck": tower_height + 1.2 + 0.345, "gate": gi})
 		count += 2
 		var y := maxf(left.y, right.y)
 		var a := Vector3(left.x, y, left.z)

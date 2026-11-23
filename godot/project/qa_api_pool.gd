@@ -30,6 +30,56 @@ func get_json(pool: ApiPool, path: String, timeout := 5.0) -> Array:
 func connections(pool: ApiPool) -> int:
 	return int(body_of(await get_json(pool, "/stats")).get("connections", -1))
 
+## 1023: a 304 must never stall (whatever framing an intermediary gives it), and a request on a
+## kept-alive connection that died silently goes again on a fresh connection at once.
+func dead_links_and_304(pool: ApiPool) -> void:
+	for kind in ["plain", "zero", "length", "chunked"]:
+		var started := Time.get_ticks_msec()
+		var answer := await get_json(pool, "/not-modified?" + kind, 8.0)
+		var ms := Time.get_ticks_msec() - started
+		check(answer[0] == HTTPRequest.RESULT_SUCCESS and int(answer[1]) == 304 and (answer[3] as PackedByteArray).is_empty(),
+			"304 (%s) result %d code %d" % [kind, answer[0], answer[1]])
+		check(ms < 1000, "304 (%s) stalled %d ms" % [kind, ms])
+		var after := await get_json(pool, "/api/state")
+		check(after[0] == HTTPRequest.RESULT_SUCCESS and body_of(after).get("path") == "/api/state", "request after a 304 (%s) failed" % kind)
+		print("QA_API_POOL 304 framing=", kind, " ms=", ms)
+	# A connection kept alive and then dead (no FIN, no RST, no answer ever): the next request is
+	# answered on a fresh connection within the reused-answer limit, not after its 12 s timeout.
+	await get_json(pool, "/api/state")
+	var kill := await get_json(pool, "/kill-open")
+	check(kill[0] == HTTPRequest.RESULT_SUCCESS, "kill-open failed")
+	var retries_before := pool.fresh_retries
+	var reused_before := pool.requests_reused
+	var started := Time.get_ticks_msec()
+	var revived := await pool.request(HTTPClient.METHOD_GET, "/api/state", PackedStringArray(["Accept: application/json"]), "", 12.0, 1 << 20)
+	var revived_ms := Time.get_ticks_msec() - started
+	check(pool.requests_reused > reused_before, "the request after the link died did not try the kept-alive connection")
+	check(revived[0] == HTTPRequest.RESULT_SUCCESS and body_of(revived).get("path") == "/api/state", "request on a dead kept-alive connection failed: %s" % str(revived.slice(0, 2)))
+	check(revived_ms < (ApiPool.REUSED_ANSWER_USEC / 1000) + 1500, "dead connection held the request %d ms" % revived_ms)
+	check(pool.fresh_retries == retries_before + 1, "dead connection not retried on a fresh one")
+	print("QA_API_POOL dead_link_ms=", revived_ms, " fresh_retries=", pool.fresh_retries)
+	# A command (POST) keeps its Idempotency-Key on the fresh connection.
+	await get_json(pool, "/kill-open")
+	var command := await pool.request(HTTPClient.METHOD_POST, "/api/command", PackedStringArray(["Content-Type: application/json", "Idempotency-Key: dead-1"]),
+		JSON.stringify({"kind": "train"}), 12.0, 1 << 20)
+	check(command[0] == HTTPRequest.RESULT_SUCCESS and body_of(command).get("key") == "dead-1", "command after a dead link lost its key: %s" % str(body_of(command)))
+	# An idle connection older than IDLE_REUSE_USEC is closed, not reused.
+	await get_json(pool, "/api/state")
+	check(pool.idle.size() >= 1, "no idle connection kept")
+	for i in pool.idle_since.size():
+		pool.idle_since[i] -= ApiPool.IDLE_REUSE_USEC + 1000000
+	var dropped_before := pool.stale_dropped
+	reused_before = pool.requests_reused
+	var aged := await get_json(pool, "/api/state")
+	check(aged[0] == HTTPRequest.RESULT_SUCCESS and pool.requests_reused == reused_before and pool.stale_dropped > dropped_before, "an old idle connection was reused")
+	# drop_idle (the app came back to the foreground) closes every idle connection.
+	await get_json(pool, "/api/state")
+	pool.drop_idle()
+	check(pool.idle.is_empty() and pool.idle_since.is_empty(), "drop_idle left idle connections")
+	reused_before = pool.requests_reused
+	var fresh := await get_json(pool, "/api/state")
+	check(fresh[0] == HTTPRequest.RESULT_SUCCESS and pool.requests_reused == reused_before, "request after drop_idle reused a connection")
+
 func run() -> void:
 	var script := ProjectSettings.globalize_path("res://tests/support/keepalive_server.py")
 	pid = OS.create_process("python3", [script, str(PORT)])
@@ -108,6 +158,8 @@ func run() -> void:
 		check(completed[0] == 6 and Time.get_ticks_msec() - cancel_started < 500, "Cancelled previews kept waiting for their HTTP timeout")
 		check(pool.peak_active <= 4 and pool.requests_cancelled >= 3, "Active worker bound/cancellation not enforced")
 		print("QA_API_POOL reused=", pool.requests_reused, " total=", pool.requests_total, " opened=", pool.connections_opened)
+	if ready:
+		await dead_links_and_304(pool)
 	# Closed port: clean connection failure.
 	pool.configure("http://127.0.0.1:9")
 	var refused := await get_json(pool, "/api/state", 3.0)

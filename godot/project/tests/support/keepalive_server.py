@@ -1,10 +1,13 @@
-"""Local HTTP/1.1 server for qa_api_pool.gd: counts TCP connections, can drop idle ones."""
-import gzip, json, sys, threading, time
+"""Local HTTP/1.1 server for qa_api_pool.gd: counts TCP connections, can drop idle ones, can turn
+the open connections into dead ones (requests read, never answered, sockets kept open: a phone's
+link after a network change), and answers 304s with the framings an intermediary may give them."""
+import gzip, json, socket, sys, threading, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 connections = 0
 lock = threading.Lock()
 sockets = []
+dead = set()   # connections that swallow every further request
 
 class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
@@ -32,6 +35,31 @@ class Handler(BaseHTTPRequestHandler):
         self.handle_any(self.rfile.read(length))
     def handle_any(self, payload):
         path = self.path
+        if self.connection in dead:
+            # A dead link: the request is read and never answered; the socket stays open.
+            while True:
+                time.sleep(60)
+        if path == "/kill-open":
+            # Answer, then every connection open now (this one included) goes dead.
+            self.reply(b'{"ok":true}')
+            with lock:
+                for s in sockets:
+                    dead.add(s)
+            return
+        if path.startswith("/not-modified"):
+            # 304 framings: none (Cloudflare's), Content-Length: 0, a stray Content-Length, chunked.
+            kind = path.split("?")[-1] if "?" in path else "plain"
+            self.send_response(304)
+            self.send_header("ETag", 'W/"qa"')
+            if kind == "zero":
+                self.send_header("Content-Length", "0")
+            elif kind == "length":
+                self.send_header("Content-Length", "1234")
+            elif kind == "chunked":
+                self.send_header("Transfer-Encoding", "chunked")
+            self.end_headers()
+            self.wfile.flush()
+            return
         if path == "/stats":
             self.reply(json.dumps({"connections": connections}).encode())
         elif path == "/drop":

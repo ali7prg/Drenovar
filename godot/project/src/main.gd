@@ -220,7 +220,14 @@ var offline_notice_shown := false
 const COMMAND_RETRY_DELAYS := [0.4, 1.2, 2.8]
 const COMMAND_RETRY_WINDOW_MS := 30000
 const CONNECTION_NOTICE_AFTER_MS := 10000
+# When the last 200 or 304 arrived, in the app's own running time (1023): a frame longer than
+# LINK_FRAME_CAP_MS (the forest compiling a script, a scene build) and the time the app spent
+# suspended in the background move it on by their excess, so neither counts as time without
+# a connection; only real request failures and real silence do.
 var last_ok_msec := 0
+const LINK_FRAME_CAP_MS := 250
+var link_frame_msec := 0
+var paused_at_msec := -1
 var creature_portraits: Array[Texture2D] = []
 var next_notice_check_msec := 0
 # Conditional state polls (v6/docs/CONDITIONAL-STATE-1022.md): the full tagged answer is kept
@@ -2558,6 +2565,7 @@ func _notification(what: int) -> void:
 		diagnostics.set_state("exited", Time.get_unix_time_from_system())
 	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
 		diagnostics.set_state("foreground", Time.get_unix_time_from_system())
+		on_app_resumed()
 	if what == NOTIFICATION_OS_MEMORY_WARNING:
 		diagnostics.log_event("memory_warning", {"memory_mb": snappedf(Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, 0.1),
 			"scenes": scene_cache.size()}, Time.get_unix_time_from_system())
@@ -2565,6 +2573,8 @@ func _notification(what: int) -> void:
 		drain_retired_scenes(true)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
 		diagnostics.set_state("background", Time.get_unix_time_from_system())
+		if what == NOTIFICATION_APPLICATION_PAUSED and paused_at_msec < 0:
+			paused_at_msec = Time.get_ticks_msec()
 		if state_save_pending:
 			remember_state(true)
 		last_frame_us = 0
@@ -6374,6 +6384,26 @@ func advanced_state(server_ms: float) -> Dictionary:
 				encounter.behavior = "idle" if cycle < 4000.0 else "roaming"
 	return next
 
+## The outage meter's clock (1023): the excess of a long frame is not silence of the server.
+func discount_stall() -> void:
+	var now := Time.get_ticks_msec()
+	if link_frame_msec > 0 and now - link_frame_msec > LINK_FRAME_CAP_MS:
+		last_ok_msec = mini(now, last_ok_msec + now - link_frame_msec - LINK_FRAME_CAP_MS)
+	link_frame_msec = now
+
+## The app came back from the background (1023): the kept-alive connections may be dead (another
+## network, a NAT that forgot them, sockets iOS tore down), so none is reused; the time away is not
+## counted by the outage meter; the state is asked for at once on a fresh connection.
+func on_app_resumed() -> void:
+	api.drop_idle()
+	old_api.drop_idle()
+	var now := Time.get_ticks_msec()
+	if paused_at_msec >= 0:
+		last_ok_msec = mini(now, last_ok_msec + now - paused_at_msec)
+		paused_at_msec = -1
+	link_frame_msec = now
+	poll = 1000.0
+
 func connection_notice_due() -> bool:
 	return connected() and (diagnostics.network_failures > 0 or diagnostics.server_failures > 0) \
 		and Time.get_ticks_msec() - last_ok_msec >= CONNECTION_NOTICE_AFTER_MS
@@ -6470,6 +6500,7 @@ func apply_not_modified(response: Dictionary, sent_tag: String, tag_serial: int)
 	accept(advanced_state(server_time))
 
 func _process(delta: float) -> void:
+	discount_stall()
 	advance_server_clock(delta)
 	# The notice toast shows only while there is a notice; a new one eases in.
 	if message != null and message.text != message_shown:

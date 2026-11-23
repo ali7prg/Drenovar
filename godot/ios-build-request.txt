@@ -13,3 +13,4 @@ recruitment 3D stage, construction strip with blurred city, upgrade «Сейча
 level-V cap («Скоро»), speed-ups with queues and quick use, network fixes (fresh connection after a
 silent link, long frames are not an outage), forest loads while touching, safe area, black
 material fix, whole-unit portraits.
+Build re-requested: 1023 (0.6.0), 2026-11-23: run 141 built the IPA but could not publish it (release notes godot/runtime-audit-1023/RELEASE-RU.md were missing); notes added, the workflow now checks them first.

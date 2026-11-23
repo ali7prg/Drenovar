@@ -46,6 +46,9 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "build=$build" >> "$GITHUB_OUTPUT"
           echo "ipa=DRENOVAR-game-$build.ipa" >> "$GITHUB_OUTPUT"
+          # The release step needs these notes; fail now, not after the 15-minute export (1023 run 141).
+          notes="godot/runtime-audit-$build/RELEASE-RU.md"
+          test -s "$notes" || { echo "::error::$notes is missing: write the release notes for build $build first."; exit 1; }
       - name: Verify the engine capsule (pinned hashes)
         run: |
           meta=godot/ios-engine/engine-capsule.json

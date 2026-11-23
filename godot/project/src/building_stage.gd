@@ -28,6 +28,7 @@ extends Control
 
 const UiKit = preload("res://src/ui_kit.gd")
 const NEW_PARTS := preload("res://src/building_new_parts.gdshader")
+const SOON_ENGRAVING := preload("res://src/soon_engraving.gdshader")
 
 ## The camera looks from the front right, about 31 degrees above the ground.
 const VIEW := Vector3(0.82, 0.74, 1.0)
@@ -694,6 +695,15 @@ func _ready() -> void:
 	view.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	view.modulate.a = 0.0
 	add_child(view)
+	if soon:
+		# The «Скоро» card's building is drawn by a child with the engraving material (1023).
+		var engraving := SoonArt.new()
+		engraving.stage = self
+		var tone := ShaderMaterial.new()
+		tone.shader = SOON_ENGRAVING
+		engraving.material = tone
+		add_child(engraving)
+		engraving.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	resized.connect(layout)
 	layout()
 
@@ -862,36 +872,100 @@ func _draw() -> void:
 			draw_style_box(UiKit.flat(Color("#8e2a1e"), Color("#e9c779"), 5, Vector2.ZERO, 2), ribbon)
 			note.draw(get_canvas_item(), Vector2(ribbon.position.x + 16.0, ribbon.position.y + roundf((26.0 - note.get_size().y) * 0.5)), UiKit.GOLD)
 
-## The «Скоро» card in the «После» slot (premium UI stage 4b): the current building as a dark
-## silhouette in a drift of mist, a carved plate «Скоро» and one line. No model, no level
-## number, no tile edge.
+## The «Скоро» card in the «После» slot (premium UI stage 4b, redrawn for 1023): a card of the
+## construction strip's own anatomy standing where the next level would stand. An enamel window
+## with a pool of warm light and the current building as a dark, gold-rimmed silhouette (the next
+## level stays veiled); the carved oak band with «Скоро» across the card; one line in ink,
+## «Уровень VI готовится», on the card's parchment; the strip's carved frame. Each part has its own
+## band, measured from the slot and the caption plate under it, so nothing overlaps and the line
+## never leaves the card (it steps down from 17 to 13 units if a narrow window needs it).
+static var soon_styles := {}
+
+static func soon_style(key: String) -> StyleBox:
+	if not soon_styles.has(key):
+		match key:
+			"body":
+				# The fill is a grey gradient; on the window's light parchment the strip's tint reads
+				# dull, so the card's parchment is lifted to the window's cream.
+				soon_styles[key] = UiKit.tinted("kit_card_fill", Vector4(14, 14, 14, 14), Color(1.2, 1.14, 1.02))
+			"panel":
+				soon_styles[key] = UiKit.tinted("kit_card_fill", Vector4(14, 14, 14, 14), Color("#3d3530"))
+			"band":
+				soon_styles[key] = UiKit.nine("kit_strip", Vector4(26, 14, 26, 14), Vector4.ZERO)
+			"frame":
+				soon_styles[key] = UiKit.tinted("kit_card_frame", Vector4(16, 16, 16, 16), Color(1.2, 1.1, 0.9))
+			"shadow":
+				var flat := StyleBoxFlat.new()
+				flat.bg_color = Color(0, 0, 0, 0)
+				flat.shadow_color = Color(0.1, 0.06, 0.02, 0.4)
+				flat.shadow_size = 14
+				flat.shadow_offset = Vector2(0, 6)
+				flat.set_corner_radius_all(14)
+				soon_styles[key] = flat
+	return soon_styles[key]
+
+## The card's rect in the slot: as wide as the strip's cards allow, above the caption plate.
+func soon_card(slot: Rect2) -> Rect2:
+	var width := clampf(slot.size.x * 0.8, 200.0, 280.0)
+	var height := minf(width * 1.22, size.y - CAPTION_BAND - 14.0)
+	var top := clampf(slot.get_center().y - height * 0.5, 6.0, size.y - CAPTION_BAND - 8.0 - height)
+	return Rect2(roundf(slot.get_center().x - width * 0.5), roundf(top), roundf(width), roundf(height))
+
+## The enamel window: the upper 58 % of the card.
+func soon_window(card: Rect2) -> Rect2:
+	return Rect2(card.position + Vector2(8, 8), Vector2(card.size.x - 16, roundf(card.size.y * 0.58) - 8))
+
+## Where the veiled building stands: on the window's floor, inside the window.
+func soon_picture(slot: Rect2) -> Rect2:
+	var window := soon_window(soon_card(slot))
+	var side := minf(window.size.x * 0.9, window.size.y * 1.04)
+	return Rect2(roundf(window.get_center().x - side * 0.5), roundf(window.end.y - 3.0 - side), roundf(side), roundf(side))
+
+## The «Скоро» card's building with the engraving material.
+class SoonArt extends Control:
+	var stage: Control
+
+	func _init() -> void:
+		name = "SoonArt"
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		if stage == null or stage.size.x < 4.0:
+			return
+		var art: Texture2D = stage.card_art(stage.type)
+		if art != null:
+			draw_texture_rect(art, stage.soon_picture(stage.art_rect(1, stage.framing())), false)
+
 func draw_soon(slot: Rect2) -> void:
-	var art: Texture2D = card_art(type)
-	var centre := slot.get_center()
-	if art != null:
-		# The silhouette: the diorama art in a deep oak tone, a little smaller and lifted.
-		var shape := Rect2(centre - slot.size * 0.42 - Vector2(0, slot.size.y * 0.04), slot.size * 0.84)
-		draw_texture_rect(art, shape.grow(3.0), false, Color(0.92, 0.82, 0.62, 0.22))
-		draw_texture_rect(art, shape, false, Color(0.13, 0.1, 0.075, 0.82))
-	# Mist: soft pale washes drifting over the lower half and the flanks.
-	var mist: Texture2D = UiKit.tex("kit_ink")
-	if mist != null:
-		for wash: Array in [[Vector2(0.0, 0.2), Vector2(1.15, 0.55), 0.62], [Vector2(-0.24, -0.02), Vector2(0.7, 0.5), 0.42],
-				[Vector2(0.26, 0.06), Vector2(0.72, 0.5), 0.45], [Vector2(0.0, 0.34), Vector2(1.3, 0.42), 0.7]]:
-			var extent: Vector2 = slot.size * (wash[1] as Vector2)
-			var at: Vector2 = centre + slot.size * (wash[0] as Vector2) - extent * 0.5
-			draw_texture_rect(mist, Rect2(at, extent), false, Color(0.97, 0.93, 0.84, float(wash[2])))
-	var word := UiKit.KitText.line("Скоро", UiKit.TITLE_FONT, 30)
-	var plate_width := word.get_size().x + 70.0
-	var plate := Rect2(roundf(centre.x - plate_width * 0.5), roundf(centre.y - 30.0), plate_width, 48.0)
-	draw_style_box(UiKit.nine("kit_strip", Vector4(26, 14, 26, 14), Vector4.ZERO), plate)
-	var at := Vector2(roundf(plate.get_center().x - word.get_size().x * 0.5), plate.position.y + roundf((plate.size.y - word.get_size().y) * 0.5))
-	word.draw_outline(get_canvas_item(), at, 6, UiKit.SHADE)
-	word.draw(get_canvas_item(), at, UiKit.GOLD)
-	var line := UiKit.KitText.line("Новые уровни зданий скоро появятся", UiKit.LABEL_FONT, 16)
-	var p := Vector2(roundf(centre.x - line.get_size().x * 0.5), plate.end.y + 10.0)
-	line.draw_outline(get_canvas_item(), p, 5, Color(0.98, 0.95, 0.88, 0.9))
-	line.draw(get_canvas_item(), p, UiKit.INK)
+	var card := soon_card(slot)
+	var canvas := get_canvas_item()
+	draw_style_box(soon_style("shadow"), card.grow(-4))
+	draw_style_box(soon_style("body"), card)
+	var window := soon_window(card)
+	draw_style_box(soon_style("panel"), window)
+	draw_texture_rect(UiKit.warm_glow(), Rect2(window.position.x - 16, window.position.y + window.size.y * 0.08, window.size.x + 32, window.size.y * 0.96), false, Color(1, 1, 1, 0.85))
+	# The building (SoonArt, over this drawing) stands on the window's floor in its shadow.
+	var picture := soon_picture(slot)
+	draw_texture_rect(UiKit.ground_shadow(), Rect2(picture.position.x + picture.size.x * 0.12, window.end.y - picture.size.y * 0.2, picture.size.x * 0.76, picture.size.y * 0.17), false, Color(1, 1, 1, 0.6))
+	# «Скоро» on the carved oak band across the card, just under the window.
+	var band := Rect2(card.position.x, window.end.y + 4.0, card.size.x, 42.0)
+	draw_style_box(soon_style("band"), band)
+	var word := UiKit.KitText.line("Скоро", UiKit.TITLE_FONT, 26)
+	var word_at := Vector2(roundf(band.get_center().x - word.get_size().x * 0.5), band.position.y + roundf((band.size.y - word.get_size().y) * 0.5) - 1.0)
+	word.draw_outline(canvas, word_at, 5, UiKit.SHADE)
+	word.draw(canvas, word_at, UiKit.GOLD)
+	# One line in ink, centred in the parchment under the band.
+	var text := "Уровень %s готовится" % ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"][clampi(levels[0], 1, 10)]
+	var room := card.size.x - 28.0
+	var line := UiKit.KitText.line(text, UiKit.LABEL_FONT, 17)
+	for font_size in [16, 15, 14, 13]:
+		if line.get_size().x <= room:
+			break
+		line = UiKit.KitText.line(text, UiKit.LABEL_FONT, font_size)
+	var lower := Rect2(card.position.x, band.end.y, card.size.x, card.end.y - band.end.y - 6.0)
+	var line_at := Vector2(roundf(lower.get_center().x - line.get_size().x * 0.5), roundf(lower.get_center().y - line.get_size().y * 0.5))
+	line.draw(canvas, line_at, UiKit.INK)
+	draw_style_box(soon_style("frame"), card)
 
 # Built after the window's first frame: the open itself costs no 3D work.
 func _notification(what: int) -> void:

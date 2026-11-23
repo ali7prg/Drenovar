@@ -1,0 +1,54 @@
+HEAD 55dae4a611f9672b1afe0e17d3c5bc3bb8d65eb3  server 08db61a4c2a30a49baa684a0a9134c955d8ee334  godot 4.6.3.stable.official.7d41c59c4  node v24.22.1  start 2026-11-23T08:18:35Z
+qa_camera_hud rc=0 secs=3 :: QA_CAMERA_HUD checks=153 failures=0
+qa_runtime rc=0 secs=2 :: QA_RUNTIME checks=21 failures=0
+qa_batch_parity rc=0 secs=1 :: QA_BATCH_PARITY comparisons=5496 failures=0 reference_buffer_bytes=24455520 candidate_buffer_bytes=17142672
+qa_optimization rc=0 secs=3 :: QA_OPTIMIZATION comparisons=11040 failures=0 frustum_edge_cells=0
+qa_warriors rc=0 secs=0 :: QA_WARRIORS checks=72 failures=0
+qa_web_panels rc=0 secs=3 :: QA_WEB_PANELS checks=37 failures=0
+qa_city_parity rc=0 secs=4 :: QA_CITY_PARITY steps=7 vegetation_rebuilds=3 checks=279 failures=0
+qa_stability rc=0 secs=5 :: QA_STABILITY checks=6 failures=0
+qa_panel_latency rc=0 secs=4 :: QA_PANEL_LATENCY panels=26 checks=26 failures=0
+qa_diagnostics rc=0 secs=0 :: QA_DIAGNOSTICS checks=14 failures=0
+qa_gait rc=0 secs=3 :: QA_GAIT checks=91 failures=0
+qa_network rc=0 secs=2 :: QA_NETWORK checks=11 failures=0
+qa_camera_fling rc=0 secs=4 :: QA_CAMERA_FLING checks=9 failures=0
+qa_idempotency rc=0 secs=11 :: QA_IDEMPOTENCY checks=7 failures=0
+qa_troops06 rc=0 secs=1 :: QA_TROOPS06 checks=122 failures=0
+qa_api_pool rc=0 secs=11 :: QA_API_POOL checks=58 failures=0
+qa_touch_buttons rc=0 secs=3 :: QA_TOUCH_BUTTONS checks=11 failures=0
+qa_prewarm rc=0 secs=3 :: QA_PREWARM checks=9 failures=0
+qa_battle_fx rc=0 secs=3 :: QA_BATTLE_FX checks=22 failures=0
+qa_action_ring rc=0 secs=2 :: QA_ACTION_RING checks=9 failures=0
+qa_session_store rc=0 secs=0 :: QA_SESSION_STORE checks=11 failures=0
+qa_server_clock rc=0 secs=14 :: QA_SERVER_CLOCK checks=3 failures=0
+qa_build_menu rc=0 secs=3 :: QA_BUILD_MENU checks=20 failures=0
+qa_instant_start rc=0 secs=6 :: QA_INSTANT_START checks=12 failures=0 launch_ms=1523
+qa_city_works rc=0 secs=19 :: QA_CITY_WORKS checks=39 failures=0
+qa_single_scene rc=0 secs=3 :: QA_SINGLE_SCENE checks=8 failures=0
+qa_hunt rc=1 secs=3 :: QA_HUNT checks=38 failures=1
+qa_world_hunt rc=0 secs=4 :: QA_WORLD_HUNT checks=22 failures=0
+qa_creatures_v2 rc=0 secs=2 :: QA_CREATURES checks=310 failures=0
+qa_creatures_v2_lifecycle rc=0 secs=7 :: QA_CREATURES_LIFECYCLE checks=72 failures=0
+qa_workers rc=0 secs=15 :: QA_WORKERS checks=38 failures=0
+qa_speedups rc=0 secs=7 :: QA_SPEEDUPS checks=18 failures=0
+qa_town_plan rc=0 secs=6 :: QA_TOWN_PLAN checks=35 failures=0
+qa_legacy_build rc=0 secs=2 :: QA_LEGACY_BUILD checks=22 failures=0
+qa_building_looks rc=1 secs=3 :: QA_BUILDING_LOOKS upgrade checks=25 failures=5
+qa_building_looks_restart rc=1 secs=2 :: QA_BUILDING_LOOKS restart checks=26 failures=1
+qa_architecture rc=0 secs=12 :: QA_ARCHITECTURE checks=988 failures=0
+qa_forest_world rc=0 secs=11 :: QA_FOREST_WORLD checks=2968 failures=0
+qa_forest_flow rc=0 secs=13 :: QA_FOREST_FLOW checks=166 failures=0
+qa_forest_captives rc=0 secs=18 :: QA_FOREST_CAPTIVES checks=226 failures=0
+qa_http_304 rc=0 secs=1 :: QA_HTTP_304 checks=15 failures=0 pool_304_ms=13 httprequest_ms=28 httprequest_code=304 connections_opened=1 reused=4
+qa_net_1022 rc=1 secs=15 :: QA_NET_1022 checks=48 failures=4
+qa_forest_v6 rc=0 secs=11 :: QA_FOREST_V6 steps=17 commands=20 checks=43 failures=0
+qa_net_1023 rc=0 secs=29 :: QA_NET_1023 checks=15 failures=0
+qa_safe_area rc=0 secs=9 :: QA_SAFE_AREA checks=73 failures=0
+qa_stage4b rc=0 secs=5 :: {"checks":60,"status":"passed"}
+qa_stage4a rc=0 secs=3 :: {"checks":2499,"lanes":8,"plan":{"count":2,"finishes":true,"seconds":1200,"use":[["construction-3",1],["construction-2",1]],"waste":200},"remaining":1000,"status":"passed"}
+qa_recruitment rc=0 secs=3 :: {"cases":[{"case":"open","open_ms":7.44},{"case":"locked"},{"case":"switch"},{"case":"quantity","max":500},{"case":"train","order":"v6-1"},{"case":"progress"},{"case":"speedups"},{"case":"cancel"},{"case":"close"}],"checks":56,"fixture":"synthetic localhost","open_ms":7.44,"status":"passed"}
+qa_building_services rc=0 secs=5 :: {"checks":42,"states":6,"status":"passed"}
+qa_build_strip rc=0 secs=13 :: {"cases":15,"checks":697,"status":"passed"}
+qa_button_responsiveness rc=0 secs=4 :: {"checks":50,"failures":[],"method":"Linux Godot 4.6.3 headless; real Input.parse_input_event touch; synthetic V6 fixture; busy flag held; no device latency claim","timings":[{"button":"Меню","pressed_signal":true,"title":"Меню","touch_roundtrip_ms":67.001},{"button":"Армия","pressed_si
+qa_building_actions rc=0 secs=55 :: {"capped_states":162,"checks":2984,"states":297,"status":"passed"}
+END 2026-11-23T08:24:49Z

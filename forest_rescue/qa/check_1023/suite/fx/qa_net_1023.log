@@ -1,0 +1,19 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 85.958, &"terrain": 2697.409, &"tiles": 55.256, &"impostors": 230.715, &"visuals": 1157.113, &"total": 4309.277 } kit=0 missing kit assets
+QA_NET_1023 forest_while_touching_ms=6128 longest_frame_ms=44.9 indicator=true ratio_max=1.00
+QA_NET_1023 checks=15 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 22 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+ERROR: Pages in use exist at exit in PagedAllocator: N7Variant5Pools12BucketMediumE
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)
+ERROR: Pages in use exist at exit in PagedAllocator: N7Variant5Pools11BucketSmallE
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)
+ERROR: 1 RID allocations of type 'N26RendererEnvironmentStorage11EnvironmentE' were leaked at exit.
+ERROR: 9 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 2 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N17RendererSceneCull6CameraE' were leaked at exit.

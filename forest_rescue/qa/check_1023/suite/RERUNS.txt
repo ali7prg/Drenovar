@@ -1,0 +1,16 @@
+Reruns after the first pass of SUMMARY.txt (same commit, same machine, 2026-11-23):
+
+qa_net_1022: the first pass ran it on a fixture with the adventure ON (DRENOVAR_QA_ADVENTURE=1), so its four
+  "adventure off" checks failed (48/4). The suite needs the adventure off, as in 1022:
+  ADV=0 COND=1 HALL=2 -> fx2/qa_net_1022.log: QA_NET_1022 checks=48 failures=0.
+
+qa_hunt: 38/1 in the first pass ("Soldiers on the field: 12", 24 expected at that moment). Six reruns on this
+  commit: QA_HUNT checks=50 failures=0 (6 of 6). The 1022 baseline (22f6f3f): 50/0 in 2 of 2.
+
+qa_forest_e2e (V6 fixture, adventure on, hall II at the start): e2e/qa_forest_e2e.log,
+  QA_FOREST_E2E steps=214 reloads=21 commands=2 checks=966 failures=0, 198 adventure commands all 200, 66 s.
+
+verify_playable_pack (godot/tools, CI runs it on the exported pack): on the project with an empty profile
+  (XDG_DATA_HOME empty), a local copy that counts, instead of loading, the one scene CI generates and this
+  machine lacks (architecture-v6/units/SIEGE-RAM-01.tscn): verify_playable_pack_local.log,
+  {"architecture":162,"build":"1023","entry":"res://main.tscn","failures":[],"models_loaded":11}.

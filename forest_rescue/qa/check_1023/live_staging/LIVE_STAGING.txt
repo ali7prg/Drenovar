@@ -1,0 +1,54 @@
+1023 live network and forest-load runs, real client against the staging Worker
+==============================================================================
+
+Where: Worker drenovar-game-stage-forest (staging; its own D1), over Cloudflare, from this Linux
+machine through godot/tools/qa-freeze-relay.py (a local TCP relay that can freeze a kept-alive
+link on command, the way a NAT or a mobile radio drops an idle connection without a FIN).
+Harness: godot/project/qa_staging_net.gd (headless Godot 4.6.3, real main.tscn, synthetic staging
+device; no production Worker, no production data). Request lines carry method, path, code, time,
+whether the connection was opened/reused and, from 1023, whether a fresh retry happened.
+"before_*" = build 1022 code (22f6f3f, scratch copy), "after_*" = build 1023 code (this branch).
+Date: 2026-11-23.
+
+idle scenario (60 s in the background, then the relay freezes the kept link at +140 s)
+-----------------------------------------------------------------------------------------
+                         before_idle (1022)              after_idle (1023)
+requests                 32: 9×200, 22×304, 1 timeout    32: 8×200, 24×304, 0 failures
+frozen-link request      12 006 ms RESULT_TIMEOUT        4 097 ms, fresh retry, 200
+«Нет связи · повторяем»  shown at 154.3 s                never shown
+first request after the  133 ms on the 108 s old link   683 ms on a new connection
+60 s background gap      (it happened to be alive)       (kept links dropped on resume)
+304 answers (median/max) 22 (66 / 310 ms)                24 (103 / 267 ms)
+connections opened       2                               3
+longest frame            784 ms (first state applied)    482 ms
+frames over 50 ms        17                              9
+
+touch scenario (a finger pans the city without pause from launch)
+-----------------------------------------------------------------
+                         before_touch (1022)             after_touch (1023)   after_touch2 (1023)
+finger down              2.3 s → 92.3 s                  2.7 s → 8.5 s        2.5 s → 8.4 s
+forest game ready        93.5 s (only after the finger   4.1 s (finger down)  3.7 s (finger down)
+                         lifted)
+forest world ready       98.3 s                          8.5 s                8.4 s
+longest frame            499 ms (first state applied)    646 ms (same moment) 480 ms (same moment)
+longest frame after that 134 ms (forest_river shader)    330 and 214 ms       55 ms
+                                                         (pipeline warm-up)
+requests / failures      35 / 0                          14 / 0               14 / 0
+304 answers (median/max) 27 (68 / 102 ms)                9 (73 / 81 ms)       9 (60 / 75 ms)
+
+Reading:
+- H1 (304 stalls): not on Cloudflare: its 304s carry no Content-Length and no Transfer-Encoding;
+  all 91 of them in these runs completed (median 60–103 ms, longest 310 ms), none waited for a body. 1023 also hardens a 304/204 with a stray framing header
+  (qa_api_pool: 1022 waited 8 s on such an answer, 1023 14 ms).
+- H2 (dead kept-alive links): confirmed. 1022 waited the full 12 s timeout on a frozen link and
+  showed the pill; 1023 abandons a reused link that has not answered in 3.5 s, retries once on a
+  fresh connection (the request succeeds) and drops links idle for over 20 s or after a resume.
+- H3 (stalls counted as an outage): the meter now discounts frames over 250 ms and time in the
+  background (qa_net_1023: a 9.5 s frame or 11 s in the background after one failure shows no
+  pill; 10 s of real silence still does).
+- H4 (forest only while idle): confirmed (93.5 s, after the finger lifted); fixed (3.7–4.1 s with
+  the finger down). The two warm-up frames of after_touch (330 and 214 ms) did not repeat in
+  after_touch2 (nothing over 55 ms after the first state).
+
+Files: <tag>.json (report, events, requests, long frames), <tag>.log (client output),
+<tag>.relay.log (relay connections and the freeze). No headers, tokens or account data are logged.

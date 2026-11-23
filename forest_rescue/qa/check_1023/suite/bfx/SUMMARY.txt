@@ -1,0 +1,7 @@
+qa_stage4b rc=0 secs=5 :: {"checks":60,"status":"passed"}
+qa_stage4a rc=0 secs=3 :: {"checks":2499,"lanes":8,"plan":{"count":2,"finishes":true,"seconds":1200,"use":[["construction-3",1],["construction-2",1]],"waste":200},"remaining":1000,"status":"passed"}
+qa_recruitment rc=0 secs=3 :: {"cases":[{"case":"open","open_ms":7.44},{"case":"locked"},{"case":"switch"},{"case":"quantity","max":500},{"case":"train","order":"v6-1"},{"case":"progress"},{"case":"speedups"},{"case":"cancel"},{"case":"close"}],"checks":56,"fixture":"synthetic localhost","open_ms":7.44,"status":"passed"}
+qa_building_services rc=0 secs=5 :: {"checks":42,"states":6,"status":"passed"}
+qa_build_strip rc=0 secs=13 :: {"cases":15,"checks":697,"status":"passed"}
+qa_button_responsiveness rc=0 secs=4 :: {"checks":50,"failures":[],"method":"Linux Godot 4.6.3 headless; real Input.parse_input_event touch; synthetic V6 fixture; busy flag held; no device latency claim","timings":[{"button":"Меню","pressed_signal":true,"title":"Меню","touch_roundtrip_ms":67.001},{"button":"Армия","pressed_si
+qa_building_actions rc=0 secs=55 :: {"capped_states":162,"checks":2984,"states":297,"status":"passed"}

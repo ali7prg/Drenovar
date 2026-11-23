@@ -1,0 +1,33 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+PANEL {"call_ms":4.98,"next_frame_ms":4.82,"panel":"environment_catalog"}
+PANEL {"call_ms":4.75,"next_frame_ms":2.96,"panel":"performance"}
+PANEL {"call_ms":4.43,"next_frame_ms":1.43,"panel":"controls_menu"}
+PANEL {"call_ms":4.05,"next_frame_ms":2.78,"panel":"building_ECO-05"}
+PANEL {"call_ms":4.05,"next_frame_ms":2.91,"panel":"city_actions"}
+PANEL {"call_ms":3.78,"next_frame_ms":3.15,"panel":"encounter"}
+PANEL {"call_ms":3.52,"next_frame_ms":3.36,"panel":"recruitment_again"}
+PANEL {"call_ms":3.47,"next_frame_ms":3.47,"panel":"economy"}
+PANEL {"call_ms":2.38,"next_frame_ms":4.5,"panel":"starter_goals"}
+PANEL {"call_ms":2.36,"next_frame_ms":4.23,"panel":"recruitment_first"}
+PANEL {"call_ms":2.33,"next_frame_ms":4.56,"panel":"account"}
+PANEL {"call_ms":2.32,"next_frame_ms":4.61,"panel":"building_RES-04"}
+PANEL {"call_ms":2.29,"next_frame_ms":4.64,"panel":"training_buildings"}
+PANEL {"call_ms":2.25,"next_frame_ms":4.5,"panel":"construction"}
+PANEL {"call_ms":2.21,"next_frame_ms":4.62,"panel":"building_MIL-01"}
+PANEL {"call_ms":2.14,"next_frame_ms":4.81,"panel":"building_RES-01"}
+PANEL {"call_ms":2.1,"next_frame_ms":4.79,"panel":"map_options"}
+PANEL {"call_ms":1.88,"next_frame_ms":4.98,"panel":"clearings"}
+PANEL {"call_ms":1.86,"next_frame_ms":5.17,"panel":"city_hunt"}
+PANEL {"call_ms":1.82,"next_frame_ms":5.08,"panel":"world_directory"}
+PANEL {"call_ms":1.73,"next_frame_ms":5.13,"panel":"hospital"}
+PANEL {"call_ms":1.73,"next_frame_ms":5.16,"panel":"armies"}
+PANEL {"call_ms":1.59,"next_frame_ms":5.3,"panel":"world_hunt"}
+PANEL {"call_ms":1.13,"next_frame_ms":5.8,"panel":"world_marches"}
+PANEL {"call_ms":1.03,"next_frame_ms":5.92,"panel":"world_cities"}
+PANEL {"call_ms":0.86,"next_frame_ms":6.02,"panel":"reports"}
+QA_PANEL_LATENCY panels=26 checks=26 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 10 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

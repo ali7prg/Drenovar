@@ -1,0 +1,271 @@
+{
+ "events": [
+  {
+   "event": "milestone",
+   "t": 2689,
+   "what": "city_interactive"
+  },
+  {
+   "event": "milestone",
+   "t": 2689,
+   "what": "server_state"
+  },
+  {
+   "event": "adventure",
+   "offered": true,
+   "t": 2689
+  },
+  {
+   "event": "touch_start",
+   "t": 2689
+  },
+  {
+   "event": "milestone",
+   "t": 2797,
+   "what": "forest_game_loading"
+  },
+  {
+   "event": "milestone",
+   "t": 4116,
+   "what": "forest_game_ready"
+  },
+  {
+   "event": "milestone",
+   "t": 4116,
+   "what": "world_attaching"
+  },
+  {
+   "event": "milestone",
+   "t": 8522,
+   "what": "world_ready"
+  },
+  {
+   "event": "touch_stop",
+   "t": 8522
+  }
+ ],
+ "long_frames": [
+  {
+   "during": "|||",
+   "ms": 97.2,
+   "t": 1275
+  },
+  {
+   "during": "|||",
+   "ms": 59.8,
+   "t": 1369
+  },
+  {
+   "during": "|||",
+   "ms": 85.7,
+   "t": 1454
+  },
+  {
+   "during": "|||",
+   "ms": 645.7,
+   "t": 2797
+  },
+  {
+   "during": "attaching|city forest instances||",
+   "ms": 74.2,
+   "t": 8522
+  },
+  {
+   "during": "attached|pipeline warm-up||",
+   "ms": 329.8,
+   "t": 9443
+  },
+  {
+   "during": "attached|pipeline warm-up||",
+   "ms": 213.5,
+   "t": 10226
+  }
+ ],
+ "report": {
+  "by_result_code": {
+   "0 200": 5,
+   "0 304": 9
+  },
+  "frame_max": 645.673,
+  "frame_p99": 15.866,
+  "frames": 5643,
+  "freeze": false,
+  "full_polls": 2,
+  "gap_s": 0,
+  "long_frames_over50": 7,
+  "milestones": {
+   "city_interactive": 2689,
+   "forest_game_loading": 2797,
+   "forest_game_ready": 4116,
+   "server_state": 2689,
+   "world_attaching": 4116,
+   "world_ready": 8522
+  },
+  "network_failures_end": 0,
+  "not_modified_polls": 9,
+  "ok_ms_max": 887.0,
+  "ok_ms_p50": 77.0,
+  "ok_ms_p95": 887.0,
+  "opened": 1,
+  "requests": 14,
+  "reused": 13,
+  "scenario": "touch",
+  "t0_ticks": 338
+ },
+ "requests": [
+  {
+   "at": 1602,
+   "code": 200,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 887,
+   "opened": true,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": false
+  },
+  {
+   "at": 3028,
+   "code": 200,
+   "fresh_retry": false,
+   "method": "POST",
+   "ms": 116,
+   "opened": false,
+   "path": "/api/native/game/command",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 4443,
+   "code": 200,
+   "fresh_retry": false,
+   "method": "POST",
+   "ms": 122,
+   "opened": false,
+   "path": "/api/native/game/session/new",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 6162,
+   "code": 200,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 116,
+   "opened": false,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 10573,
+   "code": 304,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 67,
+   "opened": false,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 14573,
+   "code": 304,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 79,
+   "opened": false,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 18564,
+   "code": 304,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 62,
+   "opened": false,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 22564,
+   "code": 304,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 81,
+   "opened": false,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 26584,
+   "code": 304,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 73,
+   "opened": false,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 30582,
+   "code": 304,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 76,
+   "opened": false,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 34588,
+   "code": 304,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 64,
+   "opened": false,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 38593,
+   "code": 200,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 112,
+   "opened": false,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 42592,
+   "code": 304,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 56,
+   "opened": false,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": true
+  },
+  {
+   "at": 46598,
+   "code": 304,
+   "fresh_retry": false,
+   "method": "GET",
+   "ms": 77,
+   "opened": false,
+   "path": "/api/native/game/state",
+   "result": 0,
+   "reused": true
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+LOCAL_MISSING res://assets/city/architecture-v6/units/SIEGE-RAM-01.tscn
+{"architecture":162,"build":"1023","entry":"res://main.tscn","failures":[],"models_loaded":11,"scope":"Linux exported game pack; no physical iPhone acceptance"}
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 10 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.

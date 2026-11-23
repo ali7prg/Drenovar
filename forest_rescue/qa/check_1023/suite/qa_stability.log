@@ -1,0 +1,8 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+QA_STABILITY_REPORT {"boot_memory_mb":172.5,"boot_ms":1631,"cached_city":{"memory_mb":238.1,"ms":11,"nodes":989,"objects":6118,"scene":"city","worst_frame_ms":0.0},"cycles":[{"cold_city":{"memory_mb":222.0,"ms":158,"nodes":870,"objects":5780,"scene":"city","worst_frame_ms":25.1},"cycle":0,"orphans":0,"settled_memory_mb":188.7,"settled_nodes":457},{"cold_city":{"memory_mb":222.0,"ms":195,"nodes":867,"objects":5773,"scene":"city","worst_frame_ms":34.4},"cycle":1,"orphans":0,"settled_memory_mb":188.7,"settled_nodes":457},{"cold_city":{"memory_mb":222.0,"ms":231,"nodes":867,"objects":5773,"scene":"city","worst_frame_ms":32.3},"cycle":2,"orphans":0,"settled_memory_mb":188.7,"settled_nodes":457},{"cold_city":{"memory_mb":222.0,"ms":173,"nodes":867,"objects":5773,"scene":"city","worst_frame_ms":33.3},"cycle":3,"orphans":0,"settled_memory_mb":188.7,"settled_nodes":457}],"first_world":{"memory_mb":235.4,"ms":465,"nodes":989,"objects":6101,"scene":"world","worst_frame_ms":14.1}}
+QA_STABILITY checks=6 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 10 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

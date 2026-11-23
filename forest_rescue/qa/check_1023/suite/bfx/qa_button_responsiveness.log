@@ -1,0 +1,57 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+BUTTON_CHECK synthetic V6 account loaded true
+BUTTON_CHECK touch target on canvas: Меню true
+BUTTON_CHECK Меню dispatches while a command is busy true
+BUTTON_CHECK Меню opens a panel true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Армия true
+BUTTON_CHECK Армия dispatches while a command is busy true
+BUTTON_CHECK Армия opens a panel true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Строить true
+BUTTON_CHECK Строить dispatches while a command is busy true
+BUTTON_CHECK Строить opens a panel true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Отчёты true
+BUTTON_CHECK Отчёты dispatches while a command is busy true
+BUTTON_CHECK Отчёты opens a panel true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Меню true
+BUTTON_CHECK menu reopens after previous close true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Меню true
+BUTTON_CHECK menu reopens after previous close true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Меню true
+BUTTON_CHECK menu reopens after previous close true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Меню true
+BUTTON_CHECK menu reopens after previous close true
+BUTTON_CHECK touch target on canvas: × true
+BUTTON_CHECK close restores HUD and map input true
+BUTTON_CHECK close restores native touch emulation true
+BUTTON_CHECK touch target on canvas: Карта true
+BUTTON_CHECK map starts despite a pending command true
+BUTTON_CHECK map opens true
+BUTTON_CHECK touch target on canvas: Город true
+BUTTON_CHECK city returns true
+{"checks":50,"failures":[],"method":"Linux Godot 4.6.3 headless; real Input.parse_input_event touch; synthetic V6 fixture; busy flag held; no device latency claim","timings":[{"button":"Меню","pressed_signal":true,"title":"Меню","touch_roundtrip_ms":67.001},{"button":"Армия","pressed_signal":true,"title":"Армия и осада","touch_roundtrip_ms":34.297},{"button":"Строить","pressed_signal":true,"title":"Строительство","touch_roundtrip_ms":48.671},{"button":"Отчёты","pressed_signal":true,"title":"Летопись сражений","touch_roundtrip_ms":34.238}]}
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 10 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

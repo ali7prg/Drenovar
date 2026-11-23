@@ -1,0 +1,5 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+CREATURES_V2 {"dragor":{"bones":48,"clips":14,"cycle_node_delta":0.0,"cycle_resource_delta":0.0,"death_lowest_bone_m":0.227,"fur_card_meshes":0,"overlays":0,"sockets":11},"kamneklyk":{"bones":40,"clips":12,"cycle_node_delta":0.0,"cycle_resource_delta":0.0,"death_lowest_bone_m":0.189,"fur_card_meshes":2,"overlays":1,"sockets":10},"tenerys":{"bones":44,"clips":14,"cycle_node_delta":0.0,"cycle_resource_delta":0.0,"death_lowest_bone_m":0.167,"fur_card_meshes":2,"overlays":0,"sockets":10},"velkor":{"bones":41,"clips":12,"cycle_node_delta":0.0,"cycle_resource_delta":0.0,"death_lowest_bone_m":0.182,"fur_card_meshes":2,"overlays":2,"sockets":10}}
+CREATURES_V2_CHECKS 310 failures 0
+QA_CREATURES checks=310 failures=0

@@ -1,0 +1,35 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+BUILDING_UI_TYPE_OK B05
+BUILDING_UI_TYPE_OK B01
+BUILDING_UI_TYPE_OK B02
+BUILDING_UI_TYPE_OK B03
+BUILDING_UI_TYPE_OK B04
+BUILDING_UI_TYPE_OK B06
+BUILDING_UI_TYPE_OK B07
+BUILDING_UI_TYPE_OK B08
+BUILDING_UI_TYPE_OK B09
+BUILDING_UI_TYPE_OK B10
+BUILDING_UI_TYPE_OK B11
+BUILDING_UI_TYPE_OK B12
+BUILDING_UI_TYPE_OK B13
+BUILDING_UI_TYPE_OK B14
+BUILDING_UI_TYPE_OK B15
+BUILDING_UI_TYPE_OK B16
+BUILDING_UI_TYPE_OK B17
+BUILDING_UI_TYPE_OK B18
+BUILDING_UI_TYPE_OK B19
+BUILDING_UI_TYPE_OK B20
+BUILDING_UI_TYPE_OK B21
+BUILDING_UI_TYPE_OK B22
+BUILDING_UI_TYPE_OK B23
+BUILDING_UI_TYPE_OK B24
+BUILDING_UI_TYPE_OK B25
+BUILDING_UI_TYPE_OK B26
+BUILDING_UI_TYPE_OK B27
+{"capped_states":162,"checks":2984,"states":297,"status":"passed"}
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.

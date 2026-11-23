@@ -1,0 +1,12 @@
+qa_instant_start, alternating 1023 (this branch) and 1022 (22f6f3f scratch copy), same machine, 2026-11-23, headless Godot 4.6.3:
+1023: QA_INSTANT_START checks=12 failures=0 launch_ms=1305
+1022: QA_INSTANT_START checks=12 failures=0 launch_ms=1309
+1023: QA_INSTANT_START checks=12 failures=0 launch_ms=1386
+1022: QA_INSTANT_START checks=12 failures=0 launch_ms=1450
+1023: QA_INSTANT_START checks=12 failures=0 launch_ms=1448
+1022: QA_INSTANT_START checks=12 failures=0 launch_ms=1456
+1023: QA_INSTANT_START checks=12 failures=0 launch_ms=1523
+1022: QA_INSTANT_START checks=12 failures=0 launch_ms=1430
+
+Offline launch profile (main-thread frames once the city is interactive, no server):
+1022: longest interactive frame 291.7 ms, 13 frames over 50 ms; 1023: 69.1 ms, 2 frames over 50 ms.

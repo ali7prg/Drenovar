@@ -97,3 +97,42 @@ Counts below are "checks/failures" as printed by each suite.
 | `qa_warriors` | 72/0 |
 | `qa_troops06` | 122/0 |
 | `qa_instant_start` | 12/0 ×3, launch_ms 1161, 1183, 1172 |
+
+## Build 1023 (2026-11-23)
+
+Game branch `claude/kind-babbage-4swyw3`, build 1023 (0.6.0); server checkout `08db61a` unchanged
+(no server change was needed, see C1). Godot 4.6.3, Node 24.22.1, Linux, no iPhone. Logs:
+`forest_rescue/qa/check_1023/` (`suite/SUMMARY.txt` = every suite on the final commit,
+`suite/RERUNS.txt`, `LAUNCH.txt`, `live_staging/LIVE_STAGING.txt`, `shots/`).
+
+| # | Requirement | Status | Evidence |
+|---|---|---|---|
+| C1 | H1: 304 answers stall the client | DONE (refuted for Cloudflare, hardened) | Live on the staging Worker `drenovar-game-stage-forest`: 91 of 91 304s completed, median 60–103 ms, longest 310 ms; Cloudflare's 304 has no Content-Length or Transfer-Encoding. A 304/204 with a stray framing header (an intermediary): 1022 waited 8 s, 1023 completes it in about 14 ms (`qa_api_pool` 58/0, `qa_http_304` 15/0). No server change. |
+| C2 | H2: dead kept-alive links | DONE (confirmed, fixed) | `live_staging/before_idle` vs `after_idle` (relay freezes the kept link): 1022 waited 12 006 ms (timeout), then «Нет связи · повторяем» at 154.3 s; 1023 abandons the silent reused link after 3.5 s, retries once on a fresh connection: 4 097 ms, 200, no pill, 0 failures in 32 requests. Links idle over 20 s and all kept links after a resume are dropped (683 ms first request after the 60 s gap, on a new connection). `qa_api_pool` 58/0, `qa_net_1023` 15/0. |
+| C3 | H3: main-thread stalls counted as an outage | DONE (partly confirmed, fixed) | The outage meter discounts frames over 250 ms and time in the background; `qa_net_1023`: a 9.5 s frame or 11 s in the background after one failure shows no pill, 10 s of real silence still does. Longest frame after launch with the server: 784 → 482 ms (`before_idle` / `after_idle`). |
+| C4 | H4: the forest loads only while the screen is idle | DONE (confirmed, fixed) | 1022: nothing loaded in 60 s of touching (`qa_net_1023` on the baseline); live, ready at 93.5 s, after the finger lifted. 1023: threaded staged loads with no idle gate and a progress plate («Лес потерянных · готовим лес · NN %»): ready in 3.7–4.1 s live with the finger down (`after_touch`, `after_touch2`), 6.0–6.3 s in `qa_net_1023`, longest load frame 59–79.5 ms headless. |
+| C5 | Frames over 50 ms at launch | DONE | Offline launch profile: interactive frames max 291.7 → 69.1 ms, frames over 50 ms 13 → 2. Forest script-compile frames (114–192 ms in 1022) are gone. Launch: 1023 1305–1523 ms, 1022 1309–1456 ms, alternating on the same machine (`LAUNCH.txt`). |
+| C6 | Black blobs on bushes, rocks and roads | DONE (cause found, fixed) | The scenery atlas material (ferns, berry and round bushes, branches, mossy rocks, reeds) and the world road material, both StandardMaterial3D with alpha scissor, render black in the mobile renderer on the reference Vulkan driver; Forward+ and compatibility are correct on the same driver. Bisect: unshaded, no scissor or alpha hash fix it; MSAA, textures, culling, shadows do not. Replaced by equivalent hand-written spatial shaders (`src/scenery.gdshader`, `src/world_road.gdshader`; one texture sample instead of three for scenery). City sample: black pixels about 1300 → 249 (the rest are real shadows); world map matches Forward+; forest 0. `shots/blobs_*`, stage 4b world stills. `qa_city_parity` 279/0 (material keyed by atlas), `qa_optimization` 11040/0, `qa_forest_world` 2968/0. Metal on the iPhone not verifiable here. |
+| C7 | Safe area; the close medallion cut at the right edge | DONE | `src/safe_area.gd` maps the display safe area to canvas units (iPhone 12 landscape: 76 / 0 / 76 / 34). HUD, window heads, close medallions, resource plates, content, the construction strip, the forest row and its plate stay inside it; a full window is never wider than the screen (1022: B11 at IV was 1382 wide, close at 1316–1372; 1023: 1366, close 1300–1356). `qa_safe_area` 73/0 (fails with the fit disabled, as a check of the check); `shots/safe_*`. |
+| C8 | «Скоро» card | DONE | A construction-strip card in the «После» slot: the building's engraving in gold, the «Скоро» band, «Уровень VI готовится» (`MAX_OPEN_BUILDING_LEVEL` stays 5). `shots/soon_before_1022.jpg`, `shots/soon_after_1023.jpg`; `qa_build_strip` 697/0, `qa_building_actions` 2984/0. |
+| C9 | Whole unit on unit cards (owner request) | DONE | Portraits re-baked with the whole silhouette plus 4% of air (lance and pennant, spear and bow tips, feet, hooves inside): `shots/units_portraits_1022_top_1023_bottom.jpg`. Whole figures on the army tier cards, formation and lazaret heads, march confirmation, recruitment queue, work-list buttons, march rows and the legacy compose/garrison slots; busts only in round medallions and dense rows. Re-shot stills: `ui_premium/shots/stage4b/after_army.jpg` and others, `shots/units_*`. `qa_stage4b` 60/0, `qa_stage4a` 2499/0, `qa_recruitment` 56/0. |
+| C10 | Build 1023 and the playable pack | DONE (here) / PARTIAL (IPA) | `project.godot` build 1023, `export_presets.cfg` version 1023, short version 0.6.0. `verify_playable_pack` expectations hold on the project with an empty profile: build 1023, models 11, architecture 162, «Аккаунт» on a fresh install, 0 requests, no failures. One scene is generated only in CI (`build_all.py --native-only`): the ram's field model, missing on this machine, so the local run counted it without loading it (`suite/verify_playable_pack_local.log`). The IPA is built when `godot/ios-build-request.txt` changes; that file was left to the lead. |
+| C11 | iPhone 12 measurements | OPEN | No device here (as A23). |
+
+### Suites on the final commit
+
+| Suite | Result |
+|---|---|
+| 1021 CI suite, 34 scenarios | 34 pass (`qa_hunt` 38/1 once: 12 of 24 soldiers on the field at the check; 6 reruns 50/0, the 1022 baseline 2 of 2 50/0) |
+| `qa_api_pool` / `qa_http_304` / `qa_network` / `qa_idempotency` | 58/0 / 15/0 / 11/0 / 7/0 |
+| `qa_net_1022` (V6 fixture, adventure off) / `qa_net_1023` (hall III) | 48/0 / 15/0 |
+| `qa_safe_area` (V6 fixture, hall III) | 73/0 |
+| `qa_forest_world` / `qa_forest_flow` / `qa_forest_captives` (`--fixed-fps 30`) | 2968/0 / 166/0 / 226/0 |
+| `qa_forest_v6` (V6 fixture, adventure on) | 43/0, 17 steps, 20 commands |
+| `qa_forest_e2e` (V6 fixture, adventure on, hall II at the start) | 966/0: 214 steps, 12 sites, 60 tasks, 12 guardians, 12 cages, 12 escorts, boss in 3 phases (victory), 21 reloads, 198 commands all 200, 66 s |
+| `qa_stage4b` / `qa_stage4a` / `qa_recruitment` / `qa_building_services` | 60/0 / 2499/0 / 56/0 / 42/0 |
+| `qa_build_strip` / `qa_building_actions` / `qa_button_responsiveness` | 697/0 / 2984/0 (297 states) / 50/0 |
+| `qa_panel_latency` / `qa_camera_hud` / `qa_city_parity` / `qa_optimization` | 26/0 / 153/0 / 279/0 / 11040/0 |
+| `qa_architecture` / `qa_troops06` / `qa_creatures_v2` / `qa_warriors` | 988/0 / 122/0 / 310/0 / 72/0 |
+| `qa_building_looks` / `--restart` | 25/5 and 26/1 (same since 1020) |
+| `qa_instant_start` | 12/0; launch_ms 1305, 1386, 1448, 1523 (1022 alternating: 1309, 1450, 1456, 1430) |

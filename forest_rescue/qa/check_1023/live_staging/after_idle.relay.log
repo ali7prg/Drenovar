@@ -1,0 +1,7 @@
+   0.000 listening 39801
+   2.461 open 1
+ 110.780 close 1  swallowed=0 life=108.3s
+ 110.784 open 2
+ 140.783 freeze [2]
+ 146.184 open 3
+ 185.817 close 3  swallowed=0 life=39.6s

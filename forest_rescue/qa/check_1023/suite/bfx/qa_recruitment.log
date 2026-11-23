@@ -1,0 +1,22 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:257)
+   GDScript backtrace (most recent call first):
+       [0] scene_resource (res://src/landscape.gd:396)
+       [1] add_warrior (res://src/landscape.gd:1105)
+       [2] present_parade (res://src/landscape.gd:1645)
+       [3] _process (res://src/main.gd:6755)
+ERROR: Parameter "t" is null.
+   at: texture_2d_initialize (./servers/rendering/dummy/storage/texture_storage.h:84)
+   GDScript backtrace (most recent call first):
+       [0] scene_resource (res://src/landscape.gd:396)
+       [1] add_warrior (res://src/landscape.gd:1105)
+       [2] present_parade (res://src/landscape.gd:1645)
+       [3] _process (res://src/main.gd:6755)
+{"cases":[{"case":"open","open_ms":7.44},{"case":"locked"},{"case":"switch"},{"case":"quantity","max":500},{"case":"train","order":"v6-1"},{"case":"progress"},{"case":"speedups"},{"case":"cancel"},{"case":"close"}],"checks":56,"fixture":"synthetic localhost","open_ms":7.44,"status":"passed"}
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+ERROR: 2 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.

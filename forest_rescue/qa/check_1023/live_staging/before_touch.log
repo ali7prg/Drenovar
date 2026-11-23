@@ -1,0 +1,67 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+EVENT {"event":"milestone","t":2343,"what":"city_interactive"}
+EVENT {"event":"milestone","t":2343,"what":"server_state"}
+EVENT {"event":"adventure","offered":true,"t":2343}
+EVENT {"event":"touch_start","t":2343}
+EVENT {"event":"milestone","t":2438,"what":"forest_game_loading"}
+EVENT {"event":"touch_stop","t":92347}
+EVENT {"event":"milestone","t":93455,"what":"forest_game_ready"}
+EVENT {"event":"milestone","t":93455,"what":"world_attaching"}
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 80.311, &"terrain": 2518.958, &"tiles": 48.363, &"impostors": 314.876, &"visuals": 1230.146, &"total": 4163.512 } kit=0 missing kit assets
+EVENT {"event":"milestone","t":98320,"what":"world_ready"}
+QA_STAGING_NET {"by_result_code":{"0 200":8,"0 304":27},"frame_max":499.356,"frame_p99":12.389,"frames":17986,"freeze":false,"full_polls":5,"gap_s":0,"long_frames_over50":13,"milestones":{"city_interactive":2342,"forest_game_loading":2438,"forest_game_ready":93455,"server_state":2343,"world_attaching":93455,"world_ready":98320},"network_failures_end":0,"not_modified_polls":27,"ok_ms_max":654.0,"ok_ms_p50":69.0,"ok_ms_p95":446.0,"opened":1,"requests":35,"reused":34,"scenario":"touch","t0_ticks":251}
+REQ {"at":1535,"code":200,"method":"GET","ms":654,"opened":true,"path":"/api/native/game/state","result":0,"reused":false}
+REQ {"at":2594,"code":200,"method":"POST","ms":126,"opened":false,"path":"/api/native/game/command","result":0,"reused":true}
+REQ {"at":6010,"code":200,"method":"GET","ms":116,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":10010,"code":304,"method":"GET","ms":75,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":14009,"code":304,"method":"GET","ms":68,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":18018,"code":304,"method":"GET","ms":89,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":22022,"code":304,"method":"GET","ms":66,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":26029,"code":304,"method":"GET","ms":61,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":30033,"code":304,"method":"GET","ms":102,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":34041,"code":304,"method":"GET","ms":96,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":38051,"code":200,"method":"GET","ms":123,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":42052,"code":304,"method":"GET","ms":68,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":46063,"code":304,"method":"GET","ms":61,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":50068,"code":304,"method":"GET","ms":68,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":54077,"code":304,"method":"GET","ms":102,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":58085,"code":304,"method":"GET","ms":75,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":62084,"code":304,"method":"GET","ms":61,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":66085,"code":304,"method":"GET","ms":69,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":70096,"code":200,"method":"GET","ms":117,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":74101,"code":304,"method":"GET","ms":68,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":78109,"code":304,"method":"GET","ms":67,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":82118,"code":304,"method":"GET","ms":74,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":86122,"code":304,"method":"GET","ms":67,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":90130,"code":304,"method":"GET","ms":61,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":93691,"code":200,"method":"POST","ms":446,"opened":false,"path":"/api/native/game/session/new","result":0,"reused":true}
+REQ {"at":94149,"code":200,"method":"GET","ms":114,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":98143,"code":304,"method":"GET","ms":61,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":102151,"code":304,"method":"GET","ms":85,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":106155,"code":304,"method":"GET","ms":57,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":110155,"code":304,"method":"GET","ms":64,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":114155,"code":304,"method":"GET","ms":64,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":118161,"code":304,"method":"GET","ms":74,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":122164,"code":304,"method":"GET","ms":65,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":126160,"code":200,"method":"GET","ms":113,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+REQ {"at":130174,"code":304,"method":"GET","ms":63,"opened":false,"path":"/api/native/game/state","result":0,"reused":true}
+LONG {"during":"|||","ms":106.1,"t":1298}
+LONG {"during":"|||","ms":63.0,"t":1408}
+LONG {"during":"|||","ms":58.1,"t":1466}
+LONG {"during":"|||","ms":92.1,"t":1558}
+LONG {"during":"|||","ms":499.4,"t":2437}
+LONG {"during":"||res://src/forest_rescue/game/adventure_content.gd|gameload","ms":80.3,"t":2549}
+LONG {"during":"||res://src/forest_rescue/game/hud_art.gd|gameload","ms":55.9,"t":93052}
+LONG {"during":"||res://src/forest_rescue/game/boss_telegraphs.gd|gameload","ms":109.9,"t":93324}
+LONG {"during":"||res://src/forest_rescue/game/adventure_audio.gd|gameload","ms":82.1,"t":93419}
+LONG {"during":"attaching||res://src/forest_rescue/world/forest_fog.gd|","ms":100.7,"t":93638}
+LONG {"during":"attaching||res://src/forest_rescue/world/forest_river.gdshader|","ms":133.3,"t":93886}
+LONG {"during":"attaching|||","ms":62.5,"t":96906}
+LONG {"during":"attached|post-setup (warmed)||","ms":65.4,"t":101312}
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 10 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+rc=0

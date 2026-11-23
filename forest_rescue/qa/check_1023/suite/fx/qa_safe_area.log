@@ -1,0 +1,11 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+QA_SAFE_AREA building_window width=1366 close=(1300, 31 – 1356, 87) hero=554
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 66.598, &"terrain": 2506.803, &"tiles": 49.433, &"impostors": 227.282, &"visuals": 1003.723, &"total": 3854.468 } kit=0 missing kit assets
+QA_SAFE_AREA forest_row=(76, 512 – 838, 596) nav=(850, 455 – 1290, 543)
+QA_SAFE_AREA checks=73 failures=0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2663)
+ERROR: 10 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

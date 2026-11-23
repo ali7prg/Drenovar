@@ -194,12 +194,19 @@ func run() -> void:
 			game.close_modal()
 			game.open_building_ring({"item": instance_of("B05"), "position": marker.position, "kind": "building"})
 			if repeat == 0:
-				# Mid-unfold (about 60 ms in) and at rest.
+				# Mid-unfold and at rest. Lavapipe frames are slower than the 170 ms unfold, so
+				# the unfold is held at 45 % for the still (the same drawing a phone shows ~75 ms in).
+				var ring = game.action_ring
+				if ring.get("unfold_tween") != null:
+					ring.unfold_tween.kill()
+					ring.set_unfold(0.45)
 				await frames(2)
 				var dir := ProjectSettings.globalize_path(shots_dir)
 				DirAccess.make_dir_recursive_absolute(dir)
 				root.get_texture().get_image().save_png(dir.path_join(prefix + "ring_unfold.png"))
 				saved.append("ring_unfold")
+				if ring.has_method("set_unfold"):
+					ring.set_unfold(1.0)
 			await shot("ring", 24)
 			game.action_ring.close()
 	if wanted("menu"):
@@ -214,7 +221,14 @@ func run() -> void:
 		await wait_until(func(): return game.modal.visible and game.modal_title.text == "Код подключения", 8.0)
 		await shot("pairing")
 	if wanted("confirm"):
-		await timed("confirm", func(): game.confirm_profile_action(game.sign_out_question(), func(): pass))
+		# The sign-out question as the account asks it (danger: it cannot be undone); the action
+		# is a no-op here so the still does not sign out.
+		var ask := func():
+			if game.v6_panels.VIEW_SCRIPTS.has("menu_view"):
+				game.v6_panels.menu_view.confirm(game.sign_out_question(), func(): pass, "Подтвердить", true, "kit_emb_exit")
+			else:
+				game.confirm_profile_action(game.sign_out_question(), func(): pass)
+		await timed("confirm", ask)
 		await shot("confirm")
 	if wanted("trade"):
 		await timed("trade", game.v6_panels.trade)
@@ -254,10 +268,14 @@ func run() -> void:
 		# The banner's own rule: a failure and 10 s without an answer (the clock is moved back).
 		var failures: int = game.diagnostics.network_failures
 		var last_ok: int = game.last_ok_msec
-		game.diagnostics.network_failures = maxi(1, failures)
-		game.last_ok_msec = Time.get_ticks_msec() - 11000
-		game.update_connection_notice()
-		await shot("banner_offline", 8)
+		var offline := func():
+			game.diagnostics.network_failures = maxi(1, failures)
+			game.last_ok_msec = Time.get_ticks_msec() - 11000
+			game.update_connection_notice()
+		offline.call()
+		# The fixture keeps answering the game's polls: the state is set again just before
+		# the capture, so an answer that landed meanwhile does not hide the pill.
+		await shot("banner_offline", 8, offline)
 		game.diagnostics.network_failures = failures
 		game.last_ok_msec = Time.get_ticks_msec()
 		game.update_connection_notice()

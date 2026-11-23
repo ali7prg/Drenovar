@@ -285,10 +285,13 @@ static func stage_helmet(material: BaseMaterial3D) -> BaseMaterial3D:
 	var key := material.get_instance_id()
 	if not helmet_tones.has(key):
 		var toned := material.duplicate() as BaseMaterial3D
-		toned.albedo_color = material.albedo_color * Color(0.6, 0.58, 0.55, 1.0)
-		toned.roughness = maxf(material.roughness, 0.64)
-		toned.metallic = minf(material.metallic, 0.42)
-		toned.metallic_specular = 0.28
+		# The brim's underside faces the stage's bright floor and sky at a grazing angle, where
+		# a polished metal turns white whatever its colour: rougher and less metallic keeps it
+		# reading as dark forged iron.
+		toned.albedo_color = material.albedo_color * Color(0.56, 0.54, 0.51, 1.0)
+		toned.roughness = maxf(material.roughness, 0.74)
+		toned.metallic = minf(material.metallic, 0.28)
+		toned.metallic_specular = 0.2
 		toned.set_meta("drenovar_stage_helmet", true)
 		helmet_tones[key] = toned
 	return helmet_tones[key]

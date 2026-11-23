@@ -5,6 +5,8 @@ extends SceneTree
 ## transport, as in qa_forest_integration_shots.gd (no network).
 ##   xvfb-run -a -s "-screen 0 1366x630x24" godot --path godot/project --rendering-driver vulkan \
 ##     --rendering-method mobile -s qa_stage4b_forest.gd -- --shots=/abs/dir [--prefix=p_] [--only=a,b]
+## Headless with --repeat=N: no stills; the journal, the rewards, the locked card and the intro
+## card open N times and the median main-thread time of opens 2..N is printed beside the first.
 
 const FIXTURES := "res://data/forest_rescue/game/fixtures/"
 
@@ -27,6 +29,7 @@ var prefix := ""
 var only: PackedStringArray = []
 var saved: PackedStringArray = []
 var timings := {}
+var repeat := 0
 
 func _initialize() -> void:
 	call_deferred("run")
@@ -55,10 +58,22 @@ func shoot(name: String) -> void:
 	saved.append(name)
 	print("SHOT ", name, " t=", Time.get_ticks_msec())
 
-func timed(name: String, action: Callable) -> void:
-	var started := Time.get_ticks_usec()
-	await action.call()
-	timings[name] = snappedf((Time.get_ticks_usec() - started) / 1000.0, 0.01)
+func timed(name: String, action: Callable, undo := Callable()) -> void:
+	var runs: Array = []
+	for i in maxi(1, repeat):
+		if i > 0:
+			if undo.is_valid():
+				undo.call()
+			else:
+				game.close_modal()
+			await frames(3)
+		var started := Time.get_ticks_usec()
+		await action.call()
+		runs.append((Time.get_ticks_usec() - started) / 1000.0)
+		await process_frame
+	var later: Array = runs.slice(1) if runs.size() > 1 else runs.duplicate()
+	later.sort()
+	timings[name] = {"first_ms": snappedf(runs[0], 0.01), "median_ms": snappedf(later[later.size() / 2], 0.01), "runs": runs.size()}
 
 func fresh(state_name: String) -> void:
 	game.close_modal()
@@ -99,6 +114,8 @@ func run() -> void:
 			prefix = argument.trim_prefix("--prefix=")
 		elif argument.begins_with("--only="):
 			only = argument.trim_prefix("--only=").split(",", false)
+		elif argument.begins_with("--repeat="):
+			repeat = int(argument.trim_prefix("--repeat="))
 	DirAccess.make_dir_recursive_absolute(out)
 	root.size = Vector2i(1366, 630)
 	game = load("res://main.tscn").instantiate()
@@ -175,7 +192,7 @@ func run() -> void:
 	if wanted("forest_intro_card"):
 		hud.bar.hide()
 		hud.hint.hide()
-		await timed("forest_intro_card", forest.intro.show_static_card)
+		await timed("forest_intro_card", forest.intro.show_static_card, func(): forest.intro.static_card.hide())
 		await frames(12)
 		await shoot("forest_intro_card")
 		if is_instance_valid(forest.intro.static_card):
@@ -184,7 +201,7 @@ func run() -> void:
 		await fresh("locked_hall2")
 		hud.bar.hide()
 		hud.hint.hide()
-		await timed("forest_locked", func(): hud.show_locked("hall"))
+		await timed("forest_locked", func(): hud.show_locked("hall"), hud.hide_locked)
 		await frames(16)
 		await shoot("forest_locked")
 		hud.hide_locked()

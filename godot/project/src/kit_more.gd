@@ -85,6 +85,9 @@ class MenuTile extends Button:
 
 	func _init() -> void:
 		focus_mode = Control.FOCUS_NONE
+		# The caption is drawn in two lines; the Button's own (transparent) text must not
+		# widen the tile to one line of it, or a row of six pushes the window off the screen.
+		clip_text = true
 		custom_minimum_size = Vector2(136, 116)
 		mouse_entered.connect(queue_redraw)
 		mouse_exited.connect(queue_redraw)
@@ -459,7 +462,13 @@ class HeadCard extends Control:
 			Paint.draw_medal(self, art.get_center() + Vector2(0, -6), 76.0, emblem, true)
 		var x := art.end.x + 22.0
 		var width := size.x - x - (96.0 if not level.is_empty() else 28.0)
-		var head := UiKit.KitText.line(title, UiKit.LABEL_FONT, 24, width)
+		# A long name steps down (24 → 21 → 19) before it is trimmed.
+		var title_size := 24
+		for step in [24, 21, 19]:
+			title_size = step
+			if UiKit.KitText.line(title, UiKit.LABEL_FONT, step).get_size().x <= width:
+				break
+		var head := UiKit.KitText.line(title, UiKit.LABEL_FONT, title_size, width)
 		var sub := UiKit.KitText.line(subtitle, UiKit.BODY_FONT, 16, width)
 		var y := roundf((size.y - head.get_size().y - sub.get_size().y) * 0.5)
 		head.draw_outline(get_canvas_item(), Vector2(x, y), 4, UiKit.SHADE)

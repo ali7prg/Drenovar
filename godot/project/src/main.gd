@@ -31,6 +31,7 @@ const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
 # (its scripts compile in ~0.3 s); created after the launch, only when the server projects the adventure.
 const ForestFlags = preload("res://src/forest_rescue/world/forest_flags.gd")
 const ForestProgress = preload("res://src/forest_progress.gd")
+const SafeArea = preload("res://src/safe_area.gd")
 # DRENOVAR-V6-ROSTER-5: spearman, swordsman, longbowman, crossbowman, knight (ENG-05/07/08/09/10 retired).
 const RECRUIT_ORDER := ["ENG-01", "ENG-02", "ENG-03", "ENG-04", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
@@ -209,6 +210,15 @@ var forest_game: Node # FOREST_RESCUE hook (null until the server offers the adv
 var forest_game_loading := false
 var forest_load_started_msec := -1
 var forest_progress: Control   # 1023: «Лес потерянных · готовим лес» while the layers load
+# 1023: the display's safe area (src/safe_area.gd): the HUD, the windows' heads and close buttons,
+# the construction strip and the forest row keep clear of the notch and the home indicator.
+var hud_outer: Control
+var modal_safe_spacers: Array[Control] = []
+var modal_close: Control
+var safe_check_accum := 0.0
+var fitting_modal := false
+const HUD_MARGIN := Vector4(52, 4, 52, 24)
+const FOREST_PROGRESS_MARGIN := Vector2(16, 14)
 var forest_ratio := 0.0
 var launch_done := false
 signal forest_game_ready
@@ -328,6 +338,10 @@ func _ready() -> void:
 	state = data.demo
 	add_child(hud)
 	build_ui()
+	SafeArea.parse_args(OS.get_cmdline_user_args())
+	SafeArea.refresh(get_viewport())
+	apply_safe_area()
+	get_viewport().size_changed.connect(refresh_safe_area)
 	# FOREST_RESCUE hook: adventure overlay, actors, intro and network client. 1022: lazy, see
 	# maybe_start_forest_game() (QA/capture tools may ask for the eager 1021+forest order).
 	if ForestFlags.eager():
@@ -448,11 +462,12 @@ func build_ui() -> void:
 	action_ring.clock = timer_now
 	root.add_child(action_ring)
 	var outer := VBoxContainer.new()
+	hud_outer = outer
 	outer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	outer.offset_left = 52
-	outer.offset_right = -52
-	outer.offset_top = 4
-	outer.offset_bottom = -24
+	outer.offset_left = HUD_MARGIN.x
+	outer.offset_right = -HUD_MARGIN.z
+	outer.offset_top = HUD_MARGIN.y
+	outer.offset_bottom = -HUD_MARGIN.w
 	outer.add_theme_constant_override("separation",12)
 	outer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(outer)
@@ -546,10 +561,6 @@ func build_ui() -> void:
 	connection_badge.hide()
 	forest_progress = ForestProgress.new()
 	forest_progress.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	forest_progress.offset_left = 16
-	forest_progress.offset_top = -ForestProgress.PLATE_SIZE.y - 14
-	forest_progress.offset_right = forest_progress.offset_left + ForestProgress.PLATE_SIZE.x
-	forest_progress.offset_bottom = -14
 	root.add_child(forest_progress)
 	relocation_pins = Control.new()
 	relocation_pins.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -624,6 +635,16 @@ func build_ui() -> void:
 	titles.add_child(modal_title)
 	var close_button := UiKit.close_button(close_modal)
 	heading.add_child(close_button)
+	modal_close = close_button
+	# Safe-area spacers at both ends of the head and the body (1023): the oak band stays edge to
+	# edge, the title, the close button and the content keep clear of the notch.
+	var head_left := Control.new()
+	head_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	heading.add_child(head_left)
+	heading.move_child(head_left, 0)
+	var head_right := Control.new()
+	head_right.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	heading.add_child(head_right)
 	# Kept for callers of the previous layout; the bronze trim of the band is the divider now.
 	var divider := ColorRect.new()
 	modal_divider = divider
@@ -639,12 +660,19 @@ func build_ui() -> void:
 	modal_hero = Control.new()
 	modal_hero.name = "ModalHero"
 	modal_hero.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var body_left := Control.new()
+	body_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	body_row.add_child(body_left)
 	body_row.add_child(modal_side_space[0])
 	body_row.add_child(modal_hero)
 	modal_content = MarginContainer.new()
 	modal_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body_row.add_child(modal_content)
 	body_row.add_child(modal_side_space[1])
+	var body_right := Control.new()
+	body_right.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	body_row.add_child(body_right)
+	modal_safe_spacers = [head_left, head_right, body_left, body_right]
 	for side_space: Control in modal_side_space:
 		side_space.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		side_space.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -697,6 +725,11 @@ func build_ui() -> void:
 	modal.add_child(modal_frame)
 	place_modal("center")
 	modal.hide()
+	# A full window never grows past the screen (1023): the building window's hero (half the
+	# width) and its widest row of chips asked for about 30 units more than 1366, so the band
+	# sat 15 units right and the close button was cut by the screen's edge.
+	modal.minimum_size_changed.connect(fit_full_modal)
+	modal.resized.connect(fit_full_modal)
 	result_notice = Button.new()
 	result_notice.text = "Бой завершён · Открыть результат"
 	result_notice.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
@@ -2781,6 +2814,32 @@ func building_definition(type: String) -> Dictionary:
 			return building
 	return {}
 
+## Re-reads the display's safe area (rotation, a resized window) and re-lays what depends on it.
+func refresh_safe_area() -> void:
+	if SafeArea.refresh(get_viewport()):
+		apply_safe_area()
+
+## The HUD's frame, the loading plate, the open window and the construction strip follow the safe
+## area; the forest row reads SafeArea itself (adventure_hud.gd). With no insets every value is the
+## 1022 one.
+func apply_safe_area() -> void:
+	if hud_outer != null:
+		hud_outer.offset_left = SafeArea.left(HUD_MARGIN.x)
+		hud_outer.offset_top = SafeArea.top(HUD_MARGIN.y)
+		hud_outer.offset_right = -SafeArea.right(HUD_MARGIN.z)
+		hud_outer.offset_bottom = -SafeArea.bottom(HUD_MARGIN.w)
+	if forest_progress != null:
+		var plate: Vector2 = ForestProgress.PLATE_SIZE
+		forest_progress.offset_left = SafeArea.left(FOREST_PROGRESS_MARGIN.x)
+		forest_progress.offset_right = forest_progress.offset_left + plate.x
+		forest_progress.offset_bottom = -SafeArea.bottom(FOREST_PROGRESS_MARGIN.y)
+		forest_progress.offset_top = forest_progress.offset_bottom - plate.y
+	if modal != null and not modal_layout.is_empty():
+		place_modal(modal_layout)
+	for strip in get_tree().get_nodes_in_group("safe_area_layout"):
+		if strip.has_method("layout"):
+			strip.layout()
+
 func place_modal(layout: String) -> void:
 	modal_layout = layout
 	var anchors := Rect2(0.5, 0.5, 0, 0)
@@ -2819,14 +2878,30 @@ func place_modal(layout: String) -> void:
 			# Bottom sheet: the city stays visible above it.
 			anchors = Rect2(0, 1, 1, 0)
 			offsets = Rect2(40, -396, -80, 388)
+	var edges := Vector4(offsets.position.x, offsets.position.y, offsets.end.x, offsets.end.y)
+	# Windows docked to a screen edge keep their 1022 gap or the safe area, whichever is larger
+	# (1023). Full windows and the strip stay edge to edge: their band and backdrop may run under
+	# the notch, their head, close button and content are inset in arrange_modal().
+	if layout != "full" and layout != "strip":
+		if anchors.position.x == 0.0 and edges.x >= 0.0:
+			edges.x = SafeArea.left(edges.x)
+		if anchors.position.y == 0.0 and edges.y >= 0.0:
+			edges.y = SafeArea.top(edges.y)
+		if anchors.end.x == 1.0 and edges.z <= 0.0:
+			edges.z = -SafeArea.right(-edges.z)
+		if anchors.end.y == 1.0 and edges.w <= 0.0:
+			var lift := SafeArea.bottom(-edges.w) + edges.w
+			edges.w -= lift
+			if anchors.position.y == 1.0:
+				edges.y -= lift   # a bottom sheet keeps its height and rises above the home indicator
 	modal.anchor_left = anchors.position.x
 	modal.anchor_top = anchors.position.y
 	modal.anchor_right = anchors.end.x
 	modal.anchor_bottom = anchors.end.y
-	modal.offset_left = offsets.position.x
-	modal.offset_top = offsets.position.y
-	modal.offset_right = offsets.end.x
-	modal.offset_bottom = offsets.end.y
+	modal.offset_left = edges.x
+	modal.offset_top = edges.y
+	modal.offset_right = edges.z
+	modal.offset_bottom = edges.w
 	arrange_modal()
 
 # Frame, header and content column for the current layout (src/ui_kit.gd).
@@ -2860,21 +2935,41 @@ func arrange_modal() -> void:
 	if is_inside_tree():
 		view = get_viewport().get_visible_rect().size
 	var hero_on := full and modal_hero.get_child_count() > 0
+	var side := 28 if full else 22
+	# Safe area of a full window (1023): the head's ends and the body's ends give way to the notch;
+	# the head band keeps its 14 / 10 content margins and its 6 unit spacing, the body its margins.
+	var safe := SafeArea.insets if full else Vector4.ZERO
+	var head_sep := 6.0
+	var head_need := Vector2(maxf(0.0, safe.x - 14.0), maxf(0.0, safe.z - 10.0))
+	var body_left := safe.x if hero_on else maxf(0.0, safe.x - side)
+	var body_right := maxf(0.0, safe.z - (side + 10 if hero_on else side))
+	var spacer_widths := [maxf(0.0, head_need.x - head_sep), maxf(0.0, head_need.y - head_sep), body_left, body_right]
+	for index in modal_safe_spacers.size():
+		var spacer: Control = modal_safe_spacers[index]
+		spacer.custom_minimum_size.x = spacer_widths[index]
+		# A head spacer also adds the row's spacing, so it shows only when the inset needs it.
+		spacer.visible = (head_need[index] > 0.0) if index < 2 else spacer_widths[index] > 0.0
+	if modal_wallet != null:
+		# The resource plates stay left of the close medallion when it moves in from the notch
+		# (the strip's medallion is 14 units from the edge, a full window's 10 plus the band's 6).
+		var strip_need := maxf(0.0, SafeArea.insets.z - 14.0) if strip else 0.0
+		modal_wallet.offset_right = -82.0 - head_need.y - strip_need
 	modal_hero.visible = hero_on
-	modal_hero.custom_minimum_size.x = roundf(view.x * modal_hero_share) if hero_on else 0.0
+	modal_hero.custom_minimum_size.x = maxf(0.0, roundf(view.x * modal_hero_share) - body_left) if hero_on else 0.0
 	for side_space: Control in modal_side_space:
 		side_space.visible = full and not hero_on
 	if full and not hero_on:
+		var room := view.x - 56.0 - body_left - body_right
 		modal_content.size_flags_horizontal = Control.SIZE_FILL
-		modal_content.custom_minimum_size.x = (view.x - 56.0) if modal_full_width else minf(900.0, view.x - 56.0)
+		modal_content.custom_minimum_size.x = room if modal_full_width else minf(900.0, room)
 	else:
 		modal_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		modal_content.custom_minimum_size.x = 0.0
-	var side := 28 if full else 22
 	# Full windows keep air between the values and the scroll bar on the right.
 	# Full windows leave room for the section plate that hangs under the title.
 	var crumb_on := full and not modal_eyebrow.text.is_empty()
-	var margins := {"margin_left": 8 if hero_on else side, "margin_right": side + (10 if hero_on else 0), "margin_top": 22 if crumb_on else 12, "margin_bottom": 18 if full else 20}
+	# A full window's list ends above the home indicator (its band and backdrop run to the edge).
+	var margins := {"margin_left": 8 if hero_on else side, "margin_right": side + (10 if hero_on else 0), "margin_top": 22 if crumb_on else 12, "margin_bottom": int(SafeArea.bottom(18)) if full else 20}
 	if strip:
 		margins = {"margin_left": 0, "margin_right": 0, "margin_top": 0, "margin_bottom": 0}
 	modal_content.begin_bulk_theme_override()
@@ -2882,6 +2977,21 @@ func arrange_modal() -> void:
 		if modal_content.get_theme_constant(key) != margins[key]:
 			modal_content.add_theme_constant_override(key, margins[key])
 	modal_content.end_bulk_theme_override()
+
+## A full window never asks for more than the screen's width (1023). The building window's hero
+## column takes half the width and its widest row of chips asked for about 30 units more than
+## 1366: the window grew past the right edge, the band slid 15 units and the close button was cut.
+## The hero gives up the excess (never below 30 % of the width; its art is centred in it).
+func fit_full_modal() -> void:
+	if fitting_modal or modal_layout != "full" or not modal_hero.visible or not is_inside_tree():
+		return
+	var view := get_viewport().get_visible_rect().size
+	var excess := modal.get_combined_minimum_size().x - view.x
+	if excess <= 0.5:
+		return
+	fitting_modal = true
+	modal_hero.custom_minimum_size.x = maxf(roundf(view.x * 0.3), modal_hero.custom_minimum_size.x - ceilf(excess))
+	fitting_modal = false
 
 # Optional illustration column of a full-screen window: art over a tinted ink-wash splash.
 # Section line and resource plates on the upper board of the tall header (full windows).
@@ -6558,6 +6668,12 @@ func _process(delta: float) -> void:
 	discount_stall()
 	advance_server_clock(delta)
 	update_forest_progress(delta)
+	# The safe area can change without a resize (the phone turned from one landscape side to the
+	# other); twice a second is enough and costs two display queries.
+	safe_check_accum += delta
+	if safe_check_accum >= 0.5:
+		safe_check_accum = 0.0
+		refresh_safe_area()
 	# The notice toast shows only while there is a notice; a new one eases in.
 	if message != null and message.text != message_shown:
 		show_toast_change()

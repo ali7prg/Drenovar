@@ -12,6 +12,7 @@ extends Control
 const UiKit = preload("res://src/ui_kit.gd")
 const Style = preload("res://src/forest_rescue/game/hud_style.gd")
 const Art = preload("res://src/forest_rescue/game/hud_art.gd")
+const SafeArea = preload("res://src/safe_area.gd")
 const STRIP_ORDER := ["wood", "stone", "food", "iron", "coins"]
 ## The chevrons on the gilded «Продолжить» (Art multiplies ivory by this tint).
 const CONTINUE_INK := Color(0.25, 0.15, 0.05)
@@ -66,6 +67,7 @@ var compact := false
 var strip_head: BoxContainer
 var strip_chest: Control
 var last_nav_edge := -1.0
+var last_safe_revision := -1
 
 func setup(owner_game: Node) -> void:
 	game = owner_game
@@ -722,7 +724,7 @@ func draw_arrow() -> void:
 # ---------------------------------------------------------------- layout and per-frame
 func nav_left_edge() -> float:
 	var nav: Dictionary = game.main.nav_buttons
-	var left := get_viewport_rect().size.x - 52.0
+	var left := get_viewport_rect().size.x - SafeArea.right(52.0)
 	for key in nav:
 		var control: Control = nav[key]
 		if is_instance_valid(control) and control.is_visible_in_tree():
@@ -734,7 +736,9 @@ func layout() -> void:
 		return
 	var view := get_viewport_rect().size
 	var right_edge := nav_left_edge() - 12.0
-	var available := right_edge - 52.0
+	# The row starts where the HUD's frame starts: 52 units or the safe area (1023).
+	var row_left := SafeArea.left(52.0)
+	var available := right_edge - row_left
 	# One row like art/07: task card, reward strip (fills the rest), three buttons; the existing
 	# DRENOVAR navigation keeps the bottom-right corner, so the row ends where it begins.
 	var buttons_width := 76.0 + 72.0 + 108.0 + 16.0
@@ -766,7 +770,7 @@ func layout() -> void:
 		reward_amounts[key].add_theme_font_size_override("font_size", 12 if compact else 14)
 	reward_strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	reward_strip.visible = available >= card_width + 16.0 + strip_min + buttons_width
-	bar.position = Vector2(52, view.y - 84 - 8)
+	bar.position = Vector2(row_left, view.y - 84 - SafeArea.bottom(8.0))
 	bar.size = Vector2(maxf(available, 300.0), 84)
 	layout_hint()
 	if locked_card.visible:
@@ -783,6 +787,7 @@ func layout() -> void:
 		var lane_right := maxf(lane_left + size_now.x, view.x * 0.56)
 		battle_header.position = Vector2(lane_left + (lane_right - lane_left - size_now.x) * 0.5, 6)
 	last_nav_edge = right_edge
+	last_safe_revision = SafeArea.revision
 
 func layout_hint() -> void:
 	if hint == null:
@@ -791,11 +796,11 @@ func layout_hint() -> void:
 	var width := minf(640.0, bar.size.x)
 	hint_label.custom_minimum_size.x = width - 28.0
 	hint.reset_size()
-	hint.position = Vector2(52, bar.position.y - hint.get_combined_minimum_size().y - 8.0)
+	hint.position = Vector2(bar.position.x, bar.position.y - hint.get_combined_minimum_size().y - 8.0)
 
 func tick(_delta: float) -> void:
 	var now := Time.get_ticks_msec()
-	if bar.visible and absf(nav_left_edge() - 12.0 - last_nav_edge) > 0.5:
+	if bar.visible and (absf(nav_left_edge() - 12.0 - last_nav_edge) > 0.5 or last_safe_revision != SafeArea.revision):
 		layout()
 	for pill in toasts.get_children():
 		var until := float(pill.get_meta("until", 0))

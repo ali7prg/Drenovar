@@ -12,6 +12,7 @@ extends Control
 
 const UiKit = preload("res://src/ui_kit.gd")
 const BuildCard = preload("res://src/build_card.gd")
+const SafeArea = preload("res://src/safe_area.gd")
 
 signal category_chosen(index: int)
 signal closed
@@ -28,6 +29,8 @@ var queues_button: Button
 func _ready() -> void:
 	name = "BuildStrip"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# main.gd re-lays the group when the display's safe area changes (1023).
+	add_to_group("safe_area_layout")
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	heading = Heading.new()
@@ -110,15 +113,19 @@ func layout() -> void:
 		return
 	var w := size.x
 	var h := size.y
+	# The close medallion, the title plate and the rail keep their 1022 gaps or the safe area
+	# (1023); the cards still glide under the notch, their last one rests clear of it.
+	var inset_left := SafeArea.left(18.0)
 	close_button.size = close_button.get_combined_minimum_size()
-	close_button.position = Vector2(w - close_button.size.x - 14.0, 10.0)
+	close_button.position = Vector2(w - close_button.size.x - SafeArea.right(14.0), 10.0)
 	heading.size = Vector2(heading.measure(), 84)
-	heading.position = Vector2(18, 6)
+	heading.position = Vector2(inset_left, 6)
 	var rail_size := rail.get_combined_minimum_size()
 	rail.size = rail_size
 	var top := 96.0
-	rail.position = Vector2(18, roundf(top + maxf(0.0, (h - top - 12.0 - rail_size.y) * 0.5)))
-	var left := 18.0 + maxf(100.0, rail_size.x) + 20.0
+	rail.position = Vector2(inset_left, roundf(top + maxf(0.0, (h - top - 12.0 - rail_size.y) * 0.5)))
+	var left := inset_left + maxf(100.0, rail_size.x) + 20.0
+	swipe.pad_right = SafeArea.right(Swipe.PAD_RIGHT)
 	# The strip holds the lower part of the screen (the card bodies take about the lower half,
 	# the buildings rise above them), so the player's city reads above it.
 	var tall := minf(Swipe.HEIGHT, h - 90.0)
@@ -196,6 +203,7 @@ class Swipe extends Control:
 	var edge: Control
 	var indicator: Control
 	var cards: Array = []
+	var pad_right := PAD_RIGHT
 	var offset := 0.0
 	var velocity := 0.0
 	var moving := false
@@ -235,7 +243,7 @@ class Swipe extends Control:
 		return BuildCard.SIZE.x + GAP
 
 	func content_width() -> float:
-		return PAD_LEFT + cards.size() * pitch() - GAP + PAD_RIGHT
+		return PAD_LEFT + cards.size() * pitch() - GAP + pad_right
 
 	func max_offset() -> float:
 		return maxf(0.0, content_width() - size.x)
@@ -274,7 +282,7 @@ class Swipe extends Control:
 			card.size = BuildCard.SIZE
 			card.position = Vector2(index * pitch(), top)
 		indicator.position = Vector2(0, size.y - 12)
-		indicator.size = Vector2(size.x - PAD_RIGHT, 6)
+		indicator.size = Vector2(size.x - pad_right, 6)
 		# Over the card bodies only, so the city between and below them is not darkened.
 		edge.position = Vector2(0, top + BuildCard.TOP)
 		edge.size = Vector2(size.x, BuildCard.SIZE.y - BuildCard.TOP)

@@ -1,0 +1,15 @@
+suite	result_after	note
+qa_forest_1024 (legacy 0/300/700 ms, 2 sites)	50/50, 50/50, 50/50 checks pass	baseline 259de0a1: 20, 27, 27 failures
+qa_forest_1024 (kingdom, 12 sites, 0 ms)	161/161 checks pass	baseline 259de0a1: 92 failures of 155
+qa_forest_1024 rendered (OpenGL, legacy, 1 site)	all scenario checks pass; one mechanism retry	button rows meaningless in rendered mode (seconds per frame); baseline: intro 0.00 s, cage MISSING
+qa_forest_e2e (local harness)	966 checks, 0 failures	first run aborted at engine shutdown after the report (exit 134), rerun exit 0
+qa_forest_v6 (local harness)	43 checks, 0 failures
+qa_forest_flow	166 checks, 0 failures
+qa_forest_captives	226 checks, 1 failure	same failure on baseline 259de0a1 (cage opening: 0/3 outside afterwards, fixture-driven)
+qa_forest_world	2968 checks, 0 failures
+qa_forest_arena_camera	script error at line 153 (forest_game is null: offline fixture boot, lazy forest layer)	same error on baseline 259de0a1
+qa_forest_perf	not run	needs Vulkan; Vulkan on lavapipe deadlocks after the forest world build on this machine
+qa_runtime	21 checks, 0 failures
+qa_instant_start	12 checks, 0 failures
+qa_optimization	11040 comparisons, 0 failures
+qa_townsfolk	91 checks, 0 failures

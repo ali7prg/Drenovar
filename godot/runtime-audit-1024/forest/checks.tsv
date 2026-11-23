@@ -1,0 +1,5 @@
+run	before_checks	before_failures	after_checks	after_failures
+qa_legacy_lat0	44	20	50	0
+qa_legacy_lat300	44	27	50	0
+qa_legacy_lat700	44	27	50	0
+qa_kingdom_all	155	92	161	0

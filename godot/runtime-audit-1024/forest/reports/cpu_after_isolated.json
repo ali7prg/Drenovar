@@ -1,0 +1,299 @@
+{
+  "cages": {
+    "lf_site_01": {
+      "cage": "oak",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Берёзовая просека",
+      "release_scene_s": 12.0,
+      "released": true
+    }
+  },
+  "checks": 38,
+  "cpu": {
+    "fight": {
+      "actors_tick_us": 4753.7,
+      "origin_usec": 1363,
+      "predict_usec": 12
+    },
+    "lead_update": {
+      "max_us": 5026,
+      "mean_us": 222.3,
+      "updates": 70
+    },
+    "menace": {
+      "actors_tick_us": 5053.0,
+      "origin_usec": 1363,
+      "predict_usec": 720
+    },
+    "walk": {
+      "actors_tick_us": 4682.6,
+      "lead_restamp_max_us": 212,
+      "lead_restamp_mean_us": 124.8,
+      "origin_usec": 1363,
+      "predict_usec": 720
+    }
+  },
+  "failures": [],
+  "fight": {
+    "lf_site_01": {
+      "animated_s": 8.86,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 4.29,
+      "result_at_s": 10.05,
+      "server_s": 6.3
+    }
+  },
+  "fog": {
+    "horse": {
+      "lag_max_s": 0.0,
+      "lag_mean_s": 0.0,
+      "lag_p95_s": 0.0,
+      "samples": 53
+    },
+    "move_ms": 48441.0,
+    "squad": {
+      "lag_max_s": 0.0,
+      "lag_mean_s": 0.0,
+      "lag_p95_s": 0.0,
+      "samples": 53
+    },
+    "walk_s": 14.0
+  },
+  "intro": {
+    "first_seen_s": 4.87,
+    "halls": {
+      "2": {
+        "origin_hidden": false,
+        "search_ms": 1.18,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "3": {
+        "origin_hidden": false,
+        "search_ms": 1.1,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "4": {
+        "origin_hidden": false,
+        "search_ms": 1.12,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "5": {
+        "origin_hidden": false,
+        "search_ms": 1.14,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      }
+    },
+    "horse_frames": 1014,
+    "occluded_frames": 0,
+    "origin_hidden": false,
+    "spot_search_ms": 1.36,
+    "spot_shift_m": 0.0,
+    "synthetic_tower": {
+      "in_front": {
+        "origin_hidden": true,
+        "search_ms": 1.49,
+        "shift_m": 5.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "on_origin": {
+        "origin_hidden": true,
+        "search_ms": 1.6,
+        "shift_m": 5.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      }
+    },
+    "visible_run_s": 6.38
+  },
+  "latency": {
+    "actions": {
+      "defeat_guardian": {
+        "confirmed_ms_max": 25.8,
+        "confirmed_ms_median": 25.8,
+        "first_visual_ms_max": 0.7,
+        "first_visual_ms_median": 0.7,
+        "n": 1
+      },
+      "discover": {
+        "confirmed_ms_max": 16.6,
+        "confirmed_ms_median": 16.6,
+        "first_visual_ms_max": 0.6,
+        "first_visual_ms_median": 0.6,
+        "n": 1
+      },
+      "discover_horse": {
+        "confirmed_ms_max": 21.2,
+        "confirmed_ms_median": 21.2,
+        "first_visual_ms_max": 0.5,
+        "first_visual_ms_median": 0.5,
+        "n": 1
+      },
+      "engage_guardian": {
+        "confirmed_ms_max": 77.4,
+        "confirmed_ms_median": 77.4,
+        "first_visual_ms_max": 10.3,
+        "first_visual_ms_median": 10.3,
+        "n": 1
+      },
+      "escort_home": {
+        "confirmed_ms_max": 18.9,
+        "confirmed_ms_median": 18.9,
+        "first_visual_ms_max": 0.4,
+        "first_visual_ms_median": 0.4,
+        "n": 1
+      },
+      "escort_start": {
+        "confirmed_ms_max": 26.6,
+        "confirmed_ms_median": 26.6,
+        "first_visual_ms_max": 8.2,
+        "first_visual_ms_median": 8.2,
+        "n": 1
+      },
+      "form_squad": {
+        "confirmed_ms_max": 13.8,
+        "confirmed_ms_median": 13.8,
+        "first_visual_ms_max": 13.8,
+        "first_visual_ms_median": 13.8,
+        "n": 1
+      },
+      "landmark→input": {
+        "confirmed_ms_max": -1,
+        "confirmed_ms_median": -1.0,
+        "first_visual_ms_max": 0.4,
+        "first_visual_ms_median": 0.4,
+        "n": 3
+      },
+      "move": {
+        "confirmed_ms_max": 38.0,
+        "confirmed_ms_median": 18.4,
+        "first_visual_ms_max": 17.6,
+        "first_visual_ms_median": 13.8,
+        "n": 3
+      },
+      "move→cage": {
+        "confirmed_ms_max": 21.5,
+        "confirmed_ms_median": 21.5,
+        "first_visual_ms_max": 21.5,
+        "first_visual_ms_median": 21.5,
+        "n": 1
+      },
+      "move→guardian": {
+        "confirmed_ms_max": 19.3,
+        "confirmed_ms_median": 19.3,
+        "first_visual_ms_max": 0.5,
+        "first_visual_ms_median": 0.5,
+        "n": 1
+      },
+      "recover_artifact": {
+        "confirmed_ms_max": 16.9,
+        "confirmed_ms_median": 16.9,
+        "first_visual_ms_max": 0.4,
+        "first_visual_ms_median": 0.4,
+        "n": 1
+      },
+      "unlock_cage": {
+        "confirmed_ms_max": 19.2,
+        "confirmed_ms_median": 19.2,
+        "first_visual_ms_max": 0.8,
+        "first_visual_ms_median": 0.8,
+        "n": 1
+      }
+    },
+    "latency_ms": 0
+  },
+  "menace": {
+    "lf_site_01": {
+      "approach_s": 0.0,
+      "guardian": "alive",
+      "horse_fear_s": 0.03,
+      "menace_s": 0.03,
+      "squad_guard_s": 0.45
+    }
+  },
+  "puzzle": {
+    "pictures": 24,
+    "symbols": 24
+  },
+  "server_cpu": {
+    "GET state": {
+      "max_ms": 17.8,
+      "median_ms": 3.4,
+      "n": 52
+    },
+    "POST command": {
+      "max_ms": 3.4,
+      "median_ms": 3.4,
+      "n": 1
+    },
+    "POST new": {
+      "max_ms": 12.9,
+      "median_ms": 12.9,
+      "n": 2
+    },
+    "attempt_task": {
+      "max_ms": 6.0,
+      "median_ms": 4.4,
+      "n": 5
+    },
+    "discover_horse": {
+      "max_ms": 3.7,
+      "median_ms": 3.7,
+      "n": 1
+    },
+    "engage_guardian": {
+      "max_ms": 51.7,
+      "median_ms": 51.7,
+      "n": 1
+    },
+    "escort_start": {
+      "max_ms": 7.0,
+      "median_ms": 7.0,
+      "n": 1
+    },
+    "finish_intro": {
+      "max_ms": 3.4,
+      "median_ms": 3.4,
+      "n": 1
+    },
+    "form_squad": {
+      "max_ms": 3.0,
+      "median_ms": 3.0,
+      "n": 1
+    },
+    "mechanism_input": {
+      "max_ms": 4.3,
+      "median_ms": 4.2,
+      "n": 3
+    },
+    "move": {
+      "max_ms": 6.3,
+      "median_ms": 4.3,
+      "n": 8
+    },
+    "start_intro": {
+      "max_ms": 2.7,
+      "median_ms": 2.7,
+      "n": 1
+    }
+  }
+}

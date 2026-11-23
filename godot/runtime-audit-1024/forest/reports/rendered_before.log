@@ -1,0 +1,19 @@
+CHECK ok   forest game layer loaded lazily after the launch
+CHECK ok   forest world layer attached by itself after the city
+CHECK ok   forest unlocked
+CHECK FAIL puzzle: 0 of 24 option symbols have a picture icon (atlas)
+CHECK ok   hall intro plays
+CHECK FAIL intro: the horse is on screen, unoccluded and out of the fog for 0.00 s in a row (≥ 1.5)
+CHECK FAIL fog clears with the squad: worst lag 1.87 s, p95 1.67 s, mean 0.91 s (≤ 0.3)
+CHECK FAIL fog clears with the horse: worst lag 2.07 s, p95 1.87 s, mean 1.15 s (≤ 0.3)
+CHECK FAIL lf_site_01: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_01: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_01: the squad takes the guard stance facing the creature (-1.00 s)
+CHECK FAIL lf_site_01: 0/3 option cards show their picture (≥ 120 px tall)
+CHECK ok   mechanism solved through the UI lf_site_01
+CHECK ok   fight with a server timeline at lf_site_01
+CHECK ok   lf_site_01: 4.67 s of fight animation on screen before the result text (≥ 4.0), result at 6.20 s
+CHECK ok   fight won at lf_site_01
+CHECK FAIL lf_site_01 (Берёзовая просека): cage MISSING, 3/3 captives in it, on screen before the release
+CHECK FAIL lf_site_01: the release plays on screen (0.0 s, door still, 3 captives out)
+QA_FOREST_1024 checks=31 failures=23

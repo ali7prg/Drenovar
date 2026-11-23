@@ -1,0 +1,668 @@
+{
+  "cages": {
+    "lf_site_01": {
+      "cage": "oak",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Берёзовая просека",
+      "release_scene_s": 12.0,
+      "released": true
+    },
+    "lf_site_02": {
+      "cage": "iron",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Каменный карман",
+      "release_scene_s": 12.02,
+      "released": true
+    },
+    "lf_site_03": {
+      "cage": "root",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Пепельная часовня",
+      "release_scene_s": 12.01,
+      "released": true
+    },
+    "lf_site_04": {
+      "cage": "oak",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Шёпот елей",
+      "release_scene_s": 12.0,
+      "released": true
+    },
+    "lf_site_05": {
+      "cage": "iron",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Смоляная низина",
+      "release_scene_s": 12.0,
+      "released": true
+    },
+    "lf_site_06": {
+      "cage": "root",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Угольный круг",
+      "release_scene_s": 12.0,
+      "released": true
+    },
+    "lf_site_07": {
+      "cage": "oak",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Ольховый брод",
+      "release_scene_s": 12.0,
+      "released": true
+    },
+    "lf_site_08": {
+      "cage": "iron",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Травяной лабиринт",
+      "release_scene_s": 12.0,
+      "released": true
+    },
+    "lf_site_09": {
+      "cage": "root",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Папоротниковый уступ",
+      "release_scene_s": 12.0,
+      "released": true
+    },
+    "lf_site_10": {
+      "cage": "oak",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Изломанная терраса",
+      "release_scene_s": 12.0,
+      "released": true
+    },
+    "lf_site_11": {
+      "cage": "iron",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Речные ступени",
+      "release_scene_s": 12.0,
+      "released": true
+    },
+    "lf_site_12": {
+      "cage": "root",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Роща старых костей",
+      "release_scene_s": 12.01,
+      "released": true
+    }
+  },
+  "checks": 161,
+  "cpu": {
+    "fight": {
+      "actors_tick_us": 6207.9,
+      "origin_usec": 5107,
+      "predict_usec": 11
+    },
+    "lead_update": {
+      "max_us": 5961,
+      "mean_us": 583.3,
+      "updates": 68
+    },
+    "menace": {
+      "actors_tick_us": 5137.5,
+      "origin_usec": 5107,
+      "predict_usec": 761
+    },
+    "walk": {
+      "actors_tick_us": 5212.0,
+      "origin_usec": 5107,
+      "predict_usec": 761
+    }
+  },
+  "failures": [],
+  "fight": {
+    "lf_site_01": {
+      "animated_s": 8.91,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 4.34,
+      "result_at_s": 10.11,
+      "server_s": 6.3
+    },
+    "lf_site_02": {
+      "animated_s": 9.05,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 4.35,
+      "result_at_s": 10.24,
+      "server_s": 6.3
+    },
+    "lf_site_03": {
+      "animated_s": 8.9,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 4.33,
+      "result_at_s": 10.1,
+      "server_s": 6.3
+    },
+    "lf_site_04": {
+      "animated_s": 8.97,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 4.33,
+      "result_at_s": 10.18,
+      "server_s": 6.3
+    },
+    "lf_site_05": {
+      "animated_s": 8.45,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 3.7,
+      "result_at_s": 10.25,
+      "server_s": 6.3
+    },
+    "lf_site_06": {
+      "animated_s": 8.32,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 3.72,
+      "result_at_s": 10.13,
+      "server_s": 6.3
+    },
+    "lf_site_07": {
+      "animated_s": 8.89,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 4.31,
+      "result_at_s": 10.1,
+      "server_s": 6.3
+    },
+    "lf_site_08": {
+      "animated_s": 8.32,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 3.73,
+      "result_at_s": 10.12,
+      "server_s": 6.3
+    },
+    "lf_site_09": {
+      "animated_s": 8.45,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 3.74,
+      "result_at_s": 10.26,
+      "server_s": 6.3
+    },
+    "lf_site_10": {
+      "animated_s": 8.14,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 3.57,
+      "result_at_s": 10.1,
+      "server_s": 6.3
+    },
+    "lf_site_11": {
+      "animated_s": 8.15,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 3.57,
+      "result_at_s": 10.11,
+      "server_s": 6.3
+    },
+    "lf_site_12": {
+      "animated_s": 8.14,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 3.57,
+      "result_at_s": 10.09,
+      "server_s": 6.3
+    }
+  },
+  "fog": {
+    "horse": {
+      "lag_max_s": 0.0,
+      "lag_mean_s": 0.0,
+      "lag_p95_s": 0.0,
+      "samples": 53
+    },
+    "move_ms": 48441.0,
+    "squad": {
+      "lag_max_s": 0.0,
+      "lag_mean_s": 0.0,
+      "lag_p95_s": 0.0,
+      "samples": 53
+    },
+    "walk_s": 14.0
+  },
+  "intro": {
+    "first_seen_s": 4.84,
+    "halls": {
+      "2": {
+        "origin_hidden": false,
+        "search_ms": 0.98,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "3": {
+        "origin_hidden": false,
+        "search_ms": 1.03,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "4": {
+        "origin_hidden": false,
+        "search_ms": 1.07,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "5": {
+        "origin_hidden": false,
+        "search_ms": 1.21,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      }
+    },
+    "horse_frames": 1008,
+    "occluded_frames": 0,
+    "origin_hidden": false,
+    "spot_search_ms": 5.11,
+    "spot_shift_m": 0.0,
+    "synthetic_tower": {
+      "in_front": {
+        "origin_hidden": true,
+        "search_ms": 1.46,
+        "shift_m": 5.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "on_origin": {
+        "origin_hidden": true,
+        "search_ms": 1.65,
+        "shift_m": 5.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      }
+    },
+    "visible_run_s": 6.39
+  },
+  "latency": {
+    "actions": {
+      "defeat_guardian": {
+        "confirmed_ms_max": 33.8,
+        "confirmed_ms_median": 23.9,
+        "first_visual_ms_max": 5.1,
+        "first_visual_ms_median": 0.9,
+        "n": 12
+      },
+      "discover": {
+        "confirmed_ms_max": 40.2,
+        "confirmed_ms_median": 23.7,
+        "first_visual_ms_max": 4.7,
+        "first_visual_ms_median": 0.7,
+        "n": 12
+      },
+      "discover_horse": {
+        "confirmed_ms_max": 15.0,
+        "confirmed_ms_median": 15.0,
+        "first_visual_ms_max": 0.3,
+        "first_visual_ms_median": 0.3,
+        "n": 1
+      },
+      "engage_guardian": {
+        "confirmed_ms_max": 30.8,
+        "confirmed_ms_median": 17.7,
+        "first_visual_ms_max": 25.6,
+        "first_visual_ms_median": 16.4,
+        "n": 12
+      },
+      "escort_home": {
+        "confirmed_ms_max": 27.4,
+        "confirmed_ms_median": 18.8,
+        "first_visual_ms_max": 0.4,
+        "first_visual_ms_median": 0.4,
+        "n": 12
+      },
+      "escort_start": {
+        "confirmed_ms_max": 170.7,
+        "confirmed_ms_median": 65.8,
+        "first_visual_ms_max": 78.2,
+        "first_visual_ms_median": 48.8,
+        "n": 12
+      },
+      "form_squad": {
+        "confirmed_ms_max": 18.8,
+        "confirmed_ms_median": 18.8,
+        "first_visual_ms_max": 18.8,
+        "first_visual_ms_median": 18.8,
+        "n": 1
+      },
+      "landmark→input": {
+        "confirmed_ms_max": -1,
+        "confirmed_ms_median": -1.0,
+        "first_visual_ms_max": 0.5,
+        "first_visual_ms_median": 0.4,
+        "n": 9
+      },
+      "mechanism_input": {
+        "confirmed_ms_max": 29.7,
+        "confirmed_ms_median": 19.0,
+        "first_visual_ms_max": 0.5,
+        "first_visual_ms_median": 0.2,
+        "n": 27
+      },
+      "move": {
+        "confirmed_ms_max": 71.5,
+        "confirmed_ms_median": 27.2,
+        "first_visual_ms_max": 71.5,
+        "first_visual_ms_median": 22.1,
+        "n": 25
+      },
+      "move→cage": {
+        "confirmed_ms_max": 33.1,
+        "confirmed_ms_median": 19.2,
+        "first_visual_ms_max": 33.1,
+        "first_visual_ms_median": 18.9,
+        "n": 12
+      },
+      "move→guardian": {
+        "confirmed_ms_max": 483.8,
+        "confirmed_ms_median": 18.7,
+        "first_visual_ms_max": 0.5,
+        "first_visual_ms_median": 0.4,
+        "n": 12
+      },
+      "occupy_plates": {
+        "confirmed_ms_max": 27.3,
+        "confirmed_ms_median": 21.3,
+        "first_visual_ms_max": 41.6,
+        "first_visual_ms_median": 34.6,
+        "n": 3
+      },
+      "recover_artifact": {
+        "confirmed_ms_max": 36.3,
+        "confirmed_ms_median": 19.2,
+        "first_visual_ms_max": 0.4,
+        "first_visual_ms_median": 0.3,
+        "n": 12
+      },
+      "unlock_cage": {
+        "confirmed_ms_max": 89.2,
+        "confirmed_ms_median": 23.0,
+        "first_visual_ms_max": 1.0,
+        "first_visual_ms_median": 0.4,
+        "n": 12
+      }
+    },
+    "latency_ms": 0
+  },
+  "menace": {
+    "lf_site_01": {
+      "approach_s": 0.0,
+      "guardian": "alive",
+      "horse_fear_s": 0.02,
+      "menace_s": 0.02,
+      "squad_guard_s": 0.45
+    },
+    "lf_site_02": {
+      "approach_s": 2.58,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.46
+    },
+    "lf_site_03": {
+      "approach_s": 2.05,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.44
+    },
+    "lf_site_04": {
+      "approach_s": 1.53,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.47
+    },
+    "lf_site_05": {
+      "approach_s": 2.49,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.45
+    },
+    "lf_site_06": {
+      "approach_s": 2.19,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.45
+    },
+    "lf_site_07": {
+      "approach_s": 1.08,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.47
+    },
+    "lf_site_08": {
+      "approach_s": 2.45,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.47
+    },
+    "lf_site_09": {
+      "approach_s": 2.14,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.46
+    },
+    "lf_site_10": {
+      "approach_s": 1.4,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.48
+    },
+    "lf_site_11": {
+      "approach_s": 2.48,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.48
+    },
+    "lf_site_12": {
+      "approach_s": 1.9,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.45
+    }
+  },
+  "puzzle": {
+    "pictures": 24,
+    "symbols": 24
+  },
+  "server_cpu": {
+    "GET state": {
+      "max_ms": 55.0,
+      "median_ms": 3.8,
+      "n": 268
+    },
+    "POST command": {
+      "max_ms": 3.2,
+      "median_ms": 3.2,
+      "n": 1
+    },
+    "POST new": {
+      "max_ms": 9.0,
+      "median_ms": 9.0,
+      "n": 2
+    },
+    "attempt_task": {
+      "max_ms": 18.3,
+      "median_ms": 5.2,
+      "n": 60
+    },
+    "discover_horse": {
+      "max_ms": 4.5,
+      "median_ms": 4.5,
+      "n": 1
+    },
+    "engage_guardian": {
+      "max_ms": 7.3,
+      "median_ms": 4.4,
+      "n": 12
+    },
+    "escort_start": {
+      "max_ms": 11.7,
+      "median_ms": 7.1,
+      "n": 12
+    },
+    "finish_intro": {
+      "max_ms": 6.5,
+      "median_ms": 6.5,
+      "n": 1
+    },
+    "form_squad": {
+      "max_ms": 3.4,
+      "median_ms": 3.4,
+      "n": 1
+    },
+    "mechanism_input": {
+      "max_ms": 8.3,
+      "median_ms": 4.1,
+      "n": 36
+    },
+    "move": {
+      "max_ms": 9.5,
+      "median_ms": 4.5,
+      "n": 58
+    },
+    "occupy_plates": {
+      "max_ms": 5.6,
+      "median_ms": 5.0,
+      "n": 3
+    },
+    "start_intro": {
+      "max_ms": 4.2,
+      "median_ms": 4.2,
+      "n": 1
+    }
+  }
+}

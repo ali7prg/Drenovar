@@ -1,0 +1,14 @@
+# 60 extra ActorDirector ticks (delta 0) per sample, headless, llvmpipe-class desktop CPU (not iPhone); runs 1-2 on 2 pinned cores, matrix runs shared the machine with renders
+run	build	walk_actors_tick_us	menace_actors_tick_us	fight_actors_tick_us	lead_update_mean_us	lead_update_max_us	lead_updates	origin_search_us	predict_us
+before1	259de0a1	4586.2	4906.1	4597.2	0.0	0	0	—	—
+before2	259de0a1	4276.3	4438.1	4653.5	0.0	0	0	—	—
+after1	working tree	5200.4	4525.6	6332.2	174.0	375	69	1254	809
+after2	working tree	4471.5	4557.2	4679.4	306.2	6285	69	1263	811
+before4/qa_legacy_lat0	259de0a1	6089.1	5218.8	5338.1	0.0	0	0	—	—
+before4/qa_legacy_lat300	259de0a1	5824.3	5142.1	5815.4	0.0	0	0	—	—
+before4/qa_legacy_lat700	259de0a1	6708.7	4388.0	5292.5	0.0	0	0	—	—
+before4/qa_kingdom_all	259de0a1	6268.1	4762.4	4761.9	0.0	0	0	—	—
+after4/qa_legacy_lat0	working tree	5079.8	4412.7	4929.9	462.9	4853	68	5343	4715
+after4/qa_legacy_lat300	working tree	5838.8	5018.8	4826.4	452.1	9149	68	1296	737
+after4/qa_legacy_lat700	working tree	7963.7	4569.8	4794.6	325.7	4329	68	1317	1082
+after4/qa_kingdom_all	working tree	5212.0	5137.5	6207.9	583.3	5961	68	5107	761

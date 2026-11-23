@@ -1,0 +1,13 @@
+site	name	cage	before_cage_shown	before_captives_in_cage	before_release_s	after_cage_shown	after_captives_in_cage	after_release_s	after_released	result
+lf_site_01	Берёзовая просека	oak	False	3	0.0	True	3	12.0	True	PASS
+lf_site_02	Каменный карман	iron	False	3	0.0	True	3	12.02	True	PASS
+lf_site_03	Пепельная часовня	root	False	3	0.0	True	3	12.01	True	PASS
+lf_site_04	Шёпот елей	oak	False	3	0.0	True	3	12.0	True	PASS
+lf_site_05	Смоляная низина	iron	False	3	0.0	True	3	12.0	True	PASS
+lf_site_06	Угольный круг	root	False	3	0.0	True	3	12.0	True	PASS
+lf_site_07	Ольховый брод	oak	False	3	0.0	True	3	12.0	True	PASS
+lf_site_08	Травяной лабиринт	iron	False	3	0.0	True	3	12.0	True	PASS
+lf_site_09	Папоротниковый уступ	root	False	3	0.0	True	3	12.0	True	PASS
+lf_site_10	Изломанная терраса	oak	False	3	0.0	True	3	12.0	True	PASS
+lf_site_11	Речные ступени	iron	False	3	0.0	True	3	12.0	True	PASS
+lf_site_12	Роща старых костей	root	False	3	0.0	True	3	12.01	True	PASS

@@ -1,0 +1,305 @@
+{
+  "cages": {
+    "lf_site_01": {
+      "cage": "oak",
+      "cage_shown": false,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Берёзовая просека",
+      "release_scene_s": 0.0,
+      "released": false
+    },
+    "lf_site_02": {
+      "cage": "iron",
+      "cage_shown": false,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Каменный карман",
+      "release_scene_s": 0.0,
+      "released": false
+    }
+  },
+  "checks": 44,
+  "cpu": {
+    "fight": {
+      "actors_tick_us": 5338.1
+    },
+    "lead_update": {
+      "max_us": 0,
+      "mean_us": 0.0,
+      "updates": 0
+    },
+    "menace": {
+      "actors_tick_us": 5218.8
+    },
+    "walk": {
+      "actors_tick_us": 6089.1
+    }
+  },
+  "failures": [
+    "puzzle: 0 of 24 option symbols have a picture icon (atlas)",
+    "fog clears with the squad: worst lag 1.99 s, p95 1.60 s, mean 0.68 s (≤ 0.3)",
+    "fog clears with the horse: worst lag 2.06 s, p95 1.87 s, mean 0.87 s (≤ 0.3)",
+    "lf_site_01: the creature menaces -1.00 s after the squad arrives (≤ 1.0)",
+    "lf_site_01: the horse shows fear (-1.00 s)",
+    "lf_site_01: the squad takes the guard stance facing the creature (-1.00 s)",
+    "lf_site_01: 0/3 option cards show their picture (≥ 120 px tall)",
+    "lf_site_01: a visible melee — 0.14 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death",
+    "lf_site_01 (Берёзовая просека): cage MISSING, 3/3 captives in it, on screen before the release",
+    "lf_site_01: the release plays on screen (0.0 s, door still, 3 captives out)",
+    "lf_site_02: the creature menaces -1.00 s after the squad arrives (≤ 1.0)",
+    "lf_site_02: the horse shows fear (-1.00 s)",
+    "lf_site_02: the squad takes the guard stance facing the creature (-1.00 s)",
+    "lf_site_02: 0/3 option cards show their picture (≥ 120 px tall)",
+    "lf_site_02: a visible melee — 0.16 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death",
+    "lf_site_02 (Каменный карман): cage MISSING, 3/3 captives in it, on screen before the release",
+    "lf_site_02: the release plays on screen (0.0 s, door still, 3 captives out)",
+    "button move: first visual response 113 ms worst (≤ 100) at 0 ms latency",
+    "button defeat_guardian: first visual response 433 ms worst (≤ 100) at 0 ms latency",
+    "button escort_home: first visual response 216 ms worst (≤ 100) at 0 ms latency"
+  ],
+  "fight": {
+    "lf_site_01": {
+      "animated_s": 8.06,
+      "beats": [
+        "charge",
+        "squad_strike",
+        "creature_hit",
+        "creature_attack",
+        "squad_hit",
+        "creature_roar",
+        "creature_death"
+      ],
+      "melee_contact_s": 0.14,
+      "result_at_s": 10.13,
+      "server_s": 6.3
+    },
+    "lf_site_02": {
+      "animated_s": 7.75,
+      "beats": [
+        "charge",
+        "squad_strike",
+        "creature_hit",
+        "creature_attack",
+        "squad_hit",
+        "creature_roar",
+        "creature_death"
+      ],
+      "melee_contact_s": 0.16,
+      "result_at_s": 9.87,
+      "server_s": 6.3
+    }
+  },
+  "fog": {
+    "horse": {
+      "lag_max_s": 2.06,
+      "lag_mean_s": 0.87,
+      "lag_p95_s": 1.87,
+      "samples": 53
+    },
+    "move_ms": 48441.0,
+    "squad": {
+      "lag_max_s": 1.99,
+      "lag_mean_s": 0.68,
+      "lag_p95_s": 1.6,
+      "samples": 53
+    },
+    "walk_s": 14.0
+  },
+  "intro": {
+    "first_seen_s": 5.06,
+    "halls": {
+
+    },
+    "horse_frames": 1013,
+    "occluded_frames": 0,
+    "visible_run_s": 6.39
+  },
+  "latency": {
+    "actions": {
+      "defeat_guardian": {
+        "confirmed_ms_max": 141.1,
+        "confirmed_ms_median": 141.1,
+        "first_visual_ms_max": 433.2,
+        "first_visual_ms_median": 433.2,
+        "n": 2
+      },
+      "discover": {
+        "confirmed_ms_max": 32.9,
+        "confirmed_ms_median": 32.9,
+        "first_visual_ms_max": 32.9,
+        "first_visual_ms_median": 32.9,
+        "n": 2
+      },
+      "discover_horse": {
+        "confirmed_ms_max": 21.6,
+        "confirmed_ms_median": 21.6,
+        "first_visual_ms_max": 9.1,
+        "first_visual_ms_median": 9.1,
+        "n": 1
+      },
+      "engage_guardian": {
+        "confirmed_ms_max": 13.9,
+        "confirmed_ms_median": 13.9,
+        "first_visual_ms_max": 13.9,
+        "first_visual_ms_median": 13.9,
+        "n": 2
+      },
+      "escort_home": {
+        "confirmed_ms_max": 15.9,
+        "confirmed_ms_median": 15.9,
+        "first_visual_ms_max": 216.1,
+        "first_visual_ms_median": 216.1,
+        "n": 2
+      },
+      "escort_start": {
+        "confirmed_ms_max": 18.8,
+        "confirmed_ms_median": 18.8,
+        "first_visual_ms_max": 71.1,
+        "first_visual_ms_median": 71.1,
+        "n": 2
+      },
+      "form_squad": {
+        "confirmed_ms_max": 11.4,
+        "confirmed_ms_median": 11.4,
+        "first_visual_ms_max": 31.8,
+        "first_visual_ms_median": 31.8,
+        "n": 1
+      },
+      "landmark→input": {
+        "confirmed_ms_max": -1,
+        "confirmed_ms_median": -1.0,
+        "first_visual_ms_max": 37.1,
+        "first_visual_ms_median": 14.1,
+        "n": 3
+      },
+      "mechanism_input": {
+        "confirmed_ms_max": 22.1,
+        "confirmed_ms_median": 21.2,
+        "first_visual_ms_max": 22.1,
+        "first_visual_ms_median": 21.2,
+        "n": 3
+      },
+      "move": {
+        "confirmed_ms_max": 32.4,
+        "confirmed_ms_median": 20.8,
+        "first_visual_ms_max": 113.4,
+        "first_visual_ms_median": 44.2,
+        "n": 5
+      },
+      "move→cage": {
+        "confirmed_ms_max": 70.6,
+        "confirmed_ms_median": 70.6,
+        "first_visual_ms_max": 97.1,
+        "first_visual_ms_median": 97.1,
+        "n": 2
+      },
+      "move→guardian": {
+        "confirmed_ms_max": 22.9,
+        "confirmed_ms_median": 22.9,
+        "first_visual_ms_max": 22.8,
+        "first_visual_ms_median": 22.8,
+        "n": 2
+      },
+      "recover_artifact": {
+        "confirmed_ms_max": 18.3,
+        "confirmed_ms_median": 18.3,
+        "first_visual_ms_max": 18.3,
+        "first_visual_ms_median": 18.3,
+        "n": 2
+      },
+      "unlock_cage": {
+        "confirmed_ms_max": 30.1,
+        "confirmed_ms_median": 30.1,
+        "first_visual_ms_max": 30.1,
+        "first_visual_ms_median": 30.1,
+        "n": 2
+      }
+    },
+    "latency_ms": 0
+  },
+  "menace": {
+    "lf_site_01": {
+      "approach_s": 0.0,
+      "guardian": "alive",
+      "horse_fear_s": -1.0,
+      "menace_s": -1.0,
+      "squad_guard_s": -1.0
+    },
+    "lf_site_02": {
+      "approach_s": 2.67,
+      "guardian": "alive",
+      "horse_fear_s": -1.0,
+      "menace_s": -1.0,
+      "squad_guard_s": -1.0
+    }
+  },
+  "puzzle": {
+    "pictures": 0,
+    "symbols": 24
+  },
+  "server_cpu": {
+    "GET state": {
+      "max_ms": 86.3,
+      "median_ms": 3.3,
+      "n": 67
+    },
+    "POST command": {
+      "max_ms": 3.6,
+      "median_ms": 3.6,
+      "n": 1
+    },
+    "POST new": {
+      "max_ms": 14.9,
+      "median_ms": 14.9,
+      "n": 2
+    },
+    "attempt_task": {
+      "max_ms": 10.3,
+      "median_ms": 4.8,
+      "n": 10
+    },
+    "discover_horse": {
+      "max_ms": 4.8,
+      "median_ms": 4.8,
+      "n": 1
+    },
+    "engage_guardian": {
+      "max_ms": 3.8,
+      "median_ms": 3.8,
+      "n": 2
+    },
+    "escort_start": {
+      "max_ms": 6.3,
+      "median_ms": 6.3,
+      "n": 2
+    },
+    "finish_intro": {
+      "max_ms": 3.3,
+      "median_ms": 3.3,
+      "n": 1
+    },
+    "form_squad": {
+      "max_ms": 4.3,
+      "median_ms": 4.3,
+      "n": 1
+    },
+    "mechanism_input": {
+      "max_ms": 27.0,
+      "median_ms": 4.7,
+      "n": 6
+    },
+    "move": {
+      "max_ms": 48.5,
+      "median_ms": 3.6,
+      "n": 12
+    },
+    "start_intro": {
+      "max_ms": 2.8,
+      "median_ms": 2.8,
+      "n": 1
+    }
+  }
+}

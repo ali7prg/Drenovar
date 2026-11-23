@@ -1,0 +1,336 @@
+{
+  "cages": {
+    "lf_site_01": {
+      "cage": "oak",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Берёзовая просека",
+      "release_scene_s": 12.0,
+      "released": true
+    },
+    "lf_site_02": {
+      "cage": "iron",
+      "cage_shown": true,
+      "captives": 3,
+      "captives_in_cage_shown": 3,
+      "fog_clear": true,
+      "name": "Каменный карман",
+      "release_scene_s": 12.0,
+      "released": true
+    }
+  },
+  "checks": 50,
+  "cpu": {
+    "fight": {
+      "actors_tick_us": 4826.4,
+      "origin_usec": 1296,
+      "predict_usec": 73
+    },
+    "lead_update": {
+      "max_us": 9149,
+      "mean_us": 452.1,
+      "updates": 68
+    },
+    "menace": {
+      "actors_tick_us": 5018.8,
+      "origin_usec": 1296,
+      "predict_usec": 737
+    },
+    "walk": {
+      "actors_tick_us": 5838.8,
+      "origin_usec": 1296,
+      "predict_usec": 737
+    }
+  },
+  "failures": [],
+  "fight": {
+    "lf_site_01": {
+      "animated_s": 8.73,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 4.34,
+      "result_at_s": 9.94,
+      "server_s": 6.3
+    },
+    "lf_site_02": {
+      "animated_s": 8.6,
+      "beats": [
+        "creature_roar",
+        "charge",
+        "creature_hit",
+        "squad_strike",
+        "creature_attack",
+        "squad_hit",
+        "creature_death"
+      ],
+      "melee_contact_s": 4.33,
+      "result_at_s": 9.79,
+      "server_s": 6.3
+    }
+  },
+  "fog": {
+    "horse": {
+      "lag_max_s": 0.0,
+      "lag_mean_s": 0.0,
+      "lag_p95_s": 0.0,
+      "samples": 53
+    },
+    "move_ms": 48441.0,
+    "squad": {
+      "lag_max_s": 0.0,
+      "lag_mean_s": 0.0,
+      "lag_p95_s": 0.0,
+      "samples": 53
+    },
+    "walk_s": 14.0
+  },
+  "intro": {
+    "first_seen_s": 4.62,
+    "halls": {
+      "2": {
+        "origin_hidden": false,
+        "search_ms": 1.15,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "3": {
+        "origin_hidden": false,
+        "search_ms": 1.38,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "4": {
+        "origin_hidden": false,
+        "search_ms": 1.14,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "5": {
+        "origin_hidden": false,
+        "search_ms": 1.22,
+        "shift_m": 0.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      }
+    },
+    "horse_frames": 1014,
+    "occluded_frames": 0,
+    "origin_hidden": false,
+    "spot_search_ms": 1.3,
+    "spot_shift_m": 0.0,
+    "synthetic_tower": {
+      "in_front": {
+        "origin_hidden": true,
+        "search_ms": 1.56,
+        "shift_m": 5.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      },
+      "on_origin": {
+        "origin_hidden": true,
+        "search_ms": 1.69,
+        "shift_m": 5.0,
+        "spot_hidden": false,
+        "squad_spot_hidden": false
+      }
+    },
+    "visible_run_s": 6.39
+  },
+  "latency": {
+    "actions": {
+      "defeat_guardian": {
+        "confirmed_ms_max": 326.1,
+        "confirmed_ms_median": 326.1,
+        "first_visual_ms_max": 1.2,
+        "first_visual_ms_median": 1.2,
+        "n": 2
+      },
+      "discover": {
+        "confirmed_ms_max": 325.5,
+        "confirmed_ms_median": 325.5,
+        "first_visual_ms_max": 0.6,
+        "first_visual_ms_median": 0.6,
+        "n": 2
+      },
+      "discover_horse": {
+        "confirmed_ms_max": 312.8,
+        "confirmed_ms_median": 312.8,
+        "first_visual_ms_max": 0.7,
+        "first_visual_ms_median": 0.7,
+        "n": 1
+      },
+      "engage_guardian": {
+        "confirmed_ms_max": 376.1,
+        "confirmed_ms_median": 376.1,
+        "first_visual_ms_max": 38.4,
+        "first_visual_ms_median": 38.4,
+        "n": 2
+      },
+      "escort_home": {
+        "confirmed_ms_max": 323.4,
+        "confirmed_ms_median": 323.4,
+        "first_visual_ms_max": 1.3,
+        "first_visual_ms_median": 1.3,
+        "n": 2
+      },
+      "escort_start": {
+        "confirmed_ms_max": 331.7,
+        "confirmed_ms_median": 331.7,
+        "first_visual_ms_max": 18.3,
+        "first_visual_ms_median": 18.3,
+        "n": 2
+      },
+      "form_squad": {
+        "confirmed_ms_max": 325.3,
+        "confirmed_ms_median": 325.3,
+        "first_visual_ms_max": 16.4,
+        "first_visual_ms_median": 16.4,
+        "n": 1
+      },
+      "landmark→input": {
+        "confirmed_ms_max": -1,
+        "confirmed_ms_median": -1.0,
+        "first_visual_ms_max": 4.4,
+        "first_visual_ms_median": 0.3,
+        "n": 3
+      },
+      "mechanism_input": {
+        "confirmed_ms_max": 335.7,
+        "confirmed_ms_median": 319.0,
+        "first_visual_ms_max": 0.3,
+        "first_visual_ms_median": 0.2,
+        "n": 3
+      },
+      "move": {
+        "confirmed_ms_max": 347.6,
+        "confirmed_ms_median": 325.7,
+        "first_visual_ms_max": 23.9,
+        "first_visual_ms_median": 12.3,
+        "n": 5
+      },
+      "move→cage": {
+        "confirmed_ms_max": 370.8,
+        "confirmed_ms_median": 370.8,
+        "first_visual_ms_max": 17.6,
+        "first_visual_ms_median": 17.6,
+        "n": 2
+      },
+      "move→guardian": {
+        "confirmed_ms_max": 613.0,
+        "confirmed_ms_median": 613.0,
+        "first_visual_ms_max": 0.5,
+        "first_visual_ms_median": 0.5,
+        "n": 2
+      },
+      "recover_artifact": {
+        "confirmed_ms_max": 326.3,
+        "confirmed_ms_median": 326.3,
+        "first_visual_ms_max": 0.8,
+        "first_visual_ms_median": 0.8,
+        "n": 2
+      },
+      "unlock_cage": {
+        "confirmed_ms_max": 342.1,
+        "confirmed_ms_median": 342.1,
+        "first_visual_ms_max": 1.0,
+        "first_visual_ms_median": 1.0,
+        "n": 2
+      }
+    },
+    "latency_ms": 300
+  },
+  "menace": {
+    "lf_site_01": {
+      "approach_s": 0.0,
+      "guardian": "alive",
+      "horse_fear_s": 0.02,
+      "menace_s": 0.02,
+      "squad_guard_s": 0.43
+    },
+    "lf_site_02": {
+      "approach_s": 0.66,
+      "guardian": "alive",
+      "horse_fear_s": 0.01,
+      "menace_s": 0.01,
+      "squad_guard_s": 0.44
+    }
+  },
+  "puzzle": {
+    "pictures": 24,
+    "symbols": 24
+  },
+  "server_cpu": {
+    "GET state": {
+      "max_ms": 163.2,
+      "median_ms": 3.7,
+      "n": 72
+    },
+    "POST command": {
+      "max_ms": 3.5,
+      "median_ms": 3.5,
+      "n": 1
+    },
+    "POST new": {
+      "max_ms": 12.0,
+      "median_ms": 12.0,
+      "n": 2
+    },
+    "attempt_task": {
+      "max_ms": 8.6,
+      "median_ms": 4.7,
+      "n": 10
+    },
+    "discover_horse": {
+      "max_ms": 3.2,
+      "median_ms": 3.2,
+      "n": 1
+    },
+    "engage_guardian": {
+      "max_ms": 8.6,
+      "median_ms": 8.6,
+      "n": 2
+    },
+    "escort_start": {
+      "max_ms": 7.3,
+      "median_ms": 7.3,
+      "n": 2
+    },
+    "finish_intro": {
+      "max_ms": 3.9,
+      "median_ms": 3.9,
+      "n": 1
+    },
+    "form_squad": {
+      "max_ms": 3.0,
+      "median_ms": 3.0,
+      "n": 1
+    },
+    "mechanism_input": {
+      "max_ms": 4.8,
+      "median_ms": 4.5,
+      "n": 6
+    },
+    "move": {
+      "max_ms": 6.3,
+      "median_ms": 4.9,
+      "n": 12
+    },
+    "start_intro": {
+      "max_ms": 3.2,
+      "median_ms": 3.2,
+      "n": 1
+    }
+  }
+}

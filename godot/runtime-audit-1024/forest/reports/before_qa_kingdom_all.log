@@ -1,0 +1,551 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+CHECK ok   forest game layer loaded lazily after the launch
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 76.527, &"terrain": 3072.027, &"tiles": 62.496, &"impostors": 274.825, &"visuals": 1866.669, &"total": 5611.544 } kit=0 missing kit assets
+CHECK ok   forest world layer attached by itself after the city
+CHECK ok   forest unlocked
+CHECK FAIL puzzle: 0 of 24 option symbols have a picture icon (atlas)
+CHECK ok   hall intro plays
+INTRO_DIAG {"intro_horse":false,"intro_t":0.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":0.3,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":0.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":0.5,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":0.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":0.7,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":0.8,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":0.9,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.0,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_BLOCKERS {"blockers":[],"p":"(-8.0, 8.08323, -55.0)","spots":""}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.2,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.3,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.4,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.5,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_BLOCKERS {"blockers":[],"p":"(-8.0, 8.08323, -55.0)","spots":""}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.9,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.1,"target":"(5.0, 0.0, -4.1)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(923.0, 11.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.2,"target":"(4.7, 0.1, -4.9)","zoom":69.7}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(921.0, 14.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.3,"target":"(4.4, 0.3, -6.1)","zoom":69.1}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(917.0, 19.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.4,"target":"(4.0, 0.5, -7.7)","zoom":68.4}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(912.0, 26.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.5,"target":"(3.4, 0.7, -9.6)","zoom":67.4}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(904.0, 36.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.6,"target":"(2.6, 1.1, -12.5)","zoom":65.9}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(895.0, 48.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.8,"target":"(1.7, 1.5, -15.6)","zoom":64.2}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(886.0, 60.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.9,"target":"(0.9, 1.8, -18.4)","zoom":62.6}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(875.0, 75.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.0,"target":"(0.0, 2.3, -21.9)","zoom":60.8}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(859.0, 95.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.1,"target":"(-1.2, 2.8, -26.2)","zoom":58.4}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(845.0, 114.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.3,"target":"(-2.3, 3.3, -29.9)","zoom":56.3}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(830.0, 134.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.4,"target":"(-3.3, 3.7, -33.5)","zoom":54.3}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(813.0, 155.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.5,"target":"(-4.3, 4.2, -37.0)","zoom":52.3}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(797.0, 176.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.6,"target":"(-5.2, 4.6, -40.2)","zoom":50.5}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(780.0, 198.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.7,"target":"(-6.1, 5.0, -43.4)","zoom":48.7}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(761.0, 224.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.8,"target":"(-7.0, 5.4, -46.8)","zoom":46.7}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(737.0, 255.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.0,"target":"(-8.3, 6.0, -51.3)","zoom":44.6}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(718.0, 281.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.1,"target":"(-8.8, 6.2, -53.2)","zoom":43.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(702.0, 301.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.3,"target":"(-9.3, 6.5, -55.0)","zoom":41.8}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(690.0, 317.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.4,"target":"(-9.7, 6.7, -56.5)","zoom":40.9}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(681.0, 329.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.5,"target":"(-10.0, 6.8, -57.3)","zoom":40.3}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 333.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.6,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.7,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.8,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.9,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.0,"pos":"(-13.5, 6.8, -61.9)","rig":true,"screen":"(693.0, 248.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.0,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.1,"pos":"(-13.4, 6.8, -61.7)","rig":true,"screen":"(692.0, 250.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.1,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.2,"pos":"(-13.2, 6.8, -61.5)","rig":true,"screen":"(692.0, 254.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.2,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.3,"pos":"(-12.9, 6.8, -61.2)","rig":true,"screen":"(691.0, 258.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.3,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.4,"pos":"(-12.7, 6.8, -60.9)","rig":true,"screen":"(690.0, 261.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.4,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.6,"pos":"(-12.4, 6.8, -60.5)","rig":true,"screen":"(690.0, 265.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.5,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.7,"pos":"(-12.2, 6.8, -60.2)","rig":true,"screen":"(689.0, 269.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.6,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.8,"pos":"(-11.9, 6.8, -59.9)","rig":true,"screen":"(688.0, 273.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.7,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.9,"pos":"(-11.7, 6.8, -59.6)","rig":true,"screen":"(688.0, 277.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.8,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.0,"pos":"(-11.3, 6.8, -59.1)","rig":true,"screen":"(687.0, 283.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.0,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.1,"pos":"(-11.1, 6.8, -58.8)","rig":true,"screen":"(686.0, 287.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.1,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.2,"pos":"(-10.8, 6.8, -58.5)","rig":true,"screen":"(685.0, 290.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.2,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.3,"pos":"(-10.6, 6.8, -58.2)","rig":true,"screen":"(685.0, 294.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.3,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.4,"pos":"(-10.3, 6.8, -57.9)","rig":true,"screen":"(684.0, 298.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.4,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.5,"pos":"(-10.0, 6.8, -57.6)","rig":true,"screen":"(683.0, 302.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.5,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.6,"pos":"(-9.8, 6.8, -57.2)","rig":true,"screen":"(682.0, 306.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.6,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.7,"pos":"(-9.5, 6.8, -56.9)","rig":true,"screen":"(682.0, 310.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.7,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.8,"pos":"(-9.3, 6.8, -56.6)","rig":true,"screen":"(681.0, 314.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.8,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.9,"pos":"(-9.1, 6.8, -56.3)","rig":true,"screen":"(680.0, 317.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.9,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.0,"pos":"(-8.8, 6.8, -56.0)","rig":true,"screen":"(680.0, 321.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.0,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.1,"pos":"(-8.6, 6.8, -55.7)","rig":true,"screen":"(679.0, 325.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.1,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.2,"pos":"(-8.3, 6.8, -55.4)","rig":true,"screen":"(678.0, 329.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.2,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.4,"pos":"(-8.1, 6.8, -55.1)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.3,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.4,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.5,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.6,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.8,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.9,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.0,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.1,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.2,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.3,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.4,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.5,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.6,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.7,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.8,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.9,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.0,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.1,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.2,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.3,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.4,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.5,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.6,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.7,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.8,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(677.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.9,"target":"(-10.0, 6.8, -57.5)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 333.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.0,"target":"(-10.0, 6.8, -57.4)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(681.0, 329.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.1,"target":"(-9.8, 6.7, -56.6)","zoom":40.3}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(690.0, 316.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.2,"target":"(-9.3, 6.5, -55.1)","zoom":40.9}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(704.0, 298.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.3,"target":"(-8.7, 6.2, -53.0)","zoom":42.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(722.0, 275.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.4,"target":"(-8.0, 5.9, -50.3)","zoom":43.3}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(741.0, 250.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.5,"target":"(-7.1, 5.5, -47.1)","zoom":45.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(762.0, 223.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.6,"target":"(-6.1, 5.0, -43.6)","zoom":46.9}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(783.0, 195.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.8,"target":"(-5.0, 4.5, -39.8)","zoom":48.9}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(803.0, 169.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.9,"target":"(-3.9, 4.0, -35.8)","zoom":51.1}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(822.0, 143.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":11.0,"target":"(-2.7, 3.5, -31.6)","zoom":53.4}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(840.0, 120.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":11.1,"target":"(-1.6, 3.0, -27.5)","zoom":55.7}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(857.0, 98.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":11.2,"target":"(-0.4, 2.5, -23.4)","zoom":58.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(872.0, 79.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":11.3,"target":"(0.7, 2.0, -19.5)","zoom":60.3}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(885.0, 62.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.4,"target":"(1.7, 1.5, -15.8)","zoom":62.4}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(896.0, 47.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.5,"target":"(2.6, 1.1, -12.5)","zoom":64.4}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(905.0, 34.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.6,"target":"(3.4, 0.7, -9.6)","zoom":66.1}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(913.0, 24.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.7,"target":"(4.1, 0.4, -7.2)","zoom":67.6}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(919.0, 17.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.8,"target":"(4.6, 0.2, -5.4)","zoom":68.8}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(923.0, 12.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.9,"target":"(4.9, 0.0, -4.3)","zoom":69.6}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.0,"target":"(5.0, 0.0, -4.0)","zoom":69.9}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.1,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.2,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.3,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.4,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.5,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+CHECK ok   intro: the horse is on screen, unoccluded and out of the fog for 6.39 s in a row (≥ 1.5)
+PRESS {"action":"form_squad","confirmed_ms":11.3,"first_visual_ms":26.5,"ok":true}
+PRESS {"action":"move","confirmed_ms":14.9,"first_visual_ms":36.9,"ok":true}
+PRESS {"action":"discover_horse","confirmed_ms":11.7,"first_visual_ms":11.7,"ok":true}
+PRESS {"action":"move","confirmed_ms":22.1,"first_visual_ms":11.1,"ok":true}
+CHECK FAIL fog clears with the squad: worst lag 1.89 s, p95 1.69 s, mean 0.69 s (≤ 0.3)
+CHECK FAIL fog clears with the horse: worst lag 2.15 s, p95 1.89 s, mean 0.92 s (≤ 0.3)
+MENACE_DIAG {"battle":"","clip":"Idle","members":3,"move":false,"node":"lf_site_01","pending":null,"rig":true,"site":"lf_site_01","squad_d":2.60000038146973,"state":"ready"}
+CHECK FAIL lf_site_01: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_01: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_01: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":25.8,"first_visual_ms":25.8,"ok":true}
+CHECK FAIL lf_site_01: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"landmark→input","confirmed_ms":23.5,"first_visual_ms":47.7,"ok":true}
+PRESS {"action":"landmark→input","confirmed_ms":28.0,"first_visual_ms":28.0,"ok":true}
+PRESS {"action":"landmark→input","confirmed_ms":16.5,"first_visual_ms":16.5,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_01
+PRESS {"action":"move","confirmed_ms":20.9,"first_visual_ms":20.9,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":22.0,"first_visual_ms":22.0,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":23.5,"first_visual_ms":23.5,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":12.9,"first_visual_ms":12.9,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_01
+CHECK ok   lf_site_01: 8.15 s of fight animation on screen before the result text (≥ 4.0), result at 10.26 s
+CHECK FAIL lf_site_01: a visible melee — 0.16 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_01
+PRESS {"action":"defeat_guardian","confirmed_ms":25.8,"first_visual_ms":337.6,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":16.7,"first_visual_ms":28.8,"ok":true}
+CHECK FAIL lf_site_01 (Берёзовая просека): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":24.0,"first_visual_ms":24.0,"ok":true}
+CHECK FAIL lf_site_01: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":16.5,"first_visual_ms":48.2,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":16.1,"first_visual_ms":208.7,"ok":true}
+PRESS {"action":"move","confirmed_ms":15.9,"first_visual_ms":70.0,"ok":true}
+MENACE_DIAG {"battle":"lf_site_01","clip":"Idle","members":3,"move":false,"node":"lf_site_02","pending":null,"rig":true,"site":"lf_site_02","squad_d":2.59999847412109,"state":"ready"}
+CHECK FAIL lf_site_02: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_02: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_02: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":24.4,"first_visual_ms":24.4,"ok":true}
+CHECK FAIL lf_site_02: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"mechanism_input","confirmed_ms":32.6,"first_visual_ms":32.6,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":30.6,"first_visual_ms":30.6,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":31.1,"first_visual_ms":31.1,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_02
+PRESS {"action":"move","confirmed_ms":37.9,"first_visual_ms":62.2,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":25.1,"first_visual_ms":25.1,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":43.7,"first_visual_ms":43.7,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":22.1,"first_visual_ms":22.1,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_02
+CHECK ok   lf_site_02: 8.07 s of fight animation on screen before the result text (≥ 4.0), result at 10.17 s
+CHECK FAIL lf_site_02: a visible melee — 0.13 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_02
+PRESS {"action":"defeat_guardian","confirmed_ms":21.8,"first_visual_ms":21.8,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":21.5,"first_visual_ms":36.0,"ok":true}
+CHECK FAIL lf_site_02 (Каменный карман): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":26.1,"first_visual_ms":26.1,"ok":true}
+CHECK FAIL lf_site_02: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":32.0,"first_visual_ms":81.3,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":29.4,"first_visual_ms":199.1,"ok":true}
+PRESS {"action":"move","confirmed_ms":18.7,"first_visual_ms":98.3,"ok":true}
+MENACE_DIAG {"battle":"lf_site_02","clip":"Idle","members":3,"move":false,"node":"lf_site_03","pending":null,"rig":true,"site":"lf_site_03","squad_d":2.59999847412109,"state":"ready"}
+CHECK FAIL lf_site_03: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_03: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_03: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":28.6,"first_visual_ms":28.6,"ok":true}
+CHECK FAIL lf_site_03: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"mechanism_input","confirmed_ms":16.9,"first_visual_ms":16.9,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":26.1,"first_visual_ms":26.1,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":17.6,"first_visual_ms":17.6,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_03
+PRESS {"action":"move","confirmed_ms":28.0,"first_visual_ms":47.9,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":23.5,"first_visual_ms":6.4,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":13.0,"first_visual_ms":13.0,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":31.5,"first_visual_ms":31.5,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_03
+CHECK ok   lf_site_03: 8.07 s of fight animation on screen before the result text (≥ 4.0), result at 10.17 s
+CHECK FAIL lf_site_03: a visible melee — 0.12 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_03
+PRESS {"action":"defeat_guardian","confirmed_ms":20.8,"first_visual_ms":20.8,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":27.8,"first_visual_ms":49.1,"ok":true}
+CHECK FAIL lf_site_03 (Пепельная часовня): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":19.5,"first_visual_ms":19.5,"ok":true}
+CHECK FAIL lf_site_03: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":22.2,"first_visual_ms":108.2,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":16.8,"first_visual_ms":189.0,"ok":true}
+PRESS {"action":"move","confirmed_ms":17.0,"first_visual_ms":88.4,"ok":true}
+MENACE_DIAG {"battle":"lf_site_03","clip":"Idle","members":3,"move":false,"node":"lf_site_04","pending":null,"rig":true,"site":"lf_site_04","squad_d":2.59999847412109,"state":"ready"}
+CHECK FAIL lf_site_04: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_04: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_04: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":15.9,"first_visual_ms":15.9,"ok":true}
+CHECK FAIL lf_site_04: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"occupy_plates","confirmed_ms":24.7,"first_visual_ms":40.3,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":31.7,"first_visual_ms":8.3,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":24.0,"first_visual_ms":23.9,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":23.9,"first_visual_ms":23.9,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_04
+PRESS {"action":"move","confirmed_ms":30.4,"first_visual_ms":30.4,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":35.0,"first_visual_ms":35.0,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":32.8,"first_visual_ms":32.8,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":17.5,"first_visual_ms":7.2,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_04
+CHECK ok   lf_site_04: 7.97 s of fight animation on screen before the result text (≥ 4.0), result at 10.10 s
+CHECK FAIL lf_site_04: a visible melee — 0.19 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_04
+PRESS {"action":"defeat_guardian","confirmed_ms":22.5,"first_visual_ms":22.5,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":13.2,"first_visual_ms":23.8,"ok":true}
+CHECK FAIL lf_site_04 (Шёпот елей): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":38.7,"first_visual_ms":38.7,"ok":true}
+CHECK FAIL lf_site_04: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":41.9,"first_visual_ms":122.7,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":22.4,"first_visual_ms":191.3,"ok":true}
+PRESS {"action":"move","confirmed_ms":21.1,"first_visual_ms":101.2,"ok":true}
+MENACE_DIAG {"battle":"lf_site_04","clip":"Idle","members":3,"move":false,"node":"lf_site_05","pending":null,"rig":true,"site":"lf_site_05","squad_d":2.59999847412109,"state":"ready"}
+CHECK FAIL lf_site_05: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_05: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_05: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":30.1,"first_visual_ms":30.1,"ok":true}
+CHECK FAIL lf_site_05: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"landmark→input","confirmed_ms":23.7,"first_visual_ms":41.7,"ok":true}
+PRESS {"action":"landmark→input","confirmed_ms":15.2,"first_visual_ms":6.2,"ok":true}
+PRESS {"action":"landmark→input","confirmed_ms":17.9,"first_visual_ms":17.9,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_05
+PRESS {"action":"move","confirmed_ms":17.9,"first_visual_ms":17.9,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":19.8,"first_visual_ms":19.8,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":16.7,"first_visual_ms":16.7,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":15.3,"first_visual_ms":15.3,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_05
+CHECK ok   lf_site_05: 7.34 s of fight animation on screen before the result text (≥ 4.0), result at 9.94 s
+CHECK FAIL lf_site_05: a visible melee — 0.14 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_05
+PRESS {"action":"defeat_guardian","confirmed_ms":25.2,"first_visual_ms":25.2,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":20.7,"first_visual_ms":30.5,"ok":true}
+CHECK FAIL lf_site_05 (Смоляная низина): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":34.2,"first_visual_ms":34.2,"ok":true}
+CHECK FAIL lf_site_05: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":15.9,"first_visual_ms":122.7,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":38.9,"first_visual_ms":170.3,"ok":true}
+PRESS {"action":"move","confirmed_ms":34.1,"first_visual_ms":171.2,"ok":true}
+MENACE_DIAG {"battle":"lf_site_05","clip":"Idle","members":3,"move":false,"node":"lf_site_06","pending":null,"rig":true,"site":"lf_site_06","squad_d":2.59999847412109,"state":"ready"}
+CHECK FAIL lf_site_06: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_06: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_06: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":16.0,"first_visual_ms":16.0,"ok":true}
+CHECK FAIL lf_site_06: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"mechanism_input","confirmed_ms":26.5,"first_visual_ms":26.5,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":31.8,"first_visual_ms":31.8,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":18.5,"first_visual_ms":18.5,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_06
+PRESS {"action":"move","confirmed_ms":24.6,"first_visual_ms":36.3,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":40.7,"first_visual_ms":40.7,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":16.8,"first_visual_ms":16.8,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":14.9,"first_visual_ms":14.9,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_06
+CHECK ok   lf_site_06: 7.52 s of fight animation on screen before the result text (≥ 4.0), result at 10.14 s
+CHECK FAIL lf_site_06: a visible melee — 0.12 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_06
+PRESS {"action":"defeat_guardian","confirmed_ms":26.0,"first_visual_ms":26.0,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":27.4,"first_visual_ms":46.3,"ok":true}
+CHECK FAIL lf_site_06 (Угольный круг): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":21.5,"first_visual_ms":21.5,"ok":true}
+CHECK FAIL lf_site_06: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":24.2,"first_visual_ms":108.1,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":17.4,"first_visual_ms":198.0,"ok":true}
+PRESS {"action":"move","confirmed_ms":15.7,"first_visual_ms":112.9,"ok":true}
+MENACE_DIAG {"battle":"lf_site_06","clip":"Idle","members":3,"move":false,"node":"lf_site_07","pending":null,"rig":true,"site":"lf_site_07","squad_d":2.59999847412109,"state":"ready"}
+CHECK FAIL lf_site_07: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_07: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_07: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":23.6,"first_visual_ms":23.6,"ok":true}
+CHECK FAIL lf_site_07: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"mechanism_input","confirmed_ms":21.2,"first_visual_ms":21.2,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":28.5,"first_visual_ms":28.5,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":22.4,"first_visual_ms":22.4,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_07
+PRESS {"action":"move","confirmed_ms":26.2,"first_visual_ms":46.0,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":18.6,"first_visual_ms":8.0,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":17.1,"first_visual_ms":8.4,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":20.4,"first_visual_ms":7.9,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_07
+CHECK ok   lf_site_07: 8.02 s of fight animation on screen before the result text (≥ 4.0), result at 10.10 s
+CHECK FAIL lf_site_07: a visible melee — 0.12 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_07
+PRESS {"action":"defeat_guardian","confirmed_ms":29.4,"first_visual_ms":29.4,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":254.4,"first_visual_ms":269.1,"ok":true}
+CHECK FAIL lf_site_07 (Ольховый брод): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":19.0,"first_visual_ms":19.0,"ok":true}
+CHECK FAIL lf_site_07: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":17.6,"first_visual_ms":99.6,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":23.5,"first_visual_ms":192.9,"ok":true}
+PRESS {"action":"move","confirmed_ms":28.5,"first_visual_ms":158.4,"ok":true}
+MENACE_DIAG {"battle":"lf_site_07","clip":"Idle","members":3,"move":false,"node":"lf_site_08","pending":null,"rig":true,"site":"lf_site_08","squad_d":2.59999847412109,"state":"ready"}
+CHECK FAIL lf_site_08: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_08: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_08: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":18.3,"first_visual_ms":18.3,"ok":true}
+CHECK FAIL lf_site_08: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"occupy_plates","confirmed_ms":30.5,"first_visual_ms":44.3,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":17.1,"first_visual_ms":7.0,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":12.6,"first_visual_ms":12.6,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":16.5,"first_visual_ms":16.5,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_08
+PRESS {"action":"move","confirmed_ms":17.4,"first_visual_ms":17.4,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":33.9,"first_visual_ms":10.5,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":40.1,"first_visual_ms":40.1,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":20.6,"first_visual_ms":20.6,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_08
+CHECK ok   lf_site_08: 7.49 s of fight animation on screen before the result text (≥ 4.0), result at 10.10 s
+CHECK FAIL lf_site_08: a visible melee — 0.16 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_08
+PRESS {"action":"defeat_guardian","confirmed_ms":32.4,"first_visual_ms":32.4,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":23.5,"first_visual_ms":34.0,"ok":true}
+CHECK FAIL lf_site_08 (Травяной лабиринт): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":29.8,"first_visual_ms":29.8,"ok":true}
+CHECK FAIL lf_site_08: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":24.5,"first_visual_ms":187.8,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":18.8,"first_visual_ms":233.7,"ok":true}
+PRESS {"action":"move","confirmed_ms":35.0,"first_visual_ms":199.6,"ok":true}
+MENACE_DIAG {"battle":"lf_site_08","clip":"Idle","members":3,"move":false,"node":"lf_site_09","pending":null,"rig":true,"site":"lf_site_09","squad_d":2.59999847412109,"state":"ready"}
+CHECK FAIL lf_site_09: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_09: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_09: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":29.2,"first_visual_ms":29.2,"ok":true}
+CHECK FAIL lf_site_09: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"landmark→input","confirmed_ms":22.1,"first_visual_ms":40.0,"ok":true}
+PRESS {"action":"landmark→input","confirmed_ms":17.0,"first_visual_ms":6.8,"ok":true}
+PRESS {"action":"landmark→input","confirmed_ms":21.5,"first_visual_ms":10.0,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_09
+PRESS {"action":"move","confirmed_ms":21.4,"first_visual_ms":21.4,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":19.9,"first_visual_ms":19.9,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":22.3,"first_visual_ms":22.3,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":33.2,"first_visual_ms":10.8,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_09
+CHECK ok   lf_site_09: 7.66 s of fight animation on screen before the result text (≥ 4.0), result at 10.24 s
+CHECK FAIL lf_site_09: a visible melee — 0.14 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_09
+PRESS {"action":"defeat_guardian","confirmed_ms":23.0,"first_visual_ms":23.0,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":23.4,"first_visual_ms":46.9,"ok":true}
+CHECK FAIL lf_site_09 (Папоротниковый уступ): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":67.3,"first_visual_ms":67.3,"ok":true}
+CHECK FAIL lf_site_09: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":28.3,"first_visual_ms":154.4,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":23.0,"first_visual_ms":181.0,"ok":true}
+PRESS {"action":"move","confirmed_ms":18.3,"first_visual_ms":142.1,"ok":true}
+MENACE_DIAG {"battle":"lf_site_09","clip":"Idle","members":3,"move":false,"node":"lf_site_10","pending":null,"rig":true,"site":"lf_site_10","squad_d":2.60000038146973,"state":"ready"}
+CHECK FAIL lf_site_10: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_10: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_10: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":24.6,"first_visual_ms":24.6,"ok":true}
+CHECK FAIL lf_site_10: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"mechanism_input","confirmed_ms":33.3,"first_visual_ms":33.3,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":25.9,"first_visual_ms":25.9,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":19.3,"first_visual_ms":19.3,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_10
+PRESS {"action":"move","confirmed_ms":20.5,"first_visual_ms":39.4,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":25.0,"first_visual_ms":5.5,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":19.0,"first_visual_ms":19.0,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":18.5,"first_visual_ms":18.5,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_10
+CHECK ok   lf_site_10: 7.42 s of fight animation on screen before the result text (≥ 4.0), result at 10.10 s
+CHECK FAIL lf_site_10: a visible melee — 0.17 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_10
+PRESS {"action":"defeat_guardian","confirmed_ms":32.9,"first_visual_ms":32.9,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":36.1,"first_visual_ms":49.3,"ok":true}
+CHECK FAIL lf_site_10 (Изломанная терраса): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":26.5,"first_visual_ms":26.5,"ok":true}
+CHECK FAIL lf_site_10: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":22.2,"first_visual_ms":154.5,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":17.6,"first_visual_ms":195.3,"ok":true}
+PRESS {"action":"move","confirmed_ms":29.0,"first_visual_ms":156.0,"ok":true}
+MENACE_DIAG {"battle":"lf_site_10","clip":"Idle","members":3,"move":false,"node":"lf_site_11","pending":null,"rig":true,"site":"lf_site_11","squad_d":2.59999847412109,"state":"ready"}
+CHECK FAIL lf_site_11: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_11: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_11: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":26.3,"first_visual_ms":26.3,"ok":true}
+CHECK FAIL lf_site_11: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"mechanism_input","confirmed_ms":21.5,"first_visual_ms":21.5,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":23.5,"first_visual_ms":23.5,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":12.9,"first_visual_ms":12.9,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_11
+PRESS {"action":"move","confirmed_ms":20.7,"first_visual_ms":30.1,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":22.9,"first_visual_ms":11.0,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":230.1,"first_visual_ms":13.5,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":15.4,"first_visual_ms":15.4,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_11
+CHECK ok   lf_site_11: 7.36 s of fight animation on screen before the result text (≥ 4.0), result at 10.11 s
+CHECK FAIL lf_site_11: a visible melee — 0.18 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_11
+PRESS {"action":"defeat_guardian","confirmed_ms":73.4,"first_visual_ms":73.4,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":23.1,"first_visual_ms":46.4,"ok":true}
+CHECK FAIL lf_site_11 (Речные ступени): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":26.9,"first_visual_ms":26.9,"ok":true}
+CHECK FAIL lf_site_11: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":30.3,"first_visual_ms":169.1,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":17.7,"first_visual_ms":197.3,"ok":true}
+PRESS {"action":"move","confirmed_ms":17.4,"first_visual_ms":150.8,"ok":true}
+MENACE_DIAG {"battle":"lf_site_11","clip":"Idle","members":3,"move":false,"node":"lf_site_12","pending":null,"rig":true,"site":"lf_site_12","squad_d":2.59999847412109,"state":"ready"}
+CHECK FAIL lf_site_12: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+CHECK FAIL lf_site_12: the horse shows fear (-1.00 s)
+CHECK FAIL lf_site_12: the squad takes the guard stance facing the creature (-1.00 s)
+PRESS {"action":"discover","confirmed_ms":23.8,"first_visual_ms":23.8,"ok":true}
+CHECK FAIL lf_site_12: 0/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"occupy_plates","confirmed_ms":30.9,"first_visual_ms":42.3,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":20.8,"first_visual_ms":8.6,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":24.7,"first_visual_ms":9.5,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":22.4,"first_visual_ms":9.6,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_12
+PRESS {"action":"move","confirmed_ms":29.9,"first_visual_ms":16.1,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":13.8,"first_visual_ms":13.8,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":27.3,"first_visual_ms":14.2,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":30.5,"first_visual_ms":30.5,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_12
+CHECK ok   lf_site_12: 7.33 s of fight animation on screen before the result text (≥ 4.0), result at 10.07 s
+CHECK FAIL lf_site_12: a visible melee — 0.13 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+CHECK ok   fight won at lf_site_12
+PRESS {"action":"defeat_guardian","confirmed_ms":21.5,"first_visual_ms":21.5,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":48.4,"first_visual_ms":71.8,"ok":true}
+CHECK FAIL lf_site_12 (Роща старых костей): cage MISSING, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":16.6,"first_visual_ms":16.6,"ok":true}
+CHECK FAIL lf_site_12: the release plays on screen (0.0 s, door still, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":21.5,"first_visual_ms":158.7,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":30.2,"first_visual_ms":174.4,"ok":true}
+CHECK ok   button form_squad: first visual response 26 ms worst (≤ 100) at 0 ms latency
+CHECK FAIL button move: first visual response 200 ms worst (≤ 100) at 0 ms latency
+CHECK ok   button discover_horse: first visual response 12 ms worst (≤ 100) at 0 ms latency
+CHECK ok   button discover: first visual response 30 ms worst (≤ 100) at 0 ms latency
+CHECK ok   button landmark→input: first visual response 48 ms worst (≤ 100) at 0 ms latency
+CHECK ok   button recover_artifact: first visual response 41 ms worst (≤ 100) at 0 ms latency
+CHECK ok   button move→guardian: first visual response 44 ms worst (≤ 100) at 0 ms latency
+CHECK ok   button engage_guardian: first visual response 32 ms worst (≤ 100) at 0 ms latency
+CHECK FAIL button defeat_guardian: first visual response 338 ms worst (≤ 100) at 0 ms latency
+CHECK FAIL button move→cage: first visual response 269 ms worst (≤ 100) at 0 ms latency
+CHECK ok   button unlock_cage: first visual response 67 ms worst (≤ 100) at 0 ms latency
+CHECK FAIL button escort_start: first visual response 188 ms worst (≤ 100) at 0 ms latency
+CHECK FAIL button escort_home: first visual response 234 ms worst (≤ 100) at 0 ms latency
+CHECK ok   button mechanism_input: first visual response 33 ms worst (≤ 100) at 0 ms latency
+CHECK ok   button occupy_plates: first visual response 44 ms worst (≤ 100) at 0 ms latency
+QA_FOREST_1024_REPORT {"cages":{"lf_site_01":{"cage":"oak","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Берёзовая просека","release_scene_s":0.0,"released":false},"lf_site_02":{"cage":"iron","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Каменный карман","release_scene_s":0.0,"released":false},"lf_site_03":{"cage":"root","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Пепельная часовня","release_scene_s":0.0,"released":false},"lf_site_04":{"cage":"oak","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Шёпот елей","release_scene_s":0.0,"released":false},"lf_site_05":{"cage":"iron","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Смоляная низина","release_scene_s":0.0,"released":false},"lf_site_06":{"cage":"root","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Угольный круг","release_scene_s":0.0,"released":false},"lf_site_07":{"cage":"oak","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Ольховый брод","release_scene_s":0.0,"released":false},"lf_site_08":{"cage":"iron","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Травяной лабиринт","release_scene_s":0.0,"released":false},"lf_site_09":{"cage":"root","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Папоротниковый уступ","release_scene_s":0.0,"released":false},"lf_site_10":{"cage":"oak","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Изломанная терраса","release_scene_s":0.0,"released":false},"lf_site_11":{"cage":"iron","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Речные ступени","release_scene_s":0.0,"released":false},"lf_site_12":{"cage":"root","cage_shown":false,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Роща старых костей","release_scene_s":0.0,"released":false}},"checks":155,"cpu":{"fight":{"actors_tick_us":4761.9},"lead_update":{"max_us":0,"mean_us":0.0,"updates":0},"menace":{"actors_tick_us":4762.4},"walk":{"actors_tick_us":6268.1}},"failures":["puzzle: 0 of 24 option symbols have a picture icon (atlas)","fog clears with the squad: worst lag 1.89 s, p95 1.69 s, mean 0.69 s (≤ 0.3)","fog clears with the horse: worst lag 2.15 s, p95 1.89 s, mean 0.92 s (≤ 0.3)","lf_site_01: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_01: the horse shows fear (-1.00 s)","lf_site_01: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_01: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_01: a visible melee — 0.16 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_01 (Берёзовая просека): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_01: the release plays on screen (0.0 s, door still, 3 captives out)","lf_site_02: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_02: the horse shows fear (-1.00 s)","lf_site_02: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_02: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_02: a visible melee — 0.13 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_02 (Каменный карман): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_02: the release plays on screen (0.0 s, door still, 3 captives out)","lf_site_03: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_03: the horse shows fear (-1.00 s)","lf_site_03: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_03: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_03: a visible melee — 0.12 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_03 (Пепельная часовня): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_03: the release plays on screen (0.0 s, door still, 3 captives out)","lf_site_04: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_04: the horse shows fear (-1.00 s)","lf_site_04: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_04: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_04: a visible melee — 0.19 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_04 (Шёпот елей): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_04: the release plays on screen (0.0 s, door still, 3 captives out)","lf_site_05: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_05: the horse shows fear (-1.00 s)","lf_site_05: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_05: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_05: a visible melee — 0.14 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_05 (Смоляная низина): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_05: the release plays on screen (0.0 s, door still, 3 captives out)","lf_site_06: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_06: the horse shows fear (-1.00 s)","lf_site_06: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_06: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_06: a visible melee — 0.12 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_06 (Угольный круг): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_06: the release plays on screen (0.0 s, door still, 3 captives out)","lf_site_07: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_07: the horse shows fear (-1.00 s)","lf_site_07: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_07: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_07: a visible melee — 0.12 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_07 (Ольховый брод): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_07: the release plays on screen (0.0 s, door still, 3 captives out)","lf_site_08: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_08: the horse shows fear (-1.00 s)","lf_site_08: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_08: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_08: a visible melee — 0.16 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_08 (Травяной лабиринт): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_08: the release plays on screen (0.0 s, door still, 3 captives out)","lf_site_09: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_09: the horse shows fear (-1.00 s)","lf_site_09: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_09: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_09: a visible melee — 0.14 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_09 (Папоротниковый уступ): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_09: the release plays on screen (0.0 s, door still, 3 captives out)","lf_site_10: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_10: the horse shows fear (-1.00 s)","lf_site_10: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_10: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_10: a visible melee — 0.17 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_10 (Изломанная терраса): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_10: the release plays on screen (0.0 s, door still, 3 captives out)","lf_site_11: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_11: the horse shows fear (-1.00 s)","lf_site_11: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_11: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_11: a visible melee — 0.18 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_11 (Речные ступени): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_11: the release plays on screen (0.0 s, door still, 3 captives out)","lf_site_12: the creature menaces -1.00 s after the squad arrives (≤ 1.0)","lf_site_12: the horse shows fear (-1.00 s)","lf_site_12: the squad takes the guard stance facing the creature (-1.00 s)","lf_site_12: 0/3 option cards show their picture (≥ 120 px tall)","lf_site_12: a visible melee — 0.13 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death","lf_site_12 (Роща старых костей): cage MISSING, 3/3 captives in it, on screen before the release","lf_site_12: the release plays on screen (0.0 s, door still, 3 captives out)","button move: first visual response 200 ms worst (≤ 100) at 0 ms latency","button defeat_guardian: first visual response 338 ms worst (≤ 100) at 0 ms latency","button move→cage: first visual response 269 ms worst (≤ 100) at 0 ms latency","button escort_start: first visual response 188 ms worst (≤ 100) at 0 ms latency","button escort_home: first visual response 234 ms worst (≤ 100) at 0 ms latency"],"fight":{"lf_site_01":{"animated_s":8.15,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.16,"result_at_s":10.26,"server_s":6.3},"lf_site_02":{"animated_s":8.07,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.13,"result_at_s":10.17,"server_s":6.3},"lf_site_03":{"animated_s":8.07,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.12,"result_at_s":10.17,"server_s":6.3},"lf_site_04":{"animated_s":7.97,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.19,"result_at_s":10.1,"server_s":6.3},"lf_site_05":{"animated_s":7.34,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.14,"result_at_s":9.94,"server_s":6.3},"lf_site_06":{"animated_s":7.52,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.12,"result_at_s":10.14,"server_s":6.3},"lf_site_07":{"animated_s":8.02,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.12,"result_at_s":10.1,"server_s":6.3},"lf_site_08":{"animated_s":7.49,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.16,"result_at_s":10.1,"server_s":6.3},"lf_site_09":{"animated_s":7.66,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.14,"result_at_s":10.24,"server_s":6.3},"lf_site_10":{"animated_s":7.42,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.17,"result_at_s":10.1,"server_s":6.3},"lf_site_11":{"animated_s":7.36,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.18,"result_at_s":10.11,"server_s":6.3},"lf_site_12":{"animated_s":7.33,"beats":["charge","squad_strike","creature_hit","creature_attack","squad_hit","creature_roar","creature_death"],"melee_contact_s":0.13,"result_at_s":10.07,"server_s":6.3}},"fog":{"horse":{"lag_max_s":2.15,"lag_mean_s":0.92,"lag_p95_s":1.89,"samples":53},"move_ms":48441.0,"squad":{"lag_max_s":1.89,"lag_mean_s":0.69,"lag_p95_s":1.69,"samples":53},"walk_s":14.0},"intro":{"first_seen_s":4.99,"halls":{},"horse_frames":1007,"occluded_frames":0,"visible_run_s":6.39},"latency":{"actions":{"defeat_guardian":{"confirmed_ms_max":73.4,"confirmed_ms_median":25.8,"first_visual_ms_max":337.6,"first_visual_ms_median":26.0,"n":12},"discover":{"confirmed_ms_max":30.1,"confirmed_ms_median":24.6,"first_visual_ms_max":30.1,"first_visual_ms_median":24.6,"n":12},"discover_horse":{"confirmed_ms_max":11.7,"confirmed_ms_median":11.7,"first_visual_ms_max":11.7,"first_visual_ms_median":11.7,"n":1},"engage_guardian":{"confirmed_ms_max":33.2,"confirmed_ms_median":20.4,"first_visual_ms_max":31.5,"first_visual_ms_median":15.4,"n":12},"escort_home":{"confirmed_ms_max":38.9,"confirmed_ms_median":22.4,"first_visual_ms_max":233.7,"first_visual_ms_median":195.3,"n":12},"escort_start":{"confirmed_ms_max":41.9,"confirmed_ms_median":24.2,"first_visual_ms_max":187.8,"first_visual_ms_median":122.7,"n":12},"form_squad":{"confirmed_ms_max":11.3,"confirmed_ms_median":11.3,"first_visual_ms_max":26.5,"first_visual_ms_median":26.5,"n":1},"landmark→input":{"confirmed_ms_max":-1,"confirmed_ms_median":-1.0,"first_visual_ms_max":47.7,"first_visual_ms_median":17.9,"n":9},"mechanism_input":{"confirmed_ms_max":33.3,"confirmed_ms_median":23.5,"first_visual_ms_max":33.3,"first_visual_ms_median":21.5,"n":27},"move":{"confirmed_ms_max":37.9,"confirmed_ms_median":21.1,"first_visual_ms_max":199.6,"first_visual_ms_median":47.9,"n":25},"move→cage":{"confirmed_ms_max":254.4,"confirmed_ms_median":23.5,"first_visual_ms_max":269.1,"first_visual_ms_median":46.4,"n":12},"move→guardian":{"confirmed_ms_max":230.1,"confirmed_ms_median":23.5,"first_visual_ms_max":43.7,"first_visual_ms_median":19.0,"n":12},"occupy_plates":{"confirmed_ms_max":30.9,"confirmed_ms_median":30.5,"first_visual_ms_max":44.3,"first_visual_ms_median":42.3,"n":3},"recover_artifact":{"confirmed_ms_max":40.7,"confirmed_ms_median":23.5,"first_visual_ms_max":40.7,"first_visual_ms_median":19.8,"n":12},"unlock_cage":{"confirmed_ms_max":67.3,"confirmed_ms_median":26.5,"first_visual_ms_max":67.3,"first_visual_ms_median":26.5,"n":12}},"latency_ms":0},"menace":{"lf_site_01":{"approach_s":0.0,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0},"lf_site_02":{"approach_s":2.78,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0},"lf_site_03":{"approach_s":2.53,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0},"lf_site_04":{"approach_s":1.8,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0},"lf_site_05":{"approach_s":2.64,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0},"lf_site_06":{"approach_s":2.32,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0},"lf_site_07":{"approach_s":1.44,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0},"lf_site_08":{"approach_s":2.65,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0},"lf_site_09":{"approach_s":2.3,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0},"lf_site_10":{"approach_s":1.69,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0},"lf_site_11":{"approach_s":2.58,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0},"lf_site_12":{"approach_s":2.34,"guardian":"alive","horse_fear_s":-1.0,"menace_s":-1.0,"squad_guard_s":-1.0}},"puzzle":{"pictures":0,"symbols":24},"server_cpu":{"GET state":{"max_ms":91.5,"median_ms":3.8,"n":265},"POST command":{"max_ms":3.4,"median_ms":3.4,"n":1},"POST new":{"max_ms":16.9,"median_ms":16.9,"n":2},"attempt_task":{"max_ms":60.2,"median_ms":5.5,"n":60},"discover_horse":{"max_ms":3.3,"median_ms":3.3,"n":1},"engage_guardian":{"max_ms":5.8,"median_ms":4.2,"n":12},"escort_start":{"max_ms":21.8,"median_ms":7.2,"n":12},"finish_intro":{"max_ms":3.3,"median_ms":3.3,"n":1},"form_squad":{"max_ms":2.4,"median_ms":2.4,"n":1},"mechanism_input":{"max_ms":10.8,"median_ms":5.0,"n":36},"move":{"max_ms":135.1,"median_ms":5.1,"n":58},"occupy_plates":{"max_ms":14.1,"median_ms":6.9,"n":3},"start_intro":{"max_ms":2.9,"median_ms":2.9,"n":1}}}
+QA_FOREST_1024 checks=155 failures=92
+  FAIL puzzle: 0 of 24 option symbols have a picture icon (atlas)
+  FAIL fog clears with the squad: worst lag 1.89 s, p95 1.69 s, mean 0.69 s (≤ 0.3)
+  FAIL fog clears with the horse: worst lag 2.15 s, p95 1.89 s, mean 0.92 s (≤ 0.3)
+  FAIL lf_site_01: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_01: the horse shows fear (-1.00 s)
+  FAIL lf_site_01: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_01: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_01: a visible melee — 0.16 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_01 (Берёзовая просека): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_01: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL lf_site_02: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_02: the horse shows fear (-1.00 s)
+  FAIL lf_site_02: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_02: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_02: a visible melee — 0.13 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_02 (Каменный карман): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_02: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL lf_site_03: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_03: the horse shows fear (-1.00 s)
+  FAIL lf_site_03: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_03: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_03: a visible melee — 0.12 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_03 (Пепельная часовня): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_03: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL lf_site_04: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_04: the horse shows fear (-1.00 s)
+  FAIL lf_site_04: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_04: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_04: a visible melee — 0.19 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_04 (Шёпот елей): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_04: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL lf_site_05: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_05: the horse shows fear (-1.00 s)
+  FAIL lf_site_05: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_05: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_05: a visible melee — 0.14 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_05 (Смоляная низина): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_05: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL lf_site_06: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_06: the horse shows fear (-1.00 s)
+  FAIL lf_site_06: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_06: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_06: a visible melee — 0.12 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_06 (Угольный круг): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_06: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL lf_site_07: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_07: the horse shows fear (-1.00 s)
+  FAIL lf_site_07: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_07: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_07: a visible melee — 0.12 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_07 (Ольховый брод): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_07: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL lf_site_08: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_08: the horse shows fear (-1.00 s)
+  FAIL lf_site_08: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_08: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_08: a visible melee — 0.16 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_08 (Травяной лабиринт): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_08: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL lf_site_09: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_09: the horse shows fear (-1.00 s)
+  FAIL lf_site_09: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_09: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_09: a visible melee — 0.14 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_09 (Папоротниковый уступ): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_09: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL lf_site_10: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_10: the horse shows fear (-1.00 s)
+  FAIL lf_site_10: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_10: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_10: a visible melee — 0.17 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_10 (Изломанная терраса): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_10: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL lf_site_11: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_11: the horse shows fear (-1.00 s)
+  FAIL lf_site_11: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_11: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_11: a visible melee — 0.18 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_11 (Речные ступени): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_11: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL lf_site_12: the creature menaces -1.00 s after the squad arrives (≤ 1.0)
+  FAIL lf_site_12: the horse shows fear (-1.00 s)
+  FAIL lf_site_12: the squad takes the guard stance facing the creature (-1.00 s)
+  FAIL lf_site_12: 0/3 option cards show their picture (≥ 120 px tall)
+  FAIL lf_site_12: a visible melee — 0.13 s in contact (< 3 m, ≥ 2.0), beats charge,squad_strike,creature_hit,creature_attack,squad_hit,creature_roar,creature_death
+  FAIL lf_site_12 (Роща старых костей): cage MISSING, 3/3 captives in it, on screen before the release
+  FAIL lf_site_12: the release plays on screen (0.0 s, door still, 3 captives out)
+  FAIL button move: first visual response 200 ms worst (≤ 100) at 0 ms latency
+  FAIL button defeat_guardian: first visual response 338 ms worst (≤ 100) at 0 ms latency
+  FAIL button move→cage: first visual response 269 ms worst (≤ 100) at 0 ms latency
+  FAIL button escort_start: first visual response 188 ms worst (≤ 100) at 0 ms latency
+  FAIL button escort_home: first visual response 234 ms worst (≤ 100) at 0 ms latency
+EXIT 1

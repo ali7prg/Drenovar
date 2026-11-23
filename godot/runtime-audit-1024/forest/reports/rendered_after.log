@@ -1,0 +1,36 @@
+CHECK ok   forest game layer loaded lazily after the launch
+CHECK ok   forest world layer attached by itself after the city
+CHECK ok   forest unlocked
+CHECK ok   puzzle: 24 of 24 option symbols have a picture icon (atlas)
+CHECK ok   hall intro plays
+INTRO_DIAG {"intro_horse":false,"intro_t":1.8,"pos":"(-18.0, 6.7, -55.0)","rig":true,"screen":"(861.0, -30.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":false,"state":"ready","t":1.0,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.8,"pos":"(-18.0, 6.7, -55.0)","rig":true,"screen":"(840.0, 12.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.0,"target":"(-0.6, 1.5, -16.0)","zoom":64.5}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.8,"pos":"(-18.0, 6.7, -55.0)","rig":true,"screen":"(750.0, 190.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.0,"target":"(-14.3, 5.2, -45.3)","zoom":48.1}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.8,"pos":"(-18.0, 6.7, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.0,"target":"(-19.9, 6.7, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.8,"pos":"(-21.3, 6.8, -59.2)","rig":true,"screen":"(687.0, 279.0)","seen":{"fog":0.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":5.0,"target":"(-19.9, 6.7, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.8,"pos":"(-20.0, 6.7, -57.5)","rig":true,"screen":"(683.0, 301.0)","seen":{"fog":0.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":6.0,"target":"(-19.9, 6.7, -57.3)","zoom":40.0}
+INTRO_BLOCKERS {"blockers":[],"p":"(-19.97217, 8.007749, -57.46521)","spots":"{ \"horse\": (-18.0, 6.674471, -55.0), \"squad\": (-16.25085, 6.674471, -52.81357), \"out\": (-0.624695, 0.0, -0.780869), \"shifted\": true }"}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.8,"pos":"(-18.6, 6.7, -55.8)","rig":true,"screen":"(679.0, 322.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.0,"target":"(-19.9, 6.7, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.8,"pos":"(-18.0, 6.7, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.0,"target":"(-19.9, 6.7, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.8,"pos":"(-18.0, 6.7, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.0,"target":"(-19.9, 6.7, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.8,"pos":"(-18.0, 6.7, -55.0)","rig":true,"screen":"(755.0, 180.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.0,"target":"(-11.1, 4.3, -38.6)","zoom":48.7}
+INTRO_BLOCKERS {"blockers":[],"p":"(-18.0, 7.974471, -55.0)","spots":"{ \"horse\": (-18.0, 6.674471, -55.0), \"squad\": (-16.25085, 6.674471, -52.81357), \"out\": (-0.624695, 0.0, -0.780869), \"shifted\": true }"}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.8,"pos":"(-18.0, 6.7, -55.0)","rig":true,"screen":"(855.0, -18.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":false,"state":"ready","t":11.0,"target":"(4.3, 0.2, -5.5)","zoom":68.3}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.8,"pos":"(-18.0, 6.7, -55.0)","rig":true,"screen":"(861.0, -30.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":false,"state":"ready","t":12.0,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+CHECK ok   intro: the horse is on screen, unoccluded and out of the fog for 3.60 s in a row (≥ 1.5)
+CHECK ok   fog clears with the squad: worst lag 0.00 s, p95 0.00 s, mean 0.00 s (≤ 0.3)
+CHECK ok   fog clears with the horse: worst lag 0.00 s, p95 0.00 s, mean 0.00 s (≤ 0.3)
+CHECK ok   lf_site_01: the creature menaces 0.20 s after the squad arrives (≤ 1.0)
+CHECK ok   lf_site_01: the horse shows fear (1.20 s)
+CHECK ok   lf_site_01: the squad takes the guard stance facing the creature (0.47 s)
+CHECK ok   lf_site_01: 3/3 option cards show their picture (≥ 120 px tall)
+CHECK FAIL mechanism solved through the UI lf_site_01
+CHECK ok   lf_site_01: 3/3 option cards show their picture (≥ 120 px tall)
+CHECK ok   mechanism solved through the UI lf_site_01
+CHECK ok   fight with a server timeline at lf_site_01
+CHECK ok   lf_site_01: 4.80 s of fight animation on screen before the result text (≥ 4.0), result at 6.07 s
+CHECK ok   lf_site_01: a visible melee — 4.27 s in contact (< 3 m, ≥ 2.0), beats creature_roar,charge,creature_hit,squad_strike,creature_attack,squad_hit,creature_death
+CHECK ok   fight won at lf_site_01
+CHECK ok   lf_site_01 (Берёзовая просека): cage shown, 3/3 captives in it, on screen before the release
+CHECK ok   lf_site_01: the release plays on screen (12.0 s, door opened, 3 captives out)
+QA_FOREST_1024 checks=35 failures=7

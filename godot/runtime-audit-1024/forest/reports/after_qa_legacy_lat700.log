@@ -1,0 +1,201 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+CHECK ok   forest game layer loaded lazily after the launch
+ForestQuarry: 2 items (terraces + crane) r0=16.4
+ForestWorld: ready { &"data": 135.419, &"terrain": 2764.14, &"tiles": 78.812, &"impostors": 301.354, &"visuals": 1203.594, &"total": 4459.765 } kit=0 missing kit assets
+CHECK ok   forest world layer attached by itself after the city
+CHECK ok   forest unlocked
+CHECK ok   puzzle: 24 of 24 option symbols have a picture icon (atlas)
+CHECK ok   hall intro plays
+INTRO_DIAG {"intro_horse":false,"intro_t":0.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":0.5,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":0.6,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":0.7,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":0.8,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":0.9,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.0,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_BLOCKERS {"blockers":[],"p":"(-8.0, 8.08323, -55.0)","spots":"{ \"horse\": (-8.0, 6.78323, -55.0), \"squad\": (-10.0, 6.708318, -53.0), \"out\": (-0.624695, 0.0, -0.780869), \"shifted\": false }"}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.1,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.3,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":1.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.4,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.5,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_BLOCKERS {"blockers":[],"p":"(-8.0, 8.08323, -55.0)","spots":"{ \"horse\": (-8.0, 6.78323, -55.0), \"squad\": (-10.0, 6.708318, -53.0), \"out\": (-0.624695, 0.0, -0.780869), \"shifted\": false }"}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.6,"target":"(4.9, 0.0, -4.2)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(923.0, 11.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.7,"target":"(4.8, 0.1, -4.8)","zoom":69.7}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(921.0, 14.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.8,"target":"(4.4, 0.3, -6.0)","zoom":69.2}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(917.0, 19.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":1.9,"target":"(4.0, 0.4, -7.5)","zoom":68.4}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(906.0, 33.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.2,"target":"(2.8, 1.0, -12.0)","zoom":66.3}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(898.0, 44.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.3,"target":"(2.0, 1.4, -14.7)","zoom":64.7}
+INTRO_DIAG {"intro_horse":false,"intro_t":2.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(889.0, 56.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":2.4,"target":"(1.2, 1.7, -17.6)","zoom":63.1}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(872.0, 77.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":2.6,"target":"(-0.2, 2.4, -22.6)","zoom":60.4}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(857.0, 98.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":2.7,"target":"(-1.4, 2.9, -26.8)","zoom":58.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(844.0, 114.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":2.8,"target":"(-2.2, 3.3, -30.0)","zoom":56.2}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(831.0, 131.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":2.9,"target":"(-3.1, 3.7, -33.1)","zoom":54.5}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(811.0, 158.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.1,"target":"(-4.4, 4.3, -37.6)","zoom":52.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(793.0, 181.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.2,"target":"(-5.3, 4.7, -41.0)","zoom":50.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(778.0, 201.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.3,"target":"(-6.1, 5.1, -43.8)","zoom":48.4}
+INTRO_DIAG {"intro_horse":false,"intro_t":3.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(760.0, 224.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.4,"target":"(-6.9, 5.4, -46.8)","zoom":46.7}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(744.0, 246.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.5,"target":"(-7.6, 5.8, -49.3)","zoom":45.2}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(727.0, 267.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.6,"target":"(-8.3, 6.1, -51.7)","zoom":43.8}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(713.0, 285.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.7,"target":"(-8.8, 6.3, -53.6)","zoom":42.6}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(700.0, 302.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.8,"target":"(-9.3, 6.5, -55.2)","zoom":41.6}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(690.0, 315.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":3.9,"target":"(-9.6, 6.7, -56.3)","zoom":40.9}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(683.0, 325.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.0,"target":"(-9.8, 6.7, -57.1)","zoom":40.3}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(679.0, 330.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.1,"target":"(-9.900001, 6.8, -57.3)","zoom":40.1}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 331.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.2,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.3,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":4.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.5,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.0,"pos":"(-12.4, 6.8, -60.4)","rig":true,"screen":"(690.0, 265.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.6,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.1,"pos":"(-12.3, 6.8, -60.3)","rig":true,"screen":"(690.0, 266.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.7,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.2,"pos":"(-12.2, 6.8, -60.2)","rig":true,"screen":"(689.0, 268.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.8,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.3,"pos":"(-12.0, 6.8, -60.0)","rig":true,"screen":"(689.0, 270.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":4.9,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.4,"pos":"(-11.9, 6.8, -59.8)","rig":true,"screen":"(689.0, 272.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.0,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.5,"pos":"(-11.7, 6.8, -59.7)","rig":true,"screen":"(688.0, 274.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.1,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.6,"pos":"(-11.6, 6.8, -59.5)","rig":true,"screen":"(688.0, 276.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.2,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.8,"pos":"(-11.4, 6.8, -59.3)","rig":true,"screen":"(687.0, 279.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.3,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":5.9,"pos":"(-11.3, 6.8, -59.1)","rig":true,"screen":"(687.0, 281.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.4,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.0,"pos":"(-11.2, 6.8, -59.0)","rig":true,"screen":"(687.0, 283.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.5,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.1,"pos":"(-11.0, 6.8, -58.8)","rig":true,"screen":"(686.0, 285.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.6,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.2,"pos":"(-10.9, 6.8, -58.6)","rig":true,"screen":"(686.0, 287.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.7,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.3,"pos":"(-10.7, 6.8, -58.4)","rig":true,"screen":"(685.0, 290.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.8,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.4,"pos":"(-10.6, 6.8, -58.2)","rig":true,"screen":"(685.0, 292.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":5.9,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.5,"pos":"(-10.5, 6.8, -58.1)","rig":true,"screen":"(685.0, 294.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.0,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.6,"pos":"(-10.3, 6.8, -57.9)","rig":true,"screen":"(684.0, 296.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.1,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.7,"pos":"(-10.2, 6.8, -57.7)","rig":true,"screen":"(684.0, 298.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.2,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.8,"pos":"(-10.0, 6.8, -57.5)","rig":true,"screen":"(683.0, 300.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.3,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":6.9,"pos":"(-9.900001, 6.8, -57.4)","rig":true,"screen":"(683.0, 302.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.4,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.0,"pos":"(-9.8, 6.8, -57.2)","rig":true,"screen":"(683.0, 305.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.5,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.1,"pos":"(-9.6, 6.8, -57.0)","rig":true,"screen":"(682.0, 307.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.6,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.2,"pos":"(-9.5, 6.8, -56.8)","rig":true,"screen":"(682.0, 309.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.7,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.3,"pos":"(-9.3, 6.8, -56.7)","rig":true,"screen":"(681.0, 311.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.8,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.4,"pos":"(-9.2, 6.8, -56.5)","rig":true,"screen":"(681.0, 313.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":6.9,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.5,"pos":"(-9.0, 6.8, -56.3)","rig":true,"screen":"(681.0, 315.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.0,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.6,"pos":"(-8.900001, 6.8, -56.1)","rig":true,"screen":"(680.0, 318.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.1,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.7,"pos":"(-8.8, 6.8, -56.0)","rig":true,"screen":"(680.0, 320.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.3,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.8,"pos":"(-8.6, 6.8, -55.8)","rig":true,"screen":"(680.0, 322.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.4,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":7.9,"pos":"(-8.5, 6.8, -55.6)","rig":true,"screen":"(679.0, 324.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.5,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.0,"pos":"(-8.3, 6.8, -55.4)","rig":true,"screen":"(679.0, 326.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.6,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.1,"pos":"(-8.2, 6.8, -55.2)","rig":true,"screen":"(678.0, 329.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.7,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.2,"pos":"(-8.1, 6.8, -55.1)","rig":true,"screen":"(678.0, 331.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.8,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 331.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":7.9,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 331.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.0,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.1,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.2,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.3,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":8.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.4,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.5,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.6,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.7,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.8,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":8.9,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.0,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.1,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.2,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.3,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":9.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.4,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(678.0, 332.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.5,"target":"(-9.900001, 6.8, -57.3)","zoom":40.0}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(679.0, 330.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.6,"target":"(-9.8, 6.7, -56.9)","zoom":40.1}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(686.0, 321.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.7,"target":"(-9.400001, 6.6, -55.7)","zoom":40.6}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.3,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(698.0, 305.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":9.9,"target":"(-8.900001, 6.3, -53.8)","zoom":41.5}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(714.0, 284.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.0,"target":"(-8.2, 6.0, -51.3)","zoom":42.7}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(733.0, 259.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.1,"target":"(-7.4, 5.6, -48.4)","zoom":44.3}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(754.0, 232.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.2,"target":"(-6.4, 5.2, -45.0)","zoom":46.1}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(775.0, 205.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.3,"target":"(-5.4, 4.7, -41.2)","zoom":48.1}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(795.0, 178.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.4,"target":"(-4.3, 4.2, -37.3)","zoom":50.2}
+INTRO_DIAG {"intro_horse":true,"intro_t":10.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(815.0, 152.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.5,"target":"(-3.1, 3.7, -33.2)","zoom":52.5}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(833.0, 128.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.6,"target":"(-2.0, 3.2, -29.1)","zoom":54.8}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(850.0, 106.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.7,"target":"(-0.8, 2.7, -25.0)","zoom":57.1}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(866.0, 86.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.8,"target":"(0.3, 2.2, -21.0)","zoom":59.4}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.4,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(880.0, 68.0)","seen":{"fog":1.0,"occluded":false,"seen":true},"shown":true,"state":"ready","t":10.9,"target":"(1.3, 1.7, -17.2)","zoom":61.6}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(892.0, 52.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.0,"target":"(2.3, 1.2, -13.7)","zoom":63.6}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(902.0, 39.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.1,"target":"(3.2, 0.8, -10.6)","zoom":65.5}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(910.0, 28.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.2,"target":"(3.9, 0.5, -8.0)","zoom":67.1}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.8,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(917.0, 19.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.3,"target":"(4.4, 0.3, -6.0)","zoom":68.4}
+INTRO_DIAG {"intro_horse":true,"intro_t":11.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(921.0, 13.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.4,"target":"(4.8, 0.1, -4.6)","zoom":69.3}
+INTRO_DIAG {"intro_horse":true,"intro_t":12.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(924.0, 10.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.5,"target":"(5.0, 0.0, -4.0)","zoom":69.8}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.6,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.2,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":1.0,"occluded":false,"seen":false},"shown":true,"state":"ready","t":11.7,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.5,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.0,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.6,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.2,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.7,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.3,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":12.9,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.4,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":13.0,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.5,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+INTRO_DIAG {"intro_horse":false,"intro_t":13.1,"pos":"(-8.0, 6.8, -55.0)","rig":true,"screen":"(925.0, 9.0)","seen":{"fog":0.997455806564672,"occluded":false,"seen":false},"shown":true,"state":"ready","t":12.6,"target":"(5.0, 0.0, -4.0)","zoom":70.0}
+CHECK ok   intro: the horse is on screen, unoccluded and out of the fog for 6.38 s in a row (≥ 1.5)
+PRESS {"action":"form_squad","confirmed_ms":710.9,"first_visual_ms":9.1,"ok":true}
+PRESS {"action":"move","confirmed_ms":715.2,"first_visual_ms":16.6,"ok":true}
+PRESS {"action":"discover_horse","confirmed_ms":717.5,"first_visual_ms":0.7,"ok":true}
+PRESS {"action":"move","confirmed_ms":728.8,"first_visual_ms":12.6,"ok":true}
+CHECK ok   fog clears with the squad: worst lag 0.00 s, p95 0.00 s, mean 0.00 s (≤ 0.3)
+CHECK ok   fog clears with the horse: worst lag 0.00 s, p95 0.00 s, mean 0.00 s (≤ 0.3)
+CHECK ok   lf_site_01: the creature menaces 0.01 s after the squad arrives (≤ 1.0)
+CHECK ok   lf_site_01: the horse shows fear (0.01 s)
+CHECK ok   lf_site_01: the squad takes the guard stance facing the creature (0.46 s)
+PRESS {"action":"discover","confirmed_ms":720.5,"first_visual_ms":0.8,"ok":true}
+CHECK ok   lf_site_01: 3/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"landmark→input","confirmed_ms":711.3,"first_visual_ms":0.4,"ok":true}
+PRESS {"action":"landmark→input","confirmed_ms":727.0,"first_visual_ms":0.3,"ok":true}
+PRESS {"action":"landmark→input","confirmed_ms":728.2,"first_visual_ms":0.4,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_01
+PRESS {"action":"move","confirmed_ms":715.0,"first_visual_ms":0.5,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":727.8,"first_visual_ms":0.7,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":733.8,"first_visual_ms":0.3,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":716.9,"first_visual_ms":11.2,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_01
+CHECK ok   lf_site_01: 8.75 s of fight animation on screen before the result text (≥ 4.0), result at 9.95 s
+CHECK ok   lf_site_01: a visible melee — 4.37 s in contact (< 3 m, ≥ 2.0), beats creature_roar,charge,creature_hit,squad_strike,creature_attack,squad_hit,creature_death
+CHECK ok   fight won at lf_site_01
+PRESS {"action":"defeat_guardian","confirmed_ms":722.2,"first_visual_ms":0.7,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":718.4,"first_visual_ms":13.5,"ok":true}
+CHECK ok   lf_site_01 (Берёзовая просека): cage shown, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":722.2,"first_visual_ms":0.9,"ok":true}
+CHECK ok   lf_site_01: the release plays on screen (12.0 s, door opened, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":802.2,"first_visual_ms":18.7,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":715.9,"first_visual_ms":1.0,"ok":true}
+PRESS {"action":"move","confirmed_ms":737.8,"first_visual_ms":8.9,"ok":true}
+CHECK ok   lf_site_02: the creature menaces 0.02 s after the squad arrives (≤ 1.0)
+CHECK ok   lf_site_02: the horse shows fear (0.02 s)
+CHECK ok   lf_site_02: the squad takes the guard stance facing the creature (0.40 s)
+PRESS {"action":"discover","confirmed_ms":717.5,"first_visual_ms":1.0,"ok":true}
+CHECK ok   lf_site_02: 3/3 option cards show their picture (≥ 120 px tall)
+PRESS {"action":"mechanism_input","confirmed_ms":720.0,"first_visual_ms":0.3,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":723.3,"first_visual_ms":0.3,"ok":true}
+PRESS {"action":"mechanism_input","confirmed_ms":765.5,"first_visual_ms":0.2,"ok":true}
+CHECK ok   mechanism solved through the UI lf_site_02
+PRESS {"action":"move","confirmed_ms":721.4,"first_visual_ms":15.3,"ok":true}
+PRESS {"action":"recover_artifact","confirmed_ms":722.6,"first_visual_ms":4.9,"ok":true}
+PRESS {"action":"move→guardian","confirmed_ms":726.3,"first_visual_ms":0.4,"ok":true}
+PRESS {"action":"engage_guardian","confirmed_ms":725.0,"first_visual_ms":8.4,"ok":true}
+CHECK ok   fight with a server timeline at lf_site_02
+CHECK ok   lf_site_02: 9.01 s of fight animation on screen before the result text (≥ 4.0), result at 10.20 s
+CHECK ok   lf_site_02: a visible melee — 4.33 s in contact (< 3 m, ≥ 2.0), beats creature_roar,charge,creature_hit,squad_strike,creature_attack,squad_hit,creature_death
+CHECK ok   fight won at lf_site_02
+PRESS {"action":"defeat_guardian","confirmed_ms":727.2,"first_visual_ms":0.7,"ok":true}
+PRESS {"action":"move→cage","confirmed_ms":734.2,"first_visual_ms":14.0,"ok":true}
+CHECK ok   lf_site_02 (Каменный карман): cage shown, 3/3 captives in it, on screen before the release
+PRESS {"action":"unlock_cage","confirmed_ms":753.0,"first_visual_ms":2.3,"ok":true}
+CHECK ok   lf_site_02: the release plays on screen (12.0 s, door opened, 3 captives out)
+PRESS {"action":"escort_start","confirmed_ms":758.9,"first_visual_ms":8.0,"ok":true}
+PRESS {"action":"escort_home","confirmed_ms":731.6,"first_visual_ms":5.2,"ok":true}
+CHECK ok   intro spot, hall 2: the mare's spot is in view (origin free, shift 0.0 m)
+CHECK ok   intro spot, hall 3: the mare's spot is in view (origin free, shift 0.0 m)
+CHECK ok   intro spot, hall 4: the mare's spot is in view (origin free, shift 0.0 m)
+CHECK ok   intro spot, hall 5: the mare's spot is in view (origin free, shift 0.0 m)
+CHECK ok   intro spot with a tower in_front: origin hidden true → the mare's spot moves 5.0 m into view (spot hidden false, squad hidden false, 1.46 ms)
+CHECK ok   intro spot with a tower on_origin: origin hidden true → the mare's spot moves 5.0 m into view (spot hidden false, squad hidden false, 1.66 ms)
+CHECK ok   button form_squad: first visual response 9 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button move: first visual response 17 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button discover_horse: first visual response 1 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button discover: first visual response 1 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button landmark→input: first visual response 0 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button recover_artifact: first visual response 5 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button move→guardian: first visual response 0 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button engage_guardian: first visual response 11 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button defeat_guardian: first visual response 1 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button move→cage: first visual response 14 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button unlock_cage: first visual response 2 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button escort_start: first visual response 19 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button escort_home: first visual response 5 ms worst (≤ 100) at 700 ms latency
+CHECK ok   button mechanism_input: first visual response 0 ms worst (≤ 100) at 700 ms latency
+QA_FOREST_1024_REPORT {"cages":{"lf_site_01":{"cage":"oak","cage_shown":true,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Берёзовая просека","release_scene_s":12.0,"released":true},"lf_site_02":{"cage":"iron","cage_shown":true,"captives":3,"captives_in_cage_shown":3,"fog_clear":true,"name":"Каменный карман","release_scene_s":12.0,"released":true}},"checks":50,"cpu":{"fight":{"actors_tick_us":4794.6,"origin_usec":1317,"predict_usec":12},"lead_update":{"max_us":4329,"mean_us":325.7,"updates":68},"menace":{"actors_tick_us":4569.8,"origin_usec":1317,"predict_usec":1082},"walk":{"actors_tick_us":7963.7,"origin_usec":1317,"predict_usec":1082}},"failures":[],"fight":{"lf_site_01":{"animated_s":8.75,"beats":["creature_roar","charge","creature_hit","squad_strike","creature_attack","squad_hit","creature_death"],"melee_contact_s":4.37,"result_at_s":9.95,"server_s":6.3},"lf_site_02":{"animated_s":9.01,"beats":["creature_roar","charge","creature_hit","squad_strike","creature_attack","squad_hit","creature_death"],"melee_contact_s":4.33,"result_at_s":10.2,"server_s":6.3}},"fog":{"horse":{"lag_max_s":0.0,"lag_mean_s":0.0,"lag_p95_s":0.0,"samples":53},"move_ms":48441.0,"squad":{"lag_max_s":0.0,"lag_mean_s":0.0,"lag_p95_s":0.0,"samples":53},"walk_s":14.0},"intro":{"first_seen_s":4.55,"halls":{"2":{"origin_hidden":false,"search_ms":1.18,"shift_m":0.0,"spot_hidden":false,"squad_spot_hidden":false},"3":{"origin_hidden":false,"search_ms":1.1,"shift_m":0.0,"spot_hidden":false,"squad_spot_hidden":false},"4":{"origin_hidden":false,"search_ms":1.14,"shift_m":0.0,"spot_hidden":false,"squad_spot_hidden":false},"5":{"origin_hidden":false,"search_ms":1.18,"shift_m":0.0,"spot_hidden":false,"squad_spot_hidden":false}},"horse_frames":1011,"occluded_frames":0,"origin_hidden":false,"spot_search_ms":1.32,"spot_shift_m":0.0,"synthetic_tower":{"in_front":{"origin_hidden":true,"search_ms":1.46,"shift_m":5.0,"spot_hidden":false,"squad_spot_hidden":false},"on_origin":{"origin_hidden":true,"search_ms":1.66,"shift_m":5.0,"spot_hidden":false,"squad_spot_hidden":false}},"visible_run_s":6.38},"latency":{"actions":{"defeat_guardian":{"confirmed_ms_max":727.2,"confirmed_ms_median":727.2,"first_visual_ms_max":0.7,"first_visual_ms_median":0.7,"n":2},"discover":{"confirmed_ms_max":720.5,"confirmed_ms_median":720.5,"first_visual_ms_max":1.0,"first_visual_ms_median":1.0,"n":2},"discover_horse":{"confirmed_ms_max":717.5,"confirmed_ms_median":717.5,"first_visual_ms_max":0.7,"first_visual_ms_median":0.7,"n":1},"engage_guardian":{"confirmed_ms_max":725.0,"confirmed_ms_median":725.0,"first_visual_ms_max":11.2,"first_visual_ms_median":11.2,"n":2},"escort_home":{"confirmed_ms_max":731.6,"confirmed_ms_median":731.6,"first_visual_ms_max":5.2,"first_visual_ms_median":5.2,"n":2},"escort_start":{"confirmed_ms_max":802.2,"confirmed_ms_median":802.2,"first_visual_ms_max":18.7,"first_visual_ms_median":18.7,"n":2},"form_squad":{"confirmed_ms_max":710.9,"confirmed_ms_median":710.9,"first_visual_ms_max":9.1,"first_visual_ms_median":9.1,"n":1},"landmark→input":{"confirmed_ms_max":-1,"confirmed_ms_median":-1.0,"first_visual_ms_max":0.4,"first_visual_ms_median":0.4,"n":3},"mechanism_input":{"confirmed_ms_max":765.5,"confirmed_ms_median":723.3,"first_visual_ms_max":0.3,"first_visual_ms_median":0.3,"n":3},"move":{"confirmed_ms_max":737.8,"confirmed_ms_median":721.4,"first_visual_ms_max":16.6,"first_visual_ms_median":12.6,"n":5},"move→cage":{"confirmed_ms_max":734.2,"confirmed_ms_median":734.2,"first_visual_ms_max":14.0,"first_visual_ms_median":14.0,"n":2},"move→guardian":{"confirmed_ms_max":733.8,"confirmed_ms_median":733.8,"first_visual_ms_max":0.4,"first_visual_ms_median":0.4,"n":2},"recover_artifact":{"confirmed_ms_max":727.8,"confirmed_ms_median":727.8,"first_visual_ms_max":4.9,"first_visual_ms_median":4.9,"n":2},"unlock_cage":{"confirmed_ms_max":753.0,"confirmed_ms_median":753.0,"first_visual_ms_max":2.3,"first_visual_ms_median":2.3,"n":2}},"latency_ms":700},"menace":{"lf_site_01":{"approach_s":0.0,"guardian":"alive","horse_fear_s":0.01,"menace_s":0.01,"squad_guard_s":0.46},"lf_site_02":{"approach_s":0.0,"guardian":"alive","horse_fear_s":0.02,"menace_s":0.02,"squad_guard_s":0.4}},"puzzle":{"pictures":24,"symbols":24},"server_cpu":{"GET state":{"max_ms":60.3,"median_ms":3.6,"n":74},"POST command":{"max_ms":3.6,"median_ms":3.6,"n":1},"POST new":{"max_ms":12.1,"median_ms":12.1,"n":2},"attempt_task":{"max_ms":11.8,"median_ms":7.5,"n":10},"discover_horse":{"max_ms":2.7,"median_ms":2.7,"n":1},"engage_guardian":{"max_ms":5.3,"median_ms":5.3,"n":2},"escort_start":{"max_ms":6.8,"median_ms":6.8,"n":2},"finish_intro":{"max_ms":3.0,"median_ms":3.0,"n":1},"form_squad":{"max_ms":3.7,"median_ms":3.7,"n":1},"mechanism_input":{"max_ms":6.8,"median_ms":4.7,"n":6},"move":{"max_ms":9.1,"median_ms":6.1,"n":12},"start_intro":{"max_ms":2.7,"median_ms":2.7,"n":1}}}
+QA_FOREST_1024 checks=50 failures=0
+EXIT 0

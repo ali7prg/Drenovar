@@ -20,6 +20,21 @@ const BOSS_TARGET := "lf_boss_ancient_maw"
 const HORSE_TARGET := "lf_horse_origin"
 const HOME_TARGET := "lf_home_reception"
 
+## Build 1024 sound hooks (the audio stage connects to them; nothing listens yet). Each fires at the
+## moment its sound belongs to: the mare's fear neigh, a creature's roar (menace or a telegraphed
+## ability), each contact of a fight (squad → guardian, guardian → squad, a death), the cage gate
+## swinging open, a press of an adventure command.
+signal horse_feared(site_id: String)
+signal creature_roared(site_id: String, species: String)
+signal fight_hit(site_id: String, attacker: String, target: String)
+signal cage_opened(site_id: String)
+signal button_pressed(action: String)
+
+## Build 1024: a command taking longer than this shows the small «sending» dots on «Продолжить».
+const SENDING_HINT_MS := 1500
+## Round-trip estimate (ms) of adventure commands (exponential average; diagnostics).
+var command_rtt_ms := 0.0
+
 var main: Node
 var content: Content
 var client: Client
@@ -485,7 +500,8 @@ func schedule_settle_poll() -> void:
 	if settle == INF:
 		return
 	var now := client.server_now()
-	if now < settle + 250.0:
+	# 1024: 60 ms (was 250): the client clock already trails the server's by half a round trip.
+	if now < settle + 60.0:
 		return
 	var ticks := Time.get_ticks_msec()
 	if settle_polled_for == settle and ticks - settle_poll_ticks < 1500:
@@ -580,6 +596,11 @@ func guide() -> Dictionary:
 	var units: Dictionary = squad.get("units", {})
 	var node := String(squad.get("node", ""))
 	var moving: bool = squad.get("move") is Dictionary
+	# 1024: a walk whose arrival time has passed counts as arrived (the next command settles it on the
+	# server first) instead of waiting for the next state read — no dead second after every walk.
+	if moving and arrived_locally(squad.move):
+		moving = false
+		node = String(squad.move.get("targetId", node))
 	var busy: Variant = squad.get("busy")
 	var current_phase := client.phase()
 	var fight := client.battle()
@@ -632,7 +653,7 @@ func guide() -> Dictionary:
 		return result
 	if busy != null and String(busy) == "escort":
 		var walk := client.escort()
-		if String(walk.get("state", "")) == "home":
+		if String(walk.get("state", "")) == "home" or (walk.get("move") is Dictionary and arrived_locally(walk.move)):
 			return finish_with(result, "button.escort", "attempt_task", {"siteId":String(walk.get("siteId", next_site)), "taskId":"escort_home"}, content.text("cage.released"))
 		result.hint = content.text("cage.released")
 		result.target = HOME_TARGET
@@ -720,10 +741,15 @@ func rescue_step(result: Dictionary, site_id: String, task_id: String, node: Str
 		"escort_home":
 			result.target = HOME_TARGET
 			var walk := client.escort()
-			if not walk.is_empty() and String(walk.get("siteId", "")) == site_id and String(walk.get("state", "")) == "home":
+			if not walk.is_empty() and String(walk.get("siteId", "")) == site_id and (String(walk.get("state", "")) == "home" or (walk.get("move") is Dictionary and arrived_locally(walk.move))):
 				return finish_with(result, "button.escort", "attempt_task", {"siteId":site_id, "taskId":"escort_home"}, content.text("cage.released"))
 			return finish_with(result, "button.escort", "escort_start", {"siteId":site_id}, content.text("cage.released"))
 	return result
+
+## The walk's arrival (server time) has passed on the client clock (which runs behind the server's by
+## about half a round trip, so the server has settled it by the time a command arrives).
+func arrived_locally(move: Variant) -> bool:
+	return move is Dictionary and move.get("arriveAt") != null and client.server_now() >= float(move.arriveAt) + 60.0
 
 func finish_with(result: Dictionary, label_key: String, action: String, fields: Dictionary, detail: String) -> Dictionary:
 	result.action = action
@@ -760,6 +786,9 @@ func refresh_hud() -> void:
 
 # ------------------------------------------------------------------ actions
 func on_continue_pressed() -> void:
+	hud.press_feedback()
+	if acting or client.in_flight:
+		return   # 1024: the press already running keeps its animation; a second tap never doubles it
 	var step := guide()
 	if not bool(step.get("enabled", false)):
 		return
@@ -807,18 +836,41 @@ func wait_idle() -> void:
 		waited += 1
 
 ## Sends one authoritative command; UI feedback only. Returns the client result.
+## 1024: the press is answered at once — its animation starts (actors.predict: the walk along the drawn
+## trail, the charge, the soldier's gesture, the cage unlock up to the latch) and the server's answer
+## takes over in the background (actors.settle_prediction: hand-over without a step back, or a calm
+## roll-back on a refusal). The button stays lit (a second tap is ignored while one runs); only a
+## command slower than SENDING_HINT_MS shows the small «sending» dots. Outcomes stay the server's.
 func request_action(action: String, fields: Dictionary = {}, kind := "adventure") -> Dictionary:
+	button_pressed.emit(action)
+	var animate := kind == "adventure" and client.unlocked() and world_ready()
+	if animate:
+		actors.predict(action, fields)
+		if action == "engage_guardian":
+			frame_fight(String(fields.get("siteId", "")))
 	# Commands are serialized: a tap during another command waits for it (bounded), never drops.
 	var waited := 0
 	while (acting or client.in_flight) and waited < 900:
 		await get_tree().process_frame
 		waited += 1
 	if acting or client.in_flight:
+		if animate:
+			actors.settle_prediction(false)
 		return {"ok":false, "error":"LOCAL_BUSY", "message":content.text("network.pending")}
 	acting = true
-	hud.continue_button.disabled = true
+	var serial := Time.get_ticks_usec()
+	sending_serial = serial
+	get_tree().create_timer(SENDING_HINT_MS / 1000.0).timeout.connect(func():
+		if acting and sending_serial == serial:
+			hud.set_sending(true))
+	var started := Time.get_ticks_msec()
 	var result: Dictionary = await client.send(action, fields, kind)
 	acting = false
+	hud.set_sending(false)
+	var took := float(Time.get_ticks_msec() - started)
+	command_rtt_ms = took if command_rtt_ms <= 0.0 else lerpf(command_rtt_ms, took, 0.3)
+	if animate:
+		actors.settle_prediction(bool(result.get("ok", false)))
 	guide_signature = ""
 	if not bool(result.get("ok", false)):
 		var message := String(result.get("message", ""))
@@ -827,6 +879,26 @@ func request_action(action: String, fields: Dictionary = {}, kind := "adventure"
 		if result.get("retry", false):
 			panels.offer_retry()
 	return result
+
+var sending_serial := 0
+var fight_framed_for := ""
+
+## On «Атаковать»: the camera frames the squad and the creature (once per fight, unless the player
+## holds the camera elsewhere far away).
+func frame_fight(site_id: String) -> void:
+	if site_id.is_empty() or fight_framed_for == site_id or not is_instance_valid(stage):
+		return
+	var anchor := site_anchor(site_id)
+	var enemy: Vector3 = anchor.get("guardian", Vector3.INF)
+	if enemy == Vector3.INF:
+		return
+	fight_framed_for = site_id
+	var squad_pos: Vector3 = actors.squad_focus()
+	var focus := enemy if squad_pos == Vector3.INF else enemy.lerp(squad_pos, 0.45)
+	if focus.distance_to(stage.target) > 60.0:
+		return
+	stage.target = focus
+	stage.zoom = minf(float(stage.zoom), 28.0)
 
 func retry_last() -> void:
 	if not client.has_pending_retry() or acting:
@@ -909,7 +981,12 @@ func on_events(events: Array) -> void:
 				pass
 
 func on_network(status: String, detail: String) -> void:
-	if status in ["retrying", "offline"]:
+	# 1024: a silent repeat with the same key is the network layer's business: the small «sending» dots,
+	# not the «Проверяем результат на сервере…» banner over the game. A real loss still says so.
+	if status == "retrying":
+		hud.set_sending(true)
+	elif status == "offline":
+		hud.set_sending(false)
 		hud.toast(detail, "network", 4.0)
 
 func on_fog_revealed(_revision: int) -> void:

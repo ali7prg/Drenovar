@@ -177,7 +177,13 @@ func tick(delta: float) -> void:
 		var to: Vector3 = game.target_position("lf_horse_origin")
 		if to == Vector3.INF:
 			to = game.ground(HORSE_TO.x, HORSE_TO.y)
-		game.actors.start_intro_horse(from, to, 2.3)
+		# 1024: she walks out of the mist onto a spot no wall or tower hides from the camera, ~7 m.
+		var spots: Dictionary = game.actors.horse_origin_spots()
+		if not spots.is_empty():
+			to = spots.horse
+			var start: Vector3 = to + (spots.out as Vector3) * 7.0
+			from = game.ground(start.x, start.z)
+		game.actors.start_intro_horse(from, to, 3.2)
 	if elapsed >= 8.0 and not shown_lines.has("line3"):
 		shown_lines.line3 = true
 		set_line(t("intro.line3"), true)
@@ -186,6 +192,11 @@ func tick(delta: float) -> void:
 		game.actors.stop_intro_horse()
 
 func entrance_target() -> Vector3:
+	var spots: Dictionary = game.actors.horse_origin_spots()
+	if not spots.is_empty():
+		# Framing: the spot she stops on and the mist she comes out of (3 m into it), above the card.
+		var spot: Vector3 = spots.horse
+		return spot + (spots.out as Vector3) * 3.0 + Vector3(0.0, 0.0, 0.0)
 	var p: Vector3 = game.target_position("lf_horse_origin")
 	if p == Vector3.INF:
 		p = ENTRANCE

@@ -35,6 +35,37 @@ var symbols: Array = []
 var solution: Array = []
 var previous_camera := {}
 var pending_landmark := ""
+## Build 1024: the option the player just pressed while the server decides (the card pulses briefly —
+## a short neutral "checking" beat instead of a blocking banner); cleared by the answer.
+var checking_symbol := ""
+var checking_since := 0
+
+## Build 1024: picture icons of every puzzle option (painted procedurally by
+## src/forest_rescue/world/tools/build_puzzle_icons.py into one 768 x 512 atlas of 128 px cells; the
+## order below is the generator's ORDER). Read at ~100 px on the option cards, inside the widget discs.
+const ICON_ATLAS := "res://assets/forest_rescue/ui/lf_puzzle_icons.png"
+const ICON_ORDER := ["split_birch", "white_moss", "fallen_trunk", "resin_pine", "double_stump", "resin_bowl",
+	"bent_fern", "flat_slab", "three_notches", "mountain", "river", "leaf",
+	"coal", "seed", "tree", "sun", "stone", "root",
+	"brake", "pawl", "raise", "left_plate", "right_plate", "center_latch"]
+const ICON_CELL := 128
+const ICON_COLUMNS := 6
+const CARD_ICON := 92
+static var icon_cache: Dictionary = {}
+
+## The picture of a puzzle symbol (AtlasTexture cell of the atlas), null for an unknown symbol.
+static func symbol_icon(symbol: String) -> Texture2D:
+	if icon_cache.has(symbol):
+		return icon_cache[symbol]
+	var index := ICON_ORDER.find(symbol)
+	if index < 0 or not ResourceLoader.exists(ICON_ATLAS):
+		return null
+	var atlas := AtlasTexture.new()
+	atlas.atlas = load(ICON_ATLAS)
+	atlas.region = Rect2((index % ICON_COLUMNS) * ICON_CELL, (index / ICON_COLUMNS) * ICON_CELL, ICON_CELL, ICON_CELL)
+	atlas.filter_clip = true
+	icon_cache[symbol] = atlas
+	return atlas
 
 func setup(owner_game: Node) -> void:
 	game = owner_game
@@ -94,7 +125,8 @@ func setup(owner_game: Node) -> void:
 	progress.add_child(count_label)
 	widget = Control.new()
 	widget.name = "MechanismWidget"
-	widget.custom_minimum_size = Vector2(380, 196)
+	widget.custom_minimum_size = Vector2(380, 150)
+	widget.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	widget.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	widget.mouse_filter = Control.MOUSE_FILTER_STOP
 	widget.draw.connect(draw_widget)
@@ -216,13 +248,22 @@ func build_inputs() -> void:
 	for child in inputs.get_children():
 		child.queue_free()
 	for symbol in symbols:
+		# Picture cards: the painted icon (~92 px) over its name, so the option reads at a glance.
 		var control := Button.new()
 		control.name = "Symbol_" + String(symbol)
 		control.text = game.content.symbol_label(String(symbol))
-		control.custom_minimum_size = Vector2(0, 46)
-		control.add_theme_font_size_override("font_size", 16)
+		control.icon = symbol_icon(String(symbol))
+		control.expand_icon = control.icon != null
+		control.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		control.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		control.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		control.add_theme_constant_override("icon_max_width", CARD_ICON)
+		control.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		control.custom_minimum_size = Vector2(124, CARD_ICON + 42) if control.icon != null else Vector2(0, 46)
+		control.add_theme_font_size_override("font_size", 15)
 		Style.apply_button(control, "leather")
 		control.pressed.connect(send_symbol.bind(String(symbol)))
+		control.button_down.connect(press_feedback.bind(control))
 		inputs.add_child(control)
 
 func refresh() -> void:
@@ -238,7 +279,9 @@ func refresh() -> void:
 	recover_button.visible = solved and not found
 	inputs.visible = not solved
 	for child in inputs.get_children():
-		(child as Button).disabled = sending or (kind == "paired_latch" and not plates_occupied)
+		# 1024: not greyed while a press is checked (the pressed card pulses instead); the paired latch
+		# stays shut until both plates are held.
+		(child as Button).disabled = kind == "paired_latch" and not plates_occupied
 	if solved:
 		feedback.text = game.content.text("artifact.bound")
 		feedback.add_theme_color_override("font_color", Color("#c8f0a0"))
@@ -281,8 +324,12 @@ func on_progress(target_site: String, ok: bool) -> void:
 func send_symbol(symbol: String) -> void:
 	if sending:
 		return
+	game.button_pressed.emit("mechanism_input")
+	checking_symbol = symbol
+	checking_since = Time.get_ticks_msec()
 	if kind == "trail_cache" and not observed(symbol):
-		# The squad must really reach the landmark first (server records it as observed).
+		# The squad must really reach the landmark first (server records it as observed); the input is
+		# sent as soon as the walk's arrival time passes (tick) — the server settles the walk first.
 		pending_landmark = symbol
 		sending = true
 		refresh()
@@ -298,6 +345,7 @@ func send_symbol(symbol: String) -> void:
 	game.actors.mechanism_feedback(site_id, symbol, true)
 	var result: Dictionary = await game.request_action("mechanism_input", {"siteId":site_id, "symbol":symbol})
 	sending = false
+	end_checking()
 	if bool(result.get("ok", false)):
 		var announced := false
 		for event in result.get("events", []):
@@ -307,6 +355,52 @@ func send_symbol(symbol: String) -> void:
 			var after := int(mechanism().get("progress", 0))
 			var last := String(mechanism().get("lastResult", ""))
 			on_progress(site_id, last == "ok" or after > before or bool(mechanism().get("solved", false)))
+	refresh()
+
+## The pressed card dips at once (≤ 1 frame) — the press is seen before anything else happens.
+func press_feedback(control: Button) -> void:
+	control.pivot_offset = control.size * 0.5
+	control.scale = Vector2(0.92, 0.92)
+	var tween := control.create_tween()
+	tween.tween_property(control, "scale", Vector2.ONE, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func end_checking() -> void:
+	checking_symbol = ""
+	for child in inputs.get_children():
+		(child as Control).modulate = Color.WHITE
+
+## The walk to a trail landmark has reached it (by the server's own arrival time).
+func landmark_reached(symbol: String) -> bool:
+	if observed(symbol):
+		return true
+	var move: Variant = game.client.squad().get("move")
+	return move is Dictionary and String(move.get("targetId", "")) == site_id + ":landmark:" + symbol and game.arrived_locally(move)
+
+## Trail cache: the input for a landmark the squad has just reached (no extra state read first).
+func send_input_now(symbol: String) -> void:
+	if sending:
+		return
+	checking_symbol = symbol
+	checking_since = Time.get_ticks_msec()
+	sending = true
+	refresh()
+	var before := int(mechanism().get("progress", 0))
+	game.actors.mechanism_feedback(site_id, symbol, true)
+	var result: Dictionary = await game.request_action("mechanism_input", {"siteId":site_id, "symbol":symbol})
+	if not bool(result.get("ok", false)) and String(result.get("error", "")) in ["MECHANISM_NOT_READY", "LANDMARK_NOT_REACHED"]:
+		# The walk had not settled yet on the server (clock skew): once more, a moment later.
+		await get_tree().create_timer(0.35).timeout
+		result = await game.request_action("mechanism_input", {"siteId":site_id, "symbol":symbol})
+	sending = false
+	end_checking()
+	if bool(result.get("ok", false)):
+		var announced := false
+		for event in result.get("events", []):
+			if String(event.get("type", "")) == "mechanism_progress":
+				announced = true
+		if not announced:
+			var after := int(mechanism().get("progress", 0))
+			on_progress(site_id, after > before or bool(mechanism().get("solved", false)))
 	refresh()
 
 func landmark_tapped(symbol: String) -> void:
@@ -333,10 +427,16 @@ func recover() -> void:
 func tick(delta: float) -> void:
 	if not open_flag:
 		return
-	if not pending_landmark.is_empty() and not sending and observed(pending_landmark) and not (game.client.squad().get("move") is Dictionary):
+	if not pending_landmark.is_empty() and not sending and not game.acting and landmark_reached(pending_landmark):
 		var symbol := pending_landmark
 		pending_landmark = ""
-		send_symbol(symbol)
+		send_input_now(symbol)
+	if not checking_symbol.is_empty():
+		# Neutral «checking» beat on the pressed card: a soft warm pulse while the server decides.
+		var card := inputs.get_node_or_null("Symbol_" + checking_symbol) as Control
+		if card != null:
+			var pulse := 0.5 + 0.5 * sin((Time.get_ticks_msec() - checking_since) / 90.0)
+			card.modulate = Color(1.0 + 0.25 * pulse, 1.0 + 0.18 * pulse, 0.85 + 0.1 * pulse)
 	if shake > 0.0 or flash > 0.0 or reset_spin > 0.0:
 		shake = maxf(0.0, shake - delta * 2.2)
 		flash = maxf(0.0, flash - delta * 1.6)
@@ -560,10 +660,10 @@ func draw_trail(progress: int, solved: bool) -> void:
 		var symbol := String(order[i])
 		if not found and i == progress:
 			var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 260.0 + i)
-			widget.draw_circle(p, 31.0, Color(1.0, 0.8, 0.35, 0.12 + 0.14 * pulse))
-		bronze_disc(p, 24.0, found)
+			widget.draw_circle(p, 38.0, Color(1.0, 0.8, 0.35, 0.12 + 0.14 * pulse))
+		bronze_disc(p, 31.0, found)
 		if found or observed(symbol):
-			draw_symbol(widget, symbol, p, 28.0, ENGRAVE)
+			draw_symbol(widget, symbol, p, 34.0, ENGRAVE)
 		else:
 			widget.draw_string(get_theme_default_font(), p + Vector2(-5, 7), "?", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, ENGRAVE)
 	var log := Rect2(cache - Vector2(34, 10), Vector2(68, 20))
@@ -595,6 +695,12 @@ func widget_input(event: InputEvent) -> void:
 
 # ------------------------------------------------------------------ symbol glyphs
 static func draw_symbol(ci: CanvasItem, symbol: String, c: Vector2, s: float, color: Color) -> void:
+	var icon := symbol_icon(symbol)
+	if icon != null:
+		# 1024: the painted picture fills the disc (the line glyphs below stay as the fallback).
+		var d := s * 1.75
+		ci.draw_texture_rect(icon, Rect2(c - Vector2(d, d) * 0.5, Vector2(d, d)), false)
+		return
 	var w := maxf(1.5, s * 0.09)
 	var h := s * 0.5
 	match symbol:

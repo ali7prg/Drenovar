@@ -96,6 +96,26 @@ var impostors: Node
 var occluders: Node3D                     # ForestOccluders (whole-tree fade of crowns hiding actors)
 var _cull_timer := 0.0
 var _sight_timer := 0.0
+## Build 1024 «туман отстаёт от коня»: presentation lead of the server's own fog reveal. The server
+## reveals cells within 10 m of the squad's COMMITTED path (a checkpoint every 4 units, settled by the
+## state reads every 1.2 s, then a 2 s dissolve): on the phone the mare and the squad walked into
+## fog that cleared up to ~5 s after them. lead_bits stamps the same discs (cell centre within
+## LEAD_RADIUS < the server's 10 m) along the AUTHORITATIVE move path the projection already holds,
+## up to a little ahead of the squad and the mare, as they walk — so every lead cell is one the
+## server reveals itself when the walk commits it (no knowledge the server does not hand out; the
+## projection stays authoritative: displayed = (projection | lead) & ~hold). Never sent anywhere.
+const LEAD_RADIUS := 9.0          # 10 m server disc − 1 m (its path samples are ≤ 2 m apart)
+const LEAD_AHEAD := 4.0           # metres ahead of the farther of the squad / the mare
+const LEAD_STEP := 0.2            # s between lead updates while a move runs
+const LEAD_REVEAL_SECONDS := 0.45 # dissolve of a lead cell (the server's own reveal takes 2 s)
+const LEAD_KEEP_MS := 12000       # lead cells the projection never confirmed are dropped after this
+var lead_bits := PackedByteArray()
+var _lead_timer := 0.0
+var _lead_move := ""
+var _lead_reach := 0.0
+var _lead_idle_since := 0
+## Per-frame cost probe (QA): usec spent in the last lead update.
+var lead_usec := 0
 
 
 # ============================================================================================
@@ -1107,6 +1127,10 @@ func _process(delta: float) -> void:
 	if _sight_timer <= 0.0 and not locked:
 		_sight_timer = 0.5
 		_update_sights()
+	_lead_timer -= delta
+	if _lead_timer <= 0.0 and not locked:
+		_lead_timer = LEAD_STEP
+		_update_lead()
 
 
 ## Whole-tree occluder fade: trees whose crown would hide a visible adventure actor or site prop
@@ -1190,10 +1214,9 @@ func apply_adventure(adv: Dictionary) -> void:
 		hold_bits = PackedByteArray()
 		if not locked:
 			entrance_released = true
-	var shown := bits.duplicate()
-	if hold_bits.size() == ForestFog.BYTES:
-		for i in ForestFog.BYTES:
-			shown[i] = shown[i] & ~hold_bits[i]
+	if locked or hold_bits.size() == ForestFog.BYTES:
+		lead_bits = PackedByteArray()
+	var shown := _shown_bits()
 	var key := Marshalls.raw_to_base64(shown) + ("L" if locked else "U")
 	if fog != null and key != last_fog_key:
 		var first := last_fog_key.is_empty()
@@ -1205,6 +1228,121 @@ func apply_adventure(adv: Dictionary) -> void:
 	if boss.has("state"):
 		set_boss_arena_state(String(boss.state))
 	_update_sights()
+
+
+## (projection | lead) & ~hold: the fog the player sees.
+func _shown_bits() -> PackedByteArray:
+	var shown := projection_bits.duplicate()
+	var lead := lead_bits.size() == ForestFog.BYTES and shown.size() == ForestFog.BYTES
+	var hold := hold_bits.size() == ForestFog.BYTES and shown.size() == ForestFog.BYTES
+	if lead or hold:
+		for i in shown.size():
+			var v := shown[i]
+			if lead:
+				v = v | lead_bits[i]
+			if hold:
+				v = v & ~hold_bits[i]
+			shown[i] = v
+	return shown
+
+
+func _presentation_now() -> float:
+	if clock_source.is_valid():
+		return float(clock_source.call())
+	return server_time_ms + float(Time.get_ticks_msec() - received_at_ms)
+
+
+## Build 1024: stamps the lead discs along the running authoritative move (squad / escort walk) up to
+## LEAD_AHEAD past the farther of the squad and the mare; dissolves newly lit cells in
+## LEAD_REVEAL_SECONDS. Incremental per move (only the stretch walked since the last update).
+func _update_lead() -> void:
+	if fog == null or locked or hold_bits.size() == ForestFog.BYTES or projection_bits.size() != ForestFog.BYTES:
+		return
+	var started := Time.get_ticks_usec()
+	var now := _presentation_now()
+	var squad: Variant = adventure.get("squad")
+	var move: Variant = squad.get("move") if squad is Dictionary else null
+	if not (move is Dictionary and (move.get("path", []) as Array).size() >= 2):
+		# No walk: drop lead cells once the projection holds them (or after LEAD_KEEP_MS regardless).
+		if lead_bits.size() == ForestFog.BYTES:
+			if _lead_idle_since == 0:
+				_lead_idle_since = Time.get_ticks_msec()
+			var covered := true
+			for i in ForestFog.BYTES:
+				if lead_bits[i] & ~projection_bits[i]:
+					covered = false
+					break
+			if covered or Time.get_ticks_msec() - _lead_idle_since > LEAD_KEEP_MS:
+				lead_bits = PackedByteArray()
+				_lead_move = ""
+				if not covered:
+					_push_shown(false)
+		lead_usec = Time.get_ticks_usec() - started
+		return
+	_lead_idle_since = 0
+	var key := "%s|%s|%s" % [str(move.get("departAt", 0)), str(move.get("arriveAt", 0)), str(move.get("targetId", ""))]
+	if key != _lead_move:
+		_lead_move = key
+		_lead_reach = 0.0
+	var path: Array = move.path
+	var reach := _path_travel(move, now)
+	var horse: Variant = adventure.get("horse")
+	if horse is Dictionary and horse.get("visible", false) and horse.get("move") is Dictionary \
+			and str(horse.move.get("departAt", 0)) == str(move.get("departAt", 0)):
+		reach = maxf(reach, _path_travel(horse.move, now))
+	reach += LEAD_AHEAD
+	if reach <= _lead_reach + 0.5:
+		lead_usec = Time.get_ticks_usec() - started
+		return
+	if lead_bits.size() != ForestFog.BYTES:
+		lead_bits = PackedByteArray()
+		lead_bits.resize(ForestFog.BYTES)
+	var before := lead_bits.duplicate()
+	var from := maxf(0.0, _lead_reach - 1.0)
+	var walked := 0.0
+	for i in range(1, path.size()):
+		var a := Vector2(float(path[i - 1].x), float(path[i - 1].z))
+		var b := Vector2(float(path[i].x), float(path[i].z))
+		var length := a.distance_to(b)
+		if walked + length >= from and walked <= reach:
+			var t0 := clampf((from - walked) / maxf(length, 0.0001), 0.0, 1.0)
+			var t1 := clampf((reach - walked) / maxf(length, 0.0001), 0.0, 1.0)
+			var steps := maxi(1, ceili((t1 - t0) * length / 2.0))
+			for k in steps + 1:
+				ForestFog.stamp_disc(lead_bits, a.lerp(b, lerpf(t0, t1, float(k) / steps)), LEAD_RADIUS)
+		walked += length
+		if walked > reach:
+			break
+	_lead_reach = reach
+	var grows := false
+	for i in ForestFog.BYTES:
+		if lead_bits[i] & ~before[i] & ~projection_bits[i]:
+			grows = true
+			break
+	if grows:
+		_push_shown(true)
+	lead_usec = Time.get_ticks_usec() - started
+
+
+## Distance (m) travelled along a server move's path at `now` (same timing as _move_position).
+func _path_travel(move: Dictionary, now: float) -> float:
+	var path: Array = move.get("path", [])
+	var total := 0.0
+	for i in range(1, path.size()):
+		total += Vector2(float(path[i].x) - float(path[i - 1].x), float(path[i].z) - float(path[i - 1].z)).length()
+	var depart := float(move.get("departAt", now))
+	var arrive := float(move.get("arriveAt", now))
+	return clampf((now - depart) / maxf(1.0, arrive - depart), 0.0, 1.0) * total
+
+
+func _push_shown(lead_reveal: bool) -> void:
+	var shown := _shown_bits()
+	var key := Marshalls.raw_to_base64(shown) + "U"
+	if key == last_fog_key:
+		return
+	last_fog_key = key
+	displayed_bits = shown
+	fog.set_target(shown, anchor_bits, not reduced_motion, LEAD_REVEAL_SECONDS if lead_reveal else ForestFog.REVEAL_SECONDS)
 
 
 func _refresh_local_anchors() -> void:
@@ -1410,6 +1548,11 @@ func atlas_node_of(target_id: String) -> String:
 	return ""
 
 
+## Build 1024: the entrance corridor of the fog (atlas; fog.mjs ENTRANCE_CORRIDOR) {from, to, radius}.
+func entrance_corridor_spec() -> Dictionary:
+	return atlas.entrance_corridor if atlas != null else {}
+
+
 ## WORLD_API v3.3: the arena's entrance yaw (deg, atlas entranceYawDeg; the gap faces the trail).
 func arena_entrance_yaw_deg() -> float:
 	return atlas.arena_yaw_deg
@@ -1439,7 +1582,7 @@ func fog_cleared_at(x: float, z: float) -> bool:
 	var cell := ForestFog.cell_of(x, z)
 	if cell.x < 0:
 		return false
-	return ForestFog.bit(projection_bits, cell.x, cell.y) and not ForestFog.bit(hold_bits, cell.x, cell.y)
+	return (ForestFog.bit(projection_bits, cell.x, cell.y) or ForestFog.bit(lead_bits, cell.x, cell.y)) and not ForestFog.bit(hold_bits, cell.x, cell.y)
 
 
 func play_entrance_reveal(duration_ms: int) -> void:

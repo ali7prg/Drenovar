@@ -229,8 +229,11 @@ func _process(_delta: float) -> void:
 	if load_state == "ready":
 		dispatch_markers()
 
+## Build 1024: false for a site prop out of view (director); its model loads behind the rigs on screen.
+var wanted := true
+
 func poll_load(blocking := false) -> void:
-	var background := actor_id.begins_with("__warm_")
+	var background := actor_id.begins_with("__warm_") or not wanted
 	var scene: Variant = fetch_now(asset_path) if blocking else fetch(asset_path, background)
 	if scene is bool and not fallback_path.is_empty():
 		scene = fetch_now(fallback_path) if blocking else fetch(fallback_path, background)
@@ -635,10 +638,13 @@ func _on_animation_finished(clip_name: StringName) -> void:
 	marker_cursor = length
 	clip_finished.emit(self, current_id)
 
+## Build 1024: a hidden rig whose model is still loading keeps processing (poll_load runs in _process).
+## Before, the director hid every prop on its first frame (not ready → set_active(false) → processing
+## off), so cages, mechanisms and artifacts stayed "loading" for the whole session and never appeared.
 func set_active(active: bool) -> void:
 	if visible != active:
 		visible = active
-	process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
+	process_mode = Node.PROCESS_MODE_INHERIT if active or load_state == "loading" else Node.PROCESS_MODE_DISABLED
 
 # ------------------------------------------------------------------ prop pose composer
 func animation_of(clip_id: String) -> Animation:

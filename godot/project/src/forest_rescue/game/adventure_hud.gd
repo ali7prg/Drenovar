@@ -68,6 +68,10 @@ var strip_head: BoxContainer
 var strip_chest: Control
 var last_nav_edge := -1.0
 var last_safe_revision := -1
+## Build 1024: «sending» — three small pulsing dots on «Продолжить», shown only when a command has
+## taken longer than ~1.5 s (forest_game) or the network layer repeats it; never a blocking banner.
+var sending_dots: Control
+var sending_on := false
 
 func setup(owner_game: Node) -> void:
 	game = owner_game
@@ -210,6 +214,21 @@ func build_bar() -> void:
 	squad_button = make_medal_button("SquadButton", "kit_emb_shield", text("hud.squad"), func(): game.on_squad_pressed())
 	continue_button = make_action_button("ContinueButton", "chevrons", text("hud.continue"), "gold", func(): game.on_continue_pressed())
 	continue_button.custom_minimum_size = Vector2(118, 78)
+	sending_dots = Control.new()
+	sending_dots.name = "SendingDots"
+	sending_dots.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sending_dots.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	sending_dots.offset_left = -34
+	sending_dots.offset_right = -6
+	sending_dots.offset_top = 6
+	sending_dots.offset_bottom = 16
+	sending_dots.visible = false
+	sending_dots.draw.connect(func():
+		var phase := Time.get_ticks_msec() / 260.0
+		for i in 3:
+			var a := 0.35 + 0.65 * maxf(0.0, sin(phase - i * 0.9))
+			sending_dots.draw_circle(Vector2(5 + i * 9, 5), 3.2, Color(CONTINUE_INK, a)))
+	continue_button.add_child(sending_dots)
 
 ## «Продолжить»: a gilded plate with dark chevrons and an ink caption (the kit's primary).
 func make_action_button(id: String, icon_kind: String, caption: String, style: String, action: Callable) -> Button:
@@ -325,6 +344,20 @@ func set_continue(caption: String, enabled: bool) -> void:
 	if icon != null:
 		icon.tint = CONTINUE_INK if enabled else Color(0.94, 0.92, 0.86)
 		icon.queue_redraw()
+
+## Instant press response (≤ 1 frame): «Продолжить» dips and springs back.
+func press_feedback() -> void:
+	if not is_instance_valid(continue_button):
+		return
+	continue_button.pivot_offset = continue_button.size * 0.5
+	continue_button.scale = Vector2(0.93, 0.93)
+	var tween := continue_button.create_tween()
+	tween.tween_property(continue_button, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func set_sending(on: bool) -> void:
+	sending_on = on
+	if is_instance_valid(sending_dots):
+		sending_dots.visible = on
 
 func strip_center() -> Vector2:
 	return reward_strip.get_global_rect().get_center() if is_instance_valid(reward_strip) else Vector2.ZERO
@@ -813,3 +846,5 @@ func tick(_delta: float) -> void:
 		if banner.modulate.a <= 0.01:
 			hide_banner()
 	arrow.queue_redraw()
+	if sending_on and is_instance_valid(sending_dots):
+		sending_dots.queue_redraw()

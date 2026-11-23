@@ -562,24 +562,38 @@ func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, 
 	var grows := false
 	var first := previous.size() != BYTES
 	var shown_t := smoothstep(0.0, 1.0, reveal_t)
+	# Build 1024: one pass over the raw RGBA8 bytes (was 4900 get_pixel/set_pixel calls on the main
+	# thread per target — the lead reveal retargets every ~2 s while the squad walks).
+	var data := state_image.get_data()
+	var continuing := revealing and not first and animate
 	for row in GRID:
+		var inner_r := row - GRID_OFFSET
 		for column in GRID:
 			var inner_c := column - GRID_OFFSET
-			var inner_r := row - GRID_OFFSET
-			var before := bit(previous, inner_c, inner_r) if not first else false
-			var after := bit(bits, inner_c, inner_r)
+			var after := false
+			var before := false
+			if inner_c >= 0 and inner_r >= 0 and inner_c < COLUMNS and inner_r < ROWS:
+				var index := inner_r * COLUMNS + inner_c
+				var mask := 1 << (index & 7)
+				after = (bits[index >> 3] & mask) != 0
+				before = not first and (previous[index >> 3] & mask) != 0
 			if after and not before:
 				grows = true
-			var px := state_image.get_pixel(column, row)
-			# During an unfinished reveal, continue from what is shown now.
-			var start := lerpf(px.g, px.r, shown_t) if revealing else px.r
-			var start_top := lerpf(px.a, px.b, shown_t) if revealing else px.b
-			var target := clampf(0.5 + sdf[row * GRID + column] / SDF_RANGE, 0.0, 1.0)
-			var target_top := tops[row * GRID + column] / HEIGHT_RANGE
-			if first or not animate:
-				start = target
-				start_top = target_top
-			state_image.set_pixel(column, row, Color(target, start, target_top, start_top))
+			var cell := row * GRID + column
+			var o := cell * 4
+			var target := clampi(int((0.5 + sdf[cell] / SDF_RANGE) * 255.0), 0, 255)
+			var target_top := clampi(int(tops[cell] / HEIGHT_RANGE * 255.0), 0, 255)
+			var start := target
+			var start_top := target_top
+			if not first and animate:
+				# During an unfinished reveal, continue from what is shown now.
+				start = int(lerpf(data[o + 1], data[o], shown_t)) if continuing else data[o]
+				start_top = int(lerpf(data[o + 3], data[o + 2], shown_t)) if continuing else data[o + 2]
+			data[o] = target
+			data[o + 1] = start
+			data[o + 2] = target_top
+			data[o + 3] = start_top
+	state_image.set_data(GRID, GRID, false, Image.FORMAT_RGBA8, data)
 	state_texture.update(state_image)
 	if animate and grows and not reduced_motion:
 		reveal_seconds = maxf(0.05, seconds)
@@ -596,10 +610,11 @@ func set_target(bits: PackedByteArray, anchors: PackedByteArray, animate: bool, 
 
 
 func _settle() -> void:
-	for row in GRID:
-		for column in GRID:
-			var p := state_image.get_pixel(column, row)
-			state_image.set_pixel(column, row, Color(p.r, p.r, p.b, p.b))
+	var data := state_image.get_data()
+	for o in range(0, data.size(), 4):
+		data[o + 1] = data[o]
+		data[o + 3] = data[o + 2]
+	state_image.set_data(GRID, GRID, false, Image.FORMAT_RGBA8, data)
 	state_texture.update(state_image)
 
 

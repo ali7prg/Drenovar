@@ -48,7 +48,7 @@ const SQUAD_FORMATION := [Vector3(0, 0, 0), Vector3(-0.85, 0, -1.25), Vector3(0.
 const LIVE_RANGE := 70.0
 ## Where the squad stops short of a glade sub-target (server node = the cage / guardian /
 ## device spot itself): door front, fighting distance, device front.
-const STAND_OFF := {"cage":2.0, "guardian":3.4, "key":1.9, "boss":12.5}
+const STAND_OFF := {"cage":2.0, "guardian":5.2, "key":1.9, "boss":12.5}
 ## The mare keeps back from the boss: she waits at the arena gap, behind the squad.
 const HORSE_BOSS_STAND_OFF := 21.0
 ## Orthographic size thresholds for LOD0 / LOD1 (× rig.lod_scale); beyond = LOD2.
@@ -89,7 +89,8 @@ var lod_zoom := -1.0
 var horse_wait_ticks := 0
 var horse_was_walking := false
 var horse_transition_until := 0
-var guardian_alerted: Dictionary = {}
+var horse_afraid: Dictionary = {}
+var guardian_alerted: Dictionary = {}   # (1023, kept for saved QA hooks; the menace replaces it)
 ## Root-yaw turns in progress: id -> {from, root, length, clip}.
 var turns: Dictionary = {}
 ## Mechanism presentation per site: {signature, progress, solved, pose (stable), live: {...}}.
@@ -389,6 +390,7 @@ func tick(delta: float) -> void:
 	update_ribbon()
 	update_preview()
 	update_battle_hud(now)
+	update_fight_fx(now)
 	run_choreography(delta)
 
 static func lod_for(zoom: float, scale := 1.0) -> int:
@@ -410,8 +412,161 @@ func update_lod() -> void:
 func squad_member_count() -> int:
 	var squad: Dictionary = game.client.squad()
 	if game.total_units(squad.get("units", {})) <= 0:
+		if String(predicted.get("action", "")) == "form_squad":
+			return clampi(game.total_units(predicted.get("fields", {}).get("units", {})), 0, 3)
 		return 0
 	return clampi(int(squad.get("members", 3)), 1, 3)
+
+# ------------------------------------------------------------------ 1024: optimistic presentation
+## Build 1024 «кнопки ждут сервер»: a press starts its animation at once (forest_game.request_action →
+## predict), the server's answer takes over (settle_prediction), a refusal rolls back (the stable pose
+## from the unchanged state returns, place() eases them there). Nothing here decides an outcome or
+## grants anything: the walk follows the drawn trail to the target the button names, the charge, the
+## soldier's unlock / inspect gesture are presentation; positions, fights, rewards stay the server's.
+const PREDICT_TTL_MS := 15000
+const HANDOFF_MS := 2500.0
+var predicted: Dictionary = {}
+var handoffs: Dictionary = {}
+var walk_speed_mps := 2.4
+## Per-frame cost probe (QA).
+var predict_usec := 0
+
+func predict(action: String, fields: Dictionary) -> void:
+	var started := Time.get_ticks_usec()
+	var squad: Dictionary = game.client.squad()
+	var node := String(squad.get("node", ""))
+	predicted = {"action": action, "fields": fields, "at": Time.get_ticks_msec(), "server_at": now_ms(), "node": node}
+	match action:
+		"move", "escort_start":
+			var target := String(fields.get("targetId", "lf_home_reception" if action == "escort_start" else ""))
+			if not (squad.get("move") is Dictionary) and not target.is_empty() and squad_member_count() > 0:
+				var path := predicted_path(node, target)
+				if path.size() >= 2:
+					predicted.move = {"path": path, "targetId": target, "departAt": now_ms(), "predicted": true}
+					# The points already lie on the drawn trail: no visual_path() remap (≈ 0.1 ms per metre
+					# of trail on the press frame).
+					predicted.route = PathMotion.build(path)
+					if float(predicted.route.total) - float(STAND_OFF.get(target_kind(target), 0.0)) < 0.6:
+						# Already there (a step to the guardian from the guard stance): a nod instead of a walk.
+						predicted.erase("move")
+						predicted.erase("route")
+						predicted.gesture = ["lf_soldier_salute", "lf_soldier_idle", "Idle"]
+		"engage_guardian":
+			engage_pending_for = String(fields.get("siteId", ""))
+			menace.erase(engage_pending_for)
+		"attempt_task":
+			var site_id := String(fields.get("siteId", ""))
+			match String(fields.get("taskId", "")):
+				"unlock_cage":
+					if not choreo.has("cage:" + site_id):
+						on_cage_opened(site_id)
+						choreo["cage:" + site_id].confirmed = false
+				"discover", "recover_artifact":
+					predicted.gesture = ["lf_soldier_help", "lf_soldier_idle", "Idle"]
+				_:
+					predicted.gesture = ["lf_soldier_salute", "lf_soldier_idle", "Idle"]
+		"discover_horse":
+			predicted.gesture = ["lf_soldier_salute", "lf_soldier_idle", "Idle"]
+			var horse: Rig = rigs.get("horse")
+			if horse != null and horse.is_ready():
+				horse.play(["lf_horse_call", "lf_horse_idle", "Idle"], 0.15, true)
+				horse_transition_until = Time.get_ticks_msec() + 1400
+	if predicted.has("gesture"):
+		var leader: Rig = rigs.get("squad_0")
+		if leader != null and leader.is_ready():
+			leader.play(predicted.gesture, 0.15, true)
+	predict_usec = Time.get_ticks_usec() - started
+
+## The server answered: hand the predicted walk over (no step back) or roll back a refusal.
+func settle_prediction(ok: bool) -> void:
+	var action := String(predicted.get("action", ""))
+	if ok and predicted.has("move"):
+		var squad: Dictionary = game.client.squad()
+		var move: Variant = squad.get("move")
+		if move is Dictionary:
+			var pred_d := predicted_distance(predicted.move, now_ms())
+			var key := "%s|%s|%s" % [str(move.get("departAt", 0)), str(move.get("arriveAt", 0)), str(move.get("targetId", ""))]
+			var route := route_for(key, move.get("path", []))
+			var server_d := PathMotion.travelled(move, route, now_ms())
+			if float(route.total) > 0.1 and move.get("arriveAt") != null:
+				walk_speed_mps = clampf(float(route.total) / maxf(0.1, (float(move.arriveAt) - float(move.departAt)) / 1000.0), 0.6, 6.0)
+			if pred_d > server_d:
+				handoffs["%s|%s" % [str(move.get("departAt", 0)), str(move.get("targetId", ""))]] = {"lead": minf(pred_d - server_d, 4.0), "at": Time.get_ticks_msec()}
+	if not ok:
+		if action == "engage_guardian":
+			engage_pending_for = ""
+		if action == "attempt_task" and String(predicted.get("fields", {}).get("taskId", "")) == "unlock_cage":
+			var beat_id := "cage:" + String(predicted.fields.get("siteId", ""))
+			if choreo.has(beat_id) and not bool(choreo[beat_id].get("confirmed", true)):
+				choreo.erase(beat_id)
+				choreo.erase("key:" + String(predicted.fields.get("siteId", "")))
+				var soldier: Rig = rigs.get("squad_0")
+				if soldier != null:
+					soldier.play(["lf_soldier_idle", "Idle"], 0.3)
+	else:
+		if action == "attempt_task" and String(predicted.get("fields", {}).get("taskId", "")) == "unlock_cage":
+			var beat_id := "cage:" + String(predicted.fields.get("siteId", ""))
+			if choreo.has(beat_id):
+				choreo[beat_id].confirmed = true
+	if action != "engage_guardian" or not ok:
+		engage_pending_for = "" if not ok else engage_pending_for
+	predicted = {}
+	for key in handoffs.keys():
+		if Time.get_ticks_msec() - int(handoffs[key].at) > HANDOFF_MS * 2.0:
+			handoffs.erase(key)
+
+## The drawn trail (world trail_path) from the squad's node to the target as server-style points.
+func predicted_path(from_node: String, target: String) -> Array:
+	var value: Variant = game.world_call("trail_path", [from_node, target])
+	var points: Array = []
+	var start := squad_focus()
+	if start != Vector3.INF:
+		points.append({"x": start.x, "z": start.z})
+	if value is PackedVector3Array and value.size() >= 2:
+		for p: Vector3 in value:
+			if points.is_empty() or Vector2(p.x - float(points.back().x), p.z - float(points.back().z)).length() > 0.3:
+				points.append({"x": p.x, "z": p.z})
+	else:
+		var b: Vector3 = game.target_position(target)
+		if b == Vector3.INF:
+			return []
+		points.append({"x": b.x, "z": b.z})
+	return points
+
+## Metres walked by a predicted move: a start that ramps up over the first PREDICT_RAMP_S (the first
+## step), then the squad's walking speed.
+const PREDICT_RAMP_S := 0.4
+func predicted_distance(move: Dictionary, now: float) -> float:
+	var t := maxf(0.0, (now - float(move.get("departAt", now))) / 1000.0)
+	return walk_speed_mps * (t * t * 0.5 / PREDICT_RAMP_S if t < PREDICT_RAMP_S else t - PREDICT_RAMP_S * 0.5)
+
+## Pose of a squad member on the predicted walk (or {} when none applies).
+func predicted_pose(index: int, now: float) -> Dictionary:
+	if predicted.is_empty() or Time.get_ticks_msec() - int(predicted.at) > PREDICT_TTL_MS:
+		return {}
+	var squad: Dictionary = game.client.squad()
+	if predicted.has("move") and not (squad.get("move") is Dictionary):
+		var move: Dictionary = predicted.move
+		var route: Dictionary = predicted.get("route", {})
+		if route.is_empty():
+			return {}
+		var d := minf(float(route.total) - float(STAND_OFF.get(target_kind(String(move.targetId)), 0.0)), predicted_distance(move, now))
+		var behind := maxf(0.0, d - float(index) * 1.6)
+		var sample := PathMotion.sample(route, behind)
+		var tangent: Vector3 = sample.tangent
+		var side := Vector3(tangent.z, 0, -tangent.x)
+		var t := (now - float(move.departAt)) / 1000.0
+		return {"position": sample.position + side * SQUAD_FORMATION[index].x * 0.8, "yaw": PathMotion.yaw_of(tangent), "moving": true,
+			"speed": maxf(0.6, walk_speed_mps * minf(1.0, t / PREDICT_RAMP_S)), "predicted": true}
+	if String(predicted.action) == "engage_guardian" and game.client.battle().is_empty():
+		var site_id := String(predicted.fields.get("siteId", ""))
+		var fake := {"siteId": site_id, "startedAt": float(predicted.server_at), "endsAt": float(predicted.server_at) + 60000.0, "timeline": []}
+		var pose := battle_member_pose(index, fake, now)
+		pose.erase("clip")
+		return pose
+	return {}
+
+
 
 ## Presentation route of a server move: its path mapped onto the drawn, meandered trail
 ## (world.visual_path) — same arc-length fraction and timing as the server move.
@@ -436,10 +591,17 @@ static func target_kind(target_id: String) -> String:
 		return target_id.get_slice(":", 1)
 	return ""
 
-func move_sample(move: Dictionary, now: float, back := 0.0, stand_off := -1.0) -> Dictionary:
+func move_sample(move: Dictionary, now: float, back := 0.0, stand_off := -1.0, who := "squad") -> Dictionary:
 	var key := "%s|%s|%s" % [str(move.get("departAt", 0)), str(move.get("arriveAt", 0)), str(move.get("targetId", ""))]
 	var route := route_for(key, move.get("path", []))
 	var distance := PathMotion.travelled(move, route, now)
+	# 1024: the optimistic walk started before the server answered; the authoritative walk takes over
+	# without stepping back — the lead the prediction had fades over HANDOFF_MS (a slightly slower pace).
+	var handoff_key := "%s|%s" % [str(move.get("departAt", 0)), str(move.get("targetId", ""))]
+	if handoffs.has(handoff_key):
+		var handoff: Dictionary = handoffs[handoff_key]
+		var fade := 1.0 - smoothstep(0.0, HANDOFF_MS, float(Time.get_ticks_msec() - int(handoff.at)))
+		distance = minf(float(route.total), distance + float(handoff.lead) * fade)
 	# Presentation: the squad stops short of a cage / guardian / device / boss spot (the server
 	# node is the spot itself); the ribbon and arrival timing are unchanged.
 	if stand_off < 0.0:
@@ -447,6 +609,9 @@ func move_sample(move: Dictionary, now: float, back := 0.0, stand_off := -1.0) -
 	var limit := float(route.total) - stand_off
 	var shown := minf(distance, maxf(limit, 0.0))
 	var sample := PathMotion.sample(route, maxf(0.0, shown - back))
+	var shift := origin_shift(move, route, maxf(0.0, shown - back), who)
+	if shift != Vector3.ZERO:
+		sample.position = (sample.position as Vector3) + shift
 	sample.arrived = now >= float(move.get("arriveAt", 0)) or distance >= limit
 	sample.speed = 0.0 if sample.arrived else PathMotion.speed(move, route)
 	sample.route = route
@@ -530,7 +695,7 @@ func update_horse(now: float, delta: float) -> void:
 		target = horse_rest_point(String(horse.get("node", "")), target)
 	if move is Dictionary and not (move.get("path", []) as Array).is_empty():
 		var boss_move := String(move.get("targetId", "")) == "lf_boss_ancient_maw"
-		var sample := move_sample(move, now, 0.0, HORSE_BOSS_STAND_OFF if boss_move else -1.0)
+		var sample := move_sample(move, now, 0.0, HORSE_BOSS_STAND_OFF if boss_move else -1.0, "horse")
 		target = sample.position
 		yaw = PathMotion.yaw_of(sample.tangent)
 		moving = not sample.arrived
@@ -546,9 +711,26 @@ func update_horse(now: float, delta: float) -> void:
 					if blended.distance_to(target) > 0.01:
 						yaw = PathMotion.yaw_of(blended - target) if moving else yaw
 					target = blended
+	# 1024: a menacing creature nearby frightens her: an alarmed start (alert), then she backs off
+	# ~2.5 m away from it, turned away, and stays alert, looking back at it.
+	var fear := "" if moving else menace_near(actor.position, 24.0)
+	if not fear.is_empty():
+		var creature: Rig = rigs.get("guardian_" + fear)
+		var away := Vector3(actor.position.x - creature.position.x, 0, actor.position.z - creature.position.z)
+		away = away.normalized() if away.length_squared() > 0.01 else Vector3.BACK
+		if not horse_afraid.has(fear):
+			horse_afraid[fear] = {"at": Time.get_ticks_msec(), "from": target}
+			actor.play(["lf_horse_alert", "lf_horse_idle", "Idle"], 0.12, true)
+			horse_transition_until = Time.get_ticks_msec() + 1100
+			game.horse_feared.emit(fear)
+		var startled := Time.get_ticks_msec() - int(horse_afraid[fear].at) < 900
+		target = (horse_afraid[fear].from as Vector3) + (Vector3.ZERO if startled else away * 2.6)
+		yaw = float(motion.get("horse", {}).get("yaw", yaw)) if startled else PathMotion.yaw_of(away)
+	else:
+		horse_afraid.clear()
 	var measured := place("horse", actor, target, yaw, delta)
 	var speed := speed_now if moving else measured
-	var mood := String(horse.get("mood", "calm"))
+	var mood := "alert" if not fear.is_empty() else String(horse.get("mood", "calm"))
 	var walking := moving or measured > 0.35
 	if walking:
 		turns.erase("horse")
@@ -575,7 +757,9 @@ func update_horse(now: float, delta: float) -> void:
 		if not waiting and mood != "alert" and absf(diff) > deg_to_rad(65.0) and start_turn("horse", actor, diff, "lf_horse_turn_left", "lf_horse_turn_right"):
 			pass
 		elif mood == "alert":
-			actor.play(["lf_horse_alert", "lf_horse_idle", "Idle"], 0.25)
+			# Alert, glancing back at what frightens her now and then.
+			var glance := fmod((Time.get_ticks_msec() - int(horse_afraid.values()[0].at if not horse_afraid.is_empty() else 0)) / 1000.0, 5.0)
+			actor.play(["lf_horse_look_back", "lf_horse_alert", "Idle"] if glance > 3.6 else ["lf_horse_alert", "lf_horse_idle", "Idle"], 0.25)
 		elif waiting:
 			if horse_wait_ticks == 0:
 				horse_wait_ticks = Time.get_ticks_msec()
@@ -593,6 +777,9 @@ func update_horse(now: float, delta: float) -> void:
 ## Where the mare waits at a glade (site centre / key / sub-targets): beside the squad, back
 ## towards the approach, on the side away from the mechanism; `fallback` elsewhere.
 func horse_rest_point(node: String, fallback: Vector3) -> Vector3:
+	if node == "lf_horse_origin":
+		var spots := horse_origin_spots()
+		return spots.get("horse", fallback) if not spots.is_empty() else fallback
 	var site_id := node.get_slice(":", 0).replace("lf_key_", "lf_site_")
 	if not site_id.begins_with("lf_site_"):
 		return fallback
@@ -637,6 +824,190 @@ func forest_heading() -> float:
 	if origin == Vector3.INF or first == Vector3.INF:
 		return PI
 	return PathMotion.yaw_of(first - origin)
+
+# ------------------------------------------------------------------ 1024: the mare's spot by the entrance
+## Build 1024 «коня не видно за стеной»: lf_horse_origin (server node) lies in the 10 m strip of known
+## ground between the city wall and the forest; with a high wall, a tower or a gate tower between it
+## and the fixed city camera (azimuth 45°, 38° down) the mare stood hidden behind masonry for the whole
+## intro (the owner saw only her plate over a tower). The presentation spot is the nearest point of
+## known ground (town square ±55 m or the entrance corridor), on the forest side, that no wall /
+## tower / gate / building box hides from the camera; the squad's spot the same, beside her.
+## Presentation only: the server node and every rule stay at lf_horse_origin; moves that start or end
+## there blend onto the spots over their first / last ORIGIN_BLEND metres (move_sample).
+const ORIGIN_SEARCH := 10.0
+const ORIGIN_BLEND := 6.0
+var origin_spots: Dictionary = {}
+var origin_key := ""
+var origin_at := 0
+const ORIGIN_RECHECK_MS := 2000
+## Per-frame cost probe (QA): usec of the last spot search (per layout change; re-checked every 2 s during the intro).
+var origin_usec := 0
+
+func origin_point() -> Vector3:
+	return game.target_position("lf_horse_origin")
+
+## {"horse": Vector3, "squad": Vector3, "out": Vector3 (unit, towards the forest)} or {} without a city.
+func horse_origin_spots() -> Dictionary:
+	var origin := origin_point()
+	var stage: Node3D = game.stage
+	if origin == Vector3.INF or not is_instance_valid(stage) or stage.get("walls") == null or stage.camera == null:
+		return {}
+	var walls = stage.walls
+	# The city rebuilds its walls / buildings in stages (a hall upgrade, a layout change): the key holds
+	# the node counts as well, and a cached answer is re-checked every ORIGIN_RECHECK_MS.
+	var buildings: Variant = stage.get("buildings")
+	var key := "%s|%d|%s|%s|%d|%d" % [str(origin.snapped(Vector3.ONE * 0.25)), stage.get_instance_id(), str(walls.signature),
+		str(walls.node.get_instance_id() if is_instance_valid(walls.node) else 0), walls.node.get_child_count() if is_instance_valid(walls.node) else 0,
+		(buildings as Node).get_child_count() if buildings is Node else 0]
+	var intro_on: bool = not intro_horse.is_empty() or (game.get("intro") != null and game.intro.mode == "animated")
+	if key == origin_key and (not intro_on or Time.get_ticks_msec() - origin_at < ORIGIN_RECHECK_MS):
+		return origin_spots
+	origin_at = Time.get_ticks_msec()
+	origin_key = key
+	var started := Time.get_ticks_usec()
+	var corridor := {"from": Vector2(-8, -55), "to": Vector2(-12, -60), "radius": 3.0}
+	var atlas_corridor: Variant = game.world_call("entrance_corridor_spec")
+	if atlas_corridor is Dictionary and not atlas_corridor.is_empty():
+		corridor = atlas_corridor
+	var out2: Vector2 = (corridor.to - corridor.from).normalized()
+	var out := Vector3(out2.x, 0, out2.y)
+	var boxes := structure_boxes(origin, 48.0)
+	var toward: Vector3 = stage.camera.global_transform.basis.z.normalized()
+	var candidates: Array = []
+	var step := 1.0
+	var r := -ORIGIN_SEARCH
+	while r <= ORIGIN_SEARCH:
+		var c := -ORIGIN_SEARCH
+		while c <= ORIGIN_SEARCH:
+			var offset := Vector3(c, 0, r)
+			if offset.length() <= ORIGIN_SEARCH and offset.dot(out) >= -1.5:
+				candidates.append(offset)
+			c += step
+		r += step
+	candidates.sort_custom(func(a: Vector3, b: Vector3) -> bool: return a.length_squared() < b.length_squared())
+	var horse := Vector3.INF
+	var squad := Vector3.INF
+	# Nearest fully visible spot; if a structure hides every one, the least hidden (fewest sample points).
+	var fallback := Vector3.INF
+	var fallback_hidden := 6
+	for offset: Vector3 in candidates:
+		var p: Vector3 = origin + offset
+		if not known_ground(p, corridor):
+			continue
+		var g: Vector3 = game.ground(p.x, p.z)
+		var hidden := structure_hidden_points(g, boxes, toward)
+		if hidden > 0:
+			if hidden < fallback_hidden:
+				fallback_hidden = hidden
+				fallback = g
+			continue
+		if horse == Vector3.INF:
+			horse = g
+		elif g.distance_to(horse) >= 2.6 and g.distance_to(horse) <= 5.0 and (g - horse).dot(out) <= 0.5:
+			squad = g
+			break
+	if horse == Vector3.INF:
+		horse = fallback if fallback != Vector3.INF else origin
+	if squad == Vector3.INF:
+		squad = horse - out * 2.8
+	origin_spots = {"horse": horse, "squad": squad, "out": out, "shifted": horse.distance_to(origin) > 0.5}
+	origin_usec = Time.get_ticks_usec() - started
+	return origin_spots
+
+## Known ground by construction: the town square (createFogState: cell centres −54…54 → ±56) or the
+## entrance corridor (cells whose centre lies within its radius); 1 m inside, so the fog edge band
+## never covers the actor.
+func known_ground(p: Vector3, corridor: Dictionary) -> bool:
+	if maxf(absf(p.x), absf(p.z)) <= 55.0:
+		return true
+	var a: Vector2 = corridor.from
+	var b: Vector2 = corridor.to
+	var q := Vector2(p.x, p.z)
+	var t := clampf((q - a).dot(b - a) / maxf((b - a).length_squared(), 0.0001), 0.0, 1.0)
+	return q.distance_to(a.lerp(b, t)) <= float(corridor.radius) - 1.0
+
+## Oriented boxes of the city structures (wall pieces, towers, roofs, gate, buildings) within `reach` m
+## of p: {"xf": instance → world, "inv": world → instance, "box": local AABB, "world": world AABB}.
+## Oriented, not world AABBs: a tower roof is a pyramid turned 45°, its world AABB is twice its area
+## and hid the whole entrance.
+func structure_boxes(center: Vector3, reach: float) -> Array:
+	var stage: Node3D = game.stage
+	var roots: Array = []
+	if stage.walls != null and is_instance_valid(stage.walls.node):
+		roots.append(stage.walls.node)
+	if stage.get("buildings") is Node:
+		roots.append(stage.buildings)
+	if is_instance_valid(stage.get("gate_node")):
+		roots.append(stage.gate_node)
+	var boxes: Array = []
+	for node_root in roots:
+		for node in (node_root as Node).find_children("*", "GeometryInstance3D", true, false):
+			var geometry := node as GeometryInstance3D
+			if not geometry.is_visible_in_tree():
+				continue
+			if geometry is MultiMeshInstance3D:
+				var multi: MultiMesh = (geometry as MultiMeshInstance3D).multimesh
+				if multi == null or multi.mesh == null:
+					continue
+				var local := multi.mesh.get_aabb()
+				var count := multi.visible_instance_count if multi.visible_instance_count >= 0 else multi.instance_count
+				for i in count:
+					var xf: Transform3D = geometry.global_transform * multi.get_instance_transform(i)
+					add_structure_box(boxes, xf, local, center, reach)
+			elif geometry is MeshInstance3D and (geometry as MeshInstance3D).mesh != null:
+				add_structure_box(boxes, geometry.global_transform, (geometry as MeshInstance3D).mesh.get_aabb(), center, reach)
+	return boxes
+
+func add_structure_box(boxes: Array, xf: Transform3D, local: AABB, center: Vector3, reach: float) -> void:
+	var world: AABB = xf * local
+	if Vector2(world.get_center().x - center.x, world.get_center().z - center.z).length() > reach + world.size.length() * 0.5:
+		return
+	if absf(xf.basis.determinant()) < 0.000001:
+		return
+	boxes.append({"xf": xf, "inv": xf.affine_inverse(), "box": local, "world": world})
+
+## How many of the actor's sample points (legs 0.5 m, body 1.3 m, head 2.0 m, ±0.9 m flanks at 1.0 m) a
+## structure hides from the orthographic camera (0…5); inside a structure counts as hidden. The legs
+## count: a spot right behind a wall walk showed only the mare's back.
+func structure_hidden_points(g: Vector3, boxes: Array, toward: Vector3) -> int:
+	var side := Vector3(toward.z, 0, -toward.x).normalized()
+	var hidden := 0
+	for p: Vector3 in [g + Vector3.UP * 0.5, g + Vector3.UP * 1.3, g + Vector3.UP * 2.0, g + Vector3.UP * 1.0 + side * 0.9, g + Vector3.UP * 1.0 - side * 0.9]:
+		var a := p + toward * 0.3
+		var b := p + toward * 140.0
+		for entry: Dictionary in boxes:
+			if not (entry.world as AABB).grow(0.3).intersects_segment(a, b) and not (entry.world as AABB).grow(0.3).has_point(p):
+				continue
+			var inv: Transform3D = entry.inv
+			var box: AABB = entry.box
+			if box.grow(0.2).has_point(inv * p) or box.intersects_segment(inv * a, inv * b):
+				hidden += 1
+				break
+	return hidden
+
+func structure_hides(g: Vector3, boxes: Array, toward: Vector3) -> bool:
+	return structure_hidden_points(g, boxes, toward) > 0
+
+## Presentation shift of a move that starts or ends at the horse origin onto the spot of `who`
+## ("horse" / "squad"), faded over ORIGIN_BLEND m.
+func origin_shift(move: Dictionary, route: Dictionary, distance: float, who: String) -> Vector3:
+	var spots := horse_origin_spots()
+	if spots.is_empty() or not bool(spots.get("shifted", false)):
+		return Vector3.ZERO
+	var origin := origin_point()
+	var path: Array = move.get("path", [])
+	if path.is_empty():
+		return Vector3.ZERO
+	var spot: Vector3 = spots.get(who, spots.horse)
+	var shift := Vector3(spot.x - origin.x, 0, spot.z - origin.z)
+	var first := Vector2(float(path[0].get("x", 0)), float(path[0].get("z", 0)))
+	var last := Vector2(float(path.back().get("x", 0)), float(path.back().get("z", 0)))
+	var w := 0.0
+	if first.distance_to(Vector2(origin.x, origin.z)) < 1.5:
+		w = maxf(w, 1.0 - smoothstep(0.0, ORIGIN_BLEND, distance))
+	if String(move.get("targetId", "")) == "lf_horse_origin" or last.distance_to(Vector2(origin.x, origin.z)) < 1.5:
+		w = maxf(w, smoothstep(float(route.total) - ORIGIN_BLEND, float(route.total), distance))
+	return shift * w
 
 ## Intro presentation: the mare walks out of the mist along the entrance corridor.
 func start_intro_horse(from: Vector3, to: Vector3, walk_seconds: float) -> void:
@@ -693,7 +1064,7 @@ func update_squad(now: float, delta: float) -> void:
 				actor.pose_at(pose.clip, pose.at)
 			else:
 				actor.play(pose.clip, 0.2)
-		elif not soldier_one_shot(actor):
+		elif not soldier_one_shot(actor) or pose.get("predicted", false):
 			# Speed-matched: the authoritative path speed while moving, the measured speed otherwise.
 			actor.locomote(float(pose.get("speed", 0.0)) if pose.get("moving", false) else speed, GUARD_CLIPS if pose.get("guard", false) else SOLDIER_CLIPS)
 		if show_actor(actor, actor.position):
@@ -715,6 +1086,9 @@ func soldier_one_shot(actor: Rig) -> bool:
 	return actor.playing_id() in ["lf_soldier_salute", "lf_soldier_help", "lf_soldier_unlock"]
 
 func squad_pose(index: int, now: float) -> Dictionary:
+	var guess := predicted_pose(index, now)
+	if not guess.is_empty():
+		return guess
 	var squad: Dictionary = game.client.squad()
 	var move: Variant = squad.get("move")
 	var busy: Variant = squad.get("busy")
@@ -745,6 +1119,10 @@ func squad_pose(index: int, now: float) -> Dictionary:
 		center = game.ground(float(rest.get("x", 0)), float(rest.get("z", 0)))
 	if center == Vector3.INF:
 		center = game.target_position("lf_horse_origin")
+	if node == "lf_horse_origin":
+		var spots := horse_origin_spots()
+		if not spots.is_empty():
+			center = spots.squad
 	var site_here := node.get_slice(":", 0).replace("lf_key_", "lf_site_")
 	var anchor: Dictionary = game.site_anchor(site_here) if site_here.begins_with("lf_site_") else {}
 	var plates: Variant = game.client.poi(site_here).get("mechanism", {}).get("plates")
@@ -779,6 +1157,19 @@ func squad_pose(index: int, now: float) -> Dictionary:
 				fwd = fwd.normalized()
 				var right := Vector3(fwd.z, 0, -fwd.x)
 				return {"position":front + right * lateral.x * 1.1 - fwd * absf(lateral.z) * 0.8, "yaw":PathMotion.yaw_of(fwd)}
+	# 1024: a menacing creature at this glade: the squad stands its ground in the guard stance,
+	# shields towards it (centre of the glade or the guardian's approach).
+	if menace.has(site_here) and (node == site_here or node.ends_with(":guardian")):
+		var creature: Rig = rigs.get("guardian_" + site_here)
+		if creature != null and is_instance_valid(creature):
+			var focus_g := focus_for_node(node, center)
+			var fwd := focus_g - center
+			fwd.y = 0
+			fwd = fwd.normalized() if fwd.length_squared() > 0.01 else Vector3.FORWARD
+			var right_g := Vector3(fwd.z, 0, -fwd.x)
+			var base := center - fwd * float(STAND_OFF.guardian) if node.ends_with(":guardian") else center
+			var spot: Vector3 = base + right_g * [0.0, -1.3, 1.3][index] - fwd * [0.0, 0.5, 0.5][index]
+			return {"position":spot, "yaw":PathMotion.yaw_of(creature.position - spot), "guard":true}
 	var focus := focus_for_node(node, center)
 	var forward := (focus - center)
 	forward.y = 0
@@ -874,6 +1265,9 @@ func update_props(site_id: String, poi: Dictionary, anchor: Dictionary, near: bo
 	var cage_pos: Vector3 = anchor.get("cage", anchor.get("center", Vector3.ZERO))
 	cage.position = game.ground(cage_pos.x, cage_pos.z)
 	cage.rotation.y = float(anchor.get("cage_yaw", 0.0))
+	# 1024: set_active keeps a loading rig processing (actor_rig); `wanted` puts out-of-view props
+	# behind the on-screen rigs in the load queue. Before, every cage stayed "loading" forever.
+	cage.wanted = near
 	cage.set_active(near and cage.is_ready())
 	var artifact: Dictionary = poi.get("artifact", {})
 	var family := String(artifact.get("family", "stone_rune"))
@@ -894,6 +1288,7 @@ func update_props(site_id: String, poi: Dictionary, anchor: Dictionary, near: bo
 		markers.append({"position":cage.position + Vector3.UP * 1.6, "kind":"cage", "site":site_id, "id":cage_id})
 	var artifact_id := "artifact_" + site_id
 	var key_prop := rig(artifact_id, ASSETS + "props/lf_artifact_%s.glb" % family, "", 1.0, props_parent)
+	key_prop.wanted = near
 	record.artifact = artifact_id
 	if key_prop.is_ready():
 		apply_artifact_variant(key_prop, family, String(artifact.get("id", "")), site_id)
@@ -911,6 +1306,7 @@ func update_props(site_id: String, poi: Dictionary, anchor: Dictionary, near: bo
 			if pit_void != null:
 				pit_void.position.y += PIT_VOID_LIFT
 			device.set_meta("void_lifted", true)
+		device.wanted = near
 		device.set_active(near and device.is_ready())
 		if device.is_ready():
 			update_mechanism_pose(site_id, kind, device, mechanism, state != "hidden", delta)
@@ -1436,24 +1832,122 @@ func update_guardian(site_id: String, poi: Dictionary, anchor: Dictionary, now: 
 	if squad_pos != Vector3.INF and squad_pos.distance_to(home) < 14.0:
 		face = squad_pos
 	if dying:
+		menace.erase(site_id)
 		show_actor(actor, actor.position, near)
 		return
 	var fight: Dictionary = game.client.battle()
 	var in_battle: bool = not fight.is_empty() and String(fight.get("siteId", "")) == site_id and String(fight.get("species", "")) != "ancient_maw"
+	if in_battle and engage_pending_for == site_id:
+		engage_pending_for = ""  # the server's fight took over the optimistic charge
 	var center: Vector3 = anchor.get("center", home)
 	var out := Vector3(home.x - center.x, 0, home.z - center.z)
 	var stand := home if in_battle or out.length_squared() < 0.01 else home + out.normalized() * 1.2
-	var speed := place(id, actor, stand, PathMotion.yaw_of(face - stand), delta)
+	var menacing := not in_battle and squad_pos != Vector3.INF and squad_member_count() > 0 \
+		and Vector2(squad_pos.x - home.x, squad_pos.z - home.z).length() < MENACE_RANGE and engage_pending_for != site_id
+	if not menacing:
+		menace.erase(site_id)
 	if in_battle:
+		var lunge := guardian_battle_offset(fight, now, home)
+		place(id, actor, home + lunge, PathMotion.yaw_of(battle_focus(fight) - home), delta)
 		guardian_battle_pose(actor, fight, now)
-	elif squad_pos != Vector3.INF and squad_pos.distance_to(home) < 12.0 and not guardian_alerted.get(site_id, false):
-		guardian_alerted[site_id] = true
-		actor.play(["Alert", "Roar", "Idle"], 0.2, true)
-		game.audio.play_cue("fr_distant_rumble", 10.0)
-	elif not actor.player or not actor.player.is_playing() or actor.current_id in ["Idle", "Walk", "Run"]:
-		actor.locomote(speed, CREATURE_CLIPS)
+	elif menacing:
+		update_menace(site_id, actor, id, home, squad_pos, String(spec.get("species", "tenerys")), delta)
+	else:
+		var speed := place(id, actor, stand, PathMotion.yaw_of(face - stand), delta)
+		if not actor.player or not actor.player.is_playing() or actor.current_id in ["Idle", "Walk", "Run", "stalk", "alert"]:
+			actor.locomote(speed, CREATURE_CLIPS)
+	update_menace_ring(site_id, actor)
 	if show_actor(actor, actor.position, near):
 		markers.append({"position":actor.position + Vector3.UP * 2.2, "kind":"guardian", "site":site_id, "id":id})
+
+# ------------------------------------------------------------------ 1024: the creature menaces
+## Build 1024 «Тенерис безобиден»: once the squad comes within MENACE_RANGE of a living guardian's lair
+## (and no fight runs) the creature roars at once (Roar = tenerys howl), then stalks an arc in front of
+## its lair facing the squad (stalk clip, speed-matched) and roars again every MENACE_ROAR_EVERY s with
+## a red ground ring pulsing under it (telegraph). The mare backs away from it, alert (update_horse);
+## the squad takes the guard stance facing it (squad_pose). Presentation only.
+const MENACE_RANGE := 18.0
+const MENACE_ROAR_EVERY := 6.5
+const MENACE_CLIPS := {"idle":["alert", "Alert", "Idle"], "walk":["stalk", "Walk"], "run":["Run"], "walk_speed":1.1, "run_speed":4.0}
+var menace: Dictionary = {}
+var menace_rings: Dictionary = {}
+## A press on «Атаковать» (optimistic): the menace yields to the charge before the server answers.
+var engage_pending_for := ""
+
+func update_menace(site_id: String, actor: Rig, id: String, home: Vector3, squad_pos: Vector3, species: String, delta: float) -> void:
+	var ticks := Time.get_ticks_msec()
+	if not menace.has(site_id):
+		menace[site_id] = {"since": ticks, "next_roar": ticks, "roar_until": 0, "species": species}
+	var m: Dictionary = menace[site_id]
+	var to_squad := Vector3(squad_pos.x - home.x, 0, squad_pos.z - home.z)
+	var dir := to_squad.normalized() if to_squad.length_squared() > 0.01 else Vector3.BACK
+	var side := Vector3(dir.z, 0, -dir.x)
+	if ticks >= int(m.next_roar):
+		var length := actor.clip_length(["Roar", "Alert"]) if actor.is_ready() else 1.6
+		m.roar_until = ticks + int(1000.0 * clampf(length, 0.9, 2.6))
+		m.next_roar = ticks + int(1000.0 * (MENACE_ROAR_EVERY + randf() * 1.5))
+		m.roars = int(m.get("roars", 0)) + 1
+		actor.play(["Roar", "Alert", "Idle"], 0.15, true)
+		game.creature_roared.emit(site_id, species)
+		game.audio.play_cue("fr_distant_rumble", 10.0)
+	var roaring := ticks < int(m.roar_until)
+	var phase := (ticks - int(m.since)) / 1000.0
+	var stalk := home + dir * 0.9 + side * sin(phase * 0.85) * 1.7
+	var state: Dictionary = motion.get(id, {})
+	var target: Vector3 = state.get("position", stalk) if roaring else stalk
+	var speed := place(id, actor, target, PathMotion.yaw_of(squad_pos - actor.position), delta)
+	if roaring:
+		if actor.current_id not in ["Roar", "Alert"]:
+			actor.play(["Roar", "Alert", "Idle"], 0.15)
+	else:
+		actor.locomote(maxf(speed, 0.0), MENACE_CLIPS)
+
+## The red ring under a roaring creature (one flat torus per site, alpha pulse; hidden otherwise).
+func update_menace_ring(site_id: String, actor: Rig) -> void:
+	var ring: MeshInstance3D = menace_rings.get(site_id)
+	var m: Dictionary = menace.get(site_id, {})
+	var ticks := Time.get_ticks_msec()
+	var strength := 0.0
+	if not m.is_empty() and actor.visible:
+		var left := int(m.roar_until) - ticks
+		if left > 0:
+			strength = clampf(left / 400.0, 0.0, 1.0) * (0.65 + 0.35 * sin(ticks / 70.0))
+	if strength <= 0.0:
+		if ring != null and is_instance_valid(ring):
+			ring.visible = false
+		return
+	if ring == null or not is_instance_valid(ring):
+		ring = MeshInstance3D.new()
+		ring.name = "MenaceRing_" + site_id
+		var torus := TorusMesh.new()
+		torus.inner_radius = 1.9
+		torus.outer_radius = 2.25
+		torus.rings = 32
+		torus.ring_segments = 6
+		ring.mesh = torus
+		ring.scale = Vector3(1.0, 0.08, 1.0)
+		var material := StandardMaterial3D.new()
+		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		material.albedo_color = Color(1.0, 0.25, 0.1, 0.8)
+		material.no_depth_test = false
+		ring.material_override = material
+		ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		ring.set_meta("no_canopy_fade", true)
+		ring.set_meta("fog_exempt", true)
+		root.add_child(ring)
+		menace_rings[site_id] = ring
+	ring.visible = true
+	ring.position = actor.position + Vector3.UP * 0.15
+	(ring.material_override as StandardMaterial3D).albedo_color.a = 0.85 * strength
+
+## Site whose menacing creature stands within `reach` m of p ("" when none).
+func menace_near(p: Vector3, reach: float) -> String:
+	for site_id in menace:
+		var creature: Rig = rigs.get("guardian_" + String(site_id))
+		if creature != null and is_instance_valid(creature) and Vector2(creature.position.x - p.x, creature.position.z - p.z).length() <= reach:
+			return String(site_id)
+	return ""
 
 # ------------------------------------------------------------------ battles (server timeline)
 func battle_elapsed(fight: Dictionary, now: float) -> float:
@@ -1514,6 +2008,45 @@ func latest_event(fight: Dictionary, elapsed: float, actor: String, window: floa
 			best = event
 	return best
 
+## Build 1024 «у атаки Тенериса нет анимации»: the guardian fight reads on screen. The squad charges
+## from its guard line onto the melee spots (CHARGE_S, jog), each squad volley is a lunge with the
+## sword (lf_soldier_attack, contact marker 0.65 s → sparks + fight_hit), the creature strikes back
+## with a lunge (attack_claw / attack_bite; its ability telegraphed by a roar), recoils on hits, the
+## struck soldier reels (lf_soldier_hit, knocked back), the knocked-out representatives stay wounded
+## (lf_soldier_help after the fight); the creature dies on the server's death event, or roars over a
+## retreating squad on a defeat. Every beat comes from the server timeline (startedAt + t).
+const MELEE := 2.4
+const CHARGE_FROM := 2.8
+const CHARGE_S := 1.0
+var fight_fx_key := ""
+var fight_fx_t := -1.0
+var fight_wounded: Dictionary = {}
+
+func battle_focus(fight: Dictionary) -> Vector3:
+	var site_id := String(fight.get("siteId", ""))
+	var anchor: Dictionary = game.site_anchor(site_id)
+	var enemy: Vector3 = anchor.get("guardian", Vector3.ZERO)
+	var approach: Vector3 = anchor.get("approach", enemy + Vector3(0, 0, 4))
+	var away := Vector3(approach.x - enemy.x, 0, approach.z - enemy.z)
+	away = away.normalized() if away.length_squared() > 0.01 else Vector3.BACK
+	return enemy + away * MELEE
+
+## The creature's own motion in the fight: a lunge at the squad on each strike, a recoil on hits.
+func guardian_battle_offset(fight: Dictionary, now: float, home: Vector3) -> Vector3:
+	var elapsed := battle_elapsed(fight, now)
+	var toward := battle_focus(fight) - home
+	toward.y = 0
+	toward = toward.normalized() if toward.length_squared() > 0.01 else Vector3.BACK
+	var amount := 0.0
+	for event in timeline_window(fight, elapsed - 1.0, elapsed):
+		var at := float(event.get("t", 0.0))
+		var kind := String(event.get("type", ""))
+		if String(event.get("actor", "")) == "guardian" and kind in ["attack", "ability"]:
+			amount += 1.1 * sin(PI * clampf((elapsed - at) / 0.9, 0.0, 1.0))
+		elif String(event.get("actor", "")) == "squad" and kind == "hit":
+			amount -= 0.35 * sin(PI * clampf((elapsed - at) / 0.45, 0.0, 1.0))
+	return toward * amount
+
 func guardian_battle_pose(actor: Rig, fight: Dictionary, now: float) -> void:
 	var elapsed := battle_elapsed(fight, now)
 	var ending := float(fight.get("endsAt", now)) <= now
@@ -1524,18 +2057,41 @@ func guardian_battle_pose(actor: Rig, fight: Dictionary, now: float) -> void:
 	if ending and String(fight.get("outcome", "")) == "victory":
 		actor.hold_end(["Death"])
 		return
+	if ending:
+		# The squad lost or withdrew: the creature roars over the field.
+		actor.play(["Roar", "Alert", "Idle"], 0.2)
+		return
 	var own := latest_event(fight, elapsed, "guardian", 1.3)
 	if not own.is_empty() and String(own.get("type", "")) in ["attack", "ability", "telegraph"]:
-		actor.pose_at(["Attack"] if String(own.type) == "attack" else ["Roar", "Alert", "Attack"], elapsed - float(own.get("t", 0.0)))
+		var kind := String(own.type)
+		var clip: Array = ["Roar", "Alert", "Attack"]
+		if kind == "attack":
+			clip = ["attack_claw", "Attack"] if int(own.get("order", 0)) % 2 == 0 else ["Attack"]
+		elif kind == "ability":
+			clip = ["attack_pounce", "Attack"]
+		actor.pose_at(clip, elapsed - float(own.get("t", 0.0)))
 		return
 	var struck := latest_event(fight, elapsed, "squad", 0.6, "hit")
 	if not struck.is_empty():
 		actor.pose_at(["Hit"], maxf(0.0, elapsed - float(struck.get("t", 0.0))))
 		return
 	if elapsed < 1.2:
-		actor.pose_at(["Alert", "Idle"], elapsed)
+		actor.pose_at(["Roar", "Alert", "Idle"], elapsed)
 		return
-	actor.play(["Idle"], 0.25)
+	actor.play(["alert", "Idle"], 0.25)
+
+## Which representatives the guardian's hits knock out (wounded): the server's knocked units, mapped
+## onto the three soldiers in hit order (index 2, then 1); none while every unit stands.
+func wounded_members(fight: Dictionary, elapsed: float) -> Dictionary:
+	var wounded := {}
+	var hits := 0
+	for event in timeline_window(fight, -1.0e9, elapsed):
+		if String(event.get("actor", "")) == "guardian" and String(event.get("type", "")) == "hit":
+			var knocked: Variant = event.get("knocked", {})
+			if knocked is Dictionary and not (knocked as Dictionary).is_empty():
+				wounded[[2, 1, 0][mini(hits, 2)]] = true
+				hits += 1
+	return wounded
 
 func battle_member_pose(index: int, fight: Dictionary, now: float) -> Dictionary:
 	var site_id := String(fight.get("siteId", ""))
@@ -1547,13 +2103,32 @@ func battle_member_pose(index: int, fight: Dictionary, now: float) -> Dictionary
 	away = away.normalized() if away.length_squared() > 0.01 else Vector3.BACK
 	# boss fight: a tight wedge inside the entrance gap — at ±24° the wing soldiers stood behind the entrance
 	# rocks from the city camera (qa_forest_arena_camera: 2-17 % of their silhouette visible)
-	var distance: float = ([BOSS_FIGHT_DISTANCE, BOSS_FIGHT_DISTANCE - 1.2, BOSS_FIGHT_DISTANCE - 1.2][index]) if boss_fight else 3.6
-	var spread: float = ([0.0, -0.17, 0.17] if boss_fight else [0.0, -0.75, 0.75])[index]
+	var distance: float = ([BOSS_FIGHT_DISTANCE, BOSS_FIGHT_DISTANCE - 1.2, BOSS_FIGHT_DISTANCE - 1.2][index]) if boss_fight else MELEE + [0.0, 0.35, 0.35][index]
+	var spread: float = ([0.0, -0.17, 0.17] if boss_fight else [0.0, -0.62, 0.62])[index]
 	var p := enemy + away.rotated(Vector3.UP, spread) * distance
 	var yaw := PathMotion.yaw_of(enemy - p)
 	var elapsed := battle_elapsed(fight, now)
-	if float(fight.get("endsAt", now)) <= now:
+	var ended := float(fight.get("endsAt", now)) <= now
+	if not boss_fight:
+		var wounded := wounded_members(fight, elapsed)
+		if ended:
+			if String(fight.get("outcome", "")) != "victory":
+				# Defeat / withdrawal: back to the guard line, shields up.
+				return {"position":enemy + away.rotated(Vector3.UP, spread) * (distance + CHARGE_FROM + 1.5), "yaw":yaw, "guard":true}
+			if wounded.has(index):
+				return {"position":p + away * 0.6, "yaw":yaw, "clip":["lf_soldier_help", "lf_soldier_guard", "Idle"]}
+			return {"position":p, "yaw":yaw, "clip":["lf_soldier_guard", "lf_soldier_idle", "Idle"]}
+		if elapsed < CHARGE_S:
+			# The charge: from the guard line onto the melee spot (jog, speed-matched).
+			var from := enemy + away.rotated(Vector3.UP, spread * 0.8) * (distance + CHARGE_FROM)
+			var f := smoothstep(0.0, CHARGE_S, elapsed)
+			return {"position":from.lerp(p, f), "yaw":yaw, "moving":true, "speed":CHARGE_FROM / CHARGE_S * 1.2}
+		for event in timeline_window(fight, -1.0e9, elapsed):
+			if String(event.get("type", "")) == "death" and String(event.get("actor", "")) == "squad":
+				return {"position":p, "yaw":yaw, "clip":["lf_soldier_death", "Death"], "at":elapsed - float(event.get("t", 0.0))}
+	elif ended:
 		return {"position":p, "yaw":yaw, "clip":["lf_soldier_guard", "lf_soldier_idle", "Idle"]}
+	var hit_order := 0
 	for event in timeline_window(fight, elapsed - 1.25, elapsed):
 		var at := float(event.get("t", 0.0))
 		if at > elapsed or elapsed - at > 1.25:
@@ -1561,10 +2136,44 @@ func battle_member_pose(index: int, fight: Dictionary, now: float) -> Dictionary
 		var who := int(event.get("member", event.get("index", -1)))
 		var actor_kind := String(event.get("actor", ""))
 		if actor_kind == "squad" and String(event.get("type", "")) == "attack" and (who == index or (who < 0 and (int(at * 10.0) + index) % 3 != 2)):
-			return {"position":p + (enemy - p).normalized() * 0.5 * sin(PI * clampf((elapsed - at) / 1.2, 0.0, 1.0)), "yaw":yaw, "clip":["lf_soldier_attack", "Sword_Drill", "Attack"], "at":elapsed - at}
-		if actor_kind in ["guardian", "boss"] and String(event.get("type", "")) == "hit" and (who == index or (who < 0 and index == int(at) % 3)) and elapsed - at < 0.5:
-			return {"position":p, "yaw":yaw, "clip":["lf_soldier_hit", "Hit"], "at":elapsed - at}
+			var lunge := (0.5 if boss_fight else 0.9) * sin(PI * clampf((elapsed - at) / 1.2, 0.0, 1.0))
+			return {"position":p + (enemy - p).normalized() * lunge, "yaw":yaw, "clip":["lf_soldier_attack", "Sword_Drill", "Attack"], "at":elapsed - at}
+		if actor_kind in ["guardian", "boss"] and String(event.get("type", "")) == "hit" and (who == index or (who < 0 and index == (int(event.get("order", int(at))) + hit_order) % 3)) and elapsed - at < 0.6:
+			var reel := 0.0 if boss_fight else 0.5 * sin(PI * clampf((elapsed - at) / 0.6, 0.0, 1.0))
+			return {"position":p - (enemy - p).normalized() * reel, "yaw":yaw, "clip":["lf_soldier_hit", "Hit"], "at":elapsed - at}
 	return {"position":p, "yaw":yaw, "clip":["lf_soldier_guard", "lf_soldier_idle", "Shield_Block", "Idle"]}
+
+## Sparks and sound hooks on the fight's contact moments (each timeline event once per fight).
+func update_fight_fx(now: float) -> void:
+	var fight: Dictionary = game.client.battle()
+	if fight.is_empty() or String(fight.get("species", "")) == "ancient_maw":
+		return
+	var key := String(fight.get("reportId", str(fight.get("startedAt", 0))))
+	var elapsed := battle_elapsed(fight, now)
+	if key != fight_fx_key:
+		fight_fx_key = key
+		fight_fx_t = elapsed - 0.05 if elapsed > 0.5 else -1.0
+	if elapsed <= fight_fx_t:
+		return
+	var site_id := String(fight.get("siteId", ""))
+	var creature: Rig = rigs.get("guardian_" + site_id)
+	for event in timeline_window(fight, fight_fx_t + 0.0001, elapsed):
+		var kind := String(event.get("type", ""))
+		var who := String(event.get("actor", ""))
+		if kind == "hit" and who == "squad":
+			if creature != null and creature.visible:
+				game.fx.burst_world(creature.position + Vector3.UP * 0.6, "hit")
+			game.fight_hit.emit(site_id, "squad", "guardian")
+		elif kind == "hit" and who == "guardian":
+			var struck: Rig = rigs.get("squad_%d" % (int(event.get("order", 0)) % maxi(1, squad_member_count())))
+			if struck != null and struck.visible:
+				game.fx.burst_world(struck.position + Vector3.UP * 0.4, "hit")
+			game.fight_hit.emit(site_id, "guardian", "squad")
+		elif kind in ["telegraph", "ability"] and who == "guardian":
+			game.creature_roared.emit(site_id, String(fight.get("species", "")))
+		elif kind == "death":
+			game.fight_hit.emit(site_id, "death", who)
+	fight_fx_t = elapsed
 
 func update_battle_hud(now: float) -> void:
 	var fight: Dictionary = game.client.battle()
@@ -2031,6 +2640,7 @@ func on_task_completed(site_id: String, task_id: String) -> void:
 
 func on_cage_opened(site_id: String) -> void:
 	if choreo.has("cage:" + site_id):
+		choreo["cage:" + site_id].confirmed = true
 		return
 	var people := []
 	for person in game.client.poi(site_id).get("captives", []):
@@ -2119,7 +2729,9 @@ func run_cage(beat: Dictionary, delta: float) -> bool:
 				seat_artifact(key_prop, cage, true)
 				key_prop.set_active(true)
 			# latch_release (soldier marker) → lf_cage_unlock; fallback by time.
-			if beat.flags.has("latch_release") or st >= 2.0:
+			# 1024: a predicted unlock (button pressed, server not answered yet) waits here for the
+			# confirmation; a refusal removes the beat (settle_prediction).
+			if (beat.flags.has("latch_release") or st >= 2.0) and bool(beat.get("confirmed", true)):
 				if ready_cage:
 					cage.play(["lf_cage_unlock"], 0.0, true)
 				game.audio.play_cue("fr_cage_latch")
@@ -2135,6 +2747,7 @@ func run_cage(beat: Dictionary, delta: float) -> bool:
 					cage.set_meta("pose", "open")
 					cage.play(["lf_cage_gate_open"], 0.0, true)
 				game.audio.play_cue("fr_gate_creak")
+				game.cage_opened.emit(site_id)
 				if has_soldier:
 					soldier.play(["lf_soldier_help", "lf_soldier_idle", "Idle"], 0.25, true)
 				set_stage(beat, "gate")

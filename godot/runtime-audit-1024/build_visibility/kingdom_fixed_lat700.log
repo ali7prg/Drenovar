@@ -1,0 +1,124 @@
+ok   Local server given (--server=http://127.0.0.1:PORT)
+ok   Local realm reset
+ok   Settlement created on the local V6 server (201)
+ok   Game connected to the local V6 server and shows the city
+ok   City is a kingdom
+ok   Two builders
+ok   Build opens the V6 construction strip
+ok   A card can be built
+ok   Жилой дом: tapping the card starts placement
+ok   Жилой дом: 29 plots offered, each with a spot
+ok   Жилой дом: the camera shows a free plot
+ok   Жилой дом: no offered plot lies on a building ()
+ok   Жилой дом: the server quotes the build on v1-6
+ok   Жилой дом: the ghost stands on the chosen plot
+ok   Жилой дом: the chosen plot glows
+ok   Жилой дом: the server answered the order
+ok   Жилой дом: scaffolding and builders at the chosen spot after «Построить»
+E2E  B02 on v1-6: answer after 779 ms; scaffolding and builders after 9 ms (frame 1 of 104)
+ok   Жилой дом: scaffolding and builders at once after «Построить» (frame 1, 9 ms; answer 779 ms)
+ok   Жилой дом: scaffolding before the server answers (9 ms, answer 779 ms)
+ok   Жилой дом: the new building rises inside the scaffolding
+ok   Жилой дом: the camera is on the site
+ok   Жилой дом (site): on dry ground (height 2.89)
+ok   Жилой дом (site): inside the wall ring
+ok   Жилой дом (site): no tree stands in it (0)
+ok   Жилой дом: the site carries the name and progress plate
+ok   Жилой дом: the card says under construction (busy), not built
+ok   Жилой дом: no finished building before the end
+ok   Build opens the V6 construction strip
+ok   A card can be built
+ok   Склад: tapping the card starts placement
+ok   Склад: 28 plots offered, each with a spot
+ok   Склад: the camera shows a free plot
+ok   Склад: no offered plot lies on a building ()
+ok   Склад: the server quotes the build on v1-7
+ok   Склад: the ghost stands on the chosen plot
+ok   Склад: the chosen plot glows
+ok   Склад: the server answered the order
+ok   Склад: scaffolding and builders at the chosen spot after «Построить»
+E2E  B03 on v1-7: answer after 799 ms; scaffolding and builders after 6 ms (frame 1 of 104)
+ok   Склад: scaffolding and builders at once after «Построить» (frame 1, 6 ms; answer 799 ms)
+ok   Склад: scaffolding before the server answers (6 ms, answer 799 ms)
+ok   Склад: the new building rises inside the scaffolding
+ok   Склад: the camera is on the site
+ok   Склад (site): on dry ground (height 0.21)
+ok   Склад (site): inside the wall ring
+ok   Склад (site): no tree stands in it (0)
+ok   Склад: the site carries the name and progress plate
+ok   Склад: the card says under construction (busy), not built
+ok   Склад: no finished building before the end
+ok   The server runs both orders (order and order2)
+ok   Both sites have scaffolding and builders
+ok   Жилой дом (first site, second order running): on dry ground (height 2.89)
+ok   Жилой дом (first site, second order running): inside the wall ring
+ok   Жилой дом (first site, second order running): no tree stands in it (0)
+ok   The server answers a poll with 304 (cached state, advanced_state)
+ok   Sites stay through the conditional polls
+E2E  state polls while building: 1 full, 3 not modified
+ok   Construction orders carry their end
+ok   The state after the end has the new buildings
+ok   Жилой дом: on its plot v1-6
+ok   Жилой дом: tap marker and name plate in the city
+ok   Жилой дом: stands where it was built (0.0 m off)
+ok   Жилой дом: its model is drawn at the spot
+ok   Жилой дом: on dry ground (height 2.89)
+ok   Жилой дом: inside the wall ring
+ok   Жилой дом: no tree stands in it (0)
+ok   Жилой дом: the scaffolding and builders are gone
+ok   Жилой дом: the card says built (maxed)
+ok   Склад: on its plot v1-7
+ok   Склад: tap marker and name plate in the city
+ok   Склад: stands where it was built (0.0 m off)
+ok   Склад: its model is drawn at the spot
+ok   Склад: on dry ground (height 0.21)
+ok   Склад: inside the wall ring
+ok   Склад: no tree stands in it (0)
+ok   Склад: the scaffolding and builders are gone
+ok   Склад: the card says built (maxed)
+ok   Build opens the V6 construction strip
+ok   A card can be built
+ok   Амбар: tapping the card starts placement
+ok   Амбар: 27 plots offered, each with a spot
+ok   Амбар: the camera shows a free plot
+ok   Амбар: no offered plot lies on a building ()
+ok   Амбар: the server quotes the build on v1-4
+ok   Амбар: the ghost stands on the chosen plot
+ok   Амбар: the chosen plot glows
+ok   Амбар: the server answered the order
+ok   Амбар: scaffolding and builders at the chosen spot after «Построить»
+E2E  B04 on v1-4: answer after 792 ms; scaffolding and builders after 7 ms (frame 1 of 97)
+ok   Амбар: scaffolding and builders at once after «Построить» (frame 1, 7 ms; answer 792 ms)
+ok   Амбар: scaffolding before the server answers (7 ms, answer 792 ms)
+ok   Амбар: the new building rises inside the scaffolding
+ok   Амбар: the camera is on the site
+ok   Амбар (site): on dry ground (height 0.35)
+ok   Амбар (site): inside the wall ring
+ok   Амбар (site): no tree stands in it (0)
+ok   Амбар: the site carries the name and progress plate
+ok   Амбар: the card says under construction (busy), not built
+ok   Амбар: no finished building before the end
+ok   Construction orders carry their end
+ok   The state after the end has the new buildings
+ok   Амбар: on its plot v1-4
+ok   Амбар: tap marker and name plate in the city
+ok   Амбар: stands where it was built (0.0 m off)
+ok   Амбар: its model is drawn at the spot
+ok   Амбар: on dry ground (height 0.35)
+ok   Амбар: inside the wall ring
+ok   Амбар: no tree stands in it (0)
+ok   Амбар: the scaffolding and builders are gone
+ok   Амбар: the card says built (maxed)
+ok   No two buildings overlap ()
+ok   The city draws 3 more building models
+ok   Refused order: no scaffolding or building is left on v1-5
+ok   Refused order: the server's reason is kept (Недостаточно ресурсов)
+E2E  refused B05 on v1-5: forecast shown true, removed true
+E2E  built: B02 on v1-6 at (-6.0, -21.0), B03 on v1-7 at (9.0, -20.0), B04 on v1-4 at (-19.0, 10.0)
+QA_BUILD_E2E scenario=kingdom checks=111 failures=0
+QA_BUILD_E2E B02 on v1-6: answer after 779 ms; scaffolding and builders after 9 ms (frame 1 of 104)
+QA_BUILD_E2E B03 on v1-7: answer after 799 ms; scaffolding and builders after 6 ms (frame 1 of 104)
+QA_BUILD_E2E state polls while building: 1 full, 3 not modified
+QA_BUILD_E2E B04 on v1-4: answer after 792 ms; scaffolding and builders after 7 ms (frame 1 of 97)
+QA_BUILD_E2E refused B05 on v1-5: forecast shown true, removed true
+QA_BUILD_E2E built: B02 on v1-6 at (-6.0, -21.0), B03 on v1-7 at (9.0, -20.0), B04 on v1-4 at (-19.0, 10.0)

@@ -187,7 +187,8 @@ func run() -> void:
 	var steps: Array = []
 	# 1. Building upgrade: no vegetation change.
 	steps.append(func(s): s.city.buildings[1].level = 2)
-	# 2. Construction order on a free plot (scaffold appears).
+	# 2. Construction order on a free plot: the scaffold appears and its plot is cleared of
+	#    trees (a V6 order has no clearing step; build 1024).
 	steps.append(func(s): s.city.kingdom.order = {"kind": "build", "plotId": "v1-5", "type": "RES-02"})
 	# 3. Trees felled.
 	steps.append(func(s): s.city.progress.felled = [data.woods[3].id, data.woods[40].id, data.woods[400].id])
@@ -218,8 +219,8 @@ func run() -> void:
 		fresh = await rebuilt(data, state)
 		compare("step %d" % index, before, after, fresh)
 		fresh.free()
-	check(vegetation_steps == [3, 4, 5], "Vegetation rebuilt on unexpected steps: " + str(vegetation_steps))
-	check(after.ground_rebuilds - ground_before == 2, "Ground cover rebuilt %d times, expected 2 (plot + grove)" % (after.ground_rebuilds - ground_before))
+	check(vegetation_steps == [2, 3, 4, 5], "Vegetation rebuilt on unexpected steps: " + str(vegetation_steps))
+	check(after.ground_rebuilds - ground_before == 3, "Ground cover rebuilt %d times, expected 3 (site + plot + grove)" % (after.ground_rebuilds - ground_before))
 	var vegetation_total: int = after.vegetation_rebuilds - rebuilds_before
 	before.free()
 	after.free()

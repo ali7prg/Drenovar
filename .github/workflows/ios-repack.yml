@@ -106,7 +106,7 @@ jobs:
             ${{ runner.temp }}/SHA256.txt
             ${{ runner.temp }}/DRENOVAR-game-${{ steps.meta.outputs.build }}.pck
             ${{ runner.temp }}/DRENOVAR-game-evidence-${{ steps.meta.outputs.build }}.zip
-          retention-days: 30
+          retention-days: 3
       - name: Publish as a test pre-release (direct download link)
         env:
           GH_TOKEN: ${{ github.token }}

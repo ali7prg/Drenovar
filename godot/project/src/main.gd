@@ -86,6 +86,15 @@ var profile_button: Button
 # the newer ones); kept in user://hud.cfg.
 var reports_seen_ms := 0.0
 const HUD_STATE_PATH := "user://hud.cfg"
+## Settings of the menu (premium UI stage 4b): sound on the master bus, less motion (no window
+## settle, no ring unfold). Kept in the HUD's file.
+var sound_on := true
+var reduced_motion := false
+## Tone of the notice toast: "info", "good" or "warn" (an error, said calmly).
+var message_tone := "info"
+var message_shown := ""
+var message_warn_text := ""
+var message_tween: Tween
 var modal: PanelContainer
 var modal_title: Label
 var modal_eyebrow: Label
@@ -109,6 +118,9 @@ var modal_layout := "center"
 # Share of the screen width the hero column of a full-screen window takes (the recruitment
 # window sets a wider one for its rail and 3D stage; reset on every open).
 var modal_hero_share := 0.4
+## A full window without a hero column whose body spans the screen (the chronicle's rows);
+## the others keep a 900-unit reading width.
+var modal_full_width := false
 # Upper board of the tall header of full-screen windows: section line on the left, the
 # player's resources (live) on the right.
 var modal_top: Control
@@ -209,6 +221,7 @@ const COMMAND_RETRY_DELAYS := [0.4, 1.2, 2.8]
 const COMMAND_RETRY_WINDOW_MS := 30000
 const CONNECTION_NOTICE_AFTER_MS := 10000
 var last_ok_msec := 0
+var creature_portraits: Array[Texture2D] = []
 var next_notice_check_msec := 0
 # Conditional state polls (v6/docs/CONDITIONAL-STATE-1022.md): the full tagged answer is kept
 # (never an advanced copy); a 304 re-applies it with the time moved on. Off for the rest of the
@@ -437,6 +450,11 @@ func build_ui() -> void:
 	var saved := ConfigFile.new()
 	if saved.load(HUD_STATE_PATH) == OK:
 		reports_seen_ms = float(saved.get_value("hud", "reports_seen_ms", 0.0))
+		sound_on = bool(saved.get_value("settings", "sound", true))
+		reduced_motion = bool(saved.get_value("settings", "reduced_motion", false))
+		action_ring.reduced_motion = reduced_motion
+	if not sound_on:
+		AudioServer.set_bus_mute(0, true)
 	var wallet := HBoxContainer.new()
 	wallet.add_theme_constant_override("separation", 2)
 	wallet.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -481,22 +499,30 @@ func build_ui() -> void:
 	map_controls.add_child(minimap)
 	minimap.hide()
 	map_controls.add_child(navigation)
+	# The notice toast (premium UI stage 4b): the carved oak plate of the completion banners,
+	# a small medallion with its tone (info, done, a calm amber «!» for an error) and ivory
+	# text. It eases in when its text changes and hides when the text is empty.
 	message = Label.new()
+	message.name = "Message"
 	message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	message.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	message.add_theme_color_override("font_color", UiKit.IVORY)
-	message.add_theme_color_override("font_outline_color", Color("#121916"))
+	message.add_theme_color_override("font_outline_color", Color("#120c07"))
 	message.add_theme_constant_override("outline_size", 4)
 	message.add_theme_font_override("font", UiKit.LABEL_FONT)
-	message.add_theme_stylebox_override("normal", UiKit.toast_style())
+	message.add_theme_font_size_override("font_size", 18)
+	message.add_theme_stylebox_override("normal", toast_plate(58))
 	message.self_modulate.a = 0.0
+	message.draw.connect(draw_toast_mark.bind(message))
 	outer.add_child(message)
 	connection_badge = Label.new()
 	connection_badge.name = "ConnectionBadge"
 	connection_badge.text = OFFLINE_NOTICE
-	connection_badge.add_theme_font_size_override("font_size", 15)
-	connection_badge.add_theme_color_override("font_color", Color("#ffd9a8"))
-	connection_badge.add_theme_stylebox_override("normal", UiKit.toast_style())
+	connection_badge.add_theme_font_override("font", UiKit.LABEL_FONT)
+	connection_badge.add_theme_font_size_override("font_size", 16)
+	connection_badge.add_theme_color_override("font_color", Color("#f6e2b8"))
+	connection_badge.add_theme_stylebox_override("normal", toast_plate(46))
+	connection_badge.draw.connect(draw_toast_mark.bind(connection_badge))
 	connection_badge.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	connection_badge.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	connection_badge.offset_top = 60
@@ -617,9 +643,27 @@ func build_ui() -> void:
 	modal_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	modal_body.add_theme_constant_override("separation",10)
 	scroll.add_child(modal_body)
+	# What went wrong inside a window, said calmly: ink on a warm parchment note with a
+	# small amber medallion (stage 4b), never red alarm text.
 	modal_status = Label.new()
+	modal_status.name = "ModalStatus"
 	modal_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	modal_status.add_theme_color_override("font_color", UiKit.WARN)
+	modal_status.add_theme_color_override("font_color", UiKit.INK)
+	modal_status.add_theme_font_override("font", UiKit.LABEL_FONT)
+	modal_status.add_theme_font_size_override("font_size", 17)
+	var note := StyleBoxFlat.new()
+	note.bg_color = Color("#f6e6c4")
+	note.border_color = Color("#c08a3e")
+	note.set_border_width_all(1)
+	note.border_width_left = 4
+	note.set_corner_radius_all(8)
+	note.content_margin_left = 48
+	note.content_margin_right = 14
+	note.content_margin_top = 8
+	note.content_margin_bottom = 8
+	note.anti_aliasing = true
+	modal_status.add_theme_stylebox_override("normal", note)
+	modal_status.draw.connect(draw_toast_mark.bind(modal_status))
 	modal_status.hide()
 	column.add_child(modal_status)
 	modal_footer = HBoxContainer.new()
@@ -644,6 +688,59 @@ func build_ui() -> void:
 	result_notice.hide()
 	refresh_hud()
 
+## The toast plate: carved oak with gold lozenge ends (kit_strip), room at the left for the
+## tone medallion.
+func toast_plate(left: int) -> StyleBoxTexture:
+	var plate := UiKit.nine("kit_strip", Vector4(26, 14, 26, 14), Vector4(left, 9, 30, 11)).duplicate() as StyleBoxTexture
+	return plate
+
+## The tone medallion at the left of a toast, the connection pill and a window's notice.
+func draw_toast_mark(item: Label) -> void:
+	if item.text.is_empty():
+		return
+	var small := item == connection_badge
+	var centre := Vector2(28.0 if item != modal_status else 24.0, item.size.y * 0.5)
+	var r := 11.0 if small or item == modal_status else 14.0
+	# «Отправляем…» on the window's status line is a wait, not a warning.
+	var tone := message_tone if item == message else ("wait" if item != modal_status or modal_status.text.ends_with("…") else "warn")
+	item.draw_circle(centre + Vector2(0, 1.5), r + 1.5, Color(0, 0, 0, 0.3), true, -1.0, true)
+	item.draw_circle(centre, r + 1.5, Color("#e2b766"), true, -1.0, true)
+	var face: Color = {"good": Color("#2f7d36"), "warn": Color("#b0661c"), "wait": Color("#3a2a1c")}.get(tone, Color("#2a4f63"))
+	item.draw_circle(centre, r, face, true, -1.0, true)
+	match tone:
+		"good":
+			item.draw_polyline(PackedVector2Array([centre + Vector2(-r * 0.45, 0), centre + Vector2(-r * 0.1, r * 0.38), centre + Vector2(r * 0.5, -r * 0.4)]), UiKit.IVORY, 2.6, true)
+		"warn":
+			item.draw_line(centre + Vector2(0, -r * 0.5), centre + Vector2(0, r * 0.15), UiKit.IVORY, 3.0, true)
+			item.draw_circle(centre + Vector2(0, r * 0.48), 1.9, UiKit.IVORY, true, -1.0, true)
+		"wait":
+			item.draw_texture_rect(UiKit.tex("kit_hourglass"), Rect2(centre - Vector2(r * 0.55, r * 0.75), Vector2(r * 1.1, r * 1.5)), false)
+		_:
+			item.draw_circle(centre + Vector2(0, -r * 0.45), 1.9, UiKit.IVORY, true, -1.0, true)
+			item.draw_line(centre + Vector2(0, -r * 0.1), centre + Vector2(0, r * 0.5), UiKit.IVORY, 3.0, true)
+
+## A new notice: its tone (an error, a done job, or news), then a short ease-in (80 ms
+## fade and a 6 px rise; none with less motion). Empty text hides the toast at once.
+func show_toast_change() -> void:
+	message_shown = message.text
+	if message_tween != null:
+		message_tween.kill()
+	if message.text.is_empty():
+		message.self_modulate.a = 0.0
+		return
+	if message.text != message_warn_text:
+		message_tone = "good" if message.text.begins_with("Готово") or message.text.ends_with("скопирован") or message.text.contains("завершен") else "info"
+	message.queue_redraw()
+	if reduced_motion:
+		message.self_modulate.a = 1.0
+		return
+	message.self_modulate.a = 0.0
+	message.pivot_offset = message.size * 0.5
+	message.scale = Vector2(0.97, 0.97)
+	message_tween = create_tween().set_parallel()
+	message_tween.tween_property(message, "self_modulate:a", 1.0, 0.08)
+	message_tween.tween_property(message, "scale", Vector2.ONE, 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
 func hud_action(parent: Container, caption: String, symbol: String, action: Callable) -> Button:
 	var control := HudAction.new()
 	control.caption = caption
@@ -654,26 +751,32 @@ func hud_action(parent: Container, caption: String, symbol: String, action: Call
 	parent.add_child(control)
 	return control
 
+## «Меню» (premium UI stage 4b, src/v6_menu.gd): grouped medallion tiles and the settings.
 func show_controls_menu() -> void:
-	var selecting := relocation_pins.visible
-	open_modal("Меню", "left", "DRENOVAR")
-	if selecting:
-		button(modal_body, "Список свободных мест", show_relocation_list)
-		button(modal_body, "Вернуться к выбору на карте", show_relocation)
-	if map_name == "city":
-		button(modal_body, "Поселение и строительство", show_city_actions)
-		button(modal_body, "Центрировать город", func(): close_modal(); center_city())
-	else:
-		button(modal_body, "Показать весь мир", show_world_overview)
-		button(modal_body, "Общий мир", show_world_directory)
-		button(modal_body, "Слои карты", show_map_options)
-		button(modal_body, "Повернуть карту", func(): close_modal(); rotate_world())
-	button(modal_body, "Приблизить", func(): close_modal(); zoom_scene(1.2))
-	button(modal_body, "Отдалить", func(): close_modal(); zoom_scene(0.83))
-	button(modal_body, "Плавность на устройстве", show_performance)
-	if forest_game != null: # FOREST_RESCUE hook: journal entry
-		forest_game.add_menu_entries(modal_body)
-	button(modal_body, "О приложении", show_application)
+	v6_panels.menu_view.open()
+
+## Sound on or off (the master bus), kept with the HUD's state; the forest follows it.
+func set_sound(on: bool) -> void:
+	sound_on = on
+	AudioServer.set_bus_mute(0, not on)
+	save_setting("sound", on)
+	if forest_game != null and forest_game.sound_enabled != on:
+		forest_game.set_sound(on)
+
+## Less motion: windows open without their settle, the ring without its unfold, and the
+## forest's own reduced motion.
+func set_reduced_motion(on: bool) -> void:
+	reduced_motion = on
+	action_ring.reduced_motion = on
+	save_setting("reduced_motion", on)
+	if forest_game != null and forest_game.reduced_motion != on:
+		forest_game.set_reduced_motion(on)
+
+func save_setting(key: String, value: Variant) -> void:
+	var saved := ConfigFile.new()
+	saved.load(HUD_STATE_PATH)
+	saved.set_value("settings", key, value)
+	saved.save(HUD_STATE_PATH)
 
 func setup_resource_icons() -> void:
 	var atlas := load("res://assets/ui/resources.png") as Texture2D
@@ -981,13 +1084,7 @@ func show_city_actions() -> void:
 	if is_v6_server():
 		if not await ensure_v6_ready():
 			return
-		open_modal("Поселение", "right", "ОБЩИЙ ГОРОД · I–XI")
-		button(modal_body, "Строить", v6_panels.catalog)
-		button(modal_body, "Очереди и отмена", v6_panels.queues)
-		button(modal_body, "Ресурсы и доход", v6_panels.economy)
-		button(modal_body, "Армия", v6_panels.army)
-		button(modal_body, "Найти существо", show_city_hunt)
-		row(modal_body, "Строители: %d · работники: %d / %d" % [int(state.workers), int(state.v6.workforce.used), int(state.v6.workforce.capacity)])
+		v6_panels.menu_view.city_actions()
 		return
 	open_modal("Поселение")
 	button(modal_body, "Строить", show_build_menu)
@@ -2565,48 +2662,16 @@ func rotate_world() -> void:
 		stage.world_yaw = wrapf(stage.world_yaw + PI / 4.0, -PI, PI)
 
 func show_map_options() -> void:
-	open_modal("Слои мира", "right")
-	for resources in [true, false]:
-		var toggle := CheckButton.new()
-		toggle.text = "Месторождения и угодья" if resources else "Мелкие детали"
-		toggle.button_pressed = stage.resource_layer if resources else stage.detail_layer
-		toggle.toggled.connect(func(_enabled): stage.toggle_scenery_layer(resources))
-		modal_body.add_child(toggle)
-	button(modal_body, "Найти своё поселение", focus_own_city)
-	button(modal_body, "Окружение мира", show_environment_catalog)
+	v6_panels.world_view.map_options()
 
 func show_world_directory() -> void:
-	open_modal("Общий мир", "right", "ДРЕНОВАР · КАРТА МИРА")
-	button(modal_body, "Мой город", focus_own_city, state.world.cities.any(func(city): return city.id == player_id))
-	var reason: String = state.world.get("relocationReason", "")
-	button(modal_body, "Переселить город", show_relocation, not player_id.is_empty() and reason.is_empty())
-	if not reason.is_empty():
-		row(modal_body, reason)
-	button(modal_body, "Города", show_world_cities)
-	button(modal_body, "Цели охоты", show_world_hunt)
-	button(modal_body, "Походы", show_world_marches)
-	button(modal_body, "Окружение мира", show_environment_catalog)
+	v6_panels.world_view.directory()
 
 func show_world_cities() -> void:
-	open_modal("Города", "right", "ДРЕНОВАР · КАРТА МИРА")
-	for city in state.world.cities:
-		var name_suffix := " · ваш город" if city.id == player_id else ""
-		button(modal_body, "%s · ур. %d%s" % [city.name, int(city.level), name_suffix], inspect_settlement.bind(city))
-	if state.world.cities.is_empty():
-		row(modal_body, "На карте пока нет серверных поселений.")
-	button(modal_body, "К общему миру", show_world_directory)
+	v6_panels.world_view.cities()
 
 func show_world_marches() -> void:
-	open_modal("Походы", "right", "ДРЕНОВАР · КАРТА МИРА")
-	var has_marches := false
-	for army in state.world.armies:
-		if army.status == "returned":
-			continue
-		has_marches = true
-		button(modal_body, army.get("name", "Поход"), inspect_army.bind(army))
-	if not has_marches:
-		row(modal_body, "На карте сейчас нет активных походов.")
-	button(modal_body, "К общему миру", show_world_directory)
+	v6_panels.world_view.marches()
 
 func show_environment_catalog(category_index := 0) -> void:
 	open_modal("Окружение мира", "right")
@@ -2731,6 +2796,9 @@ func place_modal(layout: String) -> void:
 			offsets = Rect2(-480, 13, 960, -26)
 		"result":
 			offsets = Rect2(-310, -249, 620, 498)
+		"dialog":
+			# Confirmations and the pairing code (stage 4b): a small centred window.
+			offsets = Rect2(-300, -190, 600, 380)
 		"strip":
 			# Construction strip (src/build_strip.gd): the whole screen, no panel; the blurred
 			# city (city_backdrop) is the window's background.
@@ -2787,7 +2855,7 @@ func arrange_modal() -> void:
 		side_space.visible = full and not hero_on
 	if full and not hero_on:
 		modal_content.size_flags_horizontal = Control.SIZE_FILL
-		modal_content.custom_minimum_size.x = minf(900.0, view.x - 56.0)
+		modal_content.custom_minimum_size.x = (view.x - 56.0) if modal_full_width else minf(900.0, view.x - 56.0)
 	else:
 		modal_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		modal_content.custom_minimum_size.x = 0.0
@@ -2948,6 +3016,7 @@ func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D
 	modal_eyebrow.text = eyebrow
 	modal_eyebrow.visible = not eyebrow.is_empty()
 	modal_hero_share = 0.4
+	modal_full_width = false
 	modal_status.hide()
 	empty(modal_body)
 	empty(modal_tools)
@@ -2966,7 +3035,7 @@ func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D
 	dimmer.show()
 	modal.show()
 	modal_scroll.set_modal_active(true)
-	if entering:
+	if entering and not reduced_motion:
 		# Quick settle (fade + 2 % scale, 120 ms); input is live from the first frame.
 		modal.modulate.a = 0.75
 		modal.pivot_offset = modal.get_rect().size * 0.5 if modal.size.x > 0 else Vector2.ZERO
@@ -3069,12 +3138,22 @@ func warm_panel_textures() -> void:
 		var card := "res://assets/ui/buildings/%s.png" % key
 		if not build_cards.has(key) and ResourceLoader.exists(card) and ResourceLoader.load_threaded_request(card, "Texture2D") == OK:
 			pending.append(card)
+	# Creature portraits of the world windows (src/world_cards.gd): twelve small images, kept
+	# referenced so the hunt list and a creature's window find them in the resource cache.
+	for species: String in CreatureVisuals.registry().get("species", {}):
+		for path: Variant in CreatureVisuals.entry(species).get("portraits", []):
+			if ResourceLoader.exists(str(path)) and ResourceLoader.load_threaded_request(str(path), "Texture2D") == OK:
+				pending.append(str(path))
 	while not pending.is_empty():
 		await get_tree().process_frame
 		for full: String in pending.duplicate():
 			if ResourceLoader.load_threaded_get_status(full) != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
 				pending.erase(full)
 				var texture := ResourceLoader.load_threaded_get(full) as Texture2D
+				if full.begins_with("res://assets/creatures-v2/"):
+					if texture != null:
+						creature_portraits.append(texture)
+					continue
 				if full == atlas:
 					if environment_atlas == null:
 						environment_atlas = texture
@@ -4026,109 +4105,10 @@ func encounter_title(encounter: Dictionary) -> String:
 	var roman: String = ["I", "II", "III"][clampi(int(encounter.level), 1, 3) - 1]
 	return "%s · %s" % [encounter.spec.name, roman]
 
+## A creature (src/world_cards.gd): its portrait (the live model in the city), level, health,
+## rewards and «Атаковать»/«Собрать отряд» in the footer.
 func inspect_encounter(encounter: Dictionary) -> void:
-	var city_hunt := map_name == "city"
-	var spec: Dictionary = encounter.spec
-	var level := int(spec.get("requiredHall", 1))
-	var available: bool = encounter.status != "defeated" and int(encounter.hp) > 0
-	open_modal(spec.name if city_hunt else encounter_title(encounter), "city_target" if city_hunt else "right",
-		"ДИКИЕ ЗЕМЛИ" if city_hunt else "ДРЕНОВАР · ДИКИЕ ЗЕМЛИ")
-	var details: Container = modal_body
-	var art_panel := panel(4)
-	art_panel.add_theme_stylebox_override("panel", WebPanels.gradient_style(Color("#465647"), Color("#1a2d25"), WebPanels.BRASS, 4))
-	if city_hunt:
-		var card := HBoxContainer.new()
-		modal_body.add_child(card)
-		card.add_child(art_panel)
-		art_panel.custom_minimum_size.x = 144
-		art_panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-		details = VBoxContainer.new()
-		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		card.add_child(details)
-		var portrait := VBoxContainer.new()
-		art_panel.add_child(portrait)
-		var preview := create_unit_preview(portrait, 145)
-		var species: String = encounter.get("species", spec.get("id", ""))
-		if data.creatureModels.has(species):
-			var tier := clampi(int(encounter.level), 1, 3)
-			var model: String = CreatureVisuals.model_path(species, tier, data.creatureModels[species][tier - 1])
-			load_unit_preview.call_deferred(preview, {"preview":model, "drill":"idle", "creature":species, "level":tier}, 0.63)
-		row(portrait, "УР. %d" % int(encounter.level))
-	else:
-		modal_body.add_child(art_panel)
-		var art_species := str(encounter.get("species", spec.get("id", "velkor")))
-		var portraits: Array = CreatureVisuals.entry(art_species).get("portraits", []) if CreatureVisuals.active(art_species) else []
-		var portrait_path := str(portraits[clampi(int(encounter.level), 1, 3) - 1]) if portraits.size() == 3 else ""
-		if not portrait_path.is_empty() and ResourceLoader.exists(portrait_path):
-			# creatures-v2: the portrait is rendered from the same model and level look as the field.
-			var art := TextureRect.new()
-			art.texture = load(portrait_path)
-			art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			art.custom_minimum_size = Vector2(0, 148)
-			art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			art_panel.add_child(art)
-		else:
-			panel_art(art_panel, "velkor%d.webp" % int(encounter.level), Vector2(0, 148))
-	var tiers := HBoxContainer.new()
-	details.add_child(tiers)
-	var encounters: Array = state.get("encounters", []) if city_hunt else state.world.encounters
-	for other in encounters:
-		if other.get("species") != encounter.get("species"):
-			continue
-		var tier := button(tiers, ["I", "II", "III"][clampi(int(other.level), 1, 3) - 1], inspect_current_encounter.bind(other.id))
-		tier.accessibility_name = encounter_title(other)
-		if other.id == encounter.id:
-			WebPanels.primary(tier)
-	var health := ProgressBar.new()
-	health.max_value = maxi(1, int(spec.hp))
-	health.value = int(encounter.hp) if available else 0
-	health.show_percentage = false
-	health.custom_minimum_size.y = 9
-	health.add_theme_stylebox_override("background", UiKit.nine("kit_track", Vector4(11, 10, 11, 10), Vector4.ZERO))
-	health.add_theme_stylebox_override("fill", UiKit.nine("kit_fill_green", Vector4(11, 10, 11, 10), Vector4.ZERO))
-	details.add_child(health)
-	row(details, "%d / %d здоровья" % [int(health.value), int(spec.hp)])
-	var rewards: Dictionary = spec.get("rewards", {})
-	if not rewards.is_empty():
-		var material: String = {"claws":"когтей", "horns":"рогов", "fangs":"клыков", "scales":"чешуи"}.get(spec.get("item", ""), "трофеев")
-		row(details, "За победу · %d еды · %d %s · %d опыта" %
-			[int(rewards.get("food", 0)), int(rewards.get("material", 0)), material, int(spec.get("xp", 0))])
-	if city_hunt:
-		var dossier := VBoxContainer.new()
-		button(details, "О существе", func(): dossier.visible = not dossier.visible)
-		details.add_child(dossier)
-		dossier.hide()
-		row(dossier, "Мощь %d · Атака %d · Защита %d" % [int(spec.strength), int(spec.attack), int(spec.defense)])
-	else:
-		var about := str(CreatureVisuals.entry(str(encounter.get("species", spec.get("id", "")))).get("description", ""))
-		row(details, about if not about.is_empty() else "Рывком бьёт по передней линии. Копейщики могут принять удар, пока стрелки ведут огонь.")
-	if encounter.status == "reserved":
-		row(details, "Эту цель уже преследует другой отряд.")
-	elif not available:
-		if encounter.get("respawnAt", 0) > server_time():
-			var remaining := Label.new()
-			details.add_child(remaining)
-			bind_countdown(remaining, "Возрождение через", encounter.respawnAt)
-		else:
-			row(details, "Существо побеждено.")
-	if hall_level() < level:
-		row(details, "Требуется ратуша уровня %d." % level)
-	elif player_id.is_empty():
-		row(details, "Войдите в аккаунт, чтобы отправить отряд.")
-	var p: Vector3 = stage.point(encounter.position)
-	if available:
-		for marker in stage.creature_markers:
-			if marker.id == encounter.id:
-				p = marker.position
-				break
-		stage.target = stage.ground_point(p)
-		stage.zoom = minf(stage.zoom, 42.0 if city_hunt else 85.0)
-	modal_footer.show()
-	var attack := panel_action(modal_footer, "Атаковать" if city_hunt else "Собрать отряд",
-		compose_march.bind("city" if city_hunt else world_kind(encounter), encounter.id, encounter_title(encounter)),
-		not player_id.is_empty() and available and encounter.status == "alive" and hall_level() >= level)
-	attack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v6_panels.world_view.encounter(encounter)
 
 # Server worldKind of a world hunt: "velkor" for the Velkor sites (the only kind server v92
 # knows); other world creatures (server patch creatures-world-v1) are addressed by species.
@@ -4139,20 +4119,16 @@ func world_kind(encounter: Dictionary) -> String:
 func show_city_hunt() -> void:
 	open_modal("Цели охоты", "garrison", "ДИКИЕ ЗЕМЛИ")
 	append_hunt_targets(state.get("encounters", []))
-	button(modal_body, "К поселению", show_city_actions)
+	modal_footer.show()
+	UiKit.style_button(button(modal_footer, "К поселению", show_city_actions), "tertiary", 18).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 func show_world_hunt() -> void:
 	open_modal("Цели охоты", "right", "ДРЕНОВАР · ДИКИЕ ЗЕМЛИ")
 	append_hunt_targets(state.world.encounters)
-	button(modal_body, "К общему миру", show_world_directory)
+	v6_panels.world_view.back_to_world()
 
 func append_hunt_targets(encounters: Array) -> void:
-	for encounter in encounters:
-		var status: String = {"alive":"доступен", "reserved":"занят", "defeated":"побеждён"}.get(encounter.status, encounter.status)
-		button(modal_body, "%s · ур. %d · %s" % [encounter.spec.name, int(encounter.level), status],
-			inspect_current_encounter.bind(encounter.id))
-	if encounters.is_empty():
-		row(modal_body, "Здесь пока нет целей охоты.")
+	v6_panels.world_view.hunts(encounters)
 
 func compose_march(kind: String, id: String, title: String) -> void:
 	if v6_panels.enabled() and kind == "pvp":
@@ -4815,24 +4791,43 @@ func show_account() -> void:
 				panel_action(modal_body, "Подключить веб-версию", begin_transfer)
 	button(modal_body, "Выйти из приложения", confirm_profile_action.bind(sign_out_question(), sign_out))
 
-func add_name_fields(profile: Dictionary) -> void:
+## The player's and the settlement's names (editNames), restyled in stage 4b: a caption
+## over each field, the save as a gold button that wakes when a name changes. `after` is the
+## window to show once the server has them (the account by default).
+func add_name_fields(profile: Dictionary, after := Callable()) -> void:
 	var saved_nickname := str(profile.get("nickname")) if profile.get("nickname") != null else ""
 	var saved_settlement: String = state.city.name
+	var fields := GridContainer.new()
+	fields.columns = 2
+	fields.add_theme_constant_override("h_separation", 16)
+	fields.add_theme_constant_override("v_separation", 4)
+	modal_body.add_child(fields)
+	for caption in ["Имя игрока", "Название поселения"]:
+		UiKit.label(fields, caption, 16, UiKit.BRONZE, UiKit.LABEL_FONT, false)
 	var nickname := LineEdit.new()
+	nickname.name = "NicknameField"
 	nickname.placeholder_text = "Имя игрока"
 	nickname.max_length = 60
 	nickname.text = saved_nickname
-	modal_body.add_child(nickname)
+	nickname.custom_minimum_size = Vector2(0, 50)
+	nickname.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fields.add_child(nickname)
 	var settlement := LineEdit.new()
+	settlement.name = "SettlementField"
 	settlement.placeholder_text = "Название поселения"
 	settlement.max_length = 60
 	settlement.text = saved_settlement
-	modal_body.add_child(settlement)
+	settlement.custom_minimum_size = Vector2(0, 50)
+	settlement.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fields.add_child(settlement)
 	var save := Button.new()
 	save.text = "Сохранить имена"
-	save.custom_minimum_size.y = 42
+	save.custom_minimum_size = Vector2(260, 50)
+	save.size_flags_horizontal = Control.SIZE_SHRINK_END
 	save.disabled = true
+	UiKit.style_button(save, "primary", 19)
 	modal_body.add_child(save)
+	var back: Callable = after if after.is_valid() else show_account
 	var changes_for_fields := func() -> Dictionary:
 		var changes := {}
 		var next_nickname := nickname.text.strip_edges()
@@ -4857,17 +4852,17 @@ func add_name_fields(profile: Dictionary) -> void:
 		modal_status.text = "Сохраняем…"
 		modal_status.show()
 		changes.kind = "editNames"
-		var accepted := await command(changes, show_account)
+		var accepted := await command(changes, back)
 		if not accepted and is_instance_valid(nickname) and nickname.is_inside_tree():
 			nickname.editable = true
 			settlement.editable = true
 			refresh_save.call(""))
 
+## A question before an account action (premium UI stage 4b): signing out is a cranberry
+## «Выйти» under a door; opening another settlement and starting anew are gold.
 func confirm_profile_action(title: String, action: Callable) -> void:
-	open_modal("Подтверждение")
-	row(modal_body, title)
-	button(modal_body, "Подтвердить", action)
-	button(modal_body, "Отмена", show_account)
+	var leaving := action == sign_out
+	v6_panels.menu_view.confirm(title, action, "Подтвердить", leaving, "kit_emb_exit" if leaving else "kit_emb_town")
 
 func show_performance() -> void:
 	var primitives := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
@@ -5359,6 +5354,8 @@ func reset_session(reason := "auth_401") -> void:
 ## with the outcome badge, the opponent, when it was, the losses and the spoils.
 func show_reports() -> void:
 	open_modal("Летопись сражений", "full", "ОТЧЁТЫ О БОЯХ")
+	modal_full_width = true
+	arrange_modal()
 	var reports: Array = state.get("reports", []).duplicate()
 	if reports.is_empty():
 		UiKit.label(modal_body, "Пока нет боевых отчётов. Они появятся после первого похода или охоты.", 17, UiKit.INK_MUTED)
@@ -5380,6 +5377,19 @@ func show_reports() -> void:
 			if count > 0:
 				parts.append("%s %s" % [format_balance(count), section[1]])
 		row.losses = ", ".join(parts)
+		# Premium UI stage 4b: the party's portraits with their counts, and the opponent's.
+		var party: Dictionary = {}
+		for section: String in ["surviving", "wounded", "dead"]:
+			for id: String in report.get(section, {}):
+				party[id] = int(party.get(id, 0)) + int(report[section][id])
+		for id: String in party:
+			if row.party.size() < 4 and int(party[id]) > 0:
+				row.party.append([unit_portrait(id, true), format_balance(int(party[id]))])
+		var species := str(opponent.get("species", ""))
+		var faces: Array = CreatureVisuals.entry(species).get("portraits", []) if not species.is_empty() else []
+		var face_path := str(faces[clampi(int(opponent.get("level", 1)), 1, faces.size()) - 1]) if not faces.is_empty() else ""
+		row.foe = load(face_path) as Texture2D if not face_path.is_empty() and ResourceLoader.exists(face_path) else null
+		row.foe_emblem = UiKit.tex("kit_emb_helm") if row.foe == null else null
 		var resources: Dictionary = report.get("rewards", {}).get("resources", {})
 		for id in RESOURCE_NAMES:
 			if int(resources.get(id, 0)) > 0:
@@ -5665,12 +5675,21 @@ func remember_state(force := false) -> void:
 	state_save_pending = false
 	SessionStore.save_state(session, state, server_offset, endpoint)
 
+## An error, said calmly and with what to do: the server's own words, a hint where the
+## words alone leave the player stuck, and the amber medallion (not red alarm text).
+func calm_error(text: String) -> String:
+	var hints := {"Ответ сервера не удалось прочитать.": "Сервер ответил неразборчиво. Попробуйте ещё раз через минуту.",
+		"Сервер недоступен": "Сервер сейчас недоступен. Мы повторим сами; можно продолжать играть."}
+	return hints.get(text, text)
+
 func show_error(response: Dictionary) -> void:
 	if int(response.get("httpStatus", 0)) == 426:
 		client_update_required = true
 		restoring_session = false
 		show_account.call_deferred()
-	message.text = response.get("error","Ответ сервера не удалось прочитать.")
+	message_tone = "warn"
+	message_warn_text = calm_error(str(response.get("error","Ответ сервера не удалось прочитать.")))
+	message.text = message_warn_text
 	if modal.visible:
 		modal_status.text = message.text
 		modal_status.show()
@@ -6462,9 +6481,9 @@ func apply_not_modified(response: Dictionary, sent_tag: String, tag_serial: int)
 
 func _process(delta: float) -> void:
 	advance_server_clock(delta)
-	# The notice banner (src/ui_kit.gd toast) shows only while there is a notice.
-	if message != null:
-		message.self_modulate.a = 0.0 if message.text.is_empty() else 1.0
+	# The notice toast shows only while there is a notice; a new one eases in.
+	if message != null and message.text != message_shown:
+		show_toast_change()
 	drain_retired_scenes()
 	memory_peak_mb = maxf(memory_peak_mb, Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0)
 	diagnostics.heartbeat(map_name, memory_in_use_mb(),
@@ -6805,21 +6824,7 @@ func pick_marker(screen_position: Vector2) -> void:
 			pick_world_feature(screen_position)
 
 func inspect_army(army: Dictionary) -> void:
-	open_modal(str(army.get("name", "Поход")))
-	var status: String = {"outbound":"В пути", "fighting":"В бою", "returning":"Возвращается"}.get(army.status, army.status)
-	row(modal_body, status)
-	var units: Dictionary = army.get("returnUnits", army.units) if army.status == "returning" else army.units
-	for id in units:
-		if int(units[id]) > 0:
-			row(modal_body, "%s × %d" % [unit_for_id(id).get("name", id), int(units[id])])
-	button(modal_body, "Следить за отрядом", focus_army.bind(army))
-	var finish: Variant = march_finish(army)
-	if finish != null:
-		countdown("До следующей фазы", float(finish))
-		if army.status in ["outbound", "returning"] and army.get("owner", player_id) == player_id and not player_id.is_empty():
-			button(modal_body, "Ускорить марш", show_march_speedups.bind(army))
-	if map_name == "city" and army.status == "outbound" and not player_id.is_empty():
-		button(modal_body, "Отозвать отряд", command.bind({"kind":"recall", "armyId":army.id}))
+	v6_panels.world_view.army(army)
 
 func pick_world_feature(screen_position: Vector2) -> void:
 	if stage.camera_zoom > 132.0:
@@ -6842,26 +6847,7 @@ func pick_world_feature(screen_position: Vector2) -> void:
 		row(modal_body, "Координаты · %d : %d" % [roundi(chosen.x + 150), roundi(chosen.z + 120)])
 
 func inspect_settlement(item: Dictionary) -> void:
-	open_modal(item.name, "right", "ПОСЕЛЕНИЕ")
-	row(modal_body, "Ратуша · уровень %d" % int(item.level))
-	if item.has("wallLevel"):
-		var wall := int(item.wallLevel)
-		row(modal_body, "Стены и ворота · уровень %d" % wall if wall > 0 else ("Частокол без «Стен и ворот»" if int(item.level) >= 2 else "Без стен"))
-	if item.get("nickname") is String and not item.nickname.is_empty():
-		row(modal_body, "Игрок · " + item.nickname)
-	button(modal_body, "Рассмотреть на карте", focus_minimap.bind(Vector2(item.position.x, item.position.z)))
-	if item.id == state.playerId:
-		button(modal_body, "Войти в город", show_scene.bind("city"))
-		button(modal_body, "Найти место для переселения", show_relocation)
-	elif item.get("pvp", false):
-		var own_index: int = state.world.cities.find_custom(func(city): return city.id == player_id)
-		var eligible: bool = own_index >= 0 and state.world.cities[own_index].get("pvp", false)
-		if own_index >= 0 and not eligible:
-			row(modal_body, "Ваше поселение · " + state.world.cities[own_index].get("pvpReason", "PvP закрыто"))
-		panel_action(modal_body, "Собрать отряд", compose_march.bind("pvp", item.id, item.name), eligible)
-	elif item.get("pvpReason") is String:
-		row(modal_body, item.pvpReason)
-	button(modal_body, "К списку городов", show_world_cities)
+	v6_panels.world_view.settlement(item)
 
 func inspect_current_settlement(id: String) -> void:
 	for item in state.world.cities:
@@ -6870,22 +6856,7 @@ func inspect_current_settlement(id: String) -> void:
 			return
 
 func inspect_world_plot(item: Dictionary) -> void:
-	open_modal("Свободное место", "right", "ПЕРЕСЕЛЕНИЕ")
-	var current: String = state.city.get("worldSlotId", "")
-	if not current.begins_with("slot-") or not current.trim_prefix("slot-").is_valid_int():
-		return
-	var reason: String = state.world.get("relocationReason", "")
-	if not reason.is_empty():
-		row(modal_body, reason)
-		return
-	row(modal_body, "Координаты · %d : %d" % [roundi(float(item.x) + 150), roundi(float(item.z) + 120)])
-	var order := {"kind":"relocateCity","slot":int(item.slot.trim_prefix("slot-")),"fromSlot":int(current.trim_prefix("slot-"))}
-	button(modal_body, "Выбрать другое место", show_relocation)
-	var occupied: bool = state.world.cities.any(func(city): return city.slot == item.slot)
-	if occupied:
-		row(modal_body, "Это место уже занято. Выбери другое.")
-	panel_action(modal_body, "Подтвердить переселение", command.bind(order, focus_own_city),
-		not player_id.is_empty() and not occupied)
+	v6_panels.world_view.world_plot(item)
 
 func show_relocation() -> void:
 	if map_name != "world" or scene_loading or player_id.is_empty():
@@ -6909,22 +6880,7 @@ func draw_relocation_pins() -> void:
 			relocation_pins.draw_line(point - Vector2(0, 5), point + Vector2(0, 5), Color.WHITE, 2)
 
 func show_relocation_list() -> void:
-	open_modal("Переселение", "right")
-	var origin := stage.target
-	for city in state.world.cities:
-		if city.id == player_id:
-			origin = stage.point(city.position)
-			break
-	var sites: Array = stage.empty_plots.duplicate()
-	sites.sort_custom(func(a, b):
-		return origin.distance_squared_to(a.position) < origin.distance_squared_to(b.position))
-	if sites.is_empty():
-		row(modal_body, "Свободных мест пока нет.")
-	for site in sites:
-		button(modal_body, "%d : %d" % [roundi(site.position.x + 150), roundi(site.position.z + 120)], func():
-			stage.target = site.position
-			stage.zoom = 85.0
-			inspect_world_plot(site.item))
+	v6_panels.world_view.relocation_list()
 
 func inspect_plot(plot: Dictionary) -> void:
 	if is_v6_server():

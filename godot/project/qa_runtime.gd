@@ -21,7 +21,8 @@ func run() -> void:
 	check(game.profile_button.get_global_rect().position.x < 140, "Profile must be in upper-left corner")
 	check(not game.nav_buttons.city.visible and game.nav_buttons.world.visible, "City has one world switch")
 	game.show_controls_menu()
-	var labels: Array = game.modal_body.get_children().map(func(n): return n.text if n is Button else "")
+	# The menu's entries are medallion tiles in grouped grids (premium UI stage 4b).
+	var labels: Array = game.modal_body.find_children("*", "Button", true, false).map(func(n): return n.text)
 	check(labels.has("Поселение и строительство") and labels.has("Плавность на устройстве"), "Menu lost access to city actions or diagnostics")
 	game.close_modal()
 	var stage = game.stage

@@ -14,6 +14,9 @@ const VIEW_SCRIPTS := {
 	"queue_view": "res://src/v6_queues.gd",
 	"service_view": "res://src/v6_services.gd",
 	"army_view": "res://src/v6_army.gd",
+	"menu_view": "res://src/v6_menu.gd",
+	"economy_view": "res://src/v6_economy.gd",
+	"world_view": "res://src/world_cards.gd",
 }
 const ROMAN := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"]
 var ui: Node
@@ -40,6 +43,18 @@ var service_view:
 var army_view:
 	get:
 		return view("army_view")
+# Menu, account, pairing code and confirmations (src/v6_menu.gd, stage 4b).
+var menu_view:
+	get:
+		return view("menu_view")
+# Market, economy, objectives and archive (src/v6_economy.gd, stage 4b).
+var economy_view:
+	get:
+		return view("economy_view")
+# World map windows (src/world_cards.gd, stage 4b).
+var world_view:
+	get:
+		return view("world_view")
 var views := {}
 var scripts := {}
 var warming: Array[String] = []
@@ -260,20 +275,6 @@ func warnings() -> void:
 		var alarm: Label = ui.UiKit.label(ui.modal_body, "Башня обнаружила нападение · до прибытия %d с" % int(warning.eta_seconds), 18, ui.UiKit.BAD, ui.UiKit.LABEL_FONT)
 		alarm.name = "AttackWarning"
 
-func stock_line(alarms := true) -> void:
-	if alarms:
-		warnings()
-	var s: Dictionary = ui.state.v6
-	for r: String in ["wood", "food", "stone", "iron", "coins"]:
-		var amount := "%s / %s" % [ui.format_balance(int(s.stock[r])), ui.format_balance(int(s.capacities[r]))]
-		if int(s.escrow[r]) > 0:
-			amount += " · резерв %s" % ui.format_balance(int(s.escrow[r]))
-		var stopped: bool = s.production_stopped[r]
-		var rate := "производство приостановлено" if stopped else "+%s/ч" % per_hour(float(s.production_per_hour[r]))
-		ui.UiKit.resource_row(ui.modal_body, ui.resource_icons.get(r), str(ui.RESOURCE_NAMES[r]), amount, rate, stopped)
-	ui.UiKit.stat_row(ui.modal_body, "Работники", "%d / %d" % [int(s.workforce.used), int(s.workforce.capacity)])
-	ui.UiKit.stat_row(ui.modal_body, "Армия", "%d / %d" % [int(s.army_used), int(s.army_capacity)])
-
 func per_hour(value: float) -> String:
 	if is_equal_approx(value, roundf(value)):
 		return ui.format_balance(int(roundf(value)))
@@ -294,6 +295,8 @@ func link(parent: Container, title: String, action: Callable) -> Button:
 	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return control
 
+## «Экономика поселения» (src/v6_economy.gd): the hourly income, a card per resource with its
+## storage bar and rate, workers and the army.
 func economy() -> void:
 	var navigation := begin_view()
 	var generation: int = ui.modal_generation
@@ -301,12 +304,7 @@ func economy() -> void:
 		return
 	if navigation != navigation_request or generation != ui.modal_generation:
 		return
-	ui.open_modal("Экономика поселения", "full", "ЗАПАСЫ И ДОХОД В ЧАС")
-	section_title("Запасы и доход")
-	stock_line()
-	var more := links()
-	link(more, "Очереди и отмена", queues)
-	link(more, "Цели поселения", objectives)
+	economy_view.economy()
 
 func move_building(b: Dictionary, environment: String) -> void:
 	begin_view()
@@ -709,6 +707,8 @@ func unit_card(control: Button, unit_id: String) -> void:
 		control.add_theme_constant_override("h_separation", 16)
 	control.end_bulk_theme_override()
 
+## «Рынок» (src/v6_economy.gd): the day's turnover, one quantity and a card per resource with
+## «Купить»/«Продать» and the estimated coins.
 func trade() -> void:
 	var navigation := begin_view()
 	var generation: int = ui.modal_generation
@@ -716,32 +716,7 @@ func trade() -> void:
 		return
 	if navigation != navigation_request or generation != ui.modal_generation:
 		return
-	ui.open_modal("Рынок", "full", "ОБЩИЙ ДНЕВНОЙ ОБОРОТ", ui.v6_card("B05"))
-	section_title("Сделка")
-	var amount: SpinBox = ui.UiKit.quantity(ui.modal_body, 1, 10000000, 1)[1]
-	amount.custom_minimum_size.x = 170
-	var deals := GridContainer.new()
-	deals.name = "Deals"
-	deals.columns = 3
-	deals.add_theme_constant_override("h_separation", 12)
-	deals.add_theme_constant_override("v_separation", 10)
-	ui.modal_body.add_child(deals)
-	for resource: String in ["wood", "food", "stone", "iron"]:
-		var r := resource
-		var name := HBoxContainer.new()
-		name.add_theme_constant_override("separation", 10)
-		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		deals.add_child(name)
-		ui.add_resource_icon(name, r, 34)
-		ui.UiKit.label(name, str(ui.RESOURCE_NAMES[r]), 19, ui.UiKit.INK, ui.UiKit.LABEL_FONT, false).size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		var buy: Button = ui.button(deals, "Купить " + str(ui.RESOURCE_NAMES[r]), func(): send({"kind":"trade", "direction":"buy", "resource":r, "quantity":int(amount.value)}))
-		ui.UiKit.style_button(buy, "green", 17)
-		buy.custom_minimum_size.x = 200
-		var sell: Button = ui.button(deals, "Продать " + str(ui.RESOURCE_NAMES[r]), func(): send({"kind":"trade", "direction":"sell", "resource":r, "quantity":int(amount.value)}))
-		ui.UiKit.style_button(sell, "secondary", 17)
-		sell.custom_minimum_size.x = 200
-	section_title("Запасы поселения")
-	stock_line()
+	economy_view.trade()
 
 func metric_value(metric: String, value: Variant) -> String:
 	if metric.ends_with("_bp"):
@@ -758,91 +733,26 @@ func plain_number(value: Variant) -> String:
 		return ui.format_balance(int(roundf(float(value))))
 	return String.num(float(value), 2)
 
+## «Аккаунт» (src/v6_menu.gd): the profile column and the account's actions as cards.
 func account() -> void:
 	begin_view()
-	var primary: bool = ui.endpoint == "https://drenovar-game.ali069587.workers.dev"
-	ui.open_modal("Аккаунт", "full", "DRENOVAR · ОБЩИЙ ГОРОД" if primary else "DRENOVAR · ТЕСТОВАЯ ВЕРСИЯ")
-	ui.message.text = ""
-	ui.row(ui.modal_body, "Версия %s · сборка %s" % [ProjectSettings.get_setting("application/config/version"), ProjectSettings.get_setting("application/config/build_number", "")])
-	if not ui.login_proof.is_empty():
-		var challenge: String = ui.login_proof.sha256_text()
-		var code: String = challenge.left(8).to_upper()
-		ui.row(ui.modal_body, "Код подтверждения: " + code)
-		if ui.pending_login_save_error:
-			ui.row(ui.modal_body, "Не удалось сохранить незавершённый вход. Если приложение перезапустится, начните вход заново.")
-		ui.row(ui.modal_body, "В Safari войдите в тот же аккаунт ChatGPT, которому принадлежит ваш город. Введите этот код и нажмите «Разрешить вход». Затем вернитесь в DRENOVAR — откроется существующий город.")
-		ui.button(ui.modal_body, "Открыть вход через ChatGPT", ui.open_login_page.bind(challenge))
-		ui.button(ui.modal_body, "Скопировать код", func(): DisplayServer.clipboard_set(code))
-		ui.button(ui.modal_body, "Проверить вход", ui.finish_login.bind(true))
-		ui.button(ui.modal_body, "Начать вход заново", ui.restart_login)
-		ui.button(ui.modal_body, "Отмена входа", ui.cancel_transfer)
-		return
-	if ui.client_update_required:
-		ui.row(ui.modal_body, "Сервер запросил обновление приложения. Здесь указан номер установленной сборки.")
-		ui.button(ui.modal_body, "Открыть сборки DRENOVAR", func(): OS.shell_open("https://github.com/ali7prg/Drenovar/releases"))
-	if primary and not enabled():
-		ui.button(ui.modal_body, "Войти через ChatGPT", ui.begin_main_login)
-	ui.row(ui.modal_body, "Войдите через ChatGPT, чтобы открыть свой существующий город. Здания, ресурсы и армия останутся на общем сервере. Подключение по коду — дополнительный способ входа." if primary else "Это отдельный тестовый мир V6. Поселения действующей игры здесь пока недоступны; их прогресс сохранён в действующей версии.")
-	ui.button(ui.modal_body, "Открыть основной город в браузере" if primary else "Открыть действующую веб-версию", func(): OS.shell_open(ui.OLD_SERVER_URL))
-	if ui.restoring_session:
-		ui.row(ui.modal_body, "Восстанавливаем подключение к вашему городу…")
-		ui.button(ui.modal_body, "Повторить подключение", ui.restore_account)
-		return
-	if not ui.connected():
-		ui.button(ui.modal_body, "Подключить устройство" if primary else "Подключиться к тестовому миру", func():
-			await ui.device_login()
-			account()
-		)
-		return
-	if ui.saved_session_error:
-		ui.row(ui.modal_body, "Не удалось сохранить вход на устройстве. Не закрывайте приложение до подключения второго устройства.")
-	if enabled():
-		ui.row(ui.modal_body, str(ui.state.city.name))
-		if not ui.state.v6.get("legacy_building_archive", []).is_empty():
-			ui.button(ui.modal_body, "Архив прежних зданий", archive)
-		ui.row(ui.modal_body, "Чтобы открыть этот же город на другом устройстве, получите код и введите его там. Код действует 10 минут.")
-		ui.button(ui.modal_body, "Получить код подключения", pairing_code)
-	else:
-		ui.row(ui.modal_body, "Введите код из своего города в веб-версии. Новое поселение для этого создавать не нужно." if primary else "Введите код из аккаунта веб-версии V6 или создайте отдельное тестовое поселение.")
-		if not primary:
-			ui.button(ui.modal_body, "Создать тестовое поселение", ui.create_settlement)
-	var input := LineEdit.new()
-	input.placeholder_text = "16 знаков из веб-версии V6"
-	input.max_length = 20
-	input.custom_minimum_size = Vector2(260, 48)
-	ui.modal_body.add_child(input)
-	ui.button(ui.modal_body, "Открыть мой город" if primary else "Подключить тестовое поселение", func():
-		var response: Dictionary = await ui.send_request("pair/accept", {"code":input.text})
-		if response.has("error"):
-			ui.show_error(response)
-		else:
-			ui.player_id = ""
-			await ui.sync_account()
-			account()
-	)
-	ui.button(ui.modal_body, "Выйти из аккаунта на устройстве", ui.confirm_profile_action.bind(ui.sign_out_question(), ui.sign_out))
+	menu_view.account()
 
 func archive() -> void:
-	begin_view()
+	var navigation := begin_view()
 	await load_catalogue()
-	ui.open_modal("Архив прежних зданий", "full", "ТЕСТОВЫЙ ВАРИАНТ COMPAT-P2")
-	ui.row(ui.modal_body, "Исходные здания сохранены в архиве; они не дают второй игровой эффект. Компенсация за преобразование выдаётся один раз.")
-	for entry: Dictionary in ui.state.v6.get("legacy_building_archive", []):
-		var previous: Dictionary = entry.instance
-		var row: Dictionary = row_for(str(previous.to_type), int(previous.level))
-		ui.row(ui.modal_body, "%s · %s · прежний участок %s" % [str(row.get("name_ru", "Прежнее здание")), ROMAN[int(previous.level)-1], str(previous.plot)])
-		for resource: String in entry.proposed_compensation:
-			ui.row(ui.modal_body, "%s: %d" % [ui.RESOURCE_NAMES[resource], int(entry.proposed_compensation[resource])])
+	if navigation != navigation_request:
+		return
+	economy_view.archive()
 
 func pairing_code() -> void:
 	var response: Dictionary = await ui.send_request("pair/create", {})
 	if response.has("error"):
 		ui.show_error(response)
 		return
-	ui.open_modal("Код подключения", "center", "ДЕЙСТВУЕТ 10 МИНУТ")
-	ui.row(ui.modal_body, str(response.code))
-	ui.row(ui.modal_body, "В веб-версии откройте «Аккаунт» и введите код. Показывайте код только своему устройству.")
+	menu_view.pairing(response)
 
+## «Цели поселения» (src/v6_economy.gd): quest cards with rewards; the current one claims.
 func objectives() -> void:
 	var navigation := begin_view()
 	var generation: int = ui.modal_generation
@@ -850,12 +760,7 @@ func objectives() -> void:
 		return
 	if navigation != navigation_request or generation != ui.modal_generation:
 		return
-	ui.open_modal("Цели поселения", "full", "НАГРАДЫ")
-	for step: Dictionary in ui.state.v6.get("starter", []):
-		ui.row(ui.modal_body, str(step.title) + (" · получено" if step.claimed else " · выполнено" if step.ready else " · в процессе"))
-		if step.ready and not step.claimed:
-			var objective: String = step.id
-			ui.button(ui.modal_body, "Получить награду", func(): await ui.command({"kind":"starter71", "objectiveId":objective}); objectives())
+	economy_view.objectives()
 
 ## Speed-up items for a running order: the queues window on that job. `back` reopens the
 ## window it came from (the recruitment window) when the job is done.

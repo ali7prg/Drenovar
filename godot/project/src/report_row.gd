@@ -11,6 +11,11 @@ var when := ""
 var losses := ""
 var spoils: Array = []
 var unread := false
+## [[portrait, count text], ...] of the party (premium UI stage 4b), and the opponent's face
+## (a creature's portrait; a settlement shows a crest).
+var party: Array = []
+var foe: Texture2D
+var foe_emblem: Texture2D
 
 func _init() -> void:
 	flat = true
@@ -45,7 +50,33 @@ func _draw() -> void:
 		draw_circle(centre + Vector2(d * 0.36, -d * 0.36), 7.0, Color("#f2d48b"))
 		draw_circle(centre + Vector2(d * 0.36, -d * 0.36), 5.0, Color("#a8231d"))
 	var x := 16.0 + d + 16.0
-	var width := maxf(60.0, size.x - x - 18.0)
+	# The right end: the opponent in a framed tile, the party's portraits before it (wide rows).
+	var right := size.x - 18.0
+	var wide := size.x > 900.0
+	if wide:
+		var tile := Rect2(size.x - 16.0 - (size.y - 20.0), 10.0, size.y - 20.0, size.y - 20.0)
+		draw_texture_rect(UiKit.tex("kit_ink"), tile.grow(6.0), false, Color(0.42, 0.36, 0.3, 0.55))
+		draw_style_box(UiKit.nine("kit_tile", Vector4(14, 14, 14, 14), Vector4.ZERO), tile)
+		if foe != null:
+			draw_texture_rect(foe, tile.grow(-4.0), false)
+		elif foe_emblem != null:
+			draw_texture_rect(foe_emblem, Rect2(tile.get_center() - tile.size * 0.3, tile.size * 0.6), false)
+		right = tile.position.x - 14.0
+		var cell := 54.0
+		var px := right - party.size() * (cell + 8.0)
+		for entry: Array in party:
+			var spot := Rect2(px, 12.0, cell, cell)
+			draw_style_box(UiKit.nine("kit_tile", Vector4(14, 14, 14, 14), Vector4.ZERO), spot)
+			if entry[0] != null:
+				draw_texture_rect(entry[0], spot.grow(-3.0), false)
+			var count := UiKit.KitText.line(str(entry[1]), UiKit.LABEL_FONT, 14)
+			var tag := Rect2(spot.get_center().x - count.get_size().x * 0.5 - 7.0, spot.end.y - 2.0, count.get_size().x + 14.0, 20.0)
+			draw_style_box(UiKit.nine("kit_pill", Vector4(18, 12, 18, 12), Vector4.ZERO), tag)
+			count.draw(get_canvas_item(), Vector2(tag.position.x + 7.0, tag.position.y + roundf((20.0 - count.get_size().y) * 0.5)), UiKit.GOLD)
+			px += cell + 8.0
+		if not party.is_empty():
+			right -= party.size() * (cell + 8.0) + 6.0
+	var width := maxf(60.0, right - x)
 	var y := 12.0
 	# The outcome on an enamel pill, the opponent beside it, the time on the right.
 	var word := UiKit.KitText.line(badge[0], UiKit.LABEL_FONT, 15)
@@ -59,7 +90,7 @@ func _draw() -> void:
 	draw_style_box(enamel, pill)
 	word.draw(get_canvas_item(), Vector2(pill.position.x + 10.0, pill.position.y + roundf((pill.size.y - word.get_size().y) * 0.5)), Color.WHITE)
 	var time_line := UiKit.KitText.line(when, UiKit.BODY_FONT, 15)
-	time_line.draw(get_canvas_item(), Vector2(size.x - 18.0 - time_line.get_size().x, y + 3.0), UiKit.INK_MUTED)
+	time_line.draw(get_canvas_item(), Vector2(right - time_line.get_size().x, y + 3.0), UiKit.INK_MUTED)
 	var name_line := UiKit.KitText.line(opponent, UiKit.LABEL_FONT, 20, maxf(40.0, width - pill.size.x - time_line.get_size().x - 30.0))
 	name_line.draw(get_canvas_item(), Vector2(pill.end.x + 12.0, y), UiKit.INK)
 	y += 34.0
@@ -76,5 +107,5 @@ func _draw() -> void:
 		var value := UiKit.KitText.line(str(entry[1]), UiKit.LABEL_FONT, 15)
 		value.draw(get_canvas_item(), Vector2(cx, y + roundf((22.0 - value.get_size().y) * 0.5)), UiKit.GOOD)
 		cx += value.get_size().x + 14.0
-		if cx > size.x - 60.0:
+		if cx > right - 40.0:
 			break

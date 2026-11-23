@@ -13,6 +13,7 @@ const UiKit = preload("res://src/ui_kit.gd")
 const UnitStage = preload("res://src/unit_stage.gd")
 const Queues = preload("res://src/v6_queues.gd")
 const Services = preload("res://src/v6_services.gd")
+const KitMore = preload("res://src/kit_more.gd")
 
 var panels
 var ui
@@ -81,6 +82,7 @@ func army() -> void:
 		["Раненых", ui.format_balance(wounded)]]
 	summary.note = "Таран занимает 5 мест. Раненые сверх коек погибают."
 	oak_column(summary, [["Лазарет", panels.services.bind("B16"), "secondary", "ArmyHospital"], ["Показать плац в городе", ui.open_parade, "tertiary"]])
+	summary_band(wounded)
 	units_section()
 	marches_section()
 	var targets: Array = ui.state.get("world", {}).get("cities", []).filter(func(c): return c.id != ui.state.playerId and c.get("pvp", false))
@@ -97,6 +99,44 @@ func army() -> void:
 			ui.modal_body.add_child(row)
 			row.add_action("Поход", "primary", Vector2(190, 52)).pressed.connect(panels.formation.bind(str(target.id), str(target.name)))
 	last_open_usec = Time.get_ticks_usec() - started
+
+## Premium UI stage 4b: the army at a glance (troops at home, their might, the wounded, the
+## troops away) and the way to a march (choose a target, then the party).
+func summary_band(wounded: int) -> void:
+	var home := 0
+	var might := 0
+	var power := {}
+	for unit: Dictionary in panels.catalogue.get("units", []):
+		power[str(unit.unit_id)] = int(unit.get("power_reference", 0))
+	var healthy: Dictionary = v6().get("healthy", {})
+	for id: String in healthy:
+		home += int(healthy[id])
+		might += int(healthy[id]) * int(power.get(id, 0))
+	var away := 0
+	for march: Dictionary in ui.state.get("armies", []) + ui.state.get("world", {}).get("armies", []):
+		if march.get("owner", ui.state.playerId) == ui.state.playerId and march.status != "returned":
+			for id: String in march.get("units", {}):
+				away += int(march.units[id])
+	var band := KitMore.StatBand.new()
+	band.name = "ArmyBand"
+	band.cells = [[UiKit.tex("kit_emb_inf"), ui.format_balance(home), "Воинов дома"],
+		[UiKit.tex("kit_emb_sword"), UiKit.compact(might), "Мощь войска"],
+		[UiKit.tex("kit_emb_heal"), ui.format_balance(wounded), "Раненых"],
+		[UiKit.tex("kit_emb_march"), ui.format_balance(away), "В походе"]]
+	ui.modal_body.add_child(band)
+	var go := HBoxContainer.new()
+	go.name = "ArmyMarch"
+	go.add_theme_constant_override("separation", 12)
+	ui.modal_body.add_child(go)
+	var compose: Button = ui.panel_action(go, "Собрать отряд", ui.show_city_hunt, home > 0)
+	compose.name = "ComposeEntry"
+	compose.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	compose.icon = UiKit.tex("kit_emb_sword")
+	compose.expand_icon = true
+	compose.add_theme_constant_override("icon_max_width", 30)
+	var note: Label = UiKit.label(go, "Выберите цель охоты или поселение — состав отряда собирается там.", 15, UiKit.INK_MUTED)
+	note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	note.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
 func units_section() -> void:
 	var home: Dictionary = v6().get("healthy", {})
@@ -118,6 +158,8 @@ func units_section() -> void:
 		var unit: Dictionary = entry[0]
 		var card: BaseButton = UiKit.tier_card(tier_of(unit), str(unit.name_ru), ui.format_balance(int(entry[1])), UnitStage.portrait(str(unit.unit_id), true))
 		card.name = "Unit_" + str(unit.unit_id)
+		# Larger cards than the recruitment roster (stage 4b): the army is the subject here.
+		card.custom_minimum_size = Vector2(138, 192)
 		card.tooltip_text = "%s · %s" % [unit.name_ru, ui.format_balance(int(entry[1]))]
 		var building_type := str(unit.get("building_id", ""))
 		var unit_id := str(unit.unit_id)

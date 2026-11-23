@@ -28,6 +28,14 @@ var buttons: Array[Button] = []
 var subject_id := ""
 var opened_at := 0
 var clock := Callable()
+## Less motion (main.set_reduced_motion): the medallions are in place at once.
+var reduced_motion := false
+## The unfold: every medallion springs out of the building along its spoke. Only the drawing
+## moves (RingButton.unfold); each button's rect is at its final place from the first frame,
+## so a tap during the unfold lands on the action it aims at.
+const UNFOLD_SECONDS := 0.17
+const UNFOLD_STAGGER := 0.018
+var unfold_tween: Tween
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -98,15 +106,25 @@ func open(id: String, title: String, at: Vector3, view: Camera3D, actions: Array
 	opened_at = Time.get_ticks_msec()
 	visible = true
 	follow()
-	# Pop in: each medallion grows from the building in turn.
-	for index in buttons.size():
-		var item := buttons[index]
-		item.modulate.a = 0.0
-		item.pivot_offset = Vector2(BUTTON, BUTTON) * 0.5
-		item.scale = Vector2.ONE * 0.6
-		var tween := create_tween().set_parallel(true)
-		tween.tween_property(item, "modulate:a", 1.0, 0.12).set_delay(index * 0.025)
-		tween.tween_property(item, "scale", Vector2.ONE, 0.16).set_delay(index * 0.025).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	if unfold_tween != null:
+		unfold_tween.kill()
+	if reduced_motion:
+		set_unfold(1.0)
+	else:
+		set_unfold(0.0)
+		unfold_tween = create_tween()
+		unfold_tween.tween_method(set_unfold, 0.0, 1.0, UNFOLD_SECONDS)
+
+## Unfold progress (0..1) of the whole ring; each medallion starts a little after the one
+## before it and settles with a small overshoot.
+func set_unfold(value: float) -> void:
+	var count := buttons.size()
+	var each := UNFOLD_SECONDS - UNFOLD_STAGGER * maxf(0.0, count - 1)
+	for index in count:
+		var local := clampf((value * UNFOLD_SECONDS - UNFOLD_STAGGER * index) / each, 0.0, 1.0)
+		var item := buttons[index] as RingButton
+		if item != null:
+			item.set_unfold(local)
 
 func close() -> void:
 	visible = false
@@ -141,6 +159,8 @@ func follow() -> void:
 		var angle := -PI * 0.5 - spread * 0.5 + spread * t
 		var at := centre + Vector2(cos(angle), sin(angle)) * RADIUS
 		buttons[index].position = at - Vector2(BUTTON, BUTTON) * 0.5
+		if buttons[index] is RingButton:
+			buttons[index].spoke = centre - at
 	plate.reset_size()
 	plate.position = centre + Vector2(-plate.size.x * 0.5, 24.0)
 
@@ -153,14 +173,38 @@ class RingButton extends Button:
 	var soon := false
 	var ends := 0.0
 	var clock := Callable()
+	## From the medallion's centre to the building's (follow() keeps it current).
+	var spoke := Vector2.ZERO
+	var unfold := 1.0
+	var caption_home := Vector2(-22, BUTTON + 1)
+
+	## 0: drawn small at the building, 1: at rest. A back-out ease gives the spring.
+	func set_unfold(value: float) -> void:
+		unfold = value
+		var e := ease_back(value)
+		modulate.a = clampf(value * 2.2, 0.0, 1.0)
+		if get_child_count() > 0 and get_child(0) is Label:
+			(get_child(0) as Label).position = caption_home + spoke * (1.0 - e)
+		queue_redraw()
+
+	static func ease_back(t: float) -> float:
+		var c := 1.9
+		var u := t - 1.0
+		return 1.0 + (c + 1.0) * u * u * u + c * u * u
 
 	func _draw() -> void:
+		if unfold < 1.0:
+			var e := ease_back(unfold)
+			var k := lerpf(0.45, 1.0, clampf(e, 0.0, 1.2))
+			var middle := Vector2(BUTTON, BUTTON) * 0.5
+			draw_set_transform(spoke * (1.0 - e) + middle * (1.0 - k), 0.0, Vector2(k, k))
 		var pressed_now := get_draw_mode() == DRAW_PRESSED or get_draw_mode() == DRAW_HOVER_PRESSED
 		var d := BUTTON - (4.0 if pressed_now else 0.0)
 		var centre := Vector2(BUTTON * 0.5, BUTTON * 0.5 + (1.5 if pressed_now else 0.0))
-		draw_circle(centre + Vector2(0, 2.5), d * 0.5 + 2.0, Color(0, 0, 0, 0.35), true, -1.0, true)
+		draw_circle(centre + Vector2(0, 3.0), d * 0.5 + 2.5, Color(0, 0, 0, 0.38), true, -1.0, true)
 		var tone := Color(0.72, 0.7, 0.68) if soon else (Color(0.82, 0.78, 0.74) if pressed_now else Color.WHITE)
-		draw_texture_rect(UiKit.tex("kit_rail_on" if primary else "kit_rail"), Rect2(centre - Vector2(d, d) * 0.5, Vector2(d, d)), false, tone)
+		# Glazed enamel disc in a gold bezel (kit_ring_disc); the main action is on the gold one.
+		draw_texture_rect(UiKit.tex("kit_ring_disc_on" if primary else "kit_ring_disc"), Rect2(centre - Vector2(d, d) * 0.5, Vector2(d, d)), false, tone)
 		var side := d * 0.6
 		if emblem != null:
 			draw_texture_rect(emblem, Rect2(centre - Vector2(side, side) * 0.5, Vector2(side, side)), false, Color(0.7, 0.68, 0.66, 0.85) if soon else tone)

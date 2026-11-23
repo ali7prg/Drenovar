@@ -1,0 +1,11 @@
+qa_legacy_v6_plots exit=0 secs=5 QA_LEGACY_V6_PLOTS checks=16 failures=0 
+qa_build_menu exit=0 secs=3 QA_BUILD_MENU open_ms=45.3 cards=19 QA_BUILD_MENU checks=20 failures=0 
+qa_city_works exit=0 secs=19 QA_CITY_WORKS checks=39 failures=0 
+qa_runtime exit=0 secs=3 QA_RUNTIME checks=21 failures=0 
+qa_instant_start exit=0 secs=6 QA_INSTANT_START checks=12 failures=0 launch_ms=1583 
+qa_townsfolk exit=0 secs=32 QA_TOWNSFOLK checks=91 failures=0 
+qa_legacy_build exit=0 secs=2 QA_LEGACY_BUILD checks=22 failures=0 
+qa_workers exit=0 secs=16 QA_WORKERS checks=38 failures=0 
+qa_town_plan exit=0 secs=6 QA_TOWN_YARD_CROSSING metres=29.0 dense_grazes=1 QA_TOWN_PLAN checks=35 failures=0 
+qa_city_parity exit=0 secs=4 QA_CITY_PARITY steps=7 vegetation_rebuilds=4 checks=279 failures=0 
+qa_city_walls exit=1 secs=3 RESULT failures=4 

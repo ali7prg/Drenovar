@@ -517,14 +517,16 @@ func pick_plot(id: String) -> void:
 func quote_ready() -> bool:
 	return not placing.is_empty() and not placing.get("pending", true)
 
-## «Построить»: the quoted terms are sent; the city shows the scaffolding when the server
-## accepts it.
+## «Построить»: the quoted terms are sent; the city shows the scaffolding on the plot at once
+## (a forecast that the server's order takes over, or that goes if the server refuses).
 func confirm_build() -> void:
 	if placing.is_empty() or placing.quote.is_empty():
 		return
 	var intent := {"kind": "construction", "building": placing.type, "target": 1, "plot": placing.plot,
 		"economy_version": VERSION, "expected_duration_seconds": int(placing.quote.duration_seconds)}
 	var title := str(placing.row.get("name_ru", placing.type))
+	var type := str(placing.type)
+	var group := group_of(placing.row)
 	var at: Vector3 = Vector3.INF
 	for plot: Dictionary in placing.plots:
 		if plot.id == placing.plot:
@@ -532,7 +534,12 @@ func confirm_build() -> void:
 	cancel_placement()
 	if at != Vector3.INF:
 		ui.stage.target = at
-	if await ui.command({"kind": "v6", "intent": intent}):
+	# The scaffolding stands on the plot at once; the server's order takes it over.
+	var forecast: String = ui.predict_construction(str(intent.plot), group if not group.is_empty() else type,
+		BuildingStage.runtime_type(ui.data, type), int(intent.expected_duration_seconds))
+	var accepted: bool = await ui.command({"kind": "v6", "intent": intent})
+	ui.settle_construction(forecast, accepted)
+	if accepted:
 		ui.message.text = "Строительство началось: %s" % title
 
 ## The plot list of the type (the inspector's «Участок N» buttons): the fallback to tapping

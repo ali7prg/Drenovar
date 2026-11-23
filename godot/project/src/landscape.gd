@@ -1365,9 +1365,14 @@ func present_city(state: Dictionary, staged := false) -> void:
 	for id in plot_positions:
 		var at: Vector3 = plot_positions[id]
 		obstacles.append([Vector2(at.x, at.z), CityWalls.BUILDING_CLEARANCE])
-	var order_plot: String = str(order.get("plotId", "")) if order is Dictionary else ""
+	# The plots of both construction orders (the second builder's order2 too): the ring
+	# bulges around their sites and no tree stands in them (see the exclusions below).
+	var order_plots := {}
+	for job: Variant in [order, construction.get("order2") if construction is Dictionary else null]:
+		if job is Dictionary and not str(job.get("plotId", "")).is_empty():
+			order_plots[str(job.plotId)] = true
 	for plot in plots:
-		if plot.id == order_plot or plot.id.begins_with("site-"):
+		if order_plots.has(plot.id) or plot.id.begins_with("site-"):
 			obstacles.append([Vector2(float(plot.x), float(plot.z)), CityWalls.BUILDING_CLEARANCE])
 	# The main gate of the ring is the "walls and gate" building itself (B18 levels I-V).
 	var gate_scene: Dictionary = level_model_for("SUP-03", maxi(1, defence_level))
@@ -1389,7 +1394,9 @@ func present_city(state: Dictionary, staged := false) -> void:
 	for lot: Dictionary in town_plan.lots:
 		exclusions.append(lot.rect)
 	for plot in plots:
-		if (kingdom is Dictionary and plot.id in kingdom.get("clearedPlots", [])) or plot.id.begins_with("site-"):
+		# A V6 construction site has no clearing step: its plot is cleared when the order starts,
+		# or the scaffolding and the rising building stood inside the forest.
+		if (kingdom is Dictionary and plot.id in kingdom.get("clearedPlots", [])) or plot.id.begins_with("site-") or order_plots.has(plot.id):
 			exclusions.append(Rect2(plot.x - 6.7, plot.z - 6.7, 13.4, 13.4))
 		if not plot_positions.has(plot.id):
 			plot_positions[plot.id] = Vector3(plot.x, sample_city(plot.x, plot.z), plot.z)

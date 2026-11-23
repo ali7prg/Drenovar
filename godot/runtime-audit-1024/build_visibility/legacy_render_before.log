@@ -1,0 +1,117 @@
+ok   Local server given (--server=http://127.0.0.1:PORT)
+ok   Local realm reset
+ok   Settlement created on the local V6 server (201)
+ok   Settlement turned into one of the earlier model and migrated by the server
+ok   Game connected to the local V6 server and shows the city
+ok   City is of the earlier model (legacyUpgrades, no kingdom)
+ok   Older buildings stand on the legacy grid plot-N
+ok   Two builders
+ok   Build opens the V6 construction strip
+ok   A card can be built
+ok   Охотничий лагерь: tapping the card starts placement
+ok   Охотничий лагерь: 33 plots offered, each with a spot
+ok   Охотничий лагерь: the camera shows a free plot
+FAIL Охотничий лагерь: no offered plot lies on a building (v1-2~legacy-7, v1-0~legacy-0, v1-5~legacy-11, v1-3~legacy-8, v1-3~legacy-10, v1-7~legacy-6, v1-6~legacy-5, v1-1~legacy-12, v1-4~legacy-14, v1-8~legacy-1, v1-11~legacy-3, v1-22~legacy-4)
+ok   Охотничий лагерь: the server quotes the build on v1-2
+ok   Охотничий лагерь: the ghost stands on the chosen plot
+ok   Охотничий лагерь: the chosen plot glows
+ok   Охотничий лагерь: the server answered the order
+FAIL Охотничий лагерь: scaffolding and builders at the chosen spot after «Построить»
+E2E  B10 on v1-2: answer after 1427 ms; scaffolding and builders after -1 ms (frame -1 of 2)
+FAIL Охотничий лагерь: scaffolding and builders at once after «Построить» (frame -1, -1 ms; answer 1427 ms)
+ok   Охотничий лагерь: the camera is on the site
+ok   Охотничий лагерь (site): on dry ground (height 0.58)
+ok   Охотничий лагерь (site): inside the wall ring
+ok   Охотничий лагерь (site): no tree stands in it (0)
+FAIL Охотничий лагерь: the site carries the name and progress plate
+ok   Охотничий лагерь: the card says under construction (busy), not built
+ok   Охотничий лагерь: no finished building before the end
+ok   Build opens the V6 construction strip
+ok   A card can be built
+ok   Лесопилка: tapping the card starts placement
+ok   Лесопилка: 32 plots offered, each with a spot
+ok   Лесопилка: the camera shows a free plot
+FAIL Лесопилка: no offered plot lies on a building (v1-0~legacy-0, v1-5~legacy-11, v1-7~legacy-6, v1-3~legacy-8, v1-3~legacy-10, v1-6~legacy-5, v1-1~legacy-12, v1-4~legacy-14, v1-8~legacy-1, v1-22~legacy-4, v1-11~legacy-3)
+ok   Лесопилка: the server quotes the build on v1-0
+ok   Лесопилка: the ghost stands on the chosen plot
+ok   Лесопилка: the chosen plot glows
+ok   Лесопилка: the server answered the order
+FAIL Лесопилка: scaffolding and builders at the chosen spot after «Построить»
+E2E  B21 on v1-0: answer after 1616 ms; scaffolding and builders after -1 ms (frame -1 of 2)
+FAIL Лесопилка: scaffolding and builders at once after «Построить» (frame -1, -1 ms; answer 1616 ms)
+ok   Лесопилка: the camera is on the site
+ok   Лесопилка (site): on dry ground (height 0.27)
+ok   Лесопилка (site): inside the wall ring
+ok   Лесопилка (site): no tree stands in it (0)
+FAIL Лесопилка: the site carries the name and progress plate
+ok   Лесопилка: the card says under construction (busy), not built
+FAIL Лесопилка: no finished building before the end
+ok   The server runs both orders (order and order2)
+FAIL Both sites have scaffolding and builders
+ok   Охотничий лагерь (first site, second order running): on dry ground (height 0.58)
+ok   Охотничий лагерь (first site, second order running): inside the wall ring
+ok   Охотничий лагерь (first site, second order running): no tree stands in it (0)
+ok   The server answers a poll with 304 (cached state, advanced_state)
+FAIL Sites stay through the conditional polls
+E2E  state polls while building: 0 full, 3 not modified
+ok   Construction orders carry their end
+ok   The state after the end has the new buildings
+ok   Охотничий лагерь: on its plot v1-2
+FAIL Охотничий лагерь: tap marker and name plate in the city
+FAIL Охотничий лагерь: its model is drawn at the spot
+ok   Охотничий лагерь: on dry ground (height 0.58)
+ok   Охотничий лагерь: inside the wall ring
+ok   Охотничий лагерь: no tree stands in it (0)
+ok   Охотничий лагерь: the scaffolding and builders are gone
+ok   Охотничий лагерь: the card says built (maxed)
+ok   Лесопилка: on its plot v1-0
+FAIL Лесопилка: tap marker and name plate in the city
+ok   Лесопилка: its model is drawn at the spot
+ok   Лесопилка: on dry ground (height 0.27)
+ok   Лесопилка: inside the wall ring
+ok   Лесопилка: no tree stands in it (0)
+ok   Лесопилка: the scaffolding and builders are gone
+ok   Лесопилка: the card says built (maxed)
+ok   Build opens the V6 construction strip
+ok   A card can be built
+ok   Пшеничная ферма: tapping the card starts placement
+ok   Пшеничная ферма: 31 plots offered, each with a spot
+ok   Пшеничная ферма: the camera shows a free plot
+FAIL Пшеничная ферма: no offered plot lies on a building (v1-1~legacy-12, v1-3~legacy-8, v1-3~legacy-10, v1-6~legacy-5, v1-7~legacy-6, v1-4~legacy-14, v1-5~legacy-11, v1-8~legacy-1, v1-11~legacy-3, v1-22~legacy-4)
+ok   Пшеничная ферма: the server quotes the build on v1-1
+ok   Пшеничная ферма: the ghost stands on the chosen plot
+ok   Пшеничная ферма: the chosen plot glows
+ok   Пшеничная ферма: the server answered the order
+FAIL Пшеничная ферма: scaffolding and builders at the chosen spot after «Построить»
+E2E  B22 on v1-1: answer after 1992 ms; scaffolding and builders after -1 ms (frame -1 of 2)
+FAIL Пшеничная ферма: scaffolding and builders at once after «Построить» (frame -1, -1 ms; answer 1992 ms)
+ok   Пшеничная ферма: the camera is on the site
+ok   Пшеничная ферма (site): on dry ground (height 1.57)
+ok   Пшеничная ферма (site): inside the wall ring
+ok   Пшеничная ферма (site): no tree stands in it (0)
+FAIL Пшеничная ферма: the site carries the name and progress plate
+ok   Пшеничная ферма: the card says under construction (busy), not built
+ok   Пшеничная ферма: no finished building before the end
+ok   Construction orders carry their end
+ok   The state after the end has the new buildings
+ok   Пшеничная ферма: on its plot v1-1
+FAIL Пшеничная ферма: tap marker and name plate in the city
+FAIL Пшеничная ферма: its model is drawn at the spot
+ok   Пшеничная ферма: on dry ground (height 1.57)
+ok   Пшеничная ферма: inside the wall ring
+ok   Пшеничная ферма: no tree stands in it (0)
+ok   Пшеничная ферма: the scaffolding and builders are gone
+ok   Пшеничная ферма: the card says built (maxed)
+ok   No two buildings overlap ()
+FAIL The city draws 3 more building models
+ok   Refused order: no scaffolding or building is left on v1-6
+ok   Refused order: the server's reason is kept (Недостаточно ресурсов)
+E2E  refused B26 on v1-6: forecast shown false, removed true
+E2E  built: B10 on v1-2 at (7.0, -4.0), B21 on v1-0 at (-5.0, -5.0), B22 on v1-1 at (-16.0, -5.0)
+QA_BUILD_E2E scenario=legacy checks=104 failures=21
+QA_BUILD_E2E B10 on v1-2: answer after 1427 ms; scaffolding and builders after -1 ms (frame -1 of 2)
+QA_BUILD_E2E B21 on v1-0: answer after 1616 ms; scaffolding and builders after -1 ms (frame -1 of 2)
+QA_BUILD_E2E state polls while building: 0 full, 3 not modified
+QA_BUILD_E2E B22 on v1-1: answer after 1992 ms; scaffolding and builders after -1 ms (frame -1 of 2)
+QA_BUILD_E2E refused B26 on v1-6: forecast shown false, removed true
+QA_BUILD_E2E built: B10 on v1-2 at (7.0, -4.0), B21 on v1-0 at (-5.0, -5.0), B22 on v1-1 at (-16.0, -5.0)

@@ -6044,6 +6044,29 @@ func predict_work(order: Dictionary) -> void:
 	if is_instance_valid(stage) and map_name == "city":
 		refresh_hud()
 
+## A V6 construction on its way (src/v6_build.gd confirm_build): its site shows at once on the
+## chosen plot (scaffolding, builders, the rising building and its timer), like the instant
+## orders of the earlier model, instead of one server round trip later. `key` is the id the
+## server gives the order (the type, or its shared plot group), so the confirmed site takes
+## over the same scaffolding. Returns the forecast's slot for settle_construction.
+func predict_construction(plot: String, key: String, runtime_type: String, seconds: int) -> String:
+	var now := server_time()
+	var slot := free_slot("site")
+	pending_works[slot] = {"key": key, "building": "", "plot": plot, "type": runtime_type, "started": now,
+		"ends": now + float(seconds) * 1000.0, "order": {"kind": "v6", "action": "build", "plotId": plot},
+		"cost": {}, "level": -1, "sent": Time.get_ticks_msec()}
+	return slot
+
+## The answer is in: the server's order replaces the forecast (current_works drops it once the
+## state carries the order); a refused order takes it away at once.
+func settle_construction(slot: String, accepted: bool) -> void:
+	if not pending_works.has(slot):
+		return
+	if accepted:
+		pending_works[slot].answered = Time.get_ticks_msec()
+	else:
+		pending_works.erase(slot)
+
 func free_slot(prefix: String) -> String:
 	var index := 1
 	while pending_works.has(prefix if index == 1 else prefix + str(index)):
@@ -6185,9 +6208,12 @@ func site_view(source: Dictionary) -> Dictionary:
 	if source.started <= 0.0:
 		var terms: Dictionary = data.buildingTerms.get(source.type if existing.is_empty() else str(existing.type), {})
 		source.started = float(source.ends) - 1000.0 * float(terms.get("seconds", 30))
-	if stage.work_sites.has(plot_id):
+	# A V6 plot not in use yet in a settlement of the earlier model (a construction just sent,
+	# see predict_construction) stands at the spot the city gave it (Landscape.v6_spots).
+	var spot: Vector3 = stage.work_sites.get(plot_id, stage.v6_spots.get(plot_id, Vector3.INF))
+	if spot != Vector3.INF:
 		site = source
-		site.position = stage.work_sites[plot_id]
+		site.position = spot
 		# A new building rises inside the scaffolding; an upgrade keeps the building.
 		if existing.is_empty() and data.types.has(source.type):
 			var asset: Dictionary = data.models[data.types[source.type]]

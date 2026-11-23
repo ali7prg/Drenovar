@@ -259,7 +259,15 @@ static func stage_materials(unit: Node3D) -> void:
 			continue
 		for surface in part.mesh.get_surface_count():
 			var material := part.get_active_material(surface) as BaseMaterial3D
-			if material == null or material.has_meta("drenovar_stage_surface"):
+			if material == null or material.has_meta("drenovar_stage_helmet"):
+				continue
+			# Premium UI stage 4b: the spearman's polished kettle hat caught the stage's sky as
+			# a bright white ring round the brim. On the stage only (this instance, never the
+			# shared material the city uses) the steel is darker and less glossy.
+			if material.resource_name.to_lower().contains("steel_helmet"):
+				part.set_surface_override_material(surface, stage_helmet(material))
+				continue
+			if material.has_meta("drenovar_stage_surface"):
 				continue
 			material.set_meta("drenovar_stage_surface", true)
 			var name := material.resource_name.to_lower()
@@ -269,6 +277,21 @@ static func stage_materials(unit: Node3D) -> void:
 				material.rim_enabled = true
 				material.rim = 0.28
 				material.rim_tint = 0.65
+
+static var helmet_tones := {}
+
+## The stage's tone of a polished steel helmet (one per source material).
+static func stage_helmet(material: BaseMaterial3D) -> BaseMaterial3D:
+	var key := material.get_instance_id()
+	if not helmet_tones.has(key):
+		var toned := material.duplicate() as BaseMaterial3D
+		toned.albedo_color = material.albedo_color * Color(0.6, 0.58, 0.55, 1.0)
+		toned.roughness = maxf(material.roughness, 0.64)
+		toned.metallic = minf(material.metallic, 0.42)
+		toned.metallic_specular = 0.28
+		toned.set_meta("drenovar_stage_helmet", true)
+		helmet_tones[key] = toned
+	return helmet_tones[key]
 
 # ------------------------------------------------------------------ framing
 

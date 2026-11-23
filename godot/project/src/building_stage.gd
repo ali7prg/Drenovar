@@ -50,6 +50,11 @@ static var runtime := {}
 static var materials := {}
 static var environment: Environment
 static var glow_material: ShaderMaterial
+## Diorama tiles by seed (tile_meshes), and the ones a worker thread is making.
+static var tile_cache := {}
+static var tile_tasks := {}
+static var tile_results := {}
+static var tile_mutex := Mutex.new()
 
 # ------------------------------------------------------------------ data
 
@@ -224,9 +229,11 @@ static func outline(angle: float, seed: int) -> float:
 ## dark soil with roots and lighter strata, field stones and a few bushes round the rim, and
 ## a soft shadow below.
 static func make_tile(seed := 7) -> Node3D:
-	var kit := tile_materials()
-	var root := Node3D.new()
-	root.name = "Diorama"
+	return tile_node(tile_meshes(seed))
+
+## The tile's four surfaces (turf, soil, stones, bushes) as mesh arrays. Pure arithmetic on
+## SurfaceTools, no RenderingServer call, so it runs on a worker thread (request_tile).
+static func tile_arrays(seed: int) -> Array:
 	var steps := 120
 	# Top: rings from the centre to the lip (fractions of the outline, height).
 	var rings := [[0.0, 0.0], [0.3, 0.0], [0.55, 0.0], [0.74, 0.0], [0.87, -0.015], [0.94, -0.05], [0.972, -0.11], [0.99, -0.19], [1.0, -0.28]]
@@ -261,11 +268,8 @@ static func make_tile(seed := 7) -> Node3D:
 				top.set_color(quad[index][1])
 				top.add_vertex(quad[index][0])
 	top.generate_normals()
-	var turf := MeshInstance3D.new()
-	turf.name = "Turf"
-	turf.mesh = top.commit()
-	turf.material_override = kit.grass
-	root.add_child(turf)
+	top.index()
+	var out: Array = [top.commit_to_arrays()]
 	# Soil cut: from the lip down, drawn in toward the bottom, an uneven lower edge, darker
 	# strata and the turf's root mat just under the grass.
 	var side := SurfaceTool.new()
@@ -297,11 +301,8 @@ static func make_tile(seed := 7) -> Node3D:
 				side.set_color(quad[index][1])
 				side.add_vertex(quad[index][0])
 	side.generate_normals()
-	var soil := MeshInstance3D.new()
-	soil.name = "Soil"
-	soil.mesh = side.commit()
-	soil.material_override = kit.soil
-	root.add_child(soil)
+	side.index()
+	out.append(side.commit_to_arrays())
 	# Field stones half sunk at the lip and in the soil cut.
 	var stones := SurfaceTool.new()
 	stones.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -314,11 +315,8 @@ static func make_tile(seed := 7) -> Node3D:
 		var centre := Vector3(cos(angle) * r, (-0.85 if low else -0.16) + size * 0.15, sin(angle) * r)
 		add_stone(stones, centre, Vector3(size * 1.3, size * 0.7, size), seed + k * 13)
 	stones.generate_normals()
-	var rocks := MeshInstance3D.new()
-	rocks.name = "Stones"
-	rocks.mesh = stones.commit()
-	rocks.material_override = kit.stone
-	root.add_child(rocks)
+	stones.index()
+	out.append(stones.commit_to_arrays())
 	# A few low bushes on the back corners (behind the building, never in front of it).
 	var bushes := SurfaceTool.new()
 	bushes.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -331,11 +329,73 @@ static func make_tile(seed := 7) -> Node3D:
 			var size := 0.42 + 0.3 * noise(float(leaf), float(k) + 9.0, seed + 41)
 			add_stone(bushes, base + spread + Vector3(0, size * 0.55, 0), Vector3(size, size * 0.9, size), seed + leaf * 7 + k, Color("#7f9a4e"), Color("#4f6b31"))
 	bushes.generate_normals()
-	var green := MeshInstance3D.new()
-	green.name = "Bushes"
-	green.mesh = bushes.commit()
-	green.material_override = kit.leaf
-	root.add_child(green)
+	bushes.index()
+	out.append(bushes.commit_to_arrays())
+	return out
+
+## Meshes of a tile, made at most once per seed (a handful kept; each is about 0.2 MB).
+static func tile_meshes(seed: int) -> Array:
+	if tile_cache.has(seed):
+		return tile_cache[seed]
+	var arrays: Array = tile_arrays(seed)
+	return keep_tile(seed, arrays)
+
+static func keep_tile(seed: int, arrays: Array) -> Array:
+	var meshes: Array = []
+	for surface_arrays: Array in arrays:
+		var mesh := ArrayMesh.new()
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arrays)
+		meshes.append(mesh)
+	if tile_cache.size() >= 8:
+		tile_cache.erase(tile_cache.keys()[0])
+	tile_cache[seed] = meshes
+	return meshes
+
+## Starts a tile's arithmetic on a worker thread (harmless when made or running). Every task
+## is waited for (finish_tile): by take_tile, or when the stage that asked leaves the tree.
+static func request_tile(seed: int) -> void:
+	if tile_cache.has(seed) or tile_tasks.has(seed) or tile_results.has(seed):
+		return
+	tile_tasks[seed] = WorkerThreadPool.add_task(func():
+		var arrays := tile_arrays(seed)
+		tile_mutex.lock()
+		tile_results[seed] = arrays
+		tile_mutex.unlock())
+
+static func finish_tile(seed: int, block: bool) -> void:
+	if tile_tasks.has(seed) and (block or WorkerThreadPool.is_task_completed(tile_tasks[seed])):
+		WorkerThreadPool.wait_for_task_completion(tile_tasks[seed])
+		tile_tasks.erase(seed)
+
+## The tile's node once its worker is done (null while it still runs).
+static func take_tile(seed: int) -> Node3D:
+	if tile_cache.has(seed):
+		return tile_node(tile_cache[seed])
+	finish_tile(seed, false)
+	if tile_tasks.has(seed):
+		return null
+	tile_mutex.lock()
+	var arrays: Array = tile_results.get(seed, [])
+	tile_results.erase(seed)
+	tile_mutex.unlock()
+	if arrays.is_empty():
+		request_tile(seed)
+		return null
+	return tile_node(keep_tile(seed, arrays))
+
+static func tile_node(meshes: Array) -> Node3D:
+	var kit := tile_materials()
+	var root := Node3D.new()
+	root.name = "Diorama"
+	var parts: Array[MeshInstance3D] = []
+	for entry: Array in [["Turf", kit.grass], ["Soil", kit.soil], ["Stones", kit.stone], ["Bushes", kit.leaf]]:
+		var part := MeshInstance3D.new()
+		part.name = entry[0]
+		part.mesh = meshes[parts.size()]
+		part.material_override = entry[1]
+		part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		root.add_child(part)
+		parts.append(part)
 	# Soft shadow of the tile on whatever is behind it.
 	var shadow := MeshInstance3D.new()
 	shadow.name = "TileShadow"
@@ -346,8 +406,6 @@ static func make_tile(seed := 7) -> Node3D:
 	shadow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	shadow.position = Vector3(-0.8, -TILE_DEPTH - 0.7, -0.8)
 	root.add_child(shadow)
-	for part: MeshInstance3D in [turf, soil, rocks, green]:
-		part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	return root
 
 ## A lumpy field stone (a squashed, dented sphere) into a SurfaceTool; with `lit` and `moss`
@@ -541,6 +599,7 @@ var viewport: SubViewport
 var camera: Camera3D
 var mounts: Array = []
 var waiting: Array = []
+var tiles_waiting: Array = []
 var world_built := false
 var models_placed := 0
 var spin := 0.0
@@ -603,6 +662,9 @@ func setup(game_data: Dictionary, v6_type: String, current: int, final_level := 
 		captions[0] = "Окончательный уровень · ур. XI"
 	if soon:
 		captions[1] = "После · скоро"
+	# The tiles' arithmetic starts now, on a worker: the live view is built a frame later.
+	for side: int in sides():
+		request_tile(tile_seed(side))
 
 ## The first level of a family is all new against the level before it (nothing to light).
 func family_start(level: int) -> bool:
@@ -800,33 +862,36 @@ func _draw() -> void:
 			draw_style_box(UiKit.flat(Color("#8e2a1e"), Color("#e9c779"), 5, Vector2.ZERO, 2), ribbon)
 			note.draw(get_canvas_item(), Vector2(ribbon.position.x + 16.0, ribbon.position.y + roundf((26.0 - note.get_size().y) * 0.5)), UiKit.GOLD)
 
-## The «Скоро» card in the «После» slot: the empty diorama tile under a dark linen veil, a
-## carved plate «Скоро» and one line. No model, no level number.
+## The «Скоро» card in the «После» slot (premium UI stage 4b): the current building as a dark
+## silhouette in a drift of mist, a carved plate «Скоро» and one line. No model, no level
+## number, no tile edge.
 func draw_soon(slot: Rect2) -> void:
-	var card := Rect2(slot.position.x + slot.size.x * 0.1, slot.position.y + slot.size.y * 0.06, slot.size.x * 0.8, slot.size.y * 0.9)
-	var tile: Texture2D = card_art("tile")
-	if tile != null:
-		draw_texture_rect(tile, slot, false, Color(0.42, 0.4, 0.38, 0.75))
-	var veil := UiKit.flat(Color("#1d1510c8"), Color("#b8873e"), 14, Vector2.ZERO, 2)
-	draw_style_box(veil, card)
-	draw_style_box(UiKit.flat(Color(0, 0, 0, 0), Color("#e9c77955"), 10, Vector2.ZERO, 1), card.grow(-6))
-	var sun := minf(card.size.x, card.size.y) * 0.62
-	draw_texture_rect(UiKit.tex("kit_solar"), Rect2(card.get_center() - Vector2(sun, sun) * 0.5 - Vector2(0, card.size.y * 0.1), Vector2(sun, sun)), false, Color(0.95, 0.78, 0.45, 0.16))
+	var art: Texture2D = card_art(type)
+	var centre := slot.get_center()
+	if art != null:
+		# The silhouette: the diorama art in a deep oak tone, a little smaller and lifted.
+		var shape := Rect2(centre - slot.size * 0.42 - Vector2(0, slot.size.y * 0.04), slot.size * 0.84)
+		draw_texture_rect(art, shape.grow(3.0), false, Color(0.92, 0.82, 0.62, 0.22))
+		draw_texture_rect(art, shape, false, Color(0.13, 0.1, 0.075, 0.82))
+	# Mist: soft pale washes drifting over the lower half and the flanks.
+	var mist: Texture2D = UiKit.tex("kit_ink")
+	if mist != null:
+		for wash: Array in [[Vector2(0.0, 0.2), Vector2(1.15, 0.55), 0.62], [Vector2(-0.24, -0.02), Vector2(0.7, 0.5), 0.42],
+				[Vector2(0.26, 0.06), Vector2(0.72, 0.5), 0.45], [Vector2(0.0, 0.34), Vector2(1.3, 0.42), 0.7]]:
+			var extent: Vector2 = slot.size * (wash[1] as Vector2)
+			var at: Vector2 = centre + slot.size * (wash[0] as Vector2) - extent * 0.5
+			draw_texture_rect(mist, Rect2(at, extent), false, Color(0.97, 0.93, 0.84, float(wash[2])))
 	var word := UiKit.KitText.line("Скоро", UiKit.TITLE_FONT, 30)
 	var plate_width := word.get_size().x + 70.0
-	var plate := Rect2(roundf(card.get_center().x - plate_width * 0.5), roundf(card.get_center().y - 34.0), plate_width, 48.0)
+	var plate := Rect2(roundf(centre.x - plate_width * 0.5), roundf(centre.y - 30.0), plate_width, 48.0)
 	draw_style_box(UiKit.nine("kit_strip", Vector4(26, 14, 26, 14), Vector4.ZERO), plate)
 	var at := Vector2(roundf(plate.get_center().x - word.get_size().x * 0.5), plate.position.y + roundf((plate.size.y - word.get_size().y) * 0.5))
 	word.draw_outline(get_canvas_item(), at, 6, UiKit.SHADE)
 	word.draw(get_canvas_item(), at, UiKit.GOLD)
-	var line := UiKit.KitText.line("Новые уровни зданий", UiKit.LABEL_FONT, 17)
-	var line2 := UiKit.KitText.line("скоро появятся", UiKit.LABEL_FONT, 17)
-	var y := plate.end.y + 12.0
-	for text: TextLine in [line, line2]:
-		var p := Vector2(roundf(card.get_center().x - text.get_size().x * 0.5), y)
-		text.draw_outline(get_canvas_item(), p, 4, UiKit.SHADE)
-		text.draw(get_canvas_item(), p, UiKit.IVORY)
-		y += text.get_size().y
+	var line := UiKit.KitText.line("Новые уровни зданий скоро появятся", UiKit.LABEL_FONT, 16)
+	var p := Vector2(roundf(centre.x - line.get_size().x * 0.5), plate.end.y + 10.0)
+	line.draw_outline(get_canvas_item(), p, 5, Color(0.98, 0.95, 0.88, 0.9))
+	line.draw(get_canvas_item(), p, UiKit.INK)
 
 # Built after the window's first frame: the open itself costs no 3D work.
 func _notification(what: int) -> void:
@@ -836,6 +901,9 @@ func _notification(what: int) -> void:
 		# Nothing 3D outlives the window: the viewport and the instances are children of this
 		# node; the next level's scene leaves memory too (the city keeps the current one).
 		scenes.clear()
+		# The tiles' workers are waited for (a task left unwaited aborts the engine at exit).
+		for side: int in sides():
+			finish_tile(tile_seed(side), true)
 
 func build_world() -> void:
 	if world_built or not is_inside_tree():
@@ -871,7 +939,13 @@ func build_world() -> void:
 		mount.name = "Tile%d" % side
 		mount.position = (basis[0] as Vector3) * tile_offset(side, frame)
 		holder.add_child(mount)
-		mount.add_child(make_tile(hash(type) % 97 + side * 13))
+		# The tile's arithmetic runs on a worker (about 15 ms each): the placeholder art stays
+		# until both tiles and the models are in.
+		var tile := take_tile(tile_seed(side))
+		if tile != null:
+			mount.add_child(tile)
+		else:
+			tiles_waiting.append(side)
 		mounts[side] = mount
 		if not str(paths[side]).is_empty():
 			waiting.append(side)
@@ -897,9 +971,18 @@ func frame_camera() -> void:
 		if mounts.size() > side and mounts[side] != null:
 			mounts[side].position = (basis[0] as Vector3) * tile_offset(side, frame)
 
+func tile_seed(side: int) -> int:
+	return hash(type) % 97 + side * 13
+
 func _process(delta: float) -> void:
 	if not world_built:
 		return
+	for side: int in tiles_waiting.duplicate():
+		var tile := take_tile(tile_seed(side))
+		if tile != null:
+			tiles_waiting.erase(side)
+			mounts[side].add_child(tile)
+			mark_dirty(3)
 	for side: int in waiting.duplicate():
 		var scene := take(str(paths[side]))
 		if scene != null:
@@ -914,7 +997,7 @@ func _process(delta: float) -> void:
 			queue_redraw()
 		elif not requested.has(paths[side]) and not scenes.has(paths[side]):
 			waiting.erase(side)
-	if waiting.is_empty() and view.modulate.a < 0.01 and (fade == null or not fade.is_running()):
+	if waiting.is_empty() and tiles_waiting.is_empty() and view.modulate.a < 0.01 and (fade == null or not fade.is_running()):
 		reveal()
 	# Both tiles turn together: a short intro turn when they appear, the finger's turn with its
 	# glide, then an ease back to the front view, where the picture holds.

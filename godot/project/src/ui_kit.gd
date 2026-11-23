@@ -47,7 +47,10 @@ const TEXTURES := ["kit_body", "kit_body_dark", "kit_hourglass", "kit_header", "
 	"kit_emb_book", "kit_emb_heal", "kit_emb_sheaf", "kit_emb_sword", "kit_emb_shield", "kit_emb_march", "kit_emb_map",
 	"kit_emb_scroll", "kit_emb_menu", "kit_emb_info", "kit_emb_up", "kit_emb_speed", "kit_emb_move", "kit_emb_trade", "kit_emb_helm",
 	"kit_item_build_1", "kit_item_build_2", "kit_item_build_3", "kit_item_build_4", "kit_item_build_5",
-	"kit_item_train_1", "kit_item_train_2", "kit_item_train_3", "kit_item_train_4", "kit_item_train_5"]
+	"kit_item_train_1", "kit_item_train_2", "kit_item_train_3", "kit_item_train_4", "kit_item_train_5",
+	"kit_emb_tree", "kit_emb_aim", "kit_emb_zoom_in", "kit_emb_zoom_out", "kit_emb_gauge", "kit_emb_layers", "kit_emb_rotate",
+	"kit_emb_globe", "kit_emb_award", "kit_emb_key", "kit_emb_bell", "kit_emb_chest", "kit_emb_next", "kit_emb_copy", "kit_emb_exit",
+	"kit_switch_on", "kit_switch_off", "kit_ring_disc", "kit_ring_disc_on"]
 
 static var textures := {}
 static var requested := {}
@@ -1355,6 +1358,14 @@ static func theme(base: Theme) -> Theme:
 		t.set_color("font_hover_color", type, INK)
 		t.set_color("font_pressed_color", type, INK)
 		t.set_color("font_focus_color", type, INK)
+		t.set_font("font", type, LABEL_FONT)
+		t.set_font_size("font_size", type, 18)
+	# Premium switch (stage 4b): forest enamel with a gold knob when on, dark iron when off.
+	t.set_icon("checked", "CheckButton", switch_icon(true))
+	t.set_icon("unchecked", "CheckButton", switch_icon(false))
+	t.set_icon("checked_disabled", "CheckButton", switch_icon(true))
+	t.set_icon("unchecked_disabled", "CheckButton", switch_icon(false))
+	t.set_constant("h_separation", "CheckButton", 14)
 	var field_box := nine("kit_field", Vector4(10, 10, 10, 10), Vector4(12, 6, 12, 6))
 	t.set_stylebox("normal", "LineEdit", field_box)
 	t.set_stylebox("focus", "LineEdit", flat(Color.TRANSPARENT, Color("#c99a45"), 6, Vector2.ZERO, 2))
@@ -1388,6 +1399,45 @@ static func theme(base: Theme) -> Theme:
 	t.set_color("font_color", "PopupMenu", IVORY)
 	themes[base] = t
 	return t
+
+## The switch of a CheckButton (stage 4b): 64 x 34 on the canvas, finger-sized.
+static var switch_icons := {}
+
+## The premium switch at 64×34 canvas units: CheckButton draws its icon at the texture's own
+## size, and the kit's pixels are painted at two texels per unit.
+static func switch_icon(on: bool) -> Texture2D:
+	if not switch_icons.has(on):
+		switch_icons[on] = HalfTexture.new(tex("kit_switch_on" if on else "kit_switch_off"), Vector2(64, 34))
+	return switch_icons[on]
+
+## A kit texture reported (and drawn) at a given canvas size, for controls that draw a theme
+## icon at the texture's size.
+class HalfTexture extends Texture2D:
+	var source: Texture2D
+	var shown := Vector2.ZERO
+
+	func _init(from: Texture2D, at_size: Vector2) -> void:
+		source = from
+		shown = at_size
+
+	func _get_width() -> int:
+		return int(shown.x)
+
+	func _get_height() -> int:
+		return int(shown.y)
+
+	func _has_alpha() -> bool:
+		return true
+
+	func _draw(canvas: RID, at: Vector2, tint: Color, transpose: bool) -> void:
+		source.draw_rect(canvas, Rect2(at, shown), false, tint, transpose)
+
+	func _draw_rect(canvas: RID, rect: Rect2, tile: bool, tint: Color, transpose: bool) -> void:
+		source.draw_rect(canvas, rect, tile, tint, transpose)
+
+	func _draw_rect_region(canvas: RID, rect: Rect2, region: Rect2, tint: Color, transpose: bool, clip_uv: bool) -> void:
+		var k := source.get_size() / shown
+		source.draw_rect_region(canvas, rect, Rect2(region.position * k, region.size * k), tint, transpose, clip_uv)
 
 ## Instant touch-down acknowledgement used by the modal touch path (TouchScroll):
 ## a slight press-in scale around the centre.

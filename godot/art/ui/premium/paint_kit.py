@@ -1567,6 +1567,209 @@ def stage4_emblems(out):
     grooves += np.exp(-(np.abs(sdf_ucap(x, y, 28.0, 30.0, 11.5, 28.0, 9.0, 1.0)) / 0.45) ** 2) * coverage(dome) * 0.35
     save('kit_emb_helm', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
 
+def stage4b_art(out):
+    """Stage 4b: forged emblems of the menu, the account, the world and the forest, in the
+    same 56-unit family (a fir for the forest, a target for «centre the city», a lens with a
+    plus and a minus, a gauge for smoothness, stacked layers, a turning arrow, a globe, an
+    award star with ribbons, a key, a bell for sound, a chest for rewards and the archive, a
+    double chevron for «continue», two sheets for «copy», a door for «sign out»), a premium
+    switch (enamel track in bronze, a gold lozenge-capped knob) and a glossy medallion face
+    for the action ring."""
+    n = 56
+    W = H = n * S
+    x, y = grid(W, H)
+    # Forest: a fir of three tiers on a trunk.
+    tiers = []
+    for top, half, base in ((5.0, 9.0, 21.0), (13.0, 14.0, 32.0), (22.0, 19.0, 44.0)):
+        tiers.append(convex(x, y, [(28.0, top), (28.0 + half, base), (28.0 - half, base)]))
+    trunk = sdf_round(x, y, 28.0, 48.0, 3.4, 4.5, 0.8)
+    d = np.minimum.reduce(tiers + [trunk])
+    grooves = np.exp(-((x - 28.0) / 0.45) ** 2) * coverage(d) * 0.35
+    for gy in (21.0, 32.0):
+        grooves += np.exp(-((y - gy + 0.8) / 0.5) ** 2) * coverage(d + 0.6) * 0.5
+    save('kit_emb_tree', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Centre: a target with four ticks.
+    ring = np.abs(sdf_circle(x, y, 28.0, 28.0, 15.0)) - 2.0
+    dot = sdf_circle(x, y, 28.0, 28.0, 4.2)
+    ticks = []
+    for deg in (0, 90, 180, 270):
+        rx, ry = rot(x, y, 28.0, 28.0, deg)
+        ticks.append(convex(rx, ry, [(28.0, 15.0), (31.5, 4.0), (24.5, 4.0)]))
+    d = np.minimum.reduce([ring, dot] + ticks)
+    save('kit_emb_aim', relief(d, n, grooves=ring_groove(x, y, 28.0, 28.0, 15.0, 0.45) * 0.5), out)
+    # Zoom: a lens on a handle with a plus or a minus cut in it.
+    lens = np.abs(sdf_circle(x, y, 24.0, 24.0, 14.0)) - 2.6
+    handle = sdf_ucap(x, y, 35.0, 35.0, 3.0, 49.0, 49.0, 4.2)
+    glass = sdf_circle(x, y, 24.0, 24.0, 11.4)
+    bar_h = sdf_round(x, y, 24.0, 24.0, 7.0, 1.9, 0.8)
+    bar_v = sdf_round(x, y, 24.0, 24.0, 1.9, 7.0, 0.8)
+    for name, mark in (('kit_emb_zoom_in', np.minimum(bar_h, bar_v)), ('kit_emb_zoom_out', bar_h)):
+        d = np.minimum.reduce([lens, handle, mark])
+        grooves = np.exp(-((sdf_segment(x, y, 36.0, 36.0, 48.0, 48.0)) / 0.5) ** 2) * coverage(handle) * 0.4
+        save(name, relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Smoothness: a gauge with a needle.
+    arc = np.maximum(np.abs(sdf_circle(x, y, 28.0, 33.0, 20.0)) - 2.2, y - 36.0)
+    hub = sdf_circle(x, y, 28.0, 33.0, 4.4)
+    nx, ny = rot(x, y, 28.0, 33.0, -40)
+    needle = sdf_ucap(nx, ny, 28.0, 33.0, 2.4, 28.0, 15.0, 0.8)
+    marks = []
+    for deg in (-70, -35, 0, 35, 70):
+        rx, ry = rot(x, y, 28.0, 33.0, deg)
+        marks.append(sdf_round(rx, ry, 28.0, 17.5, 1.1, 2.6, 0.5))
+    base_ = sdf_round(x, y, 28.0, 43.0, 13.0, 2.2, 1.2)
+    d = np.minimum.reduce([arc, hub, needle, base_] + marks)
+    save('kit_emb_gauge', relief(d, n), out)
+    # Layers: three stacked lozenges.
+    parts = []
+    grooves = np.zeros_like(x)
+    for cy in (36.0, 28.0, 20.0):
+        plate = sdf_rhombus(x, y, 28.0, cy, 21.0, 9.5)
+        parts.append(plate)
+        grooves += np.exp(-(np.abs(plate + 2.2) / 0.45) ** 2) * coverage(plate) * 0.45
+    d = parts[2]
+    for plate in parts[:2]:
+        d = np.minimum(d, np.maximum(plate, -(parts[2] - 1.6)))
+    save('kit_emb_layers', relief(np.minimum.reduce(parts), n, grooves=np.clip(grooves, 0, 1)), out)
+    # Rotate: an open ring with an arrow head.
+    ang = np.arctan2(y - 28.0, x - 28.0)
+    ring = np.maximum(np.abs(sdf_circle(x, y, 28.0, 28.0, 16.0)) - 2.6, -(np.abs(ang + 2.0) - 0.45))
+    head = convex(x, y, [(10.0, 15.0), (20.0, 9.0), (21.0, 21.0)])
+    save('kit_emb_rotate', relief(np.minimum(ring, head), n), out)
+    # Globe: a sphere with meridians and parallels.
+    sphere = sdf_circle(x, y, 28.0, 28.0, 21.0)
+    grooves = np.zeros_like(x)
+    for k in (0.0, 0.55, 1.0):
+        rx_ = 21.0 * max(0.08, k)
+        grooves += np.exp(-((np.sqrt(((x - 28.0) / rx_) ** 2 + ((y - 28.0) / 21.0) ** 2) - 1.0) * rx_ / 0.5) ** 2) * coverage(sphere + 1.5) * 0.6
+    for ly in (17.0, 28.0, 39.0):
+        grooves += np.exp(-((y - ly) / 0.5) ** 2) * coverage(sphere + 1.5) * 0.6
+    save('kit_emb_globe', relief(sphere, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Award: an eight-point star on two ribbons.
+    star = None
+    for i in range(8):
+        a0 = math.tau * i / 8
+        long = 19.0 if i % 2 == 0 else 15.0
+        px, py = 28.0 + long * math.sin(a0), 21.0 - long * math.cos(a0)
+        lx, ly = 28.0 + 7.5 * math.sin(a0 + 0.5), 21.0 - 7.5 * math.cos(a0 + 0.5)
+        rx2, ry2 = 28.0 + 7.5 * math.sin(a0 - 0.5), 21.0 - 7.5 * math.cos(a0 - 0.5)
+        tri = convex(x, y, [(px, py), (lx, ly), (28.0, 21.0), (rx2, ry2)])
+        star = tri if star is None else np.minimum(star, tri)
+    core = sdf_circle(x, y, 28.0, 21.0, 8.5)
+    ribbons = np.minimum(convex(x, y, [(19.0, 34.0), (26.0, 37.0), (22.0, 54.0), (18.0, 49.0), (12.0, 52.0)]),
+                         convex(x, y, [(37.0, 34.0), (44.0, 52.0), (38.0, 49.0), (34.0, 54.0), (30.0, 37.0)]))
+    d = np.minimum.reduce([star, core, ribbons])
+    grooves = ring_groove(x, y, 28.0, 21.0, 5.6, 0.5) * 0.8
+    save('kit_emb_award', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Key: a ring bow, a shaft and two bits.
+    bow = np.abs(sdf_circle(x, y, 17.0, 20.0, 9.5)) - 3.0
+    shaft = sdf_round(x, y, 34.0, 33.0, 2.6, 2.6, 1.0)
+    rx, ry = rot(x, y, 17.0, 20.0, -45)
+    shaft = sdf_round(rx, ry, 17.0, 39.0, 2.8, 14.0, 1.2)
+    bits = np.minimum(sdf_round(rx, ry, 23.0, 47.0, 4.0, 2.2, 0.8), sdf_round(rx, ry, 22.0, 41.0, 3.2, 1.9, 0.8))
+    d = np.minimum.reduce([bow, shaft, bits])
+    save('kit_emb_key', relief(d, n, grooves=ring_groove(x, y, 17.0, 20.0, 9.5, 0.5) * 0.5), out)
+    # Sound: a bell (kolokol) with a crown loop, a flared lip and a clapper.
+    dome = np.maximum(sdf_ucap(x, y, 28.0, 36.0, 15.0, 28.0, 16.0, 9.0), y - 40.0)
+    flare = convex(x, y, [(13.0, 34.0), (43.0, 34.0), (49.0, 43.0), (7.0, 43.0)])
+    lip = sdf_round(x, y, 28.0, 43.0, 21.5, 2.6, 1.3)
+    crown = np.abs(sdf_circle(x, y, 28.0, 7.0, 3.6)) - 1.5
+    clapper = sdf_circle(x, y, 28.0, 49.5, 3.6)
+    d = np.minimum.reduce([dome, flare, lip, crown, clapper])
+    grooves = np.exp(-((y - 22.0) / 0.5) ** 2) * coverage(dome) * 0.55 + np.exp(-((y - 37.0) / 0.5) ** 2) * coverage(flare + 0.5) * 0.6
+    save('kit_emb_bell', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Chest: a bound chest with a lid and a lock plate.
+    body = sdf_round(x, y, 28.0, 36.0, 20.0, 11.0, 1.6)
+    lid = np.maximum(sdf_round(x, y, 28.0, 22.0, 20.0, 9.0, 6.0), y - 24.5)
+    lock = sdf_round(x, y, 28.0, 29.0, 4.2, 5.0, 1.0)
+    d = np.minimum.reduce([body, lid, lock])
+    grooves = np.exp(-((y - 25.0) / 0.5) ** 2) * coverage(d) * 0.8
+    for bx in (14.0, 42.0):
+        grooves += np.exp(-((x - bx) / 0.6) ** 2) * coverage(d) * 0.55
+    grooves += np.exp(-(np.abs(lock) / 0.45) ** 2) * 0.6
+    save('kit_emb_chest', relief(d, n, grooves=np.clip(grooves, 0, 1)), out)
+    # Continue: a double chevron pointing right.
+    parts = []
+    for left in (9.0, 25.0):
+        parts.append(convex(x, y, [(left, 10.0), (left + 9.0, 10.0), (left + 22.0, 28.0), (left + 13.0, 28.0)]))
+        parts.append(convex(x, y, [(left + 13.0, 28.0), (left + 22.0, 28.0), (left + 9.0, 46.0), (left, 46.0)]))
+    save('kit_emb_next', relief(np.minimum.reduce(parts), n), out)
+    # Copy: two sheets, one over the other.
+    back = np.maximum(sdf_round(x, y, 23.0, 23.0, 12.0, 14.0, 2.0), -sdf_round(x, y, 33.0, 33.0, 14.5, 16.5, 2.5))
+    back = np.maximum(np.abs(sdf_round(x, y, 23.0, 23.0, 12.0, 14.0, 2.0)) - 2.0, -sdf_round(x, y, 33.0, 33.0, 14.5, 16.5, 2.5))
+    front = sdf_round(x, y, 33.0, 33.0, 12.0, 14.0, 2.0)
+    grooves = np.zeros_like(x)
+    for ly in (27.0, 32.0, 37.0):
+        grooves += np.exp(-(sdf_segment(x, y, 26.0, ly, 40.0, ly) / 0.5) ** 2) * coverage(front) * 0.6
+    save('kit_emb_copy', relief(np.minimum(back, front), n, grooves=np.clip(grooves, 0, 1)), out)
+    # Sign out: an arched doorway with an arrow leaving it.
+    outer = np.maximum(sdf_ucap(x, y, 20.0, 50.0, 13.0, 20.0, 20.0, 13.0), y - 50.0)
+    inner_ = np.maximum(sdf_ucap(x, y, 20.0, 50.0, 8.5, 20.0, 20.0, 8.5), y - 47.0)
+    frame_ = np.maximum(outer, -inner_)
+    sill = sdf_round(x, y, 20.0, 50.0, 15.0, 2.2, 1.0)
+    arrow = np.minimum(sdf_round(x, y, 37.0, 33.0, 9.5, 2.4, 1.0), convex(x, y, [(42.0, 24.5), (52.0, 33.0), (42.0, 41.5)]))
+    save('kit_emb_exit', relief(np.minimum.reduce([frame_, sill, arrow]), n), out)
+    # The switch (64 x 34 units): a recessed enamel track in a bronze rim and a gold knob;
+    # on: forest enamel, knob right; off: dark iron, knob left.
+    w, h = 64, 34
+    W2, H2 = w * S, h * S
+    x2, y2 = grid(W2, H2)
+    for name, on in (('kit_switch_on', True), ('kit_switch_off', False)):
+        a = canvas(w, h)
+        d = sdf_round(x2, y2, w / 2, h / 2, w / 2 - 2.0, h / 2 - 3.0, h / 2 - 3.0)
+        sh = blur(coverage(d), 1.2) * 0.4
+        a = over(a, np.zeros((H2, W2, 3), np.float32), np.roll(sh, int(1.2 * S), axis=0))
+        t = -d
+        stops = [(0.0, '#1f5a2a'), (0.5, '#2f7d36'), (1.0, '#5fb05a')] if on else [(0.0, '#151312'), (0.6, '#2a2622'), (1.0, '#3c3630')]
+        face = ramp(np.clip(y2 / h, 0, 1), stops)
+        inner = np.exp(-((t - 2.6) / 1.6) ** 2) * 0.45
+        face = face * (1 - inner[..., None])
+        height = smooth(0, 0.9, t) * (1 - smooth(1.1, 2.2, t))
+        metal = bronze(light(height, 1.5), 1.0)
+        rim = 1 - smooth(1.8, 2.5, t)
+        rgb = face * (1 - rim[..., None]) + metal * rim[..., None]
+        a = over(a, rgb, coverage(d))
+        kx = w - h / 2 - 1.0 if on else h / 2 + 1.0
+        ksh = blur(coverage(sdf_circle(x2, y2, kx, h / 2 + 1.4, 12.0)), 1.4) * 0.5
+        a = over(a, np.zeros((H2, W2, 3), np.float32), ksh)
+        knob = sdf_circle(x2, y2, kx, h / 2, 12.0)
+        kh = smooth(0, 4.0, -knob)
+        cap = sdf_rhombus(x2, y2, kx, h / 2, 4.6, 4.6)
+        kh = kh + smooth(0, 1.2, -cap) * 0.6
+        a = over(a, bronze(light(kh, 1.7), 1.2, 'gold' if on else 'bronze'), coverage(knob))
+        save(name, a, out)
+    # Glossy ring medallion (72 units): a deep lapis enamel face with a bright upper-left
+    # glaze and a hot rim, for the action ring (the HUD keeps kit_rail).
+    for name, tone, stops in (('kit_ring_disc', 'bronze', [(0.0, '#3f6a78'), (0.55, '#1c3340'), (1.0, '#0d1a22')]),
+                              ('kit_ring_disc_on', 'gold', [(0.0, '#4f7f86'), (0.55, '#1f3b45'), (1.0, '#0e1d24')])):
+        size = 72
+        W3 = H3 = size * S
+        x3, y3 = grid(W3, H3)
+        a = canvas(size, size)
+        c = size / 2
+        r = c - 3.0
+        sh = blur(coverage(sdf_circle(x3, y3, c, c + 2.2, r)), 1.6) * 0.5
+        a = over(a, np.zeros((H3, W3, 3), np.float32), sh)
+        d = sdf_circle(x3, y3, c, c, r)
+        t = -d
+        ring_w = 5.6
+        rr = np.sqrt((x3 - c * 0.78) ** 2 + (y3 - c * 0.7) ** 2) / r
+        face = ramp(np.clip(rr * 0.75, 0, 1), stops)
+        # Glaze: a soft crescent of light across the upper left of the enamel.
+        glaze = np.exp(-((np.sqrt((x3 - c * 0.86) ** 2 + (y3 - c * 0.86) ** 2) - r * 0.62) / (r * 0.16)) ** 2)
+        glaze = glaze * np.clip((c - y3) / r + 0.15, 0, 1) * np.clip((c * 1.15 - x3) / r + 0.3, 0, 1)
+        face = np.clip(face + glaze[..., None] * 0.55, 0, 1)
+        spot = np.exp(-(((x3 - c * 0.64) / (r * 0.2)) ** 2 + ((y3 - c * 0.56) / (r * 0.11)) ** 2)) * 0.85
+        face = np.clip(face + spot[..., None], 0, 1)
+        height = smooth(0, ring_w * 0.5, t) * (1 - smooth(ring_w * 0.5, ring_w + 0.5, t))
+        metal = bronze(light(height, 1.7), 1.3, tone)
+        ring_m = 1 - smooth(ring_w - 0.4, ring_w + 0.4, t)
+        rgb = face * (1 - ring_m[..., None]) + metal * ring_m[..., None]
+        inner = np.exp(-((t - ring_w - 1.0) / 1.4) ** 2) * 0.4 * (1 - ring_m)
+        rgb = rgb * (1 - inner[..., None])
+        a = over(a, rgb, coverage(d))
+        save(name, a, out)
+
+
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else 'kit_png'
     os.makedirs(out, exist_ok=True)
@@ -1607,6 +1810,7 @@ def main():
     dais_top(out)
     items(out)
     stage4_emblems(out)
+    stage4b_art(out)
     total = sum(os.path.getsize(os.path.join(out, f)) for f in os.listdir(out))
     print('painted', len(os.listdir(out)), 'textures,', total // 1024, 'KiB of PNG in', out)
 

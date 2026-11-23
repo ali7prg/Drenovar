@@ -12,6 +12,7 @@ extends RefCounted
 const UiKit = preload("res://src/ui_kit.gd")
 const UnitStage = preload("res://src/unit_stage.gd")
 const Queues = preload("res://src/v6_queues.gd")
+const Services = preload("res://src/v6_services.gd")
 
 var panels
 var ui
@@ -213,17 +214,17 @@ func formation(target: String, name: String) -> void:
 		row.name = "Pick_" + id
 		row.add_theme_stylebox_override("panel", UiKit.row_style())
 		ui.modal_body.add_child(row)
-		var line := HBoxContainer.new()
-		line.add_theme_constant_override("separation", 14)
-		row.add_child(line)
-		var tile := UiKit.icon_tile(UnitStage.portrait(id, true), 74, ["I", "II", "III", "IV", "V"][tier_of(unit) - 1])
-		line.add_child(tile)
 		var middle := VBoxContainer.new()
-		middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		middle.add_theme_constant_override("separation", 2)
-		line.add_child(middle)
-		UiKit.label(middle, str(unit.name_ru), 19, UiKit.INK, UiKit.LABEL_FONT)
-		UiKit.label(middle, "Доступно %s · мест на воина %d" % [ui.format_balance(available), per], 15, UiKit.INK_MUTED)
+		middle.add_theme_constant_override("separation", 0)
+		row.add_child(middle)
+		# Portrait on its tier's tile, name and what is at home in one drawn node.
+		var head := Services.UnitHead.new()
+		head.face = UnitStage.portrait(id, true)
+		head.tier = tier_of(unit)
+		head.title = str(unit.name_ru)
+		head.line = "Доступно %s · мест на воина %d" % [ui.format_balance(available), per]
+		head.accessibility_name = "%s · %s" % [head.title, head.line]
+		middle.add_child(head)
 		var pick: Array = UiKit.quantity(middle, 0, mini(available, capacity / per), 0)
 		inputs[id] = pick[1]
 		slots[id] = per

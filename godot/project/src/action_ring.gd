@@ -8,9 +8,10 @@ extends Control
 #
 # Premium UI stage 4a (ui_premium/STAGE4A.md): each action is a bronze medallion with a
 # forged emblem (one drawn node, RingButton) and its caption under it; the main action
-# sits on a gold disc. An action can carry options: {"soon": true} dims it under a «Скоро»
-# ribbon (the level after the open one), {"ends": msec} shows the time left of the job the
-# action speeds up, {"emblem": "kit_emb_bow"} picks another emblem.
+# sits on a gold disc. An action can carry options: {"soon": true} dims it with a small
+# padlock (the level after the open one; the caption reads «Скоро»), {"ends": msec} shows
+# the time left of the job the action speeds up, {"emblem": "kit_emb_bow"} picks another
+# emblem.
 
 const UiKit = preload("res://src/ui_kit.gd")
 const BUTTON := 70.0
@@ -166,11 +167,12 @@ class RingButton extends Button:
 		elif glyph != null:
 			draw_texture_rect(glyph, Rect2(centre - Vector2(side, side) * 0.5, Vector2(side, side)), false, tone)
 		if soon:
-			# «Скоро»: a small oak ribbon across the lower rim.
-			var word := UiKit.KitText.line("Скоро", UiKit.LABEL_FONT, 13)
-			var ribbon := Rect2(centre.x - word.get_size().x * 0.5 - 9.0, centre.y + d * 0.18, word.get_size().x + 18.0, 19.0)
-			draw_style_box(UiKit.nine("kit_pill", Vector4(18, 12, 18, 12), Vector4.ZERO), ribbon)
-			word.draw(get_canvas_item(), Vector2(ribbon.position.x + 9.0, ribbon.position.y + roundf((ribbon.size.y - word.get_size().y) * 0.5)), UiKit.GOLD)
+			# «Скоро» (the caption under it): a bronze padlock on the lower rim of the dimmed
+			# upgrade, so the word is not said twice.
+			var spot := centre + Vector2(d * 0.27, d * 0.25)
+			draw_circle(spot, d * 0.2, Color("#1c120a"), true, -1.0, true)
+			draw_arc(spot, d * 0.2, 0, TAU, 32, Color("#c89a52"), 1.6, true)
+			UiKit.KitPaint.lock(self, spot + Vector2(0, d * 0.01), d * 0.26)
 		elif ends > 0.0 and clock.is_valid():
 			var left := maxf(0.0, ends - float(clock.call()))
 			var seconds := ceili(left / 1000.0)

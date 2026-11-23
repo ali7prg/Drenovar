@@ -44,8 +44,11 @@ func frames(count: int) -> void:
 func wanted(name: String) -> bool:
 	return only.is_empty() or name in only
 
-func shot(name: String, settle := 20) -> void:
+func shot(name: String, settle := 20, before_capture := Callable()) -> void:
 	await frames(settle)
+	if before_capture.is_valid():
+		before_capture.call()
+		await frames(2)
 	var dir := ProjectSettings.globalize_path(shots_dir)
 	DirAccess.make_dir_recursive_absolute(dir)
 	root.get_texture().get_image().save_png(dir.path_join(prefix + name + ".png"))
@@ -186,12 +189,20 @@ func run() -> void:
 	await frames(40)
 	# Display only: unread battle reports for the «Отчёты» badge (the fixture fights none).
 	game.state.reports = sample_reports()
+	# Unread for the stills, whatever an earlier run of this machine already read.
+	game.reports_seen_ms = 0.0
 	game.refresh_hud()
 	if wanted("city"):
 		var hall := marker_of("B11")
 		if not hall.is_empty():
 			await look_at_marker(hall, 64.0)
-		await shot("city", 30)
+		# A state refresh from the fixture (which fights no battles) clears the sample
+		# reports; they are put back just before the capture.
+		await shot("city", 30, func():
+			game.state.reports = sample_reports()
+			game.reports_seen_ms = 0.0
+			game.refresh_hud_badges()
+			print("CITY_BADGES reports=", game.nav_buttons.reports.badge, " build=", game.nav_buttons.build.badge))
 	if wanted("ring_busy"):
 		var marker := marker_of("B11")
 		if not marker.is_empty():
@@ -259,12 +270,14 @@ func run() -> void:
 		await wait_until(func(): return game.modal.visible and game.modal_body.get_child_count() > 0)
 		await shot("hospital")
 	if wanted("reports") or wanted("report"):
-		game.state.reports = sample_reports()
+		# Kept here too: a state refresh from the server can replace the list meanwhile.
+		var samples := sample_reports()
+		game.state.reports = samples
 		if wanted("reports"):
 			await timed("reports", game.show_reports)
 			await shot("reports")
 		if wanted("report"):
-			await timed("report", func(): game.show_report(game.state.reports[0]))
+			await timed("report", func(): game.show_report(samples[0]))
 			await shot("report")
 	if game.modal.visible:
 		game.close_modal()

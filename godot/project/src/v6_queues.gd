@@ -546,6 +546,10 @@ func speed_rows(order: Dictionary) -> void:
 				quick.stack.append(item_texture(queue, int(item[1])))
 	if quick.stack.is_empty() and not items.is_empty():
 		quick.stack.append(item_texture(queue, int(items[0][1])))
+	if owned.is_empty():
+		# Nothing to apply: a plain row, not the warm plate that invites a tap.
+		quick.quick = false
+		quick.icon = quick.stack[0] if not quick.stack.is_empty() else null
 	ui.modal_body.add_child(quick)
 	if not owned.is_empty():
 		var apply := quick.add_action("Применить", "primary", Vector2(206, 56))

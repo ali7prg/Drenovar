@@ -185,16 +185,17 @@ func hospital() -> void:
 		row.name = "Wounded_" + id
 		row.add_theme_stylebox_override("panel", UiKit.row_style())
 		ui.modal_body.add_child(row)
-		var line := HBoxContainer.new()
-		line.add_theme_constant_override("separation", 14)
-		row.add_child(line)
-		line.add_child(UiKit.icon_tile(UnitStage.portrait(id, true), 72, "×" + UiKit.compact(count)))
 		var middle := VBoxContainer.new()
-		middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		middle.add_theme_constant_override("separation", 2)
-		line.add_child(middle)
-		UiKit.label(middle, str(unit.get("name_ru", id)), 19, UiKit.INK, UiKit.LABEL_FONT)
-		UiKit.label(middle, "Раненых: %s" % ui.format_balance(count), 15, UiKit.INK_MUTED)
+		middle.add_theme_constant_override("separation", 0)
+		row.add_child(middle)
+		# Portrait, name and count in one drawn node; the slider and field under them.
+		var head := UnitHead.new()
+		head.face = UnitStage.portrait(id, true)
+		head.tier = clampi(int(unit.get("required_building", 1)), 1, UiKit.TIERS.size())
+		head.title = str(unit.get("name_ru", id))
+		head.line = "Раненых: %s" % ui.format_balance(count)
+		head.accessibility_name = "%s · %s" % [head.title, head.line]
+		middle.add_child(head)
 		var pick: Array = UiKit.quantity(middle, 0, count, mini(count, left))
 		left -= mini(count, left)
 		fields[id] = pick[1]
@@ -331,3 +332,28 @@ class ResearchCard extends Control:
 		if not note.is_empty():
 			var warn := UiKit.KitText.line(note, UiKit.LABEL_FONT, 15, width)
 			warn.draw(get_canvas_item(), Vector2(x, y), UiKit.WARN)
+
+## A unit's head line in one drawn node: the portrait on a tile of its tier, the name and
+## a line under it (how many lie wounded; how many stand ready in the formation).
+class UnitHead extends Control:
+	var face: Texture2D
+	var tier := 1
+	var title := ""
+	var line := ""
+
+	func _init() -> void:
+		custom_minimum_size.y = 72
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		var tile := Rect2(0, 2, 68, 68)
+		draw_style_box(UiKit.tinted("kit_card_fill", Vector4(14, 14, 14, 14), UiKit.TIERS[tier - 1].lightened(0.18)), tile)
+		if face != null:
+			draw_texture_rect(face, tile.grow(-2), false)
+		draw_style_box(UiKit.tinted("kit_card_frame", Vector4(16, 16, 16, 16), Color.WHITE), tile)
+		var x := tile.end.x + 16.0
+		var width := maxf(40.0, size.x - x)
+		var name_line := UiKit.KitText.line(title, UiKit.LABEL_FONT, 20, width)
+		name_line.draw(get_canvas_item(), Vector2(x, 12), UiKit.INK)
+		var count_line := UiKit.KitText.line(line, UiKit.BODY_FONT, 16, width)
+		count_line.draw(get_canvas_item(), Vector2(x, 16 + name_line.get_size().y), UiKit.INK_MUTED)

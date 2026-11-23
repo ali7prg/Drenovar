@@ -156,7 +156,7 @@ func units_section() -> void:
 	ui.modal_body.add_child(flow)
 	for entry: Array in shown:
 		var unit: Dictionary = entry[0]
-		var card: BaseButton = UiKit.tier_card(tier_of(unit), str(unit.name_ru), ui.format_balance(int(entry[1])), UnitStage.portrait(str(unit.unit_id), true))
+		var card: BaseButton = UiKit.tier_card(tier_of(unit), str(unit.name_ru), ui.format_balance(int(entry[1])), UnitStage.portrait(str(unit.unit_id)))
 		card.name = "Unit_" + str(unit.unit_id)
 		# Larger cards than the recruitment roster (stage 4b): the army is the subject here.
 		card.custom_minimum_size = Vector2(138, 192)
@@ -261,7 +261,7 @@ func formation(target: String, name: String) -> void:
 		row.add_child(middle)
 		# Portrait on its tier's tile, name and what is at home in one drawn node.
 		var head := Services.UnitHead.new()
-		head.face = UnitStage.portrait(id, true)
+		head.face = UnitStage.portrait(id)
 		head.tier = tier_of(unit)
 		head.title = str(unit.name_ru)
 		head.line = "Доступно %s · мест на воина %d" % [ui.format_balance(available), per]
@@ -327,7 +327,7 @@ func confirm_march(body: Dictionary, result: Dictionary, name: String) -> void:
 	row.add_theme_constant_override("h_separation", 8)
 	ui.modal_body.add_child(row)
 	for id: String in body.units:
-		row.add_child(UiKit.icon_tile(UnitStage.portrait(id, true), 60, "×" + UiKit.compact(int(body.units[id]))))
+		row.add_child(UiKit.icon_tile(UnitStage.portrait(id), 60, "×" + UiKit.compact(int(body.units[id])), 74))
 	UiKit.label(ui.modal_body, "Потери зависят от гарнизона цели и сопровождения.", 15, UiKit.INK_MUTED)
 	ui.modal_footer.show()
 	var send: Button = panels.work_button(ui.modal_footer, "Отправить", func():

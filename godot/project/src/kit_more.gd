@@ -213,6 +213,17 @@ class Card extends Control:
 					draw_style_box(UiKit.nine("kit_tile", Vector4(14, 14, 14, 14), Vector4.ZERO), tile)
 					if icon != null:
 						draw_texture_rect(icon, tile.grow(-4), false, icon_tint)
+				"figure":
+					# A unit's whole figure: a portrait-shaped tile, the art aspect-fit and
+					# standing on the tile's floor (spear tip and hooves inside).
+					tile = Rect2(16.0, roundf((size.y - side) * 0.5), roundf(side * 0.82), side)
+					draw_style_box(UiKit.nine("kit_tile", Vector4(14, 14, 14, 14), Vector4.ZERO), tile)
+					if icon != null:
+						var room := tile.grow(-4)
+						var source := icon.get_size()
+						var k := minf(room.size.x / source.x, room.size.y / source.y)
+						var drawn := source * k
+						draw_texture_rect(icon, Rect2(Vector2(room.position.x + (room.size.x - drawn.x) * 0.5, room.end.y - drawn.y), drawn), false, icon_tint)
 				"plain":
 					if icon != null:
 						draw_texture_rect(icon, tile.grow(-4), false, icon_tint)

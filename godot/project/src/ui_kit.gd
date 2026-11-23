@@ -881,19 +881,31 @@ class KitMedal extends TextureButton:
 
 ## Icon tile (dark enamel square in bronze) holding a texture.
 ## Item tile; count_text ("×3") sits in the lower right corner like a stack count.
-static func icon_tile(icon: Texture2D, size := 64, count_text := "") -> PanelContainer:
+## height: a taller tile for a unit's whole figure (UnitStage.portrait without the bust); its
+## count then sits on its own line under the figure, so it never covers the feet.
+static func icon_tile(icon: Texture2D, size := 64, count_text := "", height := 0) -> PanelContainer:
 	var tile := PanelContainer.new()
-	tile.custom_minimum_size = Vector2(size, size)
+	var figure := height > 0
+	var count_line := 18 if figure and not count_text.is_empty() else 0
+	tile.custom_minimum_size = Vector2(size, (height if figure else size) + count_line)
 	tile.add_theme_stylebox_override("panel", nine("kit_tile", Vector4(14, 14, 14, 14), Vector4(8, 8, 8, 8)))
 	tile.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var holder: Container = tile
+	if count_line > 0:
+		var column := VBoxContainer.new()
+		column.add_theme_constant_override("separation", 0)
+		column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tile.add_child(column)
+		holder = column
 	if icon != null:
 		var picture := TextureRect.new()
 		picture.texture = icon
 		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tile.add_child(picture)
+		picture.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		holder.add_child(picture)
 	if not count_text.is_empty():
 		var count := Label.new()
 		count.name = "KitCount"
@@ -903,10 +915,12 @@ static func icon_tile(icon: Texture2D, size := 64, count_text := "") -> PanelCon
 		count.add_theme_color_override("font_color", IVORY)
 		count.add_theme_color_override("font_outline_color", Color("#1a120a"))
 		count.add_theme_constant_override("outline_size", 5)
-		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER if count_line > 0 else HORIZONTAL_ALIGNMENT_RIGHT
 		count.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tile.add_child(count)
+		if count_line > 0:
+			count.custom_minimum_size.y = count_line
+		holder.add_child(count)
 	return tile
 
 ## Stat line: name on the left, value (and an optional green gain) on the right, a bronze

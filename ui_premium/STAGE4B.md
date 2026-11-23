@@ -81,8 +81,8 @@ action is a gilded button in the footer, the footer's first child as the march t
 - a settlement (`inspect_settlement`): crest and banner colour, owner, distance; «Войти в город»
   or «Собрать отряд»;
 - a free place (`inspect_world_plot`) and the relocation list;
-- a march (`inspect_army`): the party's portraits in the head, a row per unit, the countdown,
-  recall;
+- a march (`inspect_army`): the party's portraits in the head, a row per unit (since 1023 the whole
+  unit on a portrait tile, `KitMore.Card` icon mode «figure»), the countdown, recall;
 - the cities, the marches, the world directory (three columns of tiles with the worlds' emblems),
   the map layers (two premium switches on cards and the map's shortcuts).
 A march's travel time comes from the server's route quote in the march window; nothing guesses it.

@@ -334,17 +334,17 @@ func army(army: Dictionary) -> void:
 		var face: Texture2D = ui.unit_portrait(id, true)
 		if face != null and faces.size() < 3:
 			faces.append(face)
-		counts.append([face, "%s × %d" % [ui.unit_for_id(id).get("name", id), int(units[id])], UiKit.INK])
+		counts.append([face, "%s × %d" % [ui.unit_for_id(id).get("name", id), int(units[id])], UiKit.INK, ui.unit_portrait(id)])
 	var top := head(null, str(army.get("name", "Поход")), "%s · %d воинов" % [status, total], "", Color("#5a4a3a"))
 	top.pictures = faces
 	if faces.is_empty():
 		top.emblem = UiKit.tex("kit_emb_march")
 	for entry: Array in counts:
 		var row := KitMore.Card.new()
-		row.icon = entry[0]
-		row.icon_mode = "portrait"
+		row.icon = entry[3] if entry[3] != null else entry[0]
+		row.icon_mode = "figure"
 		row.title = entry[1]
-		row.custom_minimum_size.y = 64
+		row.custom_minimum_size.y = 84
 		ui.modal_body.add_child(row)
 	var finish: Variant = ui.march_finish(army)
 	if finish != null:

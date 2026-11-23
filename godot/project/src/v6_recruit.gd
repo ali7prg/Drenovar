@@ -521,7 +521,8 @@ func queue_card(order: Dictionary) -> void:
 	row.add_theme_constant_override("separation", 14)
 	card.add_child(row)
 	var id := str(order.get("unit", "SIEGE-RAM-01" if order.kind == "repair_ram" else ""))
-	row.add_child(UiKit.icon_tile(UnitStage.portrait(id, true), 72, "×" + str(int(order.get("quantity", 1)))))
+	# The whole unit; the count is in the title beside it («Копейщик × 30»).
+	row.add_child(UiKit.icon_tile(UnitStage.portrait(id), 72, "", 88))
 	var middle := VBoxContainer.new()
 	middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	middle.alignment = BoxContainer.ALIGNMENT_CENTER

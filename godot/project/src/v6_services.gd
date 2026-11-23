@@ -190,7 +190,7 @@ func hospital() -> void:
 		row.add_child(middle)
 		# Portrait, name and count in one drawn node; the slider and field under them.
 		var head := UnitHead.new()
-		head.face = UnitStage.portrait(id, true)
+		head.face = UnitStage.portrait(id)
 		head.tier = clampi(int(unit.get("required_building", 1)), 1, UiKit.TIERS.size())
 		head.title = str(unit.get("name_ru", id))
 		head.line = "Раненых: %s" % ui.format_balance(count)
@@ -333,27 +333,35 @@ class ResearchCard extends Control:
 			var warn := UiKit.KitText.line(note, UiKit.LABEL_FONT, 15, width)
 			warn.draw(get_canvas_item(), Vector2(x, y), UiKit.WARN)
 
-## A unit's head line in one drawn node: the portrait on a tile of its tier, the name and
-## a line under it (how many lie wounded; how many stand ready in the formation).
+## A unit's head line in one drawn node: the whole unit on a tile of its tier (a portrait
+## tile, so the lance, the feet and the horse's hooves stay inside), the name and a line
+## under it (how many lie wounded; how many stand ready in the formation).
 class UnitHead extends Control:
+	const TILE := Rect2(0, 2, 72, 92)
 	var face: Texture2D
 	var tier := 1
 	var title := ""
 	var line := ""
 
 	func _init() -> void:
-		custom_minimum_size.y = 72
+		custom_minimum_size.y = TILE.end.y + 2.0
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	func _draw() -> void:
-		var tile := Rect2(0, 2, 68, 68)
+		var tile := TILE
 		draw_style_box(UiKit.tinted("kit_card_fill", Vector4(14, 14, 14, 14), UiKit.TIERS[tier - 1].lightened(0.18)), tile)
 		if face != null:
-			draw_texture_rect(face, tile.grow(-2), false)
+			# Aspect-fit, standing on the tile's floor (the art is never stretched).
+			var box := tile.grow(-4)
+			var source := face.get_size()
+			var k := minf(box.size.x / source.x, box.size.y / source.y)
+			var drawn := source * k
+			draw_texture_rect(face, Rect2(Vector2(box.position.x + (box.size.x - drawn.x) * 0.5, box.end.y - drawn.y), drawn), false)
 		draw_style_box(UiKit.tinted("kit_card_frame", Vector4(16, 16, 16, 16), Color.WHITE), tile)
 		var x := tile.end.x + 16.0
 		var width := maxf(40.0, size.x - x)
 		var name_line := UiKit.KitText.line(title, UiKit.LABEL_FONT, 20, width)
-		name_line.draw(get_canvas_item(), Vector2(x, 12), UiKit.INK)
 		var count_line := UiKit.KitText.line(line, UiKit.BODY_FONT, 16, width)
-		count_line.draw(get_canvas_item(), Vector2(x, 16 + name_line.get_size().y), UiKit.INK_MUTED)
+		var top := roundf(tile.get_center().y - (name_line.get_size().y + 4.0 + count_line.get_size().y) * 0.5)
+		name_line.draw(get_canvas_item(), Vector2(x, top), UiKit.INK)
+		count_line.draw(get_canvas_item(), Vector2(x, top + 4.0 + name_line.get_size().y), UiKit.INK_MUTED)

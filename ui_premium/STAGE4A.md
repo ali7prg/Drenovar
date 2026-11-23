@@ -98,7 +98,7 @@ One window, opened as «Очереди поселения» (HUD, city actions, 
 - **«Армия и осада».** A dark oak column at the left: the army's capacity bar («191 / 14K»), the
   march limit, parties at once, beds, the wounded, «Лазарет» and «Показать плац в городе». At the
   right: the troops at home as tier cards with their portraits, counts and names (a card opens its
-  training building), the rams, the parties on the march with their timers and «Отозвать» /
+  training building; since 1023 the whole unit, lance, feet and hooves inside), the rams, the parties on the march with their timers and «Отозвать» /
   «Отступить», and the targets.
 - **«Поход: …».** The target on the oak column with the march capacity filling as troops are
   chosen; «Все доступные» and «Очистить»; a row per unit with its portrait, a slider and a field;
@@ -234,7 +234,8 @@ ring) were made in the session scratchpad only.
   figures, and the table has a header row (в строю, ранены, погибли);
 - lazaret and formation: the portrait, name and count of a unit are one drawn head with a larger
   portrait on its tier's enamel (tier colours match the army cards and the recruitment window);
-  this also halved the nodes per row;
+  this also halved the nodes per row; since 1023 the head shows the whole unit on a 72 × 92
+  portrait tile (it was a bust stretched on a square);
 - ring: «Скоро» was said twice (a ribbon on the medallion and the caption); the medallion now
   carries a small bronze padlock, the caption says «Скоро»;
 - the building's own name plate no longer shows through its open ring (the ring's plate carries

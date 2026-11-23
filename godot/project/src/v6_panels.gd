@@ -707,7 +707,8 @@ func unit_card(control: Button, unit_id: String) -> void:
 	control.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	control.begin_bulk_theme_override()
 	control.add_theme_font_size_override("font_size", 21)
-	var face: Texture2D = ui.unit_portrait(unit_id, true)
+	# The whole unit (expand_icon keeps the figure's aspect inside the button's height).
+	var face: Texture2D = ui.unit_portrait(unit_id)
 	if face != null:
 		control.icon = face
 		control.expand_icon = true

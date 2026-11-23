@@ -3,8 +3,9 @@ extends SceneTree
 ## the same preview meshes and materials the recruitment stage shows, one consistent 3/4
 ## camera, the stage's light rig (warm key, cool fill, warm rim, cool kicker), transparent
 ## background. Rendered at 2-3x the final size; godot/art/ui/units/finish_portraits.py
-## downsizes them (premultiplied Lanczos) into res://assets/ui/units/<id>.webp (full figure,
-## cards) and <id>-bust.webp (head and shoulders, queues, army, small slots), and copies
+## downsizes them (premultiplied Lanczos) into res://assets/ui/units/<id>.webp (the whole figure,
+## cards and unit tiles) and <id>-bust.webp (head and shoulders, round medallions and small
+## chips), and copies
 ## framing.json: each unit's silhouette in the camera plane, measured on the posed unit over
 ## its whole stage animation, weapons included (skinned meshes only report their rest pose,
 ## so the stage cannot measure a raised lance itself).
@@ -163,10 +164,14 @@ func bake(id: String, scene: PackedScene, drill: String) -> void:
 		else:
 			# The card portrait: the stage's framing rule without the plinth, so the stage can
 			# place it exactly where the live model will stand.
-			# Cards keep the figure large: the silhouette is cut a little above the helmet, so
-			# a raised lance leaves the card (the stage shows it whole).
+			# 1023 (owner): the whole unit on every card, the lance tip, the feet and the horse's
+			# hooves inside the frame, so the card frames the whole measured silhouette (it was
+			# cut a little above the helmet, and a raised lance or spear left the card). The
+			# silhouette is measured orthographically and the portrait is a perspective shot, so
+			# the top gets 4% of air: the pennant and the bow tip no longer touch the edge.
 			var feet := Vector3(shape.box.get_center().x, shape.bottom, shape.box.get_center().z)
-			var card := {"up": [ext.up[0], minf(float(ext.up[1]), snappedf((shape.top - shape.bottom) * 0.985 + 0.1, 0.01))], "right": ext.right}
+			var tall: float = float(ext.up[1]) - float(ext.up[0])
+			var card := {"up": [ext.up[0], snappedf(float(ext.up[1]) + tall * 0.04, 0.01)], "right": ext.right.duplicate()}
 			framing[id]["card"] = card
 			var visible_height := UnitStage.fit(card, aspect, UnitStage.PORTRAIT_TOP, UnitStage.PORTRAIT_FEET, UnitStage.PORTRAIT_WIDTH)
 			UnitStage.aim(camera, feet, card, visible_height, UnitStage.PORTRAIT_FEET)

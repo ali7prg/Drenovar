@@ -2332,7 +2332,7 @@ func show_armies() -> void:
 		if available > 0:
 			var entry := HBoxContainer.new()
 			modal_body.add_child(entry)
-			unit_art(entry, unit.id, Vector2(56, 56))
+			unit_art(entry, unit.id, Vector2(48, 60), true)
 			var details := button(entry, "%s · %d" % [unit.name, available], show_garrison_unit.bind(unit, available))
 			details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
@@ -3314,9 +3314,10 @@ func unit_portrait(id: String, bust := false) -> Texture2D:
 	var baked := UnitStage.portrait(id, bust)
 	return baked if baked != null else panel_texture(id + ".png")
 
-func unit_art(parent: Container, id: String, pixels: Vector2) -> TextureRect:
+## full: the whole unit (a portrait-shaped slot); otherwise the bust (dense tables).
+func unit_art(parent: Container, id: String, pixels: Vector2, full := false) -> TextureRect:
 	var art := TextureRect.new()
-	art.texture = unit_portrait(id, true)
+	art.texture = unit_portrait(id, not full)
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	art.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -4357,7 +4358,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 				var portrait := PanelContainer.new()
 				portrait.add_theme_stylebox_override("panel", UiKit.tinted("kit_card_fill", Vector4(14, 14, 14, 14), UiKit.TIERS[recruit_tier(unit_id) - 1].lightened(0.18)))
 				slot.add_child(portrait)
-				unit_art(portrait, unit_id, Vector2(46, 46))
+				unit_art(portrait, unit_id, Vector2(46, 58), true)
 				var remove := button(slot, "%s × %d" % [unit.name, units[unit_id]], func(): selected[unit_id].value = 0)
 				UiKit.style_button(remove, "tertiary", 17)
 				remove.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -4424,7 +4425,7 @@ func compose_march(kind: String, id: String, title: String) -> void:
 		var frame := PanelContainer.new()
 		frame.add_theme_stylebox_override("panel", UiKit.tinted("kit_card_fill", Vector4(14, 14, 14, 14), UiKit.TIERS[tier - 1].lightened(0.18)))
 		controls.add_child(frame)
-		unit_art(frame, unit.id, Vector2(56, 56))
+		unit_art(frame, unit.id, Vector2(56, 72), true)
 		var badge := Label.new()
 		badge.text = ["I", "II", "III", "IV", "V"][tier - 1]
 		badge.add_theme_font_size_override("font_size", 12)

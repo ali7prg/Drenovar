@@ -96,11 +96,18 @@ The ring of a training building offers «Обучение» (the hospital and ac
    - `godot/art/ui/units/finish_portraits.py` downsizes them with premultiplied Lanczos into lossy
      WebP q90 with an exact alpha plane: full figures 288×352, busts 128×128.
    - They are imported lossy with mipmaps.
-   - Portraits are used on:
-     - the tier cards, the stage placeholder, the queue cards and the rail medallions;
-     - the new «Войска в городе» tiles of the army window;
-     - the formation slots and the legacy recruitment, garrison and hospital art (`main.unit_portrait` /
-       `unit_art`), with a fallback to the old painted panel art for units without a portrait.
+   - Portraits are used on (since 1023, by the owner's request, the whole figure wherever a card or
+     a tile stands for the unit; the bust only in round medallions and dense rows):
+     - the whole figure: the tier cards of the recruitment and army windows, the stage placeholder,
+       the recruitment queue cards, the formation and lazaret heads (a portrait-shaped tile), the
+       march confirmation tiles, the building work-list buttons, the march window's rows, and the
+       legacy compose, garrison and recruitment art (`main.unit_portrait` / `unit_art(..., true)`),
+       with a fallback to the old painted panel art for units without a portrait;
+     - the bust: the queue rail medallions, the march window's head trio, the chronicle's party
+       chips and the battle result table.
+   - 1023: the full figure frames the whole measured silhouette plus 4% of air at the top (the
+     lance and its pennant, the spear and bow tips, the feet and the horse's hooves all inside).
+     Until 1022 it was cut a little above the helmet, so a raised lance left the card.
    - Rebuild:
      ```
      VK_ICD_FILENAMES=/opt/lavapipe/lvp_icd.json xvfb-run -a -s "-screen 0 1280x1024x24" \

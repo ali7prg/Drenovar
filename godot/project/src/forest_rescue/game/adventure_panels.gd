@@ -5,6 +5,12 @@ extends RefCounted
 ## battle result. All strings come from the authored JSON files (see adventure_content.gd).
 
 const Style = preload("res://src/forest_rescue/game/hud_style.gd")
+const UiKit = preload("res://src/ui_kit.gd")
+## Premium UI stage 4b (ui_premium/STAGE4B.md): the journal opens on a carved oak band with the
+## campaign's two counts, its acts under rushnyk headings and its places on linen cards (a gold
+## rim once the place is done); the reward reserve is one ledger card. Every text stays a Label
+## or a Button (tests and accessibility read them); kit_more.gd is loaded when the journal opens.
+const KIT_MORE := "res://src/kit_more.gd"
 const RESOURCE_ORDER := ["food", "wood", "stone", "iron", "coins"]
 const ROMAN := ["I", "II", "III", "IV"]
 ## Forest squad roster (production server, 2026-11-21): only these five units can join the squad; any
@@ -34,10 +40,43 @@ func body_label(value: String, size := 18, color := Color("#2b2016")) -> Label:
 	main.modal_body.add_child(label)
 	return label
 
+## A section title between the rushnyk bands of UiKit.section_header (the words stay a Label).
 func heading(value: String) -> Label:
-	var label := body_label(value, 22, Color("#8d5f22"))
+	var label := body_label(value, 21, Color("#5a3510"))
 	label.add_theme_font_override("font", Style.TITLE_FONT)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.custom_minimum_size.y = 36
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.draw.connect(draw_heading_bands.bind(label))
 	return label
+
+func draw_heading_bands(label: Label) -> void:
+	if label.get_line_count() > 1:
+		return
+	var font := label.get_theme_font("font")
+	var half := font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 21).x * 0.5
+	var centre := label.size.x * 0.5
+	var mid := floorf(label.size.y * 0.5)
+	var stitch := UiKit.tex("kit_stitch")
+	var rosette := UiKit.tex("kit_rosette")
+	for side: float in [-1.0, 1.0]:
+		var inner := centre + side * (half + 12.0)
+		var outer := 0.0 if side < 0.0 else label.size.x
+		var rose_inner := Rect2(inner - (13.0 if side < 0.0 else 0.0), mid - 6.5, 13.0, 13.0)
+		var rose_outer := Rect2(outer - (0.0 if side < 0.0 else 13.0), mid - 6.5, 13.0, 13.0)
+		var from := minf(rose_inner.position.x, rose_outer.position.x) + 13.0
+		var to := maxf(rose_inner.position.x, rose_outer.position.x)
+		if to - from > 4.0:
+			label.draw_texture_rect(stitch, Rect2(from, mid - 6.0, to - from, 12.0), true, Color(1, 1, 1, 0.9))
+		if to - from > -13.0:
+			label.draw_texture_rect(rosette, rose_inner, false)
+			label.draw_texture_rect(rosette, rose_outer, false)
+
+## "Заданий спасения: 6/60" → ["6/60", "Заданий спасения"] for a StatBand cell.
+func stat_cell(icon: String, line: String) -> Array:
+	var caption := line.get_slice(":", 0).strip_edges()
+	var value := line.substr(line.find(":") + 1).strip_edges() if line.contains(":") else line
+	return [UiKit.tex(icon), value, caption]
 
 func action(caption: String, callable: Callable, enabled := true, primary := false) -> Button:
 	if primary:
@@ -159,16 +198,18 @@ func open_journal() -> void:
 	var tasks_done := 0
 	for entry in camp.get("sites", []):
 		tasks_done += int(entry.get("step", 0))
-	var tools := HFlowContainer.new()
-	main.modal_body.add_child(tools)
-	var chip := func(text_value: String):
-		var label := Label.new()
-		label.text = text_value
-		label.add_theme_color_override("font_color", Color("#6a5843"))
-		tools.add_child(label)
-	chip.call(t("campaign.progress", {"count":tasks_done}) + "   ")
-	chip.call(t("people.progress", {"count":int(camp.get("rescuedCount", camp.get("rescuedIds", []).size()))}))
+	var band: Control = load(KIT_MORE).StatBand.new()
+	band.name = "JournalCounts"
+	band.custom_minimum_size.y = 76
+	var rescued := int(camp.get("rescuedCount", camp.get("rescuedIds", []).size()))
+	band.cells = [stat_cell("kit_emb_scroll", t("campaign.progress", {"count":tasks_done})),
+		stat_cell("kit_emb_town", t("people.progress", {"count":rescued}))]
+	band.accessibility_name = t("campaign.progress", {"count":tasks_done}) + " · " + t("people.progress", {"count":rescued})
+	main.modal_body.add_child(band)
 	var controls := HFlowContainer.new()
+	controls.name = "JournalControls"
+	controls.add_theme_constant_override("h_separation", 10)
+	controls.add_theme_constant_override("v_separation", 6)
 	main.modal_body.add_child(controls)
 	main.button(controls, t("reward.ledger"), open_rewards)
 	if bool(camp.get("paused", false)):
@@ -177,16 +218,21 @@ func open_journal() -> void:
 		main.button(controls, t("button.pause"), close_then(func(): game.request_action("pause")))
 	if client.hall_level() >= 3:
 		main.button(controls, t("intro.replay"), close_then(func(): game.intro.replay()))
+	# The two switches on their own row (the kit's premium switches, from the window theme).
+	var settings := HBoxContainer.new()
+	settings.name = "JournalSettings"
+	settings.add_theme_constant_override("separation", 28)
+	main.modal_body.add_child(settings)
 	var motion := CheckButton.new()
 	motion.text = t("hud.settings.motion")
 	motion.button_pressed = game.reduced_motion
 	motion.toggled.connect(func(on): game.set_reduced_motion(on))
-	controls.add_child(motion)
+	settings.add_child(motion)
 	var sound := CheckButton.new()
 	sound.text = t("hud.settings.sound")
 	sound.button_pressed = game.sound_enabled
 	sound.toggled.connect(func(on): game.set_sound(on))
-	controls.add_child(sound)
+	settings.add_child(sound)
 	body_label(t("pause.note"), 15, Color("#6a5843"))
 	var unlocked_acts: Array = camp.get("actUnlocked", [true, false, false, false])
 	for act in 4:
@@ -227,7 +273,10 @@ func add_site_summary(site_id: String, detailed: bool) -> void:
 	var step := int(entry.get("step", 0))
 	var visible := bool(entry.get("visible", false)) or step > 0
 	var box := PanelContainer.new()
-	box.add_theme_stylebox_override("panel", Style.frame(Color("#2a2620"), Color("#1d1a16"), Color("#6f5a3a"), 8, 1, Vector4(12, 8, 12, 8)))
+	box.name = "Site_" + site_id
+	box.add_theme_stylebox_override("panel", site_style(step >= 5))
+	if not visible:
+		box.modulate = Color(1, 1, 1, 0.72)
 	main.modal_body.add_child(box)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 3)
@@ -236,7 +285,7 @@ func add_site_summary(site_id: String, detailed: bool) -> void:
 	title.text = "%d. %s · %s" % [int(site.get("number", 0)), String(site.get("name", "")) if visible else t("site.unknown"), t("site.progress", {"count":step})]
 	title.add_theme_font_override("font", Style.TITLE_FONT)
 	title.add_theme_font_size_override("font_size", 19)
-	title.add_theme_color_override("font_color", Color("#f2e7d0"))
+	title.add_theme_color_override("font_color", UiKit.INK)
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(title)
 	if not visible:
@@ -253,7 +302,7 @@ func add_site_summary(site_id: String, detailed: bool) -> void:
 		label.text = value
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.add_theme_font_size_override("font_size", 16)
-		label.add_theme_color_override("font_color", Color("#d9cdb2"))
+		label.add_theme_color_override("font_color", UiKit.INK_MUTED)
 		column.add_child(label)
 	var people: PackedStringArray = []
 	for person in site.get("captives", []):
@@ -262,7 +311,8 @@ func add_site_summary(site_id: String, detailed: bool) -> void:
 	who.text = " · ".join(people)
 	who.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	who.add_theme_font_size_override("font_size", 16)
-	who.add_theme_color_override("font_color", Color("#ebcc89"))
+	who.add_theme_font_override("font", Style.TITLE_FONT)
+	who.add_theme_color_override("font_color", UiKit.BRONZE)
 	column.add_child(who)
 	if step >= 4 or detailed:
 		for person in site.get("captives", []):
@@ -272,7 +322,8 @@ func add_site_summary(site_id: String, detailed: bool) -> void:
 				quote.text = "%s: «%s»" % [person.get("name", ""), said]
 				quote.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				quote.add_theme_font_size_override("font_size", 15)
-				quote.add_theme_color_override("font_color", Color("#cfc3a8"))
+				quote.add_theme_font_override("font", Style.italic())
+				quote.add_theme_color_override("font_color", UiKit.INK)
 				column.add_child(quote)
 	if step >= 5:
 		var testimony: Dictionary = content.testimony(site_id)
@@ -282,14 +333,32 @@ func add_site_summary(site_id: String, detailed: bool) -> void:
 			said_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			said_label.add_theme_font_override("font", Style.TITLE_FONT)
 			said_label.add_theme_font_size_override("font_size", 16)
-			said_label.add_theme_color_override("font_color", Color("#f4e1b4"))
+			said_label.add_theme_color_override("font_color", Color("#5a3510"))
 			column.add_child(said_label)
 		var post := Label.new()
 		post.text = String(site.get("postState", ""))
 		post.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		post.add_theme_font_size_override("font_size", 14)
-		post.add_theme_color_override("font_color", Color("#a99f88"))
+		post.add_theme_color_override("font_color", Color("#8a7a64"))
 		column.add_child(post)
+
+## A place's card: linen in a bronze rim; a done place (all five tasks) gets the gold rim.
+static var site_styles := {}
+func site_style(done: bool) -> StyleBox:
+	if site_styles.has(done):
+		return site_styles[done]
+	var row := UiKit.nine("kit_row", Vector4(14, 14, 14, 14), Vector4(16, 10, 16, 12))
+	var box: StyleBox = row
+	if done:
+		var layered := Style.Layered.new()
+		layered.layers = [row, UiKit.tinted("kit_card_frame", Vector4(16, 16, 16, 16), Color(1.35, 1.18, 0.82))]
+		layered.content_margin_left = 16
+		layered.content_margin_top = 10
+		layered.content_margin_right = 16
+		layered.content_margin_bottom = 12
+		box = layered
+	site_styles[done] = box
+	return box
 
 # ------------------------------------------------------------------ reward reserve (escrow)
 func open_rewards() -> void:
@@ -298,25 +367,53 @@ func open_rewards() -> void:
 	var earned: Dictionary = escrow.get("earned", {})
 	var claimed: Dictionary = escrow.get("claimed", {})
 	var pending: Dictionary = escrow.get("pending", {})
+	# One ledger card: the column captions once («Начислено всего», «Получено на склад»,
+	# «Осталось забрать»), then a row per resource; what is left to take is in bronze.
+	var ledger := PanelContainer.new()
+	ledger.name = "EscrowLedger"
+	ledger.add_theme_stylebox_override("panel", UiKit.nine("kit_row", Vector4(14, 14, 14, 14), Vector4(18, 12, 18, 14)))
+	main.modal_body.add_child(ledger)
 	var grid := GridContainer.new()
 	grid.name = "EscrowGrid"
 	grid.columns = 4
-	grid.add_theme_constant_override("h_separation", 14)
-	main.modal_body.add_child(grid)
+	grid.add_theme_constant_override("h_separation", 18)
+	grid.add_theme_constant_override("v_separation", 9)
+	grid.draw.connect(draw_ledger_lines.bind(grid))
+	ledger.add_child(grid)
+	var columns := [["hud.earned", earned], ["reward.claimed", claimed], ["reward.pending", pending]]
+	grid.add_child(Control.new())
+	for pair in columns:
+		var caption := Label.new()
+		caption.text = t(pair[0], {"amount":""}).get_slice(":", 0).strip_edges()
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		caption.add_theme_font_override("font", Style.TITLE_FONT)
+		caption.add_theme_font_size_override("font_size", 14)
+		caption.add_theme_color_override("font_color", UiKit.INK_MUTED)
+		grid.add_child(caption)
 	var pending_total := 0
 	for key in RESOURCE_ORDER:
 		var head := HBoxContainer.new()
-		main.add_resource_icon(head, key, 26)
+		head.add_theme_constant_override("separation", 8)
+		main.add_resource_icon(head, key, 28)
 		var name := Label.new()
 		name.text = t("reward.resources." + key)
+		name.add_theme_font_override("font", Style.TITLE_FONT)
+		name.add_theme_font_size_override("font_size", 17)
+		name.add_theme_color_override("font_color", UiKit.INK)
 		head.add_child(name)
 		grid.add_child(head)
-		for pair in [["hud.earned", earned], ["reward.claimed", claimed], ["reward.pending", pending]]:
+		for pair in columns:
 			var cell := Label.new()
 			cell.name = "%s_%s" % [key, String(pair[0]).get_slice(".", 1)]
-			cell.text = t(pair[0], {"amount":content.format_amount(int(pair[1].get(key, 0)))})
-			cell.add_theme_font_size_override("font_size", 15)
-			cell.add_theme_color_override("font_color", Color("#6a5843") if pair[0] != "reward.pending" else Color("#8d5f22"))
+			cell.text = content.format_amount(int(pair[1].get(key, 0)))
+			cell.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			cell.add_theme_font_size_override("font_size", 16)
+			if pair[0] == "reward.pending":
+				cell.add_theme_font_override("font", Style.TITLE_FONT)
+				cell.add_theme_color_override("font_color", UiKit.BRONZE)
+			else:
+				cell.add_theme_color_override("font_color", UiKit.INK_MUTED)
 			grid.add_child(cell)
 		pending_total += int(pending.get(key, 0))
 	body_label(t("reward.capacity") if pending_total > 0 else t("reward.reserve"), 15, Color("#6a5843"))
@@ -337,6 +434,14 @@ func open_rewards() -> void:
 			open_rewards()
 		if not bool(result.get("ok", false)) and is_instance_valid(toggle):
 			toggle.set_pressed_no_signal(bool(client.adv.get("autoRefill", false))))
+
+## Hairlines between the ledger's rows.
+func draw_ledger_lines(grid: GridContainer) -> void:
+	var children := grid.get_children()
+	for index in range(grid.columns, children.size(), grid.columns):
+		var row_start: Control = children[index]
+		var colour := Color(0.55, 0.37, 0.13, 0.45 if index == grid.columns else 0.18)
+		grid.draw_rect(Rect2(0, row_start.position.y - 5.0, grid.size.x, 1.0), colour)
 
 func claim_rewards() -> void:
 	var before: Dictionary = client.adv.get("escrow", {}).get("pending", {}).duplicate()

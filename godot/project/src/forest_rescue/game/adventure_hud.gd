@@ -5,10 +5,16 @@ extends Control
 ## * hint pill with the next step, toasts, banner (art/18 centre), locked card (art/18 left),
 ##   intro prompt (art/18 right), battle header, off-screen target arrow.
 ## It never blocks map gestures outside its own visible widgets.
+## Premium UI stage 4b (ui_premium/STAGE4B.md): the row is a linen task card, a carved oak
+## reward strip, two bronze medallions («Маршрут», «Отряд») like the city's HUD actions and a
+## gilded «Продолжить» plate; toasts, banner and cards use the same kit as the city.
 
+const UiKit = preload("res://src/ui_kit.gd")
 const Style = preload("res://src/forest_rescue/game/hud_style.gd")
 const Art = preload("res://src/forest_rescue/game/hud_art.gd")
 const STRIP_ORDER := ["wood", "stone", "food", "iron", "coins"]
+## The chevrons on the gilded «Продолжить» (Art multiplies ivory by this tint).
+const CONTINUE_INK := Color(0.25, 0.15, 0.05)
 
 var game: Node
 var bar: HBoxContainer
@@ -113,6 +119,7 @@ func build_bar() -> void:
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(column)
 	task_title = Style.label("", 15, Style.PARCHMENT_INK, true)
+	task_title.add_theme_constant_override("line_spacing", -2)
 	task_title.name = "TaskTitle"
 	task_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	task_title.max_lines_visible = 2
@@ -130,11 +137,11 @@ func build_bar() -> void:
 	task_dots.draw.connect(draw_dots)
 	progress.add_child(task_dots)
 	var divider := ColorRect.new()
-	divider.color = Color("#8d6c42")
+	divider.color = Color(0.55, 0.37, 0.13, 0.45)
 	divider.custom_minimum_size = Vector2(1, 20)
 	divider.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	progress.add_child(divider)
-	task_count = Style.label("", 18, Style.PARCHMENT_INK, true)
+	task_count = Style.label("", 17, UiKit.BRONZE, true)
 	task_count.name = "TaskCount"
 	progress.add_child(task_count)
 	reward_strip = PanelContainer.new()
@@ -155,10 +162,16 @@ func build_bar() -> void:
 	strip_head.add_theme_constant_override("separation", 2)
 	strip_head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	strip.add_child(strip_head)
-	strip_chest = Art.new("chest", Vector2(36, 40))
+	var chest := TextureRect.new()
+	chest.texture = UiKit.tex("kit_emb_chest")
+	chest.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	chest.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	chest.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chest.custom_minimum_size = Vector2(36, 40)
+	strip_chest = chest
 	strip_chest.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	strip_head.add_child(strip_chest)
-	reward_caption = Style.label(text("hud.rewardFor"), 13, Style.IVORY, true)
+	reward_caption = Style.label(text("hud.rewardFor"), 13, UiKit.GOLD_DIM, true, 3)
 	reward_caption.name = "RewardCaption"
 	reward_caption.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	reward_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -167,8 +180,8 @@ func build_bar() -> void:
 		var key: String = STRIP_ORDER[index]
 		if index > 0:
 			var line := ColorRect.new()
-			line.color = Color("#5c4830")
-			line.custom_minimum_size = Vector2(1, 52)
+			line.color = Color(0.86, 0.66, 0.36, 0.26)
+			line.custom_minimum_size = Vector2(1, 44)
 			line.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			strip.add_child(line)
@@ -186,16 +199,17 @@ func build_bar() -> void:
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		cell.add_child(icon)
-		var amount := Style.label("", 14, Style.IVORY, false, 3)
+		var amount := Style.label("", 14, UiKit.GOLD, true, 4)
 		amount.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		cell.add_child(amount)
 		reward_amounts[key] = amount
 		reward_cells[key] = cell
-	route_button = make_action_button("RouteButton", "pin", text("hud.route"), "leather", func(): game.on_route_pressed())
-	squad_button = make_action_button("SquadButton", "squad", text("hud.squad"), "leather", func(): game.on_squad_pressed())
+	route_button = make_medal_button("RouteButton", "kit_emb_march", text("hud.route"), func(): game.on_route_pressed())
+	squad_button = make_medal_button("SquadButton", "kit_emb_shield", text("hud.squad"), func(): game.on_squad_pressed())
 	continue_button = make_action_button("ContinueButton", "chevrons", text("hud.continue"), "gold", func(): game.on_continue_pressed())
 	continue_button.custom_minimum_size = Vector2(118, 78)
 
+## «Продолжить»: a gilded plate with dark chevrons and an ink caption (the kit's primary).
 func make_action_button(id: String, icon_kind: String, caption: String, style: String, action: Callable) -> Button:
 	var control := Button.new()
 	control.name = id
@@ -207,14 +221,17 @@ func make_action_button(id: String, icon_kind: String, caption: String, style: S
 	bar.add_child(control)
 	var column := VBoxContainer.new()
 	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	column.offset_top = 2
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
-	column.add_theme_constant_override("separation", 1)
+	column.add_theme_constant_override("separation", 0)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	control.add_child(column)
 	var icon := Art.new(icon_kind, Vector2(30, 30))
+	icon.name = "Icon"
+	icon.tint = CONTINUE_INK
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	column.add_child(icon)
-	var label := Style.label(caption, 14, Style.IVORY, true, 2)
+	var label := Style.label(caption, 15, UiKit.PRIMARY_INK, true, 0)
 	label.name = "Caption"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(label)
@@ -222,12 +239,53 @@ func make_action_button(id: String, icon_kind: String, caption: String, style: S
 		continue_caption = label
 	return control
 
+## «Маршрут» and «Отряд»: a bronze medallion with a forged emblem and the caption under it,
+## drawn like the city's HUD actions beside them (src/hud_action.gd). The caption stays a
+## Label named "Caption" (tests and accessibility read it).
+func make_medal_button(id: String, emblem: String, caption: String, action: Callable) -> Button:
+	var control := Button.new()
+	control.name = id
+	control.custom_minimum_size = Vector2(76, 78)
+	control.tooltip_text = caption
+	control.accessibility_name = caption
+	var empty := StyleBoxEmpty.new()
+	for state in ["normal", "hover", "pressed", "hover_pressed", "focus", "disabled"]:
+		control.add_theme_stylebox_override(state, empty)
+	control.pressed.connect(action)
+	control.draw.connect(draw_medal.bind(control, UiKit.tex(emblem)))
+	bar.add_child(control)
+	var label := Style.label(caption, 14, Color("#fff1d2"), true, 5)
+	label.name = "Caption"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	label.offset_left = -6
+	label.offset_right = 6
+	label.offset_top = -22
+	label.offset_bottom = -2
+	control.add_child(label)
+	return control
+
+func draw_medal(control: Button, emblem: Texture2D) -> void:
+	var held := control.is_pressed()
+	var d := 58.0 if compact else 60.0
+	var centre := Vector2(control.size.x * 0.5, 32.0)
+	if held:
+		centre.y += 2.0
+		d -= 4.0
+	var tone := Color(0.8, 0.76, 0.72) if held else (Color(0.62, 0.6, 0.58) if control.disabled else Color.WHITE)
+	control.draw_circle(centre + Vector2(0, 2), d * 0.5 + 3.0, Color(0, 0, 0, 0.32), true, -1.0, true)
+	control.draw_texture_rect(UiKit.tex("kit_rail"), Rect2(centre - Vector2(d, d) * 0.5, Vector2(d, d)), false, tone)
+	var side := d * 0.6
+	control.draw_texture_rect(emblem, Rect2(centre - Vector2(side, side) * 0.5, Vector2(side, side)), false, tone)
+	if (control.is_hovered() or control.has_focus()) and not held:
+		control.draw_arc(centre, d * 0.5 - 1.0, 0, TAU, 64, Color("#ffe2a0"), 1.8, true)
+
 func draw_dots() -> void:
 	var total := maxi(1, progress_total)
 	var spacing := minf(30.0, (task_dots.size.x - 16.0) / maxf(1.0, total - 1))
 	var y := task_dots.size.y * 0.5
 	var start := (task_dots.size.x - spacing * (total - 1)) * 0.5
-	task_dots.draw_line(Vector2(start, y), Vector2(start + spacing * (total - 1), y), Color("#6b5434"), 2.0, true)
+	task_dots.draw_line(Vector2(start, y), Vector2(start + spacing * (total - 1), y), Color(0.55, 0.37, 0.13, 0.7), 2.0, true)
 	for i in total:
 		var c := Vector2(start + spacing * i, y)
 		if i < progress_value:
@@ -236,16 +294,16 @@ func draw_dots() -> void:
 			task_dots.draw_circle(c + Vector2(-2, -2), 2.6, Color("#fff1c4"))
 			task_dots.draw_arc(c, 7.0, 0, TAU, 20, Color("#8a5a14"), 1.3, true)
 		else:
-			task_dots.draw_circle(c, 7.0, Color("#5e5547"))
-			task_dots.draw_circle(c + Vector2(-1.5, -1.5), 2.2, Color("#8d8270"))
-			task_dots.draw_arc(c, 7.0, 0, TAU, 20, Color("#3a3128"), 1.3, true)
+			task_dots.draw_circle(c, 7.0, Color("#4a3b2c"))
+			task_dots.draw_circle(c + Vector2(-1.5, -1.5), 2.2, Color("#7d6a52"))
+			task_dots.draw_arc(c, 7.0, 0, TAU, 20, Color("#b8893f"), 1.4, true)
 
 func set_task(title: String, value: int, total: int) -> void:
 	task_title.text = title
 	progress_value = clampi(value, 0, maxi(1, total))
 	progress_total = maxi(1, total)
 	task_count.text = "%d / %d" % [progress_value, progress_total]
-	task_dots.custom_minimum_size.x = clampf(26.0 * progress_total + 8.0, 70.0, 150.0)
+	task_dots.custom_minimum_size.x = clampf((22.0 if compact else 26.0) * progress_total + 8.0, 64.0, 150.0)
 	task_dots.queue_redraw()
 
 func set_reward(caption: String, resources: Dictionary) -> void:
@@ -260,6 +318,11 @@ func set_continue(caption: String, enabled: bool) -> void:
 	continue_caption.text = caption
 	continue_button.disabled = not enabled
 	continue_button.tooltip_text = caption
+	continue_caption.add_theme_color_override("font_color", UiKit.PRIMARY_INK if enabled else Color("#efe9dc"))
+	var icon = continue_button.find_child("Icon", true, false)
+	if icon != null:
+		icon.tint = CONTINUE_INK if enabled else Color(0.94, 0.92, 0.86)
+		icon.queue_redraw()
 
 func strip_center() -> Vector2:
 	return reward_strip.get_global_rect().get_center() if is_instance_valid(reward_strip) else Vector2.ZERO
@@ -313,14 +376,23 @@ func toast(value: String, kind := "info", seconds := 4.5) -> void:
 		if existing.get_meta("text", "") == value:
 			existing.set_meta("until", Time.get_ticks_msec() + seconds * 1000.0)
 			return
+	# The city's toast (carved oak plate, tone medallion at the left): a reward is good, an
+	# error a calm amber mark, a lost connection a wait.
 	var pill := PanelContainer.new()
-	var colors := {"info":Color("#8f7346"), "reward":Color("#e8c36f"), "error":Color("#c9694e"), "network":Color("#6f8fa8")}
-	pill.add_theme_stylebox_override("panel", Style.frame(Color("#231c14e6"), Color("#15110ce6"), colors.get(kind, Color("#8f7346")), 12, 2, Vector4(16, 7, 16, 7)))
+	pill.add_theme_stylebox_override("panel", Style.toast_plate())
 	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	pill.set_meta("text", value)
+	pill.set_meta("kind", kind)
 	pill.set_meta("until", Time.get_ticks_msec() + seconds * 1000.0)
-	var label := Style.label(value, 17, Style.IVORY)
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var tone: String = {"reward": "good", "error": "warn", "network": "wait"}.get(kind, "info")
+	pill.draw.connect(func(): UiKit.draw_tone(pill, Vector2(30.0, pill.size.y * 0.5), 13.0, tone))
+	var label := Style.label(value, 17, Style.IVORY, false, 0)
+	label.add_theme_font_override("font", Style.BODY_FONT)
+	# A short notice sits on a plate fitted to its words; a long one wraps across the column.
+	if Style.BODY_FONT.get_string_size(value, HORIZONTAL_ALIGNMENT_LEFT, -1, 17).x > 560.0:
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	else:
+		pill.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	pill.add_child(label)
 	toasts.add_child(pill)
@@ -360,11 +432,12 @@ func build_banner() -> void:
 	words.add_theme_constant_override("separation", 0)
 	words.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	plate.add_child(words)
-	banner_title = Style.label("", 30, Style.IVORY, true, 4)
+	banner_title = Style.title("", 28)
 	banner_title.name = "BannerTitle"
 	banner_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	words.add_child(banner_title)
-	banner_sub = Style.label("", 16, Color("#e3d7b8"), false, 3)
+	banner_sub = Style.label("", 16, Style.IVORY, false, 4)
+	banner_sub.add_theme_color_override("font_outline_color", Color("#0c2412"))
 	banner_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner_sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	banner_sub.custom_minimum_size.x = 380
@@ -381,8 +454,8 @@ func draw_banner_ribbons() -> void:
 		var out: float = x + side * 30.0
 		var tail := PackedVector2Array([Vector2(x, y), Vector2(out, y + 6.0), Vector2(out - side * 11.0, y + h * 0.55),
 			Vector2(out, y + h), Vector2(x, y + h - 4.0)])
-		banner_plate.draw_colored_polygon(tail, Color("#8b2a1c"))
-		banner_plate.draw_polyline(PackedVector2Array([tail[0], tail[1], tail[2], tail[3], tail[4]]), Color("#4f150e"), 2.0, true)
+		banner_plate.draw_colored_polygon(tail, Color("#7d2026"))
+		banner_plate.draw_polyline(PackedVector2Array([tail[0], tail[1], tail[2], tail[3], tail[4]]), Color("#c49a4f"), 2.0, true)
 
 func show_banner(title: String, subtitle := "", seconds := 4.0) -> void:
 	banner_title.text = title
@@ -417,7 +490,7 @@ func build_locked_card() -> void:
 	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(header)
 	var left_space := Control.new()
-	left_space.custom_minimum_size = Vector2(36, 0)
+	left_space.custom_minimum_size = Vector2(40, 0)
 	left_space.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	header.add_child(left_space)
 	var medal := Art.new("medallion", Vector2(170, 52))
@@ -426,26 +499,25 @@ func build_locked_card() -> void:
 	var close := Button.new()
 	close.name = "LockedClose"
 	close.text = "×"
-	close.flat = true
-	close.custom_minimum_size = Vector2(36, 36)
+	close.custom_minimum_size = Vector2(40, 40)
+	close.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	close.tooltip_text = text("button.close")
 	close.accessibility_name = text("button.close")
-	close.add_theme_color_override("font_color", Color("#d9c9a4"))
-	close.add_theme_font_size_override("font_size", 24)
+	Style.close_style(close)
 	close.pressed.connect(_on_locked_close)
 	header.add_child(close)
-	locked_title = Style.label(text("forest.locked.title"), 31, Style.IVORY, true, 0)
+	locked_title = Style.title(text("forest.locked.title"), 29)
 	locked_title.name = "LockedTitle"
 	locked_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(locked_title)
-	locked_body = Style.label(text("forest.locked.body"), 19, Color("#e2d6bd"), true, 0)
+	locked_body = Style.label(text("forest.locked.body"), 19, Color("#efe2c6"), true, 0)
 	locked_body.name = "LockedBody"
 	locked_body.add_theme_font_override("font", Style.italic())
 	locked_body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	locked_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	locked_body.custom_minimum_size.x = 400
 	column.add_child(locked_body)
-	locked_progress = Style.label("", 16, Color("#b9ae96"), false, 0)
+	locked_progress = Style.label("", 16, UiKit.GOLD_DIM, true, 0)
 	locked_progress.name = "LockedProgress"
 	locked_progress.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(locked_progress)
@@ -455,7 +527,7 @@ func build_locked_card() -> void:
 	locked_cta.custom_minimum_size = Vector2(300, 54)
 	locked_cta.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	locked_cta.add_theme_font_override("font", Style.TITLE_FONT)
-	locked_cta.add_theme_font_size_override("font_size", 23)
+	locked_cta.add_theme_font_size_override("font_size", 22)
 	Style.apply_button(locked_cta, "red")
 	locked_cta.pressed.connect(func(): game.open_town_hall())
 	column.add_child(locked_cta)
@@ -498,12 +570,7 @@ func build_invite() -> void:
 func build_battle_header() -> void:
 	battle_header = PanelContainer.new()
 	battle_header.name = "BattleHeader"
-	var panel: StyleBoxTexture = Style.dark_panel().duplicate()
-	panel.content_margin_top = 6
-	panel.content_margin_bottom = 6
-	panel.content_margin_left = 12
-	panel.content_margin_right = 12
-	battle_header.add_theme_stylebox_override("panel", panel)
+	battle_header.add_theme_stylebox_override("panel", Style.leather_strip(Vector4(28, 7, 28, 8)))
 	battle_header.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(battle_header)
 	var column := VBoxContainer.new()
@@ -514,7 +581,7 @@ func build_battle_header() -> void:
 	row.add_theme_constant_override("separation", 10)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(row)
-	battle_title = Style.label("", 16, Style.IVORY, true, 0)
+	battle_title = Style.label("", 16, UiKit.GOLD, true, 3)
 	battle_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	battle_title.custom_minimum_size.x = 210
 	battle_title.clip_text = true
@@ -523,22 +590,26 @@ func build_battle_header() -> void:
 	row.add_child(battle_timer)
 	battle_retreat = Button.new()
 	battle_retreat.text = text("boss.retreat")
-	battle_retreat.custom_minimum_size = Vector2(0, 26)
+	battle_retreat.custom_minimum_size = Vector2(0, 32)
 	battle_retreat.add_theme_font_size_override("font_size", 13)
 	Style.apply_button(battle_retreat, "leather")
 	battle_retreat.pressed.connect(func(): game.request_action("retreat"))
 	row.add_child(battle_retreat)
 	battle_bar = ProgressBar.new()
-	battle_bar.custom_minimum_size = Vector2(470, 8)
+	battle_bar.custom_minimum_size = Vector2(470, 10)
 	battle_bar.show_percentage = false
 	var fill := StyleBoxFlat.new()
-	fill.bg_color = Color("#c4472f")
-	fill.set_corner_radius_all(3)
+	fill.bg_color = Color("#b8352b")
+	fill.border_color = Color("#e07a5c")
+	fill.border_width_top = 1
+	fill.set_corner_radius_all(5)
+	fill.anti_aliasing = true
 	var back := StyleBoxFlat.new()
-	back.bg_color = Color("#2a1712")
-	back.border_color = Color("#8a6a3c")
+	back.bg_color = Color("#1b100b")
+	back.border_color = Color("#a88347")
 	back.set_border_width_all(1)
-	back.set_corner_radius_all(3)
+	back.set_corner_radius_all(5)
+	back.anti_aliasing = true
 	battle_bar.add_theme_stylebox_override("fill", fill)
 	battle_bar.add_theme_stylebox_override("background", back)
 	column.add_child(battle_bar)
@@ -667,13 +738,14 @@ func layout() -> void:
 	# One row like art/07: task card, reward strip (fills the rest), three buttons; the existing
 	# DRENOVAR navigation keeps the bottom-right corner, so the row ends where it begins.
 	var buttons_width := 76.0 + 72.0 + 108.0 + 16.0
-	var strip_min := 36.0 + 6.0 + 46.0 * 5.0 + 4.0 * 13.0 + 24.0
+	# The carved oak strip keeps 18 units at each end for its gold lozenges.
+	var strip_min := 36.0 + 6.0 + 46.0 * 5.0 + 4.0 * 13.0 + 36.0
 	compact = available < 200.0 + 16.0 + strip_min + 84.0 + buttons_width
 	# 1022: the 1021 navigation starts further left (874 px of 1366); a compact row narrows the task
 	# card and the reward cells so the reward strip and «За спасение:» stay on screen.
 	var cell_width := 40.0 if compact else 46.0
 	var card_width := 184.0 if compact else 200.0
-	strip_min = 30.0 + 6.0 + cell_width * 5.0 + 4.0 * 13.0 + 24.0 if compact else strip_min
+	strip_min = 30.0 + 6.0 + cell_width * 5.0 + 4.0 * 13.0 + 36.0 if compact else strip_min
 	# «За спасение:» stays visible: inline beside the chest when there is room (art/07),
 	# otherwise stacked under a smaller chest.
 	reward_caption.visible = not reward_caption.text.is_empty()
@@ -686,7 +758,7 @@ func layout() -> void:
 	route_button.custom_minimum_size.x = 70.0 if compact else 76.0
 	squad_button.custom_minimum_size.x = 66.0 if compact else 72.0
 	continue_button.custom_minimum_size.x = 100.0 if compact else 108.0
-	task_dots.custom_minimum_size.x = 72.0 if compact else 96.0
+	task_dots.custom_minimum_size.x = 64.0 if compact else 96.0
 	bar.add_theme_constant_override("separation", 6 if compact else 8)
 	if reward_strip.get_child_count() > 0:
 		reward_strip.get_child(0).add_theme_constant_override("separation", 3 if compact else 6)

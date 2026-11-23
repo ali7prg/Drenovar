@@ -703,21 +703,7 @@ func draw_toast_mark(item: Label) -> void:
 	var r := 11.0 if small or item == modal_status else 14.0
 	# «Отправляем…» on the window's status line is a wait, not a warning.
 	var tone := message_tone if item == message else ("wait" if item != modal_status or modal_status.text.ends_with("…") else "warn")
-	item.draw_circle(centre + Vector2(0, 1.5), r + 1.5, Color(0, 0, 0, 0.3), true, -1.0, true)
-	item.draw_circle(centre, r + 1.5, Color("#e2b766"), true, -1.0, true)
-	var face: Color = {"good": Color("#2f7d36"), "warn": Color("#b0661c"), "wait": Color("#3a2a1c")}.get(tone, Color("#2a4f63"))
-	item.draw_circle(centre, r, face, true, -1.0, true)
-	match tone:
-		"good":
-			item.draw_polyline(PackedVector2Array([centre + Vector2(-r * 0.45, 0), centre + Vector2(-r * 0.1, r * 0.38), centre + Vector2(r * 0.5, -r * 0.4)]), UiKit.IVORY, 2.6, true)
-		"warn":
-			item.draw_line(centre + Vector2(0, -r * 0.5), centre + Vector2(0, r * 0.15), UiKit.IVORY, 3.0, true)
-			item.draw_circle(centre + Vector2(0, r * 0.48), 1.9, UiKit.IVORY, true, -1.0, true)
-		"wait":
-			item.draw_texture_rect(UiKit.tex("kit_hourglass"), Rect2(centre - Vector2(r * 0.55, r * 0.75), Vector2(r * 1.1, r * 1.5)), false)
-		_:
-			item.draw_circle(centre + Vector2(0, -r * 0.45), 1.9, UiKit.IVORY, true, -1.0, true)
-			item.draw_line(centre + Vector2(0, -r * 0.1), centre + Vector2(0, r * 0.5), UiKit.IVORY, 3.0, true)
+	UiKit.draw_tone(item, centre, r, tone)
 
 ## A new notice: its tone (an error, a done job, or news), then a short ease-in (80 ms
 ## fade and a 6 px rise; none with less motion). Empty text hides the toast at once.

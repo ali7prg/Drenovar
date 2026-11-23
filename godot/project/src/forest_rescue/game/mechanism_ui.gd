@@ -60,15 +60,17 @@ func setup(owner_game: Node) -> void:
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titles.add_theme_constant_override("separation", 0)
 	header.add_child(titles)
-	eyebrow = Style.label("", 14, Color("#ebcc89"))
+	eyebrow = Style.label("", 14, Color("#e9cf95"), true)
 	titles.add_child(eyebrow)
-	title = Style.label("", 25, Style.IVORY, true)
+	title = Style.title("", 24)
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	titles.add_child(title)
 	close_button = Button.new()
 	close_button.name = "MechanismClose"
 	close_button.text = "×"
-	close_button.custom_minimum_size = Vector2(48, 44)
+	close_button.custom_minimum_size = Vector2(44, 44)
+	close_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	Style.close_style(close_button)
 	close_button.tooltip_text = game.content.text("button.close")
 	close_button.accessibility_name = game.content.text("button.close")
 	close_button.pressed.connect(close)
@@ -88,7 +90,7 @@ func setup(owner_game: Node) -> void:
 	dots.custom_minimum_size = Vector2(110, 22)
 	dots.draw.connect(draw_dots)
 	progress.add_child(dots)
-	count_label = Style.label("", 18, Style.IVORY, true)
+	count_label = Style.label("", 18, Style.GOLD, true, 3)
 	progress.add_child(count_label)
 	widget = Control.new()
 	widget.name = "MechanismWidget"

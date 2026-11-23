@@ -1320,6 +1320,26 @@ class KitWarm extends Control:
 static func toast_style() -> StyleBoxTexture:
 	return nine("kit_pill", Vector4(18, 12, 18, 12), Vector4(24, 8, 24, 9))
 
+## The tone medallion of a notice (a toast, the connection pill, a window's status line, the
+## forest's toasts): a gold-rimmed enamel disc with a tick (good), a mark (warn, calm amber,
+## never red), an hourglass (wait) or an "i" (info).
+static func draw_tone(item: CanvasItem, centre: Vector2, r: float, tone: String) -> void:
+	item.draw_circle(centre + Vector2(0, 1.5), r + 1.5, Color(0, 0, 0, 0.3), true, -1.0, true)
+	item.draw_circle(centre, r + 1.5, Color("#e2b766"), true, -1.0, true)
+	var face: Color = {"good": Color("#2f7d36"), "warn": Color("#b0661c"), "wait": Color("#3a2a1c")}.get(tone, Color("#2a4f63"))
+	item.draw_circle(centre, r, face, true, -1.0, true)
+	match tone:
+		"good":
+			item.draw_polyline(PackedVector2Array([centre + Vector2(-r * 0.45, 0), centre + Vector2(-r * 0.1, r * 0.38), centre + Vector2(r * 0.5, -r * 0.4)]), IVORY, 2.6, true)
+		"warn":
+			item.draw_line(centre + Vector2(0, -r * 0.5), centre + Vector2(0, r * 0.15), IVORY, 3.0, true)
+			item.draw_circle(centre + Vector2(0, r * 0.48), 1.9, IVORY, true, -1.0, true)
+		"wait":
+			item.draw_texture_rect(tex("kit_hourglass"), Rect2(centre - Vector2(r * 0.55, r * 0.75), Vector2(r * 1.1, r * 1.5)), false)
+		_:
+			item.draw_circle(centre + Vector2(0, -r * 0.45), 1.9, IVORY, true, -1.0, true)
+			item.draw_line(centre + Vector2(0, -r * 0.1), centre + Vector2(0, r * 0.5), IVORY, 3.0, true)
+
 ## Resource chip on the HUD: a dark oak pill under the icon and amount.
 static func hud_chip_styles() -> Dictionary:
 	var normal := nine("kit_pill", Vector4(18, 12, 18, 12), Vector4(8, 2, 10, 2)).duplicate() as StyleBoxTexture

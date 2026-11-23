@@ -267,6 +267,7 @@ func link_button(id: String, caption: String, action: Callable) -> Button:
 	control.text = caption
 	control.flat = true
 	control.custom_minimum_size = Vector2(120, 48)
+	control.add_theme_font_override("font", Style.TITLE_FONT)
 	control.add_theme_font_size_override("font_size", 17)
 	control.add_theme_color_override("font_color", Color("#efe2c6"))
 	control.add_theme_color_override("font_hover_color", Color.WHITE)
@@ -317,7 +318,7 @@ func build_static_card() -> void:
 	var medal := Art.new("medallion", Vector2(180, 52))
 	medal.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	column.add_child(medal)
-	var heading := Style.label(t("forest.unlocked.title"), 29, Style.IVORY, true)
+	var heading := Style.title(t("forest.unlocked.title"), 28)
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(heading)
 	var horse := Art.new("horse", Vector2(150, 92))
@@ -328,7 +329,7 @@ func build_static_card() -> void:
 		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		column.add_child(line)
-	var note := Style.label(t("intro.rewardsNote"), 15, Color("#c9bd9f"))
+	var note := Style.label(t("intro.rewardsNote"), 15, Color("#e9cf95"), true)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(note)

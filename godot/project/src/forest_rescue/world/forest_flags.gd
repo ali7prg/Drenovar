@@ -66,6 +66,12 @@ const GAME_LAYER := [
 	"res://src/forest_rescue/game/adventure_content.gd",
 	"res://src/forest_rescue/game/adventure_client.gd",
 	"res://assets/ui/NotoSerif-Regular.ttf",
+	# The kit's fonts, src/ui_kit.gd and src/safe_area.gd are loaded by main.gd before the
+	# adventure (cached: staging them costs nothing); listed so the layer is complete on its own.
+	"res://assets/ui/fonts/RuslanDisplay-Regular.ttf",
+	"res://assets/ui/fonts/Philosopher-Bold.ttf",
+	"res://src/ui_kit.gd",
+	"res://src/safe_area.gd",
 	"res://src/forest_rescue/game/hud_style.gd",
 	"res://src/forest_rescue/game/hud_art.gd",
 	"res://src/forest_rescue/game/adventure_hud.gd",

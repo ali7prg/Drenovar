@@ -25,6 +25,11 @@ func _initialize() -> void:
 func material_key(material: Material) -> String:
 	if material == null:
 		return "-"
+	# 1023: the scenery atlas material is a ShaderMaterial (src/scenery.gdshader) with the same
+	# atlas, vertex colour, cut-out and lighting as the 0.5.9 StandardMaterial3D; it keys as that.
+	if material is ShaderMaterial and material.shader != null and material.shader.resource_path == "res://src/scenery.gdshader":
+		var atlas: Variant = material.get_shader_parameter("atlas")
+		return "StandardMaterial3D:" + (atlas.resource_path if atlas is Texture2D else "")
 	if material is BaseMaterial3D and material.albedo_texture != null:
 		return material.get_class() + ":" + material.albedo_texture.resource_path
 	if material is ShaderMaterial:

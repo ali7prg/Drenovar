@@ -23,6 +23,8 @@ const WATER_SHADER = preload("res://src/water.gdshader")
 const BIOME_SHADER = preload("res://src/biome.gdshader")
 const MEADOW_SHADER = preload("res://src/meadow.gdshader")
 const FOREST_SHADER = preload("res://src/forest.gdshader")
+const SCENERY_SHADER = preload("res://src/scenery.gdshader")
+const WORLD_ROAD_SHADER = preload("res://src/world_road.gdshader")
 const CityWorks = preload("res://src/city_works.gd")
 const CityWalls = preload("res://src/city_walls.gd")
 const TownPlan = preload("res://src/town_plan.gd")
@@ -167,7 +169,7 @@ var terrain_bounds := AABB()
 var route_preview: MeshInstance3D
 var scenery := Node3D.new()
 var city_ground_detail := Node3D.new()
-var scenery_material: StandardMaterial3D
+var scenery_material: ShaderMaterial
 var meadow_material: ShaderMaterial
 var meadow_stone: StandardMaterial3D
 var city_road_mesh: MeshInstance3D
@@ -250,14 +252,11 @@ func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_v
 		meadow_stone.albedo_texture = load(data.stoneTexture)
 		meadow_stone.vertex_color_use_as_albedo = true
 		meadow_stone.roughness = 0.94
-	scenery_material = StandardMaterial3D.new()
-	scenery_material.albedo_texture = load(data.environmentTexture)
-	scenery_material.vertex_color_use_as_albedo = true
-	scenery_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	scenery_material.roughness = 0.95
-	scenery_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-	scenery_material.alpha_scissor_threshold = 0.36
-	scenery_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	# The atlas colour times the vertex colour, cut out at 0.36, both faces (src/scenery.gdshader;
+	# 1023: was a StandardMaterial3D with the same settings).
+	scenery_material = ShaderMaterial.new()
+	scenery_material.shader = SCENERY_SHADER
+	scenery_material.set_shader_parameter("atlas", load(data.environmentTexture))
 	var ground_paths: Array = data.cityGround if is_city else data.worldGround
 	if not is_city:
 		world_heights = Marshalls.base64_to_raw(data.worldHeights).to_float32_array()
@@ -578,9 +577,13 @@ func build_world_water() -> void:
 	add_child(mesh)
 
 func build_world_roads() -> void:
-	var road := surface("path")
-	road.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-	road.alpha_scissor_threshold = 0.05
+	# The «path» surface cut out at 0.05, both faces (src/world_road.gdshader; 1023: was the
+	# surface("path") StandardMaterial3D with alpha scissor).
+	var road := ShaderMaterial.new()
+	road.shader = WORLD_ROAD_SHADER
+	road.set_shader_parameter("albedo_map", load(SURFACES + "path-albedo.webp"))
+	road.set_shader_parameter("normal_map", load(SURFACES + "path-normal.png"))
+	road.set_shader_parameter("roughness_map", load(SURFACES + "path-roughness.png"))
 	var roads := scene_resource("res://assets/world-roads.glb").instantiate()
 	roads.name = "Roads"
 	add_child(roads)

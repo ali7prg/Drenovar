@@ -799,7 +799,7 @@ func show_controls_menu() -> void:
 ## Sound on or off (the master bus), kept with the HUD's state; the forest follows it.
 func set_sound(on: bool) -> void:
 	sound_on = on
-	AudioServer.set_bus_mute(0, not on)
+	Sound.set_muted("master", not on, false)
 	save_setting("sound", on)
 	if forest_game != null and forest_game.sound_enabled != on:
 		forest_game.set_sound(on)
@@ -2645,6 +2645,8 @@ func reset_gestures() -> void:
 			release_placement(placement_screen_point())
 
 func close_modal() -> void:
+	if modal.visible:
+		Sound.ui("close")
 	result_open = false
 	modal_scroll.set_modal_active(false)
 	economy_rows.clear()
@@ -3103,6 +3105,8 @@ func add_hero_art(art: Texture2D, tint := Color("#b98c52"), caption := "") -> vo
 	modal_hero.add_child(picture)
 
 func open_modal(title: String, layout := "center", eyebrow := "", art: Texture2D = null) -> void:
+	if not modal.visible:
+		Sound.ui("open")
 	action_ring.close()
 	cancel_placement()
 	var strip := layout == "strip"
@@ -3363,6 +3367,7 @@ func open_building_ring(marker: Dictionary) -> void:
 		actions.append(["Переместить", "move", start_move.bind(building)])
 	if upgradable:
 		actions.append(["Сведения", "info", inspect_building.bind(building)])
+	Sound.ui("building_tap")
 	action_ring.open(str(building.id), "%s · ур. %d" % [building_title(building.type), level], marker.position, stage.camera, actions)
 
 func inspect_building(building: Dictionary) -> void:
@@ -5611,6 +5616,8 @@ func result_label(parent: Container, value: String, font_size: int, color: Color
 func show_report(report: Dictionary, announced := false) -> void:
 	var victory: bool = report.get("outcome") == "victory"
 	var title := "Победа" if victory else "Отряд потерпел поражение"
+	if announced and report.get("outcome") != "scout":
+		Sound.stinger("victory" if victory else "defeat")
 	open_modal(title, "result")
 	var heading := HBoxContainer.new()
 	modal_body.add_child(heading)
@@ -5853,6 +5860,7 @@ func show_error(response: Dictionary) -> void:
 		client_update_required = true
 		restoring_session = false
 		show_account.call_deferred()
+	Sound.order_failed()
 	message_tone = "warn"
 	message_warn_text = calm_error(str(response.get("error","Ответ сервера не удалось прочитать.")))
 	message.text = message_warn_text
@@ -5927,6 +5935,7 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 		return false
 	var instant := instant_order(order) and not after_success.is_valid()
 	if instant:
+		Sound.order_sent(order)
 		predict_work(order)
 		if modal.visible:
 			close_modal()
@@ -5974,6 +5983,7 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 		command_settled.emit()
 		if instant:
 			forget_prediction(order)
+			Sound.order_failed()
 			message.text = "Не выполнено: " + str(response.get("error", "сервер не ответил"))
 		elif generation == modal_generation:
 			show_error(response)
@@ -5981,6 +5991,8 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	accept(response)
 	command_in_progress = false
 	command_settled.emit()
+	if not instant:
+		Sound.order_sent(order)
 	if instant:
 		# The answer is in: a forecast the state does not carry goes after a moment.
 		for slot in pending_works:
@@ -7018,6 +7030,7 @@ func pick_marker(screen_position: Vector2) -> void:
 	if best.get("kind","") == "building":
 		open_building_ring(best)
 	elif best.get("kind","") == "wall":
+		Sound.ui("building_tap")
 		action_ring.open("city-walls", "Стены поселения", best.position, stage.camera,
 			[["Оборона", "defence", show_city_defence], ["Строить", "build", show_build_menu.bind("support")]])
 	elif best.get("kind","") == "encounter":

@@ -214,6 +214,7 @@ static func flourish(mirrored: bool) -> TextureRect:
 static func close_button(action: Callable) -> Button:
 	var control := Button.new()
 	control.text = "×"
+	control.set_meta("sfx", "close")
 	control.tooltip_text = "Закрыть"
 	control.accessibility_name = "Закрыть"
 	control.custom_minimum_size = Vector2(56, 56)
@@ -281,6 +282,7 @@ static func style_button(control: Button, kind := "tertiary", font_size := 19) -
 static func rail_button(icon: Texture2D, selected: bool, caption := "") -> Button:
 	var control := Button.new()
 	control.custom_minimum_size = Vector2(72, 72)
+	control.set_meta("sfx", "tab")
 	control.tooltip_text = caption
 	control.accessibility_name = caption
 	var disc := nine("kit_rail_on" if selected else "kit_rail", Vector4.ZERO, Vector4(14, 14, 14, 14))
@@ -821,6 +823,7 @@ class KitNeed extends TextureButton:
 ## hourglass while the building is training. One drawn node (KitMedal).
 static func rail_medal(face: Texture2D, selected: bool, caption: String, busy := false, emblem: Texture2D = null) -> BaseButton:
 	var control := KitMedal.new()
+	control.set_meta("sfx", "tab")
 	control.face = face
 	control.emblem = emblem
 	control.selected = selected

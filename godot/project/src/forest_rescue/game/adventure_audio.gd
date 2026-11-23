@@ -3,6 +3,11 @@ extends Node
 ## priority stealing with a short fade, hoof only on animation contact markers, wind only over
 ## the forest (300 ms fades), nothing in background, respects the game's master bus mute and
 ## the adventure sound setting. Streams are OGG conversions of the delivered cues.
+## Build 1024: the cues play on the SFX bus and the game's sound hub (autoload Sound) adds the
+## recorded layer: hooves, the horse's snorts, neighs and fear, Teneris' roar and growl, the fight's
+## blade, shield and body hits, deaths, the reward stinger, the fog's swish, the puzzle's right and
+## wrong, and one interface sound for every adventure button (button_pressed). The forest's wind and
+## birds are the hub's forest ambience (and its music theme) while wind_on is true.
 
 const DIR := "res://assets/forest_rescue/audio/"
 const VOICES := 4
@@ -18,6 +23,11 @@ var cooldowns: Dictionary = {}
 var wind_on := false
 var hoof_index := 0
 var played: Array[String] = []
+var last_hoof_msec := -100000
+var fight_count := 0
+
+func hub() -> Node:
+	return get_node_or_null("/root/Sound")
 
 func setup(owner_game: Node) -> void:
 	game = owner_game
@@ -26,11 +36,51 @@ func setup(owner_game: Node) -> void:
 		var player := AudioStreamPlayer.new()
 		player.name = "Voice%d" % i
 		player.set_meta("cue", "")
+		player.bus = &"SFX"
 		add_child(player)
 		players.append(player)
 	# Decode ahead of time (never inside a tap or contact callback).
 	for id in LEVELS:
-		stream(id)
+		if id != "fr_forest_wind" and id != "fr_horse_hoof":
+			stream(id)
+	game.horse_feared.connect(func(_site: String): recorded("forest/horse_fear"))
+	game.creature_roared.connect(on_roar)
+	game.fight_hit.connect(on_fight_hit)
+	game.cage_opened.connect(func(_site: String): recorded("ui/reward", -4.0))
+	game.button_pressed.connect(func(_action: String):
+		var sound := hub()
+		if sound != null:
+			sound.ui("press"))
+
+## A recorded sound through the hub (2D: the camera follows the adventure).
+func recorded(stem: String, gain_db := 0.0) -> void:
+	var sound := hub()
+	if sound != null and allowed():
+		sound.sfx(stem, null, gain_db)
+
+func on_roar(site_id: String, species: String) -> void:
+	# The boss and a guardian in its lair roar; in a fight the attack's warning is a growl.
+	var fight: Dictionary = game.client.battle()
+	var fighting := not fight.is_empty() and String(fight.get("siteId", "")) == site_id and String(fight.get("outcome", "pending")) == "pending"
+	recorded("forest/growl" if fighting and species != "ancient_maw" else "forest/roar")
+
+func on_fight_hit(_site_id: String, attacker: String, target: String) -> void:
+	fight_count += 1
+	match attacker:
+		"squad":
+			recorded("combat/clash" if fight_count % 3 != 0 else "combat/flesh", -2.0)
+			if fight_count % 3 == 1:
+				recorded("combat/creature_hurt", -3.0)
+		"guardian":
+			recorded("combat/shield" if fight_count % 2 == 0 else "combat/flesh", -2.0)
+			if fight_count % 3 == 0:
+				recorded("voice/soldier_hurt", -2.0)
+		"death":
+			if target == "guardian":
+				recorded("combat/creature_death")
+			else:
+				recorded("voice/soldier_death")
+			recorded("combat/fall", -2.0)
 
 func stream(id: String) -> AudioStream:
 	if streams.has(id):
@@ -83,6 +133,17 @@ func play_cue(id: String, cooldown := 0.0, rate := 1.0) -> void:
 		if player == null:
 			return
 	cooldowns[id] = now + cooldown
+	var sound := hub()
+	if sound != null:
+		match id:
+			"fr_large_reward":
+				sound.stinger("reward")
+				sound.sfx("ui/reward", null, -2.0)
+			"fr_people_rescued":
+				sound.stinger("reward")
+				sound.sfx("forest/horse_neigh", null, -4.0)
+			"fr_artifact_discovery":
+				sound.sfx("ui/reward", null, -5.0)
 	player.stream = value
 	player.volume_db = float(LEVELS.get(id, -8.0))
 	player.pitch_scale = rate
@@ -94,18 +155,26 @@ func play_cue(id: String, cooldown := 0.0, rate := 1.0) -> void:
 
 func hoof(_position: Vector3) -> void:
 	hoof_index += 1
-	# Deterministic small variation (0.95–1.05), no random per-frame timer.
-	var rate := 0.95 + 0.1 * float((hoof_index * 7) % 11) / 10.0
-	for player in players:
-		if player.playing and int(PRIORITY.get(String(player.get_meta("cue", "")), 0)) > 2:
-			return
-	play_cue("fr_horse_hoof", 0.12, rate)
+	if not allowed():
+		return
+	var now := Time.get_ticks_msec()
+	var sound := hub()
+	if sound == null:
+		return
+	# The recorded gallop (combat/hoof); the horse snorts when it sets off, now and then neighs.
+	if now - last_hoof_msec > 2500:
+		sound.sfx("forest/horse_neigh" if hoof_index % 5 == 0 else "forest/horse_snort", null, -3.0)
+	last_hoof_msec = now
+	sound.sfx("combat/hoof", null, -1.0)
 
 func set_forest_ambience(on: bool) -> void:
 	var wanted := on and allowed()
 	if wanted == wind_on:
 		return
 	wind_on = wanted
+	if hub() != null:
+		# The hub plays the forest's recorded wind and birds (Sound.AMBIENCE.forest).
+		return
 	var wind: AudioStreamPlayer = null
 	for player in players:
 		if String(player.get_meta("cue", "")) == "fr_forest_wind" and player.playing:

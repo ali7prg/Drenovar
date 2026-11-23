@@ -1,0 +1,312 @@
+{
+  "buses": {
+    "found": {
+      "Ambient": 4,
+      "Master": 0,
+      "Music": 1,
+      "SFX": 2,
+      "UI": 3,
+      "Voice": 5
+    },
+    "ios_session_category": 0,
+    "limiter_ceiling_db": -1.0,
+    "master_effects": [
+      "AudioEffectCompressor",
+      "AudioEffectHardLimiter"
+    ]
+  },
+  "buttons": {
+    "application": {
+      "buttons": 3,
+      "pressed": 3,
+      "sounds": [
+        1,
+        1,
+        1
+      ]
+    },
+    "city actions": {
+      "buttons": 7,
+      "pressed": 7,
+      "sounds": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "credits": {
+      "buttons": 2,
+      "pressed": 2,
+      "sounds": [
+        1,
+        1
+      ]
+    },
+    "economy": {
+      "buttons": 3,
+      "pressed": 3,
+      "sounds": [
+        1,
+        1,
+        1
+      ]
+    },
+    "forest hud": {
+      "buttons": 2,
+      "pressed": 2,
+      "sounds": [
+        1,
+        1
+      ]
+    },
+    "forest journal": {
+      "buttons": 6,
+      "pressed": 6,
+      "sounds": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "hud": {
+      "buttons": 11,
+      "pressed": 10,
+      "sounds": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "menu": {
+      "buttons": 13,
+      "pressed": 13,
+      "sounds": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "reports": {
+      "buttons": 1,
+      "pressed": 1,
+      "sounds": [
+        1
+      ]
+    },
+    "sound window": {
+      "buttons": 8,
+      "pressed": 8,
+      "sounds": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "checks": 296,
+  "events": {
+    "combat/armor": true,
+    "combat/arrow_hit": true,
+    "combat/bow": true,
+    "combat/clash": true,
+    "combat/creature_death": true,
+    "combat/crossbow": true,
+    "combat/fall": true,
+    "combat/flesh": true,
+    "combat/shield": true,
+    "voice/soldier_death": true
+  },
+  "failures": [],
+  "files": {
+    "count": 133,
+    "missing": [],
+    "uncredited": [],
+    "variants": 49
+  },
+  "forest_mood": {
+    "after_s": 4.56,
+    "mood": "forest",
+    "wind_on": true
+  },
+  "forest_unlocked": true,
+  "loudness": {
+    "off_target": [],
+    "rows": 133,
+    "total_mb": 16.85
+  },
+  "music": {
+    "history": [
+      {
+        "msec": 1670,
+        "theme": "city"
+      },
+      {
+        "msec": 9626,
+        "theme": "world"
+      },
+      {
+        "msec": 13711,
+        "theme": "city"
+      },
+      {
+        "msec": 16740,
+        "theme": "forest"
+      },
+      {
+        "msec": 20521,
+        "theme": "battle"
+      },
+      {
+        "msec": 22267,
+        "theme": "city"
+      },
+      {
+        "msec": 22274,
+        "theme": "battle"
+      },
+      {
+        "msec": 31468,
+        "theme": "forest"
+      },
+      {
+        "msec": 37953,
+        "theme": "city"
+      },
+      {
+        "msec": 65618,
+        "theme": "world"
+      },
+      {
+        "msec": 97713,
+        "theme": "forest"
+      },
+      {
+        "msec": 130669,
+        "theme": "battle"
+      }
+    ],
+    "steps": [
+      {
+        "after_s": 0.0,
+        "to": "city",
+        "track": "city_irelands_coast"
+      },
+      {
+        "after_s": 1.155,
+        "crossfade": {
+          "both_frames": 318,
+          "frames": 435,
+          "playing_after": 1
+        },
+        "to": "world",
+        "track": "world_heroic_demise",
+        "track_start_s": 0.013
+      },
+      {
+        "after_s": 1.066,
+        "crossfade": {
+          "both_frames": 316,
+          "frames": 435,
+          "playing_after": 1
+        },
+        "resumed_s": 7.90056705474854,
+        "to": "city",
+        "track": "city_irelands_coast"
+      },
+      {
+        "after_s": 0.007,
+        "by_forest_mood": false,
+        "crossfade": {
+          "both_frames": 319,
+          "frames": 435,
+          "playing_after": 1
+        },
+        "to": "forest",
+        "track": "forest_mystery_forest"
+      },
+      {
+        "to": "battle",
+        "track": "battle_defying_commodus"
+      }
+    ]
+  },
+  "performance": {
+    "accepted": 6,
+    "burst_400_calls_us": 4230,
+    "hub_frame_us": 5.7,
+    "per_stem": {
+      "combat/clash": 3,
+      "voice/soldier_hurt": 1,
+      "voice/war_cry": 2
+    },
+    "playing_after_burst": 6,
+    "static_memory_mb": 728.3,
+    "stream_memory_mb": 10.74,
+    "streams_loaded": 131,
+    "voice_bus": 3
+  },
+  "settings": {
+    "bus_db": {
+      "Ambient": -15.0411996841431,
+      "Master": -1.83029961585999,
+      "Music": -16.9176006317139,
+      "SFX": -8.87395000457764,
+      "UI": -24.9151496887207,
+      "Voice": -8.19607830047607
+    },
+    "music_db_at_40": -16.9,
+    "saved": {
+      "ambient": 0.5,
+      "master": 0.9,
+      "music": 0.4,
+      "sfx": 0.6,
+      "ui": 0.3,
+      "voice": 0.7
+    }
+  },
+  "soundscapes": {
+    "battle": 29.6286621315193,
+    "city": 29.7215419501134,
+    "forest": 29.7215419501134,
+    "world": 29.7215419501134
+  },
+  "window": {
+    "bus_db_at_30_percent": {
+      "ambient": -23.9,
+      "master": -20.9,
+      "music": -22.3,
+      "sfx": -20.9,
+      "ui": -24.9,
+      "voice": -22.9
+    }
+  }
+}

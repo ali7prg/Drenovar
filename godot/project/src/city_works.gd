@@ -249,6 +249,7 @@ func present_lumberjack(job: Dictionary, now_ms: float) -> void:
 			var trunk: Vector3 = stage.array_point(tree.p)
 			chips.global_position = trunk.lerp(lumber_at, 0.35) + Vector3.UP * 1.0
 			chips.restart()
+			Sound.sfx("city/axe", chips.global_position)
 
 var site_node: Node3D
 var site_model: Node3D
@@ -345,6 +346,7 @@ func present_builders(site: Dictionary, now_ms: float) -> void:
 			var forward := Vector3(sin(builder.rotation.y), 0, cos(builder.rotation.y))
 			sparks.global_position = builder.position + forward * 1.0 + Vector3.UP * 1.1
 			sparks.restart()
+			Sound.sfx("city/hammer", sparks.global_position, -1.5 * index)
 	var puff := int(floor(seconds / 2.6))
 	if working and last_swing.get("dust", -1) != puff:
 		last_swing.dust = puff
@@ -721,6 +723,8 @@ func topple_tree(id: String) -> void:
 	var fall := create_tween()
 	if wait > 0.0:
 		fall.tween_interval(minf(wait, 30.0))
+	# The recording creaks, then crashes about 1.3 s in: as the trunk lands.
+	fall.tween_callback(func(): Sound.sfx("city/tree_fall", trunk))
 	fall.tween_property(pivot, "rotation:x", deg_to_rad(86.0), 1.15).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	var reward := "+%d дерева" % int(tree.get("wood", 0))
 	fall.tween_callback(func():
@@ -737,6 +741,8 @@ func celebrate(at: Vector3, text: String) -> void:
 	burst.global_position = at + Vector3.UP * 3.0
 	burst.spread = 180.0
 	burst.restart()
+	Sound.sfx("city/build_done", at + Vector3.UP * 3.0)
+	Sound.stinger("construction_done")
 	get_tree().create_timer(1.6).timeout.connect(burst.queue_free)
 	float_text(at + Vector3.UP * 7.0, text, Color("#ffe39a"))
 

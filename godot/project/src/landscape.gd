@@ -1850,6 +1850,7 @@ func present_creatures(state: Dictionary, server_ms: float, delta: float) -> voi
 				if not announced_fights.has(army.id):
 					announced_fights[army.id] = true
 					fight_started.emit(str(army.id), p)
+					combat_audio.fight_begins(str(army.id), p)
 				fight_positions[id] = p
 				fight_cores[id] = float(plan.get("clear", 0.0))
 				if clip != "Roar":

@@ -199,6 +199,7 @@ func open() -> void:
 	var forest = ui.forest_game
 	if forest != null and forest.client.available(): # FOREST_RESCUE hook: journal entry
 		tile(about, str(forest.content.text("title")), "kit_emb_tree", forest.open_journal)
+	tile(about, "Звук и музыка", "kit_emb_bell", sound_settings)
 	tile(about, "Плавность на устройстве", "kit_emb_gauge", ui.show_performance)
 	tile(about, "О приложении", "kit_emb_info", ui.show_application)
 	last_open_usec = Time.get_ticks_usec() - started
@@ -218,6 +219,108 @@ func settings(column: VBoxContainer) -> void:
 			toggle.add_theme_color_override(state, UiKit.IVORY)
 		toggle.toggled.connect(entry[2])
 		column.add_child(toggle)
+	var volumes: Button = styled(Button.new(), "tertiary", 16, 44)
+	volumes.name = "SoundSettingsButton"
+	volumes.text = "Громкость…"
+	volumes.pressed.connect(sound_settings)
+	column.add_child(volumes)
+
+# ------------------------------------------------------------------ sound (build 1024)
+const SOUND_ROWS := [["master", "Общая громкость"], ["music", "Музыка"], ["sfx", "Эффекты"],
+	["ui", "Кнопки"], ["ambient", "Окружение"], ["voice", "Голоса"]]
+
+## «Звук и музыка»: six volumes 0–100 % with a switch each (off = silent), saved on the device
+## (user://hud.cfg) by the Sound hub; and the authors of the music and sounds.
+func sound_settings() -> void:
+	ui.open_modal("Звук и музыка", "center", "НАСТРОЙКИ")
+	var rows := VBoxContainer.new()
+	rows.name = "SoundRows"
+	rows.add_theme_constant_override("separation", 2)
+	ui.modal_body.add_child(rows)
+	for entry: Array in SOUND_ROWS:
+		sound_row(rows, entry[0], entry[1])
+	note("Переключатель справа выключает звук целиком; ползунок — громкость. Беззвучный режим iPhone тоже отключает звуки игры.", UiKit.INK_MUTED, 15)
+	var credits: Button = styled(ui.button(ui.modal_body, "Музыка и звуки: авторы", sound_credits), "tertiary", 18, 50)
+	credits.name = "SoundCredits"
+
+func sound_row(parent: Container, key: String, caption: String) -> void:
+	var row := HBoxContainer.new()
+	row.name = "SoundRow_" + key
+	row.add_theme_constant_override("separation", 14)
+	row.custom_minimum_size.y = 50
+	parent.add_child(row)
+	var label: Label = UiKit.label(row, caption, 19, UiKit.INK, UiKit.LABEL_FONT, false)
+	label.custom_minimum_size.x = 210
+	label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var slider := HSlider.new()
+	slider.name = "Volume_" + key
+	slider.min_value = 0
+	slider.max_value = 100
+	slider.step = 1
+	slider.value = roundf(float(Sound.volume[key]) * 100.0)
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	slider.custom_minimum_size = Vector2(300, 46)
+	slider.focus_mode = Control.FOCUS_NONE
+	slider.accessibility_name = caption
+	slider.add_to_group("panel_slider")
+	row.add_child(slider)
+	var percent: Label = UiKit.label(row, "%d %%" % int(slider.value), 18, UiKit.INK_MUTED, UiKit.LABEL_FONT, false)
+	percent.name = "Percent_" + key
+	percent.custom_minimum_size.x = 70
+	percent.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	percent.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var toggle := CheckButton.new()
+	toggle.name = "Mute_" + key
+	toggle.focus_mode = Control.FOCUS_NONE
+	toggle.tooltip_text = "Включить или выключить: " + caption
+	toggle.accessibility_name = caption + ": звук"
+	toggle.button_pressed = not bool(Sound.muted[key])
+	toggle.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(toggle)
+	var last_tick := [int(slider.value)]
+	slider.value_changed.connect(func(v: float):
+		Sound.set_volume(key, v / 100.0)
+		percent.text = "%d %%" % int(v)
+		if v > 0.0 and not toggle.button_pressed:
+			# Moving a silenced slider turns its sound back on.
+			toggle.button_pressed = true
+		if absi(int(v) - last_tick[0]) >= 10:
+			last_tick[0] = int(v)
+			Sound.ui("slider"))
+	slider.drag_ended.connect(func(_changed: bool): sound_preview(key))
+	toggle.toggled.connect(func(on: bool):
+		if key == "master":
+			ui.set_sound(on)
+		else:
+			Sound.set_muted(key, not on)
+		if on:
+			sound_preview(key))
+
+## A short sample of what the slider changes (the music and the ambience are already playing).
+func sound_preview(key: String) -> void:
+	match key:
+		"sfx":
+			Sound.sfx("combat/clash")
+		"ui":
+			Sound.ui("press")
+		"voice":
+			Sound.sfx("voice/war_cry", null, -3.0)
+		"master":
+			Sound.ui("reward")
+
+func sound_credits() -> void:
+	ui.open_modal("Музыка и звуки: авторы", "center", "DRENOVAR")
+	note("Музыка и звуки — свободные записи (CC0 и CC-BY). Спасибо авторам!", UiKit.INK, 17)
+	var list := VBoxContainer.new()
+	list.name = "CreditsList"
+	list.add_theme_constant_override("separation", 6)
+	ui.modal_body.add_child(list)
+	for entry: Array in Sound.Bank.CREDITS:
+		var line: Label = UiKit.label(list, "«%s» — %s · %s" % [entry[0], entry[1], entry[2]], 15, UiKit.INK)
+		line.tooltip_text = String(entry[3])
+	var back: Button = styled(ui.button(ui.modal_body, "Назад к громкости", sound_settings), "tertiary", 18, 50)
+	back.name = "CreditsBack"
 
 ## «Поселение» (city actions of a V6 settlement): a docked window of tiles.
 func city_actions() -> void:

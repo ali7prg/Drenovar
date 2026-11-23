@@ -951,6 +951,7 @@ func on_events(events: Array) -> void:
 				panels.on_transfer(moved)
 			"horse_joined":
 				hud.toast(String(content.campaign.get("prologue", {}).get("completionText", "")), "reward", 6.0)
+				audio.recorded("forest/horse_neigh")
 				audio.play_cue("fr_large_reward")
 				fx.award(content.prologue_reward(), actors.squad_focus())
 			"mechanism_progress":
@@ -967,6 +968,7 @@ func on_events(events: Array) -> void:
 			"boss_started":
 				hud.show_banner(String(content.campaign.get("boss", {}).get("displayName", "")), String(content.line("boss_enter").get("text", "")), 5.0)
 				audio.play_cue("fr_distant_rumble")
+				audio.recorded("forest/roar")
 				actors.on_boss_started()
 			"boss_phase":
 				var phase_id := String(event.get("phase", ""))
@@ -978,7 +980,8 @@ func on_events(events: Array) -> void:
 			"intro_present":
 				intro.on_intro_present(event)
 			"fog_revealed":
-				pass
+				# The fog draws back: a soft swish (at most one every 1.5 s, Sound.MIN_GAP).
+				audio.recorded("forest/fog_reveal")
 
 func on_network(status: String, detail: String) -> void:
 	# 1024: a silent repeat with the same key is the network layer's business: the small «sending» dots,
@@ -991,6 +994,16 @@ func on_network(status: String, detail: String) -> void:
 
 func on_fog_revealed(_revision: int) -> void:
 	pass
+
+## The music the hub should play here: "forest" over the forest, "battle" while a fight runs
+## there, "" elsewhere (then the city's own theme).
+func music_mood() -> String:
+	if audio == null or not audio.wind_on:
+		return ""
+	var fight: Dictionary = client.battle()
+	if not fight.is_empty() and String(fight.get("outcome", "pending")) == "pending":
+		return "battle"
+	return "forest"
 
 # ------------------------------------------------------------------ settings
 func load_settings() -> void:

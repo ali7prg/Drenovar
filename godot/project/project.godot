@@ -25,6 +25,15 @@ config/icon="res://assets/icons/drenovar_icon_512.png"
 
 combat_v010/enabled=true
 
+[audio]
+
+general/ios/session_category=0
+general/ios/mix_with_others=true
+
+[autoload]
+
+Sound="*res://src/audio/sound.gd"
+
 [display]
 
 window/size/viewport_width=1366

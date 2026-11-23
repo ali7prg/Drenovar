@@ -1,0 +1,2127 @@
+== ambient/battle_din.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -20.2 LUFS
+    Threshold: -30.2 LUFS
+
+  Loudness range:
+    LRA:         5.0 LU
+    Threshold: -40.7 LUFS
+    LRA low:   -23.4 LUFS
+    LRA high:  -18.4 LUFS
+
+  True peak:
+    Peak:       -5.4 dBFS
+
+== ambient/city_birds.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -20.2 LUFS
+    Threshold: -30.2 LUFS
+
+  Loudness range:
+    LRA:         4.0 LU
+    Threshold: -40.1 LUFS
+    LRA low:   -22.3 LUFS
+    LRA high:  -18.3 LUFS
+
+  True peak:
+    Peak:       -5.8 dBFS
+
+== ambient/city_market.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -20.1 LUFS
+    Threshold: -30.1 LUFS
+
+  Loudness range:
+    LRA:         2.0 LU
+    Threshold: -40.2 LUFS
+    LRA low:   -21.0 LUFS
+    LRA high:  -19.0 LUFS
+
+  True peak:
+    Peak:       -5.0 dBFS
+
+== ambient/forest_birds.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -21.0 LUFS
+    Threshold: -31.7 LUFS
+
+  Loudness range:
+    LRA:        10.8 LU
+    Threshold: -41.7 LUFS
+    LRA low:   -27.1 LUFS
+    LRA high:  -16.4 LUFS
+
+  True peak:
+    Peak:       -1.4 dBFS
+
+== ambient/world_wind.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -20.2 LUFS
+    Threshold: -30.5 LUFS
+
+  Loudness range:
+    LRA:         8.2 LU
+    Threshold: -40.2 LUFS
+    LRA low:   -24.2 LUFS
+    LRA high:  -16.0 LUFS
+
+  True peak:
+    Peak:       -4.0 dBFS
+
+== music/battle_defying_commodus.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.0 LUFS
+    Threshold: -26.0 LUFS
+
+  Loudness range:
+    LRA:         2.6 LU
+    Threshold: -36.0 LUFS
+    LRA low:   -17.3 LUFS
+    LRA high:  -14.7 LUFS
+
+  True peak:
+    Peak:       -4.0 dBFS
+
+== music/city_irelands_coast.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.0 LUFS
+    Threshold: -26.0 LUFS
+
+  Loudness range:
+    LRA:         4.6 LU
+    Threshold: -36.0 LUFS
+    LRA low:   -18.7 LUFS
+    LRA high:  -14.1 LUFS
+
+  True peak:
+    Peak:       -1.2 dBFS
+
+== music/city_woodland_fantasy.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.1 LUFS
+    Threshold: -26.1 LUFS
+
+  Loudness range:
+    LRA:         5.7 LU
+    Threshold: -36.1 LUFS
+    LRA low:   -19.1 LUFS
+    LRA high:  -13.5 LUFS
+
+  True peak:
+    Peak:       -1.3 dBFS
+
+== music/forest_mystery_forest.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.2 LUFS
+    Threshold: -26.5 LUFS
+
+  Loudness range:
+    LRA:         8.1 LU
+    Threshold: -36.5 LUFS
+    LRA low:   -21.8 LUFS
+    LRA high:  -13.6 LUFS
+
+  True peak:
+    Peak:       -1.4 dBFS
+
+== music/world_heroic_demise.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.0 LUFS
+    Threshold: -26.0 LUFS
+
+  Loudness range:
+    LRA:         5.2 LU
+    Threshold: -36.0 LUFS
+    LRA low:   -18.7 LUFS
+    LRA high:  -13.5 LUFS
+
+  True peak:
+    Peak:       -1.6 dBFS
+
+== sfx/city/axe_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.5 dBFS
+
+== sfx/city/axe_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.3 dBFS
+
+== sfx/city/axe_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -19.8 LUFS
+    Threshold: -29.8 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.5 dBFS
+
+== sfx/city/build_done_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -4.3 dBFS
+
+== sfx/city/hammer_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.5 dBFS
+
+== sfx/city/hammer_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.4 dBFS
+
+== sfx/city/hammer_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.8 dBFS
+
+== sfx/city/hammer_3.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.3 dBFS
+
+== sfx/city/tree_fall_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -24.7 LUFS
+    Threshold: -36.6 LUFS
+
+  Loudness range:
+    LRA:         0.4 LU
+    Threshold: -46.7 LUFS
+    LRA low:   -26.9 LUFS
+    LRA high:  -26.5 LUFS
+
+  True peak:
+    Peak:       -3.1 dBFS
+
+== sfx/combat/armor_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.7 dBFS
+
+== sfx/combat/armor_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -27.9 LUFS
+    Threshold: -40.9 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.8 dBFS
+
+== sfx/combat/armor_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.5 dBFS
+
+== sfx/combat/arrow_hit_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -24.1 LUFS
+    Threshold: -34.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.3 dBFS
+
+== sfx/combat/arrow_hit_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.4 dBFS
+
+== sfx/combat/arrow_hit_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.4 dBFS
+
+== sfx/combat/bow_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -1.7 dBFS
+
+== sfx/combat/bow_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.0 dBFS
+
+== sfx/combat/bow_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.1 dBFS
+
+== sfx/combat/clash_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -19.6 LUFS
+    Threshold: -31.3 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.1 dBFS
+
+== sfx/combat/clash_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -20.5 LUFS
+    Threshold: -30.5 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/combat/clash_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -1.7 dBFS
+
+== sfx/combat/clash_3.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -21.7 LUFS
+    Threshold: -34.6 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.2 dBFS
+
+== sfx/combat/clash_4.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.7 dBFS
+
+== sfx/combat/clash_5.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -25.0 LUFS
+    Threshold: -41.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -4.4 dBFS
+
+== sfx/combat/creature_death_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -18.9 LUFS
+    Threshold: -29.5 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.3 dBFS
+
+== sfx/combat/creature_death_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -17.0 LUFS
+    Threshold: -27.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/combat/creature_hurt_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -20.7 LUFS
+    Threshold: -30.7 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.4 dBFS
+
+== sfx/combat/creature_hurt_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/combat/creature_hurt_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/combat/creature_roar_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -15.0 LUFS
+    Threshold: -25.5 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/combat/creature_roar_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -11.5 LUFS
+    Threshold: -22.1 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/combat/creature_roar_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.5 LUFS
+    Threshold: -27.6 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/combat/crossbow_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.5 dBFS
+
+== sfx/combat/crossbow_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.8 dBFS
+
+== sfx/combat/fall_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.2 dBFS
+
+== sfx/combat/fall_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/combat/flesh_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.6 dBFS
+
+== sfx/combat/flesh_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.5 dBFS
+
+== sfx/combat/flesh_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -22.9 LUFS
+    Threshold: -32.9 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.2 dBFS
+
+== sfx/combat/flesh_3.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/combat/foot_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.6 dBFS
+
+== sfx/combat/foot_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/combat/foot_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.8 dBFS
+
+== sfx/combat/hoof_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.8 dBFS
+
+== sfx/combat/hoof_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.7 dBFS
+
+== sfx/combat/hoof_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/combat/horn_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.2 LUFS
+    Threshold: -26.6 LUFS
+
+  Loudness range:
+    LRA:         3.9 LU
+    Threshold: -37.1 LUFS
+    LRA low:   -19.5 LUFS
+    LRA high:  -15.6 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/combat/javelin_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.1 dBFS
+
+== sfx/combat/javelin_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/combat/shield_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -26.3 LUFS
+    Threshold: -39.2 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.8 dBFS
+
+== sfx/combat/shield_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.3 dBFS
+
+== sfx/combat/shield_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/combat/swing_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.6 LUFS
+    Threshold: -26.6 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.6 dBFS
+
+== sfx/combat/swing_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -17.5 LUFS
+    Threshold: -27.5 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.1 dBFS
+
+== sfx/combat/swing_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.6 LUFS
+    Threshold: -26.6 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.4 dBFS
+
+== sfx/combat/wood_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.3 dBFS
+
+== sfx/combat/wood_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/combat/wood_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -27.3 LUFS
+    Threshold: -37.3 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -4.2 dBFS
+
+== sfx/forest/fog_reveal_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -21.9 LUFS
+    Threshold: -34.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.1 dBFS
+
+== sfx/forest/fog_reveal_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -17.3 LUFS
+    Threshold: -27.5 LUFS
+
+  Loudness range:
+    LRA:        20.0 LU
+    Threshold: -37.9 LUFS
+    LRA low:   -37.9 LUFS
+    LRA high:  -17.9 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/forest/growl_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -22.8 LUFS
+    Threshold: -32.8 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.2 dBFS
+
+== sfx/forest/growl_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -18.9 LUFS
+    Threshold: -28.9 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/forest/growl_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -14.3 LUFS
+    Threshold: -24.3 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.1 dBFS
+
+== sfx/forest/horse_fear_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -15.8 LUFS
+    Threshold: -27.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.5 dBFS
+
+== sfx/forest/horse_fear_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -12.3 LUFS
+    Threshold: -22.7 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.4 dBFS
+
+== sfx/forest/horse_neigh_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.7 dBFS
+
+== sfx/forest/horse_neigh_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -17.1 LUFS
+    Threshold: -30.5 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.8 dBFS
+
+== sfx/forest/horse_snort_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -18.3 LUFS
+    Threshold: -29.1 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.7 dBFS
+
+== sfx/forest/horse_snort_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -18.1 LUFS
+    Threshold: -29.8 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/forest/horse_snort_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -32.0 LUFS
+    Threshold: -43.6 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.1 dBFS
+
+== sfx/forest/horse_snort_3.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -21.2 LUFS
+    Threshold: -32.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.1 dBFS
+
+== sfx/forest/howl_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -13.6 LUFS
+    Threshold: -23.9 LUFS
+
+  Loudness range:
+    LRA:         2.3 LU
+    Threshold: -33.6 LUFS
+    LRA low:   -15.0 LUFS
+    LRA high:  -12.7 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/forest/howl_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -17.7 LUFS
+    Threshold: -28.8 LUFS
+
+  Loudness range:
+    LRA:         9.2 LU
+    Threshold: -39.4 LUFS
+    LRA low:   -25.5 LUFS
+    LRA high:  -16.3 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/forest/owl_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -12.5 LUFS
+    Threshold: -25.4 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/forest/roar_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -20.7 LUFS
+    Threshold: -31.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.8 dBFS
+
+== sfx/forest/roar_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -19.8 LUFS
+    Threshold: -30.4 LUFS
+
+  Loudness range:
+    LRA:         2.3 LU
+    Threshold: -40.4 LUFS
+    LRA low:   -21.8 LUFS
+    LRA high:  -19.5 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/ui/build_start_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.3 dBFS
+
+== sfx/ui/build_start_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.1 dBFS
+
+== sfx/ui/building_tap_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.5 dBFS
+
+== sfx/ui/building_tap_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/ui/close_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.1 dBFS
+
+== sfx/ui/collect_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -27.1 LUFS
+    Threshold: -37.1 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.7 dBFS
+
+== sfx/ui/collect_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -24.9 LUFS
+    Threshold: -34.9 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.9 dBFS
+
+== sfx/ui/collect_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -19.7 LUFS
+    Threshold: -29.7 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.1 dBFS
+
+== sfx/ui/error_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.5 dBFS
+
+== sfx/ui/error_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/ui/march_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -15.2 LUFS
+    Threshold: -25.5 LUFS
+
+  Loudness range:
+    LRA:         2.4 LU
+    Threshold: -35.7 LUFS
+    LRA low:   -17.3 LUFS
+    LRA high:  -14.8 LUFS
+
+  True peak:
+    Peak:       -2.8 dBFS
+
+== sfx/ui/march_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -12.9 LUFS
+    Threshold: -23.9 LUFS
+
+  Loudness range:
+    LRA:         0.1 LU
+    Threshold: -33.6 LUFS
+    LRA low:   -13.7 LUFS
+    LRA high:  -13.5 LUFS
+
+  True peak:
+    Peak:       -2.8 dBFS
+
+== sfx/ui/open_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -30.1 LUFS
+    Threshold: -40.1 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -4.4 dBFS
+
+== sfx/ui/open_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -20.7 LUFS
+    Threshold: -30.7 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -4.1 dBFS
+
+== sfx/ui/press_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.1 dBFS
+
+== sfx/ui/press_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.6 dBFS
+
+== sfx/ui/press_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.3 dBFS
+
+== sfx/ui/purchase_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -26.5 LUFS
+    Threshold: -38.1 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.4 dBFS
+
+== sfx/ui/purchase_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.7 dBFS
+
+== sfx/ui/purchase_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.7 dBFS
+
+== sfx/ui/puzzle_right_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.2 dBFS
+
+== sfx/ui/puzzle_wrong_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.2 dBFS
+
+== sfx/ui/reward_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -26.9 LUFS
+    Threshold: -36.9 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.6 dBFS
+
+== sfx/ui/reward_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.7 dBFS
+
+== sfx/ui/slider_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.8 dBFS
+
+== sfx/ui/speedup_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.2 dBFS
+
+== sfx/ui/speedup_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/ui/tab_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.3 dBFS
+
+== sfx/ui/tab_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.4 dBFS
+
+== sfx/ui/tab_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.9 dBFS
+
+== sfx/ui/toggle_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/ui/toggle_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/ui/train_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.3 dBFS
+
+== sfx/ui/train_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.8 dBFS
+
+== sfx/voice/soldier_death_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -14.8 LUFS
+    Threshold: -25.3 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/voice/soldier_death_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -13.4 LUFS
+    Threshold: -23.4 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.0 dBFS
+
+== sfx/voice/soldier_death_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -17.0 LUFS
+    Threshold: -30.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.2 dBFS
+
+== sfx/voice/soldier_hurt_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -17.0 LUFS
+    Threshold: -27.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/voice/soldier_hurt_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -15.8 LUFS
+    Threshold: -25.8 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.1 dBFS
+
+== sfx/voice/soldier_hurt_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.8 dBFS
+
+== sfx/voice/war_cry_0.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -14.9 LUFS
+    Threshold: -25.9 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.7 dBFS
+
+== sfx/voice/war_cry_1.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -17.5 LUFS
+    Threshold: -27.9 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -2.9 dBFS
+
+== sfx/voice/war_cry_2.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -17.3 LUFS
+    Threshold: -27.3 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+
+  True peak:
+    Peak:       -3.8 dBFS
+
+== stingers/construction_done.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.1 LUFS
+    Threshold: -26.1 LUFS
+
+  Loudness range:
+    LRA:         1.8 LU
+    Threshold: -36.5 LUFS
+    LRA low:   -17.5 LUFS
+    LRA high:  -15.7 LUFS
+
+  True peak:
+    Peak:       -5.0 dBFS
+
+== stingers/defeat.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -15.9 LUFS
+    Threshold: -26.5 LUFS
+
+  Loudness range:
+    LRA:         4.7 LU
+    Threshold: -36.6 LUFS
+    LRA low:   -19.4 LUFS
+    LRA high:  -14.7 LUFS
+
+  True peak:
+    Peak:       -6.9 dBFS
+
+== stingers/reward.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.3 LUFS
+    Threshold: -29.5 LUFS
+
+  Loudness range:
+    LRA:        20.1 LU
+    Threshold: -40.0 LUFS
+    LRA low:   -40.0 LUFS
+    LRA high:  -19.9 LUFS
+
+  True peak:
+    Peak:       -6.1 dBFS
+
+== stingers/victory.ogg
+Summary:
+
+  Integrated loudness:
+    I:         -16.1 LUFS
+    Threshold: -27.3 LUFS
+
+  Loudness range:
+    LRA:         9.9 LU
+    Threshold: -36.1 LUFS
+    LRA low:   -24.3 LUFS
+    LRA high:  -14.4 LUFS
+
+  True peak:
+    Peak:       -4.3 dBFS

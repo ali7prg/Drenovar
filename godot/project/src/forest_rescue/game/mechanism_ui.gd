@@ -308,6 +308,7 @@ func on_progress(target_site: String, ok: bool) -> void:
 		flash = 1.0
 		flash_color = Color(1.0, 0.85, 0.4, 0.5)
 		feedback.text = ""
+		game.audio.recorded("ui/puzzle_right")
 		game.audio.play_cue("fr_cage_latch")
 		if bool(mechanism().get("solved", false)):
 			game.fx.burst_hud(widget.get_global_rect().get_center())
@@ -317,6 +318,7 @@ func on_progress(target_site: String, ok: bool) -> void:
 		flash = 1.0
 		reset_spin = 1.0
 		flash_color = Color(1.0, 0.3, 0.2, 0.45)
+		game.audio.recorded("ui/puzzle_wrong")
 		feedback.text = game.content.text("mechanism.wrong")
 		feedback.add_theme_color_override("font_color", Color("#ffb08a"))
 	refresh()

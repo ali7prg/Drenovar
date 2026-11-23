@@ -1,0 +1,14 @@
+suite	result	note
+qa_audio_1024 (headless, local V6 harness with the adventure, --record)	296 checks, 0 failures	55 button presses in 10 panels incl. forest HUD and journal: 1 interface sound each
+qa_audio_1024 (OpenGL under Xvfb, --window-only --shots)	185 checks, 0 failures	Vulkan/lavapipe run deadlocked after the forest world build (known), killed
+qa_combat_audio	0 failures	pool 8, dedup 512
+qa_runtime	21 checks, 0 failures
+qa_instant_start	12 checks, 0 failures ×3	launch_ms after 1348 / 1211 / 1126 (median 1211); before (same machine, stash of HEAD) 1320 / 1246 / 1257 (median 1257)
+qa_optimization	11040 comparisons, 0 failures
+qa_townsfolk	91 checks, 0 failures	one earlier run during a parallel lavapipe render failed spacing (1.57 s < 0.6 m) — rerun alone passes
+qa_forest_1024 (kingdom, 12 sites, 0 ms)	161 checks, 0 failures
+qa_forest_1024 (legacy, 2 sites, 700 ms)	50 checks, 0 failures
+qa_forest_e2e (local harness)	966 checks, 0 failures
+qa_forest_flow	166 checks, 0 failures
+qa_build_menu	20 checks, 0 failures	open_ms 55.1
+qa_city_works	39 checks, 0 failures

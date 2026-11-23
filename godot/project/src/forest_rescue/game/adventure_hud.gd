@@ -364,6 +364,7 @@ func strip_center() -> Vector2:
 
 func _on_card_input(event: InputEvent, which: String) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		game.button_pressed.emit("card_" + which)
 		if which == "journal":
 			game.open_journal()
 		else:

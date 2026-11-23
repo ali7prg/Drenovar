@@ -97,7 +97,9 @@ func free_plots(environment: String) -> Array:
 	var out: Array = []
 	var plots: Dictionary = ui.state.get("v6_plots", {})
 	for id: String in plots:
-		if environment in plots[id] and not taken.has(id):
+		# A plot the city cannot show (in a settlement of the earlier model, one that would land
+		# on an older building) is not free: the card would offer a build with nowhere to go.
+		if environment in plots[id] and not taken.has(id) and plot_position(id) != Vector3.INF:
 			out.append(id)
 	return out
 
@@ -384,6 +386,13 @@ func placing_active() -> bool:
 	return not placing.is_empty()
 
 func plot_position(id: String) -> Vector3:
+	# A settlement of the earlier model draws the V6 plots at the spots the city gave them
+	# (Landscape.v6_plot_spots): INF for a plot that would land on an older building.
+	if is_instance_valid(ui.stage) and not ui.stage.v6_spots.is_empty():
+		if ui.stage.v6_spots.has(id):
+			return ui.stage.v6_spots[id]
+		# An older building's legacy plot (plot-N), e.g. the town hall.
+		return ui.stage.work_sites.get(id, Vector3.INF)
 	for plot: Dictionary in ui.data.get("plots", []):
 		if str(plot.id) == id:
 			var x := float(plot.x)

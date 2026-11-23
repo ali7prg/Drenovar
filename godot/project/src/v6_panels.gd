@@ -323,7 +323,8 @@ func move_building(b: Dictionary, environment: String) -> void:
 		var occupied := false
 		for other: Dictionary in ui.state.v6.buildings:
 			occupied = occupied or other.plot == plot
-		if not occupied:
+		# A plot the city cannot show (it would land on an older building) is not offered.
+		if not occupied and build.plot_position(plot) != Vector3.INF:
 			ui.button(ui.modal_body, build.plot_name(plot), send.bind({"kind":"move", "building_id":b.id, "plot":plot}))
 
 ## The construction strip (src/v6_build.gd): every type of the catalogue as a card over the

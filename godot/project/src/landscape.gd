@@ -205,6 +205,10 @@ var static_heights: Dictionary = {}
 # Trees that survive the exclusion and street filters for the current ground signature.
 var eligible_trees: Array = []
 var work_sites := {}
+# Where the V6 plots (v1-N) stand in a settlement of the earlier model (legacy plots plot-N):
+# id -> Vector3, Vector3.INF for a plot that would land on an older building. Empty in a
+# kingdom settlement, whose plot table is the V6 one (see v6_plot_spots).
+var v6_spots := {}
 
 func setup(game_data: Dictionary, state: Dictionary, scene_name: String, saved_view: Dictionary) -> void:
 	data = game_data
@@ -1275,7 +1279,7 @@ func present_city(state: Dictionary, staged := false) -> void:
 	var lairs := creature_lairs(state)
 	var key := JSON.stringify([city.buildings, progress.get("sites", []), progress.get("felled", []),
 		progress.get("cleared", []), kingdom.get("clearedPlots", []) if kingdom is Dictionary else [],
-		order, district, lairs])
+		order, construction.get("order2") if construction is Dictionary else null, district, lairs])
 	if key == geometries.get("city_signature",""):
 		sync_parade(army, district)
 		return
@@ -1283,6 +1287,15 @@ func present_city(state: Dictionary, staged := false) -> void:
 	place_markers.clear()
 	empty_plots.clear()
 	var plots: Array = data.plots.duplicate() if kingdom is Dictionary else data.legacyPlots.duplicate()
+	# The V6 server builds on its own plots (v1-N) also in a settlement of the earlier model
+	# (plot-N): those plots join the table at their spots, or the new building, its
+	# scaffolding and its builders had nowhere to stand and never appeared.
+	v6_spots = {} if kingdom is Dictionary else v6_plot_spots(city, [order, construction.get("order2") if construction is Dictionary else null])
+	if not kingdom is Dictionary:
+		for id: String in v6_spots:
+			var spot: Vector3 = v6_spots[id]
+			if spot != Vector3.INF and used_v6_plot(city, [order, construction.get("order2") if construction is Dictionary else null], id):
+				plots.append({"id": id, "x": spot.x, "z": spot.z})
 	for id in progress.get("sites", []):
 		if data.treePlots.has(id):
 			plots.append(data.treePlots[id])
@@ -1427,6 +1440,65 @@ func present_city(state: Dictionary, staged := false) -> void:
 	townsfolk_district = district
 	if townsfolk != null:
 		townsfolk.sync(hall_level, district)
+
+## The spots of the V6 plots (data.plots, v1-N) in a settlement of the earlier model, whose
+## older buildings stand on the legacy grid (plot-N). The two grids overlap, so:
+## 1. the older buildings keep their spots;
+## 2. a V6 plot in use (a building or a construction order on it), in plot order, keeps its
+##    own spot when it is clear of everything placed so far, else it takes the nearest free
+##    legacy spot that is clear (a building is never hidden inside another one);
+## 3. a free V6 plot is offered at its own spot only when that is clear, else not at all
+##    (Vector3.INF), so a new building never lands on an older one.
+## A plot keeps its spot while the older buildings stay put: a later build only uses a spot
+## that step 3 found clear of every spot already placed.
+func v6_plot_spots(city: Dictionary, orders: Array) -> Dictionary:
+	const CLEAR := 8.0
+	var fixed: Array[Vector2] = []
+	var legacy_free: Array[Vector2] = []
+	var legacy_taken := {}
+	for building in city.get("buildings", []):
+		legacy_taken[str(building.get("plotId", ""))] = true
+	for plot in data.legacyPlots:
+		var at := Vector2(float(plot.x), float(plot.z))
+		if legacy_taken.has(str(plot.id)):
+			fixed.append(at)
+		else:
+			legacy_free.append(at)
+	var clear := func(at: Vector2) -> bool:
+		for other: Vector2 in fixed:
+			if other.distance_to(at) < CLEAR:
+				return false
+		return true
+	var spots := {}
+	var free_ids: Array = []
+	for plot in data.plots:
+		var id := str(plot.id)
+		var own := Vector2(float(plot.x), float(plot.z))
+		if not used_v6_plot(city, orders, id):
+			free_ids.append([id, own])
+			continue
+		var at := own
+		if not clear.call(own):
+			var best := INF
+			for candidate: Vector2 in legacy_free:
+				if clear.call(candidate) and candidate.distance_to(own) < best:
+					best = candidate.distance_to(own)
+					at = candidate
+		fixed.append(at)
+		spots[id] = Vector3(at.x, sample_city(at.x, at.y), at.y)
+	for entry: Array in free_ids:
+		var own: Vector2 = entry[1]
+		spots[entry[0]] = Vector3(own.x, sample_city(own.x, own.y), own.y) if clear.call(own) else Vector3.INF
+	return spots
+
+func used_v6_plot(city: Dictionary, orders: Array, id: String) -> bool:
+	for building in city.get("buildings", []):
+		if str(building.get("plotId", "")) == id:
+			return true
+	for order: Variant in orders:
+		if order is Dictionary and str(order.get("plotId", "")) == id:
+			return true
+	return false
 
 func city_base_type(type: String) -> String:
 	for definition in data.buildings:

@@ -33,9 +33,6 @@ const TownGround = preload("res://src/town_ground.gd")
 # actor scripts it uses (~0.2 s of compiling on a desktop) load on a worker after the launch, as
 # the 1022 world layer does; until then the town is empty and walk_ground() is ground_point().
 const TOWNSFOLK_SCRIPT := "res://src/townsfolk.gd"
-# Build 1024: archers and crossbowmen keeping watch on the wall (src/wall_guards.gd); their script
-# loads on a worker once the townsfolk are in, the troop models through request_model().
-const WALL_GUARDS_SCRIPT := "res://src/wall_guards.gd"
 const TOWN_LOTS := "res://assets/city/town_lots.json"
 # B18 gate scenes are authored at plot scale; in the city wall they stand larger so
 # the carriageway and towers match the height of the ring curtain.
@@ -57,8 +54,6 @@ var townsfolk: Node3D = null
 var townsfolk_load := ""
 var townsfolk_hall := 1
 var townsfolk_district: Variant = null
-var wall_guards: Node3D = null
-var wall_guards_load := ""
 var town_lots: Dictionary = {}
 var town_rebuilds := 0
 var forest_materials := {}
@@ -1577,34 +1572,6 @@ func level_model_for(type: String, level: int) -> Dictionary:
 func present_workers(time: float) -> void:
 	if townsfolk != null or attach_townsfolk():
 		townsfolk.present(time)
-	# The guards follow the townsfolk (one script loading on a worker at a time); they re-plan
-	# themselves when the wall is drawn anew (src/wall_guards.gd).
-	if (townsfolk_load == "ready" or townsfolk_load == "failed") and (wall_guards != null or attach_wall_guards()):
-		wall_guards.present(time)
-
-## The wall guards' script loads on a worker (first call); true once they are added.
-func attach_wall_guards() -> bool:
-	if wall_guards != null:
-		return true
-	if map_name != "city" or wall_guards_load == "failed":
-		return false
-	if wall_guards_load.is_empty():
-		wall_guards_load = "loading"
-		if ResourceLoader.load_threaded_request(WALL_GUARDS_SCRIPT) != OK:
-			wall_guards_load = "failed"
-			return false
-	var status := ResourceLoader.load_threaded_get_status(WALL_GUARDS_SCRIPT)
-	if status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-		return false
-	var script: Variant = ResourceLoader.load_threaded_get(WALL_GUARDS_SCRIPT) if status == ResourceLoader.THREAD_LOAD_LOADED else null
-	if not script is GDScript:
-		wall_guards_load = "failed"
-		return false
-	wall_guards = script.new()
-	wall_guards.setup(self)
-	add_child(wall_guards)
-	wall_guards_load = "ready"
-	return true
 
 # Starts the townsfolk script loading on a worker (first call) and adds the townsfolk once it is
 # in. True when they are there.

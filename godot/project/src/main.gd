@@ -1,7 +1,8 @@
 extends Node
 
 const V6Panels = preload("res://src/v6_panels.gd")
-const ReportRow = preload("res://src/report_row.gd")
+# Rows of the chronicle (stage 4a): compiled after launch with the V6 windows (warm_views).
+const REPORT_ROW := "res://src/report_row.gd"
 var v6_panels = V6Panels.new(self)
 
 const Landscape = preload("res://src/landscape.gd")
@@ -1903,7 +1904,7 @@ func show_speedups(queue: String, order: Dictionary, building_id: String) -> voi
 		var use := button(modal_body, label, preview_speedup.bind(queue, order, building_id, id),
 			count > 0 and not player_id.is_empty() and not speedup_in_flight)
 		# The painted item of its tier (stage 4a), the same art as the V6 window.
-		use.icon = UiKit.tex("kit_item_%s_%d" % ["train" if queue == "training" else "build", V6Panels.Queues.tier_of(duration)])
+		use.icon = UiKit.tex("kit_item_%s_%d" % ["train" if queue == "training" else "build", v6_panels.script_of(V6Panels.VIEW_SCRIPTS.queue_view).tier_of(duration)])
 		use.expand_icon = true
 		use.add_theme_constant_override("icon_max_width", 44)
 		use.custom_minimum_size.y = maxf(use.custom_minimum_size.y, 56)
@@ -2453,6 +2454,10 @@ func drain_retired_scenes(urgent := false) -> void:
 		if is_instance_valid(node):
 			node.free()
 		freed += 1
+
+func _exit_tree() -> void:
+	# Window scripts still compiling on a worker thread (v6_panels.warm_views) finish first.
+	v6_panels.finish_warm()
 
 func _notification(what: int) -> void:
 	if combat_diagnostics != null:
@@ -3033,6 +3038,15 @@ func warm_windows() -> void:
 			combos.append([fonts[key], pair[0], pair[1]])
 	UiKit.warm_text(hud, combos)
 	UnitStage.warm_stage()
+	warm_views_soon()
+
+## The window scripts (premium UI stage 4a) compile on a worker thread a frame after the
+## launch screen starts to fade: that frame's own warm-ups load scripts on the main thread,
+## which would wait for a compile running beside them.
+func warm_views_soon() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	v6_panels.warm_views([REPORT_ROW])
 
 func warm_panel_textures() -> void:
 	# Decode recruitment portraits on a worker thread after launch, so the first
@@ -5352,8 +5366,9 @@ func show_reports() -> void:
 		return
 	reports.reverse()
 	var now := timer_now()
+	var row_script := v6_panels.script_of(REPORT_ROW)
 	for report: Dictionary in reports:
-		var row := ReportRow.new()
+		var row = row_script.new()
 		row.name = "Report_" + str(report.get("id", modal_body.get_child_count()))
 		row.outcome = "scout" if report.get("outcome", "") == "scout" else ("victory" if report.get("outcome", "") == "victory" else "defeat")
 		var opponent: Dictionary = report.get("creature", {})
@@ -5431,7 +5446,7 @@ func show_report(report: Dictionary, announced := false) -> void:
 	sigil.custom_minimum_size = Vector2(0, 74)
 	sigil.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sigil.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var sigil_emblem: String = ReportRow.badge_of("victory" if victory else str(report.get("outcome", "defeat")))[2]
+	var sigil_emblem: String = v6_panels.script_of(REPORT_ROW).badge_of("victory" if victory else str(report.get("outcome", "defeat")))[2]
 	sigil.draw.connect(func():
 		var d := 72.0
 		var centre := Vector2(sigil.size.x * 0.5, 37.0)

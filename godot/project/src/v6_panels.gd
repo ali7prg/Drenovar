@@ -1,13 +1,20 @@
 extends RefCounted
 
 const VERSION := "DRENOVAR-V6-C1.0"
-const Recruit = preload("res://src/v6_recruit.gd")
 const UnitStage = preload("res://src/unit_stage.gd")
 const V6Build = preload("res://src/v6_build.gd")
 const BuildingStage = preload("res://src/building_stage.gd")
-const Queues = preload("res://src/v6_queues.gd")
-const Services = preload("res://src/v6_services.gd")
-const Army = preload("res://src/v6_army.gd")
+# The recruitment, queues, academy/lazaret and army windows are compiled off the launch
+# path (premium UI stage 4a): main.gd asks warm_views() once the city is shown, their
+# scripts load on a worker thread, and the first open finds them ready. (As preloads they
+# added about 190 ms of compiling to every launch here.) A window opened before that
+# compiles its script once, then and there.
+const VIEW_SCRIPTS := {
+	"recruit": "res://src/v6_recruit.gd",
+	"queue_view": "res://src/v6_queues.gd",
+	"service_view": "res://src/v6_services.gd",
+	"army_view": "res://src/v6_army.gd",
+}
 const ROMAN := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"]
 var ui: Node
 var catalogue: Dictionary = {}
@@ -16,15 +23,26 @@ var quote_request := 0
 var navigation_request := 0
 var submitting := false
 # Recruitment window of the training buildings (src/v6_recruit.gd).
-var recruit
+var recruit:
+	get:
+		return view("recruit")
 # Construction strip and placement of new buildings (src/v6_build.gd).
 var build
 # Queues and speed-ups window (src/v6_queues.gd).
-var queue_view
+var queue_view:
+	get:
+		return view("queue_view")
 # Academy and infirmary windows (src/v6_services.gd).
-var service_view
+var service_view:
+	get:
+		return view("service_view")
 # Army and march windows (src/v6_army.gd).
-var army_view
+var army_view:
+	get:
+		return view("army_view")
+var views := {}
+var scripts := {}
+var warming: Array[String] = []
 
 func begin_view() -> int:
 	navigation_request += 1
@@ -33,23 +51,59 @@ signal catalogue_loaded(success: bool)
 
 func _init(owner_node: Node) -> void:
 	ui = owner_node
-	recruit = Recruit.new(self)
 	build = V6Build.new(self)
-	queue_view = Queues.new(self)
-	service_view = Services.new(self)
-	army_view = Army.new(self)
+
+## A window of VIEW_SCRIPTS, made on first use.
+func view(key: String) -> RefCounted:
+	if not views.has(key):
+		views[key] = script_of(VIEW_SCRIPTS[key]).new(self)
+	return views[key]
+
+## A script loaded at most once: taken from the worker thread's load when warm_views asked
+## for it (waiting if it is still compiling), else loaded here.
+func script_of(path: String) -> GDScript:
+	if not scripts.has(path):
+		var script: GDScript = null
+		if ResourceLoader.load_threaded_get_status(path) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			script = ResourceLoader.load_threaded_get(path) as GDScript
+		scripts[path] = script if script != null else load(path)
+	return scripts[path]
+
+## After launch (main.gd): compiles the window scripts on a worker thread, `extra` too.
+func warm_views(extra: Array = []) -> void:
+	for path: String in VIEW_SCRIPTS.values() + extra:
+		if not scripts.has(path) and not path in warming and ResourceLoader.load_threaded_request(path, "GDScript") == OK:
+			warming.append(path)
+	while not warming.is_empty():
+		if not is_instance_valid(ui) or not ui.is_inside_tree():
+			return
+		await ui.get_tree().process_frame
+		for path: String in warming.duplicate():
+			if scripts.has(path) or ResourceLoader.load_threaded_get_status(path) != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+				warming.erase(path)
+				script_of(path)
+
+## On exit (main.gd): a compile still running on the worker is waited for, not cut short.
+func finish_warm() -> void:
+	for path: String in warming.duplicate():
+		script_of(path)
+	warming.clear()
+
+## Whether a building trains units (its window is the recruitment window).
+func trains(type: String) -> bool:
+	return script_of(VIEW_SCRIPTS.recruit).trains(type)
 
 ## New confirmed server state (main.gd accept): the open recruitment window follows it.
 func state_changed() -> void:
-	if recruit != null and recruit.is_open():
-		recruit.refresh()
-	if queue_view != null and queue_view.is_open():
-		queue_view.refresh()
+	if views.has("recruit") and views.recruit.is_open():
+		views.recruit.refresh()
+	if views.has("queue_view") and views.queue_view.is_open():
+		views.queue_view.refresh()
 
 ## Starts loading the 3D unit of a training building on a worker thread, so its window
 ## opens in one frame and the live model is ready (or nearly) when the stage asks for it.
 func warm_recruitment(type: String) -> void:
-	if not Recruit.trains(type) or catalogue.is_empty():
+	if not trains(type) or catalogue.is_empty():
 		return
 	var chosen: String = recruit.chosen.get(type, "")
 	if chosen.is_empty():
@@ -135,7 +189,7 @@ func open_ring(marker: Dictionary) -> void:
 		actions.append(["Скоро", "upgrade", inspect_instance.bind(str(b.id)), {"soon": true}])
 	if type in ["B11", "B12", "B13", "B15", "B16", "B17"]:
 		var emblem: String = {"B11": "kit_emb_inf", "B12": "kit_emb_bow", "B13": "kit_emb_horse", "B15": "kit_emb_book", "B16": "kit_emb_heal", "B17": "kit_emb_ram"}[type]
-		actions.append(["Обучение" if Recruit.trains(type) else ("Исследования" if type == "B15" else ("Лечение" if type == "B16" else "Работы здания")),
+		actions.append(["Обучение" if trains(type) else ("Исследования" if type == "B15" else ("Лечение" if type == "B16" else "Работы здания")),
 			"heal" if type == "B16" else "train", services.bind(type), {"emblem": emblem}])
 		warm_recruitment(type)
 	# A running job here: «Ускорить» with its time left (or «Очередь» for jobs no item speeds up).
@@ -606,7 +660,7 @@ func services(type: String) -> void:
 		return
 	if navigation != navigation_request or generation != ui.modal_generation:
 		return
-	if Recruit.trains(type) and int(building(type).get("level", 0)) > 0:
+	if trains(type) and int(building(type).get("level", 0)) > 0:
 		# Training buildings: the recruitment window (switches in place when it is open).
 		recruit.open(type)
 		return

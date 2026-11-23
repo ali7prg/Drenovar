@@ -51,9 +51,10 @@ func shoot(name: String) -> void:
 	game.diagnostics.server_failures = 0
 	game.last_ok_msec = Time.get_ticks_msec()
 	game.update_connection_notice()
-	await RenderingServer.frame_post_draw
+	# The headless renderer never signals frame_post_draw: no still there (open times only).
 	if DisplayServer.get_name() == "headless":
 		return
+	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png(out.path_join(prefix + name + ".png"))
 	saved.append(name)
 	print("SHOT ", name, " t=", Time.get_ticks_msec())
@@ -125,6 +126,11 @@ func run() -> void:
 	while game.scene_loading or not is_instance_valid(game.stage):
 		await process_frame
 	forest = await game.ensure_forest_game()
+	# The window scripts' warm compile after launch (stage 4a; kit_more.gd, which the journal
+	# uses, among them) finishes first, as it does long before a player opens the journal.
+	var deadline := Time.get_ticks_msec() + 60000
+	while is_instance_valid(game.v6_panels) and not game.v6_panels.warming.is_empty() and Time.get_ticks_msec() < deadline:
+		await process_frame
 	stub = StubHost.new()
 	stub.main = game
 	root.add_child(stub)

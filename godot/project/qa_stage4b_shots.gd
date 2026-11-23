@@ -151,6 +151,11 @@ func run() -> void:
 	while (game.scene_loading or not is_instance_valid(game.stage)) and Time.get_ticks_msec() < deadline:
 		await process_frame
 	await frames(30)
+	# The window scripts' warm compile after launch (stage 4a) finishes first, as it does long
+	# before a player's first tap; the first launch's own «Аккаунт» compiles its script during
+	# the launch's first frames (main.gd, v6_panels.request_view).
+	while is_instance_valid(game.v6_panels) and not game.v6_panels.warming.is_empty() and Time.get_ticks_msec() < deadline:
+		await process_frame
 	if wanted("account_entry"):
 		# A fresh device: the account entry the first launch shows («Аккаунт»).
 		game.reset_session()

@@ -350,6 +350,10 @@ func _ready() -> void:
 		var deadline := Time.get_ticks_msec() + 6000
 		while restore_running and Time.get_ticks_msec() < deadline:
 			await get_tree().process_frame
+	if endpoint == LIVE_SERVER and (not v6_panels.enabled() or not login_proof.is_empty()) and not smoke:
+		# «Аккаунт» opens after the launch (below) and is a lazy view (premium UI stage 4b):
+		# its script compiles on a worker while the first frames are drawn.
+		v6_panels.request_view("menu_view")
 	var warm := await settle_first_frames(launch)
 	diagnostics.log_event("launch", {"city_ms": city_built_ms, "first_frames_ms": warm.x, "first_frames": warm.y,
 		"total_ms": Time.get_ticks_msec() - launch_started}, Time.get_unix_time_from_system(), false)

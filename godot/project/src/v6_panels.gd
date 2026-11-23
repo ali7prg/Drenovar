@@ -98,6 +98,14 @@ func warm_views(extra: Array = []) -> void:
 				warming.erase(path)
 				script_of(path)
 
+## Starts one view's compile on a worker now. main.gd asks it for the first launch's «Аккаунт»
+## while the city's first frames are drawn behind the launch screen, so the account opens
+## without compiling the menu's script (about 70 ms here) on the main thread.
+func request_view(key: String) -> void:
+	var path: String = VIEW_SCRIPTS[key]
+	if not scripts.has(path) and not path in warming and ResourceLoader.load_threaded_request(path, "GDScript") == OK:
+		warming.append(path)
+
 ## On exit (main.gd): a compile still running on the worker is waited for, not cut short.
 func finish_warm() -> void:
 	for path: String in warming.duplicate():

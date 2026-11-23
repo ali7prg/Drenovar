@@ -1424,20 +1424,27 @@ static func theme(base: Theme) -> Theme:
 static var switch_icons := {}
 
 ## The premium switch at 64×34 canvas units: CheckButton draws its icon at the texture's own
-## size, and the kit's pixels are painted at two texels per unit.
+## size, and the kit's pixels are painted at two texels per unit. The theme is made during the
+## launch, so the texture itself is only taken (from its worker decode) when a switch is drawn.
 static func switch_icon(on: bool) -> Texture2D:
 	if not switch_icons.has(on):
-		switch_icons[on] = HalfTexture.new(tex("kit_switch_on" if on else "kit_switch_off"), Vector2(64, 34))
+		var kit_name := "kit_switch_on" if on else "kit_switch_off"
+		switch_icons[on] = HalfTexture.new(func() -> Texture2D: return tex(kit_name), Vector2(64, 34))
 	return switch_icons[on]
 
 ## A kit texture reported (and drawn) at a given canvas size, for controls that draw a theme
-## icon at the texture's size.
+## icon at the texture's size. The kit texture is looked up on the first draw, not when made.
 class HalfTexture extends Texture2D:
-	var source: Texture2D
+	var lookup: Callable
 	var shown := Vector2.ZERO
+	var source: Texture2D:
+		get:
+			if source == null:
+				source = lookup.call()
+			return source
 
-	func _init(from: Texture2D, at_size: Vector2) -> void:
-		source = from
+	func _init(texture_lookup: Callable, at_size: Vector2) -> void:
+		lookup = texture_lookup
 		shown = at_size
 
 	func _get_width() -> int:

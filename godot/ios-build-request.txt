@@ -7,3 +7,9 @@ Build requested: 1022 (0.6.0), 2026-11-22, from the merged 1021 line with the fo
 adventure, five-unit roster, conditional polls and the fast launch.
 Second request: the pack check now expects the five-unit roster (11 unit models).
 Third request (final): after the full-adventure e2e (966/0), the combat test fix and the 304 carry fix.
+
+Build requested: 1023 (0.6.0), 2026-11-23: premium UI redesign of every window (stages 1-4b),
+recruitment 3D stage, construction strip with blurred city, upgrade «Сейчас → После» with the
+level-V cap («Скоро»), speed-ups with queues and quick use, network fixes (fresh connection after a
+silent link, long frames are not an outage), forest loads while touching, safe area, black
+material fix, whole-unit portraits.

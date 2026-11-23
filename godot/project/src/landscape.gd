@@ -4116,7 +4116,7 @@ func attach_forest_world(gate := Callable()) -> void:
 		forest_attach_state = "off"   # rollback flag: the 1021 forest stays (asked once, not every frame)
 		return
 	forest_attach_state = "attaching"
-	await ForestFlags.load_staged(ForestFlags.WORLD_LAYER, get_tree(), gate)
+	await ForestFlags.load_staged(ForestFlags.WORLD_LAYER, get_tree(), gate, "world")
 	var script: Variant = load(ForestFlags.WORLD_LAYER_SCRIPT)
 	if not script is GDScript or not is_inside_tree():
 		forest_attach_state = "failed"

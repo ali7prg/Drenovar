@@ -285,6 +285,7 @@ func on_rig_ready(actor: Node3D) -> void:
 static var pipelines_warmed := false
 
 const WARM_PER_FRAME := 4
+const WARM_BUDGET_USEC := 4000
 
 func warm_pipelines() -> void:
 	var world_node: Variant = game.get("world")
@@ -310,13 +311,19 @@ func warm_pipelines() -> void:
 	# 1022: the layer arrives while the city is interactive: a few rigs per frame (their models load one
 	# at a time, ActorRig.MAX_PARALLEL_LOADS) and, below, a few shown per frame so the pipelines compile
 	# over several frames instead of in one.
+	# 1023: by time, not count (WARM_PER_FRAME at most): a frame stops adding rigs after WARM_BUDGET_USEC.
+	var slice := Time.get_ticks_usec()
+	var in_slice := 0
 	for i in paths.size():
 		var id := "__warm_%d" % i
 		var actor := rig(id, String(paths[i]))
 		actor.position = Vector3(float(i % 8) * 4.0, -400.0, float(i / 8) * 4.0)
 		ids.append(id)
-		if i % WARM_PER_FRAME == WARM_PER_FRAME - 1:
+		in_slice += 1
+		if in_slice >= WARM_PER_FRAME or Time.get_ticks_usec() - slice > WARM_BUDGET_USEC:
 			await game.get_tree().process_frame
+			slice = Time.get_ticks_usec()
+			in_slice = 0
 	var fx: Variant = game.get("fx")
 	if fx != null and fx.has_method("ensure_world") and fx.ensure_world():
 		fx.burst_world(Vector3(0, -400, -8))
@@ -330,12 +337,17 @@ func warm_pipelines() -> void:
 		if not loading:
 			break
 		await game.get_tree().process_frame
+	slice = Time.get_ticks_usec()
+	in_slice = 0
 	for i in ids.size():
 		var actor: Rig = rigs.get(ids[i])
 		if actor != null and is_instance_valid(actor):
 			actor.visible = true
-		if i % WARM_PER_FRAME == WARM_PER_FRAME - 1:
+		in_slice += 1
+		if in_slice >= WARM_PER_FRAME or Time.get_ticks_usec() - slice > WARM_BUDGET_USEC:
 			await game.get_tree().process_frame
+			slice = Time.get_ticks_usec()
+			in_slice = 0
 	for frame in 3:
 		await game.get_tree().process_frame
 	for id in ids:

@@ -861,7 +861,18 @@ func build_city_forest(city: Dictionary, exclusions: Array, staged := false) -> 
 	build_parts.extras_ms = (Time.get_ticks_usec() - part) / 1000.0
 	part = Time.get_ticks_usec()
 	_refresh_local_anchors()
+	if staged:
+		# 1023: the anchors, the fog receivers and the fog cull each get a frame of their own
+		await stage.yield_frame()
+		build_parts.frames += 1
+		if serial != _forest_build_serial:
+			return
 	_register_fog_receivers()
+	if staged:
+		await stage.yield_frame()
+		build_parts.frames += 1
+		if serial != _forest_build_serial:
+			return
 	_apply_fog_cull()
 	build_parts.fog_cull_ms = (Time.get_ticks_usec() - part) / 1000.0
 	if staged:

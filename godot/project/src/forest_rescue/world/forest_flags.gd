@@ -129,15 +129,38 @@ static func set_eager(value: int) -> void:
 	_eager_override = value
 
 
-## Loads `paths` one per frame (already cached ones cost nothing and take no frame). With a gate (main's
-## prewarm_may_continue: no finger down, camera still, a quiet moment) each load waits for the player to be idle.
-static func load_staged(paths: Array, tree: SceneTree, gate := Callable()) -> void:
+## Loads `paths` in order, each on a worker thread (a threaded ResourceLoader request, one at a time,
+## leaves first): the main thread never compiles a forest script or parses a shader, so the city keeps
+## its frame rate and the load goes on while the player touches the screen (1023). Up to 1022 each
+## resource was compiled on the main thread (50–290 ms frames) and waited for an idle moment (no
+## finger down, camera still, 600 ms after the last touch): a player panning the city kept the
+## adventure from loading at all (the real client on staging: 90 s of panning, nothing loaded; the
+## layers were ready 6 s after the finger lifted). `_gate` is no longer used.
+## `layer` names the list in `progress` (done, total) for the loading indicator.
+static func load_staged(paths: Array, tree: SceneTree, _gate := Callable(), layer := "") -> void:
+	if not layer.is_empty():
+		progress[layer] = Vector2i(0, paths.size())
+	var done := 0
 	for path in paths:
-		if ResourceLoader.has_cached(path):
-			continue
-		while gate.is_valid() and not gate.call():
-			await tree.process_frame
-		staged_last = path
-		load(path)
-		await tree.process_frame
+		if not ResourceLoader.has_cached(path):
+			staged_last = path
+			if ResourceLoader.load_threaded_request(path) == OK:
+				while ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+					await tree.process_frame
+				ResourceLoader.load_threaded_get(path)
+			else:
+				load(path)
+		done += 1
+		if not layer.is_empty():
+			progress[layer] = Vector2i(done, paths.size())
 	staged_last = ""
+
+
+## Per layer ("game", "world"): resources loaded / in the list, for main.gd's loading indicator.
+static var progress: Dictionary = {}
+
+
+## Starts the world layer's scripts on a worker as soon as the game layer starts (1023): both lists
+## compile side by side instead of one after the other; attach_forest_world then finds them cached.
+static func prefetch(paths: Array, tree: SceneTree) -> void:
+	await load_staged(paths, tree, Callable(), "world")

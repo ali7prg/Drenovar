@@ -185,9 +185,9 @@ func maybe_attach_world() -> void:
 		return
 	if not stage.has_method("attach_forest_world") or String(stage.get("forest_attach_state")) != "":
 		return
-	if client.unlocked():
-		hud.toast(content.text("hud.preparing"), "info", 3.0)
-	stage.attach_forest_world(main.prewarm_may_continue)
+	# 1023: no idle gate (the layer loads while the player touches the screen); main.gd's loading
+	# indicator replaces the «готовится» toast.
+	stage.attach_forest_world()
 
 ## QA: attaches the world layer now (whatever the launch state) and waits until it is ready.
 func ensure_world(timeout_ms := 120000) -> bool:

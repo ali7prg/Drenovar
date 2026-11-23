@@ -30,6 +30,7 @@ const TITLE_FONT = preload("res://assets/ui/NotoSerif-Regular.ttf")
 # FOREST_RESCUE hook: gameplay layer of «Лес потерянных» (src/forest_rescue/game/). 1022: not preloaded
 # (its scripts compile in ~0.3 s); created after the launch, only when the server projects the adventure.
 const ForestFlags = preload("res://src/forest_rescue/world/forest_flags.gd")
+const ForestProgress = preload("res://src/forest_progress.gd")
 # DRENOVAR-V6-ROSTER-5: spearman, swordsman, longbowman, crossbowman, knight (ENG-05/07/08/09/10 retired).
 const RECRUIT_ORDER := ["ENG-01", "ENG-02", "ENG-03", "ENG-04", "ENG-06"]
 const RECRUIT_FACILITIES := {"MIL-01":"Казармы пехоты", "MIL-02":"Стрельбище", "MIL-03":"Конюшня"}
@@ -206,6 +207,9 @@ var followed_army := ""
 var next_minimap_draw := 0
 var forest_game: Node # FOREST_RESCUE hook (null until the server offers the adventure)
 var forest_game_loading := false
+var forest_load_started_msec := -1
+var forest_progress: Control   # 1023: «Лес потерянных · готовим лес» while the layers load
+var forest_ratio := 0.0
 var launch_done := false
 signal forest_game_ready
 var diagnostics := SessionDiagnostics.new()
@@ -540,6 +544,13 @@ func build_ui() -> void:
 	connection_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(connection_badge)
 	connection_badge.hide()
+	forest_progress = ForestProgress.new()
+	forest_progress.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	forest_progress.offset_left = 16
+	forest_progress.offset_top = -ForestProgress.PLATE_SIZE.y - 14
+	forest_progress.offset_right = forest_progress.offset_left + ForestProgress.PLATE_SIZE.x
+	forest_progress.offset_bottom = -14
+	root.add_child(forest_progress)
 	relocation_pins = Control.new()
 	relocation_pins.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(relocation_pins)
@@ -5205,6 +5216,46 @@ func forest_state_changed() -> void:
 	else:
 		maybe_start_forest_game()
 
+## The forest layers' load as a share (1023, the loading indicator): the two script lists, then the
+## world layer's setup steps in their order, then the city's forest swap. Never goes back.
+const FOREST_STAGE_SHARE := {"data": 0.24, "landmarks.plan": 0.28, "terrain.new": 0.32, "terrain.shadows+tiles": 0.36,
+	"terrain.bake (thread)": 0.42, "kit": 0.56, "canopy+paths": 0.6, "river+water": 0.63, "quarry": 0.66,
+	"impostor meshes": 0.68, "impostors": 0.72, "fog": 0.76, "landmarks.populate": 0.8, "fog receivers": 0.84,
+	"adventure state": 0.86, "post-setup (city build / first ticks)": 0.9}
+
+func forest_loading() -> bool:
+	if forest_load_started_msec < 0 or not ForestFlags.enabled():
+		return false
+	if forest_game_loading or forest_game == null:
+		return true
+	var attach: String = str(stage.get("forest_attach_state")) if is_instance_valid(stage) and map_name == "city" else ""
+	return attach == "" or attach == "attaching"
+
+func forest_load_share() -> float:
+	var game: Vector2i = ForestFlags.progress.get("game", Vector2i(0, 1))
+	var world: Vector2i = ForestFlags.progress.get("world", Vector2i(0, 1))
+	var share := 0.14 * float(game.x) / maxf(1.0, float(game.y)) + 0.08 * float(world.x) / maxf(1.0, float(world.y))
+	if is_instance_valid(stage):
+		var node: Variant = stage.get("forest_world")
+		if node == null:
+			node = stage.find_child("ForestWorld", false, false)
+		if node is Node and is_instance_valid(node):
+			share = maxf(share, float(FOREST_STAGE_SHARE.get(str(node.get("setup_stage")), 0.22)))
+		if str(stage.get("forest_attach_state")) == "attached":
+			share = 1.0
+	return share
+
+func update_forest_progress(delta: float) -> void:
+	if not is_instance_valid(forest_progress):
+		return
+	var loading := forest_loading() and map_name == "city" and not scene_loading and \
+		bool(state.get("adventure", {}).get("access", {}).get("unlocked", false)) if state.get("adventure") is Dictionary else false
+	if not loading and not forest_progress.visible:
+		return
+	forest_ratio = maxf(forest_ratio, forest_load_share())
+	forest_progress.reduced_motion = reduced_motion
+	forest_progress.update(loading, forest_ratio, delta)
+
 func maybe_start_forest_game() -> void:
 	if forest_game == null and not forest_game_loading and launch_done and adventure_offered(state):
 		ensure_forest_game()
@@ -5217,7 +5268,11 @@ func ensure_forest_game() -> Node:
 		await forest_game_ready
 		return forest_game
 	forest_game_loading = true
-	await ForestFlags.load_staged(ForestFlags.GAME_LAYER, get_tree(), prewarm_may_continue)
+	forest_load_started_msec = Time.get_ticks_msec()
+	# 1023: both layers' scripts compile on worker threads side by side, whatever the player does.
+	if ForestFlags.enabled():
+		ForestFlags.prefetch(ForestFlags.WORLD_LAYER, get_tree())
+	await ForestFlags.load_staged(ForestFlags.GAME_LAYER, get_tree(), Callable(), "game")
 	var layer: Node = load(ForestFlags.GAME_LAYER_SCRIPT).new()
 	add_child(layer)
 	layer.setup(self)
@@ -6502,6 +6557,7 @@ func apply_not_modified(response: Dictionary, sent_tag: String, tag_serial: int)
 func _process(delta: float) -> void:
 	discount_stall()
 	advance_server_clock(delta)
+	update_forest_progress(delta)
 	# The notice toast shows only while there is a notice; a new one eases in.
 	if message != null and message.text != message_shown:
 		show_toast_change()

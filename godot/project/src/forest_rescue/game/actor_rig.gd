@@ -35,6 +35,15 @@ static var reported_missing: Dictionary = {}
 ## texture upload against the main thread in the rendered game (Godot 4.6.3, mobile renderer).
 static var loading: Dictionary = {}
 const MAX_PARALLEL_LOADS := 1
+## 1023: the first view first. A rig on screen (the horse, the squad, the site's guardian) takes the
+## next load slot before the background warm-up rigs ("__warm_*"), which used to queue every model of
+## the campaign ahead of it. A path a live rig waits for is kept here (with the frame it last asked).
+static var live_waiting: Dictionary = {}
+## 1023: at most INSTANCE_BUDGET_USEC of model instancing per frame (at least one model), so a frame
+## where several loads finish together does not instance them all at once.
+const INSTANCE_BUDGET_USEC := 6000
+static var instance_frame := -1
+static var instance_spent := 0
 
 var actor_id := ""
 var asset_path := ""
@@ -73,7 +82,7 @@ var glow_materials: Array[BaseMaterial3D] = []
 var node_cache: Dictionary = {}
 var last_speed_scale := 1.0
 
-static func fetch(path: String) -> Variant:
+static func fetch(path: String, background := false) -> Variant:
 	if path.is_empty():
 		return false
 	if scenes.has(path):
@@ -86,8 +95,18 @@ static func fetch(path: String) -> Variant:
 		return false
 	if not requested.has(path):
 		collect_loads()
+		var frame := Engine.get_process_frames()
+		if background:
+			for waiting: String in live_waiting.keys():
+				if frame - int(live_waiting[waiting]) > 2 or requested.has(waiting):
+					live_waiting.erase(waiting)
+			if not live_waiting.is_empty():
+				return null
 		if loading.size() >= MAX_PARALLEL_LOADS:
+			if not background:
+				live_waiting[path] = frame
 			return null
+		live_waiting.erase(path)
 		requested[path] = true
 		if ResourceLoader.load_threaded_request(path, "PackedScene") != OK:
 			scenes[path] = load(path)
@@ -211,15 +230,23 @@ func _process(_delta: float) -> void:
 		dispatch_markers()
 
 func poll_load(blocking := false) -> void:
-	var scene: Variant = fetch_now(asset_path) if blocking else fetch(asset_path)
+	var background := actor_id.begins_with("__warm_")
+	var scene: Variant = fetch_now(asset_path) if blocking else fetch(asset_path, background)
 	if scene is bool and not fallback_path.is_empty():
-		scene = fetch_now(fallback_path) if blocking else fetch(fallback_path)
+		scene = fetch_now(fallback_path) if blocking else fetch(fallback_path, background)
 		using_fallback = true
 	if scene == null:
 		return
 	if scene is bool or not scene is PackedScene:
 		load_state = "missing"
 		return
+	var frame := Engine.get_process_frames()
+	if frame != instance_frame:
+		instance_frame = frame
+		instance_spent = 0
+	elif not blocking and instance_spent >= INSTANCE_BUDGET_USEC:
+		return   # this frame's instancing budget is spent: the next frame
+	var instanced_at := Time.get_ticks_usec()
 	model = (scene as PackedScene).instantiate() as Node3D
 	model.name = "Model"
 	model.scale = Vector3.ONE * model_scale
@@ -249,6 +276,7 @@ func poll_load(blocking := false) -> void:
 	if not using_fallback and (painted or not variant.is_empty()):
 		apply_look()
 	load_state = "ready"
+	instance_spent += Time.get_ticks_usec() - instanced_at
 	if lods[1].size() + lods[2].size() > 0:
 		set_lod(maxi(lod_level, 0), true)
 	if not current_id.is_empty():

@@ -1,0 +1,453 @@
+{
+  "build_strip": {
+    "buttons": 22,
+    "scrolls": [],
+    "smallest": [
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@22",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@22",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@27",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@27",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@32",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@32",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@37",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@37",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@42",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@42",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 56,
+        "min_pt_15": 34.9,
+        "min_pt_se": 27.3,
+        "name": "StripClose",
+        "path": "/@ScrollContainer@89/@VBoxContainer@90/BuildStrip/StripClose",
+        "text": "×",
+        "w": 56
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@48",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@48",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@49",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@49",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@50",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@50",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@51",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@51",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@52",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@52",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 54.9,
+        "min_pt_se": 42.9,
+        "name": "ProfileButton",
+        "path": "Control@16/@VBoxContainer@18/@HBoxContainer@19/ProfileButton",
+        "text": "",
+        "w": 310
+      }
+    ],
+    "under_44pt_iphone15": 6
+  },
+  "hud": {
+    "buttons": 11,
+    "scrolls": [],
+    "smallest": [
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@22",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@22",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@27",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@27",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@32",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@32",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@37",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@37",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@42",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@42",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@48",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@48",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@49",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@49",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@50",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@50",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@51",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@51",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@52",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@52",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 54.9,
+        "min_pt_se": 42.9,
+        "name": "ProfileButton",
+        "path": "Control@16/@VBoxContainer@18/@HBoxContainer@19/ProfileButton",
+        "text": "",
+        "w": 310
+      }
+    ],
+    "under_44pt_iphone15": 5
+  },
+  "menu": {
+    "buttons": 30,
+    "scrolls": [],
+    "smallest": [
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@22",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@22",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@27",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@27",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@32",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@32",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@37",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@37",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@42",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@42",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 52,
+        "min_pt_15": 32.4,
+        "min_pt_se": 25.4,
+        "name": "MotionSwitch",
+        "path": "/@HBoxContainer@79/ModalHero/@VBoxContainer@397/MotionSwitch",
+        "text": "Меньше движения",
+        "w": 364
+      },
+      {
+        "h": 52,
+        "min_pt_15": 32.4,
+        "min_pt_se": 25.4,
+        "name": "SoundSwitch",
+        "path": "tainer@79/ModalHero/@VBoxContainer@397/SoundLine/SoundSwitch",
+        "text": "Звук",
+        "w": 204
+      },
+      {
+        "h": 52,
+        "min_pt_15": 32.4,
+        "min_pt_se": 25.4,
+        "name": "SoundSettingsButton",
+        "path": "9/ModalHero/@VBoxContainer@397/SoundLine/SoundSettingsButton",
+        "text": "Громкость…",
+        "w": 150
+      },
+      {
+        "h": 56,
+        "min_pt_15": 34.9,
+        "min_pt_se": 27.3,
+        "name": "@Button@75",
+        "path": "l/@VBoxContainer@66/ModalHeader/@HBoxContainer@67/@Button@75",
+        "text": "×",
+        "w": 56
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@48",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@48",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@49",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@49",
+        "text": "",
+        "w": 84
+      },
+      {
+        "h": 88,
+        "min_pt_15": 52.4,
+        "min_pt_se": 41.0,
+        "name": "@Button@50",
+        "path": "xContainer@54/@VBoxContainer@56/@HBoxContainer@59/@Button@50",
+        "text": "",
+        "w": 84
+      }
+    ],
+    "under_44pt_iphone15": 9
+  },
+  "sound_settings": {
+    "buttons": 19,
+    "scrolls": [],
+    "smallest": [
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@22",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@22",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@27",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@27",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@32",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@32",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@37",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@37",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 44,
+        "min_pt_15": 27.4,
+        "min_pt_se": 21.5,
+        "name": "@Button@42",
+        "path": "xContainer@18/@HBoxContainer@19/@HBoxContainer@21/@Button@42",
+        "text": "",
+        "w": 108
+      },
+      {
+        "h": 50,
+        "min_pt_15": 31.2,
+        "min_pt_se": 24.4,
+        "name": "SoundCredits",
+        "path": "tainer@85/@ScrollContainer@89/@VBoxContainer@90/SoundCredits",
+        "text": "Музыка и звуки: авторы",
+        "w": 692
+      },
+      {
+        "h": 50,
+        "min_pt_15": 31.2,
+        "min_pt_se": 24.4,
+        "name": "Mute_voice",
+        "path": "ner@89/@VBoxContainer@90/SoundRows/SoundRow_voice/Mute_voice",
+        "text": "",
+        "w": 64
+      },
+      {
+        "h": 50,
+        "min_pt_15": 31.2,
+        "min_pt_se": 24.4,
+        "name": "Mute_ambient",
+        "path": "89/@VBoxContainer@90/SoundRows/SoundRow_ambient/Mute_ambient",
+        "text": "",
+        "w": 64
+      },
+      {
+        "h": 50,
+        "min_pt_15": 31.2,
+        "min_pt_se": 24.4,
+        "name": "Mute_ui",
+        "path": "Container@89/@VBoxContainer@90/SoundRows/SoundRow_ui/Mute_ui",
+        "text": "",
+        "w": 64
+      },
+      {
+        "h": 50,
+        "min_pt_15": 31.2,
+        "min_pt_se": 24.4,
+        "name": "Mute_sfx",
+        "path": "ntainer@89/@VBoxContainer@90/SoundRows/SoundRow_sfx/Mute_sfx",
+        "text": "",
+        "w": 64
+      },
+      {
+        "h": 50,
+        "min_pt_15": 31.2,
+        "min_pt_se": 24.4,
+        "name": "Mute_music",
+        "path": "ner@89/@VBoxContainer@90/SoundRows/SoundRow_music/Mute_music",
+        "text": "",
+        "w": 64
+      },
+      {
+        "h": 50,
+        "min_pt_15": 31.2,
+        "min_pt_se": 24.4,
+        "name": "Mute_master",
+        "path": "r@89/@VBoxContainer@90/SoundRows/SoundRow_master/Mute_master",
+        "text": "",
+        "w": 64
+      }
+    ],
+    "under_44pt_iphone15": 13
+  }
+}

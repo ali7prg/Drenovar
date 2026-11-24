@@ -15,7 +15,12 @@ const CAMPAIGN_ID := "forest_rescue_v1"
 const SCHEMA_VERSION := 1
 # 1022: one network stack with the city (main.gd COMMAND_RETRY_DELAYS / transient_failure):
 # silent repeats after 0.4, 1.2 and 2.8 s with the same Idempotency-Key and body.
-const RETRY_DELAYS := [0.4, 1.2, 2.8]
+# 1024: the same schedule as the city's (then 4, 6, 8 s), jittered, within RETRY_WINDOW_MS; the key of an
+# uncertain command is kept on the device (main.gd remember_retry_key), so the same command given again
+# after a restart of the app is the same command to the server.
+const RETRY_DELAYS := [0.4, 1.2, 2.8, 4.0, 6.0, 8.0]
+const RETRY_WINDOW_MS := 30000
+const RETRY_JITTER := 0.2
 const UNCERTAIN_HTTP := [408, 425, 429, 500, 502, 503, 504, 520, 521, 522, 523, 524, 525, 526, 527, 530]
 const TRANSPORT_ERRORS := ["Сервер недоступен", "Сервер не ответил вовремя. Проверь соединение и повтори.",
 	"Не удалось установить защищённое соединение с сервером."]
@@ -168,20 +173,32 @@ func send(action: String, fields: Dictionary = {}, kind := "adventure") -> Dicti
 		return _fail("FOREST_LOCKED_HALL_LEVEL", content.text("error.forestLocked"))
 	if in_flight:
 		return _fail("LOCAL_BUSY", content.text("network.pending"))
-	var key := uuid4()
+	var signature := "adventure|" + JSON.stringify([kind, action, fields])
+	var key := ""
+	if host.has_method("recall_retry_key"):
+		key = host.recall_retry_key(signature)
+	if key.is_empty():
+		key = uuid4()
 	# CONTRACT v1.1: optional body requestId equal to the Idempotency-Key header; both are
 	# reused unchanged when an uncertain request is retried.
 	var body := {"kind":kind, "campaignId":CAMPAIGN_ID, "action":action, "requestId":key}
 	for name in fields:
 		body[name] = fields[name]
-	pending = {"body":body, "key":key, "attempts":0}
+	pending = {"body":body, "key":key, "attempts":0, "signature":signature}
+	if host.has_method("remember_retry_key"):
+		host.remember_retry_key(signature, key)
 	return await _deliver()
+
+func _settled() -> void:
+	if host.has_method("forget_retry_key") and pending.has("signature"):
+		host.forget_retry_key(String(pending.signature))
 
 ## Re-sends the last uncertain request with the same key and body.
 func retry_pending() -> Dictionary:
 	if pending.is_empty() or in_flight:
 		return _fail("NOTHING_TO_RETRY", "")
 	pending.attempts = 0
+	pending.erase("first_sent")
 	return await _deliver()
 
 func has_pending_retry() -> bool:
@@ -190,6 +207,8 @@ func has_pending_retry() -> bool:
 func _deliver() -> Dictionary:
 	in_flight = true
 	network_status.emit("pending", content.text("network.pending"))
+	if not pending.has("first_sent"):
+		pending.first_sent = Time.get_ticks_msec()
 	while true:
 		# 1022: requests no longer wait for one another (main.send_request never refuses).
 		pending.attempts = int(pending.attempts) + 1
@@ -198,6 +217,7 @@ func _deliver() -> Dictionary:
 		var verdict := classify(response)
 		if verdict == "ok":
 			var body: Dictionary = pending.body
+			_settled()
 			pending = {}
 			in_flight = false
 			host.accept(response)
@@ -213,14 +233,18 @@ func _deliver() -> Dictionary:
 			await host.get_tree().create_timer(0.25).timeout
 			continue
 		if verdict == "uncertain":
-			if int(pending.attempts) > RETRY_DELAYS.size():
+			var pause := 0.0
+			if int(pending.attempts) <= RETRY_DELAYS.size():
+				pause = float(RETRY_DELAYS[int(pending.attempts) - 1]) * (1.0 + randf_range(-RETRY_JITTER, RETRY_JITTER))
+			if int(pending.attempts) > RETRY_DELAYS.size() or Time.get_ticks_msec() - int(pending.first_sent) + int(pause * 1000.0) > RETRY_WINDOW_MS:
 				in_flight = false
 				network_status.emit("offline", content.text("network.offline"))
 				last_result = {"ok":false, "error":"OFFLINE", "retry":true, "message":content.text("network.offline")}
 				return last_result
 			network_status.emit("retrying", content.text("network.pending"))
-			await host.get_tree().create_timer(RETRY_DELAYS[int(pending.attempts) - 1]).timeout
+			await host.get_tree().create_timer(pause).timeout
 			continue
+		_settled()
 		pending = {}
 		in_flight = false
 		var code := String(response.get("error", "ERROR"))

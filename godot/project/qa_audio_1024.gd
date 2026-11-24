@@ -71,6 +71,42 @@ func _initialize() -> void:
 			window_only = true
 	call_deferred("run")
 
+## 1024 stage 5: the menu's switches are 52 px tall (32 pt on an iPhone 15; they were 40) and the settings
+## column keeps to the oak panel (16 px above the screen's bottom; it ran past it). «Экономия заряда» («Плавность на устройстве»):
+## 30 frames a second and the 3D at 75 % of the pixels when on; off: the phone's 60 (no cap on a desktop)
+## and full resolution; kept in hud.cfg.
+func power_saving_check() -> void:
+	await frames(40)   # the window settles
+	var screen_bottom := game.get_viewport().get_visible_rect().size.y
+	for switch_name in ["SoundSwitch", "MotionSwitch", "SoundSettingsButton"]:
+		var other := game.modal.find_child(switch_name, true, false) as Control
+		check(other != null and other.size.y >= 52, "menu %s is touch-sized (%s)" % [switch_name, str(other.size if other != null else Vector2.ZERO)])
+		check(other != null and other.get_global_rect().end.y <= screen_bottom - 16 + 0.5, "menu %s on the oak panel, above the screen's bottom (%s)" % [switch_name, str(other.get_global_rect() if other != null else Rect2())])
+	game.show_performance()
+	await frames(3)
+	var power := game.modal_body.find_child("PowerSwitch", true, false) as CheckButton
+	check(power != null and power.size.y >= 52, "«Плавность на устройстве» has the «Экономия заряда» switch")
+	if power == null:
+		return
+	var was: bool = game.power_saving
+	var fps_before := Engine.max_fps
+	power.button_pressed = true
+	await frames(1)
+	var saved := ConfigFile.new()
+	saved.load("user://hud.cfg")
+	check(game.power_saving and Engine.max_fps == game.POWER_SAVING_MAX_FPS and is_equal_approx(game.get_viewport().scaling_3d_scale, game.POWER_SAVING_3D_SCALE) \
+		and bool(saved.get_value("settings", "power_saving", false)), "power saving on: %d fps, 3D x%.2f, saved" % [Engine.max_fps, game.get_viewport().scaling_3d_scale])
+	power.button_pressed = false
+	await frames(1)
+	var expected_fps: int = game.PHONE_MAX_FPS if OS.has_feature("mobile") else 0
+	check(not game.power_saving and Engine.max_fps == expected_fps and is_equal_approx(game.get_viewport().scaling_3d_scale, 1.0),
+		"power saving off: max_fps %d (the phone's 60, no cap on a desktop), 3D x%.2f" % [Engine.max_fps, game.get_viewport().scaling_3d_scale])
+	report.power_saving = {"fps_before": fps_before, "on_fps": game.POWER_SAVING_MAX_FPS, "off_fps": Engine.max_fps, "scale_on": game.POWER_SAVING_3D_SCALE}
+	if was:
+		power.button_pressed = true
+	game.show_controls_menu()
+	await frames(2)
+
 func run() -> void:
 	sound = root.get_node_or_null("Sound")
 	check(sound != null, "Sound autoload present")
@@ -329,6 +365,7 @@ func window_check() -> void:
 	var shortcut: Node = game.modal.find_child("SoundSettingsButton", true, false)
 	check(entry != null, "menu has the «Звук и музыка» tile")
 	check(shortcut != null, "menu settings have the «Громкость…» button")
+	await power_saving_check()
 	menu.sound_settings()
 	await frames(3)
 	var levels := {}
@@ -340,6 +377,8 @@ func window_check() -> void:
 		if slider == null or toggle == null:
 			continue
 		check(slider.size.y >= 44 and toggle.size.x >= 44, "row %s is touch-sized" % key)
+		# 1024 stage 5: the switch takes the row's height (64 x 50, 31 pt on an iPhone 15; it was 64 x 34).
+		check(toggle.size.y >= menu.SOUND_KNOB - 0.5, "switch %s is %d px tall (row height)" % [key, int(toggle.size.y)])
 		var before := float(sound.volume[key])
 		slider.value = 30
 		check(is_equal_approx(float(sound.volume[key]), 0.3), "slider %s sets 30 %%" % key)
@@ -355,6 +394,22 @@ func window_check() -> void:
 		slider.value = roundf(before * 100.0)
 	report.window = {"bus_db_at_30_percent": levels}
 	check(game.modal_body.find_child("SoundCredits", true, false) != null, "credits entry in the sound window")
+	# 1024 stage 5: all six rows and the credits fit at 1366 × 630 without scrolling, inside the screen's
+	# safe area (an iPhone with a notch: 47 pt at the sides, 21 pt at the bottom).
+	await frames(2)
+	var scroll: ScrollContainer = game.modal_scroll
+	var bar := scroll.get_v_scroll_bar()
+	var view := scroll.get_global_rect()
+	var credits_button := game.modal_body.find_child("SoundCredits", true, false) as Control
+	var inside := credits_button != null and view.grow(0.5).encloses(credits_button.get_global_rect())
+	for row in menu.SOUND_ROWS:
+		var line := game.modal_body.find_child("SoundRow_" + str(row[0]), true, false) as Control
+		inside = inside and line != null and view.grow(0.5).encloses(line.get_global_rect())
+	check(bar.max_value <= bar.page + 0.5 and inside, "sound window: six rows and the credits fit without scrolling (content %d px, view %d px)" % [int(bar.max_value), int(bar.page)])
+	var screen := Rect2(Vector2.ZERO, game.get_viewport().get_visible_rect().size)
+	var safe := Rect2(Vector2(47, 0), screen.size - Vector2(94, 21))
+	check(safe.encloses(game.modal.get_global_rect()), "sound window inside the notch safe area: %s" % str(game.modal.get_global_rect()))
+	report.window.fit = {"content_px": int(bar.max_value), "view_px": int(bar.page), "window": str(game.modal.get_global_rect())}
 	if not shots.is_empty():
 		DirAccess.make_dir_recursive_absolute(shots)
 		await frames(10)

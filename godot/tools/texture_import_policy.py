@@ -16,7 +16,8 @@ import sys
 THREE_D = ("army/", "city/", "city-details/", "city-ground/", "creature-assets37/", "creatures-v2/", "world-ground/",
            "world-scenery/", "environment/surfaces20.png", "environment/forest60",
            "forest_rescue/")  # 1022: the forest adventure's kit, landmarks, props, actors, arena and impostors
-TWO_D = ("ui/", "icons/", "intro/", "creatures37/", "environment/atlas.webp")
+TWO_D = ("ui/", "icons/", "intro/", "creatures37/", "environment/atlas.webp",
+         "forest_rescue/ui/")  # 1024: the puzzle picture atlas of the forest windows (2D, lossless)
 TWO_D_NAMES = ("_portrait_",)  # creatures-v2/<id>/<id>_portrait_<level>.webp: hunt panel art, not a 3D texture
 
 

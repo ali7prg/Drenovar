@@ -92,6 +92,15 @@ const HUD_STATE_PATH := "user://hud.cfg"
 ## settle, no ring unfold). Kept in the HUD's file.
 var sound_on := true
 var reduced_motion := false
+# «Экономия заряда» (1024): 30 frames a second and the 3D drawn at POWER_SAVING_3D_SCALE of the screen's
+# pixels (the interface stays sharp). Off by default; kept in user://hud.cfg.
+var power_saving := false
+const POWER_SAVING_3D_SCALE := 0.75
+# The frame cap on a phone (1024): 60 frames a second also on a 120 Hz ProMotion screen (the engine's
+# Info.plist allows 120), half the heat for the same picture; set once the city is interactive, so the
+# launch's frame-sliced loading is not slowed.
+const PHONE_MAX_FPS := 60
+const POWER_SAVING_MAX_FPS := 30
 ## Tone of the notice toast: "info", "good" or "warn" (an error, said calmly).
 var message_tone := "info"
 var message_shown := ""
@@ -227,13 +236,31 @@ var diagnostics := SessionDiagnostics.new()
 # smoothness panel or with --combat-diagnostics); see src/combat_diagnostics.gd.
 var combat_diagnostics: CanvasLayer = null
 const OFFLINE_NOTICE := "Нет связи · повторяем"
+const SERVER_NOTICE := "Сервер не отвечает · повторяем"
+const LINK_HINT_TEXT := "Связь…"
 var offline_notice_shown := false
 # 1022 network rules (drenovar-server v6/docs/STATUS-1022-SERVER.md §10–11): transient failures
-# are repeated silently with the same Idempotency-Key; the connection pill shows only after
-# 10 s without any 200 or 304.
-const COMMAND_RETRY_DELAYS := [0.4, 1.2, 2.8]
+# are repeated silently with the same Idempotency-Key.
+# 1024 (qa_net_1024.gd, network chaos): the repeats go on, with growing jittered pauses, for the whole
+# COMMAND_RETRY_WINDOW_MS (an outage of up to half a minute no longer fails the order); the link is
+# shown in two steps: a small dim «Связь…» (link_hint) after LINK_HINT_AFTER_MS without any 200/304
+# following a failure, or while a request has waited LINK_HINT_SLOW_MS; the pill «Нет связи · повторяем»
+# only after CONNECTION_NOTICE_AFTER_MS without any 200/304 and with the network itself silent
+# (ApiPool.link_age_usec: no connection opened, no answer byte) for OFFLINE_LINK_SILENCE_MS; a server
+# that is reachable but failing or slow reads «Сервер не отвечает · повторяем» after the same 20 s.
+const COMMAND_RETRY_DELAYS := [0.4, 1.2, 2.8, 4.0, 6.0, 8.0]
 const COMMAND_RETRY_WINDOW_MS := 30000
-const CONNECTION_NOTICE_AFTER_MS := 10000
+const RETRY_JITTER := 0.2
+const CONNECTION_NOTICE_AFTER_MS := 20000
+const OFFLINE_LINK_SILENCE_MS := 10000
+const LINK_HINT_AFTER_MS := 3000
+const LINK_HINT_SLOW_MS := 6000
+# A command whose answer was lost keeps its Idempotency-Key for this long, across a restart of the app
+# (user://pending_commands.json): the same order given again within it is the same order to the server.
+const RETRY_KEY_TTL_SEC := 600
+const RETRY_KEYS_PATH := "user://pending_commands.json"
+var link_hint: Label
+var link_hint_since := 0
 # When the last 200 or 304 arrived, in the app's own running time (1023): a frame longer than
 # LINK_FRAME_CAP_MS (the forest compiling a script, a scene build) and the time the app spent
 # suspended in the background move it on by their excess, so neither counts as time without
@@ -275,7 +302,7 @@ const FLING_FRICTION := 5.5
 const FLING_SAMPLE_USEC := 90000
 var drag_samples: Array = []
 # Idempotency keys kept for commands whose response was lost in transport, so a
-# retry of the same order can never be applied twice by the server.
+# retry of the same order can never be applied twice by the server: signature -> {key, at (unix s)}.
 var retry_keys: Dictionary = {}
 var fling_velocity := Vector2.ZERO
 var fling_point := Vector2.ZERO
@@ -384,6 +411,7 @@ func _ready() -> void:
 		"total_ms": Time.get_ticks_msec() - launch_started}, Time.get_unix_time_from_system(), false)
 	launch.finish()
 	launch_done = true
+	apply_frame_pacing()
 	warm_panel_textures()
 	# Unit portraits (cards, queues, army) decode on worker threads now, not on first use.
 	UnitStage.warm_portraits(data.get("unitModels", {}).keys() + ["SIEGE-RAM-01"])
@@ -483,6 +511,7 @@ func build_ui() -> void:
 		sound_on = bool(saved.get_value("settings", "sound", true))
 		reduced_motion = bool(saved.get_value("settings", "reduced_motion", false))
 		action_ring.reduced_motion = reduced_motion
+		power_saving = bool(saved.get_value("settings", "power_saving", false))
 	if not sound_on:
 		AudioServer.set_bus_mute(0, true)
 	var wallet := HBoxContainer.new()
@@ -559,6 +588,21 @@ func build_ui() -> void:
 	connection_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(connection_badge)
 	connection_badge.hide()
+	# 1024: the first, quiet step of the link notice: small dim text where the pill would be, no plate.
+	link_hint = Label.new()
+	link_hint.name = "LinkHint"
+	link_hint.text = LINK_HINT_TEXT
+	link_hint.add_theme_font_override("font", UiKit.LABEL_FONT)
+	link_hint.add_theme_font_size_override("font_size", 14)
+	link_hint.add_theme_color_override("font_color", Color(UiKit.IVORY, 0.72))
+	link_hint.add_theme_color_override("font_outline_color", Color("#120c07"))
+	link_hint.add_theme_constant_override("outline_size", 3)
+	link_hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	link_hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	link_hint.offset_top = 64
+	link_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(link_hint)
+	link_hint.hide()
 	forest_progress = ForestProgress.new()
 	forest_progress.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	root.add_child(forest_progress)
@@ -812,6 +856,22 @@ func set_reduced_motion(on: bool) -> void:
 	save_setting("reduced_motion", on)
 	if forest_game != null and forest_game.reduced_motion != on:
 		forest_game.set_reduced_motion(on)
+
+## «Экономия заряда»: 30 frames a second and a lighter 3D image; off: the phone's 60.
+func set_power_saving(on: bool) -> void:
+	power_saving = on
+	save_setting("power_saving", on)
+	apply_frame_pacing()
+
+func apply_frame_pacing() -> void:
+	if power_saving:
+		Engine.max_fps = POWER_SAVING_MAX_FPS
+	elif OS.has_feature("mobile"):
+		Engine.max_fps = PHONE_MAX_FPS
+	else:
+		Engine.max_fps = 0
+	if is_inside_tree():
+		get_viewport().scaling_3d_scale = POWER_SAVING_3D_SCALE if power_saving else 1.0
 
 func save_setting(key: String, value: Variant) -> void:
 	var saved := ConfigFile.new()
@@ -2617,6 +2677,10 @@ func _notification(what: int) -> void:
 		drain_retired_scenes(true)
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
 		diagnostics.set_state("background", Time.get_unix_time_from_system())
+		# On a phone the app is leaving the screen: no routine polls until it is back. A desktop window
+		# that only lost the focus is still on screen and keeps polling.
+		if what == NOTIFICATION_APPLICATION_PAUSED or OS.has_feature("mobile"):
+			app_in_background = true
 		if what == NOTIFICATION_APPLICATION_PAUSED and paused_at_msec < 0:
 			paused_at_msec = Time.get_ticks_msec()
 		if state_save_pending:
@@ -2863,6 +2927,12 @@ func place_modal(layout: String) -> void:
 		"profile":
 			anchors = Rect2(0.5, 0, 0, 1)
 			offsets = Rect2(-330, 50, 660, -66)
+		"settings":
+			# «Звук и музыка» (1024): the centred window at the full height of the screen, so all six
+			# volume rows fit without scrolling (30 px from the top and from the bottom: the home indicator).
+			# (The Rect2's size is end - start: the bottom edge sits at 30 + (-60) = -30.)
+			anchors = Rect2(0.5, 0, 0, 1)
+			offsets = Rect2(-368, 30, 736, -60)
 		"garrison":
 			anchors = Rect2(0.5, 0, 0, 1)
 			offsets = Rect2(-480, 13, 960, -26)
@@ -4995,6 +5065,16 @@ func show_performance() -> void:
 	var primitives := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
 	var draw_calls := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 	open_modal("Плавность на этом устройстве")
+	# «Экономия заряда» (1024): the player's own choice, beside the numbers it changes.
+	var saver := CheckButton.new()
+	saver.name = "PowerSwitch"
+	saver.text = "Экономия заряда · 30 кадров в секунду, 3D чуть мягче"
+	saver.button_pressed = power_saving
+	saver.focus_mode = Control.FOCUS_NONE
+	saver.custom_minimum_size.y = 52
+	saver.accessibility_name = "Экономия заряда"
+	saver.toggled.connect(set_power_saving)
+	modal_body.add_child(saver)
 	row(modal_body, diagnostics.summary())
 	if frame_count < 30:
 		row(modal_body, "Поиграй несколько секунд, чтобы получить замер.")
@@ -5962,21 +6042,26 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 	var signature := JSON.stringify(order)
 	var key: String = str(order.get("requestId", ""))
 	if key.is_empty():
-		key = retry_keys.get(signature, Crypto.new().generate_random_bytes(16).hex_encode())
+		key = recall_retry_key(signature)
+	if key.is_empty():
+		key = Crypto.new().generate_random_bytes(16).hex_encode()
+	# 1024: the key is on the device before the order leaves, so a restart while it is on its way
+	# (the app killed, the phone out of battery) cannot turn the same order into a second one.
+	remember_retry_key(signature, key)
 	var first_sent := Time.get_ticks_msec()
 	var response: Dictionary = await request("command", order, key)
 	# Quiet retries with the same idempotency key and body (the server never applies an
-	# order twice): a dropped mobile connection is usually back within a second (rule 10).
+	# order twice): a dropped mobile connection is usually back within a second (rule 10);
+	# 1024: then every few seconds, jittered, for the rest of the window.
 	for pause in COMMAND_RETRY_DELAYS:
-		if not transient_failure(response) or Time.get_ticks_msec() - first_sent + int(pause * 1000.0) > COMMAND_RETRY_WINDOW_MS:
+		var wait := retry_pause(pause, response)
+		if not transient_failure(response) or Time.get_ticks_msec() - first_sent + int(wait * 1000.0) > COMMAND_RETRY_WINDOW_MS:
 			break
 		command_retries += 1
-		await get_tree().create_timer(pause).timeout
+		await get_tree().create_timer(wait).timeout
 		response = await request("command", order, key)
-	if transient_failure(response):
-		retry_keys[signature] = key
-	else:
-		retry_keys.erase(signature)
+	if not transient_failure(response):
+		forget_retry_key(signature)
 	if not response.has("city"):
 		last_command_error = str(response.get("error", "сервер не ответил"))
 		command_in_progress = false
@@ -6008,6 +6093,76 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 			close_modal()
 	message.text = "Действие выполнено"
 	return true
+
+## A retry pause with ±RETRY_JITTER (many phones that lost the same cell do not come back in step), and
+## never shorter than a Retry-After the server sent.
+func retry_pause(pause: float, response: Dictionary) -> float:
+	var wait := pause * (1.0 + randf_range(-RETRY_JITTER, RETRY_JITTER))
+	return maxf(wait, minf(float(response.get("retryAfter", 0.0)), 10.0))
+
+# --- 1024: idempotency keys of orders whose answer was lost, kept on the device ----------------------
+# retry_keys: this session's; stored_retry_keys: earlier sessions' (read once from RETRY_KEYS_PATH).
+var stored_retry_keys: Dictionary = {}
+var retry_keys_loaded := false
+
+func load_retry_keys() -> void:
+	retry_keys_loaded = true
+	if not FileAccess.file_exists(RETRY_KEYS_PATH):
+		return
+	var stored: Variant = JSON.parse_string(FileAccess.get_file_as_string(RETRY_KEYS_PATH))
+	if not stored is Dictionary:
+		return
+	var now := Time.get_unix_time_from_system()
+	for signature: String in stored:
+		var entry: Variant = stored[signature]
+		if entry is Dictionary and str(entry.get("key", "")).length() >= 16 and now - float(entry.get("at", 0)) < RETRY_KEY_TTL_SEC:
+			stored_retry_keys[signature] = {"key": str(entry.key), "at": float(entry.at)}
+
+func save_retry_keys() -> void:
+	var now := Time.get_unix_time_from_system()
+	var keep := {}
+	for book: Dictionary in [stored_retry_keys, retry_keys]:
+		for signature: String in book:
+			if now - float(book[signature].get("at", 0)) < RETRY_KEY_TTL_SEC:
+				keep[signature] = book[signature]
+	var file := FileAccess.open(RETRY_KEYS_PATH, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify(keep))
+
+## The key an order (or an adventure command: forest_rescue adventure_client.gd) was last sent with,
+## while its outcome is unknown and younger than RETRY_KEY_TTL_SEC (this session or an earlier one);
+## "" otherwise.
+func recall_retry_key(signature: String) -> String:
+	if not retry_keys_loaded:
+		load_retry_keys()
+	var now := Time.get_unix_time_from_system()
+	for book: Dictionary in [retry_keys, stored_retry_keys]:
+		var entry: Variant = book.get(signature)
+		if entry is Dictionary and now - float(entry.get("at", 0)) < RETRY_KEY_TTL_SEC:
+			return str(entry.key)
+	return ""
+
+func remember_retry_key(signature: String, key: String) -> void:
+	if not retry_keys_loaded:
+		load_retry_keys()
+	var entry: Variant = retry_keys.get(signature, stored_retry_keys.get(signature))
+	if entry is Dictionary and str(entry.key) == key:
+		# The first send keeps its time: the window counts from the order, not from a retry.
+		retry_keys[signature] = entry
+		stored_retry_keys.erase(signature)
+		return
+	retry_keys[signature] = {"key": key, "at": Time.get_unix_time_from_system()}
+	stored_retry_keys.erase(signature)
+	save_retry_keys()
+
+## The outcome is known (the server answered, yes or no): the key is not needed any more.
+func forget_retry_key(signature: String) -> void:
+	if not retry_keys_loaded:
+		load_retry_keys()
+	var known := retry_keys.erase(signature)
+	known = stored_retry_keys.erase(signature) or known
+	if known:
+		save_retry_keys()
 
 # Local forecast of the work an order starts, shown until the server state takes over.
 # The countdown runs at once with the server's own duration (the same terms the
@@ -6449,8 +6604,10 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	# Kept-alive connections: a command no longer pays for a new TCP and TLS handshake.
 	pool.configure(base)
 	var started_us := Time.get_ticks_usec()
+	# The answer is parsed on the pool's worker thread (1024): a state or the building catalogue
+	# (670 KB) no longer costs its JSON parse on the frame it arrives in.
 	var result: Array = await pool.request(HTTPClient.METHOD_GET if payload == null else HTTPClient.METHOD_POST, "/api/" + path,
-		headers, "" if payload == null else JSON.stringify(payload), timeout_seconds, 8 * 1024 * 1024, foreground, is_current)
+		headers, "" if payload == null else JSON.stringify(payload), timeout_seconds, 8 * 1024 * 1024, foreground, is_current, true)
 	# An obsolete read-only preview is cancelled deliberately. It must not report
 	# a network outage after its window closed or a newer request succeeded.
 	if is_current.is_valid() and not is_current.call():
@@ -6488,19 +6645,26 @@ func send_request(path: String, payload: Variant = null, foreground := true, tim
 	if int(result[1]) == 304:
 		return {"notModified":true, "httpStatus":304, "etag":header_value(result[2], "etag"),
 			"serverTime":header_value(result[2], "x-drenovar-server-time"), "quietUntil":header_value(result[2], "x-drenovar-quiet-until")}
-	var response := JSON.new()
-	if response.parse(result[3].get_string_from_utf8()) == OK and response.data is Dictionary:
+	var parsed: Variant = result[4] if result.size() > 4 else null
+	var retry_after := header_value(result[2], "retry-after")
+	if parsed is Dictionary:
+		var data: Dictionary = parsed
 		if int(result[1]) >= 400:
-			response.data.httpStatus = result[1]
+			data.httpStatus = result[1]
+			if retry_after.is_valid_float():
+				data.retryAfter = float(retry_after)
 		elif not extra_headers.is_empty():
 			var tag := header_value(result[2], "etag")
 			if not tag.is_empty():
-				response.data["__etag"] = tag
-		return response.data
+				data["__etag"] = tag
+		return data
 	# Preserve the status on HTML/empty error pages too, so the existing bounded
 	# retry keeps the original Idempotency-Key and cannot create another army.
-	return {"error":"Сервер временно перегружен. Повторите попытку." if int(result[1]) >= 500 else "Сервер вернул неожиданный ответ (HTTP %d)." % int(result[1]),
+	var page := {"error":"Сервер временно перегружен. Повторите попытку." if int(result[1]) >= 500 else "Сервер вернул неожиданный ответ (HTTP %d)." % int(result[1]),
 		"httpStatus":int(result[1]), "unreadable":true}
+	if retry_after.is_valid_float():
+		page.retryAfter = float(retry_after)
+	return page
 
 static func header_value(headers: PackedStringArray, name: String) -> String:
 	for line in headers:
@@ -6598,9 +6762,15 @@ func discount_stall() -> void:
 ## The app came back from the background (1023): the kept-alive connections may be dead (another
 ## network, a NAT that forgot them, sockets iOS tore down), so none is reused; the time away is not
 ## counted by the outage meter; the state is asked for at once on a fresh connection.
+## 1024: a request still in flight from before the pause (a poll on a flow that died with the
+## suspension) tries again at once on a fresh connection, beside its first try: it no longer holds
+## the next poll back for the rest of its 12 s timeout, the cause of a «Нет связи» flash on return.
 func on_app_resumed() -> void:
 	api.drop_idle()
 	old_api.drop_idle()
+	api.hedge_in_flight()
+	old_api.hedge_in_flight()
+	app_in_background = false
 	var now := Time.get_ticks_msec()
 	if paused_at_msec >= 0:
 		last_ok_msec = mini(now, last_ok_msec + now - paused_at_msec)
@@ -6612,15 +6782,45 @@ func connection_notice_due() -> bool:
 	return connected() and (diagnostics.network_failures > 0 or diagnostics.server_failures > 0) \
 		and Time.get_ticks_msec() - last_ok_msec >= CONNECTION_NOTICE_AFTER_MS
 
+## The network itself silent for OFFLINE_LINK_SILENCE_MS: no connection opened and no byte of an answer
+## (a server that accepts connections but is slow or failing is not «no connection»).
+func network_silent() -> bool:
+	var age := api.link_age_usec()
+	return age < 0 or age >= OFFLINE_LINK_SILENCE_MS * 1000
+
+## The small dim «Связь…»: a failed request not yet followed by any 200/304 for LINK_HINT_AFTER_MS, or
+## a request that has waited LINK_HINT_SLOW_MS for its answer.
+func link_hint_due() -> bool:
+	if not connected():
+		return false
+	var now := Time.get_ticks_msec()
+	if (diagnostics.network_failures > 0 or diagnostics.server_failures > 0) and now - last_ok_msec >= LINK_HINT_AFTER_MS:
+		return true
+	return oldest_wait_ms() >= LINK_HINT_SLOW_MS and now - last_ok_msec >= LINK_HINT_SLOW_MS
+
+## How long the oldest request in flight has waited (ms), 0 when none.
+func oldest_wait_ms() -> int:
+	var oldest := 0
+	var now := Time.get_ticks_msec()
+	for entry: Dictionary in api.jobs.values():
+		oldest = maxi(oldest, now - int(entry.get("started_ms", now)))
+	return oldest
+
 func update_connection_notice() -> void:
-	# 1022 rule 10: a blip is repeated silently; the small pill under the resources shows only
-	# after 10 s without any 200 or 304 (never over the game).
+	# 1022 rule 10: a blip is repeated silently. 1024: first the small dim «Связь…»; the pill under the
+	# resources only after 20 s without any 200 or 304 (never over the game), «Нет связи» only when
+	# the network itself is silent too.
 	var due := connection_notice_due()
-	var offline := due and diagnostics.network_failures > 0
+	var offline := due and diagnostics.network_failures > 0 and network_silent()
 	offline_notice_shown = offline
 	if is_instance_valid(connection_badge):
-		connection_badge.text = OFFLINE_NOTICE if offline else "Ошибка сервера · повторяем"
+		connection_badge.text = OFFLINE_NOTICE if offline else SERVER_NOTICE
 		connection_badge.visible = due
+	if is_instance_valid(link_hint):
+		var hint := not due and link_hint_due()
+		if hint and not link_hint.visible:
+			link_hint_since = Time.get_ticks_msec()
+		link_hint.visible = hint
 
 func poll_account_state(due := false) -> void:
 	if restore_running or login_in_progress or not connected() or (player_id.is_empty() and not restoring_session):
@@ -6822,12 +7022,22 @@ func _process(delta: float) -> void:
 		interval = 1.5
 	if state_save_pending and Time.get_ticks_msec() - state_saved_msec >= STATE_SAVE_INTERVAL_MSEC:
 		remember_state()
+	if app_in_background:
+		return
 	if poll > interval:
 		poll = 0
+		poll_jitter = randf_range(0.85, 1.15)
 		if login_link_used and not login_proof.is_empty():
 			await finish_login()
 		elif connected() and (not player_id.is_empty() or restoring_session):
 			await poll_account_state()
+
+const IDLE_SLOW_AFTER_MS := 90000
+const IDLE_POLL_SECONDS := 8.0
+# A fresh jitter factor for every poll (0.85–1.15).
+var poll_jitter := 1.0
+# The app is in the background (paused, or the window lost the focus): no routine polls.
+var app_in_background := false
 
 # Rule 11 (server net-policy): 650 ms only within 3 s of a visible fight (an army within 3 s of
 # arrival, a fight, a return started less than 3 s ago), 2 s while any army is out, 4 s at rest;
@@ -6845,10 +7055,22 @@ func poll_interval() -> float:
 		if arrive > 0.0 and ((now >= arrive - 3000.0 and now <= maxf(ends, arrive)) or (now >= back and now < back + 3000.0)):
 			base = 0.65
 			break
-	var failures := maxi(diagnostics.network_failures, diagnostics.server_failures)
-	if failures >= 2:
-		return minf(base * pow(2.0, failures - 1), 15.0)
+	# 1024: a lost network is probed again quickly (a failed connection costs the server nothing and the
+	# player sees the city come back within seconds of the signal); a failing server is given room
+	# (x 2^(n-1) up to 15 s), both jittered so that phones do not come back in step.
+	if diagnostics.server_failures >= 2:
+		return minf(base * pow(2.0, diagnostics.server_failures - 1), 15.0) * poll_jitter
+	if diagnostics.network_failures >= 2:
+		return minf(base, minf(1.5 * diagnostics.network_failures, 5.0)) * poll_jitter
+	# At rest and untouched for a while (nothing running, no army out): every 8 s instead of 4.
+	if base >= 4.0 and Time.get_ticks_msec() - last_interaction_msec > IDLE_SLOW_AFTER_MS and works_idle():
+		return IDLE_POLL_SECONDS * poll_jitter
 	return base
+
+## No order of the player's running whose end is near (a timer that ends within the next minute is polled
+## at its zero anyway, ask_server_at_zero).
+func works_idle() -> bool:
+	return pending_works.is_empty() and not command_in_progress and shown_jobs.is_empty() and shown_sites.is_empty()
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventMouseButton or \

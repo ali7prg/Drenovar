@@ -56,8 +56,9 @@ func serve(count: int) -> void:
 		await serve_one()
 
 func attempt(game: Node, order: Dictionary) -> Dictionary:
-	# A lost response is retried three times inside command() with the same key (1022: 0.4, 1.2, 2.8 s).
-	var requests := 4 if mode == "drop" else 1
+	# A lost response is retried inside command() with the same key (1022: 0.4, 1.2, 2.8 s; 1024: then
+	# 4, 6 and 8 s, jittered, all within the 30 s window).
+	var requests: int = 1 + game.COMMAND_RETRY_DELAYS.size() if mode == "drop" else 1
 	var expected := served + requests
 	serve(requests)
 	var outcome: bool = await game.command(order, func(): pass)
@@ -85,11 +86,13 @@ func run() -> void:
 	await attempt(game, order)
 	var other := {"kind": "trade", "resource": "stone", "amount": 100}
 	await attempt(game, other)
-	check(keys.size() == 11, "Server saw %d requests" % keys.size())
-	if keys.size() == 11:
-		check(keys.slice(0, 9).all(func(k): return k == keys[0]), "Retries after lost responses changed the key")
-		check(keys[9] != keys[8], "Key reused after the server answered")
-		check(keys[10] != keys[9], "Different order reused a key")
+	var per_drop: int = 1 + game.COMMAND_RETRY_DELAYS.size()
+	var total := per_drop * 2 + 3
+	check(keys.size() == total, "Server saw %d requests (%d expected)" % [keys.size(), total])
+	if keys.size() == total:
+		check(keys.slice(0, per_drop * 2 + 1).all(func(k): return k == keys[0]), "Retries after lost responses changed the key")
+		check(keys[per_drop * 2 + 1] != keys[per_drop * 2], "Key reused after the server answered")
+		check(keys[per_drop * 2 + 2] != keys[per_drop * 2 + 1], "Different order reused a key")
 	check(not game.busy and not game.command_in_progress, "Client stuck after failures")
 	check(game.retry_keys.is_empty(), "Retry keys leaked after answers")
 	server.stop()

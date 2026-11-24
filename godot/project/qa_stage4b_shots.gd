@@ -270,12 +270,12 @@ func run() -> void:
 		game.show_error({"error": "Не хватает железа: нужно ещё 340."})
 		await shot("toast_error", 12)
 		game.message.text = ""
-		# The banner's own rule: a failure and 10 s without an answer (the clock is moved back).
+		# The banner's own rule: a failure and 20 s without an answer (1024; the clock is moved back).
 		var failures: int = game.diagnostics.network_failures
 		var last_ok: int = game.last_ok_msec
 		var offline := func():
 			game.diagnostics.network_failures = maxi(1, failures)
-			game.last_ok_msec = Time.get_ticks_msec() - 11000
+			game.last_ok_msec = Time.get_ticks_msec() - 21000
 			game.update_connection_notice()
 		offline.call()
 		# The fixture keeps answering the game's polls: the state is set again just before

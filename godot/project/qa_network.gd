@@ -31,11 +31,16 @@ func run() -> void:
 	await game.poll_account_state()
 	check(not game.connection_badge.visible, "A single failure already reported offline")
 	await game.poll_account_state()
-	# 1022 rule 10: failures are silent until 10 s pass without any 200 or 304.
-	check(not game.connection_badge.visible, "Two quick failures already reported offline (notice is due only after 10 s)")
+	# 1022 rule 10: failures are silent; 1024: the small dim «Связь…» first, the pill only after 20 s
+	# without any 200 or 304.
+	check(not game.connection_badge.visible, "Two quick failures already reported offline (notice is due only after 20 s)")
 	game.last_ok_msec = Time.get_ticks_msec() - 10001
 	game.update_connection_notice()
-	check(game.connection_badge.visible and game.message.text != game.OFFLINE_NOTICE, "Outage must show the small badge, not the centre message")
+	check(not game.connection_badge.visible and game.link_hint.visible, "After 10 s only the quiet «Связь…» shows")
+	game.last_ok_msec = Time.get_ticks_msec() - 20001
+	game.update_connection_notice()
+	check(game.connection_badge.visible and not game.link_hint.visible and game.message.text != game.OFFLINE_NOTICE, "Outage must show the small badge, not the centre message")
+	check(game.connection_badge.text == game.OFFLINE_NOTICE, "A port that refuses connections reads «Нет связи»: " + game.connection_badge.text)
 	check(not game.busy and not game.polling_state, "Failed request left the client busy")
 	var started := Time.get_ticks_msec()
 	var response: Dictionary = await game.request("command", {"type": "qa"})
@@ -43,9 +48,13 @@ func run() -> void:
 	check(not game.busy, "Command failure left busy flag set")
 	var events: Array = game.diagnostics.record.events.slice(logged_before).map(func(e): return e.kind)
 	check(events.count("network_error") == 1, "Outage logged %d times" % events.count("network_error"))
-	# Backoff: with 3+ failures the active-march interval exceeds the normal 0.8 s.
+	# 1024: a lost network is probed again within a few seconds (a failed connection costs the server
+	# nothing); a failing server (5xx) is given room: base x 2^(n-1) up to 15 s.
 	check(game.diagnostics.network_failures >= 3, "Failure counter not advanced")
-	check(game.poll_interval() > 4.0 and game.poll_interval() <= 15.0, "No backoff after failures: %.2f s" % game.poll_interval())
+	check(game.poll_interval() >= 1.5 * 0.85 and game.poll_interval() <= 5.0 * 1.15, "Lost network not probed quickly: %.2f s" % game.poll_interval())
+	game.diagnostics.server_failures = 3
+	check(game.poll_interval() > 4.0 and game.poll_interval() <= 15.0 * 1.15, "No backoff after server failures: %.2f s" % game.poll_interval())
+	game.diagnostics.server_failures = 0
 	game.diagnostics.network_result(true, "", Time.get_unix_time_from_system(), Time.get_ticks_msec())
 	game.update_connection_notice()
 	check(not game.connection_badge.visible, "Badge not hidden after recovery")

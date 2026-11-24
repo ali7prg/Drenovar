@@ -114,14 +114,20 @@ func run() -> void:
 	game.diagnostics.network_failures = maxi(1, game.diagnostics.network_failures)
 	game.update_connection_notice()
 	check(not game.connection_badge.visible, "a 9.5 s frame after one failure showed «%s»" % game.connection_badge.text)
-	# Real silence still shows the pill (the 1022 rule is kept).
+	# Real silence still shows the pill (1024: after 20 s, «Нет связи» only when the network itself is
+	# silent too; before that the quiet «Связь…»).
 	game.last_ok_msec = Time.get_ticks_msec() - 10001
+	game.api.link_usec = Time.get_ticks_usec() - 11000000
 	game.update_connection_notice()
-	check(game.connection_badge.visible and game.connection_badge.text == game.OFFLINE_NOTICE, "10 s of real silence with a failure shows the pill")
+	check(not game.connection_badge.visible and game.link_hint.visible, "10 s of real silence with a failure shows the quiet «Связь…» only")
+	game.last_ok_msec = Time.get_ticks_msec() - 20001
+	game.api.link_usec = Time.get_ticks_usec() - 11000000
+	game.update_connection_notice()
+	check(game.connection_badge.visible and game.connection_badge.text == game.OFFLINE_NOTICE, "20 s of real silence with a failure shows the pill")
 	game.diagnostics.network_failures = 0
 	game.last_ok_msec = Time.get_ticks_msec()
 	game.update_connection_notice()
-	check(not game.connection_badge.visible, "pill hidden after an answer")
+	check(not game.connection_badge.visible and not game.link_hint.visible, "pill hidden after an answer")
 	# --- the background is not counted; coming back starts on fresh connections ----------------
 	while game.api.idle.is_empty() and Time.get_ticks_msec() < deadline + 10000:
 		await process_frame

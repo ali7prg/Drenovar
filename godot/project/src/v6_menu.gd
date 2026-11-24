@@ -205,25 +205,40 @@ func open() -> void:
 	last_open_usec = Time.get_ticks_usec() - started
 
 ## The settings under the profile card: premium switches on the oak.
+## 1024: the switches are 52 px tall (32 pt on an iPhone 15; they were 40) and «Громкость…» sits beside
+## «Звук», so the column keeps to the oak panel at 1366 x 630 (it ran 9 px past the screen's bottom; the
+## profile card above takes what is left). «Экономия заряда» is in «Плавность на устройстве»
+## (main.gd show_performance).
 func settings(column: VBoxContainer) -> void:
 	var caption: Label = UiKit.label(column, "Настройки", 16, UiKit.GOLD_DIM, UiKit.LABEL_FONT, false)
 	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	for entry: Array in [["Звук", ui.sound_on, ui.set_sound, "SoundSwitch"], ["Меньше движения", ui.reduced_motion, ui.set_reduced_motion, "MotionSwitch"]]:
-		var toggle := CheckButton.new()
-		toggle.name = entry[3]
-		toggle.text = entry[0]
-		toggle.button_pressed = entry[1]
-		toggle.focus_mode = Control.FOCUS_NONE
-		toggle.custom_minimum_size.y = 40
-		for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
-			toggle.add_theme_color_override(state, UiKit.IVORY)
-		toggle.toggled.connect(entry[2])
-		column.add_child(toggle)
-	var volumes: Button = styled(Button.new(), "tertiary", 16, 44)
+	var sound_line := HBoxContainer.new()
+	sound_line.name = "SoundLine"
+	sound_line.add_theme_constant_override("separation", 10)
+	column.add_child(sound_line)
+	for entry: Array in [["Звук", ui.sound_on, ui.set_sound, "SoundSwitch", sound_line], ["Меньше движения", ui.reduced_motion, ui.set_reduced_motion, "MotionSwitch", column]]:
+		var toggle := switch(entry[0], entry[1], entry[2], entry[3])
+		toggle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		(entry[4] as Container).add_child(toggle)
+	var volumes: Button = styled(Button.new(), "tertiary", 16, 52)
 	volumes.name = "SoundSettingsButton"
 	volumes.text = "Громкость…"
+	volumes.custom_minimum_size.x = 150
 	volumes.pressed.connect(sound_settings)
-	column.add_child(volumes)
+	sound_line.add_child(volumes)
+
+## A premium switch on the oak (52 px tall: a finger's target; the look comes from the kit's icons).
+static func switch(text: String, on: bool, changed: Callable, node_name: String) -> CheckButton:
+	var toggle := CheckButton.new()
+	toggle.name = node_name
+	toggle.text = text
+	toggle.button_pressed = on
+	toggle.focus_mode = Control.FOCUS_NONE
+	toggle.custom_minimum_size.y = 52
+	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
+		toggle.add_theme_color_override(state, UiKit.IVORY)
+	toggle.toggled.connect(changed)
+	return toggle
 
 # ------------------------------------------------------------------ sound (build 1024)
 const SOUND_ROWS := [["master", "Общая громкость"], ["music", "Музыка"], ["sfx", "Эффекты"],
@@ -232,7 +247,9 @@ const SOUND_ROWS := [["master", "Общая громкость"], ["music", "М�
 ## «Звук и музыка»: six volumes 0–100 % with a switch each (off = silent), saved on the device
 ## (user://hud.cfg) by the Sound hub; and the authors of the music and sounds.
 func sound_settings() -> void:
-	ui.open_modal("Звук и музыка", "center", "НАСТРОЙКИ")
+	# 1024: the full-height window and a smaller knob (still a finger's width) fit all six rows and the
+	# credits at 1366 × 630 without scrolling (qa_audio_1024 checks it).
+	ui.open_modal("Звук и музыка", "settings", "НАСТРОЙКИ")
 	var rows := VBoxContainer.new()
 	rows.name = "SoundRows"
 	rows.add_theme_constant_override("separation", 2)
@@ -247,7 +264,7 @@ func sound_row(parent: Container, key: String, caption: String) -> void:
 	var row := HBoxContainer.new()
 	row.name = "SoundRow_" + key
 	row.add_theme_constant_override("separation", 14)
-	row.custom_minimum_size.y = 50
+	row.custom_minimum_size.y = SOUND_KNOB
 	parent.add_child(row)
 	var label: Label = UiKit.label(row, caption, 19, UiKit.INK, UiKit.LABEL_FONT, false)
 	label.custom_minimum_size.x = 210
@@ -260,7 +277,11 @@ func sound_row(parent: Container, key: String, caption: String) -> void:
 	slider.value = roundf(float(Sound.volume[key]) * 100.0)
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	slider.custom_minimum_size = Vector2(300, 46)
+	slider.custom_minimum_size = Vector2(300, SOUND_KNOB)
+	var knob := compact_knob()
+	if knob != null:
+		slider.add_theme_icon_override("grabber", knob)
+		slider.add_theme_icon_override("grabber_highlight", knob)
 	slider.focus_mode = Control.FOCUS_NONE
 	slider.accessibility_name = caption
 	slider.add_to_group("panel_slider")
@@ -276,7 +297,9 @@ func sound_row(parent: Container, key: String, caption: String) -> void:
 	toggle.tooltip_text = "Включить или выключить: " + caption
 	toggle.accessibility_name = caption + ": звук"
 	toggle.button_pressed = not bool(Sound.muted[key])
-	toggle.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	# 1024: the switch takes the row's full height (its look is unchanged: the styles are empty and the
+	# icon is centred), a 64 x 50 target instead of 64 x 34 (31 pt instead of 21 on an iPhone 15).
+	toggle.size_flags_vertical = Control.SIZE_FILL
 	row.add_child(toggle)
 	var last_tick := [int(slider.value)]
 	slider.value_changed.connect(func(v: float):
@@ -296,6 +319,24 @@ func sound_row(parent: Container, key: String, caption: String) -> void:
 			Sound.set_muted(key, not on)
 		if on:
 			sound_preview(key))
+
+## The volume knob of «Звук и музыка»: the kit's knob at SOUND_KNOB px (68 px made the window scroll).
+const SOUND_KNOB := 50
+static var knob_cache: Texture2D = null
+
+static func compact_knob() -> Texture2D:
+	if knob_cache != null:
+		return knob_cache
+	var source := UiKit.tex("kit_knob")
+	var image: Image = source.get_image() if source != null else null
+	if image == null or image.is_empty():
+		return null
+	image = image.duplicate()
+	if image.is_compressed():
+		image.decompress()
+	image.resize(SOUND_KNOB, SOUND_KNOB, Image.INTERPOLATE_LANCZOS)
+	knob_cache = ImageTexture.create_from_image(image)
+	return knob_cache
 
 ## A short sample of what the slider changes (the music and the ambience are already playing).
 func sound_preview(key: String) -> void:

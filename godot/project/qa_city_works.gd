@@ -123,7 +123,11 @@ func run() -> void:
 	var last_ok: int = game.last_ok_msec
 	game.last_ok_msec = Time.get_ticks_msec()
 	check(game.timer_end_label() == "Завершаем…", "A blip shown as an outage: " + game.timer_end_label())
+	# 1024: the alarm waits for 20 s without any 200/304 (CONNECTION_NOTICE_AFTER_MS); at 11 s only the
+	# small «Связь…» shows, and the timer still says the server is being asked.
 	game.last_ok_msec = Time.get_ticks_msec() - 11000
+	check(game.timer_end_label() == "Завершаем…", "An 11 s gap shown as an outage: " + game.timer_end_label())
+	game.last_ok_msec = Time.get_ticks_msec() - 21000
 	check(game.timer_end_label() == "Нет связи · ждём сервер", "Offline zero shown as done: " + game.timer_end_label())
 	game.diagnostics.network_failures = 0
 	game.last_ok_msec = last_ok

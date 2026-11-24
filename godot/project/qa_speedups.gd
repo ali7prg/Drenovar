@@ -53,7 +53,9 @@ func run() -> void:
 	var apply: Button = game.modal_body.find_children("*", "Button", true, false).filter(func(b): return b.text == "Применить")[0]
 	# Double press: exactly one command.
 	var sent := [0]
-	var before: int = game.api.requests_total
+	# 1024: only the orders are counted (a lost network is polled again every few seconds meanwhile).
+	game.api.trace_all = true
+	var before: int = game.api.trace.filter(func(t): return str(t.path).ends_with("/command")).size()
 	apply.pressed.emit()
 	apply.pressed.emit()
 	await process_frame
@@ -63,9 +65,9 @@ func run() -> void:
 	check(not game.modal.visible, "Speedup window still open after the tap")
 	while game.command_in_progress or game.speedup_in_flight:
 		await process_frame
-	sent[0] = game.api.requests_total - before
-	# command() retries a lost answer three times with the same key (1022: 0.4, 1.2, 2.8 s): 1 order = up to 4 requests.
-	check(sent[0] >= 1 and sent[0] <= 4, "Requests for one press: %d" % sent[0])
+	sent[0] = game.api.trace.filter(func(t): return str(t.path).ends_with("/command")).size() - before
+	# command() retries a lost answer with the same key (1022: 0.4, 1.2, 2.8 s; 1024: then 4, 6, 8 s within 30 s).
+	check(sent[0] >= 1 and sent[0] <= 1 + game.COMMAND_RETRY_DELAYS.size(), "Requests for one press: %d" % sent[0])
 	var keys: Array = game.retry_keys.values()
 	check(keys.size() == 1, "A failed speedup must keep one idempotency key for a retry: %d" % keys.size())
 	# Preview for a longer order: 20:00 left, 5 min -> 15:00.

@@ -146,13 +146,13 @@ func run() -> void:
 	await game.poll_account_state()
 	await game.poll_account_state()
 	check(game.diagnostics.server_failures >= 2, "two failed polls counted")
-	check(not game.connection_badge.visible, "two failed polls stay silent (notice only after 10 s)")
-	game.last_ok_msec = Time.get_ticks_msec() - 10001
+	check(not game.connection_badge.visible, "two failed polls stay silent (notice only after 20 s, build 1024)")
+	game.last_ok_msec = Time.get_ticks_msec() - 20001
 	game.update_connection_notice()
-	check(game.connection_badge.visible, "notice after 10 s without a 200/304")
+	check(game.connection_badge.visible and game.connection_badge.text == game.SERVER_NOTICE, "notice after 20 s without a 200/304; 503 pages read as the server's: " + game.connection_badge.text)
 	await game.poll_account_state()
 	check(not game.connection_badge.visible and game.diagnostics.server_failures == 0, "a 200/304 clears the notice")
-	report.banner = {"after_two_failures": false, "after_10s": true, "after_success": game.connection_badge.visible}
+	report.banner = {"after_two_failures": false, "after_20s": true, "after_success": game.connection_badge.visible}
 	# --- a tap is never refused because another request is in flight
 	game.send_request("state", null, true)
 	check(game.busy, "the first foreground request is in flight")

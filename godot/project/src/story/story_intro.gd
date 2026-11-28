@@ -25,6 +25,7 @@ const UiKit = preload("res://src/ui_kit.gd")
 ## Seconds behind black before t = 0: the presentation fog finishes its reveal (2 s) and the trees of
 ## the clearing stream in, so the first frame is the finished map.
 const PREROLL := 3.0
+const CITY_YAW := 45.0
 const HUMANS := "res://assets/forest_rescue/humans/"
 const PROPS := "res://assets/forest_rescue/props/"
 const VOICE := "res://assets/story/voice/"
@@ -512,8 +513,10 @@ func sfx(path: String, gain_db := 0.0, pitch := 1.0) -> void:
 
 ## Camera key: from the previous key the view eases (smootherstep) to this one by `time`.
 ## at: Vector3 (world) | String (actor id, followed live) | Array [id, id] (midpoint).
-func cam(time: float, at_value: Variant, zoom: float, offset := Vector3.ZERO) -> void:
-	cam_keys.append({"t": time, "at": at_value, "zoom": zoom, "offset": offset})
+## yaw: where the camera looks from, degrees around Y (45 = the city camera, from +X+Z); a close-up
+## may turn to face a detail and must turn back to 45 before the game takes the camera again.
+func cam(time: float, at_value: Variant, zoom: float, offset := Vector3.ZERO, yaw := CITY_YAW) -> void:
+	cam_keys.append({"t": time, "at": at_value, "zoom": zoom, "offset": offset, "yaw": yaw})
 
 func fade(time: float, alpha: float) -> void:
 	fade_keys.append([time, alpha])
@@ -535,7 +538,7 @@ func script_timeline() -> void:
 	# Tim and Danko face each other 0.6 m apart (lf_story_support partner placement) along the screen's
 	# horizontal, seen through the bars of the +X side: clear of the door and the corner post.
 	# The latch beat starts at LT (lf_story_latch_reach; every cue after it is relative to it).
-	const LT := 26.7
+	const LT := 27.3
 	# The latch_reach root (lf_story_clips meta cagePlacement): inside, by the latch-side bars, facing the door.
 	var latch_spot := CAGE + Vector2(0.95, 0.95)
 	var exit := Vector2(-76.4, -8.3)
@@ -636,30 +639,32 @@ func script_timeline() -> void:
 		sweep_goal = 0.0
 		orc_glow_goal = 0.0)
 	# The warden turns his back: Tenerys is sent to the edge, the wolf with him.
+	at(21.0, func() -> void: say("l03_orc_edge"))
 	at(21.6, func() -> void:
 		face("orc", Vector2(-92.0, -10.0), 0.9)
 		play("orc", ["lf_orc_turn_left"], 0.2))
-	at(21.8, func() -> void: say("l03_orc_edge"))
 	cam(22.8, Vector3(-82.0, 0, -13.0), 15.0)
 	at(23.3, func() -> void:
 		walk("orc", [Vector2(-85.4, -12.2)], 1.1, ["lf_orc_walk"], ["lf_orc_idle"], deg_to_rad(-80.0))
 		walk("tenerys", [Vector2(-80.5, 2.0), Vector2(-86.0, 8.0)], 3.0, ["walk"], [])
 		walk("wolf", [Vector2(-66.0, -18.0), Vector2(-62.0, -26.0)], 3.0, ["walk"], []))
 	# The line is over before he moves: he gets up as the warden walks off and creeps to the latch.
-	at(24.0, func() -> void:
+	at(24.9, func() -> void:
 		play("danko", ["lf_civilian_stand_up", "lf_civilian_wait"], 0.25, true, 1.4)
 		play("tim", ["lf_civilian_cage_wait"], 0.35))
-	cam(25.2, cage_point(Vector3(0.75, 0.95, 0.4)), 6.5)
-	at(25.3, func() -> void:
-		walk("danko", [CAGE + Vector2(0.85, 0.35), latch_spot], 1.0, ["lf_story_sneak"], [], 0.0, 0.0, 0.8))
+	cam(25.0, cage_point(Vector3(0.75, 0.95, 0.1)), 6.0)
+	cam(25.9, cage_point(Vector3(0.8, 0.95, 0.3)), 5.6)
+	at(26.0, func() -> void:
+		walk("danko", [CAGE + Vector2(0.85, 0.35), latch_spot], 1.1, ["lf_story_sneak"], [], 0.0, 0.0, 0.85))
 	at(LT, func() -> void:
 		hide_actor("tenerys")
 		hide_actor("wolf")
 		face("danko", 0.0, 0.25)
 		play("danko", ["lf_story_latch_reach"], 0.2))
 	# Close-up: the hand on the latch (marker lift 1.6 s → cage latch_clear 0.7 s).
-	cam(LT + 0.3, cage_point(Vector3(0.95, 1.2, 1.55)), 2.5)
-	cam(LT + 2.4, cage_point(Vector3(0.98, 1.15, 1.6)), 2.7)    # held through lift, click and push
+	# The close-up turns to face the door (yaw 15°: hand, latch and the gap in clear view).
+	cam(LT + 0.5, cage_point(Vector3(1.0, 1.25, 1.55)), 2.9, Vector3.ZERO, 15.0)
+	cam(LT + 2.7, cage_point(Vector3(1.05, 1.15, 1.6)), 3.1, Vector3.ZERO, 15.0)    # held through lift, click and push
 	at(LT + 0.9, func() -> void:
 		var cage: Rig = cast.cage
 		cage.play(["lf_cage_unlock"], 0.0, true))
@@ -672,8 +677,8 @@ func script_timeline() -> void:
 	at(LT + 3.0, func() -> void:
 		play("danko", ["lf_story_squeeze"], 0.2)
 		follow_root_path("danko", "lf_story_squeeze"))
-	cam(LT + 3.3, cage_point(Vector3(1.3, 0.9, 2.1)), 5.0)    # the squeeze through the gap
-	cam(LT + 4.6, cage_point(Vector3(1.9, 0.8, 2.9)), 6.5)
+	cam(LT + 3.4, cage_point(Vector3(1.3, 0.9, 2.1)), 5.0, Vector3.ZERO, 28.0)    # the squeeze through the gap
+	cam(LT + 4.6, cage_point(Vector3(1.9, 0.8, 2.9)), 6.5, Vector3.ZERO, 40.0)
 	at(LT + 4.7, func() -> void:
 		door_goal = 0.0
 		door_rate = 0.5
@@ -975,15 +980,17 @@ func update_camera() -> void:
 	var from: Dictionary = cam_keys[index]
 	var at_point := key_point(from.at) + (from.offset as Vector3)
 	var zoom := float(from.zoom)
+	var yaw := float(from.yaw)
 	if index < cam_keys.size() - 1 and t > float(from.t):
 		var to: Dictionary = cam_keys[index + 1]
 		var k := clampf((t - float(from.t)) / maxf(float(to.t) - float(from.t), 0.001), 0.0, 1.0)
 		var s := k * k * k * (k * (k * 6.0 - 15.0) + 10.0)
 		at_point = at_point.lerp(key_point(to.at) + (to.offset as Vector3), s)
 		zoom = exp(lerpf(log(zoom), log(float(to.zoom)), s))
-	set_view(at_point, zoom)
+		yaw = lerpf(yaw, float(to.yaw), s)
+	set_view(at_point, zoom, yaw)
 
-func set_view(at_point: Vector3, zoom: float) -> void:
+func set_view(at_point: Vector3, zoom: float, yaw := CITY_YAW) -> void:
 	var ground: Vector3 = stage.ground_point(Vector3(at_point.x, 0, at_point.z))
 	# A key above the ground (the latch, the door) centres that point; actors centre their feet.
 	var target := Vector3(at_point.x, maxf(ground.y, at_point.y), at_point.z)
@@ -992,6 +999,11 @@ func set_view(at_point: Vector3, zoom: float) -> void:
 	stage.camera_target = target
 	stage.camera_zoom = zoom
 	stage.apply_camera_pose()
+	if absf(yaw - CITY_YAW) > 0.01:
+		# Same distance and pitch as the city camera (target + (75, 83, 75)), turned around Y.
+		var flat := Vector2(75.0, 75.0).length()
+		stage.camera.position = target + Vector3(sin(deg_to_rad(yaw)) * flat, 83.0, cos(deg_to_rad(yaw)) * flat)
+		stage.camera.look_at(target, Vector3.UP)
 	stage.refresh_camera_visibility(false)
 
 func update_fade() -> void:

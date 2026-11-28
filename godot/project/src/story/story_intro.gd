@@ -615,9 +615,10 @@ func show_caption(text: String) -> void:
 func script_timeline() -> void:
 	var cage_door_out := CAGE + Vector2(0.0, 2.7)
 	var inside := {
-		"lada": CAGE + Vector2(-0.85, -0.2), "sava": CAGE + Vector2(-0.3, -0.75), "tim": CAGE + Vector2(0.92, -0.77),
+		"lada": CAGE + Vector2(-0.85, -0.2), "sava": CAGE + Vector2(-0.95, 0.6), "tim": CAGE + Vector2(0.92, -0.77),
 		"danko": CAGE + Vector2(0.5, -0.35)}
-	# Tim and Danko face each other 0.6 m apart (lf_story_support partner placement) along the screen's
+	# Sava sits at the front-left corner: deeper in, the gate's top beam would cut him off at the knees in
+	# the latch close-up. Tim and Danko face each other 0.6 m apart (lf_story_support partner placement) along the screen's
 	# horizontal, seen through the bars of the +X side: clear of the door and the corner post.
 	# The latch beat starts at LT (lf_story_latch_reach; every cue after it is relative to it).
 	const LT := 27.3
@@ -738,6 +739,12 @@ func script_timeline() -> void:
 	cam(25.9, cage_point(Vector3(0.8, 0.95, 0.3)), 5.6)
 	at(26.0, func() -> void:
 		walk("danko", [CAGE + Vector2(0.85, 0.35), latch_spot], 1.1, ["lf_story_sneak"], [], 0.0, 0.0, 0.85))
+	# Tim keeps watch: a step after him to the bars behind his shoulder, eyes on the warden (in the
+	# latch close-up he stands whole behind Danko, not cut off at the waist by the frame top).
+	at(26.4, func() -> void:
+		walk("tim", [CAGE + Vector2(1.12, 0.28)], 0.8, ["lf_story_sneak"], ["lf_civilian_cage_wait"], NAN, 0.0, 0.8))
+	at(27.6, func() -> void:
+		face("tim", Vector2(-85.4, -12.2), 0.6))
 	at(LT, func() -> void:
 		hide_actor("tenerys")
 		hide_actor("wolf")

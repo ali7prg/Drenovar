@@ -26,6 +26,8 @@ const UiKit = preload("res://src/ui_kit.gd")
 ## the clearing stream in, so the first frame is the finished map.
 const PREROLL := 3.0
 const CITY_YAW := 45.0
+## The city camera's pitch: target + (75, 83, 75) looks down atan(83 / 106.07).
+const CITY_PITCH := 38.04
 const HUMANS := "res://assets/forest_rescue/humans/"
 const PROPS := "res://assets/forest_rescue/props/"
 const VOICE := "res://assets/story/voice/"
@@ -288,7 +290,7 @@ func build_props() -> void:
 	var door := hall_door()
 	var out := hall_out()
 	var side := Vector3(out.z, 0, -out.x)
-	var hook_base: Vector3 = stage.ground_point(door + side * 1.7 + out * 0.6)
+	var hook_base: Vector3 = stage.ground_point(door + side * 2.2 + out * 0.7)
 	lantern_hook = Node3D.new()
 	lantern_hook.name = "LanternHook"
 	root.add_child(lantern_hook)
@@ -317,20 +319,75 @@ func build_props() -> void:
 	lantern_prop = make_lantern()
 	lantern_hook.add_child(lantern_prop)
 	lantern_prop.position = Vector3(0, 1.82, 0.45)
-	var bench := MeshInstance3D.new()
-	var bench_mesh := BoxMesh.new()
-	bench_mesh.size = Vector3(1.3, 0.45, 0.42)
-	bench.mesh = bench_mesh
-	bench.material_override = wood
+	# A plank bench against the facade (seat top 0.45 m, as lf_story_sit_down expects) and a water
+	# barrel by the door, where Mitya dips the cup.
+	var bench := Node3D.new()
 	bench.name = "Bench"
 	root.add_child(bench)
+	var seat_wood := StandardMaterial3D.new()
+	seat_wood.albedo_color = Color("#7a5634")
+	seat_wood.roughness = 0.9
+	for part: Array in [[Vector3(1.4, 0.07, 0.4), Vector3(0, 0.415, 0), seat_wood],
+			[Vector3(0.08, 0.38, 0.34), Vector3(-0.55, 0.19, 0), wood], [Vector3(0.08, 0.38, 0.34), Vector3(0.55, 0.19, 0), wood],
+			[Vector3(1.1, 0.06, 0.05), Vector3(0, 0.12, 0), wood]]:
+		var mesh := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = part[0]
+		mesh.mesh = box
+		mesh.position = part[1]
+		mesh.material_override = part[2]
+		bench.add_child(mesh)
 	var seat := bench_spot()
-	bench.position = stage.ground_point(seat) + Vector3.UP * 0.225
+	bench.position = stage.ground_point(seat)
 	bench.look_at(bench.position + out, Vector3.UP)
+	var barrel := Node3D.new()
+	barrel.name = "WaterBarrel"
+	root.add_child(barrel)
+	var staves := MeshInstance3D.new()
+	var staves_mesh := CylinderMesh.new()
+	staves_mesh.top_radius = 0.27
+	staves_mesh.bottom_radius = 0.25
+	staves_mesh.height = 0.78
+	staves.mesh = staves_mesh
+	var barrel_wood := StandardMaterial3D.new()
+	barrel_wood.albedo_color = Color("#6b4a2c")
+	barrel_wood.roughness = 0.85
+	staves.material_override = barrel_wood
+	staves.position = Vector3(0, 0.39, 0)
+	barrel.add_child(staves)
+	for hoop_y in [0.14, 0.64]:
+		var hoop := MeshInstance3D.new()
+		var hoop_mesh := CylinderMesh.new()
+		hoop_mesh.top_radius = 0.275
+		hoop_mesh.bottom_radius = 0.275
+		hoop_mesh.height = 0.05
+		hoop.mesh = hoop_mesh
+		var iron := StandardMaterial3D.new()
+		iron.albedo_color = Color("#2e2a26")
+		iron.metallic = 0.6
+		iron.roughness = 0.5
+		hoop.material_override = iron
+		hoop.position = Vector3(0, hoop_y, 0)
+		barrel.add_child(hoop)
+	var water := MeshInstance3D.new()
+	var water_mesh := CylinderMesh.new()
+	water_mesh.top_radius = 0.24
+	water_mesh.bottom_radius = 0.24
+	water_mesh.height = 0.02
+	water.mesh = water_mesh
+	var water_material := StandardMaterial3D.new()
+	water_material.albedo_color = Color("#22323a")
+	water_material.metallic = 0.3
+	water_material.roughness = 0.08
+	water.material_override = water_material
+	water.position = Vector3(0, 0.73, 0)
+	barrel.add_child(water)
 	cup_prop = StoryCast.make_cup()
 	lantern_hook.visible = false
 	bench.visible = false
+	barrel.visible = false
 	cast["bench"] = bench
+	cast["barrel"] = barrel
 	cast["hook"] = lantern_hook
 
 func make_lantern() -> Node3D:
@@ -341,6 +398,17 @@ func make_lantern() -> Node3D:
 	if scene != null:
 		var model: Node3D = scene.instantiate()
 		holder.add_child(model)
+		# Its glass is lit white and clips to a flat white panel by day: a warm flame colour instead.
+		for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+			for i in mesh.get_surface_override_material_count():
+				var material := mesh.get_active_material(i) as BaseMaterial3D
+				if material == null or not material.emission_enabled:
+					continue
+				var warm := material.duplicate() as BaseMaterial3D
+				warm.albedo_color = Color("#f3a24a")
+				warm.emission = Color("#ff9a3c")
+				warm.emission_energy_multiplier = 0.9
+				mesh.set_surface_override_material(i, warm)
 		var light := OmniLight3D.new()
 		light.light_color = Color("#ffb45e")
 		light.light_energy = 1.4
@@ -369,8 +437,9 @@ func cage_point(local: Vector3) -> Vector3:
 
 ## The hall's front: model yaw 0 in the town plan (landscape.gd model_transform), front faces +Z.
 const HALL_FRONT := Vector3(0, 0, 1)
-## The door steps of the hall I model, from its plan point (measured in the city camera).
-const HALL_DOOR_OFFSET := Vector3(3.6, 0, 5.4)
+## The front edge of the door step of the hall I model (starterHall), from its plan point: the double
+## door is centred on the +Z facade (measured with ground pegs, camera from the south).
+const HALL_DOOR_OFFSET := Vector3(0.0, 0, 1.6)
 ## The ruined watchpost (lf_env_ruined_watchpost_1 of the forest world): the cover on the trail.
 const RUIN := Vector2(-69.7, 24.8)
 
@@ -393,7 +462,7 @@ func hall_door() -> Vector3:
 func bench_spot() -> Vector3:
 	var out := hall_out()
 	var side := Vector3(out.z, 0, -out.x)
-	return hall_door() + out * 1.6 - side * 1.4
+	return hall_door() - side * 2.6 - out * 0.45    # against the facade, left of the door step
 
 # ------------------------------------------------------------------ presentation fog
 
@@ -420,6 +489,13 @@ func present_forest(on: bool) -> void:
 	forest.set_presentation({"access": {"unlocked": true}, "intro": {"status": "acknowledged"},
 		"fog": {"visibleBase64": Marshalls.raw_to_base64(bits), "revision": 9_000_000}, "serverTime": now})
 	forest_presented = true
+
+## The town's own walking people (src/townsfolk.gd) stay out of the home scene at the hall door, so
+## the family reads; they are back when the cutscene ends.
+func town_people(on: bool) -> void:
+	var people: Variant = stage.get("townsfolk")
+	if people is Node3D and is_instance_valid(people):
+		(people as Node3D).visible = on
 
 func stamp(bits: PackedByteArray, p: Vector2, r: float) -> void:
 	var x := p.x - r
@@ -467,7 +543,12 @@ func walk(id: String, points: Array, speed: float, clip: Array, end_clip: Array 
 ## the actor keeps its yaw): for in-place clips whose feet were authored against that path.
 func follow_root_path(id: String, clip_id: String) -> void:
 	var actor: Rig = cast[id]
-	var samples: Array = StoryCast.clips_meta.get(clip_id, {}).get("rootPathXYZ_m", [])
+	var meta: Dictionary = StoryCast.clips_meta.get(clip_id, {})
+	var samples: Array = meta.get("rootPathXYZ_m", [])
+	if samples.is_empty():
+		# Straight travel one-shots (halt, stumble) give the distance along their facing only.
+		for d: Variant in meta.get("rootPath_m", []):
+			samples.append([0.0, 0.0, float(d)])
 	if samples.is_empty():
 		return
 	var start := Vector2(actor.position.x, actor.position.z)
@@ -515,8 +596,9 @@ func sfx(path: String, gain_db := 0.0, pitch := 1.0) -> void:
 ## at: Vector3 (world) | String (actor id, followed live) | Array [id, id] (midpoint).
 ## yaw: where the camera looks from, degrees around Y (45 = the city camera, from +X+Z); a close-up
 ## may turn to face a detail and must turn back to 45 before the game takes the camera again.
-func cam(time: float, at_value: Variant, zoom: float, offset := Vector3.ZERO, yaw := CITY_YAW) -> void:
-	cam_keys.append({"t": time, "at": at_value, "zoom": zoom, "offset": offset, "yaw": yaw})
+## pitch: how steeply it looks down (degrees); steeper than the city camera sees over a tall roof.
+func cam(time: float, at_value: Variant, zoom: float, offset := Vector3.ZERO, yaw := CITY_YAW, pitch := CITY_PITCH) -> void:
+	cam_keys.append({"t": time, "at": at_value, "zoom": zoom, "offset": offset, "yaw": yaw, "pitch": pitch})
 
 func fade(time: float, alpha: float) -> void:
 	fade_keys.append([time, alpha])
@@ -719,9 +801,12 @@ func script_timeline() -> void:
 		hide_actor("tenerys")
 		walk("danko", [hide_spot + Vector2(5.0, -4.6), Vector2(-58.0, 17.0), Vector2(-51.0, 10.5)], 3.4, ["lf_story_run"], []))
 	cam(55.4, "danko", 15.0, Vector3(2.0, 0, -2.0))
+	cam(56.25, "danko", 15.0, Vector3(2.0, 0, -2.0))    # held into the black; the town shot cuts in under it
 	fade(55.6, 0.0)
 	fade(56.3, 1.0)
 	# ----- beat 4: home (town hall I) -----
+	# The hall's door faces +Z onto its paved forecourt; the barracks stands 6 m across it, so the town
+	# shots look from the south and steeper than the city camera (pitch 50) to see the forecourt over it.
 	var door := hall_door()
 	var out := hall_out()
 	var side := Vector3(out.z, 0, -out.x)
@@ -730,92 +815,125 @@ func script_timeline() -> void:
 	var side2 := Vector2(side.x, side.z)
 	var bench := bench_spot()
 	var bench2 := Vector2(bench.x, bench.z)
-	var threshold := door2 + out2 * 1.0
-	var entry_dir := (threshold - Vector2(-20.0, 6.0)).normalized()
+	var barrel2 := door2 + side2 * 1.45 - out2 * 0.4
+	var town_yaw := rad_to_deg(atan2(out2.x, out2.y))    # the camera in front of the door
+	const TOWN_PITCH := 50.0
+	# Danko comes in from the forest side along the forecourt (side2 = along the facade): runs, gives
+	# out to a stagger, trips, and grandpa, who has rushed out, catches him.
+	var lane_start := door2 - side2 * 18.0 - out2 * 0.2
+	var lane_mid := door2 - side2 * 5.0 + out2 * 0.1
+	var tire_at := door2 - side2 * 3.2 + out2 * 0.7
+	var trip_at := door2 - side2 * 2.0 + out2 * 0.9
+	var stumble_len := float(StoryCast.clips_meta.get("lf_story_stumble", {}).get("rootDistance_m", 0.92))
+	var fallen := trip_at + side2 * stumble_len
+	var catch_at := fallen + side2 * 0.8
+	var run_end := 56.5 + (lane_start.distance_to(lane_mid) + lane_mid.distance_to(tire_at)) / 3.4
+	var trip_t := run_end + tire_at.distance_to(trip_at) / 0.95
+	var ostap_start := door2 + side2 * 0.6 + out2 * 0.45
+	var D := trip_t + 1.45 - 61.6    # everything at the bench runs this much later than its listed time
 	at(56.5, func() -> void:
 		present_forest(false)
+		town_people(false)
 		var sound := get_node_or_null("/root/Sound")
 		if sound != null:
 			sound.set_theme_override("city")
 		hide_actor("danko")
 		show_actor("bench", bench2, 0.0)
-		(cast.bench as Node3D).position = p3(bench2, 0.225)
+		(cast.bench as Node3D).position = p3(bench2)
 		(cast.bench as Node3D).look_at((cast.bench as Node3D).position + out, Vector3.UP)
+		show_actor("barrel", barrel2, 0.0)
 		show_actor("hook", Vector2(lantern_hook.position.x, lantern_hook.position.z), rad_to_deg(lantern_hook.rotation.y))
-		show_actor("ostap", door2 + side2 * 0.6 + out2 * 0.4, rad_to_deg(atan2(out2.x, out2.y)), ["lf_civilian_wait"])
-		show_actor("vesna", door2 - side2 * 0.9 - out2 * 0.2, rad_to_deg(atan2(out2.x, out2.y)) + 20.0, ["lf_civilian_wait"])
-		show_actor("mitya", door2 - side2 * 2.4 + out2 * 1.2, rad_to_deg(atan2(out2.x, out2.y)) - 30.0, ["lf_civilian_wait"])
-		show_actor("danko", threshold - entry_dir * 19.0, rad_to_deg(atan2(entry_dir.x, entry_dir.y)))
-		walk("danko", [threshold - entry_dir * 1.4], 3.4, ["lf_story_run"], ["lf_story_stumble"]))
-	# Into the settlement across the open square: a close tracking shot in profile, so the run reads,
-	# then the camera hands over to the threshold where grandpa catches him.
-	cam(56.5, "danko", 7.0, Vector3(1.4, 0, -0.35))
-	cam(58.0, "danko", 7.4, Vector3(1.3, 0, -0.3))
-	cam(59.6, p3(threshold - entry_dir * 3.0), 12.0)    # he comes round the house into the square
+		show_actor("ostap", ostap_start, town_yaw - 25.0, ["lf_civilian_wait"])
+		show_actor("vesna", door2 + side2 * 1.0 + out2 * 0.3, town_yaw - 15.0, ["lf_civilian_wait"])
+		show_actor("mitya", door2 + side2 * 3.4 + out2 * 0.9, town_yaw - 40.0, ["lf_civilian_wait"])
+		show_actor("danko", lane_start, rad_to_deg(atan2(side2.x, side2.y)))
+		walk("danko", [lane_mid, tire_at], 3.4, ["lf_story_run"], []))
+	# A close profile track as he comes in (so the run reads), then the forecourt with the family at the
+	# door, then in on the catch.
+	cam(56.5, "danko", 7.0, side * 1.6, town_yaw, TOWN_PITCH)
+	cam(58.6, "danko", 7.6, side * 1.9, town_yaw, TOWN_PITCH)
+	cam(60.3, p3(door2 - side2 * 1.6 + out2 * 0.7), 9.5, Vector3.ZERO, town_yaw, TOWN_PITCH)
+	cam(trip_t - 0.7, p3(door2 - side2 * 1.6 + out2 * 0.7), 9.5, Vector3.ZERO, town_yaw, TOWN_PITCH)
+	cam(trip_t + 0.8, p3(fallen.lerp(catch_at, 0.5) + out2 * 0.2), 5.6, Vector3.ZERO, town_yaw, TOWN_PITCH)
+	cam(61.6 + D, p3(fallen.lerp(catch_at, 0.5) + out2 * 0.2), 5.8, Vector3.ZERO, town_yaw, TOWN_PITCH)
 	fade(56.6, 1.0)
 	fade(57.3, 0.0)
 	at(57.2, func() -> void: show_caption("Drenovar"))
-	cam(60.6, p3(threshold + out2 * 0.6), 11.0)
-	at(60.4, func() -> void:
-		face("ostap", threshold - entry_dir * 2.0, 0.25)
-		walk("ostap", [threshold], 2.2, ["lf_civilian_follow"], ["lf_story_catch"]))
-	at(61.6, func() -> void:
-		play("danko", ["lf_civilian_follow_tired"], 0.25)
+	at(run_end, func() -> void:
+		walk("danko", [trip_at], 0.95, ["lf_civilian_follow_tired"], []))
+	at(run_end - 0.3, func() -> void:
+		face("ostap", tire_at, 0.3)
+		face("vesna", tire_at, 0.5))
+	at(trip_t - 0.9, func() -> void:
+		walk("ostap", [catch_at], ostap_start.distance_to(catch_at) / 0.8, ["lf_civilian_follow"], ["lf_civilian_wait"], atan2(-side2.x, -side2.y)))
+	at(trip_t, func() -> void:
+		walkers.erase("danko")
+		(cast.danko as Node3D).position = p3(trip_at)
+		play("danko", ["lf_story_stumble"], 0.12)
+		follow_root_path("danko", "lf_story_stumble"))
+	at(trip_t + 0.15, func() -> void:
+		play("ostap", ["lf_story_catch"], 0.12))
+	at(61.6 + D, func() -> void:
+		play("danko", ["lf_civilian_follow_tired"], 0.3)
 		walk("danko", [bench2 + out2 * 0.05], 0.9, ["lf_civilian_follow_tired"], ["lf_story_sit_down", "lf_story_sit"], atan2(out2.x, out2.y))
+		play("ostap", ["lf_civilian_wait"], 0.4)
 		walk("vesna", [bench2 + side2 * 0.7 + out2 * 0.5], 1.2, ["lf_civilian_follow"], ["lf_story_guide_sit"], atan2(-side2.x - out2.x, -side2.y - out2.y))
-		walk("mitya", [door2 - out2 * 1.5], 2.8, ["lf_story_run"], []))
-	at(64.8, func() -> void:
-		walk("ostap", [bench2 - side2 * 1.0 + out2 * 0.6], 1.0, ["lf_civilian_follow"], ["lf_civilian_wait"], atan2(side2.x, side2.y))
-		walk("mitya", [bench2 + out2 * 1.1 - side2 * 0.25], 1.6, ["lf_story_carry_cup"], ["lf_story_offer"], atan2(-out2.x, -out2.y))
+		# Mitya runs to the water barrel by the door and dips the cup.
+		var dip := barrel2 + out2 * 0.55 + side2 * 0.2
+		walk("mitya", [dip], 1.8, ["lf_civilian_follow"], ["lf_story_point_low"], atan2(barrel2.x - dip.x, barrel2.y - dip.y)))
+	at(63.0 + D, func() -> void:
 		var holder := StoryCast.attach(cast.mitya, "PropR", cup_prop)
 		cup_prop.visible = holder != null)
-	cam(65.0, p3(bench2 + out2 * 0.6), 7.2)
-	at(66.8, func() -> void:
+	at(64.8 + D, func() -> void:
+		walk("ostap", [bench2 - side2 * 1.0 + out2 * 0.6], 1.0, ["lf_civilian_follow"], ["lf_civilian_wait"], atan2(side2.x, side2.y))
+		walk("mitya", [bench2 + out2 * 1.1 - side2 * 0.25], 1.6, ["lf_story_carry_cup"], ["lf_story_offer"], atan2(-out2.x, -out2.y)))
+	cam(64.6 + D, p3(bench2 + side2 * 0.9 + out2 * 1.1), 6.4, Vector3.ZERO, town_yaw + 15.0, TOWN_PITCH)
+	at(66.8 + D, func() -> void:
 		play("danko", ["lf_story_show_wrist"], 0.25)
 		play("mitya", ["lf_story_point_low"], 0.2)
 		say("l05_mit_wrist"))
-	at(69.5, func() -> void:
+	at(69.5 + D, func() -> void:
 		if cup_prop.get_parent() != null:
 			cup_prop.get_parent().remove_child(cup_prop)
 		StoryCast.attach(cast.danko, "PropR", cup_prop)
 		play("danko", ["lf_story_drink"], 0.3)
 		play("mitya", ["lf_civilian_wait"], 0.3))
-	at(70.4, func() -> void:
+	at(70.4 + D, func() -> void:
 		play("danko", ["lf_story_talk_seated"], 0.3)
 		say("l06_dan_cage"))
-	at(75.9, func() -> void:
+	at(75.9 + D, func() -> void:
 		face("mitya", Vector2((cast.ostap as Node3D).position.x, (cast.ostap as Node3D).position.z), 0.4)
 		play("mitya", ["lf_story_talk"], 0.3)
 		say("l07_mit_others"))
-	at(78.2, func() -> void:
+	at(78.2 + D, func() -> void:
 		face("ostap", Vector2((cast.danko as Node3D).position.x, (cast.danko as Node3D).position.z), 0.4)
 		play("ostap", ["lf_story_talk"], 0.3)
 		say("l08_ost_many"))
-	at(79.6, func() -> void:
+	at(79.6 + D, func() -> void:
 		play("danko", ["lf_story_talk_seated"], 0.3)
 		say("l09_dan_three"))
 	# Grandpa answers with a deed: the lantern from its hook.
 	var hook_xz := Vector2(lantern_hook.position.x, lantern_hook.position.z)
 	var under_hook := hook_xz + out2 * 0.05
-	at(82.4, func() -> void:
+	at(82.4 + D, func() -> void:
 		walk("ostap", [under_hook], 1.4, ["lf_civilian_follow"], ["lf_story_take_lantern"], atan2(out2.x, out2.y) + PI))
-	cam(83.0, p3(bench2.lerp(hook_xz, 0.5)), 8.5)
-	at(83.6, func() -> void:
+	cam(83.0 + D, p3(bench2.lerp(hook_xz, 0.5)), 8.5, Vector3.ZERO, town_yaw + 10.0, TOWN_PITCH)
+	at(83.6 + D, func() -> void:
 		face("vesna", door2, 0.5)
 		say("l10_ves_bread"))
-	at(84.6, func() -> void:
+	at(84.6 + D, func() -> void:
 		walk("vesna", [door2 - out2 * 0.6], 1.2, ["lf_civilian_follow"], []))
-	at(87.6, func() -> void:
+	at(87.6 + D, func() -> void:
 		hide_actor("vesna"))
-	at(88.8, func() -> void:
+	at(88.8 + D, func() -> void:
 		walk("ostap", [door2 + out2 * 2.2 - side2 * 0.6, bench2 + out2 * 1.6], 1.3, ["lf_story_walk_lantern"], ["lf_civilian_wait"], atan2(-side2.x, -side2.y))
 		play("danko", ["lf_civilian_stand_up", "lf_civilian_wait"], 0.3)
 		walk("mitya", [bench2 + out2 * 2.0 - side2 * 1.2], 1.6, ["lf_civilian_follow"], ["lf_civilian_wait"], atan2(-side2.x, -side2.y)))
-	at(87.7, func() -> void: sfx(AUDIO + "sfx/ui/collect_0.ogg", -16.0))
+	at(87.7 + D, func() -> void: sfx(AUDIO + "sfx/ui/collect_0.ogg", -16.0))
 	# Back to the city camera of the player: the hall in the middle, ready to be tapped.
-	cam(89.0, p3(bench2 + out2 * 1.2), 10.0)
-	cam(94.0, start_target, start_zoom)
-	length = 95.0
+	cam(89.0 + D, p3(bench2 + out2 * 1.2), 10.0, Vector3.ZERO, town_yaw + 10.0, TOWN_PITCH)
+	cam(94.0 + D, start_target, start_zoom)
+	length = 95.0 + D
 	cues.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))
 	cam_keys.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a.t) < float(b.t))
 
@@ -985,6 +1103,7 @@ func update_camera() -> void:
 	var at_point := key_point(from.at) + (from.offset as Vector3)
 	var zoom := float(from.zoom)
 	var yaw := float(from.yaw)
+	var pitch := float(from.pitch)
 	if index < cam_keys.size() - 1 and t > float(from.t):
 		var to: Dictionary = cam_keys[index + 1]
 		var k := clampf((t - float(from.t)) / maxf(float(to.t) - float(from.t), 0.001), 0.0, 1.0)
@@ -992,9 +1111,10 @@ func update_camera() -> void:
 		at_point = at_point.lerp(key_point(to.at) + (to.offset as Vector3), s)
 		zoom = exp(lerpf(log(zoom), log(float(to.zoom)), s))
 		yaw = lerpf(yaw, float(to.yaw), s)
-	set_view(at_point, zoom, yaw)
+		pitch = lerpf(pitch, float(to.pitch), s)
+	set_view(at_point, zoom, yaw, pitch)
 
-func set_view(at_point: Vector3, zoom: float, yaw := CITY_YAW) -> void:
+func set_view(at_point: Vector3, zoom: float, yaw := CITY_YAW, pitch := CITY_PITCH) -> void:
 	var ground: Vector3 = stage.ground_point(Vector3(at_point.x, 0, at_point.z))
 	# A key above the ground (the latch, the door) centres that point; actors centre their feet.
 	var target := Vector3(at_point.x, maxf(ground.y, at_point.y), at_point.z)
@@ -1003,10 +1123,12 @@ func set_view(at_point: Vector3, zoom: float, yaw := CITY_YAW) -> void:
 	stage.camera_target = target
 	stage.camera_zoom = zoom
 	stage.apply_camera_pose()
-	if absf(yaw - CITY_YAW) > 0.01:
-		# Same distance and pitch as the city camera (target + (75, 83, 75)), turned around Y.
-		var flat := Vector2(75.0, 75.0).length()
-		stage.camera.position = target + Vector3(sin(deg_to_rad(yaw)) * flat, 83.0, cos(deg_to_rad(yaw)) * flat)
+	if absf(yaw - CITY_YAW) > 0.01 or absf(pitch - CITY_PITCH) > 0.01:
+		# Same distance as the city camera (target + (75, 83, 75)), turned around Y and tilted.
+		var d := Vector3(75.0, 83.0, 75.0).length()
+		var y := deg_to_rad(yaw)
+		var p := deg_to_rad(pitch)
+		stage.camera.position = target + Vector3(sin(y) * cos(p), sin(p), cos(y) * cos(p)) * d
 		stage.camera.look_at(target, Vector3.UP)
 	stage.refresh_camera_visibility(false)
 
@@ -1036,6 +1158,7 @@ func finish(was_skipped: bool) -> void:
 		return
 	running = false
 	present_forest(false)
+	town_people(true)
 	var sound := get_node_or_null("/root/Sound")
 	if sound != null:
 		sound.set_theme_override("")

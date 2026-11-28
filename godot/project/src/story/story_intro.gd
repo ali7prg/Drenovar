@@ -530,10 +530,12 @@ func show_caption(text: String) -> void:
 func script_timeline() -> void:
 	var cage_door_out := CAGE + Vector2(0.0, 2.7)
 	var inside := {
-		"lada": CAGE + Vector2(-0.85, -0.2), "sava": CAGE + Vector2(-0.3, -0.75), "tim": CAGE + Vector2(0.77, -0.47),
-		"danko": CAGE + Vector2(0.35, -0.05)}
+		"lada": CAGE + Vector2(-0.85, -0.2), "sava": CAGE + Vector2(-0.3, -0.75), "tim": CAGE + Vector2(0.92, -0.77),
+		"danko": CAGE + Vector2(0.5, -0.35)}
 	# Tim and Danko face each other 0.6 m apart (lf_story_support partner placement) along the screen's
-	# horizontal, seen through the bars of the +X side: not behind the door, side by side in the frame.
+	# horizontal, seen through the bars of the +X side: clear of the door and the corner post.
+	# The latch beat starts at LT (lf_story_latch_reach; every cue after it is relative to it).
+	const LT := 26.7
 	# The latch_reach root (lf_story_clips meta cagePlacement): inside, by the latch-side bars, facing the door.
 	var latch_spot := CAGE + Vector2(0.95, 0.95)
 	var exit := Vector2(-76.4, -8.3)
@@ -611,8 +613,8 @@ func script_timeline() -> void:
 	cam(18.2, cage_point(Vector3(0.6, 1.0, 1.5)), 7.5)    # held on the gate until the bolt has dropped
 	at(17.8, func() -> void: sfx(FR_AUDIO + "fr_cage_latch.ogg", 2.0))   # the bolt falls (gate_close end)
 	# Close on the pair through the side bars for the drain, the buckling legs and the catch.
-	cam(19.2, cage_point(Vector3(0.55, 0.9, -0.25)), 5.2)
-	cam(21.6, cage_point(Vector3(0.55, 0.85, -0.25)), 5.6)
+	cam(19.2, cage_point(Vector3(0.71, 0.9, -0.56)), 4.6)
+	cam(21.6, cage_point(Vector3(0.71, 0.85, -0.56)), 5.0)
 	at(18.5, func() -> void:
 		face("orc", Vector2(CAGE.x, CAGE.y), 0.4)
 		play("orc", ["lf_orc_drain"], 0.2)
@@ -634,51 +636,53 @@ func script_timeline() -> void:
 		sweep_goal = 0.0
 		orc_glow_goal = 0.0)
 	# The warden turns his back: Tenerys is sent to the edge, the wolf with him.
-	at(22.2, func() -> void:
+	at(21.6, func() -> void:
 		face("orc", Vector2(-92.0, -10.0), 0.9)
 		play("orc", ["lf_orc_turn_left"], 0.2))
-	at(22.6, func() -> void: say("l03_orc_edge"))
+	at(21.8, func() -> void: say("l03_orc_edge"))
 	cam(22.8, Vector3(-82.0, 0, -13.0), 15.0)
 	at(23.3, func() -> void:
 		walk("orc", [Vector2(-85.4, -12.2)], 1.1, ["lf_orc_walk"], ["lf_orc_idle"], deg_to_rad(-80.0))
 		walk("tenerys", [Vector2(-80.5, 2.0), Vector2(-86.0, 8.0)], 3.0, ["walk"], [])
 		walk("wolf", [Vector2(-66.0, -18.0), Vector2(-62.0, -26.0)], 3.0, ["walk"], []))
-	at(23.6, func() -> void:
+	# The line is over before he moves: he gets up as the warden walks off and creeps to the latch.
+	at(24.0, func() -> void:
 		play("danko", ["lf_civilian_stand_up", "lf_civilian_wait"], 0.25, true, 1.4)
 		play("tim", ["lf_civilian_cage_wait"], 0.35))
-	at(25.0, func() -> void:
-		walk("danko", [CAGE + Vector2(0.8, 0.5), latch_spot], 1.0, ["lf_story_sneak"], [], 0.0, 0.0, 0.8))
-	at(26.2, func() -> void:
+	cam(25.2, cage_point(Vector3(0.75, 0.95, 0.4)), 6.5)
+	at(25.3, func() -> void:
+		walk("danko", [CAGE + Vector2(0.85, 0.35), latch_spot], 1.0, ["lf_story_sneak"], [], 0.0, 0.0, 0.8))
+	at(LT, func() -> void:
 		hide_actor("tenerys")
 		hide_actor("wolf")
 		face("danko", 0.0, 0.25)
 		play("danko", ["lf_story_latch_reach"], 0.2))
 	# Close-up: the hand on the latch (marker lift 1.6 s → cage latch_clear 0.7 s).
-	cam(26.4, cage_point(Vector3(0.95, 1.2, 1.55)), 3.4)
-	cam(28.6, cage_point(Vector3(0.98, 1.15, 1.6)), 3.6)    # held through lift, click and push
-	at(27.1, func() -> void:
+	cam(LT + 0.3, cage_point(Vector3(0.95, 1.2, 1.55)), 2.5)
+	cam(LT + 2.4, cage_point(Vector3(0.98, 1.15, 1.6)), 2.7)    # held through lift, click and push
+	at(LT + 0.9, func() -> void:
 		var cage: Rig = cast.cage
 		cage.play(["lf_cage_unlock"], 0.0, true))
-	at(27.8, func() -> void: sfx(FR_AUDIO + "fr_cage_latch.ogg", -6.0, 1.25))
-	at(28.4, func() -> void:
+	at(LT + 1.6, func() -> void: sfx(FR_AUDIO + "fr_cage_latch.ogg", -6.0, 1.25))
+	at(LT + 2.2, func() -> void:
 		door_time = 0.0
 		door_goal = 0.55
 		door_rate = 0.35
 		sfx(FR_AUDIO + "fr_gate_creak.ogg", -9.0, 0.9))
-	at(29.2, func() -> void:
+	at(LT + 3.0, func() -> void:
 		play("danko", ["lf_story_squeeze"], 0.2)
 		follow_root_path("danko", "lf_story_squeeze"))
-	cam(29.5, cage_point(Vector3(1.3, 0.9, 2.1)), 5.0)    # the squeeze through the gap
-	cam(30.8, cage_point(Vector3(1.9, 0.8, 2.9)), 6.5)
-	at(30.9, func() -> void:
+	cam(LT + 3.3, cage_point(Vector3(1.3, 0.9, 2.1)), 5.0)    # the squeeze through the gap
+	cam(LT + 4.6, cage_point(Vector3(1.9, 0.8, 2.9)), 6.5)
+	at(LT + 4.7, func() -> void:
 		door_goal = 0.0
 		door_rate = 0.5
 		play("danko", ["lf_story_sneak"], 0.2)
 		walk("danko", [CAGE + Vector2(2.3, 3.0), CAGE + Vector2(3.4, 4.6), Vector2(-75.6, -8.6)], 1.3, ["lf_story_sneak"], [], NAN, 0.0, 1.0))
-	at(31.4, func() -> void:
+	at(LT + 5.2, func() -> void:
 		face("tim", Vector2(CAGE.x + 1.0, CAGE.y + 3.0), 0.5)
 		play("tim", ["lf_civilian_look_back", "lf_civilian_cage_wait"], 0.3))
-	cam(32.0, ["danko", "orc"], 14.0)
+	cam(LT + 5.8, ["danko", "orc"], 14.0)
 	cam(35.4, "danko", 15.0)
 	# ----- beat 3: the chase -----
 	var trail: Array = trail_points("lf_site_01", "lf_mark_ruined_arch", Vector2(-75.6, -8.6), ARCH)

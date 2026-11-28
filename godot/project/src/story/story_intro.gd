@@ -616,8 +616,8 @@ func script_timeline() -> void:
 	cam(18.2, cage_point(Vector3(0.6, 1.0, 1.5)), 7.5)    # held on the gate until the bolt has dropped
 	at(17.8, func() -> void: sfx(FR_AUDIO + "fr_cage_latch.ogg", 2.0))   # the bolt falls (gate_close end)
 	# Close on the pair through the side bars for the drain, the buckling legs and the catch.
-	cam(19.2, cage_point(Vector3(0.71, 0.9, -0.56)), 4.6)
-	cam(21.6, cage_point(Vector3(0.71, 0.85, -0.56)), 5.0)
+	cam(19.2, cage_point(Vector3(0.71, 0.75, -0.56)), 3.6)
+	cam(21.6, cage_point(Vector3(0.71, 0.7, -0.56)), 4.0)
 	at(18.5, func() -> void:
 		face("orc", Vector2(CAGE.x, CAGE.y), 0.4)
 		play("orc", ["lf_orc_drain"], 0.2)
@@ -663,8 +663,8 @@ func script_timeline() -> void:
 		play("danko", ["lf_story_latch_reach"], 0.2))
 	# Close-up: the hand on the latch (marker lift 1.6 s → cage latch_clear 0.7 s).
 	# The close-up turns to face the door (yaw 15°: hand, latch and the gap in clear view).
-	cam(LT + 0.5, cage_point(Vector3(1.0, 1.25, 1.55)), 2.9, Vector3.ZERO, 15.0)
-	cam(LT + 2.7, cage_point(Vector3(1.05, 1.15, 1.6)), 3.1, Vector3.ZERO, 15.0)    # held through lift, click and push
+	cam(LT + 0.5, cage_point(Vector3(1.0, 1.5, 1.45)), 3.3, Vector3.ZERO, 15.0)
+	cam(LT + 2.7, cage_point(Vector3(1.05, 1.45, 1.5)), 3.4, Vector3.ZERO, 15.0)    # held through lift, click and push
 	at(LT + 0.9, func() -> void:
 		var cage: Rig = cast.cage
 		cage.play(["lf_cage_unlock"], 0.0, true))

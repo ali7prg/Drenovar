@@ -67,11 +67,7 @@ func begin(main: Node) -> void:
 	voice = AudioStreamPlayer.new()
 	voice.bus = &"Voice"
 	add_child(voice)
-	var add_clips := func(rig: Rig) -> void: StoryCast.add_story_clips(rig)
-	dialogue.add_speaker("danko", "Danko", HUMANS + "lf_civilian_quarry_worker.glb",
-		{"height": 1.58, "distance": 2.1, "yaw": -0.45, "lateral": 0.2}, ["lf_story_talk", "lf_civilian_wait"], ["lf_civilian_wait"], 1.0, "", 1, add_clips)
-	dialogue.add_speaker("ostap", "Grandpa Ostap", HUMANS + "lf_civilian_cooper.glb",
-		{"height": 1.6, "distance": 2.1, "yaw": -0.45, "lateral": 0.2}, ["lf_story_talk", "lf_civilian_wait"], ["lf_civilian_wait"], 1.0, "", 1, add_clips)
+	StoryCast.add_portrait_speakers(dialogue, ["danko", "ostap"])
 	var ground: Vector3 = stage.ground_point(hall + HALL_DOOR_OFFSET + Vector3(0, 0, 1.6))
 	person("danko", "quarry_worker", ground + Vector3(-0.7, 0, 0), deg_to_rad(80.0),
 		{"tint": {"cloth": [0.82, 0.86, 0.95], "hair": [0.55, 0.45, 0.4]}})

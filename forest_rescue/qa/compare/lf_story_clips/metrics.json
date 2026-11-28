@@ -1,0 +1,1037 @@
+{
+  "lf_story_run": {
+    "wristBendMax_deg": [
+      10.0,
+      10.0
+    ],
+    "wristTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "elbowTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "meshMinZ_m": [
+      -0.0323,
+      "RightFoot@0.53"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0365,
+      "LeftLowerLeg@0.13"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      26.5,
+      "LeftToes"
+    ],
+    "trunkLean_deg": [
+      14.1,
+      13.8,
+      14.5
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_halt": {
+    "wristBendMax_deg": [
+      18.0,
+      18.0
+    ],
+    "wristTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "elbowTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "meshMinZ_m": [
+      -0.0112,
+      "LeftFoot@0.50"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0349,
+      "LeftLowerLeg@0.23"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      25.7,
+      "LeftUpperArm"
+    ],
+    "trunkLean_deg": [
+      -2.4,
+      -10.8,
+      13.9
+    ],
+    "footSlip_mm": {
+      "Left": 1.95,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_backstep": {
+    "wristBendMax_deg": [
+      57.6,
+      59.0
+    ],
+    "wristTwistMax_deg": [
+      39.5,
+      36.5
+    ],
+    "elbowTwistMax_deg": [
+      37.4,
+      34.3
+    ],
+    "meshMinZ_m": [
+      -0.0176,
+      "RightFoot@1.03"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0361,
+      "LeftLowerLeg@0.67"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      11.7,
+      "RightLowerLeg"
+    ],
+    "trunkLean_deg": [
+      9.4,
+      8.8,
+      10.0
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_collapse": {
+    "wristBendMax_deg": [
+      73.6,
+      8.0
+    ],
+    "wristTwistMax_deg": [
+      54.6,
+      0.0
+    ],
+    "elbowTwistMax_deg": [
+      57.7,
+      0.0
+    ],
+    "meshMinZ_m": [
+      -0.037,
+      "RightFoot@1.40"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0013,
+      "RightLowerLeg@0.83"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      19.9,
+      "LeftHand"
+    ],
+    "trunkLean_deg": [
+      20.0,
+      -0.6,
+      32.5
+    ],
+    "footSlip_mm": {
+      "Left": 1.02,
+      "Right": 3.09
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_collapse_hold": {
+    "wristBendMax_deg": [
+      73.5,
+      8.0
+    ],
+    "wristTwistMax_deg": [
+      54.2,
+      0.0
+    ],
+    "elbowTwistMax_deg": [
+      57.2,
+      0.0
+    ],
+    "meshMinZ_m": [
+      -0.037,
+      "RightFoot@0.00"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0118,
+      "RightLowerLeg@0.00"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      0.9,
+      "SkirtFront2"
+    ],
+    "trunkLean_deg": [
+      31.4,
+      29.9,
+      32.8
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_support": {
+    "wristBendMax_deg": [
+      44.7,
+      44.9
+    ],
+    "wristTwistMax_deg": [
+      21.1,
+      21.4
+    ],
+    "elbowTwistMax_deg": [
+      23.3,
+      23.6
+    ],
+    "meshMinZ_m": [
+      -0.0097,
+      "RightFoot@0.33"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.013,
+      "SkirtFront2@0.60"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      29.1,
+      "LeftLowerArm"
+    ],
+    "trunkLean_deg": [
+      25.3,
+      -0.6,
+      34.5
+    ],
+    "footSlip_mm": {
+      "Left": 1.01,
+      "Right": 1.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_support_hold": {
+    "wristBendMax_deg": [
+      45.7,
+      45.9
+    ],
+    "wristTwistMax_deg": [
+      10.2,
+      11.5
+    ],
+    "elbowTwistMax_deg": [
+      12.4,
+      13.6
+    ],
+    "meshMinZ_m": [
+      0.0004,
+      "RightFoot@0.80"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.016,
+      "SkirtFront2@2.30"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      0.3,
+      "LeftLowerArm"
+    ],
+    "trunkLean_deg": [
+      34.5,
+      33.8,
+      35.2
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_latch_reach": {
+    "wristBendMax_deg": [
+      76.1,
+      4.0
+    ],
+    "wristTwistMax_deg": [
+      44.5,
+      0.0
+    ],
+    "elbowTwistMax_deg": [
+      42.4,
+      0.0
+    ],
+    "meshMinZ_m": [
+      -0.0098,
+      "RightFoot@0.30"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0398,
+      "LeftLowerLeg@0.57"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      57.3,
+      "LeftUpperArm"
+    ],
+    "trunkLean_deg": [
+      9.8,
+      -0.6,
+      13.5
+    ],
+    "footSlip_mm": {
+      "Left": 1.01,
+      "Right": 1.02
+    },
+    "ikOverreach_m": 0.0,
+    "cageCheck": {
+      "maxVertsInsideCage": 6,
+      "framesWithPenetration": 5,
+      "deepest_m": 0.0098,
+      "deepestAt": "RightFoot@0.30",
+      "deepestByBone_m": {
+        "RightFoot": 0.0098,
+        "LeftFoot": 0.0079
+      }
+    }
+  },
+  "lf_story_squeeze": {
+    "wristBendMax_deg": [
+      6.0,
+      6.0
+    ],
+    "wristTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "elbowTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "meshMinZ_m": [
+      -0.1182,
+      "LeftFoot@1.03"
+    ],
+    "meshMinZ_nonFeet_m": [
+      -0.0787,
+      "LeftLowerLeg@0.97"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      25.5,
+      "LeftUpperArm"
+    ],
+    "trunkLean_deg": [
+      18.1,
+      5.1,
+      27.7
+    ],
+    "footSlip_mm": {
+      "Left": 0.88,
+      "Right": 5.23
+    },
+    "ikOverreach_m": 0.0,
+    "cageCheck": {
+      "maxVertsInsideCage": 22,
+      "framesWithPenetration": 19,
+      "deepest_m": 0.05,
+      "deepestAt": "SkirtBack2@0.57",
+      "deepestByBone_m": {
+        "SkirtBack2": 0.05,
+        "RightFoot": 0.0258,
+        "LeftFoot": 0.0239,
+        "RightToes": 0.0067,
+        "SkirtLeft": 0.0066
+      }
+    }
+  },
+  "lf_story_sneak": {
+    "wristBendMax_deg": [
+      6.0,
+      6.0
+    ],
+    "wristTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "elbowTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "meshMinZ_m": [
+      -0.0205,
+      "RightFoot@0.07"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0347,
+      "LeftLowerLeg@0.37"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      13.1,
+      "RightLowerLeg"
+    ],
+    "trunkLean_deg": [
+      27.7,
+      27.6,
+      27.7
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_hide": {
+    "wristBendMax_deg": [
+      71.7,
+      70.6
+    ],
+    "wristTwistMax_deg": [
+      21.6,
+      20.0
+    ],
+    "elbowTwistMax_deg": [
+      16.5,
+      15.4
+    ],
+    "meshMinZ_m": [
+      -0.0387,
+      "RightFoot@0.63"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0135,
+      "SkirtRight@0.47"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      29.9,
+      "RightUpperArm"
+    ],
+    "trunkLean_deg": [
+      30.5,
+      -0.6,
+      55.7
+    ],
+    "footSlip_mm": {
+      "Left": 9.17,
+      "Right": 8.34
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_hide_hold": {
+    "wristBendMax_deg": [
+      66.2,
+      64.7
+    ],
+    "wristTwistMax_deg": [
+      8.7,
+      11.6
+    ],
+    "elbowTwistMax_deg": [
+      3.5,
+      5.8
+    ],
+    "meshMinZ_m": [
+      -0.0379,
+      "RightFoot@0.00"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0077,
+      "LeftLowerLeg@0.00"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      3.4,
+      "RightUpperArm"
+    ],
+    "trunkLean_deg": [
+      55.7,
+      54.7,
+      56.6
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_peek": {
+    "wristBendMax_deg": [
+      103.5,
+      99.7
+    ],
+    "wristTwistMax_deg": [
+      66.8,
+      61.6
+    ],
+    "elbowTwistMax_deg": [
+      63.8,
+      59.1
+    ],
+    "meshMinZ_m": [
+      -0.0379,
+      "RightFoot@0.97"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0072,
+      "LeftLowerLeg@0.97"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      35.6,
+      "LeftHand"
+    ],
+    "trunkLean_deg": [
+      65.9,
+      49.4,
+      73.1
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0095
+  },
+  "lf_story_stumble": {
+    "wristBendMax_deg": [
+      14.0,
+      14.0
+    ],
+    "wristTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "elbowTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "meshMinZ_m": [
+      -0.0206,
+      "RightFoot@0.20"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.016,
+      "SkirtFront2@1.17"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      12.2,
+      "RightUpperLeg"
+    ],
+    "trunkLean_deg": [
+      27.0,
+      11.0,
+      43.4
+    ],
+    "footSlip_mm": {
+      "Left": 5.23,
+      "Right": 6.21
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_catch": {
+    "wristBendMax_deg": [
+      31.9,
+      32.4
+    ],
+    "wristTwistMax_deg": [
+      34.8,
+      36.7
+    ],
+    "elbowTwistMax_deg": [
+      36.8,
+      38.7
+    ],
+    "meshMinZ_m": [
+      -0.0112,
+      "RightFoot@0.13"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0325,
+      "LeftLowerLeg@0.83"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      16.3,
+      "RightHand"
+    ],
+    "trunkLean_deg": [
+      9.0,
+      -0.6,
+      16.2
+    ],
+    "footSlip_mm": {
+      "Left": 0.52,
+      "Right": 2.19
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_sit": {
+    "wristBendMax_deg": [
+      35.6,
+      35.2
+    ],
+    "wristTwistMax_deg": [
+      27.0,
+      26.0
+    ],
+    "elbowTwistMax_deg": [
+      28.7,
+      27.7
+    ],
+    "meshMinZ_m": [
+      0.0034,
+      "RightFoot@0.00"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0452,
+      "LeftLowerLeg@0.00"
+    ],
+    "seatBottom_m": 0.4134,
+    "maxBoneSpeed_degPerFrame": [
+      3.4,
+      "SkirtBack2"
+    ],
+    "trunkLean_deg": [
+      2.5,
+      1.4,
+      3.7
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_sit_down": {
+    "wristBendMax_deg": [
+      38.8,
+      38.4
+    ],
+    "wristTwistMax_deg": [
+      28.0,
+      27.2
+    ],
+    "elbowTwistMax_deg": [
+      29.9,
+      28.8
+    ],
+    "meshMinZ_m": [
+      -0.0044,
+      "RightFoot@0.60"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0272,
+      "SkirtFront2@0.70"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      51.6,
+      "SkirtBack2"
+    ],
+    "trunkLean_deg": [
+      18.7,
+      -0.6,
+      39.1
+    ],
+    "footSlip_mm": {
+      "Left": 0.29,
+      "Right": 0.28
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_guide_sit": {
+    "wristBendMax_deg": [
+      83.4,
+      80.7
+    ],
+    "wristTwistMax_deg": [
+      62.4,
+      57.2
+    ],
+    "elbowTwistMax_deg": [
+      66.9,
+      61.7
+    ],
+    "meshMinZ_m": [
+      0.0023,
+      "RightFoot@1.07"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.035,
+      "LeftLowerLeg@1.07"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      22.6,
+      "RightUpperArm"
+    ],
+    "trunkLean_deg": [
+      17.8,
+      -0.6,
+      33.7
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_carry_cup": {
+    "wristBendMax_deg": [
+      28.9,
+      28.0
+    ],
+    "wristTwistMax_deg": [
+      12.7,
+      10.1
+    ],
+    "elbowTwistMax_deg": [
+      12.3,
+      9.6
+    ],
+    "meshMinZ_m": [
+      -0.019,
+      "RightFoot@0.13"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0367,
+      "LeftLowerLeg@0.47"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      13.2,
+      "LeftLowerLeg"
+    ],
+    "trunkLean_deg": [
+      0.9,
+      0.9,
+      1.0
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_offer": {
+    "wristBendMax_deg": [
+      25.2,
+      25.9
+    ],
+    "wristTwistMax_deg": [
+      7.3,
+      5.3
+    ],
+    "elbowTwistMax_deg": [
+      5.7,
+      3.6
+    ],
+    "meshMinZ_m": [
+      -0.0057,
+      "LeftFoot@0.23"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0414,
+      "LeftLowerLeg@0.10"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      7.4,
+      "LeftToes"
+    ],
+    "trunkLean_deg": [
+      5.7,
+      -0.6,
+      9.1
+    ],
+    "footSlip_mm": {
+      "Left": 0.91,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_drink": {
+    "wristBendMax_deg": [
+      100.3,
+      97.9
+    ],
+    "wristTwistMax_deg": [
+      25.8,
+      21.2
+    ],
+    "elbowTwistMax_deg": [
+      28.3,
+      23.7
+    ],
+    "meshMinZ_m": [
+      0.0034,
+      "RightFoot@0.00"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0452,
+      "LeftLowerLeg@0.00"
+    ],
+    "seatBottom_m": 0.4237,
+    "maxBoneSpeed_degPerFrame": [
+      7.2,
+      "LeftHand"
+    ],
+    "trunkLean_deg": [
+      -1.6,
+      -3.8,
+      -0.3
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_show_wrist": {
+    "wristBendMax_deg": [
+      85.2,
+      34.9
+    ],
+    "wristTwistMax_deg": [
+      40.9,
+      25.8
+    ],
+    "elbowTwistMax_deg": [
+      63.5,
+      27.5
+    ],
+    "meshMinZ_m": [
+      0.0034,
+      "RightFoot@0.00"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0452,
+      "LeftLowerLeg@0.30"
+    ],
+    "seatBottom_m": 0.4134,
+    "maxBoneSpeed_degPerFrame": [
+      59.3,
+      "SkirtBack2"
+    ],
+    "trunkLean_deg": [
+      0.1,
+      -0.1,
+      2.5
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_point_low": {
+    "wristBendMax_deg": [
+      4.0,
+      13.4
+    ],
+    "wristTwistMax_deg": [
+      0.0,
+      8.1
+    ],
+    "elbowTwistMax_deg": [
+      0.0,
+      7.8
+    ],
+    "meshMinZ_m": [
+      0.0034,
+      "RightFoot@0.00"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0419,
+      "LeftLowerLeg@0.57"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      14.6,
+      "RightLowerArm"
+    ],
+    "trunkLean_deg": [
+      4.5,
+      -0.6,
+      7.0
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0134
+  },
+  "lf_story_talk": {
+    "wristBendMax_deg": [
+      48.6,
+      49.6
+    ],
+    "wristTwistMax_deg": [
+      34.3,
+      39.4
+    ],
+    "elbowTwistMax_deg": [
+      37.2,
+      42.6
+    ],
+    "meshMinZ_m": [
+      0.0034,
+      "RightFoot@0.00"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0413,
+      "LeftLowerLeg@0.73"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      8.0,
+      "LeftHand"
+    ],
+    "trunkLean_deg": [
+      -0.6,
+      -1.1,
+      -0.0
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_talk_seated": {
+    "wristBendMax_deg": [
+      59.2,
+      60.5
+    ],
+    "wristTwistMax_deg": [
+      27.5,
+      32.6
+    ],
+    "elbowTwistMax_deg": [
+      29.4,
+      36.4
+    ],
+    "meshMinZ_m": [
+      0.0034,
+      "RightFoot@0.00"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0452,
+      "LeftLowerLeg@0.00"
+    ],
+    "seatBottom_m": 0.4237,
+    "maxBoneSpeed_degPerFrame": [
+      35.3,
+      "RightHand"
+    ],
+    "trunkLean_deg": [
+      -1.0,
+      -1.6,
+      -0.4
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_take_lantern": {
+    "wristBendMax_deg": [
+      4.0,
+      65.1
+    ],
+    "wristTwistMax_deg": [
+      0.0,
+      32.4
+    ],
+    "elbowTwistMax_deg": [
+      0.0,
+      24.0
+    ],
+    "meshMinZ_m": [
+      -0.0084,
+      "RightFoot@0.87"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0421,
+      "LeftLowerLeg@0.00"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      38.8,
+      "RightUpperArm"
+    ],
+    "trunkLean_deg": [
+      -2.4,
+      -5.1,
+      0.6
+    ],
+    "footSlip_mm": {
+      "Left": 1.56,
+      "Right": 1.56
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_walk_lantern": {
+    "wristBendMax_deg": [
+      4.0,
+      53.7
+    ],
+    "wristTwistMax_deg": [
+      0.0,
+      13.3
+    ],
+    "elbowTwistMax_deg": [
+      0.0,
+      10.9
+    ],
+    "meshMinZ_m": [
+      -0.0271,
+      "RightFoot@0.10"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0357,
+      "LeftLowerLeg@0.40"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      16.4,
+      "RightLowerLeg"
+    ],
+    "trunkLean_deg": [
+      3.2,
+      3.1,
+      3.2
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  },
+  "lf_story_look_around": {
+    "wristBendMax_deg": [
+      4.0,
+      4.0
+    ],
+    "wristTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "elbowTwistMax_deg": [
+      0.0,
+      0.0
+    ],
+    "meshMinZ_m": [
+      0.0034,
+      "RightFoot@0.00"
+    ],
+    "meshMinZ_nonFeet_m": [
+      0.0381,
+      "LeftLowerLeg@1.50"
+    ],
+    "maxBoneSpeed_degPerFrame": [
+      10.3,
+      "Head"
+    ],
+    "trunkLean_deg": [
+      0.5,
+      -0.6,
+      0.6
+    ],
+    "footSlip_mm": {
+      "Left": 0.0,
+      "Right": 0.0
+    },
+    "ikOverreach_m": 0.0
+  }
+}

@@ -1574,9 +1574,12 @@ SQ_GAP = {"atGateOpen_s": 0.55, "doorYaw_deg": -25.1, "clear_m": 0.57,
           "between": "door free stile (1.085, 0.6, 2.144) and latch-side jamb corner (1.39, 0.6, 1.667), glTF cage space"}
 
 
+SQ_START = [np.array([0.95, -1.15])]       # set from lf_story_latch_reach's end pose (pelvis over the root)
+
+
 def sq_body(t):
     """Body (pelvis xy, cage space Blender) along the squeeze path: inside -> diagonal gap -> outside."""
-    keys = [(0.0, np.array([0.95, -1.15])), (0.35, np.array([1.08, -1.41])), (0.75, np.array([1.21, -1.89])),
+    keys = [(0.0, SQ_START[0]), (0.35, np.array([1.08, -1.41])), (0.75, np.array([1.21, -1.89])),
             (1.05, np.array([1.34, -2.22])), (1.35, np.array([1.50, -2.50])), (1.6, np.array([1.55, -2.62]))]
     return env(t, keys)
 
@@ -1589,6 +1592,7 @@ def clip_squeeze():
     sec = 1.6
     start = STORE["latch_end"]
     off0 = np.array([start["hx"], start["hy"]])
+    SQ_START[0] = CAGE_ROOT[:2] + off0           # path starts where latch_reach left the body: root = cage root
     def root_w(t):                       # world root (Blender xy): body path minus a decaying start offset
         return sq_body(t) - off0 * (1.0 - float(smooth(t / 0.7)))
     r0 = root_w(0.0)

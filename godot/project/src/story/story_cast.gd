@@ -6,11 +6,32 @@ const Rig = preload("res://src/forest_rescue/game/actor_rig.gd")
 const CLIPS_PATH := "res://assets/forest_rescue/humans/lf_story_clips.glb"
 const CLIPS_META := "res://assets/forest_rescue/humans/lf_story_clips.meta.json"
 const CLIPS_PREFIX := "lf_story_clips_rig/"
+const PORTRAITS := "res://assets/story/portraits/"
+## Painted portraits (owner's art, background removed) for every story speaker: name, file, share of
+## the screen height, epithet, accent (aura, quote mark, flourish). All of them look to the right in
+## the picture; the dialogue mirrors them on the right side so they look into the screen. An optional
+## sixth value keeps the text clear of a hand that matters (Danko's marked wrist).
+const SPEAKER_PORTRAITS := {
+	"orc": ["Vargash", "orc_warden.png", 0.78, "Warden of the Birch Cage", "#e0782e"],
+	"tenerys": ["Tenerys", "tenerys.png", 0.76, "Dusk hunter", "#5aa8ff"],
+	"danko": ["Danko", "danko.png", 0.8, "Escaped from the cage", "#d8b06a", 1.04],
+	"ostap": ["Grandpa Ostap", "ostap.png", 0.8, "Elder of Drenovar", "#f0a845"],
+	"vesna": ["Grandma Vesna", "vesna.png", 0.78, "Keeper of the hearth", "#8fb874"],
+	"mitya": ["Mitya", "mitya.png", 0.7, "Ostap's grandson", "#d4704f"],
+}
 
 static var library_cache: Dictionary = {}   # rig prefix -> AnimationLibrary (retargeted copies)
 static var clips_meta: Dictionary = {}
 static var source_player: AnimationPlayer
 static var source_root: Node
+
+## Registers the painted portrait of each speaker in `ids` on a StoryDialogue.
+static func add_portrait_speakers(dialogue: Node, ids: Array) -> void:
+	for id: String in ids:
+		var entry: Array = SPEAKER_PORTRAITS[id]
+		dialogue.add_image_speaker(id, String(entry[0]), PORTRAITS + String(entry[1]),
+			{"height": float(entry[2]), "faces": "right", "edge": 0.0, "epithet": String(entry[3]), "accent": Color(String(entry[4])),
+			"inset": float(entry[5]) if entry.size() > 5 else 0.86})
 
 ## Adds every lf_story_* clip to `rig` (track prefix retargeted to the rig's own armature) and merges
 ## their meta (markers, ground speed, loop) so play()/markers work as for the rig's own clips.

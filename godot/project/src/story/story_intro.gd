@@ -28,7 +28,6 @@ const PREROLL := 3.0
 const HUMANS := "res://assets/forest_rescue/humans/"
 const PROPS := "res://assets/forest_rescue/props/"
 const VOICE := "res://assets/story/voice/"
-const PORTRAITS := "res://assets/story/portraits/"
 const AUDIO := "res://assets/audio/"
 const FR_AUDIO := "res://assets/forest_rescue/audio/"
 
@@ -106,6 +105,7 @@ var cup_prop: Node3D
 var skipped := false
 var forest_presented := false
 var actor_y_offset: Dictionary = {}
+var cage_floor := 0.12
 
 # ------------------------------------------------------------------ setup
 
@@ -267,6 +267,10 @@ func build_cast() -> void:
 		if String(node.name).to_lower().contains("roof"):
 			(node as Node3D).visible = false
 	(cast.ostap as Rig).marker.connect(on_marker)
+	# The cage floor (captive_slot_N nodes of lf_cage_wood): the people inside stand on it, not in it.
+	var slot := cage.part("captive_slot_0")
+	if slot != null and slot.is_inside_tree():
+		cage_floor = maxf(0.05, slot.global_position.y - cage.global_position.y)
 	sweep = StoryCast.bar_sweep(cage)
 	var mark := StoryCast.make_wrist_mark()
 	StoryCast.attach(cast.danko, "LeftHand", mark, Transform3D(Basis.IDENTITY, Vector3(0, 0.06, 0)))
@@ -275,20 +279,8 @@ func build_cast() -> void:
 	register_speakers()
 
 func register_speakers() -> void:
-	var talk := ["lf_story_talk", "lf_civilian_wait", "Idle"]
-	var idle := ["lf_civilian_wait", "Idle"]
-	var add_clips := func(rig: Rig) -> void: StoryCast.add_story_clips(rig)
-	# The warden and Tenerys speak from their painted portraits (owner's art, background removed).
-	dialogue.add_image_speaker("orc", "Vargash, the warden", PORTRAITS + "orc_warden.png", {"height": 0.98, "faces": "right"})
-	dialogue.add_image_speaker("tenerys", "Tenerys", PORTRAITS + "tenerys.png", {"height": 0.66, "faces": "right", "edge": 0.01})
-	dialogue.add_speaker("danko", "Danko", HUMANS + "lf_civilian_quarry_worker.glb",
-		{"height": 1.58, "distance": 2.1, "yaw": -0.45, "lateral": 0.2}, talk, idle, 1.0, "", 1, add_clips)
-	dialogue.add_speaker("mitya", "Mitya", HUMANS + "lf_civilian_courier.glb",
-		{"height": 1.12, "distance": 1.55, "yaw": -0.45, "lateral": 0.14}, talk, idle, 0.7, "", 1, add_clips)
-	dialogue.add_speaker("ostap", "Grandpa Ostap", HUMANS + "lf_civilian_cooper.glb",
-		{"height": 1.6, "distance": 2.1, "yaw": -0.45, "lateral": 0.2}, talk, idle, 1.0, "", 1, add_clips)
-	dialogue.add_speaker("vesna", "Grandma Vesna", HUMANS + "lf_civilian_herbalist.glb",
-		{"height": 1.52, "distance": 2.05, "yaw": -0.45, "lateral": 0.2}, talk, idle, 0.96, "", 1, add_clips)
+	# Everyone speaks from a painted portrait (owner's art, background removed).
+	StoryCast.add_portrait_speakers(dialogue, ["orc", "tenerys", "danko", "mitya", "ostap", "vesna"])
 
 func build_props() -> void:
 	# Lantern on its hook by the hall door (Ostap takes it down) and the bench where Vesna seats Danko.
@@ -360,6 +352,16 @@ func make_lantern() -> Node3D:
 
 func p3(xz: Vector2, lift := 0.0) -> Vector3:
 	return stage.ground_point(Vector3(xz.x, 0, xz.y)) + Vector3.UP * lift
+
+## Height of the cage floor under xz: the stone plinth inside, a ramp over the door step, 0 elsewhere.
+func cage_lift(xz: Vector2) -> float:
+	var cage: Node3D = cast.get("cage")
+	if cage == null or not cage.visible:
+		return 0.0
+	var local := xz - CAGE
+	if absf(local.x) > 1.75 or local.y < -1.7 or local.y > 2.7:
+		return 0.0
+	return cage_floor * (1.0 - smoothstep(1.35, 2.5, local.y))
 
 func cage_point(local: Vector3) -> Vector3:
 	return p3(CAGE) + local
@@ -460,6 +462,16 @@ func walk(id: String, points: Array, speed: float, clip: Array, end_clip: Array 
 	if not clip.is_empty():
 		actor.play(clip, 0.18, false, rate)
 
+## Moves `id` along a clip's own root path (meta rootPathXYZ_m: offsets from the start root every 0.1 s,
+## the actor keeps its yaw): for in-place clips whose feet were authored against that path.
+func follow_root_path(id: String, clip_id: String) -> void:
+	var actor: Rig = cast[id]
+	var samples: Array = StoryCast.clips_meta.get(clip_id, {}).get("rootPathXYZ_m", [])
+	if samples.is_empty():
+		return
+	var start := Vector2(actor.position.x, actor.position.z)
+	walkers[id] = {"track": samples, "t0": t, "start": start, "lift": cage_lift(start), "yaw": actor.rotation.y}
+
 func play(id: String, clip: Array, blend := 0.2, restart := true, speed := 1.0) -> void:
 	(cast[id] as Rig).play(clip, blend, restart, speed)
 
@@ -518,8 +530,10 @@ func show_caption(text: String) -> void:
 func script_timeline() -> void:
 	var cage_door_out := CAGE + Vector2(0.0, 2.7)
 	var inside := {
-		"lada": CAGE + Vector2(-0.72, 0.1), "sava": CAGE + Vector2(0.05, -0.45), "tim": CAGE + Vector2(0.45, 0.45),
-		"danko": CAGE + Vector2(0.95, 0.95)}
+		"lada": CAGE + Vector2(-0.85, -0.2), "sava": CAGE + Vector2(0.05, -0.45), "tim": CAGE + Vector2(-0.35, 0.55),
+		"danko": CAGE + Vector2(0.25, 0.55)}
+	# The latch_reach root (lf_story_clips meta cagePlacement): inside, by the latch-side bars, facing the door.
+	var latch_spot := CAGE + Vector2(0.95, 0.95)
 	var exit := Vector2(-76.4, -8.3)
 
 	# ----- beat 1: the round-up (0 – 17 s) -----
@@ -578,12 +592,12 @@ func script_timeline() -> void:
 		walkers["danko"] = {"path": [Vector2(actor.position.x, actor.position.z), Vector2(actor.position.x - 0.5, actor.position.z - 0.8)], "segment": 0, "speed": 0.9, "end_clip": [], "end_yaw": NAN, "lift": 0.0, "keep_yaw": true})
 	# The open door is the only place between the two beasts: in they go.
 	at(14.1, func() -> void:
-		walk("sava", [cage_door_out + Vector2(-0.3, 0.3), CAGE + Vector2(0.0, 1.2), inside.sava], 3.1, ["lf_story_run"], ["lf_civilian_cage_sit", "lf_civilian_cage_wait"], deg_to_rad(10.0), 0.12)
-		walk("lada", [cage_door_out + Vector2(-0.5, 0.2), CAGE + Vector2(-0.2, 1.2), inside.lada], 3.0, ["lf_story_run"], ["lf_civilian_cage_stand", "lf_civilian_cage_wait"], deg_to_rad(30.0), 0.12))
+		walk("sava", [cage_door_out + Vector2(-0.3, 0.3), CAGE + Vector2(0.0, 1.2), inside.sava], 3.1, ["lf_story_run"], ["lf_civilian_cage_sit", "lf_civilian_cage_wait"], deg_to_rad(10.0))
+		walk("lada", [cage_door_out + Vector2(-0.5, 0.2), CAGE + Vector2(-0.2, 1.2), inside.lada], 3.0, ["lf_story_run"], ["lf_civilian_cage_stand", "lf_civilian_cage_wait"], deg_to_rad(30.0)))
 	at(14.4, func() -> void:
-		walk("tim", [cage_door_out + Vector2(0.3, 0.2), CAGE + Vector2(0.2, 1.2), inside.tim], 3.0, ["lf_story_run"], ["lf_civilian_cage_wait"], deg_to_rad(0.0), 0.12))
+		walk("tim", [cage_door_out + Vector2(0.3, 0.2), CAGE + Vector2(0.2, 1.2), inside.tim], 3.0, ["lf_story_run"], ["lf_civilian_cage_wait"], deg_to_rad(90.0)))
 	at(14.6, func() -> void:
-		walk("danko", [cage_door_out + Vector2(0.6, 0.1), CAGE + Vector2(0.8, 1.3), inside.danko], 2.9, ["lf_story_run"], ["lf_civilian_cage_wait"], deg_to_rad(0.0), 0.12)
+		walk("danko", [cage_door_out + Vector2(0.6, 0.1), CAGE + Vector2(0.8, 1.3), inside.danko], 2.9, ["lf_story_run"], ["lf_civilian_cage_wait"], deg_to_rad(-90.0))
 		walk("orc", [Vector2(-81.5, -13.0)], 1.25, ["lf_orc_walk"], ["lf_orc_idle"], deg_to_rad(90.0)))
 	cam(15.2, Vector3(-80.0, 0, -14.6), 12.5)
 	# ----- beat 2: the cage and the escape -----
@@ -624,16 +638,18 @@ func script_timeline() -> void:
 		walk("orc", [Vector2(-85.4, -12.2)], 1.1, ["lf_orc_walk"], ["lf_orc_idle"], deg_to_rad(-80.0))
 		walk("tenerys", [Vector2(-80.5, 2.0), Vector2(-86.0, 8.0)], 3.0, ["walk"], [])
 		walk("wolf", [Vector2(-66.0, -18.0), Vector2(-62.0, -26.0)], 3.0, ["walk"], []))
-	at(25.0, func() -> void:
-		play("danko", ["lf_civilian_stand_up", "lf_civilian_wait"], 0.25)
+	at(24.0, func() -> void:
+		play("danko", ["lf_civilian_stand_up", "lf_civilian_wait"], 0.25, true, 1.4)
 		play("tim", ["lf_civilian_cage_wait"], 0.35))
+	at(25.4, func() -> void:
+		walk("danko", [CAGE + Vector2(0.7, 0.62), latch_spot], 0.9, ["lf_story_sneak"], [], 0.0, 0.0, 0.8))
 	at(26.2, func() -> void:
 		hide_actor("tenerys")
 		hide_actor("wolf")
-		face("danko", 0.0, 0.3)
+		face("danko", 0.0, 0.25)
 		play("danko", ["lf_story_latch_reach"], 0.2))
 	# Close-up: the hand on the latch (marker lift 1.6 s → cage latch_clear 0.7 s).
-	cam(26.4, cage_point(Vector3(0.95, 1.15, 1.45)), 4.6)
+	cam(26.4, cage_point(Vector3(0.95, 1.2, 1.55)), 3.4)
 	at(27.1, func() -> void:
 		var cage: Rig = cast.cage
 		cage.play(["lf_cage_unlock"], 0.0, true))
@@ -645,13 +661,13 @@ func script_timeline() -> void:
 		sfx(FR_AUDIO + "fr_gate_creak.ogg", -9.0, 0.9))
 	at(29.2, func() -> void:
 		play("danko", ["lf_story_squeeze"], 0.2)
-		walk("danko", [CAGE + Vector2(0.95, 1.9), CAGE + Vector2(1.0, 2.6)], 0.55, [], [], 0.0, 0.0))
+		follow_root_path("danko", "lf_story_squeeze"))
 	cam(29.6, cage_point(Vector3(0.8, 0.9, 2.0)), 9.5)
 	at(30.9, func() -> void:
 		door_goal = 0.0
 		door_rate = 0.5
 		play("danko", ["lf_story_sneak"], 0.2)
-		walk("danko", [CAGE + Vector2(2.4, 2.4), CAGE + Vector2(3.4, 4.6), Vector2(-75.6, -8.6)], 1.3, ["lf_story_sneak"], [], NAN, 0.0, 1.0))
+		walk("danko", [CAGE + Vector2(2.3, 3.0), CAGE + Vector2(3.4, 4.6), Vector2(-75.6, -8.6)], 1.3, ["lf_story_sneak"], [], NAN, 0.0, 1.0))
 	at(31.4, func() -> void:
 		face("tim", Vector2(CAGE.x + 1.0, CAGE.y + 3.0), 0.5)
 		play("tim", ["lf_civilian_look_back", "lf_civilian_cage_wait"], 0.3))
@@ -848,6 +864,20 @@ func update_walkers(delta: float) -> void:
 	for id in walkers.keys():
 		var state: Dictionary = walkers[id]
 		var actor: Rig = cast[id]
+		if state.has("track"):
+			var samples: Array = state.track
+			var k := (t - float(state.t0)) / 0.1
+			var i := clampi(int(floor(k)), 0, samples.size() - 1)
+			var a: Array = samples[i]
+			var b: Array = samples[mini(i + 1, samples.size() - 1)]
+			var f := clampf(k - float(i), 0.0, 1.0)
+			var offset := Vector3(lerpf(float(a[0]), float(b[0]), f), lerpf(float(a[1]), float(b[1]), f),
+				lerpf(float(a[2]), float(b[2]), f)).rotated(Vector3.UP, float(state.yaw))
+			var start: Vector2 = state.start
+			actor.position = p3(start + Vector2(offset.x, offset.z), float(state.lift) + offset.y)
+			if k >= float(samples.size() - 1):
+				walkers.erase(id)
+			continue
 		var path: Array = state.path
 		var remaining: float = float(state.speed) * delta
 		var position := Vector2(actor.position.x, actor.position.z)
@@ -866,7 +896,7 @@ func update_walkers(delta: float) -> void:
 				heading = gap / distance
 				position += heading * remaining
 				remaining = 0.0
-		actor.position = p3(position, float(state.get("lift", 0.0)))
+		actor.position = p3(position, float(state.get("lift", 0.0)) + cage_lift(position))
 		if heading != Vector2.ZERO and not state.get("keep_yaw", false):
 			var yaw := atan2(heading.x, heading.y)
 			actor.rotation.y = lerp_angle(actor.rotation.y, yaw, minf(1.0, delta * 9.0))

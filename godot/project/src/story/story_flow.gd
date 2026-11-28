@@ -39,6 +39,8 @@ var visit_sent := false
 var intro: Node
 var talk: Node
 var journal_visible := false
+var hall_pointer: Control
+var pointer_time := 0.0
 var last_gain := ""
 
 func attach(main: Node, outer: Container) -> void:
@@ -142,6 +144,7 @@ func _process(delta: float) -> void:
 	if scene_timer >= 1.0 and ui != null:
 		scene_timer = 0.0
 		check_scenes()
+	update_hall_pointer(delta)
 	if flag != null and flag.visible:
 		flag_pulse += delta
 		if current_goal().get("state", "") == "ready":
@@ -294,7 +297,9 @@ func play_intro(replay := false) -> void:
 			mark_seen("intro")
 			focus_goal = ""
 		refresh_flag()
-		highlight_flag())
+		highlight_flag()
+		if goal_by_id("ch1_hall").get("state", "") == "active":
+			show_hall_pointer())
 	intro.begin(ui)
 	refresh_flag()
 
@@ -328,6 +333,61 @@ func highlight_flag() -> void:
 	tween.tween_property(flag, "scale", Vector2.ONE, 0.25)
 	tween.tween_property(flag, "scale", Vector2(1.05, 1.05), 0.15)
 	tween.tween_property(flag, "scale", Vector2.ONE, 0.2)
+
+## After the intro: a bouncing pointer over the town hall («Tap the town hall») until it is tapped.
+func show_hall_pointer() -> void:
+	if hall_pointer != null:
+		return
+	hall_pointer = Control.new()
+	hall_pointer.name = "HallPointer"
+	hall_pointer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hall_pointer.size = Vector2(220, 96)
+	hall_pointer.draw.connect(draw_hall_pointer)
+	var hud: CanvasLayer = ui.hud
+	hud.add_child(hall_pointer)
+
+func draw_hall_pointer() -> void:
+	var bob := absf(sin(pointer_time * 3.2)) * 10.0
+	var tip := Vector2(110, 92 - bob)
+	var arrow := PackedVector2Array([tip, tip + Vector2(-18, -24), tip + Vector2(-7, -24), tip + Vector2(-7, -44),
+		tip + Vector2(7, -44), tip + Vector2(7, -24), tip + Vector2(18, -24)])
+	hall_pointer.draw_colored_polygon(arrow, Color("#f2c75c"))
+	hall_pointer.draw_polyline(arrow + PackedVector2Array([arrow[0]]), Color("#3a2410"), 2.0)
+	var font: Font = UiKit.LABEL_FONT
+	var text := "Tap the town hall"
+	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+	var plate := Rect2(Vector2(110 - width * 0.5 - 12, 0 - bob), Vector2(width + 24, 30))
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0.09, 0.065, 0.04, 0.88)
+	box.border_color = Color("#d9b46a")
+	box.set_border_width_all(1)
+	box.set_corner_radius_all(8)
+	hall_pointer.draw_style_box(box, plate)
+	hall_pointer.draw_string(font, Vector2(plate.position.x + 12, plate.position.y + 21), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, UiKit.IVORY)
+
+func update_hall_pointer(delta: float) -> void:
+	if hall_pointer == null:
+		return
+	var stage: Node = ui.stage
+	var goal := goal_by_id("ch1_hall")
+	if not is_instance_valid(stage) or goal.get("state", "active") != "active" or visit_sent:
+		hall_pointer.queue_free()
+		hall_pointer = null
+		return
+	pointer_time += delta
+	var hall := Vector3.INF
+	for marker: Dictionary in stage.place_markers:
+		if String(marker.get("kind", "")) == "building" and marker.get("item") is Dictionary and String(marker.item.get("type", "")).begins_with("ECO-05"):
+			hall = marker.position + Vector3(0, 3.0, 0)
+			break
+	var shown: bool = hall != Vector3.INF and not stage.camera.is_position_behind(hall) and String(ui.map_name) == "city" \
+		and not ui.modal.visible and (intro == null or not is_instance_valid(intro))
+	hall_pointer.visible = shown
+	if shown:
+		var at: Vector2 = stage.camera.unproject_position(hall)
+		# The HUD layer draws in the stretched canvas: unproject gives viewport pixels of the same canvas.
+		hall_pointer.position = at - Vector2(110, 96)
+		hall_pointer.queue_redraw()
 
 ## Main calls this when the player taps the town hall (chapter I: «Hear the fugitive out»).
 func hall_tapped() -> void:

@@ -747,7 +747,11 @@ func script_timeline() -> void:
 		show_actor("mitya", door2 - side2 * 2.4 + out2 * 1.2, rad_to_deg(atan2(out2.x, out2.y)) - 30.0, ["lf_civilian_wait"])
 		show_actor("danko", threshold - entry_dir * 19.0, rad_to_deg(atan2(entry_dir.x, entry_dir.y)))
 		walk("danko", [threshold - entry_dir * 1.4], 3.4, ["lf_story_run"], ["lf_story_stumble"]))
-	cam(56.5, p3(threshold - entry_dir * 11.0), 16.0)
+	# Into the settlement across the open square: a close tracking shot in profile, so the run reads,
+	# then the camera hands over to the threshold where grandpa catches him.
+	cam(56.5, "danko", 7.0, Vector3(1.4, 0, -0.35))
+	cam(58.0, "danko", 7.4, Vector3(1.3, 0, -0.3))
+	cam(59.6, p3(threshold - entry_dir * 3.0), 12.0)    # he comes round the house into the square
 	fade(56.6, 1.0)
 	fade(57.3, 0.0)
 	at(57.2, func() -> void: show_caption("Drenovar"))

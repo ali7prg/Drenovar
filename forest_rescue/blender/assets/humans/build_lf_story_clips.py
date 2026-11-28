@@ -1129,29 +1129,72 @@ def stand_cup_pose(p, cup=np.array([0.0, -0.30, 1.10]), tilt=0.0, curl=0.55, elb
 # --------------------------------------------------------------------------- clips
 
 RUN_T, RUN_V, RUN_BETA = 20 / 30.0, 3.4, 0.32          # loop periods are whole frames
-RUN_G = dict(beta=RUN_BETA, lift=0.12, step_w=0.07, heel=4.0, toeoff=40.0, y_c=0.10, kick=0.26, kick_pitch=28.0,
-             drive=0.10)
+# Stance shifted back (y_c): the ankle lands ~0.22 m ahead of the hip joint and leaves ~0.43 m behind it,
+# so the thigh sweeps from ~30 deg forward to ~20 deg back (lab frame) instead of staying under the body.
+RUN_G = dict(beta=RUN_BETA, lift=0.12, step_w=0.075, heel=6.0, toeoff=38.0, y_c=0.18, kick=0.24, kick_pitch=26.0,
+             drive=0.08)
 STORE = {}
 
 
+def stance_knee(u):
+    """Running stance knee flexion (deg) over stance u in [0, 1]: ~20 at heel strike, ~42 at 40-45 % of
+    stance (loading), back to ~20 at toe-off (push-off extension)."""
+    return 19.0 + 23.0 * math.sin(math.pi * min(1.0, max(0.0, u)) ** 0.85)
+
+
+def run_pelvis(params, T, beta, apex=0.016):
+    """Pelvis height from the stance leg: the hip joint sits where the stance knee has its running flexion
+    (stance_knee), so the leg loads and then extends through push-off; in flight the pelvis follows a
+    ballistic arc (apex ~1.6 cm for a 0.12 s flight) between toe-off and the next strike."""
+    n = len(params) - 1                       # loop: last frame == first
+    L1, L2 = cx.sk.length["LeftUpperLeg"], cx.sk.length["LeftLowerLeg"]
+    z = [None] * (n + 1)
+    for i in range(n + 1):
+        t = i / FPS
+        for s, S, ph0 in (("l", "Left", 0.0), ("r", "Right", 0.5)):
+            ph = ((t / T) - ph0) % 1.0
+            if ph < beta:
+                k = stance_knee(ph / beta) * DEG
+                d = math.sqrt(L1 * L1 + L2 * L2 + 2 * L1 * L2 * math.cos(k))
+                p = params[i]
+                hip = solved(p)[f"{S}UpperLeg"][:3, 3]
+                ank = cx.ank[S] + np.array([p[f"{s}_fx"], p[f"{s}_fy"], p[f"{s}_fz"]])
+                r2 = float((hip[0] - ank[0]) ** 2 + (hip[1] - ank[1]) ** 2)
+                z[i] = p["hz"] + (ank[2] + math.sqrt(max(d * d - r2, 0.04)) - hip[2])
+    known = [i for i in range(n) if z[i] is not None]
+    for j, i0 in enumerate(known):
+        i1 = known[(j + 1) % len(known)]
+        gap = (i1 - i0) % n
+        for k in range(1, gap):
+            u = k / gap
+            z[(i0 + k) % n] = (1 - u) * z[i0] + u * z[i1] + 4 * apex * u * (1 - u)
+    z[n] = z[0]
+    for p, zz in zip(params, z):
+        p["hz"] = zz
+
+
 def run_upper(t, p):
-    """Running for his life: ~13 deg trunk lean, big loose arm pumping driven from the shoulders, head forward."""
+    """Running for his life: ~7 deg trunk lean, pelvis/thorax counter-rotation, arms pumping from the
+    shoulders close to the body: upper arm -44..+40 deg about the trunk, the hand passes the hip pocket
+    behind the hips and rises to the chest ahead, toward the midline but not across it; the forearm
+    stays ~35 deg above horizontal in front (elbow 74-88 deg), loose fists, knuckles leading."""
     T = RUN_T
-    p["hz"] = -0.045
-    p["hp"], p["sp"], p["np_"], p["hdp"] = 11.0, 9.0, -2.0, -14.0
-    walk_upper(p, t, T, RUN_BETA, lean=0.0, bob=0.036, sway=0.012, pyaw=11.0, cyaw=15.0, roll=2.5, run=True, arm=0.0)
+    p["hp"], p["sp"], p["np_"], p["hdp"] = 6.0, 5.0, -2.0, -9.0
+    walk_upper(p, t, T, RUN_BETA, lean=0.0, bob=0.0, sway=0.012, pyaw=8.0, cyaw=11.0, roll=3.0, run=True, arm=0.0)
     w = 2 * math.pi * t / T
     for s, S, sgn in (("l", "Left", -1.0), ("r", "Right", 1.0)):
         c = sgn * math.cos(w - 0.35)
-        fk_arm(p, s, fwd=4.0 + 52.0 * c, add=-6.0 + 8.0 * max(0.0, c) - 4.0 * max(0.0, -c),
-               elb=84.0 + 16.0 * max(0.0, c) - 22.0 * max(0.0, -c), wr=10.0, tw=0.0, curl=0.45)
-        p[f"{s}_clav"] = 5.0 + 3.0 * max(0.0, c)
-        p[f"{s}_clavf"] = -7.0 * c
+        fk_arm(p, s, fwd=6.0 + 42.0 * c, add=23.0 + 9.0 * max(0.0, c),
+               elb=80.0 + 8.0 * max(0.0, c) - 6.0 * max(0.0, -c), wr=-15.0, tw=-8.0, curl=1.0)
+        p[f"{s}_clav"] = 2.0 + 2.0 * max(0.0, c)
+        p[f"{s}_clavf"] = -5.0 * c
     return p
 
 
 def clip_run():
     params, contacts = loco(RUN_T, RUN_V, RUN_G, run_upper)
+    run_pelvis(params, RUN_T, RUN_BETA)
+    reach_drop(params, True)
     STORE["run"] = params
     return dict(params=params, contacts=contacts, speed=RUN_V,
                 extra=dict(groundSpeed_mps=RUN_V, strideLength_m=round(RUN_V * RUN_T, 4),

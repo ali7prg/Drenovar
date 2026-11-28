@@ -1,8 +1,8 @@
 {
   "lf_story_run": {
     "wristBendMax_deg": [
-      10.0,
-      10.0
+      15.0,
+      15.0
     ],
     "wristTwistMax_deg": [
       0.0,
@@ -13,21 +13,21 @@
       0.0
     ],
     "meshMinZ_m": [
-      -0.0323,
+      -0.0303,
       "RightFoot@0.53"
     ],
     "meshMinZ_nonFeet_m": [
-      0.0365,
+      0.0362,
       "LeftLowerLeg@0.13"
     ],
     "maxBoneSpeed_degPerFrame": [
-      26.5,
-      "LeftToes"
+      25.9,
+      "LeftLowerLeg"
     ],
     "trunkLean_deg": [
-      14.1,
-      13.8,
-      14.5
+      7.0,
+      6.8,
+      7.2
     ],
     "footSlip_mm": {
       "Left": 0.0,
@@ -49,21 +49,21 @@
       0.0
     ],
     "meshMinZ_m": [
-      -0.0112,
+      -0.0115,
       "LeftFoot@0.50"
     ],
     "meshMinZ_nonFeet_m": [
-      0.0349,
+      0.0342,
       "LeftLowerLeg@0.23"
     ],
     "maxBoneSpeed_degPerFrame": [
-      25.7,
+      27.4,
       "LeftUpperArm"
     ],
     "trunkLean_deg": [
-      -2.4,
+      -3.7,
       -10.8,
-      13.9
+      6.8
     ],
     "footSlip_mm": {
       "Left": 1.95,

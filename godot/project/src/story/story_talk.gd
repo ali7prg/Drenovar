@@ -11,7 +11,10 @@ const StoryDialogue = preload("res://src/story/story_dialogue.gd")
 const StoryCast = preload("res://src/story/story_cast.gd")
 const HUMANS := "res://assets/forest_rescue/humans/"
 const VOICE := "res://assets/story/voice/"
-const HALL_DOOR_OFFSET := Vector3(3.6, 0, 5.4)
+## Where the two stand talk, from the hall's plan point, minus the 1.6 m step out below: in front of
+## the hall II porch steps (centred on the +Z facade), a little to the east so the barracks across the
+## forecourt stays out of the city camera's line.
+const HALL_DOOR_OFFSET := Vector3(0.8, 0, 2.4)
 const LINES := [
 	[0.8, "danko", "c2_dan_dusk", "They moved the prisoners at dusk. I know which trail they took.", "left"],
 	[5.6, "ostap", "c2_ost_show", "Show me. We'll need people for the gate and someone to bring the prisoners home.", "right"],

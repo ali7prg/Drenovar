@@ -548,6 +548,8 @@ func attach_canopy(group: Node3D) -> void:
 func apply_state_hint(state: Dictionary) -> void:
 	if state.get("city") is Dictionary:
 		city_state = state.city
+	if presentation_active:
+		return
 	var adv: Variant = state.get("adventure", {})
 	var key := JSON.stringify(adv) if adv is Dictionary else "{}"
 	if key == _last_hint:
@@ -557,6 +559,9 @@ func apply_state_hint(state: Dictionary) -> void:
 
 
 var _last_hint := ""
+## Story presentation (forest_game.set_presentation): while true, landscape state hints are not applied
+## (the presentation projection stays on screen); forest_game re-applies the server state when it ends.
+var presentation_active := false
 
 
 ## Registers one kit variant (real-metre mesh, no normalisation). Returns [mesh index, 1.0, key].

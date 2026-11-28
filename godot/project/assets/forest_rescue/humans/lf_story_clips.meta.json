@@ -1,0 +1,855 @@
+{
+  "id": "lf_story_clips",
+  "kind": "clip library",
+  "rig": "human_shared",
+  "displayBody": "lf_civilian_miller LOD0 (preview only, 1024 atlas)",
+  "tris": {
+    "LOD0": 11797
+  },
+  "bones": {
+    "deform": 50,
+    "total": 59
+  },
+  "nodes": {
+    "armature": "lf_story_clips_rig",
+    "skeleton_godot": "lf_story_clips_rig/Skeleton3D",
+    "animationPlayer": "AnimationPlayer",
+    "LOD0": "lf_story_clips_LOD0",
+    "trackPathExample": "lf_story_clips_rig/Skeleton3D:Hips",
+    "retarget": "same bone names as lf_civilian_*/lf_squad_*: replace the track prefix 'lf_story_clips_rig/' with '<asset_id>_rig/'"
+  },
+  "bounds_m": {
+    "min": [
+      -0.371,
+      -0.217,
+      0.003
+    ],
+    "max": [
+      0.381,
+      0.233,
+      1.785
+    ]
+  },
+  "seat_height_m": 0.45,
+  "seat_offset_m": [
+    0.0,
+    0.45,
+    -0.36
+  ],
+  "clips": {
+    "lf_story_run": {
+      "seconds": 0.6667,
+      "loop": true,
+      "frames": 21,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 3.4,
+      "strideLength_m": 2.2667,
+      "markers": {
+        "step_l": 0.0,
+        "step_r": 0.3333
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        0.006,
+        0.0,
+        -0.0
+      ]
+    },
+    "lf_story_halt": {
+      "seconds": 0.9,
+      "loop": false,
+      "frames": 28,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 1.0389,
+      "markers": {
+        "brake": 0.3,
+        "stop": 0.55
+      },
+      "startSpeed_mps": 3.4,
+      "rootDistance_m": 0.935,
+      "rootPath_m": [
+        0.0,
+        0.3298,
+        0.6064,
+        0.7993,
+        0.9022,
+        0.9337,
+        0.935,
+        0.935,
+        0.935,
+        0.935
+      ],
+      "footSlip_mm": {
+        "Left": 1.95,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.06
+      ]
+    },
+    "lf_story_backstep": {
+      "seconds": 1.2,
+      "loop": true,
+      "frames": 37,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": -0.9,
+      "strideLength_m": 1.08,
+      "markers": {
+        "step_l": 0.0,
+        "step_r": 0.6
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        -0.007,
+        0.0,
+        -0.0
+      ]
+    },
+    "lf_story_collapse": {
+      "seconds": 1.4,
+      "loop": false,
+      "frames": 43,
+      "rootTranslation": "in_place",
+      "markers": {
+        "buckle": 0.36,
+        "knee_down": 0.84
+      },
+      "footSlip_mm": {
+        "Left": 1.02,
+        "Right": 3.09
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.09
+      ]
+    },
+    "lf_story_collapse_hold": {
+      "seconds": 3.2,
+      "loop": true,
+      "frames": 97,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.09
+      ]
+    },
+    "lf_story_support": {
+      "seconds": 1.4,
+      "loop": false,
+      "frames": 43,
+      "rootTranslation": "in_place",
+      "markers": {
+        "step": 0.38,
+        "catch": 0.5,
+        "settle": 1.15
+      },
+      "partner": {
+        "clip": "lf_story_collapse -> lf_story_collapse_hold",
+        "placement": "Danko's root 0.6 m in front of Tim's root (glTF +Z), facing Tim",
+        "sync": "support starts 0.25 s after collapse; both holds start together"
+      },
+      "footSlip_mm": {
+        "Left": 1.01,
+        "Right": 1.0
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        0.08
+      ]
+    },
+    "lf_story_support_hold": {
+      "seconds": 3.2,
+      "loop": true,
+      "frames": 97,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "partner": {
+        "clip": "lf_story_collapse_hold",
+        "sync": "start together"
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        0.08
+      ]
+    },
+    "lf_story_latch_reach": {
+      "seconds": 3.0,
+      "loop": false,
+      "frames": 91,
+      "rootTranslation": "in_place",
+      "markers": {
+        "reach": 0.55,
+        "touch": 1.0,
+        "lift": 1.6,
+        "hold": 1.8,
+        "push": 2.2,
+        "release": 2.56
+      },
+      "cagePlacement": {
+        "root_in_cage_m": [
+          0.95,
+          0.12,
+          0.95
+        ],
+        "facing": "+Z (toward the door)",
+        "cage": "lf_cage_wood at the origin, unrotated"
+      },
+      "propPoints": {
+        "key_slot_m": [
+          0.9465,
+          1.2274,
+          1.5668
+        ],
+        "hand": "LEFT",
+        "barGap_m": {
+          "x": [
+            1.004,
+            1.184
+          ],
+          "clearAbove_y": 1.44,
+          "barWidth": 0.04,
+          "barFace_z": [
+            1.465,
+            1.496
+          ]
+        },
+        "handSlide_m": [
+          -0.08,
+          0.0,
+          0.0
+        ],
+        "door": "push from 2.2 s assumes gate_open time = 0.7 * (t - 2.2)"
+      },
+      "footSlip_mm": {
+        "Left": 1.01,
+        "Right": 1.02
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        -0.03,
+        0.0,
+        0.156
+      ]
+    },
+    "lf_story_squeeze": {
+      "seconds": 1.6,
+      "loop": false,
+      "frames": 49,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 1.0857,
+      "markers": {
+        "turn": 0.3,
+        "through": 0.85,
+        "out": 1.35
+      },
+      "rootDistance_m": 1.7371,
+      "rootPath_m": [
+        0.0,
+        0.0494,
+        0.2097,
+        0.3362,
+        0.3834,
+        0.5409,
+        0.7851,
+        0.922,
+        0.9426,
+        1.1073,
+        1.2721,
+        1.2961,
+        1.4459,
+        1.5957,
+        1.6147,
+        1.6959,
+        1.7371
+      ],
+      "rootPathXYZ_m": [
+        [
+          0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          0.0171,
+          -0.0,
+          0.0463
+        ],
+        [
+          0.0762,
+          -0.0,
+          0.1954
+        ],
+        [
+          0.1152,
+          -0.0,
+          0.3155
+        ],
+        [
+          0.1139,
+          -0.0,
+          0.3626
+        ],
+        [
+          0.1417,
+          -0.0,
+          0.5175
+        ],
+        [
+          0.1959,
+          -0.0,
+          0.7556
+        ],
+        [
+          0.2279,
+          -0.0,
+          0.8887
+        ],
+        [
+          0.2346,
+          -0.0,
+          0.9081
+        ],
+        [
+          0.295,
+          -0.0,
+          1.0614
+        ],
+        [
+          0.3554,
+          -0.0,
+          1.2147
+        ],
+        [
+          0.3657,
+          -0.0238,
+          1.2363
+        ],
+        [
+          0.44,
+          -0.0728,
+          1.3664
+        ],
+        [
+          0.5143,
+          -0.1134,
+          1.4965
+        ],
+        [
+          0.5229,
+          -0.12,
+          1.5134
+        ],
+        [
+          0.5541,
+          -0.12,
+          1.5883
+        ],
+        [
+          0.57,
+          -0.12,
+          1.6264
+        ]
+      ],
+      "rootPathNote": "node keeps facing +Z (cage door direction); glTF x/y/z offsets of the node from the start root (= latch_reach root on the cage floor, +0.12), every 0.1 s; y drops 0.12 as he steps off the threshold onto the ground",
+      "gapAssumed": {
+        "atGateOpen_s": 0.55,
+        "doorYaw_deg": -25.1,
+        "clear_m": 0.57,
+        "between": "door free stile (1.085, 0.6, 2.144) and latch-side jamb corner (1.39, 0.6, 1.667), glTF cage space"
+      },
+      "footSlip_mm": {
+        "Left": 0.88,
+        "Right": 5.23
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.0
+      ]
+    },
+    "lf_story_sneak": {
+      "seconds": 0.9333,
+      "loop": true,
+      "frames": 29,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 1.3,
+      "strideLength_m": 1.2133,
+      "markers": {
+        "step_l": 0.0,
+        "step_r": 0.4667
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        -0.004,
+        0.0,
+        -0.0
+      ]
+    },
+    "lf_story_hide": {
+      "seconds": 1.0,
+      "loop": false,
+      "frames": 31,
+      "rootTranslation": "in_place",
+      "markers": {
+        "down": 0.8
+      },
+      "footSlip_mm": {
+        "Left": 9.17,
+        "Right": 8.34
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.07
+      ]
+    },
+    "lf_story_hide_hold": {
+      "seconds": 3.0,
+      "loop": true,
+      "frames": 91,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.07
+      ]
+    },
+    "lf_story_peek": {
+      "seconds": 2.2,
+      "loop": false,
+      "frames": 67,
+      "rootTranslation": "in_place",
+      "markers": {
+        "look_left": 1.3,
+        "look_right": 1.8
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0095,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.04
+      ]
+    },
+    "lf_story_stumble": {
+      "seconds": 1.2,
+      "loop": false,
+      "frames": 37,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 0.7694,
+      "markers": {
+        "trip": 0.3,
+        "fall": 0.75
+      },
+      "startSpeed_mps": 0.95,
+      "rootDistance_m": 0.9233,
+      "rootPath_m": [
+        0.0,
+        0.0964,
+        0.2045,
+        0.3289,
+        0.4586,
+        0.5816,
+        0.6816,
+        0.7586,
+        0.8286,
+        0.8886,
+        0.9186,
+        0.9232,
+        0.9233
+      ],
+      "startsFrom": "lf_civilian_follow_tired (frame 0, left heel strike)",
+      "footSlip_mm": {
+        "Left": 5.23,
+        "Right": 6.21
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        0.1
+      ]
+    },
+    "lf_story_catch": {
+      "seconds": 1.2,
+      "loop": false,
+      "frames": 37,
+      "rootTranslation": "in_place",
+      "markers": {
+        "catch": 0.6
+      },
+      "footSlip_mm": {
+        "Left": 0.52,
+        "Right": 2.19
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        0.09
+      ]
+    },
+    "lf_story_sit": {
+      "seconds": 4.0,
+      "loop": true,
+      "frames": 121,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.36
+      ]
+    },
+    "lf_story_sit_down": {
+      "seconds": 1.4,
+      "loop": false,
+      "frames": 43,
+      "rootTranslation": "in_place",
+      "markers": {
+        "seated": 1.0
+      },
+      "footSlip_mm": {
+        "Left": 0.29,
+        "Right": 0.28
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.36
+      ]
+    },
+    "lf_story_guide_sit": {
+      "seconds": 1.6,
+      "loop": false,
+      "frames": 49,
+      "rootTranslation": "in_place",
+      "markers": {
+        "hands_on": 0.32,
+        "seated": 1.08,
+        "release": 1.2
+      },
+      "partner": {
+        "startShoulders_m": [
+          0.18,
+          1.34,
+          0.58
+        ],
+        "seatedShoulders_m": [
+          0.17,
+          1.01,
+          0.42
+        ],
+        "note": "partner root ~0.60 m in front, same facing, playing lf_story_sit_down"
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.0
+      ]
+    },
+    "lf_story_carry_cup": {
+      "seconds": 1.1,
+      "loop": true,
+      "frames": 34,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 1.0,
+      "strideLength_m": 1.1,
+      "markers": {
+        "step_l": 0.0,
+        "step_r": 0.55
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        -0.006,
+        0.0,
+        -0.0
+      ]
+    },
+    "lf_story_offer": {
+      "seconds": 1.4,
+      "loop": false,
+      "frames": 43,
+      "rootTranslation": "in_place",
+      "markers": {
+        "offer": 0.85
+      },
+      "footSlip_mm": {
+        "Left": 0.91,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        0.03
+      ]
+    },
+    "lf_story_drink": {
+      "seconds": 4.0,
+      "loop": true,
+      "frames": 121,
+      "rootTranslation": "in_place",
+      "markers": {
+        "sip": 1.25
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.36
+      ]
+    },
+    "lf_story_show_wrist": {
+      "seconds": 1.6,
+      "loop": false,
+      "frames": 49,
+      "rootTranslation": "in_place",
+      "markers": {
+        "lift": 0.75,
+        "show": 1.1
+      },
+      "partner": {
+        "boy": "1.05 m in front, 0.25 m to Danko's right (glTF (-0.25, 0, 1.05))"
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.36
+      ]
+    },
+    "lf_story_point_low": {
+      "seconds": 1.4,
+      "loop": false,
+      "frames": 43,
+      "rootTranslation": "in_place",
+      "markers": {
+        "point": 0.55
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0134,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.0
+      ]
+    },
+    "lf_story_talk": {
+      "seconds": 3.0,
+      "loop": true,
+      "frames": 91,
+      "rootTranslation": "in_place",
+      "markers": {
+        "beat": 0.8
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.0
+      ]
+    },
+    "lf_story_talk_seated": {
+      "seconds": 3.0,
+      "loop": true,
+      "frames": 91,
+      "rootTranslation": "in_place",
+      "markers": {
+        "beat": 0.8
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.36
+      ]
+    },
+    "lf_story_take_lantern": {
+      "seconds": 2.4,
+      "loop": false,
+      "frames": 73,
+      "rootTranslation": "in_place",
+      "markers": {
+        "grab": 1.0,
+        "down": 2.0
+      },
+      "propPoints": {
+        "hook_m": [
+          -0.1,
+          1.95,
+          0.25
+        ]
+      },
+      "footSlip_mm": {
+        "Left": 1.56,
+        "Right": 1.56
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.0
+      ]
+    },
+    "lf_story_walk_lantern": {
+      "seconds": 1.0,
+      "loop": true,
+      "frames": 31,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 1.4,
+      "strideLength_m": 1.4,
+      "markers": {
+        "step_l": 0.0,
+        "step_r": 0.5
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "endOffset_m": [
+        -0.006,
+        0.0,
+        -0.0
+      ]
+    },
+    "lf_story_look_around": {
+      "seconds": 2.4,
+      "loop": false,
+      "frames": 73,
+      "rootTranslation": "in_place",
+      "markers": {
+        "look_left": 0.62,
+        "look_right": 1.5
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "endOffset_m": [
+        0.0,
+        0.0,
+        -0.0
+      ]
+    }
+  },
+  "sockets": {
+    "hand_r": {
+      "bone": "PropR",
+      "parent": "RightHand",
+      "rest_m": [
+        -0.392,
+        0.855,
+        0.027
+      ],
+      "use": "cup (carry_cup/offer/drink, right side of the cup) and lantern (take_lantern/walk_lantern)"
+    },
+    "hand_l": {
+      "bone": "PropL",
+      "parent": "LeftHand",
+      "rest_m": [
+        0.4,
+        0.853,
+        0.027
+      ],
+      "use": "second hand on the cup"
+    }
+  },
+  "coordinateConvention": {
+    "up": "+Y",
+    "forward": "+Z",
+    "unit": "metre",
+    "note": "root at the origin, feet on y=0; Blender -Y forward exported to glTF +Z"
+  },
+  "notes": "Story-cutscene clips on human_shared (bone names/rolls identical to every lf_civilian_*/lf_squad_* GLB, so Godot tracks differ only by the '<asset>_rig/' prefix). 30 fps; loops have identical first/last frames. Locomotion loops are in place with planted feet sliding back at exactly groundSpeed_mps (backstep: negative = walking backwards). Travel one-shots (halt, squeeze, stumble) are in place: move the node along rootPath_m (metres travelled, every 0.1 s) and the planted feet stay put. Acting one-shots with a short step (support, collapse, catch, hide, offer) keep the root still and end with the body displaced by endOffset_m; their *_hold loops keep that offset. Seated clips (sit, sit_down end, drink, show_wrist, talk_seated) assume a 0.45 m seat with the hips 0.36 m behind the root (seat_offset_m). Props: parent cup/lantern to PropR (hand_r, grip point in the right fist); the left hand (PropL) wraps the cup's other side. halt starts on lf_story_run frame 0; stumble starts on lf_civilian_follow_tired frame 0; hide_hold/peek and collapse_hold/support_hold continue their one-shots. Cloth bones (skirt, cloak, hood, bag) carry thigh-follow secondary motion. Display body = miller LOD0 only."
+}

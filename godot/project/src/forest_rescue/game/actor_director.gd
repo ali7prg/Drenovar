@@ -359,7 +359,8 @@ func warm_pipelines() -> void:
 		world_node.set("setup_stage", "post-setup (warmed)")
 
 func tick(delta: float) -> void:
-	if not game.client.unlocked():
+	# A story scene (src/story) plays its own cast at the sites: the adventure's actors step aside.
+	if not game.client.unlocked() or game.story_presenting():
 		if root != null and is_instance_valid(root):
 			for id in rigs:
 				if is_instance_valid(rigs[id]):

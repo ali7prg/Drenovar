@@ -216,6 +216,8 @@ var next_training_update := 0.0
 var followed_army := ""
 var next_minimap_draw := 0
 var forest_game: Node # FOREST_RESCUE hook (null until the server offers the adventure)
+## Story chapters for Town Hall I–V: quest flag, journal, the intro and the chapter II talk (build 1025).
+var story_flow: Node = preload("res://src/story/story_flow.gd").new()
 var forest_game_loading := false
 var forest_load_started_msec := -1
 var forest_progress: Control   # 1023: «Лес потерянных · готовим лес» while the layers load
@@ -505,6 +507,8 @@ func build_ui() -> void:
 	setup_resource_icons()
 	profile_button = hud_action(bar, "Профиль", "profile", show_account)
 	profile_button.name = "ProfileButton"
+	add_child(story_flow)
+	story_flow.attach(self, outer)
 	var saved := ConfigFile.new()
 	if saved.load(HUD_STATE_PATH) == OK:
 		reports_seen_ms = float(saved.get_value("hud", "reports_seen_ms", 0.0))
@@ -3406,6 +3410,8 @@ func panel_texture(path: String) -> Texture2D:
 	return panel_textures[path]
 
 func open_building_ring(marker: Dictionary) -> void:
+	if marker.get("item") is Dictionary and str(marker.item.get("type", "")).begins_with("ECO-05"):
+		story_flow.hall_tapped() # STORY hook: chapter I «hear the fugitive out»
 	if is_v6_server():
 		await v6_panels.open_ring(marker)
 		return
@@ -5897,6 +5903,7 @@ func accept(response: Dictionary) -> void:
 	if is_instance_valid(stage):
 		stage.present(state)
 	forest_state_changed() # FOREST_RESCUE hook: ingest state.adventure
+	story_flow.state_changed() # STORY hook: quest flag, journal, scenes that play once
 	refresh_economy()
 	if starter_panel_open and not command_in_progress and state.get("starterEligible71", false):
 		show_starter_goals()
@@ -6001,7 +6008,7 @@ func command(order: Dictionary, after_success := Callable()) -> bool:
 		capped_requests += 1
 		message.text = SOON_LINE
 		return false
-	if is_v6_server() and order.get("kind", "") not in ["v6", "v6quote", "v6catalog", "deploy", "worldMarch", "recall", "retreat", "editNames", "relocateCity", "resource", "speedup", "starter71", "v6collect"]:
+	if is_v6_server() and order.get("kind", "") not in ["v6", "v6quote", "v6catalog", "deploy", "worldMarch", "recall", "retreat", "editNames", "relocateCity", "resource", "speedup", "starter71", "v6collect", "story72"]:
 		if not await ensure_v6_ready():
 			return false
 		if order.get("kind", "") == "trade":

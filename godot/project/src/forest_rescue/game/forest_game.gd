@@ -117,7 +117,7 @@ func on_state(state: Dictionary) -> void:
 func pick(screen_position: Vector2) -> bool:
 	if not city_active():
 		return false
-	if intro.presenting():
+	if intro.presenting() or story_presenting():
 		return true
 	if client.unlocked():
 		if not world_ready():
@@ -220,14 +220,36 @@ func world_call(method: String, args: Array = []) -> Variant:
 		return world.callv(method, args)
 	return null
 
+## Story presentation (src/story/story_intro.gd): while set, the world layer shows this projection
+## instead of the server's (fog opened round the scenes of the story intro). Presentation only: nothing
+## is sent, the client keeps the server's state, actors and HUD keep following it; clearing it re-applies
+## the server's projection.
+var presentation_adv: Dictionary = {}
+
+func set_presentation(adv: Dictionary) -> void:
+	presentation_adv = adv
+	if world != null and is_instance_valid(world) and "presentation_active" in world:
+		world.presentation_active = not adv.is_empty()
+	applied_signature = ""
+	sync_world()
+	if story_presenting() and hud != null and hud.locked_card.visible:
+		hud.hide_locked()
+
+## A story scene (src/story) owns the screen: no locked card, no adventure HUD, taps consumed.
+func story_presenting() -> bool:
+	return not presentation_adv.is_empty()
+
 func sync_world() -> void:
 	if world == null or not is_instance_valid(world):
 		return
 	var adv := client.adv if client.available() else {}
+	if not presentation_adv.is_empty():
+		adv = presentation_adv
 	var fog: Dictionary = adv.get("fog", {})
 	var camp: Dictionary = adv.get("campaign", {})
-	var signature := "%s|%s|%s|%s|%s|%s" % [str(client.available()), str(adv.get("access", {}).get("unlocked", false)),
-		str(fog.get("revision", -1)), str(camp.get("revision", -1)), str(adv.get("pois", []).size()), str(adv.get("serverTime", 0))]
+	var signature := "%s|%s|%s|%s|%s|%s|%s" % [str(client.available()), str(adv.get("access", {}).get("unlocked", false)),
+		str(fog.get("revision", -1)), str(camp.get("revision", -1)), str(adv.get("pois", []).size()), str(adv.get("serverTime", 0)),
+		"P" if not presentation_adv.is_empty() else ""]
 	if signature == applied_signature:
 		return
 	applied_signature = signature
@@ -419,7 +441,7 @@ func _process(delta: float) -> void:
 	track_stage()
 	maybe_attach_world()
 	var active := city_active()
-	hud.visible = active
+	hud.visible = active and not story_presenting()
 	mech.visible = active and mech.is_open()
 	if not active:
 		audio.set_forest_ambience(false)
@@ -441,7 +463,7 @@ func _process(delta: float) -> void:
 		var signature := JSON.stringify([guide_now.get("caption", ""), guide_now.get("hint", ""), guide_now.get("enabled", false), guide_now.get("title", "")])
 		if signature != guide_signature:
 			apply_guide(guide_now)
-	audio.set_forest_ambience(client.unlocked() and foreground and camera_over_forest())
+	audio.set_forest_ambience(client.unlocked() and foreground and camera_over_forest() and not story_presenting())
 
 func camera_over_forest() -> bool:
 	if not is_instance_valid(stage):
@@ -469,7 +491,7 @@ func update_visibility() -> void:
 			hud.hide_locked()
 
 func update_locked_dwell() -> void:
-	if client.unlocked() or intro.presenting():
+	if client.unlocked() or intro.presenting() or story_presenting():
 		dwell_started = 0
 		return
 	var camera_target: Vector3 = stage.camera_target

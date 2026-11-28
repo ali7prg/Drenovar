@@ -133,7 +133,7 @@ func run() -> void:
 	check(forest.hud.locked_card.visible, "dwell over forest shows locked card")
 	check(forest.hud.locked_title.text == content.text("forest.locked.title"), "locked title from ui.ru.json")
 	check(forest.hud.locked_body.text == content.text("forest.locked.body"), "locked body from ui.ru.json")
-	check(forest.hud.locked_progress.text == "Ратуша: уровень 2 из 3", "locked progress n/3: " + forest.hud.locked_progress.text)
+	check(forest.hud.locked_progress.text == "Условие: «Town Hall III» · Ратуша: уровень 2 из 3", "locked progress n/3: " + forest.hud.locked_progress.text)
 	check(forest.hud.locked_cta.text == "К ратуше", "locked CTA")
 	check(forest.actors.markers.is_empty() and not forest.hud.bar.visible, "no POI markers/horse/HUD while locked")
 	var food_before: int = game.balance("food")

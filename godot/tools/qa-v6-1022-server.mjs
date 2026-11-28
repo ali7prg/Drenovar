@@ -21,6 +21,8 @@
 //   /test/clock?time=<ms>   move the server clock forward (never backward)
 //   /test/hall?level=<n>    set B01 (town hall) to level n
 //   /test/army {units}      set the healthy army
+//   /test/story-reset       forget the story chapters record (p.story72: claims, visits, scenes seen)
+//   /test/felled?count=<n>  mark n city trees felled (chapter I «fell a tree» without the felling UI)
 import {createServer} from 'node:http';
 import {DatabaseSync} from 'node:sqlite';
 import {resolve} from 'node:path';
@@ -77,6 +79,16 @@ createServer(async(req, res) => {
   if (url.pathname === '/test/hall') {
    const level = Number(url.searchParams.get('level') ?? input.level);
    return json(res, 200, {ok: await mutatePlayer(p => { p.v6.buildings.find(b => b.type === 'B01').level = level; })});
+  }
+  if (url.pathname === '/test/story-reset') {
+   return json(res, 200, {ok: await mutatePlayer(p => { delete p.story72; })});
+  }
+  if (url.pathname === '/test/felled') {
+   const count = Number(url.searchParams.get('count') ?? input.count ?? 1);
+   return json(res, 200, {ok: await mutatePlayer(p => {
+    p.city ??= {}; p.city.progress ??= {}; p.city.progress.felled ??= [];
+    for (let i = p.city.progress.felled.length; i < count; i++) p.city.progress.felled.push('qa-tree-' + i);
+   })});
   }
   if (url.pathname === '/test/army') {
    return json(res, 200, {ok: await mutatePlayer(p => { p.v6.healthy = {...input.units}; })});

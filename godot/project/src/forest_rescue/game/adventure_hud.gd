@@ -577,7 +577,8 @@ func show_locked(reason: String) -> void:
 		locked_cta.hide()
 	else:
 		locked_body.text = text("forest.locked.body")
-		locked_progress.text = text("forest.locked.progress", {"level":clampi(game.client.hall_level() if game.client.known else game.main.hall_level(), 1, 3)})
+		# Build 1025 (story chapters): the entrance names its condition, «Town Hall III».
+		locked_progress.text = "Условие: «Town Hall III» · " + text("forest.locked.progress", {"level":clampi(game.client.hall_level() if game.client.known else game.main.hall_level(), 1, 3)})
 		locked_progress.show()
 		locked_cta.show()
 	locked_card.show()

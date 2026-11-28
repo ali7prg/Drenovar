@@ -1,0 +1,375 @@
+{
+  "id": "lf_orc_warden",
+  "generation": "v2 pipeline, authored (no reference art): SDF body + garment/gear meshes, hand-painted procedural atlas (orc_tex), shared human_shared rig",
+  "rig": "human_shared",
+  "tris": {
+    "LOD0": 15760,
+    "LOD1": 7760,
+    "LOD2": 2880
+  },
+  "budget": {
+    "LOD0": 16000,
+    "LOD1": 8000,
+    "LOD2": 3000
+  },
+  "bones": {
+    "deform": 50,
+    "total": 59,
+    "weightedByLOD": {
+      "LOD0": 49,
+      "LOD1": 25,
+      "LOD2": 18
+    },
+    "maxInfluences": 4,
+    "names": [
+      "Hips",
+      "Spine",
+      "Chest",
+      "UpperChest",
+      "Neck",
+      "Head",
+      "LeftShoulder",
+      "LeftUpperArm",
+      "LeftLowerArm",
+      "LeftHand",
+      "LeftThumb1",
+      "LeftThumb2",
+      "LeftIndex1",
+      "LeftIndex2",
+      "LeftMiddle1",
+      "LeftMiddle2",
+      "LeftRing1",
+      "LeftPinky1",
+      "LeftUpperLeg",
+      "LeftLowerLeg",
+      "LeftFoot",
+      "LeftToes",
+      "RightShoulder",
+      "RightUpperArm",
+      "RightLowerArm",
+      "RightHand",
+      "RightThumb1",
+      "RightThumb2",
+      "RightIndex1",
+      "RightIndex2",
+      "RightMiddle1",
+      "RightMiddle2",
+      "RightRing1",
+      "RightPinky1",
+      "RightUpperLeg",
+      "RightLowerLeg",
+      "RightFoot",
+      "RightToes",
+      "SkirtFront1",
+      "SkirtFront2",
+      "SkirtBack1",
+      "SkirtBack2",
+      "SkirtLeft",
+      "SkirtRight",
+      "Cloak1",
+      "Cloak2",
+      "Hood",
+      "Bag",
+      "PropR",
+      "PropL"
+    ]
+  },
+  "nodes": {
+    "LOD0": "lf_orc_warden_LOD0",
+    "LOD1": "lf_orc_warden_LOD1",
+    "LOD2": "lf_orc_warden_LOD2",
+    "glow_LOD0": "lf_orc_warden_glow_LOD0",
+    "glow_LOD1": "lf_orc_warden_glow_LOD1",
+    "glow_LOD2": "lf_orc_warden_glow_LOD2"
+  },
+  "materials": [
+    "lf_orc_warden_body",
+    "lf_orc_warden_hair",
+    "lf_orc_warden_cloth",
+    "lf_orc_warden_gear",
+    "lf_orc_warden_prop",
+    "lf_orc_warden_glow"
+  ],
+  "glowMaterials": [
+    "lf_orc_warden_glow"
+  ],
+  "glow": {
+    "material": "lf_orc_warden_glow",
+    "color": [
+      0.42,
+      1.0,
+      0.56
+    ],
+    "emissionStrength": 0.85,
+    "meshes": "lf_orc_warden_glow_LOD0/1/2 (staff crystal on PropR + chest crystal on UpperChest); ActorRig keeps *_glow emission, drive with set_glow(energy) during lf_orc_drain"
+  },
+  "paintedLightMix": 0.4,
+  "shading": "albedo * mix(1, lambert(sun), paintedLightMix): the atlas carries the painted light",
+  "textures": {
+    "lf_orc_warden_color.jpg": 2048
+  },
+  "bounds_m": {
+    "min": [
+      -0.517,
+      -0.842,
+      0.0
+    ],
+    "max": [
+      0.557,
+      1.085,
+      2.219
+    ]
+  },
+  "clips": {
+    "lf_orc_idle": {
+      "seconds": 3.2,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "staffFootMinZ_m": 0.0107
+    },
+    "lf_orc_walk": {
+      "seconds": 1.0667,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "groundSpeed_mps": 1.1,
+      "strideLength_m": 1.1733,
+      "markers": {
+        "step_l": 0.0,
+        "step_r": 0.5333
+      },
+      "footSlip_mm": {
+        "Left": 1.02,
+        "Right": 1.15
+      },
+      "ikOverreach_m": 0.0035,
+      "loopSeamMaxQuatDiff": 0.0,
+      "staffFootMinZ_m": 0.0527
+    },
+    "lf_orc_turn_left": {
+      "seconds": 1.0,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "rootYawDeg": 90.0,
+      "yawCurve": "yaw(t) = rootYawDeg * smoothstep(t/1.0) about the root origin (apply to the node while the clip plays; planted feet stay fixed in that yawed world frame)",
+      "markers": {
+        "step_1": 0.34,
+        "step_2": 0.67,
+        "step_3": 0.95
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "staffFootMinZ_m": 0.0108
+    },
+    "lf_orc_turn_right": {
+      "seconds": 1.0,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "rootYawDeg": -90.0,
+      "yawCurve": "yaw(t) = rootYawDeg * smoothstep(t/1.0) about the root origin (apply to the node while the clip plays; planted feet stay fixed in that yawed world frame)",
+      "markers": {
+        "step_1": 0.34,
+        "step_2": 0.67,
+        "step_3": 0.95
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "staffFootMinZ_m": 0.0108
+    },
+    "lf_orc_order_point": {
+      "seconds": 2.6,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {
+        "point": 1.05
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "staffFootMinZ_m": 0.004
+    },
+    "lf_orc_order_point_left": {
+      "seconds": 2.6,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {
+        "point": 1.05
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "staffFootMinZ_m": 0.0108
+    },
+    "lf_orc_talk": {
+      "seconds": 3.0,
+      "loop": true,
+      "rootTranslation": "in_place",
+      "markers": {},
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "loopSeamMaxQuatDiff": 0.0,
+      "staffFootMinZ_m": 0.0106
+    },
+    "lf_orc_drain": {
+      "seconds": 3.2,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {
+        "drain_start": 0.9,
+        "drain_peak": 1.9,
+        "drain_end": 2.7
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "staffFootMinZ_m": 0.0098
+    },
+    "lf_orc_roar": {
+      "seconds": 2.0,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {
+        "roar": 0.75
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "staffFootMinZ_m": 0.0107
+    },
+    "lf_orc_look": {
+      "seconds": 2.4,
+      "loop": false,
+      "rootTranslation": "in_place",
+      "markers": {
+        "look_left": 0.95,
+        "look_right": 1.95
+      },
+      "footSlip_mm": {
+        "Left": 0.0,
+        "Right": 0.0
+      },
+      "ikOverreach_m": 0.0,
+      "staffFootMinZ_m": 0.0103
+    }
+  },
+  "sockets": {
+    "hand_r": [
+      -0.4432,
+      0.8037,
+      0.0242
+    ],
+    "hand_l": [
+      0.4432,
+      0.8037,
+      0.0242
+    ],
+    "head": [
+      0.0,
+      1.925,
+      0.07
+    ],
+    "head_top": [
+      0.0,
+      2.17,
+      0.0
+    ],
+    "chest_crystal": [
+      0.0,
+      1.3792,
+      0.191
+    ],
+    "staff_crystal_rest": [
+      -0.4303,
+      0.9154,
+      0.6623
+    ]
+  },
+  "socketBones": {
+    "hand_r": {
+      "bone": "PropR",
+      "offset": [
+        0,
+        0,
+        0
+      ]
+    },
+    "hand_l": {
+      "bone": "PropL",
+      "offset": [
+        0,
+        0,
+        0
+      ]
+    },
+    "head": {
+      "bone": "Head",
+      "offset": [
+        0,
+        0,
+        0
+      ]
+    },
+    "staff_crystal": {
+      "bone": "PropR",
+      "offset": [
+        -0.648,
+        -0.0,
+        0.0
+      ],
+      "note": "bone-local offset (metres) of the staff crystal centre; the staff is rigid on PropR in every clip"
+    },
+    "staff_tip": {
+      "bone": "PropR",
+      "offset": [
+        -0.83,
+        -0.0,
+        0.0
+      ]
+    },
+    "chest_crystal": {
+      "bone": "UpperChest",
+      "offset": [
+        -0.0,
+        -0.1577,
+        0.2746
+      ]
+    }
+  },
+  "staff": {
+    "length_m": 1.9,
+    "gripFromBottom_m": 1.12,
+    "bone": "PropR",
+    "note": "held in the right fist; lf_orc_order_point hands it to the left fist (PropR keyed in world space meanwhile) and back"
+  },
+  "variants": {},
+  "coordinateConvention": {
+    "up": "+Y",
+    "forward": "+Z",
+    "unit": "metre",
+    "note": "Blender -Y forward exported to glTF +Z; feet on y=0, root at the origin; bounds_m in Blender axes (as the v2 humans)"
+  },
+  "notes": "Orc captor of a forest cage (drains strength from caged people through the bars). Rest stance is hunched (neck/head forward). Same skeleton as lf_squad_captain: human clips play on him, but their Hips translation keys are the human hip height (0.89 m vs 1.06 m), so retarget positions or use the orc clips. Turn clips: yaw the node by rootYawDeg along smoothstep(t/seconds)."
+}
